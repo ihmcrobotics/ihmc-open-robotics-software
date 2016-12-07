@@ -5,15 +5,21 @@ import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.gui.tools.VisualizerUtils;
+import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
+import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
+import us.ihmc.tools.thread.ThreadTools;
 
 public class SkippySimulation
 {
    public static final double DT = 0.0001;
    public static final double controlDT = 0.0001;
    public static final double TIME = 20.0;
-   private SimulationConstructionSet sim;
+   public static final int recordFrequency = 75;
 
-   private static final boolean USE_ICP_BASED_CONTROLLER = false;//true;//     
+   private final SimulationConstructionSet sim;
+   private final BlockingSimulationRunner blockingSimulationRunner;
+
+   private static final boolean USE_ICP_BASED_CONTROLLER = true;
 
    public SkippySimulation()
    {
@@ -24,9 +30,8 @@ public class SkippySimulation
 
       sim = new SimulationConstructionSet(skippy);
       sim.setGroundVisible(true);
-      sim.setDT(DT, 75);
-      sim.setMaxBufferSize(128000);
-      sim.setSimulateDuration(TIME);
+      sim.setDT(DT, recordFrequency);
+      sim.setMaxBufferSize(64000);
       sim.setCameraPosition(10.0, 0.0, 2.0);
 
       boolean showOverheadView = true;
@@ -45,10 +50,19 @@ public class SkippySimulation
       VisualizerUtils.createOverheadPlotter(sim, showOverheadView, yoGraphicsListRegistry);
       sim.addYoGraphicsListRegistry(yoGraphicsListRegistry);
 
-      Thread myThread = new Thread(sim);
-      myThread.start();
+      blockingSimulationRunner = new BlockingSimulationRunner(sim, 10.0 * 60.0);
+      sim.startOnAThread();
    }
 
+   public boolean run(double simulationTime) throws SimulationExceededMaximumTimeException
+   {
+      return blockingSimulationRunner.simulateAndBlockAndCatchExceptions(simulationTime);
+   }
+
+   public void destroy()
+   {
+      blockingSimulationRunner.destroySimulation();
+   }
 
    /*
     * When your simulation is run, first the main method will be called. In
@@ -58,8 +72,11 @@ public class SkippySimulation
     * Thread is started, thereby starting your simulation.
     */
 
-   public static void main(String[] args)
+   public static void main(String[] args) throws SimulationExceededMaximumTimeException
    {
-      new SkippySimulation();
+      SkippySimulation skippySimulation = new SkippySimulation();
+      skippySimulation.run(TIME);
+      ThreadTools.sleepForever();
    }
+
 }
