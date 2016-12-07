@@ -96,15 +96,15 @@ public class FootstepPlanningToolboxController extends ToolboxController
       parameters.setMaximumStepReach(0.55);
       parameters.setMaximumStepZ(0.25);
 
-      parameters.setMaximumStepXWhenForwardAndDown(0.2);
-      parameters.setMaximumStepZWhenForwardAndDown(0.10);
+      parameters.setMaximumStepXWhenForwardAndDown(0.32);
+      parameters.setMaximumStepZWhenForwardAndDown(0.18);
 
       parameters.setMaximumStepYaw(0.15);
       parameters.setMaximumStepWidth(0.4);
       parameters.setMinimumStepWidth(0.15);
       parameters.setMinimumFootholdPercent(0.95);
 
-      parameters.setWiggleInsideDelta(0.08);
+      parameters.setWiggleInsideDelta(0.02);
       parameters.setMaximumXYWiggleDistance(1.0);
       parameters.setMaximumYawWiggle(0.1);
 
