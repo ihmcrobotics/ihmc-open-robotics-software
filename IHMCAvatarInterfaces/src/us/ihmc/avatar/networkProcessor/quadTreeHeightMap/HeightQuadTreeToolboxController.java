@@ -3,6 +3,7 @@ package us.ihmc.avatar.networkProcessor.quadTreeHeightMap;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
+import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4f;
 import javax.vecmath.Vector3f;
@@ -64,6 +65,9 @@ public class HeightQuadTreeToolboxController extends ToolboxController
    private final FloatingInverseDynamicsJoint rootJoint;
    private final OneDoFJoint[] oneDoFJoints;
    private final PacketCommunicator packetCommunicator;
+
+   private final Point2d robotPosition2d = new Point2d();
+   private final double quadTreeMessageMaxRadius = 5.0;
 
    public HeightQuadTreeToolboxController(FullHumanoidRobotModel fullRobotModel, PacketCommunicator packetCommunicator, CommandInputManager commandInputManager,
          StatusMessageOutputManager statusOutputManager, YoVariableRegistry parentRegistry)
@@ -168,7 +172,10 @@ public class HeightQuadTreeToolboxController extends ToolboxController
       {
          if (DEBUG)
             PrintTools.debug("QuadTree has changed, sending packet");
-         reportMessage(HeightQuadTreeMessageConverter.convertQuadTreeForGround(quadTree));
+         Point3d rootJointPosition = new Point3d();
+         rootJoint.getTranslation(rootJointPosition);
+         robotPosition2d.set(rootJointPosition.getX(), rootJointPosition.getY());
+         reportMessage(HeightQuadTreeMessageConverter.convertQuadTreeForGround(quadTree, robotPosition2d, quadTreeMessageMaxRadius));
       }
    }
 
