@@ -2,6 +2,7 @@ package us.ihmc.exampleSimulations.skippy;
 
 import us.ihmc.exampleSimulations.skippy.SkippyRobot.RobotType;
 import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.robotics.controllers.ControllerFailureListener;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.gui.tools.VisualizerUtils;
@@ -42,15 +43,16 @@ public class SkippySimulation
          controller = new SkippyICPBasedController(skippy, controlDT, yoGraphicsListRegistry);
       else
          controller = new SkippyController(skippy, robotType, "skippyController", controlDT, yoGraphicsListRegistry);
-
       skippy.setController(controller);
-      // skippy.setController(new ExternalControlServer(skippy,
-      // "externalControlServer"));
 
       VisualizerUtils.createOverheadPlotter(sim, showOverheadView, yoGraphicsListRegistry);
       sim.addYoGraphicsListRegistry(yoGraphicsListRegistry);
 
       blockingSimulationRunner = new BlockingSimulationRunner(sim, 10.0 * 60.0);
+
+      ControllerFailureListener controllerFailureListener = blockingSimulationRunner.createControllerFailureListener();
+      skippy.setController(new SkippyFallingChecker(controllerFailureListener, skippy));
+
       sim.startOnAThread();
    }
 

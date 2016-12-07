@@ -22,7 +22,7 @@ public class SkippyTest
    @Test(timeout = 100000)
    public void testStanding() throws SimulationExceededMaximumTimeException
    {
-      assertTrue(skippySimulation.run(2.0));
+      assertTrue(skippySimulation.run(10.0));
    }
 
    @Before
