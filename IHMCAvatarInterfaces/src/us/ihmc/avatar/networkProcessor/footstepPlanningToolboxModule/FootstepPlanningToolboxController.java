@@ -115,7 +115,7 @@ public class FootstepPlanningToolboxController extends ToolboxController
       planner.setFeetPolygons(footPolygons);
 
       planner.setMaximumNumberOfNodesToExpand(500);
-      
+
       if (visualize)
       {
          SideDependentList<ConvexPolygon2d> footPolygonsInSoleFrame = planner.getFootPolygonsInSoleFrame();
@@ -126,7 +126,7 @@ public class FootstepPlanningToolboxController extends ToolboxController
 
          planner.setBipedalFootstepPlannerListener(listener);
       }
-      
+
       return planner;
    }
 
@@ -145,25 +145,9 @@ public class FootstepPlanningToolboxController extends ToolboxController
 
       if (usePlanarRegions.getBooleanValue())
       {
-         if (!requestedPlanarRegions.getBooleanValue())
-            requestPlanarRegions();
-
-         PlanarRegionsListMessage planarRegionsMessage = latestPlanarRegionsReference.getAndSet(null); 
-         
-         if (planarRegionsMessage == null)
-         {
-//            if (Math.abs(time.getDoubleValue() % 2.0) < 2.0 * dt) 
-//            {
-//               requestPlanarRegions();
-//            }
+         if (!requestAndWaitForPlanarRegions(planner))
             return;
-         }
-                  
-         timeReceivedPlanarRegion.set(toolboxTime.getDoubleValue());
-         PlanarRegionsList planarRegions = PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsMessage);
-         planner.setPlanarRegions(planarRegions);
       }
-
       else
       {
          planner.setPlanarRegions(null);
@@ -179,6 +163,22 @@ public class FootstepPlanningToolboxController extends ToolboxController
 
       reportMessage(packResult(footstepPlan, status));
       isDone.set(true);
+   }
+
+   private boolean requestAndWaitForPlanarRegions(FootstepPlanner planner)
+   {
+      if (!requestedPlanarRegions.getBooleanValue())
+         requestPlanarRegions();
+
+      PlanarRegionsListMessage planarRegionsMessage = latestPlanarRegionsReference.getAndSet(null);
+      if (planarRegionsMessage == null)
+         return false;
+
+      timeReceivedPlanarRegion.set(toolboxTime.getDoubleValue());
+      PlanarRegionsList planarRegions = PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsMessage);
+      planner.setPlanarRegions(planarRegions);
+
+      return true;
    }
 
    private void requestPlanarRegions()
@@ -201,6 +201,8 @@ public class FootstepPlanningToolboxController extends ToolboxController
       FootstepPlanningRequestPacket request = latestRequestReference.getAndSet(null);
       if (request == null)
          return false;
+
+      usePlanarRegions.set(!request.assumeFlatGround);
 
       FramePose initialStancePose = new FramePose(ReferenceFrame.getWorldFrame());
       initialStancePose.setPosition(new Point3d(request.stanceFootPositionInWorld));
