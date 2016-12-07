@@ -14,8 +14,10 @@ import us.ihmc.footstepPlanning.FootstepPlannerGoalType;
 import us.ihmc.footstepPlanning.polygonSnapping.PlanarRegionsListPolygonSnapper;
 import us.ihmc.footstepPlanning.polygonWiggling.PolygonWiggler;
 import us.ihmc.footstepPlanning.polygonWiggling.WiggleParameters;
+import us.ihmc.footstepPlanning.scoring.PenalizationHeatmapStepScorer;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
@@ -35,6 +37,8 @@ public class PlanarRegionPotentialNextStepCalculator
    private final DoubleYoVariable totalArea = new DoubleYoVariable("totalArea", registry);
    private final DoubleYoVariable stepReach = new DoubleYoVariable("stepReach", registry);
 
+   private final BooleanYoVariable enablePenalizationHeatmapScoring;
+
    private final BipedalFootstepPlannerParameters parameters;
 
    private PlanarRegionsList planarRegionsList;
@@ -52,13 +56,20 @@ public class PlanarRegionPotentialNextStepCalculator
 
    private BipedalFootstepPlannerListener listener;
 
-   private final BipedalStepScorer bipedalStepScorer;
+   private final PenalizationHeatmapStepScorer penalizationHeatmapStepScorer;
+   private final OrderInWhichConstructedStepScorer orderInWhichConstructedStepScorer;
 
-   PlanarRegionPotentialNextStepCalculator(BipedalFootstepPlannerParameters parameters, BipedalStepScorer bipedalStepScorer, YoVariableRegistry parentRegistry)
+   PlanarRegionPotentialNextStepCalculator(BipedalFootstepPlannerParameters parameters, YoVariableRegistry parentRegistry)
    {
       this.parameters = parameters;
+      
+      enablePenalizationHeatmapScoring = new BooleanYoVariable("enablePenalizationHeatmapScoring", registry);
+      enablePenalizationHeatmapScoring.set(true);
+      
+      penalizationHeatmapStepScorer = new PenalizationHeatmapStepScorer(parentRegistry, null, parameters);
+      orderInWhichConstructedStepScorer = new OrderInWhichConstructedStepScorer();
+      
       parentRegistry.addChild(registry);
-      this.bipedalStepScorer = bipedalStepScorer;
    }
 
    public void setFeetPolygons(SideDependentList<ConvexPolygon2d> footPolygonsInSoleFrame)
@@ -405,7 +416,15 @@ public class PlanarRegionPotentialNextStepCalculator
          idealFootstepPose.translate(idealStepVector);
          idealFootstepPose.setYawPitchRoll(idealStepYaw, 0.0, 0.0);
          Point3d swingFootGoal = goalPositions.get(node.getRobotSide());
-         double score = bipedalStepScorer.scoreFootstep(stanceFootPose, swingStartFootPose, idealFootstepPose, candidateFootPose, swingFootGoal);
+         double score;
+         if (enablePenalizationHeatmapScoring.getBooleanValue())
+         {
+            score = penalizationHeatmapStepScorer.scoreFootstep(stanceFootPose, swingStartFootPose, idealFootstepPose, candidateFootPose, swingFootGoal);
+         }
+         else
+         {
+            score = orderInWhichConstructedStepScorer.scoreFootstep(stanceFootPose, swingStartFootPose, idealFootstepPose, candidateFootPose, swingFootGoal);
+         }
          node.setSingleStepScore(score);
       }
 
