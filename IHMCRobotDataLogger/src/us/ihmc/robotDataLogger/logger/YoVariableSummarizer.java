@@ -96,12 +96,15 @@ public class YoVariableSummarizer
          writer.print("maximum");
          writer.print(',');
          writer.print("average");
+         writer.print(',');
+         writer.print("delta");
          writer.println();
          for(YoVariableSummarizerData data : variables)
          {
             data.writeCSV(writer);
          }
-        
+         writer.flush();
+         writer.close();
       }
       catch (FileNotFoundException e)
       {
@@ -154,7 +157,10 @@ public class YoVariableSummarizer
          writer.print(maximum);
          writer.print(',');
          writer.print(average);
+         writer.print(',');
+         writer.print(maximum - minimum);
          writer.println();
+
       }
 
       public void clear()

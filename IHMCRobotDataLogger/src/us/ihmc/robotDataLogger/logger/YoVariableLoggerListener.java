@@ -233,10 +233,6 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
          videoDataLogger.close();
       }
 
-      if(yoVariableSummarizer != null)
-      {
-         yoVariableSummarizer.writeData(new File(tempDirectory, summaryFilename));
-      }
       
       if (!connected)
       {
@@ -296,6 +292,11 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
       }
       else
       {
+
+         if(yoVariableSummarizer != null)
+         {
+            yoVariableSummarizer.writeData(new File(tempDirectory, summaryFilename));
+         }
 
          tempDirectory.renameTo(finalDirectory);
       }
