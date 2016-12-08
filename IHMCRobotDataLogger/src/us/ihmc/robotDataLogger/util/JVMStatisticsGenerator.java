@@ -41,7 +41,7 @@ public class JVMStatisticsGenerator
    private final LongYoVariable totalLoadedClassCount = new LongYoVariable("totalLoadedClassCount", registry);
    private final LongYoVariable unloadedClassCount = new LongYoVariable("unloadedClassCount", registry);
 
-   private final LongYoVariable totalCompilationTime = new LongYoVariable("totalCompilationTime", registry);
+   private final LongYoVariable totalCompilationTime = new LongYoVariable("totalCompilationTimeMs", registry);
 
    private final IntegerYoVariable availableProcessors = new IntegerYoVariable("availableProcessors", registry);
    private final DoubleYoVariable systemLoadAverage = new DoubleYoVariable("systemLoadAverage", registry);
@@ -94,7 +94,7 @@ public class JVMStatisticsGenerator
 
       void update()
       {
-         this.gcInvocations.set(gcBean.getCollectionTime());
+         this.gcInvocations.set(gcBean.getCollectionCount());
          this.gcTotalCollectionTimeMs.set(gcBean.getCollectionTime());
       }
    }
