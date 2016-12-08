@@ -10,6 +10,7 @@ import us.ihmc.atlas.AtlasJointMap;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.atlas.parameters.AtlasContactPointParameters;
+import us.ihmc.atlas.parameters.AtlasPhysicalProperties;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.obstacleCourseTests.DRCObstacleCourseWobblyFootTest;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -54,7 +55,7 @@ public class AtlasObstacleCourseWobblyFootTest extends DRCObstacleCourseWobblyFo
 
    private AtlasJointMap createJointMapWithWobblyFeet(final AtlasRobotVersion atlasVersion)
    {
-      AtlasJointMap atlasJointMap = new AtlasJointMap(atlasVersion)
+      AtlasJointMap atlasJointMap = new AtlasJointMap(atlasVersion, new AtlasPhysicalProperties(1))
       {
          @Override
          public List<ImmutablePair<String, Vector3d>> getJointNameGroundContactPointMap()
@@ -66,7 +67,7 @@ public class AtlasObstacleCourseWobblyFootTest extends DRCObstacleCourseWobblyFo
       return atlasJointMap;
    }
 
-   private AtlasContactPointParameters createWobblyContactPoints(DRCRobotJointMap jointMap, AtlasRobotVersion atlasVersion)
+   private AtlasContactPointParameters createWobblyContactPoints(AtlasJointMap jointMap, AtlasRobotVersion atlasVersion)
    {
       AtlasContactPointParameters contactPointParameters = new AtlasContactPointParameters(jointMap, atlasVersion, false);
       double footZWobbleForTests = 0.01;

@@ -56,9 +56,9 @@ public class SDFRobotTest
 
       inputStream = getClass().getClassLoader().getResourceAsStream("sdfRobotTest.sdf");
       RobotDescriptionFromSDFLoader robotDescriptionFromSDFLoader = new RobotDescriptionFromSDFLoader();
-      robotDescriptionFromSDFLoader.loadRobotDescriptionFromSDF(modelName, inputStream, resourceDirectories, mutator, sdfJointNameMap, useCollisionMeshes, enableTorqueVelocityLimits, enableJointDamping);
+      
 
-      RobotDescription robotDescription = robotDescriptionFromSDFLoader.getRobotDescription();
+      RobotDescription robotDescription = robotDescriptionFromSDFLoader.loadRobotDescriptionFromSDF(modelName, inputStream, resourceDirectories, mutator, sdfJointNameMap, useCollisionMeshes, enableTorqueVelocityLimits, enableJointDamping);
       RobotFromDescription robot = new RobotFromDescription(robotDescription);
 
       boolean graphicsExist = checkRobotsMatch(sdfHumanoidRobot, robot);

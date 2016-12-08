@@ -44,6 +44,17 @@ public class MomentumOptimizationSettings
    {
    }
 
+   public void scaleForceWeights(double scale)
+   {
+      rhoWeight /= scale;
+      rhoMin *= scale;
+      rhoRateDefaultWeight /= scale * scale;
+      rhoRateHighWeight /= scale * scale;
+      linearMomentumWeight.scale(1.0 / scale);
+      highLinearMomentumWeightForRecovery.scale(1.0 / scale);
+      angularMomentumWeight.scale(1.0 / scale);
+   }
+
    public void setHeadWeights(double jointspace, double taskspace, double userMode)
    {
       headJointspaceWeight = jointspace;
