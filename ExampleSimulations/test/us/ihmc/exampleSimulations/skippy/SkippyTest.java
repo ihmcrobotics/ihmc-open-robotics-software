@@ -18,7 +18,7 @@ import us.ihmc.tools.thread.ThreadTools;
 @ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class SkippyTest
 {
-   private static final SkippyControllerMode controllerMode = SkippyControllerMode.NONE;
+   private static final SkippyControllerMode controllerMode = SkippyControllerMode.ICP_BASED;
    private static final boolean sleepAfterTest = false;
 
    private SkippySimulation skippySimulation;
