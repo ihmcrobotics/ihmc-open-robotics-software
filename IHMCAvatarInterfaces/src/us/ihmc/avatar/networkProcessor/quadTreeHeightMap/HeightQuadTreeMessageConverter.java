@@ -2,6 +2,8 @@ package us.ihmc.avatar.networkProcessor.quadTreeHeightMap;
 
 import java.util.ArrayList;
 
+import javax.vecmath.Point2d;
+
 import us.ihmc.humanoidRobotics.communication.packets.heightQuadTree.HeightQuadTreeMessage;
 import us.ihmc.humanoidRobotics.communication.packets.heightQuadTree.HeightQuadTreeNodeMessage;
 import us.ihmc.robotics.quadTree.Box;
@@ -12,10 +14,15 @@ public class HeightQuadTreeMessageConverter
 {
    public static HeightQuadTreeMessage convertQuadTreeForGround(QuadTreeForGround quadTreeToConvert)
    {
+      return convertQuadTreeForGround(quadTreeToConvert, null, Double.POSITIVE_INFINITY);
+   }
+
+   public static HeightQuadTreeMessage convertQuadTreeForGround(QuadTreeForGround quadTreeToConvert, Point2d boundingCircleCenter, double boundingCircleRadius)
+   {
       QuadTreeForGroundNode rootNode = quadTreeToConvert.getRootNode();
       HeightQuadTreeNodeMessage rootNodeMessage = new HeightQuadTreeNodeMessage();
 
-      fullDepthCopy(rootNode, rootNodeMessage);
+      fullDepthCopy(rootNode, boundingCircleCenter, boundingCircleRadius, rootNodeMessage);
       
       HeightQuadTreeMessage heightQuadTreeMessage = new HeightQuadTreeMessage();
       heightQuadTreeMessage.root = rootNodeMessage;
@@ -25,7 +32,7 @@ public class HeightQuadTreeMessageConverter
    }
 
 
-   private static void fullDepthCopy(QuadTreeForGroundNode original, HeightQuadTreeNodeMessage copyToPack)
+   private static void fullDepthCopy(QuadTreeForGroundNode original, Point2d boundingCircleCenter, double boundingCircleRadius, HeightQuadTreeNodeMessage copyToPack)
    {
       boolean isLeaf = original.getLeaf() != null;
       copyToPack.isLeaf = isLeaf;
@@ -43,7 +50,7 @@ public class HeightQuadTreeMessageConverter
       if (isLeaf)
          return;
 
-      if (original.hasChildren() && isAncestorOfAtLeastOneLeaf(original))
+      if (original.hasChildren() && isAncestorOfAtLeastOneLeafInsideBoundingCircle(original, boundingCircleCenter, boundingCircleRadius))
       {
          copyToPack.children = new HeightQuadTreeNodeMessage[4];
          ArrayList<QuadTreeForGroundNode> children = new ArrayList<>();
@@ -55,7 +62,7 @@ public class HeightQuadTreeMessageConverter
                continue;
             if (originalChild.isEmpty())
                continue;
-            if (!isAncestorOfAtLeastOneLeaf(originalChild))
+            if (!isAncestorOfAtLeastOneLeafInsideBoundingCircle(originalChild, boundingCircleCenter, boundingCircleRadius))
                continue;
 
             // Computing the morton code to make sure that the indexing is correct.
@@ -67,21 +74,15 @@ public class HeightQuadTreeMessageConverter
 
             HeightQuadTreeNodeMessage childCopy = new HeightQuadTreeNodeMessage();
             copyToPack.children[mortonCode] = childCopy;
-            fullDepthCopy(originalChild, childCopy);
+            fullDepthCopy(originalChild, boundingCircleCenter, boundingCircleRadius, childCopy);
          }
       }
    }
 
-   /**
-    * It seems that {@link QuadTreeForGroundNode} can be created without actually holding any information.
-    * In which case, no leaves can be found as going down the tree from such a node.
-    * @param node this is the node to be tested to see if it is actually useful.
-    * @return true if the node is the ancestor of at least one leaf (== useful), false otherwise (==useless).
-    */
-   private static boolean isAncestorOfAtLeastOneLeaf(QuadTreeForGroundNode node)
+   private static boolean isAncestorOfAtLeastOneLeafInsideBoundingCircle(QuadTreeForGroundNode node, Point2d boundingCircleCenter, double boundingCircleRadius)
    {
       if (node.getLeaf() != null)
-         return true;
+         return isInsideBoundingCircle(node.getBounds().centreX, node.getBounds().centreY, boundingCircleCenter, boundingCircleRadius);
 
       if (node.isEmpty())
          return false;
@@ -91,10 +92,17 @@ public class HeightQuadTreeMessageConverter
 
       for (QuadTreeForGroundNode child : children)
       {
-         if (isAncestorOfAtLeastOneLeaf(child))
+         if (isAncestorOfAtLeastOneLeafInsideBoundingCircle(child, boundingCircleCenter, boundingCircleRadius))
             return true;
       }
 
       return false;
+   }
+
+   private static boolean isInsideBoundingCircle(double x, double y, Point2d boundingCircleCenter, double boundingCircleRadius)
+   {
+      double dx = x - boundingCircleCenter.getX();
+      double dy = y - boundingCircleCenter.getY();
+      return dx * dx + dy * dy < boundingCircleRadius * boundingCircleRadius;
    }
 }

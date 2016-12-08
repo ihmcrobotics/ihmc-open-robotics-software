@@ -26,8 +26,8 @@ import us.ihmc.tools.thread.ThreadTools;
 
 public class ColoredCircularBlobDetectorBehaviorService extends ThreadedBehaviorService
 {
-   private final ConcurrentListeningQueue<VideoPacket> videoPacketQueue = new ConcurrentListeningQueue<>(20);
-   private final ConcurrentListeningQueue<RobotConfigurationData> robotConfigurationDataQueue = new ConcurrentListeningQueue<>(20);
+   private final ConcurrentListeningQueue<VideoPacket> videoPacketQueue = new ConcurrentListeningQueue<>(2);
+   private final ConcurrentListeningQueue<RobotConfigurationData> robotConfigurationDataQueue = new ConcurrentListeningQueue<>(2);
    private long videoTimestamp = -1L;
 
    private final JPEGDecompressor jpegDecompressor = new JPEGDecompressor();
