@@ -77,7 +77,7 @@ public class SimplePlanarRegionBipedalAnytimeFootstepPlanner extends PlanarRegio
       for (int i = 0; i < listOfNodes.size(); i++)
       {
          BipedalFootstepPlannerNode node = listOfNodes.get(i);
-         boolean stillIsValid = planarRegionPotentialNextStepCalculator.snapToPlanarRegionAndCheckIfGoodSnap(node);
+         boolean stillIsValid = planarRegionPotentialNextStepCalculator.snapNodeAndCheckIfAcceptableToExpand(node);
          PrintTools.info("trying to snap node with position " + node.getSolePosition());
 
          if(!stillIsValid)
