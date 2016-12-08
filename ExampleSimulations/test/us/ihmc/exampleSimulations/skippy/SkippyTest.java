@@ -18,8 +18,8 @@ import us.ihmc.tools.thread.ThreadTools;
 @ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class SkippyTest
 {
-   private static final SkippyControllerMode controllerMode = SkippyControllerMode.ICP_BASED;
-   private static final boolean sleepAfterTest = false;
+   private static final SkippyControllerMode controllerMode = SkippyControllerMode.NONE;
+   private static final boolean sleepAfterTest = true;
 
    private SkippySimulation skippySimulation;
 
@@ -27,6 +27,10 @@ public class SkippyTest
    @Test(timeout = 100000)
    public void testStanding() throws SimulationExceededMaximumTimeException
    {
+      SkippyRobot skippy = skippySimulation.getSkippy();
+      skippy.getShoulderJoint().setQ(0.1);
+      skippy.getHipJoint().setQ(0.1);
+
       assertTrue(skippySimulation.run(10.0));
    }
 
