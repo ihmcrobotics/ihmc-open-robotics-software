@@ -27,8 +27,8 @@ public class PlanarRegionBipedalFootstepPlannerVisualizerFactory
                                                                                                                                 registry, graphicsListRegistry);
 
       PeriodicThreadScheduler scheduler = new PeriodicNonRealtimeThreadScheduler("PlannerScheduler");
-      YoVariableServer yoVariableServer = new YoVariableServer(PlanarRegionBipedalFootstepPlannerVisualizerFactory.class, scheduler, logModelProvider,
-                                                               LogSettings.FOOTSTEP_PLANNER, dtForViz, namePrefix);
+      YoVariableServer yoVariableServer = new YoVariableServer(namePrefix + PlanarRegionBipedalFootstepPlannerVisualizerFactory.class.getSimpleName(), scheduler, logModelProvider,
+                                                               LogSettings.FOOTSTEP_PLANNER, dtForViz);
       yoVariableServer.setSendKeepAlive(true);
       footstepPlannerVisualizer.setTickAndUpdatable(yoVariableServer);
 
