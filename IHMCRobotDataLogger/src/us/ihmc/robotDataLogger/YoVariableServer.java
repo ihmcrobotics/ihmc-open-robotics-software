@@ -34,10 +34,9 @@ public class YoVariableServer implements RobotVisualizer, TickAndUpdatable
 {
    private static final int VARIABLE_BUFFER_CAPACITY = 128;
    private static final int CHANGED_BUFFER_CAPACITY = 128;
-
-   private final String namePrefix;
+   
    private final double dt;
-   private final Class<?> mainClazz;
+   private final String mainClazz;
    private final InetAddress bindAddress;   
    private final LogModelProvider logModelProvider;
    private final LogSettings logSettings;
@@ -73,13 +72,13 @@ public class YoVariableServer implements RobotVisualizer, TickAndUpdatable
    private long uid = 0; 
    
    private boolean sendKeepAlive = false;
-
+   
    public YoVariableServer(Class<?> mainClazz, PeriodicThreadScheduler scheduler, LogModelProvider logModelProvider, LogSettings logSettings, double dt)
    {
-      this(mainClazz, scheduler, logModelProvider, logSettings, dt, "");
+      this(mainClazz.getSimpleName(), scheduler, logModelProvider, logSettings, dt);
    }
-
-   public YoVariableServer(Class<?> mainClazz, PeriodicThreadScheduler scheduler, LogModelProvider logModelProvider, LogSettings logSettings, double dt, String namePrefix)
+   
+   public YoVariableServer(String mainClazz, PeriodicThreadScheduler scheduler, LogModelProvider logModelProvider, LogSettings logSettings, double dt)
    {
       this.dt = dt;
       this.mainClazz = mainClazz;
@@ -87,7 +86,6 @@ public class YoVariableServer implements RobotVisualizer, TickAndUpdatable
       this.bindAddress = LogUtils.getMyIP(NetworkParameters.getHost(NetworkParameterKeys.logger));
       this.logModelProvider = logModelProvider;
       this.logSettings = logSettings;
-      this.namePrefix = namePrefix;
    }
 
    public synchronized void start()
@@ -108,7 +106,7 @@ public class YoVariableServer implements RobotVisualizer, TickAndUpdatable
       startControlServer();
       
       InetSocketAddress controlAddress = new InetSocketAddress(bindAddress, controlServer.getPort());
-      sessionBroadcaster = new LogSessionBroadcaster(controlAddress, bindAddress, mainClazz, logSettings, namePrefix);
+      sessionBroadcaster = new LogSessionBroadcaster(controlAddress, bindAddress, mainClazz, logSettings);
       producer = new YoVariableProducer(scheduler, sessionBroadcaster, handshakeBuilder, logModelProvider, mainBuffer,
             buffers.values(), sendKeepAlive);
             
