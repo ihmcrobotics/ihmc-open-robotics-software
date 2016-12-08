@@ -166,4 +166,10 @@ public class IntegerYoVariable extends YoVariable<IntegerYoVariable>
       return set(value.getIntegerValue(), notifyListeners);
    }
 
+   @Override
+   public boolean isZero()
+   {
+      return getIntegerValue() == 0;
+   }
+
 }

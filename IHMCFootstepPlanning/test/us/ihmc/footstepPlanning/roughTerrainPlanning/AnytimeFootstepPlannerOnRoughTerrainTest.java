@@ -27,6 +27,7 @@ import us.ihmc.tools.thread.ThreadTools;
 @ContinuousIntegrationAnnotations.ContinuousIntegrationPlan(categories = {IntegrationCategory.IN_DEVELOPMENT})
 public class AnytimeFootstepPlannerOnRoughTerrainTest implements PlanningTest
 {
+   private boolean assertPlannerReturnedResult = true;
    private static final boolean visualize = false;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -62,13 +63,12 @@ public class AnytimeFootstepPlannerOnRoughTerrainTest implements PlanningTest
       PlanningTestTools.configureAnytimePlannerRunnable(anytimePlanner, initialStanceFootPose, initialStanceSide, goalPose, cinderBlockField);
 
       new Thread(anytimePlanner).start();
-      checkThatPlannerKeepsGettingCloserToGoal(anytimePlanner, goalPoses, Double.MAX_VALUE);
+      FootstepPlan bestPlan = checkThatPlannerKeepsGettingCloserToGoal(anytimePlanner, goalPoses);
       anytimePlanner.requestStop();
 
-      FootstepPlan bestPlan = anytimePlanner.getBestPlanYet();
       double expectedClosestDistanceToGoal = 3.0;
       double actualClosestDistanceToGoal = getDistanceFromPlansLastFootstepToGoalFootstep(bestPlan, goalPoses);
-      assertTrue(actualClosestDistanceToGoal < expectedClosestDistanceToGoal);
+      if (assertPlannerReturnedResult) assertTrue("expectedClosestDistanceToGoal: " + expectedClosestDistanceToGoal + ", actualClosestDistanceToGoal: " + actualClosestDistanceToGoal, actualClosestDistanceToGoal < expectedClosestDistanceToGoal);
 
       if (visualize())
       {
@@ -108,20 +108,20 @@ public class AnytimeFootstepPlannerOnRoughTerrainTest implements PlanningTest
 
       new Thread(anytimePlanner).start();
 
-      double closestDistanceOfFootstepToGoal = Double.MAX_VALUE;
-      closestDistanceOfFootstepToGoal = checkThatPlannerKeepsGettingCloserToGoal(anytimePlanner, goalPoses, closestDistanceOfFootstepToGoal);
+      checkThatPlannerKeepsGettingCloserToGoal(anytimePlanner, goalPoses);
       anytimePlanner.setPlanarRegions(cinderBlockFieldTwoThirds);
-      closestDistanceOfFootstepToGoal = checkThatPlannerKeepsGettingCloserToGoal(anytimePlanner, goalPoses, closestDistanceOfFootstepToGoal);
+      checkThatPlannerKeepsGettingCloserToGoal(anytimePlanner, goalPoses);
       anytimePlanner.setPlanarRegions(cinderBlockEntireField);
-      closestDistanceOfFootstepToGoal = checkThatPlannerKeepsGettingCloserToGoal(anytimePlanner, goalPoses, closestDistanceOfFootstepToGoal);
+      FootstepPlan bestPlanYet = checkThatPlannerKeepsGettingCloserToGoal(anytimePlanner, goalPoses);
 
       anytimePlanner.requestStop();
+      double closestDistanceOfFootstepToGoal = getDistanceFromPlansLastFootstepToGoalFootstep(bestPlanYet, goalPoses);
       double expectedClosestDistanceToGoal = 3.0;
-      assertTrue(closestDistanceOfFootstepToGoal < expectedClosestDistanceToGoal);
+      if (assertPlannerReturnedResult) assertTrue("closestDistanceOfFootstepToGoal = " + closestDistanceOfFootstepToGoal + ", expectedClosestDistanceToGoal = " + expectedClosestDistanceToGoal, closestDistanceOfFootstepToGoal < expectedClosestDistanceToGoal);
 
       if (visualize())
       {
-         PlanningTestTools.visualizeAndSleep(cinderBlockEntireField, anytimePlanner.getBestPlanYet(), goalPose);
+         PlanningTestTools.visualizeAndSleep(cinderBlockEntireField, bestPlanYet, goalPose);
       }
    }
 
@@ -137,15 +137,20 @@ public class AnytimeFootstepPlannerOnRoughTerrainTest implements PlanningTest
       }
    }
 
-   private double checkThatPlannerKeepsGettingCloserToGoal(SimplePlanarRegionBipedalAnytimeFootstepPlanner anytimePlanner, SideDependentList<FramePose> goalPoses, double initialClosestDistanceToGoal)
+   private FootstepPlan checkThatPlannerKeepsGettingCloserToGoal(SimplePlanarRegionBipedalAnytimeFootstepPlanner anytimePlanner, SideDependentList<FramePose> goalPoses)
    {
-      double closestFootstepToGoal = initialClosestDistanceToGoal;
+      FootstepPlan bestPlanYet = null;
+      double closestFootstepToGoal = Double.MAX_VALUE;
 
       for(int i = 0; i < 10; i++)
       {
-         ThreadTools.sleep(100);
+         ThreadTools.sleep(500);
 
-         FootstepPlan bestPlanYet = anytimePlanner.getBestPlanYet();
+         FootstepPlan newPlan = anytimePlanner.getBestPlanYet();
+         if(newPlan == null)
+            continue;
+         else
+            bestPlanYet = newPlan;
 
          int numberOfFootsteps = bestPlanYet.getNumberOfSteps();
          if(numberOfFootsteps < 2)
@@ -153,11 +158,11 @@ public class AnytimeFootstepPlannerOnRoughTerrainTest implements PlanningTest
 
          double newClosestDistance = getDistanceFromPlansLastFootstepToGoalFootstep(bestPlanYet, goalPoses);
 
-         assertTrue(newClosestDistance <= closestFootstepToGoal);
+         if (assertPlannerReturnedResult) assertTrue(newClosestDistance <= closestFootstepToGoal);
          closestFootstepToGoal = newClosestDistance;
       }
 
-      return closestFootstepToGoal;
+      return bestPlanYet;
    }
 
    private double getDistanceFromPlansLastFootstepToGoalFootstep(FootstepPlan footstepPlan, SideDependentList<FramePose> goalPoses)
@@ -179,7 +184,7 @@ public class AnytimeFootstepPlannerOnRoughTerrainTest implements PlanningTest
       YoVariableRegistry registry = new YoVariableRegistry("test");
       SimplePlanarRegionBipedalAnytimeFootstepPlanner planner = new SimplePlanarRegionBipedalAnytimeFootstepPlanner(registry);
       BipedalFootstepPlannerParameters parameters = planner.getParameters();
-      
+
       parameters.setMaximumStepReach(0.45);
       parameters.setMaximumStepZ(0.25);
       parameters.setMaximumStepXWhenForwardAndDown(0.25);

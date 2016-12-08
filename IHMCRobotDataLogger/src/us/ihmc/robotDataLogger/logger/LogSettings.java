@@ -13,6 +13,7 @@ public enum LogSettings
    VALKYRIE_NO_CAMERAS(true),
    STEPPR_IHMC(true, "239.255.25.3"),
    SIMULATION(false, "239.255.25.4"),
+   TEST_LOGGER(true),
    BEHAVIOR(false),
    TOOLBOX(false),
    EXO_X1A(false),
