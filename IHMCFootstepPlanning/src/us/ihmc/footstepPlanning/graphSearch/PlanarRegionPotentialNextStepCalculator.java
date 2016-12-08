@@ -382,56 +382,56 @@ public class PlanarRegionPotentialNextStepCalculator
    private final RigidBodyTransform rightSoleTransform = new RigidBodyTransform();
    private final SideDependentList<RigidBodyTransform> soleTransforms = new SideDependentList<>(leftSoleTransform, rightSoleTransform);
 
-   double spoofScore = 0.0;
-
    private boolean checkIfNodeAcceptableScoreAndAddToList(BipedalFootstepPlannerNode node, ArrayList<BipedalFootstepPlannerNode> nodesToAdd, Vector3d idealStepVector, double idealStepYaw)
    {
-      boolean acceptable = checkNodeAcceptableToExpand(node);
-
-      node.setSingleStepScore(spoofScore);
-      spoofScore = spoofScore - 1.0;
-
-      BipedalFootstepPlannerNode parentNode = node.getParentNode();
-
-      if (parentNode == null)
-      {
-         node.setSingleStepScore(0.0);
-      }
-      else
-      {
-         node.getSoleTransform(soleTransforms.get(node.getRobotSide()));
-         parentNode.getSoleTransform(soleTransforms.get(parentNode.getRobotSide()));
-
-         RigidBodyTransform nodeTransform = new RigidBodyTransform();
-         node.getSoleTransform(nodeTransform);
-         FramePose candidateFootPose = new FramePose(ReferenceFrame.getWorldFrame(), nodeTransform);
-
-         RigidBodyTransform stanceFootTransform = soleTransforms.get(node.getRobotSide().getOppositeSide());
-         RigidBodyTransform swingStartFootTransform = soleTransforms.get(node.getRobotSide());
-
-         FramePose stanceFootPose = new FramePose(ReferenceFrame.getWorldFrame(), stanceFootTransform);
-         FramePose swingStartFootPose = new FramePose(ReferenceFrame.getWorldFrame(), swingStartFootTransform);
-
-         RigidBodyTransform idealStepTransform = getTransformFromStepToWorld(stanceFootTransform, idealStepVector, idealStepYaw);
-         FramePose idealFootstepPose = new FramePose(ReferenceFrame.getWorldFrame(), idealStepTransform);
-
-         Point3d swingFootGoal = goalPositions.get(node.getRobotSide());
-         double score;
-         if (enablePenalizationHeatmapScoring.getBooleanValue())
-         {
-            score = penalizationHeatmapStepScorer.scoreFootstep(stanceFootPose, swingStartFootPose, idealFootstepPose, candidateFootPose, swingFootGoal);
-         }
-         else
-         {
-            score = orderInWhichConstructedStepScorer.scoreFootstep(stanceFootPose, swingStartFootPose, idealFootstepPose, candidateFootPose, swingFootGoal);
-         }
-
-         node.setSingleStepScore(score);
-      }
+      boolean acceptable = snapNodeAndCheckIfAcceptableToExpand(node);
 
       if (acceptable)
       {
+         BipedalFootstepPlannerNode parentNode = node.getParentNode();
+
+         if (parentNode == null)
+         {
+            node.setSingleStepScore(0.0);
+         }
+         else
+         {
+            node.getSoleTransform(soleTransforms.get(node.getRobotSide()));
+            parentNode.getSoleTransform(soleTransforms.get(parentNode.getRobotSide()));
+
+            RigidBodyTransform nodeTransform = new RigidBodyTransform();
+            node.getSoleTransform(nodeTransform);
+            FramePose candidateFootPose = new FramePose(ReferenceFrame.getWorldFrame(), nodeTransform);
+
+            RigidBodyTransform stanceFootTransform = soleTransforms.get(node.getRobotSide().getOppositeSide());
+            RigidBodyTransform swingStartFootTransform = soleTransforms.get(node.getRobotSide());
+
+            FramePose stanceFootPose = new FramePose(ReferenceFrame.getWorldFrame(), stanceFootTransform);
+            FramePose swingStartFootPose = new FramePose(ReferenceFrame.getWorldFrame(), swingStartFootTransform);
+
+            RigidBodyTransform idealStepTransform = getTransformFromStepToWorld(stanceFootTransform, idealStepVector, idealStepYaw);
+            FramePose idealFootstepPose = new FramePose(ReferenceFrame.getWorldFrame(), idealStepTransform);
+
+            Point3d swingFootGoal = goalPositions.get(node.getRobotSide());
+            double score;
+            if (enablePenalizationHeatmapScoring.getBooleanValue())
+            {
+               score = penalizationHeatmapStepScorer.scoreFootstep(stanceFootPose, swingStartFootPose, idealFootstepPose, candidateFootPose, swingFootGoal);
+            }
+            else
+            {
+               score = orderInWhichConstructedStepScorer.scoreFootstep(stanceFootPose, swingStartFootPose, idealFootstepPose, candidateFootPose, swingFootGoal);
+            }
+
+            node.setSingleStepScore(score);
+         }
+
          nodesToAdd.add(node);
+      }
+
+      else
+      {
+         node.setSingleStepScore(Double.NEGATIVE_INFINITY);
       }
 
       return acceptable;
@@ -511,8 +511,10 @@ public class PlanarRegionPotentialNextStepCalculator
       transform.setM22(zAxis.getZ());
    }
 
-   private boolean checkNodeAcceptableToExpand(BipedalFootstepPlannerNode nodeToExpand)
+   protected boolean snapNodeAndCheckIfAcceptableToExpand(BipedalFootstepPlannerNode nodeToExpand)
    {
+      nodeToExpand.removePitchAndRoll();
+
       notifyListenerNodeSelectedForExpansion(nodeToExpand);
 
       if (nodeToExpand != startNode) // StartNode is from an actual footstep, so we don't need to snap it...
@@ -521,7 +523,6 @@ public class PlanarRegionPotentialNextStepCalculator
          boolean snapSucceded = snapToPlanarRegionAndCheckIfGoodSnap(nodeToExpand);
          if (!snapSucceded)
             return false;
-         ;
 
          boolean goodFootstep = checkIfGoodFootstep(nodeToExpand);
          if (!goodFootstep)
@@ -666,6 +667,10 @@ public class PlanarRegionPotentialNextStepCalculator
       RigidBodyTransform soleTransformBeforeSnap = new RigidBodyTransform();
 
       bipedalFootstepPlannerNode.getSoleTransform(soleTransformBeforeSnap);
+      if (!isTransformZUp(soleTransformBeforeSnap))
+      {
+         throw new RuntimeException("Node needs to be flat (no pitch or roll) before calling this! bipedalFootstepPlannerNode = \n" + bipedalFootstepPlannerNode);
+      }
 
       ConvexPolygon2d currentFootPolygon = new ConvexPolygon2d(footPolygonsInSoleFrame.get(nodeSide));
       currentFootPolygon.applyTransformAndProjectToXYPlane(soleTransformBeforeSnap);
@@ -807,6 +812,11 @@ public class PlanarRegionPotentialNextStepCalculator
       }
 
       return snapAndWiggleTransform;
+   }
+
+   private boolean isTransformZUp(RigidBodyTransform soleTransformBeforeSnap)
+   {
+      return Math.abs(soleTransformBeforeSnap.getM22() - 1.0) < 1e-4;
    }
 
    private void notifyListenerNodeSnappedAndStillSelectedForExpansion(BipedalFootstepPlannerNode nodeAfterSnap)

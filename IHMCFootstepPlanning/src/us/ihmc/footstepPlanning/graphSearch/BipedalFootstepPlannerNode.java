@@ -26,6 +26,7 @@ public class BipedalFootstepPlannerNode
    private static final double YAW_ROTATION_THRESHOLD_TO_CONSIDER_NODES_EQUAL = 0.04;
 
    private boolean isAtGoal = false;
+   private boolean isDead = false;
 
    private double singleStepScore;
 
@@ -105,6 +106,29 @@ public class BipedalFootstepPlannerNode
       soleTransform.multiply(snapTransform, soleTransform);
    }
 
+   public void removePitchAndRoll()
+   {
+      if (Math.abs(soleTransform.getM22() - 1.0) < 1e-4) return;
+      double m00 = soleTransform.getM00();
+      double m10 = soleTransform.getM10();
+      
+      double magnitude = Math.sqrt(m00*m00 + m10*m10);
+      m00 = m00 / magnitude;
+      m10 = m10 / magnitude;
+      
+      soleTransform.setM00(m00);
+      soleTransform.setM10(m10);
+      soleTransform.setM20(0.0);
+      
+      soleTransform.setM01(-m10);
+      soleTransform.setM11(m00);
+      soleTransform.setM21(0.0);
+      
+      soleTransform.setM02(0.0);
+      soleTransform.setM12(0.0);
+      soleTransform.setM22(1.0);
+   }
+
    public BipedalFootstepPlannerNode getParentNode()
    {
       return parentNode;
@@ -123,6 +147,16 @@ public class BipedalFootstepPlannerNode
       }
 
       this.childrenNodes.add(childNode);
+   }
+
+   public void setToDead()
+   {
+      isDead = true;
+   }
+
+   public boolean isDead()
+   {
+      return isDead;
    }
 
    public void getChildren(ArrayList<BipedalFootstepPlannerNode> childrenNodesToPack)
@@ -247,5 +281,6 @@ public class BipedalFootstepPlannerNode
    {
       return soleTransform.toString();
    }
+
 
 }
