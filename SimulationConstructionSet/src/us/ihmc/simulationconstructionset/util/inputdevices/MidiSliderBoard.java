@@ -29,7 +29,10 @@ public class MidiSliderBoard implements ExitActionListener, CloseableAndDisposab
    // There are problems with using both virtual and physical sliderboards at the same time when connected to the biped.
    private boolean alwaysShowVirtualSliderBoard = false;
 
-   private enum Devices {VIRTUAL, MOTORIZED, GENERIC}
+   private enum Devices
+   {
+      VIRTUAL, MOTORIZED, GENERIC
+   }
 
    public static final int CHECK_TIME = 10;
 
@@ -72,8 +75,9 @@ public class MidiSliderBoard implements ExitActionListener, CloseableAndDisposab
    {
       this((YoVariableHolder) scs);
       boolean showSCSWindows = scs != null && scs.getSimulationConstructionSetParameters().getShowWindows();
-      if (showSCSWindows && showVirtualSliderBoard && (preferedDevice.equals(Devices.VIRTUAL) || alwaysShowVirtualSliderBoard))
+      if ((showSCSWindows && preferedDevice.equals(Devices.VIRTUAL)) || (showVirtualSliderBoard || alwaysShowVirtualSliderBoard))
       {
+         
          if ((scs == null) || (scs.getStandardSimulationGUI() != null))
          {
             PrintTools.info(this, "Setting Up Virtual Slider Board");
@@ -110,8 +114,6 @@ public class MidiSliderBoard implements ExitActionListener, CloseableAndDisposab
          {
             this.holder = scs;
          }
-
-
 
          // if a motorized slider board is found
          if (preferedDevice.equals(Devices.MOTORIZED))
@@ -185,7 +187,7 @@ public class MidiSliderBoard implements ExitActionListener, CloseableAndDisposab
             {
                if (DEBUG)
                   System.out.println("EVL::valueChanged [" + midiControl.mapping + "] value to : " + midiControl.var.getValueAsDouble() + " YoVal:"
-                                     + midiControl.var.getValueAsDouble());
+                        + midiControl.var.getValueAsDouble());
                if (visualizer != null)
                   visualizer.updateValue(midiControl);
             }
@@ -479,7 +481,7 @@ public class MidiSliderBoard implements ExitActionListener, CloseableAndDisposab
    {
       setButton(channel, holder.getVariable(name));
    }
-   
+
    public void setButtonEnum(int channel, String name, YoVariableHolder holder, Enum<?> enumValue)
    {
       setButtonEnum(channel, (EnumYoVariable<?>) holder.getVariable(name), enumValue);
@@ -499,7 +501,7 @@ public class MidiSliderBoard implements ExitActionListener, CloseableAndDisposab
          offset = -16;
       setControl(channel + offset, var, 0, 1, 1, SliderType.BOOLEAN, ControlType.BUTTON);
    }
-   
+
    public void setButtonEnum(int channel, EnumYoVariable<?> enumYoVariable, Enum<?> enumValue)
    {
       int offset;
@@ -507,7 +509,7 @@ public class MidiSliderBoard implements ExitActionListener, CloseableAndDisposab
          offset = -8;
       else
          offset = -16;
-      
+
       setControl(channel + offset, enumYoVariable, 0.0, enumValue.ordinal(), 1.0, SliderType.ENUM, ControlType.BUTTON);
    }
 
@@ -559,7 +561,7 @@ public class MidiSliderBoard implements ExitActionListener, CloseableAndDisposab
       }
 
       YoVariable<?> variable = holder.getVariable(name);
-      if(variable == null)
+      if (variable == null)
       {
          PrintTools.error("Ahhhhhhhhh, yoVariable name " + name + " was not found in the registry. It's not getting added to the sliderboard");
          return;
@@ -573,9 +575,9 @@ public class MidiSliderBoard implements ExitActionListener, CloseableAndDisposab
       {
          PrintTools.warn("Trying to add yovariable to slider, but it does not exist, or more than 1 exists: " + varName);
       }
-      
+
       YoVariable<?> variable = holder.getVariable(varName);
-      if(variable == null)
+      if (variable == null)
       {
          PrintTools.error("Ahhhhhhhhh, yoVariable name " + varName + " was not found in the registry. It's not getting added to the sliderboard");
          return;
@@ -686,7 +688,7 @@ public class MidiSliderBoard implements ExitActionListener, CloseableAndDisposab
 
    public void setKnobEnum(int channel, EnumYoVariable<?> var)
    {
-      setControl(channel - 80, var, 0.0, var.getEnumValues().length -  1, 1.0, SliderType.ENUM, ControlType.KNOB);
+      setControl(channel - 80, var, 0.0, var.getEnumValues().length - 1, 1.0, SliderType.ENUM, ControlType.KNOB);
    }
 
    public void setSliderEnum(int channel, String name, YoVariableHolder holder)
@@ -786,8 +788,8 @@ public class MidiSliderBoard implements ExitActionListener, CloseableAndDisposab
 
    private void setControl(int channel, YoVariable<?> var, double min, double max, double exponent, SliderType sliderType, ControlType controlType)
    {
-      
-      if(var == null)
+
+      if (var == null)
       {
          PrintTools.error("YoVariable was null. It's not getting added to the sliderboard");
          return;
@@ -795,8 +797,8 @@ public class MidiSliderBoard implements ExitActionListener, CloseableAndDisposab
       setControl(channel, var, var.getName(), min, max, exponent, (min + max) / 2.0, sliderType, controlType);
    }
 
-   private synchronized void setControl(int channel, YoVariable<?> var, String name, double min, double max, double exponent, double hires, SliderType sliderType,
-           ControlType controlType)
+   private synchronized void setControl(int channel, YoVariable<?> var, String name, double min, double max, double exponent, double hires,
+         SliderType sliderType, ControlType controlType)
    {
       if (var != null)
       {
@@ -1013,7 +1015,6 @@ public class MidiSliderBoard implements ExitActionListener, CloseableAndDisposab
    {
       public void valueChanged(MidiControl midiControl);
    }
-
 
    public void setVirtualSliderBoardFrameLocation(int x, int y)
    {
