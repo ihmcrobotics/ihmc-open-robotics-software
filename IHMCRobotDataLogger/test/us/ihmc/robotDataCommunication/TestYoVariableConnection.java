@@ -2,6 +2,7 @@ package us.ihmc.robotDataCommunication;
 
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotDataLogger.logger.LogSettings;
+import us.ihmc.robotDataLogger.util.JVMStatisticsGenerator;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -23,6 +24,7 @@ public class TestYoVariableConnection
    private final DoubleYoVariable var1 = new DoubleYoVariable("var1", registry);
    private final DoubleYoVariable var2 = new DoubleYoVariable("var2", registry);
    private final IntegerYoVariable var4 = new IntegerYoVariable("var4", registry);
+   private final IntegerYoVariable var5 = new IntegerYoVariable("var5", registry);
    private final EnumYoVariable<TestEnum> var3 = new EnumYoVariable<TestEnum>("var3", "", registry, TestEnum.class, true);
    
    private final IntegerYoVariable echoIn = new IntegerYoVariable("echoIn", registry);
@@ -31,8 +33,12 @@ public class TestYoVariableConnection
    private final IntegerYoVariable timeout = new IntegerYoVariable("timeout", registry);
    
    private final BooleanYoVariable startVariableSummary = new BooleanYoVariable("startVariableSummary", registry);
+   private final BooleanYoVariable gc = new BooleanYoVariable("gc", registry);
+   
+   
    
    private final YoVariableServer server = new YoVariableServer(getClass(), new PeriodicNonRealtimeThreadScheduler("TestYoVariableConnection"), null, LogSettings.TEST_LOGGER, 0.001);
+   private final JVMStatisticsGenerator jvmStatisticsGenerator = new JVMStatisticsGenerator(server);
    
    
    private volatile long timestamp = 0;
@@ -47,8 +53,11 @@ public class TestYoVariableConnection
       server.addSummarizedVariable("tester.var2");
       server.addSummarizedVariable(var4);
       
+      jvmStatisticsGenerator.addVariablesToStatisticsGenerator(server);
       
       startVariableSummary.set(false);
+      
+      jvmStatisticsGenerator.start();
       
       new ThreadTester(server).start();
       server.start();
@@ -70,7 +79,15 @@ public class TestYoVariableConnection
          }
          var3.set(values[i]);
          
+//         var5.set(new Random().nextInt());
+         
          echoOut.set(echoIn.getIntegerValue());
+         
+         if(gc.getBooleanValue())
+         {
+            System.gc();
+            gc.set(false);
+         }
          
          timestamp += TimeTools.milliSecondsToNanoSeconds(1);
          server.update(timestamp);
