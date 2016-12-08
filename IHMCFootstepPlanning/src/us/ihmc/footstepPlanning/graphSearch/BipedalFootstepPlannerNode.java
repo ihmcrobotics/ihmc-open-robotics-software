@@ -26,6 +26,7 @@ public class BipedalFootstepPlannerNode
    private static final double YAW_ROTATION_THRESHOLD_TO_CONSIDER_NODES_EQUAL = 0.04;
 
    private boolean isAtGoal = false;
+   private boolean isDead = false;
 
    private double singleStepScore;
 
@@ -123,6 +124,16 @@ public class BipedalFootstepPlannerNode
       }
 
       this.childrenNodes.add(childNode);
+   }
+
+   public void setToDead()
+   {
+      isDead = true;
+   }
+
+   public boolean isDead()
+   {
+      return isDead;
    }
 
    public void getChildren(ArrayList<BipedalFootstepPlannerNode> childrenNodesToPack)
