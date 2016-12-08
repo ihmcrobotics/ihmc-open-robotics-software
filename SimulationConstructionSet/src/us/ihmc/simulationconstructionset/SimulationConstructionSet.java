@@ -30,6 +30,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 import javax.vecmath.Color3f;
+import javax.vecmath.Tuple3d;
 
 import com.jme3.renderer.Camera;
 
@@ -1122,6 +1123,21 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
    }
 
    /**
+    * Modify the active camera's fix.  If track is enabled for this camera the new values will be overwritten, dolly has no effect.
+    * <p/>
+    * The camera fix is point in space at which the camera is looking.
+    *
+    * @param cameraFix coordinates of the fix point.
+    */
+   public void setCameraFix(Tuple3d cameraFix)
+   {
+      if (myGUI != null)
+      {
+         myGUI.setCameraFix(cameraFix);
+      }
+   }
+
+   /**
     * Modifies the position at which the currently active camera is located.  If dolly is enabled for this camera the new values will be overwritten, track has no effect.
     *
     * @param posX X coordinate of the camera.
@@ -1134,6 +1150,19 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       {
          myGUI.setCameraPosition(posX, posY, posZ);
       }
+   }
+
+   /**
+    * Modifies the position at which the currently active camera is located.  If dolly is enabled for this camera the new values will be overwritten, track has no effect.
+    *
+    * @param cameraPosition coordinates of the camera.
+    */
+   public void setCameraPosition(Tuple3d cameraPosition)
+   {
+      if (myGUI != null)
+      {
+         myGUI.setCameraPosition(cameraPosition);
+      }      
    }
 
    /**
@@ -4447,6 +4476,5 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
    {
       mySimulation.initializeCollisionDetectionAndHandling(collisionVisualizer, collisionHandler);
    }
-
 
 }
