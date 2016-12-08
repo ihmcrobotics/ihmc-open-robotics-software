@@ -52,6 +52,7 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
       parameters = new BipedalFootstepPlannerParameters(parentRegistry);
 
       BipedalStepScorer bipedalStepScorer = new PenalizationHeatmapStepScorer(parentRegistry, null, parameters);
+//      BipedalStepScorer bipedalStepScorer = new OrderInWhichConstructedStepScorer();
       planarRegionPotentialNextStepCalculator = new PlanarRegionPotentialNextStepCalculator(parameters, bipedalStepScorer, parentRegistry);
    }
 
