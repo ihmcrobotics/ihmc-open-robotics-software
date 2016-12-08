@@ -281,6 +281,50 @@ public class Graphics3DObject
 
       return graphics3DScale;
    }
+   
+   
+   /**
+    * Scales the origin coordinate system by the specified scale factor. This will scale existing
+    * graphics and all graphics added after calling this function till identity() is called. 
+    * 
+    * 
+    * @param scaleFactor Factor by which the graphics object system is scaled.  For example, 0.5 would
+    * reduce future objects size by 50% whereas 2 would double it.
+    * @return
+    */
+   public void preScale(double scaleFactor)
+   {
+      preScale(new Vector3d(scaleFactor, scaleFactor, scaleFactor));
+   }
+   
+   /**
+    * Scales the origin coordinate system by the specified scale factor. This will scale existing
+    * graphics and all graphics added after calling this function. The components of the vector indicate
+    * scale factors in each dimension.
+    * 
+    * @param scaleFactors Vector3d describing the scaling factors in each dimension
+    * @return
+    */
+   public void preScale(Vector3d scaleFactors)
+   {
+      
+      
+      ArrayList<Graphics3DPrimitiveInstruction> newInstructions = new ArrayList<>();
+      newInstructions.add(new Graphics3DScaleInstruction(scaleFactors));
+      
+      for(int i = 0; i < graphics3DInstructions.size(); i++)
+      {
+         Graphics3DPrimitiveInstruction instruction = graphics3DInstructions.get(i);
+         newInstructions.add(instruction);
+         if(instruction instanceof Graphics3DIdentityInstruction)
+         {
+            newInstructions.add(new Graphics3DScaleInstruction(scaleFactors));
+
+         }
+      }
+      
+      graphics3DInstructions = newInstructions;
+   }
 
    /**
     * Resets the coordinate system to the joint origin.  This clears all rotations, translations,
