@@ -1,32 +1,40 @@
 package us.ihmc.footstepPlanning.graphSearch;
 
-import us.ihmc.footstepPlanning.AnytimeFootstepPlanner;
-import us.ihmc.footstepPlanning.FootstepPlan;
-import us.ihmc.footstepPlanning.FootstepPlanningResult;
-import us.ihmc.footstepPlanning.SimpleFootstep;
+import us.ihmc.footstepPlanning.*;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.tools.thread.ThreadTools;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class SimplePlanarRegionBipedalAnytimeFootstepPlanner extends PlanarRegionBipedalFootstepPlanner implements AnytimeFootstepPlanner, Runnable
 {
+   private final String namePrefix = "AnytimePlanner_";
+
    private BipedalFootstepPlannerNode closestNodeToGoal = null;
    private final AtomicReference<FootstepPlan> bestPlanYet = new AtomicReference<>(null);
    private boolean stopRequested = false;
    private boolean isBestPlanYetOptimal = false;
-   private boolean alreadySetPlanarRegions = false;
    private final AtomicReference<PlanarRegionsList> planarRegionsListReference = new AtomicReference<>(null);
-   private boolean requestInitialize = false;
+   private final AtomicReference<BipedalFootstepPlannerNode> newStartNodeReference = new AtomicReference<>(null);
+   private final IntegerYoVariable maxNumberOfNodesBeforeSleeping = new IntegerYoVariable(namePrefix + "maxNumberOfNodesBeforeSleeping", registry);
+   private final IntegerYoVariable stackSize = new IntegerYoVariable(namePrefix + "stackSize", registry);
+
+   private final FramePose tempFramePose = new FramePose();
+   private final RigidBodyTransform tempTransform = new RigidBodyTransform();
 
    public SimplePlanarRegionBipedalAnytimeFootstepPlanner(YoVariableRegistry parentRegistry)
    {
       super(parentRegistry);
+      maxNumberOfNodesBeforeSleeping.set(5000);
    }
 
    /**
@@ -35,7 +43,7 @@ public class SimplePlanarRegionBipedalAnytimeFootstepPlanner extends PlanarRegio
    @Override
    public FootstepPlan getBestPlanYet()
    {
-      return bestPlanYet.get();
+      return bestPlanYet.getAndSet(null);
    }
 
    @Override
@@ -48,12 +56,6 @@ public class SimplePlanarRegionBipedalAnytimeFootstepPlanner extends PlanarRegio
    protected void initialize()
    {
       stack.clear();
-      
-      if (initialSide == null)
-      {
-         throw new RuntimeException("initialSide == null");
-      }
-
       startNode = new BipedalFootstepPlannerNode(initialSide, initialFootPose);
       stack.push(startNode);
       closestNodeToGoal = null;
@@ -61,15 +63,93 @@ public class SimplePlanarRegionBipedalAnytimeFootstepPlanner extends PlanarRegio
       bestPlanYet.set(null);
    }
 
+   private void initializeForNewPlanarRegions()
+   {
+      stack.clear();
+      stack.push(startNode);
+      mapToAllExploredNodes.clear();
+
+      closestNodeToGoal = null;
+      bestPlanYet.set(null);
+//      trimBestPlanToNewPlanarRegions();
+   }
+
+   private void trimBestPlanToNewPlanarRegions()
+   {
+      List<BipedalFootstepPlannerNode> listOfNodes = FootstepPlanningUtils.createListOfNodesFromEndNode(closestNodeToGoal);
+      PrintTools.info("trimming plan to new planar regions");
+
+      for (int i = 0; i < listOfNodes.size(); i++)
+      {
+         BipedalFootstepPlannerNode node = listOfNodes.get(i);
+         boolean stillIsValid = planarRegionPotentialNextStepCalculator.snapNodeAndCheckIfAcceptableToExpand(node);
+         PrintTools.info("trying to snap node with position " + node.getSolePosition());
+
+         if(!stillIsValid)
+         {
+            closestNodeToGoal = node.getParentNode();
+            if(i < listOfNodes.size())
+            {
+               FootstepPlan trimmedBestPlan = FootstepPlanningUtils.createFootstepPlanFromEndNode(closestNodeToGoal);
+               bestPlanYet.set(trimmedBestPlan);
+            }
+
+            PrintTools.info("valid up to node " + i + " of " + listOfNodes.size());
+            checkIfNearbyNodeAlreadyExistsAndStoreIfNot(node);
+            break;
+         }
+         else
+         {
+            checkIfNearbyNodeAlreadyExistsAndStoreIfNot(node);
+            PrintTools.info("valid node");
+         }
+      }
+   }
+
    @Override
    public void executingFootstep(SimpleFootstep footstep)
    {
-      FramePose newStartPose = new FramePose();
-      footstep.getSoleFramePose(newStartPose);
-      RobotSide newInitialSide = footstep.getRobotSide();
+      footstep.getSoleFramePose(tempFramePose);
+      tempFramePose.getRigidBodyTransform(tempTransform);
+      BipedalFootstepPlannerNode newStartNode = new BipedalFootstepPlannerNode(footstep.getRobotSide(), tempTransform);
+      newStartNodeReference.set(newStartNode);
 
-      super.setInitialStanceFoot(newStartPose, newInitialSide);
-      requestInitialize = true;
+      PrintTools.info("executing footstep");
+   }
+
+   private void replaceStartNode()
+   {
+      BipedalFootstepPlannerNode newStartNode = newStartNodeReference.getAndSet(null);
+      if(newStartNode != null)
+      {
+         ArrayList<BipedalFootstepPlannerNode> childrenOfStartNode = new ArrayList<>();
+         startNode.getChildren(childrenOfStartNode);
+         PrintTools.info("clearing children of start node");
+
+         for(BipedalFootstepPlannerNode node : childrenOfStartNode)
+         {
+            if(!node.equals(newStartNode))
+            {
+               recursivelyMarkAsDead(node);
+            }
+         }
+
+         startNode = newStartNode;
+         initialSide = startNode.getRobotSide();
+         startNode.getSoleTransform(initialFootPose);
+      }
+   }
+
+   private void recursivelyMarkAsDead(BipedalFootstepPlannerNode node)
+   {
+      node.setToDead();
+      ArrayList<BipedalFootstepPlannerNode> childrenNodes = new ArrayList<>();
+      node.getChildren(childrenNodes);
+
+      for(BipedalFootstepPlannerNode childNode : childrenNodes)
+      {
+         recursivelyMarkAsDead(childNode);
+      }
    }
 
    @Override
@@ -94,7 +174,15 @@ public class SimplePlanarRegionBipedalAnytimeFootstepPlanner extends PlanarRegio
 
       while (!stopRequested)
       {
+         stackSize.set(stack.size());
+         replaceStartNode();
          checkForNewPlanarRegionsList();
+
+         if(stackSize.getIntegerValue() > maxNumberOfNodesBeforeSleeping.getIntegerValue())
+         {
+            ThreadTools.sleep(100);
+            continue;
+         }
 
          if (stack.isEmpty())
          {
@@ -109,6 +197,9 @@ public class SimplePlanarRegionBipedalAnytimeFootstepPlanner extends PlanarRegio
          }
 
          BipedalFootstepPlannerNode nodeToExpand = stack.pop();
+
+         if(nodeToExpand.isDead())
+            continue;
 
          boolean nearbyNodeAlreadyExists = checkIfNearbyNodeAlreadyExistsAndStoreIfNot(nodeToExpand);
          if (nearbyNodeAlreadyExists)
@@ -140,8 +231,9 @@ public class SimplePlanarRegionBipedalAnytimeFootstepPlanner extends PlanarRegio
       PlanarRegionsList planarRegionsList = planarRegionsListReference.getAndSet(null);
       if (planarRegionsList != null)
       {
+         PrintTools.info("updating planar regions");
          super.setPlanarRegions(planarRegionsList);
-         initialize();
+         initializeForNewPlanarRegions();
       }
    }
 
@@ -171,7 +263,7 @@ public class SimplePlanarRegionBipedalAnytimeFootstepPlanner extends PlanarRegio
       if (closestNodeToGoal == null || euclideanDistanceToGoal < closestNodeToGoal.getEstimatedCostToGoal())
       {
          closestNodeToGoal = nodeToSetCostOf;
-         FootstepPlan newBestPlan = new FootstepPlan(closestNodeToGoal);
+         FootstepPlan newBestPlan = FootstepPlanningUtils.createFootstepPlanFromEndNode(closestNodeToGoal);
          bestPlanYet.set(newBestPlan);
       }
    }

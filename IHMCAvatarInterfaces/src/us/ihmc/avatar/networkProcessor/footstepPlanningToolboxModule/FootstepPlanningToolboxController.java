@@ -122,7 +122,7 @@ public class FootstepPlanningToolboxController extends ToolboxController
          PlanarRegionBipedalFootstepPlannerVisualizer listener = PlanarRegionBipedalFootstepPlannerVisualizerFactory.createWithYoVariableServer(0.01,
                                                                                                                                                          null,
                                                                                                                                                          null,
-                                                                                                                                                         footPolygonsInSoleFrame);
+                                                                                                                                                         footPolygonsInSoleFrame, "Toolbox_");
 
          planner.setBipedalFootstepPlannerListener(listener);
       }

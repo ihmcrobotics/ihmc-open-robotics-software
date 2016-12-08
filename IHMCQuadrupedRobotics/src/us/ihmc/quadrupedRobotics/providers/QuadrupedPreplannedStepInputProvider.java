@@ -32,7 +32,7 @@ public class QuadrupedPreplannedStepInputProvider
    {
       inputTimedStepPacket = new AtomicReference<>(new QuadrupedTimedStepPacket());
       emptyTimedStepPacket = new QuadrupedTimedStepPacket();
-      debugTimedStepPacket = new QuadrupedTimedStepPacket(Collections.singletonList(new QuadrupedTimedStep()));
+      debugTimedStepPacket = new QuadrupedTimedStepPacket(Collections.singletonList(new QuadrupedTimedStep()), false);
 
       yoTimedStepQuadrant = new EnumYoVariable<>("timedStepQuadrant", registry, RobotQuadrant.class);
       yoTimedStepDuration = new DoubleYoVariable("timedStepDuration", registry);
