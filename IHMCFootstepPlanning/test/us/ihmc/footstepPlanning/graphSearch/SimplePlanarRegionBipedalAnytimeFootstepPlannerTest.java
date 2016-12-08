@@ -1,8 +1,9 @@
 package us.ihmc.footstepPlanning.graphSearch;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 import javax.vecmath.Point2d;
+import javax.vecmath.Point3d;
 
 import org.junit.Test;
 
@@ -31,53 +32,47 @@ public class SimplePlanarRegionBipedalAnytimeFootstepPlannerTest
 {
    private final boolean visualize = false;
 
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 20.0)
    @Test(timeout = 300000)
    public void testSameResultsAsNormalPlannerWhenUsedAsANormalPlanner()
    {
-      YoVariableRegistry registryOne = new YoVariableRegistry("One");
-      SimplePlanarRegionBipedalAnytimeFootstepPlanner anytimePlannerOne = new SimplePlanarRegionBipedalAnytimeFootstepPlanner(registryOne);
-      BipedalFootstepPlannerParameters parametersOne = anytimePlannerOne.getParameters();
-      setParameters(parametersOne);
-
-      YoVariableRegistry registryTwo = new YoVariableRegistry("Two");
-      PlanarRegionBipedalFootstepPlanner normalPlannerTwo = new PlanarRegionBipedalFootstepPlanner(registryTwo);
-      normalPlannerTwo.setMaximumNumberOfNodesToExpand(1000);
-      BipedalFootstepPlannerParameters parametersTwo = normalPlannerTwo.getParameters();
-      setParameters(parametersTwo);
+      SimplePlanarRegionBipedalAnytimeFootstepPlanner anytimePlannerOne = createAnytimePlanner();
+      PlanarRegionBipedalFootstepPlanner normalPlannerTwo = createNormalPlanner();
+      SimplePlanarRegionBipedalAnytimeFootstepPlanner anytimePlannerThree = createAnytimePlanner();
 
       SideDependentList<ConvexPolygon2d> footPolygonsInSoleFrameOne = PlanningTestTools.createDefaultFootPolygons();
       anytimePlannerOne.setFeetPolygons(footPolygonsInSoleFrameOne);
 
       SideDependentList<ConvexPolygon2d> footPolygonsInSoleFrameTwo = PlanningTestTools.createDefaultFootPolygons();
       normalPlannerTwo.setFeetPolygons(footPolygonsInSoleFrameTwo);
+      
+      SideDependentList<ConvexPolygon2d> footPolygonsInSoleFrameThree = PlanningTestTools.createDefaultFootPolygons();
+      anytimePlannerThree.setFeetPolygons(footPolygonsInSoleFrameThree);
 
       PlanarRegionBipedalFootstepPlannerVisualizer visualizerOne = null;
       PlanarRegionBipedalFootstepPlannerVisualizer visualizerTwo = null;
+      PlanarRegionBipedalFootstepPlannerVisualizer visualizerThree = null;
 
       if (visualize)
       {
-         visualizerOne = SCSPlanarRegionBipedalFootstepPlannerVisualizer.createWithSimulationConstructionSet(0.01, footPolygonsInSoleFrameOne);
-         visualizerTwo = SCSPlanarRegionBipedalFootstepPlannerVisualizer.createWithSimulationConstructionSet(0.01, footPolygonsInSoleFrameTwo);
+         Point3d cameraPosition = new Point3d(4.5, -8.0, 12.0);
+         Point3d cameraFix = new Point3d(4.5, 0.0, 0.25);
+         
+         visualizerOne = SCSPlanarRegionBipedalFootstepPlannerVisualizer.createWithSimulationConstructionSet(0.01, cameraFix, cameraPosition, footPolygonsInSoleFrameOne);
+         visualizerTwo = SCSPlanarRegionBipedalFootstepPlannerVisualizer.createWithSimulationConstructionSet(0.01, cameraFix, cameraPosition,  footPolygonsInSoleFrameTwo);
+         visualizerThree = SCSPlanarRegionBipedalFootstepPlannerVisualizer.createWithSimulationConstructionSet(0.01, cameraFix, cameraPosition,  footPolygonsInSoleFrameThree);
          anytimePlannerOne.setBipedalFootstepPlannerListener(visualizerOne);
          normalPlannerTwo.setBipedalFootstepPlannerListener(visualizerTwo);
+         anytimePlannerThree.setBipedalFootstepPlannerListener(visualizerThree);
       }
 
-      double startX = 0.0;
-      double startY = 0.0;
-      double cinderBlockSize = 0.4;
-      int courseWidthXInNumberOfBlocks = 21;
-      int courseLengthYInNumberOfBlocks = 6;
-      PlanarRegionsList planarRegionsListOne = PlanarRegionsListExamples.generateCinderBlockField(startX, startY, cinderBlockSize, courseWidthXInNumberOfBlocks,
-                                                                                                  courseLengthYInNumberOfBlocks);
-      anytimePlannerOne.setPlanarRegions(planarRegionsListOne);
+      ThreadTools.sleep(3000L);
+ 
+      setPlanarRegions(anytimePlannerOne);
+      setPlanarRegions(normalPlannerTwo); 
 
-      PlanarRegionsList planarRegionsListTwo = PlanarRegionsListExamples.generateCinderBlockField(startX, startY, cinderBlockSize, courseWidthXInNumberOfBlocks,
-                                                                                                  courseLengthYInNumberOfBlocks);
-      normalPlannerTwo.setPlanarRegions(planarRegionsListTwo);
-
-      setGoal(anytimePlannerOne, RobotSide.LEFT);
-      setGoal(normalPlannerTwo, RobotSide.LEFT);
+      setGoalAndInitialStanceFoot(anytimePlannerOne);
+      setGoalAndInitialStanceFoot(normalPlannerTwo);
 
       FootstepPlanningResult resultOne = anytimePlannerOne.plan();
       FootstepPlanningResult resultTwo = normalPlannerTwo.plan();
@@ -87,24 +82,92 @@ public class SimplePlanarRegionBipedalAnytimeFootstepPlannerTest
       FootstepPlan planOne = anytimePlannerOne.getPlan();
       FootstepPlan planTwo = normalPlannerTwo.getPlan();
 
-      assertEquals(planOne.getNumberOfSteps(), planTwo.getNumberOfSteps());
+      assertPlansAreEqual(planOne, planTwo, 0);
 
-      for (int i = 0; i < planOne.getNumberOfSteps(); i++)
+      
+      // Planner three we'll try to throw off threading...
+      Thread thread = new Thread(anytimePlannerThree);
+
+      ThreadTools.sleep(2000L);
+      setPlanarRegions(anytimePlannerThree); 
+      setGoalAndInitialStanceFoot(anytimePlannerThree);
+      thread.start();
+      ThreadTools.sleep(2000L);
+      FootstepPlan bestPlanYet = anytimePlannerThree.getBestPlanYet();
+      assertPlansAreEqual(planOne, bestPlanYet, 1);
+      
+      int numberOfIterations = 2;
+      
+      for (int i=0; i<numberOfIterations; i++)
       {
-         SimpleFootstep footstepOne = planOne.getFootstep(i);
-         SimpleFootstep footstepTwo = planTwo.getFootstep(i);
+         setPlanarRegions(anytimePlannerThree); 
+         setGoalAndInitialStanceFoot(anytimePlannerThree);
+         ThreadTools.sleep(10L);
+         setPlanarRegions(anytimePlannerThree); 
 
-         assertTrue(footstepOne.epsilonEquals(footstepTwo, 1e-5));
+         ThreadTools.sleep(2000L);
+         bestPlanYet = anytimePlannerThree.getBestPlanYet();
+         assertPlansAreEqual(planOne, bestPlanYet, 1);
+
       }
 
+      anytimePlannerThree.requestStop();
+      
       if (visualize)
       {
          ThreadTools.sleepForever();
       }
    }
 
-   private void setGoal(FootstepPlanner planner, RobotSide initialStanceSide)
+   private PlanarRegionBipedalFootstepPlanner createNormalPlanner()
    {
+      YoVariableRegistry registryTwo = new YoVariableRegistry("Two");
+      PlanarRegionBipedalFootstepPlanner normalPlannerTwo = new PlanarRegionBipedalFootstepPlanner(registryTwo);
+      normalPlannerTwo.setMaximumNumberOfNodesToExpand(1000);
+      BipedalFootstepPlannerParameters parametersTwo = normalPlannerTwo.getParameters();
+      setParameters(parametersTwo);
+      return normalPlannerTwo;
+   }
+
+   private SimplePlanarRegionBipedalAnytimeFootstepPlanner createAnytimePlanner()
+   {
+      YoVariableRegistry registryOne = new YoVariableRegistry("One");
+      SimplePlanarRegionBipedalAnytimeFootstepPlanner anytimePlannerOne = new SimplePlanarRegionBipedalAnytimeFootstepPlanner(registryOne);
+      BipedalFootstepPlannerParameters parametersOne = anytimePlannerOne.getParameters();
+      setParameters(parametersOne);
+      return anytimePlannerOne;
+   }
+
+   private void assertPlansAreEqual(FootstepPlan planOne, FootstepPlan planTwo, int withinNSteps)
+   {
+      assertTrue(Math.abs(planOne.getNumberOfSteps() - planTwo.getNumberOfSteps()) <= withinNSteps);
+
+      int numberOfStepsToCheck = Math.min(planOne.getNumberOfSteps(), planTwo.getNumberOfSteps());
+      for (int i = 0; i < numberOfStepsToCheck; i++)
+      {
+         SimpleFootstep footstepOne = planOne.getFootstep(i);
+         SimpleFootstep footstepTwo = planTwo.getFootstep(i);
+
+         assertTrue(footstepOne.epsilonEquals(footstepTwo, 1e-5));
+      }
+   }
+
+   private void setPlanarRegions(PlanarRegionBipedalFootstepPlanner planner)
+   {
+      double startX = 0.0;
+      double startY = 0.0;
+      double cinderBlockSize = 0.4;
+      int courseWidthXInNumberOfBlocks = 21;
+      int courseLengthYInNumberOfBlocks = 6;
+      PlanarRegionsList planarRegionsListOne = PlanarRegionsListExamples.generateCinderBlockField(startX, startY, cinderBlockSize, courseWidthXInNumberOfBlocks,
+                                                                                                  courseLengthYInNumberOfBlocks);
+      planner.setPlanarRegions(planarRegionsListOne);
+   }
+   
+   private void setGoalAndInitialStanceFoot(FootstepPlanner planner)
+   {
+      RobotSide initialStanceSide = RobotSide.LEFT;
+
       double xGoal = 9.0;
       double yGoal = 0.3;
       double yawGoal = 0.2;
