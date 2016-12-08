@@ -86,6 +86,7 @@ public class ExampleComplexBehaviorStateMachine extends StateMachineBehavior<Exa
    {
       TextToSpeechPacket p1 = new TextToSpeechPacket("Starting Example Behavior");
       sendPacket(p1);
+      super.onBehaviorEntered();
    }
 
    private void setupStateMachine()

@@ -5,7 +5,7 @@ buildscript {
     }
   }
   dependencies {
-    classpath "gradle.plugin.us.ihmc.gradle:ihmc-build:0.0.18"
+    classpath "gradle.plugin.us.ihmc.gradle:ihmc-build:0.0.19"
     classpath "org.hidetake:gradle-ssh-plugin:2.1.1"
   }
 }

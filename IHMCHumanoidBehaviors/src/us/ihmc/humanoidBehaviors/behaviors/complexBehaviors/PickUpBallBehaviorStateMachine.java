@@ -194,15 +194,11 @@ public class PickUpBallBehaviorStateMachine extends StateMachineBehavior<PickUpB
    @Override
    public void onBehaviorAborted()
    {
+      super.onBehaviorAborted();
       onBehaviorExited();
 
    }
 
-   @Override
-   public void onBehaviorPaused()
-   {
-
-   }
 
    @Override
    public void coactiveDataRecieved(SimpleCoactiveBehaviorDataPacket data)

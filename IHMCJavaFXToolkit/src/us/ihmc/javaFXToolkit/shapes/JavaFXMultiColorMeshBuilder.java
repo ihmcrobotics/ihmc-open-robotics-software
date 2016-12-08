@@ -67,6 +67,16 @@ public class JavaFXMultiColorMeshBuilder
       meshBuilder.addMesh(setColor(meshDataHolder, color), offset);
    }
 
+   public void addTetrahedron(float edgeLength, Tuple3f offset, Color color)
+   {
+      addMesh(MeshDataGenerator.Tetrahedron(edgeLength), offset, color);
+   }
+
+   public void addTetrahedron(double edgeLength, Tuple3d offset, Color color)
+   {
+      addMesh(MeshDataGenerator.Tetrahedron(edgeLength), offset, color);
+   }
+
    public void addPolyon(List<Point3d> polygon, Color color)
    {
       addMesh(MeshDataGenerator.Polygon(polygon), color);
