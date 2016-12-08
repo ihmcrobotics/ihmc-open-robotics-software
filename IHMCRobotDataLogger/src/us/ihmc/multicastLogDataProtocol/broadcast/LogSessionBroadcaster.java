@@ -58,7 +58,7 @@ public class LogSessionBroadcaster extends Thread
    
    private final byte[] cameras;
 
-   public LogSessionBroadcaster(InetSocketAddress controlAddress, InetAddress dataAddress, Class<?> clazz, LogSettings logSettings)
+   public LogSessionBroadcaster(InetSocketAddress controlAddress, InetAddress dataAddress, String className, LogSettings logSettings)
    {
       try
       {
@@ -67,7 +67,7 @@ public class LogSessionBroadcaster extends Thread
          this.controlAddress = controlAddress;
          this.dataAddress = dataAddress;
          this.logSettings = logSettings;
-         this.className = clazz.getSimpleName();
+         this.className = className;
          long mac;
          if (iface.isLoopback())
          {
@@ -311,7 +311,7 @@ public class LogSessionBroadcaster extends Thread
    {
       InetSocketAddress controlAddress = new InetSocketAddress("127.0.0.1", LogDataProtocolSettings.LOG_DATA_ANNOUNCE_PORT);
       InetAddress dataAddress = InetAddress.getByName("127.0.0.1");
-      LogSessionBroadcaster logSessionAnnounce = new LogSessionBroadcaster(controlAddress, dataAddress, LogSessionBroadcaster.class, LogSettings.SIMULATION);
+      LogSessionBroadcaster logSessionAnnounce = new LogSessionBroadcaster(controlAddress, dataAddress, LogSessionBroadcaster.class.getSimpleName(), LogSettings.SIMULATION);
       logSessionAnnounce.start();
       logSessionAnnounce.join();
    }

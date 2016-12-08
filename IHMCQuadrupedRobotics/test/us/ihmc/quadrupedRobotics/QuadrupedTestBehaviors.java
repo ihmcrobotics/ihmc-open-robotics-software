@@ -65,14 +65,13 @@ public class QuadrupedTestBehaviors
       double initialDoubleSupportDuration = variables.getXGaitEndDoubleSupportDurationInput().getDoubleValue();
       double initialEndPhaseShift = variables.getXGaitEndPhaseShiftInput().getDoubleValue();
       
-      variables.getXGaitEndDoubleSupportDurationInput().set(0.5);
+      variables.getXGaitEndDoubleSupportDurationInput().set(0.1);
       variables.getXGaitEndPhaseShiftInput().set(180.0);
       variables.getUserTrigger().set(QuadrupedForceControllerRequestedEvent.REQUEST_XGAIT);
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
-      conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 1.0));
+      conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 1.5));
       conductor.simulate();
 
-      variables.getXGaitEndDoubleSupportDurationInput().set(0.0);
       variables.getUserTrigger().set(QuadrupedForceControllerRequestedEvent.REQUEST_STAND);
       conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 1.0));
       conductor.simulate();

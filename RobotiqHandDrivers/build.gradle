@@ -5,7 +5,7 @@ buildscript {
     }
   }
   dependencies {
-    classpath "gradle.plugin.us.ihmc.gradle:ihmc-build:0.0.18"
+    classpath "gradle.plugin.us.ihmc.gradle:ihmc-build:0.0.19"
   }
 }
 
@@ -33,6 +33,10 @@ repositories {
     maven {
         url "http://artifactory.ihmc.us/artifactory/thirdparty/"
     }
+    
+    maven {
+        url "http://artifactory.ihmc.us/artifactory/releases/"
+   	}
 }
 
 def strings = ['ihmc', 'robotics']

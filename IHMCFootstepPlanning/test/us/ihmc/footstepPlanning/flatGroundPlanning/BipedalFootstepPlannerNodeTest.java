@@ -1,17 +1,19 @@
 package us.ihmc.footstepPlanning.flatGroundPlanning;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+import java.util.Random;
+
+import javax.vecmath.Vector3d;
+
 import org.junit.Test;
+
 import us.ihmc.footstepPlanning.graphSearch.BipedalFootstepPlannerNode;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Random;
-
-import static org.junit.Assert.assertTrue;
 
 public class BipedalFootstepPlannerNodeTest
 {
@@ -33,7 +35,7 @@ public class BipedalFootstepPlannerNodeTest
       assertTrue(nodeA.equals(nodeB));
       assertTrue(nodeA.hashCode() == nodeB.hashCode());
 
-      transformA.setRotationEulerAndZeroTranslation(1.5001, -2.0001, 399.3);
+      transformA.setRotationEulerAndZeroTranslation(1.5001, -2.0001, -30.2);
       transformB.setRotationEulerAndZeroTranslation(1.4999, -1.9999, -30.2);
 
       nodeA = new BipedalFootstepPlannerNode(RobotSide.RIGHT, transformA);
@@ -51,7 +53,7 @@ public class BipedalFootstepPlannerNodeTest
       nodeA = new BipedalFootstepPlannerNode(RobotSide.RIGHT, transformA);
       nodeB = new BipedalFootstepPlannerNode(RobotSide.RIGHT, transformB);
 
-      assertTrue(! nodeA.equals(nodeB));
+      assertTrue(!nodeA.equals(nodeB));
       assertTrue(nodeA.hashCode() != nodeB.hashCode());
    }
 
@@ -65,7 +67,7 @@ public class BipedalFootstepPlannerNodeTest
 
       RigidBodyTransform transformA = new RigidBodyTransform();
 
-      for(int i = 0; i < numTrials; i++)
+      for (int i = 0; i < numTrials; i++)
       {
          RobotSide robotSide = RobotSide.generateRandomRobotSide(random);
 
@@ -80,4 +82,52 @@ public class BipedalFootstepPlannerNodeTest
          assertTrue(nodeA.hashCode() == nodeB.hashCode());
       }
    }
+
+   public void testRemovePitchAndRoll()
+   {
+      Random random = new Random(3823L);
+      int numTrials = 100;
+      BipedalFootstepPlannerNode nodeA, nodeB;
+
+      RigidBodyTransform transform = new RigidBodyTransform();
+
+      for (int i = 0; i < numTrials; i++)
+      {
+         RobotSide robotSide = RobotSide.generateRandomRobotSide(random);
+
+         // test for exact same transform
+         transform.setRotationEulerAndZeroTranslation(RandomTools.generateRandomVector(random));
+         transform.setTranslation(RandomTools.generateRandomVector(random));
+
+         nodeA = new BipedalFootstepPlannerNode(robotSide, transform);
+         nodeB = new BipedalFootstepPlannerNode(nodeA);
+
+         nodeB.removePitchAndRoll();
+
+         RigidBodyTransform transformA = new RigidBodyTransform();
+         RigidBodyTransform transformB = new RigidBodyTransform();
+         nodeA.getSoleTransform(transformA);
+         nodeB.getSoleTransform(transformB);
+
+         Vector3d xAxisAInWorld = new Vector3d(1.0, 0.0, 0.0);
+         Vector3d xAxisBInWorld = new Vector3d(1.0, 0.0, 0.0);
+
+         transformA.transform(xAxisAInWorld);
+         transformB.transform(xAxisBInWorld);
+
+         assertEquals(1.0, xAxisAInWorld.length(), 1e-7);
+         assertEquals(1.0, xAxisBInWorld.length(), 1e-7);
+
+         assertEquals(0.0, xAxisBInWorld.getZ(), 1e-7);
+         xAxisAInWorld.setZ(0.0);
+         xAxisAInWorld.normalize();
+
+         assertEquals(1.0, xAxisAInWorld.dot(xAxisBInWorld), 1e-7);
+
+         assertTrue(nodeA.equals(nodeB));
+         assertTrue(nodeA.hashCode() == nodeB.hashCode());
+      }
+
+   }
+
 }

@@ -63,7 +63,7 @@ public abstract class QuadrupedXGaitBumpyTerrainWalkingTest implements Quadruped
       variables.getUserTrigger().set(QuadrupedForceControllerRequestedEvent.REQUEST_XGAIT);
       variables.getYoPlanarVelocityInputX().set(1.0);
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
-      conductor.addSustainGoal(YoVariableTestGoal.doubleLessThan(variables.getYoTime(), 5.0));
+      conductor.addTimeLimit(variables.getYoTime(), 5.0);
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getRobotBodyX(), 2.0));
       conductor.simulate();
       
@@ -102,8 +102,8 @@ public abstract class QuadrupedXGaitBumpyTerrainWalkingTest implements Quadruped
    @Test(timeout = 120000)
    public void testWalkingOverAggressiveBumpyTerrain() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {
-      double xAmp1 = 0.04, xFreq1 = 0.5, xAmp2 = 0.02, xFreq2 = 0.5;
-      double yAmp1 = 0.02, yFreq1 = 0.07, yAmp2 = 0.03, yFreq2 = 0.37;
+      double xAmp1 = 0.03, xFreq1 = 0.5, xAmp2 = 0.02, xFreq2 = 0.5;
+      double yAmp1 = 0.02, yFreq1 = 0.07, yAmp2 = 0.02, yFreq2 = 0.37;
       BumpyGroundProfile groundProfile = new BumpyGroundProfile(xAmp1, xFreq1, xAmp2, xFreq2, yAmp1, yFreq1, yAmp2, yFreq2, 1.0);
       
       QuadrupedTestFactory quadrupedTestFactory = createQuadrupedTestFactory();
@@ -115,17 +115,17 @@ public abstract class QuadrupedXGaitBumpyTerrainWalkingTest implements Quadruped
       
       QuadrupedTestBehaviors.readyXGait(conductor, variables);
       
-      variables.getYoComPositionInputZ().set(0.6);
+      variables.getYoComPositionInputZ().set(0.55);
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 0.5));
       conductor.simulate();
       
       QuadrupedTestBehaviors.enterXGait(conductor, variables);
 
       variables.getXGaitEndPhaseShiftInput().set(180.0);
-      variables.getXGaitEndDoubleSupportDurationInput().set(0.2);
-      variables.getXGaitStanceWidthInput().set(0.21);
-      variables.getXGaitStepDurationInput().set(0.4);
-      variables.getXGaitStepGroundClearanceInput().set(0.2);
+      variables.getXGaitEndDoubleSupportDurationInput().set(0.05);
+      variables.getXGaitStanceWidthInput().set(0.35);
+      variables.getXGaitStepDurationInput().set(0.35);
+      variables.getXGaitStepGroundClearanceInput().set(0.075);
       variables.getYoPlanarVelocityInputX().set(0.5);
       variables.getYoPlanarVelocityInputZ().set(0.0);
       conductor.addSustainGoal(YoVariableTestGoal.doubleGreaterThan(variables.getRobotBodyZ(), 0.0));
