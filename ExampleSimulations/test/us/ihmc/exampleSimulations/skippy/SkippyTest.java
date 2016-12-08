@@ -19,7 +19,7 @@ import us.ihmc.tools.thread.ThreadTools;
 public class SkippyTest
 {
    private static final SkippyControllerMode controllerMode = SkippyControllerMode.NONE;
-   private static final boolean sleepAfterTest = true;
+   private static final boolean sleepAfterTest = false;
 
    private SkippySimulation skippySimulation;
 
