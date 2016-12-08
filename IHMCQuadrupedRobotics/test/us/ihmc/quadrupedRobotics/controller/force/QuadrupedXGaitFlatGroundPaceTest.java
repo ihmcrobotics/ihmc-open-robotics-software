@@ -72,10 +72,10 @@ public abstract class QuadrupedXGaitFlatGroundPaceTest implements QuadrupedMulti
    private void paceFast(double directionX) throws AssertionFailedError
    {
       QuadrupedTestBehaviors.readyXGait(conductor, variables);
-      QuadrupedTestBehaviors.enterXGait(conductor, variables);
-      
+
       variables.getXGaitEndPhaseShiftInput().set(0.0);
-      
+      QuadrupedTestBehaviors.enterXGait(conductor, variables);
+
       variables.getYoPlanarVelocityInputX().set(directionX * 1.0);
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addTimeLimit(variables.getYoTime(), 10.0);
@@ -109,11 +109,11 @@ public abstract class QuadrupedXGaitFlatGroundPaceTest implements QuadrupedMulti
    private void paceSlow(double directionX) throws AssertionFailedError
    {
       QuadrupedTestBehaviors.readyXGait(conductor, variables);
-      QuadrupedTestBehaviors.enterXGait(conductor, variables);
-      
+
       variables.getXGaitEndPhaseShiftInput().set(0.0);
       variables.getXGaitEndDoubleSupportDurationInput().set(0.3);
-      
+      QuadrupedTestBehaviors.enterXGait(conductor, variables);
+
       variables.getYoPlanarVelocityInputX().set(directionX * 0.1);
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addTimeLimit(variables.getYoTime(), 10.0);
@@ -161,10 +161,10 @@ public abstract class QuadrupedXGaitFlatGroundPaceTest implements QuadrupedMulti
    private void paceInACircle(double directionX, double directionZ) throws AssertionFailedError
    {
       QuadrupedTestBehaviors.readyXGait(conductor, variables);
-      QuadrupedTestBehaviors.enterXGait(conductor, variables);
-      
+
       variables.getXGaitEndPhaseShiftInput().set(0.0);
-      
+      QuadrupedTestBehaviors.enterXGait(conductor, variables);
+
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 1.0));
       conductor.simulate();
