@@ -1,5 +1,7 @@
 package us.ihmc.footstepPlanning.roughTerrainPlanning;
 
+import javax.vecmath.Point3d;
+
 import us.ihmc.footstepPlanning.graphSearch.PlanarRegionBipedalFootstepPlannerVisualizer;
 import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -11,6 +13,11 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 public class SCSPlanarRegionBipedalFootstepPlannerVisualizer
 {
    public static PlanarRegionBipedalFootstepPlannerVisualizer createWithSimulationConstructionSet(double dtForViz, SideDependentList<ConvexPolygon2d> footPolygonsInSoleFrame)
+   {
+      return createWithSimulationConstructionSet(dtForViz, new Point3d(0.0, 0.0, 0.0), new Point3d(-5.0, 0.0, 5.0), footPolygonsInSoleFrame);
+   }
+
+   public static PlanarRegionBipedalFootstepPlannerVisualizer createWithSimulationConstructionSet(double dtForViz, Point3d cameraFix, Point3d cameraPosition, SideDependentList<ConvexPolygon2d> footPolygonsInSoleFrame)
    {
       YoVariableRegistry registry = new YoVariableRegistry(SCSPlanarRegionBipedalFootstepPlannerVisualizer.class.getSimpleName());
       YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
@@ -27,8 +34,8 @@ public class SCSPlanarRegionBipedalFootstepPlannerVisualizer
 
       scs.setDT(dtForViz, 1);
 
-      scs.setCameraFix(-6.0, 0.0, 0.0);
-      scs.setCameraPosition(-11.0, 0.0, 8.0);
+      scs.setCameraFix(cameraFix);
+      scs.setCameraPosition(cameraPosition);
       scs.setGroundVisible(false);
       scs.startOnAThread();
 
