@@ -161,4 +161,10 @@ public class LongYoVariable extends YoVariable<LongYoVariable>
    {
       return set(value.getLongValue(), notifyListeners);
    }
+
+   @Override
+   public boolean isZero()
+   {
+      return getLongValue() == 0l;
+   }
 }

@@ -90,7 +90,7 @@ public class YoVariableClient implements LogPacketHandler
       streamingDataTCPClient = new StreamingDataTCPClient(inetAddress, request.getDataPort(), threadedLogPacketHandler, displayOneInNPackets);
       
       logControlClient = new LogControlClient(request.getControlIP(), request.getControlPort(), this.yoVariablesUpdatedListener);
-      handshakeParser = new YoVariableHandshakeParser(registryPrefix, this.yoVariablesUpdatedListener.populateRegistry());
+      handshakeParser = new YoVariableHandshakeParser(registryPrefix);
       yoVariablesList = handshakeParser.getYoVariablesList();
       jointStates = handshakeParser.getJointStates();
 
@@ -135,34 +135,37 @@ public class YoVariableClient implements LogPacketHandler
       }
 
       long timestamp = decompressed.getLong();
-      LongBuffer data = decompressed.asLongBuffer();
 
-      for (int i = 0; i < yoVariablesList.size(); i++)
+      if(this.yoVariablesUpdatedListener.updateYoVariables())
       {
-         YoVariable<?> variable = yoVariablesList.get(i);
-         long previousValue = variable.getValueAsLongBits();
-         long newValue = data.get();
-         variable.setValueFromLongBits(newValue, false);
-         if (previousValue != newValue)
+         LongBuffer data = decompressed.asLongBuffer();
+         for (int i = 0; i < yoVariablesList.size(); i++)
          {
-            ArrayList<VariableChangedListener> changedListeners = variable.getVariableChangedListeners();
-            if (changedListeners != null)
+            YoVariable<?> variable = yoVariablesList.get(i);
+            long previousValue = variable.getValueAsLongBits();
+            long newValue = data.get();
+            variable.setValueFromLongBits(newValue, false);
+            if (previousValue != newValue)
             {
-               for (int listener = 0; listener < changedListeners.size(); listener++)
+               ArrayList<VariableChangedListener> changedListeners = variable.getVariableChangedListeners();
+               if (changedListeners != null)
                {
-                  VariableChangedListener changedListener = changedListeners.get(listener);
-                  if (!(changedListener instanceof LogControlVariableChangeListener))
+                  for (int listener = 0; listener < changedListeners.size(); listener++)
                   {
-                     changedListener.variableChanged(variable);
+                     VariableChangedListener changedListener = changedListeners.get(listener);
+                     if (!(changedListener instanceof LogControlVariableChangeListener))
+                     {
+                        changedListener.variableChanged(variable);
+                     }
                   }
                }
             }
          }
-      }
-
-      for (int i = 0; i < jointStates.size(); i++)
-      {
-         jointStates.get(i).update(data);
+         
+         for (int i = 0; i < jointStates.size(); i++)
+         {
+            jointStates.get(i).update(data);
+         }         
       }
 
       yoVariablesUpdatedListener.receivedTimestampAndData(timestamp, decompressed);
