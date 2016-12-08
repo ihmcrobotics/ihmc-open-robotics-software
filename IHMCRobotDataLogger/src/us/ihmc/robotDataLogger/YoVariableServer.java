@@ -295,6 +295,12 @@ public class YoVariableServer implements RobotVisualizer, TickAndUpdatable
       return ret;
    }
    
+
+   public void createSummary(YoVariable<?> isWalkingVariable)
+   {
+      createSummary(isWalkingVariable.getFullNameWithNameSpace());
+   }
+   
    public void createSummary(String summaryTriggerVariable)
    {
       if(findVariableInRegistries(summaryTriggerVariable) == null)
@@ -318,5 +324,6 @@ public class YoVariableServer implements RobotVisualizer, TickAndUpdatable
    {      
       this.summaryProvider.addSummarizedVariable(variable);
    }
+
 
 }
