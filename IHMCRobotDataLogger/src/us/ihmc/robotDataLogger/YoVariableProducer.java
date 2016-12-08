@@ -14,6 +14,7 @@ import java.util.zip.CRC32;
 import us.ihmc.concurrent.ConcurrentRingBuffer;
 import us.ihmc.multicastLogDataProtocol.MultiClientStreamingDataTCPServer;
 import us.ihmc.multicastLogDataProtocol.broadcast.LogSessionBroadcaster;
+import us.ihmc.multicastLogDataProtocol.control.SummaryProvider;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.tools.compression.SnappyUtils;
 import us.ihmc.util.PeriodicThreadScheduler;
@@ -34,6 +35,8 @@ public class YoVariableProducer implements Runnable
    private final LongBuffer writeBuffer;
    private final ByteBuffer compressedBuffer;
    private final ByteBuffer compressedBufferDirect;
+   
+   private final SummaryProvider summaryProvider;
 
    private final int jointStateOffset;
 
@@ -55,7 +58,7 @@ public class YoVariableProducer implements Runnable
    
    @SuppressWarnings("unchecked")
    public YoVariableProducer(PeriodicThreadScheduler scheduler, LogSessionBroadcaster session, YoVariableHandShakeBuilder handshakeBuilder, LogModelProvider logModelProvider,
-         ConcurrentRingBuffer<FullStateBuffer> mainBuffer, Collection<ConcurrentRingBuffer<RegistryBuffer>> buffers, boolean sendKeepAlive)
+         ConcurrentRingBuffer<FullStateBuffer> mainBuffer, Collection<ConcurrentRingBuffer<RegistryBuffer>> buffers, SummaryProvider summaryProvider, boolean sendKeepAlive)
    {
       this.scheduler = scheduler;
       this.mainBuffer = mainBuffer;
@@ -63,6 +66,7 @@ public class YoVariableProducer implements Runnable
       this.logModelProvider = logModelProvider;
       this.buffers = buffers.toArray(new ConcurrentRingBuffer[buffers.size()]);
       this.sendKeepAlive = sendKeepAlive;
+      this.summaryProvider = summaryProvider;
 
       this.jointStateOffset = handshakeBuilder.getNumberOfVariables();
       int numberOfJointStates = handshakeBuilder.getNumberOfJointStates();
@@ -136,7 +140,7 @@ public class YoVariableProducer implements Runnable
       try
       {
          // Make server here, so it is open before the logger connects
-         server = new MultiClientStreamingDataTCPServer(session.getPort(), handshakeBuilder, logModelProvider, compressedBackingArray.length, SEND_BUFFER_LENGTH);
+         server = new MultiClientStreamingDataTCPServer(session.getPort(), handshakeBuilder, logModelProvider, summaryProvider, compressedBackingArray.length, SEND_BUFFER_LENGTH);
          server.start();
       }
       catch (IOException e)

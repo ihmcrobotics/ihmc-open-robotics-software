@@ -22,7 +22,7 @@ public class WalkToLocationPlannedBehavior extends StateMachineBehavior<WalkToLo
 {
    public enum WalkToLocationStates
    {
-     SETUP, PLAN_PATH, PLAN_FAILED, WALK_PATH, DONE
+      SETUP, PLAN_PATH, PLAN_FAILED, WALK_PATH, DONE
    }
 
    private final FullRobotModel fullRobotModel;
@@ -67,10 +67,9 @@ public class WalkToLocationPlannedBehavior extends StateMachineBehavior<WalkToLo
    private void setUpStateMachine()
    {
 
-      
       BehaviorAction<WalkToLocationStates> setUpState = new BehaviorAction<WalkToLocationStates>(WalkToLocationStates.SETUP,
             new SimpleDoNothingBehavior(communicationBridge));
-      
+
       BehaviorAction<WalkToLocationStates> planFootSteps = new BehaviorAction<WalkToLocationStates>(WalkToLocationStates.PLAN_PATH, planPathToLocationBehavior)
       {
          @Override
@@ -137,7 +136,6 @@ public class WalkToLocationPlannedBehavior extends StateMachineBehavior<WalkToLo
          }
       };
 
-      
       statemachine.addStateWithDoneTransition(setUpState, WalkToLocationStates.PLAN_PATH);
 
       statemachine.addState(planFootSteps);
@@ -161,6 +159,7 @@ public class WalkToLocationPlannedBehavior extends StateMachineBehavior<WalkToLo
    @Override
    public void onBehaviorAborted()
    {
+      super.onBehaviorAborted();
       footstepListBehavior.onBehaviorAborted();
       isAborted.set(true);
    }
@@ -168,6 +167,7 @@ public class WalkToLocationPlannedBehavior extends StateMachineBehavior<WalkToLo
    @Override
    public void onBehaviorPaused()
    {
+      super.onBehaviorPaused();
       footstepListBehavior.onBehaviorPaused();
       isPaused.set(true);
    }
@@ -175,6 +175,7 @@ public class WalkToLocationPlannedBehavior extends StateMachineBehavior<WalkToLo
    @Override
    public void onBehaviorResumed()
    {
+      super.onBehaviorResumed();
       footstepListBehavior.onBehaviorResumed();
       isPaused.set(false);
 

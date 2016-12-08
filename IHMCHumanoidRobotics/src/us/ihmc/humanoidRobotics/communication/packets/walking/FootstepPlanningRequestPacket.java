@@ -17,6 +17,7 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
    public Quat4f stanceFootOrientationInWorld;
    public Point3f goalPositionInWorld;
    public Quat4f goalOrientationInWorld;
+   public boolean assumeFlatGround = true;
 
    public FootstepPlanningRequestPacket()
    {
@@ -44,6 +45,11 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
       goalPose.getOrientation(tempOrientation);
       goalPositionInWorld = new Point3f(tempPoint);
       goalOrientationInWorld = new Quat4f(tempOrientation);
+   }
+
+   public void setAssumeFlatGround(boolean assumeFlatGround)
+   {
+      this.assumeFlatGround = assumeFlatGround;
    }
 
    @Override

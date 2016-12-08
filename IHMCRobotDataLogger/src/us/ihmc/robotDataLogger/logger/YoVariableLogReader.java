@@ -35,6 +35,7 @@ public class YoVariableLogReader
    protected final File properties;
    private final File model;
    private final File resourceBundle;
+   private final File summary;
 
    public YoVariableLogReader(File logDirectory, LogProperties logProperties)
    {
@@ -61,6 +62,15 @@ public class YoVariableLogReader
       else
       {
          resourceBundle = null;
+      }
+      
+      if(logProperties.getSummaryFile() != null)
+      {
+         summary = new File(logDirectory, logProperties.getSummaryFile());
+      }
+      else
+      {
+         summary = null;
       }
 
       handshake = new File(logDirectory, logProperties.getHandshakeFile());
@@ -197,6 +207,12 @@ public class YoVariableLogReader
       {
          File resourceDestination = new File(destination, logProperties.getModelResourceBundlePath());
          Files.copy(resourceBundle, resourceDestination);
+      }
+      
+      if(summary != null)
+      {
+         File summaryDestination = new File(destination, logProperties.getSummaryFile());
+         Files.copy(summary, summaryDestination);
       }
    }
 
