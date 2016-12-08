@@ -29,7 +29,7 @@ public class AnytimeFootstepPlannerOnFlatTerrainTest implements PlanningTest
 {
    private static final boolean visualize = false;
    private boolean assertPlannerReturnedResult = true;
-   
+
    protected static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.1)
@@ -69,13 +69,13 @@ public class AnytimeFootstepPlannerOnFlatTerrainTest implements PlanningTest
       for (int i = 0; i < numIterations; i++)
       {
          ThreadTools.sleep(100);
-         bestPlanYet = anytimePlanner.getBestPlanYet();
+         FootstepPlan newPlan = anytimePlanner.getBestPlanYet();
 
-         int numberOfFootsteps = bestPlanYet.getNumberOfSteps();
-         if (numberOfFootsteps < 2)
+         if (newPlan == null || newPlan.getNumberOfSteps() < 2)
             continue;
 
-         SimpleFootstep lastFootstep = bestPlanYet.getFootstep(numberOfFootsteps - 1);
+         bestPlanYet = newPlan;
+         SimpleFootstep lastFootstep = bestPlanYet.getFootstep(bestPlanYet.getNumberOfSteps() - 1);
          lastFootstep.getSoleFramePose(lastFootstepPose);
          FramePose footstepGoalPose = goalPoses.get(lastFootstep.getRobotSide());
 
@@ -128,17 +128,16 @@ public class AnytimeFootstepPlannerOnFlatTerrainTest implements PlanningTest
       FootstepPlan bestPlanYet = anytimePlanner.getBestPlanYet();
       assertTrue(bestPlanYet.getNumberOfSteps() > 3);
 
-      SimpleFootstep initialFootstepFirstPlan = bestPlanYet.getFootstep(0);
       SimpleFootstep firstFootstepFirstPlan = bestPlanYet.getFootstep(1);
       SimpleFootstep secondFootstepFirstPlan = bestPlanYet.getFootstep(2);
 
-      anytimePlanner.executingFootstep(initialFootstepFirstPlan);
       anytimePlanner.executingFootstep(firstFootstepFirstPlan);
       anytimePlanner.executingFootstep(secondFootstepFirstPlan);
 
       ThreadTools.sleep(500);
       bestPlanYet = anytimePlanner.getBestPlanYet();
       assertTrue(bestPlanYet.getNumberOfSteps() > 2);
+      anytimePlanner.requestStop();
 
       SimpleFootstep initialFootstepSecondPlan = bestPlanYet.getFootstep(0);
       assertTrue(secondFootstepFirstPlan.epsilonEquals(initialFootstepSecondPlan, 1e-12));

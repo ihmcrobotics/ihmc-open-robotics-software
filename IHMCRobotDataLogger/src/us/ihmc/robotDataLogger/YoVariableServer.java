@@ -36,7 +36,7 @@ public class YoVariableServer implements RobotVisualizer, TickAndUpdatable
    private static final int CHANGED_BUFFER_CAPACITY = 128;
    
    private final double dt;
-   private final Class<?> mainClazz;
+   private final String mainClazz;
    private final InetAddress bindAddress;   
    private final LogModelProvider logModelProvider;
    private final LogSettings logSettings;
@@ -74,6 +74,11 @@ public class YoVariableServer implements RobotVisualizer, TickAndUpdatable
    private boolean sendKeepAlive = false;
    
    public YoVariableServer(Class<?> mainClazz, PeriodicThreadScheduler scheduler, LogModelProvider logModelProvider, LogSettings logSettings, double dt)
+   {
+      this(mainClazz.getSimpleName(), scheduler, logModelProvider, logSettings, dt);
+   }
+   
+   public YoVariableServer(String mainClazz, PeriodicThreadScheduler scheduler, LogModelProvider logModelProvider, LogSettings logSettings, double dt)
    {
       this.dt = dt;
       this.mainClazz = mainClazz;
