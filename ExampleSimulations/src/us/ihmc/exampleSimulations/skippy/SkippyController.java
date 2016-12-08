@@ -128,7 +128,7 @@ public class SkippyController implements RobotController
 
    private final DoubleYoVariable q_d_hip = new DoubleYoVariable("q_d_hip", registry);
    private final DoubleYoVariable q_d_shoulder = new DoubleYoVariable("q_d_shoulder", registry);
-   
+
    private final YoFramePoint hipJointPosition = new YoFramePoint("hipJointPosition", ReferenceFrame.getWorldFrame(), registry);
    private final YoFramePoint previousHipJointPosition = new YoFramePoint("previousHipJointPosition", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector hipJointUnitVector = new YoFrameVector("hipJointUnitVector", ReferenceFrame.getWorldFrame(), registry);
@@ -260,7 +260,7 @@ public class SkippyController implements RobotController
       k7 = new DoubleYoVariable("k7", registry);
       k8 = new DoubleYoVariable("k8", registry);
 
-      skippyToDo.set(SkippyToDo.JUMP_FORWARD);
+      skippyToDo.set(SkippyToDo.BALANCE);
       hipPlaneControlMode.set(SkippyPlaneControlMode.BALANCE);
       shoulderPlaneControlMode.set(SkippyPlaneControlMode.BALANCE);
 
@@ -1417,7 +1417,7 @@ public class SkippyController implements RobotController
    public class BalanceToPrepareTransitionCondition implements StateTransitionCondition
    {
       private final SkippyToDo direction;
-      
+
       public BalanceToPrepareTransitionCondition(SkippyToDo direction)
       {
          this.direction = direction;

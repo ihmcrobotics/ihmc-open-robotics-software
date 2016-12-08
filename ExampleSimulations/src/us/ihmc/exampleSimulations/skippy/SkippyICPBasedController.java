@@ -74,14 +74,14 @@ public class SkippyICPBasedController extends SimpleRobotController
       kMomentum.set(0.3);
       kAngle.set(0.1);
 
-      ticksForDesiredForce.set(1000);//10);//100);
+      ticksForDesiredForce.set(10);
       hipAngleController.setProportionalGain(20.0);
       hipAngleController.setIntegralGain(10.0);
       shoulderAngleController.setProportionalGain(0.0);
       shoulderAngleController.setIntegralGain(0.0);
       tickCounter.set(ticksForDesiredForce.getIntegerValue() + 1);
-      
-      hipSetpoint.set(Math.PI / 4.0);
+
+      hipSetpoint.set(0.0);
       shoulderSetpoint.set(0.0);
 
       makeViz(yoGraphicsListRegistries);
@@ -121,7 +121,7 @@ public class SkippyICPBasedController extends SimpleRobotController
 
       YoGraphicVector hipAxisVectorYoGraphic = new YoGraphicVector("hipAxis", hipLocationViz, hipAxisViz, 0.4, YoAppearance.Red(), true);
       yoGraphicsListRegistries.registerYoGraphic("hipAxis", hipAxisVectorYoGraphic);
-      
+
       YoGraphicVector shoulderAxisVectorYoGraphic = new YoGraphicVector("shoulderAxis", shoulderLocationViz, shoulderAxisViz, 0.4, YoAppearance.Red(), true);
       yoGraphicsListRegistries.registerYoGraphic("shoulderAxis", shoulderAxisVectorYoGraphic);
    }
@@ -140,7 +140,7 @@ public class SkippyICPBasedController extends SimpleRobotController
          double q_dHip = skippy.getHipJoint().getQ() > 0.0 ? hipSetpoint.getDoubleValue() : -hipSetpoint.getDoubleValue();
          double hipSetpointFeedback = kAngle.getDoubleValue() * (qHip - q_dHip);
          double shoulderSetpointFeedback = kAngle.getDoubleValue() * (skippy.getShoulderJoint().getQ() - shoulderSetpoint.getDoubleValue());
-         
+
          Matrix3d rotationMatrix = new Matrix3d();
          skippy.getRootJoints().get(0).getRotationToWorld(rotationMatrix);
          double yaw = RotationTools.computeYaw(rotationMatrix);
@@ -164,24 +164,24 @@ public class SkippyICPBasedController extends SimpleRobotController
       skippy.getShoulderJoint().getTranslationToWorld(worldToShoulder.getVector());
       skippy.getShoulderJointAxis(shoulderAxis);
       skippy.getHipJointAxis(hipAxis);
-      
+
       // hip specific:
       hipToFootDirection.sub(footLocation, worldToHip);
       hipToFootDirection.normalize();
       double balanceTorque = computeJointTorque(desiredGroundReaction, hipToFootDirection, hipAxis);
       double angleFeedback = computeAngleFeedbackHip();
-      
+
       if (Double.isNaN(angleFeedback + balanceTorque))
          skippy.getHipJoint().setTau(0.0);
       else
          skippy.getHipJoint().setTau(angleFeedback + balanceTorque);
-      
+
       // shoulder specific:
       shoulderToFootDirection.sub(footLocation, worldToShoulder);
       shoulderToFootDirection.normalize();
       balanceTorque = -computeJointTorque(desiredGroundReaction, hipToFootDirection, shoulderAxis);
       angleFeedback = -computeAngleFeedbackShoulder();
-      
+
       if (Double.isNaN(angleFeedback + balanceTorque))
          skippy.getShoulderJoint().setTau(0.0);
       else
@@ -233,7 +233,7 @@ public class SkippyICPBasedController extends SimpleRobotController
       double hipAngleDifference = computeAngleDifferenceInPlane(desiredGroundReaction, groundReaction, hipAxis);
       return hipAngleController.compute(hipAngleDifference, 0.0, 0.0, 0.0, dt);
    }
-   
+
    /**
     * Controller on the angle between desired and achieved ground reaction force in the shoulder plane.
     */
@@ -242,18 +242,18 @@ public class SkippyICPBasedController extends SimpleRobotController
       double shoulderAngleDifference = computeAngleDifferenceInPlane(desiredGroundReaction, groundReaction, shoulderAxis);
       return shoulderAngleController.compute(shoulderAngleDifference, 0.0, 0.0, 0.0, dt);
    }
-   
+
    private double computeAngleDifferenceInPlane(FrameVector vectorA, FrameVector vectorB, FrameVector planeNormal)
    {
       FrameVector projectedVectorA = new FrameVector();
       FrameVector projectedVectorB = new FrameVector();
       projectVectorInPlane(vectorA, planeNormal, projectedVectorA);
       projectVectorInPlane(vectorB, planeNormal, projectedVectorB);
-      
+
       FrameVector crosProduct = new FrameVector();
       crosProduct.cross(planeNormal, projectedVectorA);
       double sign = Math.signum(crosProduct.dot(projectedVectorB));
-      
+
       double angle = sign * projectedVectorA.angle(projectedVectorB);
       if (Double.isNaN(angle))
          return 0.0;
