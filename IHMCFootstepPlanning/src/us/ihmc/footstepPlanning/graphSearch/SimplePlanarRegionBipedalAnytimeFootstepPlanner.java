@@ -17,13 +17,16 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class SimplePlanarRegionBipedalAnytimeFootstepPlanner extends PlanarRegionBipedalFootstepPlanner implements AnytimeFootstepPlanner, Runnable
 {
+   private final String namePrefix = "AnytimePlanner_";
+
    private BipedalFootstepPlannerNode closestNodeToGoal = null;
    private final AtomicReference<FootstepPlan> bestPlanYet = new AtomicReference<>(null);
    private boolean stopRequested = false;
    private boolean isBestPlanYetOptimal = false;
    private final AtomicReference<PlanarRegionsList> planarRegionsListReference = new AtomicReference<>(null);
    private final AtomicReference<BipedalFootstepPlannerNode> newStartNodeReference = new AtomicReference<>(null);
-   private final IntegerYoVariable maxNumberOfNodesBeforeSleeping = new IntegerYoVariable("maxNumberOfNodesBeforeSleeping", registry);
+   private final IntegerYoVariable maxNumberOfNodesBeforeSleeping = new IntegerYoVariable(namePrefix + "maxNumberOfNodesBeforeSleeping", registry);
+   private final IntegerYoVariable stackSize = new IntegerYoVariable(namePrefix + "stackSize", registry);
 
    private final FramePose tempFramePose = new FramePose();
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
@@ -66,7 +69,9 @@ public class SimplePlanarRegionBipedalAnytimeFootstepPlanner extends PlanarRegio
       stack.push(startNode);
       mapToAllExploredNodes.clear();
 
-      trimBestPlanToNewPlanarRegions();
+      closestNodeToGoal = null;
+      bestPlanYet.set(null);
+//      trimBestPlanToNewPlanarRegions();
    }
 
    private void trimBestPlanToNewPlanarRegions()
@@ -169,11 +174,15 @@ public class SimplePlanarRegionBipedalAnytimeFootstepPlanner extends PlanarRegio
 
       while (!stopRequested)
       {
+         stackSize.set(stack.size());
          replaceStartNode();
          checkForNewPlanarRegionsList();
 
-         if(stack.size() > maxNumberOfNodesBeforeSleeping.getIntegerValue())
+         if(stackSize.getIntegerValue() > maxNumberOfNodesBeforeSleeping.getIntegerValue())
+         {
             ThreadTools.sleep(100);
+            continue;
+         }
 
          if (stack.isEmpty())
          {
