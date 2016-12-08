@@ -38,7 +38,6 @@ import us.ihmc.tools.io.printing.PrintTools;
 public class YoVariableHandshakeParser
 {
    private final String registryPrefix;
-   private final boolean registerYoVariables;
    private final YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
    private final ArrayList<JointState> jointStates = new ArrayList<>();
 
@@ -47,9 +46,8 @@ public class YoVariableHandshakeParser
    private List<YoVariableRegistry> registries = new ArrayList<>();
    private List<YoVariable<?>> variables = new ArrayList<>();
    
-   public YoVariableHandshakeParser(String registryPrefix, boolean registerYoVariables)
+   public YoVariableHandshakeParser(String registryPrefix)
    {
-      this.registerYoVariables = registerYoVariables;
       this.registryPrefix = registryPrefix;
    }
 
@@ -83,22 +81,20 @@ public class YoVariableHandshakeParser
       YoProtoHandshake yoProtoHandshake = parseYoProtoHandshake(handShake);
       
       this.dt = yoProtoHandshake.getDt();
-      if(registerYoVariables)
-      {
-         List<YoVariableRegistry> regs = parseRegistries(yoProtoHandshake, registryPrefix);
-         List<YoVariable<?>> vars = parseVariables(yoProtoHandshake, regs);
+      List<YoVariableRegistry> regs = parseRegistries(yoProtoHandshake, registryPrefix);
 
-         // don't replace those list objects (it's a big code mess), just populate them with received data
+      // don't replace those list objects (it's a big code mess), just populate them with received data
+      registries.clear();
+      registries.addAll(regs);
 
-         registries.clear();
-         registries.addAll(regs);
+      List<YoVariable<?>> vars = parseVariables(yoProtoHandshake, regs);
 
-         variables.clear();
-         variables.addAll(vars);
+      // don't replace those list objects (it's a big code mess), just populate them with received data
+      variables.clear();
+      variables.addAll(vars);
 
-         addJointStates(yoProtoHandshake);
-         addGraphicObjects(yoProtoHandshake);
-      }
+      addJointStates(yoProtoHandshake);
+      addGraphicObjects(yoProtoHandshake);
 
       int numberOfVariables = yoProtoHandshake.getVariableCount();
       int numberOfJointStateVariables = getNumberOfJointStateVariables(yoProtoHandshake);
