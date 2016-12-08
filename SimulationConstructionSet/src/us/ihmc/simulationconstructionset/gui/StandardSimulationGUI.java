@@ -45,6 +45,7 @@ import javax.swing.JTextField;
 import javax.swing.JWindow;
 import javax.swing.SwingUtilities;
 import javax.vecmath.Color3f;
+import javax.vecmath.Tuple3d;
 
 import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
 import us.ihmc.graphics3DAdapter.Graphics3DBackgroundScaleMode;
@@ -1432,9 +1433,19 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
       viewportPanel.setCameraFix(fixX, fixY, fixZ);
    }
 
+   public void setCameraFix(Tuple3d cameraFix)
+   {
+      viewportPanel.setCameraFix(cameraFix);
+   }
+
    public void setCameraPosition(double posX, double posY, double posZ)
    {
       viewportPanel.setCameraPosition(posX, posY, posZ);
+   }
+
+   public void setCameraPosition(Tuple3d cameraPosition)
+   {
+      viewportPanel.setCameraPosition(cameraPosition);      
    }
 
    public boolean allowTickUpdatesNow()
@@ -3182,4 +3193,5 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
    {
       mainPanel.add(viewportPanel); //TODO: Why is this here? 
    }
+
 }
