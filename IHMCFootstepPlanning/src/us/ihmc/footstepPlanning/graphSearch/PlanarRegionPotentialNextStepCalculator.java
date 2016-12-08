@@ -610,7 +610,7 @@ public class PlanarRegionPotentialNextStepCalculator
       return true;
    }
 
-   private boolean snapToPlanarRegionAndCheckIfGoodSnap(BipedalFootstepPlannerNode nodeToExpand)
+   protected boolean snapToPlanarRegionAndCheckIfGoodSnap(BipedalFootstepPlannerNode nodeToExpand)
    {
       if (planarRegionsList != null)
       {
