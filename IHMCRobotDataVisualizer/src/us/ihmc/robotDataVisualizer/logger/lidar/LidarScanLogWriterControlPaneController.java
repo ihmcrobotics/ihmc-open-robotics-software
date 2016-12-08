@@ -32,8 +32,8 @@ public class LidarScanLogWriterControlPaneController
       connectToggleButton.selectedProperty()
             .addListener((ChangeListener<Boolean>) (observable, oldValue, newValue) -> connectToggleButton.setText(newValue ? "Disconnect" : "Connect"));
 
-      logDataToggleButton.selectedProperty().bindBidirectional(connectToggleButton.disableProperty());
-      connectToggleButton.selectedProperty().bindBidirectional(logDataToggleButton.disableProperty());
+//      logDataToggleButton.selectedProperty().bindBidirectional(connectToggleButton.disableProperty());
+//      connectToggleButton.selectedProperty().bindBidirectional(logDataToggleButton.disableProperty());
 
       networkProcessorIPAdTextField.setTextFormatter(TextFormatterTools.ipAddressTextFormatter());
       networkProcessorIPAdTextField.setText(loggerController.networkProcessorAddressProperty().get());
