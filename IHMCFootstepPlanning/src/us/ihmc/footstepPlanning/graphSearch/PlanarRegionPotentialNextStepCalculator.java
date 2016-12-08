@@ -255,10 +255,6 @@ public class PlanarRegionPotentialNextStepCalculator
       currentToGoalVector.sub(goalPosition, currentPosition);
 
       double distance = currentToGoalVector.length();
-
-      double idealFootstepLength = parameters.getIdealFootstepLength();
-      double idealFootstepWidth = parameters.getIdealFootstepWidth();
-
       Vector3d idealStepVector = computeIdealStepVector(parameters, soleZUpTransform, nextSide, currentToGoalVector);
 
       Point3d idealStepLocationInWorld = new Point3d(idealStepVector);
@@ -398,14 +394,19 @@ public class PlanarRegionPotentialNextStepCalculator
          RigidBodyTransform nodeTransform = new RigidBodyTransform();
          node.getSoleTransform(nodeTransform);
          FramePose candidateFootPose = new FramePose(ReferenceFrame.getWorldFrame(), nodeTransform);
-         FramePose stanceFootPose = new FramePose(ReferenceFrame.getWorldFrame(), soleTransforms.get(node.getRobotSide().getOppositeSide()));
-         FramePose swingStartFootPose = new FramePose(ReferenceFrame.getWorldFrame(), soleTransforms.get(node.getRobotSide()));
-         FramePose idealFootstepPose = new FramePose(ReferenceFrame.getWorldFrame());
-         idealFootstepPose.set(stanceFootPose);
-         idealFootstepPose.translate(idealStepVector);
-         idealFootstepPose.setYawPitchRoll(idealStepYaw, 0.0, 0.0);
+
+         RigidBodyTransform stanceFootTransform = soleTransforms.get(node.getRobotSide().getOppositeSide());
+         RigidBodyTransform swingStartFootTransform = soleTransforms.get(node.getRobotSide());
+
+         FramePose stanceFootPose = new FramePose(ReferenceFrame.getWorldFrame(), stanceFootTransform);
+         FramePose swingStartFootPose = new FramePose(ReferenceFrame.getWorldFrame(), swingStartFootTransform);
+
+         RigidBodyTransform idealStepTransform = getTransformFromStepToWorld(stanceFootTransform, idealStepVector, idealStepYaw);
+         FramePose idealFootstepPose = new FramePose(ReferenceFrame.getWorldFrame(), idealStepTransform);
+
          Point3d swingFootGoal = goalPositions.get(node.getRobotSide());
          double score = bipedalStepScorer.scoreFootstep(stanceFootPose, swingStartFootPose, idealFootstepPose, candidateFootPose, swingFootGoal);
+
          node.setSingleStepScore(score);
       }
 
@@ -420,6 +421,18 @@ public class PlanarRegionPotentialNextStepCalculator
    private BipedalFootstepPlannerNode createAndAddNextNodeGivenStep(RigidBodyTransform soleZUpTransform, BipedalFootstepPlannerNode nodeToExpand,
                                                                     Vector3d stepVectorInSoleFrame, double stepYaw)
    {
+      RigidBodyTransform nextTransform = getTransformFromStepToWorld(soleZUpTransform, stepVectorInSoleFrame, stepYaw);
+
+      RobotSide nextSide = nodeToExpand.getRobotSide().getOppositeSide();
+
+      BipedalFootstepPlannerNode childNode = new BipedalFootstepPlannerNode(nextSide, nextTransform);
+      childNode.setParentNode(nodeToExpand);
+      nodeToExpand.addChild(childNode);
+      return childNode;
+   }
+
+   private RigidBodyTransform getTransformFromStepToWorld(RigidBodyTransform soleZUpTransform, Vector3d stepVectorInSoleFrame, double stepYaw)
+   {
       Point3d stepLocationInWorld = new Point3d(stepVectorInSoleFrame);
       soleZUpTransform.transform(stepLocationInWorld);
 
@@ -431,13 +444,7 @@ public class PlanarRegionPotentialNextStepCalculator
       RigidBodyTransform nextTransform = new RigidBodyTransform();
       nextTransform.setRotationEulerAndZeroTranslation(stepRotationEulerInWorld);
       nextTransform.setTranslation(stepLocationInWorld.getX(), stepLocationInWorld.getY(), stepLocationInWorld.getZ());
-
-      RobotSide nextSide = nodeToExpand.getRobotSide().getOppositeSide();
-
-      BipedalFootstepPlannerNode childNode = new BipedalFootstepPlannerNode(nextSide, nextTransform);
-      childNode.setParentNode(nodeToExpand);
-      nodeToExpand.addChild(childNode);
-      return childNode;
+      return nextTransform;
    }
 
    private void seeIfNodeIsAtGoal(BipedalFootstepPlannerNode childNode)
