@@ -117,10 +117,6 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
       attachNetworkListeningQueue(footstepStatusQueue, FootstepStatus.class);
       attachNetworkListeningQueue(planarRegionsListQueue, PlanarRegionsListMessage.class);
 
-      FramePose goal = new FramePose();
-      goal.setPosition(10.0, 0.0, 0.0);
-      setGoalPose(goal);
-
       setupStateMachine();
    }
 
@@ -214,6 +210,11 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
    public void onBehaviorEntered()
    {
       super.onBehaviorEntered();
+
+      FramePose goal = new FramePose();
+      goal.setPosition(10.0, 0.0, 0.0);
+      setGoalPose(goal);
+
       new Thread(footstepPlanner).start();
    }
 
