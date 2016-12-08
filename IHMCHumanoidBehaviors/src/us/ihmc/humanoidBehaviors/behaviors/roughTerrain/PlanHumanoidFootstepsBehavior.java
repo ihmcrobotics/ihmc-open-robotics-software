@@ -161,7 +161,7 @@ public class PlanHumanoidFootstepsBehavior extends AbstractBehavior
       PlanarRegionBipedalFootstepPlannerVisualizer listener = PlanarRegionBipedalFootstepPlannerVisualizerFactory.createWithYoVariableServer(0.01,
                                                                                                                                              fullRobotModel,
                                                                                                                                              logModelProvider,
-                                                                                                                                             footPolygonsInSoleFrame);
+                                                                                                                                             footPolygonsInSoleFrame, "Behavior_");
 
       footstepPlanner.setBipedalFootstepPlannerListener(listener);
    }
