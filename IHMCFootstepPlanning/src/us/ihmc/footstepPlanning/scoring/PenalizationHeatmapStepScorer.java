@@ -117,9 +117,9 @@ public class PenalizationHeatmapStepScorer implements BipedalStepScorer
       score += penalizeCandidateFootstep(upwardPenalizationVector, upwardPenalizationWeight.getDoubleValue());
       score += penalizeCandidateFootstep(downwardPenalizationVector, downwardPenalizationWeightConsideringStancePitch);
 
-      score += angularPenalizationWeight.getDoubleValue() * idealToCandidateOrientation.getYaw().getDoubleValue();
-      score += angularPenalizationWeight.getDoubleValue() * idealToCandidateOrientation.getPitch().getDoubleValue();
-      score += angularPenalizationWeight.getDoubleValue() * idealToCandidateOrientation.getRoll().getDoubleValue();
+      score += angularPenalizationWeight.getDoubleValue() * Math.abs(idealToCandidateOrientation.getYaw().getDoubleValue());
+      score += angularPenalizationWeight.getDoubleValue() * Math.abs(idealToCandidateOrientation.getPitch().getDoubleValue());
+      score += angularPenalizationWeight.getDoubleValue() * Math.abs(idealToCandidateOrientation.getRoll().getDoubleValue());
 
       goalProgressAwardVector.set(goal.getX(), goal.getY());
       goalProgressAwardVector.sub(new Vector2d(idealFootstep.getX(), idealFootstep.getY()));
