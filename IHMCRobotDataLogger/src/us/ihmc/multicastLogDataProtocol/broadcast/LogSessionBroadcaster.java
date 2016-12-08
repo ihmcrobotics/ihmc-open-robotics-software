@@ -41,7 +41,7 @@ public class LogSessionBroadcaster extends Thread
    private final LogSettings logSettings;
    
    private final long sessionID;
-   private final String className;
+   private final String broadcastName;
 
    private final InetSocketAddress address = new InetSocketAddress(LogDataProtocolSettings.UI_ANNOUNCE_PORT);
    private final InetAddress announceGroup;
@@ -60,6 +60,11 @@ public class LogSessionBroadcaster extends Thread
 
    public LogSessionBroadcaster(InetSocketAddress controlAddress, InetAddress dataAddress, Class<?> clazz, LogSettings logSettings)
    {
+      this(controlAddress, dataAddress, clazz, logSettings, "");
+   }
+
+   public LogSessionBroadcaster(InetSocketAddress controlAddress, InetAddress dataAddress, Class<?> clazz, LogSettings logSettings, String namePrefix)
+   {
       try
       {
          this.iface = NetworkInterface.getByInetAddress(controlAddress.getAddress());
@@ -67,7 +72,7 @@ public class LogSessionBroadcaster extends Thread
          this.controlAddress = controlAddress;
          this.dataAddress = dataAddress;
          this.logSettings = logSettings;
-         this.className = clazz.getSimpleName();
+         this.broadcastName = namePrefix + clazz.getSimpleName();
          long mac;
          if (iface.isLoopback())
          {
@@ -150,7 +155,7 @@ public class LogSessionBroadcaster extends Thread
       }
       canIHazRequest.setCameras(cameras);
       canIHazRequest.setLog(logSettings.isLog());
-      canIHazRequest.setName(className);
+      canIHazRequest.setName(broadcastName);
 
 		setRandomPort();
       try
@@ -224,7 +229,7 @@ public class LogSessionBroadcaster extends Thread
       }
       announcement.setCameras(cameras);
       announcement.setLog(logSettings.isLog());
-      announcement.setName(className);
+      announcement.setName(broadcastName);
       announcement.createRequest(sendBuffer);
 
       while (!isInterrupted())

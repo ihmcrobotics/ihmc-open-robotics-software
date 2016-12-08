@@ -220,7 +220,7 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
    public void createAndAttachYoVariableServerListenerToPlanner(LogModelProvider logModelProvider, FullRobotModel fullRobotModel)
    {
       PlanarRegionBipedalFootstepPlannerVisualizer listener = PlanarRegionBipedalFootstepPlannerVisualizerFactory
-            .createWithYoVariableServer(0.01, fullRobotModel, logModelProvider, footstepPlanner.getFootPolygonsInSoleFrame());
+            .createWithYoVariableServer(0.01, fullRobotModel, logModelProvider, footstepPlanner.getFootPolygonsInSoleFrame(), "Anytime_");
 
       footstepPlanner.setBipedalFootstepPlannerListener(listener);
    }

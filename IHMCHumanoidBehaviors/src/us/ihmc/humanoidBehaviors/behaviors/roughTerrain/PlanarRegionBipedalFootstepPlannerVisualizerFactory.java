@@ -18,7 +18,7 @@ public class PlanarRegionBipedalFootstepPlannerVisualizerFactory
 {
    public static PlanarRegionBipedalFootstepPlannerVisualizer createWithYoVariableServer(double dtForViz, FullRobotModel fullRobotModel,
                                                                                          LogModelProvider logModelProvider,
-                                                                                         SideDependentList<ConvexPolygon2d> footPolygonsInSoleFrame)
+                                                                                         SideDependentList<ConvexPolygon2d> footPolygonsInSoleFrame, String namePrefix)
    {
       YoVariableRegistry registry = new YoVariableRegistry(PlanarRegionBipedalFootstepPlannerVisualizerFactory.class.getSimpleName());
       YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
@@ -28,7 +28,7 @@ public class PlanarRegionBipedalFootstepPlannerVisualizerFactory
 
       PeriodicThreadScheduler scheduler = new PeriodicNonRealtimeThreadScheduler("PlannerScheduler");
       YoVariableServer yoVariableServer = new YoVariableServer(PlanarRegionBipedalFootstepPlannerVisualizerFactory.class, scheduler, logModelProvider,
-                                                               LogSettings.FOOTSTEP_PLANNER, dtForViz);
+                                                               LogSettings.FOOTSTEP_PLANNER, dtForViz, namePrefix);
       yoVariableServer.setSendKeepAlive(true);
       footstepPlannerVisualizer.setTickAndUpdatable(yoVariableServer);
 
