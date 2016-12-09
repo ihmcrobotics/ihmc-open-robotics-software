@@ -51,6 +51,7 @@ import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -92,7 +93,7 @@ public class KinematicsToolboxController extends ToolboxController
    private final SideDependentList<FramePose> desiredHandPoses = new SideDependentList<>();
    private final SideDependentList<DenseMatrix64F> footSelectionMatrices = new SideDependentList<>();
    private final SideDependentList<FramePose> desiredFootPoses = new SideDependentList<>();
-   private DenseMatrix64F chestSelectionMatrix = new DenseMatrix64F(6,6);
+   private DenseMatrix64F chestSelectionMatrix = null;
 
    private final SideDependentList<YoGraphicCoordinateSystem> desiredHandPosesViz = new SideDependentList<>();
    private final SideDependentList<YoGraphicCoordinateSystem> desiredFootPosesViz = new SideDependentList<>();
@@ -225,7 +226,7 @@ public class KinematicsToolboxController extends ToolboxController
          FrameOrientation desiredChestOrientation = new FrameOrientation(worldFrame);
          command.getLastTrajectoryPoint().getOrientation(desiredChestOrientation);
          desiredChestOrientationReference.set(desiredChestOrientation);
-         chestSelectionMatrix = new DenseMatrix64F(command.getSelectionMatrix());  
+         chestSelectionMatrix = new DenseMatrix64F(command.getSelectionMatrix());
       }
       
       if (commandInputManager.isNewCommandAvailable(PelvisOrientationTrajectoryCommand.class))
@@ -319,8 +320,8 @@ public class KinematicsToolboxController extends ToolboxController
          FrameVector desiredChestAngularVelocity = computeDesiredAngularVelocity(desiredChestOrientation, chestFrame);
          SpatialVelocityCommand spatialVelocityCommand = new SpatialVelocityCommand();
          spatialVelocityCommand.set(elevator, chest);
-         spatialVelocityCommand.set(desiredChestTwist, chestSelectionMatrix);
          spatialVelocityCommand.setAngularVelocity(chestFrame, elevatorFrame, desiredChestAngularVelocity);
+         spatialVelocityCommand.set(desiredChestTwist, chestSelectionMatrix);
          spatialVelocityCommand.setWeight(chestWeight.getDoubleValue());
          ret.addCommand(spatialVelocityCommand);
       }
@@ -491,9 +492,9 @@ public class KinematicsToolboxController extends ToolboxController
 
       desiredChestOrientationReference.set(null);
       chestSelectionMatrix = CommonOps.identity(6);
-      chestSelectionMatrix.set(3, 3, 0.0);
-      chestSelectionMatrix.set(4, 4, 0.0);
-      chestSelectionMatrix.set(5, 5, 0.0);
+      MatrixTools.removeRow(chestSelectionMatrix, 5);
+      MatrixTools.removeRow(chestSelectionMatrix, 4);
+      MatrixTools.removeRow(chestSelectionMatrix, 3);
 
       desiredPelvisOrientationReference.set(null);
 
