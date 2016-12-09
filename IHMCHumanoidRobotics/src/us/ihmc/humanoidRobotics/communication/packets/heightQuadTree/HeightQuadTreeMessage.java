@@ -7,6 +7,8 @@ public class HeightQuadTreeMessage extends StatusPacket<HeightQuadTreeMessage>
    public HeightQuadTreeNodeMessage root;
    public float defaultHeight = Float.NaN;
    public float resolution = Float.NaN;
+   public float sizeX = Float.NaN;
+   public float sizeY = Float.NaN;
 
    public HeightQuadTreeMessage()
    {
@@ -19,6 +21,8 @@ public class HeightQuadTreeMessage extends StatusPacket<HeightQuadTreeMessage>
       root.set(other.root);
       defaultHeight = other.defaultHeight;
       resolution = other.resolution;
+      sizeX = other.sizeX;
+      sizeY = other.sizeY;
    }
 
    @Override

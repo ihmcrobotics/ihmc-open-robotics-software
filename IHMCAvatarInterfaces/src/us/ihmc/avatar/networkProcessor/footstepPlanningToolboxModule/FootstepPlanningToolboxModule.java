@@ -29,7 +29,7 @@ public class FootstepPlanningToolboxModule extends ToolboxModule
    {
       super(desiredFullRobotModel, modelProvider, startYoVariableServer, PACKET_DESTINATION, NETWORK_PORT);
       setTimeWithoutInputsBeforeGoingToSleep(Double.POSITIVE_INFINITY);
-      footstepPlanningToolboxController = new FootstepPlanningToolboxController(contactPointParameters, statusOutputManager, packetCommunicator, registry, TimeTools.milliSecondsToSeconds(UPDATE_PERIOD_MILLISECONDS));
+      footstepPlanningToolboxController = new FootstepPlanningToolboxController(contactPointParameters, statusOutputManager, packetCommunicator, registry, TimeTools.milliSecondsToSeconds(DEFAULT_UPDATE_PERIOD_MILLISECONDS));
       packetCommunicator.attachListener(FootstepPlanningRequestPacket.class, footstepPlanningToolboxController.createRequestConsumer());
       startYoVariableServer();
    }
