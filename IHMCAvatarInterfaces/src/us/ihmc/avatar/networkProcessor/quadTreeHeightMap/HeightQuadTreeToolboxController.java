@@ -39,7 +39,7 @@ import us.ihmc.tools.io.printing.PrintTools;
 
 public class HeightQuadTreeToolboxController extends ToolboxController
 {
-   private static final double RESOLUTION = 0.02;
+   private static final double RESOLUTION = 0.03;
    private static final boolean DEBUG = false;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final double QUAD_TREE_EXTENT = 200;
