@@ -10,6 +10,7 @@ public class HeightQuadTreeToolboxRequestMessage extends TrackablePacket<HeightQ
 
    public HeightQuadTreeToolboxRequestMessage()
    {
+      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
    public static HeightQuadTreeToolboxRequestMessage clearRequest(PacketDestination destination)
