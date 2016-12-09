@@ -145,10 +145,9 @@ public class PlanarRegion
     * @param intersectionsToPack ArrayList of ConvexPolygon2d to pack with the intersections.
     * @return intersectionArea Total area of intersections
     */
-   public double getPolygonIntersectionsWhenSnapped(ConvexPolygon2d convexPolygon2d, RigidBodyTransform snappingTransform,
-         ArrayList<ConvexPolygon2d> intersectionsToPack)
+   public double getPolygonIntersectionAreaWhenSnapped(ConvexPolygon2d convexPolygon2d, RigidBodyTransform snappingTransform)
    {
-      return getPolygonIntersectionsWhenSnapped(convexPolygon2d, snappingTransform, intersectionsToPack, null);
+      return getPolygonIntersectionAreaWhenSnapped(convexPolygon2d, snappingTransform, null);
    }
    
    /**
@@ -158,8 +157,8 @@ public class PlanarRegion
     * @param intersectionsToPack ArrayList of ConvexPolygon2d to pack with the intersections.
     * @return intersectionArea Total area of intersections
     */
-   public double getPolygonIntersectionsWhenSnapped(ConvexPolygon2d convexPolygon2d, RigidBodyTransform snappingTransform,
-         ArrayList<ConvexPolygon2d> intersectionsToPack, ConvexPolygon2d intersectionPolygonToPack)
+   public double getPolygonIntersectionAreaWhenSnapped(ConvexPolygon2d convexPolygon2d, RigidBodyTransform snappingTransform,
+         ConvexPolygon2d intersectionPolygonToPack)
    {
       ConvexPolygon2d projectedPolygon = snapPolygonIntoRegionAndChangeFrameToRegionFrame(convexPolygon2d, snappingTransform);
       double intersectionArea = 0.0;
@@ -168,6 +167,11 @@ public class PlanarRegion
       {
          intersectionPolygonToPack.clear();
       }
+
+      RigidBodyTransform inverseSnappingTransform = new RigidBodyTransform(snappingTransform);
+      inverseSnappingTransform.invert();
+      RigidBodyTransform regionToPolygonTransform = new RigidBodyTransform();
+      regionToPolygonTransform.multiply(inverseSnappingTransform, fromLocalToWorldTransform);
       
       // Now, just need to go through each polygon of this region and see there is at least one intersection
       for (int i = 0; i < getNumberOfConvexPolygons(); i++)
@@ -176,13 +180,13 @@ public class PlanarRegion
 
          if (intersectingPolygon != null)
          {
+            intersectionArea += intersectingPolygon.getArea();
+            
             if (intersectionPolygonToPack != null)
             {
+               intersectingPolygon.applyTransformAndProjectToXYPlane(regionToPolygonTransform);
                intersectionPolygonToPack.addVertices(intersectingPolygon);
             }
-            
-            intersectionsToPack.add(intersectingPolygon);
-            intersectionArea += intersectingPolygon.getArea();
          }
       }
       

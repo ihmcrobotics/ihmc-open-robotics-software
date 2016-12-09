@@ -373,17 +373,22 @@ public abstract class FootstepPlannerOnRoughTerrainTest implements PlanningTest
 
    public void testPartialGaps(boolean assertPlannerReturnedResult)
    {
+      double absAngle = Math.toRadians(15.0);
+
       PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
       generator.translate(0.3, 0.0, 0.0);
       generator.addCubeReferencedAtBottomMiddle(0.6, 1.0, 0.5);
       generator.translate(0.55, 0.0, 0.0);
+      generator.rotate(absAngle/2.0, Axis.Y);
       for (int i = 0; i < 10; i++)
       {
+         double rotationAngle = i % 2 == 0 ? -absAngle : absAngle;
+         generator.rotate(rotationAngle, Axis.Y);
          generator.addCubeReferencedAtBottomMiddle(0.1, 1.0, 0.5);
          generator.translate(0.3, 0.0, 0.0);
       }
-      generator.addCubeReferencedAtBottomMiddle(0.1, 1.0, 0.5);
-      generator.translate(0.55, 0.0, 0.0);
+      generator.rotate(-absAngle/2.0, Axis.Y);
+      generator.translate(0.25, 0.0, 0.0);
       generator.addCubeReferencedAtBottomMiddle(0.6, 1.0, 0.5);
 
       // define start and goal conditions

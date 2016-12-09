@@ -637,9 +637,8 @@ public class PlanarRegionPotentialNextStepCalculator
          snappedPolygon.update();
          footArea.set(snappedPolygon.getArea());
 
-         ArrayList<ConvexPolygon2d> polygonIntersectionsOnPlanarRegion = new ArrayList<>();
          ConvexPolygon2d footholdPolygon = new ConvexPolygon2d();
-         totalArea.set(planarRegion.getPolygonIntersectionsWhenSnapped(snappedPolygon, nodeToExpandTransform, polygonIntersectionsOnPlanarRegion, footholdPolygon));
+         totalArea.set(planarRegion.getPolygonIntersectionAreaWhenSnapped(snappedPolygon, nodeToExpandTransform, footholdPolygon));
 
          nodeToExpand.setPercentageOfFoothold(totalArea.getDoubleValue() / footArea.getDoubleValue());
          
