@@ -32,7 +32,7 @@ public class BipedalFootstepPlannerParameters
    private double minimumSurfaceNormalZ = 0.7;
    private double maximumZPenetrationOnVRegions = 0.008;
 
-   BipedalFootstepPlannerParameters(YoVariableRegistry parentRegistry)
+   public BipedalFootstepPlannerParameters(YoVariableRegistry parentRegistry)
    {
       parentRegistry.addChild(registry);
 
@@ -106,6 +106,11 @@ public class BipedalFootstepPlannerParameters
    public void setMaximumYawWiggle(double maximumYawWiggle)
    {
       this.maximumYawWiggle.set(maximumYawWiggle);
+   }
+
+   public void setWiggleIntoConvexHullOfPlanarRegions(boolean wiggleIntoConvexHullOfPlanarRegions)
+   {
+      this.wiggleIntoConvexHullOfPlanarRegions.set(wiggleIntoConvexHullOfPlanarRegions);      
    }
 
    public double getIdealFootstepWidth()
@@ -192,4 +197,5 @@ public class BipedalFootstepPlannerParameters
    {
       return maximumStepWidth.getDoubleValue();
    }
+
 }

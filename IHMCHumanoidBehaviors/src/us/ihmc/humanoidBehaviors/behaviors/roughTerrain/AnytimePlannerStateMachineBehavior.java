@@ -19,6 +19,7 @@ import us.ihmc.humanoidBehaviors.stateMachine.StateMachineBehavior;
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessageConverter;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
@@ -38,6 +39,8 @@ import us.ihmc.robotics.stateMachines.StateTransitionCondition;
 import us.ihmc.robotics.time.YoTimer;
 import us.ihmc.tools.FormattingTools;
 import us.ihmc.tools.io.printing.PrintTools;
+import us.ihmc.wholeBodyController.RobotContactPointParameters;
+import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 
 import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
@@ -50,7 +53,10 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
    private final DoubleYoVariable yoTime;
    private final IntegerYoVariable maxNumberOfStepsToTake = new IntegerYoVariable(prefix + "NumberOfStepsToTake", registry);
    private final IntegerYoVariable indexOfNextFootstepToSendFromCurrentPlan = new IntegerYoVariable(prefix + "NextFootstepToSendFromCurrentPlan", registry);
-   private final SimplePlanarRegionBipedalAnytimeFootstepPlanner footstepPlanner = new SimplePlanarRegionBipedalAnytimeFootstepPlanner(registry);
+   
+   private final BipedalFootstepPlannerParameters footstepPlanningParameters;
+   private final SimplePlanarRegionBipedalAnytimeFootstepPlanner footstepPlanner;
+
    private final BooleanYoVariable reachedGoal = new BooleanYoVariable(prefix + "ReachedGoal", registry);
    private final DoubleYoVariable swingTime = new DoubleYoVariable(prefix + "SwingTime", registry);
    private final DoubleYoVariable transferTime = new DoubleYoVariable(prefix + "TransferTime", registry);
@@ -80,9 +86,17 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
    }
 
    public AnytimePlannerStateMachineBehavior(CommunicationBridge communicationBridge, DoubleYoVariable yoTime, HumanoidReferenceFrames referenceFrames,
-                                             LogModelProvider logModelProvider, FullHumanoidRobotModel fullRobotModel)
+                                             LogModelProvider logModelProvider, FullHumanoidRobotModel fullRobotModel, WholeBodyControllerParameters wholeBodyControllerParameters)
    {
       super("AnytimePlanner", AnytimePlanningState.class, yoTime, communicationBridge);
+      
+      footstepPlanningParameters = new BipedalFootstepPlannerParameters(registry);
+      setPlannerParameters(footstepPlanningParameters);
+      footstepPlanner = new SimplePlanarRegionBipedalAnytimeFootstepPlanner(footstepPlanningParameters, registry);
+      SideDependentList<ConvexPolygon2d> footPolygonsInSoleFrame = createDefaultFootPolygons(wholeBodyControllerParameters.getContactPointParameters());
+      footstepPlanner.setFeetPolygons(footPolygonsInSoleFrame);
+      footstepPlanner.setMaximumNumberOfNodesToExpand(500);
+
       this.yoTime = yoTime;
       maxNumberOfStepsToTake.set(1);
       this.referenceFrames = referenceFrames;
@@ -100,7 +114,6 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
          }
       };
 
-      setPlannerParameters();
       createAndAttachYoVariableServerListenerToPlanner(logModelProvider, fullRobotModel);
 
       swingTime.set(1.5);
@@ -170,38 +183,28 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
       statemachine.setStartState(AnytimePlanningState.REQUEST_AND_WAIT_FOR_PLANAR_REGIONS);
    }
 
-   private void setPlannerParameters()
+   private void setPlannerParameters(BipedalFootstepPlannerParameters footstepPlanningParameters)
    {
-      BipedalFootstepPlannerParameters parameters = footstepPlanner.getParameters();
+      footstepPlanningParameters.setMaximumStepReach(0.55);
+      footstepPlanningParameters.setMaximumStepZ(0.25);
 
-      parameters.setMaximumStepReach(0.65);
-      parameters.setMaximumStepZ(0.4);
+      footstepPlanningParameters.setMaximumStepXWhenForwardAndDown(0.32);
+      footstepPlanningParameters.setMaximumStepZWhenForwardAndDown(0.18);
 
-      // Atlas has ankle pitch range of motion limits, which hit when taking steps forward and down. Similar to a human.
-      // Whereas a human gets on its toes nicely to avoid the limits, this is challenging with a robot.
-      // So for now, have really conservative forward and down limits on height.
-      parameters.setMaximumStepXWhenForwardAndDown(0.2);
-      parameters.setMaximumStepWidth(0.4);
-      parameters.setMaximumStepZWhenForwardAndDown(0.20);
+      footstepPlanningParameters.setMaximumStepYaw(0.15);
+      footstepPlanningParameters.setMaximumStepWidth(0.4);
+      footstepPlanningParameters.setMinimumStepWidth(0.15);
+      footstepPlanningParameters.setMinimumFootholdPercent(0.95);
 
-      parameters.setMaximumStepYaw(0.15); //0.25);
-      parameters.setMinimumStepWidth(0.15);
-      parameters.setMinimumFootholdPercent(0.95);
+      footstepPlanningParameters.setWiggleInsideDelta(0.01);
+      footstepPlanningParameters.setMaximumXYWiggleDistance(1.0);
+      footstepPlanningParameters.setMaximumYawWiggle(0.1);
+      footstepPlanningParameters.setRejectIfCannotFullyWiggleInside(false);
+      footstepPlanningParameters.setWiggleIntoConvexHullOfPlanarRegions(true);
 
-      parameters.setWiggleInsideDelta(0.02); //0.08);
-      parameters.setMaximumXYWiggleDistance(1.0);
-      parameters.setMaximumYawWiggle(0.1);
-
-      parameters.setRejectIfCannotFullyWiggleInside(true);
-
-      double idealFootstepLength = 0.45; //0.3; //0.4;
-      double idealFootstepWidth = 0.26; //0.2; //0.25;
-      parameters.setIdealFootstep(idealFootstepLength, idealFootstepWidth);
-
-      SideDependentList<ConvexPolygon2d> footPolygonsInSoleFrame = createDefaultFootPolygons();
-      footstepPlanner.setFeetPolygons(footPolygonsInSoleFrame);
-
-      footstepPlanner.setMaximumNumberOfNodesToExpand(500);
+      double idealFootstepLength = 0.3;
+      double idealFootstepWidth = 0.25;
+      footstepPlanningParameters.setIdealFootstep(idealFootstepLength, idealFootstepWidth);
    }
 
    @Override
@@ -226,27 +229,12 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
       footstepPlanner.setBipedalFootstepPlannerListener(listener);
    }
 
-   private static ConvexPolygon2d createDefaultFootPolygon()
-   {
-      //TODO: Get this from the robot model itself.
-      double footLength = 0.26;
-      double footWidth = 0.18;
-
-      ConvexPolygon2d footPolygon = new ConvexPolygon2d();
-      footPolygon.addVertex(footLength / 2.0, footWidth / 2.0);
-      footPolygon.addVertex(footLength / 2.0, -footWidth / 2.0);
-      footPolygon.addVertex(-footLength / 2.0, footWidth / 2.0);
-      footPolygon.addVertex(-footLength / 2.0, -footWidth / 2.0);
-      footPolygon.update();
-
-      return footPolygon;
-   }
-
-   private static SideDependentList<ConvexPolygon2d> createDefaultFootPolygons()
+   private static SideDependentList<ConvexPolygon2d> createDefaultFootPolygons(RobotContactPointParameters contactPointParameters)
    {
       SideDependentList<ConvexPolygon2d> footPolygons = new SideDependentList<>();
       for (RobotSide side : RobotSide.values)
-         footPolygons.put(side, createDefaultFootPolygon());
+         footPolygons.set(side, new ConvexPolygon2d(contactPointParameters.getFootContactPoints().get(side)));
+      
       return footPolygons;
    }
 
@@ -468,8 +456,9 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
                                                                                           swingTime.getDoubleValue(), transferTime.getDoubleValue());
          indexOfNextFootstepToSendFromCurrentPlan.increment();
 
-         footstepDataListMessage.setDestination(PacketDestination.UI);
-         sendPacket(footstepDataListMessage);
+         FootstepDataListMessage footstepDataListMessageFull = FootstepDataMessageConverter.createFootstepDataListFromPlan(currentPlan, 0.0, 0.0, ExecutionMode.OVERRIDE);
+         footstepDataListMessageFull.setDestination(PacketDestination.UI);
+         sendPacket(footstepDataListMessageFull);
 
          footstepDataListMessage.setDestination(PacketDestination.CONTROLLER);
          sendPacketToController(footstepDataListMessage);

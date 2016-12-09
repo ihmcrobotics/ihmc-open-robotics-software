@@ -600,7 +600,10 @@ public class PlanarRegionPotentialNextStepCalculator
 
       BipedalFootstepPlannerNode grandParentNode = parentNode.getParentNode();
       if (grandParentNode == null)
+      {
+         //TODO: How to check in place step when first step?
          return true;
+      }
 
       if (grandParentNode.epsilonEquals(nodeToExpand, 1e-1))
       {
