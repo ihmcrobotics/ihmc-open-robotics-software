@@ -209,10 +209,12 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
    {
       super.onBehaviorEntered();
 
-      FramePose goal = new FramePose();
-      goal.setPosition(10.0, 0.0, 0.0);
+      ReferenceFrame midFeetZUpFrame = referenceFrames.getMidFeetZUpFrame();
+      FramePose goal = new FramePose(midFeetZUpFrame);
+      goal.setPosition(3.0, 0.0, 0.0);
+      goal.changeFrame(ReferenceFrame.getWorldFrame());
       setGoalPose(goal);
-
+      
       new Thread(footstepPlanner).start();
    }
 

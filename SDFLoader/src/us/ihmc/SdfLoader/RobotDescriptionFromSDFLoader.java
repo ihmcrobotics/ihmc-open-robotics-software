@@ -84,7 +84,7 @@ public class RobotDescriptionFromSDFLoader
 
       RobotDescription robotDescription = loadModelFromSDF(generalizedSDFRobotModel, jointNameMap, useCollisionMeshes, enableTorqueVelocityLimits, enableDamping);
 
-      if(!Precision.equals(jointNameMap.getModelScale(), 1.0, 1))
+      if(jointNameMap != null && !Precision.equals(jointNameMap.getModelScale(), 1.0, 1))
       {
          System.out.println("Scaling " + jointNameMap.getModelName() + " with factor " + jointNameMap.getModelScale() + ", mass scale power " + jointNameMap.getMassScalePower());
          // Scale the robotDescription before adding points from the jointMap
