@@ -42,6 +42,8 @@ import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 
+import java.util.ArrayList;
+
 import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
@@ -63,7 +65,7 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
    private final BooleanYoVariable receivedFootstepCompletedPacked = new BooleanYoVariable(prefix + "ReceivedFootstepCompletedPacket", registry);
    private final HumanoidReferenceFrames referenceFrames;
    private final BooleanYoVariable havePlanarRegionsBeenSet = new BooleanYoVariable(prefix + "HavePlanarRegionsBeenSet", registry);
-
+   
    private FootstepPlan currentPlan;
    private final IntegerYoVariable numberOfFootstepsInCurrentPlan = new IntegerYoVariable(prefix + "NumberOfFootstepsInCurrentPlan", registry);
    private final RequestAndWaitForPlanarRegionsListBehavior requestAndWaitForPlanarRegionsListBehavior;
@@ -76,6 +78,9 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
    private final FoundAPlanCondition foundAPlanCondition = new FoundAPlanCondition();
    private final ContinueWalkingAfterCompletedStepCondition continueWalkingAfterCompletedStepCondition = new ContinueWalkingAfterCompletedStepCondition();
    private final ReachedGoalAfterCompletedStepCondition reachedGoalAfterCompletedStepCondition = new ReachedGoalAfterCompletedStepCondition();
+   
+   private static final double SCALING_FACTOR_FOR_FOOTHOLD_X = 1.05;
+   private static final double SCALING_FACTOR_FOR_FOOTHOLD_Y = 2.0;
 
    private final ConcurrentListeningQueue<PlanarRegionsListMessage> planarRegionsListQueue = new ConcurrentListeningQueue<>(10);
    private final ConcurrentListeningQueue<FootstepStatus> footstepStatusQueue = new ConcurrentListeningQueue<FootstepStatus>(10);
@@ -188,12 +193,16 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
       footstepPlanningParameters.setMaximumStepReach(0.55);
       footstepPlanningParameters.setMaximumStepZ(0.25);
 
-      footstepPlanningParameters.setMaximumStepXWhenForwardAndDown(0.32);
-      footstepPlanningParameters.setMaximumStepZWhenForwardAndDown(0.18);
+      footstepPlanningParameters.setMaximumStepXWhenForwardAndDown(0.32); //32);
+      footstepPlanningParameters.setMaximumStepZWhenForwardAndDown(0.10); //18);
 
       footstepPlanningParameters.setMaximumStepYaw(0.15);
+      
+      footstepPlanningParameters.setMinimumStepWidth(0.16);
       footstepPlanningParameters.setMaximumStepWidth(0.4);
-      footstepPlanningParameters.setMinimumStepWidth(0.15);
+
+      footstepPlanningParameters.setMinimumStepLength(0.02);
+
       footstepPlanningParameters.setMinimumFootholdPercent(0.95);
 
       footstepPlanningParameters.setWiggleInsideDelta(0.01);
@@ -214,7 +223,7 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
 
       ReferenceFrame midFeetZUpFrame = referenceFrames.getMidFeetZUpFrame();
       FramePose goal = new FramePose(midFeetZUpFrame);
-      goal.setPosition(3.0, 0.0, 0.0);
+      goal.setPosition(4.0, 0.0, 0.0);
       goal.changeFrame(ReferenceFrame.getWorldFrame());
       setGoalPose(goal);
       
@@ -228,12 +237,26 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
 
       footstepPlanner.setBipedalFootstepPlannerListener(listener);
    }
-
+   
    private static SideDependentList<ConvexPolygon2d> createDefaultFootPolygons(RobotContactPointParameters contactPointParameters)
    {
       SideDependentList<ConvexPolygon2d> footPolygons = new SideDependentList<>();
       for (RobotSide side : RobotSide.values)
-         footPolygons.set(side, new ConvexPolygon2d(contactPointParameters.getFootContactPoints().get(side)));
+      {
+         ArrayList<Point2d> footPoints = contactPointParameters.getFootContactPoints().get(side);         
+         ArrayList<Point2d> scaledFootPoints = new ArrayList<Point2d>();
+         
+         for(int i = 0; i < footPoints.size(); i++)
+         {
+            Point2d footPoint = new Point2d(footPoints.get(i));
+            footPoint.setX(footPoint.getX() * SCALING_FACTOR_FOR_FOOTHOLD_X);
+            footPoint.setY(footPoint.getY() * SCALING_FACTOR_FOR_FOOTHOLD_Y);
+            scaledFootPoints.add(footPoint);
+         }
+         
+         ConvexPolygon2d scaledFoot = new ConvexPolygon2d(scaledFootPoints);
+         footPolygons.set(side, scaledFoot);         
+      }
       
       return footPolygons;
    }
