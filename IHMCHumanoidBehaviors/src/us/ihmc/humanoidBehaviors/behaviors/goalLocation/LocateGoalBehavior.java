@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors.behaviors.fiducialLocation;
+package us.ihmc.humanoidBehaviors.behaviors.goalLocation;
 
 import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
@@ -10,14 +10,14 @@ import javax.vecmath.Point3d;
 import java.text.DecimalFormat;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class LocateFiducialBehavior extends AbstractBehavior
+public class LocateGoalBehavior extends AbstractBehavior
 {
    private final GoalDetectorBehaviorService detectorBehaviorService;
    private final AtomicBoolean done = new AtomicBoolean(false);
    private final FramePose foundFiducialPose = new FramePose();
    private final DecimalFormat decimalFormat = new DecimalFormat("#.##");
 
-   public LocateFiducialBehavior(CommunicationBridgeInterface communicationBridge, GoalDetectorBehaviorService detectorBehaviorService)
+   public LocateGoalBehavior(CommunicationBridgeInterface communicationBridge, GoalDetectorBehaviorService detectorBehaviorService)
    {
       super(detectorBehaviorService.getClass().getSimpleName(), communicationBridge);
 
@@ -56,6 +56,11 @@ public class LocateFiducialBehavior extends AbstractBehavior
       TextToSpeechPacket textToSpeechPacket = new TextToSpeechPacket(message);
       textToSpeechPacket.setbeep(false);
       sendPacketToUI(textToSpeechPacket);
+   }
+
+   public void getReportedGoalPoseWorldFrame(FramePose framePoseToPack)
+   {
+      detectorBehaviorService.getReportedGoalPoseWorldFrame(framePoseToPack);
    }
 
    @Override
