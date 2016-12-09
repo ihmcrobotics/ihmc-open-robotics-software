@@ -27,6 +27,10 @@ public class LogHandshake
    public String[] resourceDirectories;
    public byte[] resourceZip;
    
+   public boolean createSummary;
+   public String summaryTriggerVariable;
+   public String[] summarizedVariables;
+   
    private static Kryo getKryo()
    {
       Kryo kryo = new Kryo();

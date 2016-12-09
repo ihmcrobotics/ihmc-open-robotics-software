@@ -44,17 +44,12 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
 
    private final BipedalFootstepPlannerParameters parameters;
 
-   public PlanarRegionBipedalFootstepPlanner(YoVariableRegistry parentRegistry)
+   public PlanarRegionBipedalFootstepPlanner(BipedalFootstepPlannerParameters parameters, YoVariableRegistry parentRegistry)
    {
+      this.parameters = parameters;
       parentRegistry.addChild(registry);
-      parameters = new BipedalFootstepPlannerParameters(parentRegistry);
 
       planarRegionPotentialNextStepCalculator = new PlanarRegionPotentialNextStepCalculator(parameters, parentRegistry);
-   }
-
-   public BipedalFootstepPlannerParameters getParameters()
-   {
-      return parameters;
    }
 
    public void setBipedalFootstepPlannerListener(BipedalFootstepPlannerListener listener)

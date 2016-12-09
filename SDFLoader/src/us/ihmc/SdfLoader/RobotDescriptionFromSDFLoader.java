@@ -3,6 +3,7 @@ package us.ihmc.SdfLoader;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -14,6 +15,7 @@ import javax.vecmath.Vector3d;
 import javax.xml.bind.JAXBException;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.math3.util.Precision;
 
 import us.ihmc.SdfLoader.xmlDescription.SDFSensor;
 import us.ihmc.SdfLoader.xmlDescription.SDFSensor.Camera;
@@ -61,20 +63,13 @@ public class RobotDescriptionFromSDFLoader
 
 //   private final SDFParameters sdfParameters;
    private List<String> resourceDirectories;
-
-   private RobotDescription robotDescription;
    private LinkedHashMap<String, JointDescription> jointDescriptions = new LinkedHashMap<>();
-   private GeneralizedSDFRobotModel generalizedSDFRobotModel;
 
    public RobotDescriptionFromSDFLoader() //SDFParameters sdfParameters)
    {
 //      this.sdfParameters = sdfParameters;
    }
 
-   public RobotDescription getRobotDescription()
-   {
-      return robotDescription;
-   }
 
    public RobotDescription loadRobotDescriptionFromSDF(String modelName, InputStream inputStream, List<String> resourceDirectories, SDFDescriptionMutator mutator, JointNameMap jointNameMap, boolean useCollisionMeshes,
          boolean enableTorqueVelocityLimits, boolean enableDamping)
@@ -85,11 +80,75 @@ public class RobotDescriptionFromSDFLoader
 
    public RobotDescription loadRobotDescriptionFromSDF(GeneralizedSDFRobotModel generalizedSDFRobotModel, JointNameMap jointNameMap, boolean useCollisionMeshes, boolean enableTorqueVelocityLimits, boolean enableDamping)
    {
-      this.generalizedSDFRobotModel = generalizedSDFRobotModel;
       this.resourceDirectories = generalizedSDFRobotModel.getResourceDirectories();
 
+      RobotDescription robotDescription = loadModelFromSDF(generalizedSDFRobotModel, jointNameMap, useCollisionMeshes, enableTorqueVelocityLimits, enableDamping);
+
+      if(jointNameMap != null && !Precision.equals(jointNameMap.getModelScale(), 1.0, 1))
+      {
+         System.out.println("Scaling " + jointNameMap.getModelName() + " with factor " + jointNameMap.getModelScale() + ", mass scale power " + jointNameMap.getMassScalePower());
+         // Scale the robotDescription before adding points from the jointMap
+         robotDescription.scale(jointNameMap.getModelScale(), jointNameMap.getMassScalePower(), Arrays.asList(jointNameMap.getHighInertiaForStableSimulationJoints()));
+         // Everything from here on will be done in "scaled robot coordinates"
+      }
+      
+      
+      // Ground Contact Points from joint name map
+      addGroundContactPoints(jointNameMap);
+
+      return robotDescription;
+   }
+
+
+   private void addGroundContactPoints(JointNameMap jointNameMap)
+   {
+      LinkedHashMap<String, Integer> counters = new LinkedHashMap<String, Integer>();
+      if (jointNameMap != null)
+      {
+         for (ImmutablePair<String, Vector3d> jointContactPoint : jointNameMap.getJointNameGroundContactPointMap())
+         {
+            String jointName = jointContactPoint.getLeft();
+
+            int count;
+            if (counters.get(jointName) == null)
+               count = 0;
+            else
+               count = counters.get(jointName);
+
+            Vector3d gcOffset = jointContactPoint.getRight();
+
+            GroundContactPointDescription groundContactPoint = new GroundContactPointDescription("gc_" + SDFConversionsHelper.sanitizeJointName(jointName) + "_" + count++, gcOffset);
+            ExternalForcePointDescription externalForcePoint = new ExternalForcePointDescription("ef_" + SDFConversionsHelper.sanitizeJointName(jointName) + "_" + count++, gcOffset);
+
+            JointDescription jointDescription = jointDescriptions.get(jointName);
+
+            jointDescription.addGroundContactPoint(groundContactPoint);
+            jointDescription.addExternalForcePoint(externalForcePoint);
+
+            counters.put(jointName, count);
+
+//            PrintTools.info("Joint Contact Point: " + jointContactPoint);
+
+            if (SHOW_CONTACT_POINTS)
+            {
+               Graphics3DObject graphics = jointDescription.getLink().getLinkGraphics();
+               if (graphics == null) graphics = new Graphics3DObject();
+
+               graphics.identity();
+               graphics.translate(jointContactPoint.getRight());
+               double radius = 0.01;
+               graphics.addSphere(radius, YoAppearance.Orange());
+
+            }
+         }
+      }
+   }
+
+
+   private RobotDescription loadModelFromSDF(GeneralizedSDFRobotModel generalizedSDFRobotModel, JointNameMap jointNameMap, boolean useCollisionMeshes, boolean enableTorqueVelocityLimits, boolean enableDamping)
+   {
       String name = generalizedSDFRobotModel.getName();
-      robotDescription = new RobotDescription(name);
+      RobotDescription robotDescription = new RobotDescription(name);
 
       ArrayList<SDFLinkHolder> rootLinks = generalizedSDFRobotModel.getRootLinks();
 
@@ -133,55 +192,12 @@ public class RobotDescriptionFromSDFLoader
          }
          addJointsRecursively(child, rootJointDescription, useCollisionMeshes, enableTorqueVelocityLimits, enableDamping, lastSimulatedJoints, false);
       }
-
-      // Ground Contact Points:
-
-      LinkedHashMap<String, Integer> counters = new LinkedHashMap<String, Integer>();
-      if (jointNameMap != null)
-      {
-         for (ImmutablePair<String, Vector3d> jointContactPoint : jointNameMap.getJointNameGroundContactPointMap())
-         {
-            String jointName = jointContactPoint.getLeft();
-
-            int count;
-            if (counters.get(jointName) == null)
-               count = 0;
-            else
-               count = counters.get(jointName);
-
-            Vector3d gcOffset = jointContactPoint.getRight();
-
-            GroundContactPointDescription groundContactPoint = new GroundContactPointDescription("gc_" + SDFConversionsHelper.sanitizeJointName(jointName) + "_" + count++, gcOffset);
-            ExternalForcePointDescription externalForcePoint = new ExternalForcePointDescription("ef_" + SDFConversionsHelper.sanitizeJointName(jointName) + "_" + count++, gcOffset);
-
-            JointDescription jointDescription = jointDescriptions.get(jointName);
-
-            jointDescription.addGroundContactPoint(groundContactPoint);
-            jointDescription.addExternalForcePoint(externalForcePoint);
-
-            counters.put(jointName, count);
-
-//            PrintTools.info("Joint Contact Point: " + jointContactPoint);
-
-            if (SHOW_CONTACT_POINTS)
-            {
-               Graphics3DObject graphics = jointDescription.getLink().getLinkGraphics();
-               if (graphics == null) graphics = new Graphics3DObject();
-
-               graphics.identity();
-               graphics.translate(jointContactPoint.getRight());
-               double radius = 0.01;
-               graphics.addSphere(radius, YoAppearance.Orange());
-
-            }
-         }
-      }
-
+      
+      // Ground contact points from model
       for (SDFJointHolder child : rootLink.getChildren())
       {
          addForceSensorsIncludingDescendants(child, jointNameMap);
       }
-
       return robotDescription;
    }
 
@@ -237,13 +253,16 @@ public class RobotDescriptionFromSDFLoader
       scsLink.setMass(mass);
       scsLink.setMomentOfInertia(inertia);
 
-      if (SHOW_COM_REFERENCE_FRAMES)
+      if (link.getVisuals() != null)
       {
-         scsLink.addCoordinateSystemToCOM(0.1);
-      }
-      if (SHOW_INERTIA_ELLIPSOIDS)
-      {
-         scsLink.addEllipsoidFromMassProperties(YoAppearance.Orange());
+         if (SHOW_COM_REFERENCE_FRAMES)
+         {
+            scsLink.addCoordinateSystemToCOM(0.1);
+         }
+         if (SHOW_INERTIA_ELLIPSOIDS)
+         {
+            scsLink.addEllipsoidFromMassProperties(YoAppearance.Orange());
+         }
       }
 
       return scsLink;

@@ -28,6 +28,9 @@ public class HeightQuadTreeMessageConverter
       heightQuadTreeMessage.root = rootNodeMessage;
       heightQuadTreeMessage.defaultHeight = (float) rootNode.getDefaultHeightWhenNoPoints();
       heightQuadTreeMessage.resolution = (float) quadTreeToConvert.getQuadTreeParameters().getResolution();
+      Box bounds = quadTreeToConvert.getRootNode().getBounds();
+      heightQuadTreeMessage.sizeX = (float) (bounds.maxX - bounds.minX);
+      heightQuadTreeMessage.sizeY = (float) (bounds.maxY - bounds.minY);
       return heightQuadTreeMessage;
    }
 
@@ -35,20 +38,12 @@ public class HeightQuadTreeMessageConverter
    private static void fullDepthCopy(QuadTreeForGroundNode original, Point2d boundingCircleCenter, double boundingCircleRadius, HeightQuadTreeNodeMessage copyToPack)
    {
       boolean isLeaf = original.getLeaf() != null;
-      copyToPack.isLeaf = isLeaf;
 
       if(isLeaf)
+      {
          copyToPack.height = (float) original.getLeaf().getAveragePoint().getZ();
-
-      Box bounds = original.getBounds();
-      copyToPack.centerX = (float) bounds.centreX;
-      copyToPack.centerY = (float) bounds.centreY;
-      copyToPack.sizeX = (float) (bounds.maxX - bounds.minX);
-      copyToPack.sizeY = (float) (bounds.maxY - bounds.minY);
-
-      // Last depth level of the tree, we're done.
-      if (isLeaf)
          return;
+      }
 
       if (original.hasChildren() && isAncestorOfAtLeastOneLeafInsideBoundingCircle(original, boundingCircleCenter, boundingCircleRadius))
       {
@@ -67,9 +62,9 @@ public class HeightQuadTreeMessageConverter
 
             // Computing the morton code to make sure that the indexing is correct.
             int mortonCode = 0;
-            if (originalChild.getBounds().centreX > copyToPack.centerX)
+            if (originalChild.getBounds().centreX > original.getBounds().centreX)
                mortonCode |= 1;
-            if (originalChild.getBounds().centreY > copyToPack.centerY)
+            if (originalChild.getBounds().centreY > original.getBounds().centreY)
                mortonCode |= 2;
 
             HeightQuadTreeNodeMessage childCopy = new HeightQuadTreeNodeMessage();
@@ -104,5 +99,62 @@ public class HeightQuadTreeMessageConverter
       double dx = x - boundingCircleCenter.getX();
       double dy = y - boundingCircleCenter.getY();
       return dx * dx + dy * dy < boundingCircleRadius * boundingCircleRadius;
+   }
+
+   public static HeightQuadTree convertMessage(HeightQuadTreeMessage messageToConvert)
+   {
+      HeightQuadTree heightQuadTree = new HeightQuadTree();
+      heightQuadTree.setDefaultHeight(messageToConvert.defaultHeight);
+      heightQuadTree.setResolution(messageToConvert.resolution);
+      heightQuadTree.setSizeX(messageToConvert.sizeX);
+      heightQuadTree.setSizeY(messageToConvert.sizeY);
+
+      if (messageToConvert.root == null)
+         return heightQuadTree;
+
+      HeightQuadTreeNode root = new HeightQuadTreeNode();
+      root.setHeight(messageToConvert.root.height);
+      root.setCenterX(0.0f);
+      root.setCenterY(0.0f);
+      root.setSizeX(messageToConvert.sizeX);
+      root.setSizeY(messageToConvert.sizeY);
+
+      fullDepthCopy(root, messageToConvert.root);
+      heightQuadTree.setRoot(root);
+
+      return heightQuadTree;
+   }
+
+   private static void fullDepthCopy(HeightQuadTreeNode node, HeightQuadTreeNodeMessage nodeMessage)
+   {
+      if (nodeMessage.children == null)
+         return;
+
+      node.assignChildrenArray();
+
+      for (int childIndex = 0; childIndex < 4; childIndex++)
+      {
+         HeightQuadTreeNodeMessage childMessage = nodeMessage.children[childIndex];
+         if (childMessage == null)
+            continue;
+
+         HeightQuadTreeNode child = new HeightQuadTreeNode();
+         child.setSizeX(0.5f * node.getSizeX());
+         child.setSizeY(0.5f * node.getSizeY());
+
+         if ((childIndex & 1) != 0)
+            child.setCenterX(node.getCenterX() + 0.5f * child.getSizeX());
+         else
+            child.setCenterX(node.getCenterX() - 0.5f * child.getSizeX());
+
+         if ((childIndex & 2) != 0)
+            child.setCenterY(node.getCenterY() + 0.5f * child.getSizeY());
+         else
+            child.setCenterY(node.getCenterY() - 0.5f * child.getSizeY());
+
+         child.setHeight(childMessage.height);
+         node.setChild(childIndex, child);
+         fullDepthCopy(child, childMessage);
+      }
    }
 }

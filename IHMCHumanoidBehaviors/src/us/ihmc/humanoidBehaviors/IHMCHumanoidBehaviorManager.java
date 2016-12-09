@@ -240,7 +240,7 @@ public class IHMCHumanoidBehaviorManager
                                                                         referenceFrames, objectDetectorBehaviorService));
       }
 
-      dispatcher.addBehavior(HumanoidBehaviorType.WALK_TO_GOAL_ANYTIME_PLANNER, new AnytimePlannerStateMachineBehavior(behaviorCommunicationBridge, yoTime, referenceFrames, logModelProvider, fullRobotModel));
+      dispatcher.addBehavior(HumanoidBehaviorType.WALK_TO_GOAL_ANYTIME_PLANNER, new AnytimePlannerStateMachineBehavior(behaviorCommunicationBridge, yoTime, referenceFrames, logModelProvider, fullRobotModel, wholeBodyControllerParameters));
 
       dispatcher.addBehavior(HumanoidBehaviorType.WALK_TO_LOCATION, new WalkToLocationBehavior(behaviorCommunicationBridge, fullRobotModel, referenceFrames,
             wholeBodyControllerParameters.getWalkingControllerParameters()));

@@ -119,6 +119,7 @@ public class CommandInputManager
     * The user is free to modify the message afterwards.
     * @param message message to be submitted to the controller.
     */
+   @SuppressWarnings("unchecked")
    public <M extends Packet<M>> void submitMessage(M message)
    {
       if (message == null)
@@ -144,7 +145,6 @@ public class CommandInputManager
          PrintTools.error(this, "The message type " + message.getClass().getSimpleName() + " is not supported.");
          return;
       }
-      @SuppressWarnings("unchecked")
       Command<?, M> nextCommand = (Command<?, M>) buffer.next();
       if (nextCommand == null)
       {
@@ -152,10 +152,11 @@ public class CommandInputManager
          return;
       }
       nextCommand.set(message);
+      Class<?> commandClass = nextCommand.getClass();
       buffer.commit();
 
       for (int i = 0; i < hasReceivedInputListeners.size(); i++)
-         hasReceivedInputListeners.get(i).hasReceivedInput();
+         hasReceivedInputListeners.get(i).hasReceivedInput((Class<? extends Command<?, ?>>) commandClass);
    }
 
    /**
@@ -181,6 +182,7 @@ public class CommandInputManager
     * The user is free to modify the command afterwards.
     * @param command command to be submitted to the controller.
     */
+   @SuppressWarnings("unchecked")
    public <C extends Command<C, ?>> void submitCommand(C command)
    {
       if (!command.isCommandValid())
@@ -195,7 +197,7 @@ public class CommandInputManager
          PrintTools.error(this, "The command type " + command.getClass().getSimpleName() + " is not supported.");
          return;
       }
-      @SuppressWarnings("unchecked")
+
       Command<C, ?> nextModifiableMessage = (Command<C, ?>) buffer.next();
       if (nextModifiableMessage == null)
       {
@@ -206,7 +208,7 @@ public class CommandInputManager
       buffer.commit();
 
       for (int i = 0; i < hasReceivedInputListeners.size(); i++)
-         hasReceivedInputListeners.get(i).hasReceivedInput();
+         hasReceivedInputListeners.get(i).hasReceivedInput((Class<? extends Command<?, ?>>) command.getClass());
    }
 
    /**
@@ -392,6 +394,6 @@ public class CommandInputManager
     */
    public static interface HasReceivedInputListener
    {
-      public void hasReceivedInput();
+      public void hasReceivedInput(Class<? extends Command<?,?>> commandClass);
    }
 }

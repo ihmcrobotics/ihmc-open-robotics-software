@@ -6,7 +6,11 @@ import us.ihmc.multicastLogDataProtocol.control.LogHandshake;
 
 public interface YoVariablesUpdatedListener
 {
-   boolean populateRegistry();
+   /**
+    * 
+    * @return true if received variables are updated
+    */
+   boolean updateYoVariables();
 
    boolean changesVariables();
 

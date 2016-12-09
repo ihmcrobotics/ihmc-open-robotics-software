@@ -138,4 +138,12 @@ public class BooleanYoVariable extends YoVariable<BooleanYoVariable>
    {
       return set(value.getBooleanValue(), notifyListeners);
    }
+
+   @Override
+   public boolean isZero()
+   {
+      return !getBooleanValue();
+   }
+   
+   
 }

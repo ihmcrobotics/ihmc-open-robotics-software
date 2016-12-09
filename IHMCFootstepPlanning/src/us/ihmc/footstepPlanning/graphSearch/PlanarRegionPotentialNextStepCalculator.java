@@ -315,7 +315,7 @@ public class PlanarRegionPotentialNextStepCalculator
       }
 
       // Add a side step.
-      double xStep = 0.0;
+      double xStep = 1.001 * Math.max(0.0, parameters.getMinimumStepLength());
       double yStep = parameters.getIdealFootstepWidth();
       Vector3d nextStepVector = new Vector3d(xStep, currentSide.negateIfLeftSide(yStep), 0.0);
       double nextStepYaw = idealStepYaw;
@@ -556,6 +556,13 @@ public class PlanarRegionPotentialNextStepCalculator
             notifyListenerNodeForExpansionWasRejected(nodeToExpand, BipedalFootstepPlannerNodeRejectionReason.STEP_NOT_WIDE_ENOUGH);
             return false;
          }
+         
+         double minimumStepLength = parameters.getMinimumStepLength();
+         if (stepFromParentInSoleFrame.getX() < minimumStepLength)
+         {
+            notifyListenerNodeForExpansionWasRejected(nodeToExpand, BipedalFootstepPlannerNodeRejectionReason.STEP_NOT_LONG_ENOUGH);
+            return false;
+         }
 
          Vector3d stepFromParentInWorld = new Vector3d(stepFromParentInSoleFrame);
 
@@ -600,7 +607,10 @@ public class PlanarRegionPotentialNextStepCalculator
 
       BipedalFootstepPlannerNode grandParentNode = parentNode.getParentNode();
       if (grandParentNode == null)
+      {
+         //TODO: How to check in place step when first step?
          return true;
+      }
 
       if (grandParentNode.epsilonEquals(nodeToExpand, 1e-1))
       {
@@ -620,7 +630,7 @@ public class PlanarRegionPotentialNextStepCalculator
 
          if (nodeToExpandSnapTransform == null)
          {
-            //            notifyListenerNodeForExpansionWasRejected(nodeToExpand, BipedalFootstepPlannerNodeRejectionReason.BAD_SNAP_OR_WIGGLE);
+//            notifyListenerNodeForExpansionWasRejected(nodeToExpand, BipedalFootstepPlannerNodeRejectionReason.BAD_SNAP_OR_WIGGLE);
             return false;
          }
 
