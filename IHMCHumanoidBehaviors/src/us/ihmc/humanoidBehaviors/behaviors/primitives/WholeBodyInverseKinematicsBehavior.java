@@ -3,6 +3,7 @@ package us.ihmc.humanoidBehaviors.behaviors.primitives;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
@@ -25,6 +26,7 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
+import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -44,8 +46,10 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
    private final BooleanYoVariable hasSentMessageToController;
 
    private final SideDependentList<DenseMatrix64F> handSelectionMatrices = new SideDependentList<>(CommonOps.identity(6), CommonOps.identity(6));
+   private final DenseMatrix64F chestSelectionMatrix = initializeChestSelctionMatrix();
    private final SideDependentList<YoFramePoint> yoDesiredHandPositions = new SideDependentList<>();
    private final SideDependentList<YoFrameQuaternion> yoDesiredHandOrientations = new SideDependentList<>();
+   private final YoFrameQuaternion yoDesiredChestOrientation;
    private final DoubleYoVariable trajectoryTime;
 
    private final KinematicsToolboxOutputConverter outputConverter;
@@ -94,6 +98,8 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
          yoDesiredHandOrientations.put(robotSide, desiredHandOrientation);
       }
 
+      yoDesiredChestOrientation = new YoFrameQuaternion(behaviorName + "DesiredChest", worldFrame, registry);
+
       outputConverter = new KinematicsToolboxOutputConverter(fullRobotModelFactory);
 
       attachNetworkListeningQueue(kinematicsToolboxOutputQueue, KinematicsToolboxOutputStatus.class);
@@ -101,9 +107,20 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
       clear();
    }
 
+   private DenseMatrix64F initializeChestSelctionMatrix()
+   {
+      DenseMatrix64F selectionMatrix = new DenseMatrix64F(3, 6);
+      selectionMatrix.set(0, 0, 1.0);
+      selectionMatrix.set(1, 1, 1.0);
+      selectionMatrix.set(2, 2, 1.0);
+      return selectionMatrix;
+   }
+
    public void clear()
    {
       currentSolutionQuality.set(Double.POSITIVE_INFINITY);
+
+      yoDesiredChestOrientation.setToNaN();
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -140,29 +157,54 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
 
    public void setHandLinearControlOnly(RobotSide robotSide)
    {
-      boolean[] controlledPositionAxes = new boolean[] {true, true, true};
-      boolean[] controlledOrientationAxes = new boolean[] {false, false, false};
+      double[] controlledPositionAxes = new double[] {1.0, 1.0, 1.0};
+      double[] controlledOrientationAxes = new double[] {0.0, 0.0, 0.0};
       setHandControlledAxes(robotSide, controlledPositionAxes, controlledOrientationAxes);
    }
 
    public void setHandLinearControlAndYawPitchOnly(RobotSide robotSide)
    {
-      boolean[] controlledPositionAxes = new boolean[] {true, true, true};
-      boolean[] controlledOrientationAxes = new boolean[] {false, true, true};
+      double[] controlledPositionAxes = new double[] {1.0, 1.0, 1.0};
+      double[] controlledOrientationAxes = new double[] {0.0, 1.0, 1.0};
       setHandControlledAxes(robotSide, controlledPositionAxes, controlledOrientationAxes);
    }
 
-   public void setHandControlledAxes(RobotSide robotSide, boolean[] controlledPositionAxes, boolean[] controlledOrientationAxes)
+   public void setHandControlledAxes(RobotSide robotSide, double[] controlledPositionAxes, double[] controlledOrientationAxes)
    {
       DenseMatrix64F selectionMatrix = handSelectionMatrices.get(robotSide);
+      double[] data = ArrayUtils.addAll(controlledOrientationAxes, controlledPositionAxes);
+      organizeDataInSelectionMatrix(selectionMatrix, data);
+   }
+
+   private void organizeDataInSelectionMatrix(DenseMatrix64F selectionMatrix, double[] data)
+   {
       selectionMatrix.reshape(6, 6);
       selectionMatrix.zero();
 
-      for (int i = 0; i < 3; i++)
+      for (int i = 0; i < 6; i++)
       {
-         selectionMatrix.set(i, i, controlledOrientationAxes[i]);
-         selectionMatrix.set(i + 3, i, controlledPositionAxes[i]);
+         selectionMatrix.set(i, i, data[i]);
       }
+      MatrixTools.removeZeroRows(selectionMatrix, 1.0e-5);
+   }
+
+   public void setDesiredChestOrientation(FrameOrientation desiredChestOrientation)
+   {
+      yoDesiredChestOrientation.setAndMatchFrame(desiredChestOrientation);
+   }
+
+   public void setChestAngularControl(boolean roll, boolean pitch, boolean yaw )
+   {
+      double[] controlledPositionAxes = new double[] {0.0, 0.0, 0.0};
+      double[] controlledOrientationAxes = new double[] {(roll)? 1.0 : 0.0, (pitch)? 1.0 : 0.0, (yaw)? 1.0 : 0.0 };
+      setChestControlledAxes(controlledPositionAxes, controlledOrientationAxes);
+   }
+
+   public void setChestControlledAxes(double[] controlledPositionAxes, double[] controlledOrientationAxes)
+   {
+      DenseMatrix64F selectionMatrix = chestSelectionMatrix;
+      double[] data = ArrayUtils.addAll(controlledOrientationAxes, controlledPositionAxes);
+      organizeDataInSelectionMatrix(selectionMatrix, data);
    }
 
    public double getSolutionQuality()
@@ -205,13 +247,18 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
          }
       }
 
-      ReferenceFrame chestFrame = fullRobotModel.getChest().getBodyFixedFrame();
-      Quat4d desiredChestOrientation = new Quat4d();
-      FrameOrientation desiredChestFrame = new FrameOrientation(chestFrame);
-      desiredChestFrame.changeFrame(worldFrame);
-      desiredChestFrame.getQuaternion(desiredChestOrientation);
-      chestTrajectoryMessage = new ChestTrajectoryMessage(0.0, desiredChestOrientation);
-
+      if (yoDesiredChestOrientation.containsNaN())
+      {
+         chestTrajectoryMessage = null;
+      }
+      else
+      {
+         YoFrameQuaternion yoDesiredChestQuaternion = yoDesiredChestOrientation;
+         Quat4d desiredChestOrientation = new Quat4d();
+         yoDesiredChestQuaternion.get(desiredChestOrientation);
+         chestTrajectoryMessage = new ChestTrajectoryMessage(0.0, desiredChestOrientation);
+      }
+      
       ReferenceFrame pelvisFrame = fullRobotModel.getPelvis().getBodyFixedFrame();
       Quat4d desiredPelvisOrientation = new Quat4d();
       FrameOrientation desiredPelvisFrame = new FrameOrientation(pelvisFrame);
@@ -227,7 +274,7 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
       {
          for (RobotSide robotSide : RobotSide.values)
          {
-            if(handTrajectoryMessage.get(robotSide) != null)
+            if (handTrajectoryMessage.get(robotSide) != null)
             {
                handTrajectoryMessage.get(robotSide).setSelectionMatrix(handSelectionMatrices.get(robotSide));
                handTrajectoryMessage.get(robotSide).setDestination(PacketDestination.KINEMATICS_TOOLBOX_MODULE);
@@ -237,6 +284,7 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
 
          if (chestTrajectoryMessage != null)
          {
+            chestTrajectoryMessage.setSelectionMatrix(chestSelectionMatrix);
             chestTrajectoryMessage.setDestination(PacketDestination.KINEMATICS_TOOLBOX_MODULE);
             sendPacket(chestTrajectoryMessage);
          }
@@ -317,12 +365,12 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
       solutionSentToController = null;
       chestTrajectoryMessage = null;
       pelvisOrientationTrajectoryMessage = null;
-      
+
       for (RobotSide robotSide : RobotSide.values)
       {
          handTrajectoryMessage.put(robotSide, null);
       }
-      
+
       deactivateKinematicsToolboxModule();
    }
 
@@ -332,7 +380,6 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
       message.setDestination(PacketDestination.KINEMATICS_TOOLBOX_MODULE);
       sendPacket(message);
    }
-
 
    @Override
    public void onBehaviorAborted()
@@ -348,6 +395,5 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
    public void onBehaviorResumed()
    {
    }
-
 
 }
