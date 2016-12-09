@@ -47,7 +47,7 @@ public abstract class ToolboxModule
 {
    protected static final boolean DEBUG = false;
    protected static final double YO_VARIABLE_SERVER_DT = 0.01;
-   protected static final int UPDATE_PERIOD_MILLISECONDS = 1;
+   protected static final int DEFAULT_UPDATE_PERIOD_MILLISECONDS = 1;
 
    protected final String name = getClass().getSimpleName();
    protected final YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
@@ -68,6 +68,7 @@ public abstract class ToolboxModule
    protected ScheduledFuture<?> toolboxTaskScheduled = null;
    protected ScheduledFuture<?> yoVariableServerScheduled = null;
    protected Runnable toolboxRunnable = null;
+   protected final int updatePeriodMilliseconds = 1;
 
    protected final DoubleYoVariable timeWithoutInputsBeforeGoingToSleep = new DoubleYoVariable("timeWithoutInputsBeforeGoingToSleep", registry);
    protected final DoubleYoVariable timeOfLastInput = new DoubleYoVariable("timeOfLastInput", registry);
@@ -78,6 +79,12 @@ public abstract class ToolboxModule
 
    public ToolboxModule(FullHumanoidRobotModel fullRobotModelToLog, LogModelProvider modelProvider, boolean startYoVariableServer,
          PacketDestination toolboxDestination, NetworkPorts toolboxPort) throws IOException
+   {
+      this(fullRobotModelToLog, modelProvider, startYoVariableServer, toolboxDestination, toolboxPort, DEFAULT_UPDATE_PERIOD_MILLISECONDS);
+   }
+
+   public ToolboxModule(FullHumanoidRobotModel fullRobotModelToLog, LogModelProvider modelProvider, boolean startYoVariableServer,
+         PacketDestination toolboxDestination, NetworkPorts toolboxPort, int updatePeriodMilliseconds) throws IOException
    {
       this.modelProvider = modelProvider;
       this.startYoVariableServer = startYoVariableServer;
@@ -128,7 +135,7 @@ public abstract class ToolboxModule
       yoVariableServer.setMainRegistry(registry, fullRobotModel, yoGraphicsListRegistry);
       startYoVariableServerOnAThread(yoVariableServer);
 
-      yoVariableServerScheduled = executorService.scheduleAtFixedRate(createYoVariableServerRunnable(yoVariableServer), 0, UPDATE_PERIOD_MILLISECONDS,
+      yoVariableServerScheduled = executorService.scheduleAtFixedRate(createYoVariableServerRunnable(yoVariableServer), 0, updatePeriodMilliseconds,
             TimeUnit.MILLISECONDS);
    }
 
@@ -156,7 +163,7 @@ public abstract class ToolboxModule
             if (Thread.interrupted())
                return;
 
-            serverTime += TimeTools.milliSecondsToSeconds(UPDATE_PERIOD_MILLISECONDS);
+            serverTime += TimeTools.milliSecondsToSeconds(updatePeriodMilliseconds);
             yoVariableServer.update(TimeTools.secondsToNanoSeconds(serverTime));
          }
       };
@@ -268,7 +275,7 @@ public abstract class ToolboxModule
          PrintTools.debug(this, "Waking up");
 
       createToolboxRunnable();
-      toolboxTaskScheduled = executorService.scheduleAtFixedRate(toolboxRunnable, 0, UPDATE_PERIOD_MILLISECONDS, TimeUnit.MILLISECONDS);
+      toolboxTaskScheduled = executorService.scheduleAtFixedRate(toolboxRunnable, 0, updatePeriodMilliseconds, TimeUnit.MILLISECONDS);
       reinitialize();
       activeMessageSource.set(packetDestination);
       getToolboxController().setPacketDestination(packetDestination);
@@ -345,7 +352,7 @@ public abstract class ToolboxModule
             {
                getToolboxController().update();
                controllerNetworkSubscriber.run();
-               yoTime.add(TimeTools.milliSecondsToSeconds(UPDATE_PERIOD_MILLISECONDS));
+               yoTime.add(TimeTools.milliSecondsToSeconds(updatePeriodMilliseconds));
 
                if (receivedInput.getAndSet(false))
                   timeOfLastInput.set(yoTime.getDoubleValue());
