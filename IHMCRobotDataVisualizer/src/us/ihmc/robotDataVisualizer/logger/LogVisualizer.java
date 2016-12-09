@@ -111,7 +111,7 @@ public class LogVisualizer
       handshakeStream.readFully(handshakeData);
       handshakeStream.close();
 
-      YoVariableHandshakeParser parser = new YoVariableHandshakeParser("logged", true);
+      YoVariableHandshakeParser parser = new YoVariableHandshakeParser("logged");
       parser.parseFrom(handshakeData);
 
       GeneralizedSDFRobotModel generalizedSDFRobotModel = null;

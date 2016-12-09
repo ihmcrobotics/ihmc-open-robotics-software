@@ -2,12 +2,12 @@ package us.ihmc.atlas.physics;
 
 import javax.vecmath.Vector3d;
 
-import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
-import us.ihmc.atlas.parameters.AtlasPhysicalProperties;
+import us.ihmc.atlas.AtlasJointMap;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.TransformTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationconstructionset.FloatingJoint;
+import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.Robot;
@@ -16,7 +16,6 @@ import us.ihmc.simulationconstructionset.physics.CollisionShapeDescription;
 import us.ihmc.simulationconstructionset.physics.CollisionShapeFactory;
 import us.ihmc.simulationconstructionset.physics.ScsCollisionConfigure;
 import us.ihmc.simulationconstructionset.physics.ScsCollisionDetector;
-import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
 /**
  * @author Peter Abeles
@@ -29,10 +28,10 @@ public class AtlasPhysicsEngineConfiguration implements ScsCollisionConfigure
    private static final int GROUP_GROUND = 0xFFFFFFFF;
    private static final int GROUP_FEET = 0xFFFFFFFF;
 
-   private DRCRobotJointMap jointMap;
+   private AtlasJointMap jointMap;
    private FloatingRootJointRobot sdfRobot;
 
-   public AtlasPhysicsEngineConfiguration(DRCRobotJointMap jointMap, FloatingRootJointRobot sdfRobot)
+   public AtlasPhysicsEngineConfiguration(AtlasJointMap jointMap, FloatingRootJointRobot sdfRobot)
    {
       this.jointMap = jointMap;
       this.sdfRobot = sdfRobot;
@@ -51,10 +50,10 @@ public class AtlasPhysicsEngineConfiguration implements ScsCollisionConfigure
       Link rightLink = rightFootJoint.getLink();
 
       CollisionShapeFactory factoryShape = collisionDetector.getShapeFactory();
-      CollisionShapeDescription collisionFoot = factoryShape.createBox(AtlasPhysicalProperties.actualFootLength / 2, AtlasPhysicalProperties.actualFootWidth / 2, 0.05);
+      CollisionShapeDescription collisionFoot = factoryShape.createBox(jointMap.getPhysicalProperties().getActualFootLength() / 2, jointMap.getPhysicalProperties().getActualFootWidth() / 2, 0.05);
 
       //      public static final double ankleHeight = 0.084;
-      RigidBodyTransform ankleToSole = TransformTools.createTranslationTransform(new Vector3d(0.0, 0.0, 0.084));//AtlasPhysicalProperties.ankle_to_sole_frame_tranform;
+      RigidBodyTransform ankleToSole = TransformTools.createTranslationTransform(new Vector3d(0.0, 0.0, 0.084));//jointMap.getPhysicalProperties().getAnkle_to_sole_frame_tranform();
       RigidBodyTransform soleToAnkle = new RigidBodyTransform();
       ankleToSole.invert(soleToAnkle);
 

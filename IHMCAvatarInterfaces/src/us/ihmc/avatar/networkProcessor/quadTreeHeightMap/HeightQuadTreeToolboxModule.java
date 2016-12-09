@@ -2,7 +2,7 @@ package us.ihmc.avatar.networkProcessor.quadTreeHeightMap;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -31,7 +31,7 @@ public class HeightQuadTreeToolboxModule extends ToolboxModule
 
    public HeightQuadTreeToolboxModule(FullHumanoidRobotModel desiredFullRobotModel, LogModelProvider modelProvider) throws IOException
    {
-      super(desiredFullRobotModel, modelProvider, false, PACKET_DESTINATION, NETWORK_PORT);
+      super(desiredFullRobotModel, modelProvider, false, PACKET_DESTINATION, NETWORK_PORT, 50);
 
       controller = new HeightQuadTreeToolboxController(fullRobotModel, packetCommunicator, commandInputManager, statusOutputManager, registry);
       setTimeWithoutInputsBeforeGoingToSleep(3.0);
@@ -57,16 +57,18 @@ public class HeightQuadTreeToolboxModule extends ToolboxModule
    @Override
    public List<Class<? extends StatusPacket<?>>> createListOfSupportedStatus()
    {
-      List<Class<? extends StatusPacket<?>>> status = new ArrayList<>();
-      status.add(HeightQuadTreeMessage.class);
-      return status;
+      return Collections.singletonList(HeightQuadTreeMessage.class);
+   }
+
+   @Override
+   public Set<Class<? extends Command<?, ?>>> silentCommands()
+   {
+      return Collections.singleton(LidarScanCommand.class);
    }
 
    @Override
    public Set<Class<? extends Packet<?>>> filterExceptions()
    {
-      Set<Class<? extends Packet<?>>> filterExceptions = new HashSet<>();
-      filterExceptions.add(LidarScanMessage.class);
-      return filterExceptions;
+      return Collections.singleton(LidarScanMessage.class);
    }
 }

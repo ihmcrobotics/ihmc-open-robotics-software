@@ -11,6 +11,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import us.ihmc.concurrent.Builder;
 import us.ihmc.concurrent.ConcurrentRingBuffer;
 import us.ihmc.multicastLogDataProtocol.control.LogHandshake;
+import us.ihmc.multicastLogDataProtocol.control.SummaryProvider;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.robotDataLogger.YoVariableHandShakeBuilder;
 
@@ -48,13 +49,13 @@ public class MultiClientStreamingDataTCPServer extends Thread
       }
    }
 
-   public MultiClientStreamingDataTCPServer(int port, YoVariableHandShakeBuilder handshakeBuilder, LogModelProvider logModelProvider, int dataSize, int bufferLength)
+   public MultiClientStreamingDataTCPServer(int port, YoVariableHandShakeBuilder handshakeBuilder, LogModelProvider logModelProvider, SummaryProvider summaryProvider, int dataSize, int bufferLength)
          throws IOException
    {
-      this(port, createHandshakeBuffer(handshakeBuilder, logModelProvider), dataSize, bufferLength);
+      this(port, createHandshakeBuffer(handshakeBuilder, logModelProvider, summaryProvider), dataSize, bufferLength);
    }
 
-   private static ByteBuffer createHandshakeBuffer(YoVariableHandShakeBuilder handshakeBuilder, LogModelProvider logModelProvider)
+   private static ByteBuffer createHandshakeBuffer(YoVariableHandShakeBuilder handshakeBuilder, LogModelProvider logModelProvider ,SummaryProvider summaryProvider)
    {
       LogHandshake handshake = new LogHandshake();
 
@@ -67,6 +68,13 @@ public class MultiClientStreamingDataTCPServer extends Thread
          handshake.model = logModelProvider.getModel();
          handshake.resourceDirectories = logModelProvider.getResourceDirectories();
          handshake.resourceZip = logModelProvider.getResourceZip();
+      }
+      
+      if(summaryProvider != null)
+      {
+         handshake.createSummary = summaryProvider.isSummarize();
+         handshake.summaryTriggerVariable = summaryProvider.getSummaryTriggerVariable();
+         handshake.summarizedVariables = summaryProvider.getSummarizedVariables();
       }
 
       return handshake.toBuffer();

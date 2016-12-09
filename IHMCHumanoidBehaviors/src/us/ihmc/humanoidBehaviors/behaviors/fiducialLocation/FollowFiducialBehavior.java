@@ -128,9 +128,7 @@ public class FollowFiducialBehavior extends AbstractBehavior
 
    private FootstepPlanner createFootstepPlanner()
    {
-      PlanarRegionBipedalFootstepPlanner planner = new PlanarRegionBipedalFootstepPlanner(registry);
-      BipedalFootstepPlannerParameters parameters = planner.getParameters();
-
+      BipedalFootstepPlannerParameters parameters = new BipedalFootstepPlannerParameters(registry);
       parameters.setMaximumStepReach(0.4);
       parameters.setMaximumStepZ(0.25);
       parameters.setMaximumStepXWhenForwardAndDown(0.25);
@@ -143,6 +141,8 @@ public class FollowFiducialBehavior extends AbstractBehavior
       double idealFootstepLength = 0.4;
       double idealFootstepWidth = 0.25;
       parameters.setIdealFootstep(idealFootstepLength, idealFootstepWidth);
+
+      PlanarRegionBipedalFootstepPlanner planner = new PlanarRegionBipedalFootstepPlanner(parameters, registry);
 
       SideDependentList<ConvexPolygon2d> footPolygonsInSoleFrame = createDefaultFootPolygons();
       planner.setFeetPolygons(footPolygonsInSoleFrame);

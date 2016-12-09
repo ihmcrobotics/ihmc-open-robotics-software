@@ -1,8 +1,11 @@
 package us.ihmc.robotics.robotDescription;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.vecmath.Vector3d;
+
+import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 public class JointDescription implements RobotDescriptionNode
 {
@@ -14,10 +17,12 @@ public class JointDescription implements RobotDescriptionNode
 
    private LinkDescription link;
 
+   // Lists of kinematic points on the robot. When adding types of kinematic points, make sure to update the getAllKinematicPoints(List<KinematicPointDescription>) function
    private final ArrayList<KinematicPointDescription> kinematicPoints = new ArrayList<>();
    private final ArrayList<ExternalForcePointDescription> externalForcePoints = new ArrayList<>();
    private final ArrayList<GroundContactPointDescription> groundContactPoints = new ArrayList<>();
 
+   // Lists of sensors. When adding sensors, make sure to update the getSensors(List<SensorDescription>) function.
    private final ArrayList<JointWrenchSensorDescription> wrenchSensors = new ArrayList<>();
    private final ArrayList<CameraSensorDescription> cameraSensors = new ArrayList<>();
    private final ArrayList<IMUSensorDescription> imuSensors = new ArrayList<>();
@@ -179,5 +184,87 @@ public class JointDescription implements RobotDescriptionNode
    public boolean isDynamic()
    {
       return isDynamic;
+   }
+   
+   public void getSensors(List<SensorDescription> sensors)
+   {
+      sensors.addAll(wrenchSensors);
+      sensors.addAll(cameraSensors);
+      sensors.addAll(imuSensors);
+      sensors.addAll(lidarSensors);
+      sensors.addAll(forceSensors);
+   }
+   
+   public void getAllKinematicPoints(List<KinematicPointDescription> allKinematicPoints)
+   {
+      allKinematicPoints.addAll(this.kinematicPoints);
+      allKinematicPoints.addAll(this.externalForcePoints);
+      allKinematicPoints.addAll(this.groundContactPoints);
+   }
+   
+   
+   public static void scaleChildrenJoint(ArrayList<JointDescription> childrenJoints, double factor, double massScalePower, List<String>  ignoreInertiaScaleJointList)
+   {
+      Vector3d offsetFromParentJoint = new Vector3d();
+      for(int i = 0; i < childrenJoints.size(); i++)
+      {
+         JointDescription description = childrenJoints.get(i);
+
+         description.getOffsetFromParentJoint(offsetFromParentJoint);
+         offsetFromParentJoint.scale(factor);
+         description.setOffsetFromParentJoint(offsetFromParentJoint);
+         
+         description.scale(factor, massScalePower, ignoreInertiaScaleJointList);
+      }
+
+   }
+   
+
+   @Override
+   public void scale(double factor, double massScalePower, List<String> ignoreInertiaScaleJointList)
+   {
+      scaleSensorsOffsets(factor);
+      scaleAllKinematicsPointOffsets(factor);
+      
+      boolean scaleInertia = true;
+      if(ignoreInertiaScaleJointList.contains(getName()))
+      {
+         scaleInertia = false;
+      }
+      link.scale(factor, massScalePower, scaleInertia);
+      JointDescription.scaleChildrenJoint(getChildrenJoints(), factor, massScalePower, ignoreInertiaScaleJointList);
+   }
+
+   private void scaleSensorsOffsets(double factor)
+   {
+      ArrayList<SensorDescription> sensors = new ArrayList<>();
+      getSensors(sensors);
+      
+      for(int i = 0; i < sensors.size(); i++)
+      {
+         SensorDescription sensor = sensors.get(i);
+         RigidBodyTransform transformToJoint = sensor.getTransformToJoint();
+         Vector3d translation = new Vector3d();
+         transformToJoint.getTranslation(translation);
+         translation.scale(factor);
+         transformToJoint.setTranslation(translation);
+         sensor.setTransformToJoint(transformToJoint);
+         
+      }
+   }
+   
+   private void scaleAllKinematicsPointOffsets(double factor)
+   {
+      ArrayList<KinematicPointDescription> allKinematicPoints = new ArrayList<>();
+      getAllKinematicPoints(allKinematicPoints);
+      for(int i = 0; i < allKinematicPoints.size(); i++)
+      {
+         KinematicPointDescription kinematicPoint = allKinematicPoints.get(i);
+         
+         Vector3d offset = kinematicPoint.getOffsetFromJoint();
+         offset.scale(factor);
+         kinematicPoint.setOffsetFromJoint(offset);
+      }
+            
    }
 }

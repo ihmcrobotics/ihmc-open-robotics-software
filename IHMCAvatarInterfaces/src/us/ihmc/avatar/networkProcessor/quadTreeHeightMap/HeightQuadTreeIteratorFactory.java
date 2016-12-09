@@ -3,20 +3,17 @@ package us.ihmc.avatar.networkProcessor.quadTreeHeightMap;
 import java.util.ArrayDeque;
 import java.util.Iterator;
 
-import us.ihmc.humanoidRobotics.communication.packets.heightQuadTree.HeightQuadTreeMessage;
-import us.ihmc.humanoidRobotics.communication.packets.heightQuadTree.HeightQuadTreeNodeMessage;
-
 public class HeightQuadTreeIteratorFactory
 {
    
-   public static Iterable<HeightQuadTreeNodeMessage> iterable(HeightQuadTreeMessage heightQuadTree)
+   public static Iterable<HeightQuadTreeNode> iterable(HeightQuadTree heightQuadTree)
    {
-      return new BaseIterable(heightQuadTree.root, null);
+      return new BaseIterable(heightQuadTree.getRoot(), null);
    }
 
-   public static Iterable<HeightQuadTreeNodeMessage> leafIterable(HeightQuadTreeMessage heightQuadTree)
+   public static Iterable<HeightQuadTreeNode> leafIterable(HeightQuadTree heightQuadTree)
    {
-      return new BaseIterable(heightQuadTree.root, leafSelectionRule());
+      return new BaseIterable(heightQuadTree.getRoot(), leafSelectionRule());
    }
 
    private static IteratorSelectionRule leafSelectionRule()
@@ -24,38 +21,38 @@ public class HeightQuadTreeIteratorFactory
       return new IteratorSelectionRule()
       {
          @Override
-         public boolean test(HeightQuadTreeNodeMessage node)
+         public boolean test(HeightQuadTreeNode node)
          {
-            return node.children == null;
+            return !node.hasChildrenArray();
          }
       };
    }
 
-   private static class BaseIterable implements Iterable<HeightQuadTreeNodeMessage>
+   private static class BaseIterable implements Iterable<HeightQuadTreeNode>
    {
-      private final HeightQuadTreeNodeMessage root;
+      private final HeightQuadTreeNode root;
       private final IteratorSelectionRule rule;
 
-      public BaseIterable(HeightQuadTreeNodeMessage root, IteratorSelectionRule rule)
+      public BaseIterable(HeightQuadTreeNode root, IteratorSelectionRule rule)
       {
          this.root = root;
          this.rule = rule;
       }
 
       @Override
-      public Iterator<HeightQuadTreeNodeMessage> iterator()
+      public Iterator<HeightQuadTreeNode> iterator()
       {
          return new BaseIterator(root, rule);
       }
    }
 
-   private static class BaseIterator implements Iterator<HeightQuadTreeNodeMessage>
+   private static class BaseIterator implements Iterator<HeightQuadTreeNode>
    {
       private final IteratorSelectionRule rule;
       /// Internal recursion stack.
-      private final ArrayDeque<HeightQuadTreeNodeMessage> stack = new ArrayDeque<>();
+      private final ArrayDeque<HeightQuadTreeNode> stack = new ArrayDeque<>();
 
-      public BaseIterator(HeightQuadTreeNodeMessage root, IteratorSelectionRule rule)
+      public BaseIterator(HeightQuadTreeNode root, IteratorSelectionRule rule)
       {
          this.rule = rule;
 
@@ -68,7 +65,7 @@ public class HeightQuadTreeIteratorFactory
          }
       }
 
-      private HeightQuadTreeNodeMessage next = null;
+      private HeightQuadTreeNode next = null;
       private boolean hasNextHasBeenCalled = false;
 
       @Override
@@ -89,7 +86,7 @@ public class HeightQuadTreeIteratorFactory
       }
 
       @Override
-      public HeightQuadTreeNodeMessage next()
+      public HeightQuadTreeNode next()
       {
          if (!hasNextHasBeenCalled)
          {
@@ -98,12 +95,12 @@ public class HeightQuadTreeIteratorFactory
          }
 
          hasNextHasBeenCalled = false;
-         HeightQuadTreeNodeMessage ret = next;
+         HeightQuadTreeNode ret = next;
          next = null;
          return ret;
       }
 
-      private HeightQuadTreeNodeMessage searchNextNodePassingRule()
+      private HeightQuadTreeNode searchNextNodePassingRule()
       {
          if (stack.isEmpty())
             return null;
@@ -113,26 +110,26 @@ public class HeightQuadTreeIteratorFactory
 
          while (!stack.isEmpty())
          {
-            HeightQuadTreeNodeMessage currentNode = searchNextNode();
+            HeightQuadTreeNode currentNode = searchNextNode();
             if (currentNode == null || rule.test(currentNode))
                return currentNode;
          }
          return null;
       }
 
-      private HeightQuadTreeNodeMessage searchNextNode()
+      private HeightQuadTreeNode searchNextNode()
       {
          if (stack.isEmpty())
             return null;
 
-         HeightQuadTreeNodeMessage currentNode = stack.poll();
+         HeightQuadTreeNode currentNode = stack.poll();
 
-         if (currentNode.children != null)
+         if (currentNode.hasChildrenArray())
          {
             // push on stack in reverse order
             for (int i = 3; i >= 0; i--)
             {
-               HeightQuadTreeNodeMessage child = currentNode.children[i];
+               HeightQuadTreeNode child = currentNode.getChild(i);
                if (child != null)
                   stack.add(child);
             }
@@ -144,6 +141,6 @@ public class HeightQuadTreeIteratorFactory
 
    public static interface IteratorSelectionRule
    {
-      public boolean test(HeightQuadTreeNodeMessage node);
+      public boolean test(HeightQuadTreeNode node);
    }
 }

@@ -182,8 +182,7 @@ public class AnytimeFootstepPlannerOnRoughTerrainTest implements PlanningTest
    public SimplePlanarRegionBipedalAnytimeFootstepPlanner getPlanner()
    {
       YoVariableRegistry registry = new YoVariableRegistry("test");
-      SimplePlanarRegionBipedalAnytimeFootstepPlanner planner = new SimplePlanarRegionBipedalAnytimeFootstepPlanner(registry);
-      BipedalFootstepPlannerParameters parameters = planner.getParameters();
+      BipedalFootstepPlannerParameters parameters = new BipedalFootstepPlannerParameters(registry);
 
       parameters.setMaximumStepReach(0.45);
       parameters.setMaximumStepZ(0.25);
@@ -198,6 +197,7 @@ public class AnytimeFootstepPlannerOnRoughTerrainTest implements PlanningTest
       double idealFootstepWidth = 0.2;
       parameters.setIdealFootstep(idealFootstepLength, idealFootstepWidth);
 
+      SimplePlanarRegionBipedalAnytimeFootstepPlanner planner = new SimplePlanarRegionBipedalAnytimeFootstepPlanner(parameters, registry);
       SideDependentList<ConvexPolygon2d> footPolygonsInSoleFrame = PlanningTestTools.createDefaultFootPolygons();
       planner.setFeetPolygons(footPolygonsInSoleFrame);
 

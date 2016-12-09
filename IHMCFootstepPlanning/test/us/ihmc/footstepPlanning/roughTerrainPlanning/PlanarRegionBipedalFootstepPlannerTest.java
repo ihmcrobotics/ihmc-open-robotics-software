@@ -92,8 +92,7 @@ public class PlanarRegionBipedalFootstepPlannerTest extends FootstepPlannerOnRou
    public FootstepPlanner getPlanner()
    {
       YoVariableRegistry registry = new YoVariableRegistry("test");
-      PlanarRegionBipedalFootstepPlanner planner = new PlanarRegionBipedalFootstepPlanner(registry);
-      BipedalFootstepPlannerParameters parameters = planner.getParameters();
+      BipedalFootstepPlannerParameters parameters = new BipedalFootstepPlannerParameters(registry);
 
       parameters.setMaximumStepReach(0.55); //0.45);
       parameters.setMaximumStepZ(0.25);
@@ -111,6 +110,8 @@ public class PlanarRegionBipedalFootstepPlannerTest extends FootstepPlannerOnRou
       double idealFootstepLength = 0.3;
       double idealFootstepWidth = 0.2;
       parameters.setIdealFootstep(idealFootstepLength, idealFootstepWidth);
+
+      PlanarRegionBipedalFootstepPlanner planner = new PlanarRegionBipedalFootstepPlanner(parameters, registry);
 
       SideDependentList<ConvexPolygon2d> footPolygonsInSoleFrame = PlanningTestTools.createDefaultFootPolygons();
       planner.setFeetPolygons(footPolygonsInSoleFrame);

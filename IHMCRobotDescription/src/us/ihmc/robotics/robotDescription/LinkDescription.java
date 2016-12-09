@@ -7,6 +7,7 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
 import org.ejml.data.DenseMatrix64F;
+import org.ejml.ops.CommonOps;
 
 import us.ihmc.graphics3DDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphics3DDescription.appearance.YoAppearance;
@@ -354,6 +355,36 @@ public class LinkDescription
    public void computePrincipalMomentsOfInertia()
    {
       InertiaTools.computePrincipalMomentsOfInertia(momentOfInertia, principalAxesRotation, principalMomentsOfInertia);
+   }
+
+   public void scale(double factor, double massScalePower, boolean scaleInertia)
+   {
+      // Center of mass offset scales with the scaling factor
+      centerOfMassOffset.scale(factor);
+      
+      // Mass scales with factor^massScalePower. massScalePower is 3 when considering constant density
+      
+      if(scaleInertia)
+      {
+         mass = Math.pow(factor, massScalePower) * mass;
+         // The components of the inertia matrix are defined with int(r^2 dm). So they scale factor ^ (2 + massScalePower)
+         double inertiaScale = Math.pow(factor, massScalePower + 2);
+         CommonOps.scale(inertiaScale, momentOfInertia);
+         computePrincipalMomentsOfInertia();
+      }
+      
+      
+      if(linkGraphics != null)
+      {
+         linkGraphics.preScale(factor);
+      }
+      if(collisionMesh != null)
+      {
+         collisionMesh.scale(factor);
+      }
+      
+      
+      
    }
 
 }
