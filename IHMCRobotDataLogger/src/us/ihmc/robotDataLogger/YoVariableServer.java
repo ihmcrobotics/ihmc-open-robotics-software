@@ -16,6 +16,7 @@ import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.multicastLogDataProtocol.LogUtils;
 import us.ihmc.multicastLogDataProtocol.broadcast.LogSessionBroadcaster;
 import us.ihmc.multicastLogDataProtocol.control.LogControlServer;
+import us.ihmc.multicastLogDataProtocol.control.SummaryProvider;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.robotDataLogger.jointState.JointHolder;
 import us.ihmc.robotDataLogger.logger.LogSettings;
@@ -36,7 +37,7 @@ public class YoVariableServer implements RobotVisualizer, TickAndUpdatable
    private static final int CHANGED_BUFFER_CAPACITY = 128;
    
    private final double dt;
-   private final Class<?> mainClazz;
+   private final String mainClazz;
    private final InetAddress bindAddress;   
    private final LogModelProvider logModelProvider;
    private final LogSettings logSettings;
@@ -73,7 +74,14 @@ public class YoVariableServer implements RobotVisualizer, TickAndUpdatable
    
    private boolean sendKeepAlive = false;
    
+   private final SummaryProvider summaryProvider = new SummaryProvider();
+   
    public YoVariableServer(Class<?> mainClazz, PeriodicThreadScheduler scheduler, LogModelProvider logModelProvider, LogSettings logSettings, double dt)
+   {
+      this(mainClazz.getSimpleName(), scheduler, logModelProvider, logSettings, dt);
+   }
+   
+   public YoVariableServer(String mainClazz, PeriodicThreadScheduler scheduler, LogModelProvider logModelProvider, LogSettings logSettings, double dt)
    {
       this.dt = dt;
       this.mainClazz = mainClazz;
@@ -103,7 +111,7 @@ public class YoVariableServer implements RobotVisualizer, TickAndUpdatable
       InetSocketAddress controlAddress = new InetSocketAddress(bindAddress, controlServer.getPort());
       sessionBroadcaster = new LogSessionBroadcaster(controlAddress, bindAddress, mainClazz, logSettings);
       producer = new YoVariableProducer(scheduler, sessionBroadcaster, handshakeBuilder, logModelProvider, mainBuffer,
-            buffers.values(), sendKeepAlive);
+            buffers.values(), summaryProvider, sendKeepAlive);
             
       sessionBroadcaster.requestPort();
       producer.start();
@@ -274,5 +282,53 @@ public class YoVariableServer implements RobotVisualizer, TickAndUpdatable
       mainDynamicGraphicObjectsListRegistry = yoGraphicsListRegistry;
       
    }
+   
+   private YoVariable<?> findVariableInRegistries(String variableName)
+   {
+      YoVariable<?> ret = mainRegistry.getVariable(variableName);
+      if(ret == null)
+      {
+         for(ImmutablePair<YoVariableRegistry, YoGraphicsListRegistry> v : variableData)
+         {
+            ret = v.getLeft().getVariable(variableName);
+            if(ret != null)
+            {
+               return ret;
+            }
+         }
+      }
+      return ret;
+   }
+   
+
+   public void createSummary(YoVariable<?> isWalkingVariable)
+   {
+      createSummary(isWalkingVariable.getFullNameWithNameSpace());
+   }
+   
+   public void createSummary(String summaryTriggerVariable)
+   {
+      if(findVariableInRegistries(summaryTriggerVariable) == null)
+      {
+         throw new RuntimeException("Variable " + summaryTriggerVariable + " is not registered with the logger");
+      }
+      this.summaryProvider.setSummarize(true);
+      this.summaryProvider.setSummaryTriggerVariable(summaryTriggerVariable);
+   }
+   
+   public void addSummarizedVariable(String variable)
+   {
+      if(findVariableInRegistries(variable) == null)
+      {
+         throw new RuntimeException("Variable " + variable + " is not registered with the logger");
+      }
+      this.summaryProvider.addSummarizedVariable(variable);
+   }
+   
+   public void addSummarizedVariable(YoVariable<?> variable)
+   {      
+      this.summaryProvider.addSummarizedVariable(variable);
+   }
+
 
 }

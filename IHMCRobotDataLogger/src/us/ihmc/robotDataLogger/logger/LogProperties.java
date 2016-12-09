@@ -111,6 +111,16 @@ public abstract class LogProperties extends Properties
    {
       return getProperty(description + ".timestamps");
    }
+   
+   public void setSummaryFile(String filename)
+   {
+      setProperty("variables.summary", filename);
+   }
+   
+   public String getSummaryFile()
+   {
+      return getProperty("variables.summary");
+   }
 
    public void setModelLoaderClass(String clazz)
    {

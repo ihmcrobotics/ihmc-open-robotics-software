@@ -25,7 +25,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.WalkingHighLevelHumanoidController.WalkingMessageHandler.currentNumberOfFootsteps</Variables>
+		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.WalkingHighLevelHumanoidController.WalkingMessageHandler.currentNumberOfFootsteps,root.atlas.t</Variables>
 		<GraphConfiguration>
 			<Name>config3</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -61,7 +61,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables></Variables>
+		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.HighLevelHumanoidControllerToolbox.CommonHumanoidReferenceFramesVisualizer.centerOfMassZ,root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.HighLevelControlManagerFactory.CenterOfMassHeightManager.LookAheadCoMHeightTrajectoryGenerator.desiredCoMHeight</Variables>
 		<GraphConfiguration>
 			<Name>config6</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -97,9 +97,9 @@ Plotter,
 
 <Current View>Normal View</Current View>
  <Canvas 1> 
- <Camera X>3.730660086275897</Camera X>
- <Camera Y>7.45285643969142</Camera Y>
- <Camera Z>0.9976406823164573</Camera Z>
+ <Camera X>-2.703132767970728</Camera X>
+ <Camera Y>-1.7883207348322612</Camera Y>
+ <Camera Z>0.6654198618651357</Camera Z>
  <Dolly data> 
  <Position X>2.0</Position X>
  <Position Y>12.0</Position Y>
@@ -116,15 +116,15 @@ Plotter,
  <Position Y>0.0</Position Y>
  <Position Z>0.0</Position Z>
  <Track Booleans>
-<Track>true</Track>
+<Track>false</Track>
 <Track X>true</Track X>
 <Track Y>true</Track Y>
-<Track Z>true</Track Z>
+<Track Z>false</Track Z>
 </Track Booleans>
 </Track data>
 <Fix Position>
-<Fix X>3.2709258222224515</Fix X>
-<Fix Y>8.895679726138132</Fix Y>
-<Fix Z>0.8926829999034993</Fix Z>
+<Fix X>-0.10522069440352855</Fix X>
+<Fix Y>0.11900290050080176</Fix Y>
+<Fix Z>0.3157529083962993</Fix Z>
 </Fix Position>
 </Canvas 1>
