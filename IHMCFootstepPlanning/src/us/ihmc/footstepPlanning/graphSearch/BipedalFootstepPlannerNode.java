@@ -29,6 +29,7 @@ public class BipedalFootstepPlannerNode
    private boolean isDead = false;
 
    private double singleStepScore;
+   private double percentageOfFoothold = 1.0;
 
    public BipedalFootstepPlannerNode(RobotSide footstepSide, RigidBodyTransform soleTransform)
    {
@@ -282,5 +283,13 @@ public class BipedalFootstepPlannerNode
       return soleTransform.toString();
    }
 
+   public double getPercentageOfFoothold()
+   {
+      return percentageOfFoothold;
+   }
 
+   public void setPercentageOfFoothold(double percentageOfFoothold)
+   {
+      this.percentageOfFoothold = percentageOfFoothold;
+   }
 }
