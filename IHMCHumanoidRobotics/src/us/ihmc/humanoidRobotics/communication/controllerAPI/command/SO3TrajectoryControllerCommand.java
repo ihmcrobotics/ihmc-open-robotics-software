@@ -15,10 +15,11 @@ public abstract class SO3TrajectoryControllerCommand<T extends SO3TrajectoryCont
    private long commandId = Packet.VALID_MESSAGE_DEFAULT_ID;
    private ExecutionMode executionMode = ExecutionMode.OVERRIDE;
    private long previousCommandId = Packet.INVALID_MESSAGE_ID;
-   private final DenseMatrix64F selectionMatrix = new DenseMatrix64F(6,6);
+   private final DenseMatrix64F selectionMatrix = new DenseMatrix64F(3,6);
 
    public SO3TrajectoryControllerCommand()
    {
+      clear();
    }
 
    @Override
@@ -28,8 +29,12 @@ public abstract class SO3TrajectoryControllerCommand<T extends SO3TrajectoryCont
       commandId = Packet.VALID_MESSAGE_DEFAULT_ID;
       executionMode = ExecutionMode.OVERRIDE;
       previousCommandId = Packet.INVALID_MESSAGE_ID;
-      selectionMatrix.reshape(6, 6);
+      selectionMatrix.reshape(3, 6);
       selectionMatrix.zero();
+      for (int i = 0; i < 3; i++)
+      {
+         selectionMatrix.set(i, i, 1.0);
+      }
    }
 
    @Override
@@ -39,8 +44,12 @@ public abstract class SO3TrajectoryControllerCommand<T extends SO3TrajectoryCont
       commandId = Packet.VALID_MESSAGE_DEFAULT_ID;
       executionMode = ExecutionMode.OVERRIDE;
       previousCommandId = Packet.INVALID_MESSAGE_ID;
-      selectionMatrix.reshape(6, 6);
+      selectionMatrix.reshape(3, 6);
       selectionMatrix.zero();
+      for (int i = 0; i < 3; i++)
+      {
+         selectionMatrix.set(i, i, 1.0);
+      }
    }
 
    @Override
