@@ -2,7 +2,6 @@ package us.ihmc.footstepPlanning.graphSearch;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.List;
@@ -11,7 +10,6 @@ import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlanner;
 import us.ihmc.footstepPlanning.FootstepPlannerGoal;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
-import us.ihmc.footstepPlanning.scoring.PenalizationHeatmapStepScorer;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
@@ -51,8 +49,7 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
       parentRegistry.addChild(registry);
       parameters = new BipedalFootstepPlannerParameters(parentRegistry);
 
-      BipedalStepScorer bipedalStepScorer = new PenalizationHeatmapStepScorer(parentRegistry, null, parameters);
-      planarRegionPotentialNextStepCalculator = new PlanarRegionPotentialNextStepCalculator(parameters, bipedalStepScorer, parentRegistry);
+      planarRegionPotentialNextStepCalculator = new PlanarRegionPotentialNextStepCalculator(parameters, parentRegistry);
    }
 
    public BipedalFootstepPlannerParameters getParameters()

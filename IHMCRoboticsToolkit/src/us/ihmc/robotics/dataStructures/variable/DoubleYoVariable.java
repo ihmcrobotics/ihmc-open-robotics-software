@@ -3,6 +3,8 @@ package us.ihmc.robotics.dataStructures.variable;
 import java.text.FieldPosition;
 import java.text.NumberFormat;
 
+import org.apache.commons.math3.util.Precision;
+
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 
 /**
@@ -284,5 +286,11 @@ public class DoubleYoVariable extends YoVariable<DoubleYoVariable>
    {
       this.set(Double.NaN);
 
+   }
+
+   @Override
+   public boolean isZero()
+   {
+      return Precision.equals(0.0, getDoubleValue(), 1);
    }
 }

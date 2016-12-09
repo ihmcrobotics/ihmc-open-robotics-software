@@ -11,6 +11,8 @@ import us.ihmc.robotics.robotSide.RobotSide;
 
 public class FootstepPlan
 {
+   private final ArrayList<SimpleFootstep> footsteps = new ArrayList<>();
+
    public FootstepPlan()
    {
    }
@@ -33,8 +35,6 @@ public class FootstepPlan
 
       reverse();
    }
-
-   private final ArrayList<SimpleFootstep> footsteps = new ArrayList<>();
 
    public int getNumberOfSteps()
    {

@@ -410,6 +410,13 @@ public class YoGraphicPlanarRegionsList extends YoGraphic implements RemoteYoGra
     */
    public void submitPlanarRegionsListToRender(PlanarRegionsList planarRegionsList)
    {
+      if (planarRegionsList == null)
+      {
+         //TODO: Clear the viz when the planarRegionsList is null;
+         
+         return;
+      }
+
       if (planarRegionsListsDeque.size() > MAX_PLANAR_REGIONS_LIST_DEQUE_SIZE)
          return;
 

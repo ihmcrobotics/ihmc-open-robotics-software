@@ -18,7 +18,7 @@ public class CinderBlockFieldWithFiducialEnvironment implements CommonAvatarEnvi
    {
       combinedTerrainObject3D.addTerrainObject(DefaultCommonAvatarEnvironment.setUpGround("FlatGround"));
       combinedTerrainObject3D.addTerrainObject(DefaultCommonAvatarEnvironment.setUpCinderBlockFieldActual("CinderBlockField", 0.0, 0.0, new ArrayList<List<FramePose>>()));
-      combinedTerrainObject3D.addTerrainObject(DefaultCommonAvatarEnvironment.addFiducial(new Vector3d(5.0, 0.0, 1.7), 0.0, Fiducial.FIDUCIAL50));
+      combinedTerrainObject3D.addTerrainObject(DefaultCommonAvatarEnvironment.addFiducial(new Vector3d(12.0, 0.0, 1.7), 0.0, Fiducial.FIDUCIAL50));
    }
 
    @Override

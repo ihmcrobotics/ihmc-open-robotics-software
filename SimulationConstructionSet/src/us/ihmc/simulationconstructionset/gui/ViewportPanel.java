@@ -9,6 +9,7 @@ import java.util.ArrayList;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.vecmath.Tuple3d;
 
 import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
 import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
@@ -410,9 +411,19 @@ public class ViewportPanel extends JPanel implements CameraSelector, ActiveCamer
       activeView.getCameraController().setFixPosition(fixX, fixY, fixZ);
    }
 
+   public void setCameraFix(Tuple3d cameraFix)
+   {
+      activeView.getCameraController().setFixPosition(cameraFix.getX(), cameraFix.getY(), cameraFix.getZ());      
+   }
+
    public void setCameraPosition(double posX, double posY, double posZ)
    {
       activeView.getCameraController().setCameraPosition(posX, posY, posZ);
+   }
+
+   public void setCameraPosition(Tuple3d cameraPosition)
+   {
+      activeView.getCameraController().setCameraPosition(cameraPosition.getX(), cameraPosition.getY(), cameraPosition.getZ());      
    }
 
    public void setCameraTracking(boolean track, boolean trackX, boolean trackY, boolean trackZ)
@@ -842,4 +853,6 @@ public class ViewportPanel extends JPanel implements CameraSelector, ActiveCamer
          standardGUIActions.makeCheckBoxesConsistentWithCamera();
       }
    }
+
+
 }

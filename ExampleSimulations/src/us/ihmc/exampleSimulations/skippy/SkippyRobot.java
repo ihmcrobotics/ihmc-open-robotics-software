@@ -125,7 +125,8 @@ public class SkippyRobot extends Robot
    private ExternalForcePoint balanceForce;
    public static ExternalForcePoint glueDownToGroundPoint;
 
-   private final double initialBodySidewaysLean = 0.0 * Math.PI / 48.0; //0.2
+//   private final double initialBodySidewaysLean = 0.13783;   //Limit sideways lean for IcpBasedControl to balance
+   private final double initialBodySidewaysLean = 0.0; //Limit sideways lean for FeedbackPostureControl to balance
    private final double initialShoulderJointAngle = 0.0 * Math.PI / 6.0;
    private final double initialYawIfSkippy = 0.0* Math.PI * 0.8;
 
@@ -205,8 +206,8 @@ public class SkippyRobot extends Robot
          this.addRootJoint(rootJointIfSkippy);
 
          RigidBodyTransform transform = new RigidBodyTransform();
-         transform.setRotationEulerAndZeroTranslation(Math.PI / 7.0 - 2.0 * Math.PI / 8.0, -initialBodySidewaysLean, initialYawIfSkippy);
-         transform.setTranslation(new Vector3d(0.0, 0.0, 2.0-0.15975+0.0032));
+         transform.setRotationEulerAndZeroTranslation(0.0, -initialBodySidewaysLean, initialYawIfSkippy);
+         transform.setTranslation(new Vector3d(0.0, 0.0, 2.0));
          rootJointIfSkippy.setRotationAndTranslation(transform);
 
          shoulderJoint = new PinJoint("shoulderJoint", new Vector3d(0.0, 0.0, TORSO_LENGTH / 2), this, Axis.Y);
@@ -224,7 +225,7 @@ public class SkippyRobot extends Robot
 
          hipJoint = new PinJoint("hip", new Vector3d(0.0, 0.0, -TORSO_LENGTH / 2.0), this, Axis.X);
          hipJoint.setDamping(0.0);
-         hipJoint.setInitialState(2.0 * Math.PI / 8.0, 0.0);
+         hipJoint.setInitialState(0.0, 0.0);
          Link leg = createLegSkippy();
          hipJoint.setLink(leg);
 
@@ -295,7 +296,7 @@ public class SkippyRobot extends Robot
       // create a LinkGraphics object to manipulate the visual representation of the link
       Graphics3DObject linkGraphics = new Graphics3DObject();
       linkGraphics.translate(0.0, 0.0, -LEG_LENGTH);
-      linkGraphics.addCube(LEG_CUBE_LENGTH, LEG_CUBE_LENGTH, LEG_LENGTH, YoAppearance.Glass(0.75));
+      linkGraphics.addCube(LEG_CUBE_LENGTH, LEG_CUBE_LENGTH, LEG_LENGTH, YoAppearance.Blue());
       /*
        * Joint
        */
@@ -554,7 +555,7 @@ public class SkippyRobot extends Robot
       comToPack.set(tempCOMPosition);
       tempLinearMomentum.scale(1.0 / totalMass);
       comVelocityToPack.set(tempLinearMomentum);
-      
+
       double omega0 = Math.sqrt(comToPack.getZ() / Math.abs(getGravity()));
 
       icpToPack.scaleAdd(omega0, comVelocityToPack, comToPack);
@@ -571,7 +572,7 @@ public class SkippyRobot extends Robot
       hipAxisToPack.set(tempJointAxis);
       hipAxisToPack.normalize();
    }
-   
+
    public void getShoulderJointAxis(FrameVector shoulderAxisToPack)
    {
       shoulderJoint.getJointAxis(tempJointAxis);

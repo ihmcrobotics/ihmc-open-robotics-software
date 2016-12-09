@@ -332,4 +332,10 @@ public class EnumYoVariable<T extends Enum<T>> extends YoVariable<EnumYoVariable
    {
       return enumValuesAsString.length;
    }
+
+   @Override
+   public boolean isZero()
+   {
+      return getEnumValue() == null;
+   }
 }
