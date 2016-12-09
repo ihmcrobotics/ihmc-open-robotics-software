@@ -8,6 +8,8 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Quat4f;
 import javax.vecmath.Vector3f;
 
+import org.apache.commons.lang3.mutable.MutableBoolean;
+
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
@@ -97,6 +99,7 @@ public class HeightQuadTreeToolboxController extends ToolboxController
    }
 
    private final FramePoint scanPoint = new FramePoint();
+   private final MutableBoolean quadTreeUpdateRequested = new MutableBoolean(false);
 
    @Override
    protected void updateInternal()
@@ -112,9 +115,13 @@ public class HeightQuadTreeToolboxController extends ToolboxController
       if (commandInputManager.isNewCommandAvailable(HeightQuadTreeToolboxRequestCommand.class))
       {
          HeightQuadTreeToolboxRequestCommand command = commandInputManager.pollNewestCommand(HeightQuadTreeToolboxRequestCommand.class);
+
+         if (command.isQuadTreeUpdateRequested())
+            quadTreeUpdateRequested.setTrue();
+
          if (command.isClearQuadTreeRequested())
          {
-            System.out.println("clearing the quad tree!");
+            PrintTools.info("clearing the quad tree!");
             quadTree.clearTree(Double.NaN);
             commandInputManager.flushAllCommands();
             return;
@@ -134,8 +141,6 @@ public class HeightQuadTreeToolboxController extends ToolboxController
       {
          return;
       }
-
-      boolean hasQuadTreeChanged = false;
 
       List<LidarScanCommand> newPointClouds = commandInputManager.pollNewCommands(LidarScanCommand.class);
 
@@ -161,14 +166,14 @@ public class HeightQuadTreeToolboxController extends ToolboxController
             double x = scanPoint.getX();
             double y = scanPoint.getY();
             double z = scanPoint.getZ();
-            hasQuadTreeChanged |= quadTree.addPoint(x, y, z);
+            quadTree.addPoint(x, y, z);
          }
       }
 
       if (DEBUG)
          PrintTools.debug("Done updating the QuadTree.");
 
-      if (hasQuadTreeChanged)
+      if (quadTreeUpdateRequested.booleanValue())
       {
          if (DEBUG)
             PrintTools.debug("QuadTree has changed, sending packet");
@@ -176,6 +181,7 @@ public class HeightQuadTreeToolboxController extends ToolboxController
          rootJoint.getTranslation(rootJointPosition);
          robotPosition2d.set(rootJointPosition.getX(), rootJointPosition.getY());
          reportMessage(HeightQuadTreeMessageConverter.convertQuadTreeForGround(quadTree, robotPosition2d, quadTreeMessageMaxRadius));
+         quadTreeUpdateRequested.setFalse();
       }
    }
 
