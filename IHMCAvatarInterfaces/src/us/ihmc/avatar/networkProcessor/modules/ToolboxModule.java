@@ -97,10 +97,13 @@ public abstract class ToolboxModule
       timeWithoutInputsBeforeGoingToSleep.set(0.5);
       commandInputManager.registerHasReceivedInputListener(new HasReceivedInputListener()
       {
+         private final Set<Class<? extends Command<?, ?>>> silentCommands = silentCommands();
+
          @Override
-         public void hasReceivedInput()
+         public void hasReceivedInput(Class<? extends Command<?, ?>> commandClass)
          {
-            receivedInput.set(true);
+            if (!silentCommands.contains(commandClass))
+               receivedInput.set(true);
          }
       });
 
@@ -368,10 +371,27 @@ public abstract class ToolboxModule
 
    abstract public ToolboxController getToolboxController();
 
+   /**
+    * @return used to create the {@link CommandInputManager} and to defines the input API.
+    */
    abstract public List<Class<? extends Command<?, ?>>> createListOfSupportedCommands();
 
+   /**
+    * @return used to create the {@link StatusMessageOutputManager} and to defines the output API.
+    */
    abstract public List<Class<? extends StatusPacket<?>>> createListOfSupportedStatus();
+   
+   /**
+    * @return the collection of commands that cannot wake up this module.
+    */
+   public Set<Class<? extends Command<?, ?>>> silentCommands()
+   {
+      return Collections.emptySet();
+   }
 
+   /**
+    * @return the collection of messages that are allowed to go through the message filter.
+    */
    public Set<Class<? extends Packet<?>>> filterExceptions()
    {
       return Collections.emptySet();

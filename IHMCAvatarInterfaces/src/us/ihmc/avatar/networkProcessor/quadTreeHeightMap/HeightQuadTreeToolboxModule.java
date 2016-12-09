@@ -57,16 +57,18 @@ public class HeightQuadTreeToolboxModule extends ToolboxModule
    @Override
    public List<Class<? extends StatusPacket<?>>> createListOfSupportedStatus()
    {
-      List<Class<? extends StatusPacket<?>>> status = new ArrayList<>();
-      status.add(HeightQuadTreeMessage.class);
-      return status;
+      return Collections.singletonList(HeightQuadTreeMessage.class);
+   }
+
+   @Override
+   public Set<Class<? extends Command<?, ?>>> silentCommands()
+   {
+      return Collections.singleton(LidarScanCommand.class);
    }
 
    @Override
    public Set<Class<? extends Packet<?>>> filterExceptions()
    {
-      Set<Class<? extends Packet<?>>> filterExceptions = new HashSet<>();
-      filterExceptions.add(LidarScanMessage.class);
-      return filterExceptions;
+      return Collections.singleton(LidarScanMessage.class);
    }
 }
