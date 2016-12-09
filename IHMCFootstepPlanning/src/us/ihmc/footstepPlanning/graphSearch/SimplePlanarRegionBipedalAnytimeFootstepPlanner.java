@@ -6,11 +6,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.footstepPlanning.AnytimeFootstepPlanner;
-import us.ihmc.footstepPlanning.FootstepPlan;
-import us.ihmc.footstepPlanning.FootstepPlanningResult;
-import us.ihmc.footstepPlanning.FootstepPlanningUtils;
-import us.ihmc.footstepPlanning.SimpleFootstep;
+import us.ihmc.footstepPlanning.*;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.geometry.FramePose;
@@ -25,6 +21,7 @@ public class SimplePlanarRegionBipedalAnytimeFootstepPlanner extends PlanarRegio
 
    private BipedalFootstepPlannerNode closestNodeToGoal = null;
    private final AtomicReference<FootstepPlan> bestPlanYet = new AtomicReference<>(null);
+   private final AtomicReference<FootstepPlannerGoal> footstepPlannerGoalReference = new AtomicReference<>(null);
    private boolean stopRequested = false;
    private boolean isBestPlanYetOptimal = false;
    private final AtomicReference<PlanarRegionsList> planarRegionsListReference = new AtomicReference<>(null);
@@ -159,6 +156,21 @@ public class SimplePlanarRegionBipedalAnytimeFootstepPlanner extends PlanarRegio
       }
    }
 
+   private void replaceGoalPose()
+   {
+      FootstepPlannerGoal newGoal = footstepPlannerGoalReference.getAndSet(null);
+      if(newGoal != null)
+      {
+         planarRegionPotentialNextStepCalculator.setGoal(newGoal);
+      }
+   }
+
+   @Override
+   public void setGoal(FootstepPlannerGoal goal)
+   {
+      planarRegionPotentialNextStepCalculator.setGoal(goal);
+   }
+
    private void recursivelyMarkAsDead(BipedalFootstepPlannerNode node)
    {
       node.setToDead();
@@ -195,6 +207,7 @@ public class SimplePlanarRegionBipedalAnytimeFootstepPlanner extends PlanarRegio
       {
          stackSize.set(stack.size());
          replaceStartNode();
+         replaceGoalPose();
          checkForNewPlanarRegionsList();
 
          if(stackSize.getIntegerValue() > maxNumberOfNodesBeforeSleeping.getIntegerValue())

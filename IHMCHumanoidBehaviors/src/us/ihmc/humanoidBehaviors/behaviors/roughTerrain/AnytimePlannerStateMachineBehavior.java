@@ -9,6 +9,10 @@ import us.ihmc.footstepPlanning.graphSearch.BipedalFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.PlanarRegionBipedalFootstepPlannerVisualizer;
 import us.ihmc.footstepPlanning.graphSearch.SimplePlanarRegionBipedalAnytimeFootstepPlanner;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.behaviorServices.FiducialDetectorBehaviorService;
+import us.ihmc.humanoidBehaviors.behaviors.behaviorServices.ObjectDetectorBehaviorService;
+import us.ihmc.humanoidBehaviors.behaviors.goalLocation.GoalDetectorBehaviorService;
+import us.ihmc.humanoidBehaviors.behaviors.goalLocation.LocateGoalBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SimpleDoNothingBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SleepBehavior;
@@ -52,6 +56,13 @@ import javax.vecmath.Tuple3d;
 public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<AnytimePlannerStateMachineBehavior.AnytimePlanningState>
 {
    private final String prefix = getClass().getSimpleName();
+   private static final GoalDetectorType GOAL_DETECTOR_TYPE = GoalDetectorType.FIDUCIAL;
+
+   private enum GoalDetectorType
+   {
+      FIDUCIAL, VALVE;
+   }
+
    private final DoubleYoVariable yoTime;
    private final IntegerYoVariable maxNumberOfStepsToTake = new IntegerYoVariable(prefix + "NumberOfStepsToTake", registry);
    private final IntegerYoVariable indexOfNextFootstepToSendFromCurrentPlan = new IntegerYoVariable(prefix + "NextFootstepToSendFromCurrentPlan", registry);
@@ -65,9 +76,10 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
    private final BooleanYoVariable receivedFootstepCompletedPacked = new BooleanYoVariable(prefix + "ReceivedFootstepCompletedPacket", registry);
    private final HumanoidReferenceFrames referenceFrames;
    private final BooleanYoVariable havePlanarRegionsBeenSet = new BooleanYoVariable(prefix + "HavePlanarRegionsBeenSet", registry);
-   
    private FootstepPlan currentPlan;
    private final IntegerYoVariable numberOfFootstepsInCurrentPlan = new IntegerYoVariable(prefix + "NumberOfFootstepsInCurrentPlan", registry);
+
+   private final LocateGoalBehavior locateGoalBehavior;
    private final RequestAndWaitForPlanarRegionsListBehavior requestAndWaitForPlanarRegionsListBehavior;
    private final SleepBehavior sleepBehavior;
    private final CheckForBestPlanBehavior checkForBestPlanBehavior;
@@ -87,7 +99,7 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
 
    public enum AnytimePlanningState
    {
-      REQUEST_AND_WAIT_FOR_PLANAR_REGIONS, SLEEP, CHECK_FOR_BEST_PLAN, SEND_OVER_FOOTSTEP_AND_WAIT_FOR_COMPLETION, REACHED_GOAL
+      LOCATE_GOAL, REQUEST_AND_WAIT_FOR_PLANAR_REGIONS, SLEEP, CHECK_FOR_BEST_PLAN, SEND_OVER_FOOTSTEP_AND_WAIT_FOR_COMPLETION, REACHED_GOAL
    }
 
    public AnytimePlannerStateMachineBehavior(CommunicationBridge communicationBridge, DoubleYoVariable yoTime, HumanoidReferenceFrames referenceFrames,
@@ -106,6 +118,28 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
       maxNumberOfStepsToTake.set(1);
       this.referenceFrames = referenceFrames;
 
+      GoalDetectorBehaviorService goalDetectorBehaviorService;
+      switch(GOAL_DETECTOR_TYPE)
+      {
+      case FIDUCIAL:
+         goalDetectorBehaviorService = new FiducialDetectorBehaviorService(communicationBridge, null);
+         break;
+      case VALVE:
+         try
+         {
+            goalDetectorBehaviorService = new ObjectDetectorBehaviorService(communicationBridge, null);
+            break;
+         }
+         catch(Exception e)
+         {
+            e.printStackTrace();
+            System.err.println("Cannot create valve detector service!");
+         }
+      default:
+         throw new RuntimeException("Cannot create detector " + GOAL_DETECTOR_TYPE);
+      }
+
+      locateGoalBehavior = new LocateGoalBehavior(communicationBridge, goalDetectorBehaviorService);
       requestAndWaitForPlanarRegionsListBehavior = new RequestAndWaitForPlanarRegionsListBehavior(communicationBridge);
       sleepBehavior = new SleepBehavior(communicationBridge, yoTime);
       checkForBestPlanBehavior = new CheckForBestPlanBehavior(communicationBridge);
@@ -138,6 +172,27 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
 
    private void setupStateMachine()
    {
+      BehaviorAction<AnytimePlanningState> locateGoalAction = new BehaviorAction<AnytimePlanningState>(
+            AnytimePlanningState.LOCATE_GOAL, locateGoalBehavior)
+      {
+         protected void setBehaviorInput()
+         {
+            TextToSpeechPacket p1 = new TextToSpeechPacket("Starting to locate goal");
+            sendPacket(p1);
+         }
+
+         @Override
+         public void doTransitionOutOfAction()
+         {
+            FramePose goalPose = new FramePose();
+            locateGoalBehavior.getReportedGoalPoseWorldFrame(goalPose);
+            setGoalPose(goalPose);
+            super.doTransitionOutOfAction();
+
+            sendPacketToUI(new UIPositionCheckerPacket(goalPose.getFramePointCopy().getPoint(), goalPose.getFrameOrientationCopy().getQuaternion()));
+         }
+      };
+
       BehaviorAction<AnytimePlanningState> requestPlanarRegionsAction = new BehaviorAction<AnytimePlanningState>(
             AnytimePlanningState.REQUEST_AND_WAIT_FOR_PLANAR_REGIONS, requestAndWaitForPlanarRegionsListBehavior)
       {
@@ -173,6 +228,7 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
          }
       };
 
+      statemachine.addStateWithDoneTransition(locateGoalAction, AnytimePlanningState.CHECK_FOR_BEST_PLAN.REQUEST_AND_WAIT_FOR_PLANAR_REGIONS);
       statemachine.addStateWithDoneTransition(requestPlanarRegionsAction, AnytimePlanningState.SLEEP);
       statemachine.addStateWithDoneTransition(sleepAction, AnytimePlanningState.CHECK_FOR_BEST_PLAN);
       statemachine.addState(checkForBestPlan);
@@ -185,7 +241,7 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
       sendFootstepAndWaitForCompletion.addStateTransition(AnytimePlanningState.CHECK_FOR_BEST_PLAN, continueWalkingAfterCompletedStepCondition);
       sendFootstepAndWaitForCompletion.addStateTransition(AnytimePlanningState.REACHED_GOAL, reachedGoalAfterCompletedStepCondition);
 
-      statemachine.setStartState(AnytimePlanningState.REQUEST_AND_WAIT_FOR_PLANAR_REGIONS);
+      statemachine.setStartState(AnytimePlanningState.LOCATE_GOAL);
    }
 
    private void setPlannerParameters(BipedalFootstepPlannerParameters footstepPlanningParameters)
