@@ -143,12 +143,32 @@ public class PlanarRegion
     * @param convexPolygon2d Polygon to snap.
     * @param snappingTransform RigidBodyTransform that snaps the polygon onto this region. Must have same surface normal as this region.
     * @param intersectionsToPack ArrayList of ConvexPolygon2d to pack with the intersections.
+    * @return intersectionArea Total area of intersections
     */
-   public void getPolygonIntersectionsWhenSnapped(ConvexPolygon2d convexPolygon2d, RigidBodyTransform snappingTransform,
+   public double getPolygonIntersectionsWhenSnapped(ConvexPolygon2d convexPolygon2d, RigidBodyTransform snappingTransform,
          ArrayList<ConvexPolygon2d> intersectionsToPack)
    {
+      return getPolygonIntersectionsWhenSnapped(convexPolygon2d, snappingTransform, intersectionsToPack, null);
+   }
+   
+   /**
+    * Returns all of the intersections when the convexPolygon is snapped onto this PlanarRegion with the snappingTransform.
+    * @param convexPolygon2d Polygon to snap.
+    * @param snappingTransform RigidBodyTransform that snaps the polygon onto this region. Must have same surface normal as this region.
+    * @param intersectionsToPack ArrayList of ConvexPolygon2d to pack with the intersections.
+    * @return intersectionArea Total area of intersections
+    */
+   public double getPolygonIntersectionsWhenSnapped(ConvexPolygon2d convexPolygon2d, RigidBodyTransform snappingTransform,
+         ArrayList<ConvexPolygon2d> intersectionsToPack, ConvexPolygon2d intersectionPolygonToPack)
+   {
       ConvexPolygon2d projectedPolygon = snapPolygonIntoRegionAndChangeFrameToRegionFrame(convexPolygon2d, snappingTransform);
-
+      double intersectionArea = 0.0;
+      
+      if (intersectionPolygonToPack != null)
+      {
+         intersectionPolygonToPack.clear();
+      }
+      
       // Now, just need to go through each polygon of this region and see there is at least one intersection
       for (int i = 0; i < getNumberOfConvexPolygons(); i++)
       {
@@ -156,9 +176,22 @@ public class PlanarRegion
 
          if (intersectingPolygon != null)
          {
+            if (intersectionPolygonToPack != null)
+            {
+               intersectionPolygonToPack.addVertices(intersectingPolygon);
+            }
+            
             intersectionsToPack.add(intersectingPolygon);
+            intersectionArea += intersectingPolygon.getArea();
          }
       }
+      
+      if (intersectionPolygonToPack != null)
+      {
+         intersectionPolygonToPack.update();
+      }
+      
+      return intersectionArea;
    }
 
    /**
