@@ -416,11 +416,11 @@ public class PlanarRegionPotentialNextStepCalculator
             double score;
             if (enablePenalizationHeatmapScoring.getBooleanValue())
             {
-               score = penalizationHeatmapStepScorer.scoreFootstep(stanceFootPose, swingStartFootPose, idealFootstepPose, candidateFootPose, swingFootGoal);
+               score = penalizationHeatmapStepScorer.scoreFootstep(stanceFootPose, swingStartFootPose, idealFootstepPose, candidateFootPose, swingFootGoal, node.getPercentageOfFoothold());
             }
             else
             {
-               score = orderInWhichConstructedStepScorer.scoreFootstep(stanceFootPose, swingStartFootPose, idealFootstepPose, candidateFootPose, swingFootGoal);
+               score = orderInWhichConstructedStepScorer.scoreFootstep(stanceFootPose, swingStartFootPose, idealFootstepPose, candidateFootPose, swingFootGoal, node.getPercentageOfFoothold());
             }
 
             node.setSingleStepScore(score);
@@ -648,6 +648,8 @@ public class PlanarRegionPotentialNextStepCalculator
             totalArea.add(intersectionPolygon.getArea());
          }
 
+         nodeToExpand.setPercentageOfFoothold(totalArea.getDoubleValue() / footArea.getDoubleValue());
+         
          if (totalArea.getDoubleValue() < parameters.getMinimumFootholdPercent() * footArea.getDoubleValue())
          {
             notifyListenerNodeForExpansionWasRejected(nodeToExpand, BipedalFootstepPlannerNodeRejectionReason.NOT_ENOUGH_AREA);

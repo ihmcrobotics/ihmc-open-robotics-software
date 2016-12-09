@@ -89,7 +89,7 @@ public class PenalizationHeatmapStepScorerTest
          FramePose candidateFootstep = new FramePose(worldFrame);
          candidateFootstep.setPose(idealFootstep);
 
-         double idealFootstepScore = footstepScorer.scoreFootstep(stanceFoot, swingStartFoot, idealFootstep, candidateFootstep, goal);
+         double idealFootstepScore = footstepScorer.scoreFootstep(stanceFoot, swingStartFoot, idealFootstep, candidateFootstep, goal, 1.0);
          assertEquals(0.0, idealFootstepScore, 1e-7);
       }
 
@@ -115,7 +115,7 @@ public class PenalizationHeatmapStepScorerTest
          RigidBodyTransform transform = new RigidBodyTransform();
          transform.setTranslation(RandomTools.generateRandomDouble(random, 0.1), RandomTools.generateRandomDouble(random, 0.1), 0.0);
          candidateFootstep.applyTransform(transform);
-         double footstepScore = footstepScorer.scoreFootstep(stanceFoot, swingStartFoot, idealFootstep, candidateFootstep, goal);
+         double footstepScore = footstepScorer.scoreFootstep(stanceFoot, swingStartFoot, idealFootstep, candidateFootstep, goal, 1.0);
 
          assertTrue(footstepScore <= 0.0);
       }
@@ -178,7 +178,7 @@ public class PenalizationHeatmapStepScorerTest
             //applySlopeCandidateSet(candidateFramePose, xYoVariable, yYoVariable);
             applyVerticalCandidateSet(candidateFramePose, xYoVariable, yYoVariable);
 
-            double score = footstepScorer.scoreFootstep(stanceFramePose, swingStartFramePose, idealFramePose, candidateFramePose, footstepPlannerGoal);
+            double score = footstepScorer.scoreFootstep(stanceFramePose, swingStartFramePose, idealFramePose, candidateFramePose, footstepPlannerGoal, 1.0);
             scoreYoVariable.set(score);
 
             if (candidateIndex.getIntegerValue() == 0)
