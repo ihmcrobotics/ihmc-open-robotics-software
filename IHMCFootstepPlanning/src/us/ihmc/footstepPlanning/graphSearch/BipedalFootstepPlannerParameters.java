@@ -18,6 +18,7 @@ public class BipedalFootstepPlannerParameters
    private final DoubleYoVariable maximumStepYaw = new DoubleYoVariable("maximumStepYaw", registry);
    private final DoubleYoVariable maximumStepWidth = new DoubleYoVariable("maximumStepWidth", registry);
    private final DoubleYoVariable minimumStepWidth = new DoubleYoVariable("minimumStepWidth", registry);
+   private final DoubleYoVariable minimumStepLength = new DoubleYoVariable("minimumStepLength", registry);
 
    private final DoubleYoVariable maximumStepXWhenForwardAndDown = new DoubleYoVariable("maximumStepXWhenForwardAndDown", registry);
    private final DoubleYoVariable maximumStepZWhenForwardAndDown = new DoubleYoVariable("maximumStepZWhenForwardAndDown", registry);
@@ -81,6 +82,11 @@ public class BipedalFootstepPlannerParameters
    {
       this.maximumStepWidth.set(maximumStepWidth);
    }
+   
+   public void setMinimumStepLength(double minimumStepLength)
+   {
+      this.minimumStepLength.set(minimumStepLength);
+   }
 
    public void setMinimumFootholdPercent(double minimumFootholdPercent)
    {
@@ -143,6 +149,11 @@ public class BipedalFootstepPlannerParameters
       return minimumStepWidth.getDoubleValue();
    }
 
+   public double getMinimumStepLength()
+   {
+      return minimumStepLength.getDoubleValue();
+   }
+
    public double getMaximumStepXWhenForwardAndDown()
    {
       return maximumStepXWhenForwardAndDown.getDoubleValue();
@@ -197,5 +208,6 @@ public class BipedalFootstepPlannerParameters
    {
       return maximumStepWidth.getDoubleValue();
    }
+
 
 }
