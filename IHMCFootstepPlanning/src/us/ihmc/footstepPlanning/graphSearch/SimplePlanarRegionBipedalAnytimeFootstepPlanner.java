@@ -1,6 +1,16 @@
 package us.ihmc.footstepPlanning.graphSearch;
 
-import us.ihmc.footstepPlanning.*;
+import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicReference;
+
+import javax.vecmath.Point3d;
+import javax.vecmath.Vector3d;
+
+import us.ihmc.footstepPlanning.AnytimeFootstepPlanner;
+import us.ihmc.footstepPlanning.FootstepPlan;
+import us.ihmc.footstepPlanning.FootstepPlanningResult;
+import us.ihmc.footstepPlanning.FootstepPlanningUtils;
+import us.ihmc.footstepPlanning.SimpleFootstep;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.geometry.FramePose;
@@ -8,12 +18,6 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.tools.thread.ThreadTools;
-
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class SimplePlanarRegionBipedalAnytimeFootstepPlanner extends PlanarRegionBipedalFootstepPlanner implements AnytimeFootstepPlanner, Runnable
 {
@@ -31,9 +35,11 @@ public class SimplePlanarRegionBipedalAnytimeFootstepPlanner extends PlanarRegio
    private final FramePose tempFramePose = new FramePose();
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
 
-   public SimplePlanarRegionBipedalAnytimeFootstepPlanner(YoVariableRegistry parentRegistry)
+   private BipedalFootstepPlannerNode parentOfStartNode = null;
+
+   public SimplePlanarRegionBipedalAnytimeFootstepPlanner(BipedalFootstepPlannerParameters parameters, YoVariableRegistry parentRegistry)
    {
-      super(parentRegistry);
+      super(parameters, parentRegistry);
       maxNumberOfNodesBeforeSleeping.set(5000);
    }
 
@@ -55,6 +61,8 @@ public class SimplePlanarRegionBipedalAnytimeFootstepPlanner extends PlanarRegio
    @Override
    protected void initialize()
    {
+      parentOfStartNode = null;
+      
       stack.clear();
       startNode = new BipedalFootstepPlannerNode(initialSide, initialFootPose);
       stack.push(startNode);
@@ -145,6 +153,8 @@ public class SimplePlanarRegionBipedalAnytimeFootstepPlanner extends PlanarRegio
          initialSide = footstep.getRobotSide();
          footstep.getSoleFramePose(tempPose);
          tempPose.getRigidBodyTransform(initialFootPose);
+         
+         parentOfStartNode = startNode;
          startNode = new BipedalFootstepPlannerNode(initialSide, initialFootPose);
       }
    }
@@ -209,6 +219,13 @@ public class SimplePlanarRegionBipedalAnytimeFootstepPlanner extends PlanarRegio
 
          if(nodeToExpand.isDead())
             continue;
+
+         // If stepping in place on first step, don't...
+         if (parentOfStartNode != null)
+         {
+            if (parentOfStartNode.epsilonEquals(nodeToExpand, 0.01))
+               continue;
+         }
 
          boolean nearbyNodeAlreadyExists = checkIfNearbyNodeAlreadyExistsAndStoreIfNot(nodeToExpand);
          if (nearbyNodeAlreadyExists)

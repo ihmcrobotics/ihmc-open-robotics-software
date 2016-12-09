@@ -122,19 +122,21 @@ public class SimplePlanarRegionBipedalAnytimeFootstepPlannerTest
    private PlanarRegionBipedalFootstepPlanner createNormalPlanner()
    {
       YoVariableRegistry registryTwo = new YoVariableRegistry("Two");
-      PlanarRegionBipedalFootstepPlanner normalPlannerTwo = new PlanarRegionBipedalFootstepPlanner(registryTwo);
+      BipedalFootstepPlannerParameters parameters = new BipedalFootstepPlannerParameters(registryTwo);
+      setParameters(parameters);
+
+      PlanarRegionBipedalFootstepPlanner normalPlannerTwo = new PlanarRegionBipedalFootstepPlanner(parameters, registryTwo);
       normalPlannerTwo.setMaximumNumberOfNodesToExpand(1000);
-      BipedalFootstepPlannerParameters parametersTwo = normalPlannerTwo.getParameters();
-      setParameters(parametersTwo);
       return normalPlannerTwo;
    }
 
    private SimplePlanarRegionBipedalAnytimeFootstepPlanner createAnytimePlanner()
    {
       YoVariableRegistry registryOne = new YoVariableRegistry("One");
-      SimplePlanarRegionBipedalAnytimeFootstepPlanner anytimePlannerOne = new SimplePlanarRegionBipedalAnytimeFootstepPlanner(registryOne);
-      BipedalFootstepPlannerParameters parametersOne = anytimePlannerOne.getParameters();
-      setParameters(parametersOne);
+      BipedalFootstepPlannerParameters parameters = new BipedalFootstepPlannerParameters(registryOne);
+      setParameters(parameters);
+
+      SimplePlanarRegionBipedalAnytimeFootstepPlanner anytimePlannerOne = new SimplePlanarRegionBipedalAnytimeFootstepPlanner(parameters, registryOne);
       return anytimePlannerOne;
    }
 
