@@ -50,4 +50,10 @@ public class HeightQuadTreeToolboxRequestCommand implements Command<HeightQuadTr
    {
       return requestClearQuadTree || requestQuadTreeUpdate;
    }
+
+   @Override
+   public String toString()
+   {
+      return getClass().getSimpleName() + ": clear request = " + requestClearQuadTree + ", quadTree request = " + requestQuadTreeUpdate;
+   }
 }
