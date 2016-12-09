@@ -4,12 +4,7 @@ import us.ihmc.communication.packets.StatusPacket;
 
 public class HeightQuadTreeNodeMessage extends StatusPacket<HeightQuadTreeNodeMessage>
 {
-   public boolean isLeaf;
    public float height = Float.NaN;
-   public float centerX = Float.NaN;
-   public float centerY = Float.NaN;
-   public float sizeX = Float.NaN;
-   public float sizeY = Float.NaN;
 
    public HeightQuadTreeNodeMessage[] children;
 
@@ -25,12 +20,7 @@ public class HeightQuadTreeNodeMessage extends StatusPacket<HeightQuadTreeNodeMe
    @Override
    public void set(HeightQuadTreeNodeMessage other)
    {
-      isLeaf = other.isLeaf;
       height = other.height;
-      centerX = other.centerX;
-      centerY = other.centerY;
-      sizeX = other.sizeX;
-      sizeY = other.sizeY;
 
       if (other.children != null)
       {
@@ -61,18 +51,8 @@ public class HeightQuadTreeNodeMessage extends StatusPacket<HeightQuadTreeNodeMe
    @Override
    public boolean epsilonEquals(HeightQuadTreeNodeMessage other, double epsilon)
    {
-      if (isLeaf != other.isLeaf)
-         return false;
       // Float.compare for NaNs
       if (Float.compare(height, other.height) != 0)
-         return false;
-      if (Float.compare(centerX, other.centerX) != 0)
-         return false;
-      if (Float.compare(centerY, other.centerY) != 0)
-         return false;
-      if (Float.compare(sizeX, other.sizeX) != 0)
-         return false;
-      if (Float.compare(sizeY, other.sizeY) != 0)
          return false;
       if (getNumberOfChildren() != other.getNumberOfChildren())
          return false;

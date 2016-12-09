@@ -6,51 +6,49 @@ import javax.vecmath.Vector2d;
 import org.apache.commons.lang3.mutable.MutableDouble;
 import org.apache.commons.lang3.mutable.MutableObject;
 
-import us.ihmc.humanoidRobotics.communication.packets.heightQuadTree.HeightQuadTreeNodeMessage;
-
 public class HeightQuadTreeSearchTools
 {
-   public static HeightQuadTreeNodeMessage searchNode(HeightQuadTreeNodeMessage node, double x, double y)
+   public static HeightQuadTreeNode searchNode(HeightQuadTreeNode node, double x, double y)
    {
       return searchNode(node, (float) x, (float) y);
    }
 
-   public static HeightQuadTreeNodeMessage searchNode(HeightQuadTreeNodeMessage node, float x, float y)
+   public static HeightQuadTreeNode searchNode(HeightQuadTreeNode node, float x, float y)
    {
       if (node == null)
          return null;
 
-      if (node.children == null && Math.abs(x - node.centerX) < node.sizeX && Math.abs(x - node.centerY) < node.sizeY)
+      if (node.hasChildrenArray() && Math.abs(x - node.getCenterX()) < node.getSizeX() && Math.abs(x - node.getCenterY()) < node.getSizeY())
          return node;
 
-      if (node.children == null || node.getNumberOfChildren() == 0)
+      if (node.hasChildrenArray() || node.getNumberOfChildren() == 0)
          return node;
 
       int mortonCode = 0;
-      if (x > node.centerX)
+      if (x > node.getCenterX())
          mortonCode |= 1;
-      if (y > node.centerY)
+      if (y > node.getCenterY())
          mortonCode |= 2;
 
-      HeightQuadTreeNodeMessage child = node.children[mortonCode];
+      HeightQuadTreeNode child = node.getChild(mortonCode);
 
       if (child == null)
          return null;
       else
-         return searchNode(node.children[mortonCode], x, y);
+         return searchNode(node.getChild(mortonCode), x, y);
    }
 
-   public static void findRadiusNeighbors(HeightQuadTreeNodeMessage rootNode, double x, double y, double radius, NeighborActionRule actionRule)
+   public static void findRadiusNeighbors(HeightQuadTreeNode rootNode, double x, double y, double radius, NeighborActionRule actionRule)
    {
       double radiusSquared = radius * radius;
       findRadiusNeighbors(rootNode, x, y, radius, radiusSquared, actionRule);
    }
 
-   private static void findRadiusNeighbors(HeightQuadTreeNodeMessage node, double x, double y, double radius, double radiusSquared,
+   private static void findRadiusNeighbors(HeightQuadTreeNode node, double x, double y, double radius, double radiusSquared,
          NeighborActionRule actionRule)
    {
-      double xNode = node.centerX;
-      double yNode = node.centerY;
+      double xNode = node.getCenterX();
+      double yNode = node.getCenterY();
 
       // if search ball S(q,r) contains octant, simply add point indexes.
       if (contains(node, x, y, radiusSquared))
@@ -74,7 +72,7 @@ public class HeightQuadTreeSearchTools
       // check whether child nodes are in range.
       for (int childIndex = 0; childIndex < 4; childIndex++)
       {
-         HeightQuadTreeNodeMessage child = node.children[childIndex];
+         HeightQuadTreeNode child = node.getChild(childIndex);
          if (child == null)
             continue;
 
@@ -84,9 +82,9 @@ public class HeightQuadTreeSearchTools
       }
    }
 
-   public static void doActionOnLeavesRecursively(HeightQuadTreeNodeMessage node, NeighborActionRule actionRule)
+   public static void doActionOnLeavesRecursively(HeightQuadTreeNode node, NeighborActionRule actionRule)
    {
-      if (node.children == null)
+      if (node.hasChildrenArray())
       {
          actionRule.doActionOnNeighbor(node);
          return;
@@ -94,14 +92,14 @@ public class HeightQuadTreeSearchTools
 
       for (int childIndex = 0; childIndex < 4; childIndex++)
       {
-         HeightQuadTreeNodeMessage childNode = node.children[childIndex];
+         HeightQuadTreeNode childNode = node.getChild(childIndex);
          if (childNode != null)
             doActionOnLeavesRecursively(childNode, actionRule);
       }
    }
 
-   public static double findNearestNeighbor(HeightQuadTreeNodeMessage rootNode, double x, double y, double minDistance, double maxDistance,
-         MutableObject<HeightQuadTreeNodeMessage> nearestNeighborToPack)
+   public static double findNearestNeighbor(HeightQuadTreeNode rootNode, double x, double y, double minDistance, double maxDistance,
+         MutableObject<HeightQuadTreeNode> nearestNeighborToPack)
    {
       MutableDouble result = new MutableDouble(maxDistance);
 
@@ -114,11 +112,11 @@ public class HeightQuadTreeSearchTools
          return Double.NaN;
    }
 
-   private static boolean findNearestNeighbor(HeightQuadTreeNodeMessage node, double x, double y, double minDistance, MutableDouble maxDistance,
-         MutableObject<HeightQuadTreeNodeMessage> nearestNeighborToPack)
+   private static boolean findNearestNeighbor(HeightQuadTreeNode node, double x, double y, double minDistance, MutableDouble maxDistance,
+         MutableObject<HeightQuadTreeNode> nearestNeighborToPack)
    {
-      double xNode = node.centerX;
-      double yNode = node.centerY;
+      double xNode = node.getCenterX();
+      double yNode = node.getCenterY();
 
       // 1. first descend to leaf and check in leafs points.
       if (node.getNumberOfChildren() == 0)
@@ -146,7 +144,7 @@ public class HeightQuadTreeSearchTools
       if (y > yNode)
          mortonCode |= 2;
 
-      HeightQuadTreeNodeMessage child = node.children[mortonCode];
+      HeightQuadTreeNode child = node.getChild(mortonCode);
 
       if (child != null)
       {
@@ -163,7 +161,7 @@ public class HeightQuadTreeSearchTools
          if (childIndex == mortonCode)
             continue;
 
-         child = node.children[childIndex];
+         child = node.getChild(childIndex);
 
          if (child == null)
             continue;
@@ -199,7 +197,7 @@ public class HeightQuadTreeSearchTools
       return Math.copySign(output, coord);
    }
 
-   public static void doActionOnRayKeys(HeightQuadTreeNodeMessage root, Point2d origin, Vector2d direction, double maxRange, RayActionRule actionRule,
+   public static void doActionOnRayKeys(HeightQuadTreeNode root, Point2d origin, Vector2d direction, double maxRange, RayActionRule actionRule,
          double resolution)
    {
       // see "A Faster Voxel Traversal Algorithm for Ray Tracing" by Amanatides & Woo
@@ -294,28 +292,28 @@ public class HeightQuadTreeSearchTools
       } // end while
    }
 
-   public static boolean contains(HeightQuadTreeNodeMessage node, double squareRadius, double x, double y)
+   public static boolean contains(HeightQuadTreeNode node, double squareRadius, double x, double y)
    {
       // we exploit the symmetry to reduce the test to test whether the farthest corner is inside the search ball.
-      x = Math.abs(x - node.centerX);
-      y = Math.abs(y - node.centerY);
+      x = Math.abs(x - node.getCenterX());
+      y = Math.abs(y - node.getCenterY());
 
       // reminder: (x, y, z) - (-halfNodeSize, -halfNodeSize, -halfNodeSize) = (x, y, z) + (halfNodeSize, halfNodeSize, halfNodeSize)
-      x += 0.5f * node.sizeX;
-      y += 0.5f * node.sizeY;
+      x += 0.5f * node.getSizeX();
+      y += 0.5f * node.getSizeY();
 
       return (x * x + y * y) < squareRadius;
    }
 
-   public static boolean overlaps(HeightQuadTreeNodeMessage node, double x, double y, double radius, double squareRadius)
+   public static boolean overlaps(HeightQuadTreeNode node, double x, double y, double radius, double squareRadius)
    {
       // we exploit the symmetry to reduce the test to testing if its inside the Minkowski sum around the positive quadrant.
-      double dx = Math.abs(x - node.centerX);
-      double dy = Math.abs(y - node.centerY);
+      double dx = Math.abs(x - node.getCenterX());
+      double dy = Math.abs(y - node.getCenterY());
 
       // (1) Checking the line region 
-      float halfSizeX = 0.5f * node.sizeX;
-      float halfSizeY = 0.5f * node.sizeY;
+      float halfSizeX = 0.5f * node.getSizeX();
+      float halfSizeY = 0.5f * node.getSizeY();
 
       // a. completely outside, since q' is outside the relevant area.
       if (dx > radius + halfSizeX || dy > radius + halfSizeY)
@@ -332,16 +330,16 @@ public class HeightQuadTreeSearchTools
       return (dx * dx + dy * dy) < squareRadius;
    }
 
-   public static boolean inside(HeightQuadTreeNodeMessage node, double x, double y, double radius)
+   public static boolean inside(HeightQuadTreeNode node, double x, double y, double radius)
    {
       // we exploit the symmetry to reduce the test to test
       // whether the farthest corner is inside the search ball.
-      x = Math.abs(x - node.centerX);
-      y = Math.abs(y - node.centerY);
+      x = Math.abs(x - node.getCenterX());
+      y = Math.abs(y - node.getCenterY());
 
-      if (x + radius > 0.5f * node.sizeX)
+      if (x + radius > 0.5f * node.getSizeX())
          return false;
-      if (y + radius > 0.5f * node.sizeY)
+      if (y + radius > 0.5f * node.getSizeY())
          return false;
 
       return true;
@@ -349,6 +347,6 @@ public class HeightQuadTreeSearchTools
 
    public static interface NeighborActionRule
    {
-      public void doActionOnNeighbor(HeightQuadTreeNodeMessage node);
+      public void doActionOnNeighbor(HeightQuadTreeNode node);
    }
 }
