@@ -24,11 +24,11 @@ public class HeightQuadTreeToolboxRequestMessage extends TrackablePacket<HeightQ
 
    public static HeightQuadTreeToolboxRequestMessage requestQuadTreeUpdate(PacketDestination destination)
    {
-      HeightQuadTreeToolboxRequestMessage clearMessage = new HeightQuadTreeToolboxRequestMessage();
-      clearMessage.setDestination(destination);
-      clearMessage.requestClearQuadTree = false;
-      clearMessage.requestQuadTreeUpdate = true;
-      return clearMessage;
+      HeightQuadTreeToolboxRequestMessage requestMessage = new HeightQuadTreeToolboxRequestMessage();
+      requestMessage.setDestination(destination);
+      requestMessage.requestClearQuadTree = false;
+      requestMessage.requestQuadTreeUpdate = true;
+      return requestMessage;
    }
 
    public boolean isClearQuadTreeRequested()
