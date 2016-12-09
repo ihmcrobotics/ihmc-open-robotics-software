@@ -50,4 +50,10 @@ public class HeightQuadTreeToolboxRequestMessage extends TrackablePacket<HeightQ
          return false;
       return true;
    }
+
+   @Override
+   public String toString()
+   {
+      return getClass().getSimpleName() + ": clear request = " + requestClearQuadTree + ", quadTree request = " + requestQuadTreeUpdate;
+   }
 }
