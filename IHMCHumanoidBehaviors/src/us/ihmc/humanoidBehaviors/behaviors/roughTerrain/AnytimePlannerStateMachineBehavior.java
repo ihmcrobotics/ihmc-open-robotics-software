@@ -9,7 +9,6 @@ import us.ihmc.footstepPlanning.graphSearch.BipedalFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.PlanarRegionBipedalFootstepPlannerVisualizer;
 import us.ihmc.footstepPlanning.graphSearch.SimplePlanarRegionBipedalAnytimeFootstepPlanner;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.roughTerrain.PlanarRegionBipedalFootstepPlannerVisualizerFactory;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SimpleDoNothingBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SleepBehavior;
@@ -39,7 +38,6 @@ import us.ihmc.robotics.stateMachines.StateTransitionCondition;
 import us.ihmc.robotics.time.YoTimer;
 import us.ihmc.tools.FormattingTools;
 import us.ihmc.tools.io.printing.PrintTools;
-import us.ihmc.tools.thread.ThreadTools;
 
 import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
@@ -455,7 +453,6 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
          PlanarRegionsList planarRegionsList = PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsListMessage);
          if (planarRegionsList != null)
             footstepPlanner.setPlanarRegions(planarRegionsList);
-         }
 
          // notify planner footstep is being taken
          PrintTools.info("current plan size: " + currentPlan.getNumberOfSteps() + ", current footstep: " + indexOfNextFootstepToSendFromCurrentPlan
