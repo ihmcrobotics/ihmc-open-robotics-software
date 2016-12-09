@@ -23,7 +23,7 @@ public class HeightQuadTreeIteratorFactory
          @Override
          public boolean test(HeightQuadTreeNode node)
          {
-            return node.hasChildrenArray();
+            return !node.hasChildrenArray();
          }
       };
    }
