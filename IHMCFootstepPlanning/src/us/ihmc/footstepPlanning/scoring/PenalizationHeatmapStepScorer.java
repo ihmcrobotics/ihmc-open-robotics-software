@@ -38,6 +38,7 @@ public class PenalizationHeatmapStepScorer implements BipedalStepScorer
    private final DoubleYoVariable stancePitchDownwardPenalizationWeight;
    private final DoubleYoVariable angularPenalizationWeight;
    private final DoubleYoVariable goalProgressAwardWeight;
+   private final DoubleYoVariable negativeFootholdLinearPenalization;
 
    private final YoFrameVector idealToCandidateVector;
    private final YoFrameOrientation idealToCandidateOrientation;
@@ -67,6 +68,7 @@ public class PenalizationHeatmapStepScorer implements BipedalStepScorer
       stancePitchDownwardPenalizationWeight = new DoubleYoVariable(prefix + "StancePitchDownwardPenalizationWeight", parentRegistry);
       angularPenalizationWeight = new DoubleYoVariable(prefix + "AngularPenalizationWeight", parentRegistry);
       goalProgressAwardWeight = new DoubleYoVariable(prefix + "GoalProgressAwardWeight", parentRegistry);
+      negativeFootholdLinearPenalization = new DoubleYoVariable(prefix + "NegativeFootholdLinearPenalization", parentRegistry);
 
       idealToCandidateVector = new YoFrameVector(prefix + "IdealToCandidateVector", ReferenceFrame.getWorldFrame(), parentRegistry);
       idealToCandidateOrientation = new YoFrameOrientation(prefix + "IdealToCandidateOrientation", ReferenceFrame.getWorldFrame(), parentRegistry);
@@ -84,13 +86,14 @@ public class PenalizationHeatmapStepScorer implements BipedalStepScorer
       outwardPenalizationWeight.set(-2.5);
       upwardPenalizationWeight.set(-2.0);
       downwardPenalizationWeight.set(-2.0);
-      stancePitchDownwardPenalizationWeight.set(20.0);
+      stancePitchDownwardPenalizationWeight.set(-20.0);
       angularPenalizationWeight.set(0.0);
       goalProgressAwardWeight.set(0.0);
+      negativeFootholdLinearPenalization.set(-5.0);
    }
 
    @Override
-   public double scoreFootstep(FramePose stanceFoot, FramePose swingStartFoot, FramePose idealFootstep, FramePose candidateFootstep, Point3d goal)
+   public double scoreFootstep(FramePose stanceFoot, FramePose swingStartFoot, FramePose idealFootstep, FramePose candidateFootstep, Point3d goal, double percentageOfFoothold)
    {
       double score = 0.0;
 
@@ -107,7 +110,7 @@ public class PenalizationHeatmapStepScorer implements BipedalStepScorer
       double downwardPenalizationWeightConsideringStancePitch = downwardPenalizationWeight.getDoubleValue();
       if (stanceFoot.getPitch() < 0)
       {
-         downwardPenalizationWeightConsideringStancePitch += stanceFoot.getPitch() * stancePitchDownwardPenalizationWeight.getDoubleValue();
+         downwardPenalizationWeightConsideringStancePitch += -stanceFoot.getPitch() * stancePitchDownwardPenalizationWeight.getDoubleValue();
       }
 
       score += penalizeCandidateFootstep(forwardPenalizationVector, forwardPenalizationWeight.getDoubleValue());
@@ -125,7 +128,9 @@ public class PenalizationHeatmapStepScorer implements BipedalStepScorer
       goalProgressAwardVector.sub(new Vector2d(idealFootstep.getX(), idealFootstep.getY()));
 
       score += awardCandidateFootstep(goalProgressAwardVector, goalProgressAwardWeight.getDoubleValue());
-
+      
+      score += (1.0 - percentageOfFoothold) * negativeFootholdLinearPenalization.getDoubleValue();
+      
       return score;
    }
 
