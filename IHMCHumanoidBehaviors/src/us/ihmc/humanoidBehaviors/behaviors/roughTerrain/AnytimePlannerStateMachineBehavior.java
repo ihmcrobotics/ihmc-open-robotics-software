@@ -184,7 +184,7 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
       // So for now, have really conservative forward and down limits on height.
       parameters.setMaximumStepXWhenForwardAndDown(0.2);
       parameters.setMaximumStepWidth(0.4);
-      parameters.setMaximumStepZWhenForwardAndDown(0.10);
+      parameters.setMaximumStepZWhenForwardAndDown(0.20);
 
       parameters.setMaximumStepYaw(0.15); //0.25);
       parameters.setMinimumStepWidth(0.15);
@@ -451,12 +451,10 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
          footstepStatusQueue.clear();
 
          // set newest planar regions
-         if (!havePlanarRegionsBeenSet.getBooleanValue())
-         {
-            PlanarRegionsListMessage planarRegionsListMessage = planarRegionsListQueue.getLatestPacket();
-            PlanarRegionsList planarRegionsList = PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsListMessage);
-            if (planarRegionsList != null)
-               footstepPlanner.setPlanarRegions(planarRegionsList);
+         PlanarRegionsListMessage planarRegionsListMessage = planarRegionsListQueue.getLatestPacket();
+         PlanarRegionsList planarRegionsList = PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsListMessage);
+         if (planarRegionsList != null)
+            footstepPlanner.setPlanarRegions(planarRegionsList);
          }
 
          // notify planner footstep is being taken
@@ -577,10 +575,7 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
       @Override
       public boolean checkCondition()
       {
-         boolean b = receivedFootstepCompletedPacked.getBooleanValue() && !reachedGoal.getBooleanValue();
-         if (System.currentTimeMillis() % 100 == 0)
-            PrintTools.info("checking if should continue walking: " + b);
-         return b;
+         return receivedFootstepCompletedPacked.getBooleanValue() && !reachedGoal.getBooleanValue();
       }
    }
 

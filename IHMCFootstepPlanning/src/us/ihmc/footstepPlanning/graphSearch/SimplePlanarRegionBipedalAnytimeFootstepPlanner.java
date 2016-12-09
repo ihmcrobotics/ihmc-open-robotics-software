@@ -24,7 +24,7 @@ public class SimplePlanarRegionBipedalAnytimeFootstepPlanner extends PlanarRegio
    private boolean stopRequested = false;
    private boolean isBestPlanYetOptimal = false;
    private final AtomicReference<PlanarRegionsList> planarRegionsListReference = new AtomicReference<>(null);
-   private final AtomicReference<BipedalFootstepPlannerNode> newStartNodeReference = new AtomicReference<>(null);
+   private final AtomicReference<SimpleFootstep> latestExecutedFootstepReference = new AtomicReference<>(null);
    private final IntegerYoVariable maxNumberOfNodesBeforeSleeping = new IntegerYoVariable(namePrefix + "maxNumberOfNodesBeforeSleeping", registry);
    private final IntegerYoVariable stackSize = new IntegerYoVariable(namePrefix + "stackSize", registry);
 
@@ -76,67 +76,76 @@ public class SimplePlanarRegionBipedalAnytimeFootstepPlanner extends PlanarRegio
 
    private void trimBestPlanToNewPlanarRegions()
    {
-      List<BipedalFootstepPlannerNode> listOfNodes = FootstepPlanningUtils.createListOfNodesFromEndNode(closestNodeToGoal);
-      PrintTools.info("trimming plan to new planar regions");
-
-      for (int i = 0; i < listOfNodes.size(); i++)
-      {
-         BipedalFootstepPlannerNode node = listOfNodes.get(i);
-         boolean stillIsValid = planarRegionPotentialNextStepCalculator.snapNodeAndCheckIfAcceptableToExpand(node);
-         PrintTools.info("trying to snap node with position " + node.getSolePosition());
-
-         if(!stillIsValid)
-         {
-            closestNodeToGoal = node.getParentNode();
-            if(i < listOfNodes.size())
-            {
-               FootstepPlan trimmedBestPlan = FootstepPlanningUtils.createFootstepPlanFromEndNode(closestNodeToGoal);
-               bestPlanYet.set(trimmedBestPlan);
-            }
-
-            PrintTools.info("valid up to node " + i + " of " + listOfNodes.size());
-            checkIfNearbyNodeAlreadyExistsAndStoreIfNot(node);
-            break;
-         }
-         else
-         {
-            checkIfNearbyNodeAlreadyExistsAndStoreIfNot(node);
-            PrintTools.info("valid node");
-         }
-      }
+//      List<BipedalFootstepPlannerNode> listOfNodes = FootstepPlanningUtils.createListOfNodesFromEndNode(closestNodeToGoal);
+//      PrintTools.info("trimming plan to new planar regions");
+//
+//      for (int i = 0; i < listOfNodes.size(); i++)
+//      {
+//         BipedalFootstepPlannerNode node = listOfNodes.get(i);
+//         boolean stillIsValid = planarRegionPotentialNextStepCalculator.snapNodeAndCheckIfAcceptableToExpand(node);
+//         PrintTools.info("trying to snap node with position " + node.getSolePosition());
+//
+//         if(!stillIsValid)
+//         {
+//            closestNodeToGoal = node.getParentNode();
+//            if(i < listOfNodes.size())
+//            {
+//               FootstepPlan trimmedBestPlan = FootstepPlanningUtils.createFootstepPlanFromEndNode(closestNodeToGoal);
+//               bestPlanYet.set(trimmedBestPlan);
+//            }
+//
+//            PrintTools.info("valid up to node " + i + " of " + listOfNodes.size());
+//            checkIfNearbyNodeAlreadyExistsAndStoreIfNot(node);
+//            break;
+//         }
+//         else
+//         {
+//            checkIfNearbyNodeAlreadyExistsAndStoreIfNot(node);
+//            PrintTools.info("valid node");
+//         }
+//      }
    }
 
    @Override
    public void executingFootstep(SimpleFootstep footstep)
    {
-      footstep.getSoleFramePose(tempFramePose);
-      tempFramePose.getRigidBodyTransform(tempTransform);
-      BipedalFootstepPlannerNode newStartNode = new BipedalFootstepPlannerNode(footstep.getRobotSide(), tempTransform);
-      newStartNodeReference.set(newStartNode);
-
-      PrintTools.info("executing footstep");
+      latestExecutedFootstepReference.set(footstep);
    }
 
    private void replaceStartNode()
    {
-      BipedalFootstepPlannerNode newStartNode = newStartNodeReference.getAndSet(null);
-      if(newStartNode != null)
+//      BipedalFootstepPlannerNode newStartNode = newStartNodeReference.getAndSet(null);
+//      if(newStartNode != null)
+//      {
+//         ArrayList<BipedalFootstepPlannerNode> childrenOfStartNode = new ArrayList<>();
+//         startNode.getChildren(childrenOfStartNode);
+//         PrintTools.info("clearing children of start node");
+//
+//         for (BipedalFootstepPlannerNode node : childrenOfStartNode)
+//         {
+//            if (!node.equals(newStartNode))
+//            {
+//               recursivelyMarkAsDead(node);
+//            }
+//            else
+//            {
+//               PrintTools.info("found new start node");
+//               startNode = node;
+//            }
+//         }
+//
+//         initialSide = startNode.getRobotSide();
+//         startNode.getSoleTransform(initialFootPose);
+//      }
+
+      SimpleFootstep footstep = latestExecutedFootstepReference.getAndSet(null);
+      if (footstep != null)
       {
-         ArrayList<BipedalFootstepPlannerNode> childrenOfStartNode = new ArrayList<>();
-         startNode.getChildren(childrenOfStartNode);
-         PrintTools.info("clearing children of start node");
-
-         for(BipedalFootstepPlannerNode node : childrenOfStartNode)
-         {
-            if(!node.equals(newStartNode))
-            {
-               recursivelyMarkAsDead(node);
-            }
-         }
-
-         startNode = newStartNode;
-         initialSide = startNode.getRobotSide();
-         startNode.getSoleTransform(initialFootPose);
+         FramePose tempPose = new FramePose();
+         initialSide = footstep.getRobotSide();
+         footstep.getSoleFramePose(tempPose);
+         tempPose.getRigidBodyTransform(initialFootPose);
+         startNode = new BipedalFootstepPlannerNode(initialSide, initialFootPose);
       }
    }
 
