@@ -85,8 +85,6 @@ public class ValkyrieArmControllerParameters extends ArmControllerParameters
    @Override
    public String[] getPositionControlledJointNames(RobotSide robotSide)
    {
-      if (runningOnRealRobot)
-      {
          String[] positionControlledJointNames = new String[3];
 
          int i = 0;
@@ -95,11 +93,6 @@ public class ValkyrieArmControllerParameters extends ArmControllerParameters
          positionControlledJointNames[i++] = jointMap.getArmJointName(robotSide, ArmJointName.WRIST_ROLL);
 
          return positionControlledJointNames;
-      }
-      else
-      {
-         return null;
-      }
    }
 
    private Map<ArmJointName, DoubleYoVariable> jointAccelerationIntegrationAlphaPosition;
