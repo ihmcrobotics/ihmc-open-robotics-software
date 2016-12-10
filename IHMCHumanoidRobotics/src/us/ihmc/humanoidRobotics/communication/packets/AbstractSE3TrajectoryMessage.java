@@ -152,8 +152,11 @@ public abstract class AbstractSE3TrajectoryMessage<T extends AbstractSE3Trajecto
       if (selectionMatrixDiagonal == null)
          selectionMatrixDiagonal = new float[6];
 
-      for (int i = 0; i < selectionMatrix.getNumRows(); i++)
-         selectionMatrixDiagonal[i] = (float) selectionMatrix.get(i, i);
+      DenseMatrix64F inner = new DenseMatrix64F(selectionMatrix.getNumCols(), selectionMatrix.getNumCols());
+      CommonOps.multInner(selectionMatrix, inner);
+      
+      for (int i = 0; i < inner.getNumRows(); i++)
+         selectionMatrixDiagonal[i] = (float) inner.get(i, i);
    }
 
    public final int getNumberOfTrajectoryPoints()

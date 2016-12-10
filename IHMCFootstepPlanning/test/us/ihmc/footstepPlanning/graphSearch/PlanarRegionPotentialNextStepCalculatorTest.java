@@ -129,7 +129,7 @@ public class PlanarRegionPotentialNextStepCalculatorTest
 
       FootstepPlan footstepPlan = new FootstepPlan(endNode);
 //      System.out.println(footstepPlan.getNumberOfSteps());
-      listener.notifyListenerSolutionWasFound(footstepPlan);
+      listener.solutionWasFound(footstepPlan);
 
       assertTrue(footstepPlan.getNumberOfSteps() <= maxNumberOfExpectedFootsteps);
    }

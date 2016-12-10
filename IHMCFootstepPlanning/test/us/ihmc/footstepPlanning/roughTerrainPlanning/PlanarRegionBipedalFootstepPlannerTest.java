@@ -125,6 +125,8 @@ public class PlanarRegionBipedalFootstepPlannerTest extends FootstepPlannerOnRou
       parameters.setMinimumStepWidth(0.15);
       parameters.setMinimumFootholdPercent(0.95);
 
+      parameters.setMinimumStepLength(-0.03);
+
       parameters.setWiggleInsideDelta(0.05);
       parameters.setMaximumXYWiggleDistance(1.0);
       parameters.setMaximumYawWiggle(0.1);

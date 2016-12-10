@@ -384,6 +384,7 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
 
       commandInputManager.flushAllCommands();
 
+      privilegedConfigurationCommand.clear();
       privilegedConfigurationCommand.setPrivilegedConfigurationOption(PrivilegedConfigurationOption.AT_ZERO);
 
       for (RobotSide robotSide : RobotSide.values)

@@ -384,6 +384,8 @@ public class PlanarRegionPotentialNextStepCalculator
 
    private boolean checkIfNodeAcceptableScoreAndAddToList(BipedalFootstepPlannerNode node, ArrayList<BipedalFootstepPlannerNode> nodesToAdd, Vector3d idealStepVector, double idealStepYaw)
    {
+      notifyListenerNodeUnderConsideration(node);
+
       boolean acceptable = snapNodeAndCheckIfAcceptableToExpand(node);
 
       if (acceptable)
@@ -515,8 +517,6 @@ public class PlanarRegionPotentialNextStepCalculator
    {
       nodeToExpand.removePitchAndRoll();
 
-      notifyListenerNodeSelectedForExpansion(nodeToExpand);
-
       if (nodeToExpand != startNode) // StartNode is from an actual footstep, so we don't need to snap it...
       {
          // Make sure popped node is a good one and can be expanded...
@@ -534,6 +534,8 @@ public class PlanarRegionPotentialNextStepCalculator
                return false;
          }
       }
+
+      notifyListenerNodeUnderConsiderationWasSuccessful(nodeToExpand);
 
       return true;
    }
@@ -553,14 +555,14 @@ public class PlanarRegionPotentialNextStepCalculator
          if (((robotSide == RobotSide.LEFT) && (stepFromParentInSoleFrame.getY() < minimumStepWidth))
                || ((robotSide == RobotSide.RIGHT) && (stepFromParentInSoleFrame.getY() > -minimumStepWidth)))
          {
-            notifyListenerNodeForExpansionWasRejected(nodeToExpand, BipedalFootstepPlannerNodeRejectionReason.STEP_NOT_WIDE_ENOUGH);
+            notifyListenerNodeUnderConsiderationWasRejected(nodeToExpand, BipedalFootstepPlannerNodeRejectionReason.STEP_NOT_WIDE_ENOUGH);
             return false;
          }
          
          double minimumStepLength = parameters.getMinimumStepLength();
          if (stepFromParentInSoleFrame.getX() < minimumStepLength)
          {
-            notifyListenerNodeForExpansionWasRejected(nodeToExpand, BipedalFootstepPlannerNodeRejectionReason.STEP_NOT_LONG_ENOUGH);
+            notifyListenerNodeUnderConsiderationWasRejected(nodeToExpand, BipedalFootstepPlannerNodeRejectionReason.STEP_NOT_LONG_ENOUGH);
             return false;
          }
 
@@ -573,21 +575,21 @@ public class PlanarRegionPotentialNextStepCalculator
 
          if (Math.abs(stepFromParentInWorld.getZ()) > parameters.getMaximumStepZ())
          {
-            notifyListenerNodeForExpansionWasRejected(nodeToExpand, BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_HIGH_OR_LOW);
+            notifyListenerNodeUnderConsiderationWasRejected(nodeToExpand, BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_HIGH_OR_LOW);
             return false;
          }
 
          if ((stepFromParentInSoleFrame.getX() > parameters.getMaximumStepXWhenForwardAndDown())
                && (stepFromParentInWorld.getZ() < -Math.abs(parameters.getMaximumStepZWhenForwardAndDown())))
          {
-            notifyListenerNodeForExpansionWasRejected(nodeToExpand, BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_FORWARD_AND_DOWN);
+            notifyListenerNodeUnderConsiderationWasRejected(nodeToExpand, BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_FORWARD_AND_DOWN);
             return false;
          }
 
          stepReach.set(stepFromParentInWorld.length());
          if (stepReach.getDoubleValue() > parameters.getMaximumStepReach())
          {
-            notifyListenerNodeForExpansionWasRejected(nodeToExpand, BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_FAR);
+            notifyListenerNodeUnderConsiderationWasRejected(nodeToExpand, BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_FAR);
             return false;
          }
       }
@@ -614,7 +616,7 @@ public class PlanarRegionPotentialNextStepCalculator
 
       if (grandParentNode.epsilonEquals(nodeToExpand, 1e-1))
       {
-         notifyListenerNodeForExpansionWasRejected(nodeToExpand, BipedalFootstepPlannerNodeRejectionReason.STEP_IN_PLACE);
+         notifyListenerNodeUnderConsiderationWasRejected(nodeToExpand, BipedalFootstepPlannerNodeRejectionReason.STEP_IN_PLACE);
          return false;
       }
 
@@ -656,7 +658,7 @@ public class PlanarRegionPotentialNextStepCalculator
          
          if (totalArea.getDoubleValue() < parameters.getMinimumFootholdPercent() * footArea.getDoubleValue())
          {
-            notifyListenerNodeForExpansionWasRejected(nodeToExpand, BipedalFootstepPlannerNodeRejectionReason.NOT_ENOUGH_AREA);
+            notifyListenerNodeUnderConsiderationWasRejected(nodeToExpand, BipedalFootstepPlannerNodeRejectionReason.NOT_ENOUGH_AREA);
             return false;
          }
       }
@@ -688,19 +690,19 @@ public class PlanarRegionPotentialNextStepCalculator
                                                                                                         planarRegionToPack);
       if (snapTransform == null)
       {
-         notifyListenerNodeForExpansionWasRejected(bipedalFootstepPlannerNode, BipedalFootstepPlannerNodeRejectionReason.COULD_NOT_SNAP);
+         notifyListenerNodeUnderConsiderationWasRejected(bipedalFootstepPlannerNode, BipedalFootstepPlannerNodeRejectionReason.COULD_NOT_SNAP);
          return null;
       }
 
       if (Math.abs(snapTransform.getM22()) < parameters.getMinimumSurfaceNormalZ())
       {
-         notifyListenerNodeForExpansionWasRejected(bipedalFootstepPlannerNode, BipedalFootstepPlannerNodeRejectionReason.SURFACE_NORMAL_TOO_STEEP_TO_SNAP);
+         notifyListenerNodeUnderConsiderationWasRejected(bipedalFootstepPlannerNode, BipedalFootstepPlannerNodeRejectionReason.SURFACE_NORMAL_TOO_STEEP_TO_SNAP);
          return null;
       }
 
       BipedalFootstepPlannerNode nodeAfterSnap = new BipedalFootstepPlannerNode(bipedalFootstepPlannerNode);
       nodeAfterSnap.transformSoleTransformWithSnapTransformFromZeroZ(snapTransform, planarRegionToPack);
-      notifyListenerNodeSnappedAndStillSelectedForExpansion(nodeAfterSnap);
+//      notifyListenerNodeSnappedAndStillSelectedForExpansion(nodeAfterSnap);
 
       WiggleParameters wiggleParameters = new WiggleParameters();
       wiggleParameters.deltaInside = wiggleInsideDelta;
@@ -724,7 +726,7 @@ public class PlanarRegionPotentialNextStepCalculator
 
       if (wiggleTransformLocalToLocal == null)
       {
-         notifyListenerNodeForExpansionWasRejected(nodeAfterSnap, BipedalFootstepPlannerNodeRejectionReason.COULD_NOT_WIGGLE_INSIDE);
+         notifyListenerNodeUnderConsiderationWasRejected(nodeAfterSnap, BipedalFootstepPlannerNodeRejectionReason.COULD_NOT_WIGGLE_INSIDE);
 
          //TODO: Possibly have different node scores depending on how firm on ground they are.
          if (parameters.getRejectIfCannotFullyWiggleInside())
@@ -811,7 +813,7 @@ public class PlanarRegionPotentialNextStepCalculator
 
                   if (zPenetration > parameters.getMaximumZPenetrationOnVRegions())
                   {
-                     notifyListenerNodeForExpansionWasRejected(bipedalFootstepPlannerNode,
+                     notifyListenerNodeUnderConsiderationWasRejected(bipedalFootstepPlannerNode,
                                                                BipedalFootstepPlannerNodeRejectionReason.TOO_MUCH_PENETRATION_AFTER_WIGGLE);
                      return null;
                   }
@@ -828,27 +830,27 @@ public class PlanarRegionPotentialNextStepCalculator
       return Math.abs(soleTransformBeforeSnap.getM22() - 1.0) < 1e-4;
    }
 
-   private void notifyListenerNodeSnappedAndStillSelectedForExpansion(BipedalFootstepPlannerNode nodeAfterSnap)
+   private void notifyListenerNodeUnderConsideration(BipedalFootstepPlannerNode nodeToExpand)
    {
       if (listener != null)
       {
-         listener.nodeSelectedForExpansion(nodeAfterSnap);
+         listener.nodeUnderConsideration(nodeToExpand);
       }
    }
 
-   private void notifyListenerNodeSelectedForExpansion(BipedalFootstepPlannerNode nodeToExpand)
+   private void notifyListenerNodeUnderConsiderationWasSuccessful(BipedalFootstepPlannerNode node)
    {
       if (listener != null)
       {
-         listener.nodeSelectedForExpansion(nodeToExpand);
+         listener.nodeUnderConsiderationWasSuccessful(node);
       }
    }
 
-   private void notifyListenerNodeForExpansionWasRejected(BipedalFootstepPlannerNode nodeToExpand, BipedalFootstepPlannerNodeRejectionReason reason)
+   private void notifyListenerNodeUnderConsiderationWasRejected(BipedalFootstepPlannerNode nodeToExpand, BipedalFootstepPlannerNodeRejectionReason reason)
    {
       if (listener != null)
       {
-         listener.nodeForExpansionWasRejected(nodeToExpand, reason);
+         listener.nodeUnderConsiderationWasRejected(nodeToExpand, reason);
       }
    }
 
