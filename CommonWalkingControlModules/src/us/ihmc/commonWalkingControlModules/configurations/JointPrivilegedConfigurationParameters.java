@@ -8,12 +8,12 @@ public class JointPrivilegedConfigurationParameters
 
    public double getConfigurationGain()
    {
-      return 100.0;
+      return 40.0;
    }
 
    public double getVelocityGain()
    {
-      return 10.0;
+      return 6.0;
    }
 
    public double getMaxVelocity()
@@ -28,6 +28,6 @@ public class JointPrivilegedConfigurationParameters
 
    public double getWeight()
    {
-      return 10.0;
+      return 5.0;
    }
 }
