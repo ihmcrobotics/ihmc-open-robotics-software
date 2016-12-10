@@ -232,7 +232,7 @@ public class SimplePlanarRegionBipedalAnytimeFootstepPlanner extends PlanarRegio
             continue;
 
          setNodesCostsAndRememberIfClosestYet(nodeToExpand);
-         notifyListenerNodeForExpansionWasAccepted(nodeToExpand);
+         notifyListenerNodeIsBeingExpanded(nodeToExpand);
 
          if (nodeToExpand.isAtGoal())
          {
