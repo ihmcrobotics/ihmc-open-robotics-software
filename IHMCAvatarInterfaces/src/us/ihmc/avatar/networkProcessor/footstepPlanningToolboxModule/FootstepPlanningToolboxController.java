@@ -91,8 +91,8 @@ public class FootstepPlanningToolboxController extends ToolboxController
    private PlanarRegionBipedalFootstepPlanner createPlanarRegionBipedalPlanner(SideDependentList<ConvexPolygon2d> footPolygons)
    {
       BipedalFootstepPlannerParameters parameters = new BipedalFootstepPlannerParameters(registry);
-      parameters.setMaximumStepReach(0.55);
-      parameters.setMaximumStepZ(0.25);
+      parameters.setMaximumStepReach(0.62);
+      parameters.setMaximumStepZ(0.15);
 
       parameters.setMaximumStepXWhenForwardAndDown(0.32);
       parameters.setMaximumStepZWhenForwardAndDown(0.18);
@@ -100,12 +100,12 @@ public class FootstepPlanningToolboxController extends ToolboxController
       parameters.setMaximumStepYaw(0.15);
       parameters.setMaximumStepWidth(0.4);
       parameters.setMinimumStepWidth(0.15);
-      parameters.setMinimumFootholdPercent(0.95);
+      parameters.setMinimumFootholdPercent(0.40); //0.50);
 
-      parameters.setWiggleInsideDelta(0.02);
-      parameters.setMaximumXYWiggleDistance(1.0);
+      parameters.setWiggleInsideDelta(-0.02); //-0.05);
+      parameters.setMaximumXYWiggleDistance(0.05); //1.0);
       parameters.setMaximumYawWiggle(0.1);
-      parameters.setRejectIfCannotFullyWiggleInside(true);
+      parameters.setRejectIfCannotFullyWiggleInside(false);
       parameters.setWiggleIntoConvexHullOfPlanarRegions(true);
 
       double idealFootstepLength = 0.3;
@@ -116,7 +116,7 @@ public class FootstepPlanningToolboxController extends ToolboxController
 
       planner.setFeetPolygons(footPolygons);
 
-      planner.setMaximumNumberOfNodesToExpand(500);
+      planner.setMaximumNumberOfNodesToExpand(2000);
 
       if (visualize)
       {

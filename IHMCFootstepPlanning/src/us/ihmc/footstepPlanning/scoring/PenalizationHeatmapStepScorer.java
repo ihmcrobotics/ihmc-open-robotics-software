@@ -89,7 +89,7 @@ public class PenalizationHeatmapStepScorer implements BipedalStepScorer
       stancePitchDownwardPenalizationWeight.set(-20.0);
       angularPenalizationWeight.set(0.0);
       goalProgressAwardWeight.set(0.0);
-      negativeFootholdLinearPenalization.set(-5.0);
+      negativeFootholdLinearPenalization.set(-0.5); //-5.0);
    }
 
    @Override
