@@ -1190,7 +1190,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
    {
       ThreadTools.startAThread(this, "Simulation Contruction Set");
 
-      while (this.isSimulationThreadUpAndRunning())
+      while (!this.isSimulationThreadUpAndRunning())
       {
          Thread.yield();
       }

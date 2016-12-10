@@ -32,6 +32,7 @@ import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.RotationTools;
+import us.ihmc.robotics.math.filters.GlitchFilteredBooleanYoVariable;
 import us.ihmc.robotics.math.frames.YoFramePoseUsingQuaternions;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.referenceFrames.TransformReferenceFrame;
@@ -72,6 +73,7 @@ public class FiducialDetectorFromCameraImages
    private final DoubleYoVariable detectorEulerRotZ = new DoubleYoVariable(prefix + "DetectorEulerRotZ", registry);
 
    private final BooleanYoVariable targetIDHasBeenLocated = new BooleanYoVariable(prefix + "TargetIDHasBeenLocated", registry);
+   private final GlitchFilteredBooleanYoVariable targetIDHasBeenLocatedFiltered = new GlitchFilteredBooleanYoVariable(prefix + "TargetIDHasBeenLocatedFiltered", registry, targetIDHasBeenLocated, 4);
    private final LongYoVariable targetIDToLocate = new LongYoVariable(prefix + "TargetIDToLocate", registry);
 
    private final YoFramePoseUsingQuaternions cameraPose = new YoFramePoseUsingQuaternions(prefix + "CameraPoseWorld", ReferenceFrame.getWorldFrame(), registry);
@@ -263,6 +265,8 @@ public class FiducialDetectorFromCameraImages
             targetIDHasBeenLocated.set(false);
          }
       }
+      
+      targetIDHasBeenLocatedFiltered.update();
    }
 
    private final IntrinsicParameters intrinsicParameters = new IntrinsicParameters();
