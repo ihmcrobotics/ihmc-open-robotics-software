@@ -418,11 +418,11 @@ public class PlanarRegionPotentialNextStepCalculator
             double score;
             if (enablePenalizationHeatmapScoring.getBooleanValue())
             {
-               score = penalizationHeatmapStepScorer.scoreFootstep(stanceFootPose, swingStartFootPose, idealFootstepPose, candidateFootPose, swingFootGoal);
+               score = penalizationHeatmapStepScorer.scoreFootstep(stanceFootPose, swingStartFootPose, idealFootstepPose, candidateFootPose, swingFootGoal, node.getPercentageOfFoothold());
             }
             else
             {
-               score = orderInWhichConstructedStepScorer.scoreFootstep(stanceFootPose, swingStartFootPose, idealFootstepPose, candidateFootPose, swingFootGoal);
+               score = orderInWhichConstructedStepScorer.scoreFootstep(stanceFootPose, swingStartFootPose, idealFootstepPose, candidateFootPose, swingFootGoal, node.getPercentageOfFoothold());
             }
 
             node.setSingleStepScore(score);
@@ -646,17 +646,16 @@ public class PlanarRegionPotentialNextStepCalculator
          snappedPolygon.update();
          footArea.set(snappedPolygon.getArea());
 
-         ArrayList<ConvexPolygon2d> polygonIntersectionsOnPlanarRegion = new ArrayList<>();
-         planarRegion.getPolygonIntersectionsWhenSnapped(snappedPolygon, nodeToExpandTransform, polygonIntersectionsOnPlanarRegion);
+         ConvexPolygon2d footholdPolygon = new ConvexPolygon2d();
+         totalArea.set(planarRegion.getPolygonIntersectionAreaWhenSnapped(snappedPolygon, nodeToExpandTransform, footholdPolygon));
 
-         totalArea.set(0.0);
-         for (int i = 0; i < polygonIntersectionsOnPlanarRegion.size(); i++)
+         nodeToExpand.setPercentageOfFoothold(totalArea.getDoubleValue() / footArea.getDoubleValue());
+         
+         if (nodeToExpand.isPartialFoothold())
          {
-            ConvexPolygon2d intersectionPolygon = polygonIntersectionsOnPlanarRegion.get(i);
-            intersectionPolygon.update();
-            totalArea.add(intersectionPolygon.getArea());
+            nodeToExpand.setPartialFootholdPolygon(footholdPolygon);
          }
-
+         
          if (totalArea.getDoubleValue() < parameters.getMinimumFootholdPercent() * footArea.getDoubleValue())
          {
             notifyListenerNodeUnderConsiderationWasRejected(nodeToExpand, BipedalFootstepPlannerNodeRejectionReason.NOT_ENOUGH_AREA);
