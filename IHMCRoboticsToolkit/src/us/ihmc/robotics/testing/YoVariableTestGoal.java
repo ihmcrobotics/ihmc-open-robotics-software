@@ -184,6 +184,62 @@ public abstract class YoVariableTestGoal implements VariableChangedListener
 
       };
    }
+   
+   public static YoVariableTestGoal or(YoVariableTestGoal goalOne, YoVariableTestGoal goalTwo)
+   {
+      return new YoVariableTestGoal()
+      {
+         @Override
+         public boolean currentlyMeetsGoal()
+         {
+            return goalOne.currentlyMeetsGoal() || goalTwo.currentlyMeetsGoal();
+         }
+
+         @Override
+         public String toString()
+         {
+            return goalOne.toString() + " or " + goalTwo.toString();
+         }
+
+      };
+   }
+   
+   public static YoVariableTestGoal and(YoVariableTestGoal goalOne, YoVariableTestGoal goalTwo)
+   {
+      return new YoVariableTestGoal()
+      {
+         @Override
+         public boolean currentlyMeetsGoal()
+         {
+            return goalOne.currentlyMeetsGoal() && goalTwo.currentlyMeetsGoal();
+         }
+
+         @Override
+         public String toString()
+         {
+            return goalOne.toString() + " and " + goalTwo.toString();
+         }
+
+      };
+   }
+
+   public static YoVariableTestGoal not(YoVariableTestGoal goal)
+   {
+      return new YoVariableTestGoal()
+      {
+         @Override
+         public boolean currentlyMeetsGoal()
+         {
+            return !goal.currentlyMeetsGoal();
+         }
+
+         @Override
+         public String toString()
+         {
+            return "not " + goal.toString();
+         }
+      };
+   }
 
    private static String getFormattedBooleanYoVariable(final BooleanYoVariable booleanYoVariable)
    {
