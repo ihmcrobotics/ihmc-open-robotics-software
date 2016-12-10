@@ -193,6 +193,8 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
             super.doTransitionOutOfAction();
 
             sendPacketToUI(new UIPositionCheckerPacket(goalPose.getFramePointCopy().getPoint(), goalPose.getFrameOrientationCopy().getQuaternion()));
+
+            PrintTools.info("got the goal: \n" + goalPose + " \n requesting planar regions...");
          }
       };
 
@@ -231,7 +233,7 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
          }
       };
 
-      statemachine.addStateWithDoneTransition(locateGoalAction, AnytimePlanningState.CHECK_FOR_BEST_PLAN.REQUEST_AND_WAIT_FOR_PLANAR_REGIONS);
+      statemachine.addStateWithDoneTransition(locateGoalAction, AnytimePlanningState.REQUEST_AND_WAIT_FOR_PLANAR_REGIONS);
       statemachine.addStateWithDoneTransition(requestPlanarRegionsAction, AnytimePlanningState.SLEEP);
       statemachine.addStateWithDoneTransition(sleepAction, AnytimePlanningState.CHECK_FOR_BEST_PLAN);
       statemachine.addState(checkForBestPlan);

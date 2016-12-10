@@ -63,7 +63,7 @@ public class LocateGoalBehavior extends AbstractBehavior
 
    public void getReportedGoalPoseWorldFrame(FramePose framePoseToPack)
    {
-      detectorBehaviorService.getReportedGoalPoseWorldFrame(framePoseToPack);
+      framePoseToPack.setIncludingFrame(foundFiducialPose);
    }
 
    @Override
