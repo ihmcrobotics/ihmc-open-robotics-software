@@ -13,6 +13,7 @@ import us.ihmc.communication.net.AtomicSettableTimestampProvider;
 import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
 import us.ihmc.graphics3DAdapter.camera.RenderedSceneHandler;
 import us.ihmc.graphics3DDescription.Graphics3DObject;
+import us.ihmc.graphics3DDescription.appearance.YoAppearance;
 import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -31,10 +32,13 @@ import us.ihmc.simulationconstructionset.util.environments.Fiducial;
 import us.ihmc.simulationconstructionset.util.environments.FloatingFiducialBoxRobot;
 import us.ihmc.simulationconstructionset.util.simulationRunner.GoalOrientedTestConductor;
 import us.ihmc.tools.TimestampProvider;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.continuousIntegration.ContinuousIntegrationTools;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
 import us.ihmc.tools.thread.ThreadTools;
 
+@ContinuousIntegrationPlan(categories = IntegrationCategory.IN_DEVELOPMENT)
 public class FiducialDetectorFromCameraImagesTest
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
@@ -64,6 +68,12 @@ public class FiducialDetectorFromCameraImagesTest
       SimulationConstructionSet scsForDetecting = new SimulationConstructionSet(new Robot[] { simpleRobotWithCamera, floatingFiducialBoxRobot});
       scsForDetecting.addYoGraphicsListRegistry(yoGraphicsListRegistry);
 
+      
+      Graphics3DObject staticLinkGraphics = new Graphics3DObject();
+      staticLinkGraphics.translate(10.0, 0.0, 0.0);
+      staticLinkGraphics.addCube(0.01, 10.0, 10.0, YoAppearance.Orange());
+      scsForDetecting.addStaticLinkGraphics(staticLinkGraphics);
+      
       CameraConfiguration cameraConfiguration = new CameraConfiguration("cameraMount");
       cameraConfiguration.setCameraMount("cameraMount");
       //      cameraConfiguration.setCameraFieldOfView(fieldOfView);
@@ -127,6 +137,7 @@ public class FiducialDetectorFromCameraImagesTest
       GoalOrientedTestConductor testConductor = new GoalOrientedTestConductor(scsForDetecting, simulationTestingParameters);
 
       BooleanYoVariable fiducialTargetIDHasBeenLocated = (BooleanYoVariable) scsForDetecting.getVariable("fiducialTargetIDHasBeenLocated");
+      BooleanYoVariable fiducialTargetIDHasBeenLocatedFiltered = (BooleanYoVariable) scsForDetecting.getVariable("fiducialTargetIDHasBeenLocatedFiltered");
 
       DoubleYoVariable fiducialReportedPoseWorldFrameX = (DoubleYoVariable) scsForDetecting.getVariable("fiducialReportedPoseWorldFrameX");
       DoubleYoVariable fiducialReportedPoseWorldFrameY = (DoubleYoVariable) scsForDetecting.getVariable("fiducialReportedPoseWorldFrameY");
@@ -180,7 +191,7 @@ public class FiducialDetectorFromCameraImagesTest
 
       testConductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(time, 6.0));
 
-      testConductor.addSustainGoal(YoVariableTestGoal.booleanEquals(fiducialTargetIDHasBeenLocated, true));
+      testConductor.addSustainGoal(YoVariableTestGoal.or(YoVariableTestGoal.doubleLessThan(time, 0.1), YoVariableTestGoal.booleanEquals(fiducialTargetIDHasBeenLocatedFiltered, true)));
 
       double okTrackingDeltaPositionX = 0.05;
       double okTrackingDeltaPositionYZ = 0.05;
