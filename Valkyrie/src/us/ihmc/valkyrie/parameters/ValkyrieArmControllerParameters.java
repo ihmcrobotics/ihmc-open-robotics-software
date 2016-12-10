@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
@@ -22,9 +23,9 @@ public class ValkyrieArmControllerParameters extends ArmControllerParameters
    private final boolean runningOnRealRobot;
    private final DRCRobotJointMap jointMap;
 
-   public ValkyrieArmControllerParameters(boolean runningOnRealRobot, DRCRobotJointMap jointMap)
+   public ValkyrieArmControllerParameters(DRCRobotJointMap jointMap, DRCRobotModel.RobotTarget target)
    {
-      this.runningOnRealRobot = runningOnRealRobot;
+      this.runningOnRealRobot = target == DRCRobotModel.RobotTarget.REAL_ROBOT || target == DRCRobotModel.RobotTarget.GAZEBO;
       this.jointMap = jointMap;
    }
 
@@ -85,6 +86,8 @@ public class ValkyrieArmControllerParameters extends ArmControllerParameters
    @Override
    public String[] getPositionControlledJointNames(RobotSide robotSide)
    {
+      if (runningOnRealRobot)
+      {
          String[] positionControlledJointNames = new String[3];
 
          int i = 0;
@@ -93,6 +96,11 @@ public class ValkyrieArmControllerParameters extends ArmControllerParameters
          positionControlledJointNames[i++] = jointMap.getArmJointName(robotSide, ArmJointName.WRIST_ROLL);
 
          return positionControlledJointNames;
+      }
+      else
+      {
+         return null;
+      }
    }
 
    private Map<ArmJointName, DoubleYoVariable> jointAccelerationIntegrationAlphaPosition;
