@@ -138,7 +138,7 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
             continue;
 
          numberOfNodesExpanded.increment();
-         notifyListenerNodeForExpansionWasAccepted(nodeToExpand);
+         notifyListenerNodeIsBeingExpanded(nodeToExpand);
 
          if (nodeToExpand.isAtGoal())
          {
@@ -205,7 +205,7 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
    {
       if (listener != null)
       {
-         listener.notifyListenerSolutionWasFound(footstepPlan);
+         listener.solutionWasFound(footstepPlan);
       }
    }
 
@@ -213,15 +213,15 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
    {
       if (listener != null)
       {
-         listener.notifyListenerSolutionWasNotFound();
+         listener.solutionWasNotFound();
       }
    }
 
-   protected void notifyListenerNodeForExpansionWasAccepted(BipedalFootstepPlannerNode nodeToExpand)
+   protected void notifyListenerNodeIsBeingExpanded(BipedalFootstepPlannerNode nodeToExpand)
    {
       if (listener != null)
       {
-         listener.nodeForExpansionWasAccepted(nodeToExpand);
+         listener.nodeIsBeingExpanded(nodeToExpand);
       }
    }
 }
