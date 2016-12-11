@@ -1089,6 +1089,6 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    @Override
    public boolean controlHeightWithMomentum()
    {
-      return false;
+      return true;
    }
 }
