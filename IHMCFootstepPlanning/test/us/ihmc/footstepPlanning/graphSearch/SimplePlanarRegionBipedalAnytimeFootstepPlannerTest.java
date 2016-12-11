@@ -36,9 +36,13 @@ public class SimplePlanarRegionBipedalAnytimeFootstepPlannerTest
    @Test(timeout = 300000)
    public void testSameResultsAsNormalPlannerWhenUsedAsANormalPlanner()
    {
-      SimplePlanarRegionBipedalAnytimeFootstepPlanner anytimePlannerOne = createAnytimePlanner();
-      PlanarRegionBipedalFootstepPlanner normalPlannerTwo = createNormalPlanner();
-      SimplePlanarRegionBipedalAnytimeFootstepPlanner anytimePlannerThree = createAnytimePlanner();
+      YoVariableRegistry registryOne = new YoVariableRegistry("registryOne");
+      YoVariableRegistry registryTwo = new YoVariableRegistry("registryTwo");
+      YoVariableRegistry registryThree = new YoVariableRegistry("registryThree");
+
+      SimplePlanarRegionBipedalAnytimeFootstepPlanner anytimePlannerOne = createAnytimePlanner(registryOne);
+      PlanarRegionBipedalFootstepPlanner normalPlannerTwo = createNormalPlanner(registryTwo);
+      SimplePlanarRegionBipedalAnytimeFootstepPlanner anytimePlannerThree = createAnytimePlanner(registryThree);
 
       SideDependentList<ConvexPolygon2d> footPolygonsInSoleFrameOne = PlanningTestTools.createDefaultFootPolygons();
       anytimePlannerOne.setFeetPolygons(footPolygonsInSoleFrameOne);
@@ -58,9 +62,9 @@ public class SimplePlanarRegionBipedalAnytimeFootstepPlannerTest
          Point3d cameraPosition = new Point3d(4.5, -8.0, 12.0);
          Point3d cameraFix = new Point3d(4.5, 0.0, 0.25);
          
-         visualizerOne = SCSPlanarRegionBipedalFootstepPlannerVisualizer.createWithSimulationConstructionSet(0.01, cameraFix, cameraPosition, footPolygonsInSoleFrameOne);
-         visualizerTwo = SCSPlanarRegionBipedalFootstepPlannerVisualizer.createWithSimulationConstructionSet(0.01, cameraFix, cameraPosition,  footPolygonsInSoleFrameTwo);
-         visualizerThree = SCSPlanarRegionBipedalFootstepPlannerVisualizer.createWithSimulationConstructionSet(0.01, cameraFix, cameraPosition,  footPolygonsInSoleFrameThree);
+         visualizerOne = SCSPlanarRegionBipedalFootstepPlannerVisualizer.createWithSimulationConstructionSet(0.01, cameraFix, cameraPosition, footPolygonsInSoleFrameOne, registryOne);
+         visualizerTwo = SCSPlanarRegionBipedalFootstepPlannerVisualizer.createWithSimulationConstructionSet(0.01, cameraFix, cameraPosition,  footPolygonsInSoleFrameTwo, registryTwo);
+         visualizerThree = SCSPlanarRegionBipedalFootstepPlannerVisualizer.createWithSimulationConstructionSet(0.01, cameraFix, cameraPosition,  footPolygonsInSoleFrameThree, registryThree);
          anytimePlannerOne.setBipedalFootstepPlannerListener(visualizerOne);
          normalPlannerTwo.setBipedalFootstepPlannerListener(visualizerTwo);
          anytimePlannerThree.setBipedalFootstepPlannerListener(visualizerThree);
@@ -119,24 +123,22 @@ public class SimplePlanarRegionBipedalAnytimeFootstepPlannerTest
       }
    }
 
-   private PlanarRegionBipedalFootstepPlanner createNormalPlanner()
+   private PlanarRegionBipedalFootstepPlanner createNormalPlanner(YoVariableRegistry registry)
    {
-      YoVariableRegistry registryTwo = new YoVariableRegistry("Two");
-      BipedalFootstepPlannerParameters parameters = new BipedalFootstepPlannerParameters(registryTwo);
+      BipedalFootstepPlannerParameters parameters = new BipedalFootstepPlannerParameters(registry);
       setParameters(parameters);
 
-      PlanarRegionBipedalFootstepPlanner normalPlannerTwo = new PlanarRegionBipedalFootstepPlanner(parameters, registryTwo);
+      PlanarRegionBipedalFootstepPlanner normalPlannerTwo = new PlanarRegionBipedalFootstepPlanner(parameters, registry);
       normalPlannerTwo.setMaximumNumberOfNodesToExpand(1000);
       return normalPlannerTwo;
    }
 
-   private SimplePlanarRegionBipedalAnytimeFootstepPlanner createAnytimePlanner()
+   private SimplePlanarRegionBipedalAnytimeFootstepPlanner createAnytimePlanner(YoVariableRegistry registry)
    {
-      YoVariableRegistry registryOne = new YoVariableRegistry("One");
-      BipedalFootstepPlannerParameters parameters = new BipedalFootstepPlannerParameters(registryOne);
+      BipedalFootstepPlannerParameters parameters = new BipedalFootstepPlannerParameters(registry);
       setParameters(parameters);
 
-      SimplePlanarRegionBipedalAnytimeFootstepPlanner anytimePlannerOne = new SimplePlanarRegionBipedalAnytimeFootstepPlanner(parameters, registryOne);
+      SimplePlanarRegionBipedalAnytimeFootstepPlanner anytimePlannerOne = new SimplePlanarRegionBipedalAnytimeFootstepPlanner(parameters, registry);
       return anytimePlannerOne;
    }
 

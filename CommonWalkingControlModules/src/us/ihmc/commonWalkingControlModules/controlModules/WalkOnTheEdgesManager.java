@@ -35,6 +35,7 @@ public class WalkOnTheEdgesManager
    private final BooleanYoVariable doToeOffIfPossibleInSingleSupport = new BooleanYoVariable("doToeOffIfPossibleInSingleSupport", registry);
    private final BooleanYoVariable doToeOffWhenHittingAnkleLimit = new BooleanYoVariable("doToeOffWhenHittingAnkleLimit", registry);
    private final BooleanYoVariable doToeOff = new BooleanYoVariable("doToeOff", registry);
+   private final DoubleYoVariable ankleLowerLimitToTriggerToeOff = new DoubleYoVariable("ankleLowerLimitToTriggerToeOff", registry);
 
    private final BooleanYoVariable isDesiredICPOKForToeOff = new BooleanYoVariable("isDesiredICPOKForToeOff", registry);
    private final BooleanYoVariable isCurrentICPOKForToeOff = new BooleanYoVariable("isCurrentICPOKForToeOff", registry);
@@ -80,6 +81,7 @@ public class WalkOnTheEdgesManager
       this.doToeOffIfPossible.set(walkingControllerParameters.doToeOffIfPossible());
       this.doToeOffIfPossibleInSingleSupport.set(walkingControllerParameters.doToeOffIfPossibleInSingleSupport());
       this.doToeOffWhenHittingAnkleLimit.set(walkingControllerParameters.doToeOffWhenHittingAnkleLimit());
+      this.ankleLowerLimitToTriggerToeOff.set(walkingControllerParameters.getAnkleLowerLimitToTriggerToeOff());
 
       this.walkingControllerParameters = walkingControllerParameters;
 
@@ -92,7 +94,7 @@ public class WalkOnTheEdgesManager
       extraCoMMaxHeightWithToes.set(0.08);
 
       minStepLengthForToeOff.set(walkingControllerParameters.getMinStepLengthForToeOff());
-      minStepHeightForToeOff.set(0.10);
+      minStepHeightForToeOff.set(walkingControllerParameters.getMinStepHeightForToeOff());
 
       isRearAnklePitchHittingLimit = new BooleanYoVariable("isRearAnklePitchHittingLimit", registry);
       isRearAnklePitchHittingLimitFilt = new GlitchFilteredBooleanYoVariable("isRearAnklePitchHittingLimitFilt", registry, isRearAnklePitchHittingLimit, 10);
@@ -177,7 +179,8 @@ public class WalkOnTheEdgesManager
    private boolean checkAnkleLimitForToeOff(RobotSide trailingLeg)
    {
       OneDoFJoint anklePitch = fullRobotModel.getLegJoint(trailingLeg, LegJointName.ANKLE_PITCH);
-      isRearAnklePitchHittingLimit.set(Math.abs(anklePitch.getJointLimitLower() - anklePitch.getQ()) < 0.02);
+      double lowerLimit = Math.max(anklePitch.getJointLimitLower(), ankleLowerLimitToTriggerToeOff.getDoubleValue());
+      isRearAnklePitchHittingLimit.set(Math.abs(lowerLimit - anklePitch.getQ()) < 0.02);
       isRearAnklePitchHittingLimitFilt.update();
 
       if (!doToeOffWhenHittingAnkleLimit.getBooleanValue())
@@ -200,7 +203,7 @@ public class WalkOnTheEdgesManager
          return;
       }
 
-         doToeOff.set(true);
+      doToeOff.set(true);
    }
 
    private boolean isFrontFootWellPositionedForToeOff(RobotSide trailingLeg, ReferenceFrame frontFootFrame)

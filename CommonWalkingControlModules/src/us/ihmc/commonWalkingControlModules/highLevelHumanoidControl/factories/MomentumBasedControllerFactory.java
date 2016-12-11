@@ -6,6 +6,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.JointPrivilegedConfigurationParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.userDesired.UserDesiredControllerCommandGenerators;
@@ -258,6 +259,7 @@ public class MomentumBasedControllerFactory implements CloseableAndDisposable
       // Setup the MomentumBasedController ////////////////////////////////////////////////////////
       GeometricJacobianHolder geometricJacobianHolder = new GeometricJacobianHolder();
       MomentumOptimizationSettings momentumOptimizationSettings = walkingControllerParameters.getMomentumOptimizationSettings();
+      JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters = walkingControllerParameters.getJointPrivilegedConfigurationParameters();
       double omega0 = walkingControllerParameters.getOmega0();
       momentumBasedController = new HighLevelHumanoidControllerToolbox(fullRobotModel, geometricJacobianHolder, referenceFrames, footSwitches, 
             centerOfMassDataHolder, wristForceSensors, yoTime,
@@ -291,8 +293,9 @@ public class MomentumBasedControllerFactory implements CloseableAndDisposable
       RigidBody[] controlledBodies = {fullRobotModel.getPelvis(), fullRobotModel.getFoot(RobotSide.LEFT), fullRobotModel.getFoot(RobotSide.RIGHT)};
       InverseDynamicsJoint[] jointsToOptimizeFor = HighLevelHumanoidControllerToolbox.computeJointsToOptimizeFor(fullRobotModel, jointsToIgnore);
       List<? extends ContactablePlaneBody> contactablePlaneBodies = momentumBasedController.getContactablePlaneBodyList();
-      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(fullRobotModel, controlledBodies, jointsToOptimizeFor, momentumOptimizationSettings, referenceFrames,
-            controlDT, gravityZ, geometricJacobianHolder, twistCalculator, contactablePlaneBodies, yoGraphicsListRegistry, registry);
+      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(fullRobotModel, controlledBodies, jointsToOptimizeFor, momentumOptimizationSettings,
+            jointPrivilegedConfigurationParameters, referenceFrames, controlDT, gravityZ, geometricJacobianHolder, twistCalculator, contactablePlaneBodies,
+            yoGraphicsListRegistry, registry);
       FeedbackControlCommandList template = managerFactory.createFeedbackControlTemplate();
       WholeBodyControllerCore controllerCore = new WholeBodyControllerCore(toolbox, template, registry);
       ControllerCoreOutputReadOnly controllerCoreOutput = controllerCore.getOutputForHighLevelController();
