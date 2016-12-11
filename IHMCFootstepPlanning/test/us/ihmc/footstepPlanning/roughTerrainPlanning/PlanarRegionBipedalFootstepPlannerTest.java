@@ -109,6 +109,9 @@ public class PlanarRegionBipedalFootstepPlannerTest extends FootstepPlannerOnRou
       parameters.setMaximumXYWiggleDistance(1.0);
       parameters.setMaximumYawWiggle(0.1);
 
+      parameters.setCliffHeightToShiftAwayFrom(0.04);
+      parameters.setMinimumDistanceFromCliffBottoms(0.22);
+
       double idealFootstepLength = 0.3;
       double idealFootstepWidth = 0.2;
       parameters.setIdealFootstep(idealFootstepLength, idealFootstepWidth);
@@ -120,10 +123,8 @@ public class PlanarRegionBipedalFootstepPlannerTest extends FootstepPlannerOnRou
 
       if (visualize)
       {
-         PlanarRegionBipedalFootstepPlannerVisualizer visualizer = SCSPlanarRegionBipedalFootstepPlannerVisualizer.createWithSimulationConstructionSet(1.0,
-                                                                                                                                                       footPolygonsInSoleFrame);
+         PlanarRegionBipedalFootstepPlannerVisualizer visualizer = SCSPlanarRegionBipedalFootstepPlannerVisualizer.createWithSimulationConstructionSet(1.0, footPolygonsInSoleFrame, registry);
          planner.setBipedalFootstepPlannerListener(visualizer);
-         visualizer.getYoVariableRegistry().addChild(registry);
       }
 
       planner.setMaximumNumberOfNodesToExpand(100);
