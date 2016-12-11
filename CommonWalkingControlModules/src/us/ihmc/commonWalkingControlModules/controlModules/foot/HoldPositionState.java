@@ -43,8 +43,6 @@ public class HoldPositionState extends AbstractFootControlState
    // During the partial foothold walking this command was split up to control the roll and pitch of
    // the foot separately using only the ankle joints.
    private final SpatialFeedbackControlCommand spatialFeedbackControlCommand = new SpatialFeedbackControlCommand();
-   private final PrivilegedConfigurationCommand straightLegsPrivilegedConfigurationCommand = new PrivilegedConfigurationCommand();
-   private final PrivilegedConfigurationCommand bentLegsPrivilegedConfigurationCommand = new PrivilegedConfigurationCommand();
 
    private static final boolean VISUALIZE = false;
    private static final double EPSILON = 0.010;
@@ -129,20 +127,9 @@ public class HoldPositionState extends AbstractFootControlState
       doSmartHoldPosition.set(true);
       doHoldFootFlatOrientation.set(false);
 
-      FullHumanoidRobotModel fullRobotModel = footControlHelper.getMomentumBasedController().getFullRobotModel();
-      RigidBody pelvis = fullRobotModel.getPelvis();
-      RigidBody foot = contactableFoot.getRigidBody();
-      OneDoFJoint kneePitch = fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE_PITCH);
-
-      straightLegsPrivilegedConfigurationCommand.addJoint(kneePitch, PrivilegedConfigurationOption.AT_ZERO);
-      straightLegsPrivilegedConfigurationCommand.applyPrivilegedConfigurationToSubChain(pelvis, foot);
-
-      bentLegsPrivilegedConfigurationCommand.addJoint(kneePitch, PrivilegedConfigurationOption.AT_MID_RANGE);
-      bentLegsPrivilegedConfigurationCommand.applyPrivilegedConfigurationToSubChain(pelvis, foot);
-
-      spatialFeedbackControlCommand.set(rootBody, foot);
+      spatialFeedbackControlCommand.set(rootBody, contactableFoot.getRigidBody());
       bodyFixedControlledPose.setToZero(soleFrame);
-      bodyFixedControlledPose.changeFrame(foot.getBodyFixedFrame());
+      bodyFixedControlledPose.changeFrame(contactableFoot.getRigidBody().getBodyFixedFrame());
       spatialFeedbackControlCommand.setControlFrameFixedInEndEffector(bodyFixedControlledPose);
 
       desiredSoleFrame = new ReferenceFrame(namePrefix + "DesiredSoleFrame", worldFrame)
