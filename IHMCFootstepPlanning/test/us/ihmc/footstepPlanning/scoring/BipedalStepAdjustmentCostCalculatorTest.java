@@ -8,8 +8,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
-import javax.vecmath.Point3d;
-
 import org.junit.Test;
 
 import us.ihmc.footstepPlanning.testTools.PlanningTestTools;
@@ -37,10 +35,9 @@ import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.Cont
 import us.ihmc.tools.continuousIntegration.ContinuousIntegrationTools;
 import us.ihmc.tools.thread.ThreadTools;
 
-public class PenalizationHeatmapStepScorerTest
+public class BipedalStepAdjustmentCostCalculatorTest
 {
-   private Color[] scoreColorGradient;
-   private Point3d footstepPlannerGoal = new Point3d(4.0, 1.0, 0.3);
+   private Color[] costColorGradient;
    private ConvexPolygon2d defaultFootPolygon;
    private Map<Integer, YoGraphicPolygon> candidateFootstepPolygons;
    private DoubleYoVariable colorIndexYoVariable;
@@ -58,17 +55,15 @@ public class PenalizationHeatmapStepScorerTest
 
    @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 3000000)
-   public void testIdealFootstepAlwaysScoresBetterThanOthers()
+   public void testIdealFootstepAlwaysBetterThanOthers()
    {
       Random random = new Random(1776L);
 
       YoVariableRegistry registry = new YoVariableRegistry("Test");
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
-      PenalizationHeatmapStepScorer footstepScorer = new PenalizationHeatmapStepScorer(registry, yoGraphicsListRegistry);
+      BipedalStepAdjustmentCostCalculator stepAdjustmentCostCalculator = new BipedalStepAdjustmentCostCalculator(registry, yoGraphicsListRegistry);
 
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-
-      Point3d goal = new Point3d(100.0, 2.0, 3.0);
 
       int numberOfIdealStepsToTest = 1000;
 
@@ -89,8 +84,8 @@ public class PenalizationHeatmapStepScorerTest
          FramePose candidateFootstep = new FramePose(worldFrame);
          candidateFootstep.setPose(idealFootstep);
 
-         double idealFootstepScore = footstepScorer.scoreFootstep(stanceFoot, swingStartFoot, idealFootstep, candidateFootstep, goal, 1.0);
-         assertEquals(0.0, idealFootstepScore, 1e-7);
+         double idealFootstepCost = stepAdjustmentCostCalculator.calculateCost(stanceFoot, swingStartFoot, idealFootstep, candidateFootstep, 1.0);
+         assertEquals(0.0, idealFootstepCost, 1e-7);
       }
 
       int numberOfRandomXYTranslations = 1000;
@@ -115,9 +110,9 @@ public class PenalizationHeatmapStepScorerTest
          RigidBodyTransform transform = new RigidBodyTransform();
          transform.setTranslation(RandomTools.generateRandomDouble(random, 0.1), RandomTools.generateRandomDouble(random, 0.1), 0.0);
          candidateFootstep.applyTransform(transform);
-         double footstepScore = footstepScorer.scoreFootstep(stanceFoot, swingStartFoot, idealFootstep, candidateFootstep, goal, 1.0);
+         double footstepCost = stepAdjustmentCostCalculator.calculateCost(stanceFoot, swingStartFoot, idealFootstep, candidateFootstep, 1.0);
 
-         assertTrue(footstepScore <= 0.0);
+         assertTrue(footstepCost >= 0.0);
       }
 
    }
@@ -134,18 +129,18 @@ public class PenalizationHeatmapStepScorerTest
       YoVariableRegistry registry = scs.getRootRegistry();
       yoTime = (DoubleYoVariable) registry.getVariable("t");
 
-      DoubleYoVariable scoreYoVariable = new DoubleYoVariable("score", registry);
+      DoubleYoVariable costYoVariable = new DoubleYoVariable("cost", registry);
       DoubleYoVariable xYoVariable = new DoubleYoVariable("x", registry);
       DoubleYoVariable yYoVariable = new DoubleYoVariable("y", registry);
       colorIndexYoVariable = new DoubleYoVariable("colorIndex", registry);
       stanceFootPitch = new DoubleYoVariable("stanceFootPitch", registry);
       candidateIndex = new IntegerYoVariable("candidateIndex", registry);
 
-      PenalizationHeatmapStepScorer footstepScorer = new PenalizationHeatmapStepScorer(registry, yoGraphicsListRegistry);
+      BipedalStepAdjustmentCostCalculator stepAdjustmentCostCalculator = new BipedalStepAdjustmentCostCalculator(registry, yoGraphicsListRegistry);
 
       candidateFootstepPolygons = new HashMap<>();
 
-      scoreColorGradient = Gradient.createGradient(Color.GREEN, Color.RED, 1000);
+      costColorGradient = Gradient.createGradient(Color.GREEN, Color.RED, 1000);
       stanceFootPitch.set(-0.2);
 
       defaultFootPolygon = PlanningTestTools.createDefaultFootPolygon();
@@ -175,11 +170,11 @@ public class PenalizationHeatmapStepScorerTest
 
             FramePose candidateFramePose = new FramePose(ReferenceFrame.getWorldFrame());
 
-            //applySlopeCandidateSet(candidateFramePose, xYoVariable, yYoVariable);
+//            applySlopeCandidateSet(candidateFramePose, xYoVariable, yYoVariable);
             applyVerticalCandidateSet(candidateFramePose, xYoVariable, yYoVariable);
 
-            double score = footstepScorer.scoreFootstep(stanceFramePose, swingStartFramePose, idealFramePose, candidateFramePose, footstepPlannerGoal, 1.0);
-            scoreYoVariable.set(score);
+            double cost = stepAdjustmentCostCalculator.calculateCost(stanceFramePose, swingStartFramePose, idealFramePose, candidateFramePose, 1.0);
+            costYoVariable.set(cost);
 
             if (candidateIndex.getIntegerValue() == 0)
             {
@@ -189,7 +184,7 @@ public class PenalizationHeatmapStepScorerTest
                }
             }
             candidateFootstepPolygons.get(candidateIndex.getIntegerValue()).setPose(candidateFramePose);
-            candidateFootstepPolygons.get(candidateIndex.getIntegerValue()).updateAppearance(getAppearanceForScore(scoreYoVariable.getDoubleValue()));
+            candidateFootstepPolygons.get(candidateIndex.getIntegerValue()).updateAppearance(getAppearanceForCost(costYoVariable.getDoubleValue()));
          }
       });
 
@@ -259,20 +254,20 @@ public class PenalizationHeatmapStepScorerTest
       return footstepYoGraphicPolygon;
    }
 
-   private AppearanceDefinition getAppearanceForScore(double score)
+   private AppearanceDefinition getAppearanceForCost(double cost)
    {
-      double greenScore = 0.0;
-      double redScore = -1.5;
+      double greenCost = 0.0;
+      double redCost = 1.5;
 
-      score -= greenScore;
-      score = -score;
+      cost -= greenCost;
+      cost = -cost;
 
-      double index = score * 1000.0 / (greenScore - redScore);
+      double index = cost * 1000.0 / (greenCost - redCost);
       index = MathTools.clipToMinMax(index, 0, 999);
 
       colorIndexYoVariable.set(index);
 
-      Color scoreColor = scoreColorGradient[(int) (index)];
-      return new YoAppearanceRGBColor(scoreColor, 0.0);
+      Color costColor = costColorGradient[(int) (index)];
+      return new YoAppearanceRGBColor(costColor, 0.0);
    }
 }
