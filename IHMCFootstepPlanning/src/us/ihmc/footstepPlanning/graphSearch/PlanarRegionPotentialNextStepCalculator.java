@@ -62,13 +62,13 @@ public class PlanarRegionPotentialNextStepCalculator
    PlanarRegionPotentialNextStepCalculator(BipedalFootstepPlannerParameters parameters, YoVariableRegistry parentRegistry)
    {
       this.parameters = parameters;
-      
+
       enablePenalizationHeatmapScoring = new BooleanYoVariable("enablePenalizationHeatmapScoring", registry);
       enablePenalizationHeatmapScoring.set(true);
-      
+
       penalizationHeatmapStepScorer = new PenalizationHeatmapStepScorer(parentRegistry, null, parameters);
       orderInWhichConstructedStepScorer = new OrderInWhichConstructedStepScorer();
-      
+
       parentRegistry.addChild(registry);
    }
 
@@ -247,13 +247,13 @@ public class PlanarRegionPotentialNextStepCalculator
    {
       ArrayList<BipedalFootstepPlannerNode> nodesToAdd = new ArrayList<>();
 
-      BipedalFootstepPlannerNode goalNode = computeGoalNodeIfGoalIsReachable(nodeToExpand);
-      if (goalNode != null)
-      {
-         boolean acceptable = checkIfNodeAcceptableScoreAndAddToList(goalNode, nodesToAdd, new Vector3d(), 0.0);
-         if (acceptable)
-            return nodesToAdd;
-      }
+//      BipedalFootstepPlannerNode goalNode = computeGoalNodeIfGoalIsReachable(nodeToExpand);
+//      if (goalNode != null)
+//      {
+//         boolean acceptable = checkIfNodeAcceptableScoreAndAddToList(goalNode, nodesToAdd, new Vector3d(), 0.0);
+//         if (acceptable)
+//            return nodesToAdd;
+//      }
 
       RigidBodyTransform soleZUpTransform = computeSoleZUpTransform(nodeToExpand);
 
@@ -558,7 +558,7 @@ public class PlanarRegionPotentialNextStepCalculator
             notifyListenerNodeUnderConsiderationWasRejected(nodeToExpand, BipedalFootstepPlannerNodeRejectionReason.STEP_NOT_WIDE_ENOUGH);
             return false;
          }
-         
+
          double minimumStepLength = parameters.getMinimumStepLength();
          if (stepFromParentInSoleFrame.getX() < minimumStepLength)
          {
@@ -650,12 +650,12 @@ public class PlanarRegionPotentialNextStepCalculator
          totalArea.set(planarRegion.getPolygonIntersectionAreaWhenSnapped(snappedPolygon, nodeToExpandTransform, footholdPolygon));
 
          nodeToExpand.setPercentageOfFoothold(totalArea.getDoubleValue() / footArea.getDoubleValue());
-         
+
          if (nodeToExpand.isPartialFoothold())
          {
             nodeToExpand.setPartialFootholdPolygon(footholdPolygon);
          }
-         
+
          if (totalArea.getDoubleValue() < parameters.getMinimumFootholdPercent() * footArea.getDoubleValue())
          {
             notifyListenerNodeUnderConsiderationWasRejected(nodeToExpand, BipedalFootstepPlannerNodeRejectionReason.NOT_ENOUGH_AREA);
