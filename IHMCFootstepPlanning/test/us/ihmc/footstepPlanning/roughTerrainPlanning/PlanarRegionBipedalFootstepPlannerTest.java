@@ -2,6 +2,7 @@ package us.ihmc.footstepPlanning.roughTerrainPlanning;
 
 import javax.vecmath.Vector3d;
 
+import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.footstepPlanning.FootstepPlanner;
@@ -14,12 +15,17 @@ import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationTools;
 import us.ihmc.tools.continuousIntegration.IntegrationCategory;
 
 @ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
 public class PlanarRegionBipedalFootstepPlannerTest extends FootstepPlannerOnRoughTerrainTest
 {
-   private static final boolean visualize = false;
+   private YoVariableRegistry registry;
+   private BipedalFootstepPlannerParameters parameters;
+   private PlanarRegionBipedalFootstepPlanner planner;
+   
+   private static final boolean visualize = !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 300000)
@@ -87,13 +93,29 @@ public class PlanarRegionBipedalFootstepPlannerTest extends FootstepPlannerOnRou
    {
       super.testCompareStepBeforeGap(!visualize);
    }
-
-   @Override
-   public FootstepPlanner getPlanner()
+   
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 300000)
+   public void testPartialGaps()
    {
-      YoVariableRegistry registry = new YoVariableRegistry("test");
-      BipedalFootstepPlannerParameters parameters = new BipedalFootstepPlannerParameters(registry);
+      parameters.setMinimumFootholdPercent(0.4);
+      parameters.setRejectIfCannotFullyWiggleInside(false);
+      
+      super.testPartialGaps(!visualize);
+   }
+   
+   @Before
+   public void setupPlanner()
+   {
+      registry = new YoVariableRegistry("test");
+      parameters = new BipedalFootstepPlannerParameters(registry);
+      planner = new PlanarRegionBipedalFootstepPlanner(parameters, registry);
+      
+      setDefaultParameters();
+   }
 
+   private void setDefaultParameters()
+   {
       parameters.setMaximumStepReach(0.55); //0.45);
       parameters.setMaximumStepZ(0.25);
       parameters.setMaximumStepXWhenForwardAndDown(0.25);
@@ -101,7 +123,7 @@ public class PlanarRegionBipedalFootstepPlannerTest extends FootstepPlannerOnRou
       parameters.setMaximumStepYaw(0.15);
       parameters.setMaximumStepWidth(0.4);
       parameters.setMinimumStepWidth(0.15);
-      parameters.setMinimumFootholdPercent(0.8);
+      parameters.setMinimumFootholdPercent(0.95);
 
       parameters.setMinimumStepLength(-0.03);
 
@@ -116,8 +138,6 @@ public class PlanarRegionBipedalFootstepPlannerTest extends FootstepPlannerOnRou
       double idealFootstepWidth = 0.2;
       parameters.setIdealFootstep(idealFootstepLength, idealFootstepWidth);
 
-      PlanarRegionBipedalFootstepPlanner planner = new PlanarRegionBipedalFootstepPlanner(parameters, registry);
-
       SideDependentList<ConvexPolygon2d> footPolygonsInSoleFrame = PlanningTestTools.createDefaultFootPolygons();
       planner.setFeetPolygons(footPolygonsInSoleFrame);
 
@@ -128,7 +148,11 @@ public class PlanarRegionBipedalFootstepPlannerTest extends FootstepPlannerOnRou
       }
 
       planner.setMaximumNumberOfNodesToExpand(100);
+   }
 
+   @Override
+   public FootstepPlanner getPlanner()
+   {
       return planner;
    }
 

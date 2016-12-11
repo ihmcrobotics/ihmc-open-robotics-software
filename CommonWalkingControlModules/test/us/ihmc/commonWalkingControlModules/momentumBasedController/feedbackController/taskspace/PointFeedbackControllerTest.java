@@ -14,6 +14,7 @@ import org.ejml.interfaces.linsol.LinearSolver;
 import org.ejml.ops.CommonOps;
 import org.junit.Test;
 
+import us.ihmc.commonWalkingControlModules.configurations.JointPrivilegedConfigurationParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.PointFeedbackControlCommand;
@@ -82,8 +83,9 @@ public class PointFeedbackControllerTest
       double controlDT = 0.004;
 
       MomentumOptimizationSettings momentumOptimizationSettings = new MomentumOptimizationSettings();
-      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(null, null, jointsToOptimizeFor, momentumOptimizationSettings, null, controlDT, 0.0, geometricJacobianHolder,
-            twistCalculator, null, null, registry);
+      JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters = new JointPrivilegedConfigurationParameters();
+      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(null, null, jointsToOptimizeFor, momentumOptimizationSettings,
+            jointPrivilegedConfigurationParameters, null, controlDT, 0.0, geometricJacobianHolder, twistCalculator, null, null, registry);
       FeedbackControllerToolbox feedbackControllerToolbox = new FeedbackControllerToolbox(registry);
       PointFeedbackController pointFeedbackController = new PointFeedbackController(endEffector, toolbox, feedbackControllerToolbox, registry);
 
@@ -103,7 +105,7 @@ public class PointFeedbackControllerTest
       DenseMatrix64F jInverse = new DenseMatrix64F(numberOfDoFs, 6);
       JointIndexHandler jointIndexHandler = toolbox.getJointIndexHandler();
       MotionQPInputCalculator motionQPInputCalculator = new MotionQPInputCalculator(centerOfMassFrame, geometricJacobianHolder, twistCalculator,
-            jointIndexHandler, registry);
+            jointIndexHandler, jointPrivilegedConfigurationParameters, registry);
       DenseMatrix64F jointAccelerations = new DenseMatrix64F(numberOfDoFs, 1);
       RobotJointVelocityAccelerationIntegrator integrator = new RobotJointVelocityAccelerationIntegrator(controlDT);
 
@@ -178,8 +180,9 @@ public class PointFeedbackControllerTest
       double controlDT = 0.004;
       
       MomentumOptimizationSettings momentumOptimizationSettings = new MomentumOptimizationSettings();
-      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(null, null, jointsToOptimizeFor, momentumOptimizationSettings, null, controlDT, 0.0, geometricJacobianHolder,
-            twistCalculator, null, null, registry);
+      JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters = new JointPrivilegedConfigurationParameters();
+      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(null, null, jointsToOptimizeFor, momentumOptimizationSettings,
+            jointPrivilegedConfigurationParameters, null, controlDT, 0.0, geometricJacobianHolder, twistCalculator, null, null, registry);
       FeedbackControllerToolbox feedbackControllerToolbox = new FeedbackControllerToolbox(registry);
       PointFeedbackController pointFeedbackController = new PointFeedbackController(endEffector, toolbox, feedbackControllerToolbox, registry);
 
@@ -199,7 +202,7 @@ public class PointFeedbackControllerTest
       DenseMatrix64F jInverse = new DenseMatrix64F(numberOfDoFs, 6);
       JointIndexHandler jointIndexHandler = toolbox.getJointIndexHandler();
       MotionQPInputCalculator motionQPInputCalculator = new MotionQPInputCalculator(centerOfMassFrame, geometricJacobianHolder, twistCalculator,
-            jointIndexHandler, registry);
+            jointIndexHandler, jointPrivilegedConfigurationParameters, registry);
       DenseMatrix64F jointAccelerations = new DenseMatrix64F(numberOfDoFs, 1);
       DenseMatrix64F jointAccelerationsFromJerryQP = new DenseMatrix64F(numberOfDoFs, 1);
       DenseMatrix64F jointAccelerationsFromQPOASES = new DenseMatrix64F(numberOfDoFs, 1);

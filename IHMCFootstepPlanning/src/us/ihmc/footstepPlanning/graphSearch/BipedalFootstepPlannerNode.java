@@ -8,6 +8,7 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.AngleTools;
+import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -30,6 +31,8 @@ public class BipedalFootstepPlannerNode
    private boolean isDead = false;
 
    private double singleStepScore;
+   private double percentageOfFoothold = 1.0;
+   private ConvexPolygon2d partialFootholdPolygon;
 
    public BipedalFootstepPlannerNode(RobotSide footstepSide, RigidBodyTransform soleTransform)
    {
@@ -289,7 +292,30 @@ public class BipedalFootstepPlannerNode
    {
       return soleTransform.toString();
    }
+   
+   public boolean isPartialFoothold()
+   {
+      return MathTools.isLessThan(percentageOfFoothold, 1.0, 5);
+   }
+
+   public double getPercentageOfFoothold()
+   {
+      return percentageOfFoothold;
+   }
+
+   public void setPercentageOfFoothold(double percentageOfFoothold)
+   {
+      this.percentageOfFoothold = percentageOfFoothold;
+   }
 
 
+   public ConvexPolygon2d getPartialFootholdPolygon()
+   {
+      return partialFootholdPolygon;
+   }
 
+   public void setPartialFootholdPolygon(ConvexPolygon2d partialFootholdPolygon)
+   {
+      this.partialFootholdPolygon = partialFootholdPolygon;
+   }
 }
