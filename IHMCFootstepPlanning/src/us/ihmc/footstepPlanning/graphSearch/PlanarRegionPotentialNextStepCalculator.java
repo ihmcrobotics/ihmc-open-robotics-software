@@ -566,6 +566,15 @@ public class PlanarRegionPotentialNextStepCalculator
             return false;
          }
 
+         double maximumStepWidth = parameters.getMaximumStepWidth();
+
+         if (((robotSide == RobotSide.LEFT) && (stepFromParentInSoleFrame.getY() > maximumStepWidth))
+               || ((robotSide == RobotSide.RIGHT) && (stepFromParentInSoleFrame.getY() < -maximumStepWidth)))
+         {
+            notifyListenerNodeUnderConsiderationWasRejected(nodeToExpand, BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_WIDE);
+            return false;
+         }
+
          double minimumStepLength = parameters.getMinimumStepLength();
          if (stepFromParentInSoleFrame.getX() < minimumStepLength)
          {
