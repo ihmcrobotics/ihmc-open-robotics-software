@@ -17,7 +17,7 @@ import us.ihmc.tools.continuousIntegration.IntegrationCategory;
 @ContinuousIntegrationAnnotations.ContinuousIntegrationPlan(categories = IntegrationCategory.IN_DEVELOPMENT)
 public class PlanarRegionBipedalFootstepPlannerOnFlatTest extends FootstepPlannerOnFlatGroundTest
 {
-   private static final boolean visualize = false;
+   private static final boolean visualize = true;
 
    @Override
    @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.1)
@@ -32,7 +32,7 @@ public class PlanarRegionBipedalFootstepPlannerOnFlatTest extends FootstepPlanne
    @Test(timeout = 300000)
    public void testATightTurn()
    {
-      super.testATightTurn(true);
+      super.testATightTurn(false);
    }
 
    @Override
