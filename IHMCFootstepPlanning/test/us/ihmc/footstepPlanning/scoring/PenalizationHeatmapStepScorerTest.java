@@ -64,7 +64,7 @@ public class PenalizationHeatmapStepScorerTest
 
       YoVariableRegistry registry = new YoVariableRegistry("Test");
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
-      PenalizationHeatmapStepScorer footstepScorer = new PenalizationHeatmapStepScorer(registry, yoGraphicsListRegistry, null);
+      PenalizationHeatmapStepScorer footstepScorer = new PenalizationHeatmapStepScorer(registry, yoGraphicsListRegistry);
 
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -141,7 +141,7 @@ public class PenalizationHeatmapStepScorerTest
       stanceFootPitch = new DoubleYoVariable("stanceFootPitch", registry);
       candidateIndex = new IntegerYoVariable("candidateIndex", registry);
 
-      PenalizationHeatmapStepScorer footstepScorer = new PenalizationHeatmapStepScorer(registry, yoGraphicsListRegistry, null);
+      PenalizationHeatmapStepScorer footstepScorer = new PenalizationHeatmapStepScorer(registry, yoGraphicsListRegistry);
 
       candidateFootstepPolygons = new HashMap<>();
 
