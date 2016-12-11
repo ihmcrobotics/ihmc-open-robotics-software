@@ -259,7 +259,10 @@ public class OnToesState extends AbstractFootControlState
    @Override
    public InverseDynamicsCommand<?> getInverseDynamicsCommand()
    {
-      return null;
+      if (attemptToStraightenLegs)
+         return straightLegsPrivilegedConfigurationCommand;
+      else
+         return bentLegsPrivilegedConfigurationCommand;
    }
 
    @Override

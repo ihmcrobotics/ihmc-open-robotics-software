@@ -25,8 +25,11 @@ import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
+import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 
@@ -57,8 +60,10 @@ public class SupportState extends AbstractFootControlState
    private final PoseReferenceFrame desiredSoleFrame;
    private final YoGraphicReferenceFrame frameViz;
 
+   private final InverseDynamicsCommandList inverseDymamicsCommandsList = new InverseDynamicsCommandList();
    private final SpatialAccelerationCommand spatialAccelerationCommand = new SpatialAccelerationCommand();
    private final SpatialFeedbackControlCommand spatialFeedbackControlCommand = new SpatialFeedbackControlCommand();
+
    private final DenseMatrix64F accelerationSelectionMatrix = new DenseMatrix64F(dofs, dofs);
    private final DenseMatrix64F feedbackSelectionMatrix = new DenseMatrix64F(dofs, dofs);
 
@@ -88,7 +93,6 @@ public class SupportState extends AbstractFootControlState
    private final BooleanYoVariable requestFootholdExploration;
    private final DoubleYoVariable recoverTime;
    private final DoubleYoVariable timeBeforeExploring;
-   private final InverseDynamicsCommandList inverseDymamicsCommandsList = new InverseDynamicsCommandList();
 
    public SupportState(FootControlHelper footControlHelper, YoSE3PIDGainsInterface holdPositionGains, YoVariableRegistry parentRegistry)
    {
@@ -323,8 +327,15 @@ public class SupportState extends AbstractFootControlState
       inverseDymamicsCommandsList.clear();
       inverseDymamicsCommandsList.addCommand(spatialAccelerationCommand);
       inverseDymamicsCommandsList.addCommand(explorationHelper.getCommand());
+
+      if (attemptToStraightenLegs)
+         inverseDymamicsCommandsList.addCommand(straightLegsPrivilegedConfigurationCommand);
+      else
+         inverseDymamicsCommandsList.addCommand(bentLegsPrivilegedConfigurationCommand);
+
       return inverseDymamicsCommandsList;
    }
+
 
    @Override
    public FeedbackControlCommand<?> getFeedbackControlCommand()
