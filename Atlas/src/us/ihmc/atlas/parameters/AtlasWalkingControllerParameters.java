@@ -166,6 +166,14 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
 
    /** {@inheritDoc} */
    @Override
+   public double getAnkleLowerLimitToTriggerToeOff()
+   {
+      return -1.0;
+   }
+
+
+   /** {@inheritDoc} */
+   @Override
    public double getMaximumToeOffAngle()
    {
       return Math.toRadians(45.0);
