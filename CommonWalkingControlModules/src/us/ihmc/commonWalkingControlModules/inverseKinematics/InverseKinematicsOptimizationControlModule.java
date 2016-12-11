@@ -65,7 +65,8 @@ public class InverseKinematicsOptimizationControlModule
       double controlDT = toolbox.getControlDT();
       GeometricJacobianHolder geometricJacobianHolder = toolbox.getGeometricJacobianHolder();
       TwistCalculator twistCalculator = toolbox.getTwistCalculator();
-      motionQPInputCalculator = new MotionQPInputCalculator(centerOfMassFrame, geometricJacobianHolder, twistCalculator, jointIndexHandler, registry);
+      motionQPInputCalculator = new MotionQPInputCalculator(centerOfMassFrame, geometricJacobianHolder, twistCalculator, jointIndexHandler,
+            toolbox.getJointPrivilegedConfigurationParameters(), registry);
       boundCalculator = new InverseDynamicsQPBoundCalculator(jointIndexHandler, controlDT, registry);
 
       qDotMinMatrix = new DenseMatrix64F(numberOfDoFs, 1);

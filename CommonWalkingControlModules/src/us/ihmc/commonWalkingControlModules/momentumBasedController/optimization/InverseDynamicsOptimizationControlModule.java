@@ -103,7 +103,8 @@ public class InverseDynamicsOptimizationControlModule
       motionQPInput = new MotionQPInput(numberOfDoFs);
       externalWrenchHandler = new ExternalWrenchHandler(gravityZ, centerOfMassFrame, rootJoint, contactablePlaneBodies);
 
-      motionQPInputCalculator = new MotionQPInputCalculator(centerOfMassFrame, geometricJacobianHolder, twistCalculator, jointIndexHandler, registry);
+      motionQPInputCalculator = new MotionQPInputCalculator(centerOfMassFrame, geometricJacobianHolder, twistCalculator, jointIndexHandler,
+            toolbox.getJointPrivilegedConfigurationParameters(), registry);
       boundCalculator = new InverseDynamicsQPBoundCalculator(jointIndexHandler, controlDT, registry);
 
       absoluteMaximumJointAcceleration.set(200.0);

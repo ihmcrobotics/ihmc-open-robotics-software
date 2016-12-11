@@ -95,11 +95,11 @@ public class FootstepPlanningToolboxController extends ToolboxController
       parameters.setMaximumStepZ(0.25);
 
       parameters.setMaximumStepXWhenForwardAndDown(0.32);
-      parameters.setMaximumStepZWhenForwardAndDown(0.18);
+      parameters.setMaximumStepZWhenForwardAndDown(0.10);
 
       parameters.setMaximumStepYaw(0.15);
       parameters.setMaximumStepWidth(0.4);
-      parameters.setMinimumStepWidth(0.15);
+      parameters.setMinimumStepWidth(0.16);
       parameters.setMinimumFootholdPercent(0.95);
 
       parameters.setWiggleInsideDelta(0.02);
@@ -112,7 +112,7 @@ public class FootstepPlanningToolboxController extends ToolboxController
       parameters.setMinimumDistanceFromCliffBottoms(0.22);
 
       double idealFootstepLength = 0.3;
-      double idealFootstepWidth = 0.2;
+      double idealFootstepWidth = 0.22;
       parameters.setIdealFootstep(idealFootstepLength, idealFootstepWidth);
       
       PlanarRegionBipedalFootstepPlanner planner = new PlanarRegionBipedalFootstepPlanner(parameters, registry);

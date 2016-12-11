@@ -481,13 +481,8 @@ public class PlanarRegionTest
       snappingTransform.setRotationEulerAndZeroTranslation(0.1, 0.2, 0.3);
       snappingTransform.setTranslation(1.2, 3.4, 5.6);
 
-      ArrayList<ConvexPolygon2d> intersectionsToPack = new ArrayList<>();
-      planarRegion.getPolygonIntersectionsWhenSnapped(polygonToSnap, snappingTransform, intersectionsToPack);
-
-      assertEquals(1, intersectionsToPack.size());
-      ConvexPolygon2d intersection = intersectionsToPack.get(0);
-
-      assertEquals(0.04, intersection.getArea(), 1e-7);
+      double intersectionArea = planarRegion.getPolygonIntersectionAreaWhenSnapped(polygonToSnap, snappingTransform);
+      assertEquals(0.04, intersectionArea, 1e-7);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
