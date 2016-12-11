@@ -92,9 +92,55 @@ public class PlanarRegion
    }
 
    /**
-    * Verify if the given polygon intersects this region projected onto the XY-plane.
+    * Check if the given lineSegment intersects this region projected onto the XY-plane.
+    * @param lineSegmentInWorld
+    * @return true if the lineSegment intersects this PlanarRegion.
+    */
+   public boolean isLineSegmentIntersecting(LineSegment2d lineSegmentInWorld)
+   {
+      // Instead of projecting all the polygons of this region onto the world XY-plane,
+      // the given lineSegment is projected along the z-world axis to be snapped onto plane.
+      LineSegment2d projectedLineSegment = projectLineSegmentVerticallyToRegion(lineSegmentInWorld);
+
+      // Now, just need to go through each polygon of this region and see there is at least one intersection
+      for (int i = 0; i < getNumberOfConvexPolygons(); i++)
+      {
+         ConvexPolygon2d polygonToCheck = convexPolygons.get(i);
+         Point2d[] intersectionPoints = polygonToCheck.intersectionWith(projectedLineSegment);
+         if ((intersectionPoints != null) && (intersectionPoints.length > 0) && (intersectionPoints[0] != null))
+            return true;
+      }
+      // Did not find any intersection
+      return false;
+   }
+
+   /**
+    * Returns all of the intersections when the convexPolygon is projected vertically onto this PlanarRegion.
+    * @param convexPolygonInWorld Polygon to project vertically.
+    * @param intersectionsInPlaneFrameToPack ArrayList of ConvexPolygon2d to pack with the intersections.
+    */
+   public void getLineSegmentIntersectionsWhenProjectedVertically(LineSegment2d lineSegmentInWorld, ArrayList<Point2d[]> intersectionsInPlaneFrameToPack)
+   {
+      // Instead of projecting all the polygons of this region onto the world XY-plane,
+      // the given lineSegment is projected along the z-world axis to be snapped onto plane.
+      LineSegment2d projectedLineSegment = projectLineSegmentVerticallyToRegion(lineSegmentInWorld);
+
+      // Now, just need to go through each polygon of this region and see there is at least one intersection
+      for (int i = 0; i < getNumberOfConvexPolygons(); i++)
+      {
+         Point2d[] intersectionPoints = convexPolygons.get(i).intersectionWith(projectedLineSegment);
+
+         if ((intersectionPoints != null) && (intersectionPoints.length > 0) && (intersectionPoints[0] != null))
+         {
+            intersectionsInPlaneFrameToPack.add(intersectionPoints);
+         }
+      }
+   }
+
+   /**
+    * Check if the given polygon intersects this region projected onto the XY-plane.
     * @param convexPolygon2d
-    * @return
+    * @return true if the polygon intersects this PlanarRegion.
     */
    public boolean isPolygonIntersecting(ConvexPolygon2d convexPolygon2d)
    {
@@ -143,12 +189,36 @@ public class PlanarRegion
     * @param convexPolygon2d Polygon to snap.
     * @param snappingTransform RigidBodyTransform that snaps the polygon onto this region. Must have same surface normal as this region.
     * @param intersectionsToPack ArrayList of ConvexPolygon2d to pack with the intersections.
+    * @return intersectionArea Total area of intersections
     */
-   public void getPolygonIntersectionsWhenSnapped(ConvexPolygon2d convexPolygon2d, RigidBodyTransform snappingTransform,
-         ArrayList<ConvexPolygon2d> intersectionsToPack)
+   public double getPolygonIntersectionAreaWhenSnapped(ConvexPolygon2d convexPolygon2d, RigidBodyTransform snappingTransform)
+   {
+      return getPolygonIntersectionAreaWhenSnapped(convexPolygon2d, snappingTransform, null);
+   }
+   
+   /**
+    * Returns all of the intersections when the convexPolygon is snapped onto this PlanarRegion with the snappingTransform.
+    * @param convexPolygon2d Polygon to snap.
+    * @param snappingTransform RigidBodyTransform that snaps the polygon onto this region. Must have same surface normal as this region.
+    * @param intersectionsToPack ArrayList of ConvexPolygon2d to pack with the intersections.
+    * @return intersectionArea Total area of intersections
+    */
+   public double getPolygonIntersectionAreaWhenSnapped(ConvexPolygon2d convexPolygon2d, RigidBodyTransform snappingTransform,
+         ConvexPolygon2d intersectionPolygonToPack)
    {
       ConvexPolygon2d projectedPolygon = snapPolygonIntoRegionAndChangeFrameToRegionFrame(convexPolygon2d, snappingTransform);
+      double intersectionArea = 0.0;
+      
+      if (intersectionPolygonToPack != null)
+      {
+         intersectionPolygonToPack.clear();
+      }
 
+      RigidBodyTransform inverseSnappingTransform = new RigidBodyTransform(snappingTransform);
+      inverseSnappingTransform.invert();
+      RigidBodyTransform regionToPolygonTransform = new RigidBodyTransform();
+      regionToPolygonTransform.multiply(inverseSnappingTransform, fromLocalToWorldTransform);
+      
       // Now, just need to go through each polygon of this region and see there is at least one intersection
       for (int i = 0; i < getNumberOfConvexPolygons(); i++)
       {
@@ -156,9 +226,22 @@ public class PlanarRegion
 
          if (intersectingPolygon != null)
          {
-            intersectionsToPack.add(intersectingPolygon);
+            intersectionArea += intersectingPolygon.getArea();
+            
+            if (intersectionPolygonToPack != null)
+            {
+               intersectingPolygon.applyTransformAndProjectToXYPlane(regionToPolygonTransform);
+               intersectionPolygonToPack.addVertices(intersectingPolygon);
+            }
          }
       }
+      
+      if (intersectionPolygonToPack != null)
+      {
+         intersectionPolygonToPack.update();
+      }
+      
+      return intersectionArea;
    }
 
    /**
@@ -217,6 +300,44 @@ public class PlanarRegion
       return projectedPolygon;
    }
 
+   
+   /**
+    * Projects the input LineSegment2d to the plane defined by this PlanarRegion by translating each vertex in world z.
+    * Then puts each vertex in local frame. In doing so, the length of the rotated lineSegment will actually increase on tilted PlanarRegions.
+    * @param lineSegmentInWorld LineSegment2d to project
+    * @return new projected LineSegment2d
+    */
+   private LineSegment2d projectLineSegmentVerticallyToRegion(LineSegment2d lineSegmentInWorld)
+   {
+      Point2d[] snappedEndpoints = new Point2d[2];
+
+      Point2d originalVertex = lineSegmentInWorld.getFirstEndpoint();
+      Point3d snappedVertex3d = new Point3d();
+
+      // Find the vertex 3d that is snapped to the plane following z-world.
+      snappedVertex3d.setX(originalVertex.getX());
+      snappedVertex3d.setY(originalVertex.getY());
+      snappedVertex3d.setZ(getPlaneZGivenXY(originalVertex.getX(), originalVertex.getY()));
+
+      // Transform to local coordinates
+      fromWorldToLocalTransform.transform(snappedVertex3d);
+      snappedEndpoints[0] = new Point2d(snappedVertex3d.getX(), snappedVertex3d.getY());
+
+      originalVertex = lineSegmentInWorld.getSecondEndpoint();
+
+      // Find the vertex 3d that is snapped to the plane following z-world.
+      snappedVertex3d.setX(originalVertex.getX());
+      snappedVertex3d.setY(originalVertex.getY());
+      snappedVertex3d.setZ(getPlaneZGivenXY(originalVertex.getX(), originalVertex.getY()));
+
+      // Transform to local coordinates
+      fromWorldToLocalTransform.transform(snappedVertex3d);
+      snappedEndpoints[1] = new Point2d(snappedVertex3d.getX(), snappedVertex3d.getY());
+
+      LineSegment2d projectedLineSegment = new LineSegment2d(snappedEndpoints);
+      return projectedLineSegment;
+   }
+   
    /**
     * Computes if the point is in the region projected onto the world xy-plane.
     * Note that the z-coordinate of the query is ignored.
@@ -651,4 +772,5 @@ public class PlanarRegion
 
       return new PlanarRegion(regionTransform, regionConvexPolygons);
    }
+
 }

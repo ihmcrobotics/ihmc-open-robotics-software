@@ -5,6 +5,8 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Random;
 
+import javax.vecmath.Point3d;
+import javax.vecmath.Vector2d;
 import javax.vecmath.Vector3d;
 
 import org.junit.Test;
@@ -14,6 +16,7 @@ import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations;
+import us.ihmc.tools.testing.JUnitTools;
 
 public class BipedalFootstepPlannerNodeTest
 {
@@ -83,6 +86,8 @@ public class BipedalFootstepPlannerNodeTest
       }
    }
 
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @Test(timeout = 300000)
    public void testRemovePitchAndRoll()
    {
       Random random = new Random(3823L);
@@ -130,4 +135,27 @@ public class BipedalFootstepPlannerNodeTest
 
    }
 
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @Test(timeout = 300000)
+   public void testShiftInSoleFrame()
+   {
+      RigidBodyTransform soleTransform = new RigidBodyTransform();
+      BipedalFootstepPlannerNode node = new BipedalFootstepPlannerNode(RobotSide.LEFT, soleTransform);
+      
+      Vector2d shiftVector = new Vector2d(1.0, 2.0);
+      node.shiftInSoleFrame(shiftVector);
+
+      Point3d solePosition = node.getSolePosition();
+      JUnitTools.assertTuple3dEquals(new Point3d(1.0, 2.0, 0.0), solePosition, 1e-7);
+      
+      soleTransform = new RigidBodyTransform();
+      soleTransform.setRotationEulerAndZeroTranslation(0.0, 0.0, Math.PI/2.0);
+      node = new BipedalFootstepPlannerNode(RobotSide.LEFT, soleTransform);
+      
+      shiftVector = new Vector2d(1.0, 2.0);
+      node.shiftInSoleFrame(shiftVector);
+
+      solePosition = node.getSolePosition();
+      JUnitTools.assertTuple3dEquals(new Point3d(-2.0, 1.0, 0.0), solePosition, 1e-7);
+   }
 }

@@ -384,6 +384,7 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
 
       commandInputManager.flushAllCommands();
 
+      privilegedConfigurationCommand.clear();
       privilegedConfigurationCommand.setPrivilegedConfigurationOption(PrivilegedConfigurationOption.AT_ZERO);
 
       for (RobotSide robotSide : RobotSide.values)
@@ -391,15 +392,6 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
          ArmJointName[] armJointNames = fullRobotModel.getRobotSpecificJointNames().getArmJointNames();
          for (int i = 0; i < armJointNames.length; i++)
             privilegedConfigurationCommand.addJoint(fullRobotModel.getArmJoint(robotSide, armJointNames[i]), PrivilegedConfigurationOption.AT_MID_RANGE);
-      }
-
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         privilegedConfigurationCommand.addJoint(fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE_PITCH), PrivilegedConfigurationOption.AT_MID_RANGE);
-
-         RigidBody pelvis = fullRobotModel.getPelvis();
-         RigidBody foot = fullRobotModel.getFoot(robotSide);
-         privilegedConfigurationCommand.applyPrivilegedConfigurationToSubChain(pelvis, foot);
       }
 
       initializeContacts();

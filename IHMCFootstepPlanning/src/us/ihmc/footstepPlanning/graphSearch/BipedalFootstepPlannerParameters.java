@@ -30,6 +30,9 @@ public class BipedalFootstepPlannerParameters
    private final DoubleYoVariable maximumXYWiggleDistance = new DoubleYoVariable("maximumXYWiggleDistance", registry);
    private final DoubleYoVariable maximumYawWiggle = new DoubleYoVariable("maximumYawWiggle", registry);
 
+   private final DoubleYoVariable cliffHeightToShiftAwayFrom = new DoubleYoVariable("cliffHeightToShiftAwayFrom", registry);
+   private final DoubleYoVariable minimumDistanceFromCliffBottoms = new DoubleYoVariable("minimumDistanceFromCliffBottoms", registry);
+
    private double minimumSurfaceNormalZ = 0.7;
    private double maximumZPenetrationOnVRegions = 0.008;
 
@@ -207,6 +210,26 @@ public class BipedalFootstepPlannerParameters
    public double getMaximumStepWidth()
    {
       return maximumStepWidth.getDoubleValue();
+   }
+
+   public double getCliffHeightToShiftAwayFrom()
+   {
+      return cliffHeightToShiftAwayFrom.getDoubleValue();
+   }
+
+   public void setCliffHeightToShiftAwayFrom(double cliffHeightToShiftAwayFrom)
+   {
+      this.cliffHeightToShiftAwayFrom.set(cliffHeightToShiftAwayFrom);
+   }
+
+   public double getMinimumDistanceFromCliffBottoms()
+   {
+      return minimumDistanceFromCliffBottoms.getDoubleValue();
+   }
+
+   public void setMinimumDistanceFromCliffBottoms(double minimumDistanceFromCliffBottoms)
+   {
+      this.minimumDistanceFromCliffBottoms.set(minimumDistanceFromCliffBottoms);
    }
 
 

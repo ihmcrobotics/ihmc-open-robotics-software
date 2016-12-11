@@ -186,6 +186,26 @@ public class MeshDataGenerator
 
    /**
     * Create a triangle mesh for the given polygon.
+    * @param polygonTransformToWorld transform to use to obtain polygon 3D coordinates in world.
+    * @param convexPolygon the polygon to create a mesh from.
+    * @return the created triangle mesh.
+    */
+   public static MeshDataHolder Polygon(RigidBodyTransform polygonTransformToWorld, List<Point2d> convexPolygon)
+   {
+      Point3f[] points = new Point3f[convexPolygon.size()];
+      int reverseIndex = convexPolygon.size();
+      for (int i = 0; i < convexPolygon.size(); i++)
+      {
+         Point2d vertex = convexPolygon.get(--reverseIndex);
+         points[i] = new Point3f((float) vertex.getX(), (float) vertex.getY(), 0.0f);
+         polygonTransformToWorld.transform(points[i]);
+      }
+
+      return Polygon(points);
+   }
+
+   /**
+    * Create a triangle mesh for the given polygon.
     * @param convexPolygon the polygon to create a mesh from.
     * @return the created triangle mesh.
     */
