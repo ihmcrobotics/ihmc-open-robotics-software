@@ -53,6 +53,7 @@ public abstract class LinearMomentumRateOfChangeControlModule
    protected final SpatialForceVector desiredMomentumRate = new SpatialForceVector();
    protected final DenseMatrix64F linearAndAngularZSelectionMatrix = CommonOps.identity(6);
    protected final DenseMatrix64F linearXYSelectionMatrix = CommonOps.identity(6);
+   protected final DenseMatrix64F linearXYAndAngularZSelectionMatrix = CommonOps.identity(6);
 
    protected double omega0 = 0.0;
    protected double totalMass;
@@ -131,6 +132,11 @@ public abstract class LinearMomentumRateOfChangeControlModule
       MatrixTools.removeRow(linearXYSelectionMatrix, 5); // remove height
       MatrixTools.removeRow(linearXYSelectionMatrix, 0);
       MatrixTools.removeRow(linearXYSelectionMatrix, 0);
+      MatrixTools.removeRow(linearXYSelectionMatrix, 0);
+
+      MatrixTools.removeRow(linearXYAndAngularZSelectionMatrix, 5); // remove height
+      MatrixTools.removeRow(linearXYAndAngularZSelectionMatrix, 0);
+      MatrixTools.removeRow(linearXYAndAngularZSelectionMatrix, 0);
 
       angularMomentumRateWeight.set(defaultAngularMomentumRateWeight);
       linearMomentumRateWeight.set(defaultLinearMomentumRateWeight);
@@ -304,7 +310,10 @@ public abstract class LinearMomentumRateOfChangeControlModule
          desiredMomentumRate.setToZero(centerOfMassFrame);
          desiredMomentumRate.setLinearPart(linearMomentumRateOfChange);
          momentumRateCommand.set(desiredMomentumRate);
-         momentumRateCommand.setSelectionMatrix(linearAndAngularZSelectionMatrix);
+         if (!controlHeightWithMomentum)
+            momentumRateCommand.setSelectionMatrix(linearXYAndAngularZSelectionMatrix);
+         else
+            momentumRateCommand.setSelectionMatrix(linearAndAngularZSelectionMatrix);
       }
       else
       {
