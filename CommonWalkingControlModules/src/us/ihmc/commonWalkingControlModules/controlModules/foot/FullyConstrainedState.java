@@ -6,6 +6,8 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactSt
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.SolverWeightLevels;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePoint2d;
@@ -16,6 +18,8 @@ import us.ihmc.robotics.sensors.FootSwitchInterface;
 public class FullyConstrainedState extends AbstractFootControlState
 {
    private final FrameVector fullyConstrainedNormalContactVector;
+
+   private final InverseDynamicsCommandList inverseDymamicsCommandsList = new InverseDynamicsCommandList();
    private final SpatialAccelerationCommand spatialAccelerationCommand = new SpatialAccelerationCommand();
 
    private final FramePoint2d cop = new FramePoint2d();
@@ -82,9 +86,17 @@ public class FullyConstrainedState extends AbstractFootControlState
    }
 
    @Override
-   public SpatialAccelerationCommand getInverseDynamicsCommand()
+   public InverseDynamicsCommand<?> getInverseDynamicsCommand()
    {
-      return spatialAccelerationCommand;
+      inverseDymamicsCommandsList.clear();
+      inverseDymamicsCommandsList.addCommand(spatialAccelerationCommand);
+
+      if (attemptToStraightenLegs)
+         inverseDymamicsCommandsList.addCommand(straightLegsPrivilegedConfigurationCommand);
+      else
+         inverseDymamicsCommandsList.addCommand(bentLegsPrivilegedConfigurationCommand);
+
+      return inverseDymamicsCommandsList;
    }
 
    @Override

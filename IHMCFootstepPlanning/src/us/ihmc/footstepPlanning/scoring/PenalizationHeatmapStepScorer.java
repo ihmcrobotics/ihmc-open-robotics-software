@@ -3,7 +3,6 @@ package us.ihmc.footstepPlanning.scoring;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector2d;
 
-import us.ihmc.footstepPlanning.graphSearch.BipedalFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.BipedalStepScorer;
 import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -19,8 +18,6 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class PenalizationHeatmapStepScorer implements BipedalStepScorer
 {
-   private final BipedalFootstepPlannerParameters footstepPlannerParameters;
-
    private final YoFrameVector2d forwardPenalizationVector;
    private final YoFrameVector2d backwardPenalizationVector;
    private final YoFrameVector2d inwardPenalizationVector;
@@ -45,11 +42,8 @@ public class PenalizationHeatmapStepScorer implements BipedalStepScorer
 
    private final FrameVector tempFrameVectorForDot;
 
-   public PenalizationHeatmapStepScorer(YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsRegistry,
-                                        BipedalFootstepPlannerParameters footstepPlannerParameters)
+   public PenalizationHeatmapStepScorer(YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsRegistry)
    {
-      this.footstepPlannerParameters = footstepPlannerParameters;
-
       String prefix = "footstepScorer";
       forwardPenalizationVector = new YoFrameVector2d(prefix + "ForwardPenalizationVector", ReferenceFrame.getWorldFrame(), parentRegistry);
       backwardPenalizationVector = new YoFrameVector2d(prefix + "BackwardPenalizationVector", ReferenceFrame.getWorldFrame(), parentRegistry);
@@ -180,11 +174,18 @@ public class PenalizationHeatmapStepScorer implements BipedalStepScorer
 
    private void setXYVectorFromPoseToPoseNormalize(YoFrameVector2d vectorToPack, FramePose fromPose, FramePose toPose)
    {
-      FrameVector2d frameTuple2d = vectorToPack.getFrameTuple2d();
-      frameTuple2d.setByProjectionOntoXYPlane(toPose.getFramePointCopy());
-      fromPose.checkReferenceFrameMatch(vectorToPack);
-      frameTuple2d.sub(fromPose.getX(), fromPose.getY());
-      frameTuple2d.normalize();
-      vectorToPack.setWithoutChecks(frameTuple2d);
+      if (fromPose.epsilonEquals(toPose, 1e-7, Double.MAX_VALUE))
+      {
+         vectorToPack.set(fromPose.getReferenceFrame(), 0.0, 0.0);
+      }
+      else
+      {
+         FrameVector2d frameTuple2d = vectorToPack.getFrameTuple2d();
+         frameTuple2d.setByProjectionOntoXYPlane(toPose.getFramePointCopy());
+         fromPose.checkReferenceFrameMatch(vectorToPack);
+         frameTuple2d.sub(fromPose.getX(), fromPose.getY());
+         frameTuple2d.normalize();
+         vectorToPack.setWithoutChecks(frameTuple2d);
+      }
    }
 }

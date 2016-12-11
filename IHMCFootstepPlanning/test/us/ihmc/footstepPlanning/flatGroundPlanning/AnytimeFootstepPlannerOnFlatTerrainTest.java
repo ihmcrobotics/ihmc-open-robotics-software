@@ -169,7 +169,7 @@ public class AnytimeFootstepPlannerOnFlatTerrainTest implements PlanningTest
       if (visualize)
       {
          PlanarRegionBipedalFootstepPlannerVisualizer visualizer = SCSPlanarRegionBipedalFootstepPlannerVisualizer
-               .createWithSimulationConstructionSet(1.0, footPolygonsInSoleFrame);
+               .createWithSimulationConstructionSet(1.0, footPolygonsInSoleFrame, registry);
          planner.setBipedalFootstepPlannerListener(visualizer);
       }
 

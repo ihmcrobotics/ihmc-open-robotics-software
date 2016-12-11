@@ -371,6 +371,46 @@ public class PlanarRegionTest
       point3d.set(2.0, 2.0, Double.POSITIVE_INFINITY);
       assertFalse(planarRegion.isPointInsideByProjectionOntoXYPlane(point3d));
 
+      // Do a bunch of trivial queries with isLineSegmentIntersecting(LineSegment2d) method.
+      LineSegment2d lineSegment = new LineSegment2d(0.0, 0.0, 2.0, 2.0);
+      assertTrue(planarRegion.isLineSegmentIntersecting(lineSegment));
+      ArrayList<Point2d[]> intersectionsInPlaneFrame = new ArrayList<>();
+      planarRegion.getLineSegmentIntersectionsWhenProjectedVertically(lineSegment, intersectionsInPlaneFrame);
+      assertEquals(3, intersectionsInPlaneFrame.size());
+
+      lineSegment = new LineSegment2d(0.0, 0.0, 0.5, 0.5);
+      assertFalse("Not intersecting if fully inside a single polygon", planarRegion.isLineSegmentIntersecting(lineSegment));
+      intersectionsInPlaneFrame.clear();
+      planarRegion.getLineSegmentIntersectionsWhenProjectedVertically(lineSegment, intersectionsInPlaneFrame);
+      assertEquals(0, intersectionsInPlaneFrame.size());
+
+      lineSegment = new LineSegment2d(0.0, 0.0, 0.0, 1.5);
+      assertTrue("Intersecting if fully inside but cross two polygons", planarRegion.isLineSegmentIntersecting(lineSegment));
+      intersectionsInPlaneFrame.clear();
+      planarRegion.getLineSegmentIntersectionsWhenProjectedVertically(lineSegment, intersectionsInPlaneFrame);
+      assertEquals(2, intersectionsInPlaneFrame.size());
+      Point2d[] points = intersectionsInPlaneFrame.get(0);
+      assertEquals(1, points.length);
+      JUnitTools.assertTuple2dEquals(new Point2d(0.0, 1.0), points[0], 1e-7);
+      points = intersectionsInPlaneFrame.get(1);
+      assertEquals(1, points.length);
+      JUnitTools.assertTuple2dEquals(new Point2d(0.0, 1.0), points[0], 1e-7);
+      
+      lineSegment = new LineSegment2d(2.5, 0.5, 3.0, 9.0);
+      assertTrue(planarRegion.isLineSegmentIntersecting(lineSegment));
+      lineSegment = new LineSegment2d(2.5, 4.5, 3.0, 9.0);
+      assertFalse("Not intersecting if fully outside", planarRegion.isLineSegmentIntersecting(lineSegment));
+
+      lineSegment = new LineSegment2d(2.0, -2.0, 2.0, 2.0);
+      assertTrue(planarRegion.isLineSegmentIntersecting(lineSegment));  
+      intersectionsInPlaneFrame.clear();
+      planarRegion.getLineSegmentIntersectionsWhenProjectedVertically(lineSegment, intersectionsInPlaneFrame);
+      assertEquals(1, intersectionsInPlaneFrame.size());
+      points = intersectionsInPlaneFrame.get(0);
+      assertEquals(2, points.length);
+      JUnitTools.assertTuple2dEquals(new Point2d(2.0, 1.0), points[0], 1e-7);
+      JUnitTools.assertTuple2dEquals(new Point2d(2.0, -1.0), points[1], 1e-7);
+
       ConvexPolygon2d convexPolygon = new ConvexPolygon2d();
       convexPolygon.addVertex(0.2, 0.2);
       convexPolygon.addVertex(0.2, -0.2);

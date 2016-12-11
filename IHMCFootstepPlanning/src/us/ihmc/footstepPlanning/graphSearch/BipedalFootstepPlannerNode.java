@@ -3,6 +3,7 @@ package us.ihmc.footstepPlanning.graphSearch;
 import java.util.ArrayList;
 
 import javax.vecmath.Point3d;
+import javax.vecmath.Vector2d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.robotics.MathTools;
@@ -21,8 +22,8 @@ public class BipedalFootstepPlannerNode
    private ArrayList<BipedalFootstepPlannerNode> childrenNodes;
    private double estimatedCostToGoal;
 
-   private static final double XY_DISTANCE_THRESHOLD_TO_CONSIDER_NODES_EQUAL = 0.02;
-   private static final double YAW_ROTATION_THRESHOLD_TO_CONSIDER_NODES_EQUAL = 0.04;
+   private static final double XY_DISTANCE_THRESHOLD_TO_CONSIDER_NODES_EQUAL = 0.2;
+   private static final double YAW_ROTATION_THRESHOLD_TO_CONSIDER_NODES_EQUAL = 0.4;
 
    private boolean isAtGoal = false;
    private boolean isDead = false;
@@ -107,6 +108,13 @@ public class BipedalFootstepPlannerNode
       soleTransform.multiply(snapTransform, soleTransform);
    }
 
+   public void shiftInSoleFrame(Vector2d shiftVector)
+   {
+      RigidBodyTransform shiftTransform = new RigidBodyTransform();
+      shiftTransform.setTranslation(new Vector3d(shiftVector.getX(), shiftVector.getY(), 0.0));
+      soleTransform.multiply(soleTransform, shiftTransform);
+   }
+
    public void removePitchAndRoll()
    {
       if (Math.abs(soleTransform.getM22() - 1.0) < 1e-4) return;
@@ -168,7 +176,7 @@ public class BipedalFootstepPlannerNode
    public double getCostToHereFromStart()
    {
       if (parentNode == null)
-         return 0.0;
+         return getSingleStepScore();
       return getSingleStepScore() + parentNode.getCostToHereFromStart();
    }
 
@@ -269,10 +277,10 @@ public class BipedalFootstepPlannerNode
    {
       return soleTransform.toString();
    }
-   
+
    public boolean isPartialFoothold()
    {
-      return MathTools.isLessThan(percentageOfFoothold, 1.0, 5);
+      return MathTools.isPreciselyLessThan(percentageOfFoothold, 1.0, 1e-3);
    }
 
    public double getPercentageOfFoothold()
@@ -284,6 +292,7 @@ public class BipedalFootstepPlannerNode
    {
       this.percentageOfFoothold = percentageOfFoothold;
    }
+
 
    public ConvexPolygon2d getPartialFootholdPolygon()
    {

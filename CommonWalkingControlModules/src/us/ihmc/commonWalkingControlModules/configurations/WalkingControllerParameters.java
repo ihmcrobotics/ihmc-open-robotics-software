@@ -47,16 +47,41 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
 
    public abstract double getTimeToGetPreparedForLocomotion();
 
+   /**
+    * Boolean to enable transitions to the toe off contact state, if the appropriate conditions are satisfied.
+    * @return boolean (true = Allow Toe Off, false = Don't Allow Toe Off)
+    */
    public abstract boolean doToeOffIfPossible();
 
    public abstract boolean doToeOffIfPossibleInSingleSupport();
 
    public abstract boolean checkECMPLocationToTriggerToeOff();
 
+   /**
+    * Minimum stance length in double support to enable toe off.
+    * @return threshold stance length in meters
+    */
    public abstract double getMinStepLengthForToeOff();
 
+   /**
+    * If the leading foot is above this value in height, it is one of the last checks that says whether or not to
+    * switch the contact state to toe off for the trailing foot.
+    * @return threshold height in meters for stepping up to cause toe off
+    */
+   public double getMinStepHeightForToeOff()
+   {
+      return 0.10;
+   }
+
+   /**
+    * To enable that feature, {@link WalkingControllerParameters#doToeOffIfPossible()} return true is required. John parameter
+    */
    public abstract boolean doToeOffWhenHittingAnkleLimit();
 
+   /**
+    * Sets the maximum pitch of the foot during toe off to be fed into the whole-body controller
+    * @return maximum pitch angle
+    */
    public abstract double getMaximumToeOffAngle();
 
    public abstract boolean doToeTouchdownIfPossible();
@@ -69,6 +94,10 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
 
    public abstract boolean allowShrinkingSingleSupportFootPolygon();
 
+   /**
+    * Attempts to speed up the swing state to match the desired ICP to the current ICP.
+    * @return boolean (true = allow speed up, false = don't allow speed up)
+    */
    public abstract boolean allowDisturbanceRecoveryBySpeedingUpSwing();
 
    public abstract boolean allowAutomaticManipulationAbort();
@@ -77,6 +106,7 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
 
    /**
     * Determines whether to use the ICP Optimization controller or a standard ICP proportional controller (new feature to be tested with Atlas)
+    * @return boolean (true = use ICP Optimization, false = use ICP Proportional Controller)
     */
    public abstract boolean useOptimizationBasedICPController();
 
@@ -264,6 +294,7 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
     * Returns a ratio to multiply the swing foot velocity adjustment when the swing trajectory is modified online.
     * 0.0 will eliminate any velocity adjustment.
     * 1.0 will make it try to move to the new trajectory in 1 dt.
+    * @return damping ratio (0.0 to 1.0)
     */
    public double getSwingFootVelocityAdjustmentDamping()
    {
@@ -293,5 +324,36 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
          jointPrivilegedConfigurationParameters = new JointPrivilegedConfigurationParameters();
 
       return jointPrivilegedConfigurationParameters;
+   }
+
+   /**
+    * Determines whether or not to attempt to directly control the height.
+    * If true, the height will be controlled by controlling either the pelvis or the center of mass height.
+    * If false, the height will be controlled inside the nullspace by trying to achieve the desired
+    * privileged configuration in the legs.
+    * @return boolean (true = control height with momentum, false = do not control height with momentum)
+    */
+   public boolean controlHeightWithMomentum()
+   {
+      return true;
+   }
+
+   /**
+    * Determines whether or not to attempt to use straight legs when controlling the height in the nullspace.
+    * This will not do anything noticeable unless {@link WalkingControllerParameters#controlHeightWithMomentum()} returns true.
+    * @return boolean (true = try and straighten, false = do not try and straighten)
+    */
+   public boolean attemptToStraightenLegs()
+   {
+      return true;
+   }
+
+   /**
+    * Returns a percent of the swing state to switch the privileged configuration to having straight knees
+    * @return ratio of swing state (0.0 to 1.0)
+    */
+   public double getPercentOfSwingToStraightenLeg()
+   {
+      return 0.8;
    }
 }
