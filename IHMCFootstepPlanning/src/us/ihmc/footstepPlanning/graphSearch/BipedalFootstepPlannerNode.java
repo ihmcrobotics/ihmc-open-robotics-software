@@ -3,6 +3,7 @@ package us.ihmc.footstepPlanning.graphSearch;
 import java.util.ArrayList;
 
 import javax.vecmath.Point3d;
+import javax.vecmath.Vector2d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.robotics.MathTools;
@@ -107,6 +108,13 @@ public class BipedalFootstepPlannerNode
       // Ignore the z since the snap transform snapped from z = 0. Keep everything else.
       soleTransform.setM23(0.0);
       soleTransform.multiply(snapTransform, soleTransform);
+   }
+
+   public void shiftInSoleFrame(Vector2d shiftVector)
+   {
+      RigidBodyTransform shiftTransform = new RigidBodyTransform();
+      shiftTransform.setTranslation(new Vector3d(shiftVector.getX(), shiftVector.getY(), 0.0));
+      soleTransform.multiply(soleTransform, shiftTransform);
    }
 
    public void removePitchAndRoll()
@@ -287,7 +295,7 @@ public class BipedalFootstepPlannerNode
    
    public boolean isPartialFoothold()
    {
-      return MathTools.isLessThan(percentageOfFoothold, 1.0, 5);
+      return MathTools.isPreciselyLessThan(percentageOfFoothold, 1.0, 1e-3);
    }
 
    public double getPercentageOfFoothold()
@@ -299,6 +307,7 @@ public class BipedalFootstepPlannerNode
    {
       this.percentageOfFoothold = percentageOfFoothold;
    }
+
 
    public ConvexPolygon2d getPartialFootholdPolygon()
    {

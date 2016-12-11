@@ -244,7 +244,7 @@ public class GeometryTools
     * @param points ArrayList
     * @return Point2d
     */
-   public static Point2d averagePoint2ds(ArrayList<Point2d> points)
+   public static Point2d averagePoint2ds(List<Point2d> points)
    {
       Point2d totalPoint = new Point2d(0.0, 0.0);
       for (Point2d point : points)
