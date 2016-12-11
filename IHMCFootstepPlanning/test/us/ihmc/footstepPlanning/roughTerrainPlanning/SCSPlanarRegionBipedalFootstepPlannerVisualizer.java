@@ -12,14 +12,18 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
 public class SCSPlanarRegionBipedalFootstepPlannerVisualizer
 {
-   public static PlanarRegionBipedalFootstepPlannerVisualizer createWithSimulationConstructionSet(double dtForViz, SideDependentList<ConvexPolygon2d> footPolygonsInSoleFrame)
+   public static PlanarRegionBipedalFootstepPlannerVisualizer createWithSimulationConstructionSet(double dtForViz, SideDependentList<ConvexPolygon2d> footPolygonsInSoleFrame, YoVariableRegistry registryToAdd)
    {
-      return createWithSimulationConstructionSet(dtForViz, new Point3d(0.0, 0.0, 0.0), new Point3d(-5.0, 0.0, 5.0), footPolygonsInSoleFrame);
+      return createWithSimulationConstructionSet(dtForViz, new Point3d(0.0, 0.0, 0.0), new Point3d(-5.0, 0.0, 5.0), footPolygonsInSoleFrame, registryToAdd);
    }
 
-   public static PlanarRegionBipedalFootstepPlannerVisualizer createWithSimulationConstructionSet(double dtForViz, Point3d cameraFix, Point3d cameraPosition, SideDependentList<ConvexPolygon2d> footPolygonsInSoleFrame)
+   public static PlanarRegionBipedalFootstepPlannerVisualizer createWithSimulationConstructionSet(double dtForViz, Point3d cameraFix, Point3d cameraPosition, 
+                                                                                                  SideDependentList<ConvexPolygon2d> footPolygonsInSoleFrame, 
+                                                                                                  YoVariableRegistry registryToAdd)
    {
       YoVariableRegistry registry = new YoVariableRegistry(SCSPlanarRegionBipedalFootstepPlannerVisualizer.class.getSimpleName());
+      registry.addChild(registryToAdd);
+
       YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
 
       PlanarRegionBipedalFootstepPlannerVisualizer footstepPlannerVisualizer = new PlanarRegionBipedalFootstepPlannerVisualizer(10, footPolygonsInSoleFrame, registry, graphicsListRegistry);
