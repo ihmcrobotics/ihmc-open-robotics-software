@@ -58,6 +58,26 @@ public class PlanarRegionsList
 
       return containers;
    }
+   
+   /**
+    * Find all the planar regions that intersect with the given 2d line segment.
+    * The algorithm is equivalent to projecting all the regions onto the XY-plane and then finding the regions intersecting with the given line segment.
+    * @param lineSegmentInWorld the query.
+    * @param intersectingRegionsToPack ArrayList were the intersecting regions will be packed into.
+    */
+   public void findPlanarRegionsIntersectingLineSegment(LineSegment2d lineSegmentInWorld, ArrayList<PlanarRegion> intersectingRegionsToPack)
+   {
+      for (int i = 0; i < regions.size(); i++)
+      {
+         PlanarRegion candidateRegion = regions.get(i);
+         if (candidateRegion.isVertical()) continue;
+
+         if (candidateRegion.isLineSegmentIntersecting(lineSegmentInWorld))
+         {
+            intersectingRegionsToPack.add(candidateRegion);
+         }
+      }
+   }
 
    /**
     * Find all the planar regions that contain the given point.
