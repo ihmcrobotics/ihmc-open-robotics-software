@@ -482,15 +482,17 @@ public class FootControlModule
     */
    public void setAttemptToStraightenLegs(boolean attemptToStraightenLegs)
    {
+      swingState.setAttemptToStraightenLegs(attemptToStraightenLegs);
+      moveViaWaypointsState.setAttemptToStraightenLegs(attemptToStraightenLegs);
       onToesState.setAttemptToStraightenLegs(attemptToStraightenLegs);
-      if (holdPositionState != null)
-         holdPositionState.setAttemptToStraightenLegs(attemptToStraightenLegs);
-      if (supportStateNew != null)
-         supportStateNew.setAttemptToStraightenLegs(attemptToStraightenLegs);
-      if (exploreFootPolygonState != null)
-         exploreFootPolygonState.setAttemptToStraightenLegs(attemptToStraightenLegs);
       if (supportState != null)
          supportState.setAttemptToStraightenLegs(attemptToStraightenLegs);
+      if (supportStateNew != null)
+         supportStateNew.setAttemptToStraightenLegs(attemptToStraightenLegs);
+      if (holdPositionState != null)
+         holdPositionState.setAttemptToStraightenLegs(attemptToStraightenLegs);
+      if (exploreFootPolygonState != null)
+         exploreFootPolygonState.setAttemptToStraightenLegs(attemptToStraightenLegs);
    }
 
    public void setExitCMPForToeOff(FramePoint exitCMP)
