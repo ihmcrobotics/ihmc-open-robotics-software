@@ -1,9 +1,7 @@
 package us.ihmc.robotics;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
+import static us.ihmc.tools.continuousIntegration.IntegrationCategory.*;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -604,38 +602,90 @@ public class MathToolsTest
    @Test(timeout = 30000)
    public void testIsGreaterThan()
    {
-      assertTrue(MathTools.isGreaterThan(2.00011000, 2.00010000, 8));
-      assertFalse(MathTools.isGreaterThan(2.00011000, 2.00010000, 4));
+      assertTrue(MathTools.isSignificantlyGreaterThan(2.00011000, 2.00010000, 8));
+      assertFalse(MathTools.isSignificantlyGreaterThan(2.00011000, 2.00010000, 4));
+      
+      assertTrue(MathTools.isPreciselyGreaterThan(2.00011000, 2.00010000, 1e-8));
+      assertFalse(MathTools.isPreciselyGreaterThan(2.00011000, 2.00010000, 1e-3));
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testIsGreaterThanOrEqualTo()
    {
-      assertTrue(MathTools.isGreaterThanOrEqualTo(2.00011000, 2.00010000, 8));
-      assertTrue(MathTools.isGreaterThanOrEqualTo(2.00011000, 2.00010000, 4));
-      assertTrue(MathTools.isGreaterThanOrEqualTo(2.00019000, 2.00020000, 4));
-      assertFalse(MathTools.isGreaterThanOrEqualTo(2.00019000, 2.00020000, 5));
+      assertTrue(MathTools.isSignificantlyGreaterThanOrEqualTo(2.00011000, 2.00010000, 8));
+      assertTrue(MathTools.isSignificantlyGreaterThanOrEqualTo(2.00011000, 2.00010000, 4));
+      assertTrue(MathTools.isSignificantlyGreaterThanOrEqualTo(2.00019000, 2.00020000, 4));
+      assertTrue(MathTools.isSignificantlyGreaterThanOrEqualTo(2.00019000, 2.00020000, 5));
+      
+      assertTrue(MathTools.isPreciselyGreaterThanOrEqualTo(2.00011000, 2.00010000, 1e-8));
+      assertTrue(MathTools.isPreciselyGreaterThanOrEqualTo(2.00011000, 2.00010000, 1e-3));
+      assertTrue(MathTools.isPreciselyGreaterThanOrEqualTo(2.00019000, 2.00020000, 1e-3));
+      assertTrue(MathTools.isPreciselyGreaterThanOrEqualTo(2.00019000, 2.00020000, 1e-4));
+      assertTrue(MathTools.isPreciselyGreaterThanOrEqualTo(2.00020000, 2.00019000, 1e-5));
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testIsLessThan()
    {
-      assertFalse(MathTools.isLessThan(2.00011000, 2.00010000, 8));
-      assertFalse(MathTools.isLessThan(2.00011000, 2.00010000, 4));
-      assertFalse(MathTools.isLessThan(2.00019000, 2.00020000, 4));
-      assertTrue(MathTools.isLessThan(2.00019000, 2.00020000, 5));
+      assertFalse(MathTools.isPreciselyLessThan(2.00011000, 2.00010000, 1e-8));
+      assertFalse(MathTools.isPreciselyLessThan(2.00011000, 2.00010000, 1e-4));
+      assertFalse(MathTools.isPreciselyLessThan(2.00019000, 2.00020000, 1e-4));
+      assertTrue(MathTools.isPreciselyLessThan(2.00019000, 2.00020000, 1e-5));
+      
+      assertFalse(MathTools.isSignificantlyLessThan(2.00011000, 2.00010000, 1));
+      assertFalse(MathTools.isSignificantlyLessThan(2.00011000, 2.00010000, 5));
+      assertFalse(MathTools.isSignificantlyLessThan(2.00019000, 2.00020000, 5));
+      assertTrue(MathTools.isSignificantlyLessThan(2.00019000, 2.00020000, 6));
+   }
+   
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @Test(timeout = 30000)
+   public void testRoundToPrecision()
+   {
+      assertEquals("not equal", 100.0, MathTools.roundToPrecision(123.45, 100.0), 0.0);
+      assertEquals("not equal", 120.0, MathTools.roundToPrecision(123.45, 10.0), 0.0);
+      assertEquals("not equal", 123.0, MathTools.roundToPrecision(123.45, 1.0), 0.0);
+      assertEquals("not equal", 123.5, MathTools.roundToPrecision(123.45, 0.1), 0.0);
+      assertEquals("not equal", 123.45, MathTools.roundToPrecision(123.45, 0.01), 0.0);
+      assertEquals("not equal", 123.45, MathTools.roundToPrecision(123.46, 0.05), 0.0);
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testRoundToSignificantFigures()
+   {
+      assertEquals("not equal", 100.0, MathTools.roundToSignificantFigures(123.45, 1), 0.0);
+      assertEquals("not equal", 120.0, MathTools.roundToSignificantFigures(123.45, 2), 0.0);
+      assertEquals("not equal", 123.0, MathTools.roundToSignificantFigures(123.45, 3), 0.0);
+      assertEquals("not equal", 123.5, MathTools.roundToSignificantFigures(123.45, 4), 0.0);
+      assertEquals("not equal", 123.45, MathTools.roundToSignificantFigures(123.45, 5), 0.0);
+      assertEquals("not equal", 123.45, MathTools.roundToSignificantFigures(123.45, 6), 0.0);
+      
+      assertEquals("not equal", 0.0001, MathTools.roundToSignificantFigures(0.00011, 1), 0.0);
+      
+      System.out.println("Double.MIN_VALUE: " + Double.MIN_VALUE);
+      System.out.println("Double.MAX_VALUE: " + Double.MAX_VALUE);
+      System.out.println("Integer.MAX_VALUE: " + Integer.MAX_VALUE);
+      // test the limits
+      assertEquals("not equal", 1.0000000000000001E-307, MathTools.roundToSignificantFigures(1e-307, 0), 0.0);
+      assertEquals("not equal", 0.0, MathTools.roundToSignificantFigures(1.79e-308, 0), 0.0);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testIsLessThanOrEqualTo()
    {
-      assertFalse(MathTools.isLessThanOrEqualTo(2.00011000, 2.00010000, 8));
-      assertTrue(MathTools.isLessThanOrEqualTo(2.00011000, 2.00010000, 4));
-      assertTrue(MathTools.isLessThanOrEqualTo(2.00019000, 2.00020000, 4));
-      assertTrue(MathTools.isLessThanOrEqualTo(2.00019000, 2.00020000, 5));
+      assertFalse(MathTools.isSignificantlyLessThanOrEqualTo(2.00011000, 2.00010000, 8));
+      assertTrue(MathTools.isSignificantlyLessThanOrEqualTo(2.00011000, 2.00010000, 4));
+      assertTrue(MathTools.isSignificantlyLessThanOrEqualTo(2.00019000, 2.00020000, 4));
+      assertTrue(MathTools.isSignificantlyLessThanOrEqualTo(2.00019000, 2.00020000, 5));
+      
+      assertFalse(MathTools.isPreciselyLessThanOrEqualTo(2.00011000, 2.00010000, 1e-8));
+      assertTrue(MathTools.isPreciselyLessThanOrEqualTo(2.00011000, 2.00010000, 1e-4));
+      assertTrue(MathTools.isPreciselyLessThanOrEqualTo(2.00019000, 2.00020000, 1e-4));
+      assertTrue(MathTools.isPreciselyLessThanOrEqualTo(2.00019000, 2.00020000, 1e-6));
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
