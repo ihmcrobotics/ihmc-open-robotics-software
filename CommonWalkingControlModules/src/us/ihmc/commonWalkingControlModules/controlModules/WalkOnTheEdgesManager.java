@@ -92,7 +92,7 @@ public class WalkOnTheEdgesManager
       extraCoMMaxHeightWithToes.set(0.08);
 
       minStepLengthForToeOff.set(walkingControllerParameters.getMinStepLengthForToeOff());
-      minStepHeightForToeOff.set(0.10);
+      minStepHeightForToeOff.set(walkingControllerParameters.getMinStepHeightForToeOff());
 
       isRearAnklePitchHittingLimit = new BooleanYoVariable("isRearAnklePitchHittingLimit", registry);
       isRearAnklePitchHittingLimitFilt = new GlitchFilteredBooleanYoVariable("isRearAnklePitchHittingLimitFilt", registry, isRearAnklePitchHittingLimit, 10);
@@ -200,7 +200,7 @@ public class WalkOnTheEdgesManager
          return;
       }
 
-         doToeOff.set(true);
+      doToeOff.set(true);
    }
 
    private boolean isFrontFootWellPositionedForToeOff(RobotSide trailingLeg, ReferenceFrame frontFootFrame)

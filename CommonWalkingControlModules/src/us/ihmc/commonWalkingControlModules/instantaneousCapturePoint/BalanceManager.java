@@ -26,9 +26,11 @@ import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.controllers.YoPDGains;
+import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.geometry.ConvexPolygonShrinker;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -100,6 +102,7 @@ public class BalanceManager
    private final DoubleYoVariable distanceToShrinkSupportPolygonWhenHoldingCurrent = new DoubleYoVariable("distanceToShrinkSupportPolygonWhenHoldingCurrent", registry);
 
    private final BooleanYoVariable holdICPToCurrentCoMLocationInNextDoubleSupport = new BooleanYoVariable("holdICPToCurrentCoMLocationInNextDoubleSupport", registry);
+   private final BooleanYoVariable controlHeightWithMomentum = new BooleanYoVariable("controlHeightWithMomentum", registry);
 
    private final DoubleYoVariable maxICPErrorBeforeSingleSupportX = new DoubleYoVariable("maxICPErrorBeforeSingleSupportX", registry);
    private final DoubleYoVariable maxICPErrorBeforeSingleSupportY = new DoubleYoVariable("maxICPErrorBeforeSingleSupportY", registry);
@@ -154,6 +157,7 @@ public class BalanceManager
          linearMomentumRateOfChangeControlModule = new ICPBasedLinearMomentumRateOfChangeControlModule(referenceFrames, bipedSupportPolygons, controlDT,
                totalMass, gravityZ,icpControlGains, registry, yoGraphicsListRegistry, use2DCMPProjection);
       }
+      linearMomentumRateOfChangeControlModule.setControlHeightWithMomentum(walkingControllerParameters.controlHeightWithMomentum());
 
       icpPlanner = new ICPPlannerWithTimeFreezer(bipedSupportPolygons, contactableFeet, capturePointPlannerParameters, registry, yoGraphicsListRegistry);
       icpPlanner.setMinimumSingleSupportTimeForDisturbanceRecovery(minimumSwingTimeForDisturbanceRecovery);
@@ -175,6 +179,15 @@ public class BalanceManager
       double maxAllowedDistanceCMPSupport = walkingControllerParameters.getMaxAllowedDistanceCMPSupport();
       SideDependentList<FrameConvexPolygon2d> defaultFootPolygons = momentumBasedController.getDefaultFootPolygons();
       momentumRecoveryControlModule = new MomentumRecoveryControlModule(defaultFootPolygons, maxAllowedDistanceCMPSupport, registry, yoGraphicsListRegistry);
+
+      controlHeightWithMomentum.set(walkingControllerParameters.controlHeightWithMomentum());
+      controlHeightWithMomentum.addVariableChangedListener(new VariableChangedListener()
+      {
+         @Override public void variableChanged(YoVariable<?> v)
+         {
+            linearMomentumRateOfChangeControlModule.setControlHeightWithMomentum(controlHeightWithMomentum.getBooleanValue());
+         }
+      });
 
       String graphicListName = getClass().getSimpleName();
 

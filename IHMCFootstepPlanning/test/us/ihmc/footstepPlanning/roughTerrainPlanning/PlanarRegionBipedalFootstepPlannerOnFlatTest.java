@@ -88,7 +88,7 @@ public class PlanarRegionBipedalFootstepPlannerOnFlatTest extends FootstepPlanne
       if (visualize)
       {
          PlanarRegionBipedalFootstepPlannerVisualizer visualizer = SCSPlanarRegionBipedalFootstepPlannerVisualizer.createWithSimulationConstructionSet(1.0,
-                                                                                                                                                       footPolygonsInSoleFrame);
+                                                                                                                                                       footPolygonsInSoleFrame, registry);
          planner.setBipedalFootstepPlannerListener(visualizer);
       }
 
