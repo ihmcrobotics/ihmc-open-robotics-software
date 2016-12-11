@@ -108,6 +108,9 @@ public class FootstepPlanningToolboxController extends ToolboxController
       parameters.setRejectIfCannotFullyWiggleInside(true);
       parameters.setWiggleIntoConvexHullOfPlanarRegions(true);
 
+      parameters.setCliffHeightToShiftAwayFrom(0.03);
+      parameters.setMinimumDistanceFromCliffBottoms(0.22);
+
       double idealFootstepLength = 0.3;
       double idealFootstepWidth = 0.2;
       parameters.setIdealFootstep(idealFootstepLength, idealFootstepWidth);
