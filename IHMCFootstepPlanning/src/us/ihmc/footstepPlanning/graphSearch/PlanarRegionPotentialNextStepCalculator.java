@@ -71,7 +71,7 @@ public class PlanarRegionPotentialNextStepCalculator
       enablePenalizationHeatmapScoring = new BooleanYoVariable("enablePenalizationHeatmapScoring", registry);
       enablePenalizationHeatmapScoring.set(true);
 
-      penalizationHeatmapStepScorer = new PenalizationHeatmapStepScorer(parentRegistry, null, parameters);
+      penalizationHeatmapStepScorer = new PenalizationHeatmapStepScorer(parentRegistry, null);
       orderInWhichConstructedStepScorer = new OrderInWhichConstructedStepScorer();
 
       parentRegistry.addChild(registry);
