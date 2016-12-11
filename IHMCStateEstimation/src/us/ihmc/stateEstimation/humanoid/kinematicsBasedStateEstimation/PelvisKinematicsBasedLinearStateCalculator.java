@@ -302,11 +302,9 @@ public class PelvisKinematicsBasedLinearStateCalculator
          tempFrameVector.sub(tempFramePoint, tempPosition); // Delta from previous to new foot position
          copPositionsInWorld.get(trustedFoot).add(tempFrameVector); // New CoP position
       }
-      else
-      {
-         footPositionInWorld.set(rootJointPosition);
-         footPositionInWorld.sub(footToRootJointPosition);
-      }
+
+      footPositionInWorld.set(rootJointPosition);
+      footPositionInWorld.sub(footToRootJointPosition);
    }
 
    /**
