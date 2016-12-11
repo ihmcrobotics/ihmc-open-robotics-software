@@ -30,7 +30,7 @@ public class BipedalFootstepPlannerNode
    private boolean isAtGoal = false;
    private boolean isDead = false;
 
-   private double singleStepScore;
+   private double singleStepCost;
    private double percentageOfFoothold = 1.0;
    private ConvexPolygon2d partialFootholdPolygon;
 
@@ -45,14 +45,14 @@ public class BipedalFootstepPlannerNode
       this(nodeToCopy.footstepSide, nodeToCopy.soleTransform);
    }
 
-   public double getSingleStepScore()
+   public double getSingleStepCost()
    {
-      return singleStepScore;
+      return singleStepCost;
    }
 
-   public void setSingleStepScore(double singleStepScore)
+   public void setSingleStepCost(double singleStepCost)
    {
-      this.singleStepScore = singleStepScore;
+      this.singleStepCost = singleStepCost;
    }
 
    public RigidBodyTransform getTransformToParent()
@@ -288,6 +288,7 @@ public class BipedalFootstepPlannerNode
       return true;
    }
    
+   @Override
    public String toString()
    {
       return soleTransform.toString();

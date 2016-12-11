@@ -15,7 +15,7 @@ import us.ihmc.footstepPlanning.FootstepPlannerGoalType;
 import us.ihmc.footstepPlanning.polygonSnapping.PlanarRegionsListPolygonSnapper;
 import us.ihmc.footstepPlanning.polygonWiggling.PolygonWiggler;
 import us.ihmc.footstepPlanning.polygonWiggling.WiggleParameters;
-import us.ihmc.footstepPlanning.scoring.PenalizationHeatmapStepScorer;
+import us.ihmc.footstepPlanning.scoring.BipedalStepAdjustmentCostCalculator;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -42,7 +42,7 @@ public class PlanarRegionPotentialNextStepCalculator
    private final DoubleYoVariable maximumCliffYInSoleFrame = new DoubleYoVariable("maximumCliffYInSoleFrame", registry);
    private final DoubleYoVariable maximumCliffZInSoleFrame = new DoubleYoVariable("maximumCliffZInSoleFrame", registry);
 
-   private final BooleanYoVariable enablePenalizationHeatmapScoring;
+   private final BooleanYoVariable enableStepAdjustmentCosts;
 
    private final BipedalFootstepPlannerParameters parameters;
 
@@ -61,18 +61,18 @@ public class PlanarRegionPotentialNextStepCalculator
 
    private BipedalFootstepPlannerListener listener;
 
-   private final PenalizationHeatmapStepScorer penalizationHeatmapStepScorer;
-   private final OrderInWhichConstructedStepScorer orderInWhichConstructedStepScorer;
+   private final BipedalStepAdjustmentCostCalculator stepAdjustmentCostCalculator;
+   private final IncreasingCostEachStepProvider increasingCostEachStepProvider;
 
    PlanarRegionPotentialNextStepCalculator(BipedalFootstepPlannerParameters parameters, YoVariableRegistry parentRegistry)
    {
       this.parameters = parameters;
 
-      enablePenalizationHeatmapScoring = new BooleanYoVariable("enablePenalizationHeatmapScoring", registry);
-      enablePenalizationHeatmapScoring.set(true);
+      enableStepAdjustmentCosts = new BooleanYoVariable("enablePenalizationHeatmapScoring", registry);
+      enableStepAdjustmentCosts.set(true);
 
-      penalizationHeatmapStepScorer = new PenalizationHeatmapStepScorer(parentRegistry, null);
-      orderInWhichConstructedStepScorer = new OrderInWhichConstructedStepScorer();
+      stepAdjustmentCostCalculator = new BipedalStepAdjustmentCostCalculator(parentRegistry, null);
+      increasingCostEachStepProvider = new IncreasingCostEachStepProvider();
 
       parentRegistry.addChild(registry);
    }
@@ -255,7 +255,7 @@ public class PlanarRegionPotentialNextStepCalculator
       BipedalFootstepPlannerNode goalNode = computeGoalNodeIfGoalIsReachable(nodeToExpand);
       if (goalNode != null)
       {
-         boolean acceptable = checkIfNodeAcceptableScoreAndAddToList(goalNode, nodesToAdd, new Vector3d(), 0.0);
+         boolean acceptable = checkIfNodeAcceptableCostAndAddToList(goalNode, nodesToAdd, new Vector3d(), 0.0);
          if (acceptable)
             return nodesToAdd;
       }
@@ -300,7 +300,7 @@ public class PlanarRegionPotentialNextStepCalculator
       BipedalFootstepPlannerNode childNode = createAndAddNextNodeGivenStep(soleZUpTransform, nodeToExpand, idealStepVector, idealStepYaw);
       seeIfNodeIsAtGoal(childNode);
 
-      checkIfNodeAcceptableScoreAndAddToList(childNode, nodesToAdd, idealStepVector, idealStepYaw);
+      checkIfNodeAcceptableCostAndAddToList(childNode, nodesToAdd, idealStepVector, idealStepYaw);
 
       for (double xStep = idealStepVector.getX() / 2.0; xStep < 1.6 * idealStepVector.getX(); xStep = xStep + idealStepVector.getX() / 4.0)
       {
@@ -314,7 +314,7 @@ public class PlanarRegionPotentialNextStepCalculator
 
                seeIfNodeIsAtGoal(childNode);
 
-               checkIfNodeAcceptableScoreAndAddToList(childNode, nodesToAdd, idealStepVector, idealStepYaw);
+               checkIfNodeAcceptableCostAndAddToList(childNode, nodesToAdd, idealStepVector, idealStepYaw);
             }
          }
       }
@@ -327,11 +327,11 @@ public class PlanarRegionPotentialNextStepCalculator
       childNode = createAndAddNextNodeGivenStep(soleZUpTransform, nodeToExpand, nextStepVector, nextStepYaw);
 
       seeIfNodeIsAtGoal(childNode);
-      checkIfNodeAcceptableScoreAndAddToList(childNode, nodesToAdd, idealStepVector, idealStepYaw);
+      checkIfNodeAcceptableCostAndAddToList(childNode, nodesToAdd, idealStepVector, idealStepYaw);
 
-      NodeScoreComparator nodeScoreComparator = new NodeScoreComparator();
+      NodeCostComparator nodeCostComparator = new NodeCostComparator();
 
-      Collections.sort(nodesToAdd, nodeScoreComparator);
+      Collections.sort(nodesToAdd, nodeCostComparator);
       return nodesToAdd;
    }
 
@@ -388,7 +388,7 @@ public class PlanarRegionPotentialNextStepCalculator
    private final RigidBodyTransform rightSoleTransform = new RigidBodyTransform();
    private final SideDependentList<RigidBodyTransform> soleTransforms = new SideDependentList<>(leftSoleTransform, rightSoleTransform);
 
-   private boolean checkIfNodeAcceptableScoreAndAddToList(BipedalFootstepPlannerNode node, ArrayList<BipedalFootstepPlannerNode> nodesToAdd,
+   private boolean checkIfNodeAcceptableCostAndAddToList(BipedalFootstepPlannerNode node, ArrayList<BipedalFootstepPlannerNode> nodesToAdd,
                                                           Vector3d idealStepVector, double idealStepYaw)
    {
       notifyListenerNodeUnderConsideration(node);
@@ -401,7 +401,7 @@ public class PlanarRegionPotentialNextStepCalculator
 
          if (parentNode == null)
          {
-            node.setSingleStepScore(0.0);
+            node.setSingleStepCost(0.0);
          }
          else
          {
@@ -421,26 +421,24 @@ public class PlanarRegionPotentialNextStepCalculator
             RigidBodyTransform idealStepTransform = getTransformFromStepToWorld(stanceFootTransform, idealStepVector, idealStepYaw);
             FramePose idealFootstepPose = new FramePose(ReferenceFrame.getWorldFrame(), idealStepTransform);
 
-            Point3d swingFootGoal = goalPositions.get(node.getRobotSide());
-            double score;
-            if (enablePenalizationHeatmapScoring.getBooleanValue())
+            double cost;
+            if (enableStepAdjustmentCosts.getBooleanValue())
             {
-               score = penalizationHeatmapStepScorer.scoreFootstep(stanceFootPose, swingStartFootPose, idealFootstepPose, candidateFootPose, swingFootGoal, node.getPercentageOfFoothold());
+               cost = stepAdjustmentCostCalculator.calculateCost(stanceFootPose, swingStartFootPose, idealFootstepPose, candidateFootPose, node.getPercentageOfFoothold());
             }
             else
             {
-               score = orderInWhichConstructedStepScorer.scoreFootstep(stanceFootPose, swingStartFootPose, idealFootstepPose, candidateFootPose, swingFootGoal, node.getPercentageOfFoothold());
+               cost = increasingCostEachStepProvider.calculateCost(stanceFootPose, swingStartFootPose, idealFootstepPose, candidateFootPose, node.getPercentageOfFoothold());
             }
 
-            node.setSingleStepScore(score);
+            node.setSingleStepCost(cost);
          }
 
          nodesToAdd.add(node);
       }
-
       else
       {
-         node.setSingleStepScore(Double.NEGATIVE_INFINITY);
+         node.setSingleStepCost(Double.POSITIVE_INFINITY);
       }
 
       return acceptable;
@@ -868,7 +866,7 @@ public class PlanarRegionPotentialNextStepCalculator
       {
          notifyListenerNodeUnderConsiderationWasRejected(nodeAfterSnap, BipedalFootstepPlannerNodeRejectionReason.COULD_NOT_WIGGLE_INSIDE);
 
-         //TODO: Possibly have different node scores depending on how firm on ground they are.
+         //TODO: Possibly have different node costs depending on how firm on ground they are.
          if (parameters.getRejectIfCannotFullyWiggleInside())
          {
             return null;
@@ -999,18 +997,19 @@ public class PlanarRegionPotentialNextStepCalculator
       return goalPositions.get(robotSide);
    }
 
-   private class NodeScoreComparator implements Comparator<BipedalFootstepPlannerNode>
+   private class NodeCostComparator implements Comparator<BipedalFootstepPlannerNode>
    {
       @Override
       public int compare(BipedalFootstepPlannerNode nodeOne, BipedalFootstepPlannerNode nodeTwo)
       {
-         boolean greaterThan = nodeOne.getSingleStepScore() > nodeTwo.getSingleStepScore();
-         if (greaterThan)
-            return 1;
-
-         else
+         if (nodeOne.getSingleStepCost() > nodeTwo.getSingleStepCost())
+         {
             return -1;
+         }
+         else
+         {
+            return 1;
+         }
       }
-
    }
 }
