@@ -12,7 +12,6 @@ import javax.vecmath.Quat4d;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.avatar.MultiRobotTestInterface;
@@ -162,7 +161,7 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
       FrameOrientation finalPelvisOrientation = new FrameOrientation(pelvisControlFrame);
       finalPelvisOrientation.changeFrame(ReferenceFrame.getWorldFrame());
 
-      double angleEpsilon = Math.toRadians(10);
+      double angleEpsilon = Math.toRadians(12);
 
       assertTrue(isOrientationEqual(initialChestOrientation.getQuaternion(), finalChestOrientation.getQuaternion(), angleEpsilon));
       assertTrue(isOrientationEqual(initialPelvisOrientation.getQuaternion(), finalPelvisOrientation.getQuaternion(), angleEpsilon));
@@ -304,7 +303,7 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
       FrameOrientation finalChestOrientation = new FrameOrientation(chestControlFrame);
       finalChestOrientation.changeFrame(ReferenceFrame.getWorldFrame());
 
-      double chestAngleEpsilon = Math.toRadians(10);
+      double chestAngleEpsilon = Math.toRadians(12);
 
       assertTrue(isOrientationEqual(initialChestOrientation.getQuaternion(), finalChestOrientation.getQuaternion(), chestAngleEpsilon));
       double handPosition = desiredHandPose.getPositionDistance(currentHandPose);
@@ -391,7 +390,7 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
       double rightPosition = desiredHandPoseR.getPositionDistance(currentHandPoseR);
 
       double positionEpsilon = 1.0e-1;
-      System.out.println(leftPosition);
+      
       assertTrue(Math.abs(leftPosition) < positionEpsilon); 
       assertTrue(Math.abs(rightPosition) < positionEpsilon);
       
@@ -507,6 +506,59 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
       assertEquals(desiredChestOrientation.getRoll(), currentChestRoll, angleEpsilon); 
       assertEquals(initialChestYaw, currentChestYaw, angleEpsilon); 
       assertEquals(initialChestPitch, currentChestPitch, angleEpsilon); 
+      
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+   }
+   
+   @ContinuousIntegrationTest(estimatedDuration = 30.0) // Tests the selection matrix of the pelvis 
+   @Test(timeout = 160000)
+   public void testSolvingForPelvisAngularControl() throws SimulationExceededMaximumTimeException, IOException
+   {
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+
+      boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      assertTrue(success);
+
+      drcBehaviorTestHelper.updateRobotModel();
+
+      WholeBodyInverseKinematicsBehavior ik = new WholeBodyInverseKinematicsBehavior(getRobotModel(), drcBehaviorTestHelper.getYoTime(),
+                                                                                     drcBehaviorTestHelper.getBehaviorCommunicationBridge(),
+                                                                                     getRobotModel().createFullRobotModel());
+      
+      Quat4d offsetOrientationPelvis = new Quat4d();
+      RotationTools.convertYawPitchRollToQuaternion(0.3, 0.0, 0.1, offsetOrientationPelvis);
+      ReferenceFrame pelvisControlFrame = drcBehaviorTestHelper.getControllerFullRobotModel().getPelvis().getBodyFixedFrame();
+      FrameOrientation desiredPelvisOrientation = new FrameOrientation(pelvisControlFrame);
+      double initialPelvisPitch = desiredPelvisOrientation.getPitch();
+      double initialPelvisYaw = desiredPelvisOrientation.getYaw();
+      desiredPelvisOrientation.set(offsetOrientationPelvis);
+      desiredPelvisOrientation.changeFrame(ReferenceFrame.getWorldFrame());
+      ik.setTrajectoryTime(0.5);
+      ik.setPelvisAngularControl(true, false, false);
+      ik.setDesiredPelvisOrientation(desiredPelvisOrientation);   
+      drcBehaviorTestHelper.dispatchBehavior(ik);
+
+      while (!ik.isDone())
+      {
+         ThreadTools.sleep(100);
+      }
+
+      assertFalse("Bad solution: " + ik.getSolutionQuality(), ik.hasSolverFailed());
+
+      success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      assertTrue(success);
+
+      FrameOrientation currentPelvisOrientation = new FrameOrientation(pelvisControlFrame);
+      currentPelvisOrientation.changeFrame(ReferenceFrame.getWorldFrame());
+      double currentPelvisRoll = currentPelvisOrientation.getRoll();
+      double currentPelvisYaw = currentPelvisOrientation.getYaw();
+      double currentPelvisPitch = currentPelvisOrientation.getPitch();
+      
+      double angleEpsilon = Math.toRadians(1);
+
+      assertEquals(desiredPelvisOrientation.getRoll(), currentPelvisRoll, angleEpsilon); 
+      assertEquals(initialPelvisYaw, currentPelvisYaw, angleEpsilon); 
+      assertEquals(initialPelvisPitch, currentPelvisPitch, angleEpsilon); 
       
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
