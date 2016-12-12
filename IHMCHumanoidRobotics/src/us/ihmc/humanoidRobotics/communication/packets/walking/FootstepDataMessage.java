@@ -129,6 +129,7 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
       this.swingHeight = footstepData.swingHeight;
    }
 
+   @Override
    public FootstepDataMessage clone()
    {
       return new FootstepDataMessage(this);
@@ -251,6 +252,7 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
       this.trajectoryType = trajectoryType;
    }
 
+   @Override
    public String toString()
    {
       String ret = "";
@@ -272,6 +274,7 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
       return ret;
    }
 
+   @Override
    public boolean epsilonEquals(FootstepDataMessage footstepData, double epsilon)
    {
       boolean robotSideEquals = robotSide == footstepData.robotSide;
@@ -312,6 +315,7 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
       return robotSideEquals && locationEquals && orientationEquals && contactPointsEqual;
    }
 
+   @Override
    public FootstepDataMessage transform(RigidBodyTransform transform)
    {
       FootstepDataMessage ret = this.clone();
