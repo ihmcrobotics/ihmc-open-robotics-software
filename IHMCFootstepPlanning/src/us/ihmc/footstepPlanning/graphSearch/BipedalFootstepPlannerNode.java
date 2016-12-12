@@ -176,8 +176,8 @@ public class BipedalFootstepPlannerNode
    public double getCostToHereFromStart()
    {
       if (parentNode == null)
-         return getSingleStepScore();
-      return getSingleStepScore() + parentNode.getCostToHereFromStart();
+         return getSingleStepCost();
+      return getSingleStepCost() + parentNode.getCostToHereFromStart();
    }
 
    public double getEstimatedCostToGoal()

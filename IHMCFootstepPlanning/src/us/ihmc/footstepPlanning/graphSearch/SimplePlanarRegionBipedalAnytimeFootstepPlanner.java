@@ -62,7 +62,7 @@ public class SimplePlanarRegionBipedalAnytimeFootstepPlanner extends PlanarRegio
    protected void initialize()
    {
       parentOfStartNode = null;
-      
+
       stack.clear();
       startNode = new BipedalFootstepPlannerNode(initialSide, initialFootPose);
       stack.push(startNode);
@@ -153,7 +153,7 @@ public class SimplePlanarRegionBipedalAnytimeFootstepPlanner extends PlanarRegio
          initialSide = footstep.getRobotSide();
          footstep.getSoleFramePose(tempPose);
          tempPose.getRigidBodyTransform(initialFootPose);
-         
+
          parentOfStartNode = startNode;
          startNode = new BipedalFootstepPlannerNode(initialSide, initialFootPose);
       }
@@ -245,7 +245,7 @@ public class SimplePlanarRegionBipedalAnytimeFootstepPlanner extends PlanarRegio
             }
          }
 
-         expandChildrenAndAddNodes(stack, nodeToExpand);
+         expandChildrenAndAddNodes(stack, nodeToExpand, Double.POSITIVE_INFINITY);
       }
 
       notifyListenerSolutionWasNotFound();
