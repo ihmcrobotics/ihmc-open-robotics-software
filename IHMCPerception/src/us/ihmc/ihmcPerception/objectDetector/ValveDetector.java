@@ -33,12 +33,22 @@ public class ValveDetector
    private static FloatNet caffe_net;
    private static final Object caffeNetLock = new Object();
 
-   static void initialize() throws Exception
+   private static void initialize() throws Exception
    {
       if (caffe_net != null)
          return;
 
+      String gpuStr = System.getProperty("gpu");
+      if (gpuStr == null)
+         gpuStr = "-1";
       int gpu = -1;
+      try
+      {
+         gpu = Integer.parseInt(gpuStr);
+      } catch (Exception ex)
+      {
+         // keep -1 (cpu)
+      }
 
       String model, weights;
       try
@@ -203,6 +213,11 @@ public class ValveDetector
       // zoom 3x, center around maximum
       int cropW = source.getWidth() / 3;
       int cropH = source.getHeight() / 3;
+
+      if (centerX - cropW / 2 < 0)
+         centerX -= centerX - cropW / 2;
+      if (centerY - cropH / 2 < 0)
+         centerY -= centerY - cropH / 2;
 
       int left = Math.max(0, centerX - cropW / 2);
       int right = Math.min(source.getWidth() - 1, centerX + cropW / 2);
