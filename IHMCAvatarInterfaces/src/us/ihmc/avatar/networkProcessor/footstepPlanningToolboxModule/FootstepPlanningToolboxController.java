@@ -95,8 +95,8 @@ public class FootstepPlanningToolboxController extends ToolboxController
    {
       BipedalFootstepPlannerParameters footstepPlanningParameters = new BipedalFootstepPlannerParameters(registry);
       FootstepPlannerForBehaviorsHelper.setPlannerParametersForAnytimePlannerAndPlannerToolbox(footstepPlanningParameters);
-      
-      PlanarRegionBipedalFootstepPlanner footstepPlanner = new SimplePlanarRegionBipedalAnytimeFootstepPlanner(footstepPlanningParameters, registry);
+
+      PlanarRegionBipedalFootstepPlanner footstepPlanner = new PlanarRegionBipedalFootstepPlanner(footstepPlanningParameters, registry);
       footstepPlanner.setFeetPolygons(footPolygonsInSoleFrame);
       footstepPlanner.setMaximumNumberOfNodesToExpand(500);
 
