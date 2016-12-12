@@ -1641,6 +1641,22 @@ public class DefaultCommonAvatarEnvironment implements CommonAvatarEnvironmentIn
       return fiducualTerrainObject;
    }
 
+   public static CombinedTerrainObject3D addValveTextureBox(Vector3d position, double yaw)
+   {
+      YoAppearanceTexture valveTexture = new YoAppearanceTexture("/images/red-valve.jpg");
+      double boxSideLength = 1.0;
+
+      CombinedTerrainObject3D valveTerrainObject = new CombinedTerrainObject3D("ValveBox");
+
+      RigidBodyTransform location = new RigidBodyTransform();
+      location.setRotationEulerAndZeroTranslation(Math.toRadians(90.0), 0.0, yaw - Math.toRadians(90.0));
+      location.setTranslation(position);
+
+      RotatableBoxTerrainObject newBox = new RotatableBoxTerrainObject(new Box3d(location, boxSideLength, boxSideLength, boxSideLength), valveTexture);
+      valveTerrainObject.addTerrainObject(newBox);
+      return valveTerrainObject;
+   }
+
    @Override
    public TerrainObject3D getTerrainObject3D()
    {
