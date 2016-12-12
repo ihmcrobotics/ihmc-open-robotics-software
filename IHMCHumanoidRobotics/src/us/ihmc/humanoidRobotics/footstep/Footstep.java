@@ -23,7 +23,10 @@ import us.ihmc.robotics.trajectories.TrajectoryType;
 
 public class Footstep
 {
-   public static enum FootstepType {FULL_FOOTSTEP, PARTIAL_FOOTSTEP, BAD_FOOTSTEP};
+   public static enum FootstepType
+   {
+      FULL_FOOTSTEP, PARTIAL_FOOTSTEP, BAD_FOOTSTEP
+   }
 
    private static int counter = 0;
    private final String id;
@@ -484,6 +487,7 @@ public class Footstep
       return footstepType;
    }
 
+   @Override
    public String toString()
    {
       FrameOrientation frameOrientation = new FrameOrientation(ankleReferenceFrame);

@@ -31,6 +31,8 @@ import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessageConverter;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanningRequestPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanningToolboxOutputStatus;
+import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
+import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -91,34 +93,11 @@ public class FootstepPlanningToolboxController extends ToolboxController
    private PlanarRegionBipedalFootstepPlanner createPlanarRegionBipedalPlanner(SideDependentList<ConvexPolygon2d> footPolygons)
    {
       BipedalFootstepPlannerParameters parameters = new BipedalFootstepPlannerParameters(registry);
-      parameters.setMaximumStepReach(0.55);
-      parameters.setMaximumStepZ(0.25);
-
-      parameters.setMaximumStepXWhenForwardAndDown(0.32);
-      parameters.setMaximumStepZWhenForwardAndDown(0.10);
-
-      parameters.setMaximumStepYaw(0.15);
-      parameters.setMaximumStepWidth(0.4);
-      parameters.setMinimumStepWidth(0.16);
-      parameters.setMinimumFootholdPercent(0.95);
-
-      parameters.setWiggleInsideDelta(0.02);
-      parameters.setMaximumXYWiggleDistance(1.0);
-      parameters.setMaximumYawWiggle(0.1);
-      parameters.setRejectIfCannotFullyWiggleInside(true);
-      parameters.setWiggleIntoConvexHullOfPlanarRegions(true);
-
-      parameters.setCliffHeightToShiftAwayFrom(0.03);
-      parameters.setMinimumDistanceFromCliffBottoms(0.22);
-
-      double idealFootstepLength = 0.3;
-      double idealFootstepWidth = 0.22;
-      parameters.setIdealFootstep(idealFootstepLength, idealFootstepWidth);
+      setPlannerParameters(parameters);
       
       PlanarRegionBipedalFootstepPlanner planner = new PlanarRegionBipedalFootstepPlanner(parameters, registry);
 
       planner.setFeetPolygons(footPolygons);
-
       planner.setMaximumNumberOfNodesToExpand(500);
 
       if (visualize)
@@ -128,11 +107,39 @@ public class FootstepPlanningToolboxController extends ToolboxController
                                                                                                                                                          null,
                                                                                                                                                          null,
                                                                                                                                                          footPolygonsInSoleFrame, "Toolbox_");
-
          planner.setBipedalFootstepPlannerListener(listener);
       }
 
       return planner;
+   }
+
+   private void setPlannerParameters(BipedalFootstepPlannerParameters footstepPlanningParameters)
+   {
+      footstepPlanningParameters.setMaximumStepReach(0.55);
+      footstepPlanningParameters.setMaximumStepZ(0.25);
+
+      footstepPlanningParameters.setMaximumStepXWhenForwardAndDown(0.32); //32);
+      footstepPlanningParameters.setMaximumStepZWhenForwardAndDown(0.10); //18);
+
+      footstepPlanningParameters.setMaximumStepYaw(0.15);
+      footstepPlanningParameters.setMinimumStepWidth(0.16);
+      footstepPlanningParameters.setMaximumStepWidth(0.4);
+      footstepPlanningParameters.setMinimumStepLength(0.02);
+
+      footstepPlanningParameters.setMinimumFootholdPercent(0.95);
+
+      footstepPlanningParameters.setWiggleInsideDelta(0.02);
+      footstepPlanningParameters.setMaximumXYWiggleDistance(1.0);
+      footstepPlanningParameters.setMaximumYawWiggle(0.1);
+      footstepPlanningParameters.setRejectIfCannotFullyWiggleInside(true);
+      footstepPlanningParameters.setWiggleIntoConvexHullOfPlanarRegions(true);
+
+      footstepPlanningParameters.setCliffHeightToShiftAwayFrom(0.03);
+      footstepPlanningParameters.setMinimumDistanceFromCliffBottoms(0.22);
+      
+      double idealFootstepLength = 0.3;
+      double idealFootstepWidth = 0.22;
+      footstepPlanningParameters.setIdealFootstep(idealFootstepLength, idealFootstepWidth);
    }
 
    @Override
