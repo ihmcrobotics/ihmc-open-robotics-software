@@ -81,7 +81,7 @@ public class BipedalStepAdjustmentCostCalculator implements BipedalStepCostCalcu
       angularCostScalar.set(0.0);
       negativeFootholdLinearCostScalar.set(5.0);
 
-      footstepBaseCost.set(1.0);
+      footstepBaseCost.set(0.1);
    }
 
    @Override
