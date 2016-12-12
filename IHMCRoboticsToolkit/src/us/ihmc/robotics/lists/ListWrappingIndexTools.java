@@ -48,6 +48,16 @@ public class ListWrappingIndexTools
    }
 
    /**
+    * Calls {@link List#set(int, T)},
+    * but first computes index %= list.size() such that the index is always inside [0, list.size() - 1].
+    */
+   public static <T> T setWrap(int index, T newValue, List<T> list)
+   {
+      index = wrap(index, list);
+      return list.set(index, newValue);
+   }
+
+   /**
     * Returns the element that is right after the given index.
     */
    public static <T> T getNext(int index, List<T> list)
@@ -87,6 +97,19 @@ public class ListWrappingIndexTools
          return endIndex - startIndex - 1;
       else
          return (endIndex + list.size()) - startIndex - 1;
+   }
+
+   /**
+    * Returns the minimal distance between startIndex (excluded) and endIndex (excluded).
+    * <p>
+    * In other words, returns the minimum between {@code subLengthExclusive(startIndex, endIndex, list)} and  {@code subLengthExclusive(endIndex, startIndex, list)}.
+    */
+   public static int minDistanceExclusive(int startIndex, int endIndex, List<?> list)
+   {
+      if (endIndex == startIndex)
+         return 0;
+      else
+         return Math.min(subLengthExclusive(startIndex, endIndex, list), subLengthExclusive(endIndex, startIndex, list));
    }
 
    /**
