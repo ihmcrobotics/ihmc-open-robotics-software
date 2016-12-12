@@ -14,6 +14,7 @@ import us.ihmc.footstepPlanning.FootstepPlanner;
 import us.ihmc.footstepPlanning.FootstepPlannerGoal;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePose;
@@ -41,6 +42,8 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
    protected final IntegerYoVariable maximumNumberOfNodesToExpand = new IntegerYoVariable("maximumNumberOfNodesToExpand", registry);
    protected final IntegerYoVariable numberOfNodesExpanded = new IntegerYoVariable("numberOfNodesExpanded", registry);
 
+   private final ArrayList<BipedalFootstepPlannerNode> goalNodes = new ArrayList<>();
+   private final BooleanYoVariable exitAfterInitialSolution = new BooleanYoVariable("exitAfterInitialSolution", registry);
    protected BipedalFootstepPlannerNode startNode, goalNode;
    protected FootstepPlan footstepPlan = null;
 
@@ -51,6 +54,7 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
       parentRegistry.addChild(registry);
 
       planarRegionPotentialNextStepCalculator = new PlanarRegionPotentialNextStepCalculator(parameters, parentRegistry);
+      exitAfterInitialSolution.set(true);
    }
 
    public void setBipedalFootstepPlannerListener(BipedalFootstepPlannerListener listener)
@@ -62,6 +66,11 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
    public void setMaximumNumberOfNodesToExpand(int maximumNumberOfNodesToExpand)
    {
       this.maximumNumberOfNodesToExpand.set(maximumNumberOfNodesToExpand);
+   }
+
+   public void setExitAfterInitialSolution(boolean exitAfterInitialSolution)
+   {
+      this.exitAfterInitialSolution.set(exitAfterInitialSolution);
    }
 
    public void setFeetPolygons(SideDependentList<ConvexPolygon2d> footPolygonsInSoleFrame)
@@ -112,13 +121,12 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
       mapToAllExploredNodes.clear();
    }
 
-   private final ArrayList<BipedalFootstepPlannerNode> goalNodes = new ArrayList<>();
-
    @Override
    public FootstepPlanningResult plan()
    {
       initialize();
       goalNode = null;
+      goalNodes.clear();
       footstepPlan = null;
       double smallestCostToGoal = Double.POSITIVE_INFINITY;
       planarRegionPotentialNextStepCalculator.setStartNode(startNode);
@@ -145,42 +153,23 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
          notifyListenerNodeIsBeingExpanded(nodeToExpand);
 
          if (nodeToExpand.isAtGoal())
+         {
             goalNodes.add(nodeToExpand);
 
-         expandChildrenAndAddNodes(stack, nodeToExpand, smallestCostToGoal);
-
-         if (numberOfNodesExpanded.getIntegerValue() % 10000 == 0)
-         {
-            PrintTools.info("Stack Size: " + stack.size());
-
-            Collections.sort(goalNodes, new Comparator<BipedalFootstepPlannerNode>()
+            if (exitAfterInitialSolution.getBooleanValue())
             {
-               @Override
-               public int compare(BipedalFootstepPlannerNode o1, BipedalFootstepPlannerNode o2)
-               {
-                  double cost1 = o1.getCostToHereFromStart();
-                  double cost2 = o2.getCostToHereFromStart();
-                  return cost1 > cost2 ? 1 : -1;
-               }
-            });
-
-            goalNode = goalNodes.get(0);
-            double costToGoal = goalNode.getCostToHereFromStart();
-            if (costToGoal < smallestCostToGoal)
-            {
-               PrintTools.info("Reduced cost to goal: " + costToGoal);
-               smallestCostToGoal = costToGoal;
-
-               Iterator<BipedalFootstepPlannerNode> iterator = stack.iterator();
-               while (iterator.hasNext())
-               {
-                  BipedalFootstepPlannerNode node = iterator.next();
-                  if (node.getCostToHereFromStart() > smallestCostToGoal)
-                     stack.remove(node);
-               }
-               PrintTools.info("Stack Size after purge: " + stack.size());
+               updateGoalPath(smallestCostToGoal);
+               return FootstepPlanningResult.SUB_OPTIMAL_SOLUTION;
             }
          }
+         else
+            expandChildrenAndAddNodes(stack, nodeToExpand, smallestCostToGoal);
+
+         if (numberOfNodesExpanded.getIntegerValue() % 500 == 0)
+            smallestCostToGoal = updateGoalPath(smallestCostToGoal);
+
+         if (numberOfNodesExpanded.getIntegerValue() > maximumNumberOfNodesToExpand.getIntegerValue())
+            break;
       }
 
       if (goalNodes.isEmpty())
@@ -189,7 +178,43 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
          return FootstepPlanningResult.NO_PATH_EXISTS;
       }
 
+      updateGoalPath(smallestCostToGoal);
       return FootstepPlanningResult.OPTIMAL_SOLUTION;
+   }
+
+   private double updateGoalPath(double smallestCostToGoal)
+   {
+      if (goalNodes.isEmpty())
+         return Double.POSITIVE_INFINITY;
+
+      Collections.sort(goalNodes, new Comparator<BipedalFootstepPlannerNode>()
+      {
+         @Override
+         public int compare(BipedalFootstepPlannerNode o1, BipedalFootstepPlannerNode o2)
+         {
+            double cost1 = o1.getCostToHereFromStart();
+            double cost2 = o2.getCostToHereFromStart();
+            return cost1 > cost2 ? 1 : -1;
+         }
+      });
+
+      goalNode = goalNodes.get(0);
+      double costToGoal = goalNode.getCostToHereFromStart();
+      if (costToGoal < smallestCostToGoal)
+      {
+         PrintTools.info("Reduced cost to goal: " + costToGoal);
+         smallestCostToGoal = costToGoal;
+
+         Iterator<BipedalFootstepPlannerNode> iterator = stack.iterator();
+         while (iterator.hasNext())
+         {
+            BipedalFootstepPlannerNode node = iterator.next();
+            if (node.getCostToHereFromStart() > smallestCostToGoal)
+               stack.remove(node);
+         }
+      }
+
+      return smallestCostToGoal;
    }
 
    protected void expandChildrenAndAddNodes(Deque<BipedalFootstepPlannerNode> stack, BipedalFootstepPlannerNode nodeToExpand, double smallestCostToGoal)

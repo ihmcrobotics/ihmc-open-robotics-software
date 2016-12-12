@@ -1,5 +1,6 @@
 package us.ihmc.footstepPlanning.roughTerrainPlanning;
 
+import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.footstepPlanning.FootstepPlanner;
@@ -12,12 +13,18 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationTools;
 import us.ihmc.tools.continuousIntegration.IntegrationCategory;
 
 @ContinuousIntegrationAnnotations.ContinuousIntegrationPlan(categories = IntegrationCategory.IN_DEVELOPMENT)
 public class PlanarRegionBipedalFootstepPlannerOnFlatTest extends FootstepPlannerOnFlatGroundTest
 {
-   private static final boolean visualize = true;
+   private YoVariableRegistry registry;
+   private BipedalFootstepPlannerParameters parameters;
+   private PlanarRegionBipedalFootstepPlanner planner;
+
+   private static final boolean visualize = !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
+   private static final boolean showPlannerVisualizer = false;
 
    @Override
    @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.1)
@@ -32,7 +39,9 @@ public class PlanarRegionBipedalFootstepPlannerOnFlatTest extends FootstepPlanne
    @Test(timeout = 300000)
    public void testATightTurn()
    {
-      super.testATightTurn(false);
+      planner.setMaximumNumberOfNodesToExpand(Integer.MAX_VALUE);
+      planner.setExitAfterInitialSolution(false);
+      super.testATightTurn(true);
    }
 
    @Override
@@ -59,12 +68,18 @@ public class PlanarRegionBipedalFootstepPlannerOnFlatTest extends FootstepPlanne
       super.testRandomPoses(true);
    }
 
-   @Override
-   public FootstepPlanner getPlanner()
+   @Before
+   public void setupPlanner()
    {
-      YoVariableRegistry registry = new YoVariableRegistry("test");
-      BipedalFootstepPlannerParameters parameters = new BipedalFootstepPlannerParameters(registry);
+      registry = new YoVariableRegistry("test");
+      parameters = new BipedalFootstepPlannerParameters(registry);
+      planner = new PlanarRegionBipedalFootstepPlanner(parameters, registry);
 
+      setDefaultParameters();
+   }
+
+   private void setDefaultParameters()
+   {
       parameters.setMaximumStepReach(0.4);
       parameters.setMaximumStepZ(0.25);
       parameters.setMaximumStepXWhenForwardAndDown(0.25);
@@ -78,22 +93,22 @@ public class PlanarRegionBipedalFootstepPlannerOnFlatTest extends FootstepPlanne
       double idealFootstepWidth = 0.2;
       parameters.setIdealFootstep(idealFootstepLength, idealFootstepWidth);
 
-
-      PlanarRegionBipedalFootstepPlanner planner = new PlanarRegionBipedalFootstepPlanner(parameters, registry);
-      //      SimplePlanarRegionBipedalAnytimeFootstepPlanner planner = new SimplePlanarRegionBipedalAnytimeFootstepPlanner(registry);
-
       SideDependentList<ConvexPolygon2d> footPolygonsInSoleFrame = PlanningTestTools.createDefaultFootPolygons();
       planner.setFeetPolygons(footPolygonsInSoleFrame);
 
-      if (visualize)
+      if (showPlannerVisualizer)
       {
          PlanarRegionBipedalFootstepPlannerVisualizer visualizer = SCSPlanarRegionBipedalFootstepPlannerVisualizer.createWithSimulationConstructionSet(1.0,
-                                                                                                                                                       footPolygonsInSoleFrame, registry);
+               footPolygonsInSoleFrame, registry);
          planner.setBipedalFootstepPlannerListener(visualizer);
       }
 
       planner.setMaximumNumberOfNodesToExpand(1000);
+   }
 
+   @Override
+   public FootstepPlanner getPlanner()
+   {
       return planner;
    }
 
