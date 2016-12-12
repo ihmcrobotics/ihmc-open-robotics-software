@@ -5,6 +5,7 @@ import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.goalLocation.GoalDetectorBehaviorService;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.robotics.geometry.FramePose;
+import us.ihmc.tools.io.printing.PrintTools;
 
 import javax.vecmath.Point3d;
 import java.text.DecimalFormat;
@@ -45,7 +46,9 @@ public class LocateGoalBehavior extends AbstractBehavior
                                               decimalFormat.format(pitch),
                                               decimalFormat.format(roll)));
          done.set(true);
-      } else {
+      }
+      else
+      {
          sendTextToSpeechPacket("Target object not located");
          done.set(false);
       }

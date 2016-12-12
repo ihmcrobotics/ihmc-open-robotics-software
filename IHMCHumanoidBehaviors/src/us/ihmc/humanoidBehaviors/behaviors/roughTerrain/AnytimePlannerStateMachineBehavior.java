@@ -83,7 +83,7 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
    private final RequestAndWaitForPlanarRegionsListBehavior requestAndWaitForPlanarRegionsListBehavior;
    private final SleepBehavior sleepBehavior;
    private final CheckForBestPlanBehavior checkForBestPlanBehavior;
-   private final SendOverFootstepAndWaitForCompletion sendOverFootstepsAndUpdatePlannerBehavior;
+   private final SendOverFootstepAndWaitForCompletionBehavior sendOverFootstepsAndUpdatePlannerBehavior;
    private final SimpleDoNothingBehavior reachedGoalBehavior;
 
    private final NoValidPlanCondition noValidPlanCondition = new NoValidPlanCondition();
@@ -122,7 +122,10 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
       switch(GOAL_DETECTOR_TYPE)
       {
       case FIDUCIAL:
-         goalDetectorBehaviorService = new FiducialDetectorBehaviorService(communicationBridge, null);
+         FiducialDetectorBehaviorService fiducialDetectorBehaviorService = new FiducialDetectorBehaviorService(communicationBridge, null);
+         fiducialDetectorBehaviorService.setTargetIDToLocate(50);
+         fiducialDetectorBehaviorService.setExpectedFiducialSize(0.50);
+         goalDetectorBehaviorService = fiducialDetectorBehaviorService;
          break;
       case VALVE:
          try
@@ -143,7 +146,7 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
       requestAndWaitForPlanarRegionsListBehavior = new RequestAndWaitForPlanarRegionsListBehavior(communicationBridge);
       sleepBehavior = new SleepBehavior(communicationBridge, yoTime);
       checkForBestPlanBehavior = new CheckForBestPlanBehavior(communicationBridge);
-      sendOverFootstepsAndUpdatePlannerBehavior = new SendOverFootstepAndWaitForCompletion(communicationBridge);
+      sendOverFootstepsAndUpdatePlannerBehavior = new SendOverFootstepAndWaitForCompletionBehavior(communicationBridge);
       reachedGoalBehavior = new SimpleDoNothingBehavior(communicationBridge)
       {
          @Override
@@ -483,7 +486,7 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
       }
    }
 
-   private class SendOverFootstepAndWaitForCompletion extends AbstractBehavior
+   private class SendOverFootstepAndWaitForCompletionBehavior extends AbstractBehavior
    {
       private final FramePose tempFirstFootstepPose = new FramePose();
       private final Point3d tempFootstepPosePosition = new Point3d();
@@ -491,7 +494,7 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
       private final EnumYoVariable<FootstepStatus.Status> latestFootstepStatus = new EnumYoVariable<>(prefix + "LatestFootstepStatus", registry,
                                                                                                       FootstepStatus.Status.class);
 
-      public SendOverFootstepAndWaitForCompletion(CommunicationBridgeInterface communicationBridge)
+      public SendOverFootstepAndWaitForCompletionBehavior(CommunicationBridgeInterface communicationBridge)
       {
          super(communicationBridge);
       }
