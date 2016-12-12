@@ -313,7 +313,7 @@ public class FootStepPlannerToLocationBehavior extends AbstractBehavior
       updatePlannerIfPlanarRegionsListIsAvailable();
       requestPlanarRegionsList();
 
-      if (!fiducialDetectorBehaviorService.getTargetIDHasBeenLocated())
+      if (!fiducialDetectorBehaviorService.getGoalHasBeenLocated())
       {
          sendTextToSpeechPacket("Fiducial not located.");
          footstepSentTimer.reset();
@@ -323,7 +323,7 @@ public class FootStepPlannerToLocationBehavior extends AbstractBehavior
 
       pitchHeadToCenterFiducial();
 
-      fiducialDetectorBehaviorService.getReportedFiducialPoseWorldFrame(tempFootstepPlannerGoalPose);
+      fiducialDetectorBehaviorService.getReportedGoalPoseWorldFrame(tempFootstepPlannerGoalPose);
       setGoalAndInitialFootClosestToGoal(tempFootstepPlannerGoalPose);
 
 
