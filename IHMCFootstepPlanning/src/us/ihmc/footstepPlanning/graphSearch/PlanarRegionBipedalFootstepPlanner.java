@@ -15,6 +15,7 @@ import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePose;
@@ -23,6 +24,7 @@ import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.tools.io.printing.PrintTools;
 
 public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
@@ -41,6 +43,7 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
 
    protected final IntegerYoVariable maximumNumberOfNodesToExpand = new IntegerYoVariable("maximumNumberOfNodesToExpand", registry);
    protected final IntegerYoVariable numberOfNodesExpanded = new IntegerYoVariable("numberOfNodesExpanded", registry);
+   private final DoubleYoVariable timeout = new DoubleYoVariable("Timeout", registry);
 
    private final ArrayList<BipedalFootstepPlannerNode> goalNodes = new ArrayList<>();
    private final BooleanYoVariable exitAfterInitialSolution = new BooleanYoVariable("exitAfterInitialSolution", registry);
@@ -55,6 +58,7 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
 
       planarRegionPotentialNextStepCalculator = new PlanarRegionPotentialNextStepCalculator(parameters, parentRegistry);
       exitAfterInitialSolution.set(true);
+      timeout.set(Double.POSITIVE_INFINITY);
    }
 
    public void setBipedalFootstepPlannerListener(BipedalFootstepPlannerListener listener)
@@ -66,6 +70,11 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
    public void setMaximumNumberOfNodesToExpand(int maximumNumberOfNodesToExpand)
    {
       this.maximumNumberOfNodesToExpand.set(maximumNumberOfNodesToExpand);
+   }
+
+   public void setTimeout(double timeoutInSeconds)
+   {
+      this.timeout.set(timeoutInSeconds);
    }
 
    public void setExitAfterInitialSolution(boolean exitAfterInitialSolution)
@@ -131,6 +140,7 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
       double smallestCostToGoal = Double.POSITIVE_INFINITY;
       planarRegionPotentialNextStepCalculator.setStartNode(startNode);
       numberOfNodesExpanded.set(0);
+      long startTimeInNano = System.nanoTime();
 
       while (!stack.isEmpty())
       {
@@ -180,6 +190,10 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
             smallestCostToGoal = updateGoalPath(smallestCostToGoal);
 
          if (numberOfNodesExpanded.getIntegerValue() > maximumNumberOfNodesToExpand.getIntegerValue())
+            break;
+
+         long timeInNano = System.nanoTime();
+         if (TimeTools.nanoSecondstoSeconds(timeInNano - startTimeInNano) > timeout.getDoubleValue())
             break;
       }
 
