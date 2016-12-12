@@ -153,8 +153,7 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
 
          // if going to the node is more expensive then going to the goal there is no point in expanding it.
          double costToNode = nodeToExpand.getCostToHereFromStart();
-         double costToGoEstimate = 0.0; // add A* here - has to underestimate the real cost!
-         if (costToNode + costToGoEstimate > smallestCostToGoal)
+         if (costToNode > smallestCostToGoal)
             continue;
 
          // if we already found this node make sure we update its parent in case we found a better path here.
