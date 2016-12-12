@@ -20,6 +20,7 @@ import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
+import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -122,6 +123,7 @@ public class PlanningTestTools
 
                ConvexPolygon2d foothold = new ConvexPolygon2d();
                footstep.getFoothold(foothold);
+               ConvexPolygonTools.limitVerticesConservative(foothold, 4);
                YoFrameConvexPolygon2d yoFoothold = new YoFrameConvexPolygon2d("Foothold" + i, worldFrame, 4, vizRegistry);
                yoFoothold.setConvexPolygon2d(foothold);
                YoGraphicPolygon footstepViz = new YoGraphicPolygon("footstep" + i, yoFoothold, yoFootstepPose, 1.0, appearance);
