@@ -1586,6 +1586,11 @@ public class MeshDataGenerator
       return Line(point0.getX(), point0.getY(), point0.getZ(), point1.getX(), point1.getY(), point1.getZ(), width);
    }
 
+   public static MeshDataHolder Line(Point3f point0, Point3f point1, float width)
+   {
+      return Line(point0.getX(), point0.getY(), point0.getZ(), point1.getX(), point1.getY(), point1.getZ(), width);
+   }
+
    public static MeshDataHolder Line(double x0, double y0, double z0, double x1, double y1, double z1, double width)
    {
       return Line((float) x0, (float) y0, (float) z0, (float) x1, (float) y1, (float) z1, (float) width);
