@@ -50,9 +50,6 @@ public class PlanarRegionBipedalFootstepPlannerOnFlatTest extends FootstepPlanne
    @Test(timeout = 300000)
    public void testStraightLineWithInitialTurn()
    {
-      planner.setMaximumNumberOfNodesToExpand(Integer.MAX_VALUE);
-      planner.setTimeout(10.0);
-      planner.setExitAfterInitialSolution(false);
       super.testStraightLineWithInitialTurn(true);
    }
 
