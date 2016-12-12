@@ -75,6 +75,7 @@ public class LocateGoalBehavior extends AbstractBehavior
    @Override
    public void onBehaviorEntered()
    {
+      detectorBehaviorService.initialize();
    }
 
    @Override

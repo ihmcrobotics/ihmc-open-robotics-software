@@ -56,7 +56,7 @@ import javax.vecmath.Tuple3d;
 public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<AnytimePlannerStateMachineBehavior.AnytimePlanningState>
 {
    private final String prefix = getClass().getSimpleName();
-   private static final GoalDetectorType GOAL_DETECTOR_TYPE = GoalDetectorType.FIDUCIAL;
+   private static final GoalDetectorType GOAL_DETECTOR_TYPE = GoalDetectorType.VALVE;
 
    private enum GoalDetectorType
    {
@@ -281,13 +281,6 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
    public void onBehaviorEntered()
    {
       super.onBehaviorEntered();
-
-      ReferenceFrame midFeetZUpFrame = referenceFrames.getMidFeetZUpFrame();
-      FramePose goal = new FramePose(midFeetZUpFrame);
-      goal.setPosition(4.0, 0.0, 0.0);
-      goal.changeFrame(ReferenceFrame.getWorldFrame());
-      setGoalPose(goal);
-      
       new Thread(footstepPlanner).start();
    }
 
@@ -335,9 +328,6 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
 
       String xString = FormattingTools.getFormattedToSignificantFigures(goalPosition.getX(), 3);
       String yString = FormattingTools.getFormattedToSignificantFigures(goalPosition.getY(), 3);
-
-      TextToSpeechPacket p1 = new TextToSpeechPacket("Plannning Footsteps to (" + xString + ", " + yString + ")");
-      sendPacket(p1);
 
       FootstepPlannerGoal footstepPlannerGoal = new FootstepPlannerGoal();
       footstepPlannerGoal.setGoalPoseBetweenFeet(goalPose);
