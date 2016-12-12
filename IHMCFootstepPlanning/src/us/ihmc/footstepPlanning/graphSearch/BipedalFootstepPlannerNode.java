@@ -262,7 +262,7 @@ public class BipedalFootstepPlannerNode
       this.soleTransform.getRotationEuler(tempRotationVectorA);
       MathTools.roundToGivenPrecisionForAngles(tempRotationVectorA, YAW_ROTATION_THRESHOLD_TO_CONSIDER_NODES_EQUAL);
 
-      int result = getRobotSide().hashCode();
+      int result = getRobotSide() == null ? 0 : getRobotSide().hashCode();
       result = 3 * result + (int) Math.round(tempPointA.getX() / XY_DISTANCE_THRESHOLD_TO_CONSIDER_NODES_EQUAL);
       result = 3 * result + (int) Math.round(tempPointA.getY() / XY_DISTANCE_THRESHOLD_TO_CONSIDER_NODES_EQUAL);
 //      result = 3 * result + (int) Math.round(tempRotationVectorA.getX() / YAW_ROTATION_THRESHOLD_TO_CONSIDER_NODES_EQUAL);

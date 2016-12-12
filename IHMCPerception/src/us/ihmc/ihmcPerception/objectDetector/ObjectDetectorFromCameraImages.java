@@ -222,6 +222,7 @@ public class ObjectDetectorFromCameraImages
             tempFiducialDetectorFrame.changeFrame(ReferenceFrame.getWorldFrame());
 
             locatedFiducialPoseInWorldFrame.set(tempFiducialDetectorFrame);
+            System.out.println("Object located at: " + tempFiducialDetectorFrame + ", original 2D image rectangle " + rectangle);
 
             locatedFiducialReferenceFrame.update();
 
@@ -264,8 +265,6 @@ public class ObjectDetectorFromCameraImages
       K_inv.set(2,2,1);
 
       CommonOps.invert(K_inv);
-
-      this.targetIDHasBeenLocated.set(false);
 
       return K_inv;
    }
