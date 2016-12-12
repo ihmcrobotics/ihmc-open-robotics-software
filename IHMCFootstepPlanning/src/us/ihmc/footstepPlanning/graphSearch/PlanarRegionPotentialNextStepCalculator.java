@@ -431,7 +431,6 @@ public class PlanarRegionPotentialNextStepCalculator
                cost = increasingCostEachStepProvider.calculateCost(stanceFootPose, swingStartFootPose, idealFootstepPose, candidateFootPose, node.getPercentageOfFoothold());
             }
 
-            cost += 1.0;
             node.setSingleStepCost(cost);
          }
 

@@ -32,6 +32,8 @@ public class BipedalStepAdjustmentCostCalculator implements BipedalStepCostCalcu
    private final DoubleYoVariable angularCostScalar;
    private final DoubleYoVariable negativeFootholdLinearCostScalar;
 
+   private final DoubleYoVariable footstepBaseCost;
+
    private final YoFrameVector idealToCandidateVector;
    private final YoFrameOrientation idealToCandidateOrientation;
 
@@ -57,6 +59,8 @@ public class BipedalStepAdjustmentCostCalculator implements BipedalStepCostCalcu
       angularCostScalar = new DoubleYoVariable(prefix + "AngularCostScalar", parentRegistry);
       negativeFootholdLinearCostScalar = new DoubleYoVariable(prefix + "NegativeFootholdLinearCostScalar", parentRegistry);
 
+      footstepBaseCost = new DoubleYoVariable(prefix + "FootstepBaseCost", parentRegistry);
+
       idealToCandidateVector = new YoFrameVector(prefix + "IdealToCandidateVector", ReferenceFrame.getWorldFrame(), parentRegistry);
       idealToCandidateOrientation = new YoFrameOrientation(prefix + "IdealToCandidateOrientation", ReferenceFrame.getWorldFrame(), parentRegistry);
 
@@ -76,12 +80,14 @@ public class BipedalStepAdjustmentCostCalculator implements BipedalStepCostCalcu
       stancePitchDownwardCostScalar.set(20.0);
       angularCostScalar.set(0.0);
       negativeFootholdLinearCostScalar.set(5.0);
+
+      footstepBaseCost.set(1.0);
    }
 
    @Override
    public double calculateCost(FramePose stanceFoot, FramePose swingStartFoot, FramePose idealFootstep, FramePose candidateFootstep, double percentageOfFoothold)
    {
-      double cost = 0.0;
+      double cost = footstepBaseCost.getDoubleValue();
 
       setXYVectorFromPoseToPoseNormalize(forwardCostVector, swingStartFoot, idealFootstep);
       setXYVectorFromPoseToPoseNormalize(backwardCostVector, idealFootstep, swingStartFoot);
@@ -109,9 +115,9 @@ public class BipedalStepAdjustmentCostCalculator implements BipedalStepCostCalcu
       cost += angularCostScalar.getDoubleValue() * Math.abs(idealToCandidateOrientation.getYaw().getDoubleValue());
       cost += angularCostScalar.getDoubleValue() * Math.abs(idealToCandidateOrientation.getPitch().getDoubleValue());
       cost += angularCostScalar.getDoubleValue() * Math.abs(idealToCandidateOrientation.getRoll().getDoubleValue());
-      
+
       cost += (1.0 - percentageOfFoothold) * negativeFootholdLinearCostScalar.getDoubleValue();
-      
+
       return cost;
    }
 

@@ -22,8 +22,8 @@ public class BipedalFootstepPlannerNode
    private ArrayList<BipedalFootstepPlannerNode> childrenNodes;
    private double estimatedCostToGoal;
 
-   private static final double XY_DISTANCE_THRESHOLD_TO_CONSIDER_NODES_EQUAL = 0.02;
-   private static final double YAW_ROTATION_THRESHOLD_TO_CONSIDER_NODES_EQUAL = Math.toRadians(2.5);
+   private static final double XY_DISTANCE_THRESHOLD_TO_CONSIDER_NODES_EQUAL = 0.05;
+   private static final double YAW_ROTATION_THRESHOLD_TO_CONSIDER_NODES_EQUAL = Math.toRadians(5.0);
 
    private boolean isAtGoal = false;
    private boolean isDead = false;
