@@ -9,10 +9,15 @@ public abstract class StateMachineBehavior<E extends Enum<E>> extends AbstractBe
 
    protected BehaviorStateMachine<E> statemachine;
 
-   public StateMachineBehavior(String name, Class<E> enumType, DoubleYoVariable yoTime, CommunicationBridge outgoingCommunicationBridge)
+   public StateMachineBehavior(String stateMachineName, Class<E> enumType, DoubleYoVariable yoTime, CommunicationBridge outgoingCommunicationBridge)
    {
-      super(outgoingCommunicationBridge);
-      statemachine = new BehaviorStateMachine<E>(name, name + "SwitchTime", enumType, yoTime, registry);
+      this(null, stateMachineName, enumType, yoTime, outgoingCommunicationBridge);
+   }
+
+   public StateMachineBehavior(String namePrefix, String stateMachineName, Class<E> enumType, DoubleYoVariable yoTime, CommunicationBridge outgoingCommunicationBridge)
+   {
+      super(namePrefix, outgoingCommunicationBridge);
+      statemachine = new BehaviorStateMachine<E>(stateMachineName, stateMachineName + "SwitchTime", enumType, yoTime, registry);
    }
 
    public BehaviorStateMachine<E> getStateMachine()
