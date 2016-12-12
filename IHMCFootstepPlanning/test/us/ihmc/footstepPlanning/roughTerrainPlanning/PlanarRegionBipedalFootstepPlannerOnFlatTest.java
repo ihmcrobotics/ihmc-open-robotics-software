@@ -24,7 +24,7 @@ public class PlanarRegionBipedalFootstepPlannerOnFlatTest extends FootstepPlanne
    @Test(timeout = 300000)
    public void testJustStraightLine()
    {
-      super.testJustStraightLine(true);
+      super.testJustStraightLine(false);
    }
 
    @Override
