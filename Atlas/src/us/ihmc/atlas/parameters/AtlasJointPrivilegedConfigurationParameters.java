@@ -15,14 +15,14 @@ public class AtlasJointPrivilegedConfigurationParameters extends JointPrivileged
    @Override
    public double getConfigurationGain()
    {
-      return 100.0;
+      return 40.0;
    }
 
    /** {@inheritDoc} */
    @Override
    public double getVelocityGain()
    {
-      return 10.0;
+      return 6.0;
    }
 
    /** {@inheritDoc} */
@@ -43,6 +43,6 @@ public class AtlasJointPrivilegedConfigurationParameters extends JointPrivileged
    @Override
    public double getWeight()
    {
-      return 10.0;
+      return 5.0;
    }
 }
