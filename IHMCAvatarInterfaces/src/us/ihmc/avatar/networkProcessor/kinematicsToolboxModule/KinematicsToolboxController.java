@@ -95,6 +95,7 @@ public class KinematicsToolboxController extends ToolboxController
    private final SideDependentList<DenseMatrix64F> footSelectionMatrices = new SideDependentList<>();
    private final SideDependentList<FramePose> desiredFootPoses = new SideDependentList<>();
    private DenseMatrix64F chestSelectionMatrix = null;
+   private DenseMatrix64F pelvisSelectionMatrix = null;
 
    private final SideDependentList<YoGraphicCoordinateSystem> desiredHandPosesViz = new SideDependentList<>();
    private final SideDependentList<YoGraphicCoordinateSystem> desiredFootPosesViz = new SideDependentList<>();
@@ -238,6 +239,7 @@ public class KinematicsToolboxController extends ToolboxController
          FrameOrientation desiredPelvisOrientation = new FrameOrientation(worldFrame);
          command.getLastTrajectoryPoint().getOrientation(desiredPelvisOrientation);
          desiredPelvisOrientationReference.set(desiredPelvisOrientation);
+         pelvisSelectionMatrix = new DenseMatrix64F(command.getSelectionMatrix());
       }
 
    }
@@ -333,11 +335,14 @@ public class KinematicsToolboxController extends ToolboxController
       if (desiredPelvisOrientation != null)
       {
          RigidBody pelvis = desiredFullRobotModel.getPelvis();
+         Twist desiredPelvisTwist = computeDesiredTwist(desiredPelvisOrientation, pelvis, pelvisSelectionMatrix, tempErrorMagnitude);
+         newSolutionQuality += tempErrorMagnitude.doubleValue();
          ReferenceFrame pelvisFrame = pelvis.getBodyFixedFrame();
          FrameVector desiredPelvisAngularVelocity = computeDesiredAngularVelocity(desiredPelvisOrientation, pelvisFrame);
          SpatialVelocityCommand spatialVelocityCommand = new SpatialVelocityCommand();
          spatialVelocityCommand.set(elevator, pelvis);
          spatialVelocityCommand.setAngularVelocity(pelvisFrame, elevatorFrame, desiredPelvisAngularVelocity);
+         spatialVelocityCommand.set(desiredPelvisTwist, pelvisSelectionMatrix);
          spatialVelocityCommand.setWeight(pelvisOrientationWeight.getDoubleValue());
          ret.addCommand(spatialVelocityCommand);
       }
@@ -500,6 +505,10 @@ public class KinematicsToolboxController extends ToolboxController
       MatrixTools.removeRow(chestSelectionMatrix, 3);
 
       desiredPelvisOrientationReference.set(null);
+      pelvisSelectionMatrix = CommonOps.identity(6);
+      MatrixTools.removeRow(pelvisSelectionMatrix, 5);
+      MatrixTools.removeRow(pelvisSelectionMatrix, 4);
+      MatrixTools.removeRow(pelvisSelectionMatrix, 3);
 
       RobotConfigurationData robotConfigurationData = latestRobotConfigurationDataReference.getAndSet(null);
       if (robotConfigurationData == null)
