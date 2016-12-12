@@ -31,8 +31,10 @@ import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.tools.thread.ThreadTools;
 
 public class PlanningTestTools
@@ -170,7 +172,12 @@ public class PlanningTestTools
       planner.setGoal(goal);
       planner.setPlanarRegions(planarRegionsList);
 
+      ExecutionTimer timer = new ExecutionTimer("Timer", 0.0, new YoVariableRegistry("Timer"));
+      timer.startMeasurement();
       FootstepPlanningResult result = planner.plan();
+      timer.stopMeasurement();
+      PrintTools.info("Planning took " + timer.getCurrentTime().getDoubleValue() + "s");
+
       FootstepPlan footstepPlan = planner.getPlan();
       if (assertPlannerReturnedResult) assertTrue("Planner was not able to provide valid result.", result.validForExecution());
       return footstepPlan;
