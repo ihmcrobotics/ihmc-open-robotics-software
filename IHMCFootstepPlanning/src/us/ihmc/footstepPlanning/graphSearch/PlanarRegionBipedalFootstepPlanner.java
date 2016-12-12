@@ -12,6 +12,7 @@ import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlanner;
 import us.ihmc.footstepPlanning.FootstepPlannerGoal;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
+import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
@@ -150,10 +151,17 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
          BipedalFootstepPlannerNode equivalentNode = checkIfNearbyNodeAlreadyExistsAndStoreIfNot(nodeToExpand);
          if (equivalentNode != null)
          {
-            if (costToNode < equivalentNode.getCostToHereFromStart())
-               equivalentNode.setParentNode(nodeToExpand.getParentNode());
-            else
+            double costToGoToEquivalentNode = equivalentNode.getCostToHereFromStart();
+
+            if (MathTools.epsilonEquals(costToNode, costToGoToEquivalentNode, 1.0e-5))
+               nodeToExpand = equivalentNode;
+            else if (costToNode > costToGoToEquivalentNode)
                continue;
+            else
+            {
+               equivalentNode.setParentNode(nodeToExpand.getParentNode());
+               nodeToExpand = equivalentNode;
+            }
          }
 
          numberOfNodesExpanded.increment();
