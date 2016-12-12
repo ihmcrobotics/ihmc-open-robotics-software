@@ -91,8 +91,8 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
    private final ContinueWalkingAfterCompletedStepCondition continueWalkingAfterCompletedStepCondition = new ContinueWalkingAfterCompletedStepCondition();
    private final ReachedGoalAfterCompletedStepCondition reachedGoalAfterCompletedStepCondition = new ReachedGoalAfterCompletedStepCondition();
    
-   private static final double SCALING_FACTOR_FOR_FOOTHOLD_X = 1.05;
-   private static final double SCALING_FACTOR_FOR_FOOTHOLD_Y = 2.0;
+   private static final double SCALING_FACTOR_FOR_FOOTHOLD_X = 1.0;
+   private static final double SCALING_FACTOR_FOR_FOOTHOLD_Y = 1.0;
 
    private final ConcurrentListeningQueue<PlanarRegionsListMessage> planarRegionsListQueue = new ConcurrentListeningQueue<>(10);
    private final ConcurrentListeningQueue<FootstepStatus> footstepStatusQueue = new ConcurrentListeningQueue<FootstepStatus>(10);
@@ -258,22 +258,23 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
       footstepPlanningParameters.setMaximumStepZWhenForwardAndDown(0.10); //18);
 
       footstepPlanningParameters.setMaximumStepYaw(0.15);
-      
       footstepPlanningParameters.setMinimumStepWidth(0.16);
       footstepPlanningParameters.setMaximumStepWidth(0.4);
-
       footstepPlanningParameters.setMinimumStepLength(0.02);
 
       footstepPlanningParameters.setMinimumFootholdPercent(0.95);
 
-      footstepPlanningParameters.setWiggleInsideDelta(0.01);
+      footstepPlanningParameters.setWiggleInsideDelta(0.02);
       footstepPlanningParameters.setMaximumXYWiggleDistance(1.0);
       footstepPlanningParameters.setMaximumYawWiggle(0.1);
-      footstepPlanningParameters.setRejectIfCannotFullyWiggleInside(false);
+      footstepPlanningParameters.setRejectIfCannotFullyWiggleInside(true);
       footstepPlanningParameters.setWiggleIntoConvexHullOfPlanarRegions(true);
 
+      footstepPlanningParameters.setCliffHeightToShiftAwayFrom(0.03);
+      footstepPlanningParameters.setMinimumDistanceFromCliffBottoms(0.22);
+      
       double idealFootstepLength = 0.3;
-      double idealFootstepWidth = 0.25;
+      double idealFootstepWidth = 0.22;
       footstepPlanningParameters.setIdealFootstep(idealFootstepLength, idealFootstepWidth);
    }
 
