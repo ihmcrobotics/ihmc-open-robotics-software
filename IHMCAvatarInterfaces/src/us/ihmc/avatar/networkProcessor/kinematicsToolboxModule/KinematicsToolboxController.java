@@ -416,7 +416,7 @@ public class KinematicsToolboxController extends ToolboxController
       desiredTwist.getMatrix(spatialError, 0);
       subspaceError.reshape(selectionMatrix.getNumRows(), 1);
       CommonOps.mult(selectionMatrix, spatialError, subspaceError);
-      errorMagnitude.setValue(NormOps.normP2(subspaceError)/10);
+      errorMagnitude.setValue(NormOps.normP2(subspaceError));
       desiredTwist.scale(1.0 / updateDT);
 
       return desiredTwist;
