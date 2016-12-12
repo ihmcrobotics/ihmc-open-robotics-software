@@ -72,7 +72,7 @@ public class BipedalStepAdjustmentCostCalculator implements BipedalStepCostCalcu
       inwardCostScalar.set(2.0);
       outwardCostScalar.set(2.5);
       upwardCostScalar.set(2.0);
-      downwardCostScalar.set(2.0);
+      downwardCostScalar.set(0.0); //2.0);
       stancePitchDownwardCostScalar.set(20.0);
       angularCostScalar.set(0.0);
       negativeFootholdLinearCostScalar.set(5.0);
