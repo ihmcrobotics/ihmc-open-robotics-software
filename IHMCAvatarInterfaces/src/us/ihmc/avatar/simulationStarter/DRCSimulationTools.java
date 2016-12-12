@@ -96,7 +96,7 @@ public abstract class DRCSimulationTools
          simulationStarter.startBehaviorVisualizer();
 
       boolean startREAModule = modulesToStart.contains(Modules.REA_MODULE);
-      boolean startREAUI = modulesToStart.contains(Modules.REA_MODULE);
+      boolean startREAUI = modulesToStart.contains(Modules.REA_UI);
 
       if (startREAModule || startREAUI)
       {
