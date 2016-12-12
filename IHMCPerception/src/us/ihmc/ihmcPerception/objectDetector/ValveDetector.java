@@ -30,10 +30,14 @@ public class ValveDetector
 {
    private static final Logger logger = Logger.getLogger(caffe.class.getSimpleName());
 
-   private final FloatNet caffe_net;
+   private static FloatNet caffe_net;
+   private static final Object caffeNetLock = new Object();
 
-   public ValveDetector() throws Exception
+   static void initialize() throws Exception
    {
+      if (caffe_net != null)
+         return;
+
       int gpu = -1;
 
       String model, weights;
@@ -89,6 +93,11 @@ public class ValveDetector
       caffe_net.CopyTrainedLayersFrom(weights);
    }
 
+   public ValveDetector() throws Exception
+   {
+      initialize();
+   }
+
    /**
     * Export a resource embedded into a Jar file to the local file path.
     *
@@ -131,11 +140,16 @@ public class ValveDetector
 
    public List<Rectangle> detect(BufferedImage image)
    {
-      IntPointer shape = caffe_net.blob_by_name("data").shape();
-      PreprocessedImage processed = processImage(image, shape.get(3), shape.get(2));
-      caffe_net.blob_by_name("data").set_cpu_data(processed.data);
+      FloatBlobVector output;
+      PreprocessedImage processed;
+      synchronized (caffeNetLock)
+      {
+         IntPointer shape = caffe_net.blob_by_name("data").shape();
+         processed = processImage(image, shape.get(3), shape.get(2));
+         caffe_net.blob_by_name("data").set_cpu_data(processed.data);
 
-      FloatBlobVector output = caffe_net.Forward();
+         output = caffe_net.Forward();
+      }
       FloatBlob outputLayer = output.get(0);
       FloatPointer data = outputLayer.cpu_data();
       float[] networkOutput = new float[outputLayer.count()];
