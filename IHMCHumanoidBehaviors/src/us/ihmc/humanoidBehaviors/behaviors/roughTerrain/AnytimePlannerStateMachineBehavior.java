@@ -78,9 +78,6 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
    private final FoundAPlanCondition foundAPlanCondition = new FoundAPlanCondition();
    private final ContinueWalkingAfterCompletedStepCondition continueWalkingAfterCompletedStepCondition = new ContinueWalkingAfterCompletedStepCondition();
    private final ReachedGoalAfterCompletedStepCondition reachedGoalAfterCompletedStepCondition = new ReachedGoalAfterCompletedStepCondition();
-   
-   private static final double SCALING_FACTOR_FOR_FOOTHOLD_X = 1.0;
-   private static final double SCALING_FACTOR_FOR_FOOTHOLD_Y = 1.0;
 
    private final ConcurrentListeningQueue<PlanarRegionsListMessage> planarRegionsListQueue = new ConcurrentListeningQueue<>(10);
    private final ConcurrentListeningQueue<FootstepStatus> footstepStatusQueue = new ConcurrentListeningQueue<FootstepStatus>(10);
@@ -96,9 +93,9 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
       super("AnytimePlanner", AnytimePlanningState.class, yoTime, communicationBridge);
       
       footstepPlanningParameters = new BipedalFootstepPlannerParameters(registry);
-      setPlannerParameters(footstepPlanningParameters);
+      FootstepPlannerForBehaviorsHelper.setPlannerParametersForAnytimePlannerAndPlannerToolbox(footstepPlanningParameters);
       footstepPlanner = new SimplePlanarRegionBipedalAnytimeFootstepPlanner(footstepPlanningParameters, registry);
-      SideDependentList<ConvexPolygon2d> footPolygonsInSoleFrame = createDefaultFootPolygons(wholeBodyControllerParameters.getContactPointParameters());
+      SideDependentList<ConvexPolygon2d> footPolygonsInSoleFrame = FootstepPlannerForBehaviorsHelper.createDefaultFootPolygonsForAnytimePlannerAndPlannerToolbox(wholeBodyControllerParameters.getContactPointParameters());
       footstepPlanner.setFeetPolygons(footPolygonsInSoleFrame);
       footstepPlanner.setMaximumNumberOfNodesToExpand(500);
 
@@ -188,35 +185,6 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
       statemachine.setStartState(AnytimePlanningState.REQUEST_AND_WAIT_FOR_PLANAR_REGIONS);
    }
 
-   private void setPlannerParameters(BipedalFootstepPlannerParameters footstepPlanningParameters)
-   {
-      footstepPlanningParameters.setMaximumStepReach(0.55);
-      footstepPlanningParameters.setMaximumStepZ(0.25);
-
-      footstepPlanningParameters.setMaximumStepXWhenForwardAndDown(0.32); //32);
-      footstepPlanningParameters.setMaximumStepZWhenForwardAndDown(0.10); //18);
-
-      footstepPlanningParameters.setMaximumStepYaw(0.15);
-      footstepPlanningParameters.setMinimumStepWidth(0.16);
-      footstepPlanningParameters.setMaximumStepWidth(0.4);
-      footstepPlanningParameters.setMinimumStepLength(0.02);
-
-      footstepPlanningParameters.setMinimumFootholdPercent(0.95);
-
-      footstepPlanningParameters.setWiggleInsideDelta(0.02);
-      footstepPlanningParameters.setMaximumXYWiggleDistance(1.0);
-      footstepPlanningParameters.setMaximumYawWiggle(0.1);
-      footstepPlanningParameters.setRejectIfCannotFullyWiggleInside(true);
-      footstepPlanningParameters.setWiggleIntoConvexHullOfPlanarRegions(true);
-
-      footstepPlanningParameters.setCliffHeightToShiftAwayFrom(0.03);
-      footstepPlanningParameters.setMinimumDistanceFromCliffBottoms(0.22);
-      
-      double idealFootstepLength = 0.3;
-      double idealFootstepWidth = 0.22;
-      footstepPlanningParameters.setIdealFootstep(idealFootstepLength, idealFootstepWidth);
-   }
-
    @Override
    public void onBehaviorEntered()
    {
@@ -238,29 +206,7 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
 
       footstepPlanner.setBipedalFootstepPlannerListener(listener);
    }
-   
-   private static SideDependentList<ConvexPolygon2d> createDefaultFootPolygons(RobotContactPointParameters contactPointParameters)
-   {
-      SideDependentList<ConvexPolygon2d> footPolygons = new SideDependentList<>();
-      for (RobotSide side : RobotSide.values)
-      {
-         ArrayList<Point2d> footPoints = contactPointParameters.getFootContactPoints().get(side);         
-         ArrayList<Point2d> scaledFootPoints = new ArrayList<Point2d>();
-         
-         for(int i = 0; i < footPoints.size(); i++)
-         {
-            Point2d footPoint = new Point2d(footPoints.get(i));
-            footPoint.setX(footPoint.getX() * SCALING_FACTOR_FOR_FOOTHOLD_X);
-            footPoint.setY(footPoint.getY() * SCALING_FACTOR_FOR_FOOTHOLD_Y);
-            scaledFootPoints.add(footPoint);
-         }
-         
-         ConvexPolygon2d scaledFoot = new ConvexPolygon2d(scaledFootPoints);
-         footPolygons.set(side, scaledFoot);         
-      }
-      
-      return footPolygons;
-   }
+
 
    @Override
    public void onBehaviorExited()
