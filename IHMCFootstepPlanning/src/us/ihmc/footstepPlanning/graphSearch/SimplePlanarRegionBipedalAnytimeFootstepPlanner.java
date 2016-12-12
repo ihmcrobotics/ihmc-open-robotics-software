@@ -244,6 +244,9 @@ public class SimplePlanarRegionBipedalAnytimeFootstepPlanner extends PlanarRegio
          if (nearbyNodeAlreadyExists)
             continue;
 
+         if (nodeToExpand.getRobotSide() == null)
+            continue;
+
          setNodesCostsAndRememberIfClosestYet(nodeToExpand);
          notifyListenerNodeIsBeingExpanded(nodeToExpand);
 
