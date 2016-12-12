@@ -56,7 +56,7 @@ import javax.vecmath.Tuple3d;
 public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<AnytimePlannerStateMachineBehavior.AnytimePlanningState>
 {
    private final String prefix = getClass().getSimpleName();
-   private static final GoalDetectorType GOAL_DETECTOR_TYPE = GoalDetectorType.VALVE;
+   private static final GoalDetectorType GOAL_DETECTOR_TYPE = GoalDetectorType.FIDUCIAL;
 
    private enum GoalDetectorType
    {
