@@ -179,12 +179,14 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
          if (nodeToExpand.isAtGoal())
          {
             goalNodes.add(nodeToExpand);
+            smallestCostToGoal = updateGoalPath(smallestCostToGoal);
             if (exitAfterInitialSolution.getBooleanValue())
                break;
          }
          else
             expandChildrenAndAddNodes(stack, nodeToExpand, smallestCostToGoal);
 
+         // keep checking if the goal cost decreased from time to time
          if (numberOfNodesExpanded.getIntegerValue() % 500 == 0)
             smallestCostToGoal = updateGoalPath(smallestCostToGoal);
 
@@ -221,7 +223,7 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
          {
             double cost1 = o1.getCostToHereFromStart();
             double cost2 = o2.getCostToHereFromStart();
-            return cost1 > cost2 ? 1 : -1;
+            return cost1 < cost2 ? -1 : 1;
          }
       });
 
