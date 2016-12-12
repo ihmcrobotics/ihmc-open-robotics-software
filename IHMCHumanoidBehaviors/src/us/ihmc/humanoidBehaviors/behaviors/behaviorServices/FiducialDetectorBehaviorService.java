@@ -116,4 +116,10 @@ public class FiducialDetectorBehaviorService extends GoalDetectorBehaviorService
       super.destroy();
       locationEnabled.set(false);
    }
+
+   @Override
+   public void initialize()
+   {
+      fiducialDetectorFromCameraImages.reset();
+   }
 }

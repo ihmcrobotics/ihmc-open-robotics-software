@@ -13,7 +13,7 @@ import us.ihmc.tools.thread.ThreadTools;
 
 public class ObjectDetectorBehaviorService extends GoalDetectorBehaviorService
 {
-   private static final double DEFAULT_OBJECT_SIZE = 1.0;
+   private static final double DEFAULT_OBJECT_SIZE = 0.5;
    private static final double DEFAULT_FIELD_OF_VIEW_X_IN_RADIANS = Math.toRadians(80.0);
    private static final double DEFAULT_FIELD_OF_VIEW_Y_IN_RADIANS = Math.toRadians(45.0);
 
@@ -107,5 +107,11 @@ public class ObjectDetectorBehaviorService extends GoalDetectorBehaviorService
    {
       super.destroy();
       locationEnabled.set(false);
+   }
+
+   @Override
+   public void initialize()
+   {
+      objectDetectorFromCameraImages.reset();
    }
 }
