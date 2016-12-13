@@ -178,6 +178,13 @@ public class SupportState extends AbstractFootControlState
       footBarelyLoaded.set(false);
       copOnEdge.set(false);
       updateHoldPositionSetpoints();
+
+      double currentKneeAngle = kneePitch.getQ();
+      double currentKneeVelocity = kneePitch.getQd();
+      double desiredKneeAngle = ANGLE_FOR_STRAIGHT;
+      double desiredKneeVelocity = 0.0;
+
+      kneePrivilegedConfigurationTrajectory.setCubic(0.0, TIME_FOR_STRAIGHTENING, currentKneeAngle, currentKneeVelocity, desiredKneeAngle, desiredKneeVelocity);
    }
 
    @Override
@@ -188,13 +195,6 @@ public class SupportState extends AbstractFootControlState
       copOnEdge.set(false);
       frameViz.hide();
       explorationHelper.stopExploring();
-
-      double currentKneeAngle = kneePitch.getQ();
-      double currentKneeVelocity = kneePitch.getQd();
-      double desiredKneeAngle = ANGLE_FOR_STRAIGHT;
-      double desiredKneeVelocity = 0.0;
-
-      kneePrivilegedConfigurationTrajectory.setCubic(0.0, TIME_FOR_STRAIGHTENING, currentKneeAngle, currentKneeVelocity, desiredKneeAngle, desiredKneeVelocity);
    }
 
    @Override
