@@ -194,26 +194,26 @@ public class ObjectDetectorFromCameraImages
 
          Pair<List<Rectangle>, float[]> rectanglesAndHeatMaps = detector.detect(bufferedImage);
 
+         rectanglesAndHeatMaps.getLeft().sort((r1, r2) -> -Integer.compare(r1.width * r1.height, r2.width * r2.height));
+
          HeatMapPacket heatMapPacket = new HeatMapPacket();
          heatMapPacket.width = detector.getNetworkOutputWidth();
          heatMapPacket.height = detector.getNetworkOutputHeight();
          heatMapPacket.data = rectanglesAndHeatMaps.getRight();
 
-
          int[] packedBoxes = rectanglesAndHeatMaps.getLeft()
                                                   .stream()
                                                   .flatMapToInt(rect -> IntStream.of(rect.x, rect.y, rect.width, rect.height))
                                                   .toArray();
-         BoundingBoxesPacket boundingBoxesPacket = new BoundingBoxesPacket(packedBoxes);
+         String[] names = new String[rectanglesAndHeatMaps.getLeft().size()];
+         for (int i = 0; i < names.length; i++)
+         {
+            names[i] = "Valve " + i;
+         }
+         BoundingBoxesPacket boundingBoxesPacket = new BoundingBoxesPacket(packedBoxes, names);
 
          coactiveVisualizationPackets = Pair.of(boundingBoxesPacket, heatMapPacket);
 
-         Collections.sort(rectanglesAndHeatMaps.getLeft(), new Comparator<Rectangle>() {
-            @Override
-            public int compare(Rectangle r1, Rectangle r2) {
-               return -Integer.compare(r1.width * r1.height, r2.width * r2.height);
-            }
-         });
          if (rectanglesAndHeatMaps.getLeft().size() > 0)
          {
             Rectangle rectangle = rectanglesAndHeatMaps.getLeft().get(0);

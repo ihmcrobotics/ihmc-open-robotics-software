@@ -2,13 +2,7 @@ package us.ihmc.avatar.networkProcessor.modules.uiConnector;
 
 import java.util.HashMap;
 
-import us.ihmc.communication.packets.ControllerCrashNotificationPacket;
-import us.ihmc.communication.packets.InvalidPacketNotificationPacket;
-import us.ihmc.communication.packets.KinematicsToolboxOutputStatus;
-import us.ihmc.communication.packets.LidarScanMessage;
-import us.ihmc.communication.packets.PlanarRegionsListMessage;
-import us.ihmc.communication.packets.TextToSpeechPacket;
-import us.ihmc.communication.packets.UIPositionCheckerPacket;
+import us.ihmc.communication.packets.*;
 import us.ihmc.humanoidRobotics.communication.packets.DetectedObjectPacket;
 import us.ihmc.humanoidRobotics.communication.packets.bdi.BDIBehaviorStatusPacket;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlModeResponsePacket;
@@ -98,7 +92,9 @@ public class PacketsForwardedToTheUi
       UIPositionCheckerPacket.class,
       PlanarRegionsListMessage.class,
       HeightQuadTreeMessage.class,
-      LidarScanMessage.class
+      LidarScanMessage.class,
+      HeatMapPacket.class,
+      BoundingBoxesPacket.class
    };
 
    public static final HashMap<Class<?>, Long> PACKETS_ALLOWED_TO_BE_SENT_TO_THE_USER_INTERFACE_WITH_MINIMAL_INTERVALS = new HashMap<Class<?>, Long>();

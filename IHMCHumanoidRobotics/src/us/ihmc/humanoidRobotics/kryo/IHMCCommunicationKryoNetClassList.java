@@ -514,7 +514,8 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketField(TransformableQuat4d.class);
       registerPacketField(TransformablePoint3d.class);
 
-      registerPacketField(HeatMapPacket.class);
+      registerPacketClass(HeatMapPacket.class);
+      registerPacketClass(BoundingBoxesPacket.class);
 
    }
 }
