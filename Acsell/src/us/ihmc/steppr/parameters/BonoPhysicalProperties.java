@@ -8,7 +8,7 @@ import us.ihmc.robotics.geometry.TransformTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
-public class BonoPhysicalProperties extends DRCRobotPhysicalProperties
+public class BonoPhysicalProperties implements DRCRobotPhysicalProperties
 {
    /* Original Ankle
    public static final double ankleHeight = 2.0 * 0.0254;

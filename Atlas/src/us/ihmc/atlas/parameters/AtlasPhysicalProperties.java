@@ -1,12 +1,14 @@
 package us.ihmc.atlas.parameters;
 
-import us.ihmc.avatar.drcRobot.DRCRobotPhysicalProperties;
+import org.apache.bcel.generic.NEW;
+
+import us.ihmc.avatar.drcRobot.NewRobotPhysicalProperties;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.TransformTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
-public class AtlasPhysicalProperties extends DRCRobotPhysicalProperties
+public class AtlasPhysicalProperties extends NewRobotPhysicalProperties
 {
    private final static double ATLAS_HEIGHT = 2.0;
    private final static double ATLAS_WEIGHT = 155.944174;
