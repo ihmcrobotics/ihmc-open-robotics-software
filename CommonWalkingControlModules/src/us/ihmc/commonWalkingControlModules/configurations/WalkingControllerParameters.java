@@ -353,7 +353,7 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
     */
    public boolean attemptToStraightenLegs()
    {
-      return true;
+      return false;
    }
 
    /**
