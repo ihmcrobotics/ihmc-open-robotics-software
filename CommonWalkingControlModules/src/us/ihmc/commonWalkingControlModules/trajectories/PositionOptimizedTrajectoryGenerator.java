@@ -408,6 +408,9 @@ public class PositionOptimizedTrajectoryGenerator implements WaypointTrajectoryG
    @Override
    public void hideVisualization()
    {
+      if (trajectoryViz == null)
+         return;
+      trajectoryViz.hideAll();
    }
 
 }

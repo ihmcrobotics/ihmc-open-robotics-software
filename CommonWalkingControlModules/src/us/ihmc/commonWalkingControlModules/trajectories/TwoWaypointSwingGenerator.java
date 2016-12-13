@@ -161,6 +161,8 @@ public class TwoWaypointSwingGenerator implements PositionTrajectoryGenerator
    {
       timeIntoStep.set(0.0);
       isDone.set(false);
+      for (TrajectoryType trajectoryType : TrajectoryType.values)
+         trajectoryMap.get(trajectoryType).hideVisualization();
 
       initialPosition.changeFrame(worldFrame);
       finalPosition.changeFrame(worldFrame);

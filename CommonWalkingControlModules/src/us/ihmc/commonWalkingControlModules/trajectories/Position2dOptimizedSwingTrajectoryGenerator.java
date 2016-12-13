@@ -377,6 +377,9 @@ public class Position2dOptimizedSwingTrajectoryGenerator implements WaypointTraj
    @Override
    public void hideVisualization()
    {
+      if (trajectoryViz == null)
+         return;
+      trajectoryViz.hideAll();
    }
 
 }
