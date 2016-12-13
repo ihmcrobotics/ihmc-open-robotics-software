@@ -43,6 +43,8 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
    private final BooleanYoVariable yoSetDesiredAccelerationToZero;
    private final BooleanYoVariable yoSetDesiredVelocityToZero;
 
+   protected final BooleanYoVariable hasSwitchedToStraightLegs;
+
    private final YoFrameVector angularWeight;
    private final YoFrameVector linearWeight;
 
@@ -64,6 +66,8 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
       yoDesiredPosition.setToNaN();
       yoSetDesiredAccelerationToZero = new BooleanYoVariable(namePrefix + "SetDesiredAccelerationToZero", registry);
       yoSetDesiredVelocityToZero = new BooleanYoVariable(namePrefix + "SetDesiredVelocityToZero", registry);
+
+      hasSwitchedToStraightLegs = new BooleanYoVariable(namePrefix + "HasSwitchedToStraightLegs", registry);
 
       angularWeight = new YoFrameVector(namePrefix + "AngularWeight", null, registry);
       linearWeight = new YoFrameVector(namePrefix + "LinearWeight", null, registry);
@@ -125,6 +129,8 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
    {
       super.doTransitionIntoAction();
       legSingularityAndKneeCollapseAvoidanceControlModule.setCheckVelocityForSwingSingularityAvoidance(true);
+
+      hasSwitchedToStraightLegs.set(false);
 
       initializeTrajectory();
    }
@@ -202,7 +208,10 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
    @Override
    public InverseDynamicsCommand<?> getInverseDynamicsCommand()
    {
-      return bentLegsPrivilegedConfigurationCommand;
+      if (hasSwitchedToStraightLegs.getBooleanValue())
+         return straightLegsPrivilegedConfigurationCommand;
+      else
+         return bentLegsPrivilegedConfigurationCommand;
    }
 
    @Override

@@ -353,7 +353,7 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
     */
    public boolean attemptToStraightenLegs()
    {
-      return true;
+      return false;
    }
 
    /**
@@ -373,5 +373,23 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
    public double getICPProximityToLeadingFootForToeOff()
    {
       return 0.0;
+   }
+
+   /**
+    * This is the duration used to straighten the desire privileged configuration of the stance leg's knee.
+    * @return time in seconds for straightening
+    */
+   public double getDurationForStanceLegStraightening()
+   {
+      return 1.3;
+   }
+
+   /**
+    * Angle used by the privileged configuration that is defined as straight for the knees.
+    * @return angle in radians
+    */
+   public double getStraightKneeAngle()
+   {
+      return 0.05;
    }
 }
