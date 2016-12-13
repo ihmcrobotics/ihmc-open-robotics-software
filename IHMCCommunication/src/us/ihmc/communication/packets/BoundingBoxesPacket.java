@@ -11,15 +11,17 @@ import java.util.Random;
 public class BoundingBoxesPacket extends Packet<BoundingBoxesPacket>
 {
    public int[] boundingBoxXCoordinates, boundingBoxYCoordinates, boundingBoxWidths, boundingBoxHeights;
+   public String[] labels;
 
    public BoundingBoxesPacket()
    {
 
    }
 
-   public BoundingBoxesPacket(int[] packedBoxes)
+   public BoundingBoxesPacket(int[] packedBoxes, String[] labels)
    {
-      int n = packedBoxes.length;
+      this.labels = labels;
+      int n = packedBoxes.length / 4;
       boundingBoxXCoordinates = new int[n];
       boundingBoxYCoordinates = new int[n];
       boundingBoxWidths = new int[n];
@@ -33,8 +35,9 @@ public class BoundingBoxesPacket extends Packet<BoundingBoxesPacket>
       }
    }
 
-   public BoundingBoxesPacket(int[] boundingBoxXCoordinates, int[] boundingBoxYCoordinates, int[] boundingBoxWidths, int[] boundingBoxHeights)
+   public BoundingBoxesPacket(int[] boundingBoxXCoordinates, int[] boundingBoxYCoordinates, int[] boundingBoxWidths, int[] boundingBoxHeights, String[] labels)
    {
+      this.labels = labels;
       this.boundingBoxXCoordinates = boundingBoxXCoordinates;
       this.boundingBoxYCoordinates = boundingBoxYCoordinates;
       this.boundingBoxWidths = boundingBoxWidths;
@@ -44,6 +47,9 @@ public class BoundingBoxesPacket extends Packet<BoundingBoxesPacket>
    public BoundingBoxesPacket(Random random)
    {
       int boxesToGenerate = random.nextInt(20);
+
+      this.labels = new String[boxesToGenerate];
+      Arrays.fill(labels, Integer.toHexString(random.nextInt()));
 
       for (int i = 0; i < boxesToGenerate; i++)
       {
