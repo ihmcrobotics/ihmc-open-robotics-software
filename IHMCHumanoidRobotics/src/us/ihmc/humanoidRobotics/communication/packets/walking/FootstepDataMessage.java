@@ -9,10 +9,10 @@ import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 
-import us.ihmc.communication.ros.generators.RosEnumValueDocumentation;
-import us.ihmc.communication.ros.generators.RosMessagePacket;
-import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.packets.Packet;
+import us.ihmc.communication.ros.generators.RosEnumValueDocumentation;
+import us.ihmc.communication.ros.generators.RosExportedField;
+import us.ihmc.communication.ros.generators.RosMessagePacket;
 import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
 import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
@@ -232,8 +232,6 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
    public void setSwingHeight(double swingHeight)
    {
       this.swingHeight = swingHeight;
-      if (trajectoryType == TrajectoryType.DEFAULT)
-         trajectoryType = TrajectoryType.BASIC;
    }
 
    public void setPredictedContactPoints(ArrayList<Point2d> predictedContactPoints)

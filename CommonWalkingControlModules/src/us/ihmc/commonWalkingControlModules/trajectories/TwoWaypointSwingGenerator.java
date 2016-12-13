@@ -59,7 +59,7 @@ public class TwoWaypointSwingGenerator implements PositionTrajectoryGenerator
 
       this.maxSwingHeight = new DoubleYoVariable(namePrefix + "MaxSwingHeight", registry);
       this.maxSwingHeight.set(maxSwingHeight);
-      
+
       this.minSwingHeight = new DoubleYoVariable(namePrefix + "MinSwingHeight", registry);
       this.minSwingHeight.set(minSwingHeight);
 
@@ -78,7 +78,7 @@ public class TwoWaypointSwingGenerator implements PositionTrajectoryGenerator
    {
       this.stepTime.set(stepTime);
    }
-   
+
    public void setMinimumSwingHeight(double minSwingHeight)
    {
 //      this.minSwingHeight = minSwingHeight;
@@ -142,8 +142,6 @@ public class TwoWaypointSwingGenerator implements PositionTrajectoryGenerator
             waypointPositions.get(i).setZ(maxStepZ + swingHeight.getDoubleValue());
          }
          break;
-      case PUSH_RECOVERY:
-      case BASIC:
       case DEFAULT:
          for (int i = 0; i < numberWaypoints; i++)
          {

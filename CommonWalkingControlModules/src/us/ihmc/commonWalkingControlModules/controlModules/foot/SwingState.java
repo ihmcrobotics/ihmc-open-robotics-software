@@ -391,11 +391,7 @@ public class SwingState extends AbstractUnconstrainedState
       boolean worldFrameDeltaZAboveThreshold = Math.abs(newFootstepPose.getZ() - oldFootstepPosition.getZ()) > TwoWaypointTrajectoryGeneratorParameters
             .getMinimumHeightDifferenceForStepOnOrOff();
 
-      if (footstep.getTrajectoryType() == TrajectoryType.PUSH_RECOVERY)
-      {
-         trajectoryParametersProvider.set(new TrajectoryParameters(TrajectoryType.PUSH_RECOVERY));
-      }
-      else if (worldFrameDeltaZAboveThreshold)
+      if (worldFrameDeltaZAboveThreshold)
       {
          trajectoryParametersProvider.set(new TrajectoryParameters(TrajectoryType.OBSTACLE_CLEARANCE, footstep.getSwingHeight()));
       }
