@@ -44,8 +44,6 @@ public interface DRCRobotModel extends SimulatedWholeBodyControllerParameters
 
    public abstract FootstepPlanningParameterization getFootstepParameters();
 
-   public abstract WalkingControllerParameters getDrivingControllerParameters();
-
    public abstract StateEstimatorParameters getStateEstimatorParameters();
 
    public abstract DRCRobotPhysicalProperties getPhysicalProperties();

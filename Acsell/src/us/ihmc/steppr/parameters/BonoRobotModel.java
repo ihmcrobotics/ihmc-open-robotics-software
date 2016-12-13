@@ -232,12 +232,6 @@ public class BonoRobotModel implements DRCRobotModel
    }
 
    @Override
-   public WalkingControllerParameters getDrivingControllerParameters()
-   {
-      return null;
-   }
-
-   @Override
    public DRCRobotSensorInformation getSensorInformation()
    {
       return sensorInformation;

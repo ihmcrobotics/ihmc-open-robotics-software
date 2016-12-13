@@ -1,14 +1,12 @@
 package us.ihmc.atlas.parameters;
 
-import org.apache.bcel.generic.NEW;
-
 import us.ihmc.avatar.drcRobot.NewRobotPhysicalProperties;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.TransformTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
-public class AtlasPhysicalProperties extends NewRobotPhysicalProperties
+public class AtlasPhysicalProperties implements NewRobotPhysicalProperties
 {
    private final static double ATLAS_HEIGHT = 2.0;
    private final static double ATLAS_WEIGHT = 155.944174;
@@ -91,76 +89,91 @@ public class AtlasPhysicalProperties extends NewRobotPhysicalProperties
       return ankleHeight;
    }
 
+   @Override
    public double getPelvisToFoot()
    {
       return pelvisToFoot;
    }
 
+   @Override
    public double getFootWidthForControl()
    {
       return footWidthForControl;
    }
 
+   @Override
    public double getToeWidthForControl()
    {
       return toeWidthForControl;
    }
 
+   @Override
    public double getFootLengthForControl()
    {
       return footLengthForControl;
    }
 
+   @Override
    public double getFootBackForControl()
    {
       return footBackForControl;
    }
 
+   @Override
    public double getActualFootWidth()
    {
       return actualFootWidth;
    }
 
+   @Override
    public double getActualFootLength()
    {
       return actualFootLength;
    }
 
+   @Override
    public double getFootStartToetaperFromBack()
    {
       return footStartToetaperFromBack;
    }
 
+   @Override
    public double getFootForward()
    {
       return footForward;
    }
 
+   @Override
    public double getShinLength()
    {
       return shinLength;
    }
 
+   @Override
    public double getThighLength()
    {
       return thighLength;
    }
 
+   @Override
    public SideDependentList<RigidBodyTransform> getSoleToAnkleFrameTransforms()
    {
       return soleToAnkleFrameTransforms;
    }
 
+   @Override
    public SideDependentList<RigidBodyTransform> getHandAttachmentPlateToWristTransforms()
    {
       return handAttachmentPlateToWristTransforms;
    }
 
+   @Override
    public double getModelScale()
    {
       return modelScale;
    }
    
+   @Override
    public double getMassScalePower()
    {
       return massScalePower;

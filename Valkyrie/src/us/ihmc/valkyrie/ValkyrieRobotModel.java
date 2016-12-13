@@ -366,12 +366,6 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    }
 
    @Override
-   public WalkingControllerParameters getDrivingControllerParameters()
-   {
-      return getWalkingControllerParameters();
-   }
-
-   @Override
    public ValkyrieSensorInformation getSensorInformation()
    {
       return sensorInformation;
