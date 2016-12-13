@@ -4,6 +4,8 @@ public enum TrajectoryType
 {
    DEFAULT, OBSTACLE_CLEARANCE, CUSTOM;
 
+   public final static TrajectoryType[] values = values();
+
    public static String getDocumentation(TrajectoryType var)
    {
       switch (var)
