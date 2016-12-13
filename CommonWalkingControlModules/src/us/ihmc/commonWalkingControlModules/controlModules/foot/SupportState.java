@@ -15,6 +15,8 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicReferenceFrame;
 import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -25,6 +27,8 @@ import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
+import us.ihmc.robotics.math.trajectories.YoMinimumJerkTrajectory;
+import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -44,6 +48,9 @@ import us.ihmc.robotics.sensors.FootSwitchInterface;
  */
 public class SupportState extends AbstractFootControlState
 {
+   private static final double TIME_FOR_STRAIGHTENING = 1.3;
+   private static final double ANGLE_FOR_STRAIGHT = 0.05;
+
    private static final double defaultFootLoadThreshold = 0.2;
    private static final int dofs = Twist.SIZE;
 
@@ -94,6 +101,11 @@ public class SupportState extends AbstractFootControlState
    private final DoubleYoVariable recoverTime;
    private final DoubleYoVariable timeBeforeExploring;
 
+   private final RigidBody pelvis;
+
+   private final OneDoFJoint kneePitch;
+   private final YoPolynomial kneePrivilegedConfigurationTrajectory;
+
    public SupportState(FootControlHelper footControlHelper, YoSE3PIDGainsInterface holdPositionGains, YoVariableRegistry parentRegistry)
    {
       super(ConstraintType.FULL, footControlHelper);
@@ -142,6 +154,11 @@ public class SupportState extends AbstractFootControlState
          timeBeforeExploring = new DoubleYoVariable(prefix + "TimeBeforeExploring", registry);
       }
 
+      FullHumanoidRobotModel fullRobotModel = footControlHelper.getMomentumBasedController().getFullRobotModel();
+      pelvis = fullRobotModel.getPelvis();
+      kneePitch = fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE_PITCH);
+      kneePrivilegedConfigurationTrajectory = new YoPolynomial(prefix + "KneePrivilegedConfiguration", 4, registry);
+
       YoGraphicsListRegistry graphicsListRegistry = footControlHelper.getMomentumBasedController().getDynamicGraphicObjectsListRegistry();
       frameViz = new YoGraphicReferenceFrame(controlFrame, registry, 0.2);
       if (graphicsListRegistry != null)
@@ -171,6 +188,13 @@ public class SupportState extends AbstractFootControlState
       copOnEdge.set(false);
       frameViz.hide();
       explorationHelper.stopExploring();
+
+      double currentKneeAngle = kneePitch.getQ();
+      double currentKneeVelocity = kneePitch.getQd();
+      double desiredKneeAngle = ANGLE_FOR_STRAIGHT;
+      double desiredKneeVelocity = 0.0;
+
+      kneePrivilegedConfigurationTrajectory.setCubic(0.0, TIME_FOR_STRAIGHTENING, currentKneeAngle, currentKneeVelocity, desiredKneeAngle, desiredKneeVelocity);
    }
 
    @Override
@@ -275,6 +299,18 @@ public class SupportState extends AbstractFootControlState
 
       // update visualization
       frameViz.setToReferenceFrame(controlFrame);
+
+      updatePrivilegedConfiguration();
+   }
+
+   private void updatePrivilegedConfiguration()
+   {
+      double timeInTrajectory = MathTools.clipToMinMax(getTimeInCurrentState(), 0.0, TIME_FOR_STRAIGHTENING);
+      kneePrivilegedConfigurationTrajectory.compute(timeInTrajectory);
+
+      straightLegsPrivilegedConfigurationCommand.clear();
+      straightLegsPrivilegedConfigurationCommand.addJoint(kneePitch, kneePrivilegedConfigurationTrajectory.getPosition());
+      straightLegsPrivilegedConfigurationCommand.applyPrivilegedConfigurationToSubChain(pelvis, contactableFoot.getRigidBody());
    }
 
    private void updateHoldPositionSetpoints()
