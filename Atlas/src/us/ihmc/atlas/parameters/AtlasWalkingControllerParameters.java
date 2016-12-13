@@ -1099,4 +1099,11 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    {
       return true;
    }
+
+   /** {@inheritDoc} */
+   @Override
+   public double getICPProximityToLeadingFootForToeOff()
+   {
+      return 0.0;
+   }
 }

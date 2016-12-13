@@ -364,4 +364,14 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
    {
       return 0.8;
    }
+
+   /**
+    * In transfer, this is the maximum distance from the ICP to the leading foot support polygon to allow toe-off.
+    * If it is further than this, do not allow toe-off, as more control authority is needed from the trailing foot.
+    * @return ICP proximity in meters
+    */
+   public double getICPProximityToLeadingFootForToeOff()
+   {
+      return 0.0;
+   }
 }
