@@ -323,12 +323,6 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    }
 
    @Override
-   public WalkingControllerParameters getMultiContactControllerParameters()
-   {
-      return walkingControllerParameters;
-   }
-
-   @Override
    public ScsCollisionConfigure getPhysicsConfigure(FloatingRootJointRobot robotModel)
    {
       return null;

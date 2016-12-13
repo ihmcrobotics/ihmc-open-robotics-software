@@ -132,12 +132,6 @@ public class WandererRobotModel implements DRCRobotModel
    }
 
    @Override
-   public WalkingControllerParameters getMultiContactControllerParameters()
-   {
-      return multiContactControllerParameters;
-   }
-
-   @Override
    public StateEstimatorParameters getStateEstimatorParameters()
    {
       WandererStateEstimatorParameters stateEstimatorParameters = new WandererStateEstimatorParameters(runningOnRealRobot, getEstimatorDT());

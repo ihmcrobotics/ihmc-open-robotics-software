@@ -117,7 +117,6 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    private final AtlasICPOptimizationParameters icpOptimizationParameters;
    private final AtlasWalkingControllerParameters walkingControllerParameters;
    private final AtlasStateEstimatorParameters stateEstimatorParameters;
-   private final AtlasRobotMultiContactControllerParameters multiContactControllerParameters;
    private final AtlasDefaultArmConfigurations defaultArmConfigurations;
    private final AtlasFootstepSnappingParameters snappingParameters;
 
@@ -154,7 +153,6 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
       armControllerParameters = new AtlasArmControllerParameters(runningOnRealRobot, jointMap);
       walkingControllerParameters = new AtlasWalkingControllerParameters(target, jointMap);
       stateEstimatorParameters = new AtlasStateEstimatorParameters(jointMap, sensorInformation, runningOnRealRobot, getEstimatorDT());
-      multiContactControllerParameters = new AtlasRobotMultiContactControllerParameters(jointMap);
       defaultArmConfigurations = new AtlasDefaultArmConfigurations();
       snappingParameters = new AtlasFootstepSnappingParameters();
 
@@ -236,12 +234,6 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    public DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> getDefaultRobotInitialSetup(double groundHeight, double initialYaw)
    {
       return new AtlasSimInitialSetup(groundHeight, initialYaw);
-   }
-
-   @Override
-   public WalkingControllerParameters getMultiContactControllerParameters()
-   {
-      return multiContactControllerParameters;
    }
 
    @Override

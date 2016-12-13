@@ -131,12 +131,6 @@ public class BonoRobotModel implements DRCRobotModel
    }
 
    @Override
-   public WalkingControllerParameters getMultiContactControllerParameters()
-   {
-      return multiContactControllerParameters;
-   }
-
-   @Override
    public StateEstimatorParameters getStateEstimatorParameters()
    {
       BonoStateEstimatorParameters stateEstimatorParameters = new BonoStateEstimatorParameters(runningOnRealRobot, getEstimatorDT());
