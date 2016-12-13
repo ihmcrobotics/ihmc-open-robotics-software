@@ -30,8 +30,6 @@ import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.stream.IntStream;
 
@@ -51,7 +49,7 @@ public class ObjectDetectorFromCameraImages
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private ValveDetector detector;
-   private Object expectedFiducialSizeChangedConch = new Object();
+   private final Object expectedFiducialSizeChangedConch = new Object();
 
    private final JPEGDecompressor jpegDecompressor = new JPEGDecompressor();
 
@@ -200,6 +198,7 @@ public class ObjectDetectorFromCameraImages
          heatMapPacket.width = detector.getNetworkOutputWidth();
          heatMapPacket.height = detector.getNetworkOutputHeight();
          heatMapPacket.data = rectanglesAndHeatMaps.getRight();
+         heatMapPacket.name = "Valve";
 
          int[] packedBoxes = rectanglesAndHeatMaps.getLeft()
                                                   .stream()
