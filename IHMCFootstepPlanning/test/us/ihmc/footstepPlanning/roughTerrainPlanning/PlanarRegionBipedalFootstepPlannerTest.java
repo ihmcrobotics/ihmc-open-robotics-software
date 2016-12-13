@@ -33,7 +33,7 @@ public class PlanarRegionBipedalFootstepPlannerTest extends FootstepPlannerOnRou
    public void testOnStairCase()
    {
       planner.setMaximumNumberOfNodesToExpand(Integer.MAX_VALUE);
-      planner.setTimeout(50.0);
+      planner.setTimeout(10.0);
       planner.setExitAfterInitialSolution(false);
       super.testOnStaircase(new Vector3d(), true);
    }
@@ -44,7 +44,7 @@ public class PlanarRegionBipedalFootstepPlannerTest extends FootstepPlannerOnRou
    public void testSimpleStepOnBox()
    {
       planner.setMaximumNumberOfNodesToExpand(Integer.MAX_VALUE);
-      planner.setTimeout(50.0);
+      planner.setTimeout(10.0);
       planner.setExitAfterInitialSolution(false);
       super.testSimpleStepOnBox(true);
    }
