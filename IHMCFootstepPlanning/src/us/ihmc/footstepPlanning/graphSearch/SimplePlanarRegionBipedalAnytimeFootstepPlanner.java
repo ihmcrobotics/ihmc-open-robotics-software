@@ -62,6 +62,7 @@ public class SimplePlanarRegionBipedalAnytimeFootstepPlanner extends PlanarRegio
       
       stack.clear();
       startNode = new BipedalFootstepPlannerNode(initialSide, initialFootPose);
+      notifiyListenersStartNodeWasAdded(startNode);
       stack.push(startNode);
       closestNodeToGoal = null;
       mapToAllExploredNodes.clear();
@@ -72,6 +73,7 @@ public class SimplePlanarRegionBipedalAnytimeFootstepPlanner extends PlanarRegio
    {
       stack.clear();
       stack.push(startNode);
+      notifiyListenersStartNodeWasAdded(startNode);
       mapToAllExploredNodes.clear();
 
       closestNodeToGoal = null;
@@ -153,6 +155,7 @@ public class SimplePlanarRegionBipedalAnytimeFootstepPlanner extends PlanarRegio
          
          parentOfStartNode = startNode;
          startNode = new BipedalFootstepPlannerNode(initialSide, initialFootPose);
+         notifiyListenersStartNodeWasAdded(startNode);
       }
    }
 
@@ -163,12 +166,6 @@ public class SimplePlanarRegionBipedalAnytimeFootstepPlanner extends PlanarRegio
       {
          planarRegionPotentialNextStepCalculator.setGoal(newGoal);
       }
-   }
-
-   @Override
-   public void setGoal(FootstepPlannerGoal goal)
-   {
-      planarRegionPotentialNextStepCalculator.setGoal(goal);
    }
 
    private void recursivelyMarkAsDead(BipedalFootstepPlannerNode node)
@@ -197,9 +194,22 @@ public class SimplePlanarRegionBipedalAnytimeFootstepPlanner extends PlanarRegio
 
    public FootstepPlanningResult plan(boolean stopAndReturnWhenGoalIsFound)
    {
-      initialize();
       goalNode = null;
       footstepPlan = null;
+
+      while (!initialStanceFootWasSet || !goalWasSet)
+      {         
+         if (stopAndReturnWhenGoalIsFound)
+         {
+            return FootstepPlanningResult.NO_PATH_EXISTS;
+         }
+         else
+         {
+            ThreadTools.sleep(100L);
+         }
+      }
+
+      initialize();
 
       planarRegionPotentialNextStepCalculator.setStartNode(startNode);
 
