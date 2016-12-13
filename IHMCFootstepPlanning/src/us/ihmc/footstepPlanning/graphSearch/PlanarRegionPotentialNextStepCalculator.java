@@ -687,6 +687,7 @@ public class PlanarRegionPotentialNextStepCalculator
       LineSegment2d backToRight = new LineSegment2d(-0.12, 0.0, 0.0, -minimumDistanceFromCliffBottoms);
       
       LineSegment2d backToBackFurther = new LineSegment2d(-0.0, 0.0, -minimumDistanceFromCliffBottoms, 0.0);
+      LineSegment2d frontToFrontFurther = new LineSegment2d(-0.0, 0.0, minimumDistanceFromCliffBottoms, 0.0);
 
       ArrayList<LineSegment2d> lineSegmentsInSoleFrame = new ArrayList<>();
       lineSegmentsInSoleFrame.add(middleToLeft);
@@ -696,6 +697,7 @@ public class PlanarRegionPotentialNextStepCalculator
       lineSegmentsInSoleFrame.add(backToLeft);
       lineSegmentsInSoleFrame.add(backToRight);
       lineSegmentsInSoleFrame.add(backToBackFurther);
+      lineSegmentsInSoleFrame.add(frontToFrontFurther);
 
       Point3d highestPointInSoleFrame = new Point3d();
       LineSegment2d highestLineSegmentInSoleFrame = new LineSegment2d();

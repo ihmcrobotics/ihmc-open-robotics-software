@@ -204,7 +204,6 @@ public class BipedalStepAdjustmentCostCalculatorTest
       }
    }
 
-   @SuppressWarnings("unused")
    private void applySlopeCandidateSet(FramePose candidateFramePose, DoubleYoVariable xYoVariable, DoubleYoVariable yYoVariable)
    {
       candidateIndex.set((int) yoTime.getDoubleValue() % (numInX * numInY));

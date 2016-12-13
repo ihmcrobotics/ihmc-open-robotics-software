@@ -1,13 +1,14 @@
-package us.ihmc.humanoidBehaviors.behaviors.fiducialLocation;
+package us.ihmc.humanoidBehaviors.behaviors.goalLocation;
 
-import javax.vecmath.AxisAngle4d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
+import javax.vecmath.*;
 
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.behaviorServices.FiducialDetectorBehaviorService;
+import us.ihmc.humanoidBehaviors.behaviors.fiducialLocation.FollowFiducialBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.goalLocation.FindGoalBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.goalLocation.GoalDetectorBehaviorService;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HeadTrajectoryMessage;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
@@ -20,18 +21,17 @@ import us.ihmc.robotics.math.frames.YoFramePoseUsingQuaternions;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.time.YoTimer;
 
-public class FindFiducialBehavior extends AbstractBehavior
+public class FindGoalBehavior extends AbstractBehavior
 {
-   private final String prefix = "findFiducial";
+   private final String prefix = "findGoal";
 
-   private final FiducialDetectorBehaviorService fiducialDetectorBehaviorService;
-   private final long fiducialToTrack;
+   private final GoalDetectorBehaviorService fiducialDetectorBehaviorService;
    private final FullHumanoidRobotModel fullRobotModel;
    private final HumanoidReferenceFrames referenceFrames;
 
    private final YoTimer headTrajectorySentTimer;
 
-   private final BooleanYoVariable foundFiducial = new BooleanYoVariable(prefix + "FoundFiducial", registry);
+   private final BooleanYoVariable foundFiducial = new BooleanYoVariable(prefix + "FoundGoal", registry);
    private final IntegerYoVariable behaviorEnteredCount = new IntegerYoVariable(prefix + "BehaviorEnteredCount", registry);
    private final DoubleYoVariable headPitchToFindFucdicial = new DoubleYoVariable(prefix + "HeadPitchToFindFucdicial", registry);
    private final DoubleYoVariable headPitchToCenterFucdicial = new DoubleYoVariable(prefix + "HeadPitchToCenterFucdicial", registry);
@@ -39,20 +39,17 @@ public class FindFiducialBehavior extends AbstractBehavior
    private final YoFramePoseUsingQuaternions foundFiducialYoFramePose;
    private final FramePose foundFiducialPose = new FramePose();
 
-   public FindFiducialBehavior(DoubleYoVariable yoTime, CommunicationBridge behaviorCommunicationBridge, FullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames,
-         FiducialDetectorBehaviorService fiducialDetectorBehaviorService, long fiducialToTrack)
+   public FindGoalBehavior(DoubleYoVariable yoTime, CommunicationBridge behaviorCommunicationBridge, FullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames,
+                           GoalDetectorBehaviorService fiducialDetectorBehaviorService)
    {
       super(FollowFiducialBehavior.class.getSimpleName(), behaviorCommunicationBridge);
 
-      this.fiducialToTrack = fiducialToTrack;
       this.fullRobotModel = fullRobotModel;
       this.referenceFrames = referenceFrames;
 
-      foundFiducialYoFramePose = new YoFramePoseUsingQuaternions(prefix + "FoundFiducialPose", ReferenceFrame.getWorldFrame(), registry);
+      foundFiducialYoFramePose = new YoFramePoseUsingQuaternions(prefix + "FoundGoalPose", ReferenceFrame.getWorldFrame(), registry);
       this.fiducialDetectorBehaviorService = fiducialDetectorBehaviorService;
       addBehaviorService(fiducialDetectorBehaviorService);
-
-      fiducialDetectorBehaviorService.setTargetIDToLocate(this.fiducialToTrack);
 
       headPitchToFindFucdicial.set(0.6);
 
@@ -67,11 +64,16 @@ public class FindFiducialBehavior extends AbstractBehavior
    @Override
    public void doControl()
    {
-      if (fiducialDetectorBehaviorService.getTargetIDHasBeenLocated())
+      if (fiducialDetectorBehaviorService.getGoalHasBeenLocated())
       {
-         fiducialDetectorBehaviorService.getReportedFiducialPoseWorldFrame(foundFiducialPose);
+         fiducialDetectorBehaviorService.getReportedGoalPoseWorldFrame(foundFiducialPose);
          foundFiducialYoFramePose.set(foundFiducialPose);
          foundFiducial.set(true);
+         Point3d position = new Point3d();
+         foundFiducialPose.getPosition(position);
+         sendTextToSpeechPacket("Target object located at " + position);
+      } else {
+         sendTextToSpeechPacket("Target object not located");
       }
 
       if (headTrajectorySentTimer.totalElapsed() < 2.0)
@@ -87,6 +89,11 @@ public class FindFiducialBehavior extends AbstractBehavior
    public void getFiducialPose(FramePose framePoseToPack)
    {
       framePoseToPack.setPoseIncludingFrame(foundFiducialPose);
+   }
+
+   public void getGoalPose(FramePose framePoseToPack)
+   {
+      getFiducialPose(framePoseToPack);
    }
 
    private void sendTextToSpeechPacket(String message)
@@ -134,7 +141,6 @@ public class FindFiducialBehavior extends AbstractBehavior
    {
       behaviorEnteredCount.increment();
       foundFiducial.set(false);
-      fiducialDetectorBehaviorService.setTargetIDToLocate(this.fiducialToTrack);
    }
 
    @Override
