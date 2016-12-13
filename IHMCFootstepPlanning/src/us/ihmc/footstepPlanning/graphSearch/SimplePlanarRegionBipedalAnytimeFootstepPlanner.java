@@ -59,7 +59,7 @@ public class SimplePlanarRegionBipedalAnytimeFootstepPlanner extends PlanarRegio
    protected void initialize()
    {
       parentOfStartNode = null;
-      
+
       stack.clear();
       startNode = new BipedalFootstepPlannerNode(initialSide, initialFootPose);
       notifiyListenersStartNodeWasAdded(startNode);
@@ -152,7 +152,7 @@ public class SimplePlanarRegionBipedalAnytimeFootstepPlanner extends PlanarRegio
          initialSide = footstep.getRobotSide();
          footstep.getSoleFramePose(tempPose);
          tempPose.getRigidBodyTransform(initialFootPose);
-         
+
          parentOfStartNode = startNode;
          startNode = new BipedalFootstepPlannerNode(initialSide, initialFootPose);
          notifiyListenersStartNodeWasAdded(startNode);
@@ -250,7 +250,7 @@ public class SimplePlanarRegionBipedalAnytimeFootstepPlanner extends PlanarRegio
                continue;
          }
 
-         boolean nearbyNodeAlreadyExists = checkIfNearbyNodeAlreadyExistsAndStoreIfNot(nodeToExpand);
+         boolean nearbyNodeAlreadyExists = checkIfNearbyNodeAlreadyExistsAndStoreIfNot(nodeToExpand) != null;
          if (nearbyNodeAlreadyExists)
             continue;
 
@@ -271,7 +271,7 @@ public class SimplePlanarRegionBipedalAnytimeFootstepPlanner extends PlanarRegio
             }
          }
 
-         expandChildrenAndAddNodes(stack, nodeToExpand);
+         expandChildrenAndAddNodes(stack, nodeToExpand, Double.POSITIVE_INFINITY);
       }
 
       notifyListenerSolutionWasNotFound();
@@ -295,19 +295,6 @@ public class SimplePlanarRegionBipedalAnytimeFootstepPlanner extends PlanarRegio
       Point3d goalPosition = planarRegionPotentialNextStepCalculator.getGoalPosition(nodeToSetCostOf.getRobotSide());
       Vector3d currentToGoalVector = new Vector3d();
       currentToGoalVector.sub(goalPosition, currentPosition);
-
-      double costFromParent = 1.0;
-      double costToHereFromStart;
-      if (nodeToSetCostOf.getParentNode() == null)
-      {
-         costToHereFromStart = 0.0;
-      }
-      else
-      {
-         costToHereFromStart = nodeToSetCostOf.getParentNode().getCostToHereFromStart() + costFromParent;
-      }
-      nodeToSetCostOf.setCostFromParent(costFromParent);
-      nodeToSetCostOf.setCostToHereFromStart(costToHereFromStart);
 
       double euclideanDistanceToGoal = currentToGoalVector.length();
       nodeToSetCostOf.setEstimatedCostToGoal(euclideanDistanceToGoal);
