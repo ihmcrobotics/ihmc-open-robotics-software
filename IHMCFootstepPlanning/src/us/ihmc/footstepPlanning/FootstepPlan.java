@@ -50,6 +50,11 @@ public class FootstepPlan
       return footsteps.get(footstepIndex);
    }
 
+   public void addFootstep(SimpleFootstep footstep)
+   {
+      footsteps.add(footstep);
+   }
+
    public SimpleFootstep addFootstep(RobotSide robotSide, FramePose soleFramePose)
    {
       SimpleFootstep simpleFootstep = new SimpleFootstep(robotSide, soleFramePose);

@@ -197,6 +197,11 @@ public abstract class AbstractSO3TrajectoryMessage<T extends AbstractSO3Trajecto
             selectionMatrixToPack.set(i, i, selectionMatrixDiagonal[i]);
          MatrixTools.removeZeroRows(selectionMatrixToPack, 1.0e-5);
       }
+      else
+      {
+         for (int i = 0; i < 3; i++)
+            selectionMatrixToPack.set(i, i, 1.0);
+      }
    }
 
    public long getPreviousMessageId()
