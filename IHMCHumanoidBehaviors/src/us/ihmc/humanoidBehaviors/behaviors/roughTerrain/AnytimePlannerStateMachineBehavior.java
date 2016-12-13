@@ -1,6 +1,16 @@
 package us.ihmc.humanoidBehaviors.behaviors.roughTerrain;
 
-import us.ihmc.communication.packets.*;
+import javax.vecmath.Point2d;
+import javax.vecmath.Point3d;
+import javax.vecmath.Quat4d;
+import javax.vecmath.Tuple3d;
+
+import us.ihmc.communication.packets.PacketDestination;
+import us.ihmc.communication.packets.PlanarRegionMessageConverter;
+import us.ihmc.communication.packets.PlanarRegionsListMessage;
+import us.ihmc.communication.packets.RequestPlanarRegionsListMessage;
+import us.ihmc.communication.packets.TextToSpeechPacket;
+import us.ihmc.communication.packets.UIPositionCheckerPacket;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlannerGoal;
 import us.ihmc.footstepPlanning.FootstepPlannerGoalType;
@@ -9,6 +19,11 @@ import us.ihmc.footstepPlanning.graphSearch.BipedalFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.PlanarRegionBipedalFootstepPlannerVisualizer;
 import us.ihmc.footstepPlanning.graphSearch.SimplePlanarRegionBipedalAnytimeFootstepPlanner;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.behaviorServices.ConstantGoalDetectorBehaviorService;
+import us.ihmc.humanoidBehaviors.behaviors.behaviorServices.FiducialDetectorBehaviorService;
+import us.ihmc.humanoidBehaviors.behaviors.behaviorServices.ObjectDetectorBehaviorService;
+import us.ihmc.humanoidBehaviors.behaviors.goalLocation.GoalDetectorBehaviorService;
+import us.ihmc.humanoidBehaviors.behaviors.goalLocation.LocateGoalBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SimpleDoNothingBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SleepBehavior;
@@ -39,19 +54,18 @@ import us.ihmc.robotics.stateMachines.StateTransitionCondition;
 import us.ihmc.robotics.time.YoTimer;
 import us.ihmc.tools.FormattingTools;
 import us.ihmc.tools.io.printing.PrintTools;
-import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
-
-import java.util.ArrayList;
-
-import javax.vecmath.Point2d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Tuple3d;
 
 public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<AnytimePlannerStateMachineBehavior.AnytimePlanningState>
 {
    private final String prefix = getClass().getSimpleName();
+   private static final GoalDetectorType GOAL_DETECTOR_TYPE = GoalDetectorType.FIDUCIAL;
+
+   private enum GoalDetectorType
+   {
+      FIDUCIAL, VALVE, HARD_CODED;
+   }
+
    private final DoubleYoVariable yoTime;
    private final IntegerYoVariable maxNumberOfStepsToTake = new IntegerYoVariable(prefix + "NumberOfStepsToTake", registry);
    private final IntegerYoVariable indexOfNextFootstepToSendFromCurrentPlan = new IntegerYoVariable(prefix + "NextFootstepToSendFromCurrentPlan", registry);
@@ -65,29 +79,27 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
    private final BooleanYoVariable receivedFootstepCompletedPacked = new BooleanYoVariable(prefix + "ReceivedFootstepCompletedPacket", registry);
    private final HumanoidReferenceFrames referenceFrames;
    private final BooleanYoVariable havePlanarRegionsBeenSet = new BooleanYoVariable(prefix + "HavePlanarRegionsBeenSet", registry);
-   
    private FootstepPlan currentPlan;
    private final IntegerYoVariable numberOfFootstepsInCurrentPlan = new IntegerYoVariable(prefix + "NumberOfFootstepsInCurrentPlan", registry);
+
+   private final LocateGoalBehavior locateGoalBehavior;
    private final RequestAndWaitForPlanarRegionsListBehavior requestAndWaitForPlanarRegionsListBehavior;
    private final SleepBehavior sleepBehavior;
    private final CheckForBestPlanBehavior checkForBestPlanBehavior;
-   private final SendOverFootstepAndWaitForCompletion sendOverFootstepsAndUpdatePlannerBehavior;
+   private final SendOverFootstepAndWaitForCompletionBehavior sendOverFootstepsAndUpdatePlannerBehavior;
    private final SimpleDoNothingBehavior reachedGoalBehavior;
 
    private final NoValidPlanCondition noValidPlanCondition = new NoValidPlanCondition();
    private final FoundAPlanCondition foundAPlanCondition = new FoundAPlanCondition();
    private final ContinueWalkingAfterCompletedStepCondition continueWalkingAfterCompletedStepCondition = new ContinueWalkingAfterCompletedStepCondition();
    private final ReachedGoalAfterCompletedStepCondition reachedGoalAfterCompletedStepCondition = new ReachedGoalAfterCompletedStepCondition();
-   
-   private static final double SCALING_FACTOR_FOR_FOOTHOLD_X = 1.05;
-   private static final double SCALING_FACTOR_FOR_FOOTHOLD_Y = 2.0;
 
    private final ConcurrentListeningQueue<PlanarRegionsListMessage> planarRegionsListQueue = new ConcurrentListeningQueue<>(10);
    private final ConcurrentListeningQueue<FootstepStatus> footstepStatusQueue = new ConcurrentListeningQueue<FootstepStatus>(10);
 
    public enum AnytimePlanningState
    {
-      REQUEST_AND_WAIT_FOR_PLANAR_REGIONS, SLEEP, CHECK_FOR_BEST_PLAN, SEND_OVER_FOOTSTEP_AND_WAIT_FOR_COMPLETION, REACHED_GOAL
+      LOCATE_GOAL, REQUEST_AND_WAIT_FOR_PLANAR_REGIONS, SLEEP, CHECK_FOR_BEST_PLAN, SEND_OVER_FOOTSTEP_AND_WAIT_FOR_COMPLETION, REACHED_GOAL
    }
 
    public AnytimePlannerStateMachineBehavior(CommunicationBridge communicationBridge, DoubleYoVariable yoTime, HumanoidReferenceFrames referenceFrames,
@@ -96,9 +108,9 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
       super("AnytimePlanner", AnytimePlanningState.class, yoTime, communicationBridge);
       
       footstepPlanningParameters = new BipedalFootstepPlannerParameters(registry);
-      setPlannerParameters(footstepPlanningParameters);
+      FootstepPlannerForBehaviorsHelper.setPlannerParametersForAnytimePlannerAndPlannerToolbox(footstepPlanningParameters);
       footstepPlanner = new SimplePlanarRegionBipedalAnytimeFootstepPlanner(footstepPlanningParameters, registry);
-      SideDependentList<ConvexPolygon2d> footPolygonsInSoleFrame = createDefaultFootPolygons(wholeBodyControllerParameters.getContactPointParameters());
+      SideDependentList<ConvexPolygon2d> footPolygonsInSoleFrame = FootstepPlannerForBehaviorsHelper.createDefaultFootPolygonsForAnytimePlannerAndPlannerToolbox(wholeBodyControllerParameters.getContactPointParameters());
       footstepPlanner.setFeetPolygons(footPolygonsInSoleFrame);
       footstepPlanner.setMaximumNumberOfNodesToExpand(500);
 
@@ -106,10 +118,41 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
       maxNumberOfStepsToTake.set(1);
       this.referenceFrames = referenceFrames;
 
+      GoalDetectorBehaviorService goalDetectorBehaviorService;
+      switch(GOAL_DETECTOR_TYPE)
+      {
+      case FIDUCIAL:
+         FiducialDetectorBehaviorService fiducialDetectorBehaviorService = new FiducialDetectorBehaviorService(communicationBridge, null);
+         fiducialDetectorBehaviorService.setTargetIDToLocate(50);
+         fiducialDetectorBehaviorService.setExpectedFiducialSize(0.16);
+         goalDetectorBehaviorService = fiducialDetectorBehaviorService;
+         break;
+      
+      case HARD_CODED:
+      {
+         goalDetectorBehaviorService = new ConstantGoalDetectorBehaviorService(referenceFrames, new Point3d(4.0, 0.0, 0.0), communicationBridge);
+         break;
+      }
+      case VALVE:
+         try
+         {
+            goalDetectorBehaviorService = new ObjectDetectorBehaviorService(communicationBridge, null);
+            break;
+         }
+         catch(Exception e)
+         {
+            e.printStackTrace();
+            System.err.println("Cannot create valve detector service!");
+         }
+      default:
+         throw new RuntimeException("Cannot create detector " + GOAL_DETECTOR_TYPE);
+      }
+
+      locateGoalBehavior = new LocateGoalBehavior(communicationBridge, goalDetectorBehaviorService);
       requestAndWaitForPlanarRegionsListBehavior = new RequestAndWaitForPlanarRegionsListBehavior(communicationBridge);
       sleepBehavior = new SleepBehavior(communicationBridge, yoTime);
       checkForBestPlanBehavior = new CheckForBestPlanBehavior(communicationBridge);
-      sendOverFootstepsAndUpdatePlannerBehavior = new SendOverFootstepAndWaitForCompletion(communicationBridge);
+      sendOverFootstepsAndUpdatePlannerBehavior = new SendOverFootstepAndWaitForCompletionBehavior(communicationBridge);
       reachedGoalBehavior = new SimpleDoNothingBehavior(communicationBridge)
       {
          @Override
@@ -138,6 +181,29 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
 
    private void setupStateMachine()
    {
+      BehaviorAction<AnytimePlanningState> locateGoalAction = new BehaviorAction<AnytimePlanningState>(
+            AnytimePlanningState.LOCATE_GOAL, locateGoalBehavior)
+      {
+         protected void setBehaviorInput()
+         {
+            TextToSpeechPacket p1 = new TextToSpeechPacket("Starting to locate goal");
+            sendPacket(p1);
+         }
+
+         @Override
+         public void doTransitionOutOfAction()
+         {
+            FramePose goalPose = new FramePose();
+            locateGoalBehavior.getReportedGoalPoseWorldFrame(goalPose);
+            setGoalPose(goalPose);
+            super.doTransitionOutOfAction();
+
+            sendPacketToUI(new UIPositionCheckerPacket(goalPose.getFramePointCopy().getPoint(), goalPose.getFrameOrientationCopy().getQuaternion()));
+
+            PrintTools.info("got the goal: \n" + goalPose + " \n requesting planar regions...");
+         }
+      };
+
       BehaviorAction<AnytimePlanningState> requestPlanarRegionsAction = new BehaviorAction<AnytimePlanningState>(
             AnytimePlanningState.REQUEST_AND_WAIT_FOR_PLANAR_REGIONS, requestAndWaitForPlanarRegionsListBehavior)
       {
@@ -173,6 +239,7 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
          }
       };
 
+      statemachine.addStateWithDoneTransition(locateGoalAction, AnytimePlanningState.REQUEST_AND_WAIT_FOR_PLANAR_REGIONS);
       statemachine.addStateWithDoneTransition(requestPlanarRegionsAction, AnytimePlanningState.SLEEP);
       statemachine.addStateWithDoneTransition(sleepAction, AnytimePlanningState.CHECK_FOR_BEST_PLAN);
       statemachine.addState(checkForBestPlan);
@@ -185,48 +252,13 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
       sendFootstepAndWaitForCompletion.addStateTransition(AnytimePlanningState.CHECK_FOR_BEST_PLAN, continueWalkingAfterCompletedStepCondition);
       sendFootstepAndWaitForCompletion.addStateTransition(AnytimePlanningState.REACHED_GOAL, reachedGoalAfterCompletedStepCondition);
 
-      statemachine.setStartState(AnytimePlanningState.REQUEST_AND_WAIT_FOR_PLANAR_REGIONS);
-   }
-
-   private void setPlannerParameters(BipedalFootstepPlannerParameters footstepPlanningParameters)
-   {
-      footstepPlanningParameters.setMaximumStepReach(0.55);
-      footstepPlanningParameters.setMaximumStepZ(0.25);
-
-      footstepPlanningParameters.setMaximumStepXWhenForwardAndDown(0.32); //32);
-      footstepPlanningParameters.setMaximumStepZWhenForwardAndDown(0.10); //18);
-
-      footstepPlanningParameters.setMaximumStepYaw(0.15);
-      
-      footstepPlanningParameters.setMinimumStepWidth(0.16);
-      footstepPlanningParameters.setMaximumStepWidth(0.4);
-
-      footstepPlanningParameters.setMinimumStepLength(0.02);
-
-      footstepPlanningParameters.setMinimumFootholdPercent(0.95);
-
-      footstepPlanningParameters.setWiggleInsideDelta(0.01);
-      footstepPlanningParameters.setMaximumXYWiggleDistance(1.0);
-      footstepPlanningParameters.setMaximumYawWiggle(0.1);
-      footstepPlanningParameters.setRejectIfCannotFullyWiggleInside(false);
-      footstepPlanningParameters.setWiggleIntoConvexHullOfPlanarRegions(true);
-
-      double idealFootstepLength = 0.3;
-      double idealFootstepWidth = 0.25;
-      footstepPlanningParameters.setIdealFootstep(idealFootstepLength, idealFootstepWidth);
+      statemachine.setStartState(AnytimePlanningState.LOCATE_GOAL);
    }
 
    @Override
    public void onBehaviorEntered()
    {
       super.onBehaviorEntered();
-
-      ReferenceFrame midFeetZUpFrame = referenceFrames.getMidFeetZUpFrame();
-      FramePose goal = new FramePose(midFeetZUpFrame);
-      goal.setPosition(4.0, 0.0, 0.0);
-      goal.changeFrame(ReferenceFrame.getWorldFrame());
-      setGoalPose(goal);
-      
       new Thread(footstepPlanner).start();
    }
 
@@ -237,29 +269,7 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
 
       footstepPlanner.setBipedalFootstepPlannerListener(listener);
    }
-   
-   private static SideDependentList<ConvexPolygon2d> createDefaultFootPolygons(RobotContactPointParameters contactPointParameters)
-   {
-      SideDependentList<ConvexPolygon2d> footPolygons = new SideDependentList<>();
-      for (RobotSide side : RobotSide.values)
-      {
-         ArrayList<Point2d> footPoints = contactPointParameters.getFootContactPoints().get(side);         
-         ArrayList<Point2d> scaledFootPoints = new ArrayList<Point2d>();
-         
-         for(int i = 0; i < footPoints.size(); i++)
-         {
-            Point2d footPoint = new Point2d(footPoints.get(i));
-            footPoint.setX(footPoint.getX() * SCALING_FACTOR_FOR_FOOTHOLD_X);
-            footPoint.setY(footPoint.getY() * SCALING_FACTOR_FOR_FOOTHOLD_Y);
-            scaledFootPoints.add(footPoint);
-         }
-         
-         ConvexPolygon2d scaledFoot = new ConvexPolygon2d(scaledFootPoints);
-         footPolygons.set(side, scaledFoot);         
-      }
-      
-      return footPolygons;
-   }
+
 
    @Override
    public void onBehaviorExited()
@@ -274,9 +284,6 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
 
       String xString = FormattingTools.getFormattedToSignificantFigures(goalPosition.getX(), 3);
       String yString = FormattingTools.getFormattedToSignificantFigures(goalPosition.getY(), 3);
-
-      TextToSpeechPacket p1 = new TextToSpeechPacket("Plannning Footsteps to (" + xString + ", " + yString + ")");
-      sendPacket(p1);
 
       FootstepPlannerGoal footstepPlannerGoal = new FootstepPlannerGoal();
       footstepPlannerGoal.setGoalPoseBetweenFeet(goalPose);
@@ -427,7 +434,7 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
       }
    }
 
-   private class SendOverFootstepAndWaitForCompletion extends AbstractBehavior
+   private class SendOverFootstepAndWaitForCompletionBehavior extends AbstractBehavior
    {
       private final FramePose tempFirstFootstepPose = new FramePose();
       private final Point3d tempFootstepPosePosition = new Point3d();
@@ -435,7 +442,7 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
       private final EnumYoVariable<FootstepStatus.Status> latestFootstepStatus = new EnumYoVariable<>(prefix + "LatestFootstepStatus", registry,
                                                                                                       FootstepStatus.Status.class);
 
-      public SendOverFootstepAndWaitForCompletion(CommunicationBridgeInterface communicationBridge)
+      public SendOverFootstepAndWaitForCompletionBehavior(CommunicationBridgeInterface communicationBridge)
       {
          super(communicationBridge);
       }

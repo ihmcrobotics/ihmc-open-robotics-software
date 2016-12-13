@@ -44,7 +44,7 @@ public class FocusBasedCameraMouseEventHandler implements EventHandler<Event>
    private final Affine cameraOrientation = new Affine();
    private final Translate offsetFromFocusPoint = new Translate(0.0, 0.0, -DEFAULT_DISTANCE_FROM_FOCUS_POINT);
 
-   private double focusPointSlowModifier = 0.02;
+   private double focusPointSlowModifier = 0.005;
    private double focusPointFastModifier = 2.0 * focusPointSlowModifier;
 
    private final Point2d oldMouseLocation = new Point2d();
@@ -54,9 +54,6 @@ public class FocusBasedCameraMouseEventHandler implements EventHandler<Event>
    private double rotateSlowModifier = 150.0;
    private double rotateFastModifier = 0.5 * rotateSlowModifier;
    private double rollModifierScaleFactor = 30.0;
-
-   private double zoomSlowModifier = 0.01;
-   private double zoomFastModifier = 2.0 * zoomSlowModifier;
 
    private final PerspectiveCamera camera;
    private final Vector3d up;
@@ -146,21 +143,9 @@ public class FocusBasedCameraMouseEventHandler implements EventHandler<Event>
 
    private void handleScrollEvent(ScrollEvent event)
    {
-      double deltaZoom = 0.0;
-      double modifier = 0.0;
+      double deltaZoom = event.getDeltaY();
 
-      if (event.isShiftDown())
-      {
-         deltaZoom = event.getDeltaX();
-         modifier = zoomFastModifier;
-      }
-      else
-      {
-         deltaZoom = event.getDeltaY();
-         modifier = zoomSlowModifier;
-      }
-
-      double newOffset = offsetFromFocusPoint.getTz() + deltaZoom * modifier;
+      double newOffset = offsetFromFocusPoint.getTz() + Math.abs(offsetFromFocusPoint.getTz()) / 10.0 * Math.signum(deltaZoom);
       newOffset = MathTools.clipToMinMax(newOffset, -0.90 * camera.getFarClip(), -1.10 * camera.getNearClip());
       offsetFromFocusPoint.setZ(newOffset);
    }
@@ -277,6 +262,9 @@ public class FocusBasedCameraMouseEventHandler implements EventHandler<Event>
       //Add shift modifier to simulate running speed
       if (isShiftDown.get())
          change = focusPointFastModifier;
+
+      change *= Math.pow(Math.abs(offsetFromFocusPoint.getTz()), 1.5);
+      change = Math.min(change, 0.1);
 
       Vector3d focusPointShift = new Vector3d();
       

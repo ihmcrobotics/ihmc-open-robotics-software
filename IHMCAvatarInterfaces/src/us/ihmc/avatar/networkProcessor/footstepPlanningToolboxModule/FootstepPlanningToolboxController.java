@@ -24,8 +24,10 @@ import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.graphSearch.BipedalFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.PlanarRegionBipedalFootstepPlanner;
 import us.ihmc.footstepPlanning.graphSearch.PlanarRegionBipedalFootstepPlannerVisualizer;
+import us.ihmc.footstepPlanning.graphSearch.SimplePlanarRegionBipedalAnytimeFootstepPlanner;
 import us.ihmc.footstepPlanning.simplePlanners.PlanThenSnapPlanner;
 import us.ihmc.footstepPlanning.simplePlanners.TurnWalkTurnPlanner;
+import us.ihmc.humanoidBehaviors.behaviors.roughTerrain.FootstepPlannerForBehaviorsHelper;
 import us.ihmc.humanoidBehaviors.behaviors.roughTerrain.PlanarRegionBipedalFootstepPlannerVisualizerFactory;
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessageConverter;
@@ -39,7 +41,6 @@ import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
@@ -76,63 +77,39 @@ public class FootstepPlanningToolboxController extends ToolboxController
       this.dt = dt;
       packetCommunicator.attachListener(PlanarRegionsListMessage.class, createPlanarRegionsConsumer());
 
-      SideDependentList<ConvexPolygon2d> footPolygons = new SideDependentList<>();
-      for (RobotSide side : RobotSide.values)
-         footPolygons.set(side, new ConvexPolygon2d(contactPointParameters.getFootContactPoints().get(side)));
+//      SideDependentList<ConvexPolygon2d> footPolygons = new SideDependentList<>();
+//      for (RobotSide side : RobotSide.values)
+//         footPolygons.set(side, new ConvexPolygon2d(contactPointParameters.getFootContactPoints().get(side)));
 
-      plannerMap.put(Planners.PLANAR_REGION_BIPEDAL, createPlanarRegionBipedalPlanner(footPolygons));
-      plannerMap.put(Planners.PLAN_THEN_SNAP, new PlanThenSnapPlanner(new TurnWalkTurnPlanner(), footPolygons));
+      SideDependentList<ConvexPolygon2d> footPolygonsInSoleFrame = FootstepPlannerForBehaviorsHelper.createDefaultFootPolygonsForAnytimePlannerAndPlannerToolbox(contactPointParameters);
+
+      plannerMap.put(Planners.PLANAR_REGION_BIPEDAL, createPlanarRegionBipedalPlanner(footPolygonsInSoleFrame));
+      plannerMap.put(Planners.PLAN_THEN_SNAP, new PlanThenSnapPlanner(new TurnWalkTurnPlanner(), footPolygonsInSoleFrame));
       activePlanner.set(Planners.PLANAR_REGION_BIPEDAL);
 
       usePlanarRegions.set(true);
       isDone.set(true);
    }
 
-   private PlanarRegionBipedalFootstepPlanner createPlanarRegionBipedalPlanner(SideDependentList<ConvexPolygon2d> footPolygons)
+   private PlanarRegionBipedalFootstepPlanner createPlanarRegionBipedalPlanner(SideDependentList<ConvexPolygon2d> footPolygonsInSoleFrame)
    {
-      BipedalFootstepPlannerParameters parameters = new BipedalFootstepPlannerParameters(registry);
-      parameters.setMaximumStepReach(0.55);
-      parameters.setMaximumStepZ(0.25);
+      BipedalFootstepPlannerParameters footstepPlanningParameters = new BipedalFootstepPlannerParameters(registry);
+      FootstepPlannerForBehaviorsHelper.setPlannerParametersForAnytimePlannerAndPlannerToolbox(footstepPlanningParameters);
 
-      parameters.setMaximumStepXWhenForwardAndDown(0.32);
-      parameters.setMaximumStepZWhenForwardAndDown(0.10);
-
-      parameters.setMaximumStepYaw(0.15);
-      parameters.setMaximumStepWidth(0.4);
-      parameters.setMinimumStepWidth(0.16);
-      parameters.setMinimumFootholdPercent(0.95);
-
-      parameters.setWiggleInsideDelta(0.02);
-      parameters.setMaximumXYWiggleDistance(1.0);
-      parameters.setMaximumYawWiggle(0.1);
-      parameters.setRejectIfCannotFullyWiggleInside(true);
-      parameters.setWiggleIntoConvexHullOfPlanarRegions(true);
-
-      parameters.setCliffHeightToShiftAwayFrom(0.03);
-      parameters.setMinimumDistanceFromCliffBottoms(0.22);
-
-      double idealFootstepLength = 0.3;
-      double idealFootstepWidth = 0.22;
-      parameters.setIdealFootstep(idealFootstepLength, idealFootstepWidth);
-      
-      PlanarRegionBipedalFootstepPlanner planner = new PlanarRegionBipedalFootstepPlanner(parameters, registry);
-
-      planner.setFeetPolygons(footPolygons);
-
-      planner.setMaximumNumberOfNodesToExpand(500);
+      PlanarRegionBipedalFootstepPlanner footstepPlanner = new PlanarRegionBipedalFootstepPlanner(footstepPlanningParameters, registry);
+      footstepPlanner.setFeetPolygons(footPolygonsInSoleFrame);
+      footstepPlanner.setMaximumNumberOfNodesToExpand(500);
 
       if (visualize)
       {
-         SideDependentList<ConvexPolygon2d> footPolygonsInSoleFrame = planner.getFootPolygonsInSoleFrame();
          PlanarRegionBipedalFootstepPlannerVisualizer listener = PlanarRegionBipedalFootstepPlannerVisualizerFactory.createWithYoVariableServer(0.01,
                                                                                                                                                          null,
                                                                                                                                                          null,
                                                                                                                                                          footPolygonsInSoleFrame, "Toolbox_");
-
-         planner.setBipedalFootstepPlannerListener(listener);
+         footstepPlanner.setBipedalFootstepPlannerListener(listener);
       }
 
-      return planner;
+      return footstepPlanner;
    }
 
    @Override

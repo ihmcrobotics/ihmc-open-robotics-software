@@ -71,17 +71,22 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
       return footPolygonsInSoleFrame;
    }
 
+   protected boolean initialStanceFootWasSet = false;
+   protected boolean goalWasSet = false;
+   
    @Override
-   public void setInitialStanceFoot(FramePose stanceFootPose, RobotSide initialSide)
+   public final void setInitialStanceFoot(FramePose stanceFootPose, RobotSide initialSide)
    {
+      initialStanceFootWasSet = true;
       stanceFootPose.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
       this.initialSide = initialSide;
       stanceFootPose.getPose(initialFootPose);
    }
 
    @Override
-   public void setGoal(FootstepPlannerGoal goal)
+   public final void setGoal(FootstepPlannerGoal goal)
    {
+      goalWasSet = true;
       planarRegionPotentialNextStepCalculator.setGoal(goal);
    }
 
@@ -111,18 +116,24 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
    {
       stack.clear();
       startNode = new BipedalFootstepPlannerNode(initialSide, initialFootPose);
+      notifiyListenersStartNodeWasAdded(startNode);
       stack.push(startNode);
 //      closestNodeToGoal = null;
       mapToAllExploredNodes.clear();
    }
-   
+
    @Override
    public FootstepPlanningResult plan()
    {
-      initialize();
       goalNode = null;
       footstepPlan = null;
 
+      if (!initialStanceFootWasSet || !goalWasSet)
+      {         
+         return FootstepPlanningResult.NO_PATH_EXISTS;
+      }
+
+      initialize();
       planarRegionPotentialNextStepCalculator.setStartNode(startNode);
 
       numberOfNodesExpanded.set(0);
@@ -220,5 +231,14 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
       {
          listener.nodeIsBeingExpanded(nodeToExpand);
       }
+   }
+   
+   
+   protected void notifiyListenersStartNodeWasAdded(BipedalFootstepPlannerNode startNode)
+   {
+      if (listener != null)
+      {
+         listener.startNodeWasAdded(startNode);
+      }    
    }
 }

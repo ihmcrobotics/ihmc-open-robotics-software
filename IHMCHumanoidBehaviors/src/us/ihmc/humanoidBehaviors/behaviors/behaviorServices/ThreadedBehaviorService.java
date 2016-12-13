@@ -64,4 +64,6 @@ public abstract class ThreadedBehaviorService extends BehaviorService
    }
    
    public abstract void doThreadAction();
+   
+   public abstract void initialize();
 }

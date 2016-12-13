@@ -7,6 +7,7 @@ import us.ihmc.robotics.geometry.RigidBodyTransform;
 public interface BipedalFootstepPlannerListener
 {
    public abstract void goalWasSet(RigidBodyTransform goalLeftFootPose, RigidBodyTransform goalRightFootPose);
+   public abstract void startNodeWasAdded(BipedalFootstepPlannerNode startNode);
    public abstract void planarRegionsListSet(PlanarRegionsList planarRegionsList);
    
    public abstract void nodeIsBeingExpanded(BipedalFootstepPlannerNode nodeToExpand);
