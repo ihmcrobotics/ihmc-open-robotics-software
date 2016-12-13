@@ -47,6 +47,8 @@ public class VirtualSliderBoardGui implements CloseableAndDisposable
 
    public VirtualSliderBoardGui(MidiSliderBoard sliderBoard, final CloseableAndDisposableRegistry closeableAndDisposableRegistry)
    {
+
+      System.out.println("CREATING VIRTUAL SLIDERBOARD");
       this.closeableAndDisposableRegistry = closeableAndDisposableRegistry;
 
       this.sliderBoard = sliderBoard;
