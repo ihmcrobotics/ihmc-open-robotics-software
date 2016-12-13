@@ -131,4 +131,11 @@ public class ColoredCircularBlobDetectorBehaviorService extends ThreadedBehavior
    {
       return ballListConch;
    }
+
+   @Override
+   public void initialize()
+   {
+      // TODO implement me
+      
+   }
 }
