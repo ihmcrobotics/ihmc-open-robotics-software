@@ -81,10 +81,15 @@ public class View3DFactory
 
    public void addCameraController()
    {
-      addCameraController(0.05, 50.0);
+      addCameraController(0.05, 50.0, false);
    }
 
-   public void addCameraController(double nearClip, double farClip)
+   public void addCameraController(boolean enableShiftClickFocusTranslation)
+   {
+      addCameraController(0.05, 50.0, enableShiftClickFocusTranslation);
+   }
+
+   public void addCameraController(double nearClip, double farClip, boolean enableShiftClickFocusTranslation)
    {
       PerspectiveCamera camera = new PerspectiveCamera(true);
       camera.setNearClip(nearClip);
@@ -95,6 +100,8 @@ public class View3DFactory
       ReadOnlyDoubleProperty widthProperty = widthProperty();
       ReadOnlyDoubleProperty heightProperty = heightProperty();
       FocusBasedCameraMouseEventHandler cameraController = new FocusBasedCameraMouseEventHandler(widthProperty, heightProperty, camera, up);
+      if (enableShiftClickFocusTranslation)
+         cameraController.enableShiftClickFocusTranslation();
       addEventHandler(Event.ANY, cameraController);
       addNodeToView(cameraController.getFocusPointViz());
    }
