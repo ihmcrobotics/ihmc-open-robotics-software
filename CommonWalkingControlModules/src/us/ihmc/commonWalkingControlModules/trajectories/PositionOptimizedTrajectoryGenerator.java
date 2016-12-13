@@ -19,7 +19,6 @@ import us.ihmc.robotics.lists.GenericTypeBuilder;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
-import us.ihmc.robotics.math.trajectories.PositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.robotics.math.trajectories.waypoints.PolynomialOrder;
 import us.ihmc.robotics.math.trajectories.waypoints.TrajectoryPointOptimizer;
@@ -36,7 +35,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
  * @author gwiedebach
  *
  */
-public class PositionOptimizedTrajectoryGenerator implements PositionTrajectoryGenerator
+public class PositionOptimizedTrajectoryGenerator implements WaypointTrajectoryGenerator
 {
    public static final int maxWaypoints = 12;
    public static final int dimensions = 3;
@@ -194,6 +193,7 @@ public class PositionOptimizedTrajectoryGenerator implements PositionTrajectoryG
     * @param finalPosition
     * @param finalVelocity
     */
+   @Override
    public void setEndpointConditions(FramePoint initialPosition, FrameVector initialVelocity, FramePoint finalPosition, FrameVector finalVelocity)
    {
       this.initialPosition.setIncludingFrame(initialPosition);
@@ -222,6 +222,7 @@ public class PositionOptimizedTrajectoryGenerator implements PositionTrajectoryG
     *
     * @param waypointPositions
     */
+   @Override
    public void setWaypoints(ArrayList<FramePoint> waypointPositions)
    {
       if (waypointPositions.size() > maxWaypoints)
@@ -391,6 +392,7 @@ public class PositionOptimizedTrajectoryGenerator implements PositionTrajectoryG
       getAcceleration(accelerationToPack);
    }
 
+   @Override
    public void informDone()
    {
       desiredPosition.setToZero(true);
