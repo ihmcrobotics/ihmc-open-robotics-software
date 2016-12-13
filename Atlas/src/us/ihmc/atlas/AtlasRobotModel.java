@@ -237,12 +237,6 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    }
 
    @Override
-   public ScsCollisionConfigure getPhysicsConfigure(FloatingRootJointRobot sdfRobot)
-   {
-      return new AtlasPhysicsEngineConfiguration(getJointMap(), sdfRobot);
-   }
-
-   @Override
    public AtlasContactPointParameters getContactPointParameters()
    {
       return jointMap.getContactPointParameters();
@@ -258,7 +252,6 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
       jointMap.getContactPointParameters().addMoreFootContactPointsSimOnly(nContactPointsX, nContactPointsY, edgePointsOnly);
    }
 
-   @Override
    public void setJointDamping(FloatingRootJointRobot simulatedRobot)
    {
       AtlasDampingParameters.setDampingParameters(simulatedRobot, getDRCHandType(), getJointMap());
