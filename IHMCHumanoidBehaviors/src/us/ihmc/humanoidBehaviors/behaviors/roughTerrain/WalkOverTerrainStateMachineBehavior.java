@@ -10,9 +10,9 @@ import us.ihmc.communication.packets.RequestPlanarRegionsListMessage;
 import us.ihmc.communication.packets.RequestPlanarRegionsListMessage.RequestType;
 import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.behaviorServices.FiducialDetectorBehaviorService;
 import us.ihmc.humanoidBehaviors.behaviors.examples.GetUserValidationBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.fiducialLocation.FindFiducialBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.goalLocation.FindGoalBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.goalLocation.GoalDetectorBehaviorService;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.AtlasPrimitiveActions;
 import us.ihmc.humanoidBehaviors.behaviors.roughTerrain.WalkOverTerrainStateMachineBehavior.WalkOverTerrainState;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
@@ -26,6 +26,7 @@ import us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataStateComm
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HeadTrajectoryMessage;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -48,7 +49,7 @@ public class WalkOverTerrainStateMachineBehavior extends StateMachineBehavior<Wa
 
    private final AtlasPrimitiveActions atlasPrimitiveActions;
 
-   private final FindFiducialBehavior lookForGoalBehavior;
+   private final FindGoalBehavior lookForGoalBehavior;
    private final SleepBehavior sleepBehavior;
    private final LookDownBehavior lookDownAtTerrainBehavior;
    private final PlanHumanoidFootstepsBehavior planHumanoidFootstepsBehavior;
@@ -62,17 +63,16 @@ public class WalkOverTerrainStateMachineBehavior extends StateMachineBehavior<Wa
    private final DoubleYoVariable yoTime;
 
    private final EnumYoVariable<RobotSide> nextSideToSwing;
-   
+
    private final String prefix = getClass().getSimpleName();
    private final DoubleYoVariable swingTime = new DoubleYoVariable(prefix + "SwingTime", registry);
    private final DoubleYoVariable transferTime = new DoubleYoVariable(prefix + "TransferTime", registry);
    private final IntegerYoVariable maxNumberOfStepsToTake = new IntegerYoVariable(prefix + "NumberOfStepsToTake", registry);
 
-   public WalkOverTerrainStateMachineBehavior(CommunicationBridge communicationBridge, DoubleYoVariable yoTime, AtlasPrimitiveActions atlasPrimitiveActions,
-         LogModelProvider logModelProvider, FullHumanoidRobotModel fullRobotModel,
-         HumanoidReferenceFrames referenceFrames, FiducialDetectorBehaviorService fiducialDetectorBehaviorService, int fiducialToTrack)
+   public WalkOverTerrainStateMachineBehavior(CommunicationBridge communicationBridge, DoubleYoVariable yoTime, AtlasPrimitiveActions atlasPrimitiveActions, LogModelProvider logModelProvider, FullHumanoidRobotModel fullRobotModel,
+                                              HumanoidReferenceFrames referenceFrames, GoalDetectorBehaviorService goalDetectorBehaviorService)
    {
-      super("WalkOverTerrain", WalkOverTerrainState.class, yoTime, communicationBridge);
+      super(goalDetectorBehaviorService.getClass().getSimpleName(), "WalkOverTerrain_" + goalDetectorBehaviorService.getClass().getSimpleName(), WalkOverTerrainState.class, yoTime, communicationBridge);
 
       this.yoTime = yoTime;
 
@@ -85,13 +85,14 @@ public class WalkOverTerrainStateMachineBehavior extends StateMachineBehavior<Wa
       this.atlasPrimitiveActions = atlasPrimitiveActions;
 
       //create your behaviors
+      this.lookForGoalBehavior = new FindGoalBehavior(yoTime, communicationBridge, fullRobotModel, referenceFrames,
+                                                      goalDetectorBehaviorService);
 
-      lookForGoalBehavior = new FindFiducialBehavior(yoTime, communicationBridge, fullRobotModel, referenceFrames, fiducialDetectorBehaviorService, fiducialToTrack);
       sleepBehavior = new SleepBehavior(communicationBridge, yoTime);
       sleepBehavior.setSleepTime(2.0);
       lookDownAtTerrainBehavior = new LookDownBehavior(communicationBridge);
 
-      planHumanoidFootstepsBehavior = new PlanHumanoidFootstepsBehavior(yoTime, communicationBridge, fullRobotModel, referenceFrames, fiducialDetectorBehaviorService);
+      planHumanoidFootstepsBehavior = new PlanHumanoidFootstepsBehavior(yoTime, communicationBridge, fullRobotModel, referenceFrames);
 //      planHumanoidFootstepsBehavior.createAndAttachSCSListenerToPlanner();
       planHumanoidFootstepsBehavior.createAndAttachYoVariableServerListenerToPlanner(logModelProvider, fullRobotModel);
 
@@ -141,7 +142,7 @@ public class WalkOverTerrainStateMachineBehavior extends StateMachineBehavior<Wa
             sendPacket(p1);
          }
       };
-      
+
       BehaviorAction<WalkOverTerrainState> sleepAction = new BehaviorAction<WalkOverTerrainState>(WalkOverTerrainState.SLEEP, sleepBehavior)
       {
          @Override
@@ -170,10 +171,10 @@ public class WalkOverTerrainStateMachineBehavior extends StateMachineBehavior<Wa
          protected void setBehaviorInput()
          {
             FramePose goalPose = new FramePose();
-            lookForGoalBehavior.getFiducialPose(goalPose);
+            lookForGoalBehavior.getGoalPose(goalPose);
             Tuple3d goalPosition = new Point3d();
             goalPose.getPosition(goalPosition);
-            
+
             String xString = FormattingTools.getFormattedToSignificantFigures(goalPosition.getX(), 3);
             String yString = FormattingTools.getFormattedToSignificantFigures(goalPosition.getY(), 3);
 

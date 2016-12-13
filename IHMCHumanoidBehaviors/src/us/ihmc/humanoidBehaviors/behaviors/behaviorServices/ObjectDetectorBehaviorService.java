@@ -5,38 +5,38 @@ import us.ihmc.humanoidBehaviors.behaviors.goalLocation.GoalDetectorBehaviorServ
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.VideoPacket;
-import us.ihmc.ihmcPerception.fiducialDetector.FiducialDetectorFromCameraImages;
+import us.ihmc.ihmcPerception.objectDetector.ObjectDetectorFromCameraImages;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.tools.thread.ThreadTools;
 
-public class FiducialDetectorBehaviorService extends GoalDetectorBehaviorService
+public class ObjectDetectorBehaviorService extends GoalDetectorBehaviorService
 {
-   private static final double DEFAULT_FIDUCIAL_SIZE = 0.16;
+   private static final double DEFAULT_OBJECT_SIZE = 0.5;
    private static final double DEFAULT_FIELD_OF_VIEW_X_IN_RADIANS = Math.toRadians(80.0);
    private static final double DEFAULT_FIELD_OF_VIEW_Y_IN_RADIANS = Math.toRadians(45.0);
-   
-   private final ConcurrentListeningQueue<VideoPacket> videoPacketQueue = new ConcurrentListeningQueue<VideoPacket>(2);
 
-   private final Object fiducialDetectorFromCameraImagesConch = new Object();
-   private final FiducialDetectorFromCameraImages fiducialDetectorFromCameraImages;
+   private final ConcurrentListeningQueue<VideoPacket> videoPacketQueue = new ConcurrentListeningQueue<VideoPacket>(20);
+
+   private final Object detectorFromCameraImagesConch = new Object();
+   private final ObjectDetectorFromCameraImages objectDetectorFromCameraImages;
    private RigidBodyTransform transformFromReportedToFiducialFrame;
-   
+
    private final BooleanYoVariable locationEnabled;
 
-   public FiducialDetectorBehaviorService(CommunicationBridgeInterface communicationBridge,
-                                          YoGraphicsListRegistry yoGraphicsListRegistry)
+   public ObjectDetectorBehaviorService(CommunicationBridgeInterface communicationBridge,
+                                        YoGraphicsListRegistry yoGraphicsListRegistry) throws Exception
    {
-      super(FiducialDetectorBehaviorService.class.getSimpleName(), communicationBridge);
+      super(ObjectDetectorBehaviorService.class.getSimpleName(), communicationBridge);
 
       getCommunicationBridge().attachNetworkListeningQueue(videoPacketQueue, VideoPacket.class);
 
       transformFromReportedToFiducialFrame = new RigidBodyTransform();
-      fiducialDetectorFromCameraImages = new FiducialDetectorFromCameraImages(transformFromReportedToFiducialFrame, getYoVariableRegistry(), yoGraphicsListRegistry);
+      objectDetectorFromCameraImages = new ObjectDetectorFromCameraImages(transformFromReportedToFiducialFrame, getYoVariableRegistry(), yoGraphicsListRegistry);
 
-      fiducialDetectorFromCameraImages.setFieldOfView(DEFAULT_FIELD_OF_VIEW_X_IN_RADIANS, DEFAULT_FIELD_OF_VIEW_Y_IN_RADIANS);
-      fiducialDetectorFromCameraImages.setExpectedFiducialSize(DEFAULT_FIDUCIAL_SIZE);
+      objectDetectorFromCameraImages.setFieldOfView(DEFAULT_FIELD_OF_VIEW_X_IN_RADIANS, DEFAULT_FIELD_OF_VIEW_Y_IN_RADIANS);
+      objectDetectorFromCameraImages.setExpectedObjectSize(DEFAULT_OBJECT_SIZE);
       
       String prefix = "fiducial";
       locationEnabled = new BooleanYoVariable(prefix + "LocationEnabled", getYoVariableRegistry());
@@ -51,9 +51,9 @@ public class FiducialDetectorBehaviorService extends GoalDetectorBehaviorService
       {
          VideoPacket videoPacket = videoPacketQueue.getLatestPacket();
 
-         synchronized (fiducialDetectorFromCameraImagesConch)
+         synchronized (detectorFromCameraImagesConch)
          {
-            fiducialDetectorFromCameraImages.detectFromVideoPacket(videoPacket);
+            objectDetectorFromCameraImages.detectFromVideoPacket(videoPacket);
          }
       }
       else
@@ -62,37 +62,29 @@ public class FiducialDetectorBehaviorService extends GoalDetectorBehaviorService
       }
    }
 
-   public void setTargetIDToLocate(long targetIDToLocate)
+   public void setExpectedObjectSize(double expectedFiducialSize)
    {
-      synchronized (fiducialDetectorFromCameraImagesConch)
+      synchronized (detectorFromCameraImagesConch)
       {
-         fiducialDetectorFromCameraImages.setTargetIDToLocate(targetIDToLocate);
-      }
-   }
-   
-   public void setExpectedFiducialSize(double expectedFiducialSize)
-   {
-      synchronized (fiducialDetectorFromCameraImagesConch)
-      {
-         fiducialDetectorFromCameraImages.setExpectedFiducialSize(expectedFiducialSize);
+         objectDetectorFromCameraImages.setExpectedObjectSize(expectedFiducialSize);
       }
    }
 
    @Override
    public boolean getGoalHasBeenLocated()
    {
-      synchronized (fiducialDetectorFromCameraImagesConch)
+      synchronized (detectorFromCameraImagesConch)
       {
-         return fiducialDetectorFromCameraImages.getTargetIDHasBeenLocated();
+         return objectDetectorFromCameraImages.getTargetIDHasBeenLocated();
       }
    }
 
    @Override
    public void getReportedGoalPoseWorldFrame(FramePose framePoseToPack)
    {
-      synchronized (fiducialDetectorFromCameraImagesConch)
+      synchronized (detectorFromCameraImagesConch)
       {
-         fiducialDetectorFromCameraImages.getReportedFiducialPoseWorldFrame(framePoseToPack);
+         objectDetectorFromCameraImages.getReportedFiducialPoseWorldFrame(framePoseToPack);
       }
    }
    
@@ -120,6 +112,6 @@ public class FiducialDetectorBehaviorService extends GoalDetectorBehaviorService
    @Override
    public void initialize()
    {
-      fiducialDetectorFromCameraImages.reset();
+      objectDetectorFromCameraImages.reset();
    }
 }
