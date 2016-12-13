@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states;
 
+import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.partNames.LimbName;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.PelvisOrientationManager;
@@ -203,13 +204,14 @@ public class WalkingSingleSupportState extends SingleSupportState
       walkingMessageHandler.registerCompletedDesiredFootstep(nextFootstep);
    }
 
+   private final FramePoint2d desiredCMP = new FramePoint2d(worldFrame);
    public void switchToToeOffIfPossible(RobotSide supportSide)
    {
-      if (feetManager.doToeOffIfPossibleInSingleSupport())
+      if (feetManager.doToeOffIfPossibleInSingleSupport() && feetManager.isInFlatSupportState(supportSide))
       {
-         boolean willDoToeOff = feetManager.willDoToeOff(nextFootstep, swingSide);
+         balanceManager.getDesiredCMP(desiredCMP);
 
-         if (feetManager.isInFlatSupportState(supportSide) && willDoToeOff && balanceManager.isOnExitCMP())
+         if (feetManager.checkIfToeOffSafeSingleSupport(supportSide, balanceManager.isOnExitCMP()))
          {
             balanceManager.getNextExitCMP(nextExitCMP);
             feetManager.setExitCMPForToeOff(supportSide, nextExitCMP);
@@ -221,7 +223,6 @@ public class WalkingSingleSupportState extends SingleSupportState
    /**
     * Request the swing trajectory to speed up using {@link ICPPlanner#estimateTimeRemainingForStateUnderDisturbance(double, FramePoint2d)}.
     * It is clamped w.r.t. to {@link WalkingControllerParameters#getMinimumSwingTimeForDisturbanceRecovery()}.
-    * @param speedUpFactor
     * @return the current swing time remaining for the swing foot trajectory
     */
    private double requestSwingSpeedUpIfNeeded()
