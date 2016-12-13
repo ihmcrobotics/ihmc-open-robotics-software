@@ -17,6 +17,22 @@ public class BoundingBoxesPacket extends Packet<BoundingBoxesPacket>
 
    }
 
+   public BoundingBoxesPacket(int[] packedBoxes)
+   {
+      int n = packedBoxes.length;
+      boundingBoxXCoordinates = new int[n];
+      boundingBoxYCoordinates = new int[n];
+      boundingBoxWidths = new int[n];
+      boundingBoxHeights = new int[n];
+      for (int i = 0; i < n; i++)
+      {
+         boundingBoxXCoordinates[i] = packedBoxes[i * 4];
+         boundingBoxYCoordinates[i] = packedBoxes[i * 4 + 1];
+         boundingBoxWidths[i] = packedBoxes[i * 4 + 2];
+         boundingBoxHeights[i] = packedBoxes[i * 4 + 3];
+      }
+   }
+
    public BoundingBoxesPacket(int[] boundingBoxXCoordinates, int[] boundingBoxYCoordinates, int[] boundingBoxWidths, int[] boundingBoxHeights)
    {
       this.boundingBoxXCoordinates = boundingBoxXCoordinates;
