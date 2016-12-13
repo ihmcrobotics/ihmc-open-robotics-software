@@ -27,7 +27,6 @@ import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
-import us.ihmc.robotics.math.trajectories.YoMinimumJerkTrajectory;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
@@ -48,9 +47,6 @@ import us.ihmc.robotics.sensors.FootSwitchInterface;
  */
 public class SupportState extends AbstractFootControlState
 {
-   private static final double TIME_FOR_STRAIGHTENING = 1.3;
-   private static final double ANGLE_FOR_STRAIGHT = 0.05;
-
    private static final double defaultFootLoadThreshold = 0.2;
    private static final int dofs = Twist.SIZE;
 
@@ -101,10 +97,12 @@ public class SupportState extends AbstractFootControlState
    private final DoubleYoVariable recoverTime;
    private final DoubleYoVariable timeBeforeExploring;
 
+   // For straight legs with privileged configuration
    private final RigidBody pelvis;
-
    private final OneDoFJoint kneePitch;
    private final YoPolynomial kneePrivilegedConfigurationTrajectory;
+   private final DoubleYoVariable durationForStanceLegStraightening;
+   private final DoubleYoVariable straightKneeAngle;
 
    public SupportState(FootControlHelper footControlHelper, YoSE3PIDGainsInterface holdPositionGains, YoVariableRegistry parentRegistry)
    {
@@ -158,6 +156,10 @@ public class SupportState extends AbstractFootControlState
       pelvis = fullRobotModel.getPelvis();
       kneePitch = fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE_PITCH);
       kneePrivilegedConfigurationTrajectory = new YoPolynomial(prefix + "KneePrivilegedConfiguration", 4, registry);
+      durationForStanceLegStraightening = new DoubleYoVariable(prefix + "DurationForStanceLegStraightening", registry);
+      straightKneeAngle = new DoubleYoVariable(prefix + "StraightKneeAngle", registry);
+      durationForStanceLegStraightening.set(footControlHelper.getWalkingControllerParameters().getDurationForStanceLegStraightening());
+      straightKneeAngle.set(footControlHelper.getWalkingControllerParameters().getStraightKneeAngle());
 
       YoGraphicsListRegistry graphicsListRegistry = footControlHelper.getMomentumBasedController().getDynamicGraphicObjectsListRegistry();
       frameViz = new YoGraphicReferenceFrame(controlFrame, registry, 0.2);
@@ -181,10 +183,10 @@ public class SupportState extends AbstractFootControlState
 
       double currentKneeAngle = kneePitch.getQ();
       double currentKneeVelocity = kneePitch.getQd();
-      double desiredKneeAngle = ANGLE_FOR_STRAIGHT;
       double desiredKneeVelocity = 0.0;
 
-      kneePrivilegedConfigurationTrajectory.setCubic(0.0, TIME_FOR_STRAIGHTENING, currentKneeAngle, currentKneeVelocity, desiredKneeAngle, desiredKneeVelocity);
+      kneePrivilegedConfigurationTrajectory.setCubic(0.0, durationForStanceLegStraightening.getDoubleValue(), currentKneeAngle, currentKneeVelocity,
+                                                     straightKneeAngle.getDoubleValue(), desiredKneeVelocity);
    }
 
    @Override
@@ -305,7 +307,7 @@ public class SupportState extends AbstractFootControlState
 
    private void updatePrivilegedConfiguration()
    {
-      double timeInTrajectory = MathTools.clipToMinMax(getTimeInCurrentState(), 0.0, TIME_FOR_STRAIGHTENING);
+      double timeInTrajectory = MathTools.clipToMinMax(getTimeInCurrentState(), 0.0, durationForStanceLegStraightening.getDoubleValue());
       kneePrivilegedConfigurationTrajectory.compute(timeInTrajectory);
 
       straightLegsPrivilegedConfigurationCommand.clear();
