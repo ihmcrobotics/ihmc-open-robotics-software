@@ -1,6 +1,9 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
 import java.util.ArrayList;
+import java.util.List;
+
+import javax.vecmath.Point3d;
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
@@ -22,6 +25,7 @@ import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.trajectories.PositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.VelocityConstrainedOrientationTrajectoryGenerator;
@@ -62,6 +66,7 @@ public class SwingState extends AbstractUnconstrainedState
    private final FramePoint finalPosition = new FramePoint();
    private final FrameVector finalVelocity = new FrameVector();
    private final FramePoint stanceFootPosition = new FramePoint();
+   private final RecyclingArrayList<FramePoint> swingWaypoints = new RecyclingArrayList<>(FramePoint.class);
 
    private final PositionTrajectoryGenerator positionTrajectoryGenerator, pushRecoveryPositionTrajectoryGenerator;
    private final VelocityConstrainedOrientationTrajectoryGenerator orientationTrajectoryGenerator;
@@ -248,6 +253,8 @@ public class SwingState extends AbstractUnconstrainedState
 
       if (useNewSwingTrajectoyOptimization)
       {
+         TrajectoryType trajectoryType = trajectoryParametersProvider.getTrajectoryParameters().getTrajectoryType();
+         double swingHeight = trajectoryParametersProvider.getTrajectoryParameters().getSwingHeight();
          initialConfigurationProvider.getPosition(initialPosition);
          initialVelocityProvider.get(initialVelocity);
          finalConfigurationProvider.getPosition(finalPosition);
@@ -256,8 +263,8 @@ public class SwingState extends AbstractUnconstrainedState
          swingTrajectoryGeneratorNew.setInitialConditions(initialPosition, initialVelocity);
          swingTrajectoryGeneratorNew.setFinalConditions(finalPosition, finalVelocity);
          swingTrajectoryGeneratorNew.setStepTime(swingTimeProvider.getValue());
-         swingTrajectoryGeneratorNew.setTrajectoryType(trajectoryParametersProvider.getTrajectoryParameters().getTrajectoryType());
-         swingTrajectoryGeneratorNew.setSwingHeight(trajectoryParametersProvider.getTrajectoryParameters().getSwingHeight());
+         swingTrajectoryGeneratorNew.setTrajectoryType(trajectoryType, swingWaypoints);
+         swingTrajectoryGeneratorNew.setSwingHeight(swingHeight);
          swingTrajectoryGeneratorNew.setStanceFootPosition(stanceFootPosition);
       }
 
@@ -274,11 +281,12 @@ public class SwingState extends AbstractUnconstrainedState
 
       if (useNewSwingTrajectoyOptimization)
       {
+         TrajectoryType trajectoryType = trajectoryParametersProvider.getTrajectoryParameters().getTrajectoryType();
          finalConfigurationProvider.getPosition(finalPosition);
          touchdownVelocityProvider.get(finalVelocity);
          swingTrajectoryGeneratorNew.setFinalConditions(finalPosition, finalVelocity);
          swingTrajectoryGeneratorNew.setStepTime(swingTimeProvider.getValue());
-         swingTrajectoryGeneratorNew.setTrajectoryType(trajectoryParametersProvider.getTrajectoryParameters().getTrajectoryType());
+         swingTrajectoryGeneratorNew.setTrajectoryType(trajectoryType, swingWaypoints);
       }
 
       positionTrajectoryGenerator.initialize();
@@ -388,6 +396,20 @@ public class SwingState extends AbstractUnconstrainedState
       newFootstepPose.changeFrame(worldFrame);
       oldFootstepPosition.changeFrame(worldFrame);
 
+      // if the trajectory is custom trust the waypoints...
+      TrajectoryType trajectoryType = footstep.getTrajectoryType();
+      if (trajectoryType == TrajectoryType.CUSTOM)
+      {
+         List<Point3d> swingWaypoints = footstep.getSwingWaypoints();
+         this.swingWaypoints.clear();
+         for (int i = 0; i < swingWaypoints.size(); i++)
+            this.swingWaypoints.add().setIncludingFrame(worldFrame, swingWaypoints.get(i));
+
+         trajectoryParametersProvider.set(new TrajectoryParameters(trajectoryType));
+         return;
+      }
+
+      // ... otherwise switch the trajectory type to obstacle clearance if the robot steps up or down
       boolean worldFrameDeltaZAboveThreshold = Math.abs(newFootstepPose.getZ() - oldFootstepPosition.getZ()) > TwoWaypointTrajectoryGeneratorParameters
             .getMinimumHeightDifferenceForStepOnOrOff();
 
@@ -397,7 +419,7 @@ public class SwingState extends AbstractUnconstrainedState
       }
       else
       {
-         trajectoryParametersProvider.set(new TrajectoryParameters(footstep.getTrajectoryType(), footstep.getSwingHeight()));
+         trajectoryParametersProvider.set(new TrajectoryParameters(trajectoryType, footstep.getSwingHeight()));
       }
    }
 

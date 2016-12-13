@@ -18,6 +18,7 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
    private RobotSide robotSide;
    private FootstepOrigin origin;
    private TrajectoryType trajectoryType = TrajectoryType.DEFAULT;
+   private Point3d[] trajectoryWaypoints = null;
    private double swingHeight = 0.0;
    private final Point3d position = new Point3d();
    private final Quat4d orientation = new Quat4d();
@@ -46,6 +47,7 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
       robotSide = message.getRobotSide();
       origin = message.getOrigin();
       trajectoryType = message.getTrajectoryType();
+      trajectoryWaypoints = message.getTrajectoryWaypoints();
       swingHeight = message.getSwingHeight();
       position.set(message.getLocation());
       orientation.set(message.getOrientation());
@@ -64,6 +66,7 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
       robotSide = other.robotSide;
       origin = other.origin;
       trajectoryType = other.trajectoryType;
+      trajectoryWaypoints = other.trajectoryWaypoints;
       swingHeight = other.swingHeight;
       position.set(other.position);
       orientation.set(other.orientation);
@@ -99,6 +102,11 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
       this.trajectoryType = trajectoryType;
    }
 
+   public void setTrajectoryWaypoints(Point3d[] trajectoryWaypoints)
+   {
+      this.trajectoryWaypoints = trajectoryWaypoints;
+   }
+
    public void setPredictedContactPoints(RecyclingArrayList<Point2d> predictedContactPoints)
    {
       this.predictedContactPoints.clear();
@@ -119,6 +127,11 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
    public TrajectoryType getTrajectoryType()
    {
       return trajectoryType;
+   }
+
+   public Point3d[] getTrajectoryWaypoints()
+   {
+      return trajectoryWaypoints;
    }
 
    public double getSwingHeight()

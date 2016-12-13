@@ -15,6 +15,7 @@ import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FramePose2d;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -34,6 +35,7 @@ public class Footstep
    private final ReferenceFrame soleReferenceFrame;
 
    private final List<Point2d> predictedContactPoints = new ArrayList<>();
+   private final RecyclingArrayList<Point3d> swingWaypoints = new RecyclingArrayList<>(Point3d.class);
 
    private final boolean trustHeight;
    private boolean scriptedFootstep;
@@ -112,6 +114,18 @@ public class Footstep
    public void setTrajectoryType(TrajectoryType trajectoryType)
    {
       this.trajectoryType = trajectoryType;
+   }
+
+   public List<Point3d> getSwingWaypoints()
+   {
+      return swingWaypoints;
+   }
+
+   public void setSwingWaypoints(Point3d[] trajectoryWaypoints)
+   {
+      swingWaypoints.clear();
+      for (int i = 0; i < trajectoryWaypoints.length; i++)
+         swingWaypoints.add().set(trajectoryWaypoints[i]);
    }
 
    public double getSwingHeight()
@@ -285,7 +299,7 @@ public class Footstep
    {
       ankleReferenceFrame.setPoseAndUpdate(newPosition, newOrientation);
    }
-   
+
    public void setPose(Point3d newPosition, Quat4d newOrientation)
    {
       ankleReferenceFrame.setPoseAndUpdate(newPosition, newOrientation);
