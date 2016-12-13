@@ -1,5 +1,6 @@
 package us.ihmc.ihmcPerception.objectDetector;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.javacpp.IntPointer;
 import org.bytedeco.javacpp.Loader;
@@ -29,6 +30,8 @@ import static org.bytedeco.javacpp.caffe.TEST;
 public class ValveDetector
 {
    private static final Logger logger = Logger.getLogger(caffe.class.getSimpleName());
+   public static final int NETWORK_OUTPUT_WIDTH = 64;
+   public static final int NETWORK_OUTPUT_HEIGHT = 32;
 
    private static FloatNet caffe_net;
    private static final Object caffeNetLock = new Object();
@@ -148,7 +151,7 @@ public class ValveDetector
       }
    }
 
-   public List<Rectangle> detect(BufferedImage image)
+   public Pair<List<Rectangle>, float[]> detect(BufferedImage image)
    {
       FloatBlobVector output;
       PreprocessedImage processed;
@@ -172,19 +175,19 @@ public class ValveDetector
       {
          Rectangle focusCrop = findFocusCrop(processed, image, networkOutput, 64, 32, outputScaleX, outputScaleY);
          if (focusCrop == null)
-            return Collections.emptyList();
+            return Pair.of(Collections.emptyList(), networkOutput);
          BufferedImage cropped = image.getSubimage(focusCrop.x, focusCrop.y, focusCrop.width, focusCrop.height);
-         List<Rectangle> croppedDetection = detect(cropped);
-         return croppedDetection.stream()
+         List<Rectangle> croppedDetection = detect(cropped).getKey();
+         return Pair.of(croppedDetection.stream()
                                 .map(rect -> new Rectangle(rect.x + focusCrop.x, rect.y + focusCrop.y))
-                                .collect(Collectors.toList());
+                                .collect(Collectors.toList()), networkOutput);
       }
       List<Rectangle> result = new ArrayList<>();
       for (Component component : components)
       {
          result.add(componentBound(component, processed, outputScaleX, outputScaleY));
       }
-      return result;
+      return Pair.of(result, networkOutput);
    }
 
    private Rectangle findFocusCrop(PreprocessedImage sourcePreprocessed, BufferedImage source, float[] data, int w, int h, float outputScaleX, float outputScaleY)
@@ -500,6 +503,16 @@ public class ValveDetector
       }
 
       return result;
+   }
+
+   public int getNetworkOutputWidth()
+   {
+      return NETWORK_OUTPUT_WIDTH;
+   }
+
+   public int getNetworkOutputHeight()
+   {
+      return NETWORK_OUTPUT_HEIGHT;
    }
 
    private static class PreprocessedImage
