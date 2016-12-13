@@ -24,7 +24,6 @@ import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.graphSearch.BipedalFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.PlanarRegionBipedalFootstepPlanner;
 import us.ihmc.footstepPlanning.graphSearch.PlanarRegionBipedalFootstepPlannerVisualizer;
-import us.ihmc.footstepPlanning.graphSearch.SimplePlanarRegionBipedalAnytimeFootstepPlanner;
 import us.ihmc.footstepPlanning.simplePlanners.PlanThenSnapPlanner;
 import us.ihmc.footstepPlanning.simplePlanners.TurnWalkTurnPlanner;
 import us.ihmc.humanoidBehaviors.behaviors.roughTerrain.FootstepPlannerForBehaviorsHelper;
@@ -98,14 +97,14 @@ public class FootstepPlanningToolboxController extends ToolboxController
 
       PlanarRegionBipedalFootstepPlanner footstepPlanner = new PlanarRegionBipedalFootstepPlanner(footstepPlanningParameters, registry);
       footstepPlanner.setFeetPolygons(footPolygonsInSoleFrame);
-      footstepPlanner.setMaximumNumberOfNodesToExpand(500);
+      footstepPlanner.setMaximumNumberOfNodesToExpand(Integer.MAX_VALUE);
+      footstepPlanner.setExitAfterInitialSolution(false);
+      footstepPlanner.setTimeout(5.0);
 
       if (visualize)
       {
-         PlanarRegionBipedalFootstepPlannerVisualizer listener = PlanarRegionBipedalFootstepPlannerVisualizerFactory.createWithYoVariableServer(0.01,
-                                                                                                                                                         null,
-                                                                                                                                                         null,
-                                                                                                                                                         footPolygonsInSoleFrame, "Toolbox_");
+         PlanarRegionBipedalFootstepPlannerVisualizer listener = PlanarRegionBipedalFootstepPlannerVisualizerFactory.createWithYoVariableServer(0.01, null,
+               null, footPolygonsInSoleFrame, "Toolbox_");
          footstepPlanner.setBipedalFootstepPlannerListener(listener);
       }
 

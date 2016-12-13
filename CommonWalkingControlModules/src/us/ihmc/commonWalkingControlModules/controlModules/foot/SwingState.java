@@ -84,6 +84,7 @@ public class SwingState extends AbstractUnconstrainedState
    private final BooleanYoVariable isSwingSpeedUpEnabled;
    private final DoubleYoVariable currentTime;
    private final DoubleYoVariable currentTimeWithSwingSpeedUp;
+   private final DoubleYoVariable percentOfSwingToStraightenLeg;
 
    private final VectorProvider currentAngularVelocityProvider;
    private final FrameOrientation initialOrientation = new FrameOrientation();
@@ -124,6 +125,9 @@ public class SwingState extends AbstractUnconstrainedState
       velocityAdjustmentDamping = new DoubleYoVariable(namePrefix + "VelocityAdjustmentDamping", registry);
       velocityAdjustmentDamping.set(footControlHelper.getWalkingControllerParameters().getSwingFootVelocityAdjustmentDamping());
       adjustmentVelocityCorrection = new YoFrameVector(namePrefix + "AdjustmentVelocityCorrection", worldFrame, registry);
+
+      percentOfSwingToStraightenLeg = new DoubleYoVariable(namePrefix + "PercentOfSwingToStraightenLeg", registry);
+      percentOfSwingToStraightenLeg.set(footControlHelper.getWalkingControllerParameters().getPercentOfSwingToStraightenLeg());
 
       // todo make a smarter distinction on this as a way to work with the push recovery module
       doContinuousReplanning = new BooleanYoVariable(namePrefix + "DoContinuousReplanning", registry);
@@ -369,6 +373,8 @@ public class SwingState extends AbstractUnconstrainedState
          desiredLinearAcceleration.scale(speedUpFactorSquared);
          desiredAngularAcceleration.scale(speedUpFactorSquared);
       }
+
+      updatePrivilegedConfiguration();
    }
 
    private final FramePose newFootstepPose = new FramePose();
@@ -448,6 +454,13 @@ public class SwingState extends AbstractUnconstrainedState
          this.swingTimeRemaining.set(swingTimeProvider.getValue() - currentTimeWithSwingSpeedUp.getDoubleValue());
       else
          this.swingTimeRemaining.set(swingTimeProvider.getValue() - getTimeInCurrentState());
+   }
+
+   private void updatePrivilegedConfiguration()
+   {
+      if (currentTime.getDoubleValue() > (percentOfSwingToStraightenLeg.getDoubleValue() * swingTimeProvider.getValue()) && attemptToStraightenLegs &&
+            !hasSwitchedToStraightLegs.getBooleanValue())
+         hasSwitchedToStraightLegs.set(true);
    }
 
    /**
