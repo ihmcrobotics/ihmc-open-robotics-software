@@ -17,6 +17,7 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
+import us.ihmc.robotics.dataStructures.variable.LongYoVariable;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -43,11 +44,12 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
 
    protected final IntegerYoVariable maximumNumberOfNodesToExpand = new IntegerYoVariable("maximumNumberOfNodesToExpand", registry);
    protected final IntegerYoVariable numberOfNodesExpanded = new IntegerYoVariable("numberOfNodesExpanded", registry);
-   private final DoubleYoVariable timeout = new DoubleYoVariable("Timeout", registry);
+   protected final DoubleYoVariable timeout = new DoubleYoVariable("Timeout", registry);
+   protected final LongYoVariable planningStartTime = new LongYoVariable("planningStartTime", registry);
 
-   private final ArrayList<BipedalFootstepPlannerNode> goalNodes = new ArrayList<>();
-   private final BooleanYoVariable exitAfterInitialSolution = new BooleanYoVariable("exitAfterInitialSolution", registry);
-   protected BipedalFootstepPlannerNode startNode, goalNode;
+   protected final ArrayList<BipedalFootstepPlannerNode> goalNodes = new ArrayList<>();
+   protected final BooleanYoVariable exitAfterInitialSolution = new BooleanYoVariable("exitAfterInitialSolution", registry);
+   protected BipedalFootstepPlannerNode startNode, bestGoalNode;
    protected FootstepPlan footstepPlan = null;
 
    protected BipedalFootstepPlannerListener listener;
@@ -95,7 +97,7 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
 
    protected boolean initialStanceFootWasSet = false;
    protected boolean goalWasSet = false;
-   
+
    @Override
    public final void setInitialStanceFoot(FramePose stanceFootPose, RobotSide initialSide)
    {
@@ -121,10 +123,10 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
    @Override
    public FootstepPlan getPlan()
    {
-      if (goalNode == null)
+      if (bestGoalNode == null)
          return null;
 
-      return new FootstepPlan(goalNode);
+      return new FootstepPlan(bestGoalNode);
    }
 
    protected void initialize()
@@ -139,26 +141,26 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
    @Override
    public FootstepPlanningResult plan()
    {
-      goalNode = null;
+      bestGoalNode = null;
       goalNodes.clear();
       footstepPlan = null;
       double smallestCostToGoal = Double.POSITIVE_INFINITY;
 
       if (!initialStanceFootWasSet || !goalWasSet)
-      {         
+      {
          return FootstepPlanningResult.NO_PATH_EXISTS;
       }
 
       initialize();
       planarRegionPotentialNextStepCalculator.setStartNode(startNode);
       numberOfNodesExpanded.set(0);
-      long startTimeInNano = System.nanoTime();
+      planningStartTime.set(System.nanoTime());
 
       while (!stack.isEmpty())
       {
          BipedalFootstepPlannerNode nodeToExpand;
          // find a path to the goal fast using depth first then refine using breath first
-         if (goalNode == null)
+         if (bestGoalNode == null)
             nodeToExpand = stack.pop();
          else
             nodeToExpand = stack.pollLast();
@@ -206,7 +208,7 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
             break;
 
          long timeInNano = System.nanoTime();
-         if (TimeTools.nanoSecondstoSeconds(timeInNano - startTimeInNano) > timeout.getDoubleValue())
+         if (TimeTools.nanoSecondstoSeconds(timeInNano - planningStartTime.getLongValue()) > timeout.getDoubleValue())
             break;
       }
 
@@ -223,7 +225,7 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
       return FootstepPlanningResult.SUB_OPTIMAL_SOLUTION;
    }
 
-   private double updateGoalPath(double smallestCostToGoal)
+   protected double updateGoalPath(double smallestCostToGoal)
    {
       if (goalNodes.isEmpty())
          return Double.POSITIVE_INFINITY;
@@ -239,8 +241,8 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
          }
       });
 
-      goalNode = goalNodes.get(0);
-      double costToGoal = goalNode.getCostToHereFromStart();
+      bestGoalNode = goalNodes.get(0);
+      double costToGoal = bestGoalNode.getCostToHereFromStart();
       if (costToGoal < smallestCostToGoal)
       {
          PrintTools.info("Reduced cost to goal: " + costToGoal);
@@ -324,13 +326,12 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
          listener.nodeIsBeingExpanded(nodeToExpand);
       }
    }
-   
-   
+
    protected void notifiyListenersStartNodeWasAdded(BipedalFootstepPlannerNode startNode)
    {
       if (listener != null)
       {
          listener.startNodeWasAdded(startNode);
-      }    
+      }
    }
 }
