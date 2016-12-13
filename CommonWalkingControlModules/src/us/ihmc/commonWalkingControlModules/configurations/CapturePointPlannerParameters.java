@@ -251,4 +251,13 @@ public abstract class CapturePointPlannerParameters
    {
       return Double.NaN;
    }
+
+   /**
+    * For doing toe off in single support. Sets the exit CMP on the toes.
+    * @return
+    */
+   public boolean getToeOffInSingleSupport()
+   {
+      return false;
+   }
 }
