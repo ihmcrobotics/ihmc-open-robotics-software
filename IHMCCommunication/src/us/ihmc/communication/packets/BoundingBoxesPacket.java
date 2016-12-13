@@ -35,13 +35,13 @@ public class BoundingBoxesPacket extends Packet<BoundingBoxesPacket>
       }
    }
 
-   public BoundingBoxesPacket(int[] boundingBoxXCoordinates, int[] boundingBoxYCoordinates, int[] boundingBoxWidths, int[] boundingBoxHeights, String[] labels)
+   public BoundingBoxesPacket(BoundingBoxesPacket other)
    {
-      this.labels = labels;
-      this.boundingBoxXCoordinates = boundingBoxXCoordinates;
-      this.boundingBoxYCoordinates = boundingBoxYCoordinates;
-      this.boundingBoxWidths = boundingBoxWidths;
-      this.boundingBoxHeights = boundingBoxHeights;
+      this.labels = other.labels;
+      this.boundingBoxXCoordinates = other.boundingBoxXCoordinates;
+      this.boundingBoxYCoordinates = other.boundingBoxYCoordinates;
+      this.boundingBoxWidths = other.boundingBoxWidths;
+      this.boundingBoxHeights = other.boundingBoxHeights;
    }
 
    public BoundingBoxesPacket(Random random)
@@ -67,7 +67,7 @@ public class BoundingBoxesPacket extends Packet<BoundingBoxesPacket>
 
    @Override public boolean epsilonEquals(BoundingBoxesPacket other, double epsilon)
    {
-      return Arrays.equals(this.boundingBoxHeights, other.boundingBoxHeights) && Arrays.equals(this.boundingBoxWidths, other.boundingBoxWidths) && Arrays
+      return Arrays.equals(labels, other.labels) && Arrays.equals(this.boundingBoxHeights, other.boundingBoxHeights) && Arrays.equals(this.boundingBoxWidths, other.boundingBoxWidths) && Arrays
             .equals(this.boundingBoxXCoordinates, other.boundingBoxXCoordinates) && Arrays.equals(this.boundingBoxYCoordinates, other.boundingBoxYCoordinates);
    }
 }
