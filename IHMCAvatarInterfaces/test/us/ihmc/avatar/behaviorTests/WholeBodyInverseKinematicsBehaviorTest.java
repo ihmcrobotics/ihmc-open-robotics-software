@@ -10,11 +10,9 @@ import java.io.IOException;
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
-import javax.vecmath.Tuple3d;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.avatar.MultiRobotTestInterface;
@@ -171,7 +169,7 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
       Point3d handPosition = new Point3d();
       desiredHandPose.getPosition(handPosition);
 
-      double positionEpsilon = 1.0e-2;
+      double positionEpsilon = 1.0e-4;
       double positionDifference = handPosition.distance(controllerDesiredHandPosition);
       
       assertTrue("Position difference: " + positionDifference, positionDifference <positionEpsilon);
@@ -241,7 +239,7 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
       double rightDifference = rightPosition.distance(controllerDesiredHandPositionR);
       double leftDifference = leftPosition.distance(controllerDesiredHandPositionL);
 
-      double positionEpsilon = 1.0e-2;
+      double positionEpsilon = 1.0e-4;
       
       assertTrue("Position difference: " + rightDifference, rightDifference <positionEpsilon);
       assertTrue("Position difference: " + leftDifference, leftDifference <positionEpsilon);
@@ -320,7 +318,7 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
       Point3d handPosition = new Point3d();
       desiredHandPose.getPosition(handPosition);
 
-      double positionEpsilon = 1.0e-2;
+      double positionEpsilon = 1.0e-4;
       double positionDifference = handPosition.distance(controllerDesiredHandPosition);
       
       assertTrue("Position difference: " + positionDifference, positionDifference <positionEpsilon);
@@ -411,7 +409,7 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
       double rightDifference = rightPosition.distance(controllerDesiredHandPositionR);
       double leftDifference = leftPosition.distance(controllerDesiredHandPositionL);
 
-      double positionEpsilon = 1.0e-2;
+      double positionEpsilon = 1.0e-4;
       
       assertTrue("Position difference: " + rightDifference, rightDifference <positionEpsilon);
       assertTrue("Position difference: " + leftDifference, leftDifference <positionEpsilon);
@@ -476,7 +474,7 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
       Point3d handPosition = new Point3d();
       desiredHandPose.getPosition(handPosition);
 
-      double positionEpsilon = 1.0e-2;
+      double positionEpsilon = 1.0e-4;
       double positionDifference = handPosition.distance(controllerDesiredHandPosition);
       
       assertTrue("Position difference: " + positionDifference, positionDifference <positionEpsilon);
