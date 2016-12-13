@@ -64,6 +64,8 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
 
    private final DoubleYoVariable stepLengthToCMPOffsetFactor;
 
+   private final BooleanYoVariable toeOffInSingleSupport;
+
    private final ReferenceFrame midFeetZUpFrame;
    private final SideDependentList<ReferenceFrame> soleZUpFrames;
    private final FrameConvexPolygon2d predictedSupportPolygon = new FrameConvexPolygon2d();
@@ -126,6 +128,8 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
       stepLengthToCMPOffsetFactor = new DoubleYoVariable(namePrefix + "StepLengthToCMPOffsetFactor", registry);
 
       numberOfUpcomingFootsteps = new IntegerYoVariable(namePrefix + "NumberOfUpcomingFootsteps", registry);
+
+      toeOffInSingleSupport = new BooleanYoVariable(namePrefix + "ToeOffInSingleSupport", registry);
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -196,6 +200,8 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
       footstepHeightThresholdToPutExitCMPOnToes.set(icpPlannerParameters.getStepHeightThresholdForExitCMPOnToesWhenSteppingDown());
       footstepLengthThresholdToPutExitCMPOnToes.set(icpPlannerParameters.getStepLengthThresholdForExitCMPOnToesWhenSteppingDown());
       safeDistanceFromCMPToSupportEdgesWhenSteppingDown.set(icpPlannerParameters.getCMPSafeDistanceAwayFromToesWhenSteppingDown());
+
+      toeOffInSingleSupport.set(icpPlannerParameters.getToeOffInSingleSupport());
    }
 
    public void setUseTwoCMPsPerSupport(boolean useTwoCMPsPerSupport)
@@ -590,6 +596,16 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
             boolean isSteppingDownEnough = soleToSoleFrameVector.getZ() < -footstepHeightThresholdToPutExitCMPOnToes.getDoubleValue();
 
             putCMPOnToes = isSteppingForwardEnough && isSteppingDownEnough;
+         }
+      }
+      else if (toeOffInSingleSupport.getBooleanValue() && !isUpcomingFootstepLast)
+      {
+         if (centroidInSoleFrameOfUpcomingSupportFoot != null)
+         {
+            soleFrameOrigin.setToZero(centroidInSoleFrameOfUpcomingSupportFoot.getReferenceFrame());
+            soleFrameOrigin.changeFrame(soleFrame);
+            soleToSoleFrameVector.setIncludingFrame(soleFrameOrigin);
+            putCMPOnToes = soleToSoleFrameVector.getX() > footstepLengthThresholdToPutExitCMPOnToes.getDoubleValue();
          }
       }
 
