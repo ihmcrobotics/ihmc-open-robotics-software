@@ -1,6 +1,16 @@
 package us.ihmc.humanoidBehaviors.behaviors.roughTerrain;
 
-import us.ihmc.communication.packets.*;
+import javax.vecmath.Point2d;
+import javax.vecmath.Point3d;
+import javax.vecmath.Quat4d;
+import javax.vecmath.Tuple3d;
+
+import us.ihmc.communication.packets.PacketDestination;
+import us.ihmc.communication.packets.PlanarRegionMessageConverter;
+import us.ihmc.communication.packets.PlanarRegionsListMessage;
+import us.ihmc.communication.packets.RequestPlanarRegionsListMessage;
+import us.ihmc.communication.packets.TextToSpeechPacket;
+import us.ihmc.communication.packets.UIPositionCheckerPacket;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlannerGoal;
 import us.ihmc.footstepPlanning.FootstepPlannerGoalType;
@@ -9,6 +19,7 @@ import us.ihmc.footstepPlanning.graphSearch.BipedalFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.PlanarRegionBipedalFootstepPlannerVisualizer;
 import us.ihmc.footstepPlanning.graphSearch.SimplePlanarRegionBipedalAnytimeFootstepPlanner;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.behaviorServices.ConstantGoalDetectorBehaviorService;
 import us.ihmc.humanoidBehaviors.behaviors.behaviorServices.FiducialDetectorBehaviorService;
 import us.ihmc.humanoidBehaviors.behaviors.behaviorServices.ObjectDetectorBehaviorService;
 import us.ihmc.humanoidBehaviors.behaviors.goalLocation.GoalDetectorBehaviorService;
@@ -43,15 +54,7 @@ import us.ihmc.robotics.stateMachines.StateTransitionCondition;
 import us.ihmc.robotics.time.YoTimer;
 import us.ihmc.tools.FormattingTools;
 import us.ihmc.tools.io.printing.PrintTools;
-import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
-
-import java.util.ArrayList;
-
-import javax.vecmath.Point2d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Tuple3d;
 
 public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<AnytimePlannerStateMachineBehavior.AnytimePlanningState>
 {
@@ -60,7 +63,7 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
 
    private enum GoalDetectorType
    {
-      FIDUCIAL, VALVE;
+      FIDUCIAL, VALVE, HARD_CODED;
    }
 
    private final DoubleYoVariable yoTime;
@@ -121,9 +124,15 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
       case FIDUCIAL:
          FiducialDetectorBehaviorService fiducialDetectorBehaviorService = new FiducialDetectorBehaviorService(communicationBridge, null);
          fiducialDetectorBehaviorService.setTargetIDToLocate(50);
-         fiducialDetectorBehaviorService.setExpectedFiducialSize(0.50);
+         fiducialDetectorBehaviorService.setExpectedFiducialSize(0.16);
          goalDetectorBehaviorService = fiducialDetectorBehaviorService;
          break;
+      
+      case HARD_CODED:
+      {
+         goalDetectorBehaviorService = new ConstantGoalDetectorBehaviorService(referenceFrames, new Point3d(4.0, 0.0, 0.0), communicationBridge);
+         break;
+      }
       case VALVE:
          try
          {
