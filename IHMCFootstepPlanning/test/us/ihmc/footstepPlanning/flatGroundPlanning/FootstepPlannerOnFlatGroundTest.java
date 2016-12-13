@@ -59,8 +59,8 @@ public abstract class FootstepPlannerOnFlatGroundTest implements PlanningTest
 
    public void testATightTurn(boolean assertPlannerReturnedResult)
    {
-      double xGoal = 2.0;
-      double yGoal = 4.0;
+      double xGoal = 1.0;
+      double yGoal = 0.5;
       double yawGoal = 0.0;
       Point2d goalPosition = new Point2d(xGoal, yGoal);
       FramePose2d goalPose = new FramePose2d(ReferenceFrame.getWorldFrame(), goalPosition, yawGoal);

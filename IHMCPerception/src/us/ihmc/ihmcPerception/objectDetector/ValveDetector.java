@@ -448,7 +448,7 @@ public class ValveDetector
          for (int x = 0; x < w; x++)
          {
             float val = networkOutput[y * w + x];
-            result[y][x] = val > 0.1f && (val / norm) > 0.4f;
+            result[y][x] = val > 0.2f && (val / norm) > 0.4f;
          }
       }
 
@@ -493,7 +493,7 @@ public class ValveDetector
             }
          }
 
-         if (currentComponent.size() < 9)
+         if (currentComponent.size() < 6)
             continue;
 
          result.add(new Component(currentComponent));
