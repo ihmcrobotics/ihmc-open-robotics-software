@@ -487,6 +487,19 @@ public class WalkingMessageHandler
       RigidBody rigidBody = contactableFoot.getRigidBody();
 
       Footstep footstep = new Footstep(rigidBody, robotSide, soleFrame, footstepPoseFrame, true, contactPoints);
+      if (trajectoryType == TrajectoryType.CUSTOM)
+      {
+         if (footstepData.getTrajectoryWaypoints() == null)
+         {
+            PrintTools.warn("Can not request custom trajectory without specifying waypoints. Using default trajectory.");
+            trajectoryType = TrajectoryType.DEFAULT;
+         }
+         else
+         {
+            Point3d[] trajectoryWaypoints = footstepData.getTrajectoryWaypoints();
+            footstep.setSwingWaypoints(trajectoryWaypoints);
+         }
+      }
 
       footstep.trajectoryType = trajectoryType;
       footstep.swingHeight = footstepData.getSwingHeight();

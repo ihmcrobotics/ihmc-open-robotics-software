@@ -124,9 +124,14 @@ public class TwoWaypointSwingGenerator implements PositionTrajectoryGenerator
       else
          this.trajectoryType.set(trajectoryType);
 
-      if (this.trajectoryType.getEnumValue() == TrajectoryType.CUSTOM)
-         for (int i = 0; i < numberWaypoints; i++)
-            waypointPositions.get(i).set(waypoints.get(i));
+      if (this.trajectoryType.getEnumValue() != TrajectoryType.CUSTOM)
+         return;
+
+      for (int i = 0; i < numberWaypoints; i++)
+      {
+         waypointPositions.get(i).setIncludingFrame(waypoints.get(i));
+         waypointPositions.get(i).changeFrame(worldFrame);
+      }
    }
 
    public void setSwingHeight(double swingHeight)
