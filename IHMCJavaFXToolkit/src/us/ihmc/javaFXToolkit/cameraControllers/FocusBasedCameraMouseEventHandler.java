@@ -91,6 +91,8 @@ public class FocusBasedCameraMouseEventHandler implements EventHandler<Event>
          public void handle(long now)
          {
             shiftCameraFocusPoint();
+            double sphereRadius = 0.0025 * Math.abs(offsetFromFocusPoint.getTz());
+            focusPointViz.setRadius(sphereRadius);
          }
       }.start();
    }
