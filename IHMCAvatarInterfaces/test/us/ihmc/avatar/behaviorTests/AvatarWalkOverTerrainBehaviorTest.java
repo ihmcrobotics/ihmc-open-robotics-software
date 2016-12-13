@@ -22,6 +22,7 @@ import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.environments.CinderBlockFieldEnvironment;
 import us.ihmc.simulationconstructionset.util.environments.CinderBlockFieldWithFiducialEnvironment;
+import us.ihmc.simulationconstructionset.util.environments.CinderBlockFieldWithFiducialEnvironment.FiducialType;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.continuousIntegration.ContinuousIntegrationTools;
@@ -71,7 +72,7 @@ public abstract class AvatarWalkOverTerrainBehaviorTest implements MultiRobotTes
    public void setUp()
    {
       drcRobotModel = getRobotModel();
-      drcBehaviorTestHelper = new DRCBehaviorTestHelper(new CinderBlockFieldWithFiducialEnvironment(), getSimpleRobotName(), DRCObstacleCourseStartingLocation.DEFAULT,
+      drcBehaviorTestHelper = new DRCBehaviorTestHelper(new CinderBlockFieldWithFiducialEnvironment(FiducialType.FIDUCIAL_50), getSimpleRobotName(), DRCObstacleCourseStartingLocation.DEFAULT,
                                                         simulationTestingParameters, drcRobotModel);
    }
 
@@ -91,7 +92,7 @@ public abstract class AvatarWalkOverTerrainBehaviorTest implements MultiRobotTes
       HumanoidReferenceFrames referenceFrames = drcBehaviorTestHelper.getReferenceFrames();
       DoubleYoVariable yoTime = drcBehaviorTestHelper.getYoTime();
       FiducialDetectorBehaviorService fiducialDetectorBehaviorService = new FiducialDetectorBehaviorService(communicationBridge, yoGraphicsListRegistry);
-      int fiducialToTrack = 50;
+      fiducialDetectorBehaviorService.setTargetIDToLocate(50);
       YoVariableRegistry scsRootRegistry = drcBehaviorTestHelper.getSimulationConstructionSet().getRootRegistry();
 
       AtlasPrimitiveActions primitiveActions = new AtlasPrimitiveActions(communicationBridge, fullRobotModel, referenceFrames, drcRobotModel.getWalkingControllerParameters(), yoTime, drcRobotModel, scsRootRegistry);
@@ -99,7 +100,7 @@ public abstract class AvatarWalkOverTerrainBehaviorTest implements MultiRobotTes
       LogModelProvider logModelProvider = drcRobotModel.getLogModelProvider();
       
       WalkOverTerrainStateMachineBehavior walkOverTerrainBehavior = new WalkOverTerrainStateMachineBehavior(communicationBridge, yoTime, primitiveActions, 
-            logModelProvider, fullRobotModel, referenceFrames, fiducialDetectorBehaviorService, fiducialToTrack);
+            logModelProvider, fullRobotModel, referenceFrames, fiducialDetectorBehaviorService);
       walkOverTerrainBehavior.initialize();
       drcBehaviorTestHelper.getSimulationConstructionSet().addYoGraphicsListRegistry(yoGraphicsListRegistry);
 

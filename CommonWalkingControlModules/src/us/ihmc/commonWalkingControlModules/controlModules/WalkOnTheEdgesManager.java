@@ -120,6 +120,21 @@ public class WalkOnTheEdgesManager
       return footContactStates;
    }
 
+   /**
+    * Checks whether or not the robot state is proper for toe-off when in double support, and sets the {@link WalkOnTheEdgesManager#doToeOff} variable accordingly.
+    * These checks include:
+    *   doToeOffIfPossible
+    *   desiredECMP location being within the support polygon account for toe-off, if {@link WalkingControllerParameters#checkECMPLocationToTriggerToeOff()} is true.
+    *   desiredICP location being within the leading foot base of support.
+    *   currentICP location being within the leading foot base of support.
+    *   needToSwitchToToeOffForAnkleLimit
+    * If able and the ankles are at the joint limits, transitions to toe-off. Then checks the current state being with the base of support. Then checks the
+    * positioning of the leading leg to determine if it is acceptable.
+    * @param trailingLeg robot side for the trailing leg
+    * @param desiredECMP current desired ECMP from ICP feedback.
+    * @param desiredICP current desired ICP from the reference trajectory.
+    * @param currentICP current ICP based on the robot state.
+    */
    public void updateToeOffStatus(RobotSide trailingLeg, FramePoint2d desiredECMP, FramePoint2d desiredICP, FramePoint2d currentICP)
    {
       if (!doToeOffIfPossible.getBooleanValue())
@@ -168,6 +183,43 @@ public class WalkOnTheEdgesManager
       }
 
       if (!isDesiredICPOKForToeOff.getBooleanValue() || !isCurrentICPOKForToeOff.getBooleanValue())
+      {
+         doToeOff.set(false);
+         return;
+      }
+
+      isReadyToSwitchToToeOff(trailingLeg);
+   }
+
+   /**
+    * Checks whether or not the robot state is proper for toe-off when in single support, and sets the {@link WalkOnTheEdgesManager#doToeOff} variable accordingly.
+    * These checks include:
+    *   doToeOffIfPossibleInSingleSupport
+    *   needToSwitchToToeOffForAnkleLimit
+    *   isOnExitCMP
+    * If single support toe-off is enabled, the ankle is at its indicated limit, and the desired ECMP is on the exit ECMP,
+    * transitions to toe-off. Then checks the position of the leading leg to determine if it is acceptable.
+    * @param trailingLeg robot side for the trailing leg
+    * @param isOnExitCMP boolean as to whether or not the current ICP plan is attempting to use the exit CMP. Sets the variable {@link WalkOnTheEdgesManager#isDesiredECMPOKForToeOff}.
+    */
+   public void updateToeOffStatusSingleSupport(RobotSide trailingLeg, boolean isOnExitCMP)
+   {
+      if (!doToeOffIfPossibleInSingleSupport.getBooleanValue())
+      {
+         doToeOff.set(false);
+         isDesiredECMPOKForToeOff.set(false);
+         return;
+      }
+
+      isDesiredECMPOKForToeOff.set(isOnExitCMP);
+      boolean needToSwitchToTOeOffForAnkleLimit = checkAnkleLimitForToeOff(trailingLeg);
+      if (!needToSwitchToTOeOffForAnkleLimit)
+      {
+         doToeOff.set(false);
+         return;
+      }
+
+      if (!isDesiredECMPOKForToeOff.getBooleanValue())
       {
          doToeOff.set(false);
          return;
