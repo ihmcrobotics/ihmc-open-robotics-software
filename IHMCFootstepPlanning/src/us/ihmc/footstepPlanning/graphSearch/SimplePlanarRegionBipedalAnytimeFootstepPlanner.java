@@ -19,6 +19,7 @@ import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.tools.thread.ThreadTools;
@@ -135,41 +136,46 @@ public class SimplePlanarRegionBipedalAnytimeFootstepPlanner extends PlanarRegio
 
    private void replaceStartNode()
    {
-//      BipedalFootstepPlannerNode newStartNode = newStartNodeReference.getAndSet(null);
-//      if(newStartNode != null)
-//      {
-//         ArrayList<BipedalFootstepPlannerNode> childrenOfStartNode = new ArrayList<>();
-//         startNode.getChildren(childrenOfStartNode);
-//         PrintTools.info("clearing children of start node");
-//
-//         for (BipedalFootstepPlannerNode node : childrenOfStartNode)
-//         {
-//            if (!node.equals(newStartNode))
-//            {
-//               recursivelyMarkAsDead(node);
-//            }
-//            else
-//            {
-//               PrintTools.info("found new start node");
-//               startNode = node;
-//            }
-//         }
-//
-//         initialSide = startNode.getRobotSide();
-//         startNode.getSoleTransform(initialFootPose);
-//      }
-
-      SimpleFootstep footstep = latestExecutedFootstepReference.getAndSet(null);
-      if (footstep != null)
+      SimpleFootstep newStartingFootstep = latestExecutedFootstepReference.getAndSet(null);
+      if(newStartingFootstep != null)
       {
-         FramePose tempPose = new FramePose();
-         initialSide = footstep.getRobotSide();
-         footstep.getSoleFramePose(tempPose);
-         tempPose.getRigidBodyTransform(initialFootPose);
+         newStartingFootstep.getSoleFramePose(tempFramePose);
+         tempFramePose.changeFrame(ReferenceFrame.getWorldFrame());
+         tempFramePose.getRigidBodyTransform(tempTransform);
+         BipedalFootstepPlannerNode newStartNode = new BipedalFootstepPlannerNode(newStartingFootstep.getRobotSide(), tempTransform);
 
-         parentOfStartNode = startNode;
-         startNode = new BipedalFootstepPlannerNode(initialSide, initialFootPose);
-         notifiyListenersStartNodeWasAdded(startNode);
+         ArrayList<BipedalFootstepPlannerNode> childrenOfStartNode = new ArrayList<>();
+         startNode.getChildren(childrenOfStartNode);
+         PrintTools.info("clearing children of start node");
+         boolean newStartNodeAlreadyExists = false;
+
+         for (BipedalFootstepPlannerNode node : childrenOfStartNode)
+         {
+            if (!node.epsilonEquals(newStartNode, 1e-3))
+            {
+               recursivelyMarkAsDead(node);
+            }
+            else
+            {
+               newStartNodeAlreadyExists = true;
+               PrintTools.info("found new start node");
+               startNode = node;
+            }
+         }
+
+         if(!newStartNodeAlreadyExists)
+         {
+            initialSide = newStartingFootstep.getRobotSide();
+            newStartingFootstep.getSoleFramePose(tempFramePose);
+            tempFramePose.getRigidBodyTransform(initialFootPose);
+
+            parentOfStartNode = startNode;
+            startNode = new BipedalFootstepPlannerNode(initialSide, initialFootPose);
+            notifiyListenersStartNodeWasAdded(startNode);
+         }
+
+         initialSide = startNode.getRobotSide();
+         startNode.getSoleTransform(initialFootPose);
       }
    }
 
@@ -295,7 +301,7 @@ public class SimplePlanarRegionBipedalAnytimeFootstepPlanner extends PlanarRegio
          }
 
          // some conditions where the stack is cleared
-         if (numberOfNodesExpanded.getIntegerValue() > maximumNumberOfNodesToExpand.getIntegerValue())
+         if (maximumNumberOfNodesToExpand.getIntegerValue() > 0 && numberOfNodesExpanded.getIntegerValue() > maximumNumberOfNodesToExpand.getIntegerValue())
             stack.clear();
 
          long timeInNano = System.nanoTime();
