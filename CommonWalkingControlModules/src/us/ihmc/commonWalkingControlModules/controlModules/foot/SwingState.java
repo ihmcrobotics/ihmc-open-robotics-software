@@ -66,6 +66,7 @@ public class SwingState extends AbstractUnconstrainedState
    private final FramePoint finalPosition = new FramePoint();
    private final FrameVector finalVelocity = new FrameVector();
    private final FramePoint stanceFootPosition = new FramePoint();
+   private final RigidBodyTransform soleToControlFrame = new RigidBodyTransform();
    private final RecyclingArrayList<FramePoint> swingWaypoints = new RecyclingArrayList<>(FramePoint.class);
 
    private final PositionTrajectoryGenerator positionTrajectoryGenerator, pushRecoveryPositionTrajectoryGenerator;
@@ -96,6 +97,7 @@ public class SwingState extends AbstractUnconstrainedState
    private final double controlDT;
 
    private final ReferenceFrame footFrame;
+   private final ReferenceFrame soleFrame;
    private final ReferenceFrame toeFrame;
    private final ReferenceFrame stanceFootFrame;
    private final ReferenceFrame controlFrame;
@@ -134,6 +136,7 @@ public class SwingState extends AbstractUnconstrainedState
 
       footFrame = contactableFoot.getFrameAfterParentJoint();
       toeFrame = createToeFrame(robotSide);
+      soleFrame = footControlHelper.getMomentumBasedController().getReferenceFrames().getSoleFrame(robotSide);
 
       controlToe = walkingControllerParameters.controlToeDuringSwing();
       controlFrame = controlToe ? toeFrame : footFrame;
@@ -407,9 +410,14 @@ public class SwingState extends AbstractUnconstrainedState
       if (trajectoryType == TrajectoryType.CUSTOM)
       {
          List<Point3d> swingWaypoints = footstep.getSwingWaypoints();
+         controlFrame.getTransformToDesiredFrame(soleToControlFrame, soleFrame);
          this.swingWaypoints.clear();
          for (int i = 0; i < swingWaypoints.size(); i++)
-            this.swingWaypoints.add().setIncludingFrame(worldFrame, swingWaypoints.get(i));
+         {
+            FramePoint waypoint = this.swingWaypoints.add();
+            waypoint.setIncludingFrame(worldFrame, swingWaypoints.get(i));
+            soleToControlFrame.transform(waypoint.getPoint());
+         }
 
          trajectoryParametersProvider.set(new TrajectoryParameters(trajectoryType));
          return;
