@@ -66,8 +66,8 @@ public class TwoWaypointSwingGenerator implements PositionTrajectoryGenerator
       this.minSwingHeight = new DoubleYoVariable(namePrefix + "MinSwingHeight", registry);
       this.minSwingHeight.set(minSwingHeight);
 
-      WaypointTrajectoryGenerator trajectory = new Position2dOptimizedSwingTrajectoryGenerator(namePrefix, registry, yoGraphicsListRegistry, maxTimeIterations);
-      WaypointTrajectoryGenerator trajectoryForCustomWaypoints = new PositionOptimizedTrajectoryGenerator(namePrefix, registry, yoGraphicsListRegistry, maxTimeIterations);
+      WaypointTrajectoryGenerator trajectory = new Position2dOptimizedSwingTrajectoryGenerator(namePrefix + "2d", registry, yoGraphicsListRegistry, maxTimeIterations);
+      WaypointTrajectoryGenerator trajectoryForCustomWaypoints = new PositionOptimizedTrajectoryGenerator(namePrefix + "3d", registry, yoGraphicsListRegistry, maxTimeIterations);
 
       trajectoryMap.put(TrajectoryType.DEFAULT, trajectory);
       trajectoryMap.put(TrajectoryType.OBSTACLE_CLEARANCE, trajectory);
