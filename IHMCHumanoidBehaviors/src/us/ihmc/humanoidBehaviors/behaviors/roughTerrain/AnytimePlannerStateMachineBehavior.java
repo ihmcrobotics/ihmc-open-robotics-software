@@ -59,7 +59,7 @@ import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<AnytimePlannerStateMachineBehavior.AnytimePlanningState>
 {
    private final String prefix = getClass().getSimpleName();
-   private static final GoalDetectorType GOAL_DETECTOR_TYPE = GoalDetectorType.HARD_CODED;
+   private static final GoalDetectorType GOAL_DETECTOR_TYPE = GoalDetectorType.FIDUCIAL;
 
    private enum GoalDetectorType
    {
@@ -124,7 +124,7 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
       case FIDUCIAL:
          FiducialDetectorBehaviorService fiducialDetectorBehaviorService = new FiducialDetectorBehaviorService(communicationBridge, null);
          fiducialDetectorBehaviorService.setTargetIDToLocate(50);
-         fiducialDetectorBehaviorService.setExpectedFiducialSize(0.50);
+         fiducialDetectorBehaviorService.setExpectedFiducialSize(0.16);
          goalDetectorBehaviorService = fiducialDetectorBehaviorService;
          break;
       
