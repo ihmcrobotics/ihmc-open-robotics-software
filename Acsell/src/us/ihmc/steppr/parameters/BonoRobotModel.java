@@ -131,12 +131,6 @@ public class BonoRobotModel implements DRCRobotModel
    }
 
    @Override
-   public WalkingControllerParameters getMultiContactControllerParameters()
-   {
-      return multiContactControllerParameters;
-   }
-
-   @Override
    public StateEstimatorParameters getStateEstimatorParameters()
    {
       BonoStateEstimatorParameters stateEstimatorParameters = new BonoStateEstimatorParameters(runningOnRealRobot, getEstimatorDT());
@@ -202,12 +196,6 @@ public class BonoRobotModel implements DRCRobotModel
    }
 
    @Override
-   public void setJointDamping(FloatingRootJointRobot simulatedRobot)
-   {
-      System.err.println("Joint Damping not setup for Bono. BonoRobotModel setJointDamping!");
-   }
-
-   @Override
    public void setEnableJointDamping(boolean enableJointDamping)
    {
       this.enableJointDamping  = enableJointDamping;
@@ -221,18 +209,6 @@ public class BonoRobotModel implements DRCRobotModel
 
    @Override
    public HandModel getHandModel()
-   {
-      return null;
-   }
-
-   @Override
-   public ScsCollisionConfigure getPhysicsConfigure(FloatingRootJointRobot robotModel)
-   {
-      return null;
-   }
-
-   @Override
-   public WalkingControllerParameters getDrivingControllerParameters()
    {
       return null;
    }

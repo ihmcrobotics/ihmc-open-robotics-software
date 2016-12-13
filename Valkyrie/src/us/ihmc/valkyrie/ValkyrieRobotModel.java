@@ -323,28 +323,9 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    }
 
    @Override
-   public WalkingControllerParameters getMultiContactControllerParameters()
-   {
-      return walkingControllerParameters;
-   }
-
-   @Override
-   public ScsCollisionConfigure getPhysicsConfigure(FloatingRootJointRobot robotModel)
-   {
-      return null;
-   }
-
-   @Override
    public RobotContactPointParameters getContactPointParameters()
    {
       return jointMap.getContactPointParameters();
-   }
-
-   //For Sim Only
-   @Override
-   public void setJointDamping(FloatingRootJointRobot simulatedRobot)
-   {
-      System.err.println("Joint Damping not setup for Valkyrie. ValkyrieRobotModel setJointDamping!");
    }
 
    @Override
@@ -363,12 +344,6 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    public HandModel getHandModel()
    {
       return new ValkyrieHandModel();
-   }
-
-   @Override
-   public WalkingControllerParameters getDrivingControllerParameters()
-   {
-      return getWalkingControllerParameters();
    }
 
    @Override
