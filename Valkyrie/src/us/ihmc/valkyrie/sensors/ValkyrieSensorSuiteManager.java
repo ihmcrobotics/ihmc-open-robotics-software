@@ -47,7 +47,7 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
       String sensorName = multisenseLidarParameters.getSensorNameInSdf();
       lidarScanPublisher = new LidarScanPublisher(sensorName, fullRobotModelFactory, sensorSuitePacketCommunicator);
       lidarScanPublisher.setPPSTimestampOffsetProvider(ppsTimestampOffsetProvider);
-      lidarScanPublisher.setCollisionBoxProvider(null); // TODO Fill in when we made collision boxes for Val
+//      lidarScanPublisher.setCollisionBoxProvider(null); // TODO Fill in when we made collision boxes for Val
    }
 
    @Override
