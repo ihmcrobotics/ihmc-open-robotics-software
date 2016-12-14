@@ -1,7 +1,10 @@
 package us.ihmc.avatar.roughTerrainWalking;
 
+import java.util.List;
+
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
+import javax.vecmath.Vector3d;
 
 import org.junit.After;
 import org.junit.Before;
@@ -11,17 +14,25 @@ import us.ihmc.avatar.DRCStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
+import us.ihmc.graphics3DDescription.appearance.YoAppearance;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage.FootstepOrigin;
 import us.ihmc.robotics.Axis;
+import us.ihmc.robotics.geometry.BoundingBox3d;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.RigidBodyTransformGenerator;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
+import us.ihmc.simulationconstructionset.ExternalForcePoint;
+import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
+import us.ihmc.simulationconstructionset.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationconstructionset.util.environments.FlatGroundEnvironment;
+import us.ihmc.simulationconstructionset.util.environments.SelectableObjectListener;
+import us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObject3D;
+import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.tools.thread.ThreadTools;
 
@@ -33,11 +44,13 @@ public abstract class AvatarSwingWithWaypointsTest implements MultiRobotTestInte
    public void testRegularSwingWithWaypoints() throws SimulationExceededMaximumTimeException
    {
       String className = getClass().getSimpleName();
-      FlatGroundEnvironment environment = new FlatGroundEnvironment();
+      TestingEnvironment environment = new TestingEnvironment();
       DRCStartingLocation startingLocation = DRCObstacleCourseStartingLocation.DEFAULT;
       DRCRobotModel robotModel = getRobotModel();
       drcSimulationTestHelper = new DRCSimulationTestHelper(environment, className, startingLocation, simulationTestingParameters, robotModel);
       ThreadTools.sleep(1000);
+      drcSimulationTestHelper.getSimulationConstructionSet().setCameraPosition(8.0, -8.0, 5.0);
+      drcSimulationTestHelper.getSimulationConstructionSet().setCameraFix(1.5, 0.0, 0.8);
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
 
       double swingTime = 2.0;
@@ -80,7 +93,7 @@ public abstract class AvatarSwingWithWaypointsTest implements MultiRobotTestInte
          RobotSide robotSide = i%2 == 0 ? RobotSide.LEFT : RobotSide.RIGHT;
          double footstepY = robotSide == RobotSide.LEFT ? stepWidth : -stepWidth;
          double footstepX = stepLength * i;
-         double swingHeight = 0.1;
+         double swingHeight = 0.175;
 
          FootstepDataMessage footstep1 = footsteps.get(i-1);
          footstep1.setTrajectoryType(TrajectoryType.CUSTOM);
@@ -91,7 +104,7 @@ public abstract class AvatarSwingWithWaypointsTest implements MultiRobotTestInte
 
       // overshoot
       {
-         int i = 4;
+         int i = 3;
          RobotSide robotSide = i%2 == 0 ? RobotSide.LEFT : RobotSide.RIGHT;
          double footstepY = robotSide == RobotSide.LEFT ? stepWidth : -stepWidth;
          double footstepX = stepLength * i;
@@ -154,6 +167,14 @@ public abstract class AvatarSwingWithWaypointsTest implements MultiRobotTestInte
       drcSimulationTestHelper.send(footsteps);
       double simulationTime = (swingTime + transferTime) * steps + 1.0;
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime);
+
+      Point3d rootJointPosition = new Point3d(2.81, 0.0, 0.79);
+      Vector3d epsilon = new Vector3d(0.05, 0.05, 0.05);
+      Point3d min = new Point3d(rootJointPosition);
+      Point3d max = new Point3d(rootJointPosition);
+      min.sub(epsilon);
+      max.add(epsilon);
+      drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(new BoundingBox3d(min, max));
    }
 
    public void testSwingWithWaypointsRotated() throws SimulationExceededMaximumTimeException
@@ -225,5 +246,50 @@ public abstract class AvatarSwingWithWaypointsTest implements MultiRobotTestInte
 
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
       simulationTestingParameters = null;
+   }
+
+   public class TestingEnvironment implements CommonAvatarEnvironmentInterface
+   {
+      private final CombinedTerrainObject3D terrain;
+
+      public TestingEnvironment()
+      {
+         terrain = new CombinedTerrainObject3D(getClass().getSimpleName());
+         terrain.addBox(-0.2, -0.225, 3.2, 0.225, -0.1, 0.0);
+         terrain.addBox(0.15, 0.05, 0.45, 0.25, 0.15);
+         terrain.addBox(0.6, -0.05, 0.775, -0.25, 0.08);
+         terrain.addCylinder(new RigidBodyTransform(new Quat4d(0.0, 0.0, 0.0, 1.0), new Point3d(1.5, 0.15, 0.1)), 0.2, 0.15, YoAppearance.Grey());
+         terrain.addCylinder(new RigidBodyTransform(new Quat4d(0.0, 0.0, 0.0, 1.0), new Point3d(1.8, -0.15, 0.1)), 0.2, 0.025, YoAppearance.Grey());
+         terrain.addBox(1.96, 0.125, 1.99, 0.0, 0.2);
+         terrain.addBox(2.235, 0.175, 2.265, 0.2, 0.2);
+      }
+
+      @Override
+      public TerrainObject3D getTerrainObject3D()
+      {
+         return terrain;
+      }
+
+      @Override
+      public List<? extends Robot> getEnvironmentRobots()
+      {
+         return null;
+      }
+
+      @Override
+      public void createAndSetContactControllerToARobot()
+      {
+      }
+
+      @Override
+      public void addContactPoints(List<? extends ExternalForcePoint> externalForcePoints)
+      {
+      }
+
+      @Override
+      public void addSelectableListenerToSelectables(SelectableObjectListener selectedListener)
+      {
+      }
+
    }
 }
