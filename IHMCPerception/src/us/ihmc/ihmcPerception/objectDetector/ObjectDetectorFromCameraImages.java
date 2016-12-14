@@ -247,7 +247,6 @@ public class ObjectDetectorFromCameraImages
             tempFiducialDetectorFrame.changeFrame(ReferenceFrame.getWorldFrame());
 
             locatedFiducialPoseInWorldFrame.set(tempFiducialDetectorFrame);
-            System.out.println("Object located at: " + tempFiducialDetectorFrame + ", original 2D image rectangle " + rectangle);
 
             locatedFiducialReferenceFrame.update();
 
