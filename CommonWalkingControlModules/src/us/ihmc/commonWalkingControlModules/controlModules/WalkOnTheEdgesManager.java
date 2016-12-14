@@ -35,7 +35,9 @@ public class WalkOnTheEdgesManager
    private final BooleanYoVariable doToeOffIfPossibleInSingleSupport = new BooleanYoVariable("doToeOffIfPossibleInSingleSupport", registry);
    private final BooleanYoVariable doToeOffWhenHittingAnkleLimit = new BooleanYoVariable("doToeOffWhenHittingAnkleLimit", registry);
    private final BooleanYoVariable doToeOff = new BooleanYoVariable("doToeOff", registry);
+
    private final DoubleYoVariable ankleLowerLimitToTriggerToeOff = new DoubleYoVariable("ankleLowerLimitToTriggerToeOff", registry);
+   private final DoubleYoVariable icpProximityToLeadingFootForToeOff = new DoubleYoVariable("icpProximityToLeadingFootForToeOff", registry);
 
    private final BooleanYoVariable isDesiredICPOKForToeOff = new BooleanYoVariable("isDesiredICPOKForToeOff", registry);
    private final BooleanYoVariable isCurrentICPOKForToeOff = new BooleanYoVariable("isCurrentICPOKForToeOff", registry);
@@ -81,7 +83,9 @@ public class WalkOnTheEdgesManager
       this.doToeOffIfPossible.set(walkingControllerParameters.doToeOffIfPossible());
       this.doToeOffIfPossibleInSingleSupport.set(walkingControllerParameters.doToeOffIfPossibleInSingleSupport());
       this.doToeOffWhenHittingAnkleLimit.set(walkingControllerParameters.doToeOffWhenHittingAnkleLimit());
+
       this.ankleLowerLimitToTriggerToeOff.set(walkingControllerParameters.getAnkleLowerLimitToTriggerToeOff());
+      this.icpProximityToLeadingFootForToeOff.set(walkingControllerParameters.getICPProximityToLeadingFootForToeOff());
 
       this.walkingControllerParameters = walkingControllerParameters;
 
@@ -120,6 +124,21 @@ public class WalkOnTheEdgesManager
       return footContactStates;
    }
 
+   /**
+    * Checks whether or not the robot state is proper for toe-off when in double support, and sets the {@link WalkOnTheEdgesManager#doToeOff} variable accordingly.
+    * These checks include:
+    *   doToeOffIfPossible
+    *   desiredECMP location being within the support polygon account for toe-off, if {@link WalkingControllerParameters#checkECMPLocationToTriggerToeOff()} is true.
+    *   desiredICP location being within the leading foot base of support.
+    *   currentICP location being within the leading foot base of support.
+    *   needToSwitchToToeOffForAnkleLimit
+    * If able and the ankles are at the joint limits, transitions to toe-off. Then checks the current state being with the base of support. Then checks the
+    * positioning of the leading leg to determine if it is acceptable.
+    * @param trailingLeg robot side for the trailing leg
+    * @param desiredECMP current desired ECMP from ICP feedback.
+    * @param desiredICP current desired ICP from the reference trajectory.
+    * @param currentICP current ICP based on the robot state.
+    */
    public void updateToeOffStatus(RobotSide trailingLeg, FramePoint2d desiredECMP, FramePoint2d desiredICP, FramePoint2d currentICP)
    {
       if (!doToeOffIfPossible.getBooleanValue())
@@ -151,8 +170,22 @@ public class WalkOnTheEdgesManager
          isDesiredECMPOKForToeOff.set(true);
       }
 
-      isDesiredICPOKForToeOff.set(leadingFootSupportPolygon.isPointInside(desiredICP));
-      isCurrentICPOKForToeOff.set(leadingFootSupportPolygon.isPointInside(currentICP));
+      boolean isDesiredICPOKForToeOff, isCurrentICPOKForToeOff;
+      if (icpProximityToLeadingFootForToeOff.getDoubleValue() > 0.0)
+      {
+         isDesiredICPOKForToeOff =
+               onToesSupportPolygon.isPointInside(desiredICP) && leadingFootSupportPolygon.distance(desiredICP) < icpProximityToLeadingFootForToeOff.getDoubleValue();
+         isCurrentICPOKForToeOff =
+               onToesSupportPolygon.isPointInside(currentICP) && leadingFootSupportPolygon.distance(currentICP) < icpProximityToLeadingFootForToeOff.getDoubleValue();
+      }
+      else
+      {
+         isDesiredICPOKForToeOff = leadingFootSupportPolygon.isPointInside(desiredICP);
+         isCurrentICPOKForToeOff = leadingFootSupportPolygon.isPointInside(currentICP);
+      }
+
+      this.isDesiredICPOKForToeOff.set(isDesiredICPOKForToeOff);
+      this.isCurrentICPOKForToeOff.set(isCurrentICPOKForToeOff);
 
       boolean needToSwitchToToeOffForAnkleLimit = checkAnkleLimitForToeOff(trailingLeg);
       if (needToSwitchToToeOffForAnkleLimit)
@@ -167,7 +200,44 @@ public class WalkOnTheEdgesManager
          return;
       }
 
-      if (!isDesiredICPOKForToeOff.getBooleanValue() || !isCurrentICPOKForToeOff.getBooleanValue())
+      if (!this.isDesiredICPOKForToeOff.getBooleanValue() || !this.isCurrentICPOKForToeOff.getBooleanValue())
+      {
+         doToeOff.set(false);
+         return;
+      }
+
+      isReadyToSwitchToToeOff(trailingLeg);
+   }
+
+   /**
+    * Checks whether or not the robot state is proper for toe-off when in single support, and sets the {@link WalkOnTheEdgesManager#doToeOff} variable accordingly.
+    * These checks include:
+    *   doToeOffIfPossibleInSingleSupport
+    *   needToSwitchToToeOffForAnkleLimit
+    *   isOnExitCMP
+    * If single support toe-off is enabled, the ankle is at its indicated limit, and the desired ECMP is on the exit ECMP,
+    * transitions to toe-off. Then checks the position of the leading leg to determine if it is acceptable.
+    * @param trailingLeg robot side for the trailing leg
+    * @param isOnExitCMP boolean as to whether or not the current ICP plan is attempting to use the exit CMP. Sets the variable {@link WalkOnTheEdgesManager#isDesiredECMPOKForToeOff}.
+    */
+   public void updateToeOffStatusSingleSupport(RobotSide trailingLeg, boolean isOnExitCMP)
+   {
+      if (!doToeOffIfPossibleInSingleSupport.getBooleanValue())
+      {
+         doToeOff.set(false);
+         isDesiredECMPOKForToeOff.set(false);
+         return;
+      }
+
+      isDesiredECMPOKForToeOff.set(isOnExitCMP);
+      boolean needToSwitchToTOeOffForAnkleLimit = checkAnkleLimitForToeOff(trailingLeg);
+      if (!needToSwitchToTOeOffForAnkleLimit)
+      {
+         doToeOff.set(false);
+         return;
+      }
+
+      if (!isDesiredECMPOKForToeOff.getBooleanValue())
       {
          doToeOff.set(false);
          return;

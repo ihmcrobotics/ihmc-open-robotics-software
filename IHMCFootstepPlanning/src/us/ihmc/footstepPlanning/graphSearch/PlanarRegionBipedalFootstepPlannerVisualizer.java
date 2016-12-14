@@ -41,11 +41,13 @@ public class PlanarRegionBipedalFootstepPlannerVisualizer implements BipedalFoot
    private final IntegerYoVariable planarRegionUpdateIndex = new IntegerYoVariable("planarRegionUpdateIndex", registry);
    private final DoubleYoVariable plannerTime = new DoubleYoVariable("plannerTime", registry);
 
+   private final YoFrameConvexPolygon2d leftFootstepStart, rightFootstepStart;
    private final YoFrameConvexPolygon2d leftFootstepGoal, rightFootstepGoal;
    private final YoFrameConvexPolygon2d leftFootstepUnderConsideration, rightFootstepUnderConsideration;
    private final YoFrameConvexPolygon2d leftAcceptedFootstep, rightAcceptedFootstep;
    private final YoFrameConvexPolygon2d leftRejectedFootstep, rightRejectedFootstep;
 
+   private final YoGraphicPolygon leftFootstepStartViz, rightFootstepStartViz;
    private final YoGraphicPolygon leftFootstepGoalViz, rightFootstepGoalViz;
    private final YoGraphicPolygon leftFootstepToExpandViz, rightFootstepToExpandViz;
    private final YoGraphicPolygon leftAcceptedFootstepViz, rightAcceptedFootstepViz;
@@ -54,7 +56,7 @@ public class PlanarRegionBipedalFootstepPlannerVisualizer implements BipedalFoot
    private final SideDependentList<ArrayList<YoGraphicPolygon>> solvedPlanFootstepsViz;
    private final SideDependentList<ArrayList<YoFrameConvexPolygon2d>> solvedPlanFootstepsPolygons;
    
-   private final SideDependentList<YoGraphicPolygon> footstepGoalsViz, footstepsUnderConsiderationViz, acceptedFootstepsViz, rejectedFootstepsViz;
+   private final SideDependentList<YoGraphicPolygon> footstepStartsViz, footstepGoalsViz, footstepsUnderConsiderationViz, acceptedFootstepsViz, rejectedFootstepsViz;
 
    private final BooleanYoVariable leftNodeIsAtGoal, rightNodeIsAtGoal;
    private final SideDependentList<BooleanYoVariable> nodeIsAtGoal;
@@ -79,6 +81,8 @@ public class PlanarRegionBipedalFootstepPlannerVisualizer implements BipedalFoot
 
       int maxNumberOfVertices = leftFootInSoleFrame.getNumberOfVertices();
 
+      leftFootstepStart = new YoFrameConvexPolygon2d("leftFootstepStart", worldFrame, maxNumberOfVertices, registry);
+      rightFootstepStart = new YoFrameConvexPolygon2d("rightFootstepStart", worldFrame, maxNumberOfVertices, registry);
       leftFootstepGoal = new YoFrameConvexPolygon2d("leftFootstepGoal", worldFrame, maxNumberOfVertices, registry);
       rightFootstepGoal = new YoFrameConvexPolygon2d("rightFootstepGoal", worldFrame, maxNumberOfVertices, registry);
       leftFootstepUnderConsideration = new YoFrameConvexPolygon2d("leftFootstepUnderConsideration", worldFrame, maxNumberOfVertices, registry);
@@ -88,6 +92,8 @@ public class PlanarRegionBipedalFootstepPlannerVisualizer implements BipedalFoot
       leftRejectedFootstep = new YoFrameConvexPolygon2d("leftRejectedFootstep", worldFrame, maxNumberOfVertices, registry);
       rightRejectedFootstep = new YoFrameConvexPolygon2d("rightRejectedFootstep", worldFrame, maxNumberOfVertices, registry);
 
+      leftFootstepStart.setConvexPolygon2d(leftFootInSoleFrame);
+      rightFootstepStart.setConvexPolygon2d(leftFootInSoleFrame);
       leftFootstepGoal.setConvexPolygon2d(leftFootInSoleFrame);
       rightFootstepGoal.setConvexPolygon2d(rightFootInSoleFrame);
       leftFootstepUnderConsideration.setConvexPolygon2d(leftFootInSoleFrame);
@@ -97,6 +103,8 @@ public class PlanarRegionBipedalFootstepPlannerVisualizer implements BipedalFoot
       leftRejectedFootstep.setConvexPolygon2d(leftFootInSoleFrame);
       rightRejectedFootstep.setConvexPolygon2d(rightFootInSoleFrame);
 
+      leftFootstepStartViz = new YoGraphicPolygon("leftFootstepStartViz", leftFootstepStart, "leftFootstepStartPose", "", registry, 1.0, YoAppearance.Gold());
+      rightFootstepStartViz = new YoGraphicPolygon("rightFootstepStartViz", rightFootstepStart, "rightFootstepStartPose", "", registry, 1.0, YoAppearance.Gold());
       leftFootstepGoalViz = new YoGraphicPolygon("leftFootstepGoalViz", leftFootstepGoal, "leftFootstepGoalPose", "", registry, 1.0, YoAppearance.Chocolate());
       rightFootstepGoalViz = new YoGraphicPolygon("rightFootstepGoalViz", rightFootstepGoal, "rightFootstepGoalPose", "", registry, 1.0, YoAppearance.Chocolate());
       leftFootstepToExpandViz = new YoGraphicPolygon("leftFootstepToExpandViz", leftFootstepUnderConsideration, "leftFootstepToExpandPose", "", registry, 1.0, YoAppearance.Yellow());
@@ -106,6 +114,8 @@ public class PlanarRegionBipedalFootstepPlannerVisualizer implements BipedalFoot
       leftRejectedFootstepViz = new YoGraphicPolygon("leftRejectedFootstepViz", leftRejectedFootstep, "leftRejectedFootstepPose", "", registry, 1.0, YoAppearance.Red());
       rightRejectedFootstepViz = new YoGraphicPolygon("rightRejectedFootstepViz", rightRejectedFootstep, "rightRejectedFootstepPose", "", registry, 1.0, YoAppearance.DarkRed());
 
+      leftFootstepStartViz.setPoseToNaN();
+      rightFootstepStartViz.setPoseToNaN();
       leftFootstepGoalViz.setPoseToNaN();
       rightFootstepGoalViz.setPoseToNaN();
       leftFootstepToExpandViz.setPoseToNaN();
@@ -115,6 +125,7 @@ public class PlanarRegionBipedalFootstepPlannerVisualizer implements BipedalFoot
       leftRejectedFootstepViz.setPoseToNaN();
       rightRejectedFootstepViz.setPoseToNaN();
 
+      footstepStartsViz = new SideDependentList<>(leftFootstepStartViz, rightFootstepStartViz);
       footstepGoalsViz = new SideDependentList<>(leftFootstepGoalViz, rightFootstepGoalViz);
       footstepsUnderConsiderationViz = new SideDependentList<>(leftFootstepToExpandViz, rightFootstepToExpandViz);
       acceptedFootstepsViz = new SideDependentList<>(leftAcceptedFootstepViz, rightAcceptedFootstepViz);
@@ -124,6 +135,8 @@ public class PlanarRegionBipedalFootstepPlannerVisualizer implements BipedalFoot
       rightNodeIsAtGoal = new BooleanYoVariable("rightNodeIsAtGoal", registry);
       nodeIsAtGoal = new SideDependentList<>(leftNodeIsAtGoal, rightNodeIsAtGoal);
 
+      graphicsListRegistry.registerYoGraphic("FootstepPlanner", leftFootstepStartViz);
+      graphicsListRegistry.registerYoGraphic("FootstepPlanner", rightFootstepStartViz);
       graphicsListRegistry.registerYoGraphic("FootstepPlanner", leftFootstepGoalViz);
       graphicsListRegistry.registerYoGraphic("FootstepPlanner", rightFootstepGoalViz);
       graphicsListRegistry.registerYoGraphic("FootstepPlanner", leftFootstepToExpandViz);
@@ -241,6 +254,30 @@ public class PlanarRegionBipedalFootstepPlannerVisualizer implements BipedalFoot
 
       moveUpSlightlyToEnsureVisible(footstepUnderConsiderationViz);
       footstepUnderConsiderationViz.update();
+      tickAndUpdate();
+   }
+
+
+   @Override
+   public void startNodeWasAdded(BipedalFootstepPlannerNode startNode)
+   {
+      plannerUpdateIndex.increment();
+      
+      RobotSide robotSide = startNode.getRobotSide();
+      hideExpandingFootstepViz();
+      
+      RigidBodyTransform soleTransform = new RigidBodyTransform();
+      startNode.getSoleTransform(soleTransform);
+
+      YoGraphicPolygon startNodeViz = footstepStartsViz.get(robotSide);
+      startNodeViz.setTransformToWorld(soleTransform);
+
+      moveUpSlightlyToEnsureVisible(startNodeViz);
+      startNodeViz.update();
+      
+      YoGraphicPolygon otherStartNodesViz = footstepStartsViz.get(robotSide.getOppositeSide());
+      otherStartNodesViz.setPoseToNaN();
+
       tickAndUpdate();
    }
 
