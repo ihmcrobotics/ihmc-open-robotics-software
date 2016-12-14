@@ -29,6 +29,7 @@ import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -496,7 +497,7 @@ public class WalkingMessageHandler
          }
          else
          {
-            Point3d[] trajectoryWaypoints = footstepData.getTrajectoryWaypoints();
+            RecyclingArrayList<Point3d> trajectoryWaypoints = footstepData.getTrajectoryWaypoints();
             footstep.setSwingWaypoints(trajectoryWaypoints);
          }
       }
