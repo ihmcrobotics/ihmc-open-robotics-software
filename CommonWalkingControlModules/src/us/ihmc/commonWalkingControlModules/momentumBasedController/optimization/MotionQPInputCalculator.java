@@ -277,7 +277,7 @@ public class MotionQPInputCalculator
       if (primaryBase != null)
       {
          // Compute task point Jacobian from primary base
-         long primaryJacobianId = geometricJacobianHolder.getOrCreateGeometricJacobian(primaryBase, endEffector, base.getBodyFixedFrame());
+         long primaryJacobianId = geometricJacobianHolder.getOrCreateGeometricJacobian(primaryBase, endEffector, primaryBase.getBodyFixedFrame());
          GeometricJacobian primaryJacobian = geometricJacobianHolder.getJacobian(primaryJacobianId);
 
          primaryPointJacobian.set(primaryJacobian, tempBodyFixedPoint);
@@ -285,12 +285,11 @@ public class MotionQPInputCalculator
          DenseMatrix64F primaryPointJacobianMatrix = primaryPointJacobian.getJacobianMatrix();
 
          tempPrimaryTaskJacobian.reshape(taskSize, primaryPointJacobianMatrix.getNumCols());
-         CommonOps.mult(selectionMatrix, primaryJacobian.getJacobianMatrix(), tempPrimaryTaskJacobian);
+         CommonOps.mult(selectionMatrix, primaryPointJacobianMatrix, tempPrimaryTaskJacobian);
 
          tempFullPrimaryTaskJacobian.reshape(taskSize, numberOfDoFs);
          success = jointIndexHandler.compactBlockToFullBlock(primaryJacobian.getJointsInOrder(), tempPrimaryTaskJacobian, tempFullPrimaryTaskJacobian);
 
-         /* FIXME should we include the secondary weight option?
          boolean isJointUpstreamOfPrimaryBase = false;
 
          for (int i = jointsUsedInTask.length - 1; i >= 0; i--)
@@ -308,7 +307,6 @@ public class MotionQPInputCalculator
                   MatrixTools.scaleColumn(secondaryTaskJointsWeight.getDoubleValue(), tempJointIndices.get(j), tempTaskJacobian);
             }
          }
-         */
       }
 
       success = success && jointIndexHandler.compactBlockToFullBlock(jointsUsedInTask, tempTaskJacobian, motionQPInputToPack.taskJacobian);
