@@ -146,12 +146,10 @@ public class FlamingoStanceState extends SingleSupportState
    {
       loadFoot.set(true);
       loadFootStartTime.set(getTimeInCurrentState());
-      balanceManager.setSingleSupportTime(loadFootDuration.getDoubleValue());
-      balanceManager.setDoubleSupportTime(loadFootTransferDuration.getDoubleValue());
       balanceManager.clearICPPlan();
       balanceManager.addFootstepToPlan(walkingMessageHandler.getFootstepAtCurrentLocation(swingSide));
       balanceManager.setICPPlanSupportSide(supportSide);
-      balanceManager.initializeICPPlanForSingleSupport();
+      balanceManager.initializeICPPlanForSingleSupport(loadFootDuration.getDoubleValue(), loadFootTransferDuration.getDoubleValue());
 
       balanceManager.freezePelvisXYControl();
    }
