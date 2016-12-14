@@ -31,11 +31,16 @@ public class DampedLeastSquaresSolver implements LinearSolver<DenseMatrix64F>
       this.alpha = alpha;       
    }
 
+   /**
+    * Sets the damping factor to solve the damped least squares problem.
+    * @param alpha
+    */
    public void setAlpha(double alpha)
    {
       this.alpha = alpha;
    }
 
+   /** {@inheritDoc} */
    public boolean setA(DenseMatrix64F A)
    {
       this.A.set(A);
@@ -43,11 +48,20 @@ public class DampedLeastSquaresSolver implements LinearSolver<DenseMatrix64F>
       return true;
    }
 
+   /** {@inheritDoc} */
    public double quality()
    {
       return CommonOps.det(A);
    }
 
+   /** {@inheritDoc}
+    * <p>
+    *    In this instance, the problem is formulated as a damped least squares problem, with the damping factor set by {@link #setAlpha(double)}
+    * </p>
+    * <p>
+    *    min x^T alpha^2 x + (Ax - B)^T (Ax - B)
+    * </p>
+    */
    public void solve(DenseMatrix64F b, DenseMatrix64F x)
    {
       if (alpha == 0)
@@ -67,6 +81,14 @@ public class DampedLeastSquaresSolver implements LinearSolver<DenseMatrix64F>
       }
    }
 
+   /** {@inheritDoc}
+    * <p>
+    *    Finds the inverse of the A matrix set by {@link #setA(DenseMatrix64F)}, accounting for the damping term, alpha. Computes the damped psuedo-inverse by
+    * </p>
+    * <p>
+    *    A_inv = A^T (AA^T + alpha^2)^-1
+    * </p>
+    */
    public void invert(DenseMatrix64F A_inv)
    {
       if (alpha == 0)
@@ -86,16 +108,19 @@ public class DampedLeastSquaresSolver implements LinearSolver<DenseMatrix64F>
       }
    }
 
+   /** {@inheritDoc} */
    public boolean modifiesA()
    {
       return false;
    }
 
+   /** {@inheritDoc} */
    public boolean modifiesB()
    {
       return false;
    }
-   
+
+   /** {@inheritDoc} */
    @Override
    public SingularValueDecomposition<DenseMatrix64F> getDecomposition() {
        return null;
