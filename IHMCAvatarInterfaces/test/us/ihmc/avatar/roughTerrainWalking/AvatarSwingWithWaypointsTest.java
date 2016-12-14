@@ -14,6 +14,9 @@ import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage.FootstepOrigin;
+import us.ihmc.robotics.Axis;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.geometry.RigidBodyTransformGenerator;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
@@ -150,6 +153,52 @@ public abstract class AvatarSwingWithWaypointsTest implements MultiRobotTestInte
 
       drcSimulationTestHelper.send(footsteps);
       double simulationTime = (swingTime + transferTime) * steps + 1.0;
+      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime);
+   }
+
+   public void testSwingWithWaypointsRotated() throws SimulationExceededMaximumTimeException
+   {
+      String className = getClass().getSimpleName();
+      FlatGroundEnvironment environment = new FlatGroundEnvironment();
+      DRCStartingLocation startingLocation = DRCObstacleCourseStartingLocation.DEFAULT_BUT_ALMOST_PI;
+      DRCRobotModel robotModel = getRobotModel();
+      drcSimulationTestHelper = new DRCSimulationTestHelper(environment, className, startingLocation, simulationTestingParameters, robotModel);
+      ThreadTools.sleep(1000);
+      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
+
+      double swingTime = 2.0;
+      double transferTime = 0.8;
+      double stepLength = 0.3;
+      double stepWidth = 0.15;
+      double swingHeight = 0.1;
+      RobotSide robotSide = RobotSide.LEFT;
+
+      double yaw = startingLocation.getStartingLocationOffset().getYaw();
+      RigidBodyTransformGenerator generator = new RigidBodyTransformGenerator();
+      generator.rotate(yaw, Axis.Z);
+      RigidBodyTransform transform = generator.getRigidBodyTransformCopy();
+
+      FootstepDataListMessage footsteps = new FootstepDataListMessage(swingTime, transferTime);
+      double footstepY = robotSide == RobotSide.LEFT ? stepWidth : -stepWidth;
+      Point3d stepPosition = new Point3d(stepLength, footstepY, 0.0);
+      Quat4d stepOrientation = new Quat4d();
+      transform.transform(stepPosition);
+      transform.getRotation(stepOrientation);
+      FootstepDataMessage footstepData = new FootstepDataMessage(robotSide, stepPosition, stepOrientation);
+      footstepData.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
+      footsteps.add(footstepData);
+
+      // this should be a regular step
+      Point3d waypoint1 = new Point3d(stepLength * 0.15, footstepY, swingHeight);
+      Point3d waypoint2 = new Point3d(stepLength * 0.85, footstepY, swingHeight);
+      transform.transform(waypoint1);
+      transform.transform(waypoint2);
+
+      footstepData.setTrajectoryType(TrajectoryType.CUSTOM);
+      footstepData.setTrajectoryWaypoints(new Point3d[] {waypoint1, waypoint2});
+
+      drcSimulationTestHelper.send(footsteps);
+      double simulationTime = swingTime + transferTime + 1.0;
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime);
    }
 
