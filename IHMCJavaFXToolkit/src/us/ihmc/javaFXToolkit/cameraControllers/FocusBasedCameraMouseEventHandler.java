@@ -19,6 +19,7 @@ import javafx.event.EventHandler;
 import javafx.geometry.Point3D;
 import javafx.scene.Node;
 import javafx.scene.PerspectiveCamera;
+import javafx.scene.SubScene;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
@@ -345,7 +346,7 @@ public class FocusBasedCameraMouseEventHandler implements EventHandler<Event>
             {
                PickResult pickResult = event.getPickResult();
                Node intersectedNode = pickResult.getIntersectedNode();
-               if (intersectedNode == null)
+               if (intersectedNode == null || intersectedNode instanceof SubScene)
                   return;
                Point3D localPoint = pickResult.getIntersectedPoint();
                Point3D scenePoint = intersectedNode.getLocalToSceneTransform().transform(localPoint);
