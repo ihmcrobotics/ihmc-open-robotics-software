@@ -111,7 +111,6 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
       footstepPlanner = new SimplePlanarRegionBipedalAnytimeFootstepPlanner(footstepPlanningParameters, registry);
       SideDependentList<ConvexPolygon2d> footPolygonsInSoleFrame = FootstepPlannerForBehaviorsHelper.createDefaultFootPolygonsForAnytimePlannerAndPlannerToolbox(wholeBodyControllerParameters.getContactPointParameters());
       footstepPlanner.setFeetPolygons(footPolygonsInSoleFrame);
-      footstepPlanner.setExitAfterInitialSolution(false);
 
       this.yoTime = yoTime;
       maxNumberOfStepsToTake.set(1);
