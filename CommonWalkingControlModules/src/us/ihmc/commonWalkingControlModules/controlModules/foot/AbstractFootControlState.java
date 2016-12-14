@@ -30,6 +30,7 @@ public abstract class AbstractFootControlState extends FinishableState<Constrain
 
    protected final RobotSide robotSide;
    protected final RigidBody rootBody;
+   protected final RigidBody pelvis;
    protected final ContactableFoot contactableFoot;
 
    protected final FramePoint desiredPosition = new FramePoint(worldFrame);
@@ -58,7 +59,7 @@ public abstract class AbstractFootControlState extends FinishableState<Constrain
       rootBody = momentumBasedController.getTwistCalculator().getRootBody();
 
       FullHumanoidRobotModel fullRobotModel = footControlHelper.getMomentumBasedController().getFullRobotModel();
-      RigidBody pelvis = fullRobotModel.getPelvis();
+      pelvis = fullRobotModel.getPelvis();
       RigidBody foot = fullRobotModel.getFoot(robotSide);
       OneDoFJoint kneeJoint = fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE_PITCH);
 
