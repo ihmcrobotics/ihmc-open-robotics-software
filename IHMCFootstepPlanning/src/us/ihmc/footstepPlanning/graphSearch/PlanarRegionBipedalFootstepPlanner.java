@@ -101,17 +101,17 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
    @Override
    public final void setInitialStanceFoot(FramePose stanceFootPose, RobotSide initialSide)
    {
-      initialStanceFootWasSet = true;
       stanceFootPose.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
       this.initialSide = initialSide;
       stanceFootPose.getPose(initialFootPose);
+      initialStanceFootWasSet = true;
    }
 
    @Override
    public final void setGoal(FootstepPlannerGoal goal)
    {
-      goalWasSet = true;
       planarRegionPotentialNextStepCalculator.setGoal(goal);
+      goalWasSet = true;
    }
 
    @Override

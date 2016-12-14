@@ -44,8 +44,6 @@ public interface DRCRobotModel extends SimulatedWholeBodyControllerParameters
 
    public abstract FootstepPlanningParameterization getFootstepParameters();
 
-   public abstract WalkingControllerParameters getDrivingControllerParameters();
-
    public abstract StateEstimatorParameters getStateEstimatorParameters();
 
    public abstract DRCRobotPhysicalProperties getPhysicalProperties();
@@ -56,13 +54,9 @@ public interface DRCRobotModel extends SimulatedWholeBodyControllerParameters
 
    public abstract DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> getDefaultRobotInitialSetup(double groundHeight, double initialYaw);
 
-   public abstract ScsCollisionConfigure getPhysicsConfigure(FloatingRootJointRobot robotModel);
-
    public abstract void setEnableJointDamping(boolean enableJointDamping);
 
    public abstract boolean getEnableJointDamping();
-
-   public abstract void setJointDamping(FloatingRootJointRobot simulatedRobot);
 
    public abstract HandModel getHandModel();
 
