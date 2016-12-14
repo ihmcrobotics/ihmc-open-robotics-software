@@ -95,6 +95,7 @@ public class KinematicsToolboxController extends ToolboxController
    private final SideDependentList<DenseMatrix64F> footSelectionMatrices = new SideDependentList<>();
    private final SideDependentList<FramePose> desiredFootPoses = new SideDependentList<>();
    private DenseMatrix64F chestSelectionMatrix = null;
+   private DenseMatrix64F pelvisSelectionMatrix = null;
 
    private final SideDependentList<YoGraphicCoordinateSystem> desiredHandPosesViz = new SideDependentList<>();
    private final SideDependentList<YoGraphicCoordinateSystem> desiredFootPosesViz = new SideDependentList<>();
@@ -238,6 +239,7 @@ public class KinematicsToolboxController extends ToolboxController
          FrameOrientation desiredPelvisOrientation = new FrameOrientation(worldFrame);
          command.getLastTrajectoryPoint().getOrientation(desiredPelvisOrientation);
          desiredPelvisOrientationReference.set(desiredPelvisOrientation);
+         pelvisSelectionMatrix = new DenseMatrix64F(command.getSelectionMatrix());
       }
 
    }
@@ -320,7 +322,8 @@ public class KinematicsToolboxController extends ToolboxController
          Twist desiredChestTwist = computeDesiredTwist(desiredChestOrientation, chest, chestSelectionMatrix, tempErrorMagnitude);
          newSolutionQuality += tempErrorMagnitude.doubleValue();
          ReferenceFrame chestFrame = chest.getBodyFixedFrame();
-         FrameVector desiredChestAngularVelocity = computeDesiredAngularVelocity(desiredChestOrientation, chestFrame);
+         FrameVector desiredChestAngularVelocity = new FrameVector();
+         desiredChestTwist.getAngularVelocityInBaseFrame(desiredChestAngularVelocity); 
          SpatialVelocityCommand spatialVelocityCommand = new SpatialVelocityCommand();
          spatialVelocityCommand.set(elevator, chest);
          spatialVelocityCommand.setAngularVelocity(chestFrame, elevatorFrame, desiredChestAngularVelocity);
@@ -333,11 +336,15 @@ public class KinematicsToolboxController extends ToolboxController
       if (desiredPelvisOrientation != null)
       {
          RigidBody pelvis = desiredFullRobotModel.getPelvis();
+         Twist desiredPelvisTwist = computeDesiredTwist(desiredPelvisOrientation, pelvis, pelvisSelectionMatrix, tempErrorMagnitude);
+         newSolutionQuality += tempErrorMagnitude.doubleValue();
          ReferenceFrame pelvisFrame = pelvis.getBodyFixedFrame();
-         FrameVector desiredPelvisAngularVelocity = computeDesiredAngularVelocity(desiredPelvisOrientation, pelvisFrame);
+         FrameVector desiredPelvisAngularVelocity = new FrameVector();
+         desiredPelvisTwist.getAngularVelocityInBaseFrame(desiredPelvisAngularVelocity); 
          SpatialVelocityCommand spatialVelocityCommand = new SpatialVelocityCommand();
          spatialVelocityCommand.set(elevator, pelvis);
          spatialVelocityCommand.setAngularVelocity(pelvisFrame, elevatorFrame, desiredPelvisAngularVelocity);
+         spatialVelocityCommand.set(desiredPelvisTwist, pelvisSelectionMatrix);
          spatialVelocityCommand.setWeight(pelvisOrientationWeight.getDoubleValue());
          ret.addCommand(spatialVelocityCommand);
       }
@@ -416,7 +423,7 @@ public class KinematicsToolboxController extends ToolboxController
       desiredTwist.getMatrix(spatialError, 0);
       subspaceError.reshape(selectionMatrix.getNumRows(), 1);
       CommonOps.mult(selectionMatrix, spatialError, subspaceError);
-      errorMagnitude.setValue(NormOps.normP2(subspaceError)/10);
+      errorMagnitude.setValue(NormOps.normP2(subspaceError));
       desiredTwist.scale(1.0 / updateDT);
 
       return desiredTwist;
@@ -500,6 +507,10 @@ public class KinematicsToolboxController extends ToolboxController
       MatrixTools.removeRow(chestSelectionMatrix, 3);
 
       desiredPelvisOrientationReference.set(null);
+      pelvisSelectionMatrix = CommonOps.identity(6);
+      MatrixTools.removeRow(pelvisSelectionMatrix, 5);
+      MatrixTools.removeRow(pelvisSelectionMatrix, 4);
+      MatrixTools.removeRow(pelvisSelectionMatrix, 3);
 
       RobotConfigurationData robotConfigurationData = latestRobotConfigurationDataReference.getAndSet(null);
       if (robotConfigurationData == null)

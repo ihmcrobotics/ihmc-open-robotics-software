@@ -46,10 +46,12 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
    private final BooleanYoVariable hasSentMessageToController;
 
    private final SideDependentList<DenseMatrix64F> handSelectionMatrices = new SideDependentList<>(CommonOps.identity(6), CommonOps.identity(6));
-   private final DenseMatrix64F chestSelectionMatrix = initializeChestSelctionMatrix();
+   private final DenseMatrix64F chestSelectionMatrix = initializeAngularSelctionMatrix();
+   private final DenseMatrix64F pelvisSelectionMatrix = initializeAngularSelctionMatrix();
    private final SideDependentList<YoFramePoint> yoDesiredHandPositions = new SideDependentList<>();
    private final SideDependentList<YoFrameQuaternion> yoDesiredHandOrientations = new SideDependentList<>();
    private final YoFrameQuaternion yoDesiredChestOrientation;
+   private final YoFrameQuaternion yoDesiredPelvisOrientation;
    private final DoubleYoVariable trajectoryTime;
 
    private final KinematicsToolboxOutputConverter outputConverter;
@@ -99,6 +101,7 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
       }
 
       yoDesiredChestOrientation = new YoFrameQuaternion(behaviorName + "DesiredChest", worldFrame, registry);
+      yoDesiredPelvisOrientation = new YoFrameQuaternion(behaviorName + "DesiredPelvis", worldFrame, registry);
 
       outputConverter = new KinematicsToolboxOutputConverter(fullRobotModelFactory);
 
@@ -107,7 +110,7 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
       clear();
    }
 
-   private DenseMatrix64F initializeChestSelctionMatrix()
+   private DenseMatrix64F initializeAngularSelctionMatrix()
    {
       DenseMatrix64F selectionMatrix = new DenseMatrix64F(3, 6);
       selectionMatrix.set(0, 0, 1.0);
@@ -121,6 +124,7 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
       currentSolutionQuality.set(Double.POSITIVE_INFINITY);
 
       yoDesiredChestOrientation.setToNaN();
+      yoDesiredPelvisOrientation.setToNaN();
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -206,6 +210,25 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
       double[] data = ArrayUtils.addAll(controlledOrientationAxes, controlledPositionAxes);
       organizeDataInSelectionMatrix(selectionMatrix, data);
    }
+   
+   public void setDesiredPelvisOrientation(FrameOrientation desiredPelvisOrientation)
+   {
+      yoDesiredPelvisOrientation.setAndMatchFrame(desiredPelvisOrientation);
+   }
+
+   public void setPelvisAngularControl(boolean roll, boolean pitch, boolean yaw )
+   {
+      double[] controlledPositionAxes = new double[] {0.0, 0.0, 0.0};
+      double[] controlledOrientationAxes = new double[] {(roll)? 1.0 : 0.0, (pitch)? 1.0 : 0.0, (yaw)? 1.0 : 0.0 };
+      setPelvisControlledAxes(controlledPositionAxes, controlledOrientationAxes);
+   }
+
+   public void setPelvisControlledAxes(double[] controlledPositionAxes, double[] controlledOrientationAxes)
+   {
+      DenseMatrix64F selectionMatrix = pelvisSelectionMatrix;
+      double[] data = ArrayUtils.addAll(controlledOrientationAxes, controlledPositionAxes);
+      organizeDataInSelectionMatrix(selectionMatrix, data);
+   }
 
    public double getSolutionQuality()
    {
@@ -259,12 +282,17 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
          chestTrajectoryMessage = new ChestTrajectoryMessage(0.0, desiredChestOrientation);
       }
       
-      ReferenceFrame pelvisFrame = fullRobotModel.getPelvis().getBodyFixedFrame();
-      Quat4d desiredPelvisOrientation = new Quat4d();
-      FrameOrientation desiredPelvisFrame = new FrameOrientation(pelvisFrame);
-      desiredPelvisFrame.changeFrame(worldFrame);
-      desiredPelvisFrame.getQuaternion(desiredPelvisOrientation);
-      pelvisOrientationTrajectoryMessage = new PelvisOrientationTrajectoryMessage(0.0, desiredPelvisOrientation);
+      if (yoDesiredPelvisOrientation.containsNaN())
+      {
+         pelvisOrientationTrajectoryMessage = null;
+      }
+      else
+      {
+         YoFrameQuaternion yoDesiredPelvisQuaternion = yoDesiredPelvisOrientation;
+         Quat4d desiredPelvisOrientation = new Quat4d();
+         yoDesiredPelvisQuaternion.get(desiredPelvisOrientation);
+         pelvisOrientationTrajectoryMessage = new PelvisOrientationTrajectoryMessage(0.0, desiredPelvisOrientation);
+      }
    }
 
    @Override
@@ -291,6 +319,7 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
 
          if (pelvisOrientationTrajectoryMessage != null)
          {
+            pelvisOrientationTrajectoryMessage.setSelectionMatrix(pelvisSelectionMatrix);
             pelvisOrientationTrajectoryMessage.setDestination(PacketDestination.KINEMATICS_TOOLBOX_MODULE);
             sendPacket(pelvisOrientationTrajectoryMessage);
          }

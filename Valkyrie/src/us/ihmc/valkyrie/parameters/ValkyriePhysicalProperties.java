@@ -7,7 +7,7 @@ import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
-public class ValkyriePhysicalProperties extends DRCRobotPhysicalProperties
+public class ValkyriePhysicalProperties implements DRCRobotPhysicalProperties
 {  
    public static final double footsizeReduction = 0.04;
    

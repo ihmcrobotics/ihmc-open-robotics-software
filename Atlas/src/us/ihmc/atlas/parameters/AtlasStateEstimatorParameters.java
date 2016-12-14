@@ -196,7 +196,7 @@ public class AtlasStateEstimatorParameters extends StateEstimatorParameters
    @Override
    public boolean enableIMUYawDriftCompensation()
    {
-      return true;
+      return false;
    }
 
    @Override
