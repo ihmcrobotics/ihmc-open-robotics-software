@@ -22,6 +22,7 @@ public abstract class FootstepPlanningParameterization
    protected double reverseStepWidth = 0.25;
    protected double shuffleStepLength = 0.25;
    protected double shuffleStepWidth = 0.21;
+   protected double turningStepWidth = 0.2;
 
    public List<FootstepOffset> getOffsets(FootstepPlanState currentState)
    {
@@ -127,5 +128,10 @@ public abstract class FootstepPlanningParameterization
    public void setMinSupportPolygonArea(double minSupportPolygonArea)
    {
       this.minSupportPolygonArea = minSupportPolygonArea;
+   }
+
+   public double getTurningStepWidth()
+   {
+      return turningStepWidth ;
    }
 }
