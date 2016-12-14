@@ -121,11 +121,11 @@ public class Footstep
       return swingWaypoints;
    }
 
-   public void setSwingWaypoints(Point3d[] trajectoryWaypoints)
+   public void setSwingWaypoints(RecyclingArrayList<Point3d> trajectoryWaypoints)
    {
       swingWaypoints.clear();
-      for (int i = 0; i < trajectoryWaypoints.length; i++)
-         swingWaypoints.add().set(trajectoryWaypoints[i]);
+      for (int i = 0; i < trajectoryWaypoints.size(); i++)
+         swingWaypoints.add().set(trajectoryWaypoints.get(i));
    }
 
    public double getSwingHeight()
