@@ -49,7 +49,7 @@ public abstract class FootstepPlannerOnFlatGroundTest implements PlanningTest
       if (visualize())
          PlanningTestTools.visualizeAndSleep(null, footstepPlan, goalPose3d);
 
-      if (assertPlannerReturnedResult) assertTrue(PlanningTestTools.isGoalWithinFeet(goalPose3d, footstepPlan));
+      if (assertPlannerReturnedResult) assertTrue(PlanningTestTools.isGoalNextToLastStep(goalPose3d, footstepPlan));
    }
 
    public void testATightTurn()
@@ -77,7 +77,7 @@ public abstract class FootstepPlannerOnFlatGroundTest implements PlanningTest
       FootstepPlan footstepPlan =
             PlanningTestTools.runPlanner(getPlanner(), initialStanceFootPose3d, initialStanceFootSide, goalPose3d, null, assertPlannerReturnedResult);
 
-      if (assertPlannerReturnedResult) assertTrue(PlanningTestTools.isGoalWithinFeet(goalPose3d, footstepPlan));
+      if (assertPlannerReturnedResult) assertTrue(PlanningTestTools.isGoalNextToLastStep(goalPose3d, footstepPlan));
       if (assertPlannerReturnedResult) assertTrue(footstepPlan.getNumberOfSteps() < 30);
 
       if (visualize())
@@ -111,7 +111,7 @@ public abstract class FootstepPlannerOnFlatGroundTest implements PlanningTest
 
       if (visualize())
          PlanningTestTools.visualizeAndSleep(null, footstepPlan, goalPose3d);
-      if (assertPlannerReturnedResult) assertTrue(PlanningTestTools.isGoalWithinFeet(goalPose3d, footstepPlan));
+      if (assertPlannerReturnedResult) assertTrue(PlanningTestTools.isGoalNextToLastStep(goalPose3d, footstepPlan));
    }
 
    public void testJustTurnInPlace()
@@ -141,7 +141,7 @@ public abstract class FootstepPlannerOnFlatGroundTest implements PlanningTest
 
       if (visualize())
          PlanningTestTools.visualizeAndSleep(null, footstepPlan, goalPose3d);
-      if (assertPlannerReturnedResult) assertTrue(PlanningTestTools.isGoalWithinFeet(goalPose3d, footstepPlan));
+      if (assertPlannerReturnedResult) assertTrue(PlanningTestTools.isGoalNextToLastStep(goalPose3d, footstepPlan));
    }
 
    public void testRandomPoses()
@@ -171,6 +171,6 @@ public abstract class FootstepPlannerOnFlatGroundTest implements PlanningTest
 
       if (visualize())
          PlanningTestTools.visualizeAndSleep(null, footstepPlan, goalPose3d);
-      if (assertPlannerReturnedResult) assertTrue(PlanningTestTools.isGoalWithinFeet(goalPose3d, footstepPlan));
+      if (assertPlannerReturnedResult) assertTrue(PlanningTestTools.isGoalNextToLastStep(goalPose3d, footstepPlan));
    }
 }
