@@ -58,7 +58,7 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
    {
       parentRegistry.addChild(registry);
 
-      planarRegionPotentialNextStepCalculator = new PlanarRegionPotentialNextStepCalculator(parameters, parentRegistry);
+      planarRegionPotentialNextStepCalculator = new PlanarRegionPotentialNextStepCalculator(parameters, parentRegistry, null);
       exitAfterInitialSolution.set(true);
       timeout.set(Double.POSITIVE_INFINITY);
    }
