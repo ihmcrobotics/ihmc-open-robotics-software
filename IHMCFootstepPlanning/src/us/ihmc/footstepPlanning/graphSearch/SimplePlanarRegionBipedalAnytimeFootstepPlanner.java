@@ -169,6 +169,7 @@ public class SimplePlanarRegionBipedalAnytimeFootstepPlanner extends PlanarRegio
             notifiyListenersStartNodeWasAdded(startNode);
          }
 
+         startNode.setParentNode(null);
          initialSide = startNode.getRobotSide();
          startNode.getSoleTransform(initialFootPose);
       }
