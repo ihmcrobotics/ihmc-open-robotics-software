@@ -124,55 +124,6 @@ public class MotionQPInputCalculator
 
       nullspaceCalculator.setPseudoInverseAlpha(nullspaceProjectionAlpha.getDoubleValue());
 
-      int taskSize = 0;
-
-      for (int chainIndex = 0; chainIndex < privilegedConfigurationHandler.getNumberOfChains(); chainIndex++)
-      {
-         RigidBody chainBase = privilegedConfigurationHandler.getChainBase(chainIndex);
-         RigidBody chainEndEffector = privilegedConfigurationHandler.getChainEndEffector(chainIndex);
-
-         long chainJacobianId = geometricJacobianHolder.getOrCreateGeometricJacobian(chainBase, chainEndEffector, chainEndEffector.getBodyFixedFrame());
-         GeometricJacobian chainJacobian = geometricJacobianHolder.getJacobian(chainJacobianId);
-         InverseDynamicsJoint[] chainJoints = chainJacobian.getJointsInOrder();
-
-         if (chainJoints.length == 0)
-            continue;
-
-         // Check that all the joints are indexed before doing the calculation.
-         if (!jointIndexHandler.areJointsIndexed(chainJoints))
-            continue;
-
-         int chainNumberOfDoFs = chainJacobian.getNumberOfColumns();
-         tempCompactJacobian.reshape(chainNumberOfDoFs, chainNumberOfDoFs);
-         CommonOps.setIdentity(tempCompactJacobian);
-         nullspaceCalculator.projectOntoNullspace(tempCompactJacobian, chainJacobian.getJacobianMatrix());
-
-         tempTaskJacobian.reshape(chainNumberOfDoFs, numberOfDoFs);
-
-         // Since we know here that all the joints are indexed this method call will succeed.
-         jointIndexHandler.compactBlockToFullBlock(chainJoints, tempCompactJacobian, tempTaskJacobian);
-//         recordTaskJacobian(tempTaskJacobian);
-
-         motionQPInputToPack.reshape(taskSize + chainNumberOfDoFs);
-         CommonOps.insert(tempTaskJacobian, motionQPInputToPack.taskJacobian, taskSize, 0);
-
-         for (int i = 0; i < chainNumberOfDoFs; i++)
-         {
-            try
-            {
-               OneDoFJoint chainJoint = (OneDoFJoint) chainJoints[i];
-               motionQPInputToPack.taskObjective.set(taskSize + i, 0, privilegedConfigurationHandler.getPrivilegedJointAcceleration(chainJoint));
-            }
-            catch (ClassCastException e)
-            {
-               throw new ClassCastException("Can only handle " + OneDoFJoint.class.getSimpleName() + ". Received unexpected joint: " + chainJoints[i].getName()
-                     + ", joint class: " + chainJoints[i].getClass().getSimpleName());
-            }
-         }
-
-         taskSize += chainNumberOfDoFs;
-      }
-
       DenseMatrix64F selectionMatrix = privilegedConfigurationHandler.getSelectionMatrix();
       int robotTaskSize = selectionMatrix.getNumRows();
 
@@ -184,14 +135,14 @@ public class MotionQPInputCalculator
 
          if (success)
          {
-            motionQPInputToPack.reshape(taskSize + robotTaskSize);
+            motionQPInputToPack.reshape(robotTaskSize);
             nullspaceCalculator.projectOntoNullspace(tempTaskJacobian, allTaskJacobian);
-            CommonOps.insert(tempTaskJacobian, motionQPInputToPack.taskJacobian, taskSize, 0);
-            CommonOps.insert(privilegedConfigurationHandler.getPrivilegedJointAccelerations(), motionQPInputToPack.taskObjective, taskSize, 0);
+            CommonOps.insert(tempTaskJacobian, motionQPInputToPack.taskJacobian, 0, 0);
+            CommonOps.insert(privilegedConfigurationHandler.getPrivilegedJointAccelerations(), motionQPInputToPack.taskObjective, 0, 0);
          }
       }
 
-      return taskSize > 0;
+      return robotTaskSize > 0;
    }
 
    public boolean computePrivilegedJointVelocities(MotionQPInput motionQPInputToPack)
