@@ -118,7 +118,6 @@ public class MotionQPInputCalculator
       motionQPInputToPack.setUseWeightScalar(false);
       CommonOps.insert(privilegedConfigurationHandler.getWeights(), motionQPInputToPack.taskWeightMatrix, numberOfDoFs, 0);
 
-
       nullspaceCalculator.setPseudoInverseAlpha(nullspaceProjectionAlpha.getDoubleValue());
 
       int taskSize = 0;
