@@ -41,8 +41,6 @@ public class SimplePlanarRegionBipedalAnytimeFootstepPlanner extends PlanarRegio
    private final FramePose tempFramePose = new FramePose();
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
 
-   private BipedalFootstepPlannerNode parentOfStartNode = null;
-
    public SimplePlanarRegionBipedalAnytimeFootstepPlanner(BipedalFootstepPlannerParameters parameters, YoVariableRegistry parentRegistry)
    {
       super(parameters, parentRegistry);
@@ -67,8 +65,6 @@ public class SimplePlanarRegionBipedalAnytimeFootstepPlanner extends PlanarRegio
    @Override
    protected void initialize()
    {
-      parentOfStartNode = null;
-
       stack.clear();
       startNode = new BipedalFootstepPlannerNode(initialSide, initialFootPose);
       notifiyListenersStartNodeWasAdded(startNode);
@@ -93,40 +89,40 @@ public class SimplePlanarRegionBipedalAnytimeFootstepPlanner extends PlanarRegio
 
       closestNodeToGoal = null;
       bestPlanYet.set(null);
-//      trimBestPlanToNewPlanarRegions();
+      //      trimBestPlanToNewPlanarRegions();
    }
 
-   private void trimBestPlanToNewPlanarRegions()
-   {
-//      List<BipedalFootstepPlannerNode> listOfNodes = FootstepPlanningUtils.createListOfNodesFromEndNode(closestNodeToGoal);
-//      PrintTools.info("trimming plan to new planar regions");
-//
-//      for (int i = 0; i < listOfNodes.size(); i++)
-//      {
-//         BipedalFootstepPlannerNode node = listOfNodes.get(i);
-//         boolean stillIsValid = planarRegionPotentialNextStepCalculator.snapNodeAndCheckIfAcceptableToExpand(node);
-//         PrintTools.info("trying to snap node with position " + node.getSolePosition());
-//
-//         if(!stillIsValid)
-//         {
-//            closestNodeToGoal = node.getParentNode();
-//            if(i < listOfNodes.size())
-//            {
-//               FootstepPlan trimmedBestPlan = FootstepPlanningUtils.createFootstepPlanFromEndNode(closestNodeToGoal);
-//               bestPlanYet.set(trimmedBestPlan);
-//            }
-//
-//            PrintTools.info("valid up to node " + i + " of " + listOfNodes.size());
-//            checkIfNearbyNodeAlreadyExistsAndStoreIfNot(node);
-//            break;
-//         }
-//         else
-//         {
-//            checkIfNearbyNodeAlreadyExistsAndStoreIfNot(node);
-//            PrintTools.info("valid node");
-//         }
-//      }
-   }
+   //   private void trimBestPlanToNewPlanarRegions()
+   //   {
+   //      List<BipedalFootstepPlannerNode> listOfNodes = FootstepPlanningUtils.createListOfNodesFromEndNode(closestNodeToGoal);
+   //      PrintTools.info("trimming plan to new planar regions");
+   //
+   //      for (int i = 0; i < listOfNodes.size(); i++)
+   //      {
+   //         BipedalFootstepPlannerNode node = listOfNodes.get(i);
+   //         boolean stillIsValid = planarRegionPotentialNextStepCalculator.snapNodeAndCheckIfAcceptableToExpand(node);
+   //         PrintTools.info("trying to snap node with position " + node.getSolePosition());
+   //
+   //         if(!stillIsValid)
+   //         {
+   //            closestNodeToGoal = node.getParentNode();
+   //            if(i < listOfNodes.size())
+   //            {
+   //               FootstepPlan trimmedBestPlan = FootstepPlanningUtils.createFootstepPlanFromEndNode(closestNodeToGoal);
+   //               bestPlanYet.set(trimmedBestPlan);
+   //            }
+   //
+   //            PrintTools.info("valid up to node " + i + " of " + listOfNodes.size());
+   //            checkIfNearbyNodeAlreadyExistsAndStoreIfNot(node);
+   //            break;
+   //         }
+   //         else
+   //         {
+   //            checkIfNearbyNodeAlreadyExistsAndStoreIfNot(node);
+   //            PrintTools.info("valid node");
+   //         }
+   //      }
+   //   }
 
    @Override
    public void executingFootstep(SimpleFootstep footstep)
@@ -137,7 +133,7 @@ public class SimplePlanarRegionBipedalAnytimeFootstepPlanner extends PlanarRegio
    private void replaceStartNode()
    {
       SimpleFootstep newStartingFootstep = latestExecutedFootstepReference.getAndSet(null);
-      if(newStartingFootstep != null)
+      if (newStartingFootstep != null)
       {
          newStartingFootstep.getSoleFramePose(tempFramePose);
          tempFramePose.changeFrame(ReferenceFrame.getWorldFrame());
@@ -163,13 +159,12 @@ public class SimplePlanarRegionBipedalAnytimeFootstepPlanner extends PlanarRegio
             }
          }
 
-         if(!newStartNodeAlreadyExists)
+         if (!newStartNodeAlreadyExists)
          {
             initialSide = newStartingFootstep.getRobotSide();
             newStartingFootstep.getSoleFramePose(tempFramePose);
             tempFramePose.getRigidBodyTransform(initialFootPose);
 
-            parentOfStartNode = startNode;
             startNode = new BipedalFootstepPlannerNode(initialSide, initialFootPose);
             notifiyListenersStartNodeWasAdded(startNode);
          }
@@ -182,7 +177,7 @@ public class SimplePlanarRegionBipedalAnytimeFootstepPlanner extends PlanarRegio
    private void replaceGoalPose()
    {
       FootstepPlannerGoal newGoal = footstepPlannerGoalReference.getAndSet(null);
-      if(newGoal != null)
+      if (newGoal != null)
       {
          planarRegionPotentialNextStepCalculator.setGoal(newGoal);
       }
@@ -194,7 +189,7 @@ public class SimplePlanarRegionBipedalAnytimeFootstepPlanner extends PlanarRegio
       ArrayList<BipedalFootstepPlannerNode> childrenNodes = new ArrayList<>();
       node.getChildren(childrenNodes);
 
-      for(BipedalFootstepPlannerNode childNode : childrenNodes)
+      for (BipedalFootstepPlannerNode childNode : childrenNodes)
       {
          recursivelyMarkAsDead(childNode);
       }
