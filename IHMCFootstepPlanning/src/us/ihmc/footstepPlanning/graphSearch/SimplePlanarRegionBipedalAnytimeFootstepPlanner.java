@@ -205,6 +205,12 @@ public class SimplePlanarRegionBipedalAnytimeFootstepPlanner extends PlanarRegio
          replaceGoalPose();
          checkForNewPlanarRegionsList();
 
+         if (stack.isEmpty())
+         {
+            ThreadTools.sleep(100);
+            continue;
+         }
+
          BipedalFootstepPlannerNode nodeToExpand;
          // find a path to the goal fast using depth first then refine using breath first
          if (bestGoalNode == null)
