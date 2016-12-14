@@ -49,7 +49,7 @@ public class PlanarRegionPotentialNextStepCalculatorTest
 
       BipedalFootstepPlannerParameters parameters = createPlannerParameters(registry);
 
-      PlanarRegionPotentialNextStepCalculator calculator = new PlanarRegionPotentialNextStepCalculator(parameters, registry);
+      PlanarRegionPotentialNextStepCalculator calculator = new PlanarRegionPotentialNextStepCalculator(parameters, registry, null);
 
       YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
       SideDependentList<ConvexPolygon2d> footPolygonsInSoleFrame = PlanningTestTools.createDefaultFootPolygons();
