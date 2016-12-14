@@ -30,8 +30,8 @@ import static org.bytedeco.javacpp.caffe.TEST;
 public class ValveDetector
 {
    private static final Logger logger = Logger.getLogger(caffe.class.getSimpleName());
-   public static final int NETWORK_OUTPUT_WIDTH = 64;
-   public static final int NETWORK_OUTPUT_HEIGHT = 32;
+   private static int NETWORK_OUTPUT_WIDTH;
+   private static int NETWORK_OUTPUT_HEIGHT;
 
    private static FloatNet caffe_net;
    private static final Object caffeNetLock = new Object();
@@ -104,6 +104,8 @@ public class ValveDetector
       // Instantiate the caffe net.
       caffe_net = new FloatNet(model, TEST);
       caffe_net.CopyTrainedLayersFrom(weights);
+      NETWORK_OUTPUT_WIDTH = caffe_net.output_blobs().get(0).shape(3);
+      NETWORK_OUTPUT_HEIGHT = caffe_net.output_blobs().get(0).shape(2);
    }
 
    public ValveDetector() throws Exception
@@ -155,10 +157,13 @@ public class ValveDetector
    {
       FloatBlobVector output;
       PreprocessedImage processed;
+      int inputWidth, inputHeight;
       synchronized (caffeNetLock)
       {
          IntPointer shape = caffe_net.blob_by_name("data").shape();
-         processed = processImage(image, shape.get(3), shape.get(2));
+         inputWidth = shape.get(3);
+         inputHeight = shape.get(2);
+         processed = processImage(image, inputWidth, inputHeight);
          caffe_net.blob_by_name("data").set_cpu_data(processed.data);
 
          output = caffe_net.Forward();
@@ -168,12 +173,12 @@ public class ValveDetector
       float[] networkOutput = new float[outputLayer.count()];
       data.get(networkOutput);
 
-      final float outputScaleX = 64.0f / 1024;
-      final float outputScaleY = 32.0f / 512;
-      List<Component> components = findComponents(binarize(networkOutput, 64, 32));
+      final float outputScaleX = NETWORK_OUTPUT_WIDTH / (float)inputWidth;
+      final float outputScaleY = NETWORK_OUTPUT_HEIGHT / (float)inputHeight;
+      List<Component> components = findComponents(binarize(networkOutput, NETWORK_OUTPUT_WIDTH, NETWORK_OUTPUT_HEIGHT));
       if (components.isEmpty())
       {
-         Rectangle focusCrop = findFocusCrop(processed, image, networkOutput, 64, 32, outputScaleX, outputScaleY);
+         Rectangle focusCrop = findFocusCrop(processed, image, networkOutput, NETWORK_OUTPUT_WIDTH, NETWORK_OUTPUT_HEIGHT, outputScaleX, outputScaleY);
          if (focusCrop == null)
             return Pair.of(Collections.emptyList(), networkOutput);
          BufferedImage cropped = image.getSubimage(focusCrop.x, focusCrop.y, focusCrop.width, focusCrop.height);
