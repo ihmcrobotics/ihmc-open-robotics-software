@@ -24,6 +24,14 @@ public class AtlasSwingWithWaypointsTest extends AvatarSwingWithWaypointsTest
    }
 
    @Override
+   @ContinuousIntegrationTest(estimatedDuration = 30.0)
+   @Test(timeout = 500000)
+   public void testSwingWithWaypointsRotated() throws SimulationExceededMaximumTimeException
+   {
+      super.testSwingWithWaypointsRotated();
+   }
+
+   @Override
    public DRCRobotModel getRobotModel()
    {
       return new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, DRCRobotModel.RobotTarget.SCS, false);
