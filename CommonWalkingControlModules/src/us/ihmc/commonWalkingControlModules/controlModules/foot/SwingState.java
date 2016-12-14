@@ -33,6 +33,7 @@ import us.ihmc.robotics.math.trajectories.WrapperForMultiplePositionTrajectoryGe
 import us.ihmc.robotics.math.trajectories.providers.YoSE3ConfigurationProvider;
 import us.ihmc.robotics.math.trajectories.providers.YoVariableDoubleProvider;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
@@ -98,6 +99,7 @@ public class SwingState extends AbstractUnconstrainedState
 
    private final ReferenceFrame footFrame;
    private final ReferenceFrame soleFrame;
+   private final ReferenceFrame soleFrameZUp;
    private final ReferenceFrame toeFrame;
    private final ReferenceFrame stanceFootFrame;
    private final ReferenceFrame controlFrame;
@@ -137,6 +139,7 @@ public class SwingState extends AbstractUnconstrainedState
       footFrame = contactableFoot.getFrameAfterParentJoint();
       toeFrame = createToeFrame(robotSide);
       soleFrame = footControlHelper.getMomentumBasedController().getReferenceFrames().getSoleFrame(robotSide);
+      soleFrameZUp = new ZUpFrame(worldFrame, soleFrame, namePrefix + "SoleZUp");
 
       controlToe = walkingControllerParameters.controlToeDuringSwing();
       controlFrame = controlToe ? toeFrame : footFrame;
@@ -410,13 +413,14 @@ public class SwingState extends AbstractUnconstrainedState
       if (trajectoryType == TrajectoryType.CUSTOM)
       {
          List<Point3d> swingWaypoints = footstep.getSwingWaypoints();
+         soleFrameZUp.update();
          controlFrame.getTransformToDesiredFrame(soleToControlFrame, soleFrame);
          this.swingWaypoints.clear();
          for (int i = 0; i < swingWaypoints.size(); i++)
          {
             FramePoint waypoint = this.swingWaypoints.add();
             waypoint.setIncludingFrame(worldFrame, swingWaypoints.get(i));
-            waypoint.changeFrame(soleFrame);
+            waypoint.changeFrame(soleFrameZUp);
             soleToControlFrame.transform(waypoint.getPoint());
             waypoint.changeFrame(worldFrame);
          }
