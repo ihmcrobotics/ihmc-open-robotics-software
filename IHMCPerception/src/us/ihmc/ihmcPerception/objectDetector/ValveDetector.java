@@ -442,21 +442,30 @@ public class ValveDetector
 
    private static boolean[][] binarize(float[] networkOutput, int w, int h)
    {
-      float min = networkOutput[0], max = networkOutput[0];
-      for (float pixel : networkOutput)
-      {
-         min = Math.min(min, pixel);
-         max = Math.max(max, pixel);
-      }
-      float norm = (max - min) == 0 ? 1 : 1 / (max - min);
-
       boolean[][] result = new boolean[h][w];
       for (int y = 0; y < h; y++)
       {
          for (int x = 0; x < w; x++)
          {
             float val = networkOutput[y * w + x];
-            result[y][x] = val > 0.2f && (val / norm) > 0.4f;
+            result[y][x] = val > 0.6f;
+         }
+      }
+
+      for (int y = 0; y < h; y++)
+      {
+         for (int x = 0; x < w; x++)
+         {
+            if (result[y][x])
+               continue;
+            for (int i = -1; i <= 1; i++)
+            {
+               for (int j = -1; j <= 1; j++)
+               {
+                  if (x + i >= 0 && x + i < w && y + j >= 0 && y + j < h && result[y][x])
+                     result[y][x] = networkOutput[y * w + x] >= 0.1;
+               }
+            }
          }
       }
 
