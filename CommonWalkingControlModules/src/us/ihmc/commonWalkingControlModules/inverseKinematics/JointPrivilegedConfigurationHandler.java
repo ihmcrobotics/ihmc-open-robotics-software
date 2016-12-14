@@ -29,7 +29,7 @@ public class JointPrivilegedConfigurationHandler
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final BooleanYoVariable isJointPrivilegedConfigurationEnabled = new BooleanYoVariable("isJointPrivilegedConfigurationEnabled", registry);
-   private final DoubleYoVariable weight = new DoubleYoVariable("jointPrivilegedConfigurationDefaultWeight", registry);
+   private final DoubleYoVariable defaultWeight = new DoubleYoVariable("jointPrivilegedConfigurationDefaultWeight", registry);
    private final DoubleYoVariable configurationGain = new DoubleYoVariable("jointPrivilegedConfigurationGain", registry);
    private final DoubleYoVariable velocityGain = new DoubleYoVariable("jointPrivilegedVelocityGain", registry);
    private final DoubleYoVariable maxVelocity = new DoubleYoVariable("jointPrivilegedConfigurationMaxVelocity", registry);
@@ -43,6 +43,12 @@ public class JointPrivilegedConfigurationHandler
    private final DenseMatrix64F privilegedVelocities;
    private final DenseMatrix64F privilegedAccelerations;
    private final DenseMatrix64F selectionMatrix;
+
+   private final DenseMatrix64F privilegedConfigurationWeights;
+   private final DenseMatrix64F privilegedConfigurationGains;
+   private final DenseMatrix64F privilegedVelocityGains;
+   private final DenseMatrix64F privilegedMaxVelocities;
+   private final DenseMatrix64F privilegedMaxAccelerations;
 
    private final DenseMatrix64F jointSquaredRangeOfMotions;
    private final DenseMatrix64F positionsAtMidRangeOfMotion;
@@ -70,6 +76,12 @@ public class JointPrivilegedConfigurationHandler
       privilegedAccelerations = new DenseMatrix64F(numberOfDoFs, 1);
       selectionMatrix = CommonOps.identity(numberOfDoFs);
 
+      privilegedConfigurationWeights = new DenseMatrix64F(numberOfDoFs, 1);
+      privilegedConfigurationGains = new DenseMatrix64F(numberOfDoFs, 1);
+      privilegedVelocityGains = new DenseMatrix64F(numberOfDoFs, 1);
+      privilegedMaxVelocities = new DenseMatrix64F(numberOfDoFs, 1);
+      privilegedMaxAccelerations = new DenseMatrix64F(numberOfDoFs, 1);
+
       jointSquaredRangeOfMotions = new DenseMatrix64F(numberOfDoFs, 1);
       positionsAtMidRangeOfMotion = new DenseMatrix64F(numberOfDoFs, 1);
       jointIndices = new HashMap<>(numberOfDoFs);
@@ -82,7 +94,7 @@ public class JointPrivilegedConfigurationHandler
       velocityGain.set(jointPrivilegedConfigurationParameters.getVelocityGain());
       maxVelocity.set(jointPrivilegedConfigurationParameters.getMaxVelocity());
       maxAcceleration.set(jointPrivilegedConfigurationParameters.getMaxAcceleration());
-      weight.set(jointPrivilegedConfigurationParameters.getWeight());
+      defaultWeight.set(jointPrivilegedConfigurationParameters.getWeight());
 
       for (int i = 0; i < numberOfDoFs; i++)
       {
@@ -149,9 +161,9 @@ public class JointPrivilegedConfigurationHandler
       for (int i = 0; i < numberOfDoFs; i++)
       {
          OneDoFJoint joint = oneDoFJoints[i];
-         double qdd = 2.0 * configurationGain.getDoubleValue() * (privilegedConfigurations.get(i, 0) - joint.getQ()) / jointSquaredRangeOfMotions.get(i, 0);
-         qdd -= velocityGain.getDoubleValue() * joint.getQd();
-         qdd = MathTools.clipToMinMax(qdd, maxAcceleration.getDoubleValue());
+         double qdd = 2.0 * privilegedConfigurationGains.get(i, 0) * (privilegedConfigurations.get(i, 0) - joint.getQ()) / jointSquaredRangeOfMotions.get(i, 0);
+         qdd -= privilegedVelocityGains.get(i, 0) * joint.getQd();
+         qdd = MathTools.clipToMinMax(qdd, privilegedMaxVelocities.get(i, 0));
          privilegedAccelerations.set(i, 0, qdd);
          yoJointPrivilegedAccelerations.get(joint).set(qdd);
       }
@@ -170,8 +182,9 @@ public class JointPrivilegedConfigurationHandler
 
       isJointPrivilegedConfigurationEnabled.set(command.isEnabled());
 
+      /*
       if (command.hasNewWeight())
-         weight.set(command.getWeight());
+         defaultWeight.set(command.getWeight());
       if (command.hasNewConfigurationGain())
          configurationGain.set(command.getConfigurationGain());
       if (command.hasNewVelocityGain())
@@ -180,7 +193,7 @@ public class JointPrivilegedConfigurationHandler
          maxVelocity.set(command.getMaxVelocity());
       if (command.hasNewMaxAcceleration())
          maxAcceleration.set(command.getMaxAcceleration());
-
+      */
    }
 
    private void processPrivilegedConfigurationCommands()
@@ -246,6 +259,8 @@ public class JointPrivilegedConfigurationHandler
                else
                   PrintTools.warn(this, "Overwriting privileged configuration option for joint " + configuredJoint.getName() + ".");
             }
+
+            processConfigurationWeightsAndGains(command, jointIndex);
          }
 
          for (int chainIndex = 0; chainIndex < command.getNumberOfChains(); chainIndex++)
@@ -264,6 +279,34 @@ public class JointPrivilegedConfigurationHandler
             }
          }
       }
+   }
+
+   private void processConfigurationWeightsAndGains(PrivilegedConfigurationCommand command, int jointIndex)
+   {
+      if (command.hasNewWeight())
+         privilegedConfigurationWeights.set(jointIndex, 0, command.getWeight());
+      else
+         privilegedConfigurationWeights.set(jointIndex, 0, defaultWeight.getDoubleValue());
+
+      if (command.hasNewConfigurationGain())
+         privilegedConfigurationGains.set(jointIndex, 0, command.getConfigurationGain());
+      else
+         privilegedConfigurationGains.set(jointIndex, 0, configurationGain.getDoubleValue());
+
+      if (command.hasNewVelocityGain())
+         privilegedVelocityGains.set(jointIndex, 0, command.getVelocityGain());
+      else
+         privilegedVelocityGains.set(jointIndex, 0, velocityGain.getDoubleValue());
+
+      if (command.hasNewMaxVelocity())
+         privilegedMaxVelocities.set(jointIndex, 0, command.getMaxVelocity());
+      else
+         privilegedMaxVelocities.set(jointIndex, 0, maxVelocity.getDoubleValue());
+
+      if (command.hasNewMaxAcceleration())
+         privilegedMaxAccelerations.set(jointIndex, 0, command.getMaxAcceleration());
+      else
+         privilegedMaxAccelerations.set(jointIndex, 0, maxAcceleration.getDoubleValue());
    }
 
    private void setPrivilegedConfigurationFromOption(PrivilegedConfigurationOption option, int jointIndex)
@@ -334,11 +377,11 @@ public class JointPrivilegedConfigurationHandler
 
    /**
     * This weight is the respective priority placed on the privileged command in the optimization.
-    * @return weight for the privileged command in the optimization.
+    * @return vector of weights for the privileged command in the optimization.
     */
-   public double getWeight()
+   public DenseMatrix64F getWeights()
    {
-      return weight.getDoubleValue();
+      return privilegedConfigurationWeights;
    }
 
    /**
