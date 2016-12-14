@@ -44,6 +44,7 @@ public class MotionQPInputCalculator
    private final GeometricJacobianHolder geometricJacobianHolder;
 
    private final PointJacobian pointJacobian = new PointJacobian();
+   private final PointJacobian primaryPointJacobian = new PointJacobian();
    private final PointJacobianConvectiveTermCalculator pointJacobianConvectiveTermCalculator;
 
    private final InverseDynamicsJoint[] jointsToOptimizeFor;
@@ -267,16 +268,60 @@ public class MotionQPInputCalculator
 
       DenseMatrix64F pointJacobianMatrix = pointJacobian.getJacobianMatrix();
 
-      // // TODO: 12/13/16 include primary base stuff 
+      boolean success = true;
       tempTaskJacobian.reshape(selectionMatrix.getNumRows(), pointJacobianMatrix.getNumCols());
       CommonOps.mult(selectionMatrix, pointJacobianMatrix, tempTaskJacobian);
-      boolean success = jointIndexHandler.compactBlockToFullBlock(jacobian.getJointsInOrder(), tempTaskJacobian, motionQPInputToPack.taskJacobian);
+
+      RigidBody primaryBase = commandToConvert.getPrimaryBase();
+      InverseDynamicsJoint[] jointsUsedInTask = jacobian.getJointsInOrder();
+      if (primaryBase != null)
+      {
+         // Compute task point Jacobian from primary base
+         long primaryJacobianId = geometricJacobianHolder.getOrCreateGeometricJacobian(primaryBase, endEffector, base.getBodyFixedFrame());
+         GeometricJacobian primaryJacobian = geometricJacobianHolder.getJacobian(primaryJacobianId);
+
+         primaryPointJacobian.set(primaryJacobian, tempBodyFixedPoint);
+         primaryPointJacobian.compute();
+         DenseMatrix64F primaryPointJacobianMatrix = primaryPointJacobian.getJacobianMatrix();
+
+         tempPrimaryTaskJacobian.reshape(taskSize, primaryPointJacobianMatrix.getNumCols());
+         CommonOps.mult(selectionMatrix, primaryJacobian.getJacobianMatrix(), tempPrimaryTaskJacobian);
+
+         tempFullPrimaryTaskJacobian.reshape(taskSize, numberOfDoFs);
+         success = jointIndexHandler.compactBlockToFullBlock(primaryJacobian.getJointsInOrder(), tempPrimaryTaskJacobian, tempFullPrimaryTaskJacobian);
+
+         /* FIXME should we include the secondary weight option?
+         boolean isJointUpstreamOfPrimaryBase = false;
+
+         for (int i = jointsUsedInTask.length - 1; i >= 0; i--)
+         {
+            InverseDynamicsJoint joint = jointsUsedInTask[i];
+
+            if (joint.getSuccessor() == primaryBase)
+               isJointUpstreamOfPrimaryBase = true;
+
+            if (isJointUpstreamOfPrimaryBase)
+            {
+               tempJointIndices.reset();
+               ScrewTools.computeIndexForJoint(jointsUsedInTask, tempJointIndices, joint);
+               for (int j = 0; j < tempJointIndices.size(); j++)
+                  MatrixTools.scaleColumn(secondaryTaskJointsWeight.getDoubleValue(), tempJointIndices.get(j), tempTaskJacobian);
+            }
+         }
+         */
+      }
+
+      success = success && jointIndexHandler.compactBlockToFullBlock(jointsUsedInTask, tempTaskJacobian, motionQPInputToPack.taskJacobian);
 
       if (!success)
          return false;
 
-      recordTaskJacobian(motionQPInputToPack.taskJacobian);
+      if (commandToConvert.getPrimaryBase() != null)
+         recordTaskJacobian(tempFullPrimaryTaskJacobian);
+      else
+         recordTaskJacobian(motionQPInputToPack.taskJacobian);
 
+      // Compute the task objective: p = S * ( TDot - JDot qDot )
       pointJacobianConvectiveTermCalculator.compute(pointJacobian, pPointVelocity);
       pPointVelocity.scale(-1.0);
       pPointVelocity.add(desiredAccelerationWithRespectToBase);
