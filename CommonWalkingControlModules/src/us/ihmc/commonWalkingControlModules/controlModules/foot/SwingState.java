@@ -416,7 +416,9 @@ public class SwingState extends AbstractUnconstrainedState
          {
             FramePoint waypoint = this.swingWaypoints.add();
             waypoint.setIncludingFrame(worldFrame, swingWaypoints.get(i));
+            waypoint.changeFrame(soleFrame);
             soleToControlFrame.transform(waypoint.getPoint());
+            waypoint.changeFrame(worldFrame);
          }
 
          trajectoryParametersProvider.set(new TrajectoryParameters(trajectoryType));
