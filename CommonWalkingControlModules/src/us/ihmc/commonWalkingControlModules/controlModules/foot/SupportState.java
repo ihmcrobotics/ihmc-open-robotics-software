@@ -182,11 +182,8 @@ public class SupportState extends AbstractFootControlState
       updateHoldPositionSetpoints();
 
       double currentKneeAngle = kneePitch.getQ();
-      double currentKneeVelocity = kneePitch.getQd();
-      double desiredKneeVelocity = 0.0;
 
-      kneePrivilegedConfigurationTrajectory.setCubic(0.0, durationForStanceLegStraightening.getDoubleValue(), currentKneeAngle, currentKneeVelocity,
-                                                     straightKneeAngle.getDoubleValue(), desiredKneeVelocity);
+      kneePrivilegedConfigurationTrajectory.setCubic(0.0, durationForStanceLegStraightening.getDoubleValue(), currentKneeAngle, 0.0, straightKneeAngle.getDoubleValue(), 0.0);
    }
 
    @Override
