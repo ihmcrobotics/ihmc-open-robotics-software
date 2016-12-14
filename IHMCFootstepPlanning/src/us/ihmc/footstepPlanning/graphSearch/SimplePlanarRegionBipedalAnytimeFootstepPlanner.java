@@ -37,6 +37,7 @@ public class SimplePlanarRegionBipedalAnytimeFootstepPlanner extends PlanarRegio
    private final AtomicReference<SimpleFootstep> latestExecutedFootstepReference = new AtomicReference<>(null);
    private final IntegerYoVariable stackSize = new IntegerYoVariable(namePrefix + "stackSize", registry);
    private final DoubleYoVariable smallestCostToGoal = new DoubleYoVariable(namePrefix + "SmallestCostToGoal", registry);
+   private BipedalFootstepPlannerNode parentOfStartNode = null;
 
    private final FramePose tempFramePose = new FramePose();
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
@@ -45,6 +46,7 @@ public class SimplePlanarRegionBipedalAnytimeFootstepPlanner extends PlanarRegio
    {
       super(parameters, parentRegistry);
       smallestCostToGoal.set(Double.POSITIVE_INFINITY);
+      exitAfterInitialSolution.set(false);
    }
 
    /**
@@ -72,6 +74,7 @@ public class SimplePlanarRegionBipedalAnytimeFootstepPlanner extends PlanarRegio
       closestNodeToGoal = null;
       mapToAllExploredNodes.clear();
       bestPlanYet.set(null);
+      parentOfStartNode = null;
    }
 
    private void initializeForNewPlanarRegions()
@@ -132,46 +135,17 @@ public class SimplePlanarRegionBipedalAnytimeFootstepPlanner extends PlanarRegio
 
    private void replaceStartNode()
    {
-      SimpleFootstep newStartingFootstep = latestExecutedFootstepReference.getAndSet(null);
-      if (newStartingFootstep != null)
+      SimpleFootstep footstep = latestExecutedFootstepReference.getAndSet(null);
+      if (footstep != null)
       {
-         newStartingFootstep.getSoleFramePose(tempFramePose);
-         tempFramePose.changeFrame(ReferenceFrame.getWorldFrame());
-         tempFramePose.getRigidBodyTransform(tempTransform);
-         BipedalFootstepPlannerNode newStartNode = new BipedalFootstepPlannerNode(newStartingFootstep.getRobotSide(), tempTransform);
+         FramePose tempPose = new FramePose();
+         initialSide = footstep.getRobotSide();
+         footstep.getSoleFramePose(tempPose);
+         tempPose.getRigidBodyTransform(initialFootPose);
 
-         ArrayList<BipedalFootstepPlannerNode> childrenOfStartNode = new ArrayList<>();
-         startNode.getChildren(childrenOfStartNode);
-         PrintTools.info("clearing children of start node");
-         boolean newStartNodeAlreadyExists = false;
-
-         for (BipedalFootstepPlannerNode node : childrenOfStartNode)
-         {
-            if (!node.epsilonEquals(newStartNode, 1e-3))
-            {
-               recursivelyMarkAsDead(node);
-            }
-            else
-            {
-               newStartNodeAlreadyExists = true;
-               PrintTools.info("found new start node");
-               startNode = node;
-            }
-         }
-
-         if (!newStartNodeAlreadyExists)
-         {
-            initialSide = newStartingFootstep.getRobotSide();
-            newStartingFootstep.getSoleFramePose(tempFramePose);
-            tempFramePose.getRigidBodyTransform(initialFootPose);
-
-            startNode = new BipedalFootstepPlannerNode(initialSide, initialFootPose);
-            notifiyListenersStartNodeWasAdded(startNode);
-         }
-
-         startNode.setParentNode(null);
-         initialSide = startNode.getRobotSide();
-         startNode.getSoleTransform(initialFootPose);
+         parentOfStartNode = startNode;
+         startNode = new BipedalFootstepPlannerNode(initialSide, initialFootPose);
+         notifiyListenersStartNodeWasAdded(startNode);
       }
    }
 
@@ -231,12 +205,6 @@ public class SimplePlanarRegionBipedalAnytimeFootstepPlanner extends PlanarRegio
          replaceGoalPose();
          checkForNewPlanarRegionsList();
 
-         if (stack.isEmpty())
-         {
-            ThreadTools.sleep(100);
-            continue;
-         }
-
          BipedalFootstepPlannerNode nodeToExpand;
          // find a path to the goal fast using depth first then refine using breath first
          if (bestGoalNode == null)
@@ -246,6 +214,13 @@ public class SimplePlanarRegionBipedalAnytimeFootstepPlanner extends PlanarRegio
 
          if (nodeToExpand.isDead())
             continue;
+
+         // If stepping in place on first step, don't...
+         if (parentOfStartNode != null)
+         {
+            if (parentOfStartNode.epsilonEquals(nodeToExpand, 0.01))
+               continue;
+         }
 
          if (nodeToExpand.getRobotSide() == null)
             continue;
