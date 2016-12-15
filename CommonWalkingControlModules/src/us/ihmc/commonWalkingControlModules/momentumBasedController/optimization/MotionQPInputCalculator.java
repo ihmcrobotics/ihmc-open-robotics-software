@@ -116,7 +116,6 @@ public class MotionQPInputCalculator
 
       motionQPInputToPack.setIsMotionConstraint(false);
       motionQPInputToPack.setUseWeightScalar(false);
-      CommonOps.insert(privilegedConfigurationHandler.getWeights(), motionQPInputToPack.taskWeightMatrix, numberOfDoFs, 0);
 
       nullspaceCalculator.setPseudoInverseAlpha(nullspaceProjectionAlpha.getDoubleValue());
 
@@ -184,8 +183,10 @@ public class MotionQPInputCalculator
             nullspaceCalculator.projectOntoNullspace(tempTaskJacobian, allTaskJacobian);
             CommonOps.insert(tempTaskJacobian, motionQPInputToPack.taskJacobian, taskSize, 0);
             CommonOps.insert(privilegedConfigurationHandler.getPrivilegedJointAccelerations(), motionQPInputToPack.taskObjective, taskSize, 0);
+            CommonOps.insert(privilegedConfigurationHandler.getWeights(), motionQPInputToPack.taskWeightMatrix, taskSize, 0);
          }
       }
+
 
       return taskSize > 0;
    }
@@ -199,7 +200,6 @@ public class MotionQPInputCalculator
 
       motionQPInputToPack.setIsMotionConstraint(false);
       motionQPInputToPack.setUseWeightScalar(false);
-      CommonOps.insert(privilegedConfigurationHandler.getWeights(), motionQPInputToPack.taskWeightMatrix, numberOfDoFs, 0);
 
       DenseMatrix64F selectionMatrix = privilegedConfigurationHandler.getSelectionMatrix();
 
@@ -211,6 +211,7 @@ public class MotionQPInputCalculator
       motionQPInputToPack.reshape(taskSize);
 
       motionQPInputToPack.setTaskObjective(privilegedConfigurationHandler.getPrivilegedJointVelocities());
+      motionQPInputToPack.setTaskWeightMatrix(privilegedConfigurationHandler.getWeights());
 
       OneDoFJoint[] joints = privilegedConfigurationHandler.getJoints();
       boolean success = jointIndexHandler.compactBlockToFullBlock(joints, selectionMatrix, motionQPInputToPack.taskJacobian);
@@ -219,6 +220,7 @@ public class MotionQPInputCalculator
          return false;
 
       nullspaceCalculator.projectOntoNullspace(motionQPInputToPack.taskJacobian, allTaskJacobian);
+
 
       return true;
    }
