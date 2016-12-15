@@ -13,6 +13,7 @@ import javax.vecmath.Quat4d;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.avatar.MultiRobotTestInterface;
@@ -176,7 +177,7 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
 
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
-   
+   @Ignore
    @ContinuousIntegrationTest(estimatedDuration = 30.0) // Tests position and orientation of the two hands after a movement of 20cm in the positive x direction
    @Test(timeout = 160000)
    public void testSolvingForBothHandPoses() throws SimulationExceededMaximumTimeException, IOException
@@ -246,7 +247,7 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
 
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
-   
+   @Ignore
    @ContinuousIntegrationTest(estimatedDuration = 30.0) // Tests the selection matrix of a hand, sets a desired roll offset and makes sure it is reached
    @Test(timeout = 160000)
    public void testSolvingForHandSelectionMatrix() throws SimulationExceededMaximumTimeException, IOException
@@ -325,7 +326,7 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
 
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
-   
+   @Ignore
    @ContinuousIntegrationTest(estimatedDuration = 30.0) // Tests the method setHandLinearControlOnly, sets desired angular offsets on both hands and makes sure they are not reached
    @Test(timeout = 160000)
    public void testSolvingForHandAngularLinearControl() throws SimulationExceededMaximumTimeException, IOException
@@ -416,7 +417,7 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
       
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
-   
+   @Ignore
    @ContinuousIntegrationTest(estimatedDuration = 30.0) // Tests the method setHandLinearControlAndYawPitchOnly, sets a desired roll offset on one hand and makes sure it is not reached
    @Test(timeout = 160000)
    public void testSolvingForHandRollConstraint() throws SimulationExceededMaximumTimeException, IOException
@@ -481,7 +482,7 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
       
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
-   
+   @Ignore
    @ContinuousIntegrationTest(estimatedDuration = 30.0) // Tests the selection matrix of the chest
    @Test(timeout = 160000)
    public void testSolvingForChestAngularControl() throws SimulationExceededMaximumTimeException, IOException
@@ -534,7 +535,7 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
       
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
-   
+   @Ignore
    @ContinuousIntegrationTest(estimatedDuration = 30.0) // Tests the selection matrix of the pelvis 
    @Test(timeout = 160000)
    public void testSolvingForPelvisAngularControl() throws SimulationExceededMaximumTimeException, IOException
@@ -597,6 +598,7 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
       angleDifference.set(quatDifference);
       AngleTools.trimAngleMinusPiToPi(angleDifference.getAngle());
 
+      System.out.println(angleDifference.getAngle());
       return Math.abs(angleDifference.getAngle()) < angleEpsilon;
    }
 
