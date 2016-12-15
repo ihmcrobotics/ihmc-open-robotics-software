@@ -163,7 +163,7 @@ public class JointPrivilegedConfigurationHandler
          OneDoFJoint joint = oneDoFJoints[i];
          double qdd = 2.0 * privilegedConfigurationGains.get(i, 0) * (privilegedConfigurations.get(i, 0) - joint.getQ()) / jointSquaredRangeOfMotions.get(i, 0);
          qdd -= privilegedVelocityGains.get(i, 0) * joint.getQd();
-         qdd = MathTools.clipToMinMax(qdd, privilegedMaxVelocities.get(i, 0));
+         qdd = MathTools.clipToMinMax(qdd, privilegedMaxAccelerations.get(i, 0));
          privilegedAccelerations.set(i, 0, qdd);
          yoJointPrivilegedAccelerations.get(joint).set(qdd);
       }
@@ -409,5 +409,10 @@ public class JointPrivilegedConfigurationHandler
    public RigidBody getChainEndEffector(int chainIndex)
    {
       return chainEndEffectors.get(chainIndex);
+   }
+
+   public double getDefaultWeight()
+   {
+      return defaultConfigurationWeight.getDoubleValue();
    }
 }

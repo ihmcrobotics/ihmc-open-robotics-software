@@ -115,7 +115,8 @@ public class MotionQPInputCalculator
       privilegedConfigurationHandler.computePrivilegedJointAccelerations();
 
       motionQPInputToPack.setIsMotionConstraint(false);
-      motionQPInputToPack.setUseWeightScalar(false);
+      motionQPInputToPack.setUseWeightScalar(true);
+      motionQPInputToPack.setWeight(privilegedConfigurationHandler.getDefaultWeight());
 
       nullspaceCalculator.setPseudoInverseAlpha(nullspaceProjectionAlpha.getDoubleValue());
 
@@ -183,7 +184,7 @@ public class MotionQPInputCalculator
             nullspaceCalculator.projectOntoNullspace(tempTaskJacobian, allTaskJacobian);
             CommonOps.insert(tempTaskJacobian, motionQPInputToPack.taskJacobian, taskSize, 0);
             CommonOps.insert(privilegedConfigurationHandler.getPrivilegedJointAccelerations(), motionQPInputToPack.taskObjective, taskSize, 0);
-            CommonOps.insert(privilegedConfigurationHandler.getWeights(), motionQPInputToPack.taskWeightMatrix, taskSize, 0);
+            //CommonOps.insert(privilegedConfigurationHandler.getWeights(), motionQPInputToPack.taskWeightMatrix, taskSize, 0);
          }
       }
 
