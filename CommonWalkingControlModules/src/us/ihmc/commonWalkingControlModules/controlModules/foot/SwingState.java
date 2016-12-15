@@ -102,7 +102,7 @@ public class SwingState extends AbstractUnconstrainedState
 
    private final PoseReferenceFrame desiredSoleFrame = new PoseReferenceFrame("desiredSoleFrame", worldFrame);
    private final PoseReferenceFrame desiredControlFrame = new PoseReferenceFrame("desiredControlFrame", desiredSoleFrame);
-   private final RigidBodyTransform soleToControlFrame = new RigidBodyTransform();
+   private final RigidBodyTransform soleToControlFrameTransform = new RigidBodyTransform();
    private final FramePose desiredPose = new FramePose();
    private final Twist desiredTwist = new Twist();
    private final SpatialAccelerationVector desiredSpatialAcceleration = new SpatialAccelerationVector();
@@ -143,8 +143,8 @@ public class SwingState extends AbstractUnconstrainedState
       ReferenceFrame footFrame = contactableFoot.getFrameAfterParentJoint();
       ReferenceFrame toeFrame = createToeFrame(robotSide);
       controlFrame = walkingControllerParameters.controlToeDuringSwing() ? toeFrame : footFrame;
-      controlFrame.getTransformToDesiredFrame(soleToControlFrame, soleFrame);
-      desiredControlFrame.setPoseAndUpdate(soleToControlFrame);
+      controlFrame.getTransformToDesiredFrame(soleToControlFrameTransform, soleFrame);
+      desiredControlFrame.setPoseAndUpdate(soleToControlFrameTransform);
 
       TwistCalculator twistCalculator = momentumBasedController.getTwistCalculator();
       RigidBody rigidBody = contactableFoot.getRigidBody();
