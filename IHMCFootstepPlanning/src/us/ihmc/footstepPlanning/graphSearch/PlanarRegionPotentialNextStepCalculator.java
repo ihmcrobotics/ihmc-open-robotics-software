@@ -44,6 +44,7 @@ public class PlanarRegionPotentialNextStepCalculator
 
    private PlanarRegionsList planarRegionsList;
    private SideDependentList<ConvexPolygon2d> footPolygonsInSoleFrame;
+   private SideDependentList<ConvexPolygon2d> controllerPolygonsInSoleFrame;
 
    private FootstepPlannerGoalType footstepPlannerGoalType;
    private Point2d xyGoal;
@@ -75,10 +76,16 @@ public class PlanarRegionPotentialNextStepCalculator
 
       parentRegistry.addChild(registry);
    }
-
+   
    public void setFeetPolygons(SideDependentList<ConvexPolygon2d> footPolygonsInSoleFrame)
    {
+      setFeetPolygons(footPolygonsInSoleFrame, footPolygonsInSoleFrame);
+   }
+   
+   public void setFeetPolygons(SideDependentList<ConvexPolygon2d> footPolygonsInSoleFrame, SideDependentList<ConvexPolygon2d> controllerPolygonsInSoleFrame)
+   {
       this.footPolygonsInSoleFrame = footPolygonsInSoleFrame;
+      this.controllerPolygonsInSoleFrame = controllerPolygonsInSoleFrame;
    }
 
    public void setPlanarRegions(PlanarRegionsList planarRegionsList)
@@ -668,7 +675,7 @@ public class PlanarRegionPotentialNextStepCalculator
       RigidBodyTransform nodeToExpandTransform = new RigidBodyTransform();
       nodeToExpand.getSoleTransform(nodeToExpandTransform);
 
-      ConvexPolygon2d snappedPolygon = footPolygonsInSoleFrame.get(nodeToExpand.getRobotSide());
+      ConvexPolygon2d snappedPolygon = controllerPolygonsInSoleFrame.get(nodeToExpand.getRobotSide());
       snappedPolygon.update();
       footArea.set(snappedPolygon.getArea());
 
