@@ -47,25 +47,29 @@ public class HeadingAndVelocityEvaluationScript implements Updatable
    private final HeadingAndVelocityEvaluationEvent[] eventsToCycleThrough;
 
    public HeadingAndVelocityEvaluationScript(boolean cycleThroughAllEvents, double controlDT, SimpleDesiredHeadingControlModule desiredHeadingControlModule,
-         ManualDesiredVelocityControlModule desiredVelocityControlModule, YoVariableRegistry parentRegistry)
+         ManualDesiredVelocityControlModule desiredVelocityControlModule, HeadingAndVelocityEvaluationScriptParameters parameters, YoVariableRegistry parentRegistry)
    {
       this.controlDT = controlDT;
       this.desiredHeadingControlModule = desiredHeadingControlModule;
       this.desiredVelocityControlModule = desiredVelocityControlModule;
 
+      if(parameters == null)
+      {
+         parameters = new HeadingAndVelocityEvaluationScriptParameters();
+      }
+      
       desiredVelocityControlModule.setDesiredVelocity(new FrameVector2d(ReferenceFrame.getWorldFrame(), 0.01, 0.0));
 
       //    desiredVelocityControlModule.setVelocityAlwaysFacesHeading(false);
       //    
       desiredHeadingControlModule.setFinalHeadingTargetAngle(0.0);
       desiredHeadingControlModule.resetHeadingAngle(0.0);
-      desiredHeadingControlModule.setMaxHeadingDot(0.1);
-
-      acceleration.set(0.25);
-      maxVelocity.set(1.0); // (1.5);
-      cruiseVelocity.set(0.6); // (0.8);
-      maxHeadingDot.set(0.5);
-      sidestepVelocity.set(0.4);
+      desiredHeadingControlModule.setMaxHeadingDot(parameters.getMaxHeadingDot());//0.1
+      acceleration.set(parameters.getAcceleration());
+      maxVelocity.set(parameters.getMaxVelocity()); // (1.5);
+      cruiseVelocity.set(parameters.getCruiseVelocity()); // (0.8);
+      maxHeadingDot.set(parameters.getHeadingDot());
+      sidestepVelocity.set(parameters.getSideStepVelocity());
       eventDuration.set(evaluationEvent.getEnumValue().getMinTimeForScript());
 
       parentRegistry.addChild(registry);
@@ -308,7 +312,7 @@ public class HeadingAndVelocityEvaluationScript implements Updatable
 
       case DIAGONALLY_LEFT_45:
       {
-         updateDesiredVelocityMagnitude(cruiseVelocity.getDoubleValue());
+         updateDesiredVelocityMagnitude(sidestepVelocity.getDoubleValue());
          updateDesiredVelocityVector();
 
          break;
@@ -316,7 +320,7 @@ public class HeadingAndVelocityEvaluationScript implements Updatable
 
       case DIAGONALLY_RIGHT_45:
       {
-         updateDesiredVelocityMagnitude(cruiseVelocity.getDoubleValue());
+         updateDesiredVelocityMagnitude(sidestepVelocity.getDoubleValue());
          updateDesiredVelocityVector();
 
          break;
@@ -441,7 +445,7 @@ public class HeadingAndVelocityEvaluationScript implements Updatable
 
       public static HeadingAndVelocityEvaluationEvent[] getAllEventsEvaluationOrdering()
       {
-         return new HeadingAndVelocityEvaluationEvent[] {STEP_IN_PLACE, GO_TO_CRUISE_STRAIGHT, TURN_180_CRUISE, SPEED_UP_TO_MAX_STRAIGHT,
+         return new HeadingAndVelocityEvaluationEvent[] {DO_NOTHING_FOR_A_TINY_BIT, STEP_IN_PLACE, GO_TO_CRUISE_STRAIGHT, TURN_180_CRUISE, SPEED_UP_TO_MAX_STRAIGHT,
                SLOW_DOWN_TO_ZERO_STRAIGHT, SIDE_STEP_LEFT, SLOW_DOWN_TO_ZERO, SIDE_STEP_RIGHT, SLOW_DOWN_TO_ZERO, TURN_IN_PLACE180, DIAGONALLY_RIGHT_45,
                SLOW_DOWN_TO_ZERO, DIAGONALLY_LEFT_45, SLOW_DOWN_TO_ZERO, WAVE_CRUISE, SLOW_DOWN_TO_ZERO, TURN_IN_PLACE180, CHANGE_HEADING_WALKING_STRAIGHT,
                SLOW_DOWN_TO_ZERO};
