@@ -4,8 +4,8 @@ import javax.vecmath.Point2d;
 
 public class BoundingBox2d
 {
-   private final Point2d minPoint;
-   private final Point2d maxPoint;
+   protected final Point2d minPoint;
+   protected final Point2d maxPoint;
 
    public BoundingBox2d(Point2d min, Point2d max)
    {
