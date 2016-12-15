@@ -16,22 +16,8 @@ import org.ejml.data.DenseMatrix64F;
 
 import boofcv.struct.calib.IntrinsicParameters;
 import us.ihmc.communication.net.NetClassList;
-import us.ihmc.communication.packets.ControllerCrashNotificationPacket;
-import us.ihmc.communication.packets.IMUPacket;
-import us.ihmc.communication.packets.InvalidPacketNotificationPacket;
-import us.ihmc.communication.packets.KinematicsToolboxOutputStatus;
-import us.ihmc.communication.packets.LidarScanMessage;
-import us.ihmc.communication.packets.Packet;
-import us.ihmc.communication.packets.PacketDestination;
-import us.ihmc.communication.packets.PlanarRegionMessage;
-import us.ihmc.communication.packets.PlanarRegionsListMessage;
-import us.ihmc.communication.packets.RequestLidarScanMessage;
-import us.ihmc.communication.packets.RequestPlanarRegionsListMessage;
-import us.ihmc.communication.packets.SimulatedLidarScanPacket;
-import us.ihmc.communication.packets.TextToSpeechPacket;
-import us.ihmc.communication.packets.ToolboxStateMessage;
+import us.ihmc.communication.packets.*;
 import us.ihmc.communication.packets.ToolboxStateMessage.ToolboxState;
-import us.ihmc.communication.packets.UIPositionCheckerPacket;
 import us.ihmc.communication.producers.VideoSource;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.humanoidRobotics.communication.packets.DetectedObjectPacket;
@@ -528,6 +514,8 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketField(TransformableQuat4d.class);
       registerPacketField(TransformablePoint3d.class);
 
+      registerPacketClass(HeatMapPacket.class);
+      registerPacketClass(BoundingBoxesPacket.class);
 
    }
 }

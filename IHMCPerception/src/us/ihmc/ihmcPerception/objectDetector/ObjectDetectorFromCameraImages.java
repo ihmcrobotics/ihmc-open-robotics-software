@@ -5,8 +5,11 @@ import georegression.geometry.GeometryMath_F64;
 import georegression.struct.EulerType;
 import georegression.struct.point.Point2D_F64;
 import georegression.struct.se.Se3_F64;
+import org.apache.commons.lang3.tuple.Pair;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
+import us.ihmc.communication.packets.BoundingBoxesPacket;
+import us.ihmc.communication.packets.HeatMapPacket;
 import us.ihmc.communication.producers.JPEGDecompressor;
 import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicReferenceFrame;
 import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
@@ -27,9 +30,8 @@ import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
+import java.util.stream.IntStream;
 
 public class ObjectDetectorFromCameraImages
 {
@@ -47,7 +49,7 @@ public class ObjectDetectorFromCameraImages
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private ValveDetector detector;
-   private Object expectedFiducialSizeChangedConch = new Object();
+   private final Object expectedFiducialSizeChangedConch = new Object();
 
    private final JPEGDecompressor jpegDecompressor = new JPEGDecompressor();
 
@@ -71,6 +73,8 @@ public class ObjectDetectorFromCameraImages
    private final YoFramePoseUsingQuaternions cameraPose = new YoFramePoseUsingQuaternions(prefix + "CameraPoseWorld", ReferenceFrame.getWorldFrame(), registry);
    private final YoFramePoseUsingQuaternions locatedFiducialPoseInWorldFrame = new YoFramePoseUsingQuaternions(prefix + "LocatedPoseWorldFrame", ReferenceFrame.getWorldFrame(), registry);
    private final YoFramePoseUsingQuaternions reportedFiducialPoseInWorldFrame = new YoFramePoseUsingQuaternions(prefix + "ReportedPoseWorldFrame", ReferenceFrame.getWorldFrame(), registry);
+
+   private Pair<BoundingBoxesPacket, HeatMapPacket> coactiveVisualizationPackets;
 
    public ObjectDetectorFromCameraImages(RigidBodyTransform transformFromReportedToFiducialFrame, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry) throws Exception
    {
@@ -165,6 +169,11 @@ public class ObjectDetectorFromCameraImages
       detect(latestUnmodifiedCameraImage, videoPacket.getPosition(), videoPacket.getOrientation());
    }
 
+   public Pair<BoundingBoxesPacket, HeatMapPacket> getCoactiveVisualizationPackets()
+   {
+      return coactiveVisualizationPackets;
+   }
+
    public void detect(BufferedImage bufferedImage, Point3d cameraPositionInWorld, Quat4d cameraOrientationInWorldXForward)
    {
       synchronized (expectedFiducialSizeChangedConch)
@@ -181,16 +190,32 @@ public class ObjectDetectorFromCameraImages
          cameraPose.setOrientation(cameraOrientationInWorldXForward);
          cameraPose.setPosition(cameraPositionInWorld);
 
-         List<Rectangle> rectangles = detector.detect(bufferedImage);
-         Collections.sort(rectangles, new Comparator<Rectangle>() {
-            @Override
-            public int compare(Rectangle r1, Rectangle r2) {
-               return -Integer.compare(r1.width * r1.height, r2.width * r2.height);
-            }
-         });
-         if (rectangles.size() > 0)
+         Pair<List<Rectangle>, float[]> rectanglesAndHeatMaps = detector.detect(bufferedImage);
+
+         rectanglesAndHeatMaps.getLeft().sort((r1, r2) -> -Integer.compare(r1.width * r1.height, r2.width * r2.height));
+
+         HeatMapPacket heatMapPacket = new HeatMapPacket();
+         heatMapPacket.width = detector.getNetworkOutputWidth();
+         heatMapPacket.height = detector.getNetworkOutputHeight();
+         heatMapPacket.data = rectanglesAndHeatMaps.getRight();
+         heatMapPacket.name = "Valve";
+
+         int[] packedBoxes = rectanglesAndHeatMaps.getLeft()
+                                                  .stream()
+                                                  .flatMapToInt(rect -> IntStream.of(rect.x, rect.y, rect.width, rect.height))
+                                                  .toArray();
+         String[] names = new String[rectanglesAndHeatMaps.getLeft().size()];
+         for (int i = 0; i < names.length; i++)
          {
-            Rectangle rectangle = rectangles.get(0);
+            names[i] = "Valve " + i;
+         }
+         BoundingBoxesPacket boundingBoxesPacket = new BoundingBoxesPacket(packedBoxes, names);
+
+         coactiveVisualizationPackets = Pair.of(boundingBoxesPacket, heatMapPacket);
+
+         if (rectanglesAndHeatMaps.getLeft().size() > 0)
+         {
+            Rectangle rectangle = rectanglesAndHeatMaps.getLeft().get(0);
             double knownWidth = expectedObjectSize.getDoubleValue();
             Point2D_F64 topLeft = new Point2D_F64(rectangle.x, rectangle.y);
             Point2D_F64 bottomRight = new Point2D_F64(rectangle.x + rectangle.width, rectangle.y + rectangle.height);
@@ -222,7 +247,6 @@ public class ObjectDetectorFromCameraImages
             tempFiducialDetectorFrame.changeFrame(ReferenceFrame.getWorldFrame());
 
             locatedFiducialPoseInWorldFrame.set(tempFiducialDetectorFrame);
-            System.out.println("Object located at: " + tempFiducialDetectorFrame + ", original 2D image rectangle " + rectangle);
 
             locatedFiducialReferenceFrame.update();
 
