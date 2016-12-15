@@ -19,9 +19,6 @@ public class PrivilegedConfigurationCommand implements InverseKinematicsCommand<
    private final TDoubleArrayList privilegedOneDoFJointConfigurations = new TDoubleArrayList(initialCapacity);
    private final Map<String, PrivilegedConfigurationOption> privilegedOneDoFJointConfigurationOptions = new HashMap<>(initialCapacity);
 
-   private final List<RigidBody> bases = new ArrayList<>();
-   private final List<RigidBody> endEffectors = new ArrayList<>();
-
    private boolean enable = false;
 
    public enum PrivilegedConfigurationOption
@@ -54,9 +51,6 @@ public class PrivilegedConfigurationCommand implements InverseKinematicsCommand<
       joints.clear();
       privilegedOneDoFJointConfigurations.reset();
       privilegedOneDoFJointConfigurationOptions.clear();
-
-      bases.clear();
-      endEffectors.clear();
    }
 
    public void disable()
@@ -116,12 +110,6 @@ public class PrivilegedConfigurationCommand implements InverseKinematicsCommand<
       jointNames.add(joint.getName());
       privilegedOneDoFJointConfigurations.add(Double.NaN);
       privilegedOneDoFJointConfigurationOptions.put(joint.getName(), privilegedConfiguration);
-   }
-
-   public void applyPrivilegedConfigurationToSubChain(RigidBody base, RigidBody endEffector)
-   {
-      bases.add(base);
-      endEffectors.add(endEffector);
    }
 
    @Override
@@ -235,21 +223,6 @@ public class PrivilegedConfigurationCommand implements InverseKinematicsCommand<
    public OneDoFJoint getJoint(int jointIndex)
    {
       return joints.get(jointIndex);
-   }
-
-   public int getNumberOfChains()
-   {
-      return bases.size();
-   }
-
-   public RigidBody getChainBase(int chainIndex)
-   {
-      return bases.get(chainIndex);
-   }
-
-   public RigidBody getChainEndEffector(int chainIndex)
-   {
-      return endEffectors.get(chainIndex);
    }
 
    @Override
