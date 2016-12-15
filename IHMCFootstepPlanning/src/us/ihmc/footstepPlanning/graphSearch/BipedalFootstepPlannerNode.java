@@ -19,7 +19,7 @@ public class BipedalFootstepPlannerNode
    private RigidBodyTransform soleTransform = new RigidBodyTransform();
    private BipedalFootstepPlannerNode parentNode;
 
-   private ArrayList<BipedalFootstepPlannerNode> childrenNodes;
+   private ArrayList<BipedalFootstepPlannerNode> childrenNodes = new ArrayList<>();
    private double estimatedCostToGoal;
 
    private static final double XY_DISTANCE_THRESHOLD_TO_CONSIDER_NODES_EQUAL = 0.05;

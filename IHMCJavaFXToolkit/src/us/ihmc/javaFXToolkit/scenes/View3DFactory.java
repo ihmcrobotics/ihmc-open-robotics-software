@@ -79,12 +79,17 @@ public class View3DFactory
       addNodeToView(light);
    }
 
-   public void addCameraController()
+   public FocusBasedCameraMouseEventHandler addCameraController()
    {
-      addCameraController(0.05, 50.0);
+      return addCameraController(0.05, 50.0, false);
    }
 
-   public void addCameraController(double nearClip, double farClip)
+   public FocusBasedCameraMouseEventHandler addCameraController(boolean enableShiftClickFocusTranslation)
+   {
+      return addCameraController(0.05, 50.0, enableShiftClickFocusTranslation);
+   }
+
+   public FocusBasedCameraMouseEventHandler addCameraController(double nearClip, double farClip, boolean enableShiftClickFocusTranslation)
    {
       PerspectiveCamera camera = new PerspectiveCamera(true);
       camera.setNearClip(nearClip);
@@ -95,8 +100,11 @@ public class View3DFactory
       ReadOnlyDoubleProperty widthProperty = widthProperty();
       ReadOnlyDoubleProperty heightProperty = heightProperty();
       FocusBasedCameraMouseEventHandler cameraController = new FocusBasedCameraMouseEventHandler(widthProperty, heightProperty, camera, up);
+      if (enableShiftClickFocusTranslation)
+         cameraController.enableShiftClickFocusTranslation();
       addEventHandler(Event.ANY, cameraController);
       addNodeToView(cameraController.getFocusPointViz());
+      return cameraController;
    }
 
    private <T extends Event> void addEventHandler(EventType<T> eventType, EventHandler<? super T> eventHandler)
@@ -170,6 +178,11 @@ public class View3DFactory
    public void attachSubSceneTo(Pane pane)
    {
       pane.getChildren().add(subScene);
+      bindSubSceneSizeToPaneSize(pane);
+   }
+
+   public void bindSubSceneSizeToPaneSize(Pane pane)
+   {
       subScene.heightProperty().bind(pane.heightProperty());
       subScene.widthProperty().bind(pane.widthProperty());
    }
