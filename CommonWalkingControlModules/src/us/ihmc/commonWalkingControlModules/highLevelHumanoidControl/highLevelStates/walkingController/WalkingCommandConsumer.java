@@ -242,8 +242,6 @@ public class WalkingCommandConsumer
       if (commandInputManager.isNewCommandAvailable(FootstepDataListCommand.class))
       {
          walkingMessageHandler.handleFootstepDataListCommand(commandInputManager.pollNewestCommand(FootstepDataListCommand.class));
-         balanceManager.setDoubleSupportTime(walkingMessageHandler.getTransferTime());
-         balanceManager.setSingleSupportTime(walkingMessageHandler.getSwingTime());
       }
 
       if (commandInputManager.isNewCommandAvailable(AdjustFootstepCommand.class))
