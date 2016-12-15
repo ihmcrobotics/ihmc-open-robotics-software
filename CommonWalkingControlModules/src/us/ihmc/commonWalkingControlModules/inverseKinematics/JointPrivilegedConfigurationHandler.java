@@ -220,6 +220,15 @@ public class JointPrivilegedConfigurationHandler
 
    private void processPrivilegedConfigurations()
    {
+      for (int jointIndex = 0; jointIndex < numberOfDoFs; jointIndex++)
+      {
+         privilegedConfigurationWeights.set(jointIndex, jointIndex, defaultConfigurationWeight.getDoubleValue());
+         privilegedConfigurationGains.set(jointIndex, 0, defaultConfigurationGain.getDoubleValue());
+         privilegedVelocityGains.set(jointIndex, 0, defaultVelocityGain.getDoubleValue());
+         privilegedMaxVelocities.set(jointIndex, 0, defaultMaxVelocity.getDoubleValue());
+         privilegedMaxAccelerations.set(jointIndex, 0, defaultMaxAcceleration.getDoubleValue());
+      }
+
       for (int commandIndex = 0; commandIndex < commandList.size(); commandIndex++)
       {
          PrivilegedConfigurationCommand command = commandList.get(commandIndex);
@@ -283,28 +292,14 @@ public class JointPrivilegedConfigurationHandler
    {
       if (command.hasWeight())
          privilegedConfigurationWeights.set(jointIndex, jointIndex, command.getWeight());
-      else
-         privilegedConfigurationWeights.set(jointIndex, jointIndex, defaultConfigurationWeight.getDoubleValue());
-
       if (command.hasConfigurationGain())
          privilegedConfigurationGains.set(jointIndex, 0, command.getConfigurationGain());
-      else
-         privilegedConfigurationGains.set(jointIndex, 0, defaultConfigurationGain.getDoubleValue());
-
       if (command.hasVelocityGain())
          privilegedVelocityGains.set(jointIndex, 0, command.getVelocityGain());
-      else
-         privilegedVelocityGains.set(jointIndex, 0, defaultVelocityGain.getDoubleValue());
-
       if (command.hasMaxVelocity())
          privilegedMaxVelocities.set(jointIndex, 0, command.getMaxVelocity());
-      else
-         privilegedMaxVelocities.set(jointIndex, 0, defaultMaxVelocity.getDoubleValue());
-
       if (command.hasMaxAcceleration())
          privilegedMaxAccelerations.set(jointIndex, 0, command.getMaxAcceleration());
-      else
-         privilegedMaxAccelerations.set(jointIndex, 0, defaultMaxAcceleration.getDoubleValue());
    }
 
    private void setPrivilegedConfigurationFromOption(PrivilegedConfigurationOption option, int jointIndex)
