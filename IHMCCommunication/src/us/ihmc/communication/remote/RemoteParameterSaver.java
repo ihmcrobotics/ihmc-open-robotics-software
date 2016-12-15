@@ -18,7 +18,7 @@ import us.ihmc.communication.packets.RequestParameterListPacket;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.robotics.dataStructures.parameter.Parameter;
 
-public class ParameterSaver
+public class RemoteParameterSaver
 {
    private static final long REQUEST_TIMEOUT_MS = 5000; // 5s
 
@@ -28,7 +28,7 @@ public class ParameterSaver
    private final PacketCommunicator packetCommunicator;
    private CountDownLatch requestResponseLatch;
 
-   public ParameterSaver(Path path, String host, NetworkPorts port, NetClassList netClassList)
+   public RemoteParameterSaver(Path path, String host, NetworkPorts port, NetClassList netClassList)
    {
       this.path = path;
       this.host = host;
@@ -121,7 +121,7 @@ public class ParameterSaver
    {
       if (args.length != 2)
       {
-         System.err.println("usage: java ParameterSaver [host] [out_file_name]");
+         System.err.println("usage: java RemoteParameterSaver [host] [out_file_name]");
          System.exit(1);
       }
 
@@ -153,7 +153,7 @@ public class ParameterSaver
 
       System.out.println("Saving parameters to: " + path);
 
-      ParameterSaver saver = new ParameterSaver(path, host, port, netClassList);
+      RemoteParameterSaver saver = new RemoteParameterSaver(path, host, port, netClassList);
       saver.connect();
       saver.requestParameters();
       saver.waitForWriteToFinish();
