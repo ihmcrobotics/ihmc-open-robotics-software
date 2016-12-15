@@ -6,6 +6,8 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
+import us.ihmc.commonWalkingControlModules.configurations.JointPrivilegedConfigurationParameters;
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.SolverWeightLevels;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
@@ -97,6 +99,11 @@ public class SupportState extends AbstractFootControlState
    private final DoubleYoVariable recoverTime;
    private final DoubleYoVariable timeBeforeExploring;
 
+   // For privileged configuration commands
+   private final DoubleYoVariable privilegedWeight;
+   private final DoubleYoVariable privilegedConfigurationGain;
+   private final DoubleYoVariable privilegedVelocityGain;
+
    // For straight legs with privileged configuration
    private final RigidBody pelvis;
    private final OneDoFJoint kneePitch;
@@ -140,7 +147,9 @@ public class SupportState extends AbstractFootControlState
       explorationHelper = new ExplorationHelper(contactableFoot, footControlHelper, prefix, registry);
       partialFootholdControlModule = footControlHelper.getPartialFootholdControlModule();
       requestFootholdExploration = new BooleanYoVariable(prefix + "RequestFootholdExploration", registry);
-      ExplorationParameters explorationParameters = footControlHelper.getWalkingControllerParameters().getOrCreateExplorationParameters(registry);
+
+      WalkingControllerParameters walkingControllerParameters = footControlHelper.getWalkingControllerParameters();
+      ExplorationParameters explorationParameters = walkingControllerParameters.getOrCreateExplorationParameters(registry);
       if (explorationParameters != null)
       {
          recoverTime = explorationParameters.getRecoverTime();
@@ -152,14 +161,22 @@ public class SupportState extends AbstractFootControlState
          timeBeforeExploring = new DoubleYoVariable(prefix + "TimeBeforeExploring", registry);
       }
 
+      JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters = walkingControllerParameters.getJointPrivilegedConfigurationParameters();
+      privilegedWeight = new DoubleYoVariable(prefix + "PrivilegedWeight", registry);
+      privilegedConfigurationGain = new DoubleYoVariable(prefix + "PrivilegedConfigurationGain", registry);
+      privilegedVelocityGain = new DoubleYoVariable(prefix + "PrivilegedVelocityGain", registry);
+      privilegedWeight.set(jointPrivilegedConfigurationParameters.getSupportKneeWeight());
+      privilegedConfigurationGain.set(jointPrivilegedConfigurationParameters.getSupportKneeConfigurationGain());
+      privilegedVelocityGain.set(jointPrivilegedConfigurationParameters.getSupportKneeVelocityGain());
+
       FullHumanoidRobotModel fullRobotModel = footControlHelper.getMomentumBasedController().getFullRobotModel();
       pelvis = fullRobotModel.getPelvis();
       kneePitch = fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE_PITCH);
       kneePrivilegedConfigurationTrajectory = new YoPolynomial(prefix + "KneePrivilegedConfiguration", 4, registry);
       durationForStanceLegStraightening = new DoubleYoVariable(prefix + "DurationForStanceLegStraightening", registry);
       straightKneeAngle = new DoubleYoVariable(prefix + "StraightKneeAngle", registry);
-      durationForStanceLegStraightening.set(footControlHelper.getWalkingControllerParameters().getDurationForStanceLegStraightening());
-      straightKneeAngle.set(footControlHelper.getWalkingControllerParameters().getStraightKneeAngle());
+      durationForStanceLegStraightening.set(walkingControllerParameters.getDurationForStanceLegStraightening());
+      straightKneeAngle.set(walkingControllerParameters.getStraightKneeAngle());
 
       YoGraphicsListRegistry graphicsListRegistry = footControlHelper.getMomentumBasedController().getDynamicGraphicObjectsListRegistry();
       frameViz = new YoGraphicReferenceFrame(controlFrame, registry, 0.2);
@@ -362,6 +379,14 @@ public class SupportState extends AbstractFootControlState
       inverseDymamicsCommandsList.clear();
       inverseDymamicsCommandsList.addCommand(spatialAccelerationCommand);
       inverseDymamicsCommandsList.addCommand(explorationHelper.getCommand());
+
+      straightLegsPrivilegedConfigurationCommand.setWeight(privilegedWeight.getDoubleValue());
+      straightLegsPrivilegedConfigurationCommand.setConfigurationGain(privilegedConfigurationGain.getDoubleValue());
+      straightLegsPrivilegedConfigurationCommand.setVelocityGain(privilegedVelocityGain.getDoubleValue());
+
+      bentLegsPrivilegedConfigurationCommand.setWeight(privilegedWeight.getDoubleValue());
+      bentLegsPrivilegedConfigurationCommand.setConfigurationGain(privilegedConfigurationGain.getDoubleValue());
+      bentLegsPrivilegedConfigurationCommand.setVelocityGain(privilegedVelocityGain.getDoubleValue());
 
       if (attemptToStraightenLegs)
          inverseDymamicsCommandsList.addCommand(straightLegsPrivilegedConfigurationCommand);
