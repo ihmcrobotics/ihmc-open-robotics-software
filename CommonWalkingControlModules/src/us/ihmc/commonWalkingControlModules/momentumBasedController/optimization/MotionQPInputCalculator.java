@@ -184,11 +184,9 @@ public class MotionQPInputCalculator
             nullspaceCalculator.projectOntoNullspace(tempTaskJacobian, allTaskJacobian);
             CommonOps.insert(tempTaskJacobian, motionQPInputToPack.taskJacobian, taskSize, 0);
             CommonOps.insert(privilegedConfigurationHandler.getPrivilegedJointAccelerations(), motionQPInputToPack.taskObjective, taskSize, 0);
-            for (int i = 0; i < robotTaskSize; i++)
-               motionQPInputToPack.taskWeightMatrix.set(taskSize + i, taskSize + i, privilegedConfigurationHandler.getWeights().get(i));
+            CommonOps.insert(privilegedConfigurationHandler.getWeights(), motionQPInputToPack.taskWeightMatrix, taskSize, taskSize);
          }
       }
-
 
       return taskSize > 0;
    }

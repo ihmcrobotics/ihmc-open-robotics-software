@@ -76,7 +76,7 @@ public class JointPrivilegedConfigurationHandler
       privilegedAccelerations = new DenseMatrix64F(numberOfDoFs, 1);
       selectionMatrix = CommonOps.identity(numberOfDoFs);
 
-      privilegedConfigurationWeights = new DenseMatrix64F(numberOfDoFs, 1);
+      privilegedConfigurationWeights = new DenseMatrix64F(numberOfDoFs, numberOfDoFs);
       privilegedConfigurationGains = new DenseMatrix64F(numberOfDoFs, 1);
       privilegedVelocityGains = new DenseMatrix64F(numberOfDoFs, 1);
       privilegedMaxVelocities = new DenseMatrix64F(numberOfDoFs, 1);
@@ -282,9 +282,9 @@ public class JointPrivilegedConfigurationHandler
    private void processConfigurationWeightsAndGains(PrivilegedConfigurationCommand command, int jointIndex)
    {
       if (command.hasWeight())
-         privilegedConfigurationWeights.set(jointIndex, 0, command.getWeight());
+         privilegedConfigurationWeights.set(jointIndex, jointIndex, command.getWeight());
       else
-         privilegedConfigurationWeights.set(jointIndex, 0, defaultConfigurationWeight.getDoubleValue());
+         privilegedConfigurationWeights.set(jointIndex, jointIndex, defaultConfigurationWeight.getDoubleValue());
 
       if (command.hasConfigurationGain())
          privilegedConfigurationGains.set(jointIndex, 0, command.getConfigurationGain());
@@ -388,8 +388,10 @@ public class JointPrivilegedConfigurationHandler
     */
    public double getWeight(OneDoFJoint joint)
    {
-      return privilegedConfigurationWeights.get(jointIndices.get(joint).intValue(), 0);
+      int jointIndex = jointIndices.get(joint).intValue();
+      return privilegedConfigurationWeights.get(jointIndex, jointIndex);
    }
+
    /**
     * Returns the number of kinematic chains that contain privileged configurations.
     * @return number of kinematic chains
