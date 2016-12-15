@@ -383,6 +383,14 @@ public class JointPrivilegedConfigurationHandler
    }
 
    /**
+    * @param joint one DoF joint in question
+    * @return desired privileged weight
+    */
+   public double getWeight(OneDoFJoint joint)
+   {
+      return privilegedConfigurationWeights.get(jointIndices.get(joint).intValue(), 0);
+   }
+   /**
     * Returns the number of kinematic chains that contain privileged configurations.
     * @return number of kinematic chains
     */
@@ -411,6 +419,10 @@ public class JointPrivilegedConfigurationHandler
       return chainEndEffectors.get(chainIndex);
    }
 
+   /**
+    * Returns the default weight for the privileged configuration handler, if there is not a specific weight assigned.
+    * @return default weight
+    */
    public double getDefaultWeight()
    {
       return defaultConfigurationWeight.getDoubleValue();
