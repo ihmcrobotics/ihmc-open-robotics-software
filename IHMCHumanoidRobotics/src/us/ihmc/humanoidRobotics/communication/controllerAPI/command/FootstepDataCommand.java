@@ -18,6 +18,7 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
    private RobotSide robotSide;
    private FootstepOrigin origin;
    private TrajectoryType trajectoryType = TrajectoryType.DEFAULT;
+   private final RecyclingArrayList<Point3d> trajectoryWaypoints = new RecyclingArrayList<>(2, Point3d.class);
    private double swingHeight = 0.0;
    private final Point3d position = new Point3d();
    private final Quat4d orientation = new Quat4d();
@@ -46,6 +47,13 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
       robotSide = message.getRobotSide();
       origin = message.getOrigin();
       trajectoryType = message.getTrajectoryType();
+      Point3d[] originalWaypointList = message.getTrajectoryWaypoints();
+      trajectoryWaypoints.clear();
+      if (originalWaypointList != null)
+      {
+         for (int i = 0; i < originalWaypointList.length; i++)
+            trajectoryWaypoints.add().set(originalWaypointList[i]);
+      }
       swingHeight = message.getSwingHeight();
       position.set(message.getLocation());
       orientation.set(message.getOrientation());
@@ -64,6 +72,10 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
       robotSide = other.robotSide;
       origin = other.origin;
       trajectoryType = other.trajectoryType;
+      RecyclingArrayList<Point3d> otherWaypointList = other.trajectoryWaypoints;
+      trajectoryWaypoints.clear();
+      for (int i = 0; i < otherWaypointList.size(); i++)
+         trajectoryWaypoints.add().set(otherWaypointList.get(i));
       swingHeight = other.swingHeight;
       position.set(other.position);
       orientation.set(other.orientation);
@@ -119,6 +131,11 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
    public TrajectoryType getTrajectoryType()
    {
       return trajectoryType;
+   }
+
+   public RecyclingArrayList<Point3d> getTrajectoryWaypoints()
+   {
+      return trajectoryWaypoints;
    }
 
    public double getSwingHeight()

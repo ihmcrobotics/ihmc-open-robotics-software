@@ -52,7 +52,6 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.stateMachines.StateTransitionCondition;
 import us.ihmc.robotics.time.YoTimer;
-import us.ihmc.tools.FormattingTools;
 import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 
@@ -112,7 +111,6 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
       footstepPlanner = new SimplePlanarRegionBipedalAnytimeFootstepPlanner(footstepPlanningParameters, registry);
       SideDependentList<ConvexPolygon2d> footPolygonsInSoleFrame = FootstepPlannerForBehaviorsHelper.createDefaultFootPolygonsForAnytimePlannerAndPlannerToolbox(wholeBodyControllerParameters.getContactPointParameters());
       footstepPlanner.setFeetPolygons(footPolygonsInSoleFrame);
-      footstepPlanner.setMaximumNumberOfNodesToExpand(500);
 
       this.yoTime = yoTime;
       maxNumberOfStepsToTake.set(1);
@@ -124,7 +122,7 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
       case FIDUCIAL:
          FiducialDetectorBehaviorService fiducialDetectorBehaviorService = new FiducialDetectorBehaviorService(communicationBridge, null);
          fiducialDetectorBehaviorService.setTargetIDToLocate(50);
-         fiducialDetectorBehaviorService.setExpectedFiducialSize(0.16);
+         fiducialDetectorBehaviorService.setExpectedFiducialSize(0.22);
          goalDetectorBehaviorService = fiducialDetectorBehaviorService;
          break;
       
@@ -281,9 +279,6 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
    {
       Tuple3d goalPosition = new Point3d();
       goalPose.getPosition(goalPosition);
-
-      String xString = FormattingTools.getFormattedToSignificantFigures(goalPosition.getX(), 3);
-      String yString = FormattingTools.getFormattedToSignificantFigures(goalPosition.getY(), 3);
 
       FootstepPlannerGoal footstepPlannerGoal = new FootstepPlannerGoal();
       footstepPlannerGoal.setGoalPoseBetweenFeet(goalPose);
