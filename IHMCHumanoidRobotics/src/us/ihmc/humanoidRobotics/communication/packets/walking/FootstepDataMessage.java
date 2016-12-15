@@ -68,9 +68,9 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
          + "The waypoints specify the sole position in the world frame.")
    public Point3d[] trajectoryWaypoints = null;
 
-   @RosExportedField(documentation = "Contains information on how high the robot should step. This affects only basic and obstacle clearance trajectories."
-         + "Recommended values are between 0.1 (default) and 0.25.\n")
-   public double swingHeight = 0;
+   @RosExportedField(documentation = "Contains information on how high the robot should step. This affects trajectory types default and obstacle clearance."
+         + "Recommended values are between 0.1 (minimum swing height, default) and 0.25.\n")
+   public double swingHeight = 0.0;
 
    /**
     * Empty constructor for serialization.
