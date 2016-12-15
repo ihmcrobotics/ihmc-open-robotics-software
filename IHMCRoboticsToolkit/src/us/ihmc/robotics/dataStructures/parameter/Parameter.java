@@ -1,4 +1,4 @@
-package us.ihmc.quadrupedRobotics.params;
+package us.ihmc.robotics.dataStructures.parameter;
 
 import java.util.ArrayList;
 import java.util.List;

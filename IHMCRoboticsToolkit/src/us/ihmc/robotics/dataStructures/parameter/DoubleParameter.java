@@ -1,27 +1,27 @@
-package us.ihmc.quadrupedRobotics.params;
+package us.ihmc.robotics.dataStructures.parameter;
 
-public class IntegerParameter extends Parameter
+public class DoubleParameter extends Parameter
 {
-   private int value;
+   private double value;
 
-   private IntegerParameter() // no-arg for serialization
+   private DoubleParameter() // no-arg for serialization
    {
       super(null);
-      this.value =  0;
+      this.value =  0.0;
    }
 
-   IntegerParameter(String path, int defaultValue)
+   DoubleParameter(String path, double defaultValue)
    {
       super(path);
       this.value = defaultValue;
    }
 
-   public int get()
+   public double get()
    {
       return value;
    }
 
-   public void set(int value)
+   public void set(double value)
    {
       this.value = value;
       super.notifyChangeListeners();
@@ -32,7 +32,7 @@ public class IntegerParameter extends Parameter
    {
       try
       {
-         this.value = Integer.parseInt(value);
+         this.value = Double.parseDouble(value);
          return true;
       } catch (NumberFormatException e)
       {
@@ -43,7 +43,7 @@ public class IntegerParameter extends Parameter
    @Override
    String dumpValue()
    {
-      return Integer.toString(value);
+      return Double.toString(value);
    }
 }
 
