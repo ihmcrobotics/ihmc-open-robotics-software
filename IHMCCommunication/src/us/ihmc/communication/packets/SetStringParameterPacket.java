@@ -1,6 +1,4 @@
-package us.ihmc.quadrupedRobotics.params;
-
-import us.ihmc.communication.packets.Packet;
+package us.ihmc.communication.packets;
 
 public class SetStringParameterPacket extends Packet<SetStringParameterPacket>
 {

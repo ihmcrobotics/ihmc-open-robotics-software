@@ -1,7 +1,6 @@
-package us.ihmc.quadrupedRobotics.params;
+package us.ihmc.communication.packets;
 
 import com.google.common.math.DoubleMath;
-import us.ihmc.communication.packets.Packet;
 
 public class SetDoubleArrayParameterPacket extends Packet<SetDoubleArrayParameterPacket>
 {
