@@ -249,9 +249,8 @@ public class WalkOnTheEdgesManager
    private boolean checkAnkleLimitForToeOff(RobotSide trailingLeg)
    {
       OneDoFJoint anklePitch = fullRobotModel.getLegJoint(trailingLeg, LegJointName.ANKLE_PITCH);
-      double lowerLimit = Math.max(anklePitch.getJointLimitLower(), ankleLowerLimitToTriggerToeOff.getDoubleValue());
-      double accuracyBound = 0.02;
-      isRearAnklePitchHittingLimit.set(anklePitch.getQ() < lowerLimit + 0.02);
+      double lowerLimit = Math.max(anklePitch.getJointLimitLower() + 0.02, ankleLowerLimitToTriggerToeOff.getDoubleValue());
+      isRearAnklePitchHittingLimit.set(anklePitch.getQ() < lowerLimit);
       isRearAnklePitchHittingLimitFilt.update();
 
       if (!doToeOffWhenHittingAnkleLimit.getBooleanValue())
