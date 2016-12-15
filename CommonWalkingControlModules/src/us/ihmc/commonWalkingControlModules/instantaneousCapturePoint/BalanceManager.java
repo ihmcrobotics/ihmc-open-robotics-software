@@ -449,10 +449,10 @@ public class BalanceManager
 
    public void initializeICPPlanForSingleSupport(double swingTime, double transferTime)
    {
-      icpPlanner.initializeForSingleSupport(yoTime.getDoubleValue());
-      linearMomentumRateOfChangeControlModule.initializeForSingleSupport();
       setSingleSupportTime(swingTime);
       setDoubleSupportTime(transferTime);
+      icpPlanner.initializeForSingleSupport(yoTime.getDoubleValue());
+      linearMomentumRateOfChangeControlModule.initializeForSingleSupport();
    }
 
    public void initializeICPPlanForStanding(double swingTime, double transferTime)
@@ -462,10 +462,10 @@ public class BalanceManager
          requestICPPlannerToHoldCurrentCoM();
          holdICPToCurrentCoMLocationInNextDoubleSupport.set(false);
       }
-      icpPlanner.initializeForStanding(yoTime.getDoubleValue());
-      linearMomentumRateOfChangeControlModule.initializeForStanding();
       setSingleSupportTime(swingTime);
       setDoubleSupportTime(transferTime);
+      icpPlanner.initializeForStanding(yoTime.getDoubleValue());
+      linearMomentumRateOfChangeControlModule.initializeForStanding();
    }
 
    public void initializeICPPlanForTransfer(double swingTime, double transferTime)
@@ -475,10 +475,10 @@ public class BalanceManager
          requestICPPlannerToHoldCurrentCoM();
          holdICPToCurrentCoMLocationInNextDoubleSupport.set(false);
       }
-      icpPlanner.initializeForTransfer(yoTime.getDoubleValue());
-      linearMomentumRateOfChangeControlModule.initializeForTransfer();
       setSingleSupportTime(swingTime);
       setDoubleSupportTime(transferTime);
+      icpPlanner.initializeForTransfer(yoTime.getDoubleValue());
+      linearMomentumRateOfChangeControlModule.initializeForTransfer();
    }
 
    public boolean isTransitionToSingleSupportSafe(RobotSide transferToSide)
