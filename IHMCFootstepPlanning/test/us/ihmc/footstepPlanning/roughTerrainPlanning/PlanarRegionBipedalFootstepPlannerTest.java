@@ -24,13 +24,17 @@ public class PlanarRegionBipedalFootstepPlannerTest extends FootstepPlannerOnRou
    private YoVariableRegistry registry;
    private BipedalFootstepPlannerParameters parameters;
    private PlanarRegionBipedalFootstepPlanner planner;
-   
+
    private static final boolean visualize = !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
+   private static final boolean showPlannerVisualizer = false;
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 300000)
    public void testOnStairCase()
    {
+      planner.setMaximumNumberOfNodesToExpand(Integer.MAX_VALUE);
+      planner.setTimeout(10.0);
+      planner.setExitAfterInitialSolution(false);
       super.testOnStaircase(new Vector3d(), true);
    }
 
@@ -39,6 +43,9 @@ public class PlanarRegionBipedalFootstepPlannerTest extends FootstepPlannerOnRou
    @Test(timeout = 300000)
    public void testSimpleStepOnBox()
    {
+      planner.setMaximumNumberOfNodesToExpand(Integer.MAX_VALUE);
+      planner.setTimeout(10.0);
+      planner.setExitAfterInitialSolution(false);
       super.testSimpleStepOnBox(true);
    }
 
@@ -71,7 +78,7 @@ public class PlanarRegionBipedalFootstepPlannerTest extends FootstepPlannerOnRou
    {
       super.testOverCinderBlockField(true);
    }
-   
+
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 300000)
    public void testStepAfterPitchedUp()
@@ -79,38 +86,38 @@ public class PlanarRegionBipedalFootstepPlannerTest extends FootstepPlannerOnRou
       //super.testStepUpsAndDownsScoringDifficult(!visualize);
       super.testCompareAfterPitchedStep(!visualize, true);
    }
-   
+
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 300000)
    public void testStepAfterPitchedDown()
    {
       super.testCompareAfterPitchedStep(!visualize, false);
    }
-   
+
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 300000)
    public void testStepBeforeGap()
    {
       super.testCompareStepBeforeGap(!visualize);
    }
-   
+
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 300000)
    public void testPartialGaps()
    {
       parameters.setMinimumFootholdPercent(0.4);
       parameters.setRejectIfCannotFullyWiggleInside(false);
-      
+
       super.testPartialGaps(!visualize);
    }
-   
+
    @Before
    public void setupPlanner()
    {
       registry = new YoVariableRegistry("test");
       parameters = new BipedalFootstepPlannerParameters(registry);
       planner = new PlanarRegionBipedalFootstepPlanner(parameters, registry);
-      
+
       setDefaultParameters();
    }
 
@@ -141,7 +148,7 @@ public class PlanarRegionBipedalFootstepPlannerTest extends FootstepPlannerOnRou
       SideDependentList<ConvexPolygon2d> footPolygonsInSoleFrame = PlanningTestTools.createDefaultFootPolygons();
       planner.setFeetPolygons(footPolygonsInSoleFrame);
 
-      if (visualize)
+      if (showPlannerVisualizer)
       {
          PlanarRegionBipedalFootstepPlannerVisualizer visualizer = SCSPlanarRegionBipedalFootstepPlannerVisualizer.createWithSimulationConstructionSet(1.0, footPolygonsInSoleFrame, registry);
          planner.setBipedalFootstepPlannerListener(visualizer);

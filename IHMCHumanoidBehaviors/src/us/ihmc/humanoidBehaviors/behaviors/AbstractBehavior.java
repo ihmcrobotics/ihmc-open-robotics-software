@@ -117,10 +117,10 @@ public abstract class AbstractBehavior implements RobotController
       }
 
       addAllLocalListenersToCommunicationBridge();
-      
+
       onBehaviorEntered();
    }
-   
+
    public abstract void onBehaviorEntered();
 
    /**
@@ -137,10 +137,10 @@ public abstract class AbstractBehavior implements RobotController
       {
          behaviorService.pause();
       }
-      
+
       onBehaviorAborted();
    }
-   
+
    public abstract void onBehaviorAborted();
 
    /**
@@ -152,15 +152,15 @@ public abstract class AbstractBehavior implements RobotController
       TextToSpeechPacket p1 = new TextToSpeechPacket("Pausing Behavior");
       sendPacket(p1);
       isPaused.set(true);
-      
+
       for (BehaviorService behaviorService : behaviorsServices)
       {
          behaviorService.pause();
       }
-      
+
       onBehaviorPaused();
    }
-   
+
    public abstract void onBehaviorPaused();
 
    /**
@@ -178,10 +178,10 @@ public abstract class AbstractBehavior implements RobotController
       {
          behaviorService.run();
       }
-      
+
       onBehaviorResumed();
    }
-   
+
    public abstract void onBehaviorResumed();
 
    /**
@@ -196,12 +196,12 @@ public abstract class AbstractBehavior implements RobotController
       {
          behaviorService.pause();
       }
-      
+
       removeAllLocalListenersFromCommunicationBridge();
-      
+
       onBehaviorExited();
    }
-   
+
    public abstract void onBehaviorExited();
 
    /**
@@ -236,8 +236,10 @@ public abstract class AbstractBehavior implements RobotController
    private void removeAllLocalListenersFromCommunicationBridge()
    {
       if (DEBUG)
+      {
          System.out.println("--------------------------------------------------------------------------------");
-      System.out.println("AbstractBehavior " + behaviorName + " removeAllLocalListenersFromCommunicationBridge");
+         System.out.println("AbstractBehavior " + behaviorName + " removeAllLocalListenersFromCommunicationBridge");
+      }
       for (Class<?> key : localListeningNetworkQueues.keySet())
       {
          for (ConcurrentListeningQueue<?> queue : localListeningNetworkQueues.get(key))

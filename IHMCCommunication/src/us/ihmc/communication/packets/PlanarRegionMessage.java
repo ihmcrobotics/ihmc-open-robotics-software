@@ -13,18 +13,18 @@ public class PlanarRegionMessage extends Packet<PlanarRegionMessage>
    public int regionId = PlanarRegion.NO_REGION_ID;
    public Point3f regionOrigin;
    public Vector3f regionNormal;
-   public Point2f[] concaveHullVertices;
+   public List<Point2f[]> concaveHullsVertices;
    public List<Point2f[]> convexPolygonsVertices;
 
    public PlanarRegionMessage()
    {
    }
 
-   public PlanarRegionMessage(Point3f regionOrigin, Vector3f regionNormal, Point2f[] concaveHullVertices, List<Point2f[]> convexPolygonsVertices)
+   public PlanarRegionMessage(Point3f regionOrigin, Vector3f regionNormal, List<Point2f[]> concaveHullsVertices, List<Point2f[]> convexPolygonsVertices)
    {
       this.regionOrigin = regionOrigin;
       this.regionNormal = regionNormal;
-      this.concaveHullVertices = concaveHullVertices;
+      this.concaveHullsVertices = concaveHullsVertices;
       this.convexPolygonsVertices = convexPolygonsVertices;
    }
 
@@ -48,6 +48,11 @@ public class PlanarRegionMessage extends Packet<PlanarRegionMessage>
       return regionNormal;
    }
 
+   public List<Point2f[]> getConcaveHullsVertices()
+   {
+      return concaveHullsVertices;
+   }
+
    public List<Point2f[]> getConvexPolygonsVertices()
    {
       return convexPolygonsVertices;
@@ -64,15 +69,24 @@ public class PlanarRegionMessage extends Packet<PlanarRegionMessage>
          return false;
       if (convexPolygonsVertices.size() != other.convexPolygonsVertices.size())
          return false;
-      if (concaveHullVertices.length != other.concaveHullVertices.length)
+      if (concaveHullsVertices.size() != other.concaveHullsVertices.size())
          return false;
 
-      for (int vertexIndex = 0; vertexIndex < concaveHullVertices.length; vertexIndex++)
+      for (int hullIndex = 0; hullIndex < concaveHullsVertices.size(); hullIndex++)
       {
-         Point2f thisVertex = concaveHullVertices[vertexIndex];
-         Point2f otherVertex = other.concaveHullVertices[vertexIndex];
-         if (!thisVertex.epsilonEquals(otherVertex, (float) epsilon))
+         Point2f[] thisHull = concaveHullsVertices.get(hullIndex);
+         Point2f[] otherHull = other.concaveHullsVertices.get(hullIndex);
+
+         if (thisHull.length != otherHull.length)
             return false;
+
+         for (int vertexIndex = 0; vertexIndex < thisHull.length; vertexIndex++)
+         {
+            Point2f thisVertex = thisHull[vertexIndex];
+            Point2f otherVertex = otherHull[vertexIndex];
+            if (!thisVertex.epsilonEquals(otherVertex, (float) epsilon))
+               return false;
+         }
       }
 
       for (int polygonIndex = 0; polygonIndex < convexPolygonsVertices.size(); polygonIndex++)

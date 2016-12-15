@@ -447,14 +447,15 @@ public class BalanceManager
       pushRecoveryControlModule.initializeParametersForDoubleSupportPushRecovery();
    }
 
-   public void initializeICPPlanForSingleSupport()
+   public void initializeICPPlanForSingleSupport(double swingTime, double transferTime)
    {
       icpPlanner.initializeForSingleSupport(yoTime.getDoubleValue());
-
       linearMomentumRateOfChangeControlModule.initializeForSingleSupport();
+      setSingleSupportTime(swingTime);
+      setDoubleSupportTime(transferTime);
    }
 
-   public void initializeICPPlanForStanding()
+   public void initializeICPPlanForStanding(double swingTime, double transferTime)
    {
       if (holdICPToCurrentCoMLocationInNextDoubleSupport.getBooleanValue())
       {
@@ -463,9 +464,11 @@ public class BalanceManager
       }
       icpPlanner.initializeForStanding(yoTime.getDoubleValue());
       linearMomentumRateOfChangeControlModule.initializeForStanding();
+      setSingleSupportTime(swingTime);
+      setDoubleSupportTime(transferTime);
    }
 
-   public void initializeICPPlanForTransfer()
+   public void initializeICPPlanForTransfer(double swingTime, double transferTime)
    {
       if (holdICPToCurrentCoMLocationInNextDoubleSupport.getBooleanValue())
       {
@@ -474,6 +477,8 @@ public class BalanceManager
       }
       icpPlanner.initializeForTransfer(yoTime.getDoubleValue());
       linearMomentumRateOfChangeControlModule.initializeForTransfer();
+      setSingleSupportTime(swingTime);
+      setDoubleSupportTime(transferTime);
    }
 
    public boolean isTransitionToSingleSupportSafe(RobotSide transferToSide)
@@ -581,13 +586,13 @@ public class BalanceManager
       icpPlanner.holdCurrentICP(yoTime.getDoubleValue(), centerOfMassPosition);
    }
 
-   public void setDoubleSupportTime(double newDoubleSupportTime)
+   private void setDoubleSupportTime(double newDoubleSupportTime)
    {
       icpPlanner.setDoubleSupportTime(newDoubleSupportTime);
       linearMomentumRateOfChangeControlModule.setDoubleSupportDuration(newDoubleSupportTime);
    }
 
-   public void setSingleSupportTime(double newSingleSupportTime)
+   private void setSingleSupportTime(double newSingleSupportTime)
    {
       icpPlanner.setSingleSupportTime(newSingleSupportTime);
       linearMomentumRateOfChangeControlModule.setSingleSupportDuration(newSingleSupportTime);
