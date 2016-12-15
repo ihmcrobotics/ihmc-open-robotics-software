@@ -9,10 +9,10 @@ import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 
-import us.ihmc.communication.ros.generators.RosEnumValueDocumentation;
-import us.ihmc.communication.ros.generators.RosMessagePacket;
-import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.packets.Packet;
+import us.ihmc.communication.ros.generators.RosEnumValueDocumentation;
+import us.ihmc.communication.ros.generators.RosExportedField;
+import us.ihmc.communication.ros.generators.RosMessagePacket;
 import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
 import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
@@ -63,6 +63,10 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
 
    @RosExportedField(documentation = "This contains information on what the swing trajectory should be for each step. Recomended is DEFAULT.\n")
    public TrajectoryType trajectoryType = TrajectoryType.DEFAULT;
+
+   @RosExportedField(documentation = "In case the trajectory type is set to custom the swing waypoints can be specified here (As of Dec 2016 only two waypoints are supported).\n"
+         + "The waypoints specify the sole position in the world frame.")
+   public Point3d[] trajectoryWaypoints = null;
 
    @RosExportedField(documentation = "Contains information on how high the robot should step. This affects only basic and obstacle clearance trajectories."
          + "Recommended values are between 0.1 (default) and 0.25.\n")
@@ -232,8 +236,6 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
    public void setSwingHeight(double swingHeight)
    {
       this.swingHeight = swingHeight;
-      if (trajectoryType == TrajectoryType.DEFAULT)
-         trajectoryType = TrajectoryType.BASIC;
    }
 
    public void setPredictedContactPoints(ArrayList<Point2d> predictedContactPoints)
@@ -249,6 +251,16 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
    public void setTrajectoryType(TrajectoryType trajectoryType)
    {
       this.trajectoryType = trajectoryType;
+   }
+
+   public Point3d[] getTrajectoryWaypoints()
+   {
+      return trajectoryWaypoints;
+   }
+
+   public void setTrajectoryWaypoints(Point3d[] trajectoryWaypoints)
+   {
+      this.trajectoryWaypoints = trajectoryWaypoints;
    }
 
    public String toString()
