@@ -115,8 +115,7 @@ public class MotionQPInputCalculator
       privilegedConfigurationHandler.computePrivilegedJointAccelerations();
 
       motionQPInputToPack.setIsMotionConstraint(false);
-      motionQPInputToPack.setUseWeightScalar(true);
-      motionQPInputToPack.setWeight(privilegedConfigurationHandler.getDefaultWeight());
+      motionQPInputToPack.setUseWeightScalar(false);
 
       nullspaceCalculator.setPseudoInverseAlpha(nullspaceProjectionAlpha.getDoubleValue());
 
@@ -158,6 +157,7 @@ public class MotionQPInputCalculator
             {
                OneDoFJoint chainJoint = (OneDoFJoint) chainJoints[i];
                motionQPInputToPack.taskObjective.set(taskSize + i, 0, privilegedConfigurationHandler.getPrivilegedJointAcceleration(chainJoint));
+               motionQPInputToPack.taskWeightMatrix.set(taskSize + i, taskSize + i, privilegedConfigurationHandler.getWeight(chainJoint));
             }
             catch (ClassCastException e)
             {
@@ -184,7 +184,8 @@ public class MotionQPInputCalculator
             nullspaceCalculator.projectOntoNullspace(tempTaskJacobian, allTaskJacobian);
             CommonOps.insert(tempTaskJacobian, motionQPInputToPack.taskJacobian, taskSize, 0);
             CommonOps.insert(privilegedConfigurationHandler.getPrivilegedJointAccelerations(), motionQPInputToPack.taskObjective, taskSize, 0);
-            //CommonOps.insert(privilegedConfigurationHandler.getWeights(), motionQPInputToPack.taskWeightMatrix, taskSize, 0);
+            for (int i = 0; i < robotTaskSize; i++)
+               motionQPInputToPack.taskWeightMatrix.set(taskSize + i, taskSize + i, privilegedConfigurationHandler.getWeights().get(i));
          }
       }
 
