@@ -33,6 +33,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHuma
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.net.PacketConsumer;
+import us.ihmc.communication.packets.BodyPartsTrackingWeightsPacket;
 import us.ihmc.communication.packets.KinematicsToolboxOutputStatus;
 import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicCoordinateSystem;
 import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
@@ -108,6 +109,12 @@ public class KinematicsToolboxController extends ToolboxController
    private final DoubleYoVariable momentumWeight = new DoubleYoVariable("momentumWeight", registry);
    private final DoubleYoVariable chestWeight = new DoubleYoVariable("chestWeight", registry);
    private final DoubleYoVariable pelvisOrientationWeight = new DoubleYoVariable("pelvisOrientationWeight", registry);
+//   private final SideDependentList<DoubleYoVariable> handPositionError = new SideDependentList<>();
+//   private final SideDependentList<DoubleYoVariable> handRotationError = new SideDependentList<>();
+//   private final SideDependentList<DoubleYoVariable> footPositionError = new SideDependentList<>();
+//   private final SideDependentList<DoubleYoVariable> footRotationError = new SideDependentList<>();
+   private final DoubleYoVariable chestOrientationError = new DoubleYoVariable("chestOrientationError", registry);
+   private final DoubleYoVariable pelvisOrientationError = new DoubleYoVariable("pelvisOrientationError", registry);
 
    private final CommandInputManager commandInputManager;
    private final DoubleYoVariable solutionQuality = new DoubleYoVariable("solutionQuality", registry);
@@ -319,7 +326,7 @@ public class KinematicsToolboxController extends ToolboxController
       if (desiredChestOrientation != null)
       {         
          RigidBody chest = desiredFullRobotModel.getChest();
-         Twist desiredChestTwist = computeDesiredTwist(desiredChestOrientation, chest, chestSelectionMatrix, tempErrorMagnitude);
+         Twist desiredChestTwist = computeDesiredTwist(desiredChestOrientation, chest, chestSelectionMatrix, chestOrientationError, tempErrorMagnitude);
          newSolutionQuality += tempErrorMagnitude.doubleValue();
          ReferenceFrame chestFrame = chest.getBodyFixedFrame();
          FrameVector desiredChestAngularVelocity = new FrameVector();
@@ -336,7 +343,7 @@ public class KinematicsToolboxController extends ToolboxController
       if (desiredPelvisOrientation != null)
       {
          RigidBody pelvis = desiredFullRobotModel.getPelvis();
-         Twist desiredPelvisTwist = computeDesiredTwist(desiredPelvisOrientation, pelvis, pelvisSelectionMatrix, tempErrorMagnitude);
+         Twist desiredPelvisTwist = computeDesiredTwist(desiredPelvisOrientation, pelvis, pelvisSelectionMatrix, pelvisOrientationError, tempErrorMagnitude);
          newSolutionQuality += tempErrorMagnitude.doubleValue();
          ReferenceFrame pelvisFrame = pelvis.getBodyFixedFrame();
          FrameVector desiredPelvisAngularVelocity = new FrameVector();
@@ -376,12 +383,12 @@ public class KinematicsToolboxController extends ToolboxController
    private final DenseMatrix64F spatialError = new DenseMatrix64F(6, 1);
    private final DenseMatrix64F subspaceError = new DenseMatrix64F(6, 1);
 
-   public Twist computeDesiredTwist(FramePose desiredPose, RigidBody endEffector, DenseMatrix64F selectionMatrix, MutableDouble errorMagnitude)
+   public Twist computeDesiredTwist(FramePose desiredPose, RigidBody endEffector, DenseMatrix64F selectionMatrix, /*DoubleYoVariable rotation, DoubleYoVariable position,*/ MutableDouble errorMagnitude)
    {
-      return computeDesiredTwist(desiredPose, endEffector, endEffector.getBodyFixedFrame(), selectionMatrix, errorMagnitude);
+      return computeDesiredTwist(desiredPose, endEffector, endEffector.getBodyFixedFrame(), selectionMatrix, /*rotation, position,*/ errorMagnitude);
    }
 
-   public Twist computeDesiredTwist(FramePose desiredPose, RigidBody endEffector, ReferenceFrame controlFrame, DenseMatrix64F selectionMatrix, MutableDouble errorMagnitude)
+   public Twist computeDesiredTwist(FramePose desiredPose, RigidBody endEffector, ReferenceFrame controlFrame, DenseMatrix64F selectionMatrix, /*DoubleYoVariable rotation, DoubleYoVariable position,*/ MutableDouble errorMagnitude)
    {
       errorFramePose.setIncludingFrame(desiredPose);
       errorFramePose.changeFrame(controlFrame);
@@ -390,6 +397,9 @@ public class KinematicsToolboxController extends ToolboxController
 
       errorRotation.set(errorAxisAngle.getX(), errorAxisAngle.getY(), errorAxisAngle.getZ());
       errorRotation.scale(AngleTools.trimAngleMinusPiToPi(errorAxisAngle.getAngle()));
+      
+//      position.set(Math.sqrt(errorPosition.dot(errorPosition)));
+//      rotation.set(errorAxisAngle.getAngle());
 
       ReferenceFrame endEffectorFrame = endEffector.getBodyFixedFrame();
       Twist desiredTwist = new Twist();
@@ -403,12 +413,12 @@ public class KinematicsToolboxController extends ToolboxController
       return desiredTwist;
    }
    
-   public Twist computeDesiredTwist(FrameOrientation desiredOrientation, RigidBody endEffector, DenseMatrix64F selectionMatrix, MutableDouble errorMagnitude)
+   public Twist computeDesiredTwist(FrameOrientation desiredOrientation, RigidBody endEffector, DenseMatrix64F selectionMatrix, DoubleYoVariable rotation, MutableDouble errorMagnitude)
    {
-      return computeDesiredTwist(desiredOrientation, endEffector, endEffector.getBodyFixedFrame(), selectionMatrix, errorMagnitude);
+      return computeDesiredTwist(desiredOrientation, endEffector, endEffector.getBodyFixedFrame(), selectionMatrix, rotation, errorMagnitude);
    }
 
-   public Twist computeDesiredTwist(FrameOrientation desiredOrientation, RigidBody endEffector, ReferenceFrame controlFrame, DenseMatrix64F selectionMatrix, MutableDouble errorMagnitude)
+   public Twist computeDesiredTwist(FrameOrientation desiredOrientation, RigidBody endEffector, ReferenceFrame controlFrame, DenseMatrix64F selectionMatrix, DoubleYoVariable rotation, MutableDouble errorMagnitude)
    {
       errorFrameOrientation.setIncludingFrame(desiredOrientation);
       errorFrameOrientation.changeFrame(controlFrame);
@@ -417,6 +427,8 @@ public class KinematicsToolboxController extends ToolboxController
       errorRotation.set(errorAxisAngle.getX(), errorAxisAngle.getY(), errorAxisAngle.getZ());
       errorRotation.scale(AngleTools.trimAngleMinusPiToPi(errorAxisAngle.getAngle()));
 
+      rotation.set(errorAxisAngle.getAngle());
+      
       ReferenceFrame endEffectorFrame = endEffector.getBodyFixedFrame();
       Twist desiredTwist = new Twist();
       desiredTwist.set(endEffectorFrame, elevatorFrame, controlFrame, new Vector3d(), errorRotation);
