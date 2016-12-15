@@ -6,27 +6,27 @@ public class JointPrivilegedConfigurationParameters
    {
    }
 
-   public double getConfigurationGain()
+   public double getDefaultConfigurationGain()
    {
       return 40.0;
    }
 
-   public double getVelocityGain()
+   public double getDefaultVelocityGain()
    {
       return 6.0;
    }
 
-   public double getMaxVelocity()
+   public double getDefaultMaxVelocity()
    {
       return 2.0;
    }
 
-   public double getMaxAcceleration()
+   public double getDefaultMaxAcceleration()
    {
       return Double.POSITIVE_INFINITY;
    }
 
-   public double getWeight()
+   public double getDefaultWeight()
    {
       return 5.0;
    }
