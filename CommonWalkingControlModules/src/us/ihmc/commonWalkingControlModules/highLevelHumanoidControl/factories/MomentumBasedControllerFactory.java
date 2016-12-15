@@ -176,7 +176,7 @@ public class MomentumBasedControllerFactory implements CloseableAndDisposable
          double controlDT = momentumBasedController.getControlDT();
          ComponentBasedFootstepDataMessageGenerator footstepGenerator = new ComponentBasedFootstepDataMessageGenerator(commandInputManager, statusOutputManager,
                walkingControllerParameters, headingAndVelocityEvaluationScriptParameters, referenceFrames, contactableFeet, controlDT, useHeadingAndVelocityScript, heightMapForFootstepZ, registry);
-         momentumBasedController.addUpdatables(footstepGenerator.getModulesToUpdate());
+         momentumBasedController.addUpdatable(footstepGenerator);
       }
       else
       {
