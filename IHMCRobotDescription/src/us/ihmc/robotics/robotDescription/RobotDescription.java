@@ -88,6 +88,15 @@ public class RobotDescription implements RobotDescriptionNode, GraphicsObjectsHo
 
       return jointDescription.getLink().getLinkGraphics();
    }
+   
+   public LinkDescription getLinkDescription(String name)
+   {
+      JointDescription jointDescription = getJointDescription(name);
+      if (jointDescription == null)
+         return null;
+      
+      return jointDescription.getLink();
+   }
 
    @Override
    public void scale(double factor, double massScalePower, List<String> ignoreInertiaScaleJointList)

@@ -204,7 +204,7 @@ public abstract class CapturePointPlannerParameters
 
    /**
     * Only used when using the new ICP planner with two CMPs per support.
-    * Threshold used to figure out if the exit CMP should be put on the toes.
+    * Threshold used to figure out if the exit CMP should be put on the toes when stepping down.
     */
    public double getStepLengthThresholdForExitCMPOnToesWhenSteppingDown()
    {
@@ -250,5 +250,23 @@ public abstract class CapturePointPlannerParameters
    public double getVelocityDecayDurationWhenDone()
    {
       return Double.NaN;
+   }
+
+   /**
+    * Sets the exit CMP on the toes. If doing toe-off in single support, this is necessary.
+    * @return
+    */
+   public boolean putExitCMPOnToes()
+   {
+      return false;
+   }
+
+   /**
+    * Only used when using the new ICP planner with two CMPs per support.
+    * Threshold used to figure out if the exit CMP should be put on the toes.
+    */
+   public double getStepLengthThresholdForExitCMPOnToes()
+   {
+      return modelScale * 0.15;
    }
 }

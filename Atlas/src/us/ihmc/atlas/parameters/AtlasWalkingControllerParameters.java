@@ -122,7 +122,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    @Override
    public double getMinSwingHeightFromStanceFoot()
    {
-      return 0.1 * jointMap.getModelScale();
+      return 0.10 * jointMap.getModelScale();
    }
    
    @Override
@@ -1098,5 +1098,12 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    public boolean controlHeightWithMomentum()
    {
       return true;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public double getICPProximityToLeadingFootForToeOff()
+   {
+      return 0.0;
    }
 }

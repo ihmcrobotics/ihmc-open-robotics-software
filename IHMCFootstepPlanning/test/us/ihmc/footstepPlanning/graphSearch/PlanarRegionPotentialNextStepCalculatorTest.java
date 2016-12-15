@@ -49,7 +49,7 @@ public class PlanarRegionPotentialNextStepCalculatorTest
 
       BipedalFootstepPlannerParameters parameters = createPlannerParameters(registry);
 
-      PlanarRegionPotentialNextStepCalculator calculator = new PlanarRegionPotentialNextStepCalculator(parameters, registry);
+      PlanarRegionPotentialNextStepCalculator calculator = new PlanarRegionPotentialNextStepCalculator(parameters, registry, null);
 
       YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
       SideDependentList<ConvexPolygon2d> footPolygonsInSoleFrame = PlanningTestTools.createDefaultFootPolygons();
@@ -70,7 +70,7 @@ public class PlanarRegionPotentialNextStepCalculatorTest
       int maxNumberOfExpectedFootsteps = 20;
 
       testAndVisualizeToGoal(goalPosition, goalOrientation, calculator, listener, maxNumberOfExpectedFootsteps);
-      
+
       goalPosition = new Point3d(0.0, 5.0, 0.0);
       goalOrientation = new AxisAngle4d(new Vector3d(0.0, 0.0, 1.0), 0.0);
       maxNumberOfExpectedFootsteps = 40;
@@ -113,7 +113,7 @@ public class PlanarRegionPotentialNextStepCalculatorTest
 
       while ((node != null) && (!node.isAtGoal()))
       {
-         ArrayList<BipedalFootstepPlannerNode> childrenNodes = calculator.computeChildrenNodes(node);
+         ArrayList<BipedalFootstepPlannerNode> childrenNodes = calculator.computeChildrenNodes(node, Double.POSITIVE_INFINITY);
 
          if (childrenNodes.size() > 0)
          {

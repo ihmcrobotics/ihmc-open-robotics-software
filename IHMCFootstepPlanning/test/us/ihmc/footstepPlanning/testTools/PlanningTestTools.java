@@ -3,6 +3,8 @@ package us.ihmc.footstepPlanning.testTools;
 import static org.junit.Assert.assertTrue;
 
 import javax.vecmath.Point2d;
+import javax.vecmath.Point3d;
+import javax.vecmath.Vector3d;
 
 import us.ihmc.footstepPlanning.AnytimeFootstepPlanner;
 import us.ihmc.footstepPlanning.FootstepPlan;
@@ -24,6 +26,7 @@ import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePose;
@@ -32,8 +35,10 @@ import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.tools.thread.ThreadTools;
 
 public class PlanningTestTools
@@ -172,7 +177,12 @@ public class PlanningTestTools
       planner.setGoal(goal);
       planner.setPlanarRegions(planarRegionsList);
 
+      ExecutionTimer timer = new ExecutionTimer("Timer", 0.0, new YoVariableRegistry("Timer"));
+      timer.startMeasurement();
       FootstepPlanningResult result = planner.plan();
+      timer.stopMeasurement();
+      PrintTools.info("Planning took " + timer.getCurrentTime().getDoubleValue() + "s");
+
       FootstepPlan footstepPlan = planner.getPlan();
       if (assertPlannerReturnedResult) assertTrue("Planner was not able to provide valid result.", result.validForExecution());
       return footstepPlan;
@@ -189,21 +199,35 @@ public class PlanningTestTools
       planner.setPlanarRegions(planarRegionsList);
    }
 
-   public static boolean isGoalWithinFeet(FramePose goalPose, FootstepPlan footstepPlan)
+   public static boolean isGoalNextToLastStep(FramePose goalPose, FootstepPlan footstepPlan)
+   {
+      return isGoalNextToLastStep(goalPose, footstepPlan, 0.5);
+   }
+
+   public static boolean isGoalNextToLastStep(FramePose goalPose, FootstepPlan footstepPlan, double epsilon)
    {
       int steps = footstepPlan.getNumberOfSteps();
-      if (steps < 2)
+      if (steps < 1)
          throw new RuntimeException("Did not get enough footsteps to check if goal is within feet.");
 
-      FramePose lastFoostep = new FramePose();
-      footstepPlan.getFootstep(steps - 1).getSoleFramePose(lastFoostep);
+      SimpleFootstep footstep = footstepPlan.getFootstep(steps - 1);
+      FramePose stepPose = new FramePose();
+      footstep.getSoleFramePose(stepPose);
+      RobotSide stepSide = footstep.getRobotSide();
 
-      FramePose secondLastFoostep = new FramePose();
-      footstepPlan.getFootstep(steps - 2).getSoleFramePose(secondLastFoostep);
-      FramePose achievedGoal = new FramePose();
-      achievedGoal.interpolate(lastFoostep, secondLastFoostep, 0.5);
+      double midFeetOffset = stepSide.negateIfLeftSide(0.125);
+      Vector3d goalOffset = new Vector3d(0.0, midFeetOffset , 0.0);
+      RigidBodyTransform soleToWorld = new RigidBodyTransform();
+      stepPose.getRigidBodyTransform(soleToWorld);
+      soleToWorld.transform(goalOffset);
 
-      if (achievedGoal.epsilonEquals(goalPose, 10E-2))
+      FramePose achievedGoal = new FramePose(stepPose);
+      Point3d goalPosition = new Point3d();
+      achievedGoal.getPosition(goalPosition);
+      goalPosition.add(goalOffset);
+      achievedGoal.setPosition(goalPosition);
+
+      if (achievedGoal.epsilonEquals(goalPose, epsilon))
          return true;
       else
          return false;

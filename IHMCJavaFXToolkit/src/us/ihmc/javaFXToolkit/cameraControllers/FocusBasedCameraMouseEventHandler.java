@@ -3,6 +3,7 @@ package us.ihmc.javaFXToolkit.cameraControllers;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Predicate;
 
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Matrix3d;
@@ -16,11 +17,14 @@ import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.geometry.Point3D;
+import javafx.scene.Node;
 import javafx.scene.PerspectiveCamera;
+import javafx.scene.SubScene;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.input.PickResult;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
@@ -91,6 +95,8 @@ public class FocusBasedCameraMouseEventHandler implements EventHandler<Event>
          public void handle(long now)
          {
             shiftCameraFocusPoint();
+            double sphereRadius = 0.0025 * Math.abs(offsetFromFocusPoint.getTz());
+            focusPointViz.setRadius(sphereRadius);
          }
       }.start();
    }
@@ -153,6 +159,12 @@ public class FocusBasedCameraMouseEventHandler implements EventHandler<Event>
    private void handleMouseEvent(MouseEvent event)
    {
       if (event.getButton() != MouseButton.PRIMARY)
+         return;
+
+      if (rayBasedFocusTranslation != null)
+         rayBasedFocusTranslation.handle(event);
+
+      if (event.isStillSincePress())
          return;
 
       if (event.getEventType() == MouseEvent.MOUSE_PRESSED || event.getEventType() == MouseEvent.MOUSE_DRAGGED)
@@ -314,6 +326,36 @@ public class FocusBasedCameraMouseEventHandler implements EventHandler<Event>
       focusPointTranslation.setX(focusPointTranslation.getX() - focusPointShift.getX());
       focusPointTranslation.setY(focusPointTranslation.getY() - focusPointShift.getY());
       focusPointTranslation.setZ(focusPointTranslation.getZ() - focusPointShift.getZ());
+   }
+
+   private EventHandler<MouseEvent> rayBasedFocusTranslation = null;
+
+   public void enableShiftClickFocusTranslation()
+   {
+      setupRayBasedFocusTranslation(event -> event.isShiftDown());
+   }
+
+   public void setupRayBasedFocusTranslation(Predicate<MouseEvent> condition)
+   {
+      rayBasedFocusTranslation = new EventHandler<MouseEvent>()
+      {
+         @Override
+         public void handle(MouseEvent event)
+         {
+            if (condition.test(event) && event.isStillSincePress() && event.getEventType() == MouseEvent.MOUSE_CLICKED)
+            {
+               PickResult pickResult = event.getPickResult();
+               Node intersectedNode = pickResult.getIntersectedNode();
+               if (intersectedNode == null || intersectedNode instanceof SubScene)
+                  return;
+               Point3D localPoint = pickResult.getIntersectedPoint();
+               Point3D scenePoint = intersectedNode.getLocalToSceneTransform().transform(localPoint);
+               focusPointTranslation.setX(scenePoint.getX());
+               focusPointTranslation.setY(scenePoint.getY());
+               focusPointTranslation.setZ(scenePoint.getZ());
+            }
+         }
+      };
    }
 
    public Sphere getFocusPointViz()
