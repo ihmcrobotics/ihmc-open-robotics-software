@@ -70,7 +70,7 @@ dependencies {
     compile group: 'org.bytedeco.javacpp-presets', name: 'caffe', version: 'master-1.2', classifier: 'linux-x86_64'
     compile 'org.bytedeco.javacpp-presets:opencv:3.1.0-1.2'
     compile group: 'org.bytedeco.javacpp-presets', name: 'opencv', version: '3.1.0-1.2', classifier: 'linux-x86_64'
-    compile group: 'us.ihmc.ihmcPerception', name: 'valvenet', version: '0.0.1'
+    compile group: 'us.ihmc.ihmcPerception', name: 'valvenet', version: '0.0.2'
     compile group: 'us.ihmc.ihmcPerception', name: 'cuda', version: '7.5'
     compile "org.ddogleg:ddogleg:0.7"
 

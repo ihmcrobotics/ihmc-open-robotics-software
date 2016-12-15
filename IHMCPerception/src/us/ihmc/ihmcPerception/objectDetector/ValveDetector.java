@@ -2,13 +2,13 @@ package us.ihmc.ihmcPerception.objectDetector;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.bytedeco.javacpp.FloatPointer;
-import org.bytedeco.javacpp.IntPointer;
 import org.bytedeco.javacpp.Loader;
 import org.bytedeco.javacpp.caffe;
 import org.bytedeco.javacpp.caffe.Caffe;
 import org.bytedeco.javacpp.caffe.FloatBlob;
 import org.bytedeco.javacpp.caffe.FloatBlobVector;
 import org.bytedeco.javacpp.caffe.FloatNet;
+import us.ihmc.tools.time.Timer;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -16,11 +16,12 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 import static org.bytedeco.javacpp.caffe.TEST;
 
@@ -32,6 +33,8 @@ public class ValveDetector
    private static final Logger logger = Logger.getLogger(caffe.class.getSimpleName());
    private static int NETWORK_OUTPUT_WIDTH;
    private static int NETWORK_OUTPUT_HEIGHT;
+   private static int NETWORK_INPUT_WIDTH;
+   private static int NETWORK_INPUT_HEIGHT;
 
    private static FloatNet caffe_net;
    private static final Object caffeNetLock = new Object();
@@ -106,6 +109,8 @@ public class ValveDetector
       caffe_net.CopyTrainedLayersFrom(weights);
       NETWORK_OUTPUT_WIDTH = caffe_net.output_blobs().get(0).shape(3);
       NETWORK_OUTPUT_HEIGHT = caffe_net.output_blobs().get(0).shape(2);
+      NETWORK_INPUT_WIDTH = caffe_net.input_blobs().get(0).shape(3);
+      NETWORK_INPUT_HEIGHT = caffe_net.input_blobs().get(0).shape(2);
    }
 
    public ValveDetector() throws Exception
@@ -153,85 +158,148 @@ public class ValveDetector
       }
    }
 
-   public Pair<List<Rectangle>, float[]> detect(BufferedImage image)
+   public Pair<List<Rectangle>, HeatMap> detect(BufferedImage image)
    {
-      FloatBlobVector output;
-      PreprocessedImage processed;
-      int inputWidth, inputHeight;
+      Timer timer = new Timer();
+      timer.start();
+      Rectangle[] crops = createZoomedInCrops(image.getWidth(), image.getHeight());
+      HeatMap[] heatMaps = detectInCrops(image, crops);
+      HeatMap outputMap = combineCropHeatMaps(heatMaps);
+
+      final float outputScaleX = outputMap.w / (float)NETWORK_INPUT_WIDTH;
+      final float outputScaleY = outputMap.h / (float)NETWORK_INPUT_HEIGHT;
+      List<Component> components = findComponents(binarize(outputMap));
+      List<Rectangle> result = new ArrayList<>();
+      for (Component component : components)
+      {
+         float inputScaleX = NETWORK_INPUT_WIDTH / (float) image.getWidth();
+         float inputScaleY = NETWORK_INPUT_HEIGHT / (float) image.getHeight();
+         result.add(componentBound(component, inputScaleX, inputScaleY, outputScaleX, outputScaleY));
+      }
+
+      System.out.println("Total detection time: " + timer.lap());
+      return Pair.of(result, outputMap);
+   }
+
+   private HeatMap combineCropHeatMaps(HeatMap[] heatMaps)
+   {
+      int outW = 0, outH = 0;
+      for (HeatMap heatMap : heatMaps)
+      {
+         outW = Math.max(outW, heatMap.offsetX + heatMap.w);
+         outH = Math.max(outH, heatMap.offsetY + heatMap.h);
+      }
+
+      HeatMap result = new HeatMap(0, 0, outW, outH);
+      for (HeatMap heatMap : heatMaps)
+      {
+         result.merge(heatMap, heatMap.offsetX, heatMap.offsetY);
+      }
+
+      return result;
+   }
+
+   private Rectangle[] createZoomedInCrops(int width, int height)
+   {
+      // We split the image in 5 crops - topleft, topright, bottomleft, bottomright and center (center overlaps with the others)
+      // We then merge the outputs. This creates a super-resolution output, as if the image was zoomed in 2x, allowing
+      // for a better detection of distant objects paying only small performance penalty as the crops are batched and processed
+      // at once.
+
+      int halfWidth = width / 2;
+      int halfHeight = height / 2;
+      Rectangle[] crops = new Rectangle[5];
+      for (int i = 0; i < 2; i++)
+      {
+         for (int j = 0; j < 2; j++)
+         {
+            crops[i * 2 + j] = new Rectangle(i * halfWidth, j * halfHeight, halfWidth, halfHeight);
+         }
+      }
+      crops[4] = new Rectangle(halfWidth - halfWidth / 2, halfHeight - halfHeight / 2, halfWidth, halfHeight);
+      return crops;
+   }
+
+   private HeatMap[] detectInCrops(BufferedImage image, Rectangle[] crops)
+   {
+      int inputPixels = NETWORK_INPUT_WIDTH * NETWORK_INPUT_HEIGHT;
+      int channels = 3;
+      Timer timer = new Timer();
+      timer.start();
+      float[] processedData = new float[inputPixels * channels * crops.length];
+      PreprocessedImage[] processedImages = new PreprocessedImage[crops.length];
+      for (int i = 0; i < crops.length; i++)
+      {
+         Rectangle crop = crops[i];
+         BufferedImage cropped = image.getSubimage(crop.x, crop.y, crop.width, crop.height);
+         processedImages[i] = processImage(cropped, NETWORK_INPUT_WIDTH, NETWORK_INPUT_HEIGHT);
+         System.arraycopy(processedImages[i].data, 0, processedData, i * inputPixels * channels, processedImages[i].data.length);
+      }
+
+      FloatPointer pointer = new FloatPointer(processedData.length);
+      pointer.put(processedData);
+      System.out.println("Image preparation took: " + timer.lap());
+
+      float[] output;
       synchronized (caffeNetLock)
       {
-         IntPointer shape = caffe_net.blob_by_name("data").shape();
-         inputWidth = shape.get(3);
-         inputHeight = shape.get(2);
-         processed = processImage(image, inputWidth, inputHeight);
-         caffe_net.blob_by_name("data").set_cpu_data(processed.data);
-
-         output = caffe_net.Forward();
+         caffe_net.input_blobs().get(0).set_cpu_data(pointer);
+         output = transferNetworkOutputToJava(caffe_net.Forward());
       }
+
+      System.out.println("DetectNet took " + timer.lap());
+
+      HeatMap[] result = new HeatMap[crops.length];
+      for (int i = 0; i < result.length; i++)
+      {
+         int offsetX = (int)(crops[i].x * processedImages[i].scaleX * NETWORK_OUTPUT_WIDTH / NETWORK_INPUT_WIDTH);
+         int offsetY = (int)(crops[i].y * processedImages[i].scaleY * NETWORK_OUTPUT_HEIGHT / NETWORK_INPUT_HEIGHT);
+         result[i] = new HeatMap(offsetX, offsetY, NETWORK_OUTPUT_WIDTH, NETWORK_OUTPUT_HEIGHT);
+         System.arraycopy(output, i * NETWORK_OUTPUT_WIDTH * NETWORK_OUTPUT_HEIGHT, result[i].data, 0, result[i].data.length);
+      }
+
+      System.out.println("HeatMap generation took" + timer.lap());
+
+      return result;
+   }
+
+   private float[] transferNetworkOutputToJava(FloatBlobVector output)
+   {
       FloatBlob outputLayer = output.get(0);
       FloatPointer data = outputLayer.cpu_data();
       float[] networkOutput = new float[outputLayer.count()];
       data.get(networkOutput);
-
-      final float outputScaleX = NETWORK_OUTPUT_WIDTH / (float)inputWidth;
-      final float outputScaleY = NETWORK_OUTPUT_HEIGHT / (float)inputHeight;
-      List<Component> components = findComponents(binarize(networkOutput, NETWORK_OUTPUT_WIDTH, NETWORK_OUTPUT_HEIGHT));
-      if (components.isEmpty())
-      {
-         Rectangle focusCrop = findFocusCrop(processed, image, networkOutput, NETWORK_OUTPUT_WIDTH, NETWORK_OUTPUT_HEIGHT, outputScaleX, outputScaleY);
-         if (focusCrop == null)
-            return Pair.of(Collections.emptyList(), networkOutput);
-         BufferedImage cropped = image.getSubimage(focusCrop.x, focusCrop.y, focusCrop.width, focusCrop.height);
-         List<Rectangle> croppedDetection = detect(cropped).getKey();
-         return Pair.of(croppedDetection.stream()
-                                .map(rect -> new Rectangle(rect.x + focusCrop.x, rect.y + focusCrop.y))
-                                .collect(Collectors.toList()), networkOutput);
-      }
-      List<Rectangle> result = new ArrayList<>();
-      for (Component component : components)
-      {
-         result.add(componentBound(component, processed, outputScaleX, outputScaleY));
-      }
-      return Pair.of(result, networkOutput);
+      return networkOutput;
    }
 
-   private Rectangle findFocusCrop(PreprocessedImage sourcePreprocessed, BufferedImage source, float[] data, int w, int h, float outputScaleX, float outputScaleY)
+   static class HeatMap
    {
-      float max = data[0];
-      int maxX = 0, maxY = 0;
-      for (int y = 1; y < h - 1; y++)
+      final float[] data;
+      final int offsetX, offsetY;
+      final int w, h;
+
+      private HeatMap(int offsetX, int offsetY, int w, int h)
       {
-         for (int x = 1; x < w - 1; x++)
+         this.offsetX = offsetX;
+         this.offsetY = offsetY;
+         this.w = w;
+         this.h = h;
+         data = new float[w * h];
+      }
+
+      void merge(HeatMap other, int ox, int oy)
+      {
+         for (int y = 0; y < other.h; y++)
          {
-            int i = y * w + x;
-            if (data[i] > max)
+            for (int x = 0; x < other.w; x++)
             {
-               max = data[i];
-               maxX = x;
-               maxY = y;
+               if (oy + y < 0 || oy + y >= h || ox + x < 0 || ox + x >= w)
+                  continue;
+               int dataIndex = w * (oy + y) + (ox + x);
+               data[dataIndex] = Math.max(data[dataIndex], other.data[y * other.w + x]);
             }
          }
       }
-
-      if (max < 0.2f)
-         return null;
-
-      int centerX = convertOutputXCoordToInputXCoord(sourcePreprocessed, maxX, outputScaleX);
-      int centerY = convertOutputYCoordToInputYCoord(sourcePreprocessed, maxY, outputScaleY);
-      // zoom 3x, center around maximum
-      int cropW = source.getWidth() / 3;
-      int cropH = source.getHeight() / 3;
-
-      if (centerX - cropW / 2 < 0)
-         centerX -= centerX - cropW / 2;
-      if (centerY - cropH / 2 < 0)
-         centerY -= centerY - cropH / 2;
-
-      int left = Math.max(0, centerX - cropW / 2);
-      int right = Math.min(source.getWidth() - 1, centerX + cropW / 2);
-      int top = Math.max(0, centerY - cropH / 2);
-      int bottom = Math.min(source.getHeight() - 1, centerY + cropH / 2);
-      return new Rectangle(left, top, right - left, bottom - top);
    }
 
    private static BufferedImage imageFromArray(float[] data, int w, int h)
@@ -260,50 +328,36 @@ public class ValveDetector
 
    private static PreprocessedImage processImage(BufferedImage image, int targetW, int targetH)
    {
+      float sx = targetW / (float) image.getWidth();
+      float sy = targetH / (float) image.getHeight();
+
       image = normalizeBrightnessAndContrast(image);
-      BufferedImage padded = image, scaled = image;
       if (image.getWidth() != targetW || image.getHeight() != targetH)
       {
-         Dimension scaledDim = getScaledDimension(new Dimension(image.getWidth(), image.getHeight()), new Dimension(targetW, targetH));
-         scaled = scaleImageAspect(image, scaledDim);
-         if (scaled.getWidth() != targetW || scaled.getHeight() != targetH)
-         {
-            padded = padImage(scaled, targetW, targetH, Color.BLACK);
-         }
-         else
-         {
-            padded = scaled;
-         }
+         image = scaleImage(image, new Dimension(targetW, targetH));
       }
 
-      int tx = targetW / 2 - scaled.getWidth() / 2;
-      int ty = targetH / 2 - scaled.getHeight() / 2;
-      float sx = scaled.getWidth() / (float) image.getWidth();
-      float sy = scaled.getHeight() / (float) image.getHeight();
-
-      float[] output = new float[padded.getWidth() * padded.getHeight() * 3];
-      int n = padded.getWidth() * padded.getHeight();
-      for (int y = 0; y < padded.getHeight(); y++)
+      float[] output = new float[image.getWidth() * image.getHeight() * 3];
+      int n = image.getWidth() * image.getHeight();
+      for (int y = 0; y < image.getHeight(); y++)
       {
-         for (int x = 0; x < padded.getWidth(); x++)
+         for (int x = 0; x < image.getWidth(); x++)
          {
-            int rgb = padded.getRGB(x, y);
+            int rgb = image.getRGB(x, y);
             int a = (rgb >> 24) & 0xFF;
             int r = (rgb >> 16) & 0xFF;
             int g = (rgb >> 8) & 0xFF;
             int b = rgb & 0xFF;
             if (a == 0)
                r = g = b = 127;
-            int index = y * padded.getWidth() + x;
+            int index = y * image.getWidth() + x;
             output[index] = b / 1.0f;
             output[n + index] = g / 1.0f;
             output[2 * n + index] = r / 1.0f;
          }
       }
 
-      FloatPointer pointer = new FloatPointer(output.length);
-      pointer.put(output);
-      return new PreprocessedImage(pointer, tx, ty, sx, sy);
+      return new PreprocessedImage(output, sx, sy);
    }
 
    private static BufferedImage normalizeBrightnessAndContrast(BufferedImage source)
@@ -354,50 +408,7 @@ public class ValveDetector
       return result;
    }
 
-   private static Dimension getScaledDimension(Dimension imgSize, Dimension boundary)
-   {
-
-      int img_width = imgSize.width;
-      int img_height = imgSize.height;
-      if (img_width > img_height)
-      {
-         // need to scale based on width
-         float aspect_ratio = (float) img_height / (float) img_width;
-         img_width = boundary.width;
-         img_height = (int) ((float) img_width * aspect_ratio);
-      }
-      else
-      {
-         // need to scale based on width
-         float aspect_ratio = (float) img_width / (float) img_height;
-         img_height = boundary.height;
-         img_width = (int) ((float) img_height * aspect_ratio);
-      }
-
-      // first check if we need to scale width
-      final int original_width = img_width;
-      final int original_height = img_height;
-      if (img_width > boundary.width)
-      {
-         //scale width to fit
-         img_width = boundary.width;
-         //scale height to maintain aspect ratio
-         img_height = (img_width * original_height) / original_width;
-      }
-
-      // then check if we need to scale even with the new height
-      if (img_height > boundary.height)
-      {
-         //scale height to fit instead
-         img_height = boundary.height;
-         //scale width to maintain aspect ratio
-         img_width = (img_height * original_width) / original_height;
-      }
-
-      return new Dimension(img_width, img_height);
-   }
-
-   private static BufferedImage scaleImageAspect(BufferedImage img, Dimension targetDimensions)
+   private static BufferedImage scaleImage(BufferedImage img, Dimension targetDimensions)
    {
       // create the scaled version of the image with the specified border
       BufferedImage newImg = new BufferedImage(targetDimensions.width, targetDimensions.height, BufferedImage.TYPE_INT_ARGB);
@@ -408,47 +419,36 @@ public class ValveDetector
       return newImg;
    }
 
-   private static BufferedImage padImage(BufferedImage img, int desiredW, int desiredH, Color color)
+   private static Rectangle componentBound(Component component, float inputScaleX, float inputScaleY, float outputScaleX, float outputScaleY)
    {
-      // create the scaled version of the image with the specified border
-      BufferedImage new_img = new BufferedImage(desiredW, desiredH, BufferedImage.TYPE_INT_ARGB);
-      Graphics2D gr = (Graphics2D) new_img.getGraphics();
-      gr.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
-      assert (desiredW / 2 - img.getWidth() / 2 >= 0);
-      assert (desiredH / 2 - img.getHeight() / 2 >= 0);
-      gr.drawImage(img, desiredW / 2 - img.getWidth() / 2, desiredH / 2 - img.getHeight() / 2, img.getWidth(), img.getHeight(), null);
-      gr.dispose();
-      return new_img;
-   }
-
-   private static Rectangle componentBound(Component component, PreprocessedImage preprocessedImage, float outputScaleX, float outputScaleY)
-   {
-      int tx1 = convertOutputXCoordToInputXCoord(preprocessedImage, component.minX, outputScaleX);
-      int tx2 = convertOutputXCoordToInputXCoord(preprocessedImage, component.maxX + 1, outputScaleX);
-      int ty1 = convertOutputYCoordToInputYCoord(preprocessedImage, component.minY, outputScaleY);
-      int ty2 = convertOutputYCoordToInputYCoord(preprocessedImage, component.maxY + 1, outputScaleY);
+      int tx1 = convertOutputXCoordToInputXCoord(component.minX, outputScaleX, inputScaleX);
+      int tx2 = convertOutputXCoordToInputXCoord(component.maxX + 1, outputScaleX, inputScaleX);
+      int ty1 = convertOutputYCoordToInputYCoord(component.minY, outputScaleY, inputScaleY);
+      int ty2 = convertOutputYCoordToInputYCoord(component.maxY + 1, outputScaleY, inputScaleY);
       return new Rectangle(tx1, ty1, tx2 - tx1, ty2 - ty1);
    }
 
-   private static int convertOutputXCoordToInputXCoord(PreprocessedImage image, float xcoord, float outputScaleX)
+   private static int convertOutputXCoordToInputXCoord(float xcoord, float outputScaleX, float inputScaleX)
    {
-      return (int) ((xcoord / outputScaleX - image.shiftX) / image.scaleX);
+      return (int) ((xcoord / outputScaleX) / inputScaleX);
    }
 
-   private static int convertOutputYCoordToInputYCoord(PreprocessedImage image, float ycoord, float outputScaleY)
+   private static int convertOutputYCoordToInputYCoord(float ycoord, float outputScaleY, float inputScaleY)
    {
-      return (int) ((ycoord / outputScaleY - image.shiftY) / image.scaleY);
+      return (int) ((ycoord / outputScaleY) / inputScaleY);
    }
 
-   private static boolean[][] binarize(float[] networkOutput, int w, int h)
+   private static boolean[][] binarize(HeatMap networkOutput)
    {
+      int w = networkOutput.w;
+      int h = networkOutput.h;
       boolean[][] result = new boolean[h][w];
       for (int y = 0; y < h; y++)
       {
          for (int x = 0; x < w; x++)
          {
-            float val = networkOutput[y * w + x];
-            result[y][x] = val > 0.6f;
+            float val = networkOutput.data[y * w + x];
+            result[y][x] = val > 0.8f;
          }
       }
 
@@ -463,7 +463,7 @@ public class ValveDetector
                for (int j = -1; j <= 1; j++)
                {
                   if (x + i >= 0 && x + i < w && y + j >= 0 && y + j < h && result[y][x])
-                     result[y][x] = networkOutput[y * w + x] >= 0.1;
+                     result[y][x] = networkOutput.data[y * w + x] >= 0.1;
                }
             }
          }
@@ -497,7 +497,7 @@ public class ValveDetector
          {
             int[] coord = queue.poll();
             int x = coord[0], y = coord[1];
-            if (!thresholdedPixels[y][x] || visited[y][x] || x < 0 || y < 0 || y >= h || x >= w)
+            if (x < 0 || y < 0 || y >= h || x >= w || !thresholdedPixels[y][x] || visited[y][x])
                continue;
             currentComponent.add(coord);
             visited[y][x] = true;
@@ -510,7 +510,7 @@ public class ValveDetector
             }
          }
 
-         if (currentComponent.size() < 6)
+         if (currentComponent.size() < 12)
             continue;
 
          result.add(new Component(currentComponent));
@@ -519,26 +519,14 @@ public class ValveDetector
       return result;
    }
 
-   public int getNetworkOutputWidth()
-   {
-      return NETWORK_OUTPUT_WIDTH;
-   }
-
-   public int getNetworkOutputHeight()
-   {
-      return NETWORK_OUTPUT_HEIGHT;
-   }
-
    private static class PreprocessedImage
    {
-      private final FloatPointer data;
-      private final float shiftX, shiftY, scaleX, scaleY;
+      private final float[] data;
+      private final float scaleX, scaleY;
 
-      private PreprocessedImage(FloatPointer data, float shiftX, float shiftY, float scaleX, float scaleY)
+      private PreprocessedImage(float[] data, float scaleX, float scaleY)
       {
          this.data = data;
-         this.shiftX = shiftX;
-         this.shiftY = shiftY;
          this.scaleX = scaleX;
          this.scaleY = scaleY;
       }
