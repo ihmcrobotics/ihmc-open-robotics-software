@@ -250,7 +250,7 @@ public class WalkOnTheEdgesManager
    {
       OneDoFJoint anklePitch = fullRobotModel.getLegJoint(trailingLeg, LegJointName.ANKLE_PITCH);
       double lowerLimit = Math.max(anklePitch.getJointLimitLower(), ankleLowerLimitToTriggerToeOff.getDoubleValue());
-      isRearAnklePitchHittingLimit.set(Math.abs(lowerLimit - anklePitch.getQ()) < 0.02);
+      isRearAnklePitchHittingLimit.set(anklePitch.getQ() < lowerLimit);
       isRearAnklePitchHittingLimitFilt.update();
 
       if (!doToeOffWhenHittingAnkleLimit.getBooleanValue())
