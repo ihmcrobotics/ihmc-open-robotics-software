@@ -2,7 +2,7 @@ package us.ihmc.humanoidRobotics.footstep.footstepGenerator;
 
 import java.util.List;
 
-public abstract class FootstepPlanningParameterization
+public class FootstepPlanningParameterization
 {
    protected List<FootstepOffset> offsetList;
    protected double footWidth;
@@ -23,23 +23,48 @@ public abstract class FootstepPlanningParameterization
    protected double shuffleStepLength = 0.25;
    protected double shuffleStepWidth = 0.21;
    protected double turningStepWidth = 0.2;
+   
+   protected double maxStepUp = 0.20;
+   protected double minStepDown = -0.17;
+   protected double maxStepDistance = 0.6;
+   protected double dangerDistance = 0.75;
 
    public List<FootstepOffset> getOffsets(FootstepPlanState currentState)
    {
       return offsetList;
    }
 
-   public abstract FootstepOffset getSidestep(FootstepPlanState currentState);
+   public FootstepOffset getSidestep(FootstepPlanState currentState)
+   {
+      //use a subclass that implements this if you need it
+      return null;
+   }
 
-   public abstract boolean withinReachForNext(double xdiff, double ydiff, double thetadiff);
+   public boolean withinReachForNext(double xdiff, double ydiff, double thetadiff)
+   {
+      //use a subclass that implements this if you need it
+      return false;
+   }
 
-   public abstract double getMaxStepUp();
+   public double getMaxStepUp()
+   {
+      return maxStepUp;
+   }
 
-   public abstract double getMinStepDown();
+   public double getMinStepDown()
+   {
+      return minStepDown;
+   }
 
-   public abstract double getMaxStepDistance();
+   public double getMaxStepDistance()
+   {
+      return maxStepDistance;
+   }
 
-   public abstract double getDangerDistance();
+   public double getDangerDistance()
+   {
+      return dangerDistance;
+   }
    
    public double getMaxSupportPolygonArea()
    {
