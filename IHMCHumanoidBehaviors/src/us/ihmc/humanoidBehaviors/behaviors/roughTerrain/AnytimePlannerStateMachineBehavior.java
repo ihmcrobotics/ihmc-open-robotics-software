@@ -122,7 +122,7 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
       case FIDUCIAL:
          FiducialDetectorBehaviorService fiducialDetectorBehaviorService = new FiducialDetectorBehaviorService(communicationBridge, null);
          fiducialDetectorBehaviorService.setTargetIDToLocate(50);
-         fiducialDetectorBehaviorService.setExpectedFiducialSize(0.16);
+         fiducialDetectorBehaviorService.setExpectedFiducialSize(0.22);
          goalDetectorBehaviorService = fiducialDetectorBehaviorService;
          break;
       
