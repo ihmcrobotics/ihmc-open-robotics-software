@@ -14,6 +14,7 @@ import us.ihmc.communication.producers.JPEGDecompressor;
 import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicReferenceFrame;
 import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.VideoPacket;
+import us.ihmc.ihmcPerception.objectDetector.ValveDetector.HeatMap;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -30,7 +31,13 @@ import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 import java.util.stream.IntStream;
 
 public class ObjectDetectorFromCameraImages
@@ -74,7 +81,9 @@ public class ObjectDetectorFromCameraImages
    private final YoFramePoseUsingQuaternions locatedFiducialPoseInWorldFrame = new YoFramePoseUsingQuaternions(prefix + "LocatedPoseWorldFrame", ReferenceFrame.getWorldFrame(), registry);
    private final YoFramePoseUsingQuaternions reportedFiducialPoseInWorldFrame = new YoFramePoseUsingQuaternions(prefix + "ReportedPoseWorldFrame", ReferenceFrame.getWorldFrame(), registry);
 
-   private Pair<BoundingBoxesPacket, HeatMapPacket> coactiveVisualizationPackets;
+   private final AtomicBoolean detectionRunning = new AtomicBoolean(false);
+   private final AtomicReference<DetectionParameters> latestDetectionParameters = new AtomicReference<>();
+   private final List<Consumer<DetectionVisualizationPackets>> detectionResultListeners = Collections.synchronizedList(new ArrayList<>());
 
    public ObjectDetectorFromCameraImages(RigidBodyTransform transformFromReportedToFiducialFrame, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry) throws Exception
    {
@@ -163,15 +172,43 @@ public class ObjectDetectorFromCameraImages
       this.targetIDHasBeenLocated.set(false);
    }
 
+   public void addDetectionResultListener(Consumer<DetectionVisualizationPackets> resultListener)
+   {
+      detectionResultListeners.add(resultListener);
+   }
+
    public void detectFromVideoPacket(VideoPacket videoPacket)
    {
       BufferedImage latestUnmodifiedCameraImage = jpegDecompressor.decompressJPEGDataToBufferedImage(videoPacket.getData());
-      detect(latestUnmodifiedCameraImage, videoPacket.getPosition(), videoPacket.getOrientation());
+      latestDetectionParameters.set(new DetectionParameters(latestUnmodifiedCameraImage, videoPacket.getPosition(), videoPacket.getOrientation()));
+      detectAsync();
    }
 
-   public Pair<BoundingBoxesPacket, HeatMapPacket> getCoactiveVisualizationPackets()
+   private void detectAsync()
    {
-      return coactiveVisualizationPackets;
+      if (detectionRunning.get())
+         return;
+
+      DetectionParameters detectionParameters = latestDetectionParameters.getAndSet(null);
+      if (detectionParameters == null)
+         return;
+
+      CompletableFuture.runAsync(() ->
+      {
+         detectionRunning.set(true);
+         try
+         {
+            detect(detectionParameters.bufferedImage, detectionParameters.cameraPositionInWorld, detectionParameters.cameraOrientationInWorldXForward);
+         } finally
+         {
+            detectionRunning.set(false);
+         }
+      }).thenAccept(unused ->
+      {
+         DetectionParameters latestParams = latestDetectionParameters.get();
+         if (latestParams != detectionParameters && latestParams != null)
+            detectAsync();
+      });
    }
 
    public void detect(BufferedImage bufferedImage, Point3d cameraPositionInWorld, Quat4d cameraOrientationInWorldXForward)
@@ -190,20 +227,17 @@ public class ObjectDetectorFromCameraImages
          cameraPose.setOrientation(cameraOrientationInWorldXForward);
          cameraPose.setPosition(cameraPositionInWorld);
 
-         Pair<List<Rectangle>, float[]> rectanglesAndHeatMaps = detector.detect(bufferedImage);
+         Pair<List<Rectangle>, HeatMap> rectanglesAndHeatMaps = detector.detect(bufferedImage);
 
          rectanglesAndHeatMaps.getLeft().sort((r1, r2) -> -Integer.compare(r1.width * r1.height, r2.width * r2.height));
 
          HeatMapPacket heatMapPacket = new HeatMapPacket();
-         heatMapPacket.width = detector.getNetworkOutputWidth();
-         heatMapPacket.height = detector.getNetworkOutputHeight();
-         heatMapPacket.data = rectanglesAndHeatMaps.getRight();
+         heatMapPacket.width = rectanglesAndHeatMaps.getRight().w;
+         heatMapPacket.height = rectanglesAndHeatMaps.getRight().h;
+         heatMapPacket.data = rectanglesAndHeatMaps.getRight().data;
          heatMapPacket.name = "Valve";
 
-         int[] packedBoxes = rectanglesAndHeatMaps.getLeft()
-                                                  .stream()
-                                                  .flatMapToInt(rect -> IntStream.of(rect.x, rect.y, rect.width, rect.height))
-                                                  .toArray();
+         int[] packedBoxes = rectanglesAndHeatMaps.getLeft().stream().flatMapToInt(rect -> IntStream.of(rect.x, rect.y, rect.width, rect.height)).toArray();
          String[] names = new String[rectanglesAndHeatMaps.getLeft().size()];
          for (int i = 0; i < names.length; i++)
          {
@@ -211,7 +245,8 @@ public class ObjectDetectorFromCameraImages
          }
          BoundingBoxesPacket boundingBoxesPacket = new BoundingBoxesPacket(packedBoxes, names);
 
-         coactiveVisualizationPackets = Pair.of(boundingBoxesPacket, heatMapPacket);
+         DetectionVisualizationPackets coactiveVisualizationPackets = new DetectionVisualizationPackets(boundingBoxesPacket, heatMapPacket);
+         detectionResultListeners.forEach(consumer -> consumer.accept(coactiveVisualizationPackets));
 
          if (rectanglesAndHeatMaps.getLeft().size() > 0)
          {
@@ -316,4 +351,39 @@ public class ObjectDetectorFromCameraImages
       this.targetIDHasBeenLocated.set(false);
    }
 
+   private static class DetectionParameters
+   {
+      final BufferedImage bufferedImage;
+      final Point3d cameraPositionInWorld;
+      final Quat4d cameraOrientationInWorldXForward;
+
+      private DetectionParameters(BufferedImage bufferedImage, Point3d cameraPositionInWorld, Quat4d cameraOrientationInWorldXForward)
+      {
+         this.bufferedImage = bufferedImage;
+         this.cameraPositionInWorld = new Point3d(cameraPositionInWorld);
+         this.cameraOrientationInWorldXForward = new Quat4d(cameraOrientationInWorldXForward);
+      }
+   }
+
+   public static class DetectionVisualizationPackets
+   {
+      private final BoundingBoxesPacket boundingBoxesPacket;
+      private final HeatMapPacket heatMapPacket;
+
+      public DetectionVisualizationPackets(BoundingBoxesPacket boundingBoxesPacket, HeatMapPacket heatMapPacket)
+      {
+         this.boundingBoxesPacket = boundingBoxesPacket;
+         this.heatMapPacket = heatMapPacket;
+      }
+
+      public BoundingBoxesPacket getBoundingBoxesPacket()
+      {
+         return boundingBoxesPacket;
+      }
+
+      public HeatMapPacket getHeatMapPacket()
+      {
+         return heatMapPacket;
+      }
+   }
 }

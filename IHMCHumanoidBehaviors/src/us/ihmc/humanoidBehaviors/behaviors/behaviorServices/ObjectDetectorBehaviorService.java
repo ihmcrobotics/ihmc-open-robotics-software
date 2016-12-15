@@ -65,6 +65,11 @@ public class ObjectDetectorBehaviorService extends GoalDetectorBehaviorService
       shouldRecordVideoPackets.set(false);
       
       locationEnabled.set(false);
+
+      objectDetectorFromCameraImages.addDetectionResultListener(detectionVisualizationPackets -> {
+         getCommunicationBridge().sendPacketToUI(detectionVisualizationPackets.getBoundingBoxesPacket());
+         getCommunicationBridge().sendPacketToUI(detectionVisualizationPackets.getHeatMapPacket());
+      });
    }
 
    @Override
@@ -82,10 +87,6 @@ public class ObjectDetectorBehaviorService extends GoalDetectorBehaviorService
          synchronized (detectorFromCameraImagesConch)
          {
             objectDetectorFromCameraImages.detectFromVideoPacket(videoPacket);
-            Pair<BoundingBoxesPacket, HeatMapPacket> coactiveVisualizationPackets = objectDetectorFromCameraImages.getCoactiveVisualizationPackets();
-
-            getCommunicationBridge().sendPacketToUI(coactiveVisualizationPackets.getLeft());
-            getCommunicationBridge().sendPacketToUI(coactiveVisualizationPackets.getRight());
          }
       }
       else
