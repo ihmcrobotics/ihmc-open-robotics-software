@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.nio.file.Paths;
 
 import us.ihmc.communication.util.NetworkPorts;
-import us.ihmc.quadrupedRobotics.params.ParameterSaver;
+import us.ihmc.communication.remote.ParameterSaver;
 
 public class LLAQuadrupedParameterSaver
 {

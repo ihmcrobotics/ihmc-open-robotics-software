@@ -1,8 +1,7 @@
-package us.ihmc.quadrupedRobotics.params;
+package us.ihmc.communication.packets;
 
 import java.util.List;
 
-import us.ihmc.communication.packets.Packet;
 import us.ihmc.robotics.dataStructures.parameter.Parameter;
 
 public class ParameterListPacket extends Packet<ParameterListPacket>

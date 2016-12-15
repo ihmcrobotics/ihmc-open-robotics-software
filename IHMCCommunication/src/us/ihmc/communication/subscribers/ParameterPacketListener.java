@@ -1,6 +1,7 @@
-package us.ihmc.quadrupedRobotics.params;
+package us.ihmc.communication.subscribers;
 
 import us.ihmc.communication.net.PacketConsumer;
+import us.ihmc.communication.packets.*;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.robotics.dataStructures.parameter.*;
 

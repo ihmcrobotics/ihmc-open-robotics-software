@@ -1,4 +1,4 @@
-package us.ihmc.quadrupedRobotics.params;
+package us.ihmc.communication.remote;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -13,6 +13,8 @@ import java.util.concurrent.*;
 import us.ihmc.communication.net.NetClassList;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
+import us.ihmc.communication.packets.ParameterListPacket;
+import us.ihmc.communication.packets.RequestParameterListPacket;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.robotics.dataStructures.parameter.Parameter;
 
