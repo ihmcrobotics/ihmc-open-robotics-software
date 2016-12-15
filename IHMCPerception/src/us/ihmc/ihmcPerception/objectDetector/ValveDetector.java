@@ -1,5 +1,6 @@
 package us.ihmc.ihmcPerception.objectDetector;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.javacpp.IntPointer;
 import org.bytedeco.javacpp.Loader;
@@ -29,6 +30,8 @@ import static org.bytedeco.javacpp.caffe.TEST;
 public class ValveDetector
 {
    private static final Logger logger = Logger.getLogger(caffe.class.getSimpleName());
+   private static int NETWORK_OUTPUT_WIDTH;
+   private static int NETWORK_OUTPUT_HEIGHT;
 
    private static FloatNet caffe_net;
    private static final Object caffeNetLock = new Object();
@@ -101,6 +104,8 @@ public class ValveDetector
       // Instantiate the caffe net.
       caffe_net = new FloatNet(model, TEST);
       caffe_net.CopyTrainedLayersFrom(weights);
+      NETWORK_OUTPUT_WIDTH = caffe_net.output_blobs().get(0).shape(3);
+      NETWORK_OUTPUT_HEIGHT = caffe_net.output_blobs().get(0).shape(2);
    }
 
    public ValveDetector() throws Exception
@@ -148,14 +153,17 @@ public class ValveDetector
       }
    }
 
-   public List<Rectangle> detect(BufferedImage image)
+   public Pair<List<Rectangle>, float[]> detect(BufferedImage image)
    {
       FloatBlobVector output;
       PreprocessedImage processed;
+      int inputWidth, inputHeight;
       synchronized (caffeNetLock)
       {
          IntPointer shape = caffe_net.blob_by_name("data").shape();
-         processed = processImage(image, shape.get(3), shape.get(2));
+         inputWidth = shape.get(3);
+         inputHeight = shape.get(2);
+         processed = processImage(image, inputWidth, inputHeight);
          caffe_net.blob_by_name("data").set_cpu_data(processed.data);
 
          output = caffe_net.Forward();
@@ -165,26 +173,26 @@ public class ValveDetector
       float[] networkOutput = new float[outputLayer.count()];
       data.get(networkOutput);
 
-      final float outputScaleX = 64.0f / 1024;
-      final float outputScaleY = 32.0f / 512;
-      List<Component> components = findComponents(binarize(networkOutput, 64, 32));
+      final float outputScaleX = NETWORK_OUTPUT_WIDTH / (float)inputWidth;
+      final float outputScaleY = NETWORK_OUTPUT_HEIGHT / (float)inputHeight;
+      List<Component> components = findComponents(binarize(networkOutput, NETWORK_OUTPUT_WIDTH, NETWORK_OUTPUT_HEIGHT));
       if (components.isEmpty())
       {
-         Rectangle focusCrop = findFocusCrop(processed, image, networkOutput, 64, 32, outputScaleX, outputScaleY);
+         Rectangle focusCrop = findFocusCrop(processed, image, networkOutput, NETWORK_OUTPUT_WIDTH, NETWORK_OUTPUT_HEIGHT, outputScaleX, outputScaleY);
          if (focusCrop == null)
-            return Collections.emptyList();
+            return Pair.of(Collections.emptyList(), networkOutput);
          BufferedImage cropped = image.getSubimage(focusCrop.x, focusCrop.y, focusCrop.width, focusCrop.height);
-         List<Rectangle> croppedDetection = detect(cropped);
-         return croppedDetection.stream()
+         List<Rectangle> croppedDetection = detect(cropped).getKey();
+         return Pair.of(croppedDetection.stream()
                                 .map(rect -> new Rectangle(rect.x + focusCrop.x, rect.y + focusCrop.y))
-                                .collect(Collectors.toList());
+                                .collect(Collectors.toList()), networkOutput);
       }
       List<Rectangle> result = new ArrayList<>();
       for (Component component : components)
       {
          result.add(componentBound(component, processed, outputScaleX, outputScaleY));
       }
-      return result;
+      return Pair.of(result, networkOutput);
    }
 
    private Rectangle findFocusCrop(PreprocessedImage sourcePreprocessed, BufferedImage source, float[] data, int w, int h, float outputScaleX, float outputScaleY)
@@ -500,6 +508,16 @@ public class ValveDetector
       }
 
       return result;
+   }
+
+   public int getNetworkOutputWidth()
+   {
+      return NETWORK_OUTPUT_WIDTH;
+   }
+
+   public int getNetworkOutputHeight()
+   {
+      return NETWORK_OUTPUT_HEIGHT;
    }
 
    private static class PreprocessedImage
