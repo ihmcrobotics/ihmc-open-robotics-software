@@ -17,6 +17,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.ComponentBasedFootstepDataMessageGenerator;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.QueuedControllerCommandGenerator;
+import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.HeadingAndVelocityEvaluationScriptParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HighLevelHumanoidControllerManager;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.DoNothingBehavior;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelBehavior;
@@ -106,6 +107,8 @@ public class MomentumBasedControllerFactory implements CloseableAndDisposable
 
    private final CloseableAndDisposableRegistry closeableAndDisposableRegistry = new CloseableAndDisposableRegistry();
 
+   private HeadingAndVelocityEvaluationScriptParameters headingAndVelocityEvaluationScriptParameters;
+
    public MomentumBasedControllerFactory(ContactableBodiesFactory contactableBodiesFactory, SideDependentList<String> footForceSensorNames,
          SideDependentList<String> footContactSensorNames, SideDependentList<String> wristSensorNames, WalkingControllerParameters walkingControllerParameters,
          ArmControllerParameters armControllerParameters, CapturePointPlannerParameters capturePointPlannerParameters, HighLevelState initialBehavior)
@@ -125,6 +128,11 @@ public class MomentumBasedControllerFactory implements CloseableAndDisposable
       managerFactory.setArmControlParameters(armControllerParameters);
       managerFactory.setCapturePointPlannerParameters(capturePointPlannerParameters);
       managerFactory.setWalkingControllerParameters(walkingControllerParameters);
+   }
+   
+   public void setHeadingAndVelocityEvaluationScriptParameters(HeadingAndVelocityEvaluationScriptParameters walkingScriptParameters)
+   {
+      headingAndVelocityEvaluationScriptParameters = walkingScriptParameters;
    }
 
    public void addUpdatable(Updatable updatable)
@@ -167,7 +175,7 @@ public class MomentumBasedControllerFactory implements CloseableAndDisposable
          CommonHumanoidReferenceFrames referenceFrames = momentumBasedController.getReferenceFrames();
          double controlDT = momentumBasedController.getControlDT();
          ComponentBasedFootstepDataMessageGenerator footstepGenerator = new ComponentBasedFootstepDataMessageGenerator(commandInputManager, statusOutputManager,
-               walkingControllerParameters, referenceFrames, contactableFeet, controlDT, useHeadingAndVelocityScript, heightMapForFootstepZ, registry);
+               walkingControllerParameters, headingAndVelocityEvaluationScriptParameters, referenceFrames, contactableFeet, controlDT, useHeadingAndVelocityScript, heightMapForFootstepZ, registry);
          momentumBasedController.addUpdatables(footstepGenerator.getModulesToUpdate());
       }
       else

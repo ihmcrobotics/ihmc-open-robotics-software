@@ -7,6 +7,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.DRCGuiInitialSetup;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.initialSetup.DRCSCSInitialSetup;
+import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.HeadingAndVelocityEvaluationScriptParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.WalkingProvider;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.graphics3DAdapter.GroundProfile3D;
@@ -43,9 +44,10 @@ public class ValkyrieFlatGroundWalkingTrack
       boolean useVelocityAndHeadingScript = !USE_JOYSTICK_CONTROLLER;;
       boolean cheatWithGroundHeightAtForFootstep = false;
       
+      HeadingAndVelocityEvaluationScriptParameters walkingScriptParameters = new HeadingAndVelocityEvaluationScriptParameters();
       DRCFlatGroundWalkingTrack flatGroundWalkingTrack = new DRCFlatGroundWalkingTrack(robotInitialSetup, guiInitialSetup, scsInitialSetup,
             useVelocityAndHeadingScript, cheatWithGroundHeightAtForFootstep, robotModel,
-            WalkingProvider.VELOCITY_HEADING_COMPONENT);
+            WalkingProvider.VELOCITY_HEADING_COMPONENT, walkingScriptParameters);
       
       SimulationConstructionSet scs = flatGroundWalkingTrack.getSimulationConstructionSet();
      

@@ -42,12 +42,12 @@ public class ComponentBasedFootstepDataMessageGenerator
    private final List<Updatable> updatables = new ArrayList<>();
 
    public ComponentBasedFootstepDataMessageGenerator(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager,
-         WalkingControllerParameters walkingControllerParameters, CommonHumanoidReferenceFrames referenceFrames,
+         WalkingControllerParameters walkingControllerParameters, HeadingAndVelocityEvaluationScriptParameters scriptParameters, CommonHumanoidReferenceFrames referenceFrames,
          SideDependentList<? extends ContactablePlaneBody> bipedFeet, double controlDT, boolean useHeadingAndVelocityScript, HeightMap heightMapForFootZ, YoVariableRegistry parentRegistry)
    {
       this.commandInputManager = commandInputManager;
       this.statusOutputManager = statusOutputManager;
-      componentBasedDesiredFootstepCalculator = createComponentBasedDesiredFootstepCalculator(walkingControllerParameters, referenceFrames, bipedFeet,
+      componentBasedDesiredFootstepCalculator = createComponentBasedDesiredFootstepCalculator(walkingControllerParameters, scriptParameters, referenceFrames, bipedFeet,
             controlDT, useHeadingAndVelocityScript);
 
       if (heightMapForFootZ != null)
@@ -153,7 +153,7 @@ public class ComponentBasedFootstepDataMessageGenerator
       return footsteps;
    }
 
-   public ComponentBasedDesiredFootstepCalculator createComponentBasedDesiredFootstepCalculator(WalkingControllerParameters walkingControllerParameters,
+   public ComponentBasedDesiredFootstepCalculator createComponentBasedDesiredFootstepCalculator(WalkingControllerParameters walkingControllerParameters, HeadingAndVelocityEvaluationScriptParameters scriptParameters, 
          CommonHumanoidReferenceFrames referenceFrames, SideDependentList<? extends ContactablePlaneBody> bipedFeet, double controlDT,
          boolean useHeadingAndVelocityScript)
    {
@@ -163,14 +163,14 @@ public class ComponentBasedFootstepDataMessageGenerator
       if (useHeadingAndVelocityScript)
       {
          desiredVelocityControlModule = new ManualDesiredVelocityControlModule(ReferenceFrame.getWorldFrame(), registry);
-         desiredVelocityControlModule.setDesiredVelocity(new FrameVector2d(ReferenceFrame.getWorldFrame(), 1.0, 0.0));
+         desiredVelocityControlModule.setDesiredVelocity(new FrameVector2d(ReferenceFrame.getWorldFrame(), 0.4, 0.0));
 
          SimpleDesiredHeadingControlModule simpleDesiredHeadingControlModule = new SimpleDesiredHeadingControlModule(0.0, controlDT, registry);
-         simpleDesiredHeadingControlModule.setMaxHeadingDot(0.4);
+         simpleDesiredHeadingControlModule.setMaxHeadingDot(0.2);
          simpleDesiredHeadingControlModule.updateDesiredHeadingFrame();
          boolean cycleThroughAllEvents = true;
          HeadingAndVelocityEvaluationScript headingAndVelocityEvaluationScript = new HeadingAndVelocityEvaluationScript(cycleThroughAllEvents, controlDT,
-               simpleDesiredHeadingControlModule, desiredVelocityControlModule, registry);
+               simpleDesiredHeadingControlModule, desiredVelocityControlModule, scriptParameters, registry);
          updatables.add(headingAndVelocityEvaluationScript);
          desiredHeadingControlModule = simpleDesiredHeadingControlModule;
       }
