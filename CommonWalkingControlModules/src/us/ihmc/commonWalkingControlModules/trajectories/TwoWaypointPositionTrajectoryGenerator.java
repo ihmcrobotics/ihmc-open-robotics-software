@@ -17,7 +17,6 @@ import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.trajectories.PositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.YoConcatenatedSplines;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.robotics.trajectories.TwoWaypointTrajectoryGeneratorParameters;
 import us.ihmc.robotics.trajectories.providers.DoubleProvider;
 import us.ihmc.robotics.trajectories.providers.PositionProvider;
@@ -416,8 +415,7 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
          positionSources[i].getPosition(tempPosition);
          velocitySources[i].get(tempVelocity);
 
-         boolean setInitialVelocityToZero = setInitialSwingVelocityToZero.getBooleanValue()
-               || trajectoryParameters.getTrajectoryType() == TrajectoryType.PUSH_RECOVERY;
+         boolean setInitialVelocityToZero = setInitialSwingVelocityToZero.getBooleanValue();
          if ((i == 0) && setInitialVelocityToZero)
          {
             tempVelocity.set(0.0, 0.0, 0.0);
@@ -493,15 +491,6 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
       {
       case OBSTACLE_CLEARANCE:
          return getWaypointsForObstacleClearance(swingHeight);
-
-      case PUSH_RECOVERY:
-         double[] pushRecoveryProportionsThroughTrajectoryForGroundClearance = TwoWaypointTrajectoryGeneratorParameters
-               .getPushRecoveryProportionsThroughTrajectoryForGroundClearance();
-         double[] pushRecoveryGroundClearances = TwoWaypointTrajectoryGeneratorParameters.getPushRecoveryGroundClearances();
-         return getWaypointsAtGroundClearances(pushRecoveryGroundClearances, pushRecoveryProportionsThroughTrajectoryForGroundClearance);
-
-      case BASIC:
-         return getWaypointsAtGroundClearance(swingHeight);
 
       case DEFAULT:
       default:
