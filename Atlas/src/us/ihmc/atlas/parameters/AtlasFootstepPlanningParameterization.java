@@ -70,10 +70,10 @@ public class AtlasFootstepPlanningParameterization extends FootstepPlanningParam
    public boolean withinReachForNext(double xdiff, double ydiff, double thetadiff)
    {
       if (xdiff > 0.4 || xdiff < -0.2) return false;
-      if (ydiff > 0.4 || ydiff < footWidth + 0.02) return false;
+      if (ydiff > 0.4 || ydiff < getFootWidth() + 0.02) return false;
       if (thetadiff > Math.PI / 4 || thetadiff < 0) return false;
-      double xObtrustion = footLength / 2 * Math.cos(thetadiff) + footWidth / 2 * Math.sin(thetadiff);
-      if (xObtrustion > ydiff + (footWidth + 0.02) / 2) return false; //corner intersection between feet
+      double xObtrustion = getFootLength() / 2 * Math.cos(thetadiff) + getFootWidth() / 2 * Math.sin(thetadiff);
+      if (xObtrustion > ydiff + (getFootWidth() + 0.02) / 2) return false; //corner intersection between feet
       return true;
    }
 

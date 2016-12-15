@@ -84,5 +84,4 @@
 **/gradle-wrapper.properties
 **/gradlew
 **/gradlew.bat
-
-!**/gradle-wrapper.jar
+**/rebel.xml

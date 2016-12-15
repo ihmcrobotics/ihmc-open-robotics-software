@@ -1,5 +1,8 @@
 package us.ihmc.humanoidBehaviors.behaviors.behaviorServices;
 
+import org.apache.commons.lang3.tuple.Pair;
+import us.ihmc.communication.packets.BoundingBoxesPacket;
+import us.ihmc.communication.packets.HeatMapPacket;
 import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidBehaviors.behaviors.goalLocation.GoalDetectorBehaviorService;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
@@ -54,6 +57,10 @@ public class ObjectDetectorBehaviorService extends GoalDetectorBehaviorService
          synchronized (detectorFromCameraImagesConch)
          {
             objectDetectorFromCameraImages.detectFromVideoPacket(videoPacket);
+            Pair<BoundingBoxesPacket, HeatMapPacket> coactiveVisualizationPackets = objectDetectorFromCameraImages.getCoactiveVisualizationPackets();
+
+            getCommunicationBridge().sendPacketToUI(coactiveVisualizationPackets.getLeft());
+            getCommunicationBridge().sendPacketToUI(coactiveVisualizationPackets.getRight());
          }
       }
       else
