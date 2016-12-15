@@ -93,13 +93,12 @@ public abstract class AvatarSwingWithWaypointsTest implements MultiRobotTestInte
          RobotSide robotSide = i%2 == 0 ? RobotSide.LEFT : RobotSide.RIGHT;
          double footstepY = robotSide == RobotSide.LEFT ? stepWidth : -stepWidth;
          double footstepX = stepLength * i;
-         double swingHeight = 0.175;
 
          FootstepDataMessage footstep1 = footsteps.get(i-1);
          footstep1.setTrajectoryType(TrajectoryType.CUSTOM);
          footstep1.setTrajectoryWaypoints(new Point3d[] {
-               new Point3d(footstepX - (stepLength * 2.0), footstepY, swingHeight),
-               new Point3d(footstepX - (stepLength * 0.0), footstepY, swingHeight)});
+               new Point3d(footstepX - (stepLength * 2.0), footstepY, 0.25),
+               new Point3d(footstepX - (stepLength * 0.0), footstepY, 0.2)});
       }
 
       // overshoot
@@ -108,13 +107,12 @@ public abstract class AvatarSwingWithWaypointsTest implements MultiRobotTestInte
          RobotSide robotSide = i%2 == 0 ? RobotSide.LEFT : RobotSide.RIGHT;
          double footstepY = robotSide == RobotSide.LEFT ? stepWidth : -stepWidth;
          double footstepX = stepLength * i;
-         double swingHeight = 0.1;
 
          FootstepDataMessage footstep1 = footsteps.get(i-1);
          footstep1.setTrajectoryType(TrajectoryType.CUSTOM);
          footstep1.setTrajectoryWaypoints(new Point3d[] {
-               new Point3d(footstepX - (stepLength * 2.0 * 0.85), footstepY, swingHeight),
-               new Point3d(footstepX + 0.1, footstepY, swingHeight)});
+               new Point3d(footstepX - (stepLength * 2.0 * 0.85), footstepY, 0.2),
+               new Point3d(footstepX + 0.1, footstepY, 0.125)});
       }
 
       // swing outward sideways
@@ -124,7 +122,7 @@ public abstract class AvatarSwingWithWaypointsTest implements MultiRobotTestInte
          double footstepY = robotSide == RobotSide.LEFT ? stepWidth : -stepWidth;
          double offsetY = robotSide == RobotSide.LEFT ? 0.2 : -0.2;
          double footstepX = stepLength * i;
-         double swingHeight = 0.1;
+         double swingHeight = 0.15;
 
          FootstepDataMessage footstep1 = footsteps.get(i-1);
          footstep1.setTrajectoryType(TrajectoryType.CUSTOM);
@@ -139,7 +137,7 @@ public abstract class AvatarSwingWithWaypointsTest implements MultiRobotTestInte
          RobotSide robotSide = i%2 == 0 ? RobotSide.LEFT : RobotSide.RIGHT;
          double footstepY = robotSide == RobotSide.LEFT ? stepWidth : -stepWidth;
          double footstepX = stepLength * i;
-         double swingHeight = 0.1;
+         double swingHeight = 0.15;
 
          FootstepDataMessage footstep1 = footsteps.get(i-1);
          footstep1.setTrajectoryType(TrajectoryType.CUSTOM);
@@ -155,7 +153,7 @@ public abstract class AvatarSwingWithWaypointsTest implements MultiRobotTestInte
          double footstepY = robotSide == RobotSide.LEFT ? stepWidth : -stepWidth;
          double offsetY = robotSide == RobotSide.LEFT ? 0.15 : -0.15;
          double footstepX = stepLength * i;
-         double swingHeight = 0.1;
+         double swingHeight = 0.15;
 
          FootstepDataMessage footstep1 = footsteps.get(i-1);
          footstep1.setTrajectoryType(TrajectoryType.CUSTOM);
@@ -261,7 +259,7 @@ public abstract class AvatarSwingWithWaypointsTest implements MultiRobotTestInte
          terrain.addCylinder(new RigidBodyTransform(new Quat4d(0.0, 0.0, 0.0, 1.0), new Point3d(1.5, 0.15, 0.1)), 0.2, 0.15, YoAppearance.Grey());
          terrain.addCylinder(new RigidBodyTransform(new Quat4d(0.0, 0.0, 0.0, 1.0), new Point3d(1.8, -0.15, 0.1)), 0.2, 0.025, YoAppearance.Grey());
          terrain.addBox(1.96, 0.125, 1.99, 0.0, 0.2);
-         terrain.addBox(2.235, 0.175, 2.265, 0.2, 0.2);
+         terrain.addBox(2.235, 0.175, 2.265, 0.25, 0.2);
       }
 
       @Override
