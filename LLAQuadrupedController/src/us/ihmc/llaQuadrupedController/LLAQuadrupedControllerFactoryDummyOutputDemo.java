@@ -22,7 +22,7 @@ import us.ihmc.quadrupedRobotics.estimator.stateEstimator.QuadrupedFootSwitchFac
 import us.ihmc.quadrupedRobotics.estimator.stateEstimator.QuadrupedStateEstimatorFactory;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
-import us.ihmc.quadrupedRobotics.params.ParameterRegistry;
+import us.ihmc.robotics.dataStructures.parameter.ParameterRegistry;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedParameterSet;
 import us.ihmc.quadrupedRobotics.state.FiniteStateMachineState;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;

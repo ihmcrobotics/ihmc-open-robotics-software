@@ -1,4 +1,4 @@
-package us.ihmc.quadrupedRobotics.params;
+package us.ihmc.robotics.dataStructures.parameter;
 
 public class BooleanParameter extends Parameter
 {

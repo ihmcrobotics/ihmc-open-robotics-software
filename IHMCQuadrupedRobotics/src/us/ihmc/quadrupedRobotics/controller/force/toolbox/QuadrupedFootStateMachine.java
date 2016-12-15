@@ -1,9 +1,5 @@
 package us.ihmc.quadrupedRobotics.controller.force.toolbox;
 
-import us.ihmc.quadrupedRobotics.params.DoubleArrayParameter;
-import us.ihmc.quadrupedRobotics.params.DoubleParameter;
-import us.ihmc.quadrupedRobotics.params.IntegerParameter;
-import us.ihmc.quadrupedRobotics.params.ParameterFactory;
 import us.ihmc.quadrupedRobotics.planning.ContactState;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStep;
 import us.ihmc.quadrupedRobotics.planning.YoQuadrupedTimedStep;
