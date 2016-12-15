@@ -64,10 +64,8 @@ public abstract class AbstractFootControlState extends FinishableState<Constrain
       OneDoFJoint kneeJoint = fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE_PITCH);
 
       straightLegsPrivilegedConfigurationCommand.addJoint(kneeJoint, PrivilegedConfigurationOption.AT_ZERO);
-      straightLegsPrivilegedConfigurationCommand.applyPrivilegedConfigurationToSubChain(pelvis, foot);
 
       bentLegsPrivilegedConfigurationCommand.addJoint(kneeJoint, PrivilegedConfigurationOption.AT_MID_RANGE);
-      bentLegsPrivilegedConfigurationCommand.applyPrivilegedConfigurationToSubChain(pelvis, foot);
    }
 
    public abstract void doSpecificAction();

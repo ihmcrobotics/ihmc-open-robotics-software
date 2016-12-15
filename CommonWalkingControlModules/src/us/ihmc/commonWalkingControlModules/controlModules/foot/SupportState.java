@@ -312,7 +312,6 @@ public class SupportState extends AbstractFootControlState
 
       straightLegsPrivilegedConfigurationCommand.clear();
       straightLegsPrivilegedConfigurationCommand.addJoint(kneePitch, kneePrivilegedConfigurationTrajectory.getPosition());
-      straightLegsPrivilegedConfigurationCommand.applyPrivilegedConfigurationToSubChain(pelvis, contactableFoot.getRigidBody());
    }
 
    private void updateHoldPositionSetpoints()
