@@ -26,11 +26,12 @@ import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ComponentBasedFootstepDataMessageGenerator
+public class ComponentBasedFootstepDataMessageGenerator implements Updatable
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final EnumYoVariable<RobotSide> nextSwingLeg = EnumYoVariable.create("nextSwingLeg", RobotSide.class, registry);
    private final BooleanYoVariable walk = new BooleanYoVariable("walk", registry);
+   private final BooleanYoVariable walkPrevious = new BooleanYoVariable("walkPrevious", registry);
 
    private final DoubleYoVariable swingTime = new DoubleYoVariable("footstepGeneratorSwingTime", registry);
    private final DoubleYoVariable transferTime = new DoubleYoVariable("footstepGeneratorTransferTime", registry);
@@ -55,33 +56,12 @@ public class ComponentBasedFootstepDataMessageGenerator
          componentBasedDesiredFootstepCalculator.setGroundProfile(heightMapForFootZ);
       }
 
-      walk.addVariableChangedListener(createVariableChangedListener());
       swingTime.set(walkingControllerParameters.getDefaultSwingTime());
       transferTime.set(walkingControllerParameters.getDefaultTransferTime());
 
       createFootstepStatusListener();
 
       parentRegistry.addChild(registry);
-   }
-
-   public VariableChangedListener createVariableChangedListener()
-   {
-      return new VariableChangedListener()
-      {
-         @Override
-         public void variableChanged(YoVariable<?> v)
-         {
-            if (walk.getBooleanValue())
-            {
-               componentBasedDesiredFootstepCalculator.initialize();
-               computeAndSubmitFootsteps();
-            }
-            else
-            {
-               commandInputManager.submitMessage(new PauseWalkingMessage(true));
-            }
-         }
-      };
    }
 
    public void computeAndSubmitFootsteps()
@@ -193,9 +173,27 @@ public class ComponentBasedFootstepDataMessageGenerator
       desiredFootstepCalculator.setStepPitch(walkingControllerParameters.getStepPitch());
       return desiredFootstepCalculator;
    }
-
-   public List<Updatable> getModulesToUpdate()
+   
+   public void update(double time)
    {
-      return updatables;
+      for(int i = 0; i < updatables.size(); i++)
+      {
+         updatables.get(i).update(time);
+      }
+      
+      if (walk.getBooleanValue() != walkPrevious.getBooleanValue())
+      {
+         if (walk.getBooleanValue())
+         {
+            componentBasedDesiredFootstepCalculator.initialize();
+            computeAndSubmitFootsteps();
+         }
+         else
+         {
+            commandInputManager.submitMessage(new PauseWalkingMessage(true));
+         }
+      }
+      
+      walkPrevious.set(walk.getBooleanValue());
    }
 }

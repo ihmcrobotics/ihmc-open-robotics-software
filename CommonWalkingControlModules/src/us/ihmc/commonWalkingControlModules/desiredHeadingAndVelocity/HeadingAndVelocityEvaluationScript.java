@@ -445,7 +445,7 @@ public class HeadingAndVelocityEvaluationScript implements Updatable
 
       public static HeadingAndVelocityEvaluationEvent[] getAllEventsEvaluationOrdering()
       {
-         return new HeadingAndVelocityEvaluationEvent[] {DO_NOTHING_FOR_A_TINY_BIT, STEP_IN_PLACE, GO_TO_CRUISE_STRAIGHT, TURN_180_CRUISE, SPEED_UP_TO_MAX_STRAIGHT,
+         return new HeadingAndVelocityEvaluationEvent[] {STEP_IN_PLACE, GO_TO_CRUISE_STRAIGHT, TURN_180_CRUISE, SPEED_UP_TO_MAX_STRAIGHT,
                SLOW_DOWN_TO_ZERO_STRAIGHT, SIDE_STEP_LEFT, SLOW_DOWN_TO_ZERO, SIDE_STEP_RIGHT, SLOW_DOWN_TO_ZERO, TURN_IN_PLACE180, DIAGONALLY_RIGHT_45,
                SLOW_DOWN_TO_ZERO, DIAGONALLY_LEFT_45, SLOW_DOWN_TO_ZERO, WAVE_CRUISE, SLOW_DOWN_TO_ZERO, TURN_IN_PLACE180, CHANGE_HEADING_WALKING_STRAIGHT,
                SLOW_DOWN_TO_ZERO};
