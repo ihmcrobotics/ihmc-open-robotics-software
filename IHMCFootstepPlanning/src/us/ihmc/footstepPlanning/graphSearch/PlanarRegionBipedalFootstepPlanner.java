@@ -87,7 +87,13 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
    public void setFeetPolygons(SideDependentList<ConvexPolygon2d> footPolygonsInSoleFrame)
    {
       this.footPolygonsInSoleFrame = footPolygonsInSoleFrame;
-      planarRegionPotentialNextStepCalculator.setFeetPolygons(footPolygonsInSoleFrame);
+      planarRegionPotentialNextStepCalculator.setFeetPolygons(footPolygonsInSoleFrame, footPolygonsInSoleFrame);
+   }
+
+   public void setFeetPolygons(SideDependentList<ConvexPolygon2d> footPolygonsInSoleFrame, SideDependentList<ConvexPolygon2d> controllerPolygonsInSoleFrame)
+   {
+      this.footPolygonsInSoleFrame = footPolygonsInSoleFrame;
+      planarRegionPotentialNextStepCalculator.setFeetPolygons(footPolygonsInSoleFrame, controllerPolygonsInSoleFrame);
    }
 
    public SideDependentList<ConvexPolygon2d> getFootPolygonsInSoleFrame()

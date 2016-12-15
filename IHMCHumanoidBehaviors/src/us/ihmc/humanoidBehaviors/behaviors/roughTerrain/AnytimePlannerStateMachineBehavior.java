@@ -53,6 +53,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.stateMachines.StateTransitionCondition;
 import us.ihmc.robotics.time.YoTimer;
 import us.ihmc.tools.io.printing.PrintTools;
+import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 
 public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<AnytimePlannerStateMachineBehavior.AnytimePlanningState>
@@ -109,8 +110,10 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
       footstepPlanningParameters = new BipedalFootstepPlannerParameters(registry);
       FootstepPlannerForBehaviorsHelper.setPlannerParametersForAnytimePlannerAndPlannerToolbox(footstepPlanningParameters);
       footstepPlanner = new SimplePlanarRegionBipedalAnytimeFootstepPlanner(footstepPlanningParameters, registry);
-      SideDependentList<ConvexPolygon2d> footPolygonsInSoleFrame = FootstepPlannerForBehaviorsHelper.createDefaultFootPolygonsForAnytimePlannerAndPlannerToolbox(wholeBodyControllerParameters.getContactPointParameters());
-      footstepPlanner.setFeetPolygons(footPolygonsInSoleFrame);
+      RobotContactPointParameters contactPointParameters = wholeBodyControllerParameters.getContactPointParameters();
+      SideDependentList<ConvexPolygon2d> footPolygonsInSoleFrame = FootstepPlannerForBehaviorsHelper.createDefaultFootPolygonsForAnytimePlannerAndPlannerToolbox(contactPointParameters);
+      SideDependentList<ConvexPolygon2d> controlPolygonsInSoleFrame = FootstepPlannerForBehaviorsHelper.createDefaultFootPolygons(contactPointParameters, 1.0, 1.0);
+      footstepPlanner.setFeetPolygons(footPolygonsInSoleFrame, controlPolygonsInSoleFrame);
 
       this.yoTime = yoTime;
       maxNumberOfStepsToTake.set(1);
