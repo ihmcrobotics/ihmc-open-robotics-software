@@ -392,4 +392,14 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
    {
       return 0.05;
    }
+
+   /**
+    * If a step up or a step down is executed, the swing trajectory will switch to the obstacle clearance
+    * mode. The value defined here determines the threshold for the height difference between current foot
+    * position and step position that causes this switch.
+    */
+   public double getMinHeightDifferenceForStepUpOrDown()
+   {
+      return 0.04;
+   }
 }
