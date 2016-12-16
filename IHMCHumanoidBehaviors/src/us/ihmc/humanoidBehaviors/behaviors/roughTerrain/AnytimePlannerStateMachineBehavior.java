@@ -285,6 +285,7 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
    public void onBehaviorEntered()
    {
       super.onBehaviorEntered();
+      reachedGoal.set(false);
       new Thread(footstepPlanner).start();
    }
 
