@@ -45,6 +45,7 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
+import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -74,9 +75,10 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
    private final SimplePlanarRegionBipedalAnytimeFootstepPlanner footstepPlanner;
 
    private final BooleanYoVariable reachedGoal = new BooleanYoVariable(prefix + "ReachedGoal", registry);
+   private final DoubleYoVariable reachedGoalThreshold = new DoubleYoVariable(prefix + "ReachedGoalThreshold", registry);
    private final DoubleYoVariable swingTime = new DoubleYoVariable(prefix + "SwingTime", registry);
    private final DoubleYoVariable transferTime = new DoubleYoVariable(prefix + "TransferTime", registry);
-   private final BooleanYoVariable receivedFootstepCompletedPacked = new BooleanYoVariable(prefix + "ReceivedFootstepCompletedPacket", registry);
+   private final BooleanYoVariable receivedFootstepCompletedPacket = new BooleanYoVariable(prefix + "ReceivedFootstepCompletedPacket", registry);
    private final HumanoidReferenceFrames referenceFrames;
    private final BooleanYoVariable havePlanarRegionsBeenSet = new BooleanYoVariable(prefix + "HavePlanarRegionsBeenSet", registry);
    private FootstepPlan currentPlan;
@@ -107,6 +109,8 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
    {
       super("AnytimePlanner", AnytimePlanningState.class, yoTime, communicationBridge);
       
+      reachedGoalThreshold.set(1.5);
+
       footstepPlanningParameters = new BipedalFootstepPlannerParameters(registry);
       FootstepPlannerForBehaviorsHelper.setPlannerParametersForAnytimePlannerAndPlannerToolbox(footstepPlanningParameters);
       footstepPlanner = new SimplePlanarRegionBipedalAnytimeFootstepPlanner(footstepPlanningParameters, registry);
@@ -278,8 +282,11 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
       footstepPlanner.requestStop();
    }
 
+   private final FramePoint2d goalPosition = new FramePoint2d();
+
    public void setGoalPose(FramePose goalPose)
    {
+      goalPose.getPosition2dIncludingFrame(this.goalPosition);
       Tuple3d goalPosition = new Point3d();
       goalPose.getPosition(goalPosition);
 
@@ -455,9 +462,13 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
 
             if (footstepStatus.getStatus() == FootstepStatus.Status.COMPLETED)
             {
-               receivedFootstepCompletedPacked.set(true);
+               receivedFootstepCompletedPacket.set(true);
             }
          }
+
+         ReferenceFrame midFeetZUpFrame = referenceFrames.getMidFeetZUpFrame();
+         FramePoint2d goalPositionInMidFeetZUp = goalPosition.changeFrameAndProjectToXYPlaneCopy(midFeetZUpFrame);
+         reachedGoal.set(goalPositionInMidFeetZUp.distanceFromZero() < reachedGoalThreshold.getDoubleValue());
       }
 
       @Override
@@ -490,7 +501,7 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
 
          footstepDataListMessage.setDestination(PacketDestination.CONTROLLER);
          sendPacketToController(footstepDataListMessage);
-         receivedFootstepCompletedPacked.set(false);
+         receivedFootstepCompletedPacket.set(false);
 
          // request new planar regions
          requestPlanarRegions();
@@ -591,7 +602,7 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
       @Override
       public boolean checkCondition()
       {
-         return receivedFootstepCompletedPacked.getBooleanValue() && !reachedGoal.getBooleanValue();
+         return receivedFootstepCompletedPacket.getBooleanValue() && !reachedGoal.getBooleanValue();
       }
    }
 
@@ -600,7 +611,7 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
       @Override
       public boolean checkCondition()
       {
-         return receivedFootstepCompletedPacked.getBooleanValue() && reachedGoal.getBooleanValue();
+         return receivedFootstepCompletedPacket.getBooleanValue() && reachedGoal.getBooleanValue();
       }
    }
 }
