@@ -41,6 +41,8 @@ public class ValveDetectorProcess implements PacketConsumer<VideoPacket>
 
       valveDetectionServer.attachListener(VideoPacket.class, this);
       valveDetectionServer.connect();
+
+      detectionStatusClient.connect();
    }
 
    @Override
