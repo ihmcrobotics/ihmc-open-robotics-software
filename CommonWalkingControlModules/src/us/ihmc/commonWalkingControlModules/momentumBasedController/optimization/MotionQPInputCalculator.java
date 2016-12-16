@@ -44,7 +44,6 @@ public class MotionQPInputCalculator
    private final GeometricJacobianHolder geometricJacobianHolder;
 
    private final PointJacobian pointJacobian = new PointJacobian();
-   private final PointJacobian primaryPointJacobian = new PointJacobian();
    private final PointJacobianConvectiveTermCalculator pointJacobianConvectiveTermCalculator;
 
    private final InverseDynamicsJoint[] jointsToOptimizeFor;
@@ -226,19 +225,8 @@ public class MotionQPInputCalculator
       InverseDynamicsJoint[] jointsUsedInTask = jacobian.getJointsInOrder();
       if (primaryBase != null)
       {
-         // Compute task point Jacobian from primary base
-         long primaryJacobianId = geometricJacobianHolder.getOrCreateGeometricJacobian(primaryBase, endEffector, primaryBase.getBodyFixedFrame());
-         GeometricJacobian primaryJacobian = geometricJacobianHolder.getJacobian(primaryJacobianId);
-
-         primaryPointJacobian.set(primaryJacobian, tempBodyFixedPoint);
-         primaryPointJacobian.compute();
-         DenseMatrix64F primaryPointJacobianMatrix = primaryPointJacobian.getJacobianMatrix();
-
-         tempPrimaryTaskJacobian.reshape(taskSize, primaryPointJacobianMatrix.getNumCols());
-         CommonOps.mult(selectionMatrix, primaryPointJacobianMatrix, tempPrimaryTaskJacobian);
-
-         tempFullPrimaryTaskJacobian.reshape(taskSize, numberOfDoFs);
-         success = jointIndexHandler.compactBlockToFullBlock(primaryJacobian.getJointsInOrder(), tempPrimaryTaskJacobian, tempFullPrimaryTaskJacobian);
+         tempPrimaryTaskJacobian.reshape(taskSize, tempTaskJacobian.getNumCols());
+         tempPrimaryTaskJacobian.set(tempTaskJacobian);
 
          boolean isJointUpstreamOfPrimaryBase = false;
 
@@ -256,7 +244,14 @@ public class MotionQPInputCalculator
                for (int j = 0; j < tempJointIndices.size(); j++)
                   MatrixTools.scaleColumn(secondaryTaskJointsWeight.getDoubleValue(), tempJointIndices.get(j), tempTaskJacobian);
             }
+            else
+            {
+               MatrixTools.zeroColumn(i, tempPrimaryTaskJacobian);
+            }
          }
+
+         tempFullPrimaryTaskJacobian.reshape(taskSize, numberOfDoFs);
+         success = jointIndexHandler.compactBlockToFullBlock(jointsUsedInTask, tempPrimaryTaskJacobian, tempFullPrimaryTaskJacobian);
       }
 
       success = success && jointIndexHandler.compactBlockToFullBlock(jointsUsedInTask, tempTaskJacobian, motionQPInputToPack.taskJacobian);
@@ -323,16 +318,10 @@ public class MotionQPInputCalculator
       InverseDynamicsJoint[] jointsUsedInTask = jacobian.getJointsInOrder();
       if (primaryBase != null)
       {
-         // Compute task Jacobian from primary base
-         long primaryJacobianId = geometricJacobianHolder.getOrCreateGeometricJacobian(primaryBase, endEffector, spatialAcceleration.getExpressedInFrame());
-         GeometricJacobian primaryJacobian = geometricJacobianHolder.getJacobian(primaryJacobianId);
-         tempPrimaryTaskJacobian.reshape(taskSize, primaryJacobian.getNumberOfColumns());
-         tempFullPrimaryTaskJacobian.reshape(taskSize, numberOfDoFs);
-         CommonOps.mult(selectionMatrix, primaryJacobian.getJacobianMatrix(), tempPrimaryTaskJacobian);
-         jointIndexHandler.compactBlockToFullBlockIgnoreUnindexedJoints(primaryJacobian.getJointsInOrder(), tempPrimaryTaskJacobian, tempFullPrimaryTaskJacobian);
+         tempPrimaryTaskJacobian.reshape(taskSize, jointsUsedInTask.length);
+         tempPrimaryTaskJacobian.set(tempTaskJacobian);
 
          boolean isJointUpstreamOfPrimaryBase = false;
-
          for (int i = jointsUsedInTask.length - 1; i >= 0; i--)
          {
             InverseDynamicsJoint joint = jointsUsedInTask[i];
@@ -347,7 +336,14 @@ public class MotionQPInputCalculator
                for (int j = 0; j < tempJointIndices.size(); j++)
                   MatrixTools.scaleColumn(secondaryTaskJointsWeight.getDoubleValue(), tempJointIndices.get(j), tempTaskJacobian);
             }
+            else
+            {
+               MatrixTools.zeroColumn(i, tempPrimaryTaskJacobian);
+            }
          }
+
+         tempFullPrimaryTaskJacobian.reshape(taskSize, numberOfDoFs);
+         jointIndexHandler.compactBlockToFullBlockIgnoreUnindexedJoints(jointsUsedInTask, tempPrimaryTaskJacobian, tempFullPrimaryTaskJacobian);
       }
 
       jointIndexHandler.compactBlockToFullBlockIgnoreUnindexedJoints(jointsUsedInTask, tempTaskJacobian, motionQPInputToPack.taskJacobian);
