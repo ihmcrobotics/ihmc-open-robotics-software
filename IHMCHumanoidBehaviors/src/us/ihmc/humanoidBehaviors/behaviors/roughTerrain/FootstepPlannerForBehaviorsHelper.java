@@ -47,7 +47,7 @@ public class FootstepPlannerForBehaviorsHelper
    public static void setPlannerParametersForAnytimePlannerAndPlannerToolbox(BipedalFootstepPlannerParameters footstepPlanningParameters)
    {
       footstepPlanningParameters.setMaximumStepReach(0.55);
-      footstepPlanningParameters.setMaximumStepZ(0.26);
+      footstepPlanningParameters.setMaximumStepZ(0.28);
 
       footstepPlanningParameters.setMaximumStepXWhenForwardAndDown(0.35); //32);
       footstepPlanningParameters.setMaximumStepZWhenForwardAndDown(0.10); //18);
