@@ -111,6 +111,14 @@ public class PlanarRegionBipedalFootstepPlannerTest extends FootstepPlannerOnRou
       super.testPartialGaps(!visualize);
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 300000)
+   public void testWalkingAroundBox()
+   {
+      planner.setMaximumNumberOfNodesToExpand(Integer.MAX_VALUE);
+      super.testWalkingAroundBox();
+   }
+
    @Before
    public void setupPlanner()
    {
