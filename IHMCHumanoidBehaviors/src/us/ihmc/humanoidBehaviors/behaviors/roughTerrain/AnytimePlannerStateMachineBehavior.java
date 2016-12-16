@@ -80,6 +80,7 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
    private final SimplePlanarRegionBipedalAnytimeFootstepPlanner footstepPlanner;
 
    private final BooleanYoVariable reachedGoal = new BooleanYoVariable(prefix + "ReachedGoal", registry);
+   private final BooleanYoVariable clearedLidar = new BooleanYoVariable(prefix + "ClearedLidar", registry);
    private final DoubleYoVariable reachedGoalThreshold = new DoubleYoVariable(prefix + "ReachedGoalThreshold", registry);
    private final DoubleYoVariable swingTime = new DoubleYoVariable(prefix + "SwingTime", registry);
    private final DoubleYoVariable transferTime = new DoubleYoVariable(prefix + "TransferTime", registry);
@@ -99,6 +100,7 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
 
    private final NoValidPlanCondition noValidPlanCondition = new NoValidPlanCondition();
    private final FoundAPlanCondition foundAPlanCondition = new FoundAPlanCondition();
+   private final ClearedLidarCondition clearedLidarCondition = new ClearedLidarCondition();
    private final ContinueWalkingAfterCompletedStepCondition continueWalkingAfterCompletedStepCondition = new ContinueWalkingAfterCompletedStepCondition();
    private final ReachedGoalAfterCompletedStepCondition reachedGoalAfterCompletedStepCondition = new ReachedGoalAfterCompletedStepCondition();
 
@@ -165,7 +167,16 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
 
       locateGoalBehavior = new LocateGoalBehavior(communicationBridge, goalDetectorBehaviorService);
       requestAndWaitForPlanarRegionsListBehavior = new RequestAndWaitForPlanarRegionsListBehavior(communicationBridge);
-      sleepBehavior = new SleepBehavior(communicationBridge, yoTime, 2.0);
+      sleepBehavior = new SleepBehavior(communicationBridge, yoTime, 2.0)
+      {
+         @Override
+         public void onBehaviorExited()
+         {
+            super.onBehaviorExited();
+            this.setSleepTime(2.0);
+         }
+      };
+            
       checkForBestPlanBehavior = new CheckForBestPlanBehavior(communicationBridge);
       sendOverFootstepsAndUpdatePlannerBehavior = new SendOverFootstepAndWaitForCompletionBehavior(communicationBridge);
       squareUpBehavior = new SquareUpBehavior(communicationBridge);
@@ -279,6 +290,7 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
       statemachine.addStateWithDoneTransition(squareUp, AnytimePlanningState.REACHED_GOAL);
       statemachine.addState(reachedGoalAction);
 
+      checkForBestPlan.addStateTransition(AnytimePlanningState.REQUEST_AND_WAIT_FOR_PLANAR_REGIONS, clearedLidarCondition);
       checkForBestPlan.addStateTransition(AnytimePlanningState.REQUEST_AND_WAIT_FOR_PLANAR_REGIONS, noValidPlanCondition);
       checkForBestPlan.addStateTransition(AnytimePlanningState.SEND_OVER_FOOTSTEP_AND_WAIT_FOR_COMPLETION, foundAPlanCondition);
 
@@ -415,6 +427,11 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
       @Override
       public void doControl()
       {
+         if (!footstepPlanner.isClear())
+         {
+            return;
+         }
+
          FootstepPlan latestPlan = footstepPlanner.getBestPlanYet();
 
          if (latestPlan != null)
@@ -574,8 +591,12 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
             RequestPlanarRegionsListMessage requestPlanarRegionsListMessage = new RequestPlanarRegionsListMessage(RequestType.CLEAR);
             requestPlanarRegionsListMessage.setDestination(PacketDestination.REA_MODULE);
             sendPacket(requestPlanarRegionsListMessage);
-            
+
             currentPlan = null;
+            
+            footstepPlanner.clear();
+            sleepBehavior.setSleepTime(5.0);
+            clearedLidar.set(true);
             stepCounterForClearingLidar.set(0);
          }
       }
@@ -728,6 +749,22 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
       public boolean checkCondition()
       {
          return currentPlan == null || currentPlan.getNumberOfSteps() <= 1;
+      }
+   }
+
+   private class ClearedLidarCondition implements StateTransitionCondition
+   {
+      @Override
+      public boolean checkCondition()
+      {
+         boolean isTrueIf = clearedLidar.getBooleanValue();
+
+         if (isTrueIf)
+         {
+            clearedLidar.set(false);
+         }
+
+         return isTrueIf;
       }
    }
 
