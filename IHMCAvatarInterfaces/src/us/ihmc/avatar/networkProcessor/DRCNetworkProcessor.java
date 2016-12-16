@@ -60,6 +60,7 @@ public class DRCNetworkProcessor
          setupRobotEnvironmentAwarenessModule(params);
          setupHeightQuadTreeToolboxModule(robotModel, params);
          setupLidarScanLogger();
+         setupRemoteObjectDetectionFeedbackEndpoint(params);
       }
       catch (IOException e)
       {
@@ -145,6 +146,26 @@ public class DRCNetworkProcessor
 
          String methodName = "setupDrillDetectionModule";
          printModuleConnectedDebugStatement(PacketDestination.DRILL_DETECTOR, methodName);
+      }
+   }
+
+   private void setupRemoteObjectDetectionFeedbackEndpoint(DRCNetworkModuleParameters params)
+   {
+      if (params.isRemoteObjectDetectionFeedbackEnabled())
+      {
+         PacketCommunicator objectDetectionFeedbackCommunicator = PacketCommunicator.createTCPPacketCommunicatorServer(NetworkPorts.VALVE_DETECTOR_FEEDBACK_PORT, NET_CLASS_LIST);
+         packetRouter.attachPacketCommunicator(PacketDestination.BEHAVIOR_MODULE, objectDetectionFeedbackCommunicator);
+         try
+         {
+            objectDetectionFeedbackCommunicator.connect();
+         }
+         catch (IOException e)
+         {
+            e.printStackTrace();
+         }
+
+         String methodName = "setupRemoteObjectDetectionFeedbackEndpoint";
+         printModuleConnectedDebugStatement(PacketDestination.BEHAVIOR_MODULE, methodName);
       }
    }
 
