@@ -61,7 +61,7 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
    private ChestTrajectoryMessage chestTrajectoryMessage;
    private PelvisOrientationTrajectoryMessage pelvisOrientationTrajectoryMessage;
    private SideDependentList<HandTrajectoryMessage> handTrajectoryMessage = new SideDependentList<>();
-   private TrackingWeightsMessage trackingWeightsMessage = null;
+   private TrackingWeightsMessage trackingWeightsMessage;
 
    private final ConcurrentListeningQueue<KinematicsToolboxOutputStatus> kinematicsToolboxOutputQueue = new ConcurrentListeningQueue<>(40);
    private KinematicsToolboxOutputStatus solutionSentToController = null;
@@ -337,6 +337,11 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
             pelvisOrientationTrajectoryMessage.setDestination(PacketDestination.KINEMATICS_TOOLBOX_MODULE);
             sendPacket(pelvisOrientationTrajectoryMessage);
          }
+         
+         if (trackingWeightsMessage != null)
+         {
+            sendPacket(trackingWeightsMessage);
+         }
       }
       if (kinematicsToolboxOutputQueue.isNewPacketAvailable() && !hasSentMessageToController.getBooleanValue())
       {
@@ -408,6 +413,7 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
       solutionSentToController = null;
       chestTrajectoryMessage = null;
       pelvisOrientationTrajectoryMessage = null;
+      trackingWeightsMessage = null;
 
       for (RobotSide robotSide : RobotSide.values)
       {
