@@ -89,17 +89,4 @@ public class TrackingWeightsCommand implements Command<TrackingWeightsCommand, T
          break;
       }
    }
-
-   public void setCustomizedBodyWeights(double handWeight, double footWeight, double momentumWeight, double chestWeight, double pelvisOrientationWeight,
-                                        double privilegedWeight, double privilegedConfigurationGain, double privilegedMaxVelocity)
-   {
-         this.handWeight = handWeight;
-         this.footWeight = footWeight;
-         this.momentumWeight = momentumWeight;
-         this.chestWeight = chestWeight;
-         this.pelvisOrientationWeight = pelvisOrientationWeight;
-         this.privilegedWeight = privilegedWeight;
-         this.privilegedConfigurationGain = privilegedConfigurationGain;
-         this.privilegedMaxVelocity = privilegedMaxVelocity;
-   }
 }
