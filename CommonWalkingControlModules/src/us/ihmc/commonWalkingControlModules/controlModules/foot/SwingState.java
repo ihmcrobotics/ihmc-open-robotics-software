@@ -40,7 +40,6 @@ import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.robotics.trajectories.TrajectoryType;
-import us.ihmc.robotics.trajectories.TwoWaypointTrajectoryGeneratorParameters;
 import us.ihmc.robotics.trajectories.providers.CurrentAngularVelocityProvider;
 import us.ihmc.robotics.trajectories.providers.CurrentConfigurationProvider;
 import us.ihmc.robotics.trajectories.providers.CurrentLinearVelocityProvider;
@@ -97,6 +96,8 @@ public class SwingState extends AbstractUnconstrainedState
    private final DoubleYoVariable finalSwingHeightOffset;
    private final double controlDT;
 
+   private final DoubleYoVariable minHeightDifferenceForObstacleClearance;
+
    private final ReferenceFrame soleFrame;
    private final ReferenceFrame controlFrame;
 
@@ -128,6 +129,9 @@ public class SwingState extends AbstractUnconstrainedState
       finalSwingHeightOffset.set(footControlHelper.getWalkingControllerParameters().getDesiredTouchdownHeightOffset());
       replanTrajectory = new BooleanYoVariable(namePrefix + "SwingReplanTrajectory", registry);
       swingTimeRemaining = new YoVariableDoubleProvider(namePrefix + "SwingTimeRemaining", registry);
+
+      minHeightDifferenceForObstacleClearance = new DoubleYoVariable(namePrefix + "MinHeightDifferenceForObstacleClearance", registry);
+      minHeightDifferenceForObstacleClearance.set(walkingControllerParameters.getMinHeightDifferenceForStepUpOrDown());
 
       velocityAdjustmentDamping = new DoubleYoVariable(namePrefix + "VelocityAdjustmentDamping", registry);
       velocityAdjustmentDamping.set(footControlHelper.getWalkingControllerParameters().getSwingFootVelocityAdjustmentDamping());
@@ -427,19 +431,19 @@ public class SwingState extends AbstractUnconstrainedState
 
       footstepSolePose.setZ(footstepSolePose.getZ() + finalSwingHeightOffset.getDoubleValue());
       finalConfigurationProvider.setPose(footstepSolePose);
-      initialConfigurationProvider.getPosition(oldFootstepPosition);
       orientationTrajectoryGenerator.setFinalOrientation(footstepSolePose);
       orientationTrajectoryGenerator.setFinalVelocityToZero();
 
-      footstepSolePose.changeFrame(worldFrame);
-      oldFootstepPosition.changeFrame(worldFrame);
+      // if replanning do not change the original trajectory type
+      if (replanTrajectory.getBooleanValue())
+         return;
 
       // if the trajectory is custom trust the waypoints...
       TrajectoryType trajectoryType = footstep.getTrajectoryType();
+      this.swingWaypointsForSole.clear();
       if (trajectoryType == TrajectoryType.CUSTOM)
       {
          List<Point3d> swingWaypoints = footstep.getSwingWaypoints();
-         this.swingWaypointsForSole.clear();
          for (int i = 0; i < swingWaypoints.size(); i++)
             this.swingWaypointsForSole.add().setIncludingFrame(worldFrame, swingWaypoints.get(i));
          trajectoryParametersProvider.set(new TrajectoryParameters(trajectoryType));
@@ -447,10 +451,15 @@ public class SwingState extends AbstractUnconstrainedState
       }
 
       // ... otherwise switch the trajectory type to obstacle clearance if the robot steps up or down
-      boolean worldFrameDeltaZAboveThreshold = Math.abs(footstepSolePose.getZ() - oldFootstepPosition.getZ()) > TwoWaypointTrajectoryGeneratorParameters
-            .getMinimumHeightDifferenceForStepOnOrOff();
+      // TODO: using the initialConfigurationProvider is not ideal since a high toe off might trigger obstacle clearance mode
+      initialConfigurationProvider.getPosition(oldFootstepPosition);
 
-      if (worldFrameDeltaZAboveThreshold)
+      footstepSolePose.changeFrame(worldFrame);
+      oldFootstepPosition.changeFrame(worldFrame);
+      double zDifference = Math.abs(footstepSolePose.getZ() - oldFootstepPosition.getZ());
+      boolean stepUpOrDown = zDifference > minHeightDifferenceForObstacleClearance.getDoubleValue();
+
+      if (stepUpOrDown)
       {
          trajectoryParametersProvider.set(new TrajectoryParameters(TrajectoryType.OBSTACLE_CLEARANCE, footstep.getSwingHeight()));
       }
@@ -462,10 +471,9 @@ public class SwingState extends AbstractUnconstrainedState
 
    public void replanTrajectory(Footstep newFootstep, double swingTime, boolean continuousReplan)
    {
+      replanTrajectory.set(true);
       setFootstep(newFootstep, swingTime);
       computeSwingTimeRemaining();
-
-      replanTrajectory.set(true);
       doContinuousReplanning.set(continuousReplan);
    }
 

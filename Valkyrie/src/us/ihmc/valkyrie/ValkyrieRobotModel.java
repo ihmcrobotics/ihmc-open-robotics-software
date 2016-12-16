@@ -56,7 +56,6 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
-import us.ihmc.simulationconstructionset.physics.ScsCollisionConfigure;
 import us.ihmc.simulationconstructionset.robotController.MultiThreadedRobotControlElement;
 import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
 import us.ihmc.valkyrie.configuration.ValkyrieConfigurationRoot;
@@ -441,7 +440,7 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    @Override
    public FootstepPlanningParameterization getFootstepParameters()
    {
-      return null;
+      return new FootstepPlanningParameterization();
    }
 
    @Override
