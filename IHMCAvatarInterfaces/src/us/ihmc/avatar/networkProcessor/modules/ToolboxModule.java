@@ -91,7 +91,7 @@ public abstract class ToolboxModule
       this.thisDesitination = toolboxDestination.ordinal();
       this.fullRobotModel = fullRobotModelToLog;
       packetCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(toolboxPort, new IHMCCommunicationKryoNetClassList());
-      commandInputManager = new CommandInputManager(createListOfSupportedCommands());
+      commandInputManager = new CommandInputManager(name, createListOfSupportedCommands());
       statusOutputManager = new StatusMessageOutputManager(createListOfSupportedStatus());
       controllerNetworkSubscriber = new ControllerNetworkSubscriber(commandInputManager, statusOutputManager, null, packetCommunicator);
 

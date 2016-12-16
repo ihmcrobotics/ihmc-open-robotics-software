@@ -681,6 +681,34 @@ public class RotationTools
    }
 
    /**
+    * Removes the pitch and roll from a RigidBodyTransform. Preserves the yaw.
+    * When done, the xAxis should still point in the same direction from the point of view of looking down (-z) 
+    * @param transform
+    */
+   public static void removePitchAndRollFromTransform(RigidBodyTransform transform)
+   {
+      if (Math.abs(transform.getM22() - 1.0) < 1e-4) return;
+      double m00 = transform.getM00();
+      double m10 = transform.getM10();
+
+      double magnitude = Math.sqrt(m00*m00 + m10*m10);
+      m00 = m00 / magnitude;
+      m10 = m10 / magnitude;
+
+      transform.setM00(m00);
+      transform.setM10(m10);
+      transform.setM20(0.0);
+
+      transform.setM01(-m10);
+      transform.setM11(m00);
+      transform.setM21(0.0);
+
+      transform.setM02(0.0);
+      transform.setM12(0.0);
+      transform.setM22(1.0);
+   }
+
+   /**
     * Sets the rotation matrix, based on the yaw, pitch and roll values.
     * @param yaw yaw rotation (about a fixed z-axis)
     * @param pitch pitch rotation (about a fixed y-axis)

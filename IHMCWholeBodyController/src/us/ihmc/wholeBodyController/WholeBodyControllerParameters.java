@@ -18,9 +18,7 @@ public interface WholeBodyControllerParameters extends FullHumanoidRobotModelFac
 	public ArmControllerParameters getArmControllerParameters();
 
 	public WalkingControllerParameters getWalkingControllerParameters();
-	
-	public WalkingControllerParameters getMultiContactControllerParameters();
-	
+		
 	public RobotContactPointParameters getContactPointParameters();
 	
 	public double getControllerDT();

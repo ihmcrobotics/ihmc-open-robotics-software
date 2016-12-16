@@ -1,6 +1,5 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states;
 
-import us.ihmc.robotics.partNames.LimbName;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.PelvisOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
@@ -16,7 +15,9 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
+import us.ihmc.robotics.partNames.LimbName;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
@@ -153,7 +154,7 @@ public class WalkingSingleSupportState extends SingleSupportState
       if (balanceManager.isRecoveringFromDoubleSupportFall())
       {
          nextFootstep = balanceManager.createFootstepForRecoveringFromDisturbance(swingSide, walkingMessageHandler.getSwingTime());
-         nextFootstep.setTrajectoryType(TrajectoryType.PUSH_RECOVERY);
+         nextFootstep.setTrajectoryType(TrajectoryType.DEFAULT);
          walkingMessageHandler.reportWalkingAbortRequested();
          walkingMessageHandler.clearFootsteps();
       }
@@ -172,7 +173,7 @@ public class WalkingSingleSupportState extends SingleSupportState
       balanceManager.addFootstepToPlan(walkingMessageHandler.peek(0));
       balanceManager.addFootstepToPlan(walkingMessageHandler.peek(1));
       balanceManager.setICPPlanSupportSide(supportSide);
-      balanceManager.initializeICPPlanForSingleSupport();
+      balanceManager.initializeICPPlanForSingleSupport(walkingMessageHandler.getSwingTime(), walkingMessageHandler.getTransferTime());
 
       if (balanceManager.isRecoveringFromDoubleSupportFall())
       {
@@ -203,13 +204,14 @@ public class WalkingSingleSupportState extends SingleSupportState
       walkingMessageHandler.registerCompletedDesiredFootstep(nextFootstep);
    }
 
+   private final FramePoint2d desiredCMP = new FramePoint2d(worldFrame);
    public void switchToToeOffIfPossible(RobotSide supportSide)
    {
-      if (feetManager.doToeOffIfPossibleInSingleSupport())
+      if (feetManager.doToeOffIfPossibleInSingleSupport() && feetManager.isInFlatSupportState(supportSide))
       {
-         boolean willDoToeOff = feetManager.willDoToeOff(nextFootstep, swingSide);
+         balanceManager.getDesiredCMP(desiredCMP);
 
-         if (feetManager.isInFlatSupportState(supportSide) && willDoToeOff && balanceManager.isOnExitCMP())
+         if (feetManager.checkIfToeOffSafeSingleSupport(supportSide, balanceManager.isOnExitCMP()))
          {
             balanceManager.getNextExitCMP(nextExitCMP);
             feetManager.setExitCMPForToeOff(supportSide, nextExitCMP);
@@ -221,7 +223,6 @@ public class WalkingSingleSupportState extends SingleSupportState
    /**
     * Request the swing trajectory to speed up using {@link ICPPlanner#estimateTimeRemainingForStateUnderDisturbance(double, FramePoint2d)}.
     * It is clamped w.r.t. to {@link WalkingControllerParameters#getMinimumSwingTimeForDisturbanceRecovery()}.
-    * @param speedUpFactor
     * @return the current swing time remaining for the swing foot trajectory
     */
    private double requestSwingSpeedUpIfNeeded()
