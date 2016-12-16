@@ -3,11 +3,11 @@ package us.ihmc.ihmcPerception.objectDetector;
 import org.apache.commons.lang3.tuple.Pair;
 import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.javacpp.Loader;
-import org.bytedeco.javacpp.caffe;
 import org.bytedeco.javacpp.caffe.Caffe;
 import org.bytedeco.javacpp.caffe.FloatBlob;
 import org.bytedeco.javacpp.caffe.FloatBlobVector;
 import org.bytedeco.javacpp.caffe.FloatNet;
+import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.tools.time.Timer;
 
 import java.awt.*;
@@ -21,7 +21,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import static org.bytedeco.javacpp.caffe.TEST;
 
@@ -30,7 +29,6 @@ import static org.bytedeco.javacpp.caffe.TEST;
  */
 public class ValveDetector
 {
-   private static final Logger logger = Logger.getLogger(caffe.class.getSimpleName());
    private static int NETWORK_OUTPUT_WIDTH;
    private static int NETWORK_OUTPUT_HEIGHT;
    private static int NETWORK_INPUT_WIDTH;
@@ -38,6 +36,21 @@ public class ValveDetector
 
    private static FloatNet caffe_net;
    private static final Object caffeNetLock = new Object();
+   private static int caffe_gpu = -1;
+
+   private static void setCaffeMode(int gpu)
+   {
+      // Set device id and mode
+      if (gpu >= 0)
+      {
+         Caffe.SetDevice(gpu);
+         Caffe.set_mode(Caffe.GPU);
+      }
+      else
+      {
+         Caffe.set_mode(Caffe.CPU);
+      }
+   }
 
    private static void initialize() throws Exception
    {
@@ -68,10 +81,10 @@ public class ValveDetector
          for (String cudaLib : cudaLibs)
          {
             if (exportResource("/" + cudaLib, cudaLibsDir.getAbsolutePath()).isEmpty())
-               logger.warning("Could not extract " + cudaLib + " to " + cudaLibsDir.getAbsolutePath()
+               PrintTools.warn("Could not extract " + cudaLib + " to " + cudaLibsDir.getAbsolutePath()
                                     + ". If CUDA 7.5 is not installed, object detection will likely fail with UnsatisfiedLinkError.");
             else
-               logger.fine("Extracted " + cudaLib + " to " + cudaLibsDir);
+               PrintTools.debug("Extracted " + cudaLib + " to " + cudaLibsDir);
          }
 
          System.setProperty("java.library.path", System.getProperty("java.library.path") + File.pathSeparator + cudaLibsDir.getAbsolutePath());
@@ -79,7 +92,7 @@ public class ValveDetector
       }
       catch (Exception ex)
       {
-         logger.log(Level.SEVERE, "Could not load weights: " + ex.getMessage());
+         PrintTools.error(Level.SEVERE, "Could not load weights: " + ex.getMessage());
          throw ex;
       }
 
@@ -92,18 +105,13 @@ public class ValveDetector
          throw new Exception("Need model weights to score.");
       }
 
-      // Set device id and mode
-      if (gpu >= 0)
-      {
-         logger.info("Use GPU with device ID " + gpu);
-         Caffe.SetDevice(gpu);
-         Caffe.set_mode(Caffe.GPU);
-      }
+      setCaffeMode(gpu);
+      if (gpu < 0)
+         PrintTools.info("Use CPU.");
       else
-      {
-         logger.info("Use CPU.");
-         Caffe.set_mode(Caffe.CPU);
-      }
+         PrintTools.info("Use GPU with device ID " + gpu);
+      caffe_gpu = gpu;
+
       // Instantiate the caffe net.
       caffe_net = new FloatNet(model, TEST);
       caffe_net.CopyTrainedLayersFrom(weights);
@@ -113,7 +121,7 @@ public class ValveDetector
       NETWORK_INPUT_HEIGHT = caffe_net.input_blobs().get(0).shape(2);
    }
 
-   public ValveDetector() throws Exception
+   ValveDetector() throws Exception
    {
       initialize();
    }
@@ -132,7 +140,7 @@ public class ValveDetector
       try
       {
          stream = ValveDetector.class
-               .getResourceAsStream(resourceName);//note that each / is a directory down in the "jar tree" been the jar the root of the tree
+               .getResourceAsStream(resourceName);
          if (stream == null)
          {
             throw new Exception("Cannot get resource \"" + resourceName + "\" from Jar file.");
@@ -162,9 +170,20 @@ public class ValveDetector
    {
       Timer timer = new Timer();
       timer.start();
-      Rectangle[] crops = createZoomedInCrops(image.getWidth(), image.getHeight());
-      HeatMap[] heatMaps = detectInCrops(image, crops);
-      HeatMap outputMap = combineCropHeatMaps(heatMaps);
+
+      setCaffeMode(caffe_gpu);
+      PreprocessedImage processedImage = processImage(image, NETWORK_INPUT_WIDTH, NETWORK_INPUT_HEIGHT);
+      FloatPointer pointer = new FloatPointer(processedImage.data.length);
+      pointer.put(processedImage.data);
+
+      float[] output;
+      synchronized (caffeNetLock)
+      {
+         caffe_net.input_blobs().get(0).set_cpu_data(pointer);
+         output = transferNetworkOutputToJava(caffe_net.Forward());
+      }
+      HeatMap outputMap = new HeatMap(0, 0, NETWORK_OUTPUT_WIDTH, NETWORK_OUTPUT_HEIGHT);
+      System.arraycopy(output, 0, outputMap.data, 0, output.length);
 
       final float outputScaleX = outputMap.w / (float)NETWORK_INPUT_WIDTH;
       final float outputScaleY = outputMap.h / (float)NETWORK_INPUT_HEIGHT;
@@ -179,88 +198,6 @@ public class ValveDetector
 
       System.out.println("Total detection time: " + timer.lap());
       return Pair.of(result, outputMap);
-   }
-
-   private HeatMap combineCropHeatMaps(HeatMap[] heatMaps)
-   {
-      int outW = 0, outH = 0;
-      for (HeatMap heatMap : heatMaps)
-      {
-         outW = Math.max(outW, heatMap.offsetX + heatMap.w);
-         outH = Math.max(outH, heatMap.offsetY + heatMap.h);
-      }
-
-      HeatMap result = new HeatMap(0, 0, outW, outH);
-      for (HeatMap heatMap : heatMaps)
-      {
-         result.merge(heatMap, heatMap.offsetX, heatMap.offsetY);
-      }
-
-      return result;
-   }
-
-   private Rectangle[] createZoomedInCrops(int width, int height)
-   {
-      // We split the image in 5 crops - topleft, topright, bottomleft, bottomright and center (center overlaps with the others)
-      // We then merge the outputs. This creates a super-resolution output, as if the image was zoomed in 2x, allowing
-      // for a better detection of distant objects paying only small performance penalty as the crops are batched and processed
-      // at once.
-
-      int halfWidth = width / 2;
-      int halfHeight = height / 2;
-      Rectangle[] crops = new Rectangle[5];
-      for (int i = 0; i < 2; i++)
-      {
-         for (int j = 0; j < 2; j++)
-         {
-            crops[i * 2 + j] = new Rectangle(i * halfWidth, j * halfHeight, halfWidth, halfHeight);
-         }
-      }
-      crops[4] = new Rectangle(halfWidth - halfWidth / 2, halfHeight - halfHeight / 2, halfWidth, halfHeight);
-      return crops;
-   }
-
-   private HeatMap[] detectInCrops(BufferedImage image, Rectangle[] crops)
-   {
-      int inputPixels = NETWORK_INPUT_WIDTH * NETWORK_INPUT_HEIGHT;
-      int channels = 3;
-      Timer timer = new Timer();
-      timer.start();
-      float[] processedData = new float[inputPixels * channels * crops.length];
-      PreprocessedImage[] processedImages = new PreprocessedImage[crops.length];
-      for (int i = 0; i < crops.length; i++)
-      {
-         Rectangle crop = crops[i];
-         BufferedImage cropped = image.getSubimage(crop.x, crop.y, crop.width, crop.height);
-         processedImages[i] = processImage(cropped, NETWORK_INPUT_WIDTH, NETWORK_INPUT_HEIGHT);
-         System.arraycopy(processedImages[i].data, 0, processedData, i * inputPixels * channels, processedImages[i].data.length);
-      }
-
-      FloatPointer pointer = new FloatPointer(processedData.length);
-      pointer.put(processedData);
-      System.out.println("Image preparation took: " + timer.lap());
-
-      float[] output;
-      synchronized (caffeNetLock)
-      {
-         caffe_net.input_blobs().get(0).set_cpu_data(pointer);
-         output = transferNetworkOutputToJava(caffe_net.Forward());
-      }
-
-      System.out.println("DetectNet took " + timer.lap());
-
-      HeatMap[] result = new HeatMap[crops.length];
-      for (int i = 0; i < result.length; i++)
-      {
-         int offsetX = (int)(crops[i].x * processedImages[i].scaleX * NETWORK_OUTPUT_WIDTH / NETWORK_INPUT_WIDTH);
-         int offsetY = (int)(crops[i].y * processedImages[i].scaleY * NETWORK_OUTPUT_HEIGHT / NETWORK_INPUT_HEIGHT);
-         result[i] = new HeatMap(offsetX, offsetY, NETWORK_OUTPUT_WIDTH, NETWORK_OUTPUT_HEIGHT);
-         System.arraycopy(output, i * NETWORK_OUTPUT_WIDTH * NETWORK_OUTPUT_HEIGHT, result[i].data, 0, result[i].data.length);
-      }
-
-      System.out.println("HeatMap generation took" + timer.lap());
-
-      return result;
    }
 
    private float[] transferNetworkOutputToJava(FloatBlobVector output)
@@ -287,22 +224,9 @@ public class ValveDetector
          data = new float[w * h];
       }
 
-      void merge(HeatMap other, int ox, int oy)
-      {
-         for (int y = 0; y < other.h; y++)
-         {
-            for (int x = 0; x < other.w; x++)
-            {
-               if (oy + y < 0 || oy + y >= h || ox + x < 0 || ox + x >= w)
-                  continue;
-               int dataIndex = w * (oy + y) + (ox + x);
-               data[dataIndex] = Math.max(data[dataIndex], other.data[y * other.w + x]);
-            }
-         }
-      }
    }
 
-   private static BufferedImage imageFromArray(float[] data, int w, int h)
+   @SuppressWarnings("unused") private static BufferedImage imageFromArray(float[] data, int w, int h)
    {
       BufferedImage result = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
       float min = data[0], max = data[0];
@@ -328,10 +252,6 @@ public class ValveDetector
 
    private static PreprocessedImage processImage(BufferedImage image, int targetW, int targetH)
    {
-      float sx = targetW / (float) image.getWidth();
-      float sy = targetH / (float) image.getHeight();
-
-      image = normalizeBrightnessAndContrast(image);
       if (image.getWidth() != targetW || image.getHeight() != targetH)
       {
          image = scaleImage(image, new Dimension(targetW, targetH));
@@ -351,61 +271,42 @@ public class ValveDetector
             if (a == 0)
                r = g = b = 127;
             int index = y * image.getWidth() + x;
-            output[index] = b / 1.0f;
-            output[n + index] = g / 1.0f;
-            output[2 * n + index] = r / 1.0f;
+            output[index] = b;
+            output[n + index] = g;
+            output[2 * n + index] = r;
          }
       }
 
-      return new PreprocessedImage(output, sx, sy);
+      normalizeData(output);
+
+      return new PreprocessedImage(output);
    }
 
-   private static BufferedImage normalizeBrightnessAndContrast(BufferedImage source)
+   private static void normalizeData(float[] data)
    {
       double avg = 0, avg2 = 0;
-      int n = source.getWidth() * source.getHeight();
-      for (int y = 0; y < source.getHeight(); y++)
+      double invN = 1.0 / data.length;
+      for (float val : data)
       {
-         for (int x = 0; x < source.getWidth(); x++)
-         {
-            int rgb = source.getRGB(x, y);
-            int r = (rgb >> 16) & 0xFF;
-            int g = (rgb >> 8) & 0xFF;
-            int b = rgb & 0xFF;
-            double gray = (r + g + b) / 3.0;
-            avg += gray / n;
-            avg2 += gray * gray / n;
-         }
+         avg += val * invN;
+         avg2 += val * val * invN;
       }
 
       double var = avg2 - avg * avg;
       double stddev = Math.sqrt(var);
+      float avgf = (float)avg;
+      float invStdDev = (float)(1 / stddev);
 
-      double expectedMean = 127;
-      double expectedStdDev = 255 / 3.0;
+      float expectedMean = 127;
+      float expectedStdDev = 255 / 3.0f;
 
-      BufferedImage result = new BufferedImage(source.getWidth(), source.getHeight(), BufferedImage.TYPE_INT_ARGB);
-      for (int y = 0; y < source.getHeight(); y++)
+      for (int i = 0; i < data.length; i++)
       {
-         for (int x = 0; x < source.getWidth(); x++)
-         {
-            int rgb = source.getRGB(x, y);
-            double r = (rgb >> 16) & 0xFF;
-            double g = (rgb >> 8) & 0xFF;
-            double b = rgb & 0xFF;
-            r = ((r - avg) / stddev) * expectedStdDev + expectedMean;
-            g = ((g - avg) / stddev) * expectedStdDev + expectedMean;
-            b = ((b - avg) / stddev) * expectedStdDev + expectedMean;
-            r = Math.min(255, Math.max(0, r));
-            g = Math.min(255, Math.max(0, g));
-            b = Math.min(255, Math.max(0, b));
-            int ir = (int) r << 16;
-            int ig = (int) g << 8;
-            int ib = (int) b;
-            result.setRGB(x, y, 0xff000000 | ir | ig | ib);
-         }
+         float val = data[i];
+         val = ((val - avgf) * invStdDev) * expectedStdDev + expectedMean;
+         val = Math.max(0, Math.min(255, val));
+         data[i] = val;
       }
-      return result;
    }
 
    private static BufferedImage scaleImage(BufferedImage img, Dimension targetDimensions)
@@ -522,13 +423,10 @@ public class ValveDetector
    private static class PreprocessedImage
    {
       private final float[] data;
-      private final float scaleX, scaleY;
 
-      private PreprocessedImage(float[] data, float scaleX, float scaleY)
+      private PreprocessedImage(float[] data)
       {
          this.data = data;
-         this.scaleX = scaleX;
-         this.scaleY = scaleY;
       }
    }
 
