@@ -29,6 +29,7 @@ import us.ihmc.robotics.math.frames.YoFramePoseUsingQuaternions;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.referenceFrames.TransformReferenceFrame;
 import us.ihmc.tools.io.printing.PrintTools;
+import us.ihmc.tools.thread.ThreadTools;
 
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Point3d;
@@ -160,7 +161,7 @@ public class ObjectDetectorFromCameraImages implements PacketConsumer<ObjectDete
          //         yoGraphicsListRegistry.registerYoGraphic("Fiducials", cameraGraphic);
          //         yoGraphicsListRegistry.registerYoGraphic("Fiducials", detectorGraphic);
          //         yoGraphicsListRegistry.registerYoGraphic("Fiducials", locatedFiducialGraphic);
-         yoGraphicsListRegistry.registerYoGraphic("Fiducials", reportedFiducialGraphic);
+//         yoGraphicsListRegistry.registerYoGraphic("Fiducials", reportedFiducialGraphic);
       }
       else
       {
@@ -202,7 +203,10 @@ public class ObjectDetectorFromCameraImages implements PacketConsumer<ObjectDete
          detectionRunning.set(true);
          try
          {
-            while(results.peek() == null);
+            while(results.peek() == null)
+            {
+               ThreadTools.sleep(5);
+            }
             BufferedImage latestUnmodifiedCameraImage = jpegDecompressor.decompressJPEGDataToBufferedImage(videoPacket.getData());
             detect(latestUnmodifiedCameraImage, videoPacket.getPosition(), videoPacket.getOrientation());
          } finally

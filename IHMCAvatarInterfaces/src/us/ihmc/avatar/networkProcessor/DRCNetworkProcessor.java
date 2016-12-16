@@ -154,7 +154,7 @@ public class DRCNetworkProcessor
       if (params.isRemoteObjectDetectionFeedbackEnabled())
       {
          PacketCommunicator objectDetectionFeedbackCommunicator = PacketCommunicator.createTCPPacketCommunicatorServer(NetworkPorts.VALVE_DETECTOR_FEEDBACK_PORT, NET_CLASS_LIST);
-         packetRouter.attachPacketCommunicator(PacketDestination.BEHAVIOR_MODULE, objectDetectionFeedbackCommunicator);
+         packetRouter.attachPacketCommunicator(PacketDestination.OBJECT_DETECTOR, objectDetectionFeedbackCommunicator);
          try
          {
             objectDetectionFeedbackCommunicator.connect();
@@ -165,7 +165,7 @@ public class DRCNetworkProcessor
          }
 
          String methodName = "setupRemoteObjectDetectionFeedbackEndpoint";
-         printModuleConnectedDebugStatement(PacketDestination.BEHAVIOR_MODULE, methodName);
+         printModuleConnectedDebugStatement(PacketDestination.OBJECT_DETECTOR, methodName);
       }
    }
 
