@@ -14,10 +14,12 @@ import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.TrackingWeightsCommand.BodyWeights;
 import us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxOutputConverter;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisOrientationTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.TrackingWeightsMessage;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
@@ -59,6 +61,7 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
    private ChestTrajectoryMessage chestTrajectoryMessage;
    private PelvisOrientationTrajectoryMessage pelvisOrientationTrajectoryMessage;
    private SideDependentList<HandTrajectoryMessage> handTrajectoryMessage = new SideDependentList<>();
+   private TrackingWeightsMessage trackingWeightsMessage = null;
 
    private final ConcurrentListeningQueue<KinematicsToolboxOutputStatus> kinematicsToolboxOutputQueue = new ConcurrentListeningQueue<>(40);
    private KinematicsToolboxOutputStatus solutionSentToController = null;
@@ -229,6 +232,11 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
       double[] data = ArrayUtils.addAll(controlledOrientationAxes, controlledPositionAxes);
       organizeDataInSelectionMatrix(selectionMatrix, data);
    }
+   
+   public void setBodyWeights(BodyWeights bodyWeights)
+   {
+      trackingWeightsMessage.setTrackingWeightsMessage(bodyWeights);
+   }
 
    public double getSolutionQuality()
    {
@@ -293,6 +301,12 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
          yoDesiredPelvisQuaternion.get(desiredPelvisOrientation);
          pelvisOrientationTrajectoryMessage = new PelvisOrientationTrajectoryMessage(0.0, desiredPelvisOrientation);
       }
+      
+      
+      if (trackingWeightsMessage == null)
+      {
+         trackingWeightsMessage.setTrackingWeightsMessage(BodyWeights.STANDARD);
+      }            
    }
 
    @Override
