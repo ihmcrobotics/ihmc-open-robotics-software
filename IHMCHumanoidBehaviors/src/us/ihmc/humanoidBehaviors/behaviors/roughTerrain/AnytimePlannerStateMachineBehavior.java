@@ -167,15 +167,7 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
 
       locateGoalBehavior = new LocateGoalBehavior(communicationBridge, goalDetectorBehaviorService);
       requestAndWaitForPlanarRegionsListBehavior = new RequestAndWaitForPlanarRegionsListBehavior(communicationBridge);
-      sleepBehavior = new SleepBehavior(communicationBridge, yoTime, 2.0)
-      {
-         @Override
-         public void onBehaviorExited()
-         {
-            super.onBehaviorExited();
-            this.setSleepTime(2.0);
-         }
-      };
+      sleepBehavior = new ResettingSleepBehavior(communicationBridge, yoTime, 2.0);
             
       checkForBestPlanBehavior = new CheckForBestPlanBehavior(communicationBridge);
       sendOverFootstepsAndUpdatePlannerBehavior = new SendOverFootstepAndWaitForCompletionBehavior(communicationBridge);
@@ -414,6 +406,24 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
       public boolean isDone()
       {
          return receivedPlanarRegionsList.getBooleanValue();
+      }
+   }
+
+   private class ResettingSleepBehavior extends SleepBehavior
+   {
+      private final double sleepTime;
+
+      public ResettingSleepBehavior(CommunicationBridgeInterface outgoingCommunicationBridge, DoubleYoVariable yoTime, double sleepTime)
+      {
+         super(outgoingCommunicationBridge, yoTime, sleepTime);
+         this.sleepTime = sleepTime;
+      }
+
+      @Override
+      public void onBehaviorExited()
+      {
+         super.onBehaviorExited();
+         this.setSleepTime(sleepTime);
       }
    }
 
