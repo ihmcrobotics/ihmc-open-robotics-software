@@ -34,6 +34,7 @@ import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.time.GlobalTimer;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
@@ -590,7 +591,7 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
    }
    
    private boolean isOrientationEqual(Quat4d initialQuat, Quat4d finalQuat, double angleEpsilon)
-   {
+   {     
       Quat4d quatDifference = new Quat4d(initialQuat);
       quatDifference.mulInverse(finalQuat);
 
@@ -598,7 +599,6 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
       angleDifference.set(quatDifference);
       AngleTools.trimAngleMinusPiToPi(angleDifference.getAngle());
 
-      System.out.println(angleDifference.getAngle());
       return Math.abs(angleDifference.getAngle()) < angleEpsilon;
    }
 
