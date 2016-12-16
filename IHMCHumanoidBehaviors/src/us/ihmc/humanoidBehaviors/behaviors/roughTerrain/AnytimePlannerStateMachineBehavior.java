@@ -70,7 +70,7 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
    private final DoubleYoVariable yoTime;
    private final IntegerYoVariable maxNumberOfStepsToTake = new IntegerYoVariable(prefix + "NumberOfStepsToTake", registry);
    private final IntegerYoVariable indexOfNextFootstepToSendFromCurrentPlan = new IntegerYoVariable(prefix + "NextFootstepToSendFromCurrentPlan", registry);
-   
+
    private final BipedalFootstepPlannerParameters footstepPlanningParameters;
    private final SimplePlanarRegionBipedalAnytimeFootstepPlanner footstepPlanner;
 
@@ -108,7 +108,7 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
                                              LogModelProvider logModelProvider, FullHumanoidRobotModel fullRobotModel, WholeBodyControllerParameters wholeBodyControllerParameters)
    {
       super("AnytimePlanner", AnytimePlanningState.class, yoTime, communicationBridge);
-      
+
       reachedGoalThreshold.set(1.5);
 
       footstepPlanningParameters = new BipedalFootstepPlannerParameters(registry);
@@ -132,7 +132,7 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
          fiducialDetectorBehaviorService.setExpectedFiducialSize(0.22);
          goalDetectorBehaviorService = fiducialDetectorBehaviorService;
          break;
-      
+
       case HARD_CODED:
       {
          goalDetectorBehaviorService = new ConstantGoalDetectorBehaviorService(referenceFrames, new Point3d(4.0, 0.0, 0.0), communicationBridge);
@@ -155,7 +155,7 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
 
       locateGoalBehavior = new LocateGoalBehavior(communicationBridge, goalDetectorBehaviorService);
       requestAndWaitForPlanarRegionsListBehavior = new RequestAndWaitForPlanarRegionsListBehavior(communicationBridge);
-      sleepBehavior = new SleepBehavior(communicationBridge, yoTime);
+      sleepBehavior = new SleepBehavior(communicationBridge, yoTime, 3.0);
       checkForBestPlanBehavior = new CheckForBestPlanBehavior(communicationBridge);
       sendOverFootstepsAndUpdatePlannerBehavior = new SendOverFootstepAndWaitForCompletionBehavior(communicationBridge);
       reachedGoalBehavior = new SimpleDoNothingBehavior(communicationBridge)
