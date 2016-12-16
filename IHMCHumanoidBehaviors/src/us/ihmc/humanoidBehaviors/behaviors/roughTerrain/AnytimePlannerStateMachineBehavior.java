@@ -13,6 +13,7 @@ import us.ihmc.communication.packets.PlanarRegionsListMessage;
 import us.ihmc.communication.packets.RequestPlanarRegionsListMessage;
 import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.communication.packets.UIPositionCheckerPacket;
+import us.ihmc.communication.packets.RequestPlanarRegionsListMessage.RequestType;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlannerGoal;
 import us.ihmc.footstepPlanning.FootstepPlannerGoalType;
@@ -34,6 +35,8 @@ import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidBehaviors.stateMachine.StateMachineBehavior;
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
+import us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataClearCommand;
+import us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataClearCommand.DepthDataTree;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessageConverter;
@@ -102,6 +105,9 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
    private final ConcurrentListeningQueue<PlanarRegionsListMessage> planarRegionsListQueue = new ConcurrentListeningQueue<>(10);
    private final ConcurrentListeningQueue<FootstepStatus> footstepStatusQueue = new ConcurrentListeningQueue<FootstepStatus>(10);
    private SimpleFootstep lastFootstepSentForExecution;
+   
+   private final IntegerYoVariable stepCounterForClearingLidar = new IntegerYoVariable("StepCounterForClearingLidar", registry);
+   private final IntegerYoVariable stepsBeforeClearingLidar = new IntegerYoVariable("StepsBeforeClearingLidar", registry);
 
    public enum AnytimePlanningState
    {
@@ -176,6 +182,7 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
 
       swingTime.set(1.5);
       transferTime.set(0.3);
+      stepsBeforeClearingLidar.set(5);
 
       this.registry.addChild(requestAndWaitForPlanarRegionsListBehavior.getYoVariableRegistry());
       this.registry.addChild(sleepBehavior.getYoVariableRegistry());
@@ -286,6 +293,7 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
    {
       super.onBehaviorEntered();
       reachedGoal.set(false);
+      stepCounterForClearingLidar.set(0);
       new Thread(footstepPlanner).start();
    }
 
@@ -555,7 +563,21 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
       @Override
       public void onBehaviorExited()
       {
+         stepCounterForClearingLidar.increment();
+         
+         if (stepCounterForClearingLidar.getIntegerValue() == stepsBeforeClearingLidar.getIntegerValue())
+         {
+            DepthDataClearCommand clearLidarPacket = new DepthDataClearCommand(DepthDataTree.DECAY_POINT_CLOUD);
+            clearLidarPacket.setDestination(PacketDestination.NETWORK_PROCESSOR);
+            sendPacket(clearLidarPacket);
 
+            RequestPlanarRegionsListMessage requestPlanarRegionsListMessage = new RequestPlanarRegionsListMessage(RequestType.CLEAR);
+            requestPlanarRegionsListMessage.setDestination(PacketDestination.REA_MODULE);
+            sendPacket(requestPlanarRegionsListMessage);
+            
+            currentPlan = null;
+            stepCounterForClearingLidar.set(0);
+         }
       }
 
       @Override
