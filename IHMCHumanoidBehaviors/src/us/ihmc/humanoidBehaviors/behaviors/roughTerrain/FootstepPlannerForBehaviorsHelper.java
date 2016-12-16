@@ -13,8 +13,8 @@ import us.ihmc.wholeBodyController.RobotContactPointParameters;
 public class FootstepPlannerForBehaviorsHelper
 {
    
-   private static final double SCALING_FACTOR_FOR_FOOTHOLD_X = 1.0;
-   private static final double SCALING_FACTOR_FOR_FOOTHOLD_Y = 1.6;
+   private static final double SCALING_FACTOR_FOR_FOOTHOLD_X = 1.2;
+   private static final double SCALING_FACTOR_FOR_FOOTHOLD_Y = 2.6;
    
    public static SideDependentList<ConvexPolygon2d> createDefaultFootPolygonsForAnytimePlannerAndPlannerToolbox(RobotContactPointParameters contactPointParameters)
    {
@@ -47,7 +47,7 @@ public class FootstepPlannerForBehaviorsHelper
    public static void setPlannerParametersForAnytimePlannerAndPlannerToolbox(BipedalFootstepPlannerParameters footstepPlanningParameters)
    {
       footstepPlanningParameters.setMaximumStepReach(0.55);
-      footstepPlanningParameters.setMaximumStepZ(0.25);
+      footstepPlanningParameters.setMaximumStepZ(0.26);
 
       footstepPlanningParameters.setMaximumStepXWhenForwardAndDown(0.32); //32);
       footstepPlanningParameters.setMaximumStepZWhenForwardAndDown(0.10); //18);
