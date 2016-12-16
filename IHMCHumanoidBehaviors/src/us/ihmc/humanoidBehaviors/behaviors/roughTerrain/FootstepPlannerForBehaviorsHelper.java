@@ -13,8 +13,8 @@ import us.ihmc.wholeBodyController.RobotContactPointParameters;
 public class FootstepPlannerForBehaviorsHelper
 {
    
-   private static final double SCALING_FACTOR_FOR_FOOTHOLD_X = 1.0;
-   private static final double SCALING_FACTOR_FOR_FOOTHOLD_Y = 1.6;
+   private static final double SCALING_FACTOR_FOR_FOOTHOLD_X = 1.1;
+   private static final double SCALING_FACTOR_FOR_FOOTHOLD_Y = 2.6;
    
    public static SideDependentList<ConvexPolygon2d> createDefaultFootPolygonsForAnytimePlannerAndPlannerToolbox(RobotContactPointParameters contactPointParameters)
    {
@@ -47,9 +47,9 @@ public class FootstepPlannerForBehaviorsHelper
    public static void setPlannerParametersForAnytimePlannerAndPlannerToolbox(BipedalFootstepPlannerParameters footstepPlanningParameters)
    {
       footstepPlanningParameters.setMaximumStepReach(0.55);
-      footstepPlanningParameters.setMaximumStepZ(0.25);
+      footstepPlanningParameters.setMaximumStepZ(0.28);
 
-      footstepPlanningParameters.setMaximumStepXWhenForwardAndDown(0.32); //32);
+      footstepPlanningParameters.setMaximumStepXWhenForwardAndDown(0.35); //32);
       footstepPlanningParameters.setMaximumStepZWhenForwardAndDown(0.10); //18);
 
       footstepPlanningParameters.setMaximumStepYaw(0.15);
@@ -66,7 +66,7 @@ public class FootstepPlannerForBehaviorsHelper
       footstepPlanningParameters.setWiggleIntoConvexHullOfPlanarRegions(true);
 
       footstepPlanningParameters.setCliffHeightToShiftAwayFrom(0.03);
-      footstepPlanningParameters.setMinimumDistanceFromCliffBottoms(0.22);
+      footstepPlanningParameters.setMinimumDistanceFromCliffBottoms(0.24);
       
       double idealFootstepLength = 0.3;
       double idealFootstepWidth = 0.22;

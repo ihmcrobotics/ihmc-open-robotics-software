@@ -319,6 +319,12 @@ public class BoundingBox3d
             && boundingBox.maxPoint.getZ() >= minPoint.getZ();
    }
 
+   public boolean intersectsInXYPlane(BoundingBox2d boundingBox)
+   {
+      return maxPoint.getX() >= boundingBox.minPoint.getX() && boundingBox.maxPoint.getX() >= minPoint.getX() && maxPoint.getY() >= boundingBox.minPoint.getY()
+            && boundingBox.maxPoint.getY() >= minPoint.getY();
+   }
+
    public boolean intersects(Point3d start, Point3d end)
    {
       double invXDir = 1 / (end.getX() - start.getX());
