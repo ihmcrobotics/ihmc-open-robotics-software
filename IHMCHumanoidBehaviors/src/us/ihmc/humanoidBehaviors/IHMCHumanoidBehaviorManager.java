@@ -190,17 +190,17 @@ public class IHMCHumanoidBehaviorManager
       fiducialDetectorBehaviorService.setTargetIDToLocate(50);
       dispatcher.addBehaviorService(fiducialDetectorBehaviorService);
 
-//      ObjectDetectorBehaviorService objectDetectorBehaviorService = null;
-//      try
-//      {
-//         objectDetectorBehaviorService = new ObjectDetectorBehaviorService(behaviorCommunicationBridge, yoGraphicsListRegistry);
-//         dispatcher.addBehaviorService(objectDetectorBehaviorService);
-//      }
-//      catch (Exception e)
-//      {
-//         System.err.println("Error creating valve detection behavior service");
-//         e.printStackTrace();
-//      }
+      ObjectDetectorBehaviorService objectDetectorBehaviorService = null;
+      try
+      {
+         objectDetectorBehaviorService = new ObjectDetectorBehaviorService(behaviorCommunicationBridge, yoGraphicsListRegistry);
+         dispatcher.addBehaviorService(objectDetectorBehaviorService);
+      }
+      catch (Exception e)
+      {
+         System.err.println("Error creating valve detection behavior service");
+         e.printStackTrace();
+      }
 
       //      dispatcher.addBehavior(HumanoidBehaviorType.PICK_UP_BALL,
 //            new PickUpBallBehavior(behaviorCommunicationBridge, yoTime, yoDoubleSupport, fullRobotModel, referenceFrames, wholeBodyControllerParameters));
@@ -229,15 +229,15 @@ public class IHMCHumanoidBehaviorManager
       dispatcher.addBehavior(HumanoidBehaviorType.WAlK_OVER_TERRAIN, new WalkOverTerrainStateMachineBehavior(behaviorCommunicationBridge, yoTime, atlasPrimitiveActions, logModelProvider, fullRobotModel, referenceFrames,
                                                                                                              fiducialDetectorBehaviorService));
 
-//      if (objectDetectorBehaviorService != null)
-//      {
-//         dispatcher.addBehavior(HumanoidBehaviorType.LOCATE_VALVE, new LocateGoalBehavior(behaviorCommunicationBridge, objectDetectorBehaviorService));
-//         dispatcher.addBehavior(HumanoidBehaviorType.FOLLOW_VALVE,
-//                                new FollowFiducialBehavior(behaviorCommunicationBridge, fullRobotModel, referenceFrames, objectDetectorBehaviorService));
-//         dispatcher.addBehavior(HumanoidBehaviorType.WALK_OVER_TERRAIN_TO_VALVE,
-//                                new WalkOverTerrainStateMachineBehavior(behaviorCommunicationBridge, yoTime, atlasPrimitiveActions, logModelProvider, fullRobotModel,
-//                                                                        referenceFrames, objectDetectorBehaviorService));
-//      }
+      if (objectDetectorBehaviorService != null)
+      {
+         dispatcher.addBehavior(HumanoidBehaviorType.LOCATE_VALVE, new LocateGoalBehavior(behaviorCommunicationBridge, objectDetectorBehaviorService));
+         dispatcher.addBehavior(HumanoidBehaviorType.FOLLOW_VALVE,
+                                new FollowFiducialBehavior(behaviorCommunicationBridge, fullRobotModel, referenceFrames, objectDetectorBehaviorService));
+         dispatcher.addBehavior(HumanoidBehaviorType.WALK_OVER_TERRAIN_TO_VALVE,
+                                new WalkOverTerrainStateMachineBehavior(behaviorCommunicationBridge, yoTime, atlasPrimitiveActions, logModelProvider, fullRobotModel,
+                                                                        referenceFrames, objectDetectorBehaviorService));
+      }
 
       dispatcher.addBehavior(HumanoidBehaviorType.WALK_TO_GOAL_ANYTIME_PLANNER, new AnytimePlannerStateMachineBehavior(behaviorCommunicationBridge, yoTime, referenceFrames, logModelProvider, fullRobotModel, wholeBodyControllerParameters));
 
