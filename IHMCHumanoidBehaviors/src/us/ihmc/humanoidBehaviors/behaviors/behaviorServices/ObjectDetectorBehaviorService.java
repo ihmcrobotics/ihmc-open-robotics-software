@@ -1,8 +1,6 @@
 package us.ihmc.humanoidBehaviors.behaviors.behaviorServices;
 
-import org.apache.commons.lang3.tuple.Pair;
-import us.ihmc.communication.packets.BoundingBoxesPacket;
-import us.ihmc.communication.packets.HeatMapPacket;
+import us.ihmc.communication.packets.ObjectDetectorResultPacket;
 import us.ihmc.communication.producers.JPEGDecompressor;
 import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidBehaviors.behaviors.goalLocation.GoalDetectorBehaviorService;
@@ -13,7 +11,6 @@ import us.ihmc.ihmcPerception.objectDetector.ObjectDetectorFromCameraImages;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.tools.FormattingTools;
 import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.tools.time.DateTools;
@@ -57,6 +54,8 @@ public class ObjectDetectorBehaviorService extends GoalDetectorBehaviorService
 
       objectDetectorFromCameraImages.setFieldOfView(DEFAULT_FIELD_OF_VIEW_X_IN_RADIANS, DEFAULT_FIELD_OF_VIEW_Y_IN_RADIANS);
       objectDetectorFromCameraImages.setExpectedObjectSize(DEFAULT_OBJECT_SIZE);
+
+      getCommunicationBridge().attachListener(ObjectDetectorResultPacket.class, objectDetectorFromCameraImages);
       
       String prefix = "fiducial";
       locationEnabled = new BooleanYoVariable(prefix + "LocationEnabled", getYoVariableRegistry());

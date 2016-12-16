@@ -34,6 +34,7 @@ public class DRCNetworkModuleParameters
    private boolean useTextToSpeechModule = false;
    private boolean useRobotEnvironmentAwarenessModule = true;
    private boolean useHeightQuadTreeToolbox = true;
+   private boolean useRemoteObjectDetectionFeedback = true;
 
    private LocalObjectCommunicator simulatedSensorCommunicator;
 
@@ -284,6 +285,16 @@ public class DRCNetworkModuleParameters
    public boolean isDrillDetectionModuleEnabled()
    {
       return useDrillDetectionModule;
+   }
+
+   public boolean isRemoteObjectDetectionFeedbackEnabled()
+   {
+      return useRemoteObjectDetectionFeedback;
+   }
+
+   public void setUseRemoteObjectDetectionFeedbackEnabled(boolean useRemoteObjectDetectionFeedback)
+   {
+      this.useRemoteObjectDetectionFeedback = useRemoteObjectDetectionFeedback;
    }
 
    public void setDrillDetectionModuleEnabled(boolean b)
