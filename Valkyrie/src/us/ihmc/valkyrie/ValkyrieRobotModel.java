@@ -56,7 +56,6 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
-import us.ihmc.simulationconstructionset.physics.ScsCollisionConfigure;
 import us.ihmc.simulationconstructionset.robotController.MultiThreadedRobotControlElement;
 import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
 import us.ihmc.valkyrie.configuration.ValkyrieConfigurationRoot;
@@ -323,28 +322,9 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    }
 
    @Override
-   public WalkingControllerParameters getMultiContactControllerParameters()
-   {
-      return walkingControllerParameters;
-   }
-
-   @Override
-   public ScsCollisionConfigure getPhysicsConfigure(FloatingRootJointRobot robotModel)
-   {
-      return null;
-   }
-
-   @Override
    public RobotContactPointParameters getContactPointParameters()
    {
       return jointMap.getContactPointParameters();
-   }
-
-   //For Sim Only
-   @Override
-   public void setJointDamping(FloatingRootJointRobot simulatedRobot)
-   {
-      System.err.println("Joint Damping not setup for Valkyrie. ValkyrieRobotModel setJointDamping!");
    }
 
    @Override
@@ -363,12 +343,6 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    public HandModel getHandModel()
    {
       return new ValkyrieHandModel();
-   }
-
-   @Override
-   public WalkingControllerParameters getDrivingControllerParameters()
-   {
-      return getWalkingControllerParameters();
    }
 
    @Override
@@ -466,7 +440,7 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    @Override
    public FootstepPlanningParameterization getFootstepParameters()
    {
-      return null;
+      return new FootstepPlanningParameterization();
    }
 
    @Override

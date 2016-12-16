@@ -1,5 +1,6 @@
 package us.ihmc.javaFXToolkit.shapes;
 
+import java.util.Arrays;
 import java.util.List;
 
 import javax.vecmath.AxisAngle4d;
@@ -200,6 +201,11 @@ public class JavaFXMultiColorMeshBuilder
          Point3d end = points[0];
          addLine(start, end, lineWidth, color);
       }
+   }
+
+   public void addMultiLine(RigidBodyTransform transform, Point2d[] points, double lineWidth, Color color, boolean close)
+   {
+      addMultiLine(transform, Arrays.asList(points), lineWidth, color, close);
    }
 
    public void addMultiLine(RigidBodyTransform transform, List<Point2d> points, double lineWidth, Color color, boolean close)

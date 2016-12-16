@@ -58,8 +58,8 @@ public class PlanarRegionsList
 
       return containers;
    }
-   
-   /**
+
+    /**
     * Find all the planar regions that intersect with the given 2d line segment.
     * The algorithm is equivalent to projecting all the regions onto the XY-plane and then finding the regions intersecting with the given line segment.
     * @param lineSegmentInWorld the query.
@@ -70,6 +70,8 @@ public class PlanarRegionsList
       for (int i = 0; i < regions.size(); i++)
       {
          PlanarRegion candidateRegion = regions.get(i);
+         if (isLineSegmentObviouslyOutsideBoundingBox(candidateRegion, lineSegmentInWorld)) continue;
+
          if (candidateRegion.isVertical()) continue;
 
          if (candidateRegion.isLineSegmentIntersecting(lineSegmentInWorld))
@@ -77,6 +79,33 @@ public class PlanarRegionsList
             intersectingRegionsToPack.add(candidateRegion);
          }
       }
+   }
+
+   /**
+    * Returns true if lineSegment is Obviously Outside BoundingBox. If returns true, then definitely outside. If returns false, might still be outside.
+    * If intersects, will always return false.
+    * @param candidateRegion
+    * @param lineSegmentInWorld
+    * @return
+    */
+   private boolean isLineSegmentObviouslyOutsideBoundingBox(PlanarRegion candidateRegion, LineSegment2d lineSegmentInWorld)
+   {
+	   BoundingBox3d boundingBox = candidateRegion.getBoundingBox3dInWorld();
+
+       double xMin = boundingBox.getXMin();
+       double yMin = boundingBox.getYMin();
+       double xMax = boundingBox.getXMax();
+       double yMax = boundingBox.getYMax();
+
+       Point2d firstEndpoint = lineSegmentInWorld.getFirstEndpoint();
+       Point2d secondEndpoint = lineSegmentInWorld.getSecondEndpoint();
+
+       if ((firstEndpoint.getX() < xMin) && (secondEndpoint.getX() < xMin)) return true;
+       if ((firstEndpoint.getX() > xMax) && (secondEndpoint.getX() > xMax)) return true;
+       if ((firstEndpoint.getY() < yMin) && (secondEndpoint.getY() < yMin)) return true;
+       if ((firstEndpoint.getY() > yMax) && (secondEndpoint.getY() > yMax)) return true;
+
+       return false;
    }
 
    /**

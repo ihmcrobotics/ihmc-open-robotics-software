@@ -48,7 +48,7 @@ public abstract class FootstepPlannerOnRoughTerrainTest implements PlanningTest
       FootstepPlan footstepPlan = PlanningTestTools.runPlanner(getPlanner(), initialStanceFootPose, initialStanceSide, goalPose, stairCase, assertPlannerReturnedResult);
       if (visualize())
          PlanningTestTools.visualizeAndSleep(stairCase, footstepPlan, goalPose);
-      assertTrue(PlanningTestTools.isGoalWithinFeet(goalPose, footstepPlan));
+      assertTrue(PlanningTestTools.isGoalNextToLastStep(goalPose, footstepPlan));
    }
 
    public void testOverCinderBlockField(boolean assertPlannerReturnedResult)
@@ -74,20 +74,20 @@ public abstract class FootstepPlannerOnRoughTerrainTest implements PlanningTest
          PlanningTestTools.visualizeAndSleep(cinderBlockField, footstepPlan, goalPose);
       }
 
-      assertTrue(PlanningTestTools.isGoalWithinFeet(goalPose, footstepPlan));
+      assertTrue(PlanningTestTools.isGoalNextToLastStep(goalPose, footstepPlan));
    }
-   
+
    public void testStepUpsAndDownsScoringDifficult(boolean assertPlannerReturnedResult)
    {
       double cinderBlockSize = 0.4;
       PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
-      
+
       double cinderBlockHeight = 0.15;
-      
+
       generator.translate(0.0, 0.0, 0.001); // avoid graphical issue
       generator.addRectangle(0.6, 5.0); // standing platform
       generator.translate(0.4, 0.0, 0.0); // forward to first row
-      
+
       generator.translate(0.0, -0.5 * cinderBlockSize, 0.0);
       PlanarRegionsListExamples.generateSingleCiderBlock(generator, cinderBlockSize, cinderBlockHeight, 0, 0);
       generator.translate(0.0, cinderBlockSize, 0.0);
@@ -101,7 +101,7 @@ public abstract class FootstepPlannerOnRoughTerrainTest implements PlanningTest
       generator.translate(3 * cinderBlockSize, 0.0, 0.001);
       generator.addRectangle(0.6, 5.0);
       PlanarRegionsList cinderBlockField = generator.getPlanarRegionsList();
-      
+
       FramePose goalPose = new FramePose(worldFrame);
       goalPose.setPosition(3 * cinderBlockSize, -0.225, 0.0);
 
@@ -116,21 +116,21 @@ public abstract class FootstepPlannerOnRoughTerrainTest implements PlanningTest
          PlanningTestTools.visualizeAndSleep(cinderBlockField, footstepPlan, goalPose);
       }
 
-      assertTrue(PlanningTestTools.isGoalWithinFeet(goalPose, footstepPlan));
+      assertTrue(PlanningTestTools.isGoalNextToLastStep(goalPose, footstepPlan));
    }
-   
+
    public void testCompareAfterPitchedStep(boolean assertPlannerReturnedResult, boolean pitchCinderBack)
    {
       double cinderBlockSize = 0.4;
       double fieldHeight = 0.4;
       PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
-      
+
       double cinderBlockHeight = 0.15;
-      
+
       generator.translate(0.0, 0.0, fieldHeight); // avoid graphical issue
       generator.addRectangle(0.6, 5.0); // standing platform
       generator.translate(0.2 + cinderBlockSize, 0.0, 0.0); // forward to first row
-      
+
       generator.translate(0.0, -0.5 * cinderBlockSize, -cinderBlockHeight);
       PlanarRegionsListExamples.generateSingleCiderBlock(generator, cinderBlockSize, cinderBlockHeight, 0, 0);
       generator.translate(0.0, cinderBlockSize, 0.0);
@@ -138,7 +138,7 @@ public abstract class FootstepPlannerOnRoughTerrainTest implements PlanningTest
          PlanarRegionsListExamples.generateSingleCiderBlock(generator, cinderBlockSize, cinderBlockHeight, 2, 1);
       else
          PlanarRegionsListExamples.generateSingleCiderBlock(generator, cinderBlockSize, cinderBlockHeight, 1, 1);
-         
+
       generator.translate(cinderBlockSize, -1.5 * cinderBlockSize, 0.03);
       PlanarRegionsListExamples.generateSingleCiderBlock(generator, cinderBlockSize, cinderBlockHeight, 0, 0);
       generator.translate(0.0, cinderBlockSize, -0.06);
@@ -158,7 +158,7 @@ public abstract class FootstepPlannerOnRoughTerrainTest implements PlanningTest
          PlanarRegionsListExamples.generateSingleCiderBlock(generator, cinderBlockSize, cinderBlockHeight, 1, 1);
       generator.translate(0.0, cinderBlockSize, 0.0);
       PlanarRegionsListExamples.generateSingleCiderBlock(generator, cinderBlockSize, cinderBlockHeight, 0, 0);
-      
+
       generator.translate(cinderBlockSize, -0.5 * cinderBlockSize, 0.03);
       PlanarRegionsListExamples.generateSingleCiderBlock(generator, cinderBlockSize, cinderBlockHeight, 0, 0);
       generator.translate(0.0, cinderBlockSize, -0.06);
@@ -172,9 +172,9 @@ public abstract class FootstepPlannerOnRoughTerrainTest implements PlanningTest
       generator.translate(8 * cinderBlockSize, 0.0, fieldHeight);
       generator.addRectangle(0.6, 5.0);
       PlanarRegionsList cinderBlockField = generator.getPlanarRegionsList();
-      
+
       FramePose goalPose = new FramePose(worldFrame);
-      goalPose.setPosition(8 * cinderBlockSize, 0.0, fieldHeight);
+      goalPose.setPosition(8 * cinderBlockSize + 0.2, 0.0, fieldHeight);
 
       FramePose initialStanceFootPose = new FramePose(worldFrame);
       initialStanceFootPose.setPosition(0.0, 0.1, fieldHeight);
@@ -187,21 +187,21 @@ public abstract class FootstepPlannerOnRoughTerrainTest implements PlanningTest
          PlanningTestTools.visualizeAndSleep(cinderBlockField, footstepPlan, goalPose);
       }
 
-      assertTrue(PlanningTestTools.isGoalWithinFeet(goalPose, footstepPlan));
+      assertTrue(PlanningTestTools.isGoalNextToLastStep(goalPose, footstepPlan, 0.06));
    }
-   
+
    public void testCompareStepBeforeGap(boolean assertPlannerReturnedResult)
    {
       double cinderBlockSize = 1.0;
       double fieldHeight = 0.4;
       PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
-      
+
       double cinderBlockHeight = 0.15;
-      
+
       generator.translate(0.0, 0.0, fieldHeight); // avoid graphical issue
       generator.addRectangle(0.6, 5.0); // standing platform
       generator.translate(0.2 + cinderBlockSize, 0.0, 0.0); // forward to first row
-      
+
       generator.translate(-0.2, -0.5 * cinderBlockSize, -cinderBlockHeight);
       PlanarRegionsListExamples.generateSingleCiderBlock(generator, cinderBlockSize, cinderBlockHeight, 0, 0);
       generator.translate(0.0, cinderBlockSize, 0.0);
@@ -210,12 +210,12 @@ public abstract class FootstepPlannerOnRoughTerrainTest implements PlanningTest
       PlanarRegionsListExamples.generateSingleCiderBlock(generator, cinderBlockSize, cinderBlockHeight, 0, 0);
       generator.translate(0.0, cinderBlockSize, 0.0);
       PlanarRegionsListExamples.generateSingleCiderBlock(generator, cinderBlockSize, cinderBlockHeight, 0, 0);
-         
+
       generator.identity();
       generator.translate(3 * cinderBlockSize, 0.0, fieldHeight);
       generator.addRectangle(0.6, 5.0);
       PlanarRegionsList cinderBlockField = generator.getPlanarRegionsList();
-      
+
       FramePose goalPose = new FramePose(worldFrame);
       goalPose.setPosition(3 * cinderBlockSize, 0.0, fieldHeight);
 
@@ -230,9 +230,9 @@ public abstract class FootstepPlannerOnRoughTerrainTest implements PlanningTest
          PlanningTestTools.visualizeAndSleep(cinderBlockField, footstepPlan, goalPose);
       }
 
-      assertTrue(PlanningTestTools.isGoalWithinFeet(goalPose, footstepPlan));
+      assertTrue(PlanningTestTools.isGoalNextToLastStep(goalPose, footstepPlan));
    }
-   
+
    public void testSimpleStepOnBox()
    {
       testSimpleStepOnBox(true);
@@ -260,7 +260,7 @@ public abstract class FootstepPlannerOnRoughTerrainTest implements PlanningTest
       FootstepPlan footstepPlan = PlanningTestTools.runPlanner(getPlanner(), initialStanceFootPose, initialStanceSide, goalPose, planarRegionsList, assertPlannerReturnedResult);
       if (visualize())
          PlanningTestTools.visualizeAndSleep(planarRegionsList, footstepPlan, goalPose);
-      assertTrue(PlanningTestTools.isGoalWithinFeet(goalPose, footstepPlan));
+      assertTrue(PlanningTestTools.isGoalNextToLastStep(goalPose, footstepPlan));
    }
 
 
@@ -300,7 +300,7 @@ public abstract class FootstepPlannerOnRoughTerrainTest implements PlanningTest
       FootstepPlan footstepPlan = PlanningTestTools.runPlanner(getPlanner(), initialStanceFootPose, initialStanceSide, goalPose, planarRegionsList, assertPlannerReturnedResult);
       if (visualize())
          PlanningTestTools.visualizeAndSleep(planarRegionsList, footstepPlan, goalPose);
-      assertTrue(PlanningTestTools.isGoalWithinFeet(goalPose, footstepPlan));
+      assertTrue(PlanningTestTools.isGoalNextToLastStep(goalPose, footstepPlan));
    }
 
    public void testRandomEnvironment()
@@ -363,7 +363,7 @@ public abstract class FootstepPlannerOnRoughTerrainTest implements PlanningTest
       FootstepPlan footstepPlan = PlanningTestTools.runPlanner(getPlanner(), initialStanceFootPose, initialStanceSide, goalPose, planarRegionsList, assertPlannerReturnedResult);
       if (visualize())
          PlanningTestTools.visualizeAndSleep(planarRegionsList, footstepPlan, goalPose);
-      assertTrue(PlanningTestTools.isGoalWithinFeet(goalPose, footstepPlan));
+      assertTrue(PlanningTestTools.isGoalNextToLastStep(goalPose, footstepPlan));
    }
 
    public void testPartialGaps()
@@ -379,16 +379,16 @@ public abstract class FootstepPlannerOnRoughTerrainTest implements PlanningTest
       generator.translate(0.3, 0.0, 0.0);
       generator.addCubeReferencedAtBottomMiddle(0.6, 1.0, 0.5);
       generator.translate(0.55, 0.0, 0.0);
-      generator.rotate(absAngle/2.0, Axis.Y);
       for (int i = 0; i < 10; i++)
       {
          double rotationAngle = i % 2 == 0 ? -absAngle : absAngle;
          generator.rotate(rotationAngle, Axis.Y);
          generator.addCubeReferencedAtBottomMiddle(0.1, 1.0, 0.5);
-         generator.translate(0.3, 0.0, 0.0);
+         generator.rotate(-rotationAngle, Axis.Y);
+         double translation = i % 2 == 0 ? -0.05 : 0.45;
+         generator.translate(translation, 0.0, 0.0);
       }
-      generator.rotate(-absAngle/2.0, Axis.Y);
-      generator.translate(0.25, 0.0, 0.0);
+      generator.translate(0.1, 0.0, 0.0);
       generator.addCubeReferencedAtBottomMiddle(0.6, 1.0, 0.5);
 
       // define start and goal conditions
@@ -396,14 +396,36 @@ public abstract class FootstepPlannerOnRoughTerrainTest implements PlanningTest
       initialStanceFootPose.setPosition(0.3, 0.0, 0.5);
       RobotSide initialStanceSide = RobotSide.LEFT;
       FramePose goalPose = new FramePose(worldFrame);
-      goalPose.setPosition(4.4, 0.0, 0.5);
+      goalPose.setPosition(3.0, 0.0, 0.5);
 
       // run the test
       PlanarRegionsList planarRegionsList = generator.getPlanarRegionsList();
       FootstepPlan footstepPlan = PlanningTestTools.runPlanner(getPlanner(), initialStanceFootPose, initialStanceSide, goalPose, planarRegionsList, assertPlannerReturnedResult);
       if (visualize())
          PlanningTestTools.visualizeAndSleep(planarRegionsList, footstepPlan, goalPose);
-      assertTrue(PlanningTestTools.isGoalWithinFeet(goalPose, footstepPlan));
+      assertTrue(PlanningTestTools.isGoalNextToLastStep(goalPose, footstepPlan));
+   }
+
+   public void testWalkingAroundBox()
+   {
+      PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
+      generator.translate(2.0, 0.0, 0.0001);
+      generator.addRectangle(5.0, 5.0);
+      generator.addCubeReferencedAtBottomMiddle(1.0, 1.0, 1.0);
+      PlanarRegionsList planarRegionsList = generator.getPlanarRegionsList();
+
+      // define start and goal conditions
+      FramePose initialStanceFootPose = new FramePose(worldFrame);
+      initialStanceFootPose.setPosition(0.0, 0.15, 0.0);
+      RobotSide initialStanceSide = RobotSide.LEFT;
+      FramePose goalPose = new FramePose(worldFrame);
+      goalPose.setPosition(4.0, 0.0, 0.0);
+
+      FootstepPlan footstepPlan = PlanningTestTools.runPlanner(getPlanner(), initialStanceFootPose, initialStanceSide, goalPose, planarRegionsList,
+            !visualize());
+      if (visualize())
+         PlanningTestTools.visualizeAndSleep(planarRegionsList, footstepPlan, goalPose);
+      assertTrue(PlanningTestTools.isGoalNextToLastStep(goalPose, footstepPlan));
    }
 
    private PlanarRegionsList generateRandomTerrain(Random random)

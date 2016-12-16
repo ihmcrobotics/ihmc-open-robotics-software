@@ -7,7 +7,6 @@ import java.util.List;
 
 import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
-import javax.vecmath.Vector2d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.footstepPlanning.FootstepPlannerGoal;
@@ -16,18 +15,21 @@ import us.ihmc.footstepPlanning.polygonSnapping.PlanarRegionsListPolygonSnapper;
 import us.ihmc.footstepPlanning.polygonWiggling.PolygonWiggler;
 import us.ihmc.footstepPlanning.polygonWiggling.WiggleParameters;
 import us.ihmc.footstepPlanning.scoring.BipedalStepAdjustmentCostCalculator;
+import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
+import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.LineSegment2d;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.referenceFrames.TransformReferenceFrame;
+import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
@@ -38,16 +40,14 @@ public class PlanarRegionPotentialNextStepCalculator
    private final DoubleYoVariable footArea = new DoubleYoVariable("footArea", registry);
    private final DoubleYoVariable totalArea = new DoubleYoVariable("totalArea", registry);
    private final DoubleYoVariable stepReach = new DoubleYoVariable("stepReach", registry);
-   private final DoubleYoVariable maximumCliffXInSoleFrame = new DoubleYoVariable("maximumCliffXInSoleFrame", registry);
-   private final DoubleYoVariable maximumCliffYInSoleFrame = new DoubleYoVariable("maximumCliffYInSoleFrame", registry);
-   private final DoubleYoVariable maximumCliffZInSoleFrame = new DoubleYoVariable("maximumCliffZInSoleFrame", registry);
-
+   
    private final BooleanYoVariable enableStepAdjustmentCosts;
 
    private final BipedalFootstepPlannerParameters parameters;
 
    private PlanarRegionsList planarRegionsList;
    private SideDependentList<ConvexPolygon2d> footPolygonsInSoleFrame;
+   private SideDependentList<ConvexPolygon2d> controllerPolygonsInSoleFrame;
 
    private FootstepPlannerGoalType footstepPlannerGoalType;
    private Point2d xyGoal;
@@ -63,10 +63,13 @@ public class PlanarRegionPotentialNextStepCalculator
 
    private final BipedalStepAdjustmentCostCalculator stepAdjustmentCostCalculator;
    private final IncreasingCostEachStepProvider increasingCostEachStepProvider;
+   private final PlanarRegionBaseOfCliffAvoider baseOfCliffAvoider;
 
-   PlanarRegionPotentialNextStepCalculator(BipedalFootstepPlannerParameters parameters, YoVariableRegistry parentRegistry)
+   PlanarRegionPotentialNextStepCalculator(BipedalFootstepPlannerParameters parameters, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.parameters = parameters;
+      
+      baseOfCliffAvoider = new PlanarRegionBaseOfCliffAvoider(registry, yoGraphicsListRegistry); 
 
       enableStepAdjustmentCosts = new BooleanYoVariable("enablePenalizationHeatmapScoring", registry);
       enableStepAdjustmentCosts.set(true);
@@ -76,10 +79,16 @@ public class PlanarRegionPotentialNextStepCalculator
 
       parentRegistry.addChild(registry);
    }
-
+   
    public void setFeetPolygons(SideDependentList<ConvexPolygon2d> footPolygonsInSoleFrame)
    {
+      setFeetPolygons(footPolygonsInSoleFrame, footPolygonsInSoleFrame);
+   }
+   
+   public void setFeetPolygons(SideDependentList<ConvexPolygon2d> footPolygonsInSoleFrame, SideDependentList<ConvexPolygon2d> controllerPolygonsInSoleFrame)
+   {
       this.footPolygonsInSoleFrame = footPolygonsInSoleFrame;
+      this.controllerPolygonsInSoleFrame = controllerPolygonsInSoleFrame;
    }
 
    public void setPlanarRegions(PlanarRegionsList planarRegionsList)
@@ -248,14 +257,14 @@ public class PlanarRegionPotentialNextStepCalculator
       return null;
    }
 
-   public ArrayList<BipedalFootstepPlannerNode> computeChildrenNodes(BipedalFootstepPlannerNode nodeToExpand)
+   public ArrayList<BipedalFootstepPlannerNode> computeChildrenNodes(BipedalFootstepPlannerNode nodeToExpand, double smallestCostToGoal)
    {
       ArrayList<BipedalFootstepPlannerNode> nodesToAdd = new ArrayList<>();
 
       BipedalFootstepPlannerNode goalNode = computeGoalNodeIfGoalIsReachable(nodeToExpand);
       if (goalNode != null)
       {
-         boolean acceptable = checkIfNodeAcceptableCostAndAddToList(goalNode, nodesToAdd, new Vector3d(), 0.0);
+         boolean acceptable = checkIfNodeAcceptableCostAndAddToList(goalNode, nodesToAdd, new Vector3d(), 0.0, smallestCostToGoal);
          if (acceptable)
             return nodesToAdd;
       }
@@ -300,7 +309,7 @@ public class PlanarRegionPotentialNextStepCalculator
       BipedalFootstepPlannerNode childNode = createAndAddNextNodeGivenStep(soleZUpTransform, nodeToExpand, idealStepVector, idealStepYaw);
       seeIfNodeIsAtGoal(childNode);
 
-      checkIfNodeAcceptableCostAndAddToList(childNode, nodesToAdd, idealStepVector, idealStepYaw);
+      checkIfNodeAcceptableCostAndAddToList(childNode, nodesToAdd, idealStepVector, idealStepYaw, smallestCostToGoal);
 
       for (double xStep = idealStepVector.getX() / 2.0; xStep < 1.6 * idealStepVector.getX(); xStep = xStep + idealStepVector.getX() / 4.0)
       {
@@ -314,7 +323,7 @@ public class PlanarRegionPotentialNextStepCalculator
 
                seeIfNodeIsAtGoal(childNode);
 
-               checkIfNodeAcceptableCostAndAddToList(childNode, nodesToAdd, idealStepVector, idealStepYaw);
+               checkIfNodeAcceptableCostAndAddToList(childNode, nodesToAdd, idealStepVector, idealStepYaw, smallestCostToGoal);
             }
          }
       }
@@ -327,7 +336,7 @@ public class PlanarRegionPotentialNextStepCalculator
       childNode = createAndAddNextNodeGivenStep(soleZUpTransform, nodeToExpand, nextStepVector, nextStepYaw);
 
       seeIfNodeIsAtGoal(childNode);
-      checkIfNodeAcceptableCostAndAddToList(childNode, nodesToAdd, idealStepVector, idealStepYaw);
+      checkIfNodeAcceptableCostAndAddToList(childNode, nodesToAdd, idealStepVector, idealStepYaw, smallestCostToGoal);
 
       NodeCostComparator nodeCostComparator = new NodeCostComparator();
 
@@ -389,7 +398,7 @@ public class PlanarRegionPotentialNextStepCalculator
    private final SideDependentList<RigidBodyTransform> soleTransforms = new SideDependentList<>(leftSoleTransform, rightSoleTransform);
 
    private boolean checkIfNodeAcceptableCostAndAddToList(BipedalFootstepPlannerNode node, ArrayList<BipedalFootstepPlannerNode> nodesToAdd,
-                                                          Vector3d idealStepVector, double idealStepYaw)
+                                                          Vector3d idealStepVector, double idealStepYaw, double smallestCostToGoal)
    {
       notifyListenerNodeUnderConsideration(node);
 
@@ -434,7 +443,10 @@ public class PlanarRegionPotentialNextStepCalculator
             node.setSingleStepCost(cost);
          }
 
-         nodesToAdd.add(node);
+         if (node.getCostToHereFromStart() < smallestCostToGoal)
+            nodesToAdd.add(node);
+         else
+            return false;
       }
       else
       {
@@ -545,70 +557,82 @@ public class PlanarRegionPotentialNextStepCalculator
       return true;
    }
 
+   private final RigidBodyTransform transform = new RigidBodyTransform();
+   private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+   private final TransformReferenceFrame parentSoleFrame = new TransformReferenceFrame("parentSole", ReferenceFrame.getWorldFrame());
+   private final ZUpFrame parentSoleZupFrame = new ZUpFrame(worldFrame, parentSoleFrame, "parentSoleZupFrame");
+   private final TransformReferenceFrame nodeSoleFrame = new TransformReferenceFrame("nodeSole", ReferenceFrame.getWorldFrame());
+   private final FramePoint solePositionInParentZUpFrame = new FramePoint(parentSoleZupFrame);
+
    private boolean checkIfGoodFootstep(BipedalFootstepPlannerNode nodeToExpand)
    {
+      BipedalFootstepPlannerNode parentNode = nodeToExpand.getParentNode();
+      if (parentNode == null)
+         return true;
+
+      parentNode.getSoleTransform(transform);
+
+      parentSoleFrame.setTransformAndUpdate(transform);
+      parentSoleZupFrame.update();
+
+      nodeToExpand.getSoleTransform(transform);
+      nodeSoleFrame.setTransformAndUpdate(transform);
+
+      solePositionInParentZUpFrame.setToZero(nodeSoleFrame);
+      solePositionInParentZUpFrame.changeFrame(parentSoleZupFrame);
+
+      double minimumStepWidth = parameters.getMinimumStepWidth();
+
       RobotSide robotSide = nodeToExpand.getRobotSide();
-
-      RigidBodyTransform transformToParent = nodeToExpand.getTransformToParent();
-      if (transformToParent != null)
+      if (((robotSide == RobotSide.LEFT) && (solePositionInParentZUpFrame.getY() < minimumStepWidth))
+            || ((robotSide == RobotSide.RIGHT) && (solePositionInParentZUpFrame.getY() > -minimumStepWidth)))
       {
-         Point3d stepFromParentInSoleFrame = new Point3d();
-         transformToParent.transform(stepFromParentInSoleFrame);
+         notifyListenerNodeUnderConsiderationWasRejected(nodeToExpand, BipedalFootstepPlannerNodeRejectionReason.STEP_NOT_WIDE_ENOUGH);
+         return false;
+      }
 
-         double minimumStepWidth = parameters.getMinimumStepWidth();
+      double maximumStepWidth = parameters.getMaximumStepWidth();
 
-         if (((robotSide == RobotSide.LEFT) && (stepFromParentInSoleFrame.getY() < minimumStepWidth))
-               || ((robotSide == RobotSide.RIGHT) && (stepFromParentInSoleFrame.getY() > -minimumStepWidth)))
-         {
-            notifyListenerNodeUnderConsiderationWasRejected(nodeToExpand, BipedalFootstepPlannerNodeRejectionReason.STEP_NOT_WIDE_ENOUGH);
-            return false;
-         }
+      if (((robotSide == RobotSide.LEFT) && (solePositionInParentZUpFrame.getY() > maximumStepWidth))
+            || ((robotSide == RobotSide.RIGHT) && (solePositionInParentZUpFrame.getY() < -maximumStepWidth)))
+      {
+         notifyListenerNodeUnderConsiderationWasRejected(nodeToExpand, BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_WIDE);
+         return false;
+      }
 
-         double maximumStepWidth = parameters.getMaximumStepWidth();
+      double minimumStepLength = parameters.getMinimumStepLength();
+      if (solePositionInParentZUpFrame.getX() < minimumStepLength)
+      {
+         notifyListenerNodeUnderConsiderationWasRejected(nodeToExpand, BipedalFootstepPlannerNodeRejectionReason.STEP_NOT_LONG_ENOUGH);
+         return false;
+      }
 
-         if (((robotSide == RobotSide.LEFT) && (stepFromParentInSoleFrame.getY() > maximumStepWidth))
-               || ((robotSide == RobotSide.RIGHT) && (stepFromParentInSoleFrame.getY() < -maximumStepWidth)))
-         {
-            notifyListenerNodeUnderConsiderationWasRejected(nodeToExpand, BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_WIDE);
-            return false;
-         }
+      if (Math.abs(solePositionInParentZUpFrame.getZ()) > parameters.getMaximumStepZ())
+      {
+         notifyListenerNodeUnderConsiderationWasRejected(nodeToExpand, BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_HIGH_OR_LOW);
+         return false;
+      }
 
-         double minimumStepLength = parameters.getMinimumStepLength();
-         if (stepFromParentInSoleFrame.getX() < minimumStepLength)
-         {
-            notifyListenerNodeUnderConsiderationWasRejected(nodeToExpand, BipedalFootstepPlannerNodeRejectionReason.STEP_NOT_LONG_ENOUGH);
-            return false;
-         }
+      if ((solePositionInParentZUpFrame.getX() > parameters.getMaximumStepXWhenForwardAndDown())
+            && (solePositionInParentZUpFrame.getZ() < -Math.abs(parameters.getMaximumStepZWhenForwardAndDown())))
+      {
+         notifyListenerNodeUnderConsiderationWasRejected(nodeToExpand, BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_FORWARD_AND_DOWN);
+         return false;
+      }
 
-         Vector3d stepFromParentInWorld = new Vector3d(stepFromParentInSoleFrame);
-
-         RigidBodyTransform transformToWorld = new RigidBodyTransform();
-
-         nodeToExpand.getParentNode().getSoleTransform(transformToWorld);
-         transformToWorld.transform(stepFromParentInWorld);
-
-         if (Math.abs(stepFromParentInWorld.getZ()) > parameters.getMaximumStepZ())
-         {
-            notifyListenerNodeUnderConsiderationWasRejected(nodeToExpand, BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_HIGH_OR_LOW);
-            return false;
-         }
-
-         if ((stepFromParentInSoleFrame.getX() > parameters.getMaximumStepXWhenForwardAndDown())
-               && (stepFromParentInWorld.getZ() < -Math.abs(parameters.getMaximumStepZWhenForwardAndDown())))
-         {
-            notifyListenerNodeUnderConsiderationWasRejected(nodeToExpand, BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_FORWARD_AND_DOWN);
-            return false;
-         }
-
-         stepReach.set(stepFromParentInWorld.length());
-         if (stepReach.getDoubleValue() > parameters.getMaximumStepReach())
-         {
-            notifyListenerNodeUnderConsiderationWasRejected(nodeToExpand, BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_FAR);
-            return false;
-         }
+      stepReach.set(getXYLength(solePositionInParentZUpFrame));
+      if (stepReach.getDoubleValue() > parameters.getMaximumStepReach())
+      {
+         notifyListenerNodeUnderConsiderationWasRejected(nodeToExpand, BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_FAR);
+         return false;
       }
 
       return true;
+   }
+
+   private double getXYLength(FramePoint point)
+   {
+      return Math.sqrt(point.getX() * point.getX() + point.getY() * point.getY());
    }
 
    private boolean checkIfDifferentFromGrandParent(BipedalFootstepPlannerNode nodeToExpand)
@@ -651,7 +675,7 @@ public class PlanarRegionPotentialNextStepCalculator
 
          nodeToExpand.transformSoleTransformWithSnapTransformFromZeroZ(nodeToExpandSnapTransform, planarRegion);
 
-         shiftAwayFromCliffBottoms(nodeToExpand);
+         baseOfCliffAvoider.shiftAwayFromCliffBottoms(parameters, planarRegionsList, nodeToExpand);
 
          boolean isEnoughArea = checkIfEnoughArea(nodeToExpand, planarRegion);
          if (!isEnoughArea)
@@ -661,142 +685,24 @@ public class PlanarRegionPotentialNextStepCalculator
       return true;
    }
 
-   private void shiftAwayFromCliffBottoms(BipedalFootstepPlannerNode nodeToExpand)
-   {
-      double cliffHeightToShiftAwayFrom = parameters.getCliffHeightToShiftAwayFrom();
-      double minimumDistanceFromCliffBottoms = parameters.getMinimumDistanceFromCliffBottoms();
-
-      if ((cliffHeightToShiftAwayFrom <= 0.0) || (minimumDistanceFromCliffBottoms <= 0.0))
-         return;
-
-      RigidBodyTransform soleTransform = new RigidBodyTransform();
-      nodeToExpand.getSoleTransform(soleTransform);
-      RigidBodyTransform inverseSoleTransform = new RigidBodyTransform(soleTransform);
-      inverseSoleTransform.invert();
-
-      //TODO: Too many hard coded numbers around here...
-      
-      LineSegment2d middleToLeft = new LineSegment2d(0.0, 0.0, 0.0, minimumDistanceFromCliffBottoms);
-      LineSegment2d middleToRight = new LineSegment2d(0.0, 0.0, 0.0, -minimumDistanceFromCliffBottoms);
-      LineSegment2d frontToLeft = new LineSegment2d(0.12, 0.0, 0.0, minimumDistanceFromCliffBottoms);
-      LineSegment2d frontToRight = new LineSegment2d(0.12, 0.0, 0.0, -minimumDistanceFromCliffBottoms);
-      LineSegment2d backToLeft = new LineSegment2d(-0.12, 0.0, 0.0, minimumDistanceFromCliffBottoms);
-      LineSegment2d backToRight = new LineSegment2d(-0.12, 0.0, 0.0, -minimumDistanceFromCliffBottoms);
-      
-      LineSegment2d backToBackFurther = new LineSegment2d(-0.0, 0.0, -minimumDistanceFromCliffBottoms, 0.0);
-      LineSegment2d frontToFrontFurther = new LineSegment2d(-0.0, 0.0, minimumDistanceFromCliffBottoms, 0.0);
-
-      ArrayList<LineSegment2d> lineSegmentsInSoleFrame = new ArrayList<>();
-      lineSegmentsInSoleFrame.add(middleToLeft);
-      lineSegmentsInSoleFrame.add(middleToRight);
-      lineSegmentsInSoleFrame.add(frontToLeft);
-      lineSegmentsInSoleFrame.add(frontToRight);
-      lineSegmentsInSoleFrame.add(backToLeft);
-      lineSegmentsInSoleFrame.add(backToRight);
-      lineSegmentsInSoleFrame.add(backToBackFurther);
-      lineSegmentsInSoleFrame.add(frontToFrontFurther);
-
-      Point3d highestPointInSoleFrame = new Point3d();
-      LineSegment2d highestLineSegmentInSoleFrame = new LineSegment2d();
-      maximumCliffZInSoleFrame.set(findHighestPointInOriginalSoleFrame(soleTransform, inverseSoleTransform, lineSegmentsInSoleFrame, highestPointInSoleFrame, highestLineSegmentInSoleFrame));
-      maximumCliffXInSoleFrame.set(highestPointInSoleFrame.getX());
-      maximumCliffYInSoleFrame.set(highestPointInSoleFrame.getY());
-
-      if (maximumCliffZInSoleFrame.getDoubleValue() > cliffHeightToShiftAwayFrom)
-      {
-         Vector2d shiftVectorInSoleFrame = new Vector2d(highestPointInSoleFrame.getX(), highestPointInSoleFrame.getY());
-         shiftVectorInSoleFrame.sub(highestLineSegmentInSoleFrame.getFirstEndpointCopy());
-
-//         Vector2d shiftVectorInSoleFrameTemp = new Vector2d(highestPointInSoleFrame.getX(), highestPointInSoleFrame.getY());
-//         System.out.println("shiftVectorInSoleFrameTemp = " + shiftVectorInSoleFrameTemp);
-//         System.out.println("shiftVectorInSoleFrame = " + shiftVectorInSoleFrame);
-         
-         if (shiftVectorInSoleFrame.length() < minimumDistanceFromCliffBottoms)
-         {
-            double distanceToShift = minimumDistanceFromCliffBottoms - shiftVectorInSoleFrame.length();
-            shiftVectorInSoleFrame.normalize();
-            shiftVectorInSoleFrame.scale(-distanceToShift);
-            //TODO: This may shift a foot into another obstacle. Need something more here...
-            nodeToExpand.shiftInSoleFrame(shiftVectorInSoleFrame);
-         }
-      }
-
-      // The following is just to display the graph better...
-      if (Double.isInfinite(maximumCliffZInSoleFrame.getDoubleValue()))
-      {
-         maximumCliffZInSoleFrame.set(-0.02);
-      }
-   }
-
-   private double findHighestPointInOriginalSoleFrame(RigidBodyTransform soleTransform, RigidBodyTransform inverseSoleTransform, ArrayList<LineSegment2d> lineSegmentsInSoleFrame,
-                                                    Point3d highestPointInSoleFrameToPack, LineSegment2d highestLineSegmentInSoleFrameToPack)
-   {
-      double maxZInSoleFrame = Double.NEGATIVE_INFINITY;
-
-      LineSegment2d lineSegmentInWorldFrame = new LineSegment2d();
-      Point3d pointOneInWorldFrame = new Point3d();
-      Point3d pointTwoInWorldFrame = new Point3d();
-
-      for (LineSegment2d lineSegmentInSoleFrame : lineSegmentsInSoleFrame)
-      {
-         pointOneInWorldFrame.set(lineSegmentInSoleFrame.getFirstEndpointX(), lineSegmentInSoleFrame.getFirstEndpointY(), 0.0);
-         pointTwoInWorldFrame.set(lineSegmentInSoleFrame.getSecondEndpointX(), lineSegmentInSoleFrame.getSecondEndpointY(), 0.0);
-         
-         soleTransform.transform(pointOneInWorldFrame);
-         soleTransform.transform(pointTwoInWorldFrame);
-         
-         lineSegmentInWorldFrame.set(pointOneInWorldFrame.getX(), pointOneInWorldFrame.getY(), pointTwoInWorldFrame.getX(), pointTwoInWorldFrame.getY());
-         
-         ArrayList<PlanarRegion> intersectingRegionsToPack = new ArrayList<>();
-         planarRegionsList.findPlanarRegionsIntersectingLineSegment(lineSegmentInWorldFrame, intersectingRegionsToPack);
-         for (PlanarRegion intersectingRegion : intersectingRegionsToPack)
-         {
-            ArrayList<Point2d[]> intersectionsInPlaneFrameToPack = new ArrayList<>();
-            intersectingRegion.getLineSegmentIntersectionsWhenProjectedVertically(lineSegmentInWorldFrame, intersectionsInPlaneFrameToPack);
-            for (int i = 0; i < intersectionsInPlaneFrameToPack.size(); i++)
-            {
-               Point2d[] points = intersectionsInPlaneFrameToPack.get(i);
-               for (int j = 0; j < points.length; j++)
-               {
-                  Point2d point = points[j];
-                  RigidBodyTransform regionTransformToWorld = new RigidBodyTransform();
-                  intersectingRegion.getTransformToWorld(regionTransformToWorld);
-                  Point3d pointInOriginalSoleFrame = new Point3d(point.getX(), point.getY(), 0.0);
-                  regionTransformToWorld.transform(pointInOriginalSoleFrame);
-                  inverseSoleTransform.transform(pointInOriginalSoleFrame);
-
-                  if (pointInOriginalSoleFrame.getZ() > maxZInSoleFrame)
-                  {
-                     maxZInSoleFrame = pointInOriginalSoleFrame.getZ();
-                     highestPointInSoleFrameToPack.set(pointInOriginalSoleFrame);
-                     highestLineSegmentInSoleFrameToPack.set(lineSegmentInSoleFrame);
-                  }
-               }
-            }
-         }
-      }
-
-      return maxZInSoleFrame;
-   }
-
    private boolean checkIfEnoughArea(BipedalFootstepPlannerNode nodeToExpand, PlanarRegion planarRegion)
    {
       RigidBodyTransform nodeToExpandTransform = new RigidBodyTransform();
       nodeToExpand.getSoleTransform(nodeToExpandTransform);
 
-      ConvexPolygon2d snappedPolygon = footPolygonsInSoleFrame.get(nodeToExpand.getRobotSide());
+      ConvexPolygon2d snappedPolygon = controllerPolygonsInSoleFrame.get(nodeToExpand.getRobotSide());
       snappedPolygon.update();
       footArea.set(snappedPolygon.getArea());
-      
-         ConvexPolygon2d footholdPolygon = new ConvexPolygon2d();
-         totalArea.set(planarRegion.getPolygonIntersectionAreaWhenSnapped(snappedPolygon, nodeToExpandTransform, footholdPolygon));
 
-         nodeToExpand.setPercentageOfFoothold(totalArea.getDoubleValue() / footArea.getDoubleValue());
-         
-         if (nodeToExpand.isPartialFoothold())
-         {
-            nodeToExpand.setPartialFootholdPolygon(footholdPolygon);
-         }
+      ConvexPolygon2d footholdPolygon = new ConvexPolygon2d();
+      totalArea.set(planarRegion.getPolygonIntersectionAreaWhenSnapped(snappedPolygon, nodeToExpandTransform, footholdPolygon));
+
+      nodeToExpand.setPercentageOfFoothold(totalArea.getDoubleValue() / footArea.getDoubleValue());
+
+      if (nodeToExpand.isPartialFoothold())
+      {
+         nodeToExpand.setPartialFootholdPolygon(footholdPolygon);
+      }
 
       if (totalArea.getDoubleValue() < parameters.getMinimumFootholdPercent() * footArea.getDoubleValue())
       {

@@ -22,6 +22,10 @@ import us.ihmc.robotics.time.ExecutionTimer;
 
 public class WholeBodyControllerCore
 {
+   private static final boolean INCLUDE_INVERSE_DYNAMICS_SOLVER = true;
+   private static final boolean INCLUDE_INVERSE_KINEMATICS_SOLVER = true;
+   private static final boolean INCLUDE_VIRTUAL_MODEL_CONTROL_SOLVER = true;
+
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final EnumYoVariable<WholeBodyControllerCoreMode> currentMode = new EnumYoVariable<>("currentControllerCoreMode", registry, WholeBodyControllerCoreMode.class);
    private final IntegerYoVariable numberOfFBControllerEnabled = new IntegerYoVariable("numberOfFBControllerEnabled", registry);
@@ -44,9 +48,20 @@ public class WholeBodyControllerCore
    {
 
       feedbackController = new WholeBodyFeedbackController(toolbox, allPossibleCommands, registry);
-      inverseDynamicsSolver = new WholeBodyInverseDynamicsSolver(toolbox, registry);
-      inverseKinematicsSolver = new WholeBodyInverseKinematicsSolver(toolbox, registry);
-      virtualModelControlSolver = new WholeBodyVirtualModelControlSolver(toolbox, registry);
+
+      if (INCLUDE_INVERSE_DYNAMICS_SOLVER)
+         inverseDynamicsSolver = new WholeBodyInverseDynamicsSolver(toolbox, registry);
+      else
+         inverseDynamicsSolver = null;
+      if (INCLUDE_INVERSE_KINEMATICS_SOLVER)
+         inverseKinematicsSolver = new WholeBodyInverseKinematicsSolver(toolbox, registry);
+      else
+         inverseKinematicsSolver = null;
+      if (INCLUDE_VIRTUAL_MODEL_CONTROL_SOLVER)
+         virtualModelControlSolver = new WholeBodyVirtualModelControlSolver(toolbox, registry);
+      else
+         virtualModelControlSolver = null;
+
       JointIndexHandler jointIndexHandler = toolbox.getJointIndexHandler();
       controlledOneDoFJoints = jointIndexHandler.getIndexedOneDoFJoints();
       FloatingInverseDynamicsJoint rootJoint = toolbox.getRobotRootJoint();
@@ -62,9 +77,12 @@ public class WholeBodyControllerCore
    public void initialize()
    {
       feedbackController.initialize();
-      inverseDynamicsSolver.initialize();
-      inverseKinematicsSolver.reset();
-      virtualModelControlSolver.reset();
+      if (inverseDynamicsSolver != null)
+         inverseDynamicsSolver.initialize();
+      if (inverseKinematicsSolver != null)
+         inverseKinematicsSolver.reset();
+      if (virtualModelControlSolver != null)
+         virtualModelControlSolver.reset();
       yoLowLevelOneDoFJointDesiredDataHolder.clear();
    }
 
@@ -75,13 +93,22 @@ public class WholeBodyControllerCore
       switch (currentMode.getEnumValue())
       {
       case INVERSE_DYNAMICS:
-         inverseDynamicsSolver.reset();
+         if (inverseDynamicsSolver != null)
+            inverseDynamicsSolver.reset();
+         else
+            throw new RuntimeException("The controller core mode: " + currentMode.getEnumValue() + "is not handled.");
          break;
       case INVERSE_KINEMATICS:
-         inverseKinematicsSolver.reset();
+         if (inverseKinematicsSolver != null)
+            inverseKinematicsSolver.reset();
+         else
+            throw new RuntimeException("The controller core mode: " + currentMode.getEnumValue() + "is not handled.");
          break;
       case VIRTUAL_MODEL:
-         virtualModelControlSolver.clear();
+         if (virtualModelControlSolver != null)
+            virtualModelControlSolver.clear();
+         else
+            throw new RuntimeException("The controller core mode: " + currentMode.getEnumValue() + "is not handled.");
          break;
       case OFF:
          break;
@@ -102,15 +129,32 @@ public class WholeBodyControllerCore
       switch (currentMode.getEnumValue())
       {
       case INVERSE_DYNAMICS:
-         feedbackController.submitFeedbackControlCommandList(controllerCoreCommand.getFeedbackControlCommandList());
-         inverseDynamicsSolver.submitInverseDynamicsCommandList(controllerCoreCommand.getInverseDynamicsCommandList());
+         if (inverseDynamicsSolver != null)
+         {
+            feedbackController.submitFeedbackControlCommandList(controllerCoreCommand.getFeedbackControlCommandList());
+            inverseDynamicsSolver.submitInverseDynamicsCommandList(controllerCoreCommand.getInverseDynamicsCommandList());
+         }
+         else
+         {
+            throw new RuntimeException("The controller core mode: " + currentMode.getEnumValue() + " is not handled.");
+         }
          break;
       case INVERSE_KINEMATICS:
-         inverseKinematicsSolver.submitInverseKinematicsCommand(controllerCoreCommand.getInverseKinematicsCommandList());
+         if (inverseKinematicsSolver != null)
+            inverseKinematicsSolver.submitInverseKinematicsCommand(controllerCoreCommand.getInverseKinematicsCommandList());
+         else
+            throw new RuntimeException("The controller core mode: " + currentMode.getEnumValue() + " is not handled.");
          break;
       case VIRTUAL_MODEL:
-         feedbackController.submitFeedbackControlCommandList(controllerCoreCommand.getFeedbackControlCommandList());
-         virtualModelControlSolver.submitVirtualModelControlCommandList(controllerCoreCommand.getVirtualModelControlCommandList());
+         if (virtualModelControlSolver != null)
+         {
+            feedbackController.submitFeedbackControlCommandList(controllerCoreCommand.getFeedbackControlCommandList());
+            virtualModelControlSolver.submitVirtualModelControlCommandList(controllerCoreCommand.getVirtualModelControlCommandList());
+         }
+         else
+         {
+            throw new RuntimeException("The controller core mode: " + currentMode.getEnumValue() + " is not handled.");
+         }
          break;
       case OFF:
          break;
@@ -131,13 +175,22 @@ public class WholeBodyControllerCore
       switch (currentMode.getEnumValue())
       {
       case INVERSE_DYNAMICS:
-         doInverseDynamics();
+         if (inverseDynamicsSolver != null)
+            doInverseDynamics();
+         else
+            throw new RuntimeException("The controller core mode: " + currentMode.getEnumValue() + " is not handled.");
          break;
       case INVERSE_KINEMATICS:
-         doInverseKinematics();
+         if (inverseKinematicsSolver != null)
+            doInverseKinematics();
+         else
+            throw new RuntimeException("The controller core mode: " + currentMode.getEnumValue() + " is not handled.");
          break;
       case VIRTUAL_MODEL:
-         doVirtualModelControl();
+         if (virtualModelControlSolver != null)
+            doVirtualModelControl();
+         else
+            throw new RuntimeException("The controller core mode: " + currentMode.getEnumValue() + " is not handled.");
          break;
       case OFF:
          doNothing();
