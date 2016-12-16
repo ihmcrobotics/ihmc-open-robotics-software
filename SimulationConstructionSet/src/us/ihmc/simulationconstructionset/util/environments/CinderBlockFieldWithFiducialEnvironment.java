@@ -31,7 +31,7 @@ public class CinderBlockFieldWithFiducialEnvironment implements CommonAvatarEnvi
       switch (fiducialType)
       {
       case FIDUCIAL_50: combinedTerrainObject3D.addTerrainObject(DefaultCommonAvatarEnvironment.addFiducial(new Vector3d(12.0, 0.0, 1.7), 0.0, Fiducial.FIDUCIAL50)); break;
-      case VALVE: combinedTerrainObject3D.addTerrainObject(DefaultCommonAvatarEnvironment.addValveTextureBox(new Vector3d(5.0, 0.0, 1.7), 0.0)); break;
+      case VALVE: combinedTerrainObject3D.addTerrainObject(DefaultCommonAvatarEnvironment.addValveTextureBox(new Vector3d(10.0, 0.0, 1.7), 0.0)); break;
       }
    }
 
