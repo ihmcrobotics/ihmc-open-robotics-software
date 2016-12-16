@@ -42,6 +42,8 @@ public class SimplePlanarRegionBipedalAnytimeFootstepPlanner extends PlanarRegio
    private final FramePose tempFramePose = new FramePose();
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
 
+   private boolean clear = false;
+
    public SimplePlanarRegionBipedalAnytimeFootstepPlanner(BipedalFootstepPlannerParameters parameters, YoVariableRegistry parentRegistry)
    {
       super(parameters, parentRegistry);
@@ -199,6 +201,13 @@ public class SimplePlanarRegionBipedalAnytimeFootstepPlanner extends PlanarRegio
 
       while (!stopRequested)
       {
+         if (clear)
+         {
+            setPlanarRegions(new PlanarRegionsList());
+            getBestPlanYet();
+            clear = false;
+         }
+
          stackSize.set(stack.size());
 
          replaceStartNode();
@@ -224,7 +233,7 @@ public class SimplePlanarRegionBipedalAnytimeFootstepPlanner extends PlanarRegio
          // If stepping in place on first step, don't...
          if (parentOfStartNode != null)
          {
-            if (parentOfStartNode.epsilonEquals(nodeToExpand, 0.01))
+            if (parentOfStartNode.epsilonEquals(nodeToExpand, 0.04))
                continue;
          }
 
@@ -333,4 +342,15 @@ public class SimplePlanarRegionBipedalAnytimeFootstepPlanner extends PlanarRegio
       stopRequested = false;
       plan();
    }
+
+   public void clear()
+   {
+      this.clear = true;
+   }
+
+   public boolean isClear()
+   {
+      return !clear;
+   }
+
 }
