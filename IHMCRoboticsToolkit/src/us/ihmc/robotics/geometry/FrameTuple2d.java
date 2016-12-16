@@ -135,6 +135,11 @@ public abstract class FrameTuple2d<S extends FrameTuple2d<S, T>, T extends Tuple
       return tuple.getY();
    }
 
+   public double distanceFromZero()
+   {
+      return Math.sqrt(tuple.getX() * tuple.getX() + tuple.getY() * tuple.getY());
+   }
+
    /**
     * Returns a Point2d copy of the tuple in this FrameTuple.
     *
