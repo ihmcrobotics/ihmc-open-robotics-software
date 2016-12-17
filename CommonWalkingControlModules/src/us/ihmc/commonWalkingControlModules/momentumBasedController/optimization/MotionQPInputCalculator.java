@@ -396,12 +396,47 @@ public class MotionQPInputCalculator
       tempTaskJacobian.reshape(taskSize, jacobian.getNumberOfColumns());
       CommonOps.mult(selectionMatrix, jacobian.getJacobianMatrix(), tempTaskJacobian);
 
-      boolean success = jointIndexHandler.compactBlockToFullBlock(jacobian.getJointsInOrder(), tempTaskJacobian, motionQPInputToPack.taskJacobian);
+      boolean success = true;
+      RigidBody primaryBase = commandToConvert.getPrimaryBase();
+      InverseDynamicsJoint[] jointsUsedInTask = jacobian.getJointsInOrder();
+      if (primaryBase != null)
+      {
+         tempPrimaryTaskJacobian.reshape(taskSize, jointsUsedInTask.length);
+         tempPrimaryTaskJacobian.set(tempTaskJacobian);
+
+         boolean isJointUpstreamOfPrimaryBase = false;
+         for (int i = jointsUsedInTask.length - 1; i >= 0; i--)
+         {
+            InverseDynamicsJoint joint = jointsUsedInTask[i];
+
+            if (joint.getSuccessor() == primaryBase)
+               isJointUpstreamOfPrimaryBase = true;
+
+            if (isJointUpstreamOfPrimaryBase)
+            {
+               tempJointIndices.reset();
+               ScrewTools.computeIndexForJoint(jointsUsedInTask, tempJointIndices, joint);
+               for (int upstreamJointIndex = 0; upstreamJointIndex < tempJointIndices.size(); upstreamJointIndex++)
+               {
+                  MatrixTools.scaleColumn(secondaryTaskJointsWeight.getDoubleValue(), tempJointIndices.get(upstreamJointIndex), tempTaskJacobian);
+                  MatrixTools.zeroColumn(tempJointIndices.get(upstreamJointIndex), tempPrimaryTaskJacobian);
+               }
+            }
+         }
+
+         tempFullPrimaryTaskJacobian.reshape(taskSize, numberOfDoFs);
+         success = jointIndexHandler.compactBlockToFullBlock(jointsUsedInTask, tempPrimaryTaskJacobian, tempFullPrimaryTaskJacobian);
+      }
+
+      success = success && jointIndexHandler.compactBlockToFullBlock(jacobian.getJointsInOrder(), tempTaskJacobian, motionQPInputToPack.taskJacobian);
 
       if (!success)
          return false;
 
-      recordTaskJacobian(motionQPInputToPack.taskJacobian);
+      if (primaryBase != null)
+         recordTaskJacobian(tempFullPrimaryTaskJacobian);
+      else
+         recordTaskJacobian(motionQPInputToPack.taskJacobian);
 
       // Compute the task objective: p = S * T
       spatialVelocity.getMatrix(tempTaskObjective, 0);
