@@ -34,9 +34,7 @@ public abstract class TransferState extends WalkingState
    private final FramePoint2d capturePoint2d = new FramePoint2d();
    private final FramePoint2d desiredCMP = new FramePoint2d();
 
-   private final FramePoint2d perfectCMP = new FramePoint2d();
-   private final FramePoint2d filteredDesiredCMP = new FramePoint2d();
-   private final FrameVector2d cmpFeedback = new FrameVector2d();
+   private final FramePoint2d filteredDesiredCoP = new FramePoint2d();
    private final FramePoint nextExitCMP = new FramePoint();
 
    public TransferState(RobotSide transferToSide, WalkingStateEnum transferStateEnum, WalkingMessageHandler walkingMessageHandler,
@@ -105,14 +103,10 @@ public abstract class TransferState extends WalkingState
 
          if (doToeOff)
          {
-            cmpFeedback.setToZero(ReferenceFrame.getWorldFrame());
-            balanceManager.getPerfectCMP(perfectCMP);
-            balanceManager.getFilteredCMPFeedback(cmpFeedback);
-            filteredDesiredCMP.set(perfectCMP);
-            filteredDesiredCMP.add(cmpFeedback);
-
+            momentumBasedController.getFilteredDesiredCenterOfPressure(momentumBasedController.getContactableFeet().get(trailingLeg), filteredDesiredCoP);
             balanceManager.getNextExitCMP(nextExitCMP);
-            feetManager.computeToeOffContactPoint(trailingLeg, nextExitCMP, filteredDesiredCMP);
+
+            feetManager.computeToeOffContactPoint(trailingLeg, nextExitCMP, filteredDesiredCoP);
             feetManager.requestToeOff(trailingLeg);
             momentumBasedController.updateBipedSupportPolygons(); // need to always update biped support polygons after a change to the contact states
          }

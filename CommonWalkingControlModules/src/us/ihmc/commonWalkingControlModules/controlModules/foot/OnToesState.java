@@ -18,6 +18,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FrameLine2d;
@@ -31,6 +32,7 @@ import us.ihmc.robotics.math.trajectories.providers.YoVariableDoubleProvider;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
+import us.ihmc.tools.io.printing.PrintTools;
 
 public class OnToesState extends AbstractFootControlState
 {
@@ -69,7 +71,7 @@ public class OnToesState extends AbstractFootControlState
    private final FrameConvexPolygon2d footPolygon = new FrameConvexPolygon2d();
 
    private final DoubleYoVariable toeOffContactBlending;
-   private boolean hasComputedToeOffContactPoint = false;
+   private final BooleanYoVariable hasComputedToeOffContactPoint;
 
    public OnToesState(FootControlHelper footControlHelper, YoSE3PIDGainsInterface gains, YoVariableRegistry registry)
    {
@@ -121,6 +123,8 @@ public class OnToesState extends AbstractFootControlState
 
       toeOffContactBlending = new DoubleYoVariable(namePrefix + "ToeOffContactBlending", registry);
       toeOffContactBlending.set(0.5);
+
+      hasComputedToeOffContactPoint = new BooleanYoVariable(namePrefix + "HasComputedToeOffContactPoint", registry);
    }
 
    public void setWeight(double weight)
@@ -211,7 +215,7 @@ public class OnToesState extends AbstractFootControlState
    {
       super.doTransitionIntoAction();
 
-      if (!hasComputedToeOffContactPoint)
+      if (!hasComputedToeOffContactPoint.getBooleanValue())
          computeToeOffContactPoint(null);
 
       contactPointPosition.setXYIncludingFrame(toeOffContactPoint2d);
@@ -241,7 +245,7 @@ public class OnToesState extends AbstractFootControlState
 
       exitCMP2d.setToNaN();
 
-      hasComputedToeOffContactPoint = false;
+      hasComputedToeOffContactPoint.set(false);
    }
 
    public void setExitCMP(FramePoint exitCMP)
@@ -251,6 +255,7 @@ public class OnToesState extends AbstractFootControlState
       exitCMP2d.setByProjectionOntoXYPlaneIncludingFrame(this.exitCMP);
    }
 
+   private final FramePoint2d interpolatedRayOrigin = new FramePoint2d();
    public void computeToeOffContactPoint(FramePoint2d desiredCMP)
    {
       footPolygon.clear(soleFrame);
@@ -264,25 +269,31 @@ public class OnToesState extends AbstractFootControlState
       footPolygon.update();
 
       FramePoint2d rayOrigin;
-
       if (!exitCMP2d.containsNaN() && footPolygon.isPointInside(exitCMP2d))
          rayOrigin = exitCMP2d;
       else
          rayOrigin = footPolygon.getCentroid();
 
-      if (desiredCMP != null)
+      if (desiredCMP != null && !desiredCMP.containsNaN())
       {
-         rayOrigin.scale(1.0 - toeOffContactBlending.getDoubleValue());
+         interpolatedRayOrigin.setToZero(soleFrame);
          desiredCMP.changeFrameAndProjectToXYPlane(soleFrame);
-         desiredCMP.scale(toeOffContactBlending.getDoubleValue());
-         rayOrigin.add(desiredCMP);
+         interpolatedRayOrigin.interpolate(rayOrigin, desiredCMP, toeOffContactBlending.getDoubleValue());
+
+         if (footPolygon.isPointInside(interpolatedRayOrigin))
+            rayThroughExitCMP.set(interpolatedRayOrigin, exitCMPRayDirection2d);
+         else
+            rayThroughExitCMP.set(rayOrigin, exitCMPRayDirection2d);
+      }
+      else
+      {
+         rayThroughExitCMP.set(rayOrigin, exitCMPRayDirection2d);
       }
 
-      rayThroughExitCMP.set(rayOrigin, exitCMPRayDirection2d);
       FramePoint2d[] intersectionWithRay = footPolygon.intersectionWithRayCopy(rayThroughExitCMP);
       toeOffContactPoint2d.set(intersectionWithRay[0]);
 
-      hasComputedToeOffContactPoint = true;
+      hasComputedToeOffContactPoint.set(true);
    }
 
    @Override

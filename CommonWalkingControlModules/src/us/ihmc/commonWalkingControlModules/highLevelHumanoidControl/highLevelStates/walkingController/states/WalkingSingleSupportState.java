@@ -205,28 +205,17 @@ public class WalkingSingleSupportState extends SingleSupportState
       walkingMessageHandler.registerCompletedDesiredFootstep(nextFootstep);
    }
 
-   private final FramePoint2d filteredDesiredCMP = new FramePoint2d(worldFrame);
-   private final FramePoint2d perfectCMP = new FramePoint2d(worldFrame);
-   private final FramePoint2d desiredCMP = new FramePoint2d(worldFrame);
-   private final FrameVector2d cmpFeedback = new FrameVector2d(worldFrame);
-
+   private final FramePoint2d filteredDesiredCoP = new FramePoint2d(worldFrame);
    public void switchToToeOffIfPossible(RobotSide supportSide)
    {
       if (feetManager.doToeOffIfPossibleInSingleSupport() && feetManager.isInFlatSupportState(supportSide))
       {
-         balanceManager.getDesiredCMP(desiredCMP);
-
          if (feetManager.checkIfToeOffSafeSingleSupport(supportSide, balanceManager.isOnExitCMP()))
          {
-            cmpFeedback.setToZero(worldFrame);
-
-            balanceManager.getFilteredCMPFeedback(cmpFeedback);
-            balanceManager.getPerfectCMP(perfectCMP);
-            filteredDesiredCMP.set(perfectCMP);
-            filteredDesiredCMP.add(cmpFeedback);
-
+            momentumBasedController.getFilteredDesiredCenterOfPressure(momentumBasedController.getContactableFeet().get(supportSide), filteredDesiredCoP);
             balanceManager.getNextExitCMP(nextExitCMP);
-            feetManager.computeToeOffContactPoint(supportSide, nextExitCMP, filteredDesiredCMP);
+
+            feetManager.computeToeOffContactPoint(supportSide, nextExitCMP, filteredDesiredCoP);
             feetManager.requestToeOff(supportSide);
          }
       }
