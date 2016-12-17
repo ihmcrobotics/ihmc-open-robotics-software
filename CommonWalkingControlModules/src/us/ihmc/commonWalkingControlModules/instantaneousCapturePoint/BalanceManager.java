@@ -37,7 +37,6 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVector2d;
-import us.ihmc.robotics.math.filters.BetaFilteredYoFrameVector2d;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFrameVector2d;
@@ -69,8 +68,6 @@ public class BalanceManager
 
    private final YoFramePoint2d yoPerfectCMP = new YoFramePoint2d("perfectCMP", worldFrame, registry);
    private final YoFramePoint2d yoDesiredCMP = new YoFramePoint2d("desiredCMP", worldFrame, registry);
-
-   private final BetaFilteredYoFrameVector2d yoFilteredCMPFeedback = BetaFilteredYoFrameVector2d.createBetaFilteredYoFrameVector2d("filteredCMPFeedback", "", registry, 50, worldFrame);
 
    // TODO It seems that the achieved CMP can be off sometimes.
    // Need to review the computation of the achieved linear momentum rate or of the achieved CMP. (Sylvain)
@@ -286,7 +283,6 @@ public class BalanceManager
       linearMomentumRateOfChangeControlModule.setTransferFromSide(robotSide);
    }
 
-   private final FrameVector2d cmpFeedback = new FrameVector2d();
    public void compute(RobotSide supportLeg, double desiredCoMHeightAcceleration, boolean keepCMPInsideSupportPolygon)
    {
       momentumBasedController.getCapturePoint(capturePoint2d);
@@ -346,10 +342,6 @@ public class BalanceManager
       yoDesiredCMP.getFrameTuple2d(desiredCMP);
       linearMomentumRateOfChangeControlModule.compute(desiredCMP, desiredCMP);
       yoDesiredCMP.set(desiredCMP);
-
-      cmpFeedback.set(desiredCMP);
-      cmpFeedback.sub(perfectCMP);
-      yoFilteredCMPFeedback.update(cmpFeedback);
    }
 
    public Footstep createFootstepForRecoveringFromDisturbance(RobotSide swingSide, double swingTimeRemaining)
@@ -401,11 +393,6 @@ public class BalanceManager
    public void getDesiredICP(FramePoint2d desiredICPToPack)
    {
       yoDesiredCapturePoint.getFrameTuple2dIncludingFrame(desiredICPToPack);
-   }
-
-   public void getFilteredCMPFeedback(FrameVector2d filteredCMPFeedbackToPack)
-   {
-      yoFilteredCMPFeedback.getFrameTuple2d(filteredCMPFeedbackToPack);
    }
 
    public void getDesiredICPVelocity(FrameVector2d desiredICPVelocityToPack)
