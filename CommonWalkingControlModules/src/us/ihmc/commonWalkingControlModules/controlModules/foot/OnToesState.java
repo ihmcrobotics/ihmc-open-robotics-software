@@ -70,7 +70,7 @@ public class OnToesState extends AbstractFootControlState
    private final ReferenceFrame soleFrame;
    private final FrameConvexPolygon2d footPolygon = new FrameConvexPolygon2d();
 
-   private final DoubleYoVariable toeOffContactBlending;
+   private final DoubleYoVariable toeOffContactInterpolation;
    private final BooleanYoVariable hasComputedToeOffContactPoint;
 
    public OnToesState(FootControlHelper footControlHelper, YoSE3PIDGainsInterface gains, YoVariableRegistry registry)
@@ -121,8 +121,8 @@ public class OnToesState extends AbstractFootControlState
       exitCMPRayDirection2d.setIncludingFrame(soleFrame, 1.0, 0.0);
       rayThroughExitCMP.setToNaN(soleFrame);
 
-      toeOffContactBlending = new DoubleYoVariable(namePrefix + "ToeOffContactBlending", registry);
-      toeOffContactBlending.set(0.5);
+      toeOffContactInterpolation = new DoubleYoVariable(namePrefix + "ToeOffContactInterpolation", registry);
+      toeOffContactInterpolation.set(footControlHelper.getWalkingControllerParameters().getToeOffContactInterpolation());
 
       hasComputedToeOffContactPoint = new BooleanYoVariable(namePrefix + "HasComputedToeOffContactPoint", registry);
    }
@@ -278,7 +278,7 @@ public class OnToesState extends AbstractFootControlState
       {
          interpolatedRayOrigin.setToZero(soleFrame);
          desiredCMP.changeFrameAndProjectToXYPlane(soleFrame);
-         interpolatedRayOrigin.interpolate(rayOrigin, desiredCMP, toeOffContactBlending.getDoubleValue());
+         interpolatedRayOrigin.interpolate(rayOrigin, desiredCMP, toeOffContactInterpolation.getDoubleValue());
 
          if (footPolygon.isPointInside(interpolatedRayOrigin))
             rayThroughExitCMP.set(interpolatedRayOrigin, exitCMPRayDirection2d);
