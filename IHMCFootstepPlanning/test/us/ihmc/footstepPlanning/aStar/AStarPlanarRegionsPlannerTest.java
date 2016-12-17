@@ -1,14 +1,16 @@
-package us.ihmc.footstepPlanning.graphSearch;
+package us.ihmc.footstepPlanning.aStar;
+
+import static org.junit.Assert.assertEquals;
 
 import java.util.Comparator;
 import java.util.PriorityQueue;
 
 import org.junit.Test;
 
+import us.ihmc.footstepPlanning.aStar.FootstepNode;
 import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.continuousIntegration.IntegrationCategory;
-import us.ihmc.tools.io.printing.PrintTools;
 
 @ContinuousIntegrationPlan(categories = IntegrationCategory.EXCLUDE)
 public class AStarPlanarRegionsPlannerTest
@@ -43,17 +45,47 @@ public class AStarPlanarRegionsPlannerTest
    @Test(timeout = 3000)
    public void testPriorityQueue()
    {
+      double[] expected = new double[] {1.0, 2.0, 6.0, 9.0};
       PriorityQueue<Node> nodes = new PriorityQueue<>(new NodeComparator());
-
       nodes.add(new Node(1.0));
       nodes.add(new Node(6.0));
       nodes.add(new Node(2.0));
       nodes.add(new Node(9.0));
 
+      int count = 0;
       while (!nodes.isEmpty())
       {
          Node node = nodes.poll();
-         PrintTools.info("Got Node with cost " + node.getCost());
+         assertEquals(expected[count++], node.getCost(), 1.0e-10);
       }
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 3000)
+   public void testFootstepNode()
+   {
+      double gridX = FootstepNode.gridSizeX;
+      double gridY = FootstepNode.gridSizeY;
+      FootstepNode node;
+
+      node = new FootstepNode(gridX * 0.3, 0.0);
+      assertEquals(0.0, node.getX(), 1.0e-10);
+      assertEquals(0.0, node.getY(), 1.0e-10);
+      int hash1 = node.hashCode();
+
+      node = new FootstepNode(gridX * 0.1, -gridY * 0.2);
+      assertEquals(0.0, node.getX(), 1.0e-10);
+      assertEquals(0.0, node.getY(), 1.0e-10);
+      int hash2 = node.hashCode();
+
+      assertEquals(hash1, hash2);
+
+      node = new FootstepNode(gridX * 0.8, 0.0);
+      assertEquals(gridX, node.getX(), 1.0e-10);
+      assertEquals(0.0, node.getY(), 1.0e-10);
+
+      node = new FootstepNode(gridX * 3.8, -gridY * 8.1);
+      assertEquals(4.0 * gridX, node.getX(), 1.0e-10);
+      assertEquals(-8.0 * gridY, node.getY(), 1.0e-10);
    }
 }
