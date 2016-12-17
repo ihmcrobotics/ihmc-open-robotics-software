@@ -17,6 +17,7 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
+import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.partNames.LimbName;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -204,7 +205,11 @@ public class WalkingSingleSupportState extends SingleSupportState
       walkingMessageHandler.registerCompletedDesiredFootstep(nextFootstep);
    }
 
+   private final FramePoint2d filteredDesiredCMP = new FramePoint2d(worldFrame);
+   private final FramePoint2d perfectCMP = new FramePoint2d(worldFrame);
    private final FramePoint2d desiredCMP = new FramePoint2d(worldFrame);
+   private final FrameVector2d cmpFeedback = new FrameVector2d(worldFrame);
+
    public void switchToToeOffIfPossible(RobotSide supportSide)
    {
       if (feetManager.doToeOffIfPossibleInSingleSupport() && feetManager.isInFlatSupportState(supportSide))
@@ -213,8 +218,15 @@ public class WalkingSingleSupportState extends SingleSupportState
 
          if (feetManager.checkIfToeOffSafeSingleSupport(supportSide, balanceManager.isOnExitCMP()))
          {
+            cmpFeedback.setToZero(worldFrame);
+
+            balanceManager.getFilteredCMPFeedback(cmpFeedback);
+            balanceManager.getPerfectCMP(perfectCMP);
+            filteredDesiredCMP.set(perfectCMP);
+            filteredDesiredCMP.add(cmpFeedback);
+
             balanceManager.getNextExitCMP(nextExitCMP);
-            feetManager.setExitCMPForToeOff(supportSide, nextExitCMP);
+            feetManager.computeToeOffContactPoint(supportSide, nextExitCMP, filteredDesiredCMP);
             feetManager.requestToeOff(supportSide);
          }
       }
