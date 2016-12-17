@@ -240,12 +240,11 @@ public class MotionQPInputCalculator
             {
                tempJointIndices.reset();
                ScrewTools.computeIndexForJoint(jointsUsedInTask, tempJointIndices, joint);
-               for (int j = 0; j < tempJointIndices.size(); j++)
-                  MatrixTools.scaleColumn(secondaryTaskJointsWeight.getDoubleValue(), tempJointIndices.get(j), tempTaskJacobian);
-            }
-            else
-            {
-               MatrixTools.zeroColumn(i, tempPrimaryTaskJacobian);
+               for (int upstreamJointIndex = 0; upstreamJointIndex < tempJointIndices.size(); upstreamJointIndex++)
+               {
+                  MatrixTools.scaleColumn(secondaryTaskJointsWeight.getDoubleValue(), tempJointIndices.get(upstreamJointIndex), tempTaskJacobian);
+                  MatrixTools.zeroColumn(tempJointIndices.get(upstreamJointIndex), tempPrimaryTaskJacobian);
+               }
             }
          }
 
@@ -332,12 +331,11 @@ public class MotionQPInputCalculator
             {
                tempJointIndices.reset();
                ScrewTools.computeIndexForJoint(jointsUsedInTask, tempJointIndices, joint);
-               for (int j = 0; j < tempJointIndices.size(); j++)
-                  MatrixTools.scaleColumn(secondaryTaskJointsWeight.getDoubleValue(), tempJointIndices.get(j), tempTaskJacobian);
-            }
-            else
-            {
-               MatrixTools.zeroColumn(i, tempPrimaryTaskJacobian);
+               for (int upstreamJointIndex = 0; upstreamJointIndex < tempJointIndices.size(); upstreamJointIndex++)
+               {
+                  MatrixTools.scaleColumn(secondaryTaskJointsWeight.getDoubleValue(), tempJointIndices.get(upstreamJointIndex), tempTaskJacobian);
+                  MatrixTools.zeroColumn(tempJointIndices.get(upstreamJointIndex), tempPrimaryTaskJacobian);
+               }
             }
          }
 
@@ -397,6 +395,7 @@ public class MotionQPInputCalculator
       // Compute the task Jacobian: J = S * J
       tempTaskJacobian.reshape(taskSize, jacobian.getNumberOfColumns());
       CommonOps.mult(selectionMatrix, jacobian.getJacobianMatrix(), tempTaskJacobian);
+
       boolean success = jointIndexHandler.compactBlockToFullBlock(jacobian.getJointsInOrder(), tempTaskJacobian, motionQPInputToPack.taskJacobian);
 
       if (!success)
