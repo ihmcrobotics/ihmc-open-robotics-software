@@ -202,7 +202,6 @@ public class MotionQPInputCalculator
       }
 
       RigidBody base = commandToConvert.getBase();
-      //RigidBody primaryBase = commandToConvert.getPrimaryBase();
       RigidBody endEffector = commandToConvert.getEndEffector();
       long jacobianId = geometricJacobianHolder.getOrCreateGeometricJacobian(base, endEffector, base.getBodyFixedFrame());
       GeometricJacobian jacobian = geometricJacobianHolder.getJacobian(jacobianId);
