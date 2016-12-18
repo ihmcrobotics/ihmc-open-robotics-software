@@ -39,6 +39,7 @@ public class FeetManager
 
    private final SideDependentList<FootControlModule> footControlModules = new SideDependentList<>();
 
+   private final ToeOffHelper toeOffHelper;
    private final WalkOnTheEdgesManager walkOnTheEdgesManager;
 
    private final SideDependentList<? extends ContactablePlaneBody> feet;
@@ -58,6 +59,7 @@ public class FeetManager
    {
       this.momentumBasedController = momentumBasedController;
       feet = momentumBasedController.getContactableFeet();
+      toeOffHelper = new ToeOffHelper(momentumBasedController, feet, walkingControllerParameters, registry);
       walkOnTheEdgesManager = new WalkOnTheEdgesManager(momentumBasedController, walkingControllerParameters, feet, registry);
 
       this.footSwitches = momentumBasedController.getFootSwitches();
@@ -73,7 +75,7 @@ public class FeetManager
       walkingControllerParameters.getOrCreateExplorationParameters(registry);
       for (RobotSide robotSide : RobotSide.values)
       {
-         FootControlModule footControlModule = new FootControlModule(robotSide, walkingControllerParameters, swingFootControlGains,
+         FootControlModule footControlModule = new FootControlModule(robotSide, toeOffHelper, walkingControllerParameters, swingFootControlGains,
                holdPositionFootControlGains, toeOffFootControlGains, edgeTouchdownFootControlGains, momentumBasedController, registry);
          footControlModule.setAttemptToStraightenLegs(walkingControllerParameters.attemptToStraightenLegs());
 
@@ -329,9 +331,10 @@ public class FeetManager
       setOnToesContactState(trailingLeg);
    }
 
-   public void computeToeOffContactPoint(RobotSide robotSide, FramePoint exitCMP, FramePoint2d desiredCMP)
+   public void computeToeOffContactPoint(RobotSide trailingLeg, FramePoint exitCMP, FramePoint2d desiredCMP)
    {
-      footControlModules.get(robotSide).computeToeOffContactPoint(exitCMP, desiredCMP);
+      toeOffHelper.setExitCMP(exitCMP, trailingLeg);
+      toeOffHelper.computeToeOffContactPoint(desiredCMP, trailingLeg);
    }
 
    public void reset()

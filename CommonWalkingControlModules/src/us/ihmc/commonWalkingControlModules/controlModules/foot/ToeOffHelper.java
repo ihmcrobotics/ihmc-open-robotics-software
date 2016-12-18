@@ -2,13 +2,16 @@ package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoContactPoint;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
-import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
+import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.*;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 
 import java.util.List;
 
@@ -18,8 +21,8 @@ public class ToeOffHelper
 
    protected final HighLevelHumanoidControllerToolbox momentumBasedController;
 
-   private final YoPlaneContactState contactState;
-   private final List<YoContactPoint> contactPoints;
+   private final SideDependentList<YoPlaneContactState> contactStates = new SideDependentList<>();
+   private final SideDependentList<List<YoContactPoint>> contactPoints = new SideDependentList<>();
 
    private final FramePoint2d toeOffContactPoint2d = new FramePoint2d();
    private final FramePoint exitCMP = new FramePoint();
@@ -27,32 +30,36 @@ public class ToeOffHelper
    private final FrameVector2d exitCMPRayDirection2d = new FrameVector2d();
    private final FrameLine2d rayThroughExitCMP = new FrameLine2d();
 
-   private final ReferenceFrame soleFrame;
+   private final SideDependentList<ReferenceFrame> soleFrames = new SideDependentList<>();
    private final FrameConvexPolygon2d footPolygon = new FrameConvexPolygon2d();
 
    private final DoubleYoVariable toeOffContactInterpolation;
    private final BooleanYoVariable hasComputedToeOffContactPoint;
 
-   public ToeOffHelper(FootControlHelper footControlHelper, YoVariableRegistry parentRegistry)
+   public ToeOffHelper(HighLevelHumanoidControllerToolbox momentumBasedController, SideDependentList<? extends ContactablePlaneBody> feet,
+                       WalkingControllerParameters walkingControllerParameters, YoVariableRegistry parentRegistry)
    {
-      momentumBasedController = footControlHelper.getMomentumBasedController();
+      this.momentumBasedController = momentumBasedController;
 
-      ContactableFoot contactableFoot = footControlHelper.getContactableFoot();
-      soleFrame = contactableFoot.getSoleFrame();
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         ReferenceFrame soleFrame = feet.get(robotSide).getSoleFrame();
+         soleFrames.put(robotSide, soleFrame);
 
-      String namePrefix = contactableFoot.getName();
+         YoPlaneContactState contactState = momentumBasedController.getContactState(feet.get(robotSide));
+         contactStates.put(robotSide, contactState);
+         contactPoints.put(robotSide, contactState.getContactPoints());
+      }
 
-      contactState = momentumBasedController.getContactState(contactableFoot);
-      contactPoints = contactState.getContactPoints();
 
-      exitCMP2d.setToNaN(soleFrame);
-      exitCMPRayDirection2d.setIncludingFrame(soleFrame, 1.0, 0.0);
-      rayThroughExitCMP.setToNaN(soleFrame);
+      //exitCMP2d.setToNaN(soleFrame);
+      //exitCMPRayDirection2d.setIncludingFrame(soleFrame, 1.0, 0.0);
+      //rayThroughExitCMP.setToNaN(soleFrame);
 
-      toeOffContactInterpolation = new DoubleYoVariable(namePrefix + "ToeOffContactInterpolation", registry);
-      toeOffContactInterpolation.set(footControlHelper.getWalkingControllerParameters().getToeOffContactInterpolation());
+      toeOffContactInterpolation = new DoubleYoVariable("toeOffContactInterpolation", registry);
+      toeOffContactInterpolation.set(walkingControllerParameters.getToeOffContactInterpolation());
 
-      hasComputedToeOffContactPoint = new BooleanYoVariable(namePrefix + "HasComputedToeOffContactPoint", registry);
+      hasComputedToeOffContactPoint = new BooleanYoVariable("hasComputedToeOffContactPoint", registry);
 
       parentRegistry.addChild(registry);
    }
@@ -63,21 +70,25 @@ public class ToeOffHelper
       hasComputedToeOffContactPoint.set(false);
    }
 
-   public void setExitCMP(FramePoint exitCMP)
+   public void setExitCMP(FramePoint exitCMP, RobotSide trailingLeg)
    {
+      ReferenceFrame soleFrame = soleFrames.get(trailingLeg);
       this.exitCMP.setIncludingFrame(exitCMP);
       this.exitCMP.changeFrame(soleFrame);
+      exitCMP2d.setToZero(soleFrame);
       exitCMP2d.setByProjectionOntoXYPlaneIncludingFrame(this.exitCMP);
    }
 
    private final FramePoint2d interpolatedRayOrigin = new FramePoint2d();
-   public void computeToeOffContactPoint(FramePoint2d desiredCMP)
+   public void computeToeOffContactPoint(FramePoint2d desiredCMP, RobotSide trailingLeg)
    {
+      ReferenceFrame soleFrame = soleFrames.get(trailingLeg);
+
       footPolygon.clear(soleFrame);
 
-      for (int i = 0; i < contactPoints.size(); i++)
+      for (int i = 0; i < contactPoints.get(trailingLeg).size(); i++)
       {
-         contactPoints.get(i).getPosition2d(toeOffContactPoint2d);
+         contactPoints.get(trailingLeg).get(i).getPosition2d(toeOffContactPoint2d);
          footPolygon.addVertex(toeOffContactPoint2d);
       }
 
@@ -88,6 +99,9 @@ public class ToeOffHelper
          rayOrigin = exitCMP2d;
       else
          rayOrigin = footPolygon.getCentroid();
+
+      exitCMPRayDirection2d.setIncludingFrame(soleFrame, 1.0, 0.0);
+      rayThroughExitCMP.setToZero(soleFrame);
 
       if (desiredCMP != null && !desiredCMP.containsNaN())
       {
@@ -116,10 +130,10 @@ public class ToeOffHelper
       return hasComputedToeOffContactPoint.getBooleanValue();
    }
 
-   public void getToeOffContactPoint(FramePoint2d contactPointToPack)
+   public void getToeOffContactPoint(FramePoint2d contactPointToPack, RobotSide trailingLeg)
    {
       if (hasComputedToeOffContactPoint())
-         computeToeOffContactPoint(null);
+         computeToeOffContactPoint(null, trailingLeg);
 
       contactPointToPack.set(toeOffContactPoint2d);
    }
