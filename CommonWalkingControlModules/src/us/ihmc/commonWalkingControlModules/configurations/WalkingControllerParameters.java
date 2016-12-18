@@ -376,6 +376,17 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
    }
 
    /**
+    * In swing, this determines maximum distance from the ICP to the leading foot support polygon to allow toe-off.
+    * This distance is determined by finding the stance length, and multiplying it by the returned variable.
+    * If it is further than this, do not allow toe-off, as more control authority is needed from the trailing foot.
+    * @return percent of stance length for proximity
+    */
+   public double getICPPercentOfStanceForSSToeOff()
+   {
+      return 0.0;
+   }
+
+   /**
     * This is the duration used to straighten the desire privileged configuration of the stance leg's knee.
     * @return time in seconds for straightening
     */
