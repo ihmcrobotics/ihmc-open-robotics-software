@@ -277,9 +277,8 @@ public class WalkOnTheEdgesManager
       }
       else
       {
-         // // FIXME: 12/17/16
-         isDesiredICPOKForToeOff = onToesSupportPolygon.isPointInside(desiredICP);
-         isCurrentICPOKForToeOff = onToesSupportPolygon.isPointInside(currentICP);
+         isDesiredICPOKForToeOff = nextFootstepPolygon.isPointInside(desiredICP);
+         isCurrentICPOKForToeOff = nextFootstepPolygon.isPointInside(currentICP);
       }
 
       this.isCurrentICPOKForToeOff.set(isCurrentICPOKForToeOff);
