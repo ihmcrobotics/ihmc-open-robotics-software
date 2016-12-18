@@ -74,6 +74,7 @@ public class FootControlModule
    private final DoubleYoVariable footLoadThresholdToHoldPosition;
 
    private final FootControlHelper footControlHelper;
+   private final ToeOffHelper toeOffHelper;
 
    private final BooleanYoVariable requestExploration;
    private final BooleanYoVariable resetFootPolygon;
@@ -91,6 +92,7 @@ public class FootControlModule
       registry = new YoVariableRegistry(sidePrefix + getClass().getSimpleName());
       parentRegistry.addChild(registry);
       footControlHelper = new FootControlHelper(robotSide, walkingControllerParameters, momentumBasedController, registry);
+      toeOffHelper = new ToeOffHelper(footControlHelper, registry);
 
       this.momentumBasedController = momentumBasedController;
       this.robotSide = robotSide;
@@ -122,7 +124,7 @@ public class FootControlModule
 
       List<AbstractFootControlState> states = new ArrayList<AbstractFootControlState>();
 
-      onToesState = new OnToesState(footControlHelper, toeOffFootControlGains, registry);
+      onToesState = new OnToesState(footControlHelper, toeOffHelper, toeOffFootControlGains, registry);
       states.add(onToesState);
 
       supportStateNew = new SupportState(footControlHelper, holdPositionFootControlGains, registry);
@@ -494,8 +496,8 @@ public class FootControlModule
 
    public void computeToeOffContactPoint(FramePoint exitCMP, FramePoint2d desiredCMP)
    {
-      onToesState.setExitCMP(exitCMP);
-      onToesState.computeToeOffContactPoint(desiredCMP);
+      toeOffHelper.setExitCMP(exitCMP);
+      toeOffHelper.computeToeOffContactPoint(desiredCMP);
    }
 
    public InverseDynamicsCommand<?> getInverseDynamicsCommand()
