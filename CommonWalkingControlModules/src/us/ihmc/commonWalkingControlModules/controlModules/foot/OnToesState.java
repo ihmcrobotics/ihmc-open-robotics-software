@@ -199,7 +199,7 @@ public class OnToesState extends AbstractFootControlState
    {
       super.doTransitionIntoAction();
 
-      toeOffHelper.getToeOffContactPoint(toeOffContactPoint2d);
+      toeOffHelper.getToeOffContactPoint(toeOffContactPoint2d, robotSide);
 
       contactPointPosition.setXYIncludingFrame(toeOffContactPoint2d);
       contactPointPosition.changeFrame(contactableFoot.getRigidBody().getBodyFixedFrame());

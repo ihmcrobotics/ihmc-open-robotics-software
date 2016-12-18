@@ -79,10 +79,12 @@ public class FootControlModule
    private final BooleanYoVariable requestExploration;
    private final BooleanYoVariable resetFootPolygon;
 
-   public FootControlModule(RobotSide robotSide, WalkingControllerParameters walkingControllerParameters, YoSE3PIDGainsInterface swingFootControlGains,
+   public FootControlModule(RobotSide robotSide, ToeOffHelper toeOffHelper, WalkingControllerParameters walkingControllerParameters, YoSE3PIDGainsInterface swingFootControlGains,
          YoSE3PIDGainsInterface holdPositionFootControlGains, YoSE3PIDGainsInterface toeOffFootControlGains,
          YoSE3PIDGainsInterface edgeTouchdownFootControlGains, HighLevelHumanoidControllerToolbox momentumBasedController, YoVariableRegistry parentRegistry)
    {
+      this.toeOffHelper = toeOffHelper;
+
       contactableFoot = momentumBasedController.getContactableFeet().get(robotSide);
       momentumBasedController.setPlaneContactCoefficientOfFriction(contactableFoot, coefficientOfFriction);
       momentumBasedController.setPlaneContactStateFullyConstrained(contactableFoot);
@@ -92,7 +94,6 @@ public class FootControlModule
       registry = new YoVariableRegistry(sidePrefix + getClass().getSimpleName());
       parentRegistry.addChild(registry);
       footControlHelper = new FootControlHelper(robotSide, walkingControllerParameters, momentumBasedController, registry);
-      toeOffHelper = new ToeOffHelper(footControlHelper, registry);
 
       this.momentumBasedController = momentumBasedController;
       this.robotSide = robotSide;
@@ -492,12 +493,6 @@ public class FootControlModule
          holdPositionState.setAttemptToStraightenLegs(attemptToStraightenLegs);
       if (exploreFootPolygonState != null)
          exploreFootPolygonState.setAttemptToStraightenLegs(attemptToStraightenLegs);
-   }
-
-   public void computeToeOffContactPoint(FramePoint exitCMP, FramePoint2d desiredCMP)
-   {
-      toeOffHelper.setExitCMP(exitCMP);
-      toeOffHelper.computeToeOffContactPoint(desiredCMP);
    }
 
    public InverseDynamicsCommand<?> getInverseDynamicsCommand()
