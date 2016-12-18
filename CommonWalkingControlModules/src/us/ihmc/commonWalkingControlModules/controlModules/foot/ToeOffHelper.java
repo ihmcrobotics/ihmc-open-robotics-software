@@ -19,9 +19,6 @@ public class ToeOffHelper
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   protected final HighLevelHumanoidControllerToolbox momentumBasedController;
-
-   private final SideDependentList<YoPlaneContactState> contactStates = new SideDependentList<>();
    private final SideDependentList<List<YoContactPoint>> contactPoints = new SideDependentList<>();
 
    private final FramePoint2d toeOffContactPoint2d = new FramePoint2d();
@@ -36,19 +33,15 @@ public class ToeOffHelper
    private final DoubleYoVariable toeOffContactInterpolation;
    private final BooleanYoVariable hasComputedToeOffContactPoint;
 
-   public ToeOffHelper(HighLevelHumanoidControllerToolbox momentumBasedController, SideDependentList<? extends ContactablePlaneBody> feet,
+   public ToeOffHelper(SideDependentList<YoPlaneContactState> contactStates, SideDependentList<? extends ContactablePlaneBody> feet,
                        WalkingControllerParameters walkingControllerParameters, YoVariableRegistry parentRegistry)
    {
-      this.momentumBasedController = momentumBasedController;
-
       for (RobotSide robotSide : RobotSide.values)
       {
          ReferenceFrame soleFrame = feet.get(robotSide).getSoleFrame();
          soleFrames.put(robotSide, soleFrame);
 
-         YoPlaneContactState contactState = momentumBasedController.getContactState(feet.get(robotSide));
-         contactStates.put(robotSide, contactState);
-         contactPoints.put(robotSide, contactState.getContactPoints());
+         contactPoints.put(robotSide, contactStates.get(robotSide).getContactPoints());
       }
 
 
