@@ -314,18 +314,22 @@ public class FeetManager
     */
    public boolean checkIfToeOffSafe(RobotSide trailingLeg, FramePoint exitCMP, FramePoint2d desiredECMP, FramePoint2d desiredICP, FramePoint2d currentICP)
    {
+      walkOnTheEdgesManager.inDoubleSupport();
       walkOnTheEdgesManager.updateToeOffStatus(trailingLeg, exitCMP, desiredECMP, desiredICP, currentICP);
 
       return walkOnTheEdgesManager.doToeOff();
    }
 
    /**
-    * {@link WalkOnTheEdgesManager#updateToeOffStatusSingleSupport(Footstep, FramePoint, FramePoint2d, FramePoint2d, FramePoint2d, boolean)}.
+    * {@link WalkOnTheEdgesManager#updateToeOffStatus(RobotSide, FramePoint, FramePoint2d, FramePoint2d, FramePoint2d)}.
     * @return {@link WalkOnTheEdgesManager#doToeOff}
     */
-   public boolean checkIfToeOffSafeSingleSupport(Footstep nextFootstep, FramePoint exitCMP, FramePoint2d desiredECMP, FramePoint2d currentICP, FramePoint2d desiredICP, boolean isOnExitCMP)
+   public boolean checkIfToeOffSafeSingleSupport(Footstep nextFootstep, FramePoint exitCMP, FramePoint2d desiredECMP, FramePoint2d currentICP, FramePoint2d desiredICP)
    {
-      walkOnTheEdgesManager.updateToeOffStatusSingleSupport(nextFootstep, exitCMP, desiredECMP, currentICP, desiredICP, isOnExitCMP);
+      RobotSide trailingLeg = nextFootstep.getRobotSide().getOppositeSide();
+      walkOnTheEdgesManager.inSingleSupport();
+      walkOnTheEdgesManager.submitNextFootstep(nextFootstep);
+      walkOnTheEdgesManager.updateToeOffStatus(trailingLeg, exitCMP, desiredECMP, desiredICP, currentICP);
 
       return walkOnTheEdgesManager.doToeOff();
    }

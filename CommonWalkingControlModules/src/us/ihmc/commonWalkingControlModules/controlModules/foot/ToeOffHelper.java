@@ -3,7 +3,6 @@ package us.ihmc.commonWalkingControlModules.controlModules.foot;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoContactPoint;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -43,11 +42,6 @@ public class ToeOffHelper
 
          contactPoints.put(robotSide, contactStates.get(robotSide).getContactPoints());
       }
-
-
-      //exitCMP2d.setToNaN(soleFrame);
-      //exitCMPRayDirection2d.setIncludingFrame(soleFrame, 1.0, 0.0);
-      //rayThroughExitCMP.setToNaN(soleFrame);
 
       toeOffContactInterpolation = new DoubleYoVariable("toeOffContactInterpolation", registry);
       toeOffContactInterpolation.set(walkingControllerParameters.getToeOffContactInterpolation());
@@ -118,14 +112,9 @@ public class ToeOffHelper
       hasComputedToeOffContactPoint.set(true);
    }
 
-   public boolean hasComputedToeOffContactPoint()
-   {
-      return hasComputedToeOffContactPoint.getBooleanValue();
-   }
-
    public void getToeOffContactPoint(FramePoint2d contactPointToPack, RobotSide trailingLeg)
    {
-      if (hasComputedToeOffContactPoint())
+      if (!hasComputedToeOffContactPoint.getBooleanValue())
          computeToeOffContactPoint(null, trailingLeg);
 
       contactPointToPack.set(toeOffContactPoint2d);
