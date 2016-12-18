@@ -129,15 +129,24 @@ public class WalkOnTheEdgesManager
    }
 
    /**
+    * <p>
     * Checks whether or not the robot state is proper for toe-off when in double support, and sets the {@link WalkOnTheEdgesManager#doToeOff} variable accordingly.
+    * </p>
+    * <p>
     * These checks include:
-    *   doToeOffIfPossible
-    *   desiredECMP location being within the support polygon account for toe-off, if {@link WalkingControllerParameters#checkECMPLocationToTriggerToeOff()} is true.
-    *   desiredICP location being within the leading foot base of support.
-    *   currentICP location being within the leading foot base of support.
-    *   needToSwitchToToeOffForAnkleLimit
+    * </p>
+    * <ol>
+    *   <li>doToeOffIfPossible</li>
+    *   <li>desiredECMP location being within the support polygon account for toe-off, if {@link WalkingControllerParameters#checkECMPLocationToTriggerToeOff()} is true.</li>
+    *   <li>desiredICP location being within the leading foot base of support.</li>
+    *   <li>currentICP location being within the leading foot base of support.</li>
+    *   <li>needToSwitchToToeOffForAnkleLimit</li>
+    * </ol>
+    * <p>
     * If able and the ankles are at the joint limits, transitions to toe-off. Then checks the current state being with the base of support. Then checks the
     * positioning of the leading leg to determine if it is acceptable.
+    * </p>
+    *
     * @param trailingLeg robot side for the trailing leg
     * @param desiredECMP current desired ECMP from ICP feedback.
     * @param desiredICP current desired ICP from the reference trajectory.
@@ -191,26 +200,11 @@ public class WalkOnTheEdgesManager
       this.isDesiredICPOKForToeOff.set(isDesiredICPOKForToeOff);
       this.isCurrentICPOKForToeOff.set(isCurrentICPOKForToeOff);
 
-      boolean needToSwitchToToeOffForAnkleLimit = checkAnkleLimitForToeOff(trailingLeg);
-      if (needToSwitchToToeOffForAnkleLimit)
-      {
-         doToeOff.set(true);
+      boolean finishedChecks = checkToeOffConditions(trailingLeg);
+      if (finishedChecks)
          return;
-      }
 
-      if (!isDesiredECMPOKForToeOff.getBooleanValue())
-      {
-         doToeOff.set(false);
-         return;
-      }
-
-      if (!this.isDesiredICPOKForToeOff.getBooleanValue() || !this.isCurrentICPOKForToeOff.getBooleanValue())
-      {
-         doToeOff.set(false);
-         return;
-      }
-
-      isReadyToSwitchToToeOff(trailingLeg);
+      isReadyToSwitchToToeOff(trailingLeg, feet.get(leadingLeg).getFrameAfterParentJoint());
    }
 
    /**
@@ -238,7 +232,6 @@ public class WalkOnTheEdgesManager
     */
    public void updateToeOffStatusSingleSupport(Footstep nextFootstep, FramePoint2d desiredECMP, FramePoint2d currentICP, FramePoint2d desiredICP, boolean isOnExitCMP)
    {
-
       if (!doToeOffIfPossibleInSingleSupport.getBooleanValue())
       {
          doToeOff.set(false);
@@ -265,20 +258,35 @@ public class WalkOnTheEdgesManager
       isCurrentICPOKForToeOff.set(onToesSupportPolygon.isPointInside(currentICP));
       isDesiredICPOKForToeOff.set(onToesSupportPolygon.isPointInside(desiredICP));
 
-      needToSwitchToToeOffForAnkleLimit.set(checkAnkleLimitForToeOff(trailingLeg));
-      if (!needToSwitchToToeOffForAnkleLimit.getBooleanValue())
+      boolean finishedChecks = checkToeOffConditions(trailingLeg);
+      if (finishedChecks)
+         return;
+
+      isReadyToSwitchToToeOff(trailingLeg, footstepSoleFrame);
+   }
+
+   private boolean checkToeOffConditions(RobotSide trailingLeg)
+   {
+      if (!this.isDesiredICPOKForToeOff.getBooleanValue() || !this.isCurrentICPOKForToeOff.getBooleanValue())
       {
          doToeOff.set(false);
-         return;
+         return true;
+      }
+
+      needToSwitchToToeOffForAnkleLimit.set(checkAnkleLimitForToeOff(trailingLeg));
+      if (needToSwitchToToeOffForAnkleLimit.getBooleanValue())
+      {
+         doToeOff.set(true);
+         return true;
       }
 
       if (!isDesiredECMPOKForToeOff.getBooleanValue())
       {
          doToeOff.set(false);
-         return;
+         return true;
       }
 
-      isReadyToSwitchToToeOffSingleSupport(nextFootstep);
+      return false;
    }
 
    private boolean checkAnkleLimitForToeOff(RobotSide trailingLeg)
@@ -297,24 +305,9 @@ public class WalkOnTheEdgesManager
       return isRearAnklePitchHittingLimitFilt.getBooleanValue();
    }
 
-   private void isReadyToSwitchToToeOff(RobotSide trailingLeg)
+   private void isReadyToSwitchToToeOff(RobotSide trailingLeg, ReferenceFrame frontFootFrame)
    {
-      RobotSide leadingLeg = trailingLeg.getOppositeSide();
-      ReferenceFrame frontFootFrame = feet.get(leadingLeg).getFrameAfterParentJoint();
-
       if (!isFrontFootWellPositionedForToeOff(trailingLeg, frontFootFrame))
-      {
-         doToeOff.set(false);
-         return;
-      }
-
-      doToeOff.set(true);
-   }
-
-   private void isReadyToSwitchToToeOffSingleSupport(Footstep nextFootstep)
-   {
-      RobotSide trailingLeg = nextFootstep.getRobotSide().getOppositeSide();
-      if (!isFrontFootWellPositionedForToeOff(trailingLeg, nextFootstep.getPoseReferenceFrame()))
       {
          doToeOff.set(false);
          return;
