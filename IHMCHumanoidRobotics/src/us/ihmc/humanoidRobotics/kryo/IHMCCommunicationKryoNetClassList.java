@@ -519,5 +519,7 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketClass(HeatMapPacket.class);
       registerPacketClass(BoundingBoxesPacket.class);
 
+      registerPacketClass(ObjectDetectorResultPacket.class);
+
    }
 }
