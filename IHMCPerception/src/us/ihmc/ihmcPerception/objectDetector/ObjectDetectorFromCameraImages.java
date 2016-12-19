@@ -5,15 +5,20 @@ import georegression.geometry.GeometryMath_F64;
 import georegression.struct.EulerType;
 import georegression.struct.point.Point2D_F64;
 import georegression.struct.se.Se3_F64;
-import org.apache.commons.lang3.tuple.Pair;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
+import us.ihmc.communication.net.NetStateListener;
+import us.ihmc.communication.net.PacketConsumer;
+import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.BoundingBoxesPacket;
 import us.ihmc.communication.packets.HeatMapPacket;
+import us.ihmc.communication.packets.ObjectDetectorResultPacket;
 import us.ihmc.communication.producers.JPEGDecompressor;
+import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicReferenceFrame;
 import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.VideoPacket;
+import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -23,6 +28,8 @@ import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.math.frames.YoFramePoseUsingQuaternions;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.referenceFrames.TransformReferenceFrame;
+import us.ihmc.tools.io.printing.PrintTools;
+import us.ihmc.tools.thread.ThreadTools;
 
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Point3d;
@@ -30,10 +37,15 @@ import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.stream.IntStream;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
 
-public class ObjectDetectorFromCameraImages
+public class ObjectDetectorFromCameraImages implements PacketConsumer<ObjectDetectorResultPacket>, NetStateListener
 {
    private boolean visualize = true;
 
@@ -48,7 +60,6 @@ public class ObjectDetectorFromCameraImages
    private final ReferenceFrame cameraReferenceFrame, detectorReferenceFrame, locatedFiducialReferenceFrame, reportedFiducialReferenceFrame;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   private ValveDetector detector;
    private final Object expectedFiducialSizeChangedConch = new Object();
 
    private final JPEGDecompressor jpegDecompressor = new JPEGDecompressor();
@@ -74,14 +85,16 @@ public class ObjectDetectorFromCameraImages
    private final YoFramePoseUsingQuaternions locatedFiducialPoseInWorldFrame = new YoFramePoseUsingQuaternions(prefix + "LocatedPoseWorldFrame", ReferenceFrame.getWorldFrame(), registry);
    private final YoFramePoseUsingQuaternions reportedFiducialPoseInWorldFrame = new YoFramePoseUsingQuaternions(prefix + "ReportedPoseWorldFrame", ReferenceFrame.getWorldFrame(), registry);
 
-   private Pair<BoundingBoxesPacket, HeatMapPacket> coactiveVisualizationPackets;
+   private final AtomicBoolean detectionRunning = new AtomicBoolean(false);
+   private final List<Consumer<DetectionVisualizationPackets>> detectionResultListeners = Collections.synchronizedList(new ArrayList<>());
+
+   private final ConcurrentLinkedQueue<ObjectDetectorResultPacket> results = new ConcurrentLinkedQueue<>();
+   private final PacketCommunicator valveDetectorClient = PacketCommunicator.createTCPPacketCommunicatorClient("10.7.4.103", NetworkPorts.VALVE_DETECTOR_SERVER_PORT, new IHMCCommunicationKryoNetClassList());
 
    public ObjectDetectorFromCameraImages(RigidBodyTransform transformFromReportedToFiducialFrame, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry) throws Exception
    {
       this.expectedObjectSize.set(1.0);
       targetIDHasBeenLocated.set(true);
-
-      detector = new ValveDetector();
 
       // fov values from http://carnegierobotics.com/multisense-s7/
       fieldOfViewXinRadians.set(Math.toRadians(80.0));
@@ -148,7 +161,7 @@ public class ObjectDetectorFromCameraImages
          //         yoGraphicsListRegistry.registerYoGraphic("Fiducials", cameraGraphic);
          //         yoGraphicsListRegistry.registerYoGraphic("Fiducials", detectorGraphic);
          //         yoGraphicsListRegistry.registerYoGraphic("Fiducials", locatedFiducialGraphic);
-         yoGraphicsListRegistry.registerYoGraphic("Fiducials", reportedFiducialGraphic);
+//         yoGraphicsListRegistry.registerYoGraphic("Fiducials", reportedFiducialGraphic);
       }
       else
       {
@@ -156,6 +169,10 @@ public class ObjectDetectorFromCameraImages
       }
 
       parentRegistry.addChild(registry);
+
+      PrintTools.info(this, "Attempting to connect to valve detector...");
+      valveDetectorClient.attachStateListener(this);
+      valveDetectorClient.connect();
    }
 
    public void reset()
@@ -163,15 +180,40 @@ public class ObjectDetectorFromCameraImages
       this.targetIDHasBeenLocated.set(false);
    }
 
-   public void detectFromVideoPacket(VideoPacket videoPacket)
+   public void addDetectionResultListener(Consumer<DetectionVisualizationPackets> resultListener)
    {
-      BufferedImage latestUnmodifiedCameraImage = jpegDecompressor.decompressJPEGDataToBufferedImage(videoPacket.getData());
-      detect(latestUnmodifiedCameraImage, videoPacket.getPosition(), videoPacket.getOrientation());
+      detectionResultListeners.add(resultListener);
    }
 
-   public Pair<BoundingBoxesPacket, HeatMapPacket> getCoactiveVisualizationPackets()
+   public void detectFromVideoPacket(VideoPacket videoPacket)
    {
-      return coactiveVisualizationPackets;
+
+      detectAsync(videoPacket);
+   }
+
+   private void detectAsync(VideoPacket videoPacket)
+   {
+      if (detectionRunning.get())
+         return;
+
+      valveDetectorClient.send(videoPacket);
+
+      CompletableFuture.runAsync(() ->
+      {
+         detectionRunning.set(true);
+         try
+         {
+            while(results.peek() == null)
+            {
+               ThreadTools.sleep(5);
+            }
+            BufferedImage latestUnmodifiedCameraImage = jpegDecompressor.decompressJPEGDataToBufferedImage(videoPacket.getData());
+            detect(latestUnmodifiedCameraImage, videoPacket.getPosition(), videoPacket.getOrientation());
+         } finally
+         {
+            detectionRunning.set(false);
+         }
+      });
    }
 
    public void detect(BufferedImage bufferedImage, Point3d cameraPositionInWorld, Quat4d cameraOrientationInWorldXForward)
@@ -190,32 +232,34 @@ public class ObjectDetectorFromCameraImages
          cameraPose.setOrientation(cameraOrientationInWorldXForward);
          cameraPose.setPosition(cameraPositionInWorld);
 
-         Pair<List<Rectangle>, float[]> rectanglesAndHeatMaps = detector.detect(bufferedImage);
+         ObjectDetectorResultPacket result = results.poll();
 
-         rectanglesAndHeatMaps.getLeft().sort((r1, r2) -> -Integer.compare(r1.width * r1.height, r2.width * r2.height));
+//         Pair<List<Rectangle>, HeatMap> rectanglesAndHeatMaps = detector.detect(bufferedImage);
+//
+//         rectanglesAndHeatMaps.getLeft().sort((r1, r2) -> -Integer.compare(r1.width * r1.height, r2.width * r2.height));
+//
+//         HeatMapPacket heatMapPacket = new HeatMapPacket();
+//         heatMapPacket.width = rectanglesAndHeatMaps.getRight().w;
+//         heatMapPacket.height = rectanglesAndHeatMaps.getRight().h;
+//         heatMapPacket.data = rectanglesAndHeatMaps.getRight().data;
+//         heatMapPacket.name = "Valve";
+//
+//         int[] packedBoxes = rectanglesAndHeatMaps.getLeft().stream().flatMapToInt(rect -> IntStream.of(rect.x, rect.y, rect.width, rect.height)).toArray();
+//         String[] names = new String[rectanglesAndHeatMaps.getLeft().size()];
+//         for (int i = 0; i < names.length; i++)
+//         {
+//            names[i] = "Valve " + i;
+//         }
+//         BoundingBoxesPacket boundingBoxesPacket = new BoundingBoxesPacket(packedBoxes, names);
 
-         HeatMapPacket heatMapPacket = new HeatMapPacket();
-         heatMapPacket.width = detector.getNetworkOutputWidth();
-         heatMapPacket.height = detector.getNetworkOutputHeight();
-         heatMapPacket.data = rectanglesAndHeatMaps.getRight();
-         heatMapPacket.name = "Valve";
+         BoundingBoxesPacket boundingBoxes = result.boundingBoxes;
+         HeatMapPacket heatMap = result.heatMap;
+         DetectionVisualizationPackets coactiveVisualizationPackets = new DetectionVisualizationPackets(boundingBoxes, heatMap);
+         detectionResultListeners.forEach(consumer -> consumer.accept(coactiveVisualizationPackets));
 
-         int[] packedBoxes = rectanglesAndHeatMaps.getLeft()
-                                                  .stream()
-                                                  .flatMapToInt(rect -> IntStream.of(rect.x, rect.y, rect.width, rect.height))
-                                                  .toArray();
-         String[] names = new String[rectanglesAndHeatMaps.getLeft().size()];
-         for (int i = 0; i < names.length; i++)
+         if (boundingBoxes.labels.length > 0)
          {
-            names[i] = "Valve " + i;
-         }
-         BoundingBoxesPacket boundingBoxesPacket = new BoundingBoxesPacket(packedBoxes, names);
-
-         coactiveVisualizationPackets = Pair.of(boundingBoxesPacket, heatMapPacket);
-
-         if (rectanglesAndHeatMaps.getLeft().size() > 0)
-         {
-            Rectangle rectangle = rectanglesAndHeatMaps.getLeft().get(0);
+            Rectangle rectangle = new Rectangle(boundingBoxes.boundingBoxXCoordinates[0], boundingBoxes.boundingBoxYCoordinates[0], boundingBoxes.boundingBoxWidths[0], boundingBoxes.boundingBoxHeights[0]);
             double knownWidth = expectedObjectSize.getDoubleValue();
             Point2D_F64 topLeft = new Point2D_F64(rectangle.x, rectangle.y);
             Point2D_F64 bottomRight = new Point2D_F64(rectangle.x + rectangle.width, rectangle.y + rectangle.height);
@@ -316,4 +360,57 @@ public class ObjectDetectorFromCameraImages
       this.targetIDHasBeenLocated.set(false);
    }
 
+   private static class DetectionParameters
+   {
+      final BufferedImage bufferedImage;
+      final Point3d cameraPositionInWorld;
+      final Quat4d cameraOrientationInWorldXForward;
+
+      private DetectionParameters(BufferedImage bufferedImage, Point3d cameraPositionInWorld, Quat4d cameraOrientationInWorldXForward)
+      {
+         this.bufferedImage = bufferedImage;
+         this.cameraPositionInWorld = new Point3d(cameraPositionInWorld);
+         this.cameraOrientationInWorldXForward = new Quat4d(cameraOrientationInWorldXForward);
+      }
+   }
+
+   public static class DetectionVisualizationPackets
+   {
+      private final BoundingBoxesPacket boundingBoxesPacket;
+      private final HeatMapPacket heatMapPacket;
+
+      public DetectionVisualizationPackets(BoundingBoxesPacket boundingBoxesPacket, HeatMapPacket heatMapPacket)
+      {
+         this.boundingBoxesPacket = boundingBoxesPacket;
+         this.heatMapPacket = heatMapPacket;
+      }
+
+      public BoundingBoxesPacket getBoundingBoxesPacket()
+      {
+         return boundingBoxesPacket;
+      }
+
+      public HeatMapPacket getHeatMapPacket()
+      {
+         return heatMapPacket;
+      }
+   }
+
+   @Override
+   public void connected()
+   {
+      PrintTools.info("Connected to Valve Detector.");
+   }
+
+   @Override
+   public void disconnected()
+   {
+      PrintTools.info("Disconnected from Valve Detector.");
+   }
+
+   @Override
+   public void receivedPacket(ObjectDetectorResultPacket packet)
+   {
+      results.add(packet);
+   }
 }
