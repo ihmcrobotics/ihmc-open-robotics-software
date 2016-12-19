@@ -51,4 +51,10 @@ public class FootstepNode
       return true;
    }
 
+   @Override
+   public String toString()
+   {
+      return "Node: x=" + getX() + ", y=" + getY();
+   }
+
 }

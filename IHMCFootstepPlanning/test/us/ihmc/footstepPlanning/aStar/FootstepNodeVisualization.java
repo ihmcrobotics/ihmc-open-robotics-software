@@ -16,7 +16,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
-public class FootstepNodeVisualization
+public class FootstepNodeVisualization implements GraphVisualization
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -73,6 +73,7 @@ public class FootstepNodeVisualization
       scs.tickAndUpdate();
    }
 
+   @Override
    public void addNode(FootstepNode node, boolean active)
    {
       if (nodeExists(node))
@@ -108,6 +109,7 @@ public class FootstepNodeVisualization
       nodeCount.increment();
    }
 
+   @Override
    public void setNodeActive(FootstepNode node)
    {
       if (nodeExists(node))
@@ -128,6 +130,7 @@ public class FootstepNodeVisualization
          addNodeUnsafe(node, true);
    }
 
+   @Override
    public void setNodeInactive(FootstepNode node)
    {
       if (nodeExists(node))
@@ -148,6 +151,7 @@ public class FootstepNodeVisualization
          addNodeUnsafe(node, false);
    }
 
+   @Override
    public boolean nodeExists(FootstepNode node)
    {
       if (activeNodes.containsKey(node))
@@ -185,6 +189,7 @@ public class FootstepNodeVisualization
       scs.startOnAThread();
    }
 
+   @Override
    public void tickAndUpdate()
    {
       scs.setTime(time.getDoubleValue());

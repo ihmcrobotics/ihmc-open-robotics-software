@@ -12,6 +12,7 @@ import org.junit.Test;
 import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.continuousIntegration.IntegrationCategory;
+import us.ihmc.tools.thread.ThreadTools;
 
 @ContinuousIntegrationPlan(categories = IntegrationCategory.EXCLUDE)
 public class AStarPlanarRegionsPlannerTest
@@ -142,5 +143,16 @@ public class AStarPlanarRegionsPlannerTest
       node = new FootstepNode(gridX * 3.8, -gridY * 8.1);
       assertEquals(4.0 * gridX, node.getX(), 1.0e-10);
       assertEquals(-8.0 * gridY, node.getY(), 1.0e-10);
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 300000)
+   public void testSimpleExpansion()
+   {
+      FootstepNodeVisualization viz = new FootstepNodeVisualization(1000, 0.04);
+      AStarFootstepPlanner planner = new AStarFootstepPlanner(viz);
+      planner.plan();
+      viz.showAndSleep(true);
+      ThreadTools.sleepForever();
    }
 }
