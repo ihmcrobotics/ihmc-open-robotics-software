@@ -9,6 +9,8 @@ import java.util.PriorityQueue;
 
 import org.junit.Test;
 
+import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
 import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.continuousIntegration.IntegrationCategory;
@@ -149,8 +151,18 @@ public class AStarPlanarRegionsPlannerTest
    @Test(timeout = 300000)
    public void testSimpleExpansion()
    {
-      FootstepNodeVisualization viz = new FootstepNodeVisualization(1000, 0.04);
+      PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
+      generator.translate(0.0, 0.0, 0.0001);
+      generator.addRectangle(0.4, 0.4);
+      generator.translate(0.5, 0.4, 0.0);
+      generator.addRectangle(1.4, 0.4);
+      generator.translate(0.5, -0.4, 0.0);
+      generator.addRectangle(0.4, 0.4);
+      PlanarRegionsList planarRegionsList = generator.getPlanarRegionsList();
+
+      FootstepNodeVisualization viz = new FootstepNodeVisualization(1000, 0.04, planarRegionsList);
       AStarFootstepPlanner planner = new AStarFootstepPlanner(viz);
+      planner.setPlanarRegions(planarRegionsList);
       planner.plan();
       viz.showAndSleep(true);
       ThreadTools.sleepForever();

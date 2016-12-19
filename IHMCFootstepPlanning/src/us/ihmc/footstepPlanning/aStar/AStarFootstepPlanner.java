@@ -19,6 +19,7 @@ public class AStarFootstepPlanner implements FootstepPlanner
    private FootstepGraph graph;
    private HashSet<FootstepNode> expandedNodes;
    private PriorityQueue<FootstepNode> stack;
+   private FootstepNodeValidityChecker nodeChecker;
 
    private final GraphVisualization visualization;
 
@@ -49,8 +50,7 @@ public class AStarFootstepPlanner implements FootstepPlanner
    @Override
    public void setPlanarRegions(PlanarRegionsList planarRegionsList)
    {
-      // TODO Auto-generated method stub
-
+      nodeChecker = new FootstepNodeValidityChecker(planarRegionsList);
    }
 
    @Override
@@ -91,6 +91,9 @@ public class AStarFootstepPlanner implements FootstepPlanner
          List<FootstepNode> neighbors = computeNeighbors(nodeToExpand);
          for (FootstepNode neighbor : neighbors)
          {
+            if (!nodeChecker.isNodeValid(neighbor))
+               continue;
+
             double cost = nodeToExpand.euclideanDistance(neighbor);
             graph.checkAndSetEdge(nodeToExpand, neighbor, cost);
             stack.add(neighbor);
