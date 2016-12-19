@@ -235,7 +235,14 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
    
    public void setBodyWeights(BodyWeights bodyWeights)
    {
+      if(trackingWeightsMessage == null)
+      {
+         trackingWeightsMessage = new TrackingWeightsMessage(bodyWeights);
+      }
+      else
+      {
       trackingWeightsMessage.setTrackingWeightsMessage(bodyWeights);
+      }
    }
 
    public double getSolutionQuality()
@@ -305,8 +312,8 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
       
       if (trackingWeightsMessage == null)
       {
-         trackingWeightsMessage.setTrackingWeightsMessage(BodyWeights.STANDARD);
-      }            
+         trackingWeightsMessage = new TrackingWeightsMessage(BodyWeights.STANDARD);
+      }
    }
 
    @Override
@@ -342,6 +349,7 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
          {
             sendPacket(trackingWeightsMessage);
          }
+         
       }
       if (kinematicsToolboxOutputQueue.isNewPacketAvailable() && !hasSentMessageToController.getBooleanValue())
       {
