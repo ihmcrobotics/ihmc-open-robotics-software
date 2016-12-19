@@ -4,6 +4,7 @@ import java.util.ArrayDeque;
 import java.util.HashMap;
 import java.util.Queue;
 
+import us.ihmc.graphics3DDescription.Graphics3DObject;
 import us.ihmc.graphics3DDescription.appearance.YoAppearance;
 import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicReferenceFrame;
@@ -11,6 +12,7 @@ import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.simulationconstructionset.Robot;
@@ -35,10 +37,10 @@ public class FootstepNodeVisualization implements GraphVisualization
 
    public FootstepNodeVisualization()
    {
-      this(1000, 0.01);
+      this(1000, 0.01, null);
    }
 
-   public FootstepNodeVisualization(int maxNodes, double playbackRate)
+   public FootstepNodeVisualization(int maxNodes, double playbackRate, PlanarRegionsList regions)
    {
       nodeCount.set(0);
       time.set(0.0);
@@ -64,6 +66,11 @@ public class FootstepNodeVisualization implements GraphVisualization
 
       YoGraphicReferenceFrame worldViz = new YoGraphicReferenceFrame(worldFrame, registry, 0.5);
       graphicsListRegistry.registerYoGraphic(listName, worldViz);
+
+      Graphics3DObject graphics3DObject = new Graphics3DObject();
+      if (regions != null)
+         graphics3DObject.addPlanarRegionsList(regions);
+      scs.addStaticLinkGraphics(graphics3DObject);
 
       scs.addYoVariableRegistry(registry);
       scs.addYoGraphicsListRegistry(graphicsListRegistry);
@@ -203,7 +210,7 @@ public class FootstepNodeVisualization implements GraphVisualization
     */
    public static void main(String[] args)
    {
-      FootstepNodeVisualization viz = new FootstepNodeVisualization(100, 0.01);
+      FootstepNodeVisualization viz = new FootstepNodeVisualization(100, 0.01, null);
 
       for (int i = 0; i < 10; i++)
       {
