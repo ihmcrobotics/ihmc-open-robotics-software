@@ -7,9 +7,16 @@ public class TrackingWeightsMessage extends Packet<TrackingWeightsMessage>
 {
    BodyWeights bodyWeights;
    
+   public TrackingWeightsMessage()
+   {
+      this.bodyWeights = BodyWeights.STANDARD;
+      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
+   }
+   
    public TrackingWeightsMessage(BodyWeights bodyWeights)
    {
       this.bodyWeights = bodyWeights;
+      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
    public void setTrackingWeightsMessage(BodyWeights bodyWeights)
