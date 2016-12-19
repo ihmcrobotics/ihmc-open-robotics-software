@@ -24,6 +24,13 @@ public class FootstepNode
       return gridSizeY * yIndex;
    }
 
+   public double euclideanDistance(FootstepNode other)
+   {
+      double dx = getX() - other.getX();
+      double dy = getY() - other.getY();
+      return Math.sqrt(dx * dx + dy * dy);
+   }
+
    @Override
    public int hashCode()
    {

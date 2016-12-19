@@ -67,7 +67,7 @@ public class AStarFootstepPlanner implements FootstepPlanner
       }
 
       graph = new FootstepGraph(startNode);
-      stack = new PriorityQueue<>(new NodeComparator(graph));
+      stack = new PriorityQueue<>(new NodeComparator(graph, goalNode));
       expandedNodes = new HashSet<>();
 
       stack.add(startNode);
@@ -91,7 +91,8 @@ public class AStarFootstepPlanner implements FootstepPlanner
          List<FootstepNode> neighbors = computeNeighbors(nodeToExpand);
          for (FootstepNode neighbor : neighbors)
          {
-            graph.checkAndSetEdge(nodeToExpand, neighbor, 1.0);
+            double cost = nodeToExpand.euclideanDistance(neighbor);
+            graph.checkAndSetEdge(nodeToExpand, neighbor, cost);
             stack.add(neighbor);
          }
       }
@@ -129,17 +130,19 @@ public class AStarFootstepPlanner implements FootstepPlanner
    private class NodeComparator implements Comparator<FootstepNode>
    {
       private final FootstepGraph graph;
+      private final FootstepNode goalNode;
 
-      public NodeComparator(FootstepGraph graph)
+      public NodeComparator(FootstepGraph graph, FootstepNode goalNode)
       {
          this.graph = graph;
+         this.goalNode = goalNode;
       }
 
       @Override
       public int compare(FootstepNode o1, FootstepNode o2)
       {
-         double cost1 = graph.getCostFromStart(o1);
-         double cost2 = graph.getCostFromStart(o2);
+         double cost1 = graph.getCostFromStart(o1) + FootstepHeuristics.computeEuclidianHeuristics(o1, goalNode);
+         double cost2 = graph.getCostFromStart(o2) + FootstepHeuristics.computeEuclidianHeuristics(o2, goalNode);
          if (cost1 == cost2) return 0;
          return cost1 < cost2 ? -1 : 1;
       }
