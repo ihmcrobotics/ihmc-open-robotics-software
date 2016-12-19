@@ -100,16 +100,17 @@ public class AStarFootstepPlanner implements FootstepPlanner
          }
       }
 
-      List<FootstepNode> path = graph.getPathFromStart(goalNode);
+      if (stack.isEmpty())
+         return FootstepPlanningResult.NO_PATH_EXISTS;
+
       if (visualization != null)
       {
+         List<FootstepNode> path = graph.getPathFromStart(goalNode);
          for (FootstepNode node : path)
             visualization.setNodeActive(node);
          visualization.tickAndUpdate();
       }
 
-      if (stack.isEmpty())
-         return FootstepPlanningResult.NO_PATH_EXISTS;
       return FootstepPlanningResult.OPTIMAL_SOLUTION;
    }
 
