@@ -40,6 +40,7 @@ public class ZUpPreserveYReferenceFrame extends ReferenceFrame
    @Override
    protected void updateTransformToParent(RigidBodyTransform transformToParent)
    {
+      //TODO: Combine with RotationTools.removePitchAndRollFromTransform(). 
       origin.getReferenceFrame().getTransformToDesiredFrame(nonZUpToWorld, worldFrame);
       nonZUpToWorld.getRotation(nonZUpToWorldRotation);
 

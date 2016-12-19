@@ -9,61 +9,56 @@ public abstract class StringConverterTools
 {
    public static StringConverter<Double> metersToRoundedCentimeters()
    {
-      return new StringConverter<Double>()
-      {
-         private final NumberFormat formatter = new DecimalFormat("0;-0");
-
-         @Override
-         public String toString(Double object)
-         {
-            return formatter.format(object * 100.0);
-         }
-
-         @Override
-         public Double fromString(String string)
-         {
-            return Double.parseDouble(string) / 100.0;
-         }
-      };
+      return rounding(100.0, 0);
    }
 
    public static StringConverter<Double> radiansToRoundedDegrees()
    {
-      return new StringConverter<Double>()
-      {
-         private final NumberFormat formatter = new DecimalFormat("0;-0");
-
-         @Override
-         public String toString(Double object)
-         {
-            return formatter.format(Math.toDegrees(object));
-         }
-
-         @Override
-         public Double fromString(String string)
-         {
-            return Math.toRadians(Double.parseDouble(string));
-         }
-      };
+      return rounding(180.0 / Math.PI, 0);
    }
 
    public static StringConverter<Double> thousandRounding(boolean appendK)
    {
+      return rounding(0.001, 0, "k");
+   }
+
+   public static StringConverter<Double> rounding(double toStringScale, int numberOfDecimals)
+   {
+      return rounding(toStringScale, numberOfDecimals, "");
+   }
+
+   public static StringConverter<Double> rounding(double toStringScale, int numberOfDecimals, String suffix)
+   {
+      NumberFormat formatter;
+      if (numberOfDecimals == 0)
+      {
+         formatter = new DecimalFormat("0" + suffix + ";-0" + suffix);
+      }
+      else
+      {
+         String decimalPart = repeatString("0", numberOfDecimals);
+         formatter = new DecimalFormat("0." + decimalPart + suffix + ";-0." + decimalPart + suffix);
+      }
+
       return new StringConverter<Double>()
       {
-         private final NumberFormat formatter = new DecimalFormat("0k;-0k");
-         
+
          @Override
          public String toString(Double object)
          {
-            return formatter.format(object / 1000.0);
+            return formatter.format(object * toStringScale);
          }
-         
+
          @Override
          public Double fromString(String string)
          {
-            return Double.parseDouble(string) * 1000.0;
+            return Double.parseDouble(string) / toStringScale;
          }
       };
+   }
+
+   private static String repeatString(String s, int n)
+   {
+      return new String(new char[n]).replace("\0", s);
    }
 }

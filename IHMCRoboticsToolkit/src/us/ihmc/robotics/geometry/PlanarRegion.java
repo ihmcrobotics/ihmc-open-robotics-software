@@ -162,8 +162,12 @@ public class PlanarRegion
     */
    public boolean isPolygonIntersecting(ConvexPolygon2d convexPolygon2d)
    {
-      // Instead of projecting all the polygons of this region onto the world XY-plane,
-      // the given convex polygon is projected along the z-world axis to be snapped onto plane.
+	   BoundingBox2d polygonBoundingBox = convexPolygon2d.getBoundingBox();
+	   if (!boundingBox3dInWorld.intersectsInXYPlane(polygonBoundingBox))
+		   return false;
+
+	   // Instead of projecting all the polygons of this region onto the world XY-plane,
+	   // the given convex polygon is projected along the z-world axis to be snapped onto plane.
       ConvexPolygon2d projectedPolygon = projectPolygonVerticallyToRegion(convexPolygon2d);
       ConvexPolygon2d dummyPolygon = new ConvexPolygon2d();
 

@@ -11,6 +11,7 @@ import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class BipedalFootstepPlannerNode
@@ -53,18 +54,28 @@ public class BipedalFootstepPlannerNode
       this.singleStepCost = singleStepCost;
    }
 
-   public RigidBodyTransform getTransformToParent()
+   public RigidBodyTransform getTransformToParentCopy()
    {
       if (parentNode == null)
          return null;
 
       RigidBodyTransform transformToParent = new RigidBodyTransform();
 
-      parentNode.getSoleTransform(transformToParent);
-      transformToParent.invert();
-
-      transformToParent.multiply(transformToParent, soleTransform);
+      getTransformToParent(transformToParent);
       return transformToParent;
+   }
+   
+   public void getTransformToParent(RigidBodyTransform transformToParentToPack)
+   {
+      if (parentNode == null)
+      {
+         transformToParentToPack.setIdentity();
+      }
+      
+      parentNode.getSoleTransform(transformToParentToPack);
+      transformToParentToPack.invert();
+
+      transformToParentToPack.multiply(transformToParentToPack, soleTransform);
    }
 
    public RobotSide getRobotSide()
@@ -113,29 +124,6 @@ public class BipedalFootstepPlannerNode
       RigidBodyTransform shiftTransform = new RigidBodyTransform();
       shiftTransform.setTranslation(new Vector3d(shiftVector.getX(), shiftVector.getY(), 0.0));
       soleTransform.multiply(soleTransform, shiftTransform);
-   }
-
-   public void removePitchAndRoll()
-   {
-      if (Math.abs(soleTransform.getM22() - 1.0) < 1e-4) return;
-      double m00 = soleTransform.getM00();
-      double m10 = soleTransform.getM10();
-
-      double magnitude = Math.sqrt(m00*m00 + m10*m10);
-      m00 = m00 / magnitude;
-      m10 = m10 / magnitude;
-
-      soleTransform.setM00(m00);
-      soleTransform.setM10(m10);
-      soleTransform.setM20(0.0);
-
-      soleTransform.setM01(-m10);
-      soleTransform.setM11(m00);
-      soleTransform.setM21(0.0);
-
-      soleTransform.setM02(0.0);
-      soleTransform.setM12(0.0);
-      soleTransform.setM22(1.0);
    }
 
    public BipedalFootstepPlannerNode getParentNode()
@@ -302,5 +290,10 @@ public class BipedalFootstepPlannerNode
    public void setPartialFootholdPolygon(ConvexPolygon2d partialFootholdPolygon)
    {
       this.partialFootholdPolygon = partialFootholdPolygon;
+   }
+
+   public void removePitchAndRoll()
+   {
+      RotationTools.removePitchAndRollFromTransform(soleTransform);
    }
 }
