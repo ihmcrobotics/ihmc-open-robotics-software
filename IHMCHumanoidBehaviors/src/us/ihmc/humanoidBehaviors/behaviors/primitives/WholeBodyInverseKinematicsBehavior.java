@@ -347,6 +347,7 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
          
          if (trackingWeightsMessage != null)
          {
+            trackingWeightsMessage.setDestination(PacketDestination.KINEMATICS_TOOLBOX_MODULE);
             sendPacket(trackingWeightsMessage);
          }
          
