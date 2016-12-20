@@ -1,4 +1,4 @@
-package us.ihmc.quadrupedRobotics.state;
+package us.ihmc.robotics.stateMachines.state;
 
 /**
  * Defines a callback for a given state as triggered by an event. Note a callback does not necessarily result in a transition.

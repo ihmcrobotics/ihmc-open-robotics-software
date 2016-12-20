@@ -1,4 +1,4 @@
-package us.ihmc.quadrupedRobotics.state;
+package us.ihmc.robotics.stateMachines.state;
 
 /**
  * Defines a state machine edge, specifying a source state and event, along with the destination state.

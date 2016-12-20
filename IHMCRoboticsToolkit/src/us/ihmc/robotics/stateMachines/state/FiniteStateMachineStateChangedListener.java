@@ -1,4 +1,4 @@
-package us.ihmc.quadrupedRobotics.state;
+package us.ihmc.robotics.stateMachines.state;
 
 public interface FiniteStateMachineStateChangedListener
 {
