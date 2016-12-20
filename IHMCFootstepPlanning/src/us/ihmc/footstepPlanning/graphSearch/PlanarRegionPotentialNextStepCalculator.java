@@ -22,11 +22,14 @@ import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
+import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.referenceFrames.TransformReferenceFrame;
+import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
@@ -44,6 +47,7 @@ public class PlanarRegionPotentialNextStepCalculator
 
    private PlanarRegionsList planarRegionsList;
    private SideDependentList<ConvexPolygon2d> footPolygonsInSoleFrame;
+   private SideDependentList<ConvexPolygon2d> controllerPolygonsInSoleFrame;
 
    private FootstepPlannerGoalType footstepPlannerGoalType;
    private Point2d xyGoal;
@@ -75,10 +79,16 @@ public class PlanarRegionPotentialNextStepCalculator
 
       parentRegistry.addChild(registry);
    }
-
+   
    public void setFeetPolygons(SideDependentList<ConvexPolygon2d> footPolygonsInSoleFrame)
    {
+      setFeetPolygons(footPolygonsInSoleFrame, footPolygonsInSoleFrame);
+   }
+   
+   public void setFeetPolygons(SideDependentList<ConvexPolygon2d> footPolygonsInSoleFrame, SideDependentList<ConvexPolygon2d> controllerPolygonsInSoleFrame)
+   {
       this.footPolygonsInSoleFrame = footPolygonsInSoleFrame;
+      this.controllerPolygonsInSoleFrame = controllerPolygonsInSoleFrame;
    }
 
    public void setPlanarRegions(PlanarRegionsList planarRegionsList)
@@ -547,70 +557,82 @@ public class PlanarRegionPotentialNextStepCalculator
       return true;
    }
 
+   private final RigidBodyTransform transform = new RigidBodyTransform();
+   private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+   private final TransformReferenceFrame parentSoleFrame = new TransformReferenceFrame("parentSole", ReferenceFrame.getWorldFrame());
+   private final ZUpFrame parentSoleZupFrame = new ZUpFrame(worldFrame, parentSoleFrame, "parentSoleZupFrame");
+   private final TransformReferenceFrame nodeSoleFrame = new TransformReferenceFrame("nodeSole", ReferenceFrame.getWorldFrame());
+   private final FramePoint solePositionInParentZUpFrame = new FramePoint(parentSoleZupFrame);
+
    private boolean checkIfGoodFootstep(BipedalFootstepPlannerNode nodeToExpand)
    {
+      BipedalFootstepPlannerNode parentNode = nodeToExpand.getParentNode();
+      if (parentNode == null)
+         return true;
+
+      parentNode.getSoleTransform(transform);
+
+      parentSoleFrame.setTransformAndUpdate(transform);
+      parentSoleZupFrame.update();
+
+      nodeToExpand.getSoleTransform(transform);
+      nodeSoleFrame.setTransformAndUpdate(transform);
+
+      solePositionInParentZUpFrame.setToZero(nodeSoleFrame);
+      solePositionInParentZUpFrame.changeFrame(parentSoleZupFrame);
+
+      double minimumStepWidth = parameters.getMinimumStepWidth();
+
       RobotSide robotSide = nodeToExpand.getRobotSide();
-
-      RigidBodyTransform transformToParent = nodeToExpand.getTransformToParent();
-      if (transformToParent != null)
+      if (((robotSide == RobotSide.LEFT) && (solePositionInParentZUpFrame.getY() < minimumStepWidth))
+            || ((robotSide == RobotSide.RIGHT) && (solePositionInParentZUpFrame.getY() > -minimumStepWidth)))
       {
-         Point3d stepFromParentInSoleFrame = new Point3d();
-         transformToParent.transform(stepFromParentInSoleFrame);
+         notifyListenerNodeUnderConsiderationWasRejected(nodeToExpand, BipedalFootstepPlannerNodeRejectionReason.STEP_NOT_WIDE_ENOUGH);
+         return false;
+      }
 
-         double minimumStepWidth = parameters.getMinimumStepWidth();
+      double maximumStepWidth = parameters.getMaximumStepWidth();
 
-         if (((robotSide == RobotSide.LEFT) && (stepFromParentInSoleFrame.getY() < minimumStepWidth))
-               || ((robotSide == RobotSide.RIGHT) && (stepFromParentInSoleFrame.getY() > -minimumStepWidth)))
-         {
-            notifyListenerNodeUnderConsiderationWasRejected(nodeToExpand, BipedalFootstepPlannerNodeRejectionReason.STEP_NOT_WIDE_ENOUGH);
-            return false;
-         }
+      if (((robotSide == RobotSide.LEFT) && (solePositionInParentZUpFrame.getY() > maximumStepWidth))
+            || ((robotSide == RobotSide.RIGHT) && (solePositionInParentZUpFrame.getY() < -maximumStepWidth)))
+      {
+         notifyListenerNodeUnderConsiderationWasRejected(nodeToExpand, BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_WIDE);
+         return false;
+      }
 
-         double maximumStepWidth = parameters.getMaximumStepWidth();
+      double minimumStepLength = parameters.getMinimumStepLength();
+      if (solePositionInParentZUpFrame.getX() < minimumStepLength)
+      {
+         notifyListenerNodeUnderConsiderationWasRejected(nodeToExpand, BipedalFootstepPlannerNodeRejectionReason.STEP_NOT_LONG_ENOUGH);
+         return false;
+      }
 
-         if (((robotSide == RobotSide.LEFT) && (stepFromParentInSoleFrame.getY() > maximumStepWidth))
-               || ((robotSide == RobotSide.RIGHT) && (stepFromParentInSoleFrame.getY() < -maximumStepWidth)))
-         {
-            notifyListenerNodeUnderConsiderationWasRejected(nodeToExpand, BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_WIDE);
-            return false;
-         }
+      if (Math.abs(solePositionInParentZUpFrame.getZ()) > parameters.getMaximumStepZ())
+      {
+         notifyListenerNodeUnderConsiderationWasRejected(nodeToExpand, BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_HIGH_OR_LOW);
+         return false;
+      }
 
-         double minimumStepLength = parameters.getMinimumStepLength();
-         if (stepFromParentInSoleFrame.getX() < minimumStepLength)
-         {
-            notifyListenerNodeUnderConsiderationWasRejected(nodeToExpand, BipedalFootstepPlannerNodeRejectionReason.STEP_NOT_LONG_ENOUGH);
-            return false;
-         }
+      if ((solePositionInParentZUpFrame.getX() > parameters.getMaximumStepXWhenForwardAndDown())
+            && (solePositionInParentZUpFrame.getZ() < -Math.abs(parameters.getMaximumStepZWhenForwardAndDown())))
+      {
+         notifyListenerNodeUnderConsiderationWasRejected(nodeToExpand, BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_FORWARD_AND_DOWN);
+         return false;
+      }
 
-         Vector3d stepFromParentInWorld = new Vector3d(stepFromParentInSoleFrame);
-
-         RigidBodyTransform transformToWorld = new RigidBodyTransform();
-
-         nodeToExpand.getParentNode().getSoleTransform(transformToWorld);
-         transformToWorld.transform(stepFromParentInWorld);
-
-         if (Math.abs(stepFromParentInWorld.getZ()) > parameters.getMaximumStepZ())
-         {
-            notifyListenerNodeUnderConsiderationWasRejected(nodeToExpand, BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_HIGH_OR_LOW);
-            return false;
-         }
-
-         if ((stepFromParentInSoleFrame.getX() > parameters.getMaximumStepXWhenForwardAndDown())
-               && (stepFromParentInWorld.getZ() < -Math.abs(parameters.getMaximumStepZWhenForwardAndDown())))
-         {
-            notifyListenerNodeUnderConsiderationWasRejected(nodeToExpand, BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_FORWARD_AND_DOWN);
-            return false;
-         }
-
-         stepReach.set(stepFromParentInWorld.length());
-         if (stepReach.getDoubleValue() > parameters.getMaximumStepReach())
-         {
-            notifyListenerNodeUnderConsiderationWasRejected(nodeToExpand, BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_FAR);
-            return false;
-         }
+      stepReach.set(getXYLength(solePositionInParentZUpFrame));
+      if (stepReach.getDoubleValue() > parameters.getMaximumStepReach())
+      {
+         notifyListenerNodeUnderConsiderationWasRejected(nodeToExpand, BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_FAR);
+         return false;
       }
 
       return true;
+   }
+
+   private double getXYLength(FramePoint point)
+   {
+      return Math.sqrt(point.getX() * point.getX() + point.getY() * point.getY());
    }
 
    private boolean checkIfDifferentFromGrandParent(BipedalFootstepPlannerNode nodeToExpand)
@@ -668,19 +690,19 @@ public class PlanarRegionPotentialNextStepCalculator
       RigidBodyTransform nodeToExpandTransform = new RigidBodyTransform();
       nodeToExpand.getSoleTransform(nodeToExpandTransform);
 
-      ConvexPolygon2d snappedPolygon = footPolygonsInSoleFrame.get(nodeToExpand.getRobotSide());
+      ConvexPolygon2d snappedPolygon = controllerPolygonsInSoleFrame.get(nodeToExpand.getRobotSide());
       snappedPolygon.update();
       footArea.set(snappedPolygon.getArea());
 
-         ConvexPolygon2d footholdPolygon = new ConvexPolygon2d();
-         totalArea.set(planarRegion.getPolygonIntersectionAreaWhenSnapped(snappedPolygon, nodeToExpandTransform, footholdPolygon));
+      ConvexPolygon2d footholdPolygon = new ConvexPolygon2d();
+      totalArea.set(planarRegion.getPolygonIntersectionAreaWhenSnapped(snappedPolygon, nodeToExpandTransform, footholdPolygon));
 
-         nodeToExpand.setPercentageOfFoothold(totalArea.getDoubleValue() / footArea.getDoubleValue());
+      nodeToExpand.setPercentageOfFoothold(totalArea.getDoubleValue() / footArea.getDoubleValue());
 
-         if (nodeToExpand.isPartialFoothold())
-         {
-            nodeToExpand.setPartialFootholdPolygon(footholdPolygon);
-         }
+      if (nodeToExpand.isPartialFoothold())
+      {
+         nodeToExpand.setPartialFootholdPolygon(footholdPolygon);
+      }
 
       if (totalArea.getDoubleValue() < parameters.getMinimumFootholdPercent() * footArea.getDoubleValue())
       {

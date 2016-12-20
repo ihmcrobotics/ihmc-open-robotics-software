@@ -1,5 +1,7 @@
 package us.ihmc.humanoidBehaviors.behaviors.roughTerrain;
 
+import java.util.Random;
+
 import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
@@ -11,6 +13,7 @@ import us.ihmc.communication.packets.PlanarRegionsListMessage;
 import us.ihmc.communication.packets.RequestPlanarRegionsListMessage;
 import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.communication.packets.UIPositionCheckerPacket;
+import us.ihmc.communication.packets.RequestPlanarRegionsListMessage.RequestType;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlannerGoal;
 import us.ihmc.footstepPlanning.FootstepPlannerGoalType;
@@ -32,6 +35,8 @@ import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidBehaviors.stateMachine.StateMachineBehavior;
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
+import us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataClearCommand;
+import us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataClearCommand.DepthDataTree;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessageConverter;
@@ -45,6 +50,7 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
+import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -53,6 +59,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.stateMachines.StateTransitionCondition;
 import us.ihmc.robotics.time.YoTimer;
 import us.ihmc.tools.io.printing.PrintTools;
+import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 
 public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<AnytimePlannerStateMachineBehavior.AnytimePlanningState>
@@ -68,14 +75,16 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
    private final DoubleYoVariable yoTime;
    private final IntegerYoVariable maxNumberOfStepsToTake = new IntegerYoVariable(prefix + "NumberOfStepsToTake", registry);
    private final IntegerYoVariable indexOfNextFootstepToSendFromCurrentPlan = new IntegerYoVariable(prefix + "NextFootstepToSendFromCurrentPlan", registry);
-   
+
    private final BipedalFootstepPlannerParameters footstepPlanningParameters;
    private final SimplePlanarRegionBipedalAnytimeFootstepPlanner footstepPlanner;
 
    private final BooleanYoVariable reachedGoal = new BooleanYoVariable(prefix + "ReachedGoal", registry);
+   private final BooleanYoVariable clearedLidar = new BooleanYoVariable(prefix + "ClearedLidar", registry);
+   private final DoubleYoVariable reachedGoalThreshold = new DoubleYoVariable(prefix + "ReachedGoalThreshold", registry);
    private final DoubleYoVariable swingTime = new DoubleYoVariable(prefix + "SwingTime", registry);
    private final DoubleYoVariable transferTime = new DoubleYoVariable(prefix + "TransferTime", registry);
-   private final BooleanYoVariable receivedFootstepCompletedPacked = new BooleanYoVariable(prefix + "ReceivedFootstepCompletedPacket", registry);
+   private final BooleanYoVariable receivedFootstepCompletedPacket = new BooleanYoVariable(prefix + "ReceivedFootstepCompletedPacket", registry);
    private final HumanoidReferenceFrames referenceFrames;
    private final BooleanYoVariable havePlanarRegionsBeenSet = new BooleanYoVariable(prefix + "HavePlanarRegionsBeenSet", registry);
    private FootstepPlan currentPlan;
@@ -86,31 +95,41 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
    private final SleepBehavior sleepBehavior;
    private final CheckForBestPlanBehavior checkForBestPlanBehavior;
    private final SendOverFootstepAndWaitForCompletionBehavior sendOverFootstepsAndUpdatePlannerBehavior;
+   private final SquareUpBehavior squareUpBehavior;
    private final SimpleDoNothingBehavior reachedGoalBehavior;
 
    private final NoValidPlanCondition noValidPlanCondition = new NoValidPlanCondition();
    private final FoundAPlanCondition foundAPlanCondition = new FoundAPlanCondition();
+   private final ClearedLidarCondition clearedLidarCondition = new ClearedLidarCondition();
    private final ContinueWalkingAfterCompletedStepCondition continueWalkingAfterCompletedStepCondition = new ContinueWalkingAfterCompletedStepCondition();
    private final ReachedGoalAfterCompletedStepCondition reachedGoalAfterCompletedStepCondition = new ReachedGoalAfterCompletedStepCondition();
 
    private final ConcurrentListeningQueue<PlanarRegionsListMessage> planarRegionsListQueue = new ConcurrentListeningQueue<>(10);
    private final ConcurrentListeningQueue<FootstepStatus> footstepStatusQueue = new ConcurrentListeningQueue<FootstepStatus>(10);
+   private SimpleFootstep lastFootstepSentForExecution;
+   
+   private final IntegerYoVariable stepCounterForClearingLidar = new IntegerYoVariable("StepCounterForClearingLidar", registry);
+   private final IntegerYoVariable stepsBeforeClearingLidar = new IntegerYoVariable("StepsBeforeClearingLidar", registry);
 
    public enum AnytimePlanningState
    {
-      LOCATE_GOAL, REQUEST_AND_WAIT_FOR_PLANAR_REGIONS, SLEEP, CHECK_FOR_BEST_PLAN, SEND_OVER_FOOTSTEP_AND_WAIT_FOR_COMPLETION, REACHED_GOAL
+      LOCATE_GOAL, REQUEST_AND_WAIT_FOR_PLANAR_REGIONS, SLEEP, CHECK_FOR_BEST_PLAN, SEND_OVER_FOOTSTEP_AND_WAIT_FOR_COMPLETION, SQUARE_UP, REACHED_GOAL
    }
 
    public AnytimePlannerStateMachineBehavior(CommunicationBridge communicationBridge, DoubleYoVariable yoTime, HumanoidReferenceFrames referenceFrames,
                                              LogModelProvider logModelProvider, FullHumanoidRobotModel fullRobotModel, WholeBodyControllerParameters wholeBodyControllerParameters)
    {
       super("AnytimePlanner", AnytimePlanningState.class, yoTime, communicationBridge);
-      
+
+      reachedGoalThreshold.set(1.5);
+
       footstepPlanningParameters = new BipedalFootstepPlannerParameters(registry);
       FootstepPlannerForBehaviorsHelper.setPlannerParametersForAnytimePlannerAndPlannerToolbox(footstepPlanningParameters);
       footstepPlanner = new SimplePlanarRegionBipedalAnytimeFootstepPlanner(footstepPlanningParameters, registry);
-      SideDependentList<ConvexPolygon2d> footPolygonsInSoleFrame = FootstepPlannerForBehaviorsHelper.createDefaultFootPolygonsForAnytimePlannerAndPlannerToolbox(wholeBodyControllerParameters.getContactPointParameters());
-      footstepPlanner.setFeetPolygons(footPolygonsInSoleFrame);
+      RobotContactPointParameters contactPointParameters = wholeBodyControllerParameters.getContactPointParameters();
+      SideDependentList<ConvexPolygon2d> footPolygonsInSoleFrame = FootstepPlannerForBehaviorsHelper.createDefaultFootPolygonsForAnytimePlannerAndPlannerToolbox(contactPointParameters);
+      SideDependentList<ConvexPolygon2d> controlPolygonsInSoleFrame = FootstepPlannerForBehaviorsHelper.createDefaultFootPolygons(contactPointParameters, 1.0, 1.0);
+      footstepPlanner.setFeetPolygons(footPolygonsInSoleFrame, controlPolygonsInSoleFrame);
 
       this.yoTime = yoTime;
       maxNumberOfStepsToTake.set(1);
@@ -125,7 +144,7 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
          fiducialDetectorBehaviorService.setExpectedFiducialSize(0.22);
          goalDetectorBehaviorService = fiducialDetectorBehaviorService;
          break;
-      
+
       case HARD_CODED:
       {
          goalDetectorBehaviorService = new ConstantGoalDetectorBehaviorService(referenceFrames, new Point3d(4.0, 0.0, 0.0), communicationBridge);
@@ -148,9 +167,11 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
 
       locateGoalBehavior = new LocateGoalBehavior(communicationBridge, goalDetectorBehaviorService);
       requestAndWaitForPlanarRegionsListBehavior = new RequestAndWaitForPlanarRegionsListBehavior(communicationBridge);
-      sleepBehavior = new SleepBehavior(communicationBridge, yoTime);
+      sleepBehavior = new ResettingSleepBehavior(communicationBridge, yoTime, 2.0);
+            
       checkForBestPlanBehavior = new CheckForBestPlanBehavior(communicationBridge);
       sendOverFootstepsAndUpdatePlannerBehavior = new SendOverFootstepAndWaitForCompletionBehavior(communicationBridge);
+      squareUpBehavior = new SquareUpBehavior(communicationBridge);
       reachedGoalBehavior = new SimpleDoNothingBehavior(communicationBridge)
       {
          @Override
@@ -164,6 +185,7 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
 
       swingTime.set(1.5);
       transferTime.set(0.3);
+      stepsBeforeClearingLidar.set(5);
 
       this.registry.addChild(requestAndWaitForPlanarRegionsListBehavior.getYoVariableRegistry());
       this.registry.addChild(sleepBehavior.getYoVariableRegistry());
@@ -227,13 +249,28 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
       BehaviorAction<AnytimePlanningState> sendFootstepAndWaitForCompletion = new BehaviorAction<AnytimePlanningState>(
             AnytimePlanningState.SEND_OVER_FOOTSTEP_AND_WAIT_FOR_COMPLETION, sendOverFootstepsAndUpdatePlannerBehavior);
 
+      BehaviorAction<AnytimePlanningState> squareUp = new BehaviorAction<AnytimePlanningState>(AnytimePlanningState.SQUARE_UP, squareUpBehavior);
+
       BehaviorAction<AnytimePlanningState> reachedGoalAction = new BehaviorAction<AnytimePlanningState>(AnytimePlanningState.REACHED_GOAL, reachedGoalBehavior)
       {
          @Override
          protected void setBehaviorInput()
          {
-            TextToSpeechPacket p1 = new TextToSpeechPacket("Reached Goal!");
-            sendPacket(p1);
+            TextToSpeechPacket packet;
+            int randomInt = new Random().nextInt(5);
+            if (randomInt == 0)
+               packet = new TextToSpeechPacket("I am done. Do you want me to do this again?");
+            if (randomInt == 1)
+               packet = new TextToSpeechPacket("What is my next task?");
+            if (randomInt == 2)
+               packet = new TextToSpeechPacket("Can I crush those cinder block now human master?");
+            if (randomInt == 3)
+               packet = new TextToSpeechPacket("Urgh - I bet they make me do this again.");
+            if (randomInt == 4)
+               packet = new TextToSpeechPacket("Can I go to the bathroom now please?");
+            else
+               throw new RuntimeException("Should not go here.");
+            sendPacket(packet);
          }
       };
 
@@ -242,13 +279,15 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
       statemachine.addStateWithDoneTransition(sleepAction, AnytimePlanningState.CHECK_FOR_BEST_PLAN);
       statemachine.addState(checkForBestPlan);
       statemachine.addState(sendFootstepAndWaitForCompletion);
+      statemachine.addStateWithDoneTransition(squareUp, AnytimePlanningState.REACHED_GOAL);
       statemachine.addState(reachedGoalAction);
 
+      checkForBestPlan.addStateTransition(AnytimePlanningState.REQUEST_AND_WAIT_FOR_PLANAR_REGIONS, clearedLidarCondition);
       checkForBestPlan.addStateTransition(AnytimePlanningState.REQUEST_AND_WAIT_FOR_PLANAR_REGIONS, noValidPlanCondition);
       checkForBestPlan.addStateTransition(AnytimePlanningState.SEND_OVER_FOOTSTEP_AND_WAIT_FOR_COMPLETION, foundAPlanCondition);
 
       sendFootstepAndWaitForCompletion.addStateTransition(AnytimePlanningState.CHECK_FOR_BEST_PLAN, continueWalkingAfterCompletedStepCondition);
-      sendFootstepAndWaitForCompletion.addStateTransition(AnytimePlanningState.REACHED_GOAL, reachedGoalAfterCompletedStepCondition);
+      sendFootstepAndWaitForCompletion.addStateTransition(AnytimePlanningState.SQUARE_UP, reachedGoalAfterCompletedStepCondition);
 
       statemachine.setStartState(AnytimePlanningState.LOCATE_GOAL);
    }
@@ -257,6 +296,8 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
    public void onBehaviorEntered()
    {
       super.onBehaviorEntered();
+      reachedGoal.set(false);
+      stepCounterForClearingLidar.set(0);
       new Thread(footstepPlanner).start();
    }
 
@@ -275,8 +316,11 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
       footstepPlanner.requestStop();
    }
 
+   private final FramePoint2d goalPosition = new FramePoint2d();
+
    public void setGoalPose(FramePose goalPose)
    {
+      goalPose.getPosition2dIncludingFrame(this.goalPosition);
       Tuple3d goalPosition = new Point3d();
       goalPose.getPosition(goalPosition);
 
@@ -365,6 +409,24 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
       }
    }
 
+   private class ResettingSleepBehavior extends SleepBehavior
+   {
+      private final double sleepTime;
+
+      public ResettingSleepBehavior(CommunicationBridgeInterface outgoingCommunicationBridge, DoubleYoVariable yoTime, double sleepTime)
+      {
+         super(outgoingCommunicationBridge, yoTime, sleepTime);
+         this.sleepTime = sleepTime;
+      }
+
+      @Override
+      public void onBehaviorExited()
+      {
+         super.onBehaviorExited();
+         this.setSleepTime(sleepTime);
+      }
+   }
+
    private class CheckForBestPlanBehavior extends AbstractBehavior
    {
       public CheckForBestPlanBehavior(CommunicationBridgeInterface communicationBridge)
@@ -375,6 +437,11 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
       @Override
       public void doControl()
       {
+         if (!footstepPlanner.isClear())
+         {
+            return;
+         }
+
          FootstepPlan latestPlan = footstepPlanner.getBestPlanYet();
 
          if (latestPlan != null)
@@ -452,9 +519,13 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
 
             if (footstepStatus.getStatus() == FootstepStatus.Status.COMPLETED)
             {
-               receivedFootstepCompletedPacked.set(true);
+               receivedFootstepCompletedPacket.set(true);
             }
          }
+
+         ReferenceFrame midFeetZUpFrame = referenceFrames.getMidFeetZUpFrame();
+         FramePoint2d goalPositionInMidFeetZUp = goalPosition.changeFrameAndProjectToXYPlaneCopy(midFeetZUpFrame);
+         reachedGoal.set(goalPositionInMidFeetZUp.distanceFromZero() < reachedGoalThreshold.getDoubleValue());
       }
 
       @Override
@@ -487,7 +558,7 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
 
          footstepDataListMessage.setDestination(PacketDestination.CONTROLLER);
          sendPacketToController(footstepDataListMessage);
-         receivedFootstepCompletedPacked.set(false);
+         receivedFootstepCompletedPacket.set(false);
 
          // request new planar regions
          requestPlanarRegions();
@@ -519,7 +590,25 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
       @Override
       public void onBehaviorExited()
       {
+         stepCounterForClearingLidar.increment();
+         
+         if (stepCounterForClearingLidar.getIntegerValue() == stepsBeforeClearingLidar.getIntegerValue())
+         {
+            DepthDataClearCommand clearLidarPacket = new DepthDataClearCommand(DepthDataTree.DECAY_POINT_CLOUD);
+            clearLidarPacket.setDestination(PacketDestination.NETWORK_PROCESSOR);
+            sendPacket(clearLidarPacket);
 
+            RequestPlanarRegionsListMessage requestPlanarRegionsListMessage = new RequestPlanarRegionsListMessage(RequestType.CLEAR);
+            requestPlanarRegionsListMessage.setDestination(PacketDestination.REA_MODULE);
+            sendPacket(requestPlanarRegionsListMessage);
+
+            currentPlan = null;
+            
+            footstepPlanner.clear();
+            sleepBehavior.setSleepTime(5.0);
+            clearedLidar.set(true);
+            stepCounterForClearingLidar.set(0);
+         }
       }
 
       @Override
@@ -549,10 +638,100 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
             System.out.println("sending footstep of side " + footstep.getRobotSide());
 
             footstepDataListMessage.add(firstFootstepMessage);
+
+            lastFootstepSentForExecution = new SimpleFootstep(footstep.getRobotSide(), tempFirstFootstepPose);
          }
 
          footstepDataListMessage.setExecutionMode(ExecutionMode.OVERRIDE);
          return footstepDataListMessage;
+      }
+   }
+
+   private class SquareUpBehavior extends AbstractBehavior
+   {
+      private boolean isDone = false;
+
+      public SquareUpBehavior(CommunicationBridgeInterface communicationBridge)
+      {
+         super(communicationBridge);
+      }
+
+      @Override
+      public void doControl()
+      {
+         if (footstepStatusQueue.isNewPacketAvailable())
+         {
+            FootstepStatus footstepStatus = footstepStatusQueue.getLatestPacket();
+            if (footstepStatus.getStatus() == FootstepStatus.Status.COMPLETED)
+               isDone = true;
+         }
+      }
+
+      @Override
+      public void onBehaviorEntered()
+      {
+         // clear footstep status queue
+         footstepStatusQueue.clear();
+         isDone = false;
+
+         // assemble square up step
+         RobotSide stanceSide = lastFootstepSentForExecution.getRobotSide();
+         double width = footstepPlanningParameters.getIdealFootstepWidth();
+         ReferenceFrame stanceFootFrame = referenceFrames.getSoleFrame(stanceSide);
+         FramePose stepPose = new FramePose(stanceFootFrame);
+         stepPose.setY(stanceSide == RobotSide.LEFT ? -width : width);
+         stepPose.changeFrame(ReferenceFrame.getWorldFrame());
+
+         // make footstep data message
+         FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
+         footstepDataListMessage.setSwingTime(swingTime.getDoubleValue());
+         footstepDataListMessage.setTransferTime(transferTime.getDoubleValue());
+         Point3d position = new Point3d();
+         Quat4d orientation = new Quat4d();
+         stepPose.getPosition(position);
+         stepPose.getOrientation(orientation);
+         FootstepDataMessage firstFootstepMessage = new FootstepDataMessage(stanceSide.getOppositeSide(), position, orientation);
+         firstFootstepMessage.setOrigin(FootstepDataMessage.FootstepOrigin.AT_SOLE_FRAME);
+         footstepDataListMessage.add(firstFootstepMessage);
+         footstepDataListMessage.setExecutionMode(ExecutionMode.OVERRIDE);
+
+         // send it to the controller
+         footstepDataListMessage.setDestination(PacketDestination.CONTROLLER);
+         sendPacketToController(footstepDataListMessage);
+
+         // notify UI
+         TextToSpeechPacket p1 = new TextToSpeechPacket("Reached goal! Squaring up.");
+         sendPacket(p1);
+      }
+
+      @Override
+      public void onBehaviorAborted()
+      {
+
+      }
+
+      @Override
+      public void onBehaviorPaused()
+      {
+
+      }
+
+      @Override
+      public void onBehaviorResumed()
+      {
+
+      }
+
+      @Override
+      public void onBehaviorExited()
+      {
+
+      }
+
+      @Override
+      public boolean isDone()
+      {
+         return isDone;
       }
    }
 
@@ -583,12 +762,28 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
       }
    }
 
+   private class ClearedLidarCondition implements StateTransitionCondition
+   {
+      @Override
+      public boolean checkCondition()
+      {
+         boolean isTrueIf = clearedLidar.getBooleanValue();
+
+         if (isTrueIf)
+         {
+            clearedLidar.set(false);
+         }
+
+         return isTrueIf;
+      }
+   }
+
    private class ContinueWalkingAfterCompletedStepCondition implements StateTransitionCondition
    {
       @Override
       public boolean checkCondition()
       {
-         return receivedFootstepCompletedPacked.getBooleanValue() && !reachedGoal.getBooleanValue();
+         return receivedFootstepCompletedPacket.getBooleanValue() && !reachedGoal.getBooleanValue();
       }
    }
 
@@ -597,7 +792,7 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
       @Override
       public boolean checkCondition()
       {
-         return receivedFootstepCompletedPacked.getBooleanValue() && reachedGoal.getBooleanValue();
+         return receivedFootstepCompletedPacket.getBooleanValue() && reachedGoal.getBooleanValue();
       }
    }
 }

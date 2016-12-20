@@ -36,7 +36,7 @@ public class SkippySimulationV2
       boolean showOverheadView = true;
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
 
-      skippy.setController(new SkippyICPAndIDBasedController(skippy));
+      skippy.setController(new SkippyICPAndIDBasedController(skippy, yoGraphicsListRegistry));
 
       VisualizerUtils.createOverheadPlotter(sim, showOverheadView, yoGraphicsListRegistry);
       sim.addYoGraphicsListRegistry(yoGraphicsListRegistry);
