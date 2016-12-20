@@ -1,4 +1,4 @@
-package us.ihmc.robotics.stateMachines.state;
+package us.ihmc.robotics.stateMachines.eventBasedStateMachine;
 
 /**
  * Defines a state machine edge, specifying a source state and event, along with the destination state.

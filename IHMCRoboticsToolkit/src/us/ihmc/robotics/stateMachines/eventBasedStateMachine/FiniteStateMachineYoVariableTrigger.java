@@ -1,4 +1,4 @@
-package us.ihmc.robotics.stateMachines.state;
+package us.ihmc.robotics.stateMachines.eventBasedStateMachine;
 
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
