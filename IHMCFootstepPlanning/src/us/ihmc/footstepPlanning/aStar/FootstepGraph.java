@@ -58,7 +58,10 @@ public class FootstepGraph
          double oldNodeCost = nodeCostMap.get(endNode).getNodeCost();
          if (newNodeCost >= oldNodeCost)
             return;
-         updateChildCostsRecursively(startNode);
+
+         nodeCostMap.put(endNode, new NodeCost(newNodeCost));
+         incomingBestEdge.put(endNode, edge);
+         updateChildCostsRecursively(endNode);
       }
       else
       {
