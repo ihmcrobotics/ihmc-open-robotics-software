@@ -103,6 +103,15 @@ public class FootstepGraph
       return path;
    }
 
+   /**
+    * Will check if a node exists in the graph.
+    * @param node
+    */
+   public boolean doesNodeExist(FootstepNode node)
+   {
+      return nodeCostMap.containsKey(node);
+   }
+
    private void updateChildCostsRecursively(FootstepNode node)
    {
       if (!outgoingEdges.containsKey(node))

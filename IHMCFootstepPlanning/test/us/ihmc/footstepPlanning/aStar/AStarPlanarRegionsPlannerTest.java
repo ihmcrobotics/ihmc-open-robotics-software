@@ -11,6 +11,7 @@ import org.junit.Test;
 
 import us.ihmc.footstepPlanning.FootstepPlannerGoal;
 import us.ihmc.footstepPlanning.FootstepPlannerGoalType;
+import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.aStar.implementations.EuclidianDistanceHeuristics;
 import us.ihmc.footstepPlanning.aStar.implementations.SimpleGridResolutionBasedExpansion;
 import us.ihmc.footstepPlanning.aStar.implementations.SimpleNodeChecker;
@@ -22,7 +23,6 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.continuousIntegration.IntegrationCategory;
-import us.ihmc.tools.thread.ThreadTools;
 
 @ContinuousIntegrationPlan(categories = IntegrationCategory.EXCLUDE)
 public class AStarPlanarRegionsPlannerTest
@@ -159,6 +159,8 @@ public class AStarPlanarRegionsPlannerTest
    @Test(timeout = 300000)
    public void testSimpleExpansion()
    {
+      boolean visualize = true;
+
       // make planar regions
       PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
       generator.translate(0.0, 0.0, 0.0001);
@@ -179,19 +181,28 @@ public class AStarPlanarRegionsPlannerTest
       RobotSide startSide = RobotSide.LEFT;
 
       // create planner
-      FootstepNodeVisualization viz = new FootstepNodeVisualization(1000, 0.04, planarRegionsList);
       SimpleNodeChecker nodeChecker = new SimpleNodeChecker();
       EuclidianDistanceHeuristics heuristics = new EuclidianDistanceHeuristics();
       SimpleGridResolutionBasedExpansion expansion = new SimpleGridResolutionBasedExpansion();
+      FootstepNodeVisualization viz = null;
+      if (visualize)
+         viz = new FootstepNodeVisualization(1000, 0.04, planarRegionsList);
       AStarFootstepPlanner planner = new AStarFootstepPlanner(nodeChecker, heuristics, expansion, viz);
 
       // plan
       planner.setPlanarRegions(planarRegionsList);
       planner.setGoal(goal);
       planner.setInitialStanceFoot(startPose, startSide);
-      planner.plan();
 
-      viz.showAndSleep(true);
-      ThreadTools.sleepForever();
+      if (!visualize)
+      {
+         planner.setTimeout(0.1);
+         assertEquals(FootstepPlanningResult.OPTIMAL_SOLUTION, planner.plan());
+      }
+      else
+      {
+         planner.plan();
+         viz.showAndSleep(true);
+      }
    }
 }

@@ -17,6 +17,7 @@ import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.tools.thread.ThreadTools;
 
 public class FootstepNodeVisualization implements GraphVisualization
 {
@@ -202,6 +203,7 @@ public class FootstepNodeVisualization implements GraphVisualization
       if (autoplay)
          scs.play();
       scs.startOnAThread();
+      ThreadTools.sleepForever();
    }
 
    @Override
