@@ -6,6 +6,15 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
+/**
+ * Class that maintains a directed graph of FootstepNodes.
+ *
+ * The graph has to be connected and is grown by adding edges to known or new nodes. These
+ * edges must start at known nodes. The class is initialized with a start node and maintains
+ * shortest paths and costs to reach all nodes in the graph efficiently.
+ *
+ * @author Georg
+ */
 public class FootstepGraph
 {
    private final HashMap<FootstepEdge, EdgeCost> edgeCostMap = new HashMap<>();
@@ -21,6 +30,14 @@ public class FootstepGraph
       incomingBestEdge.put(startNode, edgeToStart);
    }
 
+   /**
+    * Adds an edge to the graph and updates all path and node costs affected. The edge must
+    * originate at a known node and the cost associated to moving along the edge must be given.
+    *
+    * @param startNode
+    * @param endNode
+    * @param transitionCost
+    */
    public void checkAndSetEdge(FootstepNode startNode, FootstepNode endNode, double transitionCost)
    {
       checkNodeExists(startNode);
@@ -50,6 +67,9 @@ public class FootstepGraph
       }
    }
 
+   /**
+    * Gets the cost associated to traveling from the start node to the given node.
+    */
    public double getCostFromStart(FootstepNode node)
    {
       checkNodeExists(node);
@@ -57,6 +77,10 @@ public class FootstepGraph
       return nodeCostMap.get(node).getNodeCost();
    }
 
+   /**
+    * Returns all nodes required to travel from the start node to the given node.
+    * The nodes returned include start and end node of the path.
+    */
    public List<FootstepNode> getPathFromStart(FootstepNode node)
    {
       checkNodeExists(node);
