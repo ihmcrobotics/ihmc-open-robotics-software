@@ -1,4 +1,4 @@
-package us.ihmc.robotics.stateMachines.state;
+package us.ihmc.robotics.stateMachines.eventBasedStateMachine;
 
 import java.util.ArrayList;
 import java.util.List;
