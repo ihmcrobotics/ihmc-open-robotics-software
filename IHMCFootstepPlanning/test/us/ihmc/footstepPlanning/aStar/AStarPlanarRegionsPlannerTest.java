@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 import org.junit.Test;
@@ -17,15 +18,23 @@ import us.ihmc.footstepPlanning.aStar.implementations.EuclidianBasedCost;
 import us.ihmc.footstepPlanning.aStar.implementations.EuclidianDistanceHeuristics;
 import us.ihmc.footstepPlanning.aStar.implementations.SimpleGridResolutionBasedExpansion;
 import us.ihmc.footstepPlanning.aStar.implementations.SimpleNodeChecker;
+import us.ihmc.footstepPlanning.aStar.implementations.SimpleSideBasedExpansion;
+import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicCoordinateSystem;
+import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
+import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.continuousIntegration.ContinuousIntegrationTools;
 import us.ihmc.tools.continuousIntegration.IntegrationCategory;
+import us.ihmc.tools.thread.ThreadTools;
 
 @ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
 public class AStarPlanarRegionsPlannerTest
@@ -113,6 +122,45 @@ public class AStarPlanarRegionsPlannerTest
       node = new FootstepNode(gridX * 3.8, -gridY * 8.1);
       assertEquals(4.0 * gridX, node.getX(), 1.0e-10);
       assertEquals(-8.0 * gridY, node.getY(), 1.0e-10);
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 300000)
+   public void testNodeExpansion()
+   {
+      FootstepNode node = new FootstepNode(0.0, 0.0, Math.PI, RobotSide.RIGHT);
+
+      SimpleSideBasedExpansion expansion = new SimpleSideBasedExpansion();
+      HashSet<FootstepNode> neighbors = expansion.expandNode(node);
+
+      YoVariableRegistry registry = new YoVariableRegistry("Test");
+      YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
+      SimulationConstructionSet scs = new SimulationConstructionSet(new Robot("Dummy"));
+
+      YoFramePose originPose = new YoFramePose("OrgionPose", ReferenceFrame.getWorldFrame(), registry);
+      originPose.setYawPitchRoll(node.getYaw(), 0.0, 0.0);
+      originPose.setXYZ(node.getX(), node.getY(), 0.0);
+      YoGraphicCoordinateSystem originNode = new YoGraphicCoordinateSystem("OrginNode", originPose, 0.4);
+      graphicsListRegistry.registerYoGraphic(getClass().getSimpleName(), originNode);
+
+      int count = 0;
+      for (FootstepNode neighbor : neighbors)
+      {
+         YoFramePose pose = new YoFramePose("NeighborPose" + count, ReferenceFrame.getWorldFrame(), registry);
+         pose.setYawPitchRoll(neighbor.getYaw(), 0.0, 0.0);
+         pose.setXYZ(neighbor.getX(), neighbor.getY(), 0.0);
+         YoGraphicCoordinateSystem neighborNode = new YoGraphicCoordinateSystem("NeighborNode" + count, pose, 0.1);
+         graphicsListRegistry.registerYoGraphic(getClass().getSimpleName(), neighborNode);
+         count++;
+      }
+
+      scs.addYoVariableRegistry(registry);
+      scs.addYoGraphicsListRegistry(graphicsListRegistry);
+      if (visualize)
+      {
+         scs.startOnAThread();
+         ThreadTools.sleepForever();
+      }
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)

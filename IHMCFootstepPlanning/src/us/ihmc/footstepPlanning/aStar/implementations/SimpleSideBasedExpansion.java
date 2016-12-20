@@ -13,11 +13,13 @@ public class SimpleSideBasedExpansion implements FootstepNodeExpansion
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private double[] stepLengths = new double[] {0.0, FootstepNode.gridSizeX, 0.1, 0.2, 0.4};
-   private double[] stepWidths = new double[] {0.15, 0.3};
-   private double[] stepYaws = new double[] {0.0, FootstepNode.gridSizeYaw, Math.PI / 9.0};
-
+   private double maxYaw = Math.PI / 8.0;
    private double defaultStepWidth = 0.25;
+
+   private double[] stepLengths = new double[] {0.0, FootstepNode.gridSizeX, 0.1, 0.2, 0.4};
+   private double[] stepWidths = new double[] {0.15, defaultStepWidth - FootstepNode.gridSizeY, defaultStepWidth + FootstepNode.gridSizeY};
+   private double[] stepYaws = new double[] {0.0, FootstepNode.gridSizeYaw, maxYaw};
+
 
    @Override
    public HashSet<FootstepNode> expandNode(FootstepNode node)
@@ -33,6 +35,7 @@ public class SimpleSideBasedExpansion implements FootstepNodeExpansion
       RobotSide stepSide = node.getRobotSide().getOppositeSide();
       double ySign = stepSide.negateIfRightSide(1.0);
 
+      // walk forward and backward
       for (int i = 0; i < stepLengths.length; i++)
       {
          double stepLength = stepLengths[i];
@@ -54,6 +57,7 @@ public class SimpleSideBasedExpansion implements FootstepNodeExpansion
          }
       }
 
+      // side step
       for (int i = 0; i < stepWidths.length; i++)
       {
          double stepWidth = stepWidths[i];
@@ -61,7 +65,6 @@ public class SimpleSideBasedExpansion implements FootstepNodeExpansion
          sideStep.setY(ySign * stepWidth);
          sideStep.changeFrame(worldFrame);
          neighbors.add(new FootstepNode(sideStep.getX(), sideStep.getY(), node.getYaw(), stepSide));
-
       }
 
       return neighbors;
