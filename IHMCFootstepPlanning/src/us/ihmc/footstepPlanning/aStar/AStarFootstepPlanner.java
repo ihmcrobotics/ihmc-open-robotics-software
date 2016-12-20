@@ -87,6 +87,9 @@ public class AStarFootstepPlanner implements FootstepPlanner
    @Override
    public FootstepPlan getPlan()
    {
+      if (!graph.doesNodeExist(goalNode))
+         return null;
+
       FootstepPlan plan = new FootstepPlan();
       List<FootstepNode> path = graph.getPathFromStart(goalNode);
       for (FootstepNode node : path)
