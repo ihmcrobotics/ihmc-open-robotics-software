@@ -14,15 +14,17 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.time.TimeTools;
 
 public class AStarFootstepPlanner implements FootstepPlanner
 {
    private FootstepGraph graph;
-   private FootstepNode goalNode;
+   private SideDependentList<FootstepNode> goalNodes;
    private FootstepNode startNode;
    private HashSet<FootstepNode> expandedNodes;
    private PriorityQueue<FootstepNode> stack;
+   private FootstepNode goalNode;
 
    private final FootstepNodeChecker nodeChecker;
    private final GraphVisualization visualization;
@@ -69,10 +71,16 @@ public class AStarFootstepPlanner implements FootstepPlanner
       checkGoalType(goal);
       FramePose goalPose = goal.getGoalPoseBetweenFeet();
       ReferenceFrame goalFrame = new PoseReferenceFrame("GoalFrame", goalPose);
-      FramePose goalNodePose = new FramePose(goalFrame);
-      goalNodePose.setY(0.125);
-      goalNodePose.changeFrame(goalPose.getReferenceFrame());
-      goalNode = new FootstepNode(goalNodePose.getX(), goalNodePose.getY(), goalNodePose.getYaw(), RobotSide.LEFT);
+      goalNodes = new SideDependentList<FootstepNode>();
+
+      for (RobotSide side : RobotSide.values)
+      {
+         FramePose goalNodePose = new FramePose(goalFrame);
+         goalNodePose.setY(side.negateIfRightSide(0.125));
+         goalNodePose.changeFrame(goalPose.getReferenceFrame());
+         FootstepNode goalNode = new FootstepNode(goalNodePose.getX(), goalNodePose.getY(), goalNodePose.getYaw(), side);
+         goalNodes.put(side, goalNode);
+      }
    }
 
    @Override
@@ -115,19 +123,21 @@ public class AStarFootstepPlanner implements FootstepPlanner
    {
       if (startNode == null)
          throw new RuntimeException("Need to set initial conditions before planning.");
-      if (goalNode == null)
+      if (goalNodes == null)
          throw new RuntimeException("Need to set goal before planning.");
 
       graph = new FootstepGraph(startNode);
-      NodeComparator nodeComparator = new NodeComparator(graph, goalNode, heuristics);
+      NodeComparator nodeComparator = new NodeComparator(graph, goalNodes, heuristics);
       stack = new PriorityQueue<>(nodeComparator);
       stack.add(startNode);
       expandedNodes = new HashSet<>();
+      goalNode = null;
 
       if (visualization != null)
       {
          visualization.addNode(startNode, true);
-         visualization.addNode(goalNode, true);
+         for (RobotSide side : RobotSide.values)
+            visualization.addNode(goalNodes.get(side), true);
          visualization.tickAndUpdate();
       }
    }
@@ -149,8 +159,13 @@ public class AStarFootstepPlanner implements FootstepPlanner
             visualization.tickAndUpdate();
          }
 
-         if (nodeToExpand.equals(goalNode))
+         RobotSide nodeSide = nodeToExpand.getRobotSide();
+         if (nodeToExpand.equals(goalNodes.get(nodeSide)))
+         {
+            goalNode = goalNodes.get(nodeSide.getOppositeSide());
+            graph.checkAndSetEdge(nodeToExpand, goalNode, 0.0);
             break;
+         }
 
          HashSet<FootstepNode> neighbors = nodeExpansion.expandNode(nodeToExpand);
          for (FootstepNode neighbor : neighbors)
