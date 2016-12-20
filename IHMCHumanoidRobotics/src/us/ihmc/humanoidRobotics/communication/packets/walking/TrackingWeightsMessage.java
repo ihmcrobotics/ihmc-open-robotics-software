@@ -1,9 +1,9 @@
 package us.ihmc.humanoidRobotics.communication.packets.walking;
 
-import us.ihmc.communication.packets.Packet;
+import us.ihmc.communication.packets.TrackablePacket;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.TrackingWeightsCommand.BodyWeights;
 
-public class TrackingWeightsMessage extends Packet<TrackingWeightsMessage>
+public class TrackingWeightsMessage extends TrackablePacket<TrackingWeightsMessage>
 {
    BodyWeights bodyWeights;
    
