@@ -13,7 +13,6 @@ import javax.vecmath.Quat4d;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.avatar.MultiRobotTestInterface;
@@ -35,7 +34,6 @@ import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.time.GlobalTimer;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
@@ -105,7 +103,7 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
 
       setupKinematicsToolboxModule();
    }
-   @Ignore
+
    @ContinuousIntegrationTest(estimatedDuration = 30.0) // Tests if pelvis and chest are not affected (change in position & orientation) by a hand movement of 20cm in the positive x direction
    @Test(timeout = 160000)
    public void testSolvingForAHandPose() throws SimulationExceededMaximumTimeException, IOException
@@ -179,7 +177,7 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
 
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
-   @Ignore
+
    @ContinuousIntegrationTest(estimatedDuration = 30.0) // Tests position and orientation of the two hands after a movement of 20cm in the positive x direction
    @Test(timeout = 160000)
    public void testSolvingForBothHandPoses() throws SimulationExceededMaximumTimeException, IOException
@@ -249,7 +247,7 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
 
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
-   @Ignore
+
    @ContinuousIntegrationTest(estimatedDuration = 30.0) // Tests the selection matrix of a hand, sets a desired roll offset and makes sure it is reached
    @Test(timeout = 160000)
    public void testSolvingForHandSelectionMatrix() throws SimulationExceededMaximumTimeException, IOException
@@ -328,7 +326,7 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
 
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
-   @Ignore
+
    @ContinuousIntegrationTest(estimatedDuration = 30.0) // Tests the method setHandLinearControlOnly, sets desired angular offsets on both hands and makes sure they are not reached
    @Test(timeout = 160000)
    public void testSolvingForHandAngularLinearControl() throws SimulationExceededMaximumTimeException, IOException
@@ -419,7 +417,7 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
       
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
-   @Ignore
+
    @ContinuousIntegrationTest(estimatedDuration = 30.0) // Tests the method setHandLinearControlAndYawPitchOnly, sets a desired roll offset on one hand and makes sure it is not reached
    @Test(timeout = 160000)
    public void testSolvingForHandRollConstraint() throws SimulationExceededMaximumTimeException, IOException
@@ -484,7 +482,7 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
       
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
-   @Ignore
+
    @ContinuousIntegrationTest(estimatedDuration = 30.0) // Tests the selection matrix of the chest
    @Test(timeout = 160000)
    public void testSolvingForChestAngularControl() throws SimulationExceededMaximumTimeException, IOException
@@ -537,7 +535,7 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
       
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
-   @Ignore
+
    @ContinuousIntegrationTest(estimatedDuration = 30.0) // Tests the selection matrix of the pelvis 
    @Test(timeout = 160000)
    public void testSolvingForPelvisAngularControl() throws SimulationExceededMaximumTimeException, IOException
@@ -602,7 +600,7 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
 
       RobotSide robotSide = RobotSide.RIGHT;
 
-      SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet();
+      SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet();      
       String nameSpace = robotSide.getCamelCaseNameForStartOfExpression() + HandControlModule.class.getSimpleName();
       String varname = nameSpace + "SwitchTime";
       double initialSwitchTime = scs.getVariable(nameSpace, varname).getValueAsDouble();
@@ -622,7 +620,9 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
       ReferenceFrame pelvisControlFrame = drcBehaviorTestHelper.getControllerFullRobotModel().getPelvis().getBodyFixedFrame();
       FrameOrientation initialPelvisOrientation = new FrameOrientation(pelvisControlFrame);
       initialPelvisOrientation.changeFrame(ReferenceFrame.getWorldFrame());
+      
       ik.setDesiredChestOrientation(initialChestOrientation);
+      ik.setDesiredPelvisOrientation(initialPelvisOrientation);
 
       FramePose desiredHandPose = new FramePose(handControlFrame);
       desiredHandPose.changeFrame(ReferenceFrame.getWorldFrame());
@@ -649,10 +649,11 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
       Quat4d controllerDesiredChestOrientation = EndToEndChestTrajectoryMessageTest.findControllerDesiredOrientation(scs);
       Quat4d controllerDesiredPelvisOrientation = EndToEndPelvisTrajectoryMessageTest.findControllerDesiredOrientation(scs);
 
-      double angleEpsilon = Math.toRadians(10);
+      double chestAngleEpsilon = Math.toRadians(1.0e-2);
+      double pelvisAngleEpsilon = Math.toRadians(1.0e-1);
 
-      assertTrue(isOrientationEqual(initialChestOrientation.getQuaternion(), controllerDesiredChestOrientation, angleEpsilon));
-      assertTrue(isOrientationEqual(initialPelvisOrientation.getQuaternion(), controllerDesiredPelvisOrientation, angleEpsilon));
+      assertTrue(isOrientationEqual(initialChestOrientation.getQuaternion(), controllerDesiredChestOrientation, chestAngleEpsilon));
+      assertTrue(isOrientationEqual(initialPelvisOrientation.getQuaternion(), controllerDesiredPelvisOrientation, pelvisAngleEpsilon));
 
       Point3d controllerDesiredHandPosition = EndToEndHandTrajectoryMessageTest.findControllerDesiredPosition(robotSide, scs);
 
@@ -676,7 +677,6 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
       angleDifference.set(quatDifference);
       AngleTools.trimAngleMinusPiToPi(angleDifference.getAngle());
 
-      System.out.println(angleDifference.getAngle());
       return Math.abs(angleDifference.getAngle()) < angleEpsilon;
    }
 
