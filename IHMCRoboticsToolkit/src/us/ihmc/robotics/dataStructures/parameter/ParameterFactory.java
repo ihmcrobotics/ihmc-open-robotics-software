@@ -1,4 +1,4 @@
-package us.ihmc.quadrupedRobotics.params;
+package us.ihmc.robotics.dataStructures.parameter;
 
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
