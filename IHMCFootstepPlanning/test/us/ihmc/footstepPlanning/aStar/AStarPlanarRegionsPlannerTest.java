@@ -1,17 +1,19 @@
 package us.ihmc.footstepPlanning.aStar;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
-import java.util.PriorityQueue;
 
 import org.junit.Test;
 
+import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlannerGoal;
 import us.ihmc.footstepPlanning.FootstepPlannerGoalType;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
+import us.ihmc.footstepPlanning.SimpleFootstep;
+import us.ihmc.footstepPlanning.aStar.implementations.EuclidianBasedCost;
 import us.ihmc.footstepPlanning.aStar.implementations.EuclidianDistanceHeuristics;
 import us.ihmc.footstepPlanning.aStar.implementations.SimpleGridResolutionBasedExpansion;
 import us.ihmc.footstepPlanning.aStar.implementations.SimpleNodeChecker;
@@ -22,55 +24,13 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationTools;
 import us.ihmc.tools.continuousIntegration.IntegrationCategory;
 
-@ContinuousIntegrationPlan(categories = IntegrationCategory.EXCLUDE)
+@ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
 public class AStarPlanarRegionsPlannerTest
 {
-   private class Node
-   {
-      private final double cost;
-
-      public Node(double cost)
-      {
-         this.cost = cost;
-      }
-
-      public double getCost()
-      {
-         return cost;
-      }
-   }
-
-   private class NodeComparator implements Comparator<Node>
-   {
-      @Override
-      public int compare(Node o1, Node o2)
-      {
-         double cost1 = o1.getCost();
-         double cost2 = o2.getCost();
-         return cost1 < cost2 ? -1 : 1;
-      }
-   }
-
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 3000)
-   public void testPriorityQueue()
-   {
-      double[] expected = new double[] {1.0, 2.0, 6.0, 9.0};
-      PriorityQueue<Node> nodes = new PriorityQueue<>(new NodeComparator());
-      nodes.add(new Node(1.0));
-      nodes.add(new Node(6.0));
-      nodes.add(new Node(2.0));
-      nodes.add(new Node(9.0));
-
-      int count = 0;
-      while (!nodes.isEmpty())
-      {
-         Node node = nodes.poll();
-         assertEquals(expected[count++], node.getCost(), 1.0e-10);
-      }
-   }
+   private static final boolean visualize = !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 3000)
@@ -159,8 +119,6 @@ public class AStarPlanarRegionsPlannerTest
    @Test(timeout = 300000)
    public void testSimpleExpansion()
    {
-      boolean visualize = true;
-
       // make planar regions
       PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
       generator.translate(0.0, 0.0, 0.0001);
@@ -184,10 +142,11 @@ public class AStarPlanarRegionsPlannerTest
       SimpleNodeChecker nodeChecker = new SimpleNodeChecker();
       EuclidianDistanceHeuristics heuristics = new EuclidianDistanceHeuristics();
       SimpleGridResolutionBasedExpansion expansion = new SimpleGridResolutionBasedExpansion();
+      EuclidianBasedCost stepCostCalculator = new EuclidianBasedCost();
       FootstepNodeVisualization viz = null;
       if (visualize)
          viz = new FootstepNodeVisualization(1000, 0.04, planarRegionsList);
-      AStarFootstepPlanner planner = new AStarFootstepPlanner(nodeChecker, heuristics, expansion, viz);
+      AStarFootstepPlanner planner = new AStarFootstepPlanner(nodeChecker, heuristics, expansion, stepCostCalculator, viz);
 
       // plan
       planner.setPlanarRegions(planarRegionsList);
@@ -198,6 +157,11 @@ public class AStarPlanarRegionsPlannerTest
       {
          planner.setTimeout(0.1);
          assertEquals(FootstepPlanningResult.OPTIMAL_SOLUTION, planner.plan());
+         FootstepPlan plan = planner.getPlan();
+         SimpleFootstep lastStep = plan.getFootstep(plan.getNumberOfSteps() - 1);
+         FramePose achievedGoalPose = new FramePose();
+         lastStep.getSoleFramePose(achievedGoalPose);
+         assertTrue(goalPose.epsilonEquals(achievedGoalPose, FootstepNode.gridSizeX));
       }
       else
       {
