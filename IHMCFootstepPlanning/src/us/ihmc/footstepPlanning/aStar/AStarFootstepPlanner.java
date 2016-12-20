@@ -1,10 +1,11 @@
 package us.ihmc.footstepPlanning.aStar;
 
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.PriorityQueue;
+
+import javax.vecmath.Vector3d;
 
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlanner;
@@ -12,6 +13,7 @@ import us.ihmc.footstepPlanning.FootstepPlannerGoal;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class AStarFootstepPlanner implements FootstepPlanner
@@ -56,8 +58,8 @@ public class AStarFootstepPlanner implements FootstepPlanner
    @Override
    public FootstepPlanningResult plan()
    {
-      FootstepNode startNode = new FootstepNode(0.0, 0.0);
-      FootstepNode goalNode = new FootstepNode(1.0, 0.0);
+      FootstepNode startNode = new FootstepNode(0.0, 0.0, 0.0, RobotSide.LEFT);
+      FootstepNode goalNode = new FootstepNode(1.0, 0.0, 0.0, RobotSide.LEFT);
 
       if (visualization != null)
       {
@@ -88,7 +90,7 @@ public class AStarFootstepPlanner implements FootstepPlanner
          if (nodeToExpand.equals(goalNode))
             break;
 
-         List<FootstepNode> neighbors = computeNeighbors(nodeToExpand);
+         HashSet<FootstepNode> neighbors = computeNeighbors(nodeToExpand);
          for (FootstepNode neighbor : neighbors)
          {
             if (!nodeChecker.isNodeValid(neighbor))
@@ -114,13 +116,34 @@ public class AStarFootstepPlanner implements FootstepPlanner
       return FootstepPlanningResult.OPTIMAL_SOLUTION;
    }
 
-   private List<FootstepNode> computeNeighbors(FootstepNode node)
+   private HashSet<FootstepNode> computeNeighbors(FootstepNode node)
    {
-      ArrayList<FootstepNode> neighbors = new ArrayList<>();
-      neighbors.add(new FootstepNode(node.getX() + FootstepNode.gridSizeX, node.getY()));
-      neighbors.add(new FootstepNode(node.getX() - FootstepNode.gridSizeX, node.getY()));
-      neighbors.add(new FootstepNode(node.getX(), node.getY() + FootstepNode.gridSizeY));
-      neighbors.add(new FootstepNode(node.getX(), node.getY() - FootstepNode.gridSizeY));
+      RobotSide stepSide = node.getRobotSide().getOppositeSide();
+      double yOffset = stepSide.negateIfLeftSide(FootstepNode.gridSizeY);
+      double stanceYaw = node.getYaw();
+
+      HashSet<FootstepNode> neighbors = new HashSet<>();
+      double yawGrid = FootstepNode.gridSizeYaw;
+      double[] neighborYaws = new double[] {stanceYaw - yawGrid, stanceYaw, stanceYaw + yawGrid};
+
+      for (int i = 0; i < neighborYaws.length; i++)
+      {
+         double neighborYaw = neighborYaws[i];
+         Vector3d offset1 = new Vector3d(FootstepNode.gridSizeX, yOffset, 0.0);
+         Vector3d offset2 = new Vector3d(-FootstepNode.gridSizeX, yOffset, 0.0);
+         Vector3d offset3 = new Vector3d(0.0, yOffset, 0.0);
+
+         RigidBodyTransform transform = new RigidBodyTransform();
+         transform.setRotationYawAndZeroTranslation(neighborYaw);
+         transform.transform(offset1);
+         transform.transform(offset2);
+         transform.transform(offset3);
+
+         neighbors.add(new FootstepNode(node.getX() + offset1.getX(), node.getY() + offset1.getY(), neighborYaw, stepSide));
+         neighbors.add(new FootstepNode(node.getX() + offset2.getX(), node.getY() + offset2.getY(), neighborYaw, stepSide));
+         neighbors.add(new FootstepNode(node.getX() + offset3.getX(), node.getY() + offset3.getY(), neighborYaw, stepSide));
+      }
+
       return neighbors;
    }
 

@@ -83,19 +83,21 @@ public class FootstepNodeVisualization implements GraphVisualization
    @Override
    public void addNode(FootstepNode node, boolean active)
    {
-      if (nodeExists(node))
+      FootstepNode localNode = creat2dNode(node);
+
+      if (nodeExists(localNode))
       {
-         if (isNodeActive(node) == active)
+         if (isNodeActive(localNode) == active)
             return;
 
          if (active)
-            setNodeActive(node);
+            setNodeActive(localNode);
          else
-            setNodeInactive(node);
+            setNodeInactive(localNode);
          return;
       }
 
-      addNodeUnsafe(node, active);
+      addNodeUnsafe(localNode, active);
    }
 
    private void addNodeUnsafe(FootstepNode node, boolean active)
@@ -119,51 +121,57 @@ public class FootstepNodeVisualization implements GraphVisualization
    @Override
    public void setNodeActive(FootstepNode node)
    {
-      if (nodeExists(node))
+      FootstepNode localNode = creat2dNode(node);
+
+      if (nodeExists(localNode))
       {
-         if (isNodeActive(node))
+         if (isNodeActive(localNode))
             return;
 
-         YoGraphicPosition inactiveDisplay = inactiveNodes.remove(node);
+         YoGraphicPosition inactiveDisplay = inactiveNodes.remove(localNode);
          YoGraphicPosition activeDisplay = activeNodeGraphicsQueue.poll();
 
          hideGraphics(inactiveDisplay);
-         setGraphics(activeDisplay, node);
+         setGraphics(activeDisplay, localNode);
 
-         activeNodes.put(node, activeDisplay);
+         activeNodes.put(localNode, activeDisplay);
          inactiveNodeGraphicsQueue.add(inactiveDisplay);
       }
       else
-         addNodeUnsafe(node, true);
+         addNodeUnsafe(localNode, true);
    }
 
    @Override
    public void setNodeInactive(FootstepNode node)
    {
-      if (nodeExists(node))
+      FootstepNode localNode = creat2dNode(node);
+
+      if (nodeExists(localNode))
       {
-         if (!isNodeActive(node))
+         if (!isNodeActive(localNode))
             return;
 
-         YoGraphicPosition inactiveDisplay = activeNodes.remove(node);
+         YoGraphicPosition inactiveDisplay = activeNodes.remove(localNode);
          YoGraphicPosition activeDisplay = inactiveNodeGraphicsQueue.poll();
 
          hideGraphics(inactiveDisplay);
-         setGraphics(activeDisplay, node);
+         setGraphics(activeDisplay, localNode);
 
-         inactiveNodes.put(node, activeDisplay);
+         inactiveNodes.put(localNode, activeDisplay);
          activeNodeGraphicsQueue.add(inactiveDisplay);
       }
       else
-         addNodeUnsafe(node, false);
+         addNodeUnsafe(localNode, false);
    }
 
    @Override
    public boolean nodeExists(FootstepNode node)
    {
-      if (activeNodes.containsKey(node))
+      FootstepNode localNode = creat2dNode(node);
+
+      if (activeNodes.containsKey(localNode))
          return true;
-      if (inactiveNodes.containsKey(node))
+      if (inactiveNodes.containsKey(localNode))
          return true;
       return false;
    }
@@ -202,6 +210,11 @@ public class FootstepNodeVisualization implements GraphVisualization
       scs.setTime(time.getDoubleValue());
       scs.tickAndUpdate();
       time.add(1.0);
+   }
+
+   private FootstepNode creat2dNode(FootstepNode node)
+   {
+      return new FootstepNode(node.getX(), node.getY());
    }
 
    /**
