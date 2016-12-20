@@ -46,6 +46,11 @@ public class AStarFootstepPlanner implements FootstepPlanner
       this.visualization = visualization;
    }
 
+   public void setWeight(double weight)
+   {
+      heuristics.setWeight(weight);
+   }
+
    public void setTimeout(double timeoutInSeconds)
    {
       timeout = timeoutInSeconds;
