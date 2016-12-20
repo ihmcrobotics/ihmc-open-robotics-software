@@ -27,7 +27,7 @@ public class AStarOnFlatTest extends FootstepPlannerOnFlatGroundTest
    @Test(timeout = 300000)
    public void testJustStraightLine()
    {
-      super.testJustStraightLine(false);
+      super.testJustStraightLine(true);
    }
 
    @Override
@@ -35,7 +35,7 @@ public class AStarOnFlatTest extends FootstepPlannerOnFlatGroundTest
    @Test(timeout = 300000)
    public void testATightTurn()
    {
-      super.testATightTurn(false);
+      super.testATightTurn(true);
    }
 
    @Override
@@ -43,7 +43,7 @@ public class AStarOnFlatTest extends FootstepPlannerOnFlatGroundTest
    @Test(timeout = 300000)
    public void testStraightLineWithInitialTurn()
    {
-      super.testStraightLineWithInitialTurn(false);
+      super.testStraightLineWithInitialTurn(true);
    }
 
    @Override
@@ -51,7 +51,7 @@ public class AStarOnFlatTest extends FootstepPlannerOnFlatGroundTest
    @Test(timeout = 300000)
    public void testJustTurnInPlace()
    {
-      super.testJustTurnInPlace(false);
+      super.testJustTurnInPlace(true);
    }
 
    @Before
@@ -62,6 +62,7 @@ public class AStarOnFlatTest extends FootstepPlannerOnFlatGroundTest
       EuclidianDistanceHeuristics heuristics = new EuclidianDistanceHeuristics();
       SimpleSideBasedExpansion expansion = new SimpleSideBasedExpansion();
       EuclidianBasedCost stepCostCalculator = new EuclidianBasedCost();
+
       if (visualizePlanner)
          visualization = new FootstepNodeVisualization(1000, 1.0, null);
       planner = new AStarFootstepPlanner(nodeChecker, heuristics, expansion, stepCostCalculator, visualization);
