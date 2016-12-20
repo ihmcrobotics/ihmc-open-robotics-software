@@ -9,8 +9,16 @@ import java.util.PriorityQueue;
 
 import org.junit.Test;
 
+import us.ihmc.footstepPlanning.FootstepPlannerGoal;
+import us.ihmc.footstepPlanning.FootstepPlannerGoalType;
+import us.ihmc.footstepPlanning.aStar.implementations.EuclidianDistanceHeuristics;
+import us.ihmc.footstepPlanning.aStar.implementations.SimpleGridResolutionBasedExpansion;
+import us.ihmc.footstepPlanning.aStar.implementations.SimpleNodeChecker;
+import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.continuousIntegration.IntegrationCategory;
@@ -151,6 +159,7 @@ public class AStarPlanarRegionsPlannerTest
    @Test(timeout = 300000)
    public void testSimpleExpansion()
    {
+      // make planar regions
       PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
       generator.translate(0.0, 0.0, 0.0001);
       generator.addRectangle(0.4, 0.4);
@@ -160,10 +169,28 @@ public class AStarPlanarRegionsPlannerTest
       generator.addRectangle(0.4, 0.4);
       PlanarRegionsList planarRegionsList = generator.getPlanarRegionsList();
 
+      // make goal and initial conditions
+      FootstepPlannerGoal goal = new FootstepPlannerGoal();
+      goal.setFootstepPlannerGoalType(FootstepPlannerGoalType.POSE_BETWEEN_FEET);
+      FramePose goalPose = new FramePose(ReferenceFrame.getWorldFrame());
+      goalPose.setX(1.0);
+      goal.setGoalPoseBetweenFeet(goalPose);
+      FramePose startPose = new FramePose();
+      RobotSide startSide = RobotSide.LEFT;
+
+      // create planner
       FootstepNodeVisualization viz = new FootstepNodeVisualization(1000, 0.04, planarRegionsList);
-      AStarFootstepPlanner planner = new AStarFootstepPlanner(viz);
+      SimpleNodeChecker nodeChecker = new SimpleNodeChecker();
+      EuclidianDistanceHeuristics heuristics = new EuclidianDistanceHeuristics();
+      SimpleGridResolutionBasedExpansion expansion = new SimpleGridResolutionBasedExpansion();
+      AStarFootstepPlanner planner = new AStarFootstepPlanner(nodeChecker, heuristics, expansion, viz);
+
+      // plan
       planner.setPlanarRegions(planarRegionsList);
+      planner.setGoal(goal);
+      planner.setInitialStanceFoot(startPose, startSide);
       planner.plan();
+
       viz.showAndSleep(true);
       ThreadTools.sleepForever();
    }

@@ -1,65 +1,105 @@
 package us.ihmc.footstepPlanning.aStar;
 
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.PriorityQueue;
 
-import javax.vecmath.Vector3d;
-
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlanner;
 import us.ihmc.footstepPlanning.FootstepPlannerGoal;
+import us.ihmc.footstepPlanning.FootstepPlannerGoalType;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class AStarFootstepPlanner implements FootstepPlanner
 {
    private FootstepGraph graph;
+   private FootstepNode goalNode;
+   private FootstepNode startNode;
    private HashSet<FootstepNode> expandedNodes;
    private PriorityQueue<FootstepNode> stack;
-   private FootstepNodeValidityChecker nodeChecker;
 
+   private final FootstepNodeChecker nodeChecker;
    private final GraphVisualization visualization;
+   private final CostToGoHeuristics heuristics;
+   private final FootstepNodeExpansion nodeExpansion;
 
-   public AStarFootstepPlanner()
+   public AStarFootstepPlanner(FootstepNodeChecker nodeChecker, CostToGoHeuristics heuristics, FootstepNodeExpansion expansion)
    {
-      this(null);
+      this(nodeChecker, heuristics, expansion, null);
    }
 
-   public AStarFootstepPlanner(GraphVisualization visualization)
+   public AStarFootstepPlanner(FootstepNodeChecker nodeChecker, CostToGoHeuristics heuristics, FootstepNodeExpansion nodeExpansion,
+         GraphVisualization visualization)
    {
+      this.nodeChecker = nodeChecker;
+      this.heuristics = heuristics;
+      this.nodeExpansion = nodeExpansion;
       this.visualization = visualization;
    }
 
    @Override
    public void setInitialStanceFoot(FramePose stanceFootPose, RobotSide side)
    {
-      // TODO Auto-generated method stub
-
+      startNode = new FootstepNode(stanceFootPose.getX(), stanceFootPose.getY(), stanceFootPose.getYaw(), side);
    }
 
    @Override
    public void setGoal(FootstepPlannerGoal goal)
    {
-      // TODO Auto-generated method stub
-
+      checkGoalType(goal);
+      FramePose goalPose = goal.getGoalPoseBetweenFeet();
+      goalNode = new FootstepNode(goalPose.getX(), goalPose.getY(), goalPose.getYaw(), RobotSide.LEFT);
    }
 
    @Override
    public void setPlanarRegions(PlanarRegionsList planarRegionsList)
    {
-      nodeChecker = new FootstepNodeValidityChecker(planarRegionsList);
+      nodeChecker.setPlanarRegions(planarRegionsList);
    }
 
    @Override
    public FootstepPlanningResult plan()
    {
-      FootstepNode startNode = new FootstepNode(0.0, 0.0, 0.0, RobotSide.LEFT);
-      FootstepNode goalNode = new FootstepNode(1.0, 0.0, 0.0, RobotSide.LEFT);
+      initialize();
+      planInternal();
+      return checkResult();
+   }
+
+   @Override
+   public FootstepPlan getPlan()
+   {
+      FootstepPlan plan = new FootstepPlan();
+      List<FootstepNode> path = graph.getPathFromStart(goalNode);
+      for (FootstepNode node : path)
+         plan.addFootstep(node.getRobotSide(), createPoseFromNode(node));
+      return plan;
+   }
+
+   private FramePose createPoseFromNode(FootstepNode node)
+   {
+      FramePose pose = new FramePose(ReferenceFrame.getWorldFrame());
+      pose.setYawPitchRoll(node.getYaw(), 0.0, 0.0);
+      pose.setX(node.getX());
+      pose.setY(node.getY());
+      return pose;
+   }
+
+   private void initialize()
+   {
+      if (startNode == null)
+         throw new RuntimeException("Need to set initial conditions before planning.");
+      if (goalNode == null)
+         throw new RuntimeException("Need to set goal before planning.");
+
+      graph = new FootstepGraph(startNode);
+      NodeComparator nodeComparator = new NodeComparator(graph, goalNode, heuristics);
+      stack = new PriorityQueue<>(nodeComparator);
+      stack.add(startNode);
+      expandedNodes = new HashSet<>();
 
       if (visualization != null)
       {
@@ -67,13 +107,10 @@ public class AStarFootstepPlanner implements FootstepPlanner
          visualization.addNode(goalNode, true);
          visualization.tickAndUpdate();
       }
+   }
 
-      graph = new FootstepGraph(startNode);
-      stack = new PriorityQueue<>(new NodeComparator(graph, goalNode));
-      expandedNodes = new HashSet<>();
-
-      stack.add(startNode);
-
+   private void planInternal()
+   {
       while (!stack.isEmpty())
       {
          FootstepNode nodeToExpand = stack.poll();
@@ -90,7 +127,7 @@ public class AStarFootstepPlanner implements FootstepPlanner
          if (nodeToExpand.equals(goalNode))
             break;
 
-         HashSet<FootstepNode> neighbors = computeNeighbors(nodeToExpand);
+         HashSet<FootstepNode> neighbors = nodeExpansion.expandNode(nodeToExpand);
          for (FootstepNode neighbor : neighbors)
          {
             if (!nodeChecker.isNodeValid(neighbor))
@@ -101,7 +138,10 @@ public class AStarFootstepPlanner implements FootstepPlanner
             stack.add(neighbor);
          }
       }
+   }
 
+   private FootstepPlanningResult checkResult()
+   {
       if (stack.isEmpty())
          return FootstepPlanningResult.NO_PATH_EXISTS;
 
@@ -113,67 +153,15 @@ public class AStarFootstepPlanner implements FootstepPlanner
          visualization.tickAndUpdate();
       }
 
-      return FootstepPlanningResult.OPTIMAL_SOLUTION;
+      if (heuristics.getWeight() <= 1.0)
+         return FootstepPlanningResult.OPTIMAL_SOLUTION;
+      return FootstepPlanningResult.SUB_OPTIMAL_SOLUTION;
    }
 
-   private HashSet<FootstepNode> computeNeighbors(FootstepNode node)
+   private void checkGoalType(FootstepPlannerGoal goal)
    {
-      RobotSide stepSide = node.getRobotSide().getOppositeSide();
-      double yOffset = stepSide.negateIfLeftSide(FootstepNode.gridSizeY);
-      double stanceYaw = node.getYaw();
-
-      HashSet<FootstepNode> neighbors = new HashSet<>();
-      double yawGrid = FootstepNode.gridSizeYaw;
-      double[] neighborYaws = new double[] {stanceYaw - yawGrid, stanceYaw, stanceYaw + yawGrid};
-
-      for (int i = 0; i < neighborYaws.length; i++)
-      {
-         double neighborYaw = neighborYaws[i];
-         Vector3d offset1 = new Vector3d(FootstepNode.gridSizeX, yOffset, 0.0);
-         Vector3d offset2 = new Vector3d(-FootstepNode.gridSizeX, yOffset, 0.0);
-         Vector3d offset3 = new Vector3d(0.0, yOffset, 0.0);
-
-         RigidBodyTransform transform = new RigidBodyTransform();
-         transform.setRotationYawAndZeroTranslation(neighborYaw);
-         transform.transform(offset1);
-         transform.transform(offset2);
-         transform.transform(offset3);
-
-         neighbors.add(new FootstepNode(node.getX() + offset1.getX(), node.getY() + offset1.getY(), neighborYaw, stepSide));
-         neighbors.add(new FootstepNode(node.getX() + offset2.getX(), node.getY() + offset2.getY(), neighborYaw, stepSide));
-         neighbors.add(new FootstepNode(node.getX() + offset3.getX(), node.getY() + offset3.getY(), neighborYaw, stepSide));
-      }
-
-      return neighbors;
+      FootstepPlannerGoalType supportedGoalType = FootstepPlannerGoalType.POSE_BETWEEN_FEET;
+      if (!(goal.getFootstepPlannerGoalType() == supportedGoalType))
+         throw new RuntimeException("Planner does not support goals other then " + supportedGoalType);
    }
-
-   @Override
-   public FootstepPlan getPlan()
-   {
-      // TODO Auto-generated method stub
-      return null;
-   }
-
-   private class NodeComparator implements Comparator<FootstepNode>
-   {
-      private final FootstepGraph graph;
-      private final FootstepNode goalNode;
-
-      public NodeComparator(FootstepGraph graph, FootstepNode goalNode)
-      {
-         this.graph = graph;
-         this.goalNode = goalNode;
-      }
-
-      @Override
-      public int compare(FootstepNode o1, FootstepNode o2)
-      {
-         double cost1 = graph.getCostFromStart(o1) + FootstepHeuristics.computeEuclidianHeuristics(o1, goalNode);
-         double cost2 = graph.getCostFromStart(o2) + FootstepHeuristics.computeEuclidianHeuristics(o2, goalNode);
-         if (cost1 == cost2) return 0;
-         return cost1 < cost2 ? -1 : 1;
-      }
-
-   }
-
 }
