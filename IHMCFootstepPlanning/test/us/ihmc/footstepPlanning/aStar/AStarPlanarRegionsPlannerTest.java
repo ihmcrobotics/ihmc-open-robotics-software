@@ -155,13 +155,22 @@ public class AStarPlanarRegionsPlannerTest
 
       if (!visualize)
       {
-         planner.setTimeout(0.1);
          assertEquals(FootstepPlanningResult.OPTIMAL_SOLUTION, planner.plan());
          FootstepPlan plan = planner.getPlan();
          SimpleFootstep lastStep = plan.getFootstep(plan.getNumberOfSteps() - 1);
          FramePose achievedGoalPose = new FramePose();
          lastStep.getSoleFramePose(achievedGoalPose);
          assertTrue(goalPose.epsilonEquals(achievedGoalPose, FootstepNode.gridSizeX));
+
+         planner.setWeight(5.0);
+         assertEquals(FootstepPlanningResult.SUB_OPTIMAL_SOLUTION, planner.plan());
+
+         planner.setTimeout(1.0e-10);
+         assertEquals(FootstepPlanningResult.TIMED_OUT_BEFORE_SOLUTION, planner.plan());
+
+         planner.setTimeout(Double.POSITIVE_INFINITY);
+         planner.setPlanarRegions(new PlanarRegionsList());
+         assertEquals(FootstepPlanningResult.NO_PATH_EXISTS, planner.plan());
       }
       else
       {
