@@ -58,6 +58,7 @@ dependencies {
     compile group: 'org.ejml', name: 'core', version: '0.28'
     compile group: 'org.ejml', name: 'dense64', version: '0.28'
     compile group: 'org.javassist', name: 'javassist', version: '3.18.1-GA'
+    compile group: 'com.google.guava', name: 'guava', version: '18.0'
 
     // NOTE: IHMCRoboticsToolkit should not depend on any other IHMC project(!), especially it should not depend on IHMCJavaToolkit.
 

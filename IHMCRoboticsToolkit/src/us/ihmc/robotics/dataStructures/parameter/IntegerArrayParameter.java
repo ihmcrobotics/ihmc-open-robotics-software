@@ -1,4 +1,4 @@
-package us.ihmc.quadrupedRobotics.params;
+package us.ihmc.robotics.dataStructures.parameter;
 
 import com.google.common.primitives.Ints;
 import org.apache.commons.lang3.StringUtils;
