@@ -27,20 +27,22 @@ public class AStarFootstepPlanner implements FootstepPlanner
    private final GraphVisualization visualization;
    private final CostToGoHeuristics heuristics;
    private final FootstepNodeExpansion nodeExpansion;
+   private final FootstepCost stepCostCalculator;
 
    private double timeout = Double.POSITIVE_INFINITY;
 
-   public AStarFootstepPlanner(FootstepNodeChecker nodeChecker, CostToGoHeuristics heuristics, FootstepNodeExpansion expansion)
+   public AStarFootstepPlanner(FootstepNodeChecker nodeChecker, CostToGoHeuristics heuristics, FootstepNodeExpansion expansion, FootstepCost stepCostCalculator)
    {
-      this(nodeChecker, heuristics, expansion, null);
+      this(nodeChecker, heuristics, expansion, stepCostCalculator, null);
    }
 
    public AStarFootstepPlanner(FootstepNodeChecker nodeChecker, CostToGoHeuristics heuristics, FootstepNodeExpansion nodeExpansion,
-         GraphVisualization visualization)
+         FootstepCost stepCostCalculator, GraphVisualization visualization)
    {
       this.nodeChecker = nodeChecker;
       this.heuristics = heuristics;
       this.nodeExpansion = nodeExpansion;
+      this.stepCostCalculator = stepCostCalculator;
       this.visualization = visualization;
    }
 
@@ -143,7 +145,7 @@ public class AStarFootstepPlanner implements FootstepPlanner
             if (!nodeChecker.isNodeValid(neighbor))
                continue;
 
-            double cost = nodeToExpand.euclideanDistance(neighbor);
+            double cost = stepCostCalculator.compute(nodeToExpand, neighbor);
             graph.checkAndSetEdge(nodeToExpand, neighbor, cost);
             stack.add(neighbor);
          }
