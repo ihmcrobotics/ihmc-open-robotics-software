@@ -21,6 +21,11 @@ import us.ihmc.footstepPlanning.FootstepPlanner;
 import us.ihmc.footstepPlanning.FootstepPlannerGoal;
 import us.ihmc.footstepPlanning.FootstepPlannerGoalType;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
+import us.ihmc.footstepPlanning.aStar.AStarFootstepPlanner;
+import us.ihmc.footstepPlanning.aStar.implementations.EuclidianBasedCost;
+import us.ihmc.footstepPlanning.aStar.implementations.EuclidianDistanceHeuristics;
+import us.ihmc.footstepPlanning.aStar.implementations.SimpleNodeChecker;
+import us.ihmc.footstepPlanning.aStar.implementations.SimpleSideBasedExpansion;
 import us.ihmc.footstepPlanning.graphSearch.BipedalFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.PlanarRegionBipedalFootstepPlanner;
 import us.ihmc.footstepPlanning.graphSearch.PlanarRegionBipedalFootstepPlannerVisualizer;
@@ -50,7 +55,8 @@ public class FootstepPlanningToolboxController extends ToolboxController
    private enum Planners
    {
       PLANAR_REGION_BIPEDAL,
-      PLAN_THEN_SNAP
+      PLAN_THEN_SNAP,
+      A_STAR
    }
    private final EnumYoVariable<Planners> activePlanner = new EnumYoVariable<>("activePlanner", registry, Planners.class);
    private final EnumMap<Planners, FootstepPlanner> plannerMap = new EnumMap<>(Planners.class);
@@ -85,10 +91,20 @@ public class FootstepPlanningToolboxController extends ToolboxController
 
       plannerMap.put(Planners.PLANAR_REGION_BIPEDAL, createPlanarRegionBipedalPlanner(planningPolygonsInSoleFrame, controllerPolygonsInSoleFrame));
       plannerMap.put(Planners.PLAN_THEN_SNAP, new PlanThenSnapPlanner(new TurnWalkTurnPlanner(), planningPolygonsInSoleFrame));
-      activePlanner.set(Planners.PLANAR_REGION_BIPEDAL);
+      plannerMap.put(Planners.A_STAR, createAStarPlanner());
+      activePlanner.set(Planners.A_STAR);
 
       usePlanarRegions.set(true);
       isDone.set(true);
+   }
+
+   private FootstepPlanner createAStarPlanner()
+   {
+      SimpleNodeChecker nodeChecker = new SimpleNodeChecker();
+      EuclidianDistanceHeuristics heuristics = new EuclidianDistanceHeuristics();
+      SimpleSideBasedExpansion expansion = new SimpleSideBasedExpansion();
+      EuclidianBasedCost stepCostCalculator = new EuclidianBasedCost();
+      return new AStarFootstepPlanner(nodeChecker, heuristics, expansion, stepCostCalculator);
    }
 
    private PlanarRegionBipedalFootstepPlanner createPlanarRegionBipedalPlanner(SideDependentList<ConvexPolygon2d> footPolygonsInSoleFrame, SideDependentList<ConvexPolygon2d> controllerPolygonsInSoleFrame)
