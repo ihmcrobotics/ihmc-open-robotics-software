@@ -11,6 +11,7 @@ import us.ihmc.footstepPlanning.FootstepPlannerGoalType;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.time.TimeTools;
@@ -67,7 +68,11 @@ public class AStarFootstepPlanner implements FootstepPlanner
    {
       checkGoalType(goal);
       FramePose goalPose = goal.getGoalPoseBetweenFeet();
-      goalNode = new FootstepNode(goalPose.getX(), goalPose.getY(), goalPose.getYaw(), RobotSide.LEFT);
+      ReferenceFrame goalFrame = new PoseReferenceFrame("GoalFrame", goalPose);
+      FramePose goalNodePose = new FramePose(goalFrame);
+      goalNodePose.setY(0.125);
+      goalNodePose.changeFrame(goalPose.getReferenceFrame());
+      goalNode = new FootstepNode(goalNodePose.getX(), goalNodePose.getY(), goalNodePose.getYaw(), RobotSide.LEFT);
    }
 
    @Override
