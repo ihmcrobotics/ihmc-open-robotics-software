@@ -105,8 +105,8 @@ public class AStarFootstepPlanner implements FootstepPlanner
 
       FootstepPlan plan = new FootstepPlan();
       List<FootstepNode> path = graph.getPathFromStart(goalNode);
-      for (FootstepNode node : path)
-         plan.addFootstep(node.getRobotSide(), createPoseFromNode(node));
+      for (int i = 1; i < path.size(); i++)
+         plan.addFootstep(path.get(i).getRobotSide(), createPoseFromNode(path.get(i)));
       return plan;
    }
 
