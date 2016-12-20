@@ -13,6 +13,7 @@ import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.time.TimeTools;
 
 public class AStarFootstepPlanner implements FootstepPlanner
 {
@@ -27,6 +28,8 @@ public class AStarFootstepPlanner implements FootstepPlanner
    private final CostToGoHeuristics heuristics;
    private final FootstepNodeExpansion nodeExpansion;
 
+   private double timeout = Double.POSITIVE_INFINITY;
+
    public AStarFootstepPlanner(FootstepNodeChecker nodeChecker, CostToGoHeuristics heuristics, FootstepNodeExpansion expansion)
    {
       this(nodeChecker, heuristics, expansion, null);
@@ -39,6 +42,11 @@ public class AStarFootstepPlanner implements FootstepPlanner
       this.heuristics = heuristics;
       this.nodeExpansion = nodeExpansion;
       this.visualization = visualization;
+   }
+
+   public void setTimeout(double timeoutInSeconds)
+   {
+      timeout = timeoutInSeconds;
    }
 
    @Override
@@ -111,6 +119,8 @@ public class AStarFootstepPlanner implements FootstepPlanner
 
    private void planInternal()
    {
+      long planningStartTime = System.nanoTime();
+
       while (!stack.isEmpty())
       {
          FootstepNode nodeToExpand = stack.poll();
@@ -137,6 +147,10 @@ public class AStarFootstepPlanner implements FootstepPlanner
             graph.checkAndSetEdge(nodeToExpand, neighbor, cost);
             stack.add(neighbor);
          }
+
+         long timeInNano = System.nanoTime();
+         if (TimeTools.nanoSecondstoSeconds(timeInNano - planningStartTime) > timeout)
+            break;
       }
    }
 
@@ -144,6 +158,8 @@ public class AStarFootstepPlanner implements FootstepPlanner
    {
       if (stack.isEmpty())
          return FootstepPlanningResult.NO_PATH_EXISTS;
+      if (!graph.doesNodeExist(goalNode))
+         return FootstepPlanningResult.TIMED_OUT_BEFORE_SOLUTION;
 
       if (visualization != null)
       {
