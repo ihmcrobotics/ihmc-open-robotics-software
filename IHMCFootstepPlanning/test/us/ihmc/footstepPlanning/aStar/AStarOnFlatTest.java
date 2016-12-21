@@ -5,8 +5,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.footstepPlanning.FootstepPlanner;
-import us.ihmc.footstepPlanning.aStar.implementations.EuclidianBasedCost;
-import us.ihmc.footstepPlanning.aStar.implementations.EuclidianDistanceHeuristics;
+import us.ihmc.footstepPlanning.aStar.implementations.DistanceAndYawBasedCost;
+import us.ihmc.footstepPlanning.aStar.implementations.DistanceAndYawBasedHeuristics;
 import us.ihmc.footstepPlanning.aStar.implementations.SimpleNodeChecker;
 import us.ihmc.footstepPlanning.aStar.implementations.SimpleSideBasedExpansion;
 import us.ihmc.footstepPlanning.flatGroundPlanning.FootstepPlannerOnFlatGroundTest;
@@ -59,9 +59,13 @@ public class AStarOnFlatTest extends FootstepPlannerOnFlatGroundTest
    {
       // create planner
       SimpleNodeChecker nodeChecker = new SimpleNodeChecker();
-      EuclidianDistanceHeuristics heuristics = new EuclidianDistanceHeuristics();
       SimpleSideBasedExpansion expansion = new SimpleSideBasedExpansion();
-      EuclidianBasedCost stepCostCalculator = new EuclidianBasedCost();
+
+//      EuclidianDistanceHeuristics heuristics = new EuclidianDistanceHeuristics();
+//      EuclidianBasedCost stepCostCalculator = new EuclidianBasedCost();
+
+      DistanceAndYawBasedHeuristics heuristics = new DistanceAndYawBasedHeuristics();
+      DistanceAndYawBasedCost stepCostCalculator = new DistanceAndYawBasedCost();
 
       if (visualizePlanner)
          visualization = new FootstepNodeVisualization(1000, 1.0, null);
