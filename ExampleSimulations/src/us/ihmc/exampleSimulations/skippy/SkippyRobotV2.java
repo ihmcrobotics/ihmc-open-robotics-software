@@ -339,4 +339,9 @@ public class SkippyRobotV2 extends Robot
       return rightShoulderFrame;
    }
 
+   public void setQ_hip(double hipAngle)
+   {
+      scsJointMap.get(SkippyJoint.HIP_PITCH).setQ(hipAngle);
+   }
+
 }
