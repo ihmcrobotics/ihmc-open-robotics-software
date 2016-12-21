@@ -63,6 +63,8 @@ public class SkippyRobotV2 extends Robot
    public static final double SHOULDER_RADIUS = 0.05;
 
    private final GroundContactPoint footContactPoint;
+   private ExternalForcePoint rootJointForce;
+
 
    private enum SkippyJoint
    {
@@ -123,6 +125,8 @@ public class SkippyRobotV2 extends Robot
       scsRootJoint = new FloatingJoint("rootJoint", new Vector3d(), this);
       scsRootJoint.setLink(createTorsoSkippy());
       scsRootJoint.setPosition(0.0, 0.0, LEG_LENGTH + TORSO_LENGTH / 2.0);
+      rootJointForce = new ExternalForcePoint("rootJointForce", new Vector3d(0.0, 0.0, LEG_LENGTH + TORSO_LENGTH / 2.0), this);
+
       this.addRootJoint(scsRootJoint);
 
       PinJoint shoulderJoint = new PinJoint("shoulderJoint", new Vector3d(0.0, 0.0, TORSO_LENGTH / 2.0), this, Axis.Y);
@@ -342,6 +346,10 @@ public class SkippyRobotV2 extends Robot
    public void setQ_hip(double hipAngle)
    {
       scsJointMap.get(SkippyJoint.HIP_PITCH).setQ(hipAngle);
+   }
+   public void setRootJointForce(double x, double y, double z)
+   {
+      rootJointForce.setForce(x, y, z);
    }
 
 }
