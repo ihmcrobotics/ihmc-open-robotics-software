@@ -22,8 +22,8 @@ import us.ihmc.footstepPlanning.FootstepPlannerGoal;
 import us.ihmc.footstepPlanning.FootstepPlannerGoalType;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.aStar.AStarFootstepPlanner;
-import us.ihmc.footstepPlanning.aStar.implementations.EuclidianBasedCost;
-import us.ihmc.footstepPlanning.aStar.implementations.EuclidianDistanceHeuristics;
+import us.ihmc.footstepPlanning.aStar.implementations.DistanceAndYawBasedCost;
+import us.ihmc.footstepPlanning.aStar.implementations.DistanceAndYawBasedHeuristics;
 import us.ihmc.footstepPlanning.aStar.implementations.SimpleNodeChecker;
 import us.ihmc.footstepPlanning.aStar.implementations.SimpleSideBasedExpansion;
 import us.ihmc.footstepPlanning.graphSearch.BipedalFootstepPlannerParameters;
@@ -101,9 +101,9 @@ public class FootstepPlanningToolboxController extends ToolboxController
    private FootstepPlanner createAStarPlanner()
    {
       SimpleNodeChecker nodeChecker = new SimpleNodeChecker();
-      EuclidianDistanceHeuristics heuristics = new EuclidianDistanceHeuristics();
       SimpleSideBasedExpansion expansion = new SimpleSideBasedExpansion();
-      EuclidianBasedCost stepCostCalculator = new EuclidianBasedCost();
+      DistanceAndYawBasedHeuristics heuristics = new DistanceAndYawBasedHeuristics();
+      DistanceAndYawBasedCost stepCostCalculator = new DistanceAndYawBasedCost();
       return new AStarFootstepPlanner(nodeChecker, heuristics, expansion, stepCostCalculator);
    }
 
