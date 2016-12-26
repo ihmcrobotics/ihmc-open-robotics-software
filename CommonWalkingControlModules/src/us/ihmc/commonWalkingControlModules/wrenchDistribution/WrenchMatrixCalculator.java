@@ -226,6 +226,11 @@ public class WrenchMatrixCalculator
       return rhoJacobianMatrix;
    }
 
+   public void getRhoJacobianMatrix(DenseMatrix64F rhoJacobianMatrix)
+   {
+      rhoJacobianMatrix.set(this.rhoJacobianMatrix);
+   }
+
    public DenseMatrix64F getCopJacobianMatrix()
    {
       return copJacobianMatrix;
@@ -279,5 +284,10 @@ public class WrenchMatrixCalculator
    public List<FrameVector> getBasisVectors()
    {
       return basisVectors;
+   }
+
+   public int getRhoSize()
+   {
+      return rhoSize;
    }
 }
