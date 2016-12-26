@@ -117,6 +117,12 @@ public class DifferentialIDMassMatrixCalculator implements MassMatrixCalculator
    }
 
    @Override
+   public void getMassMatrix(DenseMatrix64F massMatrixToPack)
+   {
+      massMatrixToPack.set(massMatrix);
+   }
+
+   @Override
    public InverseDynamicsJoint[] getJointsInOrder()
    {
       return jointsInOrder;
