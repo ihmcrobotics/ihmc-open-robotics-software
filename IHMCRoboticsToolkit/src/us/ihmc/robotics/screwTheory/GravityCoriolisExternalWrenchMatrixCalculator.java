@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 
-public class CoriolisTermMatrixCalculator
+public class GravityCoriolisExternalWrenchMatrixCalculator
 {
    private final RigidBody rootBody;
    private final InverseDynamicsJoint floatingJoint;
@@ -21,6 +21,9 @@ public class CoriolisTermMatrixCalculator
    private final ArrayList<RigidBody> allBodies = new ArrayList<>();
    private final ArrayList<RigidBody> allBodiesExceptRoot = new ArrayList<>();
    private final ArrayList<InverseDynamicsJoint> allJoints = new ArrayList<>();
+   private final ArrayList<RigidBody> listOfBodiesWithExternalWrenches = new ArrayList<>();
+
+   private final LinkedHashMap<RigidBody, Wrench> externalWrenches = new LinkedHashMap<RigidBody, Wrench>();
    private final LinkedHashMap<RigidBody, Wrench> netWrenches = new LinkedHashMap<RigidBody, Wrench>();
    private final LinkedHashMap<InverseDynamicsJoint, Wrench> jointWrenches = new LinkedHashMap<InverseDynamicsJoint, Wrench>();
    private final TwistCalculator twistCalculator;
@@ -32,7 +35,7 @@ public class CoriolisTermMatrixCalculator
 
    private final boolean doVelocityTerms;
 
-   public CoriolisTermMatrixCalculator(List<InverseDynamicsJoint> jointsToIgnore, TwistCalculator twistCalculator, boolean doVelocityTerms)
+   public GravityCoriolisExternalWrenchMatrixCalculator(List<InverseDynamicsJoint> jointsToIgnore, TwistCalculator twistCalculator, boolean doVelocityTerms)
    {
       this.rootBody = twistCalculator.getRootBody();
       this.floatingJoint = rootBody.getParentJoint();
@@ -43,7 +46,7 @@ public class CoriolisTermMatrixCalculator
 
       populateMapsAndLists();
 
-      degreesOfFreedom = determineSize(allJoints);
+      degreesOfFreedom = ScrewTools.computeDegreesOfFreedom(allJoints);
       coriolisMatrixIndices = createMassMatrixIndices(allJoints);
       coriolisMatrix = new DenseMatrix64F(degreesOfFreedom, 1);
    }
@@ -64,6 +67,12 @@ public class CoriolisTermMatrixCalculator
          {
             allBodiesExceptRoot.add(currentBody);
             netWrenches.put(currentBody, new Wrench(bodyFixedFrame, bodyFixedFrame));
+
+            if (externalWrenches.get(currentBody) == null)
+            {
+               listOfBodiesWithExternalWrenches.add(currentBody);
+               externalWrenches.put(currentBody, new Wrench(bodyFixedFrame, bodyFixedFrame));
+            }
          }
 
          if (currentBody.hasChildrenJoints())
@@ -84,6 +93,8 @@ public class CoriolisTermMatrixCalculator
                      allJoints.add(joint);
                      jointWrenches.put(joint, new Wrench());
                      morgue.add(successor);
+
+                     externalWrenches.put(successor, new Wrench());
                   }
                }
             }
@@ -91,18 +102,6 @@ public class CoriolisTermMatrixCalculator
 
          morgue.remove(currentBody);
       }
-   }
-
-   private static int determineSize(List<InverseDynamicsJoint> jointsInOrder)
-   {
-      int ret = 0;
-      for (int i = 0; i < jointsInOrder.size(); i++)
-      {
-         InverseDynamicsJoint joint = jointsInOrder.get(i);
-         ret += joint.getDegreesOfFreedom();
-      }
-
-      return ret;
    }
 
    private static int[] createMassMatrixIndices(List<InverseDynamicsJoint> jointsInOrder)
@@ -119,12 +118,29 @@ public class CoriolisTermMatrixCalculator
       return ret;
    }
 
+   public void reset()
+   {
+      for (int i = 0; i < listOfBodiesWithExternalWrenches.size(); i++)
+      {
+         Wrench externalWrench = externalWrenches.get(listOfBodiesWithExternalWrenches.get(i));
+         externalWrench.setToZero(externalWrench.getBodyFrame(), externalWrench.getExpressedInFrame());
+      }
+   }
+
    public void compute()
    {
       MatrixTools.setToZero(coriolisMatrix);
 
       computeNetWrenches();
       computeJointWrenchesAndTorques();
+   }
+
+   public void setExternalWrench(RigidBody rigidBody, Wrench externalWrench)
+   {
+      if (externalWrenches.containsKey(rigidBody))
+         externalWrenches.get(rigidBody).set(externalWrench);
+      else
+         throw new RuntimeException("External Wrench map does not contain key " + rigidBody.getName() + ".");
    }
 
    private void computeNetWrenches()
@@ -155,6 +171,9 @@ public class CoriolisTermMatrixCalculator
          Wrench jointWrench = jointWrenches.get(joint);
          jointWrench.set(netWrenches.get(successor));
 
+         Wrench externalWrench = externalWrenches.get(successor);
+         jointWrench.sub(externalWrench);
+
          List<InverseDynamicsJoint> childrenJoints = successor.getChildrenJoints();
 
          for (int childIndex = 0; childIndex < childrenJoints.size(); childIndex++)
@@ -180,6 +199,11 @@ public class CoriolisTermMatrixCalculator
          for (int dof = 0; dof < joint.getDegreesOfFreedom(); dof++)
             coriolisMatrix.set(startIndex + dof, 0, tempTauMatrix.get(dof));
       }
+   }
+
+   public int getNumberOfDegreesOfFreedom()
+   {
+      return degreesOfFreedom;
    }
 
    public void getCoriolisMatrix(DenseMatrix64F coriolisMatrixToPack)
