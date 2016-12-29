@@ -73,6 +73,11 @@ public class InverseDynamicsOptimizationControlModule
 
    public InverseDynamicsOptimizationControlModule(WholeBodyControlCoreToolbox toolbox, YoVariableRegistry parentRegistry)
    {
+      this(toolbox, null, parentRegistry);
+   }
+
+   public InverseDynamicsOptimizationControlModule(WholeBodyControlCoreToolbox toolbox, WrenchMatrixCalculator wrenchMatrixCalculator, YoVariableRegistry parentRegistry)
+   {
       controlDT = toolbox.getControlDT();
       jointIndexHandler = toolbox.getJointIndexHandler();
       jointsToOptimizeFor = jointIndexHandler.getIndexedJoints();
@@ -92,7 +97,11 @@ public class InverseDynamicsOptimizationControlModule
       MomentumOptimizationSettings momentumOptimizationSettings = toolbox.getMomentumOptimizationSettings();
 
       geometricJacobianHolder = toolbox.getGeometricJacobianHolder();
-      wrenchMatrixCalculator = new WrenchMatrixCalculator(toolbox, registry);
+
+      if (wrenchMatrixCalculator == null)
+         this.wrenchMatrixCalculator = new WrenchMatrixCalculator(toolbox, registry);
+      else
+         this.wrenchMatrixCalculator = wrenchMatrixCalculator;
 
       YoGraphicsListRegistry yoGraphicsListRegistry = toolbox.getYoGraphicsListRegistry();
       if (VISUALIZE_RHO_BASIS_VECTORS)
@@ -183,7 +192,7 @@ public class InverseDynamicsOptimizationControlModule
       SpatialForceVector centroidalMomentumRateSolution = motionQPInputCalculator.computeCentroidalMomentumRateFromSolution(qDDotSolution);
       Map<RigidBody, Wrench> externalWrenchSolution = externalWrenchHandler.getExternalWrenchMap();
       List<RigidBody> rigidBodiesWithExternalWrench = externalWrenchHandler.getRigidBodiesWithExternalWrench();
-      MomentumModuleSolution momentumModuleSolution = new MomentumModuleSolution(jointsToOptimizeFor, qDDotSolution, centroidalMomentumRateSolution,
+      MomentumModuleSolution momentumModuleSolution = new MomentumModuleSolution(jointsToOptimizeFor, qDDotSolution, rhoSolution, centroidalMomentumRateSolution,
             externalWrenchSolution, rigidBodiesWithExternalWrench);
 
       if (noConvergenceException != null)
