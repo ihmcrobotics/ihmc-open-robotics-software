@@ -14,15 +14,17 @@ public class MomentumModuleSolution
 {
    private final InverseDynamicsJoint[] jointsToOptimizeFor;
    private final DenseMatrix64F jointAccelerations;
+   private final DenseMatrix64F rhoSolution;
    private final SpatialForceVector centroidalMomentumRateSolution;
    private final Map<RigidBody, Wrench> externalWrenchSolution;
    private final List<RigidBody> rigidBodiesWithExternalWrench;
 
-   public MomentumModuleSolution(InverseDynamicsJoint[] jointsToOptimizeFor, DenseMatrix64F jointAccelerations,
+   public MomentumModuleSolution(InverseDynamicsJoint[] jointsToOptimizeFor, DenseMatrix64F jointAccelerations, DenseMatrix64F rhoSolution,
          SpatialForceVector centroidalMomentumRateSolution, Map<RigidBody, Wrench> externalWrenchSolution, List<RigidBody> rigidBodiesWithExternalWrench)
    {
       this.jointsToOptimizeFor = jointsToOptimizeFor;
       this.jointAccelerations = jointAccelerations;
+      this.rhoSolution = rhoSolution;
       this.centroidalMomentumRateSolution = centroidalMomentumRateSolution;
       this.externalWrenchSolution = externalWrenchSolution;
       this.rigidBodiesWithExternalWrench = rigidBodiesWithExternalWrench;
@@ -51,5 +53,10 @@ public class MomentumModuleSolution
    public DenseMatrix64F getJointAccelerations()
    {
       return jointAccelerations;
+   }
+
+   public DenseMatrix64F getRhoSolution()
+   {
+      return rhoSolution;
    }
 }

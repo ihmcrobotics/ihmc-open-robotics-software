@@ -2,17 +2,26 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
+import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.GeometricJacobianHolder;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.WrenchMatrixCalculator;
+import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.robotModels.FullRobotModel;
+import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.screwTheory.*;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class DynamicsMatrixCalculator
 {
    private final CompositeRigidBodyMassMatrixCalculator massMatrixCalculator;
    private final GravityCoriolisExternalWrenchMatrixCalculator coriolisMatrixCalculator;
 
+   private final WholeBodyControlCoreToolbox toolbox;
    private final WrenchMatrixCalculator wrenchMatrixCalculator;
+   private final GeometricJacobianHolder geometricJacobianHolder;
+   private final JointIndexHandler jointIndexHandler;
 
    private final DenseMatrix64F massMatrix;
    private final DenseMatrix64F coriolisMatrix;
@@ -26,34 +35,55 @@ public class DynamicsMatrixCalculator
    private final DenseMatrix64F bodyCoriolisMatrix;
    private final DenseMatrix64F bodyContactForceJacobian;
 
+   private final DenseMatrix64F jointTorques;
+
+   private final RigidBody elevator;
    private final int numberOfDoFs;
    private final int floatingBaseDoFs;
+   private final int rhoSize;
 
-   public DynamicsMatrixCalculator(ArrayList<InverseDynamicsJoint> jointsToIgnore, TwistCalculator twistCalculator, WrenchMatrixCalculator wrenchMatrixCalculator)
+   private final DenseMatrix64F tmpFullContactJacobianMatrix;
+
+   public DynamicsMatrixCalculator(WholeBodyControlCoreToolbox toolbox, WrenchMatrixCalculator wrenchMatrixCalculator)
    {
+      this(new ArrayList<>(), toolbox, wrenchMatrixCalculator);
+   }
+
+   public DynamicsMatrixCalculator(ArrayList<InverseDynamicsJoint> jointsToIgnore, WholeBodyControlCoreToolbox toolbox, WrenchMatrixCalculator wrenchMatrixCalculator)
+   {
+      this.toolbox = toolbox;
       this.wrenchMatrixCalculator = wrenchMatrixCalculator;
+      this.geometricJacobianHolder = toolbox.getGeometricJacobianHolder();
+      this.jointIndexHandler = toolbox.getJointIndexHandler();
 
-      RigidBody rootBody = twistCalculator.getRootBody();
-      int rhoSize = wrenchMatrixCalculator.getRhoSize();
+      FullRobotModel fullRobotModel = toolbox.getFullRobotModel();
+      elevator = fullRobotModel.getElevator();
+      rhoSize = wrenchMatrixCalculator.getRhoSize();
 
-      massMatrixCalculator = new CompositeRigidBodyMassMatrixCalculator(rootBody, jointsToIgnore);
-      coriolisMatrixCalculator = new GravityCoriolisExternalWrenchMatrixCalculator(jointsToIgnore, twistCalculator, true);
+      InverseDynamicsJoint[] jointsToOptimizeFor = jointIndexHandler.getIndexedJoints();
+      numberOfDoFs = jointIndexHandler.getNumberOfDoFs();
+      floatingBaseDoFs = toolbox.getRobotRootJoint().getDegreesOfFreedom();
 
-      numberOfDoFs = coriolisMatrixCalculator.getNumberOfDegreesOfFreedom();
-      floatingBaseDoFs = rootBody.getParentJoint().getDegreesOfFreedom();
+      massMatrixCalculator = new CompositeRigidBodyMassMatrixCalculator(elevator, jointsToIgnore);
+      coriolisMatrixCalculator = new GravityCoriolisExternalWrenchMatrixCalculator(jointsToIgnore, jointsToOptimizeFor, toolbox.getRobotRootJoint(), toolbox.getTwistCalculator(), true);
+
       int bodyDoFs = numberOfDoFs - floatingBaseDoFs;
+
+      jointTorques = new DenseMatrix64F(bodyDoFs, 1);
 
       massMatrix = new DenseMatrix64F(numberOfDoFs, numberOfDoFs);
       coriolisMatrix = new DenseMatrix64F(numberOfDoFs, 1);
-      contactForceJacobian = new DenseMatrix64F(numberOfDoFs, rhoSize);
+      contactForceJacobian = new DenseMatrix64F(rhoSize, numberOfDoFs);
 
       floatingBaseMassMatrix = new DenseMatrix64F(floatingBaseDoFs, numberOfDoFs);
       floatingBaseCoriolisMatrix = new DenseMatrix64F(floatingBaseDoFs, 1);
-      floatingBaseContactForceJacobian = new DenseMatrix64F(floatingBaseDoFs, rhoSize);
+      floatingBaseContactForceJacobian = new DenseMatrix64F(rhoSize, floatingBaseDoFs);
 
       bodyMassMatrix = new DenseMatrix64F(bodyDoFs, numberOfDoFs);
       bodyCoriolisMatrix = new DenseMatrix64F(bodyDoFs, 1);
-      bodyContactForceJacobian = new DenseMatrix64F(bodyDoFs, rhoSize);
+      bodyContactForceJacobian = new DenseMatrix64F(rhoSize, bodyDoFs);
+
+      tmpFullContactJacobianMatrix = new DenseMatrix64F(6, numberOfDoFs);
    }
 
    public void reset()
@@ -92,9 +122,35 @@ public class DynamicsMatrixCalculator
       coriolisMatrixCalculator.getFloatingBaseCoriolisMatrix(floatingBaseCoriolisMatrix);
       coriolisMatrixCalculator.getBodyCoriolisMatrix(bodyCoriolisMatrix);
 
-      wrenchMatrixCalculator.getRhoJacobianMatrix(contactForceJacobian);
-      CommonOps.extract(contactForceJacobian, 0, floatingBaseDoFs, 0, numberOfDoFs, floatingBaseContactForceJacobian, 0, 0);
-      CommonOps.extract(contactForceJacobian, floatingBaseDoFs, numberOfDoFs, 0, numberOfDoFs, bodyContactForceJacobian, 0, 0);
+      updateContactForceJacobians();
+      CommonOps.extract(contactForceJacobian, 0, rhoSize, 0, floatingBaseDoFs, floatingBaseContactForceJacobian, 0, 0);
+      CommonOps.extract(contactForceJacobian, 0, rhoSize, floatingBaseDoFs, numberOfDoFs, bodyContactForceJacobian, 0, 0);
+   }
+
+   private final PointJacobian tmpJacobian = new PointJacobian();
+   private void updateContactForceJacobians()
+   {
+      int contactForceStartIndex = 0;
+      List<? extends ContactablePlaneBody> contactablePlaneBodies = toolbox.getContactablePlaneBodies();
+      for (int bodyIndex = 0; bodyIndex < contactablePlaneBodies.size(); bodyIndex++)
+      {
+         RigidBody rigidBody = contactablePlaneBodies.get(bodyIndex).getRigidBody();
+         long jacobianID = geometricJacobianHolder.getOrCreateGeometricJacobian(elevator, rigidBody, elevator.getBodyFixedFrame());
+         GeometricJacobian geometricJacobian = geometricJacobianHolder.getJacobian(jacobianID);
+
+         List<FramePoint> basisVectorOrigins = wrenchMatrixCalculator.getBasisVectorOrigin(rigidBody);
+
+         for (int basisVectorIndex = 0; basisVectorIndex < basisVectorOrigins.size(); basisVectorIndex++)
+         {
+            tmpJacobian.set(geometricJacobian, basisVectorOrigins.get(basisVectorIndex));
+            tmpJacobian.compute();
+
+            jointIndexHandler.compactBlockToFullBlock(geometricJacobian.getJointsInOrder(), tmpJacobian.getJacobianMatrix(), tmpFullContactJacobianMatrix);
+            CommonOps.extract(tmpFullContactJacobianMatrix, 0, 1, 0, numberOfDoFs, contactForceJacobian, contactForceStartIndex + basisVectorIndex, 0);
+         }
+
+         contactForceStartIndex += wrenchMatrixCalculator.getRhoSize(rigidBody);
+      }
    }
 
    public void getFloatingBaseMassMatrix(DenseMatrix64F floatingBaseMassMatrixToPack)
@@ -127,6 +183,11 @@ public class DynamicsMatrixCalculator
       bodyContactForceJacobianToPack.set(bodyContactForceJacobian);
    }
 
+   public void computeJointTorques(DenseMatrix64F jointAccelerationSolution, DenseMatrix64F contactForceSolution)
+   {
+      computeJointTorques(jointTorques ,jointAccelerationSolution, contactForceSolution);
+   }
+
    /**
     * <p>
     * Computes the joint torques that satisfy the rigid body dynamics for the desired joint accelerations and contact forces
@@ -140,7 +201,7 @@ public class DynamicsMatrixCalculator
    {
       jointTorquesToPack.zero();
 
-      CommonOps.mult(-1.0, bodyContactForceJacobian, contactForceSolution, jointTorquesToPack);
+      CommonOps.multTransA(-1.0, bodyContactForceJacobian, contactForceSolution, jointTorquesToPack);
       CommonOps.addEquals(jointTorquesToPack, bodyCoriolisMatrix);
       CommonOps.multAdd(bodyMassMatrix, jointAccelerationSolution, jointTorquesToPack);
    }

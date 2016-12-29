@@ -5,23 +5,23 @@ import org.ejml.ops.CommonOps;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 
 public class GravityCoriolisExternalWrenchMatrixCalculator
 {
-   private final RigidBody rootBody;
    private final InverseDynamicsJoint floatingJoint;
    private final ArrayList<InverseDynamicsJoint> jointsToIgnore;
 
    private final int degreesOfFreedom;
    private final int[] coriolisMatrixIndices;
 
-   private final ArrayList<RigidBody> allBodies = new ArrayList<>();
-   private final ArrayList<RigidBody> allBodiesExceptRoot = new ArrayList<>();
-   private final ArrayList<InverseDynamicsJoint> allJoints = new ArrayList<>();
    private final ArrayList<RigidBody> listOfBodiesWithExternalWrenches = new ArrayList<>();
+   private final ArrayList<InverseDynamicsJoint> jointsToOptimizeFor = new ArrayList<>();
+
+   private final RigidBody[] bodiesToOptimizeFor;
 
    private final LinkedHashMap<RigidBody, Wrench> externalWrenches = new LinkedHashMap<RigidBody, Wrench>();
    private final LinkedHashMap<RigidBody, Wrench> netWrenches = new LinkedHashMap<RigidBody, Wrench>();
@@ -35,72 +35,43 @@ public class GravityCoriolisExternalWrenchMatrixCalculator
 
    private final boolean doVelocityTerms;
 
-   public GravityCoriolisExternalWrenchMatrixCalculator(List<InverseDynamicsJoint> jointsToIgnore, TwistCalculator twistCalculator, boolean doVelocityTerms)
+   public GravityCoriolisExternalWrenchMatrixCalculator(List<InverseDynamicsJoint> jointsToIgnore, InverseDynamicsJoint[] jointsToOptimizeFor,
+        FloatingInverseDynamicsJoint floatingJoint, TwistCalculator twistCalculator, boolean doVelocityTerms)
    {
-      this.rootBody = twistCalculator.getRootBody();
-      this.floatingJoint = rootBody.getParentJoint();
+      this.floatingJoint = floatingJoint;
       this.jointsToIgnore = new ArrayList<>(jointsToIgnore);
       this.twistCalculator = twistCalculator;
 
       this.doVelocityTerms = doVelocityTerms;
 
+      for (int i = 0; i < jointsToOptimizeFor.length; i++)
+         this.jointsToOptimizeFor.add(jointsToOptimizeFor[i]);
+      bodiesToOptimizeFor = ScrewTools.computeRigidBodiesAfterThisJoint(floatingJoint);
+
       populateMapsAndLists();
 
-      degreesOfFreedom = ScrewTools.computeDegreesOfFreedom(allJoints);
-      coriolisMatrixIndices = createMassMatrixIndices(allJoints);
+      degreesOfFreedom = ScrewTools.computeDegreesOfFreedom(jointsToOptimizeFor);
+      coriolisMatrixIndices = createMassMatrixIndices(this.jointsToOptimizeFor);
       coriolisMatrix = new DenseMatrix64F(degreesOfFreedom, 1);
    }
 
    private void populateMapsAndLists()
    {
-      ArrayList<RigidBody> morgue = new ArrayList<>();
-      morgue.add(rootBody);
+      for (int i = 0; i < jointsToOptimizeFor.size(); i++)
+         jointWrenches.put(jointsToOptimizeFor.get(i), new Wrench());
 
-      while (!morgue.isEmpty())
+      for (int i = 0; i < bodiesToOptimizeFor.length; i++)
       {
-         RigidBody currentBody = morgue.get(0);
-
+         RigidBody currentBody = bodiesToOptimizeFor[i];
          ReferenceFrame bodyFixedFrame = currentBody.getBodyFixedFrame();
 
-         allBodies.add(currentBody);
-         if (!currentBody.isRootBody())
+         netWrenches.put(currentBody, new Wrench(bodyFixedFrame, bodyFixedFrame));
+
+         if (externalWrenches.get(currentBody) == null)
          {
-            allBodiesExceptRoot.add(currentBody);
-            netWrenches.put(currentBody, new Wrench(bodyFixedFrame, bodyFixedFrame));
-
-            if (externalWrenches.get(currentBody) == null)
-            {
-               listOfBodiesWithExternalWrenches.add(currentBody);
-               externalWrenches.put(currentBody, new Wrench(bodyFixedFrame, bodyFixedFrame));
-            }
+            listOfBodiesWithExternalWrenches.add(currentBody);
+            externalWrenches.put(currentBody, new Wrench(bodyFixedFrame, bodyFixedFrame));
          }
-
-         if (currentBody.hasChildrenJoints())
-         {
-            List<InverseDynamicsJoint> childrenJoints = currentBody.getChildrenJoints();
-            for (InverseDynamicsJoint joint : childrenJoints)
-            {
-               if (!jointsToIgnore.contains(joint))
-               {
-                  RigidBody successor = joint.getSuccessor();
-                  if (successor != null)
-                  {
-                     if (allBodiesExceptRoot.contains(successor))
-                     {
-                        throw new RuntimeException("This algorithm doesn't do loops.");
-                     }
-
-                     allJoints.add(joint);
-                     jointWrenches.put(joint, new Wrench());
-                     morgue.add(successor);
-
-                     externalWrenches.put(successor, new Wrench());
-                  }
-               }
-            }
-         }
-
-         morgue.remove(currentBody);
       }
    }
 
@@ -145,26 +116,26 @@ public class GravityCoriolisExternalWrenchMatrixCalculator
 
    private void computeNetWrenches()
    {
-      for (int bodyIndex = 0; bodyIndex < allBodiesExceptRoot.size(); bodyIndex++)
+      for (int bodyIndex = 0; bodyIndex < bodiesToOptimizeFor.length; bodyIndex++)
       {
-         RigidBody body = allBodiesExceptRoot.get(bodyIndex);
+         RigidBody body = bodiesToOptimizeFor[bodyIndex];
          Wrench netWrench = netWrenches.get(body);
          twistCalculator.getTwistOfBody(tempTwist, body);
          if (!doVelocityTerms)
             tempTwist.setToZero();
-         tempAcceleration.setToZero();
+         tempAcceleration.setToZero(body.getBodyFixedFrame(), ReferenceFrame.getWorldFrame(), body.getBodyFixedFrame());
          body.getInertia().computeDynamicWrenchInBodyCoordinates(netWrench, tempAcceleration, tempTwist);
       }
    }
 
    private final Wrench wrenchExertedByChild = new Wrench();
-   private final DenseMatrix64F tempTauMatrix = new DenseMatrix64F();
+   private final DenseMatrix64F tempTauMatrix = new DenseMatrix64F(6);
 
    private void computeJointWrenchesAndTorques()
    {
-      for (int jointIndex = allJoints.size() - 1; jointIndex >= 0; jointIndex--)
+      for (int jointIndex = jointsToOptimizeFor.size() - 1; jointIndex >= 0; jointIndex--)
       {
-         InverseDynamicsJoint joint = allJoints.get(jointIndex);
+         InverseDynamicsJoint joint = jointsToOptimizeFor.get(jointIndex);
 
          RigidBody successor = joint.getSuccessor();
 
@@ -179,7 +150,7 @@ public class GravityCoriolisExternalWrenchMatrixCalculator
          for (int childIndex = 0; childIndex < childrenJoints.size(); childIndex++)
          {
             InverseDynamicsJoint child = childrenJoints.get(childIndex);
-            if (!jointsToIgnore.contains(child))
+            if (!jointsToIgnore.contains(child) && jointsToOptimizeFor.contains(child))
             {
                Wrench wrenchExertedOnChild = jointWrenches.get(child);
                ReferenceFrame successorFrame = successor.getBodyFixedFrame();
@@ -194,9 +165,12 @@ public class GravityCoriolisExternalWrenchMatrixCalculator
 
          joint.setTorqueFromWrench(jointWrench);
 
-         int startIndex = coriolisMatrixIndices[jointIndex];
+         int jointDoFs = joint.getDegreesOfFreedom();
+         tempTauMatrix.reshape(jointDoFs, 1);
          joint.getTauMatrix(tempTauMatrix);
-         for (int dof = 0; dof < joint.getDegreesOfFreedom(); dof++)
+
+         int startIndex = coriolisMatrixIndices[jointIndex];
+         for (int dof = 0; dof < jointDoFs; dof++)
             coriolisMatrix.set(startIndex + dof, 0, tempTauMatrix.get(dof));
       }
    }
