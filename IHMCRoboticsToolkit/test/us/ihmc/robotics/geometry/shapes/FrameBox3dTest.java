@@ -1,21 +1,24 @@
 package us.ihmc.robotics.geometry.shapes;
 
-import junit.framework.Assert;
-import org.junit.Test;
-import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
+import java.util.Random;
 
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
-import static org.junit.Assert.*;
+import org.junit.Test;
 
-import java.util.Random;
+import us.ihmc.robotics.MathTools;
+import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.math.Epsilons;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public class FrameBox3dTest
 {
@@ -90,6 +93,7 @@ public class FrameBox3dTest
       box.orthogonalProjection(point);
       assertTrue(point.epsilonEquals(expectedPoint, 1e-14));
 
+      @SuppressWarnings("serial")
       ReferenceFrame frame = new ReferenceFrame("testFrame", ReferenceFrame.getWorldFrame())
       {
          @Override
@@ -158,7 +162,7 @@ public class FrameBox3dTest
       
       assertFalse(box.isInsideOrOnSurface(pointOutsideBox, 1e-7));
    }
-
+   
    @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testApplyTransform()
@@ -188,10 +192,11 @@ public class FrameBox3dTest
          {
             Point3d point = getRandomConvexCombination(random, vertices);
             Point3d pointTransformed = new Point3d(point);
-            transform.transform(pointTransformed);
+            box.getGeometryObject().getTransformToShapeFrameUnsafe().transform(pointTransformed);
+            boxTransformed.getGeometryObject().getTransformFromShapeFrameUnsafe().transform(pointTransformed);
 
-            Assert.assertEquals(box.isInsideOrOnSurface(new FramePoint(worldFrame, point)),
-                                boxTransformed.isInsideOrOnSurface(new FramePoint(worldFrame, pointTransformed)));
+            assertEquals(box.isInsideOrOnSurface(new FramePoint(worldFrame, point)),
+                         boxTransformed.isInsideOrOnSurface(new FramePoint(worldFrame, pointTransformed)));
          }
       }
    }
@@ -208,8 +213,8 @@ public class FrameBox3dTest
 
       RigidBodyTransform transformBack = new RigidBodyTransform();
       box.getTransform(transformBack);
-      assertTrue(transform.epsilonEquals(transformBack, 0.0));
-      assertTrue(transform.epsilonEquals(box.getTransformCopy(), 0.0));
+      assertTrue(transform.epsilonEquals(transformBack, Epsilons.ONE_TRILLIONTH));
+      assertTrue(transform.epsilonEquals(box.getTransformCopy(), Epsilons.ONE_TRILLIONTH));
 
       Matrix3d matrix = new Matrix3d();
       Vector3d vector = new Vector3d();
@@ -219,8 +224,8 @@ public class FrameBox3dTest
       FramePoint CenterBack = new FramePoint(worldFrame);
 
       box.getRotation(matrixBack);
-      assertTrue(matrix.epsilonEquals(matrixBack, 0.0));
-      assertTrue(matrix.epsilonEquals(box.getRotationCopy(), 0.0));
+      assertTrue(matrix.epsilonEquals(matrixBack, Epsilons.ONE_TRILLIONTH));
+      assertTrue(matrix.epsilonEquals(box.getRotationCopy(), Epsilons.ONE_TRILLIONTH));
 
       box.getCenter(CenterBack);
       assertTrue(vector.epsilonEquals(new Vector3d(CenterBack.getVectorCopy()), 0.0));
