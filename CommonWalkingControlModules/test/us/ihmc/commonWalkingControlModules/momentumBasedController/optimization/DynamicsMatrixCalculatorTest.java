@@ -1,11 +1,13 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization;
 
 import org.ejml.data.DenseMatrix64F;
+import org.ejml.ops.CommonOps;
 import org.junit.Test;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBodyTools;
 import us.ihmc.commonWalkingControlModules.configurations.JointPrivilegedConfigurationParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.GeometricJacobianHolder;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.WrenchMatrixCalculator;
 import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
@@ -20,6 +22,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.*;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.tools.testing.JUnitTools;
 
 import javax.vecmath.Vector3d;
 import java.util.ArrayList;
@@ -31,7 +34,7 @@ public class DynamicsMatrixCalculatorTest
 {
    @ContinuousIntegrationTest(estimatedDuration = 1.1)
    @Test(timeout = 30000)
-   public void testDynamicEquivalentFloatingChainRobot() throws Exception
+   public void testDynamicEquivalenceFullHumanoidRobot() throws Exception
    {
       Random random = new Random(5641654L);
       YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
@@ -56,7 +59,7 @@ public class DynamicsMatrixCalculatorTest
 
       ScrewTestTools.setRandomPositions(joints, random);
       ScrewTestTools.setRandomVelocities(joints, random);
-      joints.get(0).getPredecessor().updateFramesRecursively();
+      fullHumanoidRobotModel.updateFrames();
 
       TwistCalculator twistCalculator = new TwistCalculator(ReferenceFrame.getWorldFrame(), elevator);
       GeometricJacobianHolder geometricJacobianHolder = new GeometricJacobianHolder();
@@ -71,7 +74,8 @@ public class DynamicsMatrixCalculatorTest
          contactablePlaneBodies.add(ContactablePlaneBodyTools.createTypicalContactablePlaneBodyForTests(footBody, soleFrame));
       }
 
-      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(fullHumanoidRobotModel, null, jointArray, momentumOptimizationSettings,
+      InverseDynamicsJoint[] jointsToOptimizeFor = HighLevelHumanoidControllerToolbox.computeJointsToOptimizeFor(fullHumanoidRobotModel, new InverseDynamicsJoint[0]);
+      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(fullHumanoidRobotModel, null, jointsToOptimizeFor, momentumOptimizationSettings,
             jointPrivilegedConfigurationParameters, referenceFrames, controlDT, gravityZ, geometricJacobianHolder, twistCalculator, contactablePlaneBodies,
             yoGraphicsListRegistry, registry);
 
@@ -81,15 +85,38 @@ public class DynamicsMatrixCalculatorTest
       InverseDynamicsCalculator inverseDynamicsCalculator = new InverseDynamicsCalculator(twistCalculator, gravityZ);
       DynamicsMatrixCalculator dynamicsMatrixCalculator = new DynamicsMatrixCalculator(toolbox, wrenchMatrixCalculator);
 
-      DenseMatrix64F rhoSolution = RandomTools.generateRandomMatrix(random, wrenchMatrixCalculator.getRhoSize(), 1, 0.0, Double.POSITIVE_INFINITY);
-      DenseMatrix64F qddotSolution = RandomTools.generateRandomMatrix(random, jointIndexHandler.getNumberOfDoFs(), 1);
+      int degreesOfFreedom = jointIndexHandler.getNumberOfDoFs();
+      int floatingBaseDoFs = fullHumanoidRobotModel.getRootJoint().getDegreesOfFreedom();
+      int bodyDoFs = degreesOfFreedom - floatingBaseDoFs;
+      DenseMatrix64F rhoSolution = RandomTools.generateRandomMatrix(random, wrenchMatrixCalculator.getRhoSize(), 1, 0.0, 1.0e5);
+      DenseMatrix64F qddotSolution = RandomTools.generateRandomMatrix(random, degreesOfFreedom, 1);
 
+      wrenchMatrixCalculator.computeMatrices();
       Map<RigidBody, Wrench> contactWrenches = wrenchMatrixCalculator.computeWrenchesFromRho(rhoSolution);
-      RigidBody[] contactsBodies = new RigidBody[contactWrenches.keySet().size()];
-      contactWrenches.keySet().toArray(contactsBodies);
-      for (int i = 0; i < contactsBodies.length; i++)
-         inverseDynamicsCalculator.setExternalWrench(contactsBodies[i], contactWrenches.get(contactsBodies[i]));
+      for (int i = 0; i < contactablePlaneBodies.size(); i++)
+      {
+         RigidBody rigidBody = contactablePlaneBodies.get(i).getRigidBody();
+         inverseDynamicsCalculator.setExternalWrench(rigidBody, contactWrenches.get(rigidBody));
+      }
 
+      DenseMatrix64F inverseDynamicsTauSolution = new DenseMatrix64F(bodyDoFs, 1);
+      DenseMatrix64F dynamicsMatrixTauSolution = new DenseMatrix64F(bodyDoFs, 1);
+
+      // compute torques using inverse dynamics calculator
+      ScrewTools.setDesiredAccelerations(jointArray, qddotSolution);
       inverseDynamicsCalculator.compute();
+
+      DenseMatrix64F tmpTauMatrix = new DenseMatrix64F(1, 1);
+      for (int i = 0; i < jointArray.length; i++)
+      {
+         jointArray[i].getTauMatrix(tmpTauMatrix);
+         inverseDynamicsTauSolution.set(i, tmpTauMatrix.get(0, 0));
+      }
+
+      // compute torques using dynamics matrix calculator
+      dynamicsMatrixCalculator.compute();
+      dynamicsMatrixCalculator.computeJointTorques(dynamicsMatrixTauSolution, qddotSolution, rhoSolution);
+
+      JUnitTools.assertMatrixEquals(inverseDynamicsTauSolution, dynamicsMatrixTauSolution, 1.0);
    }
 }
