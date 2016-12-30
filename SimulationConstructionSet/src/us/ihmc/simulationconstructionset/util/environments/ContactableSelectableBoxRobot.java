@@ -202,7 +202,7 @@ public class ContactableSelectableBoxRobot extends ContactableRobot implements S
 
    public synchronized void getCurrentBox3d(FrameBox3d frameBoxToPack)
    {
-      frameBoxToPack.setAndChangeFrame(frameBox);
+      frameBoxToPack.setIncludingFrame(frameBox);
    }
 
    @Override
