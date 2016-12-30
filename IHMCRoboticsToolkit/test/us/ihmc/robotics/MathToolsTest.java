@@ -1,7 +1,9 @@
 package us.ihmc.robotics;
 
-import static org.junit.Assert.*;
-import static us.ihmc.tools.continuousIntegration.IntegrationCategory.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -350,6 +352,20 @@ public class MathToolsTest
       double min = 1.0;
       double max = 0.9;
       MathTools.isInsideBoundsInclusive(5.0, min, max);
+   }
+   
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @Test(timeout = 30000)
+   public void testIsBoundedByMethods()
+   {
+      assertTrue(MathTools.isBoundedByExclusive(1.0, -1.0, 0.0));
+      assertTrue(MathTools.isBoundedByExclusive(-1.0, 1.0, 0.0));
+      assertFalse(MathTools.isBoundedByExclusive(-1.0, 1.0, -1.0));
+      assertFalse(MathTools.isBoundedByExclusive(-1.0, 1.0, 1.0));
+      assertTrue(MathTools.isBoundedByInclusive(-1.0, 1.0, -1.0));
+      assertTrue(MathTools.isBoundedByInclusive(-1.0, 1.0, 1.0));
+      assertTrue(MathTools.isPreciselyBoundedByInclusive(-1.0, 1.0, 1.0, 1e-12));
+      assertFalse(MathTools.isPreciselyBoundedByExclusive(-1.0, 1.0, 1.0, 1e-12));
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
