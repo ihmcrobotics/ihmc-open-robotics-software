@@ -230,13 +230,7 @@ public class ContactableButtonRobot extends ContactableSliderJointRobot {
    @Override
    public void closestIntersectionAndNormalAt(Point3d intersectionToPack, Vector3d normalToPack, Point3d pointInWorldToCheck)
    {
-      FramePoint pointToCheck = new FramePoint(ReferenceFrame.getWorldFrame(), pointInWorldToCheck);
-      //      pointToCheck.changeFrame(buttonFrame);
-
-      if (cylinderFrame.checkIfInside(pointToCheck, intersectionToPack, normalToPack))
-      {
-         return;
-      }
+      cylinderFrame.checkIfInside(pointInWorldToCheck, intersectionToPack, normalToPack);
    }
 
    @Override
