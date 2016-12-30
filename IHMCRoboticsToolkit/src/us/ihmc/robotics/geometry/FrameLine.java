@@ -1,106 +1,71 @@
 package us.ihmc.robotics.geometry;
 
+import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
-import javax.vecmath.Tuple3d;
+import javax.vecmath.Vector2d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.robotics.geometry.transformables.TransformableLine3d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
-public class FrameLine extends AbstractFrameObject<FrameLine, TransformableLine3d>
+public class FrameLine extends AbstractFrameObject<FrameLine, Line3d>
 {
-   private static final Vector3d zero = new Vector3d(0.0, 0.0, 0.0);
+   private final Line3d line;
 
-   private final Point3d origin;
-   private final Vector3d direction;
-
+   public FrameLine()
+   {
+      this(ReferenceFrame.getWorldFrame());
+   }
+   
    public FrameLine(ReferenceFrame referenceFrame)
    {
-      super(referenceFrame, new TransformableLine3d());
-
-      origin = getGeometryObject().getOrigin();
-      direction = getGeometryObject().getDirection();
+      this(referenceFrame, new Line3d());
+   }
+   
+   public FrameLine(FramePoint point, FrameVector vector)
+   {
+      this(point.getReferenceFrame(), new Line3d(point.getGeometryObject(), vector.getGeometryObject()));
+      point.checkReferenceFrameMatch(vector);
    }
 
-   public FrameLine(FramePoint origin, FrameVector direction)
+   public FrameLine(ReferenceFrame referenceFrame, Point3d point, Vector3d vector)
    {
-      this(origin.getReferenceFrame());
-
-      origin.checkReferenceFrameMatch(direction);
-      checkDirectionValidity(direction.getVector());
-
-      origin.get(this.origin);
-      direction.get(this.direction);
-      this.direction.normalize();
-   }
-
-   public FrameLine(ReferenceFrame referenceFrame, Tuple3d origin, Tuple3d direction)
-   {
-      this(referenceFrame);
-
-      checkDirectionValidity(direction);
-
-      this.referenceFrame = referenceFrame;
-      this.origin.set(origin);
-      this.direction.set(direction);
-      this.direction.normalize();
+      this(referenceFrame, new Line3d(point, vector));
    }
 
    public FrameLine(FrameLine frameLine)
    {
-      this(frameLine.getReferenceFrame());
-
-      checkDirectionValidity(frameLine.direction);
-
-      this.origin.set(frameLine.origin);
-      this.direction.set(frameLine.direction);
-      this.direction.normalize();
+      this(frameLine.getReferenceFrame(), new Line3d(frameLine.getPoint(), frameLine.getNormalizedVector()));
    }
 
-   public FramePoint getFrameOrigin()
+   public FrameLine(ReferenceFrame referenceFrame, Line3d line)
    {
-      FramePoint ret = new FramePoint(referenceFrame, origin);
-      return ret;
+      super(referenceFrame, line);
+      this.line = getGeometryObject();
    }
 
-   public FramePoint getOriginInFrame(ReferenceFrame desiredFrame)
+   public FrameVector getFrameNormalizedVectorCopy()
    {
-      FramePoint ret = getFrameOrigin();
-      ret.changeFrame(desiredFrame);
-      return ret;
+      return new FrameVector(referenceFrame, line.getNormalizedVector());
    }
 
-   public FrameVector getFrameDirection()
+   public Point3d getPoint()
    {
-      FrameVector ret = new FrameVector(referenceFrame, direction);
-      return ret;
+      return line.getPoint();
    }
 
-   public FrameVector getDirectionInFrame(ReferenceFrame desiredFrame)
+   public Vector3d getNormalizedVector()
    {
-      FrameVector ret = getFrameDirection();
-      ret.changeFrame(desiredFrame);
-      return ret;
+      return line.getNormalizedVector();
    }
 
-   public Point3d getOrigin()
+   public Point3d getPointCopy()
    {
-      return origin;
+      return new Point3d(line.getPoint());
    }
 
-   public Vector3d getDirection()
+   public Vector3d getNormalizedVectorCopy()
    {
-      return direction;
-   }
-
-   public Point3d getOriginCopy()
-   {
-      return new Point3d(origin);
-   }
-
-   public Vector3d getDirectionCopy()
-   {
-      return new Vector3d(direction);
+      return new Vector3d(line.getNormalizedVector());
    }
 
    @Override
@@ -108,40 +73,54 @@ public class FrameLine extends AbstractFrameObject<FrameLine, TransformableLine3
    {
       checkReferenceFrameMatch(otherLine);
 
-      return origin.epsilonEquals(otherLine.origin, epsilon) && direction.epsilonEquals(otherLine.direction, epsilon);
+      return line.epsilonEquals(otherLine.getGeometryObject(), epsilon);
+   }
+
+   public void setPoint(FramePoint point)
+   {
+      checkReferenceFrameMatch(point);
+
+      line.setPoint(point.getPoint());
    }
    
-   public void setFromTwoPoints(FramePoint point1, FramePoint point2)
+   public void setPointWithoutChecks(Point3d point)
    {
-      checkReferenceFrameMatch(point1);
-      checkReferenceFrameMatch(point2);
+      line.setPoint(point);
+   }
+
+   public void setVector(FrameVector vector)
+   {
+      checkReferenceFrameMatch(vector);
       
-      origin.set(point1.getPoint());
-      direction.sub(point2.getPoint(), point1.getPoint());
-      direction.normalize();
+      line.setVector(vector.getVector());
    }
 
-   public void setOrigin(FramePoint origin)
+   public void setVectorWithoutChecks(Vector3d vector)
    {
-      checkReferenceFrameMatch(origin);
-
-      this.origin.set(origin.getPoint());
+      line.setVector(vector);
    }
-
-   public void setDirection(FrameVector direction)
+   
+   public void projectOntoXYPlane(FrameLine2d lineToPack)
    {
-      checkReferenceFrameMatch(direction);
-      checkDirectionValidity(direction.getVector());
-
-      this.direction.set(direction.getVector());
+      lineToPack.set(getReferenceFrame(), line.getPoint().getX(), line.getPoint().getY(), line.getNormalizedVector().getX(), line.getNormalizedVector().getY());
    }
-
-   private static void checkDirectionValidity(Tuple3d direction)
+   
+   public void projectOntoXYPlane(Line2d lineToPack)
    {
-      if (direction.epsilonEquals(zero, 1e-12))
+      lineToPack.set(line.getPoint().getX(), line.getPoint().getY(), line.getNormalizedVector().getX(), line.getNormalizedVector().getY());
+   }
+   
+   public void projectOntoXYPlane(Point2d pointToPack, Vector2d normalizedVectorToPack)
+   {
+      pointToPack.set(line.getPoint().getX(), line.getPoint().getY());
+      normalizedVectorToPack.set(line.getNormalizedVector().getX(), line.getNormalizedVector().getY());
+      if (GeometryTools.isZero(normalizedVectorToPack, 1e-12))
       {
-         throw new RuntimeException("Direction cannot be the zero vector");
+         normalizedVectorToPack.set(Double.NaN, Double.NaN);
+      }
+      else
+      {
+         normalizedVectorToPack.normalize();
       }
    }
-
 }

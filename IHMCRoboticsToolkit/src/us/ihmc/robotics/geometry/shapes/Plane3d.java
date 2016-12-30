@@ -1,15 +1,19 @@
 package us.ihmc.robotics.geometry.shapes;
 
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
-public class Plane3d
+import us.ihmc.robotics.geometry.GeometryTools;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.geometry.interfaces.GeometryObject;
+import us.ihmc.robotics.geometry.transformables.TransformablePoint3d;
+import us.ihmc.robotics.geometry.transformables.TransformableVector3d;
+
+public class Plane3d implements GeometryObject<Plane3d>
 {
-   private Point3d point = new Point3d();
-   private Vector3d normal = new Vector3d(0.0, 0.0, 1.0);
-   private Vector3d temporaryVector = new Vector3d();
+   private TransformablePoint3d point = new TransformablePoint3d();
+   private TransformableVector3d normal = new TransformableVector3d(0.0, 0.0, 1.0);
+   private TransformableVector3d temporaryVector = new TransformableVector3d();
 
    public Plane3d()
    {
@@ -59,6 +63,11 @@ public class Plane3d
       return pointToReturn;
    }
    
+   public Point3d getPoint()
+   {
+      return point;
+   }
+   
    public void setPoint(Point3d point)
    {
       this.point.set(point);
@@ -100,12 +109,18 @@ public class Plane3d
       return normalToReturn;
    }
    
+   public Vector3d getNormal()
+   {
+      return normal;
+   }
+   
    public void setNormal(double x, double y, double z)
    {
       normal.set(x, y, z);
       normal.normalize();
    }
    
+   @Override
    public void set(Plane3d plane3d)
    {
       this.normal.set(plane3d.normal);
@@ -117,6 +132,7 @@ public class Plane3d
       this.normal.set(normal);
    }
 
+   @Override
    public boolean epsilonEquals(Plane3d plane, double epsilon)
    {
       return ((plane.normal.epsilonEquals(normal, epsilon)) && (plane.point.epsilonEquals(point, epsilon)));
@@ -152,7 +168,17 @@ public class Plane3d
 
       return (temporaryVector.dot(this.normal) <= epsilon);
    }
-
+   
+   public boolean isParallel(Plane3d otherPlane, double epsilon)
+   {
+      return GeometryTools.arePlanesParallel(this, otherPlane, epsilon);
+   }
+   
+   public boolean isCoplanar(Plane3d otherPlane, double epsilon)
+   {
+      return GeometryTools.areCoplanar(this, otherPlane, epsilon);
+   }
+   
    public Point3d orthogonalProjectionCopy(Point3d point)
    {
       Point3d returnPoint = new Point3d(point);
@@ -223,10 +249,11 @@ public class Plane3d
       return returnPlane;
    }
    
-   public void applyTransform(RigidBodyTransform transformation)
+   @Override
+   public void applyTransform(RigidBodyTransform transform)
    {
-      transformation.transform(normal);
-      transformation.transform(point);
+      point.applyTransform(transform);
+      normal.applyTransform(transform);
    }
 
    public void getIntersectionWithLine(Point3d intersectionToPack, Point3d lineStart, Vector3d lineVector)
@@ -244,6 +271,7 @@ public class Plane3d
       intersectionToPack.scaleAdd(scaleFactor, lineVector, lineStart);
    }
 
+   @Override
    public boolean containsNaN()
    {
       if (Double.isNaN(point.getX())) return true;
@@ -257,12 +285,19 @@ public class Plane3d
       return false;
    }
 
+   @Override
    public void setToNaN()
    {
       setPoint(Double.NaN, Double.NaN, Double.NaN);
       setNormal(Double.NaN, Double.NaN, Double.NaN);
    }
    
+   @Override
+   public void setToZero()
+   {
+   }
+
+   @Override
    public String toString()
    {
       StringBuilder builder = new StringBuilder();
@@ -271,5 +306,4 @@ public class Plane3d
       
       return builder.toString();
    }
-
 }
