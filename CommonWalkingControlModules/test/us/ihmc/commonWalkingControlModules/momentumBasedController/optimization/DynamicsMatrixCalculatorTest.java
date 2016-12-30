@@ -2,21 +2,27 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization
 
 import org.ejml.data.DenseMatrix64F;
 import org.junit.Test;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBodyTools;
 import us.ihmc.commonWalkingControlModules.configurations.JointPrivilegedConfigurationParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.GeometricJacobianHolder;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.WrenchMatrixCalculator;
+import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotModels.FullRobotModelTestTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.*;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 import javax.vecmath.Vector3d;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -29,6 +35,7 @@ public class DynamicsMatrixCalculatorTest
    {
       Random random = new Random(5641654L);
       YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+      YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
 
       int numberOfJoints = 10;
       double gravityZ = 9.81;
@@ -39,11 +46,13 @@ public class DynamicsMatrixCalculatorTest
          jointAxes[i] = RandomTools.generateRandomVector(random, 1.0);
 
       FullRobotModelTestTools.RandomFullHumanoidRobotModel fullHumanoidRobotModel = new FullRobotModelTestTools.RandomFullHumanoidRobotModel(random);
-      ScrewTestTools.RandomFloatingChain randomFloatingChain = new ScrewTestTools.RandomFloatingChain(random, jointAxes);
-      List<RevoluteJoint> joints = randomFloatingChain.getRevoluteJoints();
-      InverseDynamicsJoint[] jointArray = new InverseDynamicsJoint[joints.size()];
-      joints.toArray(jointArray);
-      RigidBody elevator = randomFloatingChain.getElevator();
+      fullHumanoidRobotModel.updateFrames();
+      CommonHumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(fullHumanoidRobotModel);
+
+      ArrayList<OneDoFJoint> joints = new ArrayList<>();
+      fullHumanoidRobotModel.getOneDoFJoints(joints);
+      InverseDynamicsJoint[] jointArray = fullHumanoidRobotModel.getOneDoFJoints();
+      RigidBody elevator = fullHumanoidRobotModel.getElevator();
 
       ScrewTestTools.setRandomPositions(joints, random);
       ScrewTestTools.setRandomVelocities(joints, random);
@@ -54,8 +63,18 @@ public class DynamicsMatrixCalculatorTest
 
       MomentumOptimizationSettings momentumOptimizationSettings = new MomentumOptimizationSettings();
       JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters = new JointPrivilegedConfigurationParameters();
-      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(null, null, jointArray, momentumOptimizationSettings,
-            jointPrivilegedConfigurationParameters, null, controlDT, gravityZ, geometricJacobianHolder, twistCalculator, null, null, registry);
+      ArrayList<ContactablePlaneBody> contactablePlaneBodies = new ArrayList<>();
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         RigidBody footBody = fullHumanoidRobotModel.getFoot(robotSide);
+         ReferenceFrame soleFrame = fullHumanoidRobotModel.getSoleFrame(robotSide);
+         contactablePlaneBodies.add(ContactablePlaneBodyTools.createTypicalContactablePlaneBodyForTests(footBody, soleFrame));
+      }
+
+      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(fullHumanoidRobotModel, null, jointArray, momentumOptimizationSettings,
+            jointPrivilegedConfigurationParameters, referenceFrames, controlDT, gravityZ, geometricJacobianHolder, twistCalculator, contactablePlaneBodies,
+            yoGraphicsListRegistry, registry);
+
       WrenchMatrixCalculator wrenchMatrixCalculator = new WrenchMatrixCalculator(toolbox, registry);
       JointIndexHandler jointIndexHandler = toolbox.getJointIndexHandler();
 
