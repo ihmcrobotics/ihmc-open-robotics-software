@@ -41,6 +41,11 @@ public class FullRobotModelTestTools
       private final SideDependentList<ArrayList<OneDoFJoint>> armJointIDsList = new SideDependentList<>();
       private final SideDependentList<ArrayList<OneDoFJoint>> legJointIDsList = new SideDependentList<>();
 
+      private final LegJointName[] legJointNames;
+      private final ArmJointName[] armJointNames;
+      private final SpineJointName[] spineJointNames;
+      private final NeckJointName[] neckJointNames;
+
       private final SideDependentList<HashMap<LimbName, RigidBody>> endEffectors = new SideDependentList<>();
       private final SideDependentList<RigidBody> hands = new SideDependentList<>();
       private final SideDependentList<RigidBody> feet = new SideDependentList<>();
@@ -52,6 +57,8 @@ public class FullRobotModelTestTools
       private final IMUDefinition[] imuDefinitions = new IMUDefinition[0];
       private final ForceSensorDefinition[] forceSensorDefinitions = new ForceSensorDefinition[0];
       private final ContactSensorDefinition[] contactSensorDefinitions = new ContactSensorDefinition[0];
+
+      private final RobotSpecificJointNames robotSpecificJointNames;
 
       public RandomFullHumanoidRobotModel(Random random)
       {
@@ -70,9 +77,12 @@ public class FullRobotModelTestTools
          for (RobotSide robotSide : RobotSide.values)
          {
             endEffectors.put(robotSide, new HashMap<>());
+
+            armJointIDsList.put(robotSide, new ArrayList<>());
             armJoints.put(robotSide, new HashMap<>());
             addArm(robotSide, random);
 
+            legJointIDsList.put(robotSide, new ArrayList<>());
             legJoints.put(robotSide, new HashMap<>());
             addLeg(robotSide, random);
 
@@ -84,6 +94,42 @@ public class FullRobotModelTestTools
 
          totalMass = TotalMassCalculator.computeSubTreeMass(elevator);
 
+         legJointNames = new LegJointName[legJoints.get(RobotSide.LEFT).size()];
+         armJointNames = new ArmJointName[armJoints.get(RobotSide.LEFT).size()];
+         spineJointNames = new SpineJointName[spineJoints.size()];
+         neckJointNames = new NeckJointName[neckJoints.size()];
+
+         legJoints.get(RobotSide.LEFT).keySet().toArray(legJointNames);
+         armJoints.get(RobotSide.LEFT).keySet().toArray(armJointNames);
+         spineJoints.keySet().toArray(spineJointNames);
+         neckJoints.keySet().toArray(neckJointNames);
+
+         robotSpecificJointNames = new RobotSpecificJointNames()
+         {
+            @Override
+            public LegJointName[] getLegJointNames()
+            {
+               return legJointNames;
+            }
+
+            @Override
+            public ArmJointName[] getArmJointNames()
+            {
+               return armJointNames;
+            }
+
+            @Override
+            public SpineJointName[] getSpineJointNames()
+            {
+               return spineJointNames;
+            }
+
+            @Override
+            public NeckJointName[] getNeckJointNames()
+            {
+               return neckJointNames;
+            }
+         };
       }
 
       private void addSpine(Random random)
@@ -226,7 +272,7 @@ public class FullRobotModelTestTools
 
       @Override public RobotSpecificJointNames getRobotSpecificJointNames()
       {
-         return null;
+         return robotSpecificJointNames;
       }
 
       @Override public void updateFrames()
