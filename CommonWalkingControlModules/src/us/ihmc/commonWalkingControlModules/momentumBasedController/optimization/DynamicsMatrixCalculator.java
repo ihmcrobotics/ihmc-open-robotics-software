@@ -65,7 +65,7 @@ public class DynamicsMatrixCalculator
       floatingBaseDoFs = toolbox.getRobotRootJoint().getDegreesOfFreedom();
 
       massMatrixCalculator = new CompositeRigidBodyMassMatrixCalculator(elevator, jointsToIgnore);
-      coriolisMatrixCalculator = new GravityCoriolisExternalWrenchMatrixCalculator(jointsToIgnore, jointsToOptimizeFor, toolbox.getRobotRootJoint(), toolbox.getTwistCalculator(), true);
+      coriolisMatrixCalculator = new GravityCoriolisExternalWrenchMatrixCalculator(jointsToIgnore, jointsToOptimizeFor, toolbox.getRobotRootJoint(), toolbox.getTwistCalculator(), false);
 
       int bodyDoFs = numberOfDoFs - floatingBaseDoFs;
 
