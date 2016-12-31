@@ -66,7 +66,7 @@ public class FullRobotModelTestTools
          elevator = new RigidBody("elevator", elevatorFrame);
 
          rootJoint = new SixDoFJoint("rootJoint", elevator, elevatorFrame);
-         pelvis = ScrewTestTools.addRandomRigidBody("rootBody", random, rootJoint);
+         pelvis = ScrewTestTools.addRandomRigidBody("pelvis", random, rootJoint);
 
          addSpine(random);
          chest = ScrewTestTools.addRandomRigidBody("chest", random, spineJoints.get(SpineJointName.SPINE_YAW));
@@ -227,7 +227,7 @@ public class FullRobotModelTestTools
       {
          String prefix = robotSide.getShortLowerCaseName();
 
-         RevoluteJoint hipYaw = ScrewTestTools.addRandomRevoluteJoint(prefix + "_hipYaw", yaw, random, chest);
+         RevoluteJoint hipYaw = ScrewTestTools.addRandomRevoluteJoint(prefix + "_hipYaw", yaw, random, pelvis);
          RigidBody hipTrunnion = ScrewTestTools.addRandomRigidBody(prefix + "_hipTrunnion", random, hipYaw);
 
          RevoluteJoint hipRoll = ScrewTestTools.addRandomRevoluteJoint(prefix + "_hipRoll", roll, random, hipTrunnion);
