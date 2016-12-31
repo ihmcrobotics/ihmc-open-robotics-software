@@ -13,9 +13,11 @@ import javax.vecmath.Vector2d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.robotics.MathTools;
+import us.ihmc.robotics.geometry.shapes.FramePlane3d;
 import us.ihmc.robotics.geometry.shapes.Plane3d;
 import us.ihmc.robotics.math.Epsilons;
 import us.ihmc.robotics.math.exceptions.UndefinedOperationException;
+import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class GeometryTools
@@ -1262,6 +1264,16 @@ public class GeometryTools
    public static double distanceBetweenPoints(Point2d a, Point2d b)
    {
       return a.distance(b);
+   }
+   
+   public static double dotProduct(Point2d start1, Point2d end1, Point2d start2, Point2d end2)
+   {
+      double vector1X = end1.getX() - start1.getX();
+      double vector1Y = end1.getY() - start1.getY();
+      double vector2X = end2.getX() - start2.getX();
+      double vector2Y = end2.getY() - start2.getY();
+      
+      return vector1X * vector2X + vector1Y * vector2Y;
    }
 
    /**
