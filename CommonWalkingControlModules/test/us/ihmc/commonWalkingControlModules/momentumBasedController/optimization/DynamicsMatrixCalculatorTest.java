@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization;
 
 import org.ejml.data.DenseMatrix64F;
+import org.ejml.ops.CommonOps;
 import org.junit.Test;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBodyTools;
 import us.ihmc.commonWalkingControlModules.configurations.JointPrivilegedConfigurationParameters;
@@ -28,6 +29,9 @@ import java.util.Random;
 
 public class DynamicsMatrixCalculatorTest
 {
+   // // TODO: 12/30/16  get the tolerance a lot smaller
+   private final static double tolerance = 0.1;
+
    private final Random random = new Random(5641654L);
 
    private FullHumanoidRobotModel fullHumanoidRobotModel;
@@ -39,6 +43,8 @@ public class DynamicsMatrixCalculatorTest
    private InverseDynamicsCalculator inverseDynamicsCalculator;
    private DynamicsMatrixCalculator dynamicsMatrixCalculator;
 
+   private double gravityZ;
+
    int degreesOfFreedom;
    int floatingBaseDoFs;
    int bodyDoFs;
@@ -48,6 +54,8 @@ public class DynamicsMatrixCalculatorTest
    public void testEquivalence() throws Exception
    {
       setupTest();
+
+      gravityZ = 9.81;
 
       ArrayList<OneDoFJoint> joints = new ArrayList<>();
       fullHumanoidRobotModel.getOneDoFJoints(joints);
@@ -63,9 +71,82 @@ public class DynamicsMatrixCalculatorTest
 
    @ContinuousIntegrationTest(estimatedDuration = 1.1)
    @Test(timeout = 30000)
+   public void testMassMatrixOnly() throws Exception
+   {
+      setupTest();
+
+      gravityZ = 0.0;
+
+      ArrayList<OneDoFJoint> joints = new ArrayList<>();
+      fullHumanoidRobotModel.getOneDoFJoints(joints);
+
+      DenseMatrix64F rhoSolution = new DenseMatrix64F(wrenchMatrixCalculator.getRhoSize(), 1);
+      DenseMatrix64F qddotSolution = RandomTools.generateRandomMatrix(random, degreesOfFreedom, 1);
+
+      solveAndCompare(qddotSolution, rhoSolution);
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 1.1)
+   @Test(timeout = 30000)
+   public void testMassMatrixOnlyUnitAccel() throws Exception
+   {
+      setupTest();
+
+      gravityZ = 0.0;
+
+      ArrayList<OneDoFJoint> joints = new ArrayList<>();
+      fullHumanoidRobotModel.getOneDoFJoints(joints);
+
+      DenseMatrix64F rhoSolution = new DenseMatrix64F(wrenchMatrixCalculator.getRhoSize(), 1);
+      DenseMatrix64F qddotSolution = new DenseMatrix64F(degreesOfFreedom, 1);
+      CommonOps.fill(qddotSolution, 1.0);
+
+      solveAndCompare(qddotSolution, rhoSolution);
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 1.1)
+   @Test(timeout = 30000)
+   public void testNoLoad() throws Exception
+   {
+      setupTest();
+
+      gravityZ = 0.0;
+
+      ArrayList<OneDoFJoint> joints = new ArrayList<>();
+      fullHumanoidRobotModel.getOneDoFJoints(joints);
+
+      DenseMatrix64F rhoSolution = new DenseMatrix64F(wrenchMatrixCalculator.getRhoSize(), 1);
+      DenseMatrix64F qddotSolution = new DenseMatrix64F(degreesOfFreedom, 1);
+
+      solveAndCompare(qddotSolution, rhoSolution);
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 1.1)
+   @Test(timeout = 30000)
+   public void testGravityOnly() throws Exception
+   {
+      setupTest();
+
+      gravityZ = 9.81;
+
+      ArrayList<OneDoFJoint> joints = new ArrayList<>();
+      fullHumanoidRobotModel.getOneDoFJoints(joints);
+
+      ScrewTestTools.setRandomPositions(joints, random);
+
+      DenseMatrix64F rhoSolution = new DenseMatrix64F(wrenchMatrixCalculator.getRhoSize(), 1);
+      DenseMatrix64F qddotSolution = new DenseMatrix64F(degreesOfFreedom, 1);
+
+      solveAndCompare(qddotSolution, rhoSolution);
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 1.1)
+   @Test(timeout = 30000)
    public void testCoriolisAndGravityOnly() throws Exception
    {
       setupTest();
+
+      gravityZ = 9.81;
 
       ArrayList<OneDoFJoint> joints = new ArrayList<>();
       fullHumanoidRobotModel.getOneDoFJoints(joints);
@@ -85,6 +166,8 @@ public class DynamicsMatrixCalculatorTest
    {
       setupTest();
 
+      gravityZ = 9.81;
+
       ArrayList<OneDoFJoint> joints = new ArrayList<>();
       fullHumanoidRobotModel.getOneDoFJoints(joints);
 
@@ -98,9 +181,50 @@ public class DynamicsMatrixCalculatorTest
 
    @ContinuousIntegrationTest(estimatedDuration = 1.1)
    @Test(timeout = 30000)
+   public void testMassMatrixAndCoriolisOnly() throws Exception
+   {
+      setupTest();
+
+      gravityZ = 9.81;
+
+      ArrayList<OneDoFJoint> joints = new ArrayList<>();
+      fullHumanoidRobotModel.getOneDoFJoints(joints);
+
+      ScrewTestTools.setRandomPositions(joints, random);
+      ScrewTestTools.setRandomVelocities(joints, random);
+
+      DenseMatrix64F rhoSolution = new DenseMatrix64F(wrenchMatrixCalculator.getRhoSize(), 1);
+      DenseMatrix64F qddotSolution = RandomTools.generateRandomMatrix(random, degreesOfFreedom, 1);
+
+      solveAndCompare(qddotSolution, rhoSolution);
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 1.1)
+   @Test(timeout = 30000)
+   public void testForceOnly() throws Exception
+   {
+      setupTest();
+
+      gravityZ = 0.0;
+
+      ArrayList<OneDoFJoint> joints = new ArrayList<>();
+      fullHumanoidRobotModel.getOneDoFJoints(joints);
+
+      ScrewTestTools.setRandomPositions(joints, random);
+
+      DenseMatrix64F rhoSolution = RandomTools.generateRandomMatrix(random, wrenchMatrixCalculator.getRhoSize(), 1, 0.0, 1000.0);
+      DenseMatrix64F qddotSolution = new DenseMatrix64F(degreesOfFreedom, 1);
+
+      solveAndCompare(qddotSolution, rhoSolution);
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 1.1)
+   @Test(timeout = 30000)
    public void testForceAndGravityOnly() throws Exception
    {
       setupTest();
+
+      gravityZ = 9.81;
 
       ArrayList<OneDoFJoint> joints = new ArrayList<>();
       fullHumanoidRobotModel.getOneDoFJoints(joints);
@@ -118,7 +242,6 @@ public class DynamicsMatrixCalculatorTest
       YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
 
-      double gravityZ = 9.81;
       double controlDT = 0.005;
 
       fullHumanoidRobotModel = new FullRobotModelTestTools.RandomFullHumanoidRobotModel(random);
@@ -171,21 +294,24 @@ public class DynamicsMatrixCalculatorTest
       DenseMatrix64F inverseDynamicsTauSolution = new DenseMatrix64F(bodyDoFs, 1);
       DenseMatrix64F dynamicsMatrixTauSolution = new DenseMatrix64F(bodyDoFs, 1);
 
+      // compute torques using dynamics matrix calculator
+      dynamicsMatrixCalculator.compute();
+      dynamicsMatrixCalculator.computeJointTorques(dynamicsMatrixTauSolution, qddotSolution, rhoSolution);
+
       // compute torques using inverse dynamics calculator
       ScrewTools.setDesiredAccelerations(fullHumanoidRobotModel.getOneDoFJoints(), qddotSolution);
       inverseDynamicsCalculator.compute();
 
       DenseMatrix64F tmpTauMatrix = new DenseMatrix64F(1, 1);
-      for (int i = 0; i < fullHumanoidRobotModel.getOneDoFJoints().length; i++)
+      for (int i = 0; i < bodyDoFs; i++)
       {
-         fullHumanoidRobotModel.getOneDoFJoints()[i].getTauMatrix(tmpTauMatrix);
-         inverseDynamicsTauSolution.set(i, tmpTauMatrix.get(0, 0));
+         InverseDynamicsJoint joint = jointIndexHandler.getIndexedOneDoFJoints()[i];
+         int[] jointIndices = jointIndexHandler.getJointIndices(joint);
+         joint.getTauMatrix(tmpTauMatrix);
+         for (int dof = 0; dof < jointIndices.length; dof++)
+            inverseDynamicsTauSolution.set(jointIndices[dof] - floatingBaseDoFs, tmpTauMatrix.get(dof, 0));
       }
 
-      // compute torques using dynamics matrix calculator
-      dynamicsMatrixCalculator.compute();
-      dynamicsMatrixCalculator.computeJointTorques(dynamicsMatrixTauSolution, qddotSolution, rhoSolution);
-
-      JUnitTools.assertMatrixEquals(inverseDynamicsTauSolution, dynamicsMatrixTauSolution, 1.0);
+      JUnitTools.assertMatrixEquals(inverseDynamicsTauSolution, dynamicsMatrixTauSolution, tolerance);
    }
 }

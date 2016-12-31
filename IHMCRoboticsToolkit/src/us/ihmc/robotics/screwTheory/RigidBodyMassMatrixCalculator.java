@@ -8,7 +8,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 
-public class GravityCoriolisExternalWrenchMatrixCalculator
+public class RigidBodyMassMatrixCalculator
 {
    private final RigidBody rootBody;
    private final ArrayList<RigidBody> listOfBodiesWithExternalWrenches = new ArrayList<>();
@@ -28,32 +28,28 @@ public class GravityCoriolisExternalWrenchMatrixCalculator
 
    private final int degreesOfFreedom;
 
-   private final boolean doVelocityTerms;
-
-   public GravityCoriolisExternalWrenchMatrixCalculator(TwistCalculator twistCalculator, double gravity, List<InverseDynamicsJoint> jointsToIgnore)
+   public RigidBodyMassMatrixCalculator(TwistCalculator twistCalculator, List<InverseDynamicsJoint> jointsToIgnore)
    {
-      this(ReferenceFrame.getWorldFrame(), ScrewTools.createGravitationalSpatialAcceleration(twistCalculator.getRootBody(), gravity),
-            new LinkedHashMap<>(), jointsToIgnore, true, twistCalculator);
+      this(ReferenceFrame.getWorldFrame(), ScrewTools.createGravitationalSpatialAcceleration(twistCalculator.getRootBody(), 0.0),
+            new LinkedHashMap<>(), jointsToIgnore, twistCalculator);
    }
 
-   public GravityCoriolisExternalWrenchMatrixCalculator(ReferenceFrame inertialFrame, SpatialAccelerationVector rootAcceleration, HashMap<RigidBody, Wrench> externalWrenches,
-         List<InverseDynamicsJoint> jointsToIgnore, boolean doVelocityTerms, TwistCalculator twistCalculator)
+   public RigidBodyMassMatrixCalculator(ReferenceFrame inertialFrame, SpatialAccelerationVector rootAcceleration, HashMap<RigidBody, Wrench> externalWrenches,
+         List<InverseDynamicsJoint> jointsToIgnore,  TwistCalculator twistCalculator)
    {
       this(externalWrenches, jointsToIgnore, new SpatialAccelerationCalculator(twistCalculator.getRootBody(), inertialFrame, rootAcceleration,
-            twistCalculator, doVelocityTerms, false, true), twistCalculator, doVelocityTerms);
+            twistCalculator, false, true, true), twistCalculator);
    }
 
    //// TODO: 12/31/16  remove explicit dependency on the spatial acceleration calculator
-   public GravityCoriolisExternalWrenchMatrixCalculator(HashMap<RigidBody, Wrench> externalWrenches, List<InverseDynamicsJoint> jointsToIgnore,
-         SpatialAccelerationCalculator spatialAccelerationCalculator, TwistCalculator twistCalculator, boolean doVelocityTerms)
+   public RigidBodyMassMatrixCalculator(HashMap<RigidBody, Wrench> externalWrenches, List<InverseDynamicsJoint> jointsToIgnore,
+         SpatialAccelerationCalculator spatialAccelerationCalculator, TwistCalculator twistCalculator)
    {
       this.rootBody = twistCalculator.getRootBody();
       this.externalWrenches = new LinkedHashMap<>(externalWrenches);
       this.jointsToIgnore = new ArrayList<>(jointsToIgnore);
       this.twistCalculator = twistCalculator;
       this.spatialAccelerationCalculator = spatialAccelerationCalculator;
-
-      this.doVelocityTerms = doVelocityTerms;
 
       populateMapsAndLists();
 
@@ -72,6 +68,7 @@ public class GravityCoriolisExternalWrenchMatrixCalculator
       computeJointWrenchesAndTorques();
    }
 
+
    public void setExternalWrench(RigidBody rigidBody, Wrench externalWrench)
    {
       externalWrenches.get(rigidBody).set(externalWrench);
@@ -82,8 +79,18 @@ public class GravityCoriolisExternalWrenchMatrixCalculator
       return spatialAccelerationCalculator;
    }
 
+   private void zeroAccelerations()
+   {
+      for (int i = 0; i < allJoints.size(); i++)
+      {
+         InverseDynamicsJoint joint = allJoints.get(i);
+         joint.setDesiredAccelerationToZero();
+      }
+   }
+
    private void computeTwistsAndSpatialAccelerations()
    {
+      zeroAccelerations();
       spatialAccelerationCalculator.compute();
    }
 
@@ -94,8 +101,7 @@ public class GravityCoriolisExternalWrenchMatrixCalculator
          RigidBody body = allBodiesExceptRoot.get(bodyIndex);
          Wrench netWrench = netWrenches.get(body);
          twistCalculator.getTwistOfBody(tempTwist, body);
-         if (!doVelocityTerms)
-            tempTwist.setToZero();
+         tempTwist.setToZero();
          spatialAccelerationCalculator.getAccelerationOfBody(tempAcceleration, body);
          body.getInertia().computeDynamicWrenchInBodyCoordinates(netWrench, tempAcceleration, tempTwist);
       }

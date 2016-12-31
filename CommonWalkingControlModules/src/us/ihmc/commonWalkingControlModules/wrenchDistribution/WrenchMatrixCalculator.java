@@ -281,21 +281,10 @@ public class WrenchMatrixCalculator
       return basisVectorsOrigin;
    }
 
-   /**
-    * Returns the frame points of all the basis vectors on a rigid body
-    * @param rigidBody rigid body in question
-    * @return list of frame points
-    */
-   public List<FramePoint> getBasisVectorOrigin(RigidBody rigidBody)
+   public DenseMatrix64F getRhoJacobianMatrix(RigidBody rigidBody)
    {
-      return planeContactStateToWrenchMatrixHelpers.get(rigidBody).getBasisVectorsOrigin();
+      return planeContactStateToWrenchMatrixHelpers.get(rigidBody).getRhoJacobian();
    }
-
-   public int getRhoSize(RigidBody rigidBody)
-   {
-      return planeContactStateToWrenchMatrixHelpers.get(rigidBody).getRhoSize();
-   }
-
    public List<FrameVector> getBasisVectors()
    {
       return basisVectors;
