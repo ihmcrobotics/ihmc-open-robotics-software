@@ -273,4 +273,8 @@ public class TwoWaypointSwingGenerator implements PositionTrajectoryGenerator
 
    }
 
+   public static double[] getDefaultWaypointProportions()
+   {
+      return waypointProportions;
+   }
 }
