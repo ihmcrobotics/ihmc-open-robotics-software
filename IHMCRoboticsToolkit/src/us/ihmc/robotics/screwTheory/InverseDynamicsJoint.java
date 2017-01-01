@@ -42,6 +42,8 @@ public abstract interface InverseDynamicsJoint extends CommonJoint, NameBasedHas
 
    public abstract void setConfiguration(DenseMatrix64F matrix, int rowStart);
 
+   public abstract void setJointTorque(DenseMatrix64F matrixToPack, int rowStart);
+
    public abstract void setVelocity(DenseMatrix64F jointVelocity, int i);
 
    public abstract void setDesiredAcceleration(DenseMatrix64F matrix, int rowStart);

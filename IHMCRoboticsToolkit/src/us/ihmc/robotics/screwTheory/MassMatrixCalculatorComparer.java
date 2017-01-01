@@ -14,6 +14,8 @@ public class MassMatrixCalculatorComparer
 
    private final Random random = new Random(1776L);
    private final ArrayList<MassMatrixCalculator> massMatrixCalculators = new ArrayList<MassMatrixCalculator>();
+   private final MassMatrixCalculator diffIdMassMatricCalculator;
+   private final MassMatrixCalculator compositeMassMatricCalculator;
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final ArrayList<RevoluteJoint> joints;
    private final RigidBody elevator;
@@ -25,8 +27,43 @@ public class MassMatrixCalculatorComparer
       Vector3d[] jointAxes = {X, Y, Z, Z, X, Z, Z, X, Y, Y};
       ScrewTestTools.createRandomChainRobot("", joints, elevator, jointAxes, random);
 
-      massMatrixCalculators.add(new DifferentialIDMassMatrixCalculator(worldFrame, elevator));
-      massMatrixCalculators.add(new CompositeRigidBodyMassMatrixCalculator(elevator));
+
+      diffIdMassMatricCalculator = new DifferentialIDMassMatrixCalculator(worldFrame, elevator);
+      compositeMassMatricCalculator = new CompositeRigidBodyMassMatrixCalculator(elevator);
+
+      massMatrixCalculators.add(diffIdMassMatricCalculator);
+      massMatrixCalculators.add(compositeMassMatricCalculator);
+   }
+
+   public void altCompare()
+   {
+      double diffIdTimeTaken = 0.0;
+      double compositeTimeTaken = 0.0;
+
+      int nIterations = 10000;
+      for (int i = 0; i < nIterations; i++)
+      {
+         ScrewTestTools.setRandomPositions(joints, random);
+         elevator.updateFramesRecursively();
+
+         long startTime = System.nanoTime();
+         diffIdMassMatricCalculator.compute();
+         long endTime = System.nanoTime();
+
+         diffIdTimeTaken += (endTime - startTime) / (1e9);
+
+         startTime = System.nanoTime();
+         compositeMassMatricCalculator.compute();
+         endTime = System.nanoTime();
+
+         compositeTimeTaken += (endTime - startTime) / (1e9);
+      }
+
+      double diffIdTimeTakenPerIteration = diffIdTimeTaken / nIterations;
+      double compositeTimeTakenPerIteration = compositeTimeTaken / nIterations;
+
+      System.out.println("Diff ID time taken per iteration: " + diffIdTimeTakenPerIteration + " s");
+      System.out.println("Composite RBM time taken per iteration: " + compositeTimeTakenPerIteration + " s");
    }
 
    public void compare()
@@ -51,6 +88,6 @@ public class MassMatrixCalculatorComparer
 
    public static void main(String[] args)
    {
-      new MassMatrixCalculatorComparer().compare();
+      new MassMatrixCalculatorComparer().altCompare();
    }
 }

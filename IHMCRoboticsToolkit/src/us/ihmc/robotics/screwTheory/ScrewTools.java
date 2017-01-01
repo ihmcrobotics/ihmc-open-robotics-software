@@ -746,6 +746,16 @@ public class ScrewTools
       }
    }
 
+   public static void setJointTorques(InverseDynamicsJoint[] jointList, DenseMatrix64F jointTorques)
+   {
+      int rowStart = 0;
+      for (InverseDynamicsJoint joint : jointList)
+      {
+         joint.setJointTorque(jointTorques, rowStart);
+         rowStart += joint.getDegreesOfFreedom();
+      }
+   }
+
    public static void setVelocities(InverseDynamicsJoint[] jointList, DenseMatrix64F jointVelocities)
    {
       int rowStart = 0;

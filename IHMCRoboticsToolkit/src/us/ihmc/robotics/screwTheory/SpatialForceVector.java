@@ -261,15 +261,19 @@ public class SpatialForceVector
 
    public void set(ReferenceFrame expressedInFrame, DenseMatrix64F matrix)
    {
+      set(expressedInFrame, matrix, 0);
+   }
+
+   public void set(ReferenceFrame expressedInFrame, DenseMatrix64F matrix, int rowStart)
+   {
       MathTools.checkIfEqual(matrix.getNumRows(), SIZE);
       MathTools.checkIfEqual(matrix.getNumCols(), 1);
 
       this.expressedInFrame = expressedInFrame;
-      this.angularPart.set(matrix.get(0, 0), matrix.get(1, 0), matrix.get(2, 0));
-      this.linearPart.set(matrix.get(3, 0), matrix.get(4, 0), matrix.get(5, 0));
+      this.angularPart.set(matrix.get(0, 0), matrix.get(1 + rowStart, 0), matrix.get(2 + rowStart, 0));
+      this.linearPart.set(matrix.get(3 + rowStart, 0), matrix.get(4 + rowStart, 0), matrix.get(5 + rowStart, 0));
    }
-   
-   
+
    public void set(ReferenceFrame expressedInFrame, double[] doubleArray)
    {
       MathTools.checkIfEqual(doubleArray.length, SIZE);

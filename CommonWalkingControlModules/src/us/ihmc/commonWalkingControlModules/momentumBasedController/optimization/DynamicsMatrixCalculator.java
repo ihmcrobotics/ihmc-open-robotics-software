@@ -138,6 +138,8 @@ public class DynamicsMatrixCalculator
 
       massMatrixCalculator.getMassMatrix(tmpMassMatrix);
 
+      /*
+
       int rowIndex = 0;
       for (int jointRowNumber = 0; jointRowNumber < jointsInOrder.length; jointRowNumber++)
       {
@@ -169,6 +171,7 @@ public class DynamicsMatrixCalculator
             rowIndex++;
          }
       }
+      */
    }
 
    private final DenseMatrix64F tmpCoriolisMatrix = new DenseMatrix64F(6);
@@ -193,7 +196,6 @@ public class DynamicsMatrixCalculator
    }
 
 
-   private final PointJacobian tmpJacobian = new PointJacobian();
    private void computeContactForceJacobians()
    {
       int contactForceStartIndex = 0;
@@ -226,7 +228,7 @@ public class DynamicsMatrixCalculator
       floatingBaseMassMatrixToPack.set(floatingBaseMassMatrix);
    }
 
-   public void getFloatingCoriolisMatrix(DenseMatrix64F floatingBaseCoriolisMatrixToPack)
+   public void getFloatingBaseCoriolisMatrix(DenseMatrix64F floatingBaseCoriolisMatrixToPack)
    {
       floatingBaseCoriolisMatrixToPack.set(floatingBaseCoriolisMatrix);
    }
@@ -251,9 +253,11 @@ public class DynamicsMatrixCalculator
       bodyContactForceJacobianToPack.set(bodyContactForceJacobian);
    }
 
-   public void computeJointTorques(DenseMatrix64F jointAccelerationSolution, DenseMatrix64F contactForceSolution)
+   public DenseMatrix64F computeJointTorques(DenseMatrix64F jointAccelerationSolution, DenseMatrix64F contactForceSolution)
    {
       computeJointTorques(jointTorques ,jointAccelerationSolution, contactForceSolution);
+
+      return jointTorques;
    }
 
    /**

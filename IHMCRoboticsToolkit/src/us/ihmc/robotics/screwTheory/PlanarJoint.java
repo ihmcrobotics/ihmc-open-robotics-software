@@ -161,6 +161,14 @@ public class PlanarJoint extends AbstractInverseDynamicsJoint implements Floatin
       jointAccelerationDesired.setLinearPartZ(matrix.get(rowStart + 2, 0));
    }
 
+   @Override
+   public void setJointTorque(DenseMatrix64F matrix, int rowStart)
+   {
+      successorWrench.setAngularPartY(matrix.get(rowStart + 0));
+      successorWrench.setLinearPartX(matrix.get(rowStart + 1));
+      successorWrench.setLinearPartZ(matrix.get(rowStart + 2));
+   }
+
    public void setRotation(double yaw, double pitch, double roll)
    {
       RotationTools.convertYawPitchRollToQuaternion(0.0, pitch, 0.0, jointRotation);
