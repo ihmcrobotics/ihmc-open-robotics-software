@@ -1,6 +1,8 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization;
 
 import org.ejml.data.DenseMatrix64F;
+import org.ejml.factory.LinearSolverFactory;
+import org.ejml.interfaces.linsol.LinearSolver;
 import org.ejml.ops.CommonOps;
 import org.junit.Test;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBodyTools;
@@ -30,7 +32,7 @@ import java.util.Random;
 public class DynamicsMatrixCalculatorTest
 {
    // // TODO: 12/30/16  get the tolerance a lot smaller
-   private final static double tolerance = 0.1;
+   private final static double tolerance = 5.0;
 
    private final Random random = new Random(5641654L);
 
@@ -63,8 +65,11 @@ public class DynamicsMatrixCalculatorTest
       ScrewTestTools.setRandomPositions(joints, random);
       ScrewTestTools.setRandomVelocities(joints, random);
 
-      DenseMatrix64F rhoSolution = RandomTools.generateRandomMatrix(random, wrenchMatrixCalculator.getRhoSize(), 1, 0.0, 1000.0);
+      DenseMatrix64F rhoSolution = new DenseMatrix64F(wrenchMatrixCalculator.getRhoSize(), 1);
       DenseMatrix64F qddotSolution = RandomTools.generateRandomMatrix(random, degreesOfFreedom, 1);
+
+      computeRequiredRhoSolution(qddotSolution, rhoSolution);
+      computeAchievableQddotSolution(qddotSolution, rhoSolution);
 
       solveAndCompare(qddotSolution, rhoSolution);
    }
@@ -80,10 +85,18 @@ public class DynamicsMatrixCalculatorTest
       ArrayList<OneDoFJoint> joints = new ArrayList<>();
       fullHumanoidRobotModel.getOneDoFJoints(joints);
 
-      DenseMatrix64F rhoSolution = new DenseMatrix64F(wrenchMatrixCalculator.getRhoSize(), 1);
-      DenseMatrix64F qddotSolution = RandomTools.generateRandomMatrix(random, degreesOfFreedom, 1);
+      ScrewTestTools.setRandomPositions(joints, random);
 
-      solveAndCompare(qddotSolution, rhoSolution);
+      int rhoSize = wrenchMatrixCalculator.getRhoSize();
+      DenseMatrix64F rhoSolution = new DenseMatrix64F(rhoSize, 1);
+      DenseMatrix64F qddotSolution = RandomTools.generateRandomMatrix(random, degreesOfFreedom, 1);
+      DenseMatrix64F qddotSolutionRevised = new DenseMatrix64F(degreesOfFreedom, 1);
+
+      computeRequiredRhoSolution(qddotSolution, rhoSolution);
+      computeAchievableQddotSolution(qddotSolutionRevised, rhoSolution);
+      computeRequiredRhoSolution(qddotSolutionRevised, rhoSolution, true);
+
+      solveAndCompare(qddotSolutionRevised, rhoSolution);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 1.1)
@@ -97,9 +110,14 @@ public class DynamicsMatrixCalculatorTest
       ArrayList<OneDoFJoint> joints = new ArrayList<>();
       fullHumanoidRobotModel.getOneDoFJoints(joints);
 
+      ScrewTestTools.setRandomPositions(joints, random);
+
       DenseMatrix64F rhoSolution = new DenseMatrix64F(wrenchMatrixCalculator.getRhoSize(), 1);
       DenseMatrix64F qddotSolution = new DenseMatrix64F(degreesOfFreedom, 1);
       CommonOps.fill(qddotSolution, 1.0);
+
+      computeRequiredRhoSolution(qddotSolution, rhoSolution);
+      computeAchievableQddotSolution(qddotSolution, rhoSolution);
 
       solveAndCompare(qddotSolution, rhoSolution);
    }
@@ -115,8 +133,13 @@ public class DynamicsMatrixCalculatorTest
       ArrayList<OneDoFJoint> joints = new ArrayList<>();
       fullHumanoidRobotModel.getOneDoFJoints(joints);
 
+      ScrewTestTools.setRandomPositions(joints, random);
+
       DenseMatrix64F rhoSolution = new DenseMatrix64F(wrenchMatrixCalculator.getRhoSize(), 1);
       DenseMatrix64F qddotSolution = new DenseMatrix64F(degreesOfFreedom, 1);
+
+      computeRequiredRhoSolution(qddotSolution, rhoSolution);
+      computeAchievableQddotSolution(qddotSolution, rhoSolution);
 
       solveAndCompare(qddotSolution, rhoSolution);
    }
@@ -136,6 +159,9 @@ public class DynamicsMatrixCalculatorTest
 
       DenseMatrix64F rhoSolution = new DenseMatrix64F(wrenchMatrixCalculator.getRhoSize(), 1);
       DenseMatrix64F qddotSolution = new DenseMatrix64F(degreesOfFreedom, 1);
+
+      computeRequiredRhoSolution(qddotSolution, rhoSolution);
+      computeAchievableQddotSolution(qddotSolution, rhoSolution);
 
       solveAndCompare(qddotSolution, rhoSolution);
    }
@@ -157,6 +183,9 @@ public class DynamicsMatrixCalculatorTest
       DenseMatrix64F rhoSolution = new DenseMatrix64F(wrenchMatrixCalculator.getRhoSize(), 1);
       DenseMatrix64F qddotSolution = new DenseMatrix64F(degreesOfFreedom, 1);
 
+      computeRequiredRhoSolution(qddotSolution, rhoSolution);
+      computeAchievableQddotSolution(qddotSolution, rhoSolution);
+
       solveAndCompare(qddotSolution, rhoSolution);
    }
 
@@ -175,6 +204,9 @@ public class DynamicsMatrixCalculatorTest
 
       DenseMatrix64F rhoSolution = new DenseMatrix64F(wrenchMatrixCalculator.getRhoSize(), 1);
       DenseMatrix64F qddotSolution = RandomTools.generateRandomMatrix(random, degreesOfFreedom, 1);
+
+      computeRequiredRhoSolution(qddotSolution, rhoSolution);
+      computeAchievableQddotSolution(qddotSolution, rhoSolution);
 
       solveAndCompare(qddotSolution, rhoSolution);
    }
@@ -196,24 +228,8 @@ public class DynamicsMatrixCalculatorTest
       DenseMatrix64F rhoSolution = new DenseMatrix64F(wrenchMatrixCalculator.getRhoSize(), 1);
       DenseMatrix64F qddotSolution = RandomTools.generateRandomMatrix(random, degreesOfFreedom, 1);
 
-      solveAndCompare(qddotSolution, rhoSolution);
-   }
-
-   @ContinuousIntegrationTest(estimatedDuration = 1.1)
-   @Test(timeout = 30000)
-   public void testForceOnly() throws Exception
-   {
-      setupTest();
-
-      gravityZ = 0.0;
-
-      ArrayList<OneDoFJoint> joints = new ArrayList<>();
-      fullHumanoidRobotModel.getOneDoFJoints(joints);
-
-      ScrewTestTools.setRandomPositions(joints, random);
-
-      DenseMatrix64F rhoSolution = RandomTools.generateRandomMatrix(random, wrenchMatrixCalculator.getRhoSize(), 1, 0.0, 1000.0);
-      DenseMatrix64F qddotSolution = new DenseMatrix64F(degreesOfFreedom, 1);
+      computeRequiredRhoSolution(qddotSolution, rhoSolution);
+      computeAchievableQddotSolution(qddotSolution, rhoSolution);
 
       solveAndCompare(qddotSolution, rhoSolution);
    }
@@ -233,6 +249,9 @@ public class DynamicsMatrixCalculatorTest
 
       DenseMatrix64F rhoSolution = RandomTools.generateRandomMatrix(random, wrenchMatrixCalculator.getRhoSize(), 1, 0.0, 1000.0);
       DenseMatrix64F qddotSolution = new DenseMatrix64F(degreesOfFreedom, 1);
+
+      computeRequiredRhoSolution(qddotSolution, rhoSolution);
+      computeAchievableQddotSolution(qddotSolution, rhoSolution);
 
       solveAndCompare(qddotSolution, rhoSolution);
    }
@@ -275,6 +294,82 @@ public class DynamicsMatrixCalculatorTest
       degreesOfFreedom = jointIndexHandler.getNumberOfDoFs();
       floatingBaseDoFs = fullHumanoidRobotModel.getRootJoint().getDegreesOfFreedom();
       bodyDoFs = degreesOfFreedom - floatingBaseDoFs;
+   }
+
+   private void computeRequiredRhoSolution(DenseMatrix64F qddotSolution, DenseMatrix64F rhoSolutionToPack)
+   {
+      computeRequiredRhoSolution(qddotSolution, rhoSolutionToPack, false);
+   }
+
+   private void computeRequiredRhoSolution(DenseMatrix64F qddotSolution, DenseMatrix64F rhoSolutionToPack, boolean check)
+   {
+      int rhoSize = wrenchMatrixCalculator.getRhoSize();
+
+      fullHumanoidRobotModel.updateFrames();
+      toolbox.getTwistCalculator().compute();
+      toolbox.getGeometricJacobianHolder().compute();
+
+      wrenchMatrixCalculator.computeMatrices();
+      dynamicsMatrixCalculator.compute();
+
+      DenseMatrix64F floatingBaseMassMatrix = new DenseMatrix64F(floatingBaseDoFs, degreesOfFreedom);
+      DenseMatrix64F floatingBaseContactJacobian = new DenseMatrix64F(rhoSize, floatingBaseDoFs);
+      DenseMatrix64F floatingBaseContactJacobianTranspose = new DenseMatrix64F(floatingBaseDoFs, rhoSize);
+      DenseMatrix64F floatingBaseCoriolisMatrix = new DenseMatrix64F(floatingBaseDoFs, 1);
+      DenseMatrix64F B = new DenseMatrix64F(floatingBaseDoFs, 1);
+      DenseMatrix64F B_check = new DenseMatrix64F(floatingBaseDoFs, 1);
+
+      dynamicsMatrixCalculator.getFloatingBaseMassMatrix(floatingBaseMassMatrix);
+      dynamicsMatrixCalculator.getFloatingBaseCoriolisMatrix(floatingBaseCoriolisMatrix);
+      dynamicsMatrixCalculator.getFloatingBaseContactForceJacobian(floatingBaseContactJacobian);
+
+      CommonOps.transpose(floatingBaseContactJacobian, floatingBaseContactJacobianTranspose);
+
+      CommonOps.mult(floatingBaseMassMatrix, qddotSolution, B);
+      CommonOps.add(floatingBaseCoriolisMatrix, B, B);
+
+      LinearSolver<DenseMatrix64F> pseudoInverseSolver = LinearSolverFactory.pseudoInverse(true);
+      pseudoInverseSolver.setA(floatingBaseContactJacobianTranspose);
+      pseudoInverseSolver.solve(B, rhoSolutionToPack);
+
+      CommonOps.mult(floatingBaseContactJacobianTranspose, rhoSolutionToPack, B_check);
+
+      if (check)
+         JUnitTools.assertMatrixEquals(B_check, B, 0.001);
+   }
+
+   private void computeAchievableQddotSolution(DenseMatrix64F qddotSolutionToPack, DenseMatrix64F rhoSolution)
+   {
+      int rhoSize = wrenchMatrixCalculator.getRhoSize();
+
+      DenseMatrix64F floatingBaseMassMatrix = new DenseMatrix64F(floatingBaseDoFs, degreesOfFreedom);
+      DenseMatrix64F floatingBaseContactJacobian = new DenseMatrix64F(rhoSize, floatingBaseDoFs);
+      DenseMatrix64F floatingBaseContactJacobianTranspose = new DenseMatrix64F(floatingBaseDoFs, rhoSize);
+      DenseMatrix64F floatingBaseCoriolisMatrix = new DenseMatrix64F(floatingBaseDoFs, 1);
+      DenseMatrix64F B = new DenseMatrix64F(floatingBaseDoFs, 1);
+      DenseMatrix64F B_check = new DenseMatrix64F(floatingBaseDoFs, 1);
+      DenseMatrix64F zero = new DenseMatrix64F(floatingBaseDoFs, 1);
+
+      dynamicsMatrixCalculator.getFloatingBaseMassMatrix(floatingBaseMassMatrix);
+      dynamicsMatrixCalculator.getFloatingBaseCoriolisMatrix(floatingBaseCoriolisMatrix);
+      dynamicsMatrixCalculator.getFloatingBaseContactForceJacobian(floatingBaseContactJacobian);
+
+      CommonOps.transpose(floatingBaseContactJacobian, floatingBaseContactJacobianTranspose);
+
+      CommonOps.mult(floatingBaseContactJacobianTranspose, rhoSolution, B);
+      CommonOps.subtract(B, floatingBaseCoriolisMatrix, B);
+
+      LinearSolver<DenseMatrix64F> pseudoInverseSolver = LinearSolverFactory.pseudoInverse(true);
+      pseudoInverseSolver.setA(floatingBaseMassMatrix);
+      pseudoInverseSolver.solve(B, qddotSolutionToPack);
+
+      CommonOps.mult(floatingBaseMassMatrix, qddotSolutionToPack, B_check);
+      JUnitTools.assertMatrixEquals(B, B_check, tolerance);
+
+      CommonOps.add(B_check, floatingBaseCoriolisMatrix, B_check);
+      CommonOps.multAdd(-1.0, floatingBaseContactJacobianTranspose, rhoSolution, B_check);
+
+      JUnitTools.assertMatrixEquals(B_check, zero, tolerance);
    }
 
    private void solveAndCompare(DenseMatrix64F qddotSolution, DenseMatrix64F rhoSolution)

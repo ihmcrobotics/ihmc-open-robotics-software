@@ -38,6 +38,8 @@ import us.ihmc.robotics.screwTheory.*;
 
 public class WholeBodyInverseDynamicsSolver
 {
+   private static final boolean USE_DYNAMIC_MATRIX_CALCULATOR = true;
+
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final InverseDynamicsCalculator inverseDynamicsCalculator;
@@ -52,6 +54,7 @@ public class WholeBodyInverseDynamicsSolver
    private final PlaneContactWrenchProcessor planeContactWrenchProcessor;
    private final WrenchVisualizer wrenchVisualizer;
    private final JointAccelerationIntegrationCalculator jointAccelerationIntegrationCalculator;
+   private final SpatialAccelerationCalculator spatialAccelerationCalculator;
 
    private final OneDoFJoint[] controlledOneDoFJoints;
    private final InverseDynamicsJoint[] jointsToOptimizeFor;
@@ -79,6 +82,7 @@ public class WholeBodyInverseDynamicsSolver
       WrenchMatrixCalculator wrenchMatrixCalculator = new WrenchMatrixCalculator(toolbox, registry);
       optimizationControlModule = new InverseDynamicsOptimizationControlModule(toolbox, wrenchMatrixCalculator, registry);
       dynamicsMatrixCalculator = new DynamicsMatrixCalculator(toolbox, wrenchMatrixCalculator);
+      spatialAccelerationCalculator = toolbox.getSpatialAccelerationCalculator();
 
       JointIndexHandler jointIndexHandler = toolbox.getJointIndexHandler();
       jointsToOptimizeFor = jointIndexHandler.getIndexedJoints();
@@ -109,27 +113,30 @@ public class WholeBodyInverseDynamicsSolver
 
    public void reset()
    {
-      inverseDynamicsCalculator.reset();
       optimizationControlModule.initialize();
 
-      dynamicsMatrixCalculator.reset();
+      if (USE_DYNAMIC_MATRIX_CALCULATOR)
+         dynamicsMatrixCalculator.reset();
+      else
+         inverseDynamicsCalculator.reset();
    }
 
    public void initialize()
    {
       // When you initialize into this controller, reset the estimator positions to current. Otherwise it might be in a bad state
       // where the feet are all jacked up. For example, after falling and getting back up.
-      inverseDynamicsCalculator.compute();
       optimizationControlModule.initialize();
       planeContactWrenchProcessor.initialize();
 
-      dynamicsMatrixCalculator.reset();
+      if (USE_DYNAMIC_MATRIX_CALCULATOR)
+         dynamicsMatrixCalculator.reset();
+      else
+         inverseDynamicsCalculator.compute();
    }
 
    public void compute()
    {
       MomentumModuleSolution momentumModuleSolution;
-      dynamicsMatrixCalculator.compute();
 
       try
       {
@@ -148,20 +155,31 @@ public class WholeBodyInverseDynamicsSolver
       List<RigidBody> rigidBodiesWithExternalWrench = momentumModuleSolution.getRigidBodiesWithExternalWrench();
       SpatialForceVector centroidalMomentumRateSolution = momentumModuleSolution.getCentroidalMomentumRateSolution();
 
-      dynamicsMatrixCalculator.computeJointTorques(jointAccelerations, rhoSolution);
-
       yoAchievedMomentumRateLinear.set(centroidalMomentumRateSolution.getLinearPart());
       yoAchievedMomentumRateLinear.getFrameTupleIncludingFrame(achievedMomentumRateLinear);
 
-      for (int i = 0; i < rigidBodiesWithExternalWrench.size(); i++)
+      if (USE_DYNAMIC_MATRIX_CALCULATOR)
       {
-         RigidBody rigidBody = rigidBodiesWithExternalWrench.get(i);
-         inverseDynamicsCalculator.setExternalWrench(rigidBody, externalWrenchSolution.get(rigidBody));
+         spatialAccelerationCalculator.compute();
+
+         dynamicsMatrixCalculator.compute();
+         DenseMatrix64F tauSolution = dynamicsMatrixCalculator.computeJointTorques(jointAccelerations, rhoSolution);
+
+         ScrewTools.setDesiredAccelerations(jointsToOptimizeFor, jointAccelerations);
+         ScrewTools.setJointTorques(controlledOneDoFJoints, tauSolution);
+      }
+      else
+      {
+         for (int i = 0; i < rigidBodiesWithExternalWrench.size(); i++)
+         {
+            RigidBody rigidBody = rigidBodiesWithExternalWrench.get(i);
+            inverseDynamicsCalculator.setExternalWrench(rigidBody, externalWrenchSolution.get(rigidBody));
+         }
+
+         ScrewTools.setDesiredAccelerations(jointsToOptimizeFor, jointAccelerations);
+         inverseDynamicsCalculator.compute();
       }
 
-      ScrewTools.setDesiredAccelerations(jointsToOptimizeFor, jointAccelerations);
-
-      inverseDynamicsCalculator.compute();
       updateLowLevelData();
 
       rootJoint.getWrench(residualRootJointWrench);
@@ -220,7 +238,8 @@ public class WholeBodyInverseDynamicsSolver
             break;
          case EXTERNAL_WRENCH:
             optimizationControlModule.submitExternalWrenchCommand((ExternalWrenchCommand) command);
-            dynamicsMatrixCalculator.setExternalWrench(((ExternalWrenchCommand) command).getRigidBody(), ((ExternalWrenchCommand) command).getExternalWrench());
+            if (USE_DYNAMIC_MATRIX_CALCULATOR)
+               dynamicsMatrixCalculator.setExternalWrench(((ExternalWrenchCommand) command).getRigidBody(), ((ExternalWrenchCommand) command).getExternalWrench());
             break;
          case PLANE_CONTACT_STATE:
             optimizationControlModule.submitPlaneContactStateCommand((PlaneContactStateCommand) command);

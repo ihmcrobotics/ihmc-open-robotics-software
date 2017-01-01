@@ -44,7 +44,7 @@ public class CompositeRigidBodyMassMatrixCalculator implements MassMatrixCalcula
    {
       this(rootBody, new ArrayList<InverseDynamicsJoint>());
    }
-   
+
    @Override
    public void compute()
    {
