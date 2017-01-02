@@ -1,9 +1,6 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization;
 
-import org.apache.commons.math3.analysis.function.Inverse;
 import org.ejml.data.DenseMatrix64F;
-import org.ejml.factory.LinearSolverFactory;
-import org.ejml.interfaces.linsol.LinearSolver;
 import org.ejml.ops.CommonOps;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.GeometricJacobianHolder;
@@ -11,7 +8,6 @@ import us.ihmc.commonWalkingControlModules.wrenchDistribution.WrenchMatrixCalcul
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.screwTheory.*;
-import us.ihmc.tools.io.printing.PrintTools;
 
 import java.util.ArrayList;
 import java.util.List;

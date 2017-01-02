@@ -20,6 +20,7 @@ public class FloatingBaseRigidBodyDynamicsTools
    {
       computeJacobianTranspose(floatingBaseContactForceJacobianMatrix, matrixTranspose);
 
+      CommonOps.scale(-1.0, floatingBaseCoriolisMatrix);
       CommonOps.multAdd(matrixTranspose, rho, floatingBaseCoriolisMatrix);
 
       pseudoInverseSolver.setA(floatingBaseMassMatrix);
