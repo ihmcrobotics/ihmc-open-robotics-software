@@ -33,9 +33,9 @@ import java.util.Random;
 
 public class DynamicsMatrixCalculatorTest
 {
-   // // TODO: 12/30/16  get the tolerance a lot smaller
-   private final static double tolerance = 5.0;
+   private final static double tolerance = 0.0001;
    private final static int iters = 1000;
+   private final static double maxRho = 1.0e2;
 
    private final Random random = new Random(5641654L);
 
@@ -55,7 +55,7 @@ public class DynamicsMatrixCalculatorTest
    int bodyDoFs;
 
    @ContinuousIntegrationTest(estimatedDuration = 1.1)
-   @Test(timeout = 30000)
+   @Test(timeout = 999999999)
    public void testEquivalence() throws Exception
    {
       setupTest();
@@ -102,12 +102,12 @@ public class DynamicsMatrixCalculatorTest
          ScrewTestTools.setRandomPositions(joints, random);
 
          int rhoSize = wrenchMatrixCalculator.getRhoSize();
-         DenseMatrix64F rhoSolution = RandomTools.generateRandomMatrix(random, rhoSize, 1, 0.0, 100.0);
+         DenseMatrix64F rhoSolution = RandomTools.generateRandomMatrix(random, rhoSize, 1, 0.0, maxRho);
          DenseMatrix64F qddotSolution = new DenseMatrix64F(degreesOfFreedom, 1);
          DenseMatrix64F alternativeRho = new DenseMatrix64F(rhoSize, 1);
 
          update();
-         DynamicsMatrixCalculatorTools.computeRequiredQddotGivenRho(dynamicsMatrixCalculator, qddotSolution, rhoSolution);
+         DynamicsMatrixCalculatorTools.computeQddotGivenRho(dynamicsMatrixCalculator, qddotSolution, rhoSolution);
 
          DynamicsMatrixCalculatorTools.computeRequiredRhoAndAchievableQddotGivenQddot(dynamicsMatrixCalculator, qddotSolution, alternativeRho);
 
@@ -362,11 +362,11 @@ public class DynamicsMatrixCalculatorTest
          ScrewTestTools.setRandomPositions(joints, random);
          ScrewTestTools.setRandomVelocities(joints, random);
 
-         DenseMatrix64F rhoSolution = new DenseMatrix64F(wrenchMatrixCalculator.getRhoSize(), 1);
-         DenseMatrix64F qddotSolution = RandomTools.generateRandomMatrix(random, degreesOfFreedom, 1);
+         DenseMatrix64F rhoSolution = RandomTools.generateRandomMatrix(random, wrenchMatrixCalculator.getRhoSize(), 1, 0.0, maxRho);
+         DenseMatrix64F qddotSolution = new DenseMatrix64F(degreesOfFreedom, 1);
 
          update();
-         DynamicsMatrixCalculatorTools.computeRequiredRhoAndAchievableQddotGivenQddot(dynamicsMatrixCalculator, qddotSolution, rhoSolution);
+         DynamicsMatrixCalculatorTools.computeRequiredRhoAndAchievableQddotGivenRho(dynamicsMatrixCalculator, qddotSolution, rhoSolution);
 
          solveAndCompare(qddotSolution, rhoSolution, true);
       }
@@ -417,7 +417,7 @@ public class DynamicsMatrixCalculatorTest
          dynamicsMatrixCalculator.reset();
          ScrewTestTools.setRandomPositions(joints, random);
 
-         DenseMatrix64F rhoSolution = RandomTools.generateRandomMatrix(random, wrenchMatrixCalculator.getRhoSize(), 1, 0.0, 1000.0);
+         DenseMatrix64F rhoSolution = RandomTools.generateRandomMatrix(random, wrenchMatrixCalculator.getRhoSize(), 1, 0.0, maxRho);
          DenseMatrix64F qddotSolution = new DenseMatrix64F(degreesOfFreedom, 1);
 
          solveAndCompare(qddotSolution, rhoSolution, false);
@@ -442,7 +442,7 @@ public class DynamicsMatrixCalculatorTest
          ScrewTestTools.setRandomPositions(joints, random);
          ScrewTestTools.setRandomVelocities(joints, random);
 
-         DenseMatrix64F rhoSolution = RandomTools.generateRandomMatrix(random, wrenchMatrixCalculator.getRhoSize(), 1, 0.0, 1000.0);
+         DenseMatrix64F rhoSolution = RandomTools.generateRandomMatrix(random, wrenchMatrixCalculator.getRhoSize(), 1, 0.0, maxRho);
          DenseMatrix64F qddotSolution = new DenseMatrix64F(degreesOfFreedom, 1);
 
          solveAndCompare(qddotSolution, rhoSolution, false);
@@ -520,7 +520,7 @@ public class DynamicsMatrixCalculatorTest
       dynamicsMatrixCalculator.computeJointTorques(dynamicsMatrixTauSolution, qddotSolution, rhoSolution);
 
       // compute torques using inverse dynamics calculator
-      ScrewTools.setDesiredAccelerations(fullHumanoidRobotModel.getOneDoFJoints(), qddotSolution);
+      ScrewTools.setDesiredAccelerations(jointIndexHandler.getIndexedJoints(), qddotSolution);
       inverseDynamicsCalculator.compute();
 
       DenseMatrix64F tmpTauMatrix = new DenseMatrix64F(1, 1);
@@ -552,7 +552,6 @@ public class DynamicsMatrixCalculatorTest
       DenseMatrix64F floatingBaseMassMatrix = dynamicsMatrixCalculator.getFloatingBaseMassMatrix();
       DenseMatrix64F floatingBaseCoriolisMatrix = dynamicsMatrixCalculator.getFloatingBaseCoriolisMatrix();
 
-      //DenseMatrix64F localFloatingBaseMassMatrix = new DenseMatrix64F(floatingBaseMassMatrix.getNumRows(), floatingBaseMassMatrix.getNumCols());
       DenseMatrix64F localFloatingBaseCoriolisMatrix = new DenseMatrix64F(floatingBaseCoriolisMatrix.getNumRows(), floatingBaseCoriolisMatrix.getNumCols());
 
       localFloatingBaseCoriolisMatrix.set(floatingBaseCoriolisMatrix);
