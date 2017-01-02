@@ -418,7 +418,7 @@ public class Torus3dTest
       testPointsInsideWhenOffsetBy(torus3d, 0.0, 0.0, translation);
 
       translation = (random.nextDouble() - 0.5) * 10.0;
-      double translationY = (random.nextDouble() - 0.5) * 10.0;;
+      double translationY = (random.nextDouble() - 0.5) * 10.0;
       double translationZ = (random.nextDouble() - 0.5) * 10.0;
 //      System.out.println("Torus3dTest:testTranslatedPointOnOrInside:" + translation + "," + translationY + "," + translationZ);
       transform.setTranslation(new Vector3d(translation, translationY, translationZ));
@@ -490,13 +490,13 @@ public class Torus3dTest
       RigidBodyTransform transformAppliedOnlyToCopy = new RigidBodyTransform();
       transformAppliedOnlyToCopy.setRotationPitchAndZeroTranslation(Math.PI / 4);
       torusCopy.applyTransform(transformAppliedOnlyToCopy);
-      assertFalse(torusCopy.getTransform().equals(torus.getTransform()));
+      assertFalse(torusCopy.getTransformUnsafe().equals(torus.getTransformUnsafe()));
       
       Torus3d torusCopyBySet = new Torus3d(5.0, 1.0);
       torusCopyBySet.set(torus);
       RigidBodyTransform transformAppliedOnlyToCopyBySet = new RigidBodyTransform();
       transformAppliedOnlyToCopyBySet.setRotationYawAndZeroTranslation(Math.PI / 5);
       torusCopyBySet.applyTransform(transformAppliedOnlyToCopyBySet);      
-      assertFalse(torusCopyBySet.getTransform().equals(torus.getTransform()));
+      assertFalse(torusCopyBySet.getTransformUnsafe().equals(torus.getTransformUnsafe()));
    }
 }

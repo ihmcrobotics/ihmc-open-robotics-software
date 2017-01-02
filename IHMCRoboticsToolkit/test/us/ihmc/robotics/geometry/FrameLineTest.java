@@ -94,15 +94,17 @@ public class FrameLineTest
       FrameVector vector = new FrameVector(world, direction);
       vector.normalize();
 
-      assertTrue(vector.epsilonEquals(line.getFrameDirection(), 1e-12));
+      assertTrue(vector.epsilonEquals(line.getFrameNormalizedVectorCopy(), 1e-12));
 
       line.changeFrame(target);
       vector.changeFrame(target);
 
-      assertTrue(vector.epsilonEquals(line.getFrameDirection(), 1e-12));
+      assertTrue(vector.epsilonEquals(line.getFrameNormalizedVectorCopy(), 1e-12));
 
       vector.changeFrame(target2);
-      assertTrue(line.getDirectionInFrame(target2).epsilonEquals(vector, 1e-12));
+      FrameVector frameVector = line.getFrameNormalizedVectorCopy();
+      frameVector.changeFrame(target2);
+      assertTrue(frameVector.epsilonEquals(vector, 1e-12));
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -122,15 +124,17 @@ public class FrameLineTest
       FrameVector vector = new FrameVector(world, direction);
       vector.normalize();
 
-      assertTrue(vector.epsilonEquals(line.getFrameDirection(), 1e-12));
+      assertTrue(vector.epsilonEquals(line.getFrameNormalizedVectorCopy(), 1e-12));
 
       line.changeFrame(target);
       vector.changeFrame(target);
 
-      assertTrue(vector.epsilonEquals(line.getFrameDirection(), 1e-12));
+      assertTrue(vector.epsilonEquals(line.getFrameNormalizedVectorCopy(), 1e-12));
 
       vector.changeFrame(target2);
-      assertTrue(line.getDirectionInFrame(target2).epsilonEquals(vector, 1e-12));
+      FrameVector frameNormalizedVectorCopy = line.getFrameNormalizedVectorCopy();
+      frameNormalizedVectorCopy.changeFrame(target2);
+      assertTrue(frameNormalizedVectorCopy.epsilonEquals(vector, 1e-12));
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
