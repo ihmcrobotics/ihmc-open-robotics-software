@@ -30,21 +30,26 @@ public class GravityCoriolisExternalWrenchMatrixCalculator
 
    private final boolean doVelocityTerms;
 
-   public GravityCoriolisExternalWrenchMatrixCalculator(TwistCalculator twistCalculator, double gravity, List<InverseDynamicsJoint> jointsToIgnore)
+   private static final boolean DEFAULT_DO_VELOCITY_TERMS = true;
+   private static final boolean DO_ACCELERATION_TERMS = false;
+   private static final boolean USE_DESIRED_ACCELERATIONS = true;
+
+   public GravityCoriolisExternalWrenchMatrixCalculator(TwistCalculator twistCalculator, double gravity, ArrayList<InverseDynamicsJoint> jointsToIgnore)
    {
       this(ReferenceFrame.getWorldFrame(), ScrewTools.createGravitationalSpatialAcceleration(twistCalculator.getRootBody(), gravity),
-            new LinkedHashMap<>(), jointsToIgnore, true, twistCalculator);
+            new LinkedHashMap<>(), jointsToIgnore, DEFAULT_DO_VELOCITY_TERMS, twistCalculator);
    }
 
-   public GravityCoriolisExternalWrenchMatrixCalculator(ReferenceFrame inertialFrame, SpatialAccelerationVector rootAcceleration, HashMap<RigidBody, Wrench> externalWrenches,
-         List<InverseDynamicsJoint> jointsToIgnore, boolean doVelocityTerms, TwistCalculator twistCalculator)
+   public GravityCoriolisExternalWrenchMatrixCalculator(ReferenceFrame inertialFrame, SpatialAccelerationVector rootAcceleration,
+         HashMap<RigidBody, Wrench> externalWrenches,
+         ArrayList<InverseDynamicsJoint> jointsToIgnore, boolean doVelocityTerms, TwistCalculator twistCalculator)
    {
       this(externalWrenches, jointsToIgnore, new SpatialAccelerationCalculator(twistCalculator.getRootBody(), inertialFrame, rootAcceleration,
-            twistCalculator, doVelocityTerms, false, true), twistCalculator, doVelocityTerms);
+            twistCalculator, doVelocityTerms, DO_ACCELERATION_TERMS, USE_DESIRED_ACCELERATIONS), twistCalculator, doVelocityTerms);
    }
 
    //// TODO: 12/31/16  remove explicit dependency on the spatial acceleration calculator
-   public GravityCoriolisExternalWrenchMatrixCalculator(HashMap<RigidBody, Wrench> externalWrenches, List<InverseDynamicsJoint> jointsToIgnore,
+   public GravityCoriolisExternalWrenchMatrixCalculator(HashMap<RigidBody, Wrench> externalWrenches, ArrayList<InverseDynamicsJoint> jointsToIgnore,
          SpatialAccelerationCalculator spatialAccelerationCalculator, TwistCalculator twistCalculator, boolean doVelocityTerms)
    {
       this.rootBody = twistCalculator.getRootBody();

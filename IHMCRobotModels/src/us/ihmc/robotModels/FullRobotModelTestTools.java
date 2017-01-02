@@ -231,7 +231,7 @@ public class FullRobotModelTestTools
          RigidBody hipTrunnion = ScrewTestTools.addRandomRigidBody(prefix + "_hipTrunnion", random, hipYaw);
 
          RevoluteJoint hipRoll = ScrewTestTools.addRandomRevoluteJoint(prefix + "_hipRoll", roll, random, hipTrunnion);
-         RigidBody hip = ScrewTestTools.addRandomRigidBody(prefix + "_shoulder", random, hipRoll);
+         RigidBody hip = ScrewTestTools.addRandomRigidBody(prefix + "_hip", random, hipRoll);
 
          RevoluteJoint hipPitch = ScrewTestTools.addRandomRevoluteJoint(prefix + "_hipPitch", pitch, random, hip);
          RigidBody upperLeg = ScrewTestTools.addRandomRigidBody(prefix + "_upperLeg", random, hipPitch);

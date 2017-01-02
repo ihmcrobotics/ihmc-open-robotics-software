@@ -285,6 +285,12 @@ public class WrenchMatrixCalculator
    {
       return planeContactStateToWrenchMatrixHelpers.get(rigidBody).getRhoJacobian();
    }
+
+   public ReferenceFrame getJacobianFrame()
+   {
+      return centerOfMassFrame;
+   }
+
    public List<FrameVector> getBasisVectors()
    {
       return basisVectors;
