@@ -1,6 +1,10 @@
 package us.ihmc.robotics.geometry;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,6 +12,7 @@ import java.util.Random;
 
 import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
+import javax.vecmath.Tuple3d;
 import javax.vecmath.Vector2d;
 import javax.vecmath.Vector3d;
 
@@ -1208,6 +1213,21 @@ public class GeometryToolsTest
 //
 //       }
 //    }
+   }
+   
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @Test(timeout = 30000)
+   public void testClipToBoundingBox()
+   {
+      Tuple3d tuple3d = new Point3d(1.0, -1.0, 0.0);
+      GeometryTools.clipToBoundingBox(tuple3d, -0.5, 0.5, 0.5, -0.5, 0.0, 0.0);
+      JUnitTools.assertTuple3dEquals("not equal", new Point3d(0.5, -0.5, 0.0), tuple3d, 0.0);
+      tuple3d.set(1.0, -1.0, 0.0);
+      GeometryTools.clipToBoundingBox(tuple3d, 0.5, -0.5, -0.5, 0.5, -0.1, 0.1);
+      JUnitTools.assertTuple3dEquals("not equal", new Point3d(0.5, -0.5, 0.0), tuple3d, 0.0);
+      tuple3d.set(1.0, -1.0, 2.0);
+      GeometryTools.clipToBoundingBox(tuple3d, 0.5, -0.5, -0.5, 0.5, -0.1, 1.0);
+      JUnitTools.assertTuple3dEquals("not equal", new Point3d(0.5, -0.5, 1.0), tuple3d, 0.0);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
