@@ -63,7 +63,7 @@ public class FloatingBaseRigidBodyDynamicsTools
    {
       computeJacobianTranspose(bodyContactForceJacobianMatrix, matrixTranspose);
 
-      localVector.reshape(bodyMassMatrix.getNumCols(), 1);
+      localVector.reshape(bodyContactForceJacobianMatrix.getNumRows(), 1);
       FloatingBaseRigidBodyDynamicsTools.computeRhoGivenQddot(floatingBaseMassMatrix, floatingBaseCoriolisMatrix, floatingBaseContactForceJacobianMatrix, qddot, localVector);
       FloatingBaseRigidBodyDynamicsTools.computeTauGivenRhoAndQddot(bodyMassMatrix, bodyCoriolisMatrix, bodyContactForceJacobianMatrix, qddot, localVector, tauToPack);
    }
