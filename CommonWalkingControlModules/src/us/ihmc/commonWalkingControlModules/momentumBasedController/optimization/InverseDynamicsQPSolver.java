@@ -220,6 +220,24 @@ public class InverseDynamicsQPSolver
       CommonOps.insert(taskObjective, solverInput_beq, previousSize, 0);
    }
 
+   public void addTorqueMinimizationObjective(DenseMatrix64F torqueJacobian, DenseMatrix64F torqueObjective, double taskWeight)
+   {
+      int taskSize = torqueJacobian.getNumRows();
+      int controlSize = torqueJacobian.getNumCols();
+
+      // J^T W
+      tempJtW.reshape(controlSize, taskSize);
+      MatrixTools.scaleTranspose(taskWeight, torqueJacobian, tempJtW);
+
+      // Compute: H += J^T W J
+      CommonOps.multAdd(tempJtW, torqueJacobian, solverInput_H);
+      //MatrixTools.addMatrixBlock(solverInput_H, 0, 0, tempMotionTask_H, 0, 0, numberOfDoFs, numberOfDoFs, 1.0);
+
+      // Compute: f += - J^T W Objective
+      CommonOps.multAdd(-1.0, tempJtW, torqueObjective, solverInput_f);
+      //MatrixTools.addMatrixBlock(solverInput_f, 0, 0, tempMotionTask_f, 0, 0, numberOfDoFs, 1, -1.0);
+   }
+
    /**
     * Need to be called before {@link #solve()}.
     * It sets up the constraint that ensures that the solution is dynamically feasible:
