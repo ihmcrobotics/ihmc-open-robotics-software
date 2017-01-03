@@ -83,6 +83,12 @@ public class PoseReferenceFrame extends ReferenceFrame
       this.update();
    }
 
+   public void setPositionWithoutChecksAndUpdate(double x, double y, double z)
+   {
+      originPose.setPosition(x, y, z);
+      this.update();
+   }
+
    public void setPositionAndUpdate(FramePoint framePoint)
    {
       framePoint.checkReferenceFrameMatch(parentFrame);
