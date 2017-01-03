@@ -73,9 +73,6 @@ public class WholeBodyInverseDynamicsSolver
    private final YoFrameVector yoResidualRootJointTorque;
 
    private final double controlDT;
-   private final DenseMatrix64F altTauSolution;
-   private final DenseMatrix64F altTauSolutionFromQddot;
-   private final DenseMatrix64F altTauSolutionFromRho;
 
    public WholeBodyInverseDynamicsSolver(WholeBodyControlCoreToolbox toolbox, YoVariableRegistry parentRegistry)
    {
@@ -110,10 +107,6 @@ public class WholeBodyInverseDynamicsSolver
 
       yoResidualRootJointForce = toolbox.getYoResidualRootJointForce();
       yoResidualRootJointTorque = toolbox.getYoResidualRootJointTorque();
-
-      altTauSolution = new DenseMatrix64F(ScrewTools.computeDegreesOfFreedom(controlledOneDoFJoints), 1);
-      altTauSolutionFromQddot = new DenseMatrix64F(ScrewTools.computeDegreesOfFreedom(controlledOneDoFJoints), 1);
-      altTauSolutionFromRho = new DenseMatrix64F(ScrewTools.computeDegreesOfFreedom(controlledOneDoFJoints), 1);
 
       parentRegistry.addChild(registry);
    }
@@ -165,35 +158,15 @@ public class WholeBodyInverseDynamicsSolver
       yoAchievedMomentumRateLinear.set(centroidalMomentumRateSolution.getLinearPart());
       yoAchievedMomentumRateLinear.getFrameTupleIncludingFrame(achievedMomentumRateLinear);
 
-      DenseMatrix64F tauSolution;
-      boolean floatingBaseSatisfied;
-      boolean bodySatisfied, bodyFromQddotSatisfied, bodyFromRhoSatisfied, bodyAltSatisfied;
       if (USE_DYNAMIC_MATRIX_CALCULATOR)
       {
          spatialAccelerationCalculator.compute();
 
          dynamicsMatrixCalculator.compute();
-         tauSolution = dynamicsMatrixCalculator.computeJointTorques(jointAccelerations, rhoSolution);
-         floatingBaseSatisfied = DynamicsMatrixCalculatorTools.checkFloatingBaseDynamicsSatisfied(dynamicsMatrixCalculator, jointAccelerations, rhoSolution);
-         bodySatisfied = DynamicsMatrixCalculatorTools.checkRigidBodyDynamicsSatisfied(dynamicsMatrixCalculator, jointAccelerations, tauSolution, rhoSolution);
-
-         //ScrewTools.setJointTorques(controlledOneDoFJoints, tauSolution);
-         for (int i = 0; i < rigidBodiesWithExternalWrench.size(); i++)
-         {
-            RigidBody rigidBody = rigidBodiesWithExternalWrench.get(i);
-            inverseDynamicsCalculator.setExternalWrench(rigidBody, externalWrenchSolution.get(rigidBody));
-         }
+         DenseMatrix64F tauSolution = dynamicsMatrixCalculator.computeJointTorques(jointAccelerations, rhoSolution);
 
          ScrewTools.setDesiredAccelerations(jointsToOptimizeFor, jointAccelerations);
-         inverseDynamicsCalculator.compute();
-
-         DynamicsMatrixCalculatorTools.extractTorqueMatrix(jointsToOptimizeFor, altTauSolution);
-         DynamicsMatrixCalculatorTools.computeTauGivenQddot(dynamicsMatrixCalculator, jointAccelerations, altTauSolutionFromQddot);
-         DynamicsMatrixCalculatorTools.computeTauGivenRho(dynamicsMatrixCalculator, rhoSolution, altTauSolutionFromRho);
-
-         bodyFromQddotSatisfied = DynamicsMatrixCalculatorTools.checkRigidBodyDynamicsSatisfied(dynamicsMatrixCalculator, jointAccelerations, altTauSolutionFromQddot, rhoSolution);
-         bodyFromRhoSatisfied = DynamicsMatrixCalculatorTools.checkRigidBodyDynamicsSatisfied(dynamicsMatrixCalculator, jointAccelerations, altTauSolutionFromRho, rhoSolution);
-         bodyAltSatisfied = DynamicsMatrixCalculatorTools.checkRigidBodyDynamicsSatisfied(dynamicsMatrixCalculator, jointAccelerations, altTauSolution, rhoSolution);
+         ScrewTools.setJointTorques(controlledOneDoFJoints, tauSolution);
       }
       else
       {

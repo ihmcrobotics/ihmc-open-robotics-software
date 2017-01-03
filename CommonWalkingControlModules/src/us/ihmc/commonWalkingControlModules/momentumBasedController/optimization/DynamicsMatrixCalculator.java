@@ -19,6 +19,8 @@ public class DynamicsMatrixCalculator
    private final DenseMatrix64F coriolisMatrix;
    private final DenseMatrix64F contactForceJacobian;
 
+   private final DenseMatrix64F massMatrix;
+
    private final DenseMatrix64F floatingBaseMassMatrix;
    private final DenseMatrix64F floatingBaseCoriolisMatrix;
    private final DenseMatrix64F floatingBaseContactForceJacobian;
@@ -29,6 +31,7 @@ public class DynamicsMatrixCalculator
 
    private final DenseMatrix64F jointTorques;
 
+   private final InverseDynamicsJoint[] jointsToOptimizeFor;
 
    public DynamicsMatrixCalculator(WholeBodyControlCoreToolbox toolbox, WrenchMatrixCalculator wrenchMatrixCalculator)
    {
@@ -42,6 +45,7 @@ public class DynamicsMatrixCalculator
       int rhoSize = wrenchMatrixCalculator.getRhoSize();
 
       JointIndexHandler jointIndexHandler = toolbox.getJointIndexHandler();
+      jointsToOptimizeFor = jointIndexHandler.getIndexedJoints();
 
       massMatrixCalculator = new CompositeRigidBodyMassMatrixCalculator(elevator, jointsToIgnore);
       coriolisMatrixCalculator = new GravityCoriolisExternalWrenchMatrixCalculator(toolbox.getTwistCalculator(), jointsToIgnore, toolbox.getGravityZ());
@@ -57,6 +61,7 @@ public class DynamicsMatrixCalculator
 
       jointTorques = new DenseMatrix64F(bodyDoFs, 1);
 
+      massMatrix = new DenseMatrix64F(numberOfDoFs, numberOfDoFs);
       coriolisMatrix = new DenseMatrix64F(numberOfDoFs, 1);
       contactForceJacobian = new DenseMatrix64F(rhoSize, numberOfDoFs);
 
@@ -97,7 +102,7 @@ public class DynamicsMatrixCalculator
 
    private void computeMatrices()
    {
-      DenseMatrix64F massMatrix = massMatrixCalculator.getMassMatrix();
+      massMatrixCalculator.getMassMatrix(jointsToOptimizeFor, massMatrix);
       helper.extractFloatingBaseMassMatrix(massMatrix, floatingBaseMassMatrix);
       helper.extractBodyMassMatrix(massMatrix, bodyMassMatrix);
 
@@ -115,19 +120,9 @@ public class DynamicsMatrixCalculator
       floatingBaseMassMatrixToPack.set(floatingBaseMassMatrix);
    }
 
-   public DenseMatrix64F getFloatingBaseMassMatrix()
-   {
-      return floatingBaseMassMatrix;
-   }
-
    public void getFloatingBaseCoriolisMatrix(DenseMatrix64F floatingBaseCoriolisMatrixToPack)
    {
       floatingBaseCoriolisMatrixToPack.set(floatingBaseCoriolisMatrix);
-   }
-
-   public DenseMatrix64F getFloatingBaseCoriolisMatrix()
-   {
-      return floatingBaseCoriolisMatrix;
    }
 
    public void getFloatingBaseContactForceJacobian(DenseMatrix64F floatingBaseContactForceJacobianToPack)
