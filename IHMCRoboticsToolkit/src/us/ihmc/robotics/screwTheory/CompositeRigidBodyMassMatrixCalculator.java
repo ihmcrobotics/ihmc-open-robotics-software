@@ -1,15 +1,18 @@
 package us.ihmc.robotics.screwTheory;
 
+import gnu.trove.list.array.TIntArrayList;
 import org.ejml.data.DenseMatrix64F;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 public class CompositeRigidBodyMassMatrixCalculator implements MassMatrixCalculator
 {
-   private final RigidBody[] allRigidBodiesInOrder;
+
+   private final RigidBody[] allBodiesExceptRoot;
    private final InverseDynamicsJoint[] jointsInOrder;
    private final CompositeRigidBodyInertia[] crbInertiasInOrder;
    private final int[] parentMap;
@@ -19,20 +22,33 @@ public class CompositeRigidBodyMassMatrixCalculator implements MassMatrixCalcula
    private final Twist tempTwist = new Twist();
    private int nMomentaInUse = 0;
 
+   private final LinkedHashMap<InverseDynamicsJoint, int[]> srcJointIndices = new LinkedHashMap<>();
+
    public CompositeRigidBodyMassMatrixCalculator(RigidBody rootBody, ArrayList<InverseDynamicsJoint> jointsToIgnore)
    {
-      allRigidBodiesInOrder = ScrewTools.computeSupportAndSubtreeSuccessors(rootBody);
+      allBodiesExceptRoot = ScrewTools.computeSupportAndSubtreeSuccessors(rootBody);
       jointsInOrder = computeJointsInOrder(rootBody, jointsToIgnore.toArray(new InverseDynamicsJoint[0]));
 
-      crbInertiasInOrder = createCompositeRigidBodyInertiasInOrder(allRigidBodiesInOrder.length);
-      parentMap = ScrewTools.createParentMap(allRigidBodiesInOrder);
-      massMatrixIndices = createMassMatrixIndices(allRigidBodiesInOrder);
+
+      crbInertiasInOrder = createCompositeRigidBodyInertiasInOrder(allBodiesExceptRoot.length);
+      parentMap = ScrewTools.createParentMap(allBodiesExceptRoot);
+      massMatrixIndices = createMassMatrixIndices(allBodiesExceptRoot);
 
       int degreesOfFreedom = ScrewTools.computeDegreesOfFreedom(jointsInOrder);
       massMatrix = new DenseMatrix64F(degreesOfFreedom, degreesOfFreedom);
 
       unitMomenta = createMomenta();
+
+      for (InverseDynamicsJoint joint : jointsInOrder)
+      {
+         TIntArrayList listToPackIndices = new TIntArrayList();
+         ScrewTools.computeIndexForJoint(jointsInOrder, listToPackIndices, joint);
+         int[] indices = listToPackIndices.toArray();
+
+         srcJointIndices.put(joint, indices);
+      }
    }
+
 
    public CompositeRigidBodyMassMatrixCalculator(RigidBody rootBody)
    {
@@ -45,14 +61,14 @@ public class CompositeRigidBodyMassMatrixCalculator implements MassMatrixCalcula
       massMatrix.zero();
 
       // // TODO: 1/1/17  does this ever change?
-      for (int i = 0; i < allRigidBodiesInOrder.length; i++)
+      for (int i = 0; i < allBodiesExceptRoot.length; i++)
       {
-         crbInertiasInOrder[i].set(allRigidBodiesInOrder[i].getInertia());
+         crbInertiasInOrder[i].set(allBodiesExceptRoot[i].getInertia());
       }
 
-      for (int bodyIndex = allRigidBodiesInOrder.length - 1; bodyIndex >= 0; bodyIndex--)
+      for (int bodyIndex = allBodiesExceptRoot.length - 1; bodyIndex >= 0; bodyIndex--)
       {
-         RigidBody currentBody = allRigidBodiesInOrder[bodyIndex];
+         RigidBody currentBody = allBodiesExceptRoot[bodyIndex];
          InverseDynamicsJoint parentJoint = currentBody.getParentJoint();
          CompositeRigidBodyInertia currentBodyInertia = crbInertiasInOrder[bodyIndex];
          GeometricJacobian motionSubspace = parentJoint.getMotionSubspace();
@@ -87,10 +103,10 @@ public class CompositeRigidBodyMassMatrixCalculator implements MassMatrixCalcula
       int bodyIndex = currentBodyIndex;
       while (isValidParentIndex(parentIndex = parentMap[bodyIndex]))
       {
-         ReferenceFrame parentFrame = allRigidBodiesInOrder[parentIndex].getInertia().getExpressedInFrame();
+         ReferenceFrame parentFrame = allBodiesExceptRoot[parentIndex].getInertia().getExpressedInFrame();
          changeFrameOfMomenta(parentFrame);
          bodyIndex = parentIndex;
-         GeometricJacobian motionSubspace = allRigidBodiesInOrder[bodyIndex].getParentJoint().getMotionSubspace();
+         GeometricJacobian motionSubspace = allBodiesExceptRoot[bodyIndex].getParentJoint().getMotionSubspace();
          setMassMatrixPart(currentBodyIndex, bodyIndex, motionSubspace);
       }
    }
@@ -117,6 +133,47 @@ public class CompositeRigidBodyMassMatrixCalculator implements MassMatrixCalcula
    public void getMassMatrix(DenseMatrix64F massMatrixToPack)
    {
       massMatrixToPack.set(massMatrix);
+   }
+
+   // // TODO: 1/3/17 improve the speed by remove the row/column of the unindexed joint
+   private final TIntArrayList tmpIndices = new TIntArrayList();
+   public void getMassMatrix(InverseDynamicsJoint[] jointsToConsider, DenseMatrix64F massMatrixToPack)
+   {
+      for (int rowJointNumber = 0; rowJointNumber < jointsToConsider.length; rowJointNumber++)
+      {
+         InverseDynamicsJoint rowJoint = jointsToConsider[rowJointNumber];
+
+         int[] srcRowJointIndices = srcJointIndices.get(rowJoint);
+
+         tmpIndices.reset();
+         ScrewTools.computeIndicesForJoint(jointsToConsider, tmpIndices, rowJoint);
+         int[] destRowJointIndices = tmpIndices.toArray();
+
+         for (int rowDoFNumber = 0; rowDoFNumber < rowJoint.getDegreesOfFreedom(); rowDoFNumber++)
+         {
+            int srcRowJointIndex = srcRowJointIndices[rowDoFNumber];
+            int destRowJointIndex = destRowJointIndices[rowDoFNumber];
+
+            for (int colJointNumber = 0; colJointNumber < jointsToConsider.length; colJointNumber++)
+            {
+               InverseDynamicsJoint colJoint = jointsToConsider[colJointNumber];
+
+               int[] srcColJointIndices = srcJointIndices.get(colJoint);
+
+               tmpIndices.reset();
+               ScrewTools.computeIndicesForJoint(jointsToConsider, tmpIndices, colJoint);
+               int[] destColJointIndices = tmpIndices.toArray();
+
+               for (int colDoFNumber = 0; colDoFNumber < colJoint.getDegreesOfFreedom(); colDoFNumber++)
+               {
+                  int srcColJointIndex = srcColJointIndices[colDoFNumber];
+                  int destColJointIndex = destColJointIndices[colDoFNumber];
+
+                  massMatrixToPack.set(destRowJointIndex, destColJointIndex, massMatrix.get(srcRowJointIndex, srcColJointIndex));
+               }
+            }
+         }
+      }
    }
 
    @Override
