@@ -1,6 +1,6 @@
 package us.ihmc.exampleSimulations.skippy;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 import javax.vecmath.Vector3d;
 
@@ -19,23 +19,17 @@ import us.ihmc.tools.thread.ThreadTools;
 public class SkippyV2Test
 {
 
-   //   private static final SkippyControllerMode controllerMode = SkippyControllerMode.ICP_BASED;
-   final boolean sleepAfterTest = true;
-
-   double flexHipDuration = 0.03;
-   double flexHipAngle = Math.toRadians(2.0);
-
-   SkippySimulationV2 skippySimulationV2;
-   SkippyRobotV2 skippy;
+   private static final boolean sleepAfterTest = false;
+   private SkippySimulationV2 skippySimulationV2;
+   private SkippyRobotV2 skippy;
 
    @ContinuousIntegrationTest(estimatedDuration = 10.0)
-   //@Test(timeout = 100000)
+   @Test(timeout = 100000)
    public void testStanding() throws SimulationExceededMaximumTimeException
    {
-      skippy.setQ_hip(flexHipAngle);
-      assertTrue(skippySimulationV2.run(flexHipDuration));
-      skippy.setQ_hip(0.0);
-      assertTrue(skippySimulationV2.run(10.0));
+      skippy.setQ_hip(0.1);
+      skippy.setQ_shoulder(0.1);
+      assertTrue(skippySimulationV2.run(10));
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 10.0)
@@ -52,6 +46,7 @@ public class SkippyV2Test
 
    private void pushRobot(double time, Vector3d force) throws SimulationExceededMaximumTimeException
    {
+      SkippyRobotV2 skippy = skippySimulationV2.getSkippy();
       skippy.setRootJointForce(force.x, force.y, force.z);
       assertTrue(skippySimulationV2.run(time));
       skippy.setRootJointForce(0.0, 0.0, 0.0);
