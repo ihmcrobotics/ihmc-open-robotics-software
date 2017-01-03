@@ -33,6 +33,7 @@ public class SphereWithConvexPolygonIntersectorTest
       List<Point2d> vertices;
       FrameConvexPolygon2d polygon;
       PoseReferenceFrame frame;
+      PoseReferenceFrame frame2;
       FramePoint closestPointOnPolygon;
 
       sphere = new FrameSphere3d(WORLD, 5.0, 3.0, 1.0, 2.0);
@@ -102,7 +103,7 @@ public class SphereWithConvexPolygonIntersectorTest
       JUnitTools.assertTuple3dEquals("intersection not right", new Point3d(0.0, 0.0, 0.0),
                                      closestPointOnPolygon.getPoint(), Epsilons.ONE_TRILLIONTH);
       
-      frame = new PoseReferenceFrame("testFrame2", WORLD);
+      frame = new PoseReferenceFrame("testFrame3", WORLD);
       frame.setPositionWithoutChecksAndUpdate(4.0, 2.0, 0.0);
       sphere = new FrameSphere3d(WORLD, 5.0, 3.0, 1.0, 2.0);
       vertices = new ArrayList<>();
@@ -117,6 +118,25 @@ public class SphereWithConvexPolygonIntersectorTest
                                      closestPointOnPolygon.getPoint(), Epsilons.ONE_TRILLIONTH);
       closestPointOnPolygon.changeFrame(frame);
       JUnitTools.assertTuple3dEquals("intersection not right", new Point3d(1.0, 1.0, 0.0),
+                                     closestPointOnPolygon.getPoint(), Epsilons.ONE_TRILLIONTH);
+      
+      frame = new PoseReferenceFrame("testFrame4", WORLD);
+      frame.setPositionWithoutChecksAndUpdate(4.0, 2.0, 0.0);
+      sphere = new FrameSphere3d(frame, 5.0, 3.0, 1.0, 2.0);
+      vertices = new ArrayList<>();
+      vertices.add(new Point2d(-1.0, -1.0));
+      vertices.add(new Point2d(-1.0, 1.0));
+      vertices.add(new Point2d(1.0, 1.0));
+      vertices.add(new Point2d(1.0, -1.0));
+      frame2 = new PoseReferenceFrame("testFrame4", WORLD);
+      frame2.setPositionWithoutChecksAndUpdate(9.5, 5.5, 0.0);
+      polygon = new FrameConvexPolygon2d(frame2, vertices);
+      assertTrue(sphereWithConvexPolygonIntersector.checkIfIntersectionExists(sphere, polygon));
+      closestPointOnPolygon = sphereWithConvexPolygonIntersector.getClosestPointOnPolygon();
+      JUnitTools.assertTuple3dEquals("intersection not right", new Point3d(9.0, 5.0, 0.0),
+                                     closestPointOnPolygon.getPoint(), Epsilons.ONE_TRILLIONTH);
+      closestPointOnPolygon.changeFrame(frame2);
+      JUnitTools.assertTuple3dEquals("intersection not right", new Point3d(-0.5, -0.5, 0.0),
                                      closestPointOnPolygon.getPoint(), Epsilons.ONE_TRILLIONTH);
    }
 }

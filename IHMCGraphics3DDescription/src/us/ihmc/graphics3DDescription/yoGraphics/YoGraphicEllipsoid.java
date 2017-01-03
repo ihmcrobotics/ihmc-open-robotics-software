@@ -11,10 +11,6 @@ import us.ihmc.robotics.geometry.Transform3d;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 
-/**
- * Last updated by: mjohnson
- * On: 7/22/11 9:57 AM
- */
 public class YoGraphicEllipsoid extends YoGraphicCoordinateSystem
 {
    private Vector3d radii = new Vector3d();
@@ -41,6 +37,7 @@ public class YoGraphicEllipsoid extends YoGraphicCoordinateSystem
       this.radii.set(radii);
    }
 
+   @Override
    protected void computeRotationTranslation(Transform3d transform3D)
    {
       reshapingMatrix.setIdentity();
@@ -59,10 +56,11 @@ public class YoGraphicEllipsoid extends YoGraphicCoordinateSystem
       transform3D.multiply(reshapingTransform);
    }
 
+   @Override
    public Graphics3DObject getLinkGraphics()
    {
       Graphics3DObject linkGraphics = new Graphics3DObject();
-      linkGraphics.addEllipsoid(0.5, 0.5, 0.5, appearance);
+      linkGraphics.addEllipsoid(1.0, 1.0, 1.0, appearance); // These need to be 1.0 @dcalvert
       return linkGraphics;
    }
 }
