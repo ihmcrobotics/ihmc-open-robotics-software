@@ -102,7 +102,7 @@ public class DynamicsMatrixCalculator
 
    private void computeMatrices()
    {
-      massMatrixHandler.getMassMatrix(jointsToOptimizeFor, massMatrix);
+      DenseMatrix64F massMatrix = massMatrixHandler.getMassMatrix(jointsToOptimizeFor);
       helper.extractFloatingBaseMassMatrix(massMatrix, floatingBaseMassMatrix);
       helper.extractBodyMassMatrix(massMatrix, bodyMassMatrix);
 
