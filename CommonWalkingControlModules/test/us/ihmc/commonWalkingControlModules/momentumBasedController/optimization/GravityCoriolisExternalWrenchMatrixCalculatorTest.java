@@ -141,7 +141,7 @@ public class GravityCoriolisExternalWrenchMatrixCalculatorTest
 
       jointIndexHandler = toolbox.getJointIndexHandler();
 
-      coriolisMatrixCalculator = new GravityCoriolisExternalWrenchMatrixCalculator(toolbox.getTwistCalculator(), toolbox.getGravityZ(), new ArrayList<>());
+      coriolisMatrixCalculator = new GravityCoriolisExternalWrenchMatrixCalculator(toolbox.getTwistCalculator(), new ArrayList<>(), toolbox.getGravityZ());
 
       degreesOfFreedom = jointIndexHandler.getNumberOfDoFs();
       floatingBaseDoFs = fullHumanoidRobotModel.getRootJoint().getDegreesOfFreedom();
