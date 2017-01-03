@@ -1,7 +1,6 @@
 package us.ihmc.robotics.screwTheory;
 
 import org.ejml.data.DenseMatrix64F;
-import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 import java.util.ArrayList;
@@ -10,8 +9,6 @@ import java.util.List;
 
 public class CompositeRigidBodyMassMatrixCalculator implements MassMatrixCalculator
 {
-   private final ReferenceFrame expressedInFrame;
-   private final RigidBody rootBody;
    private final RigidBody[] allRigidBodiesInOrder;
    private final InverseDynamicsJoint[] jointsInOrder;
    private final CompositeRigidBodyInertia[] crbInertiasInOrder;
@@ -22,11 +19,8 @@ public class CompositeRigidBodyMassMatrixCalculator implements MassMatrixCalcula
    private final Twist tempTwist = new Twist();
    private int nMomentaInUse = 0;
 
-   public CompositeRigidBodyMassMatrixCalculator(ReferenceFrame expressedInFrame, RigidBody rootBody, ArrayList<InverseDynamicsJoint> jointsToIgnore)
+   public CompositeRigidBodyMassMatrixCalculator(RigidBody rootBody, ArrayList<InverseDynamicsJoint> jointsToIgnore)
    {
-      this.expressedInFrame = expressedInFrame;
-      this.rootBody = rootBody;
-
       allRigidBodiesInOrder = ScrewTools.computeSupportAndSubtreeSuccessors(rootBody);
       jointsInOrder = computeJointsInOrder(rootBody, jointsToIgnore.toArray(new InverseDynamicsJoint[0]));
 
@@ -40,19 +34,9 @@ public class CompositeRigidBodyMassMatrixCalculator implements MassMatrixCalcula
       unitMomenta = createMomenta();
    }
 
-   public CompositeRigidBodyMassMatrixCalculator(RigidBody rootBody, ArrayList<InverseDynamicsJoint> jointsToIgnore)
-   {
-      this(null, rootBody, jointsToIgnore);
-   }
-
-   public CompositeRigidBodyMassMatrixCalculator(ReferenceFrame expressedInFrame, RigidBody rootBody)
-   {
-      this(expressedInFrame, rootBody, new ArrayList<InverseDynamicsJoint>());
-   }
-
    public CompositeRigidBodyMassMatrixCalculator(RigidBody rootBody)
    {
-      this(null, rootBody, new ArrayList<InverseDynamicsJoint>());
+      this(rootBody, new ArrayList<InverseDynamicsJoint>());
    }
 
    @Override
@@ -72,9 +56,7 @@ public class CompositeRigidBodyMassMatrixCalculator implements MassMatrixCalcula
          InverseDynamicsJoint parentJoint = currentBody.getParentJoint();
          CompositeRigidBodyInertia currentBodyInertia = crbInertiasInOrder[bodyIndex];
          GeometricJacobian motionSubspace = parentJoint.getMotionSubspace();
-         if (expressedInFrame != null)
-            motionSubspace.changeFrame(expressedInFrame); // // FIXME: 1/2/17
-         
+
          setUnitMomenta(currentBodyInertia, motionSubspace);
          setDiagonalTerm(bodyIndex, motionSubspace);
          setOffDiagonalTerms(bodyIndex);
