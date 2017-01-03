@@ -39,6 +39,7 @@ import us.ihmc.robotics.screwTheory.*;
 public class WholeBodyInverseDynamicsSolver
 {
    private static final boolean USE_DYNAMIC_MATRIX_CALCULATOR = true;
+   private static final boolean MINIMIZE_JOINT_TORQUES = true;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
@@ -80,8 +81,8 @@ public class WholeBodyInverseDynamicsSolver
       rootJoint = toolbox.getRobotRootJoint();
       inverseDynamicsCalculator = toolbox.getInverseDynamicsCalculator();
       WrenchMatrixCalculator wrenchMatrixCalculator = new WrenchMatrixCalculator(toolbox, registry);
-      optimizationControlModule = new InverseDynamicsOptimizationControlModule(toolbox, wrenchMatrixCalculator, registry);
       dynamicsMatrixCalculator = new DynamicsMatrixCalculator(toolbox, wrenchMatrixCalculator);
+      optimizationControlModule = new InverseDynamicsOptimizationControlModule(toolbox, wrenchMatrixCalculator, dynamicsMatrixCalculator, registry);
       spatialAccelerationCalculator = toolbox.getSpatialAccelerationCalculator();
 
       JointIndexHandler jointIndexHandler = toolbox.getJointIndexHandler();
@@ -136,6 +137,13 @@ public class WholeBodyInverseDynamicsSolver
 
    public void compute()
    {
+      if (USE_DYNAMIC_MATRIX_CALCULATOR)
+      {
+         dynamicsMatrixCalculator.compute();
+         if (MINIMIZE_JOINT_TORQUES)
+            optimizationControlModule.setupTorqueMinimizationCommand();
+      }
+
       MomentumModuleSolution momentumModuleSolution;
 
       try

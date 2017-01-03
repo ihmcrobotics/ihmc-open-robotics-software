@@ -47,6 +47,8 @@ public class InverseDynamicsOptimizationControlModule
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final WrenchMatrixCalculator wrenchMatrixCalculator;
+   private final DynamicsMatrixCalculator dynamicsMatrixCalculator;
+
    private final BasisVectorVisualizer basisVectorVisualizer;
    private final GeometricJacobianHolder geometricJacobianHolder;
    private final InverseDynamicsQPSolver qpSolver;
@@ -67,21 +69,24 @@ public class InverseDynamicsOptimizationControlModule
    private final Map<OneDoFJoint, DoubleYoVariable> jointMaximumAccelerations = new HashMap<>();
    private final Map<OneDoFJoint, DoubleYoVariable> jointMinimumAccelerations = new HashMap<>();
    private final DoubleYoVariable rhoMin = new DoubleYoVariable("rhoMin", registry);
+   private final DoubleYoVariable tauWeight = new DoubleYoVariable("tauWeight", registry);
 
    private final BooleanYoVariable hasNotConvergedInPast = new BooleanYoVariable("hasNotConvergedInPast", registry);
    private final IntegerYoVariable hasNotConvergedCounts = new IntegerYoVariable("hasNotConvergedCounts", registry);
 
    public InverseDynamicsOptimizationControlModule(WholeBodyControlCoreToolbox toolbox, YoVariableRegistry parentRegistry)
    {
-      this(toolbox, null, parentRegistry);
+      this(toolbox, null, null, parentRegistry);
    }
 
-   public InverseDynamicsOptimizationControlModule(WholeBodyControlCoreToolbox toolbox, WrenchMatrixCalculator wrenchMatrixCalculator, YoVariableRegistry parentRegistry)
+   public InverseDynamicsOptimizationControlModule(WholeBodyControlCoreToolbox toolbox, WrenchMatrixCalculator wrenchMatrixCalculator,
+         DynamicsMatrixCalculator dynamicsMatrixCalculator, YoVariableRegistry parentRegistry)
    {
       controlDT = toolbox.getControlDT();
       jointIndexHandler = toolbox.getJointIndexHandler();
       jointsToOptimizeFor = jointIndexHandler.getIndexedJoints();
       oneDoFJoints = jointIndexHandler.getIndexedOneDoFJoints();
+      this.dynamicsMatrixCalculator = dynamicsMatrixCalculator;
 
       InverseDynamicsJoint rootJoint = toolbox.getRobotRootJoint();
       ReferenceFrame centerOfMassFrame = toolbox.getCenterOfMassFrame();
@@ -116,6 +121,7 @@ public class InverseDynamicsOptimizationControlModule
             toolbox.getJointPrivilegedConfigurationParameters(), registry);
       boundCalculator = new InverseDynamicsQPBoundCalculator(jointIndexHandler, controlDT, registry);
 
+      tauWeight.set(0.001);
       absoluteMaximumJointAcceleration.set(200.0);
       qDDotMinMatrix = new DenseMatrix64F(numberOfDoFs, 1);
       qDDotMaxMatrix = new DenseMatrix64F(numberOfDoFs, 1);
@@ -155,6 +161,7 @@ public class InverseDynamicsOptimizationControlModule
 
       setupWrenchesEquilibriumConstraint();
       computePrivilegedJointAccelerations();
+      //compute
 
       if (SETUP_JOINT_LIMIT_CONSTRAINTS)
       {
@@ -251,6 +258,12 @@ public class InverseDynamicsOptimizationControlModule
       DenseMatrix64F additionalExternalWrench = externalWrenchHandler.getSumOfExternalWrenches();
       DenseMatrix64F gravityWrench = externalWrenchHandler.getGravitationalWrench();
       qpSolver.setupWrenchesEquilibriumConstraint(centroidalMomentumMatrix, rhoJacobian, convectiveTerm, additionalExternalWrench, gravityWrench);
+   }
+
+   public void setupTorqueMinimizationCommand()
+   {
+      qpSolver.addTorqueMinimizationObjective(dynamicsMatrixCalculator.getTorqueMinimizationJacobian(), dynamicsMatrixCalculator.getTorqueMinimizationObjective(),
+            tauWeight.getDoubleValue());
    }
 
    public void submitSpatialAccelerationCommand(SpatialAccelerationCommand command)
