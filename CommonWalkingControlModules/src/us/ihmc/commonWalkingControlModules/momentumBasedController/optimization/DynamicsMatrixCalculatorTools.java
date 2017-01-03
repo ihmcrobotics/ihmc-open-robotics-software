@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
-import us.ihmc.robotics.screwTheory.FloatingBaseRigidBodyDynamicsTools;
+import us.ihmc.robotics.screwTheory.*;
 
 public class DynamicsMatrixCalculatorTools
 {
@@ -15,6 +15,8 @@ public class DynamicsMatrixCalculatorTools
    private static final DenseMatrix64F localFloatingMassMatrix = new DenseMatrix64F(large, large);
    private static final DenseMatrix64F localFloatingCoriolisMatrix = new DenseMatrix64F(large, large);
    private static final DenseMatrix64F localFloatingContactJacobian = new DenseMatrix64F(large, large);
+
+   private static final DenseMatrix64F tmpMatrix = new DenseMatrix64F(SpatialForceVector.SIZE);
 
    /**
     * <p>
@@ -159,6 +161,26 @@ public class DynamicsMatrixCalculatorTools
             localBodyMassMatrix, localBodyCoriolisMatrix, localBodyContactJacobian, qddot, tau, rho);
    }
 
+   public static void extractTorqueMatrix(InverseDynamicsJoint[] joints, DenseMatrix64F torqueMatrixToPack)
+   {
+      OneDoFJoint[] filteredJoints = ScrewTools.extractRevoluteJoints(joints);
+      int bodyDoFs = ScrewTools.computeDegreesOfFreedom(filteredJoints);
+
+      int startIndex = 0;
+      for (int i = 0; i < bodyDoFs; i++)
+      {
+         InverseDynamicsJoint joint = filteredJoints[i];
+         int jointDoF = joint.getDegreesOfFreedom();
+         tmpMatrix.reshape(jointDoF, 1);
+         joint.getTauMatrix(tmpMatrix);
+
+         for (int dof = 0; dof < jointDoF; dof++)
+            torqueMatrixToPack.set(startIndex + dof, 0, tmpMatrix.get(dof, 0));
+         startIndex += jointDoF;
+      }
+
+   }
+
    /**
     * <p>
     *    Checks whether or not the floating base portion of the rigid body dynamics is satisfied by the given qddot and rho.
@@ -210,13 +232,4 @@ public class DynamicsMatrixCalculatorTools
       dynamicsMatrixCalculator.getBodyCoriolisMatrix(localBodyCoriolisMatrix);
       dynamicsMatrixCalculator.getBodyContactForceJacobian(localBodyContactJacobian);
    }
-
-
-   private static void computeJacobianTranspose(DenseMatrix64F jacobian, DenseMatrix64F jacobianTransposeToPack)
-   {
-      jacobianTransposeToPack.reshape(jacobian.getNumCols(), jacobian.getNumRows());
-      jacobianTransposeToPack.zero();
-      CommonOps.transpose(jacobian, jacobianTransposeToPack);
-   }
-
 }

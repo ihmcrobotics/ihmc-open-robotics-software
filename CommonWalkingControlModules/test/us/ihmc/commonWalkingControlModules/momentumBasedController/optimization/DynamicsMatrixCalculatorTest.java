@@ -18,6 +18,7 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelTestTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -523,15 +524,7 @@ public class DynamicsMatrixCalculatorTest
       ScrewTools.setDesiredAccelerations(jointIndexHandler.getIndexedJoints(), qddotSolution);
       inverseDynamicsCalculator.compute();
 
-      DenseMatrix64F tmpTauMatrix = new DenseMatrix64F(1, 1);
-      for (int i = 0; i < bodyDoFs; i++)
-      {
-         InverseDynamicsJoint joint = jointIndexHandler.getIndexedOneDoFJoints()[i];
-         int[] jointIndices = jointIndexHandler.getJointIndices(joint);
-         joint.getTauMatrix(tmpTauMatrix);
-         for (int dof = 0; dof < jointIndices.length; dof++)
-            inverseDynamicsTauSolution.set(jointIndices[dof] - floatingBaseDoFs, tmpTauMatrix.get(dof, 0));
-      }
+      DynamicsMatrixCalculatorTools.extractTorqueMatrix(jointIndexHandler.getIndexedJoints(), inverseDynamicsTauSolution);
 
       if (checkRigidBodyDynamics)
          Assert.assertTrue(DynamicsMatrixCalculatorTools.checkFloatingBaseRigidBodyDynamicsSatisfied(dynamicsMatrixCalculator, qddotSolution, dynamicsMatrixTauSolution, rhoSolution));
@@ -544,6 +537,8 @@ public class DynamicsMatrixCalculatorTest
          }
       }
 
+      Assert.assertTrue(!MatrixTools.isEmptyMatrix(inverseDynamicsTauSolution));
+      Assert.assertTrue(!MatrixTools.isEmptyMatrix(dynamicsMatrixTauSolution));
       JUnitTools.assertMatrixEquals(inverseDynamicsTauSolution, dynamicsMatrixTauSolution, tolerance);
    }
 
