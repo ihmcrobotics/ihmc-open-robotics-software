@@ -14,12 +14,22 @@ public class DynamicsMatrixCalculatorHelper
 
    private final LinkedHashMap<InverseDynamicsJoint, int[]> bodyOnlyIndices = new LinkedHashMap<>();
 
+   private final int degreesOfFreedom;
+   private final int bodyDoFs;
+   private final int floatingBaseDoFs;
+
+   private int rhoSize;
+
    public DynamicsMatrixCalculatorHelper(GravityCoriolisExternalWrenchMatrixCalculator coriolisMatrixCalculator, JointIndexHandler jointIndexHandler)
    {
       this.coriolisMatrixCalculator = coriolisMatrixCalculator;
       this.jointIndexHandler = jointIndexHandler;
 
+      degreesOfFreedom = ScrewTools.computeDegreesOfFreedom(jointIndexHandler.getIndexedJoints());
       OneDoFJoint[] bodyJoints = jointIndexHandler.getIndexedOneDoFJoints();
+      bodyDoFs = ScrewTools.computeDegreesOfFreedom(bodyJoints);
+      floatingBaseDoFs = degreesOfFreedom - bodyDoFs;
+
       for (InverseDynamicsJoint joint : bodyJoints)
       {
          TIntArrayList listToPackIndices = new TIntArrayList();
@@ -28,6 +38,11 @@ public class DynamicsMatrixCalculatorHelper
 
          bodyOnlyIndices.put(joint, indices);
       }
+   }
+
+   public void setRhoSize(int rhoSize)
+   {
+      this.rhoSize = rhoSize;
    }
 
    private final DenseMatrix64F tmpCoriolisMatrix = new DenseMatrix64F(SpatialForceVector.SIZE);
@@ -51,62 +66,33 @@ public class DynamicsMatrixCalculatorHelper
       }
    }
 
-   public void extractFloatingBaseCoriolisMatrix(FloatingInverseDynamicsJoint joint, DenseMatrix64F coriolisMatrixSrc, DenseMatrix64F coriolisMatrixDest)
+   public void extractFloatingBaseCoriolisMatrix(DenseMatrix64F coriolisMatrixSrc, DenseMatrix64F coriolisMatrixDest)
    {
-      int[] jointIndices = jointIndexHandler.getJointIndices(joint);
-
-      for (int jointNumber = 0; jointNumber < jointIndices.length; jointNumber++)
-      {
-         int jointIndex = jointIndices[jointNumber];
-
-         CommonOps.extract(coriolisMatrixSrc, jointIndex, jointIndex + 1, 0, 1, coriolisMatrixDest, jointNumber, 0);
-      }
+      CommonOps.extract(coriolisMatrixSrc, 0, floatingBaseDoFs, 0, 1, coriolisMatrixDest, 0, 0);
    }
 
-   public void extractBodyCoriolisMatrix(InverseDynamicsJoint[] joints, DenseMatrix64F coriolisMatrixSrc, DenseMatrix64F coriolisMatrixDest)
+   public void extractBodyCoriolisMatrix(DenseMatrix64F coriolisMatrixSrc, DenseMatrix64F coriolisMatrixDest)
    {
-      for (int i = 0; i < joints.length; i++)
-         extractBodyCoriolisMatrix(joints[i], coriolisMatrixSrc, coriolisMatrixDest);
+      CommonOps.extract(coriolisMatrixSrc, floatingBaseDoFs, degreesOfFreedom, 0, 1, coriolisMatrixDest, 0, 0);
    }
 
-   public void extractBodyCoriolisMatrix(InverseDynamicsJoint joint, DenseMatrix64F coriolisMatrixSrc, DenseMatrix64F coriolisMatrixDest)
+   public void extractFloatingBaseContactForceJacobianMatrix(DenseMatrix64F jacobainMatrixSrc, DenseMatrix64F jacobianMatrixDest)
    {
-      int[] fullJointIndices = jointIndexHandler.getJointIndices(joint);
-      int[] bodyJointIndices = bodyOnlyIndices.get(joint);
-
-      for (int jointNumber = 0; jointNumber < fullJointIndices.length; jointNumber++)
-      {
-         int fullJointIndex = fullJointIndices[jointNumber];
-         int bodyJointIndex = bodyJointIndices[jointNumber];
-
-         CommonOps.extract(coriolisMatrixSrc, fullJointIndex, fullJointIndex + 1, 0, 1, coriolisMatrixDest, bodyJointIndex, 0);
-      }
+      CommonOps.extract(jacobainMatrixSrc, 0, rhoSize, 0, floatingBaseDoFs, jacobianMatrixDest, 0, 0);
    }
 
-   // // TODO: 1/2/17  
-   public void extractFloatingBaseMassMatrix(FloatingInverseDynamicsJoint joint, DenseMatrix64F massMatrixSrc, DenseMatrix64F massMatrixDest)
+   public void extractBodyContactForceJacobianMatrix(DenseMatrix64F jacobainMatrixSrc, DenseMatrix64F jacobianMatrixDest)
    {
+      CommonOps.extract(jacobainMatrixSrc, 0, rhoSize, floatingBaseDoFs, degreesOfFreedom, jacobianMatrixDest, 0, 0);
    }
 
-   // // TODO: 1/2/17
-   public void extractBodyMassMatrix(InverseDynamicsJoint[] joints, DenseMatrix64F massMatrixSrc, DenseMatrix64F massMatrixDest)
+   public void extractFloatingBaseMassMatrix(DenseMatrix64F massMatrixSrc, DenseMatrix64F massMatrixDest)
    {
-      for (int i = 0; i < joints.length; i++)
-         extractBodyCoriolisMatrix(joints[i], massMatrixSrc, massMatrixDest);
+      CommonOps.extract(massMatrixSrc, 0, floatingBaseDoFs, 0, degreesOfFreedom, massMatrixDest, 0, 0);
    }
 
-   // // TODO: 1/2/17
-   public void extractBodyMassMatrix(InverseDynamicsJoint joint, DenseMatrix64F massMatrixSrc, DenseMatrix64F massMatrixDest)
+   public void extractBodyMassMatrix(DenseMatrix64F massMatrixSrc, DenseMatrix64F massMatrixDest)
    {
-      int[] fullJointIndices = jointIndexHandler.getJointIndices(joint);
-      int[] bodyJointIndices = bodyOnlyIndices.get(joint);
-
-      for (int jointNumber = 0; jointNumber < fullJointIndices.length; jointNumber++)
-      {
-         int fullJointIndex = fullJointIndices[jointNumber];
-         int bodyJointIndex = bodyJointIndices[jointNumber];
-
-         CommonOps.extract(massMatrixSrc, fullJointIndex, fullJointIndex + 1, 0, 1, massMatrixDest, bodyJointIndex, 0);
-      }
+      CommonOps.extract(massMatrixSrc, floatingBaseDoFs, degreesOfFreedom, 0, degreesOfFreedom, massMatrixDest, 0, 0);
    }
 }
