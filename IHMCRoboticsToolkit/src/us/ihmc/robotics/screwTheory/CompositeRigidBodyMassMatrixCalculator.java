@@ -135,46 +135,6 @@ public class CompositeRigidBodyMassMatrixCalculator implements MassMatrixCalcula
       massMatrixToPack.set(massMatrix);
    }
 
-   // // TODO: 1/3/17 improve the speed by remove the row/column of the unindexed joint
-   private final TIntArrayList tmpIndices = new TIntArrayList();
-   public void getMassMatrix(InverseDynamicsJoint[] jointsToConsider, DenseMatrix64F massMatrixToPack)
-   {
-      for (int rowJointNumber = 0; rowJointNumber < jointsToConsider.length; rowJointNumber++)
-      {
-         InverseDynamicsJoint rowJoint = jointsToConsider[rowJointNumber];
-
-         int[] srcRowJointIndices = srcJointIndices.get(rowJoint);
-
-         tmpIndices.reset();
-         ScrewTools.computeIndicesForJoint(jointsToConsider, tmpIndices, rowJoint);
-         int[] destRowJointIndices = tmpIndices.toArray();
-
-         for (int rowDoFNumber = 0; rowDoFNumber < rowJoint.getDegreesOfFreedom(); rowDoFNumber++)
-         {
-            int srcRowJointIndex = srcRowJointIndices[rowDoFNumber];
-            int destRowJointIndex = destRowJointIndices[rowDoFNumber];
-
-            for (int colJointNumber = 0; colJointNumber < jointsToConsider.length; colJointNumber++)
-            {
-               InverseDynamicsJoint colJoint = jointsToConsider[colJointNumber];
-
-               int[] srcColJointIndices = srcJointIndices.get(colJoint);
-
-               tmpIndices.reset();
-               ScrewTools.computeIndicesForJoint(jointsToConsider, tmpIndices, colJoint);
-               int[] destColJointIndices = tmpIndices.toArray();
-
-               for (int colDoFNumber = 0; colDoFNumber < colJoint.getDegreesOfFreedom(); colDoFNumber++)
-               {
-                  int srcColJointIndex = srcColJointIndices[colDoFNumber];
-                  int destColJointIndex = destColJointIndices[colDoFNumber];
-
-                  massMatrixToPack.set(destRowJointIndex, destColJointIndex, massMatrix.get(srcRowJointIndex, srcColJointIndex));
-               }
-            }
-         }
-      }
-   }
 
    @Override
    public InverseDynamicsJoint[] getJointsInOrder()
