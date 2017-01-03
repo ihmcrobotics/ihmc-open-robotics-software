@@ -345,11 +345,16 @@ public class SkippyRobotV2 extends Robot
 
    public void setQ_hip(double hipAngle)
    {
-      scsJointMap.get(SkippyJoint.HIP_PITCH).setQ(hipAngle);
+    scsJointMap.get(SkippyJoint.HIP_PITCH).setQ(hipAngle);
    }
    public void setRootJointForce(double x, double y, double z)
    {
       rootJointForce.setForce(x, y, z);
+   }
+
+   public void setQ_shoulder(double shoulderAngle)
+   {
+      scsJointMap.get(SkippyJoint.SHOULDER_ROLL).setQ(shoulderAngle);
    }
 
 }
