@@ -10,7 +10,7 @@ import java.util.ArrayList;
 
 public class DynamicsMatrixCalculator
 {
-   private final CompositeRigidBodyMassMatrixCalculator massMatrixCalculator;
+   private final CompositeRigidBodyMassMatrixHandler massMatrixHandler;
    private final GravityCoriolisExternalWrenchMatrixCalculator coriolisMatrixCalculator;
    private final ContactWrenchMatrixCalculator contactWrenchMatrixCalculator;
 
@@ -47,7 +47,7 @@ public class DynamicsMatrixCalculator
       JointIndexHandler jointIndexHandler = toolbox.getJointIndexHandler();
       jointsToOptimizeFor = jointIndexHandler.getIndexedJoints();
 
-      massMatrixCalculator = new CompositeRigidBodyMassMatrixCalculator(elevator, jointsToIgnore);
+      massMatrixHandler = new CompositeRigidBodyMassMatrixHandler(elevator, jointsToIgnore);
       coriolisMatrixCalculator = new GravityCoriolisExternalWrenchMatrixCalculator(toolbox.getTwistCalculator(), jointsToIgnore, toolbox.getGravityZ());
       contactWrenchMatrixCalculator = new ContactWrenchMatrixCalculator(elevator, toolbox.getContactablePlaneBodies(), wrenchMatrixCalculator, jointIndexHandler,
             toolbox.getGeometricJacobianHolder());
@@ -81,7 +81,7 @@ public class DynamicsMatrixCalculator
 
    public void compute()
    {
-      massMatrixCalculator.compute();
+      massMatrixHandler.compute();
       coriolisMatrixCalculator.compute();
 
       computeMatrices();
@@ -102,7 +102,7 @@ public class DynamicsMatrixCalculator
 
    private void computeMatrices()
    {
-      massMatrixCalculator.getMassMatrix(jointsToOptimizeFor, massMatrix);
+      massMatrixHandler.getMassMatrix(jointsToOptimizeFor, massMatrix);
       helper.extractFloatingBaseMassMatrix(massMatrix, floatingBaseMassMatrix);
       helper.extractBodyMassMatrix(massMatrix, bodyMassMatrix);
 

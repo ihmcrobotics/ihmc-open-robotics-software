@@ -2,6 +2,7 @@ package us.ihmc.robotics.screwTheory;
 
 import gnu.trove.list.array.TIntArrayList;
 import org.ejml.data.DenseMatrix64F;
+import org.ejml.ops.CommonOps;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 import java.util.ArrayList;
@@ -11,7 +12,6 @@ import java.util.List;
 
 public class CompositeRigidBodyMassMatrixCalculator implements MassMatrixCalculator
 {
-
    private final RigidBody[] allBodiesExceptRoot;
    private final InverseDynamicsJoint[] jointsInOrder;
    private final CompositeRigidBodyInertia[] crbInertiasInOrder;
@@ -27,7 +27,7 @@ public class CompositeRigidBodyMassMatrixCalculator implements MassMatrixCalcula
    public CompositeRigidBodyMassMatrixCalculator(RigidBody rootBody, ArrayList<InverseDynamicsJoint> jointsToIgnore)
    {
       allBodiesExceptRoot = ScrewTools.computeSupportAndSubtreeSuccessors(rootBody);
-      jointsInOrder = computeJointsInOrder(rootBody, jointsToIgnore.toArray(new InverseDynamicsJoint[0]));
+      jointsInOrder = computeJointsInOrder(rootBody, jointsToIgnore);
 
 
       crbInertiasInOrder = createCompositeRigidBodyInertiasInOrder(allBodiesExceptRoot.length);
@@ -258,10 +258,10 @@ public class CompositeRigidBodyMassMatrixCalculator implements MassMatrixCalcula
       return parentIndex >= 0;
    }
 
-   private static InverseDynamicsJoint[] computeJointsInOrder(RigidBody rootBody, InverseDynamicsJoint... jointsToIgnore)
+   private static InverseDynamicsJoint[] computeJointsInOrder(RigidBody rootBody, ArrayList<InverseDynamicsJoint> jointsToIgnore)
    {
       InverseDynamicsJoint[] jointsInOrder = ScrewTools.computeSupportAndSubtreeJoints(rootBody);
-      List<InverseDynamicsJoint> joints = new ArrayList<InverseDynamicsJoint>();
+      ArrayList<InverseDynamicsJoint> joints = new ArrayList<>();
       joints.addAll(Arrays.asList(jointsInOrder));
       if (jointsToIgnore != null)
       {
