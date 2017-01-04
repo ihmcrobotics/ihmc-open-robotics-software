@@ -30,7 +30,6 @@ import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.referenceFrames.TransformReferenceFrame;
 import us.ihmc.robotics.trajectories.TrajectoryType;
-import us.ihmc.tools.io.printing.PrintTools;
 
 public class SwingOverPlanarRegionsTrajectoryExpander
 {
@@ -40,6 +39,8 @@ public class SwingOverPlanarRegionsTrajectoryExpander
    private final TwoWaypointSwingGenerator twoWaypointSwingGenerator;
 
    private final IntegerYoVariable numberOfCheckpoints;
+   private final IntegerYoVariable maxNumberOfTries;
+   private final IntegerYoVariable numberOfTries;
    private final DoubleYoVariable minimumClearance;
    private final DoubleYoVariable incrementalAdjustmentDistance;
    private final EnumYoVariable<SwingOverPlanarRegionsTrajectoryExpansionStatus> status;
@@ -96,6 +97,8 @@ public class SwingOverPlanarRegionsTrajectoryExpander
       soleToToeLength = walkingControllerParameters.getFootLength() / 2.0;
 
       numberOfCheckpoints = new IntegerYoVariable(namePrefix + "NumberOfCheckpoints", parentRegistry);
+      numberOfTries = new IntegerYoVariable(namePrefix + "NumberOfTries", parentRegistry);
+      maxNumberOfTries = new IntegerYoVariable(namePrefix + "MaxNumberOfTries", parentRegistry);
       minimumClearance = new DoubleYoVariable(namePrefix + "MinimumClearance", parentRegistry);
       incrementalAdjustmentDistance = new DoubleYoVariable(namePrefix + "IncrementalAdjustmentDistance", parentRegistry);
       status = new EnumYoVariable<SwingOverPlanarRegionsTrajectoryExpansionStatus>(namePrefix + "Status", parentRegistry,
@@ -130,6 +133,7 @@ public class SwingOverPlanarRegionsTrajectoryExpander
 
       // Set default values
       numberOfCheckpoints.set(100);
+      maxNumberOfTries.set(50);
       minimumClearance.set(0.04);
       incrementalAdjustmentDistance.set(0.03);
    }
@@ -159,10 +163,13 @@ public class SwingOverPlanarRegionsTrajectoryExpander
       adjustedWaypoints.get(1).add(0.0, 0.0, minimumSwingHeight);
 
       status.set(SwingOverPlanarRegionsTrajectoryExpansionStatus.SEARCHING_FOR_SOLUTION);
-      while (status.getEnumValue().equals(SwingOverPlanarRegionsTrajectoryExpansionStatus.SEARCHING_FOR_SOLUTION))
+      numberOfTries.set(0);
+      while (status.getEnumValue().equals(SwingOverPlanarRegionsTrajectoryExpansionStatus.SEARCHING_FOR_SOLUTION)
+            && numberOfTries.getIntegerValue() < maxNumberOfTries.getIntegerValue())
       {
          status.set(tryATrajectory(footPolygonSoleFrame, planarRegionsList));
          updateVisualizer();
+         numberOfTries.add(1);
       }
    }
 
@@ -262,6 +269,11 @@ public class SwingOverPlanarRegionsTrajectoryExpander
       }
 
       return SwingOverPlanarRegionsTrajectoryExpansionStatus.SOLUTION_FOUND;
+   }
+   
+   public RecyclingArrayList<FramePoint> getExpandedWaypoints()
+   {
+      return adjustedWaypoints;
    }
 
    public SwingOverPlanarRegionsTrajectoryExpansionStatus getStatus()
