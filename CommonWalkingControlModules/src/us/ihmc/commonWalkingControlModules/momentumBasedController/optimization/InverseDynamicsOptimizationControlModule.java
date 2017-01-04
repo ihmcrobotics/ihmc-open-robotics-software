@@ -69,7 +69,6 @@ public class InverseDynamicsOptimizationControlModule
    private final Map<OneDoFJoint, DoubleYoVariable> jointMaximumAccelerations = new HashMap<>();
    private final Map<OneDoFJoint, DoubleYoVariable> jointMinimumAccelerations = new HashMap<>();
    private final DoubleYoVariable rhoMin = new DoubleYoVariable("rhoMin", registry);
-   private final DoubleYoVariable tauWeight = new DoubleYoVariable("tauWeight", registry);
 
    private final BooleanYoVariable hasNotConvergedInPast = new BooleanYoVariable("hasNotConvergedInPast", registry);
    private final IntegerYoVariable hasNotConvergedCounts = new IntegerYoVariable("hasNotConvergedCounts", registry);
@@ -121,7 +120,6 @@ public class InverseDynamicsOptimizationControlModule
             toolbox.getJointPrivilegedConfigurationParameters(), registry);
       boundCalculator = new InverseDynamicsQPBoundCalculator(jointIndexHandler, controlDT, registry);
 
-      tauWeight.set(0.001);
       absoluteMaximumJointAcceleration.set(200.0);
       qDDotMinMatrix = new DenseMatrix64F(numberOfDoFs, 1);
       qDDotMaxMatrix = new DenseMatrix64F(numberOfDoFs, 1);
@@ -138,6 +136,7 @@ public class InverseDynamicsOptimizationControlModule
       qpSolver = new InverseDynamicsQPSolver(numberOfDoFs, rhoSize, registry);
       qpSolver.setAccelerationRegularizationWeight(momentumOptimizationSettings.getJointAccelerationWeight());
       qpSolver.setJerkRegularizationWeight(momentumOptimizationSettings.getJointJerkWeight());
+      qpSolver.setJointTorqueWeight(momentumOptimizationSettings.getJointTorqueWeight());
 
       parentRegistry.addChild(registry);
    }
@@ -161,7 +160,6 @@ public class InverseDynamicsOptimizationControlModule
 
       setupWrenchesEquilibriumConstraint();
       computePrivilegedJointAccelerations();
-      //compute
 
       if (SETUP_JOINT_LIMIT_CONSTRAINTS)
       {
@@ -263,7 +261,7 @@ public class InverseDynamicsOptimizationControlModule
    public void setupTorqueMinimizationCommand()
    {
       qpSolver.addTorqueMinimizationObjective(dynamicsMatrixCalculator.getTorqueMinimizationAccelerationJacobian(),
-            dynamicsMatrixCalculator.getTorqueMinimizationRhoJacobian(), dynamicsMatrixCalculator.getTorqueMinimizationObjective(), tauWeight.getDoubleValue());
+            dynamicsMatrixCalculator.getTorqueMinimizationRhoJacobian(), dynamicsMatrixCalculator.getTorqueMinimizationObjective());
    }
 
    public void submitSpatialAccelerationCommand(SpatialAccelerationCommand command)
