@@ -31,7 +31,6 @@ public class DynamicsMatrixCalculator
 
    private final DenseMatrix64F jointTorques;
 
-   private final DenseMatrix64F torqueMinimizationJacobian;
    private final DenseMatrix64F torqueMinimizationObjective;
 
    private final InverseDynamicsJoint[] jointsToOptimizeFor;
@@ -77,7 +76,6 @@ public class DynamicsMatrixCalculator
       bodyContactForceJacobian = new DenseMatrix64F(rhoSize, bodyDoFs);
       bodyContactForceJacobianTranspose = new DenseMatrix64F(bodyDoFs ,rhoSize);
 
-      torqueMinimizationJacobian = new DenseMatrix64F(bodyDoFs, numberOfDoFs + rhoSize);
       torqueMinimizationObjective = new DenseMatrix64F(bodyDoFs, 1);
    }
 
@@ -125,8 +123,7 @@ public class DynamicsMatrixCalculator
 
    private void computeTorqueMinimizationTaskMatrices()
    {
-      CommonOps.insert(bodyMassMatrix, torqueMinimizationJacobian, 0, 0);
-      CommonOps.insert(bodyContactForceJacobianTranspose, torqueMinimizationJacobian, 0, bodyDoFs);
+      CommonOps.transpose(bodyContactForceJacobian, bodyContactForceJacobianTranspose);
 
       torqueMinimizationObjective.set(bodyCoriolisMatrix);
       CommonOps.scale(-1.0, torqueMinimizationObjective);
@@ -169,9 +166,14 @@ public class DynamicsMatrixCalculator
       return jointTorques;
    }
 
-   public DenseMatrix64F getTorqueMinimizationJacobian()
+   public DenseMatrix64F getTorqueMinimizationAccelerationJacobian()
    {
-      return torqueMinimizationJacobian;
+      return bodyMassMatrix;
+   }
+
+   public DenseMatrix64F getTorqueMinimizationRhoJacobian()
+   {
+      return bodyContactForceJacobianTranspose;
    }
 
    public DenseMatrix64F getTorqueMinimizationObjective()

@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization;
 
 import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.Matrix;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSolver;
@@ -56,6 +57,7 @@ public class InverseDynamicsQPSolver
    private final DenseMatrix64F tempMotionTask_f;
    private final DenseMatrix64F tempRhoTask_H;
    private final DenseMatrix64F tempRhoTask_f;
+   private final DenseMatrix64F tempTorqueTask_H;
 
    private final int numberOfDoFs;
    private final int rhoSize;
@@ -94,6 +96,8 @@ public class InverseDynamicsQPSolver
 
       tempRhoTask_H = new DenseMatrix64F(rhoSize, rhoSize);
       tempRhoTask_f = new DenseMatrix64F(rhoSize, 1);
+
+      tempTorqueTask_H = new DenseMatrix64F(numberOfDoFs, problemSize);
 
       jointAccelerationRegularization.set(0.005);
       jointJerkRegularization.set(0.1);
@@ -222,7 +226,7 @@ public class InverseDynamicsQPSolver
 
    public void addTorqueMinimizationObjective(DenseMatrix64F torqueJacobian, DenseMatrix64F torqueObjective, double taskWeight)
    {
-      int taskSize = torqueJacobian.getNumRows();
+      int taskSize = torqueObjective.getNumRows();
       int controlSize = torqueJacobian.getNumCols();
 
       // J^T W
@@ -231,11 +235,20 @@ public class InverseDynamicsQPSolver
 
       // Compute: H += J^T W J
       CommonOps.multAdd(tempJtW, torqueJacobian, solverInput_H);
-      //MatrixTools.addMatrixBlock(solverInput_H, 0, 0, tempMotionTask_H, 0, 0, numberOfDoFs, numberOfDoFs, 1.0);
 
       // Compute: f += - J^T W Objective
       CommonOps.multAdd(-1.0, tempJtW, torqueObjective, solverInput_f);
-      //MatrixTools.addMatrixBlock(solverInput_f, 0, 0, tempMotionTask_f, 0, 0, numberOfDoFs, 1, -1.0);
+   }
+
+   public void addTorqueMinimizationObjective(DenseMatrix64F torqueQddotJacobian, DenseMatrix64F torqueRhoJacobian, DenseMatrix64F torqueObjective, double taskWeight)
+   {
+      int taskSize = torqueObjective.getNumRows();
+
+      tempTorqueTask_H.reshape(taskSize, problemSize);
+      CommonOps.insert(torqueQddotJacobian, tempTorqueTask_H, 0, 0);
+      CommonOps.insert(torqueRhoJacobian, tempTorqueTask_H, 0, numberOfDoFs);
+
+      addTorqueMinimizationObjective(tempTorqueTask_H, torqueObjective, taskWeight);
    }
 
    /**

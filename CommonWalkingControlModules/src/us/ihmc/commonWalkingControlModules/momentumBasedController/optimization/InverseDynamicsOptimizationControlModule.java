@@ -262,8 +262,8 @@ public class InverseDynamicsOptimizationControlModule
 
    public void setupTorqueMinimizationCommand()
    {
-      qpSolver.addTorqueMinimizationObjective(dynamicsMatrixCalculator.getTorqueMinimizationJacobian(), dynamicsMatrixCalculator.getTorqueMinimizationObjective(),
-            tauWeight.getDoubleValue());
+      qpSolver.addTorqueMinimizationObjective(dynamicsMatrixCalculator.getTorqueMinimizationAccelerationJacobian(),
+            dynamicsMatrixCalculator.getTorqueMinimizationRhoJacobian(), dynamicsMatrixCalculator.getTorqueMinimizationObjective(), tauWeight.getDoubleValue());
    }
 
    public void submitSpatialAccelerationCommand(SpatialAccelerationCommand command)
