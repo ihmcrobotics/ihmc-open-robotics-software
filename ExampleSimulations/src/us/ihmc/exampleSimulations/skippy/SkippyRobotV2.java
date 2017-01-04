@@ -69,6 +69,8 @@ public class SkippyRobotV2 extends Robot
    private enum SkippyJoint
    {
       HIP_PITCH, SHOULDER_ROLL;
+      public static SkippyJoint[] values = {HIP_PITCH, SHOULDER_ROLL};
+
    }
 
    private enum SkippyBody
@@ -114,11 +116,11 @@ public class SkippyRobotV2 extends Robot
 
       //One end effector at each shoulder extremity
       RigidBodyTransform leftShoulder = new RigidBodyTransform();
-      leftShoulder.setTranslation(-TORSO_LENGTH / 2.0, 0.0, 0.0);
+      leftShoulder.setTranslation(-SHOULDER_LENGTH / 2.0, 0.0, 0.0);
       leftShoulderFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("leftShoulderFrame", shoulder.getBodyFixedFrame(), leftShoulder);
 
       RigidBodyTransform rightShoulder = new RigidBodyTransform();
-      rightShoulder.setTranslation(TORSO_LENGTH / 2.0, 0.0, 0.0);
+      rightShoulder.setTranslation(SHOULDER_LENGTH / 2.0, 0.0, 0.0);
       rightShoulderFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("rightShoulderFrame", shoulder.getBodyFixedFrame(), rightShoulder);
 
       // --- scs robot ---
@@ -239,7 +241,7 @@ public class SkippyRobotV2 extends Robot
    public void updateInverseDynamicsStructureFromSimulation()
    {
       // update joint angles and velocities
-      for (SkippyJoint joint : SkippyJoint.values())
+      for (SkippyJoint joint : SkippyJoint.values)
       {
          OneDoFJoint idJoint = jointMap.get(joint);
          OneDegreeOfFreedomJoint scsJoint = scsJointMap.get(joint);

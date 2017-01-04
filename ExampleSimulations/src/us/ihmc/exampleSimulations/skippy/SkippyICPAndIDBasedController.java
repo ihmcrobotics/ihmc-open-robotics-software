@@ -10,6 +10,7 @@ import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.InverseDynamicsCalculator;
@@ -26,14 +27,14 @@ public class SkippyICPAndIDBasedController extends SimpleRobotController
    private final DoubleYoVariable kCapture = new DoubleYoVariable("kCapture", registry);
    private final DoubleYoVariable totalMass = new DoubleYoVariable("totalMass", registry);
 
-//   private final FramePoint com = new FramePoint(worldFrame);
-//   private final FramePoint icp = new FramePoint(worldFrame);
-//   private final FrameVector comVelocity = new FrameVector(worldFrame);
-//   private final FrameVector angularMomentum = new FrameVector(worldFrame);
-//   private final FrameVector actualGroundReaction = new FrameVector(worldFrame);
-//   private final FramePoint footLocation = new FramePoint(worldFrame);
-//   private final FramePoint desiredCMP = new FramePoint(worldFrame);
-//   private final FrameVector desiredGroundReaction = new FrameVector(worldFrame);
+   private final FramePoint com = new FramePoint(worldFrame);
+   private final FramePoint icp = new FramePoint(worldFrame);
+   private final FrameVector comVelocity = new FrameVector(worldFrame);
+   private final FrameVector angularMomentum = new FrameVector(worldFrame);
+   private final FrameVector actualGroundReaction = new FrameVector(worldFrame);
+   private final FramePoint footLocation = new FramePoint(worldFrame);
+   private final FramePoint desiredCMP = new FramePoint(worldFrame);
+   private final FrameVector desiredGroundReaction = new FrameVector(worldFrame);
 
    private final InverseDynamicsCalculator inverseDynamicsCalculator;
    private final TwistCalculator twistCalculator;
@@ -43,7 +44,6 @@ public class SkippyICPAndIDBasedController extends SimpleRobotController
    private final YoFramePoint targetPosition;
    private final FramePoint endEffectorPosition = new FramePoint();
    private final DoubleYoVariable kp;
-
 
    private final ArrayList<YoGraphicReferenceFrame> referenceFrameGraphics = new ArrayList<>();
 
@@ -57,11 +57,11 @@ public class SkippyICPAndIDBasedController extends SimpleRobotController
       setupGraphics(graphicsListRegistry);
       totalMass.set(skippy.computeCenterOfMass(new Point3d()));
 
-      targetPosition = new YoFramePoint("targetPosition", skippy.getRightShoulderFrame(), registry);
       kp = new DoubleYoVariable("kpTaskspace", registry);
       kp.set(0.5);
 
-      targetPosition.set(0.0, 1.0,0.0);
+      targetPosition = new YoFramePoint("targetPosition", skippy.getRightShoulderFrame(), registry);
+      targetPosition.set(0.0, 0.1, 0.0);
 
    }
 
@@ -87,36 +87,27 @@ public class SkippyICPAndIDBasedController extends SimpleRobotController
    @Override
    public void doControl()
    {
+      skippy.updateInverseDynamicsStructureFromSimulation();
 
       // --- compute force to apply
 
-//      computeComAndICP(com, comVelocity, icp, angularMomentum);
-//      skippy.computeFootContactForce(actualGroundReaction.getVector());
-//      footLocation.set(skippy.computeFootLocation());
-//      cmpFromIcpDynamics(icp, footLocation, desiredCMP);
-//      desiredGroundReaction.sub(com, desiredCMP);
-//      desiredGroundReaction.normalize();
-//      double reactionModulus = Math.abs(skippy.getGravity()) * totalMass.getDoubleValue() / desiredGroundReaction.getZ();
-//      desiredGroundReaction.scale(reactionModulus);
+      //      cmpToComReaction();
 
-//      //End effector on the right shoulder
-//      ReferenceFrame rightShoulderFrame = skippy.getRightShoulderFrame();
-//      RigidBody shoulderBody = skippy.getShoulderBody();
-//      ReferenceFrame rightShoulderBodyFrame = shoulderBody.getBodyFixedFrame();
-
-      skippy.updateInverseDynamicsStructureFromSimulation();
+      //End effector on the right shoulder
+      ReferenceFrame rightShoulderFrame = skippy.getRightShoulderFrame();
+      RigidBody shoulderBody = skippy.getShoulderBody();
+      ReferenceFrame rightShoulderBodyFrame = shoulderBody.getBodyFixedFrame();
 
       // --- compute force to pull the end effector towards the target position
       ReferenceFrame endEffectorFrame = skippy.getRightShoulderFrame();
       RigidBody endEffectorBody = skippy.getShoulderBody();
       ReferenceFrame endEffectorBodyFrame = endEffectorBody.getBodyFixedFrame();
 
-      endEffectorPosition.setToZero(endEffectorFrame);
-//      endEffectorPosition.changeFrame(worldFrame);
+      endEffectorPosition.setToZero(endEffectorFrame); //set(targetPosition.getFrameTuple());  //
 
       errorVector.setIncludingFrame(targetPosition.getFrameTuple());
       errorVector.sub(endEffectorPosition);
-//      errorVector.changeFrame(endEffectorFrame);
+      errorVector.changeFrame(endEffectorFrame);
 
       endEffectorWrench.setToZero(endEffectorBodyFrame, endEffectorFrame);
       endEffectorWrench.setLinearPart(errorVector);
@@ -138,6 +129,22 @@ public class SkippyICPAndIDBasedController extends SimpleRobotController
       skippy.updateSimulationFromInverseDynamicsTorques();
 
       updateGraphics();
+   }
+
+   /**
+    * Compute desiredGroundReaction according to Skippy report Eq. 10 
+    */
+   public void cmpToComReaction()
+   {
+      // --- NOT READY!!!
+      computeComAndICP(com, comVelocity, icp, angularMomentum);
+      skippy.computeFootContactForce(actualGroundReaction.getVector());
+      footLocation.set(skippy.computeFootLocation());
+      cmpFromIcpDynamics(icp, footLocation, desiredCMP);
+      desiredGroundReaction.sub(com, desiredCMP);
+      desiredGroundReaction.normalize();
+      double reactionModulus = Math.abs(skippy.getGravity()) * totalMass.getDoubleValue() / desiredGroundReaction.getZ();
+      desiredGroundReaction.scale(reactionModulus);
    }
 
    private void updateGraphics()
@@ -172,6 +179,5 @@ public class SkippyICPAndIDBasedController extends SimpleRobotController
       desiredCMPToPack.scaleAdd(kCapture.getDoubleValue(), icpToFoot, icp);
       desiredCMPToPack.setZ(0.0);
    }
-
 
 }

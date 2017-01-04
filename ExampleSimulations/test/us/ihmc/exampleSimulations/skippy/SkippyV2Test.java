@@ -30,6 +30,7 @@ public class SkippyV2Test
       skippy.setQ_hip(0.1);
       skippy.setQ_shoulder(0.1);
       assertTrue(skippySimulationV2.run(10));
+      System.out.println("testStanding");
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 10.0)
@@ -37,11 +38,12 @@ public class SkippyV2Test
    public void testRecoveringFromPush() throws SimulationExceededMaximumTimeException
    {
       double pushDuration = 0.03;
-      Vector3d pushForce = new Vector3d(0.0, 10.0, 0.0);
+      Vector3d pushForce = new Vector3d(0.0, 0.0, -10.0);
 
       assertTrue(skippySimulationV2.run(1.0));
       pushRobot(pushDuration, pushForce);
       assertTrue(skippySimulationV2.run(5.0));
+      System.out.println("testRecoveringFromPush");
    }
 
    private void pushRobot(double time, Vector3d force) throws SimulationExceededMaximumTimeException
@@ -50,6 +52,7 @@ public class SkippyV2Test
       skippy.setRootJointForce(force.x, force.y, force.z);
       assertTrue(skippySimulationV2.run(time));
       skippy.setRootJointForce(0.0, 0.0, 0.0);
+      System.out.println("pushRobot");
    }
 
    @Before
