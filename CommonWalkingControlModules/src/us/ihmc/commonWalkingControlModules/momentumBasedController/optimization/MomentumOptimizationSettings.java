@@ -1,5 +1,8 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization;
 
+import org.ejml.data.DenseMatrix64F;
+import us.ihmc.convexOptimization.qpOASES.DenseMatrix;
+
 import javax.vecmath.Vector2d;
 import javax.vecmath.Vector3d;
 
@@ -24,6 +27,7 @@ public class MomentumOptimizationSettings
 
    private double jointAccelerationWeight = 0.005;
    private double jointJerkWeight = 0.1;
+   private double jointTorqueWeight = 0.001;
    private double rhoWeight = 0.00001;
    private double rhoMin = 4.0;
    // Be careful with that guy, even 0.005 seems to make the ICP control sluggish.
@@ -141,10 +145,11 @@ public class MomentumOptimizationSettings
       this.rhoRateHighWeight = highWeight;
    }
 
-   public void setJointWeight(double jointAccelerationWeight, double jointJerkWeight)
+   public void setJointWeight(double jointAccelerationWeight, double jointJerkWeight, double jointTorqueWeight)
    {
       this.jointAccelerationWeight = jointAccelerationWeight;
       this.jointJerkWeight = jointJerkWeight;
+      this.jointTorqueWeight = jointTorqueWeight;
    }
 
    public void setRhoMin(double rhoMin)
@@ -221,6 +226,11 @@ public class MomentumOptimizationSettings
    public double getJointJerkWeight()
    {
       return jointJerkWeight;
+   }
+
+   public double getJointTorqueWeight()
+   {
+      return jointTorqueWeight;
    }
 
    public double getRhoWeight()
