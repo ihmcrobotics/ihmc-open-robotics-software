@@ -25,6 +25,7 @@ import us.ihmc.robotics.geometry.algorithms.SphereWithConvexPolygonIntersector;
 import us.ihmc.robotics.geometry.shapes.FrameSphere3d;
 import us.ihmc.robotics.geometry.shapes.Plane3d;
 import us.ihmc.robotics.lists.RecyclingArrayList;
+import us.ihmc.robotics.math.YoCounter;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -39,16 +40,16 @@ public class SwingOverPlanarRegionsTrajectoryExpander
    private final TwoWaypointSwingGenerator twoWaypointSwingGenerator;
 
    private final IntegerYoVariable numberOfCheckpoints;
-   private final IntegerYoVariable maxNumberOfTries;
-   private final IntegerYoVariable numberOfTries;
+   private final YoCounter numberOfTriesCounter;
    private final DoubleYoVariable minimumClearance;
    private final DoubleYoVariable incrementalAdjustmentDistance;
+   private final DoubleYoVariable maximumAdjustmentDistance;
    private final EnumYoVariable<SwingOverPlanarRegionsTrajectoryExpansionStatus> status;
 
    private final FrameConvexPolygon2d frameFootPolygon;
    private final YoFramePoint trajectoryPosition;
    private final PoseReferenceFrame solePoseReferenceFrame;
-   private final RecyclingArrayList<FramePoint> interpolatedFlatPoints;
+   private final RecyclingArrayList<FramePoint> originalWaypoints;
    private final RecyclingArrayList<FramePoint> adjustedWaypoints;
    private final double minimumSwingHeight;
    private final double maximumSwingHeight;
@@ -82,7 +83,7 @@ public class SwingOverPlanarRegionsTrajectoryExpander
 
    public enum SwingOverPlanarRegionsTrajectoryExpansionStatus
    {
-      INITIALIZED, FAILURE_HIT_MAX_SWING_HEIGHT, SEARCHING_FOR_SOLUTION, SOLUTION_FOUND,
+      INITIALIZED, FAILURE_HIT_MAX_ADJUSTMENT_DISTANCE, SEARCHING_FOR_SOLUTION, SOLUTION_FOUND,
    }
 
    public SwingOverPlanarRegionsTrajectoryExpander(WalkingControllerParameters walkingControllerParameters, YoVariableRegistry parentRegistry,
@@ -95,19 +96,20 @@ public class SwingOverPlanarRegionsTrajectoryExpander
       minimumSwingHeight = walkingControllerParameters.getMinSwingHeightFromStanceFoot();
       maximumSwingHeight = walkingControllerParameters.getMaxSwingHeightFromStanceFoot();
       soleToToeLength = walkingControllerParameters.getFootLength() / 2.0;
+      System.out.println("soltotoelength: " + soleToToeLength);
 
       numberOfCheckpoints = new IntegerYoVariable(namePrefix + "NumberOfCheckpoints", parentRegistry);
-      numberOfTries = new IntegerYoVariable(namePrefix + "NumberOfTries", parentRegistry);
-      maxNumberOfTries = new IntegerYoVariable(namePrefix + "MaxNumberOfTries", parentRegistry);
+      numberOfTriesCounter = new YoCounter(namePrefix + "NumberOfTriesCounter", parentRegistry);
       minimumClearance = new DoubleYoVariable(namePrefix + "MinimumClearance", parentRegistry);
       incrementalAdjustmentDistance = new DoubleYoVariable(namePrefix + "IncrementalAdjustmentDistance", parentRegistry);
+      maximumAdjustmentDistance = new DoubleYoVariable(namePrefix + "MaximumAdjustmentDistance", parentRegistry);
       status = new EnumYoVariable<SwingOverPlanarRegionsTrajectoryExpansionStatus>(namePrefix + "Status", parentRegistry,
                                                                                    SwingOverPlanarRegionsTrajectoryExpansionStatus.class);
 
       frameFootPolygon = new FrameConvexPolygon2d();
       trajectoryPosition = new YoFramePoint(namePrefix + "TrajectoryPosition", WORLD, parentRegistry);
       solePoseReferenceFrame = new PoseReferenceFrame(namePrefix + "SolePoseReferenceFrame", WORLD);
-      interpolatedFlatPoints = new RecyclingArrayList<>(2, FramePoint.class);
+      originalWaypoints = new RecyclingArrayList<>(2, FramePoint.class);
       adjustedWaypoints = new RecyclingArrayList<>(2, FramePoint.class);
 
       sphereWithConvexPolygonIntersector = new SphereWithConvexPolygonIntersector();
@@ -133,9 +135,10 @@ public class SwingOverPlanarRegionsTrajectoryExpander
 
       // Set default values
       numberOfCheckpoints.set(100);
-      maxNumberOfTries.set(50);
+      numberOfTriesCounter.setMaxCount(50);
       minimumClearance.set(0.04);
       incrementalAdjustmentDistance.set(0.03);
+      maximumAdjustmentDistance.set(maximumSwingHeight - minimumSwingHeight);
    }
 
    public void expandTrajectoryOverPlanarRegions(ConvexPolygon2d footPolygonSoleFrame, FramePose stanceFootPose, FramePose swingStartPose,
@@ -155,21 +158,22 @@ public class SwingOverPlanarRegionsTrajectoryExpander
       twoWaypointSwingGenerator.setStepTime(1.0);
 
       double[] defaultWaypointProportions = TwoWaypointSwingGenerator.getDefaultWaypointProportions();
-      interpolatedFlatPoints.get(0).interpolate(toeOffPosition, swingEndPosition, defaultWaypointProportions[0]);
-      adjustedWaypoints.get(0).set(interpolatedFlatPoints.get(0));
-      adjustedWaypoints.get(0).add(0.0, 0.0, minimumSwingHeight);
-      interpolatedFlatPoints.get(1).interpolate(toeOffPosition, swingEndPosition, defaultWaypointProportions[1]);
-      adjustedWaypoints.get(1).set(interpolatedFlatPoints.get(1));
-      adjustedWaypoints.get(1).add(0.0, 0.0, minimumSwingHeight);
+      originalWaypoints.get(0).setToZero();
+      originalWaypoints.get(0).interpolate(toeOffPosition, swingEndPosition, defaultWaypointProportions[0]);
+      originalWaypoints.get(0).add(0.0, 0.0, minimumSwingHeight);
+      adjustedWaypoints.get(0).set(originalWaypoints.get(0));
+      originalWaypoints.get(1).setToZero();
+      originalWaypoints.get(1).interpolate(toeOffPosition, swingEndPosition, defaultWaypointProportions[1]);
+      originalWaypoints.get(1).add(0.0, 0.0, minimumSwingHeight);
+      adjustedWaypoints.get(1).set(originalWaypoints.get(1));
 
       status.set(SwingOverPlanarRegionsTrajectoryExpansionStatus.SEARCHING_FOR_SOLUTION);
-      numberOfTries.set(0);
-      while (status.getEnumValue().equals(SwingOverPlanarRegionsTrajectoryExpansionStatus.SEARCHING_FOR_SOLUTION)
-            && numberOfTries.getIntegerValue() < maxNumberOfTries.getIntegerValue())
+      numberOfTriesCounter.resetCount();
+      while (status.getEnumValue().equals(SwingOverPlanarRegionsTrajectoryExpansionStatus.SEARCHING_FOR_SOLUTION) && !numberOfTriesCounter.maxCountReached())
       {
          status.set(tryATrajectory(footPolygonSoleFrame, planarRegionsList));
          updateVisualizer();
-         numberOfTries.add(1);
+         numberOfTriesCounter.countOne();
       }
    }
 
@@ -253,10 +257,10 @@ public class SwingOverPlanarRegionsTrajectoryExpander
                      waypointAdjustmentVector.scale(time);
                      adjustedWaypoints.get(1).add(waypointAdjustmentVector);
 
-                     if (adjustedWaypoints.get(0).getZ() - interpolatedFlatPoints.get(0).getZ() > maximumSwingHeight
-                           || adjustedWaypoints.get(1).getZ() - interpolatedFlatPoints.get(1).getZ() > maximumSwingHeight)
+                     if (adjustedWaypoints.get(0).distance(originalWaypoints.get(0)) > maximumAdjustmentDistance.getDoubleValue()
+                           || adjustedWaypoints.get(1).distance(originalWaypoints.get(1)) > maximumAdjustmentDistance.getDoubleValue())
                      {
-                        return SwingOverPlanarRegionsTrajectoryExpansionStatus.FAILURE_HIT_MAX_SWING_HEIGHT;
+                        return SwingOverPlanarRegionsTrajectoryExpansionStatus.FAILURE_HIT_MAX_ADJUSTMENT_DISTANCE;
                      }
 
                      return SwingOverPlanarRegionsTrajectoryExpansionStatus.SEARCHING_FOR_SOLUTION;
@@ -270,7 +274,7 @@ public class SwingOverPlanarRegionsTrajectoryExpander
 
       return SwingOverPlanarRegionsTrajectoryExpansionStatus.SOLUTION_FOUND;
    }
-   
+
    public RecyclingArrayList<FramePoint> getExpandedWaypoints()
    {
       return adjustedWaypoints;
@@ -287,7 +291,7 @@ public class SwingOverPlanarRegionsTrajectoryExpander
    {
       if (visualizer.isPresent())
       {
-         visualizer.get().update(1.0);
+         visualizer.get().update(0.0);
       }
    }
 
