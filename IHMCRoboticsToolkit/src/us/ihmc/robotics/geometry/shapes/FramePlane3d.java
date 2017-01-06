@@ -24,6 +24,11 @@ public class FramePlane3d extends AbstractReferenceFrameHolder
    private final Point3d temporaryPointB = new Point3d();
    private final Point3d temporaryPointC = new Point3d();
 
+   public FramePlane3d()
+   {
+      this(ReferenceFrame.getWorldFrame());
+   }
+   
    public FramePlane3d(ReferenceFrame referenceFrame, Plane3d plane3d)
    {
       this.referenceFrame = referenceFrame;
@@ -74,6 +79,11 @@ public class FramePlane3d extends AbstractReferenceFrameHolder
       getNormal(returnVector);
       return returnVector;
    }
+   
+   public Vector3d getNormal()
+   {
+      return plane3d.getNormal();
+   }
 
    public void setNormal(double x, double y, double z)
    {
@@ -97,6 +107,11 @@ public class FramePlane3d extends AbstractReferenceFrameHolder
       FramePoint pointToReturn = new FramePoint(this.getReferenceFrame());
       this.getPoint(pointToReturn);
       return pointToReturn;
+   }
+   
+   public Point3d getPoint()
+   {
+      return plane3d.getPoint();
    }
 
    public void setPoint(double x, double y, double z)
@@ -147,6 +162,18 @@ public class FramePlane3d extends AbstractReferenceFrameHolder
 
       return plane3d.isOnOrBelow(pointToTest.getPoint());
    }
+   
+   public boolean isParallel(FramePlane3d otherPlane, double epsilon)
+   {
+      checkReferenceFrameMatch(otherPlane);
+      return plane3d.isParallel(otherPlane.plane3d, epsilon);
+   }
+   
+   public boolean isCoplanar(FramePlane3d otherPlane, double epsilon)
+   {
+      checkReferenceFrameMatch(otherPlane);
+      return plane3d.isCoplanar(otherPlane.plane3d, epsilon);
+   }
 
    public FramePoint orthogonalProjectionCopy(FramePoint point)
    {
@@ -194,6 +221,13 @@ public class FramePlane3d extends AbstractReferenceFrameHolder
    {
       plane3d.applyTransform(transformation);
    }
+
+   public void setIncludingFrame(ReferenceFrame referenceFrame, double pointX, double pointY, double pointZ, double normalX, double normalY, double normalZ)
+   {
+      this.referenceFrame = referenceFrame;
+      plane3d.setPoint(pointX, pointY, pointZ);
+      plane3d.setNormal(normalX, normalY, normalZ);
+   }
    
    public void getIntersectionWithLine(FramePoint pointToPack, FrameLine line)
    {
@@ -201,7 +235,7 @@ public class FramePlane3d extends AbstractReferenceFrameHolder
 	   checkReferenceFrameMatch(pointToPack.getReferenceFrame());
 	   
 	   Point3d intersectionToPack = new Point3d();
-	   plane3d.getIntersectionWithLine(intersectionToPack, line.getOrigin(), line.getDirection());
+	   plane3d.getIntersectionWithLine(intersectionToPack, line.getPoint(), line.getNormalizedVector());
 	   pointToPack.set(intersectionToPack);
    }
 

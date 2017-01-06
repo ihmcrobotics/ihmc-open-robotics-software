@@ -32,18 +32,18 @@ public class BoundingBox3d
 
    public static BoundingBox3d union(BoundingBox3d boundingBoxOne, BoundingBox3d boundingBoxTwo)
    {
-      double minX = Math.min(boundingBoxOne.minPoint.getX(), boundingBoxTwo.minPoint.getX());
-      double minY = Math.min(boundingBoxOne.minPoint.getY(), boundingBoxTwo.minPoint.getY());
-      double minZ = Math.min(boundingBoxOne.minPoint.getZ(), boundingBoxTwo.minPoint.getZ());
+      double minX = Math.min(boundingBoxOne.minPoint.getX() - boundingBoxOne.epsilon, boundingBoxTwo.minPoint.getX() - boundingBoxTwo.epsilon);
+      double minY = Math.min(boundingBoxOne.minPoint.getY() - boundingBoxOne.epsilon, boundingBoxTwo.minPoint.getY() - boundingBoxTwo.epsilon);
+      double minZ = Math.min(boundingBoxOne.minPoint.getZ() - boundingBoxOne.epsilon, boundingBoxTwo.minPoint.getZ() - boundingBoxTwo.epsilon);
 
-      double maxX = Math.max(boundingBoxOne.maxPoint.getX(), boundingBoxTwo.maxPoint.getX());
-      double maxY = Math.max(boundingBoxOne.maxPoint.getY(), boundingBoxTwo.maxPoint.getY());
-      double maxZ = Math.max(boundingBoxOne.maxPoint.getZ(), boundingBoxTwo.maxPoint.getZ());
+      double maxX = Math.max(boundingBoxOne.maxPoint.getX() + boundingBoxOne.epsilon, boundingBoxTwo.maxPoint.getX() + boundingBoxTwo.epsilon);
+      double maxY = Math.max(boundingBoxOne.maxPoint.getY() + boundingBoxOne.epsilon, boundingBoxTwo.maxPoint.getY() + boundingBoxTwo.epsilon);
+      double maxZ = Math.max(boundingBoxOne.maxPoint.getZ() + boundingBoxOne.epsilon, boundingBoxTwo.maxPoint.getZ() + boundingBoxTwo.epsilon);
 
       Point3d unionMin = new Point3d(minX, minY, minZ);
       Point3d unionMax = new Point3d(maxX, maxY, maxZ);
 
-      return new BoundingBox3d(unionMin, unionMax, Math.min(boundingBoxOne.epsilon, boundingBoxTwo.epsilon));
+      return new BoundingBox3d(unionMin, unionMax, 0.0);
    }
 
    public BoundingBox3d(Point3d min, Point3d max, double epsilon)
