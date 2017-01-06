@@ -4,7 +4,7 @@ import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.atlas.parameters.AtlasContactPointParameters;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.roughTerrainWalking.SwingOverPlanarRegionsVisualizer;
+import us.ihmc.avatar.roughTerrainWalking.AvatarSwingOverPlanarRegionsVisualizer;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 
 public class AtlasSwingOverPlanarRegionsVisualizer
@@ -14,6 +14,6 @@ public class AtlasSwingOverPlanarRegionsVisualizer
       AtlasRobotModel atlasRobotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, DRCRobotModel.RobotTarget.SCS, false);
       WalkingControllerParameters walkingControllerParameters = atlasRobotModel.getWalkingControllerParameters();
       AtlasContactPointParameters contactPointParameters = atlasRobotModel.getContactPointParameters();
-      new SwingOverPlanarRegionsVisualizer(walkingControllerParameters, contactPointParameters);
+      new AvatarSwingOverPlanarRegionsVisualizer(walkingControllerParameters, contactPointParameters);
    }
 }

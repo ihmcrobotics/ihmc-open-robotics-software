@@ -25,7 +25,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
-public class SwingOverPlanarRegionsVisualizer
+public class AvatarSwingOverPlanarRegionsVisualizer
 {
    private static final ReferenceFrame WORLD = ReferenceFrame.getWorldFrame();
    private static final AppearanceDefinition[] appearances = {YoAppearance.Gray(), YoAppearance.Gray()};
@@ -52,7 +52,7 @@ public class SwingOverPlanarRegionsVisualizer
    private final FramePose swingEndPose;
    private final SwingOverPlanarRegionsTrajectoryExpander swingOverPlanarRegionsTrajectoryExpander;
 
-   public SwingOverPlanarRegionsVisualizer(SimulationConstructionSet scs, YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry,
+   public AvatarSwingOverPlanarRegionsVisualizer(SimulationConstructionSet scs, YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry,
                                            WalkingControllerParameters walkingControllerParameters, RobotContactPointParameters contactPointParameters)
    {
       this.scs = scs;
@@ -91,9 +91,9 @@ public class SwingOverPlanarRegionsVisualizer
       swingEndPose = new FramePose(WORLD);
    }
 
-   public SwingOverPlanarRegionsVisualizer(WalkingControllerParameters walkingControllerParameters, RobotContactPointParameters contactPointParameters)
+   public AvatarSwingOverPlanarRegionsVisualizer(WalkingControllerParameters walkingControllerParameters, RobotContactPointParameters contactPointParameters)
    {
-      this(new SimulationConstructionSet(new Robot("Robot")), new YoVariableRegistry(SwingOverPlanarRegionsVisualizer.class.getSimpleName()),
+      this(new SimulationConstructionSet(new Robot("Robot")), new YoVariableRegistry(AvatarSwingOverPlanarRegionsVisualizer.class.getSimpleName()),
            new YoGraphicsListRegistry(), walkingControllerParameters, contactPointParameters);
 
       scs.addYoVariableRegistry(registry);
