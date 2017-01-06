@@ -20,6 +20,8 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
+import javax.vecmath.Point2d;
+
 public class WalkOnTheEdgesManager
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
@@ -240,10 +242,19 @@ public class WalkOnTheEdgesManager
          return;
       }
 
-      RobotSide trailingLeg = nextFootstep.getRobotSide().getOppositeSide();
       ReferenceFrame footstepSoleFrame = nextFootstep.getSoleReferenceFrame();
-      ConvexPolygon2d footPolygon = footDefaultPolygons.get(nextFootstep.getRobotSide()).getConvexPolygon2d();
-      nextFootstepPolygon.setIncludingFrameAndUpdate(footstepSoleFrame, footPolygon);
+      List<Point2d> predictedContactPoints = nextFootstep.getPredictedContactPoints();
+      if (predictedContactPoints != null && !predictedContactPoints.isEmpty())
+      {
+         nextFootstepPolygon.setIncludingFrameAndUpdate(footstepSoleFrame, predictedContactPoints);
+      }
+      else
+      {
+         ConvexPolygon2d footPolygon = footDefaultPolygons.get(nextFootstep.getRobotSide()).getConvexPolygon2d();
+         nextFootstepPolygon.setIncludingFrameAndUpdate(footstepSoleFrame, footPolygon);
+      }
+
+      RobotSide trailingLeg = nextFootstep.getRobotSide().getOppositeSide();
       nextFootstepPolygon.changeFrameAndProjectToXYPlane(worldFrame);
 
       if (walkingControllerParameters.checkECMPLocationToTriggerToeOff())
