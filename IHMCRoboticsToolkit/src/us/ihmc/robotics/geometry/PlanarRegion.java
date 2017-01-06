@@ -743,6 +743,12 @@ public class PlanarRegion
       convexHull.setAndUpdate(other.convexHull);
    }
 
+   public void setBoundingBoxEpsilon(double epsilon)
+   {
+      this.boundingBox3dInWorld.setEpsilonToGrow(epsilon);
+      updateBoundingBox();
+   }
+
    private void updateBoundingBox()
    {
       boundingBox3dInWorld.set(Double.NaN, Double.NaN, Double.NaN, Double.NaN, Double.NaN, Double.NaN);

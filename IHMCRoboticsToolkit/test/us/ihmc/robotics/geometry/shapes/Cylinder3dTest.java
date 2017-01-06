@@ -291,7 +291,7 @@ public class Cylinder3dTest
 
       Point3d pointToCheck = new Point3d(1.5, 0, 1);
       Vector3d expectedNormal = new Vector3d(1, 0, 0);
-      cylinder3d.checkIfInside(pointToCheck, closestPointToPack, normalToPack);
+      assertFalse(cylinder3d.checkIfInside(pointToCheck, closestPointToPack, normalToPack));
       assertEquals(expectedNormal, normalToPack);
    }
 

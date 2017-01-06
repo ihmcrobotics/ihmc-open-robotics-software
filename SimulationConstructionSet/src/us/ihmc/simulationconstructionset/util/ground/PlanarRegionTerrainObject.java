@@ -25,6 +25,8 @@ public class PlanarRegionTerrainObject implements TerrainObject3D, HeightMapWith
       this.planarRegion = planarRegion;
       this.allowablePenetrationThickness = allowablePenetrationThickness;
       this.linkGraphics = setupLinkGraphics();
+
+      this.planarRegion.setBoundingBoxEpsilon(allowablePenetrationThickness);
    }
 
    @Override

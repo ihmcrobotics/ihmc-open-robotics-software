@@ -94,15 +94,17 @@ public class FrameLineTest
       FrameVector vector = new FrameVector(world, direction);
       vector.normalize();
 
-      assertTrue(vector.epsilonEquals(line.getFrameDirection(), 1e-12));
+      assertTrue(vector.epsilonEquals(line.getFrameNormalizedVectorCopy(), 1e-12));
 
       line.changeFrame(target);
       vector.changeFrame(target);
 
-      assertTrue(vector.epsilonEquals(line.getFrameDirection(), 1e-12));
+      assertTrue(vector.epsilonEquals(line.getFrameNormalizedVectorCopy(), 1e-12));
 
       vector.changeFrame(target2);
-      assertTrue(line.getDirectionInFrame(target2).epsilonEquals(vector, 1e-12));
+      FrameVector frameVector = line.getFrameNormalizedVectorCopy();
+      frameVector.changeFrame(target2);
+      assertTrue(frameVector.epsilonEquals(vector, 1e-12));
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -122,35 +124,41 @@ public class FrameLineTest
       FrameVector vector = new FrameVector(world, direction);
       vector.normalize();
 
-      assertTrue(vector.epsilonEquals(line.getFrameDirection(), 1e-12));
+      assertTrue(vector.epsilonEquals(line.getFrameNormalizedVectorCopy(), 1e-12));
 
       line.changeFrame(target);
       vector.changeFrame(target);
 
-      assertTrue(vector.epsilonEquals(line.getFrameDirection(), 1e-12));
+      assertTrue(vector.epsilonEquals(line.getFrameNormalizedVectorCopy(), 1e-12));
 
       vector.changeFrame(target2);
-      assertTrue(line.getDirectionInFrame(target2).epsilonEquals(vector, 1e-12));
+      FrameVector frameNormalizedVectorCopy = line.getFrameNormalizedVectorCopy();
+      frameNormalizedVectorCopy.changeFrame(target2);
+      assertTrue(frameNormalizedVectorCopy.epsilonEquals(vector, 1e-12));
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000, expected = RuntimeException.class)
+   @Test(timeout = 30000)
    public void testConstructorA()
    {
       Point3d origin = new Point3d(1.0, 2.0, 3.0);
       Vector3d direction = new Vector3d();
 
-      new FrameLine(ReferenceFrame.getWorldFrame(), origin, direction);
+      FrameLine frameLine = new FrameLine(ReferenceFrame.getWorldFrame(), origin, direction);
+      
+      assertTrue(frameLine.containsNaN());
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000, expected = RuntimeException.class)
+   @Test(timeout = 30000)
    public void testConstructorB()
    {
       FramePoint origin = new FramePoint(ReferenceFrame.getWorldFrame(), 1.0, 2.0, 3.0);
       FrameVector direction = new FrameVector(ReferenceFrame.getWorldFrame());
 
-      new FrameLine(origin, direction);
+      FrameLine frameLine = new FrameLine(origin, direction);
+      
+      assertTrue(frameLine.containsNaN());
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
