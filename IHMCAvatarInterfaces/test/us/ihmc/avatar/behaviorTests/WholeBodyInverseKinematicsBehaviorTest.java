@@ -27,6 +27,7 @@ import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.WholeBodyInverseKinematicsBehavior;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.TrackingWeightsCommand.BodyWeights;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePose;
@@ -102,7 +103,7 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
 
       setupKinematicsToolboxModule();
    }
-   
+
    @ContinuousIntegrationTest(estimatedDuration = 30.0) // Tests if pelvis and chest are not affected (change in position & orientation) by a hand movement of 20cm in the positive x direction
    @Test(timeout = 160000)
    public void testSolvingForAHandPose() throws SimulationExceededMaximumTimeException, IOException
@@ -176,7 +177,7 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
 
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
-   
+
    @ContinuousIntegrationTest(estimatedDuration = 30.0) // Tests position and orientation of the two hands after a movement of 20cm in the positive x direction
    @Test(timeout = 160000)
    public void testSolvingForBothHandPoses() throws SimulationExceededMaximumTimeException, IOException
@@ -246,7 +247,7 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
 
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
-   
+
    @ContinuousIntegrationTest(estimatedDuration = 30.0) // Tests the selection matrix of a hand, sets a desired roll offset and makes sure it is reached
    @Test(timeout = 160000)
    public void testSolvingForHandSelectionMatrix() throws SimulationExceededMaximumTimeException, IOException
@@ -325,7 +326,7 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
 
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
-   
+
    @ContinuousIntegrationTest(estimatedDuration = 30.0) // Tests the method setHandLinearControlOnly, sets desired angular offsets on both hands and makes sure they are not reached
    @Test(timeout = 160000)
    public void testSolvingForHandAngularLinearControl() throws SimulationExceededMaximumTimeException, IOException
@@ -416,7 +417,7 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
       
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
-   
+
    @ContinuousIntegrationTest(estimatedDuration = 30.0) // Tests the method setHandLinearControlAndYawPitchOnly, sets a desired roll offset on one hand and makes sure it is not reached
    @Test(timeout = 160000)
    public void testSolvingForHandRollConstraint() throws SimulationExceededMaximumTimeException, IOException
@@ -481,7 +482,7 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
       
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
-   
+
    @ContinuousIntegrationTest(estimatedDuration = 30.0) // Tests the selection matrix of the chest
    @Test(timeout = 160000)
    public void testSolvingForChestAngularControl() throws SimulationExceededMaximumTimeException, IOException
@@ -534,7 +535,7 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
       
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
-   
+
    @ContinuousIntegrationTest(estimatedDuration = 30.0) // Tests the selection matrix of the pelvis 
    @Test(timeout = 160000)
    public void testSolvingForPelvisAngularControl() throws SimulationExceededMaximumTimeException, IOException
@@ -588,8 +589,87 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
    
-   private boolean isOrientationEqual(Quat4d initialQuat, Quat4d finalQuat, double angleEpsilon)
+   @ContinuousIntegrationTest(estimatedDuration = 30.0) 
+   @Test(timeout = 160000)
+   public void testSolvingForTrackingWieghts() throws SimulationExceededMaximumTimeException, IOException
    {
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+
+      boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      assertTrue(success);
+
+      RobotSide robotSide = RobotSide.RIGHT;
+
+      SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet();      
+      String nameSpace = robotSide.getCamelCaseNameForStartOfExpression() + HandControlModule.class.getSimpleName();
+      String varname = nameSpace + "SwitchTime";
+      double initialSwitchTime = scs.getVariable(nameSpace, varname).getValueAsDouble();
+
+      drcBehaviorTestHelper.updateRobotModel();
+
+      WholeBodyInverseKinematicsBehavior ik = new WholeBodyInverseKinematicsBehavior(getRobotModel(), drcBehaviorTestHelper.getYoTime(),
+                                                                                     drcBehaviorTestHelper.getBehaviorCommunicationBridge(),
+                                                                                     getRobotModel().createFullRobotModel());
+
+      ReferenceFrame handControlFrame = drcBehaviorTestHelper.getReferenceFrames().getHandFrame(robotSide);
+
+      ReferenceFrame chestControlFrame = drcBehaviorTestHelper.getControllerFullRobotModel().getChest().getBodyFixedFrame();
+      FrameOrientation initialChestOrientation = new FrameOrientation(chestControlFrame);
+      initialChestOrientation.changeFrame(ReferenceFrame.getWorldFrame());
+
+      ReferenceFrame pelvisControlFrame = drcBehaviorTestHelper.getControllerFullRobotModel().getPelvis().getBodyFixedFrame();
+      FrameOrientation initialPelvisOrientation = new FrameOrientation(pelvisControlFrame);
+      initialPelvisOrientation.changeFrame(ReferenceFrame.getWorldFrame());
+      
+      ik.setDesiredChestOrientation(initialChestOrientation);
+      ik.setDesiredPelvisOrientation(initialPelvisOrientation);
+
+      FramePose desiredHandPose = new FramePose(handControlFrame);
+      desiredHandPose.changeFrame(ReferenceFrame.getWorldFrame());
+      desiredHandPose.translate(0.08, 0.0, 0.0);
+      ik.setTrajectoryTime(0.5);
+      ik.setDesiredHandPose(robotSide, desiredHandPose);
+      ik.setBodyWeights(BodyWeights.HIGH);
+      drcBehaviorTestHelper.dispatchBehavior(ik);
+
+      while (!ik.isDone())
+      {
+         ThreadTools.sleep(100);
+      }
+
+      assertFalse("Bad solution: " + ik.getSolutionQuality(), ik.hasSolverFailed());
+
+      success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      assertTrue(success);
+
+      double newSwitchTime = scs.getVariable(nameSpace, varname).getValueAsDouble();
+
+      assertNotEquals(initialSwitchTime, newSwitchTime, 1.0e-3);
+
+      Quat4d controllerDesiredChestOrientation = EndToEndChestTrajectoryMessageTest.findControllerDesiredOrientation(scs);
+      Quat4d controllerDesiredPelvisOrientation = EndToEndPelvisTrajectoryMessageTest.findControllerDesiredOrientation(scs);
+
+      double chestAngleEpsilon = Math.toRadians(1.0e-2);
+      double pelvisAngleEpsilon = Math.toRadians(1.0e-1);
+
+      assertTrue(isOrientationEqual(initialChestOrientation.getQuaternion(), controllerDesiredChestOrientation, chestAngleEpsilon));
+      assertTrue(isOrientationEqual(initialPelvisOrientation.getQuaternion(), controllerDesiredPelvisOrientation, pelvisAngleEpsilon));
+
+      Point3d controllerDesiredHandPosition = EndToEndHandTrajectoryMessageTest.findControllerDesiredPosition(robotSide, scs);
+
+      Point3d handPosition = new Point3d();
+      desiredHandPose.getPosition(handPosition);
+
+      double positionEpsilon = 1.0e-4;
+      double positionDifference = handPosition.distance(controllerDesiredHandPosition);
+      
+      assertTrue("Position difference: " + positionDifference, positionDifference <positionEpsilon);
+
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+   }
+   
+   private boolean isOrientationEqual(Quat4d initialQuat, Quat4d finalQuat, double angleEpsilon)
+   {     
       Quat4d quatDifference = new Quat4d(initialQuat);
       quatDifference.mulInverse(finalQuat);
 
