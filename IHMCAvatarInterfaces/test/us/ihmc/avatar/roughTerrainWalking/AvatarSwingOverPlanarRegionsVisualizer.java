@@ -1,9 +1,13 @@
 package us.ihmc.avatar.roughTerrainWalking;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.vecmath.Vector3d;
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.trajectories.SwingOverPlanarRegionsTrajectoryExpander;
+import us.ihmc.commonWalkingControlModules.trajectories.SwingOverPlanarRegionsTrajectoryExpander.SwingOverPlanarRegionsTrajectoryCollisionType;
 import us.ihmc.graphics3DDescription.Graphics3DObject;
 import us.ihmc.graphics3DDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphics3DDescription.appearance.YoAppearance;
@@ -22,6 +26,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
@@ -35,16 +40,11 @@ public class AvatarSwingOverPlanarRegionsVisualizer
    private final YoGraphicsListRegistry yoGraphicsListRegistry;
 
    private final YoFramePose solePose;
-   private final YoFramePoint closestPolygonPoint;
-   private final YoFramePoint intersectionPoint;
-   private final YoFramePoint blockingIntersectionPoint;
    private final YoGraphicEllipsoid collisionSphere;
    private final YoGraphicPolygon stanceFootGraphic;
    private final YoGraphicPolygon swingStartGraphic;
    private final YoGraphicPolygon swingEndGraphic;
-   private final YoGraphicPosition closestPolygonPointGraphic;
-   private final YoGraphicPosition intersectionGraphic;
-   private final YoGraphicPosition blockingIntersectionGraphic;
+   private final Map<SwingOverPlanarRegionsTrajectoryCollisionType, YoGraphicPosition> intersectionMap;
 
    private final ConvexPolygon2d footPolygon;
    private final FramePose stanceFootPose;
@@ -53,7 +53,7 @@ public class AvatarSwingOverPlanarRegionsVisualizer
    private final SwingOverPlanarRegionsTrajectoryExpander swingOverPlanarRegionsTrajectoryExpander;
 
    public AvatarSwingOverPlanarRegionsVisualizer(SimulationConstructionSet scs, YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry,
-                                           WalkingControllerParameters walkingControllerParameters, RobotContactPointParameters contactPointParameters)
+                                                 WalkingControllerParameters walkingControllerParameters, RobotContactPointParameters contactPointParameters)
    {
       this.scs = scs;
       this.registry = registry;
@@ -65,26 +65,53 @@ public class AvatarSwingOverPlanarRegionsVisualizer
       swingOverPlanarRegionsTrajectoryExpander.attachVisualizer(this::update);
 
       solePose = new YoFramePose("SolePose", WORLD, registry);
-      intersectionPoint = new YoFramePoint("IntersectionPoint", WORLD, registry);
-      blockingIntersectionPoint = new YoFramePoint("BlockingIntersectionPoint", WORLD, registry);
-      closestPolygonPoint = new YoFramePoint("ClosestPolygonPoint", WORLD, registry);
       AppearanceDefinition bubble = YoAppearance.LightBlue();
       bubble.setTransparency(0.5);
       collisionSphere = new YoGraphicEllipsoid("CollisionSphere", solePose.getPosition(), solePose.getOrientation(), bubble, new Vector3d());
       stanceFootGraphic = new YoGraphicPolygon("StanceFootGraphic", footPolygon.getNumberOfVertices(), registry, 1.0, YoAppearance.Blue());
       swingStartGraphic = new YoGraphicPolygon("SwingStartGraphic", footPolygon.getNumberOfVertices(), registry, 1.0, YoAppearance.Green());
       swingEndGraphic = new YoGraphicPolygon("SwingEndGraphic", footPolygon.getNumberOfVertices(), registry, 1.0, YoAppearance.Yellow());
-      closestPolygonPointGraphic = new YoGraphicPosition("ClosestPolygonPointGraphic", closestPolygonPoint, 0.01, YoAppearance.Blue());
-      intersectionGraphic = new YoGraphicPosition("IntersectionGraphic", intersectionPoint, 0.011, YoAppearance.Yellow());
-      blockingIntersectionGraphic = new YoGraphicPosition("BlockingIntersectionGraphic", blockingIntersectionPoint, 0.012, YoAppearance.Red());
+      intersectionMap = new HashMap<SwingOverPlanarRegionsTrajectoryCollisionType, YoGraphicPosition>();
+      for (SwingOverPlanarRegionsTrajectoryCollisionType swingOverPlanarRegionsTrajectoryCollisionType : SwingOverPlanarRegionsTrajectoryCollisionType.values())
+      {
+         AppearanceDefinition appearance;
+         double size;
+         switch (swingOverPlanarRegionsTrajectoryCollisionType)
+         {
+         case CRITICAL_INTERSECTION:
+            appearance = YoAppearance.Red();
+            size = 0.014;
+            break;
+         case INTERSECTION_BUT_OUTSIDE_TRAJECTORY:
+            appearance = YoAppearance.Orange();
+            size = 0.013;
+            break;
+         case INTERSECTION_BUT_BELOW_IGNORE_PLANE:
+            appearance = YoAppearance.Yellow();
+            size = 0.012;
+            break;
+         case NO_INTERSECTION:
+            appearance = YoAppearance.Blue();
+            size = 0.011;
+            break;
+         default:
+            appearance = YoAppearance.Black();
+            size = 0.01;
+            break;
+         }
+         intersectionMap.put(swingOverPlanarRegionsTrajectoryCollisionType,
+                             new YoGraphicPosition("IntersectionGraphic" + swingOverPlanarRegionsTrajectoryCollisionType.name(),
+                                                   new YoFramePoint("IntersectionPoint" + swingOverPlanarRegionsTrajectoryCollisionType.name(), WORLD,
+                                                                    registry),
+                                                   size, appearance));
+
+         yoGraphicsListRegistry.registerYoGraphic("SwingOverPlanarRegions", intersectionMap.get(swingOverPlanarRegionsTrajectoryCollisionType));
+      }
 
       yoGraphicsListRegistry.registerYoGraphic("SwingOverPlanarRegions", collisionSphere);
       yoGraphicsListRegistry.registerYoGraphic("SwingOverPlanarRegions", stanceFootGraphic);
       yoGraphicsListRegistry.registerYoGraphic("SwingOverPlanarRegions", swingStartGraphic);
       yoGraphicsListRegistry.registerYoGraphic("SwingOverPlanarRegions", swingEndGraphic);
-      yoGraphicsListRegistry.registerYoGraphic("SwingOverPlanarRegions", closestPolygonPointGraphic);
-      yoGraphicsListRegistry.registerYoGraphic("SwingOverPlanarRegions", intersectionGraphic);
-      yoGraphicsListRegistry.registerYoGraphic("SwingOverPlanarRegions", blockingIntersectionGraphic);
 
       stanceFootPose = new FramePose(WORLD);
       swingStartPose = new FramePose(WORLD);
@@ -105,6 +132,9 @@ public class AvatarSwingOverPlanarRegionsVisualizer
       generator.translate(0.4, 0.12, 0.0001);
       generator.addCubeReferencedAtBottomMiddle(1.0, 1.0, 0.001);
       generator.addCubeReferencedAtBottomMiddle(0.1, 0.1, 0.1);
+      generator.translate(0.52, -0.12, 0.1);
+      generator.addCubeReferencedAtBottomMiddle(0.1, 0.1, 0.1);
+
       PlanarRegionsList terrain = generator.getPlanarRegionsList();
       Graphics3DObject graphics3DObject = new Graphics3DObject();
       graphics3DObject.addCoordinateSystem(0.3);
@@ -140,23 +170,13 @@ public class AvatarSwingOverPlanarRegionsVisualizer
    private void update(double dt)
    {
       solePose.setFromReferenceFrame(swingOverPlanarRegionsTrajectoryExpander.getSolePoseReferenceFrame());
-      closestPolygonPoint.set(swingOverPlanarRegionsTrajectoryExpander.getClosestPolygonPoint());
-      if (swingOverPlanarRegionsTrajectoryExpander.isIntersecting())
+
+      for (SwingOverPlanarRegionsTrajectoryCollisionType swingOverPlanarRegionsTrajectoryCollisionType : SwingOverPlanarRegionsTrajectoryCollisionType.values())
       {
-         intersectionPoint.set(swingOverPlanarRegionsTrajectoryExpander.getClosestPolygonPoint());
+         intersectionMap.get(swingOverPlanarRegionsTrajectoryCollisionType)
+                        .setPosition(swingOverPlanarRegionsTrajectoryExpander.getClosestPolygonPoint(swingOverPlanarRegionsTrajectoryCollisionType));
       }
-      else
-      {
-         intersectionPoint.setToNaN();
-      }
-      if (swingOverPlanarRegionsTrajectoryExpander.isIntersectingAndAbovePlane())
-      {
-         blockingIntersectionPoint.set(swingOverPlanarRegionsTrajectoryExpander.getClosestPolygonPoint());
-      }
-      else
-      {
-         blockingIntersectionPoint.setToNaN();
-      }
+
       double sphereRadius = swingOverPlanarRegionsTrajectoryExpander.getSphereRadius();
       collisionSphere.setRadii(new Vector3d(sphereRadius, sphereRadius, sphereRadius));
       collisionSphere.update();

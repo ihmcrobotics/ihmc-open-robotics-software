@@ -58,8 +58,12 @@ public abstract class AvatarSwingOverPlanarRegionsTest implements MultiRobotTest
       generator.translate(-2.0, 0.0, 0.0);
       generator.translate(0.35, 0.2, 0.0);
       generator.addCubeReferencedAtBottomMiddle(0.1, 0.1, 0.1);
-      generator.translate(0.65, 0.0, 0.0);
+      generator.translate(0.62, 0.0, 0.0);
       generator.addCubeReferencedAtBottomMiddle(0.1, 0.1, 0.14);
+      generator.translate(0.3, -0.3, 0.0);
+      generator.addCubeReferencedAtBottomMiddle(0.1, 0.1, 0.15);
+      generator.translate(0.4, 0.1, 0.0);
+      generator.addCubeReferencedAtBottomMiddle(0.1, 1.0, 0.11);
       //      generator.translate(0.0, 0.28, 0.0);
       //      generator.addCubeReferencedAtBottomMiddle(0.1, 0.1, 0.14);
 
@@ -83,38 +87,6 @@ public abstract class AvatarSwingOverPlanarRegionsTest implements MultiRobotTest
                                                                                                                walkingControllerParameters,
                                                                                                                contactPointParameters);
       SwingOverPlanarRegionsTrajectoryExpander swingOverPlanarRegionsTrajectoryExpander = swingOverPlanarRegionsVisualizer.getSwingOverPlanarRegionsTrajectoryExpander();
-      //      SwingOverPlanarRegionsTrajectoryExpander swingOverPlanarRegionsTrajectoryExpander = new SwingOverPlanarRegionsTrajectoryExpander(robotModel.getWalkingControllerParameters(),
-      //                                                                                                                                       registry,
-      //                                                                                                                                       yoGraphicsListRegistry);
-
-      //      YoGraphicsList vectors = new YoGraphicsList("NormalVectors");
-      //      for (int i = 0; i < planarRegionsList.getNumberOfPlanarRegions(); i++)
-      //      {
-      //         PlanarRegion planarRegion = planarRegionsList.getPlanarRegion(i);
-      //         YoFramePoint planarRegionPointInWorld = new YoFramePoint("PlanarRegionPoint" + i, ReferenceFrame.getWorldFrame(), registry);
-      //         YoFrameVector surfaceNormal = new YoFrameVector("NormalVector" + i, ReferenceFrame.getWorldFrame(), registry);
-      //
-      //         RigidBodyTransform transformToWorld = new RigidBodyTransform();
-      //         Point3d translation = new Point3d();
-      //         planarRegion.getTransformToWorld(transformToWorld);
-      //         transformToWorld.getTranslation(translation);
-      //         planarRegionPointInWorld.set(translation);
-      //
-      //         Vector3d normal = new Vector3d();
-      //         environment.getTerrainObject3D().getHeightMapIfAvailable().heightAndNormalAt(translation.x, translation.y, translation.z, normal);
-      //         surfaceNormal.setVector(normal);
-      //
-      //         YoGraphicVector surfaceNormalGraphic = new YoGraphicVector("PlanarRegionSurfaceNormalGraphic" + i, planarRegionPointInWorld, surfaceNormal,
-      //                                                                    YoAppearance.Aqua());
-      //         vectors.add(surfaceNormalGraphic);
-      //      }
-      //
-      //      drcSimulationTestHelper.getSimulationConstructionSet().addYoGraphicsList(vectors, false);
-      //
-      //      HeightMapWithNormals heightMap = environment.getTerrainObject3D().getHeightMapIfAvailable();
-      //      Graphics3DObject heightMapGraphics = new Graphics3DObject();
-      //      heightMapGraphics.addHeightMap(heightMap, 300, 300, YoAppearance.DarkGreen());
-      //      drcSimulationTestHelper.getSimulationConstructionSet().addStaticLinkGraphics(heightMapGraphics);
 
       drcSimulationTestHelper.addChildRegistry(registry);
       drcSimulationTestHelper.getSimulationConstructionSet().addYoGraphicsListRegistry(yoGraphicsListRegistry);
