@@ -13,7 +13,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.SwingOverPlanarRegionsVisualizer.trajectoryExpanderTrajectoryPositionX</Variables>
+		<Variables>root.AvatarSwingOverPlanarRegionsVisualizer.trajectoryExpanderCollisionType</Variables>
 		<GraphConfiguration>
 			<Name>config2</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -25,7 +25,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.SwingOverPlanarRegionsVisualizer.trajectoryExpanderTrajectoryPositionY</Variables>
+		<Variables>root.AvatarSwingOverPlanarRegionsVisualizer.trajectoryExpanderNumberOfTriesCounterCount</Variables>
 		<GraphConfiguration>
 			<Name>config3</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -37,7 +37,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.SwingOverPlanarRegionsVisualizer.trajectoryExpanderTrajectoryPositionZ</Variables>
+		<Variables>root.AvatarSwingOverPlanarRegionsVisualizer.trajectoryExpanderStatus</Variables>
 		<GraphConfiguration>
 			<Name>config4</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -67,9 +67,9 @@
 
 <Current View>Normal View</Current View>
  <Canvas 1> 
- <Camera X>3.7845071937985892</Camera X>
- <Camera Y>-4.673367983773055</Camera Y>
- <Camera Z>1.9658948963183502</Camera Z>
+ <Camera X>0.0</Camera X>
+ <Camera Y>-6.0</Camera Y>
+ <Camera Z>1.0</Camera Z>
  <Dolly data> 
  <Position X>2.0</Position X>
  <Position Y>12.0</Position Y>
