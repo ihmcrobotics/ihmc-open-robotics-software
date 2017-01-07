@@ -41,6 +41,8 @@ public abstract class AvatarSwingOverPlanarRegionsTest implements MultiRobotTest
    private SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
+   private static final boolean LOCAL_MODE = !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
+
    public void testSwingOverPlanarRegions() throws SimulationExceededMaximumTimeException
    {
       String className = getClass().getSimpleName();
@@ -82,11 +84,20 @@ public abstract class AvatarSwingOverPlanarRegionsTest implements MultiRobotTest
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
       RobotContactPointParameters contactPointParameters = robotModel.getContactPointParameters();
       WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
-      AvatarSwingOverPlanarRegionsVisualizer swingOverPlanarRegionsVisualizer = new AvatarSwingOverPlanarRegionsVisualizer(drcSimulationTestHelper.getSimulationConstructionSet(),
-                                                                                                               registry, yoGraphicsListRegistry,
-                                                                                                               walkingControllerParameters,
-                                                                                                               contactPointParameters);
-      SwingOverPlanarRegionsTrajectoryExpander swingOverPlanarRegionsTrajectoryExpander = swingOverPlanarRegionsVisualizer.getSwingOverPlanarRegionsTrajectoryExpander();
+
+      AvatarSwingOverPlanarRegionsVisualizer swingOverPlanarRegionsVisualizer = null;
+      SwingOverPlanarRegionsTrajectoryExpander swingOverPlanarRegionsTrajectoryExpander;
+      if (LOCAL_MODE)
+      {
+         swingOverPlanarRegionsVisualizer = new AvatarSwingOverPlanarRegionsVisualizer(drcSimulationTestHelper.getSimulationConstructionSet(), registry,
+                                                                                       yoGraphicsListRegistry, walkingControllerParameters,
+                                                                                       contactPointParameters);
+         swingOverPlanarRegionsTrajectoryExpander = swingOverPlanarRegionsVisualizer.getSwingOverPlanarRegionsTrajectoryExpander();
+      }
+      else
+      {
+         swingOverPlanarRegionsTrajectoryExpander = new SwingOverPlanarRegionsTrajectoryExpander(walkingControllerParameters, registry, yoGraphicsListRegistry);
+      }
 
       drcSimulationTestHelper.addChildRegistry(registry);
       drcSimulationTestHelper.getSimulationConstructionSet().addYoGraphicsListRegistry(yoGraphicsListRegistry);
@@ -119,8 +130,17 @@ public abstract class AvatarSwingOverPlanarRegionsTest implements MultiRobotTest
          swingStartPose.set(stanceFootPose);
          stanceFootPose.set(swingEndPose);
          swingEndPose.setPosition(footstepX, footstepY, 0.0);
-         swingOverPlanarRegionsVisualizer.expandTrajectoryOverPlanarRegions(footPolygons.get(robotSide), stanceFootPose, swingStartPose, swingEndPose,
-                                                                                    planarRegionsList);
+         if (LOCAL_MODE)
+         {
+            swingOverPlanarRegionsVisualizer.expandTrajectoryOverPlanarRegions(footPolygons.get(robotSide), stanceFootPose, swingStartPose, swingEndPose,
+                                                                               planarRegionsList);
+         }
+         else
+         {
+            swingOverPlanarRegionsTrajectoryExpander.expandTrajectoryOverPlanarRegions(footPolygons.get(robotSide), stanceFootPose, swingStartPose,
+                                                                                       swingEndPose, planarRegionsList);
+
+         }
 
          PrintTools.info("Step " + i + ": " + swingOverPlanarRegionsTrajectoryExpander.getStatus());
          PrintTools.info("Foot: " + robotSide + "  X: " + footstepX + "  Y: " + footstepY);
@@ -146,7 +166,7 @@ public abstract class AvatarSwingOverPlanarRegionsTest implements MultiRobotTest
       min.sub(epsilon);
       max.add(epsilon);
 
-      if (!ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer())
+      if (LOCAL_MODE)
       {
          ThreadTools.sleepForever();
       }
