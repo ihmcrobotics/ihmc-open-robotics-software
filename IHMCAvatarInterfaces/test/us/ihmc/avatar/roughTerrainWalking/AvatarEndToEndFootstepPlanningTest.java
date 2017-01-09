@@ -40,7 +40,6 @@ import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigura
 import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
-import us.ihmc.simulationconstructionset.util.environments.DarpaRoboticsChallengeFinalsWalkingEnvironment;
 import us.ihmc.simulationconstructionset.util.environments.PlanarRegionsListDefinedEnvironment;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.tools.MemoryTools;
@@ -145,10 +144,10 @@ public abstract class AvatarEndToEndFootstepPlanningTest implements MultiRobotTe
    @After
    public void destroySimulationAndRecycleMemory()
    {
-//      if (simulationTestingParameters.getKeepSCSUp())
-//      {
+      if (simulationTestingParameters.getKeepSCSUp())
+      {
          ThreadTools.sleepForever();
-//      }
+      }
 
       behaviorCommunicatorClient.close();
       behaviorCommunicatorServer.close();
