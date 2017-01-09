@@ -11,9 +11,9 @@ import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.packets.PlanarRegionsListMessage;
 import us.ihmc.communication.packets.RequestPlanarRegionsListMessage;
+import us.ihmc.communication.packets.RequestPlanarRegionsListMessage.RequestType;
 import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.communication.packets.UIPositionCheckerPacket;
-import us.ihmc.communication.packets.RequestPlanarRegionsListMessage.RequestType;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlannerGoal;
 import us.ihmc.footstepPlanning.FootstepPlannerGoalType;
@@ -101,7 +101,7 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
    private final ConcurrentListeningQueue<PlanarRegionsListMessage> planarRegionsListQueue = new ConcurrentListeningQueue<>(10);
    private final ConcurrentListeningQueue<FootstepStatus> footstepStatusQueue = new ConcurrentListeningQueue<FootstepStatus>(10);
    private SimpleFootstep lastFootstepSentForExecution;
-   
+
    private final IntegerYoVariable stepCounterForClearingLidar = new IntegerYoVariable("StepCounterForClearingLidar", registry);
    private final IntegerYoVariable stepsBeforeClearingLidar = new IntegerYoVariable("StepsBeforeClearingLidar", registry);
 
@@ -224,13 +224,13 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
             int randomInt = new Random().nextInt(5);
             if (randomInt == 0)
                packet = new TextToSpeechPacket("I am done. Do you want me to do this again?");
-            if (randomInt == 1)
+            else if (randomInt == 1)
                packet = new TextToSpeechPacket("What is my next task?");
-            if (randomInt == 2)
+            else if (randomInt == 2)
                packet = new TextToSpeechPacket("Can I crush those cinder block now human master?");
-            if (randomInt == 3)
+            else if (randomInt == 3)
                packet = new TextToSpeechPacket("Urgh - I bet they make me do this again.");
-            if (randomInt == 4)
+            else if (randomInt == 4)
                packet = new TextToSpeechPacket("Can I go to the bathroom now please?");
             else
                throw new RuntimeException("Should not go here.");
@@ -554,7 +554,7 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
       public void onBehaviorExited()
       {
          stepCounterForClearingLidar.increment();
-         
+
          if (stepCounterForClearingLidar.getIntegerValue() == stepsBeforeClearingLidar.getIntegerValue())
          {
             DepthDataClearCommand clearLidarPacket = new DepthDataClearCommand(DepthDataTree.DECAY_POINT_CLOUD);
@@ -566,7 +566,7 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
             sendPacket(requestPlanarRegionsListMessage);
 
             currentPlan = null;
-            
+
             footstepPlanner.clear();
             sleepBehavior.setSleepTime(5.0);
             clearedLidar.set(true);
