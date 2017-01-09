@@ -37,11 +37,13 @@ public class AnytimeFootstepPlannerOnRoughTerrainTest implements PlanningTest
    {
       double startX = 0.0;
       double startY = 0.0;
+      double cinderBlockHeight = 0.15;
       double cinderBlockSize = 0.4;
       int courseWidthXInNumberOfBlocks = 21;
       int courseLengthYInNumberOfBlocks = 6;
+      double heightVariation = 0.1;
 
-      PlanarRegionsList cinderBlockField = PlanarRegionsListExamples.generateCinderBlockField(startX, startY, cinderBlockSize, courseWidthXInNumberOfBlocks, courseLengthYInNumberOfBlocks);
+      PlanarRegionsList cinderBlockField = PlanarRegionsListExamples.generateCinderBlockField(startX, startY, cinderBlockSize, cinderBlockHeight, courseWidthXInNumberOfBlocks, courseLengthYInNumberOfBlocks, heightVariation);
 
       FramePose initialStanceFootPose = new FramePose(worldFrame);
       initialStanceFootPose.setPosition(0.0, -0.7, 0.0);
@@ -80,12 +82,14 @@ public class AnytimeFootstepPlannerOnRoughTerrainTest implements PlanningTest
    @Test(timeout = 300000)
    public void testOverCinderBlockFieldWithIncrementalKnowledgeOfTerrain()
    {
+      double cinderBlockHeight = 0.15;
       double cinderBlockSize = 0.4;
       int courseLengthYInNumberOfBlocks = 6;
+      double heightVariation = 0.1;
 
-      PlanarRegionsList cinderBlockFieldOneThird = PlanarRegionsListExamples.generateCinderBlockField(0.0, 0.0, cinderBlockSize, 7, courseLengthYInNumberOfBlocks);
-      PlanarRegionsList cinderBlockFieldTwoThirds = PlanarRegionsListExamples.generateCinderBlockField(0.0, 0.0, cinderBlockSize, 14, courseLengthYInNumberOfBlocks);
-      PlanarRegionsList cinderBlockEntireField = PlanarRegionsListExamples.generateCinderBlockField(0.0, 0.0, cinderBlockSize, 21, courseLengthYInNumberOfBlocks);
+      PlanarRegionsList cinderBlockFieldOneThird = PlanarRegionsListExamples.generateCinderBlockField(0.0, 0.0, cinderBlockHeight, cinderBlockSize, 7, courseLengthYInNumberOfBlocks, heightVariation);
+      PlanarRegionsList cinderBlockFieldTwoThirds = PlanarRegionsListExamples.generateCinderBlockField(0.0, 0.0, cinderBlockHeight, cinderBlockSize, 14, courseLengthYInNumberOfBlocks, heightVariation);
+      PlanarRegionsList cinderBlockEntireField = PlanarRegionsListExamples.generateCinderBlockField(0.0, 0.0, cinderBlockHeight, cinderBlockSize, 21, courseLengthYInNumberOfBlocks, heightVariation);
 
       FramePose initialStanceFootPose = new FramePose(worldFrame);
       initialStanceFootPose.setPosition(0.0, -0.7, 0.0);

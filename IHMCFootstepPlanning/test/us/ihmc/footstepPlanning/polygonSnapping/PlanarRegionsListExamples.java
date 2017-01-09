@@ -54,17 +54,15 @@ public class PlanarRegionsListExamples
       return planarRegionsList;
    }
    
-   public static PlanarRegionsList generateCinderBlockField(double startX, double startY, double cinderBlockSize, int courseWidthXInNumberOfBlocks, int courseLengthYInNumberOfBlocks)
+   public static PlanarRegionsList generateCinderBlockField(double startX, double startY, double cinderBlockSize, double cinderBlockHeight, int courseWidthXInNumberOfBlocks, int courseLengthYInNumberOfBlocks, double heightVariation)
    {
       PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
-      
-      double cinderBlockHeight = 0.15;
       double courseWidth = courseLengthYInNumberOfBlocks * cinderBlockSize;
       
       generator.translate(startX, startY, 0.001); // avoid graphical issue
       generator.addRectangle(0.6, courseWidth); // standing platform
       generator.translate(0.5, 0.0, 0.0); // forward to first row
-      generator.translate(0.0, -2.5 * cinderBlockSize, 0.0); // over to grid origin
+      generator.translate(0.0, -0.5 * (courseLengthYInNumberOfBlocks - 1) * cinderBlockSize, 0.0); // over to grid origin
       
       Random random = new Random(1231239L);
       for (int x = 0; x < courseWidthXInNumberOfBlocks; x++)
@@ -81,18 +79,18 @@ public class PlanarRegionsListExamples
          
          if ((x / 2) % 2 == 0)
          {
-            generator.translate(0.0, 0.0, 0.1);
+            generator.translate(0.0, 0.0, heightVariation);
          }
          else
          {
-            generator.translate(0.0, 0.0, -0.1);
+            generator.translate(0.0, 0.0, - heightVariation);
          }
             
          generator.translate(cinderBlockSize, -cinderBlockSize * courseLengthYInNumberOfBlocks, 0.0);
       }
       
       generator.identity();
-      generator.translate(9.0, 0.0, 0.001);
+      generator.translate(0.6 + courseWidthXInNumberOfBlocks * cinderBlockSize, 0.0, 0.001);
       generator.addRectangle(0.6, courseWidth);
       
       return generator.getPlanarRegionsList();

@@ -102,7 +102,7 @@ public abstract class AvatarEndToEndFootstepPlanningTest implements MultiRobotTe
          throw new RuntimeException(e);
       }
 
-      cinderBlockFieldPlanarRegions = PlanarRegionsListExamples.generateCinderBlockField(0.0, 0.0, 0.4, 5, 5);
+      cinderBlockFieldPlanarRegions = PlanarRegionsListExamples.generateCinderBlockField(0.0, 0.0, 0.5,  0.05, 5, 4, 0.0);
       PlanarRegionsListDefinedEnvironment cinderBlockFieldEnvironment = new PlanarRegionsListDefinedEnvironment(cinderBlockFieldPlanarRegions, 0.02);
 
       this.communicationBridge = new CommunicationBridge(behaviorCommunicatorServer);
@@ -177,7 +177,8 @@ public abstract class AvatarEndToEndFootstepPlanningTest implements MultiRobotTe
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
 
-      GoalDetectorBehaviorService goalDetectorBehaviorService = new ConstantGoalDetectorBehaviorService(referenceFrames, new Point3d(4.0, 0.0, 0.0),
+      Point3d goalPoint = new Point3d(3.0, 0.0, 0.0);
+      GoalDetectorBehaviorService goalDetectorBehaviorService = new ConstantGoalDetectorBehaviorService(referenceFrames, goalPoint,
                                                                                                         communicationBridge);
       AnytimePlannerStateMachineBehavior walkOverTerrainStateMachineBehavior = new AnytimePlannerStateMachineBehavior(communicationBridge, yoTime,
                                                                                                                       referenceFrames,
@@ -190,6 +191,7 @@ public abstract class AvatarEndToEndFootstepPlanningTest implements MultiRobotTe
 
       HumanoidBehaviorTypePacket requestWalkToObjectBehaviorPacket = new HumanoidBehaviorTypePacket(HumanoidBehaviorType.WALK_TO_GOAL_ANYTIME_PLANNER);
       behaviorCommunicatorClient.send(requestWalkToObjectBehaviorPacket);
+
       PrintTools.debug(this, "Requesting WalkToGoal");
 
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
@@ -197,17 +199,18 @@ public abstract class AvatarEndToEndFootstepPlanningTest implements MultiRobotTe
 
       PlanarRegionsListMessage planarRegionsListMessage = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(cinderBlockFieldPlanarRegions);
       planarRegionsListMessage.setDestination(PacketDestination.BROADCAST);
-      behaviorCommunicatorClient.send(planarRegionsListMessage);
 
-      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(20.0);
-      assertTrue(success);
+      for (int i = 0; i < 4; i++)
+      {
+         // allow 15sec for each set of 5 steps
+         behaviorCommunicatorClient.send(planarRegionsListMessage);
+         success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(15.0);
+         assertTrue(success);
+      }
 
-      behaviorCommunicatorClient.send(planarRegionsListMessage);
-      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(20.0);
-      assertTrue(success);
-
-      Point2d goalPoint = new Point2d(3.0, 0.0);
-      assertBodyIsCloseToXYLocation(goalPoint, 1.5);
+      Point2d planarGoalPoint = new Point2d(goalPoint.getX(), goalPoint.getY());
+      // TODO figure out a better assertion method, the anytime planner uses a threshold of 1.5
+      assertBodyIsCloseToXYLocation(planarGoalPoint, 1.6);
    }
 
    private void assertBodyIsCloseToXYLocation(Point2d point, double threshold)
