@@ -33,8 +33,10 @@ import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
@@ -47,8 +49,10 @@ import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations;
 import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.tools.thread.ThreadTools;
 
+import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
 import java.io.IOException;
+import java.sql.Ref;
 import java.util.Arrays;
 
 import static org.junit.Assert.assertTrue;
@@ -70,9 +74,6 @@ public abstract class AvatarEndToEndFootstepPlanningTest implements MultiRobotTe
    private PacketCommunicator behaviorCommunicatorClient;
 
    private PlanarRegionsList cinderBlockFieldPlanarRegions;
-
-   private AtlasPrimitiveActions atlasPrimitiveActions;
-   private HumanoidFloatingRootJointRobot robot;
    private YoGraphicsListRegistry yoGraphicsListRegistry;
    private HumanoidReferenceFrames referenceFrames;
    private YoVariableRegistry registry;
@@ -101,7 +102,7 @@ public abstract class AvatarEndToEndFootstepPlanningTest implements MultiRobotTe
          throw new RuntimeException(e);
       }
 
-      cinderBlockFieldPlanarRegions = PlanarRegionsListExamples.generateCinderBlockField(0.0, 0.0, 0.4, 21, 6);
+      cinderBlockFieldPlanarRegions = PlanarRegionsListExamples.generateCinderBlockField(0.0, 0.0, 0.4, 5, 5);
       PlanarRegionsListDefinedEnvironment cinderBlockFieldEnvironment = new PlanarRegionsListDefinedEnvironment(cinderBlockFieldPlanarRegions, 0.02);
 
       this.communicationBridge = new CommunicationBridge(behaviorCommunicatorServer);
@@ -115,8 +116,6 @@ public abstract class AvatarEndToEndFootstepPlanningTest implements MultiRobotTe
       yoGraphicsListRegistry = new YoGraphicsListRegistry();
       behaviorDispatcher = setupBehaviorDispatcher(fullRobotModel, communicationBridge, yoGraphicsListRegistry, behaviorCommunicatorServer, registry);
       referenceFrames = robotDataReceiver.getReferenceFrames();
-      robot = drcSimulationTestHelper.getRobot();
-      atlasPrimitiveActions = new AtlasPrimitiveActions(communicationBridge, fullRobotModel, referenceFrames, getRobotModel().getWalkingControllerParameters(), yoTime, getRobotModel(), registry);
    }
 
    private BehaviorDispatcher<HumanoidBehaviorType> setupBehaviorDispatcher(FullHumanoidRobotModel fullRobotModel, CommunicationBridge communicationBridge,
@@ -200,9 +199,25 @@ public abstract class AvatarEndToEndFootstepPlanningTest implements MultiRobotTe
       planarRegionsListMessage.setDestination(PacketDestination.BROADCAST);
       behaviorCommunicatorClient.send(planarRegionsListMessage);
 
-      PrintTools.debug(this, "Setting WalkToLocationBehavior Target");
-
-      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(15.0);
+      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(20.0);
       assertTrue(success);
+
+      behaviorCommunicatorClient.send(planarRegionsListMessage);
+      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(20.0);
+      assertTrue(success);
+
+      Point2d goalPoint = new Point2d(3.0, 0.0);
+      assertBodyIsCloseToXYLocation(goalPoint, 1.5);
+   }
+
+   private void assertBodyIsCloseToXYLocation(Point2d point, double threshold)
+   {
+      referenceFrames.updateFrames();
+      ReferenceFrame bodyFrame = referenceFrames.getABodyAttachedZUpFrame();
+      FramePoint goalPoint = new FramePoint(ReferenceFrame.getWorldFrame(), point.getX(), point.getY(), 0.0);
+      goalPoint.changeFrame(bodyFrame);
+
+      double distanceFrameBody = Math.sqrt(goalPoint.getX() * goalPoint.getX() + goalPoint.getY() * goalPoint.getY());
+      assertTrue("Robot is not within " + threshold + "m of goal", distanceFrameBody < threshold);
    }
 }
