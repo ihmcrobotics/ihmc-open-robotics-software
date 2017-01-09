@@ -5,7 +5,10 @@ import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.roughTerrainWalking.AvatarEndToEndFootstepPlanningTest;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
 
+@ContinuousIntegrationAnnotations.ContinuousIntegrationPlan(categories = IntegrationCategory.IN_DEVELOPMENT)
 public class AtlasEndToEndFootstepPlanningTest extends AvatarEndToEndFootstepPlanningTest
 {
    private final DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, DRCRobotModel.RobotTarget.SCS, false);

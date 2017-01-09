@@ -88,7 +88,7 @@ public class PlanarRegionsListExamples
             generator.translate(0.0, 0.0, -0.1);
          }
             
-         generator.translate(cinderBlockSize, -cinderBlockSize * 6, 0.0);
+         generator.translate(cinderBlockSize, -cinderBlockSize * courseLengthYInNumberOfBlocks, 0.0);
       }
       
       generator.identity();
