@@ -65,6 +65,8 @@ public class SwingOverPlanarRegionsTrajectoryExpander
    private final Vector3d waypointAdjustmentVector;
    private final Plane3d waypointAdjustmentPlane;
    private final Plane3d swingFloorPlane;
+   private final Plane3d swingStartToeFacingSwingEndPlane;
+   private final Plane3d swingEndHeelFacingSwingStartPlane;
    private final AxisAngle4d axisAngle;
    private final RigidBodyTransform rigidBodyTransform;
 
@@ -131,6 +133,8 @@ public class SwingOverPlanarRegionsTrajectoryExpander
       waypointAdjustmentVector = new Vector3d();
       waypointAdjustmentPlane = new Plane3d();
       swingFloorPlane = new Plane3d();
+      swingStartToeFacingSwingEndPlane = new Plane3d();
+      swingEndHeelFacingSwingStartPlane = new Plane3d();
       axisAngle = new AxisAngle4d();
       rigidBodyTransform = new RigidBodyTransform();
 
@@ -190,6 +194,20 @@ public class SwingOverPlanarRegionsTrajectoryExpander
       swingFloorPlane.getNormal().sub(swingStartPosition.getPoint(), swingEndPosition.getPoint());
       rigidBodyTransform.transform(swingFloorPlane.getNormal());
       swingFloorPlane.getNormal().normalize();
+      
+      swingStartToeFacingSwingEndPlane.setPoint(swingStartPosition.getPoint());
+      swingStartToeFacingSwingEndPlane.getNormal().sub(swingEndPosition.getPoint(), swingStartPosition.getPoint());
+      swingStartToeFacingSwingEndPlane.getNormal().normalize();
+      swingStartToeFacingSwingEndPlane.getNormal().scale(soleToToeLength);
+      swingStartToeFacingSwingEndPlane.getPoint().add(swingStartToeFacingSwingEndPlane.getNormal());
+      swingStartToeFacingSwingEndPlane.getNormal().normalize();
+      
+      swingEndHeelFacingSwingStartPlane.setPoint(swingEndPosition.getPoint());
+      swingEndHeelFacingSwingStartPlane.getNormal().sub(swingStartPosition.getPoint(), swingEndPosition.getPoint());
+      swingEndHeelFacingSwingStartPlane.getNormal().normalize();
+      swingEndHeelFacingSwingStartPlane.getNormal().scale(soleToToeLength);
+      swingEndHeelFacingSwingStartPlane.getPoint().add(swingEndHeelFacingSwingStartPlane.getNormal());
+      swingEndHeelFacingSwingStartPlane.getNormal().normalize();
 
       status.set(SwingOverPlanarRegionsTrajectoryExpansionStatus.SEARCHING_FOR_SOLUTION);
       numberOfTriesCounter.resetCount();
@@ -252,7 +270,9 @@ public class SwingOverPlanarRegionsTrajectoryExpander
                   {
                      updateClosestAndMostSevereIntersectionPoint(SwingOverPlanarRegionsTrajectoryCollisionType.INTERSECTION_BUT_OUTSIDE_TRAJECTORY);
 
-                     if (midGroundPoint.distance(sphereWithConvexPolygonIntersector.getClosestPointOnPolygon()) < midGroundPoint.distance(solePoseReferenceFrame.getPositionUnsafe()))
+                     if ((swingStartToeFacingSwingEndPlane.isOnOrAbove(sphereWithConvexPolygonIntersector.getClosestPointOnPolygon().getPoint())
+                           && swingEndHeelFacingSwingStartPlane.isOnOrAbove(sphereWithConvexPolygonIntersector.getClosestPointOnPolygon().getPoint()))
+                           || midGroundPoint.distance(sphereWithConvexPolygonIntersector.getClosestPointOnPolygon()) < midGroundPoint.distance(solePoseReferenceFrame.getPositionUnsafe()))
                      {
                         updateClosestAndMostSevereIntersectionPoint(SwingOverPlanarRegionsTrajectoryCollisionType.CRITICAL_INTERSECTION);
 
