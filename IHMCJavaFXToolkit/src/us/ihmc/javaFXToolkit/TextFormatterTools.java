@@ -15,7 +15,7 @@ public class TextFormatterTools
    private static final String ipAddressRegex = makePartialIPRegex();
 
    /**
-    * @return
+    * @return a TextFormatter that ensures proper formatting of an IP address.
     */
    public static TextFormatter<Change> ipAddressTextFormatter()
    {
