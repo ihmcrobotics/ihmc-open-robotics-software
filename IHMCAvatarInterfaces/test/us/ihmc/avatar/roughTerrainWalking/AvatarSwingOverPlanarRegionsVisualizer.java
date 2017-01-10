@@ -131,7 +131,9 @@ public class AvatarSwingOverPlanarRegionsVisualizer
       generator.translate(0.4, 0.0, 0.0001);
       generator.addCubeReferencedAtBottomMiddle(1.0, 1.0, 0.001);
       generator.translate(-0.15, 0.0, 0.0001);
-      generator.addCubeReferencedAtBottomMiddle(0.1, 0.1, 0.1);
+      generator.translate(0.0, 0.0, 0.25);
+      generator.addRectangle(0.1, 0.1);
+//      generator.addCubeReferencedAtBottomMiddle(0.1, 0.1, 0.1);
       generator.translate(0.52, -0.12, 0.1);
       generator.addCubeReferencedAtBottomMiddle(0.1, 0.1, 0.1);
 
