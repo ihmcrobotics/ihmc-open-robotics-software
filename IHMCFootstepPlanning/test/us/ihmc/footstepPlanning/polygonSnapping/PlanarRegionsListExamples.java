@@ -24,12 +24,18 @@ public class PlanarRegionsListExamples
 
    public static PlanarRegionsList generateStairCase()
    {
-      return generateStairCase(new Vector3d());
+      return generateStairCase(new Vector3d(), new Vector3d());
    }
 
    public static PlanarRegionsList generateStairCase(Vector3d rotationVector)
    {
+      return generateStairCase(new Vector3d(), rotationVector);
+   }
+
+   public static PlanarRegionsList generateStairCase(Vector3d translationVector, Vector3d rotationVector)
+   {
       PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
+      generator.translate(translationVector);
 
       int numberOfSteps = 5;
 
@@ -41,6 +47,7 @@ public class PlanarRegionsListExamples
       generator.addRectangle(1.2 * length * numberOfSteps, 1.2 * width);
 
       generator.identity();
+      generator.translate(translationVector);
       generator.translate(length, 0.0, 0.0);
       generator.rotateEuler(rotationVector);
       for (int i = 0; i < numberOfSteps; i++)
