@@ -132,13 +132,11 @@ public abstract class AvatarSwingOverPlanarRegionsTest implements MultiRobotTest
          swingEndPose.setPosition(footstepX, footstepY, 0.0);
          if (LOCAL_MODE)
          {
-            swingOverPlanarRegionsVisualizer.expandTrajectoryOverPlanarRegions(footPolygons.get(robotSide), stanceFootPose, swingStartPose, swingEndPose,
-                                                                               planarRegionsList);
+            swingOverPlanarRegionsVisualizer.expandTrajectoryOverPlanarRegions(stanceFootPose, swingStartPose, swingEndPose, planarRegionsList);
          }
          else
          {
-            swingOverPlanarRegionsTrajectoryExpander.expandTrajectoryOverPlanarRegions(footPolygons.get(robotSide), stanceFootPose, swingStartPose,
-                                                                                       swingEndPose, planarRegionsList);
+            swingOverPlanarRegionsTrajectoryExpander.expandTrajectoryOverPlanarRegions(stanceFootPose, swingStartPose, swingEndPose, planarRegionsList);
 
          }
 
