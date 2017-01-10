@@ -34,6 +34,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -42,6 +43,7 @@ import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigura
 import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
+import us.ihmc.simulationconstructionset.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationconstructionset.util.environments.PlanarRegionsListDefinedEnvironment;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.tools.MemoryTools;
@@ -51,9 +53,13 @@ import us.ihmc.tools.thread.ThreadTools;
 
 import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
+import javax.vecmath.Vector3d;
 import java.io.IOException;
 import java.sql.Ref;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import java.util.Random;
 
 import static org.junit.Assert.assertTrue;
 
@@ -73,7 +79,7 @@ public abstract class AvatarEndToEndFootstepPlanningTest implements MultiRobotTe
    private PacketCommunicator behaviorCommunicatorServer;
    private PacketCommunicator behaviorCommunicatorClient;
 
-   private PlanarRegionsList cinderBlockFieldPlanarRegions;
+   private PacketRouter<PacketDestination> networkProcessor;
    private YoGraphicsListRegistry yoGraphicsListRegistry;
    private HumanoidReferenceFrames referenceFrames;
    private YoVariableRegistry registry;
@@ -83,15 +89,13 @@ public abstract class AvatarEndToEndFootstepPlanningTest implements MultiRobotTe
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
 
-      PacketRouter<PacketDestination> networkProcessor = new PacketRouter<>(PacketDestination.class);
+      networkProcessor = new PacketRouter<>(PacketDestination.class);
       registry = new YoVariableRegistry(getClass().getSimpleName());
       this.yoTime = new DoubleYoVariable("yoTime", registry);
 
-      behaviorCommunicatorClient = PacketCommunicator.createIntraprocessPacketCommunicator(
-            NetworkPorts.BEHAVIOUR_MODULE_PORT, new IHMCCommunicationKryoNetClassList());
+      behaviorCommunicatorClient = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.BEHAVIOUR_MODULE_PORT, new IHMCCommunicationKryoNetClassList());
 
-      behaviorCommunicatorServer = PacketCommunicator.createIntraprocessPacketCommunicator(
-            NetworkPorts.BEHAVIOUR_MODULE_PORT, new IHMCCommunicationKryoNetClassList());
+      behaviorCommunicatorServer = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.BEHAVIOUR_MODULE_PORT, new IHMCCommunicationKryoNetClassList());
       try
       {
          behaviorCommunicatorClient.connect();
@@ -102,14 +106,7 @@ public abstract class AvatarEndToEndFootstepPlanningTest implements MultiRobotTe
          throw new RuntimeException(e);
       }
 
-      cinderBlockFieldPlanarRegions = PlanarRegionsListExamples.generateCinderBlockField(0.0, 0.0, 0.5,  0.05, 5, 4, 0.0);
-      PlanarRegionsListDefinedEnvironment cinderBlockFieldEnvironment = new PlanarRegionsListDefinedEnvironment(cinderBlockFieldPlanarRegions, 0.02);
-
       this.communicationBridge = new CommunicationBridge(behaviorCommunicatorServer);
-      drcSimulationTestHelper = new DRCSimulationTestHelper(cinderBlockFieldEnvironment, getSimpleRobotName(),
-                                                            DRCObstacleCourseStartingLocation.DEFAULT, simulationTestingParameters, getRobotModel());
-
-      networkProcessor.attachPacketCommunicator(PacketDestination.CONTROLLER, drcSimulationTestHelper.getControllerCommunicator());
       networkProcessor.attachPacketCommunicator(PacketDestination.BEHAVIOR_MODULE, behaviorCommunicatorClient);
 
       fullRobotModel = getRobotModel().createFullRobotModel();
@@ -134,19 +131,32 @@ public abstract class AvatarEndToEndFootstepPlanningTest implements MultiRobotTe
       YoVariableServer yoVariableServer = null;
       yoGraphicsListRegistry.setYoGraphicsUpdatedRemotely(false);
 
-      BehaviorDispatcher<HumanoidBehaviorType> ret = new BehaviorDispatcher<>(yoTime, robotDataReceiver, desiredBehaviorControlSubscriber, desiredBehaviorSubscriber,
-                                                                              communicationBridge, yoVariableServer, HumanoidBehaviorType.class, HumanoidBehaviorType.STOP, registry, yoGraphicsListRegistry);
+      BehaviorDispatcher<HumanoidBehaviorType> ret = new BehaviorDispatcher<>(yoTime, robotDataReceiver, desiredBehaviorControlSubscriber,
+                                                                              desiredBehaviorSubscriber, communicationBridge, yoVariableServer,
+                                                                              HumanoidBehaviorType.class, HumanoidBehaviorType.STOP, registry,
+                                                                              yoGraphicsListRegistry);
 
       return ret;
+   }
+
+   private void setUpSimulationTestHelper(CommonAvatarEnvironmentInterface environment, DRCObstacleCourseStartingLocation startingLocation)
+   {
+      if(drcSimulationTestHelper != null)
+      {
+         drcSimulationTestHelper.destroySimulation();
+      }
+
+      drcSimulationTestHelper = new DRCSimulationTestHelper(environment, getSimpleRobotName(), startingLocation, simulationTestingParameters, getRobotModel());
+      networkProcessor.attachPacketCommunicator(PacketDestination.CONTROLLER, drcSimulationTestHelper.getControllerCommunicator());
    }
 
    @After
    public void destroySimulationAndRecycleMemory()
    {
-      if (simulationTestingParameters.getKeepSCSUp())
-      {
+//      if (simulationTestingParameters.getKeepSCSUp())
+//      {
          ThreadTools.sleepForever();
-      }
+//      }
 
       behaviorCommunicatorClient.close();
       behaviorCommunicatorServer.close();
@@ -170,9 +180,13 @@ public abstract class AvatarEndToEndFootstepPlanningTest implements MultiRobotTe
 
    @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 300000)
-   public void testAnytimePlannerOverRoughTerrainBehavior() throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
+   public void testAnytimePlannerBehaviorOverRoughTerrain() throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+
+      PlanarRegionsList cinderBlockFieldPlanarRegions = PlanarRegionsListExamples.generateCinderBlockField(0.0, 0.0, 0.5, 0.05, 5, 4, 0.0);
+      PlanarRegionsListDefinedEnvironment cinderBlockFieldEnvironment = new PlanarRegionsListDefinedEnvironment(cinderBlockFieldPlanarRegions, 0.02);
+      setUpSimulationTestHelper(cinderBlockFieldEnvironment, DRCObstacleCourseStartingLocation.DEFAULT);
 
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
@@ -192,8 +206,6 @@ public abstract class AvatarEndToEndFootstepPlanningTest implements MultiRobotTe
       HumanoidBehaviorTypePacket requestWalkToObjectBehaviorPacket = new HumanoidBehaviorTypePacket(HumanoidBehaviorType.WALK_TO_GOAL_ANYTIME_PLANNER);
       behaviorCommunicatorClient.send(requestWalkToObjectBehaviorPacket);
 
-      PrintTools.debug(this, "Requesting WalkToGoal");
-
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
 
@@ -202,15 +214,81 @@ public abstract class AvatarEndToEndFootstepPlanningTest implements MultiRobotTe
 
       for (int i = 0; i < 4; i++)
       {
-         // allow 15sec for each set of 5 steps
+         // allow 20sec for each set of 5 steps
          behaviorCommunicatorClient.send(planarRegionsListMessage);
-         success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(15.0);
+         success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(20.0);
          assertTrue(success);
       }
 
       Point2d planarGoalPoint = new Point2d(goalPoint.getX(), goalPoint.getY());
-      // TODO figure out a better assertion method, the anytime planner uses a threshold of 1.5
-      assertBodyIsCloseToXYLocation(planarGoalPoint, 1.6);
+      // TODO figure out a better assertion method, the anytime planner uses a threshold of 0.5
+      assertBodyIsCloseToXYLocation(planarGoalPoint, 0.6);
+   }
+
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @Test(timeout = 300000)
+   public void testAnytimeBehaviorOverIncrementalTerrain() throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
+   {
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+
+      PlanarRegionsList stairsUp = PlanarRegionsListExamples.generateStairCase();
+      PlanarRegionsList stairsDown = PlanarRegionsListExamples.generateStairCase(new Vector3d(3.8, 0.0, 0.0), new Vector3d(Math.PI, Math.PI, 0.0));
+      PlanarRegionsList completeStairCase = new PlanarRegionsList();
+
+      for(int i = 0; i < stairsUp.getNumberOfPlanarRegions(); i++)
+      {
+         completeStairCase.addPlanarRegion(stairsUp.getPlanarRegion(i));
+         completeStairCase.addPlanarRegion(stairsDown.getPlanarRegion(i));
+      }
+
+      PlanarRegionsListDefinedEnvironment stairCaseEnvironment = new PlanarRegionsListDefinedEnvironment(completeStairCase, 0.02);
+      setUpSimulationTestHelper(stairCaseEnvironment, DRCObstacleCourseStartingLocation.DEFAULT);
+
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      assertTrue(success);
+
+      Point3d goalPoint = new Point3d(4.0, 0.0, 0.0);
+      GoalDetectorBehaviorService goalDetectorBehaviorService = new ConstantGoalDetectorBehaviorService(referenceFrames, goalPoint,
+                                                                                                        communicationBridge);
+      AnytimePlannerStateMachineBehavior walkOverTerrainStateMachineBehavior = new AnytimePlannerStateMachineBehavior(communicationBridge, yoTime,
+                                                                                                                      referenceFrames,
+                                                                                                                      getRobotModel().getLogModelProvider(),
+                                                                                                                      fullRobotModel, getRobotModel(),
+                                                                                                                      goalDetectorBehaviorService);
+
+      behaviorDispatcher.addBehavior(HumanoidBehaviorType.WALK_TO_GOAL_ANYTIME_PLANNER, walkOverTerrainStateMachineBehavior);
+      behaviorDispatcher.start();
+
+      HumanoidBehaviorTypePacket requestWalkToObjectBehaviorPacket = new HumanoidBehaviorTypePacket(HumanoidBehaviorType.WALK_TO_GOAL_ANYTIME_PLANNER);
+      behaviorCommunicatorClient.send(requestWalkToObjectBehaviorPacket);
+
+      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      assertTrue(success);
+
+      PlanarRegionsListMessage stairsUpPlanarRegionsListMessage = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(stairsUp);
+      stairsUpPlanarRegionsListMessage.setDestination(PacketDestination.BROADCAST);
+      PlanarRegionsListMessage completeStairCasePlanarRegionsListMessage = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(completeStairCase);
+      completeStairCasePlanarRegionsListMessage.setDestination(PacketDestination.BROADCAST);
+
+      for (int i = 0; i < 6; i++)
+      {
+         // allow 20sec for each set of 5 steps
+         if(i < 2)
+         {
+            behaviorCommunicatorClient.send(stairsUpPlanarRegionsListMessage);
+         }
+         else
+         {
+            behaviorCommunicatorClient.send(completeStairCasePlanarRegionsListMessage);
+         }
+
+         success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(20.0);
+         assertTrue(success);
+      }
+
+      Point2d planarGoalPoint = new Point2d(goalPoint.getX(), goalPoint.getY());
+      // TODO figure out a better assertion method, the anytime planner uses a threshold of 0.5
+      assertBodyIsCloseToXYLocation(planarGoalPoint, 0.6);
    }
 
    private void assertBodyIsCloseToXYLocation(Point2d point, double threshold)

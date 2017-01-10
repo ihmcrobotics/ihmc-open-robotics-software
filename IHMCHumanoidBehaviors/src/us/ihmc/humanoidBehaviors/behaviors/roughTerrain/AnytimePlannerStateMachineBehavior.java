@@ -115,7 +115,7 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
    {
       super("AnytimePlanner", AnytimePlanningState.class, yoTime, communicationBridge);
 
-      reachedGoalThreshold.set(1.5);
+      reachedGoalThreshold.set(0.5);
 
       footstepPlanningParameters = new BipedalFootstepPlannerParameters(registry);
       FootstepPlannerForBehaviorsHelper.setPlannerParametersForAnytimePlannerAndPlannerToolbox(footstepPlanningParameters);
