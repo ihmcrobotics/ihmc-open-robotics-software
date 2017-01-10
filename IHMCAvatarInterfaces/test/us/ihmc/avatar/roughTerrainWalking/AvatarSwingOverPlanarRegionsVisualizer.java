@@ -26,7 +26,6 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
@@ -129,8 +128,9 @@ public class AvatarSwingOverPlanarRegionsVisualizer
       scs.setCameraFix(0.4, 0.0, 0.0);
 
       PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
-      generator.translate(0.4, 0.12, 0.0001);
+      generator.translate(0.4, 0.0, 0.0001);
       generator.addCubeReferencedAtBottomMiddle(1.0, 1.0, 0.001);
+      generator.translate(-0.15, 0.0, 0.0001);
       generator.addCubeReferencedAtBottomMiddle(0.1, 0.1, 0.1);
       generator.translate(0.52, -0.12, 0.1);
       generator.addCubeReferencedAtBottomMiddle(0.1, 0.1, 0.1);
@@ -145,21 +145,21 @@ public class AvatarSwingOverPlanarRegionsVisualizer
       swingStartPose.setPosition(0.0, 0.0, 0.0);
       swingEndPose.setPosition(0.8, 0.0, 0.0);
       updateFootGraphics();
-      swingOverPlanarRegionsTrajectoryExpander.expandTrajectoryOverPlanarRegions(footPolygon, stanceFootPose, swingStartPose, swingEndPose, terrain);
+      swingOverPlanarRegionsTrajectoryExpander.expandTrajectoryOverPlanarRegions(stanceFootPose, swingStartPose, swingEndPose, terrain);
 
       scs.startOnAThread();
       scs.cropBuffer();
       ThreadTools.sleepForever();
    }
 
-   public void expandTrajectoryOverPlanarRegions(ConvexPolygon2d footPolygonSoleFrame, FramePose stanceFootPose, FramePose swingStartPose,
-                                                 FramePose swingEndPose, PlanarRegionsList planarRegionsList)
+   public void expandTrajectoryOverPlanarRegions(FramePose stanceFootPose, FramePose swingStartPose, FramePose swingEndPose,
+                                                 PlanarRegionsList planarRegionsList)
    {
       this.stanceFootPose.set(stanceFootPose);
       this.swingStartPose.set(swingStartPose);
       this.swingEndPose.set(swingEndPose);
       updateFootGraphics();
-      swingOverPlanarRegionsTrajectoryExpander.expandTrajectoryOverPlanarRegions(footPolygon, stanceFootPose, swingStartPose, swingEndPose, planarRegionsList);
+      swingOverPlanarRegionsTrajectoryExpander.expandTrajectoryOverPlanarRegions(stanceFootPose, swingStartPose, swingEndPose, planarRegionsList);
    }
 
    public SwingOverPlanarRegionsTrajectoryExpander getSwingOverPlanarRegionsTrajectoryExpander()
