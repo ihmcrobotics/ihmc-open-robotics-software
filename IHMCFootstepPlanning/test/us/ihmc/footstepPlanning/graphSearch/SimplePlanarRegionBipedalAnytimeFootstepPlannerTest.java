@@ -161,10 +161,12 @@ public class SimplePlanarRegionBipedalAnytimeFootstepPlannerTest
       double startX = 0.0;
       double startY = 0.0;
       double cinderBlockSize = 0.4;
+      double cinderBlockHeight = 0.15;
       int courseWidthXInNumberOfBlocks = 21;
       int courseLengthYInNumberOfBlocks = 6;
-      PlanarRegionsList planarRegionsListOne = PlanarRegionsListExamples.generateCinderBlockField(startX, startY, cinderBlockSize, courseWidthXInNumberOfBlocks,
-                                                                                                  courseLengthYInNumberOfBlocks);
+      double heightVariation = 0.1;
+      PlanarRegionsList planarRegionsListOne = PlanarRegionsListExamples.generateCinderBlockField(startX, startY, cinderBlockSize, cinderBlockHeight, courseWidthXInNumberOfBlocks,
+                                                                                                  courseLengthYInNumberOfBlocks, heightVariation);
       planner.setPlanarRegions(planarRegionsListOne);
    }
    
