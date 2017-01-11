@@ -18,6 +18,11 @@ public class Pose implements GeometryObject<Pose>
    private final TransformablePoint3d position;
    private final TransformableQuat4d orientation;
 
+   public Pose(Pose pose)
+   {
+      this(pose.position, pose.orientation);
+   }
+
    public Pose()
    {
       this.position = new TransformablePoint3d();
@@ -36,17 +41,20 @@ public class Pose implements GeometryObject<Pose>
       this.orientation = new TransformableQuat4d(orientation);
    }
    
+   public Pose(RigidBodyTransform transform)
+   {
+      position = new TransformablePoint3d();
+      orientation = new TransformableQuat4d();
+      
+      setPose(transform);
+   }
+
    public Pose(TransformablePoint3d position, TransformableQuat4d orientation)
    {
       this.position = new TransformablePoint3d(position);
       this.orientation = new TransformableQuat4d(orientation);
    }
 
-   public Pose(Pose pose)
-   {
-      this(pose.position, pose.orientation);
-   }
-   
    public void setX(double x)
    {
       position.setX(x);
@@ -211,6 +219,11 @@ public class Pose implements GeometryObject<Pose>
       transformToPack.set(orientation, position);
    }
    
+   public TransformablePoint3d getPositionUnsafe()
+   {
+      return position;
+   }
+   
    public void getPosition(Tuple3d tupleToPack)
    {
       tupleToPack.set(position); 
@@ -244,6 +257,11 @@ public class Pose implements GeometryObject<Pose>
    public void setOrientation(AxisAngle4d axisAngle4d)
    {
       this.orientation.setOrientation(axisAngle4d);
+   }
+   
+   public TransformableQuat4d getOrientationUnsafe()
+   {
+      return orientation;
    }
 
    public void getOrientation(Matrix3d matrixToPack)
