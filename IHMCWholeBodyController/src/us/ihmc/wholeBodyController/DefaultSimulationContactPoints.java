@@ -12,7 +12,7 @@ import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
-public class DefaultSimulationContactPoints implements SimulationContactPoints
+public class DefaultSimulationContactPoints implements SimulationFootContactPoints
 {
    @Override
    public Map<String, List<Tuple3d>> getContactPoints(double footLength, double footWidth, double toeWidth, DRCRobotJointMap jointMap,

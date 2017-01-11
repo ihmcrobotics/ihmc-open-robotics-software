@@ -8,7 +8,7 @@ import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.tools.continuousIntegration.IntegrationCategory;
 import us.ihmc.wholeBodyController.AdditionalSimulationContactPoints;
-import us.ihmc.wholeBodyController.SimulationContactPoints;
+import us.ihmc.wholeBodyController.SimulationFootContactPoints;
 
 @ContinuousIntegrationPlan(categories = {IntegrationCategory.SLOW, IntegrationCategory.VIDEO})
 public class AtlasObstacleCourseTrialsTerrainTest extends DRCObstacleCourseTrialsTerrainTest
@@ -23,7 +23,7 @@ public class AtlasObstacleCourseTrialsTerrainTest extends DRCObstacleCourseTrial
    @Override
    protected DRCRobotModel getRobotModelWithAdditionalFootContactPoints()
    {
-      SimulationContactPoints simulationContactPoints = new AdditionalSimulationContactPoints(5, 3, true, false);
+      SimulationFootContactPoints simulationContactPoints = new AdditionalSimulationContactPoints(5, 3, true, false);
       AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, DRCRobotModel.RobotTarget.SCS, false, simulationContactPoints);
       return robotModel;
    }

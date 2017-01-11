@@ -12,7 +12,7 @@ import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
-public class AdditionalSimulationContactPoints implements SimulationContactPoints
+public class AdditionalSimulationContactPoints implements SimulationFootContactPoints
 {
    private final int nContactPointsX;
    private final int nContactPointsY;
