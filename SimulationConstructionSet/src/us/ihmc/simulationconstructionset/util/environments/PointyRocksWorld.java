@@ -85,7 +85,7 @@ public class PointyRocksWorld implements CommonAvatarEnvironmentInterface
       double step = 0.5;
 
       Vector2d position = new Vector2d(length/2.0 + step/2.0, 0.15);
-      Vector2d dimensions = new Vector2d(0.02, 0.02);
+      Vector2d dimensions = new Vector2d(0.04, 0.04);
 
       addBlock(0.0, position, dimensions);
       stepLocations.add(new FramePoint(worldFrame, position.getX(), position.getY(), 0.0));
