@@ -57,7 +57,7 @@ public class AdditionalSimulationContactPoints implements SimulationContactPoint
 
                double x = (ix - 1) * dx - xOffset;
                double y = (iy - 1) * dy - yOffset;
-               double z = 0.005 * ((xOffset - Math.abs(x))/xOffset + (yOffset - Math.abs(y))/yOffset);
+               double z = 0.01 * ((xOffset - Math.abs(x))/xOffset + (yOffset - Math.abs(y))/yOffset);
 
                Point3d contactPoint = new Point3d(x, y, z);
                RigidBodyTransform transformToParentJointFrame = soleToAnkleFrameTransforms.get(robotSide);
