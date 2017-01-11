@@ -124,7 +124,7 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
    public AnytimePlannerStateMachineBehavior(CommunicationBridge communicationBridge, DoubleYoVariable yoTime, HumanoidReferenceFrames referenceFrames,
                                              LogModelProvider logModelProvider, FullHumanoidRobotModel fullRobotModel,
                                              WholeBodyControllerParameters wholeBodyControllerParameters, YoGraphicsListRegistry yoGraphicsListRegistry,
-                                             GoalDetectorBehaviorService goalDetectorBehaviorService)
+                                             GoalDetectorBehaviorService goalDetectorBehaviorService, boolean createYoVariableServerForPlannerVisualizer)
    {
       super("AnytimePlanner", AnytimePlanningState.class, yoTime, communicationBridge);
 
@@ -160,7 +160,8 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
          }
       };
 
-      createAndAttachYoVariableServerListenerToPlanner(logModelProvider, fullRobotModel);
+      if(createYoVariableServerForPlannerVisualizer)
+         createAndAttachYoVariableServerListenerToPlanner(logModelProvider, fullRobotModel);
 
       swingTime.set(0.5);
       transferTime.set(0.3);

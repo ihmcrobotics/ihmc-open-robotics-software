@@ -48,6 +48,7 @@ import us.ihmc.simulationconstructionset.util.environments.PlanarRegionsListDefi
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationTools;
 import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.tools.thread.ThreadTools;
 
@@ -65,6 +66,7 @@ import static org.junit.Assert.assertTrue;
 
 public abstract class AvatarEndToEndFootstepPlanningTest implements MultiRobotTestInterface
 {
+   private static final boolean LOCAL_MODE = !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
 
    private DRCSimulationTestHelper drcSimulationTestHelper;
@@ -194,11 +196,12 @@ public abstract class AvatarEndToEndFootstepPlanningTest implements MultiRobotTe
       Point3d goalPoint = new Point3d(3.0, 0.0, 0.0);
       GoalDetectorBehaviorService goalDetectorBehaviorService = new ConstantGoalDetectorBehaviorService(referenceFrames, goalPoint,
                                                                                                         communicationBridge);
+      boolean createYoVariableServerForPlannerVisualizer = LOCAL_MODE;
       AnytimePlannerStateMachineBehavior walkOverTerrainStateMachineBehavior = new AnytimePlannerStateMachineBehavior(communicationBridge, yoTime,
                                                                                                                       referenceFrames,
                                                                                                                       getRobotModel().getLogModelProvider(),
                                                                                                                       fullRobotModel, getRobotModel(),
-                                                                                                                      yoGraphicsListRegistry, goalDetectorBehaviorService);
+                                                                                                                      yoGraphicsListRegistry, goalDetectorBehaviorService, createYoVariableServerForPlannerVisualizer);
 
       behaviorDispatcher.addBehavior(HumanoidBehaviorType.WALK_TO_GOAL_ANYTIME_PLANNER, walkOverTerrainStateMachineBehavior);
       behaviorDispatcher.start();
@@ -250,11 +253,13 @@ public abstract class AvatarEndToEndFootstepPlanningTest implements MultiRobotTe
       Point3d goalPoint = new Point3d(4.0, 0.0, 0.0);
       GoalDetectorBehaviorService goalDetectorBehaviorService = new ConstantGoalDetectorBehaviorService(referenceFrames, goalPoint,
                                                                                                         communicationBridge);
+      boolean createYoVariableServerForPlannerVisualizer = LOCAL_MODE;
       AnytimePlannerStateMachineBehavior walkOverTerrainStateMachineBehavior = new AnytimePlannerStateMachineBehavior(communicationBridge, yoTime,
                                                                                                                       referenceFrames,
                                                                                                                       getRobotModel().getLogModelProvider(),
                                                                                                                       fullRobotModel, getRobotModel(),
-                                                                                                                      yoGraphicsListRegistry, goalDetectorBehaviorService);
+                                                                                                                      yoGraphicsListRegistry, goalDetectorBehaviorService,
+                                                                                                                      createYoVariableServerForPlannerVisualizer);
 
       behaviorDispatcher.addBehavior(HumanoidBehaviorType.WALK_TO_GOAL_ANYTIME_PLANNER, walkOverTerrainStateMachineBehavior);
       behaviorDispatcher.start();
