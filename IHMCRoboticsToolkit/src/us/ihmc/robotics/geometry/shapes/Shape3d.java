@@ -101,8 +101,14 @@ public abstract class Shape3d<S extends Shape3d<S>> implements GeometryObject<S>
       transformToShapeFrame(pointToCheck);
       boolean isInside = checkIfInsideShapeFrame(pointToCheck, closestPointOnSurfaceToPack, normalToPack);
       transformFromShapeFrame(pointToCheck);
-      transformFromShapeFrame(closestPointOnSurfaceToPack);
-      transformFromShapeFrame(normalToPack);
+      if (closestPointOnSurfaceToPack != null)
+      {
+         transformFromShapeFrame(closestPointOnSurfaceToPack);
+      }
+      if (normalToPack != null)
+      {
+         transformFromShapeFrame(normalToPack);
+      }
       return isInside;
    }
    
