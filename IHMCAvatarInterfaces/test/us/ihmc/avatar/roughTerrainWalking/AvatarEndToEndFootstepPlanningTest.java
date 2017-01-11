@@ -153,10 +153,10 @@ public abstract class AvatarEndToEndFootstepPlanningTest implements MultiRobotTe
    @After
    public void destroySimulationAndRecycleMemory()
    {
-//      if (simulationTestingParameters.getKeepSCSUp())
-//      {
+      if (simulationTestingParameters.getKeepSCSUp())
+      {
          ThreadTools.sleepForever();
-//      }
+      }
 
       behaviorCommunicatorClient.close();
       behaviorCommunicatorServer.close();
@@ -198,7 +198,7 @@ public abstract class AvatarEndToEndFootstepPlanningTest implements MultiRobotTe
                                                                                                                       referenceFrames,
                                                                                                                       getRobotModel().getLogModelProvider(),
                                                                                                                       fullRobotModel, getRobotModel(),
-                                                                                                                      yoGraphicsListRegistry);
+                                                                                                                      yoGraphicsListRegistry, goalDetectorBehaviorService);
 
       behaviorDispatcher.addBehavior(HumanoidBehaviorType.WALK_TO_GOAL_ANYTIME_PLANNER, walkOverTerrainStateMachineBehavior);
       behaviorDispatcher.start();
@@ -254,7 +254,7 @@ public abstract class AvatarEndToEndFootstepPlanningTest implements MultiRobotTe
                                                                                                                       referenceFrames,
                                                                                                                       getRobotModel().getLogModelProvider(),
                                                                                                                       fullRobotModel, getRobotModel(),
-                                                                                                                      yoGraphicsListRegistry);
+                                                                                                                      yoGraphicsListRegistry, goalDetectorBehaviorService);
 
       behaviorDispatcher.addBehavior(HumanoidBehaviorType.WALK_TO_GOAL_ANYTIME_PLANNER, walkOverTerrainStateMachineBehavior);
       behaviorDispatcher.start();
