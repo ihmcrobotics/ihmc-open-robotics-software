@@ -253,7 +253,7 @@ public abstract class HumanoidPointyRocksEnvironmentContactsTest implements Mult
             return location;
          }
       };
-      DRCRobotModel robotModel = getRobotModel(30, 15, onlyEdgeContacts);
+      DRCRobotModel robotModel = getRobotModel(15, 8, onlyEdgeContacts);
       drcSimulationTestHelper = new DRCSimulationTestHelper(environment, className, startingLocation, simulationTestingParameters, robotModel);
       drcSimulationTestHelper.getSimulationConstructionSet().hideAllDynamicGraphicObjects();
 
