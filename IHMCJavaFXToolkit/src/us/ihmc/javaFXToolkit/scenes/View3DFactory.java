@@ -276,6 +276,19 @@ public class View3DFactory
 
    /**
     * <p> Only available for sub-scene creation. </p>
+    * Wrap the sub-scene in a {@link Pane}, bind its size properties to the Pane, and returns it.
+    * It is the preferred option when creating a UI with several elements.
+    * @return the the Pane in which the sub-scene is wrapped.
+    */
+   public Pane getSubSceneWrappedInsidePane()
+   {
+      Pane pane = new Pane(subScene);
+      bindSubSceneSizeToPaneSize(pane);
+      return pane;
+   }
+
+   /**
+    * <p> Only available for sub-scene creation. </p>
     * Adds the created sub-scene to the pane's children and binds the sub-scene size to the pane's size.
     * @param pane the pane the sub-scene is to be attached to.
     */
