@@ -123,11 +123,12 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
 
    public AnytimePlannerStateMachineBehavior(CommunicationBridge communicationBridge, DoubleYoVariable yoTime, HumanoidReferenceFrames referenceFrames,
                                              LogModelProvider logModelProvider, FullHumanoidRobotModel fullRobotModel,
-                                             WholeBodyControllerParameters wholeBodyControllerParameters, YoGraphicsListRegistry yoGraphicsListRegistry)
+                                             WholeBodyControllerParameters wholeBodyControllerParameters, YoGraphicsListRegistry yoGraphicsListRegistry,
+                                             GoalDetectorBehaviorService goalDetectorBehaviorService)
    {
       super("AnytimePlanner", AnytimePlanningState.class, yoTime, communicationBridge);
 
-      reachedGoalThreshold.set(1.5);
+      reachedGoalThreshold.set(0.5);
 
       footstepPlanningParameters = new BipedalFootstepPlannerParameters(registry);
       FootstepPlannerForBehaviorsHelper.setPlannerParametersForAnytimePlannerAndPlannerToolbox(footstepPlanningParameters);
@@ -142,36 +143,6 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
       this.yoTime = yoTime;
       maxNumberOfStepsToTake.set(1);
       this.referenceFrames = referenceFrames;
-
-      GoalDetectorBehaviorService goalDetectorBehaviorService;
-      switch(GOAL_DETECTOR_TYPE)
-      {
-      case FIDUCIAL:
-         FiducialDetectorBehaviorService fiducialDetectorBehaviorService = new FiducialDetectorBehaviorService(communicationBridge, null);
-         fiducialDetectorBehaviorService.setTargetIDToLocate(50);
-         fiducialDetectorBehaviorService.setExpectedFiducialSize(0.22);
-         goalDetectorBehaviorService = fiducialDetectorBehaviorService;
-         break;
-
-      case HARD_CODED:
-      {
-         goalDetectorBehaviorService = new ConstantGoalDetectorBehaviorService(referenceFrames, new Point3d(4.0, 0.0, 0.0), communicationBridge);
-         break;
-      }
-      case VALVE:
-         try
-         {
-            goalDetectorBehaviorService = new ObjectDetectorBehaviorService(communicationBridge, null);
-            break;
-         }
-         catch(Exception e)
-         {
-            e.printStackTrace();
-            System.err.println("Cannot create valve detector service!");
-         }
-      default:
-         throw new RuntimeException("Cannot create detector " + GOAL_DETECTOR_TYPE);
-      }
 
       locateGoalBehavior = new LocateGoalBehavior(communicationBridge, goalDetectorBehaviorService);
       requestAndWaitForPlanarRegionsListBehavior = new RequestAndWaitForPlanarRegionsListBehavior(communicationBridge);
@@ -191,7 +162,7 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
 
       createAndAttachYoVariableServerListenerToPlanner(logModelProvider, fullRobotModel);
 
-      swingTime.set(1.5);
+      swingTime.set(0.5);
       transferTime.set(0.3);
       stepsBeforeClearingLidar.set(5);
 
@@ -199,7 +170,6 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
       this.registry.addChild(sleepBehavior.getYoVariableRegistry());
       this.registry.addChild(checkForBestPlanBehavior.getYoVariableRegistry());
       this.registry.addChild(sendOverFootstepsAndUpdatePlannerBehavior.getYoVariableRegistry());
-      //      this.registry.addChild(reachedGoalBehavior.getYoVariableRegistry());
 
       attachNetworkListeningQueue(footstepStatusQueue, FootstepStatus.class);
       attachNetworkListeningQueue(planarRegionsListQueue, PlanarRegionsListMessage.class);
