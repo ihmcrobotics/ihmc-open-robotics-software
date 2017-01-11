@@ -17,6 +17,7 @@ public enum DRCObstacleCourseStartingLocation implements DRCStartingLocation
    RAMP_TOP,
    NARROW_DOORWAY,
    BARRIERS,
+   BARRIERS_FURTHER_IN,
    SMALL_PLATFORM,
    MEDIUM_PLATFORM,
    ON_MEDIUM_PLATFORM,
@@ -43,6 +44,7 @@ public enum DRCObstacleCourseStartingLocation implements DRCStartingLocation
    static
    {
       addMapping(DRCObstacleCourseStartingLocation.BARRIERS, new SquaredUpDRCDemo01Robot(0.0, 1.88, Math.toRadians(-135.0), 0));
+      addMapping(DRCObstacleCourseStartingLocation.BARRIERS_FURTHER_IN, new SquaredUpDRCDemo01Robot(0.0, 4.5, Math.toRadians(-135.0), 0));
       addMapping(DRCObstacleCourseStartingLocation.DEFAULT, new OffsetAndYawRobotInitialSetup());
       addMapping(DRCObstacleCourseStartingLocation.OFFSET_ONE_METER_X_AND_Y, new SquaredUpDRCDemo01Robot(1.0, 1.0));
       addMapping(DRCObstacleCourseStartingLocation.OFFSET_ONE_METER_X_AND_Y_ROTATED_PI, new OffsetAndYawRobotInitialSetup(1.0, 1.0, 0, Math.PI));
@@ -71,7 +73,7 @@ public enum DRCObstacleCourseStartingLocation implements DRCStartingLocation
       addMapping(DRCObstacleCourseStartingLocation.SINGLE_CYLINDERBLOCKS, new SquaredUpDRCDemo01Robot(0.0, 6.0, Math.toRadians(-42.6959), Math.toRadians(90.0)));
       addMapping(DRCObstacleCourseStartingLocation.TOP_OF_SLOPES, new SquaredUpDRCDemo01Robot(0.155, 4.60, Math.toRadians(45), 0.0));
       addMapping(DRCObstacleCourseStartingLocation.DEFAULT_BUT_ALMOST_PI, new SquaredUpDRCDemo01Robot(0.0, 0.0, Math.toRadians(170.0), 0));
-   };
+   }
 
    private static void addMapping(DRCObstacleCourseStartingLocation drcDemo01StartingLocation, OffsetAndYawRobotInitialSetup robotInitialSetup)
    {

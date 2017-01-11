@@ -198,7 +198,7 @@ public abstract class AvatarEndToEndFootstepPlanningTest implements MultiRobotTe
                                                                                                                       referenceFrames,
                                                                                                                       getRobotModel().getLogModelProvider(),
                                                                                                                       fullRobotModel, getRobotModel(),
-                                                                                                                      goalDetectorBehaviorService);
+                                                                                                                      yoGraphicsListRegistry);
 
       behaviorDispatcher.addBehavior(HumanoidBehaviorType.WALK_TO_GOAL_ANYTIME_PLANNER, walkOverTerrainStateMachineBehavior);
       behaviorDispatcher.start();
@@ -254,7 +254,7 @@ public abstract class AvatarEndToEndFootstepPlanningTest implements MultiRobotTe
                                                                                                                       referenceFrames,
                                                                                                                       getRobotModel().getLogModelProvider(),
                                                                                                                       fullRobotModel, getRobotModel(),
-                                                                                                                      goalDetectorBehaviorService);
+                                                                                                                      yoGraphicsListRegistry);
 
       behaviorDispatcher.addBehavior(HumanoidBehaviorType.WALK_TO_GOAL_ANYTIME_PLANNER, walkOverTerrainStateMachineBehavior);
       behaviorDispatcher.start();
