@@ -226,7 +226,7 @@ public class View3DFactory
     * Add a set of nodes to the 3D view.
     * @param nodes the nodes to display.
     */
-   public void addNodesToView(Iterable<Node> nodes)
+   public void addNodesToView(Iterable<? extends Node> nodes)
    {
       nodes.forEach(this::addNodeToView);
    }
