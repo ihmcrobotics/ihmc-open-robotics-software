@@ -72,7 +72,7 @@ import us.ihmc.valkyrie.sensors.ValkyrieSensorSuiteManager;
 import us.ihmc.wholeBodyController.DRCHandType;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
-import us.ihmc.wholeBodyController.SimulationContactPoints;
+import us.ihmc.wholeBodyController.SimulationFootContactPoints;
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizerInterface;
 import us.ihmc.wholeBodyController.parameters.DefaultArmConfigurations;
 
@@ -108,7 +108,7 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
 
    private boolean enableJointDamping = true;
 
-   public ValkyrieRobotModel(DRCRobotModel.RobotTarget target, boolean headless, SimulationContactPoints simulationContactPoints)
+   public ValkyrieRobotModel(DRCRobotModel.RobotTarget target, boolean headless, SimulationFootContactPoints simulationContactPoints)
    {
       this(target,headless, "DEFAULT", simulationContactPoints);
    }
@@ -123,7 +123,7 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
       this(target, headless, model, null);
    }
 
-   public ValkyrieRobotModel(DRCRobotModel.RobotTarget target, boolean headless, String model, SimulationContactPoints simulationContactPoints)
+   public ValkyrieRobotModel(DRCRobotModel.RobotTarget target, boolean headless, String model, SimulationFootContactPoints simulationContactPoints)
    {
       this.target = target;
       jointMap = new ValkyrieJointMap(simulationContactPoints);

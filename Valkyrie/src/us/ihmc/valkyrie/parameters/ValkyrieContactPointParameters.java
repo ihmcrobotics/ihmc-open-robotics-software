@@ -21,7 +21,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
-import us.ihmc.wholeBodyController.SimulationContactPoints;
+import us.ihmc.wholeBodyController.SimulationFootContactPoints;
 
 public class ValkyrieContactPointParameters extends RobotContactPointParameters
 {
@@ -31,7 +31,7 @@ public class ValkyrieContactPointParameters extends RobotContactPointParameters
 
    private final DRCRobotJointMap jointMap;
 
-   public ValkyrieContactPointParameters(DRCRobotJointMap jointMap, SimulationContactPoints simulationContactPoints)
+   public ValkyrieContactPointParameters(DRCRobotJointMap jointMap, SimulationFootContactPoints simulationContactPoints)
    {
       super(jointMap, footWidth, footLength, soleToAnkleFrameTransforms);
       this.jointMap = jointMap;

@@ -63,7 +63,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
-import us.ihmc.wholeBodyController.SimulationContactPoints;
+import us.ihmc.wholeBodyController.SimulationFootContactPoints;
 
 public class AtlasJointMap implements DRCRobotJointMap
 {
@@ -116,7 +116,7 @@ public class AtlasJointMap implements DRCRobotJointMap
       this(atlasVersion, atlasPhysicalProperties, null);
    }
 
-   public AtlasJointMap(AtlasRobotVersion atlasVersion, NewRobotPhysicalProperties atlasPhysicalProperties, SimulationContactPoints simulationContactPoints)
+   public AtlasJointMap(AtlasRobotVersion atlasVersion, NewRobotPhysicalProperties atlasPhysicalProperties, SimulationFootContactPoints simulationContactPoints)
    {
       this.atlasVersion = atlasVersion;
       this.atlasPhysicalProperties = atlasPhysicalProperties;

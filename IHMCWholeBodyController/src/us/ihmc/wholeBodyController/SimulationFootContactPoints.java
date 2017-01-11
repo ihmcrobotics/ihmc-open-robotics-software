@@ -8,7 +8,7 @@ import javax.vecmath.Tuple3d;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
-public interface SimulationContactPoints
+public interface SimulationFootContactPoints
 {
    public Map<String, List<Tuple3d>> getContactPoints(double footLength, double footWidth, double toeWidth, DRCRobotJointMap jointMap,
          SideDependentList<RigidBodyTransform> soleToAnkleFrameTransforms);

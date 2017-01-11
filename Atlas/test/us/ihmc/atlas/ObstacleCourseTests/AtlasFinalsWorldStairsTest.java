@@ -40,7 +40,7 @@ import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.Cont
 import us.ihmc.tools.continuousIntegration.IntegrationCategory;
 import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.wholeBodyController.AdditionalSimulationContactPoints;
-import us.ihmc.wholeBodyController.SimulationContactPoints;
+import us.ihmc.wholeBodyController.SimulationFootContactPoints;
 
 @ContinuousIntegrationPlan(categories = {IntegrationCategory.IN_DEVELOPMENT, IntegrationCategory.VIDEO})
 public class AtlasFinalsWorldStairsTest
@@ -82,7 +82,7 @@ public class AtlasFinalsWorldStairsTest
 
       DRCStartingLocation selectedLocation = DRCSCStartingLocations.STAIRS_START;
 
-      SimulationContactPoints simulationContactPoints = new AdditionalSimulationContactPoints(10, 2, true, false);
+      SimulationFootContactPoints simulationContactPoints = new AdditionalSimulationContactPoints(10, 2, true, false);
       AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false, simulationContactPoints);
       DarpaRoboticsChallengeFinalsEnvironment environment = new DarpaRoboticsChallengeFinalsEnvironment(false, false, false, false, true);
       drcSimulationTestHelper = new DRCSimulationTestHelper(environment, "DRCWalkingUpStairsTest", selectedLocation, simulationTestingParameters,
@@ -130,7 +130,7 @@ public class AtlasFinalsWorldStairsTest
 
       DRCStartingLocation selectedLocation = DRCSCStartingLocations.STAIRS_START;
 
-      SimulationContactPoints simulationContactPoints = new AdditionalSimulationContactPoints(8, 3, false, false);
+      SimulationFootContactPoints simulationContactPoints = new AdditionalSimulationContactPoints(8, 3, false, false);
       AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false, simulationContactPoints);
       DarpaRoboticsChallengeFinalsEnvironment environment = new DarpaRoboticsChallengeFinalsEnvironment(false, false, false, false, true);
       drcSimulationTestHelper = new DRCSimulationTestHelper(environment, "DRCWalkingUpStairsTest", selectedLocation, simulationTestingParameters,

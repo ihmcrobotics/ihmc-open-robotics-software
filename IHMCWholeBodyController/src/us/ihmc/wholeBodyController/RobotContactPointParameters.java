@@ -62,7 +62,7 @@ public abstract class RobotContactPointParameters
       contactableBodiesFactory.addFootContactParameters(controllerFootGroundContactPoints, controllerToeContactPoints);
    }
 
-   protected void createSimulationContactPoints(SimulationContactPoints simulationContactPoints)
+   protected void createSimulationContactPoints(SimulationFootContactPoints simulationContactPoints)
    {
       Map<String, List<Tuple3d>> contactPoints = simulationContactPoints.getContactPoints(footLength, footWidth, toeWidth, jointMap, soleToAnkleFrameTransforms);
       for (String parentJointName : contactPoints.keySet())
