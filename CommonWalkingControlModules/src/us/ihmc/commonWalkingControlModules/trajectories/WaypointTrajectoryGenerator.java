@@ -17,4 +17,6 @@ public interface WaypointTrajectoryGenerator extends PositionTrajectoryGenerator
    public void setWaypoints(ArrayList<FramePoint> waypointPositions);
 
    public void informDone();
+
+   public double getMaxVelocity();
 }

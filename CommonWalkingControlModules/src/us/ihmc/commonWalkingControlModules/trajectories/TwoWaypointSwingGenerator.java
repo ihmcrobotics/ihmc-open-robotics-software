@@ -277,4 +277,9 @@ public class TwoWaypointSwingGenerator implements PositionTrajectoryGenerator
    {
       return waypointProportions;
    }
+
+   public double getMaxVelocity()
+   {
+      return trajectoryMap.get(trajectoryType.getEnumValue()).getMaxVelocity();
+   }
 }

@@ -382,4 +382,11 @@ public class Position2dOptimizedSwingTrajectoryGenerator implements WaypointTraj
       trajectoryViz.hideAll();
    }
 
+   @Override
+   public double getMaxVelocity()
+   {
+      // TODO Auto-generated method stub
+      return Double.NaN;
+   }
+
 }
