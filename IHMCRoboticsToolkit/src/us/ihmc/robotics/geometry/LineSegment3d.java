@@ -1,9 +1,9 @@
 package us.ihmc.robotics.geometry;
 
-import us.ihmc.robotics.hyperCubeTree.OneDimensionalBounds;
-
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
+
+import us.ihmc.robotics.hyperCubeTree.OneDimensionalBounds;
 
 public class LineSegment3d
 {
@@ -139,6 +139,46 @@ public class LineSegment3d
          ret[i] = new OneDimensionalBounds(Math.min(aVals[i], bVals[i]), Math.max(aVals[i], bVals[i]));
       }
       return ret;
+   }
+   
+   public boolean isBetweenEndpoints(Point3d point3d, double epsilon)
+   {
+      return isBetweenEndpoints(point3d.getX(), point3d.getY(), point3d.getZ(), epsilon);
+   }
+   
+   private boolean isBetweenEndpoints(double x, double y, double z, double epsilon)
+   {
+      double alpha = percentageAlongLineSegment(x, y, z);
+
+      if (alpha < epsilon)
+         return false;
+      if (alpha > 1.0 - epsilon)
+         return false;
+
+      return true;
+   }
+   
+   public double percentageAlongLineSegment(Point3d point3d)
+   {
+      return percentageAlongLineSegment(point3d.getX(), point3d.getY(), point3d.getZ());
+   }
+
+   private double percentageAlongLineSegment(double x, double y, double z)
+   {
+      double vx0 = x - pointA.getX();
+      double vy0 = y - pointA.getY();
+      double vz0 = z - pointA.getZ();
+
+      double vx1 = pointB.getX() - pointA.getX();
+      double vy1 = pointB.getY() - pointA.getY();
+      double vz1 = pointB.getZ() - pointA.getZ();
+
+      double dot = vx0 * vx1 + vy0 * vy1 + vz0 * vz1;
+      double lengthSquared = vx1 * vx1 + vy1 * vy1 + vz1 * vz1;
+
+      double alpha = dot / lengthSquared;
+
+      return alpha;
    }
 
    public void getPoints(double[] aVals, double[] bVals)
