@@ -14,6 +14,7 @@ import com.martiansoftware.jsap.JSAPException;
 import com.martiansoftware.jsap.JSAPResult;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.wholeBodyController.SimulationFootContactPoints;
 
 public class AtlasRobotModelFactory
 {
@@ -28,15 +29,31 @@ public class AtlasRobotModelFactory
 
    public static AtlasRobotModel createDefaultRobotModel()
    {
-      return createDRCRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ.toString(), DRCRobotModel.RobotTarget.SCS, false);
+      return createDRCRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ.toString(), DRCRobotModel.RobotTarget.SCS, false, null);
+   }
+
+   public static AtlasRobotModel createDefaultRobotModel(SimulationFootContactPoints simulationContactPoints)
+   {
+      return createDRCRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ.toString(), DRCRobotModel.RobotTarget.SCS, false, simulationContactPoints);
    }
 
    public static AtlasRobotModel createDefaultRobotModel(AtlasRobotVersion robotVersion)
    {
-      return createDRCRobotModel(robotVersion.toString(), DRCRobotModel.RobotTarget.SCS, false);
+      return createDRCRobotModel(robotVersion.toString(), DRCRobotModel.RobotTarget.SCS, false, null);
+   }
+
+   public static AtlasRobotModel createDefaultRobotModel(AtlasRobotVersion robotVersion, SimulationFootContactPoints simulationContactPoints)
+   {
+      return createDRCRobotModel(robotVersion.toString(), DRCRobotModel.RobotTarget.SCS, false, simulationContactPoints);
    }
 
    public static AtlasRobotModel createDRCRobotModel(String robotModelAsString, DRCRobotModel.RobotTarget runningOnRealRobot, boolean headless)
+   {
+      return createDRCRobotModel(robotModelAsString, runningOnRealRobot, headless, null);
+   }
+
+   public static AtlasRobotModel createDRCRobotModel(String robotModelAsString, DRCRobotModel.RobotTarget runningOnRealRobot, boolean headless,
+         SimulationFootContactPoints simulationContactPoints)
    {
       robotModelAsString = robotModelAsString.toUpperCase().trim();
       try
@@ -44,7 +61,7 @@ public class AtlasRobotModelFactory
          AtlasRobotVersion atlasRobotVersion = AtlasRobotVersion.valueOf(robotModelAsString);
          if (atlasRobotVersion != null)
          {
-            return new AtlasRobotModel(atlasRobotVersion, runningOnRealRobot, headless);
+            return new AtlasRobotModel(atlasRobotVersion, runningOnRealRobot, headless, simulationContactPoints);
          }
       }
       catch (Exception e)
