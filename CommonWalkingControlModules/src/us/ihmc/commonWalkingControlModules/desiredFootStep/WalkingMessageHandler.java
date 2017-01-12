@@ -59,8 +59,8 @@ public class WalkingMessageHandler
    private final IntegerYoVariable currentFootstepIndex = new IntegerYoVariable("currentFootstepIndex", registry);
    private final IntegerYoVariable currentNumberOfFootsteps = new IntegerYoVariable("currentNumberOfFootsteps", registry);
    private final BooleanYoVariable isWalkingPaused = new BooleanYoVariable("isWalkingPaused", registry);
-   private final DoubleYoVariable transferTime = new DoubleYoVariable("transferTime", registry);
-   private final DoubleYoVariable swingTime = new DoubleYoVariable("swingTime", registry);
+   private final DoubleYoVariable defaultTransferTime = new DoubleYoVariable("transferTime", registry);
+   private final DoubleYoVariable defaultSwingTime = new DoubleYoVariable("swingTime", registry);
 
    private final int numberOfFootstepsToVisualize = 4;
    @SuppressWarnings("unchecked")
@@ -74,8 +74,8 @@ public class WalkingMessageHandler
       this.contactableFeet = contactableFeet;
       this.statusOutputManager = statusOutputManager;
 
-      transferTime.set(defaultTransferTime);
-      swingTime.set(defaultSwingTime);
+      this.defaultTransferTime.set(defaultTransferTime);
+      this.defaultSwingTime.set(defaultSwingTime);
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -125,8 +125,8 @@ public class WalkingMessageHandler
       double commandSwingTime = command.getSwingTime();
       if (!Double.isNaN(commandSwingTime) && commandSwingTime > 1.0e-2 && !Double.isNaN(commandTransferTime) && commandTransferTime >= 0.0)
       {
-         transferTime.set(commandTransferTime);
-         swingTime.set(commandSwingTime);
+         defaultTransferTime.set(commandTransferTime);
+         defaultSwingTime.set(commandSwingTime);
       }
 
       for (int i = 0; i < command.getNumberOfFootsteps(); i++)
@@ -383,27 +383,27 @@ public class WalkingMessageHandler
 
    public void setDefaultTransferTime(double transferTime)
    {
-      this.transferTime.set(transferTime);
+      this.defaultTransferTime.set(transferTime);
    }
 
    public void setDefaultSwingTime(double swingTime)
    {
-      this.swingTime.set(swingTime);
+      this.defaultSwingTime.set(swingTime);
    }
 
-   public double getTransferTime()
+   public double getDefaultTransferTime()
    {
-      return transferTime.getDoubleValue();
+      return defaultTransferTime.getDoubleValue();
    }
 
-   public double getSwingTime()
+   public double getDefaultSwingTime()
    {
-      return swingTime.getDoubleValue();
+      return defaultSwingTime.getDoubleValue();
    }
 
-   public double getStepTime()
+   public double getDefaultStepTime()
    {
-      return transferTime.getDoubleValue() + swingTime.getDoubleValue();
+      return defaultTransferTime.getDoubleValue() + defaultSwingTime.getDoubleValue();
    }
 
    public int getCurrentNumberOfFootsteps()

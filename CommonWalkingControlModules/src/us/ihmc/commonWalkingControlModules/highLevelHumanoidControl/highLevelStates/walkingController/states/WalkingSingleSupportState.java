@@ -82,7 +82,7 @@ public class WalkingSingleSupportState extends SingleSupportState
             failureDetectionControlModule.setNextFootstep(nextFootstep);
             updateFootstepParameters();
 
-            feetManager.replanSwingTrajectory(swingSide, nextFootstep, walkingMessageHandler.getSwingTime(), true);
+            feetManager.replanSwingTrajectory(swingSide, nextFootstep, walkingMessageHandler.getDefaultSwingTime(), true);
 
             balanceManager.updateICPPlanForSingleSupportDisturbances();
          }
@@ -99,7 +99,7 @@ public class WalkingSingleSupportState extends SingleSupportState
             failureDetectionControlModule.setNextFootstep(nextFootstep);
             updateFootstepParameters();
 
-            feetManager.replanSwingTrajectory(swingSide, nextFootstep, walkingMessageHandler.getSwingTime(), true);
+            feetManager.replanSwingTrajectory(swingSide, nextFootstep, walkingMessageHandler.getDefaultSwingTime(), true);
 
             balanceManager.updateICPPlanForSingleSupportDisturbances();
          }
@@ -114,7 +114,7 @@ public class WalkingSingleSupportState extends SingleSupportState
             failureDetectionControlModule.setNextFootstep(nextFootstep);
             updateFootstepParameters();
 
-            feetManager.replanSwingTrajectory(swingSide, nextFootstep, walkingMessageHandler.getSwingTime(), false);
+            feetManager.replanSwingTrajectory(swingSide, nextFootstep, walkingMessageHandler.getDefaultSwingTime(), false);
 
             walkingMessageHandler.reportWalkingAbortRequested();
             walkingMessageHandler.clearFootsteps();
@@ -153,7 +153,7 @@ public class WalkingSingleSupportState extends SingleSupportState
 
       if (balanceManager.isRecoveringFromDoubleSupportFall())
       {
-         nextFootstep = balanceManager.createFootstepForRecoveringFromDisturbance(swingSide, walkingMessageHandler.getSwingTime());
+         nextFootstep = balanceManager.createFootstepForRecoveringFromDisturbance(swingSide, walkingMessageHandler.getDefaultSwingTime());
          nextFootstep.setTrajectoryType(TrajectoryType.DEFAULT);
          walkingMessageHandler.reportWalkingAbortRequested();
          walkingMessageHandler.clearFootsteps();
@@ -173,7 +173,7 @@ public class WalkingSingleSupportState extends SingleSupportState
       balanceManager.addFootstepToPlan(walkingMessageHandler.peek(0));
       balanceManager.addFootstepToPlan(walkingMessageHandler.peek(1));
       balanceManager.setICPPlanSupportSide(supportSide);
-      balanceManager.initializeICPPlanForSingleSupport(walkingMessageHandler.getSwingTime(), walkingMessageHandler.getTransferTime());
+      balanceManager.initializeICPPlanForSingleSupport(walkingMessageHandler.getDefaultSwingTime(), walkingMessageHandler.getDefaultTransferTime());
 
       if (balanceManager.isRecoveringFromDoubleSupportFall())
       {
@@ -181,7 +181,7 @@ public class WalkingSingleSupportState extends SingleSupportState
          balanceManager.requestICPPlannerToHoldCurrentCoMInNextDoubleSupport();
       }
 
-      feetManager.requestSwing(swingSide, nextFootstep, walkingMessageHandler.getSwingTime());
+      feetManager.requestSwing(swingSide, nextFootstep, walkingMessageHandler.getDefaultSwingTime());
 
       nextFootstep.getPose(desiredFootPoseInWorld);
       desiredFootPoseInWorld.changeFrame(worldFrame);
@@ -244,7 +244,7 @@ public class WalkingSingleSupportState extends SingleSupportState
 
    private void updateFootstepParameters()
    {
-      pelvisOrientationManager.setTrajectoryTime(walkingMessageHandler.getSwingTime());
+      pelvisOrientationManager.setTrajectoryTime(walkingMessageHandler.getDefaultSwingTime());
       pelvisOrientationManager.setWithUpcomingFootstep(nextFootstep);
 
       TransferToAndNextFootstepsData transferToAndNextFootstepsData = walkingMessageHandler.createTransferToAndNextFootstepDataForSingleSupport(nextFootstep, swingSide);

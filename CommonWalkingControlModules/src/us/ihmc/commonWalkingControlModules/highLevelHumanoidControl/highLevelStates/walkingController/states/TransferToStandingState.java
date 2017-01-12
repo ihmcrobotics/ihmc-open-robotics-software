@@ -94,7 +94,7 @@ public class TransferToStandingState extends WalkingState
       // Just standing in double support, do nothing
       pelvisOrientationManager.setToHoldCurrentDesiredInMidFeetZUpFrame();
       balanceManager.setICPPlanTransferFromSide(previousSupportSide);
-      balanceManager.initializeICPPlanForStanding(walkingMessageHandler.getSwingTime(), walkingMessageHandler.getTransferTime());
+      balanceManager.initializeICPPlanForStanding(walkingMessageHandler.getDefaultSwingTime(), walkingMessageHandler.getDefaultTransferTime());
    }
 
    @Override
