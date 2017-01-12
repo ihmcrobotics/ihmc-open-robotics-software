@@ -279,6 +279,11 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
          upcomingFootsteps.add(footstep);
    }
 
+   public int getNumberOfFootstepRegistered()
+   {
+      return upcomingFootsteps.size();
+   }
+
    public void computeReferenceCMPsStartingFromDoubleSupport(boolean atAStop, RobotSide transferToSide)
    {
       RobotSide transferFromSide = transferToSide.getOppositeSide();
