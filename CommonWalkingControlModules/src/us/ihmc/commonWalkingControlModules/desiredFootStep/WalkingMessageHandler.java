@@ -121,8 +121,8 @@ public class WalkingMessageHandler
       }
 
       isWalkingPaused.set(false);
-      double commandTransferTime = command.getTransferTime();
-      double commandSwingTime = command.getSwingTime();
+      double commandTransferTime = command.getDefaultTransferTime();
+      double commandSwingTime = command.getDefaultSwingTime();
       if (!Double.isNaN(commandSwingTime) && commandSwingTime > 1.0e-2 && !Double.isNaN(commandTransferTime) && commandTransferTime >= 0.0)
       {
          defaultTransferTime.set(commandTransferTime);
