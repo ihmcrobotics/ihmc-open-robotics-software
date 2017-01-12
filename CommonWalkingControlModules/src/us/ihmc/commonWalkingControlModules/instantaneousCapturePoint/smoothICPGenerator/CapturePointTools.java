@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FrameLine2d;
@@ -8,7 +8,6 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVector2d;
-import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -25,14 +24,14 @@ public class CapturePointTools
    /**
     * Compute the constant CMP locations and store them in constantCMPsToPack.
     * 
-    * @param constantCMPsToPack ArrayList that will be packed with the constant CMP locations
-    * @param footstepList ArrayList containing the footsteps
+    * @param constantCMPsToPack List that will be packed with the constant CMP locations
+    * @param footstepList List containing the footsteps
     * @param firstFootstepIndex Integer describing the index of the first footstep to consider when laying out the CMP's
     * @param lastFootstepIndex Integer describing the index of the last footstep to consider when laying out the CMP's
     * @param startStanding If true, the first constant CMP will be between the 2 first footsteps, else it will at the first footstep. 
     * @param endStanding If true, the last constant CMP will be between the 2 last footsteps, else it will at the last footstep. 
     */
-   public static void computeConstantCMPs(ArrayList<YoFramePoint> constantCMPsToPack, RecyclingArrayList<FramePoint> footstepList, int firstFootstepIndex,
+   public static void computeConstantCMPs(List<YoFramePoint> constantCMPsToPack, List<FramePoint> footstepList, int firstFootstepIndex,
          int lastFootstepIndex, boolean startStanding, boolean endStanding)
    {
       if (startStanding)
@@ -61,12 +60,12 @@ public class CapturePointTools
    /**
     * Put the constant CMP's on the footsteps.
     * 
-    * @param constantCMPsToPack ArrayList that will be packed with the constant CMP locations
-    * @param footstepList ArrayList containing the footsteps
+    * @param constantCMPsToPack List that will be packed with the constant CMP locations
+    * @param footstepList List containing the footsteps
     * @param firstFootstepIndex Integer describing the index of the first footstep to consider when laying out the CMP's
     * @param lastFootstepIndex Integer describing the index of the last footstep to consider when laying out the CMP's
     */
-   public static void computeConstantCMPsOnFeet(ArrayList<YoFramePoint> constantCMPsToPack, RecyclingArrayList<FramePoint> footstepList, int firstFootstepIndex,
+   public static void computeConstantCMPsOnFeet(List<YoFramePoint> constantCMPsToPack, List<FramePoint> footstepList, int firstFootstepIndex,
          int lastFootstepIndex)
    {
       for (int i = firstFootstepIndex; i <= lastFootstepIndex; i++)
@@ -98,7 +97,7 @@ public class CapturePointTools
     * @param stepTime equals to the single plus double support durations
     * @param omega0
     */
-   public static void computeDesiredCornerPoints(ArrayList<? extends YoFramePoint> cornerPointsToPack, ArrayList<YoFramePoint> constantCMPs,
+   public static void computeDesiredCornerPoints(List<? extends YoFramePoint> cornerPointsToPack, List<YoFramePoint> constantCMPs,
          boolean skipFirstCornerPoint, double stepTime, double omega0)
    {
       double exponentialTerm = Math.exp(-omega0 * stepTime);
@@ -117,7 +116,7 @@ public class CapturePointTools
    }
 
    /**
-    * Backward calculation of the ICP corner points as the method {@link #computeDesiredCornerPoints(ArrayList, ArrayList, boolean, double, double)}
+    * Backward calculation of the ICP corner points as the method {@link #computeDesiredCornerPoints(List, List, boolean, double, double)}
     * but considering two constant CMPs per support: an entryCMP and an exitCMP.
     * @param entryCornerPointsToPack
     * @param exitCornerPointsToPack
@@ -127,8 +126,8 @@ public class CapturePointTools
     * @param timeInPercentSpentOnExitCMPs
     * @param omega0
     */
-   public static void computeDesiredCornerPoints(ArrayList<? extends YoFramePoint> entryCornerPointsToPack,
-         ArrayList<? extends YoFramePoint> exitCornerPointsToPack, ArrayList<YoFramePoint> entryCMPs, ArrayList<YoFramePoint> exitCMPs, double stepTime,
+   public static void computeDesiredCornerPoints(List<? extends YoFramePoint> entryCornerPointsToPack,
+         List<? extends YoFramePoint> exitCornerPointsToPack, List<YoFramePoint> entryCMPs, List<YoFramePoint> exitCMPs, double stepTime,
          double timeInPercentSpentOnExitCMPs, double omega0)
    {
       double timeSpentOnExitCMP = stepTime * timeInPercentSpentOnExitCMPs;
