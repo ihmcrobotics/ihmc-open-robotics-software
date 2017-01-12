@@ -76,7 +76,7 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
    private final SideDependentList<YoFrameVector2d> exitCMPUserOffsets = new SideDependentList<>();
 
    private final IntegerYoVariable numberOfUpcomingFootsteps;
-   private final ArrayList<Footstep> upcomingFootsteps = new ArrayList<>();
+   private final List<Footstep> upcomingFootsteps = new ArrayList<>();
 
    private final FramePoint cmp = new FramePoint();
    private final FramePoint firstCMP = new FramePoint();
