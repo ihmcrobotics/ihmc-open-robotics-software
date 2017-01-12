@@ -33,8 +33,8 @@ public class FootstepDataListCommand implements Command<FootstepDataListCommand,
    {
       clear();
 
-      swingTime = message.swingTime;
-      transferTime = message.transferTime;
+      swingTime = message.swingDefaultTime;
+      transferTime = message.defaultTransferTime;
       executionMode = message.executionMode;
       ArrayList<FootstepDataMessage> dataList = message.getDataList();
       if (dataList != null)
