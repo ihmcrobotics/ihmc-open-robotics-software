@@ -225,7 +225,8 @@ public class SwingOverPlanarRegionsTrajectoryExpander
          numberOfTriesCounter.countOne();
       }
 
-      twoWaypointSwingGenerator.getMaxVelocity();
+      // TODO adjust swing time is speed is too high
+      double maxSpeed = twoWaypointSwingGenerator.computeAndGetMaxSpeed();
    }
 
    private SwingOverPlanarRegionsTrajectoryExpansionStatus tryATrajectory(PlanarRegionsList planarRegionsList)

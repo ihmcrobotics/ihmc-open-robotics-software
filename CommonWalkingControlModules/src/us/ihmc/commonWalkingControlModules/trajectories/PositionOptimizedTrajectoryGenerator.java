@@ -77,6 +77,10 @@ public class PositionOptimizedTrajectoryGenerator implements WaypointTrajectoryG
    private final BagOfBalls trajectoryViz;
    private final FramePoint ballPosition = new FramePoint();
 
+   private final DoubleYoVariable maxSpeed;
+   private final DoubleYoVariable maxSpeedTime;
+   private final FrameVector tempVelocity = new FrameVector();
+
    public PositionOptimizedTrajectoryGenerator()
    {
       this("", new YoVariableRegistry(""));
@@ -158,8 +162,8 @@ public class PositionOptimizedTrajectoryGenerator implements WaypointTrajectoryG
       else
          trajectoryViz = null;
 
-      maxVelocity = new DoubleYoVariable("MaxVelocity", registry);
-      maxVelocityTime = new DoubleYoVariable("MaxVelocityTime", registry);
+      maxSpeed = new DoubleYoVariable("MaxVelocity", registry);
+      maxSpeedTime = new DoubleYoVariable("MaxVelocityTime", registry);
    }
 
    private void extendBySegment(YoVariableRegistry registry)
@@ -416,65 +420,43 @@ public class PositionOptimizedTrajectoryGenerator implements WaypointTrajectoryG
       trajectoryViz.hideAll();
    }
 
-   public double getMaxVelocity()
+   /**
+    * Numerically compute the maximum speed along the trajectory and the time at which this speed occurs.
+    */
+   public void computeMaxSpeed()
    {
-      if (order != PolynomialOrder.ORDER3)
-         throw new RuntimeException("This only works with order 3.");
-
-      maxVelocity.set(Double.NEGATIVE_INFINITY);
-      maxVelocityTime.set(Double.NaN);
-
-      for (int segment = 0; segment < segments.getIntegerValue(); segment++)
-      {
-         // check start and end of segment:
-         double segmentStartTime;
-         double segmentEndTime;
-         if (segment == 0)
-         {
-            segmentStartTime = 0.0;
-            segmentEndTime = waypointTimes.get(segment).getDoubleValue();
-         }
-         else if (segment == segments.getIntegerValue()-1)
-         {
-            segmentStartTime = waypointTimes.get(segment-1).getDoubleValue();
-            segmentEndTime = 1.0;
-         }
-         else
-         {
-            segmentStartTime = waypointTimes.get(segment-1).getDoubleValue();
-            segmentEndTime = waypointTimes.get(segment).getDoubleValue();
-         }
-
-         checkVelocityAtTime(segmentStartTime);
-         checkVelocityAtTime(segmentEndTime);
-
-         // check for local maxima:
-         for (int dimension = 0; dimension < Direction.values.length; dimension++)
-         {
-            optimizer.getPolynomialCoefficients(coefficients, dimension);
-            coefficients.get(segment).toArray(tempCoeffs);
-            double timeOfInterest = -tempCoeffs[1] / (3.0 * tempCoeffs[0]); // order 3 specific
-
-            if (segmentStartTime < timeOfInterest && segmentEndTime > timeOfInterest)
-               checkVelocityAtTime(timeOfInterest);
-         }
-      }
-
-      return maxVelocity.getDoubleValue();
+      computeMaxSpeed(1.0E-5);
    }
 
-   private final FrameVector tempVelocity = new FrameVector();
-   private final DoubleYoVariable maxVelocity;
-   private final DoubleYoVariable maxVelocityTime;
-   private void checkVelocityAtTime(double time)
+   /**
+    * Numerically compute the maximum speed along the trajectory and the time at which this speed occurs.
+    * The time precision can be specified.
+    */
+   public void computeMaxSpeed(double timeIncrement)
    {
-      compute(time);
-      getVelocity(tempVelocity);
-      double newVelocity = tempVelocity.length();
-      if (newVelocity > maxVelocity.getDoubleValue())
+      maxSpeed.set(Double.NEGATIVE_INFINITY);
+      maxSpeedTime.set(Double.NaN);
+
+      for (double time = 0.0; time <= 1.0; time += timeIncrement)
       {
-         maxVelocity.set(newVelocity);
-         maxVelocityTime.set(time);
+         compute(time);
+         getVelocity(tempVelocity);
+         double speed = tempVelocity.length();
+         if (speed > maxSpeed.getDoubleValue())
+         {
+            maxSpeed.set(speed);
+            maxSpeedTime.set(time);
+         }
       }
+   }
+
+   public double getMaxSpeed()
+   {
+      return maxSpeed.getDoubleValue();
+   }
+
+   public double getMaxVelocityTime()
+   {
+      return maxSpeedTime.getDoubleValue();
    }
 }

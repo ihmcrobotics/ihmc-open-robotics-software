@@ -383,10 +383,17 @@ public class Position2dOptimizedSwingTrajectoryGenerator implements WaypointTraj
    }
 
    @Override
-   public double getMaxVelocity()
+   public double getMaxSpeed()
    {
       // TODO Auto-generated method stub
       return Double.NaN;
+   }
+
+   @Override
+   public void computeMaxSpeed()
+   {
+      // TODO Auto-generated method stub
+
    }
 
 }
