@@ -76,7 +76,7 @@ public abstract class SingleSupportState extends WalkingState
       if (balanceManager.isRecoveringFromDoubleSupportFall())
          minimumSwingTime = 0.15;
       else
-         minimumSwingTime = walkingMessageHandler.getSwingTime() * minimumSwingFraction.getDoubleValue();
+         minimumSwingTime = walkingMessageHandler.getDefaultSwingTime() * minimumSwingFraction.getDoubleValue();
 
       return getTimeInCurrentState() > minimumSwingTime;
    }
