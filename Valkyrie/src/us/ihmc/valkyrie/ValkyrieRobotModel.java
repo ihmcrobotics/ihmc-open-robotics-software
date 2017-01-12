@@ -169,7 +169,7 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
 
       boolean runningOnRealRobot = target == RobotTarget.REAL_ROBOT;
       capturePointPlannerParameters = new ValkyrieCapturePointPlannerParameters(runningOnRealRobot);
-      armControllerParameters = new ValkyrieArmControllerParameters(runningOnRealRobot, jointMap);
+      armControllerParameters = new ValkyrieArmControllerParameters(jointMap, target);
       walkingControllerParameters = new ValkyrieWalkingControllerParameters(jointMap, target);
       stateEstimatorParamaters = new ValkyrieStateEstimatorParameters(runningOnRealRobot, getEstimatorDT(), sensorInformation, jointMap);
       robotDescription = createRobotDescription();

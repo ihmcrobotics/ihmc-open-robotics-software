@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
@@ -22,9 +23,9 @@ public class ValkyrieArmControllerParameters extends ArmControllerParameters
    private final boolean runningOnRealRobot;
    private final DRCRobotJointMap jointMap;
 
-   public ValkyrieArmControllerParameters(boolean runningOnRealRobot, DRCRobotJointMap jointMap)
+   public ValkyrieArmControllerParameters(DRCRobotJointMap jointMap, DRCRobotModel.RobotTarget target)
    {
-      this.runningOnRealRobot = runningOnRealRobot;
+      this.runningOnRealRobot = target == DRCRobotModel.RobotTarget.REAL_ROBOT || target == DRCRobotModel.RobotTarget.GAZEBO;
       this.jointMap = jointMap;
    }
 
