@@ -34,7 +34,7 @@ public class JMEGraphics3DAdapter implements Graphics3DAdapter
    {
       this(true);
    }
-   
+
    public JMEGraphics3DAdapter(boolean setupSky)
    {
       if (setupSky)
@@ -42,7 +42,7 @@ public class JMEGraphics3DAdapter implements Graphics3DAdapter
          jmeRenderer.setupSky();
       }
    }
-   
+
    public void setupSky()
    {
       jmeRenderer.setupSky();
@@ -132,14 +132,15 @@ public class JMEGraphics3DAdapter implements Graphics3DAdapter
 
    public void closeViewport(ViewportAdapter viewport)
    {
-      if (jmeRenderer != null) jmeRenderer.closeViewport(viewport);
+      if (jmeRenderer != null)
+         jmeRenderer.closeViewport(viewport);
    }
 
    public JMERenderer getRenderer()
    {
       return jmeRenderer;
    }
-   
+
    @Override
    public JMEGPULidar createGPULidar(int pointsPerSweep, int scanHeight, double fieldOfView, double minRange, double maxRange)
    {
@@ -151,7 +152,7 @@ public class JMEGraphics3DAdapter implements Graphics3DAdapter
    {
       return jmeRenderer.createGPULidar(listener, pointsPerSweep, scanHeight, fieldOfView, minRange, maxRange);
    }
-   
+
    @Override
    public JMEGPULidar createGPULidar(GPULidarListener listener, LidarScanParameters lidarScanParameters)
    {
@@ -164,16 +165,18 @@ public class JMEGraphics3DAdapter implements Graphics3DAdapter
       return jmeRenderer.createGPULidar(lidarScanParameters);
    }
 
-	@Override
-	public void play() {
-		jmeRenderer.play();
-	}
-	
-	@Override
-	public void pause() {
-		jmeRenderer.pause();
-		
-	}
+   @Override
+   public void play()
+   {
+      jmeRenderer.play();
+   }
+
+   @Override
+   public void pause()
+   {
+      jmeRenderer.pause();
+
+   }
 
    public void addDirectionalLight(ColorRGBA color, Vector3f direction)
    {

@@ -28,7 +28,8 @@ public class JMECamera extends Camera implements CameraAdapter
 {
    public static final Quaternion convertLookingUpToLookingForward = new Quaternion();
    private static final Quaternion convertLookingForwardToLookingUp;
-   static{
+   static
+   {
       convertLookingUpToLookingForward.fromRotationMatrix(0f, 0f, 1f, 1f, 0f, 0f, 0f, 1f, 0f);
       convertLookingForwardToLookingUp = convertLookingUpToLookingForward.inverse();
    }
@@ -138,19 +139,19 @@ public class JMECamera extends Camera implements CameraAdapter
    {
       setLocationInZUpCoordinates(JMEDataTypeUtils.vecMathTuple3dToJMEVector3f(cameraPosition));
    }
-   
+
    public void setLocationInZUpCoordinates(Vector3f location)
    {
       Vector3f tempVector = new Vector3f(location);
       JMEGeometryUtils.transformFromZupToJMECoordinates(tempVector);
       setLocation(tempVector);
    }
-   
+
    public void setRotationInZUpcoordinates(Quat4d rotation)
    {
       setRotationInZUpcoordinates(JMEDataTypeUtils.vecMathQuat4dToJMEQuaternion(rotation));
    }
-   
+
    public void setRotationInZUpcoordinates(Quaternion rotation)
    {
       Quaternion tempQuat = new Quaternion(rotation);
@@ -158,6 +159,7 @@ public class JMECamera extends Camera implements CameraAdapter
       JMEGeometryUtils.transformFromZupToJMECoordinates(tempQuat);
       setRotation(tempQuat);
    }
+
    /**
     * @deprecated Use setLocationInZUpCoordinates
     */
@@ -166,7 +168,7 @@ public class JMECamera extends Camera implements CameraAdapter
    {
       super.setLocation(location);
    }
-   
+
    /**
     * @deprecated Use setRotationInZUpcoordinates
     */
@@ -175,9 +177,7 @@ public class JMECamera extends Camera implements CameraAdapter
    {
       super.setRotation(rotation);
    }
-   
-   
-   
+
    public void updateCamera()
    {
       if (cameraController != null)
@@ -206,7 +206,7 @@ public class JMECamera extends Camera implements CameraAdapter
       Quaternion quat = new Quaternion(getRotation());
       JMEGeometryUtils.transformFromJMECoordinatesToZup(quat);
       quat.multLocal(convertLookingForwardToLookingUp);
-      
+
       return new Quat4d(quat.getX(), quat.getY(), quat.getZ(), quat.getW());
    }
 
@@ -217,37 +217,38 @@ public class JMECamera extends Camera implements CameraAdapter
       return new Point3d(position.getX(), position.getY(), position.getZ());
    }
 
-   
    @Override
-   public void resize(int width, int height, boolean fixAspect) {
+   public void resize(int width, int height, boolean fixAspect)
+   {
       super.resize(width, height, false);
-      
-      if (fixAspect /*&& !parallelProjection*/) {
-         
-         
+
+      if (fixAspect /* && !parallelProjection */)
+      {
+
          frustumRight = frustumTop * ((float) getInternalWidth() / getInternalHeight());
          frustumLeft = -frustumRight;
          onFrustumChange();
-     }
+      }
    }
-   
+
    public int getInternalWidth()
    {
       return (int) (width * (viewPortRight - viewPortLeft));
    }
-   
+
    public int getInternalHeight()
    {
       return (int) (height * (viewPortTop - viewPortBottom));
    }
-   
+
    private boolean alreadyClosing = false;
-   
+
    public void closeAndDispose()
    {
-      if (alreadyClosing) return;
+      if (alreadyClosing)
+         return;
       alreadyClosing = true;
-      
+
       if (cameraController != null)
       {
          cameraController.closeAndDispose();
