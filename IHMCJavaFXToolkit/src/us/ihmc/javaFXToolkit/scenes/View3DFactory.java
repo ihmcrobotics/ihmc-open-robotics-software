@@ -165,9 +165,10 @@ public class View3DFactory
       setCamera(camera);
 
       Vector3d up = new Vector3d(0.0, 0.0, 1.0);
+      Vector3d forward = new Vector3d(1.0, 0.0, 0.0);
       ReadOnlyDoubleProperty widthProperty = widthProperty();
       ReadOnlyDoubleProperty heightProperty = heightProperty();
-      FocusBasedCameraMouseEventHandler cameraController = new FocusBasedCameraMouseEventHandler(widthProperty, heightProperty, camera, up);
+      FocusBasedCameraMouseEventHandler cameraController = new FocusBasedCameraMouseEventHandler(widthProperty, heightProperty, camera, up, forward);
       if (enableShiftClickFocusTranslation)
          cameraController.enableShiftClickFocusTranslation();
       addEventHandler(Event.ANY, cameraController);
