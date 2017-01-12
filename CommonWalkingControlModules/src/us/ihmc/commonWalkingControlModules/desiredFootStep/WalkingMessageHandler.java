@@ -121,12 +121,12 @@ public class WalkingMessageHandler
       }
 
       isWalkingPaused.set(false);
-      double commandTransferTime = command.getDefaultTransferTime();
-      double commandSwingTime = command.getDefaultSwingTime();
-      if (!Double.isNaN(commandSwingTime) && commandSwingTime > 1.0e-2 && !Double.isNaN(commandTransferTime) && commandTransferTime >= 0.0)
+      double commandDefaultTransferTime = command.getDefaultTransferTime();
+      double commandDefaultSwingTime = command.getDefaultSwingTime();
+      if (!Double.isNaN(commandDefaultSwingTime) && commandDefaultSwingTime > 1.0e-2 && !Double.isNaN(commandDefaultTransferTime) && commandDefaultTransferTime >= 0.0)
       {
-         defaultTransferTime.set(commandTransferTime);
-         defaultSwingTime.set(commandSwingTime);
+         defaultTransferTime.set(commandDefaultTransferTime);
+         defaultSwingTime.set(commandDefaultSwingTime);
       }
 
       for (int i = 0; i < command.getNumberOfFootsteps(); i++)
@@ -501,6 +501,9 @@ public class WalkingMessageHandler
             footstep.setSwingWaypoints(trajectoryWaypoints);
          }
       }
+
+      if (footstepData.hasTimings())
+         footstep.setTimings(footstepData.getSwingTime(), footstepData.getTransferTime());
 
       footstep.trajectoryType = trajectoryType;
       footstep.swingHeight = footstepData.getSwingHeight();
