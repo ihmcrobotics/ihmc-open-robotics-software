@@ -44,15 +44,15 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
     * <li> When using two CMPs per support:
     * Desired CMP locations on the feet in the early single support phase. </li>
     * */
-   private final List<YoFramePointInMultipleFrames> entryCMPs = new ArrayList<YoFramePointInMultipleFrames>();
-   private final List<YoFramePoint> entryCMPsInWorldFrameReadOnly = new ArrayList<YoFramePoint>();
+   private final List<YoFramePointInMultipleFrames> entryCMPs = new ArrayList<>();
+   private final List<YoFramePoint> entryCMPsInWorldFrameReadOnly = new ArrayList<>();
 
    /**
     * Only used when computing two CMPs per support.
     * Desired CMP locations on the feet in the late single support phase.
     */
-   private final List<YoFramePointInMultipleFrames> exitCMPs = new ArrayList<YoFramePointInMultipleFrames>();
-   private final List<YoFramePoint> exitCMPsInWorldFrameReadOnly = new ArrayList<YoFramePoint>();
+   private final List<YoFramePointInMultipleFrames> exitCMPs = new ArrayList<>();
+   private final List<YoFramePoint> exitCMPsInWorldFrameReadOnly = new ArrayList<>();
 
    private final BooleanYoVariable isDoneWalking;
    private final DoubleYoVariable maxForwardEntryCMPOffset;
