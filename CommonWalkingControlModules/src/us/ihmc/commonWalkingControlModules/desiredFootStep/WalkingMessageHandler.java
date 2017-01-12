@@ -59,8 +59,9 @@ public class WalkingMessageHandler
    private final IntegerYoVariable currentFootstepIndex = new IntegerYoVariable("currentFootstepIndex", registry);
    private final IntegerYoVariable currentNumberOfFootsteps = new IntegerYoVariable("currentNumberOfFootsteps", registry);
    private final BooleanYoVariable isWalkingPaused = new BooleanYoVariable("isWalkingPaused", registry);
-   private final DoubleYoVariable defaultTransferTime = new DoubleYoVariable("transferTime", registry);
-   private final DoubleYoVariable defaultSwingTime = new DoubleYoVariable("swingTime", registry);
+   private final DoubleYoVariable defaultTransferTime = new DoubleYoVariable("defaultTransferTime", registry);
+   private final DoubleYoVariable finalTransferTime = new DoubleYoVariable("finalTransferTime", registry);
+   private final DoubleYoVariable defaultSwingTime = new DoubleYoVariable("defaultSwingTime", registry);
 
    private final int numberOfFootstepsToVisualize = 4;
    @SuppressWarnings("unchecked")
@@ -75,6 +76,7 @@ public class WalkingMessageHandler
       this.statusOutputManager = statusOutputManager;
 
       this.defaultTransferTime.set(defaultTransferTime);
+      this.finalTransferTime.set(defaultTransferTime);
       this.defaultSwingTime.set(defaultSwingTime);
 
       for (RobotSide robotSide : RobotSide.values)
@@ -128,6 +130,12 @@ public class WalkingMessageHandler
          defaultTransferTime.set(commandDefaultTransferTime);
          defaultSwingTime.set(commandDefaultSwingTime);
       }
+
+      double commandFinalTransferTime = command.getFinalTransferTime();
+      if (commandFinalTransferTime >= 0.0)
+         finalTransferTime.set(commandFinalTransferTime);
+      else
+         finalTransferTime.set(defaultTransferTime.getDoubleValue());
 
       for (int i = 0; i < command.getNumberOfFootsteps(); i++)
       {
@@ -399,6 +407,11 @@ public class WalkingMessageHandler
    public double getDefaultSwingTime()
    {
       return defaultSwingTime.getDoubleValue();
+   }
+
+   public double getFinalTransferTime()
+   {
+      return finalTransferTime.getDoubleValue();
    }
 
    public double getDefaultStepTime()
