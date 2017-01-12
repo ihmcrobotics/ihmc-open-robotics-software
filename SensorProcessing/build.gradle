@@ -63,7 +63,6 @@ dependencies {
     compile ihmc.getProjectDependency(":IHMCRoboticsToolkit")
     compile ihmc.getProjectDependency(":IHMCGraphics3DDescription")
     compile ihmc.getProjectDependency(":IHMCRobotModels")
-    compile ihmc.getProjectDependency(":Graphics3DAdapter")
 
 
 	testCompile ihmc.getProjectDependency(":SimulationConstructionSet")
