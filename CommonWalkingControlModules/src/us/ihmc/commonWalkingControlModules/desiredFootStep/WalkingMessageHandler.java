@@ -502,8 +502,8 @@ public class WalkingMessageHandler
          }
       }
 
-      footstep.trajectoryType = trajectoryType;
-      footstep.swingHeight = footstepData.getSwingHeight();
+      footstep.setTrajectoryType(trajectoryType);
+      footstep.setSwingHeight(footstepData.getSwingHeight());
       switch (footstepData.getOrigin())
       {
       case AT_ANKLE_FRAME:
