@@ -207,7 +207,7 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    @Override
    public boolean isNeckPositionControlled()
    {
-      return target == DRCRobotModel.RobotTarget.REAL_ROBOT;
+      return target == DRCRobotModel.RobotTarget.REAL_ROBOT || target == DRCRobotModel.RobotTarget.GAZEBO;
    }
 
    @Override
