@@ -12,19 +12,20 @@ import javax.vecmath.Vector3d;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
+import us.ihmc.robotics.controllers.YoPDGains;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.JointRole;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.partNames.LimbName;
 import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
-import us.ihmc.robotics.controllers.YoPDGains;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.valkyrie.configuration.ValkyrieConfigurationRoot;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
+import us.ihmc.wholeBodyController.SimulationFootContactPoints;
 
 public class ValkyrieJointMap implements DRCRobotJointMap
 {
@@ -59,17 +60,22 @@ public class ValkyrieJointMap implements DRCRobotJointMap
 
    public ValkyrieJointMap()
    {
+      this(null);
+   }
+
+   public ValkyrieJointMap(SimulationFootContactPoints simulationContactPoints)
+   {
       boolean selectedValkyrieVersionHasArms = ValkyrieConfigurationRoot.VALKYRIE_WITH_ARMS;
       if (selectedValkyrieVersionHasArms)
       {
-         armJoints = new ArmJointName[]{ ArmJointName.SHOULDER_PITCH, ArmJointName.SHOULDER_ROLL, ArmJointName.SHOULDER_YAW, 
+         armJoints = new ArmJointName[]{ ArmJointName.SHOULDER_PITCH, ArmJointName.SHOULDER_ROLL, ArmJointName.SHOULDER_YAW,
                ArmJointName.ELBOW_PITCH, ArmJointName.ELBOW_ROLL, ArmJointName.WRIST_ROLL, ArmJointName.FIRST_WRIST_PITCH };
       }
       else
       {
          armJoints = new ArmJointName[] {};
       }
-      
+
       for (RobotSide robotSide : RobotSide.values)
       {
          String[] forcedSideJointNames = ValkyrieOrderedJointMap.forcedSideDependentJointNames.get(robotSide);
@@ -135,18 +141,18 @@ public class ValkyrieJointMap implements DRCRobotJointMap
          jointRoles.put(neckJointString, JointRole.NECK);
       }
 
-      contactPointParameters = new ValkyrieContactPointParameters(this);
-      
+      contactPointParameters = new ValkyrieContactPointParameters(this, simulationContactPoints);
+
       for (RobotSide robtSide : RobotSide.values)
       {
          nameOfJointsBeforeThighs.put(robtSide, legJointStrings.get(robtSide).get(LegJointName.HIP_PITCH));
          nameOfJointsBeforeHands.put(robtSide, armJointStrings.get(robtSide).get(ArmJointName.FIRST_WRIST_PITCH));
       }
-      
+
       jointNamesBeforeFeet[0] = getJointBeforeFootName(RobotSide.LEFT);
       jointNamesBeforeFeet[1] = getJointBeforeFootName(RobotSide.RIGHT);
-      
-      
+
+
    }
 
    private String getRobotSidePrefix(RobotSide robotSide)
@@ -255,7 +261,7 @@ public class ValkyrieJointMap implements DRCRobotJointMap
    {
       return legJointStrings.get(robotSide).get(LegJointName.ANKLE_ROLL);
    }
-   
+
    @Override
    public String getJointBeforeHandName(RobotSide robotSide)
    {
@@ -359,7 +365,7 @@ public class ValkyrieJointMap implements DRCRobotJointMap
 //         jointNameList.add(getSpineJointName(spineJoint));
 
 //      String[] ret = jointNameList.toArray(new String[0]);
-      
+
       String[] ret = new String[]
       {
 //            getLegJointName(RobotSide.LEFT, LegJointName.ANKLE_PITCH),
@@ -387,7 +393,7 @@ public class ValkyrieJointMap implements DRCRobotJointMap
             getArmJointName(RobotSide.RIGHT, ArmJointName.WRIST_ROLL),
             getArmJointName(RobotSide.RIGHT, ArmJointName.FIRST_WRIST_PITCH),
       };
-      
+
       return ret;
    }
 
@@ -402,13 +408,13 @@ public class ValkyrieJointMap implements DRCRobotJointMap
    {
       return jointNamesBeforeFeet;
    }
-   
+
    @Override
    public Enum<?>[] getRobotSegments()
    {
       return RobotSide.values;
    }
-   
+
    @Override
    public Enum<?> getEndEffectorsRobotSegment(String joineNameBeforeEndEffector)
    {
@@ -419,7 +425,7 @@ public class ValkyrieJointMap implements DRCRobotJointMap
          {
             return robotSide;
          }
-         
+
          String endOfArm = armJointStrings.get(robotSide).get(ArmJointName.FIRST_WRIST_PITCH);
          if(endOfArm != null && endOfArm.equals(joineNameBeforeEndEffector))
          {
