@@ -18,5 +18,7 @@ public interface WaypointTrajectoryGenerator extends PositionTrajectoryGenerator
 
    public void informDone();
 
-   public double getMaxVelocity();
+   public double getMaxSpeed();
+
+   public void computeMaxSpeed();
 }
