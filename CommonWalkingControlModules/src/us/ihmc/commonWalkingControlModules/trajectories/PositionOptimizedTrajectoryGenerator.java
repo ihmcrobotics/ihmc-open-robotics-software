@@ -455,7 +455,7 @@ public class PositionOptimizedTrajectoryGenerator implements WaypointTrajectoryG
       return maxSpeed.getDoubleValue();
    }
 
-   public double getMaxVelocityTime()
+   public double getMaxSpeedTime()
    {
       return maxSpeedTime.getDoubleValue();
    }
