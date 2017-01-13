@@ -55,6 +55,7 @@ public class ICPPlanner
    private final DoubleYoVariable defaultSwingTime = new DoubleYoVariable(namePrefix + "DefaultSwingTime", registry);
    private final DoubleYoVariable minSwingTime = new DoubleYoVariable(namePrefix + "MinSwingTime", registry);
    private final DoubleYoVariable defaultInitialTransferTime = new DoubleYoVariable(namePrefix + "DefaultInitialTransferTime", registry);
+   private final DoubleYoVariable finalTransferTime = new DoubleYoVariable(namePrefix + "FinalTransferTime", registry);
    private final DoubleYoVariable doubleSupportSplitFraction = new DoubleYoVariable(namePrefix + "DoubleSupportSplitFraction", registry);
    private final DoubleYoVariable initialTime = new DoubleYoVariable(namePrefix + "InitialTime", registry);
    private final DoubleYoVariable remainingTime = new DoubleYoVariable(namePrefix + "RemainingTime", registry);
@@ -106,6 +107,8 @@ public class ICPPlanner
          CapturePointPlannerParameters icpPlannerParameters, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       isStanding.set(true);
+
+      finalTransferTime.setToNaN();
 
       actualICPToHold.setToNaN();
       isHoldingPosition.set(false);
@@ -212,6 +215,7 @@ public class ICPPlanner
    public void clearPlan()
    {
       referenceCMPsCalculator.clear();
+
       for (int i = 0; i < swingTimes.size(); i++)
       {
          swingTimes.get(i).setToNaN();
@@ -310,6 +314,10 @@ public class ICPPlanner
       isStanding.set(true);
       isDoubleSupport.set(true);
       this.initialTime.set(initialTime);
+      if (finalTransferTime.isNaN())
+         transferTimes.get(0).set(defaultTransferTime.getDoubleValue());
+      else
+         transferTimes.get(0).set(finalTransferTime.getDoubleValue());
       updateTransferPlan();
    }
 
@@ -423,6 +431,7 @@ public class ICPPlanner
 
       singleSupportInitialICP.changeFrame(finalFrame);
       singleSupportFinalICP.changeFrame(worldFrame);
+
 
       if (isStanding.getBooleanValue() && !isDoneWalking)
       {
@@ -793,6 +802,16 @@ public class ICPPlanner
    public void setDefaultSingleSupportTime(double time)
    {
       defaultSwingTime.set(time);
+   }
+
+   public void setFinalTransferTime(double time)
+   {
+      finalTransferTime.set(time);
+   }
+
+   public void clearFinalTransferTime()
+   {
+      finalTransferTime.setToNaN();
    }
 
    public void setMinimumSingleSupportTimeForDisturbanceRecovery(double minTime)

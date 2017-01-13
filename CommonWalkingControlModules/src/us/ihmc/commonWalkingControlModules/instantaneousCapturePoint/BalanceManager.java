@@ -261,6 +261,7 @@ public class BalanceManager
    public void clearICPPlan()
    {
       icpPlanner.clearPlan();
+      icpPlanner.clearFinalTransferTime();
       linearMomentumRateOfChangeControlModule.clearPlan();
    }
 
@@ -447,15 +448,16 @@ public class BalanceManager
       pushRecoveryControlModule.initializeParametersForDoubleSupportPushRecovery();
    }
 
-   public void initializeICPPlanForSingleSupport(double defaultSwingTime, double defaultTransferTime)
+   public void initializeICPPlanForSingleSupport(double defaultSwingTime, double defaultTransferTime, double finalTransferTime)
    {
       setDefaultSingleSupportTime(defaultSwingTime);
       setDefaultDoubleSupportTime(defaultTransferTime);
+      setFinalTransferTime(finalTransferTime);
       icpPlanner.initializeForSingleSupport(yoTime.getDoubleValue());
       linearMomentumRateOfChangeControlModule.initializeForSingleSupport();
    }
 
-   public void initializeICPPlanForStanding(double defaultSwingTime, double defaultTransferTime)
+   public void initializeICPPlanForStanding(double defaultSwingTime, double defaultTransferTime, double finalTransferTime)
    {
       if (holdICPToCurrentCoMLocationInNextDoubleSupport.getBooleanValue())
       {
@@ -464,11 +466,12 @@ public class BalanceManager
       }
       setDefaultSingleSupportTime(defaultSwingTime);
       setDefaultDoubleSupportTime(defaultTransferTime);
+      setFinalTransferTime(finalTransferTime);
       icpPlanner.initializeForStanding(yoTime.getDoubleValue());
       linearMomentumRateOfChangeControlModule.initializeForStanding();
    }
 
-   public void initializeICPPlanForTransfer(double defaultSwingTime, double defaultTransferTime)
+   public void initializeICPPlanForTransfer(double defaultSwingTime, double defaultTransferTime, double finalTransferTime)
    {
       if (holdICPToCurrentCoMLocationInNextDoubleSupport.getBooleanValue())
       {
@@ -477,6 +480,7 @@ public class BalanceManager
       }
       setDefaultSingleSupportTime(defaultSwingTime);
       setDefaultDoubleSupportTime(defaultTransferTime);
+      setFinalTransferTime(finalTransferTime);
       icpPlanner.initializeForTransfer(yoTime.getDoubleValue());
       linearMomentumRateOfChangeControlModule.initializeForTransfer();
    }
@@ -586,16 +590,21 @@ public class BalanceManager
       icpPlanner.holdCurrentICP(yoTime.getDoubleValue(), centerOfMassPosition);
    }
 
-   private void setDefaultDoubleSupportTime(double newDoubleSupportTime)
+   private void setDefaultDoubleSupportTime(double defaultDoubleSupportTime)
    {
-      icpPlanner.setDefaultDoubleSupportTime(newDoubleSupportTime);
-      linearMomentumRateOfChangeControlModule.setDoubleSupportDuration(newDoubleSupportTime);
+      icpPlanner.setDefaultDoubleSupportTime(defaultDoubleSupportTime);
+      linearMomentumRateOfChangeControlModule.setDoubleSupportDuration(defaultDoubleSupportTime);
    }
 
-   private void setDefaultSingleSupportTime(double newSingleSupportTime)
+   private void setDefaultSingleSupportTime(double defaultSingleSupportTime)
    {
-      icpPlanner.setDefaultSingleSupportTime(newSingleSupportTime);
-      linearMomentumRateOfChangeControlModule.setSingleSupportDuration(newSingleSupportTime);
+      icpPlanner.setDefaultSingleSupportTime(defaultSingleSupportTime);
+      linearMomentumRateOfChangeControlModule.setSingleSupportDuration(defaultSingleSupportTime);
+   }
+
+   private void setFinalTransferTime(double finalTransferTime)
+   {
+      icpPlanner.setFinalTransferTime(finalTransferTime);
    }
 
    /**

@@ -153,9 +153,13 @@ public class WalkingSingleSupportState extends SingleSupportState
    {
       super.doTransitionIntoAction();
 
+      double defaultSwingTime = walkingMessageHandler.getDefaultSwingTime();
+      double defaultTransferTime = walkingMessageHandler.getDefaultTransferTime();
+      double finalTransferTime = walkingMessageHandler.getFinalTransferTime();
+
       if (balanceManager.isRecoveringFromDoubleSupportFall())
       {
-         nextFootstep = balanceManager.createFootstepForRecoveringFromDisturbance(swingSide, walkingMessageHandler.getDefaultSwingTime());
+         nextFootstep = balanceManager.createFootstepForRecoveringFromDisturbance(swingSide, defaultSwingTime);
          nextFootstep.setTrajectoryType(TrajectoryType.DEFAULT);
          walkingMessageHandler.reportWalkingAbortRequested();
          walkingMessageHandler.clearFootsteps();
@@ -168,7 +172,7 @@ public class WalkingSingleSupportState extends SingleSupportState
       if (nextFootstep.hasTimings())
          swingTime = nextFootstep.getSwingTime();
       else
-         swingTime = walkingMessageHandler.getDefaultSwingTime();
+         swingTime = defaultSwingTime;
 
       updateFootstepParameters();
 
@@ -180,7 +184,7 @@ public class WalkingSingleSupportState extends SingleSupportState
       balanceManager.addFootstepToPlan(walkingMessageHandler.peek(0));
       balanceManager.addFootstepToPlan(walkingMessageHandler.peek(1));
       balanceManager.setICPPlanSupportSide(supportSide);
-      balanceManager.initializeICPPlanForSingleSupport(walkingMessageHandler.getDefaultSwingTime(), walkingMessageHandler.getDefaultTransferTime());
+      balanceManager.initializeICPPlanForSingleSupport(defaultSwingTime, defaultTransferTime, finalTransferTime);
 
       if (balanceManager.isRecoveringFromDoubleSupportFall())
       {

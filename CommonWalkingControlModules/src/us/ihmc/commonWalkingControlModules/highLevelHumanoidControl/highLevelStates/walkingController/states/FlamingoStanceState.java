@@ -125,7 +125,10 @@ public class FlamingoStanceState extends SingleSupportState
 
       balanceManager.addFootstepToPlan(walkingMessageHandler.getFootstepAtCurrentLocation(swingSide));
       balanceManager.setICPPlanSupportSide(supportSide);
-      balanceManager.initializeICPPlanForSingleSupport(Double.POSITIVE_INFINITY, walkingMessageHandler.getDefaultTransferTime());
+      double defaultSwingTime = Double.POSITIVE_INFINITY;
+      double defaultTransferTime = walkingMessageHandler.getDefaultTransferTime();
+      double finalTransferTime = walkingMessageHandler.getFinalTransferTime();
+      balanceManager.initializeICPPlanForSingleSupport(defaultSwingTime, defaultTransferTime, finalTransferTime);
 
       pelvisOrientationManager.setToHoldCurrentDesiredInSupportFoot(supportSide);
       comHeightManager.setSupportLeg(getSupportSide());
@@ -166,7 +169,10 @@ public class FlamingoStanceState extends SingleSupportState
       balanceManager.clearICPPlan();
       balanceManager.addFootstepToPlan(walkingMessageHandler.getFootstepAtCurrentLocation(swingSide));
       balanceManager.setICPPlanSupportSide(supportSide);
-      balanceManager.initializeICPPlanForSingleSupport(loadFootDuration.getDoubleValue(), loadFootTransferDuration.getDoubleValue());
+      double defaultSwingTime = loadFootDuration.getDoubleValue();
+      double defaultTransferTime = loadFootTransferDuration.getDoubleValue();
+      double finalTransferTime = walkingMessageHandler.getFinalTransferTime();
+      balanceManager.initializeICPPlanForSingleSupport(defaultSwingTime, defaultTransferTime, finalTransferTime);
 
       balanceManager.freezePelvisXYControl();
    }
