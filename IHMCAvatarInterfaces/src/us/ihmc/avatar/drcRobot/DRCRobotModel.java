@@ -36,11 +36,14 @@ import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizerInterface;
 
 public interface DRCRobotModel extends SimulatedWholeBodyControllerParameters
 {
-   enum RobotTarget {SCS, GAZEBO, REAL_ROBOT, HEAD_ON_A_STICK}
+   enum RobotTarget
+   {
+      SCS, GAZEBO, REAL_ROBOT, HEAD_ON_A_STICK
+   }
 
    // TODO: RobotBoundingBoxes.java
 
-// public abstract boolean isRunningOnRealRobot();
+   // public abstract boolean isRunningOnRealRobot();
 
    public abstract FootstepPlanningParameterization getFootstepParameters();
 
@@ -77,13 +80,14 @@ public interface DRCRobotModel extends SimulatedWholeBodyControllerParameters
    public abstract SideDependentList<HandCommandManager> createHandCommandManager();
 
    public abstract MultiThreadedRobotControlElement createSimulatedHandController(FloatingRootJointRobot simulatedRobot,
-           ThreadDataSynchronizerInterface threadDataSynchronizer, HumanoidGlobalDataProducer globalDataProducer, CloseableAndDisposableRegistry closeableAndDisposableRegistry);
+         ThreadDataSynchronizerInterface threadDataSynchronizer, HumanoidGlobalDataProducer globalDataProducer,
+         CloseableAndDisposableRegistry closeableAndDisposableRegistry);
 
    public abstract DRCHandType getDRCHandType();
 
-   public abstract LinkedHashMap<NeckJointName,ImmutablePair<Double,Double>> getSliderBoardControlledNeckJointsWithLimits();
+   public abstract LinkedHashMap<NeckJointName, ImmutablePair<Double, Double>> getSliderBoardControlledNeckJointsWithLimits();
 
-   public abstract SideDependentList<LinkedHashMap<String,ImmutablePair<Double,Double>>> getSliderBoardControlledFingerJointsWithLimits();
+   public abstract SideDependentList<LinkedHashMap<String, ImmutablePair<Double, Double>>> getSliderBoardControlledFingerJointsWithLimits();
 
    public abstract LogSettings getLogSettings();
 

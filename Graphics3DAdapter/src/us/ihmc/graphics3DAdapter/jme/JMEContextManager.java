@@ -11,19 +11,18 @@ import us.ihmc.graphics3DAdapter.ContextManager;
 public abstract class JMEContextManager implements ContextManager
 {
    private JMERenderer jmeRenderer;
-   
+
    private boolean enableSwitching = true;
    private ArrayList<InputMapSetter> inputMapSetters = new ArrayList<InputMapSetter>();
-   
+
    protected ArrayList<JMEViewportAdapter> viewports = new ArrayList<JMEViewportAdapter>();
    private JMEViewportAdapter currentViewport;
-   
 
    public JMEContextManager(JMERenderer jmeRenderer)
    {
       this.jmeRenderer = jmeRenderer;
    }
-   
+
    public void setSwitchingEnabled(boolean enable)
    {
       enableSwitching = enable;
@@ -33,7 +32,6 @@ public abstract class JMEContextManager implements ContextManager
    {
       inputMapSetters.add(inputMapSetter);
    }
-
 
    public JMEViewportAdapter getCurrentViewport()
    {
@@ -50,16 +48,17 @@ public abstract class JMEContextManager implements ContextManager
       viewports.add(jmeViewportAdapter);
       addJMEViewportAdapterToContext(jmeViewportAdapter);
    }
-   
+
    public abstract void initialize();
+
    protected abstract void addJMEViewportAdapterToContext(JMEViewportAdapter jmeViewportAdapter);
+
    public abstract void focusOnCurrentWindow();
-   
-   
+
    protected void setCurrentViewport(JMEViewportAdapter currentViewport)
    {
       this.currentViewport = currentViewport;
-      
+
       jmeRenderer.getInputManager().clearMappings();
       getCurrentViewport().setDefaultInputMappings();
 
@@ -68,10 +67,10 @@ public abstract class JMEContextManager implements ContextManager
          inputMapSetter.setDefaultInputMappings();
       }
    }
-   
+
    protected void resetViewport(JMEViewportAdapter viewport)
    {
-      if(viewport != null)
+      if (viewport != null)
       {
          viewport.reset();
       }
@@ -82,23 +81,22 @@ public abstract class JMEContextManager implements ContextManager
       }
    }
 
-
    public void closeAndDispose()
    {
       this.jmeRenderer = null;
-      
+
       if (inputMapSetters != null)
       {
          inputMapSetters.clear();
          inputMapSetters = null;
       }
-         
+
       if (viewports != null)
       {
          viewports.clear();
          viewports = null;
       }
-      
+
       currentViewport = null;
    }
 }
