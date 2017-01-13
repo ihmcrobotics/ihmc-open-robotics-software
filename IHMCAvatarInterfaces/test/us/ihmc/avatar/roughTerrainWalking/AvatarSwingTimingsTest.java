@@ -42,6 +42,8 @@ public abstract class AvatarSwingTimingsTest implements MultiRobotTestInterface
 
       FootstepDataListMessage footsteps = new FootstepDataListMessage(0.6, 0.3, 0.1);
 
+      double initialTransferTime = 1.0;
+
       for (int i = 0; i < 10; i++)
       {
          RobotSide side = i % 2 == 0 ? RobotSide.LEFT : RobotSide.RIGHT;
@@ -52,7 +54,10 @@ public abstract class AvatarSwingTimingsTest implements MultiRobotTestInterface
          footstepData.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
 
          // start with fast swing and get slower
-         footstepData.setTimings(0.2 * i, 0.1 * i);
+         if (i == 0)
+            footstepData.setTimings(0.2 * i + 0.2, initialTransferTime);
+         else
+            footstepData.setTimings(0.2 * i + 0.2, 0.1 * i + 0.1);
 
          footsteps.add(footstepData);
       }
