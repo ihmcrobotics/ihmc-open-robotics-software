@@ -43,7 +43,6 @@ dependencies {
     compile group: 'javax.vecmath', name: 'vecmath', version: '1.5.2'
     compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
     compile 'net.sf.trove4j:trove4j:3.0.3'
-    compile "org.jfree:jfreechart:1.0.17"
 
     compile ihmc.getProjectDependency(":IHMCJavaToolkit")
     compile ihmc.getProjectDependency(":IHMCRoboticsToolkit")
