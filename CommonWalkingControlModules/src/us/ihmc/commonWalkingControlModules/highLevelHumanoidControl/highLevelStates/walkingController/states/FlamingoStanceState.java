@@ -103,6 +103,18 @@ public class FlamingoStanceState extends SingleSupportState
    }
 
    @Override
+   protected boolean hasMinimumTimePassed()
+   {
+      double minimumSwingTime;
+      if (balanceManager.isRecoveringFromDoubleSupportFall())
+         minimumSwingTime = 0.15;
+      else
+         minimumSwingTime = walkingMessageHandler.getDefaultSwingTime() * minimumSwingFraction.getDoubleValue();
+
+      return getTimeInCurrentState() > minimumSwingTime;
+   }
+
+   @Override
    public void doTransitionIntoAction()
    {
       super.doTransitionIntoAction();
@@ -136,6 +148,7 @@ public class FlamingoStanceState extends SingleSupportState
       return true;
    }
 
+   @Override
    public void handleEndEffectorLoadBearingCommand(EndEffectorLoadBearingCommand command)
    {
       if (command.getRequest(swingSide, EndEffector.FOOT) == LoadBearingRequest.LOAD)
