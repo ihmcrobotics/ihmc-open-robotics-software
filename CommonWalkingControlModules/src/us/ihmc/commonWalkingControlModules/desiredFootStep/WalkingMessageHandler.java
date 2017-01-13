@@ -404,9 +404,21 @@ public class WalkingMessageHandler
       return defaultTransferTime.getDoubleValue();
    }
 
+   public double getNextTransferTime()
+   {
+      Footstep nextFootstep = peek(0);
+      return nextFootstep.hasTimings() ? nextFootstep.getTransferTime() : getDefaultTransferTime();
+   }
+
    public double getDefaultSwingTime()
    {
       return defaultSwingTime.getDoubleValue();
+   }
+
+   public double getNextSwingTime()
+   {
+      Footstep nextFootstep = peek(0);
+      return nextFootstep.hasTimings() ? nextFootstep.getSwingTime() : getDefaultSwingTime();
    }
 
    public double getFinalTransferTime()
@@ -417,6 +429,12 @@ public class WalkingMessageHandler
    public double getDefaultStepTime()
    {
       return defaultTransferTime.getDoubleValue() + defaultSwingTime.getDoubleValue();
+   }
+
+   public double getNextStepTime()
+   {
+      Footstep nextFootstep = peek(0);
+      return nextFootstep.hasTimings() ? nextFootstep.getStepTime() : getDefaultStepTime();
    }
 
    public int getCurrentNumberOfFootsteps()

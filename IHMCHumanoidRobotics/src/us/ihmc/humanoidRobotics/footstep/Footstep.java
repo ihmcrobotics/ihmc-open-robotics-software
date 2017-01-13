@@ -526,6 +526,11 @@ public class Footstep
       return transferTime;
    }
 
+   public double getStepTime()
+   {
+      return swingTime + transferTime;
+   }
+
    public boolean epsilonEquals(Footstep otherFootstep, double epsilon)
    {
       boolean arePosesEqual = ankleReferenceFrame.epsilonEquals(otherFootstep.ankleReferenceFrame, epsilon);
