@@ -394,9 +394,9 @@ public class BalanceManager
       yoDesiredICPVelocity.getFrameTuple2dIncludingFrame(desiredICPVelocityToPack);
    }
 
-   public double getInitialTransferDuration()
+   public double getDefaultInitialTransferDuration()
    {
-      return icpPlanner.getInitialTransferDuration();
+      return icpPlanner.getDefaultInitialTransferTime();
    }
 
    public MomentumRateCommand getInverseDynamicsCommand()
