@@ -42,7 +42,7 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage> imp
    @RosExportedField(documentation = "swingTime is the time spent in single-support when stepping"
     + "\n - Queueing does not support varying swing times. If execution mode is QUEUE, all queued footsteps' swingTime will be overwritten"
     + "\n - The value can be overwritten by specifying a swing time in the FootstepDataMessage for each individual step.")
-   public double swingDefaultTime = 0.0;
+   public double defaultSwingTime = 0.0;
    @RosExportedField(documentation = "transferTime is the time spent in double-support between steps"
    + "\n - Queueing does not support varying transfer times. If execution mode is QUEUE, all queued footsteps' transferTime will be overwritten"
    + "\n - The value can be overwritten by specifying a transfer time in the FootstepDataMessage for each individual step.")
@@ -90,7 +90,7 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage> imp
       {
          this.footstepDataList = footstepDataList;
       }
-      this.swingDefaultTime = defaultSwingTime;
+      this.defaultSwingTime = defaultSwingTime;
       this.defaultTransferTime = defaultTransferTime;
       this.finalTransferTime = finalTransferTime;
       this.executionMode = executionMode;
@@ -117,7 +117,7 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage> imp
    public FootstepDataListMessage(double defaultSwingTime, double defaultTransferTime, double finalTransferTime)
    {
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
-      this.swingDefaultTime = defaultSwingTime;
+      this.defaultSwingTime = defaultSwingTime;
       this.defaultTransferTime = defaultTransferTime;
       this.finalTransferTime = finalTransferTime;
       this.executionMode = ExecutionMode.OVERRIDE;
@@ -159,7 +159,7 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage> imp
          }
       }
 
-      if (Math.abs(swingDefaultTime - otherList.swingDefaultTime) > epsilon)
+      if (Math.abs(defaultSwingTime - otherList.defaultSwingTime) > epsilon)
       {
          return false;
       }
@@ -206,7 +206,7 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage> imp
       }
       else
       {
-         return ("Starting Footstep: " + startingFootstep + "\n\tExecution Mode: " + this.executionMode + "\n\tTransfer Time: " + defaultTransferTime + "\n\tSwing Time: " + swingDefaultTime + "\n\tSize: " + this.size() + " Footsteps");
+         return ("Starting Footstep: " + startingFootstep + "\n\tExecution Mode: " + this.executionMode + "\n\tTransfer Time: " + defaultTransferTime + "\n\tSwing Time: " + defaultSwingTime + "\n\tSize: " + this.size() + " Footsteps");
       }
    }
 
@@ -217,7 +217,7 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage> imp
 
    public FootstepDataListMessage transform(RigidBodyTransform transform)
    {
-      FootstepDataListMessage ret = new FootstepDataListMessage(swingDefaultTime, defaultTransferTime, finalTransferTime);
+      FootstepDataListMessage ret = new FootstepDataListMessage(defaultSwingTime, defaultTransferTime, finalTransferTime);
 
       for (FootstepDataMessage footstepData : footstepDataList)
       {
@@ -228,9 +228,9 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage> imp
       return ret;
    }
 
-   public void setDefaultSwingTime(double swingDefaultTime)
+   public void setDefaultSwingTime(double defaultSwingTime)
    {
-      this.swingDefaultTime = swingDefaultTime;
+      this.defaultSwingTime = defaultSwingTime;
    }
 
    public void setDefaultTransferTime(double defaultTransferTime)
@@ -257,7 +257,7 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage> imp
          footstepDataList.add(new FootstepDataMessage(random));
       }
 
-      this.swingDefaultTime = RandomTools.generateRandomDoubleWithEdgeCases(random, 0.1);
+      this.defaultSwingTime = RandomTools.generateRandomDoubleWithEdgeCases(random, 0.1);
       this.defaultTransferTime = RandomTools.generateRandomDoubleWithEdgeCases(random, 0.1);
       this.finalTransferTime = RandomTools.generateRandomDoubleWithEdgeCases(random, 0.1);
       this.executionMode = RandomTools.generateRandomEnum(random, ExecutionMode.class);
