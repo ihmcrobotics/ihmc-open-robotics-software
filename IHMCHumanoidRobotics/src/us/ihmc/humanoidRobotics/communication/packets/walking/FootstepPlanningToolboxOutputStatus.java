@@ -42,7 +42,7 @@ public class FootstepPlanningToolboxOutputStatus extends StatusPacket<FootstepPl
          footstepDataList.footstepDataList.add(new FootstepDataMessage(footstepData));
       if (other.notes != null)
          footstepDataList.notes = new String(other.notes);
-      footstepDataList.swingDefaultTime = other.footstepDataList.swingDefaultTime;
+      footstepDataList.defaultSwingTime = other.footstepDataList.defaultSwingTime;
       footstepDataList.defaultTransferTime = other.footstepDataList.defaultTransferTime;
       footstepDataList.uniqueId = other.footstepDataList.uniqueId;
    }

@@ -488,6 +488,7 @@ public class Footstep
    {
       this.footstepType = footstepType;
    }
+
    public FootstepType getFootstepType()
    {
       return footstepType;

@@ -87,7 +87,7 @@ public class IHMCROSTranslationRuntimeTools
    {
       FootstepDataListMessage footsteps = new FootstepDataListMessage();
 
-      footsteps.swingDefaultTime = message.getSwingTime();
+      footsteps.defaultSwingTime = message.getSwingTime();
       footsteps.defaultTransferTime = message.getTransferTime();
       footsteps.setUniqueId(message.getUniqueId());
       footsteps.executionMode = ExecutionMode.values[message.getExecutionMode()];
@@ -261,7 +261,7 @@ public class IHMCROSTranslationRuntimeTools
 
       FootstepDataListRosMessage message = messageFactory.newFromType(rosAnnotation.rosPackage() + "/" + rosMessageClassNameFromIHMCMessage);
 
-      message.setSwingTime(footstepList.swingDefaultTime);
+      message.setSwingTime(footstepList.defaultSwingTime);
       message.setTransferTime(footstepList.defaultTransferTime);
       message.setUniqueId(footstepList.getUniqueId());
       message.setExecutionMode((byte) footstepList.executionMode.ordinal());
