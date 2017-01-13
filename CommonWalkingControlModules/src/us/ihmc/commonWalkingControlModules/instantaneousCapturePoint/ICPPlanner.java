@@ -749,7 +749,7 @@ public class ICPPlanner
       minSwingTime.set(minTime);
    }
 
-   public double getInitialTransferDuration()
+   public double getDefaultInitialTransferTime()
    {
       return defaultInitialTransferTime.getDoubleValue();
    }
