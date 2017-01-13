@@ -1,7 +1,7 @@
 package us.ihmc.graphics3DDescription.yoGraphics;
 
 import us.ihmc.graphics3DDescription.Graphics3DObject;
-import us.ihmc.plotting.artifact.Artifact;
+import us.ihmc.graphics3DDescription.plotting.artifact.Artifact;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.Transform3d;
 

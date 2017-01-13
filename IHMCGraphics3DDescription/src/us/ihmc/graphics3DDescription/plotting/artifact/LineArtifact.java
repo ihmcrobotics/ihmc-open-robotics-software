@@ -1,12 +1,12 @@
-package us.ihmc.plotting.artifact;
+package us.ihmc.graphics3DDescription.plotting.artifact;
 
 import java.awt.BasicStroke;
 
 import javax.vecmath.Point2d;
 import javax.vecmath.Vector2d;
 
-import us.ihmc.plotting.Graphics2DAdapter;
-import us.ihmc.plotting.Plotter2DAdapter;
+import us.ihmc.graphics3DDescription.plotting.Graphics2DAdapter;
+import us.ihmc.graphics3DDescription.plotting.Plotter2DAdapter;
 import us.ihmc.robotics.geometry.Line2d;
 import us.ihmc.robotics.geometry.LineSegment2d;
 

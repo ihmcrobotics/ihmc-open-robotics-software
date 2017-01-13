@@ -4,6 +4,7 @@ import java.awt.Color;
 
 import javax.vecmath.Point2d;
 
+import us.ihmc.graphics3DDescription.plotting.artifact.LineArtifact;
 import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphics3DDescription.yoGraphics.plotting.YoArtifactLine2d;
 import us.ihmc.graphics3DDescription.yoGraphics.plotting.YoArtifactLineSegment2d;
@@ -11,7 +12,6 @@ import us.ihmc.graphics3DDescription.yoGraphics.plotting.YoArtifactOval;
 import us.ihmc.graphics3DDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.graphics3DDescription.yoGraphics.plotting.YoArtifactPosition;
 import us.ihmc.plotting.Plotter;
-import us.ihmc.plotting.artifact.LineArtifact;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
