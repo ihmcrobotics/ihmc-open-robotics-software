@@ -780,17 +780,17 @@ public class ICPPlanner
       return remainingTime.getDoubleValue();
    }
 
-   public void setInitialDoubleSupportTime(double time)
+   public void setDefaultInitialDoubleSupportTime(double time)
    {
       defaultInitialTransferTime.set(time);
    }
 
-   public void setDoubleSupportTime(double time)
+   public void setDefaultDoubleSupportTime(double time)
    {
       defaultTransferTime.set(time);
    }
 
-   public void setSingleSupportTime(double time)
+   public void setDefaultSingleSupportTime(double time)
    {
       defaultSwingTime.set(time);
    }
