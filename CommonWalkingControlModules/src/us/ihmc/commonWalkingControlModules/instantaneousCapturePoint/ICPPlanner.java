@@ -242,36 +242,24 @@ public class ICPPlanner
 
       referenceCMPsCalculator.addUpcomingFootstep(footstep);
 
-      // TODO set swing time and transfer time from footstep using referenceCMPsCalculator.getNumberOfFootstepRegistered().
-      // TODO also add the following to keep using the initial transfer when no transfer is provided on the very first footstep.
-      // Unless all of the default time information is gone from the planner, treated outside and here it is assumed that the time information is passed via the footsteps.
-//      boolean hasNoTransferTime = Double.isNaN(footstep.getTranferTime());
-//      boolean isFirstFootstep = referenceCMPsCalculator.getNumberOfFootstepRegistered() == 1;
-//      if (isStanding.getBooleanValue() && hasNoTransferTime && isFirstFootstep)
-//         transferTimes.get(0).set(defaultInitialTransferTime.getDoubleValue());
+      boolean hasTimings = footstep.hasTimings();
+      int footstepIndex = referenceCMPsCalculator.getNumberOfFootstepRegistered() - 1;
 
-      boolean isFirstFootstep = referenceCMPsCalculator.getNumberOfFootstepRegistered() == 1;
-      if (isStanding.getBooleanValue() && isFirstFootstep)
-         transferTimes.get(0).set(defaultInitialTransferTime.getDoubleValue());
-   }
+      if (hasTimings)
+      {
+         swingTimes.get(footstepIndex).set(footstep.getSwingTime());
+         transferTimes.get(footstepIndex).set(footstep.getTransferTime());
+      }
+      else
+      {
+         swingTimes.get(footstepIndex).setToNaN();
 
-   /**
-    * Temporary method before {@link Footstep} gets refactored to hold onto the swing time and the transfer time.
-    * @deprecated
-    * @param footstep
-    * @param transferTimeToStep
-    * @param swingTime
-    */
-   public void addFootstepToPlan(Footstep footstep, double transferTimeToStep, double swingTime)
-   {
-      if (footstep == null)
-         return;
-
-      addFootstepToPlan(footstep);
-
-      int index = referenceCMPsCalculator.getNumberOfFootstepRegistered() - 1;
-      swingTimes.get(index).set(swingTime);
-      transferTimes.get(index).set(transferTimeToStep);
+         boolean isFirstFootstep = referenceCMPsCalculator.getNumberOfFootstepRegistered() == 1;
+         if (isStanding.getBooleanValue() && isFirstFootstep)
+            transferTimes.get(0).set(defaultInitialTransferTime.getDoubleValue());
+         else
+            transferTimes.get(footstepIndex).setToNaN();
+      }
    }
 
    public void setDesiredCapturePointState(FramePoint currentDesiredCapturePointPosition, FrameVector currentDesiredCapturePointVelocity)
