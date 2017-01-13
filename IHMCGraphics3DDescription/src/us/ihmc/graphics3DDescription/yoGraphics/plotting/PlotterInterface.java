@@ -1,6 +1,6 @@
 package us.ihmc.graphics3DDescription.yoGraphics.plotting;
 
-import us.ihmc.plotting.artifact.Artifact;
+import us.ihmc.graphics3DDescription.plotting.artifact.Artifact;
 
 public interface PlotterInterface
 {

@@ -1,10 +1,10 @@
-package us.ihmc.plotting;
+package us.ihmc.graphics3DDescription.plotting;
 
 import javax.vecmath.Tuple2d;
 
-import us.ihmc.plotting.frames.MetersReferenceFrame;
-import us.ihmc.plotting.frames.PixelsReferenceFrame;
-import us.ihmc.plotting.frames.PlotterReferenceFrame;
+import us.ihmc.graphics3DDescription.plotting.frames.MetersReferenceFrame;
+import us.ihmc.graphics3DDescription.plotting.frames.PixelsReferenceFrame;
+import us.ihmc.graphics3DDescription.plotting.frames.PlotterReferenceFrame;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 

@@ -6,9 +6,9 @@ import java.awt.Color;
 import javax.vecmath.Point2d;
 import javax.vecmath.Vector2d;
 
+import us.ihmc.graphics3DDescription.plotting.Graphics2DAdapter;
+import us.ihmc.graphics3DDescription.plotting.Plotter2DAdapter;
 import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicPosition.GraphicType;
-import us.ihmc.plotting.Graphics2DAdapter;
-import us.ihmc.plotting.Plotter2DAdapter;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;

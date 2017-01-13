@@ -10,8 +10,9 @@ import java.util.ArrayList;
 import javax.swing.JPanel;
 import javax.vecmath.Point2d;
 
-import us.ihmc.plotting.artifact.Artifact;
-import us.ihmc.plotting.artifact.ArtifactsChangedListener;
+import us.ihmc.graphics3DDescription.plotting.Plotter2DAdapter;
+import us.ihmc.graphics3DDescription.plotting.artifact.Artifact;
+import us.ihmc.graphics3DDescription.plotting.artifact.ArtifactsChangedListener;
 
 public class PlotterLegendPanel extends JPanel implements ArtifactsChangedListener
 {
