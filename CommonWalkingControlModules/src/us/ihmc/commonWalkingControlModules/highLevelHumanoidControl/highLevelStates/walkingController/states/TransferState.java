@@ -123,7 +123,7 @@ public abstract class TransferState extends WalkingState
 
       boolean isPreviousStateDoubleSupport = isInitialTransfer();
       if (isPreviousStateDoubleSupport)
-         transferTime = balanceManager.getInitialTransferDuration();
+         transferTime = balanceManager.getDefaultInitialTransferDuration();
       else
          transferTime = walkingMessageHandler.getTransferTime();
 
