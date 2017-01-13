@@ -518,8 +518,8 @@ public class WalkingMessageHandler
       if (footstepData.hasTimings())
          footstep.setTimings(footstepData.getSwingTime(), footstepData.getTransferTime());
 
-      footstep.trajectoryType = trajectoryType;
-      footstep.swingHeight = footstepData.getSwingHeight();
+      footstep.setTrajectoryType(trajectoryType);
+      footstep.setSwingHeight(footstepData.getSwingHeight());
       switch (footstepData.getOrigin())
       {
       case AT_ANKLE_FRAME:

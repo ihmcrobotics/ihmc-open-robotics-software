@@ -187,8 +187,8 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
       {
          predictedContactPoints = null;
       }
-      trajectoryType = footstep.trajectoryType;
-      swingHeight = footstep.swingHeight;
+      trajectoryType = footstep.getTrajectoryType();
+      swingHeight = footstep.getSwingHeight();
 
       if (footstep.getSwingWaypoints().size() != 0)
       {
