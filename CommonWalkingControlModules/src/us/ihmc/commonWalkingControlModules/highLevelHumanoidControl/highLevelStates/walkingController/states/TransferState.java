@@ -9,6 +9,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Hi
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.BalanceManager;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.CenterOfMassHeightManager;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
+import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -115,17 +116,18 @@ public abstract class TransferState extends WalkingState
       feetManager.initializeContactStatesForDoubleSupport(transferToSide);
       momentumBasedController.updateBipedSupportPolygons(); // need to always update biped support polygons after a change to the contact states
 
-      failureDetectionControlModule.setNextFootstep(walkingMessageHandler.peek(0));
+      Footstep nextFootstep = walkingMessageHandler.peek(0);
+      failureDetectionControlModule.setNextFootstep(nextFootstep);
 
       balanceManager.resetPushRecovery();
 
       double transferTime;
 
       boolean isPreviousStateDoubleSupport = isInitialTransfer();
-      if (isPreviousStateDoubleSupport)
-         transferTime = balanceManager.getInitialTransferDuration();
+      if (isPreviousStateDoubleSupport && (nextFootstep == null || !nextFootstep.hasTimings()))
+         transferTime = balanceManager.getDefaultInitialTransferDuration();
       else
-         transferTime = walkingMessageHandler.getTransferTime();
+         transferTime = walkingMessageHandler.getNextTransferTime();
 
       pelvisOrientationManager.setTrajectoryTime(transferTime);
    }

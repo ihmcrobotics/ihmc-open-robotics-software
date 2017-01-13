@@ -19,7 +19,7 @@ public abstract class SingleSupportState extends WalkingState
    protected final RobotSide supportSide;
    
    private final BooleanYoVariable hasMinimumTimePassed = new BooleanYoVariable("hasMinimumTimePassed", registry);
-   private final DoubleYoVariable minimumSwingFraction = new DoubleYoVariable("minimumSwingFraction", registry);
+   protected final DoubleYoVariable minimumSwingFraction = new DoubleYoVariable("minimumSwingFraction", registry);
 
    protected final WalkingMessageHandler walkingMessageHandler;
    protected final SideDependentList<FootSwitchInterface> footSwitches;
@@ -70,16 +70,7 @@ public abstract class SingleSupportState extends WalkingState
       return hasMinimumTimePassed.getBooleanValue() && footSwitches.get(swingSide).hasFootHitGround();
    }
 
-   private boolean hasMinimumTimePassed()
-   {
-      double minimumSwingTime;
-      if (balanceManager.isRecoveringFromDoubleSupportFall())
-         minimumSwingTime = 0.15;
-      else
-         minimumSwingTime = walkingMessageHandler.getSwingTime() * minimumSwingFraction.getDoubleValue();
-
-      return getTimeInCurrentState() > minimumSwingTime;
-   }
+   protected abstract boolean hasMinimumTimePassed();
 
    @Override
    public void doTransitionIntoAction()
