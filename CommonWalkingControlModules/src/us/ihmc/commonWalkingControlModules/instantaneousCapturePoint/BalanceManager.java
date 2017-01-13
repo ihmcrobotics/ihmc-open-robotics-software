@@ -396,7 +396,7 @@ public class BalanceManager
 
    public double getInitialTransferDuration()
    {
-      return icpPlanner.getInitialTransferDuration();
+      return icpPlanner.getDefaultInitialTransferTime();
    }
 
    public MomentumRateCommand getInverseDynamicsCommand()
