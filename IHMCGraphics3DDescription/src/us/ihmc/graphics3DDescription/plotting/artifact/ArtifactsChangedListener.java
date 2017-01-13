@@ -1,4 +1,4 @@
-package us.ihmc.plotting.artifact;
+package us.ihmc.graphics3DDescription.plotting.artifact;
 
 import java.util.ArrayList;
 

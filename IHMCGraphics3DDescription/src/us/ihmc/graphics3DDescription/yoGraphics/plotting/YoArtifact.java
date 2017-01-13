@@ -5,9 +5,9 @@ import java.util.ArrayList;
 
 import us.ihmc.graphics3DDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphics3DDescription.appearance.YoAppearanceRGBColor;
+import us.ihmc.graphics3DDescription.plotting.Graphics2DAdapter;
+import us.ihmc.graphics3DDescription.plotting.artifact.Artifact;
 import us.ihmc.graphics3DDescription.yoGraphics.RemoteYoGraphic;
-import us.ihmc.plotting.Graphics2DAdapter;
-import us.ihmc.plotting.artifact.Artifact;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 
 public abstract class YoArtifact extends Artifact implements RemoteYoGraphic
