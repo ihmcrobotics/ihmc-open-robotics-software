@@ -42,29 +42,79 @@ public abstract class AvatarSwingTimingsTest implements MultiRobotTestInterface
 
       FootstepDataListMessage footsteps = new FootstepDataListMessage(0.6, 0.3, 0.1);
 
-      double initialTransferTime = 1.0;
-
-      for (int i = 0; i < 10; i++)
+      for (int stepIndex = 0; stepIndex < 10; stepIndex++)
       {
-         RobotSide side = i % 2 == 0 ? RobotSide.LEFT : RobotSide.RIGHT;
+         RobotSide side = stepIndex % 2 == 0 ? RobotSide.LEFT : RobotSide.RIGHT;
          double y = side == RobotSide.LEFT ? 0.15 : -0.15;
-         Point3d location = new Point3d(0.3 * (i+1), y, 0.0);
+         Point3d location = new Point3d(0.3 * (stepIndex + 1), y, 0.0);
          Quat4d orientation = new Quat4d(0.0, 0.0, 0.0, 1.0);
          FootstepDataMessage footstepData = new FootstepDataMessage(side, location, orientation);
          footstepData.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
 
-         // start with fast swing and get slower
-         double swingTime = 0.2 * i + 0.3;
-         if (i == 0)
-            footstepData.setTimings(swingTime, initialTransferTime);
-         else
-            footstepData.setTimings(swingTime, 0.1 * i + 0.1);
+         double swingTime, transferTime;
+
+         switch (stepIndex)
+         {
+         case 0:
+            // start with very slow swings and transfers
+            transferTime = 1.0; // initial transfer
+            swingTime = 3.0;
+            footstepData.setTimings(swingTime, transferTime);
+            break;
+         case 1:
+            // do a default step
+            break;
+         case 2:
+            // do a slow swing
+            transferTime = 1.0;
+            swingTime = 3.0;
+            footstepData.setTimings(swingTime, transferTime);
+            break;
+         case 3:
+            // do a default step
+            break;
+         case 4:
+            // do a default step
+            break;
+         case 5:
+            // do a fast swing and transfer
+            transferTime = 0.2;
+            swingTime = 0.6;
+            footstepData.setTimings(swingTime, transferTime);
+            break;
+         case 6:
+            // do a slow swing
+            transferTime = 1.0;
+            swingTime = 3.0;
+            footstepData.setTimings(swingTime, transferTime);
+            break;
+         case 7:
+            // do a fast swing and transfer
+            transferTime = 0.2;
+            swingTime = 0.6;
+            footstepData.setTimings(swingTime, transferTime);
+            break;
+         case 8:
+            // do a slow swing
+            transferTime = 1.0;
+            swingTime = 3.0;
+            footstepData.setTimings(swingTime, transferTime);
+            break;
+         case 9:
+            // do a slow transfer and a fast swing
+            transferTime = 3.0;
+            swingTime = 0.6;
+            footstepData.setTimings(swingTime, transferTime);
+            break;
+         default:
+            break;
+         }
 
          footsteps.add(footstepData);
       }
 
       drcSimulationTestHelper.send(footsteps);
-      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(14.0));
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(25.0));
    }
 
    @Before
