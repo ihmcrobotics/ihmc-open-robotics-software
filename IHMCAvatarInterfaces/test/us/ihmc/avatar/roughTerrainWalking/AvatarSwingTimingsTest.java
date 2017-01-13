@@ -5,6 +5,9 @@ import static org.junit.Assert.assertTrue;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 
+import org.junit.After;
+import org.junit.Before;
+
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.DRCStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
@@ -14,6 +17,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMe
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage.FootstepOrigin;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
@@ -57,4 +61,28 @@ public abstract class AvatarSwingTimingsTest implements MultiRobotTestInterface
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(14.0));
    }
 
+   @Before
+   public void showMemoryUsageBeforeTest()
+   {
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+   }
+
+   @After
+   public void destroySimulationAndRecycleMemory()
+   {
+      if (simulationTestingParameters.getKeepSCSUp())
+      {
+         ThreadTools.sleepForever();
+      }
+
+      // Do this here in case a test fails. That way the memory will be recycled.
+      if (drcSimulationTestHelper != null)
+      {
+         drcSimulationTestHelper.destroySimulation();
+         drcSimulationTestHelper = null;
+      }
+
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+      simulationTestingParameters = null;
+   }
 }
