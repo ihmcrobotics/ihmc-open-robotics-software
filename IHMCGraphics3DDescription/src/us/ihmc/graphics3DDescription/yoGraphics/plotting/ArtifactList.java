@@ -2,7 +2,7 @@ package us.ihmc.graphics3DDescription.yoGraphics.plotting;
 
 import java.util.ArrayList;
 
-import us.ihmc.plotting.artifact.Artifact;
+import us.ihmc.graphics3DDescription.plotting.artifact.Artifact;
 
 public class ArtifactList
 {

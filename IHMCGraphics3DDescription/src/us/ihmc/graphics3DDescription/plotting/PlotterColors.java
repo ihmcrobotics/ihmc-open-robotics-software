@@ -1,4 +1,4 @@
-package us.ihmc.plotting;
+package us.ihmc.graphics3DDescription.plotting;
 
 import java.awt.Color;
 
