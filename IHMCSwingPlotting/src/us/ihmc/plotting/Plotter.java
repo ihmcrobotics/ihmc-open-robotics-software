@@ -23,6 +23,7 @@ import javax.vecmath.Point2d;
 import javax.vecmath.Vector2d;
 import javax.vecmath.Vector3d;
 
+import us.ihmc.graphics3DDescription.yoGraphics.plotting.PlotterInterface;
 import us.ihmc.plotting.artifact.Artifact;
 import us.ihmc.plotting.artifact.ArtifactsChangedListener;
 import us.ihmc.plotting.artifact.LineArtifact;
@@ -45,7 +46,7 @@ import us.ihmc.tools.io.printing.PrintTools;
  * TODO Fix zoom in for vector
  */
 @SuppressWarnings("serial")
-public class Plotter
+public class Plotter implements PlotterInterface
 {
    private static final boolean SHOW_LABELS_BY_DEFAULT = true;
    private static final boolean SHOW_SELECTION_BY_DEFAULT = false;
@@ -866,6 +867,7 @@ public class Plotter
       return pointArtifact;
    }
 
+   @Override
    public void addArtifact(Artifact newArtifact)
    {
       synchronized (artifacts)
