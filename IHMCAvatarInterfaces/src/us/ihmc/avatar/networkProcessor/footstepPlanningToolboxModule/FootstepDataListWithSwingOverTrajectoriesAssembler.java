@@ -61,8 +61,8 @@ public class FootstepDataListWithSwingOverTrajectoriesAssembler
                                            PlanarRegionsList planarRegionsList)
    {
       FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
-      footstepDataListMessage.setSwingTime(swingTime);
-      footstepDataListMessage.setTransferTime(transferTime);
+      footstepDataListMessage.setDefaultSwingTime(swingTime);
+      footstepDataListMessage.setDefaultTransferTime(transferTime);
 
       for (int i = 0; i < footstepPlan.getNumberOfSteps(); i++)
       {
@@ -119,8 +119,8 @@ public class FootstepDataListWithSwingOverTrajectoriesAssembler
                                            PlanarRegionsList planarRegionsList)
    {
       FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
-      footstepDataListMessage.setSwingTime(swingTime);
-      footstepDataListMessage.setTransferTime(transferTime);
+      footstepDataListMessage.setDefaultSwingTime(swingTime);
+      footstepDataListMessage.setDefaultTransferTime(transferTime);
 
       for (int i = 0; i < footstepList.size(); i++)
       {
