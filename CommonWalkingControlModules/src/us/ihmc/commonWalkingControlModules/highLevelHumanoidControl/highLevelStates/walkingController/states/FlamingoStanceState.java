@@ -123,6 +123,10 @@ public class FlamingoStanceState extends SingleSupportState
       balanceManager.setNextFootstep(null);
       feetManager.handleFootTrajectoryCommand(walkingMessageHandler.pollFootTrajectoryForFlamingoStance(swingSide));
 
+      balanceManager.addFootstepToPlan(walkingMessageHandler.getFootstepAtCurrentLocation(swingSide));
+      balanceManager.setICPPlanSupportSide(supportSide);
+      balanceManager.initializeICPPlanForSingleSupport(Double.POSITIVE_INFINITY, walkingMessageHandler.getDefaultTransferTime());
+
       pelvisOrientationManager.setToHoldCurrentDesiredInSupportFoot(supportSide);
       comHeightManager.setSupportLeg(getSupportSide());
       loadFoot.set(false);
