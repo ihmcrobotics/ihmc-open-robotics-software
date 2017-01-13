@@ -54,10 +54,11 @@ public abstract class AvatarSwingTimingsTest implements MultiRobotTestInterface
          footstepData.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
 
          // start with fast swing and get slower
+         double swingTime = 0.2 * i + 0.3;
          if (i == 0)
-            footstepData.setTimings(0.2 * i + 0.2, initialTransferTime);
+            footstepData.setTimings(swingTime, initialTransferTime);
          else
-            footstepData.setTimings(0.2 * i + 0.2, 0.1 * i + 0.1);
+            footstepData.setTimings(swingTime, 0.1 * i + 0.1);
 
          footsteps.add(footstepData);
       }
