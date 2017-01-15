@@ -2,8 +2,7 @@ package us.ihmc.graphics3DDescription.yoGraphics.plotting;
 
 import java.util.ArrayList;
 
-import us.ihmc.plotting.Plotter;
-import us.ihmc.plotting.artifact.Artifact;
+import us.ihmc.graphics3DDescription.plotting.artifact.Artifact;
 
 public class ArtifactList
 {
@@ -86,7 +85,7 @@ public class ArtifactList
       this.artifacts.addAll(artifacts);
    }
 
-   public void addArtifactsToPlotter(Plotter plotter)
+   public void addArtifactsToPlotter(PlotterInterface plotter)
    {
       for (Artifact artifact : artifacts)
       {

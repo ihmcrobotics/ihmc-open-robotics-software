@@ -194,14 +194,14 @@ public class SwingOverPlanarRegionsTrajectoryExpander
       swingFloorPlane.getNormal().sub(swingStartPosition.getPoint(), swingEndPosition.getPoint());
       rigidBodyTransform.transform(swingFloorPlane.getNormal());
       swingFloorPlane.getNormal().normalize();
-      
+
       swingStartToeFacingSwingEndPlane.setPoint(swingStartPosition.getPoint());
       swingStartToeFacingSwingEndPlane.getNormal().sub(swingEndPosition.getPoint(), swingStartPosition.getPoint());
       swingStartToeFacingSwingEndPlane.getNormal().normalize();
       swingStartToeFacingSwingEndPlane.getNormal().scale(soleToToeLength);
       swingStartToeFacingSwingEndPlane.getPoint().add(swingStartToeFacingSwingEndPlane.getNormal());
       swingStartToeFacingSwingEndPlane.getNormal().normalize();
-      
+
       swingEndHeelFacingSwingStartPlane.setPoint(swingEndPosition.getPoint());
       swingEndHeelFacingSwingStartPlane.getNormal().sub(swingStartPosition.getPoint(), swingEndPosition.getPoint());
       swingEndHeelFacingSwingStartPlane.getNormal().normalize();
@@ -224,6 +224,9 @@ public class SwingOverPlanarRegionsTrajectoryExpander
          updateVisualizer();
          numberOfTriesCounter.countOne();
       }
+
+      // TODO adjust swing time is speed is too high
+      double maxSpeed = twoWaypointSwingGenerator.computeAndGetMaxSpeed();
    }
 
    private SwingOverPlanarRegionsTrajectoryExpansionStatus tryATrajectory(PlanarRegionsList planarRegionsList)

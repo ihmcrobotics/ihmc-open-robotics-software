@@ -75,6 +75,7 @@ dependencies {
 	compile ihmc.getProjectDependency(":IHMCJavaToolkit")
 	compile ihmc.getProjectDependency(":IHMCRoboticsToolkit")
     compile ihmc.getProjectDependency(":IHMCGraphics3DDescription")
+    compile ihmc.getProjectDependency(":IHMCSwingPlotting")
     compile ihmc.getProjectDependency(":IHMCGeometry")
 
     testCompile group: 'org.ejml', name: 'dense64', version: '0.28'

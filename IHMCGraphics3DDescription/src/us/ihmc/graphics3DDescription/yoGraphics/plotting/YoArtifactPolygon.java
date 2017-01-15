@@ -6,8 +6,8 @@ import java.awt.geom.Rectangle2D;
 
 import javax.vecmath.Point2d;
 
-import us.ihmc.plotting.Graphics2DAdapter;
-import us.ihmc.plotting.Plotter2DAdapter;
+import us.ihmc.graphics3DDescription.plotting.Graphics2DAdapter;
+import us.ihmc.graphics3DDescription.plotting.Plotter2DAdapter;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;

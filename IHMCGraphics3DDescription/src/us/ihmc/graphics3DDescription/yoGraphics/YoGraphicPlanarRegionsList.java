@@ -18,7 +18,7 @@ import us.ihmc.graphics3DDescription.ModifiableMeshDataHolder;
 import us.ihmc.graphics3DDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphics3DDescription.appearance.YoAppearance;
 import us.ihmc.graphics3DDescription.instructions.Graphics3DAddMeshDataInstruction;
-import us.ihmc.plotting.artifact.Artifact;
+import us.ihmc.graphics3DDescription.plotting.artifact.Artifact;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
