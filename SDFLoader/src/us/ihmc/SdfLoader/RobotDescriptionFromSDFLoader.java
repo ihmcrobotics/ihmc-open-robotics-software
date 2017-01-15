@@ -222,6 +222,7 @@ public class RobotDescriptionFromSDFLoader
          }
          catch (Throwable e)
          {
+            PrintTools.warn(this, e.getMessage());
             PrintTools.warn(this, "Could not load visuals for link " + link.getName() + "! Using an empty LinkGraphicsDescription.");
 
             if(DEBUG)

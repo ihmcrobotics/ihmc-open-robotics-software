@@ -5,7 +5,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.TrackingWeig
 
 public class TrackingWeightsMessage extends TrackablePacket<TrackingWeightsMessage>
 {
-   BodyWeights bodyWeights;
+   public BodyWeights bodyWeights;
    
    public TrackingWeightsMessage()
    {

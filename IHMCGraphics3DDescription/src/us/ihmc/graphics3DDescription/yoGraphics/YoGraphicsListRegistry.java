@@ -3,9 +3,9 @@ package us.ihmc.graphics3DDescription.yoGraphics;
 import java.util.ArrayList;
 import java.util.List;
 
+import us.ihmc.graphics3DDescription.plotting.artifact.Artifact;
 import us.ihmc.graphics3DDescription.yoGraphics.plotting.ArtifactList;
-import us.ihmc.plotting.Plotter;
-import us.ihmc.plotting.artifact.Artifact;
+import us.ihmc.graphics3DDescription.yoGraphics.plotting.PlotterInterface;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.tools.gui.GraphicsUpdatable;
 
@@ -207,7 +207,7 @@ public class YoGraphicsListRegistry
       }
    }
 
-   public void addArtifactListsToPlotter(Plotter plotter)
+   public void addArtifactListsToPlotter(PlotterInterface plotter)
    {
       if (alreadyAddedToPlotter)
       {
