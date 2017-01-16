@@ -2,15 +2,15 @@ package us.ihmc.graphics3DAdapter.graphics;
 
 import java.util.ArrayList;
 
-import us.ihmc.graphics3DDescription.instructions.Graphics3DAddExtrusionInstruction;
-import us.ihmc.graphics3DDescription.instructions.Graphics3DAddHeightMapInstruction;
-import us.ihmc.graphics3DDescription.instructions.Graphics3DAddMeshDataInstruction;
-import us.ihmc.graphics3DDescription.instructions.Graphics3DAddModelFileInstruction;
-import us.ihmc.graphics3DDescription.instructions.Graphics3DPrimitiveInstruction;
-import us.ihmc.graphics3DDescription.instructions.primitives.Graphics3DIdentityInstruction;
-import us.ihmc.graphics3DDescription.instructions.primitives.Graphics3DRotateInstruction;
-import us.ihmc.graphics3DDescription.instructions.primitives.Graphics3DScaleInstruction;
-import us.ihmc.graphics3DDescription.instructions.primitives.Graphics3DTranslateInstruction;
+import us.ihmc.graphicsDescription.instructions.Graphics3DAddExtrusionInstruction;
+import us.ihmc.graphicsDescription.instructions.Graphics3DAddHeightMapInstruction;
+import us.ihmc.graphicsDescription.instructions.Graphics3DAddMeshDataInstruction;
+import us.ihmc.graphicsDescription.instructions.Graphics3DAddModelFileInstruction;
+import us.ihmc.graphicsDescription.instructions.Graphics3DPrimitiveInstruction;
+import us.ihmc.graphicsDescription.instructions.primitives.Graphics3DIdentityInstruction;
+import us.ihmc.graphicsDescription.instructions.primitives.Graphics3DRotateInstruction;
+import us.ihmc.graphicsDescription.instructions.primitives.Graphics3DScaleInstruction;
+import us.ihmc.graphicsDescription.instructions.primitives.Graphics3DTranslateInstruction;
 
 
 

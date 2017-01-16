@@ -2,7 +2,7 @@ package us.ihmc.graphics3DAdapter;
 
 import java.util.ArrayList;
 
-import us.ihmc.graphics3DDescription.HeightMap;
+import us.ihmc.graphicsDescription.HeightMap;
 import us.ihmc.robotics.geometry.BoundingBox3d;
 
 public class CombinedHeightMap implements HeightMap

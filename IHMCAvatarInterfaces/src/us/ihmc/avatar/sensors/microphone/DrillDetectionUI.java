@@ -24,7 +24,7 @@ import org.jfree.data.time.Millisecond;
 import org.jfree.data.time.TimeSeries;
 import org.jfree.data.time.TimeSeriesCollection;
 
-import us.ihmc.graphics3DDescription.plotting.artifact.PointListArtifact;
+import us.ihmc.graphicsDescription.plotting.artifact.PointListArtifact;
 import us.ihmc.plotting.Plotter;
 import us.ihmc.plotting.PlotterPanel;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;

@@ -20,8 +20,8 @@ import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.avatar.testTools.ScriptedFootstepGenerator;
-import us.ihmc.graphics3DDescription.Graphics3DObject;
-import us.ihmc.graphics3DDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.Graphics3DObject;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
@@ -169,7 +169,7 @@ public abstract class DRCObstacleCourseRampFootstepSnapperTest implements MultiR
 
       BoundingBox2d footstepContainer = new BoundingBox2d(boundingBoxMin, boundingBoxMax);
 
-      us.ihmc.graphics3DDescription.HeightMap inputHeightMap = drcSimulationTestHelper.getTestEnviroment().getTerrainObject3D().getHeightMapIfAvailable();
+      us.ihmc.graphicsDescription.HeightMap inputHeightMap = drcSimulationTestHelper.getTestEnviroment().getTerrainObject3D().getHeightMapIfAvailable();
       double resolution = 0.02;
       double heightThreshold = 0.002;
       double quadTreeMaxMultiLevelZChangeToFilterNoise = 0.2;
@@ -251,7 +251,7 @@ public abstract class DRCObstacleCourseRampFootstepSnapperTest implements MultiR
       return footstepSnapper;
    }
 
-   public HeightMapWithPoints createHeightMap(us.ihmc.graphics3DDescription.HeightMap inputHeightMap, BoundingBox2d testingRange, double resolution, double heightThreshold,
+   public HeightMapWithPoints createHeightMap(us.ihmc.graphicsDescription.HeightMap inputHeightMap, BoundingBox2d testingRange, double resolution, double heightThreshold,
          double quadTreeMaxMultiLevelZChangeToFilterNoise, int maxSameHeightPointsPerNode, double maxAllowableXYDistanceForAPointToBeConsideredClose,
          int maxNodes, SimulationConstructionSet scs)
    {
