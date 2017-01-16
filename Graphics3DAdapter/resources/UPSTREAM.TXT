@@ -1,5 +1,0 @@
-teapotASCII.STL and teapotBinary.STL are both generated from the files on 
-
-https://orion.math.iastate.edu/burkardt/data/stl/stl.html
-
-Permission to copy is given by the author.
