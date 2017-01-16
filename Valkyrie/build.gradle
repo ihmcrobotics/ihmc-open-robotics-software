@@ -69,7 +69,7 @@ dependencies {
    compile ihmc.getProjectDependency(":IHMCStateEstimation")
    compile ihmc.getProjectDependency(":CommonWalkingControlModules")
    compile ihmc.getProjectDependency(":IHMCAvatarInterfaces")
-   compile ihmc.getProjectDependency(":Graphics3DAdapter")
+   compile ihmc.getProjectDependency(":IHMCJMonkeyEngineToolkit")
    compile ihmc.getProjectDependency(":IHMCROSTools")
    compile ihmc.getProjectDependency(":IHMCRobotDataLogger")
    compile ihmc.getProjectDependency(":SDFLoader")

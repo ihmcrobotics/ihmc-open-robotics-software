@@ -23,7 +23,6 @@ import javafx.scene.transform.MatrixType;
 import javafx.scene.transform.Scale;
 import javafx.scene.transform.Transform;
 import javafx.scene.transform.Translate;
-import us.ihmc.graphics3DAdapter.graphics.Graphics3DInstructionExecutor;
 import us.ihmc.graphicsDescription.MeshDataHolder;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.instructions.Graphics3DAddExtrusionInstruction;
@@ -34,6 +33,7 @@ import us.ihmc.graphicsDescription.instructions.Graphics3DPrimitiveInstruction;
 import us.ihmc.graphicsDescription.instructions.primitives.Graphics3DRotateInstruction;
 import us.ihmc.graphicsDescription.instructions.primitives.Graphics3DScaleInstruction;
 import us.ihmc.graphicsDescription.instructions.primitives.Graphics3DTranslateInstruction;
+import us.ihmc.jMonkeyEngineToolkit.graphics.Graphics3DInstructionExecutor;
 
 /**
  * Converts a {@link us.ihmc.graphicsDescription.Graphics3DObject} to a {@link MeshView}
