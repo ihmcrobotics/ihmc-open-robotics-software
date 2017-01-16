@@ -1,0 +1,34 @@
+MaterialDef Terrain
+{
+	MaterialParameters
+	{
+		Texture2D tex0
+		Texture2D tex1
+		Texture2D tex2
+		Texture2D tex3
+				
+		Float startAngle
+		Float step
+		Float resolution
+		
+		Float camModulo
+		Float camModuloPostOffset
+		Float camModuloPreOffset
+		
+		Float oneOverCameras
+		
+		Float cameraAngleToTextureAngle
+	}
+
+	Technique
+	{
+		VertexShader GLSL100:   lidar/Distortion.vert
+		FragmentShader GLSL100: lidar/Distortion.frag
+		
+		WorldParameters
+		{
+			WorldViewProjectionMatrix
+			WorldViewMatrix
+		}
+	}
+}

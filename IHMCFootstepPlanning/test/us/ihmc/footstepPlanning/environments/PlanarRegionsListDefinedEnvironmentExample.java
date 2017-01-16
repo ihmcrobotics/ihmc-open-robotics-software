@@ -1,12 +1,12 @@
 package us.ihmc.footstepPlanning.environments;
 
 import us.ihmc.footstepPlanning.polygonSnapping.PlanarRegionsListExamples;
-import us.ihmc.graphics3DAdapter.HeightMapWithNormals;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.structure.Graphics3DNodeType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
+import us.ihmc.jMonkeyEngineToolkit.HeightMapWithNormals;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.BoundingBox3d;
 import us.ihmc.robotics.geometry.PlanarRegion;
