@@ -1,8 +1,8 @@
 package us.ihmc.graphics3DAdapter.utils;
 
-import us.ihmc.graphics3DDescription.Graphics3DObject;
-import us.ihmc.graphics3DDescription.structure.Graphics3DNode;
-import us.ihmc.graphics3DDescription.structure.Graphics3DNodeType;
+import us.ihmc.graphicsDescription.Graphics3DObject;
+import us.ihmc.graphicsDescription.structure.Graphics3DNode;
+import us.ihmc.graphicsDescription.structure.Graphics3DNodeType;
 
 public class CoordinateFrameNode extends Graphics3DNode
 {

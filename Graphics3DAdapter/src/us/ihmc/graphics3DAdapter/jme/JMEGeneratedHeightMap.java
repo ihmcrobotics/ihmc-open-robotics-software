@@ -13,9 +13,9 @@ import com.jme3.scene.Node;
 import com.jme3.system.JmeSystem;
 
 import us.ihmc.graphics3DAdapter.jme.util.SimpleLRUCache;
-import us.ihmc.graphics3DDescription.HeightMap;
-import us.ihmc.graphics3DDescription.structure.Graphics3DNode;
-import us.ihmc.graphics3DDescription.structure.Graphics3DNodeType;
+import us.ihmc.graphicsDescription.HeightMap;
+import us.ihmc.graphicsDescription.structure.Graphics3DNode;
+import us.ihmc.graphicsDescription.structure.Graphics3DNodeType;
 import us.ihmc.robotics.geometry.BoundingBox3d;
 import us.ihmc.robotics.geometry.Ray3d;
 

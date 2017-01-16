@@ -6,8 +6,8 @@ import javax.vecmath.Vector2d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.graphics3DAdapter.HeightMapWithNormals;
-import us.ihmc.graphics3DDescription.Graphics3DObject;
-import us.ihmc.graphics3DDescription.appearance.AppearanceDefinition;
+import us.ihmc.graphicsDescription.Graphics3DObject;
+import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.geometry.BoundingBox3d;
 

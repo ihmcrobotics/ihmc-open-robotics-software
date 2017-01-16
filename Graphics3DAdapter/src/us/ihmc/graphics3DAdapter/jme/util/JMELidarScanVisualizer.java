@@ -2,9 +2,9 @@ package us.ihmc.graphics3DAdapter.jme.util;
 
 import java.util.concurrent.Callable;
 
-import us.ihmc.graphics3DDescription.Graphics3DObject;
-import us.ihmc.graphics3DDescription.appearance.YoAppearance;
-import us.ihmc.graphics3DDescription.structure.Graphics3DNode;
+import us.ihmc.graphicsDescription.Graphics3DObject;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.structure.Graphics3DNode;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 public class JMELidarScanVisualizer extends JMEPointCloudVisualizer

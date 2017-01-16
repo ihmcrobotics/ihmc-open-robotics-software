@@ -1,7 +1,7 @@
 package us.ihmc.quadrupedRobotics.controller.force.toolbox;
 
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.mechanics.virtualModelController.QuadrupedVirtualModelController;
 import us.ihmc.quadrupedRobotics.mechanics.virtualModelController.QuadrupedVirtualModelControllerSettings;

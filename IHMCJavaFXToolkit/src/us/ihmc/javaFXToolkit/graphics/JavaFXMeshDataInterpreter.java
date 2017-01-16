@@ -16,9 +16,9 @@ import gnu.trove.list.array.TIntArrayList;
 import javafx.scene.shape.MeshView;
 import javafx.scene.shape.TriangleMesh;
 import javafx.scene.shape.VertexFormat;
-import us.ihmc.graphics3DDescription.MeshDataBuilder;
-import us.ihmc.graphics3DDescription.MeshDataGenerator;
-import us.ihmc.graphics3DDescription.MeshDataHolder;
+import us.ihmc.graphicsDescription.MeshDataBuilder;
+import us.ihmc.graphicsDescription.MeshDataGenerator;
+import us.ihmc.graphicsDescription.MeshDataHolder;
 
 /**
  * This class an automated interpretation of {@link MeshDataHolder} into JavaFX {@link TriangleMesh} usable via {@link MeshView}.

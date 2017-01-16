@@ -2,7 +2,7 @@ package us.ihmc.graphics3DAdapter;
 
 import javax.vecmath.Vector3d;
 
-import us.ihmc.graphics3DDescription.HeightMap;
+import us.ihmc.graphicsDescription.HeightMap;
 
 public interface HeightMapWithNormals extends HeightMap
 {

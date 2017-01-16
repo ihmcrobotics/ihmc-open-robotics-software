@@ -22,8 +22,8 @@ import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.vecmath.Point2d;
 
-import us.ihmc.graphics3DDescription.plotting.artifact.Artifact;
-import us.ihmc.graphics3DDescription.plotting.artifact.ArtifactsChangedListener;
+import us.ihmc.graphicsDescription.plotting.artifact.Artifact;
+import us.ihmc.graphicsDescription.plotting.artifact.ArtifactsChangedListener;
 
 public class PlotterShowHideMenu extends JPanel implements ArtifactsChangedListener
 {

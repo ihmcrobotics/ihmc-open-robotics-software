@@ -9,7 +9,7 @@ import us.ihmc.graphics3DAdapter.jme.JMEGraphics3DNode;
 import us.ihmc.graphics3DAdapter.jme.JMERenderer;
 import us.ihmc.graphics3DAdapter.jme.util.JMEDataTypeUtils;
 import us.ihmc.graphics3DAdapter.jme.util.JMEGeometryUtils;
-import us.ihmc.graphics3DDescription.structure.Graphics3DNode;
+import us.ihmc.graphicsDescription.structure.Graphics3DNode;
 import us.ihmc.tools.inputDevices.keyboard.Key;
 import us.ihmc.tools.inputDevices.keyboard.KeyListenerHolder;
 import us.ihmc.tools.inputDevices.keyboard.ModifierKeyHolder;

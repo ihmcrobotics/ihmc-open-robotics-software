@@ -4,13 +4,13 @@ import java.awt.Color;
 
 import javax.vecmath.Point2d;
 
-import us.ihmc.graphics3DDescription.plotting.artifact.LineArtifact;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicPosition.GraphicType;
-import us.ihmc.graphics3DDescription.yoGraphics.plotting.YoArtifactLine2d;
-import us.ihmc.graphics3DDescription.yoGraphics.plotting.YoArtifactLineSegment2d;
-import us.ihmc.graphics3DDescription.yoGraphics.plotting.YoArtifactOval;
-import us.ihmc.graphics3DDescription.yoGraphics.plotting.YoArtifactPolygon;
-import us.ihmc.graphics3DDescription.yoGraphics.plotting.YoArtifactPosition;
+import us.ihmc.graphicsDescription.plotting.artifact.LineArtifact;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
+import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactLine2d;
+import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactLineSegment2d;
+import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactOval;
+import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
+import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPosition;
 import us.ihmc.plotting.Plotter;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePoint2d;
