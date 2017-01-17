@@ -1571,6 +1571,40 @@ public class GeometryToolsTest
       }
    }
 
+   private void assertPolygons(double[] p1, double[] p2, double[] expectedSolution, double epsilon)
+   {
+      if (expectedSolution.length != 4)
+      {
+         throw new RuntimeException("Invalid input.");
+      }
+
+      ConvexPolygon2d polygon1 = getPolygon(p1);
+      ConvexPolygon2d polygon2 = getPolygon(p2);
+      Point2d[] closestPoints = GeometryTools.computeMinimumDistancePoints(polygon1, polygon2);
+      Point2d[] closestPointsReversed = GeometryTools.computeMinimumDistancePoints(polygon2, polygon1);
+      assertEquals(closestPoints[0].distance(closestPoints[1]), closestPointsReversed[0].distance(closestPointsReversed[1]), epsilon);
+      assertEquals(expectedSolution[0], closestPoints[0].getX(), epsilon);
+      assertEquals(expectedSolution[1], closestPoints[0].getY(), epsilon);
+      assertEquals(expectedSolution[2], closestPoints[1].getX(), epsilon);
+      assertEquals(expectedSolution[3], closestPoints[1].getY(), epsilon);
+   }
+
+   private ConvexPolygon2d getPolygon(double[] polygon)
+   {
+      if (polygon.length % 2 != 0)
+      {
+         throw new RuntimeException("Invalid input.");
+      }
+
+      List<Point2d> list = new ArrayList<Point2d>();
+      for (int i = 0; i < polygon.length; i += 2)
+      {
+         list.add(new Point2d(polygon[i], polygon[i + 1]));
+      }
+
+      return new ConvexPolygon2d(list);
+   }
+
    @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testGetAngleFromFirstToSecondVector() throws Exception
@@ -1673,40 +1707,6 @@ public class GeometryToolsTest
          assertEquals(expectedMinimumDistance, actualMinimumDistance, EPSILON);
       }
 
-   }
-
-   private void assertPolygons(double[] p1, double[] p2, double[] expectedSolution, double epsilon)
-   {
-      if (expectedSolution.length != 4)
-      {
-         throw new RuntimeException("Invalid input.");
-      }
-
-      ConvexPolygon2d polygon1 = getPolygon(p1);
-      ConvexPolygon2d polygon2 = getPolygon(p2);
-      Point2d[] closestPoints = GeometryTools.computeMinimumDistancePoints(polygon1, polygon2);
-      Point2d[] closestPointsReversed = GeometryTools.computeMinimumDistancePoints(polygon2, polygon1);
-      assertEquals(closestPoints[0].distance(closestPoints[1]), closestPointsReversed[0].distance(closestPointsReversed[1]), epsilon);
-      assertEquals(expectedSolution[0], closestPoints[0].getX(), epsilon);
-      assertEquals(expectedSolution[1], closestPoints[0].getY(), epsilon);
-      assertEquals(expectedSolution[2], closestPoints[1].getX(), epsilon);
-      assertEquals(expectedSolution[3], closestPoints[1].getY(), epsilon);
-   }
-
-   private ConvexPolygon2d getPolygon(double[] polygon)
-   {
-      if (polygon.length % 2 != 0)
-      {
-         throw new RuntimeException("Invalid input.");
-      }
-
-      List<Point2d> list = new ArrayList<Point2d>();
-      for (int i = 0; i < polygon.length; i += 2)
-      {
-         list.add(new Point2d(polygon[i], polygon[i + 1]));
-      }
-
-      return new ConvexPolygon2d(list);
    }
 
    public static void main(String[] args)
