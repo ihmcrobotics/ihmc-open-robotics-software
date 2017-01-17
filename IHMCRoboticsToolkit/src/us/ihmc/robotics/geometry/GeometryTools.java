@@ -18,6 +18,7 @@ import us.ihmc.robotics.geometry.shapes.Plane3d;
 import us.ihmc.robotics.math.Epsilons;
 import us.ihmc.robotics.math.exceptions.UndefinedOperationException;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.robotSide.RobotSide;
 
 public class GeometryTools
 {
@@ -38,7 +39,7 @@ public class GeometryTools
    public static double distanceFromPointToLine(Point3d point, Point3d lineStart, Vector3d lineDirection)
    {
       double directionMagnitude = lineDirection.length();
-      if (directionMagnitude < 1.0e-12)
+      if (directionMagnitude < Epsilons.ONE_TRILLIONTH)
       {
          return lineStart.distance(point);
       }
@@ -190,22 +191,167 @@ public class GeometryTools
    }
 
    /**
-    * Returns a boolean value, stating whether a 2D point is on the left side of a given line.
+    * Returns a boolean value, stating whether a 2D point is on the left side of an infinitely long line defined by a line segment.
     * "Left side" is determined based on order of {@code lineStart} and {@code lineEnd}.
     * <p>
     * For instance, given the {@code lineStart} coordinates x = 0, and y = 0, and the {@code lineEnd} coordinates x = 1, y = 0,
-    * a point located on the left of this line has a negative y coordinate.
+    * a point located on the left side of this line has a negative y coordinate.
     *<p>
     * This method will return false if the point is on the line.
     *
     * @param point the query point. Not modified.
-    * @param lineStart starting point of the line segment. Not modified.
-    * @param lineEnd end point of the line segment. Not modified.
+    * @param lineStart starting point of the line segment defining the infinite line. Not modified.
+    * @param lineEnd end point of the line segment defining the infinite line. Not modified.
     * @return {@code true} if the point is on the left side of the line, {@code false} if the point is on the right side or exactly on the line.
     */
    public static boolean isPointOnLeftSideOfLine(Point2d point, Point2d lineStart, Point2d lineEnd)
    {
-      return (((point.getY() - lineStart.getY()) * (lineEnd.getX() - lineStart.getX())) - ((point.getX() - lineStart.getX()) * (lineEnd.getY() - lineStart.getY()))) > 0.0;
+      return isPointOnSideOfLine(point, lineStart, lineEnd, RobotSide.LEFT);
+   }
+
+   /**
+    * Returns a boolean value, stating whether a 2D point is on the right side of an infinitely long line defined by a line segment.
+    * "Right side" is determined based on order of {@code lineStart} and {@code lineEnd}.
+    * <p>
+    * For instance, given the {@code lineStart} coordinates x = 0, and y = 0, and the {@code lineEnd} coordinates x = 1, y = 0,
+    * a point located on the right side of this line has a positive y coordinate.
+    *<p>
+    * This method will return false if the point is on the line.
+    *
+    * @param point the query point. Not modified.
+    * @param lineStart starting point of the line segment defining the infinite line. Not modified.
+    * @param lineEnd end point of the line segment defining the infinite line. Not modified.
+    * @return {@code true} if the point is on the right side of the line, {@code false} if the point is on the left side or exactly on the line.
+    */
+   public static boolean isPointOnRightSideOfLine(Point2d point, Point2d lineStart, Point2d lineEnd)
+   {
+      return isPointOnSideOfLine(point, lineStart, lineEnd, RobotSide.RIGHT);
+   }
+
+   /**
+    * Returns a boolean value, stating whether a 2D point is on the left or right side of an infinitely long line defined by a line segment.
+    * The idea of "side" is determined based on order of {@code lineStart} and {@code lineEnd}.
+    * <p>
+    * For instance, given the {@code lineStart} coordinates x = 0, and y = 0, and the {@code lineEnd} coordinates x = 1, y = 0,
+    * a point located on:
+    * <li> the left side of this line has a negative y coordinate.
+    * <li> the right side of this line has a positive y coordinate.
+    *<p>
+    * This method will return false if the point is on the line.
+    *
+    * @param point the query point. Not modified.
+    * @param lineStart starting point of the line segment defining the infinite line. Not modified.
+    * @param lineEnd end point of the line segment defining the infinite line. Not modified.
+    * @param side the query of the side.
+    * @return {@code true} if the point is on the query side of the line, {@code false} if the point is on the opposite side or exactly on the line.
+    */
+   public static boolean isPointOnSideOfLine(Point2d point, Point2d lineStart, Point2d lineEnd, RobotSide side)
+   {
+      return isPointOnSideOfLine(point.getX(), point.getY(), lineStart, lineEnd, side);
+   }
+
+   /**
+    * Returns a boolean value, stating whether a 2D point is on the left or right side of an infinitely long line defined by a line segment.
+    * The idea of "side" is determined based on order of {@code lineStart} and {@code lineEnd}.
+    * <p>
+    * For instance, given the {@code lineStart} coordinates x = 0, and y = 0, and the {@code lineEnd} coordinates x = 1, y = 0,
+    * a point located on:
+    * <li> the left side of this line has a negative y coordinate.
+    * <li> the right side of this line has a positive y coordinate.
+    *<p>
+    * This method will return false if the point is on the line.
+    *
+    * @param pointX the x-coordinate of the query point.
+    * @param pointY the y-coordinate of the query point.
+    * @param lineStart starting point of the line segment defining the infinite line. Not modified.
+    * @param lineEnd end point of the line segment defining the infinite line. Not modified.
+    * @param side the query of the side.
+    * @return {@code true} if the point is on the query side of the line, {@code false} if the point is on the opposite side or exactly on the line.
+    */
+   public static boolean isPointOnSideOfLine(double pointX, double pointY, Point2d lineStart, Point2d lineEnd, RobotSide side)
+   {
+      double pointOnLineX = lineStart.getX();
+      double pointOnLineY = lineStart.getY();
+      double lineDirectionX = lineEnd.getX() - lineStart.getX();
+      double lineDirectionY = lineEnd.getY() - lineStart.getY();
+      return isPointOnSideOfLine(pointX, pointY, pointOnLineX, pointOnLineY, lineDirectionX, lineDirectionY, side);
+   }
+
+   /**
+    * Returns a boolean value, stating whether a 2D point is on the left or right side of an infinitely long line.
+    * The idea of "side" is determined based on the direction of the line.
+    * <p>
+    * For instance, given the {@code lineDirection} components x = 0, and y = 1, and the {@code pointOnLine} coordinates x = 0, and y = 0, 
+    * a point located on:
+    * <li> the left side of this line has a negative y coordinate.
+    * <li> the right side of this line has a positive y coordinate.
+    *<p>
+    * This method will return false if the point is on the line.
+    *
+    * @param point the query point. Not modified.
+    * @param pointOnLine a point positioned on the infinite line. Not modified.
+    * @param lineDirection the direction of the infinite line. Not modified.
+    * @param side the query of the side.
+    * @return {@code true} if the point is on the query side of the line, {@code false} if the point is on the opposite side or exactly on the line.
+    */
+   public static boolean isPointOnSideOfLine(Point2d point, Point2d pointOnLine, Vector2d lineDirection, RobotSide side)
+   {
+      return isPointOnSideOfLine(point.getX(), point.getY(), pointOnLine, lineDirection, side);
+   }
+
+   /**
+    * Returns a boolean value, stating whether a 2D point is on the left or right side of an infinitely long line.
+    * The idea of "side" is determined based on the direction of the line.
+    * <p>
+    * For instance, given the {@code lineDirection} components x = 0, and y = 1, and the {@code pointOnLine} coordinates x = 0, and y = 0, 
+    * a point located on:
+    * <li> the left side of this line has a negative y coordinate.
+    * <li> the right side of this line has a positive y coordinate.
+    *<p>
+    * This method will return false if the point is on the line.
+    *
+    * @param pointX the x-coordinate of  the query point.
+    * @param pointY the y-coordinate of  the query point.
+    * @param pointOnLine a point positioned on the infinite line. Not modified.
+    * @param lineDirection the direction of the infinite line. Not modified.
+    * @param side the query of the side.
+    * @return {@code true} if the point is on the query side of the line, {@code false} if the point is on the opposite side or exactly on the line.
+    */
+   public static boolean isPointOnSideOfLine(double pointX, double pointY, Point2d pointOnLine, Vector2d lineDirection, RobotSide side)
+   {
+      double pointOnLineX = pointOnLine.getX();
+      double pointOnLineY = pointOnLine.getY();
+      double lineDirectionX = lineDirection.getX();
+      double lineDirectionY = lineDirection.getY();
+      return isPointOnSideOfLine(pointX, pointY, pointOnLineX, pointOnLineY, lineDirectionX, lineDirectionY, side);
+   }
+
+   /**
+    * Returns a boolean value, stating whether a 2D point is on the left or right side of an infinitely long line.
+    * The idea of "side" is determined based on the direction of the line.
+    * <p>
+    * For instance, given the {@code lineDirection} components x = 0, and y = 1, and the {@code pointOnLine} coordinates x = 0, and y = 0, 
+    * a point located on:
+    * <li> the left side of this line has a negative y coordinate.
+    * <li> the right side of this line has a positive y coordinate.
+    *<p>
+    * This method will return false if the point is on the line.
+    *
+    * @param pointX the x-coordinate of  the query point.
+    * @param pointY the y-coordinate of  the query point.
+    * @param pointOnLineX the x-coordinate of a point positioned on the infinite line.
+    * @param pointOnLineY the y-coordinate of a point positioned on the infinite line.
+    * @param lineDirectionX the x-component of the direction of the infinite line.
+    * @param lineDirectionY the y-component of the direction of the infinite line.
+    * @param side the query of the side.
+    * @return {@code true} if the point is on the query side of the line, {@code false} if the point is on the opposite side or exactly on the line.
+    */
+   public static boolean isPointOnSideOfLine(double pointX, double pointY, double pointOnLineX, double pointOnLineY, double lineDirectionX, double lineDirectionY, RobotSide side)
+   {
+      double pointToPointX = pointX - pointOnLineX;
+      double pointToPointY = pointY - pointOnLineY;
+      double crossProduct = lineDirectionX * pointToPointY - pointToPointX * lineDirectionY;
+      return side.negateIfRightSide(crossProduct) > 0.0;
    }
 
    /**
@@ -248,26 +394,15 @@ public class GeometryTools
     */
    public static boolean isPointInsideTriangleABC(Point2d point, Point2d a, Point2d b, Point2d c)
    {
-      boolean isClockwiseOrdered = isPointOnLeftSideOfLine(b, a, c);
+      // This makes the assertion working for both clockwise and counter-clockwise ordered vertices.
+      RobotSide sideToCheck = isPointOnLeftSideOfLine(b, a, c) ? RobotSide.LEFT : RobotSide.RIGHT;
 
-      if (isClockwiseOrdered)
-      { // The point must be on the right side of each vertex of the triangle
-         if (isPointOnLeftSideOfLine(point, a, b))
-            return false;
-         if (isPointOnLeftSideOfLine(point, b, c))
-            return false;
-         if (isPointOnLeftSideOfLine(point, c, a))
-            return false;
-      }
-      else
-      { // The point must be on the left side of each vertex of the triangle
-         if (!isPointOnLeftSideOfLine(point, a, b))
-            return false;
-         if (!isPointOnLeftSideOfLine(point, b, c))
-            return false;
-         if (!isPointOnLeftSideOfLine(point, c, a))
-            return false;
-      }
+      if (isPointOnSideOfLine(point, a, b, sideToCheck))
+         return false;
+      if (isPointOnSideOfLine(point, b, c, sideToCheck))
+         return false;
+      if (isPointOnSideOfLine(point, c, a, sideToCheck))
+         return false;
 
       return true;
    }
