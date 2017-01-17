@@ -234,8 +234,10 @@ public class GeometryTools
     * <p>
     * For instance, given the {@code lineStart} coordinates x = 0, and y = 0, and the {@code lineEnd} coordinates x = 1, y = 0,
     * a point located on:
-    * <li> the left side of this line has a negative y coordinate.
-    * <li> the right side of this line has a positive y coordinate.
+    * <ul>
+    *    <li> the left side of this line has a negative y coordinate.
+    *    <li> the right side of this line has a positive y coordinate.
+    * </ul>
     *<p>
     * This method will return false if the point is on the line.
     *
@@ -256,8 +258,10 @@ public class GeometryTools
     * <p>
     * For instance, given the {@code lineStart} coordinates x = 0, and y = 0, and the {@code lineEnd} coordinates x = 1, y = 0,
     * a point located on:
-    * <li> the left side of this line has a negative y coordinate.
-    * <li> the right side of this line has a positive y coordinate.
+    * <ul>
+    *    <li> the left side of this line has a negative y coordinate.
+    *    <li> the right side of this line has a positive y coordinate.
+    * </ul>
     *<p>
     * This method will return false if the point is on the line.
     *
@@ -283,8 +287,10 @@ public class GeometryTools
     * <p>
     * For instance, given the {@code lineDirection} components x = 0, and y = 1, and the {@code pointOnLine} coordinates x = 0, and y = 0, 
     * a point located on:
-    * <li> the left side of this line has a negative y coordinate.
-    * <li> the right side of this line has a positive y coordinate.
+    * <ul>
+    *    <li> the left side of this line has a negative y coordinate.
+    *    <li> the right side of this line has a positive y coordinate.
+    * </ul>
     *<p>
     * This method will return false if the point is on the line.
     *
@@ -305,8 +311,10 @@ public class GeometryTools
     * <p>
     * For instance, given the {@code lineDirection} components x = 0, and y = 1, and the {@code pointOnLine} coordinates x = 0, and y = 0, 
     * a point located on:
-    * <li> the left side of this line has a negative y coordinate.
-    * <li> the right side of this line has a positive y coordinate.
+    * <ul>
+    *    <li> the left side of this line has a negative y coordinate.
+    *    <li> the right side of this line has a positive y coordinate.
+    * </ul>
     *<p>
     * This method will return false if the point is on the line.
     *
@@ -332,8 +340,10 @@ public class GeometryTools
     * <p>
     * For instance, given the {@code lineDirection} components x = 0, and y = 1, and the {@code pointOnLine} coordinates x = 0, and y = 0, 
     * a point located on:
-    * <li> the left side of this line has a negative y coordinate.
-    * <li> the right side of this line has a positive y coordinate.
+    * <ul>
+    *    <li> the left side of this line has a negative y coordinate.
+    *    <li> the right side of this line has a positive y coordinate.
+    * </ul>
     *<p>
     * This method will return false if the point is on the line.
     *
