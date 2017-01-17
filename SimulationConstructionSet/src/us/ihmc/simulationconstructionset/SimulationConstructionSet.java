@@ -34,21 +34,21 @@ import javax.vecmath.Tuple3d;
 
 import com.jme3.renderer.Camera;
 
-import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
-import us.ihmc.graphics3DAdapter.Graphics3DBackgroundScaleMode;
-import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
-import us.ihmc.graphics3DAdapter.camera.CaptureDevice;
-import us.ihmc.graphics3DAdapter.camera.RenderedSceneHandler;
-import us.ihmc.graphics3DDescription.Graphics3DObject;
-import us.ihmc.graphics3DDescription.HeightMap;
-import us.ihmc.graphics3DDescription.appearance.AppearanceDefinition;
-import us.ihmc.graphics3DDescription.appearance.YoAppearance;
-import us.ihmc.graphics3DDescription.input.SelectedListener;
-import us.ihmc.graphics3DDescription.structure.Graphics3DNode;
-import us.ihmc.graphics3DDescription.structure.Graphics3DNodeType;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphic;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsList;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.graphicsDescription.Graphics3DObject;
+import us.ihmc.graphicsDescription.HeightMap;
+import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.input.SelectedListener;
+import us.ihmc.graphicsDescription.structure.Graphics3DNode;
+import us.ihmc.graphicsDescription.structure.Graphics3DNodeType;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphic;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.jMonkeyEngineToolkit.Graphics3DAdapter;
+import us.ihmc.jMonkeyEngineToolkit.Graphics3DBackgroundScaleMode;
+import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
+import us.ihmc.jMonkeyEngineToolkit.camera.CaptureDevice;
+import us.ihmc.jMonkeyEngineToolkit.camera.RenderedSceneHandler;
 import us.ihmc.robotics.TickAndUpdatable;
 import us.ihmc.robotics.dataStructures.YoVariableHolder;
 import us.ihmc.robotics.dataStructures.listener.RewoundListener;
@@ -1834,7 +1834,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
     * </p>
     *
     * @param cameraConfiguration CameraConfiguration
-    * @see us.ihmc.graphics3DAdapter.camera.CameraConfiguration CameraConfiguration
+    * @see us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration CameraConfiguration
     */
    public void setupCamera(CameraConfiguration cameraConfiguration)
    {

@@ -6,7 +6,7 @@ import java.util.ArrayList;
 
 import javax.swing.JCheckBoxMenuItem;
 
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphic;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphic;
 
 public class DynamicGraphicCheckBoxMenuItem extends JCheckBoxMenuItem implements ItemListener
 {

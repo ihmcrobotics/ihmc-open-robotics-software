@@ -13,7 +13,7 @@ import javax.vecmath.Point2d;
 
 import org.junit.Test;
 
-import us.ihmc.graphics3DDescription.plotting.artifact.PolygonArtifact;
+import us.ihmc.graphicsDescription.plotting.artifact.PolygonArtifact;
 import us.ihmc.plotting.PlotterPanel;
 import us.ihmc.simulationconstructionset.util.ground.steppingStones.SteppingStones;
 import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;

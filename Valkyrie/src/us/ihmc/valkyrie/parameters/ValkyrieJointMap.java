@@ -25,7 +25,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.valkyrie.configuration.ValkyrieConfigurationRoot;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
-import us.ihmc.wholeBodyController.SimulationFootContactPoints;
+import us.ihmc.wholeBodyController.FootContactPoints;
 
 public class ValkyrieJointMap implements DRCRobotJointMap
 {
@@ -63,7 +63,7 @@ public class ValkyrieJointMap implements DRCRobotJointMap
       this(null);
    }
 
-   public ValkyrieJointMap(SimulationFootContactPoints simulationContactPoints)
+   public ValkyrieJointMap(FootContactPoints simulationContactPoints)
    {
       boolean selectedValkyrieVersionHasArms = ValkyrieConfigurationRoot.VALKYRIE_WITH_ARMS;
       if (selectedValkyrieVersionHasArms)

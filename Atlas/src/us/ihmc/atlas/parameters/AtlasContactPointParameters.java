@@ -15,8 +15,8 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotiq.model.RobotiqHandModel.RobotiqHandJointNameMinimal;
 import us.ihmc.simulationconstructionset.util.LinearGroundContactModel;
 import us.ihmc.wholeBodyController.DRCHandType;
+import us.ihmc.wholeBodyController.FootContactPoints;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
-import us.ihmc.wholeBodyController.SimulationFootContactPoints;
 
 public class AtlasContactPointParameters extends RobotContactPointParameters
 {
@@ -29,7 +29,7 @@ public class AtlasContactPointParameters extends RobotContactPointParameters
    private boolean useSoftGroundContactParameters = false;
 
    public AtlasContactPointParameters(AtlasJointMap jointMap, AtlasRobotVersion atlasVersion, boolean createFootContactPoints,
-         SimulationFootContactPoints simulationContactPoints)
+         FootContactPoints footContactPoints)
    {
       super(jointMap, jointMap.getPhysicalProperties().getToeWidthForControl(), jointMap.getPhysicalProperties().getFootWidthForControl(), jointMap.getPhysicalProperties().getFootLengthForControl(), jointMap.getPhysicalProperties().getSoleToAnkleFrameTransforms());
 
@@ -37,12 +37,10 @@ public class AtlasContactPointParameters extends RobotContactPointParameters
       this.atlasVersion = atlasVersion;
       if (createFootContactPoints)
       {
-         createDefaultControllerFootContactPoints();
-
-         if (simulationContactPoints == null)
-            createDefaultSimulationFootContactPoints();
+         if (footContactPoints == null)
+            createDefaultFootContactPoints();
          else
-            createSimulationContactPoints(simulationContactPoints);
+            createContactPoints(footContactPoints);
       }
    }
 

@@ -2,9 +2,9 @@ package us.ihmc.quadrupedRobotics.planning.trajectory;
 
 import javax.vecmath.Point2d;
 
-import us.ihmc.graphics3DDescription.appearance.YoAppearance;
-import us.ihmc.graphics3DDescription.yoGraphics.BagOfBalls;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.alphaToAlpha.AlphaToAlphaFunction;
 import us.ihmc.robotics.alphaToAlpha.MultipleSegmentConstantSlope;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
