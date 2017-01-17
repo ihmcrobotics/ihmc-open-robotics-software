@@ -1809,7 +1809,8 @@ public class GeometryToolsTest
       }
    }
 
-   @Test
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @Test(timeout = 30000)
    public void testNormalizeSafeZUp() throws Exception
    {
       Vector3d actualVector;
