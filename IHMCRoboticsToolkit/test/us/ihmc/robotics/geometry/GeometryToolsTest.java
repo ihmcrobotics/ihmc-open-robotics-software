@@ -415,37 +415,37 @@ public class GeometryToolsTest
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
-   public void testIsLineIntersectingPlane()
+   public void testIsLineSegmentIntersectingPlane()
    {
       FramePoint pointOnPlane = new FramePoint(ReferenceFrame.getWorldFrame(), 0, 0, 0);
       FrameVector planeNormal = new FrameVector(pointOnPlane.getReferenceFrame(), 0, 0, 1);
       FramePoint lineStart = new FramePoint(ReferenceFrame.getWorldFrame(), 0, 0, -1);
       FramePoint lineEnd = new FramePoint(ReferenceFrame.getWorldFrame(), 0, 0, 3);
-      assertTrue(GeometryTools.isLineIntersectingPlane(pointOnPlane, planeNormal, lineStart, lineEnd));
+      assertTrue(GeometryTools.isLineSegmentIntersectingPlane(pointOnPlane, planeNormal, lineStart, lineEnd));
 
       pointOnPlane = new FramePoint(ReferenceFrame.getWorldFrame(), 0, 0, 0);
       planeNormal = new FrameVector(pointOnPlane.getReferenceFrame(), 1, 0, 0);
       lineStart = new FramePoint(ReferenceFrame.getWorldFrame(), -6, 3, -3);
       lineEnd = new FramePoint(ReferenceFrame.getWorldFrame(), 6, 3, 6);
-      assertTrue(GeometryTools.isLineIntersectingPlane(pointOnPlane, planeNormal, lineStart, lineEnd));
+      assertTrue(GeometryTools.isLineSegmentIntersectingPlane(pointOnPlane, planeNormal, lineStart, lineEnd));
 
       pointOnPlane = new FramePoint(ReferenceFrame.getWorldFrame(), 0, 0, 0);
       planeNormal = new FrameVector(pointOnPlane.getReferenceFrame(), 0, 1, 0);
       lineStart = new FramePoint(ReferenceFrame.getWorldFrame(), 6, -3, -3);
       lineEnd = new FramePoint(ReferenceFrame.getWorldFrame(), 6, 3, 6);
-      assertTrue(GeometryTools.isLineIntersectingPlane(pointOnPlane, planeNormal, lineStart, lineEnd));
+      assertTrue(GeometryTools.isLineSegmentIntersectingPlane(pointOnPlane, planeNormal, lineStart, lineEnd));
 
       pointOnPlane = new FramePoint(ReferenceFrame.getWorldFrame(), 0, 0, 0);
       planeNormal = new FrameVector(pointOnPlane.getReferenceFrame(), 0, 0, 1);
       lineStart = new FramePoint(ReferenceFrame.getWorldFrame(), 6, -3, 3);
       lineEnd = new FramePoint(ReferenceFrame.getWorldFrame(), 6, 3, 6);
-      assertFalse(GeometryTools.isLineIntersectingPlane(pointOnPlane, planeNormal, lineStart, lineEnd));
+      assertFalse(GeometryTools.isLineSegmentIntersectingPlane(pointOnPlane, planeNormal, lineStart, lineEnd));
 
       pointOnPlane = new FramePoint(ReferenceFrame.getWorldFrame(), 0, 0, 0);
       planeNormal = new FrameVector(pointOnPlane.getReferenceFrame(), 0, 0, 1);
       lineStart = new FramePoint(ReferenceFrame.getWorldFrame(), 6, -3, -3);
       lineEnd = new FramePoint(ReferenceFrame.getWorldFrame(), 6, 3, -1);
-      assertFalse(GeometryTools.isLineIntersectingPlane(pointOnPlane, planeNormal, lineStart, lineEnd));
+      assertFalse(GeometryTools.isLineSegmentIntersectingPlane(pointOnPlane, planeNormal, lineStart, lineEnd));
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)

@@ -628,7 +628,7 @@ public class GeometryTools
       // intersection point is p(s) = p0 + s*(p1 - p0)
       // scalar s = (n dot (v0 - p0))/(n dot (p1 - p0)
 
-	   if(isLineIntersectingPlane(pointOnPlane, planeNormal, lineStart, lineEnd))
+	   if(isLineSegmentIntersectingPlane(pointOnPlane, planeNormal, lineStart, lineEnd))
 	   {
 		      planeNormal.normalize();
 
@@ -659,7 +659,7 @@ public class GeometryTools
 
    }
 
-   public static boolean isLineIntersectingPlane(FramePoint pointOnPlane, FrameVector planeNormal, FramePoint lineStart, FramePoint lineEnd)
+   public static boolean isLineSegmentIntersectingPlane(FramePoint pointOnPlane, FrameVector planeNormal, FramePoint lineStart, FramePoint lineEnd)
    {
       double d = -planeNormal.getX() * pointOnPlane.getX() - planeNormal.getY() * pointOnPlane.getY() - planeNormal.getZ() * pointOnPlane.getZ();
 
