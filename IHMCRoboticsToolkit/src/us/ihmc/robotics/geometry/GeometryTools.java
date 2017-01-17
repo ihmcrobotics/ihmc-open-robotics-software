@@ -567,6 +567,7 @@ public class GeometryTools
    {
       // Switching to the notation and math described in http://geomalgorithms.com/a07-_distance.html.
       // The line1 is defined by (P0, u) and the line2 by (Q0, v).
+      // Note: the algorithm is independent from the magnitudes of lineDirection1 and lineDirection2
       Point3d P0 = lineStart1;
       Vector3d u = lineDirection1;
       Point3d Q0 = lineStart2;
@@ -578,14 +579,11 @@ public class GeometryTools
       Vector3d w0 = new Vector3d();
       w0.sub(P0, Q0);
       
-      double inverseMagnitude1 = 1.0 / lineDirection1.length();
-      double inverseMagnitude2 = 1.0 / lineDirection2.length();
-
-      double a = u.dot(u) * inverseMagnitude1 * inverseMagnitude1;
-      double b = u.dot(v) * inverseMagnitude1 * inverseMagnitude2;
-      double c = v.dot(v) * inverseMagnitude2 * inverseMagnitude2;
-      double d = u.dot(w0) * inverseMagnitude1;
-      double e = v.dot(w0) * inverseMagnitude2;
+      double a = u.dot(u);
+      double b = u.dot(v);
+      double c = v.dot(v);
+      double d = u.dot(w0);
+      double e = v.dot(w0);
 
       double delta = a * c - b * b;
 
@@ -608,8 +606,8 @@ public class GeometryTools
          tc = (a * e - b * d) / delta;
       }
 
-      Psc.scaleAdd(sc * inverseMagnitude1, u, P0);
-      Qtc.scaleAdd(tc * inverseMagnitude2, v, Q0);
+      Psc.scaleAdd(sc, u, P0);
+      Qtc.scaleAdd(tc, v, Q0);
    }
 
    /**
