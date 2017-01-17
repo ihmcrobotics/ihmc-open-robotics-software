@@ -1862,15 +1862,16 @@ public class GeometryToolsTest
          Point3d pointOnPlane = RandomTools.generateRandomPoint3d(random, -10.0, 10.0);
          Vector3d planeNormal = RandomTools.generateRandomVector(random, RandomTools.generateRandomDouble(random, 10.0));
 
-         Point3d expectedIntersection = new Point3d();
-
          Vector3d lineDirection = RandomTools.generateRandomOrthogonalVector3d(random, planeNormal, false);
          Point3d pointOnLine = new Point3d();
          pointOnLine.scaleAdd(RandomTools.generateRandomDouble(random, 10.0), lineDirection, pointOnPlane);
-         expectedIntersection.set(pointOnLine);
 
          Point3d actualIntersection = GeometryTools.getIntersectionBetweenLineAndPlane(pointOnPlane, planeNormal, pointOnLine, lineDirection);
-         JUnitTools.assertTuple3dEquals(expectedIntersection, actualIntersection, Epsilons.ONE_TRILLIONTH);
+         assertNull(actualIntersection);
+
+         pointOnLine.scaleAdd(RandomTools.generateRandomDouble(random, 1.0), planeNormal, pointOnLine);
+         actualIntersection = GeometryTools.getIntersectionBetweenLineAndPlane(pointOnPlane, planeNormal, pointOnLine, lineDirection);
+         assertNull(actualIntersection);
       }
    }
 
