@@ -1,4 +1,4 @@
-package us.ihmc.robotics.stateMachines;
+package us.ihmc.robotics.stateMachines.conditionBasedStateMachine;
 
 public class DoneWithFinishableStateTransitionCondition implements StateTransitionCondition
 {

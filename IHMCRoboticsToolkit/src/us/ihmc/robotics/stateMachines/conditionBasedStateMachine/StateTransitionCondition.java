@@ -1,4 +1,4 @@
-package us.ihmc.robotics.stateMachines;
+package us.ihmc.robotics.stateMachines.conditionBasedStateMachine;
 
 /**
  * <p>Title: SimulationConstructionSet</p>
@@ -12,7 +12,7 @@ package us.ihmc.robotics.stateMachines;
  * @author not attributable
  * @version 1.0
  */
-public interface StateTransitionAction
+public interface StateTransitionCondition
 {
-   public abstract void doTransitionAction();
+   public abstract boolean checkCondition();
 }

@@ -1,4 +1,4 @@
-package us.ihmc.robotics.stateMachines;
+package us.ihmc.robotics.stateMachines.conditionBasedStateMachine;
 
 public abstract class FinishableState<E extends Enum<E>> extends State<E>
 {

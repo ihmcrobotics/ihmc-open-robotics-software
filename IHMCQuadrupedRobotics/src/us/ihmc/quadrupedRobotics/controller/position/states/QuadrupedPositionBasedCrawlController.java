@@ -72,10 +72,10 @@ import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.*;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
-import us.ihmc.robotics.stateMachines.State;
-import us.ihmc.robotics.stateMachines.StateMachine;
-import us.ihmc.robotics.stateMachines.StateTransition;
-import us.ihmc.robotics.stateMachines.StateTransitionCondition;
+import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.State;
+import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateMachine;
+import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransition;
+import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransitionCondition;
 import us.ihmc.robotics.time.GlobalTimer;
 import us.ihmc.robotics.trajectories.MinimumJerkTrajectory;
 

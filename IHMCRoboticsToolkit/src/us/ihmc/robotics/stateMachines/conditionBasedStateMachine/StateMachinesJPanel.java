@@ -1,4 +1,4 @@
-package us.ihmc.robotics.stateMachines;
+package us.ihmc.robotics.stateMachines.conditionBasedStateMachine;
 
 import java.awt.BasicStroke;
 import java.awt.Color;

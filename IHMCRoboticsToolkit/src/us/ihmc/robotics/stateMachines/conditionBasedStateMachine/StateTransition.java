@@ -1,4 +1,4 @@
-package us.ihmc.robotics.stateMachines;
+package us.ihmc.robotics.stateMachines.conditionBasedStateMachine;
 
 import java.util.ArrayList;
 import java.util.List;

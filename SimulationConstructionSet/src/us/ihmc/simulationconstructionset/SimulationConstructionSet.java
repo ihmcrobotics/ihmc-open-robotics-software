@@ -57,7 +57,7 @@ import us.ihmc.robotics.dataStructures.registry.NameSpace;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariableList;
-import us.ihmc.robotics.stateMachines.StateMachinesJPanel;
+import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateMachinesJPanel;
 import us.ihmc.robotics.time.GlobalTimer;
 import us.ihmc.robotics.time.RealTimeRateEnforcer;
 import us.ihmc.simulationconstructionset.DataBuffer.RepeatDataBufferEntryException;
