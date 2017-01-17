@@ -363,49 +363,49 @@ public class GeometryToolsTest
       FramePoint pointOnPlane = new FramePoint(ReferenceFrame.getWorldFrame(), 0, 0, 0);
       FrameVector planeNormal = new FrameVector(pointOnPlane.getReferenceFrame(), 0, 0, 1);
       FramePoint point = new FramePoint(ReferenceFrame.getWorldFrame(), 0, 0, 3);
-      double actual = GeometryTools.distanceFromPointToPlane(pointOnPlane, planeNormal, point);
+      double actual = GeometryTools.distanceFromPointToPlane(point, pointOnPlane, planeNormal);
       double expected = 3.0;
       assertEquals("FAILED: Distance from point to plane", expected, actual, EPSILON);
 
       pointOnPlane = new FramePoint(ReferenceFrame.getWorldFrame(), 0, 0, 0);
       planeNormal = new FrameVector(pointOnPlane.getReferenceFrame(), 0, 0, 1);
       point = new FramePoint(ReferenceFrame.getWorldFrame(), 3, 3, -3);
-      actual = GeometryTools.distanceFromPointToPlane(pointOnPlane, planeNormal, point);
+      actual = GeometryTools.distanceFromPointToPlane(point, pointOnPlane, planeNormal);
       expected = 3.0;
       assertEquals("FAILED: Distance from point to plane", expected, actual, EPSILON);
 
       pointOnPlane = new FramePoint(ReferenceFrame.getWorldFrame(), 0, 0, 0);
       planeNormal = new FrameVector(pointOnPlane.getReferenceFrame(), 0, 0, 1);
       point = new FramePoint(ReferenceFrame.getWorldFrame(), 0, 0, -3);
-      actual = GeometryTools.distanceFromPointToPlane(pointOnPlane, planeNormal, point);
+      actual = GeometryTools.distanceFromPointToPlane(point, pointOnPlane, planeNormal);
       expected = 3.0;
       assertEquals("FAILED: Distance from point to plane", expected, actual, EPSILON);
 
       pointOnPlane = new FramePoint(ReferenceFrame.getWorldFrame(), 0, 0, 3);
       planeNormal = new FrameVector(pointOnPlane.getReferenceFrame(), 0, 0, 1);
       point = new FramePoint(ReferenceFrame.getWorldFrame(), 0, 0, -3);
-      actual = GeometryTools.distanceFromPointToPlane(pointOnPlane, planeNormal, point);
+      actual = GeometryTools.distanceFromPointToPlane(point, pointOnPlane, planeNormal);
       expected = 6.0;
       assertEquals("FAILED: Distance from point to plane", expected, actual, EPSILON);
 
       pointOnPlane = new FramePoint(ReferenceFrame.getWorldFrame(), 0, 0, 0);
       planeNormal = new FrameVector(pointOnPlane.getReferenceFrame(), 1, 0, 0);
       point = new FramePoint(ReferenceFrame.getWorldFrame(), 3, 0, 0);
-      actual = GeometryTools.distanceFromPointToPlane(pointOnPlane, planeNormal, point);
+      actual = GeometryTools.distanceFromPointToPlane(point, pointOnPlane, planeNormal);
       expected = 3.0;
       assertEquals("FAILED: Distance from point to plane", expected, actual, EPSILON);
 
       pointOnPlane = new FramePoint(ReferenceFrame.getWorldFrame(), 0, 0, 0);
       planeNormal = new FrameVector(pointOnPlane.getReferenceFrame(), 0, 1, 0);
       point = new FramePoint(ReferenceFrame.getWorldFrame(), 0, 3, 0);
-      actual = GeometryTools.distanceFromPointToPlane(pointOnPlane, planeNormal, point);
+      actual = GeometryTools.distanceFromPointToPlane(point, pointOnPlane, planeNormal);
       expected = 3.0;
       assertEquals("FAILED: Distance from point to plane", expected, actual, EPSILON);
 
       pointOnPlane = new FramePoint(ReferenceFrame.getWorldFrame(), 1, 1, 1);
       planeNormal = new FrameVector(pointOnPlane.getReferenceFrame(), 0, 1, 0);
       point = new FramePoint(ReferenceFrame.getWorldFrame(), 0, 3, 0);
-      actual = GeometryTools.distanceFromPointToPlane(pointOnPlane, planeNormal, point);
+      actual = GeometryTools.distanceFromPointToPlane(point, pointOnPlane, planeNormal);
       expected = 2.0;
       assertEquals("FAILED: Distance from point to plane", expected, actual, EPSILON);
    }

@@ -830,7 +830,7 @@ public class GeometryTools
       return ansStart * ansEnd < 0.0;
    }
 
-   public static double distanceFromPointToPlane(FramePoint pointOnPlane, FrameVector planeNormal, FramePoint point)
+   public static double distanceFromPointToPlane(FramePoint point, FramePoint pointOnPlane, FrameVector planeNormal)
    {
       double d = -planeNormal.getX() * pointOnPlane.getX() - planeNormal.getY() * pointOnPlane.getY() - planeNormal.getZ() * pointOnPlane.getZ();
 
