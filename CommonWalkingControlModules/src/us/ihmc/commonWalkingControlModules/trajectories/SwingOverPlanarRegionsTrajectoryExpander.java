@@ -156,7 +156,7 @@ public class SwingOverPlanarRegionsTrajectoryExpander
       maximumAdjustmentDistance.set(maximumSwingHeight - minimumSwingHeight);
    }
 
-   public void expandTrajectoryOverPlanarRegions(FramePose stanceFootPose, FramePose swingStartPose,
+   public double expandTrajectoryOverPlanarRegions(FramePose stanceFootPose, FramePose swingStartPose,
                                                  FramePose swingEndPose, PlanarRegionsList planarRegionsList)
    {
       stanceFootPose.getPositionIncludingFrame(stanceFootPosition);
@@ -225,8 +225,8 @@ public class SwingOverPlanarRegionsTrajectoryExpander
          numberOfTriesCounter.countOne();
       }
 
-      // TODO adjust swing time is speed is too high
       double maxSpeed = twoWaypointSwingGenerator.computeAndGetMaxSpeed();
+      return maxSpeed;
    }
 
    private SwingOverPlanarRegionsTrajectoryExpansionStatus tryATrajectory(PlanarRegionsList planarRegionsList)
