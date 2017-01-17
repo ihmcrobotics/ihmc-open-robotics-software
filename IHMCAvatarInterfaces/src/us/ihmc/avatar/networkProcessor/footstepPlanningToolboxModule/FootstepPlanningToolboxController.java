@@ -1,12 +1,16 @@
 package us.ihmc.avatar.networkProcessor.footstepPlanningToolboxModule;
 
+import java.util.Arrays;
 import java.util.EnumMap;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
@@ -26,12 +30,17 @@ import us.ihmc.footstepPlanning.graphSearch.PlanarRegionBipedalFootstepPlanner;
 import us.ihmc.footstepPlanning.graphSearch.PlanarRegionBipedalFootstepPlannerVisualizer;
 import us.ihmc.footstepPlanning.simplePlanners.PlanThenSnapPlanner;
 import us.ihmc.footstepPlanning.simplePlanners.TurnWalkTurnPlanner;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidBehaviors.behaviors.roughTerrain.FootstepPlannerForBehaviorsHelper;
 import us.ihmc.humanoidBehaviors.behaviors.roughTerrain.PlanarRegionBipedalFootstepPlannerVisualizerFactory;
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessageConverter;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanningRequestPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanningToolboxOutputStatus;
+import us.ihmc.humanoidRobotics.communication.subscribers.HumanoidRobotDataReceiver;
+import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -41,6 +50,9 @@ import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.sensors.ForceSensorDataHolder;
+import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
+import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
 public class FootstepPlanningToolboxController extends ToolboxController
@@ -57,22 +69,31 @@ public class FootstepPlanningToolboxController extends ToolboxController
 
    private final AtomicReference<FootstepPlanningRequestPacket> latestRequestReference = new AtomicReference<FootstepPlanningRequestPacket>(null);
    private final AtomicReference<PlanarRegionsListMessage> latestPlanarRegionsReference = new AtomicReference<PlanarRegionsListMessage>(null);
+   private Optional<PlanarRegionsList> planarRegionsList = Optional.empty();
 
    private final BooleanYoVariable usePlanarRegions = new BooleanYoVariable("usePlanarRegions", registry);
    private final BooleanYoVariable isDone = new BooleanYoVariable("isDone", registry);
    private final BooleanYoVariable requestedPlanarRegions = new BooleanYoVariable("RequestedPlanarRegions", registry);
    private final DoubleYoVariable toolboxTime = new DoubleYoVariable("ToolboxTime", registry);
    private final DoubleYoVariable timeReceivedPlanarRegion = new DoubleYoVariable("timeReceivedPlanarRegion", registry);
+   
+   private final HumanoidReferenceFrames humanoidReferenceFrames;
+   private final RobotContactPointParameters contactPointParameters;
+   private final WalkingControllerParameters walkingControllerParameters;
+   private final FootstepDataListWithSwingOverTrajectoriesAssembler footstepDataListWithSwingOverTrajectoriesAssembler;
 
    private final PacketCommunicator packetCommunicator;
    private long plannerCount = 0;
    private double dt;
 
-   public FootstepPlanningToolboxController(RobotContactPointParameters contactPointParameters, StatusMessageOutputManager statusOutputManager, PacketCommunicator packetCommunicator, YoVariableRegistry parentRegistry,
-         double dt)
+   public FootstepPlanningToolboxController(DRCRobotModel drcRobotModel, FullHumanoidRobotModel fullHumanoidRobotModel,
+                                            StatusMessageOutputManager statusOutputManager, PacketCommunicator packetCommunicator,
+                                            YoVariableRegistry parentRegistry, double dt)
    {
       super(statusOutputManager, parentRegistry);
       this.packetCommunicator = packetCommunicator;
+      this.contactPointParameters = drcRobotModel.getContactPointParameters();
+      this.walkingControllerParameters = drcRobotModel.getWalkingControllerParameters();
       this.dt = dt;
       packetCommunicator.attachListener(PlanarRegionsListMessage.class, createPlanarRegionsConsumer());
 
@@ -83,6 +104,9 @@ public class FootstepPlanningToolboxController extends ToolboxController
       SideDependentList<ConvexPolygon2d> planningPolygonsInSoleFrame = FootstepPlannerForBehaviorsHelper.createDefaultFootPolygonsForAnytimePlannerAndPlannerToolbox(contactPointParameters);
       SideDependentList<ConvexPolygon2d> controllerPolygonsInSoleFrame = FootstepPlannerForBehaviorsHelper.createDefaultFootPolygons(contactPointParameters, 1.0, 1.0);
 
+      humanoidReferenceFrames = createHumanoidReferenceFrames(fullHumanoidRobotModel);
+      footstepDataListWithSwingOverTrajectoriesAssembler = new FootstepDataListWithSwingOverTrajectoriesAssembler(humanoidReferenceFrames, walkingControllerParameters, parentRegistry, new YoGraphicsListRegistry());
+      
       plannerMap.put(Planners.PLANAR_REGION_BIPEDAL, createPlanarRegionBipedalPlanner(planningPolygonsInSoleFrame, controllerPolygonsInSoleFrame));
       plannerMap.put(Planners.PLAN_THEN_SNAP, new PlanThenSnapPlanner(new TurnWalkTurnPlanner(), planningPolygonsInSoleFrame));
       activePlanner.set(Planners.PLANAR_REGION_BIPEDAL);
@@ -133,6 +157,7 @@ public class FootstepPlanningToolboxController extends ToolboxController
       else
       {
          planner.setPlanarRegions(null);
+         planarRegionsList = Optional.empty();
       }
 
       sendMessageToUI("Starting To Plan: " + plannerCount + ", " + activePlanner.getEnumValue().toString());
@@ -159,6 +184,7 @@ public class FootstepPlanningToolboxController extends ToolboxController
       timeReceivedPlanarRegion.set(toolboxTime.getDoubleValue());
       PlanarRegionsList planarRegions = PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsMessage);
       planner.setPlanarRegions(planarRegions);
+      planarRegionsList = Optional.of(planarRegions);
 
       return true;
    }
@@ -232,6 +258,15 @@ public class FootstepPlanningToolboxController extends ToolboxController
          }
       };
    }
+   
+   public HumanoidReferenceFrames createHumanoidReferenceFrames(FullHumanoidRobotModel fullHumanoidRobotModel)
+   {
+      ForceSensorDataHolder forceSensorDataHolder = new ForceSensorDataHolder(Arrays.asList(fullHumanoidRobotModel.getForceSensorDefinitions()));
+      HumanoidRobotDataReceiver robotDataReceiver = new HumanoidRobotDataReceiver(fullHumanoidRobotModel, forceSensorDataHolder);
+
+      packetCommunicator.attachListener(RobotConfigurationData.class, robotDataReceiver);
+      return robotDataReceiver.getReferenceFrames();
+   }
 
    private void sendMessageToUI(String message)
    {
@@ -248,11 +283,26 @@ public class FootstepPlanningToolboxController extends ToolboxController
 
    private FootstepPlanningToolboxOutputStatus packResult(FootstepPlan footstepPlan, FootstepPlanningResult status)
    {
-      if (footstepPlan == null)
-         footstepPlan = new FootstepPlan();
-
       FootstepPlanningToolboxOutputStatus result = new FootstepPlanningToolboxOutputStatus();
-      result.footstepDataList = FootstepDataMessageConverter.createFootstepDataListFromPlan(footstepPlan, 0.0, 0.0, ExecutionMode.OVERRIDE);
+      if (footstepPlan == null)
+      {
+         footstepPlan = new FootstepPlan();
+         result.footstepDataList = new FootstepDataListMessage();
+      }
+      else
+      {
+         if (planarRegionsList.isPresent())
+         {
+            PrintTools.debug(this, "Planar regions present. Assembling footstep data list message");
+            result.footstepDataList = footstepDataListWithSwingOverTrajectoriesAssembler.assemble(footstepPlan, 0.0, 0.0, ExecutionMode.OVERRIDE,
+                                                                                                  planarRegionsList.get());
+         }
+         else
+         {
+            PrintTools.debug(this, "Planar regions not present. Won't swing over!");
+            result.footstepDataList = FootstepDataMessageConverter.createFootstepDataListFromPlan(footstepPlan, 0.0, 0.0, ExecutionMode.OVERRIDE);
+         }
+      }
       result.planningResult = status;
       return result;
    }

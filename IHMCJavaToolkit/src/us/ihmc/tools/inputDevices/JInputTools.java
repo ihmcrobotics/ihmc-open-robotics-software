@@ -76,7 +76,7 @@ public class JInputTools
       hasRYAxis = controller.getComponent(Component.Identifier.Axis.RY) != null;
       hasRZAxis = controller.getComponent(Component.Identifier.Axis.RZ) != null;
       
-      boolean knownModel = controller.getName().equals("SpaceM") || controller.getName().equals("Space Navigator") || controller.getName().equals("SpaceMouse Pro") || controller.getName().equals("SpaceMouse Wireless Receiver");
+      boolean knownModel = controller.getName() != null && (controller.getName().equals("SpaceM") || controller.getName().equals("Space Navigator") || controller.getName().equals("SpaceMouse Pro") || controller.getName().equals("SpaceMouse Wireless Receiver"));
       
       if (hasXAxis && hasYAxis && hasZAxis && hasRXAxis && hasRYAxis && hasRZAxis && controller.getType().equals(Controller.Type.STICK) && knownModel)
          return ControllerType.JOYSTICK_3D;

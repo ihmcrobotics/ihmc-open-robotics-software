@@ -1,7 +1,7 @@
 package us.ihmc.graphics3DAdapter.jme.terrain;
 
 import us.ihmc.graphics3DAdapter.jme.util.JMEGeometryUtils;
-import us.ihmc.graphics3DDescription.HeightMap;
+import us.ihmc.graphicsDescription.HeightMap;
 import us.ihmc.robotics.geometry.BoundingBox3d;
 
 import com.jme3.asset.AssetManager;

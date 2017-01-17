@@ -7,11 +7,17 @@ import java.util.List;
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
+import javax.vecmath.Tuple2d;
+import javax.vecmath.Tuple3d;
 import javax.vecmath.Vector2d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.robotics.MathTools;
+import us.ihmc.robotics.geometry.shapes.FramePlane3d;
+import us.ihmc.robotics.geometry.shapes.Plane3d;
+import us.ihmc.robotics.math.Epsilons;
 import us.ihmc.robotics.math.exceptions.UndefinedOperationException;
+import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class GeometryTools
@@ -319,6 +325,20 @@ public class GeometryTools
       Point2d projected = line.orthogonalProjectionCopy(testPoint);
 
       return projected;
+   }
+   
+   public static void normalizeSafelyZUp(Vector3d vector)
+   {
+      double distance = vector.length();
+
+      if (distance > Epsilons.ONE_TRILLIONTH)
+      {
+         vector.scale(1.0 / distance);
+      }
+      else
+      {
+         vector.set(0.0, 0.0, 1.0);
+      }
    }
 
    /**
@@ -881,6 +901,13 @@ public class GeometryTools
    {
       return chordLength / (2.0 * Math.sin(chordAngle / 2.0));
    }
+   
+   public static void clipToBoundingBox(Tuple3d tuple, double x1, double x2, double y1, double y2, double z1, double z2)
+   {
+      tuple.setX(x1 < x2 ? MathTools.clipToMinMax(tuple.getX(), x1, x2) : MathTools.clipToMinMax(tuple.getX(), x2, x1));
+      tuple.setY(y1 < y2 ? MathTools.clipToMinMax(tuple.getY(), y1, y2) : MathTools.clipToMinMax(tuple.getY(), y2, y1));
+      tuple.setZ(z1 < z2 ? MathTools.clipToMinMax(tuple.getZ(), z1, z2) : MathTools.clipToMinMax(tuple.getZ(), z2, z1));
+   }
 
    /**
     * Computes a vector of desired length that is perpendicular to a line.  Computed vector is in the plane defined by the specified normal vector.
@@ -1236,9 +1263,17 @@ public class GeometryTools
     */
    public static double distanceBetweenPoints(Point2d a, Point2d b)
    {
-      double deltaX = b.getX() - a.getX();
-      double deltaY = b.getY() - a.getY();
-      return Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+      return a.distance(b);
+   }
+   
+   public static double dotProduct(Point2d start1, Point2d end1, Point2d start2, Point2d end2)
+   {
+      double vector1X = end1.getX() - start1.getX();
+      double vector1Y = end1.getY() - start1.getY();
+      double vector2X = end2.getX() - start2.getX();
+      double vector2Y = end2.getY() - start2.getY();
+      
+      return vector1X * vector2X + vector1Y * vector2Y;
    }
 
    /**
@@ -1397,6 +1432,41 @@ public class GeometryTools
       x.normalize();
 
       return x;
+   }
+   
+   public static boolean arePlanesParallel(Plane3d planeOne, Plane3d planeTwo, double epsilon)
+   {
+      boolean normalsAreEqual = planeOne.getNormal().epsilonEquals(planeTwo.getNormal(), epsilon);
+      boolean normalsAreOpposite = true;
+      normalsAreOpposite &= MathTools.epsilonEquals(planeOne.getNormal().getX(), -planeTwo.getNormal().getX(), epsilon);
+      normalsAreOpposite &= MathTools.epsilonEquals(planeOne.getNormal().getY(), -planeTwo.getNormal().getY(), epsilon);
+      normalsAreOpposite &= MathTools.epsilonEquals(planeOne.getNormal().getZ(), -planeTwo.getNormal().getZ(), epsilon);
+      return normalsAreEqual || normalsAreOpposite;
+   }
+   
+   private static final ThreadLocal<Vector3d> pointVectorForDotCheck = new ThreadLocal<Vector3d>()
+   {
+      @Override
+      public Vector3d initialValue()
+      {
+         return new Vector3d();
+      }
+   };
+   
+   public static boolean areCoplanar(Plane3d planeOne, Plane3d planeTwo, double epsilon)
+   {
+      if (!planeOne.getNormal().epsilonEquals(planeTwo.getNormal(), epsilon))
+      {
+         return false;
+      }
+      
+      pointVectorForDotCheck.get().sub(planeTwo.getPoint(), planeOne.getPoint());
+      if (!MathTools.epsilonEquals(planeOne.getNormal().dot(pointVectorForDotCheck.get()), 0.0, epsilon))
+      {
+         return false; 
+      }
+      
+      return true;
    }
 
 // TODO move to polygon?
@@ -2493,5 +2563,22 @@ public class GeometryTools
    public static double cross(Vector2d firstVector, Vector2d secondVector)
    {
       return firstVector.getX() * secondVector.getY() - firstVector.getY() * secondVector.getX();
+   }
+   
+   public static boolean isZero(Tuple3d tuple, double epsilon)
+   {
+      boolean isZero = true;
+      isZero &= MathTools.epsilonEquals(tuple.getX(), 0.0, epsilon);
+      isZero &= MathTools.epsilonEquals(tuple.getY(), 0.0, epsilon);
+      isZero &= MathTools.epsilonEquals(tuple.getZ(), 0.0, epsilon);
+      return isZero;
+   }
+   
+   public static boolean isZero(Tuple2d tuple, double epsilon)
+   {
+      boolean isZero = true;
+      isZero &= MathTools.epsilonEquals(tuple.getX(), 0.0, epsilon);
+      isZero &= MathTools.epsilonEquals(tuple.getY(), 0.0, epsilon);
+      return isZero;
    }
 }

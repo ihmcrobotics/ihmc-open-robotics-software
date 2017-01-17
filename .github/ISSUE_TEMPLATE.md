@@ -1,4 +1,4 @@
-| Required Info ||
+| Required Info | |
 |---|---|
 |Version or commit hash|<!-- Output of git rev-parse HEAD, current tag, or .jar version -->|
 |Sim or Real Robot|<!-- Name of robot, whether it's sim/hardware, or N/A -->|

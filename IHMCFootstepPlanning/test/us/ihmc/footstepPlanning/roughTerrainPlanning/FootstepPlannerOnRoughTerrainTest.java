@@ -55,10 +55,12 @@ public abstract class FootstepPlannerOnRoughTerrainTest implements PlanningTest
    {
       double startX = 0.0;
       double startY = 0.0;
+      double cinderBlockHeight = 0.15;
       double cinderBlockSize = 0.4;
       int courseWidthXInNumberOfBlocks = 21;
       int courseLengthYInNumberOfBlocks = 6;
-      PlanarRegionsList cinderBlockField = PlanarRegionsListExamples.generateCinderBlockField(startX, startY, cinderBlockSize, courseWidthXInNumberOfBlocks, courseLengthYInNumberOfBlocks);
+      double heightVariation = 0.1;
+      PlanarRegionsList cinderBlockField = PlanarRegionsListExamples.generateCinderBlockField(startX, startY, cinderBlockSize, cinderBlockHeight, courseWidthXInNumberOfBlocks, courseLengthYInNumberOfBlocks, heightVariation);
 
       FramePose goalPose = new FramePose(worldFrame);
       goalPose.setPosition(9.0, 0.0, 0.0);

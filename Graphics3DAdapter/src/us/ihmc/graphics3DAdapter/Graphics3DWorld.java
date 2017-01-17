@@ -8,7 +8,7 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.graphics3DAdapter.camera.ClassicCameraController;
 import us.ihmc.graphics3DAdapter.camera.ViewportAdapter;
-import us.ihmc.graphics3DDescription.structure.Graphics3DNode;
+import us.ihmc.graphicsDescription.structure.Graphics3DNode;
 import us.ihmc.tools.thread.ThreadTools;
 
 public class Graphics3DWorld implements Graphics3DFrameListener

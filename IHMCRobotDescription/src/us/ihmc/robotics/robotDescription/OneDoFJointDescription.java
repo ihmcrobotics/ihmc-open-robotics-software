@@ -138,7 +138,7 @@ public class OneDoFJointDescription extends JointDescription
    {
       double massScale = Math.pow(factor, massScalePower);
       double dampingScale = Math.pow(factor, massScalePower + 2); // Joint acceleration is related to inertia.
-      this.damping = factor * this.damping;
+      this.damping = massScale * this.damping;
       
       this.kLimit = massScale * this.kLimit;
       this.bLimit = massScale * this.bLimit;

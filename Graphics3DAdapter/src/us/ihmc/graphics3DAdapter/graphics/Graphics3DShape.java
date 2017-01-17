@@ -1,6 +1,6 @@
 package us.ihmc.graphics3DAdapter.graphics;
 
-import us.ihmc.graphics3DDescription.MeshDataHolder;
+import us.ihmc.graphicsDescription.MeshDataHolder;
 
 public interface Graphics3DShape
 {

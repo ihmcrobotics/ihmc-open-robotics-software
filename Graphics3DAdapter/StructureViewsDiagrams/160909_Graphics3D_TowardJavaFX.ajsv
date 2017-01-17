@@ -11,12 +11,12 @@ hide all fields
 </filterScript>
         <class className="us.ihmc.graphics3DAdapter.jme.JMERenderer" modelMemberId="us.ihmc.graphics3DAdapter.jme.JMERenderer" project="Graphics3DAdapter" xLocation="1028" yLocation="124"/>
         <class className="us.ihmc.graphics3DAdapter.graphics.Graphics3DInstructionExecutor" modelMemberId="us.ihmc.graphics3DAdapter.graphics.Graphics3DInstructionExecutor" project="Graphics3DAdapter" xLocation="-52" yLocation="499"/>
-        <class className="us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DPrimitiveInstruction" modelMemberId="us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DPrimitiveInstruction" project="IHMCGraphics3DDescription" xLocation="-60" yLocation="783"/>
+        <class className="us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DPrimitiveInstruction" modelMemberId="us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DPrimitiveInstruction" project="IHMCGraphicsDescription" xLocation="-60" yLocation="783"/>
         <class className="us.ihmc.graphics3DAdapter.jme.JMEGraphics3DAdapter" modelMemberId="us.ihmc.graphics3DAdapter.jme.JMEGraphics3DAdapter" project="Graphics3DAdapter" xLocation="746" yLocation="33"/>
         <class className="us.ihmc.graphics3DAdapter.jme.JMEGraphics3DNode" modelMemberId="us.ihmc.graphics3DAdapter.jme.JMEGraphics3DNode" project="Graphics3DAdapter" xLocation="296" yLocation="213"/>
         <class className="us.ihmc.graphics3DAdapter.jme.JMEGraphicsObject" modelMemberId="us.ihmc.graphics3DAdapter.jme.JMEGraphicsObject" project="Graphics3DAdapter" xLocation="63" yLocation="348"/>
         <class className="us.ihmc.graphics3DAdapter.Graphics3DAdapter" modelMemberId="us.ihmc.graphics3DAdapter.Graphics3DAdapter" project="Graphics3DAdapter" xLocation="875" yLocation="486"/>
-        <class className="us.ihmc.graphics3DAdapter.graphics.Graphics3DObject" modelMemberId="us.ihmc.graphics3DAdapter.graphics.Graphics3DObject" project="IHMCGraphics3DDescription" xLocation="221" yLocation="616"/>
-        <class className="us.ihmc.graphics3DAdapter.structure.Graphics3DNode" modelMemberId="us.ihmc.graphics3DAdapter.structure.Graphics3DNode" project="IHMCGraphics3DDescription" xLocation="549" yLocation="572"/>
+        <class className="us.ihmc.graphics3DAdapter.graphics.Graphics3DObject" modelMemberId="us.ihmc.graphics3DAdapter.graphics.Graphics3DObject" project="IHMCGraphicsDescription" xLocation="221" yLocation="616"/>
+        <class className="us.ihmc.graphics3DAdapter.structure.Graphics3DNode" modelMemberId="us.ihmc.graphics3DAdapter.structure.Graphics3DNode" project="IHMCGraphicsDescription" xLocation="549" yLocation="572"/>
     </diagram>
 </ajsv>

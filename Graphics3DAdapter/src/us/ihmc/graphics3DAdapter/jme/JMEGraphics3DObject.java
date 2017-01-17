@@ -2,7 +2,7 @@ package us.ihmc.graphics3DAdapter.jme;
 
 import com.jme3.scene.Geometry;
 
-import us.ihmc.graphics3DDescription.Graphics3DObject;
+import us.ihmc.graphicsDescription.Graphics3DObject;
 
 public class JMEGraphics3DObject extends Graphics3DObject
 {

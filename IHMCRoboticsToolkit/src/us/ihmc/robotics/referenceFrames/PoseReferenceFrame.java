@@ -6,6 +6,8 @@ import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FramePose2d;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.geometry.transformables.TransformablePoint3d;
+import us.ihmc.robotics.geometry.transformables.TransformableQuat4d;
 
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Matrix3d;
@@ -72,6 +74,18 @@ public class PoseReferenceFrame extends ReferenceFrame
    public void setPoseAndUpdate(RigidBodyTransform transformToParent)
    {
       originPose.setPose(transformToParent);
+      this.update();
+   }
+
+   public void setPositionWithoutChecksAndUpdate(Point3d position)
+   {
+      originPose.setPosition(position);
+      this.update();
+   }
+
+   public void setPositionWithoutChecksAndUpdate(double x, double y, double z)
+   {
+      originPose.setPosition(x, y, z);
       this.update();
    }
 
@@ -167,6 +181,11 @@ public class PoseReferenceFrame extends ReferenceFrame
    {
       framePoseToPack.setPoseIncludingFrame(originPose);
    }
+   
+   public TransformablePoint3d getPositionUnsafe()
+   {
+      return originPose.getPositionUnsafe();
+   }
 
    public void getPosition(Point3d pointToPack)
    {
@@ -176,6 +195,11 @@ public class PoseReferenceFrame extends ReferenceFrame
    public void getPositionIncludingFrame(FramePoint framePointToPack)
    {
       originPose.getPositionIncludingFrame(framePointToPack);
+   }
+   
+   public TransformableQuat4d getOrientationUnsafe()
+   {
+      return originPose.getOrientationUnsafe();
    }
 
    public void getOrientation(Quat4d quaternionToPack)
