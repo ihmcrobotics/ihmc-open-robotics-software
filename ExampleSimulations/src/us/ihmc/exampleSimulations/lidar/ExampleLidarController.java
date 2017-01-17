@@ -2,12 +2,12 @@ package us.ihmc.exampleSimulations.lidar;
 
 import java.util.Random;
 
-import us.ihmc.graphics3DAdapter.GPULidar;
-import us.ihmc.graphics3DAdapter.GPULidarScanBuffer;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.jMonkeyEngineToolkit.GPULidar;
+import us.ihmc.jMonkeyEngineToolkit.GPULidarScanBuffer;
 import us.ihmc.robotics.controllers.PDController;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;

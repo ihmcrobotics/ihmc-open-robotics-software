@@ -1,11 +1,11 @@
 package us.ihmc.SdfLoader;
 
 import us.ihmc.SdfLoader.xmlDescription.SDFWorld.Road;
-import us.ihmc.graphics3DAdapter.jme.JMEGeneratedHeightMap;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.HeightMap;
 import us.ihmc.graphicsDescription.structure.Graphics3DNode;
 import us.ihmc.graphicsDescription.structure.Graphics3DNodeType;
+import us.ihmc.jMonkeyEngineToolkit.jme.JMEGeneratedHeightMap;
 
 import javax.xml.bind.JAXBException;
 import java.io.File;

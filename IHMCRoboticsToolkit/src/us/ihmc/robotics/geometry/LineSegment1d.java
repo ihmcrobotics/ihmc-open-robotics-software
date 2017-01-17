@@ -216,6 +216,26 @@ public class LineSegment1d
       return (positiveDirection ? 1.0 : -1.0) * (endpoint2 - endpoint1);
    }
 
+   /**
+    * Compute the 3D equivalent of this line segment.
+    * The 3D equivalent of each end point is computed as follows:
+    * {@code endPoint3d = endPoint1d * lineDirection3d + lineStart3d}. 
+    * @param line3d the 3D line used as reference to compute the 3D line segment.
+    * @return the 3D equivalent of this line segment.
+    */
+   public LineSegment3d toLineSegment3d(Line3d line3d)
+   {
+      return toLineSegment3d(line3d.getPoint(), line3d.getNormalizedVector());
+   }
+
+   /**
+    * Compute the 3D equivalent of this line segment.
+    * The 3D equivalent of each end point is computed as follows:
+    * {@code endPoint3d = endPoint1d * direction3d + zero3d}. 
+    * @param zero3d position of the 3D equivalent of an endpoint equal to zero.
+    * @param direction3d direction toward greater values of {@code endPoint1d}.
+    * @return the 3D equivalent of this line segment.
+    */
    public LineSegment3d toLineSegment3d(Point3d zero3d, Vector3d direction3d)
    {
       LineSegment3d lineSegment3d = new LineSegment3d();
@@ -224,6 +244,14 @@ public class LineSegment1d
       return lineSegment3d;
    }
 
+   /**
+    * Compute the 2D equivalent of this line segment.
+    * The 2D equivalent of each end point is computed as follows:
+    * {@code endPoint2d = endPoint1d * direction2d + zero2d}. 
+    * @param zero2d position of the 2D equivalent of an endpoint equal to zero.
+    * @param direction2d direction toward greater values of {@code endPoint1d}.
+    * @return the 2D equivalent of this line segment.
+    */
    public LineSegment2d toLineSegment2d(Point2d zero2d, Vector2d direction2d)
    {
       LineSegment2d lineSegment2d = new LineSegment2d();

@@ -5,7 +5,7 @@ import java.awt.event.ActionListener;
 
 import javax.swing.JCheckBox;
 
-import us.ihmc.graphics3DAdapter.camera.CameraPropertiesHolder;
+import us.ihmc.jMonkeyEngineToolkit.camera.CameraPropertiesHolder;
 
 
 public class TrackCheckBox extends JCheckBox implements ActionListener
