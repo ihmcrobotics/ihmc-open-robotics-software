@@ -689,77 +689,124 @@ public class GeometryTools
    }
 
    /**
-    * Locates and returns the intersection between
-    * the given line segment and plane
+    * Computes the coordinates of the intersection between a plane and a finite length line segment.
+    * <p>
+    * This method returns null for the following cases:
+    * <ul>
+    *    <li> the line segment is parallel to the plane,
+    *    <li> the line segment end points are on one side of the plane,
+    *    <li> the line segment length is equal to zero ({@code lineSegmentStart == lineSegmentEnd}),
+    *    <li> one of the line segment end points lies on the plane.
+    * </ul>
+    * <p>
+    * Once the existence of an intersection is verified,
+    * this method calls {@link #getIntersectionBetweenLineAndPlane(Point3d, Vector3d, Point3d, Vector3d)}
+    * to perform the actual computation.
     *
-    * @param pointOnPlane FramePoint
-    * @param planeNormal FrameVector
-    * @param lineStart FramePoint
-    * @param lineEnd FramePoint
-    * @return FramePoint
+    * @param pointOnPlane a point located on the plane. Not modified.
+    * @param planeNormal the normal of the plane. Not modified.
+    * @param lineSegmentStart first end point of the line segment. Not modified.
+    * @param lineSegmentEnd second end point of the line segment. Not modified.
+    * @return the intersection, or {@code null} if there is no intersection.
+    * @throws ReferenceFrameMismatchException if the arguments are not expressed in the same reference frame.
     */
-   public static FramePoint getIntersectionBetweenLineSegmentAndPlane(FramePoint pointOnPlane, FrameVector planeNormal, FramePoint lineStart,
-                                                                      FramePoint lineEnd)
+   public static FramePoint getIntersectionBetweenLineSegmentAndPlane(FramePoint pointOnPlane, FrameVector planeNormal, FramePoint lineSegmentStart,
+                                                                      FramePoint lineSegmentEnd)
    {
-      // po = line start, p1 = line end
-      // v0 = point on plane
-      // n = plane normal
-      // intersection point is p(s) = p0 + s*(p1 - p0)
-      // scalar s = (n dot (v0 - p0))/(n dot (p1 - p0)
+      pointOnPlane.checkReferenceFrameMatch(planeNormal);
+      lineSegmentStart.checkReferenceFrameMatch(lineSegmentEnd);
+      pointOnPlane.checkReferenceFrameMatch(lineSegmentStart);
 
-      if (isLineSegmentIntersectingPlane(pointOnPlane, planeNormal, lineStart, lineEnd))
-      {
-         planeNormal.normalize();
+      Point3d intersection = getIntersectionBetweenLineSegmentAndPlane(pointOnPlane.getPoint(), planeNormal.getVector(), lineSegmentStart.getPoint(),
+                                                                       lineSegmentEnd.getPoint());
 
-         FrameVector line = new FrameVector(lineStart.getReferenceFrame());
-         line.sub(lineEnd, lineStart);
+      if (intersection == null)
+         return null;
+      else
+         return new FramePoint(pointOnPlane.getReferenceFrame(), intersection);
+   }
 
-         FrameVector fromP0toV0 = new FrameVector(pointOnPlane.getReferenceFrame());
-         fromP0toV0.sub(pointOnPlane, lineStart);
-
-         double numerator = planeNormal.dot(fromP0toV0);
-         double denominator = planeNormal.dot(line);
-         double scaleFactor = numerator / denominator;
-
-         FramePoint ret = new FramePoint(lineStart.getReferenceFrame());
-         ret.scaleAdd(scaleFactor, line, lineStart);
-
-         if (ret.containsNaN() || ret.containsInfinity())
-         {
-            ret = null;
-         }
-
-         return ret;
+   /**
+    * Computes the coordinates of the intersection between a plane and a finite length line segment.
+    * <p>
+    * This method returns null for the following cases:
+    * <ul>
+    *    <li> the line segment is parallel to the plane,
+    *    <li> the line segment end points are on one side of the plane,
+    *    <li> the line segment length is equal to zero ({@code lineSegmentStart == lineSegmentEnd}),
+    *    <li> one of the line segment end points lies on the plane.
+    * </ul>
+    * <p>
+    * Once the existence of an intersection is verified,
+    * this method calls {@link #getIntersectionBetweenLineAndPlane(Point3d, Vector3d, Point3d, Vector3d)}
+    * to perform the actual computation.
+    *
+    * @param pointOnPlane a point located on the plane. Not modified.
+    * @param planeNormal the normal of the plane. Not modified.
+    * @param lineSegmentStart first end point of the line segment. Not modified.
+    * @param lineSegmentEnd second end point of the line segment. Not modified.
+    * @return the intersection, or {@code null} if there is no intersection.
+    */
+   public static Point3d getIntersectionBetweenLineSegmentAndPlane(Point3d pointOnPlane, Vector3d planeNormal, Point3d lineSegmentStart, Point3d lineSegmentEnd)
+   {
+      if (isLineSegmentIntersectingPlane(pointOnPlane, planeNormal, lineSegmentStart, lineSegmentEnd))
+      { // Since an intersection exists, it is now the same as computing the intersection line-plane
+         Vector3d lineDirection = new Vector3d();
+         lineDirection.sub(lineSegmentEnd, lineSegmentStart);
+         return getIntersectionBetweenLineAndPlane(pointOnPlane, planeNormal, lineSegmentStart, lineDirection);
       }
       else
       {
          return null;
       }
-
    }
 
-   public static boolean isLineSegmentIntersectingPlane(FramePoint pointOnPlane, FrameVector planeNormal, FramePoint lineStart, FramePoint lineEnd)
+   /**
+    * Test if a given line segment intersects a given plane.
+    * <p>
+    * Edge cases:
+    * <ul>
+    *    <li> the line segment end points are equal, this method returns false whether the end points are on the plane or not.
+    *    <li> one of the line segment end points is exactly on the plane, this method returns false.
+    * </ul>
+    * 
+    * @param pointOnPlane a point located on the plane. Not modified.
+    * @param planeNormal the normal of the plane. Not modified.
+    * @param lineSegmentStart first end point of the line segment. Not modified.
+    * @param lineSegmentEnd second end point of the line segment. Not modified.
+    * @return {@code true} if an intersection line segment - plane exists, {@code false} otherwise.
+    * @throws ReferenceFrameMismatchException if the arguments are not expressed in the same reference frame.
+    */
+   public static boolean isLineSegmentIntersectingPlane(FramePoint pointOnPlane, FrameVector planeNormal, FramePoint lineSegmentStart, FramePoint lineSegmentEnd)
+   {
+      pointOnPlane.checkReferenceFrameMatch(planeNormal);
+      lineSegmentStart.checkReferenceFrameMatch(lineSegmentEnd);
+      pointOnPlane.checkReferenceFrameMatch(lineSegmentStart);
+      return isLineSegmentIntersectingPlane(pointOnPlane.getPoint(), planeNormal.getVector(), lineSegmentStart.getPoint(), lineSegmentEnd.getPoint());
+   }
+
+   /**
+    * Test if a given line segment intersects a given plane.
+    * <p>
+    * Edge cases:
+    * <ul>
+    *    <li> the line segment end points are equal, this method returns false whether the end points are on the plane or not.
+    *    <li> one of the line segment end points is exactly on the plane, this method returns false.
+    * </ul>
+    * 
+    * @param pointOnPlane a point located on the plane. Not modified.
+    * @param planeNormal the normal of the plane. Not modified.
+    * @param lineSegmentStart first end point of the line segment. Not modified.
+    * @param lineSegmentEnd second end point of the line segment. Not modified.
+    * @return {@code true} if an intersection line segment - plane exists, {@code false} otherwise.
+    */
+   public static boolean isLineSegmentIntersectingPlane(Point3d pointOnPlane, Vector3d planeNormal, Point3d lineSegmentStart, Point3d lineSegmentEnd)
    {
       double d = -planeNormal.getX() * pointOnPlane.getX() - planeNormal.getY() * pointOnPlane.getY() - planeNormal.getZ() * pointOnPlane.getZ();
 
-      double ansStart = planeNormal.getX() * lineStart.getX() + planeNormal.getY() * lineStart.getY() + planeNormal.getZ() * lineStart.getZ() + d;
-
-      double ansEnd = planeNormal.getX() * lineEnd.getX() + planeNormal.getY() * lineEnd.getY() + planeNormal.getZ() * lineEnd.getZ() + d;
-
-      //      System.out.println("Start: " + ansStart + ", End: " + ansEnd);
-
-      if (((ansStart > 0) && (ansEnd < 0)) || ((ansStart < 0) && (ansEnd > 0)))
-      {
-         //         System.out.println("Line is intersecting plane");
-
-         return true;
-      }
-      else
-      {
-         //          System.out.println("Line is not intersecting plane");
-
-         return false;
-      }
+      double ansStart = planeNormal.getX() * lineSegmentStart.getX() + planeNormal.getY() * lineSegmentStart.getY() + planeNormal.getZ() * lineSegmentStart.getZ() + d;
+      double ansEnd = planeNormal.getX() * lineSegmentEnd.getX() + planeNormal.getY() * lineSegmentEnd.getY() + planeNormal.getZ() * lineSegmentEnd.getZ() + d;
+      return ansStart * ansEnd < 0.0;
    }
 
    public static double distanceFromPointToPlane(FramePoint pointOnPlane, FrameVector planeNormal, FramePoint point)
