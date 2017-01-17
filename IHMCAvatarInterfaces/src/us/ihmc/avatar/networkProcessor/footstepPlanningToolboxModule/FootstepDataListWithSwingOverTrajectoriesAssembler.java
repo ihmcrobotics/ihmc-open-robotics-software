@@ -37,6 +37,8 @@ public class FootstepDataListWithSwingOverTrajectoriesAssembler
    private final FramePose swingEndPose;
    private final ConvexPolygon2d partialFootholdPolygon;
 
+   private static final double maxSwingSpeed = 1.0;
+
    public FootstepDataListWithSwingOverTrajectoriesAssembler(HumanoidReferenceFrames humanoidReferenceFrames,
                                                              WalkingControllerParameters walkingControllerParameters, YoVariableRegistry parentRegistry,
                                                              YoGraphicsListRegistry graphicsListRegistry)
@@ -51,7 +53,7 @@ public class FootstepDataListWithSwingOverTrajectoriesAssembler
       swingEndPose = new FramePose();
       partialFootholdPolygon = new ConvexPolygon2d();
    }
-   
+
    public SwingOverPlanarRegionsTrajectoryExpansionStatus getStatus()
    {
       return swingOverPlanarRegionsTrajectoryExpander.getStatus();
@@ -71,7 +73,7 @@ public class FootstepDataListWithSwingOverTrajectoriesAssembler
             swingStartPose.setToZero(humanoidReferenceFrames.getSoleFrame(footstepPlan.getFootstep(0).getRobotSide()));
             stanceFootPose.setToZero(humanoidReferenceFrames.getSoleFrame(footstepPlan.getFootstep(0).getRobotSide().getOppositeSide()));
          }
-         
+
          SimpleFootstep simpleFootstep = footstepPlan.getFootstep(i);
 
          simpleFootstep.getSoleFramePose(swingEndPose);
@@ -80,7 +82,7 @@ public class FootstepDataListWithSwingOverTrajectoriesAssembler
                                                                            new Quat4d(swingEndPose.getOrientationUnsafe()));
          footstepDataMessage.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
 
-         swingOverPlanarRegionsTrajectoryExpander.expandTrajectoryOverPlanarRegions(stanceFootPose, swingStartPose, swingEndPose, planarRegionsList);
+         double maxSpeedDimensionless = swingOverPlanarRegionsTrajectoryExpander.expandTrajectoryOverPlanarRegions(stanceFootPose, swingStartPose, swingEndPose, planarRegionsList);
          footstepDataMessage.setTrajectoryType(TrajectoryType.CUSTOM);
          Point3d[] waypoints = new Point3d[] {new Point3d(), new Point3d()};
          swingOverPlanarRegionsTrajectoryExpander.getExpandedWaypoints().get(0).get(waypoints[0]);
@@ -90,19 +92,26 @@ public class FootstepDataListWithSwingOverTrajectoriesAssembler
          if (simpleFootstep.hasFoothold())
          {
             simpleFootstep.getFoothold(partialFootholdPolygon);
-            
+
             if (partialFootholdPolygon.getNumberOfVertices() != 4)
             {
                ConvexPolygonTools.limitVerticesConservative(partialFootholdPolygon, 4);
             }
-            
+
             ArrayList<Point2d> fourPartialFootholdCorners = new ArrayList<>();
             for (int j = 0; j < 4; j++)
             {
                fourPartialFootholdCorners.add(new Point2d(partialFootholdPolygon.getVertex(j)));
             }
-            
+
             footstepDataMessage.setPredictedContactPoints(fourPartialFootholdCorners);
+         }
+
+         double maxSpeed = maxSpeedDimensionless / swingTime;
+         if (maxSpeed > maxSwingSpeed)
+         {
+            double adjustedSwingTime = maxSpeedDimensionless / maxSwingSpeed;
+            footstepDataMessage.setTimings(adjustedSwingTime, transferTime);
          }
 
          footstepDataListMessage.add(footstepDataMessage);
@@ -114,7 +123,7 @@ public class FootstepDataListWithSwingOverTrajectoriesAssembler
       footstepDataListMessage.setExecutionMode(executionMode);
       return footstepDataListMessage;
    }
-   
+
    public FootstepDataListMessage assemble(List<Footstep> footstepList, double swingTime, double transferTime, ExecutionMode executionMode,
                                            PlanarRegionsList planarRegionsList)
    {
@@ -129,7 +138,7 @@ public class FootstepDataListWithSwingOverTrajectoriesAssembler
             swingStartPose.setToZero(humanoidReferenceFrames.getSoleFrame(footstepList.get(0).getRobotSide()));
             stanceFootPose.setToZero(humanoidReferenceFrames.getSoleFrame(footstepList.get(0).getRobotSide().getOppositeSide()));
          }
-         
+
          Footstep footstep = footstepList.get(i);
 
          footstep.getSolePose(swingEndPose);
@@ -150,18 +159,18 @@ public class FootstepDataListWithSwingOverTrajectoriesAssembler
             partialFootholdPolygon.clear();
             partialFootholdPolygon.addVertices(footstep.getPredictedContactPoints(), footstep.getPredictedContactPoints().size());
             partialFootholdPolygon.update();
-            
+
             if (partialFootholdPolygon.getNumberOfVertices() != 4)
             {
                ConvexPolygonTools.limitVerticesConservative(partialFootholdPolygon, 4);
             }
-            
+
             ArrayList<Point2d> fourPartialFootholdCorners = new ArrayList<>();
             for (int j = 0; j < 4; j++)
             {
                fourPartialFootholdCorners.add(new Point2d(partialFootholdPolygon.getVertex(j)));
             }
-            
+
             footstepDataMessage.setPredictedContactPoints(fourPartialFootholdCorners);
          }
 
