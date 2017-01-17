@@ -12,7 +12,7 @@ import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.Cont
 import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.continuousIntegration.IntegrationCategory;
 import us.ihmc.wholeBodyController.AdditionalSimulationContactPoints;
-import us.ihmc.wholeBodyController.SimulationFootContactPoints;
+import us.ihmc.wholeBodyController.FootContactPoints;
 
 @ContinuousIntegrationPlan(categories = {IntegrationCategory.SLOW})
 public class AtlasPointyRocksEnvironmentContactsTest extends HumanoidPointyRocksEnvironmentContactsTest
@@ -34,7 +34,7 @@ public class AtlasPointyRocksEnvironmentContactsTest extends HumanoidPointyRocks
    @Override
    protected DRCRobotModel getRobotModel(int xContactPoints, int yContactPoints, boolean createOnlyEdgePoints)
    {
-      SimulationFootContactPoints simulationContactPoints = new AdditionalSimulationContactPoints(xContactPoints, yContactPoints, createOnlyEdgePoints, true);
+      FootContactPoints simulationContactPoints = new AdditionalSimulationContactPoints(xContactPoints, yContactPoints, createOnlyEdgePoints, true);
       AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, DRCRobotModel.RobotTarget.SCS, false, simulationContactPoints);
       return robotModel;
    }
