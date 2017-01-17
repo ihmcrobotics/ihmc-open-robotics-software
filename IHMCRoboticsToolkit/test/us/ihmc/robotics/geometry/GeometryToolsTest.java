@@ -5,6 +5,7 @@ import static org.junit.Assert.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.Vector;
 
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Matrix3d;
@@ -358,7 +359,7 @@ public class GeometryToolsTest
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
-   public void testGetDistanceBetweenPointAndPlane()
+   public void testGetDistanceBetweenPointAndPlane1()
    {
       FramePoint pointOnPlane = new FramePoint(ReferenceFrame.getWorldFrame(), 0, 0, 0);
       FrameVector planeNormal = new FrameVector(pointOnPlane.getReferenceFrame(), 0, 0, 1);
@@ -408,6 +409,29 @@ public class GeometryToolsTest
       actual = GeometryTools.distanceFromPointToPlane(point, pointOnPlane, planeNormal);
       expected = 2.0;
       assertEquals("FAILED: Distance from point to plane", expected, actual, EPSILON);
+   }
+
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testGetDistanceBetweenPointAndPlane2()
+   {
+      for (int i = 0; i < 100; i++)
+      {
+         Point3d pointOnPlane = RandomTools.generateRandomPoint3d(random, -10.0, 10.0);
+         Vector3d planeNormal = RandomTools.generateRandomVector(random, RandomTools.generateRandomDouble(random, 0.0, 10.0));
+
+         Vector3d parallelToPlane = RandomTools.generateRandomOrthogonalVector3d(random, planeNormal, true);
+         Point3d secondPointOnPlane = new Point3d();
+         secondPointOnPlane.scaleAdd(RandomTools.generateRandomDouble(random, 10.0), parallelToPlane, pointOnPlane);
+
+         double expectedDistance = RandomTools.generateRandomDouble(random, 0.0, 10.0);
+         Point3d point = new Point3d();
+         point.scaleAdd(expectedDistance / planeNormal.length(), planeNormal, secondPointOnPlane);
+
+         double actualDistance = GeometryTools.distanceFromPointToPlane(point, pointOnPlane, planeNormal);
+         assertEquals(expectedDistance, actualDistance, Epsilons.ONE_TRILLIONTH);
+      }
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)

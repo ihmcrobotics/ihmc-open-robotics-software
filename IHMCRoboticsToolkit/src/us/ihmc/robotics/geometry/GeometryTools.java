@@ -830,14 +830,39 @@ public class GeometryTools
       return ansStart * ansEnd < 0.0;
    }
 
+   /**
+    * Computes the minimum distance between a given point and a plane.
+    * 
+    * @param point the 3D query. Not modified.
+    * @param pointOnPlane a point located on the plane. Not modified.
+    * @param planeNormal the normal of the plane. Not modified.
+    * @return the distance between the point and the plane.
+    * @throws ReferenceFrameMismatchException if the arguments are not expressed in the same reference frame.
+    */
    public static double distanceFromPointToPlane(FramePoint point, FramePoint pointOnPlane, FrameVector planeNormal)
+   {
+      point.checkReferenceFrameMatch(pointOnPlane);
+      point.checkReferenceFrameMatch(planeNormal);
+
+      return distanceFromPointToPlane(point.getPoint(), pointOnPlane.getPoint(), planeNormal.getVector());
+   }
+
+   /**
+    * Computes the minimum distance between a given point and a plane.
+    * 
+    * @param point the 3D query. Not modified.
+    * @param pointOnPlane a point located on the plane. Not modified.
+    * @param planeNormal the normal of the plane. Not modified.
+    * @return the distance between the point and the plane.
+    */
+   public static double distanceFromPointToPlane(Point3d point, Point3d pointOnPlane, Vector3d planeNormal)
    {
       double d = -planeNormal.getX() * pointOnPlane.getX() - planeNormal.getY() * pointOnPlane.getY() - planeNormal.getZ() * pointOnPlane.getZ();
 
-      double dist = Math.abs(planeNormal.getX() * point.getX() + planeNormal.getY() * point.getY() + planeNormal.getZ() * point.getZ() + d)
-                    / Math.sqrt(planeNormal.getX() * planeNormal.getX() + planeNormal.getY() * planeNormal.getY() + planeNormal.getZ() * planeNormal.getZ());
+      double numerator = planeNormal.getX() * point.getX() + planeNormal.getY() * point.getY() + planeNormal.getZ() * point.getZ() + d;
+      double denominator = planeNormal.length();
 
-      return dist;
+      return Math.abs(numerator) / denominator;
    }
 
    // TODO ensure consistant with lineSegment2D
