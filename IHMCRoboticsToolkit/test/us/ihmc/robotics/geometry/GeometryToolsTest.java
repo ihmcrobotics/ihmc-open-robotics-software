@@ -261,9 +261,6 @@ public class GeometryToolsTest
       double expectedReturn3 = 10;
       double actualReturn3 = GeometryTools.distanceFromPointToLine(point3, lineStart3, lineEnd3);
       assertEquals("return value", expectedReturn3, actualReturn3, Double.MIN_VALUE);
-
-
-
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
