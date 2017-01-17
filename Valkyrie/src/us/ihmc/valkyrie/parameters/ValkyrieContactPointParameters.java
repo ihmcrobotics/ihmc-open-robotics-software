@@ -20,8 +20,8 @@ import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
+import us.ihmc.wholeBodyController.FootContactPoints;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
-import us.ihmc.wholeBodyController.SimulationFootContactPoints;
 
 public class ValkyrieContactPointParameters extends RobotContactPointParameters
 {
@@ -31,16 +31,15 @@ public class ValkyrieContactPointParameters extends RobotContactPointParameters
 
    private final DRCRobotJointMap jointMap;
 
-   public ValkyrieContactPointParameters(DRCRobotJointMap jointMap, SimulationFootContactPoints simulationContactPoints)
+   public ValkyrieContactPointParameters(DRCRobotJointMap jointMap, FootContactPoints footContactPoints)
    {
       super(jointMap, footWidth, footLength, soleToAnkleFrameTransforms);
       this.jointMap = jointMap;
 
-      createDefaultControllerFootContactPoints();
-      if (simulationContactPoints == null)
-         createDefaultSimulationFootContactPoints();
+      if (footContactPoints == null)
+         createDefaultFootContactPoints();
       else
-         createSimulationContactPoints(simulationContactPoints);
+         createContactPoints(footContactPoints);
    }
 
    private void checkJointChildren(SDFJointHolder joint)

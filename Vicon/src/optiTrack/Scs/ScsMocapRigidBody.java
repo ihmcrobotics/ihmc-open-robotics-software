@@ -11,6 +11,7 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.vicon.QuaternionPose;
 
 public class ScsMocapRigidBody
@@ -27,6 +28,16 @@ public class ScsMocapRigidBody
    private DoubleYoVariable qz;
    private DoubleYoVariable qw;
    private BooleanYoVariable isTracked;
+   
+   private DoubleYoVariable xVel;
+   private DoubleYoVariable yVel;
+   private DoubleYoVariable zVel;
+   
+   private Vector3d lastPosition = new Vector3d();
+   private Vector3d currentPosition = new Vector3d();
+   long lastTimeUpdated = System.nanoTime();
+   
+   boolean pause = false;
 
    public ScsMocapRigidBody(int id, Vector3d position, Quat4d orientation, ArrayList<MocapMarker> listOfAssociatedMarkers, boolean isTracked)
    {
@@ -39,6 +50,11 @@ public class ScsMocapRigidBody
       qz = new DoubleYoVariable("qz", registry);
       qw = new DoubleYoVariable("qw", registry);
       this.isTracked = new BooleanYoVariable("", registry);
+      
+      
+      xVel = new DoubleYoVariable("xVel", registry);
+      yVel = new DoubleYoVariable("yVel", registry);
+      zVel = new DoubleYoVariable("zVel", registry);
 
       this.id = id;
 
@@ -69,16 +85,37 @@ public class ScsMocapRigidBody
    {
       return registry;
    }
+   
+   public void pause(boolean pause)
+   {
+      this.pause = pause;
+   }
 
    public void update(MocapRigidBody rb)
    {
-      xPos.set(rb.xPosition);
-      yPos.set(rb.yPosition);
-      zPos.set(rb.zPosition);
-      qx.set(rb.qx);
-      qy.set(rb.qy);
-      qz.set(rb.qz);
-      qw.set(rb.qw);
+      if(!pause)
+      {
+         xPos.set(rb.xPosition);
+         yPos.set(rb.yPosition);
+         zPos.set(rb.zPosition);
+         qx.set(rb.qx);
+         qy.set(rb.qy);
+         qz.set(rb.qz);
+         qw.set(rb.qw);
+         
+         currentPosition.set(rb.xPosition, rb.yPosition, rb.zPosition);
+         
+         long thisTime = System.currentTimeMillis();
+         long timeStep = thisTime - lastTimeUpdated;
+         lastTimeUpdated = System.currentTimeMillis();
+         
+         xVel.set((currentPosition.x - lastPosition.x)/(timeStep/1000.0));
+         yVel.set((currentPosition.y - lastPosition.y)/(timeStep/1000.0));
+         zVel.set((currentPosition.z - lastPosition.z)/(timeStep/1000.0));
+         
+         lastPosition = new Vector3d(currentPosition.x, currentPosition.y, currentPosition.z);
+         ThreadTools.sleep(3);
+      }
    }
 
    public ArrayList<MocapMarker> getListOfAssociatedMarkers()

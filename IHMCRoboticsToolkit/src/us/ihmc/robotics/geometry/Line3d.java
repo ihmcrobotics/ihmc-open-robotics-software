@@ -11,49 +11,54 @@ public class Line3d implements GeometryObject<Line3d>
 {
    private final TransformablePoint3d point;
    private final TransformableVector3d normalizedVector;
-   
+
    public Line3d()
    {
       this.point = new TransformablePoint3d();
       this.normalizedVector = new TransformableVector3d();
    }
-   
+
    public Line3d(Point3d point, Vector3d vector)
    {
       this.point = new TransformablePoint3d(point);
       this.normalizedVector = new TransformableVector3d(vector);
       normalize();
    }
-   
+
    public Point3d getPoint()
    {
       return point;
    }
-   
+
    public Vector3d getNormalizedVector()
    {
       return normalizedVector;
    }
-   
+
    public void setPoint(Point3d point)
    {
       this.point.set(point);
    }
-   
+
    public void setVector(Vector3d vector)
    {
       this.normalizedVector.set(vector);
       normalize();
    }
-   
+
    private void normalize()
    {
       if (GeometryTools.isZero(normalizedVector, 1e-12))
       {
          normalizedVector.setToNaN();
       }
-      
+
       normalizedVector.normalize();
+   }
+
+   public double distance(Point3d point)
+   {
+      return GeometryTools.distanceFromPointToLine(point, point, normalizedVector);
    }
 
    @Override

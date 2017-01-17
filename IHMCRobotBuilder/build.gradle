@@ -48,7 +48,7 @@ dependencies {
 	compile ihmc.getProjectDependency(":IHMCRobotDescription")
 	compile ihmc.getProjectDependency(":SDFLoader")
 	compile ihmc.getProjectDependency(":IHMCGraphicsDescription")
-	compile ihmc.getProjectDependency(":Graphics3DAdapter")
+	compile ihmc.getProjectDependency(":IHMCJMonkeyEngineToolkit")
 
 
 	testCompile ihmc.getProjectDependency(":IHMCUnitTesting")

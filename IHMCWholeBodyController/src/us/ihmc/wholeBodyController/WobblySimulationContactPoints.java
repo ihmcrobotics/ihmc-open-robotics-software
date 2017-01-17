@@ -5,14 +5,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
+import javax.vecmath.Tuple2d;
 import javax.vecmath.Tuple3d;
 
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
-public class WobblySimulationContactPoints implements SimulationFootContactPoints
+public class WobblySimulationContactPoints implements FootContactPoints
 {
    private final double zWobble;
 
@@ -22,7 +24,7 @@ public class WobblySimulationContactPoints implements SimulationFootContactPoint
    }
 
    @Override
-   public Map<String, List<Tuple3d>> getContactPoints(double footLength, double footWidth, double toeWidth, DRCRobotJointMap jointMap,
+   public Map<String, List<Tuple3d>> getSimulationContactPoints(double footLength, double footWidth, double toeWidth, DRCRobotJointMap jointMap,
          SideDependentList<RigidBodyTransform> soleToAnkleFrameTransforms)
    {
       HashMap<String, List<Tuple3d>> ret = new HashMap<>();
@@ -66,6 +68,35 @@ public class WobblySimulationContactPoints implements SimulationFootContactPoint
 
          ret.put(parentJointName, footContactPoints);
       }
+
+      return ret;
+   }
+
+   @Override
+   public SideDependentList<List<Tuple2d>> getControllerContactPoints(double footLength, double footWidth, double toeWidth)
+   {
+      SideDependentList<List<Tuple2d>> ret = new SideDependentList<>();
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         ArrayList<Tuple2d> contactPoints = new ArrayList<>();
+         contactPoints.add(new Point2d(-footLength / 2.0, -footWidth / 2.0));
+         contactPoints.add(new Point2d(-footLength / 2.0, footWidth / 2.0));
+         contactPoints.add(new Point2d(footLength / 2.0, -toeWidth / 2.0));
+         contactPoints.add(new Point2d(footLength / 2.0, toeWidth / 2.0));
+         ret.put(robotSide, contactPoints);
+      }
+
+      return ret;
+   }
+
+   @Override
+   public SideDependentList<Tuple2d> getToeOffContactPoints(double footLength, double footWidth, double toeWidth)
+   {
+      SideDependentList<Tuple2d> ret = new SideDependentList<>();
+
+      for (RobotSide robotSide : RobotSide.values)
+         ret.put(robotSide, new Point2d(footLength / 2.0, 0.0));
 
       return ret;
    }

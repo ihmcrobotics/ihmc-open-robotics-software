@@ -38,6 +38,7 @@ import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.geometry.transformables.TransformablePoint2d;
+import us.ihmc.robotics.geometry.transformables.TransformableQuat4d;
 import us.ihmc.robotics.math.trajectories.CubicPolynomialTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsOrientationTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsPositionTrajectoryGenerator;
@@ -129,9 +130,12 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       TransformablePoint2d desiredPosition2d = new TransformablePoint2d();
       desiredPosition2d.set(desiredPosition.getX(), desiredPosition.getY());
       desiredPosition2d.applyTransform(fromWorldToMidFeetZUpTransform);
+      TransformableQuat4d desiredOrientationCorrected = new TransformableQuat4d(desiredOrientation);
+      desiredOrientationCorrected.applyTransform(fromWorldToMidFeetZUpTransform);
 
       desiredPosition.setX(desiredPosition2d.getX());
       desiredPosition.setY(desiredPosition2d.getY());
+      desiredOrientation.set(desiredOrientationCorrected);
 
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0 + trajectoryTime);
       assertTrue(success);

@@ -2,7 +2,7 @@ package us.ihmc.simulationconstructionset.gui.camera;
 
 import javax.vecmath.Point3d;
 
-import us.ihmc.graphics3DAdapter.camera.CameraTrackingAndDollyPositionHolder;
+import us.ihmc.jMonkeyEngineToolkit.camera.CameraTrackingAndDollyPositionHolder;
 import us.ihmc.robotics.dataStructures.YoVariableHolder;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 

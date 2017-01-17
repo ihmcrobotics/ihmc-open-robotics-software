@@ -1,7 +1,7 @@
 package us.ihmc.simulationconstructionset;
 
-import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
-import us.ihmc.graphics3DAdapter.jme.JMEGraphics3DAdapter;
+import us.ihmc.jMonkeyEngineToolkit.Graphics3DAdapter;
+import us.ihmc.jMonkeyEngineToolkit.jme.JMEGraphics3DAdapter;
 import us.ihmc.tools.io.printing.PrintTools;
 
 public enum SupportedGraphics3DAdapter

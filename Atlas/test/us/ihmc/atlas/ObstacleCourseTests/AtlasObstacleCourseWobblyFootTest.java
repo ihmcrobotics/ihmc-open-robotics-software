@@ -9,7 +9,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.tools.continuousIntegration.IntegrationCategory;
-import us.ihmc.wholeBodyController.SimulationFootContactPoints;
+import us.ihmc.wholeBodyController.FootContactPoints;
 import us.ihmc.wholeBodyController.WobblySimulationContactPoints;
 
 @ContinuousIntegrationPlan(categories = {IntegrationCategory.SLOW, IntegrationCategory.VIDEO})
@@ -21,7 +21,7 @@ public class AtlasObstacleCourseWobblyFootTest extends DRCObstacleCourseWobblyFo
    public DRCRobotModel getRobotModel()
    {
       final AtlasRobotVersion atlasVersion = AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS;
-      SimulationFootContactPoints simulationContactPoints = new WobblySimulationContactPoints(footZWobbleForTests);
+      FootContactPoints simulationContactPoints = new WobblySimulationContactPoints(footZWobbleForTests);
       return new AtlasRobotModel(atlasVersion, DRCRobotModel.RobotTarget.SCS, false, simulationContactPoints);
    }
 
