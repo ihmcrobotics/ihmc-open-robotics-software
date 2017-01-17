@@ -34,7 +34,7 @@ import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
 import us.ihmc.utilities.ros.subscriber.RosTopicSubscriberInterface;
 import us.ihmc.valkyrie.parameters.ValkyrieContactPointParameters;
 import us.ihmc.wholeBodyController.AdditionalSimulationContactPoints;
-import us.ihmc.wholeBodyController.SimulationFootContactPoints;
+import us.ihmc.wholeBodyController.FootContactPoints;
 
 public class OpenHumanoidsSimulator
 {
@@ -72,7 +72,7 @@ public class OpenHumanoidsSimulator
    public OpenHumanoidsSimulator(String model, DRCStartingLocation startingLocation, String nameSpace, String tfPrefix,
          boolean runAutomaticDiagnosticRoutine, boolean disableViz, boolean extra_sim_points, Collection<Class> additionalPacketTypes) throws IOException
    {
-         SimulationFootContactPoints simulationContactPoints = null;
+         FootContactPoints simulationContactPoints = null;
          if (extra_sim_points)
          {
             simulationContactPoints = new AdditionalSimulationContactPoints(8, 3, false, true);
