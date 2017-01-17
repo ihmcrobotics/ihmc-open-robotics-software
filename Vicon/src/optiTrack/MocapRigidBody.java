@@ -34,6 +34,16 @@ public class MocapRigidBody extends QuaternionPose
       return id;
    }
 
+   public Vector3d getPosition()
+   {
+      return new Vector3d(xPosition, yPosition, zPosition);
+   }
+
+   public Quat4d getOrientation()
+   {
+      return new Quat4d(qx, qy, qz, qw);
+   }
+
    public ArrayList<MocapMarker> getListOfAssociatedMarkers()
    {
       return listOfAssociatedMarkers;
@@ -51,18 +61,17 @@ public class MocapRigidBody extends QuaternionPose
       for (int i = 0; i < listOfAssociatedMarkers.size(); i++)
       {
          message = message + "\nMarker " + i + " is at: " + listOfAssociatedMarkers.get(i).getPosition() + "  and has size: "
-                   + listOfAssociatedMarkers.get(i).getMarkerSize() + "m";
+               + listOfAssociatedMarkers.get(i).getMarkerSize() + "m";
       }
 
       return message;
    }
-   
-   public void getPose(RigidBodyTransform pose)
+
+   public void packPose(RigidBodyTransform pose)
    {
       pose.setRotationWithQuaternion(qx, qy, qz, qw);
       pose.setTranslation(xPosition, yPosition, zPosition);
    }
 }
-
 
 //~ Formatted by Jindent --- http://www.jindent.com

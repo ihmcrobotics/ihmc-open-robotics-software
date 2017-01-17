@@ -3,8 +3,8 @@ package us.ihmc.simulationconstructionset.util.ground;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.robotics.geometry.shapes.Box3d;
-import us.ihmc.graphics3DDescription.Graphics3DObject;
-import us.ihmc.graphics3DDescription.appearance.AppearanceDefinition;
+import us.ihmc.graphicsDescription.Graphics3DObject;
+import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.robotics.geometry.Direction;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.TransformTools;

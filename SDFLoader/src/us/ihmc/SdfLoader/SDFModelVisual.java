@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
-import us.ihmc.graphics3DDescription.Graphics3DObject;
+import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 public class SDFModelVisual extends Graphics3DObject

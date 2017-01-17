@@ -108,7 +108,7 @@ public class MocapToStateEstimatorFrameConverter
    {
       if(enableMocapUpdates)
       {
-         mocapObject.getPose(workingRigidBodyTransform);
+         mocapObject.packPose(workingRigidBodyTransform);
          workingRigidBodyTransform.multiply(mocapJigCalibrationTransform);
          workingRigidBodyTransform.multiply(transformFromMocapHeadCentroidToHeadRoot);
          mocapHeadPoseInZUp.set(workingRigidBodyTransform);
@@ -130,7 +130,7 @@ public class MocapToStateEstimatorFrameConverter
          mocapReferenceFrames.put(id, mocapObjectFrame);
       }
       
-      mocapRigidBody.getPose(mocapRigidBodyTransforms.get(id));
+      mocapRigidBody.packPose(mocapRigidBodyTransforms.get(id));
       
       ReferenceFrame referenceFrame = mocapReferenceFrames.get(id);
       referenceFrame.update();

@@ -11,7 +11,7 @@ import us.ihmc.SdfLoader.xmlDescription.SDFJoint;
 import us.ihmc.SdfLoader.xmlDescription.SDFLink;
 import us.ihmc.SdfLoader.xmlDescription.SDFModel;
 import us.ihmc.SdfLoader.xmlDescription.SDFSensor;
-import us.ihmc.graphics3DDescription.Graphics3DObject;
+import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.robotDescription.CollisionMeshDescription;
 import us.ihmc.robotics.robotDescription.GraphicsObjectsHolder;

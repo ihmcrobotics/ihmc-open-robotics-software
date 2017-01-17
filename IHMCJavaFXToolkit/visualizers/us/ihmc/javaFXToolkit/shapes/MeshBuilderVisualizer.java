@@ -10,7 +10,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.MeshView;
 import javafx.stage.Stage;
-import us.ihmc.graphics3DDescription.MeshDataGenerator;
+import us.ihmc.graphicsDescription.MeshDataGenerator;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.robotics.random.RandomTools;
 
