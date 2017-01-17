@@ -1,15 +1,13 @@
 package us.ihmc.robotics.geometry;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import javax.vecmath.AxisAngle4d;
+import javax.vecmath.Matrix3d;
 import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Tuple3d;
@@ -25,6 +23,7 @@ import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.testing.JUnitTools;
+import us.ihmc.tools.testing.MutationTestingTools;
 import us.ihmc.tools.thread.RunnableThatThrows;
 
 /**
@@ -268,7 +267,7 @@ public class GeometryToolsTest
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
-   public void testDistanceFromPointToLine1()
+   public void testDistanceFromPointToLine3D()
    {
       Point3d point = new Point3d(10, 2, 0);
       Point3d lineStart = new Point3d(4, 2, 0);
@@ -291,6 +290,29 @@ public class GeometryToolsTest
       double actualReturn1 = GeometryTools.distanceFromPointToLine(point1, lineStart1, lineEnd1);
       assertEquals("return value", expectedReturn1, actualReturn1, Double.MIN_VALUE);
 
+      for (int i = 0; i < 100; i++)
+      {
+         // Generate a random line
+         Point3d start = RandomTools.generateRandomPoint3d(random, -10.0, 10.0);
+         Point3d end = RandomTools.generateRandomPoint3d(random, -10.0, 10.0);
+         Vector3d lineDirection = new Vector3d();
+         lineDirection.sub(end, start);
+         // Generate a random vector orthogonal to the line
+         Vector3d orthogonalVector = RandomTools.generateRandomOrthogonalVector3d(random, lineDirection, true);
+         double expectedDistance = RandomTools.generateRandomDouble(random, 0.0, 10.0);
+         // Generate a random point located at an expected distance from the line
+         Point3d randomPoint = new Point3d();
+         // Randomize on the line
+         randomPoint.interpolate(start, end, RandomTools.generateRandomDouble(random, 10.0));
+         // Move the point away from the line by the expected distance
+         randomPoint.scaleAdd(expectedDistance, orthogonalVector, randomPoint);
+
+         double actualDistance = GeometryTools.distanceFromPointToLine(randomPoint, start, end);
+         assertEquals(expectedDistance, actualDistance, 1.0e-12);
+         
+         actualDistance = GeometryTools.distanceFromPointToLine(randomPoint, start, lineDirection);
+         assertEquals(expectedDistance, actualDistance, 1.0e-12);
+      }
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -1576,6 +1598,83 @@ public class GeometryToolsTest
       }
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @Test(timeout = 30000)
+   public void testGetClosestPointsForTwoLines() throws Exception
+   {
+      Point3d expectedPointOnLine1ToPack = new Point3d();
+      Point3d expectedPointOnLine2ToPack = new Point3d();
+
+      Point3d actualPointOnLine1ToPack = new Point3d();
+      Point3d actualPointOnLine2ToPack = new Point3d();
+
+      for (int i = 0; i < 100; i++)
+      {
+         Point3d lineStart1 = RandomTools.generateRandomPoint3d(random, -10.0, 10.0);
+         Vector3d lineDirection1 = RandomTools.generateRandomVector(random, RandomTools.generateRandomDouble(random, 0.0, 10.0));
+
+         // Make line2 == line1
+         Point3d lineStart2 = new Point3d(lineStart1);
+         Vector3d lineDirection2 = new Vector3d(lineDirection1);
+
+         // Shift orthogonally line2 away from line1.
+         Vector3d orthogonalToLine1 = RandomTools.generateRandomOrthogonalVector3d(random, lineDirection1, true);
+         double expectedMinimumDistance = RandomTools.generateRandomDouble(random, 0.0, 10.0);
+         lineStart2.scaleAdd(expectedMinimumDistance, orthogonalToLine1, lineStart1);
+
+         // Rotate line2 around the vector we shifted it along, so it preserves the minimum distance.
+         AxisAngle4d axisAngleAroundShiftVector = new AxisAngle4d(orthogonalToLine1, RandomTools.generateRandomDouble(random, Math.PI));
+         Matrix3d rotationMatrixAroundShiftVector = new Matrix3d();
+         rotationMatrixAroundShiftVector.set(axisAngleAroundShiftVector);
+         rotationMatrixAroundShiftVector.transform(lineDirection2);
+
+         // At this point, lineStart1 and lineStart2 are expected to be the closest points.
+         expectedPointOnLine1ToPack.set(lineStart1);
+         expectedPointOnLine2ToPack.set(lineStart2);
+
+         GeometryTools.getClosestPointsForTwoLines(lineStart1, lineDirection1, lineStart2, lineDirection2, actualPointOnLine1ToPack, actualPointOnLine2ToPack);
+         JUnitTools.assertTuple3dEquals(expectedPointOnLine1ToPack, actualPointOnLine1ToPack, EPSILON);
+         JUnitTools.assertTuple3dEquals(expectedPointOnLine2ToPack, actualPointOnLine2ToPack, EPSILON);
+
+         // Let's shift lineStart1 and lineStart2 along their respective line direction so they're not the closest points.
+         lineStart1.scaleAdd(RandomTools.generateRandomDouble(random, 10.0), lineDirection1, lineStart1);
+         lineStart2.scaleAdd(RandomTools.generateRandomDouble(random, 10.0), lineDirection2, lineStart2);
+
+         GeometryTools.getClosestPointsForTwoLines(lineStart1, lineDirection1, lineStart2, lineDirection2, actualPointOnLine1ToPack, actualPointOnLine2ToPack);
+         JUnitTools.assertTuple3dEquals(expectedPointOnLine1ToPack, actualPointOnLine1ToPack, EPSILON);
+         JUnitTools.assertTuple3dEquals(expectedPointOnLine2ToPack, actualPointOnLine2ToPack, EPSILON);
+      }
+
+      // Test the parallel case. There's an infinite number of solutions but only one minimum distance between the two lines.
+      for (int i = 0; i < 100; i++)
+      {
+         Point3d lineStart1 = RandomTools.generateRandomPoint3d(random, -10.0, 10.0);
+         Vector3d lineDirection1 = RandomTools.generateRandomVector(random, 1.0);
+
+         // Make line2 == line1
+         Point3d lineStart2 = new Point3d(lineStart1);
+         Vector3d lineDirection2 = new Vector3d(lineDirection1);
+
+         // Shift orthogonally line2 away from line1.
+         Vector3d orthogonalToLine1 = RandomTools.generateRandomOrthogonalVector3d(random, lineDirection1, true);
+         double expectedMinimumDistance = RandomTools.generateRandomDouble(random, 0.0, 10.0);
+         lineStart2.scaleAdd(expectedMinimumDistance, orthogonalToLine1, lineStart1);
+
+         GeometryTools.getClosestPointsForTwoLines(lineStart1, lineDirection1, lineStart2, lineDirection2, actualPointOnLine1ToPack, actualPointOnLine2ToPack);
+         double actualMinimumDistance = actualPointOnLine1ToPack.distance(actualPointOnLine2ToPack);
+         assertEquals(expectedMinimumDistance, actualMinimumDistance, EPSILON);
+
+         // Let's shift lineStart1 and lineStart2 along their respective line direction (the minimum distance should remain the same).
+         lineStart1.scaleAdd(RandomTools.generateRandomDouble(random, 10.0), lineDirection1, lineStart1);
+         lineStart2.scaleAdd(RandomTools.generateRandomDouble(random, 10.0), lineDirection2, lineStart2);
+
+         GeometryTools.getClosestPointsForTwoLines(lineStart1, lineDirection1, lineStart2, lineDirection2, actualPointOnLine1ToPack, actualPointOnLine2ToPack);
+         actualMinimumDistance = actualPointOnLine1ToPack.distance(actualPointOnLine2ToPack);
+         assertEquals(expectedMinimumDistance, actualMinimumDistance, EPSILON);
+      }
+
+   }
+
    private void assertPolygons(double[] p1, double[] p2, double[] expectedSolution, double epsilon)
    {
       if (expectedSolution.length != 4)
@@ -1608,5 +1707,12 @@ public class GeometryToolsTest
       }
 
       return new ConvexPolygon2d(list);
+   }
+
+   public static void main(String[] args)
+   {
+      String targetTests = GeometryToolsTest.class.getName();
+      String targetClasses = GeometryTools.class.getName();
+      MutationTestingTools.doPITMutationTestAndOpenResult(targetTests, targetClasses);
    }
 }
