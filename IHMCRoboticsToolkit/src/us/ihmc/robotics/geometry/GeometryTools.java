@@ -620,7 +620,8 @@ public class GeometryTools
     * @param lineEnd FramePoint
     * @return FramePoint
     */
-   public static FramePoint getIntersectionBetweenLineSegmentAndPlane(FramePoint pointOnPlane, FrameVector planeNormal, FramePoint lineStart, FramePoint lineEnd)
+   public static FramePoint getIntersectionBetweenLineSegmentAndPlane(FramePoint pointOnPlane, FrameVector planeNormal, FramePoint lineStart,
+                                                                      FramePoint lineEnd)
    {
       // po = line start, p1 = line end
       // v0 = point on plane
@@ -628,34 +629,34 @@ public class GeometryTools
       // intersection point is p(s) = p0 + s*(p1 - p0)
       // scalar s = (n dot (v0 - p0))/(n dot (p1 - p0)
 
-	   if(isLineSegmentIntersectingPlane(pointOnPlane, planeNormal, lineStart, lineEnd))
-	   {
-		      planeNormal.normalize();
+      if (isLineSegmentIntersectingPlane(pointOnPlane, planeNormal, lineStart, lineEnd))
+      {
+         planeNormal.normalize();
 
-		      FrameVector line = new FrameVector(lineStart.getReferenceFrame());
-		      line.sub(lineEnd, lineStart);
+         FrameVector line = new FrameVector(lineStart.getReferenceFrame());
+         line.sub(lineEnd, lineStart);
 
-		      FrameVector fromP0toV0 = new FrameVector(pointOnPlane.getReferenceFrame());
-		      fromP0toV0.sub(pointOnPlane, lineStart);
+         FrameVector fromP0toV0 = new FrameVector(pointOnPlane.getReferenceFrame());
+         fromP0toV0.sub(pointOnPlane, lineStart);
 
-		      double numerator = planeNormal.dot(fromP0toV0);
-		      double denominator = planeNormal.dot(line);
-		      double scaleFactor = numerator / denominator;
+         double numerator = planeNormal.dot(fromP0toV0);
+         double denominator = planeNormal.dot(line);
+         double scaleFactor = numerator / denominator;
 
-		      FramePoint ret = new FramePoint(lineStart.getReferenceFrame());
-		      ret.scaleAdd(scaleFactor, line, lineStart);
+         FramePoint ret = new FramePoint(lineStart.getReferenceFrame());
+         ret.scaleAdd(scaleFactor, line, lineStart);
 
-		      if (ret.containsNaN() || ret.containsInfinity())
-		      {
-		         ret = null;
-		      }
+         if (ret.containsNaN() || ret.containsInfinity())
+         {
+            ret = null;
+         }
 
-		      return ret;
-	   }
-	   else
-	   {
-		   return null;
-	   }
+         return ret;
+      }
+      else
+      {
+         return null;
+      }
 
    }
 
@@ -663,27 +664,25 @@ public class GeometryTools
    {
       double d = -planeNormal.getX() * pointOnPlane.getX() - planeNormal.getY() * pointOnPlane.getY() - planeNormal.getZ() * pointOnPlane.getZ();
 
-      double ansStart = planeNormal.getX() * lineStart.getX() + planeNormal.getY() * lineStart.getY()
-                        + planeNormal.getZ() * lineStart.getZ() + d;
+      double ansStart = planeNormal.getX() * lineStart.getX() + planeNormal.getY() * lineStart.getY() + planeNormal.getZ() * lineStart.getZ() + d;
 
       double ansEnd = planeNormal.getX() * lineEnd.getX() + planeNormal.getY() * lineEnd.getY() + planeNormal.getZ() * lineEnd.getZ() + d;
 
-//      System.out.println("Start: " + ansStart + ", End: " + ansEnd);
+      //      System.out.println("Start: " + ansStart + ", End: " + ansEnd);
 
-      if (((ansStart > 0) && (ansEnd < 0)) || ((ansStart< 0) && (ansEnd > 0)))
+      if (((ansStart > 0) && (ansEnd < 0)) || ((ansStart < 0) && (ansEnd > 0)))
       {
-//         System.out.println("Line is intersecting plane");
+         //         System.out.println("Line is intersecting plane");
 
          return true;
       }
       else
       {
-//          System.out.println("Line is not intersecting plane");
+         //          System.out.println("Line is not intersecting plane");
 
          return false;
       }
    }
-
 
    public static double distanceFromPointToPlane(FramePoint pointOnPlane, FrameVector planeNormal, FramePoint point)
    {
