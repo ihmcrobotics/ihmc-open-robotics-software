@@ -865,63 +865,118 @@ public class GeometryTools
       return Math.abs(numerator) / denominator;
    }
 
-   // TODO ensure consistant with lineSegment2D
-   public static boolean doLineSegmentsIntersect(Point2d lineStart1, Point2d lineEnd1, Point2d lineStart2, Point2d lineEnd2)
+   /**
+    * Test if two line segments intersect each other.
+    * <p>
+    * Edge cases:
+    * <ul>
+    *    <li> When the two line segments are parallel but not collinear, this method returns false.
+    *    <li> When the two line segments are collinear,
+    *     this methods returns true only if the two line segments overlap or have at least one common end point.
+    *    <li> When the two line segments have a common end point, this method returns true.
+    * </ul>
+    * 
+    * @param lineSegmentStart1 first end point of the first line segment. Not modified.
+    * @param lineSegmentEnd1 second end point of the first line segment. Not modified.
+    * @param lineSegmentStart1 first end point of the second line segment. Not modified.
+    * @param lineSegmentEnd1 second end point of the second line segment. Not modified.
+    * @return {@code true} if the two line segments intersect, {@code false} otherwise.
+    * @throws ReferenceFrameMismatchException if the arguments are not expressed in the same reference frame.
+    */
+   public static boolean doLineSegmentsIntersect(FramePoint2d lineSegmentStart1, FramePoint2d lineSegmentEnd1, FramePoint2d lineSegmentStart2, FramePoint2d lineSegmentEnd2)
    {
-      double r1numerator = (lineEnd2.getX() - lineStart2.getX()) * (lineStart1.getY() - lineStart2.getY()) - (lineEnd2.getY() - lineStart2.getY()) * (lineStart1.getX() - lineStart2.getX());
+      lineSegmentStart1.checkReferenceFrameMatch(lineSegmentEnd1);
+      lineSegmentStart2.checkReferenceFrameMatch(lineSegmentEnd2);
+      lineSegmentStart1.checkReferenceFrameMatch(lineSegmentStart2);
+      return doLineSegmentsIntersect(lineSegmentStart1.getPoint(), lineSegmentEnd1.getPoint(), lineSegmentStart2.getPoint(), lineSegmentEnd2.getPoint());
+   }
 
-      double r1denominator = (lineEnd2.getY() - lineStart2.getY()) * (lineEnd1.getX() - lineStart1.getX()) - (lineEnd2.getX() - lineStart2.getX()) * (lineEnd1.getY() - lineStart1.getY());
+   /**
+    * Test if two line segments intersect each other.
+    * <p>
+    * Edge cases:
+    * <ul>
+    *    <li> When the two line segments are parallel but not collinear, this method returns false.
+    *    <li> When the two line segments are collinear,
+    *     this methods returns true only if the two line segments overlap or have at least one common end point.
+    *    <li> When the two line segments have a common end point, this method returns true.
+    * </ul>
+    * 
+    * @param lineSegmentStart1 first end point of the first line segment. Not modified.
+    * @param lineSegmentEnd1 second end point of the first line segment. Not modified.
+    * @param lineSegmentStart1 first end point of the second line segment. Not modified.
+    * @param lineSegmentEnd1 second end point of the second line segment. Not modified.
+    * @return {@code true} if the two line segments intersect, {@code false} otherwise.
+    */
+   // TODO ensure consistant with lineSegment2D
+   public static boolean doLineSegmentsIntersect(Point2d lineSegmentStart1, Point2d lineSegmentEnd1, Point2d lineSegmentStart2, Point2d lineSegmentEnd2)
+   {
+      double eps = Epsilons.ONE_TRILLIONTH;
+      double r1numerator, r1denominator, r2numerator, r2denominator;
 
-      double r2numerator = (lineEnd1.getX() - lineStart1.getX()) * (lineStart1.getY() - lineStart2.getY()) - (lineEnd1.getY() - lineStart1.getY()) * (lineStart1.getX() - lineStart2.getX());
+      double deltax1 = lineSegmentEnd1.getX() - lineSegmentStart1.getX();
+      double deltay1 = lineSegmentEnd1.getY() - lineSegmentStart1.getY();
 
-      double r2denominator = r1denominator;
+      double deltax2 = lineSegmentEnd2.getX() - lineSegmentStart2.getX();
+      double deltay2 = lineSegmentEnd2.getY() - lineSegmentStart2.getY();
 
-      // If both numerators and the denominator are zero, the lines are collinear.
-      // We must project the lines onto the X- or Y-axis check if the segments overlap.
-      if ((r1numerator == 0.0) && (r2numerator == 0.0) && (r1denominator == 0.0))
+      double startDx = lineSegmentStart1.getX() - lineSegmentStart2.getX();
+      double startDy = lineSegmentStart1.getY() - lineSegmentStart2.getY();
+
+      r1numerator = deltax2 * startDy - deltay2 * startDx;
+      r1denominator = deltay2 * deltax1 - deltax2 * deltay1;
+
+      r2numerator = deltax1 * startDy - deltay1 * startDx;
+      r2denominator = r1denominator;
+
+      // denominator == 0 => the line segments are parallel.
+      if (Math.abs(r1denominator) < eps)
       {
-         double ls1, le1, ls2, le2;
-         if (lineStart1.getX() != lineEnd1.getX())
+         // If both numerators and the denominator are zero, the lines are collinear.
+         // We must project the lines onto the X- or Y-axis check if the segments overlap.
+         if (Math.abs(r1numerator) < eps && Math.abs(r2numerator) < eps)
          {
-            ls1 = lineStart1.getX();
-            le1 = lineEnd1.getX();
-            ls2 = lineStart2.getX();
-            le2 = lineEnd2.getX();
+            double ls1, le1, ls2, le2;
+            if (lineSegmentStart1.getX() != lineSegmentEnd1.getX())
+            {
+               ls1 = lineSegmentStart1.getX();
+               le1 = lineSegmentEnd1.getX();
+               ls2 = lineSegmentStart2.getX();
+               le2 = lineSegmentEnd2.getX();
+            }
+            else
+            {
+               ls1 = lineSegmentStart1.getY();
+               le1 = lineSegmentEnd1.getY();
+               ls2 = lineSegmentStart2.getY();
+               le2 = lineSegmentEnd2.getY();
+            }
+
+            // If both first points are less than both second points, the line
+            // segments do not intersect.
+            if (((ls1 < ls2) && (le1 < ls2)) && ((ls1 < le2) && (le1 < le2)))
+               return false;
+
+            // If both first points are greater than both second points, the line
+            // segments do not intersect.
+            if (((ls1 > ls2) && (le1 > ls2)) && ((ls1 > le2) && (le1 > le2)))
+               return false;
+
+            // Otherwise, the line segments must overlap. So we return true.
+            return true;
          }
+         // The line segments are parallel but are not collinear, they do not intersect
          else
          {
-            ls1 = lineStart1.getY();
-            le1 = lineEnd1.getY();
-            ls2 = lineStart2.getY();
-            le2 = lineEnd2.getY();
+            return false;
          }
-
-         // If both first points are less than both second points, the line
-         // segments do not intersect.
-         if (((ls1 < ls2) && (le1 < ls2)) && ((ls1 < le2) && (le1 < le2)))
-            return false;
-
-         // If both first points are greater than both second points, the line
-         // segments do not intersect.
-         if (((ls1 > ls2) && (le1 > ls2)) && ((ls1 > le2) && (le1 > le2)))
-            return false;
-
-         // Otherwise, the line segments must overlap. So we return true.
-         return true;
       }
-
-      // If the denominator is zero, but the numerators are not, then the lines are parallel.
-      if (r1denominator == 0.0)
-         return false;
 
       double r1 = r1numerator / r1denominator;
       double r2 = r2numerator / r2denominator;
 
       // If both r1 and r2 are between zero and one, the line segments intersect.
-      if ((0.0 <= r1) && (r1 <= 1.0) && (0.0 <= r2) && (r2 <= 1.0))
-         return true;
-
-      return false;
+      return (0.0 - eps < r1) && (r1 < 1.0 + eps) && (0.0 - eps < r2) && (r2 < 1.0 + eps);
    }
 
    /**
