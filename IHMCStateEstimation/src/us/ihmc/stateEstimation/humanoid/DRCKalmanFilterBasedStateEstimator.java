@@ -4,7 +4,7 @@ import javax.vecmath.Quat4d;
 import javax.vecmath.Tuple3d;
 
 import us.ihmc.controlFlow.ControlFlowGraph;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameOrientation;

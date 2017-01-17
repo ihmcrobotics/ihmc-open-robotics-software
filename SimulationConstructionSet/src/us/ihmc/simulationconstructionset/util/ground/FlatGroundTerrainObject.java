@@ -1,6 +1,6 @@
 package us.ihmc.simulationconstructionset.util.ground;
 
-import us.ihmc.graphics3DDescription.Graphics3DObject;
+import us.ihmc.graphicsDescription.Graphics3DObject;
 
 public class FlatGroundTerrainObject extends FlatGroundProfile implements TerrainObject3D
 {

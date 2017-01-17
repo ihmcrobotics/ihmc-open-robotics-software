@@ -243,6 +243,7 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
          {
             double cost1 = o1.getCostToHereFromStart();
             double cost2 = o2.getCostToHereFromStart();
+            if(cost1 == cost2) return 0;
             return cost1 < cost2 ? -1 : 1;
          }
       });

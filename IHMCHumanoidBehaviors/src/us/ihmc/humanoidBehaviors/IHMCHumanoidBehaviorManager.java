@@ -2,7 +2,7 @@ package us.ihmc.humanoidBehaviors;
 
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.util.NetworkPorts;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidBehaviors.behaviors.behaviorServices.FiducialDetectorBehaviorService;
 import us.ihmc.humanoidBehaviors.behaviors.behaviorServices.ObjectDetectorBehaviorService;
 import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.BasicPipeLineBehavior;
@@ -239,7 +239,9 @@ public class IHMCHumanoidBehaviorManager
                                                                         referenceFrames, objectDetectorBehaviorService));
       }
 
-      dispatcher.addBehavior(HumanoidBehaviorType.WALK_TO_GOAL_ANYTIME_PLANNER, new AnytimePlannerStateMachineBehavior(behaviorCommunicationBridge, yoTime, referenceFrames, logModelProvider, fullRobotModel, wholeBodyControllerParameters));
+      dispatcher.addBehavior(HumanoidBehaviorType.WALK_TO_GOAL_ANYTIME_PLANNER,
+                             new AnytimePlannerStateMachineBehavior(behaviorCommunicationBridge, yoTime, referenceFrames, logModelProvider, fullRobotModel,
+                                                                    wholeBodyControllerParameters, yoGraphicsListRegistry, fiducialDetectorBehaviorService, true));
 
       dispatcher.addBehavior(HumanoidBehaviorType.WALK_TO_LOCATION, new WalkToLocationBehavior(behaviorCommunicationBridge, fullRobotModel, referenceFrames,
             wholeBodyControllerParameters.getWalkingControllerParameters()));

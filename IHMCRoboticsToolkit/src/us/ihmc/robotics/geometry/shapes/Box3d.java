@@ -1,71 +1,41 @@
 package us.ihmc.robotics.geometry.shapes;
 
+import java.util.EnumMap;
+
+import javax.vecmath.Matrix3d;
+import javax.vecmath.Point3d;
+import javax.vecmath.Quat4d;
+import javax.vecmath.Vector3d;
+
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.Direction;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.RotationTools;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Tuple3d;
-import javax.vecmath.Vector3d;
-import java.util.ArrayList;
-import java.util.EnumMap;
-import java.util.List;
-
-public class Box3d implements Shape3d
+/**
+ * Box where base frame is in the center.
+ */
+public class Box3d extends Shape3d<Box3d>
 {
    public static final int NUM_VERTICES = 8;
    public static final int NUM_SIDES = 6;
    public static final int NUM_VERTICES_PER_FACE = 4;
 
-   protected final RigidBodyTransform transform = new RigidBodyTransform();
-   private final EnumMap<Direction, Double> dimensions = new EnumMap<Direction, Double>(Direction.class);
-   private boolean dirtyBit = true;
+   private final EnumMap<Direction, Double> dimensions;
+   private final EnumMap<FaceName, Plane3d> faces;
+   private boolean facesAreOutOfDate;
 
-   private final EnumMap<FaceName, Plane3d> faces = new EnumMap<FaceName, Plane3d>(FaceName.class);
-
-   // These are temporary storage used to prevent garbage collection in a few of the methods.
-   // Box3d is low level enough that it should never generate trash unless you call one of the
-   // methods ending in Copy.
-   private final Point3d temporaryPoint = new Point3d();
-   private final Vector3d temporaryVector = new Vector3d();
-   private final Matrix3d temporaryMatrix = new Matrix3d();
+   private final Point3d temporaryPoint;
+   private final Matrix3d temporaryMatrix;
 
    public Box3d()
    {
-      for (FaceName faceName : FaceName.values())
-      {
-         faces.put(faceName, new Plane3d());
-      }
-
-      transform.setIdentity();
-      setDimensions(1.0, 1.0, 1.0);
-      this.dirtyBit = true;
-   }
-
-   public Box3d(RigidBodyTransform configuration, double lengthX, double widthY, double heightZ)
-   {
-      for (FaceName faceName : FaceName.values())
-      {
-         faces.put(faceName, new Plane3d());
-      }
-
-      setTransform(configuration);
-      setDimensions(lengthX, widthY, heightZ);
-      this.dirtyBit = true;
+      this(1.0, 1.0, 1.0);
    }
 
    public Box3d(Box3d other)
    {
-      this();
-      this.set(other);
-   }
-
-   public Box3d(double lengthX, double widthY, double heightZ)
-   {
-      this();
-      setDimensions(lengthX, widthY, heightZ);
+      this(other.getTransformFromShapeFrameUnsafe(), other.getLength(), other.getWidth(), other.getHeight());
    }
 
    public Box3d(RigidBodyTransform configuration, double[] dimensions)
@@ -73,100 +43,176 @@ public class Box3d implements Shape3d
       this(configuration, dimensions[0], dimensions[1], dimensions[2]);
    }
 
-   public void getCenter(Tuple3d centerToPack)
+   public Box3d(double lengthX, double widthY, double heightZ)
    {
-      transform.getTranslation(temporaryVector);
-      centerToPack.set(temporaryVector);
+      dimensions = new EnumMap<Direction, Double>(Direction.class);
+      faces = new EnumMap<FaceName, Plane3d>(FaceName.class);
+      temporaryPoint = new Point3d();
+      temporaryMatrix = new Matrix3d();
+
+      commonConstructor(lengthX, widthY, heightZ);
    }
 
-   public Point3d getCenterCopy()
+   public Box3d(RigidBodyTransform transform, double length, double width, double height)
    {
-      Point3d ret = new Point3d();
-      getCenter(ret);
+      setTransform(transform);
+      dimensions = new EnumMap<Direction, Double>(Direction.class);
+      faces = new EnumMap<FaceName, Plane3d>(FaceName.class);
+      temporaryPoint = new Point3d();
+      temporaryMatrix = new Matrix3d();
 
-      return ret;
+      commonConstructor(length, width, height);
    }
 
-   public void getTransform(RigidBodyTransform transformToPack)
+   public Box3d(Point3d position, Quat4d orientation, double length, double width, double height)
    {
-      transformToPack.set(this.transform);
+      setPose(position, orientation);
+      dimensions = new EnumMap<Direction, Double>(Direction.class);
+      faces = new EnumMap<FaceName, Plane3d>(FaceName.class);
+      temporaryPoint = new Point3d();
+      temporaryMatrix = new Matrix3d();
+
+      commonConstructor(length, width, height);
    }
 
-   public RigidBodyTransform getTransformCopy()
+   public void commonConstructor(double length, double width, double height)
    {
-      RigidBodyTransform ret = new RigidBodyTransform();
-      getTransform(ret);
+      for (FaceName faceName : FaceName.values())
+      {
+         faces.put(faceName, new Plane3d());
+      }
 
-      return ret;
+      setDimensions(length, width, height);
+      facesAreOutOfDate = true;
    }
 
-   public void getRotation(Matrix3d rotationMatrixToPack)
+   public void getCenter(Point3d centerToPack)
    {
-      this.transform.getRotation(rotationMatrixToPack);
-   }
-
-   public Matrix3d getRotationCopy()
-   {
-      Matrix3d ret = new Matrix3d();
-      getRotation(ret);
-
-      return ret;
+      getPosition(centerToPack);
    }
 
    public double getDimension(Direction direction)
    {
       return dimensions.get(direction);
    }
+   
+   public double getSizeX()
+   {
+      return dimensions.get(Direction.X);
+   }
+
+   public double getSizeY()
+   {
+      return dimensions.get(Direction.Y);
+   }
+
+   public double getSizeZ()
+   {
+      return dimensions.get(Direction.Z);
+   }
 
    public double getLength()
    {
-      return getDimension(Direction.X);
+      return dimensions.get(Direction.X);
    }
 
    public double getWidth()
    {
-      return getDimension(Direction.Y);
+      return dimensions.get(Direction.Y);
    }
 
    public double getHeight()
    {
-      return getDimension(Direction.Z);
+      return dimensions.get(Direction.Z);
    }
 
-   public Plane3d getFace(FaceName faceName)
+   public void getFace(Direction direction, boolean positive, Plane3d planeToPack)
    {
-      updateFacesIfNecessary();
-
-      return faces.get(faceName);
+      planeToPack.set(faces.get(FaceName.get(positive, direction)));
+      transformFromShapeFrame(planeToPack);
+   }
+   
+   @Override
+   public void setToZero()
+   {
+      setDimensions(0.0, 0.0, 0.0);
    }
 
+   @Override
+   public void setToNaN()
+   {
+      setDimensions(Double.NaN, Double.NaN, Double.NaN);
+   }
+
+   @Override
+   public boolean containsNaN()
+   {
+      return Double.isNaN(getHeight()) || Double.isNaN(getLength()) || Double.isNaN(getWidth());
+   }
+
+   @Override
+   public boolean epsilonEquals(Box3d other, double epsilon)
+   {
+      return MathTools.epsilonEquals(getWidth(), other.getWidth(), epsilon) && MathTools.epsilonEquals(getLength(), other.getLength(), epsilon)
+            && MathTools.epsilonEquals(getHeight(), other.getHeight(), epsilon);
+   }
+
+   @Override
    public synchronized void set(Box3d other)
    {
-      setTransform(other.transform);
-      setDimensions(other.dimensions);
-      this.dirtyBit = other.dirtyBit;
-
-      //    if (this.dirtyBit)
-      //    {
-      //       for (FaceName faceName : FaceName.values())
-      //       {
-      //          this.faces.get(faceName).set(other.faces.get(faceName));
-      //       }
-      //    }
+      if (other != this)
+      {
+         setTransformFromShapeFrame(other.getTransformFromShapeFrameUnsafe());
+         setDimensions(other.dimensions);
+         facesAreOutOfDate = true;
+      }
    }
 
    public void setDimensions(EnumMap<Direction, Double> dimensions)
    {
       this.dimensions.putAll(dimensions);
-      this.dirtyBit = true;
+      facesAreOutOfDate = true;
    }
 
    public void setDimensions(double lengthX, double widthY, double heightZ)
    {
-      this.dimensions.put(Direction.X, lengthX);
-      this.dimensions.put(Direction.Y, widthY);
-      this.dimensions.put(Direction.Z, heightZ);
-      this.dirtyBit = true;
+      dimensions.put(Direction.X, lengthX);
+      dimensions.put(Direction.Y, widthY);
+      dimensions.put(Direction.Z, heightZ);
+      facesAreOutOfDate = true;
+   }
+
+   public void setFromTransform(RigidBodyTransform transform)
+   {
+      setTransformFromShapeFrame(transform);
+      facesAreOutOfDate = true;
+   }
+
+   public void setYawPitchRoll(double yaw, double pitch, double roll)
+   {
+      RotationTools.convertYawPitchRollToMatrix(yaw, pitch, roll, temporaryMatrix);
+      setRotation(temporaryMatrix);
+   }
+
+   @Override
+   public void setOrientation(Matrix3d rotation)
+   {
+      super.setOrientation(rotation);
+      facesAreOutOfDate = true;
+   }
+
+   @Override
+   public void setPosition(Point3d translation)
+   {
+      super.setPosition(translation);
+      facesAreOutOfDate = true;
+   }
+
+   @Override
+   public void applyTransform(RigidBodyTransform transform)
+   {
+      super.applyTransform(transform);
+      facesAreOutOfDate = true;
    }
 
    public void scale(double scale)
@@ -176,21 +222,23 @@ public class Box3d implements Shape3d
          dimensions.put(direction, dimensions.get(direction) * scale);
       }
 
-      this.dirtyBit = true;
+      this.facesAreOutOfDate = true;
    }
 
-   public double distance(Point3d point)
+   @Override
+   protected double distanceShapeFrame(Point3d point)
    {
-      updateFacesIfNecessary();
+      ensureFacesAreUpToDate();
       temporaryPoint.set(point);
-      orthogonalProjection(temporaryPoint);
+      orthogonalProjectionShapeFrame(temporaryPoint);
 
       return temporaryPoint.distance(point);
    }
 
-   public void orthogonalProjection(Point3d point)
+   @Override
+   protected void orthogonalProjectionShapeFrame(Point3d point)
    {
-      updateFacesIfNecessary();
+      ensureFacesAreUpToDate();
 
       for (Plane3d face : faces.values())
       {
@@ -201,70 +249,34 @@ public class Box3d implements Shape3d
       }
    }
 
-   private final RigidBodyTransform tempTransform = new RigidBodyTransform();
-
-   public void applyTransform(RigidBodyTransform transform)
+   @Override
+   protected boolean isInsideOrOnSurfaceShapeFrame(Point3d point, double epsilon)
    {
-      tempTransform.set(transform);
-      tempTransform.multiply(this.transform);
-      this.transform.set(tempTransform);
-      this.dirtyBit = true;
-   }
+      ensureFacesAreUpToDate();
 
-   public void setTransform(RigidBodyTransform transform)
-   {
-      this.transform.set(transform);
-      this.dirtyBit = true;
-   }
-
-   public void setRotation(Matrix3d rotation)
-   {
-      this.transform.setRotation(rotation);
-      this.dirtyBit = true;
-   }
-
-   public void setYawPitchRoll(double yaw, double pitch, double roll)
-   {
-      RotationTools.convertYawPitchRollToMatrix(yaw, pitch, roll, temporaryMatrix);
-      setRotation(temporaryMatrix);
-   }
-
-   public void setTranslation(Tuple3d translation)
-   {
-      this.temporaryVector.set(translation);
-      this.transform.setTranslationAndIdentityRotation(temporaryVector);
-      this.dirtyBit = true;
-   }
-
-   public boolean isInsideOrOnSurface(Point3d point)
-   {
-      return (isInsideOrOnSurface(point, 0.0));
-   }
-
-   public boolean isInsideOrOnSurface(Point3d point, double epsilon)
-   {
-      updateFacesIfNecessary();
-
+      boolean isInsideOrOnSurface = true;
       for (FaceName faceName : FaceName.values)
       {
          Plane3d face = faces.get(faceName);
          if (!face.isOnOrBelow(point, epsilon))
          {
-            return false;
+            isInsideOrOnSurface = false;
+            break;
          }
       }
-
-      return true;
+      
+      return isInsideOrOnSurface;
    }
 
-   public boolean checkIfInside(Point3d pointInWorldToCheck, Point3d closestPointToPack, Vector3d normalToPack)
+   @Override
+   protected boolean checkIfInsideShapeFrame(Point3d pointInWorldToCheck, Point3d closestPointToPack, Vector3d normalToPack)
    {
-      updateFacesIfNecessary();
+      ensureFacesAreUpToDate();
 
       if (closestPointToPack == null)
          closestPointToPack = new Point3d();
 
-      if (isInsideOrOnSurface(pointInWorldToCheck))
+      if (isInsideOrOnSurfaceShapeFrame(pointInWorldToCheck, 0.0))
       {
          Plane3d nearestFace = getClosestFace(pointInWorldToCheck);
 
@@ -281,7 +293,7 @@ public class Box3d implements Shape3d
       else
       {
          closestPointToPack.set(pointInWorldToCheck);
-         this.orthogonalProjection(closestPointToPack);
+         orthogonalProjectionShapeFrame(closestPointToPack);
 
          if (normalToPack != null)
          {
@@ -302,9 +314,9 @@ public class Box3d implements Shape3d
       }
    }
 
-   public Plane3d getClosestFace(Point3d point)
+   private Plane3d getClosestFace(Point3d point)
    {
-      updateFacesIfNecessary();
+      ensureFacesAreUpToDate();
 
       double nearestDistance = Double.POSITIVE_INFINITY;
       Plane3d nearestFace = null;
@@ -322,135 +334,127 @@ public class Box3d implements Shape3d
       return nearestFace;
    }
 
+   /**
+    * Not real-time
+    */
    public Point3d[] getVertices()
    {
-      Point3d[] ret = new Point3d[NUM_VERTICES];
-      for (int i = 0; i < ret.length; i++)
-      {
-         ret[i] = new Point3d();
-      }
-      computeVertices(ret);
-      return ret;
+      Point3d[] vertices = new Point3d[NUM_VERTICES];
+      vertices[0] = new Point3d();
+      vertices[1] = new Point3d();
+      vertices[2] = new Point3d();
+      vertices[3] = new Point3d();
+      vertices[4] = new Point3d();
+      vertices[5] = new Point3d();
+      vertices[6] = new Point3d();
+      vertices[7] = new Point3d();
+      computeVerticesShapeFrame(vertices);
+      transformVerticesFromShapeFrame(vertices);
+      return vertices;
    }
 
    public void computeVertices(Point3d[] verticesToPack)
    {
+      computeVerticesShapeFrame(verticesToPack);
+      transformVerticesFromShapeFrame(verticesToPack);
+   }
+   
+   private void computeVerticesShapeFrame(Point3d[] verticesToPack)
+   {
       MathTools.checkIfEqual(NUM_VERTICES, verticesToPack.length);
-
-      List<Vector3d> signPermutations = new ArrayList<Vector3d>(NUM_VERTICES);
-      int[] signs = new int[] { -1, 1 };
-      for (int xSign : signs)
-      {
-         for (int ySign : signs)
-         {
-            for (int zSign : signs)
-               signPermutations.add(new Vector3d(xSign, ySign, zSign));
-         }
-      }
-
-      computeVertices(verticesToPack, signPermutations);
+      
+      double dx = dimensions.get(Direction.X) / 2.0;
+      double dy = dimensions.get(Direction.Y) / 2.0;
+      double dz = dimensions.get(Direction.Z) / 2.0;
+      
+      verticesToPack[0].set(-dx, -dy, -dz);
+      verticesToPack[1].set(-dx, -dy, +dz);
+      verticesToPack[2].set(-dx, +dy, -dz);
+      verticesToPack[3].set(-dx, +dy, +dz);
+      verticesToPack[4].set(+dx, -dy, -dz);
+      verticesToPack[5].set(+dx, -dy, +dz);
+      verticesToPack[6].set(+dx, +dy, -dz);
+      verticesToPack[7].set(+dx, +dy, +dz);
    }
 
    public void computeVertices(Point3d[] verticesToPack, FaceName faceName)
    {
+      computeVerticesShapeFrame(verticesToPack, faceName);
+      transformVerticesFromShapeFrame(verticesToPack);
+   }
+   
+   private void computeVerticesShapeFrame(Point3d[] verticesToPack, FaceName faceName)
+   {
       MathTools.checkIfEqual(NUM_VERTICES_PER_FACE, verticesToPack.length);
-
-      Direction faceDirection = faceName.getDirection();
-      int faceSign = faceName.sign();
-
-      Direction[] directionValues = Direction.values();
-      Direction[] otherDirections = new Direction[directionValues.length - 1];
-      int index = 0;
-      for (Direction direction : directionValues)
+      
+      double dx = dimensions.get(Direction.X) / 2.0;
+      double dy = dimensions.get(Direction.Y) / 2.0;
+      double dz = dimensions.get(Direction.Z) / 2.0;
+      
+      if (faceName.getDirection() == Direction.X)
       {
-         if (direction != faceDirection)
-            otherDirections[index++] = direction;
+         verticesToPack[0].set(faceName.sign() * dx, -dy, -dz);
+         verticesToPack[1].set(faceName.sign() * dx, -dy, +dz);
+         verticesToPack[2].set(faceName.sign() * dx, +dy, -dz);
+         verticesToPack[3].set(faceName.sign() * dx, +dy, +dz);
       }
-
-      int[] signs = new int[] { -1, 1 };
-      List<Vector3d> signPermutations = new ArrayList<Vector3d>(NUM_VERTICES_PER_FACE);
-      for (int sign1 : signs)
+      else if (faceName.getDirection() == Direction.Y)
       {
-         for (int sign2Switch : signs)
-         {
-            Vector3d signPermutation = new Vector3d();
-            MathTools.set(signPermutation, otherDirections[0], sign1);
-            MathTools.set(signPermutation, otherDirections[1], sign1 * sign2Switch);
-            MathTools.set(signPermutation, faceDirection, faceSign);
-            signPermutations.add(signPermutation);
-         }
+         verticesToPack[0].set(-dx, faceName.sign() * dy, -dz);
+         verticesToPack[1].set(-dx, faceName.sign() * dy, +dz);
+         verticesToPack[2].set(+dx, faceName.sign() * dy, -dz);
+         verticesToPack[3].set(+dx, faceName.sign() * dy, +dz);
       }
-      computeVertices(verticesToPack, signPermutations);
+      else if (faceName.getDirection() == Direction.Z)
+      {
+         verticesToPack[0].set(-dx, -dy, faceName.sign() * dz);
+         verticesToPack[1].set(+dx, -dy, faceName.sign() * dz);
+         verticesToPack[2].set(-dx, +dy, faceName.sign() * dz);
+         verticesToPack[3].set(+dx, +dy, faceName.sign() * dz);
+      }
    }
-
-   private void computeVertices(Point3d[] verticesToPack, List<Vector3d> signPermutations)
+   
+   private void transformVerticesFromShapeFrame(Point3d[] verticesInShapeFrame)
    {
-      double xHalfLength = getDimension(Direction.X) / 2.0;
-      double yHalfWidth = getDimension(Direction.Y) / 2.0;
-      double zHalfHeight = getDimension(Direction.Z) / 2.0;
-
-      for (int i = 0; i < signPermutations.size(); i++)
+      for (int i = 0; i < verticesInShapeFrame.length; i++)
       {
-         Vector3d signPermutation = signPermutations.get(i);
-         verticesToPack[i].set(signPermutation.getX() * xHalfLength, signPermutation.getY() * yHalfWidth, signPermutation.getZ() * zHalfHeight);
-         transform.transform(verticesToPack[i]);
+         transformFromShapeFrame(verticesInShapeFrame[i]);
       }
    }
 
-   // /CLOVER:OFF
-   public String toString()
+   private void ensureFacesAreUpToDate()
    {
-      StringBuilder builder = new StringBuilder();
-
-      transform.getTranslation(temporaryVector);
-      builder.append("center: (" + temporaryVector.getX() + ", " + temporaryVector.getY() + ", " + temporaryVector.getZ() + ")\n");
-      builder.append("dimensions: (" + dimensions.get(Direction.X) + ", " + dimensions.get(Direction.Y) + ", " + dimensions.get(Direction.Z) + ")\n");
-      builder.append("faces: \n");
-
-      updateFacesIfNecessary();
-
-      for (Plane3d face : faces.values())
+      if (facesAreOutOfDate)
       {
-         builder.append(face.toString());
-      }
-
-      return builder.toString();
-   }
-
-   // /CLOVER:ON
-
-   private void updateFacesIfNecessary()
-   {
-      if (dirtyBit)
-      {
-         transform.getRotation(temporaryMatrix);
-
          for (FaceName faceName : faces.keySet())
          {
             Plane3d face = faces.get(faceName);
+            
+            double xNormal = faceName.getDirection() == Direction.X ? faceName.sign() * 1.0 : 0.0;
+            double yNormal = faceName.getDirection() == Direction.Y ? faceName.sign() * 1.0 : 0.0;
+            double zNormal = faceName.getDirection() == Direction.Z ? faceName.sign() * 1.0 : 0.0;
+            
+            face.setNormal(xNormal, yNormal, zNormal);
 
-            temporaryMatrix.getColumn(faceName.getDirection().getIndex(), temporaryVector);
-            temporaryVector.scale(faceName.sign());
-            face.setNormal(temporaryVector);
-
-            for (Direction direction : Direction.values())
-            {
-               double coordinate = (direction == faceName.getDirection()) ? faceName.sign() * getDimension(direction) / 2.0 : 0.0;
-               MathTools.set(temporaryPoint, direction, coordinate);
-            }
-
-            transform.transform(temporaryPoint);
-            face.setPoint(temporaryPoint);
+            double xPoint = faceName.getDirection() == Direction.X ? faceName.sign() * dimensions.get(Direction.X) / 2.0 : 0.0;
+            double yPoint = faceName.getDirection() == Direction.Y ? faceName.sign() * dimensions.get(Direction.Y) / 2.0 : 0.0;
+            double zPoint = faceName.getDirection() == Direction.Z ? faceName.sign() * dimensions.get(Direction.Z) / 2.0 : 0.0;
+            
+            face.setPoint(xPoint, yPoint, zPoint);
          }
       }
 
-      dirtyBit = false;
+      facesAreOutOfDate = false;
    }
 
    public static enum FaceName
    {
-      PLUSX(true, Direction.X), PLUSY(true, Direction.Y), PLUSZ(true, Direction.Z), MINUSX(false, Direction.X), MINUSY(false, Direction.Y), MINUSZ(false,
-            Direction.Z);
+      PLUSX(true, Direction.X),
+      PLUSY(true, Direction.Y),
+      PLUSZ(true, Direction.Z),
+      MINUSX(false, Direction.X),
+      MINUSY(false, Direction.Y),
+      MINUSZ(false, Direction.Z);
 
       private final boolean positive;
       private final Direction direction;
@@ -487,4 +491,90 @@ public class Box3d implements Shape3d
       }
    }
 
+   @Override
+   public String toString()
+   {
+      StringBuilder builder = new StringBuilder();
+
+      builder.append("dimensions: (" + dimensions.get(Direction.X) + ", " + dimensions.get(Direction.Y) + ", " + dimensions.get(Direction.Z) + ")\n");
+      builder.append("faces: \n");
+
+      ensureFacesAreUpToDate();
+
+      for (Plane3d face : faces.values())
+      {
+         builder.append(face.toString());
+      }
+
+      return builder.toString();
+   }
+
+   /**
+    * @deprecated Use getCenter(Point3d)
+    */
+   public Point3d getCenterCopy()
+   {
+      Point3d ret = new Point3d();
+      getCenter(ret);
+      return ret;
+   }
+
+   /**
+    * @deprecated Use getTransform(RigidBodyTransform)
+    */
+   public RigidBodyTransform getTransformCopy()
+   {
+      RigidBodyTransform ret = new RigidBodyTransform();
+      getTransform(ret);
+      return ret;
+   }
+
+   /**
+    * @deprecated Use getOrientation(Matrix3d) 
+    */
+   public void getRotation(Matrix3d rotationMatrixToPack)
+   {
+      getOrientation(rotationMatrixToPack);
+   }
+
+   /**
+    * @deprecated Use getOrientation(Matrix3d) 
+    */
+   public Matrix3d getRotationCopy()
+   {
+      Matrix3d ret = new Matrix3d();
+      getRotation(ret);
+      return ret;
+   }
+
+   /**
+    * @deprecated Makes garbage. Use getFace(Direction, boolean, Plane3d)
+    */
+   public Plane3d getFace(FaceName faceName)
+   {
+      ensureFacesAreUpToDate();
+   
+      Plane3d facePlane = new Plane3d();
+      facePlane.set(faces.get(faceName));
+      transformFromShapeFrame(facePlane);
+      return facePlane;
+   }
+
+   /**
+    * @deprecated Use setOrientation(Matrix3d)
+    */
+   public void setRotation(Matrix3d rotation)
+   {
+      super.setOrientation(rotation);
+      facesAreOutOfDate = true;
+   }
+
+   /**
+    * @deprecated Use setPosition(Point3d)
+    */
+   public void setTranslation(Point3d translation)
+   {
+      setPosition(translation);
+      facesAreOutOfDate = true;
+   }
 }

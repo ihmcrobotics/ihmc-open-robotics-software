@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import us.ihmc.graphics3DAdapter.jme.JMEAssetLocator;
 import us.ihmc.graphics3DAdapter.jme.JMEGraphicsObject;
-import us.ihmc.graphics3DDescription.structure.Graphics3DNodeType;
+import us.ihmc.graphicsDescription.structure.Graphics3DNodeType;
 
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;

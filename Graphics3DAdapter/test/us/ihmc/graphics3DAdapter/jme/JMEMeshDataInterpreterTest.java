@@ -12,8 +12,8 @@ import com.jme3.scene.Mesh;
 
 import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.graphics3DDescription.MeshDataGenerator;
-import us.ihmc.graphics3DDescription.MeshDataHolder;
+import us.ihmc.graphicsDescription.MeshDataGenerator;
+import us.ihmc.graphicsDescription.MeshDataHolder;
 import us.ihmc.tools.continuousIntegration.IntegrationCategory;
 
 @ContinuousIntegrationPlan(categories = {IntegrationCategory.UI})

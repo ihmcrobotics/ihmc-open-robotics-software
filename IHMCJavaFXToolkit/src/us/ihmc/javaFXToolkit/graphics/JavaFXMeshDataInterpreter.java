@@ -13,18 +13,40 @@ import javax.vecmath.Vector3f;
 import org.apache.commons.lang3.tuple.Pair;
 
 import gnu.trove.list.array.TIntArrayList;
+import javafx.scene.shape.MeshView;
 import javafx.scene.shape.TriangleMesh;
 import javafx.scene.shape.VertexFormat;
-import us.ihmc.graphics3DDescription.MeshDataHolder;
+import us.ihmc.graphicsDescription.MeshDataBuilder;
+import us.ihmc.graphicsDescription.MeshDataGenerator;
+import us.ihmc.graphicsDescription.MeshDataHolder;
 
+/**
+ * This class an automated interpretation of {@link MeshDataHolder} into JavaFX {@link TriangleMesh} usable via {@link MeshView}.
+ * With this tool it is possible to tools from the Graphics3DDescription library such {@link MeshDataGenerator} and {@link MeshDataBuilder}.
+ * It also provides a simple way to optimize meshes for JavaFX.
+ * @author Sylvain Bertrand
+ */
 public class JavaFXMeshDataInterpreter
 {
+   /**
+    * Translates a {@link MeshDataHolder} into {@link TriangleMesh}.
+    * @param meshData the mesh data to interpret. Not modified.
+    * @return the interpreted JavaFX {@link TriangleMesh}. Return {@code null} when the given mesh data is {@code null} or empty.
+    */
    public static TriangleMesh interpretMeshData(MeshDataHolder meshData)
    {
       return interpretMeshData(meshData, true);
    }
 
-   public static TriangleMesh interpretMeshData(MeshDataHolder meshData, boolean filterDuplicates)
+   /**
+    * Translates a {@link MeshDataHolder} into {@link TriangleMesh}.
+    * @param meshData the mesh data to interpret. Not modified.
+    * @param optimizeMesh whether to optimize the mesh data or not.
+    * The optimization consists in removing duplicate vertices, texture coordinates, and vertex normals and recomputing triangle indices accordingly.
+    * This process can be computationally intensive but it is often highly beneficial especially for large meshes and does not need to be executed on the rendering thread.
+    * @return the interpreted JavaFX {@link TriangleMesh}. Return {@code null} when the given mesh data is {@code null} or empty.
+    */
+   public static TriangleMesh interpretMeshData(MeshDataHolder meshData, boolean optimizeMesh)
    {
       if (meshData == null || meshData.getTriangleIndices().length == 0)
          return null;
@@ -35,7 +57,7 @@ public class JavaFXMeshDataInterpreter
       Vector3f[] normals = meshData.getVertexNormals();
       TIntArrayList facesIndices = new TIntArrayList();
 
-      if (filterDuplicates)
+      if (optimizeMesh)
       {
          Pair<int[], Point3f[]> filterDuplicateVertices = filterDuplicates(triangleIndices, vertices);
          Pair<int[], Vector3f[]> filterDuplicateNormals = filterDuplicates(triangleIndices, normals);
@@ -43,7 +65,7 @@ public class JavaFXMeshDataInterpreter
          vertices = filterDuplicateVertices.getRight();
          normals = filterDuplicateNormals.getRight();
          texturePoints = filterDuplicateTex.getRight();
-         
+
          for (int pos = 0; pos < triangleIndices.length; pos++)
          {
             facesIndices.add(filterDuplicateVertices.getLeft()[pos]); // vertex index
@@ -83,7 +105,7 @@ public class JavaFXMeshDataInterpreter
       @SuppressWarnings("unchecked")
       T[] filteredValue = (T[]) Array.newInstance(valuesWithDuplicates[0].getClass(), uniqueValueIndices.size());
       int pos = 0;
-      
+
       for (T value : uniqueValueIndices.keySet())
       {
          uniqueValueIndices.put(value, pos);

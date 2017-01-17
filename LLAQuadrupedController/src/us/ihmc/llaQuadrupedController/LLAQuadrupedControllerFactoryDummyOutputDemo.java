@@ -4,7 +4,7 @@ import java.io.IOException;
 
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.util.NetworkPorts;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.llaQuadrupedController.model.LLAQuadrupedModelFactory;
 import us.ihmc.llaQuadrupedController.model.LLAQuadrupedPhysicalProperties;

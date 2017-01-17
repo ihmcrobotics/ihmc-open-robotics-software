@@ -10,16 +10,16 @@ import javax.vecmath.Color3f;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 
-import us.ihmc.graphics3DDescription.appearance.AppearanceDefinition;
-import us.ihmc.graphics3DDescription.appearance.YoAppearanceRGBColor;
-import us.ihmc.graphics3DDescription.yoGraphics.RemoteYoGraphic;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphic;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicFactory;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsList;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.graphics3DDescription.yoGraphics.RemoteYoGraphic.RemoteGraphicType;
-import us.ihmc.graphics3DDescription.yoGraphics.plotting.ArtifactList;
-import us.ihmc.plotting.artifact.Artifact;
+import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
+import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
+import us.ihmc.graphicsDescription.plotting.artifact.Artifact;
+import us.ihmc.graphicsDescription.yoGraphics.RemoteYoGraphic;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphic;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicFactory;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.graphicsDescription.yoGraphics.RemoteYoGraphic.RemoteGraphicType;
+import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.robotDataLogger.generated.YoProtoHandshakeProto.YoProtoHandshake;
 import us.ihmc.robotDataLogger.generated.YoProtoHandshakeProto.YoProtoHandshake.DynamicGraphicMessage;
 import us.ihmc.robotDataLogger.generated.YoProtoHandshakeProto.YoProtoHandshake.JointDefinition;

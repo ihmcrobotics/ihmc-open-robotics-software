@@ -34,12 +34,12 @@ import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packets.KinematicsToolboxOutputStatus;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicCoordinateSystem;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ChestTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HandTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisOrientationTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.TrackingWeightsCommand;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
@@ -241,6 +241,19 @@ public class KinematicsToolboxController extends ToolboxController
          desiredPelvisOrientationReference.set(desiredPelvisOrientation);
          pelvisSelectionMatrix = new DenseMatrix64F(command.getSelectionMatrix());
       }
+      
+      if (commandInputManager.isNewCommandAvailable(TrackingWeightsCommand.class))
+      {
+         TrackingWeightsCommand command = commandInputManager.pollNewestCommand(TrackingWeightsCommand.class);
+         handWeight.set(command.handWeight);
+         footWeight.set(command.footWeight);
+         momentumWeight.set(command.momentumWeight);
+         chestWeight.set(command.chestWeight);
+         pelvisOrientationWeight.set(command.pelvisOrientationWeight);
+         privilegedWeight.set(command.privilegedWeight);
+         privilegedConfigurationGain.set(command.privilegedConfigurationGain);
+         privilegedMaxVelocity.set(command.privilegedMaxVelocity);        
+      }
 
    }
 
@@ -416,7 +429,7 @@ public class KinematicsToolboxController extends ToolboxController
 
       errorRotation.set(errorAxisAngle.getX(), errorAxisAngle.getY(), errorAxisAngle.getZ());
       errorRotation.scale(AngleTools.trimAngleMinusPiToPi(errorAxisAngle.getAngle()));
-
+      
       ReferenceFrame endEffectorFrame = endEffector.getBodyFixedFrame();
       Twist desiredTwist = new Twist();
       desiredTwist.set(endEffectorFrame, elevatorFrame, controlFrame, new Vector3d(), errorRotation);

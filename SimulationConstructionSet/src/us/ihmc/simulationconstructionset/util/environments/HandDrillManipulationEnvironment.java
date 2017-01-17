@@ -7,7 +7,7 @@ import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Vector2d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.graphics3DDescription.appearance.YoAppearanceTexture;
+import us.ihmc.graphicsDescription.appearance.YoAppearanceTexture;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.GroundContactModel;

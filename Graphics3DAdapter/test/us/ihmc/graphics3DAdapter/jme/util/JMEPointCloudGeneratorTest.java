@@ -4,8 +4,8 @@ import java.util.Random;
 
 import us.ihmc.graphics3DAdapter.Graphics3DWorld;
 import us.ihmc.graphics3DAdapter.jme.JMEGraphics3DAdapter;
-import us.ihmc.graphics3DDescription.Graphics3DObject;
-import us.ihmc.graphics3DDescription.structure.Graphics3DNode;
+import us.ihmc.graphicsDescription.Graphics3DObject;
+import us.ihmc.graphicsDescription.structure.Graphics3DNode;
 import us.ihmc.robotics.lidar.LidarScan;
 import us.ihmc.robotics.lidar.LidarScanParameters;
 import us.ihmc.robotics.random.RandomTools;
