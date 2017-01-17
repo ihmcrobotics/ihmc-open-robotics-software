@@ -7,6 +7,7 @@ import java.util.ArrayList;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JToggleButton;
 
 import optiTrack.MocapDataClient;
 import optiTrack.MocapRigidBody;
@@ -17,9 +18,11 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
 public class Example_Mocap_SCS implements MocapRigidbodiesListener
 {
+   ArrayList<ScsMocapRigidBody> listOfRbs = new ArrayList<>();
    private MocapDataClient mocapDataClient;
    YoVariableRegistry registry = new YoVariableRegistry("mainRegistry");
    SimulationConstructionSet scs;
+   boolean pause = false;
 
    public Example_Mocap_SCS()
    {
@@ -45,7 +48,28 @@ public class Example_Mocap_SCS implements MocapRigidbodiesListener
 
             scs = new SimulationConstructionSet(robot);
             scs.setMaxBufferSize(64000);
-//            scs.setDT(0.0001, 75);
+            //            scs.setDT(0.0001, 75);
+            JToggleButton pauseButton = new JToggleButton("Pause");
+            scs.addButton(pauseButton);
+            pauseButton.addActionListener(new ActionListener()
+            {
+
+               @Override
+               public void actionPerformed(ActionEvent e)
+               {
+                  pause = false;
+                  if(pauseButton.isSelected())
+                  {
+                     pause = true;
+                  }
+                  
+                  for (ScsMocapRigidBody scsRb : listOfRbs)
+                  {
+                     scsRb.pause(pause);
+                  }
+               }
+            });
+
             Thread myThread = new Thread(scs);
             myThread.start();
          }
@@ -60,8 +84,6 @@ public class Example_Mocap_SCS implements MocapRigidbodiesListener
    {
       new Example_Mocap_SCS();
    }
-
-   ArrayList<ScsMocapRigidBody> listOfRbs = new ArrayList<>();
 
    @Override
    public void updateRigidbodies(ArrayList<MocapRigidBody> listOfRigidbodies)
@@ -87,11 +109,11 @@ public class Example_Mocap_SCS implements MocapRigidbodiesListener
             registry.addChild(scsMocapRigidBody.getRegistry());
          }
       }
-      
-      if(scs != null)
+
+      if (scs != null && !pause)
       {
          scs.tickAndUpdate();
       }
-      
+
    }
 }
