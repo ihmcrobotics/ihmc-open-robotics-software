@@ -7,6 +7,7 @@ import javax.vecmath.Vector2d;
 
 import us.ihmc.robotics.geometry.transformables.TransformablePoint2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.robotSide.RobotSide;
 
 /**
  * A line segment must have two distinct endpoints by definition.
@@ -205,30 +206,12 @@ public class LineSegment2d implements Geometry2d<LineSegment2d>
 
    public boolean isPointOnLeftSideOfLineSegment(Point2d point)
    {
-      return isPointOnLeftSideOfLineSegment(point.getX(), point.getY());
+      return GeometryTools.isPointOnSideOfLine(point, endpoints[0], endpoints[1], RobotSide.LEFT);
    }
    
-   public boolean isPointOnRightSideOfLineSegment(Point2d point)    // also returns true if the point is on the line
+   public boolean isPointOnRightSideOfLineSegment(Point2d point)
    {
-      return !isPointOnLeftSideOfLineSegment(point.getX(), point.getY());
-   }
-
-   private boolean isPointOnLeftSideOfLineSegment(double x, double y)
-   {
-      double vectorX = endpoints[1].getX() - endpoints[0].getX();
-      double vectorY = endpoints[1].getY() - endpoints[0].getY();
-      double pointToPointX = x - endpoints[0].getX();
-      double pointToPointY = y - endpoints[0].getY();
-
-      double crossProduct = vectorX * pointToPointY - pointToPointX * vectorY;
-      if (crossProduct > 0.0)
-      {
-         return true;
-      }
-      else
-      {
-         return false;
-      }
+      return GeometryTools.isPointOnSideOfLine(point, endpoints[0], endpoints[1], RobotSide.RIGHT);
    }
 
    public LineSegment2d shiftToLeftCopy(double distanceToShift)
