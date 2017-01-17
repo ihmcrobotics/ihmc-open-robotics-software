@@ -22,7 +22,7 @@ import org.junit.Test;
 
 import com.google.common.base.Defaults;
 
-import us.ihmc.graphics3DAdapter.camera.CameraPropertiesHolder;
+import us.ihmc.jMonkeyEngineToolkit.camera.CameraPropertiesHolder;
 import us.ihmc.simulationconstructionset.commands.AddCameraKeyCommandExecutor;
 import us.ihmc.simulationconstructionset.commands.AddKeyPointCommandExecutor;
 import us.ihmc.simulationconstructionset.commands.CreateNewGraphWindowCommandExecutor;

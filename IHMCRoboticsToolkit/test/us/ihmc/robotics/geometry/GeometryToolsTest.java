@@ -1,15 +1,13 @@
 package us.ihmc.robotics.geometry;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import javax.vecmath.AxisAngle4d;
+import javax.vecmath.Matrix3d;
 import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Tuple3d;
@@ -20,11 +18,13 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import us.ihmc.robotics.math.Epsilons;
 import us.ihmc.robotics.math.exceptions.UndefinedOperationException;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.testing.JUnitTools;
+import us.ihmc.tools.testing.MutationTestingTools;
 import us.ihmc.tools.thread.RunnableThatThrows;
 
 /**
@@ -268,7 +268,7 @@ public class GeometryToolsTest
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
-   public void testDistanceFromPointToLine1()
+   public void testDistanceFromPointToLine3D()
    {
       Point3d point = new Point3d(10, 2, 0);
       Point3d lineStart = new Point3d(4, 2, 0);
@@ -291,6 +291,29 @@ public class GeometryToolsTest
       double actualReturn1 = GeometryTools.distanceFromPointToLine(point1, lineStart1, lineEnd1);
       assertEquals("return value", expectedReturn1, actualReturn1, Double.MIN_VALUE);
 
+      for (int i = 0; i < 100; i++)
+      {
+         // Generate a random line
+         Point3d start = RandomTools.generateRandomPoint3d(random, -10.0, 10.0);
+         Point3d end = RandomTools.generateRandomPoint3d(random, -10.0, 10.0);
+         Vector3d lineDirection = new Vector3d();
+         lineDirection.sub(end, start);
+         // Generate a random vector orthogonal to the line
+         Vector3d orthogonalVector = RandomTools.generateRandomOrthogonalVector3d(random, lineDirection, true);
+         double expectedDistance = RandomTools.generateRandomDouble(random, 0.0, 10.0);
+         // Generate a random point located at an expected distance from the line
+         Point3d randomPoint = new Point3d();
+         // Randomize on the line
+         randomPoint.interpolate(start, end, RandomTools.generateRandomDouble(random, 10.0));
+         // Move the point away from the line by the expected distance
+         randomPoint.scaleAdd(expectedDistance, orthogonalVector, randomPoint);
+
+         double actualDistance = GeometryTools.distanceFromPointToLine(randomPoint, start, end);
+         assertEquals(expectedDistance, actualDistance, 1.0e-12);
+         
+         actualDistance = GeometryTools.distanceFromPointToLine(randomPoint, start, lineDirection);
+         assertEquals(expectedDistance, actualDistance, 1.0e-12);
+      }
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -392,37 +415,37 @@ public class GeometryToolsTest
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
-   public void testIsLineIntersectingPlane()
+   public void testIsLineSegmentIntersectingPlane()
    {
       FramePoint pointOnPlane = new FramePoint(ReferenceFrame.getWorldFrame(), 0, 0, 0);
       FrameVector planeNormal = new FrameVector(pointOnPlane.getReferenceFrame(), 0, 0, 1);
       FramePoint lineStart = new FramePoint(ReferenceFrame.getWorldFrame(), 0, 0, -1);
       FramePoint lineEnd = new FramePoint(ReferenceFrame.getWorldFrame(), 0, 0, 3);
-      assertTrue(GeometryTools.isLineIntersectingPlane(pointOnPlane, planeNormal, lineStart, lineEnd));
+      assertTrue(GeometryTools.isLineSegmentIntersectingPlane(pointOnPlane, planeNormal, lineStart, lineEnd));
 
       pointOnPlane = new FramePoint(ReferenceFrame.getWorldFrame(), 0, 0, 0);
       planeNormal = new FrameVector(pointOnPlane.getReferenceFrame(), 1, 0, 0);
       lineStart = new FramePoint(ReferenceFrame.getWorldFrame(), -6, 3, -3);
       lineEnd = new FramePoint(ReferenceFrame.getWorldFrame(), 6, 3, 6);
-      assertTrue(GeometryTools.isLineIntersectingPlane(pointOnPlane, planeNormal, lineStart, lineEnd));
+      assertTrue(GeometryTools.isLineSegmentIntersectingPlane(pointOnPlane, planeNormal, lineStart, lineEnd));
 
       pointOnPlane = new FramePoint(ReferenceFrame.getWorldFrame(), 0, 0, 0);
       planeNormal = new FrameVector(pointOnPlane.getReferenceFrame(), 0, 1, 0);
       lineStart = new FramePoint(ReferenceFrame.getWorldFrame(), 6, -3, -3);
       lineEnd = new FramePoint(ReferenceFrame.getWorldFrame(), 6, 3, 6);
-      assertTrue(GeometryTools.isLineIntersectingPlane(pointOnPlane, planeNormal, lineStart, lineEnd));
+      assertTrue(GeometryTools.isLineSegmentIntersectingPlane(pointOnPlane, planeNormal, lineStart, lineEnd));
 
       pointOnPlane = new FramePoint(ReferenceFrame.getWorldFrame(), 0, 0, 0);
       planeNormal = new FrameVector(pointOnPlane.getReferenceFrame(), 0, 0, 1);
       lineStart = new FramePoint(ReferenceFrame.getWorldFrame(), 6, -3, 3);
       lineEnd = new FramePoint(ReferenceFrame.getWorldFrame(), 6, 3, 6);
-      assertFalse(GeometryTools.isLineIntersectingPlane(pointOnPlane, planeNormal, lineStart, lineEnd));
+      assertFalse(GeometryTools.isLineSegmentIntersectingPlane(pointOnPlane, planeNormal, lineStart, lineEnd));
 
       pointOnPlane = new FramePoint(ReferenceFrame.getWorldFrame(), 0, 0, 0);
       planeNormal = new FrameVector(pointOnPlane.getReferenceFrame(), 0, 0, 1);
       lineStart = new FramePoint(ReferenceFrame.getWorldFrame(), 6, -3, -3);
       lineEnd = new FramePoint(ReferenceFrame.getWorldFrame(), 6, 3, -1);
-      assertFalse(GeometryTools.isLineIntersectingPlane(pointOnPlane, planeNormal, lineStart, lineEnd));
+      assertFalse(GeometryTools.isLineSegmentIntersectingPlane(pointOnPlane, planeNormal, lineStart, lineEnd));
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -501,7 +524,7 @@ public class GeometryToolsTest
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
-   public void testGetIntersectionBetweenLineAndPlane()
+   public void testGetIntersectionBetweenLineSegmentAndPlane()
    {
       FramePoint pointOnPlane = new FramePoint(ReferenceFrame.getWorldFrame(), 0, 0, 0);
       FrameVector planeNormal = new FrameVector(pointOnPlane.getReferenceFrame(), 0, 0, 1);
@@ -509,7 +532,7 @@ public class GeometryToolsTest
       FramePoint lineEnd = new FramePoint(ReferenceFrame.getWorldFrame(), 0, 0, 3);
 
 //    FramePoint expectedReturn = new FramePoint(ReferenceFrame.getWorldFrame(), 0, 0, 0);
-      FramePoint actualReturn = GeometryTools.getIntersectionBetweenLineAndPlane(pointOnPlane, planeNormal, lineStart, lineEnd);
+      FramePoint actualReturn = GeometryTools.getIntersectionBetweenLineSegmentAndPlane(pointOnPlane, planeNormal, lineStart, lineEnd);
       assertNull(actualReturn);
 
       // assertTrue("FAILED: Plane intersection", expectedReturn.epsilonEquals(actualReturn, EPSILON));
@@ -1549,33 +1572,6 @@ public class GeometryToolsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test(timeout = 30000)
-   public void testGetAngleFromFirstToSecondVector() throws Exception
-   {
-      Random random = new Random(51651L);
-
-      for (int i = 0; i<1000; i++)
-      {
-         double firstVectorLength = RandomTools.generateRandomDouble(random, 0.0, 10.0);
-         double secondVectorLength = RandomTools.generateRandomDouble(random, 0.0, 10.0);
-         Vector2d firstVector = RandomTools.generateRandomVector2d(random, firstVectorLength);
-         Vector2d secondVector = new Vector2d();
-
-         for (double yaw = -Math.PI; yaw <= Math.PI; yaw += Math.PI / 100.0)
-         {
-            double c = Math.cos(yaw);
-            double s = Math.sin(yaw);
-            secondVector.setX(firstVector.getX() * c - firstVector.getY() * s);
-            secondVector.setY(firstVector.getX() * s + firstVector.getY() * c);
-            secondVector.scale(secondVectorLength / firstVectorLength);
-            double computedYaw = GeometryTools.getAngleFromFirstToSecondVector(firstVector, secondVector);
-            double yawDifference = AngleTools.computeAngleDifferenceMinusPiToPi(yaw, computedYaw);
-            assertEquals(0.0, yawDifference, EPSILON);
-         }
-      }
-   }
-
    private void assertPolygons(double[] p1, double[] p2, double[] expectedSolution, double epsilon)
    {
       if (expectedSolution.length != 4)
@@ -1608,5 +1604,242 @@ public class GeometryToolsTest
       }
 
       return new ConvexPolygon2d(list);
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @Test(timeout = 30000)
+   public void testGetAngleFromFirstToSecondVector() throws Exception
+   {
+      Random random = new Random(51651L);
+
+      for (int i = 0; i<1000; i++)
+      {
+         double firstVectorLength = RandomTools.generateRandomDouble(random, 0.0, 10.0);
+         double secondVectorLength = RandomTools.generateRandomDouble(random, 0.0, 10.0);
+         Vector2d firstVector = RandomTools.generateRandomVector2d(random, firstVectorLength);
+         Vector2d secondVector = new Vector2d();
+
+         for (double yaw = -Math.PI; yaw <= Math.PI; yaw += Math.PI / 100.0)
+         {
+            double c = Math.cos(yaw);
+            double s = Math.sin(yaw);
+            secondVector.setX(firstVector.getX() * c - firstVector.getY() * s);
+            secondVector.setY(firstVector.getX() * s + firstVector.getY() * c);
+            secondVector.scale(secondVectorLength / firstVectorLength);
+            double computedYaw = GeometryTools.getAngleFromFirstToSecondVector(firstVector, secondVector);
+            double yawDifference = AngleTools.computeAngleDifferenceMinusPiToPi(yaw, computedYaw);
+            assertEquals(0.0, yawDifference, EPSILON);
+         }
+      }
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @Test(timeout = 30000)
+   public void testGetClosestPointsForTwoLines() throws Exception
+   {
+      Point3d expectedPointOnLine1ToPack = new Point3d();
+      Point3d expectedPointOnLine2ToPack = new Point3d();
+
+      Point3d actualPointOnLine1ToPack = new Point3d();
+      Point3d actualPointOnLine2ToPack = new Point3d();
+
+      for (int i = 0; i < 100; i++)
+      {
+         Point3d lineStart1 = RandomTools.generateRandomPoint3d(random, -10.0, 10.0);
+         Vector3d lineDirection1 = RandomTools.generateRandomVector(random, RandomTools.generateRandomDouble(random, 0.0, 10.0));
+
+         // Make line2 == line1
+         Point3d lineStart2 = new Point3d(lineStart1);
+         Vector3d lineDirection2 = new Vector3d(lineDirection1);
+
+         // Shift orthogonally line2 away from line1.
+         Vector3d orthogonalToLine1 = RandomTools.generateRandomOrthogonalVector3d(random, lineDirection1, true);
+         double expectedMinimumDistance = RandomTools.generateRandomDouble(random, 0.0, 10.0);
+         lineStart2.scaleAdd(expectedMinimumDistance, orthogonalToLine1, lineStart1);
+
+         // Rotate line2 around the vector we shifted it along, so it preserves the minimum distance.
+         AxisAngle4d axisAngleAroundShiftVector = new AxisAngle4d(orthogonalToLine1, RandomTools.generateRandomDouble(random, Math.PI));
+         Matrix3d rotationMatrixAroundShiftVector = new Matrix3d();
+         rotationMatrixAroundShiftVector.set(axisAngleAroundShiftVector);
+         rotationMatrixAroundShiftVector.transform(lineDirection2);
+
+         // At this point, lineStart1 and lineStart2 are expected to be the closest points.
+         expectedPointOnLine1ToPack.set(lineStart1);
+         expectedPointOnLine2ToPack.set(lineStart2);
+
+         GeometryTools.getClosestPointsForTwoLines(lineStart1, lineDirection1, lineStart2, lineDirection2, actualPointOnLine1ToPack, actualPointOnLine2ToPack);
+         JUnitTools.assertTuple3dEquals(expectedPointOnLine1ToPack, actualPointOnLine1ToPack, EPSILON);
+         JUnitTools.assertTuple3dEquals(expectedPointOnLine2ToPack, actualPointOnLine2ToPack, EPSILON);
+
+         // Let's shift lineStart1 and lineStart2 along their respective line direction so they're not the closest points.
+         lineStart1.scaleAdd(RandomTools.generateRandomDouble(random, 10.0), lineDirection1, lineStart1);
+         lineStart2.scaleAdd(RandomTools.generateRandomDouble(random, 10.0), lineDirection2, lineStart2);
+
+         GeometryTools.getClosestPointsForTwoLines(lineStart1, lineDirection1, lineStart2, lineDirection2, actualPointOnLine1ToPack, actualPointOnLine2ToPack);
+         JUnitTools.assertTuple3dEquals(expectedPointOnLine1ToPack, actualPointOnLine1ToPack, EPSILON);
+         JUnitTools.assertTuple3dEquals(expectedPointOnLine2ToPack, actualPointOnLine2ToPack, EPSILON);
+      }
+
+      // Test the parallel case. There's an infinite number of solutions but only one minimum distance between the two lines.
+      for (int i = 0; i < 100; i++)
+      {
+         Point3d lineStart1 = RandomTools.generateRandomPoint3d(random, -10.0, 10.0);
+         Vector3d lineDirection1 = RandomTools.generateRandomVector(random, 1.0);
+
+         // Make line2 == line1
+         Point3d lineStart2 = new Point3d(lineStart1);
+         Vector3d lineDirection2 = new Vector3d(lineDirection1);
+
+         // Shift orthogonally line2 away from line1.
+         Vector3d orthogonalToLine1 = RandomTools.generateRandomOrthogonalVector3d(random, lineDirection1, true);
+         double expectedMinimumDistance = RandomTools.generateRandomDouble(random, 0.0, 10.0);
+         lineStart2.scaleAdd(expectedMinimumDistance, orthogonalToLine1, lineStart1);
+
+         GeometryTools.getClosestPointsForTwoLines(lineStart1, lineDirection1, lineStart2, lineDirection2, actualPointOnLine1ToPack, actualPointOnLine2ToPack);
+         double actualMinimumDistance = actualPointOnLine1ToPack.distance(actualPointOnLine2ToPack);
+         assertEquals(expectedMinimumDistance, actualMinimumDistance, EPSILON);
+
+         // Let's shift lineStart1 and lineStart2 along their respective line direction (the minimum distance should remain the same).
+         lineStart1.scaleAdd(RandomTools.generateRandomDouble(random, 10.0), lineDirection1, lineStart1);
+         lineStart2.scaleAdd(RandomTools.generateRandomDouble(random, 10.0), lineDirection2, lineStart2);
+
+         GeometryTools.getClosestPointsForTwoLines(lineStart1, lineDirection1, lineStart2, lineDirection2, actualPointOnLine1ToPack, actualPointOnLine2ToPack);
+         actualMinimumDistance = actualPointOnLine1ToPack.distance(actualPointOnLine2ToPack);
+         assertEquals(expectedMinimumDistance, actualMinimumDistance, EPSILON);
+      }
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @Test(timeout = 30000)
+   public void testIsPointInsideTriangleABC() throws Exception
+   {
+      Point2d inside = new Point2d();
+      Point2d outside = new Point2d();
+
+      for (int i = 0; i < 100; i++)
+      {
+         Point2d a = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
+         Point2d b = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
+         Point2d c = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
+
+         assertTrue(GeometryTools.isPointInsideTriangleABC(a, a, b, c));
+         assertTrue(GeometryTools.isPointInsideTriangleABC(a, c, b, a));
+         assertTrue(GeometryTools.isPointInsideTriangleABC(b, a, b, c));
+         assertTrue(GeometryTools.isPointInsideTriangleABC(b, c, b, a));
+         assertTrue(GeometryTools.isPointInsideTriangleABC(c, a, b, c));
+         assertTrue(GeometryTools.isPointInsideTriangleABC(c, c, b, a));
+
+         inside.interpolate(a, b, RandomTools.generateRandomDouble(random, 0.0, 1.0));
+         inside.interpolate(inside, c, RandomTools.generateRandomDouble(random, 0.0, 1.0));
+         assertTrue(GeometryTools.isPointInsideTriangleABC(inside, a, b, c));
+         assertTrue(GeometryTools.isPointInsideTriangleABC(inside, c, b, a));
+
+         outside.interpolate(a, b, RandomTools.generateRandomDouble(random, 1.0, 10.0));
+         outside.interpolate(outside, c, RandomTools.generateRandomDouble(random, 0.0, 1.0));
+         assertFalse(GeometryTools.isPointInsideTriangleABC(outside, a, b, c));
+         assertFalse(GeometryTools.isPointInsideTriangleABC(outside, c, b, a));
+         
+         outside.interpolate(a, b, RandomTools.generateRandomDouble(random, -10.0, 0.0));
+         outside.interpolate(outside, c, RandomTools.generateRandomDouble(random, 0.0, 1.0));
+         assertFalse(GeometryTools.isPointInsideTriangleABC(outside, a, b, c));
+         assertFalse(GeometryTools.isPointInsideTriangleABC(outside, c, b, a));
+
+         outside.interpolate(a, b, RandomTools.generateRandomDouble(random, 0.0, 1.0));
+         outside.interpolate(outside, c, RandomTools.generateRandomDouble(random, 1.0, 10.0));
+         assertFalse(GeometryTools.isPointInsideTriangleABC(outside, a, b, c));
+         assertFalse(GeometryTools.isPointInsideTriangleABC(outside, c, b, a));
+         
+         outside.interpolate(a, b, RandomTools.generateRandomDouble(random, 0.0, 1.0));
+         outside.interpolate(outside, c, RandomTools.generateRandomDouble(random, -10.0, 0.0));
+         assertFalse(GeometryTools.isPointInsideTriangleABC(outside, a, b, c));
+         assertFalse(GeometryTools.isPointInsideTriangleABC(outside, c, b, a));
+      }
+
+      Point2d a = new Point2d(1.0, 0.0);
+      Point2d b = new Point2d(1.0, 1.0);
+      Point2d c = new Point2d(0.0, 1.0);
+
+      // These tests tend to be flaky inside the loop
+      inside.interpolate(a, b, 0.5);
+      assertTrue(GeometryTools.isPointInsideTriangleABC(inside, a, b, c));
+      assertTrue(GeometryTools.isPointInsideTriangleABC(inside, c, b, a));
+      inside.interpolate(a, c, 0.5);
+      assertTrue(GeometryTools.isPointInsideTriangleABC(inside, a, b, c));
+      assertTrue(GeometryTools.isPointInsideTriangleABC(inside, c, b, a));
+      inside.interpolate(b, c, 0.5);
+      assertTrue(GeometryTools.isPointInsideTriangleABC(inside, a, b, c));
+      assertTrue(GeometryTools.isPointInsideTriangleABC(inside, c, b, a));
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @Test(timeout = 30000)
+   public void testComputeTriangleArea() throws Exception
+   {
+      // Test for right rectangle, should be half the area of the corresponding rectangle
+      for (int i = 0; i < 100; i++)
+      {
+         Point2d a = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
+         Point2d b = new Point2d();
+         Point2d c = new Point2d();
+         Point2d d = new Point2d();
+
+         Vector2d rectangleLength = RandomTools.generateRandomVector2d(random, 1.0);
+         Vector2d rectangleWidth = new Vector2d(-rectangleLength.getY(), rectangleLength.getX());
+         double length = RandomTools.generateRandomDouble(random, 0.0, 10.0);
+         double width = RandomTools.generateRandomDouble(random, 0.0, 10.0);
+         rectangleLength.scale(length);
+         rectangleWidth.scale(width);
+
+         b.add(a, rectangleLength);
+         c.add(b, rectangleWidth);
+         d.add(a, rectangleWidth);
+
+         double expectedArea = 0.5 * length * width;
+         double actualArea = GeometryTools.computeTriangleArea(a, b, c);
+         assertEquals(expectedArea, actualArea, EPSILON);
+         actualArea = GeometryTools.computeTriangleArea(a, c, d);
+         assertEquals(expectedArea, actualArea, EPSILON);
+         actualArea = GeometryTools.computeTriangleArea(b, c, d);
+         assertEquals(expectedArea, actualArea, EPSILON);
+         actualArea = GeometryTools.computeTriangleArea(a, b, d);
+         assertEquals(expectedArea, actualArea, EPSILON);
+
+         // Just an annoying case
+         assertEquals(0.0, GeometryTools.computeTriangleArea(a, a, c), EPSILON);
+      }
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @Test(timeout = 30000)
+   public void testNormalizeSafeZUp() throws Exception
+   {
+      Vector3d actualVector;
+      Vector3d expectedVector = new Vector3d();
+
+      for (int i = 0; i < 25; i++)
+      {
+         actualVector = RandomTools.generateRandomVector(random, RandomTools.generateRandomDouble(random, Epsilons.ONE_TRILLIONTH, 10.0));
+
+         expectedVector.normalize(actualVector);
+         GeometryTools.normalizeSafelyZUp(actualVector);
+         JUnitTools.assertTuple3dEquals(expectedVector, actualVector, Epsilons.ONE_TRILLIONTH);
+
+         actualVector = RandomTools.generateRandomVector(random, 0.999 * Epsilons.ONE_TRILLIONTH);
+         expectedVector.set(0.0, 0.0, 1.0);
+         GeometryTools.normalizeSafelyZUp(actualVector);
+         JUnitTools.assertTuple3dEquals(expectedVector, actualVector, Epsilons.ONE_TRILLIONTH);
+
+         actualVector = new Vector3d();
+         expectedVector.set(0.0, 0.0, 1.0);
+         GeometryTools.normalizeSafelyZUp(actualVector);
+         JUnitTools.assertTuple3dEquals(expectedVector, actualVector, Epsilons.ONE_TRILLIONTH);
+      }
+   }
+
+   public static void main(String[] args)
+   {
+      String targetTests = GeometryToolsTest.class.getName();
+      String targetClasses = GeometryTools.class.getName();
+      MutationTestingTools.doPITMutationTestAndOpenResult(targetTests, targetClasses);
    }
 }

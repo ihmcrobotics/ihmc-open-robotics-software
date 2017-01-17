@@ -15,16 +15,15 @@ public class BonoContactPointParameters extends RobotContactPointParameters
    {
       super(jointMap, toeWidth, footWidth, footLength, soleToAnkleFrameTransforms);
 
-      createDefaultControllerFootContactPoints();
-      createDefaultSimulationFootContactPoints();
+      createDefaultFootContactPoints();
    }
 
    @Override
    public void setupGroundContactModelParameters(LinearGroundContactModel linearGroundContactModel)
    {
-      linearGroundContactModel.setZStiffness(1500.0);      
-      linearGroundContactModel.setZDamping(750.0);      
-      linearGroundContactModel.setXYStiffness(25000.0);      
-      linearGroundContactModel.setXYDamping(750.0);       
+      linearGroundContactModel.setZStiffness(1500.0);
+      linearGroundContactModel.setZDamping(750.0);
+      linearGroundContactModel.setXYStiffness(25000.0);
+      linearGroundContactModel.setXYDamping(750.0);
    }
 }

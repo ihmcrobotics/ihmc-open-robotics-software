@@ -388,7 +388,7 @@ public class ConvexPolygon2dCalculator
       Point2d vertexTwo = polygon.getNextVertex(edgeIndex);
       double edgeVectorX = vertexTwo.x - vertexOne.x;
       double edgeVectorY = vertexTwo.y - vertexOne.y;
-      return Line2d.isPointOnSideOfLine(observerX, observerY, edgeVectorX, edgeVectorY, vertexOne.x, vertexOne.y, RobotSide.LEFT);
+      return GeometryTools.isPointOnSideOfLine(observerX, observerY, vertexOne.x, vertexOne.y, edgeVectorX, edgeVectorY, RobotSide.LEFT);
    }
 
    /**

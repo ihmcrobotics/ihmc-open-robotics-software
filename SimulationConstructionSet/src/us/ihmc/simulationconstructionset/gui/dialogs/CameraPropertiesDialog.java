@@ -22,7 +22,7 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.border.Border;
 
-import us.ihmc.graphics3DAdapter.camera.CameraPropertiesHolder;
+import us.ihmc.jMonkeyEngineToolkit.camera.CameraPropertiesHolder;
 import us.ihmc.simulationconstructionset.gui.ActiveCameraHolder;
 
 

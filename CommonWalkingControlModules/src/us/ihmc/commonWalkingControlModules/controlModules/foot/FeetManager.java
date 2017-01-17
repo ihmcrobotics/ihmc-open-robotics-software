@@ -312,12 +312,12 @@ public class FeetManager
    }
 
    /**
-    * {@link WalkOnTheEdgesManager#updateToeOffStatusSingleSupport(RobotSide, boolean)}
+    * {@link WalkOnTheEdgesManager#updateToeOffStatusSingleSupport(Footstep, FramePoint2d, FramePoint2d, FramePoint2d, boolean)}.
     * @return {@link WalkOnTheEdgesManager#doToeOff}
     */
-   public boolean checkIfToeOffSafeSingleSupport(RobotSide trailingLeg, boolean isOnExitCMP)
+   public boolean checkIfToeOffSafeSingleSupport(Footstep nextFootstep, FramePoint2d desiredECMP, FramePoint2d currentICP, FramePoint2d desiredICP, boolean isOnExitCMP)
    {
-      walkOnTheEdgesManager.updateToeOffStatusSingleSupport(trailingLeg, isOnExitCMP);
+      walkOnTheEdgesManager.updateToeOffStatusSingleSupport(nextFootstep, desiredECMP, currentICP, desiredICP, isOnExitCMP);
 
       return walkOnTheEdgesManager.doToeOff();
    }

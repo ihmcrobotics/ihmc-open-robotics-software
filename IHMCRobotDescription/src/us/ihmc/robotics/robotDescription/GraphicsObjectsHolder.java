@@ -1,7 +1,7 @@
 package us.ihmc.robotics.robotDescription;
 
 
-import us.ihmc.graphics3DDescription.Graphics3DObject;
+import us.ihmc.graphicsDescription.Graphics3DObject;
 
 public interface GraphicsObjectsHolder
 {
