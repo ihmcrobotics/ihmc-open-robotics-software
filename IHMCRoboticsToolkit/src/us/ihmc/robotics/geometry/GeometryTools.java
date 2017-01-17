@@ -676,10 +676,7 @@ public class GeometryTools
       // Check if the line is parallel to the plane
       if (Math.abs(denominator) < EPSILON)
       {
-         if (Math.abs(numerator) < EPSILON)
-            return new Point3d(pointOnLine);
-         else
-            return null;
+         return null;
       }
       else
       {
