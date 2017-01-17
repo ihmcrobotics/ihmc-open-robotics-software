@@ -611,6 +611,77 @@ public class GeometryTools
    }
 
    /**
+    * Computes the coordinates of the intersection between a plane and an infinitely long line.
+    * In the case the line is parallel to the plane, this method will return {@code null}.
+    * <a href="https://en.wikipedia.org/wiki/Line%E2%80%93plane_intersection"> Useful link </a>.
+    * 
+    * @param pointOnPlane a point located on the plane. Not modified.
+    * @param planeNormal the normal of the plane. Not modified.
+    * @param pointOnLine a point located on the line. Not modified.
+    * @param lineDirection the direction of the line. Not modified.
+    * @return the coordinates of the intersection, or {@code null} if the line is parallel to the plane.
+    * @throws ReferenceFrameMismatchException if the arguments are not expressed in the same frame.
+    */
+   public static FramePoint getIntersectionBetweenLineAndPlane(FramePoint pointOnPlane, FrameVector planeNormal, FramePoint pointOnLine, FrameVector lineDirection)
+   {
+      pointOnPlane.checkReferenceFrameMatch(planeNormal);
+      pointOnLine.checkReferenceFrameMatch(lineDirection);
+      pointOnPlane.checkReferenceFrameMatch(pointOnLine);
+
+      Point3d intersection = getIntersectionBetweenLineAndPlane(pointOnPlane.getPoint(), planeNormal.getVector(), pointOnLine.getPoint(), lineDirection.getVector());
+
+      if (intersection == null)
+         return null;
+      else
+         return new FramePoint(pointOnPlane.getReferenceFrame(), intersection);
+   }
+
+   /**
+    * Computes the coordinates of the intersection between a plane and an infinitely long line.
+    * In the case the line is parallel to the plane, this method will return {@code null}.
+    * <a href="https://en.wikipedia.org/wiki/Line%E2%80%93plane_intersection"> Useful link </a>.
+    * 
+    * @param pointOnPlane a point located on the plane. Not modified.
+    * @param planeNormal the normal of the plane. Not modified.
+    * @param pointOnLine a point located on the line. Not modified.
+    * @param lineDirection the direction of the line. Not modified.
+    * @return the coordinates of the intersection, or {@code null} if the line is parallel to the plane.
+    */
+   public static Point3d getIntersectionBetweenLineAndPlane(Point3d pointOnPlane, Vector3d planeNormal, Point3d pointOnLine, Vector3d lineDirection)
+   {
+      // Switching to the notation used in https://en.wikipedia.org/wiki/Line%E2%80%93plane_intersection
+      // Note: the algorithm is independent from the magnitudes of planeNormal and lineDirection
+      Point3d p0 = pointOnPlane;
+      Vector3d n = planeNormal;
+      Point3d l0 = pointOnLine;
+      Vector3d l = lineDirection;
+
+      // Let's compute the value of the coefficient d = ( (p0 - l0).n ) / ( l.n )
+      double d, numerator, denominator;
+      numerator = (p0.getX() - l0.getX()) * n.getX();
+      numerator += (p0.getY() - l0.getY()) * n.getY();
+      numerator += (p0.getZ() - l0.getZ()) * n.getZ();
+      denominator = l.dot(n);
+
+      // Check if the line is parallel to the plane
+      if (Math.abs(denominator) < EPSILON)
+      {
+         if (Math.abs(numerator) < EPSILON)
+            return new Point3d(pointOnLine);
+         else
+            return null;
+      }
+      else
+      {
+         d = numerator / denominator;
+         
+         Point3d intersection = new Point3d();
+         intersection.scaleAdd(d, l, l0);
+         return intersection;
+      }
+   }
+
+   /**
     * Locates and returns the intersection between
     * the given line segment and plane
     *
