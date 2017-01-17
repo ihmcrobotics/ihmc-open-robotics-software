@@ -1,6 +1,6 @@
 package us.ihmc.simulationconstructionset.gui;
 
-import us.ihmc.graphics3DAdapter.camera.CameraController;
+import us.ihmc.jMonkeyEngineToolkit.camera.CameraController;
 
 public interface CameraHolder
 {

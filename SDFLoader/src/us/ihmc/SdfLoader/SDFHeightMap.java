@@ -10,7 +10,7 @@ import javax.vecmath.Vector3d;
 import us.ihmc.SdfLoader.xmlDescription.SDFGeometry.HeightMap;
 import us.ihmc.robotics.geometry.BoundingBox3d;
 
-public class SDFHeightMap implements us.ihmc.graphics3DDescription.HeightMap
+public class SDFHeightMap implements us.ihmc.graphicsDescription.HeightMap
 {
    double xMin, xMax, yMin, yMax, zOffset;
    private BoundingBox3d boundingBox;

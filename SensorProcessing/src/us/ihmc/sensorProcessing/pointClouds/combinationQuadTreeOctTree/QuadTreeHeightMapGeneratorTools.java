@@ -13,13 +13,13 @@ import us.ihmc.robotics.geometry.BoundingBox2d;
  */
 public class QuadTreeHeightMapGeneratorTools
 {
-   public static QuadTreeForGroundHeightMap createHeightMap(us.ihmc.graphics3DDescription.HeightMap inputHeightMap, BoundingBox2d testingRange, double resolution)
+   public static QuadTreeForGroundHeightMap createHeightMap(us.ihmc.graphicsDescription.HeightMap inputHeightMap, BoundingBox2d testingRange, double resolution)
    {
       double heightThreshold = 0.002;
       return createHeightMap(inputHeightMap, testingRange, resolution, heightThreshold);
    }
 
-   public static QuadTreeForGroundHeightMap createHeightMap(us.ihmc.graphics3DDescription.HeightMap inputHeightMap, BoundingBox2d testingRange, double resolution, double heightThreshold)
+   public static QuadTreeForGroundHeightMap createHeightMap(us.ihmc.graphicsDescription.HeightMap inputHeightMap, BoundingBox2d testingRange, double resolution, double heightThreshold)
    {
       double quadTreeMaxMultiLevelZChangeToFilterNoise = 0.2;
       int maxSameHeightPointsPerNode = 20;
@@ -30,7 +30,7 @@ public class QuadTreeHeightMapGeneratorTools
 
 
 
-   public static QuadTreeForGroundHeightMap createHeightMap(us.ihmc.graphics3DDescription.HeightMap inputHeightMap, BoundingBox2d testingRange, double resolution, double heightThreshold,
+   public static QuadTreeForGroundHeightMap createHeightMap(us.ihmc.graphicsDescription.HeightMap inputHeightMap, BoundingBox2d testingRange, double resolution, double heightThreshold,
                                double quadTreeMaxMultiLevelZChangeToFilterNoise, int maxSameHeightPointsPerNode,
                                double maxAllowableXYDistanceForAPointToBeConsideredClose, int maxNodes)
    {

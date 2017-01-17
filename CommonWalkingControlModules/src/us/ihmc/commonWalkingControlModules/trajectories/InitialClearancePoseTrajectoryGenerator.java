@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.trajectories;
 
 import static us.ihmc.commonWalkingControlModules.trajectories.InitialClearancePositionTrajectoryGenerator.defaultLeaveTimeInPercentOfTrajectoryTime;
 
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;

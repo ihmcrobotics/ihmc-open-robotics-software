@@ -2,6 +2,7 @@ package us.ihmc.robotics.geometry;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 import javax.vecmath.AxisAngle4d;
@@ -13,12 +14,11 @@ import javax.vecmath.Vector2d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.geometry.shapes.FramePlane3d;
 import us.ihmc.robotics.geometry.shapes.Plane3d;
 import us.ihmc.robotics.math.Epsilons;
 import us.ihmc.robotics.math.exceptions.UndefinedOperationException;
-import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.robotSide.RobotSide;
 
 public class GeometryTools
 {
@@ -27,64 +27,84 @@ public class GeometryTools
    private static final double EPSILON = 1e-6;
 
    /**
-    * Compute the distance from a point to a line (defined by two 3D points).
-    * From http://mathworld.wolfram.com/Point-LineDistance3-Dimensional.html
-    * ^^Modified to return distance if line is defined by same point^^
-    *          returns distance between given 3D point and line(point)
-    * @param point Point3d
-    * @param lineStart Point3d
-    * @param lineEnd Point3d
-    * @return double
+    * Computes the minimum distance between a 3D point and an infinitely long 3D line defined by a given line segment.
+    * <a href="http://mathworld.wolfram.com/Point-LineDistance3-Dimensional.html"> Useful link</a>.
+    * If the line direction is of length equal to zero: ||{@code lineDirection}|| {@code  == 0.0}, the distance between the {@code lineStart} and the given point is computed instead.
+    *
+    * @param point 3D point to compute the distance from the line. Not modified.
+    * @param lineStart starting point of the line segment defining the infinite line. Not modified.
+    * @param lineDirection direction of the line segment defining the infinite line. Not modified.
+    * @return the minimum distance between the 3D point and the 3D line.
+    */
+   public static double distanceFromPointToLine(Point3d point, Point3d lineStart, Vector3d lineDirection)
+   {
+      double directionMagnitude = lineDirection.length();
+      if (directionMagnitude < Epsilons.ONE_TRILLIONTH)
+      {
+         return lineStart.distance(point);
+      }
+      else
+      {
+         Vector3d pointToStart = new Vector3d(lineStart);
+         pointToStart.sub(point);
+
+         Vector3d crossProduct = new Vector3d();
+         crossProduct.cross(lineDirection, pointToStart);
+
+         return crossProduct.length() / directionMagnitude;
+      }
+   }
+
+   /**
+    * Computes the minimum distance between a 3D point and an infinitely long 3D line defined by a given line segment.
+    * <a href="http://mathworld.wolfram.com/Point-LineDistance3-Dimensional.html"> Useful link</a>.
+    * If the line is defined by the same point: {@code lineStart == lineEnd}, the distance between the {@code lineStart} and the given point is computed instead.
+    *
+    * @param point 3D point to compute the distance from the line. Not modified.
+    * @param lineStart starting point of the line segment defining the infinite line. Not modified.
+    * @param lineDirection direction of the line segment defining the infinite line. Not modified.
+    * @return the minimum distance between the 3D point and the 3D line.
     */
    // TODO consider making line3d and moving into it
    public static double distanceFromPointToLine(Point3d point, Point3d lineStart, Point3d lineEnd)
    {
       if (lineStart.getX() - lineEnd.getX() == 0 & lineStart.getY() - lineEnd.getY() == 0 & lineStart.getZ() - lineEnd.getZ() == 0)
       {
-         double distance = Math.sqrt((lineStart.getX() - point.getX()) * (lineStart.getX() - point.getX()) + (lineStart.getY() - point.getY()) * (lineStart.getY() - point.getY())
-                                     + (lineStart.getZ() - point.getZ()) * (lineStart.getZ() - point.getZ()));
-
-         return distance;
+         return lineStart.distance(point);
       }
       else
       {
-         Vector3d startToEnd = new Vector3d(lineEnd);
-         startToEnd.sub(lineStart);
-
-         Vector3d pointToStart = new Vector3d(lineStart);
-         pointToStart.sub(point);
-
-         Vector3d crossProduct = new Vector3d();
-         crossProduct.cross(startToEnd, pointToStart);
-
-         return crossProduct.length() / startToEnd.length();
+         Vector3d lineDirection = new Vector3d(lineEnd);
+         lineDirection.sub(lineStart);
+         return distanceFromPointToLine(point, lineStart, lineDirection);
       }
    }
 
    /**
-    * 2d point to line distance.
+    * Returns the minimum distance between a 2D point and an infinitely long 2D
+    * line defined by a given line segment.
+    * If the line is defined by the same point: {@code lineStart == lineEnd}, the xy distance between the {@code lineStart} and the given point is computed instead.
     *
-    * @param point FramePoint
-    * @param lineStart FramePoint
-    * @param lineEnd FramePoint
-    * @return double
+    * @param point the 3D point is projected onto the xy-plane. It's projection is used to compute the distance from the line. Not modified.
+    * @param lineStart the projection of this 3D onto the xy-plane refers to the starting point of the 2D line segment that defines in its turn the infinite 2D line. Not modified.
+    * @param lineEnd the projection of this 3D onto the xy-plane refers to the end point of the 2D line segment that defines in its turn the infinite 2D line. Not modified.
+    * @return the minimum distance between the 2D point and the 2D line.
     */
    public static double distanceFromPointToLine2d(FramePoint point, FramePoint lineStart, FramePoint lineEnd)
    {
-
+      // FIXME Need to verify that all the arguments are expressed in the same reference frame.
       return distanceFromPointToLine(point.getX(), point.getY(), lineStart.getX(), lineStart.getY(), lineEnd.getX(), lineEnd.getY());
    }
 
    /**
     * Returns the minimum distance between a 2D point and an infinitely long 2D
     * line defined by a given line segment.
-    * If line is defined by the same point, returns distance between that point
-    * and the given 2D point
+    * If the line is defined by the same point: {@code lineStart == lineEnd}, the distance between the {@code lineStart} and the given point is computed instead.
     *
-    * @param point Point2d
-    * @param lineStart Point2d
-    * @param lineEnd Point2d
-    * @return double
+    * @param point 2D point to compute the distance from the line. Not modified.
+    * @param lineStart starting point of the line segment defining the infinite line. Not modified.
+    * @param lineEnd end point of the line segment defining the infinite line. Not modified.
+    * @return the minimum distance between the 2D point and the 2D line.
     */
    public static double distanceFromPointToLine(Point2d point, Point2d lineStart, Point2d lineEnd)
    {
@@ -94,13 +114,15 @@ public class GeometryTools
    /**
     * Returns the minimum distance between a 2D point and an infinitely long 2D
     * line defined by a given line segment.
-    * If line is defined by the same point, returns distance between that point
-    * and the given 2D point
+    * If the line is defined by the same point: {@code lineStart == lineEnd}, the distance between the {@code lineStart} and the given point is computed instead.
     *
-    * @param point Point2d
-    * @param lineStart Point2d
-    * @param lineEnd Point2d
-    * @return double
+    * @param pointX x-coordinate of the query.
+    * @param pointY y-coordinate of the query.
+    * @param lineStartX x-coordinate of the starting point of the line segment defining the infinite line.
+    * @param lineStartY y-coordinate of the starting point of the line segment defining the infinite line.
+    * @param lineEndX x-coordinate of the end point of the line segment defining the infinite line.
+    * @param lineEndY y-coordinate of the end point of the line segment defining the infinite line.
+    * @return the minimum distance between the 2D point and the 2D line.
     */
    public static double distanceFromPointToLine(double pointX, double pointY, double lineStartX, double lineStartY, double lineEndX, double lineEndY)
    {
@@ -121,13 +143,13 @@ public class GeometryTools
 
    /**
     * Returns the minimum distance between a point and a given line segment.
-    * holds true if line segment shrinks to a single point
+    * Holds true if line segment shrinks to a single point.
     *
-    * @param xPoint x coordinate of point to be tested
-    * @param yPoint y coordinate of point to be tested
-    * @param lineStart Point2d
-    * @param lineEnd Point2d
-    * @return double
+    * @param xPoint x coordinate of point to be tested.
+    * @param yPoint y coordinate of point to be tested.
+    * @param lineStart starting point of the line segment. Not modified.
+    * @param lineEnd end point of the line segment. Not modified.
+    * @return the minimum distance between the 2D point and the 2D line segment.
     */
    public static double distanceFromPointToLineSegment(double xPoint, double yPoint, Point2d lineStart, Point2d lineEnd)
    {
@@ -156,12 +178,12 @@ public class GeometryTools
 
    /**
     * Returns the minimum distance between a point and a given line segment.
-    * holds true if line segment shrinks to a single point
+    * Holds true if line segment shrinks to a single point.
     *
-    * @param point Point2d
-    * @param lineStart Point2d
-    * @param lineEnd Point2d
-    * @return double
+    * @param point 2D point to compute the distance from the line segment. Not modified.
+    * @param lineStart starting point of the line segment. Not modified.
+    * @param lineEnd end point of the line segment. Not modified.
+    * @return the minimum distance between the 2D point and the 2D line segment.
     */
    public static double distanceFromPointToLineSegment(Point2d point, Point2d lineStart, Point2d lineEnd)
    {
@@ -169,30 +191,187 @@ public class GeometryTools
    }
 
    /**
-    * Returns a boolean value, stating whether a 2D point is on the left side of a given line
-    * "Left side" is determined based on order of lineStart and lineEnd
+    * Returns a boolean value, stating whether a 2D point is on the left side of an infinitely long line defined by a line segment.
+    * "Left side" is determined based on order of {@code lineStart} and {@code lineEnd}.
+    * <p>
+    * For instance, given the {@code lineStart} coordinates x = 0, and y = 0, and the {@code lineEnd} coordinates x = 1, y = 0,
+    * a point located on the left side of this line has a negative y coordinate.
+    *<p>
+    * This method will return false if the point is on the line.
     *
-    * returns false if point is on line
-    *
-    * @param point Point2d
-    * @param lineStart Point2d
-    * @param lineEnd Point2d
-    * @return boolean
+    * @param point the query point. Not modified.
+    * @param lineStart starting point of the line segment defining the infinite line. Not modified.
+    * @param lineEnd end point of the line segment defining the infinite line. Not modified.
+    * @return {@code true} if the point is on the left side of the line, {@code false} if the point is on the right side or exactly on the line.
     */
    public static boolean isPointOnLeftSideOfLine(Point2d point, Point2d lineStart, Point2d lineEnd)
    {
-      return (((point.getY() - lineStart.getY()) * (lineEnd.getX() - lineStart.getX())) - ((point.getX() - lineStart.getX()) * (lineEnd.getY() - lineStart.getY()))) > 0.0;
+      return isPointOnSideOfLine(point, lineStart, lineEnd, RobotSide.LEFT);
    }
 
    /**
-    * Returns a Boolean value stating whether a point is on the left side of a given line
+    * Returns a boolean value, stating whether a 2D point is on the right side of an infinitely long line defined by a line segment.
+    * "Right side" is determined based on order of {@code lineStart} and {@code lineEnd}.
+    * <p>
+    * For instance, given the {@code lineStart} coordinates x = 0, and y = 0, and the {@code lineEnd} coordinates x = 1, y = 0,
+    * a point located on the right side of this line has a positive y coordinate.
+    *<p>
+    * This method will return false if the point is on the line.
     *
-    * @param point FramePoint
-    * @param lineStart FramePoint
-    * @param lineEnd FramePoint
-    * @return boolean
+    * @param point the query point. Not modified.
+    * @param lineStart starting point of the line segment defining the infinite line. Not modified.
+    * @param lineEnd end point of the line segment defining the infinite line. Not modified.
+    * @return {@code true} if the point is on the right side of the line, {@code false} if the point is on the left side or exactly on the line.
     */
+   public static boolean isPointOnRightSideOfLine(Point2d point, Point2d lineStart, Point2d lineEnd)
+   {
+      return isPointOnSideOfLine(point, lineStart, lineEnd, RobotSide.RIGHT);
+   }
 
+   /**
+    * Returns a boolean value, stating whether a 2D point is on the left or right side of an infinitely long line defined by a line segment.
+    * The idea of "side" is determined based on order of {@code lineStart} and {@code lineEnd}.
+    * <p>
+    * For instance, given the {@code lineStart} coordinates x = 0, and y = 0, and the {@code lineEnd} coordinates x = 1, y = 0,
+    * a point located on:
+    * <li> the left side of this line has a negative y coordinate.
+    * <li> the right side of this line has a positive y coordinate.
+    *<p>
+    * This method will return false if the point is on the line.
+    *
+    * @param point the query point. Not modified.
+    * @param lineStart starting point of the line segment defining the infinite line. Not modified.
+    * @param lineEnd end point of the line segment defining the infinite line. Not modified.
+    * @param side the query of the side.
+    * @return {@code true} if the point is on the query side of the line, {@code false} if the point is on the opposite side or exactly on the line.
+    */
+   public static boolean isPointOnSideOfLine(Point2d point, Point2d lineStart, Point2d lineEnd, RobotSide side)
+   {
+      return isPointOnSideOfLine(point.getX(), point.getY(), lineStart, lineEnd, side);
+   }
+
+   /**
+    * Returns a boolean value, stating whether a 2D point is on the left or right side of an infinitely long line defined by a line segment.
+    * The idea of "side" is determined based on order of {@code lineStart} and {@code lineEnd}.
+    * <p>
+    * For instance, given the {@code lineStart} coordinates x = 0, and y = 0, and the {@code lineEnd} coordinates x = 1, y = 0,
+    * a point located on:
+    * <li> the left side of this line has a negative y coordinate.
+    * <li> the right side of this line has a positive y coordinate.
+    *<p>
+    * This method will return false if the point is on the line.
+    *
+    * @param pointX the x-coordinate of the query point.
+    * @param pointY the y-coordinate of the query point.
+    * @param lineStart starting point of the line segment defining the infinite line. Not modified.
+    * @param lineEnd end point of the line segment defining the infinite line. Not modified.
+    * @param side the query of the side.
+    * @return {@code true} if the point is on the query side of the line, {@code false} if the point is on the opposite side or exactly on the line.
+    */
+   public static boolean isPointOnSideOfLine(double pointX, double pointY, Point2d lineStart, Point2d lineEnd, RobotSide side)
+   {
+      double pointOnLineX = lineStart.getX();
+      double pointOnLineY = lineStart.getY();
+      double lineDirectionX = lineEnd.getX() - lineStart.getX();
+      double lineDirectionY = lineEnd.getY() - lineStart.getY();
+      return isPointOnSideOfLine(pointX, pointY, pointOnLineX, pointOnLineY, lineDirectionX, lineDirectionY, side);
+   }
+
+   /**
+    * Returns a boolean value, stating whether a 2D point is on the left or right side of an infinitely long line.
+    * The idea of "side" is determined based on the direction of the line.
+    * <p>
+    * For instance, given the {@code lineDirection} components x = 0, and y = 1, and the {@code pointOnLine} coordinates x = 0, and y = 0, 
+    * a point located on:
+    * <li> the left side of this line has a negative y coordinate.
+    * <li> the right side of this line has a positive y coordinate.
+    *<p>
+    * This method will return false if the point is on the line.
+    *
+    * @param point the query point. Not modified.
+    * @param pointOnLine a point positioned on the infinite line. Not modified.
+    * @param lineDirection the direction of the infinite line. Not modified.
+    * @param side the query of the side.
+    * @return {@code true} if the point is on the query side of the line, {@code false} if the point is on the opposite side or exactly on the line.
+    */
+   public static boolean isPointOnSideOfLine(Point2d point, Point2d pointOnLine, Vector2d lineDirection, RobotSide side)
+   {
+      return isPointOnSideOfLine(point.getX(), point.getY(), pointOnLine, lineDirection, side);
+   }
+
+   /**
+    * Returns a boolean value, stating whether a 2D point is on the left or right side of an infinitely long line.
+    * The idea of "side" is determined based on the direction of the line.
+    * <p>
+    * For instance, given the {@code lineDirection} components x = 0, and y = 1, and the {@code pointOnLine} coordinates x = 0, and y = 0, 
+    * a point located on:
+    * <li> the left side of this line has a negative y coordinate.
+    * <li> the right side of this line has a positive y coordinate.
+    *<p>
+    * This method will return false if the point is on the line.
+    *
+    * @param pointX the x-coordinate of  the query point.
+    * @param pointY the y-coordinate of  the query point.
+    * @param pointOnLine a point positioned on the infinite line. Not modified.
+    * @param lineDirection the direction of the infinite line. Not modified.
+    * @param side the query of the side.
+    * @return {@code true} if the point is on the query side of the line, {@code false} if the point is on the opposite side or exactly on the line.
+    */
+   public static boolean isPointOnSideOfLine(double pointX, double pointY, Point2d pointOnLine, Vector2d lineDirection, RobotSide side)
+   {
+      double pointOnLineX = pointOnLine.getX();
+      double pointOnLineY = pointOnLine.getY();
+      double lineDirectionX = lineDirection.getX();
+      double lineDirectionY = lineDirection.getY();
+      return isPointOnSideOfLine(pointX, pointY, pointOnLineX, pointOnLineY, lineDirectionX, lineDirectionY, side);
+   }
+
+   /**
+    * Returns a boolean value, stating whether a 2D point is on the left or right side of an infinitely long line.
+    * The idea of "side" is determined based on the direction of the line.
+    * <p>
+    * For instance, given the {@code lineDirection} components x = 0, and y = 1, and the {@code pointOnLine} coordinates x = 0, and y = 0, 
+    * a point located on:
+    * <li> the left side of this line has a negative y coordinate.
+    * <li> the right side of this line has a positive y coordinate.
+    *<p>
+    * This method will return false if the point is on the line.
+    *
+    * @param pointX the x-coordinate of  the query point.
+    * @param pointY the y-coordinate of  the query point.
+    * @param pointOnLineX the x-coordinate of a point positioned on the infinite line.
+    * @param pointOnLineY the y-coordinate of a point positioned on the infinite line.
+    * @param lineDirectionX the x-component of the direction of the infinite line.
+    * @param lineDirectionY the y-component of the direction of the infinite line.
+    * @param side the query of the side.
+    * @return {@code true} if the point is on the query side of the line, {@code false} if the point is on the opposite side or exactly on the line.
+    */
+   public static boolean isPointOnSideOfLine(double pointX, double pointY, double pointOnLineX, double pointOnLineY, double lineDirectionX, double lineDirectionY, RobotSide side)
+   {
+      double pointToPointX = pointX - pointOnLineX;
+      double pointToPointY = pointY - pointOnLineY;
+      double crossProduct = lineDirectionX * pointToPointY - pointToPointX * lineDirectionY;
+      return side.negateIfRightSide(crossProduct) > 0.0;
+   }
+
+   /**
+    * Returns a boolean value, stating whether a 2D point is on the left side of a given line.
+    * "Left side" is determined based on order of {@code lineStart} and {@code lineEnd}.
+    * <p>
+    * WARNING: the 3D arguments are projected onto the XY-plane to perform the actual computation in 2D.
+    * <p>
+    * For instance, given the {@code lineStart} coordinates x = 0, and y = 0, and the {@code lineEnd} coordinates x = 1, y = 0,
+    * a point located on the left of this line has a negative y coordinate.
+    *<p>
+    * This method will return false if the point is on the line.
+    * 
+    * @param point the projection onto the XY-plane of this point is used as the 2D query point. Not modified.
+    * @param lineStart the projection onto the XY-plane of this point is used as the starting point of the 2D line segment. Not modified.
+    * @param lineEnd the projection onto the XY-plane of this point is used as the end point of the 2D line segment. Not modified.
+    * @return {@code true} if the 2D projection of the point is on the left side of the 2D projection of the line.
+    * {@code false} if the 2D projection of the point is on the right side or exactly on the 2D projection of the line.
+    */
+   // FIXME this method is confusing and error prone.
    public static boolean isPointOnLeftSideOfLine(FramePoint point, FramePoint lineStart, FramePoint lineEnd)
    {
       point.checkReferenceFrameMatch(lineStart);
@@ -207,93 +386,87 @@ public class GeometryTools
    /**
     * Returns true only if the point is inside the triangle defined by the vertices a, b, and c.
     * The triangle can be clockwise or counter-clockwise ordered.
-    * @param point the point to check if lying inside the triangle.
-    * @param a first vertex of the triangle.
-    * @param b second vertex of the triangle.
-    * @param c third vertex of the triangle.
-    * @return
+    * @param point the point to check if lying inside the triangle. Not modified.
+    * @param a first vertex of the triangle. Not modified.
+    * @param b second vertex of the triangle. Not modified.
+    * @param c third vertex of the triangle. Not modified.
+    * @return {@code true} if the query is exactly inside the triangle. {@code false} if the query point is outside triangle or exactly on an edge of the triangle.
     */
    public static boolean isPointInsideTriangleABC(Point2d point, Point2d a, Point2d b, Point2d c)
    {
-      boolean isClockwiseOrdered = isPointOnLeftSideOfLine(b, a, c);
+      // This makes the assertion working for both clockwise and counter-clockwise ordered vertices.
+      RobotSide sideToCheck = isPointOnLeftSideOfLine(b, a, c) ? RobotSide.LEFT : RobotSide.RIGHT;
 
-      if (isClockwiseOrdered)
-      { // The point must be on the right side of each vertex of the triangle
-         if (isPointOnLeftSideOfLine(point, a, b))
-            return false;
-         if (isPointOnLeftSideOfLine(point, b, c))
-            return false;
-         if (isPointOnLeftSideOfLine(point, c, a))
-            return false;
-      }
-      else
-      { // The point must be on the left side of each vertex of the triangle
-         if (!isPointOnLeftSideOfLine(point, a, b))
-            return false;
-         if (!isPointOnLeftSideOfLine(point, b, c))
-            return false;
-         if (!isPointOnLeftSideOfLine(point, c, a))
-            return false;
-      }
+      if (isPointOnSideOfLine(point, a, b, sideToCheck))
+         return false;
+      if (isPointOnSideOfLine(point, b, c, sideToCheck))
+         return false;
+      if (isPointOnSideOfLine(point, c, a, sideToCheck))
+         return false;
 
       return true;
    }
 
+   /**
+    * Compute the area of a triangle defined by its three vertices: a, b, and c.
+    * No specific ordering of the vertices is required.
+    * 
+    * @param a first vertex of the triangle. Not modified.
+    * @param b second vertex of the triangle. Not modified.
+    * @param c third vertex of the triangle. Not modified.
+    * @return the are of the triangle.
+    */
    public static double computeTriangleArea(Point2d a, Point2d b, Point2d c)
    {
       return Math.abs(0.5 * (a.x * (b.y - c.y) + b.x * (c.y - a.y) + c.x * (a.y - b.y)));
    }
 
    /**
-    * Averages the 2D points in a given Array
+    * Computes the average 2D point from a given collection of 2D points.
     *
-    * @param points ArrayList
-    * @return Point2d
+    * @param points the collection of 2D points to compute the average from. Not modified.
+    * @return the computed average.
     */
-   public static Point2d averagePoint2ds(List<Point2d> points)
+   public static Point2d averagePoint2ds(Collection<Point2d> points)
    {
       Point2d totalPoint = new Point2d(0.0, 0.0);
+
       for (Point2d point : points)
       {
-         totalPoint.setX(totalPoint.getX() + point.getX());
-         totalPoint.setY(totalPoint.getY() + point.getY());
+         totalPoint.add(point);
       }
 
-      totalPoint.setX(totalPoint.getX() / points.size());
-      totalPoint.setY(totalPoint.getY() / points.size());
+      totalPoint.scale(1.0 / points.size());
 
       return totalPoint;
    }
 
    /**
-    * Averages the 3D points in an Array
+    * Computes the average 3D point from a given collection of 3D points.
     *
-    * @param points List
-    * @return Point3d
+    * @param points the collection of 3D points to compute the average from. Not modified.
+    * @return the computed average.
     */
-   public static Point3d averagePoint3ds(List<Point3d> points)
+   public static Point3d averagePoint3ds(Collection<Point3d> points)
    {
       Point3d totalPoint = new Point3d(0.0, 0.0, 0.0);
+
       for (Point3d point : points)
       {
-         totalPoint.setX(totalPoint.getX() + point.getX());
-         totalPoint.setY(totalPoint.getY() + point.getY());
-         totalPoint.setZ(totalPoint.getZ() + point.getZ());
+         totalPoint.add(point);
       }
 
-      totalPoint.setX(totalPoint.getX() / points.size());
-      totalPoint.setY(totalPoint.getY() / points.size());
-      totalPoint.setZ(totalPoint.getZ() / points.size());
+      totalPoint.scale(1.0 / points.size());
 
       return totalPoint;
    }
 
    /**
-    * Returns the average of two 3D points
+    * Returns the average of two 3D points.
     *
-    * @param a Point3d
-    * @param b Point3d
-    * @return Point3d
+    * @param a the first 3D point. Not modified.
+    * @param b the second 3D point. Not modified.
+    * @return the computed average.
     */
    public static Point3d averagePoints(Point3d a, Point3d b)
    {
@@ -305,11 +478,11 @@ public class GeometryTools
    }
 
    /**
-    * Returns the average of two 3D points
+    * Returns the average of two 3D points.
     *
-    * @param a FramePoint
-    * @param b FramePoint
-    * @param avgToPack FramePoint
+    * @param a the first 3D point. Not modified.
+    * @param b the second 3D point. Not modified.
+    * @param avgToPack the point in which the computed average is stored. Modified.
     */
    public static void averagePoints(FramePoint a, FramePoint b, FramePoint avgToPack)
    {
@@ -318,6 +491,14 @@ public class GeometryTools
       avgToPack.scale(0.5);
    }
 
+   /**
+    * Computes the orthogonal projection of a 2D point on an infinitely long 2D line defined by a 2D line segment.
+    * 
+    * @param testPoint the point to compute the projection of. Not modified.
+    * @param lineStart starting point of the line segment defining the infinite line. Not modified.
+    * @param lineEnd end point of the line segment defining the infinite line. Not modified.
+    * @return the projection on the line.
+    */
    // TODO ensure consistant with line 2D
    public static Point2d getOrthogonalProjectionOnLine(Point2d testPoint, Point2d lineStart, Point2d lineEnd)
    {
@@ -326,7 +507,13 @@ public class GeometryTools
 
       return projected;
    }
-   
+
+   /**
+    * Attempts to normalize the given 3D vector.
+    * If the vector's length falls below {@value Epsilons#ONE_TRILLIONTH}, the vector is set to (0, 0, 1).
+    *  
+    * @param vector the 3D vector to normalize. Modified.
+    */
    public static void normalizeSafelyZUp(Vector3d vector)
    {
       double distance = vector.length();
@@ -342,51 +529,90 @@ public class GeometryTools
    }
 
    /**
-    *
-    * @param point1 FramePoint
-    * @param vector1 FrameVector
-    * @param point2 FramePoint
-    * @param vector2 FrameVector
-    * @param pointOnLine1 FramePoint
-    * @param pointOnLine2 FramePoint
+    * Given two 3D infinitely long lines, this methods computes two points P &in; line1 and Q &in; lin2 such that the distance || P - Q || is the minimum distance between the two 3D lines.
+    * <a href="http://geomalgorithms.com/a07-_distance.html"> Useful link</a>.
+    * @param lineStart1 a 3D point on the first line. Not modified.
+    * @param lineDirection1 the 3D direction of the first line. Not modified.
+    * @param lineStart2 a 3D point on the second line. Not modified.
+    * @param lineDirection2 the 3D direction of the second line. Not modified.
+    * @param pointOnLine1ToPack the 3D coordinates of the point P are packed in this 3D point. Modified.
+    * @param pointOnLine2ToPack the 3D coordinates of the point Q are packed in this 3D point. Modified.
+    * @throws ReferenceFrameMismatchException if the input arguments are not expressed in the same reference frame.
     */
-   public static void getClosestPointsForTwoLines(FramePoint point1, FrameVector vector1, FramePoint point2, FrameVector vector2, FramePoint pointOnLine1,
-           FramePoint pointOnLine2)
+   public static void getClosestPointsForTwoLines(FramePoint lineStart1, FrameVector lineDirection1, FramePoint lineStart2, FrameVector lineDirection2, FramePoint pointOnLine1ToPack,
+           FramePoint pointOnLine2ToPack)
    {
-      FrameVector fromOneToTwo = new FrameVector(point1.getReferenceFrame());
-      fromOneToTwo.sub(point2, point1);
+      lineStart1.checkReferenceFrameMatch(lineDirection1);
+      lineStart2.checkReferenceFrameMatch(lineDirection2);
+      lineStart1.checkReferenceFrameMatch(lineStart2);
 
-      vector1.normalize();
-      vector2.normalize();
+      pointOnLine1ToPack.setToZero(lineStart1.getReferenceFrame());
+      pointOnLine2ToPack.setToZero(lineStart1.getReferenceFrame());
 
-      double vector1DotVector2 = vector1.dot(vector2);
+      getClosestPointsForTwoLines(lineStart1.getPoint(), lineDirection1.getVector(), lineStart2.getPoint(), lineDirection2.getVector(), pointOnLine1ToPack.getPoint(), pointOnLine2ToPack.getPoint());
+   }
+
+   /**
+    * Given two 3D infinitely long lines, this methods computes two points P &in; line1 and Q &in; lin2 such that the distance || P - Q || is the minimum distance between the two 3D lines.
+    * <a href="http://geomalgorithms.com/a07-_distance.html"> Useful link</a>.
+    * @param lineStart1 a 3D point on the first line. Not modified.
+    * @param lineDirection1 the 3D direction of the first line. Not modified.
+    * @param lineStart2 a 3D point on the second line. Not modified.
+    * @param lineDirection2 the 3D direction of the second line. Not modified.
+    * @param pointOnLine1ToPack the 3D coordinates of the point P are packed in this 3D point. Modified.
+    * @param pointOnLine2ToPack the 3D coordinates of the point Q are packed in this 3D point. Modified.
+    */
+   public static void getClosestPointsForTwoLines(Point3d lineStart1, Vector3d lineDirection1, Point3d lineStart2, Vector3d lineDirection2, Point3d pointOnLine1ToPack,
+           Point3d pointOnLine2ToPack)
+   {
+      // Switching to the notation and math described in http://geomalgorithms.com/a07-_distance.html.
+      // The line1 is defined by (P0, u) and the line2 by (Q0, v).
+      // Note: the algorithm is independent from the magnitudes of lineDirection1 and lineDirection2
+      Point3d P0 = lineStart1;
+      Vector3d u = lineDirection1;
+      Point3d Q0 = lineStart2;
+      Vector3d v = lineDirection2;
+
+      Point3d Psc = pointOnLine1ToPack;
+      Point3d Qtc = pointOnLine2ToPack;
+
+      Vector3d w0 = new Vector3d();
+      w0.sub(P0, Q0);
+      
+      double a = u.dot(u);
+      double b = u.dot(v);
+      double c = v.dot(v);
+      double d = u.dot(w0);
+      double e = v.dot(w0);
+
+      double delta = a * c - b * b;
+
+      double sc, tc;
 
       // check to see if the lines are parallel
-      if (Math.abs(vector1DotVector2) > (1.0 - EPSILON))
+      if (Math.abs(delta) <= EPSILON)
       {
-         // just return the original points
-         System.err.println("Lines are parallel");
-         pointOnLine1.set(point1);
-         pointOnLine2.set(point2);
-
-         return;
+         /*
+          * The lines are parallel, there's an infinite number of pairs,
+          * but for one chosen point on one of the lines, there's only one closest point to it on the other line.
+          * So let's chose arbitrarily a point on the line1 and calculate the point that is closest to it on the line2.
+          */
+         sc = 0.0;
+         tc = d / b;
+      }
+      else
+      {
+         sc = (b * e - c * d) / delta;
+         tc = (a * e - b * d) / delta;
       }
 
-      double lambda1 = (fromOneToTwo.dot(vector1) - fromOneToTwo.dot(vector2) * vector1DotVector2) / (1.0 - vector1DotVector2 * vector1DotVector2);
-      double lambda2 = -(fromOneToTwo.dot(vector2) - fromOneToTwo.dot(vector1) * vector1DotVector2) / (1.0 - vector1DotVector2 * vector1DotVector2);
-
-      pointOnLine1.set(vector1);
-      pointOnLine1.scale(lambda1);
-      pointOnLine1.add(point1);
-
-      pointOnLine2.set(vector2);
-      pointOnLine2.scale(lambda2);
-      pointOnLine2.add(point2);
+      Psc.scaleAdd(sc, u, P0);
+      Qtc.scaleAdd(tc, v, Q0);
    }
 
    /**
     * Locates and returns the intersection between
-    * the given line and plane
+    * the given line segment and plane
     *
     * @param pointOnPlane FramePoint
     * @param planeNormal FrameVector
@@ -394,7 +620,8 @@ public class GeometryTools
     * @param lineEnd FramePoint
     * @return FramePoint
     */
-   public static FramePoint getIntersectionBetweenLineAndPlane(FramePoint pointOnPlane, FrameVector planeNormal, FramePoint lineStart, FramePoint lineEnd)
+   public static FramePoint getIntersectionBetweenLineSegmentAndPlane(FramePoint pointOnPlane, FrameVector planeNormal, FramePoint lineStart,
+                                                                      FramePoint lineEnd)
    {
       // po = line start, p1 = line end
       // v0 = point on plane
@@ -402,62 +629,60 @@ public class GeometryTools
       // intersection point is p(s) = p0 + s*(p1 - p0)
       // scalar s = (n dot (v0 - p0))/(n dot (p1 - p0)
 
-	   if(isLineIntersectingPlane(pointOnPlane, planeNormal, lineStart, lineEnd))
-	   {
-		      planeNormal.normalize();
+      if (isLineSegmentIntersectingPlane(pointOnPlane, planeNormal, lineStart, lineEnd))
+      {
+         planeNormal.normalize();
 
-		      FrameVector line = new FrameVector(lineStart.getReferenceFrame());
-		      line.sub(lineEnd, lineStart);
+         FrameVector line = new FrameVector(lineStart.getReferenceFrame());
+         line.sub(lineEnd, lineStart);
 
-		      FrameVector fromP0toV0 = new FrameVector(pointOnPlane.getReferenceFrame());
-		      fromP0toV0.sub(pointOnPlane, lineStart);
+         FrameVector fromP0toV0 = new FrameVector(pointOnPlane.getReferenceFrame());
+         fromP0toV0.sub(pointOnPlane, lineStart);
 
-		      double numerator = planeNormal.dot(fromP0toV0);
-		      double denominator = planeNormal.dot(line);
-		      double scaleFactor = numerator / denominator;
+         double numerator = planeNormal.dot(fromP0toV0);
+         double denominator = planeNormal.dot(line);
+         double scaleFactor = numerator / denominator;
 
-		      FramePoint ret = new FramePoint(lineStart.getReferenceFrame());
-		      ret.scaleAdd(scaleFactor, line, lineStart);
+         FramePoint ret = new FramePoint(lineStart.getReferenceFrame());
+         ret.scaleAdd(scaleFactor, line, lineStart);
 
-		      if (ret.containsNaN() || ret.containsInfinity())
-		      {
-		         ret = null;
-		      }
+         if (ret.containsNaN() || ret.containsInfinity())
+         {
+            ret = null;
+         }
 
-		      return ret;
-	   }
-	   else
-	   {
-		   return null;
-	   }
+         return ret;
+      }
+      else
+      {
+         return null;
+      }
 
    }
 
-   public static boolean isLineIntersectingPlane(FramePoint pointOnPlane, FrameVector planeNormal, FramePoint lineStart, FramePoint lineEnd)
+   public static boolean isLineSegmentIntersectingPlane(FramePoint pointOnPlane, FrameVector planeNormal, FramePoint lineStart, FramePoint lineEnd)
    {
       double d = -planeNormal.getX() * pointOnPlane.getX() - planeNormal.getY() * pointOnPlane.getY() - planeNormal.getZ() * pointOnPlane.getZ();
 
-      double ansStart = planeNormal.getX() * lineStart.getX() + planeNormal.getY() * lineStart.getY()
-                        + planeNormal.getZ() * lineStart.getZ() + d;
+      double ansStart = planeNormal.getX() * lineStart.getX() + planeNormal.getY() * lineStart.getY() + planeNormal.getZ() * lineStart.getZ() + d;
 
       double ansEnd = planeNormal.getX() * lineEnd.getX() + planeNormal.getY() * lineEnd.getY() + planeNormal.getZ() * lineEnd.getZ() + d;
 
-//      System.out.println("Start: " + ansStart + ", End: " + ansEnd);
+      //      System.out.println("Start: " + ansStart + ", End: " + ansEnd);
 
-      if (((ansStart > 0) && (ansEnd < 0)) || ((ansStart< 0) && (ansEnd > 0)))
+      if (((ansStart > 0) && (ansEnd < 0)) || ((ansStart < 0) && (ansEnd > 0)))
       {
-//         System.out.println("Line is intersecting plane");
+         //         System.out.println("Line is intersecting plane");
 
          return true;
       }
       else
       {
-//          System.out.println("Line is not intersecting plane");
+         //          System.out.println("Line is not intersecting plane");
 
          return false;
       }
    }
-
 
    public static double distanceFromPointToPlane(FramePoint pointOnPlane, FrameVector planeNormal, FramePoint point)
    {

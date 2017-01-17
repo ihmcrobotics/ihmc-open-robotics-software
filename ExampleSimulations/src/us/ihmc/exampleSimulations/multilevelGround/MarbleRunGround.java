@@ -2,7 +2,7 @@ package us.ihmc.exampleSimulations.multilevelGround;
 
 import javax.vecmath.Point3d;
 
-import us.ihmc.graphics3DDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.robotics.geometry.shapes.Box3d;
 import us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObject3D;
 

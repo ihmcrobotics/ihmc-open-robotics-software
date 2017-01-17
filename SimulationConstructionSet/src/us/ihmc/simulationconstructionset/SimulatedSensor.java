@@ -1,6 +1,6 @@
 package us.ihmc.simulationconstructionset;
 
-import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
+import us.ihmc.jMonkeyEngineToolkit.Graphics3DAdapter;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 public interface SimulatedSensor {

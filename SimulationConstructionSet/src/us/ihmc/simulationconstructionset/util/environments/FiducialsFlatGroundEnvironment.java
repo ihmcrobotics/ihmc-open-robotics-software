@@ -1,6 +1,6 @@
 package us.ihmc.simulationconstructionset.util.environments;
 
-import us.ihmc.graphics3DDescription.appearance.YoAppearanceTexture;
+import us.ihmc.graphicsDescription.appearance.YoAppearanceTexture;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.shapes.Box3d;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;

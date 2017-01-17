@@ -7,12 +7,12 @@ import javax.vecmath.Vector2d;
 
 import org.junit.Test;
 
-import us.ihmc.graphics3DDescription.plotting.PlotterPoint2d;
-import us.ihmc.graphics3DDescription.plotting.artifact.LineArtifact;
-import us.ihmc.graphics3DDescription.plotting.frames.MetersReferenceFrame;
-import us.ihmc.graphics3DDescription.plotting.frames.PixelsReferenceFrame;
-import us.ihmc.graphics3DDescription.plotting.frames.PlotterFrameSpace;
-import us.ihmc.graphics3DDescription.plotting.frames.PlotterSpaceConverter;
+import us.ihmc.graphicsDescription.plotting.PlotterPoint2d;
+import us.ihmc.graphicsDescription.plotting.artifact.LineArtifact;
+import us.ihmc.graphicsDescription.plotting.frames.MetersReferenceFrame;
+import us.ihmc.graphicsDescription.plotting.frames.PixelsReferenceFrame;
+import us.ihmc.graphicsDescription.plotting.frames.PlotterFrameSpace;
+import us.ihmc.graphicsDescription.plotting.frames.PlotterSpaceConverter;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.tools.testing.JUnitTools;
