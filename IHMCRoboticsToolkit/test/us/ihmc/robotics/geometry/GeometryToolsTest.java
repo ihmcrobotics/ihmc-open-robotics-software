@@ -541,7 +541,7 @@ public class GeometryToolsTest
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
-   public void testDoLineSegmentsIntersect()
+   public void testDoLineSegmentsIntersect1()
    {
       boolean intersect = GeometryTools.doLineSegmentsIntersect(new Point2d(-1.0, 0.0), new Point2d(1.0, 0.0), new Point2d(0.0, -1.0), new Point2d(0.0, 1.0));
       assertTrue(intersect);
@@ -575,6 +575,109 @@ public class GeometryToolsTest
 
       intersect = GeometryTools.doLineSegmentsIntersect(new Point2d(-1.0, 0.0), new Point2d(1.0, 0.0), new Point2d(-1.0, 0.0), new Point2d(1.0, 0.0));
       assertTrue(intersect);
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test//(timeout = 30000)
+   public void testDoLineSegmentsIntersect2()
+   {
+      for (int i = 0; i < 100; i++)
+      {
+         Point2d lineSegmentStart1 = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
+         Point2d lineSegmentEnd1 = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
+
+         Point2d pointOnLineSegment1 = new Point2d();
+         pointOnLineSegment1.interpolate(lineSegmentStart1, lineSegmentEnd1, RandomTools.generateRandomDouble(random, 0.0, 1.0));
+
+         Vector2d lineDirection2 = RandomTools.generateRandomVector2d(random, 1.0);
+
+         Point2d lineSegmentStart2 = new Point2d();
+         Point2d lineSegmentEnd2 = new Point2d();
+
+         // Expecting intersection
+         lineSegmentStart2.scaleAdd(RandomTools.generateRandomDouble(random, 0.0, 10.0), lineDirection2, pointOnLineSegment1);
+         lineSegmentEnd2.scaleAdd(RandomTools.generateRandomDouble(random, -10.0, 0.0), lineDirection2, pointOnLineSegment1);
+         assertTrue(GeometryTools.doLineSegmentsIntersect(lineSegmentStart1, lineSegmentEnd1, lineSegmentStart2, lineSegmentEnd2));
+         assertTrue(GeometryTools.doLineSegmentsIntersect(lineSegmentEnd1, lineSegmentStart1, lineSegmentStart2, lineSegmentEnd2));
+         assertTrue(GeometryTools.doLineSegmentsIntersect(lineSegmentEnd1, lineSegmentStart1, lineSegmentEnd2, lineSegmentStart2));
+         assertTrue(GeometryTools.doLineSegmentsIntersect(lineSegmentStart1, lineSegmentEnd1, lineSegmentEnd2, lineSegmentStart2));
+
+         // Not expecting intersection
+         lineSegmentStart2.scaleAdd(RandomTools.generateRandomDouble(random, 0.0, 10.0), lineDirection2, pointOnLineSegment1);
+         lineSegmentEnd2.scaleAdd(RandomTools.generateRandomDouble(random, 0.0, 10.0), lineDirection2, pointOnLineSegment1);
+         assertFalse(GeometryTools.doLineSegmentsIntersect(lineSegmentStart1, lineSegmentEnd1, lineSegmentStart2, lineSegmentEnd2));
+         assertFalse(GeometryTools.doLineSegmentsIntersect(lineSegmentEnd1, lineSegmentStart1, lineSegmentStart2, lineSegmentEnd2));
+         assertFalse(GeometryTools.doLineSegmentsIntersect(lineSegmentEnd1, lineSegmentStart1, lineSegmentEnd2, lineSegmentStart2));
+         assertFalse(GeometryTools.doLineSegmentsIntersect(lineSegmentStart1, lineSegmentEnd1, lineSegmentEnd2, lineSegmentStart2));
+      }
+
+      // Test intersection at one of the end points
+      for (int i = 0; i < 100; i++)
+      {
+         Point2d lineSegmentStart1 = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
+         Point2d lineSegmentEnd1 = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
+
+         Point2d pointOnLineSegment1 = new Point2d(lineSegmentStart1);
+
+         Vector2d lineDirection2 = RandomTools.generateRandomVector2d(random, 1.0);
+
+         Point2d lineSegmentStart2 = new Point2d();
+         Point2d lineSegmentEnd2 = new Point2d();
+
+         // Not expecting intersection
+         lineSegmentStart2.scaleAdd(RandomTools.generateRandomDouble(random, 0.0, 10.0), lineDirection2, pointOnLineSegment1);
+         lineSegmentEnd2.scaleAdd(RandomTools.generateRandomDouble(random, -10.0, 0.0), lineDirection2, pointOnLineSegment1);
+         assertTrue(GeometryTools.doLineSegmentsIntersect(lineSegmentStart1, lineSegmentEnd1, lineSegmentStart2, lineSegmentEnd2));
+         assertTrue(GeometryTools.doLineSegmentsIntersect(lineSegmentEnd1, lineSegmentStart1, lineSegmentStart2, lineSegmentEnd2));
+         assertTrue(GeometryTools.doLineSegmentsIntersect(lineSegmentEnd1, lineSegmentStart1, lineSegmentEnd2, lineSegmentStart2));
+         assertTrue(GeometryTools.doLineSegmentsIntersect(lineSegmentStart1, lineSegmentEnd1, lineSegmentEnd2, lineSegmentStart2));
+      }
+
+      // Test with parallel/collinear line segments
+      for (int i = 0; i < 100; i++)
+      {
+         Point2d lineSegmentStart1 = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
+         Point2d lineSegmentEnd1 = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
+
+         Point2d lineSegmentStart2 = new Point2d();
+         Point2d lineSegmentEnd2 = new Point2d();
+
+         double alpha1 = RandomTools.generateRandomDouble(random, 2.0);
+         double alpha2 = RandomTools.generateRandomDouble(random, 2.0);
+
+         // Make the second line segment collinear to the first one
+         lineSegmentStart2.interpolate(lineSegmentStart1, lineSegmentEnd1, alpha1);
+         lineSegmentEnd2.interpolate(lineSegmentStart1, lineSegmentEnd1, alpha2);
+
+         if ((0.0 < alpha1 && alpha1 < 1.0) || (0.0 < alpha2 && alpha2 < 1.0) || alpha1 * alpha2 < 0.0)
+         {
+            assertTrue(GeometryTools.doLineSegmentsIntersect(lineSegmentStart1, lineSegmentEnd1, lineSegmentStart2, lineSegmentEnd2));
+            assertTrue(GeometryTools.doLineSegmentsIntersect(lineSegmentEnd1, lineSegmentStart1, lineSegmentStart2, lineSegmentEnd2));
+            assertTrue(GeometryTools.doLineSegmentsIntersect(lineSegmentEnd1, lineSegmentStart1, lineSegmentEnd2, lineSegmentStart2));
+            assertTrue(GeometryTools.doLineSegmentsIntersect(lineSegmentStart1, lineSegmentEnd1, lineSegmentEnd2, lineSegmentStart2));
+         }
+         else
+         {
+            assertFalse(GeometryTools.doLineSegmentsIntersect(lineSegmentStart1, lineSegmentEnd1, lineSegmentStart2, lineSegmentEnd2));
+            assertFalse(GeometryTools.doLineSegmentsIntersect(lineSegmentEnd1, lineSegmentStart1, lineSegmentStart2, lineSegmentEnd2));
+            assertFalse(GeometryTools.doLineSegmentsIntersect(lineSegmentEnd1, lineSegmentStart1, lineSegmentEnd2, lineSegmentStart2));
+            assertFalse(GeometryTools.doLineSegmentsIntersect(lineSegmentStart1, lineSegmentEnd1, lineSegmentEnd2, lineSegmentStart2));
+         }
+
+         // Shift the second line segment such that it becomes only parallel to the first.
+         Vector2d orthogonal = new Vector2d();
+         orthogonal.sub(lineSegmentEnd1, lineSegmentStart1);
+         orthogonal.set(-orthogonal.getY(), orthogonal.getX());
+         orthogonal.normalize();
+
+         double distance = RandomTools.generateRandomDouble(random, 1.0e-10, 10.0);
+         lineSegmentStart2.scaleAdd(distance, orthogonal, lineSegmentStart2);
+         lineSegmentEnd2.scaleAdd(distance, orthogonal, lineSegmentEnd2);
+         assertFalse(GeometryTools.doLineSegmentsIntersect(lineSegmentStart1, lineSegmentEnd1, lineSegmentStart2, lineSegmentEnd2));
+         assertFalse(GeometryTools.doLineSegmentsIntersect(lineSegmentEnd1, lineSegmentStart1, lineSegmentStart2, lineSegmentEnd2));
+         assertFalse(GeometryTools.doLineSegmentsIntersect(lineSegmentEnd1, lineSegmentStart1, lineSegmentEnd2, lineSegmentStart2));
+         assertFalse(GeometryTools.doLineSegmentsIntersect(lineSegmentStart1, lineSegmentEnd1, lineSegmentEnd2, lineSegmentStart2));
+      }
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
