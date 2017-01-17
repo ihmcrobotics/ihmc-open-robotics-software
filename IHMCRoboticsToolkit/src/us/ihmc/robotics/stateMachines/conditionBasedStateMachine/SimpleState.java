@@ -1,4 +1,4 @@
-package us.ihmc.robotics.stateMachines;
+package us.ihmc.robotics.stateMachines.conditionBasedStateMachine;
 
 public abstract class SimpleState<E extends Enum<E>> extends State<E>
 {
