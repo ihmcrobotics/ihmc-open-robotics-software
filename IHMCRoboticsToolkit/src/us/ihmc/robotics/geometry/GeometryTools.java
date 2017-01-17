@@ -612,7 +612,7 @@ public class GeometryTools
 
    /**
     * Locates and returns the intersection between
-    * the given line and plane
+    * the given line segment and plane
     *
     * @param pointOnPlane FramePoint
     * @param planeNormal FrameVector
@@ -620,7 +620,7 @@ public class GeometryTools
     * @param lineEnd FramePoint
     * @return FramePoint
     */
-   public static FramePoint getIntersectionBetweenLineAndPlane(FramePoint pointOnPlane, FrameVector planeNormal, FramePoint lineStart, FramePoint lineEnd)
+   public static FramePoint getIntersectionBetweenLineSegmentAndPlane(FramePoint pointOnPlane, FrameVector planeNormal, FramePoint lineStart, FramePoint lineEnd)
    {
       // po = line start, p1 = line end
       // v0 = point on plane
