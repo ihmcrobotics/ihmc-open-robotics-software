@@ -18,6 +18,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import us.ihmc.robotics.math.Epsilons;
 import us.ihmc.robotics.math.exceptions.UndefinedOperationException;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -1805,6 +1806,32 @@ public class GeometryToolsTest
 
          // Just an annoying case
          assertEquals(0.0, GeometryTools.computeTriangleArea(a, a, c), EPSILON);
+      }
+   }
+
+   @Test
+   public void testNormalizeSafeZUp() throws Exception
+   {
+      Vector3d actualVector;
+      Vector3d expectedVector = new Vector3d();
+
+      for (int i = 0; i < 25; i++)
+      {
+         actualVector = RandomTools.generateRandomVector(random, RandomTools.generateRandomDouble(random, Epsilons.ONE_TRILLIONTH, 10.0));
+
+         expectedVector.normalize(actualVector);
+         GeometryTools.normalizeSafelyZUp(actualVector);
+         JUnitTools.assertTuple3dEquals(expectedVector, actualVector, Epsilons.ONE_TRILLIONTH);
+
+         actualVector = RandomTools.generateRandomVector(random, 0.999 * Epsilons.ONE_TRILLIONTH);
+         expectedVector.set(0.0, 0.0, 1.0);
+         GeometryTools.normalizeSafelyZUp(actualVector);
+         JUnitTools.assertTuple3dEquals(expectedVector, actualVector, Epsilons.ONE_TRILLIONTH);
+
+         actualVector = new Vector3d();
+         expectedVector.set(0.0, 0.0, 1.0);
+         GeometryTools.normalizeSafelyZUp(actualVector);
+         JUnitTools.assertTuple3dEquals(expectedVector, actualVector, Epsilons.ONE_TRILLIONTH);
       }
    }
 
