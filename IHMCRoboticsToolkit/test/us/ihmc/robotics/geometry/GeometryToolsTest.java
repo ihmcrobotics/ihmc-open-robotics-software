@@ -1,10 +1,6 @@
 package us.ihmc.robotics.geometry;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -2272,7 +2268,8 @@ public class GeometryToolsTest
       }
    }
 
-   @Test
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @Test(timeout = 30000)
    public void testGetIntersectionBetweenLineAndPlane() throws Exception
    {
       for (int i = 0; i < 100; i++)
@@ -2311,7 +2308,8 @@ public class GeometryToolsTest
       }
    }
 
-   @Test
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @Test(timeout = 30000)
    public void testGetIntersectionBetweenLineSegmentAndPlane2() throws Exception
    {
       Point3d endPoint0 = new Point3d();
@@ -2364,6 +2362,24 @@ public class GeometryToolsTest
          actualIntersection = GeometryTools.getIntersectionBetweenLineSegmentAndPlane(pointOnPlane, planeNormal, endPoint0, endPoint1);
          assertNull(actualIntersection);
       }
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @Test(timeout = 30000)
+   public void testGetRadiusOfArc() throws Exception
+   {
+      for (int i = 0; i < 1000; i++)
+      {
+         double expectedArcRadius = RandomTools.generateRandomDouble(random, 0.1, 100.0);
+         double chordAngle = RandomTools.generateRandomDouble(random, - 3.0 * Math.PI, 3.0 * Math.PI);
+         double chordLength = 2.0 * expectedArcRadius * Math.sin(0.5 * chordAngle);
+         double actualArcRadius = GeometryTools.getRadiusOfArc(chordLength, chordAngle);
+         assertEquals(expectedArcRadius, actualArcRadius, Epsilons.ONE_TRILLIONTH);
+      }
+
+      assertTrue(Double.isNaN(GeometryTools.getRadiusOfArc(1.0, 0.0)));
+      assertTrue(Double.isNaN(GeometryTools.getRadiusOfArc(1.0, Math.PI)));
+      assertTrue(Double.isNaN(GeometryTools.getRadiusOfArc(1.0, -Math.PI)));
    }
 
    public static void main(String[] args)
