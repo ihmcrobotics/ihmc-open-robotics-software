@@ -57,8 +57,6 @@ public class LLAQuadrupedTestFactory implements QuadrupedTestFactory
    public GoalOrientedTestConductor createTestConductor() throws IOException
    {
       useStateEstimator.setDefaultValue(USE_STATE_ESTIMATOR);
-      groundContactModelType.setDefaultValue(null);
-      providedGroundProfile3D.setDefaultValue(null);
       usePushRobotController.setDefaultValue(false);
 
       FactoryTools.checkAllFactoryFieldsAreSet(this);
@@ -103,11 +101,11 @@ public class LLAQuadrupedTestFactory implements QuadrupedTestFactory
       simulationFactory.setReferenceFrames(referenceFrames);
       simulationFactory.setNetClassList(netClassList);
       simulationFactory.setControlMode(controlMode.get());
-      if (groundContactModelType.get() != null)
+      if (groundContactModelType.hasValue())
       {
          simulationFactory.setGroundContactModelType(groundContactModelType.get());
       }
-      if (providedGroundProfile3D.get() != null)
+      if (providedGroundProfile3D.hasValue())
       {
          simulationFactory.setGroundProfile3D(providedGroundProfile3D.get());
       }
