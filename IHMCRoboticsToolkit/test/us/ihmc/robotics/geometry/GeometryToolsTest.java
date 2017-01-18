@@ -2413,6 +2413,274 @@ public class GeometryToolsTest
       assertTrue(Double.isNaN(GeometryTools.getRadiusOfArc(1.0, -Math.PI)));
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @Test(timeout = 30000)
+   public void testGetRotationBasedOnNormal1() throws Exception
+   {
+      for (int i = 0; i < 100; i++)
+      {
+         Vector3d referenceNormal = RandomTools.generateRandomVector(random, RandomTools.generateRandomDouble(random, 0.0, 10.0));
+         double expectedAngle = RandomTools.generateRandomDouble(random, 0.0, Math.PI);
+         Vector3d expectedAxis = RandomTools.generateRandomOrthogonalVector3d(random, referenceNormal, true);
+         AxisAngle4d expectedAxisAngle = new AxisAngle4d(expectedAxis, expectedAngle);
+         Matrix3d rotationMatrix = new Matrix3d();
+         rotationMatrix.set(expectedAxisAngle);
+
+         Vector3d rotatedNormal = new Vector3d();
+         rotationMatrix.transform(referenceNormal, rotatedNormal);
+         rotatedNormal.scale(RandomTools.generateRandomDouble(random, 0.0, 10.0));
+
+         AxisAngle4d actualAxisAngle = new AxisAngle4d();
+         GeometryTools.getRotationBasedOnNormal(actualAxisAngle, rotatedNormal, referenceNormal);
+
+         Vector3d actualAxis = new Vector3d(actualAxisAngle.getX(), actualAxisAngle.getY(), actualAxisAngle.getZ());
+
+         assertEquals(1.0, actualAxis.length(), Epsilons.ONE_TRILLIONTH);
+         assertEquals(0.0, actualAxis.dot(referenceNormal), Epsilons.ONE_TRILLIONTH);
+         assertEquals(0.0, actualAxis.dot(rotatedNormal), Epsilons.ONE_TRILLIONTH);
+
+         assertEquals(0.0, expectedAxis.dot(referenceNormal), Epsilons.ONE_TRILLIONTH);
+         assertEquals(0.0, expectedAxis.dot(rotatedNormal), Epsilons.ONE_TRILLIONTH);
+
+         if (actualAxisAngle.getAngle() * expectedAxisAngle.getAngle() < 0.0)
+         {
+            expectedAxis.negate();
+            expectedAngle = -expectedAngle;
+            expectedAxisAngle.set(expectedAxis, expectedAngle);
+         }
+
+         try
+         {
+            assertTrue(expectedAxisAngle.epsilonEquals(actualAxisAngle, Epsilons.ONE_TRILLIONTH));
+         }
+         catch (AssertionError e)
+         {
+            throw new AssertionError("expected:\n<" + expectedAxisAngle + ">\n but was:\n<" + actualAxisAngle + ">");
+         }
+      }
+
+      // Test close to 0.0
+      for (int i = 0; i < 100; i++)
+      {
+         Vector3d referenceNormal = RandomTools.generateRandomVector(random, RandomTools.generateRandomDouble(random, 0.0, 10.0));
+         double expectedAngle = RandomTools.generateRandomDouble(random, 0.00001, 0.001);
+         if (random.nextBoolean())
+            expectedAngle = - expectedAngle;
+         Vector3d expectedAxis = RandomTools.generateRandomOrthogonalVector3d(random, referenceNormal, true);
+         AxisAngle4d expectedAxisAngle = new AxisAngle4d(expectedAxis, expectedAngle);
+         Matrix3d rotationMatrix = new Matrix3d();
+         rotationMatrix.set(expectedAxisAngle);
+
+         Vector3d rotatedNormal = new Vector3d();
+         rotationMatrix.transform(referenceNormal, rotatedNormal);
+         rotatedNormal.scale(RandomTools.generateRandomDouble(random, 0.0, 10.0));
+
+         AxisAngle4d actualAxisAngle = new AxisAngle4d();
+         GeometryTools.getRotationBasedOnNormal(actualAxisAngle, rotatedNormal, referenceNormal);
+
+         Vector3d actualAxis = new Vector3d(actualAxisAngle.getX(), actualAxisAngle.getY(), actualAxisAngle.getZ());
+
+         assertEquals(1.0, actualAxis.length(), Epsilons.ONE_TRILLIONTH);
+         // Can not be as accurate as we get closer to 0.0
+         assertEquals(0.0, actualAxis.dot(referenceNormal), Epsilons.ONE_TEN_BILLIONTH);
+         assertEquals(0.0, actualAxis.dot(rotatedNormal), Epsilons.ONE_TEN_BILLIONTH);
+
+         assertEquals(0.0, expectedAxis.dot(referenceNormal), Epsilons.ONE_TRILLIONTH);
+         assertEquals(0.0, expectedAxis.dot(rotatedNormal), Epsilons.ONE_TRILLIONTH);
+
+         if (actualAxisAngle.getAngle() * expectedAxisAngle.getAngle() < 0.0)
+         {
+            expectedAxis.negate();
+            expectedAngle = -expectedAngle;
+            expectedAxisAngle.set(expectedAxis, expectedAngle);
+         }
+
+         try
+         {
+            // Can not be as accurate as we get closer to 0.0
+            assertTrue(expectedAxisAngle.epsilonEquals(actualAxisAngle, Epsilons.ONE_TEN_BILLIONTH));
+         }
+         catch (AssertionError e)
+         {
+            throw new AssertionError("expected:\n<" + expectedAxisAngle + ">\n but was:\n<" + actualAxisAngle + ">");
+         }
+      }
+
+      // Test close to Math.PI
+      for (int i = 0; i < 100; i++)
+      {
+         Vector3d referenceNormal = RandomTools.generateRandomVector(random, RandomTools.generateRandomDouble(random, 0.0, 10.0));
+         double expectedAngle = RandomTools.generateRandomDouble(random, 0.00001, 0.001);
+         if (random.nextBoolean())
+            expectedAngle = - expectedAngle;
+         expectedAngle += Math.PI;
+         Vector3d expectedAxis = RandomTools.generateRandomOrthogonalVector3d(random, referenceNormal, true);
+         AxisAngle4d expectedAxisAngle = new AxisAngle4d(expectedAxis, expectedAngle);
+         Matrix3d rotationMatrix = new Matrix3d();
+         rotationMatrix.set(expectedAxisAngle);
+
+         Vector3d rotatedNormal = new Vector3d();
+         rotationMatrix.transform(referenceNormal, rotatedNormal);
+         rotatedNormal.scale(RandomTools.generateRandomDouble(random, 0.0, 10.0));
+
+         AxisAngle4d actualAxisAngle = new AxisAngle4d();
+         GeometryTools.getRotationBasedOnNormal(actualAxisAngle, rotatedNormal, referenceNormal);
+
+         Vector3d actualAxis = new Vector3d(actualAxisAngle.getX(), actualAxisAngle.getY(), actualAxisAngle.getZ());
+
+         assertEquals(1.0, actualAxis.length(), Epsilons.ONE_TRILLIONTH);
+         // Can not be as accurate as we get closer to Math.PI
+         assertEquals(0.0, actualAxis.dot(referenceNormal), Epsilons.ONE_TEN_BILLIONTH);
+         assertEquals(0.0, actualAxis.dot(rotatedNormal), Epsilons.ONE_TEN_BILLIONTH);
+
+         assertEquals(0.0, expectedAxis.dot(referenceNormal), Epsilons.ONE_TRILLIONTH);
+         assertEquals(0.0, expectedAxis.dot(rotatedNormal), Epsilons.ONE_TRILLIONTH);
+         if (actualAxisAngle.getAngle() * expectedAxisAngle.getAngle() < 0.0)
+         {
+            expectedAxis.negate();
+            expectedAngle = -expectedAngle;
+            expectedAxisAngle.set(expectedAxis, expectedAngle);
+         }
+         
+         if (Math.abs(expectedAxisAngle.getAngle() + actualAxisAngle.getAngle()) > 2.0 * Math.PI - 0.1)
+         {
+            // Here the sign of the axis does not matter.
+            if (expectedAxis.dot(actualAxis) < 0.0)
+               expectedAxis.negate();
+            // Can not be as accurate as we get closer to Math.PI
+            JUnitTools.assertTuple3dEquals(expectedAxis, actualAxis, Epsilons.ONE_TEN_BILLIONTH);
+         }
+         else
+         {
+            try
+            {
+               assertTrue(expectedAxisAngle.epsilonEquals(actualAxisAngle, Epsilons.ONE_TRILLIONTH));
+            }
+            catch (AssertionError e)
+            {
+               throw new AssertionError("expected:\n<" + expectedAxisAngle + ">\n but was:\n<" + actualAxisAngle + ">");
+            }
+         }
+      }
+
+      // Test exactly at 0.0
+      for (int i = 0; i < 100; i++)
+      {
+         Vector3d referenceNormal = RandomTools.generateRandomVector(random, RandomTools.generateRandomDouble(random, 0.0, 10.0));
+         Vector3d rotatedNormal = new Vector3d(referenceNormal);
+         rotatedNormal.scale(RandomTools.generateRandomDouble(random, 0.0, 10.0));
+         double expectedAngle = 0.0;
+         Vector3d expectedAxis = new Vector3d(1.0, 0.0, 0.0);
+         AxisAngle4d expectedAxisAngle = new AxisAngle4d(expectedAxis, expectedAngle);
+
+         AxisAngle4d actualAxisAngle = new AxisAngle4d();
+         GeometryTools.getRotationBasedOnNormal(actualAxisAngle, rotatedNormal, referenceNormal);
+
+         Vector3d actualAxis = new Vector3d(actualAxisAngle.getX(), actualAxisAngle.getY(), actualAxisAngle.getZ());
+
+         assertEquals(1.0, actualAxis.length(), Epsilons.ONE_TRILLIONTH);
+
+         if (actualAxisAngle.getAngle() * expectedAxisAngle.getAngle() < 0.0)
+         {
+            expectedAxis.negate();
+            expectedAngle = -expectedAngle;
+            expectedAxisAngle.set(expectedAxis, expectedAngle);
+         }
+
+         try
+         {
+            assertTrue(expectedAxisAngle.epsilonEquals(actualAxisAngle, Epsilons.ONE_TRILLIONTH));
+         }
+         catch (AssertionError e)
+         {
+            throw new AssertionError("expected:\n<" + expectedAxisAngle + ">\n but was:\n<" + actualAxisAngle + ">");
+         }
+      }
+
+      // Test exactly at Math.PI
+      for (int i = 0; i < 100; i++)
+      {
+         Vector3d referenceNormal = RandomTools.generateRandomVector(random, RandomTools.generateRandomDouble(random, 0.0, 10.0));
+         Vector3d rotatedNormal = new Vector3d();
+         rotatedNormal.negate(referenceNormal);
+         rotatedNormal.scale(RandomTools.generateRandomDouble(random, 0.0, 10.0));
+         double expectedAngle = Math.PI;
+         Vector3d expectedAxis = new Vector3d(1.0, 0.0, 0.0);
+         AxisAngle4d expectedAxisAngle = new AxisAngle4d(expectedAxis, expectedAngle);
+
+         AxisAngle4d actualAxisAngle = new AxisAngle4d();
+         GeometryTools.getRotationBasedOnNormal(actualAxisAngle, rotatedNormal, referenceNormal);
+
+         Vector3d actualAxis = new Vector3d(actualAxisAngle.getX(), actualAxisAngle.getY(), actualAxisAngle.getZ());
+
+         assertEquals(1.0, actualAxis.length(), Epsilons.ONE_TRILLIONTH);
+
+         if (actualAxisAngle.getAngle() * expectedAxisAngle.getAngle() < 0.0)
+         {
+            expectedAxis.negate();
+            expectedAngle = -expectedAngle;
+            expectedAxisAngle.set(expectedAxis, expectedAngle);
+         }
+
+         try
+         {
+            assertTrue(expectedAxisAngle.epsilonEquals(actualAxisAngle, Epsilons.ONE_TRILLIONTH));
+         }
+         catch (AssertionError e)
+         {
+            throw new AssertionError("expected:\n<" + expectedAxisAngle + ">\n but was:\n<" + actualAxisAngle + ">");
+         }
+      }
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @Test(timeout = 30000)
+   public void testGetRotationBasedOnNormal2() throws Exception
+   {
+      // Test getRotationBasedOnNormal(AxisAngle4d rotationToPack, Vector3d normalVector3d)
+      for (int i = 0; i < 100; i++)
+      {
+         Vector3d referenceNormal = new Vector3d(0.0, 0.0, 1.0);
+         double expectedAngle = RandomTools.generateRandomDouble(random, 0.0, Math.PI);
+         Vector3d expectedAxis = RandomTools.generateRandomOrthogonalVector3d(random, referenceNormal, true);
+         AxisAngle4d expectedAxisAngle = new AxisAngle4d(expectedAxis, expectedAngle);
+         Matrix3d rotationMatrix = new Matrix3d();
+         rotationMatrix.set(expectedAxisAngle);
+
+         Vector3d rotatedNormal = new Vector3d();
+         rotationMatrix.transform(referenceNormal, rotatedNormal);
+         rotatedNormal.scale(RandomTools.generateRandomDouble(random, 0.0, 10.0));
+
+         AxisAngle4d actualAxisAngle = new AxisAngle4d();
+         GeometryTools.getRotationBasedOnNormal(actualAxisAngle, rotatedNormal, referenceNormal);
+
+         Vector3d actualAxis = new Vector3d(actualAxisAngle.getX(), actualAxisAngle.getY(), actualAxisAngle.getZ());
+
+         assertEquals(1.0, actualAxis.length(), Epsilons.ONE_TRILLIONTH);
+         assertEquals(0.0, actualAxis.dot(referenceNormal), Epsilons.ONE_TRILLIONTH);
+         assertEquals(0.0, actualAxis.dot(rotatedNormal), Epsilons.ONE_TRILLIONTH);
+
+         assertEquals(0.0, expectedAxis.dot(referenceNormal), Epsilons.ONE_TRILLIONTH);
+         assertEquals(0.0, expectedAxis.dot(rotatedNormal), Epsilons.ONE_TRILLIONTH);
+
+         if (actualAxisAngle.getAngle() * expectedAxisAngle.getAngle() < 0.0)
+         {
+            expectedAxis.negate();
+            expectedAngle = -expectedAngle;
+            expectedAxisAngle.set(expectedAxis, expectedAngle);
+         }
+
+         try
+         {
+            assertTrue(expectedAxisAngle.epsilonEquals(actualAxisAngle, Epsilons.ONE_TRILLIONTH));
+         }
+         catch (AssertionError e)
+         {
+            throw new AssertionError("expected:\n<" + expectedAxisAngle + ">\n but was:\n<" + actualAxisAngle + ">");
+         }
+      }
+   }
+
    public static void main(String[] args)
    {
       String targetTests = GeometryToolsTest.class.getName();
