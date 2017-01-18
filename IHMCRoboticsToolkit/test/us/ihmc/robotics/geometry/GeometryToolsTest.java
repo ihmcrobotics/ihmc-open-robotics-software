@@ -1122,7 +1122,7 @@ public class GeometryToolsTest
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
-   public void testGetPerpendicularVectorFromLineToPoint()
+   public void testGetPerpendicularVectorFromLineToPoint1()
    {
       FramePoint point0 = new FramePoint(ReferenceFrame.getWorldFrame(), 0, 0, 0);
       FramePoint lineStart0 = new FramePoint(ReferenceFrame.getWorldFrame(), -10, 10, 0);
@@ -1159,30 +1159,34 @@ public class GeometryToolsTest
       FrameVector actualReturn1 = GeometryTools.getPerpendicularVectorFromLineToPoint(point1, lineStart1, lineEnd1, intersectionPoint1);
 
       assertTrue("Test Failed", expectedReturn1.epsilonEquals(actualReturn1, EPSILON));
+   }
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testGetPerpendicularVectorFromLineToPoint2()
+   {
+      for (int i = 0; i < 100; i++)
+      {
+         Vector3d expectedPerpendicularVector = RandomTools.generateRandomVector(random, RandomTools.generateRandomDouble(random, 0.0, 10.0));
+         Point3d expectedIntersection = RandomTools.generateRandomPoint3d(random, -10.0, 10.0);
 
-      /*
-       *  FramePoint point1 = new FramePoint(ReferenceFrame.getWorldFrame(), 4, 2, 0);
-       *  FramePoint lineStart1 = new FramePoint(ReferenceFrame.getWorldFrame(), 0, 0, 0);
-       *  FramePoint lineEnd1 = new FramePoint(ReferenceFrame.getWorldFrame(), 0, 0, 0);
-       *  FramePoint intersectionPoint1 = new FramePoint(ReferenceFrame.getWorldFrame(), 3, 3, 0);
-       *  FrameVector x1 = new FrameVector(point1.getReferenceFrame());
-       *  x1.sub(point1, intersectionPoint1);
-       *  FrameVector expectedReturn1 = x1;
-       *  FrameVector actualReturn1 = geometryTools.getPerpendicularVectorFromLineToPoint(point1, lineStart1, lineEnd1, intersectionPoint1);
-       *  assertTrue("Test Failed", expectedReturn1.epsilonEquals(actualReturn1, EPSILON));
-       *
-       * /returns zeros if point is on line
-       *  FramePoint point2 = new FramePoint(ReferenceFrame.getWorldFrame(), 5, 0, 0);
-       *  FramePoint lineStart2 = new FramePoint(ReferenceFrame.getWorldFrame(), 0, 0, 0);
-       *  FramePoint lineEnd2 = new FramePoint(ReferenceFrame.getWorldFrame(), 10, 0, 0);
-       *  FramePoint intersectionPoint2 = new FramePoint(ReferenceFrame.getWorldFrame(), 5, 0, 0);
-       *  FrameVector x2 = new FrameVector(point2.getReferenceFrame());
-       *  x2.sub(point2, intersectionPoint2);
-       *  FrameVector expectedReturn2 = x2;
-       *  FrameVector actualReturn2 = geometryTools.getPerpendicularVectorFromLineToPoint(point2, lineStart2, lineEnd2, intersectionPoint2);
-       *  assertEquals("return value", expectedReturn2, actualReturn2);
-       */
+         Vector3d lineDirection = RandomTools.generateRandomOrthogonalVector3d(random, expectedPerpendicularVector, true);
+         Point3d firstPointOnLine = new Point3d();
+         firstPointOnLine.scaleAdd(RandomTools.generateRandomDouble(random, 10.0), lineDirection, expectedIntersection);
+         Point3d secondPointOnLine = new Point3d();
+         secondPointOnLine.scaleAdd(RandomTools.generateRandomDouble(random, 10.0), lineDirection, expectedIntersection);
+
+         Point3d point = new Point3d();
+         point.add(expectedIntersection, expectedPerpendicularVector);
+
+         Point3d actualIntersection = new Point3d();
+         Vector3d actualPerpendicularVector = GeometryTools.getPerpendicularVectorFromLineToPoint(point, firstPointOnLine, secondPointOnLine, actualIntersection);
+         JUnitTools.assertTuple3dEquals(expectedIntersection, actualIntersection, Epsilons.ONE_TRILLIONTH);
+         JUnitTools.assertTuple3dEquals(expectedPerpendicularVector, actualPerpendicularVector, Epsilons.ONE_TRILLIONTH);
+
+         actualPerpendicularVector = GeometryTools.getPerpendicularVectorFromLineToPoint(point, firstPointOnLine, secondPointOnLine, null);
+         JUnitTools.assertTuple3dEquals(expectedPerpendicularVector, actualPerpendicularVector, Epsilons.ONE_TRILLIONTH);
+      }
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
