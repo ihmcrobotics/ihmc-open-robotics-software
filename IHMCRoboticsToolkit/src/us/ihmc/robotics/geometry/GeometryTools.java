@@ -628,7 +628,7 @@ public class GeometryTools
     * @param lineDirection2 the 3D direction of the second line. Not modified.
     * @param closestPointOnLine1ToPack the 3D coordinates of the point P are packed in this 3D point. Modified.
     * @param closestPointOnLine2ToPack the 3D coordinates of the point Q are packed in this 3D point. Modified.
-    * @throws ReferenceFrameMismatchException if the input arguments are not expressed in the same reference frame.
+    * @throws ReferenceFrameMismatchException if the input arguments are not expressed in the same reference frame, except for {@code closestPointOnLine1ToPack} and  {@code closestPointOnLine2ToPack}.
     */
    public static void getClosestPointsForTwoLines(FramePoint pointOnLine1, FrameVector lineDirection1, FramePoint pointOnLine2, FrameVector lineDirection2, FramePoint closestPointOnLine1ToPack,
            FramePoint closestPointOnLine2ToPack)
@@ -1709,7 +1709,7 @@ public class GeometryTools
     * @param thirdPointOnPlane third point on the plane. Not modified.
     * @param normalToPack the vector in which the result is stored. Modified.
     * @return whether the plane normal is properly determined.
-    * @throws ReferenceFrameMismatchException if the arguments are not expressed in the same reference frame.
+    * @throws ReferenceFrameMismatchException if the arguments are not expressed in the same reference frame, except for {@code normalToPack}.
     */
    public static boolean getPlaneNormalGivenThreePoints(FramePoint firstPointOnPlane, FramePoint secondPointOnPlane, FramePoint thirdPointOnPlane, FrameVector normalToPack)
    {
@@ -1787,39 +1787,164 @@ public class GeometryTools
    }
 
    /**
-    * Returns the Perpendicular Vector that is formed
-    * between a given Line (defined by two points) and a given point
-    *
-    * Returns zeros if point is located on the line
-    *
-    * @param point FramePoint
-    * @param lineStart FramePoint
-    * @param lineEnd FramePoint
-    * @param intersectionPoint FramePoint
-    * @return FrameVector
+    * Computes the perpendicular defined by an infinitely long 3D line (defined by two 3D points) and a 3D point.
+    * To do so, the orthogonal projection of the {@code point} on line is first computed.
+    * The perpendicular vector is computed as follows: {@code perpendicularVector = point - orthogonalProjection},
+    * resulting in a vector going from the computed projection to the given {@code point}
+    * with a length equal to the distance between the point and the line.
+    * <p>
+    * Edge cases:
+    * <ul>
+    *    <li> when the distance between the two points defining the line is below {@value Epsilons#ONE_TRILLIONTH}, the method fails and returns {@code null}.
+    * </ul>
+    * </p>
+    * <p>
+    * WARNING: This method generates garbage.
+    * </p>
+    * 
+    * @param point the 3D point towards which the perpendicular vector should be pointing at. Not modified.
+    * @param firstPointOnLine a first point on the line. Not modified.
+    * @param secondPointOnLine a second point on the line. Not modified.
+    * @param orthogonalProjectionToPack a 3D point in which the projection of {@code point} onto the line is stored. Modified. Can be {@code null}.
+    * @return the vector perpendicular to the line and pointing to the {@code point}, or {@code null} when the method fails.
+    * @throws ReferenceFrameMismatchException if the arguments are not expressed in the same reference frame, except for {@code orthogonalProjectionToPack}.
     */
-
-   // TODO ensure consistant with lineSegment2D
-   public static FrameVector getPerpendicularVectorFromLineToPoint(FramePoint point, FramePoint lineStart, FramePoint lineEnd, FramePoint intersectionPoint)
+   public static FrameVector getPerpendicularVectorFromLineToPoint(FramePoint point, FramePoint firstPointOnLine, FramePoint secondPointOnLine, FramePoint orthogonalProjectionToPack)
    {
-      FrameVector lineDirection = new FrameVector(lineEnd);
-      lineDirection.sub(lineStart);
-      lineDirection.normalize();
+      FrameVector perpendicularVector = new FrameVector();
 
-      FrameVector startToPoint = new FrameVector(point);
-      startToPoint.sub(lineStart);
+      boolean success = getPerpendicularVectorFromLineToPoint(point, firstPointOnLine, secondPointOnLine, orthogonalProjectionToPack, perpendicularVector);
+      if (!success)
+         return null;
+      else
+         return perpendicularVector;
+   }
 
-      double distanceOnLine = lineDirection.dot(startToPoint);
+   /**
+    * Computes the perpendicular defined by an infinitely long 3D line (defined by two 3D points) and a 3D point.
+    * To do so, the orthogonal projection of the {@code point} on line is first computed.
+    * The perpendicular vector is computed as follows: {@code perpendicularVector = point - orthogonalProjection},
+    * resulting in a vector going from the computed projection to the given {@code point}
+    * with a length equal to the distance between the point and the line.
+    * <p>
+    * Edge cases:
+    * <ul>
+    *    <li> when the distance between the two points defining the line is below {@value Epsilons#ONE_TRILLIONTH}, the method fails and returns {@code false}.
+    * </ul>
+    * </p>
+    * 
+    * @param point the 3D point towards which the perpendicular vector should be pointing at. Not modified.
+    * @param firstPointOnLine a first point on the line. Not modified.
+    * @param secondPointOnLine a second point on the line. Not modified.
+    * @param orthogonalProjectionToPack a 3D point in which the projection of {@code point} onto the line is stored. Modified. Can be {@code null}.
+    * @param perpendicularVectorToPack a 3D vector in which the vector perpendicular to the line and pointing to the {@code point} is stored. Modified. Can NOT be {@code null}.
+    * @return {@code true} if the method succeeded, {@code false} otherwise.
+    * @throws ReferenceFrameMismatchException if the arguments are not expressed in the same reference frame, except for {@code orthogonalProjectionToPack} and {@code perpendicularVectorToPack}.
+    */
+   public static boolean getPerpendicularVectorFromLineToPoint(FramePoint point, FramePoint firstPointOnLine, FramePoint secondPointOnLine, FramePoint orthogonalProjectionToPack, FrameVector perpendicularVectorToPack)
+   {
+      point.checkReferenceFrameMatch(firstPointOnLine);
+      point.checkReferenceFrameMatch(secondPointOnLine);
+      perpendicularVectorToPack.setToZero(point.getReferenceFrame());
 
-//    FramePoint intersectionPoint = new FramePoint(lineStart.getReferenceFrame());
-      intersectionPoint.scaleAdd(distanceOnLine, lineDirection, lineStart);
+      if (orthogonalProjectionToPack == null)
+      {
+         return getPerpendicularVectorFromLineToPoint(point.getPoint(), firstPointOnLine.getPoint(), secondPointOnLine.getPoint(), null, perpendicularVectorToPack.getVector());
+      }
+      else
+      {
+         orthogonalProjectionToPack.setToZero(point.getReferenceFrame());
+         return getPerpendicularVectorFromLineToPoint(point.getPoint(), firstPointOnLine.getPoint(), secondPointOnLine.getPoint(), orthogonalProjectionToPack.getPoint(), perpendicularVectorToPack.getVector());
+      }
+   }
 
-//    System.out.println("intersectionPoint=" + intersectionPoint);
+   /**
+    * Computes the perpendicular defined by an infinitely long 3D line (defined by two 3D points) and a 3D point.
+    * To do so, the orthogonal projection of the {@code point} on line is first computed.
+    * The perpendicular vector is computed as follows: {@code perpendicularVector = point - orthogonalProjection},
+    * resulting in a vector going from the computed projection to the given {@code point}
+    * with a length equal to the distance between the point and the line.
+    * <p>
+    * Edge cases:
+    * <ul>
+    *    <li> when the distance between the two points defining the line is below {@value Epsilons#ONE_TRILLIONTH}, the method fails and returns {@code null}.
+    * </ul>
+    * </p>
+    * <p>
+    * WARNING: This method generates garbage.
+    * </p>
+    * 
+    * @param point the 3D point towards which the perpendicular vector should be pointing at. Not modified.
+    * @param firstPointOnLine a first point on the line. Not modified.
+    * @param secondPointOnLine a second point on the line. Not modified.
+    * @param orthogonalProjectionToPack a 3D point in which the projection of {@code point} onto the line is stored. Modified. Can be {@code null}.
+    * @return the vector perpendicular to the line and pointing to the {@code point}, or {@code null} when the method fails.
+    */
+   public static Vector3d getPerpendicularVectorFromLineToPoint(Point3d point, Point3d firstPointOnLine, Point3d secondPointOnLine, Point3d orthogonalProjectionToPack)
+   {
+      Vector3d perpendicularVector = new Vector3d();
+      boolean success = getPerpendicularVectorFromLineToPoint(point, firstPointOnLine, secondPointOnLine, orthogonalProjectionToPack, perpendicularVector);
+      if (!success)
+         return null;
+      else
+         return perpendicularVector;
+   }
 
-      FrameVector lineToReturn = new FrameVector(point);
-      lineToReturn.sub(intersectionPoint);
+   /**
+    * Computes the perpendicular defined by an infinitely long 3D line (defined by two 3D points) and a 3D point.
+    * To do so, the orthogonal projection of the {@code point} on line is first computed.
+    * The perpendicular vector is computed as follows: {@code perpendicularVector = point - orthogonalProjection},
+    * resulting in a vector going from the computed projection to the given {@code point}
+    * with a length equal to the distance between the point and the line.
+    * <p>
+    * Edge cases:
+    * <ul>
+    *    <li> when the distance between the two points defining the line is below {@value Epsilons#ONE_TRILLIONTH}, the method fails and returns {@code false}.
+    * </ul>
+    * </p>
+    * 
+    * @param point the 3D point towards which the perpendicular vector should be pointing at. Not modified.
+    * @param firstPointOnLine a first point on the line. Not modified.
+    * @param secondPointOnLine a second point on the line. Not modified.
+    * @param orthogonalProjectionToPack a 3D point in which the projection of {@code point} onto the line is stored. Modified. Can be {@code null}.
+    * @param perpendicularVectorToPack a 3D vector in which the vector perpendicular to the line and pointing to the {@code point} is stored. Modified. Can NOT be {@code null}.
+    * @return {@code true} if the method succeeded, {@code false} otherwise.
+    */
+   public static boolean getPerpendicularVectorFromLineToPoint(Point3d point, Point3d firstPointOnLine, Point3d secondPointOnLine, Point3d orthogonalProjectionToPack, Vector3d perpendicularVectorToPack)
+   {
+      double lineDirectionX = secondPointOnLine.getX() - firstPointOnLine.getX();
+      double lineDirectionY = secondPointOnLine.getY() - firstPointOnLine.getY();
+      double lineDirectionZ = secondPointOnLine.getZ() - firstPointOnLine.getZ();
+      double lineLength = 1.0 / Math.sqrt(lineDirectionX * lineDirectionX + lineDirectionY * lineDirectionY + lineDirectionZ * lineDirectionZ);
 
-      return lineToReturn;
+      if (lineLength < Epsilons.ONE_TRILLIONTH)
+         return false;
+
+      lineDirectionX *= lineLength;
+      lineDirectionY *= lineLength;
+      lineDirectionZ *= lineLength;
+
+      double dx = point.getX() - firstPointOnLine.getX();
+      double dy = point.getY() - firstPointOnLine.getY();
+      double dz = point.getZ() - firstPointOnLine.getZ();
+
+      double distanceFromFirstPointOnLine = lineDirectionX * dx + lineDirectionY * dy + lineDirectionZ * dz;
+
+      if (orthogonalProjectionToPack != null)
+      {
+         orthogonalProjectionToPack.set(lineDirectionX, lineDirectionY, lineDirectionZ);
+         orthogonalProjectionToPack.scaleAdd(distanceFromFirstPointOnLine, orthogonalProjectionToPack, firstPointOnLine);
+         perpendicularVectorToPack.sub(point, orthogonalProjectionToPack);
+      }
+      else
+      {
+         perpendicularVectorToPack.set(lineDirectionX, lineDirectionY, lineDirectionZ);
+         perpendicularVectorToPack.scale(distanceFromFirstPointOnLine);
+         perpendicularVectorToPack.add(firstPointOnLine);
+         perpendicularVectorToPack.negate();
+         perpendicularVectorToPack.add(point);
+      }
+      return true;
    }
 
    /**
