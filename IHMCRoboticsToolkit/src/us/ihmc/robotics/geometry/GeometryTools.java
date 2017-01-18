@@ -2005,42 +2005,67 @@ public class GeometryTools
    }
 
    /**
-    * Computes vertex B of an isosceles triangle ABC with equal legs AB and BC.
-    *
-    * Returns the solution that corresponds with the triangle in which rotation of leg AB to leg BC is counterclockwise about vertex B.
-    *
-    * @param baseVertexA
-    * @param baseVertexC
-    * @param trianglePlaneNormal
-    * @param ccwAngleAboutNormalAtTopVertex
-    * @param topVertexBToPack
+    * Assuming an isosceles triangle defined by three vertices A, B, and C, with |AB| == |BC|, this methods computes the missing vertex B
+    * given the vertices A and C, the normal of the triangle, the angle ABC that is equal to the angle at B from the the leg BA to the leg BC.
+    * <a href="https://en.wikipedia.org/wiki/Isosceles_triangle"> Useful link</a>.
+    * <p>
+    * WARNING: This method generates garbage.
+    * </p>
+    * 
+    * @param baseVertexA the first base vertex of the isosceles triangle ABC. Not modified.
+    * @param baseVertexC the second base vertex of the isosceles triangle ABC. Not modified.
+    * @param trianglePlaneNormal  the normal of the plane on which is lying. Not modified.
+    * @param ccwAngleAboutNormalAtTopVertex the angle at B from the the leg BA to the leg BC.
+    * @param topVertexBToPack the missing vertex B. Modified.
+    * @throws ReferenceFrameMismatchException if the arguments are not expressed in the same reference frame, except for {@code topVertexBToPack}.
     */
    public static void getTopVertexOfIsoscelesTriangle(FramePoint baseVertexA, FramePoint baseVertexC, FrameVector trianglePlaneNormal,
          double ccwAngleAboutNormalAtTopVertex, FramePoint topVertexBToPack)
    {
-      ReferenceFrame commonFrame = baseVertexA.referenceFrame;
+      ReferenceFrame commonFrame = baseVertexA.getReferenceFrame();
       baseVertexC.checkReferenceFrameMatch(commonFrame);
       trianglePlaneNormal.checkReferenceFrameMatch(commonFrame);
+      topVertexBToPack.setToZero(commonFrame);
 
       getTopVertexOfIsoscelesTriangle(baseVertexA.getPoint(), baseVertexC.getPoint(), trianglePlaneNormal.getVector(),
             ccwAngleAboutNormalAtTopVertex, topVertexBToPack.getPoint());
    }
 
-
+   /**
+    * Assuming an isosceles triangle defined by three vertices A, B, and C, with |AB| == |BC|, this methods computes the missing vertex B
+    * given the vertices A and C, the normal of the triangle, the angle ABC that is equal to the angle at B from the the leg BA to the leg BC.
+    * <a href="https://en.wikipedia.org/wiki/Isosceles_triangle"> Useful link</a>.
+    * 
+    * @param baseVertexA the first base vertex of the isosceles triangle ABC. Not modified.
+    * @param baseVertexC the second base vertex of the isosceles triangle ABC. Not modified.
+    * @param trianglePlaneNormal  the normal of the plane on which is lying. Not modified.
+    * @param ccwAngleAboutNormalAtTopVertex the angle at B from the the leg BA to the leg BC.
+    * @param topVertexBToPack the missing vertex B. Modified.
+    */
    public static void getTopVertexOfIsoscelesTriangle(Point3d baseVertexA, Point3d baseVertexC, Vector3d trianglePlaneNormal,
          double ccwAngleAboutNormalAtTopVertex, Point3d topVertexBToPack)
    {
-      Vector3d baseEdgeAC = new Vector3d();
-      baseEdgeAC.sub(baseVertexC, baseVertexA);
+      double baseEdgeACx = baseVertexC.getX() - baseVertexA.getX();
+      double baseEdgeACy = baseVertexC.getY() - baseVertexA.getY();
+      double baseEdgeACz = baseVertexC.getZ() - baseVertexA.getZ();
+      double baseEdgeACLength = Math.sqrt(baseEdgeACx * baseEdgeACx + baseEdgeACy * baseEdgeACy + baseEdgeACz * baseEdgeACz);
 
-      double legLengthABorCB = getRadiusOfArc(baseEdgeAC.length(), ccwAngleAboutNormalAtTopVertex);
-      double lengthOfBisectorOfBase = pythagorasGetCathetus(legLengthABorCB, 0.5 * baseEdgeAC.length());
+      double legLengthABorCB = getRadiusOfArc(baseEdgeACLength, ccwAngleAboutNormalAtTopVertex);
+      double lengthOfBisectorOfBase = pythagorasGetCathetus(legLengthABorCB, 0.5 * baseEdgeACLength);
 
-      Vector3d perpendicularBisector = new Vector3d();
-      getPerpendicularToLine(baseEdgeAC, trianglePlaneNormal, lengthOfBisectorOfBase, perpendicularBisector);
+      double perpendicularBisectorX = trianglePlaneNormal.getY() * baseEdgeACz - trianglePlaneNormal.getZ() * baseEdgeACy;
+      double perpendicularBisectorY = trianglePlaneNormal.getZ() * baseEdgeACx - trianglePlaneNormal.getX() * baseEdgeACz;
+      double perpendicularBisectorZ = trianglePlaneNormal.getX() * baseEdgeACy - trianglePlaneNormal.getY() * baseEdgeACx;
+      double scale = lengthOfBisectorOfBase;
+      scale /= Math.sqrt(perpendicularBisectorX * perpendicularBisectorX + perpendicularBisectorY * perpendicularBisectorY + perpendicularBisectorZ * perpendicularBisectorZ);
+      perpendicularBisectorX *= scale;
+      perpendicularBisectorY *= scale;
+      perpendicularBisectorZ *= scale;
 
       topVertexBToPack.interpolate(baseVertexA, baseVertexC, 0.5);
-      topVertexBToPack.add(perpendicularBisector);
+      topVertexBToPack.setX(topVertexBToPack.getX() + perpendicularBisectorX);
+      topVertexBToPack.setY(topVertexBToPack.getY() + perpendicularBisectorY);
+      topVertexBToPack.setZ(topVertexBToPack.getZ() + perpendicularBisectorZ);
    }
 
    /**
@@ -2064,31 +2089,6 @@ public class GeometryTools
       tuple.setX(x1 < x2 ? MathTools.clipToMinMax(tuple.getX(), x1, x2) : MathTools.clipToMinMax(tuple.getX(), x2, x1));
       tuple.setY(y1 < y2 ? MathTools.clipToMinMax(tuple.getY(), y1, y2) : MathTools.clipToMinMax(tuple.getY(), y2, y1));
       tuple.setZ(z1 < z2 ? MathTools.clipToMinMax(tuple.getZ(), z1, z2) : MathTools.clipToMinMax(tuple.getZ(), z2, z1));
-   }
-
-   /**
-    * Computes a vector of desired length that is perpendicular to a line.  Computed vector is in the plane defined by the specified normal vector.
-    * Vector points to the left of the line, when the line points upwards.
-    *
-    * @param lineToBisect
-    * @param planeNormal
-    * @param bisectorLengthDesired
-    * @param perpendicularVec
-    */
-   public static void getPerpendicularToLine(FrameVector line, FrameVector planeNormal, double bisectorLengthDesired, FrameVector perpendicularVec)
-   {
-      ReferenceFrame commonFrame = line.referenceFrame;
-      planeNormal.checkReferenceFrameMatch(commonFrame);
-
-      getPerpendicularToLine(line.getVector(), planeNormal.getVector(), bisectorLengthDesired, perpendicularVec.getVector());
-   }
-
-   public static void getPerpendicularToLine(Vector3d line, Vector3d planeNormal, double bisectorLengthDesired, Vector3d perpendicularVec)
-   {
-      perpendicularVec.set(0.0, 0.0, 0.0);
-      perpendicularVec.cross(planeNormal, line);
-      perpendicularVec.scale(1.0 / perpendicularVec.length());
-      perpendicularVec.scale(bisectorLengthDesired);
    }
 
    // TODO ensure consistant with lineSegment2D

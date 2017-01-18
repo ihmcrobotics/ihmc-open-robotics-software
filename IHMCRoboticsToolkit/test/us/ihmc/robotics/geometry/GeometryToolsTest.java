@@ -1,6 +1,10 @@
 package us.ihmc.robotics.geometry;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -1373,7 +1377,7 @@ public class GeometryToolsTest
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
-   public void testGetTopVertexOfIsoscelesTriangle()
+   public void testGetTopVertexOfIsoscelesTriangle1()
    {
       ReferenceFrame frame = ReferenceFrame.getWorldFrame();
 
@@ -1410,33 +1414,32 @@ public class GeometryToolsTest
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
-   public void testGetPerpendicularToLine()
+   public void testGetTopVertexOfIsoscelesTriangle2()
    {
-      ReferenceFrame frame = ReferenceFrame.getWorldFrame();
+      for (int i = 0; i < 100; i++)
+      {
+         Point3d expectedB = RandomTools.generateRandomPoint3d(random, -10.0, 10.0);
+         Point3d a = RandomTools.generateRandomPoint3d(random, -10.0, 10.0);
+         Vector3d ba = new Vector3d();
+         ba.sub(a, expectedB);
 
-      FramePoint lineStart = new FramePoint(frame);
-      FramePoint lineEnd = new FramePoint(frame);
+         double abcAngle = RandomTools.generateRandomDouble(random, 0.0, Math.PI / 2.0);
 
-      FrameVector lineStartToEnd = new FrameVector(frame);
-      FrameVector planeNormal = new FrameVector(frame);
-      FramePoint bisectorEnd = new FramePoint(frame);
+         Vector3d triangleNormal = RandomTools.generateRandomOrthogonalVector3d(random, ba, true);
+         AxisAngle4d abcAxisAngle = new AxisAngle4d(triangleNormal, abcAngle);
+         Matrix3d abcRotationMatrix = new Matrix3d();
+         abcRotationMatrix.set(abcAxisAngle);
+         Vector3d bc = new Vector3d();
+         abcRotationMatrix.transform(ba, bc);
 
-      FrameVector bisectorComputed = new FrameVector(frame);
+         Point3d c = new Point3d();
+         c.add(bc, expectedB);
 
-      double bisectorLengthDesired = 1.5;
-
-      planeNormal.setIncludingFrame(frame, 0.0, 0.0, 1.0);
-      lineStart.setIncludingFrame(frame, 0.0, -1.0, 0.0);
-      lineEnd.setIncludingFrame(frame, 0.0, 1.0, 0.0);
-      lineStartToEnd.sub(lineEnd, lineStart);
-      bisectorEnd.setIncludingFrame(frame, -bisectorLengthDesired, 0.0, 0.0);
-
-      GeometryTools.getPerpendicularToLine(lineStartToEnd, planeNormal, bisectorLengthDesired, bisectorComputed);
-      FramePoint bisectorEndComputed = FramePoint.getMidPoint(lineStart, lineEnd);
-      bisectorEndComputed.add(bisectorComputed);
-
-      String errorMsg = "Computed bisector endpoint: " + bisectorEndComputed + "\n does not match actual bisector endpoint: " + bisectorEnd;
-      assertEquals(errorMsg, 0.0, bisectorEnd.distance(bisectorEndComputed), 1e-9);
+         Point3d actualB = new Point3d();
+         GeometryTools.getTopVertexOfIsoscelesTriangle(a, c, triangleNormal, abcAngle, actualB);
+         JUnitTools.assertTuple3dEquals(expectedB, actualB, Epsilons.ONE_TRILLIONTH);
+         assertEquals(abcAngle, ba.angle(bc), Epsilons.ONE_TRILLIONTH);
+      }
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
