@@ -5,6 +5,7 @@ import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector2d;
 
+import georegression.misc.test.GeometryUnitTest;
 import us.ihmc.robotics.geometry.transformables.TransformablePoint2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -329,143 +330,14 @@ public class LineSegment2d implements Geometry2d<LineSegment2d>
    @Override
    public Point2d intersectionWith(LineSegment2d secondLineSegment2d)
    {
-      Point2d returnPoint2d = new Point2d();
-      
-      intersectionWith(secondLineSegment2d, returnPoint2d);
-
-      if (Double.isNaN(returnPoint2d.getX()) || Double.isNaN(returnPoint2d.getY()))
-      {
-         return null;
-      }
-      else
-      {
-         return returnPoint2d;
-      }
+      return GeometryTools.getIntersectionBetweenTwoLineSegments(endpoints[0], endpoints[1], secondLineSegment2d.endpoints[0], secondLineSegment2d.endpoints[1]);
    }
    
-   public void intersectionWith(LineSegment2d lineSegment, Point2d intersectionToPack)
+   public boolean intersectionWith(LineSegment2d secondLineSegment2d, Point2d intersectionToPack)
    {
-      intersectionToPack.set(intersectionWithLineSegment(lineSegment.getFirstEndpointX(), lineSegment.getFirstEndpointY(),
-                                                         lineSegment.getSecondEndpointX(), lineSegment.getSecondEndpointY()));
+      return GeometryTools.getIntersectionBetweenTwoLineSegments(endpoints[0], endpoints[1], secondLineSegment2d.endpoints[0], secondLineSegment2d.endpoints[1], intersectionToPack);
    }
    
-   private Point2d intersectionWithLineSegment(double x0, double y0, double x1, double y1)
-   {
-      double vx0 = endpoints[1].getX() - endpoints[0].getX();
-      double vy0 = endpoints[1].getY() - endpoints[0].getY();
-
-      double vx1 = x1 - x0;
-      double vy1 = y1 - y0;
-
-      GeometryTools.intersection(endpoints[0].getX(), endpoints[0].getY(), vx0, vy0, x0, y0, vx1, vy1, tempAlphaBeta);
-      if (Double.isNaN(tempAlphaBeta[0]))
-      {
-         if (endpoints[0].getX() == x0 && endpoints[0].getY() == y0)
-         {
-            Vector2d v1 = tempVector2dOne;
-            v1.set(endpoints[0].getX() - endpoints[1].getX(), endpoints[0].getY() - endpoints[1].getY());
-            Vector2d v2 = tempVector2dTwo;
-            v2.set(x0 - x1, y0 - y1);
-            double length1 = v1.length();
-
-            v1.add(v2);
-
-            double length2 = v1.length();
-
-            // if other points go in opposit directions
-            // System.out.println("A " + length1 + " " + length2);
-            if (length1 > length2)
-            {
-               tempPoint2d.set(endpoints[0].getX(), endpoints[0].getY());
-               return tempPoint2d;
-            }
-         }
-         else if (endpoints[0].getX() == x1 && endpoints[0].getY() == y1)
-         {
-            Vector2d v1 = tempVector2dOne;
-            v1.set(endpoints[0].getX() - endpoints[1].getX(), endpoints[0].getY() - endpoints[1].getY());
-            Vector2d v2 = tempVector2dTwo;
-            v2.set(x1 - x0, y1 - y0);
-            double length1 = v1.length();
-
-            v1.add(v2);
-
-            double length2 = v1.length();
-
-            // if other points go in opposite directions
-            // System.out.println("B " + length1 + " " + length2);
-            if (length1 > length2)
-            {
-               tempPoint2d.set(endpoints[0].getX(), endpoints[0].getY());
-               return tempPoint2d;
-            }
-         }
-         else if (endpoints[1].getX() == x0 && endpoints[1].getY() == y0)
-         {
-            Vector2d v1 = tempVector2dOne;
-            v1.set(endpoints[1].getX() - endpoints[0].getX(), endpoints[1].getY() - endpoints[0].getY());
-            Vector2d v2 = tempVector2dTwo;
-            v2.set(x0 - x1, y0 - y1);
-            double length1 = v1.length();
-
-            v1.add(v2);
-
-            double length2 = v1.length();
-
-            // if other points go in opposite directions
-            // System.out.println("C " + length1 + " " + length2);
-            if (length1 > length2)
-            {
-               tempPoint2d.set(endpoints[1].getX(), endpoints[1].getY());
-               return tempPoint2d;
-            }
-         }
-         else if (endpoints[1].getX() == x1 && endpoints[1].getY() == y1)
-         {
-            Vector2d v1 = tempVector2dOne;
-            v1.set(endpoints[1].getX() - endpoints[0].getX(), endpoints[1].getY() - endpoints[0].getY());
-            Vector2d v2 = tempVector2dTwo;
-            v2.set(x1 - x0, y1 - y0);
-            double length1 = v1.length();
-
-            v1.add(v2);
-
-            double length2 = v1.length();
-
-            // if other points go in opposite directions
-            // System.out.println("D " + length1 + " " + length2);
-            if (length1 > length2)
-            {
-               tempPoint2d.set(endpoints[0].getX(), endpoints[0].getY());
-               return tempPoint2d;
-            }
-         }
-
-         // should check to see if they share a common endpoint
-         // if endpoints are the same check that non matching end points point in opposite directions
-
-         tempPoint2d.set(Double.NaN, Double.NaN);
-         return tempPoint2d;
-      }
-
-      double alpha = tempAlphaBeta[0];
-      double beta = tempAlphaBeta[1];
-
-      if ((alpha < 0.0) || (alpha > 1.0))
-      {
-         tempPoint2d.set(Double.NaN, Double.NaN);
-         return tempPoint2d;
-      }
-      if ((beta < 0.0) || (beta > 1.0))
-      {
-         tempPoint2d.set(Double.NaN, Double.NaN);
-         return tempPoint2d;
-      }
-
-      tempPoint2d.set(endpoints[0].getX() + vx0 * tempAlphaBeta[0], endpoints[0].getY() + vy0 * tempAlphaBeta[0]);
-      return tempPoint2d;
-   }
-
    @Override
    public Point2d intersectionWith(Line2d line2d)
    {

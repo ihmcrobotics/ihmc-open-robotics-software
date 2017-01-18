@@ -758,12 +758,12 @@ public class GeometryToolsTest
       for (int i = 0; i < 100; i++)
       {
          Point2d pointOnLine1 = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
-         Vector2d lineDirection1 = RandomTools.generateRandomVector2d(random, 1.0);
+         Vector2d lineDirection1 = RandomTools.generateRandomVector2d(random, 10.0);
 
          Point2d expectedIntersection = new Point2d();
          expectedIntersection.scaleAdd(RandomTools.generateRandomDouble(random, 10.0), lineDirection1, pointOnLine1);
 
-         Vector2d lineDirection2 = RandomTools.generateRandomVector2d(random, 1.0);
+         Vector2d lineDirection2 = RandomTools.generateRandomVector2d(random, 10.0);
          Point2d pointOnLine2 = new Point2d(expectedIntersection);
 
          Point2d actualIntersection = GeometryTools.getIntersectionBetweenTwoLines(pointOnLine1, lineDirection1, pointOnLine2, lineDirection2);
@@ -778,7 +778,7 @@ public class GeometryToolsTest
       for (int i = 0; i < 100; i++)
       {
          Point2d pointOnLine1 = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
-         Vector2d lineDirection1 = RandomTools.generateRandomVector2d(random, 1.0);
+         Vector2d lineDirection1 = RandomTools.generateRandomVector2d(random, 10.0);
 
          Vector2d lineDirection2 = new Vector2d(lineDirection1);
          if (random.nextBoolean())
@@ -797,7 +797,7 @@ public class GeometryToolsTest
       for (int i = 0; i < 100; i++)
       {
          Point2d pointOnLine1 = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
-         Vector2d lineDirection1 = RandomTools.generateRandomVector2d(random, 1.0);
+         Vector2d lineDirection1 = RandomTools.generateRandomVector2d(random, 10.0);
 
          Point2d expectedIntersection = new Point2d();
          expectedIntersection.set(pointOnLine1);
@@ -812,6 +812,150 @@ public class GeometryToolsTest
          actualIntersection = GeometryTools.getIntersectionBetweenTwoLines(pointOnLine1, lineDirection1, pointOnLine2, lineDirection2);
          JUnitTools.assertTuple2dEquals(expectedIntersection, actualIntersection, epsilon);
       }
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testGetIntersectionBetweenTwoLineSegments()
+   {
+      Random random = new Random(3242L);
+
+      for (int i = 0; i < 100; i++)
+      {
+         Point2d lineSegmentStart1 = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
+         Point2d lineSegmentEnd1 = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
+
+         Point2d expectedIntersection = new Point2d();
+         expectedIntersection.interpolate(lineSegmentStart1, lineSegmentEnd1, RandomTools.generateRandomDouble(random, 0.0, 1.0));
+
+         Vector2d lineDirection2 = RandomTools.generateRandomVector2d(random, 1.0);
+
+         Point2d lineSegmentStart2 = new Point2d();
+         Point2d lineSegmentEnd2 = new Point2d();
+
+         // Expecting intersection
+         lineSegmentStart2.scaleAdd(RandomTools.generateRandomDouble(random, 0.0, 10.0), lineDirection2, expectedIntersection);
+         lineSegmentEnd2.scaleAdd(RandomTools.generateRandomDouble(random, -10.0, 0.0), lineDirection2, expectedIntersection);
+         assertAllCombinationsOfTwoLineSegmentsIntersection(expectedIntersection, lineSegmentStart1, lineSegmentEnd1, lineSegmentStart2, lineSegmentEnd2);
+
+         // Not expecting intersection
+         lineSegmentStart2.scaleAdd(RandomTools.generateRandomDouble(random, 0.0, 10.0), lineDirection2, expectedIntersection);
+         lineSegmentEnd2.scaleAdd(RandomTools.generateRandomDouble(random, 0.0, 10.0), lineDirection2, expectedIntersection);
+         assertOnlyExistenceOfTwoLineSegmentsIntersectionAllCombinations(false, lineSegmentStart1, lineSegmentEnd1, lineSegmentStart2, lineSegmentEnd2);
+      }
+
+      // Test intersection at one of the end points
+      for (int i = 0; i < 100; i++)
+      {
+         Point2d lineSegmentStart1 = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
+         Point2d lineSegmentEnd1 = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
+
+         Point2d expectedIntersection = new Point2d(lineSegmentStart1);
+
+         Vector2d lineDirection2 = RandomTools.generateRandomVector2d(random, 1.0);
+
+         Point2d lineSegmentStart2 = new Point2d();
+         Point2d lineSegmentEnd2 = new Point2d();
+
+         // Not expecting intersection
+         lineSegmentStart2.scaleAdd(RandomTools.generateRandomDouble(random, 0.0, 10.0), lineDirection2, expectedIntersection);
+         lineSegmentEnd2.scaleAdd(RandomTools.generateRandomDouble(random, -10.0, 0.0), lineDirection2, expectedIntersection);
+         assertAllCombinationsOfTwoLineSegmentsIntersection(expectedIntersection, lineSegmentStart1, lineSegmentEnd1, lineSegmentStart2, lineSegmentEnd2);
+      }
+
+      // Test with parallel/collinear line segments
+      for (int i = 0; i < 100; i++)
+      {
+         Point2d lineSegmentStart1 = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
+         Point2d lineSegmentEnd1 = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
+
+         Point2d lineSegmentStart2 = new Point2d();
+         Point2d lineSegmentEnd2 = new Point2d();
+
+         double alpha1 = RandomTools.generateRandomDouble(random, 2.0);
+         double alpha2 = RandomTools.generateRandomDouble(random, 2.0);
+
+         // Make the second line segment collinear to the first one
+         lineSegmentStart2.interpolate(lineSegmentStart1, lineSegmentEnd1, alpha1);
+         lineSegmentEnd2.interpolate(lineSegmentStart1, lineSegmentEnd1, alpha2);
+
+         if ((0.0 < alpha1 && alpha1 < 1.0) || (0.0 < alpha2 && alpha2 < 1.0) || alpha1 * alpha2 < 0.0)
+         {
+            assertOnlyExistenceOfTwoLineSegmentsIntersectionAllCombinations(true, lineSegmentStart1, lineSegmentEnd1, lineSegmentStart2, lineSegmentEnd2);
+         }
+         else
+         {
+            assertOnlyExistenceOfTwoLineSegmentsIntersectionAllCombinations(false, lineSegmentStart1, lineSegmentEnd1, lineSegmentStart2, lineSegmentEnd2);
+         }
+
+         // Shift the second line segment such that it becomes only parallel to the first.
+         Vector2d orthogonal = new Vector2d();
+         orthogonal.sub(lineSegmentEnd1, lineSegmentStart1);
+         orthogonal.set(-orthogonal.getY(), orthogonal.getX());
+         orthogonal.normalize();
+
+         double distance = RandomTools.generateRandomDouble(random, 1.0e-10, 10.0);
+         lineSegmentStart2.scaleAdd(distance, orthogonal, lineSegmentStart2);
+         lineSegmentEnd2.scaleAdd(distance, orthogonal, lineSegmentEnd2);
+         assertOnlyExistenceOfTwoLineSegmentsIntersectionAllCombinations(false, lineSegmentStart1, lineSegmentEnd1, lineSegmentStart2, lineSegmentEnd2);
+      }
+   }
+
+   private void assertOnlyExistenceOfTwoLineSegmentsIntersectionAllCombinations(boolean intersectionExist, Point2d lineSegmentStart1, Point2d lineSegmentEnd1, Point2d lineSegmentStart2, Point2d lineSegmentEnd2)
+   {
+      boolean success;
+      Point2d actualIntersection = new Point2d();
+
+      success = GeometryTools.getIntersectionBetweenTwoLineSegments(lineSegmentStart1, lineSegmentEnd1, lineSegmentStart2, lineSegmentEnd2, actualIntersection);
+      assertTrue(success == intersectionExist);
+      success = GeometryTools.getIntersectionBetweenTwoLineSegments(lineSegmentStart1, lineSegmentEnd1, lineSegmentEnd2, lineSegmentStart2, actualIntersection);
+      assertTrue(success == intersectionExist);
+      success = GeometryTools.getIntersectionBetweenTwoLineSegments(lineSegmentEnd1, lineSegmentStart1, lineSegmentStart2, lineSegmentEnd2, actualIntersection);
+      assertTrue(success == intersectionExist);
+      success = GeometryTools.getIntersectionBetweenTwoLineSegments(lineSegmentEnd1, lineSegmentStart1, lineSegmentEnd2, lineSegmentStart2, actualIntersection);
+      assertTrue(success == intersectionExist);
+
+      success = GeometryTools.getIntersectionBetweenTwoLineSegments(lineSegmentStart2, lineSegmentEnd2, lineSegmentStart1, lineSegmentEnd1, actualIntersection);
+      assertTrue(success == intersectionExist);
+      success = GeometryTools.getIntersectionBetweenTwoLineSegments(lineSegmentStart2, lineSegmentEnd2, lineSegmentEnd1, lineSegmentStart1, actualIntersection);
+      assertTrue(success == intersectionExist);
+      success = GeometryTools.getIntersectionBetweenTwoLineSegments(lineSegmentEnd2, lineSegmentStart2, lineSegmentStart1, lineSegmentEnd1, actualIntersection);
+      assertTrue(success == intersectionExist);
+      success = GeometryTools.getIntersectionBetweenTwoLineSegments(lineSegmentEnd2, lineSegmentStart2, lineSegmentEnd1, lineSegmentStart1, actualIntersection);
+      assertTrue(success == intersectionExist);
+   }
+
+   private void assertAllCombinationsOfTwoLineSegmentsIntersection(Point2d expectedIntersection, Point2d lineSegmentStart1, Point2d lineSegmentEnd1, Point2d lineSegmentStart2, Point2d lineSegmentEnd2)
+   {
+      double epsilon = Epsilons.ONE_TRILLIONTH;
+      boolean success;
+      Point2d actualIntersection = new Point2d();
+
+      success = GeometryTools.getIntersectionBetweenTwoLineSegments(lineSegmentStart1, lineSegmentEnd1, lineSegmentStart2, lineSegmentEnd2, actualIntersection);
+      assertTrue(success);
+      JUnitTools.assertTuple2dEquals(expectedIntersection, actualIntersection, epsilon);
+      success = GeometryTools.getIntersectionBetweenTwoLineSegments(lineSegmentStart1, lineSegmentEnd1, lineSegmentEnd2, lineSegmentStart2, actualIntersection);
+      assertTrue(success);
+      JUnitTools.assertTuple2dEquals(expectedIntersection, actualIntersection, epsilon);
+      success = GeometryTools.getIntersectionBetweenTwoLineSegments(lineSegmentEnd1, lineSegmentStart1, lineSegmentStart2, lineSegmentEnd2, actualIntersection);
+      assertTrue(success);
+      JUnitTools.assertTuple2dEquals(expectedIntersection, actualIntersection, epsilon);
+      success = GeometryTools.getIntersectionBetweenTwoLineSegments(lineSegmentEnd1, lineSegmentStart1, lineSegmentEnd2, lineSegmentStart2, actualIntersection);
+      assertTrue(success);
+      JUnitTools.assertTuple2dEquals(expectedIntersection, actualIntersection, epsilon);
+
+      success = GeometryTools.getIntersectionBetweenTwoLineSegments(lineSegmentStart2, lineSegmentEnd2, lineSegmentStart1, lineSegmentEnd1, actualIntersection);
+      assertTrue(success);
+      JUnitTools.assertTuple2dEquals(expectedIntersection, actualIntersection, epsilon);
+      success = GeometryTools.getIntersectionBetweenTwoLineSegments(lineSegmentStart2, lineSegmentEnd2, lineSegmentEnd1, lineSegmentStart1, actualIntersection);
+      assertTrue(success);
+      JUnitTools.assertTuple2dEquals(expectedIntersection, actualIntersection, epsilon);
+      success = GeometryTools.getIntersectionBetweenTwoLineSegments(lineSegmentEnd2, lineSegmentStart2, lineSegmentStart1, lineSegmentEnd1, actualIntersection);
+      assertTrue(success);
+      JUnitTools.assertTuple2dEquals(expectedIntersection, actualIntersection, epsilon);
+      success = GeometryTools.getIntersectionBetweenTwoLineSegments(lineSegmentEnd2, lineSegmentStart2, lineSegmentEnd1, lineSegmentStart1, actualIntersection);
+      assertTrue(success);
+      JUnitTools.assertTuple2dEquals(expectedIntersection, actualIntersection, epsilon);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
