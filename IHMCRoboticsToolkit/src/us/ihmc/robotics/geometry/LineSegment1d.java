@@ -48,11 +48,13 @@ public class LineSegment1d
       return new LineSegment1d(intersectionMin, intersectionMax);
    }
 
+   // FIXME Is missing the case when the other is longer than this line segment
    public boolean isOverlappingInclusive(LineSegment1d other)
    {
       return isBetweenEndpointsInclusive(other.endpoint1) || isBetweenEndpointsInclusive(other.endpoint2);
    }
 
+   // FIXME Is missing the case when the other is longer than this line segment
    public boolean isOverlappingExclusive(LineSegment1d other)
    {
       return isBetweenEndpointsExclusive(other.endpoint1) || isBetweenEndpointsExclusive(other.endpoint2);
