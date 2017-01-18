@@ -173,6 +173,8 @@ public abstract class AvatarSwingWithWaypointsTest implements MultiRobotTestInte
       min.sub(epsilon);
       max.add(epsilon);
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(new BoundingBox3d(min, max));
+
+      drcSimulationTestHelper.createVideo(getSimpleRobotName(), 2);
    }
 
    public void testSwingWithWaypointsRotated() throws SimulationExceededMaximumTimeException
