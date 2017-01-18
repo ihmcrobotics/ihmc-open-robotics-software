@@ -960,6 +960,147 @@ public class GeometryToolsTest
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
+   public void testGetIntersectionBetweenLineAndLineSegment()
+   {
+      double epsilon = Epsilons.ONE_TRILLIONTH;
+      Random random = new Random(23423L);
+      Point2d actualIntersection = new Point2d();
+      boolean success;
+
+      for (int i = 0; i < 100; i++)
+      {
+         Point2d lineSegmentStart = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
+         Point2d lineSegmentEnd = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
+
+         Point2d expectedIntersection = new Point2d();
+         expectedIntersection.interpolate(lineSegmentStart, lineSegmentEnd, RandomTools.generateRandomDouble(random, 0.0, 1.0));
+
+         Point2d pointOnLine = new Point2d(expectedIntersection);
+         Vector2d lineDirection = RandomTools.generateRandomVector2d(random, 1.0);
+
+         // Expecting intersection
+         success = GeometryTools.getIntersectionBetweenLineAndLineSegment(pointOnLine, lineDirection, lineSegmentStart, lineSegmentEnd, actualIntersection);
+         assertTrue(success);
+         JUnitTools.assertTuple2dEquals(expectedIntersection, actualIntersection, epsilon);
+
+         success = GeometryTools.getIntersectionBetweenLineAndLineSegment(pointOnLine, lineDirection, lineSegmentEnd, lineSegmentStart, actualIntersection);
+         assertTrue(success);
+         JUnitTools.assertTuple2dEquals(expectedIntersection, actualIntersection, epsilon);
+
+         pointOnLine.scaleAdd(RandomTools.generateRandomDouble(random, 0.0, 10.0), lineDirection, expectedIntersection);
+         success = GeometryTools.getIntersectionBetweenLineAndLineSegment(pointOnLine, lineDirection, lineSegmentStart, lineSegmentEnd, actualIntersection);
+         assertTrue(success);
+         JUnitTools.assertTuple2dEquals(expectedIntersection, actualIntersection, epsilon);
+
+         success = GeometryTools.getIntersectionBetweenLineAndLineSegment(pointOnLine, lineDirection, lineSegmentEnd, lineSegmentStart, actualIntersection);
+         assertTrue(success);
+         JUnitTools.assertTuple2dEquals(expectedIntersection, actualIntersection, epsilon);
+      }
+
+      // Make the intersection happen outside the line segment
+      for (int i = 0; i < 100; i++)
+      {
+         Point2d lineSegmentStart = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
+         Point2d lineSegmentEnd = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
+         
+         Point2d pointOnLine = new Point2d();
+         Vector2d lineDirection = RandomTools.generateRandomVector2d(random, 1.0);
+
+         Point2d lineLineIntersection = new Point2d();
+         lineLineIntersection.interpolate(lineSegmentStart, lineSegmentEnd, RandomTools.generateRandomDouble(random, 1.0, 2.0));
+         pointOnLine.scaleAdd(RandomTools.generateRandomDouble(random, 0.0, 10.0), lineDirection, lineLineIntersection);
+         success = GeometryTools.getIntersectionBetweenLineAndLineSegment(pointOnLine, lineDirection, lineSegmentStart, lineSegmentEnd, actualIntersection);
+         assertFalse(success);
+
+         success = GeometryTools.getIntersectionBetweenLineAndLineSegment(pointOnLine, lineDirection, lineSegmentEnd, lineSegmentStart, actualIntersection);
+         assertFalse(success);
+
+         lineLineIntersection.interpolate(lineSegmentStart, lineSegmentEnd, RandomTools.generateRandomDouble(random, -1.0, 0.0));
+         pointOnLine.scaleAdd(RandomTools.generateRandomDouble(random, 0.0, 10.0), lineDirection, lineLineIntersection);
+         success = GeometryTools.getIntersectionBetweenLineAndLineSegment(pointOnLine, lineDirection, lineSegmentStart, lineSegmentEnd, actualIntersection);
+         assertFalse(success);
+
+         success = GeometryTools.getIntersectionBetweenLineAndLineSegment(pointOnLine, lineDirection, lineSegmentEnd, lineSegmentStart, actualIntersection);
+         assertFalse(success);
+      }
+
+      // Make the intersection happen on each end point of the line segment
+      for (int i = 0; i < 100; i++)
+      {
+         Point2d lineSegmentStart = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
+         Point2d lineSegmentEnd = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
+
+         Point2d pointOnLine = new Point2d();
+         Vector2d lineDirection = RandomTools.generateRandomVector2d(random, 1.0);
+
+         Point2d expectedIntersection = new Point2d();
+         expectedIntersection.set(lineSegmentStart);
+         pointOnLine.scaleAdd(RandomTools.generateRandomDouble(random, 0.0, 10.0), lineDirection, expectedIntersection);
+         success = GeometryTools.getIntersectionBetweenLineAndLineSegment(pointOnLine, lineDirection, lineSegmentStart, lineSegmentEnd, actualIntersection);
+         assertTrue(success);
+         JUnitTools.assertTuple2dEquals(expectedIntersection, actualIntersection, epsilon);
+
+         success = GeometryTools.getIntersectionBetweenLineAndLineSegment(pointOnLine, lineDirection, lineSegmentEnd, lineSegmentStart, actualIntersection);
+         assertTrue(success);
+         JUnitTools.assertTuple2dEquals(expectedIntersection, actualIntersection, epsilon);
+
+         expectedIntersection.set(lineSegmentEnd);
+         pointOnLine.scaleAdd(RandomTools.generateRandomDouble(random, 0.0, 10.0), lineDirection, expectedIntersection);
+         success = GeometryTools.getIntersectionBetweenLineAndLineSegment(pointOnLine, lineDirection, lineSegmentStart, lineSegmentEnd, actualIntersection);
+         assertTrue(success);
+         JUnitTools.assertTuple2dEquals(expectedIntersection, actualIntersection, epsilon);
+
+         success = GeometryTools.getIntersectionBetweenLineAndLineSegment(pointOnLine, lineDirection, lineSegmentEnd, lineSegmentStart, actualIntersection);
+         assertTrue(success);
+         JUnitTools.assertTuple2dEquals(expectedIntersection, actualIntersection, epsilon);
+      }
+
+      // Make the line segment and the line parallel not collinear.
+      for (int i = 0; i < 100; i++)
+      {
+         Point2d lineSegmentStart = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
+         Point2d lineSegmentEnd = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
+         
+         Point2d pointOnLine = new Point2d(lineSegmentStart);
+         Vector2d lineDirection = new Vector2d();
+         lineDirection.sub(lineSegmentEnd, lineSegmentStart);
+         lineDirection.normalize();
+         if (random.nextBoolean())
+            lineDirection.negate();
+
+         Vector2d orthogonal = new Vector2d(-lineDirection.getY(), lineDirection.getY());
+
+         pointOnLine.scaleAdd(RandomTools.generateRandomDouble(random, 0.0, 10.0), orthogonal, pointOnLine);
+         pointOnLine.scaleAdd(RandomTools.generateRandomDouble(random, 0.0, 10.0), lineDirection, pointOnLine);
+         success = GeometryTools.getIntersectionBetweenLineAndLineSegment(pointOnLine, lineDirection, lineSegmentStart, lineSegmentEnd, actualIntersection);
+         assertFalse(success);
+      }
+
+      // Make the line segment and the line collinear.
+      for (int i = 0; i < 100; i++)
+      {
+         Point2d lineSegmentStart = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
+         Point2d lineSegmentEnd = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
+         
+         Point2d pointOnLine = new Point2d(lineSegmentStart);
+         Vector2d lineDirection = new Vector2d();
+         lineDirection.sub(lineSegmentEnd, lineSegmentStart);
+         lineDirection.normalize();
+         if (random.nextBoolean())
+            lineDirection.negate();
+
+         pointOnLine.scaleAdd(RandomTools.generateRandomDouble(random, 0.0, 10.0), lineDirection, pointOnLine);
+         success = GeometryTools.getIntersectionBetweenLineAndLineSegment(pointOnLine, lineDirection, lineSegmentStart, lineSegmentEnd, actualIntersection);
+         assertTrue(success);
+         JUnitTools.assertTuple2dEquals(lineSegmentStart, actualIntersection, epsilon);
+         success = GeometryTools.getIntersectionBetweenLineAndLineSegment(pointOnLine, lineDirection, lineSegmentEnd, lineSegmentStart, actualIntersection);
+         assertTrue(success);
+         JUnitTools.assertTuple2dEquals(lineSegmentEnd, actualIntersection, epsilon);
+      }
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testGetNormalToPlane()
    {
       Point3d a = new Point3d(0, 0, 0);

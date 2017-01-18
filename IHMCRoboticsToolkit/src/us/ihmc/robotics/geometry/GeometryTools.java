@@ -1526,6 +1526,146 @@ public class GeometryTools
    }
 
    /**
+    * Computes the intersection between an infinitely long 2D line (defined by a 2D point and a 2D direction) and a 2D line segment (defined by its two 2D end points).
+    * <p>
+    * Edge cases:
+    * <ul>
+    *    <li> When the line and the line segment are parallel but not collinear, they do not intersect, this method returns {@code null}.
+    *    <li> When the line and the line segment are collinear, they are assumed to intersect at {@code lineSegmentStart}.
+    *    <li> When the line intersects the line segment at one of its end points, this method returns that same end point.
+    * </ul>
+    * </p>
+    * <p>
+    * WARNING: This method generates garbage.
+    * </p>
+    * 
+    * @param pointOnLine a point located on the line. Not modified.
+    * @param lineDirection the line direction. Not modified.
+    * @param lineSegmentStart the first end point of the line segment. Not modified.
+    * @param lineSegmentEnd the second end point of the line segment. Not modified.
+    * @param intersectionToPack the 2D point in which the result is stored. Modified.
+    * @return the 2D point of intersection if it exist, {@code null} otherwise.
+    */
+   public static Point2d getIntersectionBetweenLineAndLineSegment(Point2d pointOnLine, Vector2d lineDirection, Point2d lineSegmentStart, Point2d lineSegmentEnd)
+   {
+      Point2d intersection = new Point2d();
+      boolean success = getIntersectionBetweenLineAndLineSegment(pointOnLine, lineDirection, lineSegmentStart, lineSegmentEnd, intersection);
+      if (!success)
+         return null;
+      else
+         return intersection;
+   }
+
+   /**
+    * Computes the intersection between an infinitely long 2D line (defined by a 2D point and a 2D direction) and a 2D line segment (defined by its two 2D end points).
+    * <p>
+    * Edge cases:
+    * <ul>
+    *    <li> When the line and the line segment are parallel but not collinear, they do not intersect.
+    *    <li> When the line and the line segment are collinear, they are assumed to intersect at {@code lineSegmentStart}.
+    *    <li> When the line intersects the line segment at one of its end points, this method returns true and the end point is the intersection.
+    * </ul>
+    * </p>
+    * 
+    * @param pointOnLine a point located on the line. Not modified.
+    * @param lineDirection the line direction. Not modified.
+    * @param lineSegmentStart the first end point of the line segment. Not modified.
+    * @param lineSegmentEnd the second end point of the line segment. Not modified.
+    * @param intersectionToPack the 2D point in which the result is stored. Modified.
+    * @return {@code true} if the line intersects the line segment, {@code false} otherwise.
+    */
+   public static boolean getIntersectionBetweenLineAndLineSegment(Point2d pointOnLine, Vector2d lineDirection, Point2d lineSegmentStart, Point2d lineSegmentEnd,
+                                                                  Point2d intersectionToPack)
+   {
+      return getIntersectionBetweenLineAndLineSegment(pointOnLine.getX(), pointOnLine.getY(), lineDirection.getX(), lineDirection.getY(),
+                                                      lineSegmentStart.getX(), lineSegmentStart.getY(), lineSegmentEnd.getX(), lineSegmentEnd.getY(),
+                                                      intersectionToPack);
+   }
+
+   /**
+    * Computes the intersection between an infinitely long 2D line (defined by a 2D point and a 2D direction) and a 2D line segment (defined by its two 2D end points).
+    * <p>
+    * Edge cases:
+    * <ul>
+    *    <li> When the line and the line segment are parallel but not collinear, they do not intersect.
+    *    <li> When the line and the line segment are collinear, they are assumed to intersect at {@code lineSegmentStart}.
+    *    <li> When the line intersects the line segment at one of its end points, this method returns true and the end point is the intersection.
+    * </ul>
+    * </p>
+    * 
+    * @param pointOnLineX x-coordinate of a point located on the line.
+    * @param pointOnLineX y-coordinate of a point located on the line.
+    * @param lineDirectionX x-component of the line direction.
+    * @param lineDirectionY y-component of the line direction.
+    * @param lineSegmentStartX x-coordinate of the first end point of the line segment.
+    * @param lineSegmentStartY y-coordinate of the first end point of the line segment.
+    * @param lineSegmentEndX x-coordinate of the second end point of the line segment.
+    * @param lineSegmentEndY y-coordinate of the second end point of the line segment.
+    * @param intersectionToPack the 2D point in which the result is stored. Modified.
+    * @return {@code true} if the line intersects the line segment, {@code false} otherwise.
+    */
+   public static boolean getIntersectionBetweenLineAndLineSegment(double pointOnLineX, double pointOnLineY, double lineDirectionX, double lineDirectionY,
+                                                                  double lineSegmentStartX, double lineSegmentStartY, double lineSegmentEndX,
+                                                                  double lineSegmentEndY, Point2d intersectionToPack)
+   {
+      double lineSegmentDirectionX = lineSegmentEndX - lineSegmentStartX;
+      double lineSegmentDirectionY = lineSegmentEndY - lineSegmentStartY;
+
+      //      We solve for x the problem of the form: A * x = b
+      //            A      *     x     =      b
+      //      / lineDirectionX -lineSegmentDirectionX \   / alpha \   / lineSegmentStartX - pointOnLineX \
+      //      |                                       | * |       | = |                                  |
+      //      \ lineDirectionY -lineSegmentDirectionY /   \ beta  /   \ lineSegmentStartY - pointOnLineY /
+      //
+      // Only one coefficient of the pair {alpha, beta} is needed to find the coordinates of the intersection.
+      // By using beta, it is possible to also determine if the intersection is between the line segment end points: 0 <= beta <= 1.
+
+      double determinant = -lineDirectionX * lineSegmentDirectionY + lineDirectionY * lineSegmentDirectionX; //(A[0][0] * A[1][1]) - (A[1][0] * A[0][1]);
+      double dx = lineSegmentStartX - pointOnLineX;
+      double dy = lineSegmentStartY - pointOnLineY;
+
+      double epsilon = 1.0E-12;
+      if (Math.abs(determinant) < epsilon)
+      { // The line and the line segment are parallel
+         // Check if they are collinear
+         double cross = dx * lineDirectionY - dy * lineDirectionX;
+         if (Math.abs(cross) < epsilon)
+         {
+            /*
+             *  The line and the line segment are collinear.
+             *  There's an infinite number of intersection.
+             *  Let's just set the result to lineSegmentStart such that it at least belongs to the line segment.
+             */
+            intersectionToPack.set(lineSegmentStartX, lineSegmentStartY);
+            return true;
+         }
+         else
+         {
+            return false;
+         }
+      }
+      else
+      {
+         double oneOverDeterminant = 1.0 / determinant;
+         double AInverse10 = oneOverDeterminant * -lineDirectionY; //-A[1][0];
+         double AInverse11 = oneOverDeterminant * lineDirectionX; // A[0][0];
+
+         double beta = AInverse10 * dx + AInverse11 * dy;// AInverse10 * b[0] + AInverse11 * b[1];
+
+         if (0.0 - epsilon < beta && beta < 1.0 + epsilon)
+         {
+            beta = MathTools.clipToMinMax(beta, 0.0, 1.0);
+            intersectionToPack.setX(lineSegmentStartX + beta * lineSegmentDirectionX);
+            intersectionToPack.setY(lineSegmentStartY + beta * lineSegmentDirectionY);
+            return true;
+         }
+         else
+         {
+            return false;
+         }
+      }
+   }
+   /**
     * Finds the intersection point between two lines.
     * First line starts at (firstPointX, firstPointY) and has direction vector (firstVectorX, firstVectorY).
     * The second line starts at (secondPointX, secondPointY) and has direction vector (secondVectorX, secondVectorY).
