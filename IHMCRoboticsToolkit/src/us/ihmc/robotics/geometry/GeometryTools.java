@@ -121,7 +121,7 @@ public class GeometryTools
     * Returns the minimum distance between a 2D point and an infinitely long 2D line defined by two points.
     * <p>
     * WARNING: the 3D arguments are projected onto the XY-plane to perform the actual computation in 2D.
-    * <p>
+    * </p>
     * <p>
     * Edge cases:
     * <ul>
@@ -1948,23 +1948,57 @@ public class GeometryTools
    }
 
    /**
-    * Not garbage free.
-    *
-    * @deprecated Use {@link #getPerpendicularVector(Vector2d, Vector2d)}
+    * Computes the vector perpendicular to the given {@code vector} such that:
+    * <ul>
+    *    <li> {@code vector.dot(perpendicularVector) == 0.0}.
+    *    <li> {@code vector.angle(perpendicularVector) == Math.PI / 2.0}.
+    * </ul>
+    * <p>
+    * WARNING: This method generates garbage.
+    * </p>
+    * 
+    * @param vector the vector to compute the perpendicular of. Not modified.
+    * @return the perpendicular vector.
     */
    public static Vector2d getPerpendicularVector(Vector2d vector)
    {
       Vector2d perpendicularVector = new Vector2d();
       getPerpendicularVector(perpendicularVector, vector);
 
-      return perpendicularVector;
+      return new Vector2d(-vector.getY(), vector.getX());
    }
 
+   /**
+    * Computes the vector perpendicular to the given {@code vector} such that:
+    * <ul>
+    *    <li> {@code vector.dot(perpendicularVector) == 0.0}.
+    *    <li> {@code vector.angle(perpendicularVector) == Math.PI / 2.0}.
+    * </ul>
+    * 
+    * @param perpendicularVectorToPack a 2D vector in which the perpendicular vector is stored. Modified.
+    * @param vector the vector to compute the perpendicular of. Not modified.
+    */
+   // FIXME reorder arguments.
    public static void getPerpendicularVector(Vector2d perpendicularVectorToPack, Vector2d vector)
    {
       perpendicularVectorToPack.set(-vector.getY(), vector.getX());
    }
 
+   /**
+    * Computes the 2D vector perpendicular to the given 2D {@code vector} such that:
+    * <ul>
+    *    <li> {@code vector2d.dot(perpendicularVector2d) == 0.0}.
+    *    <li> {@code vector2d.angle(perpendicularVector2d) == Math.PI / 2.0}.
+    * </ul>
+    * <p>
+    * WARNING: the 3D arguments are projected onto the XY-plane to perform the actual computation in 2D.
+    * </p>
+    * 
+    * @param perpendicularVectorToPack a vector in which the x and y components of the 2D perpendicular vector are stored. Modified.
+    * @param vector the vector to compute in the xy-plane the perpendicular of. Not modified.
+    */
+   // FIXME this is just bad.
+   // FIXME reorder arguments.
    public static void getPerpendicularVector2d(FrameVector perpendicularVectorToPack, FrameVector vector)
    {
       perpendicularVectorToPack.set(-vector.getY(), vector.getX(), perpendicularVectorToPack.getZ());
