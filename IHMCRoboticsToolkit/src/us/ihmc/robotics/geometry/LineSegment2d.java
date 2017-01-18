@@ -392,7 +392,7 @@ public class LineSegment2d implements Geometry2d<LineSegment2d>
 
             double length2 = v1.length();
 
-            // if other points go in opposit directions
+            // if other points go in opposite directions
             // System.out.println("B " + length1 + " " + length2);
             if (length1 > length2)
             {
@@ -412,7 +412,7 @@ public class LineSegment2d implements Geometry2d<LineSegment2d>
 
             double length2 = v1.length();
 
-            // if other points go in opposit directions
+            // if other points go in opposite directions
             // System.out.println("C " + length1 + " " + length2);
             if (length1 > length2)
             {
@@ -432,7 +432,7 @@ public class LineSegment2d implements Geometry2d<LineSegment2d>
 
             double length2 = v1.length();
 
-            // if other points go in opposit directions
+            // if other points go in opposite directions
             // System.out.println("D " + length1 + " " + length2);
             if (length1 > length2)
             {
@@ -441,8 +441,8 @@ public class LineSegment2d implements Geometry2d<LineSegment2d>
             }
          }
 
-         // should check to see if they shair a common endpoint
-         // if endpoints are the same check that non matching end points point in opposit directions
+         // should check to see if they share a common endpoint
+         // if endpoints are the same check that non matching end points point in opposite directions
 
          tempPoint2d.set(Double.NaN, Double.NaN);
          return tempPoint2d;
