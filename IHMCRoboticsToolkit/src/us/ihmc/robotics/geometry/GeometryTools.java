@@ -16,7 +16,6 @@ import javax.vecmath.Vector3d;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.shapes.Plane3d;
 import us.ihmc.robotics.math.Epsilons;
-import us.ihmc.robotics.math.exceptions.UndefinedOperationException;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -1664,69 +1663,6 @@ public class GeometryTools
             return false;
          }
       }
-   }
-
-   /**
-    * Returns the line segment percentages of the intersection point between two lines if the lines are intersecting and not colinear.
-    * If colinear, or parallel, then returns null.
-    * This is epsilon conservative in determining parallelness or colinearity. If just slightly not parallel, will still return null.
-    *
-    * TODO ensure consistant with lineSegment2D
-    *
-    * @param lineStart1 Point2d
-    * @param lineEnd1 Point2d
-    * @param lineStart2 Point2d
-    * @param lineEnd2 Point2d
-    *
-    * @deprecated Creates garbage
-    * @return Intersecting percentages of the two line segments if intersecting and not colinear. Null if not intersecting, or colinear.
-    */
-   public static double[] getLineSegmentPercentagesIfIntersecting(Point2d lineStart1, Point2d lineEnd1, Point2d lineStart2, Point2d lineEnd2)
-   {
-      double[] garbage = new double[2];
-      getLineSegmentPercentagesIfIntersecting(lineStart1.getX(), lineStart1.getY(), lineEnd1.getX(), lineEnd1.getY(), lineStart2.getX(), lineStart2.getY(), lineEnd2.getX(), lineEnd2.getY(), garbage);
-      return garbage;
-   }
-
-   /**
-    * Returns the line segment percentages of the intersection point between two lines if the lines are intersecting and not colinear.
-    * If colinear, or parallel, then returns null.
-    * This is epsilon conservative in determining parallelness or colinearity. If just slightly not parallel, will still return null.
-    *
-    * TODO ensure consistant with lineSegment2D
-    *
-    * @param lineStart1 Point2d
-    * @param lineEnd1 Point2d
-    * @param lineStart2 Point2d
-    * @param lineEnd2 Point2d
-    * @param Intersecting percentages of the two line segments if intersecting and not colinear. Null if not intersecting, or colinear.
-    */
-   public static void getLineSegmentPercentagesIfIntersecting(FramePoint lineStart1, FramePoint lineEnd1, FramePoint lineStart2, FramePoint lineEnd2, double[] percentages)
-   {
-      getLineSegmentPercentagesIfIntersecting(lineStart1.getX(), lineStart1.getY(), lineEnd1.getX(), lineEnd1.getY(), lineStart2.getX(), lineStart2.getY(), lineEnd2.getX(), lineEnd2.getY(), percentages);
-   }
-
-   private static void getLineSegmentPercentagesIfIntersecting(double l1ax, double l1ay, double l1bx, double l1by, double l2ax, double l2ay, double l2bx, double l2by, double[] percentages)
-   {
-      double r1numerator = (l2bx - l2ax) * (l1ay - l2ay) - (l2by - l2ay) * (l1ax - l2ax);
-
-      double r1denominator = (l2by - l2ay) * (l1bx - l1ax) - (l2bx - l2ax) * (l1by - l1ay);
-
-      double r2numerator = (l1bx - l1ax) * (l1ay - l2ay) - (l1by - l1ay) * (l1ax - l2ax);
-
-      double r2denominator = r1denominator;
-
-      // If the denominator is zero, the lines are either colinear or parallel.
-      if (Math.abs(r1denominator) < EPSILON)
-      {
-         throw new UndefinedOperationException("Lines are colinear or parallel.");
-      }
-
-      double r1 = r1numerator / r1denominator;
-      double r2 = r2numerator / r2denominator;
-
-      percentages[0] = r1;
-      percentages[1] = r2;
    }
 
    /**

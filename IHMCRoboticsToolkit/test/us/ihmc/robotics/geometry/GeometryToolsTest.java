@@ -23,13 +23,11 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.robotics.math.Epsilons;
-import us.ihmc.robotics.math.exceptions.UndefinedOperationException;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.testing.JUnitTools;
 import us.ihmc.tools.testing.MutationTestingTools;
-import us.ihmc.tools.thread.RunnableThatThrows;
 
 /**
  * <p>Title: </p>
@@ -681,42 +679,6 @@ public class GeometryToolsTest
          assertFalse(GeometryTools.doLineSegmentsIntersect(lineSegmentEnd1, lineSegmentStart1, lineSegmentEnd2, lineSegmentStart2));
          assertFalse(GeometryTools.doLineSegmentsIntersect(lineSegmentStart1, lineSegmentEnd1, lineSegmentEnd2, lineSegmentStart2));
       }
-   }
-
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
-   public void testGetLineSegmentPercentagesIfIntersecting()
-   {
-      double[] percentages;
-      JUnitTools.assertExceptionThrown(UndefinedOperationException.class, new RunnableThatThrows()
-      {
-         @Override
-         public void run() throws Throwable
-         {
-            double[] percentages = GeometryTools.getLineSegmentPercentagesIfIntersecting(new Point2d(-1.0, 0.0), new Point2d(1.0, 0.0), new Point2d(-1.0, 1.0),
-                  new Point2d(1.0, 1.0));
-         }
-      });
-
-      percentages = GeometryTools.getLineSegmentPercentagesIfIntersecting(new Point2d(-1.0, 0.0), new Point2d(1.0, 0.0), new Point2d(0.0, 1.0),
-              new Point2d(0.0, -1.0));
-      assertEquals(0.5, percentages[0], 1e-7);
-      assertEquals(0.5, percentages[1], 1e-7);
-
-      percentages = GeometryTools.getLineSegmentPercentagesIfIntersecting(new Point2d(-1.0, 0.0), new Point2d(1.0, 0.0), new Point2d(0.0, -1.0),
-              new Point2d(0.0, 1.0));
-      System.out.println(percentages[0] + "   " + percentages[1]);
-      assertEquals(0.5, percentages[0], 1e-7);
-      assertEquals(0.5, percentages[1], 1e-7);
-
-      JUnitTools.assertExceptionThrown(UndefinedOperationException.class, new RunnableThatThrows()
-      {
-         @Override
-         public void run() throws Throwable
-         {
-            double[] percentages = GeometryTools.getLineSegmentPercentagesIfIntersecting(new Point2d(-1.0, 0.0), new Point2d(1.0, 0.0), new Point2d(-1.0, 0.0), new Point2d(1.0, 0.0));
-         }
-      });
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
