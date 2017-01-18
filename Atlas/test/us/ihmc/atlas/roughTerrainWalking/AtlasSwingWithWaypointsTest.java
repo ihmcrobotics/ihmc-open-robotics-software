@@ -12,7 +12,7 @@ import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.Cont
 import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.continuousIntegration.IntegrationCategory;
 
-@ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
+@ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST, IntegrationCategory.VIDEO})
 public class AtlasSwingWithWaypointsTest extends AvatarSwingWithWaypointsTest
 {
    @Override
