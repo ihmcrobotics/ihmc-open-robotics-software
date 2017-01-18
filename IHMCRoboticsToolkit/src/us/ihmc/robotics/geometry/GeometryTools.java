@@ -29,7 +29,12 @@ public class GeometryTools
    /**
     * Computes the minimum distance between a 3D point and an infinitely long 3D line defined by a point and a direction.
     * <a href="http://mathworld.wolfram.com/Point-LineDistance3-Dimensional.html"> Useful link</a>.
-    * If the line direction is of length equal to zero: ||{@code lineDirection}|| {@code  == 0.0}, the distance between the {@code pointOnLine} and the given point is computed instead.
+    * <p>
+    * Edge cases:
+    * <ul>
+    *    <li> if {@code lineDirection.length() < Epsilons.ONE_TRILLIONTH}, this method returns the distance between {@code pointOnLine} and the given {@code point}.
+    * </ul>
+    * </p>
     *
     * @param point 3D point to compute the distance from the line. Not modified.
     * @param pointOnLine point located on the line. Not modified.
@@ -45,8 +50,12 @@ public class GeometryTools
    /**
     * Computes the minimum distance between a 3D point and an infinitely long 3D line defined by two points.
     * <a href="http://mathworld.wolfram.com/Point-LineDistance3-Dimensional.html"> Useful link</a>.
-    * If the line is defined by the same point: {@code firstPointOnLine == secondPointOnLine},
-    * the distance between the {@code firstPointOnLine} and the given point is computed instead.
+    * <p>
+    * Edge cases:
+    * <ul>
+    *    <li> if {@code firstPointOnLine.distance(secondPointOnLine) < Epsilons.ONE_TRILLIONTH}, this method returns the distance between {@code firstPointOnLine} and the given {@code point}.
+    * </ul>
+    * </p>
     *
     * @param point 3D point to compute the distance from the line. Not modified.
     * @param firstPointOnLine a first point located on the line. Not modified.
@@ -68,7 +77,12 @@ public class GeometryTools
    /**
     * Computes the minimum distance between a 3D point and an infinitely long 3D line defined by a point and a direction.
     * <a href="http://mathworld.wolfram.com/Point-LineDistance3-Dimensional.html"> Useful link</a>.
-    * If the line direction is of length equal to zero: ||{@code lineDirection}|| {@code  == 0.0}, the distance between the {@code pointOnLine} and the given point is computed instead.
+    * <p>
+    * Edge cases:
+    * <ul>
+    *    <li> if {@code lineDirection.length() < Epsilons.ONE_TRILLIONTH}, this method returns the distance between {@code pointOnLine} and the given {@code point}.
+    * </ul>
+    * </p>
     *
     * @param point 3D point to compute the distance from the line. Not modified.
     * @param pointOnLineX x-coordinate of a point located on the line.
@@ -106,9 +120,16 @@ public class GeometryTools
    }
 
    /**
-    * Returns the minimum distance between a 2D point and an infinitely long 2D
-    * line defined by two points.
-    * If the line is defined by the same point: {@code firstPointOnLine == secondPointOnLine}, the xy distance between the {@code firstPointOnLine} and the given point is computed instead.
+    * Returns the minimum distance between a 2D point and an infinitely long 2D line defined by two points.
+    * <p>
+    * WARNING: the 3D arguments are projected onto the XY-plane to perform the actual computation in 2D.
+    * <p>
+    * <p>
+    * Edge cases:
+    * <ul>
+    *    <li> if {@code firstPointOnLine2d.distance(secondPointOnLine2d) < Epsilons.ONE_TRILLIONTH}, this method returns the distance between {@code firstPointOnLine2d} and the given {@code point}.
+    * </ul>
+    * </p>
     *
     * @param point the 3D point is projected onto the xy-plane. It's projection is used to compute the distance from the line. Not modified.
     * @param firstPointOnLine the projection of this 3D onto the xy-plane refers to the first point on the 2D line. Not modified.
@@ -122,9 +143,13 @@ public class GeometryTools
    }
 
    /**
-    * Returns the minimum distance between a 2D point and an infinitely long 2D
-    * line defined by a given line segment.
-    * If the line is defined by the same point: {@code lineStart == lineEnd}, the distance between the {@code lineStart} and the given point is computed instead.
+    * Returns the minimum distance between a 2D point and an infinitely long 2D line defined by two points.
+    * <p>
+    * Edge cases:
+    * <ul>
+    *    <li> if {@code firstPointOnLine.distance(secondPointOnLine) < Epsilons.ONE_TRILLIONTH}, this method returns the distance between {@code firstPointOnLine} and the given {@code point}.
+    * </ul>
+    * </p>
     *
     * @param point 2D point to compute the distance from the line. Not modified.
     * @param firstPointOnLine a first point located on the line. Not modified.
@@ -137,9 +162,13 @@ public class GeometryTools
    }
 
    /**
-    * Returns the minimum distance between a 2D point and an infinitely long 2D
-    * line defined by a given line segment.
-    * If the line is defined by the same point: {@code lineStart == lineEnd}, the distance between the {@code lineStart} and the given point is computed instead.
+    * Returns the minimum distance between a 2D point and an infinitely long 2D line defined by two points.
+    * <p>
+    * Edge cases:
+    * <ul>
+    *    <li> if {@code firstPointOnLine.distance(secondPointOnLine) < Epsilons.ONE_TRILLIONTH}, this method returns the distance between {@code firstPointOnLine} and the given {@code point}.
+    * </ul>
+    * </p>
     *
     * @param pointX x-coordinate of the query.
     * @param pointY y-coordinate of the query.
@@ -174,30 +203,30 @@ public class GeometryTools
     * Returns the minimum distance between a point and a given line segment.
     * Holds true if line segment shrinks to a single point.
     *
-    * @param xPoint x coordinate of point to be tested.
-    * @param yPoint y coordinate of point to be tested.
+    * @param pointX x coordinate of point to be tested.
+    * @param pointY y coordinate of point to be tested.
     * @param lineSegmentStart starting point of the line segment. Not modified.
     * @param lineSegmentEnd end point of the line segment. Not modified.
     * @return the minimum distance between the 2D point and the 2D line segment.
     */
-   public static double distanceFromPointToLineSegment(double xPoint, double yPoint, Point2d lineSegmentStart, Point2d lineSegmentEnd)
+   public static double distanceFromPointToLineSegment(double pointX, double pointY, Point2d lineSegmentStart, Point2d lineSegmentEnd)
    {
       double startAngleDot, endAngleDot;
 
-      startAngleDot = (lineSegmentEnd.x - lineSegmentStart.x) * (xPoint - lineSegmentStart.x);
-      startAngleDot += (lineSegmentEnd.y - lineSegmentStart.y) * (yPoint - lineSegmentStart.y);
+      startAngleDot = (lineSegmentEnd.x - lineSegmentStart.x) * (pointX - lineSegmentStart.x);
+      startAngleDot += (lineSegmentEnd.y - lineSegmentStart.y) * (pointY - lineSegmentStart.y);
 
-      endAngleDot = (lineSegmentStart.x - lineSegmentEnd.x) * (xPoint - lineSegmentEnd.x);
-      endAngleDot += (lineSegmentStart.y - lineSegmentEnd.y) * (yPoint - lineSegmentEnd.y);
+      endAngleDot = (lineSegmentStart.x - lineSegmentEnd.x) * (pointX - lineSegmentEnd.x);
+      endAngleDot += (lineSegmentStart.y - lineSegmentEnd.y) * (pointY - lineSegmentEnd.y);
 
       if ((startAngleDot >= 0.0) && (endAngleDot >= 0.0))
       {
-         return distanceFromPointToLine(xPoint, yPoint, lineSegmentStart.getX(), lineSegmentStart.getY(), lineSegmentEnd.getX(), lineSegmentEnd.getY());
+         return distanceFromPointToLine(pointX, pointY, lineSegmentStart.getX(), lineSegmentStart.getY(), lineSegmentEnd.getX(), lineSegmentEnd.getY());
       }
 
       if (startAngleDot < 0.0)
       {
-         return distanceBetweenPoints(lineSegmentStart.getX(), lineSegmentStart.getY(), xPoint, yPoint);
+         return distanceBetweenPoints(lineSegmentStart.getX(), lineSegmentStart.getY(), pointX, pointY);
       }
       else
       {
@@ -206,7 +235,7 @@ public class GeometryTools
             throw new RuntimeException("totally not a physical situation here");
          }
 
-         return distanceBetweenPoints(lineSegmentEnd.getX(), lineSegmentEnd.getY(), xPoint, yPoint);
+         return distanceBetweenPoints(lineSegmentEnd.getX(), lineSegmentEnd.getY(), pointX, pointY);
       }
    }
 
