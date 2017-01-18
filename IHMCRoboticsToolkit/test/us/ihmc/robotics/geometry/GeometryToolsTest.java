@@ -1117,7 +1117,15 @@ public class GeometryToolsTest
       Vector2d actualReturn = GeometryTools.getPerpendicularVector(vector);
       assertEquals("return value", expectedReturn, actualReturn);
 
-      /** @todo fill in the test code */
+      for (int i = 0; i < 100; i++)
+      {
+         vector = RandomTools.generateRandomVector2d(random, RandomTools.generateRandomDouble(random, 0.0, 10.0));
+         Vector2d perpendicularVector = GeometryTools.getPerpendicularVector(vector);
+         assertEquals(vector.length(), perpendicularVector.length(), Epsilons.ONE_TRILLIONTH);
+         assertEquals(vector.length() * vector.length(), GeometryTools.cross(vector, perpendicularVector), Epsilons.ONE_TRILLIONTH);
+         assertEquals(0.0, vector.dot(perpendicularVector), Epsilons.ONE_TRILLIONTH);
+         assertEquals(Math.PI / 2.0, vector.angle(perpendicularVector), Epsilons.ONE_TRILLIONTH);
+      }
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
