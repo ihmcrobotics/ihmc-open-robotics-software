@@ -94,6 +94,7 @@ import us.ihmc.simulationconstructionset.gui.ViewportWindow;
 import us.ihmc.simulationconstructionset.gui.config.VarGroupList;
 import us.ihmc.simulationconstructionset.gui.dialogConstructors.GUIEnablerAndDisabler;
 import us.ihmc.simulationconstructionset.gui.hierarchyTree.NameSpaceHierarchyTree;
+import us.ihmc.simulationconstructionset.gui.tools.SimulationOverheadPlotterFactory;
 import us.ihmc.simulationconstructionset.physics.CollisionHandler;
 import us.ihmc.simulationconstructionset.physics.ScsPhysics;
 import us.ihmc.simulationconstructionset.physics.visualize.DefaultCollisionVisualizer;
@@ -4325,6 +4326,13 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
             }
          }
       });
+   }
+   
+   public SimulationOverheadPlotterFactory createSimulationOverheadPlotterFactory()
+   {
+      SimulationOverheadPlotterFactory simulationOverheadPlotterFactory = new SimulationOverheadPlotterFactory();
+      simulationOverheadPlotterFactory.setSimulationConstructionSet(this);
+      return simulationOverheadPlotterFactory;
    }
 
    public void hideAllDynamicGraphicObjects()

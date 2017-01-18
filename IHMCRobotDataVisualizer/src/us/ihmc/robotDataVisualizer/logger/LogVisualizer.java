@@ -39,7 +39,7 @@ import us.ihmc.simulationconstructionset.PlaybackListener;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.gui.SimulationOverheadPlotter;
-import us.ihmc.simulationconstructionset.gui.tools.VisualizerUtils;
+import us.ihmc.simulationconstructionset.gui.tools.SimulationOverheadPlotterFactory;
 
 public class LogVisualizer
 {
@@ -175,7 +175,10 @@ public class LogVisualizer
       YoGraphicsListRegistry yoGraphicsListRegistry = parser.getDynamicGraphicObjectsListRegistry();
       scs.addYoGraphicsListRegistry(yoGraphicsListRegistry, false);
       scs.attachPlaybackListener(createYoGraphicsUpdater(yoGraphicsListRegistry));
-      plotter = VisualizerUtils.createOverheadPlotter(scs, showOverheadView, yoGraphicsListRegistry);
+      SimulationOverheadPlotterFactory simulationOverheadPlotterFactory = scs.createSimulationOverheadPlotterFactory();
+      simulationOverheadPlotterFactory.setShowOnStart(showOverheadView);
+      simulationOverheadPlotterFactory.addYoGraphicsListRegistries(yoGraphicsListRegistry);
+      simulationOverheadPlotterFactory.createOverheadPlotter();
       scs.getRootRegistry().addChild(parser.getRootRegistry());
       scs.setGroundVisible(false);
 

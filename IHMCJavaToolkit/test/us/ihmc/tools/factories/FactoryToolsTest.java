@@ -46,13 +46,13 @@ public class FactoryToolsTest
    
    @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
-   public void testFactoryRequiresOptionalDefaults()
+   public void testFactoryRequiresOptionalNotNull()
    {
       final ExampleInvalidFactory exampleFactory = new ExampleInvalidFactory();
       exampleFactory.setRequiredField1(1.0);
       exampleFactory.setRequiredField2(1.0);
       
-      JUnitTools.assertExceptionThrown(FactoryFieldNotSetException.class, new RunnableThatThrows()
+      JUnitTools.assertExceptionThrown(NullPointerException.class, new RunnableThatThrows()
       {
          @Override
          public void run() throws Throwable
