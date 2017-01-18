@@ -1034,38 +1034,64 @@ public class GeometryTools
    }
 
    /**
+    * Computes the intersection between two infinitely long 2D lines each defined by two 2D points.
+    * <p>
+    * Edge cases:
+    * <ul>
+    *    <li> if the two lines are parallel but not collinear, the two lines do not intersect and this method returns null.
+    *    <li> if the two lines are collinear, the two lines are assumed to be intersecting at {@code pointOnLine1}.
+    * </ul>
+    * </p>
     * <p>
     * WARNING: This method generates garbage.
     * <p>
     * 
-    * @param lineStart1
-    * @param lineEnd1
-    * @param lineStart2
-    * @param lineEnd2
-    * @return
+    * @param firstPointOnLine1 a first point located on the first line. Not modified.
+    * @param secondPointOnLine1 a second point located on the first line. Not modified.
+    * @param firstPointOnLine2 a first point located on the second line. Not modified.
+    * @param secondPointOnLine2 a second point located on the second line. Not modified.
+    * @param intersectionToPack 2D point in which the result is stored. Modified.
+    * @return the 2D point of intersection if the two lines intersect, {@code null} otherwise.
     */
-   public static Point2d getIntersectionBetweenTwoLines(Point2d lineStart1, Point2d lineEnd1, Point2d lineStart2, Point2d lineEnd2)
+   public static Point2d getIntersectionBetweenTwoLines(Point2d firstPointOnLine1, Point2d secondPointOnLine1, Point2d firstPointOnLine2, Point2d secondPointOnLine2)
    {
-      Line2d line1 = new Line2d(lineStart1, lineEnd1);
-      Line2d line2 = new Line2d(lineStart2, lineEnd2);
+      Point2d intersection = new Point2d();
 
-      return line1.intersectionWith(line2);
+      double pointOnLine1x = firstPointOnLine1.getX();
+      double pointOnLine1y = firstPointOnLine1.getY();
+      double lineDirection1x = secondPointOnLine1.getX() - firstPointOnLine1.getX();
+      double lineDirection1y = secondPointOnLine1.getY() - firstPointOnLine1.getY();
+      double pointOnLine2x = firstPointOnLine2.getX();
+      double pointOnLine2y = firstPointOnLine2.getY();
+      double lineDirection2x = secondPointOnLine2.getX() - firstPointOnLine2.getX();
+      double lineDirection2y = secondPointOnLine2.getY() - firstPointOnLine2.getY();
+      boolean success = getIntersectionBetweenTwoLines(pointOnLine1x, pointOnLine1y, lineDirection1x, lineDirection1y, pointOnLine2x, pointOnLine2y, lineDirection2x, lineDirection2y, intersection);
+
+      if (!success)
+         return null;
+      else
+         return intersection;
    }
 
    /**
-    * Finds the intersection between two 2D lines.
-    * Each line is represented as a Point2d and a Vector2d.
-    * This should work as long as the two lines are not parallel.
-    * If they are parallel, it tries to return something without crashing.
+    * Computes the intersection between two infinitely long 2D lines each defined by a 2D point and a 2D direction.
+    * <p>
+    * Edge cases:
+    * <ul>
+    *    <li> if the two lines are parallel but not collinear, the two lines do not intersect and this method returns null.
+    *    <li> if the two lines are collinear, the two lines are assumed to be intersecting at {@code pointOnLine1}.
+    * </ul>
+    * </p>
     * <p>
     * WARNING: This method generates garbage.
     * <p>
-    *
-    * @param pointOnLine1 Start Point of first line.
-    * @param lineDirection1 Direction Vector of first line.
-    * @param pointOnLine2 Start Point of second line.
-    * @param lineDirection2 Direction Vector of second line.
-    * @return Point of Intersection.
+    * 
+    * @param pointOnLine1 point located on the first line. Not modified.
+    * @param lineDirection1 the first line direction. Not modified.
+    * @param pointOnLine2x point located on the second line. Not modified.
+    * @param lineDirection2x the second line direction. Not modified.
+    * @param intersectionToPack 2D point in which the result is stored. Modified.
+    * @return the 2D point of intersection if the two lines intersect, {@code null} otherwise.
     */
    public static Point2d getIntersectionBetweenTwoLines(Point2d pointOnLine1, Vector2d lineDirection1, Point2d pointOnLine2, Vector2d lineDirection2)
    {
@@ -1077,6 +1103,23 @@ public class GeometryTools
          return null;
    }
 
+   /**
+    * Computes the intersection between two infinitely long 2D lines each defined by a 2D point and a 2D direction.
+    * <p>
+    * Edge cases:
+    * <ul>
+    *    <li> if the two lines are parallel but not collinear, the two lines do not intersect.
+    *    <li> if the two lines are collinear, the two lines are assumed to be intersecting at {@code pointOnLine1}.
+    * </ul>
+    * </p>
+    * 
+    * @param pointOnLine1 point located on the first line. Not modified.
+    * @param lineDirection1 the first line direction. Not modified.
+    * @param pointOnLine2x point located on the second line. Not modified.
+    * @param lineDirection2x the second line direction. Not modified.
+    * @param intersectionToPack 2D point in which the result is stored. Modified.
+    * @return {@code true} if the two lines intersect, {@code false} otherwise.
+    */
    public static boolean getIntersectionBetweenTwoLines(Point2d pointOnLine1, Vector2d lineDirection1, Point2d pointOnLine2, Vector2d lineDirection2, Point2d intersectionToPack)
    {
       return getIntersectionBetweenTwoLines(pointOnLine1.getX(), pointOnLine1.getY(), lineDirection1.getX(), lineDirection1.getY(), pointOnLine2.getX(),
@@ -1092,8 +1135,29 @@ public class GeometryTools
       }
    };
 
+   /**
+    * Computes the intersection between two infinitely long 2D lines each defined by two 2D points.
+    * <p>
+    * WARNING: the actual computation only uses the x and y components of each argument.
+    * <p>
+    * <p>
+    * Edge cases:
+    * <ul>
+    *    <li> if the two lines are parallel but not collinear, the two lines do not intersect.
+    *    <li> if the two lines are collinear, the two lines are assumed to be intersecting at {@code firstPointOnLine1}.
+    * </ul>
+    * </p>
+    * 
+    * @param intersectionToPack the result is stored in the x and y components of this 3D point. Modified.
+    * @param firstPointOnLine1 the x and y coordinates are used to define a first 2D point on the first line. Not modified.
+    * @param secondPointOnLine1 the x and y coordinates are used to define a second 2D point on the first line. Not modified.
+    * @param firstPointOnLine2 the x and y coordinates are used to define a first 2D point on the second line. Not modified.
+    * @param secondPointOnLine2 the x and y coordinates are used to define a second 2D point on the second line. Not modified.
+    * @return {@code true} if the two lines intersect, {@code false} otherwise.
+    */
    // FIXME This method is too confusing and error prone.
    // FIXME It also needs to verify the reference frame of the arguments.
+   // FIXME change method signature to have the intersectionToPack at the end.
    public static boolean getIntersectionBetweenTwoLines2d(FramePoint intersectionToPack, FramePoint firstPointOnLine1, FramePoint secondPointOnLine1,
                                                           FramePoint firstPointOnLine2, FramePoint secondPointOnLine2)
    {
@@ -1114,8 +1178,29 @@ public class GeometryTools
       return success;
    }
 
+   /**
+    * Computes the intersection between two infinitely long 2D lines each defined by a 2D point and a 2D direction.
+    * <p>
+    * WARNING: the actual computation only uses the x and y components of each argument.
+    * <p>
+    * <p>
+    * Edge cases:
+    * <ul>
+    *    <li> if the two lines are parallel but not collinear, the two lines do not intersect.
+    *    <li> if the two lines are collinear, the two lines are assumed to be intersecting at {@code pointOnLine1}.
+    * </ul>
+    * </p>
+    * 
+    * @param intersectionToPack the result is stored in the x and y components of this 3D point. Modified.
+    * @param pointOnLine1 the x and y coordinates are used to define a 2D point on the first line. Not modified.
+    * @param lineDirection1 the x and y components are used to define the 2D direction of the first line. Not modified.
+    * @param pointOnLine2 the x and y coordinates are used to define a 2D point on the second line. Not modified.
+    * @param lineDirection2 the x and y components are used to define the 2D direction of the second line. Not modified.
+    * @return {@code true} if the two lines intersect, {@code false} otherwise.
+    */
    // FIXME This method is too confusing and error prone.
    // FIXME It also needs to verify the reference frame of the arguments.
+   // FIXME change method signature to have the intersectionToPack at the end.
    public static boolean getIntersectionBetweenTwoLines2d(FramePoint intersectionToPack, FramePoint pointOnLine1, FrameVector lineDirection1,
                                                           FramePoint pointOnLine2, FrameVector lineDirection2)
    {
@@ -1136,6 +1221,27 @@ public class GeometryTools
       return success;
    }
 
+   /**
+    * Computes the intersection between two infinitely long 2D lines each defined by a 2D point and a 2D direction.
+    * <p>
+    * Edge cases:
+    * <ul>
+    *    <li> if the two lines are parallel but not collinear, the two lines do not intersect.
+    *    <li> if the two lines are collinear, the two lines are assumed to be intersecting at {@code pointOnLine1}.
+    * </ul>
+    * </p>
+    * 
+    * @param pointOnLine1x x-coordinate of a point located on the first line.
+    * @param pointOnLine1y y-coordinate of a point located on the first line.
+    * @param lineDirection1x x-component of the first line direction.
+    * @param lineDirection1y y-component of the first line direction.
+    * @param pointOnLine2x x-coordinate of a point located on the second line.
+    * @param pointOnLine2y y-coordinate of a point located on the second line.
+    * @param lineDirection2x x-component of the second line direction.
+    * @param lineDirection2y y-component of the second line direction.
+    * @param intersectionToPack 2D point in which the result is stored. Modified.
+    * @return {@code true} if the two lines intersect, {@code false} otherwise.
+    */
    public static boolean getIntersectionBetweenTwoLines(double pointOnLine1x, double pointOnLine1y, double lineDirection1x, double lineDirection1y,
                                                         double pointOnLine2x, double pointOnLine2y, double lineDirection2x, double lineDirection2y,
                                                         Point2d intersectionToPack)
