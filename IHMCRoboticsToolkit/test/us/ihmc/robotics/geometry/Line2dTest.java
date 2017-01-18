@@ -17,6 +17,9 @@ import javax.vecmath.Vector3d;
 import org.junit.Test;
 
 import us.ihmc.robotics.MathTools;
+import us.ihmc.robotics.math.Epsilons;
+import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.tools.testing.JUnitTools;
 import us.ihmc.tools.testing.MutationTestingTools;
 import us.ihmc.tools.continuousIntegration.IntegrationCategory;
 import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
@@ -819,43 +822,70 @@ public class Line2dTest
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
-   public void testInterSectionWithLine2d()
+   public void testIntersectionWithLine2d()
    {
-      Random random = new Random(767L);
-      double delta = 1.0e-3;
+      double epsilon = Epsilons.ONE_TRILLIONTH;
+      Random random = new Random(23423L);
 
       for (int i = 0; i < ITERATIONS; i++)
       {
-         Point2d firstPointOnFirstLine = randomPoint(random);
-         Point2d secondPointOnFirstLine = randomPoint(random);
-         Vector2d directionSecondLine = new Vector2d(randomDouble(random, 10.0), randomDouble(random, 10.0));
+         Point2d pointOnLine1 = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
+         Vector2d lineDirection1 = RandomTools.generateRandomVector2d(random, 1.0);
+         Line2d line1 = new Line2d(pointOnLine1, lineDirection1);
 
-         Line2d firstLine = new Line2d(firstPointOnFirstLine, secondPointOnFirstLine);
-         Line2d secondLine = new Line2d(secondPointOnFirstLine, directionSecondLine);
+         Point2d expectedIntersection = new Point2d();
+         expectedIntersection.scaleAdd(RandomTools.generateRandomDouble(random, 10.0), lineDirection1, pointOnLine1);
 
-         Point2d intersectionFirstWithSecond = firstLine.intersectionWith(secondLine);
-         Point2d intersectionSecondWithFirst = secondLine.intersectionWith(firstLine);
+         Vector2d lineDirection2 = RandomTools.generateRandomVector2d(random, 1.0);
+         Point2d pointOnLine2 = new Point2d(expectedIntersection);
 
-         assertEquals(secondPointOnFirstLine.getX(), intersectionFirstWithSecond.getX(), delta);
-         assertEquals(secondPointOnFirstLine.getY(), intersectionFirstWithSecond.getY(), delta);
+         Point2d actualIntersection = line1.intersectionWith(new Line2d(pointOnLine2, lineDirection2));
+         JUnitTools.assertTuple2dEquals(expectedIntersection, actualIntersection, epsilon);
 
-         assertEquals(secondPointOnFirstLine.getX(), intersectionSecondWithFirst.getX(), delta);
-         assertEquals(secondPointOnFirstLine.getY(), intersectionSecondWithFirst.getY(), delta);
+         pointOnLine2.scaleAdd(RandomTools.generateRandomDouble(random, 10.0), lineDirection2, pointOnLine2);
+         actualIntersection = line1.intersectionWith(new Line2d(pointOnLine2, lineDirection2));
+         JUnitTools.assertTuple2dEquals(expectedIntersection, actualIntersection, epsilon);
+      }
 
-         Line2d firstLineCopy = new Line2d(firstLine);
-         Point2d intersectionWithParallel = firstLine.intersectionWith(firstLineCopy);
-         assertNull(intersectionWithParallel);
+      // Test when parallel but not collinear
+      for (int i = 0; i < ITERATIONS; i++)
+      {
+         Point2d pointOnLine1 = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
+         Vector2d lineDirection1 = RandomTools.generateRandomVector2d(random, 1.0);
+         Line2d line1 = new Line2d(pointOnLine1, lineDirection1);
 
-         double distance = randomDouble(random, 10.0);
-         Vector2d perpendicular = firstLine.perpendicularVector();
-         Point2d newPoint = new Point2d(firstLine.getPoint());
-         newPoint.scaleAdd(distance, perpendicular, newPoint);
-         firstLineCopy.setPoint2d(newPoint);
+         Vector2d lineDirection2 = new Vector2d(lineDirection1);
+         if (random.nextBoolean())
+            lineDirection2.negate();
+         Point2d pointOnLine2 = new Point2d(pointOnLine1);
 
-         intersectionWithParallel = firstLine.intersectionWith(firstLineCopy);
-         assertNull(intersectionWithParallel);
-         intersectionWithParallel = firstLineCopy.intersectionWith(firstLine);
-         assertNull(intersectionWithParallel);
+         Vector2d orthogonal = new Vector2d(- lineDirection1.getY(), lineDirection1.getX());
+
+         pointOnLine2.scaleAdd(RandomTools.generateRandomDouble(random, 10.0), orthogonal, pointOnLine2);
+         pointOnLine2.scaleAdd(RandomTools.generateRandomDouble(random, 10.0), lineDirection2, pointOnLine2);
+         Point2d actualIntersection = line1.intersectionWith(new Line2d(pointOnLine2, lineDirection2));
+         assertNull(actualIntersection);
+      }
+
+      // Test when collinear
+      for (int i = 0; i < ITERATIONS; i++)
+      {
+         Point2d pointOnLine1 = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
+         Vector2d lineDirection1 = RandomTools.generateRandomVector2d(random, 1.0);
+         Line2d line1 = new Line2d(pointOnLine1, lineDirection1);
+
+         Point2d expectedIntersection = new Point2d();
+         expectedIntersection.set(pointOnLine1);
+
+         Vector2d lineDirection2 = new Vector2d(lineDirection1);
+         Point2d pointOnLine2 = new Point2d(expectedIntersection);
+
+         Point2d actualIntersection = line1.intersectionWith(new Line2d(pointOnLine2, lineDirection2));
+         JUnitTools.assertTuple2dEquals(expectedIntersection, actualIntersection, epsilon);
+
+         pointOnLine2.scaleAdd(RandomTools.generateRandomDouble(random, 10.0), lineDirection2, pointOnLine2);
+         actualIntersection = line1.intersectionWith(new Line2d(pointOnLine2, lineDirection2));
+         JUnitTools.assertTuple2dEquals(expectedIntersection, actualIntersection, epsilon);
       }
    }
 
@@ -1612,8 +1642,8 @@ public class Line2dTest
       assertEquals(null, line1.intersectionWith(line11));
 
 
-      assertEquals(null, line1.intersectionWith(line5));
-      assertEquals(null, line1.intersectionWith(line6));
+      assertEquals(new Point2d(-10.0, 0.0), line1.intersectionWith(line5));
+      assertEquals(new Point2d(-10.0, 0.0), line1.intersectionWith(line6));
       assertEquals(new Point2d(10.0, 0.0), line1.intersectionWith(line2));
       assertEquals(new Point2d(10.0, 0.0), line1.intersectionWith(line10));
 
@@ -1621,9 +1651,9 @@ public class Line2dTest
       assertEquals(new Point2d(0.0, 0.0), line1.intersectionWith(line4));
 
 
-      assertEquals(null, line1.intersectionWith(line7));
-      assertEquals(null, line1.intersectionWith(line8));
-      assertEquals(null, line1.intersectionWith(line9));
+      assertEquals(new Point2d(-10.0, 0.0), line1.intersectionWith(line7));
+      assertEquals(new Point2d(-10.0, 0.0), line1.intersectionWith(line8));
+      assertEquals(new Point2d(-10.0, 0.0), line1.intersectionWith(line9));
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)

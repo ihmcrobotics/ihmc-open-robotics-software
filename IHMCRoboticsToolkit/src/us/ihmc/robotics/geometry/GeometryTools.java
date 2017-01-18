@@ -995,135 +995,203 @@ public class GeometryTools
       return line1.intersectionWith(line2);
    }
 
-   private static final ThreadLocal<double[]> tempAlphaBeta = new ThreadLocal<double[]>()
-   {
-      @Override
-      public double[] initialValue()
-      {
-         return new double[2];
-      }
-   };
-
-   private static final ThreadLocal<FrameVector[]> tempDirectionsForIntersection = new ThreadLocal<FrameVector[]>()
-   {
-      @Override
-      public FrameVector[] initialValue()
-      {
-         return new FrameVector[] {new FrameVector(), new FrameVector()};
-      }
-   };
-
-   // FIXME This method is too confusing and error prone.
-   // FIXME It also needs to verify the reference frame of the arguments.
-   public static boolean getIntersectionBetweenTwoLines2d(FramePoint intersectionToPack, FramePoint lineStart1, FramePoint lineEnd1, FramePoint lineStart2, FramePoint lineEnd2)
-   {
-      tempDirectionsForIntersection.get()[0].sub(lineEnd1, lineStart1);
-      tempDirectionsForIntersection.get()[1].sub(lineEnd2, lineStart2);
-
-      return GeometryTools.getIntersectionBetweenTwoLines2d(intersectionToPack, lineStart1, tempDirectionsForIntersection.get()[0], lineStart2, tempDirectionsForIntersection.get()[1]);
-   }
-
-   // FIXME This method is too confusing and error prone.
-   // FIXME It also needs to verify the reference frame of the arguments.
-   public static boolean getIntersectionBetweenTwoLines2d(FramePoint intersectionToPack, FramePoint point1, FrameVector direction1, FramePoint point2, FrameVector direction2)
-   {
-      GeometryTools.intersection(point1.getX(), point1.getY(), direction1.getX(), direction1.getY(), point2.getX(), point2.getY(), direction2.getX(), direction2.getY(), tempAlphaBeta.get());
-
-      if (Double.isNaN(tempAlphaBeta.get()[0]) || Double.isNaN(tempAlphaBeta.get()[1]))
-      {
-         intersectionToPack.set(Double.NaN, Double.NaN,Double.NaN);
-         return false;
-         //throw new UndefinedOperationException("Lines are parallel.");
-      }
-
-      intersectionToPack.set(point1.getX() + direction1.getX() * tempAlphaBeta.get()[0], point1.getY() + direction1.getY() * tempAlphaBeta.get()[0], intersectionToPack.getZ());
-      return true;
-   }
-
    /**
     * Finds the intersection between two 2D lines.
     * Each line is represented as a Point2d and a Vector2d.
     * This should work as long as the two lines are not parallel.
     * If they are parallel, it tries to return something without crashing.
     *
-    * @param point1 Start Point of first line.
-    * @param vector1 Direction Vector of first line.
-    * @param point2 Start Point of second line.
-    * @param vector2 Direction Vector of second line.
+    * @param pointOnLine1 Start Point of first line.
+    * @param lineDirection1 Direction Vector of first line.
+    * @param pointOnLine2 Start Point of second line.
+    * @param lineDirection2 Direction Vector of second line.
     * @return Point of Intersection.
     * @deprecated Creates garbage. Use {@link GeometryTools.intersection}.
     * TODO ensure consistant with line2D
     */
-   public static Point2d getIntersectionBetweenTwoLines(Point2d point1, Vector2d vector1, Point2d point2, Vector2d vector2)
+   public static Point2d getIntersectionBetweenTwoLines(Point2d pointOnLine1, Vector2d lineDirection1, Point2d pointOnLine2, Vector2d lineDirection2)
    {
-      Line2d line1 = new Line2d(point1, vector1);
-      Line2d line2 = new Line2d(point2, vector2);
-
-      return line1.intersectionWith(line2);
+      Point2d intersection = new Point2d();
+      boolean success = getIntersectionBetweenTwoLines(pointOnLine1, lineDirection1, pointOnLine2, lineDirection2, intersection);
+      if (success)
+         return intersection;
+      else
+         return null;
    }
 
-   /**
-       *       Finds the intersection parameters between two lines. First line starts at (firstPointX, firstPointY) and has direction vector (firstVectorX, firstVectorY).
-       *       The second line starts at (secondPointX, secondPointY) and has direction vector (secondVectorX, secondVectorY). Returns null if the lines are parallel.
-       *       Returns {alpha, beta} such that the intersection between the lines occurs at P1 + alpha * V1 = P2 + beta * V2;
-       *
-       *       @param x0 double First line starting x.
-       *       @param y0 double First line starting y.
-       *       @param vx0 double First line direction x.
-       *       @param vy0 double First line direction y.
-       *       @param x1 double Second line starting x.
-       *       @param y1 double Second line starting y.
-       *       @param vx1 double Second line direction x.
-       *       @param vy1 double Second line direction y.
-       *
-       *       @return double[] {alpha, beta} such that the intersection between the lines occurs at P1 + alpha * V1 = P2 + beta * V2;
-       */
+   public static boolean getIntersectionBetweenTwoLines(Point2d pointOnLine1, Vector2d lineDirection1, Point2d pointOnLine2, Vector2d lineDirection2, Point2d intersectionToPack)
+   {
+      return getIntersectionBetweenTwoLines(pointOnLine1.getX(), pointOnLine1.getY(), lineDirection1.getX(), lineDirection1.getY(), pointOnLine2.getX(),
+                                            pointOnLine2.getY(), lineDirection2.getX(), lineDirection2.getY(), intersectionToPack);
+   }
 
-      // TODO only used by the intersection methods in this class
-      public static void intersection(double x0, double y0, double vx0, double vy0, double x1, double y1, double vx1, double vy1, double[] alphaBetaToPack)
+   private static final ThreadLocal<Point2d> tempIntersection = new ThreadLocal<Point2d>()
+   {
+      @Override
+      public Point2d initialValue()
       {
-   //      We solve for x the problem of the form: A * x = b
-   //            A      *     x     =      b
-   //      / vx0 -vx1 \   / alpha \   / x1 - x0 \
-   //      |          | * |       | = |         |
-   //      \ vy0 -vy1 /   \ beta  /   \ y1 - y0 /
-   //
-   //
-   //      double[][] A = new double[2][2];
-   //      A[0][0] = vx0;
-   //      A[0][1] = -vx1;
-   //      A[1][0] = vy0;
-   //      A[1][1] = -vy1;
-   //
-   //      double[] b = new double[2];
-   //      b[0] = x1 - x0;
-   //      b[1] = y1 - y0;
+         return new Point2d();
+      }
+   };
 
-         double determinant = -vx0 * vy1 + vy0 * vx1; //(A[0][0] * A[1][1]) - (A[1][0] * A[0][1]);
+   // FIXME This method is too confusing and error prone.
+   // FIXME It also needs to verify the reference frame of the arguments.
+   public static boolean getIntersectionBetweenTwoLines2d(FramePoint intersectionToPack, FramePoint firstPointOnLine1, FramePoint secondPointOnLine1,
+                                                          FramePoint firstPointOnLine2, FramePoint secondPointOnLine2)
+   {
+      double pointOnLine1x = firstPointOnLine1.getX();
+      double pointOnLine1y = firstPointOnLine1.getY();
+      double lineDirection1x = secondPointOnLine1.getX() - firstPointOnLine1.getX();
+      double lineDirection1y = secondPointOnLine1.getY() - firstPointOnLine1.getY();
+      double pointOnLine2x = firstPointOnLine2.getX();
+      double pointOnLine2y = firstPointOnLine2.getY();
+      double lineDirection2x = secondPointOnLine2.getX() - firstPointOnLine2.getX();
+      double lineDirection2y = secondPointOnLine2.getY() - firstPointOnLine2.getY();
 
-         double epsilon = 1.0E-12;
-         if (Math.abs(determinant) < epsilon)
+      boolean success = getIntersectionBetweenTwoLines(pointOnLine1x, pointOnLine1y, lineDirection1x, lineDirection1y, pointOnLine2x, pointOnLine2y,
+                                                       lineDirection2x, lineDirection2y, tempIntersection.get());
+
+      if (!success)
+         intersectionToPack.setToNaN();
+      return success;
+   }
+
+   // FIXME This method is too confusing and error prone.
+   // FIXME It also needs to verify the reference frame of the arguments.
+   public static boolean getIntersectionBetweenTwoLines2d(FramePoint intersectionToPack, FramePoint pointOnLine1, FrameVector lineDirection1,
+                                                          FramePoint pointOnLine2, FrameVector lineDirection2)
+   {
+      double pointOnLine1x = pointOnLine1.getX();
+      double pointOnLine1y = pointOnLine1.getY();
+      double lineDirection1x = lineDirection1.getX();
+      double lineDirection1y = lineDirection1.getY();
+      double pointOnLine2x = pointOnLine2.getX();
+      double pointOnLine2y = pointOnLine2.getY();
+      double lineDirection2x = lineDirection2.getX();
+      double lineDirection2y = lineDirection2.getY();
+
+      boolean success = getIntersectionBetweenTwoLines(pointOnLine1x, pointOnLine1y, lineDirection1x, lineDirection1y, pointOnLine2x, pointOnLine2y,
+                                                       lineDirection2x, lineDirection2y, tempIntersection.get());
+
+      if (!success)
+         intersectionToPack.setToNaN();
+      return success;
+   }
+
+   public static boolean getIntersectionBetweenTwoLines(double pointOnLine1x, double pointOnLine1y, double lineDirection1x, double lineDirection1y,
+                                                        double pointOnLine2x, double pointOnLine2y, double lineDirection2x, double lineDirection2y,
+                                                        Point2d intersectionToPack)
+   {
+      //      We solve for x the problem of the form: A * x = b
+      //            A      *     x     =      b
+      //      / lineDirection2x -lineDirection1x \   / alpha \   / pointOnLine2x - pointOnLine1x \
+      //      |                                  | * |       | = |                               |
+      //      \ lineDirection2y -lineDirection1y /   \ beta  /   \ pointOnLine2y - pointOnLine1y /
+      // Here, only alpha or beta is needed.
+
+      double determinant = -lineDirection1x * lineDirection2y + lineDirection1y * lineDirection2x;
+
+      double dx = pointOnLine2x - pointOnLine1x;
+      double dy = pointOnLine2y - pointOnLine1y;
+
+      double epsilon = 1.0E-12;
+      if (Math.abs(determinant) < epsilon)
+      { // The lines are parallel
+         // Check if they are collinear
+         double cross = dx * lineDirection1y - dy * lineDirection1x;
+         if (Math.abs(cross) < epsilon)
          {
-            alphaBetaToPack[0] = Double.NaN;
-            alphaBetaToPack[1] = Double.NaN;
+            /*
+             *  The two lines are collinear.
+             *  There's an infinite number of intersection.
+             *  Let's just set the result to pointOnLine1.
+             */
+            intersectionToPack.set(pointOnLine1x, pointOnLine1y);
+            return true;
          }
          else
          {
-            double oneOverDeterminant = 1.0 / determinant;
-            double AInverse00 = oneOverDeterminant * -vy1; // A[1][1];
-            double AInverse01 = oneOverDeterminant *  vx1; //-A[0][1];
-            double AInverse10 = oneOverDeterminant * -vy0; //-A[1][0];
-            double AInverse11 = oneOverDeterminant *  vx0; // A[0][0];
-
-            double dx = x1 - x0;
-            double dy = y1 - y0;
-            double alpha = AInverse00 * dx + AInverse01 * dy;// AInverse00 * b[0] + AInverse01 * b[1];
-            double beta  = AInverse10 * dx + AInverse11 * dy;// AInverse10 * b[0] + AInverse11 * b[1];
-
-            alphaBetaToPack[0] = alpha;
-            alphaBetaToPack[1] = beta;
+            return false;
          }
       }
+      else
+      {
+         double oneOverDeterminant = 1.0 / determinant;
+         double AInverse00 = oneOverDeterminant * -lineDirection2y;
+         double AInverse01 = oneOverDeterminant * lineDirection2x;
+
+         double alpha = AInverse00 * dx + AInverse01 * dy;
+
+         intersectionToPack.setX(pointOnLine1x + alpha * lineDirection1x);
+         intersectionToPack.setY(pointOnLine1y + alpha * lineDirection1y);
+         return true;
+      }
+   }
+
+   /**
+    * Finds the intersection point between two lines.
+    * First line starts at (firstPointX, firstPointY) and has direction vector (firstVectorX, firstVectorY).
+    * The second line starts at (secondPointX, secondPointY) and has direction vector (secondVectorX, secondVectorY).
+    * Returns false if the lines are parallel, true otherwise
+    *
+    * @param x0 x-coordinate of a point located on the first line.
+    * @param y0 y-coordinate of a point located on the first line.
+    * @param vx0 x-component of the direction of the first line.
+    * @param vy0 y-component of the direction of the first line.
+    * @param x0 x-coordinate of a point located on the second line.
+    * @param y0 y-coordinate of a point located on the second line.
+    * @param vx1 x-component of the direction of the second line.
+    * @param vy1 y-component of the direction of the second line.
+    * @param alphaBetaToPack argument in which are packed {alpha, beta} such that the intersection between the lines occurs at P1 + alpha * V1 = P2 + beta * V2
+    * @return whether the lines intersect or not.
+    */
+   // TODO only used by the intersection methods in this class
+   public static boolean intersection(double x0, double y0, double vx0, double vy0, double x1, double y1, double vx1, double vy1, double[] alphaBetaToPack)
+   {
+      //      We solve for x the problem of the form: A * x = b
+      //            A      *     x     =      b
+      //      / vx0 -vx1 \   / alpha \   / x1 - x0 \
+      //      |          | * |       | = |         |
+      //      \ vy0 -vy1 /   \ beta  /   \ y1 - y0 /
+      //
+      //
+      //      double[][] A = new double[2][2];
+      //      A[0][0] = vx0;
+      //      A[0][1] = -vx1;
+      //      A[1][0] = vy0;
+      //      A[1][1] = -vy1;
+      //
+      //      double[] b = new double[2];
+      //      b[0] = x1 - x0;
+      //      b[1] = y1 - y0;
+
+      double determinant = -vx0 * vy1 + vy0 * vx1; //(A[0][0] * A[1][1]) - (A[1][0] * A[0][1]);
+
+      double epsilon = 1.0E-12;
+      if (Math.abs(determinant) < epsilon)
+      {
+         alphaBetaToPack[0] = Double.NaN;
+         alphaBetaToPack[1] = Double.NaN;
+         return false;
+      }
+      else
+      {
+         double oneOverDeterminant = 1.0 / determinant;
+         double AInverse00 = oneOverDeterminant * -vy1; // A[1][1];
+         double AInverse01 = oneOverDeterminant * vx1; //-A[0][1];
+         double AInverse10 = oneOverDeterminant * -vy0; //-A[1][0];
+         double AInverse11 = oneOverDeterminant * vx0; // A[0][0];
+
+         double dx = x1 - x0;
+         double dy = y1 - y0;
+         double alpha = AInverse00 * dx + AInverse01 * dy;// AInverse00 * b[0] + AInverse01 * b[1];
+         double beta = AInverse10 * dx + AInverse11 * dy;// AInverse10 * b[0] + AInverse11 * b[1];
+
+         alphaBetaToPack[0] = alpha;
+         alphaBetaToPack[1] = beta;
+         return true;
+      }
+   }
 
    /**
     * Returns the line segment percentages of the intersection point between two lines if the lines are intersecting and not colinear.

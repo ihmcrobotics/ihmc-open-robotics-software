@@ -351,74 +351,23 @@ public class Line2d implements Geometry2d<Line2d>
       return normalizedVector.dot(line.getNormalizedVector()) < 1e-7;
    }
 
-   private final double[] tempAlphaBeta = new double[2];
    @Override
    public Point2d intersectionWith(Line2d secondLine)
    {
-      double x0 = point.getX();
-      double y0 = point.getY();
-
-      double vx0 = normalizedVector.getX();
-      double vy0 = normalizedVector.getY();
-
-      double x1 = secondLine.point.getX();
-      double y1 = secondLine.point.getY();
-
-      double vx1 = secondLine.normalizedVector.getX();
-      double vy1 = secondLine.normalizedVector.getY();
-
-      GeometryTools.intersection(x0, y0, vx0, vy0, x1, y1, vx1, vy1, tempAlphaBeta);
-      if (Double.isNaN(tempAlphaBeta[0]))
-         return null;
-
-      Point2d returnPoint2d = new Point2d(x0 + vx0 * tempAlphaBeta[0], y0 + vy0 * tempAlphaBeta[0]);
-
-      return returnPoint2d;
+      return GeometryTools.getIntersectionBetweenTwoLines(point, normalizedVector, secondLine.point, secondLine.normalizedVector);
    }
 
-   public boolean intersectionWith(Point2d intersectionToPack, Line2d secondLine)
+   public boolean intersectionWith(Line2d secondLine, Point3d intersectionToPack)
    {
-      double x0 = point.getX();
-      double y0 = point.getY();
-
-      double vx0 = normalizedVector.getX();
-      double vy0 = normalizedVector.getY();
-
-      double x1 = secondLine.point.getX();
-      double y1 = secondLine.point.getY();
-
-      double vx1 = secondLine.normalizedVector.getX();
-      double vy1 = secondLine.normalizedVector.getY();
-
-      GeometryTools.intersection(x0, y0, vx0, vy0, x1, y1, vx1, vy1, tempAlphaBeta);
-      if (Double.isNaN(tempAlphaBeta[0]))
-         return false;
-
-      intersectionToPack.set(x0 + vx0 * tempAlphaBeta[0], y0 + vy0 * tempAlphaBeta[0]);
-
-      return true;
+      boolean success = GeometryTools.getIntersectionBetweenTwoLines(point, normalizedVector, secondLine.point, secondLine.normalizedVector, tempPoint2d);
+      if (success)
+         intersectionToPack.set(tempPoint2d.getX(), tempPoint2d.getY(), intersectionToPack.getZ());
+      return success;
    }
 
-   public void intersectionWith(Line2d line, Point3d intersectionToPack)
+   public boolean intersectionWith(Line2d secondLine, Point2d intersectionToPack)
    {
-      intersectionWith(line.getPoint().getX(), line.getPoint().getY(), line.getNormalizedVector().getX(), line.getNormalizedVector().getY());
-      intersectionToPack.set(tempPoint2d.getX(), tempPoint2d.getY(), intersectionToPack.getZ());
-   }
-
-   public void intersectionWith(Line2d line, Point2d intersectionToPack)
-   {
-      intersectionWith(line.getPoint().getX(), line.getPoint().getY(), line.getNormalizedVector().getX(), line.getNormalizedVector().getY());
-      intersectionToPack.set(tempPoint2d);
-   }
-
-   private Point2d intersectionWith(double x1, double y1, double vx1, double vy1)
-   {
-      GeometryTools.intersection(point.getX(), point.getY(), normalizedVector.getX(), normalizedVector.getY(), x1, y1, vx1, vy1, tempAlphaBeta);
-      if (Double.isNaN(tempAlphaBeta[0]))
-         throw new RuntimeException("Lines are parallel");
-
-      tempPoint2d.set(point.getX() + normalizedVector.getX() * tempAlphaBeta[0], point.getY() + normalizedVector.getY() * tempAlphaBeta[0]);
-      return tempPoint2d;
+      return GeometryTools.getIntersectionBetweenTwoLines(point, normalizedVector, secondLine.point, secondLine.normalizedVector, intersectionToPack);
    }
 
    @Override
