@@ -2083,12 +2083,26 @@ public class GeometryTools
       else
          return chordLength / (2.0 * Math.sin(0.5 * chordAngle));
    }
-   
-   public static void clipToBoundingBox(Tuple3d tuple, double x1, double x2, double y1, double y2, double z1, double z2)
+
+   /**
+    * Clip each component of the given tuple to the axis-aligned bounding box.
+    * Each of the bounding box minimum coordinates is defined as follows: {@code minX = x1 < x2 ? x1 : x2}.
+    * Each of the bounding box maximum coordinates is defined as follows: {@code maxX = x1 > x2 ? x1 : x2}.
+    * 
+    * @param tupleToClip the 3D tuple to clip to the bounding box. Modified.
+    * @param x1 minimum/maximum x coordinate of the bounding box.
+    * @param x2 minimum/maximum x coordinate of the bounding box.
+    * @param y1 minimum/maximum y coordinate of the bounding box.
+    * @param y2 minimum/maximum y coordinate of the bounding box.
+    * @param z1 minimum/maximum z coordinate of the bounding box.
+    * @param z2 minimum/maximum z coordinate of the bounding box.
+    */
+   // FIXME this is rather unsafe, the user should know the difference between the minimum and maximum coordinates of the bounding box.
+   public static void clipToBoundingBox(Tuple3d tupleToClip, double x1, double x2, double y1, double y2, double z1, double z2)
    {
-      tuple.setX(x1 < x2 ? MathTools.clipToMinMax(tuple.getX(), x1, x2) : MathTools.clipToMinMax(tuple.getX(), x2, x1));
-      tuple.setY(y1 < y2 ? MathTools.clipToMinMax(tuple.getY(), y1, y2) : MathTools.clipToMinMax(tuple.getY(), y2, y1));
-      tuple.setZ(z1 < z2 ? MathTools.clipToMinMax(tuple.getZ(), z1, z2) : MathTools.clipToMinMax(tuple.getZ(), z2, z1));
+      tupleToClip.setX(x1 < x2 ? MathTools.clipToMinMax(tupleToClip.getX(), x1, x2) : MathTools.clipToMinMax(tupleToClip.getX(), x2, x1));
+      tupleToClip.setY(y1 < y2 ? MathTools.clipToMinMax(tupleToClip.getY(), y1, y2) : MathTools.clipToMinMax(tupleToClip.getY(), y2, y1));
+      tupleToClip.setZ(z1 < z2 ? MathTools.clipToMinMax(tupleToClip.getZ(), z1, z2) : MathTools.clipToMinMax(tupleToClip.getZ(), z2, z1));
    }
 
    // TODO ensure consistant with lineSegment2D
