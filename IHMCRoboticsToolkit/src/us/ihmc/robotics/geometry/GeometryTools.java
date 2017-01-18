@@ -1666,32 +1666,124 @@ public class GeometryTools
    }
 
    /**
-    * Returns the Normal of a plane that is defined by three points
-    * Returns a null if three points are linear, colinear, or equal
-    * Returns a null if two points are the same
+    * Computes the normal of a plane that is defined by three points.
+    * <p>
+    * Edge cases:
+    * <ul>
+    *    <li> Returns a {@code null} if the three points are on a line.
+    *    <li> Returns {@code null} if two or three points are equal.
+    * </ul>
+    * </p>
+    * <p>
+    * WARNING: This method generates garbage.
+    * </p>
     *
-    * @param point1 FramePoint
-    * @param point2 FramePoint
-    * @param point3 FramePoint
-    * @return FrameVector
+    * @param firstPointOnPlane first point on the plane. Not modified.
+    * @param secondPointOnPlane second point on the plane. Not modified.
+    * @param thirdPointOnPlane third point on the plane. Not modified.
+    * @return the plane normal or {@code null} when the normal could not be determined.
+    * @throws ReferenceFrameMismatchException if the arguments are not expressed in the same reference frame.
     */
-   public static FrameVector getPlaneNormalGivenThreePoints(FramePoint point1, FramePoint point2, FramePoint point3)
+   public static FrameVector getPlaneNormalGivenThreePoints(FramePoint firstPointOnPlane, FramePoint secondPointOnPlane, FramePoint thirdPointOnPlane)
    {
-      FrameVector oneToTwo = new FrameVector(point2);
-      oneToTwo.sub(point1);
-
-      FrameVector oneToThree = new FrameVector(point3);
-      oneToThree.sub(point1);
-
-      FrameVector normal = new FrameVector(oneToThree.getReferenceFrame());
-      normal.cross(oneToTwo, oneToThree);
-
-      if (normal.length() > 1.0e-7)
-         normal.normalize();
-      else
+      FrameVector normal = new FrameVector();
+      boolean success = getPlaneNormalGivenThreePoints(firstPointOnPlane, secondPointOnPlane, thirdPointOnPlane, normal);
+      if (!success)
          return null;
+      else
+         return normal;
+   }
 
-      return normal;
+   /**
+    * Computes the normal of a plane that is defined by three points.
+    * <p>
+    * Edge cases:
+    * <ul>
+    *    <li> Fails and returns {@code false} if the three points are on a line.
+    *    <li> Fails and returns {@code false} if two or three points are equal.
+    * </ul>
+    * </p>
+    *
+    * @param firstPointOnPlane first point on the plane. Not modified.
+    * @param secondPointOnPlane second point on the plane. Not modified.
+    * @param thirdPointOnPlane third point on the plane. Not modified.
+    * @param normalToPack the vector in which the result is stored. Modified.
+    * @return whether the plane normal is properly determined.
+    * @throws ReferenceFrameMismatchException if the arguments are not expressed in the same reference frame.
+    */
+   public static boolean getPlaneNormalGivenThreePoints(FramePoint firstPointOnPlane, FramePoint secondPointOnPlane, FramePoint thirdPointOnPlane, FrameVector normalToPack)
+   {
+      firstPointOnPlane.checkReferenceFrameMatch(secondPointOnPlane);
+      firstPointOnPlane.checkReferenceFrameMatch(thirdPointOnPlane);
+      normalToPack.setToZero(firstPointOnPlane.getReferenceFrame());
+
+      return getPlaneNormalGivenThreePoints(firstPointOnPlane.getPoint(), secondPointOnPlane.getPoint(), thirdPointOnPlane.getPoint(), normalToPack.getVector());
+   }
+
+   /**
+    * Computes the normal of a plane that is defined by three points.
+    * <p>
+    * Edge cases:
+    * <ul>
+    *    <li> Returns a {@code null} if the three points are on a line.
+    *    <li> Returns {@code null} if two or three points are equal.
+    * </ul>
+    * </p>
+    * <p>
+    * WARNING: This method generates garbage.
+    * </p>
+    *
+    * @param firstPointOnPlane first point on the plane. Not modified.
+    * @param secondPointOnPlane second point on the plane. Not modified.
+    * @param thirdPointOnPlane third point on the plane. Not modified.
+    * @return the plane normal or {@code null} when the normal could not be determined.
+    */
+   public static Vector3d getPlaneNormalGivenThreePoints(Point3d firstPointOnPlane, Point3d secondPointOnPlane, Point3d thirdPointOnPlane)
+   {
+      Vector3d normal = new Vector3d();
+      boolean success = getPlaneNormalGivenThreePoints(firstPointOnPlane, secondPointOnPlane, thirdPointOnPlane, normal);
+      if (!success)
+         return null;
+      else
+         return normal;
+   }
+
+   /**
+    * Computes the normal of a plane that is defined by three points.
+    * <p>
+    * Edge cases:
+    * <ul>
+    *    <li> Fails and returns {@code false} if the three points are on a line.
+    *    <li> Fails and returns {@code false} if two or three points are equal.
+    * </ul>
+    * </p>
+    *
+    * @param firstPointOnPlane first point on the plane. Not modified.
+    * @param secondPointOnPlane second point on the plane. Not modified.
+    * @param thirdPointOnPlane third point on the plane. Not modified.
+    * @param normalToPack the vector in which the result is stored. Modified.
+    * @return whether the plane normal is properly determined.
+    */
+   public static boolean getPlaneNormalGivenThreePoints(Point3d firstPointOnPlane, Point3d secondPointOnPlane, Point3d thirdPointOnPlane, Vector3d normalToPack)
+   {
+      double v1_x = secondPointOnPlane.getX() - firstPointOnPlane.getX();
+      double v1_y = secondPointOnPlane.getY() - firstPointOnPlane.getY();
+      double v1_z = secondPointOnPlane.getZ() - firstPointOnPlane.getZ();
+   
+      double v2_x = thirdPointOnPlane.getX() - firstPointOnPlane.getX();
+      double v2_y = thirdPointOnPlane.getY() - firstPointOnPlane.getY();
+      double v2_z = thirdPointOnPlane.getZ() - firstPointOnPlane.getZ();
+   
+      normalToPack.setX(v1_y * v2_z - v1_z * v2_y);
+      normalToPack.setY(v2_x * v1_z - v2_z * v1_x);
+      normalToPack.setZ(v1_x * v2_y - v1_y * v2_x);
+
+      double normalLength = normalToPack.length();
+      if (normalLength < 1.0e-7)
+         return false;
+
+      normalToPack.scale(1.0 / normalLength);
+      return true;
    }
 
    /**
@@ -1751,36 +1843,6 @@ public class GeometryTools
    public static void getPerpendicularVector2d(FrameVector perpendicularVectorToPack, FrameVector vector)
    {
       perpendicularVectorToPack.set(-vector.getY(), vector.getX(), perpendicularVectorToPack.getZ());
-   }
-
-   /**
-    * Converts three 3D points into 3 framePoints (defines a plane)
-    * Calls getPlaneNormalGivenThreePoints
-    *
-    * Returns normal to plane
-    * Returns null if three points are:
-    *      linear
-    *      colinear
-    *      equal
-    *      if 2 points are equal
-    *
-    * @param point1 Point3d
-    * @param point2 Point3d
-    * @param point3 Point3d
-    * @return Vector3d
-    */
-   public static Vector3d getPlaneNormalGivenThreePoints(Point3d point1, Point3d point2, Point3d point3)
-   {
-      FramePoint framePoint1 = new FramePoint(ReferenceFrame.getWorldFrame(), point1);
-      FramePoint framePoint2 = new FramePoint(ReferenceFrame.getWorldFrame(), point2);
-      FramePoint framePoint3 = new FramePoint(ReferenceFrame.getWorldFrame(), point3);
-
-      FrameVector normal = getPlaneNormalGivenThreePoints(framePoint1, framePoint2, framePoint3);
-
-      if (normal == null)
-         return null;
-
-      return normal.getVectorCopy();
    }
 
    /**

@@ -1307,8 +1307,33 @@ public class GeometryToolsTest
       Vector3d expectedReturn7 = null;
       Vector3d actualReturn7 = GeometryTools.getPlaneNormalGivenThreePoints(point61, point62, point63);
       assertEquals("return value", expectedReturn7, actualReturn7);
+   }
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testGetPlaneNormalGivenThreePoints2()
+   {
+      for (int i = 0; i < 100; i++)
+      {
+         Vector3d expectedPlaneNormal = RandomTools.generateRandomVector(random, 1.0);
 
+         Point3d firstPointOnPlane = RandomTools.generateRandomPoint3d(random, -10.0, 10.0);
+         Point3d secondPointOnPlane = new Point3d();
+         Point3d thirdPointOnPlane = new Point3d();
+
+         Vector3d secondOrthogonalToNormal = RandomTools.generateRandomOrthogonalVector3d(random, expectedPlaneNormal, true);
+         Vector3d thirdOrthogonalToNormal = RandomTools.generateRandomOrthogonalVector3d(random, expectedPlaneNormal, true);
+
+         secondPointOnPlane.scaleAdd(RandomTools.generateRandomDouble(random, 1.0, 10.0), secondOrthogonalToNormal, firstPointOnPlane);
+         thirdPointOnPlane.scaleAdd(RandomTools.generateRandomDouble(random, 1.0, 10.0), thirdOrthogonalToNormal, firstPointOnPlane);
+
+         Vector3d actualPlaneNormal = GeometryTools.getPlaneNormalGivenThreePoints(firstPointOnPlane, secondPointOnPlane, thirdPointOnPlane);
+
+         if (expectedPlaneNormal.dot(actualPlaneNormal) < 0.0)
+            actualPlaneNormal.negate();
+
+         JUnitTools.assertTuple3dEquals(expectedPlaneNormal, actualPlaneNormal, Epsilons.ONE_TRILLIONTH);
+      }
    }
 
 /*
