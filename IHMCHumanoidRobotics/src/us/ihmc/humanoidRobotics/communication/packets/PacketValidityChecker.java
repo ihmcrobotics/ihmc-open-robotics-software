@@ -94,14 +94,14 @@ public abstract class PacketValidityChecker
    {
       ObjectErrorType packetFieldErrorType;
 
-      packetFieldErrorType = ObjectValidityChecker.validateDouble(packetToCheck.swingTime);
+      packetFieldErrorType = ObjectValidityChecker.validateDouble(packetToCheck.defaultSwingTime);
       if (packetFieldErrorType != null)
       {
          String errorMessage = "swingTime field" + packetFieldErrorType.getMessage();
          return errorMessage;
       }
 
-      packetFieldErrorType = ObjectValidityChecker.validateDouble(packetToCheck.transferTime);
+      packetFieldErrorType = ObjectValidityChecker.validateDouble(packetToCheck.defaultTransferTime);
       if (packetFieldErrorType != null)
       {
          String errorMessage = "transferTime field" + packetFieldErrorType.getMessage();

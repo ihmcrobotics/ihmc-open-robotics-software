@@ -12,7 +12,7 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import us.ihmc.communication.configuration.NetworkParameterKeys;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.concurrent.ConcurrentRingBuffer;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.multicastLogDataProtocol.LogUtils;
 import us.ihmc.multicastLogDataProtocol.broadcast.LogSessionBroadcaster;
 import us.ihmc.multicastLogDataProtocol.control.LogControlServer;

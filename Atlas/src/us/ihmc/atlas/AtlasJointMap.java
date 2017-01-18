@@ -49,7 +49,7 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import us.ihmc.atlas.parameters.AtlasContactPointParameters;
 import us.ihmc.avatar.drcRobot.NewRobotPhysicalProperties;
-import us.ihmc.graphics3DAdapter.jme.util.JMEDataTypeUtils;
+import us.ihmc.jMonkeyEngineToolkit.jme.util.JMEDataTypeUtils;
 import us.ihmc.robotics.controllers.YoPDGains;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
@@ -63,6 +63,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
+import us.ihmc.wholeBodyController.FootContactPoints;
 
 public class AtlasJointMap implements DRCRobotJointMap
 {
@@ -103,13 +104,19 @@ public class AtlasJointMap implements DRCRobotJointMap
    private final AtlasContactPointParameters contactPointParameters;
    private final AtlasRobotVersion atlasVersion;
    private final NewRobotPhysicalProperties atlasPhysicalProperties;
-   
+
    private final SideDependentList<String> nameOfJointsBeforeThighs = new SideDependentList<>();
    private final SideDependentList<String> nameOfJointsBeforeHands = new SideDependentList<>();
-   
+
    private final String[] jointNamesBeforeFeet = new String[2];
 
+
    public AtlasJointMap(AtlasRobotVersion atlasVersion, NewRobotPhysicalProperties atlasPhysicalProperties)
+   {
+      this(atlasVersion, atlasPhysicalProperties, null);
+   }
+
+   public AtlasJointMap(AtlasRobotVersion atlasVersion, NewRobotPhysicalProperties atlasPhysicalProperties, FootContactPoints simulationContactPoints)
    {
       this.atlasVersion = atlasVersion;
       this.atlasPhysicalProperties = atlasPhysicalProperties;
@@ -171,14 +178,14 @@ public class AtlasJointMap implements DRCRobotJointMap
       }
 
       boolean createFootContactPoints = true;
-      contactPointParameters = new AtlasContactPointParameters(this, atlasVersion, createFootContactPoints);
-      
+      contactPointParameters = new AtlasContactPointParameters(this, atlasVersion, createFootContactPoints, simulationContactPoints);
+
       for (RobotSide robtSide : RobotSide.values)
       {
          nameOfJointsBeforeThighs.put(robtSide, legJointStrings.get(robtSide).get(HIP_PITCH));
          nameOfJointsBeforeHands.put(robtSide, armJointStrings.get(robtSide).get(SECOND_WRIST_PITCH));
       }
-      
+
       jointNamesBeforeFeet[0] = getJointBeforeFootName(RobotSide.LEFT);
       jointNamesBeforeFeet[1] = getJointBeforeFootName(RobotSide.RIGHT);
    }
@@ -289,13 +296,13 @@ public class AtlasJointMap implements DRCRobotJointMap
    {
       return legJointStrings.get(robotSide).get(ANKLE_ROLL);
    }
-   
+
    @Override
    public String getJointBeforeHandName(RobotSide robotSide)
    {
       return nameOfJointsBeforeHands.get(robotSide);
    }
-   
+
    @Override
    public AtlasContactPointParameters getContactPointParameters()
    {
@@ -329,7 +336,7 @@ public class AtlasJointMap implements DRCRobotJointMap
    public Set<String> getLastSimulatedJoints()
    {
       HashSet<String> lastSimulatedJoints = new HashSet<>();
-      
+
       if(!atlasVersion.getHandModel().isHandSimulated())
       {
          for (RobotSide robotSide : RobotSide.values)
@@ -357,13 +364,13 @@ public class AtlasJointMap implements DRCRobotJointMap
       RigidBodyTransform attachmentPlateToWrist = atlasPhysicalProperties.getHandAttachmentPlateToWristTransforms().get(robotSide);
       RigidBodyTransform handControlFrameToWristTranform = new RigidBodyTransform();
       handControlFrameToWristTranform.multiply(attachmentPlateToWrist, attachmentPlateToPalm);
-      
+
       Vector3d translation = new Vector3d();
       handControlFrameToWristTranform.getTranslation(translation);
       translation.scale(getModelScale());
       handControlFrameToWristTranform.setTranslation(translation);
-      
-      
+
+
       return handControlFrameToWristTranform;
 //      return AtlasPhysicalProperties.handAttachmentPlateToWristTransforms.get(robotSide);
    }
@@ -403,7 +410,7 @@ public class AtlasJointMap implements DRCRobotJointMap
    {
       return pelvisName;
    }
-   
+
    @Override
    public String[] getJointNamesBeforeFeet()
    {
@@ -426,7 +433,7 @@ public class AtlasJointMap implements DRCRobotJointMap
          {
             return robotSide;
          }
-         
+
          String endOfArm = armJointStrings.get(robotSide).get(SECOND_WRIST_PITCH);
          if(endOfArm != null && endOfArm.equals(joineNameBeforeEndEffector))
          {
@@ -435,13 +442,13 @@ public class AtlasJointMap implements DRCRobotJointMap
       }
       throw new IllegalArgumentException(joineNameBeforeEndEffector + " was not listed as an end effector in " + this.getClass().getSimpleName());
    }
-   
+
    @Override
    public double getModelScale()
    {
       return atlasPhysicalProperties.getModelScale();
    }
-   
+
    @Override
    public double getMassScalePower()
    {
@@ -452,7 +459,7 @@ public class AtlasJointMap implements DRCRobotJointMap
    {
       return atlasPhysicalProperties;
    }
-   
+
    public String[] getHighInertiaForStableSimulationJoints()
    {
       return new String[] { "hokuyo_joint" };

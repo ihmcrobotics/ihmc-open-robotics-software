@@ -16,11 +16,11 @@ import us.ihmc.SdfLoader.SDFJointHolder;
 import us.ihmc.SdfLoader.SDFLinkHolder;
 import us.ihmc.SdfLoader.xmlDescription.Collision;
 import us.ihmc.SdfLoader.xmlDescription.SDFGeometry.Sphere;
-import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
+import us.ihmc.wholeBodyController.FootContactPoints;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
 public class ValkyrieContactPointParameters extends RobotContactPointParameters
@@ -31,13 +31,15 @@ public class ValkyrieContactPointParameters extends RobotContactPointParameters
 
    private final DRCRobotJointMap jointMap;
 
-   public ValkyrieContactPointParameters(DRCRobotJointMap jointMap)
+   public ValkyrieContactPointParameters(DRCRobotJointMap jointMap, FootContactPoints footContactPoints)
    {
       super(jointMap, footWidth, footLength, soleToAnkleFrameTransforms);
       this.jointMap = jointMap;
 
-      createDefaultControllerFootContactPoints();
-      createDefaultSimulationFootContactPoints();
+      if (footContactPoints == null)
+         createDefaultFootContactPoints();
+      else
+         createContactPoints(footContactPoints);
    }
 
    private void checkJointChildren(SDFJointHolder joint)
@@ -142,11 +144,6 @@ public class ValkyrieContactPointParameters extends RobotContactPointParameters
             setControllerFootContactPoint(robotSide, footGroundContactPoints.get(robotSide));
          }
       }
-   }
-
-   public void addMoreFootContactPointsSimOnly(int nContactPointsX, int nContactPointsY, boolean edgePointsOnly)
-   {
-      addMoreSimulationFootContactPoints(nContactPointsX, nContactPointsY, edgePointsOnly, true);
    }
 
    @Override

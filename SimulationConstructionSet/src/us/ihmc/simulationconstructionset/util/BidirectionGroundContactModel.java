@@ -1,6 +1,6 @@
 package us.ihmc.simulationconstructionset.util;
 
-import us.ihmc.graphics3DAdapter.GroundProfile3D;
+import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.simulationconstructionset.GroundContactModel;

@@ -2,7 +2,7 @@ package us.ihmc.quadrupedRobotics.planning.chooser.footstepChooser;
 
 import javax.vecmath.Vector3d;
 
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.MockQuadrupedReferenceFrames;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -16,7 +16,7 @@ import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.gui.tools.VisualizerUtils;
+import us.ihmc.simulationconstructionset.gui.tools.SimulationOverheadPlotterFactory;
 
 public class QuadrupedPathPreviewVisualizer implements RobotController
 {
@@ -69,7 +69,9 @@ public class QuadrupedPathPreviewVisualizer implements RobotController
       yoFootPositions.get(RobotQuadrant.HIND_RIGHT).set(new Vector3d(-0.12, -0.14, 0.0));
       
       boolean showOverheadView = true;
-      VisualizerUtils.createOverheadPlotter(scs, showOverheadView, yoGraphicsListRegistry);
+      SimulationOverheadPlotterFactory simulationOverheadPlotterFactory = scs.createSimulationOverheadPlotterFactory();
+      simulationOverheadPlotterFactory.setShowOnStart(showOverheadView);
+      simulationOverheadPlotterFactory.addYoGraphicsListRegistries(yoGraphicsListRegistry);
       scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
       scs.setDT(simulateDT, recordFrequency);
       scs.startOnAThread();

@@ -19,6 +19,7 @@ import javafx.scene.shape.Box;
 import javafx.scene.shape.MeshView;
 import javafx.stage.Stage;
 import us.ihmc.javaFXToolkit.cameraControllers.FocusBasedCameraMouseEventHandler;
+import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.robotics.random.RandomTools;
 
 public class MultiColorMeshBuilderVisualizer extends Application
@@ -38,13 +39,9 @@ public class MultiColorMeshBuilderVisualizer extends Application
    {
       primaryStage.setTitle(getClass().getSimpleName());
 
-      Group rootNode = new Group();
-      Scene scene = new Scene(rootNode, 600, 400, true);
-      scene.setFill(Color.GRAY);
-      setupCamera(rootNode, scene);
-
-      JavaFXCoordinateSystem worldCoordinateSystem = new JavaFXCoordinateSystem(0.3);
-      rootNode.getChildren().add(worldCoordinateSystem);
+      View3DFactory view3dFactory = new View3DFactory(600, 400);
+      view3dFactory.addCameraController();
+      view3dFactory.addWorldCoordinateSystem(0.3);
 
       Color[] colors = {Color.RED, Color.YELLOW, Color.BEIGE, Color.CHOCOLATE, Color.ANTIQUEWHITE, Color.CYAN};
 
@@ -55,7 +52,7 @@ public class MultiColorMeshBuilderVisualizer extends Application
       switch (MESH_TO_DISPLAY)
       {
       case BOX:
-         rootNode.getChildren().addAll(addRandomBoxes(colors, meshBuilder));
+         view3dFactory.addNodesToView(addRandomBoxes(colors, meshBuilder));
          break;
       case LINE:
          addLine(meshBuilder);
@@ -67,9 +64,9 @@ public class MultiColorMeshBuilderVisualizer extends Application
 
       MeshView meshView = new MeshView(meshBuilder.generateMesh());
       meshView.setMaterial(meshBuilder.generateMaterial());
-      rootNode.getChildren().add(meshView);
+      view3dFactory.addNodeToView(meshView);
 
-      primaryStage.setScene(scene);
+      primaryStage.setScene(view3dFactory.getScene());
       primaryStage.show();
    }
 
@@ -132,19 +129,6 @@ public class MultiColorMeshBuilderVisualizer extends Application
    private Color randomColor()
    {
       return Color.hsb(360.0 * random.nextDouble(), random.nextDouble(), random.nextDouble());
-   }
-
-   private void setupCamera(Group root, Scene scene)
-   {
-      PerspectiveCamera camera = new PerspectiveCamera(true);
-      camera.setNearClip(0.05);
-      camera.setFarClip(50.0);
-      scene.setCamera(camera);
-
-      Vector3d up = new Vector3d(0.0, 0.0, 1.0);
-      FocusBasedCameraMouseEventHandler cameraController = new FocusBasedCameraMouseEventHandler(scene.widthProperty(), scene.heightProperty(), camera, up);
-      scene.addEventHandler(Event.ANY, cameraController);
-      root.getChildren().add(cameraController.getFocusPointViz());
    }
 
    public static void main(String[] args)

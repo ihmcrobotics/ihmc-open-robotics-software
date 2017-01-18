@@ -61,9 +61,8 @@ dependencies {
     compile ihmc.getProjectDependency(":KalmanProject")
     compile ihmc.getProjectDependency(":IHMCJavaToolkit")
     compile ihmc.getProjectDependency(":IHMCRoboticsToolkit")
-    compile ihmc.getProjectDependency(":IHMCGraphics3DDescription")
+    compile ihmc.getProjectDependency(":IHMCGraphicsDescription")
     compile ihmc.getProjectDependency(":IHMCRobotModels")
-    compile ihmc.getProjectDependency(":Graphics3DAdapter")
 
 
 	testCompile ihmc.getProjectDependency(":SimulationConstructionSet")

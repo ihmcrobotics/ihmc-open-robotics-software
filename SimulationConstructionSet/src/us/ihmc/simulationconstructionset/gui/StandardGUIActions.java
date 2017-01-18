@@ -17,7 +17,7 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JToolBar;
 
-import us.ihmc.graphics3DAdapter.camera.CameraConfigurationList;
+import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfigurationList;
 import us.ihmc.simulationconstructionset.commands.AllCommandsExecutor;
 import us.ihmc.simulationconstructionset.commands.SelectGUIConfigFromFileCommandExecutor;
 import us.ihmc.simulationconstructionset.commands.SelectGraphConfigurationCommandExecutor;

@@ -3,7 +3,7 @@ package us.ihmc.simulationconstructionset;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 
-import us.ihmc.graphics3DAdapter.camera.TrackingDollyCameraController;
+import us.ihmc.jMonkeyEngineToolkit.camera.TrackingDollyCameraController;
 import us.ihmc.robotics.dataStructures.listener.RewoundListener;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;

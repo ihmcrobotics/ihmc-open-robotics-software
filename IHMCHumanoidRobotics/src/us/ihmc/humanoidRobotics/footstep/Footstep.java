@@ -9,6 +9,7 @@ import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 
+import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
@@ -45,6 +46,11 @@ public class Footstep
    // foot trajectory generation
    public TrajectoryType trajectoryType = TrajectoryType.DEFAULT;
    public double swingHeight = 0;
+
+   // swing and transfer (before the step) time can be specified individually for a footstep
+   private boolean hasTimings = false;
+   private double swingTime = Double.NaN;
+   private double transferTime = Double.NaN;
 
    public Footstep(RigidBody endEffector, RobotSide robotSide, ReferenceFrame soleFrame, PoseReferenceFrame poseReferenceFrame, boolean trustHeight)
    {
@@ -478,16 +484,6 @@ public class Footstep
       ankleReferenceFrame.getPosition2dIncludingFrame(framePoint2dToPack);
    }
 
-   public boolean epsilonEquals(Footstep otherFootstep, double epsilon)
-   {
-      boolean arePosesEqual = ankleReferenceFrame.epsilonEquals(otherFootstep.ankleReferenceFrame, epsilon);
-      boolean bodiesHaveTheSameName = endEffector.getName().equals(otherFootstep.endEffector.getName());
-      boolean sameRobotSide = robotSide == otherFootstep.robotSide;
-      boolean isTrustHeightTheSame = trustHeight == otherFootstep.trustHeight;
-
-      return arePosesEqual && bodiesHaveTheSameName && sameRobotSide && isTrustHeightTheSame;
-   }
-
    public void setFootstepType(FootstepType footstepType)
    {
       this.footstepType = footstepType;
@@ -496,17 +492,6 @@ public class Footstep
    public FootstepType getFootstepType()
    {
       return footstepType;
-   }
-
-   public String toString()
-   {
-      FrameOrientation frameOrientation = new FrameOrientation(ankleReferenceFrame);
-      frameOrientation.changeFrame(ReferenceFrame.getWorldFrame());
-
-      double[] ypr = frameOrientation.getYawPitchRoll();
-      String yawPitchRoll = "YawPitchRoll = " + Arrays.toString(ypr);
-
-      return "id: " + id + " - pose: " + ankleReferenceFrame + " - trustHeight = " + trustHeight + "\n\tYawPitchRoll= {" + yawPitchRoll + "}";
    }
 
    public boolean isScriptedFootstep()
@@ -519,4 +504,69 @@ public class Footstep
       this.scriptedFootstep = scriptedFootstep;
    }
 
+   public void setTimings(double swingTime, double transferTime)
+   {
+      hasTimings = true;
+      this.swingTime = swingTime;
+      this.transferTime = transferTime;
+   }
+
+   public boolean hasTimings()
+   {
+      return hasTimings;
+   }
+
+   public double getSwingTime()
+   {
+      return swingTime;
+   }
+
+   public double getTransferTime()
+   {
+      return transferTime;
+   }
+
+   public double getStepTime()
+   {
+      return swingTime + transferTime;
+   }
+
+   public boolean epsilonEquals(Footstep otherFootstep, double epsilon)
+   {
+      boolean arePosesEqual = ankleReferenceFrame.epsilonEquals(otherFootstep.ankleReferenceFrame, epsilon);
+      boolean bodiesHaveTheSameName = endEffector.getName().equals(otherFootstep.endEffector.getName());
+      boolean sameRobotSide = robotSide == otherFootstep.robotSide;
+      boolean isTrustHeightTheSame = trustHeight == otherFootstep.trustHeight;
+
+      boolean sameWaypoints = swingWaypoints.size() == otherFootstep.swingWaypoints.size();
+      if (sameWaypoints)
+      {
+         for (int i = 0; i < swingWaypoints.size(); i++)
+         {
+            Point3d waypoint = swingWaypoints.get(i);
+            Point3d otherWaypoint = otherFootstep.swingWaypoints.get(i);
+            sameWaypoints = sameWaypoints && waypoint.epsilonEquals(otherWaypoint, epsilon);
+         }
+      }
+
+      boolean sameTimings = hasTimings == otherFootstep.hasTimings;
+      if (hasTimings)
+      {
+         sameTimings = sameTimings && MathTools.epsilonEquals(swingTime, otherFootstep.swingTime, epsilon);
+         sameTimings = sameTimings && MathTools.epsilonEquals(transferTime, otherFootstep.transferTime, epsilon);
+      }
+
+      return arePosesEqual && bodiesHaveTheSameName && sameRobotSide && isTrustHeightTheSame && sameWaypoints && sameTimings;
+   }
+
+   public String toString()
+   {
+      FrameOrientation frameOrientation = new FrameOrientation(ankleReferenceFrame);
+      frameOrientation.changeFrame(ReferenceFrame.getWorldFrame());
+
+      double[] ypr = frameOrientation.getYawPitchRoll();
+      String yawPitchRoll = "YawPitchRoll = " + Arrays.toString(ypr);
+
+      return "id: " + id + " - pose: " + ankleReferenceFrame + " - trustHeight = " + trustHeight + "\n\tYawPitchRoll= {" + yawPitchRoll + "}";
+   }
 }

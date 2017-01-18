@@ -35,11 +35,11 @@ import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameter
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
-import us.ihmc.graphics3DAdapter.jme.util.JMEGeometryUtils;
 import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.FootstepPlanningParameterization;
 import us.ihmc.humanoidRobotics.footstep.footstepSnapper.FootstepSnappingParameters;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
+import us.ihmc.jMonkeyEngineToolkit.jme.util.JMEGeometryUtils;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.SDFLogModelProvider;
 import us.ihmc.robotDataLogger.logger.LogSettings;
@@ -72,6 +72,7 @@ import us.ihmc.valkyrie.sensors.ValkyrieSensorSuiteManager;
 import us.ihmc.wholeBodyController.DRCHandType;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
+import us.ihmc.wholeBodyController.FootContactPoints;
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizerInterface;
 import us.ihmc.wholeBodyController.parameters.DefaultArmConfigurations;
 
@@ -107,15 +108,25 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
 
    private boolean enableJointDamping = true;
 
+   public ValkyrieRobotModel(DRCRobotModel.RobotTarget target, boolean headless, FootContactPoints simulationContactPoints)
+   {
+      this(target,headless, "DEFAULT", simulationContactPoints);
+   }
+
    public ValkyrieRobotModel(DRCRobotModel.RobotTarget target, boolean headless)
    {
-      this(target,headless, "DEFAULT");
+      this(target,headless, "DEFAULT", null);
    }
 
    public ValkyrieRobotModel(DRCRobotModel.RobotTarget target, boolean headless, String model)
    {
+      this(target, headless, model, null);
+   }
+
+   public ValkyrieRobotModel(DRCRobotModel.RobotTarget target, boolean headless, String model, FootContactPoints simulationContactPoints)
+   {
       this.target = target;
-      jointMap = new ValkyrieJointMap();
+      jointMap = new ValkyrieJointMap(simulationContactPoints);
       physicalProperties = new ValkyriePhysicalProperties();
       sensorInformation = new ValkyrieSensorInformation(target);
       InputStream sdf = null;
@@ -173,7 +184,7 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
 
       boolean runningOnRealRobot = target == RobotTarget.REAL_ROBOT;
       capturePointPlannerParameters = new ValkyrieCapturePointPlannerParameters(runningOnRealRobot);
-      armControllerParameters = new ValkyrieArmControllerParameters(runningOnRealRobot, jointMap);
+      armControllerParameters = new ValkyrieArmControllerParameters(jointMap, target);
       walkingControllerParameters = new ValkyrieWalkingControllerParameters(jointMap, target);
       stateEstimatorParamaters = new ValkyrieStateEstimatorParameters(runningOnRealRobot, getEstimatorDT(), sensorInformation, jointMap);
       robotDescription = createRobotDescription();
@@ -581,10 +592,5 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
       linkHolder.getInertia().setM11(0.00208115); // i_yy
       linkHolder.getInertia().setM12(-9.8165e-09); // i_yz
       linkHolder.getInertia().setM22(0.00178402); // i_zz
-   }
-
-   public void addMoreFootContactPointsSimOnly(int nContactPointsX, int nContactPointsY, boolean edgePointsOnly)
-   {
-      jointMap.getContactPointParameters().addMoreFootContactPointsSimOnly(nContactPointsX, nContactPointsY, edgePointsOnly);
    }
 }
