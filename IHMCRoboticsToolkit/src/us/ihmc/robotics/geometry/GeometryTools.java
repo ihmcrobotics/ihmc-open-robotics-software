@@ -1013,6 +1013,8 @@ public class GeometryTools
       }
    };
 
+   // FIXME This method is too confusing and error prone.
+   // FIXME It also needs to verify the reference frame of the arguments.
    public static boolean getIntersectionBetweenTwoLines2d(FramePoint intersectionToPack, FramePoint lineStart1, FramePoint lineEnd1, FramePoint lineStart2, FramePoint lineEnd2)
    {
       tempDirectionsForIntersection.get()[0].sub(lineEnd1, lineStart1);
@@ -1021,6 +1023,8 @@ public class GeometryTools
       return GeometryTools.getIntersectionBetweenTwoLines2d(intersectionToPack, lineStart1, tempDirectionsForIntersection.get()[0], lineStart2, tempDirectionsForIntersection.get()[1]);
    }
 
+   // FIXME This method is too confusing and error prone.
+   // FIXME It also needs to verify the reference frame of the arguments.
    public static boolean getIntersectionBetweenTwoLines2d(FramePoint intersectionToPack, FramePoint point1, FrameVector direction1, FramePoint point2, FrameVector direction2)
    {
       GeometryTools.intersection(point1.getX(), point1.getY(), direction1.getX(), direction1.getY(), point2.getX(), point2.getY(), direction2.getX(), direction2.getY(), tempAlphaBeta.get());
