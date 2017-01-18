@@ -915,12 +915,31 @@ public class Line2dTest
       }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.1, categoriesOverride = IntegrationCategory.EXCLUDE)
+	@ContinuousIntegrationTest(estimatedDuration = 0.1)
 	@Test(timeout=300000)
    public void testDistanceLine2d()
    {
-      // TODO Write actual test cases, then write the code. Requires definitions.
-      fail("Has not been implemented yet.");
+	   Random random = new Random(23L);
+
+	   for (int i = 0; i < ITERATIONS; i++)
+	   {
+	      Point2d pointOnLine = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
+	      Vector2d lineDirection = RandomTools.generateRandomVector2d(random, RandomTools.generateRandomDouble(random, 0.0, 10.0));
+	      Line2d line = new Line2d(pointOnLine, lineDirection);
+
+	      Point2d randomPointOnLine = new Point2d();
+	      randomPointOnLine.scaleAdd(RandomTools.generateRandomDouble(random, 10.0), lineDirection, pointOnLine);
+
+	      Vector2d orthogonal = new Vector2d(-lineDirection.getY(), lineDirection.getX());
+	      orthogonal.normalize();
+	      double expectedDistance = RandomTools.generateRandomDouble(random, 0.0, 10.0);
+
+	      Point2d point = new Point2d();
+	      point.scaleAdd(expectedDistance, orthogonal, randomPointOnLine);
+
+	      double actualDistance = line.distance(point);
+	      assertEquals(expectedDistance, actualDistance, Epsilons.ONE_TRILLIONTH);
+	   }
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.1, categoriesOverride = IntegrationCategory.EXCLUDE)
