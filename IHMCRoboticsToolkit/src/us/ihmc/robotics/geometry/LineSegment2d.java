@@ -5,7 +5,6 @@ import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector2d;
 
-import georegression.misc.test.GeometryUnitTest;
 import us.ihmc.robotics.geometry.transformables.TransformablePoint2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -19,11 +18,6 @@ public class LineSegment2d implements Geometry2d<LineSegment2d>
 {
    protected TransformablePoint2d[] endpoints = new TransformablePoint2d[2];
    
-   private final Point2d tempPoint2d = new Point2d();
-   
-   private final Vector2d tempVector2dOne = new Vector2d(); 
-   private final Vector2d tempVector2dTwo = new Vector2d();
-
    public LineSegment2d()
    {
       endpoints[0] = new TransformablePoint2d(Double.MIN_VALUE, Double.MIN_VALUE);
@@ -325,8 +319,6 @@ public class LineSegment2d implements Geometry2d<LineSegment2d>
       return pointIsOnLine && isBetweenEndpoints(x, y, 0.0);
    }
 
-   private final double[] tempAlphaBeta = new double[2];
-   
    @Override
    public Point2d intersectionWith(LineSegment2d secondLineSegment2d)
    {
@@ -341,44 +333,9 @@ public class LineSegment2d implements Geometry2d<LineSegment2d>
    @Override
    public Point2d intersectionWith(Line2d line2d)
    {
-      Point2d returnPoint2d =  intersectionWithLine(line2d.getPoint().getX(), line2d.getPoint().getY(),
-                                                    line2d.getNormalizedVector().getX(), line2d.getNormalizedVector().getY());
-      
-      if (Double.isNaN(returnPoint2d.getX()) || Double.isNaN(returnPoint2d.getY()))
-      {
-         return null;
-      }
-      else
-      {
-         return returnPoint2d;
-      }
+      return GeometryTools.getIntersectionBetweenLineAndLineSegment(line2d.point, line2d.normalizedVector, endpoints[0], endpoints[1]);
    }
    
-   private Point2d intersectionWithLine(double originX, double originY, double directionX, double directionY)
-   {
-      double vx1 = endpoints[1].getX() - endpoints[0].getX();
-      double vy1 = endpoints[1].getY() - endpoints[0].getY();
-
-      GeometryTools.intersection(originX, originY, directionX, directionY, endpoints[0].getX(), endpoints[0].getY(), vx1, vy1, tempAlphaBeta);
-      if (Double.isNaN(tempAlphaBeta[0]))
-      {
-         tempPoint2d.set(Double.NaN, Double.NaN);
-         return tempPoint2d;
-      }
-
-      double alpha = tempAlphaBeta[0];
-      double beta = tempAlphaBeta[1];
-
-      if ((beta < 0.0) || (beta > 1.0))
-      {
-         tempPoint2d.set(Double.NaN, Double.NaN);
-         return tempPoint2d;
-      }
-      
-      tempPoint2d.set(originX + directionX * alpha, originY + directionY * alpha);
-      return tempPoint2d;
-   }
-
    @Override
    public Point2d[] intersectionWith(ConvexPolygon2d convexPolygon)
    {
