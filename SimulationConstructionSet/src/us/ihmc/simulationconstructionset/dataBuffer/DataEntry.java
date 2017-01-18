@@ -4,7 +4,6 @@ import us.ihmc.robotics.dataStructures.variable.YoVariable;
 
 public interface DataEntry
 {
-
    public abstract String getVariableName();
 
    public abstract String getFullVariableNameWithNameSpace();
@@ -37,10 +36,9 @@ public interface DataEntry
 
    public abstract void enableAutoScale(boolean b);
 
-   public abstract YoVariable getVariable();
+   public abstract YoVariable<?> getVariable();
 
    public abstract void setInverted(boolean selected);
 
    public abstract boolean getInverted();
-
 }
