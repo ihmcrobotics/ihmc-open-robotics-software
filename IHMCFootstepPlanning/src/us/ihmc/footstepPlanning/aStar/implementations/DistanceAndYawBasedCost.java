@@ -11,6 +11,6 @@ public class DistanceAndYawBasedCost implements FootstepCost
    {
       double euclideanDistance = startNode.euclideanDistance(endNode);
       double yaw = AngleTools.computeAngleDifferenceMinusPiToPi(startNode.getYaw(), endNode.getYaw());
-      return euclideanDistance + yaw;
+      return euclideanDistance + Math.abs(yaw);
    }
 }
