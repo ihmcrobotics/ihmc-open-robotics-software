@@ -64,8 +64,8 @@ public class ICPOptimizationControllerTest
       ICPOptimizationController icpOptimizationController = new ICPOptimizationController(icpPlannerParameters, icpOptimizationParameters, null, bipedSupportPolygons,
             contactableFeet, 0.001, registry, null);
       icpOptimizationController.setStepDurations(doubleSupportDuration, singleSupportDuration);
-      icpPlanner.setSingleSupportTime(singleSupportDuration);
-      icpPlanner.setDoubleSupportTime(doubleSupportDuration);
+      icpPlanner.setDefaultSingleSupportTime(singleSupportDuration);
+      icpPlanner.setDefaultDoubleSupportTime(doubleSupportDuration);
       icpPlanner.setOmega0(omega.getDoubleValue());
 
       icpPlanner.clearPlan();

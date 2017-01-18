@@ -47,10 +47,11 @@ public abstract class AvatarSwingOverPlanarRegionsTest implements MultiRobotTest
    {
       String className = getClass().getSimpleName();
 
-      double swingTime = 2.0;
-      double transferTime = 0.8;
+      double swingTime = 0.6;
+      double transferTime = 0.25;
       double stepLength = 0.3;
       double stepWidth = 0.14;
+      double maxSwingSpeed = 1.0;
       int steps = 10;
 
       PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
@@ -117,6 +118,7 @@ public abstract class AvatarSwingOverPlanarRegionsTest implements MultiRobotTest
       swingEndPose.setPosition(0.0, stepWidth, 0.0);
 
       FootstepDataListMessage footsteps = new FootstepDataListMessage(swingTime, transferTime);
+      double simulationTime = transferTime * steps + 1.0;
       for (int i = 1; i <= steps; i++)
       {
          RobotSide robotSide = i % 2 == 0 ? RobotSide.LEFT : RobotSide.RIGHT;
@@ -130,14 +132,15 @@ public abstract class AvatarSwingOverPlanarRegionsTest implements MultiRobotTest
          swingStartPose.set(stanceFootPose);
          stanceFootPose.set(swingEndPose);
          swingEndPose.setPosition(footstepX, footstepY, 0.0);
+         double maxSpeedDimensionless = Double.NaN;
+
          if (LOCAL_MODE)
          {
-            swingOverPlanarRegionsVisualizer.expandTrajectoryOverPlanarRegions(stanceFootPose, swingStartPose, swingEndPose, planarRegionsList);
+            maxSpeedDimensionless = swingOverPlanarRegionsVisualizer.expandTrajectoryOverPlanarRegions(stanceFootPose, swingStartPose, swingEndPose, planarRegionsList);
          }
          else
          {
-            swingOverPlanarRegionsTrajectoryExpander.expandTrajectoryOverPlanarRegions(stanceFootPose, swingStartPose, swingEndPose, planarRegionsList);
-
+            maxSpeedDimensionless = swingOverPlanarRegionsTrajectoryExpander.expandTrajectoryOverPlanarRegions(stanceFootPose, swingStartPose, swingEndPose, planarRegionsList);
          }
 
          PrintTools.info("Step " + i + ": " + swingOverPlanarRegionsTrajectoryExpander.getStatus());
@@ -150,11 +153,20 @@ public abstract class AvatarSwingOverPlanarRegionsTest implements MultiRobotTest
          swingOverPlanarRegionsTrajectoryExpander.getExpandedWaypoints().get(1).get(waypointTwo);
          footstepData.setTrajectoryWaypoints(new Point3d[] {waypointOne, waypointTwo});
 
+         double maxSpeed = maxSpeedDimensionless / swingTime;
+         if (maxSpeed > maxSwingSpeed)
+         {
+            double adjustedSwingTime = maxSpeedDimensionless / maxSwingSpeed;
+            footstepData.setTimings(adjustedSwingTime, transferTime);
+            simulationTime += adjustedSwingTime;
+         }
+         else
+            simulationTime += swingTime;
+
          footsteps.add(footstepData);
       }
 
       drcSimulationTestHelper.send(footsteps);
-      double simulationTime = (swingTime + transferTime) * steps + 1.0;
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime);
 
       Point3d rootJointPosition = new Point3d(2.81, 0.0, 0.79);

@@ -344,8 +344,8 @@ public class PlanHumanoidFootstepsBehavior extends AbstractBehavior
    private FootstepDataListMessage createFootstepDataListFromPlan(FootstepPlan plan, int maxNumberOfStepsToTake, double swingTime, double transferTime)
    {
       FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
-      footstepDataListMessage.setSwingTime(swingTime);
-      footstepDataListMessage.setTransferTime(transferTime);
+      footstepDataListMessage.setDefaultSwingTime(swingTime);
+      footstepDataListMessage.setDefaultTransferTime(transferTime);
       int lastStepIndex = Math.min(maxNumberOfStepsToTake + 1, plan.getNumberOfSteps());
       for (int i = 1; i < lastStepIndex; i++)
       {
