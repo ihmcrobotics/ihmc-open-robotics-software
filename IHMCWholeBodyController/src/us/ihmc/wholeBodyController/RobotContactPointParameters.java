@@ -2,9 +2,11 @@ package us.ihmc.wholeBodyController;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
+import javax.vecmath.Tuple2d;
 import javax.vecmath.Tuple3d;
 import javax.vecmath.Vector3d;
 
@@ -46,90 +48,40 @@ public abstract class RobotContactPointParameters
       this.soleToAnkleFrameTransforms = soleToAnkleFrameTransforms;
    }
 
-   protected void createDefaultControllerFootContactPoints()
+   protected void createContactPoints(FootContactPoints footContactPoints)
    {
+      Map<String, List<Tuple3d>> simulationContactPoints = footContactPoints.getSimulationContactPoints(footLength, footWidth, toeWidth, jointMap, soleToAnkleFrameTransforms);
+      for (String parentJointName : simulationContactPoints.keySet())
+      {
+         List<Tuple3d> points = simulationContactPoints.get(parentJointName);
+         for (Tuple3d point : points)
+            addSimulationContactPoint(parentJointName, point);
+      }
+
+
+      SideDependentList<List<Tuple2d>> controllerContactPoints = footContactPoints.getControllerContactPoints(footLength, footWidth, toeWidth);
       for (RobotSide robotSide : RobotSide.values)
       {
+         List<Tuple2d> points = controllerContactPoints.get(robotSide);
          controllerFootGroundContactPoints.put(robotSide, new ArrayList<Point2d>());
-         controllerFootGroundContactPoints.get(robotSide).add(new Point2d(-footLength / 2.0, -footWidth / 2.0));
-         controllerFootGroundContactPoints.get(robotSide).add(new Point2d(-footLength / 2.0, footWidth / 2.0));
-         controllerFootGroundContactPoints.get(robotSide).add(new Point2d(footLength / 2.0, -toeWidth / 2.0));
-         controllerFootGroundContactPoints.get(robotSide).add(new Point2d(footLength / 2.0, toeWidth / 2.0));
-         controllerToeContactPoints.put(robotSide, new Point2d(footLength / 2.0, 0.0));
+         for (Tuple2d point : points)
+            controllerFootGroundContactPoints.get(robotSide).add(new Point2d(point));
+      }
+
+      SideDependentList<Tuple2d> toeOffContactPoints = footContactPoints.getToeOffContactPoints(footLength, footWidth, toeWidth);
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         controllerToeContactPoints.put(robotSide, new Point2d(toeOffContactPoints.get(robotSide)));
       }
 
       contactableBodiesFactory.addFootContactParameters(controllerFootGroundContactPoints, controllerToeContactPoints);
+
+      useSoftGroundContactParameters = footContactPoints.useSoftContactPointParameters();
    }
 
-   protected void createDefaultSimulationFootContactPoints()
+   protected void createDefaultFootContactPoints()
    {
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         //SCS Sim contactPoints
-         int nContactPointsX = 2;
-         int nContactPointsY = 2;
-
-         double dx = 1.01 * footLength / (nContactPointsX - 1.0);
-         double xOffset = 1.01 * footLength / 2.0;
-
-         for (int ix = 1; ix <= nContactPointsX; ix++)
-         {
-            double alpha = (ix - 1.0) / (nContactPointsX - 1.0);
-            double footWidthAtCurrentX = (1.0 - alpha) * 1.01 * footWidth + alpha * 1.01 * toeWidth;
-            double dy = footWidthAtCurrentX / (nContactPointsY - 1.0);
-            double yOffset = footWidthAtCurrentX / 2.0;
-
-            for (int iy = 1; iy <= nContactPointsY; iy++)
-            {
-               double x = (ix - 1.0) * dx - xOffset;
-               double y = (iy - 1.0) * dy - yOffset;
-               String parentJointName = jointMap.getJointBeforeFootName(robotSide);
-               RigidBodyTransform transformToParentJointFrame = soleToAnkleFrameTransforms.get(robotSide);
-               addSimulationContactPoint(parentJointName, transformToParentJointFrame, x, y, 0.0);
-            }
-         }
-      }
-   }
-
-   protected void addMoreSimulationFootContactPoints(int nContactPointsX, int nContactPointsY, boolean edgePointsOnly, boolean useSoftGroundContactParameters)
-   {
-      double dx = footLength / (nContactPointsX - 1.0);
-      double xOffset = footLength / 2.0;
-
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         for (int ix = 1; ix <= nContactPointsX; ix++)
-         {
-            double footWidthAtCurrentX = footWidth;
-            double dy = footWidthAtCurrentX / (nContactPointsY - 1.0);
-            double yOffset = footWidthAtCurrentX / 2.0;
-
-            for (int iy = 1; iy <= nContactPointsY; iy++)
-            {
-               if ((ix == 1 || ix == nContactPointsX) && (iy == 1 || iy == nContactPointsY)) // Avoid adding corners a second time
-                  continue;
-
-               if (edgePointsOnly && ix != 1 && ix != nContactPointsX && iy != 1 && iy != nContactPointsY) // Only put points along the edges
-                  continue;
-
-               double x = (ix - 1) * dx - xOffset;
-               double y = (iy - 1) * dy - yOffset;
-               double z = 0.005 * ((xOffset - Math.abs(x))/xOffset + (yOffset - Math.abs(y))/yOffset);
-
-               String parentJointName = jointMap.getJointBeforeFootName(robotSide);
-               RigidBodyTransform transformToParentJointFrame = soleToAnkleFrameTransforms.get(robotSide);
-               addSimulationContactPoint(parentJointName, transformToParentJointFrame, x, y, z);
-            }
-         }
-      }
-
-      contactableBodiesFactory.addFootContactParameters(controllerFootGroundContactPoints, controllerToeContactPoints);
-      setUseSoftGroundContactParameters(useSoftGroundContactParameters);
-   }
-
-   public final void setUseSoftGroundContactParameters(boolean useSoftGroundContactParameters)
-   {
-      this.useSoftGroundContactParameters = useSoftGroundContactParameters;
+      createContactPoints(new DefaultFootContactPoints());
    }
 
    protected final void clearSimulationContactPoints()

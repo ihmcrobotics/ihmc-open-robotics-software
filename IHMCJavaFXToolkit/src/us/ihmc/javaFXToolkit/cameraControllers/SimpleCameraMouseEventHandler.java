@@ -6,6 +6,11 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.transform.Rotate;
 import us.ihmc.robotics.MathTools;
 
+/**
+ * Use {@link FocusBasedCameraMouseEventHandler} instead.
+ * @deprecated
+ * @author Sylvain Bertrand
+ */
 public class SimpleCameraMouseEventHandler implements EventHandler<MouseEvent>
 {
    private final Rotate xRotate = new Rotate(0.0, 0.0, 0.0, 0.0, Rotate.X_AXIS);

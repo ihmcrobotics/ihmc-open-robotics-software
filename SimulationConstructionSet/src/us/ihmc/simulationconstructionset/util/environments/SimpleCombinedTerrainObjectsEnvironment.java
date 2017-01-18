@@ -6,7 +6,7 @@ import javax.vecmath.Color3f;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObject3D;
-import us.ihmc.graphics3DDescription.appearance.YoAppearanceMaterial;
+import us.ihmc.graphicsDescription.appearance.YoAppearanceMaterial;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 public class SimpleCombinedTerrainObjectsEnvironment extends CombinedTerrainObject3D

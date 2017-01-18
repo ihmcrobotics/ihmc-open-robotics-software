@@ -9,8 +9,8 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Vector2d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.graphics3DDescription.appearance.AppearanceDefinition;
-import us.ihmc.graphics3DDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.shapes.Box3d;
@@ -85,7 +85,7 @@ public class PointyRocksWorld implements CommonAvatarEnvironmentInterface
       double step = 0.5;
 
       Vector2d position = new Vector2d(length/2.0 + step/2.0, 0.15);
-      Vector2d dimensions = new Vector2d(0.02, 0.02);
+      Vector2d dimensions = new Vector2d(0.04, 0.04);
 
       addBlock(0.0, position, dimensions);
       stepLocations.add(new FramePoint(worldFrame, position.getX(), position.getY(), 0.0));

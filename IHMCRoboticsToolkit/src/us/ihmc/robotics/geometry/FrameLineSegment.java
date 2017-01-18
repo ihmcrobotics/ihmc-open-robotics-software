@@ -3,6 +3,7 @@ package us.ihmc.robotics.geometry;
 import javax.vecmath.Point3d;
 
 import us.ihmc.robotics.geometry.transformables.TransformableLineSegment3d;
+import us.ihmc.robotics.geometry.transformables.TransformablePoint3d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 /**
@@ -66,6 +67,13 @@ public class FrameLineSegment extends AbstractFrameObject<FrameLineSegment, Tran
    {
       putValuesIntoLineSegment3d();
       return lineSegment3d.length();
+   }
+   
+   public boolean isBetweenEndpoints(FramePoint point, double epsilon)
+   {
+      checkReferenceFrameMatch(point);
+      putValuesIntoLineSegment3d();
+      return lineSegment3d.isBetweenEndpoints(point.getPoint(), epsilon);
    }
    
    public void getMidpoint(FramePoint midpointToPack)
@@ -135,12 +143,12 @@ public class FrameLineSegment extends AbstractFrameObject<FrameLineSegment, Tran
       this.endPoint.set(endPoint.getX(), endPoint.getY(), endPoint.getZ());
    }
    
-   public Point3d getStartPointUnsafe()
+   public TransformablePoint3d getStartPointUnsafe()
    {
       return getGeometryObject().getStartPoint();
    }
    
-   public Point3d getEndPointUnsafe()
+   public TransformablePoint3d getEndPointUnsafe()
    {
       return getGeometryObject().getEndPoint();
    }

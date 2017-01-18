@@ -5,6 +5,9 @@ import java.util.List;
 
 import javax.vecmath.Point2d;
 
+import org.apache.commons.math3.util.Pair;
+
+import us.ihmc.robotics.geometry.shapes.FramePlane3d;
 import us.ihmc.robotics.lists.FrameTuple2dArrayList;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
@@ -979,6 +982,16 @@ public class FrameConvexPolygon2d extends FrameGeometry2d<FrameConvexPolygon2d, 
       return new FramePoint2d(point.getReferenceFrame(), projected);
    }
 
+   public void getNormal3dVector(FrameVector normalToPack)
+   {
+      normalToPack.setIncludingFrame(getReferenceFrame(), 0.0, 0.0, 1.0);
+   }
+   
+   public void getPlane3d(FramePlane3d plane3dToPack)
+   {
+      plane3dToPack.setIncludingFrame(getReferenceFrame(), 0.0, 0.0, 0.0, 0.0, 0.0, 1.0);
+   }
+   
    @Override
    public FramePoint2d[] intersectionWith(FrameLine2d line)
    {
@@ -994,6 +1007,19 @@ public class FrameConvexPolygon2d extends FrameGeometry2d<FrameConvexPolygon2d, 
       }
 
       return ret;
+   }
+   
+   public void intersectionWith(FrameLine2d otherLine, Pair<FramePoint2d, FramePoint2d> intersection)
+   {
+      checkReferenceFrameMatch(otherLine);
+      int numberOfIntersections = ConvexPolygon2dCalculator.intersectionWithLine(otherLine.getLine2d(), intersection.getFirst().getPoint(),
+                                                                                 intersection.getSecond().getPoint(), convexPolygon);
+      if (numberOfIntersections < 2)
+      {
+         intersection.getSecond().setToNaN();
+         if (numberOfIntersections < 1)
+            intersection.getFirst().setToNaN();
+      }
    }
 
    /**
