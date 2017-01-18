@@ -578,7 +578,7 @@ public class GeometryToolsTest
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test//(timeout = 30000)
+   @Test(timeout = 30000)
    public void testDoLineSegmentsIntersect2()
    {
       for (int i = 0; i < 100; i++)
