@@ -185,7 +185,7 @@ public class GeometryTools
 
       if (firstPointOnLineX - secondPointOnLineX == 0 && firstPointOnLineY - secondPointOnLineY == 0)
       {
-         return Math.sqrt(dy * dy + dx * dx);
+         return Math.sqrt(dx * dx + dy * dy);
       }
       else
       {
@@ -1247,6 +1247,8 @@ public class GeometryTools
 
       if (!success)
          intersectionToPack.setToNaN();
+      else
+         intersectionToPack.set(tempIntersection.get().getX(), tempIntersection.get().getY(), intersectionToPack.getZ());
       return success;
    }
 
