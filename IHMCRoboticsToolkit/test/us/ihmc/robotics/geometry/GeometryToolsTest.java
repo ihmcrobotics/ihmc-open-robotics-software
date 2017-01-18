@@ -1098,14 +1098,42 @@ public class GeometryToolsTest
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
-   public void testGetPerpendicularBisector()
+   public void testGetPerpendicularBisector1()
    {
       Point2d lineStart = new Point2d(1, 1);
       Point2d lineEnd = new Point2d(5, 5);
       Point2d bisectorStart = new Point2d(2, 1);
       Vector2d bisectorDirection = new Vector2d();
       GeometryTools.getPerpendicularBisector(lineStart, lineEnd, bisectorStart, bisectorDirection);
+   }
 
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testGetPerpendicularBisector2()
+   {
+      for (int i = 0; i < 100; i++)
+      {
+         Point2d lineSegmentStart = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
+         Point2d lineSegmentEnd = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
+
+         Point2d expectedBisectorStart = new Point2d();
+         expectedBisectorStart.interpolate(lineSegmentStart, lineSegmentEnd, 0.5);
+         Vector2d expectedBisectorDirection = new Vector2d();
+         expectedBisectorDirection.sub(lineSegmentEnd, lineSegmentStart);
+         GeometryTools.getPerpendicularVector(expectedBisectorDirection, expectedBisectorDirection);
+         expectedBisectorDirection.normalize();
+
+         Point2d actualBisectorStart = new Point2d();
+         Vector2d actualBisectorDirection = new Vector2d();
+         GeometryTools.getPerpendicularBisector(lineSegmentStart, lineSegmentEnd, actualBisectorStart, actualBisectorDirection);
+         JUnitTools.assertTuple2dEquals(expectedBisectorStart, actualBisectorStart, Epsilons.ONE_TRILLIONTH);
+         JUnitTools.assertTuple2dEquals(expectedBisectorDirection, actualBisectorDirection, Epsilons.ONE_TRILLIONTH);
+
+         Point2d pointOnBisector = new Point2d();
+         pointOnBisector.scaleAdd(1.0, actualBisectorDirection, actualBisectorStart);
+         assertTrue(GeometryTools.isPointOnLeftSideOfLine(pointOnBisector, lineSegmentStart, lineSegmentEnd));
+      }
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
