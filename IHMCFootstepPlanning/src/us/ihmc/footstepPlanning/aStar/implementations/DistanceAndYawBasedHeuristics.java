@@ -11,6 +11,6 @@ public class DistanceAndYawBasedHeuristics extends CostToGoHeuristics
    {
       double euclideanDistance = node.euclideanDistance(goalNode);
       double yaw = AngleTools.computeAngleDifferenceMinusPiToPi(node.getYaw(), goalNode.getYaw());
-      return euclideanDistance + yaw;
+      return euclideanDistance + Math.abs(yaw);
    }
 }
