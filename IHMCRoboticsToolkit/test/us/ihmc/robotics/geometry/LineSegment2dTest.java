@@ -504,16 +504,16 @@ public class LineSegment2dTest
 
 
 
-      assertEquals(null, line1.intersectionWith(line1));
-      assertEquals(null, line1.intersectionWith(line5));
-      assertEquals(null, line1.intersectionWith(line6));
+      assertEquals(new Point2d(-10.0, 0.0), line1.intersectionWith(line1));
+      assertEquals(new Point2d(-10.0, 0.0), line1.intersectionWith(line5));
+      assertEquals(new Point2d(10.0, 0.0), line1.intersectionWith(line6));
       assertEquals(new Point2d(10.0, 0.0), line1.intersectionWith(line2));
       assertEquals(new Point2d(0.0, 0.0), line1.intersectionWith(line3));
       assertEquals(new Point2d(0.0, 0.0), line1.intersectionWith(line4));
 
 
       assertEquals(new Point2d(10.0, 0.0), line1.intersectionWith(line7));
-      assertEquals(null, line1.intersectionWith(line8));
+      assertEquals(new Point2d(10.0, 0.0), line1.intersectionWith(line8));
       assertEquals(null, line1.intersectionWith(line9));
    }
 
@@ -547,63 +547,61 @@ public class LineSegment2dTest
          assertOnlyExistenceOfIntersectionAllCombinations(false, lineSegmentStart1, lineSegmentEnd1, lineSegmentStart2, lineSegmentEnd2);
       }
 
-      // FIXME this is flaky
       // Test intersection at one of the end points
-//      for (int i = 0; i < 100; i++)
-//      {
-//         Point2d lineSegmentStart1 = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
-//         Point2d lineSegmentEnd1 = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
-//
-//         Point2d expectedIntersection = new Point2d(lineSegmentStart1);
-//
-//         Vector2d lineDirection2 = RandomTools.generateRandomVector2d(random, 1.0);
-//
-//         Point2d lineSegmentStart2 = new Point2d();
-//         Point2d lineSegmentEnd2 = new Point2d();
-//
-//         // Not expecting intersection
-//         lineSegmentStart2.scaleAdd(RandomTools.generateRandomDouble(random, 0.0, 10.0), lineDirection2, expectedIntersection);
-//         lineSegmentEnd2.scaleAdd(RandomTools.generateRandomDouble(random, -10.0, 0.0), lineDirection2, expectedIntersection);
-//         assertAllCombinationsOfIntersectionWith(expectedIntersection, lineSegmentStart1, lineSegmentEnd1, lineSegmentStart2, lineSegmentEnd2);
-//      }
+      for (int i = 0; i < 100; i++)
+      {
+         Point2d lineSegmentStart1 = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
+         Point2d lineSegmentEnd1 = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
 
-      // FIXME flakiness is in the place!
+         Point2d expectedIntersection = new Point2d(lineSegmentStart1);
+
+         Vector2d lineDirection2 = RandomTools.generateRandomVector2d(random, 1.0);
+
+         Point2d lineSegmentStart2 = new Point2d();
+         Point2d lineSegmentEnd2 = new Point2d();
+
+         // Not expecting intersection
+         lineSegmentStart2.scaleAdd(RandomTools.generateRandomDouble(random, 0.0, 10.0), lineDirection2, expectedIntersection);
+         lineSegmentEnd2.scaleAdd(RandomTools.generateRandomDouble(random, -10.0, 0.0), lineDirection2, expectedIntersection);
+         assertAllCombinationsOfIntersectionWith(expectedIntersection, lineSegmentStart1, lineSegmentEnd1, lineSegmentStart2, lineSegmentEnd2);
+      }
+
       // Test with parallel/collinear line segments
-//      for (int i = 0; i < 100; i++)
-//      {
-//         Point2d lineSegmentStart1 = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
-//         Point2d lineSegmentEnd1 = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
-//
-//         Point2d lineSegmentStart2 = new Point2d();
-//         Point2d lineSegmentEnd2 = new Point2d();
-//
-//         double alpha1 = RandomTools.generateRandomDouble(random, 2.0);
-//         double alpha2 = RandomTools.generateRandomDouble(random, 2.0);
-//
-//         // Make the second line segment collinear to the first one
-//         lineSegmentStart2.interpolate(lineSegmentStart1, lineSegmentEnd1, alpha1);
-//         lineSegmentEnd2.interpolate(lineSegmentStart1, lineSegmentEnd1, alpha2);
-//
-//         if ((0.0 < alpha1 && alpha1 < 1.0) || (0.0 < alpha2 && alpha2 < 1.0) || alpha1 * alpha2 < 0.0)
-//         {
-//            assertOnlyExistenceOfIntersectionAllCombinations(true, lineSegmentStart1, lineSegmentEnd1, lineSegmentStart2, lineSegmentEnd2);
-//         }
-//         else
-//         {
-//            assertOnlyExistenceOfIntersectionAllCombinations(false, lineSegmentStart1, lineSegmentEnd1, lineSegmentStart2, lineSegmentEnd2);
-//         }
-//
-//         // Shift the second line segment such that it becomes only parallel to the first.
-//         Vector2d orthogonal = new Vector2d();
-//         orthogonal.sub(lineSegmentEnd1, lineSegmentStart1);
-//         orthogonal.set(-orthogonal.getY(), orthogonal.getX());
-//         orthogonal.normalize();
-//
-//         double distance = RandomTools.generateRandomDouble(random, 1.0e-10, 10.0);
-//         lineSegmentStart2.scaleAdd(distance, orthogonal, lineSegmentStart2);
-//         lineSegmentEnd2.scaleAdd(distance, orthogonal, lineSegmentEnd2);
-//         assertOnlyExistenceOfIntersectionAllCombinations(false, lineSegmentStart1, lineSegmentEnd1, lineSegmentStart2, lineSegmentEnd2);
-//      }
+      for (int i = 0; i < 100; i++)
+      {
+         Point2d lineSegmentStart1 = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
+         Point2d lineSegmentEnd1 = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
+
+         Point2d lineSegmentStart2 = new Point2d();
+         Point2d lineSegmentEnd2 = new Point2d();
+
+         double alpha1 = RandomTools.generateRandomDouble(random, 2.0);
+         double alpha2 = RandomTools.generateRandomDouble(random, 2.0);
+
+         // Make the second line segment collinear to the first one
+         lineSegmentStart2.interpolate(lineSegmentStart1, lineSegmentEnd1, alpha1);
+         lineSegmentEnd2.interpolate(lineSegmentStart1, lineSegmentEnd1, alpha2);
+
+         if ((0.0 < alpha1 && alpha1 < 1.0) || (0.0 < alpha2 && alpha2 < 1.0) || alpha1 * alpha2 < 0.0)
+         {
+            assertOnlyExistenceOfIntersectionAllCombinations(true, lineSegmentStart1, lineSegmentEnd1, lineSegmentStart2, lineSegmentEnd2);
+         }
+         else
+         {
+            assertOnlyExistenceOfIntersectionAllCombinations(false, lineSegmentStart1, lineSegmentEnd1, lineSegmentStart2, lineSegmentEnd2);
+         }
+
+         // Shift the second line segment such that it becomes only parallel to the first.
+         Vector2d orthogonal = new Vector2d();
+         orthogonal.sub(lineSegmentEnd1, lineSegmentStart1);
+         orthogonal.set(-orthogonal.getY(), orthogonal.getX());
+         orthogonal.normalize();
+
+         double distance = RandomTools.generateRandomDouble(random, 1.0e-10, 10.0);
+         lineSegmentStart2.scaleAdd(distance, orthogonal, lineSegmentStart2);
+         lineSegmentEnd2.scaleAdd(distance, orthogonal, lineSegmentEnd2);
+         assertOnlyExistenceOfIntersectionAllCombinations(false, lineSegmentStart1, lineSegmentEnd1, lineSegmentStart2, lineSegmentEnd2);
+      }
    }
 
    private void assertOnlyExistenceOfIntersectionAllCombinations(boolean intersectionExist, Point2d lineSegmentStart1, Point2d lineSegmentEnd1, Point2d lineSegmentStart2, Point2d lineSegmentEnd2)
@@ -1193,10 +1191,10 @@ public class LineSegment2dTest
       LineSegment2d colTestLine6 = new LineSegment2d(colTestp3, colTestp2);
 
 
-      assertEquals(null, colTestLine1.intersectionWith(colTestLine2));
-      assertEquals(null, colTestLine1.intersectionWith(colTestLine3));
-      assertEquals(null, colTestLine1.intersectionWith(colTestLine4));
-      assertEquals(null, colTestLine2.intersectionWith(colTestLine4));
+      assertEquals(colTestp2, colTestLine1.intersectionWith(colTestLine2));
+      assertEquals(colTestp1, colTestLine1.intersectionWith(colTestLine3));
+      assertEquals(colTestp1, colTestLine1.intersectionWith(colTestLine4));
+      assertEquals(colTestp1, colTestLine2.intersectionWith(colTestLine4));
 
 
 
@@ -1217,10 +1215,10 @@ public class LineSegment2dTest
 
 
 
-      assertEquals(null, line5.intersectionWith(line1));
-      assertEquals(null, line1.intersectionWith(line5));
+      assertEquals(new Point2d(-10.0, 0.0), line5.intersectionWith(line1));
+      assertEquals(new Point2d(-10.0, 0.0), line1.intersectionWith(line5));
 
-      assertEquals(null, line1.intersectionWith(line6));
+      assertEquals(new Point2d(10.0, 0.0), line1.intersectionWith(line6));
 
 
       assertEquals(new Point2d(10.0, 0.0), line1.intersectionWith(line2));
@@ -1228,7 +1226,7 @@ public class LineSegment2dTest
       assertEquals(new Point2d(0.0, 0.0), line1.intersectionWith(line4));
 
       assertEquals(new Point2d(10.0, 0.0), line1.intersectionWith(line7));
-      assertEquals(null, line1.intersectionWith(line8));
+      assertEquals(new Point2d(10.0, 0.0), line1.intersectionWith(line8));
       assertEquals(null, line1.intersectionWith(line9));
    }
 

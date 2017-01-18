@@ -62,7 +62,6 @@ public class GeometryTools
     * @param secondPointOnLine a second point located on the line. Not modified.
     * @return the minimum distance between the 3D point and the 3D line.
     */
-   // TODO consider making line3d and moving into it
    public static double distanceFromPointToLine(Point3d point, Point3d firstPointOnLine, Point3d secondPointOnLine)
    {
       double pointOnLineX = firstPointOnLine.getX();
@@ -991,20 +990,48 @@ public class GeometryTools
     * @param lineSegmentEnd1 second end point of the second line segment. Not modified.
     * @return {@code true} if the two line segments intersect, {@code false} otherwise.
     */
-   // TODO ensure consistant with lineSegment2D
    public static boolean doLineSegmentsIntersect(Point2d lineSegmentStart1, Point2d lineSegmentEnd1, Point2d lineSegmentStart2, Point2d lineSegmentEnd2)
+   {
+      return doLineSegmentsIntersect(lineSegmentStart1.getX(), lineSegmentStart1.getY(), lineSegmentEnd1.getX(), lineSegmentEnd1.getY(),
+                                     lineSegmentStart2.getX(), lineSegmentStart2.getY(), lineSegmentEnd2.getX(), lineSegmentEnd2.getY());
+   }
+
+   /**
+    * Test if two line segments intersect each other.
+    * <p>
+    * Edge cases:
+    * <ul>
+    *    <li> When the two line segments are parallel but not collinear, this method returns false.
+    *    <li> When the two line segments are collinear,
+    *     this methods returns true only if the two line segments overlap or have at least one common end point.
+    *    <li> When the two line segments have a common end point, this method returns true.
+    * </ul>
+    * 
+    * @param lineSegmentStart1x x-coordinate of the first end point of the first line segment.
+    * @param lineSegmentStart1y y-coordinate of the first end point of the first line segment.
+    * @param lineSegmentEnd1x x-coordinate of the second end point of the first line segment.
+    * @param lineSegmentEnd1y y-coordinate of the second end point of the first line segment.
+    * @param lineSegmentStart2x x-coordinate of the first end point of the second line segment.
+    * @param lineSegmentStart2y y-coordinate of the first end point of the second line segment.
+    * @param lineSegmentEnd2x x-coordinate of the second end point of the second line segment.
+    * @param lineSegmentEnd2y y-coordinate of the second end point of the second line segment.
+    * @return {@code true} if the two line segments intersect, {@code false} otherwise.
+    */
+   public static boolean doLineSegmentsIntersect(double lineSegmentStart1x, double lineSegmentStart1y, double lineSegmentEnd1x,
+                                                 double lineSegmentEnd1y, double lineSegmentStart2x, double lineSegmentStart2y,
+                                                 double lineSegmentEnd2x, double lineSegmentEnd2y)
    {
       double eps = Epsilons.ONE_TRILLIONTH;
       double r1numerator, r1denominator, r2numerator, r2denominator;
 
-      double deltax1 = lineSegmentEnd1.getX() - lineSegmentStart1.getX();
-      double deltay1 = lineSegmentEnd1.getY() - lineSegmentStart1.getY();
+      double deltax1 = lineSegmentEnd1x - lineSegmentStart1x;
+      double deltay1 = lineSegmentEnd1y - lineSegmentStart1y;
 
-      double deltax2 = lineSegmentEnd2.getX() - lineSegmentStart2.getX();
-      double deltay2 = lineSegmentEnd2.getY() - lineSegmentStart2.getY();
+      double deltax2 = lineSegmentEnd2x - lineSegmentStart2x;
+      double deltay2 = lineSegmentEnd2y - lineSegmentStart2y;
 
-      double startDx = lineSegmentStart1.getX() - lineSegmentStart2.getX();
-      double startDy = lineSegmentStart1.getY() - lineSegmentStart2.getY();
+      double startDx = lineSegmentStart1x - lineSegmentStart2x;
+      double startDy = lineSegmentStart1y - lineSegmentStart2y;
 
       r1numerator = deltax2 * startDy - deltay2 * startDx;
       r1denominator = deltay2 * deltax1 - deltax2 * deltay1;
@@ -1020,19 +1047,19 @@ public class GeometryTools
          if (Math.abs(r1numerator) < eps && Math.abs(r2numerator) < eps)
          {
             double ls1, le1, ls2, le2;
-            if (lineSegmentStart1.getX() != lineSegmentEnd1.getX())
+            if (lineSegmentStart1x != lineSegmentEnd1x)
             {
-               ls1 = lineSegmentStart1.getX();
-               le1 = lineSegmentEnd1.getX();
-               ls2 = lineSegmentStart2.getX();
-               le2 = lineSegmentEnd2.getX();
+               ls1 = lineSegmentStart1x;
+               le1 = lineSegmentEnd1x;
+               ls2 = lineSegmentStart2x;
+               le2 = lineSegmentEnd2x;
             }
             else
             {
-               ls1 = lineSegmentStart1.getY();
-               le1 = lineSegmentEnd1.getY();
-               ls2 = lineSegmentStart2.getY();
-               le2 = lineSegmentEnd2.getY();
+               ls1 = lineSegmentStart1y;
+               le1 = lineSegmentEnd1y;
+               ls2 = lineSegmentStart2y;
+               le2 = lineSegmentEnd2y;
             }
 
             // If both first points are less than both second points, the line
@@ -1322,6 +1349,165 @@ public class GeometryTools
          intersectionToPack.setX(pointOnLine1x + alpha * lineDirection1x);
          intersectionToPack.setY(pointOnLine1y + alpha * lineDirection1y);
          return true;
+      }
+   }
+
+   /**
+    * Computes the intersection between two 2D line segments each defined by their two 2D end points.
+    * <p>
+    * Edge cases:
+    * <ul>
+    *    <li> When the two line segments are parallel but not collinear, the two line segments do not intersect, this method returns {@code null}.
+    *    <li> When the two line segments are collinear, if the two line segments do not overlap do not have at least one common end point, this method returns {@code null}.
+    *    <li> When the two line segments have a common end point, this method returns the common end point as the intersection.
+    * </ul>
+    * 
+    * @param lineSegmentStart1 the first end point of the first line segment. Not modified.
+    * @param lineSegmentEnd1 the second end point of the first line segment. Not modified.
+    * @param lineSegmentStart2 the first end point of the second line segment. Not modified.
+    * @param lineSegmentEnd2 the second end point of the second line segment. Not modified.
+    * @return the intersection point if it exists, {@code null} otherwise.
+    */
+   public static Point2d getIntersectionBetweenTwoLineSegments(Point2d lineSegmentStart1, Point2d lineSegmentEnd1, Point2d lineSegmentStart2,
+                                                               Point2d lineSegmentEnd2)
+   {
+      Point2d intersection = new Point2d();
+      boolean success = getIntersectionBetweenTwoLineSegments(lineSegmentStart1, lineSegmentEnd1, lineSegmentStart2, lineSegmentEnd2, intersection);
+      if (!success)
+         return null;
+      else
+         return intersection;
+   }
+
+   /**
+    * Computes the intersection between two 2D line segments each defined by their two 2D end points.
+    * <p>
+    * Edge cases:
+    * <ul>
+    *    <li> When the two line segments are parallel but not collinear, the two line segments do not intersect.
+    *    <li> When the two line segments are collinear, this methods returns true only if the two line segments overlap or have at least one common end point.
+    *    <li> When the two line segments have a common end point, this method returns true.
+    * </ul>
+    * 
+    * @param lineSegmentStart1 the first end point of the first line segment. Not modified.
+    * @param lineSegmentEnd1 the second end point of the first line segment. Not modified.
+    * @param lineSegmentStart2 the first end point of the second line segment. Not modified.
+    * @param lineSegmentEnd2 the second end point of the second line segment. Not modified.
+    * @param intersectionToPack the 2D point in which the result is stored. Modified.
+    * @return {@code true} if the two line segments intersect, {@code false} otherwise.
+    */
+   public static boolean getIntersectionBetweenTwoLineSegments(Point2d lineSegmentStart1, Point2d lineSegmentEnd1, Point2d lineSegmentStart2,
+                                                               Point2d lineSegmentEnd2, Point2d intersectionToPack)
+   {
+      return getIntersectionBetweenTwoLineSegments(lineSegmentStart1.getX(), lineSegmentStart1.getY(), lineSegmentEnd1.getX(), lineSegmentEnd1.getY(),
+                                                   lineSegmentStart2.getX(), lineSegmentStart2.getY(), lineSegmentEnd2.getX(), lineSegmentEnd2.getY(),
+                                                   intersectionToPack);
+   }
+
+   /**
+    * Computes the intersection between two 2D line segments each defined by their two 2D end points.
+    * <p>
+    * Edge cases:
+    * <ul>
+    *    <li> When the two line segments are parallel but not collinear, the two line segments do not intersect.
+    *    <li> When the two line segments are collinear, this methods returns true only if the two line segments overlap or have at least one common end point.
+    *    <li> When the two line segments have a common end point, this method returns true.
+    * </ul>
+    * 
+    * @param lineSegmentStart1x x-coordinate of the first end point of the first line segment.
+    * @param lineSegmentStart1y y-coordinate of the first end point of the first line segment.
+    * @param lineSegmentEnd1x x-coordinate of the second end point of the first line segment.
+    * @param lineSegmentEnd1y y-coordinate of the second end point of the first line segment.
+    * @param lineSegmentStart2x x-coordinate of the first end point of the second line segment.
+    * @param lineSegmentStart2y y-coordinate of the first end point of the second line segment.
+    * @param lineSegmentEnd2x x-coordinate of the second end point of the second line segment.
+    * @param lineSegmentEnd2y y-coordinate of the second end point of the second line segment.
+    * @param intersectionToPack the 2D point in which the result is stored. Modified.
+    * @return {@code true} if the two line segments intersect, {@code false} otherwise.
+    */
+   public static boolean getIntersectionBetweenTwoLineSegments(double lineSegmentStart1x, double lineSegmentStart1y, double lineSegmentEnd1x,
+                                                               double lineSegmentEnd1y, double lineSegmentStart2x, double lineSegmentStart2y,
+                                                               double lineSegmentEnd2x, double lineSegmentEnd2y, Point2d intersectionToPack)
+   {
+      if (doLineSegmentsIntersect(lineSegmentStart1x, lineSegmentStart1y, lineSegmentEnd1x, lineSegmentEnd1y, lineSegmentStart2x, lineSegmentStart2y,
+                                  lineSegmentEnd2x, lineSegmentEnd2y))
+      {
+         double lineDirection1x = lineSegmentEnd1x - lineSegmentStart1x;
+         double lineDirection1y = lineSegmentEnd1y - lineSegmentStart1y;
+         double lineDirection2x = lineSegmentEnd2x - lineSegmentStart2x;
+         double lineDirection2y = lineSegmentEnd2y - lineSegmentStart2y;
+
+         if (Math.abs(-lineDirection1x * lineDirection2y + lineDirection1y * lineDirection2x) > Epsilons.ONE_TRILLIONTH)
+         { // The line segments are not parallel and are intersecting, same as finding the intersection of two lines.
+            double pointOnLine1x = lineSegmentStart1x;
+            double pointOnLine1y = lineSegmentStart1y;
+            double pointOnLine2x = lineSegmentStart2x;
+            double pointOnLine2y = lineSegmentStart2y;
+            return getIntersectionBetweenTwoLines(pointOnLine1x, pointOnLine1y, lineDirection1x, lineDirection1y, pointOnLine2x, pointOnLine2y, lineDirection2x,
+                                                  lineDirection2y, intersectionToPack);
+         }
+         else
+         { // The line segments are parallel and intersecting, they must be overlapping.
+            // Let's first check for a common endpoint
+            double epsilon = Epsilons.ONE_TRILLIONTH;
+
+            // Let's find the first end point that is inside the other line segment and return it.
+            double lineSegment1LengthSquare = lineDirection1x * lineDirection1x + lineDirection1y * lineDirection1y;
+            double dx, dy, dot;
+
+            // Check if lineSegmentStart2 is inside lineSegment1
+            dx = lineSegmentStart2x - lineSegmentStart1x;
+            dy = lineSegmentStart2y - lineSegmentStart1y;
+            dot = dx * lineDirection1x + dy * lineDirection1y;
+
+            if (0.0 - epsilon < dot && dot < lineSegment1LengthSquare + epsilon)
+            {
+               intersectionToPack.set(lineSegmentStart2x, lineSegmentStart2y);
+               return true;
+            }
+
+            // Check if lineSegmentEnd2 is inside lineSegment1
+            dx = lineSegmentEnd2x - lineSegmentStart1x;
+            dy = lineSegmentEnd2y - lineSegmentStart1y;
+            dot = dx * lineDirection1x + dy * lineDirection1y;
+
+            if (0.0 - epsilon < dot && dot < lineSegment1LengthSquare + epsilon)
+            {
+               intersectionToPack.set(lineSegmentEnd2x, lineSegmentEnd2y);
+               return true;
+            }
+
+            double lineSegment2LengthSquare = lineDirection2x * lineDirection2x + lineDirection2y * lineDirection2y;
+
+            // Check if lineSegmentStart1 is inside lineSegment2
+            dx = lineSegmentStart1x - lineSegmentStart2x;
+            dy = lineSegmentStart1y - lineSegmentStart2y;
+            dot = dx * lineDirection2x + dy * lineDirection2y;
+
+            if (0.0 - epsilon < dot && dot < lineSegment2LengthSquare + epsilon)
+            {
+               intersectionToPack.set(lineSegmentStart1x, lineSegmentStart1y);
+               return true;
+            }
+
+            // Check if lineSegmentEnd1 is inside lineSegment2
+            dx = lineSegmentEnd1x - lineSegmentStart2x;
+            dy = lineSegmentEnd1y - lineSegmentStart2y;
+            dot = dx * lineDirection2x + dy * lineDirection2y;
+
+            if (0.0 - epsilon < dot && dot < lineSegment2LengthSquare + epsilon)
+            {
+               intersectionToPack.set(lineSegmentEnd1x, lineSegmentEnd1y);
+               return true;
+            }
+
+            // There is some inconsistency between doLineSegmentsIntersect and this method, crashing.
+            throw new RuntimeException("Unexpected state.");
+         }
+      }
+      else
+      {
+         return false;
       }
    }
 
