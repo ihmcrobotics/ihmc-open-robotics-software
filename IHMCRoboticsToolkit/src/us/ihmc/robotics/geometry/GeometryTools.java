@@ -1204,6 +1204,8 @@ public class GeometryTools
 
       if (!success)
          intersectionToPack.setToNaN();
+      else
+         intersectionToPack.set(tempIntersection.get().getX(), tempIntersection.get().getY(), intersectionToPack.getZ());
       return success;
    }
 
