@@ -2044,15 +2044,19 @@ public class GeometryTools
    }
 
    /**
-    * Returns the radius of an arc with the specified chord length and angle
+    * Returns the radius of an arc with the specified chord length and angle.
+    * <a href="http://planetcalc.com/1421/"> Useful link</a>.
     *
-    * @param chordLength
-    * @param chordAngle
-    * @return
+    * @param chordLength the length of the chord.
+    * @param chordAngle angle covered by the chord.
+    * @return the radius of the arc, or {@code Double.NaN} if {@code chordAngle % Math.PI == 0.0}.
     */
    public static double getRadiusOfArc(double chordLength, double chordAngle)
    {
-      return chordLength / (2.0 * Math.sin(chordAngle / 2.0));
+      if (chordAngle % Math.PI == 0.0)
+         return Double.NaN;
+      else
+         return chordLength / (2.0 * Math.sin(0.5 * chordAngle));
    }
    
    public static void clipToBoundingBox(Tuple3d tuple, double x1, double x2, double y1, double y2, double z1, double z2)
