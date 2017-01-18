@@ -258,7 +258,7 @@ public class GeometryTools
     * <p>
     * For instance, given the {@code lineStart} coordinates x = 0, and y = 0, and the {@code lineEnd} coordinates x = 1, y = 0,
     * a point located on the left side of this line has a negative y coordinate.
-    *<p>
+    * </p>
     * This method will return false if the point is on the line.
     *
     * @param point the query point. Not modified.
@@ -277,7 +277,7 @@ public class GeometryTools
     * <p>
     * For instance, given the {@code lineStart} coordinates x = 0, and y = 0, and the {@code lineEnd} coordinates x = 1, y = 0,
     * a point located on the right side of this line has a positive y coordinate.
-    *<p>
+    * </p>
     * This method will return false if the point is on the line.
     *
     * @param point the query point. Not modified.
@@ -300,7 +300,7 @@ public class GeometryTools
     *    <li> the left side of this line has a negative y coordinate.
     *    <li> the right side of this line has a positive y coordinate.
     * </ul>
-    *<p>
+    * </p>
     * This method will return false if the point is on the line.
     *
     * @param point the query point. Not modified.
@@ -324,7 +324,7 @@ public class GeometryTools
     *    <li> the left side of this line has a negative y coordinate.
     *    <li> the right side of this line has a positive y coordinate.
     * </ul>
-    *<p>
+    * </p>
     * This method will return false if the point is on the line.
     *
     * @param pointX the x-coordinate of the query point.
@@ -353,7 +353,7 @@ public class GeometryTools
     *    <li> the left side of this line has a negative y coordinate.
     *    <li> the right side of this line has a positive y coordinate.
     * </ul>
-    *<p>
+    * </p>
     * This method will return false if the point is on the line.
     *
     * @param point the query point. Not modified.
@@ -377,7 +377,7 @@ public class GeometryTools
     *    <li> the left side of this line has a negative y coordinate.
     *    <li> the right side of this line has a positive y coordinate.
     * </ul>
-    *<p>
+    * </p>
     * This method will return false if the point is on the line.
     *
     * @param pointX the x-coordinate of  the query point.
@@ -406,7 +406,7 @@ public class GeometryTools
     *    <li> the left side of this line has a negative y coordinate.
     *    <li> the right side of this line has a positive y coordinate.
     * </ul>
-    *<p>
+    * </p>
     * This method will return false if the point is on the line.
     *
     * @param pointX the x-coordinate of  the query point.
@@ -431,14 +431,15 @@ public class GeometryTools
     * "Left side" is determined based on order of {@code lineStart} and {@code lineEnd}.
     * <p>
     * WARNING: the 3D arguments are projected onto the XY-plane to perform the actual computation in 2D.
-    * <p>
+    * </p>
     * <p>
     * WARNING: This method generates garbage.
-    * <p>
+    * </p>
     * For instance, given the {@code lineStart} coordinates x = 0, and y = 0, and the {@code lineEnd} coordinates x = 1, y = 0,
     * a point located on the left of this line has a negative y coordinate.
     *<p>
     * This method will return false if the point is on the line.
+    * </p>
     * 
     * @param point the projection onto the XY-plane of this point is used as the 2D query point. Not modified.
     * @param firstPointOnLine the projection onto the XY-plane of this point is used as a first point located on the line. Not modified.
@@ -461,6 +462,7 @@ public class GeometryTools
    /**
     * Returns true only if the point is inside the triangle defined by the vertices a, b, and c.
     * The triangle can be clockwise or counter-clockwise ordered.
+    * 
     * @param point the point to check if lying inside the triangle. Not modified.
     * @param a first vertex of the triangle. Not modified.
     * @param b second vertex of the triangle. Not modified.
@@ -500,7 +502,7 @@ public class GeometryTools
     * Computes the average 2D point from a given collection of 2D points.
     * <p>
     * WARNING: This method generates garbage.
-    * <p>
+    * </p>
     *
     * @param points the collection of 2D points to compute the average from. Not modified.
     * @return the computed average.
@@ -523,7 +525,7 @@ public class GeometryTools
     * Computes the average 3D point from a given collection of 3D points.
     * <p>
     * WARNING: This method generates garbage.
-    * <p>
+    * </p>
     *
     * @param points the collection of 3D points to compute the average from. Not modified.
     * @return the computed average.
@@ -546,7 +548,7 @@ public class GeometryTools
     * Returns the average of two 3D points.
     * <p>
     * WARNING: This method generates garbage.
-    * <p>
+    * </p>
     *
     * @param a the first 3D point. Not modified.
     * @param b the second 3D point. Not modified.
@@ -565,7 +567,7 @@ public class GeometryTools
     * Returns the average of two 3D points.
     * <p>
     * WARNING: This method generates garbage.
-    * <p>
+    * </p>
     *
     * @param a the first 3D point. Not modified.
     * @param b the second 3D point. Not modified.
@@ -582,7 +584,7 @@ public class GeometryTools
     * Computes the orthogonal projection of a 2D point on an infinitely long 2D line defined by a 2D line segment.
     * <p>
     * WARNING: This method generates garbage.
-    * <p>
+    * </p>
     * 
     * @param testPoint the point to compute the projection of. Not modified.
     * @param firstPointOnLine a first point located on the line. Not modified.
@@ -620,6 +622,7 @@ public class GeometryTools
    /**
     * Given two 3D infinitely long lines, this methods computes two points P &in; line1 and Q &in; lin2 such that the distance || P - Q || is the minimum distance between the two 3D lines.
     * <a href="http://geomalgorithms.com/a07-_distance.html"> Useful link</a>.
+    * 
     * @param pointOnLine1 a 3D point on the first line. Not modified.
     * @param lineDirection1 the 3D direction of the first line. Not modified.
     * @param pointOnLine2 a 3D point on the second line. Not modified.
@@ -644,6 +647,7 @@ public class GeometryTools
    /**
     * Given two 3D infinitely long lines, this methods computes two points P &in; line1 and Q &in; lin2 such that the distance || P - Q || is the minimum distance between the two 3D lines.
     * <a href="http://geomalgorithms.com/a07-_distance.html"> Useful link</a>.
+    * 
     * @param pointOnLine1 a 3D point on the first line. Not modified.
     * @param lineDirection1 the 3D direction of the first line. Not modified.
     * @param pointOnLine2 a 3D point on the second line. Not modified.
@@ -705,7 +709,7 @@ public class GeometryTools
     * <a href="https://en.wikipedia.org/wiki/Line%E2%80%93plane_intersection"> Useful link </a>.
     * <p>
     * WARNING: This method generates garbage.
-    * <p>
+    * </p>
     * 
     * @param pointOnPlane a point located on the plane. Not modified.
     * @param planeNormal the normal of the plane. Not modified.
@@ -734,7 +738,7 @@ public class GeometryTools
     * <a href="https://en.wikipedia.org/wiki/Line%E2%80%93plane_intersection"> Useful link </a>.
     * <p>
     * WARNING: This method generates garbage.
-    * <p>
+    * </p>
     * 
     * @param pointOnPlane a point located on the plane. Not modified.
     * @param planeNormal the normal of the plane. Not modified.
@@ -783,13 +787,13 @@ public class GeometryTools
     *    <li> the line segment length is equal to zero ({@code lineSegmentStart == lineSegmentEnd}),
     *    <li> one of the line segment end points lies on the plane.
     * </ul>
-    * <p>
+    * </p>
     * Once the existence of an intersection is verified,
     * this method calls {@link #getIntersectionBetweenLineAndPlane(Point3d, Vector3d, Point3d, Vector3d)}
     * to perform the actual computation.
     * <p>
     * WARNING: This method generates garbage.
-    * <p>
+    * </p>
     *
     * @param pointOnPlane a point located on the plane. Not modified.
     * @param planeNormal the normal of the plane. Not modified.
@@ -824,13 +828,13 @@ public class GeometryTools
     *    <li> the line segment length is equal to zero ({@code lineSegmentStart == lineSegmentEnd}),
     *    <li> one of the line segment end points lies on the plane.
     * </ul>
-    * <p>
+    * </p>
     * Once the existence of an intersection is verified,
     * this method calls {@link #getIntersectionBetweenLineAndPlane(Point3d, Vector3d, Point3d, Vector3d)}
     * to perform the actual computation.
     * <p>
     * WARNING: This method generates garbage.
-    * <p>
+    * </p>
     *
     * @param pointOnPlane a point located on the plane. Not modified.
     * @param planeNormal the normal of the plane. Not modified.
@@ -860,6 +864,7 @@ public class GeometryTools
     *    <li> the line segment end points are equal, this method returns false whether the end points are on the plane or not.
     *    <li> one of the line segment end points is exactly on the plane, this method returns false.
     * </ul>
+    * </p>
     * 
     * @param pointOnPlane a point located on the plane. Not modified.
     * @param planeNormal the normal of the plane. Not modified.
@@ -884,6 +889,7 @@ public class GeometryTools
     *    <li> the line segment end points are equal, this method returns false whether the end points are on the plane or not.
     *    <li> one of the line segment end points is exactly on the plane, this method returns false.
     * </ul>
+    * </p>
     * 
     * @param pointOnPlane a point located on the plane. Not modified.
     * @param planeNormal the normal of the plane. Not modified.
@@ -957,6 +963,7 @@ public class GeometryTools
     *     this methods returns true only if the two line segments overlap or have at least one common end point.
     *    <li> When the two line segments have a common end point, this method returns true.
     * </ul>
+    * </p>
     * 
     * @param lineSegmentStart1 first end point of the first line segment. Not modified.
     * @param lineSegmentEnd1 second end point of the first line segment. Not modified.
@@ -983,6 +990,7 @@ public class GeometryTools
     *     this methods returns true only if the two line segments overlap or have at least one common end point.
     *    <li> When the two line segments have a common end point, this method returns true.
     * </ul>
+    * </p>
     * 
     * @param lineSegmentStart1 first end point of the first line segment. Not modified.
     * @param lineSegmentEnd1 second end point of the first line segment. Not modified.
@@ -1006,6 +1014,7 @@ public class GeometryTools
     *     this methods returns true only if the two line segments overlap or have at least one common end point.
     *    <li> When the two line segments have a common end point, this method returns true.
     * </ul>
+    * </p>
     * 
     * @param lineSegmentStart1x x-coordinate of the first end point of the first line segment.
     * @param lineSegmentStart1y y-coordinate of the first end point of the first line segment.
@@ -1100,7 +1109,7 @@ public class GeometryTools
     * </p>
     * <p>
     * WARNING: This method generates garbage.
-    * <p>
+    * </p>
     * 
     * @param firstPointOnLine1 a first point located on the first line. Not modified.
     * @param secondPointOnLine1 a second point located on the first line. Not modified.
@@ -1140,7 +1149,7 @@ public class GeometryTools
     * </p>
     * <p>
     * WARNING: This method generates garbage.
-    * <p>
+    * </p>
     * 
     * @param pointOnLine1 point located on the first line. Not modified.
     * @param lineDirection1 the first line direction. Not modified.
@@ -1195,7 +1204,7 @@ public class GeometryTools
     * Computes the intersection between two infinitely long 2D lines each defined by two 2D points.
     * <p>
     * WARNING: the actual computation only uses the x and y components of each argument.
-    * <p>
+    * </p>
     * <p>
     * Edge cases:
     * <ul>
@@ -1240,7 +1249,7 @@ public class GeometryTools
     * Computes the intersection between two infinitely long 2D lines each defined by a 2D point and a 2D direction.
     * <p>
     * WARNING: the actual computation only uses the x and y components of each argument.
-    * <p>
+    * </p>
     * <p>
     * Edge cases:
     * <ul>
@@ -1361,6 +1370,10 @@ public class GeometryTools
     *    <li> When the two line segments are collinear, if the two line segments do not overlap do not have at least one common end point, this method returns {@code null}.
     *    <li> When the two line segments have a common end point, this method returns the common end point as the intersection.
     * </ul>
+    * </p>
+    * <p>
+    * WARNING: This method generates garbage.
+    * </p>
     * 
     * @param lineSegmentStart1 the first end point of the first line segment. Not modified.
     * @param lineSegmentEnd1 the second end point of the first line segment. Not modified.
@@ -1388,6 +1401,7 @@ public class GeometryTools
     *    <li> When the two line segments are collinear, this methods returns true only if the two line segments overlap or have at least one common end point.
     *    <li> When the two line segments have a common end point, this method returns true.
     * </ul>
+    * </p>
     * 
     * @param lineSegmentStart1 the first end point of the first line segment. Not modified.
     * @param lineSegmentEnd1 the second end point of the first line segment. Not modified.
