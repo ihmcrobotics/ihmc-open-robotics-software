@@ -404,6 +404,9 @@ public class GeometryTools
     * <p>
     * WARNING: the 3D arguments are projected onto the XY-plane to perform the actual computation in 2D.
     * <p>
+    * <p>
+    * WARNING: This method generates garbage.
+    * <p>
     * For instance, given the {@code lineStart} coordinates x = 0, and y = 0, and the {@code lineEnd} coordinates x = 1, y = 0,
     * a point located on the left of this line has a negative y coordinate.
     *<p>
@@ -467,6 +470,9 @@ public class GeometryTools
 
    /**
     * Computes the average 2D point from a given collection of 2D points.
+    * <p>
+    * WARNING: This method generates garbage.
+    * <p>
     *
     * @param points the collection of 2D points to compute the average from. Not modified.
     * @return the computed average.
@@ -487,6 +493,9 @@ public class GeometryTools
 
    /**
     * Computes the average 3D point from a given collection of 3D points.
+    * <p>
+    * WARNING: This method generates garbage.
+    * <p>
     *
     * @param points the collection of 3D points to compute the average from. Not modified.
     * @return the computed average.
@@ -507,6 +516,9 @@ public class GeometryTools
 
    /**
     * Returns the average of two 3D points.
+    * <p>
+    * WARNING: This method generates garbage.
+    * <p>
     *
     * @param a the first 3D point. Not modified.
     * @param b the second 3D point. Not modified.
@@ -523,6 +535,9 @@ public class GeometryTools
 
    /**
     * Returns the average of two 3D points.
+    * <p>
+    * WARNING: This method generates garbage.
+    * <p>
     *
     * @param a the first 3D point. Not modified.
     * @param b the second 3D point. Not modified.
@@ -537,6 +552,9 @@ public class GeometryTools
 
    /**
     * Computes the orthogonal projection of a 2D point on an infinitely long 2D line defined by a 2D line segment.
+    * <p>
+    * WARNING: This method generates garbage.
+    * <p>
     * 
     * @param testPoint the point to compute the projection of. Not modified.
     * @param firstPointOnLine a first point located on the line. Not modified.
@@ -657,6 +675,9 @@ public class GeometryTools
     * Computes the coordinates of the intersection between a plane and an infinitely long line.
     * In the case the line is parallel to the plane, this method will return {@code null}.
     * <a href="https://en.wikipedia.org/wiki/Line%E2%80%93plane_intersection"> Useful link </a>.
+    * <p>
+    * WARNING: This method generates garbage.
+    * <p>
     * 
     * @param pointOnPlane a point located on the plane. Not modified.
     * @param planeNormal the normal of the plane. Not modified.
@@ -683,6 +704,9 @@ public class GeometryTools
     * Computes the coordinates of the intersection between a plane and an infinitely long line.
     * In the case the line is parallel to the plane, this method will return {@code null}.
     * <a href="https://en.wikipedia.org/wiki/Line%E2%80%93plane_intersection"> Useful link </a>.
+    * <p>
+    * WARNING: This method generates garbage.
+    * <p>
     * 
     * @param pointOnPlane a point located on the plane. Not modified.
     * @param planeNormal the normal of the plane. Not modified.
@@ -735,6 +759,9 @@ public class GeometryTools
     * Once the existence of an intersection is verified,
     * this method calls {@link #getIntersectionBetweenLineAndPlane(Point3d, Vector3d, Point3d, Vector3d)}
     * to perform the actual computation.
+    * <p>
+    * WARNING: This method generates garbage.
+    * <p>
     *
     * @param pointOnPlane a point located on the plane. Not modified.
     * @param planeNormal the normal of the plane. Not modified.
@@ -773,6 +800,9 @@ public class GeometryTools
     * Once the existence of an intersection is verified,
     * this method calls {@link #getIntersectionBetweenLineAndPlane(Point3d, Vector3d, Point3d, Vector3d)}
     * to perform the actual computation.
+    * <p>
+    * WARNING: This method generates garbage.
+    * <p>
     *
     * @param pointOnPlane a point located on the plane. Not modified.
     * @param planeNormal the normal of the plane. Not modified.
@@ -1004,7 +1034,10 @@ public class GeometryTools
    }
 
    /**
-    * @deprecated Creates garbage. Use {@link GeometryTools.intersection}.
+    * <p>
+    * WARNING: This method generates garbage.
+    * <p>
+    * 
     * @param lineStart1
     * @param lineEnd1
     * @param lineStart2
@@ -1024,14 +1057,15 @@ public class GeometryTools
     * Each line is represented as a Point2d and a Vector2d.
     * This should work as long as the two lines are not parallel.
     * If they are parallel, it tries to return something without crashing.
+    * <p>
+    * WARNING: This method generates garbage.
+    * <p>
     *
     * @param pointOnLine1 Start Point of first line.
     * @param lineDirection1 Direction Vector of first line.
     * @param pointOnLine2 Start Point of second line.
     * @param lineDirection2 Direction Vector of second line.
     * @return Point of Intersection.
-    * @deprecated Creates garbage. Use {@link GeometryTools.intersection}.
-    * TODO ensure consistant with line2D
     */
    public static Point2d getIntersectionBetweenTwoLines(Point2d pointOnLine1, Vector2d lineDirection1, Point2d pointOnLine2, Vector2d lineDirection2)
    {
