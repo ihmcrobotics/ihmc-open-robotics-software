@@ -38,21 +38,8 @@ public class GeometryTools
     */
    public static double distanceFromPointToLine(Point3d point, Point3d pointOnLine, Vector3d lineDirection)
    {
-      double directionMagnitude = lineDirection.length();
-      if (directionMagnitude < Epsilons.ONE_TRILLIONTH)
-      {
-         return pointOnLine.distance(point);
-      }
-      else
-      {
-         Vector3d pointToStart = new Vector3d(pointOnLine);
-         pointToStart.sub(point);
-
-         Vector3d crossProduct = new Vector3d();
-         crossProduct.cross(lineDirection, pointToStart);
-
-         return crossProduct.length() / directionMagnitude;
-      }
+      return distanceFromPointToLine(point, pointOnLine.getX(), pointOnLine.getY(), pointOnLine.getZ(), lineDirection.getX(), lineDirection.getY(),
+                                     lineDirection.getZ());
    }
 
    /**
@@ -69,15 +56,52 @@ public class GeometryTools
    // TODO consider making line3d and moving into it
    public static double distanceFromPointToLine(Point3d point, Point3d firstPointOnLine, Point3d secondPointOnLine)
    {
-      if (firstPointOnLine.equals(secondPointOnLine))
+      double pointOnLineX = firstPointOnLine.getX();
+      double pointOnLineY = firstPointOnLine.getY();
+      double pointOnLineZ = firstPointOnLine.getZ();
+      double lineDirectionX = secondPointOnLine.getX() - firstPointOnLine.getX();
+      double lineDirectionY = secondPointOnLine.getY() - firstPointOnLine.getY();
+      double lineDirectionZ = secondPointOnLine.getZ() - firstPointOnLine.getZ();
+      return distanceFromPointToLine(point, pointOnLineX, pointOnLineY, pointOnLineZ, lineDirectionX, lineDirectionY, lineDirectionZ);
+   }
+
+   /**
+    * Computes the minimum distance between a 3D point and an infinitely long 3D line defined by a point and a direction.
+    * <a href="http://mathworld.wolfram.com/Point-LineDistance3-Dimensional.html"> Useful link</a>.
+    * If the line direction is of length equal to zero: ||{@code lineDirection}|| {@code  == 0.0}, the distance between the {@code pointOnLine} and the given point is computed instead.
+    *
+    * @param point 3D point to compute the distance from the line. Not modified.
+    * @param pointOnLineX x-coordinate of a point located on the line.
+    * @param pointOnLineY y-coordinate of a point located on the line.
+    * @param pointOnLineZ z-coordinate of a point located on the line.
+    * @param lineDirectionX x-component of the line direction.
+    * @param lineDirectionY y-component of the line direction. 
+    * @param lineDirectionZ z-component of the line direction.
+    * @return the minimum distance between the 3D point and the 3D line.
+    */
+   public static double distanceFromPointToLine(Point3d point, double pointOnLineX, double pointOnLineY, double pointOnLineZ, double lineDirectionX,
+                                                double lineDirectionY, double lineDirectionZ)
+   {
+      double directionMagnitude = lineDirectionX * lineDirectionX + lineDirectionY * lineDirectionY + lineDirectionZ * lineDirectionZ;
+      directionMagnitude = Math.sqrt(directionMagnitude);
+
+      double dx = pointOnLineX - point.getX();
+      double dy = pointOnLineY - point.getY();
+      double dz = pointOnLineZ - point.getZ();
+
+      if (directionMagnitude < Epsilons.ONE_TRILLIONTH)
       {
-         return firstPointOnLine.distance(point);
+         return Math.sqrt(dx * dx + dy * dy + dz * dz);
       }
       else
       {
-         Vector3d lineDirection = new Vector3d(secondPointOnLine);
-         lineDirection.sub(firstPointOnLine);
-         return distanceFromPointToLine(point, firstPointOnLine, lineDirection);
+         double crossX = lineDirectionY * dz - lineDirectionZ * dy;
+         double crossY = lineDirectionZ * dx - lineDirectionX * dz;
+         double crossZ = lineDirectionX * dy - lineDirectionY * dx;
+         double distance = Math.sqrt(crossX * crossX + crossY * crossY + crossZ * crossZ);
+         distance /= directionMagnitude;
+
+         return distance;
       }
    }
 
