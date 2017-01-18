@@ -154,14 +154,14 @@ public class AvatarSwingOverPlanarRegionsVisualizer
       ThreadTools.sleepForever();
    }
 
-   public void expandTrajectoryOverPlanarRegions(FramePose stanceFootPose, FramePose swingStartPose, FramePose swingEndPose,
+   public double expandTrajectoryOverPlanarRegions(FramePose stanceFootPose, FramePose swingStartPose, FramePose swingEndPose,
                                                  PlanarRegionsList planarRegionsList)
    {
       this.stanceFootPose.set(stanceFootPose);
       this.swingStartPose.set(swingStartPose);
       this.swingEndPose.set(swingEndPose);
       updateFootGraphics();
-      swingOverPlanarRegionsTrajectoryExpander.expandTrajectoryOverPlanarRegions(stanceFootPose, swingStartPose, swingEndPose, planarRegionsList);
+      return swingOverPlanarRegionsTrajectoryExpander.expandTrajectoryOverPlanarRegions(stanceFootPose, swingStartPose, swingEndPose, planarRegionsList);
    }
 
    public SwingOverPlanarRegionsTrajectoryExpander getSwingOverPlanarRegionsTrajectoryExpander()

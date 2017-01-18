@@ -402,7 +402,7 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
 
       balanceManager.disablePelvisXYControl();
 
-      double stepTime = walkingMessageHandler.getStepTime();
+      double stepTime = walkingMessageHandler.getDefaultStepTime();
       pelvisOrientationManager.setTrajectoryTime(stepTime);
 
       if (!hasWalkingControllerBeenInitialized.getBooleanValue())

@@ -607,8 +607,8 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
                                                                      double transferTime)
       {
          FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
-         footstepDataListMessage.setSwingTime(swingTime);
-         footstepDataListMessage.setTransferTime(transferTime);
+         footstepDataListMessage.setDefaultSwingTime(swingTime);
+         footstepDataListMessage.setDefaultTransferTime(transferTime);
          int numSteps = plan.getNumberOfSteps();
          int lastStepIndex = Math.min(startIndex + maxNumberOfStepsToTake + 1, numSteps);
          for (int i = 1 + startIndex; i < lastStepIndex; i++)
@@ -636,8 +636,8 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
                                                                      double transferTime, PlanarRegionsList planarRegionsList)
       {
          FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
-         footstepDataListMessage.setSwingTime(swingTime);
-         footstepDataListMessage.setTransferTime(transferTime);
+         footstepDataListMessage.setDefaultSwingTime(swingTime);
+         footstepDataListMessage.setDefaultTransferTime(transferTime);
          int numSteps = plan.getNumberOfSteps();
          int lastStepIndex = Math.min(startIndex + maxNumberOfStepsToTake + 1, numSteps);
          
@@ -713,8 +713,8 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
 
          // make footstep data message
          FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
-         footstepDataListMessage.setSwingTime(swingTime.getDoubleValue());
-         footstepDataListMessage.setTransferTime(transferTime.getDoubleValue());
+         footstepDataListMessage.setDefaultSwingTime(swingTime.getDoubleValue());
+         footstepDataListMessage.setDefaultTransferTime(transferTime.getDoubleValue());
          Point3d position = new Point3d();
          Quat4d orientation = new Quat4d();
          stepPose.getPosition(position);
