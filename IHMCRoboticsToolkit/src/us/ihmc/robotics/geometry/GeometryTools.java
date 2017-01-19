@@ -564,9 +564,6 @@ public class GeometryTools
 
    /**
     * Returns the average of two 3D points.
-    * <p>
-    * WARNING: This method generates garbage.
-    * </p>
     *
     * @param a the first 3D point. Not modified.
     * @param b the second 3D point. Not modified.
@@ -587,7 +584,7 @@ public class GeometryTools
     * <p>
     * Edge cases:
     * <ul>
-    *    <li> if the two given points on the line are too close, i.e. {@code firstPointOnLine.distanceSquared(secondPointOnLine) < Epsilons.ONE_TRILLIONTH}, this method fails and returns null.
+    *    <li> if the two given points on the line are too close, i.e. {@code firstPointOnLine.distanceSquared(secondPointOnLine) < Epsilons.ONE_TRILLIONTH}, this method fails and returns {@code null}.
     * </ul>
     * </p>
     * 
@@ -611,7 +608,7 @@ public class GeometryTools
     * <p>
     * Edge cases:
     * <ul>
-    *    <li> if the two given points on the line are too close, i.e. {@code firstPointOnLine.distanceSquared(secondPointOnLine) < Epsilons.ONE_TRILLIONTH}, this method fails and returns null.
+    *    <li> if the two given points on the line are too close, i.e. {@code firstPointOnLine.distanceSquared(secondPointOnLine) < Epsilons.ONE_TRILLIONTH}, this method fails and returns {@code false}.
     * </ul>
     * </p>
     * 
@@ -638,7 +635,7 @@ public class GeometryTools
     * <p>
     * Edge cases:
     * <ul>
-    *    <li> if the given line direction is too small, i.e. {@code lineDirection.lengthSquared() < Epsilons.ONE_TRILLIONTH}, this method fails and returns null.
+    *    <li> if the given line direction is too small, i.e. {@code lineDirection.lengthSquared() < Epsilons.ONE_TRILLIONTH}, this method fails and returns {@code null}.
     * </ul>
     * </p>
     * 
@@ -662,7 +659,7 @@ public class GeometryTools
     * <p>
     * Edge cases:
     * <ul>
-    *    <li> if the given line direction is too small, i.e. {@code lineDirection.lengthSquared() < Epsilons.ONE_TRILLIONTH}, this method fails and returns null.
+    *    <li> if the given line direction is too small, i.e. {@code lineDirection.lengthSquared() < Epsilons.ONE_TRILLIONTH}, this method fails and returns {@code false}.
     * </ul>
     * </p>
     * 
@@ -682,7 +679,7 @@ public class GeometryTools
     * <p>
     * Edge cases:
     * <ul>
-    *    <li> if the given line direction is too small, i.e. {@code lineDirection.lengthSquared() < Epsilons.ONE_TRILLIONTH}, this method fails and returns null.
+    *    <li> if the given line direction is too small, i.e. {@code lineDirection.lengthSquared() < Epsilons.ONE_TRILLIONTH}, this method fails and returns {@code false}.
     * </ul>
     * </p>
     * 
@@ -713,6 +710,126 @@ public class GeometryTools
       projectionToPack.setY(pointOnLineY + alpha * lineDirectionY);
 
       return true;
+   }
+
+   /**
+    * Computes the orthogonal projection of a 2D point on a given 2D line segment defined by its two 2D end points.
+    * <p>
+    * Edge cases:
+    * <ul>
+    *    <li> if the length of the given line segment is too small,
+    *     i.e. {@code lineSegmentStart.distanceSquared(lineSegmentEnd) < Epsilons.ONE_TRILLIONTH},
+    *      this method fails and returns {@code null}.
+    *    <li> the projection can not be outside the line segment.
+    *     When the projection on the corresponding line is outside the line segment, the result is the closest of the two end points.
+    * </ul>
+    * </p>
+    * <p>
+    * WARNING: This method generates garbage.
+    * </p>
+    * 
+    * @param testPoint the point to compute the projection of. Not modified.
+    * @param lineSegmentStart the line segment first end point. Not modified.
+    * @param lineSegmentEnd the line segment second end point. Not modified.
+    * @return the projection of the point onto the line segment or {@code null} if the method failed.
+    */
+   public static Point2d getOrthogonalProjectionOnLineSegment(Point2d testPoint, Point2d lineSegmentStart, Point2d lineSegmentEnd)
+   {
+      Point2d projection = new Point2d();
+      boolean success = getOrthogonalProjectionOnLineSegment(testPoint, lineSegmentStart.getX(), lineSegmentStart.getY(), lineSegmentEnd.getX(), lineSegmentEnd.getY(),
+                                                  projection);
+      if (!success)
+         return null;
+      else
+         return projection;
+   }
+
+   /**
+    * Computes the orthogonal projection of a 2D point on a given 2D line segment defined by its two 2D end points.
+    * <p>
+    * Edge cases:
+    * <ul>
+    *    <li> if the length of the given line segment is too small,
+    *     i.e. {@code lineSegmentStart.distanceSquared(lineSegmentEnd) < Epsilons.ONE_TRILLIONTH},
+    *      this method fails and returns {@code false}.
+    *    <li> the projection can not be outside the line segment.
+    *     When the projection on the corresponding line is outside the line segment, the result is the closest of the two end points.
+    * </ul>
+    * </p>
+    * 
+    * @param testPoint the point to compute the projection of. Not modified.
+    * @param lineSegmentStart the line segment first end point. Not modified.
+    * @param lineSegmentEnd the line segment second end point. Not modified.
+    * @param projectionToPack point in which the projection of the point onto the line segment is stored. Modified.
+    * @return whether the method succeeded or not.
+    */
+   public static boolean getOrthogonalProjectionOnLineSegment(Point2d testPoint, Point2d lineSegmentStart, Point2d lineSegmentEnd, Point2d projectionToPack)
+   {
+      return getOrthogonalProjectionOnLineSegment(testPoint, lineSegmentStart.getX(), lineSegmentStart.getY(), lineSegmentEnd.getX(), lineSegmentEnd.getY(),
+                                                  projectionToPack);
+   }
+
+   /**
+    * Computes the orthogonal projection of a 2D point on a given 2D line segment defined by its two 2D end points.
+    * <p>
+    * Edge cases:
+    * <ul>
+    *    <li> if the length of the given line segment is too small,
+    *     i.e. {@code lineSegmentStart.distanceSquared(lineSegmentEnd) < Epsilons.ONE_TRILLIONTH},
+    *      this method fails and returns {@code false}.
+    *    <li> the projection can not be outside the line segment.
+    *     When the projection on the corresponding line is outside the line segment, the result is the closest of the two end points.
+    * </ul>
+    * </p>
+    * 
+    * @param testPoint the point to compute the projection of. Not modified.
+    * @param lineSegmentStartX the x-coordinate of the line segment first end point.
+    * @param lineSegmentStartY the y-coordinate of the line segment first end point.
+    * @param lineSegmentEndX the x-coordinate of the line segment second end point.
+    * @param lineSegmentEndY the y-coordinate of the line segment second end point.
+    * @param projectionToPack point in which the projection of the point onto the line segment is stored. Modified.
+    * @return whether the method succeeded or not.
+    */
+   public static boolean getOrthogonalProjectionOnLineSegment(Point2d testPoint, double lineSegmentStartX, double lineSegmentStartY, double lineSegmentEndX,
+                                                              double lineSegmentEndY, Point2d projectionToPack)
+   {
+      double percentage = getPercentageAlongLineSegment(testPoint.getX(), testPoint.getY(), lineSegmentStartX, lineSegmentStartY, lineSegmentEndX,
+                                                        lineSegmentEndY);
+      if (!Double.isFinite(percentage))
+         return false;
+
+      percentage = MathTools.clipToMinMax(percentage, 0.0, 1.0);
+
+      projectionToPack.setX((1.0 - percentage) * lineSegmentStartX + percentage * lineSegmentEndX);
+      projectionToPack.setY((1.0 - percentage) * lineSegmentStartY + percentage * lineSegmentEndY);
+      return true;
+   }
+
+   /**
+    * This is the same calculation as for {@link #getOrthogonalProjectionOnLineSegment(Point2d, Point2d, Point2d)}: </br>
+    * Computes the orthogonal projection of a 2D point on a given 2D line segment defined by its two 2D end points.
+    * <p>
+    * Edge cases:
+    * <ul>
+    *    <li> if the length of the given line segment is too small,
+    *     i.e. {@code lineSegmentStart.distanceSquared(lineSegmentEnd) < Epsilons.ONE_TRILLIONTH},
+    *      this method fails and returns {@code null}.
+    *    <li> the projection can not be outside the line segment.
+    *     When the projection on the corresponding line is outside the line segment, the result is the closest of the two end points.
+    * </ul>
+    * </p>
+    * <p>
+    * WARNING: This method generates garbage.
+    * </p>
+    * 
+    * @param testPoint the point to compute the projection of. Not modified.
+    * @param lineSegmentStart the line segment first end point. Not modified.
+    * @param lineSegmentEnd the line segment second end point. Not modified.
+    * @return the projection of the point onto the line segment or {@code null} if the method failed.
+    */
+   public static Point2d getClosestPointToLineSegment(Point2d testPoint, Point2d lineSegmentStart, Point2d lineSegmentEnd)
+   {
+      return getOrthogonalProjectionOnLineSegment(testPoint, lineSegmentStart, lineSegmentEnd);
    }
 
    /**
@@ -2748,25 +2865,78 @@ public class GeometryTools
    }
 
    /**
-    * Let the test point be C (Cx,Cy) and the line be AB (Ax,Ay) to (Bx,By).
-    * Let P be the point of perpendicular projection of C on AB.  The parameter
-    * r, which indicates P's position along AB, is computed by the dot product
-    * of AC and AB divided by the square of the length of AB:
-    *
-    *        AC dot AB
-    *    r = ---------
-    *        ||AB||^2
-    *
-    * Let the scalar r represent the proportional distance of the projected point along the line.  If
-    * r < 0, then lineStart is the closest point.  If r > 1, then lineEnd is the closest point.  If
-    * 0 < r < 1, then the closest point is between lineStart and lineEnd.
+    * Computes a percentage along the line segment representing the location of the projection onto the line segment of the given point.
+    * The returned percentage is in ] -&infin;; &infin; [, {@code 0.0} representing {@code lineSegmentStart}, and {@code 1.0} representing {@code lineSegmentEnd}.
+    * <p>
+    * For example, if the returned percentage is {@code 0.5}, it means that the projection of the given point is located at the middle of the line segment.
+    * The coordinates of the projection of the point can be computed from the {@code percentage} as follows:
+    * <code>
+    * Point2d projection = new Point2d(); </br>
+    * projection.interpolate(lineSegmentStart, lineSegmentEnd, percentage); </br>
+    * </code>
+    * </p>
+    * <p>
+    * Edge cases:
+    * <ul>
+    *    <li> if the length of the given line segment is too small, i.e. {@code lineSegmentStart.distanceSquared(lineSegmentEnd) < Epsilons.ONE_TRILLIONTH}, this method fails and returns {@link Double#NaN}.
+    * </ul>
+    * </p>
+    * 
+    * @param point the query. Not modified.
+    * @param lineSegmentStart the line segment first end point. Not modified.
+    * @param lineSegmentEnd the line segment second end point. Not modified.
+    * @return the computed percentage along the line segment representing where the point projection is located.
     */
-   public static Point2d getClosestPointToLineSegment(Point2d testPoint, Point2d lineStart, Point2d lineEnd)
+   public static double getPercentageAlongLineSegment(Point2d point, Point2d lineSegmentStart, Point2d lineSegmentEnd)
    {
-      LineSegment2d tempLineSegment = new LineSegment2d(lineStart, lineEnd);
+      return getPercentageAlongLineSegment(point.getX(), point.getY(), lineSegmentStart.getX(), lineSegmentStart.getY(), lineSegmentEnd.getX(),
+                                           lineSegmentEnd.getY());
+   }
 
-      return tempLineSegment.getClosestPointOnLineSegmentCopy(testPoint);
+   /**
+    * Computes a percentage along the line segment representing the location of the given point once projected onto the line segment.
+    * The returned percentage is in ] -&infin;; &infin; [, {@code 0.0} representing {@code lineSegmentStart}, and {@code 1.0} representing {@code lineSegmentEnd}.
+    * <p>
+    * For example, if the returned percentage is {@code 0.5}, it means that the projection of the given point is located at the middle of the line segment.
+    * The coordinates of the projection of the point can be computed from the {@code percentage} as follows:
+    * <code>
+    * Point2d projection = new Point2d(); </br>
+    * projection.interpolate(lineSegmentStart, lineSegmentEnd, percentage); </br>
+    * </code>
+    * </p>
+    * <p>
+    * Edge cases:
+    * <ul>
+    *    <li> if the length of the given line segment is too small, i.e. {@code lineSegmentStart.distanceSquared(lineSegmentEnd) < Epsilons.ONE_TRILLIONTH}, this method fails and returns {@link Double#NaN}.
+    * </ul>
+    * </p>
+    * 
+    * @param pointX the x-coordinate of the query point.
+    * @param pointY the y-coordinate of the query point.
+    * @param lineSegmentStartX the x-coordinate of the line segment first end point.
+    * @param lineSegmentStartY the y-coordinate of the line segment first end point.
+    * @param lineSegmentEndX the x-coordinate of the line segment second end point.
+    * @param lineSegmentEndY the y-coordinate of the line segment second end point.
+    * @return the computed percentage along the line segment representing where the point projection is located.
+    */
+   public static double getPercentageAlongLineSegment(double pointX, double pointY, double lineSegmentStartX, double lineSegmentStartY, double lineSegmentEndX,
+                                                      double lineSegmentEndY)
+   {
+      double lineSegmentDx = lineSegmentEndX - lineSegmentStartX;
+      double lineSegmentDy = lineSegmentEndY - lineSegmentStartY;
+      double lengthSquared = lineSegmentDx * lineSegmentDx + lineSegmentDy * lineSegmentDy;
 
+      if (lengthSquared < Epsilons.ONE_TRILLIONTH)
+         return Double.NaN;
+
+      double dx = pointX - lineSegmentStartX;
+      double dy = pointY - lineSegmentStartY;
+
+      double dot = dx * lineSegmentDx + dy * lineSegmentDy;
+
+      double alpha = dot / lengthSquared;
+
+      return alpha;
    }
 
    public static double getXYDistance(FramePoint point1, FramePoint point2)
