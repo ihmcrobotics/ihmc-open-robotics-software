@@ -2607,18 +2607,6 @@ public class GeometryTools
       return Math.sqrt(deltaX * deltaX + deltaY * deltaY);
    }
 
-   /**
-    * Calculates distance between two Point2ds, a and b.
-    *
-    * @param a Point2d
-    * @param b Point2d
-    * @return double
-    */
-   public static double distanceBetweenPoints(Point2d a, Point2d b)
-   {
-      return a.distance(b);
-   }
-   
    public static double dotProduct(Point2d start1, Point2d end1, Point2d start2, Point2d end2)
    {
       double vector1X = end1.getX() - start1.getX();
