@@ -2746,6 +2746,23 @@ public class GeometryToolsTest
       }
    }
 
+   @Test
+   public void testGetXYDistance() throws Exception
+   {
+      Random random = new Random(232L);
+
+      for (int i = 0; i < 1000; i++)
+      {
+         Point3d firstPoint3d = RandomTools.generateRandomPoint(random, 10.0, 10.0, 10.0);
+         Point3d secondPoint3d = RandomTools.generateRandomPoint(random, 10.0, 10.0, 10.0);
+         Point2d firstPoint2d = new Point2d(firstPoint3d.getX(), firstPoint3d.getY());
+         Point2d secondPoint2d = new Point2d(secondPoint3d.getX(), secondPoint3d.getY());
+         double expectedDistance = firstPoint2d.distance(secondPoint2d);
+         double actualDistance = GeometryTools.getXYDistance(firstPoint3d, secondPoint3d);
+         assertEquals(expectedDistance, actualDistance, Epsilons.ONE_TRILLIONTH);
+      }
+   }
+
    public static void main(String[] args)
    {
       String targetTests = GeometryToolsTest.class.getName();
