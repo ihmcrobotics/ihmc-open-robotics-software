@@ -26,6 +26,7 @@ public class DoubleStepGroundProfile extends GroundProfileFromHeightMap
       boundingBox = new BoundingBox3d(xMin, yMin, zMin, xMax, yMax, zMax);
    }
 
+   @Override
    public double heightAndNormalAt(double x, double y, double z, Vector3d normalToPack)
    {
       double height = heightAt(x, y, z);
@@ -34,6 +35,7 @@ public class DoubleStepGroundProfile extends GroundProfileFromHeightMap
       return height;
    }
 
+   @Override
    public double heightAt(double x, double y, double z)
    {
       if (x < initialGroundXStep)
@@ -50,6 +52,7 @@ public class DoubleStepGroundProfile extends GroundProfileFromHeightMap
       normal.set(0.0, 0.0, 1.0);
    }
 
+   @Override
    public BoundingBox3d getBoundingBox()
    {
       return boundingBox;

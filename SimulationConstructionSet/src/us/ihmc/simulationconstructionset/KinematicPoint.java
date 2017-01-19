@@ -109,6 +109,7 @@ public class KinematicPoint implements java.io.Serializable
       return parentJoint;
    }
 
+   @Override
    public String toString()
    {
       return ("name: " + name + " x: " + position.getX() + ", y: " + position.getY() + ", z: " + position.getZ());

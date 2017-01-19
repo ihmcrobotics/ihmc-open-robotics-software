@@ -66,6 +66,7 @@ public class LinkDefinitionFixedFrame
       this.graphicsDefinition = graphicsDefinition;
    }
 
+   @Override
    public String toString()
    {
       String returnString = "\t<Link>\n";

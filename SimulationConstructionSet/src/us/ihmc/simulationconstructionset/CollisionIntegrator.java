@@ -457,7 +457,6 @@ public class CollisionIntegrator implements java.io.Serializable
 
             // System.out.println("At bottom: (ux, uy, uz, Wz) = (" + ux_bot + ", " + uy_bot + ", 0.0, " + Wz_bot + ")" );
 
-            Restitution:
             u_fin.setZ(Math.sqrt(0.0 * 0.0 + 2.0 * Kz.dot(zeta_B) * (0.0 - Wz_bot)));
             u_fin.setX(ux_bot + Kx.dot(zeta_B) / Kz.dot(zeta_B) * (u_fin.getZ() - 0.0));
             u_fin.setY(uy_bot + Ky.dot(zeta_B) / Kz.dot(zeta_B) * (u_fin.getZ() - 0.0));
@@ -746,6 +745,7 @@ public class CollisionIntegrator implements java.io.Serializable
       {
       }
 
+      @Override
       public void derivs(double pz, double[] state, double[] deriv)
       {
          @SuppressWarnings("unused")
@@ -765,6 +765,7 @@ public class CollisionIntegrator implements java.io.Serializable
          }
       }
 
+      @Override
       public boolean isStuck(double[] state)
       {
          double ux = state[0], uy = state[1];
@@ -793,6 +794,7 @@ public class CollisionIntegrator implements java.io.Serializable
       }
 
 
+      @Override
       public void derivs(double uz, double[] state, double[] deriv) throws CollisionDerivativeException
       {
          @SuppressWarnings("unused")
@@ -826,6 +828,7 @@ public class CollisionIntegrator implements java.io.Serializable
          }
       }
 
+      @Override
       public boolean isStuck(double[] state)
       {
          double ux = state[0], uy = state[1];
@@ -851,6 +854,7 @@ public class CollisionIntegrator implements java.io.Serializable
       {
       }
 
+      @Override
       public void derivs(double Wz, double[] state, double[] deriv)
       {
          double ux = state[0], uy = state[1], uz = state[2];
@@ -869,6 +873,7 @@ public class CollisionIntegrator implements java.io.Serializable
          }
       }
 
+      @Override
       public boolean isStuck(double[] state)
       {
          double ux = state[0], uy = state[1];

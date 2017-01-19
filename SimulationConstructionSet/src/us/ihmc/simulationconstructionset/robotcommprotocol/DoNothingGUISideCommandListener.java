@@ -31,18 +31,21 @@ public class DoNothingGUISideCommandListener implements GUISideAbstractCommandLi
       return true;
    }
 
+   @Override
    public void doHello(String name, String info)
    {
       if (VERBOSE) System.out.println("DoNothingGUISideCommandListener doHello() called.");
       commandsReceived.add(new DoNothingGUISideCommandsReceived(DoNothingGUISideCommandsReceivedEnum.HELLO, name, info));
    }
 
+   @Override
    public void doAllRegistriesAndVariables(String[] registryNames, String[][] variableNames, float[][] initialValues)
    {
       if (VERBOSE) System.out.println("DoNothingGUISideCommandListener doAllRegistriesAndVariables() called.");
       commandsReceived.add(new DoNothingGUISideCommandsReceived(DoNothingGUISideCommandsReceivedEnum.ALL_REGISTRIES_AND_VARIABLES, registryNames, variableNames, initialValues));
    }
 
+   @Override
    public void doRegistrySettingsProcessed(int[] registryIndices, boolean[] isSent, boolean[] isDisallowSendingSet, boolean[] isLogged, int registrySettingsIdentifier)
    {
       if (VERBOSE) System.out.println("DoNothingGUISideCommandListener doRegistrySettingsProcessed() called.");
@@ -54,36 +57,42 @@ public class DoNothingGUISideCommandListener implements GUISideAbstractCommandLi
 
    }
 
+   @Override
    public void doSet(int index, float value)
    {
       if (VERBOSE) System.out.println("DoNothingGUISideCommandListener doSet() called.");
       commandsReceived.add(new DoNothingGUISideCommandsReceived(DoNothingGUISideCommandsReceivedEnum.SET, index, value));
    }
 
+   @Override
    public void doPeriod(int periodmsec)
    {
       if (VERBOSE) System.out.println("DoNothingGUISideCommandListener doPeriod() called.");
       commandsReceived.add(new DoNothingGUISideCommandsReceived(DoNothingGUISideCommandsReceivedEnum.PERIOD, periodmsec));
    }
 
+   @Override
    public void doUserCommand(String command)
    {
       if (VERBOSE) System.out.println("DoNothingGUISideCommandListener doUserCommand() called.");
       commandsReceived.add(new DoNothingGUISideCommandsReceived(DoNothingGUISideCommandsReceivedEnum.USER_COMMAND, command));
    }
 
+   @Override
    public void doData(float[] data)
    {
       if (VERBOSE) System.out.println("DoNothingGUISideCommandListener doData() called.");
       commandsReceived.add(new DoNothingGUISideCommandsReceived(DoNothingGUISideCommandsReceivedEnum.DATA, data));
    }
 
+   @Override
    public void doTextMessage(String message)
    {
       if (VERBOSE) System.out.println("DoNothingGUISideCommandListener doTextMessage() called.");
       commandsReceived.add(new DoNothingGUISideCommandsReceived(DoNothingGUISideCommandsReceivedEnum.TEXT_MESSAGE, message));
    }
 
+   @Override
    public void doDisconnect()
    {
       if (VERBOSE) System.out.println("DoNothingGUISideCommandListener doDisconnect() called.");
@@ -245,6 +254,7 @@ public class DoNothingGUISideCommandListener implements GUISideAbstractCommandLi
          return true;
       }
       
+      @Override
       public String toString()
       {
          String ret = doNothingGUISideCommandsReceivedEnum + " argument1 = " + argument1 + ", argument2 = " + argument2 + ", argument3 = " + argument3 + ", arrayOfStrings = " + arrayOfStrings;

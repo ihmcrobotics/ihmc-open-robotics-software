@@ -1,16 +1,13 @@
 package us.ihmc.simulationconstructionset.util.environments;
 
-import us.ihmc.graphicsDescription.appearance.YoAppearanceTexture;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.geometry.shapes.Box3d;
+import java.util.List;
+
+import javax.vecmath.Vector3d;
+
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObject3D;
-import us.ihmc.simulationconstructionset.util.ground.RotatableBoxTerrainObject;
 import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
-
-import javax.vecmath.Vector3d;
-import java.util.List;
 
 public class FiducialsFlatGroundEnvironment implements CommonAvatarEnvironmentInterface
 {

@@ -35,7 +35,6 @@ public class TwoLinkRobotForTesting extends Robot
    private final PinJoint elbowJoint;
    private DoubleYoVariable bodyPitch;
 
-   @SuppressWarnings("deprecation")
    public TwoLinkRobotForTesting()
    {
       super("TwoLink");

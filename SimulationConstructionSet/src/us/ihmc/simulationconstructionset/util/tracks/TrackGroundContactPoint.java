@@ -26,6 +26,7 @@ public class TrackGroundContactPoint extends GroundContactPoint
    {
       trackVelocityToPack.set(dx_track.getDoubleValue(), dy_track.getDoubleValue(), dz_track.getDoubleValue());
    }
+   @Override
    protected void updatePointPosition(RigidBodyTransform transform3D)
    {
       // +++JEP: OPTIMIZE: Don't compute if point is turned off...
@@ -35,6 +36,7 @@ public class TrackGroundContactPoint extends GroundContactPoint
          super.updatePointPosition(transform3D);
    }
 
+   @Override
    public void updatePointVelocity(Matrix3d R0_i, Vector3d comOffset, Vector3d v_i, Vector3d w_i)
    {
       // +++JEP: OPTIMIZE: Don't compute if point is turned off...

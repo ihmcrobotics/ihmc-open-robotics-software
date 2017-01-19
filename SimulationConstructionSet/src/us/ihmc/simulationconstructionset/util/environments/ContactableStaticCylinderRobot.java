@@ -30,8 +30,6 @@ import us.ihmc.robotics.referenceFrames.TransformReferenceFrame;
 
 public class ContactableStaticCylinderRobot extends ContactableStaticRobot implements SelectableObject, SelectedListener
 {
-   private static final long serialVersionUID = -9222718517284272299L;
-
    private static final double DEFAULT_MASS = 1000000.0;
 
    private final FrameCylinder3d cylinder;
@@ -133,22 +131,26 @@ public class ContactableStaticCylinderRobot extends ContactableStaticRobot imple
       transformToWorld.set(cylinderCenterTransformToWorld);
    }
 
+   @Override
    public synchronized boolean isPointOnOrInside(Point3d pointInWorldToCheck)
    {
       return cylinder.getCylinder3d().isInsideOrOnSurface(pointInWorldToCheck);
    }
    
+   @Override
    public boolean isClose(Point3d pointInWorldToCheck)
    {
       return isPointOnOrInside(pointInWorldToCheck);
    }
 
+   @Override
    public synchronized void closestIntersectionAndNormalAt(Point3d intersectionToPack, Vector3d normalToPack, Point3d pointInWorldToCheck)
    {
       cylinder.getCylinder3d().checkIfInside(pointInWorldToCheck, intersectionToPack, normalToPack);
    }
 
 
+   @Override
    public void selected(Graphics3DNode graphics3dNode, ModifierKeyInterface modifierKeyInterface, Point3d location, Point3d cameraLocation,
          Quat4d cameraRotation)
    {
@@ -157,6 +159,7 @@ public class ContactableStaticCylinderRobot extends ContactableStaticRobot imple
       select();
    }
 
+   @Override
    public void select()
    {
       unSelect(false);
@@ -166,12 +169,14 @@ public class ContactableStaticCylinderRobot extends ContactableStaticRobot imple
       notifySelectedListenersThisWasSelected(this);
    }
 
+   @Override
    public void unSelect(boolean reset)
    {
       cylinderGraphic.setAppearance(new YoAppearanceRGBColor(defaultColor, unselectTransparency));
       
    }
 
+   @Override
    public void addSelectedListeners(SelectableObjectListener selectedListener)
    {
       this.selectedListeners.add(selectedListener);

@@ -63,17 +63,20 @@ public class CollisionGroundContactModel implements GroundContactModel, MovingGr
       this.initGroundContact();
    }
    
+   @Override
    public void setGroundProfile3D(GroundProfile3D profile3D)
    {
       this.profile3D = profile3D;
       this.movingProfile = null;
    }
    
+   @Override
    public GroundProfile3D getGroundProfile3D()
    {
       return profile3D;
    }
 
+   @Override
    public void setGroundProfile(MovingGroundProfile profile)
    {
       this.profile3D = profile;
@@ -107,6 +110,7 @@ public class CollisionGroundContactModel implements GroundContactModel, MovingGr
 */
 
 
+   @Override
    public void doGroundContact()
    {
       iterateForward = !iterateForward;

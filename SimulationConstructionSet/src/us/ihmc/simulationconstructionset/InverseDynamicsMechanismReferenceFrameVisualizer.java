@@ -37,26 +37,31 @@ public class InverseDynamicsMechanismReferenceFrameVisualizer implements RobotCo
       yoGraphicsListRegistry.registerYoGraphicsList(yoGraphicsList);
    }
 
+   @Override
    public void initialize()
    {
       doControl();
    }
 
+   @Override
    public YoVariableRegistry getYoVariableRegistry()
    {
       return registry;
    }
 
+   @Override
    public String getName()
    {
       return name;
    }
 
+   @Override
    public String getDescription()
    {
       return getName();
    }
 
+   @Override
    public void doControl()
    {
       for (YoGraphicReferenceFrame dynamicGraphicReferenceFrame : dynamicGraphicReferenceFrames)

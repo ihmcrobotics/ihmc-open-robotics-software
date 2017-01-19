@@ -332,6 +332,7 @@ public class Track implements FunctionToIntegrate
 
    private double[] derivativeVector = new double[1];
 
+   @Override
    public double[] computeDerivativeVector()
    {
       // +++JEP OPTIMIZE
@@ -345,11 +346,13 @@ public class Track implements FunctionToIntegrate
       return derivativeVector;
    }
 
+   @Override
    public int getVectorSize()
    {
       return 1;
    }
 
+   @Override
    public DoubleYoVariable[] getOutputVariables()
    {
       return new DoubleYoVariable[] {track_linear_position};

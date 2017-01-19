@@ -191,8 +191,6 @@ public class DataFileReader
 
    }
 
-
-   @SuppressWarnings("deprecation")
    public int readData(YoDataInputStream dataStream, YoVariableList newVars, YoVariableRegistry rootRegistryToAddNewVariablesTo, DataBuffer dataBuffer,
                        SimulationConstructionSet sim)
            throws IOException
@@ -380,7 +378,7 @@ public class DataFileReader
    private DataBufferEntry getDataBufferEntry(String varName, DataBuffer dataBuffer, YoVariableRegistry rootRegistryToAddNewVariablesTo, YoVariableList newVars)
            throws IOException
    {
-      YoVariable newVariable = dataBuffer.getVariable(varName);
+      YoVariable<?> newVariable = dataBuffer.getVariable(varName);
 
       if (newVariable == null)
       {
@@ -496,9 +494,6 @@ public class DataFileReader
 
    }
 
-
-
-   @SuppressWarnings("deprecation")
    private int readASCIIData(YoDataInputStream dataStream, YoVariableList newVars, DataBuffer dataBuffer, String line,
                              YoVariableRegistry rootRegistryToAddNewVariablesTo)
            throws IOException
@@ -596,9 +591,6 @@ public class DataFileReader
       return nPoints;
    }
 
-
-
-   @SuppressWarnings("deprecation")
    private int readASCIICommaSeparatedData(YoDataInputStream dataStream, YoVariableList newVars, DataBuffer dataBuffer,
            YoVariableRegistry rootRegistryToAddNewVariablesTo)
            throws IOException
@@ -727,7 +719,7 @@ public class DataFileReader
          String varName = line.substring(0, equalsIndex).trim();
          String varVal = line.substring(equalsIndex + 1, semiIndex).trim();
 
-         YoVariable variable = varList.getVariable(varName);
+         YoVariable<?> variable = varList.getVariable(varName);
 
          boolean variableNotFound = (variable == null);
          if (variableNotFound)

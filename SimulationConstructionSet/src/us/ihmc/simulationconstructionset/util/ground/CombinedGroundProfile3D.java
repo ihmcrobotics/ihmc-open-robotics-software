@@ -68,6 +68,7 @@ public class CombinedGroundProfile3D implements GroundProfile3D
 
    private final Point3d tempPointToCheck = new Point3d();
 
+   @Override
    public boolean checkIfInside(double x, double y, double z, Point3d intersectionToPack, Vector3d normalToPack)
    {
       double smallestDistance = Double.MAX_VALUE;
@@ -103,6 +104,7 @@ public class CombinedGroundProfile3D implements GroundProfile3D
       return isInside;
    }
 
+   @Override
    public boolean isClose(double x, double y, double z)
    {
       if (boundingBox == null) return false;
@@ -110,11 +112,13 @@ public class CombinedGroundProfile3D implements GroundProfile3D
       return boundingBox.isInside(x, y, z);
    }
    
+   @Override
    public BoundingBox3d getBoundingBox()
    {
       return boundingBox;
    }
 
+   @Override
    public HeightMapWithNormals getHeightMapIfAvailable()
    {
       return heightMap;

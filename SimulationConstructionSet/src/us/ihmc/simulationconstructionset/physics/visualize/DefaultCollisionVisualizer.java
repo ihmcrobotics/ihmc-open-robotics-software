@@ -73,6 +73,7 @@ public class DefaultCollisionVisualizer implements CollisionHandlerListener
       total = 0;
    }
 
+   @Override
    public void collision(CollisionShape shapeA, CollisionShape shapeB, ExternalForcePoint forceA, ExternalForcePoint forceB, ExternalTorque torqueA,
          ExternalTorque torqueB)
    {

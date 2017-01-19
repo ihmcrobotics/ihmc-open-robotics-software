@@ -73,6 +73,7 @@ public final class SpatialVector implements java.io.Serializable
       bottom.setZ(v2.getZ());
    }
 
+   @Override
    public String toString()
    {
       return ("x1: " + top.getX() + " y1: " + top.getY() + " z1: " + top.getZ() + " x2: " + bottom.getX() + " y2: " + bottom.getY() + " z2: " + bottom.getZ());

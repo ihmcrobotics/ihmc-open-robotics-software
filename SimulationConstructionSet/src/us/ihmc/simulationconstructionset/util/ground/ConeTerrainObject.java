@@ -50,11 +50,13 @@ public class ConeTerrainObject implements TerrainObject3D, HeightMapWithNormals
       this(xMiddle, yMiddle, bottomRadius, topRadius, height, YoAppearance.Red());
    }
 
+   @Override
    public Graphics3DObject getLinkGraphics()
    {
       return linkGraphics;
    }
 
+   @Override
    public double heightAndNormalAt(double x, double y, double z, Vector3d normalToPack)
    {
       double heightAt = heightAt(x, y, z);
@@ -62,6 +64,7 @@ public class ConeTerrainObject implements TerrainObject3D, HeightMapWithNormals
       return heightAt;
    }
    
+   @Override
    public double heightAt(double x, double y, double z)
    {
       double r_from_center = Math.sqrt((x - xMiddle) * (x - xMiddle) + (y - yMiddle) * (y - yMiddle));
@@ -102,6 +105,7 @@ public class ConeTerrainObject implements TerrainObject3D, HeightMapWithNormals
       surfaceNormalAt(x, y, z, normal);
    }
    
+   @Override
    public boolean checkIfInside(double x, double y, double z, Point3d intersectionToPack, Vector3d normalToPack)
    {
       intersectionToPack.setX(x);    // Go Straight Up for now...
@@ -113,6 +117,7 @@ public class ConeTerrainObject implements TerrainObject3D, HeightMapWithNormals
       return (z < intersectionToPack.getZ());
    }
 
+   @Override
    public boolean isClose(double x, double y, double z)
    {
       if ((x < xMin) || (x > xMax) || (y < yMin) || (y > yMax))
@@ -145,11 +150,13 @@ public class ConeTerrainObject implements TerrainObject3D, HeightMapWithNormals
       return yMax;
    }
 
+   @Override
    public BoundingBox3d getBoundingBox()
    {
       return boundingBox;
    }
    
+   @Override
    public HeightMapWithNormals getHeightMapIfAvailable()
    {
       return this;

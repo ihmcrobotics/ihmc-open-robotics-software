@@ -51,11 +51,13 @@ public class GimbalJoint extends PinJoint
    }
 
 
+   @Override
    public void addJoint(Joint nextJoint)
    {
       joint3.addJoint(nextJoint);
    }
 
+   @Override
    public void setLink(Link l)
    {
       // Set this joints real link to a null link and set the second Joints link to the given link...
@@ -75,26 +77,31 @@ public class GimbalJoint extends PinJoint
       joint3.setLink(l);
    }
 
+   @Override
    public void addCameraMount(CameraMount mount)
    {
       joint3.addCameraMount(mount);
    }
    
+   @Override
    public void addIMUMount(IMUMount mount)
    {
       joint3.addIMUMount(mount);
    }
 
+   @Override
    public void addKinematicPoint(KinematicPoint point)
    {
       joint3.addKinematicPoint(point);
    }
 
+   @Override
    public void addGroundContactPoint(GroundContactPoint point)
    {
       joint3.addGroundContactPoint(point);
    }
 
+   @Override
    public void addExternalForcePoint(ExternalForcePoint point)
    {
       joint3.addExternalForcePoint(point);
@@ -120,6 +127,7 @@ public class GimbalJoint extends PinJoint
          joint3.setDamping(b_damp);
    }
 
+   @Override
    public void setDamping(double b_damp)
    {
       super.setDamping(b_damp);
@@ -134,6 +142,7 @@ public class GimbalJoint extends PinJoint
       joint3.setInitialState(q3_init, qd3_init);
    }
 
+   @Override
    public void getState(double[] state)
    {
       state[0] = q.getDoubleValue();
