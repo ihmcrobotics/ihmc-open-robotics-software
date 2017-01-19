@@ -2545,6 +2545,38 @@ public class GeometryToolsTest
       }
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @Test(timeout = 30000)
+   public void testGetTriangleBisector() throws Exception
+   {
+      Random random = new Random(1176L);
+
+      for (int i = 0; i < 100; i++)
+      {
+         Point2d a = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
+         Point2d b = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
+         Point2d c = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
+
+         Vector2d ba = new Vector2d();
+         ba.sub(a, b);
+         Vector2d bc = new Vector2d();
+         bc.sub(c, b);
+
+         double abcAngle = ba.angle(bc);
+         
+         Point2d x = new Point2d();
+         GeometryTools.getTriangleBisector(a, b, c, x);
+
+         Vector2d bx = new Vector2d();
+         bx.sub(x, b);
+
+         double abxAngle = ba.angle(bx);
+
+         assertEquals(0.5 * abcAngle, abxAngle, Epsilons.ONE_TRILLIONTH);
+         assertEquals(0.0, GeometryTools.distanceFromPointToLine(x, a, c), Epsilons.ONE_TRILLIONTH);
+      }
+   }
+
    public static void main(String[] args)
    {
       String targetTests = GeometryToolsTest.class.getName();
