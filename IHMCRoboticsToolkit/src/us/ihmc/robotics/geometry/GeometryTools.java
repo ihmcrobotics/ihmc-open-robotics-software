@@ -2562,8 +2562,9 @@ public class GeometryTools
     * <p>
     * Edge cases:
     * <ul>
-    *    <li> the vectors are the same: the rotation angle is equal to {@code 0.0} and the rotation axis is set to: (1, 0, 0).
-    *    <li> the vectors collinear pointing opposite directions: the rotation angle is equal to {@code Math.PI} and the rotation axis is set to: (1, 0, 0).
+    *    <li> the vector is aligned with {@code zUp}: the rotation angle is equal to {@code 0.0} and the rotation axis is set to: (1, 0, 0).
+    *    <li> the vector collinear pointing opposite direction of {@code zUp}: the rotation angle is equal to {@code Math.PI} and the rotation axis is set to: (1, 0, 0).
+    *    <li> if the length of the given normal is below {@code 1.0E-7}: the rotation angle is equal to {@code 0.0} and the rotation axis is set to: (1, 0, 0).
     * </ul>
     * </p>
     * The calculation becomes less accurate as the two vectors are more collinear.
@@ -2590,8 +2591,9 @@ public class GeometryTools
     * <p>
     * Edge cases:
     * <ul>
-    *    <li> the vectors are the same: the rotation angle is equal to {@code 0.0} and the rotation axis is set to: (1, 0, 0).
-    *    <li> the vectors collinear pointing opposite directions: the rotation angle is equal to {@code Math.PI} and the rotation axis is set to: (1, 0, 0).
+    *    <li> the vector is aligned with {@code zUp}: the rotation angle is equal to {@code 0.0} and the rotation axis is set to: (1, 0, 0).
+    *    <li> the vector collinear pointing opposite direction of {@code zUp}: the rotation angle is equal to {@code Math.PI} and the rotation axis is set to: (1, 0, 0).
+    *    <li> if the length of the given normal is below {@code 1.0E-7}: the rotation angle is equal to {@code 0.0} and the rotation axis is set to: (1, 0, 0).
     * </ul>
     * </p>
     * The calculation becomes less accurate as the two vectors are more collinear.
@@ -2616,6 +2618,7 @@ public class GeometryTools
     * <ul>
     *    <li> the vectors are the same: the rotation angle is equal to {@code 0.0} and the rotation axis is set to: (1, 0, 0).
     *    <li> the vectors collinear pointing opposite directions: the rotation angle is equal to {@code Math.PI} and the rotation axis is set to: (1, 0, 0).
+    *    <li> if the length of either normal is below {@code 1.0E-7}: the rotation angle is equal to {@code 0.0} and the rotation axis is set to: (1, 0, 0).
     * </ul>
     * </p>
     * The calculation becomes less accurate as the two vectors are more collinear.
@@ -2642,6 +2645,7 @@ public class GeometryTools
     * <ul>
     *    <li> the vectors are the same: the rotation angle is equal to {@code 0.0} and the rotation axis is set to: (1, 0, 0).
     *    <li> the vectors collinear pointing opposite directions: the rotation angle is equal to {@code Math.PI} and the rotation axis is set to: (1, 0, 0).
+    *    <li> if the length of either normal is below {@code 1.0E-7}: the rotation angle is equal to {@code 0.0} and the rotation axis is set to: (1, 0, 0).
     * </ul>
     * </p>
     * The calculation becomes less accurate as the two vectors are more collinear.
@@ -2674,29 +2678,11 @@ public class GeometryTools
       if (normalsAreParallel)
       {
          double rotationAngle = dot > 0.0 ? 0.0 : Math.PI;
-         rotationAxisX = 1.0;
-         rotationAxisY = 0.0;
-         rotationAxisZ = 0.0;
-         rotationToPack.set(rotationAxisX, rotationAxisY, rotationAxisZ, rotationAngle);
+         rotationToPack.set(1.0, 0.0, 0.0, rotationAngle);
          return;
       }
 
-      double rotatedNormalLength, referenceNormalLength;
-      rotatedNormalLength = rotatedNormalX * rotatedNormalX;
-      rotatedNormalLength += rotatedNormalY * rotatedNormalY;
-      rotatedNormalLength += rotatedNormalZ * rotatedNormalZ;
-      rotatedNormalLength = Math.sqrt(rotatedNormalLength);
-
-      referenceNormalLength = referenceNormalX * referenceNormalX;
-      referenceNormalLength += referenceNormalY * referenceNormalY;
-      referenceNormalLength += referenceNormalZ * referenceNormalZ;
-      referenceNormalLength = Math.sqrt(referenceNormalLength);
-
-      double inverseLengths = 1.0 / (rotatedNormalLength * referenceNormalLength);
-
-      double sin = rotationAxisLength * inverseLengths;
-      double cos = dot * inverseLengths;
-      double rotationAngle = Math.atan2(sin, cos);
+      double rotationAngle = getAngleFromFirstToSecondVector(referenceNormalX, referenceNormalY, referenceNormalZ, rotatedNormalX, rotatedNormalY, rotatedNormalZ);
 
       rotationAxisX /= rotationAxisLength;
       rotationAxisY /= rotationAxisLength;
@@ -2812,10 +2798,8 @@ public class GeometryTools
     * </ul>
     * </p>
     * 
-    * @param firstVectorX x-component of first the vector.
-    * @param firstVectorY y-component of first the vector.
-    * @param secondVectorX x-component of second the vector.
-    * @param secondVectorY y-component of second the vector.
+    * @param firstVector the first vector. Not modified.
+    * @param secondVector the second vector. Not modified.
     * @return the angle in radians from the first vector to the second vector.
     */
    public static double getAngleFromFirstToSecondVector(double firstVectorX, double firstVectorY, double secondVectorX, double secondVectorY)
@@ -2848,6 +2832,61 @@ public class GeometryTools
          angle = -angle;
 
       return angle;
+   }
+
+   /**
+    * Computes the angle in radians from the first 3D vector to the second 3D vector.
+    * The computed angle is in the range [0; <i>pi</i>].
+    * <p>
+    * Edge cases:
+    * <ul>
+    *    <li> if the length of either vector is below {@code 1.0E-7}, this method fails and returns an angle of {@code 0.0} radian.
+    * </ul>
+    * </p>
+    * 
+    * @param firstVector the first vector. Not modified.
+    * @param secondVector the second vector. Not modified.
+    * @return the angle in radians from the first vector to the second vector.
+    */
+   public static double getAngleFromFirstToSecondVector(Vector3d firstVector, Vector3d secondVector)
+   {
+      return getAngleFromFirstToSecondVector(firstVector.getX(), firstVector.getY(), firstVector.getZ(), secondVector.getX(), secondVector.getY(), secondVector.getZ());
+   }
+
+   /**
+    * Computes the angle in radians from the first 3D vector to the second 3D vector.
+    * The computed angle is in the range [0; <i>pi</i>].
+    * <p>
+    * Edge cases:
+    * <ul>
+    *    <li> if the length of either vector is below {@code 1.0E-7}, this method fails and returns an angle of {@code 0.0} radian.
+    * </ul>
+    * </p>
+    * 
+    * @param firstVectorX x-component of first the vector.
+    * @param firstVectorY y-component of first the vector.
+    * @param firstVectorZ z-component of first the vector.
+    * @param secondVectorX x-component of second the vector.
+    * @param secondVectorY y-component of second the vector.
+    * @param secondVectorZ z-component of second the vector.
+    * @return the angle in radians from the first vector to the second vector.
+    */
+   public static double getAngleFromFirstToSecondVector(double firstVectorX, double firstVectorY, double firstVectorZ, double secondVectorX, double secondVectorY, double secondVectorZ)
+   {
+      double firstVectorLength = Math.sqrt(firstVectorX * firstVectorX + firstVectorY * firstVectorY + firstVectorZ * firstVectorZ);
+
+      if (firstVectorLength < 1e-7)
+         return 0.0;
+
+      double secondVectorLength = Math.sqrt(secondVectorX * secondVectorX + secondVectorY * secondVectorY + secondVectorZ * secondVectorZ);
+
+      if (secondVectorLength < 1e-7)
+         return 0.0;
+
+      double dotProduct = firstVectorX * secondVectorX + firstVectorY * secondVectorY + firstVectorZ * secondVectorZ;
+      dotProduct /= firstVectorLength * secondVectorLength;
+
+      return Math.acos(MathTools.clipToMinMax(dotProduct, -1.0, 1.0));
    }
 
    /**

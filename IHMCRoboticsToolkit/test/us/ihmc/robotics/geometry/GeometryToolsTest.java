@@ -2763,6 +2763,32 @@ public class GeometryToolsTest
       }
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @Test(timeout = 30000)
+   public void testGetAngleFromFirstToSecondVector3D() throws Exception
+   {
+      Random random = new Random(1176L);
+      // Test getRotationBasedOnNormal(AxisAngle4d rotationToPack, Vector3d normalVector3d)
+      for (int i = 0; i < ITERATIONS; i++)
+      {
+         Vector3d firstVector = new Vector3d(0.0, 0.0, 1.0);
+         double expectedAngle = RandomTools.generateRandomDouble(random, 0.0, Math.PI);
+         Vector3d expectedAxis = RandomTools.generateRandomOrthogonalVector3d(random, firstVector, true);
+         AxisAngle4d expectedAxisAngle = new AxisAngle4d(expectedAxis, expectedAngle);
+         Matrix3d rotationMatrix = new Matrix3d();
+         rotationMatrix.set(expectedAxisAngle);
+
+         Vector3d secondVector = new Vector3d();
+         rotationMatrix.transform(firstVector, secondVector);
+         secondVector.scale(RandomTools.generateRandomDouble(random, 0.0, 10.0));
+         
+         double actualAngle = GeometryTools.getAngleFromFirstToSecondVector(firstVector, secondVector);
+
+         assertEquals(expectedAngle, actualAngle, Epsilons.ONE_TRILLIONTH);
+      }
+   }
+
+
    public static void main(String[] args)
    {
       String targetTests = GeometryToolsTest.class.getName();
