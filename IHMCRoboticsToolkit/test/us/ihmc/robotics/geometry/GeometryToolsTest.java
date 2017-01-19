@@ -729,6 +729,10 @@ public class GeometryToolsTest
          Vector2d lineDirection2 = RandomTools.generateRandomVector2d(random, 10.0);
          Point2d pointOnLine2 = new Point2d(expectedIntersection);
 
+         if (Math.abs(lineDirection1.dot(lineDirection2) / lineDirection1.length() / lineDirection2.length()) > 1.0 - 0.0005)
+            epsilon = Epsilons.ONE_HUNDRED_BILLIONTH; // Loss of precision for small angles between the two lines.
+         else
+            epsilon = Epsilons.ONE_TRILLIONTH;
          Point2d actualIntersection = GeometryTools.getIntersectionBetweenTwoLines(pointOnLine1, lineDirection1, pointOnLine2, lineDirection2);
          JUnitTools.assertTuple2dEquals(expectedIntersection, actualIntersection, epsilon);
 
@@ -908,6 +912,15 @@ public class GeometryToolsTest
                                                                    Point2d lineSegmentStart2, Point2d lineSegmentEnd2)
    {
       double epsilon = Epsilons.ONE_TRILLIONTH;
+      
+      Vector2d direction1 = new Vector2d();
+      direction1.sub(lineSegmentEnd1, lineSegmentStart1);
+      Vector2d direction2 = new Vector2d();
+      direction2.sub(lineSegmentEnd2, lineSegmentStart2);
+
+      if (Math.abs(direction1.dot(direction2)) > 1.0 - 0.0001)
+         epsilon = Epsilons.ONE_TEN_BILLIONTH;
+
       boolean success;
       Point2d actualIntersection = new Point2d();
 
@@ -1199,13 +1212,18 @@ public class GeometryToolsTest
          point.add(expectedIntersection, expectedPerpendicularVector);
 
          Point3d actualIntersection = new Point3d();
+         double epsilon = Epsilons.ONE_TRILLIONTH;
+
+         if (firstPointOnLine.distance(secondPointOnLine) < 5.0e-4)
+            epsilon = Epsilons.ONE_TEN_BILLIONTH; // Loss of precision when the given points defining the line are getting close.
+
          Vector3d actualPerpendicularVector = GeometryTools.getPerpendicularVectorFromLineToPoint(point, firstPointOnLine, secondPointOnLine,
                                                                                                   actualIntersection);
-         JUnitTools.assertTuple3dEquals(expectedIntersection, actualIntersection, Epsilons.ONE_TRILLIONTH);
-         JUnitTools.assertTuple3dEquals(expectedPerpendicularVector, actualPerpendicularVector, Epsilons.ONE_TRILLIONTH);
+         JUnitTools.assertTuple3dEquals(expectedIntersection, actualIntersection, epsilon);
+         JUnitTools.assertTuple3dEquals(expectedPerpendicularVector, actualPerpendicularVector, epsilon);
 
          actualPerpendicularVector = GeometryTools.getPerpendicularVectorFromLineToPoint(point, firstPointOnLine, secondPointOnLine, null);
-         JUnitTools.assertTuple3dEquals(expectedPerpendicularVector, actualPerpendicularVector, Epsilons.ONE_TRILLIONTH);
+         JUnitTools.assertTuple3dEquals(expectedPerpendicularVector, actualPerpendicularVector, epsilon);
       }
    }
 
@@ -1427,6 +1445,7 @@ public class GeometryToolsTest
          double abcAngle = RandomTools.generateRandomDouble(random, 0.0, Math.PI / 2.0);
 
          Vector3d triangleNormal = RandomTools.generateRandomOrthogonalVector3d(random, ba, true);
+         triangleNormal.scale(RandomTools.generateRandomDouble(random, 0.0, 10.0));
          AxisAngle4d abcAxisAngle = new AxisAngle4d(triangleNormal, abcAngle);
          Matrix3d abcRotationMatrix = new Matrix3d();
          abcRotationMatrix.set(abcAxisAngle);
@@ -1436,10 +1455,15 @@ public class GeometryToolsTest
          Point3d c = new Point3d();
          c.add(bc, expectedB);
 
+         double epsilon = Epsilons.ONE_TRILLIONTH;
+
+         if (abcAngle < 0.002)
+            epsilon = Epsilons.ONE_TEN_BILLIONTH; // Loss of precision when ba and bc are almost collinear.
+
          Point3d actualB = new Point3d();
          GeometryTools.getTopVertexOfIsoscelesTriangle(a, c, triangleNormal, abcAngle, actualB);
-         JUnitTools.assertTuple3dEquals(expectedB, actualB, Epsilons.ONE_TRILLIONTH);
-         assertEquals(abcAngle, ba.angle(bc), Epsilons.ONE_TRILLIONTH);
+         JUnitTools.assertTuple3dEquals(expectedB, actualB, epsilon);
+         assertEquals(abcAngle, ba.angle(bc), epsilon);
       }
    }
 
@@ -2154,7 +2178,12 @@ public class GeometryToolsTest
          pointOnLine.scaleAdd(RandomTools.generateRandomDouble(random, 10.0), lineDirection, expectedIntersection);
 
          Point3d actualIntersection = GeometryTools.getIntersectionBetweenLineAndPlane(pointOnPlane, planeNormal, pointOnLine, lineDirection);
-         JUnitTools.assertTuple3dEquals(expectedIntersection, actualIntersection, Epsilons.ONE_TRILLIONTH);
+
+         double epsilon = Epsilons.ONE_TRILLIONTH;
+         if (Math.abs(lineDirection.angle(planeNormal)) > Math.PI / 2.0 - 0.001)
+            epsilon = Epsilons.ONE_HUNDRED_BILLIONTH; // Loss of precision when the line direction and the plane normal are almost orthogonal.
+
+         JUnitTools.assertTuple3dEquals(expectedIntersection, actualIntersection, epsilon);
       }
 
       // Try parallel lines to plane
