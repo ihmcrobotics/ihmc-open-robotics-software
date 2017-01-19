@@ -1063,41 +1063,6 @@ public class GeometryToolsTest
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
-   public void testGetNormalToPlane()
-   {
-      Point3d a = new Point3d(0, 0, 0);
-      Point3d b = new Point3d(1, 0, 0);
-      Point3d c = new Point3d(0, 1, 0);
-      Vector3d expectedReturn = new Vector3d(0, 0, 1);
-      Vector3d actualReturn = GeometryTools.getNormalToPlane(a, b, c);
-      assertEquals("return value", expectedReturn, actualReturn);
-
-      Point3d a1 = new Point3d(5, 0, 6);
-      Point3d b1 = new Point3d(1, 0, 4);
-      Point3d c1 = new Point3d(2, 0, 65);
-      Vector3d expectedReturn1 = new Vector3d(0, 1, 0);
-      Vector3d actualReturn1 = GeometryTools.getNormalToPlane(a1, b1, c1);
-      assertEquals("return value", expectedReturn1, actualReturn1);
-
-      Point3d a2 = new Point3d(0, 6, 4);
-      Point3d b2 = new Point3d(0, 32, 6);
-      Point3d c2 = new Point3d(0, 1, 4);
-      Vector3d expectedReturn2 = new Vector3d(1, 0, 0);
-      Vector3d actualReturn2 = GeometryTools.getNormalToPlane(a2, b2, c2);
-      assertEquals("return value", expectedReturn2, actualReturn2);
-
-      /*
-       *    Point3d a3 = new Point3d(7, 5, 9);
-       *    Point3d b3 = new Point3d(0, 1, 0);
-       *    Point3d c3 = new Point3d(0, 1, 0);
-       *    Vector3d expectedReturn3 = new Vector3d(0, 0, 1);
-       *    Vector3d actualReturn3 = geometryTools.getNormalToPlane(a3, b3, c3);
-       *    assertEquals("return value", expectedReturn3, actualReturn3);
-       */
-   }
-
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
    public void testGetPerpendicularBisector1()
    {
       Point2d lineStart = new Point2d(1, 1);
@@ -1188,7 +1153,7 @@ public class GeometryToolsTest
       FramePoint lineEnd1 = new FramePoint(ReferenceFrame.getWorldFrame(), -4, 4, 0);
       FramePoint intersectionPoint1 = new FramePoint(ReferenceFrame.getWorldFrame(), -2, 2, 0);
 
-      Point2d returnPoint = GeometryTools.getClosestPointToLineSegment(new Point2d(-2.5, 1.5), new Point2d(0, 0), new Point2d(-4, 4));
+      GeometryTools.getClosestPointToLineSegment(new Point2d(-2.5, 1.5), new Point2d(0, 0), new Point2d(-4, 4));
       FrameVector x1 = new FrameVector(point1.getReferenceFrame());
       x1.sub(point1, intersectionPoint1);
       FrameVector expectedReturn1 = x1;
@@ -1665,42 +1630,8 @@ public class GeometryToolsTest
       GeometryTools.pythagorasGetCathetus(1.0, 2.0);
    }
 
-   private static final boolean VERBOSE = false;
-
    private Random random = new Random(1176L);
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
-   public void testDistanceLineSegment2dLineSegment2d()
-   {
-      // not yet implemented
-//    for (int i = 0; i < 1000; i++)
-//    {
-//       Point2d seg1p1 = new Point2d(random.nextDouble() * 1000 - 500, random.nextDouble() * 1000 - 500);
-//       Point2d seg1p2 = new Point2d(random.nextDouble() * 1000 - 500, random.nextDouble() * 1000 - 500);
-//       Point2d seg2p1 = new Point2d(random.nextDouble() * 1000 - 500, random.nextDouble() * 1000 - 500);
-//       Point2d seg2p2 = new Point2d(random.nextDouble() * 1000 - 500, random.nextDouble() * 1000 - 500);
-//
-//       LineSegment2d seg1 = new LineSegment2d(seg1p1, seg1p2);
-//       LineSegment2d seg2 = new LineSegment2d(seg2p1, seg2p2);
-//
-//       double returnedDistance = Geometry2dCalculator.distance(seg1, seg2);
-//       if (seg1.intersectionWith(seg2) != null)
-//          assertEquals("segmentes: " + seg1 + " " + seg2 + " intersect but distance is greater than 0.0: " + returnedDistance, 0.0, returnedDistance,
-//                       0.000001);
-//       else
-//       {
-//          double shortestDistance = Double.MAX_VALUE;
-//          double distance = seg1.distance(seg2p1);
-//          if (distance < shortestDistance)
-//             shortestDistance = distance;
-//
-//
-//
-//       }
-//    }
-   }
-   
    @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testClipToBoundingBox()
