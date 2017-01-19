@@ -19,6 +19,7 @@ public class StateMachineJPanelGuiSetterUpper implements GUISetterUpper
       this.inJFrame = inJFrame;
    }
 
+   @Override
    public void setupGUI(SimulationConstructionSet scs)
    {
       StateMachinesJPanel walkingStatePanel = new StateMachinesJPanel(stateMachine);

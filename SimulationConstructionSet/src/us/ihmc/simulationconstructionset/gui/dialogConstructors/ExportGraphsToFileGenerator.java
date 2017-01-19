@@ -178,6 +178,7 @@ public class ExportGraphsToFileGenerator implements ExportGraphsToFileConstructo
       }
    }
 
+   @Override
    public void closeAndDispose()
    {
       matFileFilter = null;

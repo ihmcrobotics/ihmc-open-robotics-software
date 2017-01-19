@@ -55,6 +55,7 @@ public class ViewportPanel extends JPanel implements CameraSelector, ActiveCamer
 
    }
 
+   @Override
    public TrackingDollyCameraController getCameraPropertiesForActiveCamera()
    {
       return activeView.getCameraController();
@@ -351,6 +352,7 @@ public class ViewportPanel extends JPanel implements CameraSelector, ActiveCamer
 
    // public YoCanvas3D getCanvas3D(){return activeView.getCanvas3D();}
    // public YoCanvas3D getOffscreenCanvas3D(){return this.offscreenCanvas3D;}
+   @Override
    public TrackingDollyCameraController getCamera()
    {
       return activeView.getCameraController();
@@ -457,6 +459,7 @@ public class ViewportPanel extends JPanel implements CameraSelector, ActiveCamer
       standard3DViews.clear();
    }
 
+   @Override
    public CaptureDevice getActiveCaptureDevice()
    {
       return this.getActiveView().getCaptureDevice();
@@ -474,6 +477,7 @@ public class ViewportPanel extends JPanel implements CameraSelector, ActiveCamer
       setActiveView(canvasPanel.getStandard3DView(), canvasPanel);
    }
 
+   @Override
    public void selectCamera(String name)
    {
       CameraConfiguration config = cameraConfigurationList.getCameraConfiguration(name);
@@ -595,6 +599,7 @@ public class ViewportPanel extends JPanel implements CameraSelector, ActiveCamer
       return visible.trim().equalsIgnoreCase("true");
    }
 
+   @Override
    public Dimension getMinimumSize()
    {
       return new Dimension(0, 0);
