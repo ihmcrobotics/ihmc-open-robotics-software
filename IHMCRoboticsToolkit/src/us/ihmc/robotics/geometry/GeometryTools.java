@@ -2607,6 +2607,19 @@ public class GeometryTools
       return Math.sqrt(deltaX * deltaX + deltaY * deltaY);
    }
 
+   /**
+    * Computes the dot product between two vectors each defined by two points:
+    * <ul>
+    *    <li> {@code vector1 = end1 - start1}
+    *    <li> {@code vector2 = end2 - start2}
+    * </ul>
+    * 
+    * @param start1 the origin of the first vector. Not modified.
+    * @param end1 the end of the first vector. Not modified.
+    * @param start2 the origin of the second vector. Not modified.
+    * @param end2 the end of the second vector. Not modified.
+    * @return the value of the dot product of the two vectors.
+    */
    public static double dotProduct(Point2d start1, Point2d end1, Point2d start2, Point2d end2)
    {
       double vector1X = end1.getX() - start1.getX();
