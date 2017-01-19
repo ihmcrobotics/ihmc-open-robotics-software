@@ -1,4 +1,4 @@
-package us.ihmc.simulationconstructionset.dataBuffer;
+package us.ihmc.graphicsDescription.dataBuffer;
 
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 

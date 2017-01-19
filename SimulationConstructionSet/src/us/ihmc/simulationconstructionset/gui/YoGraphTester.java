@@ -4,13 +4,13 @@ import java.util.ArrayList;
 
 import javax.swing.JFrame;
 
+import us.ihmc.graphicsDescription.dataBuffer.DataEntry;
+import us.ihmc.graphicsDescription.dataBuffer.DataEntryHolder;
+import us.ihmc.graphicsDescription.dataBuffer.TimeDataHolder;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.simulationconstructionset.DataBufferEntry;
-import us.ihmc.simulationconstructionset.dataBuffer.DataEntry;
-import us.ihmc.simulationconstructionset.dataBuffer.DataEntryHolder;
-import us.ihmc.simulationconstructionset.dataBuffer.TimeDataHolder;
 
 public class YoGraphTester
 {

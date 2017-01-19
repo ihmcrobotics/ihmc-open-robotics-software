@@ -14,7 +14,7 @@ import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
-import us.ihmc.simulationconstructionset.dataBuffer.DataEntry;
+import us.ihmc.graphicsDescription.dataBuffer.DataEntry;
 import us.ihmc.simulationconstructionset.gui.GraphPropertiesPanel;
 import us.ihmc.simulationconstructionset.gui.VarPropertiesPanel;
 import us.ihmc.simulationconstructionset.gui.YoGraph;

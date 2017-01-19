@@ -1,7 +1,7 @@
 package us.ihmc.simulationconstructionset;
 
+import us.ihmc.graphicsDescription.dataBuffer.DataEntry;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
-import us.ihmc.simulationconstructionset.dataBuffer.DataEntry;
 
 public class DataBufferEntry implements DataEntry
 {

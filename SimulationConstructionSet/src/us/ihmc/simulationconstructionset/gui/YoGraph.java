@@ -1,11 +1,11 @@
 package us.ihmc.simulationconstructionset.gui;
 
+import us.ihmc.graphicsDescription.dataBuffer.DataEntry;
+import us.ihmc.graphicsDescription.dataBuffer.DataEntryHolder;
+import us.ihmc.graphicsDescription.dataBuffer.TimeDataHolder;
 import us.ihmc.robotics.dataStructures.registry.NameSpace;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.simulationconstructionset.GraphConfiguration;
-import us.ihmc.simulationconstructionset.dataBuffer.DataEntry;
-import us.ihmc.simulationconstructionset.dataBuffer.DataEntryHolder;
-import us.ihmc.simulationconstructionset.dataBuffer.TimeDataHolder;
 import us.ihmc.simulationconstructionset.gui.dialogs.GraphPropertiesDialog;
 import us.ihmc.simulationconstructionset.robotcommprotocol.GUISideCommandListener;
 
