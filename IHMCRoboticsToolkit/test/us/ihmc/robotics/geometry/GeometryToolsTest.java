@@ -2582,6 +2582,31 @@ public class GeometryToolsTest
       }
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @Test(timeout = 30000)
+   public void testGetOrthogonalProjectionOnLine() throws Exception
+   {
+      Random random = new Random(1176L);
+
+      for (int i = 0; i < ITERATIONS; i++)
+      {
+         Point2d firstPointOnLine = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
+         Point2d secondPointOnLine = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
+         Point2d expectionProjection = new Point2d();
+         expectionProjection.interpolate(firstPointOnLine, secondPointOnLine, RandomTools.generateRandomDouble(random, 10.0));
+         Vector2d perpendicularToLineDirection = new Vector2d();
+         perpendicularToLineDirection.sub(secondPointOnLine, firstPointOnLine);
+         perpendicularToLineDirection.normalize();
+         GeometryTools.getPerpendicularVector(perpendicularToLineDirection, perpendicularToLineDirection);
+
+         Point2d testPoint = new Point2d();
+         testPoint.scaleAdd(RandomTools.generateRandomDouble(random, 10.0), perpendicularToLineDirection, expectionProjection);
+
+         Point2d actualProjection = GeometryTools.getOrthogonalProjectionOnLine(testPoint, firstPointOnLine, secondPointOnLine);
+         JUnitTools.assertTuple2dEquals(expectionProjection, actualProjection, Epsilons.ONE_TRILLIONTH);
+      }
+   }
+
    public static void main(String[] args)
    {
       String targetTests = GeometryToolsTest.class.getName();

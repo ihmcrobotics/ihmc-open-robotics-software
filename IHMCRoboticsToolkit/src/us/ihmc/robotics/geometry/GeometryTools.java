@@ -584,18 +584,135 @@ public class GeometryTools
     * <p>
     * WARNING: This method generates garbage.
     * </p>
+    * <p>
+    * Edge cases:
+    * <ul>
+    *    <li> if the two given points on the line are too close, i.e. {@code firstPointOnLine.distanceSquared(secondPointOnLine) < Epsilons.ONE_TRILLIONTH}, this method fails and returns null.
+    * </ul>
+    * </p>
     * 
     * @param testPoint the point to compute the projection of. Not modified.
     * @param firstPointOnLine a first point located on the line. Not modified.
     * @param secondPointOnLine a second point located on the line. Not modified.
-    * @return the projection on the line.
+    * @return the projection of the point onto the line or {@code null} if the method failed.
     */
    public static Point2d getOrthogonalProjectionOnLine(Point2d testPoint, Point2d firstPointOnLine, Point2d secondPointOnLine)
    {
-      Line2d line = new Line2d(firstPointOnLine, secondPointOnLine);
-      Point2d projected = line.orthogonalProjectionCopy(testPoint);
+      Point2d projection = new Point2d();
+      boolean success = getOrthogonalProjectionOnLine(testPoint, firstPointOnLine, secondPointOnLine, projection);
+      if (!success)
+         return null;
+      else
+         return projection;
+   }
 
-      return projected;
+   /**
+    * Computes the orthogonal projection of a 2D point on an infinitely long 2D line defined by a 2D line segment.
+    * <p>
+    * Edge cases:
+    * <ul>
+    *    <li> if the two given points on the line are too close, i.e. {@code firstPointOnLine.distanceSquared(secondPointOnLine) < Epsilons.ONE_TRILLIONTH}, this method fails and returns null.
+    * </ul>
+    * </p>
+    * 
+    * @param testPoint the point to compute the projection of. Not modified.
+    * @param firstPointOnLine a first point located on the line. Not modified.
+    * @param secondPointOnLine a second point located on the line. Not modified.
+    * @param projectionToPack point in which the projection of the point onto the line is stored. Modified.
+    * @return whether the method succeeded or not.
+    */
+   public static boolean getOrthogonalProjectionOnLine(Point2d testPoint, Point2d firstPointOnLine, Point2d secondPointOnLine, Point2d projectionToPack)
+   {
+      double pointOnLineX = firstPointOnLine.getX();
+      double pointOnLineY = firstPointOnLine.getY();
+      double lineDirectionX = secondPointOnLine.getX() - firstPointOnLine.getX();
+      double lineDirectionY = secondPointOnLine.getY() - firstPointOnLine.getY();
+      return getOrthogonalProjectionOnLine(testPoint, pointOnLineX, pointOnLineY, lineDirectionX, lineDirectionY, projectionToPack);
+   }
+
+   /**
+    * Computes the orthogonal projection of a 2D point on an infinitely long 2D line defined by a 2D point and a 2D direction.
+    * <p>
+    * WARNING: This method generates garbage.
+    * </p>
+    * <p>
+    * Edge cases:
+    * <ul>
+    *    <li> if the given line direction is too small, i.e. {@code lineDirection.lengthSquared() < Epsilons.ONE_TRILLIONTH}, this method fails and returns null.
+    * </ul>
+    * </p>
+    * 
+    * @param testPoint the point to compute the projection of. Not modified.
+    * @param pointOnLine a point located on the line. Not modified.
+    * @param lineDirection the direction of the line. Not modified.
+    * @return the projection of the point onto the line or {@code null} if the method failed.
+    */
+   public static Point2d getOrthogonalProjectionOnLine(Point2d testPoint, Point2d pointOnLine, Vector2d lineDirection)
+   {
+      Point2d projection = new Point2d();
+      boolean success = getOrthogonalProjectionOnLine(testPoint, pointOnLine, lineDirection, projection);
+      if (!success)
+         return null;
+      else
+         return projection;
+   }
+
+   /**
+    * Computes the orthogonal projection of a 2D point on an infinitely long 2D line defined by a 2D point and a 2D direction.
+    * <p>
+    * Edge cases:
+    * <ul>
+    *    <li> if the given line direction is too small, i.e. {@code lineDirection.lengthSquared() < Epsilons.ONE_TRILLIONTH}, this method fails and returns null.
+    * </ul>
+    * </p>
+    * 
+    * @param testPoint the point to compute the projection of. Not modified.
+    * @param pointOnLine a point located on the line. Not modified.
+    * @param lineDirection the direction of the line. Not modified.
+    * @param projectionToPack point in which the projection of the point onto the line is stored. Modified.
+    * @return whether the method succeeded or not.
+    */
+   public static boolean getOrthogonalProjectionOnLine(Point2d testPoint, Point2d pointOnLine, Vector2d lineDirection, Point2d projectionToPack)
+   {
+      return getOrthogonalProjectionOnLine(testPoint, pointOnLine.getX(), pointOnLine.getY(), lineDirection.getX(), lineDirection.getY(), projectionToPack);
+   }
+
+   /**
+    * Computes the orthogonal projection of a 2D point on an infinitely long 2D line defined by a 2D point and a 2D direction.
+    * <p>
+    * Edge cases:
+    * <ul>
+    *    <li> if the given line direction is too small, i.e. {@code lineDirection.lengthSquared() < Epsilons.ONE_TRILLIONTH}, this method fails and returns null.
+    * </ul>
+    * </p>
+    * 
+    * @param testPoint the point to compute the projection of. Not modified.
+    * @param pointOnLineX x-coordinate of a point located on the line.
+    * @param pointOnLineY y-coordinate of a point located on the line.
+    * @param lineDirectionX x-component of the direction of the line.
+    * @param lineDirectionY y-component of the direction of the line.
+    * @param projectionToPack point in which the projection of the point onto the line is stored. Modified.
+    * @return whether the method succeeded or not.
+    */
+   public static boolean getOrthogonalProjectionOnLine(Point2d testPoint, double pointOnLineX, double pointOnLineY, double lineDirectionX,
+                                                       double lineDirectionY, Point2d projectionToPack)
+   {
+      double directionLengthSquared = lineDirectionX * lineDirectionX + lineDirectionY * lineDirectionY;
+
+      if (directionLengthSquared < Epsilons.ONE_TRILLIONTH)
+         return false;
+
+      double dx = testPoint.getX() - pointOnLineX;
+      double dy = testPoint.getY() - pointOnLineY;
+
+      double dot = dx * lineDirectionX + dy * lineDirectionY;
+
+      double alpha = dot / directionLengthSquared;
+
+      projectionToPack.setX(pointOnLineX + alpha * lineDirectionX);
+      projectionToPack.setY(pointOnLineY + alpha * lineDirectionY);
+
+      return true;
    }
 
    /**
@@ -2644,8 +2761,6 @@ public class GeometryTools
     * r < 0, then lineStart is the closest point.  If r > 1, then lineEnd is the closest point.  If
     * 0 < r < 1, then the closest point is between lineStart and lineEnd.
     */
-
-
    public static Point2d getClosestPointToLineSegment(Point2d testPoint, Point2d lineStart, Point2d lineEnd)
    {
       LineSegment2d tempLineSegment = new LineSegment2d(lineStart, lineEnd);
