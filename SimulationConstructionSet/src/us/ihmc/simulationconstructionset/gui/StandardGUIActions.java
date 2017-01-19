@@ -18,6 +18,7 @@ import javax.swing.JPopupMenu;
 import javax.swing.JToolBar;
 
 import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfigurationList;
+import us.ihmc.simulationconstructionset.ExtraPanelConfiguration;
 import us.ihmc.simulationconstructionset.commands.AllCommandsExecutor;
 import us.ihmc.simulationconstructionset.commands.SelectGUIConfigFromFileCommandExecutor;
 import us.ihmc.simulationconstructionset.commands.SelectGraphConfigurationCommandExecutor;
@@ -1154,10 +1155,10 @@ public class StandardGUIActions implements GUIEnablerAndDisabler
    protected void setupExtraPanelsMenu(ExtraPanelConfigurationList extraPanelConfigurationList, ExtraPanelSelector panelSelector)
    {
       extraPanelsMenu.removeAll();
-      String[] names = extraPanelConfigurationList.getExtraPanelConfigurationNames();
-      for (String name : names)
+      for (ExtraPanelConfiguration extraPanelConfiguration : extraPanelConfigurationList.getConfigurationList())
       {
-         JCheckBoxMenuItem myItem = new JCheckBoxMenuItem(new SelectExtraPanelAction(panelSelector, name));
+         JCheckBoxMenuItem myItem = new JCheckBoxMenuItem(new SelectExtraPanelAction(panelSelector, extraPanelConfiguration));
+         myItem.setSelected(extraPanelConfiguration.showOnStart());
          extraPanelsMenu.add(myItem);
       }
    }

@@ -2,19 +2,21 @@ package us.ihmc.simulationconstructionset;
 
 import java.awt.Component;
 
-
-
 public class ExtraPanelConfiguration
 {
-   protected String name;
-   protected Component panel = null;
+   private String name;
+   private Component panel = null;
+   private boolean showOnStart;
 
-   public ExtraPanelConfiguration(String name)
+   public ExtraPanelConfiguration(String name, Component panel, boolean showOnStart)
    {
       this.name = name;
+      this.panel = panel;
+      this.setShowOnStart(showOnStart);
    }
 
-   public void setName(String name){
+   public void setName(String name)
+   {
 	   this.panel.setName(name);
    }
 
@@ -23,7 +25,7 @@ public class ExtraPanelConfiguration
       return name;
    }
 
-   public void setupPanel(Component panel)
+   public void setPanel(Component panel)
    {
       this.panel = panel;
    }
@@ -33,4 +35,13 @@ public class ExtraPanelConfiguration
       return panel;
    }
 
+   public boolean showOnStart()
+   {
+      return showOnStart;
+   }
+
+   public void setShowOnStart(boolean showOnStart)
+   {
+      this.showOnStart = showOnStart;
+   }
 }

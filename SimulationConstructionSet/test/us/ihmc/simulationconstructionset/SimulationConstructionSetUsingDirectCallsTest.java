@@ -70,9 +70,9 @@ import us.ihmc.simulationconstructionset.physics.collision.CollisionDetectionRes
 import us.ihmc.simulationconstructionset.physics.collision.DefaultCollisionHandler;
 import us.ihmc.simulationconstructionset.physics.visualize.DefaultCollisionVisualizer;
 import us.ihmc.simulationconstructionset.robotcommprotocol.RobotSocketConnection;
-import us.ihmc.tools.continuousIntegration.IntegrationCategory;
 import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
 import us.ihmc.tools.inputDevices.keyboard.ModifierKeyInterface;
 import us.ihmc.tools.thread.ThreadTools;
 
@@ -1824,9 +1824,8 @@ public class SimulationConstructionSetUsingDirectCallsTest
 
    private ExtraPanelConfiguration createExtraPanelConfigurationWithPanel(String name)
    {
-      ExtraPanelConfiguration extraPanelConfiguration = new ExtraPanelConfiguration(name);
       Button panel = new Button();
-      extraPanelConfiguration.setupPanel(panel);
+      ExtraPanelConfiguration extraPanelConfiguration = new ExtraPanelConfiguration(name, panel, false);
 
       return extraPanelConfiguration;
    }
