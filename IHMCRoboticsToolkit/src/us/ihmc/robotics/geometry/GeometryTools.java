@@ -1515,7 +1515,8 @@ public class GeometryTools
             }
 
             // There is some inconsistency between doLineSegmentsIntersect and this method, crashing.
-            throw new RuntimeException("Unexpected state.");
+            return false;
+//            throw new RuntimeException("Unexpected state.");
          }
       }
       else
