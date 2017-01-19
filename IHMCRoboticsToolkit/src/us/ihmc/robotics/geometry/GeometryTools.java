@@ -1055,7 +1055,7 @@ public class GeometryTools
          if (Math.abs(r1numerator) < eps && Math.abs(r2numerator) < eps)
          {
             double ls1, le1, ls2, le2;
-            if (lineSegmentStart1x != lineSegmentEnd1x)
+            if (Math.abs(lineSegmentStart1x - lineSegmentEnd1x) > eps)
             {
                ls1 = lineSegmentStart1x;
                le1 = lineSegmentEnd1x;
@@ -1515,8 +1515,7 @@ public class GeometryTools
             }
 
             // There is some inconsistency between doLineSegmentsIntersect and this method, crashing.
-            return false;
-//            throw new RuntimeException("Unexpected state.");
+            throw new RuntimeException("Unexpected state.");
          }
       }
       else
