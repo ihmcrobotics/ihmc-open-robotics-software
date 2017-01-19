@@ -2593,11 +2593,17 @@ public class GeometryTools
 
    /**
     * Calculates distance between two points.
+    * 
+    * @param firstPointX the x-coordinate of the first point.
+    * @param firstPointY the y-coordinate of the first point.
+    * @param secondPointX the x-coordinate of the second point.
+    * @param secondPointY the y-coordinate of the second point.
+    * @return the distance between the two points.
     */
-   public static double distanceBetweenPoints(double x0, double y0, double x1, double y1)
+   public static double distanceBetweenPoints(double firstPointX, double firstPointY, double secondPointX, double secondPointY)
    {
-      double deltaX = x1 - x0;
-      double deltaY = y1 - y0;
+      double deltaX = secondPointX - firstPointX;
+      double deltaY = secondPointY - firstPointY;
       return Math.sqrt(deltaX * deltaX + deltaY * deltaY);
    }
 
