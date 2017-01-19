@@ -833,23 +833,78 @@ public class GeometryTools
    }
 
    /**
-    * Attempts to normalize the given 3D vector.
-    * If the vector's length falls below {@value Epsilons#ONE_TRILLIONTH}, the vector is set to (0, 0, 1).
-    *  
-    * @param vector the 3D vector to normalize. Modified.
+    * Computes a percentage along the line segment representing the location of the projection onto the line segment of the given point.
+    * The returned percentage is in ] -&infin;; &infin; [, {@code 0.0} representing {@code lineSegmentStart}, and {@code 1.0} representing {@code lineSegmentEnd}.
+    * <p>
+    * For example, if the returned percentage is {@code 0.5}, it means that the projection of the given point is located at the middle of the line segment.
+    * The coordinates of the projection of the point can be computed from the {@code percentage} as follows:
+    * <code>
+    * Point2d projection = new Point2d(); </br>
+    * projection.interpolate(lineSegmentStart, lineSegmentEnd, percentage); </br>
+    * </code>
+    * </p>
+    * <p>
+    * Edge cases:
+    * <ul>
+    *    <li> if the length of the given line segment is too small, i.e. {@code lineSegmentStart.distanceSquared(lineSegmentEnd) < Epsilons.ONE_TRILLIONTH}, this method fails and returns {@link Double#NaN}.
+    * </ul>
+    * </p>
+    * 
+    * @param point the query. Not modified.
+    * @param lineSegmentStart the line segment first end point. Not modified.
+    * @param lineSegmentEnd the line segment second end point. Not modified.
+    * @return the computed percentage along the line segment representing where the point projection is located.
     */
-   public static void normalizeSafelyZUp(Vector3d vector)
+   public static double getPercentageAlongLineSegment(Point2d point, Point2d lineSegmentStart, Point2d lineSegmentEnd)
    {
-      double distance = vector.length();
+      return getPercentageAlongLineSegment(point.getX(), point.getY(), lineSegmentStart.getX(), lineSegmentStart.getY(), lineSegmentEnd.getX(),
+                                           lineSegmentEnd.getY());
+   }
 
-      if (distance > Epsilons.ONE_TRILLIONTH)
-      {
-         vector.scale(1.0 / distance);
-      }
-      else
-      {
-         vector.set(0.0, 0.0, 1.0);
-      }
+   /**
+    * Computes a percentage along the line segment representing the location of the given point once projected onto the line segment.
+    * The returned percentage is in ] -&infin;; &infin; [, {@code 0.0} representing {@code lineSegmentStart}, and {@code 1.0} representing {@code lineSegmentEnd}.
+    * <p>
+    * For example, if the returned percentage is {@code 0.5}, it means that the projection of the given point is located at the middle of the line segment.
+    * The coordinates of the projection of the point can be computed from the {@code percentage} as follows:
+    * <code>
+    * Point2d projection = new Point2d(); </br>
+    * projection.interpolate(lineSegmentStart, lineSegmentEnd, percentage); </br>
+    * </code>
+    * </p>
+    * <p>
+    * Edge cases:
+    * <ul>
+    *    <li> if the length of the given line segment is too small, i.e. {@code lineSegmentStart.distanceSquared(lineSegmentEnd) < Epsilons.ONE_TRILLIONTH}, this method fails and returns {@link Double#NaN}.
+    * </ul>
+    * </p>
+    * 
+    * @param pointX the x-coordinate of the query point.
+    * @param pointY the y-coordinate of the query point.
+    * @param lineSegmentStartX the x-coordinate of the line segment first end point.
+    * @param lineSegmentStartY the y-coordinate of the line segment first end point.
+    * @param lineSegmentEndX the x-coordinate of the line segment second end point.
+    * @param lineSegmentEndY the y-coordinate of the line segment second end point.
+    * @return the computed percentage along the line segment representing where the point projection is located.
+    */
+   public static double getPercentageAlongLineSegment(double pointX, double pointY, double lineSegmentStartX, double lineSegmentStartY, double lineSegmentEndX,
+                                                      double lineSegmentEndY)
+   {
+      double lineSegmentDx = lineSegmentEndX - lineSegmentStartX;
+      double lineSegmentDy = lineSegmentEndY - lineSegmentStartY;
+      double lengthSquared = lineSegmentDx * lineSegmentDx + lineSegmentDy * lineSegmentDy;
+
+      if (lengthSquared < Epsilons.ONE_TRILLIONTH)
+         return Double.NaN;
+
+      double dx = pointX - lineSegmentStartX;
+      double dy = pointY - lineSegmentStartY;
+
+      double dot = dx * lineSegmentDx + dy * lineSegmentDy;
+
+      double alpha = dot / lengthSquared;
+
+      return alpha;
    }
 
    /**
@@ -2826,7 +2881,7 @@ public class GeometryTools
    }
 
    /**
-    * Calculates distance between two points.
+    * Calculates the distance between two points.
     * 
     * @param firstPointX the x-coordinate of the first point.
     * @param firstPointY the y-coordinate of the first point.
@@ -2839,6 +2894,38 @@ public class GeometryTools
       double deltaX = secondPointX - firstPointX;
       double deltaY = secondPointY - firstPointY;
       return Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+   }
+
+   /**
+    * Calculates the distance on the xy-plane bewteen two 3D points.
+    * <p>
+    * WARNING: the 3D arguments are projected onto the XY-plane to perform the actual computation in 2D.
+    * </p>
+    * 
+    * @param firstPoint the first point. Not modified.
+    * @param secondPoint the second point. Not modified.
+    * @return the distance between the two points.
+    * @throws ReferenceFrameMismatchException if the arguments are not expressed in the same reference frame.
+    */
+   public static double getXYDistance(FramePoint firstPoint, FramePoint secondPoint)
+   {
+      firstPoint.checkReferenceFrameMatch(secondPoint);
+      return getXYDistance(firstPoint.getPoint(), secondPoint.getPoint());
+   }
+
+   /**
+    * Calculates the distance on the xy-plane bewteen two 3D points.
+    * <p>
+    * WARNING: the 3D arguments are projected onto the XY-plane to perform the actual computation in 2D.
+    * </p>
+    * 
+    * @param firstPoint the first point. Not modified.
+    * @param secondPoint the second point. Not modified.
+    * @return the distance between the two points.
+    */
+   public static double getXYDistance(Point3d firstPoint, Point3d secondPoint)
+   {
+      return distanceBetweenPoints(firstPoint.getX(), firstPoint.getY(), secondPoint.getX(), secondPoint.getY());
    }
 
    /**
@@ -2865,94 +2952,23 @@ public class GeometryTools
    }
 
    /**
-    * Computes a percentage along the line segment representing the location of the projection onto the line segment of the given point.
-    * The returned percentage is in ] -&infin;; &infin; [, {@code 0.0} representing {@code lineSegmentStart}, and {@code 1.0} representing {@code lineSegmentEnd}.
-    * <p>
-    * For example, if the returned percentage is {@code 0.5}, it means that the projection of the given point is located at the middle of the line segment.
-    * The coordinates of the projection of the point can be computed from the {@code percentage} as follows:
-    * <code>
-    * Point2d projection = new Point2d(); </br>
-    * projection.interpolate(lineSegmentStart, lineSegmentEnd, percentage); </br>
-    * </code>
-    * </p>
-    * <p>
-    * Edge cases:
-    * <ul>
-    *    <li> if the length of the given line segment is too small, i.e. {@code lineSegmentStart.distanceSquared(lineSegmentEnd) < Epsilons.ONE_TRILLIONTH}, this method fails and returns {@link Double#NaN}.
-    * </ul>
-    * </p>
-    * 
-    * @param point the query. Not modified.
-    * @param lineSegmentStart the line segment first end point. Not modified.
-    * @param lineSegmentEnd the line segment second end point. Not modified.
-    * @return the computed percentage along the line segment representing where the point projection is located.
+    * Attempts to normalize the given 3D vector.
+    * If the vector's length falls below {@value Epsilons#ONE_TRILLIONTH}, the vector is set to (0, 0, 1).
+    *  
+    * @param vector the 3D vector to normalize. Modified.
     */
-   public static double getPercentageAlongLineSegment(Point2d point, Point2d lineSegmentStart, Point2d lineSegmentEnd)
+   public static void normalizeSafelyZUp(Vector3d vector)
    {
-      return getPercentageAlongLineSegment(point.getX(), point.getY(), lineSegmentStart.getX(), lineSegmentStart.getY(), lineSegmentEnd.getX(),
-                                           lineSegmentEnd.getY());
-   }
+      double distance = vector.length();
 
-   /**
-    * Computes a percentage along the line segment representing the location of the given point once projected onto the line segment.
-    * The returned percentage is in ] -&infin;; &infin; [, {@code 0.0} representing {@code lineSegmentStart}, and {@code 1.0} representing {@code lineSegmentEnd}.
-    * <p>
-    * For example, if the returned percentage is {@code 0.5}, it means that the projection of the given point is located at the middle of the line segment.
-    * The coordinates of the projection of the point can be computed from the {@code percentage} as follows:
-    * <code>
-    * Point2d projection = new Point2d(); </br>
-    * projection.interpolate(lineSegmentStart, lineSegmentEnd, percentage); </br>
-    * </code>
-    * </p>
-    * <p>
-    * Edge cases:
-    * <ul>
-    *    <li> if the length of the given line segment is too small, i.e. {@code lineSegmentStart.distanceSquared(lineSegmentEnd) < Epsilons.ONE_TRILLIONTH}, this method fails and returns {@link Double#NaN}.
-    * </ul>
-    * </p>
-    * 
-    * @param pointX the x-coordinate of the query point.
-    * @param pointY the y-coordinate of the query point.
-    * @param lineSegmentStartX the x-coordinate of the line segment first end point.
-    * @param lineSegmentStartY the y-coordinate of the line segment first end point.
-    * @param lineSegmentEndX the x-coordinate of the line segment second end point.
-    * @param lineSegmentEndY the y-coordinate of the line segment second end point.
-    * @return the computed percentage along the line segment representing where the point projection is located.
-    */
-   public static double getPercentageAlongLineSegment(double pointX, double pointY, double lineSegmentStartX, double lineSegmentStartY, double lineSegmentEndX,
-                                                      double lineSegmentEndY)
-   {
-      double lineSegmentDx = lineSegmentEndX - lineSegmentStartX;
-      double lineSegmentDy = lineSegmentEndY - lineSegmentStartY;
-      double lengthSquared = lineSegmentDx * lineSegmentDx + lineSegmentDy * lineSegmentDy;
-
-      if (lengthSquared < Epsilons.ONE_TRILLIONTH)
-         return Double.NaN;
-
-      double dx = pointX - lineSegmentStartX;
-      double dy = pointY - lineSegmentStartY;
-
-      double dot = dx * lineSegmentDx + dy * lineSegmentDy;
-
-      double alpha = dot / lengthSquared;
-
-      return alpha;
-   }
-
-   public static double getXYDistance(FramePoint point1, FramePoint point2)
-   {
-      point1 = new FramePoint(point1.getReferenceFrame(), point1.getX(), point1.getY(), 0.0);
-      point2 = new FramePoint(point2.getReferenceFrame(), point2.getX(), point2.getY(), 0.0);
-
-      return point1.distance(point2);
-   }
-
-   public static double getXYDistance(Point3d point1, Point3d point2)
-   {
-      point1 = new Point3d(point1.getX(), point1.getY(), 0.0);
-      point2 = new Point3d(point2.getX(), point2.getY(), 0.0);
-
-      return point1.distance(point2);
+      if (distance > Epsilons.ONE_TRILLIONTH)
+      {
+         vector.scale(1.0 / distance);
+      }
+      else
+      {
+         vector.set(0.0, 0.0, 1.0);
+      }
    }
 
    /**
