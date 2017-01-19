@@ -2369,39 +2369,6 @@ public class GeometryTools
 
    }
 
-   public static Point2d getMatchingPairOfPoints(ArrayList<Point2d> listOfPoints)
-   {
-      Point2d matchedPoint = null;
-      for (Point2d pointToMatch : listOfPoints)
-      {
-         for (Point2d point : listOfPoints)
-         {
-            if (Math.abs(pointToMatch.getX() - point.getX()) < 0.00001)
-            {
-               if (Math.abs(pointToMatch.getY() - point.getY()) < 0.00001)
-               {
-                  matchedPoint = pointToMatch;
-               }
-            }
-         }
-      }
-
-      return matchedPoint;
-   }
-
-   public static FrameOrientation getTransform(FramePoint point, FrameVector normal)
-   {
-      RigidBodyTransform transform = new RigidBodyTransform();
-
-      transform.setRotation(getRotationBasedOnNormal(normal.getVectorCopy()));
-
-      Vector3d translation = new Vector3d();
-      point.get(translation);
-      transform.setTranslation(translation);
-
-      return new FrameOrientation(ReferenceFrame.getWorldFrame(), transform);
-   }
-
    /**
     *  This method returns the point representing where the bisector of an
     *  angle of a triangle intersects the opposite side.
@@ -2511,17 +2478,6 @@ public class GeometryTools
 
       return angle;
    }
-
-   /**
-    * Creates a Cube given size, color, and postion
-    *
-    * @param thisColor Vector3f
-    * @param position Point3d
-    * @param size double
-    * @return BranchGroup
-    */
-
-
 
    /**
     * Calculates distance between two Double points, a and b.
@@ -2726,6 +2682,7 @@ public class GeometryTools
     * @param c Point3d
     * @return Vector3d
     */
+   // FIXME duplicate of getPlaneNormalGivenThreePoints
    public static Vector3d getNormalToPlane(Point3d a, Point3d b, Point3d c)
    {
       Vector3d x = new Vector3d(b);
