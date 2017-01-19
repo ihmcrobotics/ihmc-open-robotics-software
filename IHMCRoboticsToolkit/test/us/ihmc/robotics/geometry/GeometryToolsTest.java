@@ -2505,6 +2505,46 @@ public class GeometryToolsTest
       }
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @Test(timeout = 30000)
+   public void testGetNormalPointsFromLine1() throws Exception
+   {
+      Point2d firstLinePoint = new Point2d(1.0, 1.0);
+      Point2d secondLinePoint = new Point2d(0.0, 1.0);
+      double lengthOffset = 2.0;
+      List<Point2d> normalPointsFromLine = GeometryTools.getPerpendicularBisectorSegment(firstLinePoint, secondLinePoint, lengthOffset);
+      JUnitTools.assertTuple2dEquals(new Point2d(0.5, -1.0), normalPointsFromLine.get(0), Epsilons.ONE_TRILLIONTH);
+      JUnitTools.assertTuple2dEquals(new Point2d(0.5, 3.0), normalPointsFromLine.get(1), Epsilons.ONE_TRILLIONTH);
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @Test(timeout = 30000)
+   public void testGetNormalPointsFromLine2() throws Exception
+   {
+      Random random = new Random(1176L);
+      for (int i = 0; i < 100; i++)
+      {
+         Point2d firstPointOnLine = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
+         Point2d secondPointOnLine = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
+         Vector2d lineDirection = new Vector2d();
+         lineDirection.sub(secondPointOnLine, firstPointOnLine);
+         double lengthOffset = RandomTools.generateRandomDouble(random, 0.0, 10.0);
+         List<Point2d> normalPointsFromLine = GeometryTools.getPerpendicularBisectorSegment(firstPointOnLine, secondPointOnLine, lengthOffset);
+
+         Point2d normalPoint0 = normalPointsFromLine.get(0);
+         Point2d normalPoint1 = normalPointsFromLine.get(1);
+         Vector2d normalDirection = new Vector2d();
+         normalDirection.sub(normalPoint1, normalPoint0);
+
+         assertEquals(2.0 * lengthOffset, normalDirection.length(), Epsilons.ONE_TRILLIONTH);
+         assertEquals(0.0, lineDirection.dot(normalDirection), Epsilons.ONE_TRILLIONTH);
+         assertEquals(lengthOffset, GeometryTools.distanceFromPointToLine(normalPoint0, firstPointOnLine, secondPointOnLine), Epsilons.ONE_TRILLIONTH);
+         assertEquals(lengthOffset, GeometryTools.distanceFromPointToLine(normalPoint1, firstPointOnLine, secondPointOnLine), Epsilons.ONE_TRILLIONTH);
+         assertTrue(GeometryTools.isPointOnLeftSideOfLine(normalPoint0, firstPointOnLine, secondPointOnLine));
+         assertTrue(GeometryTools.isPointOnRightSideOfLine(normalPoint1, firstPointOnLine, secondPointOnLine));
+      }
+   }
+
    public static void main(String[] args)
    {
       String targetTests = GeometryToolsTest.class.getName();
