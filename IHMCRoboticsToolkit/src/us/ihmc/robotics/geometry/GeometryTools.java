@@ -2562,11 +2562,15 @@ public class GeometryTools
    }
 
    /**
-    * Calculates distance between two Double points, a and b.
+    * Computes the Euclidean distance between the two given n-dimensional points {@code a} and {@code b}:
+    * <br>
+    * distance = Sqrt{  &sum;<sub>i=1:n</sub> { (a<sub>i</sub> - b<sub>i</sub>)<sup>2</sup>}   }
+    * <br>
     *
-    * @param a double[]
-    * @param b double[]
-    * @return double
+    * @param a array containing the first point coordinates. Not modified.
+    * @param b array containing the second point coordinates. Not modified.
+    * @return the distance between the two points.
+    * @throws IllegalArgumentException if the two vectors have different lengths.
     */
    public static double distanceBetweenPoints(double[] a, double[] b)
    {
@@ -2575,15 +2579,16 @@ public class GeometryTools
          throw new IllegalArgumentException("cannot find distance between points of different dimensions");
       }
 
-      double dist = 0.0;
+      double distance = 0.0;
       for (int i = 0; i < a.length; i++)
       {
-         dist += (a[i] - b[i]) * (a[i] - b[i]);
+         double delta = a[i] - b[i];
+         distance += delta * delta;
       }
 
-      dist = Math.sqrt(dist);
+      distance = Math.sqrt(distance);
 
-      return dist;
+      return distance;
    }
 
    /**
