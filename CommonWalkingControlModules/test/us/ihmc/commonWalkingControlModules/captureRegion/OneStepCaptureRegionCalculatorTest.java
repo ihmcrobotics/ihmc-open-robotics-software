@@ -508,13 +508,11 @@ public class OneStepCaptureRegionCalculatorTest
       scs.attachPlaybackListener(simulationOverheadPlotter);
       JPanel simulationOverheadPlotterJPanel = simulationOverheadPlotter.getJPanel();
       String plotterName = "Plotter";
-      scs.addExtraJpanel(simulationOverheadPlotterJPanel, plotterName);
+      scs.addExtraJpanel(simulationOverheadPlotterJPanel, plotterName, true);
       JPanel plotterKeyJPanel = simulationOverheadPlotter.getJPanelKey();
 
       JScrollPane scrollPane = new JScrollPane(plotterKeyJPanel);
-      scs.addExtraJpanel(scrollPane, "Plotter Legend");
-
-      scs.getStandardSimulationGUI().selectPanel(plotterName);
+      scs.addExtraJpanel(scrollPane, "Plotter Legend", false);
 
       yoGraphicsListRegistry.update();
       scs.addYoGraphicsListRegistry(yoGraphicsListRegistry, false);

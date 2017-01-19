@@ -4123,11 +4123,6 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       standardAllCommandsExecutor.toggleCameraKeyMode();
    }
 
-   public void addExtraJpanel(Component extraPanel, String name)
-   {
-      addExtraJpanel(extraPanel, name, false);
-   }
-   
    public void addExtraJpanel(Component extraPanel, String name, boolean showOnStart)
    {
       setupExtraPanel(new ExtraPanelConfiguration(name, extraPanel, showOnStart));

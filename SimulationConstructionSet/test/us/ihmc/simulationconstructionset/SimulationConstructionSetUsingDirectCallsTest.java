@@ -505,7 +505,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
       assertFalse(isViewportHidden2);
 
       Component component = new Button();
-      scs.addExtraJpanel(component, simpleComponentName);
+      scs.addExtraJpanel(component, simpleComponentName, false);
       ThreadTools.sleep(THREAD_SLEEP_TIME);
       Component componentFromSCS =  scs.getExtraPanel(simpleComponentName);
       assertEquals(component, componentFromSCS);
