@@ -774,10 +774,25 @@ public class GeometryToolsTest
          JUnitTools.assertTuple2dEquals(expectedIntersection, actualIntersection, epsilon);
       }
    }
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testGetIntersectionBetweenTwoLineSegments1()
+   {
+      Point2d lineSegmentStart1, lineSegmentEnd1;
+      Point2d lineSegmentStart2, lineSegmentEnd2;
+
+      lineSegmentStart1 = new Point2d(0.0, -0.075);
+      lineSegmentEnd1 = new Point2d(-1.6165337748745066E-16, -2.7150000000000007);
+      lineSegmentStart2 = new Point2d(0.0, 0.075);
+      lineSegmentEnd2 = new Point2d(0.0, 0.325);
+
+      assertFalse(GeometryTools.doLineSegmentsIntersect(lineSegmentStart1, lineSegmentEnd1, lineSegmentStart2, lineSegmentEnd2));
+      assertOnlyExistenceOfTwoLineSegmentsIntersectionAllCombinations(false, lineSegmentStart1, lineSegmentEnd1, lineSegmentStart2, lineSegmentEnd2);
+   }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
-   public void testGetIntersectionBetweenTwoLineSegments()
+   public void testGetIntersectionBetweenTwoLineSegments2()
    {
       Random random = new Random(3242L);
 
