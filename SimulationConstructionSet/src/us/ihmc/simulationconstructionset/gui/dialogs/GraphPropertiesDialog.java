@@ -81,6 +81,7 @@ public class GraphPropertiesDialog extends JDialog implements ActionListener
 //      parentFrame.repaint();    // This is a horrible way to get the graphs to repaint...
    }
 
+   @Override
    public void actionPerformed(ActionEvent event)
    {
       if (event.getSource() == cancelButton)
