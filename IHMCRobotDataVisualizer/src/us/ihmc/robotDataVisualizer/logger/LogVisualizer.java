@@ -145,8 +145,6 @@ public class LogVisualizer
       }
 
       boolean useCollisionMeshes = false;
-      boolean enableTorqueVelocityLimits = true;
-      boolean enableJointDamping = true;
 
       RobotDescription robotDescription;
       
@@ -154,7 +152,7 @@ public class LogVisualizer
       if(generalizedSDFRobotModel != null)
       {
          RobotDescriptionFromSDFLoader loader = new RobotDescriptionFromSDFLoader();
-         robotDescription = loader.loadRobotDescriptionFromSDF(generalizedSDFRobotModel, null, useCollisionMeshes, enableTorqueVelocityLimits, enableJointDamping);         
+         robotDescription = loader.loadRobotDescriptionFromSDF(generalizedSDFRobotModel, null, useCollisionMeshes);         
       }
       else
       {

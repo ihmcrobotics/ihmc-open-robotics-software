@@ -71,18 +71,17 @@ public class RobotDescriptionFromSDFLoader
    }
 
 
-   public RobotDescription loadRobotDescriptionFromSDF(String modelName, InputStream inputStream, List<String> resourceDirectories, SDFDescriptionMutator mutator, JointNameMap jointNameMap, boolean useCollisionMeshes,
-         boolean enableTorqueVelocityLimits, boolean enableDamping)
+   public RobotDescription loadRobotDescriptionFromSDF(String modelName, InputStream inputStream, List<String> resourceDirectories, SDFDescriptionMutator mutator, JointNameMap jointNameMap, boolean useCollisionMeshes)
    {
       GeneralizedSDFRobotModel generalizedSDFRobotModel = loadSDFFile(modelName, inputStream, resourceDirectories, mutator);
-      return loadRobotDescriptionFromSDF(generalizedSDFRobotModel, jointNameMap, useCollisionMeshes, enableTorqueVelocityLimits, enableDamping);
+      return loadRobotDescriptionFromSDF(generalizedSDFRobotModel, jointNameMap, useCollisionMeshes);
    }
 
-   public RobotDescription loadRobotDescriptionFromSDF(GeneralizedSDFRobotModel generalizedSDFRobotModel, JointNameMap jointNameMap, boolean useCollisionMeshes, boolean enableTorqueVelocityLimits, boolean enableDamping)
+   public RobotDescription loadRobotDescriptionFromSDF(GeneralizedSDFRobotModel generalizedSDFRobotModel, JointNameMap jointNameMap, boolean useCollisionMeshes)
    {
       this.resourceDirectories = generalizedSDFRobotModel.getResourceDirectories();
 
-      RobotDescription robotDescription = loadModelFromSDF(generalizedSDFRobotModel, jointNameMap, useCollisionMeshes, enableTorqueVelocityLimits, enableDamping);
+      RobotDescription robotDescription = loadModelFromSDF(generalizedSDFRobotModel, jointNameMap, useCollisionMeshes);
 
       if(jointNameMap != null && !Precision.equals(jointNameMap.getModelScale(), 1.0, 1))
       {
@@ -145,7 +144,7 @@ public class RobotDescriptionFromSDFLoader
    }
 
 
-   private RobotDescription loadModelFromSDF(GeneralizedSDFRobotModel generalizedSDFRobotModel, JointNameMap jointNameMap, boolean useCollisionMeshes, boolean enableTorqueVelocityLimits, boolean enableDamping)
+   private RobotDescription loadModelFromSDF(GeneralizedSDFRobotModel generalizedSDFRobotModel, JointNameMap jointNameMap, boolean useCollisionMeshes)
    {
       String name = generalizedSDFRobotModel.getName();
       RobotDescription robotDescription = new RobotDescription(name);
@@ -171,10 +170,7 @@ public class RobotDescriptionFromSDFLoader
       robotDescription.addRootJoint(rootJointDescription);
       jointDescriptions.put(rootJointDescription.getName(), rootJointDescription);
 
-      if (jointNameMap != null)
-      {
-         enableTorqueVelocityLimits = enableTorqueVelocityLimits && jointNameMap.isTorqueVelocityLimitsEnabled();
-      }
+
 
       for (SDFJointHolder child : rootLink.getChildren())
       {
@@ -190,7 +186,7 @@ public class RobotDescriptionFromSDFLoader
          {
             lastSimulatedJoints = new HashSet<>();
          }
-         addJointsRecursively(child, rootJointDescription, useCollisionMeshes, enableTorqueVelocityLimits, enableDamping, lastSimulatedJoints, false);
+         addJointsRecursively(child, rootJointDescription, useCollisionMeshes, lastSimulatedJoints, false);
       }
       
       // Ground contact points from model
@@ -269,7 +265,7 @@ public class RobotDescriptionFromSDFLoader
       return scsLink;
    }
 
-   protected void addJointsRecursively(SDFJointHolder joint, JointDescription scsParentJoint, boolean useCollisionMeshes, boolean enableTorqueVelocityLimits, boolean enableDamping, Set<String> lastSimulatedJoints,
+   protected void addJointsRecursively(SDFJointHolder joint, JointDescription scsParentJoint, boolean useCollisionMeshes, Set<String> lastSimulatedJoints,
          boolean doNotSimulateJoint)
    {
       Vector3d jointAxis = new Vector3d(joint.getAxisInModelFrame());
@@ -313,33 +309,21 @@ public class RobotDescriptionFromSDFLoader
             }
          }
 
-         if (enableDamping)
-         {
-            pinJoint.setDamping(joint.getDamping());
-            pinJoint.setStiction(joint.getFriction());
-         }
-         else
-         {
-            // TODO: Huh? What's this all about?
-            //                  pinJoint.setDampingParameterOnly(joint.getDamping());
-            //                  pinJoint.setStictionParameterOnly(joint.getFriction());
-         }
+         pinJoint.setDamping(joint.getDamping());
+         pinJoint.setStiction(joint.getFriction());
 
-         if (enableTorqueVelocityLimits)
+         if (!isJointInNeedOfReducedGains(joint))
          {
-            if (!isJointInNeedOfReducedGains(joint))
+            if (!Double.isNaN(joint.getEffortLimit()))
             {
-               if (!Double.isNaN(joint.getEffortLimit()))
-               {
-                  pinJoint.setEffortLimit(joint.getEffortLimit());
-               }
+               pinJoint.setEffortLimit(joint.getEffortLimit());
+            }
 
-               if (!Double.isNaN(joint.getVelocityLimit()))
+            if (!Double.isNaN(joint.getVelocityLimit()))
+            {
+               if (!isJointInNeedOfReducedGains(joint))
                {
-                  if (!isJointInNeedOfReducedGains(joint))
-                  {
-                     pinJoint.setVelocityLimits(joint.getVelocityLimit(), 500.0);
-                  }
+                  pinJoint.setVelocityLimits(joint.getVelocityLimit(), 500.0);
                }
             }
          }
@@ -363,16 +347,8 @@ public class RobotDescriptionFromSDFLoader
             }
          }
 
-         if (enableDamping)
-         {
-            sliderJoint.setDamping(joint.getDamping());
-            sliderJoint.setStiction(joint.getFriction());
-         }
-         else
-         {
-            // Huh? What's this all about?
-            //                  sliderJoint.setDampingParameterOnly(joint.getDamping());
-         }
+         sliderJoint.setDamping(joint.getDamping());
+         sliderJoint.setStiction(joint.getFriction());
 
          //               oneDoFJoints.put(joint.getName(), sliderJoint);
 
@@ -399,7 +375,7 @@ public class RobotDescriptionFromSDFLoader
 
       for (SDFJointHolder child : joint.getChildLinkHolder().getChildren())
       {
-         addJointsRecursively(child, scsJoint, useCollisionMeshes, enableTorqueVelocityLimits, enableDamping, lastSimulatedJoints, doNotSimulateJoint);
+         addJointsRecursively(child, scsJoint, useCollisionMeshes, lastSimulatedJoints, doNotSimulateJoint);
       }
 
    }
