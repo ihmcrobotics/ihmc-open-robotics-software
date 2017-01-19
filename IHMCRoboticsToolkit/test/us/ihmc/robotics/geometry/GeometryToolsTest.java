@@ -2507,7 +2507,7 @@ public class GeometryToolsTest
 
    @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
-   public void testGetNormalPointsFromLine1() throws Exception
+   public void testGetPerpendicularBisectorSegment1() throws Exception
    {
       Point2d firstLinePoint = new Point2d(1.0, 1.0);
       Point2d secondLinePoint = new Point2d(0.0, 1.0);
@@ -2519,7 +2519,7 @@ public class GeometryToolsTest
 
    @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
-   public void testGetNormalPointsFromLine2() throws Exception
+   public void testGetPerpendicularBisectorSegment2() throws Exception
    {
       Random random = new Random(1176L);
       for (int i = 0; i < 100; i++)
