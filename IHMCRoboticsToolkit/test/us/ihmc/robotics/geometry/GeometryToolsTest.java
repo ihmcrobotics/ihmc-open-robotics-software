@@ -43,6 +43,8 @@ import us.ihmc.tools.testing.MutationTestingTools;
  */
 public class GeometryToolsTest
 {
+   private static final int ITERATIONS = 1000;
+
    @Before
    public void setUp() throws Exception
    {
@@ -291,7 +293,7 @@ public class GeometryToolsTest
       double actualReturn1 = GeometryTools.distanceFromPointToLine(point1, lineStart1, lineEnd1);
       assertEquals("return value", expectedReturn1, actualReturn1, Double.MIN_VALUE);
 
-      for (int i = 0; i < 100; i++)
+      for (int i = 0; i < ITERATIONS; i++)
       {
          // Generate a random line
          Point3d start = RandomTools.generateRandomPoint3d(random, -10.0, 10.0);
@@ -413,7 +415,7 @@ public class GeometryToolsTest
    public void testGetDistanceBetweenPointAndPlane2()
    {
       Random random = new Random(1176L);
-      for (int i = 0; i < 100; i++)
+      for (int i = 0; i < ITERATIONS; i++)
       {
          Point3d pointOnPlane = RandomTools.generateRandomPoint3d(random, -10.0, 10.0);
          Vector3d planeNormal = RandomTools.generateRandomVector(random, RandomTools.generateRandomDouble(random, 0.0, 10.0));
@@ -474,7 +476,7 @@ public class GeometryToolsTest
       Point3d endPoint0 = new Point3d();
       Point3d endPoint1 = new Point3d();
 
-      for (int i = 0; i < 100; i++)
+      for (int i = 0; i < ITERATIONS; i++)
       {
          Point3d pointOnPlane = RandomTools.generateRandomPoint3d(random, -10.0, 10.0);
          Vector3d planeNormal = RandomTools.generateRandomVector(random, RandomTools.generateRandomDouble(random, 0.0, 10.0));
@@ -580,7 +582,7 @@ public class GeometryToolsTest
    public void testDoLineSegmentsIntersect2()
    {
       Random random = new Random(1176L);
-      for (int i = 0; i < 100; i++)
+      for (int i = 0; i < ITERATIONS; i++)
       {
          Point2d lineSegmentStart1 = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
          Point2d lineSegmentEnd1 = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
@@ -611,7 +613,7 @@ public class GeometryToolsTest
       }
 
       // Test intersection at one of the end points
-      for (int i = 0; i < 100; i++)
+      for (int i = 0; i < ITERATIONS; i++)
       {
          Point2d lineSegmentStart1 = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
          Point2d lineSegmentEnd1 = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
@@ -633,7 +635,7 @@ public class GeometryToolsTest
       }
 
       // Test with parallel/collinear line segments
-      for (int i = 0; i < 100; i++)
+      for (int i = 0; i < ITERATIONS; i++)
       {
          Point2d lineSegmentStart1 = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
          Point2d lineSegmentEnd1 = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
@@ -716,7 +718,7 @@ public class GeometryToolsTest
       double epsilon = Epsilons.ONE_TRILLIONTH;
       Random random = new Random(1176L);
 
-      for (int i = 0; i < 100; i++)
+      for (int i = 0; i < ITERATIONS; i++)
       {
          Point2d pointOnLine1 = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
          Vector2d lineDirection1 = RandomTools.generateRandomVector2d(random, 10.0);
@@ -736,7 +738,7 @@ public class GeometryToolsTest
       }
 
       // Test when parallel but not collinear
-      for (int i = 0; i < 100; i++)
+      for (int i = 0; i < ITERATIONS; i++)
       {
          Point2d pointOnLine1 = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
          Vector2d lineDirection1 = RandomTools.generateRandomVector2d(random, 10.0);
@@ -755,7 +757,7 @@ public class GeometryToolsTest
       }
 
       // Test when collinear
-      for (int i = 0; i < 100; i++)
+      for (int i = 0; i < ITERATIONS; i++)
       {
          Point2d pointOnLine1 = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
          Vector2d lineDirection1 = RandomTools.generateRandomVector2d(random, 10.0);
@@ -796,7 +798,7 @@ public class GeometryToolsTest
    {
       Random random = new Random(3242L);
 
-      for (int i = 0; i < 100; i++)
+      for (int i = 0; i < ITERATIONS; i++)
       {
          Point2d lineSegmentStart1 = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
          Point2d lineSegmentEnd1 = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
@@ -821,7 +823,7 @@ public class GeometryToolsTest
       }
 
       // Test intersection at one of the end points
-      for (int i = 0; i < 100; i++)
+      for (int i = 0; i < ITERATIONS; i++)
       {
          Point2d lineSegmentStart1 = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
          Point2d lineSegmentEnd1 = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
@@ -840,7 +842,7 @@ public class GeometryToolsTest
       }
 
       // Test with parallel/collinear line segments
-      for (int i = 0; i < 100; i++)
+      for (int i = 0; i < ITERATIONS; i++)
       {
          Point2d lineSegmentStart1 = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
          Point2d lineSegmentEnd1 = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
@@ -945,7 +947,7 @@ public class GeometryToolsTest
       Point2d actualIntersection = new Point2d();
       boolean success;
 
-      for (int i = 0; i < 100; i++)
+      for (int i = 0; i < ITERATIONS; i++)
       {
          Point2d lineSegmentStart = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
          Point2d lineSegmentEnd = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
@@ -976,7 +978,7 @@ public class GeometryToolsTest
       }
 
       // Make the intersection happen outside the line segment
-      for (int i = 0; i < 100; i++)
+      for (int i = 0; i < ITERATIONS; i++)
       {
          Point2d lineSegmentStart = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
          Point2d lineSegmentEnd = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
@@ -1003,7 +1005,7 @@ public class GeometryToolsTest
       }
 
       // Make the intersection happen on each end point of the line segment
-      for (int i = 0; i < 100; i++)
+      for (int i = 0; i < ITERATIONS; i++)
       {
          Point2d lineSegmentStart = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
          Point2d lineSegmentEnd = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
@@ -1034,7 +1036,7 @@ public class GeometryToolsTest
       }
 
       // Make the line segment and the line parallel not collinear.
-      for (int i = 0; i < 100; i++)
+      for (int i = 0; i < ITERATIONS; i++)
       {
          Point2d lineSegmentStart = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
          Point2d lineSegmentEnd = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
@@ -1055,7 +1057,7 @@ public class GeometryToolsTest
       }
 
       // Make the line segment and the line collinear.
-      for (int i = 0; i < 100; i++)
+      for (int i = 0; i < ITERATIONS; i++)
       {
          Point2d lineSegmentStart = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
          Point2d lineSegmentEnd = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
@@ -1093,7 +1095,7 @@ public class GeometryToolsTest
    public void testGetPerpendicularBisector2()
    {
       Random random = new Random(1176L);
-      for (int i = 0; i < 100; i++)
+      for (int i = 0; i < ITERATIONS; i++)
       {
          Point2d lineSegmentStart = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
          Point2d lineSegmentEnd = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
@@ -1127,7 +1129,7 @@ public class GeometryToolsTest
       assertEquals("return value", expectedReturn, actualReturn);
       Random random = new Random(1176L);
 
-      for (int i = 0; i < 100; i++)
+      for (int i = 0; i < ITERATIONS; i++)
       {
          vector = RandomTools.generateRandomVector2d(random, RandomTools.generateRandomDouble(random, 0.0, 10.0));
          Vector2d perpendicularVector = GeometryTools.getPerpendicularVector(vector);
@@ -1182,7 +1184,7 @@ public class GeometryToolsTest
    public void testGetPerpendicularVectorFromLineToPoint2()
    {
       Random random = new Random(1176L);
-      for (int i = 0; i < 100; i++)
+      for (int i = 0; i < ITERATIONS; i++)
       {
          Vector3d expectedPerpendicularVector = RandomTools.generateRandomVector(random, RandomTools.generateRandomDouble(random, 0.0, 10.0));
          Point3d expectedIntersection = RandomTools.generateRandomPoint3d(random, -10.0, 10.0);
@@ -1336,7 +1338,7 @@ public class GeometryToolsTest
    public void testGetPlaneNormalGivenThreePoints2()
    {
       Random random = new Random(1176L);
-      for (int i = 0; i < 100; i++)
+      for (int i = 0; i < ITERATIONS; i++)
       {
          Vector3d expectedPlaneNormal = RandomTools.generateRandomVector(random, 1.0);
 
@@ -1415,7 +1417,7 @@ public class GeometryToolsTest
    public void testGetTopVertexOfIsoscelesTriangle2()
    {
       Random random = new Random(1176L);
-      for (int i = 0; i < 100; i++)
+      for (int i = 0; i < ITERATIONS; i++)
       {
          Point3d expectedB = RandomTools.generateRandomPoint3d(random, -10.0, 10.0);
          Point3d a = RandomTools.generateRandomPoint3d(random, -10.0, 10.0);
@@ -1685,7 +1687,7 @@ public class GeometryToolsTest
    public void testMovePointInsidePolygonAlongVector()
    {
       Random random = new Random(1176L);
-      int nTests = 1000;
+      int nTests = ITERATIONS;
       int testNumber = 0;
       ReferenceFrame frame = ReferenceFrame.getWorldFrame();
 
@@ -1905,7 +1907,7 @@ public class GeometryToolsTest
    {
       Random random = new Random(51651L);
 
-      for (int i = 0; i < 1000; i++)
+      for (int i = 0; i < ITERATIONS; i++)
       {
          double firstVectorLength = RandomTools.generateRandomDouble(random, 0.0, 10.0);
          double secondVectorLength = RandomTools.generateRandomDouble(random, 0.0, 10.0);
@@ -1937,10 +1939,10 @@ public class GeometryToolsTest
       Point3d actualPointOnLine2ToPack = new Point3d();
       Random random = new Random(1176L);
 
-      for (int i = 0; i < 100; i++)
+      for (int i = 0; i < ITERATIONS; i++)
       {
          Point3d lineStart1 = RandomTools.generateRandomPoint3d(random, -10.0, 10.0);
-         Vector3d lineDirection1 = RandomTools.generateRandomVector(random, RandomTools.generateRandomDouble(random, 0.0, 10.0));
+         Vector3d lineDirection1 = RandomTools.generateRandomVector(random, RandomTools.generateRandomDouble(random, 0.5, 10.0));
 
          // Make line2 == line1
          Point3d lineStart2 = new Point3d(lineStart1);
@@ -1975,7 +1977,7 @@ public class GeometryToolsTest
       }
 
       // Test the parallel case. There's an infinite number of solutions but only one minimum distance between the two lines.
-      for (int i = 0; i < 100; i++)
+      for (int i = 0; i < ITERATIONS; i++)
       {
          Point3d lineStart1 = RandomTools.generateRandomPoint3d(random, -10.0, 10.0);
          Vector3d lineDirection1 = RandomTools.generateRandomVector(random, 1.0);
@@ -2011,7 +2013,7 @@ public class GeometryToolsTest
       Point2d outside = new Point2d();
       Random random = new Random(1176L);
 
-      for (int i = 0; i < 100; i++)
+      for (int i = 0; i < ITERATIONS; i++)
       {
          Point2d a = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
          Point2d b = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
@@ -2072,7 +2074,7 @@ public class GeometryToolsTest
    {
       Random random = new Random(1176L);
       // Test for right rectangle, should be half the area of the corresponding rectangle
-      for (int i = 0; i < 100; i++)
+      for (int i = 0; i < ITERATIONS; i++)
       {
          Point2d a = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
          Point2d b = new Point2d();
@@ -2113,7 +2115,7 @@ public class GeometryToolsTest
       Vector3d expectedVector = new Vector3d();
       Random random = new Random(1176L);
 
-      for (int i = 0; i < 25; i++)
+      for (int i = 0; i < ITERATIONS; i++)
       {
          actualVector = RandomTools.generateRandomVector(random, RandomTools.generateRandomDouble(random, Epsilons.ONE_TRILLIONTH, 10.0));
 
@@ -2138,7 +2140,7 @@ public class GeometryToolsTest
    public void testGetIntersectionBetweenLineAndPlane() throws Exception
    {
       Random random = new Random(1176L);
-      for (int i = 0; i < 100; i++)
+      for (int i = 0; i < ITERATIONS; i++)
       {
          Point3d pointOnPlane = RandomTools.generateRandomPoint3d(random, -10.0, 10.0);
          Vector3d planeNormal = RandomTools.generateRandomVector(random, RandomTools.generateRandomDouble(random, 10.0));
@@ -2156,7 +2158,7 @@ public class GeometryToolsTest
       }
 
       // Try parallel lines to plane
-      for (int i = 0; i < 100; i++)
+      for (int i = 0; i < ITERATIONS; i++)
       {
          Point3d pointOnPlane = RandomTools.generateRandomPoint3d(random, -10.0, 10.0);
          Vector3d planeNormal = RandomTools.generateRandomVector(random, RandomTools.generateRandomDouble(random, 10.0));
@@ -2182,7 +2184,7 @@ public class GeometryToolsTest
       Point3d endPoint1 = new Point3d();
 
       Random random = new Random(1176L);
-      for (int i = 0; i < 100; i++)
+      for (int i = 0; i < ITERATIONS; i++)
       {
          Point3d pointOnPlane = RandomTools.generateRandomPoint3d(random, -10.0, 10.0);
          Vector3d planeNormal = RandomTools.generateRandomVector(random, RandomTools.generateRandomDouble(random, 10.0));
@@ -2211,7 +2213,7 @@ public class GeometryToolsTest
       }
 
       // Try parallel lines to plane
-      for (int i = 0; i < 100; i++)
+      for (int i = 0; i < ITERATIONS; i++)
       {
          Point3d pointOnPlane = RandomTools.generateRandomPoint3d(random, -10.0, 10.0);
          Vector3d planeNormal = RandomTools.generateRandomVector(random, RandomTools.generateRandomDouble(random, 10.0));
@@ -2236,7 +2238,7 @@ public class GeometryToolsTest
    public void testGetRadiusOfArc() throws Exception
    {
       Random random = new Random(1176L);
-      for (int i = 0; i < 1000; i++)
+      for (int i = 0; i < ITERATIONS; i++)
       {
          double expectedArcRadius = RandomTools.generateRandomDouble(random, 0.1, 100.0);
          double chordAngle = RandomTools.generateRandomDouble(random, -3.0 * Math.PI, 3.0 * Math.PI);
@@ -2255,7 +2257,7 @@ public class GeometryToolsTest
    public void testGetRotationBasedOnNormal1() throws Exception
    {
       Random random = new Random(1176L);
-      for (int i = 0; i < 100; i++)
+      for (int i = 0; i < ITERATIONS; i++)
       {
          Vector3d referenceNormal = RandomTools.generateRandomVector(random, RandomTools.generateRandomDouble(random, 0.0, 10.0));
          double expectedAngle = RandomTools.generateRandomDouble(random, 0.0, Math.PI);
@@ -2298,10 +2300,10 @@ public class GeometryToolsTest
       }
 
       // Test close to 0.0
-      for (int i = 0; i < 100; i++)
+      for (int i = 0; i < ITERATIONS; i++)
       {
          Vector3d referenceNormal = RandomTools.generateRandomVector(random, RandomTools.generateRandomDouble(random, 0.0, 10.0));
-         double expectedAngle = RandomTools.generateRandomDouble(random, 0.00001, 0.001);
+         double expectedAngle = RandomTools.generateRandomDouble(random, 0.0001, 0.001);
          if (random.nextBoolean())
             expectedAngle = -expectedAngle;
          Vector3d expectedAxis = RandomTools.generateRandomOrthogonalVector3d(random, referenceNormal, true);
@@ -2345,7 +2347,7 @@ public class GeometryToolsTest
       }
 
       // Test close to Math.PI
-      for (int i = 0; i < 100; i++)
+      for (int i = 0; i < ITERATIONS; i++)
       {
          Vector3d referenceNormal = RandomTools.generateRandomVector(random, RandomTools.generateRandomDouble(random, 0.0, 10.0));
          double expectedAngle = RandomTools.generateRandomDouble(random, 0.00001, 0.001);
@@ -2402,7 +2404,7 @@ public class GeometryToolsTest
       }
 
       // Test exactly at 0.0
-      for (int i = 0; i < 100; i++)
+      for (int i = 0; i < ITERATIONS; i++)
       {
          Vector3d referenceNormal = RandomTools.generateRandomVector(random, RandomTools.generateRandomDouble(random, 0.0, 10.0));
          Vector3d rotatedNormal = new Vector3d(referenceNormal);
@@ -2436,7 +2438,7 @@ public class GeometryToolsTest
       }
 
       // Test exactly at Math.PI
-      for (int i = 0; i < 100; i++)
+      for (int i = 0; i < ITERATIONS; i++)
       {
          Vector3d referenceNormal = RandomTools.generateRandomVector(random, RandomTools.generateRandomDouble(random, 0.0, 10.0));
          Vector3d rotatedNormal = new Vector3d();
@@ -2477,7 +2479,7 @@ public class GeometryToolsTest
    {
       Random random = new Random(1176L);
       // Test getRotationBasedOnNormal(AxisAngle4d rotationToPack, Vector3d normalVector3d)
-      for (int i = 0; i < 100; i++)
+      for (int i = 0; i < ITERATIONS; i++)
       {
          Vector3d referenceNormal = new Vector3d(0.0, 0.0, 1.0);
          double expectedAngle = RandomTools.generateRandomDouble(random, 0.0, Math.PI);
@@ -2537,7 +2539,7 @@ public class GeometryToolsTest
    public void testGetPerpendicularBisectorSegment2() throws Exception
    {
       Random random = new Random(1176L);
-      for (int i = 0; i < 100; i++)
+      for (int i = 0; i < ITERATIONS; i++)
       {
          Point2d firstPointOnLine = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
          Point2d secondPointOnLine = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
@@ -2566,7 +2568,7 @@ public class GeometryToolsTest
    {
       Random random = new Random(1176L);
 
-      for (int i = 0; i < 100; i++)
+      for (int i = 0; i < ITERATIONS; i++)
       {
          Point2d a = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
          Point2d b = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
