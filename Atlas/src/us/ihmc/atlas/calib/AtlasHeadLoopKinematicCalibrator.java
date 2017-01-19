@@ -115,8 +115,7 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
       JPanel panel = new JPanel(new BorderLayout());
       final JLabel lblDisplay = new JLabel("", iiDisplay, JLabel.CENTER);
       panel.add(lblDisplay, BorderLayout.CENTER);
-      scs.addExtraJpanel(panel, "Image");
-      scs.getStandardSimulationGUI().selectPanel("Image");
+      scs.addExtraJpanel(panel, "Image", true);
       scs.getDataBuffer().attachIndexChangedListener(new IndexChangedListener()
       {
          @Override
@@ -130,7 +129,6 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
                scsAlignCameraToRobotCamera();
          }
       });
-      //scs.getStandardSimulationGUI().selectPanel("Image");
 
       //Set Camera Info
       String intrinsicFile = "../DarpaRoboticsChallenge/data/calibration_images/intrinsic_ros.xml";
