@@ -1947,7 +1947,7 @@ public class GeometryToolsTest
             secondVector.scale(secondVectorLength / firstVectorLength);
             double computedYaw = GeometryTools.getAngleFromFirstToSecondVector(firstVector, secondVector);
             double yawDifference = AngleTools.computeAngleDifferenceMinusPiToPi(yaw, computedYaw);
-            assertEquals(0.0, yawDifference, EPSILON);
+            assertEquals(0.0, yawDifference, Epsilons.ONE_TRILLIONTH);
          }
       }
    }
