@@ -309,7 +309,7 @@ public class GeometryToolsTest
 
          double actualDistance = GeometryTools.distanceFromPointToLine(randomPoint, start, end);
          assertEquals(expectedDistance, actualDistance, 1.0e-12);
-         
+
          actualDistance = GeometryTools.distanceFromPointToLine(randomPoint, start, lineDirection);
          assertEquals(expectedDistance, actualDistance, 1.0e-12);
       }
@@ -343,20 +343,15 @@ public class GeometryToolsTest
       /** @todo fill in the test code */
    }
 
-/*
-   public void testGetClosestPointsForTwoLines()
-   {
-      Point3d p1 = new Point3d(5, 5, 0);
-      FramePoint point1 = new FramePoint(ReferenceFrame.getWorldFrame(), p1.x, p1.y, p1.z);
-
-      FrameVector vector1 = null;
-      FramePoint point2 = null;
-      FrameVector vector2 = null;
-      FramePoint pointOnLine1 = null;
-      FramePoint pointOnLine2 = null;
-      geometryTools.getClosestPointsForTwoLines(point1, vector1, point2, vector2, pointOnLine1, pointOnLine2);
-   }
-*/
+   /*
+    * public void testGetClosestPointsForTwoLines() { Point3d p1 = new
+    * Point3d(5, 5, 0); FramePoint point1 = new
+    * FramePoint(ReferenceFrame.getWorldFrame(), p1.x, p1.y, p1.z); FrameVector
+    * vector1 = null; FramePoint point2 = null; FrameVector vector2 = null;
+    * FramePoint pointOnLine1 = null; FramePoint pointOnLine2 = null;
+    * geometryTools.getClosestPointsForTwoLines(point1, vector1, point2,
+    * vector2, pointOnLine1, pointOnLine2); }
+    */
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
@@ -411,7 +406,6 @@ public class GeometryToolsTest
       expected = 2.0;
       assertEquals("FAILED: Distance from point to plane", expected, actual, EPSILON);
    }
-
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
@@ -499,7 +493,7 @@ public class GeometryToolsTest
          endPoint1.scaleAdd(RandomTools.generateRandomDouble(random, 0.0, 10.0), lineDirection, randomLinePlaneIntersection);
          assertFalse(GeometryTools.isLineSegmentIntersectingPlane(pointOnPlane, planeNormal, endPoint0, endPoint1));
          assertFalse(GeometryTools.isLineSegmentIntersectingPlane(pointOnPlane, planeNormal, endPoint1, endPoint0));
-         
+
          // Create the two endPoints on the other side of the plane:
          endPoint0.scaleAdd(RandomTools.generateRandomDouble(random, -10.0, 0.0), lineDirection, randomLinePlaneIntersection);
          endPoint1.scaleAdd(RandomTools.generateRandomDouble(random, -10.0, 0.0), lineDirection, randomLinePlaneIntersection);
@@ -690,7 +684,7 @@ public class GeometryToolsTest
       FramePoint lineStart = new FramePoint(ReferenceFrame.getWorldFrame(), 0, 0, 1);
       FramePoint lineEnd = new FramePoint(ReferenceFrame.getWorldFrame(), 0, 0, 3);
 
-//    FramePoint expectedReturn = new FramePoint(ReferenceFrame.getWorldFrame(), 0, 0, 0);
+      //    FramePoint expectedReturn = new FramePoint(ReferenceFrame.getWorldFrame(), 0, 0, 0);
       FramePoint actualReturn = GeometryTools.getIntersectionBetweenLineSegmentAndPlane(pointOnPlane, planeNormal, lineStart, lineEnd);
       assertNull(actualReturn);
    }
@@ -747,7 +741,7 @@ public class GeometryToolsTest
             lineDirection2.negate();
          Point2d pointOnLine2 = new Point2d(pointOnLine1);
 
-         Vector2d orthogonal = new Vector2d(- lineDirection1.getY(), lineDirection1.getX());
+         Vector2d orthogonal = new Vector2d(-lineDirection1.getY(), lineDirection1.getX());
 
          pointOnLine2.scaleAdd(RandomTools.generateRandomDouble(random, 10.0), orthogonal, pointOnLine2);
          pointOnLine2.scaleAdd(RandomTools.generateRandomDouble(random, 10.0), lineDirection2, pointOnLine2);
@@ -863,7 +857,8 @@ public class GeometryToolsTest
       }
    }
 
-   private void assertOnlyExistenceOfTwoLineSegmentsIntersectionAllCombinations(boolean intersectionExist, Point2d lineSegmentStart1, Point2d lineSegmentEnd1, Point2d lineSegmentStart2, Point2d lineSegmentEnd2)
+   private void assertOnlyExistenceOfTwoLineSegmentsIntersectionAllCombinations(boolean intersectionExist, Point2d lineSegmentStart1, Point2d lineSegmentEnd1,
+                                                                                Point2d lineSegmentStart2, Point2d lineSegmentEnd2)
    {
       boolean success;
       Point2d actualIntersection = new Point2d();
@@ -887,7 +882,8 @@ public class GeometryToolsTest
       assertTrue(success == intersectionExist);
    }
 
-   private void assertAllCombinationsOfTwoLineSegmentsIntersection(Point2d expectedIntersection, Point2d lineSegmentStart1, Point2d lineSegmentEnd1, Point2d lineSegmentStart2, Point2d lineSegmentEnd2)
+   private void assertAllCombinationsOfTwoLineSegmentsIntersection(Point2d expectedIntersection, Point2d lineSegmentStart1, Point2d lineSegmentEnd1,
+                                                                   Point2d lineSegmentStart2, Point2d lineSegmentEnd2)
    {
       double epsilon = Epsilons.ONE_TRILLIONTH;
       boolean success;
@@ -964,7 +960,7 @@ public class GeometryToolsTest
       {
          Point2d lineSegmentStart = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
          Point2d lineSegmentEnd = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
-         
+
          Point2d pointOnLine = new Point2d();
          Vector2d lineDirection = RandomTools.generateRandomVector2d(random, 1.0);
 
@@ -1022,7 +1018,7 @@ public class GeometryToolsTest
       {
          Point2d lineSegmentStart = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
          Point2d lineSegmentEnd = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
-         
+
          Point2d pointOnLine = new Point2d(lineSegmentStart);
          Vector2d lineDirection = new Vector2d();
          lineDirection.sub(lineSegmentEnd, lineSegmentStart);
@@ -1043,7 +1039,7 @@ public class GeometryToolsTest
       {
          Point2d lineSegmentStart = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
          Point2d lineSegmentEnd = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
-         
+
          Point2d pointOnLine = new Point2d(lineSegmentStart);
          Vector2d lineDirection = new Vector2d();
          lineDirection.sub(lineSegmentEnd, lineSegmentStart);
@@ -1071,7 +1067,6 @@ public class GeometryToolsTest
       Vector2d bisectorDirection = new Vector2d();
       GeometryTools.getPerpendicularBisector(lineStart, lineEnd, bisectorStart, bisectorDirection);
    }
-
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
@@ -1136,7 +1131,6 @@ public class GeometryToolsTest
 
       assertTrue("Test Failed", expectedReturn0.epsilonEquals(actualReturn0, EPSILON));
 
-
       FramePoint point = new FramePoint(ReferenceFrame.getWorldFrame(), 4, 2, 0);
       FramePoint lineStart = new FramePoint(ReferenceFrame.getWorldFrame(), 0, 0, 0);
       FramePoint lineEnd = new FramePoint(ReferenceFrame.getWorldFrame(), 10, 10, 0);
@@ -1146,7 +1140,6 @@ public class GeometryToolsTest
       FrameVector expectedReturn = x;
       FrameVector actualReturn = GeometryTools.getPerpendicularVectorFromLineToPoint(point, lineStart, lineEnd, intersectionPoint);
       assertTrue("Test Failed", expectedReturn.epsilonEquals(actualReturn, EPSILON));
-
 
       FramePoint point1 = new FramePoint(ReferenceFrame.getWorldFrame(), -2.5, 1.5, 0);
       FramePoint lineStart1 = new FramePoint(ReferenceFrame.getWorldFrame(), 0, 0, 0);
@@ -1181,7 +1174,8 @@ public class GeometryToolsTest
          point.add(expectedIntersection, expectedPerpendicularVector);
 
          Point3d actualIntersection = new Point3d();
-         Vector3d actualPerpendicularVector = GeometryTools.getPerpendicularVectorFromLineToPoint(point, firstPointOnLine, secondPointOnLine, actualIntersection);
+         Vector3d actualPerpendicularVector = GeometryTools.getPerpendicularVectorFromLineToPoint(point, firstPointOnLine, secondPointOnLine,
+                                                                                                  actualIntersection);
          JUnitTools.assertTuple3dEquals(expectedIntersection, actualIntersection, Epsilons.ONE_TRILLIONTH);
          JUnitTools.assertTuple3dEquals(expectedPerpendicularVector, actualPerpendicularVector, Epsilons.ONE_TRILLIONTH);
 
@@ -1341,32 +1335,19 @@ public class GeometryToolsTest
       }
    }
 
-/*
-   public void testGetTransform()
-   {
-      FramePoint point = null;
-      FrameVector normal = null;
-      Orientation expectedReturn = null;
-      Orientation actualReturn = geometryTools.getTransform(point, normal);
-      assertEquals("return value", expectedReturn, actualReturn);
-   }
-
-   public void testGetVerticalSpansOfPoints()
-   {
-      double xMin = 0.0;
-      double yMin = 0.0;
-      double zMin = 0.0;
-      double xMax = 0.0;
-      double yMax = 0.0;
-      double zMax = 0.0;
-      double xResolution = 0.0;
-      double yResolution = 0.0;
-      double zResolution = 0.0;
-      ArrayList expectedReturn = null;
-      ArrayList actualReturn = geometryTools.getVerticalSpansOfPoints(xMin, yMin, zMin, xMax, yMax, zMax, xResolution, yResolution, zResolution);
-      assertEquals("return value", expectedReturn, actualReturn);
-   }
-*/
+   /*
+    * public void testGetTransform() { FramePoint point = null; FrameVector
+    * normal = null; Orientation expectedReturn = null; Orientation actualReturn
+    * = geometryTools.getTransform(point, normal); assertEquals("return value",
+    * expectedReturn, actualReturn); } public void
+    * testGetVerticalSpansOfPoints() { double xMin = 0.0; double yMin = 0.0;
+    * double zMin = 0.0; double xMax = 0.0; double yMax = 0.0; double zMax =
+    * 0.0; double xResolution = 0.0; double yResolution = 0.0; double
+    * zResolution = 0.0; ArrayList expectedReturn = null; ArrayList actualReturn
+    * = geometryTools.getVerticalSpansOfPoints(xMin, yMin, zMin, xMax, yMax,
+    * zMax, xResolution, yResolution, zResolution); assertEquals("return value",
+    * expectedReturn, actualReturn); }
+    */
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
@@ -1398,7 +1379,7 @@ public class GeometryToolsTest
          GeometryTools.getTopVertexOfIsoscelesTriangle(baseVertexA, baseVertexC, trianglePlaneNormal, topVertexAngle, topVertexBComputed);
 
          String errorMsg = "Computed vertex: " + topVertexBComputed + "\n does not match actual vertex: " + topVertexB + "\n when topVertex Angle = "
-                           + Math.toDegrees(topVertexAngle) + " degrees \n";
+               + Math.toDegrees(topVertexAngle) + " degrees \n";
          assertEquals(errorMsg, 0.0, topVertexB.distance(topVertexBComputed), 1e-9);
 
          topVertexAngle += Math.toRadians(1.0);
@@ -1499,14 +1480,10 @@ public class GeometryToolsTest
       boolean actualReturn4 = GeometryTools.isPointOnLeftSideOfLine(point4, lineStart4, lineEnd4);
       assertEquals("return value", expectedReturn4, actualReturn4);
 
-
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(
-      timeout = 30000,
-      expected = RuntimeException.class
-   )
+   @Test(timeout = 30000, expected = RuntimeException.class)
    public void testAngleByLawOfCosineWithNegativeSideLengthA()
    {
       double a = 1.0;
@@ -1514,10 +1491,7 @@ public class GeometryToolsTest
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(
-      timeout = 30000,
-      expected = RuntimeException.class
-   )
+   @Test(timeout = 30000, expected = RuntimeException.class)
    public void testAngleByLawOfCosineWithNegativeSideLengthB()
    {
       double a = 1.0;
@@ -1525,10 +1499,7 @@ public class GeometryToolsTest
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(
-      timeout = 30000,
-      expected = RuntimeException.class
-   )
+   @Test(timeout = 30000, expected = RuntimeException.class)
    public void testAngleByLawOfCosineWithNegativeSideLengthC()
    {
       double a = 1.0;
@@ -1546,10 +1517,7 @@ public class GeometryToolsTest
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(
-      timeout = 30000,
-      expected = RuntimeException.class
-   )
+   @Test(timeout = 30000, expected = RuntimeException.class)
    public void testSideLengthByLawOfCosineNegativeSideLengthA()
    {
       double a = 1.0;
@@ -1558,10 +1526,7 @@ public class GeometryToolsTest
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(
-      timeout = 30000,
-      expected = RuntimeException.class
-   )
+   @Test(timeout = 30000, expected = RuntimeException.class)
    public void testSideLengthByLawOfCosineNegativeSideLengthB()
    {
       double a = 1.0;
@@ -1570,10 +1535,7 @@ public class GeometryToolsTest
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(
-      timeout = 30000,
-      expected = RuntimeException.class
-   )
+   @Test(timeout = 30000, expected = RuntimeException.class)
    public void testSideLengthByLawOfCosineGreaterThanPiAngle()
    {
       double a = 1.0;
@@ -1621,10 +1583,7 @@ public class GeometryToolsTest
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(
-      timeout = 30000,
-      expected = RuntimeException.class
-   )
+   @Test(timeout = 30000, expected = RuntimeException.class)
    public void illegalPythagorasGetCathetus()
    {
       GeometryTools.pythagorasGetCathetus(1.0, 2.0);
@@ -1680,7 +1639,7 @@ public class GeometryToolsTest
                throw new RuntimeException("Not each point is inside the result. distance = " + distance);
          }
 
-//       assertTrue("Not each point isinside the result. distance = " , result.isPointInside(point));
+         //       assertTrue("Not each point isinside the result. distance = " , result.isPointInside(point));
       }
 
       for (Point2d point : secondList)
@@ -1693,7 +1652,7 @@ public class GeometryToolsTest
                throw new RuntimeException("Not each point is inside the result. distance = " + distance);
          }
 
-//       assertTrue("Not each point is inside the result", result.isPointInside(point));
+         //       assertTrue("Not each point is inside the result", result.isPointInside(point));
       }
    }
 
@@ -1729,7 +1688,7 @@ public class GeometryToolsTest
             FramePoint2d[] intersections = polygon.intersectionWith(line);
             double distanceBetweenIntersections = intersections[0].distance(intersections[1]);
 
-            double scaling = 0.6;    // larger than 0.5 means that distanceToBeInside could be infeasible
+            double scaling = 0.6; // larger than 0.5 means that distanceToBeInside could be infeasible
             double distanceToBeInside = distanceBetweenIntersections * random.nextDouble() * scaling;
             boolean feasible = distanceToBeInside < distanceBetweenIntersections / 2.0;
 
@@ -1754,7 +1713,6 @@ public class GeometryToolsTest
                assertEquals(0.5, intersectionsLineSegment.percentageAlongLineSegment(pointToMove), 1e-12);
             }
 
-
             testNumber++;
          }
 
@@ -1766,182 +1724,98 @@ public class GeometryToolsTest
    @Test(timeout = 30000)
    public void testDistanceBetweenPolygonsNegativeAngle()
    {
-      assertPolygons(new double[]
-      {
-         0, 5, 2, -2, 2, 0
-      }, new double[]
-      {
-         2.5, 1, 2.8, 1, 3, .9, 4, 0, 3, -1
-      }, new double[] {2, 0, 46.0 / 17, 6.0 / 34}, .001);
+      assertPolygons(new double[] {0, 5, 2, -2, 2, 0}, new double[] {2.5, 1, 2.8, 1, 3, .9, 4, 0, 3, -1}, new double[] {2, 0, 46.0 / 17, 6.0 / 34}, .001);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testDistanceBetweenPolygonsThirdQuadrant()
    {
-      assertPolygons(new double[]
-      {
-         -2, -1, -1, -1, -1, -2
-      }, new double[]
-      {
-         -2, -2, -2, -3, -4, -4, -4, -2
-      }, new double[] {-1.5, -1.5, -2, -2}, .001);
+      assertPolygons(new double[] {-2, -1, -1, -1, -1, -2}, new double[] {-2, -2, -2, -3, -4, -4, -4, -2}, new double[] {-1.5, -1.5, -2, -2}, .001);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testDistanceBetweenPolygonsNegativeAngleAndTwoVisibleVerticesOnPolygon1()
    {
-      assertPolygons(new double[]
-      {
-         0, 0, 1, 2, 1, 0
-      }, new double[]
-      {
-         2, 2, 0, 3, -1, 4
-      }, new double[] {1, 2, 1.2, 2.4}, .001);
+      assertPolygons(new double[] {0, 0, 1, 2, 1, 0}, new double[] {2, 2, 0, 3, -1, 4}, new double[] {1, 2, 1.2, 2.4}, .001);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testDistanceBetweenPolygonsParalellEdges()
    {
-      assertPolygons(new double[]
-      {
-         0, 0, 0, 1, 1, 0, 2, 1, 1, 2
-      }, new double[]
-      {
-         0, 3, 2, 3, -1, 4, 3, 4
-      }, new double[] {1, 2, 1, 3}, .001);
+      assertPolygons(new double[] {0, 0, 0, 1, 1, 0, 2, 1, 1, 2}, new double[] {0, 3, 2, 3, -1, 4, 3, 4}, new double[] {1, 2, 1, 3}, .001);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testDistanceBetweenPolygonsMultiplePossibleAnswers()
    {
-      assertPolygons(new double[]
-      {
-         0, 0, 0, 1, 1, 0, 2, 1, 1, 2
-      }, new double[]
-      {
-         3, 2, 2, 3, 2, 4, 4, 2
-      }, new double[] {1, 2, 2, 3}, .001);
+      assertPolygons(new double[] {0, 0, 0, 1, 1, 0, 2, 1, 1, 2}, new double[] {3, 2, 2, 3, 2, 4, 4, 2}, new double[] {1, 2, 2, 3}, .001);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testDistanceBetweenPolygonsTwoVisiblePoints()
    {
-      assertPolygons(new double[]
-      {
-         0, 0, 0, 1, 1, 0, 2, 1, 1, 2
-      }, new double[]
-      {
-         4, 1, 1, 4, 2, 4, 4, 2
-      }, new double[] {2, 1, 3, 2}, .001);
+      assertPolygons(new double[] {0, 0, 0, 1, 1, 0, 2, 1, 1, 2}, new double[] {4, 1, 1, 4, 2, 4, 4, 2}, new double[] {2, 1, 3, 2}, .001);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testDistanceBetweenPolygonsTwoVisiblePoints2()
    {
-      assertPolygons(new double[]
-      {
-         0, 0, 0, 1, 1, 0, 2, 1, 1, 2
-      }, new double[]
-      {
-         4, 1, 1.5, 4, 2, 4, 4, 2
-      }, new double[] {2, 1, 194.0 / 61, 121.0 / 61}, .001);
+      assertPolygons(new double[] {0, 0, 0, 1, 1, 0, 2, 1, 1, 2}, new double[] {4, 1, 1.5, 4, 2, 4, 4, 2}, new double[] {2, 1, 194.0 / 61, 121.0 / 61}, .001);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testDistanceBetweenPolygonsOneOfTheAnglesIsZero()
    {
-      assertPolygons(new double[]
-      {
-         0, 0, 0, 1, 1, 0, 2, 1, 1, 2
-      }, new double[]
-      {
-         0, 2, 0, 3, 1, 3, .8, 2
-      }, new double[] {.9, 1.9, .8, 2}, .001);
+      assertPolygons(new double[] {0, 0, 0, 1, 1, 0, 2, 1, 1, 2}, new double[] {0, 2, 0, 3, 1, 3, .8, 2}, new double[] {.9, 1.9, .8, 2}, .001);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testDistanceBetweenPolygonsTriangles()
    {
-      assertPolygons(new double[]
-      {
-         0, 1, 1, 0, 2, 0
-      }, new double[]
-      {
-         0, 3, 4, 3, 1, 2
-      }, new double[] {.4, .8, 1, 2}, .001);
+      assertPolygons(new double[] {0, 1, 1, 0, 2, 0}, new double[] {0, 3, 4, 3, 1, 2}, new double[] {.4, .8, 1, 2}, .001);
    }
 
-// @Test(timeout=300000)
+   // @Test(timeout=300000)
    public void testDistanceBetweenPolygonsSharedPoint()
    {
-      assertPolygons(new double[]
-      {
-         0, 0, 0, 1, 1, 0, 2, 1, 1, 2
-      }, new double[]
-      {
-         0, 2, 0, 3, 1, 3, 1, 2
-      }, new double[] {1, 2, 1, 2}, .001);
+      assertPolygons(new double[] {0, 0, 0, 1, 1, 0, 2, 1, 1, 2}, new double[] {0, 2, 0, 3, 1, 3, 1, 2}, new double[] {1, 2, 1, 2}, .001);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testDistanceBetweenPolygonsPointOnEdge()
    {
-      assertPolygons(new double[]
-      {
-         0, 0, 0, 1, 1, 0, 2, 1, 1, 2
-      }, new double[]
-      {
-         0, 2, 0, 3, 1, 3, .5, 1.5
-      }, new double[] {.5, 1.5, .5, 1.5}, .001);
+      assertPolygons(new double[] {0, 0, 0, 1, 1, 0, 2, 1, 1, 2}, new double[] {0, 2, 0, 3, 1, 3, .5, 1.5}, new double[] {.5, 1.5, .5, 1.5}, .001);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testDistanceBetweenPolygonsNegativeAngle2()
    {
-      assertPolygons(new double[]
-      {
-         0, 0, 0, 1, 1, 0, 2, 1, 1, 2
-      }, new double[]
-      {
-         0, 2, 0, 3, 1, 3, .4, 1.5
-      }, new double[] {.45, 1.45, .4, 1.5}, .001);
+      assertPolygons(new double[] {0, 0, 0, 1, 1, 0, 2, 1, 1, 2}, new double[] {0, 2, 0, 3, 1, 3, .4, 1.5}, new double[] {.45, 1.45, .4, 1.5}, .001);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testDistanceBetweenPolygonsSolutionIsTwoVertices()
    {
-      assertPolygons(new double[]
-      {
-         0, 0, 2, 0, 2, 2
-      }, new double[]
-      {
-         4, 3, 6, 3, 6, 7
-      }, new double[] {2, 2, 4, 3}, 0);
+      assertPolygons(new double[] {0, 0, 2, 0, 2, 2}, new double[] {4, 3, 6, 3, 6, 7}, new double[] {2, 2, 4, 3}, 0);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testDistanceBetweenPolygonsIntersectingPolygons()
    {
-      ConvexPolygon2d polygon1 = getPolygon(new double[]
-      {
-         0, 0, 0, 1, 1, 0, 2, 1, 1, 2
-      });
-      ConvexPolygon2d polygon2 = getPolygon(new double[]
-      {
-         1, 1, 0, 3, 2, 2, 3, 0
-      });
+      ConvexPolygon2d polygon1 = getPolygon(new double[] {0, 0, 0, 1, 1, 0, 2, 1, 1, 2});
+      ConvexPolygon2d polygon2 = getPolygon(new double[] {1, 1, 0, 3, 2, 2, 3, 0});
 
       try
       {
@@ -2006,7 +1880,7 @@ public class GeometryToolsTest
    {
       Random random = new Random(51651L);
 
-      for (int i = 0; i<1000; i++)
+      for (int i = 0; i < 1000; i++)
       {
          double firstVectorLength = RandomTools.generateRandomDouble(random, 0.0, 10.0);
          double secondVectorLength = RandomTools.generateRandomDouble(random, 0.0, 10.0);
@@ -2132,7 +2006,7 @@ public class GeometryToolsTest
          outside.interpolate(outside, c, RandomTools.generateRandomDouble(random, 0.0, 1.0));
          assertFalse(GeometryTools.isPointInsideTriangleABC(outside, a, b, c));
          assertFalse(GeometryTools.isPointInsideTriangleABC(outside, c, b, a));
-         
+
          outside.interpolate(a, b, RandomTools.generateRandomDouble(random, -10.0, 0.0));
          outside.interpolate(outside, c, RandomTools.generateRandomDouble(random, 0.0, 1.0));
          assertFalse(GeometryTools.isPointInsideTriangleABC(outside, a, b, c));
@@ -2142,7 +2016,7 @@ public class GeometryToolsTest
          outside.interpolate(outside, c, RandomTools.generateRandomDouble(random, 1.0, 10.0));
          assertFalse(GeometryTools.isPointInsideTriangleABC(outside, a, b, c));
          assertFalse(GeometryTools.isPointInsideTriangleABC(outside, c, b, a));
-         
+
          outside.interpolate(a, b, RandomTools.generateRandomDouble(random, 0.0, 1.0));
          outside.interpolate(outside, c, RandomTools.generateRandomDouble(random, -10.0, 0.0));
          assertFalse(GeometryTools.isPointInsideTriangleABC(outside, a, b, c));
@@ -2333,7 +2207,7 @@ public class GeometryToolsTest
       for (int i = 0; i < 1000; i++)
       {
          double expectedArcRadius = RandomTools.generateRandomDouble(random, 0.1, 100.0);
-         double chordAngle = RandomTools.generateRandomDouble(random, - 3.0 * Math.PI, 3.0 * Math.PI);
+         double chordAngle = RandomTools.generateRandomDouble(random, -3.0 * Math.PI, 3.0 * Math.PI);
          double chordLength = 2.0 * expectedArcRadius * Math.sin(0.5 * chordAngle);
          double actualArcRadius = GeometryTools.getRadiusOfArc(chordLength, chordAngle);
          assertEquals(expectedArcRadius, actualArcRadius, Epsilons.ONE_TRILLIONTH);
@@ -2396,7 +2270,7 @@ public class GeometryToolsTest
          Vector3d referenceNormal = RandomTools.generateRandomVector(random, RandomTools.generateRandomDouble(random, 0.0, 10.0));
          double expectedAngle = RandomTools.generateRandomDouble(random, 0.00001, 0.001);
          if (random.nextBoolean())
-            expectedAngle = - expectedAngle;
+            expectedAngle = -expectedAngle;
          Vector3d expectedAxis = RandomTools.generateRandomOrthogonalVector3d(random, referenceNormal, true);
          AxisAngle4d expectedAxisAngle = new AxisAngle4d(expectedAxis, expectedAngle);
          Matrix3d rotationMatrix = new Matrix3d();
@@ -2443,7 +2317,7 @@ public class GeometryToolsTest
          Vector3d referenceNormal = RandomTools.generateRandomVector(random, RandomTools.generateRandomDouble(random, 0.0, 10.0));
          double expectedAngle = RandomTools.generateRandomDouble(random, 0.00001, 0.001);
          if (random.nextBoolean())
-            expectedAngle = - expectedAngle;
+            expectedAngle = -expectedAngle;
          expectedAngle += Math.PI;
          Vector3d expectedAxis = RandomTools.generateRandomOrthogonalVector3d(random, referenceNormal, true);
          AxisAngle4d expectedAxisAngle = new AxisAngle4d(expectedAxis, expectedAngle);
@@ -2472,7 +2346,7 @@ public class GeometryToolsTest
             expectedAngle = -expectedAngle;
             expectedAxisAngle.set(expectedAxis, expectedAngle);
          }
-         
+
          if (Math.abs(expectedAxisAngle.getAngle() + actualAxisAngle.getAngle()) > 2.0 * Math.PI - 0.1)
          {
             // Here the sign of the axis does not matter.
