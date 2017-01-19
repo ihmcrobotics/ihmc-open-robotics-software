@@ -1,4 +1,4 @@
-package us.ihmc.simulationconstructionset.dataBuffer;
+package us.ihmc.graphicsDescription.dataBuffer;
 
 public interface TimeDataHolder
 {

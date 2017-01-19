@@ -3,6 +3,8 @@ package us.ihmc.simulationconstructionset;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 
+import us.ihmc.graphicsDescription.dataBuffer.DataEntryHolder;
+import us.ihmc.graphicsDescription.dataBuffer.TimeDataHolder;
 import us.ihmc.jMonkeyEngineToolkit.camera.TrackingDollyCameraController;
 import us.ihmc.robotics.dataStructures.listener.RewoundListener;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -11,8 +13,6 @@ import us.ihmc.robotics.dataStructures.variable.YoVariableList;
 import us.ihmc.simulationconstructionset.commands.DataBufferCommandsExecutor;
 import us.ihmc.simulationconstructionset.commands.ToggleKeyPointModeCommandExecutor;
 import us.ihmc.simulationconstructionset.commands.ToggleKeyPointModeCommandListener;
-import us.ihmc.simulationconstructionset.dataBuffer.DataEntryHolder;
-import us.ihmc.simulationconstructionset.dataBuffer.TimeDataHolder;
 import us.ihmc.simulationconstructionset.gui.KeyPoints;
 import us.ihmc.simulationconstructionset.gui.RegularExpression;
 import us.ihmc.simulationconstructionset.gui.config.VarGroup;
