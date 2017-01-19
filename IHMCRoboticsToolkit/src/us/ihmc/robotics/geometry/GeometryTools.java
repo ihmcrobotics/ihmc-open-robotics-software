@@ -2673,28 +2673,6 @@ public class GeometryTools
       return points;
    }
 
-   /**
-    * Returns the normal of a Plane specified by three points
-    * If 2 or more points are the same, returns NaN
-    *
-    * @param a Point3d
-    * @param b Point3d
-    * @param c Point3d
-    * @return Vector3d
-    */
-   // FIXME duplicate of getPlaneNormalGivenThreePoints
-   public static Vector3d getNormalToPlane(Point3d a, Point3d b, Point3d c)
-   {
-      Vector3d x = new Vector3d(b);
-      x.sub(a);
-      Vector3d y = new Vector3d(c);
-      y.sub(a);
-      x.cross(x, y);
-      x.normalize();
-
-      return x;
-   }
-   
    public static boolean arePlanesParallel(Plane3d planeOne, Plane3d planeTwo, double epsilon)
    {
       boolean normalsAreEqual = planeOne.getNormal().epsilonEquals(planeTwo.getNormal(), epsilon);
