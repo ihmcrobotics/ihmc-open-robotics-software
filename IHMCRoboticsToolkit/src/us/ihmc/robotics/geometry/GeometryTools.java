@@ -2193,6 +2193,9 @@ public class GeometryTools
     *     the method fails and returns {@code null}.
     * </ul>
     * </p>
+    * <p>
+    * WARNING: This method generates garbage.
+    * </p>
     * 
     * @param lineSegmentStart the first end point of the line segment from which the perpendicular bisector is to be computed. Not modified.
     * @param lineSegmentEnd the second end point of the line segment from which the perpendicular bisector is to be computed. Not modified.
@@ -2275,6 +2278,9 @@ public class GeometryTools
     * </ul>
     * </p>
     * The calculation becomes less accurate as the two vectors are more collinear.
+    * <p>
+    * WARNING: This method generates garbage.
+    * </p>
     * 
     * @param normalVector3d the vector that is rotated with respect to {@code zUp}. Not modified.
     * @return the minimum rotation from {@code zUp} to the {@code normalVector3d}.
@@ -2410,72 +2416,80 @@ public class GeometryTools
    }
 
    /**
-    *  This method returns the point representing where the bisector of an
-    *  angle of a triangle intersects the opposite side.
-    *  Given a triangle defined by three points (A,B,C),
-    *  To find the Bisector that divides the angle at B in half
-    *  and intersects AC at X.
+    *  Given a triangle defined by three points (A,B,C), this methods the point
+    *  X &in; AC such that the line (B, X) is the angle bisector of B.
+    *  As a result, the two angles CBX and XBA are equal.
+    *  <a href="https://en.wikipedia.org/wiki/Angle_bisector_theorem"> Useful link</a>.
+    *<p>
+    *Edge cases:
+    *<ul>
+    *   <li> if any the triangle's edge is shorter than {@link Epsilons#ONE_TRILLIONTH},
+    *    this method fails and returns {@code null}.
+    *</ul>
+    *</p>
+    * <p>
+    * WARNING: This method generates garbage.
+    * </p>
     *
-    *    BA    AX
-    *    --  = --
-    *    BC    CX
-    *
-    * not garbage free!
-    * @param A Point2d
-    * @param B Point2d
-    * @param C Point2d
-    * @return Point2d the intersection point of the bisector with the opposite side
+    * @param A the first vertex of the triangle. Not modified.
+    * @param B the second vertex of the triangle, this is the first end point of the bisector. Not modified.
+    * @param C the third vertex of the triangle. Not modified.
+    * @return the second end point of the bisector, or {@code null} if the method failed.
     */
    public static Point2d getTriangleBisector(Point2d A, Point2d B, Point2d C)
    {
-      Point2d bisectorToPack = new Point2d();
-      getTriangleBisector(A, B, C, bisectorToPack);
-      return bisectorToPack;
+      Point2d X = new Point2d();
+      getTriangleBisector(A, B, C, X);
+      return X;
    }
 
-   private static final ThreadLocal<Vector2d> tempAToC = new ThreadLocal<Vector2d>()
-   {
-      @Override
-      public Vector2d initialValue()
-      {
-         return new Vector2d();
-      }
-   };
-
    /**
-    *  This method returns the point representing where the bisector of an
-    *  angle of a triangle intersects the opposite side.
-    *  Given a triangle defined by three points (A,B,C),
-    *  To find the Bisector that divides the angle at B in half
-    *  and intersects AC at X.
+    *  Given a triangle defined by three points (A,B,C), this methods the point
+    *  X &in; AC such that the line (B, X) is the angle bisector of B.
+    *  As a result, the two angles CBX and XBA are equal.
+    *  <a href="https://en.wikipedia.org/wiki/Angle_bisector_theorem"> Useful link</a>.
+    *<p>
+    *Edge cases:
+    *<ul>
+    *   <li> if any the triangle's edge is shorter than {@link Epsilons#ONE_TRILLIONTH},
+    *    this method fails and returns {@code false}.
+    *</ul>
+    *</p>
     *
-    *    BA    AX
-    *    --  = --
-    *    BC    CX
-    *
-    *
-    * @param A Point2d
-    * @param B Point2d
-    * @param C Point2d
-    * @return Point2d the intersection point of the bisector with the opposite side
+    * @param A the first vertex of the triangle. Not modified.
+    * @param B the second vertex of the triangle, this is the first end point of the bisector. Not modified.
+    * @param C the third vertex of the triangle. Not modified.
+    * @param XToPack point in which the second end point of the bisector is stored. Modified.
+    * @return whether the bisector could be calculated or not.
     */
-   public static void getTriangleBisector(Point2d A, Point2d B, Point2d C, Point2d bisectorToPack)
+   public static boolean getTriangleBisector(Point2d A, Point2d B, Point2d C, Point2d XToPack)
    {
       // find all proportional values
       double BA = B.distance(A);
+      if (BA < Epsilons.ONE_TRILLIONTH)
+         return false;
+
       double BC = B.distance(C);
+      if (BC < Epsilons.ONE_TRILLIONTH)
+         return false;
+
       double AC = A.distance(C);
+
+      if (AC < Epsilons.ONE_TRILLIONTH)
+         return false;
+
       double AX = AC / ((BC / BA) + 1.0);
 
       // use AX distance to find X along AC
-      Vector2d AtoC = tempAToC.get();
-      AtoC.set(C);
-      AtoC.sub(A);
-      AtoC.normalize();
-      AtoC.scale(AX);
+      double vectorAXx = C.getX() - A.getX();
+      double vectorAXy = C.getY() - A.getY();
+      double inverseMagnitude = 1.0 / Math.sqrt(vectorAXx * vectorAXx + vectorAXy * vectorAXy);
+      vectorAXx *= AX * inverseMagnitude;
+      vectorAXy *= AX * inverseMagnitude;
 
-      bisectorToPack.set(A);
-      bisectorToPack.add(AtoC);
+      XToPack.set(vectorAXx, vectorAXy);
+      XToPack.add(A);
+      return false;
    }
 
    public static double getAngleFromFirstToSecondVector(Vector2d firstVector, Vector2d secondVector)
