@@ -212,6 +212,9 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
    
    private CloseableAndDisposableRegistry closeableAndDisposableRegistry = new CloseableAndDisposableRegistry();
    
+   private List<String> panelsSelectedEarly = new ArrayList<>();
+   private boolean scsWindowOpened = false;
+   
    public StandardSimulationGUI(Graphics3DAdapter graphics3dAdapter, SimulationSynchronizer simulationSynchronizer, AllCommandsExecutor allCommandsExecutor,
          AllDialogConstructorsHolder allDialogConstructorsHolder, SimulationConstructionSet sim, YoVariableHolder yoVariableHolder, Robot[] robots,
          DataBuffer buffer, VarGroupList varGroupList, JApplet jApplet, YoVariableRegistry rootRegistry)
@@ -478,7 +481,6 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
             initGUI(heightMap);
             showGUI();
          }
-
       });
    }
 
@@ -596,6 +598,16 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
                // The search interface needs to be revamped, making sure it uses InvokeLater when necessary
                // All other deadlocks in the SCS code need to be removed.
 
+            }
+            
+            @Override
+            public void windowOpened(WindowEvent e)
+            {
+               scsWindowOpened = true;
+               for (String earlySelection : panelsSelectedEarly)
+               {
+                  selectPanel(earlySelection);
+               }
             }
          });
          jFrame.addComponentListener(new ComponentAdapter()
@@ -815,6 +827,8 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
          YoVariablePanelJPopupMenu varPanelJPopupMenu = new YoVariablePanelJPopupMenu(myGraphArrayPanel, myEntryBoxArrayPanel, selectedVariableHolder, yoVariableExplorerTabbedPane,
                bookmarkedVariablesHolder);
          yoVariableExplorerTabbedPane.setVarPanelJPopupMenu(varPanelJPopupMenu);
+         
+         //sim.addExtraJpanel(new JavaFX3DPlotter().getPanel(), "3D Plotter");
       }
    }
 
@@ -1998,6 +2012,12 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
    @Override
    public void selectPanel(String panelName)
    {
+      if (!scsWindowOpened)
+      {
+         panelsSelectedEarly.add(panelName);
+         return;
+      }
+      
       for (int i = 0; i < standardGUIActions.extraPanelsMenu.getItemCount(); i++)
       {
          if (standardGUIActions.extraPanelsMenu.getItem(i).getText().equals(panelName))

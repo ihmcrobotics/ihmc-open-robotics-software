@@ -466,28 +466,29 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
 
       mySimulation.getDataBuffer().copyValuesThrough(); // Copy the values through so that anything the user changed during initialization will be YoVariablized, and the default on all graphs.
 
-      attachPlaybackListener(new PlaybackListener() {
+      attachPlaybackListener(new PlaybackListener()
+      {
+         @Override
+         public void indexChanged(int newIndex, double newTime)
+         {
 
-		@Override
-		public void indexChanged(int newIndex, double newTime) {
+         }
 
+         @Override
+         public void stop()
+         {
+            if (myGUI != null && myGUI.getGraphics3dAdapter() != null)
+               myGUI.getGraphics3dAdapter().pause();
+         }
 
-		}
-
-		@Override
-		public void stop() {
-			if (myGUI != null && myGUI.getGraphics3dAdapter() != null)
-				myGUI.getGraphics3dAdapter().pause();
-
-		}
-
-		@Override
-		public void play(double realTimeRate) {
-			if (myGUI != null && myGUI.getGraphics3dAdapter() != null)
-				myGUI.getGraphics3dAdapter().play();
-
-		}
-	});
+         @Override
+         public void play(double realTimeRate)
+         {
+            if (myGUI != null && myGUI.getGraphics3dAdapter() != null)
+               myGUI.getGraphics3dAdapter().play();
+         }
+      });
+      
       if (robots != null)
       {
          for (Robot robot : robots)
@@ -4124,10 +4125,17 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
 
    public void addExtraJpanel(Component extraPanel, String name)
    {
-      ExtraPanelConfiguration extraPanelConfig = new ExtraPanelConfiguration(name);
-      extraPanelConfig.setupPanel(extraPanel);
-      extraPanelConfig.setName(name);
-      setupExtraPanel(extraPanelConfig);
+      addExtraJpanel(extraPanel, name, false);
+   }
+   
+   public void addExtraJpanel(Component extraPanel, String name, boolean showOnStart)
+   {
+      setupExtraPanel(new ExtraPanelConfiguration(name, extraPanel, showOnStart));
+      
+      if (showOnStart)
+      {
+         getStandardSimulationGUI().selectPanel(name);
+      }
    }
 
    public void exportRobotDefinition(Robot robot, File chosenFile)
