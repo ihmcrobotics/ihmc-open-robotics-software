@@ -15,7 +15,6 @@ import org.fest.swing.exception.ComponentLookupException;
 import org.fest.swing.exception.WaitTimedOutError;
 import org.fest.swing.finder.FrameFinder;
 import org.fest.swing.finder.WindowFinder;
-import org.fest.swing.fixture.DialogFixture;
 import org.fest.swing.fixture.FrameFixture;
 import org.fest.swing.fixture.JButtonFixture;
 import org.fest.swing.fixture.JCheckBoxFixture;
@@ -37,16 +36,14 @@ public class SimulationGUITestFixture
 {
    private FrameFixture focusedWindow;
    private final FrameFixture mainSCSWindow;
-   private final SimulationConstructionSet scs;
 
    public SimulationGUITestFixture(final SimulationConstructionSet scs)
    {
       FailOnThreadViolationRepaintManager.install();
 
-      this.scs = scs;
-
       JFrame frame = GuiActionRunner.execute(new GuiQuery<JFrame>()
       {
+         @Override
          protected JFrame executeInEDT() throws SimulationExceededMaximumTimeException
          {
             JFrame jFrame = scs.getJFrame();
@@ -128,7 +125,7 @@ public class SimulationGUITestFixture
 
    public void focusDialog(String name)
    {
-      DialogFixture dialogFixture = focusedWindow.dialog(name);
+      focusedWindow.dialog(name);
    }
 
    public void focusMainSCSWindow()
@@ -597,6 +594,7 @@ public class SimulationGUITestFixture
          this.text = text;
       }
 
+      @Override
       protected boolean isMatching(JMenuItem component)
       {
          return text.equals(component.getText());
@@ -614,6 +612,7 @@ public class SimulationGUITestFixture
          this.nameEnding = nameEnding;
       }
 
+      @Override
       protected boolean isMatching(JSpinner component)
       {
          return component.getName().endsWith(nameEnding);
@@ -628,6 +627,7 @@ public class SimulationGUITestFixture
          super(JPanel.class);
       }
 
+      @Override
       protected boolean isMatching(JPanel component)
       {
          String name = component.getName();
@@ -656,6 +656,7 @@ public class SimulationGUITestFixture
          this.nThToFind = nThToFind;
       }
 
+      @Override
       protected boolean isMatching(JPanel component)
       {
          String name = component.getName();
@@ -691,6 +692,7 @@ public class SimulationGUITestFixture
          this.nThToFind = nThToFind;
       }
 
+      @Override
       protected boolean isMatching(JPanel component)
       {
          String name = component.getName();
@@ -726,6 +728,7 @@ public class SimulationGUITestFixture
          this.labelText = labelText;
       }
 
+      @Override
       protected boolean isMatching(JLabel label)
       {
          return label.getText().equals(labelText);
@@ -744,6 +747,7 @@ public class SimulationGUITestFixture
          this.nThToFind = nThToFind;
       }
 
+      @Override
       protected boolean isMatching(JFrame component)
       {
          String name = component.getName();
@@ -780,6 +784,7 @@ public class SimulationGUITestFixture
          this.nThToFind = nThToFind;
       }
 
+      @Override
       protected boolean isMatching(JFrame component)
       {
          String name = component.getName();

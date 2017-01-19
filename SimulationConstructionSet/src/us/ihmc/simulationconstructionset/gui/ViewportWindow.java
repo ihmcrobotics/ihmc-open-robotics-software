@@ -131,6 +131,7 @@ public class ViewportWindow implements ViewportSelectorCommandExecutor, ActiveCa
 
       ExportSnapshotCommandExecutor exportSnapshotCommandExecutor = new ExportSnapshotCommandExecutor()
       {
+         @Override
          public void exportSnapshot(File snapshotFile)
          {
             CaptureDevice canvas3D = activeCanvas3DHolder.getActiveCaptureDevice();
@@ -208,6 +209,7 @@ public class ViewportWindow implements ViewportSelectorCommandExecutor, ActiveCa
 
       frame.addWindowListener(new WindowAdapter()
       {
+         @Override
          public void windowClosing(WindowEvent e)
          {
             for (Component panel : tempPanelsHolder)
@@ -279,6 +281,7 @@ public class ViewportWindow implements ViewportSelectorCommandExecutor, ActiveCa
 
       ExportSnapshotCommandExecutor exportSnapshotCommandExecutor = new ExportSnapshotCommandExecutor()
       {
+         @Override
          public void exportSnapshot(File snapshotFile)
          {
             CaptureDevice capturableCanvas = activeCanvas3DHolder.getActiveCaptureDevice();
@@ -355,6 +358,7 @@ public class ViewportWindow implements ViewportSelectorCommandExecutor, ActiveCa
 
       frame.addWindowListener(new WindowAdapter()
       {
+         @Override
          public void windowClosing(WindowEvent e)
          {
             for (Component panel : tempPanelsHolder)
@@ -474,6 +478,7 @@ public class ViewportWindow implements ViewportSelectorCommandExecutor, ActiveCa
       myGUI.makeCheckMarksConsistentForExtraPanels(panelName, isSelected);
    }
 
+   @Override
    public void selectPanel(String panelName)
    {
       if (isSelectedPanel(panelName))
@@ -524,11 +529,13 @@ public class ViewportWindow implements ViewportSelectorCommandExecutor, ActiveCa
       return viewportPanel.getCameraAdapters();
    }
 
+   @Override
    public TrackingDollyCameraController getCamera()
    {
       return viewportPanel.getCamera();
    }
 
+   @Override
    public CaptureDevice getActiveCaptureDevice()
    {
       return this.getActiveView().getCaptureDevice();
@@ -544,6 +551,7 @@ public class ViewportWindow implements ViewportSelectorCommandExecutor, ActiveCa
       return frame.isVisible();
    }
 
+   @Override
    public void selectViewport(String viewportName)
    {
       ViewportConfiguration viewportConfiguration = viewportConfigurationList.getViewportConfiguration(viewportName);
@@ -563,6 +571,7 @@ public class ViewportWindow implements ViewportSelectorCommandExecutor, ActiveCa
       windowGUIActions.makeCheckBoxesConsistentWithCamera();
    }
 
+   @Override
    public void showViewport()
    {
       isViewportHidden = false;
@@ -573,6 +582,7 @@ public class ViewportWindow implements ViewportSelectorCommandExecutor, ActiveCa
       viewportPanel.updateUI();
    }
 
+   @Override
    public void hideViewport()
    {
       isViewportHidden = true;
@@ -587,11 +597,13 @@ public class ViewportWindow implements ViewportSelectorCommandExecutor, ActiveCa
       frame.setVisible(false);
    }
 
+   @Override
    public boolean isViewportHidden()
    {
       return isViewportHidden;
    }
 
+   @Override
    public void registerViewportSelectorCommandListener(ViewportSelectorCommandListener viewportSelectorCommandListener)
    {
       this.viewportSelectorCommandListener = viewportSelectorCommandListener;
@@ -607,6 +619,7 @@ public class ViewportWindow implements ViewportSelectorCommandExecutor, ActiveCa
       return viewportPanel.getXMLStyleRepresentationOfClassViewPorts(view3d, canvasNumber);
    }
 
+   @Override
    public void closeAndDispose()
    {
       viewportPanel.closeAndDispose();

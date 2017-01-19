@@ -65,17 +65,20 @@ public class ExportSnapshotDialogGenerator implements ExportSnapshotDialogConstr
       }
    }
 
+   @Override
    public void setCurrentDirectory(File dir)
    {
       fileChooser.setCurrentDirectory(dir);
    }
 
+   @Override
    public void setCurrentDirectory(String dir)
    {
       fileChooser.setCurrentDirectory(new File(dir));
    }
 
 
+   @Override
    public void constructDialog()
    {
       guiEnablerAndDisabler.disableGUIComponents();
@@ -84,6 +87,7 @@ public class ExportSnapshotDialogGenerator implements ExportSnapshotDialogConstr
       @SuppressWarnings("unused")
       SwingWorker worker = new SwingWorker()
       {
+         @Override
          public Object construct()
          {
             // synchronized(BusyLock.lock)
@@ -144,6 +148,7 @@ public class ExportSnapshotDialogGenerator implements ExportSnapshotDialogConstr
             // }
          }
 
+         @Override
          public void finished()
          {
             // Runs in Swing dispatching thread when done...

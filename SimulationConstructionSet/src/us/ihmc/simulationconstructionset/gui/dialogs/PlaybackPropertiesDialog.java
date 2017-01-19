@@ -77,6 +77,7 @@ public class PlaybackPropertiesDialog extends JDialog implements ActionListener
       parentContainer.repaint();    // This is a horrible way to get the graphs to repaint...
    }
 
+   @Override
    public void actionPerformed(ActionEvent event)
    {
       if (event.getSource() == cancelButton)
@@ -182,6 +183,7 @@ public class PlaybackPropertiesDialog extends JDialog implements ActionListener
           */
       }
 
+      @Override
       public void actionPerformed(ActionEvent event)
       {
          if (event.getSource() == realTimeTextField)

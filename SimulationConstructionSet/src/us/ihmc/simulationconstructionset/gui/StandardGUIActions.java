@@ -576,6 +576,7 @@ public class StandardGUIActions implements GUIEnablerAndDisabler
       exitMenuItem = new JMenuItem("Exit");
       exitMenuItem.addActionListener(new ActionListener()
       {
+         @Override
          public void actionPerformed(ActionEvent e)
          {
             exitActionListenerNotifier.notifyExitActionListeners();
@@ -916,6 +917,7 @@ public class StandardGUIActions implements GUIEnablerAndDisabler
    {
       EventDispatchThreadHelper.invokeAndWait(new Runnable()
       {
+         @Override
          public void run()
          {
             setupConfigurationMenuThreadUnsafe(configurationList, configurationSelector, selectGUIConfigFromFileCommandExecutor);
@@ -1006,6 +1008,7 @@ public class StandardGUIActions implements GUIEnablerAndDisabler
    {
       EventDispatchThreadHelper.invokeAndWait(new Runnable()
       {
+         @Override
          public void run()
          {
             graphGroupsMenu.removeAll();
@@ -1026,6 +1029,7 @@ public class StandardGUIActions implements GUIEnablerAndDisabler
    {
       EventDispatchThreadHelper.invokeAndWait(new Runnable()
       {
+         @Override
          public void run()
          {
             entryBoxGroupsMenu.removeAll();
@@ -1170,12 +1174,14 @@ public class StandardGUIActions implements GUIEnablerAndDisabler
       }
    }
 
+   @Override
    public void disableGUIComponents()
    {
       if (guiActions != null)
       {
          EventDispatchThreadHelper.invokeAndWait(new Runnable()
          {
+            @Override
             public void run()
             {
                for (Action action : guiActions)
@@ -1187,10 +1193,12 @@ public class StandardGUIActions implements GUIEnablerAndDisabler
       }
    }
 
+   @Override
    public void enableGUIComponents()
    {
       EventDispatchThreadHelper.invokeAndWait(new Runnable()
       {
+         @Override
          public void run()
          {
             if (guiActions != null)
@@ -1221,6 +1229,7 @@ public class StandardGUIActions implements GUIEnablerAndDisabler
    {
       EventDispatchThreadHelper.invokeLater(new Runnable()
       {
+         @Override
          public void run()
          {
             simulateAction.setEnabled(true);
