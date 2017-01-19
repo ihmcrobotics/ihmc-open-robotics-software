@@ -146,11 +146,13 @@ public class BenchmarkFieldOrArrayAccess
    {
       private long value;
 
+      @Override
       public void setValue(long value)
       {
          this.value = value;
       }
 
+      @Override
       public long getValue()
       {
          return value;
@@ -162,11 +164,13 @@ public class BenchmarkFieldOrArrayAccess
       private int index = 0;
       private long[] value = new long[1];
 
+      @Override
       public void setValue(long value)
       {
          this.value[index] = value;
       }
 
+      @Override
       public long getValue()
       {
          return value[index];

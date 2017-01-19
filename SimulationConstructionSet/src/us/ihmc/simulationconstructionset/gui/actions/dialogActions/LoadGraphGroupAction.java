@@ -32,6 +32,7 @@ public class LoadGraphGroupAction extends AbstractAction
       constructor.setCurrentDirectory(directory);
    }
 
+   @Override
    public void actionPerformed(ActionEvent e)
    {
       constructor.constructDialog();

@@ -31,6 +31,7 @@ public class PrintGraphsAction extends AbstractAction
       constructor = null;
    }
 
+   @Override
    public void actionPerformed(ActionEvent e)
    {
       constructor.constructDialog();

@@ -32,6 +32,7 @@ public class TypicalTorqueSpeedCurve implements TorqueSpeedCurve
       this.maxSpeedAtMaxTorque = maxSpeedAtMaxTorque;
    }
 
+   @Override
    public double limitTorque(double torque, double speed)
    {
       if ((speed < 0.0) && (torque > 0.0))

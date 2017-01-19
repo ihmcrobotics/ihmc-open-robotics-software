@@ -35,6 +35,7 @@ public class ExternalForcePointPIDConstraintToIntegrate extends ExternalForcePoi
       this.integralStiffness.set(integralStiffness);
    }
 
+   @Override
    protected void updateClosedJoint()
    {
       super.updateClosedJoint();

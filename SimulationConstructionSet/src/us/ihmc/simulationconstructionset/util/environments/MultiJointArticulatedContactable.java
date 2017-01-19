@@ -139,6 +139,7 @@ public abstract class MultiJointArticulatedContactable implements Contactable
       return allGroundContactPoints.get(jointIndex).get(contactPointIndex);
    }
    
+   @Override
    public void updateContactPoints()
    {
       robot.update();

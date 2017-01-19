@@ -54,6 +54,7 @@ public class CameraMount implements CameraMountInterface
       this.clipDistanceFar = clipDistanceFar;
    }
 
+   @Override
    public String getName()
    {
       return name;
@@ -69,6 +70,7 @@ public class CameraMount implements CameraMountInterface
       return parentJoint;
    }
 
+   @Override
    public String toString()
    {
       return ("name: " + name);
@@ -200,21 +202,25 @@ public class CameraMount implements CameraMountInterface
       this.fieldOfView = fieldOfView;
    }
 
+   @Override
    public double getFieldOfView()
    {
       return fieldOfView;
    }
 
+   @Override
    public double getClipDistanceNear()
    {
       return clipDistanceNear;
    }
 
+   @Override
    public double getClipDistanceFar()
    {
       return clipDistanceFar;
    }
 
+   @Override
    public void zoom(double amount)
    {
       fieldOfView = fieldOfView + amount;

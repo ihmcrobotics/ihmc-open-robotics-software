@@ -57,6 +57,7 @@ public class BalanceBeamTerrainObject implements TerrainObject3D, HeightMapWithN
       linkGraphics.addCube(forward + back, width, height, appearance);
    }
 
+   @Override
    public double heightAndNormalAt(double x, double y, double z, Vector3d normalToPack)
    {
       double heightAt = this.heightAt(x, y, z);
@@ -65,6 +66,7 @@ public class BalanceBeamTerrainObject implements TerrainObject3D, HeightMapWithN
       return heightAt;
    }
    
+   @Override
    public double heightAt(double x, double y, double z)
    {
       double xFromOrigin = x - origin.getX();
@@ -110,6 +112,7 @@ public class BalanceBeamTerrainObject implements TerrainObject3D, HeightMapWithN
    }
 
 
+   @Override
    public boolean checkIfInside(double x, double y, double z, Point3d intersectionToPack, Vector3d normalToPack)
    {
       intersectionToPack.set(x, y, heightAt(x, y, z));
@@ -118,6 +121,7 @@ public class BalanceBeamTerrainObject implements TerrainObject3D, HeightMapWithN
       return (z < intersectionToPack.getZ());
    }
 
+   @Override
    public boolean isClose(double x, double y, double z)
    {
       return boundingBox.isInside(x, y, z);
@@ -144,16 +148,19 @@ public class BalanceBeamTerrainObject implements TerrainObject3D, HeightMapWithN
       return boundingBox.getYMax();
    }
 
+   @Override
    public Graphics3DObject getLinkGraphics()
    {
       return linkGraphics;
    }
 
+   @Override
    public BoundingBox3d getBoundingBox()
    {
       return boundingBox;
    }
 
+   @Override
    public HeightMapWithNormals getHeightMapIfAvailable()
    {
       return this;

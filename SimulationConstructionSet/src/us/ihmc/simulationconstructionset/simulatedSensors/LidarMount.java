@@ -25,6 +25,7 @@ public class LidarMount implements SimulatedSensor
       this.lidarName = sensorName;
    }
 
+   @Override
    public void updateTransform(RigidBodyTransform transformToHere, double time)
    {
       this.transformToHere.set(transformToHere);
@@ -36,6 +37,7 @@ public class LidarMount implements SimulatedSensor
       }
    }
    
+   @Override
    public String getName()
    {
       return lidarName;
@@ -51,6 +53,7 @@ public class LidarMount implements SimulatedSensor
       return lidarScanParameters;
    }
    
+   @Override
    public void setWorld(Graphics3DAdapter graphics3dAdapter)
    {
       // TODO Auto-generated method stub
@@ -67,6 +70,7 @@ public class LidarMount implements SimulatedSensor
       return parentJoint;
    }
 
+   @Override
    public RigidBodyTransform getTransformToHere()
    {
       return transformToHere;

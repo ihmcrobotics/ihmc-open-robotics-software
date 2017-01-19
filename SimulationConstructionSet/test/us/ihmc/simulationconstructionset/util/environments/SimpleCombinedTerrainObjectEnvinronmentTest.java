@@ -174,6 +174,7 @@ public class SimpleCombinedTerrainObjectEnvinronmentTest
 
          scs.attachSelectedListener(new SelectedListener()
          {
+            @Override
             public void selected(Graphics3DNode graphics3dNode, ModifierKeyInterface modifierKeyHolder, Point3d location, Point3d cameraLocation,
                   Quat4d cameraRotation)
             {              

@@ -27,6 +27,7 @@ public class ZoomInAction extends AbstractAction
       AbstractActionTools.setupIconButton(this, iconFilename, shortKey, longDescription, shortDescription);
    }
 
+   @Override
    public void actionPerformed(ActionEvent e)
    {
       executor.zoomIn();

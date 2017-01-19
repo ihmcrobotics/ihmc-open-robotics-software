@@ -64,6 +64,7 @@ public class SimpleTableTerrainObject implements TerrainObject3D, HeightMapWithN
       return this.TABLE_LENGTH;
    }
 
+   @Override
    public double heightAndNormalAt(double x, double y, double z, Vector3d normalToPack)
    {
       double heightAt = heightAt(x, y, z);
@@ -71,6 +72,7 @@ public class SimpleTableTerrainObject implements TerrainObject3D, HeightMapWithN
       return heightAt;
    }
    
+   @Override
    public double heightAt(double x, double y, double z)
    {
       if ((x > boundingBox.getXMin()) && (x < boundingBox.getXMax()) && (y > boundingBox.getYMin()) && (y < boundingBox.getYMax()))
@@ -81,6 +83,7 @@ public class SimpleTableTerrainObject implements TerrainObject3D, HeightMapWithN
       return 0.0;
    }
 
+   @Override
    public boolean isClose(double x, double y, double z)
    {
       if ((z > (boundingBox.getZMax() - TABLE_THICKNESS)) && (z < boundingBox.getZMax()))
@@ -144,6 +147,7 @@ public class SimpleTableTerrainObject implements TerrainObject3D, HeightMapWithN
       surfaceNormalAt(x, y, z, normal);
    }
    
+   @Override
    public boolean checkIfInside(double x, double y, double z, Point3d intersectionToPack, Vector3d normalToPack)
    {
       intersectionToPack.setX(x);    // Go Straight Up for now...
@@ -175,16 +179,19 @@ public class SimpleTableTerrainObject implements TerrainObject3D, HeightMapWithN
       return boundingBox.getYMax();
    }
 
+   @Override
    public Graphics3DObject getLinkGraphics()
    {
       return linkGraphics;
    }
 
+   @Override
    public BoundingBox3d getBoundingBox()
    {
       return boundingBox;
    }
 
+   @Override
    public HeightMapWithNormals getHeightMapIfAvailable()
    {
       return this;

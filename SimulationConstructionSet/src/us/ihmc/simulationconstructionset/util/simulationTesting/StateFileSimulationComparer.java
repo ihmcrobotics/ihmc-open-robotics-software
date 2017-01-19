@@ -18,6 +18,7 @@ public class StateFileSimulationComparer implements SimulationComparer
       this.maxPercentDiff = maxPercentDiff;
    }
 
+   @Override
    public boolean compare(SimulationConstructionSet scs0, SimulationConstructionSet scs1)
    {
       ArrayList<SimulationConstructionSet> simulationConstructionSets = new ArrayList<SimulationConstructionSet>();
@@ -55,6 +56,7 @@ public class StateFileSimulationComparer implements SimulationComparer
       return variableDifferences;
    }
    
+   @Override
    public String toString()
    {
       StringBuffer stringBuffer = new StringBuffer();

@@ -153,6 +153,7 @@ public class TimeScriptTest
 
       TimeScriptCommand timeScriptCommandOne = new TimeScriptCommand()
       {
+         @Override
          public void doCommand()
          {  
             doubleVariable.set(valueOne);
@@ -167,6 +168,7 @@ public class TimeScriptTest
 
       TimeScriptCommand timeScriptCommandTwo = new TimeScriptCommand()
       {
+         @Override
          public void doCommand()
          {  
             doubleVariable.set(valueTwo);
@@ -180,6 +182,7 @@ public class TimeScriptTest
 
       TimeScriptCommand timeScriptCommandThree = new TimeScriptCommand()
       {
+         @Override
          public void doCommand()
          {  
             doubleVariable.set(valueThree);

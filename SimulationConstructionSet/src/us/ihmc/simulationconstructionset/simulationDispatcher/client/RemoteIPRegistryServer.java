@@ -5,6 +5,7 @@ import java.rmi.server.UnicastRemoteObject;
 
 import us.ihmc.simulationconstructionset.simulationDispatcher.interfaces.RemoteIPRegistryInterface;
 
+@SuppressWarnings("serial")
 public class RemoteIPRegistryServer extends UnicastRemoteObject implements RemoteIPRegistryInterface
 {
    private DispatchHostList hostList;
@@ -16,6 +17,7 @@ public class RemoteIPRegistryServer extends UnicastRemoteObject implements Remot
       this.hostList = hostList;
    }
 
+   @Override
    public void registerMe(String hostName, String pwd) throws RemoteException
    {
       if (!pwd.equals(this.pwd))
@@ -28,6 +30,7 @@ public class RemoteIPRegistryServer extends UnicastRemoteObject implements Remot
       hostList.registerMe(hostName);
    }
 
+   @Override
    public String[] getAllRegistered(String pwd) throws RemoteException
    {
       if (!pwd.equals(this.pwd))

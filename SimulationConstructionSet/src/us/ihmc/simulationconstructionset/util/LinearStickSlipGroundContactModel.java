@@ -137,16 +137,19 @@ public class LinearStickSlipGroundContactModel implements GroundContactModel
       this.groundBz.set(zDamping);
    }
 
+   @Override
    public void setGroundProfile3D(GroundProfile3D profile3D)
    {
       this.groundProfile3D = profile3D;
    }
 
+   @Override
    public GroundProfile3D getGroundProfile3D()
    {
       return groundProfile3D;
    }
 
+   @Override
    public void doGroundContact()
    {
       if (groundAlphaStick.getDoubleValue() < groundAlphaSlip.getDoubleValue())

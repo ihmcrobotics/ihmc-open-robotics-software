@@ -259,6 +259,7 @@ public class SimulationConstructionSetProcessDataCallTest
          copyVariable = new DoubleYoVariable("copyVariable", registry);
       }
       
+      @Override
       public void processData()
       {
          double holderDouble;
@@ -290,6 +291,7 @@ public class SimulationConstructionSetProcessDataCallTest
          countVariable = new DoubleYoVariable("countVariable", registry);
       }
       
+      @Override
       public void processData()
       {
          countVariable.set(count);         

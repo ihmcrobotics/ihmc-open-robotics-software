@@ -53,11 +53,13 @@ public class DefaultCollisionHandler implements CollisionHandler
       this.mu = mu;
    }
 
+   @Override
    public void maintenanceBeforeCollisionDetection()
    {
       shapesInContactList.clear();
    }
 
+   @Override
    public void maintenanceAfterCollisionDetection()
    {
       int numberOfCollisions = shapesInContactList.size();
@@ -80,6 +82,7 @@ public class DefaultCollisionHandler implements CollisionHandler
 
    private final ArrayList<Contacts> shapesInContactList = new ArrayList<Contacts>();
 
+   @Override
    public void handle(Contacts contacts)
    {
       shapesInContactList.add(contacts);
@@ -256,6 +259,7 @@ public class DefaultCollisionHandler implements CollisionHandler
       }
    }
 
+   @Override
    public void addListener(CollisionHandlerListener listener)
    {
       listeners.add(listener);

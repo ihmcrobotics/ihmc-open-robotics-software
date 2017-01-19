@@ -27,6 +27,7 @@ public class StopAction extends AbstractAction
       AbstractActionTools.setupIconButton(this, iconFilename, shortKey, longDescription, shortDescription);
    }
 
+   @Override
    public void actionPerformed(ActionEvent e)
    {
       executor.stop();

@@ -71,7 +71,8 @@ public class TrussWithSimpleCollisions extends RotatableBoxTerrainObject
 //	combinedTerrainObject.addStaticLinkGraphics(linkGraphics);
 
 
-	protected void addGraphics()
+	@Override
+   protected void addGraphics()
 	{
 		RigidBodyTransform transformCenterConventionToBottomConvention = box.getTransformCopy();
 //		transformCenterConventionToBottomConvention = TransformTools.transformLocalZ(transformCenterConventionToBottomConvention, -box.getDimension(Direction.Z) / 2.0);
