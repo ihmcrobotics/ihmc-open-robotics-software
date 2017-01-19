@@ -2116,7 +2116,7 @@ public class GeometryTools
     * <ul>
     *    <li> when the line segment end points are equal,
     *     more precisely when {@code lineSegmentStart.distance(lineSegmentEnd) < Epsilons.ONE_TRILLIONTH},
-    *     the method fails and returns false.
+    *     the method fails and returns {@code false}.
     * </ul>
     * </p>
     * <p>
@@ -2127,19 +2127,23 @@ public class GeometryTools
     * @param lineSegmentEnd the x and y coordinates are used to defined the second end point of the line segment. Not modified.
     * @param bisectorStartToPack a 2D point in which the x and y coordinates of the origin of the bisector are stored. Modified.
     * @param bisectorDirectionToPack a 2D vector in which the x and y components of the direction of the bisector are stored. Modified.
+    * @return whether the perpendicular bisector could be determined or not.
     */
    // FIXME same thing, the use of 3D arguments for doing computation in 2D is confusing and error prone.
    // FIXME the reference frames of the arguments need to checked and throw an exception if they are not the same.
-   public static void getZPlanePerpendicularBisector(FramePoint lineSegmentStart, FramePoint lineSegmentEnd, FramePoint bisectorStartToPack, FrameVector bisectorDirectionToPack)
+   public static boolean getZPlanePerpendicularBisector(FramePoint lineSegmentStart, FramePoint lineSegmentEnd, FramePoint bisectorStartToPack, FrameVector bisectorDirectionToPack)
    {
       Point2d lineStart2d = new Point2d(lineSegmentStart.getX(), lineSegmentStart.getY());
       Point2d lineEnd2d = new Point2d(lineSegmentEnd.getX(), lineSegmentEnd.getY());
       Point2d bisectorStart2d = new Point2d();
       Vector2d bisectorDirection2d = new Vector2d();
 
-      getPerpendicularBisector(lineStart2d, lineEnd2d, bisectorStart2d, bisectorDirection2d);
+      boolean success = getPerpendicularBisector(lineStart2d, lineEnd2d, bisectorStart2d, bisectorDirection2d);
+      if (!success)
+         return false;
       bisectorDirectionToPack.set(bisectorDirection2d.getX(), bisectorDirection2d.getY(), 0.0);
       bisectorStartToPack.set(bisectorStart2d.getX(), bisectorStart2d.getY(), 0.0);
+      return true;
    }
 
    /**
@@ -2150,17 +2154,15 @@ public class GeometryTools
     * <ul>
     *    <li> when the line segment end points are equal,
     *     more precisely when {@code lineSegmentStart.distance(lineSegmentEnd) < Epsilons.ONE_TRILLIONTH},
-    *     the method fails and returns false.
+    *     the method fails and returns {@code false}.
     * </ul>
-    * </p>
-    * <p>
-    * WARNING: This method generates garbage.
     * </p>
     * 
     * @param lineSegmentStart the first end point of the line segment. Not modified.
     * @param lineSegmentEnd the second end point of the line segment. Not modified.
     * @param bisectorStartToPack a 2D point in which the origin of the bisector is stored. Modified.
     * @param bisectorDirectionToPack a 2D vector in which the direction of the bisector is stored. Modified.
+    * @return whether the perpendicular bisector could be determined or not.
     */
    public static boolean getPerpendicularBisector(Point2d lineSegmentStart, Point2d lineSegmentEnd, Point2d bisectorStartToPack, Vector2d bisectorDirectionToPack)
    {
@@ -2172,6 +2174,91 @@ public class GeometryTools
       bisectorDirectionToPack.sub(lineSegmentEnd, lineSegmentStart);
       getPerpendicularVector(bisectorDirectionToPack, bisectorDirectionToPack);
       bisectorDirectionToPack.normalize();
+      return true;
+   }
+
+   /**
+    * Computes the end points of the perpendicular bisector segment to a line segment defined by its end points, such that:
+    * <ul>
+    *    <li> each end point of the perpendicular bisector is at a distance of {@code bisectorSegmentHalfLength} from the line segment.
+    *    <li> the first perpendicular bisector end point is located on the left side on the line segment.
+    *    <li> the second perpendicular bisector end point is located on the right side on the line segment.
+    * </ul>
+    * <p>
+    * <p>
+    * Edge cases:
+    * <ul>
+    *    <li> when the line segment end points are equal,
+    *     more precisely when {@code lineSegmentStart.distance(lineSegmentEnd) < Epsilons.ONE_TRILLIONTH},
+    *     the method fails and returns {@code null}.
+    * </ul>
+    * </p>
+    * 
+    * @param lineSegmentStart the first end point of the line segment from which the perpendicular bisector is to be computed. Not modified.
+    * @param lineSegmentEnd the second end point of the line segment from which the perpendicular bisector is to be computed. Not modified.
+    * @param bisectorSegmentHalfLength distance from the line segment each end point of the perpendicular bisector segment will be positioned.
+    * @return a list containing the two end points of the perpendicular bisector segment.
+    */
+   public static List<Point2d> getPerpendicularBisectorSegment(Point2d lineSegmentStart, Point2d lineSegmentEnd, double bisectorSegmentHalfLength)
+   {
+      Point2d bisectorSegmentStart = new Point2d();
+      Point2d bisectorSegmentEnd = new Point2d();
+
+      boolean success = getPerpendicularBisectorSegment(lineSegmentStart, lineSegmentEnd, bisectorSegmentHalfLength, bisectorSegmentStart, bisectorSegmentEnd);
+      if (!success)
+         return null;
+
+      List<Point2d> bisectorEndpoints = new ArrayList<>();
+      bisectorEndpoints.add(bisectorSegmentStart);
+      bisectorEndpoints.add(bisectorSegmentEnd);
+      return bisectorEndpoints;
+   }
+
+   /**
+    * Computes the end points of the perpendicular bisector segment to a line segment defined by its end points, such that:
+    * <ul>
+    *    <li> each end point of the perpendicular bisector is at a distance of {@code bisectorSegmentHalfLength} from the line segment.
+    *    <li> the first perpendicular bisector end point is located on the left side on the line segment.
+    *    <li> the second perpendicular bisector end point is located on the right side on the line segment.
+    * </ul>
+    * <p>
+    * <p>
+    * Edge cases:
+    * <ul>
+    *    <li> when the line segment end points are equal,
+    *     more precisely when {@code lineSegmentStart.distance(lineSegmentEnd) < Epsilons.ONE_TRILLIONTH},
+    *     the method fails and returns false.
+    * </ul>
+    * </p>
+    * 
+    * @param lineSegmentStart the first end point of the line segment from which the perpendicular bisector is to be computed. Not modified.
+    * @param lineSegmentEnd the second end point of the line segment from which the perpendicular bisector is to be computed. Not modified.
+    * @param bisectorSegmentHalfLength distance from the line segment each end point of the perpendicular bisector segment will be positioned.
+    * @param bisectorSegmentStartToPack the first end point of the perpendicular bisector segment to be computed. Modified.
+    * @param bisectorSegmentEndToPack the second end point of the perpendicular bisector segment to be computed. Modified.
+    * @return whether the perpendicular bisector could be determined or not.
+    */
+   public static boolean getPerpendicularBisectorSegment(Point2d lineSegmentStart, Point2d lineSegmentEnd, double bisectorSegmentHalfLength,
+                                                         Point2d bisectorSegmentStartToPack, Point2d bisectorSegmentEndToPack)
+   {
+      if (lineSegmentStart.distance(lineSegmentEnd) < Epsilons.ONE_TRILLIONTH)
+         return false;
+
+      // direction will be on left side of line
+      double bisectorDirectionX = -(lineSegmentEnd.getY() - lineSegmentStart.getY());
+      double bisectorDirectionY = lineSegmentEnd.getX() - lineSegmentStart.getX();
+      double directionInverseMagnitude = 1.0 / Math.sqrt(bisectorDirectionX * bisectorDirectionX + bisectorDirectionY * bisectorDirectionY);
+      bisectorDirectionX *= directionInverseMagnitude;
+      bisectorDirectionY *= directionInverseMagnitude;
+
+      double midPointX = 0.5 * (lineSegmentStart.getX() + lineSegmentEnd.getX());
+      double midPointY = 0.5 * (lineSegmentStart.getY() + lineSegmentEnd.getY());
+
+      bisectorSegmentStartToPack.setX(midPointX + bisectorDirectionX * bisectorSegmentHalfLength);
+      bisectorSegmentStartToPack.setY(midPointY + bisectorDirectionY * bisectorSegmentHalfLength);
+      bisectorSegmentEndToPack.setX(midPointX - bisectorDirectionX * bisectorSegmentHalfLength);
+      bisectorSegmentEndToPack.setY(midPointY - bisectorDirectionY * bisectorSegmentHalfLength);
+
       return true;
    }
 
@@ -2320,53 +2407,6 @@ public class GeometryTools
       rotationAxisY /= rotationAxisLength;
       rotationAxisZ /= rotationAxisLength;
       rotationToPack.set(rotationAxisX, rotationAxisY, rotationAxisZ, rotationAngle);
-   }
-
-   public static ArrayList<Point2d> getNormalPointsFromLine(Point2d firstLinePoint, Point2d secondLinePoint, double lengthOffset)
-   {
-      boolean DEBUG = false;
-      ArrayList<Point2d> listPoints = new ArrayList<Point2d>();
-
-      // Filled-in by static calls
-      Vector2d originalDirection = null;
-      Point2d bisectorStart = new Point2d(0, 0);
-      Vector2d bisectorDirection = new Vector2d(0, 0);
-      Point2d finalCalculatedPoint1 = new Point2d(0.0, 0.0);
-      Point2d finalCalculatedPoint2 = new Point2d(0.0, 0.0);
-
-      double offsetLength = lengthOffset;
-
-      GeometryTools.getPerpendicularBisector(firstLinePoint, secondLinePoint, bisectorStart, bisectorDirection);
-
-      originalDirection = new Vector2d(secondLinePoint.getX() - firstLinePoint.getX(), secondLinePoint.getY() - firstLinePoint.getY());
-
-
-      double oldAngle = GeometryTools.getAngleFromFirstToSecondVector(new Vector2d(1.0, 0.0), originalDirection);
-
-      double additionalAngle = GeometryTools.getAngleFromFirstToSecondVector(originalDirection, bisectorDirection);
-
-      double angleOffset = oldAngle + additionalAngle;
-
-      finalCalculatedPoint1.set(bisectorStart.getX() + offsetLength * Math.cos(angleOffset), bisectorStart.getY() + offsetLength * Math.sin(angleOffset));
-
-      finalCalculatedPoint2.set(bisectorStart.getX() + offsetLength * Math.cos(angleOffset + Math.PI),
-                                bisectorStart.getY() + offsetLength * Math.sin(angleOffset + Math.PI));
-      listPoints.add(finalCalculatedPoint1);
-      listPoints.add(finalCalculatedPoint2);
-
-      if (DEBUG)
-      {
-         System.out.println("\n\nBisector Start: " + bisectorStart);
-         System.out.println("Direction Vector: " + bisectorDirection);
-         System.out.println("angle between original and x-axis: " + Math.toDegrees(oldAngle));
-         System.out.println("Angle between original and bisector: " + Math.toDegrees(additionalAngle));
-         System.out.println("Angle Total: " + Math.toDegrees(angleOffset));
-         System.out.println("1. Calculated Final Point: " + finalCalculatedPoint1.getX() + ", " + finalCalculatedPoint1.getY());
-         System.out.println("2. Calculated Final Point: " + finalCalculatedPoint2.getX() + ", " + finalCalculatedPoint2.getY());
-      }
-
-      return listPoints;
-
    }
 
    /**
