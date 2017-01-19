@@ -2492,37 +2492,65 @@ public class GeometryTools
       return false;
    }
 
+   /**
+    * Computes the angle in radians from the first 2D vector to the second 2D vector.
+    * The computed angle is in the range [-<i>pi</i>; <i>pi</i>].
+    * <p>
+    * Edge cases:
+    * <ul>
+    *    <li> if the length of either vector is below {@code 1.0E-7}, this method fails and returns an angle of {@code 0.0} radian.
+    * </ul>
+    * </p>
+    * 
+    * @param vector1x x-component of first the vector.
+    * @param vector1y y-component of first the vector.
+    * @param vector2x x-component of second the vector.
+    * @param vector2y y-component of second the vector.
+    * @return the angle in radians from the first vector to the second vector.
+    */
    public static double getAngleFromFirstToSecondVector(Vector2d firstVector, Vector2d secondVector)
    {
-      double v1x = firstVector.getX();
-      double v1y = firstVector.getY();
-      double v2x = secondVector.getX();
-      double v2y = secondVector.getY();
-      return getAngleFromFirstToSecondVector(v1x, v1y, v2x, v2y);
+      return getAngleFromFirstToSecondVector(firstVector.getX(), firstVector.getY(), secondVector.getX(), secondVector.getY());
    }
 
-   public static double getAngleFromFirstToSecondVector(double v1x, double v1y, double v2x, double v2y)
+   /**
+    * Computes the angle in radians from the first 2D vector to the second 2D vector.
+    * The computed angle is in the range [-<i>pi</i>; <i>pi</i>].
+    * <p>
+    * Edge cases:
+    * <ul>
+    *    <li> if the length of either vector is below {@code 1.0E-7}, this method fails and returns an angle of {@code 0.0} radian.
+    * </ul>
+    * </p>
+    * 
+    * @param firstVectorX x-component of first the vector.
+    * @param firstVectorY y-component of first the vector.
+    * @param secondVectorX x-component of second the vector.
+    * @param secondVectorY y-component of second the vector.
+    * @return the angle in radians from the first vector to the second vector.
+    */
+   public static double getAngleFromFirstToSecondVector(double firstVectorX, double firstVectorY, double secondVectorX, double secondVectorY)
    {
-      double v1Length = Math.sqrt(v1x * v1x + v1y * v1y);
+      double firstVectorLength = Math.sqrt(firstVectorX * firstVectorX + firstVectorY * firstVectorY);
 
-      if (v1Length < 1e-7)
+      if (firstVectorLength < 1e-7)
          return 0.0;
 
-      v1x /= v1Length;
-      v1y /= v1Length;
+      firstVectorX /= firstVectorLength;
+      firstVectorY /= firstVectorLength;
 
-      double v2Length = Math.sqrt(v2x * v2x + v2y * v2y);
+      double secondVectorLength = Math.sqrt(secondVectorX * secondVectorX + secondVectorY * secondVectorY);
 
-      if (v2Length < 1e-7)
+      if (secondVectorLength < 1e-7)
          return 0.0;
 
-      v2x /= v2Length;
-      v2y /= v2Length;
+      secondVectorX /= secondVectorLength;
+      secondVectorY /= secondVectorLength;
 
       // The sign of the angle comes from the cross product
-      double crossProduct = v1x * v2y - v1y * v2x;
+      double crossProduct = firstVectorX * secondVectorY - firstVectorY * secondVectorX;
       // the magnitude of the angle comes from the dot product
-      double dotProduct = v1x * v2x + v1y * v2y;
+      double dotProduct = firstVectorX * secondVectorX + firstVectorY * secondVectorY;
 
       double angle = Math.atan2(crossProduct, dotProduct);
       // This is a hack to get the polygon tests to pass.
