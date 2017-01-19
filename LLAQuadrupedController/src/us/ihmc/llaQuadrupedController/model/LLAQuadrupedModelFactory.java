@@ -49,12 +49,10 @@ public class LLAQuadrupedModelFactory extends QuadrupedModelFactory
       }
 
       boolean useCollisionMeshes = false;
-      boolean enableTorqueVelocityLimits = true;
-      boolean enableJointDamping = true;
 
       GeneralizedSDFRobotModel generalizedSDFRobotModel = getGeneralizedRobotModel();
       RobotDescriptionFromSDFLoader loader = new RobotDescriptionFromSDFLoader();
-      robotDescription = loader.loadRobotDescriptionFromSDF(generalizedSDFRobotModel, jointMap, useCollisionMeshes, enableTorqueVelocityLimits, enableJointDamping);
+      robotDescription = loader.loadRobotDescriptionFromSDF(generalizedSDFRobotModel, jointMap, useCollisionMeshes);
    }
 
    private GeneralizedSDFRobotModel getGeneralizedRobotModel()
