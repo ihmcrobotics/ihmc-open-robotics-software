@@ -3511,9 +3511,19 @@ public class GeometryTools
       return ret;
    }
 
-   public static ArrayList<FramePoint2d> projectToXYPlane(List<FramePoint> points)
+   /**
+    * Project each point in the given list {@code points} onto the XY-plane.
+    * <p>
+    * WARNING: This method generates garbage.
+    * </p>
+    * 
+    * @param points the list of points to transform. Not modified.
+    * @return the result of the transformation.
+    */
+   public static List<FramePoint2d> projectOntoXYPlane(List<FramePoint> points)
    {
-      ArrayList<FramePoint2d> ret = new ArrayList<FramePoint2d>(points.size());
+      List<FramePoint2d> ret = new ArrayList<>(points.size());
+
       for (int i = 0; i < points.size(); i++)
       {
          FramePoint point3d = points.get(i);
