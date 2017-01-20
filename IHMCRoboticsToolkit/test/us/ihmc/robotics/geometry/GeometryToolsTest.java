@@ -775,6 +775,7 @@ public class GeometryToolsTest
          JUnitTools.assertTuple2dEquals(expectedIntersection, actualIntersection, epsilon);
       }
    }
+
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGetIntersectionBetweenTwoLineSegments1()
@@ -907,7 +908,7 @@ public class GeometryToolsTest
                                                                    Point2d lineSegmentStart2, Point2d lineSegmentEnd2)
    {
       double epsilon = Epsilons.ONE_TRILLIONTH;
-      
+
       Vector2d direction1 = new Vector2d();
       direction1.sub(lineSegmentEnd1, lineSegmentStart1);
       Vector2d direction2 = new Vector2d();
@@ -2385,7 +2386,7 @@ public class GeometryToolsTest
          bc.sub(c, b);
 
          double abcAngle = ba.angle(bc);
-         
+
          Point2d x = new Point2d();
          GeometryTools.getTriangleBisector(a, b, c, x);
 
@@ -2565,7 +2566,7 @@ public class GeometryToolsTest
          Vector3d secondVector = new Vector3d();
          rotationMatrix.transform(firstVector, secondVector);
          secondVector.scale(RandomTools.generateRandomDouble(random, 0.0, 10.0));
-         
+
          double actualAngle = GeometryTools.getAngleFromFirstToSecondVector(firstVector, secondVector);
 
          assertEquals(expectedAngle, actualAngle, Epsilons.ONE_TRILLIONTH);
@@ -2589,7 +2590,7 @@ public class GeometryToolsTest
          AxisAngle4d rotationAxisAngle = new AxisAngle4d(rotationAxis, rotationAngle);
          Matrix3d rotationMatrix = new Matrix3d();
          rotationMatrix.set(rotationAxisAngle);
-         
+
          Vector3d secondVector = new Vector3d();
          rotationMatrix.transform(firstVector, secondVector);
          secondVector.normalize();
@@ -2604,7 +2605,7 @@ public class GeometryToolsTest
          Vector3d firstVector = RandomTools.generateRandomVector(random, 1.0);
 
          Vector3d rotationAxis = RandomTools.generateRandomOrthogonalVector3d(random, firstVector, true);
-         double angleEpsilon = RandomTools.generateRandomDouble(random, 0.0,  Epsilons.ONE_MILLIONTH * Math.PI / 2.0);
+         double angleEpsilon = RandomTools.generateRandomDouble(random, 0.0, Epsilons.ONE_MILLIONTH * Math.PI / 2.0);
          double rotationAngle = RandomTools.generateRandomDouble(random, 0.0, Epsilons.ONE_MILLIONTH * Math.PI / 2.0);
          if (Math.abs(rotationAngle - angleEpsilon) < 1.0e-7)
             continue; // This is the limit of accuracy.
@@ -2612,14 +2613,13 @@ public class GeometryToolsTest
          AxisAngle4d rotationAxisAngle = new AxisAngle4d(rotationAxis, rotationAngle);
          Matrix3d rotationMatrix = new Matrix3d();
          rotationMatrix.set(rotationAxisAngle);
-         
+
          Vector3d secondVector = new Vector3d();
          rotationMatrix.transform(firstVector, secondVector);
 
          assertEquals(rotationAngle < angleEpsilon, GeometryTools.areVectorsCollinear(firstVector, secondVector, angleEpsilon));
       }
    }
-
 
    @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
@@ -2647,11 +2647,12 @@ public class GeometryToolsTest
          AxisAngle4d rotationAxisAngle = new AxisAngle4d(rotationAxis, rotationAngle);
          Matrix3d rotationMatrix = new Matrix3d();
          rotationMatrix.set(rotationAxisAngle);
-         
+
          rotationMatrix.transform(planeNormal1, planeNormal2);
 
          boolean expectedCoplanarResult = Math.abs(distanceBetweenPlanes) < distanceEpsilon && rotationAngle < angleEpsilon;
-         boolean actualCoplanarResult = GeometryTools.arePlanesCoplanar(pointOnPlane1, planeNormal1, pointOnPlane2, planeNormal2, angleEpsilon, distanceEpsilon);
+         boolean actualCoplanarResult = GeometryTools.arePlanesCoplanar(pointOnPlane1, planeNormal1, pointOnPlane2, planeNormal2, angleEpsilon,
+                                                                        distanceEpsilon);
          assertEquals(expectedCoplanarResult, actualCoplanarResult);
       }
    }
