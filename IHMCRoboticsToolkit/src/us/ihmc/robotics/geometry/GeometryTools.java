@@ -667,15 +667,15 @@ public class GeometryTools
     * </ul>
     * </p>
     * 
-    * @param testPoint the point to compute the projection of. Not modified.
+    * @param pointToProject the point to compute the projection of. Not modified.
     * @param firstPointOnLine a first point located on the line. Not modified.
     * @param secondPointOnLine a second point located on the line. Not modified.
     * @return the projection of the point onto the line or {@code null} if the method failed.
     */
-   public static Point2d getOrthogonalProjectionOnLine(Point2d testPoint, Point2d firstPointOnLine, Point2d secondPointOnLine)
+   public static Point2d getOrthogonalProjectionOnLine(Point2d pointToProject, Point2d firstPointOnLine, Point2d secondPointOnLine)
    {
       Point2d projection = new Point2d();
-      boolean success = getOrthogonalProjectionOnLine(testPoint, firstPointOnLine, secondPointOnLine, projection);
+      boolean success = getOrthogonalProjectionOnLine(pointToProject, firstPointOnLine, secondPointOnLine, projection);
       if (!success)
          return null;
       else
@@ -691,19 +691,19 @@ public class GeometryTools
     * </ul>
     * </p>
     * 
-    * @param testPoint the point to compute the projection of. Not modified.
+    * @param pointToProject the point to compute the projection of. Not modified.
     * @param firstPointOnLine a first point located on the line. Not modified.
     * @param secondPointOnLine a second point located on the line. Not modified.
     * @param projectionToPack point in which the projection of the point onto the line is stored. Modified.
     * @return whether the method succeeded or not.
     */
-   public static boolean getOrthogonalProjectionOnLine(Point2d testPoint, Point2d firstPointOnLine, Point2d secondPointOnLine, Point2d projectionToPack)
+   public static boolean getOrthogonalProjectionOnLine(Point2d pointToProject, Point2d firstPointOnLine, Point2d secondPointOnLine, Point2d projectionToPack)
    {
       double pointOnLineX = firstPointOnLine.getX();
       double pointOnLineY = firstPointOnLine.getY();
       double lineDirectionX = secondPointOnLine.getX() - firstPointOnLine.getX();
       double lineDirectionY = secondPointOnLine.getY() - firstPointOnLine.getY();
-      return getOrthogonalProjectionOnLine(testPoint, pointOnLineX, pointOnLineY, lineDirectionX, lineDirectionY, projectionToPack);
+      return getOrthogonalProjectionOnLine(pointToProject, pointOnLineX, pointOnLineY, lineDirectionX, lineDirectionY, projectionToPack);
    }
 
    /**
@@ -718,15 +718,15 @@ public class GeometryTools
     * </ul>
     * </p>
     * 
-    * @param testPoint the point to compute the projection of. Not modified.
+    * @param pointToProject the point to compute the projection of. Not modified.
     * @param pointOnLine a point located on the line. Not modified.
     * @param lineDirection the direction of the line. Not modified.
     * @return the projection of the point onto the line or {@code null} if the method failed.
     */
-   public static Point2d getOrthogonalProjectionOnLine(Point2d testPoint, Point2d pointOnLine, Vector2d lineDirection)
+   public static Point2d getOrthogonalProjectionOnLine(Point2d pointToProject, Point2d pointOnLine, Vector2d lineDirection)
    {
       Point2d projection = new Point2d();
-      boolean success = getOrthogonalProjectionOnLine(testPoint, pointOnLine, lineDirection, projection);
+      boolean success = getOrthogonalProjectionOnLine(pointToProject, pointOnLine, lineDirection, projection);
       if (!success)
          return null;
       else
@@ -742,15 +742,15 @@ public class GeometryTools
     * </ul>
     * </p>
     * 
-    * @param testPoint the point to compute the projection of. Not modified.
+    * @param pointToProject the point to compute the projection of. Not modified.
     * @param pointOnLine a point located on the line. Not modified.
     * @param lineDirection the direction of the line. Not modified.
     * @param projectionToPack point in which the projection of the point onto the line is stored. Modified.
     * @return whether the method succeeded or not.
     */
-   public static boolean getOrthogonalProjectionOnLine(Point2d testPoint, Point2d pointOnLine, Vector2d lineDirection, Point2d projectionToPack)
+   public static boolean getOrthogonalProjectionOnLine(Point2d pointToProject, Point2d pointOnLine, Vector2d lineDirection, Point2d projectionToPack)
    {
-      return getOrthogonalProjectionOnLine(testPoint, pointOnLine.getX(), pointOnLine.getY(), lineDirection.getX(), lineDirection.getY(), projectionToPack);
+      return getOrthogonalProjectionOnLine(pointToProject, pointOnLine.getX(), pointOnLine.getY(), lineDirection.getX(), lineDirection.getY(), projectionToPack);
    }
 
    /**
@@ -762,7 +762,7 @@ public class GeometryTools
     * </ul>
     * </p>
     * 
-    * @param testPoint the point to compute the projection of. Not modified.
+    * @param pointToProject the point to compute the projection of. Not modified.
     * @param pointOnLineX x-coordinate of a point located on the line.
     * @param pointOnLineY y-coordinate of a point located on the line.
     * @param lineDirectionX x-component of the direction of the line.
@@ -770,7 +770,7 @@ public class GeometryTools
     * @param projectionToPack point in which the projection of the point onto the line is stored. Modified.
     * @return whether the method succeeded or not.
     */
-   public static boolean getOrthogonalProjectionOnLine(Point2d testPoint, double pointOnLineX, double pointOnLineY, double lineDirectionX,
+   public static boolean getOrthogonalProjectionOnLine(Point2d pointToProject, double pointOnLineX, double pointOnLineY, double lineDirectionX,
                                                        double lineDirectionY, Point2d projectionToPack)
    {
       double directionLengthSquared = lineDirectionX * lineDirectionX + lineDirectionY * lineDirectionY;
@@ -778,8 +778,8 @@ public class GeometryTools
       if (directionLengthSquared < Epsilons.ONE_TRILLIONTH)
          return false;
 
-      double dx = testPoint.getX() - pointOnLineX;
-      double dy = testPoint.getY() - pointOnLineY;
+      double dx = pointToProject.getX() - pointOnLineX;
+      double dy = pointToProject.getY() - pointOnLineY;
 
       double dot = dx * lineDirectionX + dy * lineDirectionY;
 
@@ -807,15 +807,15 @@ public class GeometryTools
     * WARNING: This method generates garbage.
     * </p>
     * 
-    * @param testPoint the point to compute the projection of. Not modified.
+    * @param pointToProject the point to compute the projection of. Not modified.
     * @param lineSegmentStart the line segment first end point. Not modified.
     * @param lineSegmentEnd the line segment second end point. Not modified.
     * @return the projection of the point onto the line segment or {@code null} if the method failed.
     */
-   public static Point2d getOrthogonalProjectionOnLineSegment(Point2d testPoint, Point2d lineSegmentStart, Point2d lineSegmentEnd)
+   public static Point2d getOrthogonalProjectionOnLineSegment(Point2d pointToProject, Point2d lineSegmentStart, Point2d lineSegmentEnd)
    {
       Point2d projection = new Point2d();
-      boolean success = getOrthogonalProjectionOnLineSegment(testPoint, lineSegmentStart.getX(), lineSegmentStart.getY(), lineSegmentEnd.getX(), lineSegmentEnd.getY(),
+      boolean success = getOrthogonalProjectionOnLineSegment(pointToProject, lineSegmentStart.getX(), lineSegmentStart.getY(), lineSegmentEnd.getX(), lineSegmentEnd.getY(),
                                                   projection);
       if (!success)
          return null;
@@ -836,15 +836,15 @@ public class GeometryTools
     * </ul>
     * </p>
     * 
-    * @param testPoint the point to compute the projection of. Not modified.
+    * @param pointToProject the point to compute the projection of. Not modified.
     * @param lineSegmentStart the line segment first end point. Not modified.
     * @param lineSegmentEnd the line segment second end point. Not modified.
     * @param projectionToPack point in which the projection of the point onto the line segment is stored. Modified.
     * @return whether the method succeeded or not.
     */
-   public static boolean getOrthogonalProjectionOnLineSegment(Point2d testPoint, Point2d lineSegmentStart, Point2d lineSegmentEnd, Point2d projectionToPack)
+   public static boolean getOrthogonalProjectionOnLineSegment(Point2d pointToProject, Point2d lineSegmentStart, Point2d lineSegmentEnd, Point2d projectionToPack)
    {
-      return getOrthogonalProjectionOnLineSegment(testPoint, lineSegmentStart.getX(), lineSegmentStart.getY(), lineSegmentEnd.getX(), lineSegmentEnd.getY(),
+      return getOrthogonalProjectionOnLineSegment(pointToProject, lineSegmentStart.getX(), lineSegmentStart.getY(), lineSegmentEnd.getX(), lineSegmentEnd.getY(),
                                                   projectionToPack);
    }
 
@@ -861,7 +861,7 @@ public class GeometryTools
     * </ul>
     * </p>
     * 
-    * @param testPoint the point to compute the projection of. Not modified.
+    * @param pointToProject the point to compute the projection of. Not modified.
     * @param lineSegmentStartX the x-coordinate of the line segment first end point.
     * @param lineSegmentStartY the y-coordinate of the line segment first end point.
     * @param lineSegmentEndX the x-coordinate of the line segment second end point.
@@ -869,10 +869,10 @@ public class GeometryTools
     * @param projectionToPack point in which the projection of the point onto the line segment is stored. Modified.
     * @return whether the method succeeded or not.
     */
-   public static boolean getOrthogonalProjectionOnLineSegment(Point2d testPoint, double lineSegmentStartX, double lineSegmentStartY, double lineSegmentEndX,
+   public static boolean getOrthogonalProjectionOnLineSegment(Point2d pointToProject, double lineSegmentStartX, double lineSegmentStartY, double lineSegmentEndX,
                                                               double lineSegmentEndY, Point2d projectionToPack)
    {
-      double percentage = getPercentageAlongLineSegment(testPoint.getX(), testPoint.getY(), lineSegmentStartX, lineSegmentStartY, lineSegmentEndX,
+      double percentage = getPercentageAlongLineSegment(pointToProject.getX(), pointToProject.getY(), lineSegmentStartX, lineSegmentStartY, lineSegmentEndX,
                                                         lineSegmentEndY);
       if (!Double.isFinite(percentage))
          return false;
@@ -881,6 +881,118 @@ public class GeometryTools
 
       projectionToPack.setX((1.0 - percentage) * lineSegmentStartX + percentage * lineSegmentEndX);
       projectionToPack.setY((1.0 - percentage) * lineSegmentStartY + percentage * lineSegmentEndY);
+      return true;
+   }
+
+   /**
+    * Computes the orthogonal projection of a 3D point on a given 3D plane defined by a 3D point and 3D normal.
+    * <p>
+    * Edge cases:
+    * <ul>
+    *    <li> if the length of the plane normal is too small, i.e. less than {@link Epsilons#ONE_TRILLIONTH},
+    *      this method fails and returns {@code false}.
+    * </ul>
+    * </p>
+    * 
+    * @param pointToProject the point to compute the projection of. Not modified.
+    * @param pointOnPlane a point on the plane. Not modified.
+    * @param planeNormal the normal of the plane. Not modified.
+    * @return the projection of the point onto the plane, or {@code null} if the method failed.
+    * @throws ReferenceFrameMismatchException if the arguments are not expressed in the same reference frame.
+    */
+   public static FramePoint getOrthogonalProjectionOnPlane(FramePoint pointToProject, FramePoint pointOnPlane, FrameVector planeNormal)
+   {
+      FramePoint projection = new FramePoint();
+      boolean success = getOrthogonalProjectionOnPlane(pointToProject, pointOnPlane, planeNormal, projection);
+      if (!success)
+         return null;
+      else
+         return projection;
+   }
+
+   /**
+    * Computes the orthogonal projection of a 3D point on a given 3D plane defined by a 3D point and 3D normal.
+    * <p>
+    * Edge cases:
+    * <ul>
+    *    <li> if the length of the plane normal is too small, i.e. less than {@link Epsilons#ONE_TRILLIONTH},
+    *      this method fails and returns {@code false}.
+    * </ul>
+    * </p>
+    * 
+    * @param pointToProject the point to compute the projection of. Not modified.
+    * @param pointOnPlane a point on the plane. Not modified.
+    * @param planeNormal the normal of the plane. Not modified.
+    * @param projectionToPack point in which the projection of the point onto the plane is stored. Modified.
+    * @return whether the method succeeded or not.
+    * @throws ReferenceFrameMismatchException if the arguments are not expressed in the same reference frame,
+    *  except for {@code projectionToPack}.
+    */
+   public static boolean getOrthogonalProjectionOnPlane(FramePoint pointToProject, FramePoint pointOnPlane, FrameVector planeNormal,
+                                                        FramePoint projectionToPack)
+   {
+      pointToProject.checkReferenceFrameMatch(pointOnPlane);
+      pointToProject.checkReferenceFrameMatch(planeNormal);
+      projectionToPack.setToZero(pointToProject.getReferenceFrame());
+      return getOrthogonalProjectionOnPlane(pointToProject.getPoint(), pointOnPlane.getPoint(), planeNormal.getVector(), projectionToPack.getPoint());
+   }
+
+   /**
+    * Computes the orthogonal projection of a 3D point on a given 3D plane defined by a 3D point and 3D normal.
+    * <p>
+    * Edge cases:
+    * <ul>
+    *    <li> if the length of the plane normal is too small, i.e. less than {@link Epsilons#ONE_TRILLIONTH},
+    *      this method fails and returns {@code false}.
+    * </ul>
+    * </p>
+    * 
+    * @param pointToProject the point to compute the projection of. Not modified.
+    * @param pointOnPlane a point on the plane. Not modified.
+    * @param planeNormal the normal of the plane. Not modified.
+    * @return the projection of the point onto the plane, or {@code null} if the method failed.
+    */
+   public static Point3d getOrthogonalProjectionOnPlane(Point3d pointToProject, Point3d pointOnPlane, Vector3d planeNormal)
+   {
+      Point3d projection = new Point3d();
+      boolean success = getOrthogonalProjectionOnPlane(pointToProject, pointOnPlane, planeNormal, projection);
+      if (!success)
+         return null;
+      else
+         return projection;
+   }
+
+   /**
+    * Computes the orthogonal projection of a 3D point on a given 3D plane defined by a 3D point and 3D normal.
+    * <p>
+    * Edge cases:
+    * <ul>
+    *    <li> if the length of the plane normal is too small, i.e. less than {@link Epsilons#ONE_TRILLIONTH},
+    *      this method fails and returns {@code false}.
+    * </ul>
+    * </p>
+    * 
+    * @param pointToProject the point to compute the projection of. Not modified.
+    * @param pointOnPlane a point on the plane. Not modified.
+    * @param planeNormal the normal of the plane. Not modified.
+    * @param projectionToPack point in which the projection of the point onto the plane is stored. Modified.
+    * @return whether the method succeeded or not.
+    */
+   public static boolean getOrthogonalProjectionOnPlane(Point3d pointToProject, Point3d pointOnPlane, Vector3d planeNormal, Point3d projectionToPack)
+   {
+      double normalMagnitude = planeNormal.length();
+      if (normalMagnitude < Epsilons.ONE_TRILLIONTH)
+         return false;
+
+      projectionToPack.sub(pointToProject, pointOnPlane);
+      double signedDistance = projectionToPack.getX() * planeNormal.getX() + projectionToPack.getY() * planeNormal.getY()
+            + projectionToPack.getZ() * planeNormal.getZ();
+      signedDistance /= (normalMagnitude * normalMagnitude);
+
+      projectionToPack.setX(pointToProject.getX() - signedDistance * planeNormal.getX());
+      projectionToPack.setY(pointToProject.getY() - signedDistance * planeNormal.getY());
+      projectionToPack.setZ(pointToProject.getZ() - signedDistance * planeNormal.getZ());
+
       return true;
    }
 
@@ -901,14 +1013,14 @@ public class GeometryTools
     * WARNING: This method generates garbage.
     * </p>
     * 
-    * @param testPoint the point to compute the projection of. Not modified.
+    * @param pointToProject the point to compute the projection of. Not modified.
     * @param lineSegmentStart the line segment first end point. Not modified.
     * @param lineSegmentEnd the line segment second end point. Not modified.
     * @return the projection of the point onto the line segment or {@code null} if the method failed.
     */
-   public static Point2d getClosestPointToLineSegment(Point2d testPoint, Point2d lineSegmentStart, Point2d lineSegmentEnd)
+   public static Point2d getClosestPointToLineSegment(Point2d pointToProject, Point2d lineSegmentStart, Point2d lineSegmentEnd)
    {
-      return getOrthogonalProjectionOnLineSegment(testPoint, lineSegmentStart, lineSegmentEnd);
+      return getOrthogonalProjectionOnLineSegment(pointToProject, lineSegmentStart, lineSegmentEnd);
    }
 
    /**
@@ -1116,14 +1228,15 @@ public class GeometryTools
       Point3d Psc = closestPointOnLine1ToPack;
       Point3d Qtc = closestPointOnLine2ToPack;
 
-      Vector3d w0 = new Vector3d();
-      w0.sub(P0, Q0);
+      double w0X = P0.getX() - Q0.getX();
+      double w0Y = P0.getY() - Q0.getY();
+      double w0Z = P0.getZ() - Q0.getZ();
       
       double a = u.dot(u);
       double b = u.dot(v);
       double c = v.dot(v);
-      double d = u.dot(w0);
-      double e = v.dot(w0);
+      double d = u.getX() * w0X + u.getY() * w0Y + u.getZ() * w0Z;
+      double e = v.getX() * w0X + v.getY() * w0Y + v.getZ() * w0Z;
 
       double delta = a * c - b * b;
 
@@ -3352,35 +3465,6 @@ public class GeometryTools
          return false;
       return true;
    }
-
-   // TODO Needs to be reimplemented with EJML and without generating garbage.
-   /*
-    * Projects point p onto the plane defined by p1, p2, and p3
-    */
-//   public static Vector3d getProjectionOntoPlane(Vector3d p1, Vector3d p2, Vector3d p3, Vector3d p)
-//   {
-//      Vector3d p2_minus_p1 = new Vector3d(p2);
-//      p2_minus_p1.sub(p1);
-//
-//      Vector3d p3_minus_p1 = new Vector3d(p3);
-//      p3_minus_p1.sub(p1);
-//
-//      Vector3d n = new Vector3d(p2_minus_p1);
-//      n.cross(n, p3_minus_p1);
-//      n.normalize();
-//
-//      // convert to matrix so the following calculation is cleaner
-//      Matrix P = MatrixTools.vector3dToMatrix(p);
-//      Matrix P1 = MatrixTools.vector3dToMatrix(p1);
-//      Matrix N = MatrixTools.vector3dToMatrix(n);
-//
-//      double scale = (((P1.minus(P)).transpose()).times(N)).get(0, 0);
-//      Matrix Perp = N.times(scale);
-//
-//      Matrix Proj = P.plus(Perp);
-//
-//      return new Vector3d(Proj.get(0, 0), Proj.get(1, 0), Proj.get(2, 0));
-//   }
 
    public static double minimumDistance(FramePoint testPoint, List<FramePoint> points)
    {
