@@ -1,6 +1,10 @@
 package us.ihmc.robotics.geometry;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -2788,6 +2792,89 @@ public class GeometryToolsTest
       }
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @Test(timeout = 30000)
+   public void testAreVectorsCollinear() throws Exception
+   {
+      Random random = new Random();//232L);
+
+      for (int i = 0; i < ITERATIONS; i++)
+      {
+         Vector3d firstVector = RandomTools.generateRandomVector(random, RandomTools.generateRandomDouble(random, 0.0, 10.0));
+
+         Vector3d rotationAxis = RandomTools.generateRandomOrthogonalVector3d(random, firstVector, true);
+         double angleEpsilon = RandomTools.generateRandomDouble(random, 0.0, Math.PI / 2.0);
+         double rotationAngle = RandomTools.generateRandomDouble(random, 0.0, Math.PI / 2.0);
+
+         AxisAngle4d rotationAxisAngle = new AxisAngle4d(rotationAxis, rotationAngle);
+         Matrix3d rotationMatrix = new Matrix3d();
+         rotationMatrix.set(rotationAxisAngle);
+         
+         Vector3d secondVector = new Vector3d();
+         rotationMatrix.transform(firstVector, secondVector);
+         secondVector.normalize();
+         secondVector.scale(RandomTools.generateRandomDouble(random, 0.0, 10.0));
+
+         assertEquals(rotationAngle < angleEpsilon, GeometryTools.areVectorsCollinear(firstVector, secondVector, angleEpsilon));
+      }
+
+      // Try again with small values
+      for (int i = 0; i < ITERATIONS; i++)
+      {
+         Vector3d firstVector = RandomTools.generateRandomVector(random, 1.0);
+
+         Vector3d rotationAxis = RandomTools.generateRandomOrthogonalVector3d(random, firstVector, true);
+         double angleEpsilon = RandomTools.generateRandomDouble(random, 0.0,  Epsilons.ONE_MILLIONTH * Math.PI / 2.0);
+         double rotationAngle = RandomTools.generateRandomDouble(random, 0.0, Epsilons.ONE_MILLIONTH * Math.PI / 2.0);
+         if (Math.abs(rotationAngle - angleEpsilon) < 1.0e-7)
+            continue; // This is the limit of accuracy.
+
+         AxisAngle4d rotationAxisAngle = new AxisAngle4d(rotationAxis, rotationAngle);
+         Matrix3d rotationMatrix = new Matrix3d();
+         rotationMatrix.set(rotationAxisAngle);
+         
+         Vector3d secondVector = new Vector3d();
+         rotationMatrix.transform(firstVector, secondVector);
+
+         assertEquals(rotationAngle < angleEpsilon, GeometryTools.areVectorsCollinear(firstVector, secondVector, angleEpsilon));
+      }
+   }
+
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @Test(timeout = 30000)
+   public void testArePlanesCoplanar() throws Exception
+   {
+      Random random = new Random();//232L);
+
+      for (int i = 0; i < ITERATIONS; i++)
+      {
+         Point3d pointOnPlane1 = RandomTools.generateRandomPoint(random, 10.0, 10.0, 10.0);
+         Vector3d planeNormal1 = RandomTools.generateRandomVector(random, 1.0);
+
+         Point3d pointOnPlane2 = new Point3d();
+         Vector3d planeNormal2 = new Vector3d();
+
+         double distanceEpsilon = RandomTools.generateRandomDouble(random, 1.0);
+         double distanceBetweenPlanes = RandomTools.generateRandomDouble(random, 1.0);
+
+         pointOnPlane2.scaleAdd(distanceBetweenPlanes, planeNormal1, pointOnPlane1);
+
+         Vector3d rotationAxis = RandomTools.generateRandomOrthogonalVector3d(random, planeNormal1, true);
+         double angleEpsilon = RandomTools.generateRandomDouble(random, 0.0, Math.PI / 2.0);
+         double rotationAngle = RandomTools.generateRandomDouble(random, 0.0, Math.PI / 2.0);
+
+         AxisAngle4d rotationAxisAngle = new AxisAngle4d(rotationAxis, rotationAngle);
+         Matrix3d rotationMatrix = new Matrix3d();
+         rotationMatrix.set(rotationAxisAngle);
+         
+         rotationMatrix.transform(planeNormal1, planeNormal2);
+
+         boolean expectedCoplanarResult = Math.abs(distanceBetweenPlanes) < distanceEpsilon && rotationAngle < angleEpsilon;
+         boolean actualCoplanarResult = GeometryTools.arePlanesCoplanar(pointOnPlane1, planeNormal1, pointOnPlane2, planeNormal2, angleEpsilon, distanceEpsilon);
+         assertEquals(expectedCoplanarResult, actualCoplanarResult);
+      }
+   }
 
    public static void main(String[] args)
    {
