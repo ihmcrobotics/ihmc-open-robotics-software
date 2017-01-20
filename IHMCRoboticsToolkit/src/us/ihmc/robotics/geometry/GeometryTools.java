@@ -1,7 +1,6 @@
 package us.ihmc.robotics.geometry;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -3228,11 +3227,19 @@ public class GeometryTools
    }
 
    /**
-    * Calculate an unknown side length of a fully defined 2D Triangle by the law of Cosine
+    * Calculate an unknown side length of a fully defined 2D Triangle by the law of Cosine.
+    * <p>
+    * Given a triangle with the three sides A, B, and C, this methods calculates the length of the side C, given:
+    * <ul>
+    *    <li> the lengths of A and B.
+    *    <li> the angle between the sides A and B.
+    * </ul>
+    * </p>
     *
-    * @param lengthSideA
-    * @param lengthSideB
-    * @param angleBetweenAAndB
+    * @param lengthSideA the length of the side A.
+    * @param lengthSideB the length of the side B.
+    * @param angleBetweenAAndB the angle between the sides A and B.
+    * @throws RuntimeException if {@code lengthSideA} and/or {@code lengthSideB} are negative, if {@code angleBetweenAAndB} is greater than <i>pi</i>.
     */
    public static double getUnknownTriangleSideLengthByLawOfCosine(double lengthSideA, double lengthSideB, double angleBetweenAAndB)
    {
@@ -3248,18 +3255,17 @@ public class GeometryTools
    }
 
    /**
-    * Calculate an unknown angle of a fully defined 2D Triangle by the law of Cosine
+    * Calculate an unknown angle of a fully defined 2D Triangle by the law of Cosine.
+    * <p>
+    * Given a triangle with the three sides A, B, and C, this methods calculates the angle between A and B given the lengths of three sides.
     *
-    * @param lengthNeighbourSideA
-    * @param lengthNeighbourSideB
-    * @param lengthOppositeSideC
+    * @param lengthNeighbourSideA the length of the side A.
+    * @param lengthNeighbourSideB the length of the side B.
+    * @param lengthOppositeSideC the length of the side C.
+    * @throws RuntimeException if the lengths do not describe a triangle, see {@link #isFormingTriangle(double, double, double)}.
     */
    public static double getUnknownTriangleAngleByLawOfCosine(double lengthNeighbourSideA, double lengthNeighbourSideB, double lengthOppositeSideC)
    {
-      MathTools.checkIfInRange(lengthNeighbourSideA, 0.0, Double.POSITIVE_INFINITY);
-      MathTools.checkIfInRange(lengthNeighbourSideB, 0.0, Double.POSITIVE_INFINITY);
-      MathTools.checkIfInRange(lengthOppositeSideC, 0.0, Double.POSITIVE_INFINITY);
-
       if (GeometryTools.isFormingTriangle(lengthNeighbourSideA, lengthNeighbourSideB, lengthOppositeSideC))
       {
          return Math.acos((MathTools.square(lengthNeighbourSideA) + MathTools.square(lengthNeighbourSideB) - MathTools.square(lengthOppositeSideC))
@@ -3273,42 +3279,78 @@ public class GeometryTools
    }
 
    /**
-    * Get a unknown cathetus (90-deg triangle one of the two shorter triangle sides, neighbouring the 90-degree angle) by Pythagoras law, a^2+b^2=c^2
-    *
-    * @param hypothenuseC the longest side
-    * @param cathetusA one short side
-    * @param cathetusB the other short side
+    * Get a unknown cathetus (90-deg triangle one of the two shorter triangle sides, neighbouring the 90-degree angle) by Pythagoras law.
+    * <p>
+    * Given a right triangle with the three sides A, B, and C, where A and B are the catheti and C the hypotenuse,
+    * this method calculates the length of the cathetus B given the lengths of A and C:
+    * <br> |B|<sup>2</sup> = |C|<sup>2</sup> - |A|<sup>2</sup>. </br>
+    * <a href="https://en.wikipedia.org/wiki/Cathetus"> Useful link</a>.
+    * </p>
+    * 
+    * @param hypotenuseC the length of the hypotenuse C.
+    * @param cathetusA the length of the cathetus A.
+    * @return the length of the cathetus B.
+    * @throws RuntimeException if the length of the cathetus A is negative or greater than the hypotenuse C.
     */
-   public static double pythagorasGetCathetus(double hypothenuseC, double cathetusA)
+   public static double pythagorasGetCathetus(double hypotenuseC, double cathetusA)
    {
-      MathTools.checkIfInRange(cathetusA, 0.0, hypothenuseC);
+      MathTools.checkIfInRange(cathetusA, 0.0, hypotenuseC);
 
-      return Math.sqrt(MathTools.square(hypothenuseC) - MathTools.square(cathetusA));
-   }
-
-   public static boolean isFormingTriangle(double lengthNeighbourSideA, double lengthNeighbourSideB, double lengthOppositeSideC)
-   {
-      double[] length_checker = new double[3];
-      length_checker[0] = lengthNeighbourSideA;
-      length_checker[1] = lengthNeighbourSideB;
-      length_checker[2] = lengthOppositeSideC;
-      Arrays.sort(length_checker);
-      if (length_checker[0] + length_checker[1] <= length_checker[2])
-         return false;
-      else
-         return true;
+      return Math.sqrt(MathTools.square(hypotenuseC) - MathTools.square(cathetusA));
    }
 
    /**
-    * Get the hypothenuse c (90-degree triangle longest triangle length, opposite to the 90-degree angle) by Pythagoras law, a^2+b^2=c^2
+    * Get the hypotenuse c (90-degree triangle longest triangle length, opposite to the 90-degree angle) by Pythagoras law, a^2+b^2=c^2
+    * <p>
+    * Given a right triangle with the three sides A, B, and C, where A and B are the catheti and C the hypotenuse,
+    * this method calculates the length of the hypotenuse C given the lengths of A and B:
+    * <br> |C|<sup>2</sup> = |A|<sup>2</sup> + |B|<sup>2</sup>. </br>
+    * <a href="https://en.wikipedia.org/wiki/Cathetus"> Useful link</a>.
+    * </p>
     *
-    * @param cathetusA one short side
-    * @param cathetusB the other short side
-    * @param hypothenuseC the longest side
+    * @param cathetusA the length of the cathetus A.
+    * @param cathetusB the length of the cathetus B.
+    * @return the length of the hypotenuse C.
+    * @throws RuntimeException if any of the two lengths is negative.
     */
-   public static double pythagorasGetHypothenuse(double cathetusA, double cathetusB)
+   public static double pythagorasGetHypotenuse(double cathetusA, double cathetusB)
    {
+      MathTools.checkIfInRange(cathetusA, 0.0, Double.POSITIVE_INFINITY);
+      MathTools.checkIfInRange(cathetusB, 0.0, Double.POSITIVE_INFINITY);
       return Math.hypot(cathetusA, cathetusB);
+   }
+
+   /**
+    * This methods verifies that the given set of three lengths represents a triangle.
+    * A valid triangle with three edges A, B, and C verifies the three following inequalities:
+    * <ul>
+    *    <li> |A| + |B| > |C|
+    *    <li> |B| + |C| > |A|
+    *    <li> |C| + |A| > |B|
+    * </ul>
+    * 
+    * <a href="https://opencurriculum.org/5534/the-triangle-inequality/"> Useful link</a>.
+    * </p>
+    * 
+    * @param lengthSideA the length of the side A.
+    * @param lengthSideB the length of the side B.
+    * @param lengthSideC the length of the side C.
+    * @return {@code true} if the lengths represents the three sides of a triangle, {@code false} otherwise.
+    * @throws RuntimeException if any of the three lengths is negative.
+    */
+   public static boolean isFormingTriangle(double lengthSideA, double lengthSideB, double lengthSideC)
+   {
+      MathTools.checkIfInRange(lengthSideA, 0.0, Double.POSITIVE_INFINITY);
+      MathTools.checkIfInRange(lengthSideB, 0.0, Double.POSITIVE_INFINITY);
+      MathTools.checkIfInRange(lengthSideC, 0.0, Double.POSITIVE_INFINITY);
+
+      if (lengthSideA + lengthSideB <= lengthSideC)
+         return false;
+      if (lengthSideB + lengthSideC <= lengthSideA)
+         return false;
+      if (lengthSideA + lengthSideC <= lengthSideB)
+         return false;
+      return true;
    }
 
    // TODO Needs to be reimplemented with EJML and without generating garbage.

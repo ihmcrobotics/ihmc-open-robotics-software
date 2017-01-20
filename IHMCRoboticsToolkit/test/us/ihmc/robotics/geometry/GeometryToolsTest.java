@@ -1663,6 +1663,51 @@ public class GeometryToolsTest
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
+   public void testLawOfCosineRadnom()
+   {
+      Random random = new Random(34534L);
+
+      for (int i = 0; i < ITERATIONS; i++)
+      {
+         Point2d a = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
+         Point2d b = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
+         Point2d c = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
+
+         Vector2d ab = new Vector2d();
+         ab.sub(b, a);
+         Vector2d ba = new Vector2d();
+         ba.sub(a, b);
+         Vector2d ac = new Vector2d();
+         ac.sub(c, a);
+         Vector2d ca = new Vector2d();
+         ca.sub(a, c);
+         Vector2d bc = new Vector2d();
+         bc.sub(c, b);
+         Vector2d cb = new Vector2d();
+         cb.sub(b, c);
+
+         // The three edge lengths
+         double abLength = ab.length();
+         double acLength = ac.length();
+         double bcLength = bc.length();
+
+         // The three angles
+         double abc = Math.abs(ba.angle(bc));
+         double bca = Math.abs(cb.angle(ca));
+         double cab = Math.abs(ac.angle(ab));
+
+         assertEquals(bcLength, GeometryTools.getUnknownTriangleSideLengthByLawOfCosine(abLength, acLength, cab), Epsilons.ONE_TRILLIONTH);
+         assertEquals(abLength, GeometryTools.getUnknownTriangleSideLengthByLawOfCosine(acLength, bcLength, bca), Epsilons.ONE_TRILLIONTH);
+         assertEquals(acLength, GeometryTools.getUnknownTriangleSideLengthByLawOfCosine(abLength, bcLength, abc), Epsilons.ONE_TRILLIONTH);
+
+         assertEquals(cab, GeometryTools.getUnknownTriangleAngleByLawOfCosine(abLength, acLength, bcLength), Epsilons.ONE_TRILLIONTH);
+         assertEquals(bca, GeometryTools.getUnknownTriangleAngleByLawOfCosine(acLength, bcLength, abLength), Epsilons.ONE_TRILLIONTH);
+         assertEquals(abc, GeometryTools.getUnknownTriangleAngleByLawOfCosine(abLength, bcLength, acLength), Epsilons.ONE_TRILLIONTH);
+      }
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void isFormingTriangleFailTest()
    {
       double a = 1.0;
