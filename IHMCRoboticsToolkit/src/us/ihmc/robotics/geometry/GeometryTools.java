@@ -3466,6 +3466,13 @@ public class GeometryTools
       return true;
    }
 
+   /**
+    * Finds the smallest distance between {@code testPoint} and a list of points.
+    * 
+    * @param testPoint the query. Not modified.
+    * @param points the list of points to search through. Not modified.
+    * @return the value of the minimum distance between the query and the point cloud.
+    */
    public static double minimumDistance(FramePoint testPoint, List<FramePoint> points)
    {
       double minimumDistance = Double.POSITIVE_INFINITY;
@@ -3479,14 +3486,24 @@ public class GeometryTools
       return Math.sqrt(minimumDistance);
    }
 
-   public static List<FramePoint2d> changeFrameAndProjectToXYPlane(ReferenceFrame zUpFrame, List<FramePoint> points)
+   /**
+    * Change the frame and then project the result onto the XY-plane for each point in the given list {@code points}.
+    * <p>
+    * WARNING: This method generates garbage.
+    * </p>
+    * 
+    * @param referenceFrame the new reference frame the result will be expressed in.. Not modified.
+    * @param points the list of points to transform. Not modified.
+    * @return the result of the transformation.
+    */
+   public static List<FramePoint2d> changeFrameAndProjectToXYPlane(ReferenceFrame referenceFrame, List<FramePoint> points)
    {
-      ArrayList<FramePoint2d> ret = new ArrayList<FramePoint2d>(points.size());
+      List<FramePoint2d> ret = new ArrayList<>(points.size());
 
       for (int i = 0; i < points.size(); i++)
       {
          FramePoint framePoint = new FramePoint(points.get(i));
-         framePoint.changeFrame(zUpFrame);
+         framePoint.changeFrame(referenceFrame);
 
          ret.add(framePoint.toFramePoint2d());
       }
