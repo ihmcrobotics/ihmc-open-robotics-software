@@ -14,7 +14,6 @@ import javax.vecmath.Vector2d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.geometry.shapes.Plane3d;
 import us.ihmc.robotics.math.Epsilons;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -3010,39 +3009,61 @@ public class GeometryTools
       }
    }
 
-   public static boolean arePlanesParallel(Plane3d planeOne, Plane3d planeTwo, double epsilon)
+   /**
+    * Tests if the two given vectors are collinear given a tolerance on the angle between the two vector axes in the range ]0; <i>pi</i>/2[.
+    * This method returns {@code true} if the two vectors are collinear, whether they are pointing in the same direction or in opposite directions.
+    * 
+    * <p>
+    * Edge cases:
+    * <ul>
+    *    <li> if the length of either vector is below {@code 1.0E-7}, this method fails and returns {@code false}.
+    * </ul>
+    * </p>
+    * 
+    * @param firstVector the first vector. Not modified.
+    * @param secondVector the second vector. Not modified.
+    * @param angleEpsilon tolerance on the angle in radians.
+    * @return {@code true} if the two vectors are collinear, {@code false} otherwise.
+    */
+   public static boolean areVectorsCollinear(Vector3d firstVector, Vector3d secondVector, double angleEpsilon)
    {
-      boolean normalsAreEqual = planeOne.getNormal().epsilonEquals(planeTwo.getNormal(), epsilon);
-      boolean normalsAreOpposite = true;
-      normalsAreOpposite &= MathTools.epsilonEquals(planeOne.getNormal().getX(), -planeTwo.getNormal().getX(), epsilon);
-      normalsAreOpposite &= MathTools.epsilonEquals(planeOne.getNormal().getY(), -planeTwo.getNormal().getY(), epsilon);
-      normalsAreOpposite &= MathTools.epsilonEquals(planeOne.getNormal().getZ(), -planeTwo.getNormal().getZ(), epsilon);
-      return normalsAreEqual || normalsAreOpposite;
-   }
-   
-   private static final ThreadLocal<Vector3d> pointVectorForDotCheck = new ThreadLocal<Vector3d>()
-   {
-      @Override
-      public Vector3d initialValue()
-      {
-         return new Vector3d();
-      }
-   };
-   
-   public static boolean areCoplanar(Plane3d planeOne, Plane3d planeTwo, double epsilon)
-   {
-      if (!planeOne.getNormal().epsilonEquals(planeTwo.getNormal(), epsilon))
-      {
+      double firstVectorLength = firstVector.length();
+      if (firstVectorLength < Epsilons.ONE_TEN_MILLIONTH)
          return false;
-      }
-      
-      pointVectorForDotCheck.get().sub(planeTwo.getPoint(), planeOne.getPoint());
-      if (!MathTools.epsilonEquals(planeOne.getNormal().dot(pointVectorForDotCheck.get()), 0.0, epsilon))
-      {
-         return false; 
-      }
-      
-      return true;
+      double secondVectorLength = secondVector.length();
+      if (secondVectorLength < Epsilons.ONE_TEN_MILLIONTH)
+         return false;
+      return Math.abs(firstVector.dot(secondVector) / (firstVectorLength * secondVectorLength)) > Math.cos(angleEpsilon);
+   }
+
+   /**
+    * Tests if the two given planes are coplanar:
+    * <ul>
+    *    <li> {@code planeNormal1} and {@code planeNormal2} are collinear given the tolerance {@code angleEpsilon}.
+    *    <li> the distance of {@code pointOnPlane2} from the first plane is less than {@code distanceEpsilon}.
+    * </ul>
+    * <p>
+    * Edge cases:
+    * <ul>
+    *    <li> if the length of either normal is below {@code 1.0E-7}, this method fails and returns {@code false}.
+    * </ul>
+    * </p>
+    * 
+    * @param pointOnPlane1 a point on the first plane. Not modified.
+    * @param planeNormal1 the normal of the first plane. Not modifed.
+    * @param pointOnPlane2 a point on the second plane. Not modified.
+    * @param planeNormal2 the normal of the second plane. Not modified.
+    * @param angleEpsilon tolerance on the angle in radians to determine if the plane normals are collinear. 
+    * @param distanceEpsilon tolerance on the distance to determine if {@code pointOnPlane2} belongs to the first plane.
+    * @return {@code true} if the two planes are coplanar, {@code false} otherwise.
+    */
+   public static boolean arePlanesCoplanar(Point3d pointOnPlane1, Vector3d planeNormal1, Point3d pointOnPlane2, Vector3d planeNormal2, double angleEpsilon,
+                                           double distanceEpsilon)
+   {
+      if (!areVectorsCollinear(planeNormal1, planeNormal2, angleEpsilon))
+         return false;
+      else
+         return distanceFromPointToPlane(pointOnPlane2, pointOnPlane1, planeNormal1) < distanceEpsilon;
    }
 
 // TODO move to polygon?

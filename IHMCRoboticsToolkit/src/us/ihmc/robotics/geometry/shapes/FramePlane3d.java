@@ -162,17 +162,50 @@ public class FramePlane3d extends AbstractReferenceFrameHolder
 
       return plane3d.isOnOrBelow(pointToTest.getPoint());
    }
-   
-   public boolean isParallel(FramePlane3d otherPlane, double epsilon)
+
+   /**
+    * Tests if the two planes are parallel by testing if their normals are collinear.
+    * The latter is done given a tolerance on the angle between the two normal axes in the range ]0; <i>pi</i>/2[.
+    * 
+    * <p>
+    * Edge cases:
+    * <ul>
+    *    <li> if the length of either normal is below {@code 1.0E-7}, this method fails and returns {@code false}.
+    * </ul>
+    * </p>
+    * 
+    * @param otherPlane the other plane to do the test with. Not modified.
+    * @param angleEpsilon tolerance on the angle in radians.
+    * @return {@code true} if the two planes are parallel, {@code false} otherwise.
+    */
+   public boolean isParallel(FramePlane3d otherPlane, double angleEpsilon)
    {
       checkReferenceFrameMatch(otherPlane);
-      return plane3d.isParallel(otherPlane.plane3d, epsilon);
+      return plane3d.isParallel(otherPlane.plane3d, angleEpsilon);
    }
-   
-   public boolean isCoplanar(FramePlane3d otherPlane, double epsilon)
+
+   /**
+    * Tests if this plane and the given plane are coplanar:
+    * <ul>
+    *    <li> {@code this.normal} and {@code otherPlane.normal} are collinear given the tolerance {@code angleEpsilon}.
+    *    <li> the distance of {@code otherPlane.point} from the this plane is less than {@code distanceEpsilon}.
+    * </ul>
+    * <p>
+    * Edge cases:
+    * <ul>
+    *    <li> if the length of either normal is below {@code 1.0E-7}, this method fails and returns {@code false}.
+    * </ul>
+    * </p>
+    * 
+    * @param otherPlane the other plane to do the test with. Not modified.
+    * @param angleEpsilon tolerance on the angle in radians to determine if the plane normals are collinear. 
+    * @param distanceEpsilon tolerance on the distance to determine if {@code otherPlane.point} belongs to this plane.
+    * @return {@code true} if the two planes are coplanar, {@code false} otherwise.
+    */
+   public boolean isCoplanar(FramePlane3d otherPlane, double angleEpsilon, double distanceEpsilon)
    {
       checkReferenceFrameMatch(otherPlane);
-      return plane3d.isCoplanar(otherPlane.plane3d, epsilon);
+      return plane3d.isCoplanar(otherPlane.plane3d, angleEpsilon, distanceEpsilon);
    }
 
    public FramePoint orthogonalProjectionCopy(FramePoint point)
