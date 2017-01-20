@@ -922,6 +922,86 @@ public class GeometryTools
    }
 
    /**
+    * Computes a percentage along the line segment representing the location of the projection onto the line segment of the given point.
+    * The returned percentage is in ] -&infin;; &infin; [, {@code 0.0} representing {@code lineSegmentStart}, and {@code 1.0} representing {@code lineSegmentEnd}.
+    * <p>
+    * For example, if the returned percentage is {@code 0.5}, it means that the projection of the given point is located at the middle of the line segment.
+    * The coordinates of the projection of the point can be computed from the {@code percentage} as follows:
+    * <code>
+    * Point3d projection = new Point3d(); </br>
+    * projection.interpolate(lineSegmentStart, lineSegmentEnd, percentage); </br>
+    * </code>
+    * </p>
+    * <p>
+    * Edge cases:
+    * <ul>
+    *    <li> if the length of the given line segment is too small, i.e. {@code lineSegmentStart.distanceSquared(lineSegmentEnd) < Epsilons.ONE_TRILLIONTH}, this method fails and returns {@link Double#NaN}.
+    * </ul>
+    * </p>
+    * 
+    * @param point the query. Not modified.
+    * @param lineSegmentStart the line segment first end point. Not modified.
+    * @param lineSegmentEnd the line segment second end point. Not modified.
+    * @return the computed percentage along the line segment representing where the point projection is located.
+    */
+   public static double getPercentageAlongLineSegment(Point3d point, Point3d lineSegmentStart, Point3d lineSegmentEnd)
+   {
+      return getPercentageAlongLineSegment(point.getX(), point.getY(), point.getZ(), lineSegmentStart.getX(), lineSegmentStart.getY(), lineSegmentStart.getZ(),
+                                           lineSegmentEnd.getX(), lineSegmentEnd.getY(), lineSegmentEnd.getZ());
+   }
+
+   /**
+    * Computes a percentage along the line segment representing the location of the given point once projected onto the line segment.
+    * The returned percentage is in ] -&infin;; &infin; [, {@code 0.0} representing {@code lineSegmentStart}, and {@code 1.0} representing {@code lineSegmentEnd}.
+    * <p>
+    * For example, if the returned percentage is {@code 0.5}, it means that the projection of the given point is located at the middle of the line segment.
+    * The coordinates of the projection of the point can be computed from the {@code percentage} as follows:
+    * <code>
+    * Point3d projection = new Point3d(); </br>
+    * projection.interpolate(lineSegmentStart, lineSegmentEnd, percentage); </br>
+    * </code>
+    * </p>
+    * <p>
+    * Edge cases:
+    * <ul>
+    *    <li> if the length of the given line segment is too small, i.e. {@code lineSegmentStart.distanceSquared(lineSegmentEnd) < Epsilons.ONE_TRILLIONTH}, this method fails and returns {@link Double#NaN}.
+    * </ul>
+    * </p>
+    * 
+    * @param pointX the x-coordinate of the query point.
+    * @param pointY the y-coordinate of the query point.
+    * @param pointZ the z-coordinate of the query point.
+    * @param lineSegmentStartX the x-coordinate of the line segment first end point.
+    * @param lineSegmentStartY the y-coordinate of the line segment first end point.
+    * @param lineSegmentStartZ the z-coordinate of the line segment first end point.
+    * @param lineSegmentEndX the x-coordinate of the line segment second end point.
+    * @param lineSegmentEndY the y-coordinate of the line segment second end point.
+    * @param lineSegmentEndZ the z-coordinate of the line segment second end point.
+    * @return the computed percentage along the line segment representing where the point projection is located.
+    */
+   public static double getPercentageAlongLineSegment(double pointX, double pointY, double pointZ, double lineSegmentStartX, double lineSegmentStartY,
+                                                      double lineSegmentStartZ, double lineSegmentEndX, double lineSegmentEndY, double lineSegmentEndZ)
+   {
+      double lineSegmentDx = lineSegmentEndX - lineSegmentStartX;
+      double lineSegmentDy = lineSegmentEndY - lineSegmentStartY;
+      double lineSegmentDz = lineSegmentEndZ - lineSegmentStartZ;
+      double lengthSquared = lineSegmentDx * lineSegmentDx + lineSegmentDy * lineSegmentDy + lineSegmentDz * lineSegmentDz;
+
+      if (lengthSquared < Epsilons.ONE_TRILLIONTH)
+         return Double.NaN;
+
+      double dx = pointX - lineSegmentStartX;
+      double dy = pointY - lineSegmentStartY;
+      double dz = pointZ - lineSegmentStartZ;
+
+      double dot = dx * lineSegmentDx + dy * lineSegmentDy + dz * lineSegmentDz;
+
+      double alpha = dot / lengthSquared;
+
+      return alpha;
+   }
+
+   /**
     * Given two 3D infinitely long lines, this methods computes two points P &in; line1 and Q &in; lin2 such that the distance || P - Q || is the minimum distance between the two 3D lines.
     * <a href="http://geomalgorithms.com/a07-_distance.html"> Useful link</a>.
     * 
