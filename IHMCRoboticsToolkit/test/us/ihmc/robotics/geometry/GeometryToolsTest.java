@@ -2696,7 +2696,7 @@ public class GeometryToolsTest
    @Test(timeout = 30000)
    public void testAreVectorsCollinear() throws Exception
    {
-      Random random = new Random();//232L);
+      Random random = new Random(232L);
 
       for (int i = 0; i < ITERATIONS; i++)
       {
