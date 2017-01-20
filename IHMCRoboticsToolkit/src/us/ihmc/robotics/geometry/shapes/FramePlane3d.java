@@ -185,7 +185,7 @@ public class FramePlane3d extends AbstractReferenceFrameHolder
    }
 
    /**
-    * Tests if this plane and the given plane are coplanar:
+    * Tests if this plane and the given plane are coincident:
     * <ul>
     *    <li> {@code this.normal} and {@code otherPlane.normal} are collinear given the tolerance {@code angleEpsilon}.
     *    <li> the distance of {@code otherPlane.point} from the this plane is less than {@code distanceEpsilon}.
@@ -200,12 +200,12 @@ public class FramePlane3d extends AbstractReferenceFrameHolder
     * @param otherPlane the other plane to do the test with. Not modified.
     * @param angleEpsilon tolerance on the angle in radians to determine if the plane normals are collinear. 
     * @param distanceEpsilon tolerance on the distance to determine if {@code otherPlane.point} belongs to this plane.
-    * @return {@code true} if the two planes are coplanar, {@code false} otherwise.
+    * @return {@code true} if the two planes are coincident, {@code false} otherwise.
     */
-   public boolean isCoplanar(FramePlane3d otherPlane, double angleEpsilon, double distanceEpsilon)
+   public boolean isCoincident(FramePlane3d otherPlane, double angleEpsilon, double distanceEpsilon)
    {
       checkReferenceFrameMatch(otherPlane);
-      return plane3d.isCoplanar(otherPlane.plane3d, angleEpsilon, distanceEpsilon);
+      return plane3d.isCoincident(otherPlane.plane3d, angleEpsilon, distanceEpsilon);
    }
 
    public FramePoint orthogonalProjectionCopy(FramePoint point)

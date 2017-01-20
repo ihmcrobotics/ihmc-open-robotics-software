@@ -3310,7 +3310,7 @@ public class GeometryTools
    }
 
    /**
-    * Tests if the two given planes are coplanar:
+    * Tests if the two given planes are coincident:
     * <ul>
     *    <li> {@code planeNormal1} and {@code planeNormal2} are collinear given the tolerance {@code angleEpsilon}.
     *    <li> the distance of {@code pointOnPlane2} from the first plane is less than {@code distanceEpsilon}.
@@ -3328,9 +3328,9 @@ public class GeometryTools
     * @param planeNormal2 the normal of the second plane. Not modified.
     * @param angleEpsilon tolerance on the angle in radians to determine if the plane normals are collinear. 
     * @param distanceEpsilon tolerance on the distance to determine if {@code pointOnPlane2} belongs to the first plane.
-    * @return {@code true} if the two planes are coplanar, {@code false} otherwise.
+    * @return {@code true} if the two planes are coincident, {@code false} otherwise.
     */
-   public static boolean arePlanesCoplanar(Point3d pointOnPlane1, Vector3d planeNormal1, Point3d pointOnPlane2, Vector3d planeNormal2, double angleEpsilon,
+   public static boolean arePlanesCoincident(Point3d pointOnPlane1, Vector3d planeNormal1, Point3d pointOnPlane2, Vector3d planeNormal2, double angleEpsilon,
                                            double distanceEpsilon)
    {
       if (!areVectorsCollinear(planeNormal1, planeNormal2, angleEpsilon))
