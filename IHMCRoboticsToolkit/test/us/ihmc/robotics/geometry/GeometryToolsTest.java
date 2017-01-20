@@ -1,9 +1,6 @@
 package us.ihmc.robotics.geometry;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -2886,6 +2883,81 @@ public class GeometryToolsTest
          assertEquals(isTuple3dZero, GeometryTools.isZero(new Point3d(-x, y, -z), -epsilon));
          assertEquals(isTuple3dZero, GeometryTools.isZero(new Point3d(-x, -y, z), -epsilon));
          assertEquals(isTuple3dZero, GeometryTools.isZero(new Point3d(-x, -y, -z), -epsilon));
+      }
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @Test(timeout = 30000)
+   public void testGetIntersectionBetweenTwoPlanes() throws Exception
+   {
+      Random random = new Random(23423L);
+
+      for (int i = 0; i < ITERATIONS; i++)
+      {
+         Point3d pointOnPlane1 = RandomTools.generateRandomPoint(random, 10.0, 10.0, 10.0);
+         Vector3d planeNormal1 = RandomTools.generateRandomVector(random, RandomTools.generateRandomDouble(random, 0.0, 10.0));
+
+         Vector3d firstParallelToPlane1 = RandomTools.generateRandomOrthogonalVector3d(random, planeNormal1, true);
+         Vector3d secondParallelToPlane1 = RandomTools.generateRandomOrthogonalVector3d(random, planeNormal1, true);
+
+         Point3d firstPointOnIntersection = new Point3d();
+         Point3d secondPointOnIntersection = new Point3d();
+         firstPointOnIntersection.scaleAdd(RandomTools.generateRandomDouble(random, 10.0), firstParallelToPlane1, pointOnPlane1);
+         secondPointOnIntersection.scaleAdd(RandomTools.generateRandomDouble(random, 10.0), secondParallelToPlane1, firstPointOnIntersection);
+
+         Vector3d expectedIntersectionDirection = new Vector3d();
+         expectedIntersectionDirection.sub(secondPointOnIntersection, firstPointOnIntersection);
+         expectedIntersectionDirection.normalize();
+
+         double rotationAngle = RandomTools.generateRandomDouble(random, Math.PI);
+         AxisAngle4d rotationAxisAngle = new AxisAngle4d(expectedIntersectionDirection, rotationAngle);
+         Matrix3d rotationMatrix = new Matrix3d();
+         rotationMatrix.set(rotationAxisAngle);
+
+         Vector3d planeNormal2 = new Vector3d();
+         rotationMatrix.transform(planeNormal1, planeNormal2);
+         planeNormal2.scale(RandomTools.generateRandomDouble(random, 0.0, 10.0));
+         Point3d pointOnPlane2 = new Point3d();
+
+         Vector3d parallelToPlane2 = RandomTools.generateRandomOrthogonalVector3d(random, planeNormal2, true);
+         pointOnPlane2.scaleAdd(RandomTools.generateRandomDouble(random, 10.0), parallelToPlane2, firstPointOnIntersection);
+
+         Point3d actualPointOnIntersection = new Point3d();
+         Vector3d actualIntersectionDirection = new Vector3d();
+
+         boolean success = GeometryTools.getIntersectionBetweenTwoPlanes(pointOnPlane1, planeNormal1, pointOnPlane2, planeNormal2, actualPointOnIntersection, actualIntersectionDirection);
+         boolean areParallel = GeometryTools.areVectorsCollinear(planeNormal1, planeNormal2, Epsilons.ONE_MILLIONTH);
+         assertNotEquals(areParallel, success);
+         if (areParallel)
+            continue;
+
+         if (expectedIntersectionDirection.dot(actualIntersectionDirection) < 0.0)
+            expectedIntersectionDirection.negate();
+
+         String message = "Angle between vectors " + expectedIntersectionDirection.angle(actualIntersectionDirection);
+         assertTrue(message, GeometryTools.areVectorsCollinear(expectedIntersectionDirection, actualIntersectionDirection, Epsilons.ONE_TEN_MILLIONTH));
+         assertEquals(1.0, actualIntersectionDirection.length(), Epsilons.ONE_TRILLIONTH);
+
+         if (planeNormal1.dot(planeNormal2) < 0.0)
+            planeNormal1.negate();
+
+         double epsilon = Epsilons.ONE_BILLIONTH;
+
+         if (planeNormal1.angle(planeNormal2) < 0.15)
+            epsilon = Epsilons.ONE_HUNDRED_MILLIONTH;
+         if (planeNormal1.angle(planeNormal2) < 0.05)
+            epsilon = Epsilons.ONE_TEN_MILLIONTH;
+         if (planeNormal1.angle(planeNormal2) < 0.03)
+            epsilon = Epsilons.ONE_MILLIONTH;
+         if (planeNormal1.angle(planeNormal2) < 0.001)
+            epsilon = Epsilons.ONE_HUNDRED_THOUSANDTH;
+         if (planeNormal1.angle(planeNormal2) < 0.0001)
+            epsilon = Epsilons.ONE_TEN_THOUSANDTH;
+         if (planeNormal1.angle(planeNormal2) < 0.00005)
+            epsilon = Epsilons.ONE_THOUSANDTH;
+
+//         System.out.println("angle: " + planeNormal1.angle(planeNormal2) + ", distance: " + pointOnPlane1.distance(pointOnPlane2));
+         assertEquals(0.0, GeometryTools.distanceFromPointToLine(actualPointOnIntersection, firstPointOnIntersection, expectedIntersectionDirection), epsilon);
       }
    }
 

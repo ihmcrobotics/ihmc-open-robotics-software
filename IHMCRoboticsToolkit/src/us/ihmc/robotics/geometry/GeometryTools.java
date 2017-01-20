@@ -2227,6 +2227,119 @@ public class GeometryTools
    }
 
    /**
+    * This methods calculates the line of intersection between two planes each defined by a point and a normal.
+    * The result is packed in a 3D point located on the intersection line and the 3D direction of the intersection.
+    * <p>
+    * <a href="http://mathworld.wolfram.com/Plane-PlaneIntersection.html"> Useful link 1</a>,
+    * <a href="http://paulbourke.net/geometry/pointlineplane/"> useful link 2</a>.
+    * </p>
+    * <p>
+    * Edge cases:
+    * <ul>
+    *    <li> When the length of either the plane normal is below {@link Epsilons#ONE_TRILLIONTH}, this methods fails and returns {@code false}.
+    *    <li> When the angle between the two planes is below {@link Epsilons#ONE_MILLIONTH}, this methods fails and returns {@code false}.
+    * </ul>
+    * </p>
+    * 
+    * @param pointOnPlane1 a point on the first plane. Not modified.
+    * @param planeNormal1 the normal of the first plane. Not modified.
+    * @param pointOnPlane2 a point on the second plane. Not modified.
+    * @param planeNormal2 the normal of the second plane. Not modified.
+    * @param pointOnIntersectionToPack a 3D point that is set such that it belongs to the line of intersection between the two planes. Modified.
+    * @param intersectionDirectionToPack a 3D vector that is set to the direction of the line of intersection between the two planes. Modified.
+    * @return {@code true} if the intersection was calculated properly, {@code false} otherwise.
+    * @throws ReferenceFrameMismatchException if the arguments are not expressed in the same reference frame, except for {@code pointOnIntersectionToPack} and {@code intersectionDirectionToPack}.
+    */
+   public static boolean getIntersectionBetweenTwoPlanes(FramePoint pointOnPlane1, FrameVector planeNormal1, FramePoint pointOnPlane2, FrameVector planeNormal2,
+                                                         FramePoint pointOnIntersectionToPack, FrameVector intersectionDirectionToPack)
+   {
+      pointOnPlane1.checkReferenceFrameMatch(planeNormal1);
+      pointOnPlane2.checkReferenceFrameMatch(planeNormal2);
+      pointOnPlane1.checkReferenceFrameMatch(pointOnPlane2);
+      pointOnIntersectionToPack.setToZero(pointOnPlane1.getReferenceFrame());
+      intersectionDirectionToPack.setToZero(pointOnPlane1.getReferenceFrame());
+      return getIntersectionBetweenTwoPlanes(pointOnPlane1.getPoint(), planeNormal1.getVector(), pointOnPlane2.getPoint(), planeNormal2.getVector(),
+                                             pointOnIntersectionToPack.getPoint(), intersectionDirectionToPack.getVector());
+   }
+
+   /**
+    * This methods calculates the line of intersection between two planes each defined by a point and a normal.
+    * The result is packed in a 3D point located on the intersection line and the 3D direction of the intersection.
+    * <p>
+    * <a href="http://mathworld.wolfram.com/Plane-PlaneIntersection.html"> Useful link 1</a>,
+    * <a href="http://paulbourke.net/geometry/pointlineplane/"> useful link 2</a>.
+    * </p>
+    * <p>
+    * Edge cases:
+    * <ul>
+    *    <li> When the length of either the plane normal is below {@link Epsilons#ONE_TRILLIONTH}, this methods fails and returns {@code false}.
+    *    <li> When the angle between the two planes is below {@link Epsilons#ONE_MILLIONTH}, this methods fails and returns {@code false}.
+    * </ul>
+    * </p>
+    * 
+    * @param pointOnPlane1 a point on the first plane. Not modified.
+    * @param planeNormal1 the normal of the first plane. Not modified.
+    * @param pointOnPlane2 a point on the second plane. Not modified.
+    * @param planeNormal2 the normal of the second plane. Not modified.
+    * @param pointOnIntersectionToPack a 3D point that is set such that it belongs to the line of intersection between the two planes. Modified.
+    * @param intersectionDirectionToPack a 3D vector that is set to the direction of the line of intersection between the two planes. Modified.
+    * @return {@code true} if the intersection was calculated properly, {@code false} otherwise.
+    */
+   public static boolean getIntersectionBetweenTwoPlanes(Point3d pointOnPlane1, Vector3d planeNormal1, Point3d pointOnPlane2, Vector3d planeNormal2,
+                                                         Point3d pointOnIntersectionToPack, Vector3d intersectionDirectionToPack)
+   {
+      double normalMagnitude1 = planeNormal1.length();
+
+      if (normalMagnitude1 < Epsilons.ONE_TRILLIONTH)
+         return false;
+
+      double normalMagnitude2 = planeNormal2.length();
+
+      if (normalMagnitude2 < Epsilons.ONE_TRILLIONTH)
+         return false;
+
+      // Check if planes are parallel.
+      if (Math.abs(planeNormal1.dot(planeNormal2) / (normalMagnitude1 * normalMagnitude2)) > Math.cos(Epsilons.ONE_MILLIONTH))
+         return false;
+
+      intersectionDirectionToPack.cross(planeNormal1, planeNormal2);
+      double det = intersectionDirectionToPack.lengthSquared();
+
+      // d1 = planeNormal1 . pointOnPlane1
+      double d1 = planeNormal1.getX() * pointOnPlane1.getX() + planeNormal1.getY() * pointOnPlane1.getY() + planeNormal1.getZ() * pointOnPlane1.getZ();
+      // d2 = planeNormal2 . pointOnPlane2
+      double d2 = planeNormal2.getX() * pointOnPlane2.getX() + planeNormal2.getY() * pointOnPlane2.getY() + planeNormal2.getZ() * pointOnPlane2.getZ();
+
+      // normal3Cross2 = intersectionDirectionToPack x planeNormal2
+      double normal3Cross2X = intersectionDirectionToPack.getY() * planeNormal2.getZ() - intersectionDirectionToPack.getZ() * planeNormal2.getY();
+      double normal3Cross2Y = intersectionDirectionToPack.getZ() * planeNormal2.getX() - intersectionDirectionToPack.getX() * planeNormal2.getZ();
+      double normal3Cross2Z = intersectionDirectionToPack.getX() * planeNormal2.getY() - intersectionDirectionToPack.getY() * planeNormal2.getX();
+
+      // normal1Cross3 = planeNormal1 x intersectionDirectionToPack
+      double normal1Cross3X = planeNormal1.getY() * intersectionDirectionToPack.getZ() - planeNormal1.getZ() * intersectionDirectionToPack.getY();
+      double normal1Cross3Y = planeNormal1.getZ() * intersectionDirectionToPack.getX() - planeNormal1.getX() * intersectionDirectionToPack.getZ();
+      double normal1Cross3Z = planeNormal1.getX() * intersectionDirectionToPack.getY() - planeNormal1.getY() * intersectionDirectionToPack.getX();
+
+      // normal2Cross1 = planeNormal2 x planeNormal1
+      double normal2Cross1X = -intersectionDirectionToPack.getX();
+      double normal2Cross1Y = -intersectionDirectionToPack.getY();
+      double normal2Cross1Z = -intersectionDirectionToPack.getZ();
+
+      intersectionDirectionToPack.scale(1.0 / Math.sqrt(det));
+
+      double normal3DotPoint1 = intersectionDirectionToPack.getX() * pointOnPlane1.getX() + intersectionDirectionToPack.getY() * pointOnPlane1.getY() + intersectionDirectionToPack.getZ() * pointOnPlane1.getZ();
+      double normal3DotPoint2 = intersectionDirectionToPack.getX() * pointOnPlane2.getX() + intersectionDirectionToPack.getY() * pointOnPlane2.getY() + intersectionDirectionToPack.getZ() * pointOnPlane2.getZ();
+      double d3 = 0.5 * (normal3DotPoint1 + normal3DotPoint2);
+
+      pointOnIntersectionToPack.setX(d1 * normal3Cross2X + d2 * normal1Cross3X + d3 * normal2Cross1X);
+      pointOnIntersectionToPack.setY(d1 * normal3Cross2Y + d2 * normal1Cross3Y + d3 * normal2Cross1Y);
+      pointOnIntersectionToPack.setZ(d1 * normal3Cross2Z + d2 * normal1Cross3Z + d3 * normal2Cross1Z);
+      pointOnIntersectionToPack.scale(-1.0 / det);
+
+      return true;
+   }
+
+   /**
     * Computes the normal of a plane that is defined by three points.
     * <p>
     * Edge cases:
