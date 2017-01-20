@@ -9,12 +9,12 @@ import java.awt.event.ActionListener;
 import javax.swing.JFrame;
 import javax.swing.JMenuItem;
 
+import us.ihmc.graphicsDescription.graphInterfaces.SelectedVariableHolder;
 import us.ihmc.simulationconstructionset.gui.BookmarkedVariablesHolder;
 import us.ihmc.simulationconstructionset.gui.YoVariableExplorerTabbedPane;
 import us.ihmc.simulationconstructionset.gui.EntryBoxArrayTabbedPanel;
 import us.ihmc.simulationconstructionset.gui.ForcedRepaintPopupMenu;
 import us.ihmc.simulationconstructionset.gui.GraphArrayPanel;
-import us.ihmc.simulationconstructionset.gui.SelectedVariableHolder;
 import us.ihmc.simulationconstructionset.gui.YoSliderpanel;
 
 public class YoVariablePanelJPopupMenu extends ForcedRepaintPopupMenu
