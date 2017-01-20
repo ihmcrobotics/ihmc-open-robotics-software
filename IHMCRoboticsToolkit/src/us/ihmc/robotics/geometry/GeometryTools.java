@@ -249,6 +249,23 @@ public class GeometryTools
    }
 
    /**
+    * Returns the minimum distance between a point and a given line segment.
+    * Holds true if line segment shrinks to a single point.
+    *
+    * @param point 2D point to compute the distance from the line segment. Not modified.
+    * @param lineSegmentStart starting point of the line segment. Not modified.
+    * @param lineSegmentEnd end point of the line segment. Not modified.
+    * @return the minimum distance between the 2D point and the 2D line segment.
+    * @throws ReferenceFrameMismatchException if the arguments are not expressed in the same reference frame.
+    */
+   public static double distanceFromPointToLineSegment(FramePoint2d point, FramePoint2d lineSegmentStart, FramePoint2d lineSegmentEnd)
+   {
+      point.checkReferenceFrameMatch(lineSegmentStart);
+      point.checkReferenceFrameMatch(lineSegmentEnd);
+      return distanceFromPointToLineSegment(point.getPoint(), lineSegmentStart.getPoint(), lineSegmentEnd.getPoint());
+   }
+
+   /**
     * Returns a boolean value, stating whether a 2D point is on the left side of an infinitely long line defined by two points.
     * "Left side" is determined based on order of {@code lineStart} and {@code lineEnd}.
     * <p>
@@ -3062,70 +3079,6 @@ public class GeometryTools
          return false;
       else
          return distanceFromPointToPlane(pointOnPlane2, pointOnPlane1, planeNormal1) < distanceEpsilon;
-   }
-
-   /**
-    * arePointsInOrderColinear: This returns true if:
-    * middle point is epsilon close to start or end
-    *
-    * Otherwise:
-    * if the start is epsilon close to the end, return false
-    *
-    * if |(start to middle unit vector) dot with (start to end unit vector) - 1| > epsilon
-    * return false
-    * else return true
-    *
-    * @param startPoint Point2d
-    * @param middlePoint Point2d
-    * @param endPoint Point2d
-    * @return boolean
-    */
-   public static boolean arePointsInOrderAndColinear(Point2d startPoint, Point2d middlePoint, Point2d endPoint, double epsilon)
-   {
-      double startToEndDistance = startPoint.distance(endPoint);
-      double startToMiddleDistance = startPoint.distance(middlePoint);
-      double middleToEndDistance = middlePoint.distance(endPoint);
-
-      if (startToMiddleDistance < epsilon)
-      {
-         // middle very close to the start
-         return true;
-      }
-      else if (middleToEndDistance < epsilon)
-      {
-         // middle very close to end
-         return true;
-      }
-      else if (startToEndDistance < epsilon)
-      {
-         // start too close to end to fit middle in between
-         return false;
-      }
-      else if ((startToMiddleDistance - startToEndDistance) > epsilon)
-      {
-         // middle farther from start than end point
-         return false;
-      }
-      else if ((middleToEndDistance - startToEndDistance) > epsilon)
-      {
-         // middle farther from end than start point
-         return false;
-      }
-      else
-      {
-         Vector2d startToEnd = new Vector2d(endPoint);
-         startToEnd.sub(startPoint);
-         startToEnd.normalize();
-
-         Vector2d startToMiddle = new Vector2d(middlePoint);
-         startToMiddle.sub(startPoint);
-         startToMiddle.normalize();
-
-         if (Math.abs(1.0 - startToMiddle.dot(startToEnd)) > epsilon)
-            return false;
-         else
-            return true;
-      }
    }
 
    /**
