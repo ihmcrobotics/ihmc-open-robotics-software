@@ -1,6 +1,6 @@
 package us.ihmc.graphicsDescription.instructions;
 
-public class CubeGraphics3DInstruction extends Graphics3DInstruction
+public class CubeGraphics3DInstruction extends PrimitiveObjectGraphics3DInstruction
 {
    private final boolean centeredInTheCenter; // If false, then center in the very middle of the cube.
    private final double length;
