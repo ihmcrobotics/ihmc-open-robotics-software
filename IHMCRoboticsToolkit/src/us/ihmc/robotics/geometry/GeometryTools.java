@@ -3468,18 +3468,18 @@ public class GeometryTools
 
    public static double minimumDistance(FramePoint testPoint, List<FramePoint> points)
    {
-      double ret = Double.POSITIVE_INFINITY;
-      for (FramePoint point : points)
+      double minimumDistance = Double.POSITIVE_INFINITY;
+
+      for (int i = 0; i < points.size(); i++)
       {
-         double distanceSquared = testPoint.distanceSquared(point);
-         if (distanceSquared < ret)
-            ret = distanceSquared;
+         FramePoint point = points.get(i);
+         minimumDistance = Math.min(minimumDistance, testPoint.distanceSquared(point));
       }
 
-      return Math.sqrt(ret);
+      return Math.sqrt(minimumDistance);
    }
 
-   public static ArrayList<FramePoint2d> changeFrameToZUpAndProjectToXYPlane(ReferenceFrame zUpFrame, List<FramePoint> points)
+   public static List<FramePoint2d> changeFrameAndProjectToXYPlane(ReferenceFrame zUpFrame, List<FramePoint> points)
    {
       ArrayList<FramePoint2d> ret = new ArrayList<FramePoint2d>(points.size());
 
