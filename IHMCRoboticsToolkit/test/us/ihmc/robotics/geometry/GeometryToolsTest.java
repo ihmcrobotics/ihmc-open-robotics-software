@@ -278,7 +278,7 @@ public class GeometryToolsTest
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
-   public void testDistanceFromPointToLineSegment()
+   public void testDistanceFromPointToLineSegment2D()
    {
       Point2d point = new Point2d(10, 2);
       Point2d lineStart = new Point2d(4, 2);
@@ -321,6 +321,50 @@ public class GeometryToolsTest
          orthogonal.normalize();
          Point2d projection = new Point2d();
          Point2d testPoint = new Point2d();
+         double expectedDistance, actualDistance;
+
+         // Between end points
+         projection.interpolate(lineSegmentStart, lineSegmentEnd, RandomTools.generateRandomDouble(random, 0.0, 1.0));
+         testPoint.scaleAdd(RandomTools.generateRandomDouble(random, 10.0), orthogonal, projection);
+         expectedDistance = projection.distance(testPoint);
+         actualDistance = GeometryTools.distanceFromPointToLineSegment(testPoint, lineSegmentStart, lineSegmentEnd);
+         assertEquals(expectedDistance, actualDistance, Epsilons.ONE_TRILLIONTH);
+
+         // Before end points
+         projection.interpolate(lineSegmentStart, lineSegmentEnd, RandomTools.generateRandomDouble(random, -10.0, 0.0));
+         testPoint.scaleAdd(RandomTools.generateRandomDouble(random, 10.0), orthogonal, projection);
+         projection.set(lineSegmentStart);
+         expectedDistance = projection.distance(testPoint);
+         actualDistance = GeometryTools.distanceFromPointToLineSegment(testPoint, lineSegmentStart, lineSegmentEnd);
+         assertEquals(expectedDistance, actualDistance, Epsilons.ONE_TRILLIONTH);
+
+         // After end points
+         projection.interpolate(lineSegmentStart, lineSegmentEnd, RandomTools.generateRandomDouble(random, 1.0, 10.0));
+         testPoint.scaleAdd(RandomTools.generateRandomDouble(random, 10.0), orthogonal, projection);
+         projection.set(lineSegmentEnd);
+         expectedDistance = projection.distance(testPoint);
+         actualDistance = GeometryTools.distanceFromPointToLineSegment(testPoint, lineSegmentStart, lineSegmentEnd);
+         assertEquals(expectedDistance, actualDistance, Epsilons.ONE_TRILLIONTH);
+      }
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testDistanceFromPointToLineSegment3D()
+   {
+      Random random = new Random(32423L);
+
+      for (int i = 0; i < ITERATIONS; i++)
+      {
+         Point3d lineSegmentStart = RandomTools.generateRandomPoint3d(random, 10.0, 10.0);
+         Point3d lineSegmentEnd = RandomTools.generateRandomPoint3d(random, 10.0, 10.0);
+
+         Vector3d lineSegmentDirection = new Vector3d();
+         lineSegmentDirection.sub(lineSegmentEnd, lineSegmentStart);
+         lineSegmentDirection.normalize();
+         Vector3d orthogonal = RandomTools.generateRandomOrthogonalVector3d(random, lineSegmentDirection, true);
+         Point3d projection = new Point3d();
+         Point3d testPoint = new Point3d();
          double expectedDistance, actualDistance;
 
          // Between end points
