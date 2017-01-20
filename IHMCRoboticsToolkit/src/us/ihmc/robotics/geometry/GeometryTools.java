@@ -116,13 +116,13 @@ public class GeometryTools
    /**
     * Returns the minimum distance between a 2D point and an infinitely long 2D line defined by two points.
     * <p>
-    * WARNING: the 3D arguments are projected onto the XY-plane to perform the actual computation in 2D.
-    * </p>
-    * <p>
     * Edge cases:
     * <ul>
     *    <li> if {@code firstPointOnLine2d.distance(secondPointOnLine2d) < Epsilons.ONE_TRILLIONTH}, this method returns the distance between {@code firstPointOnLine2d} and the given {@code point}.
     * </ul>
+    * </p>
+    * <p>
+    * WARNING: the 3D arguments are projected onto the XY-plane to perform the actual computation in 2D.
     * </p>
     *
     * @param point the 3D point is projected onto the xy-plane. It's projection is used to compute the distance from the line. Not modified.
@@ -507,16 +507,16 @@ public class GeometryTools
    /**
     * Returns a boolean value, stating whether a 2D point is on the left side of a given line.
     * "Left side" is determined based on order of {@code lineStart} and {@code lineEnd}.
+    * For instance, given the {@code lineStart} coordinates x = 0, and y = 0, and the {@code lineEnd} coordinates x = 1, y = 0,
+    * a point located on the left of this line has a negative y coordinate.
+    *<p>
+    * This method will return false if the point is on the line.
+    * </p>
     * <p>
     * WARNING: the 3D arguments are projected onto the XY-plane to perform the actual computation in 2D.
     * </p>
     * <p>
     * WARNING: This method generates garbage.
-    * </p>
-    * For instance, given the {@code lineStart} coordinates x = 0, and y = 0, and the {@code lineEnd} coordinates x = 1, y = 0,
-    * a point located on the left of this line has a negative y coordinate.
-    *<p>
-    * This method will return false if the point is on the line.
     * </p>
     * 
     * @param point the projection onto the XY-plane of this point is used as the 2D query point. Not modified.
@@ -658,13 +658,13 @@ public class GeometryTools
    /**
     * Computes the orthogonal projection of a 2D point on an infinitely long 2D line defined by a 2D line segment.
     * <p>
-    * WARNING: This method generates garbage.
-    * </p>
-    * <p>
     * Edge cases:
     * <ul>
     *    <li> if the two given points on the line are too close, i.e. {@code firstPointOnLine.distanceSquared(secondPointOnLine) < Epsilons.ONE_TRILLIONTH}, this method fails and returns {@code null}.
     * </ul>
+    * </p>
+    * <p>
+    * WARNING: This method generates garbage.
     * </p>
     * 
     * @param pointToProject the point to compute the projection of. Not modified.
@@ -709,13 +709,13 @@ public class GeometryTools
    /**
     * Computes the orthogonal projection of a 2D point on an infinitely long 2D line defined by a 2D point and a 2D direction.
     * <p>
-    * WARNING: This method generates garbage.
-    * </p>
-    * <p>
     * Edge cases:
     * <ul>
     *    <li> if the given line direction is too small, i.e. {@code lineDirection.lengthSquared() < Epsilons.ONE_TRILLIONTH}, this method fails and returns {@code null}.
     * </ul>
+    * </p>
+    * <p>
+    * WARNING: This method generates garbage.
     * </p>
     * 
     * @param pointToProject the point to compute the projection of. Not modified.
@@ -1763,14 +1763,14 @@ public class GeometryTools
    /**
     * Computes the intersection between two infinitely long 2D lines each defined by two 2D points.
     * <p>
-    * WARNING: the actual computation only uses the x and y components of each argument.
-    * </p>
-    * <p>
     * Edge cases:
     * <ul>
     *    <li> if the two lines are parallel but not collinear, the two lines do not intersect.
     *    <li> if the two lines are collinear, the two lines are assumed to be intersecting at {@code firstPointOnLine1}.
     * </ul>
+    * </p>
+    * <p>
+    * WARNING: the 3D arguments are projected onto the XY-plane to perform the actual computation in 2D.
     * </p>
     * 
     * @param intersectionToPack the result is stored in the x and y components of this 3D point. Modified.
@@ -1808,14 +1808,14 @@ public class GeometryTools
    /**
     * Computes the intersection between two infinitely long 2D lines each defined by a 2D point and a 2D direction.
     * <p>
-    * WARNING: the actual computation only uses the x and y components of each argument.
-    * </p>
-    * <p>
     * Edge cases:
     * <ul>
     *    <li> if the two lines are parallel but not collinear, the two lines do not intersect.
     *    <li> if the two lines are collinear, the two lines are assumed to be intersecting at {@code pointOnLine1}.
     * </ul>
+    * </p>
+    * <p>
+    * WARNING: the 3D arguments are projected onto the XY-plane to perform the actual computation in 2D.
     * </p>
     * 
     * @param intersectionToPack the result is stored in the x and y components of this 3D point. Modified.
@@ -2670,15 +2670,15 @@ public class GeometryTools
     * Computes the 2D perpendicular bisector of 2D line segment defined by its two 2D end points.
     * The bisector starts off the the middle of the 2D line segment and points toward the left side of the 2D line segment.
     * <p>
-    * WARNING: the 3D arguments are projected onto the XY-plane to perform the actual computation in 2D.
-    * </p>
-    * <p>
     * Edge cases:
     * <ul>
     *    <li> when the line segment end points are equal,
     *     more precisely when {@code lineSegmentStart.distance(lineSegmentEnd) < Epsilons.ONE_TRILLIONTH},
     *     the method fails and returns {@code false}.
     * </ul>
+    * </p>
+    * <p>
+    * WARNING: the 3D arguments are projected onto the XY-plane to perform the actual computation in 2D.
     * </p>
     * <p>
     * WARNING: This method generates garbage.
