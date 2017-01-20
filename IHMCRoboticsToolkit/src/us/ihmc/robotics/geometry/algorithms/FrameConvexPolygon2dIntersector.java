@@ -335,6 +335,7 @@ public class FrameConvexPolygon2dIntersector
       }
    };
 
+   // TODO check out GeometryTools.getIntersectionBetweenTwoPlanes => no thread local and tested.
    public static void intersectTwoPlanes(FramePlane3d planeOne, FramePlane3d planeTwo, FrameLine intersectionToPack)
    {
       ReferenceFrame previousPlaneTwoReferenceFrame = planeTwo.getReferenceFrame();
