@@ -1,10 +1,9 @@
-package us.ihmc.simulationconstructionset.gui;
+package us.ihmc.graphicsDescription.graphInterfaces;
 
 import java.util.ArrayList;
 
 public interface GraphIndicesHolder
 {
-
    public abstract int getInPoint();
 
    public abstract int getOutPoint();
@@ -28,5 +27,4 @@ public interface GraphIndicesHolder
    public abstract ArrayList<Integer> getKeyPoints();
 
    public abstract boolean isIndexAtOutPoint();
-
 }

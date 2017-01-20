@@ -1,4 +1,4 @@
-package us.ihmc.simulationconstructionset.gui;
+package us.ihmc.graphicsDescription.graphInterfaces;
 
 import java.util.ArrayList;
 
