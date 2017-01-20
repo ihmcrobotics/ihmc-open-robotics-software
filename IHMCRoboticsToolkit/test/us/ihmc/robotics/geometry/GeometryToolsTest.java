@@ -2427,12 +2427,12 @@ public class GeometryToolsTest
 
    @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
-   public void testGetPercentageAlongLineSegment() throws Exception
+   public void testGetPercentageAlongLineSegment2d() throws Exception
    {
       Random random = new Random(23424L);
 
       // Test on line segment
-      for (int i = 0; i < 1000; i++)
+      for (int i = 0; i < ITERATIONS; i++)
       {
          Point2d lineSegmentStart = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
          Point2d lineSegmentEnd = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
@@ -2459,7 +2459,7 @@ public class GeometryToolsTest
       }
 
       // Test off line segment
-      for (int i = 0; i < 1000; i++)
+      for (int i = 0; i < ITERATIONS; i++)
       {
          Point2d lineSegmentStart = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
          Point2d lineSegmentEnd = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
@@ -2469,6 +2469,74 @@ public class GeometryToolsTest
          lineSegmentDirection.sub(lineSegmentEnd, lineSegmentStart);
          Vector2d orthogonal = GeometryTools.getPerpendicularVector(lineSegmentDirection);
          orthogonal.normalize();
+
+         // Test between end points
+         double expectedPercentage = RandomTools.generateRandomDouble(random, 0.0, 1.0);
+         pointOffLineSegment.interpolate(lineSegmentStart, lineSegmentEnd, expectedPercentage);
+         pointOffLineSegment.scaleAdd(RandomTools.generateRandomDouble(random, 10.0), orthogonal, pointOffLineSegment);
+         double actualPercentage = GeometryTools.getPercentageAlongLineSegment(pointOffLineSegment, lineSegmentStart, lineSegmentEnd);
+         assertEquals(expectedPercentage, actualPercentage, Epsilons.ONE_TRILLIONTH);
+
+         // Test before end points
+         expectedPercentage = RandomTools.generateRandomDouble(random, -10.0, 0.0);
+         pointOffLineSegment.interpolate(lineSegmentStart, lineSegmentEnd, expectedPercentage);
+         pointOffLineSegment.scaleAdd(RandomTools.generateRandomDouble(random, 10.0), orthogonal, pointOffLineSegment);
+         actualPercentage = GeometryTools.getPercentageAlongLineSegment(pointOffLineSegment, lineSegmentStart, lineSegmentEnd);
+         assertEquals(expectedPercentage, actualPercentage, Epsilons.ONE_TRILLIONTH);
+
+         // Test after end points
+         expectedPercentage = RandomTools.generateRandomDouble(random, 1.0, 10.0);
+         pointOffLineSegment.interpolate(lineSegmentStart, lineSegmentEnd, expectedPercentage);
+         pointOffLineSegment.scaleAdd(RandomTools.generateRandomDouble(random, 10.0), orthogonal, pointOffLineSegment);
+         actualPercentage = GeometryTools.getPercentageAlongLineSegment(pointOffLineSegment, lineSegmentStart, lineSegmentEnd);
+         assertEquals(expectedPercentage, actualPercentage, Epsilons.ONE_TRILLIONTH);
+      }
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @Test(timeout = 30000)
+   public void testGetPercentageAlongLineSegment3d() throws Exception
+   {
+      Random random = new Random(23424L);
+
+      // Test on line segment
+      for (int i = 0; i < ITERATIONS; i++)
+      {
+         Point3d lineSegmentStart = RandomTools.generateRandomPoint3d(random, -10.0, 10.0);
+         Point3d lineSegmentEnd = RandomTools.generateRandomPoint3d(random, -10.0, 10.0);
+
+         Point3d pointOnLineSegment = new Point3d();
+
+         // Test between end points
+         double expectedPercentage = RandomTools.generateRandomDouble(random, 0.0, 1.0);
+         pointOnLineSegment.interpolate(lineSegmentStart, lineSegmentEnd, expectedPercentage);
+         double actualPercentage = GeometryTools.getPercentageAlongLineSegment(pointOnLineSegment, lineSegmentStart, lineSegmentEnd);
+         assertEquals(expectedPercentage, actualPercentage, Epsilons.ONE_TRILLIONTH);
+
+         // Test before end points
+         expectedPercentage = RandomTools.generateRandomDouble(random, -10.0, 0.0);
+         pointOnLineSegment.interpolate(lineSegmentStart, lineSegmentEnd, expectedPercentage);
+         actualPercentage = GeometryTools.getPercentageAlongLineSegment(pointOnLineSegment, lineSegmentStart, lineSegmentEnd);
+         assertEquals(expectedPercentage, actualPercentage, Epsilons.ONE_TRILLIONTH);
+
+         // Test after end points
+         expectedPercentage = RandomTools.generateRandomDouble(random, 1.0, 10.0);
+         pointOnLineSegment.interpolate(lineSegmentStart, lineSegmentEnd, expectedPercentage);
+         actualPercentage = GeometryTools.getPercentageAlongLineSegment(pointOnLineSegment, lineSegmentStart, lineSegmentEnd);
+         assertEquals(expectedPercentage, actualPercentage, Epsilons.ONE_TRILLIONTH);
+      }
+
+      // Test off line segment
+      for (int i = 0; i < ITERATIONS; i++)
+      {
+         Point3d lineSegmentStart = RandomTools.generateRandomPoint3d(random, -10.0, 10.0);
+         Point3d lineSegmentEnd = RandomTools.generateRandomPoint3d(random, -10.0, 10.0);
+
+         Point3d pointOffLineSegment = new Point3d();
+         Vector3d lineSegmentDirection = new Vector3d();
+         lineSegmentDirection.sub(lineSegmentEnd, lineSegmentStart);
+         lineSegmentDirection.normalize();
+         Vector3d orthogonal = RandomTools.generateRandomOrthogonalVector3d(random, lineSegmentDirection, true);
 
          // Test between end points
          double expectedPercentage = RandomTools.generateRandomDouble(random, 0.0, 1.0);
