@@ -20,6 +20,7 @@ import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.exceptions.ShapeNotSupportedException;
 import us.ihmc.graphicsDescription.input.SelectedListener;
+import us.ihmc.graphicsDescription.instructions.CubeGraphics3DInstruction;
 import us.ihmc.graphicsDescription.instructions.Graphics3DAddExtrusionInstruction;
 import us.ihmc.graphicsDescription.instructions.Graphics3DAddHeightMapInstruction;
 import us.ihmc.graphicsDescription.instructions.Graphics3DAddMeshDataInstruction;
@@ -513,13 +514,13 @@ public class Graphics3DObject
     * Again, x, y and z are red, white and blue.
     * <br /><br /><img src="doc-files/LinkGraphics.addCube1.jpg">
     *
-    * @param lx length of the cube in the x direction.
-    * @param ly length of the cube in the y direction.
-    * @param lz length of the cube in the z direction.
+    * @param lengthX length of the cube in the x direction.
+    * @param widthY width of the cube in the y direction.
+    * @param heightZ height of the cube in the z direction.
     */
-   public Graphics3DAddMeshDataInstruction addCube(double lx, double ly, double lz)
+   public CubeGraphics3DInstruction addCube(double lengthX, double widthY, double heightZ)
    {
-      return addCube(lx, ly, lz, DEFAULT_APPEARANCE, null);
+      return addCube(lengthX, widthY, heightZ, DEFAULT_APPEARANCE, null);
    }
 
    /**
@@ -534,33 +535,35 @@ public class Graphics3DObject
     * <br /><br /><img src="doc-files/LinkGraphics.addCube2.jpg">
     *
     *
-    * @param lx length of the cube in the x direction.
-    * @param ly length of the cube in the y direction.
-    * @param lz length of the cube in the z direction.
+    * @param lengthX length of the cube in the x direction.
+    * @param widthY width of the cube in the y direction.
+    * @param heightZ height of the cube in the z direction.
     * @param cubeApp Appearance of the cube.  See {@link YoAppearance YoAppearance} for implementations.
     * @param textureFace Whether or not to texture map each of the 6 faces. Only relevant if the AppearanceDefinition is a texture map.
     * @return
     */
-   public Graphics3DAddMeshDataInstruction addCube(double lx, double ly, double lz, AppearanceDefinition cubeApp, boolean[] textureFaces)
+   public CubeGraphics3DInstruction addCube(double lengthX, double widthY, double heightZ, AppearanceDefinition cubeApp, boolean[] textureFaces)
    {
-      MeshDataHolder meshData = MeshDataGenerator.Cube(lx, ly, lz, false, textureFaces);
-      return addMeshData(meshData, cubeApp);
+      return addCube(lengthX, widthY, heightZ, false, cubeApp, textureFaces);
    }
 
-   public Graphics3DAddMeshDataInstruction addCube(double lx, double ly, double lz, AppearanceDefinition cubeApp)
+   public CubeGraphics3DInstruction addCube(double lengthX, double widthY, double heightZ, AppearanceDefinition cubeAppearance)
    {
-      return addCube(lx, ly, lz, cubeApp, null);
+      return addCube(lengthX, widthY, heightZ, false, cubeAppearance, null);
    }
 
-   public Graphics3DAddMeshDataInstruction addCube(double lx, double ly, double lz, boolean centered, AppearanceDefinition cubeApp, boolean[] textureFaces)
+   public CubeGraphics3DInstruction addCube(double lengthX, double widthY, double heightZ, boolean centeredInTheCenter, AppearanceDefinition cubeApp, boolean[] textureFaces)
    {
-      MeshDataHolder meshData = MeshDataGenerator.Cube(lx, ly, lz, centered, textureFaces);
-      return addMeshData(meshData, cubeApp);
+      CubeGraphics3DInstruction cubeInstruction = new CubeGraphics3DInstruction(lengthX, widthY, heightZ, centeredInTheCenter);
+      cubeInstruction.setAppearance(cubeApp);
+      cubeInstruction.setTextureFaces(textureFaces);
+      graphics3DInstructions.add(cubeInstruction);
+      return cubeInstruction;
    }
 
-   public Graphics3DAddMeshDataInstruction addCube(double lx, double ly, double lz, boolean centered, AppearanceDefinition cubeApp)
+   public CubeGraphics3DInstruction addCube(double lengthX, double widthY, double heightZ, boolean centered, AppearanceDefinition cubeApp)
    {
-      return addCube(lx, ly, lz, centered, cubeApp, null);
+      return addCube(lengthX, widthY, heightZ, centered, cubeApp, null);
    }
 
    /**
@@ -661,14 +664,20 @@ public class Graphics3DObject
    public Graphics3DAddMeshDataInstruction addMeshData(MeshDataHolder meshData, AppearanceDefinition meshAppearance)
    {
       // The subsequent classes do not accept null, just create an empty mesh in that case
+      Graphics3DAddMeshDataInstruction instruction = createMeshDataInstruction(meshData, meshAppearance);
+      graphics3DInstructions.add(instruction);
+
+      return instruction;
+   }
+
+   public static Graphics3DAddMeshDataInstruction createMeshDataInstruction(MeshDataHolder meshData, AppearanceDefinition meshAppearance)
+   {
       if (meshData == null)
       {
          meshData = new MeshDataHolder(new Point3f[0], new TexCoord2f[0], new int[0], new Vector3f[0]);
          meshData.setName("nullMesh");
       }
       Graphics3DAddMeshDataInstruction instruction = new Graphics3DAddMeshDataInstruction(meshData, meshAppearance);
-      graphics3DInstructions.add(instruction);
-
       return instruction;
    }
 

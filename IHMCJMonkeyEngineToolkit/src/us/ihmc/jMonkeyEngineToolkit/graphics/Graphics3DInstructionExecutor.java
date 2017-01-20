@@ -2,6 +2,10 @@ package us.ihmc.jMonkeyEngineToolkit.graphics;
 
 import java.util.ArrayList;
 
+import us.ihmc.graphicsDescription.Graphics3DObject;
+import us.ihmc.graphicsDescription.MeshDataGenerator;
+import us.ihmc.graphicsDescription.MeshDataHolder;
+import us.ihmc.graphicsDescription.instructions.CubeGraphics3DInstruction;
 import us.ihmc.graphicsDescription.instructions.Graphics3DAddExtrusionInstruction;
 import us.ihmc.graphicsDescription.instructions.Graphics3DAddHeightMapInstruction;
 import us.ihmc.graphicsDescription.instructions.Graphics3DAddMeshDataInstruction;
@@ -11,8 +15,6 @@ import us.ihmc.graphicsDescription.instructions.primitives.Graphics3DIdentityIns
 import us.ihmc.graphicsDescription.instructions.primitives.Graphics3DRotateInstruction;
 import us.ihmc.graphicsDescription.instructions.primitives.Graphics3DScaleInstruction;
 import us.ihmc.graphicsDescription.instructions.primitives.Graphics3DTranslateInstruction;
-
-
 
 public abstract class Graphics3DInstructionExecutor
 {
@@ -33,9 +35,18 @@ public abstract class Graphics3DInstructionExecutor
          }
          else if (instruction instanceof Graphics3DAddMeshDataInstruction)
          {
-            Graphics3DAddMeshDataInstruction graphics3DAddArcTorus = (Graphics3DAddMeshDataInstruction) instruction;
-            doAddMeshDataInstruction(graphics3DAddArcTorus);
+            Graphics3DAddMeshDataInstruction meshDataInstruction = (Graphics3DAddMeshDataInstruction) instruction;
+            doAddMeshDataInstruction(meshDataInstruction);
+         }
+         else if (instruction instanceof CubeGraphics3DInstruction)
+         {
+            CubeGraphics3DInstruction cubeInstruction = (CubeGraphics3DInstruction) instruction;
 
+            MeshDataHolder meshData = MeshDataGenerator.Cube(cubeInstruction.getLength(), cubeInstruction.getWidth(), cubeInstruction.getHeight(),
+                                                             cubeInstruction.getCenteredInTheCenter(), cubeInstruction.getTextureFaces());
+            Graphics3DAddMeshDataInstruction meshDataInstruction = Graphics3DObject.createMeshDataInstruction(meshData, cubeInstruction.getAppearance());
+
+            doAddMeshDataInstruction(meshDataInstruction);
          }
          else if (instruction instanceof Graphics3DIdentityInstruction)
          {
