@@ -3533,25 +3533,49 @@ public class GeometryTools
       return ret;
    }
 
+   /**
+    * Computes the value of the cross product between two vectors.
+    * 
+    * @param firstVector the first vector. Not modified.
+    * @param secondVector the second vector. Not modified.
+    * @return the value of the cross product of the two vectors.
+    */
    public static double cross(Vector2d firstVector, Vector2d secondVector)
    {
       return firstVector.getX() * secondVector.getY() - firstVector.getY() * secondVector.getX();
    }
-   
+
+   /**
+    * Assert on a component basis is the {@code tuple} is equal to (0, 0, 0) given the tolerance {@code epsilon}.
+    * 
+    * @param tuple the query. Not modified.
+    * @param epsilon the tolerance.
+    * @return {@code true} if the tuple's component are all equal to zero, {@code false} otherwise.
+    */
    public static boolean isZero(Tuple3d tuple, double epsilon)
    {
-      boolean isZero = true;
-      isZero &= MathTools.epsilonEquals(tuple.getX(), 0.0, epsilon);
-      isZero &= MathTools.epsilonEquals(tuple.getY(), 0.0, epsilon);
-      isZero &= MathTools.epsilonEquals(tuple.getZ(), 0.0, epsilon);
-      return isZero;
+      if (!MathTools.epsilonEquals(tuple.getX(), 0.0, epsilon))
+         return false;
+      if (!MathTools.epsilonEquals(tuple.getY(), 0.0, epsilon))
+         return false;
+      if (!MathTools.epsilonEquals(tuple.getZ(), 0.0, epsilon))
+         return false;
+      return true;
    }
-   
+
+   /**
+    * Assert on a component basis is the {@code tuple} is equal to (0, 0) given the tolerance {@code epsilon}.
+    * 
+    * @param tuple the query. Not modified.
+    * @param epsilon the tolerance.
+    * @return {@code true} if the tuple's component are all equal to zero, {@code false} otherwise.
+    */
    public static boolean isZero(Tuple2d tuple, double epsilon)
    {
-      boolean isZero = true;
-      isZero &= MathTools.epsilonEquals(tuple.getX(), 0.0, epsilon);
-      isZero &= MathTools.epsilonEquals(tuple.getY(), 0.0, epsilon);
-      return isZero;
+      if (!MathTools.epsilonEquals(tuple.getX(), 0.0, epsilon))
+         return false;
+      if (!MathTools.epsilonEquals(tuple.getY(), 0.0, epsilon))
+         return false;
+      return true;
    }
 }
