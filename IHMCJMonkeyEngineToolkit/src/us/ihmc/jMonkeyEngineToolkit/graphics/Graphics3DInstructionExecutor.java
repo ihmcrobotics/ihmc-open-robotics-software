@@ -11,6 +11,7 @@ import us.ihmc.graphicsDescription.instructions.Graphics3DAddHeightMapInstructio
 import us.ihmc.graphicsDescription.instructions.Graphics3DAddMeshDataInstruction;
 import us.ihmc.graphicsDescription.instructions.Graphics3DAddModelFileInstruction;
 import us.ihmc.graphicsDescription.instructions.Graphics3DPrimitiveInstruction;
+import us.ihmc.graphicsDescription.instructions.PrimitiveGraphics3DInstruction;
 import us.ihmc.graphicsDescription.instructions.primitives.Graphics3DIdentityInstruction;
 import us.ihmc.graphicsDescription.instructions.primitives.Graphics3DRotateInstruction;
 import us.ihmc.graphicsDescription.instructions.primitives.Graphics3DScaleInstruction;
@@ -38,15 +39,11 @@ public abstract class Graphics3DInstructionExecutor
             Graphics3DAddMeshDataInstruction meshDataInstruction = (Graphics3DAddMeshDataInstruction) instruction;
             doAddMeshDataInstruction(meshDataInstruction);
          }
-         else if (instruction instanceof CubeGraphics3DInstruction)
+         else if (instruction instanceof PrimitiveGraphics3DInstruction)
          {
-            CubeGraphics3DInstruction cubeInstruction = (CubeGraphics3DInstruction) instruction;
+            PrimitiveGraphics3DInstruction primitiveInstruction = (PrimitiveGraphics3DInstruction) instruction;
 
-            MeshDataHolder meshData = MeshDataGenerator.Cube(cubeInstruction.getLength(), cubeInstruction.getWidth(), cubeInstruction.getHeight(),
-                                                             cubeInstruction.getCenteredInTheCenter(), cubeInstruction.getTextureFaces());
-            Graphics3DAddMeshDataInstruction meshDataInstruction = Graphics3DObject.createMeshDataInstruction(meshData, cubeInstruction.getAppearance());
-
-            doAddMeshDataInstruction(meshDataInstruction);
+            doAddPrimitiveInstruction(primitiveInstruction);
          }
          else if (instruction instanceof Graphics3DIdentityInstruction)
          {
@@ -85,6 +82,8 @@ public abstract class Graphics3DInstructionExecutor
       }
 
    }
+
+   protected abstract void doAddPrimitiveInstruction(PrimitiveGraphics3DInstruction primitiveInstruction);
 
    protected abstract void doAddMeshDataInstruction(Graphics3DAddMeshDataInstruction graphics3DAddMeshData);
 

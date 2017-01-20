@@ -24,14 +24,18 @@ import com.jme3.scene.Spatial;
 import jme3tools.optimize.GeometryBatchFactory;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.HeightMap;
+import us.ihmc.graphicsDescription.MeshDataGenerator;
 import us.ihmc.graphicsDescription.MeshDataHolder;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
+import us.ihmc.graphicsDescription.instructions.CubeGraphics3DInstruction;
 import us.ihmc.graphicsDescription.instructions.Graphics3DAddExtrusionInstruction;
 import us.ihmc.graphicsDescription.instructions.Graphics3DAddHeightMapInstruction;
 import us.ihmc.graphicsDescription.instructions.Graphics3DAddMeshDataInstruction;
 import us.ihmc.graphicsDescription.instructions.Graphics3DAddModelFileInstruction;
 import us.ihmc.graphicsDescription.instructions.Graphics3DInstruction;
+import us.ihmc.graphicsDescription.instructions.PrimitiveGraphics3DInstruction;
+import us.ihmc.graphicsDescription.instructions.SphereGraphics3DInstruction;
 import us.ihmc.graphicsDescription.instructions.listeners.AppearanceChangedListener;
 import us.ihmc.graphicsDescription.instructions.listeners.ExtrusionChangedListener;
 import us.ihmc.graphicsDescription.instructions.listeners.MeshChangedListener;
@@ -477,5 +481,35 @@ public class JMEGraphicsObject extends Graphics3DInstructionExecutor
       {
          System.out.println(string);
       }
+   }
+
+   @Override
+   protected void doAddPrimitiveInstruction(PrimitiveGraphics3DInstruction primitiveInstruction)
+   {
+      if (primitiveInstruction instanceof CubeGraphics3DInstruction)
+      {
+         CubeGraphics3DInstruction cubeInstruction = (CubeGraphics3DInstruction) primitiveInstruction;
+
+         MeshDataHolder meshData = MeshDataGenerator.Cube(cubeInstruction.getLength(), cubeInstruction.getWidth(), cubeInstruction.getHeight(),
+                                                          cubeInstruction.getCenteredInTheCenter(), cubeInstruction.getTextureFaces());
+         Graphics3DAddMeshDataInstruction meshDataInstruction = Graphics3DObject.createMeshDataInstruction(meshData, cubeInstruction.getAppearance());
+
+         doAddMeshDataInstruction(meshDataInstruction);
+      }
+      else if (primitiveInstruction instanceof SphereGraphics3DInstruction)
+      {
+         SphereGraphics3DInstruction sphereInstruction = (SphereGraphics3DInstruction) primitiveInstruction;
+         
+         MeshDataHolder meshData = MeshDataGenerator.Sphere(sphereInstruction.getRadius(), sphereInstruction.getResolution(), sphereInstruction.getResolution());
+         Graphics3DAddMeshDataInstruction meshDataInstruction = Graphics3DObject.createMeshDataInstruction(meshData, sphereInstruction.getAppearance());
+
+         doAddMeshDataInstruction(meshDataInstruction);
+      }
+      else
+      {
+         throw new RuntimeException("Need to support that primitive type! primitiveInstruction = " + primitiveInstruction);
+      }
+      
+      
    }
 }
