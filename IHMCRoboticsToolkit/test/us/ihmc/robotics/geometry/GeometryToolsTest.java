@@ -2845,6 +2845,50 @@ public class GeometryToolsTest
       }
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @Test(timeout = 30000)
+   public void testIsZero() throws Exception
+   {
+      Random random = new Random(23423L);
+
+      for (int i = 0; i < ITERATIONS; i++)
+      {
+         double x = RandomTools.generateRandomDouble(random, 0.0, 10.0);
+         double y = RandomTools.generateRandomDouble(random, 0.0, 10.0);
+         double z = RandomTools.generateRandomDouble(random, 0.0, 10.0);
+         double epsilon = RandomTools.generateRandomDouble(random, 0.0, 10.0);
+
+         boolean isTuple2dZero = x < epsilon && y < epsilon;
+         boolean isTuple3dZero = x < epsilon && y < epsilon && z < epsilon;
+
+         assertEquals(isTuple2dZero, GeometryTools.isZero(new Point2d(x, y), epsilon));
+         assertEquals(isTuple2dZero, GeometryTools.isZero(new Point2d(-x, y), epsilon));
+         assertEquals(isTuple2dZero, GeometryTools.isZero(new Point2d(-x, -y), epsilon));
+         assertEquals(isTuple2dZero, GeometryTools.isZero(new Point2d(x, -y), epsilon));
+         assertEquals(isTuple2dZero, GeometryTools.isZero(new Point2d(x, y), -epsilon));
+         assertEquals(isTuple2dZero, GeometryTools.isZero(new Point2d(-x, y), -epsilon));
+         assertEquals(isTuple2dZero, GeometryTools.isZero(new Point2d(-x, -y), -epsilon));
+         assertEquals(isTuple2dZero, GeometryTools.isZero(new Point2d(x, -y), -epsilon));
+
+         assertEquals(isTuple3dZero, GeometryTools.isZero(new Point3d(x, y, z), epsilon));
+         assertEquals(isTuple3dZero, GeometryTools.isZero(new Point3d(x, y, -z), epsilon));
+         assertEquals(isTuple3dZero, GeometryTools.isZero(new Point3d(x, -y, z), epsilon));
+         assertEquals(isTuple3dZero, GeometryTools.isZero(new Point3d(x, -y, -z), epsilon));
+         assertEquals(isTuple3dZero, GeometryTools.isZero(new Point3d(-x, y, z), epsilon));
+         assertEquals(isTuple3dZero, GeometryTools.isZero(new Point3d(-x, y, -z), epsilon));
+         assertEquals(isTuple3dZero, GeometryTools.isZero(new Point3d(-x, -y, z), epsilon));
+         assertEquals(isTuple3dZero, GeometryTools.isZero(new Point3d(-x, -y, -z), epsilon));
+         assertEquals(isTuple3dZero, GeometryTools.isZero(new Point3d(x, y, z), -epsilon));
+         assertEquals(isTuple3dZero, GeometryTools.isZero(new Point3d(x, y, -z), -epsilon));
+         assertEquals(isTuple3dZero, GeometryTools.isZero(new Point3d(x, -y, z), -epsilon));
+         assertEquals(isTuple3dZero, GeometryTools.isZero(new Point3d(x, -y, -z), -epsilon));
+         assertEquals(isTuple3dZero, GeometryTools.isZero(new Point3d(-x, y, z), -epsilon));
+         assertEquals(isTuple3dZero, GeometryTools.isZero(new Point3d(-x, y, -z), -epsilon));
+         assertEquals(isTuple3dZero, GeometryTools.isZero(new Point3d(-x, -y, z), -epsilon));
+         assertEquals(isTuple3dZero, GeometryTools.isZero(new Point3d(-x, -y, -z), -epsilon));
+      }
+   }
+
    public static void main(String[] args)
    {
       String targetTests = GeometryToolsTest.class.getName();
