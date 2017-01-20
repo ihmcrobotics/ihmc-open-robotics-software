@@ -2253,13 +2253,44 @@ public class GeometryTools
    public static boolean getIntersectionBetweenTwoPlanes(FramePoint pointOnPlane1, FrameVector planeNormal1, FramePoint pointOnPlane2, FrameVector planeNormal2,
                                                          FramePoint pointOnIntersectionToPack, FrameVector intersectionDirectionToPack)
    {
+      return getIntersectionBetweenTwoPlanes(pointOnPlane1, planeNormal1, pointOnPlane2, planeNormal2, Epsilons.ONE_MILLIONTH, pointOnIntersectionToPack, intersectionDirectionToPack);
+   }
+
+   /**
+    * This methods calculates the line of intersection between two planes each defined by a point and a normal.
+    * The result is packed in a 3D point located on the intersection line and the 3D direction of the intersection.
+    * <p>
+    * <a href="http://mathworld.wolfram.com/Plane-PlaneIntersection.html"> Useful link 1</a>,
+    * <a href="http://paulbourke.net/geometry/pointlineplane/"> useful link 2</a>.
+    * </p>
+    * <p>
+    * Edge cases:
+    * <ul>
+    *    <li> When the length of either the plane normal is below {@link Epsilons#ONE_TRILLIONTH}, this methods fails and returns {@code false}.
+    *    <li> When the angle between the two planes is below {@code angleThreshold}, this methods fails and returns {@code false}.
+    * </ul>
+    * </p>
+    * 
+    * @param pointOnPlane1 a point on the first plane. Not modified.
+    * @param planeNormal1 the normal of the first plane. Not modified.
+    * @param pointOnPlane2 a point on the second plane. Not modified.
+    * @param planeNormal2 the normal of the second plane. Not modified.
+    * @param angleThreshold the minimum angle between the two planes required to do the calculation.
+    * @param pointOnIntersectionToPack a 3D point that is set such that it belongs to the line of intersection between the two planes. Modified.
+    * @param intersectionDirectionToPack a 3D vector that is set to the direction of the line of intersection between the two planes. Modified.
+    * @return {@code true} if the intersection was calculated properly, {@code false} otherwise.
+    * @throws ReferenceFrameMismatchException if the arguments are not expressed in the same reference frame, except for {@code pointOnIntersectionToPack} and {@code intersectionDirectionToPack}.
+    */
+   public static boolean getIntersectionBetweenTwoPlanes(FramePoint pointOnPlane1, FrameVector planeNormal1, FramePoint pointOnPlane2, FrameVector planeNormal2,
+                                                         double angleThreshold, FramePoint pointOnIntersectionToPack, FrameVector intersectionDirectionToPack)
+   {
       pointOnPlane1.checkReferenceFrameMatch(planeNormal1);
       pointOnPlane2.checkReferenceFrameMatch(planeNormal2);
       pointOnPlane1.checkReferenceFrameMatch(pointOnPlane2);
       pointOnIntersectionToPack.setToZero(pointOnPlane1.getReferenceFrame());
       intersectionDirectionToPack.setToZero(pointOnPlane1.getReferenceFrame());
       return getIntersectionBetweenTwoPlanes(pointOnPlane1.getPoint(), planeNormal1.getVector(), pointOnPlane2.getPoint(), planeNormal2.getVector(),
-                                             pointOnIntersectionToPack.getPoint(), intersectionDirectionToPack.getVector());
+                                             angleThreshold, pointOnIntersectionToPack.getPoint(), intersectionDirectionToPack.getVector());
    }
 
    /**
@@ -2288,6 +2319,36 @@ public class GeometryTools
    public static boolean getIntersectionBetweenTwoPlanes(Point3d pointOnPlane1, Vector3d planeNormal1, Point3d pointOnPlane2, Vector3d planeNormal2,
                                                          Point3d pointOnIntersectionToPack, Vector3d intersectionDirectionToPack)
    {
+      return getIntersectionBetweenTwoPlanes(pointOnPlane1, planeNormal1, pointOnPlane2, planeNormal2, Epsilons.ONE_MILLIONTH, pointOnIntersectionToPack, intersectionDirectionToPack);
+   }
+
+   /**
+    * This methods calculates the line of intersection between two planes each defined by a point and a normal.
+    * The result is packed in a 3D point located on the intersection line and the 3D direction of the intersection.
+    * <p>
+    * <a href="http://mathworld.wolfram.com/Plane-PlaneIntersection.html"> Useful link 1</a>,
+    * <a href="http://paulbourke.net/geometry/pointlineplane/"> useful link 2</a>.
+    * </p>
+    * <p>
+    * Edge cases:
+    * <ul>
+    *    <li> When the length of either the plane normal is below {@link Epsilons#ONE_TRILLIONTH}, this methods fails and returns {@code false}.
+    *    <li> When the angle between the two planes is below {@code angleThreshold}, this methods fails and returns {@code false}.
+    * </ul>
+    * </p>
+    * 
+    * @param pointOnPlane1 a point on the first plane. Not modified.
+    * @param planeNormal1 the normal of the first plane. Not modified.
+    * @param pointOnPlane2 a point on the second plane. Not modified.
+    * @param planeNormal2 the normal of the second plane. Not modified.
+    * @param angleThreshold the minimum angle between the two planes required to do the calculation.
+    * @param pointOnIntersectionToPack a 3D point that is set such that it belongs to the line of intersection between the two planes. Modified.
+    * @param intersectionDirectionToPack a 3D vector that is set to the direction of the line of intersection between the two planes. Modified.
+    * @return {@code true} if the intersection was calculated properly, {@code false} otherwise.
+    */
+   public static boolean getIntersectionBetweenTwoPlanes(Point3d pointOnPlane1, Vector3d planeNormal1, Point3d pointOnPlane2, Vector3d planeNormal2,
+                                                         double angleThreshold, Point3d pointOnIntersectionToPack, Vector3d intersectionDirectionToPack)
+   {
       double normalMagnitude1 = planeNormal1.length();
 
       if (normalMagnitude1 < Epsilons.ONE_TRILLIONTH)
@@ -2299,7 +2360,7 @@ public class GeometryTools
          return false;
 
       // Check if planes are parallel.
-      if (Math.abs(planeNormal1.dot(planeNormal2) / (normalMagnitude1 * normalMagnitude2)) > Math.cos(Epsilons.ONE_MILLIONTH))
+      if (Math.abs(planeNormal1.dot(planeNormal2) / (normalMagnitude1 * normalMagnitude2)) > Math.cos(Math.abs(angleThreshold)))
          return false;
 
       intersectionDirectionToPack.cross(planeNormal1, planeNormal2);
