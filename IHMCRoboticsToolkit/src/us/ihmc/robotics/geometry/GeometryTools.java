@@ -196,7 +196,12 @@ public class GeometryTools
 
    /**
     * Returns the minimum distance between a point and a given line segment.
-    * Holds true if line segment shrinks to a single point.
+    * <p>
+    * Edge cases:
+    * <ul>
+    *    <li> if {@code lineSegmentStart.distanceSquared(lineSegmentEnd) < Epsilons.ONE_TRILLIONTH}, this method returns the distance between {@code lineSegmentStart} and the given {@code point}.
+    * </ul>
+    * </p>
     *
     * @param pointX x coordinate of point to be tested.
     * @param pointY y coordinate of point to be tested.
@@ -206,37 +211,23 @@ public class GeometryTools
     */
    public static double distanceFromPointToLineSegment(double pointX, double pointY, Point2d lineSegmentStart, Point2d lineSegmentEnd)
    {
-      double startAngleDot, endAngleDot;
+      double percentage = getPercentageAlongLineSegment(pointX, pointY, lineSegmentStart.getX(), lineSegmentStart.getY(), lineSegmentEnd.getX(), lineSegmentEnd.getY());
+      percentage = MathTools.clipToMinMax(percentage, 0.0, 1.0);
 
-      startAngleDot = (lineSegmentEnd.x - lineSegmentStart.x) * (pointX - lineSegmentStart.x);
-      startAngleDot += (lineSegmentEnd.y - lineSegmentStart.y) * (pointY - lineSegmentStart.y);
+      double projectionX = (1.0 - percentage) * lineSegmentStart.getX() + percentage * lineSegmentEnd.getX();
+      double projectionY = (1.0 - percentage) * lineSegmentStart.getY() + percentage * lineSegmentEnd.getY();
 
-      endAngleDot = (lineSegmentStart.x - lineSegmentEnd.x) * (pointX - lineSegmentEnd.x);
-      endAngleDot += (lineSegmentStart.y - lineSegmentEnd.y) * (pointY - lineSegmentEnd.y);
-
-      if ((startAngleDot >= 0.0) && (endAngleDot >= 0.0))
-      {
-         return distanceFromPointToLine(pointX, pointY, lineSegmentStart.getX(), lineSegmentStart.getY(), lineSegmentEnd.getX(), lineSegmentEnd.getY());
-      }
-
-      if (startAngleDot < 0.0)
-      {
-         return distanceBetweenPoints(lineSegmentStart.getX(), lineSegmentStart.getY(), pointX, pointY);
-      }
-      else
-      {
-         if (endAngleDot >= 0.0)
-         {
-            throw new RuntimeException("totally not a physical situation here");
-         }
-
-         return distanceBetweenPoints(lineSegmentEnd.getX(), lineSegmentEnd.getY(), pointX, pointY);
-      }
+      return Math.sqrt(MathTools.square(projectionX - pointX) + MathTools.square(projectionY - pointY));
    }
 
    /**
     * Returns the minimum distance between a point and a given line segment.
-    * Holds true if line segment shrinks to a single point.
+    * <p>
+    * Edge cases:
+    * <ul>
+    *    <li> if {@code lineSegmentStart.distanceSquared(lineSegmentEnd) < Epsilons.ONE_TRILLIONTH}, this method returns the distance between {@code lineSegmentStart} and the given {@code point}.
+    * </ul>
+    * </p>
     *
     * @param point 2D point to compute the distance from the line segment. Not modified.
     * @param lineSegmentStart starting point of the line segment. Not modified.
@@ -250,7 +241,12 @@ public class GeometryTools
 
    /**
     * Returns the minimum distance between a point and a given line segment.
-    * Holds true if line segment shrinks to a single point.
+    * <p>
+    * Edge cases:
+    * <ul>
+    *    <li> if {@code lineSegmentStart.distanceSquared(lineSegmentEnd) < Epsilons.ONE_TRILLIONTH}, this method returns the distance between {@code lineSegmentStart} and the given {@code point}.
+    * </ul>
+    * </p>
     *
     * @param point 2D point to compute the distance from the line segment. Not modified.
     * @param lineSegmentStart starting point of the line segment. Not modified.
@@ -733,7 +729,7 @@ public class GeometryTools
     * <ul>
     *    <li> if the length of the given line segment is too small,
     *     i.e. {@code lineSegmentStart.distanceSquared(lineSegmentEnd) < Epsilons.ONE_TRILLIONTH},
-    *      this method fails and returns {@code null}.
+    *      this method returns {@code lineSegmentStart}.
     *    <li> the projection can not be outside the line segment.
     *     When the projection on the corresponding line is outside the line segment, the result is the closest of the two end points.
     * </ul>
@@ -765,7 +761,7 @@ public class GeometryTools
     * <ul>
     *    <li> if the length of the given line segment is too small,
     *     i.e. {@code lineSegmentStart.distanceSquared(lineSegmentEnd) < Epsilons.ONE_TRILLIONTH},
-    *      this method fails and returns {@code false}.
+    *      this method returns {@code lineSegmentStart}.
     *    <li> the projection can not be outside the line segment.
     *     When the projection on the corresponding line is outside the line segment, the result is the closest of the two end points.
     * </ul>
@@ -790,7 +786,7 @@ public class GeometryTools
     * <ul>
     *    <li> if the length of the given line segment is too small,
     *     i.e. {@code lineSegmentStart.distanceSquared(lineSegmentEnd) < Epsilons.ONE_TRILLIONTH},
-    *      this method fails and returns {@code false}.
+    *      this method returns {@code lineSegmentStart}.
     *    <li> the projection can not be outside the line segment.
     *     When the projection on the corresponding line is outside the line segment, the result is the closest of the two end points.
     * </ul>
@@ -860,7 +856,7 @@ public class GeometryTools
     * <p>
     * Edge cases:
     * <ul>
-    *    <li> if the length of the given line segment is too small, i.e. {@code lineSegmentStart.distanceSquared(lineSegmentEnd) < Epsilons.ONE_TRILLIONTH}, this method fails and returns {@link Double#NaN}.
+    *    <li> if the length of the given line segment is too small, i.e. {@code lineSegmentStart.distanceSquared(lineSegmentEnd) < Epsilons.ONE_TRILLIONTH}, this method fails and returns {@code 0.0}.
     * </ul>
     * </p>
     * 
@@ -889,7 +885,7 @@ public class GeometryTools
     * <p>
     * Edge cases:
     * <ul>
-    *    <li> if the length of the given line segment is too small, i.e. {@code lineSegmentStart.distanceSquared(lineSegmentEnd) < Epsilons.ONE_TRILLIONTH}, this method fails and returns {@link Double#NaN}.
+    *    <li> if the length of the given line segment is too small, i.e. {@code lineSegmentStart.distanceSquared(lineSegmentEnd) < Epsilons.ONE_TRILLIONTH}, this method returns {@code 0.0}.
     * </ul>
     * </p>
     * 
@@ -909,7 +905,7 @@ public class GeometryTools
       double lengthSquared = lineSegmentDx * lineSegmentDx + lineSegmentDy * lineSegmentDy;
 
       if (lengthSquared < Epsilons.ONE_TRILLIONTH)
-         return Double.NaN;
+         return 0.0;
 
       double dx = pointX - lineSegmentStartX;
       double dy = pointY - lineSegmentStartY;
@@ -935,7 +931,7 @@ public class GeometryTools
     * <p>
     * Edge cases:
     * <ul>
-    *    <li> if the length of the given line segment is too small, i.e. {@code lineSegmentStart.distanceSquared(lineSegmentEnd) < Epsilons.ONE_TRILLIONTH}, this method fails and returns {@link Double#NaN}.
+    *    <li> if the length of the given line segment is too small, i.e. {@code lineSegmentStart.distanceSquared(lineSegmentEnd) < Epsilons.ONE_TRILLIONTH}, this method fails and returns {@code 0.0}.
     * </ul>
     * </p>
     * 
@@ -964,7 +960,7 @@ public class GeometryTools
     * <p>
     * Edge cases:
     * <ul>
-    *    <li> if the length of the given line segment is too small, i.e. {@code lineSegmentStart.distanceSquared(lineSegmentEnd) < Epsilons.ONE_TRILLIONTH}, this method fails and returns {@link Double#NaN}.
+    *    <li> if the length of the given line segment is too small, i.e. {@code lineSegmentStart.distanceSquared(lineSegmentEnd) < Epsilons.ONE_TRILLIONTH}, this method fails and returns {@code 0.0}.
     * </ul>
     * </p>
     * 
@@ -988,7 +984,7 @@ public class GeometryTools
       double lengthSquared = lineSegmentDx * lineSegmentDx + lineSegmentDy * lineSegmentDy + lineSegmentDz * lineSegmentDz;
 
       if (lengthSquared < Epsilons.ONE_TRILLIONTH)
-         return Double.NaN;
+         return 0.0;
 
       double dx = pointX - lineSegmentStartX;
       double dy = pointY - lineSegmentStartY;

@@ -301,6 +301,13 @@ public class GeometryToolsTest
       double actualReturn2 = GeometryTools.distanceFromPointToLineSegment(point2, lineStart2, lineEnd2);
       assertEquals("return value", expectedReturn2, actualReturn2, EPSILON);
 
+      point2 = new Point2d(1, 1);
+      lineStart2 = new Point2d(5, 5);
+      lineEnd2 = new Point2d(5, 5);
+      expectedReturn2 = lineStart2.distance(point2);
+      actualReturn2 = GeometryTools.distanceFromPointToLineSegment(point2, lineStart2, lineEnd2);
+      assertEquals("return value", expectedReturn2, actualReturn2, EPSILON);
+
       Random random = new Random(32423L);
 
       for (int i = 0; i < ITERATIONS; i++)
