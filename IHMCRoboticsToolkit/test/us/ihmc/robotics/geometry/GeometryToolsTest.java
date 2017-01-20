@@ -2787,7 +2787,7 @@ public class GeometryToolsTest
 
    @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
-   public void testArePlanesCoplanar() throws Exception
+   public void testArePlanesCoincident() throws Exception
    {
       Random random = new Random();//232L);
 
@@ -2814,10 +2814,10 @@ public class GeometryToolsTest
 
          rotationMatrix.transform(planeNormal1, planeNormal2);
 
-         boolean expectedCoplanarResult = Math.abs(distanceBetweenPlanes) < distanceEpsilon && rotationAngle < angleEpsilon;
-         boolean actualCoplanarResult = GeometryTools.arePlanesCoplanar(pointOnPlane1, planeNormal1, pointOnPlane2, planeNormal2, angleEpsilon,
+         boolean expectedCoincidentResult = Math.abs(distanceBetweenPlanes) < distanceEpsilon && rotationAngle < angleEpsilon;
+         boolean actualCoincidentResult = GeometryTools.arePlanesCoincident(pointOnPlane1, planeNormal1, pointOnPlane2, planeNormal2, angleEpsilon,
                                                                         distanceEpsilon);
-         assertEquals(expectedCoplanarResult, actualCoplanarResult);
+         assertEquals(expectedCoincidentResult, actualCoincidentResult);
       }
    }
 
