@@ -27,6 +27,8 @@ import us.ihmc.graphicsDescription.instructions.Graphics3DAddMeshDataInstruction
 import us.ihmc.graphicsDescription.instructions.Graphics3DAddModelFileInstruction;
 import us.ihmc.graphicsDescription.instructions.Graphics3DInstruction;
 import us.ihmc.graphicsDescription.instructions.Graphics3DPrimitiveInstruction;
+import us.ihmc.graphicsDescription.instructions.PrimitiveGraphics3DInstruction;
+import us.ihmc.graphicsDescription.instructions.SphereGraphics3DInstruction;
 import us.ihmc.graphicsDescription.instructions.primitives.Graphics3DIdentityInstruction;
 import us.ihmc.graphicsDescription.instructions.primitives.Graphics3DRotateInstruction;
 import us.ihmc.graphicsDescription.instructions.primitives.Graphics3DScaleInstruction;
@@ -464,12 +466,12 @@ public class Graphics3DObject
       addArrow(length, YoAppearance.Blue(), arrowAppearance);
    }
 
-   public Graphics3DAddMeshDataInstruction add(Shape3d shape)
+   public PrimitiveGraphics3DInstruction add(Shape3d shape)
    {
       return add(shape, DEFAULT_APPEARANCE);
    }
 
-   public Graphics3DAddMeshDataInstruction add(Shape3d shape, AppearanceDefinition app)
+   public PrimitiveGraphics3DInstruction add(Shape3d shape, AppearanceDefinition app)
    {
       if (shape instanceof Sphere3d)
       {
@@ -555,8 +557,8 @@ public class Graphics3DObject
    public CubeGraphics3DInstruction addCube(double lengthX, double widthY, double heightZ, boolean centeredInTheCenter, AppearanceDefinition cubeApp, boolean[] textureFaces)
    {
       CubeGraphics3DInstruction cubeInstruction = new CubeGraphics3DInstruction(lengthX, widthY, heightZ, centeredInTheCenter);
-      cubeInstruction.setAppearance(cubeApp);
       cubeInstruction.setTextureFaces(textureFaces);
+      cubeInstruction.setAppearance(cubeApp);
       graphics3DInstructions.add(cubeInstruction);
       return cubeInstruction;
    }
@@ -624,7 +626,7 @@ public class Graphics3DObject
     *
     * @param radius radius of the new sphere in meters.
     */
-   public Graphics3DAddMeshDataInstruction addSphere(double radius)
+   public SphereGraphics3DInstruction addSphere(double radius)
    {
       return addSphere(radius, DEFAULT_APPEARANCE);
    }
@@ -641,13 +643,14 @@ public class Graphics3DObject
     * <br /><br /><img src="doc-files/LinkGraphics.addSphere2.jpg">
     *
     * @param radius radius of the new sphere in meters.
-    * @param sphereApp Appearance to be used with the new sphere.  See {@link YoAppearance YoAppearance} for implementations.
+    * @param sphereAppearance Appearance to be used with the new sphere.  See {@link YoAppearance YoAppearance} for implementations.
     */
-   public Graphics3DAddMeshDataInstruction addSphere(double radius, AppearanceDefinition sphereApp)
+   public SphereGraphics3DInstruction addSphere(double radius, AppearanceDefinition sphereAppearance)
    {
-      MeshDataHolder meshData = MeshDataGenerator.Sphere(radius, RESOLUTION, RESOLUTION);
-
-      return addMeshData(meshData, sphereApp);
+      SphereGraphics3DInstruction instruction = new SphereGraphics3DInstruction(radius, RESOLUTION);
+      instruction.setAppearance(sphereAppearance);
+      graphics3DInstructions.add(instruction);
+      return instruction;
    }
 
    public Graphics3DAddMeshDataInstruction addCapsule(double radius, double height)
