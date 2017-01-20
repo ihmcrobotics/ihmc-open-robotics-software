@@ -262,6 +262,76 @@ public class GeometryTools
    }
 
    /**
+    * Returns the minimum distance between a point and a given line segment.
+    * <p>
+    * Edge cases:
+    * <ul>
+    *    <li> if {@code lineSegmentStart.distanceSquared(lineSegmentEnd) < Epsilons.ONE_TRILLIONTH}, this method returns the distance between {@code lineSegmentStart} and the given {@code point}.
+    * </ul>
+    * </p>
+    *
+    * @param pointX x-coordinate of point to be tested.
+    * @param pointY y-coordinate of point to be tested.
+    * @param pointZ z-coordinate of point to be tested.
+    * @param lineSegmentStart starting point of the line segment. Not modified.
+    * @param lineSegmentEnd end point of the line segment. Not modified.
+    * @return the minimum distance between the 3D point and the 3D line segment.
+    */
+   public static double distanceFromPointToLineSegment(double pointX, double pointY, double pointZ, Point3d lineSegmentStart, Point3d lineSegmentEnd)
+   {
+      double percentage = getPercentageAlongLineSegment(pointX, pointY, pointZ, lineSegmentStart.getX(), lineSegmentStart.getY(), lineSegmentStart.getZ(),
+                                                        lineSegmentEnd.getX(), lineSegmentEnd.getY(), lineSegmentEnd.getZ());
+      percentage = MathTools.clipToMinMax(percentage, 0.0, 1.0);
+
+      double projectionX = (1.0 - percentage) * lineSegmentStart.getX() + percentage * lineSegmentEnd.getX();
+      double projectionY = (1.0 - percentage) * lineSegmentStart.getY() + percentage * lineSegmentEnd.getY();
+      double projectionZ = (1.0 - percentage) * lineSegmentStart.getZ() + percentage * lineSegmentEnd.getZ();
+
+      return Math.sqrt(MathTools.square(projectionX - pointX) + MathTools.square(projectionY - pointY) + MathTools.square(projectionZ - pointZ));
+   }
+
+   /**
+    * Returns the minimum distance between a point and a given line segment.
+    * <p>
+    * Edge cases:
+    * <ul>
+    *    <li> if {@code lineSegmentStart.distanceSquared(lineSegmentEnd) < Epsilons.ONE_TRILLIONTH}, this method returns the distance between {@code lineSegmentStart} and the given {@code point}.
+    * </ul>
+    * </p>
+    *
+    * @param point 3D point to compute the distance from the line segment. Not modified.
+    * @param lineSegmentStart starting point of the line segment. Not modified.
+    * @param lineSegmentEnd end point of the line segment. Not modified.
+    * @return the minimum distance between the 3D point and the 3D line segment.
+    */
+   public static double distanceFromPointToLineSegment(Point3d point, Point3d lineSegmentStart, Point3d lineSegmentEnd)
+   {
+      return distanceFromPointToLineSegment(point.getX(), point.getY(), point.getZ(), lineSegmentStart, lineSegmentEnd);
+   }
+
+   /**
+    * Returns the minimum distance between a point and a given line segment.
+    * <p>
+    * Edge cases:
+    * <ul>
+    *    <li> if {@code lineSegmentStart.distanceSquared(lineSegmentEnd) < Epsilons.ONE_TRILLIONTH}, this method returns the distance between {@code lineSegmentStart} and the given {@code point}.
+    * </ul>
+    * </p>
+    *
+    * @param point 3D point to compute the distance from the line segment. Not modified.
+    * @param lineSegmentStart starting point of the line segment. Not modified.
+    * @param lineSegmentEnd end point of the line segment. Not modified.
+    * @return the minimum distance between the 3D point and the 3D line segment.
+    * @throws ReferenceFrameMismatchException if the arguments are not expressed in the same reference frame.
+    */
+   public static double distanceFromPointToLineSegment(FramePoint point, FramePoint lineSegmentStart, FramePoint lineSegmentEnd)
+   {
+      point.checkReferenceFrameMatch(lineSegmentStart);
+      point.checkReferenceFrameMatch(lineSegmentEnd);
+      return distanceFromPointToLineSegment(point.getPoint(), lineSegmentStart.getPoint(), lineSegmentEnd.getPoint());
+   }
+
+   /**
     * Returns a boolean value, stating whether a 2D point is on the left side of an infinitely long line defined by two points.
     * "Left side" is determined based on order of {@code lineStart} and {@code lineEnd}.
     * <p>
