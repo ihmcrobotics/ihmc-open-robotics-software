@@ -129,10 +129,12 @@ public class GeometryTools
     * @param firstPointOnLine the projection of this 3D onto the xy-plane refers to the first point on the 2D line. Not modified.
     * @param secondPointOnLine the projection of this 3D onto the xy-plane refers to the second point one the 2D line. Not modified.
     * @return the minimum distance between the 2D point and the 2D line.
+    * @throws ReferenceFrameMismatchException if the arguments are not expressed in the same reference frame.
     */
    public static double distanceFromPointToLine2d(FramePoint point, FramePoint firstPointOnLine, FramePoint secondPointOnLine)
    {
-      // FIXME Need to verify that all the arguments are expressed in the same reference frame.
+      point.checkReferenceFrameMatch(firstPointOnLine);
+      point.checkReferenceFrameMatch(secondPointOnLine);
       return distanceFromPointToLine(point.getX(), point.getY(), firstPointOnLine.getX(), firstPointOnLine.getY(), secondPointOnLine.getX(),
                                      secondPointOnLine.getY());
    }
@@ -529,6 +531,7 @@ public class GeometryTools
     * @param secondPointOnLine the projection onto the XY-plane of this point is used as a second point located on the line. Not modified.
     * @return {@code true} if the 2D projection of the point is on the left side of the 2D projection of the line.
     * {@code false} if the 2D projection of the point is on the right side or exactly on the 2D projection of the line.
+    * @throws ReferenceFrameMismatchException if the arguments are not expressed in the same reference frame.
     */
    // FIXME this method is confusing and error prone.
    public static boolean isPointOnLeftSideOfLine(FramePoint point, FramePoint firstPointOnLine, FramePoint secondPointOnLine)
@@ -1788,19 +1791,23 @@ public class GeometryTools
     * WARNING: the 3D arguments are projected onto the XY-plane to perform the actual computation in 2D.
     * </p>
     * 
-    * @param intersectionToPack the result is stored in the x and y components of this 3D point. Modified.
     * @param firstPointOnLine1 the x and y coordinates are used to define a first 2D point on the first line. Not modified.
     * @param secondPointOnLine1 the x and y coordinates are used to define a second 2D point on the first line. Not modified.
     * @param firstPointOnLine2 the x and y coordinates are used to define a first 2D point on the second line. Not modified.
     * @param secondPointOnLine2 the x and y coordinates are used to define a second 2D point on the second line. Not modified.
+    * @param intersectionToPack the result is stored in the x and y components of this 3D point. Modified.
     * @return {@code true} if the two lines intersect, {@code false} otherwise.
+    * @throws ReferenceFrameMismatchException if the arguments are not expressed in the same reference frame, except for {@code intersectionToPack}.
     */
    // FIXME This method is too confusing and error prone.
-   // FIXME It also needs to verify the reference frame of the arguments.
-   // FIXME change method signature to have the intersectionToPack at the end.
-   public static boolean getIntersectionBetweenTwoLines2d(FramePoint intersectionToPack, FramePoint firstPointOnLine1, FramePoint secondPointOnLine1,
-                                                          FramePoint firstPointOnLine2, FramePoint secondPointOnLine2)
+   public static boolean getIntersectionBetweenTwoLines2d(FramePoint firstPointOnLine1, FramePoint secondPointOnLine1, FramePoint firstPointOnLine2,
+                                                          FramePoint secondPointOnLine2, FramePoint intersectionToPack)
    {
+      firstPointOnLine1.checkReferenceFrameMatch(secondPointOnLine1);
+      firstPointOnLine2.checkReferenceFrameMatch(secondPointOnLine2);
+      firstPointOnLine1.checkReferenceFrameMatch(firstPointOnLine2);
+      intersectionToPack.changeFrame(firstPointOnLine1.getReferenceFrame());
+
       double pointOnLine1x = firstPointOnLine1.getX();
       double pointOnLine1y = firstPointOnLine1.getY();
       double lineDirection1x = secondPointOnLine1.getX() - firstPointOnLine1.getX();
@@ -1833,19 +1840,23 @@ public class GeometryTools
     * WARNING: the 3D arguments are projected onto the XY-plane to perform the actual computation in 2D.
     * </p>
     * 
-    * @param intersectionToPack the result is stored in the x and y components of this 3D point. Modified.
     * @param pointOnLine1 the x and y coordinates are used to define a 2D point on the first line. Not modified.
     * @param lineDirection1 the x and y components are used to define the 2D direction of the first line. Not modified.
     * @param pointOnLine2 the x and y coordinates are used to define a 2D point on the second line. Not modified.
     * @param lineDirection2 the x and y components are used to define the 2D direction of the second line. Not modified.
+    * @param intersectionToPack the result is stored in the x and y components of this 3D point. Modified.
     * @return {@code true} if the two lines intersect, {@code false} otherwise.
+    * @throws ReferenceFrameMismatchException if the arguments are not expressed in the same reference frame, except for {@code intersectionToPack}.
     */
    // FIXME This method is too confusing and error prone.
-   // FIXME It also needs to verify the reference frame of the arguments.
-   // FIXME change method signature to have the intersectionToPack at the end.
-   public static boolean getIntersectionBetweenTwoLines2d(FramePoint intersectionToPack, FramePoint pointOnLine1, FrameVector lineDirection1,
-                                                          FramePoint pointOnLine2, FrameVector lineDirection2)
+   public static boolean getIntersectionBetweenTwoLines2d(FramePoint pointOnLine1, FrameVector lineDirection1, FramePoint pointOnLine2,
+                                                          FrameVector lineDirection2, FramePoint intersectionToPack)
    {
+      pointOnLine1.checkReferenceFrameMatch(lineDirection1);
+      pointOnLine2.checkReferenceFrameMatch(lineDirection2);
+      pointOnLine1.checkReferenceFrameMatch(pointOnLine2);
+      intersectionToPack.changeFrame(pointOnLine1.getReferenceFrame());
+
       double pointOnLine1x = pointOnLine1.getX();
       double pointOnLine1y = pointOnLine1.getY();
       double lineDirection1x = lineDirection1.getX();
@@ -2725,7 +2736,7 @@ public class GeometryTools
    public static Vector2d getPerpendicularVector(Vector2d vector)
    {
       Vector2d perpendicularVector = new Vector2d();
-      getPerpendicularVector(perpendicularVector, vector);
+      getPerpendicularVector(vector, perpendicularVector);
 
       return new Vector2d(-vector.getY(), vector.getX());
    }
@@ -2737,11 +2748,10 @@ public class GeometryTools
     *    <li> {@code vector.angle(perpendicularVector) == Math.PI / 2.0}.
     * </ul>
     * 
-    * @param perpendicularVectorToPack a 2D vector in which the perpendicular vector is stored. Modified.
     * @param vector the vector to compute the perpendicular of. Not modified.
+    * @param perpendicularVectorToPack a 2D vector in which the perpendicular vector is stored. Modified.
     */
-   // FIXME reorder arguments.
-   public static void getPerpendicularVector(Vector2d perpendicularVectorToPack, Vector2d vector)
+   public static void getPerpendicularVector(Vector2d vector, Vector2d perpendicularVectorToPack)
    {
       perpendicularVectorToPack.set(-vector.getY(), vector.getX());
    }
@@ -2756,12 +2766,11 @@ public class GeometryTools
     * WARNING: the 3D arguments are projected onto the XY-plane to perform the actual computation in 2D.
     * </p>
     * 
-    * @param perpendicularVectorToPack a vector in which the x and y components of the 2D perpendicular vector are stored. Modified.
     * @param vector the vector to compute in the xy-plane the perpendicular of. Not modified.
+    * @param perpendicularVectorToPack a vector in which the x and y components of the 2D perpendicular vector are stored. Modified.
     */
    // FIXME this is just bad.
-   // FIXME reorder arguments.
-   public static void getPerpendicularVector2d(FrameVector perpendicularVectorToPack, FrameVector vector)
+   public static void getPerpendicularVector2d(FrameVector vector, FrameVector perpendicularVectorToPack)
    {
       perpendicularVectorToPack.set(-vector.getY(), vector.getX(), perpendicularVectorToPack.getZ());
    }
