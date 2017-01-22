@@ -2137,33 +2137,33 @@ public class GeometryToolsTest
 
    @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
-   public void testGetRotationBasedOnNormal1() throws Exception
+   public void testGetAxisAngleFromFirstToSecondVector1() throws Exception
    {
       Random random = new Random(1176L);
       for (int i = 0; i < ITERATIONS; i++)
       {
-         Vector3d referenceNormal = RandomTools.generateRandomVector(random, RandomTools.generateRandomDouble(random, 0.0, 10.0));
+         Vector3d firstVector = RandomTools.generateRandomVector(random, RandomTools.generateRandomDouble(random, 0.0, 10.0));
          double expectedAngle = RandomTools.generateRandomDouble(random, 0.0, Math.PI);
-         Vector3d expectedAxis = RandomTools.generateRandomOrthogonalVector3d(random, referenceNormal, true);
+         Vector3d expectedAxis = RandomTools.generateRandomOrthogonalVector3d(random, firstVector, true);
          AxisAngle4d expectedAxisAngle = new AxisAngle4d(expectedAxis, expectedAngle);
          Matrix3d rotationMatrix = new Matrix3d();
          rotationMatrix.set(expectedAxisAngle);
 
-         Vector3d rotatedNormal = new Vector3d();
-         rotationMatrix.transform(referenceNormal, rotatedNormal);
-         rotatedNormal.scale(RandomTools.generateRandomDouble(random, 0.0, 10.0));
+         Vector3d secondVector = new Vector3d();
+         rotationMatrix.transform(firstVector, secondVector);
+         secondVector.scale(RandomTools.generateRandomDouble(random, 0.0, 10.0));
 
          AxisAngle4d actualAxisAngle = new AxisAngle4d();
-         GeometryTools.getRotationBasedOnNormal(actualAxisAngle, rotatedNormal, referenceNormal);
+         GeometryTools.getAxisAngleFromFirstToSecondVector(firstVector, secondVector, actualAxisAngle);
 
          Vector3d actualAxis = new Vector3d(actualAxisAngle.getX(), actualAxisAngle.getY(), actualAxisAngle.getZ());
 
          assertEquals(1.0, actualAxis.length(), Epsilons.ONE_TRILLIONTH);
-         assertEquals(0.0, actualAxis.dot(referenceNormal), Epsilons.ONE_TRILLIONTH);
-         assertEquals(0.0, actualAxis.dot(rotatedNormal), Epsilons.ONE_TRILLIONTH);
+         assertEquals(0.0, actualAxis.dot(firstVector), Epsilons.ONE_TRILLIONTH);
+         assertEquals(0.0, actualAxis.dot(secondVector), Epsilons.ONE_TRILLIONTH);
 
-         assertEquals(0.0, expectedAxis.dot(referenceNormal), Epsilons.ONE_TRILLIONTH);
-         assertEquals(0.0, expectedAxis.dot(rotatedNormal), Epsilons.ONE_TRILLIONTH);
+         assertEquals(0.0, expectedAxis.dot(firstVector), Epsilons.ONE_TRILLIONTH);
+         assertEquals(0.0, expectedAxis.dot(secondVector), Epsilons.ONE_TRILLIONTH);
 
          if (actualAxisAngle.getAngle() * expectedAxisAngle.getAngle() < 0.0)
          {
@@ -2185,31 +2185,31 @@ public class GeometryToolsTest
       // Test close to 0.0
       for (int i = 0; i < ITERATIONS; i++)
       {
-         Vector3d referenceNormal = RandomTools.generateRandomVector(random, RandomTools.generateRandomDouble(random, 0.0, 10.0));
+         Vector3d firstVector = RandomTools.generateRandomVector(random, RandomTools.generateRandomDouble(random, 0.0, 10.0));
          double expectedAngle = RandomTools.generateRandomDouble(random, 0.0001, 0.001);
          if (random.nextBoolean())
             expectedAngle = -expectedAngle;
-         Vector3d expectedAxis = RandomTools.generateRandomOrthogonalVector3d(random, referenceNormal, true);
+         Vector3d expectedAxis = RandomTools.generateRandomOrthogonalVector3d(random, firstVector, true);
          AxisAngle4d expectedAxisAngle = new AxisAngle4d(expectedAxis, expectedAngle);
          Matrix3d rotationMatrix = new Matrix3d();
          rotationMatrix.set(expectedAxisAngle);
 
-         Vector3d rotatedNormal = new Vector3d();
-         rotationMatrix.transform(referenceNormal, rotatedNormal);
-         rotatedNormal.scale(RandomTools.generateRandomDouble(random, 0.0, 10.0));
+         Vector3d secondVector = new Vector3d();
+         rotationMatrix.transform(firstVector, secondVector);
+         secondVector.scale(RandomTools.generateRandomDouble(random, 0.0, 10.0));
 
          AxisAngle4d actualAxisAngle = new AxisAngle4d();
-         GeometryTools.getRotationBasedOnNormal(actualAxisAngle, rotatedNormal, referenceNormal);
+         GeometryTools.getAxisAngleFromFirstToSecondVector(firstVector, secondVector, actualAxisAngle);
 
          Vector3d actualAxis = new Vector3d(actualAxisAngle.getX(), actualAxisAngle.getY(), actualAxisAngle.getZ());
 
          assertEquals(1.0, actualAxis.length(), Epsilons.ONE_TRILLIONTH);
          // Can not be as accurate as we get closer to 0.0
-         assertEquals(0.0, actualAxis.dot(referenceNormal), Epsilons.ONE_TEN_BILLIONTH);
-         assertEquals(0.0, actualAxis.dot(rotatedNormal), Epsilons.ONE_TEN_BILLIONTH);
+         assertEquals(0.0, actualAxis.dot(firstVector), Epsilons.ONE_TEN_BILLIONTH);
+         assertEquals(0.0, actualAxis.dot(secondVector), Epsilons.ONE_TEN_BILLIONTH);
 
-         assertEquals(0.0, expectedAxis.dot(referenceNormal), Epsilons.ONE_TRILLIONTH);
-         assertEquals(0.0, expectedAxis.dot(rotatedNormal), Epsilons.ONE_TRILLIONTH);
+         assertEquals(0.0, expectedAxis.dot(firstVector), Epsilons.ONE_TRILLIONTH);
+         assertEquals(0.0, expectedAxis.dot(secondVector), Epsilons.ONE_TRILLIONTH);
 
          if (actualAxisAngle.getAngle() * expectedAxisAngle.getAngle() < 0.0)
          {
@@ -2247,7 +2247,7 @@ public class GeometryToolsTest
          rotatedNormal.scale(RandomTools.generateRandomDouble(random, 0.0, 10.0));
 
          AxisAngle4d actualAxisAngle = new AxisAngle4d();
-         GeometryTools.getRotationBasedOnNormal(actualAxisAngle, rotatedNormal, referenceNormal);
+         GeometryTools.getAxisAngleFromFirstToSecondVector(referenceNormal, rotatedNormal, actualAxisAngle);
 
          Vector3d actualAxis = new Vector3d(actualAxisAngle.getX(), actualAxisAngle.getY(), actualAxisAngle.getZ());
 
@@ -2297,7 +2297,7 @@ public class GeometryToolsTest
          AxisAngle4d expectedAxisAngle = new AxisAngle4d(expectedAxis, expectedAngle);
 
          AxisAngle4d actualAxisAngle = new AxisAngle4d();
-         GeometryTools.getRotationBasedOnNormal(actualAxisAngle, rotatedNormal, referenceNormal);
+         GeometryTools.getAxisAngleFromFirstToSecondVector(referenceNormal, rotatedNormal, actualAxisAngle);
 
          Vector3d actualAxis = new Vector3d(actualAxisAngle.getX(), actualAxisAngle.getY(), actualAxisAngle.getZ());
 
@@ -2332,7 +2332,7 @@ public class GeometryToolsTest
          AxisAngle4d expectedAxisAngle = new AxisAngle4d(expectedAxis, expectedAngle);
 
          AxisAngle4d actualAxisAngle = new AxisAngle4d();
-         GeometryTools.getRotationBasedOnNormal(actualAxisAngle, rotatedNormal, referenceNormal);
+         GeometryTools.getAxisAngleFromFirstToSecondVector(referenceNormal, rotatedNormal, actualAxisAngle);
 
          Vector3d actualAxis = new Vector3d(actualAxisAngle.getX(), actualAxisAngle.getY(), actualAxisAngle.getZ());
 
@@ -2358,7 +2358,7 @@ public class GeometryToolsTest
 
    @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
-   public void testGetRotationBasedOnNormal2() throws Exception
+   public void testGetAxisAngleFromFirstToSecondVector2() throws Exception
    {
       Random random = new Random(1176L);
       // Test getRotationBasedOnNormal(AxisAngle4d rotationToPack, Vector3d normalVector3d)
@@ -2376,7 +2376,7 @@ public class GeometryToolsTest
          rotatedNormal.scale(RandomTools.generateRandomDouble(random, 0.0, 10.0));
 
          AxisAngle4d actualAxisAngle = new AxisAngle4d();
-         GeometryTools.getRotationBasedOnNormal(actualAxisAngle, rotatedNormal, referenceNormal);
+         GeometryTools.getAxisAngleFromFirstToSecondVector(referenceNormal, rotatedNormal, actualAxisAngle);
 
          Vector3d actualAxis = new Vector3d(actualAxisAngle.getX(), actualAxisAngle.getY(), actualAxisAngle.getZ());
 

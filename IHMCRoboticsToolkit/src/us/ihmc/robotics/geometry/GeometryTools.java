@@ -2998,125 +2998,130 @@ public class GeometryTools
    }
 
    /**
-    * Computes the complete minimum rotation from {@code zUp = (0, 0, 1)} to the given {@code normalVector3d} and packs it into an {@link AxisAngle4d}.
+    * Computes the complete minimum rotation from {@code zUp = (0, 0, 1)} to the given {@code vector} and packs it into an {@link AxisAngle4d}.
     * The rotation axis if perpendicular to both vectors.
-    * The rotation angle is computed as the angle from the {@code zUp} to the {@code normalVector3d}: {@code rotationAngle = referenceNormal.angle(rotatedNormal)}.
-    * Note: the vector do not need to be unit length.
+    * The rotation angle is computed as the angle from the {@code zUp} to the {@code vector}:
+    * <br> {@code rotationAngle = zUp.angle(vector)}. </br>
+    * Note: the vector does not need to be unit length.
     * <p>
     * Edge cases:
     * <ul>
     *    <li> the vector is aligned with {@code zUp}: the rotation angle is equal to {@code 0.0} and the rotation axis is set to: (1, 0, 0).
-    *    <li> the vector collinear pointing opposite direction of {@code zUp}: the rotation angle is equal to {@code Math.PI} and the rotation axis is set to: (1, 0, 0).
+    *    <li> the vector is collinear pointing opposite direction of {@code zUp}: the rotation angle is equal to {@code Math.PI} and the rotation axis is set to: (1, 0, 0).
     *    <li> if the length of the given normal is below {@code 1.0E-7}: the rotation angle is equal to {@code 0.0} and the rotation axis is set to: (1, 0, 0).
     * </ul>
     * </p>
-    * The calculation becomes less accurate as the two vectors are more collinear.
+    * <p>
+    * Note: The calculation becomes less accurate as the two vectors are more collinear.
+    * </p>
     * <p>
     * WARNING: This method generates garbage.
     * </p>
     * 
-    * @param normalVector3d the vector that is rotated with respect to {@code zUp}. Not modified.
-    * @return the minimum rotation from {@code zUp} to the {@code normalVector3d}.
+    * @param vector the 3D vector that is rotated with respect to {@code zUp}. Not modified.
+    * @return the minimum rotation from {@code zUp} to the given {@code vector}.
     */
-   // TODO this is a bad name for this method, should be renamed for something like getAxisAngleFromZUpToVector
-   public static AxisAngle4d getRotationBasedOnNormal(Vector3d normalVector3d)
+   public static AxisAngle4d getAxisAngleFromZUpToVector(Vector3d vector)
    {
-      AxisAngle4d newAxisAngle4d = new AxisAngle4d();
-      getRotationBasedOnNormal(newAxisAngle4d, normalVector3d);
-      return newAxisAngle4d;
+      AxisAngle4d axisAngle = new AxisAngle4d();
+      getAxisAngleFromZUpToVector(vector, axisAngle);
+      return axisAngle;
    }
 
    /**
-    * Computes the complete minimum rotation from {@code zUp = (0, 0, 1)} to the given {@code normalVector3d} and packs it into an {@link AxisAngle4d}.
+    * Computes the complete minimum rotation from {@code zUp = (0, 0, 1)} to the given {@code vector} and packs it into an {@link AxisAngle4d}.
     * The rotation axis if perpendicular to both vectors.
-    * The rotation angle is computed as the angle from the {@code zUp} to the {@code normalVector3d}: {@code rotationAngle = referenceNormal.angle(rotatedNormal)}.
-    * Note: the vector do not need to be unit length.
+    * The rotation angle is computed as the angle from the {@code zUp} to the {@code vector}:
+    * <br> {@code rotationAngle = zUp.angle(vector)}. </br>
+    * Note: the vector does not need to be unit length.
     * <p>
     * Edge cases:
     * <ul>
     *    <li> the vector is aligned with {@code zUp}: the rotation angle is equal to {@code 0.0} and the rotation axis is set to: (1, 0, 0).
-    *    <li> the vector collinear pointing opposite direction of {@code zUp}: the rotation angle is equal to {@code Math.PI} and the rotation axis is set to: (1, 0, 0).
+    *    <li> the vector is collinear pointing opposite direction of {@code zUp}: the rotation angle is equal to {@code Math.PI} and the rotation axis is set to: (1, 0, 0).
     *    <li> if the length of the given normal is below {@code 1.0E-7}: the rotation angle is equal to {@code 0.0} and the rotation axis is set to: (1, 0, 0).
     * </ul>
     * </p>
-    * The calculation becomes less accurate as the two vectors are more collinear.
+    * <p>
+    * Note: The calculation becomes less accurate as the two vectors are more collinear.
+    * </p>
     * 
-    * @param rotationToPack the minimum rotation from {@code zUp} to the {@code normalVector3d}. Modified.
-    * @param normalVector3d the vector that is rotated with respect to {@code zUp}. Not modified.
+    * @param vector the vector that is rotated with respect to {@code zUp}. Not modified.
+    * @param rotationToPack the minimum rotation from {@code zUp} to the given {@code vector}. Modified.
     */
-   // FIXME reorder the arguments so the argument to comes last.
-   // TODO this is a bad name for this method, should be renamed for something like getAxisAngleFromVectorToZUp
-   public static void getRotationBasedOnNormal(AxisAngle4d rotationToPack, Vector3d normalVector3d)
+   public static void getAxisAngleFromZUpToVector(Vector3d vector, AxisAngle4d rotationToPack)
    {
-      getRotationBasedOnNormal(rotationToPack, normalVector3d.getX(), normalVector3d.getY(), normalVector3d.getZ(), 0.0, 0.0, 1.0);
+      getAxisAngleFromFirstToSecondVector(0.0, 0.0, 1.0, vector.getX(), vector.getY(), vector.getZ(), rotationToPack);
    }
 
    /**
-    * Computes the complete minimum rotation from {@code referenceNormal} to the {@code rotatedNormal} and packs it into an {@link AxisAngle4d}.
+    * Computes the complete minimum rotation from {@code firstVector} to the {@code secondVector} and packs it into an {@link AxisAngle4d}.
     * The rotation axis if perpendicular to both vectors.
-    * The rotation angle is computed as the angle from the {@code referenceNormal} to the {@code rotatedNormal}: {@code rotationAngle = referenceNormal.angle(rotatedNormal)}.
+    * The rotation angle is computed as the angle from the {@code firstVector} to the {@code secondVector}:
+    * <br> {@code rotationAngle = firstVector.angle(secondVector)}. </br>
     * Note: the vectors do not need to be unit length.
     * <p>
     * Edge cases:
     * <ul>
     *    <li> the vectors are the same: the rotation angle is equal to {@code 0.0} and the rotation axis is set to: (1, 0, 0).
-    *    <li> the vectors collinear pointing opposite directions: the rotation angle is equal to {@code Math.PI} and the rotation axis is set to: (1, 0, 0).
+    *    <li> the vectors are collinear pointing opposite directions: the rotation angle is equal to {@code Math.PI} and the rotation axis is set to: (1, 0, 0).
     *    <li> if the length of either normal is below {@code 1.0E-7}: the rotation angle is equal to {@code 0.0} and the rotation axis is set to: (1, 0, 0).
     * </ul>
     * </p>
-    * The calculation becomes less accurate as the two vectors are more collinear.
+    * <p>
+    * Note: The calculation becomes less accurate as the two vectors are more collinear.
+    * </p>
     * 
-    * @param rotationToPack the minimum rotation from {@code referenceNormal} to the {@code rotatedNormal}. Modified.
-    * @param rotatedNormal the vector that is rotated with respect to the reference. Not modified.
-    * @param referenceNormal the vector used as reference. Not modified.
+    * @param firstVector the first vector. Not modified.
+    * @param secondVector the second vector that is rotated with respect to the first vector. Not modified.
+    * @param rotationToPack the minimum rotation from {@code firstVector} to the {@code secondVector}. Modified.
     */
-   // FIXME reorder the arguments so the argument to comes last.
-   // TODO this is a bad name for this method, should be renamed for something like getAxisAngleFromFirstToSecondVector
-   public static void getRotationBasedOnNormal(AxisAngle4d rotationToPack, Vector3d rotatedNormal, Vector3d referenceNormal)
+   public static void getAxisAngleFromFirstToSecondVector(Vector3d firstVector, Vector3d secondVector, AxisAngle4d rotationToPack)
    {
-      getRotationBasedOnNormal(rotationToPack, rotatedNormal.getX(), rotatedNormal.getY(), rotatedNormal.getZ(), referenceNormal.getX(), referenceNormal.getY(),
-                               referenceNormal.getZ());
+      getAxisAngleFromFirstToSecondVector(firstVector.getX(), firstVector.getY(), firstVector.getZ(), secondVector.getX(), secondVector.getY(),
+                                          secondVector.getZ(), rotationToPack);
    }
 
    /**
-    * Computes the complete minimum rotation from {@code referenceNormal} to the {@code rotatedNormal} and packs it into an {@link AxisAngle4d}.
+    * Computes the complete minimum rotation from {@code firstVector} to the {@code secondVector} and packs it into an {@link AxisAngle4d}.
     * The rotation axis if perpendicular to both vectors.
-    * The rotation angle is computed as the angle from the {@code referenceNormal} to the {@code rotatedNormal}: {@code rotationAngle = referenceNormal.angle(rotatedNormal)}.
+    * The rotation angle is computed as the angle from the {@code firstVector} to the {@code secondVector}:
+    * <br> {@code rotationAngle = firstVector.angle(secondVector)}. </br>
     * Note: the vectors do not need to be unit length.
     * <p>
     * Edge cases:
     * <ul>
     *    <li> the vectors are the same: the rotation angle is equal to {@code 0.0} and the rotation axis is set to: (1, 0, 0).
-    *    <li> the vectors collinear pointing opposite directions: the rotation angle is equal to {@code Math.PI} and the rotation axis is set to: (1, 0, 0).
+    *    <li> the vectors are collinear pointing opposite directions: the rotation angle is equal to {@code Math.PI} and the rotation axis is set to: (1, 0, 0).
     *    <li> if the length of either normal is below {@code 1.0E-7}: the rotation angle is equal to {@code 0.0} and the rotation axis is set to: (1, 0, 0).
     * </ul>
     * </p>
-    * The calculation becomes less accurate as the two vectors are more collinear.
+    * <p>
+    * Note: The calculation becomes less accurate as the two vectors are more collinear.
+    * </p>
     * 
-    * @param rotationToPack the minimum rotation from {@code referenceNormal} to the {@code rotatedNormal}. Modified.
-    * @param rotatedNormalX x-component of the vector that is rotated with respect to the reference.
-    * @param rotatedNormalY y-component of the vector that is rotated with respect to the reference.
-    * @param rotatedNormalZ z-component of the vector that is rotated with respect to the reference.
-    * @param referenceNormal x-component of the vector used as reference.
-    * @param referenceNormal y-component of the vector used as reference.
-    * @param referenceNormal z-component of the vector used as reference.
+    * @param firstVectorX x-component of the first vector.
+    * @param firstVectorY y-component of the first vector.
+    * @param firstVectorZ z-component of the first vector.
+    * @param secondVectorX x-component of the second vector that is rotated with respect to the first vector.
+    * @param secondVectorY y-component of the second vector that is rotated with respect to the first vector.
+    * @param secondVectorZ z-component of the second vector that is rotated with respect to the first vector.
+    * @param rotationToPack the minimum rotation from {@code firstVector} to the {@code secondVector}. Modified.
     */
-   // FIXME reorder the arguments so the argument to comes last.
-   // TODO this is a bad name for this method, should be renamed for something like getAxisAngleFromFirstToSecondVector
-   public static void getRotationBasedOnNormal(AxisAngle4d rotationToPack, double rotatedNormalX, double rotatedNormalY, double rotatedNormalZ,
-                                               double referenceNormalX, double referenceNormalY, double referenceNormalZ)
+   public static void getAxisAngleFromFirstToSecondVector(double firstVectorX, double firstVectorY, double firstVectorZ, double secondVectorX,
+                                                          double secondVectorY, double secondVectorZ, AxisAngle4d rotationToPack)
    {
-      double rotationAxisX = referenceNormalY * rotatedNormalZ - referenceNormalZ * rotatedNormalY;
-      double rotationAxisY = referenceNormalZ * rotatedNormalX - referenceNormalX * rotatedNormalZ;
-      double rotationAxisZ = referenceNormalX * rotatedNormalY - referenceNormalY * rotatedNormalX;
+      double rotationAxisX = firstVectorY * secondVectorZ - firstVectorZ * secondVectorY;
+      double rotationAxisY = firstVectorZ * secondVectorX - firstVectorX * secondVectorZ;
+      double rotationAxisZ = firstVectorX * secondVectorY - firstVectorY * secondVectorX;
       double rotationAxisLength = Math.sqrt(rotationAxisX * rotationAxisX + rotationAxisY * rotationAxisY + rotationAxisZ * rotationAxisZ);
 
       boolean normalsAreParallel = rotationAxisLength < 1e-7;
 
       double dot;
-      dot = rotatedNormalX * referenceNormalX;
-      dot += rotatedNormalY * referenceNormalY;
-      dot += rotatedNormalZ * referenceNormalZ;
+      dot = secondVectorX * firstVectorX;
+      dot += secondVectorY * firstVectorY;
+      dot += secondVectorZ * firstVectorZ;
 
       if (normalsAreParallel)
       {
@@ -3125,8 +3130,8 @@ public class GeometryTools
          return;
       }
 
-      double rotationAngle = getAngleFromFirstToSecondVector(referenceNormalX, referenceNormalY, referenceNormalZ, rotatedNormalX, rotatedNormalY,
-                                                             rotatedNormalZ);
+      double rotationAngle = getAngleFromFirstToSecondVector(firstVectorX, firstVectorY, firstVectorZ, secondVectorX, secondVectorY,
+                                                             secondVectorZ);
 
       rotationAxisX /= rotationAxisLength;
       rotationAxisY /= rotationAxisLength;
