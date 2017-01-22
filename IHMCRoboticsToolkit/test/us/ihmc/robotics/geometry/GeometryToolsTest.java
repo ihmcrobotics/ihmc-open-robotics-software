@@ -1513,22 +1513,6 @@ public class GeometryToolsTest
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
-   public void testGetZPlanePerpendicularBisector()
-   {
-      FramePoint lineStart = new FramePoint(ReferenceFrame.getWorldFrame(), 0.0, 0.0, 11.5);
-      FramePoint lineEnd = new FramePoint(ReferenceFrame.getWorldFrame(), -3.0, 3.0, -89.6);
-
-      FramePoint mid = new FramePoint(lineEnd.getReferenceFrame());
-      FrameVector direction = new FrameVector(lineEnd.getReferenceFrame());
-
-      GeometryTools.getZPlanePerpendicularBisector(lineStart, lineEnd, mid, direction);
-
-      // assertEquals("return value", expectedReturn, actualReturn);
-
-   }
-
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
    public void testIsPointOnLeftSideOfLine()
    {
       FramePoint lineStart = new FramePoint(ReferenceFrame.getWorldFrame(), 5.0, 0.0, 0.0);

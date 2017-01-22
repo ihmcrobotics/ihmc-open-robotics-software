@@ -2869,48 +2869,6 @@ public class GeometryTools
    }
 
    /**
-    * Computes the 2D perpendicular bisector of 2D line segment defined by its two 2D end points.
-    * The bisector starts off the the middle of the 2D line segment and points toward the left side of the 2D line segment.
-    * <p>
-    * Edge cases:
-    * <ul>
-    *    <li> when the line segment end points are equal,
-    *     more precisely when {@code lineSegmentStart.distance(lineSegmentEnd) < Epsilons.ONE_TRILLIONTH},
-    *     the method fails and returns {@code false}.
-    * </ul>
-    * </p>
-    * <p>
-    * WARNING: the 3D arguments are projected onto the XY-plane to perform the actual computation in 2D.
-    * </p>
-    * <p>
-    * WARNING: This method generates garbage.
-    * </p>
-    * 
-    * @param lineSegmentStart the x and y coordinates are used to defined the first end point of the 2D line segment. Not modified.
-    * @param lineSegmentEnd the x and y coordinates are used to defined the second end point of the line segment. Not modified.
-    * @param bisectorStartToPack a 2D point in which the x and y coordinates of the origin of the bisector are stored. Modified.
-    * @param bisectorDirectionToPack a 2D vector in which the x and y components of the direction of the bisector are stored. Modified.
-    * @return whether the perpendicular bisector could be determined or not.
-    */
-   // FIXME same thing, the use of 3D arguments for doing computation in 2D is confusing and error prone.
-   // FIXME the reference frames of the arguments need to checked and throw an exception if they are not the same.
-   public static boolean getZPlanePerpendicularBisector(FramePoint lineSegmentStart, FramePoint lineSegmentEnd, FramePoint bisectorStartToPack,
-                                                        FrameVector bisectorDirectionToPack)
-   {
-      Point2d lineStart2d = new Point2d(lineSegmentStart.getX(), lineSegmentStart.getY());
-      Point2d lineEnd2d = new Point2d(lineSegmentEnd.getX(), lineSegmentEnd.getY());
-      Point2d bisectorStart2d = new Point2d();
-      Vector2d bisectorDirection2d = new Vector2d();
-
-      boolean success = getPerpendicularBisector(lineStart2d, lineEnd2d, bisectorStart2d, bisectorDirection2d);
-      if (!success)
-         return false;
-      bisectorDirectionToPack.set(bisectorDirection2d.getX(), bisectorDirection2d.getY(), 0.0);
-      bisectorStartToPack.set(bisectorStart2d.getX(), bisectorStart2d.getY(), 0.0);
-      return true;
-   }
-
-   /**
     * Computes the perpendicular bisector of line segment defined by its two end points.
     * The bisector starts off the the middle of the line segment and points toward the left side of the line segment.
     * <p>
