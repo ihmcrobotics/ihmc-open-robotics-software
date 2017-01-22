@@ -2770,6 +2770,34 @@ public class GeometryToolsTest
 
    @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
+   public void testRotateTuple2d() throws Exception
+   {
+      Random random = new Random(232L);
+
+      for (int i = 0; i < ITERATIONS; i++)
+      {
+         Vector2d original2d = RandomTools.generateRandomVector2d(random, RandomTools.generateRandomDouble(random, 10.0));
+         Vector3d original3d = new Vector3d(original2d.getX(), original2d.getY(), 0.0);
+
+         double yaw = RandomTools.generateRandomDouble(random, 3.0 * Math.PI);
+
+         Matrix3d rotationMatrix = new Matrix3d();
+         rotationMatrix.rotZ(yaw);
+
+         Vector2d expectedTransformed2d = new Vector2d();
+         Vector3d expectedTransformed3d = new Vector3d();
+         rotationMatrix.transform(original3d, expectedTransformed3d);
+         expectedTransformed2d.set(expectedTransformed3d.getX(), expectedTransformed3d.getY());
+
+         Vector2d actualTransformed2d = new Vector2d();
+         GeometryTools.rotateTuple2d(yaw, original2d, actualTransformed2d);
+
+         JUnitTools.assertTuple2dEquals(expectedTransformed2d, actualTransformed2d, Epsilons.ONE_TRILLIONTH);
+      }
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @Test(timeout = 30000)
    public void testArePlanesCoincident() throws Exception
    {
       Random random = new Random();//232L);

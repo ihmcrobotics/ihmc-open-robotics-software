@@ -3541,6 +3541,22 @@ public class GeometryTools
    }
 
    /**
+    * Rotates the given {@code original} tuple by an angle {@code yaw} and stores the result in the tuple {@code transformed}.
+    * 
+    * @param yaw the angle in radians by which {@code original} should be rotated.
+    * @param original the original tuple. Not modified.
+    * @param transformed the tuple in which the transformed {@code original} is stored. Modified.
+    */
+   public static void rotateTuple2d(double yaw, Tuple2d original, Tuple2d transformed)
+   {
+      double cos = Math.cos(yaw);
+      double sin = Math.sin(yaw);
+
+      transformed.setX(cos * original.getX() - sin * original.getY());
+      transformed.setY(sin * original.getX() + cos * original.getY());
+   }
+
+   /**
     * Calculate an unknown side length of a fully defined 2D Triangle by the law of Cosine.
     * <p>
     * Given a triangle with the three sides A, B, and C, this methods calculates the length of the side C, given:
