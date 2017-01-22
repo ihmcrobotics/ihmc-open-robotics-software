@@ -462,7 +462,7 @@ public class DiagnosticBehavior extends AbstractBehavior
          else
          {
             AxisAngle4d rotation = new AxisAngle4d();
-            GeometryTools.getRotationBasedOnNormal(rotation, tempVector.getVector(), expectedArmZeroConfiguration);
+            GeometryTools.getAxisAngleFromFirstToSecondVector(expectedArmZeroConfiguration, tempVector.getVector(), rotation);
             armZeroJointAngleConfigurationOffset.setRotation(rotation);
          }
 

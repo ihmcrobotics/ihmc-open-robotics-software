@@ -190,7 +190,7 @@ public class FinalApproachPositionTrajectoryGenerator extends PositionTrajectory
       this.finalDirection.normalize();
       this.finalDirection.get(tempVector);
       tempVector.negate();
-      GeometryTools.getRotationBasedOnNormal(axisAngleToWorld, tempVector);
+      GeometryTools.getAxisAngleFromZUpToVector(tempVector, axisAngleToWorld);
       rotationPlane.setIncludingFrame(this.finalDirection.getReferenceFrame(), axisAngleToWorld);
 
       this.approachDistance.set(approachDistance);
