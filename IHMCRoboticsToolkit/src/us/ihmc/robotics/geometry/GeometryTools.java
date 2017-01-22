@@ -237,12 +237,33 @@ public class GeometryTools
     */
    public static double distanceFromPointToLineSegment(double pointX, double pointY, Point2d lineSegmentStart, Point2d lineSegmentEnd)
    {
-      double percentage = getPercentageAlongLineSegment(pointX, pointY, lineSegmentStart.getX(), lineSegmentStart.getY(), lineSegmentEnd.getX(),
-                                                        lineSegmentEnd.getY());
+      return distanceFromPointToLineSegment(pointX, pointY, lineSegmentStart.getX(), lineSegmentStart.getY(), lineSegmentEnd.getX(), lineSegmentEnd.getY());
+   }
+
+   /**
+    * Returns the minimum distance between a point and a given line segment.
+    * <p>
+    * Edge cases:
+    * <ul>
+    *    <li> if {@code lineSegmentStart.distanceSquared(lineSegmentEnd) < Epsilons.ONE_TRILLIONTH}, this method returns the distance between {@code lineSegmentStart} and the given {@code point}.
+    * </ul>
+    * </p>
+    *
+    * @param pointX x coordinate of point to be tested.
+    * @param pointY y coordinate of point to be tested.
+    * @param lineSegmentStartX the x-coordinate of the line segment first end point.
+    * @param lineSegmentStartY the y-coordinate of the line segment first end point.
+    * @param lineSegmentEndX the x-coordinate of the line segment second end point.
+    * @param lineSegmentEndY the y-coordinate of the line segment second end point.
+    * @return the minimum distance between the 2D point and the 2D line segment.
+    */
+   public static double distanceFromPointToLineSegment(double pointX, double pointY, double lineSegmentStartX, double lineSegmentStartY, double lineSegmentEndX, double lineSegmentEndY)
+   {
+      double percentage = getPercentageAlongLineSegment(pointX, pointY, lineSegmentStartX, lineSegmentStartY, lineSegmentEndX, lineSegmentEndY);
       percentage = MathTools.clipToMinMax(percentage, 0.0, 1.0);
 
-      double projectionX = (1.0 - percentage) * lineSegmentStart.getX() + percentage * lineSegmentEnd.getX();
-      double projectionY = (1.0 - percentage) * lineSegmentStart.getY() + percentage * lineSegmentEnd.getY();
+      double projectionX = (1.0 - percentage) * lineSegmentStartX + percentage * lineSegmentEndX;
+      double projectionY = (1.0 - percentage) * lineSegmentStartY + percentage * lineSegmentEndY;
 
       return Math.sqrt(MathTools.square(projectionX - pointX) + MathTools.square(projectionY - pointY));
    }
@@ -1752,8 +1773,8 @@ public class GeometryTools
     * 
     * @param pointOnLine1 point located on the first line. Not modified.
     * @param lineDirection1 the first line direction. Not modified.
-    * @param pointOnLine2x point located on the second line. Not modified.
-    * @param lineDirection2x the second line direction. Not modified.
+    * @param pointOnLine2 point located on the second line. Not modified.
+    * @param lineDirection2 the second line direction. Not modified.
     * @param intersectionToPack 2D point in which the result is stored. Modified.
     * @return the 2D point of intersection if the two lines intersect, {@code null} otherwise.
     */
@@ -1779,8 +1800,8 @@ public class GeometryTools
     * 
     * @param pointOnLine1 point located on the first line. Not modified.
     * @param lineDirection1 the first line direction. Not modified.
-    * @param pointOnLine2x point located on the second line. Not modified.
-    * @param lineDirection2x the second line direction. Not modified.
+    * @param pointOnLine2 point located on the second line. Not modified.
+    * @param lineDirection2 the second line direction. Not modified.
     * @param intersectionToPack 2D point in which the result is stored. Modified.
     * @return {@code true} if the two lines intersect, {@code false} otherwise.
     */
@@ -3558,6 +3579,99 @@ public class GeometryTools
          return false;
       double dot = firstVectorX * secondVectorX + firstVectorY * secondVectorY;
       return Math.abs(dot / (firstVectorLength * secondVectorLength)) > Math.cos(angleEpsilon);
+   }
+
+   /**
+    * Tests if the two given lines are collinear given a tolerance on the angle between in the range ]0; <i>pi</i>/2[.
+    * This method returns {@code true} if the two lines are collinear, whether they are pointing in the same direction or in opposite directions.
+    * 
+    * <p>
+    * Edge cases:
+    * <ul>
+    *    <li> if the direction magnitude of either line is below {@code 1.0E-7}, this method fails and returns {@code false}.
+    * </ul>
+    * </p>
+    * 
+    * @param firstPointOnLine1 a first point located on the first line. Not modified.
+    * @param secondPointOnLine1 a second point located on the first line. Not modified.
+    * @param firstPointOnLine2 a first point located on the second line. Not modified.
+    * @param secondPointOnLine2 a second point located on the second line. Not modified.
+    * @param angleEpsilon tolerance on the angle in radians.
+    * @param distanceEpsilon tolerance on the distance to determine if {@code firstPointOnLine2} belongs to the first line segment.
+    * @return {@code true} if the two line segments are collinear, {@code false} otherwise.
+    */
+   public static boolean areLinesCollinear(Point2d firstPointOnLine1, Point2d secondPointOnLine1, Point2d firstPointOnLine2, Point2d secondPointOnLine2,
+                                           double angleEpsilon, double distanceEspilon)
+   {
+      double pointOnLine1x = firstPointOnLine1.getX();
+      double pointOnLine1y = firstPointOnLine1.getY();
+      double lineDirection1x = secondPointOnLine1.getX() - firstPointOnLine1.getX();
+      double lineDirection1y = secondPointOnLine1.getY() - firstPointOnLine1.getY();
+      double pointOnLine2x = firstPointOnLine2.getX();
+      double pointOnLine2y = firstPointOnLine2.getY();
+      double lineDirection2x = secondPointOnLine2.getX() - firstPointOnLine2.getX();
+      double lineDirection2y = secondPointOnLine2.getY() - firstPointOnLine2.getY();
+      return areLinesCollinear(pointOnLine1x, pointOnLine1y, lineDirection1x, lineDirection1y, pointOnLine2x, pointOnLine2y, lineDirection2x, lineDirection2y,
+                               angleEpsilon, distanceEspilon);
+   }
+
+   /**
+    * Tests if the two given lines are collinear given a tolerance on the angle between in the range ]0; <i>pi</i>/2[.
+    * This method returns {@code true} if the two lines are collinear, whether they are pointing in the same direction or in opposite directions.
+    * 
+    * <p>
+    * Edge cases:
+    * <ul>
+    *    <li> if the direction magnitude of either line is below {@code 1.0E-7}, this method fails and returns {@code false}.
+    * </ul>
+    * </p>
+    * 
+    * @param pointOnLine1 point located on the first line. Not modified.
+    * @param lineDirection1 the first line direction. Not modified.
+    * @param pointOnLine2 point located on the second line. Not modified.
+    * @param lineDirection2 the second line direction. Not modified.
+    * @param angleEpsilon tolerance on the angle in radians.
+    * @param distanceEpsilon tolerance on the distance to determine if {@code pointOnLine2} belongs to the first line segment.
+    * @return {@code true} if the two line segments are collinear, {@code false} otherwise.
+    */
+   public static boolean areLinesCollinear(Point2d pointOnLine1, Vector2d lineDirection1, Point2d pointOnLine2, Vector2d lineDirection2, double angleEpsilon,
+                                           double distanceEspilon)
+   {
+      return areLinesCollinear(pointOnLine1.getX(), pointOnLine1.getY(), lineDirection1.getX(), lineDirection1.getY(), pointOnLine2.getX(), pointOnLine2.getY(),
+                               lineDirection2.getX(), lineDirection2.getY(), angleEpsilon, distanceEspilon);
+   }
+
+   /**
+    * Tests if the two given lines are collinear given a tolerance on the angle between in the range ]0; <i>pi</i>/2[.
+    * This method returns {@code true} if the two lines are collinear, whether they are pointing in the same direction or in opposite directions.
+    * 
+    * <p>
+    * Edge cases:
+    * <ul>
+    *    <li> if the direction magnitude of either line is below {@code 1.0E-7}, this method fails and returns {@code false}.
+    * </ul>
+    * </p>
+    * 
+    * @param pointOnLine1x x-coordinate of a point located on the first line.
+    * @param pointOnLine1y y-coordinate of a point located on the first line.
+    * @param lineDirection1x x-component of the first line direction.
+    * @param lineDirection1y y-component of the first line direction.
+    * @param pointOnLine2x x-coordinate of a point located on the second line.
+    * @param pointOnLine2y y-coordinate of a point located on the second line.
+    * @param lineDirection2x x-component of the second line direction.
+    * @param lineDirection2y y-component of the second line direction.
+    * @param angleEpsilon tolerance on the angle in radians.
+    * @param distanceEpsilon tolerance on the distance to determine if {@code pointOnLine2} belongs to the first line segment.
+    * @return {@code true} if the two line segments are collinear, {@code false} otherwise.
+    */
+   public static boolean areLinesCollinear(double pointOnLine1x, double pointOnLine1y, double lineDirection1x, double lineDirection1y, double pointOnLine2x,
+                                           double pointOnLine2y, double lineDirection2x, double lineDirection2y, double angleEpsilon, double distanceEspilon)
+   {
+      if (!areVectorsCollinear(lineDirection1x, lineDirection1y, lineDirection2x, lineDirection2y, angleEpsilon))
+            return false;
+
+      double distance = distanceFromPointToLine(pointOnLine2x, pointOnLine2y, pointOnLine1x, pointOnLine1y, lineDirection1x, lineDirection1y);
+      return distance < distanceEspilon;
    }
 
    /**
