@@ -133,7 +133,8 @@ public class GeometryTools
    public static double distanceFromPointToLine2d(FramePoint point, FramePoint firstPointOnLine, FramePoint secondPointOnLine)
    {
       // FIXME Need to verify that all the arguments are expressed in the same reference frame.
-      return distanceFromPointToLine(point.getX(), point.getY(), firstPointOnLine.getX(), firstPointOnLine.getY(), secondPointOnLine.getX(), secondPointOnLine.getY());
+      return distanceFromPointToLine(point.getX(), point.getY(), firstPointOnLine.getX(), firstPointOnLine.getY(), secondPointOnLine.getX(),
+                                     secondPointOnLine.getY());
    }
 
    /**
@@ -152,7 +153,8 @@ public class GeometryTools
     */
    public static double distanceFromPointToLine(Point2d point, Point2d firstPointOnLine, Point2d secondPointOnLine)
    {
-      return distanceFromPointToLine(point.getX(), point.getY(), firstPointOnLine.getX(), firstPointOnLine.getY(), secondPointOnLine.getX(), secondPointOnLine.getY());
+      return distanceFromPointToLine(point.getX(), point.getY(), firstPointOnLine.getX(), firstPointOnLine.getY(), secondPointOnLine.getX(),
+                                     secondPointOnLine.getY());
    }
 
    /**
@@ -172,7 +174,8 @@ public class GeometryTools
     * @param secondPointOnLineY y-coordinate of a second point located on the line.
     * @return the minimum distance between the 2D point and the 2D line.
     */
-   public static double distanceFromPointToLine(double pointX, double pointY, double firstPointOnLineX, double firstPointOnLineY, double secondPointOnLineX, double secondPointOnLineY)
+   public static double distanceFromPointToLine(double pointX, double pointY, double firstPointOnLineX, double firstPointOnLineY, double secondPointOnLineX,
+                                                double secondPointOnLineY)
    {
       double dx = firstPointOnLineY - pointY;
       double dy = firstPointOnLineX - pointX;
@@ -210,7 +213,8 @@ public class GeometryTools
     */
    public static double distanceFromPointToLineSegment(double pointX, double pointY, Point2d lineSegmentStart, Point2d lineSegmentEnd)
    {
-      double percentage = getPercentageAlongLineSegment(pointX, pointY, lineSegmentStart.getX(), lineSegmentStart.getY(), lineSegmentEnd.getX(), lineSegmentEnd.getY());
+      double percentage = getPercentageAlongLineSegment(pointX, pointY, lineSegmentStart.getX(), lineSegmentStart.getY(), lineSegmentEnd.getX(),
+                                                        lineSegmentEnd.getY());
       percentage = MathTools.clipToMinMax(percentage, 0.0, 1.0);
 
       double projectionX = (1.0 - percentage) * lineSegmentStart.getX() + percentage * lineSegmentEnd.getX();
@@ -496,7 +500,8 @@ public class GeometryTools
     * @param side the query of the side.
     * @return {@code true} if the point is on the query side of the line, {@code false} if the point is on the opposite side or exactly on the line.
     */
-   public static boolean isPointOnSideOfLine(double pointX, double pointY, double pointOnLineX, double pointOnLineY, double lineDirectionX, double lineDirectionY, RobotSide side)
+   public static boolean isPointOnSideOfLine(double pointX, double pointY, double pointOnLineX, double pointOnLineY, double lineDirectionX,
+                                             double lineDirectionY, RobotSide side)
    {
       double pointToPointX = pointX - pointOnLineX;
       double pointToPointY = pointY - pointOnLineY;
@@ -750,7 +755,8 @@ public class GeometryTools
     */
    public static boolean getOrthogonalProjectionOnLine(Point2d pointToProject, Point2d pointOnLine, Vector2d lineDirection, Point2d projectionToPack)
    {
-      return getOrthogonalProjectionOnLine(pointToProject, pointOnLine.getX(), pointOnLine.getY(), lineDirection.getX(), lineDirection.getY(), projectionToPack);
+      return getOrthogonalProjectionOnLine(pointToProject, pointOnLine.getX(), pointOnLine.getY(), lineDirection.getX(), lineDirection.getY(),
+                                           projectionToPack);
    }
 
    /**
@@ -815,8 +821,8 @@ public class GeometryTools
    public static Point2d getOrthogonalProjectionOnLineSegment(Point2d pointToProject, Point2d lineSegmentStart, Point2d lineSegmentEnd)
    {
       Point2d projection = new Point2d();
-      boolean success = getOrthogonalProjectionOnLineSegment(pointToProject, lineSegmentStart.getX(), lineSegmentStart.getY(), lineSegmentEnd.getX(), lineSegmentEnd.getY(),
-                                                  projection);
+      boolean success = getOrthogonalProjectionOnLineSegment(pointToProject, lineSegmentStart.getX(), lineSegmentStart.getY(), lineSegmentEnd.getX(),
+                                                             lineSegmentEnd.getY(), projection);
       if (!success)
          return null;
       else
@@ -842,10 +848,11 @@ public class GeometryTools
     * @param projectionToPack point in which the projection of the point onto the line segment is stored. Modified.
     * @return whether the method succeeded or not.
     */
-   public static boolean getOrthogonalProjectionOnLineSegment(Point2d pointToProject, Point2d lineSegmentStart, Point2d lineSegmentEnd, Point2d projectionToPack)
+   public static boolean getOrthogonalProjectionOnLineSegment(Point2d pointToProject, Point2d lineSegmentStart, Point2d lineSegmentEnd,
+                                                              Point2d projectionToPack)
    {
-      return getOrthogonalProjectionOnLineSegment(pointToProject, lineSegmentStart.getX(), lineSegmentStart.getY(), lineSegmentEnd.getX(), lineSegmentEnd.getY(),
-                                                  projectionToPack);
+      return getOrthogonalProjectionOnLineSegment(pointToProject, lineSegmentStart.getX(), lineSegmentStart.getY(), lineSegmentEnd.getX(),
+                                                  lineSegmentEnd.getY(), projectionToPack);
    }
 
    /**
@@ -869,8 +876,8 @@ public class GeometryTools
     * @param projectionToPack point in which the projection of the point onto the line segment is stored. Modified.
     * @return whether the method succeeded or not.
     */
-   public static boolean getOrthogonalProjectionOnLineSegment(Point2d pointToProject, double lineSegmentStartX, double lineSegmentStartY, double lineSegmentEndX,
-                                                              double lineSegmentEndY, Point2d projectionToPack)
+   public static boolean getOrthogonalProjectionOnLineSegment(Point2d pointToProject, double lineSegmentStartX, double lineSegmentStartY,
+                                                              double lineSegmentEndX, double lineSegmentEndY, Point2d projectionToPack)
    {
       double percentage = getPercentageAlongLineSegment(pointToProject.getX(), pointToProject.getY(), lineSegmentStartX, lineSegmentStartY, lineSegmentEndX,
                                                         lineSegmentEndY);
@@ -1190,8 +1197,8 @@ public class GeometryTools
     * @param closestPointOnLine2ToPack the 3D coordinates of the point Q are packed in this 3D point. Modified.
     * @throws ReferenceFrameMismatchException if the input arguments are not expressed in the same reference frame, except for {@code closestPointOnLine1ToPack} and  {@code closestPointOnLine2ToPack}.
     */
-   public static void getClosestPointsForTwoLines(FramePoint pointOnLine1, FrameVector lineDirection1, FramePoint pointOnLine2, FrameVector lineDirection2, FramePoint closestPointOnLine1ToPack,
-           FramePoint closestPointOnLine2ToPack)
+   public static void getClosestPointsForTwoLines(FramePoint pointOnLine1, FrameVector lineDirection1, FramePoint pointOnLine2, FrameVector lineDirection2,
+                                                  FramePoint closestPointOnLine1ToPack, FramePoint closestPointOnLine2ToPack)
    {
       pointOnLine1.checkReferenceFrameMatch(lineDirection1);
       pointOnLine2.checkReferenceFrameMatch(lineDirection2);
@@ -1200,7 +1207,8 @@ public class GeometryTools
       closestPointOnLine1ToPack.setToZero(pointOnLine1.getReferenceFrame());
       closestPointOnLine2ToPack.setToZero(pointOnLine1.getReferenceFrame());
 
-      getClosestPointsForTwoLines(pointOnLine1.getPoint(), lineDirection1.getVector(), pointOnLine2.getPoint(), lineDirection2.getVector(), closestPointOnLine1ToPack.getPoint(), closestPointOnLine2ToPack.getPoint());
+      getClosestPointsForTwoLines(pointOnLine1.getPoint(), lineDirection1.getVector(), pointOnLine2.getPoint(), lineDirection2.getVector(),
+                                  closestPointOnLine1ToPack.getPoint(), closestPointOnLine2ToPack.getPoint());
    }
 
    /**
@@ -1214,8 +1222,8 @@ public class GeometryTools
     * @param closestPointOnLine1ToPack the 3D coordinates of the point P are packed in this 3D point. Modified.
     * @param closestPointOnLine2ToPack the 3D coordinates of the point Q are packed in this 3D point. Modified.
     */
-   public static void getClosestPointsForTwoLines(Point3d pointOnLine1, Vector3d lineDirection1, Point3d pointOnLine2, Vector3d lineDirection2, Point3d closestPointOnLine1ToPack,
-           Point3d closestPointOnLine2ToPack)
+   public static void getClosestPointsForTwoLines(Point3d pointOnLine1, Vector3d lineDirection1, Point3d pointOnLine2, Vector3d lineDirection2,
+                                                  Point3d closestPointOnLine1ToPack, Point3d closestPointOnLine2ToPack)
    {
       // Switching to the notation used in http://geomalgorithms.com/a07-_distance.html.
       // The line1 is defined by (P0, u) and the line2 by (Q0, v).
@@ -1231,7 +1239,7 @@ public class GeometryTools
       double w0X = P0.getX() - Q0.getX();
       double w0Y = P0.getY() - Q0.getY();
       double w0Z = P0.getZ() - Q0.getZ();
-      
+
       double a = u.dot(u);
       double b = u.dot(v);
       double c = v.dot(v);
@@ -1246,9 +1254,10 @@ public class GeometryTools
       if (Math.abs(delta) <= EPSILON)
       {
          /*
-          * The lines are parallel, there's an infinite number of pairs,
-          * but for one chosen point on one of the lines, there's only one closest point to it on the other line.
-          * So let's chose arbitrarily a point on the line1 and calculate the point that is closest to it on the line2.
+          * The lines are parallel, there's an infinite number of pairs, but for
+          * one chosen point on one of the lines, there's only one closest point
+          * to it on the other line. So let's choose arbitrarily a point on the
+          * line1 and calculate the point that is closest to it on the line2.
           */
          sc = 0.0;
          tc = d / b;
@@ -1278,13 +1287,15 @@ public class GeometryTools
     * @return the coordinates of the intersection, or {@code null} if the line is parallel to the plane.
     * @throws ReferenceFrameMismatchException if the arguments are not expressed in the same frame.
     */
-   public static FramePoint getIntersectionBetweenLineAndPlane(FramePoint pointOnPlane, FrameVector planeNormal, FramePoint pointOnLine, FrameVector lineDirection)
+   public static FramePoint getIntersectionBetweenLineAndPlane(FramePoint pointOnPlane, FrameVector planeNormal, FramePoint pointOnLine,
+                                                               FrameVector lineDirection)
    {
       pointOnPlane.checkReferenceFrameMatch(planeNormal);
       pointOnLine.checkReferenceFrameMatch(lineDirection);
       pointOnPlane.checkReferenceFrameMatch(pointOnLine);
 
-      Point3d intersection = getIntersectionBetweenLineAndPlane(pointOnPlane.getPoint(), planeNormal.getVector(), pointOnLine.getPoint(), lineDirection.getVector());
+      Point3d intersection = getIntersectionBetweenLineAndPlane(pointOnPlane.getPoint(), planeNormal.getVector(), pointOnLine.getPoint(),
+                                                                lineDirection.getVector());
 
       if (intersection == null)
          return null;
@@ -1330,7 +1341,7 @@ public class GeometryTools
       else
       {
          d = numerator / denominator;
-         
+
          Point3d intersection = new Point3d();
          intersection.scaleAdd(d, l, l0);
          return intersection;
@@ -1433,7 +1444,8 @@ public class GeometryTools
     * @return {@code true} if an intersection line segment - plane exists, {@code false} otherwise.
     * @throws ReferenceFrameMismatchException if the arguments are not expressed in the same reference frame.
     */
-   public static boolean isLineSegmentIntersectingPlane(FramePoint pointOnPlane, FrameVector planeNormal, FramePoint lineSegmentStart, FramePoint lineSegmentEnd)
+   public static boolean isLineSegmentIntersectingPlane(FramePoint pointOnPlane, FrameVector planeNormal, FramePoint lineSegmentStart,
+                                                        FramePoint lineSegmentEnd)
    {
       pointOnPlane.checkReferenceFrameMatch(planeNormal);
       lineSegmentStart.checkReferenceFrameMatch(lineSegmentEnd);
@@ -1532,7 +1544,8 @@ public class GeometryTools
     * @return {@code true} if the two line segments intersect, {@code false} otherwise.
     * @throws ReferenceFrameMismatchException if the arguments are not expressed in the same reference frame.
     */
-   public static boolean doLineSegmentsIntersect(FramePoint2d lineSegmentStart1, FramePoint2d lineSegmentEnd1, FramePoint2d lineSegmentStart2, FramePoint2d lineSegmentEnd2)
+   public static boolean doLineSegmentsIntersect(FramePoint2d lineSegmentStart1, FramePoint2d lineSegmentEnd1, FramePoint2d lineSegmentStart2,
+                                                 FramePoint2d lineSegmentEnd2)
    {
       lineSegmentStart1.checkReferenceFrameMatch(lineSegmentEnd1);
       lineSegmentStart2.checkReferenceFrameMatch(lineSegmentEnd2);
@@ -1586,9 +1599,8 @@ public class GeometryTools
     * @param lineSegmentEnd2y y-coordinate of the second end point of the second line segment.
     * @return {@code true} if the two line segments intersect, {@code false} otherwise.
     */
-   public static boolean doLineSegmentsIntersect(double lineSegmentStart1x, double lineSegmentStart1y, double lineSegmentEnd1x,
-                                                 double lineSegmentEnd1y, double lineSegmentStart2x, double lineSegmentStart2y,
-                                                 double lineSegmentEnd2x, double lineSegmentEnd2y)
+   public static boolean doLineSegmentsIntersect(double lineSegmentStart1x, double lineSegmentStart1y, double lineSegmentEnd1x, double lineSegmentEnd1y,
+                                                 double lineSegmentStart2x, double lineSegmentStart2y, double lineSegmentEnd2x, double lineSegmentEnd2y)
    {
       double eps = Epsilons.ONE_TRILLIONTH;
       double r1numerator, r1denominator, r2numerator, r2denominator;
@@ -1678,7 +1690,8 @@ public class GeometryTools
     * @param intersectionToPack 2D point in which the result is stored. Modified.
     * @return the 2D point of intersection if the two lines intersect, {@code null} otherwise.
     */
-   public static Point2d getIntersectionBetweenTwoLines(Point2d firstPointOnLine1, Point2d secondPointOnLine1, Point2d firstPointOnLine2, Point2d secondPointOnLine2)
+   public static Point2d getIntersectionBetweenTwoLines(Point2d firstPointOnLine1, Point2d secondPointOnLine1, Point2d firstPointOnLine2,
+                                                        Point2d secondPointOnLine2)
    {
       Point2d intersection = new Point2d();
 
@@ -1690,7 +1703,8 @@ public class GeometryTools
       double pointOnLine2y = firstPointOnLine2.getY();
       double lineDirection2x = secondPointOnLine2.getX() - firstPointOnLine2.getX();
       double lineDirection2y = secondPointOnLine2.getY() - firstPointOnLine2.getY();
-      boolean success = getIntersectionBetweenTwoLines(pointOnLine1x, pointOnLine1y, lineDirection1x, lineDirection1y, pointOnLine2x, pointOnLine2y, lineDirection2x, lineDirection2y, intersection);
+      boolean success = getIntersectionBetweenTwoLines(pointOnLine1x, pointOnLine1y, lineDirection1x, lineDirection1y, pointOnLine2x, pointOnLine2y,
+                                                       lineDirection2x, lineDirection2y, intersection);
 
       if (!success)
          return null;
@@ -1745,7 +1759,8 @@ public class GeometryTools
     * @param intersectionToPack 2D point in which the result is stored. Modified.
     * @return {@code true} if the two lines intersect, {@code false} otherwise.
     */
-   public static boolean getIntersectionBetweenTwoLines(Point2d pointOnLine1, Vector2d lineDirection1, Point2d pointOnLine2, Vector2d lineDirection2, Point2d intersectionToPack)
+   public static boolean getIntersectionBetweenTwoLines(Point2d pointOnLine1, Vector2d lineDirection1, Point2d pointOnLine2, Vector2d lineDirection2,
+                                                        Point2d intersectionToPack)
    {
       return getIntersectionBetweenTwoLines(pointOnLine1.getX(), pointOnLine1.getY(), lineDirection1.getX(), lineDirection1.getY(), pointOnLine2.getX(),
                                             pointOnLine2.getY(), lineDirection2.getX(), lineDirection2.getY(), intersectionToPack);
@@ -1890,14 +1905,13 @@ public class GeometryTools
       double epsilon = 1.0E-12;
       if (Math.abs(determinant) < epsilon)
       { // The lines are parallel
-         // Check if they are collinear
+           // Check if they are collinear
          double cross = dx * lineDirection1y - dy * lineDirection1x;
          if (Math.abs(cross) < epsilon)
          {
             /*
-             *  The two lines are collinear.
-             *  There's an infinite number of intersection.
-             *  Let's just set the result to pointOnLine1.
+             * The two lines are collinear. There's an infinite number of
+             * intersection. Let's just set the result to pointOnLine1.
              */
             intersectionToPack.set(pointOnLine1x, pointOnLine1y);
             return true;
@@ -2022,7 +2036,7 @@ public class GeometryTools
          }
          else
          { // The line segments are parallel and intersecting, they must be overlapping.
-            // Let's first check for a common endpoint
+              // Let's first check for a common endpoint
             double epsilon = Epsilons.ONE_TRILLIONTH;
 
             // Let's find the first end point that is inside the other line segment and return it.
@@ -2187,14 +2201,15 @@ public class GeometryTools
       double epsilon = 1.0E-12;
       if (Math.abs(determinant) < epsilon)
       { // The line and the line segment are parallel
-         // Check if they are collinear
+           // Check if they are collinear
          double cross = dx * lineDirectionY - dy * lineDirectionX;
          if (Math.abs(cross) < epsilon)
          {
             /*
-             *  The line and the line segment are collinear.
-             *  There's an infinite number of intersection.
-             *  Let's just set the result to lineSegmentStart such that it at least belongs to the line segment.
+             * The line and the line segment are collinear. There's an infinite
+             * number of intersection. Let's just set the result to
+             * lineSegmentStart such that it at least belongs to the line
+             * segment.
              */
             intersectionToPack.set(lineSegmentStartX, lineSegmentStartY);
             return true;
@@ -2253,7 +2268,8 @@ public class GeometryTools
    public static boolean getIntersectionBetweenTwoPlanes(FramePoint pointOnPlane1, FrameVector planeNormal1, FramePoint pointOnPlane2, FrameVector planeNormal2,
                                                          FramePoint pointOnIntersectionToPack, FrameVector intersectionDirectionToPack)
    {
-      return getIntersectionBetweenTwoPlanes(pointOnPlane1, planeNormal1, pointOnPlane2, planeNormal2, Epsilons.ONE_MILLIONTH, pointOnIntersectionToPack, intersectionDirectionToPack);
+      return getIntersectionBetweenTwoPlanes(pointOnPlane1, planeNormal1, pointOnPlane2, planeNormal2, Epsilons.ONE_MILLIONTH, pointOnIntersectionToPack,
+                                             intersectionDirectionToPack);
    }
 
    /**
@@ -2319,7 +2335,8 @@ public class GeometryTools
    public static boolean getIntersectionBetweenTwoPlanes(Point3d pointOnPlane1, Vector3d planeNormal1, Point3d pointOnPlane2, Vector3d planeNormal2,
                                                          Point3d pointOnIntersectionToPack, Vector3d intersectionDirectionToPack)
    {
-      return getIntersectionBetweenTwoPlanes(pointOnPlane1, planeNormal1, pointOnPlane2, planeNormal2, Epsilons.ONE_MILLIONTH, pointOnIntersectionToPack, intersectionDirectionToPack);
+      return getIntersectionBetweenTwoPlanes(pointOnPlane1, planeNormal1, pointOnPlane2, planeNormal2, Epsilons.ONE_MILLIONTH, pointOnIntersectionToPack,
+                                             intersectionDirectionToPack);
    }
 
    /**
@@ -2388,8 +2405,10 @@ public class GeometryTools
 
       intersectionDirectionToPack.scale(1.0 / Math.sqrt(det));
 
-      double normal3DotPoint1 = intersectionDirectionToPack.getX() * pointOnPlane1.getX() + intersectionDirectionToPack.getY() * pointOnPlane1.getY() + intersectionDirectionToPack.getZ() * pointOnPlane1.getZ();
-      double normal3DotPoint2 = intersectionDirectionToPack.getX() * pointOnPlane2.getX() + intersectionDirectionToPack.getY() * pointOnPlane2.getY() + intersectionDirectionToPack.getZ() * pointOnPlane2.getZ();
+      double normal3DotPoint1 = intersectionDirectionToPack.getX() * pointOnPlane1.getX() + intersectionDirectionToPack.getY() * pointOnPlane1.getY()
+            + intersectionDirectionToPack.getZ() * pointOnPlane1.getZ();
+      double normal3DotPoint2 = intersectionDirectionToPack.getX() * pointOnPlane2.getX() + intersectionDirectionToPack.getY() * pointOnPlane2.getY()
+            + intersectionDirectionToPack.getZ() * pointOnPlane2.getZ();
       double d3 = 0.5 * (normal3DotPoint1 + normal3DotPoint2);
 
       pointOnIntersectionToPack.setX(d1 * normal3Cross2X + d2 * normal1Cross3X + d3 * normal2Cross1X);
@@ -2446,13 +2465,15 @@ public class GeometryTools
     * @return whether the plane normal is properly determined.
     * @throws ReferenceFrameMismatchException if the arguments are not expressed in the same reference frame, except for {@code normalToPack}.
     */
-   public static boolean getPlaneNormalGivenThreePoints(FramePoint firstPointOnPlane, FramePoint secondPointOnPlane, FramePoint thirdPointOnPlane, FrameVector normalToPack)
+   public static boolean getPlaneNormalGivenThreePoints(FramePoint firstPointOnPlane, FramePoint secondPointOnPlane, FramePoint thirdPointOnPlane,
+                                                        FrameVector normalToPack)
    {
       firstPointOnPlane.checkReferenceFrameMatch(secondPointOnPlane);
       firstPointOnPlane.checkReferenceFrameMatch(thirdPointOnPlane);
       normalToPack.setToZero(firstPointOnPlane.getReferenceFrame());
 
-      return getPlaneNormalGivenThreePoints(firstPointOnPlane.getPoint(), secondPointOnPlane.getPoint(), thirdPointOnPlane.getPoint(), normalToPack.getVector());
+      return getPlaneNormalGivenThreePoints(firstPointOnPlane.getPoint(), secondPointOnPlane.getPoint(), thirdPointOnPlane.getPoint(),
+                                            normalToPack.getVector());
    }
 
    /**
@@ -2504,11 +2525,11 @@ public class GeometryTools
       double v1_x = secondPointOnPlane.getX() - firstPointOnPlane.getX();
       double v1_y = secondPointOnPlane.getY() - firstPointOnPlane.getY();
       double v1_z = secondPointOnPlane.getZ() - firstPointOnPlane.getZ();
-   
+
       double v2_x = thirdPointOnPlane.getX() - firstPointOnPlane.getX();
       double v2_y = thirdPointOnPlane.getY() - firstPointOnPlane.getY();
       double v2_z = thirdPointOnPlane.getZ() - firstPointOnPlane.getZ();
-   
+
       normalToPack.setX(v1_y * v2_z - v1_z * v2_y);
       normalToPack.setY(v2_x * v1_z - v2_z * v1_x);
       normalToPack.setZ(v1_x * v2_y - v1_y * v2_x);
@@ -2544,7 +2565,8 @@ public class GeometryTools
     * @return the vector perpendicular to the line and pointing to the {@code point}, or {@code null} when the method fails.
     * @throws ReferenceFrameMismatchException if the arguments are not expressed in the same reference frame, except for {@code orthogonalProjectionToPack}.
     */
-   public static FrameVector getPerpendicularVectorFromLineToPoint(FramePoint point, FramePoint firstPointOnLine, FramePoint secondPointOnLine, FramePoint orthogonalProjectionToPack)
+   public static FrameVector getPerpendicularVectorFromLineToPoint(FramePoint point, FramePoint firstPointOnLine, FramePoint secondPointOnLine,
+                                                                   FramePoint orthogonalProjectionToPack)
    {
       FrameVector perpendicularVector = new FrameVector();
 
@@ -2576,7 +2598,8 @@ public class GeometryTools
     * @return {@code true} if the method succeeded, {@code false} otherwise.
     * @throws ReferenceFrameMismatchException if the arguments are not expressed in the same reference frame, except for {@code orthogonalProjectionToPack} and {@code perpendicularVectorToPack}.
     */
-   public static boolean getPerpendicularVectorFromLineToPoint(FramePoint point, FramePoint firstPointOnLine, FramePoint secondPointOnLine, FramePoint orthogonalProjectionToPack, FrameVector perpendicularVectorToPack)
+   public static boolean getPerpendicularVectorFromLineToPoint(FramePoint point, FramePoint firstPointOnLine, FramePoint secondPointOnLine,
+                                                               FramePoint orthogonalProjectionToPack, FrameVector perpendicularVectorToPack)
    {
       point.checkReferenceFrameMatch(firstPointOnLine);
       point.checkReferenceFrameMatch(secondPointOnLine);
@@ -2584,12 +2607,14 @@ public class GeometryTools
 
       if (orthogonalProjectionToPack == null)
       {
-         return getPerpendicularVectorFromLineToPoint(point.getPoint(), firstPointOnLine.getPoint(), secondPointOnLine.getPoint(), null, perpendicularVectorToPack.getVector());
+         return getPerpendicularVectorFromLineToPoint(point.getPoint(), firstPointOnLine.getPoint(), secondPointOnLine.getPoint(), null,
+                                                      perpendicularVectorToPack.getVector());
       }
       else
       {
          orthogonalProjectionToPack.setToZero(point.getReferenceFrame());
-         return getPerpendicularVectorFromLineToPoint(point.getPoint(), firstPointOnLine.getPoint(), secondPointOnLine.getPoint(), orthogonalProjectionToPack.getPoint(), perpendicularVectorToPack.getVector());
+         return getPerpendicularVectorFromLineToPoint(point.getPoint(), firstPointOnLine.getPoint(), secondPointOnLine.getPoint(),
+                                                      orthogonalProjectionToPack.getPoint(), perpendicularVectorToPack.getVector());
       }
    }
 
@@ -2615,7 +2640,8 @@ public class GeometryTools
     * @param orthogonalProjectionToPack a 3D point in which the projection of {@code point} onto the line is stored. Modified. Can be {@code null}.
     * @return the vector perpendicular to the line and pointing to the {@code point}, or {@code null} when the method fails.
     */
-   public static Vector3d getPerpendicularVectorFromLineToPoint(Point3d point, Point3d firstPointOnLine, Point3d secondPointOnLine, Point3d orthogonalProjectionToPack)
+   public static Vector3d getPerpendicularVectorFromLineToPoint(Point3d point, Point3d firstPointOnLine, Point3d secondPointOnLine,
+                                                                Point3d orthogonalProjectionToPack)
    {
       Vector3d perpendicularVector = new Vector3d();
       boolean success = getPerpendicularVectorFromLineToPoint(point, firstPointOnLine, secondPointOnLine, orthogonalProjectionToPack, perpendicularVector);
@@ -2645,7 +2671,8 @@ public class GeometryTools
     * @param perpendicularVectorToPack a 3D vector in which the vector perpendicular to the line and pointing to the {@code point} is stored. Modified. Can NOT be {@code null}.
     * @return {@code true} if the method succeeded, {@code false} otherwise.
     */
-   public static boolean getPerpendicularVectorFromLineToPoint(Point3d point, Point3d firstPointOnLine, Point3d secondPointOnLine, Point3d orthogonalProjectionToPack, Vector3d perpendicularVectorToPack)
+   public static boolean getPerpendicularVectorFromLineToPoint(Point3d point, Point3d firstPointOnLine, Point3d secondPointOnLine,
+                                                               Point3d orthogonalProjectionToPack, Vector3d perpendicularVectorToPack)
    {
       double lineDirectionX = secondPointOnLine.getX() - firstPointOnLine.getX();
       double lineDirectionY = secondPointOnLine.getY() - firstPointOnLine.getY();
@@ -2755,15 +2782,15 @@ public class GeometryTools
     * @throws ReferenceFrameMismatchException if the arguments are not expressed in the same reference frame, except for {@code topVertexBToPack}.
     */
    public static void getTopVertexOfIsoscelesTriangle(FramePoint baseVertexA, FramePoint baseVertexC, FrameVector trianglePlaneNormal,
-         double ccwAngleAboutNormalAtTopVertex, FramePoint topVertexBToPack)
+                                                      double ccwAngleAboutNormalAtTopVertex, FramePoint topVertexBToPack)
    {
       ReferenceFrame commonFrame = baseVertexA.getReferenceFrame();
       baseVertexC.checkReferenceFrameMatch(commonFrame);
       trianglePlaneNormal.checkReferenceFrameMatch(commonFrame);
       topVertexBToPack.setToZero(commonFrame);
 
-      getTopVertexOfIsoscelesTriangle(baseVertexA.getPoint(), baseVertexC.getPoint(), trianglePlaneNormal.getVector(),
-            ccwAngleAboutNormalAtTopVertex, topVertexBToPack.getPoint());
+      getTopVertexOfIsoscelesTriangle(baseVertexA.getPoint(), baseVertexC.getPoint(), trianglePlaneNormal.getVector(), ccwAngleAboutNormalAtTopVertex,
+                                      topVertexBToPack.getPoint());
    }
 
    /**
@@ -2778,7 +2805,7 @@ public class GeometryTools
     * @param topVertexBToPack the missing vertex B. Modified.
     */
    public static void getTopVertexOfIsoscelesTriangle(Point3d baseVertexA, Point3d baseVertexC, Vector3d trianglePlaneNormal,
-         double ccwAngleAboutNormalAtTopVertex, Point3d topVertexBToPack)
+                                                      double ccwAngleAboutNormalAtTopVertex, Point3d topVertexBToPack)
    {
       double baseEdgeACx = baseVertexC.getX() - baseVertexA.getX();
       double baseEdgeACy = baseVertexC.getY() - baseVertexA.getY();
@@ -2792,7 +2819,8 @@ public class GeometryTools
       double perpendicularBisectorY = trianglePlaneNormal.getZ() * baseEdgeACx - trianglePlaneNormal.getX() * baseEdgeACz;
       double perpendicularBisectorZ = trianglePlaneNormal.getX() * baseEdgeACy - trianglePlaneNormal.getY() * baseEdgeACx;
       double scale = lengthOfBisectorOfBase;
-      scale /= Math.sqrt(perpendicularBisectorX * perpendicularBisectorX + perpendicularBisectorY * perpendicularBisectorY + perpendicularBisectorZ * perpendicularBisectorZ);
+      scale /= Math.sqrt(perpendicularBisectorX * perpendicularBisectorX + perpendicularBisectorY * perpendicularBisectorY
+            + perpendicularBisectorZ * perpendicularBisectorZ);
       perpendicularBisectorX *= scale;
       perpendicularBisectorY *= scale;
       perpendicularBisectorZ *= scale;
@@ -2866,7 +2894,8 @@ public class GeometryTools
     */
    // FIXME same thing, the use of 3D arguments for doing computation in 2D is confusing and error prone.
    // FIXME the reference frames of the arguments need to checked and throw an exception if they are not the same.
-   public static boolean getZPlanePerpendicularBisector(FramePoint lineSegmentStart, FramePoint lineSegmentEnd, FramePoint bisectorStartToPack, FrameVector bisectorDirectionToPack)
+   public static boolean getZPlanePerpendicularBisector(FramePoint lineSegmentStart, FramePoint lineSegmentEnd, FramePoint bisectorStartToPack,
+                                                        FrameVector bisectorDirectionToPack)
    {
       Point2d lineStart2d = new Point2d(lineSegmentStart.getX(), lineSegmentStart.getY());
       Point2d lineEnd2d = new Point2d(lineSegmentEnd.getX(), lineSegmentEnd.getY());
@@ -2899,7 +2928,8 @@ public class GeometryTools
     * @param bisectorDirectionToPack a 2D vector in which the direction of the bisector is stored. Modified.
     * @return whether the perpendicular bisector could be determined or not.
     */
-   public static boolean getPerpendicularBisector(Point2d lineSegmentStart, Point2d lineSegmentEnd, Point2d bisectorStartToPack, Vector2d bisectorDirectionToPack)
+   public static boolean getPerpendicularBisector(Point2d lineSegmentStart, Point2d lineSegmentEnd, Point2d bisectorStartToPack,
+                                                  Vector2d bisectorDirectionToPack)
    {
       if (lineSegmentStart.distance(lineSegmentEnd) < Epsilons.ONE_TRILLIONTH)
          return false;
@@ -3128,7 +3158,8 @@ public class GeometryTools
          return;
       }
 
-      double rotationAngle = getAngleFromFirstToSecondVector(referenceNormalX, referenceNormalY, referenceNormalZ, rotatedNormalX, rotatedNormalY, rotatedNormalZ);
+      double rotationAngle = getAngleFromFirstToSecondVector(referenceNormalX, referenceNormalY, referenceNormalZ, rotatedNormalX, rotatedNormalY,
+                                                             rotatedNormalZ);
 
       rotationAxisX /= rotationAxisLength;
       rotationAxisY /= rotationAxisLength;
@@ -3296,7 +3327,8 @@ public class GeometryTools
     */
    public static double getAngleFromFirstToSecondVector(Vector3d firstVector, Vector3d secondVector)
    {
-      return getAngleFromFirstToSecondVector(firstVector.getX(), firstVector.getY(), firstVector.getZ(), secondVector.getX(), secondVector.getY(), secondVector.getZ());
+      return getAngleFromFirstToSecondVector(firstVector.getX(), firstVector.getY(), firstVector.getZ(), secondVector.getX(), secondVector.getY(),
+                                             secondVector.getZ());
    }
 
    /**
@@ -3317,7 +3349,8 @@ public class GeometryTools
     * @param secondVectorZ z-component of second the vector.
     * @return the angle in radians from the first vector to the second vector.
     */
-   public static double getAngleFromFirstToSecondVector(double firstVectorX, double firstVectorY, double firstVectorZ, double secondVectorX, double secondVectorY, double secondVectorZ)
+   public static double getAngleFromFirstToSecondVector(double firstVectorX, double firstVectorY, double firstVectorZ, double secondVectorX,
+                                                        double secondVectorY, double secondVectorZ)
    {
       double firstVectorLength = Math.sqrt(firstVectorX * firstVectorX + firstVectorY * firstVectorY + firstVectorZ * firstVectorZ);
 
@@ -3432,7 +3465,7 @@ public class GeometryTools
       double vector1Y = end1.getY() - start1.getY();
       double vector2X = end2.getX() - start2.getX();
       double vector2Y = end2.getY() - start2.getY();
-      
+
       return vector1X * vector2X + vector1Y * vector2Y;
    }
 
@@ -3505,7 +3538,7 @@ public class GeometryTools
     * @return {@code true} if the two planes are coincident, {@code false} otherwise.
     */
    public static boolean arePlanesCoincident(Point3d pointOnPlane1, Vector3d planeNormal1, Point3d pointOnPlane2, Vector3d planeNormal2, double angleEpsilon,
-                                           double distanceEpsilon)
+                                             double distanceEpsilon)
    {
       if (!areVectorsCollinear(planeNormal1, planeNormal2, angleEpsilon))
          return false;
@@ -3556,12 +3589,12 @@ public class GeometryTools
       if (GeometryTools.isFormingTriangle(lengthNeighbourSideA, lengthNeighbourSideB, lengthOppositeSideC))
       {
          return Math.acos((MathTools.square(lengthNeighbourSideA) + MathTools.square(lengthNeighbourSideB) - MathTools.square(lengthOppositeSideC))
-                          / (2.0 * lengthNeighbourSideA * lengthNeighbourSideB));
+               / (2.0 * lengthNeighbourSideA * lengthNeighbourSideB));
       }
       else
       {
-         throw new RuntimeException("Unable to build a Triangle of the given triangle sides a: "
-                                    + lengthNeighbourSideA + " b: " + lengthNeighbourSideB + " c: " + lengthOppositeSideC);
+         throw new RuntimeException("Unable to build a Triangle of the given triangle sides a: " + lengthNeighbourSideA + " b: " + lengthNeighbourSideB + " c: "
+               + lengthOppositeSideC);
       }
    }
 
