@@ -1,6 +1,7 @@
 package us.ihmc.robotics.geometry;
 
 import us.ihmc.robotics.geometry.LineSegment1d;
+import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.testing.MutationTestingTools;
 
@@ -12,6 +13,8 @@ import javax.vecmath.Vector2d;
 import javax.vecmath.Vector3d;
 
 import static org.junit.Assert.*;
+
+import java.util.Random;
 
 public class LineSegment1dTest
 {
@@ -56,7 +59,7 @@ public class LineSegment1dTest
 
    @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
-   public void lineOverlapsTest()
+   public void lineOverlapsTest1()
    {
       double firstPoint = -10;
       double secondPoint = 10;
@@ -89,6 +92,196 @@ public class LineSegment1dTest
       assertTrue(mainLine.isBetweenEndpointsInclusive(mainLine));
       assertFalse(mainLine.isBetweenEndpointsInclusive(otherLine2));
       assertTrue(mainLine.isBetweenEndpointsExclusive(new LineSegment1d(-5, 5)));
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @Test(timeout = 30000)
+   public void lineOverlapsTest2()
+   {
+      Random random = new Random(32423L);
+
+      // lineSegment2 inside lineSegment1
+      for (int i = 0; i < 1000; i++)
+      {
+         double lineSegmentStart1 = RandomTools.generateRandomDouble(random, 10.0);
+         double lineSegmentEnd1 = RandomTools.generateRandomDouble(random, 10.0);
+         LineSegment1d lineSegment1 = new LineSegment1d(lineSegmentStart1, lineSegmentEnd1);
+
+         double boundaryOne = lineSegmentStart1 < lineSegmentEnd1 ? lineSegmentStart1 : lineSegmentEnd1;
+         double boundaryTwo = lineSegmentStart1 > lineSegmentEnd1 ? lineSegmentStart1 : lineSegmentEnd1;
+         double lineSegmentStart2 = RandomTools.generateRandomDouble(random, boundaryOne, boundaryTwo);
+         double lineSegmentEnd2 = RandomTools.generateRandomDouble(random, boundaryOne, boundaryTwo);
+         LineSegment1d lineSegment2 = new LineSegment1d(lineSegmentStart2, lineSegmentEnd2);
+
+         double expectedOverlapStart = lineSegmentStart2;
+         double expectedOverlapEnd = lineSegmentEnd2;
+
+         LineSegment1d actualOverlap = new LineSegment1d();
+
+         boolean areOverlaping = lineSegment1.computeOverlap(lineSegment2, actualOverlap);
+         assertTrue(areOverlaping);
+
+         if (actualOverlap.getFirstEndpoint() != expectedOverlapStart)
+         {
+            assertTrue(expectedOverlapStart == actualOverlap.getSecondEndpoint());
+            assertTrue(expectedOverlapEnd == actualOverlap.getFirstEndpoint());
+         }
+         else
+         {
+            assertTrue(expectedOverlapStart == actualOverlap.getFirstEndpoint());
+            assertTrue(expectedOverlapEnd == actualOverlap.getSecondEndpoint());
+         }
+
+         areOverlaping = lineSegment2.computeOverlap(lineSegment1, actualOverlap);
+         assertTrue(areOverlaping);
+
+         if (actualOverlap.getFirstEndpoint() != expectedOverlapStart)
+         {
+            assertTrue(expectedOverlapStart == actualOverlap.getSecondEndpoint());
+            assertTrue(expectedOverlapEnd == actualOverlap.getFirstEndpoint());
+         }
+         else
+         {
+            assertTrue(expectedOverlapStart == actualOverlap.getFirstEndpoint());
+            assertTrue(expectedOverlapEnd == actualOverlap.getSecondEndpoint());
+         }
+      }
+
+      // lineSegment2 partially overlapping lineSegment1 case 1
+      for (int i = 0; i < 1000; i++)
+      {
+         double lineSegmentStart1 = RandomTools.generateRandomDouble(random, 10.0);
+         double lineSegmentEnd1 = RandomTools.generateRandomDouble(random, 10.0);
+         LineSegment1d lineSegment1 = new LineSegment1d(lineSegmentStart1, lineSegmentEnd1);
+
+         double boundaryOne = lineSegmentStart1 < lineSegmentEnd1 ? lineSegmentStart1 : lineSegmentEnd1;
+         double boundaryTwo = lineSegmentStart1 > lineSegmentEnd1 ? lineSegmentStart1 : lineSegmentEnd1;
+         double lineSegmentStart2 = RandomTools.generateRandomDouble(random, boundaryOne, boundaryTwo);
+         double lineSegmentEnd2 = RandomTools.generateRandomDouble(random, boundaryOne - 10.0, boundaryOne);
+         LineSegment1d lineSegment2 = new LineSegment1d(lineSegmentStart2, lineSegmentEnd2);
+
+         double expectedOverlapStart = lineSegmentStart2;
+         double expectedOverlapEnd = boundaryOne;
+
+         LineSegment1d actualOverlap = new LineSegment1d();
+
+         boolean areOverlaping = lineSegment1.computeOverlap(lineSegment2, actualOverlap);
+         assertTrue(areOverlaping);
+
+         if (actualOverlap.getFirstEndpoint() != expectedOverlapStart)
+         {
+            assertTrue(expectedOverlapStart == actualOverlap.getSecondEndpoint());
+            assertTrue(expectedOverlapEnd == actualOverlap.getFirstEndpoint());
+         }
+         else
+         {
+            assertTrue(expectedOverlapStart == actualOverlap.getFirstEndpoint());
+            assertTrue(expectedOverlapEnd == actualOverlap.getSecondEndpoint());
+         }
+
+         areOverlaping = lineSegment2.computeOverlap(lineSegment1, actualOverlap);
+         assertTrue(areOverlaping);
+
+         if (actualOverlap.getFirstEndpoint() != expectedOverlapStart)
+         {
+            assertTrue(expectedOverlapStart == actualOverlap.getSecondEndpoint());
+            assertTrue(expectedOverlapEnd == actualOverlap.getFirstEndpoint());
+         }
+         else
+         {
+            assertTrue(expectedOverlapStart == actualOverlap.getFirstEndpoint());
+            assertTrue(expectedOverlapEnd == actualOverlap.getSecondEndpoint());
+         }
+      }
+
+      // lineSegment2 partially overlapping lineSegment1 case 2
+      for (int i = 0; i < 1000; i++)
+      {
+         double lineSegmentStart1 = RandomTools.generateRandomDouble(random, 10.0);
+         double lineSegmentEnd1 = RandomTools.generateRandomDouble(random, 10.0);
+         LineSegment1d lineSegment1 = new LineSegment1d(lineSegmentStart1, lineSegmentEnd1);
+
+         double boundaryOne = lineSegmentStart1 < lineSegmentEnd1 ? lineSegmentStart1 : lineSegmentEnd1;
+         double boundaryTwo = lineSegmentStart1 > lineSegmentEnd1 ? lineSegmentStart1 : lineSegmentEnd1;
+         double lineSegmentStart2 = RandomTools.generateRandomDouble(random, boundaryOne, boundaryTwo);
+         double lineSegmentEnd2 = RandomTools.generateRandomDouble(random, boundaryTwo, boundaryTwo + 10.0);
+         LineSegment1d lineSegment2 = new LineSegment1d(lineSegmentStart2, lineSegmentEnd2);
+
+         double expectedOverlapStart = lineSegmentStart2;
+         double expectedOverlapEnd = boundaryTwo;
+
+         LineSegment1d actualOverlap = new LineSegment1d();
+
+         boolean areOverlaping = lineSegment1.computeOverlap(lineSegment2, actualOverlap);
+         assertTrue(areOverlaping);
+
+         if (actualOverlap.getFirstEndpoint() != expectedOverlapStart)
+         {
+            assertTrue(expectedOverlapStart == actualOverlap.getSecondEndpoint());
+            assertTrue(expectedOverlapEnd == actualOverlap.getFirstEndpoint());
+         }
+         else
+         {
+            assertTrue(expectedOverlapStart == actualOverlap.getFirstEndpoint());
+            assertTrue(expectedOverlapEnd == actualOverlap.getSecondEndpoint());
+         }
+
+         areOverlaping = lineSegment2.computeOverlap(lineSegment1, actualOverlap);
+         assertTrue(areOverlaping);
+
+         if (actualOverlap.getFirstEndpoint() != expectedOverlapStart)
+         {
+            assertTrue(expectedOverlapStart == actualOverlap.getSecondEndpoint());
+            assertTrue(expectedOverlapEnd == actualOverlap.getFirstEndpoint());
+         }
+         else
+         {
+            assertTrue(expectedOverlapStart == actualOverlap.getFirstEndpoint());
+            assertTrue(expectedOverlapEnd == actualOverlap.getSecondEndpoint());
+         }
+      }
+
+      // lineSegment2 not overlapping lineSegment1 case 1
+      for (int i = 0; i < 1000; i++)
+      {
+         double lineSegmentStart1 = RandomTools.generateRandomDouble(random, 10.0);
+         double lineSegmentEnd1 = RandomTools.generateRandomDouble(random, 10.0);
+         LineSegment1d lineSegment1 = new LineSegment1d(lineSegmentStart1, lineSegmentEnd1);
+
+         double max = lineSegmentStart1 > lineSegmentEnd1 ? lineSegmentStart1 : lineSegmentEnd1;
+         double lineSegmentStart2 = RandomTools.generateRandomDouble(random, max, max + 10.0);
+         double lineSegmentEnd2 = RandomTools.generateRandomDouble(random, max, max + 10.0);
+         LineSegment1d lineSegment2 = new LineSegment1d(lineSegmentStart2, lineSegmentEnd2);
+
+         LineSegment1d actualOverlap = new LineSegment1d();
+
+         boolean areOverlaping = lineSegment1.computeOverlap(lineSegment2, actualOverlap);
+         assertFalse(areOverlaping);
+
+         areOverlaping = lineSegment2.computeOverlap(lineSegment1, actualOverlap);
+         assertFalse(areOverlaping);
+      }
+
+      // lineSegment2 not overlapping lineSegment1 case 2
+      for (int i = 0; i < 1000; i++)
+      {
+         double lineSegmentStart1 = RandomTools.generateRandomDouble(random, 10.0);
+         double lineSegmentEnd1 = RandomTools.generateRandomDouble(random, 10.0);
+         LineSegment1d lineSegment1 = new LineSegment1d(lineSegmentStart1, lineSegmentEnd1);
+
+         double min = lineSegmentStart1 < lineSegmentEnd1 ? lineSegmentStart1 : lineSegmentEnd1;
+         double lineSegmentStart2 = RandomTools.generateRandomDouble(random, min - 10.0, min);
+         double lineSegmentEnd2 = RandomTools.generateRandomDouble(random, min - 10.0, min);
+         LineSegment1d lineSegment2 = new LineSegment1d(lineSegmentStart2, lineSegmentEnd2);
+
+         LineSegment1d actualOverlap = new LineSegment1d();
+
+         boolean areOverlaping = lineSegment1.computeOverlap(lineSegment2, actualOverlap);
+         assertFalse(areOverlaping);
+
+         areOverlaping = lineSegment2.computeOverlap(lineSegment1, actualOverlap);
+         assertFalse(areOverlaping);
+      }
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.1)
