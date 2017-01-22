@@ -2638,7 +2638,8 @@ public class GeometryToolsTest
       }
    }
 
-   @Test
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @Test(timeout = 30000)
    public void testGetOrthogonalProjectionOnLineSegment() throws Exception
    {
       Random random = new Random(232L);
@@ -2676,7 +2677,8 @@ public class GeometryToolsTest
       }
    }
 
-   @Test
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @Test(timeout = 30000)
    public void testGetXYDistance() throws Exception
    {
       Random random = new Random(232L);
