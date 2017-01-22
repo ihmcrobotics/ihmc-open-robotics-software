@@ -50,6 +50,7 @@ import javax.vecmath.Tuple3d;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.HeightMap;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
+import us.ihmc.graphicsDescription.graphInterfaces.SelectedVariableHolder;
 import us.ihmc.graphicsDescription.input.SelectedListener;
 import us.ihmc.graphicsDescription.structure.Graphics3DNode;
 import us.ihmc.graphicsDescription.structure.Graphics3DNodeType;
@@ -68,6 +69,7 @@ import us.ihmc.jMonkeyEngineToolkit.camera.OffscreenBufferVideoServer;
 import us.ihmc.jMonkeyEngineToolkit.camera.RenderedSceneHandler;
 import us.ihmc.jMonkeyEngineToolkit.camera.TrackingDollyCameraController;
 import us.ihmc.jMonkeyEngineToolkit.camera.ViewportAdapter;
+import us.ihmc.javaFXToolkit.graphing.JavaFX3DGraph;
 import us.ihmc.robotics.dataStructures.YoVariableHolder;
 import us.ihmc.robotics.dataStructures.registry.NameSpace;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -549,7 +551,7 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
                bookmarkedVariablesHolder, yoVariableExplorerTabbedPane);
          yoVariableExplorerTabbedPane.addVariableSearchPanel(variableSearchPanel);
 
-         myGraphArrayPanel = new GraphArrayPanel(selectedVariableHolder, myDataBuffer, jFrame);
+         myGraphArrayPanel = new GraphArrayPanel(selectedVariableHolder, myDataBuffer, jFrame, this);
       }
 
       if (jFrame != null)
@@ -827,8 +829,6 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
          YoVariablePanelJPopupMenu varPanelJPopupMenu = new YoVariablePanelJPopupMenu(myGraphArrayPanel, myEntryBoxArrayPanel, selectedVariableHolder, yoVariableExplorerTabbedPane,
                bookmarkedVariablesHolder);
          yoVariableExplorerTabbedPane.setVarPanelJPopupMenu(varPanelJPopupMenu);
-         
-         //sim.addExtraJpanel(new JavaFX3DPlotter().getPanel(), "3D Plotter");
       }
    }
 

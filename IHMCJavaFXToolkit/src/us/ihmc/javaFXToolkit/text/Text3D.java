@@ -7,6 +7,7 @@ import org.fxyz3d.shapes.primitives.Text3DMesh;
 import javafx.geometry.Bounds;
 import javafx.geometry.Point3D;
 import javafx.scene.Node;
+import javafx.scene.paint.Color;
 import us.ihmc.robotics.geometry.transformables.TransformablePoint3d;
 
 public class Text3D
@@ -15,23 +16,41 @@ public class Text3D
    private TransformablePoint3d positionDecoupled;
    private Point3D rotationAxisDecoupled;
    private double rotationAngleDecoupled;
+   private double fontHeightDecoupled;
+   private double fontThicknessDecoupled;
 
-   public Text3D(String text, double thickness)
+   public Text3D(String text)
    {
-      text3dMesh = new Text3DMesh(text, thickness);
+      text3dMesh = new Text3DMesh(text);
 
       positionDecoupled = new TransformablePoint3d();
       rotationAxisDecoupled = new Point3D(0.0, 0.0, 1.0);
-      rotationAngleDecoupled = 0.0;
+      fontThicknessDecoupled = 0.1;
 
       setFontHeight(1.0);
+   }
+   
+   public void setFontColor(Color color)
+   {
+      text3dMesh.setTextureModeNone(color);
    }
 
    public void setFontHeight(double fontHeight)
    {
-      text3dMesh.setScaleX(fontHeight / text3dMesh.getFontSize());
-      text3dMesh.setScaleY(fontHeight / text3dMesh.getFontSize());
-      text3dMesh.setScaleZ(fontHeight / text3dMesh.getFontSize());
+      fontHeightDecoupled = fontHeight;
+      
+      text3dMesh.setScaleX(fontHeightDecoupled / text3dMesh.getFontSize());
+      text3dMesh.setScaleY(fontHeightDecoupled / text3dMesh.getFontSize());
+      text3dMesh.setScaleZ(fontHeightDecoupled / text3dMesh.getFontSize());
+
+      setFontThickness(fontThicknessDecoupled);
+   }
+   
+   public void setFontThickness(double fontThickness)
+   {
+      fontThicknessDecoupled = fontThickness;
+      
+      text3dMesh.setHeight(fontThicknessDecoupled / (fontHeightDecoupled / text3dMesh.getFontSize()));
 
       setPosition(positionDecoupled);
       setOrientation(rotationAxisDecoupled, rotationAngleDecoupled);

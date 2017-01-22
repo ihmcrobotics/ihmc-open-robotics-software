@@ -80,7 +80,7 @@ public class GraphArrayWindow implements SelectGraphConfigurationCommandExecutor
       
       frame = new JFrame(windowName, configurationToUse);
       frame.setName(windowName);
-      myGraphArrayPanel = new GraphArrayPanel(selectedVariableHolder, dataBuffer, frame);
+      myGraphArrayPanel = new GraphArrayPanel(selectedVariableHolder, dataBuffer, frame, sim.getGUI());
 
       windowGUIActions = new StandardGUIActions();
 

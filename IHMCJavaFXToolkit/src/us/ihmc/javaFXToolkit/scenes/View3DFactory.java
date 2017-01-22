@@ -313,4 +313,20 @@ public class View3DFactory
       subScene.heightProperty().bind(pane.heightProperty());
       subScene.widthProperty().bind(pane.widthProperty());
    }
+   
+   /**
+    * Set background of scene or subscene.
+    * @param color
+    */
+   public void setBackgroundColor(Color color)
+   {
+      if (scene != null)
+      {
+         scene.setFill(color);
+      }
+      else
+      {
+         subScene.setFill(color);
+      }
+   }
 }
