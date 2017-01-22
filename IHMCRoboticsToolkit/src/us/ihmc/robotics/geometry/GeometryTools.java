@@ -3511,6 +3511,56 @@ public class GeometryTools
    }
 
    /**
+    * Tests if the two given vectors are collinear given a tolerance on the angle between the two vector axes in the range ]0; <i>pi</i>/2[.
+    * This method returns {@code true} if the two vectors are collinear, whether they are pointing in the same direction or in opposite directions.
+    * 
+    * <p>
+    * Edge cases:
+    * <ul>
+    *    <li> if the length of either vector is below {@code 1.0E-7}, this method fails and returns {@code false}.
+    * </ul>
+    * </p>
+    * 
+    * @param firstVector the first vector. Not modified.
+    * @param secondVector the second vector. Not modified.
+    * @param angleEpsilon tolerance on the angle in radians.
+    * @return {@code true} if the two vectors are collinear, {@code false} otherwise.
+    */
+   public static boolean areVectorsCollinear(Vector2d firstVector, Vector2d secondVector, double angleEpsilon)
+   {
+      return areVectorsCollinear(firstVector.getX(), firstVector.getY(), secondVector.getX(), secondVector.getY(), angleEpsilon);
+   }
+
+
+   /**
+    * Tests if the two given vectors are collinear given a tolerance on the angle between the two vector axes in the range ]0; <i>pi</i>/2[.
+    * This method returns {@code true} if the two vectors are collinear, whether they are pointing in the same direction or in opposite directions.
+    * 
+    * <p>
+    * Edge cases:
+    * <ul>
+    *    <li> if the length of either vector is below {@code 1.0E-7}, this method fails and returns {@code false}.
+    * </ul>
+    * </p>
+    * 
+    * @param firstVector the first vector. Not modified.
+    * @param secondVector the second vector. Not modified.
+    * @param angleEpsilon tolerance on the angle in radians.
+    * @return {@code true} if the two vectors are collinear, {@code false} otherwise.
+    */
+   public static boolean areVectorsCollinear(double firstVectorX, double firstVectorY, double secondVectorX, double secondVectorY, double angleEpsilon)
+   {
+      double firstVectorLength = Math.sqrt(firstVectorX * firstVectorX + firstVectorY * firstVectorY);
+      if (firstVectorLength < Epsilons.ONE_TEN_MILLIONTH)
+         return false;
+      double secondVectorLength = Math.sqrt(secondVectorX * secondVectorX + secondVectorY * secondVectorY);
+      if (secondVectorLength < Epsilons.ONE_TEN_MILLIONTH)
+         return false;
+      double dot = firstVectorX * secondVectorX + firstVectorY * secondVectorY;
+      return Math.abs(dot / (firstVectorLength * secondVectorLength)) > Math.cos(angleEpsilon);
+   }
+
+   /**
     * Tests if the two given planes are coincident:
     * <ul>
     *    <li> {@code planeNormal1} and {@code planeNormal2} are collinear given the tolerance {@code angleEpsilon}.

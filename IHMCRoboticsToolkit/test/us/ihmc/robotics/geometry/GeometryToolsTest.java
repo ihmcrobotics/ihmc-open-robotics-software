@@ -2722,7 +2722,7 @@ public class GeometryToolsTest
 
    @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
-   public void testAreVectorsCollinear() throws Exception
+   public void testAreVectorsCollinear3D() throws Exception
    {
       Random random = new Random(232L);
 
@@ -2763,6 +2763,44 @@ public class GeometryToolsTest
 
          Vector3d secondVector = new Vector3d();
          rotationMatrix.transform(firstVector, secondVector);
+
+         assertEquals(rotationAngle < angleEpsilon, GeometryTools.areVectorsCollinear(firstVector, secondVector, angleEpsilon));
+      }
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @Test(timeout = 30000)
+   public void testAreVectorsCollinear2D() throws Exception
+   {
+      Random random = new Random(232L);
+
+      for (int i = 0; i < ITERATIONS; i++)
+      {
+         Vector2d firstVector = RandomTools.generateRandomVector2d(random, RandomTools.generateRandomDouble(random, 0.0, 10.0));
+
+         double angleEpsilon = RandomTools.generateRandomDouble(random, 0.0, Math.PI / 2.0);
+         double rotationAngle = RandomTools.generateRandomDouble(random, 0.0, Math.PI / 2.0);
+
+         Vector2d secondVector = new Vector2d();
+         GeometryTools.rotateTuple2d(rotationAngle, firstVector, secondVector);
+         secondVector.normalize();
+         secondVector.scale(RandomTools.generateRandomDouble(random, 0.0, 10.0));
+
+         assertEquals(rotationAngle < angleEpsilon, GeometryTools.areVectorsCollinear(firstVector, secondVector, angleEpsilon));
+      }
+
+      // Try again with small values
+      for (int i = 0; i < ITERATIONS; i++)
+      {
+         Vector2d firstVector = RandomTools.generateRandomVector2d(random, RandomTools.generateRandomDouble(random, 0.0, 10.0));
+
+         double angleEpsilon = RandomTools.generateRandomDouble(random, 0.0, Epsilons.ONE_MILLIONTH * Math.PI / 2.0);
+         double rotationAngle = RandomTools.generateRandomDouble(random, 0.0, Epsilons.ONE_MILLIONTH * Math.PI / 2.0);
+         if (Math.abs(rotationAngle - angleEpsilon) < 1.0e-7)
+            continue; // This is the limit of accuracy.
+
+         Vector2d secondVector = new Vector2d();
+         GeometryTools.rotateTuple2d(rotationAngle, firstVector, secondVector);
 
          assertEquals(rotationAngle < angleEpsilon, GeometryTools.areVectorsCollinear(firstVector, secondVector, angleEpsilon));
       }
