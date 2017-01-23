@@ -390,6 +390,77 @@ public class GeometryToolsTest
       }
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @Test(timeout = 30000)
+   public void testDistanceBetweenTwoLines() throws Exception
+   {
+      Point3d closestPointOnLine1 = new Point3d();
+      Point3d closestPointOnLine2 = new Point3d();
+
+      Random random = new Random(176L);
+
+      for (int i = 0; i < ITERATIONS; i++)
+      {
+         Point3d lineStart1 = RandomTools.generateRandomPoint3d(random, -10.0, 10.0);
+         Vector3d lineDirection1 = RandomTools.generateRandomVector(random, RandomTools.generateRandomDouble(random, 0.5, 10.0));
+
+         // Make line2 == line1
+         Point3d lineStart2 = new Point3d(lineStart1);
+         Vector3d lineDirection2 = new Vector3d(lineDirection1);
+
+         // Shift orthogonally line2 away from line1.
+         Vector3d orthogonalToLine1 = RandomTools.generateRandomOrthogonalVector3d(random, lineDirection1, true);
+         double expectedMinimumDistance = RandomTools.generateRandomDouble(random, 0.0, 10.0);
+         lineStart2.scaleAdd(expectedMinimumDistance, orthogonalToLine1, lineStart1);
+
+         // Rotate line2 around the vector we shifted it along, so it preserves the minimum distance.
+         AxisAngle4d axisAngleAroundShiftVector = new AxisAngle4d(orthogonalToLine1, RandomTools.generateRandomDouble(random, Math.PI));
+         Matrix3d rotationMatrixAroundShiftVector = new Matrix3d();
+         rotationMatrixAroundShiftVector.set(axisAngleAroundShiftVector);
+         rotationMatrixAroundShiftVector.transform(lineDirection2);
+
+         // At this point, lineStart1 and lineStart2 are expected to be the closest points.
+         closestPointOnLine1.set(lineStart1);
+         closestPointOnLine2.set(lineStart2);
+
+         double actualMinimumDistance = GeometryTools.distanceBetweenTwoLines(lineStart1, lineDirection1, lineStart2, lineDirection2);
+         assertEquals(expectedMinimumDistance, actualMinimumDistance, EPSILON);
+
+         // Let's shift lineStart1 and lineStart2 along their respective line direction so they're not the closest points.
+         lineStart1.scaleAdd(RandomTools.generateRandomDouble(random, 10.0), lineDirection1, lineStart1);
+         lineStart2.scaleAdd(RandomTools.generateRandomDouble(random, 10.0), lineDirection2, lineStart2);
+
+         actualMinimumDistance = GeometryTools.distanceBetweenTwoLines(lineStart1, lineDirection1, lineStart2, lineDirection2);
+         assertEquals(expectedMinimumDistance, actualMinimumDistance, EPSILON);
+      }
+
+      // Test the parallel case. There's an infinite number of solutions but only one minimum distance between the two lines.
+      for (int i = 0; i < ITERATIONS; i++)
+      {
+         Point3d lineStart1 = RandomTools.generateRandomPoint3d(random, -10.0, 10.0);
+         Vector3d lineDirection1 = RandomTools.generateRandomVector(random, 1.0);
+
+         // Make line2 == line1
+         Point3d lineStart2 = new Point3d(lineStart1);
+         Vector3d lineDirection2 = new Vector3d(lineDirection1);
+
+         // Shift orthogonally line2 away from line1.
+         Vector3d orthogonalToLine1 = RandomTools.generateRandomOrthogonalVector3d(random, lineDirection1, true);
+         double expectedMinimumDistance = RandomTools.generateRandomDouble(random, 0.0, 10.0);
+         lineStart2.scaleAdd(expectedMinimumDistance, orthogonalToLine1, lineStart1);
+
+         double actualMinimumDistance = GeometryTools.distanceBetweenTwoLines(lineStart1, lineDirection1, lineStart2, lineDirection2);
+         assertEquals(expectedMinimumDistance, actualMinimumDistance, EPSILON);
+
+         // Let's shift lineStart1 and lineStart2 along their respective line direction (the minimum distance should remain the same).
+         lineStart1.scaleAdd(RandomTools.generateRandomDouble(random, 10.0), lineDirection1, lineStart1);
+         lineStart2.scaleAdd(RandomTools.generateRandomDouble(random, 10.0), lineDirection2, lineStart2);
+
+         actualMinimumDistance = GeometryTools.distanceBetweenTwoLines(lineStart1, lineDirection1, lineStart2, lineDirection2);
+         assertEquals(expectedMinimumDistance, actualMinimumDistance, EPSILON);
+      }
+   }
+
    /*
     * public void testGetClosestPointsForTwoLines() { Point3d p1 = new
     * Point3d(5, 5, 0); FramePoint point1 = new
@@ -1842,7 +1913,8 @@ public class GeometryToolsTest
          expectedPointOnLine1ToPack.set(lineStart1);
          expectedPointOnLine2ToPack.set(lineStart2);
 
-         GeometryTools.getClosestPointsForTwoLines(lineStart1, lineDirection1, lineStart2, lineDirection2, actualPointOnLine1ToPack, actualPointOnLine2ToPack);
+         double actualMinimumDistance = GeometryTools.getClosestPointsForTwoLines(lineStart1, lineDirection1, lineStart2, lineDirection2, actualPointOnLine1ToPack, actualPointOnLine2ToPack);
+         assertEquals(expectedMinimumDistance, actualMinimumDistance, EPSILON);
          JUnitTools.assertTuple3dEquals(expectedPointOnLine1ToPack, actualPointOnLine1ToPack, EPSILON);
          JUnitTools.assertTuple3dEquals(expectedPointOnLine2ToPack, actualPointOnLine2ToPack, EPSILON);
 
@@ -1850,7 +1922,8 @@ public class GeometryToolsTest
          lineStart1.scaleAdd(RandomTools.generateRandomDouble(random, 10.0), lineDirection1, lineStart1);
          lineStart2.scaleAdd(RandomTools.generateRandomDouble(random, 10.0), lineDirection2, lineStart2);
 
-         GeometryTools.getClosestPointsForTwoLines(lineStart1, lineDirection1, lineStart2, lineDirection2, actualPointOnLine1ToPack, actualPointOnLine2ToPack);
+         actualMinimumDistance = GeometryTools.getClosestPointsForTwoLines(lineStart1, lineDirection1, lineStart2, lineDirection2, actualPointOnLine1ToPack, actualPointOnLine2ToPack);
+         assertEquals(expectedMinimumDistance, actualMinimumDistance, EPSILON);
          JUnitTools.assertTuple3dEquals(expectedPointOnLine1ToPack, actualPointOnLine1ToPack, EPSILON);
          JUnitTools.assertTuple3dEquals(expectedPointOnLine2ToPack, actualPointOnLine2ToPack, EPSILON);
       }
@@ -1870,16 +1943,14 @@ public class GeometryToolsTest
          double expectedMinimumDistance = RandomTools.generateRandomDouble(random, 0.0, 10.0);
          lineStart2.scaleAdd(expectedMinimumDistance, orthogonalToLine1, lineStart1);
 
-         GeometryTools.getClosestPointsForTwoLines(lineStart1, lineDirection1, lineStart2, lineDirection2, actualPointOnLine1ToPack, actualPointOnLine2ToPack);
-         double actualMinimumDistance = actualPointOnLine1ToPack.distance(actualPointOnLine2ToPack);
+         double actualMinimumDistance = GeometryTools.getClosestPointsForTwoLines(lineStart1, lineDirection1, lineStart2, lineDirection2, actualPointOnLine1ToPack, actualPointOnLine2ToPack);
          assertEquals(expectedMinimumDistance, actualMinimumDistance, EPSILON);
 
          // Let's shift lineStart1 and lineStart2 along their respective line direction (the minimum distance should remain the same).
          lineStart1.scaleAdd(RandomTools.generateRandomDouble(random, 10.0), lineDirection1, lineStart1);
          lineStart2.scaleAdd(RandomTools.generateRandomDouble(random, 10.0), lineDirection2, lineStart2);
 
-         GeometryTools.getClosestPointsForTwoLines(lineStart1, lineDirection1, lineStart2, lineDirection2, actualPointOnLine1ToPack, actualPointOnLine2ToPack);
-         actualMinimumDistance = actualPointOnLine1ToPack.distance(actualPointOnLine2ToPack);
+         actualMinimumDistance = GeometryTools.getClosestPointsForTwoLines(lineStart1, lineDirection1, lineStart2, lineDirection2, actualPointOnLine1ToPack, actualPointOnLine2ToPack);
          assertEquals(expectedMinimumDistance, actualMinimumDistance, EPSILON);
       }
    }

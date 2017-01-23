@@ -381,6 +381,21 @@ public class GeometryTools
    }
 
    /**
+    * Given two 3D infinitely long lines, this methods computes the minimum distance between the two 3D lines.
+    * <a href="http://geomalgorithms.com/a07-_distance.html"> Useful link</a>.
+    * 
+    * @param pointOnLine1 a 3D point on the first line. Not modified.
+    * @param lineDirection1 the 3D direction of the first line. Not modified.
+    * @param pointOnLine2 a 3D point on the second line. Not modified.
+    * @param lineDirection2 the 3D direction of the second line. Not modified.
+    * @return the minimum distance between the two lines.
+    */
+   public static double distanceBetweenTwoLines(Point3d pointOnLine1, Vector3d lineDirection1, Point3d pointOnLine2, Vector3d lineDirection2)
+   {
+      return getClosestPointsForTwoLines(pointOnLine1, lineDirection1, pointOnLine2, lineDirection2, null, null);
+   }
+
+   /**
     * Returns a boolean value, stating whether a 2D point is on the left side of an infinitely long line defined by two points.
     * "Left side" is determined based on order of {@code lineStart} and {@code lineEnd}.
     * <p>
@@ -1427,9 +1442,10 @@ public class GeometryTools
     * @param lineDirection2 the 3D direction of the second line. Not modified.
     * @param closestPointOnLine1ToPack the 3D coordinates of the point P are packed in this 3D point. Modified.
     * @param closestPointOnLine2ToPack the 3D coordinates of the point Q are packed in this 3D point. Modified.
+    * @return the minimum distance between the two lines.
     * @throws ReferenceFrameMismatchException if the input arguments are not expressed in the same reference frame, except for {@code closestPointOnLine1ToPack} and  {@code closestPointOnLine2ToPack}.
     */
-   public static void getClosestPointsForTwoLines(FramePoint pointOnLine1, FrameVector lineDirection1, FramePoint pointOnLine2, FrameVector lineDirection2,
+   public static double getClosestPointsForTwoLines(FramePoint pointOnLine1, FrameVector lineDirection1, FramePoint pointOnLine2, FrameVector lineDirection2,
                                                   FramePoint closestPointOnLine1ToPack, FramePoint closestPointOnLine2ToPack)
    {
       pointOnLine1.checkReferenceFrameMatch(lineDirection1);
@@ -1439,8 +1455,8 @@ public class GeometryTools
       closestPointOnLine1ToPack.setToZero(pointOnLine1.getReferenceFrame());
       closestPointOnLine2ToPack.setToZero(pointOnLine1.getReferenceFrame());
 
-      getClosestPointsForTwoLines(pointOnLine1.getPoint(), lineDirection1.getVector(), pointOnLine2.getPoint(), lineDirection2.getVector(),
-                                  closestPointOnLine1ToPack.getPoint(), closestPointOnLine2ToPack.getPoint());
+      return getClosestPointsForTwoLines(pointOnLine1.getPoint(), lineDirection1.getVector(), pointOnLine2.getPoint(), lineDirection2.getVector(),
+                                         closestPointOnLine1ToPack.getPoint(), closestPointOnLine2ToPack.getPoint());
    }
 
    /**
@@ -1451,10 +1467,11 @@ public class GeometryTools
     * @param lineDirection1 the 3D direction of the first line. Not modified.
     * @param pointOnLine2 a 3D point on the second line. Not modified.
     * @param lineDirection2 the 3D direction of the second line. Not modified.
-    * @param closestPointOnLine1ToPack the 3D coordinates of the point P are packed in this 3D point. Modified.
-    * @param closestPointOnLine2ToPack the 3D coordinates of the point Q are packed in this 3D point. Modified.
+    * @param closestPointOnLine1ToPack the 3D coordinates of the point P are packed in this 3D point. Modified. Can be {@code null}.
+    * @param closestPointOnLine2ToPack the 3D coordinates of the point Q are packed in this 3D point. Modified. Can be {@code null}.
+    * @return the minimum distance between the two lines.
     */
-   public static void getClosestPointsForTwoLines(Point3d pointOnLine1, Vector3d lineDirection1, Point3d pointOnLine2, Vector3d lineDirection2,
+   public static double getClosestPointsForTwoLines(Point3d pointOnLine1, Vector3d lineDirection1, Point3d pointOnLine2, Vector3d lineDirection2,
                                                   Point3d closestPointOnLine1ToPack, Point3d closestPointOnLine2ToPack)
    {
       // Switching to the notation used in http://geomalgorithms.com/a07-_distance.html.
@@ -1500,8 +1517,21 @@ public class GeometryTools
          tc = (a * e - b * d) / delta;
       }
 
-      Psc.scaleAdd(sc, u, P0);
-      Qtc.scaleAdd(tc, v, Q0);
+      double PscX = sc * u.getX() + P0.getX();
+      double PscY = sc * u.getY() + P0.getY();
+      double PscZ = sc * u.getZ() + P0.getZ();
+
+      double QtcX = tc * v.getX() + Q0.getX();
+      double QtcY = tc * v.getY() + Q0.getY();
+      double QtcZ = tc * v.getZ() + Q0.getZ();
+
+      if (Psc != null)
+         Psc.set(PscX, PscY, PscZ);
+      if (Qtc != null)
+         Qtc.set(QtcX, QtcY, QtcZ);
+
+      double distanceSquared = MathTools.square(PscX - QtcX) + MathTools.square(PscY - QtcY) + MathTools.square(PscZ - QtcZ);
+      return Math.sqrt(distanceSquared);
    }
 
    /**
