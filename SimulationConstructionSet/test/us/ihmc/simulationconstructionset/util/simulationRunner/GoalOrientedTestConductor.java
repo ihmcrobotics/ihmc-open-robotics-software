@@ -182,7 +182,7 @@ public class GoalOrientedTestConductor implements VariableChangedListener
       
       while (scs.isSimulating())
       {
-         ThreadTools.sleep(15000);
+         Thread.yield();
       }
       
       if (assertionFailedMessage != null)

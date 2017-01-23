@@ -239,8 +239,8 @@ public class LineSegment1d
    public LineSegment3d toLineSegment3d(Point3d zero3d, Vector3d direction3d)
    {
       LineSegment3d lineSegment3d = new LineSegment3d();
-      lineSegment3d.getPointA().scaleAdd(endpoint1, direction3d, zero3d);
-      lineSegment3d.getPointB().scaleAdd(endpoint2, direction3d, zero3d);
+      lineSegment3d.getFirstEndpoint().scaleAdd(endpoint1, direction3d, zero3d);
+      lineSegment3d.getSecondEndpoint().scaleAdd(endpoint2, direction3d, zero3d);
       return lineSegment3d;
    }
 

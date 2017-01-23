@@ -1589,7 +1589,7 @@ public class MeshDataGenerator
 
    public static MeshDataHolder Line(LineSegment3d lineSegment3d, double width)
    {
-      return Line(lineSegment3d.getPointA(), lineSegment3d.getPointB(), width);
+      return Line(lineSegment3d.getFirstEndpoint(), lineSegment3d.getSecondEndpoint(), width);
    }
 
    public static MeshDataHolder Line(Point3d point0, Point3d point1, double width)
