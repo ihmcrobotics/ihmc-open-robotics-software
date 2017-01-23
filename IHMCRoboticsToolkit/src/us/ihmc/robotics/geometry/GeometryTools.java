@@ -135,8 +135,12 @@ public class GeometryTools
    {
       point.checkReferenceFrameMatch(firstPointOnLine);
       point.checkReferenceFrameMatch(secondPointOnLine);
-      return distanceFromPointToLine(point.getX(), point.getY(), firstPointOnLine.getX(), firstPointOnLine.getY(), secondPointOnLine.getX(),
-                                     secondPointOnLine.getY());
+
+      double pointOnLineX = firstPointOnLine.getX();
+      double pointOnLineY = firstPointOnLine.getY();
+      double lineDirectionX = secondPointOnLine.getX() - firstPointOnLine.getX();
+      double lineDirectionY = secondPointOnLine.getY() - firstPointOnLine.getY();
+      return distanceFromPointToLine(point.getX(), point.getY(), pointOnLineX, pointOnLineY, lineDirectionX, lineDirectionY);
    }
 
    /**
@@ -155,12 +159,34 @@ public class GeometryTools
     */
    public static double distanceFromPointToLine(Point2d point, Point2d firstPointOnLine, Point2d secondPointOnLine)
    {
-      return distanceFromPointToLine(point.getX(), point.getY(), firstPointOnLine.getX(), firstPointOnLine.getY(), secondPointOnLine.getX(),
-                                     secondPointOnLine.getY());
+      double pointOnLineX = firstPointOnLine.getX();
+      double pointOnLineY = firstPointOnLine.getY();
+      double lineDirectionX = secondPointOnLine.getX() - firstPointOnLine.getX();
+      double lineDirectionY = secondPointOnLine.getY() - firstPointOnLine.getY();
+      return distanceFromPointToLine(point.getX(), point.getY(), pointOnLineX, pointOnLineY, lineDirectionX, lineDirectionY);
    }
 
    /**
-    * Returns the minimum distance between a 2D point and an infinitely long 2D line defined by two points.
+    * Returns the minimum distance between a 2D point and an infinitely long 2D line defined by a point and a direction.
+    * <p>
+    * Edge cases:
+    * <ul>
+    *    <li> if {@code firstPointOnLine.distance(secondPointOnLine) < Epsilons.ONE_TRILLIONTH}, this method returns the distance between {@code firstPointOnLine} and the given {@code point}.
+    * </ul>
+    * </p>
+    *
+    * @param point 2D point to compute the distance from the line. Not modified.
+    * @param pointOnLine a point located on the line. Not modified.
+    * @param lineDirection the direction of the line. Not modified.
+    * @return the minimum distance between the 2D point and the 2D line.
+    */
+   public static double distanceFromPointToLine(Point2d point, Point2d pointOnLine, Vector2d lineDirection)
+   {
+      return distanceFromPointToLine(point.getX(), point.getY(), pointOnLine.getX(), pointOnLine.getY(), lineDirection.getX(), lineDirection.getY());
+   }
+
+   /**
+    * Returns the minimum distance between a 2D point and an infinitely long 2D line defined by a point and a direction.
     * <p>
     * Edge cases:
     * <ul>
@@ -170,31 +196,27 @@ public class GeometryTools
     *
     * @param pointX x-coordinate of the query.
     * @param pointY y-coordinate of the query.
-    * @param firstPointOnLineX x-coordinate of a first point located on the line.
-    * @param firstPointOnLineY y-coordinate of a first point located on the line.
-    * @param secondPointOnLineX x-coordinate of a second point located on the line.
-    * @param secondPointOnLineY y-coordinate of a second point located on the line.
+    * @param pointOnLineX x-coordinate of a point located on the line.
+    * @param pointOnLineY y-coordinate of a point located on the line.
+    * @param lineDirectionX x-component of the line direction.
+    * @param lineDirectionY y-component of the line direction.
     * @return the minimum distance between the 2D point and the 2D line.
     */
-   public static double distanceFromPointToLine(double pointX, double pointY, double firstPointOnLineX, double firstPointOnLineY, double secondPointOnLineX,
-                                                double secondPointOnLineY)
+   public static double distanceFromPointToLine(double pointX, double pointY, double pointOnLineX, double pointOnLineY, double lineDirectionX,
+                                                double lineDirectionY)
    {
-      double dx = firstPointOnLineY - pointY;
-      double dy = firstPointOnLineX - pointX;
+      double dx = pointOnLineY - pointY;
+      double dy = pointOnLineX - pointX;
+      double directionMagnitude = lineDirectionX * lineDirectionX + lineDirectionY * lineDirectionY;
+      directionMagnitude = Math.sqrt(directionMagnitude);
 
-      if (firstPointOnLineX - secondPointOnLineX == 0 && firstPointOnLineY - secondPointOnLineY == 0)
+      if (directionMagnitude < Epsilons.ONE_TRILLIONTH)
       {
          return Math.sqrt(dx * dx + dy * dy);
       }
       else
       {
-         double lineDx = secondPointOnLineX - firstPointOnLineX;
-         double lineDy = secondPointOnLineY - firstPointOnLineY;
-
-         double numerator = Math.abs(lineDx * dx - dy * lineDy);
-         double denominator = Math.sqrt(lineDx * lineDx + lineDy * lineDy);
-
-         return numerator / denominator;
+         return Math.abs(lineDirectionX * dx - dy * lineDirectionY) / directionMagnitude;
       }
    }
 
