@@ -1298,7 +1298,7 @@ public class GeometryTools
       double sc, tc;
 
       // check to see if the lines are parallel
-      if (Math.abs(delta) <= EPSILON)
+      if (delta <= EPSILON)
       {
          /*
           * The lines are parallel, there's an infinite number of pairs, but for
