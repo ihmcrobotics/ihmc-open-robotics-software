@@ -354,8 +354,8 @@ public class GeometryToolsTest
 
       for (int i = 0; i < ITERATIONS; i++)
       {
-         Point3d lineSegmentStart = RandomTools.generateRandomPoint3d(random, 10.0, 10.0);
-         Point3d lineSegmentEnd = RandomTools.generateRandomPoint3d(random, 10.0, 10.0);
+         Point3d lineSegmentStart = RandomTools.generateRandomPoint3d(random, -10.0, 10.0);
+         Point3d lineSegmentEnd = RandomTools.generateRandomPoint3d(random, -10.0, 10.0);
 
          Vector3d lineSegmentDirection = new Vector3d();
          lineSegmentDirection.sub(lineSegmentEnd, lineSegmentStart);
