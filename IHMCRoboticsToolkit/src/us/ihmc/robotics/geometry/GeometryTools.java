@@ -3722,6 +3722,30 @@ public class GeometryTools
    }
 
    /**
+    * Rotates the given {@code tupleOriginal} tuple by a axis-angle (ux, uy, uz, angle) and stores the result in the tuple {@code tupleTransformed}.
+    * 
+    * @param axisAngle the axis-angle used to rotate the tuple.
+    * @param tupleOriginal the original tuple. Not modified.
+    * @param tupleTransformed the tuple in which the transformed {@code original} is stored. Modified.
+    */
+   public static void rotateTuple3d(AxisAngle4d axisAngle, Tuple3d tupleOriginal, Tuple3d tupleTransformed)
+   {
+      double uNorm = Math.sqrt(axisAngle.getX() * axisAngle.getX() + axisAngle.getY() * axisAngle.getY() + axisAngle.getZ() * axisAngle.getZ());
+
+      if (uNorm < EPSILON)
+      {
+         return;
+      }
+      else
+      {
+         double halfTheta = 0.5 * axisAngle.getAngle();
+         double cosHalfTheta = Math.cos(halfTheta);
+         double sinHalfTheta = Math.sin(halfTheta) / uNorm;
+         rotateTuple3d(axisAngle.getX() * sinHalfTheta, axisAngle.getY() * sinHalfTheta, axisAngle.getZ() * sinHalfTheta, cosHalfTheta, tupleOriginal, tupleTransformed);
+      }
+   }
+
+   /**
     * Rotates the given {@code tupleOriginal} tuple by a quaternion (qx, qy, qz, qs) and stores the result in the tuple {@code tupleTransformed}.
     * 
     * @param quaternion the quaternion used to rotate the tuple.
@@ -3742,7 +3766,7 @@ public class GeometryTools
     */
    public static void rotateTuple3d(double qx, double qy, double qz, double qs, Tuple3d tupleOriginal, Tuple3d tupleTransformed)
    {
-      double norm = qx * qx + qy * qy + qz * qz + qs * qs;
+      double norm = Math.sqrt(qx * qx + qy * qy + qz * qz + qs * qs);
 
       if (norm < EPSILON)
       {

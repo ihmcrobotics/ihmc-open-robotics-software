@@ -2922,6 +2922,7 @@ public class GeometryToolsTest
    {
       Random random = new Random(232L);
 
+      // Test quaternion method
       for (int i = 0; i < ITERATIONS; i++)
       {
          Quat4d quaternion = RandomTools.generateRandomQuaternion(random, 2.0 * Math.PI);
@@ -2938,6 +2939,25 @@ public class GeometryToolsTest
 
          JUnitTools.assertTuple3dEquals(expectedTransformed, actualTransformed, Epsilons.ONE_TRILLIONTH);
       }
+
+      // Test axis-angle method
+      for (int i = 0; i < ITERATIONS; i++)
+      {
+         AxisAngle4d axisAngle = RandomTools.generateRandomRotation(random, 2.0 * Math.PI);
+         Vector3d original = RandomTools.generateRandomVector(random, RandomTools.generateRandomDouble(random, 10.0));
+
+         Matrix3d rotationMatrix = new Matrix3d();
+         rotationMatrix.set(axisAngle);
+
+         Vector3d expectedTransformed = new Vector3d();
+         rotationMatrix.transform(original, expectedTransformed);
+
+         Vector3d actualTransformed = new Vector3d();
+         GeometryTools.rotateTuple3d(axisAngle, original, actualTransformed);
+
+         JUnitTools.assertTuple3dEquals(expectedTransformed, actualTransformed, Epsilons.ONE_TRILLIONTH);
+      }
+
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.1)
