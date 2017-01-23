@@ -3304,81 +3304,163 @@ public class GeometryToolsTest
 
    @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
-   public void testAreLineSegmentsCollinear2D() throws Exception
+   public void testAreLinesCollinear2D() throws Exception
    {
       Random random = new Random(232L);
 
       for (int i = 0; i < ITERATIONS; i++)
       {
-         Vector2d lineSegmentDirection1 = RandomTools.generateRandomVector2d(random, RandomTools.generateRandomDouble(random, 0.0, 10.0));
+         Vector2d lineDirection1 = RandomTools.generateRandomVector2d(random, RandomTools.generateRandomDouble(random, 0.0, 10.0));
 
          double angleEpsilon = RandomTools.generateRandomDouble(random, 0.0, Math.PI / 2.0);
          double rotationAngle = RandomTools.generateRandomDouble(random, 0.0, Math.PI / 2.0);
 
-         Vector2d lineSegmentDirection2 = new Vector2d();
-         GeometryTools.rotateTuple2d(rotationAngle, lineSegmentDirection1, lineSegmentDirection2);
-         lineSegmentDirection2.normalize();
-         lineSegmentDirection2.scale(RandomTools.generateRandomDouble(random, 0.0, 10.0));
+         Vector2d lineDirection2 = new Vector2d();
+         GeometryTools.rotateTuple2d(rotationAngle, lineDirection1, lineDirection2);
+         lineDirection2.normalize();
+         lineDirection2.scale(RandomTools.generateRandomDouble(random, 0.0, 10.0));
 
-         Point2d lineSegmentStart1 = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
-         Point2d lineSegmentEnd1 = new Point2d();
-         lineSegmentEnd1.scaleAdd(RandomTools.generateRandomDouble(random, 10.0), lineSegmentDirection1, lineSegmentStart1);
+         Point2d firstPointOnLine1 = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
+         Point2d secondPointOnLine1 = new Point2d();
+         secondPointOnLine1.scaleAdd(RandomTools.generateRandomDouble(random, 10.0), lineDirection1, firstPointOnLine1);
 
-         Vector2d orthogonal = GeometryTools.getPerpendicularVector(lineSegmentDirection1);
+         Vector2d orthogonal = GeometryTools.getPerpendicularVector(lineDirection1);
          orthogonal.normalize();
          double distance = RandomTools.generateRandomDouble(random, 0.0, 10.0);
          double distanceEspilon = RandomTools.generateRandomDouble(random, 0.0, 10.0);
 
-         Point2d lineSegmentStart2 = new Point2d();
-         lineSegmentStart2.scaleAdd(distance, orthogonal, lineSegmentStart1);
-         Point2d lineSegmentEnd2 = new Point2d();
-         lineSegmentEnd2.scaleAdd(RandomTools.generateRandomDouble(random, 10.0), lineSegmentDirection2, lineSegmentStart2);
+         Point2d firstPointOnLine2 = new Point2d();
+         firstPointOnLine2.scaleAdd(distance, orthogonal, firstPointOnLine1);
+         Point2d secondPointOnLine2 = new Point2d();
+         secondPointOnLine2.scaleAdd(RandomTools.generateRandomDouble(random, 10.0), lineDirection2, firstPointOnLine2);
 
          boolean expectedCollinear = rotationAngle < angleEpsilon && distance < distanceEspilon;
-         boolean actualCollinear = GeometryTools.areLinesCollinear(lineSegmentStart1, lineSegmentEnd1, lineSegmentStart2, lineSegmentEnd2, angleEpsilon, distanceEspilon);
+         boolean actualCollinear = GeometryTools.areLinesCollinear(firstPointOnLine1, secondPointOnLine1, firstPointOnLine2, secondPointOnLine2, angleEpsilon, distanceEspilon);
          assertEquals(expectedCollinear, actualCollinear);
       }
 
       // Test only the distance with parallel line segments.
       for (int i = 0; i < ITERATIONS; i++)
       {
-         Vector2d lineSegmentDirection = RandomTools.generateRandomVector2d(random, RandomTools.generateRandomDouble(random, 0.0, 10.0));
-         Vector2d orthogonal = GeometryTools.getPerpendicularVector(lineSegmentDirection);
+         Vector2d lineDirection = RandomTools.generateRandomVector2d(random, RandomTools.generateRandomDouble(random, 0.0, 10.0));
+         Vector2d orthogonal = GeometryTools.getPerpendicularVector(lineDirection);
          orthogonal.normalize();
 
          double angleEpsilon = Epsilons.ONE_MILLIONTH;
 
-         Point2d lineSegmentStart1 = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
-         Point2d lineSegmentEnd1 = new Point2d();
-         lineSegmentEnd1.scaleAdd(RandomTools.generateRandomDouble(random, 10.0), lineSegmentDirection, lineSegmentStart1);
+         Point2d firstPointOnLine1 = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
+         Point2d secondPointOnLine1 = new Point2d();
+         secondPointOnLine1.scaleAdd(RandomTools.generateRandomDouble(random, 10.0), lineDirection, firstPointOnLine1);
 
          double distance = RandomTools.generateRandomDouble(random, 0.0, 10.0);
          double distanceEspilon = RandomTools.generateRandomDouble(random, 0.0, 10.0);
 
-         Point2d lineSegmentStart2 = new Point2d();
-         lineSegmentStart2.scaleAdd(distance, orthogonal, lineSegmentStart1);
-         Point2d lineSegmentEnd2 = new Point2d();
-         lineSegmentEnd2.scaleAdd(RandomTools.generateRandomDouble(random, 10.0), lineSegmentDirection, lineSegmentStart2);
-         lineSegmentStart2.scaleAdd(RandomTools.generateRandomDouble(random, 10.0), lineSegmentDirection, lineSegmentStart2);
+         Point2d firstPointOnLine2 = new Point2d();
+         firstPointOnLine2.scaleAdd(distance, orthogonal, firstPointOnLine1);
+         Point2d secondPointOnLine2 = new Point2d();
+         secondPointOnLine2.scaleAdd(RandomTools.generateRandomDouble(random, 10.0), lineDirection, firstPointOnLine2);
+         firstPointOnLine2.scaleAdd(RandomTools.generateRandomDouble(random, 10.0), lineDirection, firstPointOnLine2);
 
          boolean expectedCollinear = distance < distanceEspilon;
          boolean actualCollinear;
-         actualCollinear = GeometryTools.areLinesCollinear(lineSegmentStart1, lineSegmentEnd1, lineSegmentStart2, lineSegmentEnd2, angleEpsilon, distanceEspilon);
+         actualCollinear = GeometryTools.areLinesCollinear(firstPointOnLine1, secondPointOnLine1, firstPointOnLine2, secondPointOnLine2, angleEpsilon, distanceEspilon);
          assertEquals(expectedCollinear, actualCollinear);
-         actualCollinear = GeometryTools.areLinesCollinear(lineSegmentStart1, lineSegmentEnd1, lineSegmentEnd2, lineSegmentStart2, angleEpsilon, distanceEspilon);
+         actualCollinear = GeometryTools.areLinesCollinear(firstPointOnLine1, secondPointOnLine1, secondPointOnLine2, firstPointOnLine2, angleEpsilon, distanceEspilon);
          assertEquals(expectedCollinear, actualCollinear);
-         actualCollinear = GeometryTools.areLinesCollinear(lineSegmentEnd1, lineSegmentStart1, lineSegmentEnd2, lineSegmentStart2, angleEpsilon, distanceEspilon);
+         actualCollinear = GeometryTools.areLinesCollinear(secondPointOnLine1, firstPointOnLine1, secondPointOnLine2, firstPointOnLine2, angleEpsilon, distanceEspilon);
          assertEquals(expectedCollinear, actualCollinear);
-         actualCollinear = GeometryTools.areLinesCollinear(lineSegmentEnd1, lineSegmentStart1, lineSegmentStart2, lineSegmentEnd2, angleEpsilon, distanceEspilon);
+         actualCollinear = GeometryTools.areLinesCollinear(secondPointOnLine1, firstPointOnLine1, firstPointOnLine2, secondPointOnLine2, angleEpsilon, distanceEspilon);
          assertEquals(expectedCollinear, actualCollinear);
 
-         actualCollinear = GeometryTools.areLinesCollinear(lineSegmentStart2, lineSegmentEnd2, lineSegmentStart1, lineSegmentEnd1, angleEpsilon, distanceEspilon);
+         actualCollinear = GeometryTools.areLinesCollinear(firstPointOnLine2, secondPointOnLine2, firstPointOnLine1, secondPointOnLine1, angleEpsilon, distanceEspilon);
          assertEquals(expectedCollinear, actualCollinear);                                                                                
-         actualCollinear = GeometryTools.areLinesCollinear(lineSegmentEnd2, lineSegmentStart2, lineSegmentStart1, lineSegmentEnd1, angleEpsilon, distanceEspilon);
+         actualCollinear = GeometryTools.areLinesCollinear(secondPointOnLine2, firstPointOnLine2, firstPointOnLine1, secondPointOnLine1, angleEpsilon, distanceEspilon);
          assertEquals(expectedCollinear, actualCollinear);                                                                                
-         actualCollinear = GeometryTools.areLinesCollinear(lineSegmentEnd2, lineSegmentStart2, lineSegmentEnd1, lineSegmentStart1, angleEpsilon, distanceEspilon);
+         actualCollinear = GeometryTools.areLinesCollinear(secondPointOnLine2, firstPointOnLine2, secondPointOnLine1, firstPointOnLine1, angleEpsilon, distanceEspilon);
          assertEquals(expectedCollinear, actualCollinear);                                                                                
-         actualCollinear = GeometryTools.areLinesCollinear(lineSegmentStart2, lineSegmentEnd2, lineSegmentEnd1, lineSegmentStart1, angleEpsilon, distanceEspilon);
+         actualCollinear = GeometryTools.areLinesCollinear(firstPointOnLine2, secondPointOnLine2, secondPointOnLine1, firstPointOnLine1, angleEpsilon, distanceEspilon);
+         assertEquals(expectedCollinear, actualCollinear);
+      }
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @Test(timeout = 30000)
+   public void testAreLinesCollinear3D() throws Exception
+   {
+      Random random = new Random(2312L);
+
+      for (int i = 0; i < ITERATIONS; i++)
+      {
+         Vector3d lineDirection1 = RandomTools.generateRandomVector(random, RandomTools.generateRandomDouble(random, 0.0, 10.0));
+
+         double angleEpsilon = RandomTools.generateRandomDouble(random, 0.0, Math.PI / 2.0);
+         double rotationAngle = RandomTools.generateRandomDouble(random, 0.0, Math.PI / 2.0);
+         Vector3d orthogonal = RandomTools.generateRandomOrthogonalVector3d(random, lineDirection1, true);
+         AxisAngle4d axisAngle = new AxisAngle4d(orthogonal, rotationAngle);
+
+         Vector3d lineDirection2 = new Vector3d();
+         GeometryTools.rotateTuple3d(axisAngle, lineDirection1, lineDirection2);
+         lineDirection2.normalize();
+         lineDirection2.scale(RandomTools.generateRandomDouble(random, 0.0, 10.0));
+
+         Point3d firstPointOnLine1 = RandomTools.generateRandomPoint3d(random, -10.0, 10.0);
+         Point3d secondPointOnLine1 = new Point3d();
+         secondPointOnLine1.scaleAdd(RandomTools.generateRandomDouble(random, 0.0, 10.0), lineDirection1, firstPointOnLine1);
+
+         double distance = RandomTools.generateRandomDouble(random, 0.0, 10.0);
+         double distanceEspilon = RandomTools.generateRandomDouble(random, 0.0, 10.0);
+
+         Point3d firstPointOnLine2 = new Point3d();
+         firstPointOnLine2.scaleAdd(distance, orthogonal, firstPointOnLine1);
+         Point3d secondPointOnLine2 = new Point3d();
+         secondPointOnLine2.scaleAdd(RandomTools.generateRandomDouble(random, 0.0, 10.0), lineDirection2, firstPointOnLine2);
+
+         boolean expectedCollinear = rotationAngle < angleEpsilon && distance < distanceEspilon;
+         boolean actualCollinear = GeometryTools.areLinesCollinear(firstPointOnLine1, secondPointOnLine1, firstPointOnLine2, secondPointOnLine2, angleEpsilon, distanceEspilon);
+         assertEquals(expectedCollinear, actualCollinear);
+         actualCollinear = GeometryTools.areLinesCollinear(firstPointOnLine1, lineDirection1, firstPointOnLine2, lineDirection2, angleEpsilon, distanceEspilon);
+         assertEquals(expectedCollinear, actualCollinear);
+      }
+
+      // Test only the distance with parallel line segments.
+      for (int i = 0; i < ITERATIONS; i++)
+      {
+         Vector3d lineDirection = RandomTools.generateRandomVector(random, RandomTools.generateRandomDouble(random, 0.0, 10.0));
+         Vector3d orthogonal = RandomTools.generateRandomOrthogonalVector3d(random, lineDirection, true);
+
+         double angleEpsilon = Epsilons.ONE_MILLIONTH;
+
+         Point3d firstPointOnLine1 = RandomTools.generateRandomPoint3d(random, -10.0, 10.0);
+         Point3d secondPointOnLine1 = new Point3d();
+         secondPointOnLine1.scaleAdd(RandomTools.generateRandomDouble(random, 10.0), lineDirection, firstPointOnLine1);
+
+         double distance = RandomTools.generateRandomDouble(random, 0.0, 10.0);
+         double distanceEspilon = RandomTools.generateRandomDouble(random, 0.0, 10.0);
+
+         Point3d firstPointOnLine2 = new Point3d();
+         firstPointOnLine2.scaleAdd(distance, orthogonal, firstPointOnLine1);
+         Point3d secondPointOnLine2 = new Point3d();
+         secondPointOnLine2.scaleAdd(RandomTools.generateRandomDouble(random, 10.0), lineDirection, firstPointOnLine2);
+         firstPointOnLine2.scaleAdd(RandomTools.generateRandomDouble(random, 10.0), lineDirection, firstPointOnLine2);
+
+         boolean expectedCollinear = distance < distanceEspilon;
+         boolean actualCollinear;
+         actualCollinear = GeometryTools.areLinesCollinear(firstPointOnLine1, secondPointOnLine1, firstPointOnLine2, secondPointOnLine2, angleEpsilon, distanceEspilon);
+         assertEquals(expectedCollinear, actualCollinear);
+         actualCollinear = GeometryTools.areLinesCollinear(firstPointOnLine1, secondPointOnLine1, secondPointOnLine2, firstPointOnLine2, angleEpsilon, distanceEspilon);
+         assertEquals(expectedCollinear, actualCollinear);
+         actualCollinear = GeometryTools.areLinesCollinear(secondPointOnLine1, firstPointOnLine1, secondPointOnLine2, firstPointOnLine2, angleEpsilon, distanceEspilon);
+         assertEquals(expectedCollinear, actualCollinear);
+         actualCollinear = GeometryTools.areLinesCollinear(secondPointOnLine1, firstPointOnLine1, firstPointOnLine2, secondPointOnLine2, angleEpsilon, distanceEspilon);
+         assertEquals(expectedCollinear, actualCollinear);
+
+         actualCollinear = GeometryTools.areLinesCollinear(firstPointOnLine2, secondPointOnLine2, firstPointOnLine1, secondPointOnLine1, angleEpsilon, distanceEspilon);
+         assertEquals(expectedCollinear, actualCollinear);                                                                                
+         actualCollinear = GeometryTools.areLinesCollinear(secondPointOnLine2, firstPointOnLine2, firstPointOnLine1, secondPointOnLine1, angleEpsilon, distanceEspilon);
+         assertEquals(expectedCollinear, actualCollinear);                                                                                
+         actualCollinear = GeometryTools.areLinesCollinear(secondPointOnLine2, firstPointOnLine2, secondPointOnLine1, firstPointOnLine1, angleEpsilon, distanceEspilon);
+         assertEquals(expectedCollinear, actualCollinear);                                                                                
+         actualCollinear = GeometryTools.areLinesCollinear(firstPointOnLine2, secondPointOnLine2, secondPointOnLine1, firstPointOnLine1, angleEpsilon, distanceEspilon);
          assertEquals(expectedCollinear, actualCollinear);
       }
    }
