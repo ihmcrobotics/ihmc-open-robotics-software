@@ -53,7 +53,7 @@ dependencies {
     compile ihmc.getProjectDependency(":IHMCHumanoidRobotics")
     compile ihmc.getProjectDependency(":IHMCQuadrupedRobotics")
     compile ihmc.getProjectDependency(":IHMCWholeBodyController")
-    compile ihmc.getProjectDependency(":SDFLoader")
+    compile ihmc.getProjectDependency(":ModelFileLoader")
     compile ihmc.getProjectDependency(":IHMCGraphicsDescription")
     compile ihmc.getProjectDependency(":IHMCCommunication")
     compile ihmc.getProjectDependency(":IHMCJMonkeyEngineToolkit")

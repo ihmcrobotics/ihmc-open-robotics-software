@@ -49,7 +49,7 @@ dependencies {
 //   compile ihmc.getProjectDependency(":IHMCJavaToolkit")
    compile ihmc.getProjectDependency(":IHMCRoboticsToolkit")
    compile ihmc.getProjectDependency(":IHMCCommunication")
-//   compile ihmc.getProjectDependency(":SDFLoader")
+//   compile ihmc.getProjectDependency(":ModelFileLoader")
    compile ihmc.getProjectDependency(":IHMCHumanoidRobotics")
    compile ihmc.getProjectDependency(":SensorProcessing")
 //   compile ihmc.getProjectDependency(":IHMCRobotDescription")
