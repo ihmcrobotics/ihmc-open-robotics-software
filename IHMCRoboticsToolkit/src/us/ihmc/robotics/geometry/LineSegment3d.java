@@ -7,132 +7,90 @@ import us.ihmc.robotics.hyperCubeTree.OneDimensionalBounds;
 
 public class LineSegment3d
 {
-   private final Point3d pointA = new Point3d();
-   private final Point3d pointB = new Point3d();
-
-   private final Vector3d tempVector3dOne = new Vector3d();
-   private final Vector3d tempVector3dTwo = new Vector3d();
+   private final Point3d firstEndpoint = new Point3d();
+   private final Point3d secondEndpoint = new Point3d();
 
    public LineSegment3d()
    {
    }
 
-   public LineSegment3d(Point3d pointA, Point3d pointB)
+   public LineSegment3d(Point3d firstEndpoint, Point3d secondEndpoint)
    {
-      set(pointA, pointB);
+      set(firstEndpoint, secondEndpoint);
    }
 
    public void set(LineSegment3d lineSegment)
    {
-      set(lineSegment.pointA, lineSegment.pointB);
+      set(lineSegment.firstEndpoint, lineSegment.secondEndpoint);
    }
 
-   public void set(Point3d pointA, Point3d pointB)
+   public void set(Point3d firstEndpoint, Point3d secondEndpoint)
    {
-      setPointA(pointA);
-      setPointB(pointB);
+      setPointA(firstEndpoint);
+      setPointB(secondEndpoint);
    }
 
-   public void set(double xA, double yA, double zA, double xB, double yB, double zB)
+   public void set(double firstEndpointX, double firstEndpointY, double firstEndpointZ, double secondEndpointX, double secondEndpointY, double secondEndpointZ)
    {
-      setPointA(xA, yA, zA);
-      setPointB(xB, yB, zB);
+      setPointA(firstEndpointX, firstEndpointY, firstEndpointZ);
+      setPointB(secondEndpointX, secondEndpointY, secondEndpointZ);
    }
 
-   public void setPointA(Point3d pointA)
+   public void setPointA(Point3d firstEndpoint)
    {
-      this.pointA.set(pointA);
+      this.firstEndpoint.set(firstEndpoint);
    }
 
-   public void setPointA(double xA, double yA, double zA)
+   public void setPointA(double firstEndpointX, double firstEndpointY, double firstEndpointZ)
    {
-      pointA.set(xA, yA, zA);
+      firstEndpoint.set(firstEndpointX, firstEndpointY, firstEndpointZ);
    }
 
-   public void setPointB(Point3d pointB)
+   public void setPointB(Point3d secondEndpoint)
    {
-      this.pointB.set(pointB);
+      this.secondEndpoint.set(secondEndpoint);
    }
 
-   public void setPointB(double xB, double yB, double zB)
+   public void setPointB(double secondEndpointX, double secondEndpointY, double secondEndpointZ)
    {
-      pointB.set(xB, yB, zB);
+      secondEndpoint.set(secondEndpointX, secondEndpointY, secondEndpointZ);
    }
 
    public void applyTransform(RigidBodyTransform transform)
    {
-      transform.transform(pointA);
-      transform.transform(pointB);
+      transform.transform(firstEndpoint);
+      transform.transform(secondEndpoint);
    }
    
    public double length()
    {
-      return Math.sqrt((pointB.getX() - pointA.getX()) * (pointB.getX() - pointA.getX()) + (pointB.getY() - pointA.getY()) * (pointB.getY() - pointA.getY())
-            + (pointB.getZ() - pointA.getZ()) * (pointB.getZ() - pointA.getZ()));
+      double dx = secondEndpoint.getX() - firstEndpoint.getX();
+      double dy = secondEndpoint.getY() - firstEndpoint.getY();
+      double dz = secondEndpoint.getZ() - firstEndpoint.getZ();
+      return Math.sqrt(dx * dx + dy * dy + dz * dz);
    }
 
-   public double distanceToAPoint(Point3d pointC)
+   public double distanceToAPoint(Point3d point)
    {
-      Vector3d projectionOfpointC = new Vector3d();
-      projectionOfpointC.set(projection(pointC));
-
-      if (projectionOfpointC.epsilonEquals(pointA, 1e-14)) // pointC projection is below pointA
-      {
-         return pointC.distance(pointA);
-      }
-      else if (projectionOfpointC.epsilonEquals(pointB, 1e-14)) // pointC projection is up pointB
-      {
-         return pointC.distance(pointB);
-      }
-
-      return pointC.distance(new Point3d(projectionOfpointC)); // pointC projection is between pointA and pointB
+      return GeometryTools.distanceFromPointToLineSegment(point, firstEndpoint, secondEndpoint);
    }
 
-   public Point3d projection(Point3d pointC)
+   public Point3d projection(Point3d pointToProject)
    {
-      Point3d projection = new Point3d();
-
-      getProjectionOntoLineSegment(pointC, projection);
-
-      return projection;
+      return GeometryTools.getOrthogonalProjectionOnLineSegment(pointToProject, firstEndpoint, secondEndpoint);
    }
 
-   public void getProjectionOntoLineSegment(Point3d pointC, Point3d projectedPointToPack)
+   public boolean getProjectionOntoLineSegment(Point3d pointToProject, Point3d projectionToPack)
    {
-      Vector3d vectorAB = tempVector3dOne;
-      vectorAB.sub(pointB, pointA);
-      Vector3d vectorAC = tempVector3dTwo;
-      vectorAC.sub(pointC, pointA);
-      double temporaryDoubleA;
-      if ((temporaryDoubleA = vectorAC.dot(vectorAB)) <= 0.0) // pointC projection is below pointA
-      {
-         projectedPointToPack.set(pointA.getX(), pointA.getY(), pointA.getZ());
-         return;
-      }
-
-      double temporaryDoubleB;
-      if ((temporaryDoubleB = vectorAB.dot(vectorAB)) <= temporaryDoubleA) // pointC projection is up pointB
-      {
-         projectedPointToPack.set(pointB.getX(), pointB.getY(), pointB.getZ());
-         return;
-      }
-
-      double temporaryRoubleRatio;
-      temporaryRoubleRatio = temporaryDoubleA / temporaryDoubleB; // pointC projection is between pointA and pointB
-      Vector3d projectionOfPointC = tempVector3dTwo;
-      projectionOfPointC.set(pointA);
-      vectorAB.scale(temporaryRoubleRatio);
-      projectionOfPointC.add(vectorAB);
-
-      projectedPointToPack.set(projectionOfPointC.getX(), projectionOfPointC.getY(), projectionOfPointC.getZ());
+      return GeometryTools.getOrthogonalProjectionOnLineSegment(pointToProject, firstEndpoint, secondEndpoint, projectionToPack);
    }
 
    public OneDimensionalBounds[] getOuterBounds()
    {
       double[] aVals = new double[3];
-      pointA.get(aVals);
+      firstEndpoint.get(aVals);
       double[] bVals = new double[3];
-      pointB.get(bVals);
+      secondEndpoint.get(bVals);
       OneDimensionalBounds[] ret = new OneDimensionalBounds[3];
       for (int i = 0; i < 3; i++)
       {
@@ -165,32 +123,19 @@ public class LineSegment3d
 
    private double percentageAlongLineSegment(double x, double y, double z)
    {
-      double vx0 = x - pointA.getX();
-      double vy0 = y - pointA.getY();
-      double vz0 = z - pointA.getZ();
-
-      double vx1 = pointB.getX() - pointA.getX();
-      double vy1 = pointB.getY() - pointA.getY();
-      double vz1 = pointB.getZ() - pointA.getZ();
-
-      double dot = vx0 * vx1 + vy0 * vy1 + vz0 * vz1;
-      double lengthSquared = vx1 * vx1 + vy1 * vy1 + vz1 * vz1;
-
-      double alpha = dot / lengthSquared;
-
-      return alpha;
+      return GeometryTools.getPercentageAlongLineSegment(x, y, z, firstEndpoint.getX(), firstEndpoint.getY(), firstEndpoint.getZ(), secondEndpoint.getX(), secondEndpoint.getY(), secondEndpoint.getZ());
    }
 
    public void getPoints(double[] aVals, double[] bVals)
    {
-      pointA.get(aVals);
-      pointB.get(bVals);
+      firstEndpoint.get(aVals);
+      secondEndpoint.get(bVals);
    }
 
    public Vector3d getDirection()
    {
-      Vector3d direction = new Vector3d(pointB);
-      direction.sub(pointA);
+      Vector3d direction = new Vector3d(secondEndpoint);
+      direction.sub(firstEndpoint);
       direction.normalize();
 
       return direction;
@@ -198,12 +143,12 @@ public class LineSegment3d
 
    public Point3d getPointA()
    {
-      return pointA;
+      return firstEndpoint;
    }
 
    public Point3d getPointB()
    {
-      return pointB;
+      return secondEndpoint;
    }
 
 }
