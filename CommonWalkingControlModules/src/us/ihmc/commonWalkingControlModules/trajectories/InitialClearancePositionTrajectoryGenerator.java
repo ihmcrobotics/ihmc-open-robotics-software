@@ -239,7 +239,7 @@ public class InitialClearancePositionTrajectoryGenerator implements PositionTraj
       this.initialDirection.set(initialDirection);
       this.initialDirection.normalize();
       this.initialDirection.get(tempVector);
-      GeometryTools.getRotationBasedOnNormal(axisAngleToWorld, tempVector);
+      GeometryTools.getAxisAngleFromZUpToVector(tempVector, axisAngleToWorld);
       rotationPlane.setIncludingFrame(this.initialDirection.getReferenceFrame(), axisAngleToWorld);
 
       this.leaveDistance.set(leaveDistance);

@@ -57,7 +57,7 @@ dependencies {
    compile group: 'com.esotericsoftware.kryo', name: 'kryo', version: '2.20'
    compile group: 'org.tukaani', name: 'xz', version: '1.5'
    
-   compile ihmc.getProjectDependency(":SDFLoader")
+   compile ihmc.getProjectDependency(":ModelFileLoader")
    compile ihmc.getProjectDependency(":IHMCCommunication")
    compile ihmc.getProjectDependency(":IHMCJavaToolkit")
    compile ihmc.getProjectDependency(":IHMCRoboticsToolkit")

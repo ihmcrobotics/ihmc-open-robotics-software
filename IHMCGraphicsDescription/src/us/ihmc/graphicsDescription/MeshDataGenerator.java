@@ -1618,7 +1618,7 @@ public class MeshDataGenerator
 
       float yaw;
       float pitch;
-      if (Math.abs(lineDirection.getZ()) < 1.0 - 1.0e-3)
+      if (Math.abs(lineDirection.getZ()) < 1.0 - 1.0e-7)
       {
          yaw = (float) Math.atan2(lineDirection.getY(), lineDirection.getX());
          double xyLength = Math.sqrt(lineDirection.getX() * lineDirection.getX() + lineDirection.getY() * lineDirection.getY());

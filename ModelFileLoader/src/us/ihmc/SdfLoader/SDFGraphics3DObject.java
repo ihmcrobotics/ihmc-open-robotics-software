@@ -153,7 +153,7 @@ public class SDFGraphics3DObject extends LinkGraphicsDescription
                Vector3d normal = SDFConversionsHelper.stringToNormalizedVector3d(geometry.getPlane().getNormal());
                Vector2d size = SDFConversionsHelper.stringToVector2d(geometry.getPlane().getSize());
 
-               AxisAngle4d planeRotation = GeometryTools.getRotationBasedOnNormal(normal);
+               AxisAngle4d planeRotation = GeometryTools.getAxisAngleFromZUpToVector(normal);
                rotate(planeRotation);
                addCube(size.getX(), size.getY(), 0.005, getDefaultAppearanceIfNull(appearance));
             }

@@ -68,7 +68,7 @@ dependencies {
 	compile ihmc.getProjectDependency(":CommonWalkingControlModules")
 	compile ihmc.getProjectDependency(":IHMCJMonkeyEngineToolkit")
 	compile ihmc.getProjectDependency(":IHMCRobotDataLogger")
-	compile ihmc.getProjectDependency(":SDFLoader")
+	compile ihmc.getProjectDependency(":ModelFileLoader")
 	compile ihmc.getProjectDependency(":SensorProcessing")
 	compile ihmc.getProjectDependency(":SimulationConstructionSet")
 	compile ihmc.getProjectDependency(":IHMCCommunication")
