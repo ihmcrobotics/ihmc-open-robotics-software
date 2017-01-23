@@ -7,6 +7,7 @@ import java.util.List;
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
+import javax.vecmath.Quat4d;
 import javax.vecmath.Tuple2d;
 import javax.vecmath.Tuple3d;
 import javax.vecmath.Vector2d;
@@ -3705,19 +3706,73 @@ public class GeometryTools
    }
 
    /**
-    * Rotates the given {@code original} tuple by an angle {@code yaw} and stores the result in the tuple {@code transformed}.
+    * Rotates the given {@code tupleOriginal} tuple by an angle {@code yaw} and stores the result in the tuple {@code tupleTransformed}.
     * 
-    * @param yaw the angle in radians by which {@code original} should be rotated.
-    * @param original the original tuple. Not modified.
-    * @param transformed the tuple in which the transformed {@code original} is stored. Modified.
+    * @param yaw the angle in radians by which {@code tupleOriginal} should be rotated.
+    * @param tupleOriginal the original tuple. Not modified.
+    * @param tupleTransformed the tuple in which the transformed {@code original} is stored. Modified.
     */
-   public static void rotateTuple2d(double yaw, Tuple2d original, Tuple2d transformed)
+   public static void rotateTuple2d(double yaw, Tuple2d tupleOriginal, Tuple2d tupleTransformed)
    {
       double cos = Math.cos(yaw);
       double sin = Math.sin(yaw);
 
-      transformed.setX(cos * original.getX() - sin * original.getY());
-      transformed.setY(sin * original.getX() + cos * original.getY());
+      tupleTransformed.setX(cos * tupleOriginal.getX() - sin * tupleOriginal.getY());
+      tupleTransformed.setY(sin * tupleOriginal.getX() + cos * tupleOriginal.getY());
+   }
+
+   /**
+    * Rotates the given {@code tupleOriginal} tuple by a quaternion (qx, qy, qz, qs) and stores the result in the tuple {@code tupleTransformed}.
+    * 
+    * @param quaternion the quaternion used to rotate the tuple.
+    * @param tupleOriginal the original tuple. Not modified.
+    * @param tupleTransformed the tuple in which the transformed {@code original} is stored. Modified.
+    */
+   public static void rotateTuple3d(Quat4d quaternion, Tuple3d tupleOriginal, Tuple3d tupleTransformed)
+   {
+      rotateTuple3d(quaternion.getX(), quaternion.getY(), quaternion.getZ(), quaternion.getW(), tupleOriginal, tupleTransformed);
+   }
+
+   /**
+    * Rotates the given {@code tupleOriginal} tuple by a quaternion (qx, qy, qz, qs) and stores the result in the tuple {@code tupleTransformed}.
+    * 
+    * @param quaternion the quaternion used to rotate the tuple.
+    * @param tupleOriginal the original tuple. Not modified.
+    * @param tupleTransformed the tuple in which the transformed {@code original} is stored. Modified.
+    */
+   public static void rotateTuple3d(double qx, double qy, double qz, double qs, Tuple3d tupleOriginal, Tuple3d tupleTransformed)
+   {
+      double norm = qx * qx + qy * qy + qz * qz + qs * qs;
+
+      if (norm < EPSILON)
+      {
+         tupleTransformed.set(tupleOriginal);
+         return;
+      }
+
+      norm = 1.0 / norm;
+      qx *= norm;
+      qy *= norm;
+      qz *= norm;
+      qs *= norm;
+
+      // t = 2.0 * cross(q.xyz, v);
+      // v' = v + q.s * t + cross(q.xyz, t);
+      double x = tupleOriginal.getX();
+      double y = tupleOriginal.getY();
+      double z = tupleOriginal.getZ();
+
+      double crossX = 2.0 * (qy * z - qz * y);
+      double crossY = 2.0 * (qz * x - qx * z);
+      double crossZ = 2.0 * (qx * y - qy * x);
+
+      double crossCrossX = qy * crossZ - qz * crossY;
+      double crossCrossY = qz * crossX - qx * crossZ;
+      double crossCrossZ = qx * crossY - qy * crossX;
+
+      tupleTransformed.setX(x + qs * crossX + crossCrossX);
+      tupleTransformed.setY(y + qs * crossY + crossCrossY);
+      tupleTransformed.setZ(z + qs * crossZ + crossCrossZ);
    }
 
    /**
