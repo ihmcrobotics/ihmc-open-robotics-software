@@ -7,6 +7,7 @@ import java.util.List;
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
+import javax.vecmath.Quat4d;
 import javax.vecmath.Tuple2d;
 import javax.vecmath.Tuple3d;
 import javax.vecmath.Vector2d;
@@ -129,12 +130,18 @@ public class GeometryTools
     * @param firstPointOnLine the projection of this 3D onto the xy-plane refers to the first point on the 2D line. Not modified.
     * @param secondPointOnLine the projection of this 3D onto the xy-plane refers to the second point one the 2D line. Not modified.
     * @return the minimum distance between the 2D point and the 2D line.
+    * @throws ReferenceFrameMismatchException if the arguments are not expressed in the same reference frame.
     */
    public static double distanceFromPointToLine2d(FramePoint point, FramePoint firstPointOnLine, FramePoint secondPointOnLine)
    {
-      // FIXME Need to verify that all the arguments are expressed in the same reference frame.
-      return distanceFromPointToLine(point.getX(), point.getY(), firstPointOnLine.getX(), firstPointOnLine.getY(), secondPointOnLine.getX(),
-                                     secondPointOnLine.getY());
+      point.checkReferenceFrameMatch(firstPointOnLine);
+      point.checkReferenceFrameMatch(secondPointOnLine);
+
+      double pointOnLineX = firstPointOnLine.getX();
+      double pointOnLineY = firstPointOnLine.getY();
+      double lineDirectionX = secondPointOnLine.getX() - firstPointOnLine.getX();
+      double lineDirectionY = secondPointOnLine.getY() - firstPointOnLine.getY();
+      return distanceFromPointToLine(point.getX(), point.getY(), pointOnLineX, pointOnLineY, lineDirectionX, lineDirectionY);
    }
 
    /**
@@ -153,12 +160,34 @@ public class GeometryTools
     */
    public static double distanceFromPointToLine(Point2d point, Point2d firstPointOnLine, Point2d secondPointOnLine)
    {
-      return distanceFromPointToLine(point.getX(), point.getY(), firstPointOnLine.getX(), firstPointOnLine.getY(), secondPointOnLine.getX(),
-                                     secondPointOnLine.getY());
+      double pointOnLineX = firstPointOnLine.getX();
+      double pointOnLineY = firstPointOnLine.getY();
+      double lineDirectionX = secondPointOnLine.getX() - firstPointOnLine.getX();
+      double lineDirectionY = secondPointOnLine.getY() - firstPointOnLine.getY();
+      return distanceFromPointToLine(point.getX(), point.getY(), pointOnLineX, pointOnLineY, lineDirectionX, lineDirectionY);
    }
 
    /**
-    * Returns the minimum distance between a 2D point and an infinitely long 2D line defined by two points.
+    * Returns the minimum distance between a 2D point and an infinitely long 2D line defined by a point and a direction.
+    * <p>
+    * Edge cases:
+    * <ul>
+    *    <li> if {@code firstPointOnLine.distance(secondPointOnLine) < Epsilons.ONE_TRILLIONTH}, this method returns the distance between {@code firstPointOnLine} and the given {@code point}.
+    * </ul>
+    * </p>
+    *
+    * @param point 2D point to compute the distance from the line. Not modified.
+    * @param pointOnLine a point located on the line. Not modified.
+    * @param lineDirection the direction of the line. Not modified.
+    * @return the minimum distance between the 2D point and the 2D line.
+    */
+   public static double distanceFromPointToLine(Point2d point, Point2d pointOnLine, Vector2d lineDirection)
+   {
+      return distanceFromPointToLine(point.getX(), point.getY(), pointOnLine.getX(), pointOnLine.getY(), lineDirection.getX(), lineDirection.getY());
+   }
+
+   /**
+    * Returns the minimum distance between a 2D point and an infinitely long 2D line defined by a point and a direction.
     * <p>
     * Edge cases:
     * <ul>
@@ -168,31 +197,27 @@ public class GeometryTools
     *
     * @param pointX x-coordinate of the query.
     * @param pointY y-coordinate of the query.
-    * @param firstPointOnLineX x-coordinate of a first point located on the line.
-    * @param firstPointOnLineY y-coordinate of a first point located on the line.
-    * @param secondPointOnLineX x-coordinate of a second point located on the line.
-    * @param secondPointOnLineY y-coordinate of a second point located on the line.
+    * @param pointOnLineX x-coordinate of a point located on the line.
+    * @param pointOnLineY y-coordinate of a point located on the line.
+    * @param lineDirectionX x-component of the line direction.
+    * @param lineDirectionY y-component of the line direction.
     * @return the minimum distance between the 2D point and the 2D line.
     */
-   public static double distanceFromPointToLine(double pointX, double pointY, double firstPointOnLineX, double firstPointOnLineY, double secondPointOnLineX,
-                                                double secondPointOnLineY)
+   public static double distanceFromPointToLine(double pointX, double pointY, double pointOnLineX, double pointOnLineY, double lineDirectionX,
+                                                double lineDirectionY)
    {
-      double dx = firstPointOnLineY - pointY;
-      double dy = firstPointOnLineX - pointX;
+      double dx = pointOnLineY - pointY;
+      double dy = pointOnLineX - pointX;
+      double directionMagnitude = lineDirectionX * lineDirectionX + lineDirectionY * lineDirectionY;
+      directionMagnitude = Math.sqrt(directionMagnitude);
 
-      if (firstPointOnLineX - secondPointOnLineX == 0 && firstPointOnLineY - secondPointOnLineY == 0)
+      if (directionMagnitude < Epsilons.ONE_TRILLIONTH)
       {
          return Math.sqrt(dx * dx + dy * dy);
       }
       else
       {
-         double lineDx = secondPointOnLineX - firstPointOnLineX;
-         double lineDy = secondPointOnLineY - firstPointOnLineY;
-
-         double numerator = Math.abs(lineDx * dx - dy * lineDy);
-         double denominator = Math.sqrt(lineDx * lineDx + lineDy * lineDy);
-
-         return numerator / denominator;
+         return Math.abs(lineDirectionX * dx - dy * lineDirectionY) / directionMagnitude;
       }
    }
 
@@ -213,12 +238,33 @@ public class GeometryTools
     */
    public static double distanceFromPointToLineSegment(double pointX, double pointY, Point2d lineSegmentStart, Point2d lineSegmentEnd)
    {
-      double percentage = getPercentageAlongLineSegment(pointX, pointY, lineSegmentStart.getX(), lineSegmentStart.getY(), lineSegmentEnd.getX(),
-                                                        lineSegmentEnd.getY());
+      return distanceFromPointToLineSegment(pointX, pointY, lineSegmentStart.getX(), lineSegmentStart.getY(), lineSegmentEnd.getX(), lineSegmentEnd.getY());
+   }
+
+   /**
+    * Returns the minimum distance between a point and a given line segment.
+    * <p>
+    * Edge cases:
+    * <ul>
+    *    <li> if {@code lineSegmentStart.distanceSquared(lineSegmentEnd) < Epsilons.ONE_TRILLIONTH}, this method returns the distance between {@code lineSegmentStart} and the given {@code point}.
+    * </ul>
+    * </p>
+    *
+    * @param pointX x coordinate of point to be tested.
+    * @param pointY y coordinate of point to be tested.
+    * @param lineSegmentStartX the x-coordinate of the line segment first end point.
+    * @param lineSegmentStartY the y-coordinate of the line segment first end point.
+    * @param lineSegmentEndX the x-coordinate of the line segment second end point.
+    * @param lineSegmentEndY the y-coordinate of the line segment second end point.
+    * @return the minimum distance between the 2D point and the 2D line segment.
+    */
+   public static double distanceFromPointToLineSegment(double pointX, double pointY, double lineSegmentStartX, double lineSegmentStartY, double lineSegmentEndX, double lineSegmentEndY)
+   {
+      double percentage = getPercentageAlongLineSegment(pointX, pointY, lineSegmentStartX, lineSegmentStartY, lineSegmentEndX, lineSegmentEndY);
       percentage = MathTools.clipToMinMax(percentage, 0.0, 1.0);
 
-      double projectionX = (1.0 - percentage) * lineSegmentStart.getX() + percentage * lineSegmentEnd.getX();
-      double projectionY = (1.0 - percentage) * lineSegmentStart.getY() + percentage * lineSegmentEnd.getY();
+      double projectionX = (1.0 - percentage) * lineSegmentStartX + percentage * lineSegmentEndX;
+      double projectionY = (1.0 - percentage) * lineSegmentStartY + percentage * lineSegmentEndY;
 
       return Math.sqrt(MathTools.square(projectionX - pointX) + MathTools.square(projectionY - pointY));
    }
@@ -332,6 +378,36 @@ public class GeometryTools
       point.checkReferenceFrameMatch(lineSegmentStart);
       point.checkReferenceFrameMatch(lineSegmentEnd);
       return distanceFromPointToLineSegment(point.getPoint(), lineSegmentStart.getPoint(), lineSegmentEnd.getPoint());
+   }
+
+   /**
+    * Given two 3D infinitely long lines, this methods computes the minimum distance between the two 3D lines.
+    * <a href="http://geomalgorithms.com/a07-_distance.html"> Useful link</a>.
+    * 
+    * @param pointOnLine1 a 3D point on the first line. Not modified.
+    * @param lineDirection1 the 3D direction of the first line. Not modified.
+    * @param pointOnLine2 a 3D point on the second line. Not modified.
+    * @param lineDirection2 the 3D direction of the second line. Not modified.
+    * @return the minimum distance between the two lines.
+    */
+   public static double distanceBetweenTwoLines(Point3d pointOnLine1, Vector3d lineDirection1, Point3d pointOnLine2, Vector3d lineDirection2)
+   {
+      return getClosestPointsForTwoLines(pointOnLine1, lineDirection1, pointOnLine2, lineDirection2, null, null);
+   }
+
+   /**
+    * Given two 3D line segments with finite length, this methods computes the minimum distance between the two 3D line segments.
+    * <a href="http://geomalgorithms.com/a07-_distance.html"> Useful link</a>.
+    * 
+    * @param lineSegmentStart1 the first end point of the first line segment. Not modified.
+    * @param lineSegmentEnd1 the second end point of the first line segment. Not modified.
+    * @param lineSegmentStart2 the first end point of the second line segment. Not modified.
+    * @param lineSegmentEnd2 the second end point of the second line segment. Not modified.
+    * @return the minimum distance between the two line segments.
+    */
+   public static double distanceBetweenTwoLineSegments(Point3d lineSegmentStart1, Point3d lineSegmentEnd1, Point3d lineSegmentStart2, Point3d lineSegmentEnd2)
+   {
+      return getClosestPointsForTwoLineSegments(lineSegmentStart1, lineSegmentEnd1, lineSegmentStart2, lineSegmentEnd2, null, null);
    }
 
    /**
@@ -529,6 +605,7 @@ public class GeometryTools
     * @param secondPointOnLine the projection onto the XY-plane of this point is used as a second point located on the line. Not modified.
     * @return {@code true} if the 2D projection of the point is on the left side of the 2D projection of the line.
     * {@code false} if the 2D projection of the point is on the right side or exactly on the 2D projection of the line.
+    * @throws ReferenceFrameMismatchException if the arguments are not expressed in the same reference frame.
     */
    // FIXME this method is confusing and error prone.
    public static boolean isPointOnLeftSideOfLine(FramePoint point, FramePoint firstPointOnLine, FramePoint secondPointOnLine)
@@ -892,6 +969,191 @@ public class GeometryTools
    }
 
    /**
+    * Computes the orthogonal projection of a 3D point on an infinitely long 3D line defined by a 3D point and a 3D direction.
+    * <p>
+    * Edge cases:
+    * <ul>
+    *    <li> if the given line direction is too small, i.e. {@code lineDirection.lengthSquared() < Epsilons.ONE_TRILLIONTH}, this method fails and returns {@code null}.
+    * </ul>
+    * </p>
+    * <p>
+    * WARNING: This method generates garbage.
+    * </p>
+    * 
+    * @param pointToProject the point to compute the projection of. Not modified.
+    * @param pointOnLine point located on the line. Not modified.
+    * @param lineDirection direction of the line. Not modified.
+    * @return the projection of the point onto the line or {@code null} if the method failed.
+    */
+   public static Point3d getOrthogonalProjectionOnLine(Point3d pointToProject, Point3d pointOnLine, Vector3d lineDirection)
+   {
+      Point3d projection = new Point3d();
+      boolean success = getOrthogonalProjectionOnLine(pointToProject, pointOnLine, lineDirection, projection);
+      if (!success)
+         return null;
+      else
+         return projection;
+   }
+
+   /**
+    * Computes the orthogonal projection of a 3D point on an infinitely long 3D line defined by a 3D point and a 3D direction.
+    * <p>
+    * Edge cases:
+    * <ul>
+    *    <li> if the given line direction is too small, i.e. {@code lineDirection.lengthSquared() < Epsilons.ONE_TRILLIONTH}, this method fails and returns {@code false}.
+    * </ul>
+    * </p>
+    * 
+    * @param pointToProject the point to compute the projection of. Not modified.
+    * @param pointOnLine point located on the line. Not modified.
+    * @param lineDirection direction of the line. Not modified.
+    * @param projectionToPack point in which the projection of the point onto the line is stored. Modified.
+    * @return whether the method succeeded or not.
+    */
+   public static boolean getOrthogonalProjectionOnLine(Point3d pointToProject, Point3d pointOnLine, Vector3d lineDirection, Point3d projectionToPack)
+   {
+      return getOrthogonalProjectionOnLine(pointToProject, pointOnLine.getX(), pointOnLine.getY(), pointOnLine.getZ(), lineDirection.getX(),
+                                           lineDirection.getY(), lineDirection.getZ(), projectionToPack);
+   }
+
+   /**
+    * Computes the orthogonal projection of a 3D point on an infinitely long 3D line defined by a 3D point and a 3D direction.
+    * <p>
+    * Edge cases:
+    * <ul>
+    *    <li> if the given line direction is too small, i.e. {@code lineDirection.lengthSquared() < Epsilons.ONE_TRILLIONTH}, this method fails and returns {@code false}.
+    * </ul>
+    * </p>
+    * 
+    * @param pointToProject the point to compute the projection of. Not modified.
+    * @param pointOnLineX x-coordinate of a point located on the line.
+    * @param pointOnLineY y-coordinate of a point located on the line.
+    * @param pointOnLineZ z-coordinate of a point located on the line.
+    * @param lineDirectionX x-component of the direction of the line.
+    * @param lineDirectionY y-component of the direction of the line.
+    * @param lineDirectionZ z-component of the direction of the line.
+    * @param projectionToPack point in which the projection of the point onto the line is stored. Modified.
+    * @return whether the method succeeded or not.
+    */
+   public static boolean getOrthogonalProjectionOnLine(Point3d pointToProject, double pointOnLineX, double pointOnLineY, double pointOnLineZ, double lineDirectionX,
+                                                       double lineDirectionY, double lineDirectionZ, Point3d projectionToPack)
+   {
+      double directionLengthSquared = lineDirectionX * lineDirectionX + lineDirectionY * lineDirectionY + lineDirectionZ * lineDirectionZ;
+
+      if (directionLengthSquared < Epsilons.ONE_TRILLIONTH)
+         return false;
+
+      double dx = pointToProject.getX() - pointOnLineX;
+      double dy = pointToProject.getY() - pointOnLineY;
+      double dz = pointToProject.getZ() - pointOnLineZ;
+
+      double dot = dx * lineDirectionX + dy * lineDirectionY + dz * lineDirectionZ;
+
+      double alpha = dot / directionLengthSquared;
+
+      projectionToPack.setX(pointOnLineX + alpha * lineDirectionX);
+      projectionToPack.setY(pointOnLineY + alpha * lineDirectionY);
+      projectionToPack.setZ(pointOnLineZ + alpha * lineDirectionZ);
+
+      return true;
+   }
+
+   /**
+    * Computes the orthogonal projection of a 3D point on a given 3D line segment defined by its two 3D end points.
+    * <p>
+    * Edge cases:
+    * <ul>
+    *    <li> if the length of the given line segment is too small,
+    *     i.e. {@code lineSegmentStart.distanceSquared(lineSegmentEnd) < Epsilons.ONE_TRILLIONTH},
+    *      this method returns {@code lineSegmentStart}.
+    *    <li> the projection can not be outside the line segment.
+    *     When the projection on the corresponding line is outside the line segment, the result is the closest of the two end points.
+    * </ul>
+    * </p>
+    * 
+    * @param pointToProject the point to compute the projection of. Not modified.
+    * @param lineSegmentStart the line segment first end point. Not modified.
+    * @param lineSegmentEnd the line segment second end point. Not modified.
+    * @return the projection of the point onto the line segment or {@code null} if the method failed.
+    */
+   public static Point3d getOrthogonalProjectionOnLineSegment(Point3d pointToProject, Point3d lineSegmentStart, Point3d lineSegmentEnd)
+   {
+      Point3d projection = new Point3d();
+      boolean success = getOrthogonalProjectionOnLineSegment(pointToProject, lineSegmentStart.getX(), lineSegmentStart.getY(), lineSegmentStart.getZ(),
+                                                             lineSegmentEnd.getX(), lineSegmentEnd.getY(), lineSegmentEnd.getZ(), projection);
+      if (!success)
+         return null;
+      else
+         return projection;
+   }
+
+   /**
+    * Computes the orthogonal projection of a 3D point on a given 3D line segment defined by its two 3D end points.
+    * <p>
+    * Edge cases:
+    * <ul>
+    *    <li> if the length of the given line segment is too small,
+    *     i.e. {@code lineSegmentStart.distanceSquared(lineSegmentEnd) < Epsilons.ONE_TRILLIONTH},
+    *      this method returns {@code lineSegmentStart}.
+    *    <li> the projection can not be outside the line segment.
+    *     When the projection on the corresponding line is outside the line segment, the result is the closest of the two end points.
+    * </ul>
+    * </p>
+    * 
+    * @param pointToProject the point to compute the projection of. Not modified.
+    * @param lineSegmentStart the line segment first end point. Not modified.
+    * @param lineSegmentEnd the line segment second end point. Not modified.
+    * @param projectionToPack point in which the projection of the point onto the line segment is stored. Modified.
+    * @return whether the method succeeded or not.
+    */
+   public static boolean getOrthogonalProjectionOnLineSegment(Point3d pointToProject, Point3d lineSegmentStart, Point3d lineSegmentEnd,
+                                                              Point3d projectionToPack)
+   {
+      return getOrthogonalProjectionOnLineSegment(pointToProject, lineSegmentStart.getX(), lineSegmentStart.getY(), lineSegmentStart.getZ(),
+                                                  lineSegmentEnd.getX(), lineSegmentEnd.getY(), lineSegmentEnd.getZ(), projectionToPack);
+   }
+
+   /**
+    * Computes the orthogonal projection of a 3D point on a given 3D line segment defined by its two 3D end points.
+    * <p>
+    * Edge cases:
+    * <ul>
+    *    <li> if the length of the given line segment is too small,
+    *     i.e. {@code lineSegmentStart.distanceSquared(lineSegmentEnd) < Epsilons.ONE_TRILLIONTH},
+    *      this method returns {@code lineSegmentStart}.
+    *    <li> the projection can not be outside the line segment.
+    *     When the projection on the corresponding line is outside the line segment, the result is the closest of the two end points.
+    * </ul>
+    * </p>
+    * 
+    * @param pointToProject the point to compute the projection of. Not modified.
+    * @param lineSegmentStartX the x-coordinate of the line segment first end point.
+    * @param lineSegmentStartY the y-coordinate of the line segment first end point.
+    * @param lineSegmentStartZ the z-coordinate of the line segment first end point.
+    * @param lineSegmentEndX the x-coordinate of the line segment second end point.
+    * @param lineSegmentEndY the y-coordinate of the line segment second end point.
+    * @param lineSegmentEndZ the z-coordinate of the line segment second end point.
+    * @param projectionToPack point in which the projection of the point onto the line segment is stored. Modified.
+    * @return whether the method succeeded or not.
+    */
+   public static boolean getOrthogonalProjectionOnLineSegment(Point3d pointToProject, double lineSegmentStartX, double lineSegmentStartY,
+                                                              double lineSegmentStartZ, double lineSegmentEndX, double lineSegmentEndY, double lineSegmentEndZ,
+                                                              Point3d projectionToPack)
+   {
+      double percentage = getPercentageAlongLineSegment(pointToProject.getX(), pointToProject.getY(), pointToProject.getZ(), lineSegmentStartX,
+                                                        lineSegmentStartY, lineSegmentStartZ, lineSegmentEndX, lineSegmentEndY, lineSegmentEndZ);
+      if (!Double.isFinite(percentage))
+         return false;
+
+      percentage = MathTools.clipToMinMax(percentage, 0.0, 1.0);
+
+      projectionToPack.setX((1.0 - percentage) * lineSegmentStartX + percentage * lineSegmentEndX);
+      projectionToPack.setY((1.0 - percentage) * lineSegmentStartY + percentage * lineSegmentEndY);
+      projectionToPack.setZ((1.0 - percentage) * lineSegmentStartZ + percentage * lineSegmentEndZ);
+      return true;
+   }
+
+   /**
     * Computes the orthogonal projection of a 3D point on a given 3D plane defined by a 3D point and 3D normal.
     * <p>
     * Edge cases:
@@ -1195,9 +1457,10 @@ public class GeometryTools
     * @param lineDirection2 the 3D direction of the second line. Not modified.
     * @param closestPointOnLine1ToPack the 3D coordinates of the point P are packed in this 3D point. Modified.
     * @param closestPointOnLine2ToPack the 3D coordinates of the point Q are packed in this 3D point. Modified.
+    * @return the minimum distance between the two lines.
     * @throws ReferenceFrameMismatchException if the input arguments are not expressed in the same reference frame, except for {@code closestPointOnLine1ToPack} and  {@code closestPointOnLine2ToPack}.
     */
-   public static void getClosestPointsForTwoLines(FramePoint pointOnLine1, FrameVector lineDirection1, FramePoint pointOnLine2, FrameVector lineDirection2,
+   public static double getClosestPointsForTwoLines(FramePoint pointOnLine1, FrameVector lineDirection1, FramePoint pointOnLine2, FrameVector lineDirection2,
                                                   FramePoint closestPointOnLine1ToPack, FramePoint closestPointOnLine2ToPack)
    {
       pointOnLine1.checkReferenceFrameMatch(lineDirection1);
@@ -1207,8 +1470,8 @@ public class GeometryTools
       closestPointOnLine1ToPack.setToZero(pointOnLine1.getReferenceFrame());
       closestPointOnLine2ToPack.setToZero(pointOnLine1.getReferenceFrame());
 
-      getClosestPointsForTwoLines(pointOnLine1.getPoint(), lineDirection1.getVector(), pointOnLine2.getPoint(), lineDirection2.getVector(),
-                                  closestPointOnLine1ToPack.getPoint(), closestPointOnLine2ToPack.getPoint());
+      return getClosestPointsForTwoLines(pointOnLine1.getPoint(), lineDirection1.getVector(), pointOnLine2.getPoint(), lineDirection2.getVector(),
+                                         closestPointOnLine1ToPack.getPoint(), closestPointOnLine2ToPack.getPoint());
    }
 
    /**
@@ -1219,10 +1482,11 @@ public class GeometryTools
     * @param lineDirection1 the 3D direction of the first line. Not modified.
     * @param pointOnLine2 a 3D point on the second line. Not modified.
     * @param lineDirection2 the 3D direction of the second line. Not modified.
-    * @param closestPointOnLine1ToPack the 3D coordinates of the point P are packed in this 3D point. Modified.
-    * @param closestPointOnLine2ToPack the 3D coordinates of the point Q are packed in this 3D point. Modified.
+    * @param closestPointOnLine1ToPack the 3D coordinates of the point P are packed in this 3D point. Modified. Can be {@code null}.
+    * @param closestPointOnLine2ToPack the 3D coordinates of the point Q are packed in this 3D point. Modified. Can be {@code null}.
+    * @return the minimum distance between the two lines.
     */
-   public static void getClosestPointsForTwoLines(Point3d pointOnLine1, Vector3d lineDirection1, Point3d pointOnLine2, Vector3d lineDirection2,
+   public static double getClosestPointsForTwoLines(Point3d pointOnLine1, Vector3d lineDirection1, Point3d pointOnLine2, Vector3d lineDirection2,
                                                   Point3d closestPointOnLine1ToPack, Point3d closestPointOnLine2ToPack)
    {
       // Switching to the notation used in http://geomalgorithms.com/a07-_distance.html.
@@ -1251,7 +1515,7 @@ public class GeometryTools
       double sc, tc;
 
       // check to see if the lines are parallel
-      if (Math.abs(delta) <= EPSILON)
+      if (delta <= EPSILON)
       {
          /*
           * The lines are parallel, there's an infinite number of pairs, but for
@@ -1268,8 +1532,131 @@ public class GeometryTools
          tc = (a * e - b * d) / delta;
       }
 
-      Psc.scaleAdd(sc, u, P0);
-      Qtc.scaleAdd(tc, v, Q0);
+      double PscX = sc * u.getX() + P0.getX();
+      double PscY = sc * u.getY() + P0.getY();
+      double PscZ = sc * u.getZ() + P0.getZ();
+
+      double QtcX = tc * v.getX() + Q0.getX();
+      double QtcY = tc * v.getY() + Q0.getY();
+      double QtcZ = tc * v.getZ() + Q0.getZ();
+
+      if (Psc != null)
+         Psc.set(PscX, PscY, PscZ);
+      if (Qtc != null)
+         Qtc.set(QtcX, QtcY, QtcZ);
+
+      double distanceSquared = MathTools.square(PscX - QtcX) + MathTools.square(PscY - QtcY) + MathTools.square(PscZ - QtcZ);
+      return Math.sqrt(distanceSquared);
+   }
+
+   /**
+    * Given two 3D line segments with finite length, this methods computes two points P &in; lineSegment1 and Q &in; lineSegment2 such that the distance || P - Q || is the minimum distance between the two 3D line segments.
+    * <a href="http://geomalgorithms.com/a07-_distance.html"> Useful link</a>.
+    * 
+    * @param lineSegmentStart1 the first end point of the first line segment. Not modified.
+    * @param lineSegmentEnd1 the second end point of the first line segment. Not modified.
+    * @param lineSegmentStart2 the first end point of the second line segment. Not modified.
+    * @param lineSegmentEnd2 the second end point of the second line segment. Not modified.
+    * @param closestPointOnLineSegment1ToPack the 3D coordinates of the point P are packed in this 3D point. Modified. Can be {@code null}.
+    * @param closestPointOnLineSegment2ToPack the 3D coordinates of the point Q are packed in this 3D point. Modified. Can be {@code null}.
+    * @return the minimum distance between the two line segments.
+    */
+   public static double getClosestPointsForTwoLineSegments(Point3d lineSegmentStart1, Point3d lineSegmentEnd1, Point3d lineSegmentStart2, Point3d lineSegmentEnd2,
+                                                         Point3d closestPointOnLineSegment1ToPack, Point3d closestPointOnLineSegment2ToPack)
+   {
+      // Switching to the notation used in http://geomalgorithms.com/a07-_distance.html.
+      // The line1 is defined by (P0, u) and the line2 by (Q0, v).
+      Point3d P0 = lineSegmentStart1;
+      double ux = lineSegmentEnd1.getX() - lineSegmentStart1.getX();
+      double uy = lineSegmentEnd1.getY() - lineSegmentStart1.getY();
+      double uz = lineSegmentEnd1.getZ() - lineSegmentStart1.getZ();
+      Point3d Q0 = lineSegmentStart2;
+      double vx = lineSegmentEnd2.getX() - lineSegmentStart2.getX();
+      double vy = lineSegmentEnd2.getY() - lineSegmentStart2.getY();
+      double vz = lineSegmentEnd2.getZ() - lineSegmentStart2.getZ();
+
+      Point3d Psc = closestPointOnLineSegment1ToPack;
+      Point3d Qtc = closestPointOnLineSegment2ToPack;
+
+      double w0X = P0.getX() - Q0.getX();
+      double w0Y = P0.getY() - Q0.getY();
+      double w0Z = P0.getZ() - Q0.getZ();
+
+      double a = ux * ux + uy * uy + uz * uz;
+      double b = ux * vx + uy * vy + uz * vz;
+      double c = vx * vx + vy * vy + vz * vz;
+      double d = ux * w0X + uy * w0Y + uz * w0Z;
+      double e = vx * w0X + vy * w0Y + vz * w0Z;
+
+      double delta = a * c - b * b;
+
+      double sc, sNumerator, sDenominator = delta;
+      double tc, tNumerator, tDenominator = delta;
+
+      // check to see if the lines are parallel
+      if (delta <= EPSILON)
+      {
+         /*
+          * The lines are parallel, there's an infinite number of pairs, but for
+          * one chosen point on one of the lines, there's only one closest point
+          * to it on the other line. So let's choose arbitrarily a point on the
+          * lineSegment1 and calculate the point that is closest to it on the lineSegment2.
+          */
+         sNumerator = 0.0;
+         sDenominator = 1.0;
+         tNumerator = e;
+         tDenominator = c;
+      }
+      else
+      {
+         sNumerator = (b * e - c * d);
+         tNumerator = (a * e - b * d);
+
+         if (sNumerator < 0.0)
+         {
+            sNumerator = 0.0;
+            tNumerator = e;
+            tDenominator = c;
+         }
+         else if (sNumerator > sDenominator)
+         {
+            sNumerator = sDenominator;
+            tNumerator = e + b;
+            tDenominator = c;
+         }
+      }
+
+      if (tNumerator < 0.0)
+      {
+         tNumerator = 0.0;
+         sNumerator = MathTools.clipToMinMax(-d, 0.0, a);
+         sDenominator = a;
+      }
+      else if (tNumerator > tDenominator)
+      {
+         tNumerator = tDenominator;
+         sNumerator = MathTools.clipToMinMax(-d + b, 0.0, a);
+         sDenominator = a;
+      }
+
+      sc = Math.abs(sNumerator) < EPSILON ? 0.0 : sNumerator / sDenominator;
+      tc = Math.abs(tNumerator) < EPSILON ? 0.0 : tNumerator / tDenominator;
+
+      double PscX = sc * ux + P0.getX();
+      double PscY = sc * uy + P0.getY();
+      double PscZ = sc * uz + P0.getZ();
+                           
+      double QtcX = tc * vx + Q0.getX();
+      double QtcY = tc * vy + Q0.getY();
+      double QtcZ = tc * vz + Q0.getZ();
+
+      if (Psc != null)
+         Psc.set(PscX, PscY, PscZ);
+      if (Qtc != null)
+         Qtc.set(QtcX, QtcY, QtcZ);
+
+      double distanceSquared = MathTools.square(PscX - QtcX) + MathTools.square(PscY - QtcY) + MathTools.square(PscZ - QtcZ);
+      return Math.sqrt(distanceSquared);
    }
 
    /**
@@ -1727,8 +2114,8 @@ public class GeometryTools
     * 
     * @param pointOnLine1 point located on the first line. Not modified.
     * @param lineDirection1 the first line direction. Not modified.
-    * @param pointOnLine2x point located on the second line. Not modified.
-    * @param lineDirection2x the second line direction. Not modified.
+    * @param pointOnLine2 point located on the second line. Not modified.
+    * @param lineDirection2 the second line direction. Not modified.
     * @param intersectionToPack 2D point in which the result is stored. Modified.
     * @return the 2D point of intersection if the two lines intersect, {@code null} otherwise.
     */
@@ -1754,8 +2141,8 @@ public class GeometryTools
     * 
     * @param pointOnLine1 point located on the first line. Not modified.
     * @param lineDirection1 the first line direction. Not modified.
-    * @param pointOnLine2x point located on the second line. Not modified.
-    * @param lineDirection2x the second line direction. Not modified.
+    * @param pointOnLine2 point located on the second line. Not modified.
+    * @param lineDirection2 the second line direction. Not modified.
     * @param intersectionToPack 2D point in which the result is stored. Modified.
     * @return {@code true} if the two lines intersect, {@code false} otherwise.
     */
@@ -1788,19 +2175,23 @@ public class GeometryTools
     * WARNING: the 3D arguments are projected onto the XY-plane to perform the actual computation in 2D.
     * </p>
     * 
-    * @param intersectionToPack the result is stored in the x and y components of this 3D point. Modified.
     * @param firstPointOnLine1 the x and y coordinates are used to define a first 2D point on the first line. Not modified.
     * @param secondPointOnLine1 the x and y coordinates are used to define a second 2D point on the first line. Not modified.
     * @param firstPointOnLine2 the x and y coordinates are used to define a first 2D point on the second line. Not modified.
     * @param secondPointOnLine2 the x and y coordinates are used to define a second 2D point on the second line. Not modified.
+    * @param intersectionToPack the result is stored in the x and y components of this 3D point. Modified.
     * @return {@code true} if the two lines intersect, {@code false} otherwise.
+    * @throws ReferenceFrameMismatchException if the arguments are not expressed in the same reference frame, except for {@code intersectionToPack}.
     */
    // FIXME This method is too confusing and error prone.
-   // FIXME It also needs to verify the reference frame of the arguments.
-   // FIXME change method signature to have the intersectionToPack at the end.
-   public static boolean getIntersectionBetweenTwoLines2d(FramePoint intersectionToPack, FramePoint firstPointOnLine1, FramePoint secondPointOnLine1,
-                                                          FramePoint firstPointOnLine2, FramePoint secondPointOnLine2)
+   public static boolean getIntersectionBetweenTwoLines2d(FramePoint firstPointOnLine1, FramePoint secondPointOnLine1, FramePoint firstPointOnLine2,
+                                                          FramePoint secondPointOnLine2, FramePoint intersectionToPack)
    {
+      firstPointOnLine1.checkReferenceFrameMatch(secondPointOnLine1);
+      firstPointOnLine2.checkReferenceFrameMatch(secondPointOnLine2);
+      firstPointOnLine1.checkReferenceFrameMatch(firstPointOnLine2);
+      intersectionToPack.changeFrame(firstPointOnLine1.getReferenceFrame());
+
       double pointOnLine1x = firstPointOnLine1.getX();
       double pointOnLine1y = firstPointOnLine1.getY();
       double lineDirection1x = secondPointOnLine1.getX() - firstPointOnLine1.getX();
@@ -1833,19 +2224,23 @@ public class GeometryTools
     * WARNING: the 3D arguments are projected onto the XY-plane to perform the actual computation in 2D.
     * </p>
     * 
-    * @param intersectionToPack the result is stored in the x and y components of this 3D point. Modified.
     * @param pointOnLine1 the x and y coordinates are used to define a 2D point on the first line. Not modified.
     * @param lineDirection1 the x and y components are used to define the 2D direction of the first line. Not modified.
     * @param pointOnLine2 the x and y coordinates are used to define a 2D point on the second line. Not modified.
     * @param lineDirection2 the x and y components are used to define the 2D direction of the second line. Not modified.
+    * @param intersectionToPack the result is stored in the x and y components of this 3D point. Modified.
     * @return {@code true} if the two lines intersect, {@code false} otherwise.
+    * @throws ReferenceFrameMismatchException if the arguments are not expressed in the same reference frame, except for {@code intersectionToPack}.
     */
    // FIXME This method is too confusing and error prone.
-   // FIXME It also needs to verify the reference frame of the arguments.
-   // FIXME change method signature to have the intersectionToPack at the end.
-   public static boolean getIntersectionBetweenTwoLines2d(FramePoint intersectionToPack, FramePoint pointOnLine1, FrameVector lineDirection1,
-                                                          FramePoint pointOnLine2, FrameVector lineDirection2)
+   public static boolean getIntersectionBetweenTwoLines2d(FramePoint pointOnLine1, FrameVector lineDirection1, FramePoint pointOnLine2,
+                                                          FrameVector lineDirection2, FramePoint intersectionToPack)
    {
+      pointOnLine1.checkReferenceFrameMatch(lineDirection1);
+      pointOnLine2.checkReferenceFrameMatch(lineDirection2);
+      pointOnLine1.checkReferenceFrameMatch(pointOnLine2);
+      intersectionToPack.changeFrame(pointOnLine1.getReferenceFrame());
+
       double pointOnLine1x = pointOnLine1.getX();
       double pointOnLine1y = pointOnLine1.getY();
       double lineDirection1x = lineDirection1.getX();
@@ -2725,7 +3120,7 @@ public class GeometryTools
    public static Vector2d getPerpendicularVector(Vector2d vector)
    {
       Vector2d perpendicularVector = new Vector2d();
-      getPerpendicularVector(perpendicularVector, vector);
+      getPerpendicularVector(vector, perpendicularVector);
 
       return new Vector2d(-vector.getY(), vector.getX());
    }
@@ -2737,11 +3132,10 @@ public class GeometryTools
     *    <li> {@code vector.angle(perpendicularVector) == Math.PI / 2.0}.
     * </ul>
     * 
-    * @param perpendicularVectorToPack a 2D vector in which the perpendicular vector is stored. Modified.
     * @param vector the vector to compute the perpendicular of. Not modified.
+    * @param perpendicularVectorToPack a 2D vector in which the perpendicular vector is stored. Modified.
     */
-   // FIXME reorder arguments.
-   public static void getPerpendicularVector(Vector2d perpendicularVectorToPack, Vector2d vector)
+   public static void getPerpendicularVector(Vector2d vector, Vector2d perpendicularVectorToPack)
    {
       perpendicularVectorToPack.set(-vector.getY(), vector.getX());
    }
@@ -2756,12 +3150,11 @@ public class GeometryTools
     * WARNING: the 3D arguments are projected onto the XY-plane to perform the actual computation in 2D.
     * </p>
     * 
-    * @param perpendicularVectorToPack a vector in which the x and y components of the 2D perpendicular vector are stored. Modified.
     * @param vector the vector to compute in the xy-plane the perpendicular of. Not modified.
+    * @param perpendicularVectorToPack a vector in which the x and y components of the 2D perpendicular vector are stored. Modified.
     */
    // FIXME this is just bad.
-   // FIXME reorder arguments.
-   public static void getPerpendicularVector2d(FrameVector perpendicularVectorToPack, FrameVector vector)
+   public static void getPerpendicularVector2d(FrameVector vector, FrameVector perpendicularVectorToPack)
    {
       perpendicularVectorToPack.set(-vector.getY(), vector.getX(), perpendicularVectorToPack.getZ());
    }
@@ -2866,48 +3259,6 @@ public class GeometryTools
       tupleToClip.setX(x1 < x2 ? MathTools.clipToMinMax(tupleToClip.getX(), x1, x2) : MathTools.clipToMinMax(tupleToClip.getX(), x2, x1));
       tupleToClip.setY(y1 < y2 ? MathTools.clipToMinMax(tupleToClip.getY(), y1, y2) : MathTools.clipToMinMax(tupleToClip.getY(), y2, y1));
       tupleToClip.setZ(z1 < z2 ? MathTools.clipToMinMax(tupleToClip.getZ(), z1, z2) : MathTools.clipToMinMax(tupleToClip.getZ(), z2, z1));
-   }
-
-   /**
-    * Computes the 2D perpendicular bisector of 2D line segment defined by its two 2D end points.
-    * The bisector starts off the the middle of the 2D line segment and points toward the left side of the 2D line segment.
-    * <p>
-    * Edge cases:
-    * <ul>
-    *    <li> when the line segment end points are equal,
-    *     more precisely when {@code lineSegmentStart.distance(lineSegmentEnd) < Epsilons.ONE_TRILLIONTH},
-    *     the method fails and returns {@code false}.
-    * </ul>
-    * </p>
-    * <p>
-    * WARNING: the 3D arguments are projected onto the XY-plane to perform the actual computation in 2D.
-    * </p>
-    * <p>
-    * WARNING: This method generates garbage.
-    * </p>
-    * 
-    * @param lineSegmentStart the x and y coordinates are used to defined the first end point of the 2D line segment. Not modified.
-    * @param lineSegmentEnd the x and y coordinates are used to defined the second end point of the line segment. Not modified.
-    * @param bisectorStartToPack a 2D point in which the x and y coordinates of the origin of the bisector are stored. Modified.
-    * @param bisectorDirectionToPack a 2D vector in which the x and y components of the direction of the bisector are stored. Modified.
-    * @return whether the perpendicular bisector could be determined or not.
-    */
-   // FIXME same thing, the use of 3D arguments for doing computation in 2D is confusing and error prone.
-   // FIXME the reference frames of the arguments need to checked and throw an exception if they are not the same.
-   public static boolean getZPlanePerpendicularBisector(FramePoint lineSegmentStart, FramePoint lineSegmentEnd, FramePoint bisectorStartToPack,
-                                                        FrameVector bisectorDirectionToPack)
-   {
-      Point2d lineStart2d = new Point2d(lineSegmentStart.getX(), lineSegmentStart.getY());
-      Point2d lineEnd2d = new Point2d(lineSegmentEnd.getX(), lineSegmentEnd.getY());
-      Point2d bisectorStart2d = new Point2d();
-      Vector2d bisectorDirection2d = new Vector2d();
-
-      boolean success = getPerpendicularBisector(lineStart2d, lineEnd2d, bisectorStart2d, bisectorDirection2d);
-      if (!success)
-         return false;
-      bisectorDirectionToPack.set(bisectorDirection2d.getX(), bisectorDirection2d.getY(), 0.0);
-      bisectorStartToPack.set(bisectorStart2d.getX(), bisectorStart2d.getY(), 0.0);
-      return true;
    }
 
    /**
@@ -3031,125 +3382,130 @@ public class GeometryTools
    }
 
    /**
-    * Computes the complete minimum rotation from {@code zUp = (0, 0, 1)} to the given {@code normalVector3d} and packs it into an {@link AxisAngle4d}.
+    * Computes the complete minimum rotation from {@code zUp = (0, 0, 1)} to the given {@code vector} and packs it into an {@link AxisAngle4d}.
     * The rotation axis if perpendicular to both vectors.
-    * The rotation angle is computed as the angle from the {@code zUp} to the {@code normalVector3d}: {@code rotationAngle = referenceNormal.angle(rotatedNormal)}.
-    * Note: the vector do not need to be unit length.
+    * The rotation angle is computed as the angle from the {@code zUp} to the {@code vector}:
+    * <br> {@code rotationAngle = zUp.angle(vector)}. </br>
+    * Note: the vector does not need to be unit length.
     * <p>
     * Edge cases:
     * <ul>
     *    <li> the vector is aligned with {@code zUp}: the rotation angle is equal to {@code 0.0} and the rotation axis is set to: (1, 0, 0).
-    *    <li> the vector collinear pointing opposite direction of {@code zUp}: the rotation angle is equal to {@code Math.PI} and the rotation axis is set to: (1, 0, 0).
+    *    <li> the vector is collinear pointing opposite direction of {@code zUp}: the rotation angle is equal to {@code Math.PI} and the rotation axis is set to: (1, 0, 0).
     *    <li> if the length of the given normal is below {@code 1.0E-7}: the rotation angle is equal to {@code 0.0} and the rotation axis is set to: (1, 0, 0).
     * </ul>
     * </p>
-    * The calculation becomes less accurate as the two vectors are more collinear.
+    * <p>
+    * Note: The calculation becomes less accurate as the two vectors are more collinear.
+    * </p>
     * <p>
     * WARNING: This method generates garbage.
     * </p>
     * 
-    * @param normalVector3d the vector that is rotated with respect to {@code zUp}. Not modified.
-    * @return the minimum rotation from {@code zUp} to the {@code normalVector3d}.
+    * @param vector the 3D vector that is rotated with respect to {@code zUp}. Not modified.
+    * @return the minimum rotation from {@code zUp} to the given {@code vector}.
     */
-   // TODO this is a bad name for this method, should be renamed for something like getAxisAngleFromZUpToVector
-   public static AxisAngle4d getRotationBasedOnNormal(Vector3d normalVector3d)
+   public static AxisAngle4d getAxisAngleFromZUpToVector(Vector3d vector)
    {
-      AxisAngle4d newAxisAngle4d = new AxisAngle4d();
-      getRotationBasedOnNormal(newAxisAngle4d, normalVector3d);
-      return newAxisAngle4d;
+      AxisAngle4d axisAngle = new AxisAngle4d();
+      getAxisAngleFromZUpToVector(vector, axisAngle);
+      return axisAngle;
    }
 
    /**
-    * Computes the complete minimum rotation from {@code zUp = (0, 0, 1)} to the given {@code normalVector3d} and packs it into an {@link AxisAngle4d}.
+    * Computes the complete minimum rotation from {@code zUp = (0, 0, 1)} to the given {@code vector} and packs it into an {@link AxisAngle4d}.
     * The rotation axis if perpendicular to both vectors.
-    * The rotation angle is computed as the angle from the {@code zUp} to the {@code normalVector3d}: {@code rotationAngle = referenceNormal.angle(rotatedNormal)}.
-    * Note: the vector do not need to be unit length.
+    * The rotation angle is computed as the angle from the {@code zUp} to the {@code vector}:
+    * <br> {@code rotationAngle = zUp.angle(vector)}. </br>
+    * Note: the vector does not need to be unit length.
     * <p>
     * Edge cases:
     * <ul>
     *    <li> the vector is aligned with {@code zUp}: the rotation angle is equal to {@code 0.0} and the rotation axis is set to: (1, 0, 0).
-    *    <li> the vector collinear pointing opposite direction of {@code zUp}: the rotation angle is equal to {@code Math.PI} and the rotation axis is set to: (1, 0, 0).
+    *    <li> the vector is collinear pointing opposite direction of {@code zUp}: the rotation angle is equal to {@code Math.PI} and the rotation axis is set to: (1, 0, 0).
     *    <li> if the length of the given normal is below {@code 1.0E-7}: the rotation angle is equal to {@code 0.0} and the rotation axis is set to: (1, 0, 0).
     * </ul>
     * </p>
-    * The calculation becomes less accurate as the two vectors are more collinear.
+    * <p>
+    * Note: The calculation becomes less accurate as the two vectors are more collinear.
+    * </p>
     * 
-    * @param rotationToPack the minimum rotation from {@code zUp} to the {@code normalVector3d}. Modified.
-    * @param normalVector3d the vector that is rotated with respect to {@code zUp}. Not modified.
+    * @param vector the vector that is rotated with respect to {@code zUp}. Not modified.
+    * @param rotationToPack the minimum rotation from {@code zUp} to the given {@code vector}. Modified.
     */
-   // FIXME reorder the arguments so the argument to comes last.
-   // TODO this is a bad name for this method, should be renamed for something like getAxisAngleFromVectorToZUp
-   public static void getRotationBasedOnNormal(AxisAngle4d rotationToPack, Vector3d normalVector3d)
+   public static void getAxisAngleFromZUpToVector(Vector3d vector, AxisAngle4d rotationToPack)
    {
-      getRotationBasedOnNormal(rotationToPack, normalVector3d.getX(), normalVector3d.getY(), normalVector3d.getZ(), 0.0, 0.0, 1.0);
+      getAxisAngleFromFirstToSecondVector(0.0, 0.0, 1.0, vector.getX(), vector.getY(), vector.getZ(), rotationToPack);
    }
 
    /**
-    * Computes the complete minimum rotation from {@code referenceNormal} to the {@code rotatedNormal} and packs it into an {@link AxisAngle4d}.
+    * Computes the complete minimum rotation from {@code firstVector} to the {@code secondVector} and packs it into an {@link AxisAngle4d}.
     * The rotation axis if perpendicular to both vectors.
-    * The rotation angle is computed as the angle from the {@code referenceNormal} to the {@code rotatedNormal}: {@code rotationAngle = referenceNormal.angle(rotatedNormal)}.
+    * The rotation angle is computed as the angle from the {@code firstVector} to the {@code secondVector}:
+    * <br> {@code rotationAngle = firstVector.angle(secondVector)}. </br>
     * Note: the vectors do not need to be unit length.
     * <p>
     * Edge cases:
     * <ul>
     *    <li> the vectors are the same: the rotation angle is equal to {@code 0.0} and the rotation axis is set to: (1, 0, 0).
-    *    <li> the vectors collinear pointing opposite directions: the rotation angle is equal to {@code Math.PI} and the rotation axis is set to: (1, 0, 0).
+    *    <li> the vectors are collinear pointing opposite directions: the rotation angle is equal to {@code Math.PI} and the rotation axis is set to: (1, 0, 0).
     *    <li> if the length of either normal is below {@code 1.0E-7}: the rotation angle is equal to {@code 0.0} and the rotation axis is set to: (1, 0, 0).
     * </ul>
     * </p>
-    * The calculation becomes less accurate as the two vectors are more collinear.
+    * <p>
+    * Note: The calculation becomes less accurate as the two vectors are more collinear.
+    * </p>
     * 
-    * @param rotationToPack the minimum rotation from {@code referenceNormal} to the {@code rotatedNormal}. Modified.
-    * @param rotatedNormal the vector that is rotated with respect to the reference. Not modified.
-    * @param referenceNormal the vector used as reference. Not modified.
+    * @param firstVector the first vector. Not modified.
+    * @param secondVector the second vector that is rotated with respect to the first vector. Not modified.
+    * @param rotationToPack the minimum rotation from {@code firstVector} to the {@code secondVector}. Modified.
     */
-   // FIXME reorder the arguments so the argument to comes last.
-   // TODO this is a bad name for this method, should be renamed for something like getAxisAngleFromFirstToSecondVector
-   public static void getRotationBasedOnNormal(AxisAngle4d rotationToPack, Vector3d rotatedNormal, Vector3d referenceNormal)
+   public static void getAxisAngleFromFirstToSecondVector(Vector3d firstVector, Vector3d secondVector, AxisAngle4d rotationToPack)
    {
-      getRotationBasedOnNormal(rotationToPack, rotatedNormal.getX(), rotatedNormal.getY(), rotatedNormal.getZ(), referenceNormal.getX(), referenceNormal.getY(),
-                               referenceNormal.getZ());
+      getAxisAngleFromFirstToSecondVector(firstVector.getX(), firstVector.getY(), firstVector.getZ(), secondVector.getX(), secondVector.getY(),
+                                          secondVector.getZ(), rotationToPack);
    }
 
    /**
-    * Computes the complete minimum rotation from {@code referenceNormal} to the {@code rotatedNormal} and packs it into an {@link AxisAngle4d}.
+    * Computes the complete minimum rotation from {@code firstVector} to the {@code secondVector} and packs it into an {@link AxisAngle4d}.
     * The rotation axis if perpendicular to both vectors.
-    * The rotation angle is computed as the angle from the {@code referenceNormal} to the {@code rotatedNormal}: {@code rotationAngle = referenceNormal.angle(rotatedNormal)}.
+    * The rotation angle is computed as the angle from the {@code firstVector} to the {@code secondVector}:
+    * <br> {@code rotationAngle = firstVector.angle(secondVector)}. </br>
     * Note: the vectors do not need to be unit length.
     * <p>
     * Edge cases:
     * <ul>
     *    <li> the vectors are the same: the rotation angle is equal to {@code 0.0} and the rotation axis is set to: (1, 0, 0).
-    *    <li> the vectors collinear pointing opposite directions: the rotation angle is equal to {@code Math.PI} and the rotation axis is set to: (1, 0, 0).
+    *    <li> the vectors are collinear pointing opposite directions: the rotation angle is equal to {@code Math.PI} and the rotation axis is set to: (1, 0, 0).
     *    <li> if the length of either normal is below {@code 1.0E-7}: the rotation angle is equal to {@code 0.0} and the rotation axis is set to: (1, 0, 0).
     * </ul>
     * </p>
-    * The calculation becomes less accurate as the two vectors are more collinear.
+    * <p>
+    * Note: The calculation becomes less accurate as the two vectors are more collinear.
+    * </p>
     * 
-    * @param rotationToPack the minimum rotation from {@code referenceNormal} to the {@code rotatedNormal}. Modified.
-    * @param rotatedNormalX x-component of the vector that is rotated with respect to the reference.
-    * @param rotatedNormalY y-component of the vector that is rotated with respect to the reference.
-    * @param rotatedNormalZ z-component of the vector that is rotated with respect to the reference.
-    * @param referenceNormal x-component of the vector used as reference.
-    * @param referenceNormal y-component of the vector used as reference.
-    * @param referenceNormal z-component of the vector used as reference.
+    * @param firstVectorX x-component of the first vector.
+    * @param firstVectorY y-component of the first vector.
+    * @param firstVectorZ z-component of the first vector.
+    * @param secondVectorX x-component of the second vector that is rotated with respect to the first vector.
+    * @param secondVectorY y-component of the second vector that is rotated with respect to the first vector.
+    * @param secondVectorZ z-component of the second vector that is rotated with respect to the first vector.
+    * @param rotationToPack the minimum rotation from {@code firstVector} to the {@code secondVector}. Modified.
     */
-   // FIXME reorder the arguments so the argument to comes last.
-   // TODO this is a bad name for this method, should be renamed for something like getAxisAngleFromFirstToSecondVector
-   public static void getRotationBasedOnNormal(AxisAngle4d rotationToPack, double rotatedNormalX, double rotatedNormalY, double rotatedNormalZ,
-                                               double referenceNormalX, double referenceNormalY, double referenceNormalZ)
+   public static void getAxisAngleFromFirstToSecondVector(double firstVectorX, double firstVectorY, double firstVectorZ, double secondVectorX,
+                                                          double secondVectorY, double secondVectorZ, AxisAngle4d rotationToPack)
    {
-      double rotationAxisX = referenceNormalY * rotatedNormalZ - referenceNormalZ * rotatedNormalY;
-      double rotationAxisY = referenceNormalZ * rotatedNormalX - referenceNormalX * rotatedNormalZ;
-      double rotationAxisZ = referenceNormalX * rotatedNormalY - referenceNormalY * rotatedNormalX;
+      double rotationAxisX = firstVectorY * secondVectorZ - firstVectorZ * secondVectorY;
+      double rotationAxisY = firstVectorZ * secondVectorX - firstVectorX * secondVectorZ;
+      double rotationAxisZ = firstVectorX * secondVectorY - firstVectorY * secondVectorX;
       double rotationAxisLength = Math.sqrt(rotationAxisX * rotationAxisX + rotationAxisY * rotationAxisY + rotationAxisZ * rotationAxisZ);
 
       boolean normalsAreParallel = rotationAxisLength < 1e-7;
 
       double dot;
-      dot = rotatedNormalX * referenceNormalX;
-      dot += rotatedNormalY * referenceNormalY;
-      dot += rotatedNormalZ * referenceNormalZ;
+      dot = secondVectorX * firstVectorX;
+      dot += secondVectorY * firstVectorY;
+      dot += secondVectorZ * firstVectorZ;
 
       if (normalsAreParallel)
       {
@@ -3158,8 +3514,8 @@ public class GeometryTools
          return;
       }
 
-      double rotationAngle = getAngleFromFirstToSecondVector(referenceNormalX, referenceNormalY, referenceNormalZ, rotatedNormalX, rotatedNormalY,
-                                                             rotatedNormalZ);
+      double rotationAngle = getAngleFromFirstToSecondVector(firstVectorX, firstVectorY, firstVectorZ, secondVectorX, secondVectorY,
+                                                             secondVectorZ);
 
       rotationAxisX /= rotationAxisLength;
       rotationAxisY /= rotationAxisLength;
@@ -3517,6 +3873,149 @@ public class GeometryTools
    }
 
    /**
+    * Tests if the two given vectors are collinear given a tolerance on the angle between the two vector axes in the range ]0; <i>pi</i>/2[.
+    * This method returns {@code true} if the two vectors are collinear, whether they are pointing in the same direction or in opposite directions.
+    * 
+    * <p>
+    * Edge cases:
+    * <ul>
+    *    <li> if the length of either vector is below {@code 1.0E-7}, this method fails and returns {@code false}.
+    * </ul>
+    * </p>
+    * 
+    * @param firstVector the first vector. Not modified.
+    * @param secondVector the second vector. Not modified.
+    * @param angleEpsilon tolerance on the angle in radians.
+    * @return {@code true} if the two vectors are collinear, {@code false} otherwise.
+    */
+   public static boolean areVectorsCollinear(Vector2d firstVector, Vector2d secondVector, double angleEpsilon)
+   {
+      return areVectorsCollinear(firstVector.getX(), firstVector.getY(), secondVector.getX(), secondVector.getY(), angleEpsilon);
+   }
+
+
+   /**
+    * Tests if the two given vectors are collinear given a tolerance on the angle between the two vector axes in the range ]0; <i>pi</i>/2[.
+    * This method returns {@code true} if the two vectors are collinear, whether they are pointing in the same direction or in opposite directions.
+    * 
+    * <p>
+    * Edge cases:
+    * <ul>
+    *    <li> if the length of either vector is below {@code 1.0E-7}, this method fails and returns {@code false}.
+    * </ul>
+    * </p>
+    * 
+    * @param firstVector the first vector. Not modified.
+    * @param secondVector the second vector. Not modified.
+    * @param angleEpsilon tolerance on the angle in radians.
+    * @return {@code true} if the two vectors are collinear, {@code false} otherwise.
+    */
+   public static boolean areVectorsCollinear(double firstVectorX, double firstVectorY, double secondVectorX, double secondVectorY, double angleEpsilon)
+   {
+      double firstVectorLength = Math.sqrt(firstVectorX * firstVectorX + firstVectorY * firstVectorY);
+      if (firstVectorLength < Epsilons.ONE_TEN_MILLIONTH)
+         return false;
+      double secondVectorLength = Math.sqrt(secondVectorX * secondVectorX + secondVectorY * secondVectorY);
+      if (secondVectorLength < Epsilons.ONE_TEN_MILLIONTH)
+         return false;
+      double dot = firstVectorX * secondVectorX + firstVectorY * secondVectorY;
+      return Math.abs(dot / (firstVectorLength * secondVectorLength)) > Math.cos(angleEpsilon);
+   }
+
+   /**
+    * Tests if the two given lines are collinear given a tolerance on the angle between in the range ]0; <i>pi</i>/2[.
+    * This method returns {@code true} if the two lines are collinear, whether they are pointing in the same direction or in opposite directions.
+    * 
+    * <p>
+    * Edge cases:
+    * <ul>
+    *    <li> if the direction magnitude of either line is below {@code 1.0E-7}, this method fails and returns {@code false}.
+    * </ul>
+    * </p>
+    * 
+    * @param firstPointOnLine1 a first point located on the first line. Not modified.
+    * @param secondPointOnLine1 a second point located on the first line. Not modified.
+    * @param firstPointOnLine2 a first point located on the second line. Not modified.
+    * @param secondPointOnLine2 a second point located on the second line. Not modified.
+    * @param angleEpsilon tolerance on the angle in radians.
+    * @param distanceEpsilon tolerance on the distance to determine if {@code firstPointOnLine2} belongs to the first line segment.
+    * @return {@code true} if the two line segments are collinear, {@code false} otherwise.
+    */
+   public static boolean areLinesCollinear(Point2d firstPointOnLine1, Point2d secondPointOnLine1, Point2d firstPointOnLine2, Point2d secondPointOnLine2,
+                                           double angleEpsilon, double distanceEspilon)
+   {
+      double pointOnLine1x = firstPointOnLine1.getX();
+      double pointOnLine1y = firstPointOnLine1.getY();
+      double lineDirection1x = secondPointOnLine1.getX() - firstPointOnLine1.getX();
+      double lineDirection1y = secondPointOnLine1.getY() - firstPointOnLine1.getY();
+      double pointOnLine2x = firstPointOnLine2.getX();
+      double pointOnLine2y = firstPointOnLine2.getY();
+      double lineDirection2x = secondPointOnLine2.getX() - firstPointOnLine2.getX();
+      double lineDirection2y = secondPointOnLine2.getY() - firstPointOnLine2.getY();
+      return areLinesCollinear(pointOnLine1x, pointOnLine1y, lineDirection1x, lineDirection1y, pointOnLine2x, pointOnLine2y, lineDirection2x, lineDirection2y,
+                               angleEpsilon, distanceEspilon);
+   }
+
+   /**
+    * Tests if the two given lines are collinear given a tolerance on the angle between in the range ]0; <i>pi</i>/2[.
+    * This method returns {@code true} if the two lines are collinear, whether they are pointing in the same direction or in opposite directions.
+    * 
+    * <p>
+    * Edge cases:
+    * <ul>
+    *    <li> if the direction magnitude of either line is below {@code 1.0E-7}, this method fails and returns {@code false}.
+    * </ul>
+    * </p>
+    * 
+    * @param pointOnLine1 point located on the first line. Not modified.
+    * @param lineDirection1 the first line direction. Not modified.
+    * @param pointOnLine2 point located on the second line. Not modified.
+    * @param lineDirection2 the second line direction. Not modified.
+    * @param angleEpsilon tolerance on the angle in radians.
+    * @param distanceEpsilon tolerance on the distance to determine if {@code pointOnLine2} belongs to the first line segment.
+    * @return {@code true} if the two line segments are collinear, {@code false} otherwise.
+    */
+   public static boolean areLinesCollinear(Point2d pointOnLine1, Vector2d lineDirection1, Point2d pointOnLine2, Vector2d lineDirection2, double angleEpsilon,
+                                           double distanceEspilon)
+   {
+      return areLinesCollinear(pointOnLine1.getX(), pointOnLine1.getY(), lineDirection1.getX(), lineDirection1.getY(), pointOnLine2.getX(), pointOnLine2.getY(),
+                               lineDirection2.getX(), lineDirection2.getY(), angleEpsilon, distanceEspilon);
+   }
+
+   /**
+    * Tests if the two given lines are collinear given a tolerance on the angle between in the range ]0; <i>pi</i>/2[.
+    * This method returns {@code true} if the two lines are collinear, whether they are pointing in the same direction or in opposite directions.
+    * 
+    * <p>
+    * Edge cases:
+    * <ul>
+    *    <li> if the direction magnitude of either line is below {@code 1.0E-7}, this method fails and returns {@code false}.
+    * </ul>
+    * </p>
+    * 
+    * @param pointOnLine1x x-coordinate of a point located on the first line.
+    * @param pointOnLine1y y-coordinate of a point located on the first line.
+    * @param lineDirection1x x-component of the first line direction.
+    * @param lineDirection1y y-component of the first line direction.
+    * @param pointOnLine2x x-coordinate of a point located on the second line.
+    * @param pointOnLine2y y-coordinate of a point located on the second line.
+    * @param lineDirection2x x-component of the second line direction.
+    * @param lineDirection2y y-component of the second line direction.
+    * @param angleEpsilon tolerance on the angle in radians.
+    * @param distanceEpsilon tolerance on the distance to determine if {@code pointOnLine2} belongs to the first line segment.
+    * @return {@code true} if the two line segments are collinear, {@code false} otherwise.
+    */
+   public static boolean areLinesCollinear(double pointOnLine1x, double pointOnLine1y, double lineDirection1x, double lineDirection1y, double pointOnLine2x,
+                                           double pointOnLine2y, double lineDirection2x, double lineDirection2y, double angleEpsilon, double distanceEspilon)
+   {
+      if (!areVectorsCollinear(lineDirection1x, lineDirection1y, lineDirection2x, lineDirection2y, angleEpsilon))
+            return false;
+
+      double distance = distanceFromPointToLine(pointOnLine2x, pointOnLine2y, pointOnLine1x, pointOnLine1y, lineDirection1x, lineDirection1y);
+      return distance < distanceEspilon;
+   }
+
+   /**
     * Tests if the two given planes are coincident:
     * <ul>
     *    <li> {@code planeNormal1} and {@code planeNormal2} are collinear given the tolerance {@code angleEpsilon}.
@@ -3544,6 +4043,100 @@ public class GeometryTools
          return false;
       else
          return distanceFromPointToPlane(pointOnPlane2, pointOnPlane1, planeNormal1) < distanceEpsilon;
+   }
+
+   /**
+    * Rotates the given {@code tupleOriginal} tuple by an angle {@code yaw} and stores the result in the tuple {@code tupleTransformed}.
+    * 
+    * @param yaw the angle in radians by which {@code tupleOriginal} should be rotated.
+    * @param tupleOriginal the original tuple. Not modified.
+    * @param tupleTransformed the tuple in which the transformed {@code original} is stored. Modified.
+    */
+   public static void rotateTuple2d(double yaw, Tuple2d tupleOriginal, Tuple2d tupleTransformed)
+   {
+      double cos = Math.cos(yaw);
+      double sin = Math.sin(yaw);
+
+      tupleTransformed.setX(cos * tupleOriginal.getX() - sin * tupleOriginal.getY());
+      tupleTransformed.setY(sin * tupleOriginal.getX() + cos * tupleOriginal.getY());
+   }
+
+   /**
+    * Rotates the given {@code tupleOriginal} tuple by a axis-angle (ux, uy, uz, angle) and stores the result in the tuple {@code tupleTransformed}.
+    * 
+    * @param axisAngle the axis-angle used to rotate the tuple.
+    * @param tupleOriginal the original tuple. Not modified.
+    * @param tupleTransformed the tuple in which the transformed {@code original} is stored. Modified.
+    */
+   public static void rotateTuple3d(AxisAngle4d axisAngle, Tuple3d tupleOriginal, Tuple3d tupleTransformed)
+   {
+      double uNorm = Math.sqrt(axisAngle.getX() * axisAngle.getX() + axisAngle.getY() * axisAngle.getY() + axisAngle.getZ() * axisAngle.getZ());
+
+      if (uNorm < EPSILON)
+      {
+         return;
+      }
+      else
+      {
+         double halfTheta = 0.5 * axisAngle.getAngle();
+         double cosHalfTheta = Math.cos(halfTheta);
+         double sinHalfTheta = Math.sin(halfTheta) / uNorm;
+         rotateTuple3d(axisAngle.getX() * sinHalfTheta, axisAngle.getY() * sinHalfTheta, axisAngle.getZ() * sinHalfTheta, cosHalfTheta, tupleOriginal, tupleTransformed);
+      }
+   }
+
+   /**
+    * Rotates the given {@code tupleOriginal} tuple by a quaternion (qx, qy, qz, qs) and stores the result in the tuple {@code tupleTransformed}.
+    * 
+    * @param quaternion the quaternion used to rotate the tuple.
+    * @param tupleOriginal the original tuple. Not modified.
+    * @param tupleTransformed the tuple in which the transformed {@code original} is stored. Modified.
+    */
+   public static void rotateTuple3d(Quat4d quaternion, Tuple3d tupleOriginal, Tuple3d tupleTransformed)
+   {
+      rotateTuple3d(quaternion.getX(), quaternion.getY(), quaternion.getZ(), quaternion.getW(), tupleOriginal, tupleTransformed);
+   }
+
+   /**
+    * Rotates the given {@code tupleOriginal} tuple by a quaternion (qx, qy, qz, qs) and stores the result in the tuple {@code tupleTransformed}.
+    * 
+    * @param quaternion the quaternion used to rotate the tuple.
+    * @param tupleOriginal the original tuple. Not modified.
+    * @param tupleTransformed the tuple in which the transformed {@code original} is stored. Modified.
+    */
+   public static void rotateTuple3d(double qx, double qy, double qz, double qs, Tuple3d tupleOriginal, Tuple3d tupleTransformed)
+   {
+      double norm = Math.sqrt(qx * qx + qy * qy + qz * qz + qs * qs);
+
+      if (norm < EPSILON)
+      {
+         tupleTransformed.set(tupleOriginal);
+         return;
+      }
+
+      norm = 1.0 / norm;
+      qx *= norm;
+      qy *= norm;
+      qz *= norm;
+      qs *= norm;
+
+      // t = 2.0 * cross(q.xyz, v);
+      // v' = v + q.s * t + cross(q.xyz, t);
+      double x = tupleOriginal.getX();
+      double y = tupleOriginal.getY();
+      double z = tupleOriginal.getZ();
+
+      double crossX = 2.0 * (qy * z - qz * y);
+      double crossY = 2.0 * (qz * x - qx * z);
+      double crossZ = 2.0 * (qx * y - qy * x);
+
+      double crossCrossX = qy * crossZ - qz * crossY;
+      double crossCrossY = qz * crossX - qx * crossZ;
+      double crossCrossZ = qx * crossY - qy * crossX;
+
+      tupleTransformed.setX(x + qs * crossX + crossCrossX);
+      tupleTransformed.setY(y + qs * crossY + crossCrossY);
+      tupleTransformed.setZ(z + qs * crossZ + crossCrossZ);
    }
 
    /**

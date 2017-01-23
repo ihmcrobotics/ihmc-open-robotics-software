@@ -1660,7 +1660,7 @@ public class ConvexPolygon2dCalculatorTest
          Point2d edgeEnd = polygon.getNextVertex(i);
          Vector2d edgeVector = new Vector2d();
          edgeVector.sub(edgeEnd, edgeStart);
-         GeometryTools.getPerpendicularVector(expected, edgeVector);
+         GeometryTools.getPerpendicularVector(edgeVector, expected);
          expected.normalize();
 
          assertTrue("Expected normal Vector did not match computed one.", expected.epsilonEquals(normal, epsilon));
