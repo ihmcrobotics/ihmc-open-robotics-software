@@ -2,6 +2,7 @@ package us.ihmc.graphicsDescription.yoGraphics;
 
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.MeshDataGenerator;
+import us.ihmc.graphicsDescription.MeshDataHolder;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.instructions.Graphics3DAddMeshDataInstruction;
 import us.ihmc.graphicsDescription.plotting.artifact.Artifact;
@@ -66,7 +67,8 @@ public class YoGraphicPolygon extends YoGraphicAbstractShape implements RemoteYo
       graphics3dObject.setChangeable(true);
 
       ConvexPolygon2d convexPolygon2d = yoFrameConvexPolygon2d.getConvexPolygon2d();
-      instruction = graphics3dObject.addExtrudedPolygon(convexPolygon2d, 0.005, appearance);
+      MeshDataHolder meshDataHolder = MeshDataGenerator.ExtrudedPolygon(convexPolygon2d, 0.005);
+      instruction = new Graphics3DAddMeshDataInstruction(meshDataHolder, appearance);
    }
 
    @Override

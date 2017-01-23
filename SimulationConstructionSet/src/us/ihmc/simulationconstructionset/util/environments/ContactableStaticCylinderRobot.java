@@ -8,6 +8,8 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
+import us.ihmc.graphicsDescription.instructions.ConeGraphics3DInstruction;
+import us.ihmc.graphicsDescription.instructions.CylinderGraphics3DInstruction;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.simulationconstructionset.GroundContactPointGroup;
 import us.ihmc.simulationconstructionset.Link;
@@ -46,7 +48,7 @@ public class ContactableStaticCylinderRobot extends ContactableStaticRobot imple
    private final double selectTransparency = 0.0;
    private final double unselectTransparency = 0.0;
    
-   private Graphics3DAddMeshDataInstruction cylinderGraphic;
+   private CylinderGraphics3DInstruction cylinderGraphic;
    
    private final ArrayList<SelectableObjectListener> selectedListeners = new ArrayList<SelectableObjectListener>();
 

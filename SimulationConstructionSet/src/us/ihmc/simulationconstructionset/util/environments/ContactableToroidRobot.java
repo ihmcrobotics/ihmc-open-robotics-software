@@ -10,6 +10,8 @@ import javax.vecmath.Vector3d;
 
 import org.apache.commons.math3.util.FastMath;
 
+import us.ihmc.graphicsDescription.instructions.ArcTorusGraphics3DInstruction;
+import us.ihmc.graphicsDescription.instructions.HemiEllipsoidGraphics3DInstruction;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.simulationconstructionset.GroundContactPointGroup;
 import us.ihmc.simulationconstructionset.Link;
@@ -50,7 +52,7 @@ public class ContactableToroidRobot extends ContactablePinJointRobot implements 
    private final double selectTransparency = 0.0;
    private final double unselectTransparency = 0.0;
    
-   private Graphics3DAddMeshDataInstruction wheelGraphic;
+   private ArcTorusGraphics3DInstruction wheelGraphic;
    
    private final ArrayList<SelectableObjectListener> selectedListeners = new ArrayList<SelectableObjectListener>();
 
