@@ -10,6 +10,7 @@ import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
+import javax.vecmath.Quat4d;
 import javax.vecmath.Tuple3d;
 import javax.vecmath.Vector2d;
 import javax.vecmath.Vector3d;
@@ -2912,6 +2913,30 @@ public class GeometryToolsTest
          GeometryTools.rotateTuple2d(yaw, original2d, actualTransformed2d);
 
          JUnitTools.assertTuple2dEquals(expectedTransformed2d, actualTransformed2d, Epsilons.ONE_TRILLIONTH);
+      }
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @Test(timeout = 30000)
+   public void testRotateTuple3d() throws Exception
+   {
+      Random random = new Random(232L);
+
+      for (int i = 0; i < ITERATIONS; i++)
+      {
+         Quat4d quaternion = RandomTools.generateRandomQuaternion(random, 2.0 * Math.PI);
+         Vector3d original = RandomTools.generateRandomVector(random, RandomTools.generateRandomDouble(random, 10.0));
+
+         Matrix3d rotationMatrix = new Matrix3d();
+         rotationMatrix.set(quaternion);
+
+         Vector3d expectedTransformed = new Vector3d();
+         rotationMatrix.transform(original, expectedTransformed);
+
+         Vector3d actualTransformed = new Vector3d();
+         GeometryTools.rotateTuple3d(quaternion, original, actualTransformed);
+
+         JUnitTools.assertTuple3dEquals(expectedTransformed, actualTransformed, Epsilons.ONE_TRILLIONTH);
       }
    }
 
