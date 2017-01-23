@@ -1505,6 +1505,105 @@ public class GeometryTools
    }
 
    /**
+    * Given two 3D line segments with finite length, this methods computes two points P &in; lineSegment1 and Q &in; lineSegment2 such that the distance || P - Q || is the minimum distance between the two 3D line segments.
+    * <a href="http://geomalgorithms.com/a07-_distance.html"> Useful link</a>.
+    * 
+    * @param lineSegmentStart1 the first end point of the first line segment. Not modified.
+    * @param lineSegmentEnd1 the second end point of the first line segment. Not modified.
+    * @param lineSegmentStart2 the first end point of the second line segment. Not modified.
+    * @param lineSegmentEnd2 the second end point of the second line segment. Not modified.
+    * @param closestPointOnLineSegment1ToPack the 3D coordinates of the point P are packed in this 3D point. Modified.
+    * @param closestPointOnLineSegment2ToPack the 3D coordinates of the point Q are packed in this 3D point. Modified.
+    */
+   public static void getClosestPointsForTwoLineSegments(Point3d lineSegmentStart1, Point3d lineSegmentEnd1, Point3d lineSegmentStart2, Point3d lineSegmentEnd2,
+                                                         Point3d closestPointOnLineSegment1ToPack, Point3d closestPointOnLineSegment2ToPack)
+   {
+      // Switching to the notation used in http://geomalgorithms.com/a07-_distance.html.
+      // The line1 is defined by (P0, u) and the line2 by (Q0, v).
+      Point3d P0 = lineSegmentStart1;
+      double ux = lineSegmentEnd1.getX() - lineSegmentStart1.getX();
+      double uy = lineSegmentEnd1.getY() - lineSegmentStart1.getY();
+      double uz = lineSegmentEnd1.getZ() - lineSegmentStart1.getZ();
+      Point3d Q0 = lineSegmentStart2;
+      double vx = lineSegmentEnd2.getX() - lineSegmentStart2.getX();
+      double vy = lineSegmentEnd2.getY() - lineSegmentStart2.getY();
+      double vz = lineSegmentEnd2.getZ() - lineSegmentStart2.getZ();
+
+      Point3d Psc = closestPointOnLineSegment1ToPack;
+      Point3d Qtc = closestPointOnLineSegment2ToPack;
+
+      double w0X = P0.getX() - Q0.getX();
+      double w0Y = P0.getY() - Q0.getY();
+      double w0Z = P0.getZ() - Q0.getZ();
+
+      double a = ux * ux + uy * uy + uz * uz;
+      double b = ux * vx + uy * vy + uz * vz;
+      double c = vx * vx + vy * vy + vz * vz;
+      double d = ux * w0X + uy * w0Y + uz * w0Z;
+      double e = vx * w0X + vy * w0Y + vz * w0Z;
+
+      double delta = a * c - b * b;
+
+      double sc, sNumerator, sDenominator = delta;
+      double tc, tNumerator, tDenominator = delta;
+
+      // check to see if the lines are parallel
+      if (delta <= EPSILON)
+      {
+         /*
+          * The lines are parallel, there's an infinite number of pairs, but for
+          * one chosen point on one of the lines, there's only one closest point
+          * to it on the other line. So let's choose arbitrarily a point on the
+          * lineSegment1 and calculate the point that is closest to it on the lineSegment2.
+          */
+         sNumerator = 0.0;
+         sDenominator = 1.0;
+         tNumerator = e;
+         tDenominator = c;
+      }
+      else
+      {
+         sNumerator = (b * e - c * d);
+         tNumerator = (a * e - b * d);
+
+         if (sNumerator < 0.0)
+         {
+            sNumerator = 0.0;
+            tNumerator = e;
+            tDenominator = c;
+         }
+         else if (sNumerator > sDenominator)
+         {
+            sNumerator = sDenominator;
+            tNumerator = e + b;
+            tDenominator = c;
+         }
+      }
+
+      if (tNumerator < 0.0)
+      {
+         tNumerator = 0.0;
+         sNumerator = MathTools.clipToMinMax(-d, 0.0, a);
+         sDenominator = a;
+      }
+      else if (tNumerator > tDenominator)
+      {
+         tNumerator = tDenominator;
+         sNumerator = MathTools.clipToMinMax(-d + b, 0.0, a);
+         sDenominator = a;
+      }
+
+      sc = Math.abs(sNumerator) < EPSILON ? 0.0 : sNumerator / sDenominator;
+      tc = Math.abs(tNumerator) < EPSILON ? 0.0 : tNumerator / tDenominator;
+
+      Psc.set(ux, uy, uz);
+      Psc.scaleAdd(sc, P0);
+
+      Qtc.set(vx, vy, vz);
+      Qtc.scaleAdd(tc, Q0);
+   }
+
+   /**
     * Computes the coordinates of the intersection between a plane and an infinitely long line.
     * In the case the line is parallel to the plane, this method will return {@code null}.
     * <a href="https://en.wikipedia.org/wiki/Line%E2%80%93plane_intersection"> Useful link </a>.
