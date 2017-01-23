@@ -2480,7 +2480,7 @@ public class GeometryToolsTest
 
    @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
-   public void testGetOrthogonalProjectionOnLine() throws Exception
+   public void testGetOrthogonalProjectionOnLine2D() throws Exception
    {
       Random random = new Random(1176L);
 
@@ -2500,6 +2500,28 @@ public class GeometryToolsTest
 
          Point2d actualProjection = GeometryTools.getOrthogonalProjectionOnLine(testPoint, firstPointOnLine, secondPointOnLine);
          JUnitTools.assertTuple2dEquals(expectionProjection, actualProjection, Epsilons.ONE_TRILLIONTH);
+      }
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @Test(timeout = 30000)
+   public void testGetOrthogonalProjectionOnLine3D() throws Exception
+   {
+      Random random = new Random(1176L);
+
+      for (int i = 0; i < ITERATIONS; i++)
+      {
+         Point3d pointOnLine = RandomTools.generateRandomPoint3d(random, -10.0, 10.0);
+         Vector3d lineDirection = RandomTools.generateRandomVector(random, RandomTools.generateRandomDouble(random, 0.0, 10.0));
+         Point3d expectedProjection = new Point3d();
+         expectedProjection.scaleAdd(RandomTools.generateRandomDouble(random, 10.0), lineDirection, pointOnLine);
+         Vector3d perpendicularToLineDirection = RandomTools.generateRandomOrthogonalVector3d(random, lineDirection, true);
+
+         Point3d testPoint = new Point3d();
+         testPoint.scaleAdd(RandomTools.generateRandomDouble(random, 10.0), perpendicularToLineDirection, expectedProjection);
+
+         Point3d actualProjection = GeometryTools.getOrthogonalProjectionOnLine(testPoint, pointOnLine, lineDirection);
+         JUnitTools.assertTuple3dEquals(expectedProjection, actualProjection, Epsilons.ONE_TRILLIONTH);
       }
    }
 

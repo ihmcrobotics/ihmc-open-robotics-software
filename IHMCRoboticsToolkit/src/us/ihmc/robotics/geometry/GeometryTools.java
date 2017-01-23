@@ -939,6 +939,96 @@ public class GeometryTools
    }
 
    /**
+    * Computes the orthogonal projection of a 3D point on an infinitely long 3D line defined by a 3D point and a 3D direction.
+    * <p>
+    * Edge cases:
+    * <ul>
+    *    <li> if the given line direction is too small, i.e. {@code lineDirection.lengthSquared() < Epsilons.ONE_TRILLIONTH}, this method fails and returns {@code null}.
+    * </ul>
+    * </p>
+    * <p>
+    * WARNING: This method generates garbage.
+    * </p>
+    * 
+    * @param pointToProject the point to compute the projection of. Not modified.
+    * @param pointOnLine point located on the line. Not modified.
+    * @param lineDirection direction of the line. Not modified.
+    * @return the projection of the point onto the line or {@code null} if the method failed.
+    */
+   public static Point3d getOrthogonalProjectionOnLine(Point3d pointToProject, Point3d pointOnLine, Vector3d lineDirection)
+   {
+      Point3d projection = new Point3d();
+      boolean success = getOrthogonalProjectionOnLine(pointToProject, pointOnLine, lineDirection, projection);
+      if (!success)
+         return null;
+      else
+         return projection;
+   }
+
+   /**
+    * Computes the orthogonal projection of a 3D point on an infinitely long 3D line defined by a 3D point and a 3D direction.
+    * <p>
+    * Edge cases:
+    * <ul>
+    *    <li> if the given line direction is too small, i.e. {@code lineDirection.lengthSquared() < Epsilons.ONE_TRILLIONTH}, this method fails and returns {@code false}.
+    * </ul>
+    * </p>
+    * 
+    * @param pointToProject the point to compute the projection of. Not modified.
+    * @param pointOnLine point located on the line. Not modified.
+    * @param lineDirection direction of the line. Not modified.
+    * @param projectionToPack point in which the projection of the point onto the line is stored. Modified.
+    * @return whether the method succeeded or not.
+    */
+   public static boolean getOrthogonalProjectionOnLine(Point3d pointToProject, Point3d pointOnLine, Vector3d lineDirection, Point3d projectionToPack)
+   {
+      return getOrthogonalProjectionOnLine(pointToProject, pointOnLine.getX(), pointOnLine.getY(), pointOnLine.getZ(), lineDirection.getX(),
+                                           lineDirection.getY(), lineDirection.getZ(), projectionToPack);
+   }
+
+   /**
+    * Computes the orthogonal projection of a 3D point on an infinitely long 3D line defined by a 3D point and a 3D direction.
+    * <p>
+    * Edge cases:
+    * <ul>
+    *    <li> if the given line direction is too small, i.e. {@code lineDirection.lengthSquared() < Epsilons.ONE_TRILLIONTH}, this method fails and returns {@code false}.
+    * </ul>
+    * </p>
+    * 
+    * @param pointToProject the point to compute the projection of. Not modified.
+    * @param pointOnLineX x-coordinate of a point located on the line.
+    * @param pointOnLineY y-coordinate of a point located on the line.
+    * @param pointOnLineZ z-coordinate of a point located on the line.
+    * @param lineDirectionX x-component of the direction of the line.
+    * @param lineDirectionY y-component of the direction of the line.
+    * @param lineDirectionZ z-component of the direction of the line.
+    * @param projectionToPack point in which the projection of the point onto the line is stored. Modified.
+    * @return whether the method succeeded or not.
+    */
+   public static boolean getOrthogonalProjectionOnLine(Point3d pointToProject, double pointOnLineX, double pointOnLineY, double pointOnLineZ, double lineDirectionX,
+                                                       double lineDirectionY, double lineDirectionZ, Point3d projectionToPack)
+   {
+      double directionLengthSquared = lineDirectionX * lineDirectionX + lineDirectionY * lineDirectionY + lineDirectionZ * lineDirectionZ;
+
+      if (directionLengthSquared < Epsilons.ONE_TRILLIONTH)
+         return false;
+
+      double dx = pointToProject.getX() - pointOnLineX;
+      double dy = pointToProject.getY() - pointOnLineY;
+      double dz = pointToProject.getZ() - pointOnLineZ;
+
+      double dot = dx * lineDirectionX + dy * lineDirectionY + dz * lineDirectionZ;
+
+      double alpha = dot / directionLengthSquared;
+
+      projectionToPack.setX(pointOnLineX + alpha * lineDirectionX);
+      projectionToPack.setY(pointOnLineY + alpha * lineDirectionY);
+      projectionToPack.setZ(pointOnLineZ + alpha * lineDirectionZ);
+
+      return true;
+   }
+
+   /**
     * Computes the orthogonal projection of a 3D point on a given 3D plane defined by a 3D point and 3D normal.
     * <p>
     * Edge cases:
