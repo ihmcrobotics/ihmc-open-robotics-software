@@ -3,10 +3,13 @@ package us.ihmc.robotics.geometry;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
-public class LineSegment3d
+import us.ihmc.robotics.geometry.interfaces.GeometryObject;
+import us.ihmc.robotics.geometry.transformables.TransformablePoint3d;
+
+public class LineSegment3d implements GeometryObject<LineSegment3d>
 {
-   private final Point3d firstEndpoint = new Point3d();
-   private final Point3d secondEndpoint = new Point3d();
+   private final TransformablePoint3d firstEndpoint = new TransformablePoint3d();
+   private final TransformablePoint3d secondEndpoint = new TransformablePoint3d();
 
    public LineSegment3d()
    {
@@ -17,6 +20,7 @@ public class LineSegment3d
       set(firstEndpoint, secondEndpoint);
    }
 
+   @Override
    public void set(LineSegment3d lineSegment)
    {
       set(lineSegment.firstEndpoint, lineSegment.secondEndpoint);
@@ -54,6 +58,27 @@ public class LineSegment3d
       secondEndpoint.set(secondEndpointX, secondEndpointY, secondEndpointZ);
    }
 
+   @Override
+   public void setToZero()
+   {
+      firstEndpoint.setToZero();
+      secondEndpoint.setToZero();
+   }
+
+   @Override
+   public void setToNaN()
+   {
+      firstEndpoint.setToNaN();
+      secondEndpoint.setToNaN();
+   }
+
+   @Override
+   public boolean containsNaN()
+   {
+      return firstEndpoint.containsNaN() || secondEndpoint.containsNaN();
+   }
+
+   @Override
    public void applyTransform(RigidBodyTransform transform)
    {
       transform.transform(firstEndpoint);
@@ -62,10 +87,7 @@ public class LineSegment3d
 
    public double length()
    {
-      double dx = secondEndpoint.getX() - firstEndpoint.getX();
-      double dy = secondEndpoint.getY() - firstEndpoint.getY();
-      double dz = secondEndpoint.getZ() - firstEndpoint.getZ();
-      return Math.sqrt(dx * dx + dy * dy + dz * dz);
+      return firstEndpoint.distance(secondEndpoint);
    }
 
    public double distance(Point3d point)
@@ -128,5 +150,12 @@ public class LineSegment3d
    public Point3d getSecondEndpoint()
    {
       return secondEndpoint;
+   }
+
+   @Override
+   public boolean epsilonEquals(LineSegment3d other, double epsilon)
+   {
+      // TODO Auto-generated method stub
+      return false;
    }
 }
