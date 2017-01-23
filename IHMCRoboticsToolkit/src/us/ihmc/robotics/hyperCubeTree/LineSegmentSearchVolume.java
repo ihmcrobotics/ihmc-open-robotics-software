@@ -12,16 +12,30 @@ public class LineSegmentSearchVolume extends HyperVolume
    final private double[] scale;
    public LineSegmentSearchVolume(LineSegment3d lineSegment)
    {
-      super(3, lineSegment.getOuterBounds(), null, true);
+      super(3, computeOuterBounds(lineSegment), null, true);
       dim = 3;
       pointA = new double[dim];
       pointB = new double[dim];
-      scale = new double[dim]; 
-      lineSegment.getPoints(pointA,pointB);
+      scale = new double[dim];
+      lineSegment.getFirstEndpoint().get(pointA);
+      lineSegment.getSecondEndpoint().get(pointB);
       for (int i=0;i<dim;i++)
       {
          scale[i]=1.0/(pointB[i]-pointA[i]);
       }  
+   }
+   private static OneDimensionalBounds[] computeOuterBounds(LineSegment3d lineSegment)
+   {
+      double[] aVals = new double[3];
+      lineSegment.getFirstEndpoint().get(aVals);
+      double[] bVals = new double[3];
+      lineSegment.getSecondEndpoint().get(bVals);
+      OneDimensionalBounds[] ret = new OneDimensionalBounds[3];
+      for (int i = 0; i < 3; i++)
+      {
+         ret[i] = new OneDimensionalBounds(Math.min(aVals[i], bVals[i]), Math.max(aVals[i], bVals[i]));
+      }
+      return ret;
    }
    public LineSegmentSearchVolume(Point2d point1, Point2d point2)
    {
