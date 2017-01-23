@@ -39,8 +39,8 @@ public class GeometryTools
     */
    public static double distanceFromPointToLine(Point3d point, Point3d pointOnLine, Vector3d lineDirection)
    {
-      return distanceFromPointToLine(point, pointOnLine.getX(), pointOnLine.getY(), pointOnLine.getZ(), lineDirection.getX(), lineDirection.getY(),
-                                     lineDirection.getZ());
+      return distanceFromPointToLine(point.getX(), point.getY(), point.getZ(), pointOnLine.getX(), pointOnLine.getY(), pointOnLine.getZ(), lineDirection.getX(),
+                                     lineDirection.getY(), lineDirection.getZ());
    }
 
    /**
@@ -66,7 +66,8 @@ public class GeometryTools
       double lineDirectionX = secondPointOnLine.getX() - firstPointOnLine.getX();
       double lineDirectionY = secondPointOnLine.getY() - firstPointOnLine.getY();
       double lineDirectionZ = secondPointOnLine.getZ() - firstPointOnLine.getZ();
-      return distanceFromPointToLine(point, pointOnLineX, pointOnLineY, pointOnLineZ, lineDirectionX, lineDirectionY, lineDirectionZ);
+      return distanceFromPointToLine(point.getX(), point.getY(), point.getZ(), pointOnLineX, pointOnLineY, pointOnLineZ, lineDirectionX, lineDirectionY,
+                                     lineDirectionZ);
    }
 
    /**
@@ -79,7 +80,9 @@ public class GeometryTools
     * </ul>
     * </p>
     *
-    * @param point 3D point to compute the distance from the line. Not modified.
+    * @param pointX x-coordinate of the 3D point to compute the distance from the line. Not modified.
+    * @param pointY y-coordinate of the 3D point to compute the distance from the line. Not modified.
+    * @param pointZ z-coordinate of the 3D point to compute the distance from the line. Not modified.
     * @param pointOnLineX x-coordinate of a point located on the line.
     * @param pointOnLineY y-coordinate of a point located on the line.
     * @param pointOnLineZ z-coordinate of a point located on the line.
@@ -88,15 +91,15 @@ public class GeometryTools
     * @param lineDirectionZ z-component of the line direction.
     * @return the minimum distance between the 3D point and the 3D line.
     */
-   public static double distanceFromPointToLine(Point3d point, double pointOnLineX, double pointOnLineY, double pointOnLineZ, double lineDirectionX,
-                                                double lineDirectionY, double lineDirectionZ)
+   public static double distanceFromPointToLine(double pointX, double pointY, double pointZ, double pointOnLineX, double pointOnLineY, double pointOnLineZ,
+                                                double lineDirectionX, double lineDirectionY, double lineDirectionZ)
    {
       double directionMagnitude = lineDirectionX * lineDirectionX + lineDirectionY * lineDirectionY + lineDirectionZ * lineDirectionZ;
       directionMagnitude = Math.sqrt(directionMagnitude);
 
-      double dx = pointOnLineX - point.getX();
-      double dy = pointOnLineY - point.getY();
-      double dz = pointOnLineZ - point.getZ();
+      double dx = pointOnLineX - pointX;
+      double dy = pointOnLineY - pointY;
+      double dz = pointOnLineZ - pointZ;
 
       if (directionMagnitude < Epsilons.ONE_TRILLIONTH)
       {
@@ -378,6 +381,36 @@ public class GeometryTools
       point.checkReferenceFrameMatch(lineSegmentStart);
       point.checkReferenceFrameMatch(lineSegmentEnd);
       return distanceFromPointToLineSegment(point.getPoint(), lineSegmentStart.getPoint(), lineSegmentEnd.getPoint());
+   }
+
+   /**
+    * Given two 3D infinitely long lines, this methods computes the minimum distance between the two 3D lines.
+    * <a href="http://geomalgorithms.com/a07-_distance.html"> Useful link</a>.
+    * 
+    * @param pointOnLine1 a 3D point on the first line. Not modified.
+    * @param lineDirection1 the 3D direction of the first line. Not modified.
+    * @param pointOnLine2 a 3D point on the second line. Not modified.
+    * @param lineDirection2 the 3D direction of the second line. Not modified.
+    * @return the minimum distance between the two lines.
+    */
+   public static double distanceBetweenTwoLines(Point3d pointOnLine1, Vector3d lineDirection1, Point3d pointOnLine2, Vector3d lineDirection2)
+   {
+      return getClosestPointsForTwoLines(pointOnLine1, lineDirection1, pointOnLine2, lineDirection2, null, null);
+   }
+
+   /**
+    * Given two 3D line segments with finite length, this methods computes the minimum distance between the two 3D line segments.
+    * <a href="http://geomalgorithms.com/a07-_distance.html"> Useful link</a>.
+    * 
+    * @param lineSegmentStart1 the first end point of the first line segment. Not modified.
+    * @param lineSegmentEnd1 the second end point of the first line segment. Not modified.
+    * @param lineSegmentStart2 the first end point of the second line segment. Not modified.
+    * @param lineSegmentEnd2 the second end point of the second line segment. Not modified.
+    * @return the minimum distance between the two line segments.
+    */
+   public static double distanceBetweenTwoLineSegments(Point3d lineSegmentStart1, Point3d lineSegmentEnd1, Point3d lineSegmentStart2, Point3d lineSegmentEnd2)
+   {
+      return getClosestPointsForTwoLineSegments(lineSegmentStart1, lineSegmentEnd1, lineSegmentStart2, lineSegmentEnd2, null, null);
    }
 
    /**
@@ -939,6 +972,191 @@ public class GeometryTools
    }
 
    /**
+    * Computes the orthogonal projection of a 3D point on an infinitely long 3D line defined by a 3D point and a 3D direction.
+    * <p>
+    * Edge cases:
+    * <ul>
+    *    <li> if the given line direction is too small, i.e. {@code lineDirection.lengthSquared() < Epsilons.ONE_TRILLIONTH}, this method fails and returns {@code null}.
+    * </ul>
+    * </p>
+    * <p>
+    * WARNING: This method generates garbage.
+    * </p>
+    * 
+    * @param pointToProject the point to compute the projection of. Not modified.
+    * @param pointOnLine point located on the line. Not modified.
+    * @param lineDirection direction of the line. Not modified.
+    * @return the projection of the point onto the line or {@code null} if the method failed.
+    */
+   public static Point3d getOrthogonalProjectionOnLine(Point3d pointToProject, Point3d pointOnLine, Vector3d lineDirection)
+   {
+      Point3d projection = new Point3d();
+      boolean success = getOrthogonalProjectionOnLine(pointToProject, pointOnLine, lineDirection, projection);
+      if (!success)
+         return null;
+      else
+         return projection;
+   }
+
+   /**
+    * Computes the orthogonal projection of a 3D point on an infinitely long 3D line defined by a 3D point and a 3D direction.
+    * <p>
+    * Edge cases:
+    * <ul>
+    *    <li> if the given line direction is too small, i.e. {@code lineDirection.lengthSquared() < Epsilons.ONE_TRILLIONTH}, this method fails and returns {@code false}.
+    * </ul>
+    * </p>
+    * 
+    * @param pointToProject the point to compute the projection of. Not modified.
+    * @param pointOnLine point located on the line. Not modified.
+    * @param lineDirection direction of the line. Not modified.
+    * @param projectionToPack point in which the projection of the point onto the line is stored. Modified.
+    * @return whether the method succeeded or not.
+    */
+   public static boolean getOrthogonalProjectionOnLine(Point3d pointToProject, Point3d pointOnLine, Vector3d lineDirection, Point3d projectionToPack)
+   {
+      return getOrthogonalProjectionOnLine(pointToProject, pointOnLine.getX(), pointOnLine.getY(), pointOnLine.getZ(), lineDirection.getX(),
+                                           lineDirection.getY(), lineDirection.getZ(), projectionToPack);
+   }
+
+   /**
+    * Computes the orthogonal projection of a 3D point on an infinitely long 3D line defined by a 3D point and a 3D direction.
+    * <p>
+    * Edge cases:
+    * <ul>
+    *    <li> if the given line direction is too small, i.e. {@code lineDirection.lengthSquared() < Epsilons.ONE_TRILLIONTH}, this method fails and returns {@code false}.
+    * </ul>
+    * </p>
+    * 
+    * @param pointToProject the point to compute the projection of. Not modified.
+    * @param pointOnLineX x-coordinate of a point located on the line.
+    * @param pointOnLineY y-coordinate of a point located on the line.
+    * @param pointOnLineZ z-coordinate of a point located on the line.
+    * @param lineDirectionX x-component of the direction of the line.
+    * @param lineDirectionY y-component of the direction of the line.
+    * @param lineDirectionZ z-component of the direction of the line.
+    * @param projectionToPack point in which the projection of the point onto the line is stored. Modified.
+    * @return whether the method succeeded or not.
+    */
+   public static boolean getOrthogonalProjectionOnLine(Point3d pointToProject, double pointOnLineX, double pointOnLineY, double pointOnLineZ, double lineDirectionX,
+                                                       double lineDirectionY, double lineDirectionZ, Point3d projectionToPack)
+   {
+      double directionLengthSquared = lineDirectionX * lineDirectionX + lineDirectionY * lineDirectionY + lineDirectionZ * lineDirectionZ;
+
+      if (directionLengthSquared < Epsilons.ONE_TRILLIONTH)
+         return false;
+
+      double dx = pointToProject.getX() - pointOnLineX;
+      double dy = pointToProject.getY() - pointOnLineY;
+      double dz = pointToProject.getZ() - pointOnLineZ;
+
+      double dot = dx * lineDirectionX + dy * lineDirectionY + dz * lineDirectionZ;
+
+      double alpha = dot / directionLengthSquared;
+
+      projectionToPack.setX(pointOnLineX + alpha * lineDirectionX);
+      projectionToPack.setY(pointOnLineY + alpha * lineDirectionY);
+      projectionToPack.setZ(pointOnLineZ + alpha * lineDirectionZ);
+
+      return true;
+   }
+
+   /**
+    * Computes the orthogonal projection of a 3D point on a given 3D line segment defined by its two 3D end points.
+    * <p>
+    * Edge cases:
+    * <ul>
+    *    <li> if the length of the given line segment is too small,
+    *     i.e. {@code lineSegmentStart.distanceSquared(lineSegmentEnd) < Epsilons.ONE_TRILLIONTH},
+    *      this method returns {@code lineSegmentStart}.
+    *    <li> the projection can not be outside the line segment.
+    *     When the projection on the corresponding line is outside the line segment, the result is the closest of the two end points.
+    * </ul>
+    * </p>
+    * 
+    * @param pointToProject the point to compute the projection of. Not modified.
+    * @param lineSegmentStart the line segment first end point. Not modified.
+    * @param lineSegmentEnd the line segment second end point. Not modified.
+    * @return the projection of the point onto the line segment or {@code null} if the method failed.
+    */
+   public static Point3d getOrthogonalProjectionOnLineSegment(Point3d pointToProject, Point3d lineSegmentStart, Point3d lineSegmentEnd)
+   {
+      Point3d projection = new Point3d();
+      boolean success = getOrthogonalProjectionOnLineSegment(pointToProject, lineSegmentStart.getX(), lineSegmentStart.getY(), lineSegmentStart.getZ(),
+                                                             lineSegmentEnd.getX(), lineSegmentEnd.getY(), lineSegmentEnd.getZ(), projection);
+      if (!success)
+         return null;
+      else
+         return projection;
+   }
+
+   /**
+    * Computes the orthogonal projection of a 3D point on a given 3D line segment defined by its two 3D end points.
+    * <p>
+    * Edge cases:
+    * <ul>
+    *    <li> if the length of the given line segment is too small,
+    *     i.e. {@code lineSegmentStart.distanceSquared(lineSegmentEnd) < Epsilons.ONE_TRILLIONTH},
+    *      this method returns {@code lineSegmentStart}.
+    *    <li> the projection can not be outside the line segment.
+    *     When the projection on the corresponding line is outside the line segment, the result is the closest of the two end points.
+    * </ul>
+    * </p>
+    * 
+    * @param pointToProject the point to compute the projection of. Not modified.
+    * @param lineSegmentStart the line segment first end point. Not modified.
+    * @param lineSegmentEnd the line segment second end point. Not modified.
+    * @param projectionToPack point in which the projection of the point onto the line segment is stored. Modified.
+    * @return whether the method succeeded or not.
+    */
+   public static boolean getOrthogonalProjectionOnLineSegment(Point3d pointToProject, Point3d lineSegmentStart, Point3d lineSegmentEnd,
+                                                              Point3d projectionToPack)
+   {
+      return getOrthogonalProjectionOnLineSegment(pointToProject, lineSegmentStart.getX(), lineSegmentStart.getY(), lineSegmentStart.getZ(),
+                                                  lineSegmentEnd.getX(), lineSegmentEnd.getY(), lineSegmentEnd.getZ(), projectionToPack);
+   }
+
+   /**
+    * Computes the orthogonal projection of a 3D point on a given 3D line segment defined by its two 3D end points.
+    * <p>
+    * Edge cases:
+    * <ul>
+    *    <li> if the length of the given line segment is too small,
+    *     i.e. {@code lineSegmentStart.distanceSquared(lineSegmentEnd) < Epsilons.ONE_TRILLIONTH},
+    *      this method returns {@code lineSegmentStart}.
+    *    <li> the projection can not be outside the line segment.
+    *     When the projection on the corresponding line is outside the line segment, the result is the closest of the two end points.
+    * </ul>
+    * </p>
+    * 
+    * @param pointToProject the point to compute the projection of. Not modified.
+    * @param lineSegmentStartX the x-coordinate of the line segment first end point.
+    * @param lineSegmentStartY the y-coordinate of the line segment first end point.
+    * @param lineSegmentStartZ the z-coordinate of the line segment first end point.
+    * @param lineSegmentEndX the x-coordinate of the line segment second end point.
+    * @param lineSegmentEndY the y-coordinate of the line segment second end point.
+    * @param lineSegmentEndZ the z-coordinate of the line segment second end point.
+    * @param projectionToPack point in which the projection of the point onto the line segment is stored. Modified.
+    * @return whether the method succeeded or not.
+    */
+   public static boolean getOrthogonalProjectionOnLineSegment(Point3d pointToProject, double lineSegmentStartX, double lineSegmentStartY,
+                                                              double lineSegmentStartZ, double lineSegmentEndX, double lineSegmentEndY, double lineSegmentEndZ,
+                                                              Point3d projectionToPack)
+   {
+      double percentage = getPercentageAlongLineSegment(pointToProject.getX(), pointToProject.getY(), pointToProject.getZ(), lineSegmentStartX,
+                                                        lineSegmentStartY, lineSegmentStartZ, lineSegmentEndX, lineSegmentEndY, lineSegmentEndZ);
+      if (!Double.isFinite(percentage))
+         return false;
+
+      percentage = MathTools.clipToMinMax(percentage, 0.0, 1.0);
+
+      projectionToPack.setX((1.0 - percentage) * lineSegmentStartX + percentage * lineSegmentEndX);
+      projectionToPack.setY((1.0 - percentage) * lineSegmentStartY + percentage * lineSegmentEndY);
+      projectionToPack.setZ((1.0 - percentage) * lineSegmentStartZ + percentage * lineSegmentEndZ);
+      return true;
+   }
+
+   /**
     * Computes the orthogonal projection of a 3D point on a given 3D plane defined by a 3D point and 3D normal.
     * <p>
     * Edge cases:
@@ -1242,9 +1460,10 @@ public class GeometryTools
     * @param lineDirection2 the 3D direction of the second line. Not modified.
     * @param closestPointOnLine1ToPack the 3D coordinates of the point P are packed in this 3D point. Modified.
     * @param closestPointOnLine2ToPack the 3D coordinates of the point Q are packed in this 3D point. Modified.
+    * @return the minimum distance between the two lines.
     * @throws ReferenceFrameMismatchException if the input arguments are not expressed in the same reference frame, except for {@code closestPointOnLine1ToPack} and  {@code closestPointOnLine2ToPack}.
     */
-   public static void getClosestPointsForTwoLines(FramePoint pointOnLine1, FrameVector lineDirection1, FramePoint pointOnLine2, FrameVector lineDirection2,
+   public static double getClosestPointsForTwoLines(FramePoint pointOnLine1, FrameVector lineDirection1, FramePoint pointOnLine2, FrameVector lineDirection2,
                                                   FramePoint closestPointOnLine1ToPack, FramePoint closestPointOnLine2ToPack)
    {
       pointOnLine1.checkReferenceFrameMatch(lineDirection1);
@@ -1254,8 +1473,8 @@ public class GeometryTools
       closestPointOnLine1ToPack.setToZero(pointOnLine1.getReferenceFrame());
       closestPointOnLine2ToPack.setToZero(pointOnLine1.getReferenceFrame());
 
-      getClosestPointsForTwoLines(pointOnLine1.getPoint(), lineDirection1.getVector(), pointOnLine2.getPoint(), lineDirection2.getVector(),
-                                  closestPointOnLine1ToPack.getPoint(), closestPointOnLine2ToPack.getPoint());
+      return getClosestPointsForTwoLines(pointOnLine1.getPoint(), lineDirection1.getVector(), pointOnLine2.getPoint(), lineDirection2.getVector(),
+                                         closestPointOnLine1ToPack.getPoint(), closestPointOnLine2ToPack.getPoint());
    }
 
    /**
@@ -1266,10 +1485,11 @@ public class GeometryTools
     * @param lineDirection1 the 3D direction of the first line. Not modified.
     * @param pointOnLine2 a 3D point on the second line. Not modified.
     * @param lineDirection2 the 3D direction of the second line. Not modified.
-    * @param closestPointOnLine1ToPack the 3D coordinates of the point P are packed in this 3D point. Modified.
-    * @param closestPointOnLine2ToPack the 3D coordinates of the point Q are packed in this 3D point. Modified.
+    * @param closestPointOnLine1ToPack the 3D coordinates of the point P are packed in this 3D point. Modified. Can be {@code null}.
+    * @param closestPointOnLine2ToPack the 3D coordinates of the point Q are packed in this 3D point. Modified. Can be {@code null}.
+    * @return the minimum distance between the two lines.
     */
-   public static void getClosestPointsForTwoLines(Point3d pointOnLine1, Vector3d lineDirection1, Point3d pointOnLine2, Vector3d lineDirection2,
+   public static double getClosestPointsForTwoLines(Point3d pointOnLine1, Vector3d lineDirection1, Point3d pointOnLine2, Vector3d lineDirection2,
                                                   Point3d closestPointOnLine1ToPack, Point3d closestPointOnLine2ToPack)
    {
       // Switching to the notation used in http://geomalgorithms.com/a07-_distance.html.
@@ -1298,7 +1518,7 @@ public class GeometryTools
       double sc, tc;
 
       // check to see if the lines are parallel
-      if (Math.abs(delta) <= EPSILON)
+      if (delta <= EPSILON)
       {
          /*
           * The lines are parallel, there's an infinite number of pairs, but for
@@ -1315,8 +1535,131 @@ public class GeometryTools
          tc = (a * e - b * d) / delta;
       }
 
-      Psc.scaleAdd(sc, u, P0);
-      Qtc.scaleAdd(tc, v, Q0);
+      double PscX = sc * u.getX() + P0.getX();
+      double PscY = sc * u.getY() + P0.getY();
+      double PscZ = sc * u.getZ() + P0.getZ();
+
+      double QtcX = tc * v.getX() + Q0.getX();
+      double QtcY = tc * v.getY() + Q0.getY();
+      double QtcZ = tc * v.getZ() + Q0.getZ();
+
+      if (Psc != null)
+         Psc.set(PscX, PscY, PscZ);
+      if (Qtc != null)
+         Qtc.set(QtcX, QtcY, QtcZ);
+
+      double distanceSquared = MathTools.square(PscX - QtcX) + MathTools.square(PscY - QtcY) + MathTools.square(PscZ - QtcZ);
+      return Math.sqrt(distanceSquared);
+   }
+
+   /**
+    * Given two 3D line segments with finite length, this methods computes two points P &in; lineSegment1 and Q &in; lineSegment2 such that the distance || P - Q || is the minimum distance between the two 3D line segments.
+    * <a href="http://geomalgorithms.com/a07-_distance.html"> Useful link</a>.
+    * 
+    * @param lineSegmentStart1 the first end point of the first line segment. Not modified.
+    * @param lineSegmentEnd1 the second end point of the first line segment. Not modified.
+    * @param lineSegmentStart2 the first end point of the second line segment. Not modified.
+    * @param lineSegmentEnd2 the second end point of the second line segment. Not modified.
+    * @param closestPointOnLineSegment1ToPack the 3D coordinates of the point P are packed in this 3D point. Modified. Can be {@code null}.
+    * @param closestPointOnLineSegment2ToPack the 3D coordinates of the point Q are packed in this 3D point. Modified. Can be {@code null}.
+    * @return the minimum distance between the two line segments.
+    */
+   public static double getClosestPointsForTwoLineSegments(Point3d lineSegmentStart1, Point3d lineSegmentEnd1, Point3d lineSegmentStart2, Point3d lineSegmentEnd2,
+                                                         Point3d closestPointOnLineSegment1ToPack, Point3d closestPointOnLineSegment2ToPack)
+   {
+      // Switching to the notation used in http://geomalgorithms.com/a07-_distance.html.
+      // The line1 is defined by (P0, u) and the line2 by (Q0, v).
+      Point3d P0 = lineSegmentStart1;
+      double ux = lineSegmentEnd1.getX() - lineSegmentStart1.getX();
+      double uy = lineSegmentEnd1.getY() - lineSegmentStart1.getY();
+      double uz = lineSegmentEnd1.getZ() - lineSegmentStart1.getZ();
+      Point3d Q0 = lineSegmentStart2;
+      double vx = lineSegmentEnd2.getX() - lineSegmentStart2.getX();
+      double vy = lineSegmentEnd2.getY() - lineSegmentStart2.getY();
+      double vz = lineSegmentEnd2.getZ() - lineSegmentStart2.getZ();
+
+      Point3d Psc = closestPointOnLineSegment1ToPack;
+      Point3d Qtc = closestPointOnLineSegment2ToPack;
+
+      double w0X = P0.getX() - Q0.getX();
+      double w0Y = P0.getY() - Q0.getY();
+      double w0Z = P0.getZ() - Q0.getZ();
+
+      double a = ux * ux + uy * uy + uz * uz;
+      double b = ux * vx + uy * vy + uz * vz;
+      double c = vx * vx + vy * vy + vz * vz;
+      double d = ux * w0X + uy * w0Y + uz * w0Z;
+      double e = vx * w0X + vy * w0Y + vz * w0Z;
+
+      double delta = a * c - b * b;
+
+      double sc, sNumerator, sDenominator = delta;
+      double tc, tNumerator, tDenominator = delta;
+
+      // check to see if the lines are parallel
+      if (delta <= EPSILON)
+      {
+         /*
+          * The lines are parallel, there's an infinite number of pairs, but for
+          * one chosen point on one of the lines, there's only one closest point
+          * to it on the other line. So let's choose arbitrarily a point on the
+          * lineSegment1 and calculate the point that is closest to it on the lineSegment2.
+          */
+         sNumerator = 0.0;
+         sDenominator = 1.0;
+         tNumerator = e;
+         tDenominator = c;
+      }
+      else
+      {
+         sNumerator = (b * e - c * d);
+         tNumerator = (a * e - b * d);
+
+         if (sNumerator < 0.0)
+         {
+            sNumerator = 0.0;
+            tNumerator = e;
+            tDenominator = c;
+         }
+         else if (sNumerator > sDenominator)
+         {
+            sNumerator = sDenominator;
+            tNumerator = e + b;
+            tDenominator = c;
+         }
+      }
+
+      if (tNumerator < 0.0)
+      {
+         tNumerator = 0.0;
+         sNumerator = MathTools.clipToMinMax(-d, 0.0, a);
+         sDenominator = a;
+      }
+      else if (tNumerator > tDenominator)
+      {
+         tNumerator = tDenominator;
+         sNumerator = MathTools.clipToMinMax(-d + b, 0.0, a);
+         sDenominator = a;
+      }
+
+      sc = Math.abs(sNumerator) < EPSILON ? 0.0 : sNumerator / sDenominator;
+      tc = Math.abs(tNumerator) < EPSILON ? 0.0 : tNumerator / tDenominator;
+
+      double PscX = sc * ux + P0.getX();
+      double PscY = sc * uy + P0.getY();
+      double PscZ = sc * uz + P0.getZ();
+                           
+      double QtcX = tc * vx + Q0.getX();
+      double QtcY = tc * vy + Q0.getY();
+      double QtcZ = tc * vz + Q0.getZ();
+
+      if (Psc != null)
+         Psc.set(PscX, PscY, PscZ);
+      if (Qtc != null)
+         Qtc.set(QtcX, QtcY, QtcZ);
+
+      double distanceSquared = MathTools.square(PscX - QtcX) + MathTools.square(PscY - QtcY) + MathTools.square(PscZ - QtcZ);
+      return Math.sqrt(distanceSquared);
    }
 
    /**
@@ -3523,13 +3866,39 @@ public class GeometryTools
     */
    public static boolean areVectorsCollinear(Vector3d firstVector, Vector3d secondVector, double angleEpsilon)
    {
-      double firstVectorLength = firstVector.length();
+      return areVectorsCollinear(firstVector.getX(), firstVector.getY(), firstVector.getZ(), secondVector.getX(), secondVector.getY(), secondVector.getZ(), angleEpsilon);
+   }
+
+   /**
+    * Tests if the two given vectors are collinear given a tolerance on the angle between the two vector axes in the range ]0; <i>pi</i>/2[.
+    * This method returns {@code true} if the two vectors are collinear, whether they are pointing in the same direction or in opposite directions.
+    * 
+    * <p>
+    * Edge cases:
+    * <ul>
+    *    <li> if the length of either vector is below {@code 1.0E-7}, this method fails and returns {@code false}.
+    * </ul>
+    * </p>
+    * 
+    * @param firstVectorX x-component of the first vector. Not modified.
+    * @param firstVectorY y-component of the first vector. Not modified.
+    * @param firstVectorZ z-component of the first vector. Not modified.
+    * @param secondVectorX x-component of the second vector. Not modified.
+    * @param secondVectorY y-component of the second vector. Not modified.
+    * @param secondVectorZ z-component of the second vector. Not modified.
+    * @param angleEpsilon tolerance on the angle in radians.
+    * @return {@code true} if the two vectors are collinear, {@code false} otherwise.
+    */
+   public static boolean areVectorsCollinear(double firstVectorX, double firstVectorY, double firstVectorZ, double secondVectorX, double secondVectorY, double secondVectorZ, double angleEpsilon)
+   {
+      double firstVectorLength = Math.sqrt(firstVectorX * firstVectorX + firstVectorY * firstVectorY + firstVectorZ * firstVectorZ);
       if (firstVectorLength < Epsilons.ONE_TEN_MILLIONTH)
          return false;
-      double secondVectorLength = secondVector.length();
+      double secondVectorLength = Math.sqrt(secondVectorX * secondVectorX + secondVectorY * secondVectorY + secondVectorZ * secondVectorZ);
       if (secondVectorLength < Epsilons.ONE_TEN_MILLIONTH)
          return false;
-      return Math.abs(firstVector.dot(secondVector) / (firstVectorLength * secondVectorLength)) > Math.cos(angleEpsilon);
+      double dot = firstVectorX * secondVectorX + firstVectorY * secondVectorY + firstVectorZ * secondVectorZ;
+      return Math.abs(dot / (firstVectorLength * secondVectorLength)) > Math.cos(angleEpsilon);
    }
 
    /**
@@ -3553,7 +3922,6 @@ public class GeometryTools
       return areVectorsCollinear(firstVector.getX(), firstVector.getY(), secondVector.getX(), secondVector.getY(), angleEpsilon);
    }
 
-
    /**
     * Tests if the two given vectors are collinear given a tolerance on the angle between the two vector axes in the range ]0; <i>pi</i>/2[.
     * This method returns {@code true} if the two vectors are collinear, whether they are pointing in the same direction or in opposite directions.
@@ -3565,8 +3933,10 @@ public class GeometryTools
     * </ul>
     * </p>
     * 
-    * @param firstVector the first vector. Not modified.
-    * @param secondVector the second vector. Not modified.
+    * @param firstVectorX x-component of the first vector. Not modified.
+    * @param firstVectorY y-component of the first vector. Not modified.
+    * @param secondVectorX x-component of the second vector. Not modified.
+    * @param secondVectorY y-component of the second vector. Not modified.
     * @param angleEpsilon tolerance on the angle in radians.
     * @return {@code true} if the two vectors are collinear, {@code false} otherwise.
     */
@@ -3672,6 +4042,110 @@ public class GeometryTools
             return false;
 
       double distance = distanceFromPointToLine(pointOnLine2x, pointOnLine2y, pointOnLine1x, pointOnLine1y, lineDirection1x, lineDirection1y);
+      return distance < distanceEspilon;
+   }
+
+   /**
+    * Tests if the two given lines are collinear given a tolerance on the angle between in the range ]0; <i>pi</i>/2[.
+    * This method returns {@code true} if the two lines are collinear, whether they are pointing in the same direction or in opposite directions.
+    * 
+    * <p>
+    * Edge cases:
+    * <ul>
+    *    <li> if the direction magnitude of either line is below {@code 1.0E-7}, this method fails and returns {@code false}.
+    * </ul>
+    * </p>
+    * 
+    * @param firstPointOnLine1 a first point located on the first line. Not modified.
+    * @param secondPointOnLine1 a second point located on the first line. Not modified.
+    * @param firstPointOnLine2 a first point located on the second line. Not modified.
+    * @param secondPointOnLine2 a second point located on the second line. Not modified.
+    * @param angleEpsilon tolerance on the angle in radians.
+    * @param distanceEpsilon tolerance on the distance to determine if {@code firstPointOnLine2} belongs to the first line segment.
+    * @return {@code true} if the two line segments are collinear, {@code false} otherwise.
+    */
+   public static boolean areLinesCollinear(Point3d firstPointOnLine1, Point3d secondPointOnLine1, Point3d firstPointOnLine2, Point3d secondPointOnLine2,
+                                           double angleEpsilon, double distanceEspilon)
+   {
+      double pointOnLine1x = firstPointOnLine1.getX();
+      double pointOnLine1y = firstPointOnLine1.getY();
+      double pointOnLine1z = firstPointOnLine1.getZ();
+      double lineDirection1x = secondPointOnLine1.getX() - firstPointOnLine1.getX();
+      double lineDirection1y = secondPointOnLine1.getY() - firstPointOnLine1.getY();
+      double lineDirection1z = secondPointOnLine1.getZ() - firstPointOnLine1.getZ();
+      double pointOnLine2x = firstPointOnLine2.getX();
+      double pointOnLine2y = firstPointOnLine2.getY();
+      double pointOnLine2z = firstPointOnLine2.getZ();
+      double lineDirection2x = secondPointOnLine2.getX() - firstPointOnLine2.getX();
+      double lineDirection2y = secondPointOnLine2.getY() - firstPointOnLine2.getY();
+      double lineDirection2z = secondPointOnLine2.getZ() - firstPointOnLine2.getZ();
+      return areLinesCollinear(pointOnLine1x, pointOnLine1y, pointOnLine1z, lineDirection1x, lineDirection1y, lineDirection1z, pointOnLine2x, pointOnLine2y,
+                               pointOnLine2z, lineDirection2x, lineDirection2y, lineDirection2z, angleEpsilon, distanceEspilon);
+   }
+
+   /**
+    * Tests if the two given lines are collinear given a tolerance on the angle between in the range ]0; <i>pi</i>/2[.
+    * This method returns {@code true} if the two lines are collinear, whether they are pointing in the same direction or in opposite directions.
+    * 
+    * <p>
+    * Edge cases:
+    * <ul>
+    *    <li> if the direction magnitude of either line is below {@code 1.0E-7}, this method fails and returns {@code false}.
+    * </ul>
+    * </p>
+    * 
+    * @param pointOnLine1 point located on the first line. Not modified.
+    * @param lineDirection1 the first line direction. Not modified.
+    * @param pointOnLine2 point located on the second line. Not modified.
+    * @param lineDirection2 the second line direction. Not modified.
+    * @param angleEpsilon tolerance on the angle in radians.
+    * @param distanceEpsilon tolerance on the distance to determine if {@code pointOnLine2} belongs to the first line segment.
+    * @return {@code true} if the two line segments are collinear, {@code false} otherwise.
+    */
+   public static boolean areLinesCollinear(Point3d pointOnLine1, Vector3d lineDirection1, Point3d pointOnLine2, Vector3d lineDirection2, double angleEpsilon,
+                                           double distanceEspilon)
+   {
+      return areLinesCollinear(pointOnLine1.getX(), pointOnLine1.getY(), pointOnLine1.getZ(), lineDirection1.getX(), lineDirection1.getY(),
+                               lineDirection1.getZ(), pointOnLine2.getX(), pointOnLine2.getY(), pointOnLine2.getZ(), lineDirection2.getX(),
+                               lineDirection2.getY(), lineDirection2.getZ(), angleEpsilon, distanceEspilon);
+   }
+
+   /**
+    * Tests if the two given lines are collinear given a tolerance on the angle between in the range ]0; <i>pi</i>/2[.
+    * This method returns {@code true} if the two lines are collinear, whether they are pointing in the same direction or in opposite directions.
+    * 
+    * <p>
+    * Edge cases:
+    * <ul>
+    *    <li> if the direction magnitude of either line is below {@code 1.0E-7}, this method fails and returns {@code false}.
+    * </ul>
+    * </p>
+    * 
+    * @param pointOnLine1x x-coordinate of a point located on the first line.
+    * @param pointOnLine1y y-coordinate of a point located on the first line.
+    * @param pointOnLine1z z-coordinate of a point located on the first line.
+    * @param lineDirection1x x-component of the first line direction.
+    * @param lineDirection1y y-component of the first line direction.
+    * @param lineDirection1z z-component of the first line direction.
+    * @param pointOnLine2x x-coordinate of a point located on the second line.
+    * @param pointOnLine2y y-coordinate of a point located on the second line.
+    * @param pointOnLine2z z-coordinate of a point located on the second line.
+    * @param lineDirection2x x-component of the second line direction.
+    * @param lineDirection2y y-component of the second line direction.
+    * @param lineDirection2z z-component of the second line direction.
+    * @param angleEpsilon tolerance on the angle in radians.
+    * @param distanceEpsilon tolerance on the distance to determine if {@code pointOnLine2} belongs to the first line segment.
+    * @return {@code true} if the two line segments are collinear, {@code false} otherwise.
+    */
+   public static boolean areLinesCollinear(double pointOnLine1x, double pointOnLine1y, double pointOnLine1z, double lineDirection1x, double lineDirection1y,
+                                           double lineDirection1z, double pointOnLine2x, double pointOnLine2y, double pointOnLine2z, double lineDirection2x,
+                                           double lineDirection2y, double lineDirection2z, double angleEpsilon, double distanceEspilon)
+   {
+      if (!areVectorsCollinear(lineDirection1x, lineDirection1y, lineDirection1z, lineDirection2x, lineDirection2y, lineDirection2z, angleEpsilon))
+         return false;
+
+      double distance = distanceFromPointToLine(pointOnLine2x, pointOnLine2y, pointOnLine2z, pointOnLine1x, pointOnLine1y, pointOnLine1z, lineDirection1x,
+                                                lineDirection1y, lineDirection1z);
       return distance < distanceEspilon;
    }
 

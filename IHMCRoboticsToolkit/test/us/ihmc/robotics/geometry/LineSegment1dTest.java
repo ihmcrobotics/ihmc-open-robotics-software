@@ -404,8 +404,8 @@ public class LineSegment1dTest
       Vector3d direction3d = new Vector3d(1,2,3);
       LineSegment3d line3d = firstLine.toLineSegment3d(point3d, direction3d);
       
-      assertEquals(line3d.getPointA(), new Point3d(1,1,1));
-      assertEquals(line3d.getPointB(), new Point3d(11,21,31));
+      assertEquals(line3d.getFirstEndpoint(), new Point3d(1,1,1));
+      assertEquals(line3d.getSecondEndpoint(), new Point3d(11,21,31));
    }
 
    public static void main(String[] args)

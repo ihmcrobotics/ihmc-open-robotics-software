@@ -317,12 +317,12 @@ public class RotatableConvexPolygonTerrainObject implements TerrainObject3D, Hei
                  && (lateralFacesLookingThePoint.get((lateralFacesLookingThePoint.size() + i - 1) % lateralFacesLookingThePoint.size()) == true))
          {
             temporaryEdge.set(upperVertices.get(i), lowerVertices.get(i));
-            temporaryEdgeDistance = temporaryEdge.distanceToAPoint(pointToCheck);
+            temporaryEdgeDistance = temporaryEdge.distance(pointToCheck);
 
             if (temporaryEdgeDistance < smallestEdgeDistance)
             {
                smallestEdgeDistance = temporaryEdgeDistance;
-               projectionOnEdge.set(temporaryEdge.projection(pointToCheck));
+               projectionOnEdge.set(temporaryEdge.orthogonalProjectionCopy(pointToCheck));
             }
          }
 
@@ -330,12 +330,12 @@ public class RotatableConvexPolygonTerrainObject implements TerrainObject3D, Hei
          if ((lateralFacesLookingThePoint.get(i) == true) && (topFaceLookingThePoint == true))
          {
             temporaryEdge.set(upperVertices.get(i), upperVertices.get((i + 1) % upperVertices.size()));
-            temporaryEdgeDistance = temporaryEdge.distanceToAPoint(pointToCheck);
+            temporaryEdgeDistance = temporaryEdge.distance(pointToCheck);
 
             if (temporaryEdgeDistance < smallestEdgeDistance)
             {
                smallestEdgeDistance = temporaryEdgeDistance;
-               projectionOnEdge.set(temporaryEdge.projection(pointToCheck));
+               projectionOnEdge.set(temporaryEdge.orthogonalProjectionCopy(pointToCheck));
             }
          }
       }

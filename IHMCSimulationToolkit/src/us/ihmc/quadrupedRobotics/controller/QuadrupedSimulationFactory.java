@@ -442,15 +442,6 @@ public class QuadrupedSimulationFactory
          simulationOverheadPlotterFactory.addYoGraphicsListRegistries(yoGraphicsListRegistry);
          simulationOverheadPlotterFactory.setShowOnStart(showPlotter.get());
          simulationOverheadPlotterFactory.createOverheadPlotter();
-         if (showPlotter.get())
-         {
-            simulationOverheadPlotterFactory = scs.createSimulationOverheadPlotterFactory();
-            simulationOverheadPlotterFactory.setVariableNameToTrack("centerOfMass");
-            simulationOverheadPlotterFactory.addYoGraphicsListRegistries(yoGraphicsListRegistryForDetachedOverhead);
-            simulationOverheadPlotterFactory.setShowOnStart(showPlotter.get());
-            simulationOverheadPlotterFactory.setCreateInSeperateWindow(true);
-            simulationOverheadPlotterFactory.createOverheadPlotter();
-         }
       }
       
       FactoryTools.disposeFactory(this);

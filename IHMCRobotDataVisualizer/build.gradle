@@ -57,7 +57,7 @@ dependencies {
    compile group: 'net.sourceforge.jmatio', name: 'jmatio', version: '1.0'
    compile group: 'us.ihmc', name: 'IHMCVideoCodecs', version: '2.0.12'
    
-   compile ihmc.getProjectDependency(":SDFLoader")
+   compile ihmc.getProjectDependency(":ModelFileLoader")
    compile ihmc.getProjectDependency(":SimulationConstructionSet")
    compile ihmc.getProjectDependency(":IHMCCommunication")
    compile ihmc.getProjectDependency(":IHMCJavaFXToolkit")

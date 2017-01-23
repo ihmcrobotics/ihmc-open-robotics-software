@@ -36,7 +36,7 @@ public class FrameLineSegment extends AbstractFrameObject<FrameLineSegment, Tran
       checkReferenceFrameMatch(framePoint);
       
       putValuesIntoLineSegment3d();
-      return lineSegment3d.distanceToAPoint(framePoint.getPoint());
+      return lineSegment3d.distance(framePoint.getPoint());
    }
    
    public void getPointAlongPercentageOfLineSegment(double percentage, FramePoint pointToPack)
@@ -60,7 +60,7 @@ public class FrameLineSegment extends AbstractFrameObject<FrameLineSegment, Tran
       checkReferenceFrameMatch(projectedPointToPack);
       
       putValuesIntoLineSegment3d();
-      lineSegment3d.getProjectionOntoLineSegment(pointToProject.getPoint(), projectedPointToPack.getPoint());
+      lineSegment3d.orthogonalProjection(pointToProject.getPoint(), projectedPointToPack.getPoint());
    }
    
    public double getLength()
@@ -161,13 +161,13 @@ public class FrameLineSegment extends AbstractFrameObject<FrameLineSegment, Tran
    
    private void putValuesIntoLineSegment3d()
    {
-      lineSegment3d.getPointA().set(startPoint.getX(), startPoint.getY(), startPoint.getZ());
-      lineSegment3d.getPointB().set(endPoint.getX(), endPoint.getY(), endPoint.getZ());
+      lineSegment3d.getFirstEndpoint().set(startPoint.getX(), startPoint.getY(), startPoint.getZ());
+      lineSegment3d.getSecondEndpoint().set(endPoint.getX(), endPoint.getY(), endPoint.getZ());
    }
    
    private void getValuesFromLineSegment3d()
    {
-      lineSegment3d.getPointA().get(startPoint);
-      lineSegment3d.getPointB().get(endPoint);
+      lineSegment3d.getFirstEndpoint().get(startPoint);
+      lineSegment3d.getSecondEndpoint().get(endPoint);
    }
 }
