@@ -461,6 +461,178 @@ public class GeometryToolsTest
       }
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @Test(timeout = 30000)
+   public void testDistanceBetweenTwoLineSegments() throws Exception
+   {
+      Point3d closestPointOnLineSegment1 = new Point3d();
+      Point3d closestPointOnLineSegment2 = new Point3d();
+
+      Vector3d lineSegmentDirection1 = new Vector3d();
+      Vector3d lineSegmentDirection2 = new Vector3d();
+
+      Random random = new Random(11762L);
+
+      // Easy case, the closest points on inside each line segment bounds.
+      for (int i = 0; i < ITERATIONS; i++)
+      {
+         Point3d lineSegmentStart1 = RandomTools.generateRandomPoint3d(random, -10.0, 10.0);
+         Point3d lineSegmentEnd1 = RandomTools.generateRandomPoint3d(random, -10.0, 10.0);
+
+         lineSegmentDirection1.sub(lineSegmentEnd1, lineSegmentStart1);
+         lineSegmentDirection1.normalize();
+
+         // Put the first closest within bounds of line segment 1
+         closestPointOnLineSegment1.interpolate(lineSegmentStart1, lineSegmentEnd1, RandomTools.generateRandomDouble(random, 0.0, 1.0));
+
+         // Create the closest point of line segment 2
+         Vector3d orthogonalToLineSegment1 = RandomTools.generateRandomOrthogonalVector3d(random, lineSegmentDirection1, true);
+         double expectedMinimumDistance = RandomTools.generateRandomDouble(random, 0.0, 10.0);
+         closestPointOnLineSegment2.scaleAdd(expectedMinimumDistance, orthogonalToLineSegment1, closestPointOnLineSegment1);
+
+         // Set the line direction 2 to be the rotation of 1 around the shift direction used to create the expectedPointOnLineSegment2
+         double rotationAngle = RandomTools.generateRandomDouble(random, 2.0 * Math.PI);
+         AxisAngle4d rotationAroundShiftVector = new AxisAngle4d(orthogonalToLineSegment1, rotationAngle);
+         GeometryTools.rotateTuple3d(rotationAroundShiftVector, lineSegmentDirection1, lineSegmentDirection2);
+
+         // Set the end points of the line segment 2 around the expected closest point.
+         Point3d lineSegmentStart2 = new Point3d();
+         Point3d lineSegmentEnd2 = new Point3d();
+         lineSegmentStart2.scaleAdd(RandomTools.generateRandomDouble(random, -10.0, 0.0), lineSegmentDirection2, closestPointOnLineSegment2);
+         lineSegmentEnd2.scaleAdd(RandomTools.generateRandomDouble(random, 0.0, 10.0), lineSegmentDirection2, closestPointOnLineSegment2);
+
+         double actualMinimumDistance = GeometryTools.distanceBetweenTwoLineSegments(lineSegmentStart1, lineSegmentEnd1, lineSegmentStart2, lineSegmentEnd2);
+         assertEquals(expectedMinimumDistance, actualMinimumDistance, EPSILON);
+      }
+
+      // Parallel case, expecting expectedPointOnLineSegment1 = lineSegmentStart1
+      for (int i = 0; i < ITERATIONS; i++)
+      {
+         Point3d lineSegmentStart1 = RandomTools.generateRandomPoint3d(random, -10.0, 10.0);
+         Point3d lineSegmentEnd1 = RandomTools.generateRandomPoint3d(random, -10.0, 10.0);
+
+         lineSegmentDirection1.sub(lineSegmentEnd1, lineSegmentStart1);
+         lineSegmentDirection1.normalize();
+
+         // expectedPointOnLineSegment1 = lineSegmentStart1
+         closestPointOnLineSegment1.set(lineSegmentStart1);
+
+         // Create the closest point of line segment 2
+         Vector3d orthogonalToLineSegment1 = RandomTools.generateRandomOrthogonalVector3d(random, lineSegmentDirection1, true);
+         double expectedMinimumDistance = RandomTools.generateRandomDouble(random, 0.0, 10.0);
+         closestPointOnLineSegment2.scaleAdd(expectedMinimumDistance, orthogonalToLineSegment1, closestPointOnLineSegment1);
+
+         // Set the lineSegmentDirection2 = lineSegmentDirection1
+         lineSegmentDirection2.set(lineSegmentDirection1);
+
+         // Set the end points of the line segment 2 around the expected closest point.
+         Point3d lineSegmentStart2 = new Point3d();
+         Point3d lineSegmentEnd2 = new Point3d();
+         lineSegmentStart2.scaleAdd(RandomTools.generateRandomDouble(random, -10.0, 0.0), lineSegmentDirection2, closestPointOnLineSegment2);
+         lineSegmentEnd2.scaleAdd(RandomTools.generateRandomDouble(random, 0.0, 10.0), lineSegmentDirection2, closestPointOnLineSegment2);
+
+         double actualMinimumDistance = GeometryTools.distanceBetweenTwoLineSegments(lineSegmentStart1, lineSegmentEnd1, lineSegmentStart2, lineSegmentEnd2);
+         assertEquals(expectedMinimumDistance, actualMinimumDistance, EPSILON);
+
+         // Set the end points of the line segment 2 before the expected closest point, so we have expectedClosestPointOnLineSegment2 = lineSegmentEnd2
+         double shiftStartFromExpected = RandomTools.generateRandomDouble(random, -20.0, -10.0);
+         double shiftEndFromExpected = RandomTools.generateRandomDouble(random, -10.0, 0.0);
+         lineSegmentStart2.scaleAdd(shiftStartFromExpected, lineSegmentDirection2, closestPointOnLineSegment2);
+         lineSegmentEnd2.scaleAdd(shiftEndFromExpected, lineSegmentDirection2, closestPointOnLineSegment2);
+         closestPointOnLineSegment2.set(lineSegmentEnd2);
+         expectedMinimumDistance = closestPointOnLineSegment1.distance(closestPointOnLineSegment2);
+
+         actualMinimumDistance = GeometryTools.distanceBetweenTwoLineSegments(lineSegmentStart1, lineSegmentEnd1, lineSegmentStart2, lineSegmentEnd2);
+         assertEquals(expectedMinimumDistance, actualMinimumDistance, EPSILON);
+
+         actualMinimumDistance = GeometryTools.distanceBetweenTwoLineSegments(lineSegmentStart1, lineSegmentEnd1, lineSegmentEnd2, lineSegmentStart2);
+         assertEquals(expectedMinimumDistance, actualMinimumDistance, EPSILON);
+      }
+
+      // Case: on closest point on lineSegment1 outside end points.
+      for (int i = 0; i < ITERATIONS; i++)
+      {
+         Point3d lineSegmentStart1 = RandomTools.generateRandomPoint3d(random, -10.0, 10.0);
+         Point3d lineSegmentEnd1 = RandomTools.generateRandomPoint3d(random, -10.0, 10.0);
+
+         lineSegmentDirection1.sub(lineSegmentEnd1, lineSegmentStart1);
+         lineSegmentDirection1.normalize();
+
+         // Put the first closest to the start of line segment 1
+         closestPointOnLineSegment1.set(lineSegmentStart1);
+
+         // Create the closest point of line segment 2 such that it reaches out of line segment 1
+         Vector3d oppositeOflineSegmentDirection1 = new Vector3d();
+         oppositeOflineSegmentDirection1.negate(lineSegmentDirection1);
+         Vector3d orthogonalToLineSegment1 = RandomTools.generateRandomOrthogonalVector3d(random, lineSegmentDirection1, true);
+         Vector3d shiftVector = new Vector3d();
+         shiftVector.interpolate(orthogonalToLineSegment1, oppositeOflineSegmentDirection1, RandomTools.generateRandomDouble(random, 0.0, 1.0));
+         closestPointOnLineSegment2.scaleAdd(RandomTools.generateRandomDouble(random, 0.0, 10.0), shiftVector, closestPointOnLineSegment1);
+
+         // Set the line direction 2 to orthogonal to the shift vector
+         lineSegmentDirection2 = RandomTools.generateRandomOrthogonalVector3d(random, shiftVector, true);
+
+         // Set the end points of the line segment 2 around the expected closest point.
+         Point3d lineSegmentStart2 = new Point3d();
+         Point3d lineSegmentEnd2 = new Point3d();
+         lineSegmentStart2.scaleAdd(RandomTools.generateRandomDouble(random, -10.0, 0.0), lineSegmentDirection2, closestPointOnLineSegment2);
+         lineSegmentEnd2.scaleAdd(RandomTools.generateRandomDouble(random, 0.0, 10.0), lineSegmentDirection2, closestPointOnLineSegment2);
+         double expectedMinimumDistance = closestPointOnLineSegment1.distance(closestPointOnLineSegment2);
+
+         double actualMinimumDistance = GeometryTools.distanceBetweenTwoLineSegments(lineSegmentStart1, lineSegmentEnd1, lineSegmentStart2, lineSegmentEnd2);
+         assertEquals(expectedMinimumDistance, actualMinimumDistance, EPSILON);
+         actualMinimumDistance = GeometryTools.distanceBetweenTwoLineSegments(lineSegmentStart1, lineSegmentEnd1, lineSegmentEnd2, lineSegmentStart2);
+         assertEquals(expectedMinimumDistance, actualMinimumDistance, EPSILON);
+         actualMinimumDistance = GeometryTools.distanceBetweenTwoLineSegments(lineSegmentEnd1, lineSegmentStart1, lineSegmentStart2, lineSegmentEnd2);
+         assertEquals(expectedMinimumDistance, actualMinimumDistance, EPSILON);
+         actualMinimumDistance = GeometryTools.distanceBetweenTwoLineSegments(lineSegmentEnd1, lineSegmentStart1, lineSegmentEnd2, lineSegmentStart2);
+         assertEquals(expectedMinimumDistance, actualMinimumDistance, EPSILON);
+      }
+      
+      // Edge case: both closest points are outside bounds of each line segment
+      for (int i = 0; i < ITERATIONS; i++)
+      {
+         Point3d lineSegmentStart1 = RandomTools.generateRandomPoint3d(random, -10.0, 10.0);
+         Point3d lineSegmentEnd1 = RandomTools.generateRandomPoint3d(random, -10.0, 10.0);
+
+         lineSegmentDirection1.sub(lineSegmentEnd1, lineSegmentStart1);
+         lineSegmentDirection1.normalize();
+
+         // Put the first closest to the start of line segment 1
+         closestPointOnLineSegment1.set(lineSegmentStart1);
+
+         // Create the closest point of line segment 2 such that it reaches out of line segment 1
+         Vector3d oppositeOflineSegmentDirection1 = new Vector3d();
+         oppositeOflineSegmentDirection1.negate(lineSegmentDirection1);
+         Vector3d orthogonalToLineSegment1 = RandomTools.generateRandomOrthogonalVector3d(random, lineSegmentDirection1, true);
+         Vector3d shiftVector = new Vector3d();
+         shiftVector.interpolate(orthogonalToLineSegment1, oppositeOflineSegmentDirection1, RandomTools.generateRandomDouble(random, 0.0, 1.0));
+         closestPointOnLineSegment2.scaleAdd(RandomTools.generateRandomDouble(random, 0.0, 10.0), shiftVector, closestPointOnLineSegment1);
+
+         // set the start of the second line segment to the expected closest point
+         Point3d lineSegmentStart2 = new Point3d(closestPointOnLineSegment2);
+         
+
+         // Set the line direction 2 to point somewhat in the same direction as the shift vector
+         Vector3d orthogonalToShiftVector = RandomTools.generateRandomOrthogonalVector3d(random, shiftVector, true);
+         lineSegmentDirection2.interpolate(shiftVector, orthogonalToShiftVector, RandomTools.generateRandomDouble(random, 0.0, 1.0));
+
+         // Set the end points of the line segment 2 around the expected closest point.
+         Point3d lineSegmentEnd2 = new Point3d();
+         lineSegmentEnd2.scaleAdd(RandomTools.generateRandomDouble(random, 0.0, 10.0), lineSegmentDirection2, closestPointOnLineSegment2);
+
+         double expectedMinimumDistance = closestPointOnLineSegment1.distance(closestPointOnLineSegment2);
+         double actualMinimumDistance = GeometryTools.distanceBetweenTwoLineSegments(lineSegmentStart1, lineSegmentEnd1, lineSegmentStart2, lineSegmentEnd2);
+         assertEquals(expectedMinimumDistance, actualMinimumDistance, EPSILON);
+         actualMinimumDistance = GeometryTools.distanceBetweenTwoLineSegments(lineSegmentStart1, lineSegmentEnd1, lineSegmentEnd2, lineSegmentStart2);
+         assertEquals(expectedMinimumDistance, actualMinimumDistance, EPSILON);
+         actualMinimumDistance = GeometryTools.distanceBetweenTwoLineSegments(lineSegmentEnd1, lineSegmentStart1, lineSegmentStart2, lineSegmentEnd2);
+         assertEquals(expectedMinimumDistance, actualMinimumDistance, EPSILON);
+         actualMinimumDistance = GeometryTools.distanceBetweenTwoLineSegments(lineSegmentEnd1, lineSegmentStart1, lineSegmentEnd2, lineSegmentStart2);
+         assertEquals(expectedMinimumDistance, actualMinimumDistance, EPSILON);
+      }
+   }
+
    /*
     * public void testGetClosestPointsForTwoLines() { Point3d p1 = new
     * Point3d(5, 5, 0); FramePoint point1 = new
@@ -1984,8 +2156,7 @@ public class GeometryToolsTest
 
          // Create the closest point of line segment 2
          Vector3d orthogonalToLineSegment1 = RandomTools.generateRandomOrthogonalVector3d(random, lineSegmentDirection1, true);
-         double expectedMinimumDistance = RandomTools.generateRandomDouble(random, 0.0, 10.0);
-         expectedPointOnLineSegment2.scaleAdd(expectedMinimumDistance, orthogonalToLineSegment1, expectedPointOnLineSegment1);
+         expectedPointOnLineSegment2.scaleAdd(RandomTools.generateRandomDouble(random, 0.0, 10.0), orthogonalToLineSegment1, expectedPointOnLineSegment1);
 
          // Set the line direction 2 to be the rotation of 1 around the shift direction used to create the expectedPointOnLineSegment2
          double rotationAngle = RandomTools.generateRandomDouble(random, 2.0 * Math.PI);
@@ -2018,8 +2189,7 @@ public class GeometryToolsTest
 
          // Create the closest point of line segment 2
          Vector3d orthogonalToLineSegment1 = RandomTools.generateRandomOrthogonalVector3d(random, lineSegmentDirection1, true);
-         double expectedMinimumDistance = RandomTools.generateRandomDouble(random, 0.0, 10.0);
-         expectedPointOnLineSegment2.scaleAdd(expectedMinimumDistance, orthogonalToLineSegment1, expectedPointOnLineSegment1);
+         expectedPointOnLineSegment2.scaleAdd(RandomTools.generateRandomDouble(random, 0.0, 10.0), orthogonalToLineSegment1, expectedPointOnLineSegment1);
 
          // Set the lineSegmentDirection2 = lineSegmentDirection1
          lineSegmentDirection2.set(lineSegmentDirection1);
@@ -2071,8 +2241,7 @@ public class GeometryToolsTest
          Vector3d orthogonalToLineSegment1 = RandomTools.generateRandomOrthogonalVector3d(random, lineSegmentDirection1, true);
          Vector3d shiftVector = new Vector3d();
          shiftVector.interpolate(orthogonalToLineSegment1, oppositeOflineSegmentDirection1, RandomTools.generateRandomDouble(random, 0.0, 1.0));
-         double expectedMinimumDistance = RandomTools.generateRandomDouble(random, 0.0, 10.0);
-         expectedPointOnLineSegment2.scaleAdd(expectedMinimumDistance, shiftVector, expectedPointOnLineSegment1);
+         expectedPointOnLineSegment2.scaleAdd(RandomTools.generateRandomDouble(random, 0.0, 10.0), shiftVector, expectedPointOnLineSegment1);
 
          // Set the line direction 2 to orthogonal to the shift vector
          lineSegmentDirection2 = RandomTools.generateRandomOrthogonalVector3d(random, shiftVector, true);
@@ -2118,8 +2287,7 @@ public class GeometryToolsTest
          Vector3d orthogonalToLineSegment1 = RandomTools.generateRandomOrthogonalVector3d(random, lineSegmentDirection1, true);
          Vector3d shiftVector = new Vector3d();
          shiftVector.interpolate(orthogonalToLineSegment1, oppositeOflineSegmentDirection1, RandomTools.generateRandomDouble(random, 0.0, 1.0));
-         double expectedMinimumDistance = RandomTools.generateRandomDouble(random, 0.0, 10.0);
-         expectedPointOnLineSegment2.scaleAdd(expectedMinimumDistance, shiftVector, expectedPointOnLineSegment1);
+         expectedPointOnLineSegment2.scaleAdd(RandomTools.generateRandomDouble(random, 0.0, 10.0), shiftVector, expectedPointOnLineSegment1);
 
          // set the start of the second line segment to the expected closest point
          Point3d lineSegmentStart2 = new Point3d(expectedPointOnLineSegment2);

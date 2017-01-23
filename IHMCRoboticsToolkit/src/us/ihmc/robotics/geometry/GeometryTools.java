@@ -396,6 +396,21 @@ public class GeometryTools
    }
 
    /**
+    * Given two 3D line segments with finite length, this methods computes the minimum distance between the two 3D line segments.
+    * <a href="http://geomalgorithms.com/a07-_distance.html"> Useful link</a>.
+    * 
+    * @param lineSegmentStart1 the first end point of the first line segment. Not modified.
+    * @param lineSegmentEnd1 the second end point of the first line segment. Not modified.
+    * @param lineSegmentStart2 the first end point of the second line segment. Not modified.
+    * @param lineSegmentEnd2 the second end point of the second line segment. Not modified.
+    * @return the minimum distance between the two line segments.
+    */
+   public static double distanceBetweenTwoLineSegments(Point3d lineSegmentStart1, Point3d lineSegmentEnd1, Point3d lineSegmentStart2, Point3d lineSegmentEnd2)
+   {
+      return getClosestPointsForTwoLineSegments(lineSegmentStart1, lineSegmentEnd1, lineSegmentStart2, lineSegmentEnd2, null, null);
+   }
+
+   /**
     * Returns a boolean value, stating whether a 2D point is on the left side of an infinitely long line defined by two points.
     * "Left side" is determined based on order of {@code lineStart} and {@code lineEnd}.
     * <p>
@@ -1542,10 +1557,11 @@ public class GeometryTools
     * @param lineSegmentEnd1 the second end point of the first line segment. Not modified.
     * @param lineSegmentStart2 the first end point of the second line segment. Not modified.
     * @param lineSegmentEnd2 the second end point of the second line segment. Not modified.
-    * @param closestPointOnLineSegment1ToPack the 3D coordinates of the point P are packed in this 3D point. Modified.
-    * @param closestPointOnLineSegment2ToPack the 3D coordinates of the point Q are packed in this 3D point. Modified.
+    * @param closestPointOnLineSegment1ToPack the 3D coordinates of the point P are packed in this 3D point. Modified. Can be {@code null}.
+    * @param closestPointOnLineSegment2ToPack the 3D coordinates of the point Q are packed in this 3D point. Modified. Can be {@code null}.
+    * @return the minimum distance between the two line segments.
     */
-   public static void getClosestPointsForTwoLineSegments(Point3d lineSegmentStart1, Point3d lineSegmentEnd1, Point3d lineSegmentStart2, Point3d lineSegmentEnd2,
+   public static double getClosestPointsForTwoLineSegments(Point3d lineSegmentStart1, Point3d lineSegmentEnd1, Point3d lineSegmentStart2, Point3d lineSegmentEnd2,
                                                          Point3d closestPointOnLineSegment1ToPack, Point3d closestPointOnLineSegment2ToPack)
    {
       // Switching to the notation used in http://geomalgorithms.com/a07-_distance.html.
@@ -1626,11 +1642,21 @@ public class GeometryTools
       sc = Math.abs(sNumerator) < EPSILON ? 0.0 : sNumerator / sDenominator;
       tc = Math.abs(tNumerator) < EPSILON ? 0.0 : tNumerator / tDenominator;
 
-      Psc.set(ux, uy, uz);
-      Psc.scaleAdd(sc, P0);
+      double PscX = sc * ux + P0.getX();
+      double PscY = sc * uy + P0.getY();
+      double PscZ = sc * uz + P0.getZ();
+                           
+      double QtcX = tc * vx + Q0.getX();
+      double QtcY = tc * vy + Q0.getY();
+      double QtcZ = tc * vz + Q0.getZ();
 
-      Qtc.set(vx, vy, vz);
-      Qtc.scaleAdd(tc, Q0);
+      if (Psc != null)
+         Psc.set(PscX, PscY, PscZ);
+      if (Qtc != null)
+         Qtc.set(QtcX, QtcY, QtcZ);
+
+      double distanceSquared = MathTools.square(PscX - QtcX) + MathTools.square(PscY - QtcY) + MathTools.square(PscZ - QtcZ);
+      return Math.sqrt(distanceSquared);
    }
 
    /**
