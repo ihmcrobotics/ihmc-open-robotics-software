@@ -846,7 +846,7 @@ public class QuadrupedSupportPolygon implements Serializable
       {
          FramePoint pointOne = getFootstep(getFirstSupportingQuadrant());
          FramePoint pointTwo = getFootstep(getLastSupportingQuadrant());
-         return -Math.abs(GeometryTools.distanceFromPointToLine(x, y, pointOne.getX(), pointOne.getY(), pointTwo.getX(), pointTwo.getY()));
+         return -Math.abs(GeometryTools.distanceFromPointToLine(x, y, pointOne.getX(), pointOne.getY(), pointTwo.getX() - pointOne.getX(), pointTwo.getY() - pointOne.getY()));
       }
       else
       {
