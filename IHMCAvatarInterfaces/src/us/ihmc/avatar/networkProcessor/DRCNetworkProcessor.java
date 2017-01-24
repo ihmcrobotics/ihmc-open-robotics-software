@@ -10,6 +10,7 @@ import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolbox
 import us.ihmc.avatar.networkProcessor.modules.MultisenseMocapManualCalibrationTestModule;
 import us.ihmc.avatar.networkProcessor.modules.RosModule;
 import us.ihmc.avatar.networkProcessor.modules.ZeroPoseMockRobotConfigurationDataPublisherModule;
+import us.ihmc.avatar.networkProcessor.modules.mocap.IHMCMOCAPLocalizationModule;
 import us.ihmc.avatar.networkProcessor.modules.uiConnector.UiConnectionModule;
 import us.ihmc.avatar.networkProcessor.quadTreeHeightMap.HeightQuadTreeToolboxModule;
 import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
@@ -48,7 +49,7 @@ public class DRCNetworkProcessor
          setupHandModules(robotModel, params);
          setupRosModule(robotModel, params);
          setupROSAPIModule(params);
-         setupMocapModule(params);
+         setupMocapModule(robotModel, params);
          setupZeroPoseRobotConfigurationPublisherModule(robotModel, params);
          setupMultisenseManualTestModule(robotModel, params);
          setupDrillDetectionModule(params);
@@ -222,15 +223,15 @@ public class DRCNetworkProcessor
       }
    }
 
-   private void setupMocapModule(DRCNetworkModuleParameters params)  throws IOException
+   private void setupMocapModule(DRCRobotModel robotModel, DRCNetworkModuleParameters params)  throws IOException
    {
      if (params.isMocapModuleEnabled())
      {
-//        new MocapDetectedObjectModule(null, null, null);
-
-        PacketCommunicator mocapModuleCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.MOCAP_MODULE, NET_CLASS_LIST);
-        packetRouter.attachPacketCommunicator(PacketDestination.MOCAP_MODULE, mocapModuleCommunicator);
-        mocapModuleCommunicator.connect();
+        IHMCMOCAPLocalizationModule mocapModule = new IHMCMOCAPLocalizationModule(robotModel);
+        PacketCommunicator packetCommunicator = mocapModule.getPacketCommunicator();
+        packetRouter.attachPacketCommunicator(PacketDestination.MOCAP_MODULE, packetCommunicator);
+        packetRouter.attachPacketCommunicator(PacketDestination.CONTROLLER, packetCommunicator);
+        packetCommunicator.connect();
 
         String methodName = "setupMocapModule";
         printModuleConnectedDebugStatement(PacketDestination.MOCAP_MODULE, methodName);
