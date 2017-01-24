@@ -338,6 +338,18 @@ public class LineSegment3d implements GeometryObject<LineSegment3d>
 
    /**
     * Tests whether the projection of the given point onto this line segment is located
+    * between the two endpoints or exactly on an endpoint.
+    * 
+    * @param point the query. Not modified.
+    * @return {@code true} if the projection of the point is between the endpoints of this line segment, {@code false} otherwise.
+    */
+   public boolean isBetweenEndpoints(Point3d point)
+   {
+      return isBetweenEndpoints(point, 0);
+   }
+
+   /**
+    * Tests whether the projection of the given point onto this line segment is located
     * between the two endpoints with a given conservative tolerance {@code epsilon}:
     * <ul>
     *    <li> if {@code epsilon > 0}, the point has to be between the endpoints and at a minimum
