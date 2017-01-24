@@ -5,15 +5,13 @@ import javax.vecmath.AxisAngle4d;
 import javafx.embed.swing.JFXPanel;
 import javafx.scene.SceneAntialiasing;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.MeshView;
+import javafx.scene.shape.Box;
 import us.ihmc.graphicsDescription.dataBuffer.DataEntryHolder;
 import us.ihmc.graphicsDescription.dataBuffer.TimeDataHolder;
 import us.ihmc.graphicsDescription.graphInterfaces.GraphIndicesHolder;
 import us.ihmc.graphicsDescription.graphInterfaces.SelectedVariableHolder;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory.SceneType;
-import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
-import us.ihmc.javaFXToolkit.shapes.TextureColorAdaptivePalette;
 import us.ihmc.javaFXToolkit.text.Text3D;
 import us.ihmc.robotics.geometry.transformables.TransformablePoint3d;
 
@@ -38,19 +36,25 @@ public class JavaFX3DGraph
       view3dFactory.addCameraController(0.0, 1e7, false);
       view3dFactory.setBackgroundColor(Color.LIGHTGRAY);
       
-      JavaFXMultiColorMeshBuilder meshBuilder = new JavaFXMultiColorMeshBuilder(new TextureColorAdaptivePalette(7));
       double infinity = 10000.0;
       double lineWidth = 0.005;
-      double start = lineWidth / 2.0;
-      meshBuilder.addLine(-start, 0.0, 0.0, -infinity, 0.0, 0.0, lineWidth, Color.GRAY);
-      meshBuilder.addLine(0.0, -start, 0.0, 0.0, -infinity, 0.0, lineWidth, Color.GRAY);
-      meshBuilder.addLine(0.0, 0.0, -start, 0.0, 0.0, -infinity, lineWidth, Color.GRAY);
-      meshBuilder.addLine(start, 0.0, 0.0, infinity, 0.0, 0.0, lineWidth, Color.hsb(Color.RED.getHue(), 1.0, 1.0));
-      meshBuilder.addLine(0.0, start, 0.0, 0.0, infinity, 0.0, lineWidth, Color.hsb(Color.GREEN.getHue(), 1.0, 1.0));
-      meshBuilder.addLine(0.0, 0.0, start, 0.0, 0.0, infinity, lineWidth, Color.hsb(Color.BLUE.getHue(), 1.0, 1.0));
-      MeshView coordinateSystem = new MeshView(meshBuilder.generateMesh());
-      coordinateSystem.setMaterial(meshBuilder.generateMaterial());
-      view3dFactory.addNodeToView(coordinateSystem);
+      
+//      JavaFXMultiColorMeshBuilder meshBuilder = new JavaFXMultiColorMeshBuilder(new TextureColorAdaptivePalette(16));
+//      double start = lineWidth / 2.0;
+//      meshBuilder.addLine(-start, 0.0, 0.0, -infinity, 0.0, 0.0, lineWidth, Color.GRAY);
+//      meshBuilder.addLine(0.0, -start, 0.0, 0.0, -infinity, 0.0, lineWidth, Color.GRAY);
+//      meshBuilder.addLine(0.0, 0.0, -start, 0.0, 0.0, -infinity, lineWidth, Color.GRAY);
+//      meshBuilder.addLine(start, 0.0, 0.0, infinity, 0.0, 0.0, lineWidth, Color.hsb(Color.RED.getHue(), 1.0, 1.0));
+//      meshBuilder.addLine(0.0, start, 0.0, 0.0, infinity, 0.0, lineWidth, Color.hsb(Color.GREEN.getHue(), 1.0, 1.0));
+//      meshBuilder.addLine(0.0, 0.0, start, 0.0, 0.0, infinity, lineWidth, Color.hsb(Color.BLUE.getHue(), 1.0, 1.0));
+//      MeshView coordinateSystem = new MeshView(meshBuilder.generateMesh());
+//      coordinateSystem.setMaterial(meshBuilder.generateMaterial());
+//      coordinateSystem.setMouseTransparent(true);
+//      view3dFactory.addNodeToView(coordinateSystem);
+      
+      Box box = new Box(lineWidth, lineWidth, infinity);
+//      box.set
+      view3dFactory.addNodeToView(box);
       
       double fontHeight = 0.1;
       double fontThickness = lineWidth;
