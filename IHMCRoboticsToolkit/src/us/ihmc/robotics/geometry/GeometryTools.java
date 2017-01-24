@@ -235,8 +235,8 @@ public class GeometryTools
     *
     * @param pointX x coordinate of point to be tested.
     * @param pointY y coordinate of point to be tested.
-    * @param lineSegmentStart starting point of the line segment. Not modified.
-    * @param lineSegmentEnd end point of the line segment. Not modified.
+    * @param lineSegmentStart first endpoint of the line segment. Not modified.
+    * @param lineSegmentEnd second endpoint of the line segment. Not modified.
     * @return the minimum distance between the 2D point and the 2D line segment.
     */
    public static double distanceFromPointToLineSegment(double pointX, double pointY, Point2d lineSegmentStart, Point2d lineSegmentEnd)
@@ -255,10 +255,10 @@ public class GeometryTools
     *
     * @param pointX x coordinate of point to be tested.
     * @param pointY y coordinate of point to be tested.
-    * @param lineSegmentStartX the x-coordinate of the line segment first end point.
-    * @param lineSegmentStartY the y-coordinate of the line segment first end point.
-    * @param lineSegmentEndX the x-coordinate of the line segment second end point.
-    * @param lineSegmentEndY the y-coordinate of the line segment second end point.
+    * @param lineSegmentStartX the x-coordinate of the line segment first endpoint.
+    * @param lineSegmentStartY the y-coordinate of the line segment first endpoint.
+    * @param lineSegmentEndX the x-coordinate of the line segment second endpoint.
+    * @param lineSegmentEndY the y-coordinate of the line segment second endpoint.
     * @return the minimum distance between the 2D point and the 2D line segment.
     */
    public static double distanceFromPointToLineSegment(double pointX, double pointY, double lineSegmentStartX, double lineSegmentStartY, double lineSegmentEndX, double lineSegmentEndY)
@@ -282,8 +282,8 @@ public class GeometryTools
     * </p>
     *
     * @param point 2D point to compute the distance from the line segment. Not modified.
-    * @param lineSegmentStart starting point of the line segment. Not modified.
-    * @param lineSegmentEnd end point of the line segment. Not modified.
+    * @param lineSegmentStart first endpoint of the line segment. Not modified.
+    * @param lineSegmentEnd second endpoint of the line segment. Not modified.
     * @return the minimum distance between the 2D point and the 2D line segment.
     */
    public static double distanceFromPointToLineSegment(Point2d point, Point2d lineSegmentStart, Point2d lineSegmentEnd)
@@ -301,8 +301,8 @@ public class GeometryTools
     * </p>
     *
     * @param point 2D point to compute the distance from the line segment. Not modified.
-    * @param lineSegmentStart starting point of the line segment. Not modified.
-    * @param lineSegmentEnd end point of the line segment. Not modified.
+    * @param lineSegmentStart first endpoint of the line segment. Not modified.
+    * @param lineSegmentEnd second endpoint of the line segment. Not modified.
     * @return the minimum distance between the 2D point and the 2D line segment.
     * @throws ReferenceFrameMismatchException if the arguments are not expressed in the same reference frame.
     */
@@ -325,8 +325,8 @@ public class GeometryTools
     * @param pointX x-coordinate of point to be tested.
     * @param pointY y-coordinate of point to be tested.
     * @param pointZ z-coordinate of point to be tested.
-    * @param lineSegmentStart starting point of the line segment. Not modified.
-    * @param lineSegmentEnd end point of the line segment. Not modified.
+    * @param lineSegmentStart first endpoint of the line segment. Not modified.
+    * @param lineSegmentEnd second endpoint of the line segment. Not modified.
     * @return the minimum distance between the 3D point and the 3D line segment.
     */
    public static double distanceFromPointToLineSegment(double pointX, double pointY, double pointZ, Point3d lineSegmentStart, Point3d lineSegmentEnd)
@@ -352,8 +352,8 @@ public class GeometryTools
     * </p>
     *
     * @param point 3D point to compute the distance from the line segment. Not modified.
-    * @param lineSegmentStart starting point of the line segment. Not modified.
-    * @param lineSegmentEnd end point of the line segment. Not modified.
+    * @param lineSegmentStart first endpoint of the line segment. Not modified.
+    * @param lineSegmentEnd second endpoint of the line segment. Not modified.
     * @return the minimum distance between the 3D point and the 3D line segment.
     */
    public static double distanceFromPointToLineSegment(Point3d point, Point3d lineSegmentStart, Point3d lineSegmentEnd)
@@ -371,8 +371,8 @@ public class GeometryTools
     * </p>
     *
     * @param point 3D point to compute the distance from the line segment. Not modified.
-    * @param lineSegmentStart starting point of the line segment. Not modified.
-    * @param lineSegmentEnd end point of the line segment. Not modified.
+    * @param lineSegmentStart first endpoint of the line segment. Not modified.
+    * @param lineSegmentEnd second endpoint of the line segment. Not modified.
     * @return the minimum distance between the 3D point and the 3D line segment.
     * @throws ReferenceFrameMismatchException if the arguments are not expressed in the same reference frame.
     */
@@ -402,10 +402,10 @@ public class GeometryTools
     * This methods computes the minimum distance between the two 3D line segments with finite length.
     * <a href="http://geomalgorithms.com/a07-_distance.html"> Useful link</a>.
     * 
-    * @param lineSegmentStart1 the first end point of the first line segment. Not modified.
-    * @param lineSegmentEnd1 the second end point of the first line segment. Not modified.
-    * @param lineSegmentStart2 the first end point of the second line segment. Not modified.
-    * @param lineSegmentEnd2 the second end point of the second line segment. Not modified.
+    * @param lineSegmentStart1 the first endpoint of the first line segment. Not modified.
+    * @param lineSegmentEnd1 the second endpoint of the first line segment. Not modified.
+    * @param lineSegmentStart2 the first endpoint of the second line segment. Not modified.
+    * @param lineSegmentEnd2 the second endpoint of the second line segment. Not modified.
     * @return the minimum distance between the two line segments.
     */
    public static double distanceBetweenTwoLineSegments(Point3d lineSegmentStart1, Point3d lineSegmentEnd1, Point3d lineSegmentStart2, Point3d lineSegmentEnd2)
@@ -878,7 +878,7 @@ public class GeometryTools
    }
 
    /**
-    * Computes the orthogonal projection of a 2D point on a given 2D line segment defined by its two 2D end points.
+    * Computes the orthogonal projection of a 2D point on a given 2D line segment defined by its two 2D endpoints.
     * <p>
     * Edge cases:
     * <ul>
@@ -886,7 +886,7 @@ public class GeometryTools
     *     i.e. {@code lineSegmentStart.distanceSquared(lineSegmentEnd) < Epsilons.ONE_TRILLIONTH},
     *      this method returns {@code lineSegmentStart}.
     *    <li> the projection can not be outside the line segment.
-    *     When the projection on the corresponding line is outside the line segment, the result is the closest of the two end points.
+    *     When the projection on the corresponding line is outside the line segment, the result is the closest of the two endpoints.
     * </ul>
     * </p>
     * <p>
@@ -894,8 +894,8 @@ public class GeometryTools
     * </p>
     * 
     * @param pointToProject the point to compute the projection of. Not modified.
-    * @param lineSegmentStart the line segment first end point. Not modified.
-    * @param lineSegmentEnd the line segment second end point. Not modified.
+    * @param lineSegmentStart the line segment first endpoint. Not modified.
+    * @param lineSegmentEnd the line segment second endpoint. Not modified.
     * @return the projection of the point onto the line segment or {@code null} if the method failed.
     */
    public static Point2d getOrthogonalProjectionOnLineSegment(Point2d pointToProject, Point2d lineSegmentStart, Point2d lineSegmentEnd)
@@ -910,7 +910,7 @@ public class GeometryTools
    }
 
    /**
-    * Computes the orthogonal projection of a 2D point on a given 2D line segment defined by its two 2D end points.
+    * Computes the orthogonal projection of a 2D point on a given 2D line segment defined by its two 2D endpoints.
     * <p>
     * Edge cases:
     * <ul>
@@ -918,13 +918,13 @@ public class GeometryTools
     *     i.e. {@code lineSegmentStart.distanceSquared(lineSegmentEnd) < Epsilons.ONE_TRILLIONTH},
     *      this method returns {@code lineSegmentStart}.
     *    <li> the projection can not be outside the line segment.
-    *     When the projection on the corresponding line is outside the line segment, the result is the closest of the two end points.
+    *     When the projection on the corresponding line is outside the line segment, the result is the closest of the two endpoints.
     * </ul>
     * </p>
     * 
     * @param pointToProject the point to compute the projection of. Not modified.
-    * @param lineSegmentStart the line segment first end point. Not modified.
-    * @param lineSegmentEnd the line segment second end point. Not modified.
+    * @param lineSegmentStart the line segment first endpoint. Not modified.
+    * @param lineSegmentEnd the line segment second endpoint. Not modified.
     * @param projectionToPack point in which the projection of the point onto the line segment is stored. Modified.
     * @return whether the method succeeded or not.
     */
@@ -936,7 +936,7 @@ public class GeometryTools
    }
 
    /**
-    * Computes the orthogonal projection of a 2D point on a given 2D line segment defined by its two 2D end points.
+    * Computes the orthogonal projection of a 2D point on a given 2D line segment defined by its two 2D endpoints.
     * <p>
     * Edge cases:
     * <ul>
@@ -944,15 +944,15 @@ public class GeometryTools
     *     i.e. {@code lineSegmentStart.distanceSquared(lineSegmentEnd) < Epsilons.ONE_TRILLIONTH},
     *      this method returns {@code lineSegmentStart}.
     *    <li> the projection can not be outside the line segment.
-    *     When the projection on the corresponding line is outside the line segment, the result is the closest of the two end points.
+    *     When the projection on the corresponding line is outside the line segment, the result is the closest of the two endpoints.
     * </ul>
     * </p>
     * 
     * @param pointToProject the point to compute the projection of. Not modified.
-    * @param lineSegmentStartX the x-coordinate of the line segment first end point.
-    * @param lineSegmentStartY the y-coordinate of the line segment first end point.
-    * @param lineSegmentEndX the x-coordinate of the line segment second end point.
-    * @param lineSegmentEndY the y-coordinate of the line segment second end point.
+    * @param lineSegmentStartX the x-coordinate of the line segment first endpoint.
+    * @param lineSegmentStartY the y-coordinate of the line segment first endpoint.
+    * @param lineSegmentEndX the x-coordinate of the line segment second endpoint.
+    * @param lineSegmentEndY the y-coordinate of the line segment second endpoint.
     * @param projectionToPack point in which the projection of the point onto the line segment is stored. Modified.
     * @return whether the method succeeded or not.
     */
@@ -1062,7 +1062,7 @@ public class GeometryTools
    }
 
    /**
-    * Computes the orthogonal projection of a 3D point on a given 3D line segment defined by its two 3D end points.
+    * Computes the orthogonal projection of a 3D point on a given 3D line segment defined by its two 3D endpoints.
     * <p>
     * Edge cases:
     * <ul>
@@ -1070,7 +1070,7 @@ public class GeometryTools
     *     i.e. {@code lineSegmentStart.distanceSquared(lineSegmentEnd) < Epsilons.ONE_TRILLIONTH},
     *      this method returns {@code lineSegmentStart}.
     *    <li> the projection can not be outside the line segment.
-    *     When the projection on the corresponding line is outside the line segment, the result is the closest of the two end points.
+    *     When the projection on the corresponding line is outside the line segment, the result is the closest of the two endpoints.
     * </ul>
     * </p>
     * <p>
@@ -1078,8 +1078,8 @@ public class GeometryTools
     * </p>
     * 
     * @param pointToProject the point to compute the projection of. Not modified.
-    * @param lineSegmentStart the line segment first end point. Not modified.
-    * @param lineSegmentEnd the line segment second end point. Not modified.
+    * @param lineSegmentStart the line segment first endpoint. Not modified.
+    * @param lineSegmentEnd the line segment second endpoint. Not modified.
     * @return the projection of the point onto the line segment or {@code null} if the method failed.
     */
    public static Point3d getOrthogonalProjectionOnLineSegment(Point3d pointToProject, Point3d lineSegmentStart, Point3d lineSegmentEnd)
@@ -1094,7 +1094,7 @@ public class GeometryTools
    }
 
    /**
-    * Computes the orthogonal projection of a 3D point on a given 3D line segment defined by its two 3D end points.
+    * Computes the orthogonal projection of a 3D point on a given 3D line segment defined by its two 3D endpoints.
     * <p>
     * Edge cases:
     * <ul>
@@ -1102,13 +1102,13 @@ public class GeometryTools
     *     i.e. {@code lineSegmentStart.distanceSquared(lineSegmentEnd) < Epsilons.ONE_TRILLIONTH},
     *      this method returns {@code lineSegmentStart}.
     *    <li> the projection can not be outside the line segment.
-    *     When the projection on the corresponding line is outside the line segment, the result is the closest of the two end points.
+    *     When the projection on the corresponding line is outside the line segment, the result is the closest of the two endpoints.
     * </ul>
     * </p>
     * 
     * @param pointToProject the point to compute the projection of. Not modified.
-    * @param lineSegmentStart the line segment first end point. Not modified.
-    * @param lineSegmentEnd the line segment second end point. Not modified.
+    * @param lineSegmentStart the line segment first endpoint. Not modified.
+    * @param lineSegmentEnd the line segment second endpoint. Not modified.
     * @param projectionToPack point in which the projection of the point onto the line segment is stored. Modified.
     * @return whether the method succeeded or not.
     */
@@ -1120,7 +1120,7 @@ public class GeometryTools
    }
 
    /**
-    * Computes the orthogonal projection of a 3D point on a given 3D line segment defined by its two 3D end points.
+    * Computes the orthogonal projection of a 3D point on a given 3D line segment defined by its two 3D endpoints.
     * <p>
     * Edge cases:
     * <ul>
@@ -1128,17 +1128,17 @@ public class GeometryTools
     *     i.e. {@code lineSegmentStart.distanceSquared(lineSegmentEnd) < Epsilons.ONE_TRILLIONTH},
     *      this method returns {@code lineSegmentStart}.
     *    <li> the projection can not be outside the line segment.
-    *     When the projection on the corresponding line is outside the line segment, the result is the closest of the two end points.
+    *     When the projection on the corresponding line is outside the line segment, the result is the closest of the two endpoints.
     * </ul>
     * </p>
     * 
     * @param pointToProject the point to compute the projection of. Not modified.
-    * @param lineSegmentStartX the x-coordinate of the line segment first end point.
-    * @param lineSegmentStartY the y-coordinate of the line segment first end point.
-    * @param lineSegmentStartZ the z-coordinate of the line segment first end point.
-    * @param lineSegmentEndX the x-coordinate of the line segment second end point.
-    * @param lineSegmentEndY the y-coordinate of the line segment second end point.
-    * @param lineSegmentEndZ the z-coordinate of the line segment second end point.
+    * @param lineSegmentStartX the x-coordinate of the line segment first endpoint.
+    * @param lineSegmentStartY the y-coordinate of the line segment first endpoint.
+    * @param lineSegmentStartZ the z-coordinate of the line segment first endpoint.
+    * @param lineSegmentEndX the x-coordinate of the line segment second endpoint.
+    * @param lineSegmentEndY the y-coordinate of the line segment second endpoint.
+    * @param lineSegmentEndZ the z-coordinate of the line segment second endpoint.
     * @param projectionToPack point in which the projection of the point onto the line segment is stored. Modified.
     * @return whether the method succeeded or not.
     */
@@ -1273,7 +1273,7 @@ public class GeometryTools
 
    /**
     * This is the same calculation as for {@link #getOrthogonalProjectionOnLineSegment(Point2d, Point2d, Point2d)}: </br>
-    * Computes the orthogonal projection of a 2D point on a given 2D line segment defined by its two 2D end points.
+    * Computes the orthogonal projection of a 2D point on a given 2D line segment defined by its two 2D endpoints.
     * <p>
     * Edge cases:
     * <ul>
@@ -1281,7 +1281,7 @@ public class GeometryTools
     *     i.e. {@code lineSegmentStart.distanceSquared(lineSegmentEnd) < Epsilons.ONE_TRILLIONTH},
     *      this method fails and returns {@code null}.
     *    <li> the projection can not be outside the line segment.
-    *     When the projection on the corresponding line is outside the line segment, the result is the closest of the two end points.
+    *     When the projection on the corresponding line is outside the line segment, the result is the closest of the two endpoints.
     * </ul>
     * </p>
     * <p>
@@ -1289,8 +1289,8 @@ public class GeometryTools
     * </p>
     * 
     * @param pointToProject the point to compute the projection of. Not modified.
-    * @param lineSegmentStart the line segment first end point. Not modified.
-    * @param lineSegmentEnd the line segment second end point. Not modified.
+    * @param lineSegmentStart the line segment first endpoint. Not modified.
+    * @param lineSegmentEnd the line segment second endpoint. Not modified.
     * @return the projection of the point onto the line segment or {@code null} if the method failed.
     */
    public static Point2d getClosestPointToLineSegment(Point2d pointToProject, Point2d lineSegmentStart, Point2d lineSegmentEnd)
@@ -1317,8 +1317,8 @@ public class GeometryTools
     * </p>
     * 
     * @param point the query. Not modified.
-    * @param lineSegmentStart the line segment first end point. Not modified.
-    * @param lineSegmentEnd the line segment second end point. Not modified.
+    * @param lineSegmentStart the line segment first endpoint. Not modified.
+    * @param lineSegmentEnd the line segment second endpoint. Not modified.
     * @return the computed percentage along the line segment representing where the point projection is located.
     */
    public static double getPercentageAlongLineSegment(Point2d point, Point2d lineSegmentStart, Point2d lineSegmentEnd)
@@ -1347,10 +1347,10 @@ public class GeometryTools
     * 
     * @param pointX the x-coordinate of the query point.
     * @param pointY the y-coordinate of the query point.
-    * @param lineSegmentStartX the x-coordinate of the line segment first end point.
-    * @param lineSegmentStartY the y-coordinate of the line segment first end point.
-    * @param lineSegmentEndX the x-coordinate of the line segment second end point.
-    * @param lineSegmentEndY the y-coordinate of the line segment second end point.
+    * @param lineSegmentStartX the x-coordinate of the line segment first endpoint.
+    * @param lineSegmentStartY the y-coordinate of the line segment first endpoint.
+    * @param lineSegmentEndX the x-coordinate of the line segment second endpoint.
+    * @param lineSegmentEndY the y-coordinate of the line segment second endpoint.
     * @return the computed percentage along the line segment representing where the point projection is located.
     */
    public static double getPercentageAlongLineSegment(double pointX, double pointY, double lineSegmentStartX, double lineSegmentStartY, double lineSegmentEndX,
@@ -1392,8 +1392,8 @@ public class GeometryTools
     * </p>
     * 
     * @param point the query. Not modified.
-    * @param lineSegmentStart the line segment first end point. Not modified.
-    * @param lineSegmentEnd the line segment second end point. Not modified.
+    * @param lineSegmentStart the line segment first endpoint. Not modified.
+    * @param lineSegmentEnd the line segment second endpoint. Not modified.
     * @return the computed percentage along the line segment representing where the point projection is located.
     */
    public static double getPercentageAlongLineSegment(Point3d point, Point3d lineSegmentStart, Point3d lineSegmentEnd)
@@ -1423,12 +1423,12 @@ public class GeometryTools
     * @param pointX the x-coordinate of the query point.
     * @param pointY the y-coordinate of the query point.
     * @param pointZ the z-coordinate of the query point.
-    * @param lineSegmentStartX the x-coordinate of the line segment first end point.
-    * @param lineSegmentStartY the y-coordinate of the line segment first end point.
-    * @param lineSegmentStartZ the z-coordinate of the line segment first end point.
-    * @param lineSegmentEndX the x-coordinate of the line segment second end point.
-    * @param lineSegmentEndY the y-coordinate of the line segment second end point.
-    * @param lineSegmentEndZ the z-coordinate of the line segment second end point.
+    * @param lineSegmentStartX the x-coordinate of the line segment first endpoint.
+    * @param lineSegmentStartY the y-coordinate of the line segment first endpoint.
+    * @param lineSegmentStartZ the z-coordinate of the line segment first endpoint.
+    * @param lineSegmentEndX the x-coordinate of the line segment second endpoint.
+    * @param lineSegmentEndY the y-coordinate of the line segment second endpoint.
+    * @param lineSegmentEndZ the z-coordinate of the line segment second endpoint.
     * @return the computed percentage along the line segment representing where the point projection is located.
     */
    public static double getPercentageAlongLineSegment(double pointX, double pointY, double pointZ, double lineSegmentStartX, double lineSegmentStartY,
@@ -1559,10 +1559,10 @@ public class GeometryTools
     * Given two 3D line segments with finite length, this methods computes two points P &in; lineSegment1 and Q &in; lineSegment2 such that the distance || P - Q || is the minimum distance between the two 3D line segments.
     * <a href="http://geomalgorithms.com/a07-_distance.html"> Useful link</a>.
     * 
-    * @param lineSegmentStart1 the first end point of the first line segment. Not modified.
-    * @param lineSegmentEnd1 the second end point of the first line segment. Not modified.
-    * @param lineSegmentStart2 the first end point of the second line segment. Not modified.
-    * @param lineSegmentEnd2 the second end point of the second line segment. Not modified.
+    * @param lineSegmentStart1 the first endpoint of the first line segment. Not modified.
+    * @param lineSegmentEnd1 the second endpoint of the first line segment. Not modified.
+    * @param lineSegmentStart2 the first endpoint of the second line segment. Not modified.
+    * @param lineSegmentEnd2 the second endpoint of the second line segment. Not modified.
     * @param closestPointOnLineSegment1ToPack the 3D coordinates of the point P are packed in this 3D point. Modified. Can be {@code null}.
     * @param closestPointOnLineSegment2ToPack the 3D coordinates of the point Q are packed in this 3D point. Modified. Can be {@code null}.
     * @return the minimum distance between the two line segments.
@@ -1747,9 +1747,9 @@ public class GeometryTools
     * This method returns null for the following cases:
     * <ul>
     *    <li> the line segment is parallel to the plane,
-    *    <li> the line segment end points are on one side of the plane,
+    *    <li> the line segment endpoints are on one side of the plane,
     *    <li> the line segment length is equal to zero ({@code lineSegmentStart == lineSegmentEnd}),
-    *    <li> one of the line segment end points lies on the plane.
+    *    <li> one of the line segment endpoints lies on the plane.
     * </ul>
     * </p>
     * Once the existence of an intersection is verified,
@@ -1761,8 +1761,8 @@ public class GeometryTools
     *
     * @param pointOnPlane a point located on the plane. Not modified.
     * @param planeNormal the normal of the plane. Not modified.
-    * @param lineSegmentStart first end point of the line segment. Not modified.
-    * @param lineSegmentEnd second end point of the line segment. Not modified.
+    * @param lineSegmentStart first endpoint of the line segment. Not modified.
+    * @param lineSegmentEnd second endpoint of the line segment. Not modified.
     * @return the intersection, or {@code null} if there is no intersection.
     * @throws ReferenceFrameMismatchException if the arguments are not expressed in the same reference frame.
     */
@@ -1788,9 +1788,9 @@ public class GeometryTools
     * This method returns null for the following cases:
     * <ul>
     *    <li> the line segment is parallel to the plane,
-    *    <li> the line segment end points are on one side of the plane,
+    *    <li> the line segment endpoints are on one side of the plane,
     *    <li> the line segment length is equal to zero ({@code lineSegmentStart == lineSegmentEnd}),
-    *    <li> one of the line segment end points lies on the plane.
+    *    <li> one of the line segment endpoints lies on the plane.
     * </ul>
     * </p>
     * Once the existence of an intersection is verified,
@@ -1802,8 +1802,8 @@ public class GeometryTools
     *
     * @param pointOnPlane a point located on the plane. Not modified.
     * @param planeNormal the normal of the plane. Not modified.
-    * @param lineSegmentStart first end point of the line segment. Not modified.
-    * @param lineSegmentEnd second end point of the line segment. Not modified.
+    * @param lineSegmentStart first endpoint of the line segment. Not modified.
+    * @param lineSegmentEnd second endpoint of the line segment. Not modified.
     * @return the intersection, or {@code null} if there is no intersection.
     */
    public static Point3d getIntersectionBetweenLineSegmentAndPlane(Point3d pointOnPlane, Vector3d planeNormal, Point3d lineSegmentStart, Point3d lineSegmentEnd)
@@ -1825,15 +1825,15 @@ public class GeometryTools
     * <p>
     * Edge cases:
     * <ul>
-    *    <li> the line segment end points are equal, this method returns false whether the end points are on the plane or not.
-    *    <li> one of the line segment end points is exactly on the plane, this method returns false.
+    *    <li> the line segment endpoints are equal, this method returns false whether the endpoints are on the plane or not.
+    *    <li> one of the line segment endpoints is exactly on the plane, this method returns false.
     * </ul>
     * </p>
     * 
     * @param pointOnPlane a point located on the plane. Not modified.
     * @param planeNormal the normal of the plane. Not modified.
-    * @param lineSegmentStart first end point of the line segment. Not modified.
-    * @param lineSegmentEnd second end point of the line segment. Not modified.
+    * @param lineSegmentStart first endpoint of the line segment. Not modified.
+    * @param lineSegmentEnd second endpoint of the line segment. Not modified.
     * @return {@code true} if an intersection line segment - plane exists, {@code false} otherwise.
     * @throws ReferenceFrameMismatchException if the arguments are not expressed in the same reference frame.
     */
@@ -1851,15 +1851,15 @@ public class GeometryTools
     * <p>
     * Edge cases:
     * <ul>
-    *    <li> the line segment end points are equal, this method returns false whether the end points are on the plane or not.
-    *    <li> one of the line segment end points is exactly on the plane, this method returns false.
+    *    <li> the line segment endpoints are equal, this method returns false whether the endpoints are on the plane or not.
+    *    <li> one of the line segment endpoints is exactly on the plane, this method returns false.
     * </ul>
     * </p>
     * 
     * @param pointOnPlane a point located on the plane. Not modified.
     * @param planeNormal the normal of the plane. Not modified.
-    * @param lineSegmentStart first end point of the line segment. Not modified.
-    * @param lineSegmentEnd second end point of the line segment. Not modified.
+    * @param lineSegmentStart first endpoint of the line segment. Not modified.
+    * @param lineSegmentEnd second endpoint of the line segment. Not modified.
     * @return {@code true} if an intersection line segment - plane exists, {@code false} otherwise.
     */
    public static boolean isLineSegmentIntersectingPlane(Point3d pointOnPlane, Vector3d planeNormal, Point3d lineSegmentStart, Point3d lineSegmentEnd)
@@ -1925,15 +1925,15 @@ public class GeometryTools
     * <ul>
     *    <li> When the two line segments are parallel but not collinear, this method returns false.
     *    <li> When the two line segments are collinear,
-    *     this methods returns true only if the two line segments overlap or have at least one common end point.
-    *    <li> When the two line segments have a common end point, this method returns true.
+    *     this methods returns true only if the two line segments overlap or have at least one common endpoint.
+    *    <li> When the two line segments have a common endpoint, this method returns true.
     * </ul>
     * </p>
     * 
-    * @param lineSegmentStart1 first end point of the first line segment. Not modified.
-    * @param lineSegmentEnd1 second end point of the first line segment. Not modified.
-    * @param lineSegmentStart1 first end point of the second line segment. Not modified.
-    * @param lineSegmentEnd1 second end point of the second line segment. Not modified.
+    * @param lineSegmentStart1 first endpoint of the first line segment. Not modified.
+    * @param lineSegmentEnd1 second endpoint of the first line segment. Not modified.
+    * @param lineSegmentStart1 first endpoint of the second line segment. Not modified.
+    * @param lineSegmentEnd1 second endpoint of the second line segment. Not modified.
     * @return {@code true} if the two line segments intersect, {@code false} otherwise.
     * @throws ReferenceFrameMismatchException if the arguments are not expressed in the same reference frame.
     */
@@ -1953,15 +1953,15 @@ public class GeometryTools
     * <ul>
     *    <li> When the two line segments are parallel but not collinear, this method returns false.
     *    <li> When the two line segments are collinear,
-    *     this methods returns true only if the two line segments overlap or have at least one common end point.
-    *    <li> When the two line segments have a common end point, this method returns true.
+    *     this methods returns true only if the two line segments overlap or have at least one common endpoint.
+    *    <li> When the two line segments have a common endpoint, this method returns true.
     * </ul>
     * </p>
     * 
-    * @param lineSegmentStart1 first end point of the first line segment. Not modified.
-    * @param lineSegmentEnd1 second end point of the first line segment. Not modified.
-    * @param lineSegmentStart1 first end point of the second line segment. Not modified.
-    * @param lineSegmentEnd1 second end point of the second line segment. Not modified.
+    * @param lineSegmentStart1 first endpoint of the first line segment. Not modified.
+    * @param lineSegmentEnd1 second endpoint of the first line segment. Not modified.
+    * @param lineSegmentStart1 first endpoint of the second line segment. Not modified.
+    * @param lineSegmentEnd1 second endpoint of the second line segment. Not modified.
     * @return {@code true} if the two line segments intersect, {@code false} otherwise.
     */
    public static boolean doLineSegmentsIntersect(Point2d lineSegmentStart1, Point2d lineSegmentEnd1, Point2d lineSegmentStart2, Point2d lineSegmentEnd2)
@@ -1977,19 +1977,19 @@ public class GeometryTools
     * <ul>
     *    <li> When the two line segments are parallel but not collinear, this method returns false.
     *    <li> When the two line segments are collinear,
-    *     this methods returns true only if the two line segments overlap or have at least one common end point.
-    *    <li> When the two line segments have a common end point, this method returns true.
+    *     this methods returns true only if the two line segments overlap or have at least one common endpoint.
+    *    <li> When the two line segments have a common endpoint, this method returns true.
     * </ul>
     * </p>
     * 
-    * @param lineSegmentStart1x x-coordinate of the first end point of the first line segment.
-    * @param lineSegmentStart1y y-coordinate of the first end point of the first line segment.
-    * @param lineSegmentEnd1x x-coordinate of the second end point of the first line segment.
-    * @param lineSegmentEnd1y y-coordinate of the second end point of the first line segment.
-    * @param lineSegmentStart2x x-coordinate of the first end point of the second line segment.
-    * @param lineSegmentStart2y y-coordinate of the first end point of the second line segment.
-    * @param lineSegmentEnd2x x-coordinate of the second end point of the second line segment.
-    * @param lineSegmentEnd2y y-coordinate of the second end point of the second line segment.
+    * @param lineSegmentStart1x x-coordinate of the first endpoint of the first line segment.
+    * @param lineSegmentStart1y y-coordinate of the first endpoint of the first line segment.
+    * @param lineSegmentEnd1x x-coordinate of the second endpoint of the first line segment.
+    * @param lineSegmentEnd1y y-coordinate of the second endpoint of the first line segment.
+    * @param lineSegmentStart2x x-coordinate of the first endpoint of the second line segment.
+    * @param lineSegmentStart2y y-coordinate of the first endpoint of the second line segment.
+    * @param lineSegmentEnd2x x-coordinate of the second endpoint of the second line segment.
+    * @param lineSegmentEnd2y y-coordinate of the second endpoint of the second line segment.
     * @return {@code true} if the two line segments intersect, {@code false} otherwise.
     */
    public static boolean doLineSegmentsIntersect(double lineSegmentStart1x, double lineSegmentStart1y, double lineSegmentEnd1x, double lineSegmentEnd1y,
@@ -2337,23 +2337,23 @@ public class GeometryTools
    }
 
    /**
-    * Computes the intersection between two 2D line segments each defined by their two 2D end points.
+    * Computes the intersection between two 2D line segments each defined by their two 2D endpoints.
     * <p>
     * Edge cases:
     * <ul>
     *    <li> When the two line segments are parallel but not collinear, the two line segments do not intersect, this method returns {@code null}.
-    *    <li> When the two line segments are collinear, if the two line segments do not overlap do not have at least one common end point, this method returns {@code null}.
-    *    <li> When the two line segments have a common end point, this method returns the common end point as the intersection.
+    *    <li> When the two line segments are collinear, if the two line segments do not overlap do not have at least one common endpoint, this method returns {@code null}.
+    *    <li> When the two line segments have a common endpoint, this method returns the common endpoint as the intersection.
     * </ul>
     * </p>
     * <p>
     * WARNING: This method generates garbage.
     * </p>
     * 
-    * @param lineSegmentStart1 the first end point of the first line segment. Not modified.
-    * @param lineSegmentEnd1 the second end point of the first line segment. Not modified.
-    * @param lineSegmentStart2 the first end point of the second line segment. Not modified.
-    * @param lineSegmentEnd2 the second end point of the second line segment. Not modified.
+    * @param lineSegmentStart1 the first endpoint of the first line segment. Not modified.
+    * @param lineSegmentEnd1 the second endpoint of the first line segment. Not modified.
+    * @param lineSegmentStart2 the first endpoint of the second line segment. Not modified.
+    * @param lineSegmentEnd2 the second endpoint of the second line segment. Not modified.
     * @return the intersection point if it exists, {@code null} otherwise.
     */
    public static Point2d getIntersectionBetweenTwoLineSegments(Point2d lineSegmentStart1, Point2d lineSegmentEnd1, Point2d lineSegmentStart2,
@@ -2368,20 +2368,20 @@ public class GeometryTools
    }
 
    /**
-    * Computes the intersection between two 2D line segments each defined by their two 2D end points.
+    * Computes the intersection between two 2D line segments each defined by their two 2D endpoints.
     * <p>
     * Edge cases:
     * <ul>
     *    <li> When the two line segments are parallel but not collinear, the two line segments do not intersect.
-    *    <li> When the two line segments are collinear, this methods returns true only if the two line segments overlap or have at least one common end point.
-    *    <li> When the two line segments have a common end point, this method returns true.
+    *    <li> When the two line segments are collinear, this methods returns true only if the two line segments overlap or have at least one common endpoint.
+    *    <li> When the two line segments have a common endpoint, this method returns true.
     * </ul>
     * </p>
     * 
-    * @param lineSegmentStart1 the first end point of the first line segment. Not modified.
-    * @param lineSegmentEnd1 the second end point of the first line segment. Not modified.
-    * @param lineSegmentStart2 the first end point of the second line segment. Not modified.
-    * @param lineSegmentEnd2 the second end point of the second line segment. Not modified.
+    * @param lineSegmentStart1 the first endpoint of the first line segment. Not modified.
+    * @param lineSegmentEnd1 the second endpoint of the first line segment. Not modified.
+    * @param lineSegmentStart2 the first endpoint of the second line segment. Not modified.
+    * @param lineSegmentEnd2 the second endpoint of the second line segment. Not modified.
     * @param intersectionToPack the 2D point in which the result is stored. Modified.
     * @return {@code true} if the two line segments intersect, {@code false} otherwise.
     */
@@ -2394,23 +2394,23 @@ public class GeometryTools
    }
 
    /**
-    * Computes the intersection between two 2D line segments each defined by their two 2D end points.
+    * Computes the intersection between two 2D line segments each defined by their two 2D endpoints.
     * <p>
     * Edge cases:
     * <ul>
     *    <li> When the two line segments are parallel but not collinear, the two line segments do not intersect.
-    *    <li> When the two line segments are collinear, this methods returns true only if the two line segments overlap or have at least one common end point.
-    *    <li> When the two line segments have a common end point, this method returns true.
+    *    <li> When the two line segments are collinear, this methods returns true only if the two line segments overlap or have at least one common endpoint.
+    *    <li> When the two line segments have a common endpoint, this method returns true.
     * </ul>
     * 
-    * @param lineSegmentStart1x x-coordinate of the first end point of the first line segment.
-    * @param lineSegmentStart1y y-coordinate of the first end point of the first line segment.
-    * @param lineSegmentEnd1x x-coordinate of the second end point of the first line segment.
-    * @param lineSegmentEnd1y y-coordinate of the second end point of the first line segment.
-    * @param lineSegmentStart2x x-coordinate of the first end point of the second line segment.
-    * @param lineSegmentStart2y y-coordinate of the first end point of the second line segment.
-    * @param lineSegmentEnd2x x-coordinate of the second end point of the second line segment.
-    * @param lineSegmentEnd2y y-coordinate of the second end point of the second line segment.
+    * @param lineSegmentStart1x x-coordinate of the first endpoint of the first line segment.
+    * @param lineSegmentStart1y y-coordinate of the first endpoint of the first line segment.
+    * @param lineSegmentEnd1x x-coordinate of the second endpoint of the first line segment.
+    * @param lineSegmentEnd1y y-coordinate of the second endpoint of the first line segment.
+    * @param lineSegmentStart2x x-coordinate of the first endpoint of the second line segment.
+    * @param lineSegmentStart2y y-coordinate of the first endpoint of the second line segment.
+    * @param lineSegmentEnd2x x-coordinate of the second endpoint of the second line segment.
+    * @param lineSegmentEnd2y y-coordinate of the second endpoint of the second line segment.
     * @param intersectionToPack the 2D point in which the result is stored. Modified.
     * @return {@code true} if the two line segments intersect, {@code false} otherwise.
     */
@@ -2440,7 +2440,7 @@ public class GeometryTools
               // Let's first check for a common endpoint
             double epsilon = Epsilons.ONE_TRILLIONTH;
 
-            // Let's find the first end point that is inside the other line segment and return it.
+            // Let's find the first endpoint that is inside the other line segment and return it.
             double lineSegment1LengthSquare = lineDirection1x * lineDirection1x + lineDirection1y * lineDirection1y;
             double dx, dy, dot;
 
@@ -2501,13 +2501,13 @@ public class GeometryTools
    }
 
    /**
-    * Computes the intersection between an infinitely long 2D line (defined by a 2D point and a 2D direction) and a 2D line segment (defined by its two 2D end points).
+    * Computes the intersection between an infinitely long 2D line (defined by a 2D point and a 2D direction) and a 2D line segment (defined by its two 2D endpoints).
     * <p>
     * Edge cases:
     * <ul>
     *    <li> When the line and the line segment are parallel but not collinear, they do not intersect, this method returns {@code null}.
     *    <li> When the line and the line segment are collinear, they are assumed to intersect at {@code lineSegmentStart}.
-    *    <li> When the line intersects the line segment at one of its end points, this method returns that same end point.
+    *    <li> When the line intersects the line segment at one of its endpoints, this method returns that same endpoint.
     * </ul>
     * </p>
     * <p>
@@ -2516,8 +2516,8 @@ public class GeometryTools
     * 
     * @param pointOnLine a point located on the line. Not modified.
     * @param lineDirection the line direction. Not modified.
-    * @param lineSegmentStart the first end point of the line segment. Not modified.
-    * @param lineSegmentEnd the second end point of the line segment. Not modified.
+    * @param lineSegmentStart the first endpoint of the line segment. Not modified.
+    * @param lineSegmentEnd the second endpoint of the line segment. Not modified.
     * @param intersectionToPack the 2D point in which the result is stored. Modified.
     * @return the 2D point of intersection if it exist, {@code null} otherwise.
     */
@@ -2532,20 +2532,20 @@ public class GeometryTools
    }
 
    /**
-    * Computes the intersection between an infinitely long 2D line (defined by a 2D point and a 2D direction) and a 2D line segment (defined by its two 2D end points).
+    * Computes the intersection between an infinitely long 2D line (defined by a 2D point and a 2D direction) and a 2D line segment (defined by its two 2D endpoints).
     * <p>
     * Edge cases:
     * <ul>
     *    <li> When the line and the line segment are parallel but not collinear, they do not intersect.
     *    <li> When the line and the line segment are collinear, they are assumed to intersect at {@code lineSegmentStart}.
-    *    <li> When the line intersects the line segment at one of its end points, this method returns true and the end point is the intersection.
+    *    <li> When the line intersects the line segment at one of its endpoints, this method returns true and the endpoint is the intersection.
     * </ul>
     * </p>
     * 
     * @param pointOnLine a point located on the line. Not modified.
     * @param lineDirection the line direction. Not modified.
-    * @param lineSegmentStart the first end point of the line segment. Not modified.
-    * @param lineSegmentEnd the second end point of the line segment. Not modified.
+    * @param lineSegmentStart the first endpoint of the line segment. Not modified.
+    * @param lineSegmentEnd the second endpoint of the line segment. Not modified.
     * @param intersectionToPack the 2D point in which the result is stored. Modified.
     * @return {@code true} if the line intersects the line segment, {@code false} otherwise.
     */
@@ -2558,13 +2558,13 @@ public class GeometryTools
    }
 
    /**
-    * Computes the intersection between an infinitely long 2D line (defined by a 2D point and a 2D direction) and a 2D line segment (defined by its two 2D end points).
+    * Computes the intersection between an infinitely long 2D line (defined by a 2D point and a 2D direction) and a 2D line segment (defined by its two 2D endpoints).
     * <p>
     * Edge cases:
     * <ul>
     *    <li> When the line and the line segment are parallel but not collinear, they do not intersect.
     *    <li> When the line and the line segment are collinear, they are assumed to intersect at {@code lineSegmentStart}.
-    *    <li> When the line intersects the line segment at one of its end points, this method returns true and the end point is the intersection.
+    *    <li> When the line intersects the line segment at one of its endpoints, this method returns true and the endpoint is the intersection.
     * </ul>
     * </p>
     * 
@@ -2572,10 +2572,10 @@ public class GeometryTools
     * @param pointOnLineX y-coordinate of a point located on the line.
     * @param lineDirectionX x-component of the line direction.
     * @param lineDirectionY y-component of the line direction.
-    * @param lineSegmentStartX x-coordinate of the first end point of the line segment.
-    * @param lineSegmentStartY y-coordinate of the first end point of the line segment.
-    * @param lineSegmentEndX x-coordinate of the second end point of the line segment.
-    * @param lineSegmentEndY y-coordinate of the second end point of the line segment.
+    * @param lineSegmentStartX x-coordinate of the first endpoint of the line segment.
+    * @param lineSegmentStartY y-coordinate of the first endpoint of the line segment.
+    * @param lineSegmentEndX x-coordinate of the second endpoint of the line segment.
+    * @param lineSegmentEndY y-coordinate of the second endpoint of the line segment.
     * @param intersectionToPack the 2D point in which the result is stored. Modified.
     * @return {@code true} if the line intersects the line segment, {@code false} otherwise.
     */
@@ -2593,7 +2593,7 @@ public class GeometryTools
       //      \ lineDirectionY -lineSegmentDirectionY /   \ beta  /   \ lineSegmentStartY - pointOnLineY /
       //
       // Only one coefficient of the pair {alpha, beta} is needed to find the coordinates of the intersection.
-      // By using beta, it is possible to also determine if the intersection is between the line segment end points: 0 <= beta <= 1.
+      // By using beta, it is possible to also determine if the intersection is between the line segment endpoints: 0 <= beta <= 1.
 
       double determinant = -lineDirectionX * lineSegmentDirectionY + lineDirectionY * lineSegmentDirectionX; //(A[0][0] * A[1][1]) - (A[1][0] * A[0][1]);
       double dx = lineSegmentStartX - pointOnLineX;
@@ -3268,19 +3268,19 @@ public class GeometryTools
    }
 
    /**
-    * Computes the perpendicular bisector of line segment defined by its two end points.
+    * Computes the perpendicular bisector of line segment defined by its two endpoints.
     * The bisector starts off the the middle of the line segment and points toward the left side of the line segment.
     * <p>
     * Edge cases:
     * <ul>
-    *    <li> when the line segment end points are equal,
+    *    <li> when the line segment endpoints are equal,
     *     more precisely when {@code lineSegmentStart.distance(lineSegmentEnd) < Epsilons.ONE_TRILLIONTH},
     *     the method fails and returns {@code false}.
     * </ul>
     * </p>
     * 
-    * @param lineSegmentStart the first end point of the line segment. Not modified.
-    * @param lineSegmentEnd the second end point of the line segment. Not modified.
+    * @param lineSegmentStart the first endpoint of the line segment. Not modified.
+    * @param lineSegmentEnd the second endpoint of the line segment. Not modified.
     * @param bisectorStartToPack a 2D point in which the origin of the bisector is stored. Modified.
     * @param bisectorDirectionToPack a 2D vector in which the direction of the bisector is stored. Modified.
     * @return whether the perpendicular bisector could be determined or not.
@@ -3300,17 +3300,17 @@ public class GeometryTools
    }
 
    /**
-    * Computes the end points of the perpendicular bisector segment to a line segment defined by its end points, such that:
+    * Computes the endpoints of the perpendicular bisector segment to a line segment defined by its endpoints, such that:
     * <ul>
-    *    <li> each end point of the perpendicular bisector is at a distance of {@code bisectorSegmentHalfLength} from the line segment.
-    *    <li> the first perpendicular bisector end point is located on the left side on the line segment.
-    *    <li> the second perpendicular bisector end point is located on the right side on the line segment.
+    *    <li> each endpoint of the perpendicular bisector is at a distance of {@code bisectorSegmentHalfLength} from the line segment.
+    *    <li> the first perpendicular bisector endpoint is located on the left side on the line segment.
+    *    <li> the second perpendicular bisector endpoint is located on the right side on the line segment.
     * </ul>
     * <p>
     * <p>
     * Edge cases:
     * <ul>
-    *    <li> when the line segment end points are equal,
+    *    <li> when the line segment endpoints are equal,
     *     more precisely when {@code lineSegmentStart.distance(lineSegmentEnd) < Epsilons.ONE_TRILLIONTH},
     *     the method fails and returns {@code null}.
     * </ul>
@@ -3319,10 +3319,10 @@ public class GeometryTools
     * WARNING: This method generates garbage.
     * </p>
     * 
-    * @param lineSegmentStart the first end point of the line segment from which the perpendicular bisector is to be computed. Not modified.
-    * @param lineSegmentEnd the second end point of the line segment from which the perpendicular bisector is to be computed. Not modified.
-    * @param bisectorSegmentHalfLength distance from the line segment each end point of the perpendicular bisector segment will be positioned.
-    * @return a list containing the two end points of the perpendicular bisector segment.
+    * @param lineSegmentStart the first endpoint of the line segment from which the perpendicular bisector is to be computed. Not modified.
+    * @param lineSegmentEnd the second endpoint of the line segment from which the perpendicular bisector is to be computed. Not modified.
+    * @param bisectorSegmentHalfLength distance from the line segment each endpoint of the perpendicular bisector segment will be positioned.
+    * @return a list containing the two endpoints of the perpendicular bisector segment.
     */
    public static List<Point2d> getPerpendicularBisectorSegment(Point2d lineSegmentStart, Point2d lineSegmentEnd, double bisectorSegmentHalfLength)
    {
@@ -3340,27 +3340,27 @@ public class GeometryTools
    }
 
    /**
-    * Computes the end points of the perpendicular bisector segment to a line segment defined by its end points, such that:
+    * Computes the endpoints of the perpendicular bisector segment to a line segment defined by its endpoints, such that:
     * <ul>
-    *    <li> each end point of the perpendicular bisector is at a distance of {@code bisectorSegmentHalfLength} from the line segment.
-    *    <li> the first perpendicular bisector end point is located on the left side on the line segment.
-    *    <li> the second perpendicular bisector end point is located on the right side on the line segment.
+    *    <li> each endpoint of the perpendicular bisector is at a distance of {@code bisectorSegmentHalfLength} from the line segment.
+    *    <li> the first perpendicular bisector endpoint is located on the left side on the line segment.
+    *    <li> the second perpendicular bisector endpoint is located on the right side on the line segment.
     * </ul>
     * <p>
     * <p>
     * Edge cases:
     * <ul>
-    *    <li> when the line segment end points are equal,
+    *    <li> when the line segment endpoints are equal,
     *     more precisely when {@code lineSegmentStart.distance(lineSegmentEnd) < Epsilons.ONE_TRILLIONTH},
     *     the method fails and returns false.
     * </ul>
     * </p>
     * 
-    * @param lineSegmentStart the first end point of the line segment from which the perpendicular bisector is to be computed. Not modified.
-    * @param lineSegmentEnd the second end point of the line segment from which the perpendicular bisector is to be computed. Not modified.
-    * @param bisectorSegmentHalfLength distance from the line segment each end point of the perpendicular bisector segment will be positioned.
-    * @param bisectorSegmentStartToPack the first end point of the perpendicular bisector segment to be computed. Modified.
-    * @param bisectorSegmentEndToPack the second end point of the perpendicular bisector segment to be computed. Modified.
+    * @param lineSegmentStart the first endpoint of the line segment from which the perpendicular bisector is to be computed. Not modified.
+    * @param lineSegmentEnd the second endpoint of the line segment from which the perpendicular bisector is to be computed. Not modified.
+    * @param bisectorSegmentHalfLength distance from the line segment each endpoint of the perpendicular bisector segment will be positioned.
+    * @param bisectorSegmentStartToPack the first endpoint of the perpendicular bisector segment to be computed. Modified.
+    * @param bisectorSegmentEndToPack the second endpoint of the perpendicular bisector segment to be computed. Modified.
     * @return whether the perpendicular bisector could be determined or not.
     */
    public static boolean getPerpendicularBisectorSegment(Point2d lineSegmentStart, Point2d lineSegmentEnd, double bisectorSegmentHalfLength,
@@ -3546,9 +3546,9 @@ public class GeometryTools
     * </p>
     *
     * @param A the first vertex of the triangle. Not modified.
-    * @param B the second vertex of the triangle, this is the first end point of the bisector. Not modified.
+    * @param B the second vertex of the triangle, this is the first endpoint of the bisector. Not modified.
     * @param C the third vertex of the triangle. Not modified.
-    * @return the second end point of the bisector, or {@code null} if the method failed.
+    * @return the second endpoint of the bisector, or {@code null} if the method failed.
     */
    public static Point2d getTriangleBisector(Point2d A, Point2d B, Point2d C)
    {
@@ -3571,9 +3571,9 @@ public class GeometryTools
     *</p>
     *
     * @param A the first vertex of the triangle. Not modified.
-    * @param B the second vertex of the triangle, this is the first end point of the bisector. Not modified.
+    * @param B the second vertex of the triangle, this is the first endpoint of the bisector. Not modified.
     * @param C the third vertex of the triangle. Not modified.
-    * @param XToPack point in which the second end point of the bisector is stored. Modified.
+    * @param XToPack point in which the second endpoint of the bisector is stored. Modified.
     * @return whether the bisector could be calculated or not.
     */
    public static boolean getTriangleBisector(Point2d A, Point2d B, Point2d C, Point2d XToPack)
