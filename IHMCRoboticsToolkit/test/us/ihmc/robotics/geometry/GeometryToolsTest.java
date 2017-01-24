@@ -2061,6 +2061,7 @@ public class GeometryToolsTest
       Point3d actualPointOnLine2ToPack = new Point3d();
       Random random = new Random(1176L);
 
+      // Most usual case: the lines are not parallel, not intersecting.
       for (int i = 0; i < ITERATIONS; i++)
       {
          Point3d lineStart1 = RandomTools.generateRandomPoint3d(random, -10.0, 10.0);
@@ -2124,6 +2125,31 @@ public class GeometryToolsTest
 
          actualMinimumDistance = GeometryTools.getClosestPointsForTwoLines(lineStart1, lineDirection1, lineStart2, lineDirection2, actualPointOnLine1ToPack, actualPointOnLine2ToPack);
          assertEquals(expectedMinimumDistance, actualMinimumDistance, EPSILON);
+      }
+
+      // Intersection case: the lines are not parallel, but intersecting.
+      for (int i = 0; i < ITERATIONS; i++)
+      {
+         Point3d lineStart1 = RandomTools.generateRandomPoint3d(random, -10.0, 10.0);
+         Vector3d lineDirection1 = RandomTools.generateRandomVector(random, RandomTools.generateRandomDouble(random, 0.5, 10.0));
+
+         // Set the intersection point randomly on line1
+         Point3d intersection = new Point3d();
+         intersection.scaleAdd(RandomTools.generateRandomDouble(random, 10.0), lineDirection1, lineStart1);
+
+         // Set both closest points to the intersection
+         expectedPointOnLine1ToPack.set(intersection);
+         expectedPointOnLine2ToPack.set(intersection);
+
+         // Create line2 such that it intersects line1 at intersection
+         Point3d lineStart2 = new Point3d(intersection);
+         Vector3d lineDirection2 = RandomTools.generateRandomVector(random, RandomTools.generateRandomDouble(random, 10.0));
+         lineStart2.scaleAdd(RandomTools.generateRandomDouble(random, 10.0), lineDirection2, lineStart2);
+
+         double actualMinimumDistance = GeometryTools.getClosestPointsForTwoLines(lineStart1, lineDirection1, lineStart2, lineDirection2, actualPointOnLine1ToPack, actualPointOnLine2ToPack);
+         assertEquals(0.0, actualMinimumDistance, EPSILON);
+         JUnitTools.assertTuple3dEquals(expectedPointOnLine1ToPack, actualPointOnLine1ToPack, EPSILON);
+         JUnitTools.assertTuple3dEquals(expectedPointOnLine2ToPack, actualPointOnLine2ToPack, EPSILON);
       }
    }
 

@@ -163,13 +163,11 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
 
    private RobotDescription createRobotDescription()
    {
-      boolean useCollisionMeshes = false;
-      boolean enableTorqueVelocityLimits = true;
-      boolean enableJointDamping = true;
+      boolean useCollisionMeshes = true;
 
       GeneralizedSDFRobotModel generalizedSDFRobotModel = getGeneralizedRobotModel();
       RobotDescriptionFromSDFLoader descriptionLoader = new RobotDescriptionFromSDFLoader();
-      RobotDescription robotDescription = descriptionLoader.loadRobotDescriptionFromSDF(generalizedSDFRobotModel, jointMap, useCollisionMeshes, enableTorqueVelocityLimits, enableJointDamping);
+      RobotDescription robotDescription = descriptionLoader.loadRobotDescriptionFromSDF(generalizedSDFRobotModel, jointMap, useCollisionMeshes);
       return robotDescription;
    }
 
@@ -325,14 +323,8 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    @Override
    public HumanoidFloatingRootJointRobot createHumanoidFloatingRootJointRobot(boolean createCollisionMeshes)
    {
-//      boolean useCollisionMeshes = false;
-//      boolean enableTorqueVelocityLimits = false;
-//      AtlasJointMap jointMap = getJointMap();
-//      boolean enableJointDamping = getEnableJointDamping();
-//
-//      RobotDescription robotDescription = loader.createRobotDescription(jointMap, useCollisionMeshes, enableTorqueVelocityLimits, enableJointDamping);
-
-      HumanoidFloatingRootJointRobot humanoidFloatingRootJointRobot = new HumanoidFloatingRootJointRobot(robotDescription, jointMap);
+      boolean enableTorqueVelocityLimits = false;
+      HumanoidFloatingRootJointRobot humanoidFloatingRootJointRobot = new HumanoidFloatingRootJointRobot(robotDescription, jointMap, getEnableJointDamping(), enableTorqueVelocityLimits);
       return humanoidFloatingRootJointRobot;
    }
 
