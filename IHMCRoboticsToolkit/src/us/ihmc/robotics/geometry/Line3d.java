@@ -102,6 +102,11 @@ public class Line3d implements GeometryObject<Line3d>
       return GeometryTools.distanceBetweenTwoLines(point, normalizedVector, otherLine.point, otherLine.normalizedVector);
    }
 
+   public double getClosestPointsWith(Line3d otherLine, Point3d closestPointOnThisLineToPack, Point3d closestPointOnOtherLineToPack)
+   {
+      return GeometryTools.getClosestPointsForTwoLines(point, normalizedVector, otherLine.point, otherLine.normalizedVector, closestPointOnThisLineToPack, closestPointOnOtherLineToPack);
+   }
+
    @Override
    public void applyTransform(RigidBodyTransform transform)
    {
