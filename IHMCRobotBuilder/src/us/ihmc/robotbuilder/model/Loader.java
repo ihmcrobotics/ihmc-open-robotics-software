@@ -29,6 +29,6 @@ public class Loader {
                 .flatMap(modelSelector)
                 .map(selectedModel -> selectedModel
                         .flatMap((selected) -> Option.of(rawLoader[0].getGeneralizedSDFRobotModel(selected)))
-                        .map(model -> sdfLoader.loadRobotDescriptionFromSDF(model, null, true, true, true)));
+                        .map(model -> sdfLoader.loadRobotDescriptionFromSDF(model, null, true)));
     }
 }
