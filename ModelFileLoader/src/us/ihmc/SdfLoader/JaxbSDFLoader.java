@@ -19,7 +19,6 @@ import us.ihmc.SdfLoader.xmlDescription.SDFRoot;
 import us.ihmc.SdfLoader.xmlDescription.SDFWorld;
 import us.ihmc.SdfLoader.xmlDescription.SDFWorld.Road;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 import us.ihmc.robotics.partNames.JointNameMap;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.sensors.ContactSensorType;
@@ -151,13 +150,11 @@ public class JaxbSDFLoader
    public RobotDescription createRobotDescription(JointNameMap jointNameMap)
    {
       boolean useCollisionMeshes = false;
-      boolean enableTorqueVelocityLimits = true;
-      boolean enableJointDamping = true;
 
-      return createRobotDescription(jointNameMap, useCollisionMeshes, enableTorqueVelocityLimits, enableJointDamping);
+      return createRobotDescription(jointNameMap, useCollisionMeshes);
    }
 
-   public RobotDescription createRobotDescription(JointNameMap jointNameMap, boolean useCollisionMeshes, boolean enableTorqueVelocityLimits, boolean enableJointDamping)
+   public RobotDescription createRobotDescription(JointNameMap jointNameMap, boolean useCollisionMeshes)
    {
       if (jointNameMap != null)
       {
@@ -166,7 +163,7 @@ public class JaxbSDFLoader
 
 
          RobotDescriptionFromSDFLoader loader = new RobotDescriptionFromSDFLoader();
-         RobotDescription description = loader.loadRobotDescriptionFromSDF(generalizedSDFRobotModels.get(modelName), jointNameMap, useCollisionMeshes, enableTorqueVelocityLimits, enableJointDamping);
+         RobotDescription description = loader.loadRobotDescriptionFromSDF(generalizedSDFRobotModels.get(modelName), jointNameMap, useCollisionMeshes);
 
          return description;
       }
