@@ -15,7 +15,9 @@ import us.ihmc.robotics.geometry.transformables.TransformableVector3d;
  */
 public class Line3d implements GeometryObject<Line3d>
 {
+   /** Coordinates of a point located on this line. */
    private final TransformablePoint3d point = new TransformablePoint3d();
+   /** Normalized direction of this line. */
    private final TransformableVector3d normalizedVector = new TransformableVector3d();
 
    /**

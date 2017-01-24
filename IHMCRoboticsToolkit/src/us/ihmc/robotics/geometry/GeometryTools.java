@@ -384,7 +384,7 @@ public class GeometryTools
    }
 
    /**
-    * Given two 3D infinitely long lines, this methods computes the minimum distance between the two 3D lines.
+    * This methods computes the minimum distance between the two infinitely long 3D lines.
     * <a href="http://geomalgorithms.com/a07-_distance.html"> Useful link</a>.
     * 
     * @param pointOnLine1 a 3D point on the first line. Not modified.
@@ -399,7 +399,7 @@ public class GeometryTools
    }
 
    /**
-    * Given two 3D line segments with finite length, this methods computes the minimum distance between the two 3D line segments.
+    * This methods computes the minimum distance between the two 3D line segments with finite length.
     * <a href="http://geomalgorithms.com/a07-_distance.html"> Useful link</a>.
     * 
     * @param lineSegmentStart1 the first end point of the first line segment. Not modified.
