@@ -176,24 +176,24 @@ public class LineSegment3dTest
       LineSegment3d s;
 
       s = new LineSegment3d(new Point3d(0.0, 0.0, 0.0), new Point3d(1.0, 0.0, 0.0));
-      JUnitTools.assertTuple3dEquals(new Point3d(1.0, 0.0, 0.0), s.getDirectionCopy(), 0.0);
+      JUnitTools.assertTuple3dEquals(new Point3d(1.0, 0.0, 0.0), s.getDirectionCopy(true), 0.0);
 
       s = new LineSegment3d(new Point3d(0.0, 0.0, 0.0), new Point3d(0.0, 1.0, 0.0));
-      JUnitTools.assertTuple3dEquals(new Point3d(0.0, 1.0, 0.0), s.getDirectionCopy(), 0.0);
+      JUnitTools.assertTuple3dEquals(new Point3d(0.0, 1.0, 0.0), s.getDirectionCopy(true), 0.0);
 
       s = new LineSegment3d(new Point3d(0.0, 0.0, 0.0), new Point3d(0.0, 0.0, 1.0));
-      JUnitTools.assertTuple3dEquals(new Point3d(0.0, 0.0, 1.0), s.getDirectionCopy(), 0.0);
+      JUnitTools.assertTuple3dEquals(new Point3d(0.0, 0.0, 1.0), s.getDirectionCopy(true), 0.0);
 
       s = new LineSegment3d(new Point3d(0.0, 0.0, 0.0), new Point3d(2.0, 0.0, 0.0));
-      JUnitTools.assertTuple3dEquals(new Point3d(1.0, 0.0, 0.0), s.getDirectionCopy(), 0.0);
+      JUnitTools.assertTuple3dEquals(new Point3d(1.0, 0.0, 0.0), s.getDirectionCopy(true), 0.0);
 
       s = new LineSegment3d(new Point3d(0.0, 0.0, 1.0), new Point3d(0.0, 0.0, -3.0));
-      JUnitTools.assertTuple3dEquals(new Point3d(0.0, 0.0, -1.0), s.getDirectionCopy(), 0.0);
+      JUnitTools.assertTuple3dEquals(new Point3d(0.0, 0.0, -1.0), s.getDirectionCopy(true), 0.0);
 
       s = new LineSegment3d(new Point3d(0.0, 0.0, 1.0), new Point3d(0.0, 0.0, -3.0));
-      JUnitTools.assertTuple3dEquals(new Point3d(0.0, 0.0, -1.0), s.getDirectionCopy(), 0.0);
+      JUnitTools.assertTuple3dEquals(new Point3d(0.0, 0.0, -1.0), s.getDirectionCopy(true), 0.0);
 
       s = new LineSegment3d(new Point3d(0.0, 0.0, 0.0), new Point3d(Math.cos(Math.PI / 4), Math.sin(Math.PI / 4), 0.0));
-      JUnitTools.assertTuple3dEquals(new Point3d(Math.cos(Math.PI / 4), Math.sin(Math.PI / 4), 0.0), s.getDirectionCopy(), 0.0);
+      JUnitTools.assertTuple3dEquals(new Point3d(Math.cos(Math.PI / 4), Math.sin(Math.PI / 4), 0.0), s.getDirectionCopy(true), 0.0);
    }
 }

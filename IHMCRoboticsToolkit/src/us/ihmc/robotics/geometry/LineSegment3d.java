@@ -32,6 +32,12 @@ public class LineSegment3d implements GeometryObject<LineSegment3d>
       setSecondEndpoint(secondEndpoint);
    }
 
+   public void set(Point3d firstEndpoint, Vector3d fromFirstToSecondEndpoint)
+   {
+      this.firstEndpoint.set(firstEndpoint);
+      this.secondEndpoint.add(firstEndpoint, fromFirstToSecondEndpoint);
+   }
+
    public void set(double firstEndpointX, double firstEndpointY, double firstEndpointZ, double secondEndpointX, double secondEndpointY, double secondEndpointZ)
    {
       setFirstEndpoint(firstEndpointX, firstEndpointY, firstEndpointZ);
@@ -78,6 +84,16 @@ public class LineSegment3d implements GeometryObject<LineSegment3d>
       return firstEndpoint.containsNaN() || secondEndpoint.containsNaN();
    }
 
+   public boolean firstEndpointContainsNaN()
+   {
+      return firstEndpoint.containsNaN();
+   }
+
+   public boolean secondEndpointContainsNaN()
+   {
+      return secondEndpoint.containsNaN();
+   }
+
    @Override
    public void applyTransform(RigidBodyTransform transform)
    {
@@ -103,6 +119,33 @@ public class LineSegment3d implements GeometryObject<LineSegment3d>
    public boolean orthogonalProjection(Point3d pointToProject, Point3d projectionToPack)
    {
       return GeometryTools.getOrthogonalProjectionOnLineSegment(pointToProject, firstEndpoint, secondEndpoint, projectionToPack);
+   }
+
+   public void getPointAlongPercentageOfLineSegment(double percentage, Point3d pointToPack)
+   {
+      if (percentage < 0.0 || percentage > 1.0)
+         throw new RuntimeException("Percentage must be between 0.0 and 1.0. Was: " + percentage);
+
+      pointToPack.interpolate(firstEndpoint, secondEndpoint, percentage);
+   }
+
+   public void getMidpoint(Point3d midpointToPack)
+   {
+      midpointToPack.interpolate(firstEndpoint, secondEndpoint, 0.5);
+   }
+
+   public void getDirection(boolean normalize, Vector3d directionToPack)
+   {
+      directionToPack.sub(secondEndpoint, firstEndpoint);
+      if (normalize)
+         directionToPack.normalize();
+   }
+
+   public Vector3d getDirectionCopy(boolean normalize)
+   {
+      Vector3d direction = new Vector3d();
+      getDirection(normalize, direction);
+      return direction;
    }
 
    public boolean isBetweenEndpoints(Point3d point3d, double epsilon)
@@ -133,15 +176,6 @@ public class LineSegment3d implements GeometryObject<LineSegment3d>
                                                          secondEndpoint.getY(), secondEndpoint.getZ());
    }
 
-   public Vector3d getDirectionCopy()
-   {
-      Vector3d direction = new Vector3d(secondEndpoint);
-      direction.sub(firstEndpoint);
-      direction.normalize();
-
-      return direction;
-   }
-
    public Point3d getFirstEndpoint()
    {
       return firstEndpoint;
@@ -155,7 +189,6 @@ public class LineSegment3d implements GeometryObject<LineSegment3d>
    @Override
    public boolean epsilonEquals(LineSegment3d other, double epsilon)
    {
-      // TODO Auto-generated method stub
-      return false;
+      return firstEndpoint.epsilonEquals(other.firstEndpoint, epsilon) && secondEndpoint.epsilonEquals(other.secondEndpoint, epsilon);
    }
 }
