@@ -125,30 +125,30 @@ public class FrameConvexPolygon2dIntersector
          // finding minimum
          if (point3Percentage > point1Percentage && point4Percentage > point1Percentage)
          {
-            intersectionToPack.setStartPoint(point3Percentage < point4Percentage ? point3 : point4);
+            intersectionToPack.setFirstEndpoint(point3Percentage < point4Percentage ? point3 : point4);
          }
          else if (point3Percentage >= point1Percentage || point4Percentage >= point1Percentage)
          {
-            intersectionToPack.setStartPoint(point1);
+            intersectionToPack.setFirstEndpoint(point1);
          }
 
          // finding maximum
          if (point3Percentage < point2Percentage && point4Percentage < point2Percentage)
          {
-            intersectionToPack.setEndPoint(point3Percentage > point4Percentage ? point3 : point4);
+            intersectionToPack.setSecondEndpoint(point3Percentage > point4Percentage ? point3 : point4);
          }
          else if (point3Percentage <= point2Percentage || point4Percentage <= point2Percentage)
          {
-            intersectionToPack.setEndPoint(point2);
+            intersectionToPack.setSecondEndpoint(point2);
          }
 
-         if (intersectionToPack.getStartPointUnsafe().containsNaN() && !intersectionToPack.getEndPointUnsafe().containsNaN())
+         if (intersectionToPack.firstEndpointContainsNaN() && !intersectionToPack.secondEndpointContainsNaN())
          {
-            intersectionToPack.setStartPointWithoutChecks(intersectionToPack.getEndPointUnsafe());
+            intersectionToPack.setFirstEndpoint(intersectionToPack.getSecondEndpoint());
          }
-         else if (!intersectionToPack.getStartPointUnsafe().containsNaN() && intersectionToPack.getEndPointUnsafe().containsNaN())
+         else if (!intersectionToPack.firstEndpointContainsNaN() && intersectionToPack.secondEndpointContainsNaN())
          {
-            intersectionToPack.setEndPointWithoutChecks(intersectionToPack.getStartPointUnsafe());
+            intersectionToPack.setSecondEndpoint(intersectionToPack.getFirstEndpoint());
          }
 
          if (!intersectionToPack.containsNaN())
@@ -161,8 +161,8 @@ public class FrameConvexPolygon2dIntersector
          intersectionToPack.set(point1, point2);
          if (intersectionToPack.isBetweenEndpoints(point3, Epsilons.ONE_TEN_MILLIONTH))
          {
-            intersectionToPack.setStartPoint(point3);
-            intersectionToPack.setEndPoint(point3);
+            intersectionToPack.setFirstEndpoint(point3);
+            intersectionToPack.setSecondEndpoint(point3);
             return;
          }
       }
@@ -171,8 +171,8 @@ public class FrameConvexPolygon2dIntersector
          intersectionToPack.set(point3, point3);
          if (intersectionToPack.isBetweenEndpoints(point1, Epsilons.ONE_TEN_MILLIONTH))
          {
-            intersectionToPack.setStartPoint(point1);
-            intersectionToPack.setEndPoint(point1);
+            intersectionToPack.setFirstEndpoint(point1);
+            intersectionToPack.setSecondEndpoint(point1);
             return;
          }
       }
@@ -180,8 +180,8 @@ public class FrameConvexPolygon2dIntersector
       {
          if (point1.epsilonEquals(point3, Epsilons.ONE_TEN_MILLIONTH))
          {
-            intersectionToPack.setStartPoint(point1);
-            intersectionToPack.setEndPoint(point3);
+            intersectionToPack.setFirstEndpoint(point1);
+            intersectionToPack.setSecondEndpoint(point3);
             return;
          }
       }
