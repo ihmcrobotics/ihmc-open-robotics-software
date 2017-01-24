@@ -9,20 +9,21 @@ import us.ihmc.robotics.geometry.transformables.TransformableVector3d;
 
 public class Line3d implements GeometryObject<Line3d>
 {
-   private final TransformablePoint3d point;
-   private final TransformableVector3d normalizedVector;
+   private final TransformablePoint3d point = new TransformablePoint3d();
+   private final TransformableVector3d normalizedVector = new TransformableVector3d();
 
    public Line3d()
    {
-      this.point = new TransformablePoint3d();
-      this.normalizedVector = new TransformableVector3d();
    }
 
    public Line3d(Point3d point, Vector3d vector)
    {
-      this.point = new TransformablePoint3d(point);
-      this.normalizedVector = new TransformableVector3d(vector);
-      normalize();
+      set(point, vector);
+   }
+
+   public Line3d(Point3d firstPointOnLine, Point3d secondPointOnLine)
+   {
+      set(firstPointOnLine, secondPointOnLine);
    }
 
    public Point3d getPoint()
@@ -46,37 +47,17 @@ public class Line3d implements GeometryObject<Line3d>
       normalize();
    }
 
-   private void normalize()
+   public void set(Point3d point, Vector3d vector)
    {
-      if (GeometryTools.isZero(normalizedVector, 1e-12))
-      {
-         normalizedVector.setToNaN();
-      }
+      setPoint(point);
+      setVector(vector);
+   }
 
+   public void set(Point3d firstPointOnLine, Point3d secondPointOnLine)
+   {
+      setPoint(firstPointOnLine);
+      normalizedVector.sub(secondPointOnLine, firstPointOnLine);
       normalizedVector.normalize();
-   }
-
-   public double distance(Point3d point)
-   {
-      return GeometryTools.distanceFromPointToLine(point, point, normalizedVector);
-   }
-
-   @Override
-   public void applyTransform(RigidBodyTransform transform)
-   {
-      point.applyTransform(transform);
-      normalizedVector.applyTransform(transform);
-   }
-
-   @Override
-   public boolean epsilonEquals(Line3d other, double epsilon)
-   {
-      if (!point.epsilonEquals(other.point, epsilon))
-         return false;
-      if (!normalizedVector.epsilonEquals(other.normalizedVector, epsilon))
-         return false;
-
-      return true;
    }
 
    @Override
@@ -109,5 +90,43 @@ public class Line3d implements GeometryObject<Line3d>
          return true;
 
       return false;
+   }
+
+   public double distance(Point3d point)
+   {
+      return GeometryTools.distanceFromPointToLine(point, point, normalizedVector);
+   }
+
+   public double distance(Line3d otherLine)
+   {
+      return GeometryTools.distanceBetweenTwoLines(point, normalizedVector, otherLine.point, otherLine.normalizedVector);
+   }
+
+   @Override
+   public void applyTransform(RigidBodyTransform transform)
+   {
+      point.applyTransform(transform);
+      normalizedVector.applyTransform(transform);
+   }
+
+   @Override
+   public boolean epsilonEquals(Line3d other, double epsilon)
+   {
+      if (!point.epsilonEquals(other.point, epsilon))
+         return false;
+      if (!normalizedVector.epsilonEquals(other.normalizedVector, epsilon))
+         return false;
+
+      return true;
+   }
+
+   private void normalize()
+   {
+      if (GeometryTools.isZero(normalizedVector, 1e-12))
+      {
+         normalizedVector.setToNaN();
+      }
+
+      normalizedVector.normalize();
    }
 }
