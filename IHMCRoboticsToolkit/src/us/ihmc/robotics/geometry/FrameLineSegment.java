@@ -106,10 +106,10 @@ public class FrameLineSegment extends AbstractFrameObject<FrameLineSegment, Line
       lineSegment3d.orthogonalProjection(pointToProject.getPoint(), projectionToPack.getPoint());
    }
 
-   public void getPointAlongPercentageOfLineSegment(double percentage, FramePoint pointToPack)
+   public void pointBetweenEndPointsGivenPercantage(double percentage, FramePoint pointToPack)
    {
       checkReferenceFrameMatch(pointToPack);
-      lineSegment3d.getPointAlongPercentageOfLineSegment(percentage, pointToPack.getPoint());
+      lineSegment3d.pointBetweenEndPointsGivenPercentage(percentage, pointToPack.getPoint());
    }
 
    public double length()

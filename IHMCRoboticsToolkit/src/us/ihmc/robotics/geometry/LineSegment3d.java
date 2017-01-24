@@ -284,16 +284,63 @@ public class LineSegment3d implements GeometryObject<LineSegment3d>
    /**
     * Computes the coordinates of the point located at a given percentage on this line segment:
     * <br> {@code pointToPack.interpolate(firstEndpoint, secondEndpoint, percentage)} </br>
+    * <p>
+    * WARNING: This method generates garbage.
+    * </p>
+    * 
+    * @param percentage the percentage along this line segment of the point. Must be in [0, 1].
+    * @return the computed point.
+    * @throws {@link RuntimeException} if {@code percentage} &notin; [0, 1].
+    */
+   public Point3d pointBetweenEndPointsGivenPercentageCopy(double percentage)
+   {
+      Point3d point = new Point3d();
+      pointBetweenEndPointsGivenPercentage(percentage, point);
+      return point;
+   }
+
+   /**
+    * Computes the coordinates of the point located at a given percentage on this line segment:
+    * <br> {@code pointToPack.interpolate(firstEndpoint, secondEndpoint, percentage)} </br>
     * 
     * @param percentage the percentage along this line segment of the point. Must be in [0, 1].
     * @param pointToPack where the result is stored. Modified.
-    * @thows {@link RuntimeException} if {@code percentage} &notin; [0, 1].
+    * @throws {@link RuntimeException} if {@code percentage} &notin; [0, 1].
     */
-   public void getPointAlongPercentageOfLineSegment(double percentage, Point3d pointToPack)
+   public void pointBetweenEndPointsGivenPercentage(double percentage, Point3d pointToPack)
    {
       if (percentage < 0.0 || percentage > 1.0)
          throw new RuntimeException("Percentage must be between 0.0 and 1.0. Was: " + percentage);
 
+      pointToPack.interpolate(firstEndpoint, secondEndpoint, percentage);
+   }
+
+   /**
+    * Computes the coordinates of the point located on the line this line segment is lying on:
+    * <br> {@code pointToPack.interpolate(firstEndpoint, secondEndpoint, percentage)} </br>
+    * <p>
+    * WARNING: This method generates garbage.
+    * </p>
+    * 
+    * @param percentage the percentage along this line segment of the point.
+    * @return the computed point.
+    */
+   public Point3d pointOnLineGivenPercentageCopy(double percentage)
+   {
+      Point3d point = new Point3d();
+      pointOnLineGivenPercentage(percentage, point);
+      return point;
+   }
+
+   /**
+    * Computes the coordinates of the point located on the line this line segment is lying on:
+    * <br> {@code pointToPack.interpolate(firstEndpoint, secondEndpoint, percentage)} </br>
+    * 
+    * @param percentage the percentage along this line segment of the point.
+    * @param pointToPack where the result is stored. Modified.
+    */
+   public void pointOnLineGivenPercentage(double percentage, Point3d pointToPack)
+   {
       pointToPack.interpolate(firstEndpoint, secondEndpoint, percentage);
    }
 
