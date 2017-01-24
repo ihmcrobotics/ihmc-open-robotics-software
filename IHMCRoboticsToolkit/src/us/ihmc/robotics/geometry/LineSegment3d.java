@@ -341,10 +341,10 @@ public class LineSegment3d implements GeometryObject<LineSegment3d>
     * between the two endpoints with a given conservative tolerance {@code epsilon}:
     * <ul>
     *    <li> if {@code epsilon > 0}, the point has to be between the endpoints and at a minimum
-    *     distance of {@code epsilon} from the closest endpoint.
+    *     distance of {@code epsilon * this.length()} from the closest endpoint.
     *    <li> if {@code epsilon < 0}, the point has to be between the endpoints or at a maximum
-    *     distance of {@code epsilon} from the closest endpoint.
-    *    <li> if (@code epsilon == 0}, the point has to be between the endpoints or equal to
+    *     distance of {@code -epsilon * this.length()} from the closest endpoint.
+    *    <li> if {@code epsilon = 0}, the point has to be between the endpoints or equal to
     *     one of the endpoints.
     * </ul>
     * 
@@ -362,10 +362,10 @@ public class LineSegment3d implements GeometryObject<LineSegment3d>
     * between the two endpoints with a given conservative tolerance {@code epsilon}:
     * <ul>
     *    <li> if {@code epsilon > 0}, the point has to be between the endpoints and at a minimum
-    *     distance of {@code epsilon} from the closest endpoint.
+    *     distance of {@code epsilon * this.length()} from the closest endpoint.
     *    <li> if {@code epsilon < 0}, the point has to be between the endpoints or at a maximum
-    *     distance of {@code epsilon} from the closest endpoint.
-    *    <li> if (@code epsilon == 0}, the point has to be between the endpoints or equal to
+    *     distance of {@code -epsilon * this.length()} from the closest endpoint.
+    *    <li> if {@code epsilon = 0}, the point has to be between the endpoints or equal to
     *     one of the endpoints.
     * </ul>
     * 
