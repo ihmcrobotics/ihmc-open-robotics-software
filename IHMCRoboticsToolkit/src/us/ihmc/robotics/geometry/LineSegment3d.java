@@ -111,6 +111,11 @@ public class LineSegment3d implements GeometryObject<LineSegment3d>
       return GeometryTools.distanceFromPointToLineSegment(point, firstEndpoint, secondEndpoint);
    }
 
+   public double distance(LineSegment3d otherLineSegment)
+   {
+      return GeometryTools.distanceBetweenTwoLineSegments(firstEndpoint, secondEndpoint, otherLineSegment.firstEndpoint, otherLineSegment.secondEndpoint);
+   }
+
    public Point3d orthogonalProjectionCopy(Point3d pointToProject)
    {
       return GeometryTools.getOrthogonalProjectionOnLineSegment(pointToProject, firstEndpoint, secondEndpoint);
@@ -184,6 +189,16 @@ public class LineSegment3d implements GeometryObject<LineSegment3d>
    public Point3d getSecondEndpoint()
    {
       return secondEndpoint;
+   }
+
+   public void getLine(Line3d lineToPack)
+   {
+      lineToPack.set(firstEndpoint, secondEndpoint);
+   }
+
+   public Line3d getLineCopy()
+   {
+      return new Line3d(firstEndpoint, secondEndpoint);
    }
 
    @Override
