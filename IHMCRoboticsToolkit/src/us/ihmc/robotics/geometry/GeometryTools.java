@@ -1073,6 +1073,9 @@ public class GeometryTools
     *     When the projection on the corresponding line is outside the line segment, the result is the closest of the two end points.
     * </ul>
     * </p>
+    * <p>
+    * WARNING: This method generates garbage.
+    * </p>
     * 
     * @param pointToProject the point to compute the projection of. Not modified.
     * @param lineSegmentStart the line segment first end point. Not modified.
