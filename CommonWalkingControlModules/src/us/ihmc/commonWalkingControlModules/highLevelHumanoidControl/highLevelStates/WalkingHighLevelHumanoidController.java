@@ -481,6 +481,8 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
 
       if (headOrientationManager != null)
          headOrientationManager.submitNewNeckJointDesiredConfiguration(controllerCoreOutput.getLowLevelOneDoFJointDesiredDataHolder());
+      if (chestOrientationManager != null)
+         chestOrientationManager.submitNewSpineJointDesiredConfiguration(controllerCoreOutput.getLowLevelOneDoFJointDesiredDataHolder());
 
       controllerCoreOutput.getLinearMomentumRate(achievedLinearMomentumRate);
       balanceManager.computeAchievedCMP(achievedLinearMomentumRate);
@@ -639,7 +641,10 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
       }
 
       if (chestOrientationManager != null)
+      {
          controllerCoreCommand.addFeedbackControlCommand(chestOrientationManager.getFeedbackControlCommand());
+         controllerCoreCommand.addInverseDynamicsCommand(chestOrientationManager.getInverseDynamicsCommand());
+      }
 
       controllerCoreCommand.addFeedbackControlCommand(pelvisOrientationManager.getFeedbackControlCommand());
 

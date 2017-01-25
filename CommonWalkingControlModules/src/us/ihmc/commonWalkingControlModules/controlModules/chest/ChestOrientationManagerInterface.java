@@ -2,8 +2,10 @@ package us.ihmc.commonWalkingControlModules.controlModules.chest;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolderReadOnly;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ChestTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.GoHomeCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SpineTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
 
 public interface ChestOrientationManagerInterface
@@ -16,6 +18,8 @@ public interface ChestOrientationManagerInterface
 
    public void handleChestTrajectoryCommand(ChestTrajectoryCommand command);
 
+   public void handleSpineTrajectoryCommand(SpineTrajectoryCommand command);
+
    public void handleStopAllTrajectoryCommand(StopAllTrajectoryCommand command);
 
    public void handleGoHomeCommand(GoHomeCommand command);
@@ -27,4 +31,8 @@ public interface ChestOrientationManagerInterface
    public InverseDynamicsCommand<?> getInverseDynamicsCommand();
 
    public FeedbackControlCommand<?> getFeedbackControlCommand();
+
+   public void submitNewSpineJointDesiredConfiguration(LowLevelOneDoFJointDesiredDataHolderReadOnly lowLevelOneDoFJointDesiredDataHolder);
+
+   public FeedbackControlCommand<?> createFeedbackControlTemplate();
 }

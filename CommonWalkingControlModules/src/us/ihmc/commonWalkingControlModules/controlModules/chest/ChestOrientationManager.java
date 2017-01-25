@@ -7,11 +7,13 @@ import javax.vecmath.Vector3d;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OrientationFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolderReadOnly;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.communication.controllerAPI.command.CommandArrayDeque;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ChestTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.GoHomeCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SpineTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
 import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage.BodyPart;
@@ -360,5 +362,23 @@ public class ChestOrientationManager implements ChestOrientationManagerInterface
    public FeedbackControlCommand<?> getFeedbackControlCommand()
    {
       return orientationFeedbackControlCommand;
+   }
+
+   @Override
+   public void submitNewSpineJointDesiredConfiguration(LowLevelOneDoFJointDesiredDataHolderReadOnly lowLevelOneDoFJointDesiredDataHolder)
+   {
+
+   }
+
+   @Override
+   public void handleSpineTrajectoryCommand(SpineTrajectoryCommand command)
+   {
+      PrintTools.warn("Spint trajectories not implemented with this ChestOrientationManager.");
+   }
+
+   @Override
+   public FeedbackControlCommand<?> createFeedbackControlTemplate()
+   {
+      return getFeedbackControlCommand();
    }
 }
