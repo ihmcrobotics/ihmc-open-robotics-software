@@ -1,10 +1,15 @@
 package us.ihmc.avatar.networkProcessor.modules.mocap;
 
+import java.io.IOException;
+import java.util.ArrayList;
+
+import javax.vecmath.Matrix3d;
+import javax.vecmath.Vector3d;
+
 import optiTrack.MocapDataClient;
 import optiTrack.MocapRigidBody;
 import optiTrack.MocapRigidbodiesListener;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.communication.net.ObjectCommunicator;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.util.NetworkPorts;
@@ -14,22 +19,13 @@ import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotDataLogger.logger.LogSettings;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
-import us.ihmc.robotics.math.frames.YoFramePose;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.util.PeriodicNonRealtimeThreadScheduler;
 import us.ihmc.util.PeriodicThreadScheduler;
-
-import java.util.ArrayList;
-
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
 
 public class IHMCMOCAPLocalizationModule implements MocapRigidbodiesListener
 {
@@ -49,7 +45,7 @@ public class IHMCMOCAPLocalizationModule implements MocapRigidbodiesListener
    private final Vector3d tempPosition = new Vector3d();
    private final Matrix3d tempOrientation = new Matrix3d();
    
-   public IHMCMOCAPLocalizationModule(DRCRobotModel drcRobotModel)
+   public IHMCMOCAPLocalizationModule(DRCRobotModel drcRobotModel) 
    {
       MocapDataClient mocapDataClient = new MocapDataClient();
       mocapDataClient.registerRigidBodiesListener(this);
@@ -65,16 +61,25 @@ public class IHMCMOCAPLocalizationModule implements MocapRigidbodiesListener
       
       PrintTools.info("Starting server");
       yoVariableServer.start();
+      
+      try
+      {
+         packetCommunicator.connect();         
+      }
+      catch(IOException e)
+      {
+         e.printStackTrace();
+      }
    }
-
-   public PacketCommunicator getPacketCommunicator()
-   {
-      return packetCommunicator;
-   }
-
+   
    @Override
    public void updateRigidbodies(ArrayList<MocapRigidBody> listOfRigidbodies)
    {
+      if(! packetCommunicator.isConnected())
+      {
+         PrintTools.info("Packet communicator isn't registered, ignoring MOCAP data");
+      }
+      
       PrintTools.info("\nReceived rigid bodies:");
 
       for (int i = 0; i < listOfRigidbodies.size(); i++)
@@ -99,8 +104,8 @@ public class IHMCMOCAPLocalizationModule implements MocapRigidbodiesListener
       TimeStampedTransform3D timestampedTransform = createTimestampedTransform(pelvisTransform);
       StampedPosePacket stampedPosePacket = new StampedPosePacket(Integer.toString(PELVIS_ID), timestampedTransform, 1.0);
       
-//      stampedPosePacket.setDestination(PacketDestination.CONTROLLER.ordinal());
-//      packetCommunicator.send(stampedPosePacket);
+      stampedPosePacket.setDestination(PacketDestination.CONTROLLER.ordinal());
+      packetCommunicator.send(stampedPosePacket);
       
       pelvisTransform.getTranslation(tempPosition);
       pelvisTransform.getRotation(tempOrientation);
