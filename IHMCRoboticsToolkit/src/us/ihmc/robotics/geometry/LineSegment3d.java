@@ -36,6 +36,21 @@ public class LineSegment3d implements GeometryObject<LineSegment3d>
    }
 
    /**
+    * Initializes this line segment to have the given endpoints.
+    * 
+    * @param firstEndpointX x-coordinate of the first endpoint of this line segment.
+    * @param firstEndpointY y-coordinate of the first endpoint of this line segment.
+    * @param firstEndpointZ z-coordinate of the first endpoint of this line segment.
+    * @param secondEndpointX x-coordinate of the second endpoint of this line segment.
+    * @param secondEndpointY y-coordinate of the second endpoint of this line segment.
+    * @param secondEndpointZ z-coordinate of the second endpoint of this line segment.
+    */
+   public LineSegment3d(double firstEndpointX, double firstEndpointY, double firstEndpointZ, double secondEndpointX, double secondEndpointY, double secondEndpointZ)
+   {
+      set(firstEndpointX, firstEndpointY, firstEndpointZ, secondEndpointX, secondEndpointY, secondEndpointZ);
+   }
+
+   /**
     * Changes the first endpoint of this line segment.
     * 
     * @param firstEndpointX x-coordinate of the new first endpoint.
