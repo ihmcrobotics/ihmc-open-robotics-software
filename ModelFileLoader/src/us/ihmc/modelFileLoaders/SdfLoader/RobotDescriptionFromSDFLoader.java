@@ -17,6 +17,7 @@ import javax.xml.bind.JAXBException;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.math3.util.Precision;
 
+import us.ihmc.modelFileLoaders.ModelFileLoaderConversionsHelper;
 import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFSensor;
 import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFSensor.Camera;
 import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFSensor.IMU;
@@ -116,8 +117,10 @@ public class RobotDescriptionFromSDFLoader
 
             Vector3d gcOffset = jointContactPoint.getRight();
 
-            GroundContactPointDescription groundContactPoint = new GroundContactPointDescription("gc_" + SDFConversionsHelper.sanitizeJointName(jointName) + "_" + count++, gcOffset);
-            ExternalForcePointDescription externalForcePoint = new ExternalForcePointDescription("ef_" + SDFConversionsHelper.sanitizeJointName(jointName) + "_" + count++, gcOffset);
+            GroundContactPointDescription groundContactPoint = new GroundContactPointDescription("gc_" + ModelFileLoaderConversionsHelper
+                  .sanitizeJointName(jointName) + "_" + count++, gcOffset);
+            ExternalForcePointDescription externalForcePoint = new ExternalForcePointDescription("ef_" + ModelFileLoaderConversionsHelper
+                  .sanitizeJointName(jointName) + "_" + count++, gcOffset);
 
             JointDescription jointDescription = jointDescriptions.get(jointName);
 
@@ -274,7 +277,7 @@ public class RobotDescriptionFromSDFLoader
       RigidBodyTransform visualTransform = new RigidBodyTransform();
       visualTransform.setRotation(joint.getLinkRotation());
 
-      String sanitizedJointName = SDFConversionsHelper.sanitizeJointName(joint.getName());
+      String sanitizedJointName = ModelFileLoaderConversionsHelper.sanitizeJointName(joint.getName());
 
       JointDescription scsJoint;
 
@@ -459,8 +462,8 @@ public class RobotDescriptionFromSDFLoader
             // The linkRotation transform is to make sure that the linkToSensor is in a zUpFrame.
             RigidBodyTransform linkRotation = new RigidBodyTransform(child.getTransformFromModelReferenceFrame());
             linkRotation.setTranslation(0.0, 0.0, 0.0);
-            RigidBodyTransform linkToSensor = SDFConversionsHelper.poseToTransform(sensor.getPose());
-            RigidBodyTransform sensorToCamera = SDFConversionsHelper.poseToTransform(camera.getPose());
+            RigidBodyTransform linkToSensor = ModelFileLoaderConversionsHelper.poseToTransform(sensor.getPose());
+            RigidBodyTransform sensorToCamera = ModelFileLoaderConversionsHelper.poseToTransform(camera.getPose());
             RigidBodyTransform linkToCamera = new RigidBodyTransform();
             linkToCamera.multiply(linkRotation, linkToSensor);
             linkToCamera.multiply(sensorToCamera);
@@ -501,7 +504,7 @@ public class RobotDescriptionFromSDFLoader
          RigidBodyTransform linkRotation = new RigidBodyTransform(child.getTransformFromModelReferenceFrame());
          linkRotation.setTranslation(0.0, 0.0, 0.0);
          RigidBodyTransform linkToSensorInZUp = new RigidBodyTransform();
-         linkToSensorInZUp.multiply(linkRotation, SDFConversionsHelper.poseToTransform(sdfSensor.getPose()));
+         linkToSensorInZUp.multiply(linkRotation, ModelFileLoaderConversionsHelper.poseToTransform(sdfSensor.getPose()));
 
          showCordinateSystem(jointDescription, linkToSensorInZUp);
          IMUSensorDescription imuMount = new IMUSensorDescription(child.getName() + "_" + sdfSensor.getName(), linkToSensorInZUp);
@@ -591,7 +594,7 @@ public class RobotDescriptionFromSDFLoader
          RigidBodyTransform linkRotation = new RigidBodyTransform(child.getTransformFromModelReferenceFrame());
          linkRotation.setTranslation(0.0, 0.0, 0.0);
          RigidBodyTransform linkToSensorInZUp = new RigidBodyTransform();
-         linkToSensorInZUp.multiply(linkRotation, SDFConversionsHelper.poseToTransform(sensor.getPose()));
+         linkToSensorInZUp.multiply(linkRotation, ModelFileLoaderConversionsHelper.poseToTransform(sensor.getPose()));
          showCordinateSystem(scsJoint, linkToSensorInZUp);
 
          SimulatedLIDARSensorNoiseParameters noiseParameters = new SimulatedLIDARSensorNoiseParameters();
@@ -630,7 +633,7 @@ public class RobotDescriptionFromSDFLoader
          String[] jointNamesBeforeFeet = jointNameMap.getJointNamesBeforeFeet();
 
          String jointName = joint.getName();
-         String sanitizedJointName = SDFConversionsHelper.sanitizeJointName(jointName);
+         String sanitizedJointName = ModelFileLoaderConversionsHelper.sanitizeJointName(jointName);
          JointDescription scsJoint = jointDescriptions.get(sanitizedJointName);
 
          boolean jointIsParentOfFoot = false;

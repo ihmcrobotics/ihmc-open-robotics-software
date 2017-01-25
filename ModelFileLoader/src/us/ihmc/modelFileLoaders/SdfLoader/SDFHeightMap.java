@@ -7,6 +7,7 @@ import java.io.IOException;
 import javax.imageio.ImageIO;
 import javax.vecmath.Vector3d;
 
+import us.ihmc.modelFileLoaders.ModelFileLoaderConversionsHelper;
 import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFGeometry.HeightMap;
 import us.ihmc.robotics.geometry.BoundingBox3d;
 
@@ -24,8 +25,8 @@ public class SDFHeightMap implements us.ihmc.graphicsDescription.HeightMap
    
    public SDFHeightMap(String resourceId, HeightMap heightMap)
    {
-      Vector3d size = SDFConversionsHelper.stringToVector3d(heightMap.getSize());
-      offset = SDFConversionsHelper.stringToVector3d(heightMap.getPos());
+      Vector3d size = ModelFileLoaderConversionsHelper.stringToVector3d(heightMap.getSize());
+      offset = ModelFileLoaderConversionsHelper.stringToVector3d(heightMap.getPos());
       try
       {
          BufferedImage img = ImageIO.read(getClass().getClassLoader().getResourceAsStream(resourceId));

@@ -6,6 +6,7 @@ import java.util.List;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
+import us.ihmc.modelFileLoaders.ModelFileLoaderConversionsHelper;
 import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.Collision;
 import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFLink;
 import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFSensor;
@@ -40,14 +41,14 @@ public class SDFLinkHolder
 
    public SDFLinkHolder(SDFLink sdfLink)
    {
-     name = SDFConversionsHelper.sanitizeJointName(sdfLink.getName());
-     transformToModelReferenceFrame = SDFConversionsHelper.poseToTransform(sdfLink.getPose());
+     name = ModelFileLoaderConversionsHelper.sanitizeJointName(sdfLink.getName());
+     transformToModelReferenceFrame = ModelFileLoaderConversionsHelper.poseToTransform(sdfLink.getPose());
 
      if(sdfLink.getInertial() != null)
      {
-        inertialFrameWithRespectToLinkFrame = SDFConversionsHelper.poseToTransform(sdfLink.getInertial().getPose());
+        inertialFrameWithRespectToLinkFrame = ModelFileLoaderConversionsHelper.poseToTransform(sdfLink.getInertial().getPose());
         mass = Double.parseDouble(sdfLink.getInertial().getMass());
-        inertia = SDFConversionsHelper.sdfInertiaToMatrix3d(sdfLink.getInertial().getInertia());
+        inertia = ModelFileLoaderConversionsHelper.sdfInertiaToMatrix3d(sdfLink.getInertial().getInertia());
      }
      else
      {

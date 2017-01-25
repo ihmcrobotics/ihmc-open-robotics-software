@@ -4,6 +4,7 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Vector2d;
 import javax.vecmath.Vector3d;
 
+import us.ihmc.modelFileLoaders.ModelFileLoaderConversionsHelper;
 import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFWorld.Road;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
@@ -25,8 +26,8 @@ public class SDFRoadVisual extends Graphics3DObject
       Point3d endRight = new Point3d();
       for(int i = 0 ; i < road.getPoints().size() - 1; i++)
       {
-         Point3d start = new Point3d(SDFConversionsHelper.stringToVector3d(road.getPoints().get(i)));
-         Point3d end = new Point3d(SDFConversionsHelper.stringToVector3d(road.getPoints().get(i+1)));
+         Point3d start = new Point3d(ModelFileLoaderConversionsHelper.stringToVector3d(road.getPoints().get(i)));
+         Point3d end = new Point3d(ModelFileLoaderConversionsHelper.stringToVector3d(road.getPoints().get(i+1)));
          
          Vector3d direction = getDirection(start, end);
          
@@ -47,7 +48,7 @@ public class SDFRoadVisual extends Graphics3DObject
          if(i < road.getPoints().size() - 2)
          {
             Point3d startNext = end;
-            Point3d endNext = new Point3d(SDFConversionsHelper.stringToVector3d(road.getPoints().get(i+2)));
+            Point3d endNext = new Point3d(ModelFileLoaderConversionsHelper.stringToVector3d(road.getPoints().get(i+2)));
             Vector3d directionNext = getDirection(startNext, endNext);
             Vector3d nextSide = getPerpendicularVectorOfLength(width, directionNext);
 
