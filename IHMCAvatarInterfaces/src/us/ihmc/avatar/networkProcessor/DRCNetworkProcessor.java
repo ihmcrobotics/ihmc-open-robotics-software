@@ -228,10 +228,10 @@ public class DRCNetworkProcessor
      if (params.isMocapModuleEnabled())
      {
         IHMCMOCAPLocalizationModule mocapModule = new IHMCMOCAPLocalizationModule(robotModel);
-        PacketCommunicator packetCommunicator = mocapModule.getPacketCommunicator();
-        packetRouter.attachPacketCommunicator(PacketDestination.MOCAP_MODULE, packetCommunicator);
-        packetRouter.attachPacketCommunicator(PacketDestination.CONTROLLER, packetCommunicator);
-        packetCommunicator.connect();
+//        PacketCommunicator packetCommunicator = mocapModule.getPacketCommunicator();
+//        packetRouter.attachPacketCommunicator(PacketDestination.MOCAP_MODULE, packetCommunicator);
+//        packetRouter.attachPacketCommunicator(PacketDestination.CONTROLLER, packetCommunicator);
+//        packetCommunicator.connect();
 
         String methodName = "setupMocapModule";
         printModuleConnectedDebugStatement(PacketDestination.MOCAP_MODULE, methodName);

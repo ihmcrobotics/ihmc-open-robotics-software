@@ -21,6 +21,7 @@ import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
 import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.util.PeriodicNonRealtimeThreadScheduler;
 import us.ihmc.util.PeriodicThreadScheduler;
 
@@ -61,6 +62,8 @@ public class IHMCMOCAPLocalizationModule implements MocapRigidbodiesListener
       yoVariableServer = new YoVariableServer(getClass(), scheduler, logModelProvider, LogSettings.ATLAS_IAN, MOCAP_SERVER_DT);
       fullRobotModel = drcRobotModel.createFullRobotModel();
       yoVariableServer.setMainRegistry(yoVariableRegistry, fullRobotModel, null);
+      
+      PrintTools.info("Starting server");
       yoVariableServer.start();
    }
 
@@ -72,6 +75,8 @@ public class IHMCMOCAPLocalizationModule implements MocapRigidbodiesListener
    @Override
    public void updateRigidbodies(ArrayList<MocapRigidBody> listOfRigidbodies)
    {
+      PrintTools.info("\nReceived rigid bodies:");
+
       for (int i = 0; i < listOfRigidbodies.size(); i++)
       {
          MocapRigidBody mocapRigidBody = listOfRigidbodies.get(i);
@@ -82,6 +87,7 @@ public class IHMCMOCAPLocalizationModule implements MocapRigidbodiesListener
             // mocapToPelvisFrameConverter.convertMocapPoseToRobotFrame(mocapRigidBody);
             mocapRigidBody.packPose(pelvisTransform);
             sendPelvisTransformToController(pelvisTransform);            
+            PrintTools.info("Transform : \n" + pelvisTransform);
          }
       }
       
@@ -93,8 +99,8 @@ public class IHMCMOCAPLocalizationModule implements MocapRigidbodiesListener
       TimeStampedTransform3D timestampedTransform = createTimestampedTransform(pelvisTransform);
       StampedPosePacket stampedPosePacket = new StampedPosePacket(Integer.toString(PELVIS_ID), timestampedTransform, 1.0);
       
-      stampedPosePacket.setDestination(PacketDestination.CONTROLLER.ordinal());
-      packetCommunicator.send(stampedPosePacket);
+//      stampedPosePacket.setDestination(PacketDestination.CONTROLLER.ordinal());
+//      packetCommunicator.send(stampedPosePacket);
       
       pelvisTransform.getTranslation(tempPosition);
       pelvisTransform.getRotation(tempOrientation);
