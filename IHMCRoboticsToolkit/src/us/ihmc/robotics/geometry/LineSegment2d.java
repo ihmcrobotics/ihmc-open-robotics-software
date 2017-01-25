@@ -414,7 +414,7 @@ public class LineSegment2d implements Geometry2d<LineSegment2d>
    @Override
    public String toString()
    {
-      return "" + endpoints[0] + endpoints[1];
+      return endpoints[0] + "-" + endpoints[1];
    }
 
    @Override

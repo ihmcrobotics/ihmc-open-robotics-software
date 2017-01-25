@@ -9,19 +9,11 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import com.jme3.math.Transform;
 
-import us.ihmc.SdfLoader.DRCRobotSDFLoader;
-import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
-import us.ihmc.SdfLoader.JaxbSDFLoader;
-import us.ihmc.SdfLoader.RobotDescriptionFromSDFLoader;
-import us.ihmc.SdfLoader.SDFContactSensor;
-import us.ihmc.SdfLoader.SDFConversionsHelper;
-import us.ihmc.SdfLoader.SDFDescriptionMutator;
-import us.ihmc.SdfLoader.SDFForceSensor;
-import us.ihmc.SdfLoader.SDFJointHolder;
-import us.ihmc.SdfLoader.SDFLinkHolder;
-import us.ihmc.SdfLoader.xmlDescription.SDFGeometry;
-import us.ihmc.SdfLoader.xmlDescription.SDFSensor;
-import us.ihmc.SdfLoader.xmlDescription.SDFVisual;
+import us.ihmc.modelFileLoaders.SdfLoader.*;
+import us.ihmc.modelFileLoaders.ModelFileLoaderConversionsHelper;
+import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFGeometry;
+import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFSensor;
+import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFVisual;
 import us.ihmc.atlas.initialSetup.AtlasSimInitialSetup;
 import us.ihmc.atlas.parameters.AtlasArmControllerParameters;
 import us.ihmc.atlas.parameters.AtlasCapturePointPlannerParameters;
@@ -880,12 +872,12 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
 
    private void modifyLinkPose(SDFLinkHolder linkHolder, String pose)
    {
-      linkHolder.getTransformFromModelReferenceFrame().set(SDFConversionsHelper.poseToTransform(pose));
+      linkHolder.getTransformFromModelReferenceFrame().set(ModelFileLoaderConversionsHelper.poseToTransform(pose));
    }
 
    private void modifyLinkInertialPose(SDFLinkHolder linkHolder, String pose)
    {
-      linkHolder.setInertialFrameWithRespectToLinkFrame(SDFConversionsHelper.poseToTransform(pose));
+      linkHolder.setInertialFrameWithRespectToLinkFrame(ModelFileLoaderConversionsHelper.poseToTransform(pose));
    }
 
    private void modifyLinkInertia(SDFLinkHolder linkHolder, Matrix3d inertia)
