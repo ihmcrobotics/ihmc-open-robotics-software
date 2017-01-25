@@ -7,6 +7,7 @@ import javax.vecmath.Vector3d;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
+import us.ihmc.modelFileLoaders.ModelFileLoaderConversionsHelper;
 import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.AbstractSDFMesh;
 import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFGeometry;
 import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFGeometry.Mesh;
@@ -35,7 +36,7 @@ public class SDFCollisionMeshDescription extends CollisionMeshDescription
             translate(offset);
             rotate(rotation);
 
-            RigidBodyTransform visualPose = SDFConversionsHelper.poseToTransform(sdfVisual.getPose());
+            RigidBodyTransform visualPose = ModelFileLoaderConversionsHelper.poseToTransform(sdfVisual.getPose());
             Vector3d modelOffset = new Vector3d();
             Matrix3d modelRotation = new Matrix3d();
             visualPose.get(modelRotation, modelOffset);
@@ -76,8 +77,8 @@ public class SDFCollisionMeshDescription extends CollisionMeshDescription
             {
                throw new RuntimeException("Planes not implemented yet for CollisionMeshes!!");
 
-//               Vector3d normal = SDFConversionsHelper.stringToNormalizedVector3d(geometry.getPlane().getNormal());
-//               Vector2d size = SDFConversionsHelper.stringToVector2d(geometry.getPlane().getSize());
+//               Vector3d normal = ModelFileLoaderConversionsHelper.stringToNormalizedVector3d(geometry.getPlane().getNormal());
+//               Vector2d size = ModelFileLoaderConversionsHelper.stringToVector2d(geometry.getPlane().getSize());
 //
 //               AxisAngle4d planeRotation = GeometryTools.getRotationBasedOnNormal(normal);
 //               rotate(planeRotation);

@@ -7,6 +7,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map.Entry;
 
+import us.ihmc.modelFileLoaders.ModelFileLoaderConversionsHelper;
 import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFJoint;
 import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFLink;
 import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFModel;
@@ -60,15 +61,15 @@ public class GeneralizedSDFRobotModel implements GraphicsObjectsHolder
             }
          }
 
-         links.put(SDFConversionsHelper.sanitizeJointName(sdfLink.getName()), linkHolder);
+         links.put(ModelFileLoaderConversionsHelper.sanitizeJointName(sdfLink.getName()), linkHolder);
       }
 
       if(sdfJoints != null)
       {
          for (SDFJoint sdfJoint : sdfJoints)
          {
-            String parent = SDFConversionsHelper.sanitizeJointName(sdfJoint.getParent());
-            String child = SDFConversionsHelper.sanitizeJointName(sdfJoint.getChild());
+            String parent = ModelFileLoaderConversionsHelper.sanitizeJointName(sdfJoint.getParent());
+            String child = ModelFileLoaderConversionsHelper.sanitizeJointName(sdfJoint.getChild());
             try
             {
                SDFJointHolder jointHolder = new SDFJointHolder(sdfJoint, links.get(parent), links.get(child));
@@ -86,7 +87,7 @@ public class GeneralizedSDFRobotModel implements GraphicsObjectsHolder
                      this.descriptionMutator.mutateForceSensorForModel(this, sdfForceSensor);
                   }
                }
-               joints.put(SDFConversionsHelper.sanitizeJointName(sdfJoint.getName()), jointHolder);
+               joints.put(ModelFileLoaderConversionsHelper.sanitizeJointName(sdfJoint.getName()), jointHolder);
             }
             catch (IOException e)
             {
@@ -113,7 +114,7 @@ public class GeneralizedSDFRobotModel implements GraphicsObjectsHolder
 
       findRootLinks(links);
 
-      transformToRoot = SDFConversionsHelper.poseToTransform(model.getPose());
+      transformToRoot = ModelFileLoaderConversionsHelper.poseToTransform(model.getPose());
 
    }
 

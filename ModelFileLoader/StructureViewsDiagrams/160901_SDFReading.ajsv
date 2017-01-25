@@ -14,7 +14,7 @@ hide all fields
         <class className="us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFVisual" modelMemberId="us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFVisual" project="SDFLoader" xLocation="-373" yLocation="462"/>
         <class className="us.ihmc.modelFileLoaders.SdfLoader.RobotDescriptionFromSDFLoader" modelMemberId="us.ihmc.modelFileLoaders.SdfLoader.RobotDescriptionFromSDFLoader" project="SDFLoader" xLocation="-277" yLocation="-410"/>
         <class className="us.ihmc.modelFileLoaders.SdfLoader.GeneralizedSDFRobotModel" modelMemberId="us.ihmc.modelFileLoaders.SdfLoader.GeneralizedSDFRobotModel" project="SDFLoader" xLocation="75" yLocation="-93"/>
-        <class className="us.ihmc.modelFileLoaders.SdfLoader.SDFConversionsHelper" modelMemberId="us.ihmc.modelFileLoaders.SdfLoader.SDFConversionsHelper" project="SDFLoader" xLocation="376" yLocation="460"/>
+        <class className="us.ihmc.modelFileLoaders.ModelFileLoaderConversionsHelper" modelMemberId="us.ihmc.modelFileLoaders.ModelFileLoaderConversionsHelper" project="SDFLoader" xLocation="376" yLocation="460"/>
         <class className="us.ihmc.modelFileLoaders.SdfLoader.SDFGraphics3DObject" modelMemberId="us.ihmc.modelFileLoaders.SdfLoader.SDFGraphics3DObject" project="SDFLoader" xLocation="-377" yLocation="-32"/>
         <class className="us.ihmc.modelFileLoaders.SdfLoader.SDFFullRobotModel" modelMemberId="us.ihmc.modelFileLoaders.SdfLoader.SDFFullRobotModel" project="SDFLoader" xLocation="668" yLocation="147"/>
         <class className="us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.AbstractSDFMesh" modelMemberId="us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.AbstractSDFMesh" project="SDFLoader" xLocation="-83" yLocation="320"/>

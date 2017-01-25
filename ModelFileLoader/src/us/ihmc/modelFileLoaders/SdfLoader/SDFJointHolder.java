@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
+import us.ihmc.modelFileLoaders.ModelFileLoaderConversionsHelper;
 import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFJoint;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.tools.io.printing.PrintTools;
@@ -68,7 +69,7 @@ public class SDFJointHolder
          throw new IOException("Joint type " + typeString + " not implemented yet");
       }
 
-      axisInModelFrame = SDFConversionsHelper.stringToNormalizedVector3d(sdfJoint.getAxis().getXyz());
+      axisInModelFrame = ModelFileLoaderConversionsHelper.stringToNormalizedVector3d(sdfJoint.getAxis().getXyz());
       
       if(sdfJoint.getAxis().getLimit() != null)
       {
@@ -129,7 +130,7 @@ public class SDFJointHolder
          }
       }
       
-      transformFromChildLink = SDFConversionsHelper.poseToTransform(sdfJoint.getPose());
+      transformFromChildLink = ModelFileLoaderConversionsHelper.poseToTransform(sdfJoint.getPose());
 
       if(parent == null || child == null)
       {

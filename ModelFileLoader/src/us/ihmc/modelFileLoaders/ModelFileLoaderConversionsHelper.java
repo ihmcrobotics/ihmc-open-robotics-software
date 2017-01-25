@@ -1,4 +1,4 @@
-package us.ihmc.modelFileLoaders.SdfLoader;
+package us.ihmc.modelFileLoaders;
 
 import javax.vecmath.Color3f;
 import javax.vecmath.Matrix3d;
@@ -8,7 +8,7 @@ import javax.vecmath.Vector3d;
 import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFInertia;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 
-public class SDFConversionsHelper
+public class ModelFileLoaderConversionsHelper
 {
 
    public static String sanitizeJointName(String dirtyName)

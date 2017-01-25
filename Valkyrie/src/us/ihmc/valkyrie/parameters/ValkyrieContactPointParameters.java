@@ -11,7 +11,7 @@ import javax.vecmath.Point2d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.modelFileLoaders.SdfLoader.GeneralizedSDFRobotModel;
-import us.ihmc.modelFileLoaders.SdfLoader.SDFConversionsHelper;
+import us.ihmc.modelFileLoaders.ModelFileLoaderConversionsHelper;
 import us.ihmc.modelFileLoaders.SdfLoader.SDFJointHolder;
 import us.ihmc.modelFileLoaders.SdfLoader.SDFLinkHolder;
 import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.Collision;
@@ -54,7 +54,7 @@ public class ValkyrieContactPointParameters extends RobotContactPointParameters
             System.out.println("Simulation contact '" + name + "'");
             Vector3d gcOffset = new Vector3d();
 
-            SDFConversionsHelper.poseToTransform(collision.getPose()).getTranslation(gcOffset);
+            ModelFileLoaderConversionsHelper.poseToTransform(collision.getPose()).getTranslation(gcOffset);
             link.getTransformFromModelReferenceFrame().transform(gcOffset);
             addSimulationContactPoint(joint.getName(), gcOffset);
          }
@@ -64,7 +64,7 @@ public class ValkyrieContactPointParameters extends RobotContactPointParameters
             System.out.println("Controller contact '" + name + "'");
             Vector3d gcOffset = new Vector3d();
 
-            SDFConversionsHelper.poseToTransform(collision.getPose()).getTranslation(gcOffset);
+            ModelFileLoaderConversionsHelper.poseToTransform(collision.getPose()).getTranslation(gcOffset);
             link.getTransformFromModelReferenceFrame().transform(gcOffset);
             boolean assigned = false;
 
