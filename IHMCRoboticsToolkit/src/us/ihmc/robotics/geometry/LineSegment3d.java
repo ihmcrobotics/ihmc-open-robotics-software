@@ -568,4 +568,13 @@ public class LineSegment3d implements GeometryObject<LineSegment3d>
    {
       return firstEndpoint.epsilonEquals(other.firstEndpoint, epsilon) && secondEndpoint.epsilonEquals(other.secondEndpoint, epsilon);
    }
+
+   /**
+    * Returns a {@code String} with the two endpoints of this line segment.
+    */
+   @Override
+   public String toString()
+   {
+      return firstEndpoint + "-" + secondEndpoint;
+   }
 }
