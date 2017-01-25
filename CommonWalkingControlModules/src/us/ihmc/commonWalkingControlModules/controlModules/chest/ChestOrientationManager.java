@@ -30,7 +30,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.tools.io.printing.PrintTools;
 
-public class ChestOrientationManager
+public class ChestOrientationManager implements ChestOrientationManagerInterface
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -103,6 +103,7 @@ public class ChestOrientationManager
       parentRegistry.addChild(registry);
    }
 
+   @Override
    public void initialize()
    {
       if (hasBeenInitialized.getBooleanValue())
@@ -113,6 +114,7 @@ public class ChestOrientationManager
       holdCurrentOrientation();
    }
 
+   @Override
    public void compute()
    {
       if (isTrackingOrientation.getBooleanValue())
@@ -162,6 +164,7 @@ public class ChestOrientationManager
       orientationFeedbackControlCommand.setWeightsForSolver(chestAngularWeight);
    }
 
+   @Override
    public void holdCurrentOrientation()
    {
       receivedNewChestOrientationTime.set(yoTime.getDoubleValue());
@@ -175,6 +178,7 @@ public class ChestOrientationManager
       isTrajectoryStopped.set(false);
    }
 
+   @Override
    public void handleChestTrajectoryCommand(ChestTrajectoryCommand command)
    {
       switch (command.getExecutionMode())
@@ -286,17 +290,20 @@ public class ChestOrientationManager
       return maximumNumberOfWaypoints;
    }
 
+   @Override
    public void handleStopAllTrajectoryCommand(StopAllTrajectoryCommand command)
    {
       isTrajectoryStopped.set(command.isStopAllTrajectory());
    }
 
+   @Override
    public void handleGoHomeCommand(GoHomeCommand command)
    {
       if (command.getRequest(BodyPart.CHEST))
          goToHomeFromCurrentDesired(command.getTrajectoryTime());
    }
 
+   @Override
    public void goToHomeFromCurrentDesired(double trajectoryTime)
    {
       receivedNewChestOrientationTime.set(yoTime.getDoubleValue());
@@ -316,6 +323,7 @@ public class ChestOrientationManager
       isTrajectoryStopped.set(false);
    }
 
+   @Override
    public void goToHomeFromCurrent(double trajectoryTime)
    {
       receivedNewChestOrientationTime.set(yoTime.getDoubleValue());
@@ -342,11 +350,13 @@ public class ChestOrientationManager
       this.lastCommandId.set(lastCommandId);
    }
 
+   @Override
    public InverseDynamicsCommand<?> getInverseDynamicsCommand()
    {
       return null;
    }
 
+   @Override
    public FeedbackControlCommand<?> getFeedbackControlCommand()
    {
       return orientationFeedbackControlCommand;

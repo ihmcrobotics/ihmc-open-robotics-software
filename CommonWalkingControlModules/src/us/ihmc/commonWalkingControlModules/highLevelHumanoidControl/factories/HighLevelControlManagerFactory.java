@@ -7,6 +7,7 @@ import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerPar
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.PelvisOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.chest.ChestOrientationManager;
+import us.ihmc.commonWalkingControlModules.controlModules.chest.ChestOrientationManagerInterface;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.controlModules.head.HeadOrientationManager;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
@@ -33,7 +34,7 @@ public class HighLevelControlManagerFactory
    private BalanceManager balanceManager;
    private CenterOfMassHeightManager centerOfMassHeightManager;
    private HeadOrientationManager headOrientationManager;
-   private ChestOrientationManager chestOrientationManager;
+   private ChestOrientationManagerInterface chestOrientationManager;
    private ManipulationControlModule manipulationControlModule;
    private FeetManager feetManager;
    private PelvisOrientationManager pelvisOrientationManager;
@@ -139,7 +140,7 @@ public class HighLevelControlManagerFactory
       return headOrientationManager;
    }
 
-   public ChestOrientationManager getOrCreateChestOrientationManager()
+   public ChestOrientationManagerInterface getOrCreateChestOrientationManager()
    {
       if (chestOrientationManager != null)
          return chestOrientationManager;
