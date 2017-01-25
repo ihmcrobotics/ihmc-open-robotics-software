@@ -10,12 +10,12 @@ import java.util.List;
 import javax.vecmath.Point2d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
-import us.ihmc.SdfLoader.SDFConversionsHelper;
-import us.ihmc.SdfLoader.SDFJointHolder;
-import us.ihmc.SdfLoader.SDFLinkHolder;
-import us.ihmc.SdfLoader.xmlDescription.Collision;
-import us.ihmc.SdfLoader.xmlDescription.SDFGeometry.Sphere;
+import us.ihmc.modelFileLoaders.SdfLoader.GeneralizedSDFRobotModel;
+import us.ihmc.modelFileLoaders.SdfLoader.SDFConversionsHelper;
+import us.ihmc.modelFileLoaders.SdfLoader.SDFJointHolder;
+import us.ihmc.modelFileLoaders.SdfLoader.SDFLinkHolder;
+import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.Collision;
+import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFGeometry.Sphere;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
