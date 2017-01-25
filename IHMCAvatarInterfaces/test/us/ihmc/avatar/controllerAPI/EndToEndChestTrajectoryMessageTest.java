@@ -22,7 +22,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
-import us.ihmc.commonWalkingControlModules.controlModules.ChestOrientationManager;
+import us.ihmc.commonWalkingControlModules.controlModules.chest.ChestOrientationManager;
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.StopAllTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;

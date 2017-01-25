@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.controlModules;
+package us.ihmc.commonWalkingControlModules.controlModules.chest;
 
 import static us.ihmc.communication.packets.Packet.INVALID_MESSAGE_ID;
 
