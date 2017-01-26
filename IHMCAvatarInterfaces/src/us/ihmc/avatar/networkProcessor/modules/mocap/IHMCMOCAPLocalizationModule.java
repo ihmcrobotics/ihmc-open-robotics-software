@@ -15,6 +15,7 @@ import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.humanoidRobotics.communication.packets.StampedPosePacket;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
+import us.ihmc.humanoidRobotics.kryo.PPSTimestampOffsetProvider;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotDataLogger.logger.LogSettings;
@@ -37,6 +38,7 @@ public class IHMCMOCAPLocalizationModule implements MocapRigidbodiesListener
    private final YoVariableRegistry yoVariableRegistry = new YoVariableRegistry(getClass().getSimpleName());
    private final YoVariableServer yoVariableServer;
    private final FullHumanoidRobotModel fullRobotModel;
+   private final PPSTimestampOffsetProvider ppsTimestampOffsetProvider;
    
    private final DoubleYoVariable pelvisPositionX = new DoubleYoVariable("pelvisPositionX", yoVariableRegistry);
    private final DoubleYoVariable pelvisPositionY = new DoubleYoVariable("pelvisPositionY", yoVariableRegistry);
@@ -51,7 +53,8 @@ public class IHMCMOCAPLocalizationModule implements MocapRigidbodiesListener
       mocapDataClient.registerRigidBodiesListener(this);
 
       mocapToPelvisFrameConverter = new MocapToPelvisFrameConverter(drcRobotModel, packetCommunicator);
-      
+
+      ppsTimestampOffsetProvider = drcRobotModel.getPPSTimestampOffsetProvider();
       PeriodicThreadScheduler scheduler = new PeriodicNonRealtimeThreadScheduler("MocapModuleScheduler");
       LogModelProvider logModelProvider = drcRobotModel.getLogModelProvider();
       
@@ -121,6 +124,8 @@ public class IHMCMOCAPLocalizationModule implements MocapRigidbodiesListener
 
    private TimeStampedTransform3D createTimestampedTransform(RigidBodyTransform rigidBodyTransform)
    {
-      return new TimeStampedTransform3D(rigidBodyTransform, System.currentTimeMillis());
+      long actualTime = System.currentTimeMillis();
+      long adjustedTime = ppsTimestampOffsetProvider.adjustTimeStampToRobotClock(actualTime);
+      return new TimeStampedTransform3D(rigidBodyTransform, adjustedTime);
    }
 }
