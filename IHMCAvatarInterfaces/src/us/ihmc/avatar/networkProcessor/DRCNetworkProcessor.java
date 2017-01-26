@@ -222,21 +222,21 @@ public class DRCNetworkProcessor
          printModuleConnectedDebugStatement(PacketDestination.MULTISENSE_TEST_MODULE, methodName);
       }
    }
-
+   
    private void setupMocapModule(DRCRobotModel robotModel, DRCNetworkModuleParameters params)  throws IOException
    {
      if (params.isMocapModuleEnabled())
      {
-        IHMCMOCAPLocalizationModule mocapModule = new IHMCMOCAPLocalizationModule(robotModel);
-        PacketCommunicator packetCommunicator = mocapModule.getPacketCommunicator();
+        new IHMCMOCAPLocalizationModule(robotModel);
+        PacketCommunicator packetCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.MOCAP_MODULE, NET_CLASS_LIST);
         packetRouter.attachPacketCommunicator(PacketDestination.MOCAP_MODULE, packetCommunicator);
-        packetRouter.attachPacketCommunicator(PacketDestination.CONTROLLER, packetCommunicator);
         packetCommunicator.connect();
-
+        
         String methodName = "setupMocapModule";
         printModuleConnectedDebugStatement(PacketDestination.MOCAP_MODULE, methodName);
      }
    }
+      
 
    private void setupHandModules(DRCRobotModel robotModel, DRCNetworkModuleParameters params) throws IOException
    {
@@ -315,7 +315,6 @@ public class DRCNetworkProcessor
          PacketCommunicator sensorSuiteManagerCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.SENSOR_MANAGER, NET_CLASS_LIST);
          packetRouter.attachPacketCommunicator(PacketDestination.SENSOR_MANAGER, sensorSuiteManagerCommunicator);
          sensorSuiteManagerCommunicator.connect();
-
 
          String methodName = "setupSensorModule ";
          printModuleConnectedDebugStatement(PacketDestination.SENSOR_MANAGER, methodName);
