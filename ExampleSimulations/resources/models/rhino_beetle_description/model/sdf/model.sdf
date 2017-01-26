@@ -6,12 +6,12 @@
         <pose>0 0 0 0 -0 0</pose>
         <mass>5</mass>
         <inertia>
-          <ixx>0.008</ixx>
+          <ixx>0.03</ixx>
           <ixy>0</ixy>
           <ixz>0</ixz>
-          <iyy>0.01</iyy>
+          <iyy>0.05</iyy>
           <iyz>0</iyz>
-          <izz>0.01</izz>
+          <izz>0.05</izz>
         </inertia>
       </inertial>
       <visual name='BODY_visual'>
@@ -62,13 +62,13 @@
       <axis>
         <xyz>0 0 1</xyz>
         <limit>
-          <lower>-1.5708</lower>
-          <upper>1.5708</upper>
+          <lower>-3.141592</lower>
+          <upper>3.141592</upper>
           <effort>100</effort>
           <velocity>20</velocity>
         </limit>
         <dynamics>
-          <damping>0.005</damping>
+          <damping>0.0001</damping>
         </dynamics>
       </axis>
     </joint>
@@ -106,13 +106,13 @@
       <axis>
         <xyz>1 0 0</xyz>
         <limit>
-          <lower>-1.5708</lower>
-          <upper>1.5708</upper>
+          <lower>-3.141592</lower>
+          <upper>3.141592</upper>
           <effort>100</effort>
           <velocity>20</velocity>
         </limit>
         <dynamics>
-          <damping>0.005</damping>
+          <damping>0.0001</damping>
         </dynamics>
       </axis>
     </joint>
@@ -122,12 +122,12 @@
         <pose>0 0.03 0 0 -0 0</pose>
         <mass>0.25</mass>
         <inertia>
-          <ixx>0.0002</ixx>
+          <ixx>0.0005</ixx>
           <ixy>0</ixy>
           <ixz>0</ixz>
-          <iyy>4e-05</iyy>
+          <iyy>0.0001</iyy>
           <iyz>0</iyz>
-          <izz>0.0002</izz>
+          <izz>0.0005</izz>
         </inertia>
       </inertial>
       <visual name='FRONT_LEFT_LOWER_PITCH_LIMB_visual'>
@@ -150,13 +150,13 @@
       <axis>
         <xyz>1 0 0</xyz>
         <limit>
-          <lower>-1.5708</lower>
-          <upper>1.5708</upper>
+          <lower>-3.141592</lower>
+          <upper>-0.01</upper>
           <effort>100</effort>
           <velocity>20</velocity>
         </limit>
         <dynamics>
-          <damping>0.005</damping>
+          <damping>0.0001</damping>
         </dynamics>
       </axis>
     </joint>
@@ -194,13 +194,13 @@
       <axis>
         <xyz>0 0 1</xyz>
         <limit>
-          <lower>-1.5708</lower>
-          <upper>1.5708</upper>
+          <lower>-3.141592</lower>
+          <upper>3.141592</upper>
           <effort>100</effort>
           <velocity>20</velocity>
         </limit>
         <dynamics>
-          <damping>0.005</damping>
+          <damping>0.0001</damping>
         </dynamics>
       </axis>
     </joint>
@@ -238,13 +238,13 @@
       <axis>
         <xyz>1 0 0</xyz>
         <limit>
-          <lower>-1.5708</lower>
-          <upper>1.5708</upper>
+          <lower>-3.141592</lower>
+          <upper>3.141592</upper>
           <effort>100</effort>
           <velocity>20</velocity>
         </limit>
         <dynamics>
-          <damping>0.005</damping>
+          <damping>0.0001</damping>
         </dynamics>
       </axis>
     </joint>
@@ -254,12 +254,12 @@
         <pose>0 -0.03 0 0 -0 0</pose>
         <mass>0.25</mass>
         <inertia>
-          <ixx>0.0002</ixx>
+          <ixx>0.0005</ixx>
           <ixy>0</ixy>
           <ixz>0</ixz>
-          <iyy>4e-05</iyy>
+          <iyy>0.0001</iyy>
           <iyz>0</iyz>
-          <izz>0.0002</izz>
+          <izz>0.0005</izz>
         </inertia>
       </inertial>
       <visual name='FRONT_RIGHT_LOWER_PITCH_LIMB_visual'>
@@ -282,13 +282,13 @@
       <axis>
         <xyz>1 0 0</xyz>
         <limit>
-          <lower>-1.5708</lower>
-          <upper>1.5708</upper>
+          <lower>0.01</lower>
+          <upper>3.141592</upper>
           <effort>100</effort>
           <velocity>20</velocity>
         </limit>
         <dynamics>
-          <damping>0.005</damping>
+          <damping>0.0001</damping>
         </dynamics>
       </axis>
     </joint>
@@ -326,13 +326,13 @@
       <axis>
         <xyz>0 0 1</xyz>
         <limit>
-          <lower>-1.5708</lower>
-          <upper>1.5708</upper>
+          <lower>-3.141592</lower>
+          <upper>3.141592</upper>
           <effort>100</effort>
           <velocity>20</velocity>
         </limit>
         <dynamics>
-          <damping>0.005</damping>
+          <damping>0.0001</damping>
         </dynamics>
       </axis>
     </joint>
@@ -370,13 +370,13 @@
       <axis>
         <xyz>1 0 0</xyz>
         <limit>
-          <lower>-1.5708</lower>
-          <upper>1.5708</upper>
+          <lower>-3.141592</lower>
+          <upper>3.141592</upper>
           <effort>100</effort>
           <velocity>20</velocity>
         </limit>
         <dynamics>
-          <damping>0.005</damping>
+          <damping>0.0001</damping>
         </dynamics>
       </axis>
     </joint>
@@ -386,12 +386,12 @@
         <pose>0 0.03 0 0 -0 0</pose>
         <mass>0.25</mass>
         <inertia>
-          <ixx>0.0002</ixx>
+         <ixx>0.0005</ixx>
           <ixy>0</ixy>
           <ixz>0</ixz>
-          <iyy>4e-05</iyy>
+          <iyy>0.0001</iyy>
           <iyz>0</iyz>
-          <izz>0.0002</izz>
+          <izz>0.0005</izz>
         </inertia>
       </inertial>
       <visual name='HIND_LEFT_LOWER_PITCH_LIMB_visual'>
@@ -414,13 +414,13 @@
       <axis>
         <xyz>1 0 0</xyz>
         <limit>
-          <lower>-1.5708</lower>
-          <upper>1.5708</upper>
+          <lower>-3.141592</lower>
+          <upper>-0.01</upper>
           <effort>100</effort>
           <velocity>20</velocity>
         </limit>
         <dynamics>
-          <damping>0.005</damping>
+          <damping>0.0001</damping>
         </dynamics>
       </axis>
     </joint>
@@ -458,13 +458,13 @@
       <axis>
         <xyz>0 0 1</xyz>
         <limit>
-          <lower>-1.5708</lower>
-          <upper>1.5708</upper>
+          <lower>-3.141592</lower>
+          <upper>3.141592</upper>
           <effort>100</effort>
           <velocity>20</velocity>
         </limit>
         <dynamics>
-          <damping>0.005</damping>
+          <damping>0.0001</damping>
         </dynamics>
       </axis>
     </joint>
@@ -502,13 +502,13 @@
       <axis>
         <xyz>1 0 0</xyz>
         <limit>
-          <lower>-1.5708</lower>
-          <upper>1.5708</upper>
+          <lower>-3.141592</lower>
+          <upper>3.141592</upper>
           <effort>100</effort>
           <velocity>20</velocity>
         </limit>
         <dynamics>
-          <damping>0.005</damping>
+          <damping>0.0001</damping>
         </dynamics>
       </axis>
     </joint>
@@ -518,12 +518,12 @@
         <pose>0 -0.03 0 0 -0 0</pose>
         <mass>0.25</mass>
         <inertia>
-          <ixx>0.0002</ixx>
+        <ixx>0.0005</ixx>
           <ixy>0</ixy>
           <ixz>0</ixz>
-          <iyy>4e-05</iyy>
+          <iyy>0.0001</iyy>
           <iyz>0</iyz>
-          <izz>0.0002</izz>
+          <izz>0.0005</izz>
         </inertia>
       </inertial>
       <visual name='HIND_RIGHT_LOWER_PITCH_LIMB_visual'>
@@ -546,13 +546,13 @@
       <axis>
         <xyz>1 0 0</xyz>
         <limit>
-          <lower>-1.5708</lower>
-          <upper>1.5708</upper>
+          <lower>0.01</lower>
+          <upper>3.141592</upper>
           <effort>100</effort>
           <velocity>20</velocity>
         </limit>
         <dynamics>
-          <damping>0.005</damping>
+          <damping>0.0001</damping>
         </dynamics>
       </axis>
     </joint>
@@ -590,13 +590,13 @@
       <axis>
         <xyz>0 0 1</xyz>
         <limit>
-          <lower>-1.5708</lower>
-          <upper>1.5708</upper>
+          <lower>-3.141592</lower>
+          <upper>3.141592</upper>
           <effort>100</effort>
           <velocity>20</velocity>
         </limit>
         <dynamics>
-          <damping>0.005</damping>
+          <damping>0.0001</damping>
         </dynamics>
       </axis>
     </joint>
@@ -634,13 +634,13 @@
       <axis>
         <xyz>1 0 0</xyz>
         <limit>
-          <lower>-1.5708</lower>
-          <upper>1.5708</upper>
+          <lower>-3.141592</lower>
+          <upper>3.141592</upper>
           <effort>100</effort>
           <velocity>20</velocity>
         </limit>
         <dynamics>
-          <damping>0.005</damping>
+          <damping>0.0001</damping>
         </dynamics>
       </axis>
     </joint>
@@ -650,12 +650,12 @@
         <pose>0 0.03 0 0 -0 0</pose>
         <mass>0.25</mass>
         <inertia>
-          <ixx>0.0002</ixx>
+        <ixx>0.0005</ixx>
           <ixy>0</ixy>
           <ixz>0</ixz>
-          <iyy>4e-05</iyy>
+          <iyy>0.0001</iyy>
           <iyz>0</iyz>
-          <izz>0.0002</izz>
+          <izz>0.0005</izz>
         </inertia>
       </inertial>
       <visual name='MIDDLE_LEFT_LOWER_PITCH_LIMB_visual'>
@@ -678,13 +678,13 @@
       <axis>
         <xyz>1 0 0</xyz>
         <limit>
-          <lower>-1.5708</lower>
-          <upper>1.5708</upper>
+          <lower>-3.141592</lower>
+          <upper>-0.01</upper>
           <effort>100</effort>
           <velocity>20</velocity>
         </limit>
         <dynamics>
-          <damping>0.005</damping>
+          <damping>0.0001</damping>
         </dynamics>
       </axis>
     </joint>
@@ -722,13 +722,13 @@
       <axis>
         <xyz>0 0 1</xyz>
         <limit>
-          <lower>-1.5708</lower>
-          <upper>1.5708</upper>
+          <lower>-3.141592</lower>
+          <upper>3.141592</upper>
           <effort>100</effort>
           <velocity>20</velocity>
         </limit>
         <dynamics>
-          <damping>0.005</damping>
+          <damping>0.0001</damping>
         </dynamics>
       </axis>
     </joint>
@@ -766,13 +766,13 @@
       <axis>
         <xyz>1 0 0</xyz>
         <limit>
-          <lower>-1.5708</lower>
-          <upper>1.5708</upper>
+          <lower>-3.141592</lower>
+          <upper>3.141592</upper>
           <effort>100</effort>
           <velocity>20</velocity>
         </limit>
         <dynamics>
-          <damping>0.005</damping>
+          <damping>0.0001</damping>
         </dynamics>
       </axis>
     </joint>
@@ -782,12 +782,12 @@
         <pose>0 -0.03 0 0 -0 0</pose>
         <mass>0.25</mass>
         <inertia>
-          <ixx>0.0002</ixx>
+           <ixx>0.0005</ixx>
           <ixy>0</ixy>
           <ixz>0</ixz>
-          <iyy>4e-05</iyy>
+          <iyy>0.0001</iyy>
           <iyz>0</iyz>
-          <izz>0.0002</izz>
+          <izz>0.0005</izz>
         </inertia>
       </inertial>
       <visual name='MIDDLE_RIGHT_LOWER_PITCH_LIMB_visual'>
@@ -810,13 +810,13 @@
       <axis>
         <xyz>1 0 0</xyz>
         <limit>
-          <lower>-1.5708</lower>
-          <upper>1.5708</upper>
+          <lower>0.01</lower>
+          <upper>3.141592</upper>
           <effort>100</effort>
           <velocity>20</velocity>
         </limit>
         <dynamics>
-          <damping>0.005</damping>
+          <damping>0.0001</damping>
         </dynamics>
       </axis>
     </joint>
