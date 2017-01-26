@@ -160,12 +160,12 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage> imp
          }
       }
 
-      if (Math.abs(defaultSwingTime - otherList.defaultSwingTime) > epsilon)
+      if (!MathTools.epsilonEquals(this.defaultSwingTime, otherList.defaultSwingTime, epsilon))
       {
          return false;
       }
 
-      if (Math.abs(defaultTransferTime - otherList.defaultTransferTime) > epsilon)
+      if (!MathTools.epsilonEquals(this.defaultTransferTime, otherList.defaultTransferTime, epsilon))
       {
          return false;
       }
