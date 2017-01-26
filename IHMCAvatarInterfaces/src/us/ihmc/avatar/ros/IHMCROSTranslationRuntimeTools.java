@@ -9,6 +9,7 @@ import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 
+import geometry_msgs.Vector3;
 import org.ros.internal.message.Message;
 import org.ros.message.MessageFactory;
 
@@ -87,10 +88,11 @@ public class IHMCROSTranslationRuntimeTools
    {
       FootstepDataListMessage footsteps = new FootstepDataListMessage();
 
-      footsteps.defaultSwingTime = message.getSwingTime();
-      footsteps.defaultTransferTime = message.getTransferTime();
+      footsteps.defaultSwingTime = message.getDefaultSwingTime();
+      footsteps.defaultTransferTime = message.getDefaultTransferTime();
       footsteps.setUniqueId(message.getUniqueId());
       footsteps.executionMode = ExecutionMode.values[message.getExecutionMode()];
+      footsteps.finalTransferTime = message.getFinalTransferTime();
 
       ArrayList<FootstepDataMessage> stepData = new ArrayList<>();
       for (FootstepDataRosMessage footstepDataRosMessage : message.getFootstepDataList())
@@ -115,13 +117,25 @@ public class IHMCROSTranslationRuntimeTools
       ihmcMessage.setTrajectoryType(TrajectoryType.values()[message.getTrajectoryType()]);
       ihmcMessage.setUniqueId(message.getUniqueId());
 
+      if(message.getHasTimings())
+      {
+         ihmcMessage.setTimings(message.getSwingTime(), message.getTransferTime());
+      }
+
       ArrayList<Point2d> predictedContactPoints = new ArrayList<>();
       for (Point2dRosMessage point2dRosMessage : message.getPredictedContactPoints())
       {
          predictedContactPoints.add(GenericROSTranslationTools.convertPoint2DRos(point2dRosMessage));
       }
 
+      Point3d[] trajectoryWaypoints = new Point3d[message.getTrajectoryWaypoints().size()];
+      for (int i = 0; i < message.getTrajectoryWaypoints().size(); i++)
+      {
+         trajectoryWaypoints[i] = new Point3d(GenericROSTranslationTools.convertVector3(message.getTrajectoryWaypoints().get(i)));
+      }
+
       ihmcMessage.setPredictedContactPoints(predictedContactPoints);
+      ihmcMessage.setTrajectoryWaypoints(trajectoryWaypoints);
 
       return ihmcMessage;
    }
@@ -239,6 +253,19 @@ public class IHMCROSTranslationRuntimeTools
       message.setSwingHeight(footstep.getSwingHeight());
       message.setTrajectoryType((byte) footstep.getTrajectoryType().ordinal());
 
+      if(footstep.hasTimings)
+      {
+         message.setSwingTime(footstep.swingTime);
+         message.setTransferTime(footstep.transferTime);
+      }
+      else
+      {
+         message.setSwingTime(Double.NaN);
+         message.setTransferTime(Double.NaN);
+      }
+
+      message.setHasTimings(footstep.hasTimings);
+
       List<Point2dRosMessage> predictedContatcPointsRos = new ArrayList<>();
       if (footstep.predictedContactPoints != null)
       {
@@ -248,7 +275,17 @@ public class IHMCROSTranslationRuntimeTools
          }
       }
 
+      List<Vector3> trajectoryWaypoints = new ArrayList<>();
+      if(footstep.trajectoryWaypoints != null)
+      {
+         for (Point3d trajectoryWaypoint : footstep.trajectoryWaypoints)
+         {
+            trajectoryWaypoints.add(GenericROSTranslationTools.convertTuple3d(trajectoryWaypoint));
+         }
+      }
+
       message.setPredictedContactPoints(predictedContatcPointsRos);
+      message.setTrajectoryWaypoints(trajectoryWaypoints);
 
       return message;
    }
@@ -261,10 +298,11 @@ public class IHMCROSTranslationRuntimeTools
 
       FootstepDataListRosMessage message = messageFactory.newFromType(rosAnnotation.rosPackage() + "/" + rosMessageClassNameFromIHMCMessage);
 
-      message.setSwingTime(footstepList.defaultSwingTime);
-      message.setTransferTime(footstepList.defaultTransferTime);
+      message.setDefaultSwingTime(footstepList.defaultSwingTime);
+      message.setDefaultTransferTime(footstepList.defaultTransferTime);
       message.setUniqueId(footstepList.getUniqueId());
       message.setExecutionMode((byte) footstepList.executionMode.ordinal());
+      message.setFinalTransferTime(footstepList.finalTransferTime);
 
       List<FootstepDataRosMessage> convertedFootsteps = new ArrayList<>();
       for (FootstepDataMessage footstepDataMessage : footstepList.footstepDataList)
