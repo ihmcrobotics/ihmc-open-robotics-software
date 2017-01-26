@@ -4,17 +4,16 @@ import java.io.FileNotFoundException;
 
 import javax.xml.bind.JAXBException;
 
-import us.ihmc.robotModels.FullRobotModelFromDescription;
-import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
-import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
-import us.ihmc.SdfLoader.JaxbSDFLoader;
-import us.ihmc.SdfLoader.RobotDescriptionFromSDFLoader;
-import us.ihmc.robotics.partNames.JointNameMap;
-import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.robotModels.FullRobotModelFactory;
+import us.ihmc.modelFileLoaders.SdfLoader.GeneralizedSDFRobotModel;
+import us.ihmc.modelFileLoaders.SdfLoader.JaxbSDFLoader;
+import us.ihmc.modelFileLoaders.SdfLoader.RobotDescriptionFromSDFLoader;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.SDFLogModelProvider;
+import us.ihmc.robotModels.FullRobotModel;
+import us.ihmc.robotModels.FullRobotModelFactory;
+import us.ihmc.robotModels.FullRobotModelFromDescription;
 import us.ihmc.robotics.robotDescription.RobotDescription;
+import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 
 public class RhinoBeetleModelFactory implements FullRobotModelFactory
 {
