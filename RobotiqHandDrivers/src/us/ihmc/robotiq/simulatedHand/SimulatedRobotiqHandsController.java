@@ -6,7 +6,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandJointName;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandDesiredConfigurationMessage;
@@ -16,6 +17,7 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.LongYoVariable;
+import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.time.TimeTools;
@@ -23,12 +25,11 @@ import us.ihmc.robotiq.model.RobotiqHandModel;
 import us.ihmc.robotiq.model.RobotiqHandModel.RobotiqHandJointNameMinimal;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.robotController.MultiThreadedRobotControlElement;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizerInterface;
 
-public class SimulatedRobotiqHandsController implements MultiThreadedRobotControlElement
+public class SimulatedRobotiqHandsController implements MultiThreadedRobotControlElement, RobotController
 {
    private final boolean DEBUG = false;
    
@@ -179,11 +180,29 @@ public class SimulatedRobotiqHandsController implements MultiThreadedRobotContro
    {
    }
 
+   // To be able to extend RobotController so the kinematics walking controller can use it easily
+   @Override
+   public void doControl()
+   {
+      read(0L);
+      run();
+      write(0L);
+   }
+
    @Override
    public void read(long currentClockTime)
    {
-      long timestamp = threadDataSynchronizer.getTimestamp();
-      handControllerTime.set(TimeTools.nanoSecondstoSeconds(timestamp));
+      long timestamp;
+      if (threadDataSynchronizer != null)
+      {
+         timestamp = threadDataSynchronizer.getTimestamp();
+         handControllerTime.set(TimeTools.nanoSecondstoSeconds(timestamp));
+      }
+      else
+      {
+         handControllerTime.add(TimeTools.nanoSecondstoSeconds(controlDTInNS));
+      }
+
       if(jointAngleProducer != null)
       {
          jointAngleProducer.sendHandJointAnglesPacket();         
@@ -356,5 +375,11 @@ public class SimulatedRobotiqHandsController implements MultiThreadedRobotContro
    public SideDependentList<List<OneDegreeOfFreedomJoint>> getAllFingerJoints()
    {
       return allFingerJoints;
+   }
+
+   @Override
+   public String getDescription()
+   {
+      return registry.getName();
    }
 }

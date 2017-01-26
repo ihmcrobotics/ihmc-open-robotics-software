@@ -5,8 +5,8 @@ import javax.vecmath.Vector3d;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.obstacleCourseTests.DRCObstacleCourseFlatTest;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.obstacleCourseTests.DRCObstacleCourseFlatTest;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
@@ -73,7 +73,7 @@ public class ValkyrieObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 41.4, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT, IntegrationCategory.VIDEO})
+   @ContinuousIntegrationTest(estimatedDuration = 41.4)
    @Test(timeout = 210000)
    public void testRotatedStepInTheAir() throws SimulationExceededMaximumTimeException
    {

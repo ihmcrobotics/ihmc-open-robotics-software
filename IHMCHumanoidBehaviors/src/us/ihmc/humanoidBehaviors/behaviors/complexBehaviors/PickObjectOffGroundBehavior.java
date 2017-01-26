@@ -7,7 +7,7 @@ import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.coactiveElements.PickUpBallBehaviorCoactiveElementBehaviorSide;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.AtlasPrimitiveActions;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
-import us.ihmc.humanoidBehaviors.communication.BehaviorCommunicationBridge;
+import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidBehaviors.taskExecutor.ArmTrajectoryTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.GoHomeTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.HandDesiredConfigurationTask;
@@ -34,7 +34,7 @@ public class PickObjectOffGroundBehavior extends AbstractBehavior
    private final AtlasPrimitiveActions atlasPrimitiveActions;
 
    public PickObjectOffGroundBehavior(DoubleYoVariable yoTime, PickUpBallBehaviorCoactiveElementBehaviorSide coactiveElement,
-         HumanoidReferenceFrames referenceFrames, BehaviorCommunicationBridge outgoingCommunicationBridge, AtlasPrimitiveActions atlasPrimitiveActions)
+         HumanoidReferenceFrames referenceFrames, CommunicationBridge outgoingCommunicationBridge, AtlasPrimitiveActions atlasPrimitiveActions)
    {
       super(outgoingCommunicationBridge);
       this.atlasPrimitiveActions = atlasPrimitiveActions;
@@ -65,7 +65,7 @@ public class PickObjectOffGroundBehavior extends AbstractBehavior
          protected void setBehaviorInput()
          {
             TextToSpeechPacket p1 = new TextToSpeechPacket("Picking Up The Ball");
-            sendPacketToNetworkProcessor(p1);
+            sendPacket(p1);
             FramePoint point = new FramePoint(ReferenceFrame.getWorldFrame(), grabLocation.getX(),
                   grabLocation.getY(),
                   grabLocation.getZ() + objectRadius + 0.25);
@@ -127,9 +127,8 @@ public class PickObjectOffGroundBehavior extends AbstractBehavior
    }
 
    @Override
-   public void doPostBehaviorCleanup()
+   public void onBehaviorExited()
    {
-      super.doPostBehaviorCleanup();
       grabLocation = null;
    }
 
@@ -144,5 +143,25 @@ public class PickObjectOffGroundBehavior extends AbstractBehavior
    {
       // TODO Auto-generated method stub
       return pipeLine.isDone();
+   }
+
+   @Override
+   public void onBehaviorEntered()
+   {
+   }
+
+   @Override
+   public void onBehaviorAborted()
+   {
+   }
+
+   @Override
+   public void onBehaviorPaused()
+   {
+   }
+
+   @Override
+   public void onBehaviorResumed()
+   {
    }
 }

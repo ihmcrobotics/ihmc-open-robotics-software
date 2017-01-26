@@ -24,7 +24,7 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
  */
 public abstract class YoVariable<T extends YoVariable<T>>
 {
-   private static final Pattern ILLEGAL_CHARACTERS = Pattern.compile("[ .*?@#$%/^&()<>,:{}'\"\\\\]");
+   public static final Pattern ILLEGAL_CHARACTERS = Pattern.compile("[ .*?@#$%/^&()<>,:{}'\"\\\\]");
    private static final String SPACE_STRING = "  ";
 
    public static final int MAX_LENGTH_SHORT_NAME = 20;
@@ -372,4 +372,6 @@ public abstract class YoVariable<T extends YoVariable<T>>
     * @return true if value changed
     */
    public abstract boolean setValue(T value, boolean notifyListeners);
+   
+   public abstract boolean isZero();
 }

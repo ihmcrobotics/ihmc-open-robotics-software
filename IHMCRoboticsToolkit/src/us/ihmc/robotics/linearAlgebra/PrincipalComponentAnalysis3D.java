@@ -10,7 +10,6 @@ import javax.vecmath.Vector3d;
 import org.ejml.alg.dense.decomposition.svd.SvdImplicitQrDecompose_D64;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.interfaces.decomposition.SingularValueDecomposition;
-import org.ejml.ops.CommonOps;
 import org.ejml.ops.SingularOps;
 
 /**
@@ -19,20 +18,18 @@ import org.ejml.ops.SingularOps;
  * <li> The secondary axis is defined as the axis orthogonal to the principal axis and along which the provided data has the maximum variance after the principal axis. </li>
  * <li> The third axis is defined as the axis orthogonal to the principal axis and to the secondary axis. It also along this axis that the provided data has the lowest variance. </li>
  * <p>
- * These three axes are provided as unit vectors forming a direct coordinate system. However, methods are provided to obtain the variance and/or the standard variation along each of these axes.
+ * These three axes are provided as unit vectors forming a direct coordinate system. Methods are provided to also obtain the variance and/or the standard variation along each of these axes.
  * </p>
+ * <p>
+ * The algorithm is inspired from <a href="https://en.wikipedia.org/wiki/Principal_component_analysis"> Principal Component Analysis</a>.
  *
  */
 public class PrincipalComponentAnalysis3D
 {
    private static final boolean DEBUG = false;
 
-   private final DenseMatrix64F pointCloud = new DenseMatrix64F(1, 3);
-   private final DenseMatrix64F U = new DenseMatrix64F(3, 3);
    private final DenseMatrix64F W = new DenseMatrix64F(3, 3);
    private final DenseMatrix64F V = new DenseMatrix64F(3, 3);
-
-   private int numberOfPoints;
 
    /** Axis along which the data has the highest variance. It is a unit vector. */
    private final Vector3d principalAxis = new Vector3d();
@@ -41,9 +38,10 @@ public class PrincipalComponentAnalysis3D
    /** Axis along which the data has the lowest variance. It is orthogonal to the {@link #principalAxis} and {@link #secondaryAxis}. It is a unit vector. */
    private final Vector3d thirdAxis = new Vector3d();
 
-   private final Point3d mean = new Point3d();
+   private final Vector3d variance = new Vector3d();
 
-   private final Vector3d principalValues = new Vector3d();
+   private final IncrementalCovariance3D covarianceCalculator = new IncrementalCovariance3D();
+   private final DenseMatrix64F covariance = new DenseMatrix64F(3, 3);
 
    private final SingularValueDecomposition<DenseMatrix64F> svd;
 
@@ -52,97 +50,67 @@ public class PrincipalComponentAnalysis3D
       svd = new SvdImplicitQrDecompose_D64(true, false, true, false);
    }
 
+   public void clear()
+   {
+      covarianceCalculator.clear();
+   }
+
+   public void addPoint(double x, double y, double z)
+   {
+      covarianceCalculator.addDataPoint(x, y, z);
+   }
+
    /**
+    * This method clears the current data held by this and add all the points from the given point cloud.
     * Use this method before {@link #compute()} to provide the point cloud to be analyzed.
     * @param pointCloud
     */
    public void setPointCloud(List<? extends Tuple3d> pointCloud)
    {
-      numberOfPoints = pointCloud.size();
+      clear();
 
-      this.pointCloud.reshape(numberOfPoints, 3);
-
-      double scale = 1.0 / numberOfPoints;
-      mean.set(0.0, 0.0, 0.0);
-      for (int row = 0; row < numberOfPoints; row++)
-      {
-         mean.setX(mean.getX() + pointCloud.get(row).getX() * scale);
-         mean.setY(mean.getY() + pointCloud.get(row).getY() * scale);
-         mean.setZ(mean.getZ() + pointCloud.get(row).getZ() * scale);
-      }
-
-      for (int row = 0; row < numberOfPoints; row++)
-      {
-         this.pointCloud.set(row, 0, pointCloud.get(row).getX() - mean.getX());
-         this.pointCloud.set(row, 1, pointCloud.get(row).getY() - mean.getY());
-         this.pointCloud.set(row, 2, pointCloud.get(row).getZ() - mean.getZ());
-      }
-
-      if (DEBUG)
-         System.out.println("PointCloud: \n" + pointCloud);
-   }
-
-   private final DenseMatrix64F tempMatrix = new DenseMatrix64F(1, 1);
-
-   public void setPointCloud(DenseMatrix64F pointCloud)
-   {
-      if (pointCloud.getNumRows() == 3)
-      {
-         numberOfPoints = pointCloud.getNumCols();
-         tempMatrix.reshape(pointCloud.getNumCols(), pointCloud.getNumRows());
-         CommonOps.transpose(pointCloud, tempMatrix);
-      }
-      else if (pointCloud.getNumCols() == 3)
-      {
-         numberOfPoints = pointCloud.getNumRows();
-         tempMatrix.set(pointCloud);
-      }
-      else
-         throw new RuntimeException("Unexpected size");
-
-      this.pointCloud.reshape(numberOfPoints, 3);
-
-      double scale = 1.0 / numberOfPoints;
-      mean.set(0.0, 0.0, 0.0);
-      for (int row = 0; row < numberOfPoints; row++)
-      {
-         mean.setX(mean.getX() + tempMatrix.get(row, 0) * scale);
-         mean.setY(mean.getY() + tempMatrix.get(row, 1) * scale);
-         mean.setZ(mean.getZ() + tempMatrix.get(row, 2) * scale);
-      }
-
-      for (int row = 0; row < numberOfPoints; row++)
-      {
-         this.pointCloud.set(row, 0, tempMatrix.get(row, 0) - mean.getX());
-         this.pointCloud.set(row, 1, tempMatrix.get(row, 1) - mean.getY());
-         this.pointCloud.set(row, 2, tempMatrix.get(row, 2) - mean.getZ());
-      }
+      covarianceCalculator.clear();
+      covarianceCalculator.addAllDataPoints(pointCloud);
 
       if (DEBUG)
          System.out.println("PointCloud: \n" + pointCloud);
    }
 
    /**
-    * Performs the singular value decomposition to get the principal axes and necessary to get information, such as the variance, on the data.
+    * This method clears the current data held by this and add all the points from the given point cloud.
+    * Use this method before {@link #compute()} to provide the point cloud to be analyzed.
+    * @param pointCloud matrix holding the point cloud data. Its size has to be either n-by-3 or 3-by-n, where n is the number of points.
+    */
+   public void setPointCloud(DenseMatrix64F pointCloud)
+   {
+      covarianceCalculator.clear();
+      covarianceCalculator.addAllDataPoint(pointCloud);
+
+      if (DEBUG)
+         System.out.println("PointCloud: \n" + pointCloud);
+   }
+
+   /**
+    * Performs the singular value decomposition to get the principal axes and the variance of the given dataset.
     * The point cloud needs to be provided before being able to call {@link #compute()}.
     */
    public void compute()
    {
-      if (pointCloud.getNumRows() < 3)
+      if (covarianceCalculator.getSampleSize() < 3)
       {
          principalAxis.set(Double.NaN, Double.NaN, Double.NaN);
          secondaryAxis.set(Double.NaN, Double.NaN, Double.NaN);
          thirdAxis.set(Double.NaN, Double.NaN, Double.NaN);
-         principalValues.set(0.0, 0.0, 0.0);
+         variance.set(0.0, 0.0, 0.0);
          return;
       }
 
-      svd.decompose(pointCloud);
+      covarianceCalculator.getCovariance(covariance);
+      svd.decompose(covariance);
 
-      U.zero(); // do not need U
       svd.getW(W);
       svd.getV(V, false);
-      SingularOps.descendingOrder(U, false, W, V, false);
+      SingularOps.descendingOrder(null, false, W, V, false);
 
       if (DEBUG)
          System.out.println("V: \n" + V);
@@ -154,18 +122,18 @@ public class PrincipalComponentAnalysis3D
       if (DEBUG)
          System.out.println("W: \n" + W);
 
-      principalValues.setX(W.get(0, 0));
-      principalValues.setY(W.get(1, 1));
-      principalValues.setZ(W.get(2, 2));
+      variance.setX(W.get(0, 0));
+      variance.setY(W.get(1, 1));
+      variance.setZ(W.get(2, 2));
    }
 
    /**
-    * Pack the average point of the provided point cloud.
-    * @param mean
+    * Pack the average of the provided point cloud.
+    * @param meanToPack
     */
-   public void getMean(Point3d mean)
+   public void getMean(Point3d meanToPack)
    {
-      mean.set(this.mean);
+      covarianceCalculator.getMean(meanToPack);
    }
 
    /**
@@ -185,10 +153,9 @@ public class PrincipalComponentAnalysis3D
     */
    public void getVariance(Vector3d principalVarianceToPack)
    {
-      principalVarianceToPack.setX(principalValues.getX() * principalValues.getX());
-      principalVarianceToPack.setY(principalValues.getY() * principalValues.getY());
-      principalVarianceToPack.setZ(principalValues.getZ() * principalValues.getZ());
-      principalVarianceToPack.scale(1.0 / numberOfPoints);
+      principalVarianceToPack.setX(variance.getX());
+      principalVarianceToPack.setY(variance.getY());
+      principalVarianceToPack.setZ(variance.getZ());
    }
 
    /**
@@ -197,43 +164,64 @@ public class PrincipalComponentAnalysis3D
     */
    public void getStandardDeviation(Vector3d principalStandardDeviationToPack)
    {
-      principalStandardDeviationToPack.setX(Math.abs(principalValues.getX()));
-      principalStandardDeviationToPack.setY(Math.abs(principalValues.getY()));
-      principalStandardDeviationToPack.setZ(Math.abs(principalValues.getZ()));
-      principalStandardDeviationToPack.scale(1.0 / Math.sqrt(numberOfPoints));
+      principalStandardDeviationToPack.setX(Math.sqrt(variance.getX()));
+      principalStandardDeviationToPack.setY(Math.sqrt(variance.getY()));
+      principalStandardDeviationToPack.setZ(Math.sqrt(variance.getZ()));
    }
 
    /**
     * Pack the the three principal vectors in the three given vectors as follows:
-    * @param principalVectorToPack is set to the principal axis of unit length, computed by the singular value decomposition on the point cloud matrix.
-    * @param secondaryVectorToPack is set to the secondary axis of unit length, computed by the singular value decomposition on the point cloud matrix.
-    * @param thirdVectorToPack is set to the third axis of unit length, computed by the singular value decomposition on the point cloud matrix.
+    * @param principalAxisToPack is set to the principal axis of unit length, it is the axis along which the variance is the greatest.
+    * @param secondaryAxisToPack is set to the secondary axis of unit length, it is the axis along which the variance is the greatest after the principal axis.
+    * @param thirdAxisToPack is set to the third axis of unit length, it is the axis along which the variance is the least.
     */
-   public void getPrincipalVectors(Vector3d principalVectorToPack, Vector3d secondaryVectorToPack, Vector3d thirdVectorToPack)
+   public void getPrincipalVectors(Vector3d principalAxisToPack, Vector3d secondaryAxisToPack, Vector3d thirdAxisToPack)
    {
-      principalVectorToPack.set(principalAxis);
-      secondaryVectorToPack.set(secondaryAxis);
-      thirdVectorToPack.set(thirdAxis);
+      principalAxisToPack.set(principalAxis);
+      secondaryAxisToPack.set(secondaryAxis);
+      thirdAxisToPack.set(thirdAxis);
    }
 
+   /**
+    * Get the axis along which the variance is the greatest.
+    * @param principalVectorToPack
+    */
    public void getPrincipalVector(Vector3d principalVectorToPack)
    {
       principalVectorToPack.set(principalAxis);
    }
 
    /**
+    * Get the axis along which the variance is the greatest after the principal axis.
+    * @param secondaryVectorToPack
+    */
+   public void getSecondaryVector(Vector3d secondaryVectorToPack)
+   {
+      secondaryVectorToPack.set(secondaryAxis);
+   }
+
+   /**
+    * Get the axis along which the variance is the least.
+    * @param thirdVectorToPack
+    */
+   public void getThirdVector(Vector3d thirdVectorToPack)
+   {
+      thirdVectorToPack.set(thirdAxis);
+   }
+
+   /**
     * Pack the the three principal vectors in the three given vectors as follows:
-    * @param principalVectorToPack is set to the principal axis scaled by the first singular value, computed by the singular value decomposition on the point cloud matrix.
-    * @param secondaryVectorToPack is set to the secondary axis scaled by the second singular value, computed by the singular value decomposition on the point cloud matrix.
-    * @param thirdVectorToPack is set to the third axis scaled by the third singular value, computed by the singular value decomposition on the point cloud matrix.
+    * @param principalVectorToPack is set to the principal axis scaled by the variance along this axis.
+    * @param secondaryVectorToPack is set to the secondary axis scaled by the variance along this axis.
+    * @param thirdVectorToPack is set to the third axis scaled by the third variance along this axis.
     */
    public void getScaledPrincipalVectors(Vector3d principalVectorToPack, Vector3d secondaryVectorToPack, Vector3d thirdVectorToPack)
    {
       principalVectorToPack.set(principalAxis);
-      principalVectorToPack.scale(principalValues.getX());
+      principalVectorToPack.scale(variance.getX());
       secondaryVectorToPack.set(secondaryAxis);
-      secondaryVectorToPack.scale(principalValues.getY());
+      secondaryVectorToPack.scale(variance.getY());
       thirdVectorToPack.set(thirdAxis);
-      thirdVectorToPack.scale(principalValues.getZ());
+      thirdVectorToPack.scale(variance.getZ());
    }
 }

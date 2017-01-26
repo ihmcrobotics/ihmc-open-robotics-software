@@ -2,16 +2,7 @@ package us.ihmc.simulationconstructionset;
 
 import java.util.StringTokenizer;
 
-import us.ihmc.simulationconstructionset.gui.XMLReaderUtility;
-
-/**
- * <p>Title: SimulationConstructionSet</p>
- * <p>Description: </p>
- * <p>Copyright: Copyright (c) 2000</p>
- * <p>Company: Yobotics, Inc.</p>
- * @author not attributable
- * @version 1.0
- */
+import us.ihmc.tools.io.xml.XMLReaderUtility;
 
 public class GraphConfiguration
 {

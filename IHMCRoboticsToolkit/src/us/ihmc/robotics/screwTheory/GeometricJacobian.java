@@ -108,7 +108,7 @@ public class GeometricJacobian implements NameBasedHashCodeHolder
     * angular velocity part of the twist is the angular velocity of end effector frame, with respect to base frame, rotated to end effector frame
     * linear velocity part of the twist is the linear velocity of end effector frame, with respect to base frame, rotated to end effector frame
     */
-   public void getTwist(Twist twistToPack, DenseMatrix64F jointVelocities)
+   public void getTwist(DenseMatrix64F jointVelocities, Twist twistToPack)
    {
       CommonOps.mult(jacobian, jointVelocities, tempMatrix);
       twistToPack.set(getEndEffectorFrame(), getBaseFrame(), jacobianFrame, tempMatrix, 0);
@@ -122,16 +122,24 @@ public class GeometricJacobian implements NameBasedHashCodeHolder
     */
    public DenseMatrix64F computeJointTorques(Wrench wrench)
    {
+      DenseMatrix64F jointTorques = new DenseMatrix64F(1, jacobian.getNumCols());
+      computeJointTorques(wrench, jointTorques);
+      return jointTorques;
+   }
+
+   /**
+    * Computes and packs the joint torque vector that corresponds to the given wrench
+    * @param wrench the resulting wrench at the end effector.
+    *       The wrench should be expressed in this Jacobian's jacobianFrame and its 'onWhat' frame should be this Jacobian's endEffectorFrame
+    */
+   public void computeJointTorques(Wrench wrench, DenseMatrix64F jointTorquesToPack)
+   {
       // reference frame check
       wrench.getExpressedInFrame().checkReferenceFrameMatch(this.jacobianFrame);
-
-
       wrench.getMatrix(tempMatrix);
-      DenseMatrix64F jointTorques = new DenseMatrix64F(1, jacobian.getNumCols());
-      CommonOps.multTransA(tempMatrix, jacobian, jointTorques);
-      CommonOps.transpose(jointTorques);
-
-      return jointTorques;
+      jointTorquesToPack.reshape(1, jacobian.getNumCols());
+      CommonOps.multTransA(tempMatrix, jacobian, jointTorquesToPack);
+      CommonOps.transpose(jointTorquesToPack);
    }
 
    /**

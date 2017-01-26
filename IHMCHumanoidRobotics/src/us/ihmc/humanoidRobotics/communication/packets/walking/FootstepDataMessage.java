@@ -9,13 +9,14 @@ import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 
-import us.ihmc.communication.ros.generators.RosEnumValueDocumentation;
-import us.ihmc.communication.ros.generators.RosMessagePacket;
-import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.packets.Packet;
+import us.ihmc.communication.ros.generators.RosEnumValueDocumentation;
+import us.ihmc.communication.ros.generators.RosExportedField;
+import us.ihmc.communication.ros.generators.RosMessagePacket;
 import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
 import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
+import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.RotationTools;
@@ -64,9 +65,21 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
    @RosExportedField(documentation = "This contains information on what the swing trajectory should be for each step. Recomended is DEFAULT.\n")
    public TrajectoryType trajectoryType = TrajectoryType.DEFAULT;
 
-   @RosExportedField(documentation = "Contains information on how high the robot should step. This affects only basic and obstacle clearance trajectories."
-         + "Recommended values are between 0.1 (default) and 0.25.\n")
-   public double swingHeight = 0;
+   @RosExportedField(documentation = "In case the trajectory type is set to custom the swing waypoints can be specified here (As of Dec 2016 only two waypoints are supported).\n"
+         + "The waypoints specify the sole position in the world frame.")
+   public Point3d[] trajectoryWaypoints = null;
+
+   @RosExportedField(documentation = "Contains information on how high the robot should step. This affects trajectory types default and obstacle clearance."
+         + "Recommended values are between 0.1 (minimum swing height, default) and 0.25.\n")
+   public double swingHeight = 0.0;
+
+   @RosExportedField(documentation = "Boolean that determines whether the controller should use swing and transfer times specifies in this message (if true) or"
+         + "if the default swing and transfer times from the FootstepDataListMessage should be used (if false).")
+   public boolean hasTimings = false;
+   @RosExportedField(documentation = "Specifies the swing time for this footstep.")
+   public double swingTime = Double.NaN;
+   @RosExportedField(documentation = "Specifies the transfer time before this step.")
+   public double transferTime = Double.NaN;
 
    /**
     * Empty constructor for serialization.
@@ -127,6 +140,17 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
       }
       this.trajectoryType = footstepData.trajectoryType;
       this.swingHeight = footstepData.swingHeight;
+
+      if (footstepData.trajectoryWaypoints != null)
+      {
+         this.trajectoryWaypoints = new Point3d[footstepData.trajectoryWaypoints.length];
+         for (int i = 0; i < footstepData.trajectoryWaypoints.length; i++)
+            trajectoryWaypoints[i] = new Point3d(footstepData.trajectoryWaypoints[i]);
+      }
+
+      this.hasTimings = footstepData.hasTimings;
+      this.swingTime = footstepData.swingTime;
+      this.transferTime = footstepData.transferTime;
    }
 
    public FootstepDataMessage clone()
@@ -163,8 +187,19 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
       {
          predictedContactPoints = null;
       }
-      trajectoryType = footstep.trajectoryType;
-      swingHeight = footstep.swingHeight;
+      trajectoryType = footstep.getTrajectoryType();
+      swingHeight = footstep.getSwingHeight();
+
+      if (footstep.getSwingWaypoints().size() != 0)
+      {
+         trajectoryWaypoints = new Point3d[footstep.getSwingWaypoints().size()];
+         for (int i = 0; i < footstep.getSwingWaypoints().size(); i++)
+            trajectoryWaypoints[i] = new Point3d(footstep.getSwingWaypoints().get(i));
+      }
+
+      hasTimings = footstep.hasTimings();
+      swingTime = footstep.getSwingTime();
+      transferTime = footstep.getTransferTime();
    }
 
    public FootstepOrigin getOrigin()
@@ -232,8 +267,6 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
    public void setSwingHeight(double swingHeight)
    {
       this.swingHeight = swingHeight;
-      if (trajectoryType == TrajectoryType.DEFAULT)
-         trajectoryType = TrajectoryType.BASIC;
    }
 
    public void setPredictedContactPoints(ArrayList<Point2d> predictedContactPoints)
@@ -249,6 +282,38 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
    public void setTrajectoryType(TrajectoryType trajectoryType)
    {
       this.trajectoryType = trajectoryType;
+   }
+
+   public Point3d[] getTrajectoryWaypoints()
+   {
+      return trajectoryWaypoints;
+   }
+
+   public void setTrajectoryWaypoints(Point3d[] trajectoryWaypoints)
+   {
+      this.trajectoryWaypoints = trajectoryWaypoints;
+   }
+
+   public void setTimings(double swingTime, double transferTime)
+   {
+      hasTimings = true;
+      this.swingTime = swingTime;
+      this.transferTime = transferTime;
+   }
+
+   public boolean hasTimings()
+   {
+      return hasTimings;
+   }
+
+   public double getSwingTime()
+   {
+      return swingTime;
+   }
+
+   public double getTransferTime()
+   {
+      return transferTime;
    }
 
    public String toString()
@@ -309,7 +374,25 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
          }
       }
 
-      return robotSideEquals && locationEquals && orientationEquals && contactPointsEqual;
+      boolean sameWaypoints = trajectoryWaypoints.length == footstepData.trajectoryWaypoints.length;
+      if (sameWaypoints)
+      {
+         for (int i = 0; i < trajectoryWaypoints.length; i++)
+         {
+            Point3d waypoint = trajectoryWaypoints[i];
+            Point3d otherWaypoint = footstepData.trajectoryWaypoints[i];
+            sameWaypoints = sameWaypoints && waypoint.epsilonEquals(otherWaypoint, epsilon);
+         }
+      }
+
+      boolean sameTimings = hasTimings == footstepData.hasTimings;
+      if (hasTimings)
+      {
+         sameTimings = sameTimings && MathTools.epsilonEquals(swingTime, footstepData.swingTime, epsilon);
+         sameTimings = sameTimings && MathTools.epsilonEquals(transferTime, footstepData.transferTime, epsilon);
+      }
+
+      return robotSideEquals && locationEquals && orientationEquals && contactPointsEqual && sameWaypoints && sameTimings;
    }
 
    public FootstepDataMessage transform(RigidBodyTransform transform)
@@ -321,6 +404,14 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
 
       // Quat4d orientation;
       ret.orientation = TransformTools.getTransformedQuat(this.getOrientation(), transform);
+
+      // Waypoints if they exist:
+      if (trajectoryWaypoints != null)
+      {
+         for (int i = 0; i < trajectoryWaypoints.length; i++)
+            ret.trajectoryWaypoints[i] = TransformTools.getTransformedPoint(trajectoryWaypoints[i], transform);
+      }
+
       return ret;
    }
 
@@ -343,6 +434,20 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
 
       this.trajectoryType = trajectoryTypes[randomOrdinal];
       this.swingHeight = RandomTools.generateRandomDoubleWithEdgeCases(random, 0.05);
+
+      if (random.nextBoolean())
+      {
+         hasTimings = true;
+         this.swingTime = RandomTools.generateRandomDoubleInRange(random, 0.05, 2.0);
+         this.transferTime = RandomTools.generateRandomDoubleInRange(random, 0.05, 2.0);
+      }
+
+      if (trajectoryType == TrajectoryType.CUSTOM)
+      {
+         trajectoryWaypoints = new Point3d[2];
+         trajectoryWaypoints[0] = RandomTools.generateRandomPoint3d(random, -10.0, 10.0);
+         trajectoryWaypoints[1] = RandomTools.generateRandomPoint3d(random, -10.0, 10.0);
+      }
    }
 
    /** {@inheritDoc} */

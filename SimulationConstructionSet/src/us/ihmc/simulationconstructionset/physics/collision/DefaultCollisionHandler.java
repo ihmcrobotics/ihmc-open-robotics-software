@@ -53,11 +53,13 @@ public class DefaultCollisionHandler implements CollisionHandler
       this.mu = mu;
    }
 
+   @Override
    public void maintenanceBeforeCollisionDetection()
    {
       shapesInContactList.clear();
    }
 
+   @Override
    public void maintenanceAfterCollisionDetection()
    {
       int numberOfCollisions = shapesInContactList.size();
@@ -80,6 +82,7 @@ public class DefaultCollisionHandler implements CollisionHandler
 
    private final ArrayList<Contacts> shapesInContactList = new ArrayList<Contacts>();
 
+   @Override
    public void handle(Contacts contacts)
    {
       shapesInContactList.add(contacts);
@@ -93,7 +96,11 @@ public class DefaultCollisionHandler implements CollisionHandler
       boolean shapeOneIsGround = shape1.isGround();
       boolean shapeTwoIsGround = shape2.isGround();
       if (shapeOneIsGround && shapeTwoIsGround)
-         throw new RuntimeException("Both shapes are ground. Shouldn't be contacting!!");
+      {
+         // TODO: Make sure ground shapes never get checked for collisions at all...
+//         throw new RuntimeException("Both shapes are ground. Shouldn't be contacting!!");
+         return;
+      }
 
       int numberOfContacts = contacts.getNumberOfContacts();
       indices.clear();
@@ -103,9 +110,16 @@ public class DefaultCollisionHandler implements CollisionHandler
          indices.add(i);
       }
 
-      // TODO: Sims won't sim same way twice, but I don't think they do anyway...
-      Collections.shuffle(indices);
 
+      // TODO: Smarter way of doing number of cycles.
+      // Perhaps prioritize based on velocities or something.
+      // Or keep track of graph of collision dependencies...
+      int numberOfCycles = 4;
+
+      for (int cycle = 0; cycle < numberOfCycles; cycle++)
+      {
+         // TODO: Sims won't sim same way twice, but I don't think they do anyway...
+         Collections.shuffle(indices);
       for (int j = 0; j < numberOfContacts; j++)
       {
          int i = indices.get(j);
@@ -171,18 +185,18 @@ public class DefaultCollisionHandler implements CollisionHandler
             System.out.println("externalForcePointOne = " + externalForcePointOne);
             System.out.println("externalForcePointTwo = " + externalForcePointTwo);
          }
-         
+
          double velocityForMicrocollision = 0.01;
          if (shapeTwoIsGround)
          {
 //            System.out.println("shapeTwoIsGround");
             Vector3d velocityWorld = new Vector3d(0.0, 0.0, 0.0);
-            
+
             if (externalForcePointOne.getVelocityVector().lengthSquared() > velocityForMicrocollision * velocityForMicrocollision)
             {
                collisionOccurred = externalForcePointOne.resolveCollision(velocityWorld, negative_normal, epsilon, mu, p_world); // link1.epsilon, link1.mu, p_world);
             }
-        
+
             else
             {
 //               System.out.println("Microcollision");
@@ -197,7 +211,7 @@ public class DefaultCollisionHandler implements CollisionHandler
             Vector3d velocityWorld = new Vector3d(0.0, 0.0, 0.0);
             if (externalForcePointTwo.getVelocityVector().lengthSquared() > velocityForMicrocollision * velocityForMicrocollision)
             {
-               collisionOccurred = externalForcePointTwo.resolveCollision(velocityWorld, normal, epsilon, mu, p_world); // link1.epsilon, link1.mu, p_world);               
+               collisionOccurred = externalForcePointTwo.resolveCollision(velocityWorld, normal, epsilon, mu, p_world); // link1.epsilon, link1.mu, p_world);
             }
 
             else
@@ -212,7 +226,22 @@ public class DefaultCollisionHandler implements CollisionHandler
          else
          {
             //            System.out.println("Two ef points");
-            collisionOccurred = externalForcePointOne.resolveCollision(externalForcePointTwo, negative_normal, epsilon, mu, p_world); // link1.epsilon, link1.mu, p_world);
+            Vector3d velocityVectorOne = externalForcePointOne.getVelocityVector();
+            Vector3d velocityVectorTwo = externalForcePointTwo.getVelocityVector();
+
+            Vector3d velocityDifference = new Vector3d();
+            velocityDifference.sub(velocityVectorTwo, velocityVectorOne);
+
+            if (velocityDifference.lengthSquared() > velocityForMicrocollision * velocityForMicrocollision)
+            {
+               collisionOccurred = externalForcePointOne.resolveCollision(externalForcePointTwo, negative_normal, epsilon, mu, p_world); // link1.epsilon, link1.mu, p_world);
+            }
+
+            else
+            {
+               double penetrationSquared = point1.distanceSquared(point2);
+               collisionOccurred = externalForcePointOne.resolveMicroCollision(penetrationSquared, externalForcePointTwo, negative_normal, epsilon, mu, p_world); // link1.epsilon, link1.mu, p_world);
+            }
          }
 
          if (collisionOccurred)
@@ -226,10 +255,11 @@ public class DefaultCollisionHandler implements CollisionHandler
                listener.collision(shape1, shape2, externalForcePointOne, externalForcePointTwo, null, null);
             }
          }
-
+      }
       }
    }
 
+   @Override
    public void addListener(CollisionHandlerListener listener)
    {
       listeners.add(listener);

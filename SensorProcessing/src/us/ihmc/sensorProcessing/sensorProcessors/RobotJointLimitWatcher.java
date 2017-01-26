@@ -1,9 +1,9 @@
 package us.ihmc.sensorProcessing.sensorProcessors;
 
-import us.ihmc.simulationconstructionset.robotController.RobotController;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.math.YoVariableLimitChecker;
+import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
 public class RobotJointLimitWatcher implements RobotController

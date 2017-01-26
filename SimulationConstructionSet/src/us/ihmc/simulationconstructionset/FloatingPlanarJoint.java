@@ -256,6 +256,7 @@ public class FloatingPlanarJoint extends Joint implements FloatingSCSJoint
       return this.floatingJointVars;
    }
 
+   @Override
    protected void update()
    {
       this.setFloatingTransform3D(this.jointTransform3D);

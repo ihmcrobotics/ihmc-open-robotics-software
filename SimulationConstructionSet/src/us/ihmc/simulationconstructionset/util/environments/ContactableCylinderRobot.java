@@ -6,15 +6,15 @@ import javax.vecmath.Matrix3d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
-import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.simulationconstructionset.GroundContactPointGroup;
 import us.ihmc.simulationconstructionset.Link;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicVector;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
+import us.ihmc.graphicsDescription.Graphics3DObject;
+import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
 import us.ihmc.robotics.geometry.shapes.FrameCylinder3d;
@@ -110,6 +110,7 @@ public class ContactableCylinderRobot extends ContactableRobot
       }
    }
 
+   @Override
    public synchronized boolean isPointOnOrInside(Point3d pointInWorldToCheck)
    {
       afterRootJointFrame.update();
@@ -119,11 +120,13 @@ public class ContactableCylinderRobot extends ContactableRobot
       return insideOrOnSurface;
    }
 
+   @Override
    public boolean isClose(Point3d pointInWorldToCheck)
    {
       return isPointOnOrInside(pointInWorldToCheck);
    }
 
+   @Override
    public synchronized void closestIntersectionAndNormalAt(Point3d intersectionToPack, Vector3d normalToPack, Point3d pointInWorldToCheck)
    {
       afterRootJointFrame.update();

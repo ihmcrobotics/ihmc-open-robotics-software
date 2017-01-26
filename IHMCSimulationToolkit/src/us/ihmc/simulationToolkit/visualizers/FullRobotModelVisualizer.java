@@ -2,6 +2,7 @@ package us.ihmc.simulationToolkit.visualizers;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotModels.visualizer.RobotVisualizer;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -11,7 +12,6 @@ import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;

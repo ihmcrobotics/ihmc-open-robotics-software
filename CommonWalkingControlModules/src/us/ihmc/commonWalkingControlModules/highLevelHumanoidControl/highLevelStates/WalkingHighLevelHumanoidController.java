@@ -2,7 +2,6 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSt
 
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.partNames.ArmJointName;
-import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.ChestOrientationManager;
@@ -44,6 +43,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -56,14 +56,12 @@ import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
-import us.ihmc.robotics.stateMachines.GenericStateMachine;
-import us.ihmc.robotics.stateMachines.State;
-import us.ihmc.robotics.stateMachines.StateChangedListener;
-import us.ihmc.robotics.stateMachines.StateTransition;
-import us.ihmc.robotics.stateMachines.StateTransitionCondition;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
+import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.GenericStateMachine;
+import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.State;
+import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateChangedListener;
+import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransition;
+import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransitionCondition;
 
 public class WalkingHighLevelHumanoidController extends HighLevelBehavior
 {
@@ -384,6 +382,7 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
 
       commandInputManager.flushAllCommands();
 
+      privilegedConfigurationCommand.clear();
       privilegedConfigurationCommand.setPrivilegedConfigurationOption(PrivilegedConfigurationOption.AT_ZERO);
 
       for (RobotSide robotSide : RobotSide.values)
@@ -391,15 +390,6 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
          ArmJointName[] armJointNames = fullRobotModel.getRobotSpecificJointNames().getArmJointNames();
          for (int i = 0; i < armJointNames.length; i++)
             privilegedConfigurationCommand.addJoint(fullRobotModel.getArmJoint(robotSide, armJointNames[i]), PrivilegedConfigurationOption.AT_MID_RANGE);
-      }
-
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         privilegedConfigurationCommand.addJoint(fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE_PITCH), PrivilegedConfigurationOption.AT_MID_RANGE);
-
-         RigidBody pelvis = fullRobotModel.getPelvis();
-         RigidBody foot = fullRobotModel.getFoot(robotSide);
-         privilegedConfigurationCommand.applyPrivilegedConfigurationToSubChain(pelvis, foot);
       }
 
       initializeContacts();
@@ -412,7 +402,7 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
 
       balanceManager.disablePelvisXYControl();
 
-      double stepTime = walkingMessageHandler.getStepTime();
+      double stepTime = walkingMessageHandler.getDefaultStepTime();
       pelvisOrientationManager.setTrajectoryTime(stepTime);
 
       if (!hasWalkingControllerBeenInitialized.getBooleanValue())

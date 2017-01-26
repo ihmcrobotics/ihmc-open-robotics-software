@@ -7,16 +7,16 @@ import java.util.List;
 import javax.vecmath.Point2d;
 import javax.vecmath.Point3f;
 
-import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.humanoidBehaviors.behaviors.behaviorServices.ColoredCircularBlobDetectorBehaviorService;
-import us.ihmc.humanoidBehaviors.communication.BehaviorCommunicationBridge;
+import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataStateCommand;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataStateCommand.LidarState;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.PointCloudWorldPacket;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.ihmcPerception.vision.shapes.HSVRange;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.tools.io.printing.PrintTools;
@@ -35,15 +35,14 @@ public class BlobFilteredSphereDetectionBehavior extends SphereDetectionBehavior
    
    private final ColoredCircularBlobDetectorBehaviorService coloredCircularBlobDetectorBehaviorService;
    
-   public BlobFilteredSphereDetectionBehavior(BehaviorCommunicationBridge behaviorCommunicationBridge, HumanoidReferenceFrames referenceFrames,
+   public BlobFilteredSphereDetectionBehavior(CommunicationBridge behaviorCommunicationBridge, HumanoidReferenceFrames referenceFrames,
          FullHumanoidRobotModel fullRobotModel)
    {
       super(behaviorCommunicationBridge, referenceFrames);
 
-      behaviorCommunicationBridge.attachGlobalListener(getNetworkProcessorGlobalObjectConsumer());
-      attachNetworkProcessorListeningQueue(pointCloudQueue, PointCloudWorldPacket.class);
+      attachNetworkListeningQueue(pointCloudQueue, PointCloudWorldPacket.class);
 
-      coloredCircularBlobDetectorBehaviorService = new ColoredCircularBlobDetectorBehaviorService(this);
+      coloredCircularBlobDetectorBehaviorService = new ColoredCircularBlobDetectorBehaviorService(behaviorCommunicationBridge);
 
       this.headFrame = fullRobotModel.getHead().getBodyFixedFrame();
    }
@@ -79,7 +78,7 @@ public class BlobFilteredSphereDetectionBehavior extends SphereDetectionBehavior
       {
          DepthDataStateCommand enableBehaviorLidar = new DepthDataStateCommand(LidarState.ENABLE_BEHAVIOR_ONLY);
          enableBehaviorLidar.setDestination(PacketDestination.SENSOR_MANAGER);
-         sendPacketToNetworkProcessor(enableBehaviorLidar);
+         sendPacket(enableBehaviorLidar);
          
          ThreadTools.sleep(100);
          
@@ -142,19 +141,18 @@ public class BlobFilteredSphereDetectionBehavior extends SphereDetectionBehavior
    }
 
    @Override
-   public void initialize()
+   public void onBehaviorEntered()
    {
-      super.initialize();
-      coloredCircularBlobDetectorBehaviorService.initialize();
+      coloredCircularBlobDetectorBehaviorService.run();
       
       DepthDataStateCommand depthDataStateCommand = new DepthDataStateCommand(LidarState.ENABLE_BEHAVIOR_ONLY);
       depthDataStateCommand.setDestination(PacketDestination.SENSOR_MANAGER);
       
-      sendPacketToNetworkProcessor(depthDataStateCommand);
+      sendPacket(depthDataStateCommand);
       
       TextToSpeechPacket textToSpeechPacket = new TextToSpeechPacket("<prosody pitch=\"90Hz\" rate=\"-20%\" volume=\"x-loud\">I am looking for balls.</prosody>");
       textToSpeechPacket.setDestination(PacketDestination.TEXT_TO_SPEECH);
-      sendPacketToNetworkProcessor(textToSpeechPacket);
+      sendPacket(textToSpeechPacket);
    }
 
    @Override
@@ -163,22 +161,22 @@ public class BlobFilteredSphereDetectionBehavior extends SphereDetectionBehavior
       return super.isDone();
    }
 
-   @Override public void pause()
+   @Override
+   public void onBehaviorPaused()
    {
-      super.pause();
       coloredCircularBlobDetectorBehaviorService.pause();
    }
 
-   @Override public void abort()
+   @Override
+   public void onBehaviorAborted()
    {
-      super.abort();
-      coloredCircularBlobDetectorBehaviorService.stop();
+      coloredCircularBlobDetectorBehaviorService.pause();
    }
 
-   @Override public void resume()
+   @Override
+   public void onBehaviorResumed()
    {
-      super.resume();
-      coloredCircularBlobDetectorBehaviorService.resume();
+      coloredCircularBlobDetectorBehaviorService.run();
    }
 
    public Point2d getLatestBallPosition()

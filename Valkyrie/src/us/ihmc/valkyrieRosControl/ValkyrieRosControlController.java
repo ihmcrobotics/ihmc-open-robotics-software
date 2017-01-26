@@ -1,6 +1,8 @@
 package us.ihmc.valkyrieRosControl;
 
 import us.ihmc.affinity.Affinity;
+import us.ihmc.avatar.DRCEstimatorThread;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -12,8 +14,6 @@ import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.util.NetworkPorts;
-import us.ihmc.darpaRoboticsChallenge.DRCEstimatorThread;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.humanoidRobotics.communication.packets.StampedPosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
@@ -21,8 +21,8 @@ import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCo
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
-import us.ihmc.robotDataCommunication.YoVariableServer;
-import us.ihmc.robotDataCommunication.logger.LogSettings;
+import us.ihmc.robotDataLogger.YoVariableServer;
+import us.ihmc.robotDataLogger.logger.LogSettings;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.rosControl.EffortJointHandle;
 import us.ihmc.rosControl.wholeRobot.*;
@@ -69,7 +69,8 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
          "rightElbowPitch" };
 
    private static final String[] positionControlledJoints = { "lowerNeckPitch", "neckYaw", "upperNeckPitch",
-         //"rightForearmYaw", "rightWristRoll", "rightWristPitch"
+         "rightForearmYaw", "rightWristRoll", "rightWristPitch",
+         "leftForearmYaw", "leftWristRoll", "leftWristPitch"
    };
 
    public static final boolean USE_YOVARIABLE_DESIREDS = true;
@@ -104,12 +105,13 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
 
    private boolean firstTick = true;
 
-   private final ValkyrieAffinity valkyrieAffinity = new ValkyrieAffinity();
+   private final ValkyrieAffinity valkyrieAffinity;
    private boolean isGazebo;
 
    public ValkyrieRosControlController()
    {
-
+      processEnvironmentVariables();
+      valkyrieAffinity = new ValkyrieAffinity(!isGazebo);
    }
 
    private JointTorqueOffsetEstimatorControllerFactory jointTorqueOffsetEstimatorControllerFactory = null;
@@ -153,8 +155,6 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
       /*
        * Create joints
        */
-
-      processEnvironmentVariables();
 
       HashSet<String> torqueControlledJointsSet = new HashSet<>(Arrays.asList(torqueControlledJoints));
       HashSet<String> positionControlledJointsSet = new HashSet<>(Arrays.asList(positionControlledJoints));

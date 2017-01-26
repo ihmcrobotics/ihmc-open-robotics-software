@@ -13,60 +13,64 @@ import com.jme3.math.Quaternion;
 import com.jme3.math.Transform;
 import com.jme3.math.Vector3f;
 
-import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
-import us.ihmc.SdfLoader.JaxbSDFLoader;
-import us.ihmc.SdfLoader.RobotDescriptionFromSDFLoader;
-import us.ihmc.SdfLoader.SDFContactSensor;
-import us.ihmc.SdfLoader.SDFDescriptionMutator;
-import us.ihmc.SdfLoader.SDFForceSensor;
-import us.ihmc.robotModels.FullHumanoidRobotModelFromDescription;
-import us.ihmc.robotics.partNames.HumanoidJointNameMap;
-import us.ihmc.humanoidRobotics.HumanoidFloatingRootJointRobot;
-import us.ihmc.SdfLoader.SDFJointHolder;
-import us.ihmc.SdfLoader.SDFLinkHolder;
-import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
-import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.robotics.partNames.NeckJointName;
-import us.ihmc.SdfLoader.xmlDescription.SDFSensor;
+import us.ihmc.modelFileLoaders.SdfLoader.DRCRobotSDFLoader;
+import us.ihmc.modelFileLoaders.SdfLoader.GeneralizedSDFRobotModel;
+import us.ihmc.modelFileLoaders.SdfLoader.JaxbSDFLoader;
+import us.ihmc.modelFileLoaders.SdfLoader.RobotDescriptionFromSDFLoader;
+import us.ihmc.modelFileLoaders.SdfLoader.SDFContactSensor;
+import us.ihmc.modelFileLoaders.SdfLoader.SDFDescriptionMutator;
+import us.ihmc.modelFileLoaders.SdfLoader.SDFForceSensor;
+import us.ihmc.modelFileLoaders.SdfLoader.SDFJointHolder;
+import us.ihmc.modelFileLoaders.SdfLoader.SDFLinkHolder;
+import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFSensor;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.DRCRobotPhysicalProperties;
+import us.ihmc.avatar.handControl.HandCommandManager;
+import us.ihmc.avatar.handControl.packetsAndConsumers.HandModel;
+import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
+import us.ihmc.avatar.networkProcessor.time.DRCROSAlwaysZeroOffsetPPSTimestampOffsetProvider;
+import us.ihmc.avatar.ros.DRCROSPPSTimestampOffsetProvider;
+import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
-import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotPhysicalProperties;
-import us.ihmc.darpaRoboticsChallenge.footstepGenerator.HeightCalculatorParameters;
-import us.ihmc.darpaRoboticsChallenge.handControl.HandCommandManager;
-import us.ihmc.darpaRoboticsChallenge.handControl.packetsAndConsumers.HandModel;
-import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
-import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.DRCROSAlwaysZeroOffsetPPSTimestampOffsetProvider;
-import us.ihmc.darpaRoboticsChallenge.ros.DRCROSPPSTimestampOffsetProvider;
-import us.ihmc.darpaRoboticsChallenge.sensors.DRCSensorSuiteManager;
-import us.ihmc.graphics3DAdapter.jme.util.JMEGeometryUtils;
 import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.FootstepPlanningParameterization;
 import us.ihmc.humanoidRobotics.footstep.footstepSnapper.FootstepSnappingParameters;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
+import us.ihmc.jMonkeyEngineToolkit.jme.util.JMEGeometryUtils;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.SDFLogModelProvider;
-import us.ihmc.robotDataCommunication.logger.LogSettings;
+import us.ihmc.robotDataLogger.logger.LogSettings;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotModels.FullHumanoidRobotModelFromDescription;
+import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.partNames.NeckJointName;
+import us.ihmc.robotics.robotController.OutputProcessor;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
-import us.ihmc.simulationconstructionset.physics.ScsCollisionConfigure;
+import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
+import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.robotController.MultiThreadedRobotControlElement;
-import us.ihmc.simulationconstructionset.robotController.OutputProcessor;
 import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
 import us.ihmc.valkyrie.configuration.ValkyrieConfigurationRoot;
 import us.ihmc.valkyrie.configuration.YamlWithIncludesLoader;
 import us.ihmc.valkyrie.fingers.ValkyrieHandModel;
-import us.ihmc.valkyrie.parameters.*;
+import us.ihmc.valkyrie.parameters.ValkyrieArmControllerParameters;
+import us.ihmc.valkyrie.parameters.ValkyrieCapturePointPlannerParameters;
+import us.ihmc.valkyrie.parameters.ValkyrieJointMap;
+import us.ihmc.valkyrie.parameters.ValkyriePhysicalProperties;
+import us.ihmc.valkyrie.parameters.ValkyrieSensorInformation;
+import us.ihmc.valkyrie.parameters.ValkyrieStateEstimatorParameters;
+import us.ihmc.valkyrie.parameters.ValkyrieWalkingControllerParameters;
 import us.ihmc.valkyrie.sensors.ValkyrieSensorSuiteManager;
 import us.ihmc.wholeBodyController.DRCHandType;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
+import us.ihmc.wholeBodyController.FootContactPoints;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizerInterface;
 import us.ihmc.wholeBodyController.parameters.DefaultArmConfigurations;
@@ -103,15 +107,25 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
 
    private boolean enableJointDamping = true;
 
+   public ValkyrieRobotModel(DRCRobotModel.RobotTarget target, boolean headless, FootContactPoints simulationContactPoints)
+   {
+      this(target,headless, "DEFAULT", simulationContactPoints);
+   }
+
    public ValkyrieRobotModel(DRCRobotModel.RobotTarget target, boolean headless)
    {
-      this(target,headless, "DEFAULT");
+      this(target,headless, "DEFAULT", null);
    }
 
    public ValkyrieRobotModel(DRCRobotModel.RobotTarget target, boolean headless, String model)
    {
+      this(target, headless, model, null);
+   }
+
+   public ValkyrieRobotModel(DRCRobotModel.RobotTarget target, boolean headless, String model, FootContactPoints simulationContactPoints)
+   {
       this.target = target;
-      jointMap = new ValkyrieJointMap();
+      jointMap = new ValkyrieJointMap(simulationContactPoints);
       physicalProperties = new ValkyriePhysicalProperties();
       sensorInformation = new ValkyrieSensorInformation(target);
       InputStream sdf = null;
@@ -169,7 +183,7 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
 
       boolean runningOnRealRobot = target == RobotTarget.REAL_ROBOT;
       capturePointPlannerParameters = new ValkyrieCapturePointPlannerParameters(runningOnRealRobot);
-      armControllerParameters = new ValkyrieArmControllerParameters(runningOnRealRobot, jointMap);
+      armControllerParameters = new ValkyrieArmControllerParameters(jointMap, target);
       walkingControllerParameters = new ValkyrieWalkingControllerParameters(jointMap, target);
       stateEstimatorParamaters = new ValkyrieStateEstimatorParameters(runningOnRealRobot, getEstimatorDT(), sensorInformation, jointMap);
       robotDescription = createRobotDescription();
@@ -178,12 +192,10 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    private RobotDescription createRobotDescription()
    {
       boolean useCollisionMeshes = false;
-      boolean enableTorqueVelocityLimits = true;
-      boolean enableJointDamping = true;
 
       GeneralizedSDFRobotModel generalizedSDFRobotModel = getGeneralizedRobotModel();
       RobotDescriptionFromSDFLoader descriptionLoader = new RobotDescriptionFromSDFLoader();
-      RobotDescription robotDescription = descriptionLoader.loadRobotDescriptionFromSDF(generalizedSDFRobotModel, jointMap, useCollisionMeshes, enableTorqueVelocityLimits, enableJointDamping);
+      RobotDescription robotDescription = descriptionLoader.loadRobotDescriptionFromSDF(generalizedSDFRobotModel, jointMap, useCollisionMeshes);
       return robotDescription;
    }
 
@@ -318,28 +330,9 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    }
 
    @Override
-   public WalkingControllerParameters getMultiContactControllerParameters()
-   {
-      return walkingControllerParameters;
-   }
-
-   @Override
-   public ScsCollisionConfigure getPhysicsConfigure(FloatingRootJointRobot robotModel)
-   {
-      return null;
-   }
-
-   @Override
    public RobotContactPointParameters getContactPointParameters()
    {
       return jointMap.getContactPointParameters();
-   }
-
-   //For Sim Only
-   @Override
-   public void setJointDamping(FloatingRootJointRobot simulatedRobot)
-   {
-      System.err.println("Joint Damping not setup for Valkyrie. ValkyrieRobotModel setJointDamping!");
    }
 
    @Override
@@ -361,12 +354,6 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    }
 
    @Override
-   public WalkingControllerParameters getDrivingControllerParameters()
-   {
-      return getWalkingControllerParameters();
-   }
-
-   @Override
    public ValkyrieSensorInformation getSensorInformation()
    {
       return sensorInformation;
@@ -381,13 +368,10 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    @Override
    public HumanoidFloatingRootJointRobot createHumanoidFloatingRootJointRobot(boolean createCollisionMeshes)
    {
-      boolean useCollisionMeshes = false;
       boolean enableTorqueVelocityLimits = false;
-      HumanoidJointNameMap jointMap = getJointMap();
       boolean enableJointDamping = getEnableJointDamping();
 
-      RobotDescription robotDescription = loader.createRobotDescription(jointMap, useCollisionMeshes, enableTorqueVelocityLimits, enableJointDamping);
-      HumanoidFloatingRootJointRobot sdfRobot = new HumanoidFloatingRootJointRobot(robotDescription, jointMap);
+      HumanoidFloatingRootJointRobot sdfRobot = new HumanoidFloatingRootJointRobot(robotDescription, jointMap, enableJointDamping, enableTorqueVelocityLimits);
 
       if (PRINT_MODEL)
       {
@@ -461,7 +445,7 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    @Override
    public FootstepPlanningParameterization getFootstepParameters()
    {
-      return null;
+      return new FootstepPlanningParameterization();
    }
 
    @Override
@@ -499,12 +483,6 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
 
    @Override
    public DefaultArmConfigurations getDefaultArmConfigurations()
-   {
-      return null;
-   }
-
-   @Override
-   public HeightCalculatorParameters getHeightCalculatorParameters()
    {
       return null;
    }
@@ -608,10 +586,5 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
       linkHolder.getInertia().setM11(0.00208115); // i_yy
       linkHolder.getInertia().setM12(-9.8165e-09); // i_yz
       linkHolder.getInertia().setM22(0.00178402); // i_zz
-   }
-
-   public void addMoreFootContactPointsSimOnly(int nContactPointsX, int nContactPointsY, boolean edgePointsOnly)
-   {
-      jointMap.getContactPointParameters().addMoreFootContactPointsSimOnly(nContactPointsX, nContactPointsY, edgePointsOnly);
    }
 }

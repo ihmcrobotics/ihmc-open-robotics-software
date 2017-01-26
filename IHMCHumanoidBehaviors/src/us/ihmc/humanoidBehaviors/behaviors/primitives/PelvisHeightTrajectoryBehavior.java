@@ -2,7 +2,7 @@ package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
-import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
+import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisHeightTrajectoryMessage;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -18,7 +18,7 @@ public class PelvisHeightTrajectoryBehavior extends AbstractBehavior
    private final DoubleYoVariable startTime;
    private final DoubleYoVariable trajectoryTime;
 
-   public PelvisHeightTrajectoryBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, DoubleYoVariable yoTime)
+   public PelvisHeightTrajectoryBehavior(CommunicationBridgeInterface outgoingCommunicationBridge, DoubleYoVariable yoTime)
    {
       super(outgoingCommunicationBridge);
       startTime = new DoubleYoVariable(getName() + "StartTime", registry);
@@ -50,7 +50,7 @@ public class PelvisHeightTrajectoryBehavior extends AbstractBehavior
       {      
          outgoingPelvisHeightTrajectoryMessage.setDestination(PacketDestination.UI);  
          sendPacketToController(outgoingPelvisHeightTrajectoryMessage);
-         sendPacketToNetworkProcessor(outgoingPelvisHeightTrajectoryMessage);
+         sendPacket(outgoingPelvisHeightTrajectoryMessage);
          packetHasBeenSent.set(true);
          startTime.set(yoTime.getDoubleValue());
          trajectoryTime.set(outgoingPelvisHeightTrajectoryMessage.getTrajectoryTime());
@@ -58,7 +58,7 @@ public class PelvisHeightTrajectoryBehavior extends AbstractBehavior
    }
 
    @Override
-   public void initialize()
+   public void onBehaviorEntered()
    {
       packetHasBeenSent.set(false);
 
@@ -72,7 +72,7 @@ public class PelvisHeightTrajectoryBehavior extends AbstractBehavior
    }
 
    @Override
-   public void doPostBehaviorCleanup()
+   public void onBehaviorExited()
    {
       packetHasBeenSent.set(false);
       hasInputBeenSet.set(false);
@@ -104,5 +104,20 @@ public class PelvisHeightTrajectoryBehavior extends AbstractBehavior
    public boolean hasInputBeenSet()
    {
       return hasInputBeenSet.getBooleanValue();
+   }
+
+   @Override
+   public void onBehaviorAborted()
+   {
+   }
+
+   @Override
+   public void onBehaviorPaused()
+   {
+   }
+
+   @Override
+   public void onBehaviorResumed()
+   {
    }
 }

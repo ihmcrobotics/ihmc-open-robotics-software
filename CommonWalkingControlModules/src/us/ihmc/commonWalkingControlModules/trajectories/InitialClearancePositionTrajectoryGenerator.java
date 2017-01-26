@@ -5,7 +5,12 @@ import java.util.ArrayList;
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -23,11 +28,6 @@ import us.ihmc.robotics.math.frames.YoMultipleFramesHolder;
 import us.ihmc.robotics.math.trajectories.PositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.BagOfBalls;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicVector;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsList;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
 public class InitialClearancePositionTrajectoryGenerator implements PositionTrajectoryGenerator
 {
@@ -239,7 +239,7 @@ public class InitialClearancePositionTrajectoryGenerator implements PositionTraj
       this.initialDirection.set(initialDirection);
       this.initialDirection.normalize();
       this.initialDirection.get(tempVector);
-      GeometryTools.getRotationBasedOnNormal(axisAngleToWorld, tempVector);
+      GeometryTools.getAxisAngleFromZUpToVector(tempVector, axisAngleToWorld);
       rotationPlane.setIncludingFrame(this.initialDirection.getReferenceFrame(), axisAngleToWorld);
 
       this.leaveDistance.set(leaveDistance);

@@ -52,12 +52,17 @@ public class QuadProgSolver extends ConstrainedQPSolver
          throws NoConvergenceException
    {
 
-      allocateTempraryMatrixOnDemand(Aeq.numCols, Aeq.numRows, Ain.numRows);
+      allocateTempraryMatrixOnDemand(Q.numCols, Aeq.numRows, Ain.numRows);
 
       CommonOps.transpose(Aeq, this.negAeq);
       CommonOps.scale(-1, this.negAeq);
       CommonOps.transpose(Ain, this.negAin);
       CommonOps.scale(-1, this.negAin);
       return qpWrapper.solve(Q, f, negAeq, beq, negAin, bin, x, initialize);
+   }
+
+   public double getCost()
+   {
+      return qpWrapper.getObjVal();
    }
 }

@@ -24,6 +24,7 @@ public class SelectGraphConfigurationAction extends AbstractAction
       this.putValue(Action.SHORT_DESCRIPTION, "Select " + name);
    }
 
+   @Override
    public void actionPerformed(ActionEvent actionEvent)
    {
       executor.selectGraphConfiguration(name);

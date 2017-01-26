@@ -7,7 +7,7 @@ import javax.vecmath.Vector3d;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -43,6 +43,8 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
    private final BooleanYoVariable yoSetDesiredAccelerationToZero;
    private final BooleanYoVariable yoSetDesiredVelocityToZero;
 
+   protected final BooleanYoVariable hasSwitchedToStraightLegs;
+
    private final YoFrameVector angularWeight;
    private final YoFrameVector linearWeight;
 
@@ -64,6 +66,8 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
       yoDesiredPosition.setToNaN();
       yoSetDesiredAccelerationToZero = new BooleanYoVariable(namePrefix + "SetDesiredAccelerationToZero", registry);
       yoSetDesiredVelocityToZero = new BooleanYoVariable(namePrefix + "SetDesiredVelocityToZero", registry);
+
+      hasSwitchedToStraightLegs = new BooleanYoVariable(namePrefix + "HasSwitchedToStraightLegs", registry);
 
       angularWeight = new YoFrameVector(namePrefix + "AngularWeight", null, registry);
       linearWeight = new YoFrameVector(namePrefix + "LinearWeight", null, registry);
@@ -125,6 +129,8 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
    {
       super.doTransitionIntoAction();
       legSingularityAndKneeCollapseAvoidanceControlModule.setCheckVelocityForSwingSingularityAvoidance(true);
+
+      hasSwitchedToStraightLegs.set(false);
 
       initializeTrajectory();
    }
@@ -200,9 +206,12 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
    }
 
    @Override
-   public SpatialAccelerationCommand getInverseDynamicsCommand()
+   public InverseDynamicsCommand<?> getInverseDynamicsCommand()
    {
-      return null;
+      if (hasSwitchedToStraightLegs.getBooleanValue())
+         return straightLegsPrivilegedConfigurationCommand;
+      else
+         return bentLegsPrivilegedConfigurationCommand;
    }
 
    @Override

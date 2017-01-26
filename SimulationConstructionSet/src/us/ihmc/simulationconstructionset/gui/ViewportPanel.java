@@ -9,15 +9,16 @@ import java.util.ArrayList;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.vecmath.Tuple3d;
 
-import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
-import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
-import us.ihmc.graphics3DAdapter.camera.CameraConfigurationList;
-import us.ihmc.graphics3DAdapter.camera.CameraMountList;
-import us.ihmc.graphics3DAdapter.camera.CaptureDevice;
-import us.ihmc.graphics3DAdapter.camera.ClassicCameraController;
-import us.ihmc.graphics3DAdapter.camera.TrackingDollyCameraController;
-import us.ihmc.graphics3DAdapter.camera.ViewportAdapter;
+import us.ihmc.jMonkeyEngineToolkit.Graphics3DAdapter;
+import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
+import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfigurationList;
+import us.ihmc.jMonkeyEngineToolkit.camera.CameraMountList;
+import us.ihmc.jMonkeyEngineToolkit.camera.CaptureDevice;
+import us.ihmc.jMonkeyEngineToolkit.camera.ClassicCameraController;
+import us.ihmc.jMonkeyEngineToolkit.camera.TrackingDollyCameraController;
+import us.ihmc.jMonkeyEngineToolkit.camera.ViewportAdapter;
 import us.ihmc.robotics.dataStructures.YoVariableHolder;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.simulationconstructionset.ViewportConfiguration;
@@ -25,6 +26,7 @@ import us.ihmc.simulationconstructionset.ViewportPanelConfiguration;
 import us.ihmc.simulationconstructionset.commands.RunCommandsExecutor;
 import us.ihmc.simulationconstructionset.gui.camera.CameraTrackAndDollyYoVariablesHolder;
 import us.ihmc.simulationconstructionset.gui.config.CameraSelector;
+import us.ihmc.tools.io.xml.XMLReaderUtility;
 
 public class ViewportPanel extends JPanel implements CameraSelector, ActiveCameraHolder, ActiveCanvas3DHolder
 {
@@ -53,6 +55,7 @@ public class ViewportPanel extends JPanel implements CameraSelector, ActiveCamer
 
    }
 
+   @Override
    public TrackingDollyCameraController getCameraPropertiesForActiveCamera()
    {
       return activeView.getCameraController();
@@ -349,6 +352,7 @@ public class ViewportPanel extends JPanel implements CameraSelector, ActiveCamer
 
    // public YoCanvas3D getCanvas3D(){return activeView.getCanvas3D();}
    // public YoCanvas3D getOffscreenCanvas3D(){return this.offscreenCanvas3D;}
+   @Override
    public TrackingDollyCameraController getCamera()
    {
       return activeView.getCameraController();
@@ -409,9 +413,19 @@ public class ViewportPanel extends JPanel implements CameraSelector, ActiveCamer
       activeView.getCameraController().setFixPosition(fixX, fixY, fixZ);
    }
 
+   public void setCameraFix(Tuple3d cameraFix)
+   {
+      activeView.getCameraController().setFixPosition(cameraFix.getX(), cameraFix.getY(), cameraFix.getZ());      
+   }
+
    public void setCameraPosition(double posX, double posY, double posZ)
    {
       activeView.getCameraController().setCameraPosition(posX, posY, posZ);
+   }
+
+   public void setCameraPosition(Tuple3d cameraPosition)
+   {
+      activeView.getCameraController().setCameraPosition(cameraPosition.getX(), cameraPosition.getY(), cameraPosition.getZ());      
    }
 
    public void setCameraTracking(boolean track, boolean trackX, boolean trackY, boolean trackZ)
@@ -445,6 +459,7 @@ public class ViewportPanel extends JPanel implements CameraSelector, ActiveCamer
       standard3DViews.clear();
    }
 
+   @Override
    public CaptureDevice getActiveCaptureDevice()
    {
       return this.getActiveView().getCaptureDevice();
@@ -462,6 +477,7 @@ public class ViewportPanel extends JPanel implements CameraSelector, ActiveCamer
       setActiveView(canvasPanel.getStandard3DView(), canvasPanel);
    }
 
+   @Override
    public void selectCamera(String name)
    {
       CameraConfiguration config = cameraConfigurationList.getCameraConfiguration(name);
@@ -583,6 +599,7 @@ public class ViewportPanel extends JPanel implements CameraSelector, ActiveCamer
       return visible.trim().equalsIgnoreCase("true");
    }
 
+   @Override
    public Dimension getMinimumSize()
    {
       return new Dimension(0, 0);
@@ -841,4 +858,6 @@ public class ViewportPanel extends JPanel implements CameraSelector, ActiveCamer
          standardGUIActions.makeCheckBoxesConsistentWithCamera();
       }
    }
+
+
 }

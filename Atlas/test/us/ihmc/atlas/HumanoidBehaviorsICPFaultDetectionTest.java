@@ -1,8 +1,8 @@
 package us.ihmc.atlas;
 
 
-import us.ihmc.darpaRoboticsChallenge.DRCHumanoidBehaviorICPFaultDetectionTest;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.DRCHumanoidBehaviorICPFaultDetectionTest;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.tools.continuousIntegration.IntegrationCategory;
 import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;

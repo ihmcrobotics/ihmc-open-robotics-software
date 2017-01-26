@@ -1,0 +1,72 @@
+option java_outer_classname = "YoProtoHandshakeProto";
+option java_package = "us.ihmc.robotDataLogger.generated";
+
+message YoProtoHandshake
+{
+	
+	message YoRegistryDefinition
+	{
+		required uint32 parent = 1;
+		required string name = 2;
+	}
+	
+
+	message YoVariableDefinition
+	{
+		required string name = 1;
+		required uint32 registry = 2;
+		
+		enum YoProtoType
+		{
+			DoubleYoVariable = 1;
+			BooleanYoVariable = 2;
+			IntegerYoVariable = 3;
+			LongYoVariable = 4;
+			EnumYoVariable = 5;
+		}
+		
+		required YoProtoType type = 3;
+		repeated string enumValues = 4;
+		optional bool allowNullValues = 5;
+	}
+	
+	message JointDefinition
+	{
+		required string name = 1;
+		
+		enum JointType
+		{
+			SiXDoFJoint = 1;
+			OneDoFJoint = 2;
+		}
+		required JointType type = 2;
+	}
+	
+	message AppearanceDefinitionMessage
+	{
+		required double x = 1;
+		required double y = 2;
+		required double z = 3;
+		
+		required double transparency = 4;
+	}
+	
+	message DynamicGraphicMessage
+	{
+		required uint32 type = 1;
+		required string name = 2;
+		
+		repeated uint32 yo_index = 3;
+		repeated double constant = 4;
+		optional AppearanceDefinitionMessage appearance= 5;
+		optional string list_name = 6;
+	}
+	
+	optional double dt = 1;
+	repeated YoRegistryDefinition registry = 2;
+	repeated YoVariableDefinition variable = 3;
+	repeated JointDefinition joint = 4;
+	repeated DynamicGraphicMessage graphic_object = 5;
+	repeated DynamicGraphicMessage artifact = 6;
+	
+}

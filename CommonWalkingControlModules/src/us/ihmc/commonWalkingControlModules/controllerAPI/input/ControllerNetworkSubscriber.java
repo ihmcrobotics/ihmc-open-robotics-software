@@ -29,6 +29,8 @@ import us.ihmc.util.PeriodicThreadScheduler;
  */
 public class ControllerNetworkSubscriber implements Runnable, CloseableAndDisposable
 {
+   private static final boolean DEBUG = false;
+
    private final int buffersCapacity = 16;
    /** The input API to which the received messages should be submitted. */
    private final CommandInputManager controllerCommandInputManager;
@@ -113,6 +115,10 @@ public class ControllerNetworkSubscriber implements Runnable, CloseableAndDispos
          public void receivedPacket(T message)
          {
             String errorMessage = message.validateMessage();
+
+            if (DEBUG)
+               PrintTools.debug(ControllerNetworkSubscriber.this, "Received message: " + message.getClass().getSimpleName() + ", " + message);
+
             if (errorMessage != null)
             {
                reportInvalidMessage(messageClass, errorMessage);
@@ -123,7 +129,9 @@ public class ControllerNetworkSubscriber implements Runnable, CloseableAndDispos
 
             if (messageFilter.get() != null && !messageFilter.get().isMessageValid(message))
             {
-               PrintTools.error(ControllerNetworkSubscriber.this, "Packet failed to validate filter!"); 
+               if (DEBUG)
+                  PrintTools.error(ControllerNetworkSubscriber.this, "Packet failed to validate filter! Filter class: "
+                        + messageFilter.get().getClass().getSimpleName() + ", rejected message: " + message.getClass().getSimpleName());
                return;
             }
 

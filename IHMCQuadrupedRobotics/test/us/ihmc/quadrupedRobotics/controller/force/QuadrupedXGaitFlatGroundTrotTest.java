@@ -13,7 +13,7 @@ import us.ihmc.quadrupedRobotics.QuadrupedTestBehaviors;
 import us.ihmc.quadrupedRobotics.QuadrupedTestFactory;
 import us.ihmc.quadrupedRobotics.QuadrupedTestGoals;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
-import us.ihmc.quadrupedRobotics.params.ParameterRegistry;
+import us.ihmc.robotics.dataStructures.parameter.ParameterRegistry;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
 import us.ihmc.robotics.testing.YoVariableTestGoal;
 import us.ihmc.simulationconstructionset.util.simulationRunner.GoalOrientedTestConductor;
@@ -70,11 +70,11 @@ public abstract class QuadrupedXGaitFlatGroundTrotTest implements QuadrupedMulti
 
    private void trotFast(double directionX) throws AssertionFailedError
    {
-      QuadrupedTestBehaviors.standUp(conductor, variables);
-      QuadrupedTestBehaviors.enterXGait(conductor, variables);
-      
+      QuadrupedTestBehaviors.readyXGait(conductor, variables);
+
       variables.getXGaitEndPhaseShiftInput().set(180.0);
-      
+      QuadrupedTestBehaviors.enterXGait(conductor, variables);
+
       variables.getYoPlanarVelocityInputX().set(directionX * 0.6);
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addTimeLimit(variables.getYoTime(), 5.0);
@@ -107,10 +107,11 @@ public abstract class QuadrupedXGaitFlatGroundTrotTest implements QuadrupedMulti
    
    private void trotSlow(double directionX) throws AssertionFailedError
    {
-      QuadrupedTestBehaviors.standUp(conductor, variables);
+      QuadrupedTestBehaviors.readyXGait(conductor, variables);
+
+      variables.getXGaitEndPhaseShiftInput().set(180.0);
       QuadrupedTestBehaviors.enterXGait(conductor, variables);
       
-      variables.getXGaitEndPhaseShiftInput().set(180.0);
 //      variables.getXGaitEndDoubleSupportDurationInput().set(0.3);
       
       variables.getYoPlanarVelocityInputX().set(directionX * 0.1);
@@ -161,11 +162,11 @@ public abstract class QuadrupedXGaitFlatGroundTrotTest implements QuadrupedMulti
 
    private void trotInACircle(double directionX, double directionZ) throws AssertionFailedError
    {
-      QuadrupedTestBehaviors.standUp(conductor, variables);
-      QuadrupedTestBehaviors.enterXGait(conductor, variables);
-      
+      QuadrupedTestBehaviors.readyXGait(conductor, variables);
+
       variables.getXGaitEndPhaseShiftInput().set(180.0);
-      
+      QuadrupedTestBehaviors.enterXGait(conductor, variables);
+
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 1.0));
       conductor.simulate();

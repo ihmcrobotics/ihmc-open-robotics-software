@@ -138,7 +138,7 @@ public class PrivilegedConfigurationCommand implements InverseKinematicsCommand<
          joints.add(joint);
          jointNames.add(other.jointNames.get(i));
          privilegedOneDoFJointConfigurations.add(other.privilegedOneDoFJointConfigurations.get(i));
-         privilegedOneDoFJointConfigurationOptions.put(joint.getName(), other.privilegedOneDoFJointConfigurationOptions.get(joint));
+         privilegedOneDoFJointConfigurationOptions.put(joint.getName(), other.privilegedOneDoFJointConfigurationOptions.get(joint.getName()));
       }
    }
 

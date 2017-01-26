@@ -83,7 +83,7 @@ public class Sphere3dTest
       Point3d orthogonalProjection = new Point3d(randomPoint);
       sphere3d.orthogonalProjection(orthogonalProjection);
       
-      assertEquals(orthogonalProjection.distance(center), radius, 1e-7);
+      assertEquals(radius, orthogonalProjection.distance(center), 1e-7);
       Vector3d vector1 = new Vector3d(randomPoint);
       vector1.sub(center);
       

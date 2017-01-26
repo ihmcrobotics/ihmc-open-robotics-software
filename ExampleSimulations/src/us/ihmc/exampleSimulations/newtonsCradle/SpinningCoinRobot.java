@@ -5,35 +5,25 @@ import java.util.ArrayList;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
-import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
+import us.ihmc.graphicsDescription.Graphics3DObject;
+import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.robotDescription.CollisionMeshDescription;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.FunctionToIntegrate;
 import us.ihmc.simulationconstructionset.Link;
-import us.ihmc.simulationconstructionset.NullJoint;
 import us.ihmc.simulationconstructionset.Robot;
-import us.ihmc.simulationconstructionset.physics.CollisionShape;
-import us.ihmc.simulationconstructionset.physics.CollisionShapeDescription;
-import us.ihmc.simulationconstructionset.physics.CollisionShapeFactory;
-import us.ihmc.simulationconstructionset.physics.ScsCollisionDetector;
-import us.ihmc.simulationconstructionset.physics.collision.simple.PolytopeShapeDescription;
-import us.ihmc.simulationconstructionset.physics.collision.simple.SimpleCollisionDetector;
 
 public class SpinningCoinRobot
 {
-   private final ScsCollisionDetector collisionDetector;
    private final double coinWidth = 0.00175; //quarter //0.1
    private final double coinRadius = 0.01213; //0.5; //
    private final double coinMass = 0.00567; //1.0; //
    private double spinningAngularVelocity = 10.0 * 2.0 * Math.PI;
-
-   private final double margin = 0.0002;
 
    private final ArrayList<Robot> robots = new ArrayList<>();
 
@@ -49,15 +39,10 @@ public class SpinningCoinRobot
    {
       final Robot coinRobot = new Robot("SpinningCoin");
 
-      //      collisionDetector = new GdxCollisionDetector(100.0);
-      collisionDetector = new SimpleCollisionDetector();
-      CollisionShapeFactory collisionShapeFactory = collisionDetector.getShapeFactory();
-      collisionShapeFactory.setMargin(margin);
-
       Vector3d offset = new Vector3d(0.0, 0.0, 0.0);
       FloatingJoint floatingJoint = new FloatingJoint("root", offset, coinRobot);
 
-      Link link = createCylinderCoin(collisionShapeFactory, coinRobot);
+      Link link = createCylinderCoin(coinRobot);
 
       floatingJoint.setLink(link);
       coinRobot.addRootJoint(floatingJoint);
@@ -117,7 +102,7 @@ public class SpinningCoinRobot
       coinRobot.addYoVariableRegistry(registry);
    }
 
-   private Link createCylinderCoin(CollisionShapeFactory collisionShapeFactory, Robot robot)
+   private Link createCylinderCoin(Robot robot)
    {
       Link link = new Link("coin");
       link.setMassAndRadiiOfGyration(coinMass, coinRadius / 2.0, coinRadius / 2.0, coinWidth / 2.0);
@@ -133,27 +118,19 @@ public class SpinningCoinRobot
 
       AppearanceDefinition color = YoAppearance.Purple();
       linkGraphics.addCylinder(coinWidth, coinRadius, color);
-      link.setLinkGraphics(linkGraphics);
-
       linkGraphics.identity();
       linkGraphics.translate(0.0, 0.0, coinWidth / 2.0);
       linkGraphics.addCube(coinRadius / 3.0, coinRadius / 3.0, coinWidth / 4.0, YoAppearance.AliceBlue());
       linkGraphics.translate(0.0, 0.0, -coinWidth - coinWidth / 4.0);
       linkGraphics.addCube(coinRadius / 3.0, coinRadius / 3.0, coinWidth / 4.0, YoAppearance.Gold());
-
       //      link.addEllipsoidFromMassProperties(YoAppearance.DarkGreen());
-      CollisionShapeDescription<?> shapeDescription = collisionShapeFactory.createCylinder(coinRadius, coinWidth);
+      link.setLinkGraphics(linkGraphics);
 
-      RigidBodyTransform shapeToLinkTransform = new RigidBodyTransform();
-      shapeToLinkTransform.setTranslation(new Vector3d(0.0, 0.0, 0.0));
-      collisionShapeFactory.addShape(link, shapeToLinkTransform, shapeDescription, false, 0xFFFFFFFF, 0xFFFFFFFF);
-      link.enableCollisions(2.0, robot.getRobotsYoVariableRegistry());
+      CollisionMeshDescription collisionMeshDescription = new CollisionMeshDescription();
+      collisionMeshDescription.addCylinderReferencedAtCenter(coinRadius, coinWidth);
+      link.setCollisionMesh(collisionMeshDescription);
+
       return link;
-   }
-
-   public ScsCollisionDetector getCollisionDetector()
-   {
-      return collisionDetector;
    }
 
    public ArrayList<Robot> getRobots()

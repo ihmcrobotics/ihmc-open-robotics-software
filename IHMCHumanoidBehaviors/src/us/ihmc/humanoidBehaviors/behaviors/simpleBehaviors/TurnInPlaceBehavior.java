@@ -7,7 +7,7 @@ import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.FootstepListBehavior;
-import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
+import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.SimplePathParameters;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.TurnInPlaceFootstepGenerator;
@@ -42,7 +42,7 @@ public class TurnInPlaceBehavior extends AbstractBehavior
    private final SideDependentList<ReferenceFrame> soleFrames = new SideDependentList<ReferenceFrame>();
    private FrameOrientation2d targetOrientationInWorldFrame;
 
-   public TurnInPlaceBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, FullHumanoidRobotModel fullRobotModel,
+   public TurnInPlaceBehavior(CommunicationBridgeInterface outgoingCommunicationBridge, FullHumanoidRobotModel fullRobotModel,
          HumanoidReferenceFrames referenceFrames, WalkingControllerParameters walkingControllerParameters)
    {
       super(outgoingCommunicationBridge);
@@ -85,11 +85,10 @@ public class TurnInPlaceBehavior extends AbstractBehavior
    }
 
    @Override
-   public void initialize()
+   public void onBehaviorEntered()
    {
       hasTargetBeenProvided.set(false);
       haveFootstepsBeenGenerated.set(false);
-      footstepListBehavior.initialize();
    }
 
    public int getNumberOfFootSteps()
@@ -135,41 +134,27 @@ public class TurnInPlaceBehavior extends AbstractBehavior
       footstepListBehavior.doControl();
    }
 
-   @Override
-   protected void passReceivedNetworkProcessorObjectToChildBehaviors(Object object)
-   {
-      if (footstepListBehavior != null)
-         footstepListBehavior.consumeObjectFromNetworkProcessor(object);
-   }
+  
+
 
    @Override
-   protected void passReceivedControllerObjectToChildBehaviors(Object object)
+   public void onBehaviorAborted()
    {
-      if (footstepListBehavior != null)
-         footstepListBehavior.consumeObjectFromController(object);
-   }
-
-   @Override
-   public void abort()
-   {
-      footstepListBehavior.abort();
-      super.abort();
+      footstepListBehavior.onBehaviorAborted();
    }
 
   
 
    @Override
-   public void pause()
+   public void onBehaviorPaused()
    {
-      footstepListBehavior.pause();
-      super.pause();
+      footstepListBehavior.onBehaviorPaused();
    }
 
    @Override
-   public void resume()
+   public void onBehaviorResumed()
    {
-      footstepListBehavior.resume();
-      super.resume();
+      footstepListBehavior.onBehaviorResumed();
    }
 
    @Override
@@ -183,13 +168,13 @@ public class TurnInPlaceBehavior extends AbstractBehavior
    }
 
    @Override
-   public void doPostBehaviorCleanup()
+   public void onBehaviorExited()
    {
       isPaused.set(false);
       isAborted.set(false);
       hasTargetBeenProvided.set(false);
       haveFootstepsBeenGenerated.set(false);
-      footstepListBehavior.doPostBehaviorCleanup();
+      footstepListBehavior.onBehaviorExited();
    }
 
    public boolean hasInputBeenSet()

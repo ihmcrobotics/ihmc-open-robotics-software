@@ -1,8 +1,8 @@
 package us.ihmc.exampleSimulations.simpleDynamicWalkingExample;
 
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.gui.tools.VisualizerUtils;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
+import us.ihmc.simulationconstructionset.gui.tools.SimulationOverheadPlotterFactory;
 
 public class Step7Simulation
 {
@@ -43,7 +43,11 @@ public class Step7Simulation
       sim.setCameraTracking(true, true, true, false);
       sim.addYoGraphicsListRegistry(yoGraphicsListRegistry);
       
-      VisualizerUtils.createOverheadPlotter(sim, true, "centerOfMass", yoGraphicsListRegistry);
+      SimulationOverheadPlotterFactory simulationOverheadPlotterFactory = sim.createSimulationOverheadPlotterFactory();
+      simulationOverheadPlotterFactory.setVariableNameToTrack("centerOfMass");
+      simulationOverheadPlotterFactory.setShowOnStart(true);
+      simulationOverheadPlotterFactory.addYoGraphicsListRegistries(yoGraphicsListRegistry);
+      simulationOverheadPlotterFactory.createOverheadPlotter();
       
       sim.startOnAThread();
 

@@ -5,7 +5,7 @@ buildscript {
     }
   }
   dependencies {
-    classpath "gradle.plugin.us.ihmc.gradle:ihmc-build:0.0.18"
+    classpath "gradle.plugin.us.ihmc.gradle:ihmc-build:0.0.19"
   }
 }
 
@@ -13,7 +13,7 @@ apply plugin: "us.ihmc.gradle.ihmc-build"
 
 if(!rootProject.name.equals('IHMCOpenRoboticsSoftware')) { evaluationDependsOn(':IHMCOpenRoboticsSoftware') }
 
-sourceCompatibility = 1.7
+sourceCompatibility = 1.8
 version = "${getOpenRoboticsSoftwareProject().version}"
 project.ext.fullVersion = "${getOpenRoboticsSoftwareProject().ext.fullVersion}"
 project.ext.vcsUrl = "${getOpenRoboticsSoftwareProject().ext.vcsUrl}"
@@ -45,25 +45,29 @@ dependencies {
     compile group: 'org.ejml', name: 'dense64', version: '0.28'
     compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
     compile group: 'junit', name: 'junit', version: '4.11'
-    compile group: 'org.georegression', name: 'georegression', version: '0.8'
-    compile group: 'org.boofcv', name: 'geo', version: '0.19'
+    compile group: 'org.georegression', name: 'georegression', version: '0.11'
+    compile group: 'org.boofcv', name: 'geo', version: '0.24.1'
     compile group: 'us.ihmc', name: 'IHMCRealtime', version: '1.1.2'
-//    compile group: 'org.projectbubo', name: 'ProjectBUBO', version: '160309'
-    compile group: 'com.martiansoftware', name: 'jsap', version: '2.1'
     compile group: 'us.ihmc.thirdparty.org.opencv', name: 'opencv', version: '3.1.0-160510'
+    compile "org.boofcv:ip:0.24.1"
+    compile "org.boofcv:io:0.24.1"
+    compile "org.boofcv:recognition:0.24.1"
+    compile "us.ihmc:IHMCNativeLibraryLoader:1.0"
 
     compile ihmc.getProjectDependency(":IHMCRobotModels")
 	compile ihmc.getProjectDependency(":IHMCCommunication")
 	compile ihmc.getProjectDependency(":IHMCHumanoidRobotics")
 	compile ihmc.getProjectDependency(":CommonWalkingControlModules")
 	compile ihmc.getProjectDependency(":SimulationConstructionSet")
-	compile ihmc.getProjectDependency(":RobotDataCommunication")
+	compile ihmc.getProjectDependency(":IHMCRobotDataLogger")
 	compile ihmc.getProjectDependency(":SensorProcessing")
 	compile ihmc.getProjectDependency(":IHMCWholeBodyController")
 	compile ihmc.getProjectDependency(":IHMCJavaToolkit")
 	compile ihmc.getProjectDependency(":IHMCRoboticsToolkit")
     compile ihmc.getProjectDependency(":IHMCPerception")
-    compile ihmc.getProjectDependency(":IHMCGraphics3DDescription")
+    compile ihmc.getProjectDependency(":IHMCGraphicsDescription")
+    compile ihmc.getProjectDependency(":IHMCFootstepPlanning")
+	
     testCompile ihmc.getProjectDependency(":IHMCUnitTesting")
 }
 

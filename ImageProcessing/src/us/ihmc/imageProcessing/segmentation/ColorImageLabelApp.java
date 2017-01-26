@@ -1,32 +1,5 @@
 package us.ihmc.imageProcessing.segmentation;
 
-import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.ComponentEvent;
-import java.awt.event.ComponentListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.awt.event.MouseMotionListener;
-import java.awt.image.BufferedImage;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.swing.Box;
-import javax.swing.BoxLayout;
-import javax.swing.JButton;
-import javax.swing.JComponent;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JSpinner;
-import javax.swing.JTextField;
-import javax.swing.SpinnerNumberModel;
-
 import boofcv.alg.color.ColorHsv;
 import boofcv.alg.misc.ImageMiscOps;
 import boofcv.gui.image.ShowImages;
@@ -34,9 +7,18 @@ import boofcv.io.image.ConvertBufferedImage;
 import boofcv.io.image.UtilImageIO;
 import boofcv.misc.BoofMiscOps;
 import boofcv.struct.ImageRectangle;
-import boofcv.struct.image.ImageFloat32;
-import boofcv.struct.image.ImageUInt8;
-import boofcv.struct.image.MultiSpectral;
+import boofcv.struct.image.GrayF32;
+import boofcv.struct.image.InterleavedU8;
+import boofcv.struct.image.Planar;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
+import java.awt.image.BufferedImage;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Peter Abeles
@@ -51,10 +33,10 @@ public class ColorImageLabelApp extends JPanel implements ActionListener {
    BufferedImage work;
 
    // Input image convert into HSV
-   MultiSpectral<ImageFloat32> hsv;
+   Planar<GrayF32> hsv;
 
    // binary image highlighted by the user
-   ImageUInt8 selected;
+   InterleavedU8 selected;
 
    VisualizeScatter scatter;
 
@@ -85,12 +67,12 @@ public class ColorImageLabelApp extends JPanel implements ActionListener {
       // create output images
       this.work = new BufferedImage(w,h,BufferedImage.TYPE_INT_RGB);
 
-      this.selected = new ImageUInt8(w,h);
+      this.selected = new InterleavedU8(w,h,1);
 
       // Convert the input image into the HSV color model
-      hsv = new MultiSpectral<ImageFloat32>(ImageFloat32.class,w,h,3);
+      hsv = new Planar<GrayF32>(GrayF32.class,w,h,3);
 
-      MultiSpectral<ImageFloat32> inputMS = new MultiSpectral<ImageFloat32>(ImageFloat32.class,w,h,3);
+      Planar<GrayF32> inputMS = new Planar<GrayF32>(GrayF32.class,w,h,3);
       ConvertBufferedImage.convertFrom(input, inputMS, true);
       ColorHsv.rgbToHsv_F32(inputMS, hsv);
 
@@ -161,9 +143,9 @@ public class ColorImageLabelApp extends JPanel implements ActionListener {
       String label = textLabel.getText();
       List<double[]> colors = new ArrayList<double[]>();
 
-      ImageFloat32 H = hsv.getBand(0);
-      ImageFloat32 S = hsv.getBand(1);
-      ImageFloat32 V = hsv.getBand(2);
+      GrayF32 H = hsv.getBand(0);
+      GrayF32 S = hsv.getBand(1);
+      GrayF32 V = hsv.getBand(2);
 
       for( int y = 0; y < selected.height; y++ ) {
          int index = selected.startIndex + y*selected.stride;
@@ -238,7 +220,7 @@ public class ColorImageLabelApp extends JPanel implements ActionListener {
          // mark pixels near the selected point
          ImageRectangle r = new ImageRectangle(x-drawRadius,y-drawRadius,x+drawRadius+1,y+drawRadius+1);
          BoofMiscOps.boundRectangleInside(selected,r);
-         ImageMiscOps.fillRectangle(selected,1,r.x0,r.y0,r.x1-r.x0,r.y1-r.y0);
+         ImageMiscOps.fillRectangle(selected, (byte)1,r.x0,r.y0,r.x1-r.x0,r.y1-r.y0);
 
          // visualize these changes
          synchronized ( work ) {

@@ -5,12 +5,12 @@ import java.util.List;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
+import javax.vecmath.Vector3d;
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.coactiveElements.WalkToLocationBehaviorCoactiveElementBehaviorSide;
 import us.ihmc.humanoidBehaviors.coactiveDesignFramework.CoactiveElement;
-import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
+import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.SimplePathParameters;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.TurnStraightTurnFootstepGenerator;
@@ -76,9 +76,7 @@ public class WalkToLocationBehavior extends AbstractBehavior
 
    private double minDistanceThresholdForWalking, minYawThresholdForWalking;
 
-   private WalkToLocationBehaviorCoactiveElementBehaviorSide coactiveElement;
-
-   public WalkToLocationBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, FullHumanoidRobotModel fullRobotModel,
+   public WalkToLocationBehavior(CommunicationBridgeInterface outgoingCommunicationBridge, FullHumanoidRobotModel fullRobotModel,
          HumanoidReferenceFrames referenceFrames, WalkingControllerParameters walkingControllerParameters)
    {
       super(outgoingCommunicationBridge);
@@ -98,11 +96,6 @@ public class WalkToLocationBehavior extends AbstractBehavior
          feet.put(robotSide, fullRobotModel.getFoot(robotSide));
          soleFrames.put(robotSide, fullRobotModel.getSoleFrame(robotSide));
       }
-
-      coactiveElement = new WalkToLocationBehaviorCoactiveElementBehaviorSide();
-      coactiveElement.setWalkToBehavior(this);
-      registry.addChild(coactiveElement.getUserInterfaceWritableYoVariableRegistry());
-      registry.addChild(coactiveElement.getMachineWritableYoVariableRegistry());
 
    }
 
@@ -193,7 +186,7 @@ public class WalkToLocationBehavior extends AbstractBehavior
    }
 
    @Override
-   public void initialize()
+   public void onBehaviorEntered()
    {
       hasTargetBeenProvided.set(false);
       haveFootstepsBeenGenerated.set(false);
@@ -266,9 +259,11 @@ public class WalkToLocationBehavior extends AbstractBehavior
             footsteps.addAll(footstepsNominalOrientation);
          }
 
+         Vector3d footlocation = new Vector3d();
+         referenceFrames.getAnkleZUpFrame(RobotSide.LEFT).getTransformToWorldFrame().getTranslation(footlocation);
          for (Footstep footstep : footsteps)
          {
-            footstep.setZ(midFeetPosition.getZ());
+            footstep.setZ(footlocation.getZ());
          }
       }
 
@@ -299,37 +294,23 @@ public class WalkToLocationBehavior extends AbstractBehavior
    }
 
    @Override
-   protected void passReceivedNetworkProcessorObjectToChildBehaviors(Object object)
+   public void onBehaviorAborted()
    {
-      if (footstepListBehavior != null)
-         footstepListBehavior.consumeObjectFromNetworkProcessor(object);
-   }
-
-   @Override
-   protected void passReceivedControllerObjectToChildBehaviors(Object object)
-   {
-      if (footstepListBehavior != null)
-         footstepListBehavior.consumeObjectFromController(object);
-   }
-
-   @Override
-   public void abort()
-   {
-      footstepListBehavior.abort();
+      footstepListBehavior.onBehaviorAborted();
       isAborted.set(true);
    }
 
    @Override
-   public void pause()
+   public void onBehaviorPaused()
    {
-      footstepListBehavior.pause();
+      footstepListBehavior.onBehaviorPaused();
       isPaused.set(true);
    }
 
    @Override
-   public void resume()
+   public void onBehaviorResumed()
    {
-      footstepListBehavior.resume();
+      footstepListBehavior.onBehaviorResumed();
       isPaused.set(false);
 
    }
@@ -349,14 +330,14 @@ public class WalkToLocationBehavior extends AbstractBehavior
    }
 
    @Override
-   public void doPostBehaviorCleanup()
+   public void onBehaviorExited()
    {
       isPaused.set(false);
       isAborted.set(false);
       hasTargetBeenProvided.set(false);
       haveFootstepsBeenGenerated.set(false);
       hasInputBeenSet.set(false);
-      footstepListBehavior.doPostBehaviorCleanup();
+      footstepListBehavior.onBehaviorExited();
    }
 
    public boolean hasInputBeenSet()

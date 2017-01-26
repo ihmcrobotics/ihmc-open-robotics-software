@@ -5,7 +5,7 @@ buildscript {
     }
   }
   dependencies {
-    classpath "gradle.plugin.us.ihmc.gradle:ihmc-build:0.0.18"
+    classpath "gradle.plugin.us.ihmc.gradle:ihmc-build:0.0.19"
   }
 }
 
@@ -15,7 +15,7 @@ if (!rootProject.name.equals('IHMCOpenRoboticsSoftware')) {
     evaluationDependsOn(':IHMCOpenRoboticsSoftware')
 }
 
-sourceCompatibility = 1.7
+sourceCompatibility = 1.8
 version = "${getOpenRoboticsSoftwareProject().version}"
 project.ext.fullVersion = "${getOpenRoboticsSoftwareProject().ext.fullVersion}"
 project.ext.vcsUrl = "${getOpenRoboticsSoftwareProject().ext.vcsUrl}"
@@ -48,9 +48,7 @@ dependencies {
     compile group: 'com.google.guava', name: 'guava', version: '18.0'
     compile group: 'us.ihmc', name: 'IHMCRealtime', version: '1.1.2'
 
-    compile ihmc.getProjectDependency(":RobotDataCommunication")
-    compile ihmc.getProjectDependency(":SimulationConstructionSet")
-    compile ihmc.getProjectDependency(":Graphics3DAdapter")
+    compile ihmc.getProjectDependency(":IHMCRobotDataLogger")
     compile ihmc.getProjectDependency(":CommonWalkingControlModules")
     compile ihmc.getProjectDependency(":ConvexOptimizationAdapter")
     compile ihmc.getProjectDependency(":IHMCHumanoidRobotics")
@@ -60,11 +58,13 @@ dependencies {
     compile ihmc.getProjectDependency(":IHMCRobotModels")
     compile ihmc.getProjectDependency(":SensorProcessing")
     compile ihmc.getProjectDependency(":IHMCStateEstimation")
-    compile ihmc.getProjectDependency(":IHMCGraphics3DDescription")
+    compile ihmc.getProjectDependency(":IHMCGraphicsDescription")
+    compile ihmc.getProjectDependency(":IHMCRobotDescription")
 
     testCompile group: 'com.google.caliper', name: 'caliper', version: '1.0-beta-2'
     testCompile ihmc.getProjectDependency(":IHMCUnitTesting")
     
+    testCompile ihmc.getProjectDependency(":SimulationConstructionSet")
     testCompile ihmc.getProjectTestDependency(":SimulationConstructionSet")
     testCompile ihmc.getProjectTestDependency(":CommonWalkingControlModules")
 }

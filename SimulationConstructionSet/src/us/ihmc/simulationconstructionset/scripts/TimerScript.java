@@ -24,6 +24,7 @@ public class TimerScript implements Script
       parentRegistry.addChild(registry);
    }
    
+   @Override
    public void doScript(double t)
    {
       if(startTimer.getBooleanValue())

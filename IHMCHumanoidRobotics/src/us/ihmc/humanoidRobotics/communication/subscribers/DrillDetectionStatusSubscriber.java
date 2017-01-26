@@ -2,51 +2,74 @@ package us.ihmc.humanoidRobotics.communication.subscribers;
 
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.DrillDetectionPacket;
 import us.ihmc.tools.thread.ThreadTools;
 
-public class DrillDetectionStatusSubscriber implements PacketConsumer<DrillDetectionPacket>, Runnable
+public class DrillDetectionStatusSubscriber implements PacketConsumer<DrillDetectionPacket>
 {
    private ConcurrentLinkedQueue<DrillDetectionPacket> incomingDetectedDrillPackets = new ConcurrentLinkedQueue<>();
 
    private ArrayList<DrillDetectionStatusListener> listOfListeners = new ArrayList<DrillDetectionStatusListener>();
 
+   private final ThreadFactory threadFactory = ThreadTools.getNamedThreadFactory(getClass().getName());
+   private final ExecutorService executorService = Executors.newSingleThreadExecutor(threadFactory);
+
    public DrillDetectionStatusSubscriber()
    {
-      Thread t = new Thread(this);
-      t.start();
    }
 
    public void registerListener(DrillDetectionStatusListener listener)
    {
       listOfListeners.add(listener);
+      executorService.execute(createCallListenersTask());
    }
 
    @Override
    public void receivedPacket(DrillDetectionPacket packet)
    {
       incomingDetectedDrillPackets.add(packet);
+      executorService.execute(createCallListenersTask());
+      System.out.println("received drill packet");
    }
 
-   @Override
-   public void run()
+   private Runnable createCallListenersTask()
    {
-      while (true)
+      return new Runnable()
       {
-         DrillDetectionPacket newDrillPacket = incomingDetectedDrillPackets.poll();
-         if (newDrillPacket != null)
+         @Override
+         public void run()
          {
-
-            for (DrillDetectionStatusListener listener : listOfListeners)
+            try
             {
-               listener.updateStatusPacket(newDrillPacket);
+               callListeners();
+            }
+            catch (Exception e)
+            {
+               e.printStackTrace();
             }
          }
-
-         ThreadTools.sleep(1);
+      };
+   }
+   
+   private void callListeners()
+   {
+      DrillDetectionPacket newDrillPacket = incomingDetectedDrillPackets.poll();
+      if (newDrillPacket != null)
+      {
+         for (DrillDetectionStatusListener listener : listOfListeners)
+         {
+            listener.updateStatusPacket(newDrillPacket);
+         }
       }
    }
 
+   public void shutdown()
+   {
+      executorService.shutdownNow();
+   }
 }

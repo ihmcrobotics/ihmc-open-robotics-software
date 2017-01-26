@@ -10,8 +10,6 @@ public class JointDefinitionFixedFrame implements Comparable<JointDefinitionFixe
 {
    public enum JointType {PIN_JOINT, SLIDER_JOINT, FLOATING_JOINT, FLOATING_PLANAR_JOINT}
 
-   ;
-
    private String jointName;
 
    private JointDefinitionFixedFrame parentJoint = null;
@@ -170,6 +168,7 @@ public class JointDefinitionFixedFrame implements Comparable<JointDefinitionFixe
    }
 
 
+   @Override
    public String toString()
    {
       String returnString = "";
@@ -276,6 +275,7 @@ public class JointDefinitionFixedFrame implements Comparable<JointDefinitionFixe
       return returnString;
    }
 
+   @Override
    public int compareTo(JointDefinitionFixedFrame o)
    {
       return o.getJointName().compareTo(getJointName());

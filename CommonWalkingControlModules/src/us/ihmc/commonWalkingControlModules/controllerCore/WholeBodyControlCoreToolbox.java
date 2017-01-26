@@ -2,11 +2,13 @@ package us.ihmc.commonWalkingControlModules.controllerCore;
 
 import java.util.List;
 
+import us.ihmc.commonWalkingControlModules.configurations.JointPrivilegedConfigurationParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.GeometricJacobianHolder;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.PlaneContactWrenchProcessor;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointIndexHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.visualizer.WrenchVisualizer;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -23,7 +25,6 @@ import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.sensorProcessing.frames.ReferenceFrames;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
 public class WholeBodyControlCoreToolbox
 {
@@ -46,6 +47,7 @@ public class WholeBodyControlCoreToolbox
    private final double totalRobotMass;
 
    private final MomentumOptimizationSettings momentumOptimizationSettings;
+   private final JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters;
 
    private final PlaneContactWrenchProcessor planeContactWrenchProcessor;
    private final WrenchVisualizer wrenchVisualizer;
@@ -58,14 +60,15 @@ public class WholeBodyControlCoreToolbox
 
    private final JointIndexHandler jointIndexHandler;
 
-   public WholeBodyControlCoreToolbox(FullRobotModel fullRobotModel, RigidBody[] controlledBodies, InverseDynamicsJoint[] controlledJoints, MomentumOptimizationSettings momentumOptimizationSettings,
-         ReferenceFrames referenceFrames, double controlDT, double gravityZ, GeometricJacobianHolder geometricJacobianHolder,
-         TwistCalculator twistCalculator, List<? extends ContactablePlaneBody> contactablePlaneBodies, YoGraphicsListRegistry yoGraphicsListRegistry,
-         YoVariableRegistry registry)
+   public WholeBodyControlCoreToolbox(FullRobotModel fullRobotModel, RigidBody[] controlledBodies, InverseDynamicsJoint[] controlledJoints,
+         MomentumOptimizationSettings momentumOptimizationSettings, JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters,
+         ReferenceFrames referenceFrames, double controlDT, double gravityZ, GeometricJacobianHolder geometricJacobianHolder, TwistCalculator twistCalculator,
+         List<? extends ContactablePlaneBody> contactablePlaneBodies, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry registry)
    {
       this.fullRobotModel = fullRobotModel;
       this.controlledBodies = controlledBodies;
       this.momentumOptimizationSettings = momentumOptimizationSettings;
+      this.jointPrivilegedConfigurationParameters = jointPrivilegedConfigurationParameters;
       this.referenceFrames = referenceFrames;
       this.controlDT = controlDT;
       this.gravityZ = gravityZ;
@@ -115,17 +118,23 @@ public class WholeBodyControlCoreToolbox
    }
 
    public static WholeBodyControlCoreToolbox createForInverseKinematicsOnly(FullRobotModel fullRobotModel, InverseDynamicsJoint[] controlledJoints,
-         CommonHumanoidReferenceFrames referenceFrames, double controlDT, GeometricJacobianHolder geometricJacobianHolder, TwistCalculator twistCalculator)
+         JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters, CommonHumanoidReferenceFrames referenceFrames, double controlDT,
+         GeometricJacobianHolder geometricJacobianHolder, TwistCalculator twistCalculator)
    {
       MomentumOptimizationSettings momentumOptimizationSettings = new MomentumOptimizationSettings();
-      WholeBodyControlCoreToolbox ret = new WholeBodyControlCoreToolbox(fullRobotModel, null, controlledJoints, momentumOptimizationSettings, referenceFrames, controlDT, Double.NaN,
-            geometricJacobianHolder, twistCalculator, null, null, null);
+      WholeBodyControlCoreToolbox ret = new WholeBodyControlCoreToolbox(fullRobotModel, null, controlledJoints, momentumOptimizationSettings,
+            jointPrivilegedConfigurationParameters, referenceFrames, controlDT, Double.NaN, geometricJacobianHolder, twistCalculator, null, null, null);
       return ret;
    }
 
    public MomentumOptimizationSettings getMomentumOptimizationSettings()
    {
       return momentumOptimizationSettings;
+   }
+
+   public JointPrivilegedConfigurationParameters getJointPrivilegedConfigurationParameters()
+   {
+      return jointPrivilegedConfigurationParameters;
    }
 
    public TwistCalculator getTwistCalculator()

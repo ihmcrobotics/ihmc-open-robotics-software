@@ -9,6 +9,7 @@ import us.ihmc.robotics.geometry.BoundingBox3d;
 public class InclinedGroundProfile extends GroundProfileFromHeightMap
 {
    private static final double xMinDefault = -20.0, xMaxDefault = 20.0, yMinDefault = -20.0, yMaxDefault = 20.0;
+   private static final double heightOffset = -0.5;
    private static final double angleOfInclinationDefault = 0.0;
 
    private final BoundingBox3d boundingBox;
@@ -47,7 +48,7 @@ public class InclinedGroundProfile extends GroundProfileFromHeightMap
       double height = 0.0;
 
       if (boundingBox.isXYInside(x, y))
-         height = -x * Math.tan(angleOfInclination);
+         height = -x * Math.tan(angleOfInclination) + heightOffset;
 
       return height;
    }

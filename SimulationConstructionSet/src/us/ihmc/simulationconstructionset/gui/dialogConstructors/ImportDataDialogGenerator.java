@@ -9,7 +9,7 @@ import javax.swing.JOptionPane;
 
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.gui.MyFileFilter;
+import us.ihmc.tools.gui.MyFileFilter;
 
 public class ImportDataDialogGenerator implements ImportDataDialogConstructor
 {
@@ -66,17 +66,20 @@ public class ImportDataDialogGenerator implements ImportDataDialogConstructor
       }
    }
 
+   @Override
    public void setCurrentDirectory(File dir)
    {
       fileChooser.setCurrentDirectory(dir);
    }
 
+   @Override
    public void setCurrentDirectory(String dir)
    {
       fileChooser.setCurrentDirectory(new File(dir));
    }
 
 
+   @Override
    public void constructDialog()
    {
       sim.disableGUIComponents();
@@ -105,6 +108,7 @@ public class ImportDataDialogGenerator implements ImportDataDialogConstructor
       sim.enableGUIComponents();
    }
 
+   @Override
    public void closeAndDispose()
    {
       fileChooser = null;

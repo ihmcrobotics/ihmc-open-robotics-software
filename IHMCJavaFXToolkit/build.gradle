@@ -21,6 +21,27 @@ project.ext.licenseURL = "http://www.apache.org/licenses/LICENSE-2.0.txt"
 project.ext.licenseName = "Apache License, Version 2.0"
 project.ext.bintrayLicenseName = "Apache-2.0"
 
+project.sourceSets {
+    main {
+        java {
+            srcDirs = ['src', 'visualizers']
+        }
+
+        resources {
+            srcDirs = ['src', 'resources']
+        }
+    }
+
+    test {
+        java {
+            srcDirs = ['test']
+        }
+
+        resources {
+            srcDirs = ['testResources']
+        }
+    }
+}
 
 repositories ihmc.ihmcDefaultArtifactProxies()
 
@@ -41,8 +62,11 @@ repositories {
 dependencies {
     compile group: 'javax.vecmath', name: 'vecmath', version: '1.5.2'
     compile "net.sf.trove4j:trove4j:3.0.3"
+    compile "org.apache.commons:commons-lang3:3.4"
+    compile ("org.fxyz3d:fxyz3d:0.1.1") {
+        exclude group: 'java3d', module: 'vecmath'
+    }
 
-    compile ihmc.getProjectDependency(":IHMCGraphics3DDescription")
-//    compile ihmc.getProjectDependency(":IHMCJavaToolkit")
+    compile ihmc.getProjectDependency(":IHMCGraphicsDescription")
     compile ihmc.getProjectDependency(":IHMCRoboticsToolkit")
 }

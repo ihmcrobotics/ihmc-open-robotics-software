@@ -13,8 +13,10 @@ import org.apache.tools.zip.ZipFile;
 import us.ihmc.robotics.partNames.LimbName;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceRGBColor;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -22,8 +24,6 @@ import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicCoordinateSystem;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition;
 
 
 public class AtlasCalibrationDataViewer extends AtlasKinematicCalibrator

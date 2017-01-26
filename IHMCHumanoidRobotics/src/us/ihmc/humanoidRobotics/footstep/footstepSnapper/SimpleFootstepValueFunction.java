@@ -15,7 +15,8 @@ public class SimpleFootstepValueFunction implements FootstepValueFunction
    private double slopeGain = -0.25; //more slope is bad
    private double areaGain = 100; //more area is good
 
-   public SimpleFootstepValueFunction(FootstepSnappingParameters parameters){
+   public SimpleFootstepValueFunction(FootstepSnappingParameters parameters)
+   {
       this.parameters = parameters;
       updateFunction();
    }

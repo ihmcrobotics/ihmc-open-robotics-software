@@ -7,9 +7,9 @@ import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.atlas.parameters.AtlasArmControllerParameters;
 import us.ihmc.atlas.parameters.AtlasDefaultArmConfigurations;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.sensors.ProvidedMassMatrixToolRigidBodyTest;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.wholeBodyController.parameters.DefaultArmConfigurations.ArmConfigurations;
 

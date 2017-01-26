@@ -1,9 +1,9 @@
 package us.ihmc.atlas;
 
-import us.ihmc.darpaRoboticsChallenge.DRCSimulationStarter;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.environment.DRCDemo01NavigationEnvironment;
-import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkModuleParameters;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.networkProcessor.DRCNetworkModuleParameters;
+import us.ihmc.avatar.simulationStarter.DRCSimulationStarter;
+import us.ihmc.simulationconstructionset.util.environments.DefaultCommonAvatarEnvironment;
 
 public class AtlasAutomaticDiagnosticDemo
 {
@@ -11,7 +11,7 @@ public class AtlasAutomaticDiagnosticDemo
    {
       DRCRobotModel robotModel = AtlasRobotModelFactory.createDefaultRobotModel();
 
-      DRCSimulationStarter simulationStarter = new DRCSimulationStarter(robotModel, new DRCDemo01NavigationEnvironment());
+      DRCSimulationStarter simulationStarter = new DRCSimulationStarter(robotModel, new DefaultCommonAvatarEnvironment());
       simulationStarter.setRunMultiThreaded(true);
       //      simulationStarter.registerHighLevelController(new CarIngressEgressControllerFactory(robotModel.getMultiContactControllerParameters(), true));
 

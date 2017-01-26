@@ -1,7 +1,6 @@
 package us.ihmc.humanoidRobotics.footstep.footstepGenerator;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
@@ -54,11 +53,11 @@ public abstract class AbstractFootstepGenerator implements FootstepGenerator
    protected HeightMapWithPoints heightMap;
    protected SideDependentList<? extends ContactablePlaneBody> contactableFeet;
 //   protected final FootstepSnapper footstepSnapper = new SimpleFootstepSnapper();
-   
+
    //TODO: Fix so not specific to Atlas...
    private final FootstepSnappingParameters snappingParameters = new AtlasFootstepSnappingParameters();
    private final FootstepSnapper footstepSnapper = new ConvexHullFootstepSnapper(new SimpleFootstepValueFunction(snappingParameters), snappingParameters);
-   
+
    private SideDependentList<Footstep> priorStanceFeet;
    boolean priorStanceFeetSpecified = false;
    protected double initialDeltaFeetYaw;
@@ -79,7 +78,7 @@ public abstract class AbstractFootstepGenerator implements FootstepGenerator
    }
 
    @Override
-   public List<Footstep> generateDesiredFootstepList()
+   public ArrayList<Footstep> generateDesiredFootstepList()
    {
       ArrayList<Footstep> ret = new ArrayList<Footstep>();
       initialize();
@@ -249,14 +248,12 @@ public abstract class AbstractFootstepGenerator implements FootstepGenerator
 
    protected abstract OverheadPath getPath();
 
-   @Override
    public void setHeightMap(HeightMapWithPoints heightMap, SideDependentList<? extends ContactablePlaneBody> contactableFeet)
    {
       this.heightMap = heightMap;
       this.contactableFeet = contactableFeet;
    }
 
-   @Override
    public void setPoseFinderParams(double kernelMaskSafetyBuffer, double kernelSize)
    {
       footstepSnapper.setUseMask(USE_MASK, kernelMaskSafetyBuffer, kernelSize);

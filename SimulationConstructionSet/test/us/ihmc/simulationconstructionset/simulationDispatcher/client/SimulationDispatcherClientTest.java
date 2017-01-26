@@ -33,8 +33,9 @@ public class SimulationDispatcherClientTest
 
       String codebase = System.getProperty("java.rmi.server.codebase");
       if (codebase == "null")
-         ;
-      codebase = "";
+      {
+         codebase = "";
+      }
 
 //      String myCodeBase = "file://halo/Public/Projects/SimulationDispatcher/SimulationDispatcherTestClient.jar";
       String myCodeBase = "https://bengal.ihmc.us/svn/SimulationDispatcher/SimulationDispatcherTestClient/SimulationDispatcherTestClient.jar";

@@ -40,6 +40,7 @@ public class NameSpaceHierarchyNodeRenderer extends JPanel implements TreeCellRe
       this.treeNodeRegistryMap = treeNodeRegistryMap;
    }
 
+   @Override
    public Component getTreeCellRendererComponent(JTree tree, Object value, boolean isSelected, boolean expanded, boolean leaf, int row, boolean hasFocus)
    {
       if (value != null)
@@ -80,6 +81,7 @@ public class NameSpaceHierarchyNodeRenderer extends JPanel implements TreeCellRe
       return this;
    }
 
+   @Override
    public Dimension getPreferredSize()
    {
       Dimension checkBoxDimension = sendCheck.isVisible() ? sendCheck.getPreferredSize() : new Dimension(0, 0);
@@ -93,6 +95,7 @@ public class NameSpaceHierarchyNodeRenderer extends JPanel implements TreeCellRe
       return new Dimension(nodeWidth, nodeHeight);
    }
 
+   @Override
    public void doLayout()
    {
       Dimension checkBoxDimension = sendCheck.isVisible() ? sendCheck.getPreferredSize() : new Dimension(0, 0);
@@ -125,6 +128,7 @@ public class NameSpaceHierarchyNodeRenderer extends JPanel implements TreeCellRe
       label.setBounds(checkBoxDimension.width * 2, yLabel, labelDimension.width, labelDimension.height);
    }
 
+   @Override
    public void setBackground(Color color)
    {
       if (color instanceof ColorUIResource)
@@ -143,6 +147,7 @@ public class NameSpaceHierarchyNodeRenderer extends JPanel implements TreeCellRe
          // empty
       }
 
+      @Override
       public void setBackground(Color color)
       {
          if (color instanceof ColorUIResource)
@@ -150,6 +155,7 @@ public class NameSpaceHierarchyNodeRenderer extends JPanel implements TreeCellRe
          super.setBackground(color);
       }
 
+      @Override
       public void paint(Graphics g)
       {
          String labelString;
@@ -187,6 +193,7 @@ public class NameSpaceHierarchyNodeRenderer extends JPanel implements TreeCellRe
          super.paint(g);
       }
 
+      @Override
       public Dimension getPreferredSize()
       {
          Dimension retDimension = super.getPreferredSize();

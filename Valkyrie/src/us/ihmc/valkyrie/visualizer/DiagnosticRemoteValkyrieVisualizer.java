@@ -2,9 +2,9 @@ package us.ihmc.valkyrie.visualizer;
 
 import us.ihmc.communication.configuration.NetworkParameterKeys;
 import us.ihmc.communication.configuration.NetworkParameters;
-import us.ihmc.robotDataCommunication.YoVariableClient;
-import us.ihmc.robotDataCommunication.visualizer.SCSVisualizer;
-import us.ihmc.robotDataCommunication.visualizer.SCSVisualizerStateListener;
+import us.ihmc.robotDataLogger.YoVariableClient;
+import us.ihmc.robotDataVisualizer.visualizer.SCSVisualizer;
+import us.ihmc.robotDataVisualizer.visualizer.SCSVisualizerStateListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;

@@ -4,7 +4,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
-import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
+import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 
 public class WaitForUserValidationBehavior extends AbstractBehavior
@@ -15,7 +15,7 @@ public class WaitForUserValidationBehavior extends AbstractBehavior
 
    ExecutorService executorService = Executors.newFixedThreadPool(2);
 
-   public WaitForUserValidationBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, BooleanYoVariable validClicked,
+   public WaitForUserValidationBehavior(CommunicationBridgeInterface outgoingCommunicationBridge, BooleanYoVariable validClicked,
          BooleanYoVariable validAcknoledged)
    {
       super(outgoingCommunicationBridge);
@@ -50,7 +50,27 @@ public class WaitForUserValidationBehavior extends AbstractBehavior
   
 
    @Override
-   public void initialize()
+   public void onBehaviorEntered()
+   {
+   }
+
+   @Override
+   public void onBehaviorAborted()
+   {
+   }
+
+   @Override
+   public void onBehaviorPaused()
+   {
+   }
+
+   @Override
+   public void onBehaviorResumed()
+   {
+   }
+
+   @Override
+   public void onBehaviorExited()
    {
    }
 }

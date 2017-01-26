@@ -172,6 +172,15 @@ public class DecayingResolutionFilter
       }
    }
 
+   /**
+    * Unsafe when reading/writing from different threads, but it is quicker.
+    * @return
+    */
+   public Point3f[] getPoints3fUnsynchronized()
+   {
+      return list.toArray(new Point3f[0]);
+   }
+
    public ArrayList<TimestampedPoint> getPointsCopy()
    {
       // Thread-safely copies points into a new array

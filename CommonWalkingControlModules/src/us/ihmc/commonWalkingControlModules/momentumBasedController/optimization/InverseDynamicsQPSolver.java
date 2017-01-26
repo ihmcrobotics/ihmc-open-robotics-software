@@ -68,6 +68,8 @@ public class InverseDynamicsQPSolver
       this.rhoSize = rhoSize;
       this.problemSize = numberOfDoFs + rhoSize;
 
+      firstCall.set(true);
+
       solverInput_H = new DenseMatrix64F(problemSize, problemSize);
       solverInput_f = new DenseMatrix64F(problemSize, 1);
 
@@ -148,9 +150,18 @@ public class InverseDynamicsQPSolver
          addJointJerkRegularization();
    }
 
-   public void addRegularization()
+   private void addRegularization()
    {
       CommonOps.addEquals(solverInput_H, regularizationMatrix);
+   }
+
+   private void addJointJerkRegularization()
+   {
+      for (int i = 0; i < numberOfDoFs; i++)
+      {
+         solverInput_H.add(i, i, jointJerkRegularization.getDoubleValue());
+         solverInput_f.add(i, 0, -jointJerkRegularization.getDoubleValue() * solverOutput_jointAccelerations.get(i, 0));
+      }
    }
 
    public void addMotionInput(MotionQPInput input)
@@ -300,19 +311,12 @@ public class InverseDynamicsQPSolver
       MatrixTools.addMatrixBlock(solverInput_f, numberOfDoFs, 0, tempRhoTask_f, 0, 0, rhoSize, 1, -1.0);
    }
 
-   public void addJointJerkRegularization()
-   {
-      for (int i = 0; i < numberOfDoFs; i++)
-      {
-         solverInput_H.add(i, i, jointJerkRegularization.getDoubleValue());
-         solverInput_f.add(i, 0, -jointJerkRegularization.getDoubleValue() * solverOutput_jointAccelerations.get(i, 0));
-      }
-   }
-
    public void solve() throws NoConvergenceException
    {
       if (!hasWrenchesEquilibriumConstraintBeenSetup)
          throw new RuntimeException("The wrench equilibrium constraint has to be setup before calling solve().");
+
+      addRegularization();
 
       numberOfEqualityConstraints.set(solverInput_Aeq.getNumRows());
       numberOfInequalityConstraints.set(solverInput_Ain.getNumRows());

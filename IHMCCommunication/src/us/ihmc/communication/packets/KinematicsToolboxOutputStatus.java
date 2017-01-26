@@ -14,7 +14,6 @@ import us.ihmc.robotics.nameBasedHashCode.NameBasedHashCodeTools;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.SixDoFJoint;
 
 public class KinematicsToolboxOutputStatus extends StatusPacket<KinematicsToolboxOutputStatus>
 {

@@ -10,8 +10,8 @@ import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.gui.MyFileFilter;
 import us.ihmc.simulationconstructionset.gui.StandardSimulationGUI;
+import us.ihmc.tools.gui.MyFileFilter;
 
 public class SaveConfigurationDialogGenerator implements SaveConfigurationDialogConstructor
 {
@@ -47,16 +47,19 @@ public class SaveConfigurationDialogGenerator implements SaveConfigurationDialog
       }
    }
 
+   @Override
    public void setCurrentDirectory(File dir)
    {
       dataFileChooser.setCurrentDirectory(dir);
    }
 
+   @Override
    public void setCurrentDirectory(String dir)
    {
       dataFileChooser.setCurrentDirectory(new File(dir));
    }
 
+   @Override
    public void constructDialog()
    {
       sim.disableGUIComponents();

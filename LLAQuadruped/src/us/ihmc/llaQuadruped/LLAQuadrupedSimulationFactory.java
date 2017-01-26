@@ -7,15 +7,19 @@ import us.ihmc.robotModels.OutputWriter;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.communication.net.NetClassList;
 import us.ihmc.llaQuadruped.simulation.LLAQuadrupedGroundContactParameters;
+import us.ihmc.llaQuadrupedController.model.LLAQuadrupedModelFactory;
+import us.ihmc.llaQuadrupedController.model.LLAQuadrupedPhysicalProperties;
+import us.ihmc.llaQuadrupedController.model.LLAQuadrupedSensorInformation;
+import us.ihmc.llaQuadrupedController.parameters.LLAQuadrupedStateEstimatorParameters;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
+import us.ihmc.quadrupedRobotics.controller.QuadrupedSimulationFactory;
 import us.ihmc.quadrupedRobotics.controller.position.states.QuadrupedPositionBasedCrawlControllerParameters;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.estimator.stateEstimator.QuadrupedSensorInformation;
-import us.ihmc.quadrupedRobotics.factories.QuadrupedSimulationFactory;
 import us.ihmc.quadrupedRobotics.model.QuadrupedModelFactory;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.quadrupedRobotics.model.QuadrupedSimulationInitialPositionParameters;
-import us.ihmc.quadrupedRobotics.params.ParameterRegistry;
+import us.ihmc.robotics.dataStructures.parameter.ParameterRegistry;
 import us.ihmc.quadrupedRobotics.simulation.GroundContactParameters;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedParameterSet;
@@ -53,7 +57,7 @@ public class LLAQuadrupedSimulationFactory
       QuadrupedPositionBasedCrawlControllerParameters positionBasedCrawlControllerParameters = new LLAQuadrupedPositionBasedCrawlControllerParameters();
 
       FullQuadrupedRobotModel fullRobotModel = modelFactory.createFullRobotModel();
-      FloatingRootJointRobot sdfRobot = modelFactory.createSdfRobot();
+      FloatingRootJointRobot sdfRobot = new FloatingRootJointRobot(modelFactory.createSdfRobot());
 
       SensorTimestampHolder timestampProvider = new LLAQuadrupedTimestampProvider(sdfRobot);
 

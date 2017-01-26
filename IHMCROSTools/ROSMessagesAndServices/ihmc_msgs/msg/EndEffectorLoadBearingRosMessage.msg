@@ -23,6 +23,10 @@ int64 unique_id
 
 # This message utilizes "enums". Enum value information for this message follows.
 
+# "load_bearing_request" enum values:
+uint8 LOAD=0 # Request to load the given end-effector.
+uint8 UNLOAD=1 # Request to unload the given end-effector.
+
 # "end_effector" enum values:
 uint8 FOOT=0 # In this case, the user also needs to provide the robotSide. If in the air, the corresponding foot will enter first a vertical ground approach transition and eventually touch the ground and switch to loadbearing. Then the robot is ready to walk. It is preferable to request a foot to switch to load bearing when it is aready close to the ground.
 uint8 HAND=1 # In this case, the user also needs to provide the robotSide. It is preferable to request a hand to switch to load bearing when it is aready close to the ground.
@@ -30,8 +34,4 @@ uint8 HAND=1 # In this case, the user also needs to provide the robotSide. It is
 # "robot_side" enum values:
 uint8 LEFT=0 # refers to the LEFT side of a robot
 uint8 RIGHT=1 # refers to the RIGHT side of a robot
-
-# "load_bearing_request" enum values:
-uint8 LOAD=0 # Request to load the given end-effector.
-uint8 UNLOAD=1 # Request to unload the given end-effector.
 

@@ -1,5 +1,8 @@
 package us.ihmc.commonWalkingControlModules.inverseKinematics;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
@@ -17,11 +20,16 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MotionQPInput;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MotionQPInputCalculator;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
+import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.tools.exceptions.NoConvergenceException;
+import us.ihmc.tools.io.printing.PrintTools;
 
 public class InverseKinematicsOptimizationControlModule
 {
@@ -31,15 +39,23 @@ public class InverseKinematicsOptimizationControlModule
    private final MotionQPInputCalculator motionQPInputCalculator;
    private final InverseDynamicsQPBoundCalculator boundCalculator;
 
+   private final OneDoFJoint[] oneDoFJoints;
    private final InverseDynamicsJoint[] jointsToOptimizeFor;
    private final int numberOfDoFs;
 
-   private final DenseMatrix64F qDotMin, qDotMax;
+   private final Map<OneDoFJoint, DoubleYoVariable> jointMaximumVelocities = new HashMap<>();
+   private final Map<OneDoFJoint, DoubleYoVariable> jointMinimumVelocities = new HashMap<>();
+   private final DenseMatrix64F qDotMinMatrix, qDotMaxMatrix;
+   private final JointIndexHandler jointIndexHandler;
+
+   private final BooleanYoVariable hasNotConvergedInPast = new BooleanYoVariable("hasNotConvergedInPast", registry);
+   private final IntegerYoVariable hasNotConvergedCounts = new IntegerYoVariable("hasNotConvergedCounts", registry);
 
    public InverseKinematicsOptimizationControlModule(WholeBodyControlCoreToolbox toolbox, YoVariableRegistry parentRegistry)
    {
-      JointIndexHandler jointIndexHandler = toolbox.getJointIndexHandler();
+      jointIndexHandler = toolbox.getJointIndexHandler();
       jointsToOptimizeFor = jointIndexHandler.getIndexedJoints();
+      oneDoFJoints = jointIndexHandler.getIndexedOneDoFJoints();
 
       ReferenceFrame centerOfMassFrame = toolbox.getCenterOfMassFrame();
 
@@ -49,11 +65,19 @@ public class InverseKinematicsOptimizationControlModule
       double controlDT = toolbox.getControlDT();
       GeometricJacobianHolder geometricJacobianHolder = toolbox.getGeometricJacobianHolder();
       TwistCalculator twistCalculator = toolbox.getTwistCalculator();
-      motionQPInputCalculator = new MotionQPInputCalculator(centerOfMassFrame, geometricJacobianHolder, twistCalculator, jointIndexHandler, registry);
+      motionQPInputCalculator = new MotionQPInputCalculator(centerOfMassFrame, geometricJacobianHolder, twistCalculator, jointIndexHandler,
+            toolbox.getJointPrivilegedConfigurationParameters(), registry);
       boundCalculator = new InverseDynamicsQPBoundCalculator(jointIndexHandler, controlDT, registry);
 
-      qDotMin = new DenseMatrix64F(numberOfDoFs, 1);
-      qDotMax = new DenseMatrix64F(numberOfDoFs, 1);
+      qDotMinMatrix = new DenseMatrix64F(numberOfDoFs, 1);
+      qDotMaxMatrix = new DenseMatrix64F(numberOfDoFs, 1);
+
+      for (int i = 0; i < oneDoFJoints.length; i++)
+      {
+         OneDoFJoint joint = oneDoFJoints[i];
+         jointMaximumVelocities.put(joint, new DoubleYoVariable("qd_max_qp_" + joint.getName(), registry));
+         jointMinimumVelocities.put(joint, new DoubleYoVariable("qd_min_qp_" + joint.getName(), registry));
+      }
 
       qpSolver = new InverseKinematicsQPSolver(numberOfDoFs, registry);
 
@@ -71,9 +95,9 @@ public class InverseKinematicsOptimizationControlModule
       NoConvergenceException noConvergenceException = null;
 
       computePrivilegedJointVelocities();
-      boundCalculator.computeJointVelocityLimits(qDotMin, qDotMax);
-      qpSolver.setMaxJointVelocities(qDotMax);
-      qpSolver.setMinJointVelocities(qDotMin);
+      computeJointVelocityLimits();
+      qpSolver.setMaxJointVelocities(qDotMaxMatrix);
+      qpSolver.setMinJointVelocities(qDotMinMatrix);
 
       try
       {
@@ -81,6 +105,15 @@ public class InverseKinematicsOptimizationControlModule
       }
       catch (NoConvergenceException e)
       {
+         if (!hasNotConvergedInPast.getBooleanValue())
+         {
+            e.printStackTrace();
+            PrintTools.warn(this, "Only showing the stack trace of the first " + e.getClass().getSimpleName() + ". This may be happening more than once.");
+         }
+
+         hasNotConvergedInPast.set(true);
+         hasNotConvergedCounts.increment();
+
          noConvergenceException = e;
       }
 
@@ -91,6 +124,22 @@ public class InverseKinematicsOptimizationControlModule
          throw new InverseKinematicsOptimizationException(noConvergenceException, inverseKinematicsSolution);
 
       return inverseKinematicsSolution;
+   }
+
+   private void computeJointVelocityLimits()
+   {
+      boundCalculator.computeJointVelocityLimits(qDotMinMatrix, qDotMaxMatrix);
+
+      for (int i = 0; i < oneDoFJoints.length; i++)
+      {
+         OneDoFJoint joint = oneDoFJoints[i];
+
+         int jointIndex = jointIndexHandler.getOneDoFJointIndex(joint);
+         double qDDotMin = qDotMinMatrix.get(jointIndex, 0);
+         double qDDotMax = qDotMaxMatrix.get(jointIndex, 0);
+         jointMinimumVelocities.get(joint).set(qDDotMin);
+         jointMaximumVelocities.get(joint).set(qDDotMax);
+      }
    }
 
    private void computePrivilegedJointVelocities()

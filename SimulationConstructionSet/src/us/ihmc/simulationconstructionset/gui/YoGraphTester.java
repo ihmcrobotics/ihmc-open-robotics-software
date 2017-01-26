@@ -4,13 +4,13 @@ import java.util.ArrayList;
 
 import javax.swing.JFrame;
 
+import us.ihmc.graphicsDescription.dataBuffer.DataEntry;
+import us.ihmc.graphicsDescription.dataBuffer.DataEntryHolder;
+import us.ihmc.graphicsDescription.dataBuffer.TimeDataHolder;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.simulationconstructionset.DataBufferEntry;
-import us.ihmc.simulationconstructionset.dataBuffer.DataEntry;
-import us.ihmc.simulationconstructionset.dataBuffer.DataEntryHolder;
-import us.ihmc.simulationconstructionset.dataBuffer.TimeDataHolder;
 
 public class YoGraphTester
 {
@@ -24,6 +24,7 @@ public class YoGraphTester
 
       YoGraphRemover yoGraphRemover = new YoGraphRemover()
       {
+         @Override
          public void removeGraph(YoGraph yoGraph)
          {
          }
@@ -31,7 +32,8 @@ public class YoGraphTester
 
       DataEntryHolder dataEntryHolder = new DataEntryHolder()
       {
-         public DataEntry getEntry(YoVariable yoVariable)
+         @Override
+         public DataEntry getEntry(YoVariable<?> yoVariable)
          {
             return null;
          }
@@ -95,6 +97,7 @@ public class YoGraphTester
          }
       }
       
+      @Override
       public double[] getTimeData()
       {
          return timeData;
@@ -113,61 +116,73 @@ public class YoGraphTester
       int outPoint = 75;
       int maxIndex = 200;
       
+      @Override
       public void tickLater(int i)
       {
          index = index + i;
       }
 
+      @Override
       public void setRightPlotIndex(int newRightIndex)
       {
          this.rightPlotIndex = newRightIndex;
       }
 
+      @Override
       public void setLeftPlotIndex(int newLeftIndex)
       {
          this.leftPlotIndex = newLeftIndex;
       }
 
+      @Override
       public void setIndexLater(int newIndex)
       {
          this.index = newIndex;
       }
 
+      @Override
       public int getRightPlotIndex()
       {
          return rightPlotIndex;
       }
 
+      @Override
       public int getMaxIndex()
       {
          return maxIndex;
       }
 
+      @Override
       public int getLeftPlotIndex()
       {
          return leftPlotIndex;
       }
 
+      @Override
       public ArrayList<Integer> getKeyPoints()
       {
          return keyPoints;
       }
 
+      @Override
       public int getIndex()
       {
          return index;
       }
 
+      @Override
       public int getInPoint()
       {
          return inPoint;
       }
       
+      @Override
       public int getOutPoint()
       {
          return outPoint;
       }
 
+      @Override
       public boolean isIndexAtOutPoint()
       {
          return (getIndex() == getOutPoint());

@@ -116,7 +116,7 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
       
       AxisAngle4d rotationToDesired = new AxisAngle4d();
       alignAxisWithThis.changeFrame(referenceNormal.getReferenceFrame());
-      GeometryTools.getRotationBasedOnNormal(rotationToDesired, alignAxisWithThis.getVectorCopy(), referenceNormal.getVectorCopy());
+      GeometryTools.getAxisAngleFromFirstToSecondVector(referenceNormal.getVectorCopy(), alignAxisWithThis.getVectorCopy(), rotationToDesired);
       
       RigidBodyTransform transformToDesired = new RigidBodyTransform();
 
@@ -168,7 +168,7 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
       ReferenceFrame initialFrame = alignAxisWithThis.getReferenceFrame();
       alignAxisWithThis.changeFrame(currentXYZAxis.getReferenceFrame());
       AxisAngle4d rotationToDesired = new AxisAngle4d();
-      GeometryTools.getRotationBasedOnNormal(rotationToDesired, alignAxisWithThis.getVector(), currentXYZAxis.getVector());
+      GeometryTools.getAxisAngleFromFirstToSecondVector(currentXYZAxis.getVector(), alignAxisWithThis.getVector(), rotationToDesired);
       alignAxisWithThis.changeFrame(initialFrame);
       
       RigidBodyTransform transformToDesired = new RigidBodyTransform();
@@ -615,7 +615,7 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
    {
       RigidBodyTransform ret = new RigidBodyTransform();
 
-      ret.setRotation(GeometryTools.getRotationBasedOnNormal(zAxis.getVectorCopy()));
+      ret.setRotation(GeometryTools.getAxisAngleFromZUpToVector(zAxis.getVectorCopy()));
       Vector3d translation = new Vector3d();
       point.get(translation);
       ret.setTranslation(translation);

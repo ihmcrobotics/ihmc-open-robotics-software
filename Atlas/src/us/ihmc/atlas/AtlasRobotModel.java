@@ -9,68 +9,53 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import com.jme3.math.Transform;
 
-import us.ihmc.robotModels.FullHumanoidRobotModelFromDescription;
-import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
-import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
-import us.ihmc.humanoidRobotics.HumanoidFloatingRootJointRobot;
-import us.ihmc.SdfLoader.JaxbSDFLoader;
-import us.ihmc.SdfLoader.RobotDescriptionFromSDFLoader;
-import us.ihmc.SdfLoader.SDFContactSensor;
-import us.ihmc.SdfLoader.SDFConversionsHelper;
-import us.ihmc.SdfLoader.SDFDescriptionMutator;
-import us.ihmc.SdfLoader.SDFForceSensor;
-import us.ihmc.SdfLoader.SDFJointHolder;
-import us.ihmc.SdfLoader.SDFLinkHolder;
-import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.robotics.partNames.ArmJointName;
-import us.ihmc.robotics.partNames.NeckJointName;
-import us.ihmc.SdfLoader.xmlDescription.SDFGeometry;
-import us.ihmc.SdfLoader.xmlDescription.SDFSensor;
-import us.ihmc.SdfLoader.xmlDescription.SDFVisual;
+import us.ihmc.modelFileLoaders.SdfLoader.*;
+import us.ihmc.modelFileLoaders.ModelFileLoaderConversionsHelper;
+import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFGeometry;
+import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFSensor;
+import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFVisual;
 import us.ihmc.atlas.initialSetup.AtlasSimInitialSetup;
 import us.ihmc.atlas.parameters.AtlasArmControllerParameters;
 import us.ihmc.atlas.parameters.AtlasCapturePointPlannerParameters;
 import us.ihmc.atlas.parameters.AtlasContactPointParameters;
 import us.ihmc.atlas.parameters.AtlasDefaultArmConfigurations;
-import us.ihmc.atlas.parameters.AtlasDrivingControllerParameters;
 import us.ihmc.atlas.parameters.AtlasFootstepPlanningParameterization;
-import us.ihmc.atlas.parameters.AtlasHeightCalculatorParameters;
 import us.ihmc.atlas.parameters.AtlasICPOptimizationParameters;
 import us.ihmc.atlas.parameters.AtlasPhysicalProperties;
-import us.ihmc.atlas.parameters.AtlasRobotMultiContactControllerParameters;
 import us.ihmc.atlas.parameters.AtlasSensorInformation;
 import us.ihmc.atlas.parameters.AtlasStateEstimatorParameters;
 import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
-import us.ihmc.atlas.physics.AtlasPhysicsEngineConfiguration;
 import us.ihmc.atlas.ros.AtlasPPSTimestampOffsetProvider;
 import us.ihmc.atlas.sensors.AtlasCollisionBoxProvider;
 import us.ihmc.atlas.sensors.AtlasSensorSuiteManager;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.handControl.HandCommandManager;
+import us.ihmc.avatar.handControl.packetsAndConsumers.HandModel;
+import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
+import us.ihmc.avatar.networkProcessor.time.DRCROSAlwaysZeroOffsetPPSTimestampOffsetProvider;
+import us.ihmc.avatar.networkProcessor.time.SimulationRosClockPPSTimestampOffsetProvider;
+import us.ihmc.avatar.ros.DRCROSPPSTimestampOffsetProvider;
+import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
-import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
-import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.footstepGenerator.HeightCalculatorParameters;
-import us.ihmc.darpaRoboticsChallenge.handControl.HandCommandManager;
-import us.ihmc.darpaRoboticsChallenge.handControl.packetsAndConsumers.HandModel;
-import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
-import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.DRCROSAlwaysZeroOffsetPPSTimestampOffsetProvider;
-import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.SimulationRosClockPPSTimestampOffsetProvider;
-import us.ihmc.darpaRoboticsChallenge.ros.DRCROSPPSTimestampOffsetProvider;
-import us.ihmc.darpaRoboticsChallenge.sensors.DRCSensorSuiteManager;
-import us.ihmc.graphics3DAdapter.jme.util.JMEGeometryUtils;
 import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.FootstepPlanningParameterization;
 import us.ihmc.humanoidRobotics.footstep.footstepSnapper.AtlasFootstepSnappingParameters;
 import us.ihmc.humanoidRobotics.footstep.footstepSnapper.FootstepSnappingParameters;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
+import us.ihmc.jMonkeyEngineToolkit.jme.util.JMEGeometryUtils;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.SDFLogModelProvider;
-import us.ihmc.robotDataCommunication.logger.LogSettings;
+import us.ihmc.robotDataLogger.logger.LogSettings;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotModels.FullHumanoidRobotModelFromDescription;
+import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.partNames.ArmJointName;
+import us.ihmc.robotics.partNames.NeckJointName;
+import us.ihmc.robotics.robotController.OutputProcessor;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -80,17 +65,22 @@ import us.ihmc.robotiq.model.RobotiqHandModel;
 import us.ihmc.robotiq.simulatedHand.SimulatedRobotiqHandsController;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
-import us.ihmc.simulationconstructionset.Robot;
-import us.ihmc.simulationconstructionset.physics.ScsCollisionConfigure;
+import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
+import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.robotController.MultiThreadedRobotControlElement;
-import us.ihmc.simulationconstructionset.robotController.OutputProcessor;
 import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
 import us.ihmc.wholeBodyController.DRCHandType;
+import us.ihmc.wholeBodyController.FootContactPoints;
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizerInterface;
 import us.ihmc.wholeBodyController.parameters.DefaultArmConfigurations;
 
 public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
 {
+   public final static boolean SCALE_ATLAS = false;
+   private final static double DESIRED_ATLAS_HEIGHT = 0.66;
+   private final static double DESIRED_ATLAS_WEIGHT = 15;
+
+
    private final double HARDSTOP_RESTRICTION_ANGLE = Math.toRadians(5.0);
 
    private final AtlasRobotVersion selectedVersion;
@@ -108,6 +98,7 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
 
    private final JaxbSDFLoader loader;
 
+   private final AtlasPhysicalProperties atlasPhysicalProperties;
    private final AtlasJointMap jointMap;
    private final AtlasSensorInformation sensorInformation;
    private final AtlasArmControllerParameters armControllerParameters;
@@ -115,10 +106,7 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    private final AtlasICPOptimizationParameters icpOptimizationParameters;
    private final AtlasWalkingControllerParameters walkingControllerParameters;
    private final AtlasStateEstimatorParameters stateEstimatorParameters;
-   private final AtlasRobotMultiContactControllerParameters multiContactControllerParameters;
-   private final AtlasDrivingControllerParameters drivingControllerParameters;
    private final AtlasDefaultArmConfigurations defaultArmConfigurations;
-   private final AtlasHeightCalculatorParameters heightCalculatorParameters;
    private final AtlasFootstepSnappingParameters snappingParameters;
 
    private boolean enableJointDamping = true;
@@ -127,8 +115,22 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
 
    public AtlasRobotModel(AtlasRobotVersion atlasVersion, DRCRobotModel.RobotTarget target, boolean headless)
    {
+      this(atlasVersion, target, headless, null);
+   }
+
+   public AtlasRobotModel(AtlasRobotVersion atlasVersion, DRCRobotModel.RobotTarget target, boolean headless, FootContactPoints simulationContactPoints)
+   {
+      if(SCALE_ATLAS)
+      {
+         atlasPhysicalProperties  = new AtlasPhysicalProperties(DESIRED_ATLAS_HEIGHT, DESIRED_ATLAS_WEIGHT);
+      }
+      else
+      {
+         atlasPhysicalProperties = new AtlasPhysicalProperties();
+      }
+
       selectedVersion = atlasVersion;
-      jointMap = new AtlasJointMap(selectedVersion);
+      jointMap = new AtlasJointMap(selectedVersion, atlasPhysicalProperties, simulationContactPoints);
       this.target = target;
 
       this.loader = DRCRobotSDFLoader.loadDRCRobot(selectedVersion.getResourceDirectories(), selectedVersion.getSdfFileAsStream(), this);
@@ -139,16 +141,13 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
       }
 
       boolean runningOnRealRobot = target == DRCRobotModel.RobotTarget.REAL_ROBOT;
-      capturePointPlannerParameters = new AtlasCapturePointPlannerParameters();
+      capturePointPlannerParameters = new AtlasCapturePointPlannerParameters(atlasPhysicalProperties);
       icpOptimizationParameters = new AtlasICPOptimizationParameters(runningOnRealRobot);
       sensorInformation = new AtlasSensorInformation(target);
       armControllerParameters = new AtlasArmControllerParameters(runningOnRealRobot, jointMap);
       walkingControllerParameters = new AtlasWalkingControllerParameters(target, jointMap);
       stateEstimatorParameters = new AtlasStateEstimatorParameters(jointMap, sensorInformation, runningOnRealRobot, getEstimatorDT());
-      multiContactControllerParameters = new AtlasRobotMultiContactControllerParameters(jointMap);
-      drivingControllerParameters = new AtlasDrivingControllerParameters(jointMap);
       defaultArmConfigurations = new AtlasDefaultArmConfigurations();
-      heightCalculatorParameters = new AtlasHeightCalculatorParameters();
       snappingParameters = new AtlasFootstepSnappingParameters();
 
       robotDescription = createRobotDescription();
@@ -156,13 +155,11 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
 
    private RobotDescription createRobotDescription()
    {
-      boolean useCollisionMeshes = false;
-      boolean enableTorqueVelocityLimits = true;
-      boolean enableJointDamping = true;
+      boolean useCollisionMeshes = true;
 
       GeneralizedSDFRobotModel generalizedSDFRobotModel = getGeneralizedRobotModel();
       RobotDescriptionFromSDFLoader descriptionLoader = new RobotDescriptionFromSDFLoader();
-      RobotDescription robotDescription = descriptionLoader.loadRobotDescriptionFromSDF(generalizedSDFRobotModel, jointMap, useCollisionMeshes, enableTorqueVelocityLimits, enableJointDamping);
+      RobotDescription robotDescription = descriptionLoader.loadRobotDescriptionFromSDF(generalizedSDFRobotModel, jointMap, useCollisionMeshes);
       return robotDescription;
    }
 
@@ -193,7 +190,7 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    @Override
    public AtlasPhysicalProperties getPhysicalProperties()
    {
-      return new AtlasPhysicalProperties();
+      return atlasPhysicalProperties;
    }
 
    @Override
@@ -232,18 +229,6 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    }
 
    @Override
-   public WalkingControllerParameters getMultiContactControllerParameters()
-   {
-      return multiContactControllerParameters;
-   }
-
-   @Override
-   public ScsCollisionConfigure getPhysicsConfigure(FloatingRootJointRobot sdfRobot)
-   {
-      return new AtlasPhysicsEngineConfiguration(getJointMap(), sdfRobot);
-   }
-
-   @Override
    public AtlasContactPointParameters getContactPointParameters()
    {
       return jointMap.getContactPointParameters();
@@ -254,12 +239,11 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
       jointMap.getContactPointParameters().createHandContactPoints(useHighResolutionPointGrid);
    }
 
-   public void addMoreFootContactPointsSimOnly(int nContactPointsX, int nContactPointsY, boolean edgePointsOnly)
-   {
-      jointMap.getContactPointParameters().addMoreFootContactPointsSimOnly(nContactPointsX, nContactPointsY, edgePointsOnly);
-   }
+//   public void addMoreFootContactPointsSimOnly(int nContactPointsX, int nContactPointsY, boolean edgePointsOnly)
+//   {
+//      jointMap.getContactPointParameters().addMoreFootContactPointsSimOnly(nContactPointsX, nContactPointsY, edgePointsOnly);
+//   }
 
-   @Override
    public void setJointDamping(FloatingRootJointRobot simulatedRobot)
    {
       AtlasDampingParameters.setDampingParameters(simulatedRobot, getDRCHandType(), getJointMap());
@@ -284,12 +268,6 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
          return new RobotiqHandModel();
 
       return null;
-   }
-
-   @Override
-   public WalkingControllerParameters getDrivingControllerParameters()
-   {
-      return drivingControllerParameters;
    }
 
    @Override
@@ -337,14 +315,9 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    @Override
    public HumanoidFloatingRootJointRobot createHumanoidFloatingRootJointRobot(boolean createCollisionMeshes)
    {
-      boolean useCollisionMeshes = false;
       boolean enableTorqueVelocityLimits = false;
-      AtlasJointMap jointMap = getJointMap();
-      boolean enableJointDamping = getEnableJointDamping();
-
-      RobotDescription robotDescription = loader.createRobotDescription(jointMap, useCollisionMeshes, enableTorqueVelocityLimits, enableJointDamping);
-
-      return new HumanoidFloatingRootJointRobot(robotDescription, jointMap);
+      HumanoidFloatingRootJointRobot humanoidFloatingRootJointRobot = new HumanoidFloatingRootJointRobot(robotDescription, jointMap, getEnableJointDamping(), enableTorqueVelocityLimits);
+      return humanoidFloatingRootJointRobot;
    }
 
    @Override
@@ -378,7 +351,7 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
          return AtlasPPSTimestampOffsetProvider.getInstance(sensorInformation);
       }
 
-      if ((target == DRCRobotModel.RobotTarget.SCS) && DRCConfigParameters.SEND_ROBOT_DATA_TO_ROS)
+      if ((target == DRCRobotModel.RobotTarget.SCS) && AtlasSensorInformation.SEND_ROBOT_DATA_TO_ROS)
       {
          return new SimulationRosClockPPSTimestampOffsetProvider();
       }
@@ -506,11 +479,6 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    public DefaultArmConfigurations getDefaultArmConfigurations()
    {
       return defaultArmConfigurations;
-   }
-   @Override
-   public HeightCalculatorParameters getHeightCalculatorParameters()
-   {
-      return heightCalculatorParameters;
    }
 
    @Override
@@ -904,12 +872,12 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
 
    private void modifyLinkPose(SDFLinkHolder linkHolder, String pose)
    {
-      linkHolder.getTransformFromModelReferenceFrame().set(SDFConversionsHelper.poseToTransform(pose));
+      linkHolder.getTransformFromModelReferenceFrame().set(ModelFileLoaderConversionsHelper.poseToTransform(pose));
    }
 
    private void modifyLinkInertialPose(SDFLinkHolder linkHolder, String pose)
    {
-      linkHolder.setInertialFrameWithRespectToLinkFrame(SDFConversionsHelper.poseToTransform(pose));
+      linkHolder.setInertialFrameWithRespectToLinkFrame(ModelFileLoaderConversionsHelper.poseToTransform(pose));
    }
 
    private void modifyLinkInertia(SDFLinkHolder linkHolder, Matrix3d inertia)

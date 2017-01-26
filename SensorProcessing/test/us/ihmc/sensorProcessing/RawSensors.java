@@ -5,7 +5,7 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.simulationconstructionset.rawSensors.RawIMUSensorsInterface;
+import us.ihmc.robotics.sensors.RawIMUSensorsInterface;
 
 public class RawSensors implements RawIMUSensorsInterface
 {

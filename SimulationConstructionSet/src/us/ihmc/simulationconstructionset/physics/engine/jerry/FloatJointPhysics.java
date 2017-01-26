@@ -44,12 +44,14 @@ public class FloatJointPhysics extends JointPhysics<FloatingJoint>
       super(owner);
    }
 
+   @Override
    protected void jointDependentChangeVelocity(double delta_qd)
    {
       System.err.println("Error!!!! FloatingJoint.jointDependentChangeVelocity should never be called!!!");
    }
 
    // Override featherstonePassOne since don't need to do everything...
+   @Override
    public void featherstonePassOne(Vector3d w_h, Vector3d v_h, Matrix3d Rh_0)
    {
       owner.update();
@@ -107,12 +109,14 @@ public class FloatJointPhysics extends JointPhysics<FloatingJoint>
       }
    }
 
+   @Override
    protected void jointDependentSetAndGetRotation(Matrix3d Rh_i)
    {
       tempOrientation2.set(owner.q_qx.getDoubleValue(), owner.q_qy.getDoubleValue(), owner.q_qz.getDoubleValue(), owner.q_qs.getDoubleValue());
       Rh_i.set(tempOrientation2);
    }
 
+   @Override
    protected void jointDependentFeatherstonePassOne()
    {
       // No torques:
@@ -134,11 +138,13 @@ public class FloatJointPhysics extends JointPhysics<FloatingJoint>
       // ///////////////////////////////
    }
 
+   @Override
    protected void jointDependentSet_d_i()
    {
       System.err.println("Error!!!! FloatingJoint.jointDependentSet_d_i should never be called!!!");
    }
 
+   @Override
    protected void jointDependentFeatherstonePassTwo(Vector3d w_h)
    {
       // Coriolis Forces:
@@ -156,7 +162,8 @@ public class FloatJointPhysics extends JointPhysics<FloatingJoint>
     * externalForceR.sub(point_offset, comOffset);  // No linear motion component!!!
     * }
     */
-    public void featherstonePassThree()
+    @Override
+   public void featherstonePassThree()
    {
       // Recurse over the children:
       for (int i = 0; i < owner.childrenJoints.size(); i++)
@@ -167,6 +174,7 @@ public class FloatJointPhysics extends JointPhysics<FloatingJoint>
       }
    }
 
+   @Override
    public void featherstonePassFour(SpatialVector a_hat_h, int passNumber) throws UnreasonableAccelerationException
    {
       I_hat_i.getMatrix(I_hat_matrix);
@@ -248,6 +256,7 @@ public class FloatJointPhysics extends JointPhysics<FloatingJoint>
       // System.out.println(this);
    }
 
+   @Override
    protected void jointDependentRecordK(int passNumber)
    {
       k_qdd_x[passNumber] = owner.qdd_x.getDoubleValue();
@@ -276,11 +285,13 @@ public class FloatJointPhysics extends JointPhysics<FloatingJoint>
             + owner.q_qs.getDoubleValue() * owner.qd_wz.getDoubleValue());
    }
 
+   @Override
    protected void jointDependentFeatherstonePassFour(double Q, int passNumber)
    {
       // Do nothing here...
    }
 
+   @Override
    public void recursiveEulerIntegrate(double stepSize)
    {
       owner.q_x.set(q_x_n + owner.qd_x.getDoubleValue() * stepSize);
@@ -314,6 +325,7 @@ public class FloatJointPhysics extends JointPhysics<FloatingJoint>
       }
    }
 
+   @Override
    public void recursiveRungeKuttaSum(double stepSize)
    {
       owner.q_x.set(q_x_n + stepSize * (k_qd_x[0] / 6.0 + k_qd_x[1] / 3.0 + k_qd_x[2] / 3.0 + k_qd_x[3] / 6.0));
@@ -348,6 +360,7 @@ public class FloatJointPhysics extends JointPhysics<FloatingJoint>
       }
    }
 
+   @Override
    public void recursiveSaveTempState()
    {
       q_x_n = owner.q_x.getDoubleValue();
@@ -373,6 +386,7 @@ public class FloatJointPhysics extends JointPhysics<FloatingJoint>
       }
    }
 
+   @Override
    public void recursiveRestoreTempState()
    {
       owner.q_x.set(q_x_n);
@@ -398,6 +412,7 @@ public class FloatJointPhysics extends JointPhysics<FloatingJoint>
       }
    }
 
+   @Override
    protected void impulseResponseComputeDeltaV(SpatialVector delta_v_parent, SpatialVector delta_v_me)
    {
       // Override with FloatingJoint as in Mirtich p. 144
@@ -410,6 +425,7 @@ public class FloatJointPhysics extends JointPhysics<FloatingJoint>
       delta_v_me.bottom.set(-a_hat_matrix.get(3, 0), -a_hat_matrix.get(4, 0), -a_hat_matrix.get(5, 0));
    }
 
+   @Override
    protected void propagateImpulseSetDeltaVOnPath(SpatialVector delta_v_parent, SpatialVector delta_v_me)
    {
       // Override with FloatingJoint as in Mirtich p. 144
@@ -436,6 +452,7 @@ public class FloatJointPhysics extends JointPhysics<FloatingJoint>
       owner.qd_z.set(owner.qd_z.getDoubleValue() + delta_qd_xyz.getZ());
    }
 
+   @Override
    protected boolean jointDependentVerifyReasonableAccelerations()
    {
       if (Math.abs(owner.qdd_x.getDoubleValue()) > Joint.MAX_TRANS_ACCEL)

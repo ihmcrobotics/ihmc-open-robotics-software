@@ -4,7 +4,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
-import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
+import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.StopAllTrajectoryMessage;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -30,12 +30,12 @@ public class HandTrajectoryBehavior extends AbstractBehavior
    protected final BooleanYoVariable hasStatusBeenReceived;
    private final BooleanYoVariable isDone;
 
-   public HandTrajectoryBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, DoubleYoVariable yoTime)
+   public HandTrajectoryBehavior(CommunicationBridgeInterface outgoingCommunicationBridge, DoubleYoVariable yoTime)
    {
       this(null, outgoingCommunicationBridge, yoTime);
    }
 
-   public HandTrajectoryBehavior(String namePrefix, OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, DoubleYoVariable yoTime)
+   public HandTrajectoryBehavior(String namePrefix, CommunicationBridgeInterface outgoingCommunicationBridge, DoubleYoVariable yoTime)
    {
       super(namePrefix, outgoingCommunicationBridge);
 
@@ -88,10 +88,10 @@ public class HandTrajectoryBehavior extends AbstractBehavior
    {
       if (!isPaused.getBooleanValue() && !isAborted.getBooleanValue())
       {
-         outgoingMessage.setDestination(PacketDestination.UI);
+        // outgoingMessage.setDestination(PacketDestination.UI);
 
-         sendPacketToController(outgoingMessage);
-         sendPacketToNetworkProcessor(outgoingMessage);
+         //sendPacketToController(outgoingMessage);
+         sendPacket(outgoingMessage);
 
          hasPacketBeenSent.set(true);
 
@@ -111,7 +111,7 @@ public class HandTrajectoryBehavior extends AbstractBehavior
    }
 
    @Override
-   public void initialize()
+   public void onBehaviorEntered()
    {
       hasInputBeenSet.set(false);
       hasPacketBeenSent.set(false);
@@ -128,7 +128,7 @@ public class HandTrajectoryBehavior extends AbstractBehavior
    }
 
    @Override
-   public void doPostBehaviorCleanup()
+   public void onBehaviorExited()
    {
       hasPacketBeenSent.set(false);
       outgoingMessage = null;
@@ -147,14 +147,14 @@ public class HandTrajectoryBehavior extends AbstractBehavior
    }
 
    @Override
-   public void abort()
+   public void onBehaviorAborted()
    {
       stopArmMotion();
       isAborted.set(true);
    }
 
    @Override
-   public void pause()
+   public void onBehaviorPaused()
    {
       if (isPaused.getBooleanValue())
       {
@@ -168,7 +168,7 @@ public class HandTrajectoryBehavior extends AbstractBehavior
    }
 
    @Override
-   public void resume()
+   public void onBehaviorResumed()
    {
       if (!isPaused.getBooleanValue())
       {

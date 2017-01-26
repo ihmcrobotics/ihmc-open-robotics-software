@@ -1,20 +1,18 @@
 package us.ihmc.imageProcessing.segmentation;
 
-import georegression.geometry.UtilPoint3D_F32;
-import georegression.struct.point.Point2D_I32;
-
-import java.util.List;
-
-import org.ddogleg.struct.FastQueue;
-
 import boofcv.alg.filter.binary.Contour;
 import boofcv.alg.misc.ImageMiscOps;
 import boofcv.misc.BoofMiscOps;
 import boofcv.struct.ImageRectangle;
 import boofcv.struct.image.Color3_F32;
-import boofcv.struct.image.ImageFloat32;
-import boofcv.struct.image.ImageUInt8;
-import boofcv.struct.image.MultiSpectral;
+import boofcv.struct.image.GrayF32;
+import boofcv.struct.image.InterleavedU8;
+import boofcv.struct.image.Planar;
+import georegression.geometry.UtilPoint3D_F32;
+import georegression.struct.point.Point2D_I32;
+import org.ddogleg.struct.FastQueue;
+
+import java.util.List;
 
 /**
  * @author Peter Abeles
@@ -23,13 +21,13 @@ public class LocalReclassifyContour {
 
 
 
-   ImageUInt8 binary;
-   ImageUInt8 changed = new ImageUInt8(1,1);
+   InterleavedU8 binary;
+   InterleavedU8 changed = new InterleavedU8(1, 1, 1);
 
    ImageRectangle rect = new ImageRectangle();
    int radius = 2;
 
-   ImageFloat32 band0,band1,band2;
+   GrayF32 band0,band1,band2;
    float distIn,distOut;
    int numIn,numOut;
 
@@ -40,8 +38,9 @@ public class LocalReclassifyContour {
 
    FastQueue<ChangeInfo> change = new FastQueue<ChangeInfo>(ChangeInfo.class,true);
    FastQueue<ChangeInfo> changeOld = new FastQueue<ChangeInfo>(ChangeInfo.class,true);
+   int[] data = new int[1];
 
-   public void process( List<Contour> contours , ImageUInt8 binary , MultiSpectral<ImageFloat32> color ) {
+   public void process( List<Contour> contours , InterleavedU8 binary , Planar<GrayF32> color ) {
       band0 = color.getBand(0);
       band1 = color.getBand(1);
       band2 = color.getBand(2);
@@ -108,7 +107,8 @@ public class LocalReclassifyContour {
 
          computeDistance(p.x,p.y);
 
-         if( binary.unsafe_get(p.x,p.y) == 1 ) {
+         binary.get(p.x,p.y, data);
+         if( data[0] == 1 ) {
             if( distOut < distIn && distOut < maxDistance ) {
                changeValue(p.x,p.y,0);
             }
@@ -125,7 +125,8 @@ public class LocalReclassifyContour {
       if( !binary.isInBounds(x,y))
          return;
 
-      if( binary.unsafe_get(x, y) == 0 ) {
+      binary.get(x, y, data);
+      if( data[0] == 0 ) {
          if( computeDistance(x,y) )
             return;
 
@@ -151,7 +152,8 @@ public class LocalReclassifyContour {
       numIn = 0;
       for( int y = rect.y0; y < rect.y1; y++ ) {
          for( int x = rect.x0; x < rect.x1; x++ ) {
-            if( binary.unsafe_get(x,y) == 0 ) {
+            binary.get(x,y,data);
+            if( data[0] == 0 ) {
                meanOut.band0 += band0.unsafe_get(x,y);
                meanOut.band1 += band1.unsafe_get(x,y);
                meanOut.band2 += band2.unsafe_get(x,y);
@@ -188,7 +190,8 @@ public class LocalReclassifyContour {
    }
 
    private void changeValue( int x , int y , int value ) {
-      if( changed.get(x,y) == 0 ) {
+      changed.get(x,y,data);
+      if( data[0] == 0 ) {
          changed.set(x,y,1);
          change.grow().set(x,y,value);
       }
@@ -197,7 +200,7 @@ public class LocalReclassifyContour {
    private void applyChanges() {
       for( int i = 0; i < change.size; i++ ) {
          ChangeInfo c = change.get(i);
-         binary.unsafe_set(c.x, c.y, c.value);
+         binary.set(c.x, c.y, c.value);
 //         System.out.println(" "+c.x+" "+c.y+" = "+c.value);
       }
    }

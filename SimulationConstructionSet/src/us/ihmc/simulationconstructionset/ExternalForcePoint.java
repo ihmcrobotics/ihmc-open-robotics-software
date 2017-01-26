@@ -58,6 +58,7 @@ public class ExternalForcePoint extends KinematicPoint
       impulse = new YoFrameVector(name + "_p", "", ReferenceFrame.getWorldFrame(), registry);
    }
 
+   @Override
    public String toString()
    {
       return ("name: " + name + "x: " + getX() + ", y: " + getY() + ", z: " + getZ());
@@ -68,6 +69,7 @@ public class ExternalForcePoint extends KinematicPoint
       return ((force.getX() == 0.0) && (force.getY() == 0.0) && (force.getZ() == 0.0) && (moment.getX() == 0.0) && (moment.getY() == 0.0) && (moment.getZ() == 0.0));
    }
 
+   @Override
    public void reset()
    {
       super.reset();
@@ -87,6 +89,18 @@ public class ExternalForcePoint extends KinematicPoint
       zAxis.set(0,0,0);
       yAxis.set(0,0,0);
       xAxis.set(0,0,0);
+   }
+
+
+
+   public boolean resolveMicroCollision(double penetrationSquared, ExternalForcePoint externalForcePointTwo, Vector3d negative_normal, double epsilon, double mu, Vector3d p_world)
+   {
+      //TODO: Duplicate code all over the place here. Clean this up once it works well. Test cases too!
+      epsilon = epsilon + 1000000.0 * penetrationSquared;
+      if (epsilon > 20.0)
+         epsilon = 20.0;
+
+      return resolveCollision(externalForcePointTwo, negative_normal, epsilon, mu, p_world);
    }
 
 
@@ -290,4 +304,5 @@ public class ExternalForcePoint extends KinematicPoint
       rot.setM21(yAxis.getZ());
       rot.setM22(zAxis.getZ());
    }
+
 }

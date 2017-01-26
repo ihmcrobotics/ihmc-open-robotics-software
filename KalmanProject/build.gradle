@@ -5,7 +5,7 @@ buildscript {
     }
   }
   dependencies {
-    classpath "gradle.plugin.us.ihmc.gradle:ihmc-build:0.0.18"
+    classpath "gradle.plugin.us.ihmc.gradle:ihmc-build:0.0.19"
   }
 }
 
@@ -15,7 +15,7 @@ if (!rootProject.name.equals('IHMCOpenRoboticsSoftware')) {
     evaluationDependsOn(':IHMCOpenRoboticsSoftware')
 }
 
-sourceCompatibility = 1.7
+sourceCompatibility = 1.8
 version = "${getOpenRoboticsSoftwareProject().version}"
 project.ext.fullVersion = "${getOpenRoboticsSoftwareProject().ext.fullVersion}"
 project.ext.vcsUrl = "${getOpenRoboticsSoftwareProject().ext.vcsUrl}"
@@ -45,10 +45,9 @@ dependencies {
     compile group: 'org.ejml', name: 'simple', version: '0.28'
     compile group: 'org.ejml', name: 'dense64', version: '0.28'
 
-    compile ihmc.getProjectDependency(":SimulationConstructionSet")
     compile ihmc.getProjectDependency(":IHMCRoboticsToolkit")
-    compile ihmc.getProjectDependency(":IHMCGraphics3DDescription")
-
+	
+	testCompile ihmc.getProjectDependency(":SimulationConstructionSet")	
     testCompile ihmc.getProjectDependency(":IHMCUnitTesting")
 }
 

@@ -9,18 +9,17 @@ import javax.vecmath.Point3d;
 
 import com.martiansoftware.jsap.JSAPException;
 
+import optiTrack.IHMCMocapDataClient;
 import optiTrack.MocapRigidBody;
 import optiTrack.MocapRigidbodiesListener;
 import sensor_msgs.PointCloud2;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.communication.net.NetClassList;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.util.NetworkPorts;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.lidarTests.IHMCMocapDataClient;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.PointCloudWorldPacket;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
@@ -106,7 +105,7 @@ public class MultisenseHeadOnAStickManualTestMinimalNetworkProcessor  extends Ro
          if (id == MULTISENSE_MOCAP_ID)
          {
             RigidBodyTransform pose = new RigidBodyTransform();
-            mocapObject.getPose(pose);
+            mocapObject.packPose(pose);
             headPoseInZUp.set(pose);
          }
       }

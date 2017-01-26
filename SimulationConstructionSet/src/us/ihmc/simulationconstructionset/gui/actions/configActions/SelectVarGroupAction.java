@@ -26,6 +26,7 @@ public class SelectVarGroupAction extends AbstractAction
       this.putValue(Action.SHORT_DESCRIPTION, "Short Description");
    }
 
+   @Override
    public void actionPerformed(ActionEvent e)
    {
       varGroupSelector.selectVarGroup(name);

@@ -27,7 +27,7 @@ import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BlobFilteredSphereDet
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SphereDetectionBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.WaitForUserValidationBehavior;
 import us.ihmc.humanoidBehaviors.coactiveDesignFramework.CoactiveElement;
-import us.ihmc.humanoidBehaviors.communication.BehaviorCommunicationBridge;
+import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidBehaviors.taskExecutor.ArmTrajectoryTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.ChestOrientationTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.GoHomeTask;
@@ -85,7 +85,7 @@ public class PickUpBallBehavior extends AbstractBehavior
 
    private HumanoidReferenceFrames referenceFrames;
 
-   public PickUpBallBehavior(BehaviorCommunicationBridge outgoingCommunicationBridge, DoubleYoVariable yoTime, BooleanYoVariable yoDoubleSupport,
+   public PickUpBallBehavior(CommunicationBridge outgoingCommunicationBridge, DoubleYoVariable yoTime, BooleanYoVariable yoDoubleSupport,
          FullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames, WholeBodyControllerParameters wholeBodyControllerParameters)
    {
       super(outgoingCommunicationBridge);
@@ -115,7 +115,7 @@ public class PickUpBallBehavior extends AbstractBehavior
       walkToLocationBehavior = new WalkToLocationBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrames,
             wholeBodyControllerParameters.getWalkingControllerParameters());
       behaviors.add(walkToLocationBehavior);
-      wholeBodyBehavior = new WholeBodyInverseKinematicsBehavior(wholeBodyControllerParameters, yoTime, outgoingCommunicationBridge);
+      wholeBodyBehavior = new WholeBodyInverseKinematicsBehavior(wholeBodyControllerParameters, yoTime, outgoingCommunicationBridge, fullRobotModel);
 
       behaviors.add(wholeBodyBehavior);
 
@@ -217,7 +217,7 @@ public class PickUpBallBehavior extends AbstractBehavior
          protected void setBehaviorInput()
          {
             TextToSpeechPacket p1 = new TextToSpeechPacket("LOOKING FOR BALL");
-            sendPacketToNetworkProcessor(p1);
+            sendPacket(p1);
             coactiveElement.currentState.set(PickUpBallBehaviorState.SEARCHING_FOR_BALL);
             coactiveElement.searchingForBall.set(true);
             coactiveElement.foundBall.set(false);
@@ -259,7 +259,7 @@ public class PickUpBallBehavior extends AbstractBehavior
          protected void setBehaviorInput()
          {
             TextToSpeechPacket p1 = new TextToSpeechPacket("Walking To The Ball");
-            sendPacketToNetworkProcessor(p1);
+            sendPacket(p1);
             coactiveElement.currentState.set(PickUpBallBehaviorState.WALKING_TO_BALL);
             coactiveElement.searchingForBall.set(false);
             coactiveElement.waitingForValidation.set(false);
@@ -280,7 +280,7 @@ public class PickUpBallBehavior extends AbstractBehavior
 
       HeadTrajectoryMessage message = new HeadTrajectoryMessage(1, desiredHeadQuat);
 
-      HeadTrajectoryBehavior headTrajectoryBehavior = new HeadTrajectoryBehavior(outgoingCommunicationBridge, yoTime);
+      HeadTrajectoryBehavior headTrajectoryBehavior = new HeadTrajectoryBehavior(communicationBridge, yoTime);
 
       headTrajectoryBehavior.initialize();
       headTrajectoryBehavior.setInput(message);
@@ -303,7 +303,7 @@ public class PickUpBallBehavior extends AbstractBehavior
 
       HeadTrajectoryMessage messageHeadUp = new HeadTrajectoryMessage(1, desiredHeadUpQuat);
 
-      HeadTrajectoryBehavior headTrajectoryUpBehavior = new HeadTrajectoryBehavior(outgoingCommunicationBridge, yoTime);
+      HeadTrajectoryBehavior headTrajectoryUpBehavior = new HeadTrajectoryBehavior(communicationBridge, yoTime);
 
       headTrajectoryUpBehavior.initialize();
       headTrajectoryUpBehavior.setInput(messageHeadUp);
@@ -353,7 +353,7 @@ public class PickUpBallBehavior extends AbstractBehavior
          protected void setBehaviorInput()
          {
             TextToSpeechPacket p1 = new TextToSpeechPacket("Looking for the ball");
-            sendPacketToNetworkProcessor(p1);
+            sendPacket(p1);
             coactiveElement.currentState.set(PickUpBallBehaviorState.SEARCHING_FOR_BALL);
             coactiveElement.searchingForBall.set(true);
             coactiveElement.foundBall.set(false);
@@ -394,7 +394,7 @@ public class PickUpBallBehavior extends AbstractBehavior
                   initialSphereDetectionBehavior.getBallLocation().getZ() + initialSphereDetectionBehavior.getSpehereRadius() + 0.25);
 
             TextToSpeechPacket p1 = new TextToSpeechPacket("I think i found the ball");
-            sendPacketToNetworkProcessor(p1);
+            sendPacket(p1);
             coactiveElement.currentState.set(PickUpBallBehaviorState.REACHING_FOR_BALL);
             FramePoint point = new FramePoint(ReferenceFrame.getWorldFrame(), initialSphereDetectionBehavior.getBallLocation().getX(),
                   initialSphereDetectionBehavior.getBallLocation().getY(),
@@ -485,7 +485,7 @@ public class PickUpBallBehavior extends AbstractBehavior
          {
             super.setBehaviorInput();
             TextToSpeechPacket p1 = new TextToSpeechPacket("Putting The Ball In The Bucket");
-            sendPacketToNetworkProcessor(p1);
+            sendPacket(p1);
             coactiveElement.currentState.set(PickUpBallBehaviorState.PUTTING_BALL_IN_BASKET);
          }
       };
@@ -635,19 +635,17 @@ public class PickUpBallBehavior extends AbstractBehavior
    }
 
    @Override
-   public void initialize()
+   public void onBehaviorEntered()
    {
-      super.initialize();
       setupPipelineForKick();
 
    }
 
    @Override
-   public void doPostBehaviorCleanup()
+   public void onBehaviorExited()
    {
-      super.doPostBehaviorCleanup();
       TextToSpeechPacket p1 = new TextToSpeechPacket("YAY IM ALL DONE");
-      sendPacketToNetworkProcessor(p1);
+      sendPacket(p1);
 
       coactiveElement.currentState.set(PickUpBallBehaviorState.STOPPED);
 
@@ -664,11 +662,9 @@ public class PickUpBallBehavior extends AbstractBehavior
    }
 
    @Override
-   public void abort()
+   public void onBehaviorAborted()
    {
-      super.abort();
-
-      doPostBehaviorCleanup();
+      onBehaviorExited();
       this.pipeLine.clearAll();
 
       for (AbstractBehavior behavior : behaviors)
@@ -678,12 +674,11 @@ public class PickUpBallBehavior extends AbstractBehavior
    }
 
    @Override
-   public void pause()
+   public void onBehaviorPaused()
    {
-      super.pause();
       for (AbstractBehavior behavior : behaviors)
       {
-         behavior.pause();
+         behavior.onBehaviorPaused();
       }
    }
 
@@ -694,32 +689,11 @@ public class PickUpBallBehavior extends AbstractBehavior
    }
 
    @Override
-   protected void passReceivedNetworkProcessorObjectToChildBehaviors(Object object)
+   public void onBehaviorResumed()
    {
-      for (AbstractBehavior behavior : behaviors)
-      {
-         behavior.consumeObjectFromNetworkProcessor(object);
-      }
-   }
-
-   @Override
-   protected void passReceivedControllerObjectToChildBehaviors(Object object)
-   {
-      for (AbstractBehavior behavior : behaviors)
-      {
-         behavior.consumeObjectFromController(object);
-      }
    }
 
   
 
-   //   public void setHSVRange(HSVRange hsvRange)
-   //   {
-   //      if (initialSphereDetectionBehavior instanceof BlobFilteredSphereDetectionBehavior)
-   //      {
-   //         BlobFilteredSphereDetectionBehavior blobFilteredSphereDetectionBehavior = (BlobFilteredSphereDetectionBehavior) initialSphereDetectionBehavior;
-   //         blobFilteredSphereDetectionBehavior.resetHSVRanges();
-   //         blobFilteredSphereDetectionBehavior.addHSVRange(hsvRange);
-   //      }
-   //   }
+
 }

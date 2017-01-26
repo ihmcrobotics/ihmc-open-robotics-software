@@ -1,0 +1,134 @@
+buildscript {
+  repositories {
+    maven {
+      url "https://plugins.gradle.org/m2/"
+    }
+  }
+  dependencies {
+    classpath "gradle.plugin.us.ihmc.gradle:ihmc-build:0.0.19"
+  }
+}
+
+apply plugin: "us.ihmc.gradle.ihmc-build"
+
+if (!rootProject.name.equals('IHMCOpenRoboticsSoftware')) {
+    evaluationDependsOn(':IHMCOpenRoboticsSoftware')
+    evaluationDependsOn(ihmc.getProjectDependencyGradlePath("IHMCQuadrupedRobotics"))
+}
+
+sourceCompatibility = 1.8
+version = "${getOpenRoboticsSoftwareProject().version}"
+project.ext.fullVersion = "${getOpenRoboticsSoftwareProject().ext.fullVersion}"
+project.ext.vcsUrl = "${getOpenRoboticsSoftwareProject().ext.vcsUrl}"
+project.ext.licenseURL = "http://www.apache.org/licenses/LICENSE-2.0.txt"
+project.ext.licenseName = "Apache License, Version 2.0"
+project.ext.bintrayLicenseName = "Apache-2.0"
+
+repositories ihmc.ihmcDefaultArtifactProxies()
+
+repositories {
+    mavenLocal()
+    jcenter()
+    mavenCentral()
+    maven {
+        url "http://artifactory.ihmc.us/artifactory/thirdparty/"
+    }
+}
+
+def strings = ['ihmc', 'robotics']
+ihmc.configureForIHMCOpenSourceBintrayPublish(false, "mavenJava", "maven-release", strings)
+
+dependencies {
+   testCompile group: 'junit', name: 'junit', version: '4.11'
+
+   compile group: 'javax.vecmath', name: 'vecmath', version: '1.5.2'
+   compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
+
+   compile ihmc.getProjectDependency(":IHMCQuadrupedRobotics")
+   compile ihmc.getProjectDependency(":IHMCJavaToolkit")
+   compile ihmc.getProjectDependency(":IHMCRoboticsToolkit")
+   compile ihmc.getProjectDependency(":IHMCCommunication")
+   compile ihmc.getProjectDependency(":ModelFileLoader")
+   compile ihmc.getProjectDependency(":IHMCHumanoidRobotics")
+   compile ihmc.getProjectDependency(":IHMCStateEstimation")
+   compile ihmc.getProjectDependency(":IHMCGraphicsDescription")
+   compile ihmc.getProjectDependency(":IHMCHumanoidRobotics")
+   compile ihmc.getProjectDependency(":SensorProcessing")
+   compile ihmc.getProjectDependency(":IHMCRobotDescription")
+   compile ihmc.getProjectDependency(":IHMCRobotModels")
+   
+   testCompile ihmc.getProjectDependency(":IHMCUnitTesting")
+   
+}
+
+
+// Do not disable/remove this block to make your compile work. It will break the Quarduped deployment infrastructure.
+afterEvaluate {
+	project.configurations.runtime.each {
+	
+		if(it.name.contains("SimulationConstructionSet") || it.name.contains("IHMCJMonkeyEngineToolkit") )
+		{
+			throw new GradleException("LLAQuardupedController cannot depend on SimulationConstructionSet in order to optimize Ahead-of-Time compilation. Please fix your dependency graph. Note that testCompile dependencies are fine.")
+		}
+	
+	}
+}
+
+jar {
+   List depend = []
+   configurations.runtime.each {
+      depend.add('lib/' + it.name)
+   }
+
+
+    manifest {
+        attributes(
+                "Created-By": "IHMC Gradle Build Script",
+                "Implementation-Title": project.name,
+                "Implementation-Version": project.version,
+                "Implementation-Vendor": "IHMC",
+
+                "Bundle-Name": project.name,
+                "Bundle-Version": project.version,
+                "Bundle-License": "${project.ext.licenseURL}",
+                "Bundle-Vendor": "IHMC",
+                'Class-Path': depend.join(' '))
+                
+    }
+}
+
+task install(dependsOn: ['jar']) {
+
+   doLast {
+
+   	def projectDir = project.buildscript.sourceFile.parent
+
+    File dest = new File(project.rootDir, 'install')
+    
+    File libdest = new File(dest, 'lib')
+    dest.mkdir();
+    libdest.mkdir();
+    
+    
+   configurations.runtime.each {
+   	   def fileToCopy = it.toString()
+       copy{
+    	 from fileToCopy
+    	 into libdest    	 
+       }
+    }
+    
+    copy{
+    	from jar.archivePath
+    	into dest
+    	rename (jar.archiveName, 'LLAQuadrupedController.jar')
+    }
+    
+    File scriptDir = new File(projectDir, "launchScripts/local")
+    copy{
+    	from scriptDir
+    	into dest
+    }
+    
+    	}
+   }

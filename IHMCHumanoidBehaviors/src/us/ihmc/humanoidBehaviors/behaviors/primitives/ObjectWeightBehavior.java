@@ -1,7 +1,7 @@
 package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
-import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
+import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ObjectWeightPacket;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 
@@ -11,7 +11,7 @@ public class ObjectWeightBehavior extends AbstractBehavior
    private final BooleanYoVariable packetAvailable = new BooleanYoVariable("packetAvailable" + behaviorName, registry);
    private ObjectWeightPacket objectWeightPacket;
    
-   public ObjectWeightBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge)
+   public ObjectWeightBehavior(CommunicationBridgeInterface outgoingCommunicationBridge)
    {
       super(outgoingCommunicationBridge);
    }
@@ -47,16 +47,14 @@ public class ObjectWeightBehavior extends AbstractBehavior
    }
 
    @Override
-   public void doPostBehaviorCleanup()
+   public void onBehaviorExited()
    {
-      super.doPostBehaviorCleanup();
       hasInputBeenSet.set(false);
    }
 
    @Override
-   public void initialize()
+   public void onBehaviorEntered()
    {
-      super.initialize();
       hasInputBeenSet.set(false);
       packetAvailable.set(false);
    }
@@ -64,6 +62,21 @@ public class ObjectWeightBehavior extends AbstractBehavior
    public boolean hasInputBeenSet()
    {
       return hasInputBeenSet.getBooleanValue();
+   }
+
+   @Override
+   public void onBehaviorAborted()
+   {
+   }
+
+   @Override
+   public void onBehaviorPaused()
+   {
+   }
+
+   @Override
+   public void onBehaviorResumed()
+   {
    }
 
 }

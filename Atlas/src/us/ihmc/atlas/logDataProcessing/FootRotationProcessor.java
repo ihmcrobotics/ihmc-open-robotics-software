@@ -1,17 +1,17 @@
 package us.ihmc.atlas.logDataProcessing;
 
+import us.ihmc.avatar.logProcessor.LogDataProcessorFunction;
+import us.ihmc.avatar.logProcessor.LogDataProcessorHelper;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.PartialFootholdControlModule;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
-import us.ihmc.darpaRoboticsChallenge.logProcessor.LogDataProcessorFunction;
-import us.ihmc.darpaRoboticsChallenge.logProcessor.LogDataProcessorHelper;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
 public class FootRotationProcessor implements LogDataProcessorFunction
 {

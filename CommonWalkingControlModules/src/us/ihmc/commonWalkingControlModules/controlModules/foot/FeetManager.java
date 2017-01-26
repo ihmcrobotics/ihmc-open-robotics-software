@@ -15,7 +15,10 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajecto
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
+import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
+import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -47,6 +50,8 @@ public class FeetManager
 
    private final HighLevelHumanoidControllerToolbox momentumBasedController;
 
+   private final BooleanYoVariable attemptToStraightenLegs = new BooleanYoVariable("attemptToStraightenLegs", registry);
+
    // TODO Needs to be cleaned up someday... (Sylvain)
    public FeetManager(HighLevelHumanoidControllerToolbox momentumBasedController, WalkingControllerParameters walkingControllerParameters,
          YoVariableRegistry parentRegistry)
@@ -70,9 +75,20 @@ public class FeetManager
       {
          FootControlModule footControlModule = new FootControlModule(robotSide, walkingControllerParameters, swingFootControlGains,
                holdPositionFootControlGains, toeOffFootControlGains, edgeTouchdownFootControlGains, momentumBasedController, registry);
+         footControlModule.setAttemptToStraightenLegs(walkingControllerParameters.attemptToStraightenLegs());
 
          footControlModules.put(robotSide, footControlModule);
       }
+
+      attemptToStraightenLegs.set(walkingControllerParameters.attemptToStraightenLegs());
+      attemptToStraightenLegs.addVariableChangedListener(new VariableChangedListener()
+      {
+         @Override public void variableChanged(YoVariable<?> v)
+         {
+            for (RobotSide robotSide : RobotSide.values)
+               footControlModules.get(robotSide).setAttemptToStraightenLegs(attemptToStraightenLegs.getBooleanValue());
+         }
+      });
 
       parentRegistry.addChild(registry);
    }
@@ -142,9 +158,9 @@ public class FeetManager
       return footControlModules.get(robotSide).getCurrentConstraintType();
    }
 
-   public void replanSwingTrajectory(RobotSide swingSide, Footstep footstep, double swingTime)
+   public void replanSwingTrajectory(RobotSide swingSide, Footstep footstep, double swingTime, boolean continuousReplan)
    {
-      footControlModules.get(swingSide).replanTrajectory(footstep, swingTime);
+      footControlModules.get(swingSide).replanTrajectory(footstep, swingTime, continuousReplan);
    }
 
    public void requestMoveStraightTouchdownForDisturbanceRecovery(RobotSide swingSide)
@@ -284,9 +300,24 @@ public class FeetManager
       return walkOnTheEdgesManager.willDoToeOff(nextFootstep, transferToSide);
    }
 
+   /**
+    * {@link WalkOnTheEdgesManager#updateToeOffStatus(RobotSide, FramePoint2d, FramePoint2d, FramePoint2d)}
+    * @return {@link WalkOnTheEdgesManager#doToeOff}
+    */
    public boolean checkIfToeOffSafe(RobotSide trailingLeg, FramePoint2d desiredECMP, FramePoint2d desiredICP, FramePoint2d currentICP)
    {
       walkOnTheEdgesManager.updateToeOffStatus(trailingLeg, desiredECMP, desiredICP, currentICP);
+
+      return walkOnTheEdgesManager.doToeOff();
+   }
+
+   /**
+    * {@link WalkOnTheEdgesManager#updateToeOffStatusSingleSupport(Footstep, FramePoint2d, FramePoint2d, FramePoint2d, boolean)}.
+    * @return {@link WalkOnTheEdgesManager#doToeOff}
+    */
+   public boolean checkIfToeOffSafeSingleSupport(Footstep nextFootstep, FramePoint2d desiredECMP, FramePoint2d currentICP, FramePoint2d desiredICP, boolean isOnExitCMP)
+   {
+      walkOnTheEdgesManager.updateToeOffStatusSingleSupport(nextFootstep, desiredECMP, currentICP, desiredICP, isOnExitCMP);
 
       return walkOnTheEdgesManager.doToeOff();
    }

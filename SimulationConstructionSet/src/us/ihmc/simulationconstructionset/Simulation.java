@@ -3,17 +3,23 @@ package us.ihmc.simulationconstructionset;
 import java.io.Serializable;
 import java.util.ArrayList;
 
-import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
-import us.ihmc.graphics3DAdapter.HeightMap;
+import us.ihmc.graphicsDescription.HeightMap;
+import us.ihmc.jMonkeyEngineToolkit.Graphics3DAdapter;
 import us.ihmc.robotics.dataStructures.YoVariableHolder;
 import us.ihmc.robotics.dataStructures.listener.RewoundListener;
 import us.ihmc.robotics.dataStructures.registry.NameSpace;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariableList;
+import us.ihmc.robotics.robotDescription.CollisionMeshDescription;
 import us.ihmc.simulationconstructionset.DataBuffer.RepeatDataBufferEntryException;
 import us.ihmc.simulationconstructionset.graphics.GraphicsRobot;
+import us.ihmc.simulationconstructionset.physics.CollisionHandler;
+import us.ihmc.simulationconstructionset.physics.CollisionShapeFactory;
+import us.ihmc.simulationconstructionset.physics.ScsCollisionDetector;
 import us.ihmc.simulationconstructionset.physics.ScsPhysics;
+import us.ihmc.simulationconstructionset.physics.collision.simple.SimpleCollisionDetector;
+import us.ihmc.simulationconstructionset.physics.visualize.DefaultCollisionVisualizer;
 import us.ihmc.simulationconstructionset.scripts.Script;
 import us.ihmc.simulationconstructionset.synchronization.SimulationSynchronizer;
 import us.ihmc.simulationconstructionset.util.ground.FlatGroundProfile;
@@ -106,46 +112,55 @@ public class Simulation implements YoVariableHolder, Serializable // Runnable,
       this.mySimulator.addScript(script);
    }
 
+   @Override
    public ArrayList<YoVariable<?>> getAllVariables()
    {
       return myDataBuffer.getAllVariables();
    }
 
+   @Override
    public YoVariable<?>[] getAllVariablesArray()
    {
       return myDataBuffer.getAllVariablesArray();
    }
 
+   @Override
    public YoVariable<?> getVariable(String varname)
    {
       return myDataBuffer.getVariable(varname);
    }
 
+   @Override
    public boolean hasUniqueVariable(String varname)
    {
       return myDataBuffer.hasUniqueVariable(varname);
    }
 
+   @Override
    public YoVariable<?> getVariable(String nameSpace, String varname)
    {
       return myDataBuffer.getVariable(nameSpace, varname);
    }
 
+   @Override
    public boolean hasUniqueVariable(String nameSpace, String varname)
    {
       return myDataBuffer.hasUniqueVariable(nameSpace, varname);
    }
 
+   @Override
    public ArrayList<YoVariable<?>> getVariables(String nameSpace, String varname)
    {
       return myDataBuffer.getVariables(nameSpace, varname);
    }
 
+   @Override
    public ArrayList<YoVariable<?>> getVariables(String varname)
    {
       return myDataBuffer.getVariables(varname);
    }
 
+   @Override
    public ArrayList<YoVariable<?>> getVariables(NameSpace nameSpace)
    {
       return myDataBuffer.getVariables(nameSpace);
@@ -488,6 +503,61 @@ public class Simulation implements YoVariableHolder, Serializable // Runnable,
    public SimulationSynchronizer getSimulationSynchronizer()
    {
       return simulationSynchronizer;
+   }
+
+   public void initializeCollisionDetectionAndHandling(DefaultCollisionVisualizer collisionVisualizer, CollisionHandler collisionHandler)
+   {
+      ScsCollisionDetector collisionDetector = createCollisionShapesFromLinks(robots);
+
+      if (collisionVisualizer != null) collisionHandler.addListener(collisionVisualizer);
+
+      collisionDetector.initialize();
+      this.initPhysics(new ScsPhysics(null, collisionDetector, collisionHandler, collisionVisualizer));
+   }
+
+   private static ScsCollisionDetector createCollisionShapesFromLinks(Robot[] robots)
+   {
+      ScsCollisionDetector collisionDetector;
+
+      //      collisionDetector = new GdxCollisionDetector(100.0);
+      collisionDetector = new SimpleCollisionDetector();
+      ((SimpleCollisionDetector) collisionDetector).setUseSimpleSpeedupMethod();
+
+      CollisionShapeFactory collisionShapeFactory = collisionDetector.getShapeFactory();
+      collisionShapeFactory.setMargin(0.002);
+
+      for (Robot robot : robots)
+      {
+         createCollisionShapesFromLinks(robot, collisionShapeFactory, robot.getRobotsYoVariableRegistry());
+      }
+
+      return collisionDetector;
+   }
+
+   private static void createCollisionShapesFromLinks(Robot robot, CollisionShapeFactory collisionShapeFactory, YoVariableRegistry registry)
+   {
+      ArrayList<Joint> rootJoints = robot.getRootJoints();
+      for (Joint rootJoint : rootJoints)
+      {
+         createCollisionShapesFromLinksRecursively(rootJoint, collisionShapeFactory, registry);
+      }
+   }
+
+   private static void createCollisionShapesFromLinksRecursively(Joint joint, CollisionShapeFactory collisionShapeFactory, YoVariableRegistry registry)
+   {
+      Link link = joint.getLink();
+      link.enableCollisions(registry);
+      CollisionMeshDescription collisionMeshDescription = link.getCollisionMeshDescription();
+      if (collisionMeshDescription != null)
+      {
+         collisionShapeFactory.addCollisionMeshDescription(link, collisionMeshDescription);
+      }
+
+      ArrayList<Joint> childrenJoints = joint.getChildrenJoints();
+      for (Joint childJoint : childrenJoints)
+      {
+         createCollisionShapesFromLinksRecursively(childJoint, collisionShapeFactory, registry);
+      }
    }
 
 }

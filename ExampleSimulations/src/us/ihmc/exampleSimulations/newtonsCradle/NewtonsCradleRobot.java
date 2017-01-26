@@ -2,35 +2,22 @@ package us.ihmc.exampleSimulations.newtonsCradle;
 
 import javax.vecmath.Vector3d;
 
-import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
-import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
+import us.ihmc.graphicsDescription.Graphics3DObject;
+import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.robotics.Axis;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.robotDescription.CollisionMeshDescription;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.PinJoint;
 import us.ihmc.simulationconstructionset.Robot;
-import us.ihmc.simulationconstructionset.physics.CollisionShapeDescription;
-import us.ihmc.simulationconstructionset.physics.CollisionShapeFactory;
-import us.ihmc.simulationconstructionset.physics.ScsCollisionDetector;
-import us.ihmc.simulationconstructionset.physics.collision.simple.SimpleCollisionDetector;
 
 public class NewtonsCradleRobot extends Robot
 {
-   private final ScsCollisionDetector collisionDetector;
-
    public NewtonsCradleRobot()
    {
       super("NewtonsCradle");
 
       int numberOfBalls = 6;
-
-//      collisionDetector = new GdxCollisionDetector(this.getRobotsYoVariableRegistry(), 10000);
-      collisionDetector = new SimpleCollisionDetector();
-
-      CollisionShapeFactory collisionShapeFactory = collisionDetector.getShapeFactory();
-      collisionShapeFactory.setMargin(0.02);
-
       double ballRadius = 0.05;
 
       double stringLength = 0.6;
@@ -39,7 +26,7 @@ public class NewtonsCradleRobot extends Robot
       double ballRadiusOfGyration = ballRadius * 0.6;
 
       double pinJointHeight = 1.1 * stringLength;
-      double pinJointSeparation = 2.001 * ballRadius; //TODO: Crashes when less than 2.001
+      double pinJointSeparation = 2.001 * ballRadius;
 
       for (int i = 0; i < numberOfBalls; i++)
       {
@@ -58,11 +45,10 @@ public class NewtonsCradleRobot extends Robot
          linkGraphics.addSphere(ballRadius, aliceBlue);
          link.setLinkGraphics(linkGraphics);
 
-         CollisionShapeDescription shapeDesc = collisionShapeFactory.createSphere(ballRadius);
-         RigidBodyTransform shapeToLinkTransform = new RigidBodyTransform();
-         shapeToLinkTransform.setTranslation(new Vector3d(0.0, 0.0, -stringLength));
-         collisionShapeFactory.addShape(link, shapeToLinkTransform, shapeDesc, false, 0xFFFFFFFF, 0xFFFFFFFF);
-         link.enableCollisions(10,this.getRobotsYoVariableRegistry());
+         CollisionMeshDescription collisionMeshDescription = new CollisionMeshDescription();
+         collisionMeshDescription.translate(0.0, 0.0, -stringLength);
+         collisionMeshDescription.addSphere(ballRadius);
+         link.setCollisionMesh(collisionMeshDescription);
 
          pinJoint.setLink(link);
          this.addRootJoint(pinJoint);
@@ -78,9 +64,5 @@ public class NewtonsCradleRobot extends Robot
       this.addStaticLinkGraphics(barAbove);
    }
 
-   public ScsCollisionDetector getCollisionDetector()
-   {
-      return collisionDetector;
-   }
 
 }

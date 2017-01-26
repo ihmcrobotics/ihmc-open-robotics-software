@@ -15,7 +15,11 @@ public class SimpleCollisionShapeWithLink extends SimpleCollisionShape implement
    {
       super(collisionShapeDescription);
       this.link = link;
-      this.shapeToLink.set(shapeToLink);
+
+      if (shapeToLink != null)
+      {
+         this.shapeToLink.set(shapeToLink);
+      }
    }
 
    @Override

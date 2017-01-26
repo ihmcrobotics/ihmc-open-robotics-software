@@ -864,7 +864,7 @@ public class GilbertJohnsonKeerthiCollisionDetectorTest
    {
       LineSegment3d lineSegment = new LineSegment3d(pointA, pointB);
       Point3d projectedPoint = new Point3d();
-      lineSegment.getProjectionOntoLineSegment(pointToProject, projectedPoint);
+      lineSegment.orthogonalProjection(pointToProject, projectedPoint);
 
       return projectedPoint;
    }

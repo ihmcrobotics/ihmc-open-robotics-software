@@ -18,7 +18,7 @@ import georegression.struct.shapes.Sphere3D_F64;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
-import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
+import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidRobotics.communication.packets.DetectedObjectPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.PointCloudWorldPacket;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
@@ -50,17 +50,19 @@ public class SphereDetectionBehavior extends AbstractBehavior
 
    private final float BALL_RADIUS = 0.0762f;
 
-   protected final ConcurrentListeningQueue<PointCloudWorldPacket> pointCloudQueue = new ConcurrentListeningQueue<PointCloudWorldPacket>();
+   protected final ConcurrentListeningQueue<PointCloudWorldPacket> pointCloudQueue = new ConcurrentListeningQueue<PointCloudWorldPacket>(100);
 
    private final HumanoidReferenceFrames humanoidReferenceFrames;
 
    // temp vars
    private final Point3d chestPosition = new Point3d();
 
-   public SphereDetectionBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, HumanoidReferenceFrames referenceFrames)
+   public SphereDetectionBehavior(CommunicationBridgeInterface outgoingCommunicationBridge, HumanoidReferenceFrames referenceFrames)
    {
       super(outgoingCommunicationBridge);
-      this.attachNetworkProcessorListeningQueue(pointCloudQueue, PointCloudWorldPacket.class);
+      this.attachNetworkListeningQueue(pointCloudQueue, PointCloudWorldPacket.class);
+      System.out.println("SphereDetectionBehavior queue size "+communicationBridge.getListeningNetworkQueues().size());
+
       this.humanoidReferenceFrames = referenceFrames;
    }
 
@@ -106,7 +108,7 @@ public class SphereDetectionBehavior extends AbstractBehavior
          id++;
          RigidBodyTransform t = new RigidBodyTransform();
          t.setTranslation(ball.getCenter().x, ball.getCenter().y, ball.getCenter().z);
-         sendPacketToNetworkProcessor(new DetectedObjectPacket(t, 4));
+         sendPacket(new DetectedObjectPacket(t, 4));
       }
 
       if (balls.size() > 0)
@@ -125,7 +127,7 @@ public class SphereDetectionBehavior extends AbstractBehavior
          ballY.set(0);
          ballZ.set(0);
       }
-      
+
       PointCloudWorldPacket pointCloudWorldPacket = new PointCloudWorldPacket();
       pointCloudWorldPacket.setDestination(PacketDestination.UI);
       pointCloudWorldPacket.setTimestamp(System.nanoTime());
@@ -138,8 +140,8 @@ public class SphereDetectionBehavior extends AbstractBehavior
       Point3d[] groundQuadTree = new Point3d[1];
       groundQuadTree[0] = new Point3d();
       pointCloudWorldPacket.setGroundQuadTreeSupport(groundQuadTree);
-      
-      sendPacketToNetworkProcessor(pointCloudWorldPacket);
+
+      sendPacket(pointCloudWorldPacket);
    }
 
    public ArrayList<Sphere3D_F64> detectBalls(Point3f[] fullPoints)
@@ -244,17 +246,29 @@ public class SphereDetectionBehavior extends AbstractBehavior
    }
 
    @Override
-   public void doPostBehaviorCleanup()
+   public void onBehaviorExited()
    {
-      super.doPostBehaviorCleanup();
       ballFound.set(false);
    }
 
-  
+   @Override
+   public void onBehaviorEntered()
+   {
+      onBehaviorExited();
+   }
 
    @Override
-   public void initialize()
+   public void onBehaviorAborted()
    {
-      doPostBehaviorCleanup();
+   }
+
+   @Override
+   public void onBehaviorPaused()
+   {
+   }
+
+   @Override
+   public void onBehaviorResumed()
+   {
    }
 }

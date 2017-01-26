@@ -1,7 +1,7 @@
 package us.ihmc.exampleSimulations.fallingSphere;
 
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.simulationconstructionset.robotController.RobotController;
+import us.ihmc.robotics.robotController.RobotController;
 
 public class FallingSphereController implements RobotController
 {

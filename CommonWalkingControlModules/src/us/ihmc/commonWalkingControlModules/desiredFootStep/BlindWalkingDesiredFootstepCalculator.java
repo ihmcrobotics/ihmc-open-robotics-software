@@ -70,7 +70,7 @@ public class BlindWalkingDesiredFootstepCalculator extends AbstractDesiredFootst
    }
 
    @Override
-   public void initializeDesiredFootstep(RobotSide supportLegSide)
+   public void initializeDesiredFootstep(RobotSide supportLegSide, double stepDuration)
    {
       RobotSide swingLegSide = supportLegSide.getOppositeSide();
       ZUpFrame supportZUpFrame = soleZUpFrames.get(supportLegSide);
@@ -91,7 +91,8 @@ public class BlindWalkingDesiredFootstepCalculator extends AbstractDesiredFootst
    }
 
    @Override
-   public FootstepDataMessage predictFootstepAfterDesiredFootstep(RobotSide supportLegSide, FootstepDataMessage desiredFootstep, double timeFromNow)
+   public FootstepDataMessage predictFootstepAfterDesiredFootstep(RobotSide supportLegSide, FootstepDataMessage desiredFootstep, double timeFromNow,
+         double stepDuration)
    {
       RobotSide futureSwingLegSide = supportLegSide;
       PoseReferenceFrame futureSupportFrame = new PoseReferenceFrame("futureSupportFrame", worldFrame);

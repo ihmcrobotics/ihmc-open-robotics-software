@@ -8,14 +8,14 @@ import java.net.URL;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 
-import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
+import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
 import us.ihmc.simulationconstructionset.GroundContactModel;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.gui.MyFileFilter;
 import us.ihmc.simulationconstructionset.gui.StandardSimulationGUI;
-import us.ihmc.simulationconstructionset.gui.XMLReaderUtility;
 import us.ihmc.simulationconstructionset.robotdefinition.RobotDefinitionFixedFrame;
+import us.ihmc.tools.gui.MyFileFilter;
+import us.ihmc.tools.io.xml.XMLReaderUtility;
 
 public class LoadRobotConfigurationDialogGenerator implements LoadRobotConfigurationDialogConstructor
 {
@@ -67,16 +67,19 @@ public class LoadRobotConfigurationDialogGenerator implements LoadRobotConfigura
       }
    }
 
+   @Override
    public void setCurrentDirectory(File dir)
    {
       dataFileChooser.setCurrentDirectory(dir);
    }
 
+   @Override
    public void setCurrentDirectory(String dir)
    {
       dataFileChooser.setCurrentDirectory(new File(dir));
    }
 
+   @Override
    public void constructDialog()
    {
       sim.disableGUIComponents();

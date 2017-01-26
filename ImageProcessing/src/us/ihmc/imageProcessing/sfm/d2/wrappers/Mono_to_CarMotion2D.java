@@ -1,22 +1,23 @@
 package us.ihmc.imageProcessing.sfm.d2.wrappers;
 
-import georegression.geometry.RotationMatrixGenerator;
-import georegression.struct.se.Se2_F64;
-import georegression.struct.se.Se3_F64;
-import us.ihmc.imageProcessing.sfm.d2.EstimateCarMotion2D;
 import boofcv.abst.sfm.d3.MonocularPlaneVisualOdometry;
 import boofcv.alg.sfm.overhead.OverheadView;
 import boofcv.struct.calib.MonoPlaneParameters;
 import boofcv.struct.calib.StereoParameters;
-import boofcv.struct.image.ImageFloat32;
-import boofcv.struct.image.MultiSpectral;
+import boofcv.struct.image.GrayF32;
+import boofcv.struct.image.Planar;
+import georegression.geometry.ConvertRotation3D_F64;
+import georegression.struct.EulerType;
+import georegression.struct.se.Se2_F64;
+import georegression.struct.se.Se3_F64;
+import us.ihmc.imageProcessing.sfm.d2.EstimateCarMotion2D;
 
 /**
  * @author Peter Abeles
  */
 public class Mono_to_CarMotion2D implements EstimateCarMotion2D
 {
-   MonocularPlaneVisualOdometry<ImageFloat32> alg;
+   MonocularPlaneVisualOdometry<GrayF32> alg;
 
    MonoPlaneParameters param = new MonoPlaneParameters();
 
@@ -26,7 +27,7 @@ public class Mono_to_CarMotion2D implements EstimateCarMotion2D
    Se3_F64 groundToWorld = new Se3_F64();
    Se2_F64 output = new Se2_F64();
 
-   public Mono_to_CarMotion2D(MonocularPlaneVisualOdometry<ImageFloat32> alg)
+   public Mono_to_CarMotion2D(MonocularPlaneVisualOdometry<GrayF32> alg)
    {
       this.alg = alg;
    }
@@ -51,7 +52,7 @@ public class Mono_to_CarMotion2D implements EstimateCarMotion2D
       alg.reset();
    }
 
-   public boolean process(ImageFloat32 left, ImageFloat32 right, OverheadView<MultiSpectral<ImageFloat32>> overhead)
+   public boolean process(GrayF32 left, GrayF32 right, OverheadView<Planar<GrayF32>> overhead)
    {
       if( !alg.process(left) )
          return false;
@@ -66,7 +67,7 @@ public class Mono_to_CarMotion2D implements EstimateCarMotion2D
       output.T.x = groundToWorld.T.z;
       output.T.y = -groundToWorld.T.x;
 
-      double[] euler = RotationMatrixGenerator.matrixToEulerXYZ(groundToWorld.getR(),(double[])null);
+      double[] euler = ConvertRotation3D_F64.matrixToEuler(groundToWorld.getR(), EulerType.XYZ, null);
       double rotY = -euler[1];
 
       output.setYaw(rotY);

@@ -3,8 +3,8 @@ package us.ihmc.simulationconstructionset;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
-import us.ihmc.graphics3DAdapter.camera.CameraMountInterface;
+import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
+import us.ihmc.jMonkeyEngineToolkit.camera.CameraMountInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
@@ -54,6 +54,7 @@ public class CameraMount implements CameraMountInterface
       this.clipDistanceFar = clipDistanceFar;
    }
 
+   @Override
    public String getName()
    {
       return name;
@@ -69,6 +70,7 @@ public class CameraMount implements CameraMountInterface
       return parentJoint;
    }
 
+   @Override
    public String toString()
    {
       return ("name: " + name);
@@ -200,21 +202,25 @@ public class CameraMount implements CameraMountInterface
       this.fieldOfView = fieldOfView;
    }
 
+   @Override
    public double getFieldOfView()
    {
       return fieldOfView;
    }
 
+   @Override
    public double getClipDistanceNear()
    {
       return clipDistanceNear;
    }
 
+   @Override
    public double getClipDistanceFar()
    {
       return clipDistanceFar;
    }
 
+   @Override
    public void zoom(double amount)
    {
       fieldOfView = fieldOfView + amount;
