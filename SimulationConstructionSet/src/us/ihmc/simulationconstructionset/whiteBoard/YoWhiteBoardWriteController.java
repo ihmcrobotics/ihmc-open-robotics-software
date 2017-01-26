@@ -4,8 +4,8 @@ import java.io.IOException;
 
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
-import us.ihmc.simulationconstructionset.robotController.OutputProcessor;
-import us.ihmc.simulationconstructionset.robotController.RobotController;
+import us.ihmc.robotics.robotController.OutputProcessor;
+import us.ihmc.robotics.robotController.RobotController;
 
 public class YoWhiteBoardWriteController implements RobotController, OutputProcessor
 {
@@ -37,6 +37,7 @@ public class YoWhiteBoardWriteController implements RobotController, OutputProce
       this.writeOnInitialize = writeOnInitialize;
    }
 
+   @Override
    public void doControl()
    {
       if ((ticksTillNextWrite == null) || (ticksTillNextWrite.getIntegerValue() <= 0))
@@ -51,16 +52,19 @@ public class YoWhiteBoardWriteController implements RobotController, OutputProce
       }
    }
 
+   @Override
    public YoVariableRegistry getYoVariableRegistry()
    {
       return registry;
    }
 
+   @Override
    public String getName()
    {
       return "YoWhiteBoardWriteController";
    }
 
+   @Override
    public void initialize()
    {
       if (writeOnInitialize)
@@ -69,11 +73,13 @@ public class YoWhiteBoardWriteController implements RobotController, OutputProce
       }
    }
 
+   @Override
    public void update()
    {
       doControl();
    }
 
+   @Override
    public String getDescription()
    {
       return "YoWhiteBoardWriteController";

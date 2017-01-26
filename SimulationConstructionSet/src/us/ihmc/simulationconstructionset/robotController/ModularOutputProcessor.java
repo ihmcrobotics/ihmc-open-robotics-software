@@ -3,6 +3,7 @@ package us.ihmc.simulationconstructionset.robotController;
 import java.util.ArrayList;
 
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.robotController.OutputProcessor;
 
 public class ModularOutputProcessor implements OutputProcessor
 {
@@ -48,6 +49,7 @@ public class ModularOutputProcessor implements OutputProcessor
       this.registry.addChild(outputProcessor.getYoVariableRegistry());
    }
 
+   @Override
    public void initialize()
    {
       for (int i = 0; i < outputProcessors.size(); i++)
@@ -56,6 +58,7 @@ public class ModularOutputProcessor implements OutputProcessor
       }
    }
 
+   @Override
    public void update()
    {
       for (int i = 0; i < outputProcessors.size(); i++)
@@ -64,16 +67,19 @@ public class ModularOutputProcessor implements OutputProcessor
       }
    }
 
+   @Override
    public YoVariableRegistry getYoVariableRegistry()
    {
       return registry;
    }
 
+   @Override
    public String getName()
    {
       return registry.getName();
    }
 
+   @Override
    public String getDescription()
    {
       return description;

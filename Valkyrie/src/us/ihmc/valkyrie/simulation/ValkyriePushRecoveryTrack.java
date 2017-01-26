@@ -5,17 +5,17 @@ import javax.vecmath.Vector3d;
 import com.martiansoftware.jsap.JSAPException;
 
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.humanoidRobotics.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
-import us.ihmc.commonWalkingControlModules.pushRecovery.PushRobotController;
-import us.ihmc.darpaRoboticsChallenge.DRCFlatGroundWalkingTrack;
-import us.ihmc.darpaRoboticsChallenge.DRCGuiInitialSetup;
-import us.ihmc.darpaRoboticsChallenge.DRCSCSInitialSetup;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
-import us.ihmc.darpaRoboticsChallenge.validation.YoVariableThreadAccessValidator;
-import us.ihmc.graphics3DAdapter.GroundProfile3D;
+import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
+import us.ihmc.avatar.DRCFlatGroundWalkingTrack;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.initialSetup.DRCGuiInitialSetup;
+import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
+import us.ihmc.avatar.initialSetup.DRCSCSInitialSetup;
+import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
+import us.ihmc.robotics.dataStructures.validation.YoVariableThreadAccessValidator;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
+import us.ihmc.simulationToolkit.controllers.PushRobotController;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.ground.FlatGroundProfile;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
@@ -47,7 +47,7 @@ public class ValkyriePushRecoveryTrack
       DRCFlatGroundWalkingTrack track = new DRCFlatGroundWalkingTrack(robotInitialSetup, guiInitialSetup, scsInitialSetup, useVelocityAndHeadingScript,
             cheatWithGroundHeightAtForFootstep, model);
 
-      FloatingRootJointRobot robot = track.getDrcSimulation().getRobot();
+      FloatingRootJointRobot robot = track.getAvatarSimulation().getHumanoidFloatingRootJointRobot();
       FullHumanoidRobotModel fullRobotModel = model.createFullRobotModel();
       PushRobotController pushRobotController = new PushRobotController(robot, fullRobotModel);
 

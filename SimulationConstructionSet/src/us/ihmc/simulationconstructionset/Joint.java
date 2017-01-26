@@ -6,11 +6,11 @@ import javax.vecmath.Matrix3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.graphics3DAdapter.camera.CameraMountInterface;
 import us.ihmc.simulationconstructionset.physics.engine.jerry.JointPhysics;
 import us.ihmc.simulationconstructionset.simulatedSensors.LidarMount;
 import us.ihmc.simulationconstructionset.simulatedSensors.WrenchCalculatorInterface;
 import us.ihmc.robotics.kinematics.CommonJoint;
+import us.ihmc.jMonkeyEngineToolkit.camera.CameraMountInterface;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 

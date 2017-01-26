@@ -8,7 +8,7 @@ import javax.swing.JFrame;
 
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.gui.MyFileFilter;
+import us.ihmc.tools.gui.MyFileFilter;
 
 public class SaveRobotConfigurationDialogGenerator implements SaveRobotConfigurationDialogConstructor
 {
@@ -59,16 +59,19 @@ public class SaveRobotConfigurationDialogGenerator implements SaveRobotConfigura
       }
    }
 
+   @Override
    public void setCurrentDirectory(File directory)
    {
       dataFileChooser.setCurrentDirectory(directory);
    }
 
+   @Override
    public void setCurrentDirectory(String directory)
    {
       dataFileChooser.setCurrentDirectory(new File(directory));
    }
 
+   @Override
    public void constructDialog()
    {
       if (dataFileChooser.showSaveDialog(frame) == JFileChooser.APPROVE_OPTION)

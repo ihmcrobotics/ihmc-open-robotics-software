@@ -30,7 +30,7 @@ import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.SpatialMotionVector;
-import us.ihmc.robotics.stateMachines.FinishableState;
+import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.FinishableState;
 import us.ihmc.tools.FormattingTools;
 
 public class TaskspaceToJointspaceHandPositionControlState extends FinishableState<HandControlMode>

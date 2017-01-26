@@ -10,18 +10,29 @@ import java.util.List;
 
 public class QuadrupedTimedStepPacket extends Packet<QuadrupedTimedStepPacket>
 {
-   public final ArrayList<QuadrupedTimedStep> steps = new ArrayList<>();
+   private final ArrayList<QuadrupedTimedStep> steps;
+   private final boolean isExpressedInAbsoluteTime;
 
    public QuadrupedTimedStepPacket()
    {
       this(Collections.<QuadrupedTimedStep> emptyList());
-      
-      setDestination(PacketDestination.CONTROLLER);
+   }
+
+   public QuadrupedTimedStepPacket(boolean isExpressedInAbsoluteTime)
+   {
+      this(Collections.<QuadrupedTimedStep> emptyList(), isExpressedInAbsoluteTime);
    }
 
    public QuadrupedTimedStepPacket(List<QuadrupedTimedStep> steps)
    {
-      this.steps.addAll(steps);
+      this(steps, true);
+   }
+
+   public QuadrupedTimedStepPacket(List<QuadrupedTimedStep> steps, boolean isExpressedInAbsoluteTime)
+   {
+      this.steps = new ArrayList<>(steps);
+      this.isExpressedInAbsoluteTime = isExpressedInAbsoluteTime;
+      setDestination(PacketDestination.CONTROLLER);
    }
 
    public int size()
@@ -29,14 +40,14 @@ public class QuadrupedTimedStepPacket extends Packet<QuadrupedTimedStepPacket>
       return steps.size();
    }
 
-   public QuadrupedTimedStep get(int i)
-   {
-      return steps.get(i);
-   }
-
-   public ArrayList<QuadrupedTimedStep> get()
+   public ArrayList<QuadrupedTimedStep> getSteps()
    {
       return steps;
+   }
+
+   public boolean isExpressedInAbsoluteTime()
+   {
+      return isExpressedInAbsoluteTime;
    }
 
    @Override
@@ -57,6 +68,9 @@ public class QuadrupedTimedStepPacket extends Packet<QuadrupedTimedStepPacket>
       if(other == null)
          return false;
 
+      if (isExpressedInAbsoluteTime() != other.isExpressedInAbsoluteTime)
+         return false;
+
       if (this.steps.size() != other.steps.size())
          return false;
 
@@ -65,6 +79,7 @@ public class QuadrupedTimedStepPacket extends Packet<QuadrupedTimedStepPacket>
          if (!this.steps.get(i).epsilonEquals(other.steps.get(i), epsilon))
             return false;
       }
+
       return true;
    }
 }

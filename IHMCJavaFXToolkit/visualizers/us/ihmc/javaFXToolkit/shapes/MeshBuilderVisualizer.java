@@ -3,21 +3,15 @@ package us.ihmc.javaFXToolkit.shapes;
 import java.util.Random;
 
 import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
 import javax.vecmath.Vector3f;
 
 import javafx.application.Application;
-import javafx.event.Event;
-import javafx.scene.Group;
-import javafx.scene.PerspectiveCamera;
-import javafx.scene.Scene;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.MeshView;
 import javafx.stage.Stage;
-import us.ihmc.graphics3DAdapter.graphics.MeshDataGenerator;
-import us.ihmc.javaFXToolkit.cameraControllers.FocusBasedCameraMouseEventHandler;
-import us.ihmc.javaFXToolkit.graphics.JavaFXMeshDataInterpreter;
+import us.ihmc.graphicsDescription.MeshDataGenerator;
+import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.robotics.random.RandomTools;
 
 public class MeshBuilderVisualizer extends Application
@@ -35,15 +29,11 @@ public class MeshBuilderVisualizer extends Application
    {
       primaryStage.setTitle(getClass().getSimpleName());
 
-      Group rootNode = new Group();
-      Scene scene = new Scene(rootNode, 600, 400, true);
-      scene.setFill(Color.GRAY);
-      setupCamera(rootNode, scene);
+      View3DFactory view3dFactory = new View3DFactory(600, 400);
+      view3dFactory.addCameraController();
+      view3dFactory.addWorldCoordinateSystem(0.3);
 
-//      JavaFXCoordinateSystem worldCoordinateSystem = new JavaFXCoordinateSystem(0.3);
-//      rootNode.getChildren().add(worldCoordinateSystem);
-
-      MeshBuilder meshBuilder = new MeshBuilder();
+      JavaFXMeshBuilder meshBuilder = new JavaFXMeshBuilder();
       switch (MESH_TO_DISPLAY)
       {
       case BOX:
@@ -71,13 +61,13 @@ public class MeshBuilderVisualizer extends Application
       material.setDiffuseColor(Color.CYAN);
       material.setSpecularColor(Color.CYAN.brighter());
       meshView.setMaterial(material);
-      rootNode.getChildren().add(meshView);
+      view3dFactory.addNodeToView(meshView);
 
-      primaryStage.setScene(scene);
+      primaryStage.setScene(view3dFactory.getScene());
       primaryStage.show();
    }
 
-   public void addRandomBoxes(MeshBuilder meshBuilder)
+   public void addRandomBoxes(JavaFXMeshBuilder meshBuilder)
    {
       int count = 0;
       for (float x = -5.0f; x <= 5.0f; x += 0.055f)
@@ -91,7 +81,7 @@ public class MeshBuilderVisualizer extends Application
       System.out.println("Number of boxes: " + count);
    }
 
-   private void addLines(MeshBuilder meshBuilder)
+   private void addLines(JavaFXMeshBuilder meshBuilder)
    {
       Point3d start = new Point3d(0.3, 0.0, -0.);
       Point3d end = new Point3d(0.0, 0.3, 0.0);
@@ -99,7 +89,7 @@ public class MeshBuilderVisualizer extends Application
       meshBuilder.addLine(start, end, lineWidth);
    }
 
-   private void addCylinders(MeshBuilder meshBuilder)
+   private void addCylinders(JavaFXMeshBuilder meshBuilder)
    {
       Point3d cylinderPosition = new Point3d(1.0, 0.0, 0.0);
       double height = 0.3;
@@ -109,7 +99,7 @@ public class MeshBuilderVisualizer extends Application
       meshBuilder.addMesh(MeshDataGenerator.Cylinder(radius, height, 64));
    }
 
-   private void addCones(MeshBuilder meshBuilder)
+   private void addCones(JavaFXMeshBuilder meshBuilder)
    {
       Point3d conePosition = new Point3d(0.4, 0.0, 0.0);
       double height = 0.3;
@@ -117,19 +107,6 @@ public class MeshBuilderVisualizer extends Application
       meshBuilder.addCone(height, radius, conePosition);
 //      meshBuilder.addMesh(MeshDataGenerator.ArcTorus(0.0, 2.0 * Math.PI, 0.3, 0.01, 128));
       meshBuilder.addMesh(MeshDataGenerator.Cone(height, radius, 64));
-   }
-
-   private void setupCamera(Group root, Scene scene)
-   {
-      PerspectiveCamera camera = new PerspectiveCamera(true);
-      camera.setNearClip(0.05);
-      camera.setFarClip(50.0);
-      scene.setCamera(camera);
-
-      Vector3d up = new Vector3d(0.0, 0.0, 1.0);
-      FocusBasedCameraMouseEventHandler cameraController = new FocusBasedCameraMouseEventHandler(scene.widthProperty(), scene.heightProperty(), camera, up);
-      scene.addEventHandler(Event.ANY, cameraController);
-      root.getChildren().add(cameraController.getFocusPointViz());
    }
 
    public static void main(String[] args)

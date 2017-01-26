@@ -12,20 +12,21 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import boofcv.abst.fiducial.calib.CalibrationDetectorChessboard;
+import boofcv.abst.fiducial.calib.ConfigChessboard;
+import boofcv.alg.geo.calibration.CalibrationObservation;
+import boofcv.factory.calib.FactoryCalibrationTarget;
+import boofcv.struct.image.GrayF32;
 import org.ejml.data.DenseMatrix64F;
 
-import boofcv.abst.calib.ConfigChessboard;
-import boofcv.abst.calib.PlanarCalibrationDetector;
 import boofcv.alg.geo.PerspectiveOps;
 import boofcv.alg.geo.calibration.Zhang99ComputeTargetHomography;
 import boofcv.alg.geo.calibration.Zhang99DecomposeHomography;
-import boofcv.factory.calib.FactoryPlanarCalibrationTarget;
 import boofcv.gui.feature.VisualizeFeatures;
 import boofcv.io.UtilIO;
 import boofcv.io.image.ConvertBufferedImage;
 import boofcv.io.image.UtilImageIO;
 import boofcv.struct.calib.IntrinsicParameters;
-import boofcv.struct.image.ImageFloat32;
 import georegression.struct.point.Point2D_F64;
 import georegression.struct.point.Point3D_F64;
 import georegression.struct.point.Vector2D_F64;
@@ -116,7 +117,7 @@ public class DetectChessboardInKinematicsData
       IntrinsicParameters intrinsic = UtilIO.loadXML("../DarpaRoboticsChallenge/data/calibration_images/intrinsic_ros.xml");
       DenseMatrix64F K = PerspectiveOps.calibrationMatrix(intrinsic, null);
 
-      PlanarCalibrationDetector target = FactoryPlanarCalibrationTarget.detectorChessboard(new ConfigChessboard(boardWidth, boardHeight, 0.03));
+      CalibrationDetectorChessboard target = FactoryCalibrationTarget.detectorChessboard(new ConfigChessboard(boardWidth, boardHeight, 0.03));
 
       // Computes the homography
       Zhang99ComputeTargetHomography computeH = new Zhang99ComputeTargetHomography(target.getLayout());
@@ -143,7 +144,7 @@ public class DetectChessboardInKinematicsData
          System.out.print("Processing " + f.getName() + " ");
 
          BufferedImage orig = UtilImageIO.loadImage(new File(f, "leftEyeImage.png").getAbsolutePath());
-         ImageFloat32 input = ConvertBufferedImage.convertFrom(orig, (ImageFloat32) null);
+         GrayF32 input = ConvertBufferedImage.convertFrom(orig, (GrayF32) null);
 
          if (orig.getWidth() != intrinsic.width || orig.getHeight() != intrinsic.height)
             throw new IllegalArgumentException("Unexpected image size " + orig.getWidth() + " " + orig.getHeight());
@@ -163,10 +164,10 @@ public class DetectChessboardInKinematicsData
          }
 
          // Ordered observations of calibration points on the target
-         List<Point2D_F64> observations = target.getDetectedPoints();
+         CalibrationObservation calibrationObservation = target.getDetectedPoints();
 
          // Compute the homography
-         if (!computeH.computeHomography(observations))
+         if (!computeH.computeHomography(calibrationObservation))
             throw new RuntimeException("Can't compute homography");
 
          DenseMatrix64F H = computeH.getHomography();
@@ -184,7 +185,7 @@ public class DetectChessboardInKinematicsData
          {
             Point2D_F64 p = target.getLayout().get(i);
             Point3D_F64 p3 = new Point3D_F64(p.x, p.y, 0);
-            Point2D_F64 obsPixel = observations.get(i);
+            Point2D_F64 obsPixel = calibrationObservation.get(i).pixel;
 
             SePointOps_F64.transform(targetToCamera, p3, p3);
             Point2D_F64 expected = PerspectiveOps.convertNormToPixel(K, new Point2D_F64(p3.x / p3.z, p3.y / p3.z), null);
@@ -222,17 +223,17 @@ public class DetectChessboardInKinematicsData
          out.println();
          out.println();
          out.println("# List of detected calibration points in pixels");
-         for (Point2D_F64 p : observations)
+         for (CalibrationObservation.Point point : calibrationObservation.points)
          {
-            out.printf("%f %f%n", p.x, p.y);
+            out.printf("%f %f%n", point.pixel.x, point.pixel.y);
          }
          out.close();
 
 
          // render and display the results
-         for (int i = 0; i < observations.size(); i++)
+         for (int i = 0; i < calibrationObservation.size(); i++)
          {
-            Point2D_F64 p = observations.get(i);
+            Point2D_F64 p = calibrationObservation.get(i).pixel;
             if (i == 0)
                VisualizeFeatures.drawPoint(g2, (int) p.x, (int) p.y, 3, Color.YELLOW);
             else

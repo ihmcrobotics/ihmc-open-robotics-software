@@ -4,5 +4,5 @@ import us.ihmc.robotics.dataStructures.variable.YoVariable;
 
 public interface BookmarkedVariableAddedListener
 {
-   public abstract void bookmarkAdded(YoVariable variable);
+   public abstract void bookmarkAdded(YoVariable<?> variable);
 }

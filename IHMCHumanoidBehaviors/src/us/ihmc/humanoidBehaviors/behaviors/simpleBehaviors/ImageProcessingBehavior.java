@@ -12,7 +12,7 @@ import us.ihmc.communication.producers.CompressedVideoDataFactory;
 import us.ihmc.communication.producers.CompressedVideoDataServer;
 import us.ihmc.communication.producers.CompressedVideoHandler;
 import us.ihmc.communication.producers.VideoSource;
-import us.ihmc.humanoidBehaviors.communication.BehaviorCommunicationBridge;
+import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.VideoPacket;
 
 public abstract class ImageProcessingBehavior extends VideoPacketListenerBehavior
@@ -20,7 +20,7 @@ public abstract class ImageProcessingBehavior extends VideoPacketListenerBehavio
    private final CompressedVideoDataServer videoDataServer;
    private final PacketDestination videoPacketDestination;
 
-   public ImageProcessingBehavior(String namePrefix, final BehaviorCommunicationBridge communicationBridge, PacketDestination videoPacketDestination)
+   public ImageProcessingBehavior(String namePrefix, final CommunicationBridge communicationBridge, PacketDestination videoPacketDestination)
    {
       super(namePrefix, communicationBridge);
 
@@ -53,7 +53,7 @@ public abstract class ImageProcessingBehavior extends VideoPacketListenerBehavio
          if(videoPacketDestination.equals(PacketDestination.CONTROLLER))
             sendPacketToController(videoPacket);
          else
-            sendPacketToNetworkProcessor(videoPacket);
+            sendPacket(videoPacket);
       }
 
       @Override

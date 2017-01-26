@@ -10,9 +10,12 @@ import org.junit.Test;
 import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
 import us.ihmc.tools.testing.MutationTestingTools;
 
+@ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class TrajectoryPointOptimizerTest
 {
    private static final double epsilon = 10E-7;

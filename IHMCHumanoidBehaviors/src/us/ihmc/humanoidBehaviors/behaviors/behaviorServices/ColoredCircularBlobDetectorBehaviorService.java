@@ -9,10 +9,11 @@ import javax.vecmath.Point2d;
 import org.opencv.core.Point;
 import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
+
 import us.ihmc.communication.producers.JPEGCompressor;
 import us.ihmc.communication.producers.JPEGDecompressor;
 import us.ihmc.communication.producers.VideoSource;
-import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
+import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.VideoPacket;
 import us.ihmc.ihmcPerception.OpenCVTools;
@@ -25,13 +26,13 @@ import us.ihmc.tools.thread.ThreadTools;
 
 public class ColoredCircularBlobDetectorBehaviorService extends ThreadedBehaviorService
 {
-   private final ConcurrentListeningQueue<VideoPacket> videoPacketQueue = new ConcurrentListeningQueue<>();
-   private final ConcurrentListeningQueue<RobotConfigurationData> robotConfigurationDataQueue = new ConcurrentListeningQueue<>();
+   private final ConcurrentListeningQueue<VideoPacket> videoPacketQueue = new ConcurrentListeningQueue<>(2);
+   private final ConcurrentListeningQueue<RobotConfigurationData> robotConfigurationDataQueue = new ConcurrentListeningQueue<>(2);
    private long videoTimestamp = -1L;
-   
+
    private final JPEGDecompressor jpegDecompressor = new JPEGDecompressor();
    private final JPEGCompressor jpegCompressor = new JPEGCompressor();
-   
+
    private final OpenCVColoredCircularBlobDetector openCVColoredCircularBlobDetector;
    private final Point2d latestBallPosition2d = new Point2d();
    private final List<Point2d> latestBallPositionSet = new ArrayList<>();
@@ -40,13 +41,13 @@ public class ColoredCircularBlobDetectorBehaviorService extends ThreadedBehavior
 
    private static final Scalar circleColor = new Scalar(160, 0, 0);
 
-   public ColoredCircularBlobDetectorBehaviorService(AbstractBehavior behaviorInterface)
+   public ColoredCircularBlobDetectorBehaviorService(CommunicationBridgeInterface communicationBridge)
    {
-      super(ColoredCircularBlobDetectorBehaviorService.class.getSimpleName(), behaviorInterface);
-      
-      getBehaviorInterface().attachNetworkProcessorListeningQueue(videoPacketQueue, VideoPacket.class);
-      getBehaviorInterface().attachNetworkProcessorListeningQueue(robotConfigurationDataQueue, RobotConfigurationData.class);
-      
+      super(ColoredCircularBlobDetectorBehaviorService.class.getSimpleName(), communicationBridge);
+
+      getCommunicationBridge().attachNetworkListeningQueue(videoPacketQueue, VideoPacket.class);
+      getCommunicationBridge().attachNetworkListeningQueue(robotConfigurationDataQueue, RobotConfigurationData.class);
+
       OpenCVColoredCircularBlobDetectorFactory factory = new OpenCVColoredCircularBlobDetectorFactory();
       factory.setCaptureSource(OpenCVColoredCircularBlobDetector.CaptureSource.JAVA_BUFFERED_IMAGES);
       openCVColoredCircularBlobDetector = factory.buildBlobDetector();
@@ -81,11 +82,11 @@ public class ColoredCircularBlobDetectorBehaviorService extends ThreadedBehavior
          byte[] jpegThresholdImage = jpegCompressor.convertBufferedImageToJPEGData(thresholdBufferedImage);
          VideoPacket circleBlobThresholdImagePacket = new VideoPacket(VideoSource.CV_THRESHOLD, videoTimestamp, jpegThresholdImage,
                                                                       videoPacket.getPosition(), videoPacket.getOrientation(), videoPacket.getIntrinsicParameters());
-         getBehaviorInterface().sendPacketToNetworkProcessor(circleBlobThresholdImagePacket);
+         getCommunicationBridge().sendPacket(circleBlobThresholdImagePacket);
 
          if (circles.size() > 0)
             latestBallPosition2d.set(circles.get(0).getCenter());
-         
+
          synchronized (ballListConch)
          {
             latestBallPositionSet.clear();
@@ -100,12 +101,12 @@ public class ColoredCircularBlobDetectorBehaviorService extends ThreadedBehavior
          ThreadTools.sleep(10);
       }
    }
-   
+
    public void addHSVRange(HSVRange hsvRange)
    {
       openCVColoredCircularBlobDetector.addHSVRange(hsvRange);
    }
-   
+
    public List<Point2d> getLatestBallPositionSet()
    {
       return latestBallPositionSet;
@@ -115,7 +116,7 @@ public class ColoredCircularBlobDetectorBehaviorService extends ThreadedBehavior
    {
       return latestBallPosition2d;
    }
-   
+
    public BufferedImage getLatestUnmodifiedCameraImage()
    {
       return latestUnmodifiedCameraImage;
@@ -129,5 +130,12 @@ public class ColoredCircularBlobDetectorBehaviorService extends ThreadedBehavior
    public Object getBallListConch()
    {
       return ballListConch;
+   }
+
+   @Override
+   public void initialize()
+   {
+      // TODO implement me
+      
    }
 }

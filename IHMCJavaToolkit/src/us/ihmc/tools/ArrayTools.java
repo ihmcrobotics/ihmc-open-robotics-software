@@ -190,6 +190,26 @@ public class ArrayTools
 
       return true;
    }
+
+   /**
+    * Use JUnitTools.assertArraysEquals
+    */
+   public static boolean deltaEquals(float[] a, float[] b, float delta)
+   {
+      if(a == null || b == null)
+         return false;
+
+      if (a.length != b.length)
+         return false;
+
+      for (int i = 0; i < a.length; i++)
+      {
+         if (Math.abs(a[i] - b[i]) > delta)
+            return false;
+      }
+
+      return true;
+   }
    
    /**
     * Copies @param list, splits the list in half at @param newStartIndex, and then pastes the top half under the top half

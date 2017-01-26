@@ -4,7 +4,7 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataControllerCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataListCommand;
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage.FootstepOrigin;
@@ -72,7 +72,7 @@ public class UserDesiredFootstepDataMessageGenerator
    private FramePoint desiredPosition;
    private FrameOrientation desiredOrientation;
 
-   private final FootstepDataControllerCommand desiredFootstepCommand = new FootstepDataControllerCommand();
+   private final FootstepDataCommand desiredFootstepCommand = new FootstepDataCommand();
    private final FootstepDataListCommand footstepCommandList = new FootstepDataListCommand();
 
    public UserDesiredFootstepDataMessageGenerator(final CommandInputManager commandInputManager, final SideDependentList<ContactableFoot> bipedFeet,

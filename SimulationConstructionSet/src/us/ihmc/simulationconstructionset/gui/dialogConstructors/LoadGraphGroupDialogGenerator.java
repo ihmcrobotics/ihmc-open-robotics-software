@@ -10,26 +10,23 @@ import javax.swing.JFrame;
 
 import us.ihmc.simulationconstructionset.GraphConfiguration;
 import us.ihmc.simulationconstructionset.gui.GraphArrayPanel;
-import us.ihmc.simulationconstructionset.gui.MyFileFilter;
 import us.ihmc.simulationconstructionset.gui.StandardSimulationGUI;
-import us.ihmc.simulationconstructionset.gui.XMLReaderUtility;
 import us.ihmc.simulationconstructionset.gui.config.GraphGroupSelector;
+import us.ihmc.tools.gui.MyFileFilter;
+import us.ihmc.tools.io.xml.XMLReaderUtility;
 
 public class LoadGraphGroupDialogGenerator implements LoadGraphGroupDialogConstructor
 {
    private javax.swing.filechooser.FileFilter dataFileFilter = new MyFileFilter(new String[] {".graphConf"}, "GraphGroup Configuration (.graphConf)");
-   private File chosenFile;
    private JFileChooser dataFileChooser;
    private JFrame frame;
    private GUIEnablerAndDisabler guiEnablerAndDisabler;
-   private GraphArrayPanel graphArrayPanel;
    private StandardSimulationGUI myGUI;
    private GraphGroupSelector graphGroupSelector;
 
 
    public LoadGraphGroupDialogGenerator(GUIEnablerAndDisabler guiEnablerAndDisabler, StandardSimulationGUI myGUI, GraphGroupSelector graphGroupSelector, JFrame frame, GraphArrayPanel graphArrayPanel)
    {
-      this.graphArrayPanel = graphArrayPanel;
       this.graphGroupSelector = graphGroupSelector;
       this.frame = frame;
       this.guiEnablerAndDisabler = guiEnablerAndDisabler;
@@ -53,16 +50,19 @@ public class LoadGraphGroupDialogGenerator implements LoadGraphGroupDialogConstr
       }
    }
 
+   @Override
    public void setCurrentDirectory(File dir)
    {
       dataFileChooser.setCurrentDirectory(dir);
    }
 
+   @Override
    public void setCurrentDirectory(String dir)
    {
       dataFileChooser.setCurrentDirectory(new File(dir));
    }
 
+   @Override
    public void constructDialog()
    {
       guiEnablerAndDisabler.disableGUIComponents();
@@ -78,6 +78,7 @@ public class LoadGraphGroupDialogGenerator implements LoadGraphGroupDialogConstr
       guiEnablerAndDisabler.enableGUIComponents();
    }
 
+   @Override
    public void loadGraphGroupFile(File file)
    {
       String fileEnding = ".graphConf";
@@ -168,14 +169,13 @@ public class LoadGraphGroupDialogGenerator implements LoadGraphGroupDialogConstr
       }
    }
 
+   @Override
    public void closeAndDispose()
    {      
        dataFileFilter = null;
-       chosenFile = null;
        dataFileChooser = null;
        frame = null;
        guiEnablerAndDisabler = null;
-       graphArrayPanel = null;
        myGUI = null;
        graphGroupSelector = null;
    }

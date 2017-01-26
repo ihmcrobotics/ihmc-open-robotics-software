@@ -1,7 +1,7 @@
 package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
-import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
+import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidRobotics.communication.packets.walking.EndEffectorLoadBearingMessage;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 
@@ -10,11 +10,11 @@ public class EndEffectorLoadBearingBehavior extends AbstractBehavior
    private final BooleanYoVariable packetHasBeenSent = new BooleanYoVariable("packetHasBeenSent" + behaviorName, registry);
    private EndEffectorLoadBearingMessage outgoingEndEffectorLoadBearingMessage;
 
-   public EndEffectorLoadBearingBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge)
+   public EndEffectorLoadBearingBehavior(CommunicationBridgeInterface outgoingCommunicationBridge)
    {
       super(outgoingCommunicationBridge);
    }
-   public EndEffectorLoadBearingBehavior(String prefix, OutgoingCommunicationBridgeInterface outgoingCommunicationBridge)
+   public EndEffectorLoadBearingBehavior(String prefix, CommunicationBridgeInterface outgoingCommunicationBridge)
    {
       super(prefix,outgoingCommunicationBridge);
    }
@@ -44,7 +44,7 @@ public class EndEffectorLoadBearingBehavior extends AbstractBehavior
 
 
    @Override
-   public void doPostBehaviorCleanup()
+   public void onBehaviorExited()
    {
       packetHasBeenSent.set(false);
       outgoingEndEffectorLoadBearingMessage = null;
@@ -67,5 +67,21 @@ public class EndEffectorLoadBearingBehavior extends AbstractBehavior
 		   return true;
 	   else
 		   return false;
+   }
+   @Override
+   public void onBehaviorEntered()
+   {
+   }
+   @Override
+   public void onBehaviorAborted()
+   {
+   }
+   @Override
+   public void onBehaviorPaused()
+   {
+   }
+   @Override
+   public void onBehaviorResumed()
+   {
    }
 }

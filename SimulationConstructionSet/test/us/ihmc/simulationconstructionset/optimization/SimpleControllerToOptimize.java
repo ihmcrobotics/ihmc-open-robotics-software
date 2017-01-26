@@ -2,7 +2,7 @@ package us.ihmc.simulationconstructionset.optimization;
 
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.simulationconstructionset.robotController.RobotController;
+import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.utilities.parameterOptimization.DoubleYoVariableParameterToOptimize;
 import us.ihmc.utilities.parameterOptimization.ListOfParametersToOptimize;
 
@@ -28,25 +28,30 @@ public class SimpleControllerToOptimize implements RobotController
       return listOfParametersToOptimize;
    }
    
+   @Override
    public void initialize()
    {      
    }
 
+   @Override
    public YoVariableRegistry getYoVariableRegistry()
    {
       return registry;
    }
 
+   @Override
    public String getName()
    {
       return "SimpleControllerToOptimize";
    }
 
+   @Override
    public String getDescription()
    {
       return getName();
    }
 
+   @Override
    public void doControl()
    {
       costFunction.set((2.0 - parameterOne.getDoubleValue()) * (2.0 - parameterOne.getDoubleValue()));

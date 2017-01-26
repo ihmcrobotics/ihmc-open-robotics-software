@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.captureRegion;
 
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -11,8 +12,6 @@ import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.simulationconstructionset.util.ground.steppingStones.SteppingStones;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
 /**
  * Provides the function adjustFootstep which takes a footstep and a capture region
@@ -34,7 +33,7 @@ public class FootstepAdjustor
    private final SideDependentList<ConvexPolygon2d> defaultSupportPolygons;
 
    private FootstepAdjusterVisualizer footstepAdjusterVisualizer = null;
-   private SteppingStones steppingStones = null;
+//   private SteppingStones steppingStones = null;
 
    public FootstepAdjustor(SideDependentList<? extends ContactablePlaneBody> contactableFeet, YoVariableRegistry parentRegistry,
          YoGraphicsListRegistry yoGraphicsListRegistry)
@@ -72,14 +71,14 @@ public class FootstepAdjustor
       }
 
       // If there are stepping stones then intersect them with the capture region.
-      if (steppingStones == null)
+//      if (steppingStones == null)
       {
          desiredSteppingRegion.setIncludingFrameAndUpdate(captureRegion);
       }
-      else
-      {
-         updateDesiredSteppingRegion(captureRegion, steppingStones, footstep, desiredSteppingRegion);
-      }
+//      else
+//      {
+//         updateDesiredSteppingRegion(captureRegion, steppingStones, footstep, desiredSteppingRegion);
+//      }
 
       // Check if the desired footstep intersects the capture region.
       calculateTouchdownFootPolygon(footstep, desiredSteppingRegion.getReferenceFrame(), touchdownFootPolygon);
@@ -154,22 +153,22 @@ public class FootstepAdjustor
       polygonToPack.scale(centroid2d, SHRINK_TOUCHDOWN_POLYGON_FACTOR);
    }
 
-   /**
-    * This function intersects the capture region with the stepping stones and returns the best
-    * intersecting polygon. Here 'best' means the one closest to the original footstep location.
-    */
-   private void updateDesiredSteppingRegion(FrameConvexPolygon2d captureRegion, SteppingStones steppingStones, Footstep footstep,
-         FrameConvexPolygon2d polygonToPack)
-   {
-      // TODO
-      //      polygonToPack.setIncludingFrameAndUpdate(captureRegion);
-      throw new RuntimeException("Implement me!");
-   }
+//   /**
+//    * This function intersects the capture region with the stepping stones and returns the best
+//    * intersecting polygon. Here 'best' means the one closest to the original footstep location.
+//    */
+//   private void updateDesiredSteppingRegion(FrameConvexPolygon2d captureRegion, SteppingStones steppingStones, Footstep footstep,
+//         FrameConvexPolygon2d polygonToPack)
+//   {
+//      // TODO
+//      //      polygonToPack.setIncludingFrameAndUpdate(captureRegion);
+//      throw new RuntimeException("Implement me!");
+//   }
 
-   public void setSteppingStones(SteppingStones steppingStones)
-   {
-      this.steppingStones = steppingStones;
-   }
+//   public void setSteppingStones(SteppingStones steppingStones)
+//   {
+//      this.steppingStones = steppingStones;
+//   }
 
    public FrameConvexPolygon2d getTouchdownFootPolygon()
    {

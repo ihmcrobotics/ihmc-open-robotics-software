@@ -5,7 +5,7 @@ buildscript {
     }
   }
   dependencies {
-    classpath "gradle.plugin.us.ihmc.gradle:ihmc-build:0.0.18"
+    classpath "gradle.plugin.us.ihmc.gradle:ihmc-build:0.0.19"
   }
 }
 
@@ -16,7 +16,7 @@ if (!rootProject.name.equals('IHMCOpenRoboticsSoftware')) {
     evaluationDependsOn(ihmc.getProjectDependencyGradlePath("IHMCQuadrupedRobotics"))
 }
 
-sourceCompatibility = 1.7
+sourceCompatibility = 1.8
 version = "${getOpenRoboticsSoftwareProject().version}"
 project.ext.fullVersion = "${getOpenRoboticsSoftwareProject().ext.fullVersion}"
 project.ext.vcsUrl = "${getOpenRoboticsSoftwareProject().ext.vcsUrl}"
@@ -42,20 +42,20 @@ dependencies {
    testCompile group: 'junit', name: 'junit', version: '4.11'
 
    compile group: 'javax.vecmath', name: 'vecmath', version: '1.5.2'
-   compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
+//   compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
 
    compile ihmc.getProjectDependency(":IHMCQuadrupedRobotics")
    compile ihmc.getProjectDependency(":SimulationConstructionSet")
-   compile ihmc.getProjectDependency(":IHMCJavaToolkit")
+//   compile ihmc.getProjectDependency(":IHMCJavaToolkit")
    compile ihmc.getProjectDependency(":IHMCRoboticsToolkit")
    compile ihmc.getProjectDependency(":IHMCCommunication")
-   compile ihmc.getProjectDependency(":SDFLoader")
+//   compile ihmc.getProjectDependency(":ModelFileLoader")
    compile ihmc.getProjectDependency(":IHMCHumanoidRobotics")
-//   compile ihmc.getProjectDependency(":IHMCStateEstimation")
    compile ihmc.getProjectDependency(":SensorProcessing")
-   compile ihmc.getProjectDependency(":IHMCRobotDescription")
+//   compile ihmc.getProjectDependency(":IHMCRobotDescription")
    compile ihmc.getProjectDependency(":IHMCRobotModels")
     compile ihmc.getProjectDependency(":IHMCSimulationToolkit")
+    compile ihmc.getProjectDependency(":LLAQuadrupedController")
    
 
    testCompile ihmc.getProjectDependency(":IHMCUnitTesting")

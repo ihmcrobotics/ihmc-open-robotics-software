@@ -1,15 +1,15 @@
 package us.ihmc.simulationconstructionset.util.visualizers;
 
-import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
-import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
+import us.ihmc.graphicsDescription.structure.Graphics3DNode;
+import us.ihmc.jMonkeyEngineToolkit.Graphics3DAdapter;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.graphics.GraphicsRobot;
-import us.ihmc.simulationconstructionset.robotController.RobotController;
 
 public class RobotFreezeFramer implements RobotController
 {
@@ -62,6 +62,7 @@ public class RobotFreezeFramer implements RobotController
       this.doFreezeFrame.set(doFreezeFrame);
    }
 
+   @Override
    public void doControl()
    {
       if (doFreezeFrame.getBooleanValue() && (robot.getTime() > nextFreezeTime.getDoubleValue()))
@@ -74,20 +75,24 @@ public class RobotFreezeFramer implements RobotController
 
 
 
+   @Override
    public YoVariableRegistry getYoVariableRegistry()
    {
       return registry;
    }
 
+   @Override
    public String getName()
    {
       return "RobotFreezeFramer";
    }
    
+   @Override
    public void initialize()
    {      
    }
 
+   @Override
    public String getDescription()
    {
       return getName();

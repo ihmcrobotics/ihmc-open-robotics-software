@@ -8,10 +8,10 @@ public class EnumYoVariable<T extends Enum<T>> extends YoVariable<EnumYoVariable
 {
    public static final int NULL_VALUE = -1;
 
-   private final Class<T> enumType;
+   private Class<T> enumType;
    private final boolean allowNullValue;
-   private final T[] enumValues;
-   private final String[] enumValuesAsString;
+   private T[] enumValues;
+   private String[] enumValuesAsString;
 
    private int valueOrdinal;
 
@@ -129,6 +129,17 @@ public class EnumYoVariable<T extends Enum<T>> extends YoVariable<EnumYoVariable
       checkIfBackedByEnum();
       return enumType;
    }
+   
+   public void setEnumType(Class<T> enumType)
+   {
+      this.enumType = enumType;
+      enumValues = enumType.getEnumConstants();
+      enumValuesAsString = new String[enumValues.length];
+      for(int i = 0; i < enumValues.length; i++)
+      {
+         enumValuesAsString[i] = enumValues[i].toString();
+      }
+   }
 
    /**
     * Set the enum value of this variable.  If not of enum type a warning will be printed.
@@ -234,6 +245,7 @@ public class EnumYoVariable<T extends Enum<T>> extends YoVariable<EnumYoVariable
       }
    }
    
+   @Override
    public void setValueFromDouble(double value, boolean notifyListeners)
    {
       try
@@ -247,11 +259,13 @@ public class EnumYoVariable<T extends Enum<T>> extends YoVariable<EnumYoVariable
       }
    }
 
+   @Override
    public double getValueAsDouble()
    {
       return valueOrdinal;
    }
 
+   @Override
    public String toString()
    {
       StringBuffer retBuffer = new StringBuffer();
@@ -267,11 +281,13 @@ public class EnumYoVariable<T extends Enum<T>> extends YoVariable<EnumYoVariable
     *
     * @param stringBuffer StringBuffer to which the value will be appended
     */
+   @Override
    public void getValueString(StringBuffer stringBuffer)
    {
       stringBuffer.append(getStringValue());
    }
 
+   @Override
    public void getValueStringFromDouble(StringBuffer stringBuffer, double doubleValue)
    {
       int index = (int) Math.round(doubleValue);
@@ -320,5 +336,11 @@ public class EnumYoVariable<T extends Enum<T>> extends YoVariable<EnumYoVariable
    public int getEnumSize()
    {
       return enumValuesAsString.length;
+   }
+
+   @Override
+   public boolean isZero()
+   {
+      return getEnumValue() == null;
    }
 }

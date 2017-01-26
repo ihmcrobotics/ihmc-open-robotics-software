@@ -4,10 +4,10 @@ import javax.vecmath.Matrix3d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.SliderJoint;
+import us.ihmc.graphicsDescription.Graphics3DObject;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -230,13 +230,7 @@ public class ContactableButtonRobot extends ContactableSliderJointRobot {
    @Override
    public void closestIntersectionAndNormalAt(Point3d intersectionToPack, Vector3d normalToPack, Point3d pointInWorldToCheck)
    {
-      FramePoint pointToCheck = new FramePoint(ReferenceFrame.getWorldFrame(), pointInWorldToCheck);
-      //      pointToCheck.changeFrame(buttonFrame);
-
-      if (cylinderFrame.checkIfInside(pointToCheck, intersectionToPack, normalToPack))
-      {
-         return;
-      }
+      cylinderFrame.checkIfInside(pointInWorldToCheck, intersectionToPack, normalToPack);
    }
 
    @Override

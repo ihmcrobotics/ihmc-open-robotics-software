@@ -6,6 +6,7 @@ import org.ejml.ops.CommonOps;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MotionQPInput;
 import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSolver;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
@@ -15,6 +16,7 @@ public class InverseKinematicsQPSolver
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
+   private final BooleanYoVariable firstCall = new BooleanYoVariable("firstCall", registry);
    private final SimpleEfficientActiveSetQPSolver qpSolver = new SimpleEfficientActiveSetQPSolver();
 
    private final DenseMatrix64F solverInput_H;
@@ -36,12 +38,15 @@ public class InverseKinematicsQPSolver
    private final IntegerYoVariable numberOfInequalityConstraints = new IntegerYoVariable("numberOfInequalityConstraints", registry);
    private final IntegerYoVariable numberOfConstraints = new IntegerYoVariable("numberOfConstraints", registry);
    private final DoubleYoVariable jointVelocityRegularization = new DoubleYoVariable("jointVelocityRegularization", registry);
+   private final DoubleYoVariable jointAccelerationRegularization = new DoubleYoVariable("jointAccelerationRegularization", registry);
 
    private final int numberOfDoFs;
 
    public InverseKinematicsQPSolver(int numberOfDoFs, YoVariableRegistry parentRegistry)
    {
       this.numberOfDoFs = numberOfDoFs;
+
+      firstCall.set(true);
 
       solverInput_H = new DenseMatrix64F(numberOfDoFs, numberOfDoFs);
       solverInput_f = new DenseMatrix64F(numberOfDoFs, 1);
@@ -57,7 +62,8 @@ public class InverseKinematicsQPSolver
       CommonOps.fill(solverInput_ub, Double.POSITIVE_INFINITY);
 
       solverOutput = new DenseMatrix64F(numberOfDoFs, 1);
-      jointVelocityRegularization.set(0.1);
+      jointVelocityRegularization.set(0.5);
+      jointAccelerationRegularization.set(10.0);
 
       desiredJointVelocities = new DenseMatrix64F(numberOfDoFs, 1);
 
@@ -69,11 +75,24 @@ public class InverseKinematicsQPSolver
       solverInput_H.zero();
       for (int i = 0; i < numberOfDoFs; i++)
          solverInput_H.set(i, i, jointVelocityRegularization.getDoubleValue());
+
       solverInput_f.reshape(numberOfDoFs, 1);
       solverInput_f.zero();
 
       solverInput_Aeq.reshape(0, numberOfDoFs);
       solverInput_beq.reshape(0, 1);
+
+      if (!firstCall.getBooleanValue())
+         addJointAccelerationRegularization();
+   }
+
+   private void addJointAccelerationRegularization()
+   {
+      for (int i = 0; i < numberOfDoFs; i++)
+      {
+         solverInput_H.add(i, i, jointAccelerationRegularization.getDoubleValue());
+         solverInput_f.add(i, 0, -jointAccelerationRegularization.getDoubleValue() * solverOutput.get(i, 0));
+      }
    }
 
    private final DenseMatrix64F tempJtW = new DenseMatrix64F(1, 1);
@@ -157,6 +176,7 @@ public class InverseKinematicsQPSolver
          throw new NoConvergenceException(numberOfIterations.getIntegerValue());
 
       desiredJointVelocities.set(solverOutput);
+      firstCall.set(false);
    }
 
    public DenseMatrix64F getJointVelocities()

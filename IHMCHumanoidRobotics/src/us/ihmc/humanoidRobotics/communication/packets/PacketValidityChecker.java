@@ -12,6 +12,7 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.DesiredSteeri
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.OneDoFJointTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.SteeringWheelInformationPacket;
+import us.ihmc.humanoidRobotics.communication.packets.walking.AdjustFootstepMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.EndEffectorLoadBearingMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootTrajectoryMessage;
@@ -93,14 +94,14 @@ public abstract class PacketValidityChecker
    {
       ObjectErrorType packetFieldErrorType;
 
-      packetFieldErrorType = ObjectValidityChecker.validateDouble(packetToCheck.swingTime);
+      packetFieldErrorType = ObjectValidityChecker.validateDouble(packetToCheck.defaultSwingTime);
       if (packetFieldErrorType != null)
       {
          String errorMessage = "swingTime field" + packetFieldErrorType.getMessage();
          return errorMessage;
       }
 
-      packetFieldErrorType = ObjectValidityChecker.validateDouble(packetToCheck.transferTime);
+      packetFieldErrorType = ObjectValidityChecker.validateDouble(packetToCheck.defaultTransferTime);
       if (packetFieldErrorType != null)
       {
          String errorMessage = "transferTime field" + packetFieldErrorType.getMessage();
@@ -119,6 +120,45 @@ public abstract class PacketValidityChecker
                return errorMessage;
             }
 
+         }
+      }
+
+      return null;
+   }
+
+   /**
+    * Checks the validity of a {@link FootstepDataMessage}.
+    * @param packetToCheck
+    * @return null if the packet is valid, or the error message.
+    */
+   public static String validateFootstepDataMessage(AdjustFootstepMessage packetToCheck)
+   {
+      ObjectErrorType packetFieldErrorType;
+
+      packetFieldErrorType = ObjectValidityChecker.validateEnum(packetToCheck.getOrigin());
+      if (packetFieldErrorType != null)
+         return "origin field " + packetFieldErrorType.getMessage();
+
+      packetFieldErrorType = ObjectValidityChecker.validateEnum(packetToCheck.getRobotSide());
+      if (packetFieldErrorType != null)
+         return "robotSide field" + packetFieldErrorType.getMessage();
+
+      packetFieldErrorType = ObjectValidityChecker.validateTuple3d(packetToCheck.getLocation());
+      if (packetFieldErrorType != null)
+         return "location field " + packetFieldErrorType.getMessage();
+
+      packetFieldErrorType = ObjectValidityChecker.validateQuat4d(packetToCheck.getOrientation());
+      if (packetFieldErrorType != null)
+         return "orientation field " + packetFieldErrorType.getMessage();
+
+      if (packetToCheck.getPredictedContactPoints() != null)
+      {
+         for (int arrayListIndex = 0; arrayListIndex < packetToCheck.getPredictedContactPoints().size(); arrayListIndex++)
+         {
+            packetFieldErrorType = ObjectValidityChecker.validateTuple2d(packetToCheck.getPredictedContactPoints().get(arrayListIndex));
+
+            if (packetFieldErrorType != null)
+               return "predictedContactPoints field " + packetFieldErrorType.getMessage();
          }
       }
 

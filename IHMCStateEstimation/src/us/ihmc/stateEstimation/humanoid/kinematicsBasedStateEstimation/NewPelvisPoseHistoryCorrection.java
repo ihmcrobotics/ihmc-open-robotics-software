@@ -3,7 +3,9 @@ package us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.StampedPosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.LocalizationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.PelvisPoseErrorPacket;
@@ -17,17 +19,22 @@ import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.RotationTools;
+import us.ihmc.robotics.geometry.TransformTools;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
 import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.SixDoFJoint;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicCoordinateSystem;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
 public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrectionInterface
 {
+   
+   private static final double Z_DEADZONE_SIZE = 0.014;
+   private static final double Y_DEADZONE_SIZE = 0.014;
+   private static final double X_DEADZONE_SIZE = 0.014;
+   private static final double YAW_DEADZONE_IN_DEGREES = 1.0;
+   
    private final BooleanYoVariable enableProcessNewPackets;
    
    private static final boolean ENABLE_GRAPHICS = true;
@@ -50,6 +57,12 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
    
    private final double estimatorDT;
    private boolean sendCorrectionUpdate = false;
+   
+   //Deadzone translation variables
+   private final DoubleYoVariable xDeadzoneSize;
+   private final DoubleYoVariable yDeadzoneSize;
+   private final DoubleYoVariable zDeadzoneSize;
+   private final DoubleYoVariable yawDeadzoneSize;
 
    private final DoubleYoVariable alphaFilterBreakFrequency;
    
@@ -94,6 +107,7 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
    private final Quat4d errorBetweenCorrectedAndLocalizationQuaternion_Rotation = new Quat4d();
    
    private final BooleanYoVariable isErrorTooBig;
+   private final TimeStampedTransform3D timeStampedTransform3DToPack = new TimeStampedTransform3D();
    
    public NewPelvisPoseHistoryCorrection(FullInverseDynamicsStructure inverseDynamicsStructure, final double dt, YoVariableRegistry parentRegistry,
          YoGraphicsListRegistry yoGraphicsListRegistry, int pelvisBufferSize)
@@ -118,6 +132,15 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
       this.pelvisPoseCorrectionCommunicator = externalPelvisPoseSubscriber;
       this.registry = new YoVariableRegistry("newPelvisPoseHistoryCorrection");
       parentRegistry.addChild(registry);
+      
+      xDeadzoneSize = new DoubleYoVariable("xDeadzoneSize", registry);
+      xDeadzoneSize.set(X_DEADZONE_SIZE);
+      yDeadzoneSize = new DoubleYoVariable("yDeadzoneSize", registry);
+      yDeadzoneSize.set(Y_DEADZONE_SIZE);
+      zDeadzoneSize = new DoubleYoVariable("zDeadzoneSize", registry);
+      zDeadzoneSize.set(Z_DEADZONE_SIZE);
+      yawDeadzoneSize = new DoubleYoVariable("yawDeadzoneSize", registry);
+      yawDeadzoneSize.set(Math.toRadians(YAW_DEADZONE_IN_DEGREES));
       
       enableProcessNewPackets = new BooleanYoVariable("enableProcessNewPackets", registry);
       enableProcessNewPackets.set(true);
@@ -227,6 +250,9 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
       }
    }
 
+   private final RigidBodyTransform tempTransform = new RigidBodyTransform(); 
+   private final Vector3d tempTranslation = new Vector3d();
+   private final Quat4d tempRotation = new Quat4d();
    /**
     * pulls the corrected pose from the buffer, check that the nonprocessed buffer has
     * corresponding pelvis poses and calculates the total error
@@ -240,6 +266,28 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
 
          if (outdatedPoseUpdater.stateEstimatorTimeStampedBufferIsInRange(timeStampedExternalPose.getTimeStamp()))
          {
+            outdatedPoseUpdater.getStateEstimatorTransform(timeStampedExternalPose.getTimeStamp(), timeStampedTransform3DToPack);
+            RigidBodyTransform stateEstimatorPose = timeStampedTransform3DToPack.getTransform3D();
+            RigidBodyTransform localizationPose = timeStampedExternalPose.getTransform3D();
+            
+            //get difference between the localization pose and the state estimator pose, then check for "deadband"
+            tempTransform.set(stateEstimatorPose);
+            tempTransform.invert();
+            tempTransform.multiply(localizationPose);
+            tempTransform.getTranslation(tempTranslation);
+            tempTransform.getRotation(tempRotation);
+            
+            //if we are in the deadband just return
+            boolean withinXDeadband = Math.abs(tempTranslation.getX()) < xDeadzoneSize.getDoubleValue();
+            boolean withinYDeadBand = Math.abs(tempTranslation.getY()) < yDeadzoneSize.getDoubleValue();
+            boolean withinZDeadband = Math.abs(tempTranslation.getZ()) < zDeadzoneSize.getDoubleValue();
+            boolean withinYawDeadband = Math.abs(RotationTools.computeYaw(tempRotation)) < yawDeadzoneSize.getDoubleValue();
+            if(withinXDeadband && withinYDeadBand && withinZDeadband && withinYawDeadband)
+            {
+               return;
+            }
+            
+            
             if (!hasOneIcpPacketEverBeenReceived.getBooleanValue())
                hasOneIcpPacketEverBeenReceived.set(true);
             double confidence = newPacket.getConfidenceFactor();
@@ -326,10 +374,4 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
    {
       this.pelvisPoseCorrectionCommunicator = externalPelvisPoseSubscriber;
    }
-   
-   public void setDeadZoneSizes(double xDeadzoneSize, double yDeadzoneSize, double zDeadzoneSize, double yawDeadzoneSize)
-   {
-      offsetErrorInterpolator.setDeadZoneSizes(xDeadzoneSize, yDeadzoneSize, zDeadzoneSize, yawDeadzoneSize);
-   }
-   
 }

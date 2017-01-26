@@ -173,7 +173,7 @@ public class LidarScan
    {
       LineSegment3d unitSegment = getLineSegment(index, 1.0f);
 
-      return new Ray3d(unitSegment.getPointA(), unitSegment.getDirection());
+      return new Ray3d(unitSegment.getFirstEndpoint(), unitSegment.getDirectionCopy(true));
    }
 
 

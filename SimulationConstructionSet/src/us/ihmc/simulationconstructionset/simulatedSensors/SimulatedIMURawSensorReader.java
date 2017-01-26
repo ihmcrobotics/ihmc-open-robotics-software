@@ -3,8 +3,6 @@ package us.ihmc.simulationconstructionset.simulatedSensors;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.simulationconstructionset.rawSensors.RawIMUSensorsInterface;
-import us.ihmc.simulationconstructionset.robotController.RawSensorReader;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -12,11 +10,13 @@ import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.corruptors.NoisyDoubleYoVariable;
 import us.ihmc.robotics.math.corruptors.NoisyYoRotationMatrix;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.robotController.RawSensorReader;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationCalculator;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
+import us.ihmc.robotics.sensors.RawIMUSensorsInterface;
 
 public abstract class SimulatedIMURawSensorReader implements RawSensorReader
 {
@@ -146,12 +146,14 @@ public abstract class SimulatedIMURawSensorReader implements RawSensorReader
       compassList = new NoisyDoubleYoVariable[]{compassX, compassY, compassZ};
    }
 
+   @Override
    public void initialize()
    {
       initializeNoise();
       read();
    }
 
+   @Override
    public void read()
    {
       twistCalculator.compute();
@@ -233,16 +235,19 @@ public abstract class SimulatedIMURawSensorReader implements RawSensorReader
    
    protected abstract void simulateIMU();
 
+   @Override
    public YoVariableRegistry getYoVariableRegistry()
    {
       return registry;
    }
 
+   @Override
    public String getName()
    {
       return name;
    }
 
+   @Override
    public String getDescription()
    {
       return name;

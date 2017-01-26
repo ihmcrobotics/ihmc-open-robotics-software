@@ -24,14 +24,14 @@ public class LineSegment3dTest
       LineSegment3d segment = new LineSegment3d(point0, point1);
       assertEquals(1.0, segment.length(), 1e-14);
 
-      segment.setPointA(Math.sqrt(3), Math.sqrt(3), Math.sqrt(3));
-      segment.setPointB(Math.sqrt(3), Math.sqrt(3), Math.sqrt(3));
+      segment.setFirstEndpoint(Math.sqrt(3), Math.sqrt(3), Math.sqrt(3));
+      segment.setSecondEndpoint(Math.sqrt(3), Math.sqrt(3), Math.sqrt(3));
       assertEquals(0.0, segment.length(), 1e-14);
 
-      segment.setPointB(-Math.sqrt(3), -Math.sqrt(3), -Math.sqrt(3));
+      segment.setSecondEndpoint(-Math.sqrt(3), -Math.sqrt(3), -Math.sqrt(3));
       assertEquals(6.0, segment.length(), 1e-14);
 
-      segment.setPointB(0.0, 0.0, 0.0);
+      segment.setSecondEndpoint(0.0, 0.0, 0.0);
       assertEquals(3.0, segment.length(), 1e-14);
    }
 
@@ -43,33 +43,33 @@ public class LineSegment3dTest
       Point3d point1 = new Point3d(1.0, 0.0, 0.0);
       LineSegment3d segment = new LineSegment3d(point0, point1);
       Point3d point = new Point3d(0.0, 0.0, 1.0);
-      assertEquals(1.0, segment.distanceToAPoint(point), 1e-14);
+      assertEquals(1.0, segment.distance(point), 1e-14);
 
       point.set(0.5, 0.0, 1.0);
-      assertEquals(1.0, segment.distanceToAPoint(point), 1e-14);
+      assertEquals(1.0, segment.distance(point), 1e-14);
 
       point.set(1.0, 0.0, 1.0);
-      assertEquals(1.0, segment.distanceToAPoint(point), 1e-14);
+      assertEquals(1.0, segment.distance(point), 1e-14);
 
       point.set(-1.0, 0.0, 1.0);
-      assertEquals(Math.sqrt(2.0), segment.distanceToAPoint(point), 1e-14);
+      assertEquals(Math.sqrt(2.0), segment.distance(point), 1e-14);
 
       point.set(2.0, 0.0, 1.0);
-      assertEquals(Math.sqrt(2.0), segment.distanceToAPoint(point), 1e-14);
+      assertEquals(Math.sqrt(2.0), segment.distance(point), 1e-14);
 
       segment.set(0.0, 0.0, 0.0, 2.0, 2.0, 0.0);
       point.set(2.0, 0.0, 0.0);
-      assertEquals(2.0 / Math.sqrt(2.0), segment.distanceToAPoint(point), 1e-14);
+      assertEquals(2.0 / Math.sqrt(2.0), segment.distance(point), 1e-14);
 
       point.set(3.0, 0.0, 0.0);
-      assertEquals(3.0 / Math.sqrt(2.0), segment.distanceToAPoint(point), 1e-14);
+      assertEquals(3.0 / Math.sqrt(2.0), segment.distance(point), 1e-14);
 
       point.set(4.0, 0.0, 0.0);
-      assertEquals(4.0 / Math.sqrt(2.0), segment.distanceToAPoint(point), 1e-14);
+      assertEquals(4.0 / Math.sqrt(2.0), segment.distance(point), 1e-14);
 
-      segment.setPointB(-2.0, -2.0, -2.0);
+      segment.setSecondEndpoint(-2.0, -2.0, -2.0);
       point.set(2.0, 2.0, 2.0);
-      assertEquals(segment.length(), segment.distanceToAPoint(point), 1e-14);
+      assertEquals(segment.length(), segment.distance(point), 1e-14);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -81,21 +81,21 @@ public class LineSegment3dTest
       LineSegment3d segmentAB = new LineSegment3d(pointA, pointB);
       Point3d pointC = new Point3d(3.0, 3.0, 1.5); //PointC projection is below pointA
       Point3d expectedPointCprojection = new Point3d(pointA);
-      assertEquals(expectedPointCprojection.getX(), segmentAB.projection(pointC).getX(), 1e-14);
-      assertEquals(expectedPointCprojection.getY(), segmentAB.projection(pointC).getY(), 1e-14);
-      assertEquals(expectedPointCprojection.getZ(), segmentAB.projection(pointC).getZ(), 1e-14);
+      assertEquals(expectedPointCprojection.getX(), segmentAB.orthogonalProjectionCopy(pointC).getX(), 1e-14);
+      assertEquals(expectedPointCprojection.getY(), segmentAB.orthogonalProjectionCopy(pointC).getY(), 1e-14);
+      assertEquals(expectedPointCprojection.getZ(), segmentAB.orthogonalProjectionCopy(pointC).getZ(), 1e-14);
 
       pointC = new Point3d(3.0, 3.0, 5.5);
       expectedPointCprojection = new Point3d(pointB); //PointC projection is up pointB	
-      assertEquals(expectedPointCprojection.getX(), segmentAB.projection(pointC).getX(), 1e-14);
-      assertEquals(expectedPointCprojection.getY(), segmentAB.projection(pointC).getY(), 1e-14);
-      assertEquals(expectedPointCprojection.getZ(), segmentAB.projection(pointC).getZ(), 1e-14);
+      assertEquals(expectedPointCprojection.getX(), segmentAB.orthogonalProjectionCopy(pointC).getX(), 1e-14);
+      assertEquals(expectedPointCprojection.getY(), segmentAB.orthogonalProjectionCopy(pointC).getY(), 1e-14);
+      assertEquals(expectedPointCprojection.getZ(), segmentAB.orthogonalProjectionCopy(pointC).getZ(), 1e-14);
 
       pointC = new Point3d(3.0, 3.0, 4.5);
       expectedPointCprojection = new Point3d(1.0, 2.0, 4.5); //PointC projection is between pointA and pointB	
-      assertEquals(expectedPointCprojection.getX(), segmentAB.projection(pointC).getX(), 1e-14);
-      assertEquals(expectedPointCprojection.getY(), segmentAB.projection(pointC).getY(), 1e-14);
-      assertEquals(expectedPointCprojection.getZ(), segmentAB.projection(pointC).getZ(), 1e-14);
+      assertEquals(expectedPointCprojection.getX(), segmentAB.orthogonalProjectionCopy(pointC).getX(), 1e-14);
+      assertEquals(expectedPointCprojection.getY(), segmentAB.orthogonalProjectionCopy(pointC).getY(), 1e-14);
+      assertEquals(expectedPointCprojection.getZ(), segmentAB.orthogonalProjectionCopy(pointC).getZ(), 1e-14);
 
    }
 
@@ -152,11 +152,11 @@ public class LineSegment3dTest
 
          expectedPointCdistance = pointC.distance(expectedPointCprojection);
 
-         assertEquals(expectedPointCprojection.getX(), segmentAB.projection(pointC).getX(), 1e-12);
-         assertEquals(expectedPointCprojection.getY(), segmentAB.projection(pointC).getY(), 1e-12);
-         assertEquals(expectedPointCprojection.getZ(), segmentAB.projection(pointC).getZ(), 1e-12);
+         assertEquals(expectedPointCprojection.getX(), segmentAB.orthogonalProjectionCopy(pointC).getX(), 1e-12);
+         assertEquals(expectedPointCprojection.getY(), segmentAB.orthogonalProjectionCopy(pointC).getY(), 1e-12);
+         assertEquals(expectedPointCprojection.getZ(), segmentAB.orthogonalProjectionCopy(pointC).getZ(), 1e-12);
 
-         assertEquals(expectedPointCdistance, segmentAB.distanceToAPoint(pointC), 1e-12);
+         assertEquals(expectedPointCdistance, segmentAB.distance(pointC), 1e-12);
       }
    }
 
@@ -176,24 +176,24 @@ public class LineSegment3dTest
       LineSegment3d s;
 
       s = new LineSegment3d(new Point3d(0.0, 0.0, 0.0), new Point3d(1.0, 0.0, 0.0));
-      JUnitTools.assertTuple3dEquals(new Point3d(1.0, 0.0, 0.0), s.getDirection(), 0.0);
+      JUnitTools.assertTuple3dEquals(new Point3d(1.0, 0.0, 0.0), s.getDirectionCopy(true), 0.0);
 
       s = new LineSegment3d(new Point3d(0.0, 0.0, 0.0), new Point3d(0.0, 1.0, 0.0));
-      JUnitTools.assertTuple3dEquals(new Point3d(0.0, 1.0, 0.0), s.getDirection(), 0.0);
+      JUnitTools.assertTuple3dEquals(new Point3d(0.0, 1.0, 0.0), s.getDirectionCopy(true), 0.0);
 
       s = new LineSegment3d(new Point3d(0.0, 0.0, 0.0), new Point3d(0.0, 0.0, 1.0));
-      JUnitTools.assertTuple3dEquals(new Point3d(0.0, 0.0, 1.0), s.getDirection(), 0.0);
+      JUnitTools.assertTuple3dEquals(new Point3d(0.0, 0.0, 1.0), s.getDirectionCopy(true), 0.0);
 
       s = new LineSegment3d(new Point3d(0.0, 0.0, 0.0), new Point3d(2.0, 0.0, 0.0));
-      JUnitTools.assertTuple3dEquals(new Point3d(1.0, 0.0, 0.0), s.getDirection(), 0.0);
+      JUnitTools.assertTuple3dEquals(new Point3d(1.0, 0.0, 0.0), s.getDirectionCopy(true), 0.0);
 
       s = new LineSegment3d(new Point3d(0.0, 0.0, 1.0), new Point3d(0.0, 0.0, -3.0));
-      JUnitTools.assertTuple3dEquals(new Point3d(0.0, 0.0, -1.0), s.getDirection(), 0.0);
+      JUnitTools.assertTuple3dEquals(new Point3d(0.0, 0.0, -1.0), s.getDirectionCopy(true), 0.0);
 
       s = new LineSegment3d(new Point3d(0.0, 0.0, 1.0), new Point3d(0.0, 0.0, -3.0));
-      JUnitTools.assertTuple3dEquals(new Point3d(0.0, 0.0, -1.0), s.getDirection(), 0.0);
+      JUnitTools.assertTuple3dEquals(new Point3d(0.0, 0.0, -1.0), s.getDirectionCopy(true), 0.0);
 
       s = new LineSegment3d(new Point3d(0.0, 0.0, 0.0), new Point3d(Math.cos(Math.PI / 4), Math.sin(Math.PI / 4), 0.0));
-      JUnitTools.assertTuple3dEquals(new Point3d(Math.cos(Math.PI / 4), Math.sin(Math.PI / 4), 0.0), s.getDirection(), 0.0);
+      JUnitTools.assertTuple3dEquals(new Point3d(Math.cos(Math.PI / 4), Math.sin(Math.PI / 4), 0.0), s.getDirectionCopy(true), 0.0);
    }
 }

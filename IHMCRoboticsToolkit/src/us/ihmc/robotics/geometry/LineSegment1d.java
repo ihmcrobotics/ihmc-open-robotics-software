@@ -9,8 +9,8 @@ import us.ihmc.robotics.MathTools;
 
 public class LineSegment1d
 {
-   private double endpoint1;
-   private double endpoint2;
+   private double endpoint1 = Double.NaN;
+   private double endpoint2 = Double.NaN;
    private boolean positiveDirection;
 
    public LineSegment1d()
@@ -50,12 +50,12 @@ public class LineSegment1d
 
    public boolean isOverlappingInclusive(LineSegment1d other)
    {
-      return isBetweenEndpointsInclusive(other.endpoint1) || isBetweenEndpointsInclusive(other.endpoint2);
+      return isBetweenEndpointsInclusive(other.endpoint1) || isBetweenEndpointsInclusive(other.endpoint2) || other.isBetweenEndpointsInclusive(endpoint1) || other.isBetweenEndpointsInclusive(endpoint2);
    }
 
    public boolean isOverlappingExclusive(LineSegment1d other)
    {
-      return isBetweenEndpointsExclusive(other.endpoint1) || isBetweenEndpointsExclusive(other.endpoint2);
+      return isBetweenEndpointsExclusive(other.endpoint1) || isBetweenEndpointsExclusive(other.endpoint2) || other.isBetweenEndpointsExclusive(endpoint1) || other.isBetweenEndpointsExclusive(endpoint2);
    }
 
    public boolean isBetweenEndpointsInclusive(LineSegment1d other)
@@ -127,7 +127,7 @@ public class LineSegment1d
       if (positiveDirection)
          return point < endpoint1;
       else
-         return point > endpoint2;
+         return point > endpoint1;
    }
 
    public boolean isAfter(double point)
@@ -135,7 +135,7 @@ public class LineSegment1d
       if (positiveDirection)
          return point > endpoint2;
       else
-         return point < endpoint1;
+         return point < endpoint2;
    }
 
    public void set(double firstEndpoint, double secondEndpoint)
@@ -177,7 +177,7 @@ public class LineSegment1d
 
    public void setMaxPoint(double newMaxPoint)
    {
-      if (newMaxPoint >= getMinPoint())
+      if (newMaxPoint <= getMinPoint())
          throw new RuntimeException("Unexpected newMaxPoint: " + newMaxPoint + ", expected it to be greater than the current min point: " + getMinPoint());
       if (positiveDirection)
          endpoint2 = newMaxPoint;
@@ -216,20 +216,54 @@ public class LineSegment1d
       return (positiveDirection ? 1.0 : -1.0) * (endpoint2 - endpoint1);
    }
 
+   /**
+    * Compute the 3D equivalent of this line segment.
+    * The 3D equivalent of each end point is computed as follows:
+    * {@code endPoint3d = endPoint1d * lineDirection3d + lineStart3d}. 
+    * @param line3d the 3D line used as reference to compute the 3D line segment.
+    * @return the 3D equivalent of this line segment.
+    */
+   public LineSegment3d toLineSegment3d(Line3d line3d)
+   {
+      return toLineSegment3d(line3d.getPoint(), line3d.getNormalizedVector());
+   }
+
+   /**
+    * Compute the 3D equivalent of this line segment.
+    * The 3D equivalent of each end point is computed as follows:
+    * {@code endPoint3d = endPoint1d * direction3d + zero3d}. 
+    * @param zero3d position of the 3D equivalent of an endpoint equal to zero.
+    * @param direction3d direction toward greater values of {@code endPoint1d}.
+    * @return the 3D equivalent of this line segment.
+    */
    public LineSegment3d toLineSegment3d(Point3d zero3d, Vector3d direction3d)
    {
       LineSegment3d lineSegment3d = new LineSegment3d();
-      lineSegment3d.getPointA().scaleAdd(endpoint1, direction3d, zero3d);
-      lineSegment3d.getPointB().scaleAdd(endpoint2, direction3d, zero3d);
+      lineSegment3d.getFirstEndpoint().scaleAdd(endpoint1, direction3d, zero3d);
+      lineSegment3d.getSecondEndpoint().scaleAdd(endpoint2, direction3d, zero3d);
       return lineSegment3d;
    }
 
+   /**
+    * Compute the 2D equivalent of this line segment.
+    * The 2D equivalent of each end point is computed as follows:
+    * {@code endPoint2d = endPoint1d * direction2d + zero2d}. 
+    * @param zero2d position of the 2D equivalent of an endpoint equal to zero.
+    * @param direction2d direction toward greater values of {@code endPoint1d}.
+    * @return the 2D equivalent of this line segment.
+    */
    public LineSegment2d toLineSegment2d(Point2d zero2d, Vector2d direction2d)
    {
       LineSegment2d lineSegment2d = new LineSegment2d();
       lineSegment2d.getFirstEndpoint().scaleAdd(endpoint1, direction2d, zero2d);
       lineSegment2d.getSecondEndpoint().scaleAdd(endpoint2, direction2d, zero2d);
       return lineSegment2d;
+   }
+
+   @Override
+   public String toString()
+   {
+      return "(" + endpoint1 + ")-(" + endpoint2 + ")";
    }
 
    private void updateDirection()

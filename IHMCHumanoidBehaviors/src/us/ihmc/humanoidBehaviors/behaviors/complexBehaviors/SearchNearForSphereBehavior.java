@@ -19,7 +19,7 @@ import us.ihmc.humanoidBehaviors.behaviors.primitives.SetLidarParametersBehavior
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SphereDetectionBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.WaitForUserValidationBehavior;
-import us.ihmc.humanoidBehaviors.communication.BehaviorCommunicationBridge;
+import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidBehaviors.stateMachine.StateMachineBehavior;
 import us.ihmc.humanoidBehaviors.taskExecutor.ChestOrientationTask;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataFilterParameters;
@@ -46,7 +46,7 @@ public class SearchNearForSphereBehavior extends StateMachineBehavior<SearchNear
    private final AtlasPrimitiveActions atlasPrimitiveActions;
 
    public SearchNearForSphereBehavior(DoubleYoVariable yoTime, PickUpBallBehaviorCoactiveElementBehaviorSide coactiveElement,
-         HumanoidReferenceFrames referenceFrames, BehaviorCommunicationBridge outgoingCommunicationBridge, boolean requireUserValidation,
+         HumanoidReferenceFrames referenceFrames, CommunicationBridge outgoingCommunicationBridge, boolean requireUserValidation,
          AtlasPrimitiveActions atlasPrimitiveActions)
    {
       super("SearchForSpehereNear", SearchNearState.class, yoTime, outgoingCommunicationBridge);
@@ -56,10 +56,8 @@ public class SearchNearForSphereBehavior extends StateMachineBehavior<SearchNear
       this.requireUserValidation = requireUserValidation;
 
       initialSphereDetectionBehavior = new SphereDetectionBehavior(outgoingCommunicationBridge, referenceFrames);
-      addChildBehavior(initialSphereDetectionBehavior);
       waitForUserValidationBehavior = new WaitForUserValidationBehavior(outgoingCommunicationBridge, coactiveElement.validClicked,
             coactiveElement.validAcknowledged);
-      addChildBehavior(waitForUserValidationBehavior);
       setupStateMachine();
    }
 
@@ -132,7 +130,7 @@ public class SearchNearForSphereBehavior extends StateMachineBehavior<SearchNear
          protected void setBehaviorInput()
          {
             TextToSpeechPacket p1 = new TextToSpeechPacket("LOOKING FOR BALL");
-            sendPacketToNetworkProcessor(p1);
+            sendPacket(p1);
             coactiveElement.searchingForBall.set(true);
             coactiveElement.foundBall.set(false);
             coactiveElement.ballX.set(0);
@@ -178,11 +176,9 @@ public class SearchNearForSphereBehavior extends StateMachineBehavior<SearchNear
 
       else
          statemachine.addState(findBallTask);
-      statemachine.setCurrentState(SearchNearState.LOOK_DOWN);
+      statemachine.setStartState(SearchNearState.LOOK_DOWN);
 
    }
-
- 
 
    public boolean foundBall()
    {
@@ -197,6 +193,11 @@ public class SearchNearForSphereBehavior extends StateMachineBehavior<SearchNear
    public double getSphereRadius()
    {
       return initialSphereDetectionBehavior.getSpehereRadius();
+   }
+
+   @Override
+   public void onBehaviorExited()
+   {
    }
 
 }

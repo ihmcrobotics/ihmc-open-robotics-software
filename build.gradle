@@ -14,7 +14,7 @@ import org.ajoberstar.grgit.*
 
 project.ext.repo = Grgit.open(projectDir)
 
-version = '0.8.0'
+version = '0.8.2'
 
 project.ext.fullVersion = version
 project.ext.vcsUrl = "https://github.com/ihmcrobotics/ihmc-open-robotics-software"
@@ -60,7 +60,7 @@ task performRelease(type: GradleBuild) {
    }
    buildFile "build.gradle"
    startParameter gradle.startParameter
-   tasks = ["bintrayUpload", ":RobotDataCommunication:publishLoggerDistributionToBintray"]
+   tasks = ["bintrayUpload", ":IHCMRobotDataLogger:publishLoggerDistributionToBintray"]
 }
 
 task publishAllToMavenLocal(type: GradleBuild) {

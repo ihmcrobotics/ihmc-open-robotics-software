@@ -24,6 +24,7 @@ import com.badlogic.gdx.physics.bullet.collision.btPersistentManifold;
 import com.badlogic.gdx.physics.bullet.collision.btSphereShape;
 
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.robotDescription.CollisionMeshDescription;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.physics.CollisionShape;
 import us.ihmc.simulationconstructionset.physics.CollisionShapeDescription;
@@ -71,11 +72,13 @@ public class GdxCollisionDetector implements ScsCollisionDetector
    {
    }
 
+   @Override
    public CollisionShapeFactory getShapeFactory()
    {
       return factory;
    }
 
+   @Override
    public void removeShape(Link link)
    {
       BulletCollisionShapeWithLink info = (BulletCollisionShapeWithLink) link.getCollisionShape();
@@ -83,6 +86,7 @@ public class GdxCollisionDetector implements ScsCollisionDetector
       allShapes.remove(info);
    }
 
+   @Override
    public CollisionShape lookupCollisionShape(Link link)
    {
       for (int i = 0; i < allShapes.size(); i++)
@@ -163,11 +167,13 @@ public class GdxCollisionDetector implements ScsCollisionDetector
    {
       float margin = (float) CollisionShapeFactory.DEFAULT_MARGIN;
 
+      @Override
       public void setMargin(double margin)
       {
          this.margin = (float) margin;
       }
 
+      @Override
       public CollisionShapeDescription createBox(double radiusX, double radiusY, double radiusZ)
       {
          btBoxShape box = new btBoxShape(new Vector3((float) radiusX, (float) radiusY, (float) radiusZ));
@@ -176,6 +182,7 @@ public class GdxCollisionDetector implements ScsCollisionDetector
          return new BulletShapeDescription(box);
       }
 
+      @Override
       public CollisionShapeDescription createCylinder(double radius, double height)
       {
          btCylinderShape shape = new btCylinderShapeZ(new Vector3((float) radius, (float) radius, (float) height / 2.0f));
@@ -184,6 +191,7 @@ public class GdxCollisionDetector implements ScsCollisionDetector
          return new BulletShapeDescription(shape);
       }
 
+      @Override
       public CollisionShapeDescription createSphere(double radius)
       {
          btSphereShape shape = new btSphereShape((float) radius);
@@ -192,6 +200,7 @@ public class GdxCollisionDetector implements ScsCollisionDetector
          return new BulletShapeDescription(shape);
       }
 
+      @Override
       public CollisionShapeDescription createCapsule(double radius, double height)
       {
          btCapsuleShape shape = new btCapsuleShape((float) radius, (float) (height));
@@ -233,6 +242,14 @@ public class GdxCollisionDetector implements ScsCollisionDetector
 
          return shape;
       }
+
+      @Override
+      public void addCollisionMeshDescription(Link link, CollisionMeshDescription collisionMeshDescription)
+      {
+         // TODO Auto-generated method stub
+      }
+
+
    }
 
    /**

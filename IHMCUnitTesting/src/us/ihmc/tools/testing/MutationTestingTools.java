@@ -134,12 +134,12 @@ public class MutationTestingTools
    
    // COPIED FROM IHMCJAVATOOLKIT FOR DEPENDENCY REASONS
    
-   public static enum PathType
+   private static enum PathType
    {
       FILE, DIRECTORY,
    }
    
-   public static abstract class BasicPathVisitor
+   private static abstract class BasicPathVisitor
    {
       public FileVisitResult visitPath(Path path, PathType pathType)
       {
@@ -147,7 +147,7 @@ public class MutationTestingTools
       }
    }
    
-   public static void walkDepth(final Path directory, int maxDepth, final BasicPathVisitor basicFileVisitor)
+   private static void walkDepth(final Path directory, int maxDepth, final BasicPathVisitor basicFileVisitor)
    {
       try
       {
@@ -180,12 +180,12 @@ public class MutationTestingTools
       }
    }
 
-   public static void walkFlat(final Path directory, final BasicPathVisitor basicFileVisitor)
+   private static void walkFlat(final Path directory, final BasicPathVisitor basicFileVisitor)
    {
       walkDepth(directory, 1, basicFileVisitor);
    }
    
-   public static List<String> readAllLines(Path path)
+   private static List<String> readAllLines(Path path)
    {
       try
       {
@@ -198,7 +198,7 @@ public class MutationTestingTools
       }
    }
    
-   public static void writeAllLines(List<String> lines, Path path)
+   private static void writeAllLines(List<String> lines, Path path)
    {
       PrintWriter printer = newPrintWriter(path);
       
@@ -210,12 +210,12 @@ public class MutationTestingTools
       printer.close();
    }
    
-   public static PrintWriter newPrintWriter(Path path)
+   private static PrintWriter newPrintWriter(Path path)
    {
       return newPrintWriter(path, false);
    }
    
-   public static PrintWriter newPrintWriter(Path path, boolean append)
+   private static PrintWriter newPrintWriter(Path path, boolean append)
    {
       try
       {

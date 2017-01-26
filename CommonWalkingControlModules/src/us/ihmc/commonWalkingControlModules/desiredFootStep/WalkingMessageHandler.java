@@ -10,9 +10,11 @@ import javax.vecmath.Quat4d;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.controllerAPI.command.CommandArrayDeque;
 import us.ihmc.communication.packets.TextToSpeechPacket;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.AdjustFootstepCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataControllerCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataListCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PauseWalkingCommand;
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
@@ -27,13 +29,13 @@ import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.trajectories.TrajectoryType;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.tools.io.printing.PrintTools;
 
 public class WalkingMessageHandler
@@ -44,6 +46,8 @@ public class WalkingMessageHandler
 
    // TODO Need to find something better than an ArrayList.
    private final List<Footstep> upcomingFootsteps = new ArrayList<>();
+   private final BooleanYoVariable hasNewFootstepAdjustment = new BooleanYoVariable("hasNewFootstepAdjustement", registry);
+   private final AdjustFootstepCommand requestedFootstepAdjustment = new AdjustFootstepCommand();
    private final SideDependentList<? extends ContactablePlaneBody> contactableFeet;
    private final SideDependentList<Footstep> footstepsAtCurrentLocation = new SideDependentList<>();
    private final SideDependentList<Footstep> lastDesiredFootsteps = new SideDependentList<>();
@@ -55,8 +59,9 @@ public class WalkingMessageHandler
    private final IntegerYoVariable currentFootstepIndex = new IntegerYoVariable("currentFootstepIndex", registry);
    private final IntegerYoVariable currentNumberOfFootsteps = new IntegerYoVariable("currentNumberOfFootsteps", registry);
    private final BooleanYoVariable isWalkingPaused = new BooleanYoVariable("isWalkingPaused", registry);
-   private final DoubleYoVariable transferTime = new DoubleYoVariable("transferTime", registry);
-   private final DoubleYoVariable swingTime = new DoubleYoVariable("swingTime", registry);
+   private final DoubleYoVariable defaultTransferTime = new DoubleYoVariable("defaultTransferTime", registry);
+   private final DoubleYoVariable finalTransferTime = new DoubleYoVariable("finalTransferTime", registry);
+   private final DoubleYoVariable defaultSwingTime = new DoubleYoVariable("defaultSwingTime", registry);
 
    private final int numberOfFootstepsToVisualize = 4;
    @SuppressWarnings("unchecked")
@@ -70,8 +75,9 @@ public class WalkingMessageHandler
       this.contactableFeet = contactableFeet;
       this.statusOutputManager = statusOutputManager;
 
-      transferTime.set(defaultTransferTime);
-      swingTime.set(defaultSwingTime);
+      this.defaultTransferTime.set(defaultTransferTime);
+      this.finalTransferTime.set(defaultTransferTime);
+      this.defaultSwingTime.set(defaultSwingTime);
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -117,13 +123,19 @@ public class WalkingMessageHandler
       }
 
       isWalkingPaused.set(false);
-      double commandTransferTime = command.getTransferTime();
-      double commandSwingTime = command.getSwingTime();
-      if (!Double.isNaN(commandSwingTime) && commandSwingTime > 1.0e-2 && !Double.isNaN(commandTransferTime) && commandTransferTime >= 0.0)
+      double commandDefaultTransferTime = command.getDefaultTransferTime();
+      double commandDefaultSwingTime = command.getDefaultSwingTime();
+      if (!Double.isNaN(commandDefaultSwingTime) && commandDefaultSwingTime > 1.0e-2 && !Double.isNaN(commandDefaultTransferTime) && commandDefaultTransferTime >= 0.0)
       {
-         transferTime.set(commandTransferTime);
-         swingTime.set(commandSwingTime);
+         defaultTransferTime.set(commandDefaultTransferTime);
+         defaultSwingTime.set(commandDefaultSwingTime);
       }
+
+      double commandFinalTransferTime = command.getFinalTransferTime();
+      if (commandFinalTransferTime >= 0.0)
+         finalTransferTime.set(commandFinalTransferTime);
+      else
+         finalTransferTime.set(defaultTransferTime.getDoubleValue());
 
       for (int i = 0; i < command.getNumberOfFootsteps(); i++)
       {
@@ -131,6 +143,20 @@ public class WalkingMessageHandler
          upcomingFootsteps.add(newFootstep);
       }
       updateVisualization();
+   }
+
+   public void handleAdjustFootstepCommand(AdjustFootstepCommand command)
+   {
+      if (isWalkingPaused.getBooleanValue())
+      {
+         PrintTools.warn(this, "Received " + AdjustFootstepCommand.class.getSimpleName() + " but walking is currently paused. Command ignored.");
+         requestedFootstepAdjustment.clear();
+         hasNewFootstepAdjustment.set(false);
+         return;
+      }
+
+      requestedFootstepAdjustment.set(command);
+      hasNewFootstepAdjustment.set(true);
    }
 
    public void handlePauseWalkingCommand(PauseWalkingCommand command)
@@ -173,6 +199,48 @@ public class WalkingMessageHandler
       return upcomingFootTrajectoryCommandListForFlamingoStance.get(swingSide).poll();
    }
 
+   public boolean pollRequestedFootstepAdjustment(Footstep footstepToAdjust)
+   {
+      if (!hasNewFootstepAdjustment.getBooleanValue())
+         return false;
+
+      if (footstepToAdjust.getRobotSide() != requestedFootstepAdjustment.getRobotSide())
+      {
+         PrintTools.warn(this, "RobotSide does not match: side of footstep to be adjusted: " + footstepToAdjust.getRobotSide() + ", side of adjusted footstep: " + requestedFootstepAdjustment.getRobotSide());
+         hasNewFootstepAdjustment.set(false);
+         requestedFootstepAdjustment.clear();
+         return false;
+      }
+
+      Point3d adjustedPosition = requestedFootstepAdjustment.getPosition();
+      Quat4d adjustedOrientation = requestedFootstepAdjustment.getOrientation();
+
+      switch (requestedFootstepAdjustment.getOrigin())
+      {
+      case AT_ANKLE_FRAME:
+         footstepToAdjust.setPose(adjustedPosition, adjustedOrientation);
+         break;
+      case AT_SOLE_FRAME:
+         footstepToAdjust.setSolePose(adjustedPosition, adjustedOrientation);
+         break;
+      default:
+         throw new RuntimeException("Should not get there.");
+      }
+
+      if (!requestedFootstepAdjustment.getPredictedContactPoints().isEmpty())
+      {
+         List<Point2d> contactPoints = new ArrayList<>();
+         for (int i = 0; i < footstepToAdjust.getPredictedContactPoints().size(); i++)
+            contactPoints.add(footstepToAdjust.getPredictedContactPoints().get(i));
+         footstepToAdjust.setPredictedContactPointsFromPoint2ds(contactPoints);
+      }
+
+      hasNewFootstepAdjustment.set(false);
+      requestedFootstepAdjustment.clear();
+
+      return true;
+   }
+
    public void insertNextFootstep(Footstep newNextFootstep)
    {
       if (newNextFootstep != null)
@@ -182,6 +250,16 @@ public class WalkingMessageHandler
    public boolean hasUpcomingFootsteps()
    {
       return !upcomingFootsteps.isEmpty() && !isWalkingPaused.getBooleanValue();
+   }
+
+   public boolean hasRequestedFootstepAdjustment()
+   {
+      if (isWalkingPaused.getBooleanValue())
+      {
+         hasNewFootstepAdjustment.set(false);
+         requestedFootstepAdjustment.clear();
+      }
+      return hasNewFootstepAdjustment.getBooleanValue();
    }
 
    public boolean isNextFootstepFor(RobotSide swingSide)
@@ -231,14 +309,20 @@ public class WalkingMessageHandler
       updateVisualization();
    }
 
+   private final Point3d desiredFootPositionInWorld = new Point3d();
+   private final Quat4d desiredFootOrientationInWorld = new Quat4d();
    private final Point3d actualFootPositionInWorld = new Point3d();
    private final Quat4d actualFootOrientationInWorld = new Quat4d();
    private final TextToSpeechPacket reusableSpeechPacket = new TextToSpeechPacket();
    private final WalkingControllerFailureStatusMessage failureStatusMessage = new WalkingControllerFailureStatusMessage();
 
-   public void reportFootstepStarted(RobotSide robotSide)
+   public void reportFootstepStarted(RobotSide robotSide, FramePose desiredFootPoseInWorld, FramePose actualFootPoseInWorld)
    {
-      statusOutputManager.reportStatusMessage(new FootstepStatus(FootstepStatus.Status.STARTED, currentFootstepIndex.getIntegerValue()));
+      desiredFootPoseInWorld.getPose(desiredFootPositionInWorld, desiredFootOrientationInWorld);
+      actualFootPoseInWorld.getPose(actualFootPositionInWorld, actualFootOrientationInWorld);
+      statusOutputManager.reportStatusMessage(new FootstepStatus(FootstepStatus.Status.STARTED, currentFootstepIndex.getIntegerValue(),
+            desiredFootPositionInWorld, desiredFootOrientationInWorld,
+            actualFootPositionInWorld, actualFootOrientationInWorld, robotSide));
    }
 
    public void reportFootstepCompleted(RobotSide robotSide, FramePose actualFootPoseInWorld)
@@ -307,27 +391,50 @@ public class WalkingMessageHandler
 
    public void setDefaultTransferTime(double transferTime)
    {
-      this.transferTime.set(transferTime);
+      this.defaultTransferTime.set(transferTime);
    }
 
    public void setDefaultSwingTime(double swingTime)
    {
-      this.swingTime.set(swingTime);
+      this.defaultSwingTime.set(swingTime);
    }
 
-   public double getTransferTime()
+   public double getDefaultTransferTime()
    {
-      return transferTime.getDoubleValue();
+      return defaultTransferTime.getDoubleValue();
    }
 
-   public double getSwingTime()
+   public double getNextTransferTime()
    {
-      return swingTime.getDoubleValue();
+      Footstep nextFootstep = peek(0);
+      return nextFootstep != null && nextFootstep.hasTimings() ? nextFootstep.getTransferTime() : getDefaultTransferTime();
    }
 
-   public double getStepTime()
+   public double getDefaultSwingTime()
    {
-      return transferTime.getDoubleValue() + swingTime.getDoubleValue();
+      return defaultSwingTime.getDoubleValue();
+   }
+
+   public double getNextSwingTime()
+   {
+      Footstep nextFootstep = peek(0);
+      return nextFootstep != null && nextFootstep.hasTimings() ? nextFootstep.getSwingTime() : getDefaultSwingTime();
+   }
+
+   public double getFinalTransferTime()
+   {
+      return finalTransferTime.getDoubleValue();
+   }
+
+   public double getDefaultStepTime()
+   {
+      return defaultTransferTime.getDoubleValue() + defaultSwingTime.getDoubleValue();
+   }
+
+   public double getNextStepTime()
+   {
+      Footstep nextFootstep = peek(0);
+      return nextFootstep != null && nextFootstep.hasTimings() ? nextFootstep.getStepTime() : getDefaultStepTime();
    }
 
    public int getCurrentNumberOfFootsteps()
@@ -349,6 +456,11 @@ public class WalkingMessageHandler
       }
 
       footstepListVisualizer.update(upcomingFootsteps);
+   }
+
+   public void updateVisualizationAfterFootstepAdjustement(Footstep adjustedFootstep)
+   {
+      footstepListVisualizer.updateFirstFootstep(adjustedFootstep);
    }
 
    public TransferToAndNextFootstepsData createTransferToAndNextFootstepDataForDoubleSupport(RobotSide transferToSide)
@@ -384,7 +496,7 @@ public class WalkingMessageHandler
       return transferToAndNextFootstepsData;
    }
 
-   private Footstep createFootstep(FootstepDataControllerCommand footstepData)
+   private Footstep createFootstep(FootstepDataCommand footstepData)
    {
       FramePose footstepPose = new FramePose(worldFrame, footstepData.getPosition(), footstepData.getOrientation());
       PoseReferenceFrame footstepPoseFrame = new PoseReferenceFrame("footstepPoseFrame", footstepPose);
@@ -407,9 +519,25 @@ public class WalkingMessageHandler
       RigidBody rigidBody = contactableFoot.getRigidBody();
 
       Footstep footstep = new Footstep(rigidBody, robotSide, soleFrame, footstepPoseFrame, true, contactPoints);
+      if (trajectoryType == TrajectoryType.CUSTOM)
+      {
+         if (footstepData.getTrajectoryWaypoints() == null)
+         {
+            PrintTools.warn("Can not request custom trajectory without specifying waypoints. Using default trajectory.");
+            trajectoryType = TrajectoryType.DEFAULT;
+         }
+         else
+         {
+            RecyclingArrayList<Point3d> trajectoryWaypoints = footstepData.getTrajectoryWaypoints();
+            footstep.setSwingWaypoints(trajectoryWaypoints);
+         }
+      }
 
-      footstep.trajectoryType = trajectoryType;
-      footstep.swingHeight = footstepData.getSwingHeight();
+      if (footstepData.hasTimings())
+         footstep.setTimings(footstepData.getSwingTime(), footstepData.getTransferTime());
+
+      footstep.setTrajectoryType(trajectoryType);
+      footstep.setSwingHeight(footstepData.getSwingHeight());
       switch (footstepData.getOrigin())
       {
       case AT_ANKLE_FRAME:

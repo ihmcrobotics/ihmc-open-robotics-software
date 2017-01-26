@@ -2,15 +2,16 @@ package us.ihmc.valkyrie.simulation;
 
 import java.net.URI;
 
-import us.ihmc.humanoidRobotics.HumanoidFloatingRootJointRobot;
+import us.ihmc.avatar.DRCFlatGroundWalkingTrack;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.initialSetup.DRCGuiInitialSetup;
+import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
+import us.ihmc.avatar.initialSetup.DRCSCSInitialSetup;
+import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.HeadingAndVelocityEvaluationScriptParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.WalkingProvider;
 import us.ihmc.communication.configuration.NetworkParameters;
-import us.ihmc.darpaRoboticsChallenge.DRCFlatGroundWalkingTrack;
-import us.ihmc.darpaRoboticsChallenge.DRCGuiInitialSetup;
-import us.ihmc.darpaRoboticsChallenge.DRCSCSInitialSetup;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
-import us.ihmc.graphics3DAdapter.GroundProfile3D;
+import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
+import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.ground.FlatGroundProfile;
 import us.ihmc.tools.thread.ThreadTools;
@@ -43,9 +44,10 @@ public class ValkyrieFlatGroundWalkingTrack
       boolean useVelocityAndHeadingScript = !USE_JOYSTICK_CONTROLLER;;
       boolean cheatWithGroundHeightAtForFootstep = false;
       
+      HeadingAndVelocityEvaluationScriptParameters walkingScriptParameters = new HeadingAndVelocityEvaluationScriptParameters();
       DRCFlatGroundWalkingTrack flatGroundWalkingTrack = new DRCFlatGroundWalkingTrack(robotInitialSetup, guiInitialSetup, scsInitialSetup,
             useVelocityAndHeadingScript, cheatWithGroundHeightAtForFootstep, robotModel,
-            WalkingProvider.VELOCITY_HEADING_COMPONENT);
+            WalkingProvider.VELOCITY_HEADING_COMPONENT, walkingScriptParameters);
       
       SimulationConstructionSet scs = flatGroundWalkingTrack.getSimulationConstructionSet();
      
@@ -66,8 +68,8 @@ public class ValkyrieFlatGroundWalkingTrack
 
   		 
          ValkyrieSliderBoard.setupJoyStickAndTreadmill(scs.getRootRegistry());
-         flatGroundWalkingTrack.getDrcSimulation().start();
-         flatGroundWalkingTrack.getDrcSimulation().simulate();
+         flatGroundWalkingTrack.getAvatarSimulation().start();
+         flatGroundWalkingTrack.getAvatarSimulation().simulate();
       }
    }
 

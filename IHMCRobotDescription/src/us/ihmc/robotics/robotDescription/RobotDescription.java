@@ -1,8 +1,9 @@
 package us.ihmc.robotics.robotDescription;
 
 import java.util.ArrayList;
+import java.util.List;
 
-import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
+import us.ihmc.graphicsDescription.Graphics3DObject;
 
 public class RobotDescription implements RobotDescriptionNode, GraphicsObjectsHolder
 {
@@ -69,7 +70,7 @@ public class RobotDescription implements RobotDescriptionNode, GraphicsObjectsHo
    }
 
    @Override
-   public Graphics3DObject getCollisionObject(String name)
+   public CollisionMeshDescription getCollisionObject(String name)
    {
       JointDescription jointDescription = getJointDescription(name);
       if (jointDescription == null)
@@ -87,5 +88,19 @@ public class RobotDescription implements RobotDescriptionNode, GraphicsObjectsHo
 
       return jointDescription.getLink().getLinkGraphics();
    }
+   
+   public LinkDescription getLinkDescription(String name)
+   {
+      JointDescription jointDescription = getJointDescription(name);
+      if (jointDescription == null)
+         return null;
+      
+      return jointDescription.getLink();
+   }
 
+   @Override
+   public void scale(double factor, double massScalePower, List<String> ignoreInertiaScaleJointList)
+   {
+      JointDescription.scaleChildrenJoint(getChildrenJoints(), factor, massScalePower, ignoreInertiaScaleJointList);
+   }
 }

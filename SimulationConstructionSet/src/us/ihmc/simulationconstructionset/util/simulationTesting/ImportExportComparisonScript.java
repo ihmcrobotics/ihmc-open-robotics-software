@@ -17,6 +17,7 @@ public class ImportExportComparisonScript implements SimulationComparisonScript
       this.nTicksFinal = nTicksFinal;
    }
 
+   @Override
    public void doInitialAction(SimulationConstructionSet scs0, SimulationConstructionSet scs1)
    {
       SimulationConstructionSet[] scss = {scs0, scs1};
@@ -31,6 +32,7 @@ public class ImportExportComparisonScript implements SimulationComparisonScript
       }
    }
 
+   @Override
    public void doFinalAction(SimulationConstructionSet scs0, SimulationConstructionSet scs1)
    {
       SimulationConstructionSet[] scss = {scs0, scs1};

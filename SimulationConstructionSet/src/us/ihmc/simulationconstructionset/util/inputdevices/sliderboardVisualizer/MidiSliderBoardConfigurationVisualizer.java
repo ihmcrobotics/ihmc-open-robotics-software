@@ -8,6 +8,7 @@ import java.util.Hashtable;
 import us.ihmc.simulationconstructionset.util.inputdevices.MidiControl;
 import us.ihmc.simulationconstructionset.util.inputdevices.MidiControl.SliderType;
 
+@SuppressWarnings("serial")
 public class MidiSliderBoardConfigurationVisualizer extends JFrame
 {
    private Hashtable<Integer, MidiControl> controlsHashTable = new Hashtable<Integer, MidiControl>(40);
@@ -223,6 +224,6 @@ public class MidiSliderBoardConfigurationVisualizer extends JFrame
 
    public static void main(String[] args)
    {
-      MidiSliderBoardConfigurationVisualizer visualizer = new MidiSliderBoardConfigurationVisualizer(null);
+      new MidiSliderBoardConfigurationVisualizer(null);
    }
 }

@@ -305,11 +305,11 @@ public class FrameLineSegment2d extends FrameGeometry2d<FrameLineSegment2d, Line
       lineSegment.orthogonalProjection(point.getPoint());
    }
 
-   public void orthogonalProjection(FramePoint2d projectedPointToPack, FramePoint2d point)
+   public void orthogonalProjection(FramePoint2d point, FramePoint2d projectedPointToPack)
    {
       checkReferenceFrameMatch(point);
       projectedPointToPack.setToZero(referenceFrame);
-      lineSegment.orthogonalProjection(projectedPointToPack.getPoint(), point.getPoint());
+      lineSegment.orthogonalProjection(point.getPoint(), projectedPointToPack.getPoint());
    }
 
    @Override

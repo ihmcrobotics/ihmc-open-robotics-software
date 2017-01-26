@@ -8,8 +8,8 @@ import org.junit.Test;
 
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
-import us.ihmc.darpaRoboticsChallenge.NumericalInverseKinematicsCalculatorWithRobotTest;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.NumericalInverseKinematicsCalculatorWithRobotTest;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -44,6 +44,6 @@ public class AtlasNumericalInverseKinematicsCalculatorWithRobotTest extends Nume
       boolean updateListenersEachStep = true;
       double errorThreshold = 0.01;
       boolean success = testAPose(random, handEndEffectorPositionFK, handEndEffectorOrientationFK, initialGuessForTests, errorThreshold , updateListenersEachStep);
-      assertTrue(success);
+      assertTrue("testAPose returned false", success);
    }
 }

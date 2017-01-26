@@ -1,8 +1,0 @@
-option java_outer_classname = "YoVariableLoggerRequestProto";
-option java_package = "us.ihmc.robotDataCommunication.generated";
-
-message YoVariableLoggerRequest
-{
-	required string host = 1;
-	required string logName = 2;
-}

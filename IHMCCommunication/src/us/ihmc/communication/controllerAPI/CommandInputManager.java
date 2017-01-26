@@ -35,6 +35,7 @@ import us.ihmc.tools.io.printing.PrintTools;
  */
 public class CommandInputManager
 {
+   private final String printStatementPrefix;
    private final int buffersCapacity = 16;
 
    /**
@@ -64,6 +65,7 @@ public class CommandInputManager
    /** List of the listeners that should get notified when receiving a new valid command. */
    private final List<HasReceivedInputListener> hasReceivedInputListeners = new ArrayList<>();
 
+
    /**
     * Only constructor to build a new API. No new constructors will be tolerated.
     * 
@@ -71,6 +73,19 @@ public class CommandInputManager
     */
    public CommandInputManager(List<Class<? extends Command<?, ?>>> commandsToRegister)
    {
+      this(null, commandsToRegister);
+   }
+
+   /**
+    * Only constructor to build a new API. No new constructors will be tolerated.
+    * 
+    * @param name name used when printing statements. It should preferably be unique to distinguish the 
+    * different modules using this class.
+    * @param commandsToRegister list of the commands that this API should support.
+    */
+   public CommandInputManager(String name, List<Class<? extends Command<?, ?>>> commandsToRegister)
+   {
+      this.printStatementPrefix = name == null ? "" : name + ": ";
       registerNewCommands(commandsToRegister);
    }
 
@@ -119,10 +134,19 @@ public class CommandInputManager
     * The user is free to modify the message afterwards.
     * @param message message to be submitted to the controller.
     */
+   @SuppressWarnings("unchecked")
    public <M extends Packet<M>> void submitMessage(M message)
    {
-      if (message == null || message.getUniqueId() == Packet.INVALID_MESSAGE_ID)
+      if (message == null)
+      {
+         PrintTools.warn(this, printStatementPrefix + "Received a null message, ignored.");
          return;
+      }
+      if (message.getUniqueId() == Packet.INVALID_MESSAGE_ID)
+      {
+         PrintTools.warn(this, printStatementPrefix + "Received a message with an invalid id, ignored. Message class: " + message.getClass().getSimpleName());
+         return;
+      }
 
       if (message instanceof MultiplePacketHolder)
       {
@@ -133,21 +157,21 @@ public class CommandInputManager
       ConcurrentRingBuffer<? extends Command<?, ?>> buffer = messageClassToBufferMap.get(message.getClass());
       if (buffer == null)
       {
-         PrintTools.error(this, "The message type " + message.getClass().getSimpleName() + " is not supported.");
+         PrintTools.error(this, printStatementPrefix + "The message type " + message.getClass().getSimpleName() + " is not supported.");
          return;
       }
-      @SuppressWarnings("unchecked")
       Command<?, M> nextCommand = (Command<?, M>) buffer.next();
       if (nextCommand == null)
       {
-         PrintTools.warn(this, "The buffer for the message: " + message.getClass().getSimpleName() + " is full. Message ignored.");
+         PrintTools.warn(this, printStatementPrefix + "The buffer for the message: " + message.getClass().getSimpleName() + " is full. Message ignored.");
          return;
       }
       nextCommand.set(message);
+      Class<?> commandClass = nextCommand.getClass();
       buffer.commit();
 
       for (int i = 0; i < hasReceivedInputListeners.size(); i++)
-         hasReceivedInputListeners.get(i).hasReceivedInput();
+         hasReceivedInputListeners.get(i).hasReceivedInput((Class<? extends Command<?, ?>>) commandClass);
    }
 
    /**
@@ -173,6 +197,7 @@ public class CommandInputManager
     * The user is free to modify the command afterwards.
     * @param command command to be submitted to the controller.
     */
+   @SuppressWarnings("unchecked")
    public <C extends Command<C, ?>> void submitCommand(C command)
    {
       if (!command.isCommandValid())
@@ -184,21 +209,21 @@ public class CommandInputManager
       ConcurrentRingBuffer<? extends Command<?, ?>> buffer = commandClassToBufferMap.get(command.getClass());
       if (buffer == null)
       {
-         PrintTools.error(this, "The command type " + command.getClass().getSimpleName() + " is not supported.");
+         PrintTools.error(this, printStatementPrefix + "The command type " + command.getClass().getSimpleName() + " is not supported.");
          return;
       }
-      @SuppressWarnings("unchecked")
+
       Command<C, ?> nextModifiableMessage = (Command<C, ?>) buffer.next();
       if (nextModifiableMessage == null)
       {
-         PrintTools.warn(this, "The buffer for the command: " + command.getClass().getSimpleName() + " is full. Command ignored.");
+         PrintTools.warn(this, printStatementPrefix + "The buffer for the command: " + command.getClass().getSimpleName() + " is full. Command ignored.");
          return;
       }
       nextModifiableMessage.set(command);
       buffer.commit();
 
       for (int i = 0; i < hasReceivedInputListeners.size(); i++)
-         hasReceivedInputListeners.get(i).hasReceivedInput();
+         hasReceivedInputListeners.get(i).hasReceivedInput((Class<? extends Command<?, ?>>) command.getClass());
    }
 
    /**
@@ -384,6 +409,6 @@ public class CommandInputManager
     */
    public static interface HasReceivedInputListener
    {
-      public void hasReceivedInput();
+      public void hasReceivedInput(Class<? extends Command<?,?>> commandClass);
    }
 }

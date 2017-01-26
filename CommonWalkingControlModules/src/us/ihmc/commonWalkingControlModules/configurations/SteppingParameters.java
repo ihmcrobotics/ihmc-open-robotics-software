@@ -24,7 +24,9 @@ public interface SteppingParameters extends FootstepParameters
    public abstract double getMaxStepDown();
 
    public abstract double getMaxSwingHeightFromStanceFoot();
-
+   
+   public abstract double  getMinSwingHeightFromStanceFoot();
+  
    public abstract double getMaxAngleTurnOutwards(); //the maximum angle the foot can turn outwards in a step
 
    public abstract double getMaxAngleTurnInwards(); //the maximum angle the foot can turn inwards in a step

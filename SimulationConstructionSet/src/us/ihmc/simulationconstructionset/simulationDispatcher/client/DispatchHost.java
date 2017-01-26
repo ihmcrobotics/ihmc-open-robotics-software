@@ -113,6 +113,7 @@ public class DispatchHost
 
    private Thread lookupThread = new Thread("Dispatch Host Lookup")
    {
+      @Override
       public void run()
       {
          while (true)

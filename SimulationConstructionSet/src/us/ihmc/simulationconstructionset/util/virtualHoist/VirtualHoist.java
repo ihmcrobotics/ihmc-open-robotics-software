@@ -9,12 +9,12 @@ import javax.vecmath.Vector3d;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.Robot;
-import us.ihmc.simulationconstructionset.robotController.RobotController;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.robotController.RobotController;
 
 public class VirtualHoist implements RobotController
 {
@@ -136,6 +136,7 @@ public class VirtualHoist implements RobotController
       return teepeeLocation.getZ();
    }
 
+   @Override
    public void doControl()
    {
       // For each external force point, figure out the force vector and apply it:
@@ -203,20 +204,24 @@ public class VirtualHoist implements RobotController
       }
    }
 
+   @Override
    public YoVariableRegistry getYoVariableRegistry()
    {
       return registry;
    }
 
+   @Override
    public String getName()
    {
       return "VirtualHoist";
    }
 
+   @Override
    public void initialize()
    {
    }
 
+   @Override
    public String getDescription()
    {
       return getName();

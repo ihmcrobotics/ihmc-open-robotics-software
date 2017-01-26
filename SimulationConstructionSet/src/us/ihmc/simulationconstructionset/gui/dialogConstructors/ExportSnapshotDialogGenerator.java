@@ -9,8 +9,8 @@ import javax.swing.JFrame;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.commands.ExportSnapshotCommandExecutor;
 import us.ihmc.simulationconstructionset.gui.ActiveCanvas3DHolder;
-import us.ihmc.simulationconstructionset.gui.MyFileFilter;
 import us.ihmc.simulationconstructionset.gui.SwingWorker;
+import us.ihmc.tools.gui.MyFileFilter;
 
 public class ExportSnapshotDialogGenerator implements ExportSnapshotDialogConstructor
 {
@@ -65,17 +65,20 @@ public class ExportSnapshotDialogGenerator implements ExportSnapshotDialogConstr
       }
    }
 
+   @Override
    public void setCurrentDirectory(File dir)
    {
       fileChooser.setCurrentDirectory(dir);
    }
 
+   @Override
    public void setCurrentDirectory(String dir)
    {
       fileChooser.setCurrentDirectory(new File(dir));
    }
 
 
+   @Override
    public void constructDialog()
    {
       guiEnablerAndDisabler.disableGUIComponents();
@@ -84,6 +87,7 @@ public class ExportSnapshotDialogGenerator implements ExportSnapshotDialogConstr
       @SuppressWarnings("unused")
       SwingWorker worker = new SwingWorker()
       {
+         @Override
          public Object construct()
          {
             // synchronized(BusyLock.lock)
@@ -144,6 +148,7 @@ public class ExportSnapshotDialogGenerator implements ExportSnapshotDialogConstr
             // }
          }
 
+         @Override
          public void finished()
          {
             // Runs in Swing dispatching thread when done...

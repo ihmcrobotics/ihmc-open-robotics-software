@@ -5,11 +5,16 @@ import java.util.Random;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
+import org.ejml.data.DenseMatrix64F;
+import org.ejml.ops.CommonOps;
+
 import us.ihmc.communication.packets.TrackablePacket;
 import us.ihmc.communication.ros.generators.RosExportedField;
+import us.ihmc.communication.ros.generators.RosIgnoredField;
 import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.transformables.Transformable;
+import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSO3TrajectoryPointList;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -32,6 +37,8 @@ public abstract class AbstractSO3TrajectoryMessage<T extends AbstractSO3Trajecto
          + " If a message appears to be missing (previousMessageId different from the last message ID received by the controller), the motion is aborted."
          + " If previousMessageId == 0, the controller will not check for the ID of the last received message.")
    public long previousMessageId = INVALID_MESSAGE_ID;
+   @RosIgnoredField
+   public float[] selectionMatrixDiagonal;
 
    public AbstractSO3TrajectoryMessage()
    {
@@ -127,6 +134,22 @@ public abstract class AbstractSO3TrajectoryMessage<T extends AbstractSO3Trajecto
       this.previousMessageId = previousMessageId;
    }
 
+   /**
+    * The selectionMatrix needs to be nx6 or nx3.
+    * @param selectionMatrix
+    */
+   public void setSelectionMatrix(DenseMatrix64F selectionMatrix)
+   {
+      if (selectionMatrixDiagonal == null)
+         selectionMatrixDiagonal = new float[3];
+
+      DenseMatrix64F inner = new DenseMatrix64F(selectionMatrix.getNumCols(), selectionMatrix.getNumCols());
+      CommonOps.multInner(selectionMatrix, inner);
+      
+      for (int i = 0; i < 3; i++)
+         selectionMatrixDiagonal[i] = (float) inner.get(i, i);
+   }
+
    public final int getNumberOfTrajectoryPoints()
    {
       return taskspaceTrajectoryPoints.length;
@@ -156,6 +179,29 @@ public abstract class AbstractSO3TrajectoryMessage<T extends AbstractSO3Trajecto
    public ExecutionMode getExecutionMode()
    {
       return executionMode;
+   }
+
+   public boolean hasSelectionMatrix()
+   {
+      return selectionMatrixDiagonal != null;
+   }
+
+   public void getSelectionMatrix(DenseMatrix64F selectionMatrixToPack)
+   {
+      selectionMatrixToPack.reshape(3, 6);
+      selectionMatrixToPack.zero();
+      
+      if (selectionMatrixDiagonal != null)
+      {
+         for (int i = 0; i < 3; i++)
+            selectionMatrixToPack.set(i, i, selectionMatrixDiagonal[i]);
+         MatrixTools.removeZeroRows(selectionMatrixToPack, 1.0e-5);
+      }
+      else
+      {
+         for (int i = 0; i < 3; i++)
+            selectionMatrixToPack.set(i, i, 1.0);
+      }
    }
 
    public long getPreviousMessageId()

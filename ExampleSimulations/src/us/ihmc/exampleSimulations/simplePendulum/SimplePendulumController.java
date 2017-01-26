@@ -2,7 +2,7 @@ package us.ihmc.exampleSimulations.simplePendulum;
 
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.simulationconstructionset.robotController.RobotController;
+import us.ihmc.robotics.robotController.RobotController;
 
 /**
  * Created by amoucheboeuf on 2/11/16.

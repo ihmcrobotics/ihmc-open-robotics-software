@@ -1,10 +1,9 @@
 package us.ihmc.imageProcessing.segmentation;
 
+import boofcv.struct.image.GrayF32;
+
 import java.util.ArrayList;
 import java.util.List;
-
-import boofcv.struct.image.ImageFloat32;
-import boofcv.struct.image.ImageUInt8;
 
 /**
  * @author Peter Abeles
@@ -23,7 +22,7 @@ public class RoadClassification {
       other.add(d);
    }
 
-   public void classify( ImageFloat32 band0 , ImageFloat32 band1 , ImageUInt8 output ) {
+   public void classify( GrayF32 band0 , GrayF32 band1 , GrayF32 output ) {
 
       System.out.println("total road = "+road.size()+"  other "+other.size());
 

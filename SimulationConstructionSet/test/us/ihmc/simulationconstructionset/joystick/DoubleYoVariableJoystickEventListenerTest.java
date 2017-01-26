@@ -62,31 +62,37 @@ public class DoubleYoVariableJoystickEventListenerTest
       private Identifier identifier;
       private float deadZone;
 
+      @Override
       public boolean isRelative()
       {
          return isRelative;
       }
 
+      @Override
       public boolean isAnalog()
       {
          return isAnalog;
       }
 
+      @Override
       public float getPollData()
       {
          return pollData;
       }
 
+      @Override
       public String getName()
       {
          return name;
       }
 
+      @Override
       public Identifier getIdentifier()
       {
          return identifier;
       }
 
+      @Override
       public float getDeadZone()
       {
          return deadZone;

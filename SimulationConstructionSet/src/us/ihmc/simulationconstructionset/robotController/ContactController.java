@@ -3,6 +3,7 @@ package us.ihmc.simulationconstructionset.robotController;
 import java.util.List;
 
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.util.ground.Contactable;
 import us.ihmc.simulationconstructionset.util.ground.SimpleStickSlipContactModel;
@@ -57,26 +58,31 @@ public class ContactController implements RobotController
       contactModel.setFrictionCoefficients(alphaStick, alphaSlip);
    }
 
+   @Override
    public void initialize()
    {
    }
 
 
+   @Override
    public void doControl()
    {
       contactModel.doContact();
    }
 
+   @Override
    public YoVariableRegistry getYoVariableRegistry()
    {
       return registry;
    }
 
+   @Override
    public String getName()
    {
       return registry.getName();
    }
 
+   @Override
    public String getDescription()
    {
       return getName();

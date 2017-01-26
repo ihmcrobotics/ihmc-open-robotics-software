@@ -26,7 +26,7 @@ public abstract class AbstractSimpleParametersFootstepGenerator extends Abstract
    protected boolean isLeftRightPath;
    protected boolean isRightwardPath;
    protected FootstepCounter footstepCounter;
-   
+
    public AbstractSimpleParametersFootstepGenerator(SideDependentList<RigidBody> feet, SideDependentList<ReferenceFrame> soleFrames, PathTypeStepParameters pathType)
    {
       super(feet, soleFrames);
@@ -113,9 +113,9 @@ public abstract class AbstractSimpleParametersFootstepGenerator extends Abstract
       // 3a) near foot if L/R (whether or not turn steps made or side preference indicated) [independently decided start step]
       int skipFoot = -1;
       if (isLeftRightPath)
-      {            
+      {
          RobotSide nearSideStep = isRightwardPath ? RobotSide.RIGHT : RobotSide.LEFT;
-         
+
          if (straightPathStartIndex == 0)
          {
             if(willSetFirstStraightStepToFarSideIfNoTurns)
@@ -217,4 +217,6 @@ public abstract class AbstractSimpleParametersFootstepGenerator extends Abstract
 
       return createFootstep(currentFootstepSide, footstepPose2d);
    }
+
+   public abstract boolean hasDisplacement();
 }

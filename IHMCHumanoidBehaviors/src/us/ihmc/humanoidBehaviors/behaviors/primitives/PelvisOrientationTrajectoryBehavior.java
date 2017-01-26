@@ -4,7 +4,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
-import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
+import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisOrientationTrajectoryMessage;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -19,7 +19,7 @@ public class PelvisOrientationTrajectoryBehavior extends AbstractBehavior
    private final DoubleYoVariable trajectoryTime;
    private final BooleanYoVariable trajectoryTimeElapsed;
 
-   public PelvisOrientationTrajectoryBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, DoubleYoVariable yoTime)
+   public PelvisOrientationTrajectoryBehavior(CommunicationBridgeInterface outgoingCommunicationBridge, DoubleYoVariable yoTime)
    {
       super(outgoingCommunicationBridge);
 
@@ -52,7 +52,7 @@ public class PelvisOrientationTrajectoryBehavior extends AbstractBehavior
       if (!isPaused.getBooleanValue() && !isAborted.getBooleanValue())
       {
          outgoingPelvisOrientationTrajectoryMessage.setDestination(PacketDestination.UI);
-         sendPacketToNetworkProcessor(outgoingPelvisOrientationTrajectoryMessage);
+         sendPacket(outgoingPelvisOrientationTrajectoryMessage);
          sendPacketToController(outgoingPelvisOrientationTrajectoryMessage);
          hasPacketBeenSent.set(true);
          startTime.set(yoTime.getDoubleValue());
@@ -61,7 +61,7 @@ public class PelvisOrientationTrajectoryBehavior extends AbstractBehavior
    }
 
    @Override
-   public void initialize()
+   public void onBehaviorEntered()
    {
       hasPacketBeenSent.set(false);
 
@@ -72,7 +72,7 @@ public class PelvisOrientationTrajectoryBehavior extends AbstractBehavior
    }
 
    @Override
-   public void doPostBehaviorCleanup()
+   public void onBehaviorExited()
    {
       hasPacketBeenSent.set(false);
       outgoingPelvisOrientationTrajectoryMessage = null;
@@ -87,7 +87,7 @@ public class PelvisOrientationTrajectoryBehavior extends AbstractBehavior
 
 
    @Override //TODO: Not currently implemented for this behavior
-   public void resume()
+   public void onBehaviorResumed()
    {
       isPaused.set(false);
       startTime.set(yoTime.getDoubleValue());
@@ -108,5 +108,15 @@ public class PelvisOrientationTrajectoryBehavior extends AbstractBehavior
    public boolean hasInputBeenSet()
    {
       return outgoingPelvisOrientationTrajectoryMessage != null;
+   }
+
+   @Override
+   public void onBehaviorAborted()
+   {
+   }
+
+   @Override
+   public void onBehaviorPaused()
+   {
    }
 }

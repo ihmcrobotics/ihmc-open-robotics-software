@@ -10,7 +10,7 @@ import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.EndEffectorLoadBearingBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.FootTrajectoryBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
-import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
+import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidBehaviors.taskExecutor.FootTrajectoryTask;
 import us.ihmc.humanoidRobotics.communication.packets.walking.EndEffectorLoadBearingMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.EndEffectorLoadBearingMessage.EndEffector;
@@ -43,7 +43,7 @@ public class KickBehavior extends AbstractBehavior
    private final DoubleYoVariable trajectoryTime;
    private final SideDependentList<ReferenceFrame> ankleZUpFrames;
 
-   public KickBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, DoubleYoVariable yoTime, BooleanYoVariable yoDoubleSupport,
+   public KickBehavior(CommunicationBridgeInterface outgoingCommunicationBridge, DoubleYoVariable yoTime, BooleanYoVariable yoDoubleSupport,
          FullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames)
    {
       super(outgoingCommunicationBridge);
@@ -118,7 +118,7 @@ public class KickBehavior extends AbstractBehavior
 
       submitFootPosition(kickFoot, new FramePoint(ankleZUpFrames.get(kickFoot.getOppositeSide()), 0.0, kickFoot.negateIfRightSide(0.25), 0));
 
-      final EndEffectorLoadBearingBehavior footStateBehavior = new EndEffectorLoadBearingBehavior(outgoingCommunicationBridge);
+      final EndEffectorLoadBearingBehavior footStateBehavior = new EndEffectorLoadBearingBehavior(communicationBridge);
       pipeLine.submitSingleTaskStage(new BehaviorAction(footStateBehavior)
       {
 
@@ -151,43 +151,39 @@ public class KickBehavior extends AbstractBehavior
    }
 
    @Override
-   public void initialize()
+   public void onBehaviorEntered()
    {
-      super.initialize();
       for (AbstractBehavior behavior : behaviors)
       {
-         behavior.initialize();
+         behavior.onBehaviorEntered();
       }
    }
 
    @Override
-   public void doPostBehaviorCleanup()
+   public void onBehaviorExited()
    {
       hasInputBeenSet.set(false);
-      super.doPostBehaviorCleanup();
       for (AbstractBehavior behavior : behaviors)
       {
-         behavior.doPostBehaviorCleanup();
+         behavior.onBehaviorExited();
       }
    }
 
    @Override
-   public void abort()
+   public void onBehaviorAborted()
    {
-      super.abort();
       for (AbstractBehavior behavior : behaviors)
       {
-         behavior.abort();
+         behavior.onBehaviorAborted();
       }
    }
 
    @Override
-   public void pause()
+   public void onBehaviorPaused()
    {
-      super.pause();
       for (AbstractBehavior behavior : behaviors)
       {
-         behavior.pause();
+         behavior.onBehaviorPaused();
       }
    }
 
@@ -198,32 +194,15 @@ public class KickBehavior extends AbstractBehavior
    }
 
    @Override
-   public void resume()
+   public void onBehaviorResumed()
    {
-      super.resume();
       for (AbstractBehavior behavior : behaviors)
       {
-         behavior.resume();
+         behavior.onBehaviorResumed();
       }
    }
 
-   @Override
-   protected void passReceivedNetworkProcessorObjectToChildBehaviors(Object object)
-   {
-      for (AbstractBehavior behavior : behaviors)
-      {
-         behavior.consumeObjectFromNetworkProcessor(object);
-      }
-   }
-
-   @Override
-   protected void passReceivedControllerObjectToChildBehaviors(Object object)
-   {
-      for (AbstractBehavior behavior : behaviors)
-      {
-         behavior.consumeObjectFromController(object);
-      }
-   }
+  
 
    public boolean hasInputBeenSet()
    {

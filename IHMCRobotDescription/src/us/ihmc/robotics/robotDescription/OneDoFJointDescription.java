@@ -1,5 +1,7 @@
 package us.ihmc.robotics.robotDescription;
 
+import java.util.List;
+
 import javax.vecmath.Vector3d;
 
 import us.ihmc.robotics.Axis;
@@ -129,5 +131,20 @@ public class OneDoFJointDescription extends JointDescription
    public double getEffortLimit()
    {
       return effortLimit;
+   }
+   
+   @Override
+   public void scale(double factor, double massScalePower, List<String> ignoreInertiaScaleJointList)
+   {
+      double massScale = Math.pow(factor, massScalePower);
+      double dampingScale = Math.pow(factor, massScalePower + 2); // Joint acceleration is related to inertia.
+      this.damping = massScale * this.damping;
+      
+      this.kLimit = massScale * this.kLimit;
+      this.bLimit = massScale * this.bLimit;
+      
+      this.velocityDamping = massScale * this.velocityDamping;
+      
+      super.scale(factor, massScalePower, ignoreInertiaScaleJointList);
    }
 }

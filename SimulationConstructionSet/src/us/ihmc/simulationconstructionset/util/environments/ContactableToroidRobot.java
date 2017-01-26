@@ -10,31 +10,31 @@ import javax.vecmath.Vector3d;
 
 import org.apache.commons.math3.util.FastMath;
 
-import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
-import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceRGBColor;
-import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DAddMeshDataInstruction;
-import us.ihmc.graphics3DAdapter.input.SelectedListener;
-import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
+import us.ihmc.graphicsDescription.instructions.ArcTorusGraphics3DInstruction;
+import us.ihmc.graphicsDescription.instructions.HemiEllipsoidGraphics3DInstruction;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.simulationconstructionset.GroundContactPointGroup;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.PinJoint;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicVector;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.tools.inputDevices.keyboard.Key;
 import us.ihmc.tools.inputDevices.keyboard.ModifierKeyInterface;
 import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
 import us.ihmc.robotics.geometry.shapes.FrameTorus3d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.graphicsDescription.Graphics3DObject;
+import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
+import us.ihmc.graphicsDescription.input.SelectedListener;
+import us.ihmc.graphicsDescription.instructions.Graphics3DAddMeshDataInstruction;
+import us.ihmc.graphicsDescription.structure.Graphics3DNode;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.screwTheory.RigidBodyInertia;
 
 public class ContactableToroidRobot extends ContactablePinJointRobot implements SelectableObject, SelectedListener
 {
-   private static final long serialVersionUID = -9222717517284272299L;
-   
    public static final double DEFAULT_RADIUS = 0.2;
    public static final double DEFAULT_THICKNESS = 0.05;
    private static final double DEFAULT_MASS = 1.0;
@@ -52,7 +52,7 @@ public class ContactableToroidRobot extends ContactablePinJointRobot implements 
    private final double selectTransparency = 0.0;
    private final double unselectTransparency = 0.0;
    
-   private Graphics3DAddMeshDataInstruction wheelGraphic;
+   private ArcTorusGraphics3DInstruction wheelGraphic;
    
    private final ArrayList<SelectableObjectListener> selectedListeners = new ArrayList<SelectableObjectListener>();
 
@@ -144,22 +144,26 @@ public class ContactableToroidRobot extends ContactablePinJointRobot implements 
       return pinJoint;
    }
 
+   @Override
    public synchronized boolean isPointOnOrInside(Point3d pointInWorldToCheck)
    {
       return wheelTorus.getTorus3d().isInsideOrOnSurface(pointInWorldToCheck);
    }
    
+   @Override
    public boolean isClose(Point3d pointInWorldToCheck)
    {
       return isPointOnOrInside(pointInWorldToCheck);
    }
 
+   @Override
    public synchronized void closestIntersectionAndNormalAt(Point3d intersectionToPack, Vector3d normalToPack, Point3d pointInWorldToCheck)
    {
       wheelTorus.getTorus3d().checkIfInside(pointInWorldToCheck, intersectionToPack, normalToPack);
    }
 
 
+   @Override
    public void selected(Graphics3DNode graphics3dNode, ModifierKeyInterface modifierKeyInterface, Point3d location, Point3d cameraLocation,
          Quat4d cameraRotation)
    {
@@ -168,6 +172,7 @@ public class ContactableToroidRobot extends ContactablePinJointRobot implements 
       select();
    }
 
+   @Override
    public void select()
    {
       unSelect(false);
@@ -177,12 +182,14 @@ public class ContactableToroidRobot extends ContactablePinJointRobot implements 
       notifySelectedListenersThisWasSelected(this);
    }
 
+   @Override
    public void unSelect(boolean reset)
    {
       wheelGraphic.setAppearance(new YoAppearanceRGBColor(defaultColor, unselectTransparency));
       
    }
 
+   @Override
    public void addSelectedListeners(SelectableObjectListener selectedListener)
    {
       this.selectedListeners.add(selectedListener);

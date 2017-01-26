@@ -2,7 +2,6 @@ package us.ihmc.valkyrieRosControl;
 
 import java.util.List;
 
-import javax.vecmath.Matrix3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
@@ -12,7 +11,6 @@ import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.AuxiliaryRobotData;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
@@ -24,8 +22,11 @@ import us.ihmc.sensorProcessing.simulatedSensors.StateEstimatorSensorDefinitions
 import us.ihmc.sensorProcessing.stateEstimation.SensorProcessingConfiguration;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.ForceSensorCalibrationModule;
 import us.ihmc.tools.TimestampProvider;
-import us.ihmc.valkyrie.imu.MicroStrainData;
-import us.ihmc.valkyrieRosControl.dataHolders.*;
+import us.ihmc.valkyrieRosControl.dataHolders.YoEffortJointHandleHolder;
+import us.ihmc.valkyrieRosControl.dataHolders.YoForceTorqueSensorHandle;
+import us.ihmc.valkyrieRosControl.dataHolders.YoIMUHandleHolder;
+import us.ihmc.valkyrieRosControl.dataHolders.YoJointStateHandleHolder;
+import us.ihmc.valkyrieRosControl.dataHolders.YoPositionJointHandleHolder;
 import us.ihmc.wholeBodyController.JointTorqueOffsetProcessor;
 import us.ihmc.wholeBodyController.diagnostics.JointTorqueOffsetEstimator;
 
@@ -46,8 +47,6 @@ public class ValkyrieRosControlSensorReader implements SensorReader, JointTorque
    private final Quat4d orientation = new Quat4d();
 
    private final DenseMatrix64F torqueForce = new DenseMatrix64F(6, 1);
-   private final Matrix3d quaternionConversionMatrix = new Matrix3d();
-   private final Matrix3d orientationMatrix = new Matrix3d();
 
    private final ValkyrieRosControlLowLevelController lowlLevelController;
 

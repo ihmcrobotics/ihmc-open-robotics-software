@@ -1,22 +1,21 @@
 package us.ihmc.imageProcessing.tracking;
 
-import java.awt.Graphics2D;
-import java.awt.image.BufferedImage;
-import java.util.List;
-
-import org.ejml.data.DenseMatrix64F;
-
-import boofcv.abst.calib.ConfigChessboard;
-import boofcv.abst.calib.PlanarCalibrationDetector;
+import boofcv.abst.fiducial.calib.CalibrationDetectorChessboard;
+import boofcv.abst.fiducial.calib.ConfigChessboard;
+import boofcv.alg.geo.calibration.CalibrationObservation;
 import boofcv.alg.geo.calibration.Zhang99ComputeTargetHomography;
 import boofcv.alg.geo.calibration.Zhang99DecomposeHomography;
-import boofcv.factory.calib.FactoryPlanarCalibrationTarget;
+import boofcv.factory.calib.FactoryCalibrationTarget;
 import boofcv.gui.image.ShowImages;
 import boofcv.io.image.ConvertBufferedImage;
 import boofcv.io.image.UtilImageIO;
-import boofcv.struct.image.ImageFloat32;
+import boofcv.struct.image.GrayF32;
 import georegression.struct.point.Point2D_F64;
 import georegression.struct.se.Se3_F64;
+import org.ejml.data.DenseMatrix64F;
+
+import java.awt.*;
+import java.awt.image.BufferedImage;
 
 /**
  * @author Peter Abeles
@@ -25,12 +24,12 @@ public class TrackCalibrationGrid
 {
    public static void main( String args[] ) {
       BufferedImage image = UtilImageIO.loadImage("/home/pja/Desktop/auto_exp/frame0002.jpg");
-      ImageFloat32 gray = ConvertBufferedImage.convertFrom(image,(ImageFloat32)null);
+      GrayF32 gray = ConvertBufferedImage.convertFrom(image, (GrayF32)null);
 
 
       // Detects the target and calibration point inside the target
 
-      PlanarCalibrationDetector target = FactoryPlanarCalibrationTarget.detectorChessboard(new ConfigChessboard(5, 6, 10));
+      CalibrationDetectorChessboard target = FactoryCalibrationTarget.detectorChessboard(new ConfigChessboard(5, 6, 10));
       if( !target.process(gray) )
          throw new RuntimeException("Failed to detect target");
 
@@ -48,15 +47,16 @@ public class TrackCalibrationGrid
 
       System.out.println("Translation: "+motion.getT());
 
-      List<Point2D_F64> points = target.getDetectedPoints();
+      CalibrationObservation calibrationObservation = target.getDetectedPoints();
 
       Graphics2D g2 = image.createGraphics();
 
       int r = 2;
       int w = r*2+1;
 
-      for( Point2D_F64 p : points ) {
+      for( CalibrationObservation.Point point : calibrationObservation.points ) {
 
+         Point2D_F64 p = point.pixel;
          int x = (int)p.x-r;
          int y = (int)p.y-r;
 
@@ -64,7 +64,7 @@ public class TrackCalibrationGrid
          g2.fillOval(x,y,w,w);
       }
 
-      ShowImages.showWindow(image,"Detected Features");
+      ShowImages.showWindow(image, "Detected Features");
 
    }
 }

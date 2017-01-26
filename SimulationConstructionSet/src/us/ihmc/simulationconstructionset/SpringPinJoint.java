@@ -13,6 +13,7 @@ import us.ihmc.robotics.dataStructures.variable.YoVariable;
  * @author steel
  *
  */
+@SuppressWarnings("serial")
 public class SpringPinJoint extends PinJoint
 {
    
@@ -59,12 +60,14 @@ public class SpringPinJoint extends PinJoint
       });
    }
    
+   @Override
    public void setKp(double kp)
    {
       super.setKp(kp);
       this.kp.set(kp, false);
    }
    
+   @Override
    public void setKd(double kd)
    {
       super.setKd(kd);

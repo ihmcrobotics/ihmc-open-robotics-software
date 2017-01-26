@@ -51,6 +51,7 @@ public class StandardAllCommandsExecutor implements AllCommandsExecutor
       }
    }
 
+   @Override
    public void addCameraKey()
    {
       if (standardSimulationGUI != null)
@@ -62,6 +63,7 @@ public class StandardAllCommandsExecutor implements AllCommandsExecutor
       return standardSimulationGUI.getCameraKeyPoints();
    }
 
+   @Override
    public void addKeyPoint()
    {
       if (standardSimulationGUI != null)
@@ -78,16 +80,19 @@ public class StandardAllCommandsExecutor implements AllCommandsExecutor
       return standardSimulationGUI.getKeyPoints();
    }
 
+   @Override
    public GraphArrayWindow createNewGraphWindow()
    {
       return createNewGraphWindow(null);
    }
 
+   @Override
    public GraphArrayWindow createNewGraphWindow(String graphGroupName)
    {
       return createNewGraphWindow(graphGroupName, 0, null, null, false);
    }
 
+   @Override
    public GraphArrayWindow createNewGraphWindow(String graphGroupName, int screenID, Point windowLocation, Dimension windowSize, boolean maximizeWindow)
    {
       if (standardSimulationGUI != null)
@@ -96,6 +101,7 @@ public class StandardAllCommandsExecutor implements AllCommandsExecutor
       return null;
    }
 
+   @Override
    public GraphArrayWindow getGraphArrayWindow(String windowName)
    {
       if (standardSimulationGUI != null)
@@ -104,16 +110,19 @@ public class StandardAllCommandsExecutor implements AllCommandsExecutor
       return null;
    }
 
+   @Override
    public ViewportWindow createNewViewportWindow()
    {
       return createNewViewportWindow(null);
    }
 
+   @Override
    public ViewportWindow createNewViewportWindow(String viewportName)
    {
       return createNewViewportWindow(viewportName, 0, false);
    }
 
+   @Override
    public ViewportWindow createNewViewportWindow(String viewportName, int screenID, boolean maximizeWindow)
    {
       if (standardSimulationGUI != null)
@@ -122,6 +131,7 @@ public class StandardAllCommandsExecutor implements AllCommandsExecutor
          return null;
    }
 
+   @Override
    public ViewportWindow getViewportWindow(String windowName)
    {
       if (standardSimulationGUI != null)
@@ -130,6 +140,7 @@ public class StandardAllCommandsExecutor implements AllCommandsExecutor
       return null;
    }
 
+   @Override
    public void cropBuffer()
    {
       dataBuffer.cropData();
@@ -137,6 +148,7 @@ public class StandardAllCommandsExecutor implements AllCommandsExecutor
          standardSimulationGUI.zoomFullView();
    }
    
+   @Override
    public void packBuffer()
    {
       dataBuffer.packData();
@@ -144,6 +156,7 @@ public class StandardAllCommandsExecutor implements AllCommandsExecutor
          standardSimulationGUI.updateGraphs();
    }
    
+   @Override
    public void cutBuffer()
    {
       dataBuffer.cutData();
@@ -151,6 +164,7 @@ public class StandardAllCommandsExecutor implements AllCommandsExecutor
          standardSimulationGUI.zoomFullView();
    }
    
+   @Override
    public void thinBuffer(int keepEveryNthPoint)
    {
       dataBuffer.thinData(keepEveryNthPoint);
@@ -158,41 +172,48 @@ public class StandardAllCommandsExecutor implements AllCommandsExecutor
          standardSimulationGUI.zoomFullView();
    }
 
+   @Override
    public void gotoInPoint()
    {
       if (standardSimulationGUI != null)
          standardSimulationGUI.gotoInPoint();
    }
 
+   @Override
    public void gotoOutPoint()
    {
       if (standardSimulationGUI != null)
          standardSimulationGUI.gotoOutPoint();
    }
 
+   @Override
    public void nextCameraKey()
    {
       if (standardSimulationGUI != null)
          standardSimulationGUI.nextCameraKey();
    }
 
+   @Override
    public void play()
    {
       simulationConstructionSet.play();
    }
 
+   @Override
    public void previousCameraKey()
    {
       if (standardSimulationGUI != null)
          standardSimulationGUI.previousCameraKey();
    }
 
+   @Override
    public void removeCameraKey()
    {
       if (standardSimulationGUI != null)
          standardSimulationGUI.removeCameraKey();
    }
 
+   @Override
    public void setInPoint()
    {
       if (standardSimulationGUI != null)
@@ -201,6 +222,7 @@ public class StandardAllCommandsExecutor implements AllCommandsExecutor
          dataBuffer.setInPoint();
    }
 
+   @Override
    public void setOutPoint()
    {
       if (standardSimulationGUI != null)
@@ -217,16 +239,19 @@ public class StandardAllCommandsExecutor implements AllCommandsExecutor
          dataBuffer.setInOutPointFullBuffer();
    }
 
+   @Override
    public void simulate()
    {
       simulationConstructionSet.simulate();
    }
 
+   @Override
    public boolean isSimulating()
    {
       return simulationConstructionSet.isSimulating();
    }
 
+   @Override
    public void stepBackward()
    {
       if (standardSimulationGUI != null)
@@ -237,6 +262,7 @@ public class StandardAllCommandsExecutor implements AllCommandsExecutor
       }
    }
 
+   @Override
    public void stepForward()
    {
       if (standardSimulationGUI != null)
@@ -247,27 +273,32 @@ public class StandardAllCommandsExecutor implements AllCommandsExecutor
       }
    }
 
+   @Override
    public void stop()
    {
       simulationConstructionSet.stop();
    }
 
+   @Override
    public void toggleCameraKeyMode()
    {
       if (standardSimulationGUI != null)
          standardSimulationGUI.toggleCameraKeyMode();
    }
 
+   @Override
    public boolean isKeyPointModeToggled()
    {
       return dataBuffer.isKeyPointModeToggled();
    }
 
+   @Override
    public void toggleKeyPointMode()
    {
       dataBuffer.toggleKeyPointMode();
    }
 
+   @Override
    public void registerToggleKeyPointModeCommandListener(ToggleKeyPointModeCommandListener commandListener)
    {
       if (dataBuffer != null)
@@ -278,17 +309,20 @@ public class StandardAllCommandsExecutor implements AllCommandsExecutor
       }
    }
 
+   @Override
    public void selectViewport(String viewportName)
    {
       if (standardSimulationGUI != null)
          standardSimulationGUI.selectViewport(viewportName);
    }
 
+   @Override
    public void hideViewport()
    {
       if (standardSimulationGUI != null)
          EventDispatchThreadHelper.invokeLater(new Runnable()
          {
+            @Override
             public void run()
             {
                standardSimulationGUI.hideViewport();
@@ -296,11 +330,13 @@ public class StandardAllCommandsExecutor implements AllCommandsExecutor
          });
    }
 
+   @Override
    public void showViewport()
    {
       if (standardSimulationGUI != null)
          EventDispatchThreadHelper.invokeLater(new Runnable()
          {
+            @Override
             public void run()
             {
                standardSimulationGUI.showViewport();
@@ -308,6 +344,7 @@ public class StandardAllCommandsExecutor implements AllCommandsExecutor
          });
    }
 
+   @Override
    public boolean isViewportHidden()
    {
       if (standardSimulationGUI != null)
@@ -315,6 +352,7 @@ public class StandardAllCommandsExecutor implements AllCommandsExecutor
       return true;
    }
 
+   @Override
    public void registerViewportSelectorCommandListener(ViewportSelectorCommandListener commandListener)
    {
       if (standardSimulationGUI != null)
@@ -325,84 +363,100 @@ public class StandardAllCommandsExecutor implements AllCommandsExecutor
       }
    }
 
+   @Override
    public void zoomIn()
    {
       if (standardSimulationGUI != null)
          standardSimulationGUI.zoomIn();
    }
 
+   @Override
    public void zoomOut()
    {
       if (standardSimulationGUI != null)
          standardSimulationGUI.zoomOut();
    }
 
+   @Override
    public void selectGUIConfigFromFile(String fullPath)
    {
       GUIConfigurationSaveAndLoad defaultSaveAndLoad = new GUIConfigurationSaveAndLoad(simulationConstructionSet, standardSimulationGUI);
       defaultSaveAndLoad.loadGUIConfiguration(fullPath);
    }
 
+   @Override
    public void setPlaybackRealTimeRate(double realtimeRate)
    {
       simulationConstructionSet.setPlaybackRealTimeRate(realtimeRate);
    }
 
+   @Override
    public double getPlaybackRealTimeRate()
    {
       return simulationConstructionSet.getPlaybackRealTimeRate();
    }
 
+   @Override
    public int getInPoint()
    {
       return simulationConstructionSet.getInPoint();
    }
 
+   @Override
    public void setIndex(int index)
    {
       simulationConstructionSet.setIndex(index);
    }
 
+   @Override
    public void setIndexButDoNotNotifySimulationRewoundListeners(int index)
    {
       simulationConstructionSet.setIndexButDoNotNotifySimulationRewoundListeners(index);
    }
 
+   @Override
    public boolean tick(int ticks)
    {
       return simulationConstructionSet.tick(ticks);
    }
 
+   @Override
    public boolean tickButDoNotNotifySimulationRewoundListeners(int ticks)
    {
       return simulationConstructionSet.tickButDoNotNotifySimulationRewoundListeners(ticks);
    }
 
+   @Override
    public int getIndex()
    {
       return simulationConstructionSet.getIndex();
    }
 
+   @Override
    public boolean isIndexBetweenInAndOutPoint(int indexToCheck)
    {
       return simulationConstructionSet.isIndexBetweenInAndOutPoint(indexToCheck);
    }
 
+   @Override
    public int getOutPoint()
    {
       return simulationConstructionSet.getOutPoint();
    }
 
+   @Override
    public void exportSnapshot(File snapshotFile)
    {
       simulationConstructionSet.exportSnapshot(snapshotFile);
    }
 
+   @Override
    public void enableGUIComponents()
    {
       simulationConstructionSet.enableGUIComponents();
    }
 
+   @Override
    public void disableGUIComponents()
    {
       simulationConstructionSet.disableGUIComponents();
@@ -410,6 +464,7 @@ public class StandardAllCommandsExecutor implements AllCommandsExecutor
 
    private boolean alreadyStartedClosing = false;
    
+   @Override
    public void closeAndDispose()
    {
       if (alreadyStartedClosing) return;
