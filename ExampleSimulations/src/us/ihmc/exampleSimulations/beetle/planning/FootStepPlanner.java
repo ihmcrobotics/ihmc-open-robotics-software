@@ -94,7 +94,7 @@ public class FootStepPlanner
       bodyFrameProjectedInFutureLineArtifact.setRecordHistory(true);
 
       footScalarFromNominalToBody = new YoFrameVector(prefix + "footScalarFromNominalToBody", bodyZUpFrame, registry);
-      footScalarFromNominalToBody.set(1.0, 0.5, 1.0);
+      footScalarFromNominalToBody.set(1.0, 0.6, 1.0);
 
       feetOffsetFromBody = new YoFrameVector(prefix + "feetOffsetFromBody", bodyZUpFrame, registry);
       feetOffsetFromBody.set(-0.002, 0.0, 0.0);

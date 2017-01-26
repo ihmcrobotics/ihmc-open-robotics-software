@@ -97,8 +97,8 @@ public class HexapodStepController
       timeInSwing = new DoubleYoVariable(prefix + "TimeInSwing", registry);
 
       footStepPlanner = new FootStepPlanner(prefix, fullRobotModel, referenceFrames, twistCalculator, yoGraphicsListRegistry, registry);
-      transferTime.set(60.0);
-      swingTime.set(1.0);
+      transferTime.set(0.01);
+      swingTime.set(0.5);
       groundClearance.set(0.03);
       inStance.set(true);
 
@@ -126,7 +126,7 @@ public class HexapodStepController
 
          SpatialFeedbackControlCommand spatialFeedbackControlCommand = new SpatialFeedbackControlCommand();
          spatialFeedbackControlCommand.set(fullRobotModel.getPelvis(), shinRigidBody);
-         spatialFeedbackControlCommand.setWeightsForSolver(new Vector3d(1.0, 1.0, 1.0), new Vector3d(1.0, 1.0, 1.0));
+         spatialFeedbackControlCommand.setWeightsForSolver(new Vector3d(0.0, 0.0, 0.0), new Vector3d(100.0, 100.0, 100.0));
          spatialFeedbackControlCommand.setControlFrameFixedInEndEffector(footInShinFrame);
          spatialFeedbackControlCommands.set(robotSextant, spatialFeedbackControlCommand);
 

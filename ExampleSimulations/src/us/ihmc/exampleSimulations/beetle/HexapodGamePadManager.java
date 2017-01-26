@@ -75,16 +75,16 @@ public class HexapodGamePadManager implements JoystickEventListener
          currentOrientationRoll.set(value2 * -0.4);
          break;
       case LEFT_STICK_X:
-         desiredLinearVelocityY.set(channels.get(XBoxOneMapping.LEFT_STICK_X) * 0.2);
+         desiredLinearVelocityY.set(channels.get(XBoxOneMapping.LEFT_STICK_X) * 0.25);
          break;
       case LEFT_STICK_Y:
          desiredLinearVelocityX.set(channels.get(XBoxOneMapping.LEFT_STICK_Y) * 0.2);
          break;
       case RIGHT_STICK_X:
-         desiredAngularVelocityZ.set(channels.get(XBoxOneMapping.RIGHT_STICK_X) * 0.2);
+         desiredAngularVelocityZ.set(channels.get(XBoxOneMapping.RIGHT_STICK_X) * 0.5);
          break;
       case RIGHT_STICK_Y:
-         currentOrientationPitch.set(channels.get(XBoxOneMapping.RIGHT_STICK_Y) * 0.1);
+         currentOrientationPitch.set(channels.get(XBoxOneMapping.RIGHT_STICK_Y) * 0.2);
          break;
       case SELECT:
          controllerCoreMode.set(WholeBodyControllerCoreMode.INVERSE_DYNAMICS);
