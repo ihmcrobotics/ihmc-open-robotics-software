@@ -3,6 +3,7 @@ package us.ihmc.humanoidBehaviors.behaviors.scripts.engine;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Path;
 import java.util.ArrayList;
 
 import com.thoughtworks.xstream.io.StreamException;
@@ -26,9 +27,9 @@ public class ScriptEngine
       this.controllerHandler = controllerHandler;
    }
 
-   public void startRecording(String filename)
+   public void startRecording(Path scriptDirectory, String baseFileName)
    {
-      this.controllerHandler.startRecordingScript(filename, scriptFrame);
+      this.controllerHandler.startRecordingScript(scriptDirectory, baseFileName, scriptFrame);
       isRecording = true;
    }
 
@@ -63,7 +64,7 @@ public class ScriptEngine
       ScriptFileLoader loader;
       try
       {
-         loader = new ScriptFileLoader(file.getAbsolutePath());
+         loader = new ScriptFileLoader(file);
          ArrayList<ScriptObject> scriptObjects = loader.readIntoList();
          loader.close();
 
