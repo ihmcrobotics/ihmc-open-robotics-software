@@ -108,30 +108,8 @@
 			<MinScaling>0.0</MinScaling>
 		</GraphConfig>
 	</Graph>
-</GraphGroup>
-<Entry Boxes Tab Pane>
-<EntryBoxTab>
-<Title>
-Tab0
-</Title>
-<Entry Boxes>root.rhinoBeetle.idParams_.kpbodySpatialGains,root.rhinoBeetle.idParams_.kdbodySpatialGains,root.rhinoBeetle.idParams_.zetabodySpatialGains,root.rhinoBeetle.HexapodSimulationController.HexapodHighLevelControlManager.HexapodStepController.HexapodStepControllerTransferTime</Entry Boxes>
-</EntryBoxTab>
-</Entry Boxes Tab Pane>
-
-<Number of ViewPorts>1</Number of ViewPorts>
- <Main Viewport> 
-<Visible> true</Visible>
-</Main Viewport>
-
-<Graph Array Window Size>2</Graph Array Window Size>
-<Graph Array Window1>
-<ScreenID>2</ScreenID>
-<WindowLocation>1912.0, -8.0</WindowLocation>
-<WindowSize>1936.0, 1176.0</WindowSize>
-<GraphGroup>
-	<Cols>3</Cols>
 	<Graph>
-		<Variables>root.rhinoBeetle.HexapodSimulationController.achievedMomentumRateLinearX,root.rhinoBeetle.HexapodSimulationController.desiredMomentumRateLinearX</Variables>
+		<Variables>root.rhinoBeetle.q_FRONT_RIGHT_LOWER_PITCH</Variables>
 		<GraphConfiguration>
 			<Name>config10</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -142,8 +120,36 @@ Tab0
 			<MinScaling>0.0</MinScaling>
 		</GraphConfig>
 	</Graph>
+</GraphGroup>
+<Entry Boxes Tab Pane>
+<EntryBoxTab>
+<Title>
+Tab0
+</Title>
+<Entry Boxes>root.rhinoBeetle.idParams_.kpbodySpatialGains,root.rhinoBeetle.idParams_.kdbodySpatialGains,root.rhinoBeetle.idParams_.zetabodySpatialGains,root.rhinoBeetle.HexapodSimulationController.HexapodHighLevelControlManager.HexapodStepController.HexapodStepControllerTransferTime,root.rhinoBeetle.HexapodSimulationController.HexapodHighLevelControlManager.controllerCoreMode,root.rhinoBeetle.HexapodSimulationController.HexapodHighLevelControlManager.HexapodStepController.HexapodStepControllerSwingTime,root.rhinoBeetle.HexapodSimulationController.HexapodHighLevelControlManager.BodySpatialManager.BODYdesiredLinearVelocityX</Entry Boxes>
+</EntryBoxTab>
+<EntryBoxTab>
+<Title>
+Tab1
+</Title>
+<Entry Boxes>root.rhinoBeetle.HexapodSimulationController.HexapodHighLevelControlManager.HexapodStepController.FootStepPlanner.HexapodStepControllerfootScalarFromNominalToBodyX,root.rhinoBeetle.HexapodSimulationController.HexapodHighLevelControlManager.HexapodStepController.FootStepPlanner.HexapodStepControllerfootScalarFromNominalToBodyY,root.rhinoBeetle.HexapodSimulationController.HexapodHighLevelControlManager.HexapodStepController.FootStepPlanner.HexapodStepControllerfootScalarFromNominalToBodyZ</Entry Boxes>
+</EntryBoxTab>
+</Entry Boxes Tab Pane>
+
+<Number of ViewPorts>1</Number of ViewPorts>
+ <Main Viewport> 
+<Visible> true</Visible>
+</Main Viewport>
+
+<Graph Array Window Size>3</Graph Array Window Size>
+<Graph Array Window1>
+<ScreenID>2</ScreenID>
+<WindowLocation>-32000.0, -32000.0</WindowLocation>
+<WindowSize>1936.0, 1176.0</WindowSize>
+<GraphGroup>
+	<Cols>3</Cols>
 	<Graph>
-		<Variables>root.rhinoBeetle.HexapodSimulationController.achievedMomentumRateLinearY,root.rhinoBeetle.HexapodSimulationController.desiredMomentumRateLinearY</Variables>
+		<Variables>root.rhinoBeetle.HexapodSimulationController.achievedMomentumRateLinearX,root.rhinoBeetle.HexapodSimulationController.desiredMomentumRateLinearX</Variables>
 		<GraphConfiguration>
 			<Name>config11</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -155,7 +161,7 @@ Tab0
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.rhinoBeetle.HexapodSimulationController.achievedMomentumRateLinearZ,root.rhinoBeetle.HexapodSimulationController.desiredMomentumRateLinearZ</Variables>
+		<Variables>root.rhinoBeetle.HexapodSimulationController.achievedMomentumRateLinearY,root.rhinoBeetle.HexapodSimulationController.desiredMomentumRateLinearY</Variables>
 		<GraphConfiguration>
 			<Name>config12</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -167,7 +173,7 @@ Tab0
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.rhinoBeetle.HexapodSimulationController.WholeBodyControllerCore.WholeBodyVirtualModelControlSolver.achievedMomentumRateAngularX,root.rhinoBeetle.HexapodSimulationController.WholeBodyControllerCore.WholeBodyVirtualModelControlSolver.desiredMomentumRateAngularX</Variables>
+		<Variables>root.rhinoBeetle.HexapodSimulationController.achievedMomentumRateLinearZ,root.rhinoBeetle.HexapodSimulationController.desiredMomentumRateLinearZ</Variables>
 		<GraphConfiguration>
 			<Name>config13</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -179,7 +185,7 @@ Tab0
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.rhinoBeetle.HexapodSimulationController.WholeBodyControllerCore.WholeBodyVirtualModelControlSolver.achievedMomentumRateAngularY,root.rhinoBeetle.HexapodSimulationController.WholeBodyControllerCore.WholeBodyVirtualModelControlSolver.desiredMomentumRateAngularY</Variables>
+		<Variables>root.rhinoBeetle.HexapodSimulationController.WholeBodyControllerCore.WholeBodyVirtualModelControlSolver.achievedMomentumRateAngularX,root.rhinoBeetle.HexapodSimulationController.WholeBodyControllerCore.WholeBodyVirtualModelControlSolver.desiredMomentumRateAngularX</Variables>
 		<GraphConfiguration>
 			<Name>config14</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -191,7 +197,7 @@ Tab0
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.rhinoBeetle.HexapodSimulationController.WholeBodyControllerCore.WholeBodyVirtualModelControlSolver.achievedMomentumRateAngularZ,root.rhinoBeetle.HexapodSimulationController.WholeBodyControllerCore.WholeBodyVirtualModelControlSolver.desiredMomentumRateAngularZ</Variables>
+		<Variables>root.rhinoBeetle.HexapodSimulationController.WholeBodyControllerCore.WholeBodyVirtualModelControlSolver.achievedMomentumRateAngularY,root.rhinoBeetle.HexapodSimulationController.WholeBodyControllerCore.WholeBodyVirtualModelControlSolver.desiredMomentumRateAngularY</Variables>
 		<GraphConfiguration>
 			<Name>config15</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -203,7 +209,7 @@ Tab0
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.rhinoBeetle.HexapodSimulationController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.BODYAchievedLinearAccelerationX,root.rhinoBeetle.HexapodSimulationController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.BODYDesiredLinearAccelerationX</Variables>
+		<Variables>root.rhinoBeetle.HexapodSimulationController.WholeBodyControllerCore.WholeBodyVirtualModelControlSolver.achievedMomentumRateAngularZ,root.rhinoBeetle.HexapodSimulationController.WholeBodyControllerCore.WholeBodyVirtualModelControlSolver.desiredMomentumRateAngularZ</Variables>
 		<GraphConfiguration>
 			<Name>config16</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -215,7 +221,7 @@ Tab0
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.rhinoBeetle.HexapodSimulationController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.BODYAchievedLinearAccelerationY,root.rhinoBeetle.HexapodSimulationController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.BODYDesiredLinearAccelerationY</Variables>
+		<Variables>root.rhinoBeetle.HexapodSimulationController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.BODYAchievedLinearAccelerationX,root.rhinoBeetle.HexapodSimulationController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.BODYDesiredLinearAccelerationX</Variables>
 		<GraphConfiguration>
 			<Name>config17</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -227,7 +233,7 @@ Tab0
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.rhinoBeetle.HexapodSimulationController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.BODYAchievedLinearAccelerationZ,root.rhinoBeetle.HexapodSimulationController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.BODYDesiredLinearAccelerationZ</Variables>
+		<Variables>root.rhinoBeetle.HexapodSimulationController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.BODYAchievedLinearAccelerationY,root.rhinoBeetle.HexapodSimulationController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.BODYDesiredLinearAccelerationY</Variables>
 		<GraphConfiguration>
 			<Name>config18</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -239,7 +245,7 @@ Tab0
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.rhinoBeetle.HexapodSimulationController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.BODYAchievedAngularAccelerationX,root.rhinoBeetle.HexapodSimulationController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.BODYDesiredAngularAccelerationX</Variables>
+		<Variables>root.rhinoBeetle.HexapodSimulationController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.BODYAchievedLinearAccelerationZ,root.rhinoBeetle.HexapodSimulationController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.BODYDesiredLinearAccelerationZ</Variables>
 		<GraphConfiguration>
 			<Name>config19</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -251,7 +257,7 @@ Tab0
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.rhinoBeetle.HexapodSimulationController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.BODYAchievedAngularAccelerationY,root.rhinoBeetle.HexapodSimulationController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.BODYDesiredAngularAccelerationY</Variables>
+		<Variables>root.rhinoBeetle.HexapodSimulationController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.BODYAchievedAngularAccelerationX,root.rhinoBeetle.HexapodSimulationController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.BODYDesiredAngularAccelerationX</Variables>
 		<GraphConfiguration>
 			<Name>config20</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -263,7 +269,7 @@ Tab0
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.rhinoBeetle.HexapodSimulationController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.BODYAchievedAngularAccelerationZ,root.rhinoBeetle.HexapodSimulationController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.BODYDesiredAngularAccelerationZ</Variables>
+		<Variables>root.rhinoBeetle.HexapodSimulationController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.BODYAchievedAngularAccelerationY,root.rhinoBeetle.HexapodSimulationController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.BODYDesiredAngularAccelerationY</Variables>
 		<GraphConfiguration>
 			<Name>config21</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -274,15 +280,8 @@ Tab0
 			<MinScaling>0.0</MinScaling>
 		</GraphConfig>
 	</Graph>
-</GraphGroup>
-</Graph Array Window1><Graph Array Window2>
-<ScreenID>3</ScreenID>
-<WindowLocation>3832.0, 567.0</WindowLocation>
-<WindowSize>1936.0, 1176.0</WindowSize>
-<GraphGroup>
-	<Cols>3</Cols>
 	<Graph>
-		<Variables>root.rhinoBeetle.HexapodSimulationController.HexapodHighLevelControlManager.BodySpatialManager.BODYdesiredLinearVelocityX,root.rhinoBeetle.HexapodSimulationController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.BODYDesiredLinearVelocityX,root.rhinoBeetle.HexapodSimulationController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.BODYCurrentLinearVelocityX</Variables>
+		<Variables>root.rhinoBeetle.HexapodSimulationController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.BODYAchievedAngularAccelerationZ,root.rhinoBeetle.HexapodSimulationController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.BODYDesiredAngularAccelerationZ</Variables>
 		<GraphConfiguration>
 			<Name>config22</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -293,8 +292,15 @@ Tab0
 			<MinScaling>0.0</MinScaling>
 		</GraphConfig>
 	</Graph>
+</GraphGroup>
+</Graph Array Window1><Graph Array Window2>
+<ScreenID>2</ScreenID>
+<WindowLocation>-32000.0, -32000.0</WindowLocation>
+<WindowSize>1936.0, 1176.0</WindowSize>
+<GraphGroup>
+	<Cols>3</Cols>
 	<Graph>
-		<Variables>root.rhinoBeetle.HexapodSimulationController.HexapodHighLevelControlManager.BodySpatialManager.BODYdesiredLinearVelocityY,root.rhinoBeetle.HexapodSimulationController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.BODYDesiredLinearVelocityY,root.rhinoBeetle.HexapodSimulationController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.BODYCurrentLinearVelocityY</Variables>
+		<Variables>root.rhinoBeetle.HexapodSimulationController.HexapodHighLevelControlManager.BodySpatialManager.BODYdesiredLinearVelocityX,root.rhinoBeetle.HexapodSimulationController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.BODYDesiredLinearVelocityX,root.rhinoBeetle.HexapodSimulationController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.BODYCurrentLinearVelocityX</Variables>
 		<GraphConfiguration>
 			<Name>config23</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -306,7 +312,7 @@ Tab0
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.rhinoBeetle.HexapodSimulationController.HexapodHighLevelControlManager.BodySpatialManager.BODYdesiredLinearVelocityZ,root.rhinoBeetle.HexapodSimulationController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.BODYDesiredLinearVelocityZ,root.rhinoBeetle.HexapodSimulationController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.BODYCurrentLinearVelocityZ</Variables>
+		<Variables>root.rhinoBeetle.HexapodSimulationController.HexapodHighLevelControlManager.BodySpatialManager.BODYdesiredLinearVelocityY,root.rhinoBeetle.HexapodSimulationController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.BODYDesiredLinearVelocityY,root.rhinoBeetle.HexapodSimulationController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.BODYCurrentLinearVelocityY</Variables>
 		<GraphConfiguration>
 			<Name>config24</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -318,7 +324,7 @@ Tab0
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.rhinoBeetle.HexapodSimulationController.HexapodHighLevelControlManager.BodySpatialManager.BODYdesiredAngularVelocityX,root.rhinoBeetle.HexapodSimulationController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.BODYCurrentAngularVelocityX</Variables>
+		<Variables>root.rhinoBeetle.HexapodSimulationController.HexapodHighLevelControlManager.BodySpatialManager.BODYdesiredLinearVelocityZ,root.rhinoBeetle.HexapodSimulationController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.BODYDesiredLinearVelocityZ,root.rhinoBeetle.HexapodSimulationController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.BODYCurrentLinearVelocityZ</Variables>
 		<GraphConfiguration>
 			<Name>config25</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -330,7 +336,7 @@ Tab0
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.rhinoBeetle.HexapodSimulationController.HexapodHighLevelControlManager.BodySpatialManager.BODYdesiredAngularVelocityY,root.rhinoBeetle.HexapodSimulationController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.BODYCurrentAngularVelocityY</Variables>
+		<Variables>root.rhinoBeetle.HexapodSimulationController.HexapodHighLevelControlManager.BodySpatialManager.BODYdesiredAngularVelocityX,root.rhinoBeetle.HexapodSimulationController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.BODYCurrentAngularVelocityX</Variables>
 		<GraphConfiguration>
 			<Name>config26</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -342,7 +348,7 @@ Tab0
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.rhinoBeetle.HexapodSimulationController.HexapodHighLevelControlManager.BodySpatialManager.BODYdesiredAngularVelocityZ,root.rhinoBeetle.HexapodSimulationController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.BODYCurrentAngularVelocityZ</Variables>
+		<Variables>root.rhinoBeetle.HexapodSimulationController.HexapodHighLevelControlManager.BodySpatialManager.BODYdesiredAngularVelocityY,root.rhinoBeetle.HexapodSimulationController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.BODYCurrentAngularVelocityY</Variables>
 		<GraphConfiguration>
 			<Name>config27</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -354,7 +360,7 @@ Tab0
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.rhinoBeetle.HexapodSimulationController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.BODYDesiredPositionX,root.rhinoBeetle.q_x,root.rhinoBeetle.HexapodSimulationController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.BODYCurrentPositionX</Variables>
+		<Variables>root.rhinoBeetle.HexapodSimulationController.HexapodHighLevelControlManager.BodySpatialManager.BODYdesiredAngularVelocityZ,root.rhinoBeetle.HexapodSimulationController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.BODYCurrentAngularVelocityZ</Variables>
 		<GraphConfiguration>
 			<Name>config28</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -366,7 +372,7 @@ Tab0
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.rhinoBeetle.HexapodSimulationController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.BODYDesiredPositionY,root.rhinoBeetle.HexapodSimulationController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.BODYCurrentPositionY</Variables>
+		<Variables>root.rhinoBeetle.HexapodSimulationController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.BODYDesiredPositionX,root.rhinoBeetle.q_x,root.rhinoBeetle.HexapodSimulationController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.BODYCurrentPositionX</Variables>
 		<GraphConfiguration>
 			<Name>config29</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -378,7 +384,7 @@ Tab0
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.rhinoBeetle.HexapodSimulationController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.BODYDesiredPositionZ,root.rhinoBeetle.HexapodSimulationController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.BODYCurrentPositionZ</Variables>
+		<Variables>root.rhinoBeetle.HexapodSimulationController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.BODYDesiredPositionY,root.rhinoBeetle.HexapodSimulationController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.BODYCurrentPositionY</Variables>
 		<GraphConfiguration>
 			<Name>config30</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -390,7 +396,7 @@ Tab0
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.rhinoBeetle.HexapodSimulationController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.BODYDesiredLinearAccelerationX,root.rhinoBeetle.HexapodSimulationController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.BODYAchievedLinearAccelerationX</Variables>
+		<Variables>root.rhinoBeetle.HexapodSimulationController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.BODYDesiredPositionZ,root.rhinoBeetle.HexapodSimulationController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.BODYCurrentPositionZ</Variables>
 		<GraphConfiguration>
 			<Name>config31</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -402,7 +408,7 @@ Tab0
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.rhinoBeetle.HexapodSimulationController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.BODYDesiredLinearAccelerationY,root.rhinoBeetle.HexapodSimulationController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.BODYAchievedLinearAccelerationY</Variables>
+		<Variables>root.rhinoBeetle.HexapodSimulationController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.BODYDesiredLinearAccelerationX,root.rhinoBeetle.HexapodSimulationController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.BODYAchievedLinearAccelerationX</Variables>
 		<GraphConfiguration>
 			<Name>config32</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -414,7 +420,7 @@ Tab0
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.rhinoBeetle.HexapodSimulationController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.BODYDesiredLinearAccelerationZ,root.rhinoBeetle.HexapodSimulationController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.BODYAchievedLinearAccelerationZ</Variables>
+		<Variables>root.rhinoBeetle.HexapodSimulationController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.BODYDesiredLinearAccelerationY,root.rhinoBeetle.HexapodSimulationController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.BODYAchievedLinearAccelerationY</Variables>
 		<GraphConfiguration>
 			<Name>config33</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -426,7 +432,7 @@ Tab0
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.rhinoBeetle.HexapodSimulationController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.BODYDesiredAngularAccelerationX,root.rhinoBeetle.HexapodSimulationController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.BODYAchievedAngularAccelerationX</Variables>
+		<Variables>root.rhinoBeetle.HexapodSimulationController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.BODYDesiredLinearAccelerationZ,root.rhinoBeetle.HexapodSimulationController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.BODYAchievedLinearAccelerationZ</Variables>
 		<GraphConfiguration>
 			<Name>config34</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -438,7 +444,7 @@ Tab0
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.rhinoBeetle.HexapodSimulationController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.BODYDesiredAngularAccelerationY,root.rhinoBeetle.HexapodSimulationController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.BODYAchievedAngularAccelerationY</Variables>
+		<Variables>root.rhinoBeetle.HexapodSimulationController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.BODYDesiredAngularAccelerationX,root.rhinoBeetle.HexapodSimulationController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.BODYAchievedAngularAccelerationX</Variables>
 		<GraphConfiguration>
 			<Name>config35</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -450,7 +456,7 @@ Tab0
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.rhinoBeetle.HexapodSimulationController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.BODYDesiredAngularAccelerationZ,root.rhinoBeetle.HexapodSimulationController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.BODYAchievedAngularAccelerationZ</Variables>
+		<Variables>root.rhinoBeetle.HexapodSimulationController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.BODYDesiredAngularAccelerationY,root.rhinoBeetle.HexapodSimulationController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.BODYAchievedAngularAccelerationY</Variables>
 		<GraphConfiguration>
 			<Name>config36</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -461,8 +467,171 @@ Tab0
 			<MinScaling>0.0</MinScaling>
 		</GraphConfig>
 	</Graph>
+	<Graph>
+		<Variables>root.rhinoBeetle.HexapodSimulationController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.BODYDesiredAngularAccelerationZ,root.rhinoBeetle.HexapodSimulationController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.BODYAchievedAngularAccelerationZ</Variables>
+		<GraphConfiguration>
+			<Name>config37</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
 </GraphGroup>
-</Graph Array Window2>
+</Graph Array Window2><Graph Array Window3>
+<ScreenID>3</ScreenID>
+<WindowLocation>3826.0, 627.0</WindowLocation>
+<WindowSize>1936.0, 1176.0</WindowSize>
+<GraphGroup>
+	<Cols>3</Cols>
+	<Graph>
+		<Variables>root.rhinoBeetle.HexapodSimulationController.HexapodHighLevelControlManager.HexapodStepController.HexapodStepControllerHIND_RIGHTdesiredPositionX,root.rhinoBeetle.HexapodSimulationController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.HIND_RIGHT_LOWER_PITCH_LIMBDesiredPositionX,root.rhinoBeetle.HexapodSimulationController.HexapodHighLevelControlManager.HexapodStepController.HexapodStepControllerHIND_RIGHTcurrentPositionX,root.rhinoBeetle.HexapodSimulationController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.HIND_RIGHT_LOWER_PITCH_LIMBCurrentPositionX</Variables>
+		<GraphConfiguration>
+			<Name>config38</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.rhinoBeetle.HexapodSimulationController.HexapodHighLevelControlManager.HexapodStepController.HexapodStepControllerHIND_RIGHTdesiredPositionY,root.rhinoBeetle.HexapodSimulationController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.HIND_RIGHT_LOWER_PITCH_LIMBDesiredPositionY,root.rhinoBeetle.HexapodSimulationController.HexapodHighLevelControlManager.HexapodStepController.HexapodStepControllerHIND_RIGHTcurrentPositionY,root.rhinoBeetle.HexapodSimulationController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.HIND_RIGHT_LOWER_PITCH_LIMBCurrentPositionY</Variables>
+		<GraphConfiguration>
+			<Name>config39</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.rhinoBeetle.HexapodSimulationController.HexapodHighLevelControlManager.HexapodStepController.HexapodStepControllerHIND_RIGHTdesiredPositionZ,root.rhinoBeetle.HexapodSimulationController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.HIND_RIGHT_LOWER_PITCH_LIMBDesiredPositionZ,root.rhinoBeetle.HexapodSimulationController.HexapodHighLevelControlManager.HexapodStepController.HexapodStepControllerHIND_RIGHTcurrentPositionZ,root.rhinoBeetle.HexapodSimulationController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.HIND_RIGHT_LOWER_PITCH_LIMBCurrentPositionZ</Variables>
+		<GraphConfiguration>
+			<Name>config40</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.rhinoBeetle.HexapodSimulationController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.HIND_RIGHT_LOWER_PITCH_LIMBDesiredLinearVelocityX,root.rhinoBeetle.HexapodSimulationController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.HIND_RIGHT_LOWER_PITCH_LIMBCurrentLinearVelocityX</Variables>
+		<GraphConfiguration>
+			<Name>config41</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.rhinoBeetle.HexapodSimulationController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.HIND_RIGHT_LOWER_PITCH_LIMBDesiredLinearVelocityY,root.rhinoBeetle.HexapodSimulationController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.HIND_RIGHT_LOWER_PITCH_LIMBCurrentLinearVelocityY</Variables>
+		<GraphConfiguration>
+			<Name>config42</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.rhinoBeetle.HexapodSimulationController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.HIND_RIGHT_LOWER_PITCH_LIMBDesiredLinearVelocityZ,root.rhinoBeetle.HexapodSimulationController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.HIND_RIGHT_LOWER_PITCH_LIMBCurrentLinearVelocityZ</Variables>
+		<GraphConfiguration>
+			<Name>config43</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.rhinoBeetle.HexapodSimulationController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.HIND_RIGHT_LOWER_PITCH_LIMBDesiredLinearAccelerationX,root.rhinoBeetle.HexapodSimulationController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.HIND_RIGHT_LOWER_PITCH_LIMBAchievedLinearAccelerationX,root.rhinoBeetle.HexapodSimulationController.HexapodHighLevelControlManager.HexapodStepController.HexapodStepControllerHIND_RIGHTTwoWaypointSwingGenerator.HexapodStepControllerHIND_RIGHT2dTrajectory.HexapodStepControllerHIND_RIGHT2dDesiredAccelerationX</Variables>
+		<GraphConfiguration>
+			<Name>config44</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.rhinoBeetle.HexapodSimulationController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.HIND_RIGHT_LOWER_PITCH_LIMBDesiredLinearAccelerationY,root.rhinoBeetle.HexapodSimulationController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.HIND_RIGHT_LOWER_PITCH_LIMBAchievedLinearAccelerationY,root.rhinoBeetle.HexapodSimulationController.HexapodHighLevelControlManager.HexapodStepController.HexapodStepControllerHIND_RIGHTTwoWaypointSwingGenerator.HexapodStepControllerHIND_RIGHT2dTrajectory.HexapodStepControllerHIND_RIGHT2dDesiredAccelerationY</Variables>
+		<GraphConfiguration>
+			<Name>config45</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.rhinoBeetle.HexapodSimulationController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.HIND_RIGHT_LOWER_PITCH_LIMBDesiredLinearAccelerationZ,root.rhinoBeetle.HexapodSimulationController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.HIND_RIGHT_LOWER_PITCH_LIMBAchievedLinearAccelerationZ,root.rhinoBeetle.HexapodSimulationController.HexapodHighLevelControlManager.HexapodStepController.HexapodStepControllerHIND_RIGHTTwoWaypointSwingGenerator.HexapodStepControllerHIND_RIGHT2dTrajectory.HexapodStepControllerHIND_RIGHT2dDesiredAccelerationZ</Variables>
+		<GraphConfiguration>
+			<Name>config46</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.rhinoBeetle.HexapodSimulationController.HexapodHighLevelControlManager.HexapodStepController.HexapodStepControllerHIND_RIGHTTwoWaypointSwingGenerator.HexapodStepControllerHIND_RIGHT2dTrajectory.HexapodStepControllerHIND_RIGHT2dDesiredAccelerationX</Variables>
+		<GraphConfiguration>
+			<Name>config47</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.rhinoBeetle.HexapodSimulationController.HexapodHighLevelControlManager.HexapodStepController.HexapodStepControllerHIND_RIGHTTwoWaypointSwingGenerator.HexapodStepControllerHIND_RIGHT2dTrajectory.HexapodStepControllerHIND_RIGHT2dDesiredAccelerationY</Variables>
+		<GraphConfiguration>
+			<Name>config48</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.rhinoBeetle.HexapodSimulationController.HexapodHighLevelControlManager.HexapodStepController.HexapodStepControllerHIND_RIGHTTwoWaypointSwingGenerator.HexapodStepControllerHIND_RIGHT2dTrajectory.HexapodStepControllerHIND_RIGHT2dDesiredAccelerationZ</Variables>
+		<GraphConfiguration>
+			<Name>config49</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+</GraphGroup>
+</Graph Array Window3>
 
 <Extra Panels>
 <Main Viewport>
@@ -471,9 +640,9 @@ null,
 
 <Current View>Normal View</Current View>
  <Canvas 1> 
- <Camera X>1.446005811894855E-18</Camera X>
- <Camera Y>-1.5375828671875325</Camera Y>
- <Camera Z>0.34670518137532674</Camera Z>
+ <Camera X>19.895481953070117</Camera X>
+ <Camera Y>0.4802768274016233</Camera Y>
+ <Camera Z>0.8909366150813193</Camera Z>
  <Dolly data> 
  <Position X>2.0</Position X>
  <Position Y>12.0</Position Y>
@@ -490,15 +659,15 @@ null,
  <Position Y>0.0</Position Y>
  <Position Z>0.0</Position Z>
  <Track Booleans>
-<Track>false</Track>
+<Track>true</Track>
 <Track X>true</Track X>
 <Track Y>true</Track Y>
-<Track Z>false</Track Z>
+<Track Z>true</Track Z>
 </Track Booleans>
 </Track data>
 <Fix Position>
-<Fix X>1.446005811894855E-18</Fix X>
-<Fix Y>-0.023615067020166473</Fix Y>
-<Fix Z>0.24577399469750238</Fix Z>
+<Fix X>20.652330158584807</Fix X>
+<Fix Y>2.495710799028889E-4</Fix Y>
+<Fix Z>0.1321608183863172</Fix Z>
 </Fix Position>
 </Canvas 1>
