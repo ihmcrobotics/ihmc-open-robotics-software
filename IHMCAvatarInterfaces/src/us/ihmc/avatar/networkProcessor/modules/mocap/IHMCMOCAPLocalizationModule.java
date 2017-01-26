@@ -78,6 +78,7 @@ public class IHMCMOCAPLocalizationModule implements MocapRigidbodiesListener
       if(! packetCommunicator.isConnected())
       {
          PrintTools.info("Packet communicator isn't registered, ignoring MOCAP data");
+         return;
       }
       
       PrintTools.info("\nReceived rigid bodies:");
@@ -100,7 +101,7 @@ public class IHMCMOCAPLocalizationModule implements MocapRigidbodiesListener
    }
 
    private void sendPelvisTransformToController(RigidBodyTransform pelvisTransform)
-   {
+   {      
       TimeStampedTransform3D timestampedTransform = createTimestampedTransform(pelvisTransform);
       StampedPosePacket stampedPosePacket = new StampedPosePacket(Integer.toString(PELVIS_ID), timestampedTransform, 1.0);
       
