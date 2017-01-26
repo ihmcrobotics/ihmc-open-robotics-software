@@ -27,7 +27,13 @@ public abstract class ICPOptimizationParameters
     * The weight for tracking the desired footsteps.
     * Setting this weight fairly high ensures that the footsteps will only be adjusted when the CMP control authority has been saturated.
     */
-   public abstract double getFootstepWeight();
+   public abstract double getForwardFootstepWeight();
+
+   /**
+    * The weight for tracking the desired footsteps.
+    * Setting this weight fairly high ensures that the footsteps will only be adjusted when the CMP control authority has been saturated.
+    */
+   public abstract double getLateralFootstepWeight();
 
    /**
     * Penalization on changes in the footstep location solution between control ticks.
@@ -40,7 +46,14 @@ public abstract class ICPOptimizationParameters
     * This weight penalizes using a large amount of CMP control.
     * Setting this weight high will make the robot behave similar to using point feet control / minimal ankle torques and angular momentum.
     */
-   public abstract double getFeedbackWeight();
+   public abstract double getFeedbackForwardWeight();
+
+   /**
+    * The weight for tracking the nominal desired CMP.
+    * This weight penalizes using a large amount of CMP control.
+    * Setting this weight high will make the robot behave similar to using point feet control / minimal ankle torques and angular momentum.
+    */
+   public abstract double getFeedbackLateralWeight();
 
    /**
     * Penalization on changes feedback CMP between control ticks.
@@ -154,7 +167,7 @@ public abstract class ICPOptimizationParameters
     * Exiting the support polygon is achieved by using angular momentum.
     * This should be used sparingly.
     */
-   public abstract double getMaxCMPForwardExit();
+   public abstract double getDoubleSupportMaxCMPForwardExit();
 
    /**
     * Maximum lateral distance the CMP is allowed to exit the support polygon.
@@ -162,7 +175,23 @@ public abstract class ICPOptimizationParameters
     * Exiting the support polygon is achieved by using angular momentum.
     * This should be used sparingly.
     */
-   public abstract double getMaxCMPLateralExit();
+
+   public abstract double getDoubleSupportMaxCMPLateralExit();
+   /**
+    * Maximum forward distance the CMP is allowed to exit the support polygon.
+    * Defined in the midZUpFrame when in double support, and the soleZUpFrame when in single support.
+    * Exiting the support polygon is achieved by using angular momentum.
+    * This should be used sparingly.
+    */
+   public abstract double getSingleSupportMaxCMPForwardExit();
+
+   /**
+    * Maximum lateral distance the CMP is allowed to exit the support polygon.
+    * Defined in the midZUpFrame when in double support, and the soleZUpFrame when in single support.
+    * Exiting the support polygon is achieved by using angular momentum.
+    * This should be used sparingly.
+    */
+   public abstract double getSingleSupportMaxCMPLateralExit();
 
    /**
     * Deadband on the step adjustment.

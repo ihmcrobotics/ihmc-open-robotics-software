@@ -3,7 +3,7 @@ package us.ihmc.avatar.polaris;
 import java.util.ArrayList;
 import java.util.List;
 
-import us.ihmc.SdfLoader.DRCRobotSDFLoader;
+import us.ihmc.modelFileLoaders.SdfLoader.DRCRobotSDFLoader;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.util.environments.SelectableObjectListener;
