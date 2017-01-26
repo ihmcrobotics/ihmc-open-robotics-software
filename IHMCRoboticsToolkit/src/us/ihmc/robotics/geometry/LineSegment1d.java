@@ -260,6 +260,12 @@ public class LineSegment1d
       return lineSegment2d;
    }
 
+   @Override
+   public String toString()
+   {
+      return "(" + endpoint1 + ")-(" + endpoint2 + ")";
+   }
+
    private void updateDirection()
    {
       positiveDirection = endpoint1 <= endpoint2;
