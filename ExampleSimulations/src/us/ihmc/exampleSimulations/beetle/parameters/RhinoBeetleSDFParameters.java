@@ -4,7 +4,7 @@ import java.io.InputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import us.ihmc.SdfLoader.SDFParameters;
+import us.ihmc.modelFileLoaders.SdfLoader.SDFParameters;
 
 public class RhinoBeetleSDFParameters implements SDFParameters
 {
