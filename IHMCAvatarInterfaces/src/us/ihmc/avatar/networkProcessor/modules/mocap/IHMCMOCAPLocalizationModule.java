@@ -10,6 +10,7 @@ import optiTrack.MocapDataClient;
 import optiTrack.MocapRigidBody;
 import optiTrack.MocapRigidbodiesListener;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.util.NetworkPorts;
@@ -24,14 +25,18 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
+import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.util.PeriodicNonRealtimeThreadScheduler;
 import us.ihmc.util.PeriodicThreadScheduler;
 
-public class IHMCMOCAPLocalizationModule implements MocapRigidbodiesListener
+public class IHMCMOCAPLocalizationModule implements MocapRigidbodiesListener, PacketConsumer<RobotConfigurationData>
 {
    private static final double MOCAP_SERVER_DT = 0.002;
    private static final int PELVIS_ID = 1;
+   
+   private boolean timestampHasBeenSet = false;
+   private long latestRobotTimeStamp = Long.MIN_VALUE;
    
    private final MocapToPelvisFrameConverter mocapToPelvisFrameConverter;
    private final PacketCommunicator packetCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.MOCAP_MODULE, new IHMCCommunicationKryoNetClassList());
@@ -51,7 +56,9 @@ public class IHMCMOCAPLocalizationModule implements MocapRigidbodiesListener
    {
       MocapDataClient mocapDataClient = new MocapDataClient();
       mocapDataClient.registerRigidBodiesListener(this);
-
+      
+      packetCommunicator.attachListener(RobotConfigurationData.class, this);
+      
       mocapToPelvisFrameConverter = new MocapToPelvisFrameConverter(drcRobotModel, packetCommunicator);
 
       ppsTimestampOffsetProvider = drcRobotModel.getPPSTimestampOffsetProvider();
@@ -84,8 +91,6 @@ public class IHMCMOCAPLocalizationModule implements MocapRigidbodiesListener
          return;
       }
       
-      PrintTools.info("\nReceived rigid bodies:");
-
       for (int i = 0; i < listOfRigidbodies.size(); i++)
       {
          MocapRigidBody mocapRigidBody = listOfRigidbodies.get(i);
@@ -96,7 +101,6 @@ public class IHMCMOCAPLocalizationModule implements MocapRigidbodiesListener
             // mocapToPelvisFrameConverter.convertMocapPoseToRobotFrame(mocapRigidBody);
             mocapRigidBody.packPose(pelvisTransform);
             sendPelvisTransformToController(pelvisTransform);            
-            PrintTools.info("Transform : \n" + pelvisTransform);
          }
       }
       
@@ -105,27 +109,35 @@ public class IHMCMOCAPLocalizationModule implements MocapRigidbodiesListener
 
    private void sendPelvisTransformToController(RigidBodyTransform pelvisTransform)
    {      
-      TimeStampedTransform3D timestampedTransform = createTimestampedTransform(pelvisTransform);
-      StampedPosePacket stampedPosePacket = new StampedPosePacket(Integer.toString(PELVIS_ID), timestampedTransform, 1.0);
-      
-      stampedPosePacket.setDestination(PacketDestination.CONTROLLER.ordinal());
-      packetCommunicator.send(stampedPosePacket);
-      
-      pelvisTransform.getTranslation(tempPosition);
-      pelvisTransform.getRotation(tempOrientation);
-            
-      fullRobotModel.getRootJoint().setPosition(tempPosition);
-      fullRobotModel.getRootJoint().setRotation(tempOrientation);
-      
-      pelvisPositionX.set(tempPosition.getX());
-      pelvisPositionY.set(tempPosition.getY());
-      pelvisPositionZ.set(tempPosition.getZ());
+      if(timestampHasBeenSet)
+      {
+         TimeStampedTransform3D timestampedTransform = new TimeStampedTransform3D(pelvisTransform, latestRobotTimeStamp);      
+         StampedPosePacket stampedPosePacket = new StampedPosePacket(Integer.toString(PELVIS_ID), timestampedTransform, 1.0);
+         
+         stampedPosePacket.setDestination(PacketDestination.CONTROLLER.ordinal());
+         packetCommunicator.send(stampedPosePacket);
+         
+         pelvisTransform.getTranslation(tempPosition);
+         pelvisTransform.getRotation(tempOrientation);
+               
+         fullRobotModel.getRootJoint().setPosition(tempPosition);
+         fullRobotModel.getRootJoint().setRotation(tempOrientation);
+         
+         pelvisPositionX.set(tempPosition.getX());
+         pelvisPositionY.set(tempPosition.getY());
+         pelvisPositionZ.set(tempPosition.getZ());         
+      }
+      else
+      {
+         System.err.println("Haven't received timestamp from controller, ignoring mocap data");
+      }
    }
-
-   private TimeStampedTransform3D createTimestampedTransform(RigidBodyTransform rigidBodyTransform)
+   
+   @Override
+   public void receivedPacket(RobotConfigurationData packet)
    {
-      long actualTime = System.currentTimeMillis();
-      long adjustedTime = ppsTimestampOffsetProvider.adjustTimeStampToRobotClock(actualTime);
-      return new TimeStampedTransform3D(rigidBodyTransform, adjustedTime);
+      timestampHasBeenSet = true;
+      latestRobotTimeStamp = packet.lastReceivedPacketRobotTimestamp;
+      
    }
 }
