@@ -197,12 +197,6 @@ public class DRCSimulationTestHelper
       return scs.getVariable(nameSpace, name);
    }
 
-   public void loadScriptFile(String scriptFilename, ReferenceFrame referenceFrame)
-   {
-      ScriptBasedControllerCommandGenerator scriptBasedControllerCommandGenerator = simulationStarter.getScriptBasedControllerCommandGenerator();
-      scriptBasedControllerCommandGenerator.loadScriptFile(scriptFilename, referenceFrame);
-   }
-
    public void loadScriptFile(InputStream scriptInputStream, ReferenceFrame referenceFrame)
    {
       ScriptBasedControllerCommandGenerator scriptBasedControllerCommandGenerator = simulationStarter.getScriptBasedControllerCommandGenerator();
