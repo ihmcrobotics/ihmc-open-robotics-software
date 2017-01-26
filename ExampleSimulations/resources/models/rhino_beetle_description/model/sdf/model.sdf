@@ -1,0 +1,824 @@
+<sdf version='1.4'>
+  <model name='rhinoBeetle'>
+    <link name='BODY'>
+      <pose>0 0 0 0 -0 0</pose>
+      <inertial>
+        <pose>0 0 0 0 -0 0</pose>
+        <mass>5</mass>
+        <inertia>
+          <ixx>0.008</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.01</iyy>
+          <iyz>0</iyz>
+          <izz>0.01</izz>
+        </inertia>
+      </inertial>
+      <visual name='BODY_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://rhino_beetle_description/model/meshes/body.obj</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <velocity_decay>
+        <linear>0</linear>
+        <angular>0</angular>
+      </velocity_decay>
+    </link>
+    <link name='FRONT_LEFT_UPPER_YAW_LIMB'>
+      <pose>0.103213 0.036628 -0.025503 0 -0 0</pose>
+      <inertial>
+        <pose>0 0 0.05 0 -0 0</pose>
+        <mass>0.25</mass>
+        <inertia>
+          <ixx>0.0002</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.0002</iyy>
+          <iyz>0</iyz>
+          <izz>0.0002</izz>
+        </inertia>
+      </inertial>
+      <visual name='FRONT_LEFT_UPPER_YAW_LIMB_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://rhino_beetle_description/model/meshes/none.obj</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <velocity_decay>
+        <linear>0</linear>
+        <angular>0</angular>
+      </velocity_decay>
+    </link>
+    <joint name='FRONT_LEFT_YAW' type='revolute'>
+      <child>FRONT_LEFT_UPPER_YAW_LIMB</child>
+      <parent>BODY</parent>
+      <axis>
+        <xyz>0 0 1</xyz>
+        <limit>
+          <lower>-1.5708</lower>
+          <upper>1.5708</upper>
+          <effort>100</effort>
+          <velocity>20</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.005</damping>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='FRONT_LEFT_UPPER_PITCH_LIMB'>
+      <pose>0.103213 0.036628 -0.025503 0 -0 0</pose>
+      <inertial>
+        <pose>0 0.02 0 0 -0 0</pose>
+        <mass>0.25</mass>
+        <inertia>
+          <ixx>0.0002</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>5e-05</iyy>
+          <iyz>0</iyz>
+          <izz>0.0002</izz>
+        </inertia>
+      </inertial>
+      <visual name='FRONT_LEFT_UPPER_PITCH_LIMB_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://rhino_beetle_description/model/meshes/frontLeftUpperLimb.obj</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <velocity_decay>
+        <linear>0</linear>
+        <angular>0</angular>
+      </velocity_decay>
+    </link>
+    <joint name='FRONT_LEFT_UPPER_PITCH' type='revolute'>
+      <child>FRONT_LEFT_UPPER_PITCH_LIMB</child>
+      <parent>FRONT_LEFT_UPPER_YAW_LIMB</parent>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <lower>-1.5708</lower>
+          <upper>1.5708</upper>
+          <effort>100</effort>
+          <velocity>20</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.005</damping>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='FRONT_LEFT_LOWER_PITCH_LIMB'>
+      <pose>0.104819 0.121063 -0.025346 0 -0 0</pose>
+      <inertial>
+        <pose>0 0.03 0 0 -0 0</pose>
+        <mass>0.25</mass>
+        <inertia>
+          <ixx>0.0002</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>4e-05</iyy>
+          <iyz>0</iyz>
+          <izz>0.0002</izz>
+        </inertia>
+      </inertial>
+      <visual name='FRONT_LEFT_LOWER_PITCH_LIMB_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://rhino_beetle_description/model/meshes/frontLeftLowerLimb.obj</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <velocity_decay>
+        <linear>0</linear>
+        <angular>0</angular>
+      </velocity_decay>
+    </link>
+    <joint name='FRONT_LEFT_LOWER_PITCH' type='revolute'>
+      <child>FRONT_LEFT_LOWER_PITCH_LIMB</child>
+      <parent>FRONT_LEFT_UPPER_PITCH_LIMB</parent>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <lower>-1.5708</lower>
+          <upper>1.5708</upper>
+          <effort>100</effort>
+          <velocity>20</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.005</damping>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='FRONT_RIGHT_UPPER_YAW_LIMB'>
+      <pose>0.103213 -0.036628 -0.025503 0 -0 0</pose>
+      <inertial>
+        <pose>0 0 0.05 0 -0 0</pose>
+        <mass>0.25</mass>
+        <inertia>
+          <ixx>0.0002</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.0002</iyy>
+          <iyz>0</iyz>
+          <izz>0.0002</izz>
+        </inertia>
+      </inertial>
+      <visual name='FRONT_RIGHT_UPPER_YAW_LIMB_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://rhino_beetle_description/model/meshes/none.obj</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <velocity_decay>
+        <linear>0</linear>
+        <angular>0</angular>
+      </velocity_decay>
+    </link>
+    <joint name='FRONT_RIGHT_YAW' type='revolute'>
+      <child>FRONT_RIGHT_UPPER_YAW_LIMB</child>
+      <parent>BODY</parent>
+      <axis>
+        <xyz>0 0 1</xyz>
+        <limit>
+          <lower>-1.5708</lower>
+          <upper>1.5708</upper>
+          <effort>100</effort>
+          <velocity>20</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.005</damping>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='FRONT_RIGHT_UPPER_PITCH_LIMB'>
+      <pose>0.103213 -0.036628 -0.025503 0 -0 0</pose>
+      <inertial>
+        <pose>0 -0.02 0 0 -0 0</pose>
+        <mass>0.25</mass>
+        <inertia>
+          <ixx>0.0002</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>5e-05</iyy>
+          <iyz>0</iyz>
+          <izz>0.0002</izz>
+        </inertia>
+      </inertial>
+      <visual name='FRONT_RIGHT_UPPER_PITCH_LIMB_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://rhino_beetle_description/model/meshes/frontRightUpperLimb.obj</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <velocity_decay>
+        <linear>0</linear>
+        <angular>0</angular>
+      </velocity_decay>
+    </link>
+    <joint name='FRONT_RIGHT_UPPER_PITCH' type='revolute'>
+      <child>FRONT_RIGHT_UPPER_PITCH_LIMB</child>
+      <parent>FRONT_RIGHT_UPPER_YAW_LIMB</parent>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <lower>-1.5708</lower>
+          <upper>1.5708</upper>
+          <effort>100</effort>
+          <velocity>20</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.005</damping>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='FRONT_RIGHT_LOWER_PITCH_LIMB'>
+      <pose>0.104819 -0.121063 -0.025346 0 -0 0</pose>
+      <inertial>
+        <pose>0 -0.03 0 0 -0 0</pose>
+        <mass>0.25</mass>
+        <inertia>
+          <ixx>0.0002</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>4e-05</iyy>
+          <iyz>0</iyz>
+          <izz>0.0002</izz>
+        </inertia>
+      </inertial>
+      <visual name='FRONT_RIGHT_LOWER_PITCH_LIMB_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://rhino_beetle_description/model/meshes/frontRightLowerLimb.obj</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <velocity_decay>
+        <linear>0</linear>
+        <angular>0</angular>
+      </velocity_decay>
+    </link>
+    <joint name='FRONT_RIGHT_LOWER_PITCH' type='revolute'>
+      <child>FRONT_RIGHT_LOWER_PITCH_LIMB</child>
+      <parent>FRONT_RIGHT_UPPER_PITCH_LIMB</parent>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <lower>-1.5708</lower>
+          <upper>1.5708</upper>
+          <effort>100</effort>
+          <velocity>20</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.005</damping>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='HIND_LEFT_UPPER_YAW_LIMB'>
+      <pose>-0.046486 0.045496 -0.030929 0 -0 0</pose>
+      <inertial>
+        <pose>0 0 0.05 0 -0 0</pose>
+        <mass>0.25</mass>
+        <inertia>
+          <ixx>0.0002</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.0002</iyy>
+          <iyz>0</iyz>
+          <izz>0.0002</izz>
+        </inertia>
+      </inertial>
+      <visual name='HIND_LEFT_UPPER_YAW_LIMB_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://rhino_beetle_description/model/meshes/none.obj</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <velocity_decay>
+        <linear>0</linear>
+        <angular>0</angular>
+      </velocity_decay>
+    </link>
+    <joint name='HIND_LEFT_YAW' type='revolute'>
+      <child>HIND_LEFT_UPPER_YAW_LIMB</child>
+      <parent>BODY</parent>
+      <axis>
+        <xyz>0 0 1</xyz>
+        <limit>
+          <lower>-1.5708</lower>
+          <upper>1.5708</upper>
+          <effort>100</effort>
+          <velocity>20</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.005</damping>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='HIND_LEFT_UPPER_PITCH_LIMB'>
+      <pose>-0.046486 0.045496 -0.030929 0 -0 0</pose>
+      <inertial>
+        <pose>0 0.02 0 0 -0 0</pose>
+        <mass>0.25</mass>
+        <inertia>
+          <ixx>0.0002</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>5e-05</iyy>
+          <iyz>0</iyz>
+          <izz>0.0002</izz>
+        </inertia>
+      </inertial>
+      <visual name='HIND_LEFT_UPPER_PITCH_LIMB_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://rhino_beetle_description/model/meshes/hindLeftUpperLimb.obj</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <velocity_decay>
+        <linear>0</linear>
+        <angular>0</angular>
+      </velocity_decay>
+    </link>
+    <joint name='HIND_LEFT_UPPER_PITCH' type='revolute'>
+      <child>HIND_LEFT_UPPER_PITCH_LIMB</child>
+      <parent>HIND_LEFT_UPPER_YAW_LIMB</parent>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <lower>-1.5708</lower>
+          <upper>1.5708</upper>
+          <effort>100</effort>
+          <velocity>20</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.005</damping>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='HIND_LEFT_LOWER_PITCH_LIMB'>
+      <pose>-0.052029 0.12862 -0.03325 0 -0 0</pose>
+      <inertial>
+        <pose>0 0.03 0 0 -0 0</pose>
+        <mass>0.25</mass>
+        <inertia>
+          <ixx>0.0002</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>4e-05</iyy>
+          <iyz>0</iyz>
+          <izz>0.0002</izz>
+        </inertia>
+      </inertial>
+      <visual name='HIND_LEFT_LOWER_PITCH_LIMB_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://rhino_beetle_description/model/meshes/hindLeftLowerLimb.obj</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <velocity_decay>
+        <linear>0</linear>
+        <angular>0</angular>
+      </velocity_decay>
+    </link>
+    <joint name='HIND_LEFT_LOWER_PITCH' type='revolute'>
+      <child>HIND_LEFT_LOWER_PITCH_LIMB</child>
+      <parent>HIND_LEFT_UPPER_PITCH_LIMB</parent>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <lower>-1.5708</lower>
+          <upper>1.5708</upper>
+          <effort>100</effort>
+          <velocity>20</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.005</damping>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='HIND_RIGHT_UPPER_YAW_LIMB'>
+      <pose>-0.046486 -0.045496 -0.030929 0 -0 0</pose>
+      <inertial>
+        <pose>0 0 0.05 0 -0 0</pose>
+        <mass>0.25</mass>
+        <inertia>
+          <ixx>0.0002</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.0002</iyy>
+          <iyz>0</iyz>
+          <izz>0.0002</izz>
+        </inertia>
+      </inertial>
+      <visual name='HIND_RIGHT_UPPER_YAW_LIMB_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://rhino_beetle_description/model/meshes/none.obj</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <velocity_decay>
+        <linear>0</linear>
+        <angular>0</angular>
+      </velocity_decay>
+    </link>
+    <joint name='HIND_RIGHT_YAW' type='revolute'>
+      <child>HIND_RIGHT_UPPER_YAW_LIMB</child>
+      <parent>BODY</parent>
+      <axis>
+        <xyz>0 0 1</xyz>
+        <limit>
+          <lower>-1.5708</lower>
+          <upper>1.5708</upper>
+          <effort>100</effort>
+          <velocity>20</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.005</damping>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='HIND_RIGHT_UPPER_PITCH_LIMB'>
+      <pose>-0.046486 -0.045496 -0.030929 0 -0 0</pose>
+      <inertial>
+        <pose>0 -0.02 0 0 -0 0</pose>
+        <mass>0.25</mass>
+        <inertia>
+          <ixx>0.0002</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>5e-05</iyy>
+          <iyz>0</iyz>
+          <izz>0.0002</izz>
+        </inertia>
+      </inertial>
+      <visual name='HIND_RIGHT_UPPER_PITCH_LIMB_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://rhino_beetle_description/model/meshes/hindRightUpperLimb.obj</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <velocity_decay>
+        <linear>0</linear>
+        <angular>0</angular>
+      </velocity_decay>
+    </link>
+    <joint name='HIND_RIGHT_UPPER_PITCH' type='revolute'>
+      <child>HIND_RIGHT_UPPER_PITCH_LIMB</child>
+      <parent>HIND_RIGHT_UPPER_YAW_LIMB</parent>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <lower>-1.5708</lower>
+          <upper>1.5708</upper>
+          <effort>100</effort>
+          <velocity>20</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.005</damping>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='HIND_RIGHT_LOWER_PITCH_LIMB'>
+      <pose>-0.052029 -0.12862 -0.03325 0 -0 0</pose>
+      <inertial>
+        <pose>0 -0.03 0 0 -0 0</pose>
+        <mass>0.25</mass>
+        <inertia>
+          <ixx>0.0002</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>4e-05</iyy>
+          <iyz>0</iyz>
+          <izz>0.0002</izz>
+        </inertia>
+      </inertial>
+      <visual name='HIND_RIGHT_LOWER_PITCH_LIMB_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://rhino_beetle_description/model/meshes/hindRightLowerLimb.obj</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <velocity_decay>
+        <linear>0</linear>
+        <angular>0</angular>
+      </velocity_decay>
+    </link>
+    <joint name='HIND_RIGHT_LOWER_PITCH' type='revolute'>
+      <child>HIND_RIGHT_LOWER_PITCH_LIMB</child>
+      <parent>HIND_RIGHT_UPPER_PITCH_LIMB</parent>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <lower>-1.5708</lower>
+          <upper>1.5708</upper>
+          <effort>100</effort>
+          <velocity>20</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.005</damping>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='MIDDLE_LEFT_UPPER_YAW_LIMB'>
+      <pose>0.044806 0.043041 -0.018062 0 -0 0</pose>
+      <inertial>
+        <pose>0 0 0.05 0 -0 0</pose>
+        <mass>0.25</mass>
+        <inertia>
+          <ixx>0.0002</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.0002</iyy>
+          <iyz>0</iyz>
+          <izz>0.0002</izz>
+        </inertia>
+      </inertial>
+      <visual name='MIDDLE_LEFT_UPPER_YAW_LIMB_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://rhino_beetle_description/model/meshes/none.obj</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <velocity_decay>
+        <linear>0</linear>
+        <angular>0</angular>
+      </velocity_decay>
+    </link>
+    <joint name='MIDDLE_LEFT_YAW' type='revolute'>
+      <child>MIDDLE_LEFT_UPPER_YAW_LIMB</child>
+      <parent>BODY</parent>
+      <axis>
+        <xyz>0 0 1</xyz>
+        <limit>
+          <lower>-1.5708</lower>
+          <upper>1.5708</upper>
+          <effort>100</effort>
+          <velocity>20</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.005</damping>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='MIDDLE_LEFT_UPPER_PITCH_LIMB'>
+      <pose>0.044806 0.043041 -0.018062 0 -0 0</pose>
+      <inertial>
+        <pose>0 0.02 0 0 -0 0</pose>
+        <mass>0.25</mass>
+        <inertia>
+          <ixx>0.0002</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>5e-05</iyy>
+          <iyz>0</iyz>
+          <izz>0.0002</izz>
+        </inertia>
+      </inertial>
+      <visual name='MIDDLE_LEFT_UPPER_PITCH_LIMB_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://rhino_beetle_description/model/meshes/middleLeftUpperLimb.obj</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <velocity_decay>
+        <linear>0</linear>
+        <angular>0</angular>
+      </velocity_decay>
+    </link>
+    <joint name='MIDDLE_LEFT_UPPER_PITCH' type='revolute'>
+      <child>MIDDLE_LEFT_UPPER_PITCH_LIMB</child>
+      <parent>MIDDLE_LEFT_UPPER_YAW_LIMB</parent>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <lower>-1.5708</lower>
+          <upper>1.5708</upper>
+          <effort>100</effort>
+          <velocity>20</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.005</damping>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='MIDDLE_LEFT_LOWER_PITCH_LIMB'>
+      <pose>0.048861 0.125093 -0.017237 0 -0 0</pose>
+      <inertial>
+        <pose>0 0.03 0 0 -0 0</pose>
+        <mass>0.25</mass>
+        <inertia>
+          <ixx>0.0002</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>4e-05</iyy>
+          <iyz>0</iyz>
+          <izz>0.0002</izz>
+        </inertia>
+      </inertial>
+      <visual name='MIDDLE_LEFT_LOWER_PITCH_LIMB_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://rhino_beetle_description/model/meshes/middleLeftLowerLimb.obj</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <velocity_decay>
+        <linear>0</linear>
+        <angular>0</angular>
+      </velocity_decay>
+    </link>
+    <joint name='MIDDLE_LEFT_LOWER_PITCH' type='revolute'>
+      <child>MIDDLE_LEFT_LOWER_PITCH_LIMB</child>
+      <parent>MIDDLE_LEFT_UPPER_PITCH_LIMB</parent>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <lower>-1.5708</lower>
+          <upper>1.5708</upper>
+          <effort>100</effort>
+          <velocity>20</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.005</damping>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='MIDDLE_RIGHT_UPPER_YAW_LIMB'>
+      <pose>0.044806 -0.043041 -0.018062 0 -0 0</pose>
+      <inertial>
+        <pose>0 0 0.05 0 -0 0</pose>
+        <mass>0.25</mass>
+        <inertia>
+          <ixx>0.0002</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.0002</iyy>
+          <iyz>0</iyz>
+          <izz>0.0002</izz>
+        </inertia>
+      </inertial>
+      <visual name='MIDDLE_RIGHT_UPPER_YAW_LIMB_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://rhino_beetle_description/model/meshes/none.obj</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <velocity_decay>
+        <linear>0</linear>
+        <angular>0</angular>
+      </velocity_decay>
+    </link>
+    <joint name='MIDDLE_RIGHT_YAW' type='revolute'>
+      <child>MIDDLE_RIGHT_UPPER_YAW_LIMB</child>
+      <parent>BODY</parent>
+      <axis>
+        <xyz>0 0 1</xyz>
+        <limit>
+          <lower>-1.5708</lower>
+          <upper>1.5708</upper>
+          <effort>100</effort>
+          <velocity>20</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.005</damping>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='MIDDLE_RIGHT_UPPER_PITCH_LIMB'>
+      <pose>0.044806 -0.043041 -0.018062 0 -0 0</pose>
+      <inertial>
+        <pose>0 -0.02 0 0 -0 0</pose>
+        <mass>0.25</mass>
+        <inertia>
+          <ixx>0.0002</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>5e-05</iyy>
+          <iyz>0</iyz>
+          <izz>0.0002</izz>
+        </inertia>
+      </inertial>
+      <visual name='MIDDLE_RIGHT_UPPER_PITCH_LIMB_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://rhino_beetle_description/model/meshes/middleRightUpperLimb.obj</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <velocity_decay>
+        <linear>0</linear>
+        <angular>0</angular>
+      </velocity_decay>
+    </link>
+    <joint name='MIDDLE_RIGHT_UPPER_PITCH' type='revolute'>
+      <child>MIDDLE_RIGHT_UPPER_PITCH_LIMB</child>
+      <parent>MIDDLE_RIGHT_UPPER_YAW_LIMB</parent>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <lower>-1.5708</lower>
+          <upper>1.5708</upper>
+          <effort>100</effort>
+          <velocity>20</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.005</damping>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='MIDDLE_RIGHT_LOWER_PITCH_LIMB'>
+      <pose>0.048861 -0.125093 -0.017237 0 -0 0</pose>
+      <inertial>
+        <pose>0 -0.03 0 0 -0 0</pose>
+        <mass>0.25</mass>
+        <inertia>
+          <ixx>0.0002</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>4e-05</iyy>
+          <iyz>0</iyz>
+          <izz>0.0002</izz>
+        </inertia>
+      </inertial>
+      <visual name='MIDDLE_RIGHT_LOWER_PITCH_LIMB_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://rhino_beetle_description/model/meshes/middleRightLowerLimb.obj</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <velocity_decay>
+        <linear>0</linear>
+        <angular>0</angular>
+      </velocity_decay>
+    </link>
+    <joint name='MIDDLE_RIGHT_LOWER_PITCH' type='revolute'>
+      <child>MIDDLE_RIGHT_LOWER_PITCH_LIMB</child>
+      <parent>MIDDLE_RIGHT_UPPER_PITCH_LIMB</parent>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <lower>-1.5708</lower>
+          <upper>1.5708</upper>
+          <effort>100</effort>
+          <velocity>20</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.005</damping>
+        </dynamics>
+      </axis>
+    </joint>
+  </model>
+</sdf>
