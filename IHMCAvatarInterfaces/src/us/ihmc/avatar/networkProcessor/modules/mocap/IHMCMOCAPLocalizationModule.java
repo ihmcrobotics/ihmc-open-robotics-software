@@ -18,6 +18,7 @@ import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
 import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -41,12 +42,13 @@ public class IHMCMOCAPLocalizationModule implements MocapRigidbodiesListener
    private final YoVariableServer yoVariableServer;
    private final FullHumanoidRobotModel fullRobotModel;
    
-   private final DoubleYoVariable pelvisPositionX = new DoubleYoVariable("pelvisPositionX", yoVariableRegistry);
-   private final DoubleYoVariable pelvisPositionY = new DoubleYoVariable("pelvisPositionY", yoVariableRegistry);
-   private final DoubleYoVariable pelvisPositionZ = new DoubleYoVariable("pelvisPositionZ", yoVariableRegistry);
+   private final DoubleYoVariable markersPositionX = new DoubleYoVariable("markersPositionX", yoVariableRegistry);
+   private final DoubleYoVariable markersPositionY = new DoubleYoVariable("markersPositionY", yoVariableRegistry);
+   private final DoubleYoVariable markersPositionZ = new DoubleYoVariable("markersPositionZ", yoVariableRegistry);
    
-   private final Vector3d tempPosition = new Vector3d();
-   private final Matrix3d tempOrientation = new Matrix3d();
+   private final DoubleYoVariable markersYaw = new DoubleYoVariable("markersYaw", yoVariableRegistry);
+   private final DoubleYoVariable markersPitch = new DoubleYoVariable("markersPitch", yoVariableRegistry);
+   private final DoubleYoVariable markersRoll = new DoubleYoVariable("markersRoll", yoVariableRegistry);
    
    public IHMCMOCAPLocalizationModule(DRCRobotModel drcRobotModel)
    {
@@ -58,7 +60,7 @@ public class IHMCMOCAPLocalizationModule implements MocapRigidbodiesListener
       PeriodicThreadScheduler scheduler = new PeriodicNonRealtimeThreadScheduler("MocapModuleScheduler");
       LogModelProvider logModelProvider = drcRobotModel.getLogModelProvider();
       
-      yoVariableServer = new YoVariableServer(getClass(), scheduler, logModelProvider, LogSettings.ATLAS_IAN, MOCAP_SERVER_DT);
+      yoVariableServer = new YoVariableServer(getClass(), scheduler, logModelProvider, drcRobotModel.getLogSettings(), MOCAP_SERVER_DT);
       fullRobotModel = drcRobotModel.createFullRobotModel();
       yoVariableServer.setMainRegistry(yoVariableRegistry, fullRobotModel, null);
       yoVariableServer.start();
@@ -81,11 +83,26 @@ public class IHMCMOCAPLocalizationModule implements MocapRigidbodiesListener
             RigidBodyTransform pelvisTransform = new RigidBodyTransform();
             // mocapToPelvisFrameConverter.convertMocapPoseToRobotFrame(mocapRigidBody);
             mocapRigidBody.packPose(pelvisTransform);
-            sendPelvisTransformToController(pelvisTransform);            
+            sendPelvisTransformToController(pelvisTransform);   
+            setMarkersYoVariables(mocapRigidBody);
          }
       }
       
       yoVariableServer.update(System.currentTimeMillis());
+   }
+
+   private void setMarkersYoVariables(MocapRigidBody mocapRigidBody)
+   {
+      markersPositionX.set(mocapRigidBody.xPosition);
+      markersPositionY.set(mocapRigidBody.yPosition);
+      markersPositionZ.set(mocapRigidBody.zPosition);
+      
+      double[] yawPitchRoll = new double[3];
+      RotationTools.convertQuaternionToYawPitchRoll(mocapRigidBody.getOrientation(), yawPitchRoll);
+      
+      markersYaw.set(yawPitchRoll[0]);      
+      markersPitch.set(yawPitchRoll[1]);      
+      markersRoll.set(yawPitchRoll[2]);      
    }
 
    private void sendPelvisTransformToController(RigidBodyTransform pelvisTransform)
@@ -96,15 +113,7 @@ public class IHMCMOCAPLocalizationModule implements MocapRigidbodiesListener
       stampedPosePacket.setDestination(PacketDestination.CONTROLLER.ordinal());
       packetCommunicator.send(stampedPosePacket);
       
-      pelvisTransform.getTranslation(tempPosition);
-      pelvisTransform.getRotation(tempOrientation);
-            
-      fullRobotModel.getRootJoint().setPosition(tempPosition);
-      fullRobotModel.getRootJoint().setRotation(tempOrientation);
       
-      pelvisPositionX.set(tempPosition.getX());
-      pelvisPositionY.set(tempPosition.getY());
-      pelvisPositionZ.set(tempPosition.getZ());
    }
 
    private TimeStampedTransform3D createTimestampedTransform(RigidBodyTransform rigidBodyTransform)
