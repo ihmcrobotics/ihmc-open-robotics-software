@@ -85,7 +85,7 @@ public class FullQuadrupedRobotModelFromDescription extends FullRobotModelFromDe
    }
 
    /* (non-Javadoc)
-    * @see us.ihmc.SdfLoader.FullQuadrupedRobotModel#getFoot(us.ihmc.robotics.robotSide.RobotQuadrant)
+    * @see us.ihmc.modelFileLoaders.SdfLoader.FullQuadrupedRobotModel#getFoot(us.ihmc.robotics.robotSide.RobotQuadrant)
     */
    @Override
    public RigidBody getFoot(RobotQuadrant robotQuadrant)
@@ -94,7 +94,7 @@ public class FullQuadrupedRobotModelFromDescription extends FullRobotModelFromDe
    }
 
    /* (non-Javadoc)
-    * @see us.ihmc.SdfLoader.FullQuadrupedRobotModel#getLegOneDoFJoints(us.ihmc.robotics.robotSide.RobotQuadrant)
+    * @see us.ihmc.modelFileLoaders.SdfLoader.FullQuadrupedRobotModel#getLegOneDoFJoints(us.ihmc.robotics.robotSide.RobotQuadrant)
     */
    @Override
    public List<OneDoFJoint> getLegOneDoFJoints(RobotQuadrant quadrant)
@@ -103,7 +103,7 @@ public class FullQuadrupedRobotModelFromDescription extends FullRobotModelFromDe
    }
 
    /* (non-Javadoc)
-    * @see us.ihmc.SdfLoader.FullQuadrupedRobotModel#getOneDoFJointBeforeFoot(us.ihmc.robotics.robotSide.RobotQuadrant)
+    * @see us.ihmc.modelFileLoaders.SdfLoader.FullQuadrupedRobotModel#getOneDoFJointBeforeFoot(us.ihmc.robotics.robotSide.RobotQuadrant)
     */
    @Override
    public OneDoFJoint getOneDoFJointBeforeFoot(RobotQuadrant quadrant)
@@ -112,7 +112,7 @@ public class FullQuadrupedRobotModelFromDescription extends FullRobotModelFromDe
    }
 
    /* (non-Javadoc)
-    * @see us.ihmc.SdfLoader.FullQuadrupedRobotModel#getOneDoFJointByName(us.ihmc.SdfLoader.partNames.QuadrupedJointName)
+    * @see us.ihmc.modelFileLoaders.SdfLoader.FullQuadrupedRobotModel#getOneDoFJointByName(us.ihmc.modelFileLoaders.SdfLoader.partNames.QuadrupedJointName)
     */
    @Override
    public OneDoFJoint getOneDoFJointByName(QuadrupedJointName name)
@@ -121,7 +121,7 @@ public class FullQuadrupedRobotModelFromDescription extends FullRobotModelFromDe
    }
 
    /* (non-Javadoc)
-    * @see us.ihmc.SdfLoader.FullQuadrupedRobotModel#getNameForOneDoFJoint(us.ihmc.robotics.screwTheory.OneDoFJoint)
+    * @see us.ihmc.modelFileLoaders.SdfLoader.FullQuadrupedRobotModel#getNameForOneDoFJoint(us.ihmc.robotics.screwTheory.OneDoFJoint)
     */
    @Override
    public QuadrupedJointName getNameForOneDoFJoint(OneDoFJoint oneDoFJoint)
@@ -130,7 +130,7 @@ public class FullQuadrupedRobotModelFromDescription extends FullRobotModelFromDe
    }
 
    /* (non-Javadoc)
-    * @see us.ihmc.SdfLoader.FullQuadrupedRobotModel#getJointLimit(us.ihmc.SdfLoader.partNames.QuadrupedJointName)
+    * @see us.ihmc.modelFileLoaders.SdfLoader.FullQuadrupedRobotModel#getJointLimit(us.ihmc.modelFileLoaders.SdfLoader.partNames.QuadrupedJointName)
     */
    @Override
    public JointLimit getJointLimit(QuadrupedJointName jointName)
