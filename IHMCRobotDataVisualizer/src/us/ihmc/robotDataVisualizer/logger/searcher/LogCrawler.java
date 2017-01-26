@@ -5,8 +5,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 
-import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
-import us.ihmc.SdfLoader.RobotDescriptionFromSDFLoader;
+import us.ihmc.modelFileLoaders.SdfLoader.GeneralizedSDFRobotModel;
+import us.ihmc.modelFileLoaders.SdfLoader.RobotDescriptionFromSDFLoader;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.SDFModelLoader;
 import us.ihmc.robotDataLogger.YoVariableHandshakeParser;
 import us.ihmc.robotDataLogger.logger.LogPropertiesReader;

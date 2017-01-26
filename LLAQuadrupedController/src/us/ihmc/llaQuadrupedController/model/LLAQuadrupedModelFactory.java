@@ -6,9 +6,9 @@ import java.util.Collection;
 
 import javax.xml.bind.JAXBException;
 
-import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
-import us.ihmc.SdfLoader.JaxbSDFLoader;
-import us.ihmc.SdfLoader.RobotDescriptionFromSDFLoader;
+import us.ihmc.modelFileLoaders.SdfLoader.GeneralizedSDFRobotModel;
+import us.ihmc.modelFileLoaders.SdfLoader.JaxbSDFLoader;
+import us.ihmc.modelFileLoaders.SdfLoader.RobotDescriptionFromSDFLoader;
 import us.ihmc.quadrupedRobotics.model.QuadrupedModelFactory;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotModels.FullQuadrupedRobotModelFromDescription;
