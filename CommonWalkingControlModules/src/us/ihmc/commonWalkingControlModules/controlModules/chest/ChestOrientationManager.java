@@ -1,384 +1,287 @@
 package us.ihmc.commonWalkingControlModules.controlModules.chest;
 
-import static us.ihmc.communication.packets.Packet.INVALID_MESSAGE_ID;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.vecmath.Vector3d;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OrientationFeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelJointDataReadOnly;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolderReadOnly;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlModule;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
-import us.ihmc.communication.controllerAPI.command.CommandArrayDeque;
-import us.ihmc.communication.packets.Packet;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ChestTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.GoHomeCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SpineTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
 import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage.BodyPart;
-import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.LongYoVariable;
+import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.math.frames.YoFrameVector;
-import us.ihmc.robotics.math.trajectories.waypoints.FrameSO3TrajectoryPoint;
-import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsOrientationTrajectoryGenerator;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.tools.io.printing.PrintTools;
+import us.ihmc.robotics.screwTheory.ScrewTools;
+import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.GenericStateMachine;
+import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateMachineTools;
 
-public class ChestOrientationManager implements ChestOrientationManagerInterface
+public class ChestOrientationManager
 {
-   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   private final OrientationFeedbackControlCommand orientationFeedbackControlCommand = new OrientationFeedbackControlCommand();
+   private final GenericStateMachine<ChestControlMode, ChestControlState> stateMachine;
+   private final EnumYoVariable<ChestControlMode> requestedState = new EnumYoVariable<>("headRequestedControlMode", registry, ChestControlMode.class, true);
 
-   private final DoubleYoVariable yoTime;
-   private final DoubleYoVariable receivedNewChestOrientationTime = new DoubleYoVariable("receivedNewChestOrientationTime", registry);
+   private final BooleanYoVariable hasBeenInitialized = new BooleanYoVariable(getClass().getSimpleName() + "Initialized", registry);
 
-   private final BooleanYoVariable isTrajectoryStopped = new BooleanYoVariable("isChestOrientationTrajectoryStopped", registry);
-   private final BooleanYoVariable isTrackingOrientation = new BooleanYoVariable("isTrackingOrientation", registry);
+   private final TaskspaceChestControlState taskspaceChestControlState;
+   private final JointspaceChestControlState jointspaceChestControlState;
 
-   private final BooleanYoVariable hasBeenInitialized = new BooleanYoVariable("hasChestOrientationManagerBeenInitialized", registry);
-
-   private final MultipleWaypointsOrientationTrajectoryGenerator orientationTrajectoryGenerator;
-   private final ReferenceFrame pelvisZUpFrame;
    private final ReferenceFrame chestFrame;
+   private final FrameOrientation initialOrientation = new FrameOrientation();
+   private final double[] initialJointPositions;
 
-   private final FrameOrientation tempOrientation = new FrameOrientation();
+   private final OneDoFJoint[] jointsOriginal;
+   private final OneDoFJoint[] jointsAtDesiredPosition;
 
-   private final FrameOrientation desiredOrientation = new FrameOrientation();
-   private final FrameVector desiredAngularVelocity = new FrameVector();
-   private final FrameVector feedForwardAngularAcceleration = new FrameVector();
-   private final FrameSO3TrajectoryPoint initialTrajectoryPoint = new FrameSO3TrajectoryPoint();
+   private LowLevelOneDoFJointDesiredDataHolderReadOnly newJointDesiredData = null;
 
-   private final YoFrameVector yoChestAngularWeight = new YoFrameVector("chestWeight", null, registry);
-   private final Vector3d chestAngularWeight = new Vector3d();
-
-   private final YoOrientationPIDGainsInterface gains;
-
-   private final LongYoVariable lastCommandId;
-
-   private final BooleanYoVariable isReadyToHandleQueuedCommands;
-   private final LongYoVariable numberOfQueuedCommands;
-   private final CommandArrayDeque<ChestTrajectoryCommand> commandQueue = new CommandArrayDeque<>(ChestTrajectoryCommand.class);
-
-   private final BooleanYoVariable followChestRollSineWave = new BooleanYoVariable("followChestRollSineWave", registry);
-   private final DoubleYoVariable chestRollSineFrequency = new DoubleYoVariable("chestRollSineFrequency", registry);
-   private final DoubleYoVariable chestRollSineMagnitude = new DoubleYoVariable("chestRollSineMagnitude", registry);
-
-   public ChestOrientationManager(HighLevelHumanoidControllerToolbox momentumBasedController, YoOrientationPIDGainsInterface gains, Vector3d angularWeight,
-         double trajectoryTime, YoVariableRegistry parentRegistry)
+   public ChestOrientationManager(HighLevelHumanoidControllerToolbox humanoidControllerToolbox, YoOrientationPIDGainsInterface gains, Vector3d angularWeight, YoVariableRegistry parentRegistry)
    {
-      this.gains = gains;
-      yoTime = momentumBasedController.getYoTime();
-      pelvisZUpFrame = momentumBasedController.getPelvisZUpFrame();
+      String className = getClass().getSimpleName();
+      DoubleYoVariable yoTime = humanoidControllerToolbox.getYoTime();
+      stateMachine = new GenericStateMachine<>(className, className + "SwitchTime", ChestControlMode.class, yoTime, registry);
 
-      FullRobotModel fullRobotModel = momentumBasedController.getFullRobotModel();
-      RigidBody chest = fullRobotModel.getChest();
-      RigidBody elevator = fullRobotModel.getElevator();
+      RigidBody chest = humanoidControllerToolbox.getFullRobotModel().getChest();
+      RigidBody pelvis = humanoidControllerToolbox.getFullRobotModel().getPelvis();
       chestFrame = chest.getBodyFixedFrame();
+      jointsOriginal = ScrewTools.createOneDoFJointPath(pelvis, chest);
+      jointsAtDesiredPosition = ScrewTools.cloneOneDoFJointPath(pelvis, chest);
+      initialJointPositions = new double[jointsOriginal.length];
 
-      yoChestAngularWeight.set(angularWeight);
-      yoChestAngularWeight.get(chestAngularWeight);
-      orientationFeedbackControlCommand.setWeightsForSolver(chestAngularWeight);
-      orientationFeedbackControlCommand.set(elevator, chest);
-      orientationFeedbackControlCommand.setGains(gains);
+      taskspaceChestControlState = new TaskspaceChestControlState(humanoidControllerToolbox, gains, angularWeight, parentRegistry);
+      jointspaceChestControlState = new JointspaceChestControlState();
 
-      boolean allowMultipleFrames = true;
-      String namePrefix = "chest";
-      orientationTrajectoryGenerator = new MultipleWaypointsOrientationTrajectoryGenerator(namePrefix, allowMultipleFrames, pelvisZUpFrame, registry);
-      orientationTrajectoryGenerator.registerNewTrajectoryFrame(worldFrame);
-
-      lastCommandId = new LongYoVariable(namePrefix + "LastCommandId", registry);
-      lastCommandId.set(Packet.INVALID_MESSAGE_ID);
-
-      isReadyToHandleQueuedCommands = new BooleanYoVariable(namePrefix + "IsReadyToHandleQueuedChestTrajectoryCommands", registry);
-      numberOfQueuedCommands = new LongYoVariable(namePrefix + "NumberOfQueuedCommands", registry);
-
+      setupStateMachine();
       parentRegistry.addChild(registry);
+      hasBeenInitialized.set(false);
    }
 
-   @Override
+   private void setupStateMachine()
+   {
+      List<ChestControlState> states = new ArrayList<>();
+      states.add(taskspaceChestControlState);
+      states.add(jointspaceChestControlState);
+
+      for (ChestControlState fromState : states)
+      {
+         for (ChestControlState toState : states)
+         {
+            StateMachineTools.addRequestedStateTransition(requestedState, false, fromState, toState);
+         }
+         stateMachine.addState(fromState);
+      }
+
+      stateMachine.setCurrentState(ChestControlMode.TASK_SPACE);
+   }
+
+   public void setWeights(double jointspace, Vector3d taskspace)
+   {
+      jointspaceChestControlState.setWeight(jointspace);
+      taskspaceChestControlState.setWeights(taskspace);
+   }
+
    public void initialize()
    {
       if (hasBeenInitialized.getBooleanValue())
          return;
 
       hasBeenInitialized.set(true);
-
       holdCurrentOrientation();
    }
 
-   @Override
-   public void compute()
-   {
-      if (isTrackingOrientation.getBooleanValue())
-      {
-         if (!isTrajectoryStopped.getBooleanValue())
-         {
-            double deltaTime = yoTime.getDoubleValue() - receivedNewChestOrientationTime.getDoubleValue();
-            orientationTrajectoryGenerator.compute(deltaTime);
-
-            if (orientationTrajectoryGenerator.isDone() && !commandQueue.isEmpty())
-            {
-               double firstTrajectoryPointTime = orientationTrajectoryGenerator.getLastWaypointTime();
-               ChestTrajectoryCommand command = commandQueue.poll();
-               numberOfQueuedCommands.decrement();
-               initializeTrajectoryGenerator(command, firstTrajectoryPointTime);
-               orientationTrajectoryGenerator.compute(deltaTime);
-            }
-         }
-         boolean isTrajectoryDone = orientationTrajectoryGenerator.isDone();
-
-         if (isTrajectoryDone)
-            orientationTrajectoryGenerator.changeFrame(pelvisZUpFrame);
-
-         isTrackingOrientation.set(!isTrajectoryDone);
-      }
-
-
-      if (followChestRollSineWave.getBooleanValue())
-      {
-         double roll = chestRollSineMagnitude.getDoubleValue() * Math.sin(yoTime.getDoubleValue() * chestRollSineFrequency.getDoubleValue() * 2.0 * Math.PI);
-         tempOrientation.setIncludingFrame(pelvisZUpFrame, 0.0, 0.0, roll);
-         tempOrientation.changeFrame(worldFrame);
-
-         desiredOrientation.set(tempOrientation);
-      }
-
-      else
-      {
-         orientationTrajectoryGenerator.getOrientation(desiredOrientation);
-      }
-
-      desiredAngularVelocity.setToZero(worldFrame);
-      feedForwardAngularAcceleration.setToZero(worldFrame);
-      orientationFeedbackControlCommand.changeFrameAndSet(desiredOrientation, desiredAngularVelocity, feedForwardAngularAcceleration);
-      orientationFeedbackControlCommand.setGains(gains);
-      yoChestAngularWeight.get(chestAngularWeight);
-      orientationFeedbackControlCommand.setWeightsForSolver(chestAngularWeight);
-   }
-
-   @Override
    public void holdCurrentOrientation()
    {
-      receivedNewChestOrientationTime.set(yoTime.getDoubleValue());
-      initialTrajectoryPoint.setToZero(chestFrame);
-      initialTrajectoryPoint.changeFrame(pelvisZUpFrame);
-
-      orientationTrajectoryGenerator.clear(pelvisZUpFrame);
-      orientationTrajectoryGenerator.appendWaypoint(initialTrajectoryPoint);
-      orientationTrajectoryGenerator.initialize();
-      isTrackingOrientation.set(true);
-      isTrajectoryStopped.set(false);
+      computeDesiredOrientation(initialOrientation);
+      taskspaceChestControlState.holdOrientation(initialOrientation);
+      requestState(taskspaceChestControlState.getStateEnum());
    }
 
-   @Override
+   public void compute()
+   {
+      initialize();
+      stateMachine.checkTransitionConditions();
+      stateMachine.doAction();
+   }
+
    public void handleChestTrajectoryCommand(ChestTrajectoryCommand command)
    {
-      switch (command.getExecutionMode())
-      {
-      case OVERRIDE:
-         isReadyToHandleQueuedCommands.set(true);
-         clearCommandQueue(command.getCommandId());
-         receivedNewChestOrientationTime.set(yoTime.getDoubleValue());
-         initializeTrajectoryGenerator(command, 0.0);
-         return;
-      case QUEUE:
-         boolean success = queueChestTrajectoryCommand(command);
-         if (!success)
-         {
-            isReadyToHandleQueuedCommands.set(false);
-            clearCommandQueue(INVALID_MESSAGE_ID);
-            holdCurrentOrientation();
-         }
-         return;
-      default:
-         PrintTools.warn(this, "Unknown " + ExecutionMode.class.getSimpleName() + " value: " + command.getExecutionMode() + ". Command ignored.");
-         return;
-      }
+      computeDesiredOrientation(initialOrientation);
+      taskspaceChestControlState.handleChestTrajectoryCommand(command, initialOrientation);
+      requestState(taskspaceChestControlState.getStateEnum());
    }
 
-   private boolean queueChestTrajectoryCommand(ChestTrajectoryCommand command)
+   public void handleSpineTrajectoryCommand(SpineTrajectoryCommand command)
    {
-      if (!isReadyToHandleQueuedCommands.getBooleanValue())
-      {
-         PrintTools.warn(this, "The very first " + command.getClass().getSimpleName() + " of a series must be " + ExecutionMode.OVERRIDE + ". Aborting motion.");
-         return false;
-      }
-
-      long previousCommandId = command.getPreviousCommandId();
-
-      if (previousCommandId != INVALID_MESSAGE_ID && lastCommandId.getLongValue() != INVALID_MESSAGE_ID && lastCommandId.getLongValue() != previousCommandId)
-      {
-         PrintTools.warn(this, "Previous command ID mismatch: previous ID from command = " + previousCommandId
-               + ", last message ID received by the controller = " + lastCommandId.getLongValue() + ". Aborting motion.");
-         return false;
-      }
-
-      if (command.getTrajectoryPoint(0).getTime() < 1.0e-5)
-      {
-         PrintTools.warn(this, "Time of the first trajectory point of a queued command must be greater than zero. Aborting motion.");
-         return false;
-      }
-
-      commandQueue.add(command);
-      numberOfQueuedCommands.increment();
-      lastCommandId.set(command.getCommandId());
-
-      return true;
+      computeDesiredJointPositions(initialJointPositions);
+      boolean success = jointspaceChestControlState.handleNeckTrajectoryCommand(command, initialJointPositions);
+      if (!success)
+         holdCurrentOrientation();
+      requestState(jointspaceChestControlState.getStateEnum());
    }
 
-   private void initializeTrajectoryGenerator(ChestTrajectoryCommand command, double firstTrajectoryPointTime)
-   {
-      command.addTimeOffset(firstTrajectoryPointTime);
-
-      if (command.getTrajectoryPoint(0).getTime() > firstTrajectoryPointTime + 1.0e-5)
-      {
-         orientationTrajectoryGenerator.getOrientation(desiredOrientation);
-         desiredOrientation.changeFrame(worldFrame);
-         desiredAngularVelocity.setToZero(worldFrame);
-
-         orientationTrajectoryGenerator.clear(worldFrame);
-         orientationTrajectoryGenerator.appendWaypoint(0.0, desiredOrientation, desiredAngularVelocity);
-      }
-      else
-      {
-         orientationTrajectoryGenerator.clear(worldFrame);
-      }
-
-      int numberOfTrajectoryPoints = queueExceedingTrajectoryPointsIfNeeded(command);
-
-      for (int trajectoryPointIndex = 0; trajectoryPointIndex < numberOfTrajectoryPoints; trajectoryPointIndex++)
-      {
-         orientationTrajectoryGenerator.appendWaypoint(command.getTrajectoryPoint(trajectoryPointIndex));
-      }
-
-      orientationTrajectoryGenerator.changeFrame(pelvisZUpFrame);
-      orientationTrajectoryGenerator.initialize();
-      isTrackingOrientation.set(true);
-      isTrajectoryStopped.set(false);
-   }
-
-   private int queueExceedingTrajectoryPointsIfNeeded(ChestTrajectoryCommand command)
-   {
-      int numberOfTrajectoryPoints = command.getNumberOfTrajectoryPoints();
-
-      int maximumNumberOfWaypoints = orientationTrajectoryGenerator.getMaximumNumberOfWaypoints() - orientationTrajectoryGenerator.getCurrentNumberOfWaypoints();
-
-      if (numberOfTrajectoryPoints <= maximumNumberOfWaypoints)
-         return numberOfTrajectoryPoints;
-
-      ChestTrajectoryCommand commandForExcedent = commandQueue.addFirst();
-      numberOfQueuedCommands.increment();
-      commandForExcedent.clear();
-      commandForExcedent.setPropertiesOnly(command);
-
-      for (int trajectoryPointIndex = maximumNumberOfWaypoints; trajectoryPointIndex < numberOfTrajectoryPoints; trajectoryPointIndex++)
-      {
-         commandForExcedent.addTrajectoryPoint(command.getTrajectoryPoint(trajectoryPointIndex));
-      }
-
-      double timeOffsetToSubtract = command.getTrajectoryPoint(maximumNumberOfWaypoints - 1).getTime();
-      commandForExcedent.subtractTimeOffset(timeOffsetToSubtract);
-
-      return maximumNumberOfWaypoints;
-   }
-
-   @Override
    public void handleStopAllTrajectoryCommand(StopAllTrajectoryCommand command)
    {
-      isTrajectoryStopped.set(command.isStopAllTrajectory());
+      if (command.isStopAllTrajectory())
+         holdCurrentOrientation();
    }
 
-   @Override
    public void handleGoHomeCommand(GoHomeCommand command)
    {
       if (command.getRequest(BodyPart.CHEST))
          goToHomeFromCurrentDesired(command.getTrajectoryTime());
    }
 
-   @Override
    public void goToHomeFromCurrentDesired(double trajectoryTime)
    {
-      receivedNewChestOrientationTime.set(yoTime.getDoubleValue());
+      computeDesiredOrientation(initialOrientation);
 
-      orientationTrajectoryGenerator.getOrientation(desiredOrientation);
-
-      desiredOrientation.changeFrame(pelvisZUpFrame);
-      desiredAngularVelocity.setToZero(pelvisZUpFrame);
-      orientationTrajectoryGenerator.clear(pelvisZUpFrame);
-      orientationTrajectoryGenerator.appendWaypoint(0.0, desiredOrientation, desiredAngularVelocity);
-
-      desiredOrientation.setToZero(pelvisZUpFrame);
-      orientationTrajectoryGenerator.appendWaypoint(trajectoryTime, desiredOrientation, desiredAngularVelocity);
-      orientationTrajectoryGenerator.initialize();
-
-      isTrackingOrientation.set(true);
-      isTrajectoryStopped.set(false);
+      taskspaceChestControlState.goToHome(trajectoryTime, initialOrientation);
+      requestState(taskspaceChestControlState.getStateEnum());
    }
 
-   @Override
    public void goToHomeFromCurrent(double trajectoryTime)
    {
-      receivedNewChestOrientationTime.set(yoTime.getDoubleValue());
-      orientationTrajectoryGenerator.clear(pelvisZUpFrame);
+      initialOrientation.setToZero(chestFrame);
 
-      desiredAngularVelocity.setToZero(pelvisZUpFrame);
-      desiredOrientation.setToZero(pelvisZUpFrame);
-      initialTrajectoryPoint.setToZero(chestFrame);
-      initialTrajectoryPoint.changeFrame(pelvisZUpFrame);
-
-      orientationTrajectoryGenerator.appendWaypoint(initialTrajectoryPoint);
-      orientationTrajectoryGenerator.appendWaypoint(trajectoryTime, desiredOrientation, desiredAngularVelocity);
-      orientationTrajectoryGenerator.initialize();
-
-      isTrackingOrientation.set(true);
-      isTrajectoryStopped.set(false);
-
+      taskspaceChestControlState.goToHome(trajectoryTime, initialOrientation);
+      requestState(taskspaceChestControlState.getStateEnum());
    }
 
-   private void clearCommandQueue(long lastCommandId)
+   private void requestState(ChestControlMode state)
    {
-      commandQueue.clear();
-      numberOfQueuedCommands.set(0);
-      this.lastCommandId.set(lastCommandId);
+      if (stateMachine.getCurrentStateEnum() != state)
+         requestedState.set(state);
    }
 
-   @Override
-   public InverseDynamicsCommand<?> getInverseDynamicsCommand()
+   private void computeDesiredOrientation(FrameOrientation desiredOrientationToPack)
    {
-      return null;
+      if (stateMachine.getCurrentStateEnum() == ChestControlMode.TASK_SPACE)
+      {
+         taskspaceChestControlState.getDesiredOrientation(initialOrientation);
+      }
+      else
+      {
+         updateJointsAtDesiredPosition();
+         ReferenceFrame desiredEndEffectorFrame = jointsAtDesiredPosition[jointsAtDesiredPosition.length - 1].getSuccessor().getBodyFixedFrame();
+         desiredOrientationToPack.setToZero(desiredEndEffectorFrame);
+      }
+
+      if (initialOrientation.containsNaN())
+         initialOrientation.setToZero(chestFrame);
    }
 
-   @Override
-   public FeedbackControlCommand<?> getFeedbackControlCommand()
+   private void computeDesiredJointPositions(double[] desiredJointPositionsToPack)
    {
-      return orientationFeedbackControlCommand;
+      if (stateMachine.getCurrentStateEnum() == ChestControlMode.JOINT_SPACE)
+      {
+         for (int i = 0; i < jointsOriginal.length; i++)
+         {
+            desiredJointPositionsToPack[i] = jointspaceChestControlState.getJointDesiredPosition(jointsOriginal[i]);
+         }
+      }
+      else
+      {
+         updateJointsAtDesiredPosition();
+         for (int i = 0; i < jointsAtDesiredPosition.length; i++)
+         {
+            desiredJointPositionsToPack[i] = jointsAtDesiredPosition[i].getQ();
+         }
+      }
    }
 
-   @Override
+   private void updateJointsAtDesiredPosition()
+   {
+      if (newJointDesiredData != null)
+      {
+         for (int i = 0; i < jointsAtDesiredPosition.length; i++)
+         {
+            OneDoFJoint jointAtDesiredPosition = jointsAtDesiredPosition[i];
+            double q = jointsOriginal[i].getQ();
+            double qd = jointsOriginal[i].getQd();
+
+            if (newJointDesiredData.hasDataForJoint(jointsOriginal[i]))
+            {
+               LowLevelJointDataReadOnly jointDesiredData = newJointDesiredData.getLowLevelJointData(jointsOriginal[i]);
+
+               double qDesired = jointDesiredData.hasDesiredPosition() ? jointDesiredData.getDesiredPosition() : q;
+               jointAtDesiredPosition.setQ(qDesired);
+
+               double qdDesired = jointDesiredData.hasDesiredVelocity() ? jointDesiredData.getDesiredVelocity() : qd;
+               jointAtDesiredPosition.setQd(qdDesired);
+            }
+            else
+            {
+               jointAtDesiredPosition.setQ(q);
+               jointAtDesiredPosition.setQd(qd);
+            }
+         }
+
+         newJointDesiredData = null;
+      }
+      else if (stateMachine.getCurrentStateEnum() == ChestControlMode.JOINT_SPACE)
+      {
+         for (int i = 0; i < jointsAtDesiredPosition.length; i++)
+         {
+            jointsAtDesiredPosition[i].setQ(jointspaceChestControlState.getJointDesiredPosition(jointsOriginal[i]));
+            jointsAtDesiredPosition[i].setQd(jointspaceChestControlState.getJointDesiredVelocity(jointsOriginal[i]));
+         }
+      }
+      else
+      {
+         for (int i = 0; i < jointsAtDesiredPosition.length; i++)
+         {
+            jointsAtDesiredPosition[i].setQ(jointsOriginal[i].getQ());
+            jointsAtDesiredPosition[i].setQd(jointsOriginal[i].getQd());
+         }
+      }
+
+      jointsAtDesiredPosition[0].updateFramesRecursively();
+   }
+
+   /**
+    * In a best effort of having continuity in desireds between states, the low-level data can be used to update the {@link HandControlModule} with
+    * the most recent desired joint positions and velocities.
+    * @param lowLevelOneDoFJointDesiredDataHolder Data that will be used to update the arm desired configuration. Only a read-only access is needed.
+    */
    public void submitNewSpineJointDesiredConfiguration(LowLevelOneDoFJointDesiredDataHolderReadOnly lowLevelOneDoFJointDesiredDataHolder)
    {
-
+      newJointDesiredData = lowLevelOneDoFJointDesiredDataHolder;
    }
 
-   @Override
-   public void handleSpineTrajectoryCommand(SpineTrajectoryCommand command)
+   public InverseDynamicsCommand<?> getInverseDynamicsCommand()
    {
-      PrintTools.warn("Spint trajectories not implemented with this ChestOrientationManager.");
+      return stateMachine.getCurrentState().getInverseDynamicsCommand();
    }
 
-   @Override
-   public FeedbackControlCommand<?> createFeedbackControlTemplate()
+   public FeedbackControlCommand<?> getFeedbackControlCommand()
    {
-      return getFeedbackControlCommand();
+      return stateMachine.getCurrentState().getFeedbackControlCommand();
+   }
+
+   public FeedbackControlCommandList createFeedbackControlTemplate()
+   {
+      FeedbackControlCommandList ret = new FeedbackControlCommandList();
+      for (ChestControlMode mode : ChestControlMode.values())
+      {
+         ChestControlState state = stateMachine.getState(mode);
+         if (state != null && state.getFeedbackControlCommand() != null)
+            ret.addCommand(state.getFeedbackControlCommand());
+      }
+      return ret;
    }
 }
