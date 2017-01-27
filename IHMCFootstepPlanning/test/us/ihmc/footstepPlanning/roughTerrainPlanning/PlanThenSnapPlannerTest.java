@@ -17,8 +17,7 @@ import us.ihmc.tools.continuousIntegration.IntegrationCategory;
 public class PlanThenSnapPlannerTest extends FootstepPlannerOnRoughTerrainTest
 {
    private static final boolean visualize = !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
-   private final PlanThenSnapPlanner planner =
-         new PlanThenSnapPlanner(new TurnWalkTurnPlanner(), PlanningTestTools.createDefaultFootPolygons());
+   private final PlanThenSnapPlanner planner = new PlanThenSnapPlanner(new TurnWalkTurnPlanner(), PlanningTestTools.createDefaultFootPolygons());
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 300000)
