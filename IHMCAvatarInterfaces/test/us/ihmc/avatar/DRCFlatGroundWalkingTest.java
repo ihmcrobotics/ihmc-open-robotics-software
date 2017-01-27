@@ -14,6 +14,7 @@ import us.ihmc.avatar.initialSetup.DRCGuiInitialSetup;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.initialSetup.DRCSCSInitialSetup;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
+import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.HeadingAndVelocityEvaluationScriptParameters;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
 import us.ihmc.robotModels.visualizer.RobotVisualizer;
@@ -93,7 +94,8 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
       FlatGroundEnvironment flatGround = new FlatGroundEnvironment();
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
       drcSimulationTestHelper = new DRCSimulationTestHelper(flatGround, robotModel.getSimpleRobotName() + "FlatGroundWalking", selectedLocation,
-            simulationTestingParameters, getRobotModel(), true, useVelocityAndHeadingScript, cheatWithGroundHeightAtForFootstep);
+            simulationTestingParameters, getRobotModel(), true, useVelocityAndHeadingScript, cheatWithGroundHeightAtForFootstep, getWalkingScriptParameters());
+      
       SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
       setupCameraForUnitTest(scs);
       simulateAndAssertGoodWalking(drcSimulationTestHelper, doPelvisWarmup);
@@ -311,5 +313,10 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
    public SimulationTestingParameters getSimulationTestingParameters()
    {
       return simulationTestingParameters;
+   }
+   
+   public HeadingAndVelocityEvaluationScriptParameters getWalkingScriptParameters()
+   {
+      return null;
    }
 }
