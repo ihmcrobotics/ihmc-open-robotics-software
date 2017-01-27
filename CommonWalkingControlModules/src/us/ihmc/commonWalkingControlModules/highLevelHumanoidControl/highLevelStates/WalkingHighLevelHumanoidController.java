@@ -4,7 +4,7 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactSt
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.PelvisOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
-import us.ihmc.commonWalkingControlModules.controlModules.chest.ChestOrientationManagerInterface;
+import us.ihmc.commonWalkingControlModules.controlModules.chest.ChestOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.controlModules.head.HeadOrientationManager;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
@@ -75,7 +75,7 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
    private final HighLevelControlManagerFactory managerFactory;
 
    private final PelvisOrientationManager pelvisOrientationManager;
-   private final ChestOrientationManagerInterface chestOrientationManager;
+   private final ChestOrientationManager chestOrientationManager;
    private final HeadOrientationManager headOrientationManager;
    private final ManipulationControlModule manipulationControlModule;
    private final FeetManager feetManager;

@@ -7,8 +7,6 @@ import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerPar
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.PelvisOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.chest.ChestOrientationManager;
-import us.ihmc.commonWalkingControlModules.controlModules.chest.ChestOrientationManagerInterface;
-import us.ihmc.commonWalkingControlModules.controlModules.chest.ChestOrientationManagerNew;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.controlModules.head.HeadOrientationManager;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
@@ -35,7 +33,7 @@ public class HighLevelControlManagerFactory
    private BalanceManager balanceManager;
    private CenterOfMassHeightManager centerOfMassHeightManager;
    private HeadOrientationManager headOrientationManager;
-   private ChestOrientationManagerInterface chestOrientationManager;
+   private ChestOrientationManager chestOrientationManager;
    private ManipulationControlModule manipulationControlModule;
    private FeetManager feetManager;
    private PelvisOrientationManager pelvisOrientationManager;
@@ -141,7 +139,7 @@ public class HighLevelControlManagerFactory
       return headOrientationManager;
    }
 
-   public ChestOrientationManagerInterface getOrCreateChestOrientationManager()
+   public ChestOrientationManager getOrCreateChestOrientationManager()
    {
       if (chestOrientationManager != null)
          return chestOrientationManager;
@@ -159,12 +157,9 @@ public class HighLevelControlManagerFactory
       if (!hasMomentumOptimizationSettings(ChestOrientationManager.class))
          return null;
 
-//      double trajectoryTimeHeadOrientation = walkingControllerParameters.getTrajectoryTimeHeadOrientation();
       YoOrientationPIDGainsInterface chestControlGains = walkingControllerParameters.createChestControlGains(registry);
       Vector3d chestAngularWeight = momentumOptimizationSettings.getChestAngularWeight();
-//      chestOrientationManager = new ChestOrientationManager(momentumBasedController, chestControlGains, chestAngularWeight, trajectoryTimeHeadOrientation, registry);
-
-      chestOrientationManager = new ChestOrientationManagerNew(momentumBasedController, chestControlGains, chestAngularWeight, registry);
+      chestOrientationManager = new ChestOrientationManager(momentumBasedController, chestControlGains, chestAngularWeight, registry);
       return chestOrientationManager;
    }
 
