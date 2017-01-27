@@ -85,6 +85,8 @@ public class ChestOrientationManagerNew implements ChestOrientationManagerInterf
          }
          stateMachine.addState(fromState);
       }
+
+      stateMachine.setCurrentState(ChestControlMode.TASK_SPACE);
    }
 
    public void setWeights(double jointspace, Vector3d taskspace)
@@ -108,7 +110,7 @@ public class ChestOrientationManagerNew implements ChestOrientationManagerInterf
    {
       computeDesiredOrientation(initialOrientation);
       taskspaceChestControlState.holdOrientation(initialOrientation);
-      requestedState.set(taskspaceChestControlState.getStateEnum());
+      requestState(taskspaceChestControlState.getStateEnum());
    }
 
    @Override
@@ -124,8 +126,7 @@ public class ChestOrientationManagerNew implements ChestOrientationManagerInterf
    {
       computeDesiredOrientation(initialOrientation);
       taskspaceChestControlState.handleChestTrajectoryCommand(command, initialOrientation);
-      if (stateMachine.getCurrentStateEnum() != ChestControlMode.TASK_SPACE)
-         requestedState.set(taskspaceChestControlState.getStateEnum());
+      requestState(taskspaceChestControlState.getStateEnum());
    }
 
    @Override
@@ -135,8 +136,7 @@ public class ChestOrientationManagerNew implements ChestOrientationManagerInterf
       boolean success = jointspaceChestControlState.handleNeckTrajectoryCommand(command, initialJointPositions);
       if (!success)
          holdCurrentOrientation();
-      if (stateMachine.getCurrentStateEnum() != ChestControlMode.JOINT_SPACE)
-         requestedState.set(jointspaceChestControlState.getStateEnum());
+      requestState(jointspaceChestControlState.getStateEnum());
    }
 
    @Override
@@ -159,7 +159,7 @@ public class ChestOrientationManagerNew implements ChestOrientationManagerInterf
       computeDesiredOrientation(initialOrientation);
 
       taskspaceChestControlState.goToHome(trajectoryTime, initialOrientation);
-      requestedState.set(taskspaceChestControlState.getStateEnum());
+      requestState(taskspaceChestControlState.getStateEnum());
    }
 
    @Override
@@ -168,7 +168,13 @@ public class ChestOrientationManagerNew implements ChestOrientationManagerInterf
       initialOrientation.setToZero(chestFrame);
 
       taskspaceChestControlState.goToHome(trajectoryTime, initialOrientation);
-      requestedState.set(taskspaceChestControlState.getStateEnum());
+      requestState(taskspaceChestControlState.getStateEnum());
+   }
+
+   private void requestState(ChestControlMode state)
+   {
+      if (stateMachine.getCurrentStateEnum() != state)
+         requestedState.set(state);
    }
 
    private void computeDesiredOrientation(FrameOrientation desiredOrientationToPack)
@@ -183,6 +189,9 @@ public class ChestOrientationManagerNew implements ChestOrientationManagerInterf
          ReferenceFrame desiredEndEffectorFrame = jointsAtDesiredPosition[jointsAtDesiredPosition.length - 1].getSuccessor().getBodyFixedFrame();
          desiredOrientationToPack.setToZero(desiredEndEffectorFrame);
       }
+
+      if (initialOrientation.containsNaN())
+         initialOrientation.setToZero(chestFrame);
    }
 
    private void computeDesiredJointPositions(double[] desiredJointPositionsToPack)
