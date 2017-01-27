@@ -480,9 +480,14 @@ public class SwingState extends AbstractUnconstrainedState
    private void computeSwingTimeRemaining()
    {
       if (!currentTimeWithSwingSpeedUp.isNaN())
-         this.swingTimeRemaining.set(swingTimeProvider.getValue() - currentTimeWithSwingSpeedUp.getDoubleValue());
+      {
+         double swingTimeRemaining = (swingTimeProvider.getValue() - currentTimeWithSwingSpeedUp.getDoubleValue()) / swingTimeSpeedUpFactor.getDoubleValue();
+         this.swingTimeRemaining.set(swingTimeRemaining);
+      }
       else
+      {
          this.swingTimeRemaining.set(swingTimeProvider.getValue() - getTimeInCurrentState());
+      }
    }
 
    private void updatePrivilegedConfiguration()
