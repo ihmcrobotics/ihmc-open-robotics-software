@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.controlModules.chest;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.FinishableState;
 
 public abstract class ChestControlState extends FinishableState<ChestControlMode>
@@ -10,6 +11,8 @@ public abstract class ChestControlState extends FinishableState<ChestControlMode
    {
       super(stateEnum);
    }
+
+   public abstract void handleStopAllTrajectoryCommand(StopAllTrajectoryCommand command);
 
    public abstract InverseDynamicsCommand<?> getInverseDynamicsCommand();
 

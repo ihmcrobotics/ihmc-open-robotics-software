@@ -136,8 +136,7 @@ public class ChestOrientationManager
 
    public void handleStopAllTrajectoryCommand(StopAllTrajectoryCommand command)
    {
-      if (command.isStopAllTrajectory())
-         holdCurrentOrientation();
+      stateMachine.getCurrentState().handleStopAllTrajectoryCommand(command);
    }
 
    public void handleGoHomeCommand(GoHomeCommand command)

@@ -1,6 +1,7 @@
 package us.ihmc.avatar.controllerAPI;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static us.ihmc.avatar.controllerAPI.EndToEndHandTrajectoryMessageTest.findQuat4d;
 import static us.ihmc.avatar.controllerAPI.EndToEndHandTrajectoryMessageTest.findVector3d;
@@ -20,7 +21,7 @@ import org.junit.Test;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
-import us.ihmc.commonWalkingControlModules.controlModules.chest.ChestOrientationManager;
+import us.ihmc.commonWalkingControlModules.controlModules.chest.TaskspaceChestControlState;
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.StopAllTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
@@ -683,14 +684,17 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
 
       Quat4d desiredOrientationBeforeStop = findControllerDesiredOrientation(scs);
 
+      assertFalse(findControllerStopBoolean(scs));
+
       StopAllTrajectoryMessage stopAllTrajectoryMessage = new StopAllTrajectoryMessage();
       drcSimulationTestHelper.send(stopAllTrajectoryMessage);
 
-      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.1);
+      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.05);
       assertTrue(success);
 
       Quat4d desiredOrientationAfterStop = findControllerDesiredOrientation(scs);
 
+      assertTrue(findControllerStopBoolean(scs));
       JUnitTools.assertQuaternionsEqual(desiredOrientationBeforeStop, desiredOrientationAfterStop, 5.0e-2);
    }
 
@@ -713,7 +717,7 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
 
    public static boolean findControllerStopBoolean(SimulationConstructionSet scs)
    {
-      return ((BooleanYoVariable) scs.getVariable(ChestOrientationManager.class.getSimpleName(), "isChestOrientationTrajectoryStopped")).getBooleanValue();
+      return ((BooleanYoVariable) scs.getVariable(TaskspaceChestControlState.class.getSimpleName(), "isChestOrientationTrajectoryStopped")).getBooleanValue();
    }
 
    public static int findControllerNumberOfWaypoints(SimulationConstructionSet scs)
