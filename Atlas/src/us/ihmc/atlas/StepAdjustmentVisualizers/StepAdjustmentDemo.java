@@ -65,28 +65,13 @@ public class StepAdjustmentDemo
    private double transferTime;
    private double initialTransferTime;
 
-   public StepAdjustmentDemo(String scriptName)
+   public StepAdjustmentDemo(AtlasRobotModel robotModel, String scriptName)
    {
       this.scriptName = scriptName;
+      this.robotModel = robotModel;
 
       FlatGroundEnvironment flatGround = new FlatGroundEnvironment();
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
-
-      robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, DRCRobotModel.RobotTarget.SCS, false)
-      {
-         @Override
-         public WalkingControllerParameters getWalkingControllerParameters()
-         {
-            return new AtlasWalkingControllerParameters(RobotTarget.SCS, getJointMap())
-            {
-               @Override
-               public boolean useOptimizationBasedICPController()
-               {
-                  return true;
-               }
-            };
-         }
-      };
 
       PacketCommunicator controllerCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.CONTROLLER_PORT, new IHMCCommunicationKryoNetClassList());
 

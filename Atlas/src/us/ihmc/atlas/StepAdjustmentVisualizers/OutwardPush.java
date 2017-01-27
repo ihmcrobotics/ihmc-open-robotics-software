@@ -1,5 +1,10 @@
 package us.ihmc.atlas.StepAdjustmentVisualizers;
 
+import us.ihmc.atlas.AtlasRobotModel;
+import us.ihmc.atlas.AtlasRobotVersion;
+import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransitionCondition;
 
@@ -16,7 +21,29 @@ public class OutwardPush
 
    public static void main(String[] args)
    {
-      StepAdjustmentDemo stepAdjustmentDemo = new StepAdjustmentDemo(script);
+      AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, DRCRobotModel.RobotTarget.SCS, false)
+      {
+         @Override
+         public WalkingControllerParameters getWalkingControllerParameters()
+         {
+            return new AtlasWalkingControllerParameters(DRCRobotModel.RobotTarget.SCS, getJointMap())
+            {
+               @Override
+               public boolean useOptimizationBasedICPController()
+               {
+                  return true;
+               }
+
+               @Override
+               public double getMinimumSwingTimeForDisturbanceRecovery()
+               {
+                  return 0.5;
+               }
+            };
+         }
+      };
+
+      StepAdjustmentDemo stepAdjustmentDemo = new StepAdjustmentDemo(robotModel, script);
 
       double swingTime = stepAdjustmentDemo.getSwingTime();
 

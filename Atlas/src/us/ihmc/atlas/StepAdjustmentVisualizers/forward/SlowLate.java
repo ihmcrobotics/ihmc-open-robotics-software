@@ -1,7 +1,8 @@
-package us.ihmc.atlas.StepAdjustmentVisualizers;
+package us.ihmc.atlas.StepAdjustmentVisualizers.forward;
 
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
+import us.ihmc.atlas.StepAdjustmentVisualizers.StepAdjustmentDemo;
 import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -10,12 +11,12 @@ import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransition
 
 import javax.vecmath.Vector3d;
 
-public class ForwardPush
+public class SlowLate
 {
-   private static String script = "scripts/stepAdjustment_forwardWalkingFast.xml";
+   private static String script = "scripts/stepAdjustment_forwardWalkingSlow.xml";
    private static double simulationTime = 10.0;
 
-   public ForwardPush()
+   public SlowLate()
    {
    }
 
@@ -26,7 +27,7 @@ public class ForwardPush
          @Override
          public WalkingControllerParameters getWalkingControllerParameters()
          {
-            return new AtlasWalkingControllerParameters(RobotTarget.SCS, getJointMap())
+            return new AtlasWalkingControllerParameters(DRCRobotModel.RobotTarget.SCS, getJointMap())
             {
                @Override
                public boolean useOptimizationBasedICPController()
@@ -37,7 +38,7 @@ public class ForwardPush
                @Override
                public double getMinimumSwingTimeForDisturbanceRecovery()
                {
-                  return 0.5;
+                  return 0.6;
                }
             };
          }
@@ -47,11 +48,11 @@ public class ForwardPush
 
       double swingTime = stepAdjustmentDemo.getSwingTime();
 
-      double delay = 0.5 * swingTime;
+      double delay = 0.85 * swingTime;
 
       // push parameters:
       Vector3d forceDirection = new Vector3d(1.0, 0.0, 0.0);
-      double percentWeight = 0.70;
+      double percentWeight = 0.25;
       double magnitude = percentWeight * stepAdjustmentDemo.getTotalMass() * 9.81;
       double duration = 0.1 * swingTime;
 
