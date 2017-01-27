@@ -1,7 +1,8 @@
-package us.ihmc.atlas.StepAdjustmentVisualizers;
+package us.ihmc.atlas.StepAdjustmentVisualizers.forwardStepOutwardPush;
 
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
+import us.ihmc.atlas.StepAdjustmentVisualizers.StepAdjustmentDemo;
 import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -10,12 +11,12 @@ import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransition
 
 import javax.vecmath.Vector3d;
 
-public class OutwardPush
+public class FastBigAdjustment
 {
    private static String script = "scripts/stepAdjustment_forwardWalkingFast.xml";
    private static double simulationTime = 10.0;
 
-   public OutwardPush()
+   public FastBigAdjustment()
    {
    }
 
@@ -51,7 +52,7 @@ public class OutwardPush
 
       // push parameters:
       Vector3d forceDirection = new Vector3d(0.0, -1.0, 0.0);
-      double percentWeight = 0.7;
+      double percentWeight = 0.9;
       double magnitude = percentWeight * stepAdjustmentDemo.getTotalMass() * 9.81;
       double duration = 0.1 * swingTime;
 

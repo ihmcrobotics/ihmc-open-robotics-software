@@ -1,4 +1,4 @@
-package us.ihmc.atlas.StepAdjustmentVisualizers.forward;
+package us.ihmc.atlas.StepAdjustmentVisualizers.forwardStepAndPush;
 
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
@@ -11,12 +11,12 @@ import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransition
 
 import javax.vecmath.Vector3d;
 
-public class SlowNoAdjustmentOrSpeedUp
+public class SlowNoAdjustment
 {
    private static String script = "scripts/stepAdjustment_forwardWalkingSlow.xml";
    private static double simulationTime = 10.0;
 
-   public SlowNoAdjustmentOrSpeedUp()
+   public SlowNoAdjustment()
    {
    }
 
@@ -52,7 +52,7 @@ public class SlowNoAdjustmentOrSpeedUp
 
       // push parameters:
       Vector3d forceDirection = new Vector3d(1.0, 0.0, 0.0);
-      double percentWeight = 0.25;
+      double percentWeight = 0.31;
       double magnitude = percentWeight * stepAdjustmentDemo.getTotalMass() * 9.81;
       double duration = 0.1 * swingTime;
 
