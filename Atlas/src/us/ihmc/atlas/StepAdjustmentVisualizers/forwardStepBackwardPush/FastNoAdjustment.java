@@ -1,4 +1,4 @@
-package us.ihmc.atlas.StepAdjustmentVisualizers.forward;
+package us.ihmc.atlas.StepAdjustmentVisualizers.forwardStepBackwardPush;
 
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
@@ -11,12 +11,12 @@ import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransition
 
 import javax.vecmath.Vector3d;
 
-public class SlowLate
+public class FastNoAdjustment
 {
-   private static String script = "scripts/stepAdjustment_forwardWalkingSlow.xml";
+   private static String script = "scripts/stepAdjustment_forwardWalkingFast.xml";
    private static double simulationTime = 10.0;
 
-   public SlowLate()
+   public FastNoAdjustment()
    {
    }
 
@@ -27,7 +27,7 @@ public class SlowLate
          @Override
          public WalkingControllerParameters getWalkingControllerParameters()
          {
-            return new AtlasWalkingControllerParameters(DRCRobotModel.RobotTarget.SCS, getJointMap())
+            return new AtlasWalkingControllerParameters(RobotTarget.SCS, getJointMap())
             {
                @Override
                public boolean useOptimizationBasedICPController()
@@ -38,7 +38,7 @@ public class SlowLate
                @Override
                public double getMinimumSwingTimeForDisturbanceRecovery()
                {
-                  return 0.6;
+                  return 0.5;
                }
             };
          }
@@ -48,11 +48,11 @@ public class SlowLate
 
       double swingTime = stepAdjustmentDemo.getSwingTime();
 
-      double delay = 0.85 * swingTime;
+      double delay = 0.5 * swingTime;
 
       // push parameters:
-      Vector3d forceDirection = new Vector3d(1.0, 0.0, 0.0);
-      double percentWeight = 0.25;
+      Vector3d forceDirection = new Vector3d(-1.0, 0.0, 0.0);
+      double percentWeight = 0.2;
       double magnitude = percentWeight * stepAdjustmentDemo.getTotalMass() * 9.81;
       double duration = 0.1 * swingTime;
 

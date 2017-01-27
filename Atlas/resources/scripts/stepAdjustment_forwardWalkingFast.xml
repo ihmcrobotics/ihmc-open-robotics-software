@@ -11,7 +11,7 @@
         <robotSide>RIGHT</robotSide>
         <location>
           <x>0.5</x>
-          <y>-0.26671412620116813</y>
+          <y>-0.168</y>
           <z>0.08720333059715135</z>
         </location>
         <orientation>
@@ -30,7 +30,7 @@
         <robotSide>LEFT</robotSide>
         <location>
           <x>1.0</x>
-          <y>-0.017041399876145363</y>
+          <y>0.082</y>
           <z>0.0899105387040812</z>
         </location>
         <orientation>
@@ -49,7 +49,7 @@
         <robotSide>RIGHT</robotSide>
         <location>
           <x>1.5</x>
-          <y>-0.26771924565912086</y>
+          <y>-0.168</y>
           <z>0.0923983180204497</z>
         </location>
         <orientation>
@@ -68,7 +68,7 @@
         <robotSide>LEFT</robotSide>
         <location>
           <x>2.0</x>
-          <y>-0.018398187749269906</y>
+          <y>0.082</y>
           <z>0.09510537190316294</z>
         </location>
         <orientation>
@@ -87,7 +87,7 @@
         <robotSide>RIGHT</robotSide>
         <location>
           <x>2.5</x>
-          <y>-0.2690760335322454</y>
+          <y>-0.168</y>
           <z>0.09759315121953145</z>
         </location>
         <orientation>
@@ -106,7 +106,7 @@
         <robotSide>LEFT</robotSide>
         <location>
           <x>3.0</x>
-          <y>-0.01907658168583215</y>
+          <y>0.082</y>
           <z>0.09770278850270381</z>
         </location>
         <orientation>
