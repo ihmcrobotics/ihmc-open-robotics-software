@@ -227,8 +227,6 @@ public class TaskspaceChestControlState extends ChestControlState
          desiredOrientation.setIncludingFrame(currentDesired);
          desiredOrientation.changeFrame(worldFrame);
          desiredAngularVelocity.setToZero(worldFrame);
-
-         PrintTools.info("Appending initial point at time: 0.0");
          orientationTrajectoryGenerator.appendWaypoint(0.0, desiredOrientation, desiredAngularVelocity);
       }
 
@@ -236,7 +234,6 @@ public class TaskspaceChestControlState extends ChestControlState
 
       for (int trajectoryPointIndex = 0; trajectoryPointIndex < numberOfTrajectoryPoints; trajectoryPointIndex++)
       {
-         PrintTools.info("Appending point at time: " + command.getTrajectoryPoint(trajectoryPointIndex).getTime());
          orientationTrajectoryGenerator.appendWaypoint(command.getTrajectoryPoint(trajectoryPointIndex));
       }
 
