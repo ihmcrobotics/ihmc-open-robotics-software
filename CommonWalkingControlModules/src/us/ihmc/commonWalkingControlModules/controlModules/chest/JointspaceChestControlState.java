@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.controlModules.chest;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SpineTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
 public class JointspaceChestControlState extends ChestControlState
@@ -69,6 +70,13 @@ public class JointspaceChestControlState extends ChestControlState
    {
       // TODO Auto-generated method stub
       return 0;
+   }
+
+   @Override
+   public void handleStopAllTrajectoryCommand(StopAllTrajectoryCommand command)
+   {
+      // TODO Auto-generated method stub
+
    }
 
 }

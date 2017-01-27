@@ -269,6 +269,7 @@ public class TaskspaceChestControlState extends ChestControlState
       return maximumNumberOfWaypoints;
    }
 
+   @Override
    public void handleStopAllTrajectoryCommand(StopAllTrajectoryCommand command)
    {
       isTrajectoryStopped.set(command.isStopAllTrajectory());
