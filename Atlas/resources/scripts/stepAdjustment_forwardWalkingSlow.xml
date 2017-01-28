@@ -120,7 +120,7 @@
       </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
     </footstepDataList>
     <defaultSwingTime>1.2</defaultSwingTime>
-    <defaultTransferTime>1.0</defaultTransferTime>
+    <defaultTransferTime>0.8</defaultTransferTime>
   </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage>
   <long>1457583856477</long>
   <us.ihmc.humanoidRobotics.communication.packets.walking.EndOfScriptCommand>

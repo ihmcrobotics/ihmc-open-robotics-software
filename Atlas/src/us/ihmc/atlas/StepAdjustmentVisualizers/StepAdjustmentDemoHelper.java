@@ -39,7 +39,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Random;
 
-public class StepAdjustmentDemo
+public class StepAdjustmentDemoHelper
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
 
@@ -65,7 +65,7 @@ public class StepAdjustmentDemo
    private double transferTime;
    private double initialTransferTime;
 
-   public StepAdjustmentDemo(AtlasRobotModel robotModel, String scriptName)
+   public StepAdjustmentDemoHelper(AtlasRobotModel robotModel, String scriptName)
    {
       this.scriptName = scriptName;
       this.robotModel = robotModel;
