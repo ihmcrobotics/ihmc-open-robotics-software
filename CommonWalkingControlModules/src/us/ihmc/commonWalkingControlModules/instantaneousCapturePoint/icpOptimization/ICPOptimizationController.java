@@ -127,6 +127,8 @@ public class ICPOptimizationController
    private final double dynamicRelaxationDoubleSupportWeightModifier;
    private final int maximumNumberOfFootstepsToConsider;
 
+   private boolean localWasStepAdjusted;
+
    private boolean localUseTwoCMPs;
    private boolean localUseInitialICP;
    private boolean localUseFeedback;
@@ -301,8 +303,7 @@ public class ICPOptimizationController
       for (int i = 1; i < numberOfFootstepsToConsider + 1; i++)
          footstepRecursionMultiplierCalculator.submitTimes(i, doubleSupportDuration.getDoubleValue(), singleSupportDuration.getDoubleValue());
 
-      footstepRecursionMultiplierCalculator.computeRecursionMultipliers(numberOfFootstepsToConsider, isInTransfer.getBooleanValue(),
-            localUseTwoCMPs, omega0);
+      footstepRecursionMultiplierCalculator.computeRecursionMultipliers(numberOfFootstepsToConsider, isInTransfer.getBooleanValue(), localUseTwoCMPs, omega0);
 
       inputHandler.initializeForDoubleSupport(isStanding.getBooleanValue(), localUseTwoCMPs, transferToSide, omega0);
 
@@ -367,6 +368,8 @@ public class ICPOptimizationController
       localUseFeedbackWeightHardening = useFeedbackWeightHardening.getBooleanValue();
 
       localScaleUpcomingStepWeights = scaleUpcomingStepWeights.getBooleanValue();
+
+      localWasStepAdjusted = false;
    }
 
    private final FramePoint2d desiredCMP = new FramePoint2d();
@@ -437,10 +440,17 @@ public class ICPOptimizationController
          solutionHandler.computeReferenceFromSolutions(footstepSolutions, inputHandler, beginningOfStateICP, omega0, numberOfFootstepsToConsider);
          solutionHandler.computeNominalValues(upcomingFootstepLocations, inputHandler, beginningOfStateICP, omega0, numberOfFootstepsToConsider);
 
-         if (solutionHandler.wasFootstepAdjusted())
+         if (solutionHandler.getFootstepAdjustment().length() > 0.02 && !localWasStepAdjusted)
+         {
+            localWasStepAdjusted = true;
             upcomingDoubleSupportSplitFraction.set(doubleSupportSplitFractionUnderDisturbance.getDoubleValue());
-         else
+            footstepRecursionMultiplierCalculator.computeRecursionMultipliers(numberOfFootstepsToConsider, isInTransfer.getBooleanValue(), localUseTwoCMPs, omega0);
+         }
+         else if (solutionHandler.getFootstepAdjustment().length() <= 0.02 && localWasStepAdjusted)
+         {
+            localWasStepAdjusted = false;
             upcomingDoubleSupportSplitFraction.set(defaultDoubleSupportSplitFraction.getDoubleValue());
+         }
       }
 
       solutionHandler.getControllerReferenceCMP(desiredCMP);
