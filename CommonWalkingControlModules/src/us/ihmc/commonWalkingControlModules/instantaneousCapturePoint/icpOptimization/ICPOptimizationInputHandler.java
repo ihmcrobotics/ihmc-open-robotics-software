@@ -44,7 +44,7 @@ public class ICPOptimizationInputHandler
    private final DoubleYoVariable singleSupportDuration;
 
    private final DoubleYoVariable exitCMPDurationInPercentOfStepTime;
-   private final DoubleYoVariable doubleSupportSplitFraction;
+   private final DoubleYoVariable upcomingDoubleSupportSplitFraction;
 
    private final ArrayList<YoFramePointInMultipleFrames> entryCornerPoints = new ArrayList<>();
    private final ArrayList<YoFramePointInMultipleFrames> exitCornerPoints = new ArrayList<>();
@@ -55,7 +55,7 @@ public class ICPOptimizationInputHandler
    public ICPOptimizationInputHandler(CapturePointPlannerParameters icpPlannerParameters, BipedSupportPolygons bipedSupportPolygons,
          SideDependentList<? extends ContactablePlaneBody> contactableFeet, int maximumNumberOfFootstepsToConsider,
          FootstepRecursionMultiplierCalculator footstepRecursionMultiplierCalculator, DoubleYoVariable doubleSupportDuration,
-         DoubleYoVariable singleSupportDuration, DoubleYoVariable exitCMPDurationInPercentOfStepTime, DoubleYoVariable doubleSupportSplitFraction,
+         DoubleYoVariable singleSupportDuration, DoubleYoVariable exitCMPDurationInPercentOfStepTime, DoubleYoVariable upcomingDoubleSupportSplitFraction,
          boolean visualize, YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.footstepRecursionMultiplierCalculator = footstepRecursionMultiplierCalculator;
@@ -63,10 +63,9 @@ public class ICPOptimizationInputHandler
       this.doubleSupportDuration = doubleSupportDuration;
       this.singleSupportDuration = singleSupportDuration;
       this.exitCMPDurationInPercentOfStepTime = exitCMPDurationInPercentOfStepTime;
-      this.doubleSupportSplitFraction = doubleSupportSplitFraction;
+      this.upcomingDoubleSupportSplitFraction = upcomingDoubleSupportSplitFraction;
 
       exitCMPDurationInPercentOfStepTime.set(icpPlannerParameters.getTimeSpentOnExitCMPInPercentOfStepTime());
-      doubleSupportSplitFraction.set(icpPlannerParameters.getDoubleSupportSplitFraction());
 
       referenceCMPsCalculator = new ReferenceCentroidalMomentumPivotLocationsCalculator(namePrefix, bipedSupportPolygons, contactableFeet,
             maximumNumberOfFootstepsToConsider, registry);
@@ -178,7 +177,7 @@ public class ICPOptimizationInputHandler
 
    private void computeFinalICP(int numberOfFootstepsToConsider, boolean useTwoCMPs, boolean isInTransfer, double omega0)
    {
-      double doubleSupportTimeSpentBeforeEntryCornerPoint = doubleSupportDuration.getDoubleValue() * doubleSupportSplitFraction.getDoubleValue();
+      double doubleSupportTimeSpentBeforeEntryCornerPoint = doubleSupportDuration.getDoubleValue() * upcomingDoubleSupportSplitFraction.getDoubleValue();
       double steppingDuration = doubleSupportDuration.getDoubleValue() + singleSupportDuration.getDoubleValue();
 
       double totalTimeSpentOnExitCMP = steppingDuration * exitCMPDurationInPercentOfStepTime.getDoubleValue();

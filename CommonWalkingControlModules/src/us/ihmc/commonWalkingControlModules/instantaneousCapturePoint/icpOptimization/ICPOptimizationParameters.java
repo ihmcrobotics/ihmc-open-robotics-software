@@ -205,7 +205,19 @@ public abstract class ICPOptimizationParameters
     * This is used to prevent there being step adjustment in the last portion of a step, when more change cannot be realized.
     */
    public abstract double getRemainingTimeToStopAdjusting();
-   
+
+   /**
+    * Represents in percent of the current double support duration, how much time the transfer will spend before reaching the next entry CMP.
+    * The returned value should be between 0.0 and 1.0:
+    * <li> 0.0 is equivalent to spend the entire double support on the initial CMP (last entry CMP if using one CMP per support, last exit CMP otherwise), </li>
+    * <li> 1.0 is equivalent to spend the entire double support on the next entry CMP. </li>
+    * <p> A value close to 0.5 is preferable. </p>
+    */
+   public double getDoubleSupportSplitFractionUnderDisturbance()
+   {
+      return 0.1;
+   }
+
    /**
     * This method determines whether or not to use a discontinuous deadband.
     * If set true, the value of the deadband is not subtracted out, as normally done.
