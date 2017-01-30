@@ -156,6 +156,21 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
     */
    public abstract boolean doPrepareManipulationForLocomotion();
 
+   /**
+    * Specifies if the pelvis orientation controller should
+    * be initialized before starting to walk.
+    * When the controller is initialized, the pelvis will
+    * smoothly cancel out the user orientation offset on
+    * the first transfer of a walking sequence.
+    * 
+    * @return whether the pelvis orientation control should get prepared
+    *  for walking.
+    */
+   public boolean doPreparePelvisForLocomotion()
+   {
+      return true;
+   }
+
    public abstract boolean controlHeadAndHandsWithSliders();
 
    public abstract double getDefaultTransferTime();
