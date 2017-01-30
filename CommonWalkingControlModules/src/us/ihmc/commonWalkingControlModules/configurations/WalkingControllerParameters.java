@@ -171,6 +171,17 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
       return true;
    }
 
+   /**
+    * Specifies whether upper-body motion is allowed when the robot is walking
+    * or during any exchange support.
+    * 
+    * @return whether the upper-body can be moved during walking or not.
+    */
+   public boolean allowUpperBodyMotionDuringLocomotion()
+   {
+      return false;
+   }
+
    public abstract boolean controlHeadAndHandsWithSliders();
 
    public abstract double getDefaultTransferTime();
