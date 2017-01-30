@@ -113,7 +113,6 @@ public class AdjustingFootstepSnapper implements FootstepSnapper
    @Override
    public Footstep.FootstepType snapFootstep(Footstep footstep, HeightMapWithPoints heightMap){
       FootstepDataMessage originalFootstep = new FootstepDataMessage(footstep);
-
       //set to the sole pose
       Vector3d position = new Vector3d();
       Quat4d orientation = new Quat4d();
