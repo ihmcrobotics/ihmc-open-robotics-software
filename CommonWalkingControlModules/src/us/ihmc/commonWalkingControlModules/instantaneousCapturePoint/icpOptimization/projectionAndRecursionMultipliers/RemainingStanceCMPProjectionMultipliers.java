@@ -13,15 +13,15 @@ public class RemainingStanceCMPProjectionMultipliers
    private final EntryCMPProjectionMultiplier entryMultiplier;
    private final PreviousExitCMPProjectionMultiplier previousExitMultiplier;
 
-   public RemainingStanceCMPProjectionMultipliers(DoubleYoVariable doubleSupportSplitRatio,
+   public RemainingStanceCMPProjectionMultipliers(DoubleYoVariable defaultDoubleSupportSplitRatio, DoubleYoVariable upcomingDoubleSupportSplitRatio,
          DoubleYoVariable exitCMPDurationInPercentOfStepTime, DoubleYoVariable startOfSplineTime, DoubleYoVariable endOfSplineTime,
          DoubleYoVariable totalTrajectoryTime, YoVariableRegistry parentRegistry)
    {
-      exitMultiplier = new ExitCMPProjectionMultiplier(registry, doubleSupportSplitRatio, exitCMPDurationInPercentOfStepTime, startOfSplineTime,
+      exitMultiplier = new ExitCMPProjectionMultiplier(registry, defaultDoubleSupportSplitRatio, upcomingDoubleSupportSplitRatio, exitCMPDurationInPercentOfStepTime, startOfSplineTime,
             endOfSplineTime, totalTrajectoryTime);
-      entryMultiplier = new EntryCMPProjectionMultiplier(registry, doubleSupportSplitRatio, exitCMPDurationInPercentOfStepTime, startOfSplineTime,
+      entryMultiplier = new EntryCMPProjectionMultiplier(registry, defaultDoubleSupportSplitRatio, exitCMPDurationInPercentOfStepTime, startOfSplineTime,
             endOfSplineTime, totalTrajectoryTime);
-      previousExitMultiplier = new PreviousExitCMPProjectionMultiplier(registry, doubleSupportSplitRatio);
+      previousExitMultiplier = new PreviousExitCMPProjectionMultiplier(registry, defaultDoubleSupportSplitRatio);
 
       parentRegistry.addChild(registry);
    }

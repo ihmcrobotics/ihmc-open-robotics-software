@@ -20,11 +20,12 @@ public class FinalICPRecursionMultiplierTest
    {
       YoVariableRegistry registry = new YoVariableRegistry("robert");
       DoubleYoVariable yoOmega = new DoubleYoVariable("omega", registry);
-      DoubleYoVariable doubleSupportSplitFraction = new DoubleYoVariable("doubleSupportSplitFraction", registry);
+      DoubleYoVariable defaultDoubleSupportSplitFraction = new DoubleYoVariable("defaultDoubleSupportSplitFraction", registry);
+      DoubleYoVariable upcomingDoubleSupportSplitFraction = new DoubleYoVariable("upcomingDoubleSupportSplitFraction", registry);
       double omega = 3.0;
       yoOmega.set(omega);
 
-      FinalICPRecursionMultiplier finalICPRecursionMultiplier = new FinalICPRecursionMultiplier(registry, doubleSupportSplitFraction);
+      FinalICPRecursionMultiplier finalICPRecursionMultiplier = new FinalICPRecursionMultiplier(registry, defaultDoubleSupportSplitFraction, upcomingDoubleSupportSplitFraction);
       Random random = new Random();
 
       int maxSteps = 5;
@@ -48,7 +49,8 @@ public class FinalICPRecursionMultiplierTest
             String name = "number of steps = " + i;
 
             double splitFraction = 0.7 * random.nextDouble();
-            doubleSupportSplitFraction.set(splitFraction);
+            defaultDoubleSupportSplitFraction.set(splitFraction);
+            upcomingDoubleSupportSplitFraction.set(splitFraction);
 
             for (int step = 0; step < maxSteps; step++)
             {

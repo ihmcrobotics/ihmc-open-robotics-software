@@ -20,20 +20,21 @@ public class RemainingStanceCMPProjectionMultipliersTest
    {
       YoVariableRegistry registry = new YoVariableRegistry("robert");
 
-      DoubleYoVariable doubleSupportSplitRatio = new DoubleYoVariable("doubleSupportSplitRatio", registry);
+      DoubleYoVariable defaultDoubleSupportSplitRatio = new DoubleYoVariable("defaultDoubleSupportSplitRatio", registry);
+      DoubleYoVariable upcomingDoubleSupportSplitRatio = new DoubleYoVariable("upcomingDoubleSupportSplitRatio", registry);
       DoubleYoVariable exitRatio = new DoubleYoVariable("exitRatio", registry);
       DoubleYoVariable startOfSplineTime = new DoubleYoVariable("startOfSplineTime", registry);
       DoubleYoVariable endOfSplineTime = new DoubleYoVariable("endOfSplineTime", registry);
       DoubleYoVariable totalTrajectoryTime = new DoubleYoVariable("totalTrajectoryTime", registry);
 
-      ExitCMPProjectionMultiplier exitMultiplier = new ExitCMPProjectionMultiplier(registry, doubleSupportSplitRatio, exitRatio, startOfSplineTime, endOfSplineTime,
+      ExitCMPProjectionMultiplier exitMultiplier = new ExitCMPProjectionMultiplier(registry, defaultDoubleSupportSplitRatio, upcomingDoubleSupportSplitRatio,
+            exitRatio, startOfSplineTime, endOfSplineTime, totalTrajectoryTime);
+      EntryCMPProjectionMultiplier entryMultiplier = new EntryCMPProjectionMultiplier(registry, defaultDoubleSupportSplitRatio, exitRatio, startOfSplineTime, endOfSplineTime,
             totalTrajectoryTime);
-      EntryCMPProjectionMultiplier entryMultiplier = new EntryCMPProjectionMultiplier(registry, doubleSupportSplitRatio, exitRatio, startOfSplineTime, endOfSplineTime,
-            totalTrajectoryTime);
-      PreviousExitCMPProjectionMultiplier previosuMultiplier = new PreviousExitCMPProjectionMultiplier(registry, doubleSupportSplitRatio);
+      PreviousExitCMPProjectionMultiplier previosuMultiplier = new PreviousExitCMPProjectionMultiplier(registry, defaultDoubleSupportSplitRatio);
 
-      RemainingStanceCMPProjectionMultipliers remainingMultipliers = new RemainingStanceCMPProjectionMultipliers(doubleSupportSplitRatio, exitRatio,
-            startOfSplineTime, endOfSplineTime, totalTrajectoryTime, registry);
+      RemainingStanceCMPProjectionMultipliers remainingMultipliers = new RemainingStanceCMPProjectionMultipliers(defaultDoubleSupportSplitRatio, upcomingDoubleSupportSplitRatio,
+            exitRatio, startOfSplineTime, endOfSplineTime, totalTrajectoryTime, registry);
 
       ArrayList<DoubleYoVariable> doubleSupportDurations = new ArrayList<>();
       ArrayList<DoubleYoVariable> singleSupportDurations = new ArrayList<>();

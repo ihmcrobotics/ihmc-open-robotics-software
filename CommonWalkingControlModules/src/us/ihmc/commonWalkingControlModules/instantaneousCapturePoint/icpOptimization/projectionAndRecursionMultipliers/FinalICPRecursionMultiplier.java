@@ -1,7 +1,6 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.projectionAndRecursionMultipliers;
 
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 
 import java.util.ArrayList;
@@ -10,21 +9,20 @@ public class FinalICPRecursionMultiplier extends DoubleYoVariable
 {
    private static final String namePrefix = "finalICPRecursionMultiplier";
 
-   private final DoubleYoVariable doubleSupportSplitFraction;
+   private final DoubleYoVariable defaultDoubleSupportSplitFraction;
+   private final DoubleYoVariable upcomingDoubleSupportSplitFraction;
 
-   public FinalICPRecursionMultiplier(YoVariableRegistry registry, DoubleYoVariable doubleSupportSplitFraction)
+   public FinalICPRecursionMultiplier(YoVariableRegistry registry, DoubleYoVariable defaultDoubleSupportSplitFraction, DoubleYoVariable upcomingDoubleSupportSplitFraction)
    {
-      this(namePrefix, registry, doubleSupportSplitFraction);
+      this(namePrefix, registry, defaultDoubleSupportSplitFraction, upcomingDoubleSupportSplitFraction);
    }
 
-   public FinalICPRecursionMultiplier(String name, YoVariableRegistry registry, DoubleYoVariable doubleSupportSplitFraction)
+   public FinalICPRecursionMultiplier(String name, YoVariableRegistry registry, DoubleYoVariable defaultDoubleSupportSplitFraction, DoubleYoVariable upcomingDoubleSupportSplitFraction)
    {
       super(name, registry);
 
-      if (doubleSupportSplitFraction == null)
-         this.doubleSupportSplitFraction = new DoubleYoVariable(namePrefix + "_DoubleSupportSplitFraction", registry);
-      else
-         this.doubleSupportSplitFraction = doubleSupportSplitFraction;
+      this.defaultDoubleSupportSplitFraction = defaultDoubleSupportSplitFraction;
+      this.upcomingDoubleSupportSplitFraction = upcomingDoubleSupportSplitFraction;
    }
 
    public void compute(int numberOfStepsToConsider, ArrayList<DoubleYoVariable> doubleSupportDurations, ArrayList<DoubleYoVariable> singleSupportDurations,
@@ -38,12 +36,12 @@ public class FinalICPRecursionMultiplier extends DoubleYoVariable
       double timeToFinish;
       if (useTwoCMPs && isInTransfer)
       {
-         double endOfDoubleSupport = doubleSupportSplitFraction.getDoubleValue() * doubleSupportDurations.get(0).getDoubleValue();
+         double endOfDoubleSupport = defaultDoubleSupportSplitFraction.getDoubleValue() * doubleSupportDurations.get(0).getDoubleValue();
          timeToFinish = endOfDoubleSupport + doubleSupportDurations.get(0).getDoubleValue() + singleSupportDurations.get(0).getDoubleValue();
       }
       else
       {
-         timeToFinish = doubleSupportSplitFraction.getDoubleValue() * doubleSupportDurations.get(1).getDoubleValue();
+         timeToFinish = upcomingDoubleSupportSplitFraction.getDoubleValue() * doubleSupportDurations.get(1).getDoubleValue();
 
          if (isInTransfer)
             timeToFinish += singleSupportDurations.get(0).getDoubleValue();

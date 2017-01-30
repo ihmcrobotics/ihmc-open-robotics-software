@@ -109,9 +109,13 @@ public class ICPOptimizationController
    private final BooleanYoVariable hasNotConvergedInPast = new BooleanYoVariable(yoNamePrefix + "HasNotConvergedInPast", registry);
    private final IntegerYoVariable hasNotConvergedCounts = new IntegerYoVariable(yoNamePrefix + "HasNotConvergedCounts", registry);
 
+   private final BooleanYoVariable doingBigAdjustment = new BooleanYoVariable(yoNamePrefix + "DoingBigAdjustment", registry);
+
    private final DoubleYoVariable upcomingDoubleSupportSplitFraction;
    private final DoubleYoVariable defaultDoubleSupportSplitFraction;
    private final DoubleYoVariable doubleSupportSplitFractionUnderDisturbance;
+   private final DoubleYoVariable magnitudeForBigAdjustment;
+   private final boolean useDifferentSplitRatioForBigAdjustment;
 
    private final ICPOptimizationSolver solver;
    private final FootstepRecursionMultiplierCalculator footstepRecursionMultiplierCalculator;
@@ -126,8 +130,6 @@ public class ICPOptimizationController
    private final double controlDT;
    private final double dynamicRelaxationDoubleSupportWeightModifier;
    private final int maximumNumberOfFootstepsToConsider;
-
-   private boolean localWasStepAdjusted;
 
    private boolean localUseTwoCMPs;
    private boolean localUseInitialICP;
@@ -197,11 +199,14 @@ public class ICPOptimizationController
       defaultDoubleSupportSplitFraction = new DoubleYoVariable(yoNamePrefix + "DefaultDoubleSupportSplitFraction", registry);
       doubleSupportSplitFractionUnderDisturbance = new DoubleYoVariable(yoNamePrefix + "DoubleSupportSplitFractionUnderDisturbance", registry);
       upcomingDoubleSupportSplitFraction = new DoubleYoVariable(yoNamePrefix + "UpcomingDoubleSupportSplitFraction", registry);
+      magnitudeForBigAdjustment = new DoubleYoVariable(yoNamePrefix + "MagnitudeForBigAdjustment", registry);
 
       exitCMPDurationInPercentOfStepTime.set(icpPlannerParameters.getTimeSpentOnExitCMPInPercentOfStepTime());
       defaultDoubleSupportSplitFraction.set(icpPlannerParameters.getDoubleSupportSplitFraction());
-      doubleSupportSplitFractionUnderDisturbance.set(icpOptimizationParameters.getDoubleSupportSplitFractionUnderDisturbance());
+      doubleSupportSplitFractionUnderDisturbance.set(icpOptimizationParameters.getDoubleSupportSplitFractionForBigAdjustment());
       upcomingDoubleSupportSplitFraction.set(icpPlannerParameters.getDoubleSupportSplitFraction());
+      magnitudeForBigAdjustment.set(icpOptimizationParameters.getMagnitudeForBigAdjustment());
+      useDifferentSplitRatioForBigAdjustment = icpOptimizationParameters.useDifferentSplitRatioForBigAdjustment();
 
       footstepRecursionMultiplierCalculator = new FootstepRecursionMultiplierCalculator(icpPlannerParameters, exitCMPDurationInPercentOfStepTime,
             defaultDoubleSupportSplitFraction, upcomingDoubleSupportSplitFraction, maximumNumberOfFootstepsToConsider, registry);
@@ -368,8 +373,7 @@ public class ICPOptimizationController
       localUseFeedbackWeightHardening = useFeedbackWeightHardening.getBooleanValue();
 
       localScaleUpcomingStepWeights = scaleUpcomingStepWeights.getBooleanValue();
-
-      localWasStepAdjusted = false;
+      doingBigAdjustment.set(false);
    }
 
    private final FramePoint2d desiredCMP = new FramePoint2d();
@@ -440,16 +444,14 @@ public class ICPOptimizationController
          solutionHandler.computeReferenceFromSolutions(footstepSolutions, inputHandler, beginningOfStateICP, omega0, numberOfFootstepsToConsider);
          solutionHandler.computeNominalValues(upcomingFootstepLocations, inputHandler, beginningOfStateICP, omega0, numberOfFootstepsToConsider);
 
-         if (solutionHandler.getFootstepAdjustment().length() > 0.02 && !localWasStepAdjusted)
+         if (solutionHandler.getFootstepAdjustment().length() > magnitudeForBigAdjustment.getDoubleValue())
          {
-            localWasStepAdjusted = true;
-            upcomingDoubleSupportSplitFraction.set(doubleSupportSplitFractionUnderDisturbance.getDoubleValue());
-            footstepRecursionMultiplierCalculator.computeRecursionMultipliers(numberOfFootstepsToConsider, isInTransfer.getBooleanValue(), localUseTwoCMPs, omega0);
-         }
-         else if (solutionHandler.getFootstepAdjustment().length() <= 0.02 && localWasStepAdjusted)
-         {
-            localWasStepAdjusted = false;
-            upcomingDoubleSupportSplitFraction.set(defaultDoubleSupportSplitFraction.getDoubleValue());
+            if (!doingBigAdjustment.getBooleanValue() && useDifferentSplitRatioForBigAdjustment)
+            {
+               doingBigAdjustment.set(true);
+               upcomingDoubleSupportSplitFraction.set(doubleSupportSplitFractionUnderDisturbance.getDoubleValue());
+               footstepRecursionMultiplierCalculator.computeRecursionMultipliers(numberOfFootstepsToConsider, isInTransfer.getBooleanValue(), localUseTwoCMPs, omega0);
+            }
          }
       }
 
