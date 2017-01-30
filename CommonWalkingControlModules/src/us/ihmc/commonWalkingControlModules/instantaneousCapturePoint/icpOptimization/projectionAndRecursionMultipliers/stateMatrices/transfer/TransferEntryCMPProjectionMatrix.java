@@ -7,13 +7,13 @@ import java.util.ArrayList;
 
 public class TransferEntryCMPProjectionMatrix extends DenseMatrix64F
 {
-   private final DoubleYoVariable doubleSupportSplitRatio;
+   private final DoubleYoVariable defaultDoubleSupportSplitRatio;
 
-   public TransferEntryCMPProjectionMatrix(DoubleYoVariable doubleSupportSplitRatio)
+   public TransferEntryCMPProjectionMatrix(DoubleYoVariable defaultDoubleSupportSplitRatio)
    {
       super(4, 1);
 
-      this.doubleSupportSplitRatio = doubleSupportSplitRatio;
+      this.defaultDoubleSupportSplitRatio = defaultDoubleSupportSplitRatio;
    }
 
    public void reset()
@@ -32,8 +32,8 @@ public class TransferEntryCMPProjectionMatrix extends DenseMatrix64F
 
       if (useTwoCMPs)
       {
-         double initialDoubleSupportDuration = doubleSupportSplitRatio.getDoubleValue() * doubleSupportDuration;
-         double endOfDoubleSupportDuration = (1.0 - doubleSupportSplitRatio.getDoubleValue()) * doubleSupportDuration;
+         double initialDoubleSupportDuration = defaultDoubleSupportSplitRatio.getDoubleValue() * doubleSupportDuration;
+         double endOfDoubleSupportDuration = (1.0 - defaultDoubleSupportSplitRatio.getDoubleValue()) * doubleSupportDuration;
 
          double initialDoubleSupportProjection = Math.exp(-omega0 * initialDoubleSupportDuration);
          double endOfDoubleSupportProjection = Math.exp(-omega0 * endOfDoubleSupportDuration);

@@ -29,7 +29,8 @@ public class CurrentStateProjectionMultiplierTest
       YoVariableRegistry registry = new YoVariableRegistry("registry");
 
       DoubleYoVariable omega = new DoubleYoVariable("omega", registry);
-      DoubleYoVariable doubleSupportSplitRatio = new DoubleYoVariable("doubleSupportSplitRatio", registry);
+      DoubleYoVariable defaultDoubleSupportSplitRatio = new DoubleYoVariable("defaultDoubleSupportSplitRatio", registry);
+      DoubleYoVariable upcomingDoubleSupportSplitRatio = new DoubleYoVariable("upcomingDoubleSupportSplitRatio", registry);
       DoubleYoVariable exitCMPDurationInPercentOfSteptime = new DoubleYoVariable("exitCMPDurationInPercentOfSteptime", registry);
       DoubleYoVariable startOfSplineTime = new DoubleYoVariable("startOfSplineTime", registry);
       DoubleYoVariable endOfSplineTime = new DoubleYoVariable("endOfSplineTime", registry);
@@ -46,8 +47,8 @@ public class CurrentStateProjectionMultiplierTest
       ArrayList<DoubleYoVariable> singleSupportDurations = new ArrayList<>();
       singleSupportDurations.add(singleSupportDuration);
 
-      CurrentStateProjectionMultiplier multiplier = new CurrentStateProjectionMultiplier(registry, doubleSupportSplitRatio, startOfSplineTime, endOfSplineTime,
-            totalTrajectoryTime);
+      CurrentStateProjectionMultiplier multiplier = new CurrentStateProjectionMultiplier(registry, defaultDoubleSupportSplitRatio, upcomingDoubleSupportSplitRatio,
+            startOfSplineTime, endOfSplineTime, totalTrajectoryTime);
 
       int iters = 100;
       for (int i = 0; i < iters; i++)
@@ -57,7 +58,8 @@ public class CurrentStateProjectionMultiplierTest
          double exitRatio = 0.7 * random.nextDouble();
 
          omega.set(omega0);
-         doubleSupportSplitRatio.set(splitRatio);
+         defaultDoubleSupportSplitRatio.set(splitRatio);
+         upcomingDoubleSupportSplitRatio.set(splitRatio);
          exitCMPDurationInPercentOfSteptime.set(exitRatio);
 
          double currentDoubleSupport = 2.0 * random.nextDouble();
@@ -101,7 +103,8 @@ public class CurrentStateProjectionMultiplierTest
       YoVariableRegistry registry = new YoVariableRegistry("registry");
 
       DoubleYoVariable omega = new DoubleYoVariable("omega", registry);
-      DoubleYoVariable doubleSupportSplitRatio = new DoubleYoVariable("doubleSupportSplitRatio", registry);
+      DoubleYoVariable defaultDoubleSupportSplitRatio = new DoubleYoVariable("defaultDoubleSupportSplitRatio", registry);
+      DoubleYoVariable upcomingDoubleSupportSplitRatio = new DoubleYoVariable("upcomingDoubleSupportSplitRatio", registry);
       DoubleYoVariable exitCMPDurationInPercentOfSteptime = new DoubleYoVariable("exitCMPDurationInPercentOfSteptime", registry);
       DoubleYoVariable startOfSplineTime = new DoubleYoVariable("startOfSplineTime", registry);
       DoubleYoVariable endOfSplineTime = new DoubleYoVariable("endOfSplineTime", registry);
@@ -118,8 +121,8 @@ public class CurrentStateProjectionMultiplierTest
       ArrayList<DoubleYoVariable> singleSupportDurations = new ArrayList<>();
       singleSupportDurations.add(singleSupportDuration);
 
-      CurrentStateProjectionMultiplier multiplier = new CurrentStateProjectionMultiplier(registry, doubleSupportSplitRatio, startOfSplineTime, endOfSplineTime,
-            totalTrajectoryTime);
+      CurrentStateProjectionMultiplier multiplier = new CurrentStateProjectionMultiplier(registry, defaultDoubleSupportSplitRatio, upcomingDoubleSupportSplitRatio,
+            startOfSplineTime, endOfSplineTime, totalTrajectoryTime);
 
       int iters = 100;
       for (int i = 0; i < iters; i++)
@@ -129,7 +132,8 @@ public class CurrentStateProjectionMultiplierTest
          double exitRatio = 0.7 * random.nextDouble();
 
          omega.set(omega0);
-         doubleSupportSplitRatio.set(splitRatio);
+         defaultDoubleSupportSplitRatio.set(splitRatio);
+         upcomingDoubleSupportSplitRatio.set(splitRatio);
          exitCMPDurationInPercentOfSteptime.set(exitRatio);
 
          double currentDoubleSupport = 2.0 * random.nextDouble();
@@ -173,7 +177,8 @@ public class CurrentStateProjectionMultiplierTest
       YoVariableRegistry registry = new YoVariableRegistry("registry");
 
       DoubleYoVariable omega = new DoubleYoVariable("omega", registry);
-      DoubleYoVariable doubleSupportSplitRatio = new DoubleYoVariable("doubleSupportSplitRatio", registry);
+      DoubleYoVariable defaultDoubleSupportSplitRatio = new DoubleYoVariable("defaultDoubleSupportSplitRatio", registry);
+      DoubleYoVariable upcomingDoubleSupportSplitRatio = new DoubleYoVariable("upcomingDoubleSupportSplitRatio", registry);
       DoubleYoVariable exitCMPDurationInPercentOfSteptime = new DoubleYoVariable("exitCMPDurationInPercentOfSteptime", registry);
       DoubleYoVariable startOfSplineTime = new DoubleYoVariable("startOfSplineTime", registry);
       DoubleYoVariable endOfSplineTime = new DoubleYoVariable("endOfSplineTime", registry);
@@ -190,8 +195,8 @@ public class CurrentStateProjectionMultiplierTest
       ArrayList<DoubleYoVariable> singleSupportDurations = new ArrayList<>();
       singleSupportDurations.add(singleSupportDuration);
 
-      CurrentStateProjectionMultiplier multiplier = new CurrentStateProjectionMultiplier(registry, doubleSupportSplitRatio, startOfSplineTime, endOfSplineTime,
-            totalTrajectoryTime);
+      CurrentStateProjectionMultiplier multiplier = new CurrentStateProjectionMultiplier(registry, defaultDoubleSupportSplitRatio, upcomingDoubleSupportSplitRatio,
+            startOfSplineTime, endOfSplineTime, totalTrajectoryTime);
       TransferStateEndRecursionMatrix transferStateEndRecursionMatrix = new TransferStateEndRecursionMatrix();
 
       CubicProjectionMatrix cubicProjectionMatrix = new CubicProjectionMatrix();
@@ -205,7 +210,8 @@ public class CurrentStateProjectionMultiplierTest
          double exitRatio = 0.7 * random.nextDouble();
 
          omega.set(omega0);
-         doubleSupportSplitRatio.set(splitRatio);
+         defaultDoubleSupportSplitRatio.set(splitRatio);
+         upcomingDoubleSupportSplitRatio.set(splitRatio);
          exitCMPDurationInPercentOfSteptime.set(exitRatio);
 
          double currentDoubleSupport = 2.0 * random.nextDouble();
@@ -257,7 +263,8 @@ public class CurrentStateProjectionMultiplierTest
       YoVariableRegistry registry = new YoVariableRegistry("registry");
 
       DoubleYoVariable omega = new DoubleYoVariable("omega", registry);
-      DoubleYoVariable doubleSupportSplitRatio = new DoubleYoVariable("doubleSupportSplitRatio", registry);
+      DoubleYoVariable defaultDoubleSupportSplitRatio = new DoubleYoVariable("defaultDoubleSupportSplitRatio", registry);
+      DoubleYoVariable upcomingDoubleSupportSplitRatio = new DoubleYoVariable("upcomingDoubleSupportSplitRatio", registry);
       DoubleYoVariable exitCMPDurationInPercentOfSteptime = new DoubleYoVariable("exitCMPDurationInPercentOfSteptime", registry);
       DoubleYoVariable startOfSplineTime = new DoubleYoVariable("startOfSplineTime", registry);
       DoubleYoVariable endOfSplineTime = new DoubleYoVariable("endOfSplineTime", registry);
@@ -274,8 +281,8 @@ public class CurrentStateProjectionMultiplierTest
       ArrayList<DoubleYoVariable> singleSupportDurations = new ArrayList<>();
       singleSupportDurations.add(singleSupportDuration);
 
-      CurrentStateProjectionMultiplier multiplier = new CurrentStateProjectionMultiplier(registry, doubleSupportSplitRatio, startOfSplineTime, endOfSplineTime,
-            totalTrajectoryTime);
+      CurrentStateProjectionMultiplier multiplier = new CurrentStateProjectionMultiplier(registry, upcomingDoubleSupportSplitRatio, upcomingDoubleSupportSplitRatio,
+            startOfSplineTime, endOfSplineTime, totalTrajectoryTime);
       TransferStateEndRecursionMatrix transferStateEndRecursionMatrix = new TransferStateEndRecursionMatrix();
 
       CubicProjectionMatrix cubicProjectionMatrix = new CubicProjectionMatrix();
@@ -289,7 +296,8 @@ public class CurrentStateProjectionMultiplierTest
          double exitRatio = 0.7 * random.nextDouble();
 
          omega.set(omega0);
-         doubleSupportSplitRatio.set(splitRatio);
+         defaultDoubleSupportSplitRatio.set(splitRatio);
+         upcomingDoubleSupportSplitRatio.set(splitRatio);
          exitCMPDurationInPercentOfSteptime.set(exitRatio);
 
          double currentDoubleSupport = 2.0 * random.nextDouble();
@@ -342,7 +350,8 @@ public class CurrentStateProjectionMultiplierTest
       YoVariableRegistry registry = new YoVariableRegistry("registry");
 
       DoubleYoVariable omega = new DoubleYoVariable("omega", registry);
-      DoubleYoVariable doubleSupportSplitRatio = new DoubleYoVariable("doubleSupportSplitRatio", registry);
+      DoubleYoVariable defaultDoubleSupportSplitRatio = new DoubleYoVariable("defaultDoubleSupportSplitRatio", registry);
+      DoubleYoVariable upcomingDoubleSupportSplitRatio = new DoubleYoVariable("upcomingDoubleSupportSplitRatio", registry);
       DoubleYoVariable exitCMPDurationInPercentOfSteptime = new DoubleYoVariable("exitCMPDurationInPercentOfSteptime", registry);
       DoubleYoVariable startOfSplineTime = new DoubleYoVariable("startOfSplineTime", registry);
       DoubleYoVariable endOfSplineTime = new DoubleYoVariable("endOfSplineTime", registry);
@@ -359,8 +368,8 @@ public class CurrentStateProjectionMultiplierTest
       ArrayList<DoubleYoVariable> singleSupportDurations = new ArrayList<>();
       singleSupportDurations.add(singleSupportDuration);
 
-      CurrentStateProjectionMultiplier multiplier = new CurrentStateProjectionMultiplier(registry, doubleSupportSplitRatio, startOfSplineTime, endOfSplineTime,
-            totalTrajectoryTime);
+      CurrentStateProjectionMultiplier multiplier = new CurrentStateProjectionMultiplier(registry, defaultDoubleSupportSplitRatio, upcomingDoubleSupportSplitRatio,
+            startOfSplineTime, endOfSplineTime, totalTrajectoryTime);
 
       int iters = 100;
       for (int i = 0; i < iters; i++)
@@ -370,7 +379,8 @@ public class CurrentStateProjectionMultiplierTest
          double exitRatio = 0.7 * random.nextDouble();
 
          omega.set(omega0);
-         doubleSupportSplitRatio.set(splitRatio);
+         defaultDoubleSupportSplitRatio.set(splitRatio);
+         upcomingDoubleSupportSplitRatio.set(splitRatio);
          exitCMPDurationInPercentOfSteptime.set(exitRatio);
 
          double currentDoubleSupport = 2.0 * random.nextDouble();
@@ -420,7 +430,8 @@ public class CurrentStateProjectionMultiplierTest
       YoVariableRegistry registry = new YoVariableRegistry("registry");
 
       DoubleYoVariable omega = new DoubleYoVariable("omega", registry);
-      DoubleYoVariable doubleSupportSplitRatio = new DoubleYoVariable("doubleSupportSplitRatio", registry);
+      DoubleYoVariable defaultDoubleSupportSplitRatio = new DoubleYoVariable("defaultDoubleSupportSplitRatio", registry);
+      DoubleYoVariable upcomingDoubleSupportSplitRatio = new DoubleYoVariable("upcomingDoubleSupportSplitRatio", registry);
       DoubleYoVariable exitCMPDurationInPercentOfSteptime = new DoubleYoVariable("exitCMPDurationInPercentOfSteptime", registry);
       DoubleYoVariable startOfSplineTime = new DoubleYoVariable("startOfSplineTime", registry);
       DoubleYoVariable endOfSplineTime = new DoubleYoVariable("endOfSplineTime", registry);
@@ -437,8 +448,8 @@ public class CurrentStateProjectionMultiplierTest
       ArrayList<DoubleYoVariable> singleSupportDurations = new ArrayList<>();
       singleSupportDurations.add(singleSupportDuration);
 
-      CurrentStateProjectionMultiplier multiplier = new CurrentStateProjectionMultiplier(registry, doubleSupportSplitRatio, startOfSplineTime, endOfSplineTime,
-            totalTrajectoryTime);
+      CurrentStateProjectionMultiplier multiplier = new CurrentStateProjectionMultiplier(registry, defaultDoubleSupportSplitRatio, upcomingDoubleSupportSplitRatio,
+            startOfSplineTime, endOfSplineTime, totalTrajectoryTime);
 
       int iters = 100;
       for (int i = 0; i < iters; i++)
@@ -448,7 +459,8 @@ public class CurrentStateProjectionMultiplierTest
          double exitRatio = 0.7 * random.nextDouble();
 
          omega.set(omega0);
-         doubleSupportSplitRatio.set(splitRatio);
+         defaultDoubleSupportSplitRatio.set(splitRatio);
+         upcomingDoubleSupportSplitRatio.set(splitRatio);
          exitCMPDurationInPercentOfSteptime.set(exitRatio);
 
          double currentDoubleSupport = 2.0 * random.nextDouble();
@@ -489,7 +501,8 @@ public class CurrentStateProjectionMultiplierTest
       YoVariableRegistry registry = new YoVariableRegistry("registry");
 
       DoubleYoVariable omega = new DoubleYoVariable("omega", registry);
-      DoubleYoVariable doubleSupportSplitRatio = new DoubleYoVariable("doubleSupportSplitRatio", registry);
+      DoubleYoVariable defaultDoubleSupportSplitRatio = new DoubleYoVariable("defaultDoubleSupportSplitRatio", registry);
+      DoubleYoVariable upcomingDoubleSupportSplitRatio = new DoubleYoVariable("upcomingDoubleSupportSplitRatio", registry);
       DoubleYoVariable exitCMPDurationInPercentOfSteptime = new DoubleYoVariable("exitCMPDurationInPercentOfSteptime", registry);
       DoubleYoVariable startOfSplineTime = new DoubleYoVariable("startOfSplineTime", registry);
       DoubleYoVariable endOfSplineTime = new DoubleYoVariable("endOfSplineTime", registry);
@@ -506,8 +519,8 @@ public class CurrentStateProjectionMultiplierTest
       ArrayList<DoubleYoVariable> singleSupportDurations = new ArrayList<>();
       singleSupportDurations.add(singleSupportDuration);
 
-      CurrentStateProjectionMultiplier multiplier = new CurrentStateProjectionMultiplier(registry, doubleSupportSplitRatio, startOfSplineTime, endOfSplineTime,
-            totalTrajectoryTime);
+      CurrentStateProjectionMultiplier multiplier = new CurrentStateProjectionMultiplier(registry, defaultDoubleSupportSplitRatio, upcomingDoubleSupportSplitRatio,
+            startOfSplineTime, endOfSplineTime, totalTrajectoryTime);
 
       int iters = 100;
       for (int i = 0; i < iters; i++)
@@ -517,7 +530,8 @@ public class CurrentStateProjectionMultiplierTest
          double exitRatio = 0.7 * random.nextDouble();
 
          omega.set(omega0);
-         doubleSupportSplitRatio.set(splitRatio);
+         defaultDoubleSupportSplitRatio.set(splitRatio);
+         upcomingDoubleSupportSplitRatio.set(splitRatio);
          exitCMPDurationInPercentOfSteptime.set(exitRatio);
 
          double currentDoubleSupport = 2.0 * random.nextDouble();
@@ -563,7 +577,8 @@ public class CurrentStateProjectionMultiplierTest
       YoVariableRegistry registry = new YoVariableRegistry("registry");
 
       DoubleYoVariable omega = new DoubleYoVariable("omega", registry);
-      DoubleYoVariable doubleSupportSplitRatio = new DoubleYoVariable("doubleSupportSplitRatio", registry);
+      DoubleYoVariable defaultDoubleSupportSplitRatio = new DoubleYoVariable("defaultDoubleSupportSplitRatio", registry);
+      DoubleYoVariable upcomingDoubleSupportSplitRatio = new DoubleYoVariable("upcomingDoubleSupportSplitRatio", registry);
       DoubleYoVariable exitCMPDurationInPercentOfSteptime = new DoubleYoVariable("exitCMPDurationInPercentOfSteptime", registry);
       DoubleYoVariable startOfSplineTime = new DoubleYoVariable("startOfSplineTime", registry);
       DoubleYoVariable endOfSplineTime = new DoubleYoVariable("endOfSplineTime", registry);
@@ -580,8 +595,8 @@ public class CurrentStateProjectionMultiplierTest
       ArrayList<DoubleYoVariable> singleSupportDurations = new ArrayList<>();
       singleSupportDurations.add(singleSupportDuration);
 
-      CurrentStateProjectionMultiplier multiplier = new CurrentStateProjectionMultiplier(registry, doubleSupportSplitRatio, startOfSplineTime, endOfSplineTime,
-            totalTrajectoryTime);
+      CurrentStateProjectionMultiplier multiplier = new CurrentStateProjectionMultiplier(registry, defaultDoubleSupportSplitRatio, upcomingDoubleSupportSplitRatio,
+            startOfSplineTime, endOfSplineTime, totalTrajectoryTime);
 
       int iters = 100;
       for (int i = 0; i < iters; i++)
@@ -591,7 +606,8 @@ public class CurrentStateProjectionMultiplierTest
          double exitRatio = 0.7 * random.nextDouble();
 
          omega.set(omega0);
-         doubleSupportSplitRatio.set(splitRatio);
+         defaultDoubleSupportSplitRatio.set(splitRatio);
+         upcomingDoubleSupportSplitRatio.set(splitRatio);
          exitCMPDurationInPercentOfSteptime.set(exitRatio);
 
          double currentDoubleSupport = 2.0 * random.nextDouble();
@@ -637,7 +653,8 @@ public class CurrentStateProjectionMultiplierTest
       YoVariableRegistry registry = new YoVariableRegistry("registry");
 
       DoubleYoVariable omega = new DoubleYoVariable("omega", registry);
-      DoubleYoVariable doubleSupportSplitRatio = new DoubleYoVariable("doubleSupportSplitRatio", registry);
+      DoubleYoVariable defaultDoubleSupportSplitRatio = new DoubleYoVariable("defaultDoubleSupportSplitRatio", registry);
+      DoubleYoVariable upcomingDoubleSupportSplitRatio = new DoubleYoVariable("upcomingDoubleSupportSplitRatio", registry);
       DoubleYoVariable exitCMPDurationInPercentOfSteptime = new DoubleYoVariable("exitCMPDurationInPercentOfSteptime", registry);
       DoubleYoVariable startOfSplineTime = new DoubleYoVariable("startOfSplineTime", registry);
       DoubleYoVariable endOfSplineTime = new DoubleYoVariable("endOfSplineTime", registry);
@@ -654,11 +671,11 @@ public class CurrentStateProjectionMultiplierTest
       ArrayList<DoubleYoVariable> singleSupportDurations = new ArrayList<>();
       singleSupportDurations.add(singleSupportDuration);
 
-      CurrentStateProjectionMultiplier multiplier = new CurrentStateProjectionMultiplier(registry, doubleSupportSplitRatio, startOfSplineTime, endOfSplineTime,
-            totalTrajectoryTime);
+      CurrentStateProjectionMultiplier multiplier = new CurrentStateProjectionMultiplier(registry, defaultDoubleSupportSplitRatio, upcomingDoubleSupportSplitRatio,
+            startOfSplineTime, endOfSplineTime, totalTrajectoryTime);
 
-      SwingStateEndRecursionMatrix swingStateEndRecursionMatrix = new SwingStateEndRecursionMatrix(doubleSupportSplitRatio, startOfSplineTime, endOfSplineTime,
-            totalTrajectoryTime);
+      SwingStateEndRecursionMatrix swingStateEndRecursionMatrix = new SwingStateEndRecursionMatrix(defaultDoubleSupportSplitRatio, upcomingDoubleSupportSplitRatio,
+            startOfSplineTime, endOfSplineTime, totalTrajectoryTime);
       CubicProjectionMatrix cubicProjectionMatrix = new CubicProjectionMatrix();
       CubicProjectionDerivativeMatrix cubicProjectionDerivativeMatrix = new CubicProjectionDerivativeMatrix();
       int iters = 100;
@@ -669,7 +686,8 @@ public class CurrentStateProjectionMultiplierTest
          double exitRatio = 0.7 * random.nextDouble();
 
          omega.set(omega0);
-         doubleSupportSplitRatio.set(splitRatio);
+         defaultDoubleSupportSplitRatio.set(splitRatio);
+         upcomingDoubleSupportSplitRatio.set(splitRatio);
          exitCMPDurationInPercentOfSteptime.set(exitRatio);
 
          double currentDoubleSupport = 2.0 * random.nextDouble();
@@ -726,7 +744,8 @@ public class CurrentStateProjectionMultiplierTest
       YoVariableRegistry registry = new YoVariableRegistry("registry");
 
       DoubleYoVariable omega = new DoubleYoVariable("omega", registry);
-      DoubleYoVariable doubleSupportSplitRatio = new DoubleYoVariable("doubleSupportSplitRatio", registry);
+      DoubleYoVariable defaultDoubleSupportSplitRatio = new DoubleYoVariable("defaultDoubleSupportSplitRatio", registry);
+      DoubleYoVariable upcomingDoubleSupportSplitRatio = new DoubleYoVariable("upcomingDoubleSupportSplitRatio", registry);
       DoubleYoVariable exitCMPDurationInPercentOfSteptime = new DoubleYoVariable("exitCMPDurationInPercentOfSteptime", registry);
       DoubleYoVariable startOfSplineTime = new DoubleYoVariable("startOfSplineTime", registry);
       DoubleYoVariable endOfSplineTime = new DoubleYoVariable("endOfSplineTime", registry);
@@ -743,11 +762,11 @@ public class CurrentStateProjectionMultiplierTest
       ArrayList<DoubleYoVariable> singleSupportDurations = new ArrayList<>();
       singleSupportDurations.add(singleSupportDuration);
 
-      CurrentStateProjectionMultiplier multiplier = new CurrentStateProjectionMultiplier(registry, doubleSupportSplitRatio, startOfSplineTime, endOfSplineTime,
-            totalTrajectoryTime);
+      CurrentStateProjectionMultiplier multiplier = new CurrentStateProjectionMultiplier(registry, defaultDoubleSupportSplitRatio, upcomingDoubleSupportSplitRatio,
+            startOfSplineTime, endOfSplineTime, totalTrajectoryTime);
 
-      SwingStateEndRecursionMatrix swingStateEndRecursionMatrix = new SwingStateEndRecursionMatrix(doubleSupportSplitRatio, startOfSplineTime, endOfSplineTime,
-            totalTrajectoryTime);
+      SwingStateEndRecursionMatrix swingStateEndRecursionMatrix = new SwingStateEndRecursionMatrix(defaultDoubleSupportSplitRatio, upcomingDoubleSupportSplitRatio,
+            startOfSplineTime, endOfSplineTime, totalTrajectoryTime);
       CubicProjectionMatrix cubicProjectionMatrix = new CubicProjectionMatrix();
       CubicProjectionDerivativeMatrix cubicProjectionDerivativeMatrix = new CubicProjectionDerivativeMatrix();
       int iters = 100;
@@ -758,7 +777,8 @@ public class CurrentStateProjectionMultiplierTest
          double exitRatio = 0.7 * random.nextDouble();
 
          omega.set(omega0);
-         doubleSupportSplitRatio.set(splitRatio);
+         defaultDoubleSupportSplitRatio.set(splitRatio);
+         upcomingDoubleSupportSplitRatio.set(splitRatio);
          exitCMPDurationInPercentOfSteptime.set(exitRatio);
 
          double currentDoubleSupport = 2.0 * random.nextDouble();
@@ -815,7 +835,8 @@ public class CurrentStateProjectionMultiplierTest
       YoVariableRegistry registry = new YoVariableRegistry("registry");
 
       DoubleYoVariable omega = new DoubleYoVariable("omega", registry);
-      DoubleYoVariable doubleSupportSplitRatio = new DoubleYoVariable("doubleSupportSplitRatio", registry);
+      DoubleYoVariable defaultDoubleSupportSplitRatio = new DoubleYoVariable("defaultDoubleSupportSplitRatio", registry);
+      DoubleYoVariable upcomingDoubleSupportSplitRatio = new DoubleYoVariable("upcomingDoubleSupportSplitRatio", registry);
       DoubleYoVariable exitCMPDurationInPercentOfSteptime = new DoubleYoVariable("exitCMPDurationInPercentOfSteptime", registry);
       DoubleYoVariable startOfSplineTime = new DoubleYoVariable("startOfSplineTime", registry);
       DoubleYoVariable endOfSplineTime = new DoubleYoVariable("endOfSplineTime", registry);
@@ -832,8 +853,8 @@ public class CurrentStateProjectionMultiplierTest
       ArrayList<DoubleYoVariable> singleSupportDurations = new ArrayList<>();
       singleSupportDurations.add(singleSupportDuration);
 
-      CurrentStateProjectionMultiplier multiplier = new CurrentStateProjectionMultiplier(registry, doubleSupportSplitRatio, startOfSplineTime, endOfSplineTime,
-            totalTrajectoryTime);
+      CurrentStateProjectionMultiplier multiplier = new CurrentStateProjectionMultiplier(registry, defaultDoubleSupportSplitRatio, upcomingDoubleSupportSplitRatio,
+            startOfSplineTime, endOfSplineTime, totalTrajectoryTime);
       TransferStateEndRecursionMatrix transferStateEndRecursionMatrix = new TransferStateEndRecursionMatrix();
 
       CubicProjectionMatrix cubicProjectionMatrix = new CubicProjectionMatrix();
@@ -847,7 +868,8 @@ public class CurrentStateProjectionMultiplierTest
          double exitRatio = 0.7 * random.nextDouble();
 
          omega.set(omega0);
-         doubleSupportSplitRatio.set(splitRatio);
+         defaultDoubleSupportSplitRatio.set(splitRatio);
+         upcomingDoubleSupportSplitRatio.set(splitRatio);
          exitCMPDurationInPercentOfSteptime.set(exitRatio);
 
          double currentDoubleSupport = 2.0 * random.nextDouble();
@@ -899,7 +921,8 @@ public class CurrentStateProjectionMultiplierTest
       YoVariableRegistry registry = new YoVariableRegistry("registry");
 
       DoubleYoVariable omega = new DoubleYoVariable("omega", registry);
-      DoubleYoVariable doubleSupportSplitRatio = new DoubleYoVariable("doubleSupportSplitRatio", registry);
+      DoubleYoVariable defaultDoubleSupportSplitRatio = new DoubleYoVariable("defaultDoubleSupportSplitRatio", registry);
+      DoubleYoVariable upcomingDoubleSupportSplitRatio = new DoubleYoVariable("upcomingDoubleSupportSplitRatio", registry);
       DoubleYoVariable exitCMPDurationInPercentOfSteptime = new DoubleYoVariable("exitCMPDurationInPercentOfSteptime", registry);
       DoubleYoVariable startOfSplineTime = new DoubleYoVariable("startOfSplineTime", registry);
       DoubleYoVariable endOfSplineTime = new DoubleYoVariable("endOfSplineTime", registry);
@@ -916,8 +939,8 @@ public class CurrentStateProjectionMultiplierTest
       ArrayList<DoubleYoVariable> singleSupportDurations = new ArrayList<>();
       singleSupportDurations.add(singleSupportDuration);
 
-      CurrentStateProjectionMultiplier multiplier = new CurrentStateProjectionMultiplier(registry, doubleSupportSplitRatio, startOfSplineTime, endOfSplineTime,
-            totalTrajectoryTime);
+      CurrentStateProjectionMultiplier multiplier = new CurrentStateProjectionMultiplier(registry, defaultDoubleSupportSplitRatio, upcomingDoubleSupportSplitRatio,
+            startOfSplineTime, endOfSplineTime, totalTrajectoryTime);
       TransferStateEndRecursionMatrix transferStateEndRecursionMatrix = new TransferStateEndRecursionMatrix();
 
       CubicProjectionMatrix cubicProjectionMatrix = new CubicProjectionMatrix();
@@ -931,7 +954,8 @@ public class CurrentStateProjectionMultiplierTest
          double exitRatio = 0.7 * random.nextDouble();
 
          omega.set(omega0);
-         doubleSupportSplitRatio.set(splitRatio);
+         defaultDoubleSupportSplitRatio.set(splitRatio);
+         upcomingDoubleSupportSplitRatio.set(splitRatio);
          exitCMPDurationInPercentOfSteptime.set(exitRatio);
 
          double currentDoubleSupport = 2.0 * random.nextDouble();

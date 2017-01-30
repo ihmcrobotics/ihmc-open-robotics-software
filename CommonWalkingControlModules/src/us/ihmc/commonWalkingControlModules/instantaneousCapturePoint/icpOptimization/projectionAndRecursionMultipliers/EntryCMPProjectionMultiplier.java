@@ -20,7 +20,7 @@ public class EntryCMPProjectionMultiplier
    private final SwingEntryCMPProjectionMatrix swingEntryCMPProjectionMatrix;
 
    private final DoubleYoVariable exitCMPRatio;
-   private final DoubleYoVariable doubleSupportSplitRatio;
+   private final DoubleYoVariable defaultDoubleSupportSplitRatio;
 
    private final DoubleYoVariable startOfSplineTime;
    private final DoubleYoVariable endOfSplineTime;
@@ -31,14 +31,14 @@ public class EntryCMPProjectionMultiplier
    private final DoubleYoVariable positionMultiplier;
    private final DoubleYoVariable velocityMultiplier;
 
-   public EntryCMPProjectionMultiplier(YoVariableRegistry registry, DoubleYoVariable doubleSupportSplitRatio,
-         DoubleYoVariable exitCMPRatio, DoubleYoVariable startOfSplineTime, DoubleYoVariable endOfSplineTime, DoubleYoVariable totalTrajectoryTime)
+   public EntryCMPProjectionMultiplier(YoVariableRegistry registry, DoubleYoVariable defaultDoubleSupportSplitRatio, DoubleYoVariable exitCMPRatio,
+         DoubleYoVariable startOfSplineTime, DoubleYoVariable endOfSplineTime, DoubleYoVariable totalTrajectoryTime)
    {
       positionMultiplier = new DoubleYoVariable("EntryCMPProjectionMultiplier", registry);
       velocityMultiplier = new DoubleYoVariable("EntryCMPVelocityProjectionMultiplier", registry);
 
       this.exitCMPRatio = exitCMPRatio;
-      this.doubleSupportSplitRatio = doubleSupportSplitRatio;
+      this.defaultDoubleSupportSplitRatio = defaultDoubleSupportSplitRatio;
 
       this.startOfSplineTime = startOfSplineTime;
       this.endOfSplineTime = endOfSplineTime;
@@ -47,8 +47,8 @@ public class EntryCMPProjectionMultiplier
       cubicProjectionMatrix = new CubicProjectionMatrix();
       cubicProjectionDerivativeMatrix = new CubicProjectionDerivativeMatrix();
 
-      transferEntryCMPProjectionMatrix = new TransferEntryCMPProjectionMatrix(doubleSupportSplitRatio);
-      swingEntryCMPProjectionMatrix = new SwingEntryCMPProjectionMatrix(doubleSupportSplitRatio, exitCMPRatio, startOfSplineTime);
+      transferEntryCMPProjectionMatrix = new TransferEntryCMPProjectionMatrix(defaultDoubleSupportSplitRatio);
+      swingEntryCMPProjectionMatrix = new SwingEntryCMPProjectionMatrix(defaultDoubleSupportSplitRatio, exitCMPRatio, startOfSplineTime);
    }
 
    public void reset()
@@ -157,7 +157,7 @@ public class EntryCMPProjectionMultiplier
 
          double timeSpentOnEntryCMP = (1.0 - exitCMPRatio.getDoubleValue()) * stepDuration;
 
-         double endOfDoubleSupportDuration = (1.0 - doubleSupportSplitRatio.getDoubleValue()) * currentDoubleSupportDuration;
+         double endOfDoubleSupportDuration = (1.0 - defaultDoubleSupportSplitRatio.getDoubleValue()) * currentDoubleSupportDuration;
 
          double entryRecursionTime = timeInState + endOfDoubleSupportDuration - timeSpentOnEntryCMP;
          double entryRecursion = Math.exp(omega0 * entryRecursionTime);

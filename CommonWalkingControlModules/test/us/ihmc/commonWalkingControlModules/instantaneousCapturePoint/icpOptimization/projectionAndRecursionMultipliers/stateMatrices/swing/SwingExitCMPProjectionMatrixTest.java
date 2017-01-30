@@ -23,14 +23,15 @@ public class SwingExitCMPProjectionMatrixTest
    {
       YoVariableRegistry registry = new YoVariableRegistry("registry");
 
-      DoubleYoVariable doubleSupportSplitRatio = new DoubleYoVariable("doubleSupportSplitRatio", registry);
+      DoubleYoVariable defaultDoubleSupportSplitRatio = new DoubleYoVariable("defaultDoubleSupportSplitRatio", registry);
+      DoubleYoVariable upcomingDoubleSupportSplitRatio = new DoubleYoVariable("upcomingDoubleSupportSplitRatio", registry);
       DoubleYoVariable exitCMPDurationInPercentOfSteptime = new DoubleYoVariable("exitCMPDurationInPercentOfSteptime", registry);
       DoubleYoVariable startOfSplineTime = new DoubleYoVariable("startOfSplineTime", registry);
       DoubleYoVariable endOfSplineTime = new DoubleYoVariable("endOfSplineTime", registry);
       DoubleYoVariable totalTrajectoryTime = new DoubleYoVariable("totalTrajectoryTime", registry);
 
-      SwingExitCMPProjectionMatrix swingExitCMPProjectionMatrix = new SwingExitCMPProjectionMatrix(doubleSupportSplitRatio, exitCMPDurationInPercentOfSteptime,
-            startOfSplineTime, endOfSplineTime, totalTrajectoryTime);
+      SwingExitCMPProjectionMatrix swingExitCMPProjectionMatrix = new SwingExitCMPProjectionMatrix(defaultDoubleSupportSplitRatio,
+            upcomingDoubleSupportSplitRatio, exitCMPDurationInPercentOfSteptime, startOfSplineTime, endOfSplineTime, totalTrajectoryTime);
 
       Assert.assertEquals("", 4, swingExitCMPProjectionMatrix.numRows);
       Assert.assertEquals("", 1, swingExitCMPProjectionMatrix.numCols);
@@ -49,14 +50,15 @@ public class SwingExitCMPProjectionMatrixTest
 
 
 
-      DoubleYoVariable doubleSupportSplitRatio = new DoubleYoVariable("doubleSupportSplitRatio", registry);
+      DoubleYoVariable defaultDoubleSupportSplitRatio = new DoubleYoVariable("defaultDoubleSupportSplitRatio", registry);
+      DoubleYoVariable upcomingDoubleSupportSplitRatio = new DoubleYoVariable("upcomingDoubleSupportSplitRatio", registry);
       DoubleYoVariable exitCMPDurationInPercentOfSteptime = new DoubleYoVariable("exitCMPDurationInPercentOfSteptime", registry);
       DoubleYoVariable startOfSplineTime = new DoubleYoVariable("startOfSplineTime", registry);
       DoubleYoVariable endOfSplineTime = new DoubleYoVariable("endOfSplineTime", registry);
       DoubleYoVariable totalTrajectoryTime = new DoubleYoVariable("totalTrajectoryTime", registry);
 
-      SwingExitCMPProjectionMatrix swingExitCMPProjectionMatrix = new SwingExitCMPProjectionMatrix(doubleSupportSplitRatio, exitCMPDurationInPercentOfSteptime,
-            startOfSplineTime, endOfSplineTime, totalTrajectoryTime);
+      SwingExitCMPProjectionMatrix swingExitCMPProjectionMatrix = new SwingExitCMPProjectionMatrix(defaultDoubleSupportSplitRatio,
+            upcomingDoubleSupportSplitRatio, exitCMPDurationInPercentOfSteptime, startOfSplineTime, endOfSplineTime, totalTrajectoryTime);
 
       ArrayList<DoubleYoVariable> doubleSupportDurations = new ArrayList<>();
       ArrayList<DoubleYoVariable> singleSupportDurations = new ArrayList<>();
@@ -69,7 +71,8 @@ public class SwingExitCMPProjectionMatrixTest
          double splitRatio = 0.5 * random.nextDouble();
          double exitRatio = 0.5 * random.nextDouble();
 
-         doubleSupportSplitRatio.set(splitRatio);
+         defaultDoubleSupportSplitRatio.set(splitRatio);
+         upcomingDoubleSupportSplitRatio.set(splitRatio);
          exitCMPDurationInPercentOfSteptime.set(exitRatio);
 
          double doubleSupportDuration = 2.0 * random.nextDouble();

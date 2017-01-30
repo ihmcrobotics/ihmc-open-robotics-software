@@ -23,13 +23,14 @@ public class SwingStateEndRecursionMatrixTest
    {
       YoVariableRegistry registry = new YoVariableRegistry("registry");
 
-      DoubleYoVariable doubleSupportSplitRatio = new DoubleYoVariable("doubleSupportSplitRatio", registry);
+      DoubleYoVariable defaultDoubleSupportSplitRatio = new DoubleYoVariable("defaultDoubleSupportSplitRatio", registry);
+      DoubleYoVariable upcomingDoubleSupportSplitRatio = new DoubleYoVariable("upcomingDoubleSupportSplitRatio", registry);
       DoubleYoVariable startOfSplineTime = new DoubleYoVariable("startOfSplineTime", registry);
       DoubleYoVariable endOfSplineTime = new DoubleYoVariable("endOfSplineTime", registry);
       DoubleYoVariable totalTrajectoryTime = new DoubleYoVariable("totalTrajectoryTime", registry);
 
-      SwingStateEndRecursionMatrix swingStateEndRecursionMatrix = new SwingStateEndRecursionMatrix(doubleSupportSplitRatio, startOfSplineTime, endOfSplineTime,
-            totalTrajectoryTime);
+      SwingStateEndRecursionMatrix swingStateEndRecursionMatrix = new SwingStateEndRecursionMatrix(defaultDoubleSupportSplitRatio, upcomingDoubleSupportSplitRatio,
+            startOfSplineTime, endOfSplineTime, totalTrajectoryTime);
 
       Assert.assertEquals("", 4, swingStateEndRecursionMatrix.numRows);
       Assert.assertEquals("", 1, swingStateEndRecursionMatrix.numCols);
@@ -48,7 +49,8 @@ public class SwingStateEndRecursionMatrixTest
 
       double omega0 = 3.0;
 
-      DoubleYoVariable doubleSupportSplitRatio = new DoubleYoVariable("doubleSupportSplitRatio", registry);
+      DoubleYoVariable defaultDoubleSupportSplitRatio = new DoubleYoVariable("defaultDoubleSupportSplitRatio", registry);
+      DoubleYoVariable upcomingDoubleSupportSplitRatio = new DoubleYoVariable("upcomingDoubleSupportSplitRatio", registry);
       DoubleYoVariable startOfSplineTime = new DoubleYoVariable("startOfSplineTime", registry);
       DoubleYoVariable endOfSplineTime = new DoubleYoVariable("endOfSplineTime", registry);
       DoubleYoVariable totalTrajectoryTime = new DoubleYoVariable("totalTrajectoryTime", registry);
@@ -60,14 +62,15 @@ public class SwingStateEndRecursionMatrixTest
       singleSupportDurations.add(new DoubleYoVariable("singleSupportDuration", registry));
 
 
-      SwingStateEndRecursionMatrix swingStateEndRecursionMatrix = new SwingStateEndRecursionMatrix(doubleSupportSplitRatio, startOfSplineTime, endOfSplineTime,
-            totalTrajectoryTime);
+      SwingStateEndRecursionMatrix swingStateEndRecursionMatrix = new SwingStateEndRecursionMatrix(defaultDoubleSupportSplitRatio, upcomingDoubleSupportSplitRatio,
+            startOfSplineTime, endOfSplineTime, totalTrajectoryTime);
 
       for (int i = 0; i < iters; i++)
       {
          double splitRatio = 0.5 * random.nextDouble();
 
-         doubleSupportSplitRatio.set(splitRatio);
+         defaultDoubleSupportSplitRatio.set(splitRatio);
+         upcomingDoubleSupportSplitRatio.set(splitRatio);
 
          double currentDoubleSupportDuration = 2.0 * random.nextDouble();
          double upcomingDoubleSupportDuration = 2.0 * random.nextDouble();
