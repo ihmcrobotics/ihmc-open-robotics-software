@@ -144,6 +144,16 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
 
    public abstract double getSwingHeightMaxForPushRecoveryTrajectory();
 
+   /**
+    * Specifies if the arm controller should be switching
+    * to chest frame or jointspace only if necessary.
+    * This is particularly useful when manipulation was performed
+    * with respect to world during standing to prevent "leaving a hand behind"
+    * when the robot starts walking.
+    * 
+    * @return whether the manipulation control should get prepared
+    *  for walking.
+    */
    public abstract boolean doPrepareManipulationForLocomotion();
 
    public abstract boolean controlHeadAndHandsWithSliders();
