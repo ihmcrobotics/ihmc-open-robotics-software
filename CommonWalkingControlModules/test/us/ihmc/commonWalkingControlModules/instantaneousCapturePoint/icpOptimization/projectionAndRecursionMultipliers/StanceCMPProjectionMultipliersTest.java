@@ -24,6 +24,7 @@ public class StanceCMPProjectionMultipliersTest
 
       DoubleYoVariable omega = new DoubleYoVariable("omega", registry);
       DoubleYoVariable doubleSupportSplitRatio = new DoubleYoVariable("doubleSupportSplitRatio", registry);
+      DoubleYoVariable upcomingDoubleSupportSplitRatio = new DoubleYoVariable("upcomingDoubleSupportSplitRatio", registry);
       DoubleYoVariable exitCMPDurationInPercentOfStepTime = new DoubleYoVariable("exitCMPDurationInPercentOfStepTime", registry);
 
       ArrayList<DoubleYoVariable> doubleSupportDurations = new ArrayList<>();
@@ -33,7 +34,7 @@ public class StanceCMPProjectionMultipliersTest
       singleSupportDurations.add(new DoubleYoVariable("singleSupportduration", registry));
 
       StanceCMPProjectionMultipliers stanceCMPProjectionMultipliers = new StanceCMPProjectionMultipliers("", doubleSupportSplitRatio,
-            exitCMPDurationInPercentOfStepTime, registry);
+            upcomingDoubleSupportSplitRatio, exitCMPDurationInPercentOfStepTime, registry);
 
       for (int i = 0; i < iters; i++)
       {

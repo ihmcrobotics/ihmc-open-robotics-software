@@ -16,12 +16,14 @@ public class StanceCMPProjectionMultipliers
    private final DoubleYoVariable entryMultiplier;
 
    private final DoubleYoVariable doubleSupportSplitFraction;
+   private final DoubleYoVariable upcomingDoubleSupportSplitFraction;
    private final DoubleYoVariable exitCMPDurationInPercentOfStepTime;
 
-   public StanceCMPProjectionMultipliers(String namePrefix, DoubleYoVariable doubleSupportSplitFraction,
+   public StanceCMPProjectionMultipliers(String namePrefix, DoubleYoVariable doubleSupportSplitFraction, DoubleYoVariable upcomingDoubleSupportSplitFraction,
          DoubleYoVariable exitCMPDurationInPercentOfStepTime, YoVariableRegistry parentRegistry)
    {
       this.doubleSupportSplitFraction = doubleSupportSplitFraction;
+      this.upcomingDoubleSupportSplitFraction = upcomingDoubleSupportSplitFraction;
       this.exitCMPDurationInPercentOfStepTime = exitCMPDurationInPercentOfStepTime;
 
       exitMultiplier = new DoubleYoVariable(namePrefix + exitName, registry);
@@ -50,7 +52,7 @@ public class StanceCMPProjectionMultipliers
          boolean isInTransfer, double omega0, int numberOfStepsToConsider)
    {
       double firstStepTime = currentDoubleSupportDuration + singleSupportDuration;
-      double timeSpentOnInitialDoubleSupportUpcoming = doubleSupportSplitFraction.getDoubleValue() * upcomingDoubleSupportDuration;
+      double timeSpentOnInitialDoubleSupportUpcoming = upcomingDoubleSupportSplitFraction.getDoubleValue() * upcomingDoubleSupportDuration;
       double timeSpentOnEndDoubleSupportCurrent = (1.0 - doubleSupportSplitFraction.getDoubleValue()) * currentDoubleSupportDuration;
 
       if (numberOfStepsToConsider == 0)

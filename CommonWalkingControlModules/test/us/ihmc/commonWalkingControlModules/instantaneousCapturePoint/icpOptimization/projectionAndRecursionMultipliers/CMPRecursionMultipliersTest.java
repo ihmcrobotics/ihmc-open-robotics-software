@@ -20,6 +20,7 @@ public class CMPRecursionMultipliersTest
    {
       YoVariableRegistry registry = new YoVariableRegistry("registry");
       DoubleYoVariable doubleSupportSplitRatio = new DoubleYoVariable("doubleSupportSplitRatio", registry);
+      DoubleYoVariable upcomingDoubleSupportSplitRatio = new DoubleYoVariable("upcomingDoubleSupportSplitRatio", registry);
       DoubleYoVariable exitCMPRatio = new DoubleYoVariable("exitCMPRatio", registry);
       DoubleYoVariable yoOmega = new DoubleYoVariable("omega", registry);
 
@@ -39,7 +40,8 @@ public class CMPRecursionMultipliersTest
          singleSupportDurations.add(new DoubleYoVariable("singleSupportDuration" + i, registry));
       }
 
-      CMPRecursionMultipliers cmpRecursionMultipliers = new CMPRecursionMultipliers("", maxSteps, doubleSupportSplitRatio, exitCMPRatio, registry);
+      CMPRecursionMultipliers cmpRecursionMultipliers = new CMPRecursionMultipliers("", maxSteps, doubleSupportSplitRatio, upcomingDoubleSupportSplitRatio,
+            exitCMPRatio, registry);
 
       for (int iter = 0; iter < iters; iter++)
       {

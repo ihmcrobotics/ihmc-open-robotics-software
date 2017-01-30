@@ -15,15 +15,17 @@ public class CMPRecursionMultipliers
    private final ArrayList<DoubleYoVariable> entryMultipliers = new ArrayList<>();
 
    private final DoubleYoVariable doubleSupportSplitFraction;
+   private final DoubleYoVariable upcomingDoubleSupportSplitFraction;
    private final DoubleYoVariable exitCMPDurationInPercentOfStepTime;
 
    private final int maximumNumberOfFootstepsToConsider;
 
    public CMPRecursionMultipliers(String namePrefix, int maximumNumberOfFootstepsToConsider, DoubleYoVariable doubleSupportSplitFraction,
-         DoubleYoVariable exitCMPDurationInPercentOfStepTime, YoVariableRegistry parentRegistry)
+         DoubleYoVariable upcomingDoubleSupportSplitFraction, DoubleYoVariable exitCMPDurationInPercentOfStepTime, YoVariableRegistry parentRegistry)
    {
       this.maximumNumberOfFootstepsToConsider = maximumNumberOfFootstepsToConsider;
       this.doubleSupportSplitFraction = doubleSupportSplitFraction;
+      this.upcomingDoubleSupportSplitFraction = upcomingDoubleSupportSplitFraction;
       this.exitCMPDurationInPercentOfStepTime = exitCMPDurationInPercentOfStepTime;
 
       for (int i = 0; i < maximumNumberOfFootstepsToConsider; i++)
@@ -61,7 +63,7 @@ public class CMPRecursionMultipliers
    private void computeWithOneCMP(int numberOfStepsToConsider, ArrayList<DoubleYoVariable> doubleSupportDurations, ArrayList<DoubleYoVariable> singleSupportDurations,
          boolean isInTransfer, double omega0)
    {
-      double timeToFinish = doubleSupportSplitFraction.getDoubleValue() * doubleSupportDurations.get(1).getDoubleValue();
+      double timeToFinish = upcomingDoubleSupportSplitFraction.getDoubleValue() * doubleSupportDurations.get(1).getDoubleValue();
 
       if (isInTransfer)
          timeToFinish += singleSupportDurations.get(0).getDoubleValue();
@@ -86,7 +88,7 @@ public class CMPRecursionMultipliers
          boolean isInTransfer, double omega0)
    {
       double firstStepTime = doubleSupportDurations.get(0).getDoubleValue() + singleSupportDurations.get(0).getDoubleValue();
-      double timeSpentOnInitialDoubleSupportUpcoming = doubleSupportSplitFraction.getDoubleValue() * doubleSupportDurations.get(1).getDoubleValue();
+      double timeSpentOnInitialDoubleSupportUpcoming = upcomingDoubleSupportSplitFraction.getDoubleValue() * doubleSupportDurations.get(1).getDoubleValue();
       double timeSpentOnEndDoubleSupportCurrent = (1.0 - doubleSupportSplitFraction.getDoubleValue()) * doubleSupportDurations.get(0).getDoubleValue();
 
       double timeToFinish;

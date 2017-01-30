@@ -1,6 +1,5 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization;
 
-import org.ejml.data.DenseMatrix64F;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.projectionAndRecursionMultipliers.*;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -28,6 +27,7 @@ public class FootstepRecursionMultiplierCalculator
    private final InitialICPProjectionMultiplier initialICPProjectionMultiplier;
 
    private final DoubleYoVariable doubleSupportSplitFraction;
+   private final DoubleYoVariable upcomingDoubleSupportSplitFraction;
    private final DoubleYoVariable exitCMPDurationInPercentOfStepTime;
 
    private final DoubleYoVariable maximumSplineDuration;
@@ -42,11 +42,13 @@ public class FootstepRecursionMultiplierCalculator
    private final int maxNumberOfFootstepsToConsider;
 
    public FootstepRecursionMultiplierCalculator(CapturePointPlannerParameters icpPlannerParameters, DoubleYoVariable exitCMPDurationInPercentOfStepTime,
-         DoubleYoVariable doubleSupportSplitFraction, int maxNumberOfFootstepsToConsider, YoVariableRegistry parentRegistry)
+         DoubleYoVariable doubleSupportSplitFraction, DoubleYoVariable upcomingDoubleSupportSplitFraction, int maxNumberOfFootstepsToConsider,
+         YoVariableRegistry parentRegistry)
    {
       this.maxNumberOfFootstepsToConsider = maxNumberOfFootstepsToConsider;
       this.exitCMPDurationInPercentOfStepTime = exitCMPDurationInPercentOfStepTime;
       this.doubleSupportSplitFraction = doubleSupportSplitFraction;
+      this.upcomingDoubleSupportSplitFraction = upcomingDoubleSupportSplitFraction;
 
       for (int i = 0; i < maxNumberOfFootstepsToConsider; i++)
       {
@@ -55,8 +57,9 @@ public class FootstepRecursionMultiplierCalculator
       }
 
       cmpRecursionMultipliers = new CMPRecursionMultipliers("", maxNumberOfFootstepsToConsider, doubleSupportSplitFraction,
+            upcomingDoubleSupportSplitFraction, exitCMPDurationInPercentOfStepTime, registry);
+      stanceCMPProjectionMultipliers = new StanceCMPProjectionMultipliers("", doubleSupportSplitFraction, upcomingDoubleSupportSplitFraction,
             exitCMPDurationInPercentOfStepTime, registry);
-      stanceCMPProjectionMultipliers = new StanceCMPProjectionMultipliers("", doubleSupportSplitFraction, exitCMPDurationInPercentOfStepTime, registry);
 
       maximumSplineDuration = new DoubleYoVariable(namePrefix + "MaximumSplineDuration", registry);
       minimumSplineDuration = new DoubleYoVariable(namePrefix + "MinimumSplineDuration", registry);
@@ -73,7 +76,7 @@ public class FootstepRecursionMultiplierCalculator
       endOfSplineTime = new DoubleYoVariable(namePrefix + "EndOfSplineTime", registry);
 
       remainingStanceCMPProjectionMultipliers = new RemainingStanceCMPProjectionMultipliers(doubleSupportSplitFraction,
-               exitCMPDurationInPercentOfStepTime, startOfSplineTime, endOfSplineTime, totalTrajectoryTime, registry);
+            exitCMPDurationInPercentOfStepTime, startOfSplineTime, endOfSplineTime, totalTrajectoryTime, registry);
       currentStateProjectionMultiplier = new CurrentStateProjectionMultiplier(registry, doubleSupportSplitFraction, startOfSplineTime, endOfSplineTime,
             totalTrajectoryTime);
       initialICPProjectionMultiplier = new InitialICPProjectionMultiplier(registry, startOfSplineTime, endOfSplineTime, totalTrajectoryTime);
