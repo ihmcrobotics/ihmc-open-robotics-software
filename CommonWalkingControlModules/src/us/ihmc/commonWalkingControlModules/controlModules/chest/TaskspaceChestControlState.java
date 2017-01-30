@@ -68,7 +68,7 @@ public class TaskspaceChestControlState extends ChestControlState
 
    private final FrameOrientation tempOrientation = new FrameOrientation();
 
-   public TaskspaceChestControlState(HighLevelHumanoidControllerToolbox humanoidControllerToolbox, YoOrientationPIDGainsInterface gains, Vector3d angularWeight, YoVariableRegistry parentRegistry)
+   public TaskspaceChestControlState(HighLevelHumanoidControllerToolbox humanoidControllerToolbox, YoOrientationPIDGainsInterface gains, YoVariableRegistry parentRegistry)
    {
       super(ChestControlMode.TASK_SPACE);
 
@@ -80,9 +80,6 @@ public class TaskspaceChestControlState extends ChestControlState
       RigidBody elevator = fullRobotModel.getElevator();
       pelvisZUpFrame = humanoidControllerToolbox.getPelvisZUpFrame();
 
-      yoChestAngularWeight.set(angularWeight);
-      yoChestAngularWeight.get(chestAngularWeight);
-      orientationFeedbackControlCommand.setWeightsForSolver(chestAngularWeight);
       orientationFeedbackControlCommand.set(elevator, chest);
       orientationFeedbackControlCommand.setGains(gains);
 

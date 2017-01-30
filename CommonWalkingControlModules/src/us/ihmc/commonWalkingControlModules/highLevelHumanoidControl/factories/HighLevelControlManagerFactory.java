@@ -19,7 +19,6 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.io.printing.PrintTools;
@@ -157,9 +156,8 @@ public class HighLevelControlManagerFactory
       if (!hasMomentumOptimizationSettings(ChestOrientationManager.class))
          return null;
 
-      YoOrientationPIDGainsInterface chestControlGains = walkingControllerParameters.createChestControlGains(registry);
       Vector3d chestAngularWeight = momentumOptimizationSettings.getChestAngularWeight();
-      chestOrientationManager = new ChestOrientationManager(momentumBasedController, chestControlGains, chestAngularWeight, registry);
+      chestOrientationManager = new ChestOrientationManager(momentumBasedController, walkingControllerParameters, registry);
       return chestOrientationManager;
    }
 
