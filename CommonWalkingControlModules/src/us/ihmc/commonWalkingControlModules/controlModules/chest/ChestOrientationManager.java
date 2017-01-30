@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.vecmath.Vector3d;
 
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
@@ -18,6 +19,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SpineTraject
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage.BodyPart;
 import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
+import us.ihmc.robotics.controllers.YoPIDGains;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -50,7 +52,7 @@ public class ChestOrientationManager
 
    private LowLevelOneDoFJointDesiredDataHolderReadOnly newJointDesiredData = null;
 
-   public ChestOrientationManager(HighLevelHumanoidControllerToolbox humanoidControllerToolbox, YoOrientationPIDGainsInterface gains, Vector3d angularWeight, YoVariableRegistry parentRegistry)
+   public ChestOrientationManager(HighLevelHumanoidControllerToolbox humanoidControllerToolbox, WalkingControllerParameters walkingControllerParameters, YoVariableRegistry parentRegistry)
    {
       String className = getClass().getSimpleName();
       DoubleYoVariable yoTime = humanoidControllerToolbox.getYoTime();
@@ -63,8 +65,14 @@ public class ChestOrientationManager
       jointsAtDesiredPosition = ScrewTools.cloneOneDoFJointPath(pelvis, chest);
       initialJointPositions = new double[jointsOriginal.length];
 
-      taskspaceChestControlState = new TaskspaceChestControlState(humanoidControllerToolbox, gains, angularWeight, parentRegistry);
-      jointspaceChestControlState = new JointspaceChestControlState();
+      YoOrientationPIDGainsInterface taskspaceGains = walkingControllerParameters.createHeadOrientationControlGains(registry);
+      YoPIDGains jointspaceGains = walkingControllerParameters.createSpineControlGains(registry);
+
+      taskspaceChestControlState = new TaskspaceChestControlState(humanoidControllerToolbox, taskspaceGains, registry);
+      jointspaceChestControlState = new JointspaceChestControlState(jointsOriginal, jointspaceGains, yoTime, registry);
+
+      taskspaceChestControlState.setWeights(walkingControllerParameters.getMomentumOptimizationSettings().getChestAngularWeight());
+      jointspaceChestControlState.setWeight(walkingControllerParameters.getMomentumOptimizationSettings().getSpineJointspaceWeight());
 
       setupStateMachine();
       parentRegistry.addChild(registry);

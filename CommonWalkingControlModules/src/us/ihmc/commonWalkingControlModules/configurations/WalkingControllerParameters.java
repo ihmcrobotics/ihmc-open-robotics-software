@@ -10,6 +10,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoPDGains;
+import us.ihmc.robotics.controllers.YoPIDGains;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
@@ -133,6 +134,12 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
    public abstract YoPDGains createUnconstrainedJointsControlGains(YoVariableRegistry registry);
 
    public abstract YoOrientationPIDGainsInterface createChestControlGains(YoVariableRegistry registry);
+
+   /** The gains used when the spine joints are controlled directly instead of the chest orientation */
+   public YoPIDGains createSpineControlGains(YoVariableRegistry registry)
+   {
+      return null;
+   }
 
    public abstract YoSE3PIDGainsInterface createSwingFootControlGains(YoVariableRegistry registry);
 

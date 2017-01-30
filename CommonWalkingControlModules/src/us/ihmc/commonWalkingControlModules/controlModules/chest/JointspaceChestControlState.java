@@ -16,6 +16,7 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.waypoints.SimpleTrajectoryPoint1DList;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.tools.io.printing.PrintTools;
 
 public class JointspaceChestControlState extends ChestControlState
 {
@@ -63,6 +64,12 @@ public class JointspaceChestControlState extends ChestControlState
 
    public boolean handleSpineTrajectoryCommand(SpineTrajectoryCommand command, double[] initialJointPositions)
    {
+      if (gains == null)
+      {
+         PrintTools.warn("Can not send spine trajectory commands. Gains are null.");
+         return false;
+      }
+
       if (!ControllerCommandValidationTools.checkSpineTrajectoryCommand(jointsOriginal, command))
       {
          if (jointsOriginal.length != command.getNumberOfJoints())

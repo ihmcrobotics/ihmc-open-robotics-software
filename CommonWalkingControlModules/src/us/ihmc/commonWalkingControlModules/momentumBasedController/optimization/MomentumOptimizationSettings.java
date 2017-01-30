@@ -5,7 +5,7 @@ import javax.vecmath.Vector3d;
 
 public class MomentumOptimizationSettings
 {
- 
+
    private final Vector3d linearMomentumWeight = new Vector3d(0.05, 0.05, 0.01);
    private final Vector3d highLinearMomentumWeightForRecovery = new Vector3d(0.5, 0.5, 0.05);
    private final Vector3d angularMomentumWeight = new Vector3d(0.0, 0.0, 0.0);
@@ -16,8 +16,9 @@ public class MomentumOptimizationSettings
    private Vector3d highLinearFootWeight = new Vector3d(50.0, 50.0, 50.0);
 
    private Vector3d chestAngularWeight = new Vector3d(15.0, 10.0, 5.0);
+   private double spineJointspaceWeight = 1.0;
    private Vector3d pelvisAngularWeight = new Vector3d(5.0, 5.0, 5.0);
-   
+
    private int nBasisVectorsPerContactPoint = 4;
    private int nContactPointsPerContactableBody = 4;
    private int nContactableBodies = 2;
@@ -181,7 +182,7 @@ public class MomentumOptimizationSettings
    {
       copRateHighWeight.set(weight);
    }
-   
+
 
    public void setNumberOfBasisVectorsPerContactPoint(int nBasisVectorsPerContactPoint)
    {
@@ -341,5 +342,10 @@ public class MomentumOptimizationSettings
    public int getRhoSize()
    {
       return  nContactableBodies * nContactPointsPerContactableBody * nBasisVectorsPerContactPoint;
+   }
+
+   public double getSpineJointspaceWeight()
+   {
+      return spineJointspaceWeight;
    }
 }
