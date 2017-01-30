@@ -128,7 +128,7 @@ public class ChestOrientationManager
    public void handleSpineTrajectoryCommand(SpineTrajectoryCommand command)
    {
       computeDesiredJointPositions(initialJointPositions);
-      boolean success = jointspaceChestControlState.handleNeckTrajectoryCommand(command, initialJointPositions);
+      boolean success = jointspaceChestControlState.handleSpineTrajectoryCommand(command, initialJointPositions);
       if (!success)
          holdCurrentOrientation();
       requestState(jointspaceChestControlState.getStateEnum());
