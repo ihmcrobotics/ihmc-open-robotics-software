@@ -54,7 +54,7 @@ public class RigidBodyInertia extends GeneralizedRigidBodyInertia
       return bodyFrame;
    }
 
-   public void computeDynamicWrenchInBodyCoordinates(Wrench dynamicWrenchToPack, SpatialAccelerationVector acceleration, Twist twist)    // TODO: write test
+   public void computeDynamicWrenchInBodyCoordinates(SpatialAccelerationVector acceleration, Twist twist, Wrench dynamicWrenchToPack)    // TODO: write test
    {
       checkExpressedInBodyFixedFrame();
       checkIsCrossPartZero();    // otherwise this operation would be a lot less efficient
