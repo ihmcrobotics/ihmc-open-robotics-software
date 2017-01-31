@@ -231,7 +231,7 @@ public abstract class ICPOptimizationParameters
     */
    public double getDoubleSupportSplitFractionForBigAdjustment()
    {
-      return 0.25;
+      return 0.15;
    }
 
    /**
@@ -239,7 +239,7 @@ public abstract class ICPOptimizationParameters
     */
    public double getMinimumTimeOnInitialCMPForBigAdjustment()
    {
-      return 0.1;
+      return 0.09;
    }
 
    /**
