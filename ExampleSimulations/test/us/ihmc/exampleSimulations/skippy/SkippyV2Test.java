@@ -15,7 +15,7 @@ import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.Cont
 import us.ihmc.tools.continuousIntegration.IntegrationCategory;
 import us.ihmc.tools.thread.ThreadTools;
 
-@ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
+@ContinuousIntegrationPlan(categories = {IntegrationCategory.IN_DEVELOPMENT})
 public class SkippyV2Test
 {
 
