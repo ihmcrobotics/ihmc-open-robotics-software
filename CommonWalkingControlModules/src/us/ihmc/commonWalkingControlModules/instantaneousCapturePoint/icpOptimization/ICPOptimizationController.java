@@ -446,19 +446,8 @@ public class ICPOptimizationController
          solutionHandler.computeReferenceFromSolutions(footstepSolutions, inputHandler, beginningOfStateICP, omega0, numberOfFootstepsToConsider);
          solutionHandler.computeNominalValues(upcomingFootstepLocations, inputHandler, beginningOfStateICP, omega0, numberOfFootstepsToConsider);
 
-         if (solutionHandler.getFootstepAdjustment().length() > magnitudeForBigAdjustment.getDoubleValue())
-         {
-            if (!doingBigAdjustment.getBooleanValue() && useDifferentSplitRatioForBigAdjustment)
-            {
-               doingBigAdjustment.set(true);
-
-               double minimumDoubleSupportSplitFraction = minimumTimeOnInitialCMPForBigAdjustment / doubleSupportDuration.getDoubleValue();
-               minimumDoubleSupportSplitFraction = Math.max(minimumDoubleSupportSplitFraction, doubleSupportSplitFractionUnderDisturbance.getDoubleValue());
-
-               upcomingDoubleSupportSplitFraction.set(minimumDoubleSupportSplitFraction);
-               footstepRecursionMultiplierCalculator.computeRecursionMultipliers(numberOfFootstepsToConsider, isInTransfer.getBooleanValue(), localUseTwoCMPs, omega0);
-            }
-         }
+         if (useDifferentSplitRatioForBigAdjustment)
+            computeUpcomingDoubleSupportSplitFraction(numberOfFootstepsToConsider, omega0);
       }
 
       solutionHandler.getControllerReferenceCMP(desiredCMP);
@@ -755,6 +744,20 @@ public class ICPOptimizationController
 
          double alpha = Math.sqrt(Math.pow(feedbackGains.getX(), 2) + Math.pow(feedbackGains.getY(), 2));
          scaledFeedbackWeight.scale(1.0 / alpha);
+      }
+   }
+
+   private void computeUpcomingDoubleSupportSplitFraction(int numberOfFootstepsToConsider, double omega0)
+   {
+      double footstepAdjustmentSize = solutionHandler.getFootstepAdjustment().length();
+
+      double minimumDoubleSupportSplitFraction = minimumTimeOnInitialCMPForBigAdjustment / doubleSupportDuration.getDoubleValue();
+      minimumDoubleSupportSplitFraction = Math.max(minimumDoubleSupportSplitFraction, doubleSupportSplitFractionUnderDisturbance.getDoubleValue());
+
+      if (footstepAdjustmentSize > magnitudeForBigAdjustment.getDoubleValue() && !doingBigAdjustment.getBooleanValue())
+      {
+         upcomingDoubleSupportSplitFraction.set(minimumDoubleSupportSplitFraction);
+         footstepRecursionMultiplierCalculator.computeRecursionMultipliers(numberOfFootstepsToConsider, isInTransfer.getBooleanValue(), localUseTwoCMPs, omega0);
       }
    }
 
