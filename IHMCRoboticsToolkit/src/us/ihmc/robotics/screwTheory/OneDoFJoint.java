@@ -20,8 +20,6 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
    protected SpatialAccelerationVector unitSuccessorAcceleration;
    protected SpatialAccelerationVector unitPredecessorAcceleration;
 
-   private FrameVector jointAxis;
-
    private double q;
    private double qd;
    private double qdd;
@@ -68,7 +66,6 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
    {
       this(name, predecessor, beforeJointFrame, afterJointFrame);
       setSuccessor(successor);
-      this.jointAxis = jointAxis;
    }
 
    public OneDoFJoint(String name, RigidBody predecessor, ReferenceFrame beforeJointFrame, OneDoFJointReferenceFrame afterJointFrame)
@@ -460,15 +457,9 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
       checksum.update(qddDesired);
    }
 
-   public FrameVector getJointAxis()
-   {
-      return jointAxis;
-   }
+   public abstract FrameVector getJointAxis();
 
-   public void getJointAxis(FrameVector axisToPack)
-   {
-      axisToPack.setIncludingFrame(jointAxis);
-   }
+   public abstract void getJointAxis(FrameVector axisToPack);
 
    // DRC Hack
 
