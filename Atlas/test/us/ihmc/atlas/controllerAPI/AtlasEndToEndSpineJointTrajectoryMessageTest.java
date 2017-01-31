@@ -21,6 +21,13 @@ public class AtlasEndToEndSpineJointTrajectoryMessageTest extends EndToEndSpineJ
       super.testSingleWaypoint();
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 10.0)
+   @Test (timeout = 100000)
+   public void testSwitchingBetweenControlModes() throws SimulationExceededMaximumTimeException
+   {
+      super.testSwitchingBetweenControlModes();
+   }
+
    @Override
    public DRCRobotModel getRobotModel()
    {
