@@ -189,6 +189,14 @@ public class RandomTools
       return ret;
    }
 
+   public static Vector3d[] generateRandomVectorArray(Random random, int numberOfVectors, double length)
+   {
+      Vector3d[] vectors = new Vector3d[numberOfVectors];
+      for (int i = 0; i < numberOfVectors; i++)
+         vectors[i] = generateRandomVector(random, length);
+      return vectors;
+   }
+
    public static Vector4d generateRandomVector4d(Random random, Tuple4d lowerBound, Tuple4d upperBound)
    {
       Vector4d ret = new Vector4d();
