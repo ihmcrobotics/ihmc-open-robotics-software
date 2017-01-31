@@ -3,6 +3,7 @@ package us.ihmc.robotics.screwTheory;
 import org.ejml.data.DenseMatrix64F;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.ReferenceFrameMismatchException;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
@@ -533,9 +534,9 @@ public abstract class SpatialMotionVector
    
    public void checkReferenceFramesMatch(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame)
    {
-      if (this.bodyFrame != bodyFrame) throw new RuntimeException("this.bodyFrame != bodyFrame");
-      if (this.baseFrame != baseFrame) throw new RuntimeException("this.baseFrame != baseFrame");
-      if (this.expressedInFrame != expressedInFrame) throw new RuntimeException("this.expressedInFrame != expressedInFrame");
+      if (this.bodyFrame != bodyFrame) throw new ReferenceFrameMismatchException("this.bodyFrame != bodyFrame");
+      if (this.baseFrame != baseFrame) throw new ReferenceFrameMismatchException("this.baseFrame != baseFrame");
+      if (this.expressedInFrame != expressedInFrame) throw new ReferenceFrameMismatchException("this.expressedInFrame != expressedInFrame");
    }
 
    ///CLOVER:OFF
