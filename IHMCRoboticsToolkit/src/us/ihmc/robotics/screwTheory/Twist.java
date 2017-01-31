@@ -5,7 +5,10 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+
+import java.util.Random;
 
 import javax.vecmath.Vector3d;
 
@@ -348,5 +351,22 @@ public class Twist extends SpatialMotionVector
 
       return ret;
    }
+
+   public static Twist generateRandomTwist(Random random, ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame)
+   {
+      double linearVelocityMagnitude = random.nextDouble();
+      double angularVelocityMagnitude = random.nextDouble();
+      return generateRandomTwist(random, bodyFrame, baseFrame, expressedInFrame, angularVelocityMagnitude, linearVelocityMagnitude);
+   }
+
+   public static Twist generateRandomTwist(Random random, ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame,
+                                           double angularVelocityMagnitude, double linearVelocityMagnitude)
+   {
+      Twist randomTwist = new Twist(bodyFrame, baseFrame, expressedInFrame);
+      randomTwist.setLinearPart(RandomTools.generateRandomVector(random, linearVelocityMagnitude));
+      randomTwist.setAngularPart(RandomTools.generateRandomVector(random, angularVelocityMagnitude));
+      return randomTwist;
+   }
+
    ///CLOVER:ON
 }
