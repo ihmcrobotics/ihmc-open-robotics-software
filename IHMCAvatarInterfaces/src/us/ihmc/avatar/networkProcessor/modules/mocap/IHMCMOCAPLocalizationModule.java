@@ -3,7 +3,7 @@ package us.ihmc.avatar.networkProcessor.modules.mocap;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import javax.vecmath.Matrix3d;
+import javax.vecmath.Quat4d;
 import javax.vecmath.Quat4f;
 import javax.vecmath.Vector3d;
 import javax.vecmath.Vector3f;
@@ -21,13 +21,13 @@ import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.humanoidRobotics.kryo.PPSTimestampOffsetProvider;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.robotDataLogger.YoVariableServer;
-import us.ihmc.robotDataLogger.logger.LogSettings;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
@@ -40,18 +40,19 @@ public class IHMCMOCAPLocalizationModule implements MocapRigidbodiesListener, Pa
 {
    private static final double MOCAP_SERVER_DT = 0.002;
    private static final int PELVIS_ID = 1;
-   
-   private boolean timestampHasBeenSet = false;
-   private long latestRobotTimeStamp = Long.MIN_VALUE;
-   
-   private final MocapToPelvisFrameConverter mocapToPelvisFrameConverter;
+
+   private ReferenceFrame mocapFrame = null;
+   private RobotConfigurationData latestRobotConfigurationData = null;
+   private final MocapToPelvisFrameConverter mocapToPelvisFrameConverter = new MocapToPelvisFrameConverter();
+
    private final PacketCommunicator packetCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.MOCAP_MODULE, new IHMCCommunicationKryoNetClassList());
    private final YoVariableRegistry yoVariableRegistry = new YoVariableRegistry(getClass().getSimpleName());
    private final YoVariableServer yoVariableServer;
    private final FullHumanoidRobotModel fullRobotModel;
    private final PPSTimestampOffsetProvider ppsTimestampOffsetProvider;
    private final RobotConfigurationDataBuffer robotConfigurationDataBuffer;
-   
+   private final RigidBodyTransform pelvisTransform = new RigidBodyTransform();
+
    private final DoubleYoVariable markersPositionX = new DoubleYoVariable("markersPositionX", yoVariableRegistry);
    private final DoubleYoVariable markersPositionY = new DoubleYoVariable("markersPositionY", yoVariableRegistry);
    private final DoubleYoVariable markersPositionZ = new DoubleYoVariable("markersPositionZ", yoVariableRegistry);
@@ -59,7 +60,15 @@ public class IHMCMOCAPLocalizationModule implements MocapRigidbodiesListener, Pa
    private final DoubleYoVariable markersYaw = new DoubleYoVariable("markersYaw", yoVariableRegistry);
    private final DoubleYoVariable markersPitch = new DoubleYoVariable("markersPitch", yoVariableRegistry);
    private final DoubleYoVariable markersRoll = new DoubleYoVariable("markersRoll", yoVariableRegistry);
-   
+
+   private final DoubleYoVariable computedPelvisPositionX = new DoubleYoVariable("computedPelvisPositionX", yoVariableRegistry);
+   private final DoubleYoVariable computedPelvisPositionY = new DoubleYoVariable("computedPelvisPositionY", yoVariableRegistry);
+   private final DoubleYoVariable computedPelvisPositionZ = new DoubleYoVariable("computedPelvisPositionZ", yoVariableRegistry);
+
+   private final DoubleYoVariable computedPelvisYaw = new DoubleYoVariable("computedPelvisYaw", yoVariableRegistry);
+   private final DoubleYoVariable computedPelvisPitch = new DoubleYoVariable("computedPelvisPitch", yoVariableRegistry);
+   private final DoubleYoVariable computedPelvisRoll = new DoubleYoVariable( "computedPelvisRoll", yoVariableRegistry);
+
    public IHMCMOCAPLocalizationModule(DRCRobotModel drcRobotModel) 
    {
       MocapDataClient mocapDataClient = new MocapDataClient();
@@ -67,9 +76,7 @@ public class IHMCMOCAPLocalizationModule implements MocapRigidbodiesListener, Pa
       
       packetCommunicator.attachListener(RobotConfigurationData.class, this);
       
-      mocapToPelvisFrameConverter = new MocapToPelvisFrameConverter(drcRobotModel, packetCommunicator);
       robotConfigurationDataBuffer = new RobotConfigurationDataBuffer();
-      
       ppsTimestampOffsetProvider = drcRobotModel.getPPSTimestampOffsetProvider();
       PeriodicThreadScheduler scheduler = new PeriodicNonRealtimeThreadScheduler("MocapModuleScheduler");
       LogModelProvider logModelProvider = drcRobotModel.getLogModelProvider();
@@ -99,22 +106,36 @@ public class IHMCMOCAPLocalizationModule implements MocapRigidbodiesListener, Pa
          PrintTools.info("Packet communicator isn't registered, ignoring MOCAP data");
          return;
       }
-      
+
+      if(!mocapToPelvisFrameConverter.isInitialized() && latestRobotConfigurationData != null)
+      {
+         ReferenceFrame pelvisFrame = fullRobotModel.getPelvis().getBodyFixedFrame();
+         MocapRigidBody pelvisRigidBody = getPelvisRigidBody(listOfRigidbodies);
+         mocapToPelvisFrameConverter.initialize(pelvisFrame, pelvisRigidBody);
+      }
+      else
+      {
+         PrintTools.info("Waiting for robot configuration data");
+         return;
+      }
+
+      MocapRigidBody pelvisRigidBody = getPelvisRigidBody(listOfRigidbodies);
+      sendPelvisTransformToController(pelvisRigidBody);
+      setMarkersYoVariables(pelvisRigidBody);
+
+      yoVariableServer.update(System.currentTimeMillis());
+   }
+
+   private MocapRigidBody getPelvisRigidBody(ArrayList<MocapRigidBody> listOfRigidbodies)
+   {
       for (int i = 0; i < listOfRigidbodies.size(); i++)
       {
-         MocapRigidBody mocapRigidBody = listOfRigidbodies.get(i);
-         
-         if(mocapRigidBody.getId() == PELVIS_ID)
-         {
-            RigidBodyTransform pelvisTransform = new RigidBodyTransform();
-            // mocapToPelvisFrameConverter.convertMocapPoseToRobotFrame(mocapRigidBody);
-            mocapRigidBody.packPose(pelvisTransform);
-            sendPelvisTransformToController(pelvisTransform);   
-            setMarkersYoVariables(mocapRigidBody);
-         }
+         MocapRigidBody rigidBody = listOfRigidbodies.get(i);
+         if(rigidBody.getId() == PELVIS_ID)
+            return rigidBody;
       }
-      
-      yoVariableServer.update(System.currentTimeMillis());
+
+      return null;
    }
 
    private void setMarkersYoVariables(MocapRigidBody mocapRigidBody)
@@ -131,11 +152,34 @@ public class IHMCMOCAPLocalizationModule implements MocapRigidbodiesListener, Pa
       markersRoll.set(yawPitchRoll[2]);      
    }
 
-   private void sendPelvisTransformToController(RigidBodyTransform pelvisTransform)
-   {      
-      if(timestampHasBeenSet)
+   private void setPelvisYoVariables(RigidBodyTransform pelvisTransform)
+   {
+      Vector3d pelvisTranslation = new Vector3d();
+      double[] yawPitchRoll = new double[3];
+
+      pelvisTransform.getTranslation(pelvisTranslation);
+
+      Quat4d pelvisRotation = new Quat4d();
+      pelvisTransform.getRotation(pelvisRotation);
+      RotationTools.convertQuaternionToYawPitchRoll(pelvisRotation, yawPitchRoll);
+
+      computedPelvisPositionX.set(pelvisTranslation.getX());
+      computedPelvisPositionY.set(pelvisTranslation.getY());
+      computedPelvisPositionZ.set(pelvisTranslation.getZ());
+
+      computedPelvisYaw.set(yawPitchRoll[0]);
+      computedPelvisPitch.set(yawPitchRoll[1]);
+      computedPelvisRoll.set(yawPitchRoll[2]);
+   }
+
+   private void sendPelvisTransformToController(MocapRigidBody pelvisRigidBody)
+   {
+      mocapToPelvisFrameConverter.getPelvisTransformFromMocapRigidBody(pelvisRigidBody, pelvisTransform);
+      setPelvisYoVariables(pelvisTransform);
+
+      if(latestRobotConfigurationData != null)
       {
-         TimeStampedTransform3D timestampedTransform = new TimeStampedTransform3D(pelvisTransform, latestRobotTimeStamp);      
+         TimeStampedTransform3D timestampedTransform = new TimeStampedTransform3D(pelvisTransform, latestRobotConfigurationData.getTimestamp());
          StampedPosePacket stampedPosePacket = new StampedPosePacket(Integer.toString(PELVIS_ID), timestampedTransform, 1.0);
          
          stampedPosePacket.setDestination(PacketDestination.CONTROLLER.ordinal());
@@ -150,8 +194,7 @@ public class IHMCMOCAPLocalizationModule implements MocapRigidbodiesListener, Pa
    @Override
    public void receivedPacket(RobotConfigurationData packet)
    {
-      timestampHasBeenSet = true;
-      latestRobotTimeStamp = packet.lastReceivedPacketRobotTimestamp;
+      latestRobotConfigurationData = packet;
       
       FloatingInverseDynamicsJoint rootJoint = fullRobotModel.getRootJoint();
 

@@ -1,118 +1,127 @@
 package us.ihmc.avatar.networkProcessor.modules.mocap;
 
+import optiTrack.MocapMarker;
 import optiTrack.MocapRigidBody;
-import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-import us.ihmc.humanoidRobotics.communication.subscribers.HumanoidRobotDataReceiver;
-import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
 
-import java.util.HashMap;
+import javax.vecmath.Matrix3d;
+import javax.vecmath.Vector3d;
+import java.util.ArrayList;
 
 public class MocapToPelvisFrameConverter
 {
-   HashMap<Integer, ReferenceFrame> mocapReferenceFrames = new HashMap<Integer, ReferenceFrame>();
-   HashMap<Integer, RigidBodyTransform> mocapRigidBodyTransforms = new HashMap<Integer, RigidBodyTransform>();
+   private boolean initialized = false;
 
-   private final HumanoidRobotDataReceiver robotDataReceiver;
+   private ReferenceFrame mocapFrame = null;
 
-   private final ReferenceFrame robotPelvisFrame;
-   private final ReferenceFrame mocapPelvisFrame;
+   private static final Vector3d markerPlateOriginInPelvisFrame = new Vector3d(0.1719, 0.0, 0.11324);
+   private static final double ballRadius = 0.006;
 
-   /** in world frame, uses mocapHeadPoseInZUp as it's transform to parent */
-   private final ReferenceFrame mocapOffsetFrame;
+   private static final Vector3d markerPoint1OffsetInPelvisFrame = new Vector3d(0.02 + ballRadius, - 0.04387, 0.0213);
+   private static final Vector3d markerPoint2OffsetInPelvisFrame = new Vector3d(0.005 + ballRadius, 0.04445, 0.0213);
+   private static final Vector3d markerPoint3OffsetInPelvisFrame = new Vector3d(0.005 + ballRadius, 0.04445, -0.0381);
+   private static final Vector3d markerPoint4OffsetInPelvisFrame = new Vector3d(0.005 + ballRadius, - 0.04387, -0.0381);
 
-   /** the transform from mocap head in z-up to mocap origin */
-   private final RigidBodyTransform mocapPelvisPoseInZUp = new RigidBodyTransform();
+   private static final Vector3d markerPoint1InPelvisFrame = new Vector3d();
+   private static final Vector3d markerPoint2InPelvisFrame = new Vector3d();
+   private static final Vector3d markerPoint3InPelvisFrame = new Vector3d();
+   private static final Vector3d markerPoint4InPelvisFrame = new Vector3d();
 
-   /** the change in frame between pelvis in mocap to pelvis in robot world */
-   private final RigidBodyTransform transformFromMocapPelvisToRobotPelvis = new RigidBodyTransform();
-
-   /** the transform from the mocap centroid to robot pelvis */
-   private final RigidBodyTransform transformFromMocapHeadCentroidToHeadRoot = new RigidBodyTransform();
-
-   /** the calibration transform found by aligning the point cloud with the mocap objects*/
-   private final RigidBodyTransform mocapJigCalibrationTransform = new RigidBodyTransform();
-
-   /** used to pack the mocap pose and multiply the calibration and transform to headroot */
-   private final RigidBodyTransform workingRigidBodyTransform = new RigidBodyTransform();
-
-   private boolean enableMocapUpdates = false;
-
-   private ReferenceFrame mocapOrigin = new ReferenceFrame("mocapOrigin", ReferenceFrame.getWorldFrame())
+   static
    {
-
-      @Override
-      protected void updateTransformToParent(RigidBodyTransform transformToParent)
-      {
-         transformToParent.setIdentity();
-      }
-   };
-
-
-   public MocapToPelvisFrameConverter(DRCRobotModel robotModel, PacketCommunicator mocapModulePacketCommunicator)
-   {
-      FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
-      robotDataReceiver = new HumanoidRobotDataReceiver(fullRobotModel, null);
-      HumanoidReferenceFrames referenceFrames = robotDataReceiver.getReferenceFrames();
-      robotPelvisFrame = referenceFrames.getPelvisFrame();
-
-      mocapPelvisFrame = new ReferenceFrame("pelvisInMocapFrame", mocapOrigin)
-      {
-         @Override
-         protected void updateTransformToParent(RigidBodyTransform transformToParent)
-         {
-            transformToParent.set(mocapPelvisPoseInZUp);
-         }
-      };
-
-      mocapOffsetFrame = new ReferenceFrame("mocapOffsetFrame", mocapOrigin)
-      {
-
-         @Override
-         protected void updateTransformToParent(RigidBodyTransform transformToParent)
-         {
-            transformToParent.set(transformFromMocapPelvisToRobotPelvis);
-         }
-      };
-
-      mocapModulePacketCommunicator.attachListener(RobotConfigurationData.class, robotDataReceiver);
+      markerPoint1InPelvisFrame.add(markerPlateOriginInPelvisFrame, markerPoint1OffsetInPelvisFrame);
+      markerPoint2InPelvisFrame.add(markerPlateOriginInPelvisFrame, markerPoint2OffsetInPelvisFrame);
+      markerPoint3InPelvisFrame.add(markerPlateOriginInPelvisFrame, markerPoint3OffsetInPelvisFrame);
+      markerPoint4InPelvisFrame.add(markerPlateOriginInPelvisFrame, markerPoint4OffsetInPelvisFrame);
    }
 
-   public RigidBodyTransform convertMocapPoseToRobotFrame(MocapRigidBody mocapRigidBody)
+   public MocapToPelvisFrameConverter()
    {
-      int id = mocapRigidBody.getId();
 
-      if(!mocapReferenceFrames.containsKey(id))
-      {
-         ReferenceFrame mocapObjectFrame = createReferenceFrameForMocapObject(id);
-         mocapReferenceFrames.put(id, mocapObjectFrame);
-      }
-
-      mocapRigidBody.packPose(mocapRigidBodyTransforms.get(id));
-
-      ReferenceFrame referenceFrame = mocapReferenceFrames.get(id);
-      referenceFrame.update();
-
-      return referenceFrame.getTransformToDesiredFrame(mocapOffsetFrame);
    }
 
-   private ReferenceFrame createReferenceFrameForMocapObject(int id)
+   public boolean isInitialized()
    {
-      final RigidBodyTransform mocapRigidBodyTransform = new RigidBodyTransform();
-      mocapRigidBodyTransforms.put(id, mocapRigidBodyTransform);
-      ReferenceFrame mocapObjectFrame = new ReferenceFrame("mocapObject" + id, mocapOrigin )
+      return initialized;
+   }
+
+   public void initialize(ReferenceFrame pelvisFrame, MocapRigidBody markerRigidBody)
+   {
+      ArrayList<MocapMarker> mocapMarkers = markerRigidBody.getListOfAssociatedMarkers();
+      if(mocapMarkers.size() != 4)
       {
-         @Override
-         protected void updateTransformToParent(RigidBodyTransform transformToParent)
-         {
-            transformToParent.set(mocapRigidBodyTransform);
-         }
-      };
-      return mocapObjectFrame;
+         throw new RuntimeException("Rigid body " + markerRigidBody.getId() + " should have 4 markers, but it has " + mocapMarkers.size());
+      }
+
+      RigidBodyTransform pelvisToMocapTransform = computePelvisToMocapTransform(mocapMarkers);
+      RigidBodyTransform worldToPelvisTransform = pelvisFrame.getTransformToWorldFrame();
+      worldToPelvisTransform.invert();
+
+      RigidBodyTransform worldToMocapTransform = new RigidBodyTransform();
+      worldToMocapTransform.multiply(pelvisToMocapTransform);
+      worldToMocapTransform.multiply(worldToPelvisTransform);
+
+      initialized = true;
+
+      mocapFrame = ReferenceFrame.constructFrameWithUnchangingTransformFromParent("mocapFrame", ReferenceFrame.getWorldFrame(), worldToMocapTransform);
+   }
+
+   private RigidBodyTransform computePelvisToMocapTransform(ArrayList<MocapMarker> mocapMarkers)
+   {
+      MocapMarker marker1 = mocapMarkers.get(0);
+      MocapMarker marker2 = mocapMarkers.get(1);
+      MocapMarker marker3 = mocapMarkers.get(2);
+      MocapMarker marker4 = mocapMarkers.get(3);
+
+      Vector3d robotXAxisInMocapFrame = new Vector3d();
+      Vector3d robotYAxisInMocapFrame = new Vector3d();
+      Vector3d robotZAxisInMocapFrame = new Vector3d();
+
+      robotYAxisInMocapFrame.sub(marker3.getPosition(), marker4.getPosition());
+      robotZAxisInMocapFrame.sub(marker2.getPosition(), marker3.getPosition());
+      robotXAxisInMocapFrame.cross(robotYAxisInMocapFrame, robotZAxisInMocapFrame);
+
+      robotXAxisInMocapFrame.normalize();
+      robotYAxisInMocapFrame.normalize();
+      robotZAxisInMocapFrame.normalize();
+
+      Matrix3d robotToMocapRotationMatrix = new Matrix3d();
+      robotToMocapRotationMatrix.setColumn(0, robotXAxisInMocapFrame.getX(), robotXAxisInMocapFrame.getY(), robotXAxisInMocapFrame.getZ());
+      robotToMocapRotationMatrix.setColumn(1, robotYAxisInMocapFrame.getX(), robotYAxisInMocapFrame.getY(), robotYAxisInMocapFrame.getZ());
+      robotToMocapRotationMatrix.setColumn(2, robotZAxisInMocapFrame.getX(), robotZAxisInMocapFrame.getY(), robotZAxisInMocapFrame.getZ());
+
+      Vector3d marker2ToPlateOriginInMocapFrame = new Vector3d(markerPoint2InPelvisFrame);
+      marker2ToPlateOriginInMocapFrame.negate();
+      robotToMocapRotationMatrix.transform(marker2ToPlateOriginInMocapFrame);
+
+      Vector3d plateOriginToPelvisJointInMocapFrame = new Vector3d(markerPlateOriginInPelvisFrame);
+      plateOriginToPelvisJointInMocapFrame.negate();
+      robotToMocapRotationMatrix.transform(plateOriginToPelvisJointInMocapFrame);
+
+      Vector3d pelvisJointInMocapFrame = new Vector3d(marker2.getPosition());
+      pelvisJointInMocapFrame.add(marker2ToPlateOriginInMocapFrame);
+      pelvisJointInMocapFrame.add(plateOriginToPelvisJointInMocapFrame);
+
+      RigidBodyTransform pelvisToMocapTransform = new RigidBodyTransform();
+      pelvisToMocapTransform.set(robotToMocapRotationMatrix, pelvisJointInMocapFrame);
+      pelvisToMocapTransform.invert();
+
+      return pelvisToMocapTransform;
+   }
+
+   public void getPelvisTransformFromMocapRigidBody(MocapRigidBody mocapRigidBody, RigidBodyTransform pelvisTransform)
+   {
+      ArrayList<MocapMarker> mocapMarkers = mocapRigidBody.getListOfAssociatedMarkers();
+      if(mocapMarkers.size() != 4)
+      {
+         throw new RuntimeException("Rigid body " + mocapRigidBody.getId() + " should have 4 markers, but it has " + mocapMarkers.size());
+      }
+
+      RigidBodyTransform pelvisToMocapTransform = computePelvisToMocapTransform(mocapMarkers);
+      FramePose pelvisPose = new FramePose(mocapFrame, pelvisToMocapTransform);
+      pelvisPose.changeFrame(ReferenceFrame.getWorldFrame());
+      pelvisPose.getRigidBodyTransform(pelvisTransform);
    }
 }
