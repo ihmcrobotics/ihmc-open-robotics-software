@@ -182,6 +182,7 @@ public class SimulationRewindabilityVerifierTest
          this.robot = robot;
       }
       
+      @Override
       public void doControl()
       {      
          variableOne.set(Math.cos(robot.getTime()));
@@ -190,20 +191,24 @@ public class SimulationRewindabilityVerifierTest
          variableFour.set(1.2);
       }
 
+      @Override
       public YoVariableRegistry getYoVariableRegistry()
       {
          return registry;
       }
 
+      @Override
       public String getName()
       {
         return "Test";
       }
       
+      @Override
       public void initialize()
       {      
       }
 
+      @Override
       public String getDescription()
       {
          return getName();
@@ -221,6 +226,7 @@ public class SimulationRewindabilityVerifierTest
          super(robot);
       }
       
+      @Override
       public void doControl()
       {
          super.doControl();
@@ -249,6 +255,7 @@ public class SimulationRewindabilityVerifierTest
          super(robot);
       }
       
+      @Override
       public void doControl()
       {
          super.doControl();

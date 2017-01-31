@@ -29,6 +29,7 @@ public class LocalYoWhiteBoard extends YoWhiteBoard
          myBrotherWhiteBoard.setMyBrotherWhiteBoard(this);
    }
 
+   @Override
    public void whiteBoardSpecificConnect()
    {
       ArrayList<YoVariable<?>> allVariablesToRead = new ArrayList<YoVariable<?>>();
@@ -55,6 +56,7 @@ public class LocalYoWhiteBoard extends YoWhiteBoard
       setConnected(true);
    }
 
+   @Override
    public void whiteBoardSpecificWriteData(double[] doubleVariablesToWriteBuffer, int[] intVariablesToWriteBuffer, boolean[] booleanVariablesToWriteBuffer,
            int[] enumVariablesToWriteBuffer, int writeIndex)
    {
@@ -63,6 +65,7 @@ public class LocalYoWhiteBoard extends YoWhiteBoard
    }
 
 
+   @Override
    public void closeYoWhiteBoard() throws IOException
    {
       setConnected(false);       

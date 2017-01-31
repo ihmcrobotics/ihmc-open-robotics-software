@@ -13,7 +13,7 @@ import us.ihmc.quadrupedRobotics.QuadrupedTestBehaviors;
 import us.ihmc.quadrupedRobotics.QuadrupedTestFactory;
 import us.ihmc.quadrupedRobotics.QuadrupedTestGoals;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
-import us.ihmc.quadrupedRobotics.params.ParameterRegistry;
+import us.ihmc.robotics.dataStructures.parameter.ParameterRegistry;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
 import us.ihmc.robotics.controllers.ControllerFailureException;
 import us.ihmc.robotics.testing.YoVariableTestGoal;

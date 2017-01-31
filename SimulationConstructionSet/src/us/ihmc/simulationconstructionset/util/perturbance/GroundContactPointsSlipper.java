@@ -213,25 +213,30 @@ public class GroundContactPointsSlipper implements RobotController
       return touchdownCoM;
    }
 
+   @Override
    public void initialize()
    {
    }
 
+   @Override
    public YoVariableRegistry getYoVariableRegistry()
    {
       return registry;
    }
 
+   @Override
    public String getName()
    {
       return registry.getName();
    }
 
+   @Override
    public String getDescription()
    {
       return getName();
    }
 
+   @Override
    public void doControl()
    {
       if (doSlip.getBooleanValue())

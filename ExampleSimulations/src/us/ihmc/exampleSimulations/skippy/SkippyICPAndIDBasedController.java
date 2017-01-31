@@ -5,8 +5,8 @@ import java.util.ArrayList;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicReferenceFrame;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;

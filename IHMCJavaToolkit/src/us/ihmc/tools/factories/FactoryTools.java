@@ -10,12 +10,23 @@ public class FactoryTools
       {
          if (FactoryField.class.isAssignableFrom(field.getType()))
          {
-            FactoryField<?> factoryField = null;
             try
             {
                field.setAccessible(true);
-               factoryField = (FactoryField<?>) field.get(factory);
-               factoryField.get();
+               
+               if (OptionalFactoryField.class.isAssignableFrom(field.getType()))
+               {
+                  OptionalFactoryField<?> optionalFactoryField = (OptionalFactoryField<?>) field.get(factory);
+                  if (optionalFactoryField.hasValue())
+                  {
+                     optionalFactoryField.get();
+                  }
+               }
+               else
+               {
+                  RequiredFactoryField<?> requiredFactoryField = (RequiredFactoryField<?>) field.get(factory);
+                  requiredFactoryField.get();
+               }
             }
             catch (IllegalArgumentException | IllegalAccessException e)
             {

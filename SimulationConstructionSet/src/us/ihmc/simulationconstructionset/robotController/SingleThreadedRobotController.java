@@ -15,6 +15,7 @@ public class SingleThreadedRobotController extends AbstractThreadedRobotControll
       this.scs = scs;
    }
 
+   @Override
    public void addController(MultiThreadedRobotControlElement controller, int executionsPerControlTick, boolean skipFirstControlCycle)
    {
       controllers.add(new SingleThreadedRobotControllerExecutor(simulatedRobot, controller, executionsPerControlTick, skipFirstControlCycle, registry));

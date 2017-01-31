@@ -180,25 +180,30 @@ public class ReflectionSimulationComparerTest
          this.isRewindable = isRewindable;
       }
 
+      @Override
       public void initialize()
       {         
       }
 
+      @Override
       public YoVariableRegistry getYoVariableRegistry()
       {
          return registry;
       }
 
+      @Override
       public String getName()
       {
          return "RewindableController";
       }
 
+      @Override
       public String getDescription()
       {
          return getName();
       }
 
+      @Override
       public void doControl()
       {
          counter.increment();

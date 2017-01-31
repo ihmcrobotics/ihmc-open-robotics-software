@@ -635,10 +635,16 @@ public class KDTree
          while (leftMarker < rightMarker)
          {
             // Advance left marker and test
-            while (points[++leftMarker][splitDimension] < splitValue);
+            while (points[++leftMarker][splitDimension] < splitValue)
+            {
+               
+            }
 
             // Advance right marker and test
-            while (points[--rightMarker][splitDimension] > splitValue);
+            while (points[--rightMarker][splitDimension] > splitValue)
+            {
+               
+            }
 
             // Swap points and objects
             if (leftMarker < rightMarker)

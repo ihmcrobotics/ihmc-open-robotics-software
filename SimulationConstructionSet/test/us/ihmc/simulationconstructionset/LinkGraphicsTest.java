@@ -6,11 +6,11 @@ import javax.vecmath.Point2d;
 
 import org.junit.Test;
 
-import us.ihmc.graphics3DDescription.Graphics3DObject;
-import us.ihmc.graphics3DDescription.MeshDataGenerator;
-import us.ihmc.graphics3DDescription.MeshDataHolder;
-import us.ihmc.graphics3DDescription.appearance.AppearanceDefinition;
-import us.ihmc.graphics3DDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.Graphics3DObject;
+import us.ihmc.graphicsDescription.MeshDataGenerator;
+import us.ihmc.graphicsDescription.MeshDataHolder;
+import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.tools.continuousIntegration.IntegrationCategory;
 import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;

@@ -123,6 +123,7 @@ public class AlternatingSlopesGroundProfile extends GroundProfileFromHeightMap
       return ret;
    }
 
+   @Override
    public double heightAndNormalAt(double x, double y, double z, Vector3d normalToPack)
    {
       double height = heightAt(x, y, z);
@@ -131,6 +132,7 @@ public class AlternatingSlopesGroundProfile extends GroundProfileFromHeightMap
       return height;
    }
    
+   @Override
    public double heightAt(double x, double y, double z)
    {
       int indexOnLeft = findIndexOnLeft(xzPairs, x);
@@ -193,6 +195,7 @@ public class AlternatingSlopesGroundProfile extends GroundProfileFromHeightMap
       }
    }
 
+   @Override
    public BoundingBox3d getBoundingBox()
    {
       return boundingBox;

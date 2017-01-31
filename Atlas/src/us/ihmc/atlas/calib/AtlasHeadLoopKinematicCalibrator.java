@@ -15,9 +15,9 @@ import org.ddogleg.optimization.UtilOptimize;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.graphics3DDescription.appearance.YoAppearanceRGBColor;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicCoordinateSystem;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicPosition;
+import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
@@ -115,8 +115,7 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
       JPanel panel = new JPanel(new BorderLayout());
       final JLabel lblDisplay = new JLabel("", iiDisplay, JLabel.CENTER);
       panel.add(lblDisplay, BorderLayout.CENTER);
-      scs.addExtraJpanel(panel, "Image");
-      scs.getStandardSimulationGUI().selectPanel("Image");
+      scs.addExtraJpanel(panel, "Image", true);
       scs.getDataBuffer().attachIndexChangedListener(new IndexChangedListener()
       {
          @Override
@@ -130,7 +129,6 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
                scsAlignCameraToRobotCamera();
          }
       });
-      //scs.getStandardSimulationGUI().selectPanel("Image");
 
       //Set Camera Info
       String intrinsicFile = "../DarpaRoboticsChallenge/data/calibration_images/intrinsic_ros.xml";

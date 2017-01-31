@@ -30,8 +30,8 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
-import us.ihmc.robotics.stateMachines.GenericStateMachine;
-import us.ihmc.robotics.stateMachines.StateMachineTools;
+import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.GenericStateMachine;
+import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateMachineTools;
 
 public class HeadOrientationManager
 {

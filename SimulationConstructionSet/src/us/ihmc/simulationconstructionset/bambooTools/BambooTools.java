@@ -198,6 +198,7 @@ public class BambooTools
 
       FileFilter fileFilter = new FileFilter()
       {
+         @Override
          public boolean accept(File file)
          {
             if (!file.isDirectory())
@@ -229,6 +230,7 @@ public class BambooTools
    {
       Comparator<File> fileAlphabeticalComparator = new Comparator<File>()
       {
+         @Override
          public int compare(File file1, File file2)
          {
             String name1 = file1.getName();

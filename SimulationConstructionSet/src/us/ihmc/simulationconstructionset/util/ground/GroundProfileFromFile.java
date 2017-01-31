@@ -9,9 +9,9 @@ import java.util.StringTokenizer;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.graphics3DAdapter.HeightMapWithNormals;
-import us.ihmc.graphics3DDescription.Graphics3DObject;
-import us.ihmc.graphics3DDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.Graphics3DObject;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.jMonkeyEngineToolkit.HeightMapWithNormals;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -26,7 +26,7 @@ public class GroundProfileFromFile extends GroundProfileFromHeightMap
    private KDTree kdTree;
    private final BoundingBox3d boundingBox;
 
-   public static enum VariableType {X, Y, Z};
+   public static enum VariableType {X, Y, Z}
 
    public GroundProfileFromFile(String BDITerrainFilePath, int maxPointsInLeaves, RigidBodyTransform transform3D)
    {
@@ -223,6 +223,7 @@ public class GroundProfileFromFile extends GroundProfileFromHeightMap
       return null;
    }
 
+   @Override
    public double heightAndNormalAt(double x, double y, double z, Vector3d normalToPack)
    {
       double height = heightAt(x, y, z);
@@ -233,6 +234,7 @@ public class GroundProfileFromFile extends GroundProfileFromHeightMap
    
    private final double[] query = new double[2];
 
+   @Override
    public double heightAt(double x, double y, double z)
    {
       if (!boundingBox.isXYInside(x, y)) return 0.0;
@@ -290,7 +292,6 @@ public class GroundProfileFromFile extends GroundProfileFromHeightMap
          /**
           *
           */
-         private static final long serialVersionUID = 5737598224027895000L;
       };
 
       SimulationConstructionSet scs = new SimulationConstructionSet(rob);
@@ -330,6 +331,7 @@ public class GroundProfileFromFile extends GroundProfileFromHeightMap
 
    }
    
+   @Override
    public BoundingBox3d getBoundingBox()
    {
       return boundingBox;

@@ -58,11 +58,13 @@ public class VirtualSliderBoardGui implements CloseableAndDisposable
 
       sliderBoard.addListener(new SliderBoardControlAddedListener()
       {
+         @Override
          public void controlAdded(MidiControl ctrl)
          {
             addSlider(ctrl);
          }
 
+         @Override
          public void controlRemoved(MidiControl ctrl)
          {
             removeSlider(ctrl, closeableAndDisposableRegistry);
@@ -71,6 +73,7 @@ public class VirtualSliderBoardGui implements CloseableAndDisposable
 
       listener = new VariableChangedListener()
       {
+         @Override
          public void variableChanged(YoVariable<?> v)
          {
             synchronized (VirtualSliderBoardGui.this)
@@ -96,6 +99,7 @@ public class VirtualSliderBoardGui implements CloseableAndDisposable
       closeableAndDisposableRegistry.registerCloseableAndDisposable(this);
    }
 
+   @Override
    public void closeAndDispose()
    {
       sliderPanels.clear();
@@ -112,6 +116,7 @@ public class VirtualSliderBoardGui implements CloseableAndDisposable
       
       SwingUtilities.invokeLater(new Runnable()
       {
+         @Override
          public void run()
          {
             mainPanel.setVisible(false);
@@ -258,6 +263,7 @@ public class VirtualSliderBoardGui implements CloseableAndDisposable
          this.slider = slider;
       }
 
+      @Override
       public void stateChanged(ChangeEvent e)
       {
          // System.out.println();
@@ -293,6 +299,7 @@ public class VirtualSliderBoardGui implements CloseableAndDisposable
          this.slider = slider;
       }
 
+      @Override
       public void actionPerformed(ActionEvent e)
       {
          try

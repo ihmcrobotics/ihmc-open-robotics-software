@@ -20,7 +20,12 @@ public class FloatingRootJointRobot extends RobotFromDescription
 
    public FloatingRootJointRobot(RobotDescription robotDescription)
    {
-      super(robotDescription);
+      this(robotDescription, true, true);
+   }
+   
+   public FloatingRootJointRobot(RobotDescription robotDescription, boolean enableDamping, boolean enableJointTorqueAndVelocityLimits)
+   {
+      super(robotDescription, enableDamping, enableJointTorqueAndVelocityLimits);
 
       rootJoint = (FloatingJoint) this.getRootJoints().get(0);
 

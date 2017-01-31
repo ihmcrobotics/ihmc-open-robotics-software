@@ -29,6 +29,7 @@ public class ForcePerturbance implements DirectedPerturbance
          parentRegistry.addChild(registry);
    }
 
+   @Override
    public void perturb(Vector3d direction)
    {
       Vector3d force = new Vector3d(direction);
@@ -40,11 +41,13 @@ public class ForcePerturbance implements DirectedPerturbance
       }
    }
 
+   @Override
    public double getBallVelocityMagnitude()
    {
       return ballVelocityMagnitude;
    }
 
+   @Override
    public double getBallMass()
    {
       return impulse() / getBallVelocityMagnitude();
@@ -55,11 +58,13 @@ public class ForcePerturbance implements DirectedPerturbance
       return disturbanceMagnitude.getDoubleValue() * disturbanceDuration.getDoubleValue();
    }
 
+   @Override
    public void doEveryTick()
    {
       forcePerturbable.resetPerturbanceForceIfNecessary();
    }
    
+   @Override
    public String toString()
    {
       return name + ": Magnitude=" + disturbanceMagnitude.getDoubleValue() + ", Duration="+disturbanceDuration.getDoubleValue();

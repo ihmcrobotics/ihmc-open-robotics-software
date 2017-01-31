@@ -105,7 +105,7 @@ public class MultisenseHeadOnAStickManualTestMinimalNetworkProcessor  extends Ro
          if (id == MULTISENSE_MOCAP_ID)
          {
             RigidBodyTransform pose = new RigidBodyTransform();
-            mocapObject.getPose(pose);
+            mocapObject.packPose(pose);
             headPoseInZUp.set(pose);
          }
       }

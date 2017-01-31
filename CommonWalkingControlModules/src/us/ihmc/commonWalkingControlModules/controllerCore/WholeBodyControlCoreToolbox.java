@@ -8,7 +8,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.PlaneContactW
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointIndexHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.visualizer.WrenchVisualizer;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;

@@ -3,8 +3,8 @@ package us.ihmc.simulationconstructionset;
 import java.io.Serializable;
 import java.util.ArrayList;
 
-import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
-import us.ihmc.graphics3DDescription.HeightMap;
+import us.ihmc.graphicsDescription.HeightMap;
+import us.ihmc.jMonkeyEngineToolkit.Graphics3DAdapter;
 import us.ihmc.robotics.dataStructures.YoVariableHolder;
 import us.ihmc.robotics.dataStructures.listener.RewoundListener;
 import us.ihmc.robotics.dataStructures.registry.NameSpace;
@@ -112,46 +112,55 @@ public class Simulation implements YoVariableHolder, Serializable // Runnable,
       this.mySimulator.addScript(script);
    }
 
+   @Override
    public ArrayList<YoVariable<?>> getAllVariables()
    {
       return myDataBuffer.getAllVariables();
    }
 
+   @Override
    public YoVariable<?>[] getAllVariablesArray()
    {
       return myDataBuffer.getAllVariablesArray();
    }
 
+   @Override
    public YoVariable<?> getVariable(String varname)
    {
       return myDataBuffer.getVariable(varname);
    }
 
+   @Override
    public boolean hasUniqueVariable(String varname)
    {
       return myDataBuffer.hasUniqueVariable(varname);
    }
 
+   @Override
    public YoVariable<?> getVariable(String nameSpace, String varname)
    {
       return myDataBuffer.getVariable(nameSpace, varname);
    }
 
+   @Override
    public boolean hasUniqueVariable(String nameSpace, String varname)
    {
       return myDataBuffer.hasUniqueVariable(nameSpace, varname);
    }
 
+   @Override
    public ArrayList<YoVariable<?>> getVariables(String nameSpace, String varname)
    {
       return myDataBuffer.getVariables(nameSpace, varname);
    }
 
+   @Override
    public ArrayList<YoVariable<?>> getVariables(String varname)
    {
       return myDataBuffer.getVariables(varname);
    }
 
+   @Override
    public ArrayList<YoVariable<?>> getVariables(NameSpace nameSpace)
    {
       return myDataBuffer.getVariables(nameSpace);

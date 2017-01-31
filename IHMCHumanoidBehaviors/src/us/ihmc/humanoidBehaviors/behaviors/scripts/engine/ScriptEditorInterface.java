@@ -11,6 +11,8 @@ import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 
 import javax.swing.AbstractAction;
@@ -59,7 +61,7 @@ public class ScriptEditorInterface
    private final JTextField setDeltaTime;
    private final JTextField setEpsilon;
 
-   private final JComboBox scriptTypeSelector;
+   private final JComboBox<String> scriptTypeSelector;
    private final JTextArea loadInfo;
    private final JLabel frameLabel;
    private final JTabbedPane tabbedPane;
@@ -71,7 +73,6 @@ public class ScriptEditorInterface
    private int loadCounter;
 
    private File scriptFile1;
-   private File scriptFile2;
    private JButton compareScripts;
    private JButton openXML;
 
@@ -202,13 +203,14 @@ public class ScriptEditorInterface
       openXML.setToolTipText("Edit scripts right here");
       openXML.addActionListener(new OpenXML());
 
-      scriptTypeSelector = new JComboBox(scriptTypeSelectorString);
+      scriptTypeSelector = new JComboBox<String>(scriptTypeSelectorString);
 
       frameLabel = new JLabel("No reference frame");
       frameLabel.setToolTipText("Shows the current reference frame of the loaded script. Only scripts with the same reference frame can be loaded");
 
       setDeltaTime.addFocusListener(new FocusAdapter()
       {
+         @Override
          public void focusGained(FocusEvent fEvt)
          {
             JTextField tField = (JTextField) fEvt.getSource();
@@ -218,6 +220,7 @@ public class ScriptEditorInterface
 
       saveTableDataName.addFocusListener(new FocusAdapter()
       {
+         @Override
          public void focusGained(FocusEvent fEvt)
          {
             JTextField tField = (JTextField) fEvt.getSource();
@@ -301,6 +304,7 @@ public class ScriptEditorInterface
 
       actionMap.put("DeleteRow", new AbstractAction()
       {
+         @Override
          public void actionPerformed(ActionEvent e)
          {
             // TODO: integrate with DeleteSelectedRows class
@@ -325,6 +329,7 @@ public class ScriptEditorInterface
       inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_Z, 0), "UndoDeleteRow");
       actionMap.put("UndoDeleteRow", new AbstractAction()
       {
+         @Override
          public void actionPerformed(ActionEvent e)
          {
             undoDeleteSelectedRows();
@@ -334,6 +339,7 @@ public class ScriptEditorInterface
       im.put(KeyStroke.getKeyStroke(KeyEvent.VK_W, 0), "MoveRowUp");
       actionMap.put("MoveRowUp", new AbstractAction()
       {
+         @Override
          public void actionPerformed(ActionEvent e)
          {
             moveRowUp();
@@ -343,6 +349,7 @@ public class ScriptEditorInterface
       im.put(KeyStroke.getKeyStroke(KeyEvent.VK_S, 0), "MoveRowDown");
       actionMap.put("MoveRowDown", new AbstractAction()
       {
+         @Override
          public void actionPerformed(ActionEvent e)
          {
             moveRowDown();
@@ -352,6 +359,7 @@ public class ScriptEditorInterface
       im.put(KeyStroke.getKeyStroke(KeyEvent.VK_C, 0), "CopyRow");
       actionMap.put("CopyRow", new AbstractAction()
       {
+         @Override
          public void actionPerformed(ActionEvent e)
          {
             copyRow();
@@ -361,6 +369,7 @@ public class ScriptEditorInterface
       im2.put(KeyStroke.getKeyStroke(KeyEvent.VK_P, 0), "CopyRowOver");
       actionMap2.put("CopyRowOver", new AbstractAction()
       {
+         @Override
          public void actionPerformed(ActionEvent e)
          {
             copyRowOver();
@@ -370,6 +379,7 @@ public class ScriptEditorInterface
       im.put(KeyStroke.getKeyStroke(KeyEvent.VK_F5, 0), "refreshTableData");
       actionMap.put("refreshTableData", new AbstractAction()
       {
+         @Override
          public void actionPerformed(ActionEvent e)
          {
             refreshTableData();
@@ -380,6 +390,7 @@ public class ScriptEditorInterface
 
    private class checkListener implements ActionListener
    {
+      @Override
       public void actionPerformed(ActionEvent event)
       {
          checkWhichBox(table1check, table2check);
@@ -388,6 +399,7 @@ public class ScriptEditorInterface
 
    private class SetNewDeltaTimes implements ActionListener
    {
+      @Override
       public void actionPerformed(ActionEvent event)
       {
          int selected = scriptTypeSelector.getSelectedIndex();
@@ -415,6 +427,7 @@ public class ScriptEditorInterface
 
    private class RefreshTableData implements ActionListener
    {
+      @Override
       public void actionPerformed(ActionEvent event)
       {
          refreshTableData();
@@ -423,6 +436,7 @@ public class ScriptEditorInterface
 
    private class OpenXML implements ActionListener
    {
+      @Override
       public void actionPerformed(ActionEvent event)
       {
          openXML();
@@ -434,6 +448,7 @@ public class ScriptEditorInterface
       private ArrayList<ScriptObject> script;
       private File scriptFile;
 
+      @Override
       public void actionPerformed(ActionEvent event)
       {
          if (checkWhichBox(table1check, table2check) == 0)
@@ -458,19 +473,17 @@ public class ScriptEditorInterface
             if (checkWhichBox(table1check, table2check) == 2)
             {
                loadInfo.append(loadCounter + ") Table 2:  " + scriptFile.getName() + "\n\n");
-               scriptFile2 = scriptFile;
             }
 
             if (checkWhichBox(table1check, table2check) == 3)
             {
                loadInfo.append(loadCounter + ") Table 1 & 2:  " + scriptFile.getName() + "\n\n");
                scriptFile1 = scriptFile;
-               scriptFile2 = scriptFile;
             }
 
             try
             {
-               ScriptFileLoader loader = new ScriptFileLoader(scriptFile.toString());
+               ScriptFileLoader loader = new ScriptFileLoader(scriptFile);
                script = loader.readIntoList();
                loader.close();
                appendData(script);
@@ -590,6 +603,7 @@ public class ScriptEditorInterface
 
    private class DeleteAllTablesListener implements ActionListener
    {
+      @Override
       public void actionPerformed(ActionEvent event)
       {
          deleteAllTables();
@@ -598,6 +612,7 @@ public class ScriptEditorInterface
 
    private class DeleteTableListener implements ActionListener
    {
+      @Override
       public void actionPerformed(ActionEvent event)
       {
          deleteAll();
@@ -606,6 +621,7 @@ public class ScriptEditorInterface
 
    private class DeleteSelectedRows implements ActionListener
    {
+      @Override
       public void actionPerformed(ActionEvent event)
       {
          int[] rowIndex = table.getSelectedRows();
@@ -628,19 +644,20 @@ public class ScriptEditorInterface
 
    private class SaveTableListener implements ActionListener
    {
+      @Override
       public void actionPerformed(ActionEvent event)
       {
          setTimeStampsFromDeltaTimes();
-         String filename = ScriptEngineSettings.scriptSavingDirectory + saveTableDataName.getText() + ScriptEngineSettings.extension;
+         Path saveFilePath = Paths.get(ScriptEngineSettings.scriptSavingDirectory, saveTableDataName.getText() + ScriptEngineSettings.extension);
          ScriptFileSaver scriptFileSaver;
          try
          {
-            scriptFileSaver = new ScriptFileSaver(filename, false);
+            scriptFileSaver = new ScriptFileSaver(saveFilePath, false);
             scriptFileSaver.recordList(tableData);
             scriptFileSaver.close();
             saveTableDataName.setText("Save succesfull!");
             loadInfo.setText(loadInfoText);
-            loadInfo.append("Table 1's Script saved in: \n" + filename + "\n");
+            loadInfo.append("Table 1's Script saved in: \n" + saveFilePath + "\n");
 
             ArrayList<ScriptObject> temp = tableData;
             model.setRowCount(0);
@@ -656,6 +673,7 @@ public class ScriptEditorInterface
 
    private class CompareScripts implements ActionListener
    {
+      @Override
       public void actionPerformed(ActionEvent event)
       {
          compareScripts();
@@ -664,6 +682,7 @@ public class ScriptEditorInterface
 
    private class DeleteAllPauses implements ActionListener
    {
+      @Override
       public void actionPerformed(ActionEvent event)
       {
          for (int i = 0; i < tableData.size(); i++)
@@ -692,6 +711,7 @@ public class ScriptEditorInterface
 
    private class MoveRowUp implements ActionListener
    {
+      @Override
       public void actionPerformed(ActionEvent event)
       {
          moveRowUp();
@@ -700,6 +720,7 @@ public class ScriptEditorInterface
 
    private class MoveRowDown implements ActionListener
    {
+      @Override
       public void actionPerformed(ActionEvent event)
       {
          moveRowDown();

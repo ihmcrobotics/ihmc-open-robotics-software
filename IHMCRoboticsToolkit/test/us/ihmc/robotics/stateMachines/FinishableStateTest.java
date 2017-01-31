@@ -6,6 +6,8 @@ import org.junit.Test;
 
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.FinishableState;
+import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateMachine;
 import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public class FinishableStateTest

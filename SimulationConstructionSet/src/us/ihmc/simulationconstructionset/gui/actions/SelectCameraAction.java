@@ -25,6 +25,7 @@ public class SelectCameraAction extends AbstractAction
       this.putValue(Action.SHORT_DESCRIPTION, "Short Description");
    }
 
+   @Override
    public void actionPerformed(ActionEvent e)
    {
       cameraSelector.selectCamera(name);

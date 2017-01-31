@@ -1,6 +1,6 @@
 package us.ihmc.avatar.initialSetup;
 
-import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
+import us.ihmc.jMonkeyEngineToolkit.Graphics3DAdapter;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;

@@ -7,8 +7,8 @@ import javax.vecmath.Quat4d;
 
 import org.junit.Test;
 
-import us.ihmc.graphics3DDescription.input.SelectedListener;
-import us.ihmc.graphics3DDescription.structure.Graphics3DNode;
+import us.ihmc.graphicsDescription.input.SelectedListener;
+import us.ihmc.graphicsDescription.structure.Graphics3DNode;
 import us.ihmc.simulationconstructionset.DoNothingController;
 import us.ihmc.simulationconstructionset.GroundContactModel;
 import us.ihmc.simulationconstructionset.Robot;
@@ -174,6 +174,7 @@ public class SimpleCombinedTerrainObjectEnvinronmentTest
 
          scs.attachSelectedListener(new SelectedListener()
          {
+            @Override
             public void selected(Graphics3DNode graphics3dNode, ModifierKeyInterface modifierKeyHolder, Point3d location, Point3d cameraLocation,
                   Quat4d cameraRotation)
             {              

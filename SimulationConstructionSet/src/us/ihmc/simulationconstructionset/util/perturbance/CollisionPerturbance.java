@@ -26,6 +26,7 @@ public class CollisionPerturbance implements DirectedPerturbance
          parentRegistry.addChild(registry);
    }
 
+   @Override
    public void perturb(Vector3d direction)
    {
       Vector3d ballVelocity = new Vector3d(direction);
@@ -37,16 +38,19 @@ public class CollisionPerturbance implements DirectedPerturbance
       }
    }
 
+   @Override
    public double getBallMass()
    {
       return 2.0 * disturbanceEnergy.getDoubleValue() / (ballVelocityMagnitude * ballVelocityMagnitude);
    }
    
+   @Override
    public double getBallVelocityMagnitude()
    {
       return ballVelocityMagnitude;
    }
 
+   @Override
    public void doEveryTick()
    {
       // empty

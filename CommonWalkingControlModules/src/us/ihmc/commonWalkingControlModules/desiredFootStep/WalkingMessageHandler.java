@@ -10,7 +10,7 @@ import javax.vecmath.Quat4d;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.controllerAPI.command.CommandArrayDeque;
 import us.ihmc.communication.packets.TextToSpeechPacket;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.AdjustFootstepCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajectoryCommand;
@@ -59,8 +59,9 @@ public class WalkingMessageHandler
    private final IntegerYoVariable currentFootstepIndex = new IntegerYoVariable("currentFootstepIndex", registry);
    private final IntegerYoVariable currentNumberOfFootsteps = new IntegerYoVariable("currentNumberOfFootsteps", registry);
    private final BooleanYoVariable isWalkingPaused = new BooleanYoVariable("isWalkingPaused", registry);
-   private final DoubleYoVariable transferTime = new DoubleYoVariable("transferTime", registry);
-   private final DoubleYoVariable swingTime = new DoubleYoVariable("swingTime", registry);
+   private final DoubleYoVariable defaultTransferTime = new DoubleYoVariable("defaultTransferTime", registry);
+   private final DoubleYoVariable finalTransferTime = new DoubleYoVariable("finalTransferTime", registry);
+   private final DoubleYoVariable defaultSwingTime = new DoubleYoVariable("defaultSwingTime", registry);
 
    private final int numberOfFootstepsToVisualize = 4;
    @SuppressWarnings("unchecked")
@@ -74,8 +75,9 @@ public class WalkingMessageHandler
       this.contactableFeet = contactableFeet;
       this.statusOutputManager = statusOutputManager;
 
-      transferTime.set(defaultTransferTime);
-      swingTime.set(defaultSwingTime);
+      this.defaultTransferTime.set(defaultTransferTime);
+      this.finalTransferTime.set(defaultTransferTime);
+      this.defaultSwingTime.set(defaultSwingTime);
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -121,13 +123,19 @@ public class WalkingMessageHandler
       }
 
       isWalkingPaused.set(false);
-      double commandTransferTime = command.getTransferTime();
-      double commandSwingTime = command.getSwingTime();
-      if (!Double.isNaN(commandSwingTime) && commandSwingTime > 1.0e-2 && !Double.isNaN(commandTransferTime) && commandTransferTime >= 0.0)
+      double commandDefaultTransferTime = command.getDefaultTransferTime();
+      double commandDefaultSwingTime = command.getDefaultSwingTime();
+      if (!Double.isNaN(commandDefaultSwingTime) && commandDefaultSwingTime > 1.0e-2 && !Double.isNaN(commandDefaultTransferTime) && commandDefaultTransferTime >= 0.0)
       {
-         transferTime.set(commandTransferTime);
-         swingTime.set(commandSwingTime);
+         defaultTransferTime.set(commandDefaultTransferTime);
+         defaultSwingTime.set(commandDefaultSwingTime);
       }
+
+      double commandFinalTransferTime = command.getFinalTransferTime();
+      if (commandFinalTransferTime >= 0.0)
+         finalTransferTime.set(commandFinalTransferTime);
+      else
+         finalTransferTime.set(defaultTransferTime.getDoubleValue());
 
       for (int i = 0; i < command.getNumberOfFootsteps(); i++)
       {
@@ -383,27 +391,50 @@ public class WalkingMessageHandler
 
    public void setDefaultTransferTime(double transferTime)
    {
-      this.transferTime.set(transferTime);
+      this.defaultTransferTime.set(transferTime);
    }
 
    public void setDefaultSwingTime(double swingTime)
    {
-      this.swingTime.set(swingTime);
+      this.defaultSwingTime.set(swingTime);
    }
 
-   public double getTransferTime()
+   public double getDefaultTransferTime()
    {
-      return transferTime.getDoubleValue();
+      return defaultTransferTime.getDoubleValue();
    }
 
-   public double getSwingTime()
+   public double getNextTransferTime()
    {
-      return swingTime.getDoubleValue();
+      Footstep nextFootstep = peek(0);
+      return nextFootstep != null && nextFootstep.hasTimings() ? nextFootstep.getTransferTime() : getDefaultTransferTime();
    }
 
-   public double getStepTime()
+   public double getDefaultSwingTime()
    {
-      return transferTime.getDoubleValue() + swingTime.getDoubleValue();
+      return defaultSwingTime.getDoubleValue();
+   }
+
+   public double getNextSwingTime()
+   {
+      Footstep nextFootstep = peek(0);
+      return nextFootstep != null && nextFootstep.hasTimings() ? nextFootstep.getSwingTime() : getDefaultSwingTime();
+   }
+
+   public double getFinalTransferTime()
+   {
+      return finalTransferTime.getDoubleValue();
+   }
+
+   public double getDefaultStepTime()
+   {
+      return defaultTransferTime.getDoubleValue() + defaultSwingTime.getDoubleValue();
+   }
+
+   public double getNextStepTime()
+   {
+      Footstep nextFootstep = peek(0);
+      return nextFootstep != null && nextFootstep.hasTimings() ? nextFootstep.getStepTime() : getDefaultStepTime();
    }
 
    public int getCurrentNumberOfFootsteps()
@@ -502,8 +533,11 @@ public class WalkingMessageHandler
          }
       }
 
-      footstep.trajectoryType = trajectoryType;
-      footstep.swingHeight = footstepData.getSwingHeight();
+      if (footstepData.hasTimings())
+         footstep.setTimings(footstepData.getSwingTime(), footstepData.getTransferTime());
+
+      footstep.setTrajectoryType(trajectoryType);
+      footstep.setSwingHeight(footstepData.getSwingHeight());
       switch (footstepData.getOrigin())
       {
       case AT_ANKLE_FRAME:

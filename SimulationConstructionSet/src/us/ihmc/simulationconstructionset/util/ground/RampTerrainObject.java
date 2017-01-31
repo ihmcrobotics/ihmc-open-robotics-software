@@ -3,10 +3,10 @@ package us.ihmc.simulationconstructionset.util.ground;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.graphics3DAdapter.HeightMapWithNormals;
-import us.ihmc.graphics3DDescription.Graphics3DObject;
-import us.ihmc.graphics3DDescription.appearance.AppearanceDefinition;
-import us.ihmc.graphics3DDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.Graphics3DObject;
+import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.jMonkeyEngineToolkit.HeightMapWithNormals;
 import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.geometry.BoundingBox3d;
 
@@ -50,11 +50,13 @@ public class RampTerrainObject implements TerrainObject3D, HeightMapWithNormals
       this(xStart, yStart, xEnd, yEnd, height, YoAppearance.Black());
    }
 
+   @Override
    public Graphics3DObject getLinkGraphics()
    {
       return linkGraphics;
    }
 
+   @Override
    public double heightAndNormalAt(double x, double y, double z, Vector3d normalToPack)
    {
       double heightAt = heightAt(x, y, z);
@@ -62,6 +64,7 @@ public class RampTerrainObject implements TerrainObject3D, HeightMapWithNormals
       return heightAt;
    }
 
+   @Override
    public double heightAt(double x, double y, double z)
    {
       if ((x > xMin) && (x < xMax) && (y > yMin) && (y < yMax))
@@ -142,6 +145,7 @@ public class RampTerrainObject implements TerrainObject3D, HeightMapWithNormals
       surfaceNormalAt(x, y, z, normal);
    }
 
+   @Override
    public boolean checkIfInside(double x, double y, double z, Point3d intersectionToPack, Vector3d normalToPack)
    {
       double heightAt = heightAt(x, y, z);
@@ -153,6 +157,7 @@ public class RampTerrainObject implements TerrainObject3D, HeightMapWithNormals
       return true;
    }
    
+   @Override
    public boolean isClose(double x, double y, double z)
    {
       return boundingBox.isXYInside(x, y);
@@ -178,11 +183,13 @@ public class RampTerrainObject implements TerrainObject3D, HeightMapWithNormals
       return yMax;
    }
 
+   @Override
    public BoundingBox3d getBoundingBox()
    {
       return boundingBox;
    }
    
+   @Override
    public HeightMapWithNormals getHeightMapIfAvailable()
    {
       return this;

@@ -8,10 +8,10 @@ import java.util.Vector;
 
 import us.ihmc.codecs.builder.MP4H264MovieBuilder;
 import us.ihmc.codecs.generated.EUsageType;
-import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
-import us.ihmc.graphics3DAdapter.camera.CameraController;
-import us.ihmc.graphics3DAdapter.camera.CaptureDevice;
-import us.ihmc.graphics3DAdapter.camera.ViewportAdapter;
+import us.ihmc.jMonkeyEngineToolkit.Graphics3DAdapter;
+import us.ihmc.jMonkeyEngineToolkit.camera.CameraController;
+import us.ihmc.jMonkeyEngineToolkit.camera.CaptureDevice;
+import us.ihmc.jMonkeyEngineToolkit.camera.ViewportAdapter;
 import us.ihmc.simulationconstructionset.TimeHolder;
 import us.ihmc.simulationconstructionset.commands.DataBufferCommandsExecutor;
 import us.ihmc.simulationconstructionset.commands.ExportVideoCommandExecutor;
@@ -50,6 +50,7 @@ public class ExportVideo implements ExportVideoCommandExecutor
       this.guiEnablerAndDisabler = guiEnablerAndDisabler;
    }
 
+   @Override
    public void createVideo(File selectedFile)
    {
       Dimension dimension = new Dimension(1280, 720); // Default to 720p
@@ -64,6 +65,7 @@ public class ExportVideo implements ExportVideoCommandExecutor
       this.createVideo(cameraController, selectedFile, dimension, isSequanceSelected, playBackRate, frameRate);
    }
 
+   @Override
    public void createVideo(CameraController cameraController, File selectedFile, Dimension dimension, Boolean isSequanceSelected, double playBackRate, double frameRate)
    {
       Graphics3DAdapter graphics3dAdapter = standardSimulationGUI.getGraphics3dAdapter();
@@ -80,6 +82,7 @@ public class ExportVideo implements ExportVideoCommandExecutor
       graphics3dAdapter.closeViewport(adapter);
    }
 
+   @Override
    public void createVideo(CaptureDevice captureDevice, File selected, Boolean isSequenceSelected, double playBackRate, double frameRate)
    {
       printIfDebug("Creating Video. File = " + selected);

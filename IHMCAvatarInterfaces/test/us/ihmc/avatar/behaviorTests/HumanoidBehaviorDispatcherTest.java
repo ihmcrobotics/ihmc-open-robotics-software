@@ -27,7 +27,7 @@ import us.ihmc.communication.PacketRouter;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.util.NetworkPorts;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidBehaviors.IHMCHumanoidBehaviorManager;
 import us.ihmc.humanoidBehaviors.behaviors.diagnostic.DiagnosticBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.diagnostic.DiagnosticBehavior.DiagnosticTask;

@@ -595,6 +595,44 @@ public class MathTools
    {
       return roundToPrecision(numberOne, precision) <= roundToPrecision(numberTwo, precision);
    }
+   
+   public static boolean isPreciselyBoundedByInclusive(double boundaryOne, double boundaryTwo, double number, double precision)
+   {
+      return isBoundedByInclusive(roundToPrecision(boundaryOne, precision), roundToPrecision(boundaryTwo, precision), roundToPrecision(number, precision));
+   }
+   
+   public static boolean isPreciselyBoundedByExclusive(double boundaryOne, double boundaryTwo, double number, double precision)
+   {
+      return isBoundedByExclusive(roundToPrecision(boundaryOne, precision), roundToPrecision(boundaryTwo, precision), roundToPrecision(number, precision));
+   }
+   
+   public static boolean isBoundedByInclusive(double boundaryOne, double boundaryTwo, double number)
+   {
+      if (boundaryOne < boundaryTwo)
+      {
+         return number >= boundaryOne && number <= boundaryTwo;
+      }
+      else // (boundaryOne >= boundaryTwo)
+      {
+         return number >= boundaryTwo && number <= boundaryOne;
+      }
+   }
+   
+   public static boolean isBoundedByExclusive(double boundaryOne, double boundaryTwo, double number)
+   {
+      if (boundaryOne < boundaryTwo)
+      {
+         return number > boundaryOne && number < boundaryTwo;
+      }
+      else if (boundaryOne > boundaryTwo)
+      {
+         return number > boundaryTwo && number < boundaryOne;
+      }
+      else // (boundaryOne == boundaryTwo)
+      {
+         return false;
+      }
+   }
 
    public static void set(Tuple3d tuple, Direction direction, double value)
    {

@@ -11,7 +11,7 @@ import us.ihmc.quadrupedRobotics.QuadrupedTestBehaviors;
 import us.ihmc.quadrupedRobotics.QuadrupedTestFactory;
 import us.ihmc.quadrupedRobotics.QuadrupedTestGoals;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
-import us.ihmc.quadrupedRobotics.params.ParameterRegistry;
+import us.ihmc.robotics.dataStructures.parameter.ParameterRegistry;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
 import us.ihmc.robotics.controllers.ControllerFailureException;
 import us.ihmc.robotics.testing.YoVariableTestGoal;
@@ -72,7 +72,7 @@ public abstract class QuadrupedPositionCrawlFlatGroundWalkingTest implements Qua
       
       variables.getYoPlanarVelocityInputX().set(0.06);
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
-      conductor.addSustainGoal(YoVariableTestGoal.doubleLessThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 25.0));
+      conductor.addSustainGoal(YoVariableTestGoal.doubleLessThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 35.0));
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getRobotBodyX(), 0.35));
       conductor.simulate();
       

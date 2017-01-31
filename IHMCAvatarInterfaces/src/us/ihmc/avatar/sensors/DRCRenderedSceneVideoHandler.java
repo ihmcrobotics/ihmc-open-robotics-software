@@ -7,9 +7,9 @@ import javax.vecmath.Quat4d;
 
 import boofcv.struct.calib.IntrinsicParameters;
 import us.ihmc.communication.net.ObjectCommunicator;
-import us.ihmc.graphics3DAdapter.camera.RenderedSceneHandler;
 import us.ihmc.humanoidRobotics.communication.packets.LocalVideoPacket;
 import us.ihmc.humanoidRobotics.communication.producers.RawVideoDataServer;
+import us.ihmc.jMonkeyEngineToolkit.camera.RenderedSceneHandler;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class DRCRenderedSceneVideoHandler extends RawVideoDataServer implements RenderedSceneHandler

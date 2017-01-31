@@ -8,9 +8,9 @@ import javax.vecmath.Vector3d;
 
 import org.ejml.data.DenseMatrix64F;
 
-import us.ihmc.graphics3DDescription.Graphics3DObject;
-import us.ihmc.graphics3DDescription.appearance.AppearanceDefinition;
-import us.ihmc.graphics3DDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.Graphics3DObject;
+import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.InertiaTools;
 import us.ihmc.robotics.robotDescription.CollisionMeshDescription;
@@ -112,6 +112,7 @@ public class Link implements java.io.Serializable
     *
     * @return String representation of this link.
     */
+   @Override
    public String toString()
    {
       StringBuffer retBuffer = new StringBuffer();

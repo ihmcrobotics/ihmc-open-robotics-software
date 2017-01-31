@@ -72,11 +72,13 @@ public class GdxCollisionDetector implements ScsCollisionDetector
    {
    }
 
+   @Override
    public CollisionShapeFactory getShapeFactory()
    {
       return factory;
    }
 
+   @Override
    public void removeShape(Link link)
    {
       BulletCollisionShapeWithLink info = (BulletCollisionShapeWithLink) link.getCollisionShape();
@@ -84,6 +86,7 @@ public class GdxCollisionDetector implements ScsCollisionDetector
       allShapes.remove(info);
    }
 
+   @Override
    public CollisionShape lookupCollisionShape(Link link)
    {
       for (int i = 0; i < allShapes.size(); i++)
@@ -164,11 +167,13 @@ public class GdxCollisionDetector implements ScsCollisionDetector
    {
       float margin = (float) CollisionShapeFactory.DEFAULT_MARGIN;
 
+      @Override
       public void setMargin(double margin)
       {
          this.margin = (float) margin;
       }
 
+      @Override
       public CollisionShapeDescription createBox(double radiusX, double radiusY, double radiusZ)
       {
          btBoxShape box = new btBoxShape(new Vector3((float) radiusX, (float) radiusY, (float) radiusZ));
@@ -177,6 +182,7 @@ public class GdxCollisionDetector implements ScsCollisionDetector
          return new BulletShapeDescription(box);
       }
 
+      @Override
       public CollisionShapeDescription createCylinder(double radius, double height)
       {
          btCylinderShape shape = new btCylinderShapeZ(new Vector3((float) radius, (float) radius, (float) height / 2.0f));
@@ -185,6 +191,7 @@ public class GdxCollisionDetector implements ScsCollisionDetector
          return new BulletShapeDescription(shape);
       }
 
+      @Override
       public CollisionShapeDescription createSphere(double radius)
       {
          btSphereShape shape = new btSphereShape((float) radius);
@@ -193,6 +200,7 @@ public class GdxCollisionDetector implements ScsCollisionDetector
          return new BulletShapeDescription(shape);
       }
 
+      @Override
       public CollisionShapeDescription createCapsule(double radius, double height)
       {
          btCapsuleShape shape = new btCapsuleShape((float) radius, (float) (height));

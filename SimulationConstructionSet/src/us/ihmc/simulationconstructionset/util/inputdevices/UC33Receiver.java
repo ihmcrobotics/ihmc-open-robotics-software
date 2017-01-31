@@ -32,10 +32,12 @@ public class UC33Receiver implements Receiver
       this.variableChangedListeners = variableChangedListeners;
    }
 
+   @Override
    public void close()
    {
    }
 
+   @Override
    public void send(MidiMessage message, long timeStamp)
    {
       if (message instanceof ShortMessage)

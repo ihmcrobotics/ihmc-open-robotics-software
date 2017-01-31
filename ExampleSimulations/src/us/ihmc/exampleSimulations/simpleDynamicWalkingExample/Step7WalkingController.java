@@ -6,14 +6,14 @@ import javax.vecmath.Vector3d;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.exampleSimulations.simpleDynamicWalkingExample.RobotParameters2.LinkNames;
-import us.ihmc.graphics3DDescription.appearance.YoAppearance;
-import us.ihmc.graphics3DDescription.yoGraphics.BagOfBalls;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicPosition;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsList;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicPosition.GraphicType;
-import us.ihmc.graphics3DDescription.yoGraphics.plotting.ArtifactList;
-import us.ihmc.graphics3DDescription.yoGraphics.plotting.YoArtifactPosition;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
+import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
+import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPosition;
 import us.ihmc.robotics.controllers.PIDController;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -32,10 +32,10 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.screwTheory.Wrench;
-import us.ihmc.robotics.stateMachines.State;
-import us.ihmc.robotics.stateMachines.StateMachine;
-import us.ihmc.robotics.stateMachines.StateTransition;
-import us.ihmc.robotics.stateMachines.StateTransitionCondition;
+import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.State;
+import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateMachine;
+import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransition;
+import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransitionCondition;
 import us.ihmc.robotics.trajectories.providers.DoubleProvider;
 
 public class Step7WalkingController implements RobotController

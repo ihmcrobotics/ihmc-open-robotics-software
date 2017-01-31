@@ -36,6 +36,9 @@ public class TransferToWalkingSingleSupportState extends TransferState
       for (int i = 0; i < 3; i++)
          balanceManager.addFootstepToPlan(walkingMessageHandler.peek(i));
       balanceManager.setICPPlanTransferToSide(transferToSide);
-      balanceManager.initializeICPPlanForTransfer(walkingMessageHandler.getSwingTime(), walkingMessageHandler.getTransferTime());
+      double defaultSwingTime = walkingMessageHandler.getDefaultSwingTime();
+      double defaultTransferTime = walkingMessageHandler.getDefaultTransferTime();
+      double finalTransferTime = walkingMessageHandler.getFinalTransferTime();
+      balanceManager.initializeICPPlanForTransfer(defaultSwingTime, defaultTransferTime, finalTransferTime);
    }
 }

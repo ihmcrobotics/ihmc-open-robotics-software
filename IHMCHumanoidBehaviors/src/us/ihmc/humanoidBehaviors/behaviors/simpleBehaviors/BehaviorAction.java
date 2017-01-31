@@ -5,11 +5,9 @@ import java.util.ArrayList;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.coactiveDesignFramework.CoactiveBehaviorTools;
 import us.ihmc.humanoidBehaviors.coactiveDesignFramework.CoactiveElement;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.stateMachines.FinishableState;
-import us.ihmc.robotics.stateMachines.StateTransition;
-import us.ihmc.robotics.stateMachines.StateTransitionCondition;
-import us.ihmc.tools.io.printing.PrintTools;
+import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.FinishableState;
+import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransition;
+import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransitionCondition;
 import us.ihmc.tools.taskExecutor.Task;
 
 // a behavior action can be used in either a StateMachine or a pipeline.

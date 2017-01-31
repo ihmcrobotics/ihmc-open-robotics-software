@@ -101,7 +101,7 @@ public class MultisenseMocapManualCalibrationTestModule implements MocapRigidbod
       {
          MocapRigidBody mocapObject = listOfRigidbodies.get(rigidBodyIndex);
          RigidBodyTransform pose = new RigidBodyTransform();
-         mocapObject.getPose(pose);
+         mocapObject.packPose(pose);
          int id = mocapObject.getId();
 
          if (id == MULTISENSE_MOCAP_ID)
@@ -147,7 +147,7 @@ public class MultisenseMocapManualCalibrationTestModule implements MocapRigidbod
    private void sendDetectedObjectPacketToUi(MocapRigidBody mocapObject)
    {
       RigidBodyTransform pose = new RigidBodyTransform();
-      mocapObject.getPose(pose);
+      mocapObject.packPose(pose);
       if(USE_ROBOT_FRAME)
       {
          pose = mocapToStateEstimatorFrameConverter.convertMocapPoseToRobotFrame(mocapObject);
