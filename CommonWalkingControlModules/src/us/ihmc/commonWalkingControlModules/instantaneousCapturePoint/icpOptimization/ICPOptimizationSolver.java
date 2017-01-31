@@ -23,7 +23,8 @@ public class ICPOptimizationSolver
    private static final boolean DEBUG = false;
    private final boolean localDebug;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private static final double betaSmoothing = 0.01;
+   private static final double cmpBetaSmoothing = 0.001;
+   private static final double reachabilityBetaSmoothing = 0.1;
 
    private final YoMatrix yoWeightG;
    private final YoMatrix yoWeightg;
@@ -927,7 +928,7 @@ public class ICPOptimizationSolver
       computeCMPLocationConstraint();
 
       CommonOps.setIdentity(stanceCMPCost_G);
-      CommonOps.scale(betaSmoothing, stanceCMPCost_G);
+      CommonOps.scale(cmpBetaSmoothing, stanceCMPCost_G);
 
       MatrixTools.setMatrixBlock(solverInput_H, numberOfFreeVariables, numberOfFreeVariables, stanceCMPCost_G, 0, 0, numberOfCMPVertices, numberOfCMPVertices, 1.0);
 
@@ -974,7 +975,7 @@ public class ICPOptimizationSolver
       computeReachabilityConstraint();
 
       CommonOps.setIdentity(reachabilityCost_G);
-      CommonOps.scale(betaSmoothing, reachabilityCost_G);
+      CommonOps.scale(reachabilityBetaSmoothing, reachabilityCost_G);
 
       MatrixTools.setMatrixBlock(solverInput_H, reachabilityConstraintIndex, reachabilityConstraintIndex, reachabilityCost_G, 0, 0,
             numberOfReachabilityVertices, numberOfReachabilityVertices, 1.0);
