@@ -39,7 +39,6 @@ import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters
 import us.ihmc.simulationconstructionset.robotController.SimpleRobotController;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.tools.testing.JUnitTools;
 import us.ihmc.tools.thread.ThreadTools;
 
@@ -81,9 +80,7 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
       SpineTrajectoryMessage message3 = createRandomSpineMessage(trajectoryTime, random);
 
       executeMessage(message1);
-      PrintTools.info("Next Message");
       executeMessage(message2);
-      PrintTools.info("Next Message");
       executeMessage(message3);
 
       assertDesiredsContinous(controllerSpy);
@@ -119,7 +116,6 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
    {
       assertFalse("Joint and Taskspace control was inconsistent.", controllerSpy.wasControlInconsistent());
       double maxSpeed = controllerSpy.getMaxSpeed();
-      PrintTools.info("Max Speed was " + maxSpeed);
       String errorMessage = "The maximum speed along the trajectory was " + maxSpeed + " this was probably caused by a discontinous desired value.";
       assertTrue(errorMessage, maxSpeed < MAX_SPEED_FOR_CONTINOUS);
    }
