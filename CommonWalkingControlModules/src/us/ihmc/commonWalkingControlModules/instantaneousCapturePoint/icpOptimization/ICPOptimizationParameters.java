@@ -207,13 +207,37 @@ public abstract class ICPOptimizationParameters
    public abstract double getRemainingTimeToStopAdjusting();
 
    /**
+    * Represents the amount of adjustment to define as big
+    */
+   public boolean useDifferentSplitRatioForBigAdjustment()
+   {
+      return true;
+   }
+
+   /**
+    * Represents the amount of adjustment to define as big
+    */
+   public double getMagnitudeForBigAdjustment()
+   {
+      return 0.1;
+   }
+
+   /**
     * Represents in percent of the current double support duration, how much time the transfer will spend before reaching the next entry CMP.
     * The returned value should be between 0.0 and 1.0:
     * <li> 0.0 is equivalent to spend the entire double support on the initial CMP (last entry CMP if using one CMP per support, last exit CMP otherwise), </li>
     * <li> 1.0 is equivalent to spend the entire double support on the next entry CMP. </li>
     * <p> A value close to 0.5 is preferable. </p>
     */
-   public double getDoubleSupportSplitFractionUnderDisturbance()
+   public double getDoubleSupportSplitFractionForBigAdjustment()
+   {
+      return 0.25;
+   }
+
+   /**
+    * Represents the minimum time in transfer before reaching the next entry CMP.
+    */
+   public double getMinimumTimeOnInitialCMPForBigAdjustment()
    {
       return 0.1;
    }

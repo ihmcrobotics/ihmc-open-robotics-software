@@ -7,17 +7,19 @@ import java.util.ArrayList;
 
 public class SwingStateEndRecursionMatrix extends DenseMatrix64F
 {
-   private final DoubleYoVariable doubleSupportSplitRatio;
+   private final DoubleYoVariable defaultDoubleSupportSplitRatio;
+   private final DoubleYoVariable upcomingDoubleSupportSplitRatio;
    private final DoubleYoVariable startOfSplineTime;
    private final DoubleYoVariable endOfSplineTime;
    private final DoubleYoVariable totalTrajectoryTime;
 
-   public SwingStateEndRecursionMatrix(DoubleYoVariable doubleSupportSplitRatio, DoubleYoVariable startOfSplineTime, DoubleYoVariable endOfSplineTime,
-         DoubleYoVariable totalTrajectoryTime)
+   public SwingStateEndRecursionMatrix(DoubleYoVariable defaultDoubleSupportSplitRatio, DoubleYoVariable upcomingDoubleSupportSplitRatio,
+         DoubleYoVariable startOfSplineTime, DoubleYoVariable endOfSplineTime, DoubleYoVariable totalTrajectoryTime)
    {
       super(4, 1);
 
-      this.doubleSupportSplitRatio = doubleSupportSplitRatio;
+      this.defaultDoubleSupportSplitRatio = defaultDoubleSupportSplitRatio;
+      this.upcomingDoubleSupportSplitRatio = upcomingDoubleSupportSplitRatio;
       this.startOfSplineTime = startOfSplineTime;
       this.endOfSplineTime = endOfSplineTime;
       this.totalTrajectoryTime = totalTrajectoryTime;
@@ -40,8 +42,8 @@ public class SwingStateEndRecursionMatrix extends DenseMatrix64F
    {
       double stepDuration = currentDoubleSupportDuration + singleSupportDuration;
 
-      double endOfCurrentDoubleSupportDuration = (1.0 - doubleSupportSplitRatio.getDoubleValue()) * currentDoubleSupportDuration;
-      double upcomingInitialDoubleSupportDuration = doubleSupportSplitRatio.getDoubleValue() * upcomingDoubleSupportDuration;
+      double endOfCurrentDoubleSupportDuration = (1.0 - defaultDoubleSupportSplitRatio.getDoubleValue()) * currentDoubleSupportDuration;
+      double upcomingInitialDoubleSupportDuration = upcomingDoubleSupportSplitRatio.getDoubleValue() * upcomingDoubleSupportDuration;
 
       double lastSegmentDuration = totalTrajectoryTime.getDoubleValue() - endOfSplineTime.getDoubleValue();
       double stateRecursionToEnd = Math.exp(-omega0 * lastSegmentDuration);

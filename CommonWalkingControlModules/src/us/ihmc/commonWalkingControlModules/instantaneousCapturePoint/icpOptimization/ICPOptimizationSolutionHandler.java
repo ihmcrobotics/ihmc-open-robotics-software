@@ -40,6 +40,7 @@ public class ICPOptimizationSolutionHandler
 
    private final BooleanYoVariable useDiscontinuousDeadband;
    private final BooleanYoVariable footstepWasAdjusted;
+   private final YoFrameVector2d footstepAdjustment;
 
    private final DoubleYoVariable controllerCostToGo;
    private final DoubleYoVariable controllerFootstepCostToGo;
@@ -78,6 +79,7 @@ public class ICPOptimizationSolutionHandler
 
       useDiscontinuousDeadband = new BooleanYoVariable("useDiscontinuousDeadband", registry);
       footstepWasAdjusted = new BooleanYoVariable("footstepWasAdjusted", registry);
+      footstepAdjustment = new YoFrameVector2d("footstepAdjustment", worldFrame, registry);
 
       footstepDeadband.set(icpOptimizationParameters.getAdjustmentDeadband());
       footstepSolutionResolution.set(icpOptimizationParameters.getFootstepSolutionResolution());
@@ -149,17 +151,21 @@ public class ICPOptimizationSolutionHandler
          upcomingFootsteps.get(i).getPosition2d(upcomingFootstepLocation);
          ReferenceFrame deadbandFrame = upcomingFootsteps.get(i).getSoleReferenceFrame();
 
-         boolean footstepWasAdjusted = applyLocationDeadband(locationSolution, upcomingFootstepLocation, referenceFootstepLocations.get(i).getFrameTuple2d(), deadbandFrame,
+         FramePoint2d referenceFootstepLocation = referenceFootstepLocations.get(i).getFrameTuple2d();
+         boolean footstepWasAdjusted = applyLocationDeadband(locationSolution, upcomingFootstepLocation, referenceFootstepLocation, deadbandFrame,
                footstepDeadband.getDoubleValue(), footstepSolutionResolution.getDoubleValue());
 
          if (i == 0)
+         {
             firstStepAdjusted = footstepWasAdjusted;
+            footstepAdjustment.set(locationSolution);
+            footstepAdjustment.sub(referenceFootstepLocation);
+         }
 
          footstepSolutionsToPack.get(i).set(locationSolution);
       }
 
       this.footstepWasAdjusted.set(firstStepAdjusted);
-
    }
 
    private final FramePoint solutionLocation = new FramePoint();
@@ -302,6 +308,11 @@ public class ICPOptimizationSolutionHandler
    public boolean wasFootstepAdjusted()
    {
       return footstepWasAdjusted.getBooleanValue();
+   }
+
+   public FrameVector2d getFootstepAdjustment()
+   {
+      return footstepAdjustment.getFrameTuple2d();
    }
 }
 

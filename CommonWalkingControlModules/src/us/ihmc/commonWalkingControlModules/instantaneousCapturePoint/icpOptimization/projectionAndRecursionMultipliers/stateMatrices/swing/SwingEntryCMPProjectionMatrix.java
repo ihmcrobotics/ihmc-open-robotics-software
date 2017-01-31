@@ -7,17 +7,17 @@ import java.util.ArrayList;
 
 public class SwingEntryCMPProjectionMatrix extends DenseMatrix64F
 {
-   private final DoubleYoVariable doubleSupportSplitRatio;
+   private final DoubleYoVariable defaultDoubleSupportSplitRatio;
    private final DoubleYoVariable exitCMPDurationInPercentOfStepTime;
 
    private final DoubleYoVariable startOfSplineTime;
 
-   public SwingEntryCMPProjectionMatrix(DoubleYoVariable doubleSupportSplitRatio, DoubleYoVariable exitCMPDurationInPercentOfStepTime,
+   public SwingEntryCMPProjectionMatrix(DoubleYoVariable defaultDoubleSupportSplitRatio, DoubleYoVariable exitCMPDurationInPercentOfStepTime,
          DoubleYoVariable startOfSplineTime)
    {
       super(4, 1);
 
-      this.doubleSupportSplitRatio = doubleSupportSplitRatio;
+      this.defaultDoubleSupportSplitRatio = defaultDoubleSupportSplitRatio;
       this.exitCMPDurationInPercentOfStepTime = exitCMPDurationInPercentOfStepTime;
 
       this.startOfSplineTime = startOfSplineTime;
@@ -42,7 +42,7 @@ public class SwingEntryCMPProjectionMatrix extends DenseMatrix64F
       {
          double stepDuration = doubleSupportDuration + singleSupportDuration;
 
-         double endOfDoubleSupportDuration = (1.0 - doubleSupportSplitRatio.getDoubleValue()) * doubleSupportDuration;
+         double endOfDoubleSupportDuration = (1.0 - defaultDoubleSupportSplitRatio.getDoubleValue()) * doubleSupportDuration;
          double timeSpentOnEntryCMP = (1.0 - exitCMPDurationInPercentOfStepTime.getDoubleValue()) * stepDuration;
 
          projectionDuration = startOfSplineTime.getDoubleValue() + endOfDoubleSupportDuration - timeSpentOnEntryCMP;

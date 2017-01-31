@@ -109,9 +109,14 @@ public class ICPOptimizationController
    private final BooleanYoVariable hasNotConvergedInPast = new BooleanYoVariable(yoNamePrefix + "HasNotConvergedInPast", registry);
    private final IntegerYoVariable hasNotConvergedCounts = new IntegerYoVariable(yoNamePrefix + "HasNotConvergedCounts", registry);
 
+   private final BooleanYoVariable doingBigAdjustment = new BooleanYoVariable(yoNamePrefix + "DoingBigAdjustment", registry);
+
    private final DoubleYoVariable upcomingDoubleSupportSplitFraction;
    private final DoubleYoVariable defaultDoubleSupportSplitFraction;
    private final DoubleYoVariable doubleSupportSplitFractionUnderDisturbance;
+   private final DoubleYoVariable magnitudeForBigAdjustment;
+   private final boolean useDifferentSplitRatioForBigAdjustment;
+   private final double minimumTimeOnInitialCMPForBigAdjustment;
 
    private final ICPOptimizationSolver solver;
    private final FootstepRecursionMultiplierCalculator footstepRecursionMultiplierCalculator;
@@ -195,11 +200,15 @@ public class ICPOptimizationController
       defaultDoubleSupportSplitFraction = new DoubleYoVariable(yoNamePrefix + "DefaultDoubleSupportSplitFraction", registry);
       doubleSupportSplitFractionUnderDisturbance = new DoubleYoVariable(yoNamePrefix + "DoubleSupportSplitFractionUnderDisturbance", registry);
       upcomingDoubleSupportSplitFraction = new DoubleYoVariable(yoNamePrefix + "UpcomingDoubleSupportSplitFraction", registry);
+      magnitudeForBigAdjustment = new DoubleYoVariable(yoNamePrefix + "MagnitudeForBigAdjustment", registry);
 
       exitCMPDurationInPercentOfStepTime.set(icpPlannerParameters.getTimeSpentOnExitCMPInPercentOfStepTime());
       defaultDoubleSupportSplitFraction.set(icpPlannerParameters.getDoubleSupportSplitFraction());
-      doubleSupportSplitFractionUnderDisturbance.set(icpOptimizationParameters.getDoubleSupportSplitFractionUnderDisturbance());
+      doubleSupportSplitFractionUnderDisturbance.set(icpOptimizationParameters.getDoubleSupportSplitFractionForBigAdjustment());
       upcomingDoubleSupportSplitFraction.set(icpPlannerParameters.getDoubleSupportSplitFraction());
+      magnitudeForBigAdjustment.set(icpOptimizationParameters.getMagnitudeForBigAdjustment());
+      useDifferentSplitRatioForBigAdjustment = icpOptimizationParameters.useDifferentSplitRatioForBigAdjustment();
+      minimumTimeOnInitialCMPForBigAdjustment = icpOptimizationParameters.getMinimumTimeOnInitialCMPForBigAdjustment();
 
       footstepRecursionMultiplierCalculator = new FootstepRecursionMultiplierCalculator(icpPlannerParameters, exitCMPDurationInPercentOfStepTime,
             defaultDoubleSupportSplitFraction, upcomingDoubleSupportSplitFraction, maximumNumberOfFootstepsToConsider, registry);
@@ -301,8 +310,7 @@ public class ICPOptimizationController
       for (int i = 1; i < numberOfFootstepsToConsider + 1; i++)
          footstepRecursionMultiplierCalculator.submitTimes(i, doubleSupportDuration.getDoubleValue(), singleSupportDuration.getDoubleValue());
 
-      footstepRecursionMultiplierCalculator.computeRecursionMultipliers(numberOfFootstepsToConsider, isInTransfer.getBooleanValue(),
-            localUseTwoCMPs, omega0);
+      footstepRecursionMultiplierCalculator.computeRecursionMultipliers(numberOfFootstepsToConsider, isInTransfer.getBooleanValue(), localUseTwoCMPs, omega0);
 
       inputHandler.initializeForDoubleSupport(isStanding.getBooleanValue(), localUseTwoCMPs, transferToSide, omega0);
 
@@ -367,6 +375,7 @@ public class ICPOptimizationController
       localUseFeedbackWeightHardening = useFeedbackWeightHardening.getBooleanValue();
 
       localScaleUpcomingStepWeights = scaleUpcomingStepWeights.getBooleanValue();
+      doingBigAdjustment.set(false);
    }
 
    private final FramePoint2d desiredCMP = new FramePoint2d();
@@ -437,10 +446,19 @@ public class ICPOptimizationController
          solutionHandler.computeReferenceFromSolutions(footstepSolutions, inputHandler, beginningOfStateICP, omega0, numberOfFootstepsToConsider);
          solutionHandler.computeNominalValues(upcomingFootstepLocations, inputHandler, beginningOfStateICP, omega0, numberOfFootstepsToConsider);
 
-         if (solutionHandler.wasFootstepAdjusted())
-            upcomingDoubleSupportSplitFraction.set(doubleSupportSplitFractionUnderDisturbance.getDoubleValue());
-         else
-            upcomingDoubleSupportSplitFraction.set(defaultDoubleSupportSplitFraction.getDoubleValue());
+         if (solutionHandler.getFootstepAdjustment().length() > magnitudeForBigAdjustment.getDoubleValue())
+         {
+            if (!doingBigAdjustment.getBooleanValue() && useDifferentSplitRatioForBigAdjustment)
+            {
+               doingBigAdjustment.set(true);
+
+               double minimumDoubleSupportSplitFraction = minimumTimeOnInitialCMPForBigAdjustment / doubleSupportDuration.getDoubleValue();
+               minimumDoubleSupportSplitFraction = Math.max(minimumDoubleSupportSplitFraction, doubleSupportSplitFractionUnderDisturbance.getDoubleValue());
+
+               upcomingDoubleSupportSplitFraction.set(minimumDoubleSupportSplitFraction);
+               footstepRecursionMultiplierCalculator.computeRecursionMultipliers(numberOfFootstepsToConsider, isInTransfer.getBooleanValue(), localUseTwoCMPs, omega0);
+            }
+         }
       }
 
       solutionHandler.getControllerReferenceCMP(desiredCMP);

@@ -20,7 +20,8 @@ public class ExitCMPProjectionMultiplier
    private final SwingExitCMPProjectionMatrix swingExitCMPProjectionMatrix;
 
    private final DoubleYoVariable exitCMPRatio;
-   private final DoubleYoVariable doubleSupportSplitRatio;
+   private final DoubleYoVariable defaultDoubleSupportSplitRatio;
+   private final DoubleYoVariable upcomingDoubleSupportSplitRatio;
 
    private final DoubleYoVariable startOfSplineTime;
    private final DoubleYoVariable endOfSplineTime;
@@ -31,14 +32,15 @@ public class ExitCMPProjectionMultiplier
    private final DoubleYoVariable positionMultiplier;
    private final DoubleYoVariable velocityMultiplier;
 
-   public ExitCMPProjectionMultiplier(YoVariableRegistry registry, DoubleYoVariable doubleSupportSplitRatio,
+   public ExitCMPProjectionMultiplier(YoVariableRegistry registry, DoubleYoVariable defaultDoubleSupportSplitRatio, DoubleYoVariable upcomingDoubleSupportSplitRatio,
          DoubleYoVariable exitCMPRatio, DoubleYoVariable startOfSplineTime, DoubleYoVariable endOfSplineTime, DoubleYoVariable totalTrajectoryTime)
    {
       positionMultiplier = new DoubleYoVariable("ExitCMPProjectionMultiplier", registry);
       velocityMultiplier = new DoubleYoVariable("ExitCMPProjectionVelocityMultiplier", registry);
 
       this.exitCMPRatio = exitCMPRatio;
-      this.doubleSupportSplitRatio = doubleSupportSplitRatio;
+      this.defaultDoubleSupportSplitRatio = defaultDoubleSupportSplitRatio;
+      this.upcomingDoubleSupportSplitRatio = upcomingDoubleSupportSplitRatio;
 
       this.startOfSplineTime = startOfSplineTime;
       this.endOfSplineTime = endOfSplineTime;
@@ -47,8 +49,9 @@ public class ExitCMPProjectionMultiplier
       cubicProjectionMatrix = new CubicProjectionMatrix();
       cubicProjectionDerivativeMatrix = new CubicProjectionDerivativeMatrix();
 
-      transferExitCMPProjectionMatrix = new TransferExitCMPProjectionMatrix(doubleSupportSplitRatio);
-      swingExitCMPProjectionMatrix = new SwingExitCMPProjectionMatrix(doubleSupportSplitRatio, exitCMPRatio, startOfSplineTime, endOfSplineTime, totalTrajectoryTime);
+      transferExitCMPProjectionMatrix = new TransferExitCMPProjectionMatrix(defaultDoubleSupportSplitRatio);
+      swingExitCMPProjectionMatrix = new SwingExitCMPProjectionMatrix(defaultDoubleSupportSplitRatio, upcomingDoubleSupportSplitRatio,
+            exitCMPRatio, startOfSplineTime, endOfSplineTime, totalTrajectoryTime);
    }
 
    public void reset()
@@ -159,8 +162,8 @@ public class ExitCMPProjectionMultiplier
          double timeSpentOnExitCMP = exitCMPRatio.getDoubleValue() * stepDuration;
          double timeSpentOnEntryCMP = (1.0 - exitCMPRatio.getDoubleValue()) * stepDuration;
 
-         double upcomingInitialDoubleSupportDuration = doubleSupportSplitRatio.getDoubleValue() * upcomingDoubleSupportDuration;
-         double endOfDoubleSupportDuration = (1.0 - doubleSupportSplitRatio.getDoubleValue()) * currentDoubleSupportDuration;
+         double upcomingInitialDoubleSupportDuration = upcomingDoubleSupportSplitRatio.getDoubleValue() * upcomingDoubleSupportDuration;
+         double endOfDoubleSupportDuration = (1.0 - defaultDoubleSupportSplitRatio.getDoubleValue()) * currentDoubleSupportDuration;
 
          double exitRecursionTime = upcomingInitialDoubleSupportDuration - timeSpentOnExitCMP;
          double exitRecursion = 1.0 - Math.exp(omega0 * exitRecursionTime);

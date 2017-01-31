@@ -7,19 +7,21 @@ import java.util.ArrayList;
 
 public class SwingExitCMPProjectionMatrix extends DenseMatrix64F
 {
-   private final DoubleYoVariable doubleSupportSplitRatio;
+   private final DoubleYoVariable defaultDoubleSupportSplitRatio;
+   private final DoubleYoVariable upcomingDoubleSupportSplitRatio;
    private final DoubleYoVariable exitCMPRatio;
 
    private final DoubleYoVariable startOfSplineTime;
    private final DoubleYoVariable endOfSplineTime;
    private final DoubleYoVariable totalTrajectoryTime;
 
-   public SwingExitCMPProjectionMatrix(DoubleYoVariable doubleSupportSplitRatio, DoubleYoVariable exitCMPRatio,
+   public SwingExitCMPProjectionMatrix(DoubleYoVariable defaultDoubleSupportSplitRatio, DoubleYoVariable upcomingDoubleSupportSplitRatio, DoubleYoVariable exitCMPRatio,
          DoubleYoVariable startOfSplineTime, DoubleYoVariable endOfSplineTime, DoubleYoVariable totalTrajectoryTime)
    {
       super(4, 1);
 
-      this.doubleSupportSplitRatio = doubleSupportSplitRatio;
+      this.defaultDoubleSupportSplitRatio = defaultDoubleSupportSplitRatio;
+      this.upcomingDoubleSupportSplitRatio = upcomingDoubleSupportSplitRatio;
       this.exitCMPRatio = exitCMPRatio;
 
       this.startOfSplineTime = startOfSplineTime;
@@ -34,15 +36,15 @@ public class SwingExitCMPProjectionMatrix extends DenseMatrix64F
 
    public void compute(ArrayList<DoubleYoVariable> doubleSupportDurations, ArrayList<DoubleYoVariable> singleSupportDurations, double omega0, boolean useInitialICP)
    {
-      compute(doubleSupportDurations.get(1).getDoubleValue(),doubleSupportDurations.get(0).getDoubleValue(), singleSupportDurations.get(0).getDoubleValue(), omega0, useInitialICP);
+      compute(doubleSupportDurations.get(1).getDoubleValue(), doubleSupportDurations.get(0).getDoubleValue(), singleSupportDurations.get(0).getDoubleValue(), omega0, useInitialICP);
    }
 
    public void compute(double upcomingDoubleSupportDuration, double currentDoubleSupportDuration, double singleSupportDuration, double omega0, boolean useInitialICP)
    {
       double stepDuration = currentDoubleSupportDuration + singleSupportDuration;
 
-      double upcomingInitialDoubleSupportDuration = doubleSupportSplitRatio.getDoubleValue() * upcomingDoubleSupportDuration;
-      double endOfDoubleSupportDuration = (1.0 - doubleSupportSplitRatio.getDoubleValue()) * currentDoubleSupportDuration;
+      double upcomingInitialDoubleSupportDuration = upcomingDoubleSupportSplitRatio.getDoubleValue() * upcomingDoubleSupportDuration;
+      double endOfDoubleSupportDuration = (1.0 - defaultDoubleSupportSplitRatio.getDoubleValue()) * currentDoubleSupportDuration;
 
       double timeSpentOnExitCMP = exitCMPRatio.getDoubleValue() * stepDuration;
       double timeSpentOnEntryCMP = (1.0 - exitCMPRatio.getDoubleValue()) * stepDuration;
