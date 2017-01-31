@@ -206,8 +206,8 @@ public class SkippyRobot extends Robot
          this.addRootJoint(rootJointIfSkippy);
 
          RigidBodyTransform transform = new RigidBodyTransform();
-         transform.setRotationEulerAndZeroTranslation(0.0, -initialBodySidewaysLean, initialYawIfSkippy);
-         transform.setTranslation(new Vector3d(0.0, 0.0, 2.0));
+         transform.setRotationEulerAndZeroTranslation(/*0.0*/Math.PI / 7.0 - 2.0 * Math.PI / 8.0, -initialBodySidewaysLean, initialYawIfSkippy);
+         transform.setTranslation(new Vector3d(0.0, 0.0, /*2.0*/2.0-0.15975+0.0032));
          rootJointIfSkippy.setRotationAndTranslation(transform);
 
          shoulderJoint = new PinJoint("shoulderJoint", new Vector3d(0.0, 0.0, TORSO_LENGTH / 2), this, Axis.Y);
@@ -225,7 +225,7 @@ public class SkippyRobot extends Robot
 
          hipJoint = new PinJoint("hip", new Vector3d(0.0, 0.0, -TORSO_LENGTH / 2.0), this, Axis.X);
          hipJoint.setDamping(0.0);
-         hipJoint.setInitialState(0.0, 0.0);
+         hipJoint.setInitialState(/*0.0*/2.0 * Math.PI / 8.0, 0.0);
          Link leg = createLegSkippy();
          hipJoint.setLink(leg);
 
