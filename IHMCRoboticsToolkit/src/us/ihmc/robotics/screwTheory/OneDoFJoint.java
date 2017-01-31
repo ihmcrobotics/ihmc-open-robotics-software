@@ -61,13 +61,6 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
     */
    private boolean isOnline = true;
 
-   public OneDoFJoint(String name, RigidBody predecessor, RigidBody successor, ReferenceFrame beforeJointFrame, OneDoFJointReferenceFrame afterJointFrame,
-         FrameVector jointAxis)
-   {
-      this(name, predecessor, beforeJointFrame, afterJointFrame);
-      setSuccessor(successor);
-   }
-
    public OneDoFJoint(String name, RigidBody predecessor, ReferenceFrame beforeJointFrame, OneDoFJointReferenceFrame afterJointFrame)
    {
       super(name, predecessor, beforeJointFrame);
