@@ -15,10 +15,10 @@ import com.jmatio.io.MatFileWriter;
 import com.jmatio.types.MLArray;
 import com.jmatio.types.MLDouble;
 
+import us.ihmc.graphicsDescription.dataBuffer.DataEntry;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.simulationconstructionset.DataBuffer;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.dataBuffer.DataEntry;
 import us.ihmc.simulationconstructionset.gui.GraphArrayPanel;
 import us.ihmc.simulationconstructionset.gui.GraphArrayWindow;
 import us.ihmc.simulationconstructionset.gui.StandardSimulationGUI;
@@ -178,6 +178,7 @@ public class ExportGraphsToFileGenerator implements ExportGraphsToFileConstructo
       }
    }
 
+   @Override
    public void closeAndDispose()
    {
       matFileFilter = null;

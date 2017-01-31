@@ -588,45 +588,36 @@ public class Line2d implements Geometry2d<Line2d>
       }
    }
 
-
    /**
-    * Compute the orthogonal projection of the given point and modify it to store the result.
+    * Computes the orthogonal projection of the given 2D point on this 2D line.
+    * 
+    * @param point2d the point to project on this line. Modified.
     */
    @Override
    public void orthogonalProjection(Point2d point2d)
    {
-//    Point2d[] endPoints = lineSegment.endpoints;
-      Point2d endPoint = point;
-
-      double vx0 = point2d.getX() - endPoint.getX();
-      double vy0 = point2d.getY() - endPoint.getY();
-
-      double vx1 = normalizedVector.getX();
-      double vy1 = normalizedVector.getY();
-
-      double dot = vx0 * vx1 + vy0 * vy1;
-      double lengthSquared = vx1 * vx1 + vy1 * vy1;
-
-      double alpha = dot / lengthSquared;
-
-//    if (alpha < 0.0) alpha = 0.0;
-//    if (alpha > 1.0) alpha = 1.0;
-
-      double x = endPoint.getX() + alpha * vx1;
-      double y = endPoint.getY() + alpha * vy1;
-
-      point2d.setX(x);
-      point2d.setY(y);
+      GeometryTools.getOrthogonalProjectionOnLine(point2d, point, normalizedVector, point2d);
    }
 
-// TODO move to Line2d
+   /**
+    * Computes the orthogonal projection of the given 2D point on this 2D line.
+    * <p>
+    * WARNING: This method generates garbage.
+    * </p>
+    * 
+    * @param point2d the point to compute the projection of. Not modified.
+    * @return the projection of the point onto the line or {@code null} if the method failed.
+    */
    @Override
-   public Point2d orthogonalProjectionCopy(Point2d point)
+   public Point2d orthogonalProjectionCopy(Point2d point2d)
    {
-      Point2d copy = new Point2d(point);
-      orthogonalProjection(copy);
+      Point2d projection = new Point2d();
 
-      return copy;
+      boolean success = GeometryTools.getOrthogonalProjectionOnLine(point2d, point, normalizedVector, projection);
+      if (!success)
+         return null;
+      else
+         return projection;
    }
 
    public boolean equals(Line2d otherLine)

@@ -46,7 +46,7 @@ dependencies {
 	compile group: 'io.javaslang', name: 'javaslang', version: '2.0.3'
 	compile ihmc.getProjectDependency(":IHMCJavaFXToolkit")
 	compile ihmc.getProjectDependency(":IHMCRobotDescription")
-	compile ihmc.getProjectDependency(":SDFLoader")
+	compile ihmc.getProjectDependency(":ModelFileLoader")
 	compile ihmc.getProjectDependency(":IHMCGraphicsDescription")
 	compile ihmc.getProjectDependency(":IHMCJMonkeyEngineToolkit")
 

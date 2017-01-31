@@ -53,8 +53,13 @@ public class RobotFromDescription extends Robot implements OneDegreeOfFreedomJoi
 
    public RobotFromDescription(RobotDescription description)
    {
+      this(description, true, true);
+   }
+   
+   public RobotFromDescription(RobotDescription description, boolean enableDamping, boolean enableJointTorqueAndVelocityLimits)
+   {
       super(description.getName());
-      constructRobotFromDescription(description);
+      constructRobotFromDescription(description, enableDamping, enableJointTorqueAndVelocityLimits);
 
 //      System.out.println(this);
    }
@@ -115,20 +120,20 @@ public class RobotFromDescription extends Robot implements OneDegreeOfFreedomJoi
       return jointToGroundContactPointsMap.get(joint);
    }
 
-   private void constructRobotFromDescription(RobotDescription description)
+   private void constructRobotFromDescription(RobotDescription description, boolean enableDamping, boolean enableJointTorqueAndVelocityLimits)
    {
       ArrayList<JointDescription> rootJointDescriptions = description.getRootJoints();
 
       for (JointDescription rootJointDescription : rootJointDescriptions)
       {
-         Joint rootJoint = constructJointRecursively(rootJointDescription);
+         Joint rootJoint = constructJointRecursively(rootJointDescription, enableDamping, enableJointTorqueAndVelocityLimits);
          this.addRootJoint(rootJoint);
       }
    }
 
-   private Joint constructJointRecursively(JointDescription jointDescription)
+   private Joint constructJointRecursively(JointDescription jointDescription, boolean enableDamping, boolean enableJointTorqueAndVelocityLimits)
    {
-      Joint joint = createSingleJoint(jointDescription);
+      Joint joint = createSingleJoint(jointDescription, enableDamping, enableJointTorqueAndVelocityLimits);
 
       addGroundContactPoints(jointDescription, joint);
       addExternalForcePoints(jointDescription, joint);
@@ -145,7 +150,7 @@ public class RobotFromDescription extends Robot implements OneDegreeOfFreedomJoi
       ArrayList<JointDescription> childrenJoints = jointDescription.getChildrenJoints();
       for (JointDescription childJointDescription : childrenJoints)
       {
-         Joint childJoint = constructJointRecursively(childJointDescription);
+         Joint childJoint = constructJointRecursively(childJointDescription, enableDamping, enableJointTorqueAndVelocityLimits);
          joint.addJoint(childJoint);
       }
 
@@ -299,7 +304,7 @@ public class RobotFromDescription extends Robot implements OneDegreeOfFreedomJoi
       }
    }
 
-   private Joint createSingleJoint(JointDescription jointDescription)
+   private Joint createSingleJoint(JointDescription jointDescription, boolean enableDamping, boolean enableJointTorqueAndVelocityLimits)
    {
       Joint joint;
 
@@ -346,9 +351,15 @@ public class RobotFromDescription extends Robot implements OneDegreeOfFreedomJoi
                pinJoint.setLimitStops(qMin, qMax, kLimit, bLimit);
             }
 
-            pinJoint.setDamping(pinJointDescription.getDamping());
-            pinJoint.setVelocityLimits(pinJointDescription.getVelocityLimit(), pinJointDescription.getVelocityDamping());
-            pinJoint.setStiction(pinJointDescription.getStiction());
+            if(enableDamping)
+            {
+               pinJoint.setDamping(pinJointDescription.getDamping());
+               pinJoint.setStiction(pinJointDescription.getStiction());
+            }
+            if(enableJointTorqueAndVelocityLimits)
+            {
+               pinJoint.setVelocityLimits(pinJointDescription.getVelocityLimit(), pinJointDescription.getVelocityDamping());
+            }
          }
          else
          {
@@ -381,9 +392,15 @@ public class RobotFromDescription extends Robot implements OneDegreeOfFreedomJoi
             pinJoint.setLimitStops(qMin, qMax, kLimit, bLimit);
          }
 
-         pinJoint.setDamping(pinJointDescription.getDamping());
-         pinJoint.setVelocityLimits(pinJointDescription.getVelocityLimit(), pinJointDescription.getVelocityDamping());
-         pinJoint.setStiction(pinJointDescription.getStiction());
+         if(enableDamping)
+         {
+            pinJoint.setDamping(pinJointDescription.getDamping());
+            pinJoint.setStiction(pinJointDescription.getStiction());
+         }
+         if(enableJointTorqueAndVelocityLimits)
+         {
+            pinJoint.setVelocityLimits(pinJointDescription.getVelocityLimit(), pinJointDescription.getVelocityDamping());
+         }
       }
       else if (jointDescription instanceof SliderJointDescription)
       {

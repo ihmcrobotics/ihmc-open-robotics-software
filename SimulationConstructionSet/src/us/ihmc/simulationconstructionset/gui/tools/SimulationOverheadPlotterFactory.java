@@ -94,13 +94,13 @@ public class SimulationOverheadPlotterFactory
       }
       else
       {
-         simulationConstructionSet.get().addExtraJpanel(plotterPanel, plotterName);
+         simulationConstructionSet.get().addExtraJpanel(plotterPanel, plotterName, showOnStart.get());
 
-         simulationConstructionSet.get().addExtraJpanel(scrollPane, "Plotter Legend");
+         simulationConstructionSet.get().addExtraJpanel(scrollPane, "Plotter Legend", false);
 
          JScrollPane menuScrollPanel = new JScrollPane(simulationOverheadPlotter.getMenuPanel());
          menuScrollPanel.getVerticalScrollBar().setUnitIncrement(16);
-         simulationConstructionSet.get().addExtraJpanel(menuScrollPanel, PlotterShowHideMenu.getPanelName());
+         simulationConstructionSet.get().addExtraJpanel(menuScrollPanel, PlotterShowHideMenu.getPanelName(), false);
 
          for (int i = 0; i < yoGraphicsListRegistries.get().size(); i++)
          {
@@ -132,11 +132,6 @@ public class SimulationOverheadPlotterFactory
                   simulationOverheadPlotter.setYawVariableToTrack((DoubleYoVariable) trackingVariable);
                }
             }
-         }
-
-         if (showOnStart.get())
-         {
-            simulationConstructionSet.get().getStandardSimulationGUI().selectPanel(plotterName);
          }
       }
 

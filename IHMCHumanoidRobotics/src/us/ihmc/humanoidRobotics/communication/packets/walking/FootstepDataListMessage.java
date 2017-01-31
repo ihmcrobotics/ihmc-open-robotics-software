@@ -48,8 +48,9 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage> imp
    + "\n - The value can be overwritten by specifying a transfer time in the FootstepDataMessage for each individual step.")
    public double defaultTransferTime = 0.0;
 
-   @RosExportedField(documentation = "Specifies the transfer time to go to standing after the execution of the footstep list is finished.")
-   public double finalTransferTime = 0.0;
+   @RosExportedField(documentation = "Specifies the transfer time to go to standing after the execution of the footstep list is finished."
+   + "\nIf the value is negative the defaultTransfer time will be used.")
+   public double finalTransferTime = -1.0;
 
    /**
     * Empty constructor for serialization.
@@ -159,12 +160,12 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage> imp
          }
       }
 
-      if (Math.abs(defaultSwingTime - otherList.defaultSwingTime) > epsilon)
+      if (!MathTools.epsilonEquals(this.defaultSwingTime, otherList.defaultSwingTime, epsilon))
       {
          return false;
       }
 
-      if (Math.abs(defaultTransferTime - otherList.defaultTransferTime) > epsilon)
+      if (!MathTools.epsilonEquals(this.defaultTransferTime, otherList.defaultTransferTime, epsilon))
       {
          return false;
       }

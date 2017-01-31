@@ -2,6 +2,7 @@ package us.ihmc.humanoidBehaviors.behaviors.scripts.engine;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -29,12 +30,12 @@ public class ScriptBasedControllerCommandGenerator
       this.controllerCommands = controllerCommands;
    }
 
-   public void loadScriptFile(String scriptFilename, ReferenceFrame referenceFrame)
+   public void loadScriptFile(Path scriptFilePath, ReferenceFrame referenceFrame)
    {
       ScriptFileLoader scriptFileLoader;
       try
       {
-         scriptFileLoader = new ScriptFileLoader(scriptFilename);
+         scriptFileLoader = new ScriptFileLoader(scriptFilePath);
          
          RigidBodyTransform transformFromReferenceFrameToWorldFrame = referenceFrame.getTransformToDesiredFrame(ReferenceFrame.getWorldFrame());
          ArrayList<ScriptObject> scriptObjectsList = scriptFileLoader.readIntoList(transformFromReferenceFrameToWorldFrame);
@@ -43,7 +44,7 @@ public class ScriptBasedControllerCommandGenerator
       }
       catch (IOException e)
       {
-         System.err.println("Could not load script file " + scriptFilename);
+         System.err.println("Could not load script file " + scriptFilePath);
       }            
    }
    

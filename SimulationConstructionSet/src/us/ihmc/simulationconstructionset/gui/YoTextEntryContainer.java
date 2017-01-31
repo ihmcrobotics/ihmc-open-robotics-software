@@ -18,7 +18,7 @@ public class YoTextEntryContainer implements YoVariableEntryContainer
    private static final int TEXT_BOX_WIDTH = 100;
    private static final int BOX_HEIGHT = YoEntryBox.COMPONENT_HEIGHT;
    private NumberFormat numFormat;
-   private YoVariable variableInThisBox;
+   private YoVariable<?> variableInThisBox;
    private JLabel label;
    private JTextField jTextField;
 
@@ -26,12 +26,14 @@ public class YoTextEntryContainer implements YoVariableEntryContainer
    {
    }
 
-   public YoVariable getVariable()
+   @Override
+   public YoVariable<?> getVariable()
    {
       return variableInThisBox;
    }
 
 
+   @Override
    public synchronized void update(YoEntryBox yoEntryBox)
    {
       if (jTextField.hasFocus())
@@ -66,6 +68,7 @@ public class YoTextEntryContainer implements YoVariableEntryContainer
       }
    }
 
+   @Override
    public void actionPerformed(YoEntryBox yoEntryBox, ActionEvent evt)
    {
       String text = jTextField.getText();
@@ -96,7 +99,8 @@ public class YoTextEntryContainer implements YoVariableEntryContainer
    }
 
 
-   public void removeVariable(YoVariable variable)
+   @Override
+   public void removeVariable(YoVariable<?> variable)
    {
       if (getVariable() == variable)
          variableInThisBox = null;
@@ -105,6 +109,7 @@ public class YoTextEntryContainer implements YoVariableEntryContainer
    }
 
 
+   @Override
    public void setup(YoEntryBox yoEntryBox)
    {
       label = new JLabel(YoEntryBox.DEFAULT_UNBOUND_ENTRY_BOX_LABEL);
@@ -123,6 +128,7 @@ public class YoTextEntryContainer implements YoVariableEntryContainer
       yoEntryBox.add(jTextField);
    }
 
+   @Override
    public void shutdown(YoEntryBox yoEntryBox)
    {
       numFormat = null;
@@ -134,7 +140,8 @@ public class YoTextEntryContainer implements YoVariableEntryContainer
    }
 
 
-   public void bindToVariable(YoEntryBox yoEntryBox, YoVariable variable)
+   @Override
+   public void bindToVariable(YoEntryBox yoEntryBox, YoVariable<?> variable)
    {
       variableInThisBox = variable;
       label.setText("  "+variable.getName()+"  ");
@@ -183,17 +190,20 @@ public class YoTextEntryContainer implements YoVariableEntryContainer
 
 
 
+   @Override
    public boolean isEventSource(YoEntryBox yoEntryBox, FocusEvent evt)
    {
       return evt.getSource().equals(jTextField);
    }
 
+   @Override
    public void focusLost(YoEntryBox yoEntryBox)
    {
       update(yoEntryBox);
       jTextField.setCaretPosition(1);
    }
 
+   @Override
    public void focusGained(YoEntryBox yoEntryBox)
    {
       update(yoEntryBox);

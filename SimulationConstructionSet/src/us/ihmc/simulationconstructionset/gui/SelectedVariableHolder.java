@@ -10,14 +10,14 @@ import us.ihmc.robotics.dataStructures.variable.YoVariable;
 
 public class SelectedVariableHolder
 {
-   private YoVariable var;
+   private YoVariable<?> var;
    private final ArrayList<ChangeListener> listeners = new ArrayList<ChangeListener>();
 
    public SelectedVariableHolder()
    {
    }
 
-   public void setSelectedVariable(YoVariable var)
+   public void setSelectedVariable(YoVariable<?> var)
    {
       this.var = var;
 
@@ -28,7 +28,7 @@ public class SelectedVariableHolder
       }
    }
 
-   public YoVariable getSelectedVariable()
+   public YoVariable<?> getSelectedVariable()
    {
       return this.var;
    }

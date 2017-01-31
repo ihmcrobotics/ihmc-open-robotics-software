@@ -62,6 +62,7 @@ public class IntGlobalParameter extends GlobalParameter
    }
 
 
+   @Override
    public String getValueInStringFormat()
    {
       String ret = Integer.toString(((IntegerYoVariable)yoVariable).getIntegerValue());

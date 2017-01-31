@@ -100,7 +100,7 @@ public class SpiralBasedAlgorithm
          rayThroughSphere.sub(sphereOrigin, pointsOnSphere[rayIndex]);
          rayThroughSphere.normalize();
 
-         GeometryTools.getRotationBasedOnNormal(rotationForXAxisAlignedWithRay, rayThroughSphere, xAxis);
+         GeometryTools.getAxisAngleFromFirstToSecondVector(xAxis, rayThroughSphere, rotationForXAxisAlignedWithRay);
          rotationMatrixForXAxisAlignedWithRay.set(rotationForXAxisAlignedWithRay);
 
          for (int rotationAroundRayIndex = 0; rotationAroundRayIndex < numberOfRotationsAroundRay; rotationAroundRayIndex++)

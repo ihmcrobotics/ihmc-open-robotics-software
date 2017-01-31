@@ -209,6 +209,7 @@ public class LinearStickSlipGroundContactModelTest
 
       GroundContactPointsHolder pointsHolder = new GroundContactPointsHolder()
       {
+         @Override
          public ArrayList<GroundContactPoint> getGroundContactPoints(int groundContactGroupIdentifier)
          {
             return groundContactPoints;

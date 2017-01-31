@@ -67,7 +67,7 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
 
    @RosExportedField(documentation = "In case the trajectory type is set to custom the swing waypoints can be specified here (As of Dec 2016 only two waypoints are supported).\n"
          + "The waypoints specify the sole position in the world frame.")
-   public Point3d[] trajectoryWaypoints = null;
+   public Point3d[] trajectoryWaypoints = new Point3d[0];
 
    @RosExportedField(documentation = "Contains information on how high the robot should step. This affects trajectory types default and obstacle clearance."
          + "Recommended values are between 0.1 (minimum swing height, default) and 0.25.\n")
@@ -334,6 +334,17 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
          ret += "null";
       }
 
+      ret += trajectoryType.name() + "\n";
+
+      if(trajectoryWaypoints != null)
+      {
+         ret += "waypoints = " + trajectoryWaypoints.length + "\n";
+      }
+      else
+      {
+         ret += "no waypoints" + "\n";
+      }
+
       return ret;
    }
 
@@ -374,14 +385,27 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
          }
       }
 
-      boolean sameWaypoints = trajectoryWaypoints.length == footstepData.trajectoryWaypoints.length;
-      if (sameWaypoints)
+      boolean trajectoryWaypointsEqual = true;
+
+      if ((this.trajectoryWaypoints == null) && (footstepData.trajectoryWaypoints != null))
+         trajectoryWaypointsEqual = false;
+      else if ((this.trajectoryWaypoints != null) && (footstepData.trajectoryWaypoints == null))
+         trajectoryWaypointsEqual = false;
+      else if (this.trajectoryWaypoints != null)
       {
-         for (int i = 0; i < trajectoryWaypoints.length; i++)
+         int size = trajectoryWaypoints.length;
+         if (size != footstepData.trajectoryWaypoints.length)
+            trajectoryWaypointsEqual = false;
+         else
          {
-            Point3d waypoint = trajectoryWaypoints[i];
-            Point3d otherWaypoint = footstepData.trajectoryWaypoints[i];
-            sameWaypoints = sameWaypoints && waypoint.epsilonEquals(otherWaypoint, epsilon);
+            for (int i = 0; i < size; i++)
+            {
+               Point3d pointOne = trajectoryWaypoints[i];
+               Point3d pointTwo = footstepData.trajectoryWaypoints[i];
+
+               if (!(pointOne.distanceSquared(pointTwo) < 1e-7))
+                  trajectoryWaypointsEqual = false;
+            }
          }
       }
 
@@ -392,7 +416,7 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
          sameTimings = sameTimings && MathTools.epsilonEquals(transferTime, footstepData.transferTime, epsilon);
       }
 
-      return robotSideEquals && locationEquals && orientationEquals && contactPointsEqual && sameWaypoints && sameTimings;
+      return robotSideEquals && locationEquals && orientationEquals && contactPointsEqual && trajectoryWaypointsEqual && sameTimings;
    }
 
    public FootstepDataMessage transform(RigidBodyTransform transform)

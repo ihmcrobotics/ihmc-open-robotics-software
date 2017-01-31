@@ -290,7 +290,7 @@ public class SimpleCollisionDetector implements ScsCollisionDetector
       double sphereRadius = descriptionTwo.getRadius();
       descriptionTwo.getCenter(centerOfSphere);
 
-      lineSegmentOne.getProjectionOntoLineSegment(centerOfSphere, closestPointOnOne);
+      lineSegmentOne.orthogonalProjection(centerOfSphere, closestPointOnOne);
 
       double distanceSquared = centerOfSphere.distanceSquared(closestPointOnOne);
 
@@ -452,8 +452,8 @@ public class SimpleCollisionDetector implements ScsCollisionDetector
             SupportingVertexHolder descriptionTwo, double smoothingRadiusTwo, CollisionDetectionResult result)
       {
       descriptionOne.getLineSegment(tempLineSegment);
-      final Point3d tempSegmentPointOne = tempLineSegment.getPointA();
-      final Point3d tempSegmentPointTwo = tempLineSegment.getPointB();
+      final Point3d tempSegmentPointOne = tempLineSegment.getFirstEndpoint();
+      final Point3d tempSegmentPointTwo = tempLineSegment.getSecondEndpoint();
 
       double capsuleRadius = descriptionOne.getRadius();
 
@@ -580,10 +580,10 @@ public class SimpleCollisionDetector implements ScsCollisionDetector
    public void getClosestPointsOnLineSegments(LineSegment3d segmentOne, LineSegment3d segmentTwo, Point3d closestPointOnOneToPack,
          Point3d closestPointOnTwoToPack)
    {
-      Point3d p0 = segmentOne.getPointA();
-      Point3d p1 = segmentOne.getPointB();
-      Point3d q0 = segmentTwo.getPointA();
-      Point3d q1 = segmentTwo.getPointB();
+      Point3d p0 = segmentOne.getFirstEndpoint();
+      Point3d p1 = segmentOne.getSecondEndpoint();
+      Point3d q0 = segmentTwo.getFirstEndpoint();
+      Point3d q1 = segmentTwo.getSecondEndpoint();
 
       uVector.sub(p1, p0);
       vVector.sub(q1, q0);

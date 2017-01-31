@@ -26,6 +26,7 @@ public class TrackCheckBox extends JCheckBox implements ActionListener
       addActionListener(this);
    }
 
+   @Override
    public void actionPerformed(ActionEvent actionEvent)
    {
       CameraPropertiesHolder camera = cameraHolder.getCameraPropertiesForActiveCamera();
@@ -37,6 +38,7 @@ public class TrackCheckBox extends JCheckBox implements ActionListener
    {
       EventDispatchThreadHelper.invokeAndWait(new Runnable()
       {
+         @Override
          public void run()
          {
             CameraPropertiesHolder camera = cameraHolder.getCameraPropertiesForActiveCamera();
@@ -48,6 +50,7 @@ public class TrackCheckBox extends JCheckBox implements ActionListener
    {
       EventDispatchThreadHelper.invokeAndWait(new Runnable()
       {
+         @Override
          public void run()
          {
             CameraPropertiesHolder camera = cameraHolder.getCameraPropertiesForActiveCamera();

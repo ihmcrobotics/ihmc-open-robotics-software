@@ -68,6 +68,7 @@ public class SimulatedMotionNodeIMURawSensorReader extends SimulatedIMURawSensor
    }
 
    // Make sure that simulateIMU() is only executed at original sample rate!
+   @Override
    protected void simulateIMU()
    {
       // TODO: Add time delay, internal filters, sensor range clipping, nonlinearities

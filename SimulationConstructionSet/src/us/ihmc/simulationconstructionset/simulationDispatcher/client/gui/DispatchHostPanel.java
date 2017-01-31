@@ -37,6 +37,7 @@ public abstract class DispatchHostPanel extends JPanel implements KeyListener, M
       anim.start();
    }
 
+   @Override
    public void run()
    {
       while (true)
@@ -55,18 +56,22 @@ public abstract class DispatchHostPanel extends JPanel implements KeyListener, M
 
 
 
+   @Override
    public void mousePressed(MouseEvent evt)
    {
    }
 
+   @Override
    public void mouseReleased(MouseEvent evt)
    {
    }
 
+   @Override
    public void mouseEntered(MouseEvent evt)
    {
    }
 
+   @Override
    public void mouseExited(MouseEvent evt)
    {
    }
@@ -74,6 +79,7 @@ public abstract class DispatchHostPanel extends JPanel implements KeyListener, M
    protected int selected = -1;
    protected DispatchHost selectedHost;
 
+   @Override
    public void mouseClicked(MouseEvent evt)
    {
       // System.out.println("Mouse Clicked");
@@ -122,14 +128,17 @@ public abstract class DispatchHostPanel extends JPanel implements KeyListener, M
       return this.selectedHost;
    }
 
+   @Override
    public void keyTyped(KeyEvent evt)
    {
    }
 
+   @Override
    public void keyReleased(KeyEvent evt)
    {
    }
 
+   @Override
    public void keyPressed(KeyEvent evt)
    {
       int code = evt.getKeyCode();
@@ -154,6 +163,7 @@ public abstract class DispatchHostPanel extends JPanel implements KeyListener, M
       this.repaint();
    }
 
+   @Override
    public void paintComponent(Graphics g)
    {
       super.paintComponent(g);

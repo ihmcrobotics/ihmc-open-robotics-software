@@ -15,11 +15,13 @@ public abstract class GroundProfileFromHeightMap implements HeightMapWithNormals
    {
    }
 
+   @Override
    public boolean isClose(double x, double y, double z)
    {
       return this.getBoundingBox().isInside(x, y, z);
    }
 
+   @Override
    public boolean checkIfInside(double x, double y, double z, Point3d intersectionToPack, Vector3d normalToPack)
    {
       double heightAt = this.heightAndNormalAt(x, y, z, normalToPack);
@@ -34,6 +36,7 @@ public abstract class GroundProfileFromHeightMap implements HeightMapWithNormals
       intersectionToPack.set(x, y, heightAt);
    }
    
+   @Override
    public HeightMapWithNormals getHeightMapIfAvailable()
    {
       return this;

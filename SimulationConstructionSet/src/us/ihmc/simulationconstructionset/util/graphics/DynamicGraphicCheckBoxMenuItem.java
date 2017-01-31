@@ -30,6 +30,7 @@ public class DynamicGraphicCheckBoxMenuItem extends JCheckBoxMenuItem implements
       this.yoGraphics.addAll(yoGraphics);
    }
 
+   @Override
    public void itemStateChanged(ItemEvent ie)
    {
       if (ie.getStateChange() == ItemEvent.SELECTED)

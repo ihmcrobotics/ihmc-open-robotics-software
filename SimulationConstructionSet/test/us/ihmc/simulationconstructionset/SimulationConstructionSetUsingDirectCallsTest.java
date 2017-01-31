@@ -70,9 +70,9 @@ import us.ihmc.simulationconstructionset.physics.collision.CollisionDetectionRes
 import us.ihmc.simulationconstructionset.physics.collision.DefaultCollisionHandler;
 import us.ihmc.simulationconstructionset.physics.visualize.DefaultCollisionVisualizer;
 import us.ihmc.simulationconstructionset.robotcommprotocol.RobotSocketConnection;
-import us.ihmc.tools.continuousIntegration.IntegrationCategory;
 import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
 import us.ihmc.tools.inputDevices.keyboard.ModifierKeyInterface;
 import us.ihmc.tools.thread.ThreadTools;
 
@@ -505,7 +505,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
       assertFalse(isViewportHidden2);
 
       Component component = new Button();
-      scs.addExtraJpanel(component, simpleComponentName);
+      scs.addExtraJpanel(component, simpleComponentName, false);
       ThreadTools.sleep(THREAD_SLEEP_TIME);
       Component componentFromSCS =  scs.getExtraPanel(simpleComponentName);
       assertEquals(component, componentFromSCS);
@@ -1267,21 +1267,25 @@ public class SimulationConstructionSetUsingDirectCallsTest
       ScsCollisionDetector scsCollisionDetector = new ScsCollisionDetector()
       {
 
+         @Override
          public void removeShape(Link link)
          {
 
          }
 
+         @Override
          public CollisionShape lookupCollisionShape(Link link)
          {
             return null;
          }
 
+         @Override
          public void initialize()
          {
 
          }
 
+         @Override
          public CollisionShapeFactory getShapeFactory()
          {
             return null;
@@ -1323,11 +1327,13 @@ public class SimulationConstructionSetUsingDirectCallsTest
    {
       ToggleKeyPointModeCommandListener toggleKeyPointModeCommandListener = new ToggleKeyPointModeCommandListener()
       {
+         @Override
          public void updateKeyPointModeStatus()
          {
             toggleKeyPointModeCommandListenerHasBeenCalled.set(true);
          }
 
+         @Override
          public void closeAndDispose()
          {
          }
@@ -1348,6 +1354,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
    {
       SelectedListener selectedListener = new SelectedListener()
       {
+         @Override
          public void selected(Graphics3DNode graphics3dNode, ModifierKeyInterface modifierKeyInterface, Point3d location, Point3d cameraLocation,
                Quat4d cameraRotation)
          {
@@ -1362,6 +1369,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
    {
       DataProcessingFunction dataProcessingFunction = new DataProcessingFunction()
       {
+         @Override
          public void processData()
          {
             processDataHasBeenCalled.set(true);
@@ -1382,6 +1390,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
    {
       PlayCycleListener playCycleListener = new PlayCycleListener()
       {
+         @Override
          public void update(int tick)
          {
 
@@ -1525,11 +1534,13 @@ public class SimulationConstructionSetUsingDirectCallsTest
    {
       NewDataListener newDataListener = new NewDataListener()
       {
+         @Override
          public void newDataHasBeenSent()
          {
 
          }
 
+         @Override
          public void newDataHasBeenReceived()
          {
 
@@ -1649,16 +1660,19 @@ public class SimulationConstructionSetUsingDirectCallsTest
    {
       PlaybackListener listener = new PlaybackListener()
       {
+         @Override
          public void indexChanged(int newIndex, double newTime)
          {
 
          }
 
+         @Override
          public void play(double realTimeRate)
          {
             realTimeRateInSCS.set(realTimeRate);
          }
 
+         @Override
          public void stop()
          {
 
@@ -1672,6 +1686,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
    {
       SimulationDoneCriterion criterion = new SimulationDoneCriterion()
       {
+         @Override
          public boolean isSimulationDone()
          {
             return setSimulationDoneCriterion.getBooleanValue();
@@ -1685,11 +1700,13 @@ public class SimulationConstructionSetUsingDirectCallsTest
    {
       SimulationDoneListener listener = new SimulationDoneListener()
       {
+         @Override
          public void simulationDone()
          {
             simulationDoneListenerHasBeenNotified.set(true);
          }
 
+         @Override
          public void simulationDoneWithException(Throwable throwable)
          {
 
@@ -1807,9 +1824,8 @@ public class SimulationConstructionSetUsingDirectCallsTest
 
    private ExtraPanelConfiguration createExtraPanelConfigurationWithPanel(String name)
    {
-      ExtraPanelConfiguration extraPanelConfiguration = new ExtraPanelConfiguration(name);
       Button panel = new Button();
-      extraPanelConfiguration.setupPanel(panel);
+      ExtraPanelConfiguration extraPanelConfiguration = new ExtraPanelConfiguration(name, panel, false);
 
       return extraPanelConfiguration;
    }
@@ -1927,6 +1943,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
    {
       RewoundListener ret = new RewoundListener()
       {
+         @Override
          public void wasRewound()
          {
             simulationRewoundListenerHasBeenNotified.set(true);
@@ -1940,6 +1957,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
    {
       ExitActionListener ret = new ExitActionListener()
       {
+         @Override
          public void exitActionPerformed()
          {
             exitActionListenerHasBeenNotified.set(true);

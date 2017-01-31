@@ -26,14 +26,7 @@ public class DebugSCSVarListException
 
    public static void main(String[] args)
    {
-      Robot robot = new Robot("Test")
-      {
-
-         /**
-          *
-          */
-         private static final long serialVersionUID = -8640414778071304871L;
-      } ;
+      Robot robot = new Robot("Test");
 
       SimulationConstructionSet scs = new SimulationConstructionSet(robot);
 

@@ -31,6 +31,7 @@ public class FlatGroundProfile extends GroundProfileFromHeightMap
       this.boundingBox = new BoundingBox3d(xMin, yMin, zHeight - 1.0, xMax, yMax, zHeight + 0.01);
    }
 
+   @Override
    public double heightAndNormalAt(double x, double y, double z, Vector3d normalToPack)
    {
       double height = heightAt(x, y, z);
@@ -39,6 +40,7 @@ public class FlatGroundProfile extends GroundProfileFromHeightMap
       return height;
    }
 
+   @Override
    public double heightAt(double x, double y, double z)
    {
       return zHeight;
@@ -51,6 +53,7 @@ public class FlatGroundProfile extends GroundProfileFromHeightMap
       normal.setZ(1.0);
    }
 
+   @Override
    public BoundingBox3d getBoundingBox()
    {
       return boundingBox;

@@ -39,7 +39,7 @@ public class HandstepHelper
    {
       surfaceNormal.normalize();
       AxisAngle4d rotationAxisAngle = new AxisAngle4d();
-      GeometryTools.getRotationBasedOnNormal(rotationAxisAngle, surfaceNormal);
+      GeometryTools.getAxisAngleFromZUpToVector(surfaceNormal, rotationAxisAngle);
 
       AxisAngle4d rotationAboutNormal = new AxisAngle4d(surfaceNormal, rotationAngleAboutNormal);
 

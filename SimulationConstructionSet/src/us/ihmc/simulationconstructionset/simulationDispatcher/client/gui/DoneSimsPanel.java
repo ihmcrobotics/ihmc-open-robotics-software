@@ -17,12 +17,14 @@ public class DoneSimsPanel extends SimulationToDispatchPanel
       super(dispatcher);
    }
 
+   @Override
    public void simulationsChanged()
    {
       SimulationToDispatch[] doneSimulations = dispatcher.getDoneSimulations();
       setSimulationsToDisplay(doneSimulations);
    }
 
+   @Override
    public void paintComponent(Graphics graphics)
    {
       super.paintComponent(graphics);
