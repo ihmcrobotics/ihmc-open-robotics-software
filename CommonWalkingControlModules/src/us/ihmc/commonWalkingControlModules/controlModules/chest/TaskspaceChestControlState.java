@@ -70,7 +70,7 @@ public class TaskspaceChestControlState extends ChestControlState
 
    public TaskspaceChestControlState(HighLevelHumanoidControllerToolbox humanoidControllerToolbox, YoOrientationPIDGainsInterface gains, YoVariableRegistry parentRegistry)
    {
-      super(ChestControlMode.TASK_SPACE);
+      super(ChestControlMode.TASKSPACE);
 
       this.gains = gains;
       yoTime = humanoidControllerToolbox.getYoTime();

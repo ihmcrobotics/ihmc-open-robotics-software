@@ -25,7 +25,7 @@ public class JointspaceChestControlState extends ChestControlState
    private final Map<OneDoFJoint, MultipleWaypointsTrajectoryGenerator> jointTrajectoryGenerators = new HashMap<>();
    private final Map<OneDoFJoint, BooleanYoVariable> jointTrackingPosition = new HashMap<>();
 
-   private final DoubleYoVariable weight = new DoubleYoVariable("headJointspaceWeight", registry);
+   private final DoubleYoVariable weight = new DoubleYoVariable("chestJointspaceWeight", registry);
    private final YoPIDGains gains;
    private final JointspaceFeedbackControlCommand feedbackControlCommand = new JointspaceFeedbackControlCommand();
 
@@ -37,7 +37,7 @@ public class JointspaceChestControlState extends ChestControlState
 
    public JointspaceChestControlState(OneDoFJoint[] spineJoints, YoPIDGains gains, DoubleYoVariable yoTime, YoVariableRegistry parentRegistry)
    {
-      super(ChestControlMode.JOINT_SPACE);
+      super(ChestControlMode.JOINTSPACE);
 
       this.jointsOriginal = spineJoints;
       this.gains = gains;

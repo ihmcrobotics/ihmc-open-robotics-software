@@ -36,7 +36,7 @@ public class ChestOrientationManager
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final GenericStateMachine<ChestControlMode, ChestControlState> stateMachine;
-   private final EnumYoVariable<ChestControlMode> requestedState = new EnumYoVariable<>("headRequestedControlMode", registry, ChestControlMode.class, true);
+   private final EnumYoVariable<ChestControlMode> requestedState = new EnumYoVariable<>("chestRequestedControlMode", registry, ChestControlMode.class, true);
 
    private final BooleanYoVariable hasBeenInitialized = new BooleanYoVariable(getClass().getSimpleName() + "Initialized", registry);
 
@@ -65,7 +65,7 @@ public class ChestOrientationManager
       jointsAtDesiredPosition = ScrewTools.cloneOneDoFJointPath(pelvis, chest);
       initialJointPositions = new double[jointsOriginal.length];
 
-      YoOrientationPIDGainsInterface taskspaceGains = walkingControllerParameters.createHeadOrientationControlGains(registry);
+      YoOrientationPIDGainsInterface taskspaceGains = walkingControllerParameters.createChestControlGains(registry);
       YoPIDGains jointspaceGains = walkingControllerParameters.createSpineControlGains(registry);
 
       taskspaceChestControlState = new TaskspaceChestControlState(humanoidControllerToolbox, taskspaceGains, registry);
@@ -94,7 +94,7 @@ public class ChestOrientationManager
          stateMachine.addState(fromState);
       }
 
-      stateMachine.setCurrentState(ChestControlMode.TASK_SPACE);
+      stateMachine.setCurrentState(ChestControlMode.TASKSPACE);
    }
 
    public void setWeights(double jointspace, Vector3d taskspace)
@@ -177,7 +177,7 @@ public class ChestOrientationManager
 
    private void computeDesiredOrientation(FrameOrientation desiredOrientationToPack)
    {
-      if (stateMachine.getCurrentStateEnum() == ChestControlMode.TASK_SPACE)
+      if (stateMachine.getCurrentStateEnum() == ChestControlMode.TASKSPACE)
       {
          taskspaceChestControlState.getDesiredOrientation(initialOrientation);
       }
@@ -194,7 +194,7 @@ public class ChestOrientationManager
 
    private void computeDesiredJointPositions(double[] desiredJointPositionsToPack)
    {
-      if (stateMachine.getCurrentStateEnum() == ChestControlMode.JOINT_SPACE)
+      if (stateMachine.getCurrentStateEnum() == ChestControlMode.JOINTSPACE)
       {
          for (int i = 0; i < jointsOriginal.length; i++)
          {
@@ -240,7 +240,7 @@ public class ChestOrientationManager
 
          newJointDesiredData = null;
       }
-      else if (stateMachine.getCurrentStateEnum() == ChestControlMode.JOINT_SPACE)
+      else if (stateMachine.getCurrentStateEnum() == ChestControlMode.JOINTSPACE)
       {
          for (int i = 0; i < jointsAtDesiredPosition.length; i++)
          {
