@@ -156,6 +156,26 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
       assertDesiredsContinous(controllerSpy);
    }
 
+   /**
+    * This tests a trajectory a lot of waypoints. The message does not do anything except testing that
+    * the controller does not blow up.
+    * @throws SimulationExceededMaximumTimeException
+    */
+   public void testLongMessage() throws SimulationExceededMaximumTimeException
+   {
+      setupTest();
+
+      int waypoints = 200;
+      SpineTrajectoryMessage message = new SpineTrajectoryMessage(numberOfJoints, waypoints);
+      for (int waypoint = 0; waypoint < waypoints; waypoint++)
+         for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
+            message.setTrajectoryPoint(jointIdx, waypoint, 0.1 * (double) waypoint, 0.0, 0.0);
+      executeMessage(message);
+
+      assertControlWasConsistent(controllerSpy);
+      assertDesiredsContinous(controllerSpy);
+   }
+
    private SpineTrajectoryMessage createRandomSpineMessage(double trajectoryTime, Random random)
    {
       double[] jointDesireds = new double[numberOfJoints];
