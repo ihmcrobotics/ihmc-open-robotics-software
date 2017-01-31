@@ -47,7 +47,7 @@ public class StandingState extends WalkingState
       pelvisOrientationManager = managerFactory.getOrCreatePelvisOrientationManager();
 
       doPrepareManipulationForLocomotion.set(walkingControllerParameters.doPrepareManipulationForLocomotion());
-      doPreparePelvisForLocomotion.set(true);
+      doPreparePelvisForLocomotion.set(walkingControllerParameters.doPreparePelvisForLocomotion());
    }
 
    @Override

@@ -269,7 +269,7 @@ public class ConvexHullFootstepSnapper implements FootstepSnapper
       // bad list of points
       double height;
       Vector3d surfaceNormal = new Vector3d();
-      if (pointList.isEmpty())
+      if (pointList == null || pointList.isEmpty())
       {
          height = defaultHeight;
          surfaceNormal.set(0.0, 0.0, 1.0);
