@@ -13,6 +13,6 @@ import us.ihmc.robotics.dataStructures.variable.YoVariable;
 
 public interface DoubleClickListener
 {
-   public void doubleClicked(YoVariable variable);
+   public void doubleClicked(YoVariable<?> variable);
 
 }

@@ -10,27 +10,28 @@ import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateChangeReco
 public class StateVisitedTwiceSimulationDoneCriterion implements SimulationDoneCriterion
 {
    private final StateChangeRecorder stateChangeRecorder;
-   private final ArrayList<State> exceptions = new ArrayList<State>();
-   private State stateVisitedTwice;
+   private final ArrayList<State<?>> exceptions = new ArrayList<>();
+   private State<?> stateVisitedTwice;
    private boolean isEnabled = true;
 
-   public StateVisitedTwiceSimulationDoneCriterion(StateChangeRecorder stateChangeRecorder)
+   public StateVisitedTwiceSimulationDoneCriterion(StateChangeRecorder<?> stateChangeRecorder)
    {
       this.stateChangeRecorder = stateChangeRecorder;
    }
 
+   @Override
    public boolean isSimulationDone()
    {
       if (isEnabled)
       {
          HashMap<State, ArrayList<Double>> statesAndSwitchTimes = stateChangeRecorder.getStatesAndSwitchTimes();
 
-         for (State state : exceptions)
+         for (State<?> state : exceptions)
          {
             statesAndSwitchTimes.remove(state);
          }
 
-         for (State state : statesAndSwitchTimes.keySet())
+         for (State<?> state : statesAndSwitchTimes.keySet())
          {
             if (statesAndSwitchTimes.get(state).size() > 1)
             {
@@ -44,12 +45,12 @@ public class StateVisitedTwiceSimulationDoneCriterion implements SimulationDoneC
       return false;
    }
 
-   public State getStateVisitedTwice()
+   public State<?> getStateVisitedTwice()
    {
       return stateVisitedTwice;
    }
 
-   public void addException(State exceptionState)
+   public void addException(State<?> exceptionState)
    {
       this.exceptions.add(exceptionState);
    }

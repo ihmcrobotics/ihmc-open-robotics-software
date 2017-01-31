@@ -133,6 +133,7 @@ public class DynamicGraphicObjectEvaluation
 
       Runnable runnable = new Runnable()
       {
+         @Override
          public void run()
          {
             int i = 0;

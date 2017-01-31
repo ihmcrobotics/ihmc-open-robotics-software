@@ -921,7 +921,7 @@ public class DefaultCommonAvatarEnvironment implements CommonAvatarEnvironmentIn
                Matrix3d pitchRollMatrix = new Matrix3d();
                Matrix3d cinderBlockOrientation = new Matrix3d();
 
-               pitchRollMatrix.set(GeometryTools.getRotationBasedOnNormal(cinderBlockNormal));
+               pitchRollMatrix.set(GeometryTools.getAxisAngleFromZUpToVector(cinderBlockNormal));
                cinderBlockOrientation.rotZ(Math.toRadians(courseAngle));
                cinderBlockOrientation.mul(pitchRollMatrix);
 

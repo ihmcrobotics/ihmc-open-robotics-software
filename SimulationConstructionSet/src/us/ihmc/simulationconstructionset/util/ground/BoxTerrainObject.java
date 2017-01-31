@@ -55,13 +55,15 @@ public class BoxTerrainObject implements TerrainObject3D, HeightMapWithNormals
  }
 
 
- public Graphics3DObject getLinkGraphics()
+ @Override
+public Graphics3DObject getLinkGraphics()
  {
    return linkGraphics;
 
  }
 
- public double heightAndNormalAt(double x, double y, double z, Vector3d normalToPack)
+ @Override
+public double heightAndNormalAt(double x, double y, double z, Vector3d normalToPack)
  {
     double heightAt = this.heightAt(x, y, z);
     this.surfaceNormalAt(x, y, z, normalToPack);
@@ -69,7 +71,8 @@ public class BoxTerrainObject implements TerrainObject3D, HeightMapWithNormals
     return heightAt;
  }
  
- public double heightAt(double x, double y, double z)
+ @Override
+public double heightAt(double x, double y, double z)
  {
    if ((x > boundingBox.getXMin()) && (x < boundingBox.getXMax()) && (y > boundingBox.getYMin()) && (y < boundingBox.getYMax()))
    {
@@ -128,6 +131,7 @@ public class BoxTerrainObject implements TerrainObject3D, HeightMapWithNormals
       surfaceNormalAt(x, y, z, normal);
    }
 
+   @Override
    public boolean checkIfInside(double x, double y, double z, Point3d intersectionToPack, Vector3d normalToPack)
    {
       intersectionToPack.setX(x);    // Go Straight Up for now...
@@ -139,6 +143,7 @@ public class BoxTerrainObject implements TerrainObject3D, HeightMapWithNormals
       return (z < intersectionToPack.getZ());
    }
 
+   @Override
    public boolean isClose(double x, double y, double z)
    {
       return (boundingBox.isXYInside(x, y));
@@ -165,11 +170,13 @@ public class BoxTerrainObject implements TerrainObject3D, HeightMapWithNormals
       return boundingBox.getYMax();
    }
 
+   @Override
    public BoundingBox3d getBoundingBox()
    {
       return boundingBox;
    }
 
+   @Override
    public HeightMapWithNormals getHeightMapIfAvailable()
    {
       return this;

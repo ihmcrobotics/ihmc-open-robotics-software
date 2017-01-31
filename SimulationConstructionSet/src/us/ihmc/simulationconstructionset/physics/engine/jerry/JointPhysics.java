@@ -1888,6 +1888,7 @@ public abstract class JointPhysics< J extends Joint>
     */
    protected abstract void jointDependentChangeVelocity(double delta_qd);
 
+   @Override
    public String toString() {
 
       StringBuffer retBuffer = new StringBuffer();

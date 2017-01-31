@@ -112,6 +112,7 @@ public class Link implements java.io.Serializable
     *
     * @return String representation of this link.
     */
+   @Override
    public String toString()
    {
       StringBuffer retBuffer = new StringBuffer();

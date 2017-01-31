@@ -1,5 +1,6 @@
 package us.ihmc.graphicsDescription;
 
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.net.URL;
 import java.util.ArrayList;
@@ -20,12 +21,7 @@ import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.exceptions.ShapeNotSupportedException;
 import us.ihmc.graphicsDescription.input.SelectedListener;
-import us.ihmc.graphicsDescription.instructions.Graphics3DAddExtrusionInstruction;
-import us.ihmc.graphicsDescription.instructions.Graphics3DAddHeightMapInstruction;
-import us.ihmc.graphicsDescription.instructions.Graphics3DAddMeshDataInstruction;
-import us.ihmc.graphicsDescription.instructions.Graphics3DAddModelFileInstruction;
-import us.ihmc.graphicsDescription.instructions.Graphics3DInstruction;
-import us.ihmc.graphicsDescription.instructions.Graphics3DPrimitiveInstruction;
+import us.ihmc.graphicsDescription.instructions.*;
 import us.ihmc.graphicsDescription.instructions.primitives.Graphics3DIdentityInstruction;
 import us.ihmc.graphicsDescription.instructions.primitives.Graphics3DRotateInstruction;
 import us.ihmc.graphicsDescription.instructions.primitives.Graphics3DScaleInstruction;
@@ -463,12 +459,12 @@ public class Graphics3DObject
       addArrow(length, YoAppearance.Blue(), arrowAppearance);
    }
 
-   public Graphics3DAddMeshDataInstruction add(Shape3d shape)
+   public PrimitiveGraphics3DInstruction add(Shape3d shape)
    {
       return add(shape, DEFAULT_APPEARANCE);
    }
 
-   public Graphics3DAddMeshDataInstruction add(Shape3d shape, AppearanceDefinition app)
+   public PrimitiveGraphics3DInstruction add(Shape3d shape, AppearanceDefinition app)
    {
       if (shape instanceof Sphere3d)
       {
@@ -513,13 +509,13 @@ public class Graphics3DObject
     * Again, x, y and z are red, white and blue.
     * <br /><br /><img src="doc-files/LinkGraphics.addCube1.jpg">
     *
-    * @param lx length of the cube in the x direction.
-    * @param ly length of the cube in the y direction.
-    * @param lz length of the cube in the z direction.
+    * @param lengthX length of the cube in the x direction.
+    * @param widthY width of the cube in the y direction.
+    * @param heightZ height of the cube in the z direction.
     */
-   public Graphics3DAddMeshDataInstruction addCube(double lx, double ly, double lz)
+   public CubeGraphics3DInstruction addCube(double lengthX, double widthY, double heightZ)
    {
-      return addCube(lx, ly, lz, DEFAULT_APPEARANCE, null);
+      return addCube(lengthX, widthY, heightZ, DEFAULT_APPEARANCE, null);
    }
 
    /**
@@ -534,33 +530,35 @@ public class Graphics3DObject
     * <br /><br /><img src="doc-files/LinkGraphics.addCube2.jpg">
     *
     *
-    * @param lx length of the cube in the x direction.
-    * @param ly length of the cube in the y direction.
-    * @param lz length of the cube in the z direction.
+    * @param lengthX length of the cube in the x direction.
+    * @param widthY width of the cube in the y direction.
+    * @param heightZ height of the cube in the z direction.
     * @param cubeApp Appearance of the cube.  See {@link YoAppearance YoAppearance} for implementations.
     * @param textureFace Whether or not to texture map each of the 6 faces. Only relevant if the AppearanceDefinition is a texture map.
     * @return
     */
-   public Graphics3DAddMeshDataInstruction addCube(double lx, double ly, double lz, AppearanceDefinition cubeApp, boolean[] textureFaces)
+   public CubeGraphics3DInstruction addCube(double lengthX, double widthY, double heightZ, AppearanceDefinition cubeApp, boolean[] textureFaces)
    {
-      MeshDataHolder meshData = MeshDataGenerator.Cube(lx, ly, lz, false, textureFaces);
-      return addMeshData(meshData, cubeApp);
+      return addCube(lengthX, widthY, heightZ, false, cubeApp, textureFaces);
    }
 
-   public Graphics3DAddMeshDataInstruction addCube(double lx, double ly, double lz, AppearanceDefinition cubeApp)
+   public CubeGraphics3DInstruction addCube(double lengthX, double widthY, double heightZ, AppearanceDefinition cubeAppearance)
    {
-      return addCube(lx, ly, lz, cubeApp, null);
+      return addCube(lengthX, widthY, heightZ, false, cubeAppearance, null);
    }
 
-   public Graphics3DAddMeshDataInstruction addCube(double lx, double ly, double lz, boolean centered, AppearanceDefinition cubeApp, boolean[] textureFaces)
+   public CubeGraphics3DInstruction addCube(double lengthX, double widthY, double heightZ, boolean centeredInTheCenter, AppearanceDefinition cubeApp, boolean[] textureFaces)
    {
-      MeshDataHolder meshData = MeshDataGenerator.Cube(lx, ly, lz, centered, textureFaces);
-      return addMeshData(meshData, cubeApp);
+      CubeGraphics3DInstruction cubeInstruction = new CubeGraphics3DInstruction(lengthX, widthY, heightZ, centeredInTheCenter);
+      cubeInstruction.setTextureFaces(textureFaces);
+      cubeInstruction.setAppearance(cubeApp);
+      graphics3DInstructions.add(cubeInstruction);
+      return cubeInstruction;
    }
 
-   public Graphics3DAddMeshDataInstruction addCube(double lx, double ly, double lz, boolean centered, AppearanceDefinition cubeApp)
+   public CubeGraphics3DInstruction addCube(double lengthX, double widthY, double heightZ, boolean centered, AppearanceDefinition cubeApp)
    {
-      return addCube(lx, ly, lz, centered, cubeApp, null);
+      return addCube(lengthX, widthY, heightZ, centered, cubeApp, null);
    }
 
    /**
@@ -575,13 +573,13 @@ public class Graphics3DObject
     * Again, x, y and z are red, white and blue.
     * <br /><br /><img src="doc-files/LinkGraphics.addWedge1.jpg">
     *
-    * @param lx length of the wedge in the x direction.
-    * @param ly length of the wedge in the y direction.
-    * @param lz length of the wedge in the z direction.
+    * @param lengthX length of the wedge in the x direction.
+    * @param widthY width of the wedge in the y direction.
+    * @param heightZ height of the wedge in the z direction.
     */
-   public Graphics3DAddMeshDataInstruction addWedge(double lx, double ly, double lz)
+   public WedgeGraphics3DInstruction addWedge(double lengthX, double widthY, double heightZ)
    {
-      return addWedge(lx, ly, lz, DEFAULT_APPEARANCE);
+      return addWedge(lengthX, widthY, heightZ, DEFAULT_APPEARANCE);
    }
 
    /**
@@ -597,15 +595,17 @@ public class Graphics3DObject
     * Again, x, y and z are red, white and blue.
     * <br /><br /><img src="doc-files/LinkGraphics.addWedge2.jpg">
     *
-    * @param lx length of the wedge in the x direction.
-    * @param ly length of the wedge in the y direction.
-    * @param lz length of the wedge in the z direction.
-    * @param wedgeApp Appearance of the wedge.  See {@link YoAppearance YoAppearance} for implementations.
+    * @param lengthX length of the wedge in the x direction.
+    * @param widthY width of the wedge in the y direction.
+    * @param heightZ height of the wedge in the z direction.
+    * @param wedgeAppearance Appearance of the wedge.  See {@link YoAppearance YoAppearance} for implementations.
     */
-   public Graphics3DAddMeshDataInstruction addWedge(double lx, double ly, double lz, AppearanceDefinition wedgeApp)
+   public WedgeGraphics3DInstruction addWedge(double lengthX, double widthY, double heightZ, AppearanceDefinition wedgeAppearance)
    {
-      MeshDataHolder meshData = MeshDataGenerator.Wedge(lx, ly, lz);
-      return addMeshData(meshData, wedgeApp);
+      WedgeGraphics3DInstruction wedgeGraphics3DInstruction = new WedgeGraphics3DInstruction(lengthX, widthY, heightZ);
+      wedgeGraphics3DInstruction.setAppearance(wedgeAppearance);
+      graphics3DInstructions.add(wedgeGraphics3DInstruction);
+      return wedgeGraphics3DInstruction;
    }
 
    /**
@@ -621,7 +621,7 @@ public class Graphics3DObject
     *
     * @param radius radius of the new sphere in meters.
     */
-   public Graphics3DAddMeshDataInstruction addSphere(double radius)
+   public SphereGraphics3DInstruction addSphere(double radius)
    {
       return addSphere(radius, DEFAULT_APPEARANCE);
    }
@@ -638,37 +638,46 @@ public class Graphics3DObject
     * <br /><br /><img src="doc-files/LinkGraphics.addSphere2.jpg">
     *
     * @param radius radius of the new sphere in meters.
-    * @param sphereApp Appearance to be used with the new sphere.  See {@link YoAppearance YoAppearance} for implementations.
+    * @param sphereAppearance Appearance to be used with the new sphere.  See {@link YoAppearance YoAppearance} for implementations.
     */
-   public Graphics3DAddMeshDataInstruction addSphere(double radius, AppearanceDefinition sphereApp)
+   public SphereGraphics3DInstruction addSphere(double radius, AppearanceDefinition sphereAppearance)
    {
-      MeshDataHolder meshData = MeshDataGenerator.Sphere(radius, RESOLUTION, RESOLUTION);
-
-      return addMeshData(meshData, sphereApp);
+      SphereGraphics3DInstruction instruction = new SphereGraphics3DInstruction(radius, RESOLUTION);
+      instruction.setAppearance(sphereAppearance);
+      graphics3DInstructions.add(instruction);
+      return instruction;
    }
 
-   public Graphics3DAddMeshDataInstruction addCapsule(double radius, double height)
+   public CapsuleGraphics3DInstruction addCapsule(double radius, double height)
    {
       return addCapsule(radius, height, DEFAULT_APPEARANCE);
    }
 
-   public Graphics3DAddMeshDataInstruction addCapsule(double radius, double height, AppearanceDefinition capsuleAppearance)
+   public CapsuleGraphics3DInstruction addCapsule(double radius, double height, AppearanceDefinition capsuleAppearance)
    {
-      MeshDataHolder meshData = MeshDataGenerator.Capsule(height - 2.0 * radius, radius, radius, radius, CAPSULE_RESOLUTION, CAPSULE_RESOLUTION);
-      return addMeshData(meshData, capsuleAppearance);
+      CapsuleGraphics3DInstruction capsuleInstruction = new CapsuleGraphics3DInstruction(height - 2.0, radius, radius, radius, CAPSULE_RESOLUTION);
+      capsuleInstruction.setAppearance(capsuleAppearance);
+      graphics3DInstructions.add(capsuleInstruction);
+      return capsuleInstruction;
    }
 
    public Graphics3DAddMeshDataInstruction addMeshData(MeshDataHolder meshData, AppearanceDefinition meshAppearance)
    {
       // The subsequent classes do not accept null, just create an empty mesh in that case
+      Graphics3DAddMeshDataInstruction instruction = createMeshDataInstruction(meshData, meshAppearance);
+      graphics3DInstructions.add(instruction);
+
+      return instruction;
+   }
+
+   public static Graphics3DAddMeshDataInstruction createMeshDataInstruction(MeshDataHolder meshData, AppearanceDefinition meshAppearance)
+   {
       if (meshData == null)
       {
          meshData = new MeshDataHolder(new Point3f[0], new TexCoord2f[0], new int[0], new Vector3f[0]);
          meshData.setName("nullMesh");
       }
       Graphics3DAddMeshDataInstruction instruction = new Graphics3DAddMeshDataInstruction(meshData, meshAppearance);
-      graphics3DInstructions.add(instruction);
-
       return instruction;
    }
 
@@ -687,7 +696,7 @@ public class Graphics3DObject
     * @param yRadius y direction radius in meters
     * @param zRadius z direction radius in meters
     */
-   public Graphics3DAddMeshDataInstruction addEllipsoid(double xRadius, double yRadius, double zRadius)
+   public EllipsoidGraphics3DInstruction addEllipsoid(double xRadius, double yRadius, double zRadius)
    {
       return addEllipsoid(xRadius, yRadius, zRadius, DEFAULT_APPEARANCE);
    }
@@ -706,13 +715,14 @@ public class Graphics3DObject
     * @param xRadius x direction radius in meters
     * @param yRadius y direction radius in meters
     * @param zRadius z direction radius in meters
-    * @param ellipsoidApp Appearance to be used with the new ellipsoid.  See {@link YoAppearance YoAppearance} for implementations.
+    * @param ellipsoidAppearance Appearance to be used with the new ellipsoid.  See {@link YoAppearance YoAppearance} for implementations.
     */
-   public Graphics3DAddMeshDataInstruction addEllipsoid(double xRadius, double yRadius, double zRadius, AppearanceDefinition ellipsoidApp)
+   public EllipsoidGraphics3DInstruction addEllipsoid(double xRadius, double yRadius, double zRadius, AppearanceDefinition ellipsoidAppearance)
    {
-      MeshDataHolder meshData = MeshDataGenerator.Ellipsoid(xRadius, yRadius, zRadius, RESOLUTION, RESOLUTION);
-
-      return addMeshData(meshData, ellipsoidApp);
+      EllipsoidGraphics3DInstruction ellipsoidInstruction = new EllipsoidGraphics3DInstruction(xRadius, yRadius, zRadius, RESOLUTION);
+      ellipsoidInstruction.setAppearance(ellipsoidAppearance);
+      graphics3DInstructions.add(ellipsoidInstruction);
+      return ellipsoidInstruction;
    }
 
    /**
@@ -729,7 +739,7 @@ public class Graphics3DObject
     * @param height cylinder height in meters.
     * @param radius cylinder radius in meters.
     */
-   public Graphics3DAddMeshDataInstruction addCylinder(double height, double radius)
+   public CylinderGraphics3DInstruction addCylinder(double height, double radius)
    {
       return addCylinder(height, radius, DEFAULT_APPEARANCE);
    }
@@ -749,11 +759,12 @@ public class Graphics3DObject
     * @param radius cylinder radius in meters.
     * @param cylApp Appearance to be used with the new cylinder.  See {@link YoAppearance YoAppearance} for implementations.
     */
-   public Graphics3DAddMeshDataInstruction addCylinder(double height, double radius, AppearanceDefinition cylApp)
+   public CylinderGraphics3DInstruction addCylinder(double height, double radius, AppearanceDefinition cylApp)
    {
-      MeshDataHolder meshData = MeshDataGenerator.Cylinder(radius, height, RESOLUTION);
-
-      return addMeshData(meshData, cylApp);
+      CylinderGraphics3DInstruction cylinderInstruction = new CylinderGraphics3DInstruction(radius, height, RESOLUTION);
+      cylinderInstruction.setAppearance(cylApp);
+      graphics3DInstructions.add(cylinderInstruction);
+      return cylinderInstruction;
    }
 
    /**
@@ -770,7 +781,7 @@ public class Graphics3DObject
     * @param height cone height in meters.
     * @param radius cone radius in meters.
     */
-   public Graphics3DAddMeshDataInstruction addCone(double height, double radius)
+   public ConeGraphics3DInstruction addCone(double height, double radius)
    {
       return addCone(height, radius, DEFAULT_APPEARANCE);
    }
@@ -790,11 +801,12 @@ public class Graphics3DObject
     * @param radius cone radius in meters.
     * @param coneApp Appearance to be used with the new cone.  See {@link YoAppearance YoAppearance} for implementations.
     */
-   public Graphics3DAddMeshDataInstruction addCone(double height, double radius, AppearanceDefinition coneApp)
+   public ConeGraphics3DInstruction addCone(double height, double radius, AppearanceDefinition coneApp)
    {
-      MeshDataHolder meshData = MeshDataGenerator.Cone(height, radius, RESOLUTION);
-
-      return addMeshData(meshData, coneApp);
+      ConeGraphics3DInstruction coneInstruction = new ConeGraphics3DInstruction(height, radius, RESOLUTION);
+      coneInstruction.setAppearance(coneApp);
+      graphics3DInstructions.add(coneInstruction);
+      return coneInstruction;
    }
 
    /**
@@ -816,7 +828,7 @@ public class Graphics3DObject
     * @param tx x direction width of the top in meters
     * @param ty y direction width of the top in meters
     */
-   public Graphics3DAddMeshDataInstruction addGenTruncatedCone(double height, double bx, double by, double tx, double ty)
+   public TruncatedConeGraphics3DInstruction addGenTruncatedCone(double height, double bx, double by, double tx, double ty)
    {
       return addGenTruncatedCone(height, bx, by, tx, ty, DEFAULT_APPEARANCE);
    }
@@ -843,11 +855,12 @@ public class Graphics3DObject
     * @param ty y direction width of the top in meters
     * @param coneApp Appearance to be used with the new truncated cone.  See {@link YoAppearance YoAppearance} for implementations.
     */
-   public Graphics3DAddMeshDataInstruction addGenTruncatedCone(double height, double bx, double by, double tx, double ty, AppearanceDefinition coneApp)
+   public TruncatedConeGraphics3DInstruction addGenTruncatedCone(double height, double bx, double by, double tx, double ty, AppearanceDefinition coneApp)
    {
-      MeshDataHolder meshData = MeshDataGenerator.GenTruncatedCone(height, bx, by, tx, ty, RESOLUTION);
-
-      return addMeshData(meshData, coneApp);
+      TruncatedConeGraphics3DInstruction truncatedConeInstruction = new TruncatedConeGraphics3DInstruction(height, bx, by, tx, ty, RESOLUTION);
+      truncatedConeInstruction.setAppearance(coneApp);
+      graphics3DInstructions.add(truncatedConeInstruction);
+      return truncatedConeInstruction;
    }
 
    /**
@@ -867,7 +880,7 @@ public class Graphics3DObject
     * @param yRad radius of the ellipsoid in the y direction.
     * @param zRad radius of the ellipsoid in the z direction.
     */
-   public Graphics3DAddMeshDataInstruction addHemiEllipsoid(double xRad, double yRad, double zRad)
+   public HemiEllipsoidGraphics3DInstruction addHemiEllipsoid(double xRad, double yRad, double zRad)
    {
       return addHemiEllipsoid(xRad, yRad, zRad, DEFAULT_APPEARANCE);
    }
@@ -890,11 +903,12 @@ public class Graphics3DObject
     * @param zRad radius of the ellipsoid in the z direction.
     * @param hEApp Appearance to be used with the new hemi ellipsoid.  See {@link YoAppearance YoAppearance} for implementations.
     */
-   public Graphics3DAddMeshDataInstruction addHemiEllipsoid(double xRad, double yRad, double zRad, AppearanceDefinition hEApp)
+   public HemiEllipsoidGraphics3DInstruction addHemiEllipsoid(double xRad, double yRad, double zRad, AppearanceDefinition hEApp)
    {
-      MeshDataHolder meshData = MeshDataGenerator.HemiEllipsoid(xRad, yRad, zRad, RESOLUTION, RESOLUTION);
-
-      return addMeshData(meshData, hEApp);
+      HemiEllipsoidGraphics3DInstruction hemiEllipsoidInstruction = new HemiEllipsoidGraphics3DInstruction(xRad, yRad, zRad, RESOLUTION);
+      hemiEllipsoidInstruction.setAppearance(hEApp);
+      graphics3DInstructions.add(hemiEllipsoidInstruction);
+      return hemiEllipsoidInstruction;
    }
 
    /**
@@ -919,7 +933,7 @@ public class Graphics3DObject
     * @param majorRadius Distance from the origin to the center of the torus
     * @param minorRadius Distance from the center of the torus to the walls on either side.
     */
-   public Graphics3DAddMeshDataInstruction addArcTorus(double startAngle, double endAngle, double majorRadius, double minorRadius)
+   public ArcTorusGraphics3DInstruction addArcTorus(double startAngle, double endAngle, double majorRadius, double minorRadius)
    {
       return addArcTorus(startAngle, endAngle, majorRadius, minorRadius, DEFAULT_APPEARANCE);
    }
@@ -948,12 +962,13 @@ public class Graphics3DObject
     * @param minorRadius Distance from the center of the torus to the walls on either side.
     * @param arcTorusApp Appearance to be used with the new arctorus.  See {@link YoAppearance YoAppearance} for implementations.
     */
-   public Graphics3DAddMeshDataInstruction addArcTorus(double startAngle, double endAngle, double majorRadius, double minorRadius,
+   public ArcTorusGraphics3DInstruction addArcTorus(double startAngle, double endAngle, double majorRadius, double minorRadius,
          AppearanceDefinition arcTorusApp)
    {
-      MeshDataHolder meshData = MeshDataGenerator.ArcTorus(startAngle, endAngle, majorRadius, minorRadius, RESOLUTION);
-
-      return addMeshData(meshData, arcTorusApp);
+      ArcTorusGraphics3DInstruction arcTorusInstruction = new ArcTorusGraphics3DInstruction(startAngle, endAngle, majorRadius, minorRadius, RESOLUTION);
+      arcTorusInstruction.setAppearance(arcTorusApp);
+      graphics3DInstructions.add(arcTorusInstruction);
+      return arcTorusInstruction;
    }
 
    /**
@@ -975,7 +990,7 @@ public class Graphics3DObject
     * @param lz Height of the cube in meters. (z direction)
     * @param lh Height of the pyramids in meters.
     */
-   public Graphics3DAddMeshDataInstruction addPyramidCube(double lx, double ly, double lz, double lh)
+   public PyramidCubeGraphics3DInstruction addPyramidCube(double lx, double ly, double lz, double lh)
    {
       return addPyramidCube(lx, ly, lz, lh, DEFAULT_APPEARANCE);
    }
@@ -1000,13 +1015,15 @@ public class Graphics3DObject
     * @param lh Height of the pyramids in meters.
     * @param cubeApp Appearance to be used with the new pyramid cube.  See {@link YoAppearance YoAppearance} for implementations.
     */
-   public Graphics3DAddMeshDataInstruction addPyramidCube(double lx, double ly, double lz, double lh, AppearanceDefinition cubeApp)
+   public PyramidCubeGraphics3DInstruction addPyramidCube(double lx, double ly, double lz, double lh, AppearanceDefinition cubeApp)
    {
-      MeshDataHolder meshData = MeshDataGenerator.PyramidCube(lx, ly, lz, lh);
-      return addMeshData(meshData, cubeApp);
+      PyramidCubeGraphics3DInstruction pyradmidCubeInstruction = new PyramidCubeGraphics3DInstruction(lx, ly, lz, lh);
+      pyradmidCubeInstruction.setAppearance(cubeApp);
+      graphics3DInstructions.add(pyradmidCubeInstruction);
+      return pyradmidCubeInstruction;
    }
 
-   public Graphics3DAddMeshDataInstruction addPolygon(ArrayList<Point3d> polygonPoints)
+   public PolygonGraphics3DInstruction addPolygon(ArrayList<Point3d> polygonPoints)
    {
       return addPolygon(polygonPoints, DEFAULT_APPEARANCE);
    }
@@ -1020,11 +1037,11 @@ public class Graphics3DObject
     * @param polygonPoints ArrayList containing the points.
     * @param yoAppearance Appearance to be used with the new polygon.  See {@link YoAppearance YoAppearance} for implementations.
     */
-   public Graphics3DAddMeshDataInstruction addPolygon(ArrayList<Point3d> polygonPoints, AppearanceDefinition yoAppearance)
+   public PolygonGraphics3DInstruction addPolygon(ArrayList<Point3d> polygonPoints, AppearanceDefinition yoAppearance)
    {
-      MeshDataHolder meshData = MeshDataGenerator.Polygon(polygonPoints);
-
-      return addMeshData(meshData, yoAppearance);
+      PolygonGraphics3DInstruction graphicsInstruction = new PolygonGraphics3DInstruction(polygonPoints);
+      graphicsInstruction.setAppearance(yoAppearance);
+      return graphicsInstruction;
    }
 
    /**
@@ -1035,18 +1052,23 @@ public class Graphics3DObject
     * @param convexPolygon2d ConvexPolygon2d containing the points.
     * @param yoAppearance Appearance to be used with the new polygon.  See {@link YoAppearance YoAppearance} for implementations.
     */
-   public Graphics3DAddMeshDataInstruction addPolygon(ConvexPolygon2d convexPolygon2d, AppearanceDefinition yoAppearance)
+   public PolygonGraphics3DInstruction addPolygon(ConvexPolygon2d convexPolygon2d, AppearanceDefinition yoAppearance)
    {
-      MeshDataHolder meshData = MeshDataGenerator.Polygon(convexPolygon2d);
+      ArrayList<Point3d> polygonPoints = new ArrayList<Point3d>();
+      int numPoints = convexPolygon2d.getNumberOfVertices();
 
-      return addMeshData(meshData, yoAppearance);
+      for (int i = 0; i < numPoints; i++)
+      {
+         Point2d planarPoint = convexPolygon2d.getVertex(i);
+         polygonPoints.add(new Point3d(planarPoint.getX(), planarPoint.getY(), 0.0));
+      }
+
+      return addPolygon(polygonPoints, yoAppearance);
    }
 
-   public Graphics3DAddMeshDataInstruction addPolygon(ConvexPolygon2d convexPolygon2d)
+   public PolygonGraphics3DInstruction addPolygon(ConvexPolygon2d convexPolygon2d)
    {
-      MeshDataHolder meshData = MeshDataGenerator.Polygon(convexPolygon2d);
-
-      return addMeshData(meshData, DEFAULT_APPEARANCE);
+      return addPolygon(convexPolygon2d, DEFAULT_APPEARANCE);
    }
 
    /** Adds the PlanarRegionsList transforming from the current coordinate system.
@@ -1141,26 +1163,36 @@ public class Graphics3DObject
       return addPolygon(polygonPoints, yoAppearance);
    }
 
-   public Graphics3DAddMeshDataInstruction addExtrudedPolygon(ConvexPolygon2d convexPolygon2d, double height)
+   public ExtrudedPolygonGraphics3DInstruction addExtrudedPolygon(ConvexPolygon2d convexPolygon2d, double height)
    {
       return addExtrudedPolygon(convexPolygon2d, height, DEFAULT_APPEARANCE);
    }
 
-   public Graphics3DAddMeshDataInstruction addExtrudedPolygon(ConvexPolygon2d convexPolygon2d, double height, AppearanceDefinition appearance)
+   public ExtrudedPolygonGraphics3DInstruction addExtrudedPolygon(ConvexPolygon2d convexPolygon2d, double height, AppearanceDefinition appearance)
    {
-      MeshDataHolder meshData = MeshDataGenerator.ExtrudedPolygon(convexPolygon2d, height);
-      return addMeshData(meshData, appearance);
+      ArrayList<Point2d> polygonPoints = new ArrayList<Point2d>();
+      for (int i = 0; i < convexPolygon2d.getNumberOfVertices(); i++)
+      {
+         polygonPoints.add(convexPolygon2d.getVertex(i));
+      }
+
+      ExtrudedPolygonGraphics3DInstruction extrudedPolygonInstruction = new ExtrudedPolygonGraphics3DInstruction(polygonPoints, height);
+      extrudedPolygonInstruction.setAppearance(appearance);
+      graphics3DInstructions.add(extrudedPolygonInstruction);
+      return extrudedPolygonInstruction;
    }
 
-   public Graphics3DAddMeshDataInstruction addExtrudedPolygon(List<Point2d> polygonPoints, double height)
+   public ExtrudedPolygonGraphics3DInstruction addExtrudedPolygon(List<Point2d> polygonPoints, double height)
    {
       return addExtrudedPolygon(polygonPoints, height, DEFAULT_APPEARANCE);
    }
 
-   public Graphics3DAddMeshDataInstruction addExtrudedPolygon(List<Point2d> polygonPoints, double height, AppearanceDefinition appearance)
+   public ExtrudedPolygonGraphics3DInstruction addExtrudedPolygon(List<Point2d> polygonPoints, double height, AppearanceDefinition appearance)
    {
-      MeshDataHolder meshData = MeshDataGenerator.ExtrudedPolygon(polygonPoints, height);
-      return addMeshData(meshData, appearance);
+      ExtrudedPolygonGraphics3DInstruction graphicsInstruction = new ExtrudedPolygonGraphics3DInstruction(polygonPoints, height);
+      graphicsInstruction.setAppearance(appearance);
+      graphics3DInstructions.add(graphicsInstruction);
+      return graphicsInstruction;
    }
 
    /**

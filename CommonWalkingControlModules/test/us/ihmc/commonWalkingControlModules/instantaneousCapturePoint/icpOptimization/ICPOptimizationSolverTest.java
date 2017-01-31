@@ -686,7 +686,12 @@ public class ICPOptimizationSolverTest extends ICPOptimizationSolver
          return 1;
       }
 
-      @Override public double getFootstepWeight()
+      @Override public double getForwardFootstepWeight()
+      {
+         return 10.0;
+      }
+
+      @Override public double getLateralFootstepWeight()
       {
          return 10.0;
       }
@@ -696,7 +701,12 @@ public class ICPOptimizationSolverTest extends ICPOptimizationSolver
          return 0.0001;
       }
 
-      @Override public double getFeedbackWeight()
+      @Override public double getFeedbackForwardWeight()
+      {
+         return 2.0;
+      }
+
+      @Override public double getFeedbackLateralWeight()
       {
          return 2.0;
       }
@@ -791,12 +801,22 @@ public class ICPOptimizationSolverTest extends ICPOptimizationSolver
          return 1.0;
       }
 
-      @Override public double getMaxCMPForwardExit()
+      @Override public double getDoubleSupportMaxCMPForwardExit()
       {
          return 0.05;
       }
 
-      @Override public double getMaxCMPLateralExit()
+      @Override public double getDoubleSupportMaxCMPLateralExit()
+      {
+         return 0.03;
+      }
+
+      @Override public double getSingleSupportMaxCMPForwardExit()
+      {
+         return 0.05;
+      }
+
+      @Override public double getSingleSupportMaxCMPLateralExit()
       {
          return 0.03;
       }

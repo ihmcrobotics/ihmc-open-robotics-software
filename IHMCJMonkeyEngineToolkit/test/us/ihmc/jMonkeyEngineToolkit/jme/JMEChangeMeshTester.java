@@ -29,7 +29,8 @@ public class JMEChangeMeshTester extends SimpleApplication
       Graphics3DObject graphics = new Graphics3DObject();
       graphics.setChangeable(true);
       graphics.rotate(Math.PI/2.0, Axis.Z);
-      instruction = graphics.addEllipsoid(1.0, 1.0, 1.0, YoAppearance.Red());
+      int resolution = 24;
+      instruction = new Graphics3DAddMeshDataInstruction(MeshDataGenerator.Ellipsoid(1.0, 1.0, 1.0, resolution, resolution), YoAppearance.Red());
       JMEGraphicsObject graphicsObject = new JMEGraphicsObject(this, new JMEAssetLocator(assetManager), graphics);
 
       node = graphicsObject.getNode();

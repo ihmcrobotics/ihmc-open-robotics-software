@@ -110,11 +110,13 @@ public class RotatableRampTerrainObject implements TerrainObject3D, HeightMapWit
       return new Point2d(pointToTransform.getX(),pointToTransform.getY());
    }
 
+   @Override
    public Graphics3DObject getLinkGraphics()
    {
       return linkGraphics;
    }
 
+   @Override
    public double heightAndNormalAt(double x, double y, double z, Vector3d normalToPack)
    {
       double heightAt = heightAt(x, y, z);
@@ -122,6 +124,7 @@ public class RotatableRampTerrainObject implements TerrainObject3D, HeightMapWit
       return heightAt;
    }
    
+   @Override
    public double heightAt(double xGlobal, double yGlobal, double zGlobal)
    {
       Point2d localPoint = transformToLocalCoordinates(new Point2d(xGlobal,yGlobal));
@@ -217,6 +220,7 @@ public class RotatableRampTerrainObject implements TerrainObject3D, HeightMapWit
    }
    
    
+   @Override
    public boolean checkIfInside(double x, double y, double z, Point3d intersectionToPack, Vector3d normalToPack)
    {
       closestIntersectionTo(x, y, z, intersectionToPack);
@@ -226,16 +230,19 @@ public class RotatableRampTerrainObject implements TerrainObject3D, HeightMapWit
    }
 
 
+   @Override
    public boolean isClose(double x, double y, double z)
    {
       return boundingBox.isXYInside(x, y);
    }
 
+   @Override
    public BoundingBox3d getBoundingBox()
    {
       return boundingBox;
    }
 
+   @Override
    public HeightMapWithNormals getHeightMapIfAvailable()
    {
       return this;

@@ -62,6 +62,7 @@ public class RobotFreezeFramer implements RobotController
       this.doFreezeFrame.set(doFreezeFrame);
    }
 
+   @Override
    public void doControl()
    {
       if (doFreezeFrame.getBooleanValue() && (robot.getTime() > nextFreezeTime.getDoubleValue()))
@@ -74,20 +75,24 @@ public class RobotFreezeFramer implements RobotController
 
 
 
+   @Override
    public YoVariableRegistry getYoVariableRegistry()
    {
       return registry;
    }
 
+   @Override
    public String getName()
    {
       return "RobotFreezeFramer";
    }
    
+   @Override
    public void initialize()
    {      
    }
 
+   @Override
    public String getDescription()
    {
       return getName();

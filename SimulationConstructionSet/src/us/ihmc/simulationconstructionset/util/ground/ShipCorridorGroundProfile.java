@@ -45,6 +45,7 @@ public class ShipCorridorGroundProfile implements GroundProfile3D, HeightMapWith
       this.boundingBox = new BoundingBox3d(xMin, yMin, zMin, xMax, yMax, zMax);
 	}
 
+   @Override
    public double heightAndNormalAt(double x, double y, double z, Vector3d normalToPack)
    {
       double heightAt = heightAt(x, y, z);
@@ -52,7 +53,8 @@ public class ShipCorridorGroundProfile implements GroundProfile3D, HeightMapWith
       return heightAt;
    }
    
-	public double heightAt(double x, double y, double z)
+	@Override
+   public double heightAt(double x, double y, double z)
 	{ 
 		double height;
 
@@ -88,7 +90,8 @@ public class ShipCorridorGroundProfile implements GroundProfile3D, HeightMapWith
 		return height;
 	}
 
-	public boolean isClose(double x, double y, double z)
+	@Override
+   public boolean isClose(double x, double y, double z)
 	{
 		return true;
 	}
@@ -202,6 +205,7 @@ public class ShipCorridorGroundProfile implements GroundProfile3D, HeightMapWith
    private Vector3d tempVector = new Vector3d();
    private Vector3d tempVectorTwo = new Vector3d();
 	
+   @Override
    public boolean checkIfInside(double x, double y, double z, Point3d intersectionToPack, Vector3d normalToPack)
    {
       closestIntersectionTo(x, y, z, intersectionToPack);
@@ -240,11 +244,13 @@ public class ShipCorridorGroundProfile implements GroundProfile3D, HeightMapWith
 	   return wallInclination;
 	}
 	
+   @Override
    public BoundingBox3d getBoundingBox()
    {
       return boundingBox;
    }
 
+   @Override
    public HeightMapWithNormals getHeightMapIfAvailable()
    {
       return this;

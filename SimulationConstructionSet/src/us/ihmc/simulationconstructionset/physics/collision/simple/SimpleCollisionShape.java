@@ -25,6 +25,7 @@ public class SimpleCollisionShape implements CollisionShape
       return isGround;
    }
    
+   @Override
    public void setIsGround(boolean isGround)
    {
       this.isGround = isGround;

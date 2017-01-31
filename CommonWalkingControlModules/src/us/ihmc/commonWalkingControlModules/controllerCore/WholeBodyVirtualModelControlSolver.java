@@ -354,7 +354,7 @@ public class WholeBodyVirtualModelControlSolver
 
       tmpWrench.setToZero(accelerationVector.getBodyFrame(), accelerationVector.getExpressedInFrame());
 
-      conversionInertias.get(controlledBody).computeDynamicWrenchInBodyCoordinates(tmpWrench, accelerationVector, tmpTwist);
+      conversionInertias.get(controlledBody).computeDynamicWrenchInBodyCoordinates(accelerationVector, tmpTwist, tmpWrench);
 
       tmpWrench.changeBodyFrameAttachedToSameBody(controlledBody.getBodyFixedFrame());
       tmpWrench.changeFrame(ReferenceFrame.getWorldFrame());

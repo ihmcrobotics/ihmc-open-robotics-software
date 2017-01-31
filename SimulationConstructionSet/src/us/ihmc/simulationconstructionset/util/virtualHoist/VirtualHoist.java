@@ -136,6 +136,7 @@ public class VirtualHoist implements RobotController
       return teepeeLocation.getZ();
    }
 
+   @Override
    public void doControl()
    {
       // For each external force point, figure out the force vector and apply it:
@@ -203,20 +204,24 @@ public class VirtualHoist implements RobotController
       }
    }
 
+   @Override
    public YoVariableRegistry getYoVariableRegistry()
    {
       return registry;
    }
 
+   @Override
    public String getName()
    {
       return "VirtualHoist";
    }
 
+   @Override
    public void initialize()
    {
    }
 
+   @Override
    public String getDescription()
    {
       return getName();

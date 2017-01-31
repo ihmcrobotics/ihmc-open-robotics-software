@@ -58,6 +58,7 @@ public class ExternalForcePoint extends KinematicPoint
       impulse = new YoFrameVector(name + "_p", "", ReferenceFrame.getWorldFrame(), registry);
    }
 
+   @Override
    public String toString()
    {
       return ("name: " + name + "x: " + getX() + ", y: " + getY() + ", z: " + getZ());
@@ -68,6 +69,7 @@ public class ExternalForcePoint extends KinematicPoint
       return ((force.getX() == 0.0) && (force.getY() == 0.0) && (force.getZ() == 0.0) && (moment.getX() == 0.0) && (moment.getY() == 0.0) && (moment.getZ() == 0.0));
    }
 
+   @Override
    public void reset()
    {
       super.reset();

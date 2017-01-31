@@ -48,6 +48,7 @@ public class YoEntryBoxTest
       {
       }
 
+      @Override
       public void attachRobot(Robot robot)
       {
          registry = new YoVariableRegistry("controllerRegistry");
@@ -64,25 +65,30 @@ public class YoEntryBoxTest
          time = robot.getYoTime();
       }
 
+      @Override
       public void initialize()
       {
       }
 
+      @Override
       public YoVariableRegistry getYoVariableRegistry()
       {
          return registry;
       }
 
+      @Override
       public String getName()
       {
          return name;
       }
 
+      @Override
       public String getDescription()
       {
          return name;
       }
 
+      @Override
       public void doControl()
       {
          switch (badGreekVariable.getEnumValue())

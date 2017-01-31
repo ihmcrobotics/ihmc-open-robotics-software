@@ -183,6 +183,7 @@ public class CameraPropertiesDialog extends JDialog implements ActionListener
       parentContainer.repaint();    // This is a horrible way to get the graphs to repaint...
    }
 
+   @Override
    public void actionPerformed(ActionEvent event)
    {
       if (event.getSource() == cancelButton)
@@ -562,6 +563,7 @@ public class CameraPropertiesDialog extends JDialog implements ActionListener
 
       }
 
+      @Override
       public void actionPerformed(ActionEvent event)
       {
          updateTracking();
@@ -741,6 +743,7 @@ public class CameraPropertiesDialog extends JDialog implements ActionListener
          this.addActionListener(this);
       }
 
+      @Override
       public void actionPerformed(ActionEvent actionEvent)
       {
          CameraPropertiesHolder cameraPropertiesHolder = cameraHolder.getCameraPropertiesForActiveCamera();
@@ -766,6 +769,7 @@ public class CameraPropertiesDialog extends JDialog implements ActionListener
          this.addActionListener(this);
       }
 
+      @Override
       public void actionPerformed(ActionEvent actionEvent)
       {
          CameraPropertiesHolder cameraPropertiesHolder = cameraHolder.getCameraPropertiesForActiveCamera();

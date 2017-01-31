@@ -22,7 +22,7 @@ public class HarmonographSimulation
       simulationConstructionSet.setDT(simulateDT, recordFrequency);
       
       HarmonographPaperJPanel harmonographPaperJPanel = robot.getHarmonographPaperJPanel();
-      simulationConstructionSet.addExtraJpanel(harmonographPaperJPanel, "Harmonograph Paper");
+      simulationConstructionSet.addExtraJpanel(harmonographPaperJPanel, "Harmonograph Paper", false);
       
       Thread thread = new Thread(simulationConstructionSet);
       thread.start();

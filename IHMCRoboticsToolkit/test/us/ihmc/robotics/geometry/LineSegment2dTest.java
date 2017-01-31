@@ -474,6 +474,70 @@ public class LineSegment2dTest
       assertEquals(1.0, line1.percentageAlongLineSegment(new Point2d(10.0, 0.0)), 0.001);
       assertEquals(0.5, line1.percentageAlongLineSegment(new Point2d(0.0, 5.0)), 0.001);
 
+      Random random = new Random(23424L);
+
+      // Test on line segment
+      for (int i = 0; i < 1000; i++)
+      {
+         Point2d lineSegmentStart = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
+         Point2d lineSegmentEnd = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
+         LineSegment2d lineSegment = new LineSegment2d(lineSegmentStart, lineSegmentEnd);
+
+         Point2d pointOnLineSegment = new Point2d();
+
+         // Test between end points
+         double expectedPercentage = RandomTools.generateRandomDouble(random, 0.0, 1.0);
+         pointOnLineSegment.interpolate(lineSegmentStart, lineSegmentEnd, expectedPercentage);
+         double actualPercentage = lineSegment.percentageAlongLineSegment(pointOnLineSegment);
+         assertEquals(expectedPercentage, actualPercentage, Epsilons.ONE_TRILLIONTH);
+
+         // Test before end points
+         expectedPercentage = RandomTools.generateRandomDouble(random, -10.0, 0.0);
+         pointOnLineSegment.interpolate(lineSegmentStart, lineSegmentEnd, expectedPercentage);
+         actualPercentage = lineSegment.percentageAlongLineSegment(pointOnLineSegment);
+         assertEquals(expectedPercentage, actualPercentage, Epsilons.ONE_TRILLIONTH);
+
+         // Test after end points
+         expectedPercentage = RandomTools.generateRandomDouble(random, 1.0, 10.0);
+         pointOnLineSegment.interpolate(lineSegmentStart, lineSegmentEnd, expectedPercentage);
+         actualPercentage = lineSegment.percentageAlongLineSegment(pointOnLineSegment);
+         assertEquals(expectedPercentage, actualPercentage, Epsilons.ONE_TRILLIONTH);
+      }
+
+      // Test off line segment
+      for (int i = 0; i < 1000; i++)
+      {
+         Point2d lineSegmentStart = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
+         Point2d lineSegmentEnd = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
+         LineSegment2d lineSegment = new LineSegment2d(lineSegmentStart, lineSegmentEnd);
+
+         Point2d pointOffLineSegment = new Point2d();
+         Vector2d lineSegmentDirection = new Vector2d();
+         lineSegmentDirection.sub(lineSegmentEnd, lineSegmentStart);
+         Vector2d orthogonal = GeometryTools.getPerpendicularVector(lineSegmentDirection);
+         orthogonal.normalize();
+
+         // Test between end points
+         double expectedPercentage = RandomTools.generateRandomDouble(random, 0.0, 1.0);
+         pointOffLineSegment.interpolate(lineSegmentStart, lineSegmentEnd, expectedPercentage);
+         pointOffLineSegment.scaleAdd(RandomTools.generateRandomDouble(random, 10.0), orthogonal, pointOffLineSegment);
+         double actualPercentage = lineSegment.percentageAlongLineSegment(pointOffLineSegment);
+         assertEquals(expectedPercentage, actualPercentage, Epsilons.ONE_TRILLIONTH);
+
+         // Test before end points
+         expectedPercentage = RandomTools.generateRandomDouble(random, -10.0, 0.0);
+         pointOffLineSegment.interpolate(lineSegmentStart, lineSegmentEnd, expectedPercentage);
+         pointOffLineSegment.scaleAdd(RandomTools.generateRandomDouble(random, 10.0), orthogonal, pointOffLineSegment);
+         actualPercentage = lineSegment.percentageAlongLineSegment(pointOffLineSegment);
+         assertEquals(expectedPercentage, actualPercentage, Epsilons.ONE_TRILLIONTH);
+
+         // Test after end points
+         expectedPercentage = RandomTools.generateRandomDouble(random, 1.0, 10.0);
+         pointOffLineSegment.interpolate(lineSegmentStart, lineSegmentEnd, expectedPercentage);
+         pointOffLineSegment.scaleAdd(RandomTools.generateRandomDouble(random, 10.0), orthogonal, pointOffLineSegment);
+         actualPercentage = lineSegment.percentageAlongLineSegment(pointOffLineSegment);
+         assertEquals(expectedPercentage, actualPercentage, Epsilons.ONE_TRILLIONTH);
+      }
    }
 
 // @Test(timeout=300000)
@@ -1105,7 +1169,40 @@ public class LineSegment2dTest
       projectedPoint = line1.orthogonalProjectionCopy(origionalPoint);
       assertEquals(new Point2d(5.0, 0.0), projectedPoint);
 
+      Random random = new Random(2342L);
 
+      for (int i = 0; i < 1000; i++)
+      {
+         Point2d lineSegmentStart = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
+         Point2d lineSegmentEnd = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
+         LineSegment2d lineSegment = new LineSegment2d(lineSegmentStart, lineSegmentEnd);
+         Vector2d orthogonal = new Vector2d();
+         orthogonal.sub(lineSegmentEnd, lineSegmentStart);
+         GeometryTools.getPerpendicularVector(orthogonal, orthogonal);
+         orthogonal.normalize();
+         Point2d expectedProjection = new Point2d();
+         Point2d testPoint = new Point2d();
+
+         // Between end points
+         expectedProjection.interpolate(lineSegmentStart, lineSegmentEnd, RandomTools.generateRandomDouble(random, 0.0, 1.0));
+         testPoint.scaleAdd(RandomTools.generateRandomDouble(random, 10.0), orthogonal, expectedProjection);
+         Point2d actualProjection = lineSegment.orthogonalProjectionCopy(testPoint);
+         JUnitTools.assertTuple2dEquals(expectedProjection, actualProjection, Epsilons.ONE_TRILLIONTH);
+
+         // Before end points
+         expectedProjection.interpolate(lineSegmentStart, lineSegmentEnd, RandomTools.generateRandomDouble(random, -10.0, 0.0));
+         testPoint.scaleAdd(RandomTools.generateRandomDouble(random, 10.0), orthogonal, expectedProjection);
+         expectedProjection.set(lineSegmentStart);
+         actualProjection = lineSegment.orthogonalProjectionCopy(testPoint);
+         JUnitTools.assertTuple2dEquals(expectedProjection, actualProjection, Epsilons.ONE_TRILLIONTH);
+
+         // After end points
+         expectedProjection.interpolate(lineSegmentStart, lineSegmentEnd, RandomTools.generateRandomDouble(random, 1.0, 10.0));
+         testPoint.scaleAdd(RandomTools.generateRandomDouble(random, 10.0), orthogonal, expectedProjection);
+         expectedProjection.set(lineSegmentEnd);
+         actualProjection = lineSegment.orthogonalProjectionCopy(testPoint);
+         JUnitTools.assertTuple2dEquals(expectedProjection, actualProjection, Epsilons.ONE_TRILLIONTH);
+      }
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)

@@ -48,16 +48,14 @@ public class LineSegment1d
       return new LineSegment1d(intersectionMin, intersectionMax);
    }
 
-   // FIXME Is missing the case when the other is longer than this line segment
    public boolean isOverlappingInclusive(LineSegment1d other)
    {
-      return isBetweenEndpointsInclusive(other.endpoint1) || isBetweenEndpointsInclusive(other.endpoint2);
+      return isBetweenEndpointsInclusive(other.endpoint1) || isBetweenEndpointsInclusive(other.endpoint2) || other.isBetweenEndpointsInclusive(endpoint1) || other.isBetweenEndpointsInclusive(endpoint2);
    }
 
-   // FIXME Is missing the case when the other is longer than this line segment
    public boolean isOverlappingExclusive(LineSegment1d other)
    {
-      return isBetweenEndpointsExclusive(other.endpoint1) || isBetweenEndpointsExclusive(other.endpoint2);
+      return isBetweenEndpointsExclusive(other.endpoint1) || isBetweenEndpointsExclusive(other.endpoint2) || other.isBetweenEndpointsExclusive(endpoint1) || other.isBetweenEndpointsExclusive(endpoint2);
    }
 
    public boolean isBetweenEndpointsInclusive(LineSegment1d other)
@@ -241,8 +239,8 @@ public class LineSegment1d
    public LineSegment3d toLineSegment3d(Point3d zero3d, Vector3d direction3d)
    {
       LineSegment3d lineSegment3d = new LineSegment3d();
-      lineSegment3d.getPointA().scaleAdd(endpoint1, direction3d, zero3d);
-      lineSegment3d.getPointB().scaleAdd(endpoint2, direction3d, zero3d);
+      lineSegment3d.getFirstEndpoint().scaleAdd(endpoint1, direction3d, zero3d);
+      lineSegment3d.getSecondEndpoint().scaleAdd(endpoint2, direction3d, zero3d);
       return lineSegment3d;
    }
 
@@ -260,6 +258,12 @@ public class LineSegment1d
       lineSegment2d.getFirstEndpoint().scaleAdd(endpoint1, direction2d, zero2d);
       lineSegment2d.getSecondEndpoint().scaleAdd(endpoint2, direction2d, zero2d);
       return lineSegment2d;
+   }
+
+   @Override
+   public String toString()
+   {
+      return "(" + endpoint1 + ")-(" + endpoint2 + ")";
    }
 
    private void updateDirection()

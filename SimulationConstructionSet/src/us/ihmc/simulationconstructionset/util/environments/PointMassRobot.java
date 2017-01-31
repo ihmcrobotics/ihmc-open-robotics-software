@@ -17,8 +17,6 @@ import us.ihmc.robotics.Axis;
 
 public class PointMassRobot extends Robot
 {
-   private static final long serialVersionUID = 471055183219410116L;
-
    private static final double DEFAULT_MASS = 10.0;
    private static final double DEFAULT_RADIUS = 0.02;
    private static final double DEFAULT_FORCE_VECTOR_SCALE = 1.0 / 50.0;

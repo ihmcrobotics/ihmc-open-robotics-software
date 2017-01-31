@@ -110,6 +110,7 @@ public class ContactableCylinderRobot extends ContactableRobot
       }
    }
 
+   @Override
    public synchronized boolean isPointOnOrInside(Point3d pointInWorldToCheck)
    {
       afterRootJointFrame.update();
@@ -119,11 +120,13 @@ public class ContactableCylinderRobot extends ContactableRobot
       return insideOrOnSurface;
    }
 
+   @Override
    public boolean isClose(Point3d pointInWorldToCheck)
    {
       return isPointOnOrInside(pointInWorldToCheck);
    }
 
+   @Override
    public synchronized void closestIntersectionAndNormalAt(Point3d intersectionToPack, Vector3d normalToPack, Point3d pointInWorldToCheck)
    {
       afterRootJointFrame.update();

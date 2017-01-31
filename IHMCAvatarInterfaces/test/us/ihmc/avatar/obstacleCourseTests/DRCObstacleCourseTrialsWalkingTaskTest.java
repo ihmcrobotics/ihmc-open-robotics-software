@@ -11,11 +11,11 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisHeightTrajectoryMessage;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.BoundingBox3d;
@@ -111,7 +111,7 @@ public abstract class DRCObstacleCourseTrialsWalkingTaskTest implements MultiRob
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
-      String scriptName = "scripts/ExerciseAndJUnitScripts/TwoCinderBlocksStepOn_LeftFootTest.xml";
+      String scriptName = "scripts/ExerciseAndJUnitScripts/TwoCinderBlocksStepOn_LeftFootTest_slow.xml";
 
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.IN_FRONT_OF_TWO_HIGH_CINDERBLOCKS;
 
@@ -127,15 +127,7 @@ public abstract class DRCObstacleCourseTrialsWalkingTaskTest implements MultiRob
       InputStream scriptInputStream = getClass().getClassLoader().getResourceAsStream(scriptName);
       drcSimulationTestHelper.loadScriptFile(scriptInputStream, fullRobotModel.getSoleFrame(RobotSide.LEFT));
 
-      SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
-      DoubleYoVariable swingTime = (DoubleYoVariable) simulationConstructionSet.getVariable("swingTime");
-      DoubleYoVariable transferTime = (DoubleYoVariable) simulationConstructionSet.getVariable("transferTime");
-
       ThreadTools.sleep(0);
-
-      swingTime.set(1.6);
-      transferTime.set(0.8);
-
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.5);
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(14.5);
 

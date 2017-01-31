@@ -23,11 +23,13 @@ public class DataBufferPropertiesDialogGenerator implements DataBufferProperties
       this.listener = listener;
    }
 
+   @Override
    public void constructDialog()
    {
       new DataBufferPropertiesDialog(parentContainer, frame, dataBuffer, listener);
    }
 
+   @Override
    public void closeAndDispose()
    {
       dataBuffer = null;

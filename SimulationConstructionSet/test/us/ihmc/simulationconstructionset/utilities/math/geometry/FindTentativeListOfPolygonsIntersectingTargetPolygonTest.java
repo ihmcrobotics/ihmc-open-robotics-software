@@ -459,6 +459,7 @@ public class FindTentativeListOfPolygonsIntersectingTargetPolygonTest
          JFrame f = new JFrame("Plotter Panel");
          f.addWindowListener(new WindowAdapter()
          {
+            @Override
             public void windowClosing(WindowEvent e)
             {
                System.exit(0);
