@@ -695,6 +695,16 @@ public class Plotter implements PlotterInterface
       setScale(getPlotterWidthPixels() / viewRangeInX, getPlotterHeightPixels() / viewRangeInY);
    }
    
+   public void setViewRangeX(double viewRangeInX)
+   {
+      setScale(getPlotterWidthPixels() / viewRangeInX, metersToPixels.getY());
+   }
+   
+   public void setViewRangeY(double viewRangeInY)
+   {
+      setScale(metersToPixels.getX(), getPlotterHeightPixels() / viewRangeInY);
+   }
+   
    public void setViewRange(double minimumViewRange)
    {
       double smallestDimension;
@@ -772,6 +782,16 @@ public class Plotter implements PlotterInterface
       {
          return metersToPixels.getY() * getPlotterHeightPixels();
       }
+   }
+
+   public double getViewRangeX()
+   {
+      return metersToPixels.getX() * getPlotterWidthPixels();
+   }
+
+   public double getViewRangeY()
+   {
+      return metersToPixels.getY() * getPlotterWidthPixels();
    }
 
    public void setDrawHistory(boolean drawHistory)
