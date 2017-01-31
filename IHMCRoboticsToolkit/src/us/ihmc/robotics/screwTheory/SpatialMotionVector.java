@@ -516,7 +516,7 @@ public abstract class SpatialMotionVector
     * @param epsilon  the threshold value  
     * @return true or false
     */
-   public boolean epsilonEquals(SpatialAccelerationVector spatialMotionVector, double epsilon)
+   public boolean epsilonEquals(SpatialMotionVector spatialMotionVector, double epsilon)
    {
       checkReferenceFramesMatch(spatialMotionVector);
       
@@ -526,7 +526,7 @@ public abstract class SpatialMotionVector
       return true;
    }
 
-   public void checkReferenceFramesMatch(SpatialAccelerationVector spatialMotionVector)
+   public void checkReferenceFramesMatch(SpatialMotionVector spatialMotionVector)
    {
       checkReferenceFramesMatch(spatialMotionVector.bodyFrame, spatialMotionVector.baseFrame, spatialMotionVector.expressedInFrame);
    }
