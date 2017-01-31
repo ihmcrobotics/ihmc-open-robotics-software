@@ -235,6 +235,14 @@ public abstract class ICPOptimizationParameters
    }
 
    /**
+    * Represents the minimum time in transfer before reaching the next entry CMP.
+    */
+   public double getMinimumTimeOnInitialCMPForBigAdjustment()
+   {
+      return 0.1;
+   }
+
+   /**
     * This method determines whether or not to use a discontinuous deadband.
     * If set true, the value of the deadband is not subtracted out, as normally done.
     */

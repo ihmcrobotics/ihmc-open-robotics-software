@@ -116,6 +116,7 @@ public class ICPOptimizationController
    private final DoubleYoVariable doubleSupportSplitFractionUnderDisturbance;
    private final DoubleYoVariable magnitudeForBigAdjustment;
    private final boolean useDifferentSplitRatioForBigAdjustment;
+   private final double minimumTimeOnInitialCMPForBigAdjustment;
 
    private final ICPOptimizationSolver solver;
    private final FootstepRecursionMultiplierCalculator footstepRecursionMultiplierCalculator;
@@ -207,6 +208,7 @@ public class ICPOptimizationController
       upcomingDoubleSupportSplitFraction.set(icpPlannerParameters.getDoubleSupportSplitFraction());
       magnitudeForBigAdjustment.set(icpOptimizationParameters.getMagnitudeForBigAdjustment());
       useDifferentSplitRatioForBigAdjustment = icpOptimizationParameters.useDifferentSplitRatioForBigAdjustment();
+      minimumTimeOnInitialCMPForBigAdjustment = icpOptimizationParameters.getMinimumTimeOnInitialCMPForBigAdjustment();
 
       footstepRecursionMultiplierCalculator = new FootstepRecursionMultiplierCalculator(icpPlannerParameters, exitCMPDurationInPercentOfStepTime,
             defaultDoubleSupportSplitFraction, upcomingDoubleSupportSplitFraction, maximumNumberOfFootstepsToConsider, registry);
@@ -449,7 +451,11 @@ public class ICPOptimizationController
             if (!doingBigAdjustment.getBooleanValue() && useDifferentSplitRatioForBigAdjustment)
             {
                doingBigAdjustment.set(true);
-               upcomingDoubleSupportSplitFraction.set(doubleSupportSplitFractionUnderDisturbance.getDoubleValue());
+
+               double minimumDoubleSupportSplitFraction = minimumTimeOnInitialCMPForBigAdjustment / doubleSupportDuration.getDoubleValue();
+               minimumDoubleSupportSplitFraction = Math.max(minimumDoubleSupportSplitFraction, doubleSupportSplitFractionUnderDisturbance.getDoubleValue());
+
+               upcomingDoubleSupportSplitFraction.set(minimumDoubleSupportSplitFraction);
                footstepRecursionMultiplierCalculator.computeRecursionMultipliers(numberOfFootstepsToConsider, isInTransfer.getBooleanValue(), localUseTwoCMPs, omega0);
             }
          }
