@@ -231,7 +231,7 @@ public abstract class ICPOptimizationParameters
     */
    public double getDoubleSupportSplitFractionForBigAdjustment()
    {
-      return 0.1;
+      return 0.25;
    }
 
    /**

@@ -151,14 +151,15 @@ public class ICPOptimizationSolutionHandler
          upcomingFootsteps.get(i).getPosition2d(upcomingFootstepLocation);
          ReferenceFrame deadbandFrame = upcomingFootsteps.get(i).getSoleReferenceFrame();
 
-         boolean footstepWasAdjusted = applyLocationDeadband(locationSolution, upcomingFootstepLocation, referenceFootstepLocations.get(i).getFrameTuple2d(), deadbandFrame,
+         FramePoint2d referenceFootstepLocation = referenceFootstepLocations.get(i).getFrameTuple2d();
+         boolean footstepWasAdjusted = applyLocationDeadband(locationSolution, upcomingFootstepLocation, referenceFootstepLocation, deadbandFrame,
                footstepDeadband.getDoubleValue(), footstepSolutionResolution.getDoubleValue());
 
          if (i == 0)
          {
             firstStepAdjusted = footstepWasAdjusted;
             footstepAdjustment.set(locationSolution);
-            footstepAdjustment.sub(upcomingFootstepLocation);
+            footstepAdjustment.sub(referenceFootstepLocation);
          }
 
          footstepSolutionsToPack.get(i).set(locationSolution);

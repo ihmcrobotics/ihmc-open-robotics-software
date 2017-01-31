@@ -119,8 +119,8 @@
         <swingHeight>0.0</swingHeight>
       </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
     </footstepDataList>
-    <swingTime>0.7</swingTime>
-    <transferTime>0.25</transferTime>
+    <defaultSwingTime>0.7</defaultSwingTime>
+    <defaultTransferTime>0.25</defaultTransferTime>
   </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage>
   <long>1457583856477</long>
   <us.ihmc.humanoidRobotics.communication.packets.walking.PauseWalkingMessage>
