@@ -12,8 +12,8 @@ import javax.vecmath.Vector3d;
 
 public class AtlasStepAdjustmentDemo
 {
-   private static StepScriptType stepScriptType = StepScriptType.STATIONARY_FAST;
-   private static TestType testType = TestType.FEEDBACK_ONLY;
+   private static StepScriptType stepScriptType = StepScriptType.FORWARD_FAST;
+   private static TestType testType = TestType.BIG_ADJUSTMENT;
    private static PushDirection pushDirection = PushDirection.OUTWARD;
 
    private static String forwardFastScript = "scripts/stepAdjustment_forwardWalkingFast.xml";
@@ -92,7 +92,7 @@ public class AtlasStepAdjustmentDemo
             switch(testType)
             {
             case BIG_ADJUSTMENT:
-               percentWeight = 0.64;
+               percentWeight = 1.1;
                break;
             case NO_ADJUSTMENT:
                percentWeight = 0.34;
@@ -111,7 +111,7 @@ public class AtlasStepAdjustmentDemo
             switch(testType)
             {
             case BIG_ADJUSTMENT:
-               percentWeight = 1.8;
+               percentWeight = 1.92;
                break;
             case NO_ADJUSTMENT:
                percentWeight = 0.3;
@@ -130,7 +130,7 @@ public class AtlasStepAdjustmentDemo
             switch(testType)
             {
             case BIG_ADJUSTMENT:
-               percentWeight = 1.4;
+               percentWeight = 1.65;
                break;
             case NO_ADJUSTMENT:
                percentWeight = 0.45;
@@ -156,7 +156,7 @@ public class AtlasStepAdjustmentDemo
             switch(testType)
             {
             case BIG_ADJUSTMENT:
-               percentWeight = 0.7;
+               percentWeight = 0.83;
                break;
             case NO_ADJUSTMENT:
                percentWeight = 0.4;
@@ -175,7 +175,7 @@ public class AtlasStepAdjustmentDemo
             switch(testType)
             {
             case BIG_ADJUSTMENT:
-               percentWeight = 1.15;
+               percentWeight = 1.22;
                break;
             case NO_ADJUSTMENT:
                percentWeight = 0.31;
@@ -194,7 +194,7 @@ public class AtlasStepAdjustmentDemo
             switch(testType)
             {
             case BIG_ADJUSTMENT:
-               percentWeight = 1.8;
+               percentWeight = 1.85;
                break;
             case NO_ADJUSTMENT:
                percentWeight = 0.25;
@@ -220,10 +220,10 @@ public class AtlasStepAdjustmentDemo
             switch(testType)
             {
             case BIG_ADJUSTMENT:
-               percentWeight = 0.29;
+               percentWeight = 0.98;
                break;
             case NO_ADJUSTMENT:
-               percentWeight = 0.18;
+               percentWeight = 0.2;
                break;
             case SPEED_UP_ONLY:
                percentWeight = 0.47;
@@ -258,7 +258,7 @@ public class AtlasStepAdjustmentDemo
             switch(testType)
             {
             case BIG_ADJUSTMENT:
-               percentWeight = 1.33;
+               percentWeight = 1.41;
                break;
             case NO_ADJUSTMENT:
                percentWeight = 0.2;
