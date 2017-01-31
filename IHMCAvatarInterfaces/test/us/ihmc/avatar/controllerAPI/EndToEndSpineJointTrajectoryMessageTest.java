@@ -26,6 +26,7 @@ import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
+import us.ihmc.robotics.math.QuaternionCalculus;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -285,6 +286,8 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
       private final BooleanYoVariable inconsistentControl = new BooleanYoVariable("InconsistentControl", registry);
       private final DoubleYoVariable maxSpeed = new DoubleYoVariable("maxSpeed", registry);
 
+      private final QuaternionCalculus quaternionCalculus = new QuaternionCalculus();
+
       public ControllerSpy(OneDoFJoint[] spineJoints, SimulationConstructionSet scs, double controllerDT)
       {
          this.spineJoints = spineJoints;
@@ -342,9 +345,9 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
             Quat4d previous = previousDesiredOrientation.getQuaternionCopy();
             Quat4d current = currentDesiredOrientation.getQuaternionCopy();
             Quat4d derivative = new Quat4d();
-            computeQDotByFiniteDifferenceCentral(previous, current, controllerDT, derivative);
+            quaternionCalculus.computeQDotByFiniteDifferenceCentral(previous, current, controllerDT, derivative);
             Vector3d angularVelocity = new Vector3d();
-            computeAngularVelocityInWorldFrame(current, derivative, angularVelocity);
+            quaternionCalculus.computeAngularVelocityInWorldFrame(current, derivative, angularVelocity);
             double speed = angularVelocity.length();
             if (speed > maxSpeed.getDoubleValue())
                maxSpeed.set(speed);
@@ -361,33 +364,6 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
       public boolean wasControlInconsistent()
       {
          return inconsistentControl.getBooleanValue();
-      }
-
-      private void computeQDotByFiniteDifferenceCentral(Quat4d qPrevious, Quat4d qNext, double dt, Quat4d qDotToPack)
-      {
-         qDotToPack.set(qNext);
-         qDotToPack.sub(qPrevious);
-         qDotToPack.scale(0.5 / dt);
-      }
-
-      private final Quat4d qConj = new Quat4d();
-      private void computeAngularVelocityInWorldFrame(Quat4d q, Quat4d qDot, Vector3d angularVelocityToPack)
-      {
-         qConj.conjugate(q);
-         multiply(qDot, qConj, angularVelocityToPack);
-         angularVelocityToPack.scale(2.0);
-      }
-
-      private final Quat4d pureQuatForMultiply = new Quat4d();
-      private void multiply(Quat4d q1, Quat4d q2, Vector3d resultToPack)
-      {
-         pureQuatForMultiply.mul(q1, q2);
-         setVectorFromPureQuaternion(pureQuatForMultiply, resultToPack);
-      }
-
-      private void setVectorFromPureQuaternion(Quat4d pureQuaternion, Vector3d vectorToPack)
-      {
-         vectorToPack.set(pureQuaternion.getX(), pureQuaternion.getY(), pureQuaternion.getZ());
       }
    }
 }
