@@ -59,7 +59,7 @@ public class SpineTrajectoryMessage extends Packet<SpineTrajectoryMessage> imple
    {
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
       jointTrajectoryMessages = new OneDoFJointTrajectoryMessage[numberOfJoints];
-      for (int i = 0; i < numberOfTrajectoryPoints; i++)
+      for (int i = 0; i < numberOfJoints; i++)
          jointTrajectoryMessages[i] = new OneDoFJointTrajectoryMessage(numberOfTrajectoryPoints);
    }
 
