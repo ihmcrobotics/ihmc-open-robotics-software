@@ -113,7 +113,7 @@ public class IHMCMOCAPLocalizationModule implements MocapRigidbodiesListener, Pa
          MocapRigidBody pelvisRigidBody = getPelvisRigidBody(listOfRigidbodies);
          mocapToPelvisFrameConverter.initialize(pelvisFrame, pelvisRigidBody);
       }
-      else
+      else if(latestRobotConfigurationData == null)
       {
          PrintTools.info("Waiting for robot configuration data");
          return;
@@ -193,7 +193,7 @@ public class IHMCMOCAPLocalizationModule implements MocapRigidbodiesListener, Pa
    
    @Override
    public void receivedPacket(RobotConfigurationData packet)
-   {
+   {      
       latestRobotConfigurationData = packet;
       
       FloatingInverseDynamicsJoint rootJoint = fullRobotModel.getRootJoint();
