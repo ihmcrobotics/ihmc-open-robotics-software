@@ -49,7 +49,6 @@ public class LidarScanLoggerUI extends Application
       view3dFactory.addCameraController();
       view3dFactory.addWorldCoordinateSystem(0.3);
       view3dFactory.attachSubSceneTo(centerPane);
-      view3dFactory.enableRequestFocusOnMouseClicked();
       view3dFactory.addNodeToView(lidarScanLogViewer.getRoot());
       
       primaryStage.setTitle(getClass().getSimpleName());

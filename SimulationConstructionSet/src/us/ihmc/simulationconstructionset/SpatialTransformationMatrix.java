@@ -13,6 +13,7 @@ public final class SpatialTransformationMatrix implements java.io.Serializable
    {
    }
 
+   @Override
    public String toString()
    {
       String ret = "R = " + R + "\n" + "r_Twidle = " + r_Twidle;

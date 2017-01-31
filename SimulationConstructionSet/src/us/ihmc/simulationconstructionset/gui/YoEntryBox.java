@@ -62,10 +62,11 @@ public class YoEntryBox extends JPanel implements MouseListener, ActionListener,
       JMenuItem delete = new JMenuItem("Delete Entry Box");
       delete.addActionListener(new ActionListener()
       {
+         @Override
          public void actionPerformed(ActionEvent e)
          {
             System.out.println(e);
-            YoVariable variable = activeEntryContainer.getVariable();
+            YoVariable<?> variable = activeEntryContainer.getVariable();
             if (variable != null)
                removeVariable(variable);
          }
@@ -82,7 +83,7 @@ public class YoEntryBox extends JPanel implements MouseListener, ActionListener,
       variableChangedListeners.add(listener);
    }
 
-   protected static void informVariableChangedListeners(YoVariable variableChanged)
+   protected static void informVariableChangedListeners(YoVariable<?> variableChanged)
    {
       for (int i = 0; i < variableChangedListeners.size(); i++)
       {
@@ -96,6 +97,7 @@ public class YoEntryBox extends JPanel implements MouseListener, ActionListener,
       variableChangedListeners.remove(listener);
    }
    
+   @Override
    public void actionPerformed(ActionEvent evt)
    {
 //    System.out.println("YoEntryBox: Hey, I haz an actionPerformed!");
@@ -103,7 +105,7 @@ public class YoEntryBox extends JPanel implements MouseListener, ActionListener,
    }
    
    
-   public void addVariable(YoVariable variable)
+   public void addVariable(YoVariable<?> variable)
    {
       if ((entryBoxArrayPanel != null) && entryBoxArrayPanel.isHoldingVariable(variable))
          return;
@@ -116,6 +118,7 @@ public class YoEntryBox extends JPanel implements MouseListener, ActionListener,
    }
 
 
+   @Override
    public void focusGained(FocusEvent evt)
    {
       if (activeEntryContainer.getVariable() != null)
@@ -126,6 +129,7 @@ public class YoEntryBox extends JPanel implements MouseListener, ActionListener,
          passOnFocusRequest();
    }
 
+   @Override
    public void focusLost(FocusEvent evt)
    {
       if (activeEntryContainer.isEventSource(this, evt))
@@ -160,28 +164,32 @@ public class YoEntryBox extends JPanel implements MouseListener, ActionListener,
       return selectedVariableHolder;
    }
 
-   public YoVariable getVariableInThisBox()
+   public YoVariable<?> getVariableInThisBox()
    {
       return activeEntryContainer.getVariable();
    }
 
-   public boolean isHoldingVariable(YoVariable v)
+   public boolean isHoldingVariable(YoVariable<?> v)
    {
       return (this.activeEntryContainer.getVariable() == v);
    }
 
+   @Override
    public void mouseClicked(MouseEvent evt)
    {
    }
 
+   @Override
    public void mouseEntered(MouseEvent evt)
    {
    }
 
+   @Override
    public void mouseExited(MouseEvent evt)
    {
    }
 
+   @Override
    public void mousePressed(MouseEvent evt)
    {
       this.requestFocus();
@@ -201,7 +209,7 @@ public class YoEntryBox extends JPanel implements MouseListener, ActionListener,
          {
             // YoVariable v = VarPanel.selectedVariable;
 
-            YoVariable v = selectedVariableHolder.getSelectedVariable();
+            YoVariable<?> v = selectedVariableHolder.getSelectedVariable();
             if (v != null)
                this.addVariable(v);
          }
@@ -228,6 +236,7 @@ public class YoEntryBox extends JPanel implements MouseListener, ActionListener,
    }
 
 
+   @Override
    public void mouseReleased(MouseEvent evt)
    {
    }
@@ -242,7 +251,7 @@ public class YoEntryBox extends JPanel implements MouseListener, ActionListener,
    }
 
 
-   public void removeVariable(YoVariable variable)
+   public void removeVariable(YoVariable<?> variable)
    {
       activeEntryContainer.removeVariable(variable);
 
@@ -259,7 +268,7 @@ public class YoEntryBox extends JPanel implements MouseListener, ActionListener,
       this.updateUI();
    }
 
-   @SuppressWarnings({"rawtypes", "unchecked"})
+   @SuppressWarnings({"rawtypes"})
    private void setContainerType(YoVariable variable)
    {
       if ((variable instanceof EnumYoVariable<?>) && USE_NEW_DISPLAY_FOR_ENUMS)
@@ -289,7 +298,7 @@ public class YoEntryBox extends JPanel implements MouseListener, ActionListener,
       updateActiveContainer();
    }
    
-   public void setVariableInThisBox(YoVariable variableInThisBox)
+   public void setVariableInThisBox(YoVariable<?> variableInThisBox)
    {
       setContainerType(variableInThisBox);
       activeEntryContainer.bindToVariable(this, variableInThisBox);
@@ -304,6 +313,7 @@ public class YoEntryBox extends JPanel implements MouseListener, ActionListener,
       
       EventDispatchThreadHelper.invokeLater(new Runnable()
       {
+         @Override
          public void run()
          {
             activeEntryContainer.update(thisEntryBox);            
@@ -311,7 +321,7 @@ public class YoEntryBox extends JPanel implements MouseListener, ActionListener,
    }
 
 
-   protected void updateToolTipText(YoVariable variableInThisBox)
+   protected void updateToolTipText(YoVariable<?> variableInThisBox)
    {
       String toolTip = variableInThisBox.getDescription();
       if ((toolTip == null) || toolTip.equals(""))
@@ -324,9 +334,10 @@ public class YoEntryBox extends JPanel implements MouseListener, ActionListener,
       return activeEntryContainer;
    }
 
+   @Override
    public void stateChanged(ChangeEvent e)
    {
-      YoVariable tmp = ((SelectedVariableHolder) e.getSource()).getSelectedVariable();
+      YoVariable<?> tmp = ((SelectedVariableHolder) e.getSource()).getSelectedVariable();
       if (activeEntryContainer.getVariable() != null)
       {
          if (activeEntryContainer.getVariable().equals(tmp))

@@ -10,17 +10,17 @@ import java.util.List;
 import javax.vecmath.Point2d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
-import us.ihmc.SdfLoader.SDFConversionsHelper;
-import us.ihmc.SdfLoader.SDFJointHolder;
-import us.ihmc.SdfLoader.SDFLinkHolder;
-import us.ihmc.SdfLoader.xmlDescription.Collision;
-import us.ihmc.SdfLoader.xmlDescription.SDFGeometry.Sphere;
-import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.modelFileLoaders.SdfLoader.GeneralizedSDFRobotModel;
+import us.ihmc.modelFileLoaders.ModelFileLoaderConversionsHelper;
+import us.ihmc.modelFileLoaders.SdfLoader.SDFJointHolder;
+import us.ihmc.modelFileLoaders.SdfLoader.SDFLinkHolder;
+import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.Collision;
+import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFGeometry.Sphere;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
+import us.ihmc.wholeBodyController.FootContactPoints;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
 public class ValkyrieContactPointParameters extends RobotContactPointParameters
@@ -31,13 +31,15 @@ public class ValkyrieContactPointParameters extends RobotContactPointParameters
 
    private final DRCRobotJointMap jointMap;
 
-   public ValkyrieContactPointParameters(DRCRobotJointMap jointMap)
+   public ValkyrieContactPointParameters(DRCRobotJointMap jointMap, FootContactPoints footContactPoints)
    {
       super(jointMap, footWidth, footLength, soleToAnkleFrameTransforms);
       this.jointMap = jointMap;
 
-      createDefaultControllerFootContactPoints();
-      createDefaultSimulationFootContactPoints();
+      if (footContactPoints == null)
+         createDefaultFootContactPoints();
+      else
+         createContactPoints(footContactPoints);
    }
 
    private void checkJointChildren(SDFJointHolder joint)
@@ -52,7 +54,7 @@ public class ValkyrieContactPointParameters extends RobotContactPointParameters
             System.out.println("Simulation contact '" + name + "'");
             Vector3d gcOffset = new Vector3d();
 
-            SDFConversionsHelper.poseToTransform(collision.getPose()).getTranslation(gcOffset);
+            ModelFileLoaderConversionsHelper.poseToTransform(collision.getPose()).getTranslation(gcOffset);
             link.getTransformFromModelReferenceFrame().transform(gcOffset);
             addSimulationContactPoint(joint.getName(), gcOffset);
          }
@@ -62,7 +64,7 @@ public class ValkyrieContactPointParameters extends RobotContactPointParameters
             System.out.println("Controller contact '" + name + "'");
             Vector3d gcOffset = new Vector3d();
 
-            SDFConversionsHelper.poseToTransform(collision.getPose()).getTranslation(gcOffset);
+            ModelFileLoaderConversionsHelper.poseToTransform(collision.getPose()).getTranslation(gcOffset);
             link.getTransformFromModelReferenceFrame().transform(gcOffset);
             boolean assigned = false;
 
@@ -142,11 +144,6 @@ public class ValkyrieContactPointParameters extends RobotContactPointParameters
             setControllerFootContactPoint(robotSide, footGroundContactPoints.get(robotSide));
          }
       }
-   }
-
-   public void addMoreFootContactPointsSimOnly(int nContactPointsX, int nContactPointsY, boolean edgePointsOnly)
-   {
-      addMoreSimulationFootContactPoints(nContactPointsX, nContactPointsY, edgePointsOnly, true);
    }
 
    @Override

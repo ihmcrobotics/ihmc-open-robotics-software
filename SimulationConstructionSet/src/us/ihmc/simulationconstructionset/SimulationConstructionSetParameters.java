@@ -121,6 +121,7 @@ public class SimulationConstructionSetParameters
       this.showYoGraphicObjects = showYoGraphicObjects;
    }
    
+   @Override
    public String toString()
    {
       String st = "showSplashScreen: " + showSplashScreen + "\n";    

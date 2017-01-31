@@ -29,6 +29,7 @@ public class StepUpGroundProfile extends GroundProfileFromHeightMap
       boundingBox = new BoundingBox3d(xMin, yMin, zMin, xMax, yMax, zMax);
    }
 
+   @Override
    public void closestIntersectionAndNormalAt(double x, double y, double z, Point3d intersection, Vector3d normal)
    {
       closestIntersectionTo(x, y, z, intersection);
@@ -41,6 +42,7 @@ public class StepUpGroundProfile extends GroundProfileFromHeightMap
       intersection.set(x, y, heightAt(x, y, z));
    }
 
+   @Override
    public double heightAndNormalAt(double x, double y, double z, Vector3d normalToPack)
    {
       double height = heightAt(x, y, z);
@@ -49,6 +51,7 @@ public class StepUpGroundProfile extends GroundProfileFromHeightMap
       return height;
    }
    
+   @Override
    public double heightAt(double x, double y, double z)
    {
       if (x > groundXStep)
@@ -62,6 +65,7 @@ public class StepUpGroundProfile extends GroundProfileFromHeightMap
       normal.set(0.0, 0.0, 1.0);
    }
    
+   @Override
    public BoundingBox3d getBoundingBox()
    {
       return boundingBox;

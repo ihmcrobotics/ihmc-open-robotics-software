@@ -26,6 +26,7 @@ public class HideShowViewportAction extends AbstractAction implements ViewportSe
       viewportSelector.registerViewportSelectorCommandListener(this);
    }
 
+   @Override
    public void actionPerformed(ActionEvent e)
    {
       if (viewportSelector.isViewportHidden())
@@ -38,6 +39,7 @@ public class HideShowViewportAction extends AbstractAction implements ViewportSe
       }
    }
 
+   @Override
    public void updateViewportStatus()
    {
       if (viewportSelector.isViewportHidden())

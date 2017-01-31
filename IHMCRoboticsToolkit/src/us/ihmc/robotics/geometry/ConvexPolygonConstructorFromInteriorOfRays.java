@@ -74,7 +74,7 @@ public class ConvexPolygonConstructorFromInteriorOfRays
             Point2d intersection = getAndRemovePointFromPool();
             if (intersection == null) throw new RuntimeException("intersection == null!");
             
-            boolean foundIntersection = ray.intersectionWith(intersection, previousRayToCheck);
+            boolean foundIntersection = ray.intersectionWith(previousRayToCheck, intersection);
             
             if (!foundIntersection)
             {
@@ -113,7 +113,7 @@ public class ConvexPolygonConstructorFromInteriorOfRays
                   previousIndexToCheck = evenMorePreviousIndexToCheck;
                   
                   intersection = getAndRemovePointFromPool();
-                  foundIntersection = ray.intersectionWith(intersection, evenMorePreviousRayToCheck);
+                  foundIntersection = ray.intersectionWith(evenMorePreviousRayToCheck, intersection);
                   if (!foundIntersection)
                   {
                      returnPointsToPool(intersectionPoints);

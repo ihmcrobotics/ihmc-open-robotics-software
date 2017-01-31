@@ -276,16 +276,19 @@ public class GUISideProtocolListener implements UserCommandNetworkReader
 
    
 
+   @Override
    public int readInt() throws IOException
    {
       return dataInputStream.readInt();
    }
 
+   @Override
    public float readFloat() throws IOException
    {
       return dataInputStream.readFloat();
    }
 
+   @Override
    public double readDouble() throws IOException
    {
       return dataInputStream.readDouble();

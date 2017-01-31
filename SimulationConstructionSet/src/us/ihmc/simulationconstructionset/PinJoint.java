@@ -115,6 +115,7 @@ public class PinJoint extends OneDegreeOfFreedomJoint
     * the graphics are also updated, however, this is nolonger the primary means of
     * graphics updates.
     */
+   @Override
    protected void update()
    {
       this.setPinTransform3D(this.jointTransform3D, physics.u_i, q.getDoubleValue());
@@ -150,6 +151,7 @@ public class PinJoint extends OneDegreeOfFreedomJoint
     *
     * @param tau torque to be applied at this joint.
     */
+   @Override
    public void setTau(double tau)
    {
       if (Double.isNaN(tau))
@@ -182,6 +184,7 @@ public class PinJoint extends OneDegreeOfFreedomJoint
     *
     * @return YoVariable representing the angle of this joint.
     */
+   @Override
    public DoubleYoVariable getQYoVariable()
    {
       return q;
@@ -203,6 +206,7 @@ public class PinJoint extends OneDegreeOfFreedomJoint
     *
     * @return YoVariable representing the current angle of this joint.
     */
+   @Override
    public DoubleYoVariable getQDYoVariable()
    {
       return qd;
@@ -224,6 +228,7 @@ public class PinJoint extends OneDegreeOfFreedomJoint
     *
     * @return YoVariable representing the current acceleration
     */
+   @Override
    public DoubleYoVariable getQDDYoVariable()
    {
       return qdd;
@@ -245,6 +250,7 @@ public class PinJoint extends OneDegreeOfFreedomJoint
     *
     * @return YoVariable representing the currently applied torque.
     */
+   @Override
    public DoubleYoVariable getTauYoVariable()
    {
       return tau;
@@ -261,6 +267,7 @@ public class PinJoint extends OneDegreeOfFreedomJoint
       return tau.getDoubleValue();
    }
 
+   @Override
    public void setQ(double q)
    {
       if (Double.isNaN(q))
@@ -271,6 +278,7 @@ public class PinJoint extends OneDegreeOfFreedomJoint
       this.q.set(q);
    }
 
+   @Override
    public void setQd(double qd)
    {
       if (Double.isNaN(qd))
@@ -281,6 +289,7 @@ public class PinJoint extends OneDegreeOfFreedomJoint
       this.qd.set(qd);
    }
 
+   @Override
    public void setQdd(double qdd)
    {
       if (Double.isNaN(qdd))
@@ -375,6 +384,7 @@ public class PinJoint extends OneDegreeOfFreedomJoint
     *
     * @param b_damp general damping constant for this joint
     */
+   @Override
    public void setDamping(double b_damp)
    {
       if (tauDamping == null)

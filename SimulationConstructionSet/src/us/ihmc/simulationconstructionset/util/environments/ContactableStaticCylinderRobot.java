@@ -8,14 +8,8 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.graphics3DDescription.Graphics3DObject;
-import us.ihmc.graphics3DDescription.appearance.AppearanceDefinition;
-import us.ihmc.graphics3DDescription.appearance.YoAppearanceRGBColor;
-import us.ihmc.graphics3DDescription.input.SelectedListener;
-import us.ihmc.graphics3DDescription.instructions.Graphics3DAddMeshDataInstruction;
-import us.ihmc.graphics3DDescription.structure.Graphics3DNode;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicVector;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.graphicsDescription.instructions.ConeGraphics3DInstruction;
+import us.ihmc.graphicsDescription.instructions.CylinderGraphics3DInstruction;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.simulationconstructionset.GroundContactPointGroup;
 import us.ihmc.simulationconstructionset.Link;
@@ -23,6 +17,14 @@ import us.ihmc.simulationconstructionset.NullJoint;
 import us.ihmc.tools.inputDevices.keyboard.Key;
 import us.ihmc.tools.inputDevices.keyboard.ModifierKeyInterface;
 import us.ihmc.robotics.geometry.shapes.FrameCylinder3d;
+import us.ihmc.graphicsDescription.Graphics3DObject;
+import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
+import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
+import us.ihmc.graphicsDescription.input.SelectedListener;
+import us.ihmc.graphicsDescription.instructions.Graphics3DAddMeshDataInstruction;
+import us.ihmc.graphicsDescription.structure.Graphics3DNode;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
@@ -30,8 +32,6 @@ import us.ihmc.robotics.referenceFrames.TransformReferenceFrame;
 
 public class ContactableStaticCylinderRobot extends ContactableStaticRobot implements SelectableObject, SelectedListener
 {
-   private static final long serialVersionUID = -9222718517284272299L;
-
    private static final double DEFAULT_MASS = 1000000.0;
 
    private final FrameCylinder3d cylinder;
@@ -48,7 +48,7 @@ public class ContactableStaticCylinderRobot extends ContactableStaticRobot imple
    private final double selectTransparency = 0.0;
    private final double unselectTransparency = 0.0;
    
-   private Graphics3DAddMeshDataInstruction cylinderGraphic;
+   private CylinderGraphics3DInstruction cylinderGraphic;
    
    private final ArrayList<SelectableObjectListener> selectedListeners = new ArrayList<SelectableObjectListener>();
 
@@ -133,22 +133,26 @@ public class ContactableStaticCylinderRobot extends ContactableStaticRobot imple
       transformToWorld.set(cylinderCenterTransformToWorld);
    }
 
+   @Override
    public synchronized boolean isPointOnOrInside(Point3d pointInWorldToCheck)
    {
       return cylinder.getCylinder3d().isInsideOrOnSurface(pointInWorldToCheck);
    }
    
+   @Override
    public boolean isClose(Point3d pointInWorldToCheck)
    {
       return isPointOnOrInside(pointInWorldToCheck);
    }
 
+   @Override
    public synchronized void closestIntersectionAndNormalAt(Point3d intersectionToPack, Vector3d normalToPack, Point3d pointInWorldToCheck)
    {
       cylinder.getCylinder3d().checkIfInside(pointInWorldToCheck, intersectionToPack, normalToPack);
    }
 
 
+   @Override
    public void selected(Graphics3DNode graphics3dNode, ModifierKeyInterface modifierKeyInterface, Point3d location, Point3d cameraLocation,
          Quat4d cameraRotation)
    {
@@ -157,6 +161,7 @@ public class ContactableStaticCylinderRobot extends ContactableStaticRobot imple
       select();
    }
 
+   @Override
    public void select()
    {
       unSelect(false);
@@ -166,12 +171,14 @@ public class ContactableStaticCylinderRobot extends ContactableStaticRobot imple
       notifySelectedListenersThisWasSelected(this);
    }
 
+   @Override
    public void unSelect(boolean reset)
    {
       cylinderGraphic.setAppearance(new YoAppearanceRGBColor(defaultColor, unselectTransparency));
       
    }
 
+   @Override
    public void addSelectedListeners(SelectableObjectListener selectedListener)
    {
       this.selectedListeners.add(selectedListener);

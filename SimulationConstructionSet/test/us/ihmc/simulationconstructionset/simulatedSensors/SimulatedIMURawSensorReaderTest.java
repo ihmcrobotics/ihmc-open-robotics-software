@@ -226,6 +226,7 @@ public class SimulatedIMURawSensorReaderTest
       private double r_imu_compass_y = 0.0;
       private double r_imu_compass_z = 0.0;  
 
+      @Override
       public void setOrientation(Matrix3d orientation, int imuIndex)
       {      
          r_imu_m00 = orientation.getM00();
@@ -241,6 +242,7 @@ public class SimulatedIMURawSensorReaderTest
          r_imu_m22 = orientation.getM22();
       }
 
+      @Override
       public void setAcceleration(Vector3d acceleration, int imuIndex)
       {
          r_imu_accel_x = acceleration.getX();
@@ -248,6 +250,7 @@ public class SimulatedIMURawSensorReaderTest
          r_imu_accel_z = acceleration.getZ();
       }
 
+      @Override
       public void setAngularVelocity(Vector3d gyroscope, int imuIndex)
       {
          r_imu_gyro_x = gyroscope.getX();
@@ -255,6 +258,7 @@ public class SimulatedIMURawSensorReaderTest
          r_imu_gyro_z = gyroscope.getZ();
       }
 
+      @Override
       public void setCompass(Vector3d compass, int imuIndex)
       {
          r_imu_compass_x = compass.getX();
@@ -262,6 +266,7 @@ public class SimulatedIMURawSensorReaderTest
          r_imu_compass_z = compass.getZ();
       }
 
+      @Override
       public void getOrientation(Matrix3d orientationToPack, int imuIndex)
       {
          orientationToPack.setM00(r_imu_m00);
@@ -277,16 +282,19 @@ public class SimulatedIMURawSensorReaderTest
          orientationToPack.setM22(r_imu_m22);
       }
 
+      @Override
       public void getAcceleration(Vector3d accelerationToPack, int imuIndex)
       {
          accelerationToPack.set(r_imu_accel_x, r_imu_accel_y, r_imu_accel_z);
       }
 
+      @Override
       public void getAngularVelocity(Vector3d angularVelocityToPack, int imuIndex)
       {
          angularVelocityToPack.set(r_imu_gyro_x, r_imu_gyro_y, r_imu_gyro_z);
       }
 
+      @Override
       public void getCompass(Vector3d compassToPack, int imuIndex)
       {
          compassToPack.set(r_imu_compass_x, r_imu_compass_y, r_imu_compass_z);

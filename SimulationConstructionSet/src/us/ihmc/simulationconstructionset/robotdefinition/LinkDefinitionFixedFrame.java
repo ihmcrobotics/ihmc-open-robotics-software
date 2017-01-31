@@ -3,8 +3,8 @@ package us.ihmc.simulationconstructionset.robotdefinition;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.graphics3DDescription.Graphics3DObject;
-import us.ihmc.graphics3DDescription.instructions.Graphics3DPrimitiveInstruction;
+import us.ihmc.graphicsDescription.Graphics3DObject;
+import us.ihmc.graphicsDescription.instructions.Graphics3DPrimitiveInstruction;
 import us.ihmc.tools.io.xml.XMLReaderUtility;
 
 public class LinkDefinitionFixedFrame
@@ -66,6 +66,7 @@ public class LinkDefinitionFixedFrame
       this.graphicsDefinition = graphicsDefinition;
    }
 
+   @Override
    public String toString()
    {
       String returnString = "\t<Link>\n";

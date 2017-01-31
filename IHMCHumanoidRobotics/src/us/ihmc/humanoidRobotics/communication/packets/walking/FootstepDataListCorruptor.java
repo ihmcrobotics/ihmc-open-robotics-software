@@ -25,7 +25,7 @@ public class FootstepDataListCorruptor
    
    public FootstepDataListMessage corruptDataList(FootstepDataListMessage footstepDataList)
    {
-      FootstepDataListMessage ret = new FootstepDataListMessage(footstepDataList.swingTime, footstepDataList.transferTime);
+      FootstepDataListMessage ret = new FootstepDataListMessage(footstepDataList.defaultSwingTime, footstepDataList.defaultTransferTime);
       
       for (FootstepDataMessage footstepData : footstepDataList)
       {

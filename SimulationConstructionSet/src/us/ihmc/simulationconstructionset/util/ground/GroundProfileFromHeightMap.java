@@ -3,9 +3,9 @@ package us.ihmc.simulationconstructionset.util.ground;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.graphics3DAdapter.GroundProfile3D;
-import us.ihmc.graphics3DAdapter.HeightMapWithNormals;
-import us.ihmc.graphics3DDescription.HeightMap;
+import us.ihmc.graphicsDescription.HeightMap;
+import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
+import us.ihmc.jMonkeyEngineToolkit.HeightMapWithNormals;
 import us.ihmc.robotics.dataStructures.HeightMapWithPoints;
 import us.ihmc.robotics.geometry.BoundingBox3d;
 
@@ -15,11 +15,13 @@ public abstract class GroundProfileFromHeightMap implements HeightMapWithNormals
    {
    }
 
+   @Override
    public boolean isClose(double x, double y, double z)
    {
       return this.getBoundingBox().isInside(x, y, z);
    }
 
+   @Override
    public boolean checkIfInside(double x, double y, double z, Point3d intersectionToPack, Vector3d normalToPack)
    {
       double heightAt = this.heightAndNormalAt(x, y, z, normalToPack);
@@ -34,6 +36,7 @@ public abstract class GroundProfileFromHeightMap implements HeightMapWithNormals
       intersectionToPack.set(x, y, heightAt);
    }
    
+   @Override
    public HeightMapWithNormals getHeightMapIfAvailable()
    {
       return this;

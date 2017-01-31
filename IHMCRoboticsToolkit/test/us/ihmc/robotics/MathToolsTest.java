@@ -1,7 +1,9 @@
 package us.ihmc.robotics;
 
-import static org.junit.Assert.*;
-import static us.ihmc.tools.continuousIntegration.IntegrationCategory.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -350,6 +352,20 @@ public class MathToolsTest
       double min = 1.0;
       double max = 0.9;
       MathTools.isInsideBoundsInclusive(5.0, min, max);
+   }
+   
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @Test(timeout = 30000)
+   public void testIsBoundedByMethods()
+   {
+      assertTrue(MathTools.isBoundedByExclusive(1.0, -1.0, 0.0));
+      assertTrue(MathTools.isBoundedByExclusive(-1.0, 1.0, 0.0));
+      assertFalse(MathTools.isBoundedByExclusive(-1.0, 1.0, -1.0));
+      assertFalse(MathTools.isBoundedByExclusive(-1.0, 1.0, 1.0));
+      assertTrue(MathTools.isBoundedByInclusive(-1.0, 1.0, -1.0));
+      assertTrue(MathTools.isBoundedByInclusive(-1.0, 1.0, 1.0));
+      assertTrue(MathTools.isPreciselyBoundedByInclusive(-1.0, 1.0, 1.0, 1e-12));
+      assertFalse(MathTools.isPreciselyBoundedByExclusive(-1.0, 1.0, 1.0, 1e-12));
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -737,70 +753,6 @@ public class MathToolsTest
    {
       Random rand = new Random();
       MathTools.lcm(rand.nextLong());
-   }
-
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
-   public void testArePointsInOrderColinear()
-   {
-      Point3d startPoint = new Point3d(0.0, 0.0, 0.0);
-      Point3d middlePoint = new Point3d(1.0, 1.0, 1.0);
-      Point3d endPoint = new Point3d(2.0, 2.0, 2.0);
-      boolean expectedReturn = true;
-      double epsilon = 1e-10;
-      boolean actualReturn = GeometryTools.arePointsInOrderAndColinear(startPoint, middlePoint, endPoint, epsilon);
-      assertEquals("return value", expectedReturn, actualReturn);
-
-      /** @todo fill in the test code */
-   }
-
-   @ContinuousIntegrationTest(estimatedDuration = 0.2)
-   @Test(timeout = 30000)
-   public void testArePointsInOrderColinear2()
-   {
-      Random random = new Random(100L);
-      double scale = 10.0;
-
-      // these points should pass
-      int numberOfTests = 1000;
-      for (int i = 0; i < numberOfTests; i++)
-      {
-         double x, y, z;
-         x = scale * (random.nextDouble() - 0.5);
-         y = scale * (random.nextDouble() - 0.5);
-         z = scale * (random.nextDouble() - 0.5);
-         Point3d start = new Point3d(x, y, z);
-
-         x = scale * (random.nextDouble() - 0.5);
-         y = scale * (random.nextDouble() - 0.5);
-         z = scale * (random.nextDouble() - 0.5);
-         Point3d end = new Point3d(x, y, z);
-
-         Vector3d startToEnd = new Vector3d(end);
-         startToEnd.sub(start);
-
-         double epsilon = 1e-10;
-         if (startToEnd.length() < epsilon)
-            continue;
-         else
-         {
-            for (int j = 0; j < numberOfTests; j++)
-            {
-               double percentAlong = 0.99 * random.nextDouble();
-               Vector3d adder = new Vector3d(startToEnd);
-               adder.scale(percentAlong);
-
-               Point3d middle = new Point3d(start);
-               middle.add(adder);
-
-               boolean inOrder = GeometryTools.arePointsInOrderAndColinear(start, middle, end, epsilon);
-               if (!inOrder)
-               {
-                  fail("FAILED: start=" + start + ", middle=" + middle + ", end=" + end);
-               }
-            }
-         }
-      }
    }
 
 // @DeployableTestMethod(estimatedDuration = 0.1)

@@ -34,21 +34,21 @@ import javax.vecmath.Tuple3d;
 
 import com.jme3.renderer.Camera;
 
-import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
-import us.ihmc.graphics3DAdapter.Graphics3DBackgroundScaleMode;
-import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
-import us.ihmc.graphics3DAdapter.camera.CaptureDevice;
-import us.ihmc.graphics3DAdapter.camera.RenderedSceneHandler;
-import us.ihmc.graphics3DDescription.Graphics3DObject;
-import us.ihmc.graphics3DDescription.HeightMap;
-import us.ihmc.graphics3DDescription.appearance.AppearanceDefinition;
-import us.ihmc.graphics3DDescription.appearance.YoAppearance;
-import us.ihmc.graphics3DDescription.input.SelectedListener;
-import us.ihmc.graphics3DDescription.structure.Graphics3DNode;
-import us.ihmc.graphics3DDescription.structure.Graphics3DNodeType;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphic;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsList;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.graphicsDescription.Graphics3DObject;
+import us.ihmc.graphicsDescription.HeightMap;
+import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.input.SelectedListener;
+import us.ihmc.graphicsDescription.structure.Graphics3DNode;
+import us.ihmc.graphicsDescription.structure.Graphics3DNodeType;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphic;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.jMonkeyEngineToolkit.Graphics3DAdapter;
+import us.ihmc.jMonkeyEngineToolkit.Graphics3DBackgroundScaleMode;
+import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
+import us.ihmc.jMonkeyEngineToolkit.camera.CaptureDevice;
+import us.ihmc.jMonkeyEngineToolkit.camera.RenderedSceneHandler;
 import us.ihmc.robotics.TickAndUpdatable;
 import us.ihmc.robotics.dataStructures.YoVariableHolder;
 import us.ihmc.robotics.dataStructures.listener.RewoundListener;
@@ -57,7 +57,7 @@ import us.ihmc.robotics.dataStructures.registry.NameSpace;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariableList;
-import us.ihmc.robotics.stateMachines.StateMachinesJPanel;
+import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateMachinesJPanel;
 import us.ihmc.robotics.time.GlobalTimer;
 import us.ihmc.robotics.time.RealTimeRateEnforcer;
 import us.ihmc.simulationconstructionset.DataBuffer.RepeatDataBufferEntryException;
@@ -94,6 +94,7 @@ import us.ihmc.simulationconstructionset.gui.ViewportWindow;
 import us.ihmc.simulationconstructionset.gui.config.VarGroupList;
 import us.ihmc.simulationconstructionset.gui.dialogConstructors.GUIEnablerAndDisabler;
 import us.ihmc.simulationconstructionset.gui.hierarchyTree.NameSpaceHierarchyTree;
+import us.ihmc.simulationconstructionset.gui.tools.SimulationOverheadPlotterFactory;
 import us.ihmc.simulationconstructionset.physics.CollisionHandler;
 import us.ihmc.simulationconstructionset.physics.ScsPhysics;
 import us.ihmc.simulationconstructionset.physics.visualize.DefaultCollisionVisualizer;
@@ -465,28 +466,29 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
 
       mySimulation.getDataBuffer().copyValuesThrough(); // Copy the values through so that anything the user changed during initialization will be YoVariablized, and the default on all graphs.
 
-      attachPlaybackListener(new PlaybackListener() {
+      attachPlaybackListener(new PlaybackListener()
+      {
+         @Override
+         public void indexChanged(int newIndex, double newTime)
+         {
 
-		@Override
-		public void indexChanged(int newIndex, double newTime) {
+         }
 
+         @Override
+         public void stop()
+         {
+            if (myGUI != null && myGUI.getGraphics3dAdapter() != null)
+               myGUI.getGraphics3dAdapter().pause();
+         }
 
-		}
-
-		@Override
-		public void stop() {
-			if (myGUI != null && myGUI.getGraphics3dAdapter() != null)
-				myGUI.getGraphics3dAdapter().pause();
-
-		}
-
-		@Override
-		public void play(double realTimeRate) {
-			if (myGUI != null && myGUI.getGraphics3dAdapter() != null)
-				myGUI.getGraphics3dAdapter().play();
-
-		}
-	});
+         @Override
+         public void play(double realTimeRate)
+         {
+            if (myGUI != null && myGUI.getGraphics3dAdapter() != null)
+               myGUI.getGraphics3dAdapter().play();
+         }
+      });
+      
       if (robots != null)
       {
          for (Robot robot : robots)
@@ -1834,7 +1836,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
     * </p>
     *
     * @param cameraConfiguration CameraConfiguration
-    * @see us.ihmc.graphics3DAdapter.camera.CameraConfiguration CameraConfiguration
+    * @see us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration CameraConfiguration
     */
    public void setupCamera(CameraConfiguration cameraConfiguration)
    {
@@ -4121,12 +4123,14 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       standardAllCommandsExecutor.toggleCameraKeyMode();
    }
 
-   public void addExtraJpanel(Component extraPanel, String name)
+   public void addExtraJpanel(Component extraPanel, String name, boolean showOnStart)
    {
-      ExtraPanelConfiguration extraPanelConfig = new ExtraPanelConfiguration(name);
-      extraPanelConfig.setupPanel(extraPanel);
-      extraPanelConfig.setName(name);
-      setupExtraPanel(extraPanelConfig);
+      setupExtraPanel(new ExtraPanelConfiguration(name, extraPanel, showOnStart));
+      
+      if (showOnStart)
+      {
+         getStandardSimulationGUI().selectPanel(name);
+      }
    }
 
    public void exportRobotDefinition(Robot robot, File chosenFile)
@@ -4325,6 +4329,13 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
             }
          }
       });
+   }
+   
+   public SimulationOverheadPlotterFactory createSimulationOverheadPlotterFactory()
+   {
+      SimulationOverheadPlotterFactory simulationOverheadPlotterFactory = new SimulationOverheadPlotterFactory();
+      simulationOverheadPlotterFactory.setSimulationConstructionSet(this);
+      return simulationOverheadPlotterFactory;
    }
 
    public void hideAllDynamicGraphicObjects()

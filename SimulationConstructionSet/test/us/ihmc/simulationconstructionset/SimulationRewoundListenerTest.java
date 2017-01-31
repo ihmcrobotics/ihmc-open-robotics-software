@@ -79,6 +79,7 @@ public class SimulationRewoundListenerTest
    private class SimpleSimulationRewoundListener implements RewoundListener
    {
       private int count = 0;
+      @Override
       public void wasRewound()
       {
 //         System.out.println(count + ": Sim was rewound");
@@ -89,5 +90,5 @@ public class SimulationRewoundListenerTest
       {
          return count;
       }
-   };
+   }
 }

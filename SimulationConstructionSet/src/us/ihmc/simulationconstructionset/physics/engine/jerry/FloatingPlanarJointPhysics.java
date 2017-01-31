@@ -33,6 +33,7 @@ public class FloatingPlanarJointPhysics extends JointPhysics<FloatingPlanarJoint
       super(owner);
    }
 
+   @Override
    protected void jointDependentChangeVelocity(double delta_qd)
    {
       System.err.println("Error!!!! FloatingPlanarJoint.jointDependentChangeVelocity should never be called!!!");
@@ -40,6 +41,7 @@ public class FloatingPlanarJointPhysics extends JointPhysics<FloatingPlanarJoint
 
    // Override featherstonePassOne since don't need to do everything...
 
+   @Override
    public void featherstonePassOne(Vector3d w_h, Vector3d v_h, Matrix3d Rh_0)
    {
       // this.update(false);
@@ -101,6 +103,7 @@ public class FloatingPlanarJointPhysics extends JointPhysics<FloatingPlanarJoint
    }
 
 
+   @Override
    protected void jointDependentFeatherstonePassOne()
    {
       // No torques:
@@ -130,11 +133,13 @@ public class FloatingPlanarJointPhysics extends JointPhysics<FloatingPlanarJoint
       Ri_0.transform(v_i);
    }
 
+   @Override
    protected void jointDependentSet_d_i()
    {
       System.err.println("Error!!!! FloatingPlanarJoint.jointDependentSet_d_i should never be called!!!");
    }
 
+   @Override
    protected void jointDependentFeatherstonePassTwo(Vector3d w_h)
    {
       // Coriolis Forces:
@@ -148,6 +153,7 @@ public class FloatingPlanarJointPhysics extends JointPhysics<FloatingPlanarJoint
    }
 
 
+   @Override
    public void featherstonePassThree()
    {
       // Recurse over the children:
@@ -161,6 +167,7 @@ public class FloatingPlanarJointPhysics extends JointPhysics<FloatingPlanarJoint
    }
 
    private Vector3d wdXr = new Vector3d(), wXr = new Vector3d(), wXwXr = new Vector3d();
+   @Override
    public void featherstonePassFour(SpatialVector a_hat_h, int passNumber) throws UnreasonableAccelerationException
    {
       if (owner.type == Plane.XY)
@@ -276,6 +283,7 @@ public class FloatingPlanarJointPhysics extends JointPhysics<FloatingPlanarJoint
    }
 
 
+   @Override
    protected void jointDependentRecordK(int passNumber)
    {
       k_qdd_t1[passNumber] = owner.qdd_t1.getDoubleValue();
@@ -286,11 +294,13 @@ public class FloatingPlanarJointPhysics extends JointPhysics<FloatingPlanarJoint
       k_qd_rot[passNumber] = owner.qd_rot.getDoubleValue();
    }
 
+   @Override
    protected void jointDependentFeatherstonePassFour(double Q, int passNumber)
    {
       // Do nothing here...
    }
 
+   @Override
    public void recursiveEulerIntegrate(double stepSize)
    {
       owner.q_t1.set(q_t1_n + owner.qd_t1.getDoubleValue() * stepSize);
@@ -310,6 +320,7 @@ public class FloatingPlanarJointPhysics extends JointPhysics<FloatingPlanarJoint
 
    }
 
+   @Override
    public void recursiveRungeKuttaSum(double stepSize)
    {
       owner.q_t1.set(q_t1_n + stepSize * (k_qd_t1[0] / 6.0 + k_qd_t1[1] / 3.0 + k_qd_t1[2] / 3.0 + k_qd_t1[3] / 6.0));
@@ -330,6 +341,7 @@ public class FloatingPlanarJointPhysics extends JointPhysics<FloatingPlanarJoint
 
 
 
+   @Override
    public void recursiveSaveTempState()
    {
       q_t1_n = owner.q_t1.getDoubleValue();
@@ -348,6 +360,7 @@ public class FloatingPlanarJointPhysics extends JointPhysics<FloatingPlanarJoint
       }
    }
 
+   @Override
    public void recursiveRestoreTempState()
    {
       owner.q_t1.set(q_t1_n);
@@ -367,6 +380,7 @@ public class FloatingPlanarJointPhysics extends JointPhysics<FloatingPlanarJoint
    }
 
 
+   @Override
    protected void impulseResponseComputeDeltaV(SpatialVector delta_v_parent, SpatialVector delta_v_me)
    {
       // Override with FloatingPlanarJoint as in Mirtich p. 144
@@ -411,6 +425,7 @@ public class FloatingPlanarJointPhysics extends JointPhysics<FloatingPlanarJoint
 
    private Vector3d delta_qd_xyz = new Vector3d();
 
+   @Override
    protected void propagateImpulseSetDeltaVOnPath(SpatialVector delta_v_parent, SpatialVector delta_v_me)
    {
       // Override with FloatingJoint as in Mirtich p. 144
@@ -485,6 +500,7 @@ public class FloatingPlanarJointPhysics extends JointPhysics<FloatingPlanarJoint
    private Matrix Y_hat_matrix = new Matrix(3, 1);    // new Matrix(6,1);
    private Matrix I_hat_inverse = new Matrix(3, 3);
 
+   @Override
    protected boolean jointDependentVerifyReasonableAccelerations()
    {
       if (Math.abs(owner.qdd_t1.getDoubleValue()) > Joint.MAX_TRANS_ACCEL)
@@ -497,6 +513,7 @@ public class FloatingPlanarJointPhysics extends JointPhysics<FloatingPlanarJoint
       return true;
    }
 
+   @Override
    protected void jointDependentSetAndGetRotation(Matrix3d Rh_i)
    {
       Rh_i.setIdentity();    // We probably can rely on Rh_i not changing its 1 and 0 elements but let's just be safe.

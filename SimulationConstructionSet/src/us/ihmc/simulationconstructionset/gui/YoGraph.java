@@ -1,11 +1,11 @@
 package us.ihmc.simulationconstructionset.gui;
 
+import us.ihmc.graphicsDescription.dataBuffer.DataEntry;
+import us.ihmc.graphicsDescription.dataBuffer.DataEntryHolder;
+import us.ihmc.graphicsDescription.dataBuffer.TimeDataHolder;
 import us.ihmc.robotics.dataStructures.registry.NameSpace;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.simulationconstructionset.GraphConfiguration;
-import us.ihmc.simulationconstructionset.dataBuffer.DataEntry;
-import us.ihmc.simulationconstructionset.dataBuffer.DataEntryHolder;
-import us.ihmc.simulationconstructionset.dataBuffer.TimeDataHolder;
 import us.ihmc.simulationconstructionset.gui.dialogs.GraphPropertiesDialog;
 import us.ihmc.simulationconstructionset.robotcommprotocol.GUISideCommandListener;
 
@@ -122,6 +122,7 @@ public class YoGraph extends JPanel implements MouseListener, MouseMotionListene
       final YoGraph thisYoGraph = this;
       delete.addActionListener(new ActionListener()
       {
+         @Override
          public void actionPerformed(ActionEvent e)
          {
             thisYoGraph.yoGraphRemover.removeGraph(thisYoGraph);
@@ -364,7 +365,7 @@ public class YoGraph extends JPanel implements MouseListener, MouseMotionListene
 
    public void addVariableFromSelectedVariableHolder()
    {
-      YoVariable yoVariable = selectedVariableHolder.getSelectedVariable();
+      YoVariable<?> yoVariable = selectedVariableHolder.getSelectedVariable();
       if (yoVariable != null)
          addVariable(dataEntryHolder.getEntry(yoVariable));
    }
@@ -682,7 +683,6 @@ public class YoGraph extends JPanel implements MouseListener, MouseMotionListene
    @SuppressWarnings("unused")
    private String spaceString = "  ";
    private char[] charArray = new char[80];
-   @SuppressWarnings("unused")
    private final java.text.NumberFormat doubleFormat = new java.text.DecimalFormat(" 0.00000;-0.00000");
    private final FieldPosition fieldPosition = new FieldPosition(NumberFormat.INTEGER_FIELD);
    
@@ -776,6 +776,7 @@ public class YoGraph extends JPanel implements MouseListener, MouseMotionListene
 
    }
 
+   @Override
    public void paintComponent(Graphics g)
    {
       if (graphConfiguration.getPlotType() == YoGraph.TIME_PLOT)
@@ -1179,6 +1180,7 @@ public class YoGraph extends JPanel implements MouseListener, MouseMotionListene
       g.drawChars(charArray, 0, length, cumOffset, yToDrawAt);    // Print it.
    }
 
+   @Override
    public void keyPressed(KeyEvent evt)
    {
       int code = evt.getKeyCode();
@@ -1212,6 +1214,7 @@ public class YoGraph extends JPanel implements MouseListener, MouseMotionListene
       }
    }
 
+   @Override
    public void keyReleased(KeyEvent evt)
    {
       int code = evt.getKeyCode();
@@ -1232,6 +1235,7 @@ public class YoGraph extends JPanel implements MouseListener, MouseMotionListene
       }
    }
 
+   @Override
    public void keyTyped(KeyEvent evt)
    {
       char character = evt.getKeyChar();
@@ -1274,19 +1278,22 @@ public class YoGraph extends JPanel implements MouseListener, MouseMotionListene
 
    }
 
-
+   @Override
    public void mouseReleased(MouseEvent evt)
    {
    }
 
+   @Override
    public void mouseEntered(MouseEvent evt)
    {
    }
 
+   @Override
    public void mouseExited(MouseEvent evt)
    {
    }
 
+   @Override
    public void mousePressed(MouseEvent evt)
    {
       if (evt.getSource().equals(this))
@@ -1412,6 +1419,7 @@ public class YoGraph extends JPanel implements MouseListener, MouseMotionListene
             final JMenuItem menuItem = new JMenuItem("Remove " + dataBufferEntry.getVariableName());
             menuItem.addActionListener(new ActionListener()
             {
+               @Override
                public void actionPerformed(ActionEvent e)
                {
                   removeEntry(dataBufferEntry);
@@ -1473,6 +1481,7 @@ public class YoGraph extends JPanel implements MouseListener, MouseMotionListene
       return (leftPlotIndex + (2 * x * (rightPlotIndex - leftPlotIndex) + w) / (2 * w));
    }
 
+   @Override
    public void mouseMoved(MouseEvent evt)
    {
    }
@@ -1483,10 +1492,12 @@ public class YoGraph extends JPanel implements MouseListener, MouseMotionListene
    private int draggedX, draggedY;
    private int clickedIndex, clickedLeftIndex, clickedRightIndex;
 
+   @Override
    public void mouseClicked(MouseEvent evt)
    {
    }
 
+   @Override
    public void mouseDragged(MouseEvent evt)
    {
       draggedX = evt.getX();
@@ -1561,6 +1572,7 @@ public class YoGraph extends JPanel implements MouseListener, MouseMotionListene
 //    return selectedVariableHolder;
 // }
 
+   @Override
    public void focusGained(FocusEvent arg0)
    {
       if (arg0.getSource().equals(this) && hadFocus)
@@ -1571,6 +1583,7 @@ public class YoGraph extends JPanel implements MouseListener, MouseMotionListene
       hadFocus = true;
    }
 
+   @Override
    public void focusLost(FocusEvent arg0)
    {
       popupMenu.setVisible(false);

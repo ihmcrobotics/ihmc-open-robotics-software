@@ -144,7 +144,43 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
 
    public abstract double getSwingHeightMaxForPushRecoveryTrajectory();
 
+   /**
+    * Specifies if the arm controller should be switching
+    * to chest frame or jointspace only if necessary.
+    * This is particularly useful when manipulation was performed
+    * with respect to world during standing to prevent "leaving a hand behind"
+    * when the robot starts walking.
+    * 
+    * @return whether the manipulation control should get prepared
+    *  for walking.
+    */
    public abstract boolean doPrepareManipulationForLocomotion();
+
+   /**
+    * Specifies if the pelvis orientation controller should
+    * be initialized before starting to walk.
+    * When the controller is initialized, the pelvis will
+    * smoothly cancel out the user orientation offset on
+    * the first transfer of a walking sequence.
+    * 
+    * @return whether the pelvis orientation control should get prepared
+    *  for walking.
+    */
+   public boolean doPreparePelvisForLocomotion()
+   {
+      return true;
+   }
+
+   /**
+    * Specifies whether upper-body motion is allowed when the robot is walking
+    * or during any exchange support.
+    * 
+    * @return whether the upper-body can be moved during walking or not.
+    */
+   public boolean allowUpperBodyMotionDuringLocomotion()
+   {
+      return false;
+   }
 
    public abstract boolean controlHeadAndHandsWithSliders();
 
@@ -371,6 +407,17 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
     * @return ICP proximity in meters
     */
    public double getICPProximityToLeadingFootForToeOff()
+   {
+      return 0.0;
+   }
+
+   /**
+    * In swing, this determines maximum distance from the ICP to the leading foot support polygon to allow toe-off.
+    * This distance is determined by finding the stance length, and multiplying it by the returned variable.
+    * If it is further than this, do not allow toe-off, as more control authority is needed from the trailing foot.
+    * @return percent of stance length for proximity
+    */
+   public double getICPPercentOfStanceForSSToeOff()
    {
       return 0.0;
    }

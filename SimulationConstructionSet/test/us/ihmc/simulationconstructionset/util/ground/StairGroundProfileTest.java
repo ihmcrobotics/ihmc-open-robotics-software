@@ -2,7 +2,7 @@ package us.ihmc.simulationconstructionset.util.ground;
 
 import org.junit.Test;
 
-import us.ihmc.graphics3DAdapter.GroundProfile3D;
+import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public class StairGroundProfileTest extends GroundProfileTest

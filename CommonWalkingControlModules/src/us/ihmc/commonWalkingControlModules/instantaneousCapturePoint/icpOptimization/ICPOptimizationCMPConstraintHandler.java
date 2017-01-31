@@ -9,19 +9,27 @@ import us.ihmc.robotics.robotSide.RobotSide;
 
 public class ICPOptimizationCMPConstraintHandler
 {
-   private final DoubleYoVariable maxCMPExitForward;
-   private final DoubleYoVariable maxCMPExitSideways;
+   private final DoubleYoVariable maxCMPDoubleSupportExitForward;
+   private final DoubleYoVariable maxCMPDoubleSupportExitSideways;
+   private final DoubleYoVariable maxCMPSingleSupportExitForward;
+   private final DoubleYoVariable maxCMPSingleSupportExitSideways;
    private final BipedSupportPolygons bipedSupportPolygons;
 
    public ICPOptimizationCMPConstraintHandler(BipedSupportPolygons bipedSupportPolygons, ICPOptimizationParameters icpOptimizationParameters, YoVariableRegistry registry)
    {
       this.bipedSupportPolygons = bipedSupportPolygons;
 
-      maxCMPExitForward = new DoubleYoVariable("maxCMPForwardExit", registry);
-      maxCMPExitSideways = new DoubleYoVariable("maxCMPLateralExit", registry);
+      maxCMPDoubleSupportExitForward = new DoubleYoVariable("maxCMPDoubleSupportForwardExit", registry);
+      maxCMPDoubleSupportExitSideways = new DoubleYoVariable("maxCMPDoubleSupportLateralExit", registry);
 
-      maxCMPExitForward.set(icpOptimizationParameters.getMaxCMPForwardExit());
-      maxCMPExitSideways.set(icpOptimizationParameters.getMaxCMPLateralExit());
+      maxCMPDoubleSupportExitForward.set(icpOptimizationParameters.getDoubleSupportMaxCMPForwardExit());
+      maxCMPDoubleSupportExitSideways.set(icpOptimizationParameters.getDoubleSupportMaxCMPLateralExit());
+
+      maxCMPSingleSupportExitForward = new DoubleYoVariable("maxCMPSingleSupportForwardExit", registry);
+      maxCMPSingleSupportExitSideways = new DoubleYoVariable("maxCMPSingleSupportLateralExit", registry);
+
+      maxCMPSingleSupportExitForward.set(icpOptimizationParameters.getSingleSupportMaxCMPForwardExit());
+      maxCMPSingleSupportExitSideways.set(icpOptimizationParameters.getSingleSupportMaxCMPLateralExit());
    }
 
    private final FramePoint2d tempVertex = new FramePoint2d();
@@ -40,8 +48,8 @@ public class ICPOptimizationCMPConstraintHandler
          for (int i = 0; i < supportPolygon.getNumberOfVertices(); i++)
          {
             supportPolygon.getFrameVertex(i, tempVertex);
-            solver.setSupportPolygonVertex(numberOfVertices + i, tempVertex, supportPolygon.getReferenceFrame(), maxCMPExitForward.getDoubleValue(),
-                  maxCMPExitSideways.getDoubleValue());
+            solver.setSupportPolygonVertex(numberOfVertices + i, tempVertex, supportPolygon.getReferenceFrame(), maxCMPDoubleSupportExitForward.getDoubleValue(),
+                  maxCMPDoubleSupportExitSideways.getDoubleValue());
          }
 
          numberOfVertices += supportPolygon.getNumberOfVertices();
@@ -55,8 +63,8 @@ public class ICPOptimizationCMPConstraintHandler
       for (int i = 0; i < supportPolygon.getNumberOfVertices(); i++)
       {
          supportPolygon.getFrameVertex(i, tempVertex);
-         solver.setSupportPolygonVertex(i, tempVertex, supportPolygon.getReferenceFrame(), maxCMPExitForward.getDoubleValue(),
-               maxCMPExitSideways.getDoubleValue());
+         solver.setSupportPolygonVertex(i, tempVertex, supportPolygon.getReferenceFrame(), maxCMPSingleSupportExitForward.getDoubleValue(),
+               maxCMPSingleSupportExitSideways.getDoubleValue());
       }
    }
 

@@ -9,9 +9,9 @@ import javax.vecmath.Vector3d;
 import org.apache.commons.math3.geometry.euclidean.threed.Line;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 
-import us.ihmc.graphics3DAdapter.HeightMapWithNormals;
-import us.ihmc.graphics3DDescription.Graphics3DObject;
-import us.ihmc.graphics3DDescription.appearance.AppearanceDefinition;
+import us.ihmc.graphicsDescription.Graphics3DObject;
+import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
+import us.ihmc.jMonkeyEngineToolkit.HeightMapWithNormals;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.BoundingBox3d;
 import us.ihmc.robotics.geometry.shapes.Box3d;
@@ -90,17 +90,20 @@ public class CylinderTerrainObject implements TerrainObject3D, HeightMapWithNorm
    }
 
 
+   @Override
    public Graphics3DObject getLinkGraphics()
    {
       return linkGraphics;
 
    }
 
+   @Override
    public BoundingBox3d getBoundingBox()
    {
       return boundingBox;
    }
 
+   @Override
    public double heightAndNormalAt(double x, double y, double z, Vector3d normalToPack)
    {
       double heightAt = heightAt(x, y, 1e9);
@@ -109,6 +112,7 @@ public class CylinderTerrainObject implements TerrainObject3D, HeightMapWithNorm
       return heightAt;
    }
 
+   @Override
    public double heightAt(double x, double y, double z)
    {
       Line axis = getAxis();
@@ -277,6 +281,7 @@ public class CylinderTerrainObject implements TerrainObject3D, HeightMapWithNorm
       return boundingBox.getYMax();
    }
 
+   @Override
    public boolean isClose(double x, double y, double z)
    {
       return boundingBox.isXYInside(x, y);
@@ -302,12 +307,14 @@ public class CylinderTerrainObject implements TerrainObject3D, HeightMapWithNorm
       cylinder.checkIfInside(tempPoint, intersectionToPack, normalToPack);
    }
 
+   @Override
    public boolean checkIfInside(double x, double y, double z, Point3d intersectionToPack, Vector3d normalToPack)
    {
       tempPoint.set(x, y, z);
       return cylinder.checkIfInside(tempPoint, intersectionToPack, normalToPack);
    }
 
+   @Override
    public HeightMapWithNormals getHeightMapIfAvailable()
    {
       return this;

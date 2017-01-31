@@ -42,7 +42,7 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
-import us.ihmc.simulationconstructionset.gui.tools.VisualizerUtils;
+import us.ihmc.simulationconstructionset.gui.tools.SimulationOverheadPlotterFactory;
 import us.ihmc.simulationconstructionset.robotController.AbstractThreadedRobotController;
 import us.ihmc.simulationconstructionset.robotController.MultiThreadedRobotControlElement;
 import us.ihmc.simulationconstructionset.robotController.MultiThreadedRobotController;
@@ -365,9 +365,13 @@ public class AvatarSimulationFactory
 
       if (guiInitialSetup.get().isGuiShown())
       {
-         VisualizerUtils.createOverheadPlotter(simulationConstructionSet, guiInitialSetup.get().isShowOverheadView(), "centerOfMass",
-                                               controllerThread.getDynamicGraphicObjectsListRegistry(),
-                                               stateEstimationThread.getDynamicGraphicObjectsListRegistry(), actualCMPComputer.getYoGraphicsListRegistry());
+         SimulationOverheadPlotterFactory simulationOverheadPlotterFactory = simulationConstructionSet.createSimulationOverheadPlotterFactory();
+         simulationOverheadPlotterFactory.setShowOnStart(guiInitialSetup.get().isShowOverheadView());
+         simulationOverheadPlotterFactory.setVariableNameToTrack("centerOfMass");
+         simulationOverheadPlotterFactory.addYoGraphicsListRegistries(controllerThread.getDynamicGraphicObjectsListRegistry());
+         simulationOverheadPlotterFactory.addYoGraphicsListRegistries(stateEstimationThread.getDynamicGraphicObjectsListRegistry());
+         simulationOverheadPlotterFactory.addYoGraphicsListRegistries(actualCMPComputer.getYoGraphicsListRegistry());
+         simulationOverheadPlotterFactory.createOverheadPlotter();
          guiInitialSetup.get().initializeGUI(simulationConstructionSet, humanoidFloatingRootJointRobot, robotModel.get());
       }
 

@@ -50,6 +50,7 @@ public class ModularSensorProcessor implements SensorProcessor
       this.registry.addChild(sensorProcessor.getYoVariableRegistry());
    }
 
+   @Override
    public void initialize()
    {
       for (int i = 0; i < sensorProcessors.size(); i++)
@@ -58,6 +59,7 @@ public class ModularSensorProcessor implements SensorProcessor
       }
    }
 
+   @Override
    public void update()
    {
       for (int i = 0; i < sensorProcessors.size(); i++)
@@ -66,16 +68,19 @@ public class ModularSensorProcessor implements SensorProcessor
       }
    }
 
+   @Override
    public YoVariableRegistry getYoVariableRegistry()
    {
       return registry;
    }
 
+   @Override
    public String getName()
    {
       return registry.getName();
    }
 
+   @Override
    public String getDescription()
    {
       return description;
