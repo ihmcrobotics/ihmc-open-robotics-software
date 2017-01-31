@@ -133,6 +133,11 @@ public class ScrewTestTools
       joint.setQd(random.nextDouble());
    }
 
+   public static void setRandomVelocity(OneDoFJoint joint, Random random, double min, double max)
+   {
+      joint.setQd(RandomTools.generateRandomDouble(random, min, max));
+   }
+
    public static void setRandomDesiredAccelerations(OneDoFJoint[] joints, Random random)
    {
       for (OneDoFJoint joint : joints)
@@ -157,11 +162,27 @@ public class ScrewTestTools
       }
    }
 
+   public static void setRandomPositions(Iterable<? extends OneDoFJoint> joints, Random random, double min, double max)
+   {
+      for (OneDoFJoint joint : joints)
+      {
+         setRandomPosition(joint, random, min, max);
+      }
+   }
+
    public static void setRandomVelocities(Iterable<? extends OneDoFJoint> joints, Random random)
    {
       for (OneDoFJoint joint : joints)
       {
          setRandomVelocity(joint, random);
+      }
+   }
+
+   public static void setRandomVelocities(Iterable<? extends OneDoFJoint> joints, Random random, double min, double max)
+   {
+      for (OneDoFJoint joint : joints)
+      {
+         setRandomVelocity(joint, random, min, max);
       }
    }
 
