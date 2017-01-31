@@ -118,11 +118,11 @@ public class BipedalStepAdjustmentCostCalculatorTest
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test(timeout = 3000000)
+   @Test(timeout = 300000)
    public void testScoringFootsteps()
    {
       SimulationTestingParameters simulationTestingParameters = new SimulationTestingParameters();
-      simulationTestingParameters.setCreateGUI(!ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer());
+      simulationTestingParameters.setCreateGUI(false);//!ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer());
       Robot robot = new Robot("Test");
       SimulationConstructionSet scs = new SimulationConstructionSet(robot, simulationTestingParameters);
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
