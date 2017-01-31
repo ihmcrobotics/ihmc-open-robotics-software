@@ -19,7 +19,8 @@ public class CurrentStateProjectionMultiplier
    private final TransferStateEndRecursionMatrix transferStateEndRecursionMatrix;
    private final SwingStateEndRecursionMatrix swingStateEndRecursionMatrix;
 
-   private final DoubleYoVariable doubleSupportSplitRatio;
+   private final DoubleYoVariable defaultDoubleSupportSplitRatio;
+   private final DoubleYoVariable upcomingDoubleSupportSplitRatio;
 
    private final DoubleYoVariable startOfSplineTime;
    private final DoubleYoVariable endOfSplineTime;
@@ -30,20 +31,22 @@ public class CurrentStateProjectionMultiplier
    private final DoubleYoVariable positionMultiplier;
    private final DoubleYoVariable velocityMultiplier;
 
-   public CurrentStateProjectionMultiplier(YoVariableRegistry registry, DoubleYoVariable doubleSupportSplitRatio, DoubleYoVariable startOfSplineTime,
-         DoubleYoVariable endOfSplineTime, DoubleYoVariable totalTrajectoryTime)
+   public CurrentStateProjectionMultiplier(YoVariableRegistry registry, DoubleYoVariable defaultDoubleSupportSplitRatio, DoubleYoVariable upcomingDoubleSupportSplitRatio,
+         DoubleYoVariable startOfSplineTime, DoubleYoVariable endOfSplineTime, DoubleYoVariable totalTrajectoryTime)
    {
       positionMultiplier = new DoubleYoVariable("CurrentStateProjectionMultiplier", registry);
       velocityMultiplier = new DoubleYoVariable("CurrentStateVelocityProjectionMultiplier", registry);
 
-      this.doubleSupportSplitRatio = doubleSupportSplitRatio;
+      this.defaultDoubleSupportSplitRatio = defaultDoubleSupportSplitRatio;
+      this.upcomingDoubleSupportSplitRatio = upcomingDoubleSupportSplitRatio;
 
       this.startOfSplineTime = startOfSplineTime;
       this.endOfSplineTime = endOfSplineTime;
       this.totalTrajectoryTime = totalTrajectoryTime;
 
       transferStateEndRecursionMatrix = new TransferStateEndRecursionMatrix();
-      swingStateEndRecursionMatrix = new SwingStateEndRecursionMatrix(doubleSupportSplitRatio, startOfSplineTime, endOfSplineTime, totalTrajectoryTime);
+      swingStateEndRecursionMatrix = new SwingStateEndRecursionMatrix(defaultDoubleSupportSplitRatio, upcomingDoubleSupportSplitRatio, startOfSplineTime,
+            endOfSplineTime, totalTrajectoryTime);
 
       cubicProjectionMatrix = new CubicProjectionMatrix();
       cubicProjectionDerivativeMatrix = new CubicProjectionDerivativeMatrix();
@@ -142,8 +145,8 @@ public class CurrentStateProjectionMultiplier
 
          double stepDuration = currentDoubleSupportDuration + singleSupportDuration;
 
-         double upcomingInitialDoubleSupportDuration = doubleSupportSplitRatio.getDoubleValue() * upcomingDoubleSupportDuration;
-         double endOfDoubleSupportDuration = (1.0 - doubleSupportSplitRatio.getDoubleValue()) * currentDoubleSupportDuration;
+         double upcomingInitialDoubleSupportDuration = upcomingDoubleSupportSplitRatio.getDoubleValue() * upcomingDoubleSupportDuration;
+         double endOfDoubleSupportDuration = (1.0 - defaultDoubleSupportSplitRatio.getDoubleValue()) * currentDoubleSupportDuration;
 
          double recursionTime = timeInState + upcomingInitialDoubleSupportDuration + endOfDoubleSupportDuration - stepDuration;
          return Math.exp(omega0 * recursionTime);
