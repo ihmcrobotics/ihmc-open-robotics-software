@@ -240,7 +240,7 @@ public class AtlasICPOptimizationParameters extends ICPOptimizationParameters
    @Override
    public double getLateralReachabilityInnerLimit()
    {
-      return 0.1;
+      return 0.18;
    }
 
    /** {@inheritDoc} */
