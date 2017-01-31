@@ -23,7 +23,7 @@ public class AtlasICPOptimizationParameters extends ICPOptimizationParameters
    @Override
    public double getForwardFootstepWeight()
    {
-      return runningOnRealRobot ? 20.0 : 5.0;
+      return runningOnRealRobot ? 20.0 : 15.0;
    }
 
    /** {@inheritDoc} */
@@ -37,14 +37,14 @@ public class AtlasICPOptimizationParameters extends ICPOptimizationParameters
    @Override
    public double getFootstepRegularizationWeight()
    {
-      return runningOnRealRobot ? 0.001 : 0.001;
+      return runningOnRealRobot ? 0.001 : 0.005;
    }
 
    /** {@inheritDoc} */
    @Override
    public double getFeedbackForwardWeight()
    {
-      return runningOnRealRobot ? 0.5 : 10.0;
+      return runningOnRealRobot ? 0.5 : 0.5;
    }
 
    /** {@inheritDoc} */
@@ -65,28 +65,28 @@ public class AtlasICPOptimizationParameters extends ICPOptimizationParameters
    @Override
    public double getFeedbackParallelGain()
    {
-      return runningOnRealRobot ? 3.0 : 5.0;
+      return runningOnRealRobot ? 3.0 : 3.0;
    }
 
    /** {@inheritDoc} */
    @Override
    public double getFeedbackOrthogonalGain()
    {
-      return runningOnRealRobot ? 2.5 : 5.0;
+      return runningOnRealRobot ? 2.5 : 2.5;
    }
 
    /** {@inheritDoc} */
    @Override
    public double getDynamicRelaxationWeight()
    {
-      return runningOnRealRobot ? 500.0 : 5000.0;
+      return runningOnRealRobot ? 500.0 : 1000.0;
    }
 
    /** {@inheritDoc} */
    @Override
    public double getDynamicRelaxationDoubleSupportWeightModifier()
    {
-      return runningOnRealRobot ? 1.0 : 5.0;
+      return runningOnRealRobot ? 1.0 : 1.0;
    }
 
    /** {@inheritDoc} */
@@ -184,28 +184,28 @@ public class AtlasICPOptimizationParameters extends ICPOptimizationParameters
    @Override
    public double getDoubleSupportMaxCMPForwardExit()
    {
-      return 0.01;
+      return 0.001;
    }
 
    /** {@inheritDoc} */
    @Override
    public double getDoubleSupportMaxCMPLateralExit()
    {
-      return 0.005;
+      return 0.001;
    }
 
    /** {@inheritDoc} */
    @Override
    public double getSingleSupportMaxCMPForwardExit()
    {
-      return -0.015;
+      return 0.001;
    }
 
    /** {@inheritDoc} */
    @Override
    public double getSingleSupportMaxCMPLateralExit()
    {
-      return -0.005;
+      return 0.001;
    }
 
    /** {@inheritDoc} */
