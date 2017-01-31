@@ -45,6 +45,13 @@ public class AtlasEndToEndSpineJointTrajectoryMessageTest extends EndToEndSpineJ
       super.testMultipleWaypoints();
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 35.0, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT})
+   @Test (timeout = 100000)
+   public void testLongMessage() throws SimulationExceededMaximumTimeException
+   {
+      super.testLongMessage();
+   }
+
    @Override
    public DRCRobotModel getRobotModel()
    {
