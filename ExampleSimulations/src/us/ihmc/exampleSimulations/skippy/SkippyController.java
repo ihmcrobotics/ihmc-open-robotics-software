@@ -1728,7 +1728,7 @@ public class SkippyController implements RobotController
 
       public void doTransitionIntoAction()
       {
-         qd_hip.set(0.45);
+         q_d_hip.set(0.45);
       }
 
       public void doTransitionOutOfAction()
@@ -1829,7 +1829,7 @@ public class SkippyController implements RobotController
 
          qd_hip.set(-0.9);
          qd_shoulder.set(0.0);
-         robot.glueDownToGroundPoint.setForce(0.0, 0.0, -1450.0);
+         //robot.glueDownToGroundPoint.setForce(0.0, 0.0, -1450.0);
       }
 
       public void doTransitionOutOfAction()
