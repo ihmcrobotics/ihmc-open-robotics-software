@@ -40,6 +40,7 @@ import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters
 import us.ihmc.simulationconstructionset.robotController.SimpleRobotController;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.tools.MemoryTools;
+import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.tools.testing.JUnitTools;
 import us.ihmc.tools.thread.ThreadTools;
 
@@ -47,7 +48,7 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
 {
    private static final double DESIRED_EPSILON = 1.0E-10;
    private static final double DESIRED_QUAT_EPSILON = 0.01;
-   private static final double MAX_SPEED_FOR_CONTINOUS = 20.0;
+   private static final double MAX_SPEED_FOR_CONTINOUS = 10.0;
 
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
 
@@ -60,6 +61,10 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
    private int numberOfJoints;
    private ControllerSpy controllerSpy;
 
+   /**
+    * This tests the execution of a single spine waypoint.
+    * @throws SimulationExceededMaximumTimeException
+    */
    public void testSingleWaypoint() throws SimulationExceededMaximumTimeException
    {
       setupTest();
@@ -68,9 +73,16 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
       SpineTrajectoryMessage message = createRandomSpineMessage(trajectoryTime, random);
 
       executeMessage(message);
+
+      assertControlWasConsistent(controllerSpy);
       assertDesiredsContinous(controllerSpy);
    }
 
+   /**
+    * This tests that the switching between jointspace and taskspace control modes works properly.
+    * It does not test that the desired joint positions are continuous over the state switches anymore.
+    * @throws SimulationExceededMaximumTimeException
+    */
    public void testSwitchingBetweenControlModes() throws SimulationExceededMaximumTimeException
    {
       setupTest();
@@ -84,6 +96,63 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
       executeMessage(message2);
       executeMessage(message3);
 
+      assertControlWasConsistent(controllerSpy);
+   }
+
+   /**
+    * This tests that the joint desireds are continuous when sending multiple joint space messages.
+    * @throws SimulationExceededMaximumTimeException
+    */
+   public void testDesiredsAreContinuous() throws SimulationExceededMaximumTimeException
+   {
+      setupTest();
+
+      double trajectoryTime = 1.0;
+      for (int i = 0; i < 10; i++)
+      {
+         SpineTrajectoryMessage message = createRandomSpineMessage(trajectoryTime, random);
+         executeMessage(message);
+      }
+
+      assertControlWasConsistent(controllerSpy);
+      assertDesiredsContinous(controllerSpy);
+   }
+
+   /**
+    * This tests a trajectory with multiple waypoints. This will execute a spine yaw sine wave.
+    * @throws SimulationExceededMaximumTimeException
+    */
+   public void testMultipleWaypoints() throws SimulationExceededMaximumTimeException
+   {
+      setupTest();
+
+      double amplitude = 0.2;
+      double frequency = 0.25;
+      double totalTime = 10.0;
+      int waypoints = 20;
+
+      SpineTrajectoryMessage message = new SpineTrajectoryMessage(numberOfJoints, waypoints);
+      for (int waypoint = 0; waypoint < waypoints; waypoint++)
+      {
+         double timeAtWaypoint = totalTime * (double) waypoint / (double) waypoints;
+         double desiredPosition = amplitude * Math.sin(2.0 * Math.PI * frequency * timeAtWaypoint);
+         double desiredVelocity = 2.0 * Math.PI * frequency * amplitude * Math.cos(2.0 * Math.PI * frequency * timeAtWaypoint);
+
+         if (waypoint == 0 || waypoint == waypoints - 1)
+            desiredVelocity = 0.0;
+
+         for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
+         {
+            if (jointIdx == 0)
+               message.setTrajectoryPoint(jointIdx, waypoint, timeAtWaypoint, desiredPosition, desiredVelocity);
+            else
+               message.setTrajectoryPoint(jointIdx, waypoint, timeAtWaypoint, 0.0, 0.0);
+         }
+      }
+
+      executeMessage(message);
+
+      assertControlWasConsistent(controllerSpy);
       assertDesiredsContinous(controllerSpy);
    }
 
@@ -113,9 +182,13 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
       return new ChestTrajectoryMessage(trajectoryTime, desiredOrientation);
    }
 
-   private static void assertDesiredsContinous(ControllerSpy controllerSpy)
+   private static void assertControlWasConsistent(ControllerSpy controllerSpy)
    {
       assertFalse("Joint and Taskspace control was inconsistent.", controllerSpy.wasControlInconsistent());
+   }
+
+   private static void assertDesiredsContinous(ControllerSpy controllerSpy)
+   {
       double maxSpeed = controllerSpy.getMaxSpeed();
       String errorMessage = "The maximum speed along the trajectory was " + maxSpeed + " this was probably caused by a discontinous desired value.";
       assertTrue(errorMessage, maxSpeed < MAX_SPEED_FOR_CONTINOUS);
@@ -358,6 +431,7 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
 
       public double getMaxSpeed()
       {
+         PrintTools.info("Max Speed: " + maxSpeed.getDoubleValue());
          return maxSpeed.getDoubleValue();
       }
 
@@ -366,4 +440,5 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
          return inconsistentControl.getBooleanValue();
       }
    }
+
 }
