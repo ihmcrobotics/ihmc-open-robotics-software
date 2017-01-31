@@ -219,7 +219,7 @@ public abstract class ICPOptimizationParameters
     */
    public double getMagnitudeForBigAdjustment()
    {
-      return 0.1;
+      return 0.2;
    }
 
    /**
