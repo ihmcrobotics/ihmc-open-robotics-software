@@ -4,8 +4,12 @@ import org.ejml.data.DenseMatrix64F;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.ReferenceFrameMismatchException;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+
+import java.util.Random;
 
 import javax.vecmath.Vector3d;
 
@@ -39,6 +43,18 @@ public class Twist extends SpatialMotionVector
    public Twist(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame, Vector3d linearVelocity, Vector3d angularVelocity)
    {
       super(bodyFrame, baseFrame, expressedInFrame, linearVelocity, angularVelocity);
+   }
+
+   /**
+    * @param bodyFrame what we're specifying the motion of
+    * @param baseFrame with respect to what we're specifying the motion
+    * @param linearPart linear part of the spatial motion vector expressed in the {@code expressedInFrame} to use.
+    * @param angularPart angular part of the spatial motion vector expressed in the {@code expressedInFrame} to use.
+    * @throws ReferenceFrameMismatchException if the linear and angular parts are not expressed in the same reference frame.
+    */
+   public Twist(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, FrameVector linearVelocity, FrameVector angularVelocity)
+   {
+      super(bodyFrame, baseFrame, linearVelocity, angularVelocity);
    }
 
    /**
@@ -348,5 +364,22 @@ public class Twist extends SpatialMotionVector
 
       return ret;
    }
+
+   public static Twist generateRandomTwist(Random random, ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame)
+   {
+      double linearVelocityMagnitude = random.nextDouble();
+      double angularVelocityMagnitude = random.nextDouble();
+      return generateRandomTwist(random, bodyFrame, baseFrame, expressedInFrame, angularVelocityMagnitude, linearVelocityMagnitude);
+   }
+
+   public static Twist generateRandomTwist(Random random, ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame,
+                                           double angularVelocityMagnitude, double linearVelocityMagnitude)
+   {
+      Twist randomTwist = new Twist(bodyFrame, baseFrame, expressedInFrame);
+      randomTwist.setLinearPart(RandomTools.generateRandomVector(random, linearVelocityMagnitude));
+      randomTwist.setAngularPart(RandomTools.generateRandomVector(random, angularVelocityMagnitude));
+      return randomTwist;
+   }
+
    ///CLOVER:ON
 }

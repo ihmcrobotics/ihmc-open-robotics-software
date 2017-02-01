@@ -10,6 +10,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoPDGains;
+import us.ihmc.robotics.controllers.YoPIDGains;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
@@ -134,6 +135,12 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
 
    public abstract YoOrientationPIDGainsInterface createChestControlGains(YoVariableRegistry registry);
 
+   /** The gains used when the spine joints are controlled directly instead of the chest orientation */
+   public YoPIDGains createSpineControlGains(YoVariableRegistry registry)
+   {
+      return null;
+   }
+
    public abstract YoSE3PIDGainsInterface createSwingFootControlGains(YoVariableRegistry registry);
 
    public abstract YoSE3PIDGainsInterface createHoldPositionFootControlGains(YoVariableRegistry registry);
@@ -144,7 +151,43 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
 
    public abstract double getSwingHeightMaxForPushRecoveryTrajectory();
 
+   /**
+    * Specifies if the arm controller should be switching
+    * to chest frame or jointspace only if necessary.
+    * This is particularly useful when manipulation was performed
+    * with respect to world during standing to prevent "leaving a hand behind"
+    * when the robot starts walking.
+    * 
+    * @return whether the manipulation control should get prepared
+    *  for walking.
+    */
    public abstract boolean doPrepareManipulationForLocomotion();
+
+   /**
+    * Specifies if the pelvis orientation controller should
+    * be initialized before starting to walk.
+    * When the controller is initialized, the pelvis will
+    * smoothly cancel out the user orientation offset on
+    * the first transfer of a walking sequence.
+    * 
+    * @return whether the pelvis orientation control should get prepared
+    *  for walking.
+    */
+   public boolean doPreparePelvisForLocomotion()
+   {
+      return true;
+   }
+
+   /**
+    * Specifies whether upper-body motion is allowed when the robot is walking
+    * or during any exchange support.
+    * 
+    * @return whether the upper-body can be moved during walking or not.
+    */
+   public boolean allowUpperBodyMotionDuringLocomotion()
+   {
+      return false;
+   }
 
    public abstract boolean controlHeadAndHandsWithSliders();
 

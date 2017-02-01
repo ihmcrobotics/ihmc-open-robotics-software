@@ -56,7 +56,6 @@ public class SDFCollisionMeshDescription extends CollisionMeshDescription
                double radius = Double.parseDouble(geometry.getCylinder().getRadius());
 //               translate(0.0, 0.0, -length/2.0);
 
-               System.out.println("Adding Cylinder with height = " + length + " and radius + " + radius);
                addCylinderReferencedAtCenter(length, radius);
             }
             else if(geometry.getBox() != null)

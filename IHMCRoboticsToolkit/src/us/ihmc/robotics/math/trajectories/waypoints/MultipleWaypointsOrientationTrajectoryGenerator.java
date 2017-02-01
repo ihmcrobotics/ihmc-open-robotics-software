@@ -302,6 +302,11 @@ public class MultipleWaypointsOrientationTrajectoryGenerator extends Orientation
       return waypoints.get(numberOfWaypoints.getIntegerValue() - 1).getTime();
    }
 
+   public void getLastWaypoint(FrameSO3TrajectoryPoint pointToPack)
+   {
+      pointToPack.set(waypoints.get(numberOfWaypoints.getIntegerValue() - 1));
+   }
+
    @Override
    public String toString()
    {

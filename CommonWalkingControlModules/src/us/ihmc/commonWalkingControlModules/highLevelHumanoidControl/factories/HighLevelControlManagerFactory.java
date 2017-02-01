@@ -5,8 +5,8 @@ import javax.vecmath.Vector3d;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.controlModules.ChestOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.PelvisOrientationManager;
+import us.ihmc.commonWalkingControlModules.controlModules.chest.ChestOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.controlModules.head.HeadOrientationManager;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
@@ -19,7 +19,6 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.io.printing.PrintTools;
@@ -157,10 +156,8 @@ public class HighLevelControlManagerFactory
       if (!hasMomentumOptimizationSettings(ChestOrientationManager.class))
          return null;
 
-      double trajectoryTimeHeadOrientation = walkingControllerParameters.getTrajectoryTimeHeadOrientation();
-      YoOrientationPIDGainsInterface chestControlGains = walkingControllerParameters.createChestControlGains(registry);
       Vector3d chestAngularWeight = momentumOptimizationSettings.getChestAngularWeight();
-      chestOrientationManager = new ChestOrientationManager(momentumBasedController, chestControlGains, chestAngularWeight, trajectoryTimeHeadOrientation, registry);
+      chestOrientationManager = new ChestOrientationManager(momentumBasedController, walkingControllerParameters, registry);
       return chestOrientationManager;
    }
 
@@ -332,7 +329,7 @@ public class HighLevelControlManagerFactory
 
       if (chestOrientationManager != null)
       {
-         ret.addCommand(chestOrientationManager.getFeedbackControlCommand());
+         ret.addCommand(chestOrientationManager.createFeedbackControlTemplate());
       }
 
       if (pelvisOrientationManager != null)
