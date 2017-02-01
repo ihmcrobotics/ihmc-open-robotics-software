@@ -69,7 +69,7 @@ public class SimpleSideBasedExpansion implements FootstepNodeExpansion
 
       // turn in place
       FramePose turnStep = new FramePose(stanceFrame);
-      turnStep.setY(defaultStepWidth * (1.0 + Math.cos(maxYaw)) / 2.0);
+      turnStep.setY(ySign * defaultStepWidth * (1.0 + Math.cos(maxYaw)) / 2.0);
       turnStep.setX(-defaultStepWidth * Math.sin(maxYaw) / 2.0);
       turnStep.changeFrame(worldFrame);
       double yaw = node.getYaw() + ySign * maxYaw;
