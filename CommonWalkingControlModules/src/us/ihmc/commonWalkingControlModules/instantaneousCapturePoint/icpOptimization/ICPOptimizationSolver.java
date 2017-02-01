@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization;
 
 import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.Matrix;
 import org.ejml.ops.CommonOps;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.qpInput.*;
 import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSolver;
@@ -32,15 +33,6 @@ public class ICPOptimizationSolver
    private final YoMatrix yoSolver_Aeq;
    private final YoMatrix yoSolver_beq;
 
-   /*
-   private final YoMatrix yoStanceCMP_Aeq;
-   private final YoMatrix yoStanceCMP_beq;
-   private final YoMatrix yoStanceCMPDynamics_Aeq;
-   private final YoMatrix yoStanceCMPDynamics_beq;
-   private final YoMatrix yoStanceCMPSum_Aeq;
-   private final YoMatrix yoStanceCMPSum_beq;
-   */
-
    private final ICPQPIndexHandler indexHandler;
    private final ICPQPInputCalculator inputCalculator;
 
@@ -54,6 +46,7 @@ public class ICPOptimizationSolver
 
    private final DynamicsConstraintInput dynamicsConstraintInput;
    private final ConstraintToConvexRegion cmpLocationConstraint;
+   private final ConstraintToConvexRegion reachabilityConstraint;
 
    protected final DenseMatrix64F solverInput_Aeq;
    protected final DenseMatrix64F solverInput_AeqTrans;
@@ -63,24 +56,9 @@ public class ICPOptimizationSolver
    protected final DenseMatrix64F solverInput_AineqTrans;
    protected final DenseMatrix64F solverInput_bineq;
 
-   protected final DenseMatrix64F reachabilityCost_G;
-
-   protected final DenseMatrix64F reachability_Aeq;
-   protected final DenseMatrix64F reachability_beq;
-   protected final DenseMatrix64F reachabilityDynamics_Aeq;
-   protected final DenseMatrix64F reachabilityDynamics_beq;
-   protected final DenseMatrix64F reachabilitySum_Aeq;
-   protected final DenseMatrix64F reachabilitySum_beq;
-   protected final DenseMatrix64F reachability_Aineq;
-   protected final DenseMatrix64F reachability_bineq;
-
-   protected final ArrayList<DenseMatrix64F> cmpVertexLocations = new ArrayList<>();
-   protected final ArrayList<DenseMatrix64F> reachabilityVertexLocations = new ArrayList<>();
-
    protected final ArrayList<DenseMatrix64F> footstepRecursionMultipliers = new ArrayList<>();
    protected final ArrayList<DenseMatrix64F> referenceFootstepLocations = new ArrayList<>();
    protected final ArrayList<DenseMatrix64F> previousFootstepLocations = new ArrayList<>();
-   private final DenseMatrix64F footstepObjectiveVector;
 
    protected final DenseMatrix64F finalICPRecursion = new DenseMatrix64F(2, 1);
    protected final DenseMatrix64F cmpOffsetRecursionEffect = new DenseMatrix64F(2, 1);
@@ -118,7 +96,6 @@ public class ICPOptimizationSolver
    private final DenseMatrix64F dynamicRelaxationCostToGo;
 
    protected final int maximumNumberOfFootstepsToConsider;
-   private final int maximumNumberOfCMPVertices;
    private final int maximumNumberOfReachabilityVertices = 4;
 
    protected int numberOfFootstepsToConsider;
@@ -156,7 +133,6 @@ public class ICPOptimizationSolver
       inputCalculator = new ICPQPInputCalculator(indexHandler);
 
       maximumNumberOfFootstepsToConsider = icpOptimizationParameters.getMaximumNumberOfFootstepsToConsider();
-      this.maximumNumberOfCMPVertices = maximumNumberOfCMPVertices;
 
       minimumFootstepWeight = icpOptimizationParameters.getMinimumFootstepWeight();
       minimumFeedbackWeight = icpOptimizationParameters.getMinimumFeedbackWeight();
@@ -176,21 +152,11 @@ public class ICPOptimizationSolver
 
       dynamicsConstraintInput = new DynamicsConstraintInput(maximumNumberOfFreeVariables);
       cmpLocationConstraint = new ConstraintToConvexRegion(maximumNumberOfCMPVertices);
+      reachabilityConstraint = new ConstraintToConvexRegion(maximumNumberOfReachabilityVertices);
 
       solverInput_Aeq = new DenseMatrix64F(maximumNumberOfFreeVariables, maximumNumberOfLagrangeMultipliers);
       solverInput_AeqTrans = new DenseMatrix64F(maximumNumberOfLagrangeMultipliers, maximumNumberOfFreeVariables);
       solverInput_beq = new DenseMatrix64F(maximumNumberOfLagrangeMultipliers, 1);
-
-      reachabilityCost_G = new DenseMatrix64F(maximumNumberOfReachabilityVertices, maximumNumberOfReachabilityVertices);
-      reachability_Aeq = new DenseMatrix64F(maximumNumberOfFreeVariables, 3);
-      reachability_beq = new DenseMatrix64F(3, 1);
-      reachabilityDynamics_Aeq = new DenseMatrix64F(maximumNumberOfFreeVariables, 1);
-      reachabilityDynamics_beq = new DenseMatrix64F(2, 1);
-      reachabilitySum_Aeq = new DenseMatrix64F(maximumNumberOfReachabilityVertices, 1);
-      reachabilitySum_beq = new DenseMatrix64F(2, 1);
-
-      reachability_Aineq = new DenseMatrix64F(maximumNumberOfReachabilityVertices, maximumNumberOfReachabilityVertices);
-      reachability_bineq = new DenseMatrix64F(maximumNumberOfReachabilityVertices, 1);
 
       solverInput_Aineq = new DenseMatrix64F(maximumNumberOfCMPVertices + maximumNumberOfReachabilityVertices, maximumNumberOfCMPVertices + maximumNumberOfReachabilityVertices);
       solverInput_AineqTrans = new DenseMatrix64F(maximumNumberOfCMPVertices + maximumNumberOfReachabilityVertices, maximumNumberOfCMPVertices + maximumNumberOfReachabilityVertices);
@@ -203,17 +169,6 @@ public class ICPOptimizationSolver
 
          footstepRecursionMultipliers.add(new DenseMatrix64F(2, 2));
          footstepWeights.add(new DenseMatrix64F(2, 2));
-      }
-      footstepObjectiveVector =  new DenseMatrix64F(2 * maximumNumberOfFreeVariables, 1);
-
-      for (int i = 0; i < maximumNumberOfCMPVertices; i++)
-      {
-         cmpVertexLocations.add(new DenseMatrix64F(2, 1));
-      }
-
-      for (int i = 0; i < maximumNumberOfReachabilityVertices; i++)
-      {
-         reachabilityVertexLocations.add(new DenseMatrix64F(2, 1));
       }
 
       solution = new DenseMatrix64F(maximumNumberOfFreeVariables + maximumNumberOfLagrangeMultipliers, 1);
@@ -273,27 +228,7 @@ public class ICPOptimizationSolver
       indexHandler.setNumberOfReachabilityVertices(numberOfReachabilityVertices);
       this.numberOfReachabilityVertices = numberOfReachabilityVertices;
 
-      reachabilityCost_G.zero();
-      reachability_Aeq.zero();
-      reachability_beq.zero();
-      reachabilityDynamics_Aeq.zero();
-      reachabilityDynamics_beq.zero();
-      reachabilitySum_Aeq.zero();
-      reachabilitySum_beq.zero();
-
-      reachability_Aineq.zero();
-      reachability_bineq.zero();
-
-      reachabilityCost_G.reshape(numberOfReachabilityVertices, numberOfReachabilityVertices);
-      reachability_Aeq.reshape(2 * maximumNumberOfFootstepsToConsider + 4 + numberOfCMPVertices + numberOfReachabilityVertices, 3);
-      reachabilityDynamics_Aeq.reshape(2 * maximumNumberOfFootstepsToConsider + 4 + numberOfCMPVertices + numberOfReachabilityVertices, 2);
-      reachabilitySum_Aeq.reshape(numberOfReachabilityVertices, 1);
-
-      reachability_Aineq.reshape(numberOfReachabilityVertices, numberOfReachabilityVertices);
-      reachability_bineq.reshape(numberOfReachabilityVertices, 1);
-
-      for (int i = 0; i < maximumNumberOfReachabilityVertices; i++)
-         reachabilityVertexLocations.get(i).zero();
+      reachabilityConstraint.reset();
    }
 
    public void submitProblemConditions(int numberOfFootstepsToConsider, boolean useStepAdjustment, boolean useFeedback, boolean useTwoCMPs)
@@ -409,7 +344,6 @@ public class ICPOptimizationSolver
       freeVariableSolution.reshape(numberOfFreeVariables + numberOfCMPVertices + numberOfReachabilityVertices, 1);
       lagrangeMultiplierSolution.reshape(numberOfLagrangeMultipliers, 1);
       footstepLocationSolution.reshape(numberOfFootstepVariables, 1);
-      footstepObjectiveVector.reshape(numberOfFootstepVariables, 1);
    }
 
    private final DenseMatrix64F identity = CommonOps.identity(2, 2);
@@ -512,7 +446,7 @@ public class ICPOptimizationSolver
    }
 
    private final FramePoint tmpPoint = new FramePoint();
-   public void setSupportPolygonVertex(FramePoint2d vertexLocation, ReferenceFrame frame, double xBuffer, double yBuffer)
+   public void addSupportPolygonVertex(FramePoint2d vertexLocation, ReferenceFrame frame, double xBuffer, double yBuffer)
    {
       tmpPoint.setToZero(frame);
       tmpPoint.setXY(vertexLocation);
@@ -532,14 +466,13 @@ public class ICPOptimizationSolver
       cmpLocationConstraint.addVertex(tmpPoint);
    }
 
-   public void setReachabilityVertex(int vertexIndex, FramePoint2d vertexLocation, ReferenceFrame frame)
+   public void addReachabilityVertex(FramePoint2d vertexLocation, ReferenceFrame frame)
    {
       tmpPoint.setToZero(frame);
       tmpPoint.setXY(vertexLocation);
       tmpPoint.changeFrame(worldFrame);
 
-      reachabilityVertexLocations.get(vertexIndex).set(0, 0, tmpPoint.getX());
-      reachabilityVertexLocations.get(vertexIndex).set(1, 0, tmpPoint.getY());
+      reachabilityConstraint.addVertex(tmpPoint);
    }
 
    public void compute(FramePoint2d finalICPRecursion, FramePoint2d cmpOffsetRecursionEffect, FramePoint2d currentICP, FramePoint2d perfectCMP,
@@ -669,71 +602,48 @@ public class ICPOptimizationSolver
       cmpLocationConstraint.setPositionOffset(perfectCMP);
       cmpLocationConstraint.setIndexOfVariableToConstrain(indexHandler.getFeedbackCMPIndex());
       cmpLocationConstraint.setSmoothingWeight(betaSmoothing);
-
       cmpLocationConstraint.formulateConstraint();
 
       int numberOfVertices = cmpLocationConstraint.getNumberOfVertices();
-      MatrixTools.setMatrixBlock(solverInput_H, numberOfFreeVariables, numberOfFreeVariables, cmpLocationConstraint.smoothingCost, 0, 0, numberOfVertices, numberOfVertices, 1.0);
+      int cmpContstraintIndex = indexHandler.getCMPConstraintIndex();
+      MatrixTools.setMatrixBlock(solverInput_H, cmpContstraintIndex, cmpContstraintIndex, cmpLocationConstraint.smoothingCost, 0, 0, numberOfVertices, numberOfVertices, 1.0);
 
       MatrixTools.setMatrixBlock(solverInput_Aeq, cmpLocationConstraint.getIndexOfVariableToConstrain(), currentEqualityConstraintIndex, cmpLocationConstraint.indexSelectionMatrix, 0, 0, 2, 2, 1.0);
-      MatrixTools.setMatrixBlock(solverInput_Aeq, numberOfFreeVariables, currentEqualityConstraintIndex, cmpLocationConstraint.dynamics_Aeq, 0, 0, numberOfVertices, 2, 1.0);
+      MatrixTools.setMatrixBlock(solverInput_Aeq, cmpContstraintIndex, currentEqualityConstraintIndex, cmpLocationConstraint.dynamics_Aeq, 0, 0, numberOfVertices, 2, 1.0);
       MatrixTools.setMatrixBlock(solverInput_beq, currentEqualityConstraintIndex, 0, cmpLocationConstraint.dynamics_beq, 0, 0, 2, 1, 1.0);
 
-      MatrixTools.setMatrixBlock(solverInput_Aeq, numberOfFreeVariables, currentEqualityConstraintIndex + 2, cmpLocationConstraint.sum_Aeq, 0, 0, numberOfVertices, 1, 1.0);
+      MatrixTools.setMatrixBlock(solverInput_Aeq, cmpContstraintIndex, currentEqualityConstraintIndex + 2, cmpLocationConstraint.sum_Aeq, 0, 0, numberOfVertices, 1, 1.0);
       MatrixTools.setMatrixBlock(solverInput_beq, currentEqualityConstraintIndex + 2, 0, cmpLocationConstraint.sum_beq, 0, 0, 1, 1, 1.0);
 
       MatrixTools.setMatrixBlock(solverInput_Aineq, indexHandler.getCMPConstraintIndex(), currentInequalityConstraintIndex, cmpLocationConstraint.Aineq, 0, 0, numberOfVertices, numberOfVertices, 1.0);
-      MatrixTools.setMatrixBlock(solverInput_bineq, currentInequalityConstraintIndex, 0, cmpLocationConstraint.bineq, 0, 0, numberOfCMPVertices, 1, 1.0);
+      MatrixTools.setMatrixBlock(solverInput_bineq, currentInequalityConstraintIndex, 0, cmpLocationConstraint.bineq, 0, 0, numberOfVertices, 1, 1.0);
 
       currentEqualityConstraintIndex += 3;
-      currentInequalityConstraintIndex += numberOfCMPVertices;
+      currentInequalityConstraintIndex += cmpLocationConstraint.getNumberOfVertices();
    }
 
    private void addReachabilityConstraint()
    {
-      computeReachabilityConstraint();
+      reachabilityConstraint.setIndexOfVariableToConstrain(indexHandler.getFootstepIndex());
+      reachabilityConstraint.setSmoothingWeight(betaSmoothing);
+      reachabilityConstraint.formulateConstraint();
 
-      CommonOps.setIdentity(reachabilityCost_G);
-      CommonOps.scale(betaSmoothing, reachabilityCost_G);
-
+      int numberOfVertices = reachabilityConstraint.getNumberOfVertices();
       int reachabilityConstraintIndex = indexHandler.getReachabilityConstraintIndex();
-      MatrixTools.setMatrixBlock(solverInput_H, reachabilityConstraintIndex, reachabilityConstraintIndex, reachabilityCost_G, 0, 0,
-            numberOfReachabilityVertices, numberOfReachabilityVertices, 1.0);
+      MatrixTools.setMatrixBlock(solverInput_H, reachabilityConstraintIndex, reachabilityConstraintIndex, cmpLocationConstraint.smoothingCost, 0, 0, numberOfVertices, numberOfVertices, 1.0);
 
-      MatrixTools.setMatrixBlock(solverInput_Aeq, 0, currentEqualityConstraintIndex, reachability_Aeq, 0, 0, numberOfFreeVariables + numberOfCMPVertices + numberOfReachabilityVertices, 3, 1.0);
-      MatrixTools.setMatrixBlock(solverInput_beq, currentEqualityConstraintIndex, 0, reachability_beq, 0, 0, 3, 1, 1.0);
+      MatrixTools.setMatrixBlock(solverInput_Aeq, indexHandler.getFootstepIndex(), currentEqualityConstraintIndex, reachabilityConstraint.indexSelectionMatrix, 0, 0, 2, 2, 1.0);
+      MatrixTools.setMatrixBlock(solverInput_Aeq, reachabilityConstraintIndex, currentEqualityConstraintIndex, reachabilityConstraint.dynamics_Aeq, 0, 0, numberOfVertices, 2, 1.0);
+      MatrixTools.setMatrixBlock(solverInput_beq, currentEqualityConstraintIndex, 0, reachabilityConstraint.dynamics_beq, 0, 0, 2, 1, 1.0);
 
-      MatrixTools.setMatrixBlock(solverInput_Aineq, reachabilityConstraintIndex, currentInequalityConstraintIndex, reachability_Aineq, 0, 0, numberOfReachabilityVertices, numberOfReachabilityVertices, 1.0);
-      MatrixTools.setMatrixBlock(solverInput_bineq, currentInequalityConstraintIndex, 0, reachability_bineq, 0, 0, numberOfReachabilityVertices, 1, 1.0);
+      MatrixTools.setMatrixBlock(solverInput_Aeq, reachabilityConstraintIndex, currentEqualityConstraintIndex + 2, reachabilityConstraint.sum_Aeq, 0, 0, numberOfVertices, 1, 1.0);
+      MatrixTools.setMatrixBlock(solverInput_beq, currentEqualityConstraintIndex + 2, 0, reachabilityConstraint.sum_beq, 0, 0, 1, 1, 1.0);
+
+      MatrixTools.setMatrixBlock(solverInput_Aineq, reachabilityConstraintIndex, currentInequalityConstraintIndex, reachabilityConstraint.Aineq, 0, 0, numberOfVertices, numberOfVertices, 1.0);
+      MatrixTools.setMatrixBlock(solverInput_bineq, currentInequalityConstraintIndex, 0, reachabilityConstraint.bineq, 0, 0, numberOfVertices, 1, 1.0);
 
       currentEqualityConstraintIndex += 3;
-      currentInequalityConstraintIndex += numberOfReachabilityVertices;
-   }
-
-   private void computeReachabilityConstraint()
-   {
-      // set up location constraints
-      reachabilityDynamics_Aeq.set(0, 0, -1.0);
-      reachabilityDynamics_Aeq.set(1, 1, -1.0);
-
-      int offset = indexHandler.getReachabilityConstraintIndex();
-      for (int i = 0; i < numberOfReachabilityVertices; i++)
-      {
-         reachabilityDynamics_Aeq.set(offset + i, 0, reachabilityVertexLocations.get(i).get(0, 0));
-         reachabilityDynamics_Aeq.set(offset + i, 1, reachabilityVertexLocations.get(i).get(1, 0));
-
-         reachabilitySum_Aeq.set(i, 0, 1.0);
-
-         reachability_Aineq.set(i, i, -1.0);
-      }
-
-      reachabilitySum_beq.set(0, 0, 1.0);
-
-      MatrixTools.setMatrixBlock(reachability_Aeq, 0, 0, reachabilityDynamics_Aeq, 0, 0, numberOfFootstepVariables + 4 + numberOfCMPVertices + numberOfReachabilityVertices, 2, 1.0);
-      MatrixTools.setMatrixBlock(reachability_Aeq, offset, 2, reachabilitySum_Aeq, 0, 0, numberOfReachabilityVertices, 1, 1.0);
-
-      MatrixTools.setMatrixBlock(reachability_beq, 0, 0, reachabilityDynamics_beq, 0, 0, 2, 1, 1.0);
-      MatrixTools.setMatrixBlock(reachability_beq, 2, 0, reachabilitySum_beq, 0, 0, 1, 1, 1.0);
+      currentInequalityConstraintIndex += reachabilityConstraint.getNumberOfVertices();
    }
 
    private void addDynamicConstraint()

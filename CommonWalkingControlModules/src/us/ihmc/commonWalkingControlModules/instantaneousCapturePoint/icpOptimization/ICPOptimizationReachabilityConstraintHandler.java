@@ -52,19 +52,19 @@ public class ICPOptimizationReachabilityConstraintHandler
 
       tempVertex.setToZero(supportSoleFrame);
       tempVertex.set(forwardReachabilityLimit.getDoubleValue(), lateralInnerLimit);
-      solver.setReachabilityVertex(0, tempVertex, supportSoleFrame);
+      solver.addReachabilityVertex(tempVertex, supportSoleFrame);
 
       tempVertex.setToZero(supportSoleFrame);
       tempVertex.set(forwardReachabilityLimit.getDoubleValue(), lateralOuterLimit);
-      solver.setReachabilityVertex(1, tempVertex, supportSoleFrame);
+      solver.addReachabilityVertex(tempVertex, supportSoleFrame);
 
       tempVertex.setToZero(supportSoleFrame);
       tempVertex.set(backwardReachabilityLimit.getDoubleValue(), lateralInnerLimit);
-      solver.setReachabilityVertex(2, tempVertex, supportSoleFrame);
+      solver.addReachabilityVertex(tempVertex, supportSoleFrame);
 
       tempVertex.setToZero(supportSoleFrame);
       tempVertex.set(backwardReachabilityLimit.getDoubleValue(), lateralOuterLimit);
-      solver.setReachabilityVertex(3, tempVertex, supportSoleFrame);
+      solver.addReachabilityVertex(tempVertex, supportSoleFrame);
    }
 
    public void updateReachabilityConstraintForDoubleSupport(ICPOptimizationSolver solver)

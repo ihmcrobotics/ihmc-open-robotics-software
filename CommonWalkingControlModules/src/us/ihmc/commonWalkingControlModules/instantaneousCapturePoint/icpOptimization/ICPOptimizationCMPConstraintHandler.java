@@ -48,7 +48,7 @@ public class ICPOptimizationCMPConstraintHandler
          for (int i = 0; i < supportPolygon.getNumberOfVertices(); i++)
          {
             supportPolygon.getFrameVertex(i, tempVertex);
-            solver.setSupportPolygonVertex(numberOfVertices + i, tempVertex, supportPolygon.getReferenceFrame(), maxCMPDoubleSupportExitForward.getDoubleValue(),
+            solver.addSupportPolygonVertex(tempVertex, supportPolygon.getReferenceFrame(), maxCMPDoubleSupportExitForward.getDoubleValue(),
                   maxCMPDoubleSupportExitSideways.getDoubleValue());
          }
 
@@ -63,7 +63,7 @@ public class ICPOptimizationCMPConstraintHandler
       for (int i = 0; i < supportPolygon.getNumberOfVertices(); i++)
       {
          supportPolygon.getFrameVertex(i, tempVertex);
-         solver.setSupportPolygonVertex(i, tempVertex, supportPolygon.getReferenceFrame(), maxCMPSingleSupportExitForward.getDoubleValue(),
+         solver.addSupportPolygonVertex(tempVertex, supportPolygon.getReferenceFrame(), maxCMPSingleSupportExitForward.getDoubleValue(),
                maxCMPSingleSupportExitSideways.getDoubleValue());
       }
    }
