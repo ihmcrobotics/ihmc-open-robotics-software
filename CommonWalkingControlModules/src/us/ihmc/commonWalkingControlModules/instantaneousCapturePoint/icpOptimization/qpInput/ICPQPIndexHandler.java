@@ -2,18 +2,19 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimiz
 
 public class ICPQPIndexHandler
 {
-   protected int numberOfFootstepsToConsider;
-   protected int numberOfCMPVertices = 0;
-   protected int numberOfReachabilityVertices = 0;
-   protected int numberOfFreeVariables = 0;
-   protected int numberOfFootstepVariables = 0;
-   protected int numberOfLagrangeMultipliers = 2;
+   private int numberOfFootstepsToConsider;
+   private int numberOfCMPVertices = 0;
+   private int numberOfReachabilityVertices = 0;
+   private int numberOfFreeVariables = 0;
+   private int numberOfFootstepVariables = 0;
+   private int numberOfLagrangeMultipliers = 2;
 
-   protected int feedbackCMPIndex;
-   protected int dynamicRelaxationIndex;
-   protected int cmpConstraintIndex;
-   protected int reachabilityConstraintIndex;
-   protected int lagrangeMultiplierIndex;
+   private int footstepIndex = 0;
+   private int feedbackCMPIndex;
+   private int dynamicRelaxationIndex;
+   private int cmpConstraintIndex;
+   private int reachabilityConstraintIndex;
+   private int lagrangeMultiplierIndex;
 
    public ICPQPIndexHandler()
    {
@@ -69,19 +70,11 @@ public class ICPQPIndexHandler
       cmpConstraintIndex = dynamicRelaxationIndex + 2;
       reachabilityConstraintIndex = cmpConstraintIndex + numberOfCMPVertices;
       lagrangeMultiplierIndex = reachabilityConstraintIndex + numberOfReachabilityVertices;
+   }
 
-      /*
-      if (DEBUG)
-      {
-         yoFeedbackCMPIndex.set(feedbackCMPIndex);
-         yoCmpConstraintIndex.set(cmpConstraintIndex);
-         yoDynamicRelaxtionIndex.set(dynamicRelaxationIndex);
-         yoLagrangeMultiplierIndex.set(lagrangeMultiplierIndex);
-      }
-
-      reset();
-      reshape();
-      */
+   public int getFootstepIndex()
+   {
+      return footstepIndex;
    }
 
    public int getFeedbackCMPIndex()
