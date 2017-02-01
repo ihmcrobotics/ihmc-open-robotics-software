@@ -2,10 +2,7 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimiz
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.qpInput.DynamicRelaxationTaskInput;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.qpInput.FeedbackTaskInput;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.qpInput.ICPQPIndexHandler;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.qpInput.ICPQPInputCalculator;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.qpInput.*;
 import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSolver;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
@@ -31,9 +28,6 @@ public class ICPOptimizationSolver
 
    private final YoMatrix yoWeightG;
    private final YoMatrix yoWeightg;
-   private final YoMatrix footstepH;
-   private final YoMatrix footsteph;
-   private final YoMatrix footstepReferenceLocation;
 
    private final YoMatrix yoDynamics_Aeq;
    private final YoMatrix yoDynamics_beq;
@@ -54,17 +48,9 @@ public class ICPOptimizationSolver
    protected final DenseMatrix64F solverInput_h;
    protected final DenseMatrix64F solverInputResidualCost;
 
-   protected final DenseMatrix64F footstepCost_H;
-   protected final DenseMatrix64F footstepCost_h;
-   protected final DenseMatrix64F footstepResidualCost;
-
-   protected final DenseMatrix64F footstepRegularizationCost_H;
-   protected final DenseMatrix64F footstepRegularizationCost_h;
-   protected final DenseMatrix64F footstepRegularizationResidualCost;
-
-
    private final FeedbackTaskInput feedbackTaskInput;
    private final DynamicRelaxationTaskInput dynamicRelaxationTask;
+   private final FootstepTaskInput footstepTaskInput;
 
    protected final DenseMatrix64F stanceCMPCost_G;
 
@@ -195,16 +181,9 @@ public class ICPOptimizationSolver
       solverInput_h = new DenseMatrix64F(maximumNumberOfFreeVariables, 1);
       solverInputResidualCost = new DenseMatrix64F(1, 1);
 
-      footstepCost_H = new DenseMatrix64F(2 * maximumNumberOfFootstepsToConsider, 2 * maximumNumberOfFootstepsToConsider);
-      footstepCost_h = new DenseMatrix64F(2 * maximumNumberOfFootstepsToConsider, 1);
-      footstepResidualCost = new DenseMatrix64F(1, 1);
-
-      footstepRegularizationCost_H = new DenseMatrix64F(2 * maximumNumberOfFootstepsToConsider, 2 * maximumNumberOfFootstepsToConsider);
-      footstepRegularizationCost_h = new DenseMatrix64F(2 * maximumNumberOfFootstepsToConsider, 1);
-      footstepRegularizationResidualCost = new DenseMatrix64F(1, 1);
-
       feedbackTaskInput = new FeedbackTaskInput();
       dynamicRelaxationTask = new DynamicRelaxationTaskInput();
+      footstepTaskInput = new FootstepTaskInput(maximumNumberOfFootstepsToConsider);
 
       solverInput_Aeq = new DenseMatrix64F(maximumNumberOfFreeVariables, maximumNumberOfLagrangeMultipliers);
       solverInput_AeqTrans = new DenseMatrix64F(maximumNumberOfLagrangeMultipliers, maximumNumberOfFreeVariables);
@@ -286,9 +265,6 @@ public class ICPOptimizationSolver
          yoWeightG = new YoMatrix("solverQuadraticCost", maximumNumberOfFreeVariables, maximumNumberOfFreeVariables, registry);
          yoWeightg = new YoMatrix("solverLinearCost", maximumNumberOfFreeVariables, 1, registry);
 
-         footstepH = new YoMatrix("footstepQuadraticCost", 2 * maximumNumberOfFootstepsToConsider, 2 * maximumNumberOfFootstepsToConsider, registry);
-         footsteph = new YoMatrix("footstepLinearCost", 2 * maximumNumberOfFootstepsToConsider, 1, registry);
-
          yoDynamics_Aeq = new YoMatrix("dynamics_Aeq", maximumNumberOfFreeVariables, 2, registry);
          yoDynamics_beq = new YoMatrix("dynamics_beq", 2, 1, registry);
 
@@ -302,8 +278,6 @@ public class ICPOptimizationSolver
          yoStanceCMPSum_Aeq = new YoMatrix("stanceCMPSum_Aeq", maximumNumberOfCMPVertices, 1, registry);
          yoStanceCMPSum_beq = new YoMatrix("stanceCMPSum_beq", 1, 1, registry);
 
-         footstepReferenceLocation = new YoMatrix("footstepReferenceLocation", 2 * maximumNumberOfFootstepsToConsider, 1, registry);
-
          parentRegistry.addChild(registry);
       }
       else
@@ -312,9 +286,6 @@ public class ICPOptimizationSolver
 
          yoWeightG = null;
          yoWeightg = null;
-
-         footstepH = null;
-         footsteph = null;
 
          yoDynamics_Aeq = null;
          yoDynamics_beq = null;
@@ -328,8 +299,6 @@ public class ICPOptimizationSolver
          yoStanceCMPDynamics_beq = null;
          yoStanceCMPSum_Aeq = null;
          yoStanceCMPSum_beq = null;
-
-         footstepReferenceLocation = null;
       }
    }
 
@@ -438,14 +407,7 @@ public class ICPOptimizationSolver
       solverInput_h.zero();
       solverInputResidualCost.zero();
 
-      footstepCost_H.zero();
-      footstepCost_h.zero();
-      footstepResidualCost.zero();
-
-      footstepRegularizationCost_H.zero();
-      footstepRegularizationCost_h.zero();
-      footstepRegularizationResidualCost.zero();
-
+      footstepTaskInput.reset();
       feedbackTaskInput.reset();
       dynamicRelaxationTask.reset();
 
@@ -496,11 +458,7 @@ public class ICPOptimizationSolver
       solverInput_H.reshape(numberOfFreeVariables + numberOfCMPVertices + numberOfReachabilityVertices, numberOfFreeVariables + numberOfCMPVertices + numberOfReachabilityVertices);
       solverInput_h.reshape(numberOfFreeVariables + numberOfCMPVertices + numberOfReachabilityVertices, 1);
 
-      footstepCost_H.reshape(numberOfFootstepVariables, numberOfFootstepVariables);
-      footstepCost_h.reshape(numberOfFootstepVariables, 1);
-
-      footstepRegularizationCost_H.reshape(numberOfFootstepVariables, numberOfFootstepVariables);
-      footstepRegularizationCost_h.reshape(numberOfFootstepVariables, 1);
+      footstepTaskInput.reshape(numberOfFootstepsToConsider);
 
       solverInput_Aeq.reshape(numberOfFreeVariables + numberOfCMPVertices + numberOfReachabilityVertices, numberOfLagrangeMultipliers);
       solverInput_AeqTrans.reshape(numberOfLagrangeMultipliers, numberOfFreeVariables + numberOfCMPVertices + numberOfReachabilityVertices);
@@ -698,9 +656,6 @@ public class ICPOptimizationSolver
       if (useStepAdjustment)
       {
          addStepAdjustmentTask();
-
-         if (hasFootstepRegularizationTerm)
-            addFootstepRegularizationTask();
       }
 
       addDynamicConstraint();
@@ -761,54 +716,18 @@ public class ICPOptimizationSolver
       MatrixTools.addMatrixBlock(solverInput_h, dynamicRelaxationIndex, 0, dynamicRelaxationTask.linearTerm, 0, 0, 2, 1, 1.0);
    }
 
-   private final DenseMatrix64F tmpFootstepObjective = new DenseMatrix64F(2, 1);
    protected void addStepAdjustmentTask()
    {
-      footstepObjectiveVector.zero();
       for (int i = 0; i < numberOfFootstepsToConsider; i++)
       {
-         MatrixTools.setMatrixBlock(footstepCost_H, 2 * i, 2 * i, footstepWeights.get(i), 0, 0, 2, 2, 1.0);
+         inputCalculator.computeFootstepTask(i, footstepTaskInput, footstepWeights.get(i), referenceFootstepLocations.get(i));
 
-         tmpFootstepObjective.zero();
-         tmpFootstepObjective.set(referenceFootstepLocations.get(i));
-         CommonOps.mult(footstepWeights.get(i), tmpFootstepObjective, tmpFootstepObjective);
-         CommonOps.multTransA(referenceFootstepLocations.get(i), tmpFootstepObjective, footstepRegularizationResidualCost);
-
-         MatrixTools.setMatrixBlock(footstepCost_h, 2 * i, 0, tmpFootstepObjective, 0, 0, 2, 1, 1.0);
-         CommonOps.addEquals(solverInputResidualCost, footstepRegularizationResidualCost);
-
-         MatrixTools.setMatrixBlock(footstepObjectiveVector, 2 * i, 0, referenceFootstepLocations.get(i), 0, 0, 2, 1, 1.0);
+         if (hasFootstepRegularizationTerm)
+            inputCalculator.computeFootstepRegularizationTask(i, footstepTaskInput, footstepRegularizationWeight, previousFootstepLocations.get(i));
       }
 
-      MatrixTools.addMatrixBlock(solverInput_H, 0, 0, footstepCost_H, 0, 0, numberOfFootstepVariables, numberOfFootstepVariables, 1.0);
-      MatrixTools.addMatrixBlock(solverInput_h, 0, 0, footstepCost_h, 0, 0, numberOfFootstepVariables, 1, 1.0);
-
-      if (localDebug)
-      {
-         footstepReferenceLocation.set(footstepObjectiveVector);
-         footstepH.set(footstepCost_H);
-         footsteph.set(footstepCost_h);
-      }
-   }
-
-   private final DenseMatrix64F tmpObjective = new DenseMatrix64F(2, 1);
-   protected void addFootstepRegularizationTask()
-   {
-      for (int i = 0; i < numberOfFootstepsToConsider; i++)
-      {
-         MatrixTools.setMatrixBlock(footstepRegularizationCost_H, 2 * i, 2 * i, footstepRegularizationWeight, 0, 0, 2, 2, 1.0);
-
-         tmpObjective.zero();
-         tmpObjective.set(previousFootstepLocations.get(i));
-         CommonOps.mult(footstepRegularizationWeight, tmpObjective, tmpObjective);
-         CommonOps.multTransA(previousFootstepLocations.get(i), tmpObjective, footstepRegularizationResidualCost);
-
-         MatrixTools.setMatrixBlock(footstepRegularizationCost_h, 2 * i, 0, tmpObjective, 0, 0, 2, 1, 1.0);
-         CommonOps.addEquals(solverInputResidualCost, footstepRegularizationResidualCost);
-      }
-
-      MatrixTools.addMatrixBlock(solverInput_H, 0, 0, footstepRegularizationCost_H, 0, 0, numberOfFootstepVariables, numberOfFootstepVariables, 1.0);
-      MatrixTools.addMatrixBlock(solverInput_h, 0, 0, footstepRegularizationCost_h, 0, 0, numberOfFootstepVariables, 1, 1.0);
+      MatrixTools.addMatrixBlock(solverInput_H, 0, 0, footstepTaskInput.quadraticTerm, 0, 0, numberOfFootstepVariables, numberOfFootstepVariables, 1.0);
+      MatrixTools.addMatrixBlock(solverInput_h, 0, 0, footstepTaskInput.linearTerm, 0, 0, numberOfFootstepVariables, 1, 1.0);
    }
 
    private void addCMPLocationConstraint()
@@ -1051,11 +970,15 @@ public class ICPOptimizationSolver
       CommonOps.mult(solverInput_H, freeVariableSolution, tmpCost);
       CommonOps.multTransA(freeVariableSolution, tmpCost, costToGo);
 
+      /*
       CommonOps.mult(footstepCost_H, footstepLocationSolution, tmpFootstepCost);
       CommonOps.multTransA(footstepLocationSolution, tmpFootstepCost, footstepCostToGo);
+      */
 
+      /*
       CommonOps.mult(footstepRegularizationCost_H, footstepLocationSolution, tmpFootstepCost);
       CommonOps.multTransA(footstepLocationSolution, tmpFootstepCost, footstepRegularizationCostToGo);
+      */
 
       CommonOps.mult(feedbackTaskInput.quadraticTerm, feedbackDeltaSolution, tmpFeedbackCost);
       CommonOps.multTransA(feedbackDeltaSolution, tmpFeedbackCost, feedbackCostToGo);
@@ -1072,11 +995,15 @@ public class ICPOptimizationSolver
       CommonOps.multTransA(solverInput_h, freeVariableSolution, tmpCostScalar);
       CommonOps.addEquals(costToGo, tmpCostScalar);
 
+      /*
       CommonOps.multTransA(-1.0, footstepCost_h, footstepLocationSolution, tmpCostScalar);
       CommonOps.addEquals(footstepCostToGo, tmpCostScalar);
+      */
 
+      /*
       CommonOps.multTransA(-1.0, footstepRegularizationCost_h, footstepLocationSolution, tmpCostScalar);
       CommonOps.addEquals(footstepRegularizationCostToGo, tmpCostScalar);
+      */
 
       CommonOps.multTransA(-1.0, feedbackTaskInput.linearTerm, feedbackDeltaSolution, tmpCostScalar);
       CommonOps.addEquals(feedbackCostToGo, tmpCostScalar);
@@ -1088,8 +1015,8 @@ public class ICPOptimizationSolver
 
       // residual cost
       CommonOps.addEquals(costToGo, solverInputResidualCost);
-      CommonOps.addEquals(footstepCostToGo, footstepResidualCost);
-      CommonOps.addEquals(footstepRegularizationCostToGo, footstepRegularizationResidualCost);
+      //CommonOps.addEquals(footstepCostToGo, footstepResidualCost);
+      //CommonOps.addEquals(footstepRegularizationCostToGo, footstepRegularizationResidualCost);
       CommonOps.addEquals(feedbackCostToGo, feedbackTaskInput.residualCost);
       //CommonOps.addEquals(feedbackRegularizationCostToGo, feedbackRegularizationResidualCost);
       CommonOps.addEquals(dynamicRelaxationCostToGo, dynamicRelaxationTask.residualCost);
