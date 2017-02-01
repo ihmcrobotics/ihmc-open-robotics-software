@@ -13,8 +13,8 @@ public class SimpleSideBasedExpansion implements FootstepNodeExpansion
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private double maxYaw = Math.PI / 8.0;
-   private double defaultStepWidth = 0.25;
+   private static final double maxYaw = Math.PI / 8.0;
+   private static final double defaultStepWidth = 0.25;
 
    private double[] stepLengths = new double[] {0.0, FootstepNode.gridSizeX, 0.1, 0.2, 0.4};
    private double[] stepWidths = new double[] {0.15, defaultStepWidth - FootstepNode.gridSizeY, defaultStepWidth + FootstepNode.gridSizeY};
@@ -66,6 +66,14 @@ public class SimpleSideBasedExpansion implements FootstepNodeExpansion
          sideStep.changeFrame(worldFrame);
          neighbors.add(new FootstepNode(sideStep.getX(), sideStep.getY(), node.getYaw(), stepSide));
       }
+
+      // turn in place
+      FramePose turnStep = new FramePose(stanceFrame);
+      turnStep.setY(defaultStepWidth * (1.0 + Math.cos(maxYaw)) / 2.0);
+      turnStep.setX(-defaultStepWidth * Math.sin(maxYaw) / 2.0);
+      turnStep.changeFrame(worldFrame);
+      double yaw = node.getYaw() + ySign * maxYaw;
+      neighbors.add(new FootstepNode(turnStep.getX(), turnStep.getY(), yaw, stepSide));
 
       return neighbors;
    }
