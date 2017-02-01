@@ -65,6 +65,8 @@ public class Plotter implements PlotterInterface
    private boolean xyZoomEnabled = ENABLE_XY_ZOOM_BY_DEFAULT;
    private boolean rotationEnabled = ENABLE_ROTATION_BY_DEFAULT;
    
+   private final PlotterColors plotterColors;
+   
    private final JPanel panel;
    
    private final PlotterMouseAdapter mouseAdapter;
@@ -106,6 +108,13 @@ public class Plotter implements PlotterInterface
    
    public Plotter()
    {
+      this(PlotterColors.simulationConstructionSetStyle());
+   }
+   
+   public Plotter(PlotterColors plotterColors)
+   {
+      this.plotterColors = plotterColors;
+      
       panel = new JPanel()
       {
          @Override
@@ -202,7 +211,7 @@ public class Plotter implements PlotterInterface
       graphics2dAdapter = new Graphics2DAdapter(plotter2dAdapter);
       
       panel.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createRaisedBevelBorder(), BorderFactory.createLoweredBevelBorder()));
-      panel.setBackground(PlotterColors.BACKGROUND);
+      panel.setBackground(plotterColors.getBackgroundColor());
       
       mouseAdapter = new PlotterMouseAdapter();
       componentAdapter = new PlotterComponentAdapter();
@@ -312,7 +321,7 @@ public class Plotter implements PlotterInterface
             
             if (showLabels)
             {
-               graphics2d.setColor(PlotterColors.LABEL_COLOR);
+               graphics2d.setColor(plotterColors.getLabelColor());
                gridLinePencil.changeFrame(metersFrame);
                String labelString = FormattingTools.getFormattedToSignificantFigures(gridLinePencil.getX(), 2);
                gridLinePencil.changeFrame(pixelsFrame);
@@ -358,7 +367,7 @@ public class Plotter implements PlotterInterface
             
             if (showLabels)
             {
-               graphics2d.setColor(PlotterColors.LABEL_COLOR);
+               graphics2d.setColor(plotterColors.getLabelColor());
                gridLinePencil.changeFrame(metersFrame);
                String labelString = FormattingTools.getFormattedToSignificantFigures(gridLinePencil.getY(), 2);
                gridLinePencil.changeFrame(pixelsFrame);
@@ -384,7 +393,7 @@ public class Plotter implements PlotterInterface
       
       // paint grid centerline
       origin.changeFrame(pixelsFrame);
-      graphics2d.setColor(PlotterColors.GRID_AXIS);
+      graphics2d.setColor(plotterColors.getGridAxisColor());
       tempGridLine.set(origin.getX(), origin.getY(), 1.0, 0.0);
       graphics2d.drawLine(pixelsFrame, tempGridLine);
       tempGridLine.set(origin.getX(), origin.getY(), 0.0, 1.0);
@@ -424,7 +433,7 @@ public class Plotter implements PlotterInterface
       if (showSelection)
       {
          selected.changeFrame(screenFrame);
-         graphics2d.setColor(PlotterColors.SELECTION);
+         graphics2d.setColor(plotterColors.getSelectionColor());
          double crossSize = 8.0;
          graphics2d.drawLineSegment(screenFrame, selected.getX() - crossSize,
                                                  selected.getY() - crossSize,
@@ -439,7 +448,7 @@ public class Plotter implements PlotterInterface
       // paint selected area
       if (showSelection)
       {
-         graphics2d.setColor(PlotterColors.SELECTION);
+         graphics2d.setColor(plotterColors.getSelectionColor());
          double Xmin, Xmax, Ymin, Ymax;
          if (selectionAreaStart.getX() > selectionAreaEnd.getX())
          {
@@ -497,15 +506,15 @@ public class Plotter implements PlotterInterface
    {
       if (nthGridLineFromOrigin % 10 == 0)
       {
-         graphics2d.setColor(PlotterColors.GRID_EVERY_10);
+         graphics2d.setColor(plotterColors.getGridEveryTenColor());
       }
       else if (nthGridLineFromOrigin % 5 == 0)
       {
-         graphics2d.setColor(PlotterColors.GRID_EVERY_5);
+         graphics2d.setColor(plotterColors.getGridEveryFiveColor());
       }
       else
       {
-         graphics2d.setColor(PlotterColors.GRID_EVERY_1);
+         graphics2d.setColor(plotterColors.getGridEveryOneColor());
       }
    }
    
