@@ -6,10 +6,15 @@ import org.ejml.ops.CommonOps;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 
+import java.util.ArrayList;
+
 public class ICPQPInputCalculator
 {
-   public ICPQPInputCalculator(ICPOptimizationParameters icpOptimizationParameters, int maximumNumberOfCMPVertices)
+   public ICPQPIndexHandler indexHandler;
+
+   public ICPQPInputCalculator(ICPQPIndexHandler indexHandler)
    {
+      this.indexHandler = indexHandler;
    }
 
    public void computeFeedbackTask(ICPQPInput icpQPInput, DenseMatrix64F feedbackWeight)
@@ -58,5 +63,37 @@ public class ICPQPInputCalculator
       CommonOps.multTransA(objective, tmpObjective, icpQPInput.residualCost); // // FIXME: 1/31/17 
 
       MatrixTools.addMatrixBlock(icpQPInput.linearTerm, 2 * footstepNumber, 0, tmpObjective, 0, 0, 2, 1, 1.0);
+   }
+
+   private static final DenseMatrix64F identity = CommonOps.identity(2, 2);
+   public void computeDynamicsConstraint(ICPEqualityConstraintInput icpEqualityInput, DenseMatrix64F currentICP, DenseMatrix64F finalICPRecursion,
+         DenseMatrix64F stanceCMPProjection, DenseMatrix64F initialICPProjection, boolean useTwoCMPs, DenseMatrix64F cmpOffsetRecursionEffect,
+         boolean useFeedback, DenseMatrix64F feedbackGain, boolean useStepAdjustment, int numberOfSteps, ArrayList<DenseMatrix64F> footstepRecursionMultipliers)
+   {
+      CommonOps.setIdentity(identity);
+      MatrixTools.setMatrixBlock(icpEqualityInput.Aeq, indexHandler.getDynamicRelaxationIndex(), 0, identity, 0, 0, 2, 2, 1.0);
+
+      if (useFeedback)
+      {
+         CommonOps.invert(feedbackGain);
+
+         MatrixTools.setMatrixBlock(icpEqualityInput.Aeq, indexHandler.getFeedbackCMPIndex(), 0, feedbackGain, 0, 0, 2, 2, 1.0);
+      }
+      if (useStepAdjustment)
+      {
+         for (int i = 0; i < numberOfSteps; i++)
+         {
+            MatrixTools.setMatrixBlock(icpEqualityInput.Aeq, 2 * i, 0, footstepRecursionMultipliers.get(i), 0, 0, 2, 2, 1.0);
+         }
+      }
+
+      CommonOps.subtractEquals(currentICP, finalICPRecursion);
+      CommonOps.subtractEquals(currentICP, stanceCMPProjection);
+      CommonOps.subtractEquals(currentICP, initialICPProjection);
+
+      if (useTwoCMPs)
+         CommonOps.subtractEquals(currentICP, cmpOffsetRecursionEffect);
+
+      MatrixTools.setMatrixBlock(icpEqualityInput.beq, 0, 0, currentICP, 0, 0, 2, 1, 1.0);
    }
 }
