@@ -4,6 +4,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ArmDesiredAc
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ArmTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.NeckTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.OneDoFJointTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SpineTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmDesiredAccelerationsMessage.ArmControlMode;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.lists.RecyclingArrayList;
@@ -18,6 +19,11 @@ public class ControllerCommandValidationTools
    }
 
    public static boolean checkNeckTrajectoryCommand(OneDoFJoint[] joints, NeckTrajectoryCommand command)
+   {
+      return checkOneDoFJointTrajectoryCommandList(joints, command.getTrajectoryPointLists());
+   }
+
+   public static boolean checkSpineTrajectoryCommand(OneDoFJoint[] joints, SpineTrajectoryCommand command)
    {
       return checkOneDoFJointTrajectoryCommandList(joints, command.getTrajectoryPointLists());
    }

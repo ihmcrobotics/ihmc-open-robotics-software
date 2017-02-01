@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.controlModules;
+package us.ihmc.commonWalkingControlModules.controlModules.chest;
 
 import static us.ihmc.communication.packets.Packet.INVALID_MESSAGE_ID;
 
@@ -30,90 +30,70 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.tools.io.printing.PrintTools;
 
-public class ChestOrientationManager
+public class TaskspaceChestControlState extends ChestControlState
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+
    private final OrientationFeedbackControlCommand orientationFeedbackControlCommand = new OrientationFeedbackControlCommand();
-
-   private final DoubleYoVariable yoTime;
-   private final DoubleYoVariable receivedNewChestOrientationTime = new DoubleYoVariable("receivedNewChestOrientationTime", registry);
-
-   private final BooleanYoVariable isTrajectoryStopped = new BooleanYoVariable("isChestOrientationTrajectoryStopped", registry);
-   private final BooleanYoVariable isTrackingOrientation = new BooleanYoVariable("isTrackingOrientation", registry);
-
-   private final BooleanYoVariable hasBeenInitialized = new BooleanYoVariable("hasChestOrientationManagerBeenInitialized", registry);
-
-   private final MultipleWaypointsOrientationTrajectoryGenerator orientationTrajectoryGenerator;
-   private final ReferenceFrame pelvisZUpFrame;
-   private final ReferenceFrame chestFrame;
-
-   private final FrameOrientation tempOrientation = new FrameOrientation();
+   private final YoFrameVector yoChestAngularWeight = new YoFrameVector("chestWeight", null, registry);
+   private final Vector3d chestAngularWeight = new Vector3d();
+   private final YoOrientationPIDGainsInterface gains;
 
    private final FrameOrientation desiredOrientation = new FrameOrientation();
    private final FrameVector desiredAngularVelocity = new FrameVector();
    private final FrameVector feedForwardAngularAcceleration = new FrameVector();
+
+   private final MultipleWaypointsOrientationTrajectoryGenerator orientationTrajectoryGenerator;
    private final FrameSO3TrajectoryPoint initialTrajectoryPoint = new FrameSO3TrajectoryPoint();
+   private final FrameSO3TrajectoryPoint tempTrajectoryPoint = new FrameSO3TrajectoryPoint();
+   private final ReferenceFrame pelvisZUpFrame;
 
-   private final YoFrameVector yoChestAngularWeight = new YoFrameVector("chestWeight", null, registry);
-   private final Vector3d chestAngularWeight = new Vector3d();
-
-   private final YoOrientationPIDGainsInterface gains;
+   private final CommandArrayDeque<ChestTrajectoryCommand> commandQueue = new CommandArrayDeque<>(ChestTrajectoryCommand.class);
+   private final BooleanYoVariable isReadyToHandleQueuedCommands = new BooleanYoVariable("chestIsReadyToHandleQueuedChestTrajectoryCommands", registry);
+   private final LongYoVariable numberOfQueuedCommands = new LongYoVariable("chestNumberOfQueuedCommands", registry);
 
    private final LongYoVariable lastCommandId;
 
-   private final BooleanYoVariable isReadyToHandleQueuedCommands;
-   private final LongYoVariable numberOfQueuedCommands;
-   private final CommandArrayDeque<ChestTrajectoryCommand> commandQueue = new CommandArrayDeque<>(ChestTrajectoryCommand.class);
+   private final BooleanYoVariable isTrajectoryStopped = new BooleanYoVariable("isChestOrientationTrajectoryStopped", registry);
+   private final BooleanYoVariable isTrackingOrientation = new BooleanYoVariable("isTrackingOrientation", registry);
+
+   private final DoubleYoVariable yoTime;
+   private final DoubleYoVariable receivedNewChestOrientationTime = new DoubleYoVariable("receivedNewChestOrientationTime", registry);
 
    private final BooleanYoVariable followChestRollSineWave = new BooleanYoVariable("followChestRollSineWave", registry);
    private final DoubleYoVariable chestRollSineFrequency = new DoubleYoVariable("chestRollSineFrequency", registry);
    private final DoubleYoVariable chestRollSineMagnitude = new DoubleYoVariable("chestRollSineMagnitude", registry);
 
-   public ChestOrientationManager(HighLevelHumanoidControllerToolbox momentumBasedController, YoOrientationPIDGainsInterface gains, Vector3d angularWeight,
-         double trajectoryTime, YoVariableRegistry parentRegistry)
-   {
-      this.gains = gains;
-      yoTime = momentumBasedController.getYoTime();
-      pelvisZUpFrame = momentumBasedController.getPelvisZUpFrame();
+   private final FrameOrientation tempOrientation = new FrameOrientation();
 
-      FullRobotModel fullRobotModel = momentumBasedController.getFullRobotModel();
+   public TaskspaceChestControlState(HighLevelHumanoidControllerToolbox humanoidControllerToolbox, YoOrientationPIDGainsInterface gains, YoVariableRegistry parentRegistry)
+   {
+      super(ChestControlMode.TASKSPACE);
+
+      this.gains = gains;
+      yoTime = humanoidControllerToolbox.getYoTime();
+
+      FullRobotModel fullRobotModel = humanoidControllerToolbox.getFullRobotModel();
       RigidBody chest = fullRobotModel.getChest();
       RigidBody elevator = fullRobotModel.getElevator();
-      chestFrame = chest.getBodyFixedFrame();
+      pelvisZUpFrame = humanoidControllerToolbox.getPelvisZUpFrame();
 
-      yoChestAngularWeight.set(angularWeight);
-      yoChestAngularWeight.get(chestAngularWeight);
-      orientationFeedbackControlCommand.setWeightsForSolver(chestAngularWeight);
       orientationFeedbackControlCommand.set(elevator, chest);
       orientationFeedbackControlCommand.setGains(gains);
 
-      boolean allowMultipleFrames = true;
-      String namePrefix = "chest";
-      orientationTrajectoryGenerator = new MultipleWaypointsOrientationTrajectoryGenerator(namePrefix, allowMultipleFrames, pelvisZUpFrame, registry);
+      orientationTrajectoryGenerator = new MultipleWaypointsOrientationTrajectoryGenerator("chest", true, pelvisZUpFrame, registry);
       orientationTrajectoryGenerator.registerNewTrajectoryFrame(worldFrame);
 
-      lastCommandId = new LongYoVariable(namePrefix + "LastCommandId", registry);
+      lastCommandId = new LongYoVariable("chestLastCommandId", registry);
       lastCommandId.set(Packet.INVALID_MESSAGE_ID);
-
-      isReadyToHandleQueuedCommands = new BooleanYoVariable(namePrefix + "IsReadyToHandleQueuedChestTrajectoryCommands", registry);
-      numberOfQueuedCommands = new LongYoVariable(namePrefix + "NumberOfQueuedCommands", registry);
 
       parentRegistry.addChild(registry);
    }
 
-   public void initialize()
-   {
-      if (hasBeenInitialized.getBooleanValue())
-         return;
-
-      hasBeenInitialized.set(true);
-
-      holdCurrentOrientation();
-   }
-
-   public void compute()
+   @Override
+   public void doAction()
    {
       if (isTrackingOrientation.getBooleanValue())
       {
@@ -124,10 +104,12 @@ public class ChestOrientationManager
 
             if (orientationTrajectoryGenerator.isDone() && !commandQueue.isEmpty())
             {
-               double firstTrajectoryPointTime = orientationTrajectoryGenerator.getLastWaypointTime();
+               orientationTrajectoryGenerator.getLastWaypoint(tempTrajectoryPoint);
+               double firstTrajectoryPointTime = tempTrajectoryPoint.getTime();
+               tempTrajectoryPoint.getOrientation(tempOrientation);
                ChestTrajectoryCommand command = commandQueue.poll();
                numberOfQueuedCommands.decrement();
-               initializeTrajectoryGenerator(command, firstTrajectoryPointTime);
+               initializeTrajectoryGenerator(command, firstTrajectoryPointTime, tempOrientation);
                orientationTrajectoryGenerator.compute(deltaTime);
             }
          }
@@ -162,11 +144,13 @@ public class ChestOrientationManager
       orientationFeedbackControlCommand.setWeightsForSolver(chestAngularWeight);
    }
 
-   public void holdCurrentOrientation()
+   public void holdOrientation(FrameOrientation orientation)
    {
+      desiredOrientation.setIncludingFrame(orientation);
+      desiredOrientation.changeFrame(pelvisZUpFrame);
+      initialTrajectoryPoint.setToZero(pelvisZUpFrame);
+      initialTrajectoryPoint.setOrientation(desiredOrientation);
       receivedNewChestOrientationTime.set(yoTime.getDoubleValue());
-      initialTrajectoryPoint.setToZero(chestFrame);
-      initialTrajectoryPoint.changeFrame(pelvisZUpFrame);
 
       orientationTrajectoryGenerator.clear(pelvisZUpFrame);
       orientationTrajectoryGenerator.appendWaypoint(initialTrajectoryPoint);
@@ -175,7 +159,7 @@ public class ChestOrientationManager
       isTrajectoryStopped.set(false);
    }
 
-   public void handleChestTrajectoryCommand(ChestTrajectoryCommand command)
+   public void handleChestTrajectoryCommand(ChestTrajectoryCommand command, FrameOrientation currentDesired)
    {
       switch (command.getExecutionMode())
       {
@@ -183,7 +167,7 @@ public class ChestOrientationManager
          isReadyToHandleQueuedCommands.set(true);
          clearCommandQueue(command.getCommandId());
          receivedNewChestOrientationTime.set(yoTime.getDoubleValue());
-         initializeTrajectoryGenerator(command, 0.0);
+         initializeTrajectoryGenerator(command, 0.0, currentDesired);
          return;
       case QUEUE:
          boolean success = queueChestTrajectoryCommand(command);
@@ -191,7 +175,7 @@ public class ChestOrientationManager
          {
             isReadyToHandleQueuedCommands.set(false);
             clearCommandQueue(INVALID_MESSAGE_ID);
-            holdCurrentOrientation();
+            holdOrientation(currentDesired);
          }
          return;
       default:
@@ -230,22 +214,17 @@ public class ChestOrientationManager
       return true;
    }
 
-   private void initializeTrajectoryGenerator(ChestTrajectoryCommand command, double firstTrajectoryPointTime)
+   private void initializeTrajectoryGenerator(ChestTrajectoryCommand command, double firstTrajectoryPointTime, FrameOrientation currentDesired)
    {
       command.addTimeOffset(firstTrajectoryPointTime);
+      orientationTrajectoryGenerator.clear(worldFrame);
 
       if (command.getTrajectoryPoint(0).getTime() > firstTrajectoryPointTime + 1.0e-5)
       {
-         orientationTrajectoryGenerator.getOrientation(desiredOrientation);
+         desiredOrientation.setIncludingFrame(currentDesired);
          desiredOrientation.changeFrame(worldFrame);
          desiredAngularVelocity.setToZero(worldFrame);
-
-         orientationTrajectoryGenerator.clear(worldFrame);
          orientationTrajectoryGenerator.appendWaypoint(0.0, desiredOrientation, desiredAngularVelocity);
-      }
-      else
-      {
-         orientationTrajectoryGenerator.clear(worldFrame);
       }
 
       int numberOfTrajectoryPoints = queueExceedingTrajectoryPointsIfNeeded(command);
@@ -256,6 +235,7 @@ public class ChestOrientationManager
       }
 
       orientationTrajectoryGenerator.changeFrame(pelvisZUpFrame);
+
       orientationTrajectoryGenerator.initialize();
       isTrackingOrientation.set(true);
       isTrajectoryStopped.set(false);
@@ -286,23 +266,23 @@ public class ChestOrientationManager
       return maximumNumberOfWaypoints;
    }
 
+   @Override
    public void handleStopAllTrajectoryCommand(StopAllTrajectoryCommand command)
    {
       isTrajectoryStopped.set(command.isStopAllTrajectory());
    }
 
-   public void handleGoHomeCommand(GoHomeCommand command)
+   public void handleGoHomeCommand(GoHomeCommand command, FrameOrientation currentDesired)
    {
       if (command.getRequest(BodyPart.CHEST))
-         goToHomeFromCurrentDesired(command.getTrajectoryTime());
+         goToHome(command.getTrajectoryTime(), currentDesired);
    }
 
-   public void goToHomeFromCurrentDesired(double trajectoryTime)
+   public void goToHome(double trajectoryTime, FrameOrientation currentDesired)
    {
       receivedNewChestOrientationTime.set(yoTime.getDoubleValue());
 
-      orientationTrajectoryGenerator.getOrientation(desiredOrientation);
-
+      desiredOrientation.setIncludingFrame(currentDesired);
       desiredOrientation.changeFrame(pelvisZUpFrame);
       desiredAngularVelocity.setToZero(pelvisZUpFrame);
       orientationTrajectoryGenerator.clear(pelvisZUpFrame);
@@ -316,25 +296,6 @@ public class ChestOrientationManager
       isTrajectoryStopped.set(false);
    }
 
-   public void goToHomeFromCurrent(double trajectoryTime)
-   {
-      receivedNewChestOrientationTime.set(yoTime.getDoubleValue());
-      orientationTrajectoryGenerator.clear(pelvisZUpFrame);
-
-      desiredAngularVelocity.setToZero(pelvisZUpFrame);
-      desiredOrientation.setToZero(pelvisZUpFrame);
-      initialTrajectoryPoint.setToZero(chestFrame);
-      initialTrajectoryPoint.changeFrame(pelvisZUpFrame);
-
-      orientationTrajectoryGenerator.appendWaypoint(initialTrajectoryPoint);
-      orientationTrajectoryGenerator.appendWaypoint(trajectoryTime, desiredOrientation, desiredAngularVelocity);
-      orientationTrajectoryGenerator.initialize();
-
-      isTrackingOrientation.set(true);
-      isTrajectoryStopped.set(false);
-
-   }
-
    private void clearCommandQueue(long lastCommandId)
    {
       commandQueue.clear();
@@ -342,13 +303,37 @@ public class ChestOrientationManager
       this.lastCommandId.set(lastCommandId);
    }
 
+   public void setWeights(Vector3d weights)
+   {
+      yoChestAngularWeight.set(weights);
+   }
+
+   @Override
    public InverseDynamicsCommand<?> getInverseDynamicsCommand()
    {
       return null;
    }
 
+   @Override
    public FeedbackControlCommand<?> getFeedbackControlCommand()
    {
       return orientationFeedbackControlCommand;
    }
+
+   @Override
+   public void doTransitionIntoAction()
+   {
+   }
+
+   @Override
+   public void doTransitionOutOfAction()
+   {
+      orientationTrajectoryGenerator.clear();
+   }
+
+   public void getDesiredOrientation(FrameOrientation desiredOrientationToPack)
+   {
+      orientationTrajectoryGenerator.getOrientation(desiredOrientationToPack);
+   }
+
 }
