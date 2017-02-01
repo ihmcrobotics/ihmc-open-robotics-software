@@ -148,4 +148,21 @@ public class MocapToPelvisFrameConverter
       pelvisPose.changeFrame(ReferenceFrame.getWorldFrame());
       pelvisPose.getRigidBodyTransform(pelvisTransform);
    }
+   
+   public Vector3d getMarkerOffsetInPelvisFrame(int markerId)
+   {
+      switch(markerId)
+      {
+      case 1:
+         return markerPoint1InPelvisFrame;
+      case 2:
+         return markerPoint2InPelvisFrame;
+      case 3:
+         return markerPoint3InPelvisFrame;
+      case 4:
+         return markerPoint4InPelvisFrame;
+      default:
+         return null;
+      }
+   }
 }
