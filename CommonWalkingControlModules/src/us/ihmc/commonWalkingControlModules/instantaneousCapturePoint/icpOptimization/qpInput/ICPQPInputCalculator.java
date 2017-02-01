@@ -70,7 +70,6 @@ public class ICPQPInputCalculator
          DenseMatrix64F stanceCMPProjection, DenseMatrix64F initialICPProjection, boolean useTwoCMPs, DenseMatrix64F cmpOffsetRecursionEffect,
          boolean useFeedback, DenseMatrix64F feedbackGain, boolean useStepAdjustment, int numberOfSteps, ArrayList<DenseMatrix64F> footstepRecursionMultipliers)
    {
-      CommonOps.setIdentity(identity);
       MatrixTools.setMatrixBlock(icpEqualityInput.Aeq, indexHandler.getDynamicRelaxationIndex(), 0, identity, 0, 0, 2, 2, 1.0);
 
       if (useFeedback)

@@ -137,11 +137,13 @@ public class ICPOptimizationSolverTest extends ICPOptimizationSolver
       assertEquals(name, 1, footstepRegularizationCost_h.numCols, epsilon);
       */
 
+      /*
       if (useFeedback)
       {
          assertEquals(name, this.numberOfCMPVertices, stanceCMPCost_G.numRows, epsilon);
          assertEquals(name, this.numberOfCMPVertices, stanceCMPCost_G.numCols, epsilon);
       }
+      */
 
       /*
       assertEquals(name, 2, feedbackCost_H.numRows, epsilon);
@@ -181,6 +183,7 @@ public class ICPOptimizationSolverTest extends ICPOptimizationSolver
       assertEquals(name, 1, dynamics_beq.numCols, epsilon);
       */
 
+      /*
       if (useFeedback)
       {
          assertEquals(name, 4 + numberOfVertices, stanceCMP_Aeq.numRows, epsilon);
@@ -203,6 +206,7 @@ public class ICPOptimizationSolverTest extends ICPOptimizationSolver
          assertEquals(name, numberOfVertices, stanceCMP_bineq.numRows, epsilon);
          assertEquals(name, 1, stanceCMP_bineq.numCols, epsilon);
       }
+      */
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 1.0)
@@ -386,11 +390,13 @@ public class ICPOptimizationSolverTest extends ICPOptimizationSolver
       JUnitTools.assertMatrixEquals(dynamics_beq, extractedDynamics_beq, epsilon);
       */
 
+      /*
       JUnitTools.assertMatrixEquals(stanceCMPDynamics_Aeq, extractedCMPDynamics_Aeq, epsilon);
       JUnitTools.assertMatrixEquals(stanceCMPDynamics_beq, extractedCMPDynamics_beq, epsilon);
 
       JUnitTools.assertMatrixEquals(stanceCMPSum_Aeq, extractedCMPSum_Aeq, epsilon);
       JUnitTools.assertMatrixEquals(stanceCMPSum_beq, extractedCMPSum_beq, epsilon);
+      */
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 1.0)
