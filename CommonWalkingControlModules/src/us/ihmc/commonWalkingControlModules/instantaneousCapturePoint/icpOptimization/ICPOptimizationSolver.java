@@ -32,12 +32,14 @@ public class ICPOptimizationSolver
    private final YoMatrix yoSolver_Aeq;
    private final YoMatrix yoSolver_beq;
 
+   /*
    private final YoMatrix yoStanceCMP_Aeq;
    private final YoMatrix yoStanceCMP_beq;
    private final YoMatrix yoStanceCMPDynamics_Aeq;
    private final YoMatrix yoStanceCMPDynamics_beq;
    private final YoMatrix yoStanceCMPSum_Aeq;
    private final YoMatrix yoStanceCMPSum_beq;
+   */
 
    private final ICPQPIndexHandler indexHandler;
    private final ICPQPInputCalculator inputCalculator;
@@ -51,8 +53,7 @@ public class ICPOptimizationSolver
    private final FootstepTaskInput footstepTaskInput;
 
    private final DynamicsConstraintInput dynamicsConstraintInput;
-
-   protected final DenseMatrix64F stanceCMPCost_G;
+   private final ConstraintToConvexRegion cmpLocationConstraint;
 
    protected final DenseMatrix64F solverInput_Aeq;
    protected final DenseMatrix64F solverInput_AeqTrans;
@@ -61,15 +62,6 @@ public class ICPOptimizationSolver
    protected final DenseMatrix64F solverInput_Aineq;
    protected final DenseMatrix64F solverInput_AineqTrans;
    protected final DenseMatrix64F solverInput_bineq;
-
-   protected final DenseMatrix64F stanceCMP_Aeq;
-   protected final DenseMatrix64F stanceCMP_beq;
-   protected final DenseMatrix64F stanceCMPDynamics_Aeq;
-   protected final DenseMatrix64F stanceCMPDynamics_beq;
-   protected final DenseMatrix64F stanceCMPSum_Aeq;
-   protected final DenseMatrix64F stanceCMPSum_beq;
-   protected final DenseMatrix64F stanceCMP_Aineq;
-   protected final DenseMatrix64F stanceCMP_bineq;
 
    protected final DenseMatrix64F reachabilityCost_G;
 
@@ -183,21 +175,11 @@ public class ICPOptimizationSolver
       footstepTaskInput = new FootstepTaskInput(maximumNumberOfFootstepsToConsider);
 
       dynamicsConstraintInput = new DynamicsConstraintInput(maximumNumberOfFreeVariables);
+      cmpLocationConstraint = new ConstraintToConvexRegion(maximumNumberOfCMPVertices);
 
       solverInput_Aeq = new DenseMatrix64F(maximumNumberOfFreeVariables, maximumNumberOfLagrangeMultipliers);
       solverInput_AeqTrans = new DenseMatrix64F(maximumNumberOfLagrangeMultipliers, maximumNumberOfFreeVariables);
       solverInput_beq = new DenseMatrix64F(maximumNumberOfLagrangeMultipliers, 1);
-
-      stanceCMPCost_G = new DenseMatrix64F(maximumNumberOfCMPVertices, maximumNumberOfCMPVertices);
-      stanceCMP_Aeq = new DenseMatrix64F(4 + maximumNumberOfCMPVertices, 3);
-      stanceCMP_beq = new DenseMatrix64F(3, 1);
-      stanceCMPDynamics_Aeq = new DenseMatrix64F(4 + maximumNumberOfCMPVertices, 2);
-      stanceCMPDynamics_beq = new DenseMatrix64F(2, 1);
-      stanceCMPSum_Aeq = new DenseMatrix64F(maximumNumberOfCMPVertices, 1);
-      stanceCMPSum_beq = new DenseMatrix64F(1, 1);
-
-      stanceCMP_Aineq = new DenseMatrix64F(maximumNumberOfCMPVertices, maximumNumberOfCMPVertices);
-      stanceCMP_bineq = new DenseMatrix64F(maximumNumberOfCMPVertices, 1);
 
       reachabilityCost_G = new DenseMatrix64F(maximumNumberOfReachabilityVertices, maximumNumberOfReachabilityVertices);
       reachability_Aeq = new DenseMatrix64F(maximumNumberOfFreeVariables, 3);
@@ -264,13 +246,6 @@ public class ICPOptimizationSolver
          yoSolver_Aeq = new YoMatrix("solver_Aeq", maximumNumberOfFreeVariables, maximumNumberOfLagrangeMultipliers, registry);
          yoSolver_beq = new YoMatrix("solver_beq", maximumNumberOfLagrangeMultipliers, 1, registry);
 
-         yoStanceCMP_Aeq = new YoMatrix("stanceCMP_Aeq", 4 + maximumNumberOfCMPVertices, 3, registry);
-         yoStanceCMP_beq = new YoMatrix("stanceCMP_beq", 3, 1, registry);
-         yoStanceCMPDynamics_Aeq = new YoMatrix("stanceCMPDynamics_Aeq", 4 + maximumNumberOfCMPVertices, 2, registry);
-         yoStanceCMPDynamics_beq = new YoMatrix("stanceCMPDynamics_beq", 2, 1, registry);
-         yoStanceCMPSum_Aeq = new YoMatrix("stanceCMPSum_Aeq", maximumNumberOfCMPVertices, 1, registry);
-         yoStanceCMPSum_beq = new YoMatrix("stanceCMPSum_beq", 1, 1, registry);
-
          parentRegistry.addChild(registry);
       }
       else
@@ -282,13 +257,6 @@ public class ICPOptimizationSolver
 
          yoSolver_Aeq = null;
          yoSolver_beq = null;
-
-         yoStanceCMP_Aeq = null;
-         yoStanceCMP_beq = null;
-         yoStanceCMPDynamics_Aeq = null;
-         yoStanceCMPDynamics_beq = null;
-         yoStanceCMPSum_Aeq = null;
-         yoStanceCMPSum_beq = null;
       }
    }
 
@@ -297,29 +265,7 @@ public class ICPOptimizationSolver
       this.numberOfCMPVertices = numberOfCMPVertices;
       indexHandler.setNumberOfCMPVertices(numberOfCMPVertices);
 
-      stanceCMPCost_G.zero();
-      stanceCMP_Aeq.zero();
-      stanceCMP_beq.zero();
-      stanceCMPDynamics_Aeq.zero();
-      stanceCMPDynamics_beq.zero();
-      stanceCMPSum_Aeq.zero();
-      stanceCMPSum_beq.zero();
-
-      stanceCMP_Aineq.zero();
-      stanceCMP_bineq.zero();
-
-      stanceCMPCost_G.reshape(numberOfCMPVertices, numberOfCMPVertices);
-      stanceCMP_Aeq.reshape(4 + numberOfCMPVertices, 3);
-      stanceCMPDynamics_Aeq.reshape(4 + numberOfCMPVertices, 2);
-      stanceCMPSum_Aeq.reshape(numberOfCMPVertices, 1);
-
-      stanceCMP_Aineq.reshape(numberOfCMPVertices, numberOfCMPVertices);
-      stanceCMP_bineq.reshape(numberOfCMPVertices, 1);
-
-      for (int i = 0; i < maximumNumberOfCMPVertices; i++)
-      {
-         cmpVertexLocations.get(i).zero();
-      }
+      cmpLocationConstraint.reset();
    }
 
    public void setNumberOfReachabilityVertices(int numberOfReachabilityVertices)
@@ -566,7 +512,7 @@ public class ICPOptimizationSolver
    }
 
    private final FramePoint tmpPoint = new FramePoint();
-   public void setSupportPolygonVertex(int vertexIndex, FramePoint2d vertexLocation, ReferenceFrame frame, double xBuffer, double yBuffer)
+   public void setSupportPolygonVertex(FramePoint2d vertexLocation, ReferenceFrame frame, double xBuffer, double yBuffer)
    {
       tmpPoint.setToZero(frame);
       tmpPoint.setXY(vertexLocation);
@@ -583,8 +529,7 @@ public class ICPOptimizationSolver
 
       tmpPoint.changeFrame(worldFrame);
 
-      cmpVertexLocations.get(vertexIndex).set(0, 0, tmpPoint.getX());
-      cmpVertexLocations.get(vertexIndex).set(1, 0, tmpPoint.getY());
+      cmpLocationConstraint.addVertex(tmpPoint);
    }
 
    public void setReachabilityVertex(int vertexIndex, FramePoint2d vertexLocation, ReferenceFrame frame)
@@ -721,49 +666,27 @@ public class ICPOptimizationSolver
 
    private void addCMPLocationConstraint()
    {
-      computeCMPLocationConstraint();
+      cmpLocationConstraint.setPositionOffset(perfectCMP);
+      cmpLocationConstraint.setIndexOfVariableToConstrain(indexHandler.getFeedbackCMPIndex());
+      cmpLocationConstraint.setSmoothingWeight(betaSmoothing);
 
-      CommonOps.setIdentity(stanceCMPCost_G);
-      CommonOps.scale(betaSmoothing, stanceCMPCost_G);
+      cmpLocationConstraint.formulateConstraint();
 
-      MatrixTools.setMatrixBlock(solverInput_H, numberOfFreeVariables, numberOfFreeVariables, stanceCMPCost_G, 0, 0, numberOfCMPVertices, numberOfCMPVertices, 1.0);
+      int numberOfVertices = cmpLocationConstraint.getNumberOfVertices();
+      MatrixTools.setMatrixBlock(solverInput_H, numberOfFreeVariables, numberOfFreeVariables, cmpLocationConstraint.smoothingCost, 0, 0, numberOfVertices, numberOfVertices, 1.0);
 
-      MatrixTools.setMatrixBlock(solverInput_Aeq, indexHandler.getFeedbackCMPIndex(), currentEqualityConstraintIndex, stanceCMP_Aeq, 0, 0, 4 + numberOfCMPVertices, 3, 1.0);
-      MatrixTools.setMatrixBlock(solverInput_beq, currentEqualityConstraintIndex, 0, stanceCMP_beq, 0, 0, 3, 1, 1.0);
+      MatrixTools.setMatrixBlock(solverInput_Aeq, cmpLocationConstraint.getIndexOfVariableToConstrain(), currentEqualityConstraintIndex, cmpLocationConstraint.indexSelectionMatrix, 0, 0, 2, 2, 1.0);
+      MatrixTools.setMatrixBlock(solverInput_Aeq, numberOfFreeVariables, currentEqualityConstraintIndex, cmpLocationConstraint.dynamics_Aeq, 0, 0, numberOfVertices, 2, 1.0);
+      MatrixTools.setMatrixBlock(solverInput_beq, currentEqualityConstraintIndex, 0, cmpLocationConstraint.dynamics_beq, 0, 0, 2, 1, 1.0);
 
-      MatrixTools.setMatrixBlock(solverInput_Aineq, indexHandler.getCMPConstraintIndex(), currentInequalityConstraintIndex, stanceCMP_Aineq, 0, 0, numberOfCMPVertices, numberOfCMPVertices, 1.0);
-      MatrixTools.setMatrixBlock(solverInput_bineq, currentInequalityConstraintIndex, 0, stanceCMP_bineq, 0, 0, numberOfCMPVertices, 1, 1.0);
+      MatrixTools.setMatrixBlock(solverInput_Aeq, numberOfFreeVariables, currentEqualityConstraintIndex + 2, cmpLocationConstraint.sum_Aeq, 0, 0, numberOfVertices, 1, 1.0);
+      MatrixTools.setMatrixBlock(solverInput_beq, currentEqualityConstraintIndex + 2, 0, cmpLocationConstraint.sum_beq, 0, 0, 1, 1, 1.0);
+
+      MatrixTools.setMatrixBlock(solverInput_Aineq, indexHandler.getCMPConstraintIndex(), currentInequalityConstraintIndex, cmpLocationConstraint.Aineq, 0, 0, numberOfVertices, numberOfVertices, 1.0);
+      MatrixTools.setMatrixBlock(solverInput_bineq, currentInequalityConstraintIndex, 0, cmpLocationConstraint.bineq, 0, 0, numberOfCMPVertices, 1, 1.0);
 
       currentEqualityConstraintIndex += 3;
       currentInequalityConstraintIndex += numberOfCMPVertices;
-   }
-
-   private void computeCMPLocationConstraint()
-   {
-      // set up location constraints
-      stanceCMPDynamics_Aeq.set(0, 0, -1.0);
-      stanceCMPDynamics_Aeq.set(1, 1, -1.0);
-
-      int offset = indexHandler.getCMPConstraintIndex() - indexHandler.getFeedbackCMPIndex();
-      for (int i = 0; i < numberOfCMPVertices; i++)
-      {
-         stanceCMPDynamics_Aeq.set(offset + i, 0, cmpVertexLocations.get(i).get(0, 0));
-         stanceCMPDynamics_Aeq.set(offset + i, 1, cmpVertexLocations.get(i).get(1, 0));
-
-         stanceCMPSum_Aeq.set(i, 0, 1.0);
-
-         stanceCMP_Aineq.set(i, i, -1.0);
-      }
-
-      stanceCMPDynamics_beq.set(perfectCMP);
-
-      stanceCMPSum_beq.set(0, 0, 1.0);
-
-      MatrixTools.setMatrixBlock(stanceCMP_Aeq, 0, 0, stanceCMPDynamics_Aeq, 0, 0, 4 + numberOfCMPVertices, 2, 1.0);
-      MatrixTools.setMatrixBlock(stanceCMP_Aeq, offset, 2, stanceCMPSum_Aeq, 0, 0, numberOfCMPVertices, 1, 1.0);
-
-      MatrixTools.setMatrixBlock(stanceCMP_beq, 0, 0, stanceCMPDynamics_beq, 0, 0, 2, 1, 1.0);
-      MatrixTools.setMatrixBlock(stanceCMP_beq, 2, 0, stanceCMPSum_beq, 0, 0, 1, 1, 1.0);
    }
 
    private void addReachabilityConstraint()
@@ -842,12 +765,6 @@ public class ICPOptimizationSolver
          yoWeightg.set(solverInput_h);
          yoSolver_Aeq.set(solverInput_Aeq);
          yoSolver_beq.set(solverInput_beq);
-         yoStanceCMP_Aeq.set(stanceCMP_Aeq);
-         yoStanceCMP_beq.set(stanceCMP_beq);
-         yoStanceCMPDynamics_Aeq.set(stanceCMPDynamics_Aeq);
-         yoStanceCMPDynamics_beq.set(stanceCMPDynamics_beq);
-         yoStanceCMPSum_Aeq.set(stanceCMPSum_Aeq);
-         yoStanceCMPSum_beq.set(stanceCMPSum_beq);
       }
 
       activeSetSolver.setQuadraticCostFunction(solverInput_H, solverInput_h, 0.0);
