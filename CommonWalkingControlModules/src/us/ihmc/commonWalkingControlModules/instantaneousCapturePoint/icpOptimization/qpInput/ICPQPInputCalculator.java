@@ -92,4 +92,26 @@ public class ICPQPInputCalculator
 
       MatrixTools.setMatrixBlock(icpEqualityInput.beq, 0, 0, currentICP, 0, 0, 2, 1, 1.0);
    }
+
+   public void submitFeedbackTask(ICPQPInput icpQPInput, DenseMatrix64F solverInput_H, DenseMatrix64F solverInput_h)
+   {
+      int feedbackCMPIndex = indexHandler.getFeedbackCMPIndex();
+      MatrixTools.addMatrixBlock(solverInput_H, feedbackCMPIndex, feedbackCMPIndex, icpQPInput.quadraticTerm, 0, 0, 2, 2, 1.0);
+      MatrixTools.addMatrixBlock(solverInput_h, feedbackCMPIndex, 0, icpQPInput.linearTerm, 0, 0, 2, 1, 1.0);
+   }
+
+   public void submitDynamicRelaxationTask(ICPQPInput icpQPInput, DenseMatrix64F solverInput_H, DenseMatrix64F solverInput_h)
+   {
+      int dynamicRelaxationIndex = indexHandler.getDynamicRelaxationIndex();
+      MatrixTools.addMatrixBlock(solverInput_H, dynamicRelaxationIndex, dynamicRelaxationIndex, icpQPInput.quadraticTerm, 0, 0, 2, 2, 1.0);
+      MatrixTools.addMatrixBlock(solverInput_h, dynamicRelaxationIndex, 0, icpQPInput.linearTerm, 0, 0, 2, 1, 1.0);
+   }
+
+   public void submitFootstepTask(ICPQPInput icpQPInput, DenseMatrix64F solverInput_H, DenseMatrix64F solverInput_h)
+   {
+      int numberOfFootstepVariables = indexHandler.getNumberOfFootstepVariables();
+
+      MatrixTools.addMatrixBlock(solverInput_H, 0, 0, icpQPInput.quadraticTerm, 0, 0, numberOfFootstepVariables, numberOfFootstepVariables, 1.0);
+      MatrixTools.addMatrixBlock(solverInput_h, 0, 0, icpQPInput.linearTerm, 0, 0, numberOfFootstepVariables, 1, 1.0);
+   }
 }

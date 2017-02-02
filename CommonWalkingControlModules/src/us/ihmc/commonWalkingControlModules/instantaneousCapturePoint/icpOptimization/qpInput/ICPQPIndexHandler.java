@@ -1,8 +1,5 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.qpInput;
 
-import org.ejml.data.DenseMatrix64F;
-import us.ihmc.robotics.linearAlgebra.MatrixTools;
-
 public class ICPQPIndexHandler
 {
    private int numberOfFootstepsToConsider;
@@ -12,7 +9,6 @@ public class ICPQPIndexHandler
    private int numberOfFootstepVariables = 0;
    private int numberOfLagrangeMultipliers = 2;
 
-   private int footstepIndex = 0;
    private int feedbackCMPIndex;
    private int dynamicRelaxationIndex;
    private int cmpConstraintIndex;
@@ -61,9 +57,14 @@ public class ICPQPIndexHandler
       lagrangeMultiplierIndex = reachabilityConstraintIndex + numberOfReachabilityVertices;
    }
 
-   public int getFootstepIndex()
+   public int getFootstepStartIndex()
    {
-      return footstepIndex;
+      return 0;
+   }
+
+   public int getFootstepIndex(int footstepIndex)
+   {
+      return 2 * footstepIndex;
    }
 
    public int getFeedbackCMPIndex()
@@ -91,15 +92,8 @@ public class ICPQPIndexHandler
       return lagrangeMultiplierIndex;
    }
 
-   public void submitFeedbackTask(ICPQPInput icpQPInput, DenseMatrix64F solverInput_H, DenseMatrix64F solverInput_h)
+   public int getNumberOfFootstepVariables()
    {
-      MatrixTools.addMatrixBlock(solverInput_H, feedbackCMPIndex, feedbackCMPIndex, icpQPInput.quadraticTerm, 0, 0, 2, 2, 1.0);
-      MatrixTools.addMatrixBlock(solverInput_h, feedbackCMPIndex, 0, icpQPInput.linearTerm, 0, 0, 2, 1, 1.0);
-   }
-
-   public void submitDynamicRelaxationTask(ICPQPInput icpQPInput, DenseMatrix64F solverInput_H, DenseMatrix64F solverInput_h)
-   {
-      MatrixTools.addMatrixBlock(solverInput_H, dynamicRelaxationIndex, dynamicRelaxationIndex, icpQPInput.quadraticTerm, 0, 0, 2, 2, 1.0);
-      MatrixTools.addMatrixBlock(solverInput_h, dynamicRelaxationIndex, 0, icpQPInput.linearTerm, 0, 0, 2, 1, 1.0);
+      return numberOfFootstepVariables;
    }
 }
