@@ -72,11 +72,10 @@ public class ICPOptimizationSolver
    private final DenseMatrix64F tmpCost;
    private final DenseMatrix64F tmpFootstepCost;
    private final DenseMatrix64F tmpFeedbackCost;
+
    private final DenseMatrix64F costToGo;
    private final DenseMatrix64F footstepCostToGo;
-   private final DenseMatrix64F footstepRegularizationCostToGo;
    private final DenseMatrix64F feedbackCostToGo;
-   private final DenseMatrix64F feedbackRegularizationCostToGo;
    private final DenseMatrix64F dynamicRelaxationCostToGo;
 
    protected final int maximumNumberOfFootstepsToConsider;
@@ -151,9 +150,7 @@ public class ICPOptimizationSolver
       tmpFeedbackCost = new DenseMatrix64F(2, 1);
       costToGo = new DenseMatrix64F(1, 1);
       footstepCostToGo = new DenseMatrix64F(1, 1);
-      footstepRegularizationCostToGo = new DenseMatrix64F(1, 1);
       feedbackCostToGo = new DenseMatrix64F(1, 1);
-      feedbackRegularizationCostToGo = new DenseMatrix64F(1, 1);
       dynamicRelaxationCostToGo = new DenseMatrix64F(1, 1);
 
       activeSetSolver = new SimpleEfficientActiveSetQPSolver();
@@ -604,9 +601,7 @@ public class ICPOptimizationSolver
    {
       costToGo.zero();
       footstepCostToGo.zero();
-      footstepRegularizationCostToGo.zero();
       feedbackCostToGo.zero();
-      feedbackRegularizationCostToGo.zero();
       dynamicRelaxationCostToGo.zero();
 
       tmpCost.zero();
@@ -621,15 +616,8 @@ public class ICPOptimizationSolver
       CommonOps.mult(solverInput_H, freeVariableSolution, tmpCost);
       CommonOps.multTransA(freeVariableSolution, tmpCost, costToGo);
 
-      /*
-      CommonOps.mult(footstepCost_H, footstepLocationSolution, tmpFootstepCost);
+      CommonOps.mult(footstepTaskInput.quadraticTerm, footstepLocationSolution, tmpFootstepCost);
       CommonOps.multTransA(footstepLocationSolution, tmpFootstepCost, footstepCostToGo);
-      */
-
-      /*
-      CommonOps.mult(footstepRegularizationCost_H, footstepLocationSolution, tmpFootstepCost);
-      CommonOps.multTransA(footstepLocationSolution, tmpFootstepCost, footstepRegularizationCostToGo);
-      */
 
       CommonOps.mult(feedbackTaskInput.quadraticTerm, feedbackDeltaSolution, tmpFeedbackCost);
       CommonOps.multTransA(feedbackDeltaSolution, tmpFeedbackCost, feedbackCostToGo);
@@ -637,39 +625,23 @@ public class ICPOptimizationSolver
       CommonOps.mult(dynamicRelaxationTask.quadraticTerm, dynamicRelaxationSolution, tmpFeedbackCost);
       CommonOps.multTransA(dynamicRelaxationSolution, tmpFeedbackCost, dynamicRelaxationCostToGo);
 
-      /*
-      CommonOps.mult(feedbackRegularizationCost_H, feedbackDeltaSolution, tmpFeedbackCost);
-      CommonOps.multTransA(feedbackDeltaSolution, tmpFeedbackCost, feedbackRegularizationCostToGo);
-      */
-
       // linear cost
       CommonOps.multTransA(solverInput_h, freeVariableSolution, tmpCostScalar);
       CommonOps.addEquals(costToGo, tmpCostScalar);
 
-      /*
-      CommonOps.multTransA(-1.0, footstepCost_h, footstepLocationSolution, tmpCostScalar);
+      CommonOps.multTransA(-1.0, footstepTaskInput.linearTerm, footstepLocationSolution, tmpCostScalar);
       CommonOps.addEquals(footstepCostToGo, tmpCostScalar);
-      */
-
-      /*
-      CommonOps.multTransA(-1.0, footstepRegularizationCost_h, footstepLocationSolution, tmpCostScalar);
-      CommonOps.addEquals(footstepRegularizationCostToGo, tmpCostScalar);
-      */
 
       CommonOps.multTransA(-1.0, feedbackTaskInput.linearTerm, feedbackDeltaSolution, tmpCostScalar);
       CommonOps.addEquals(feedbackCostToGo, tmpCostScalar);
 
-      /*
-      CommonOps.multTransA(-1.0, feedbackRegularizationCost_h, feedbackDeltaSolution, tmpCostScalar);
-      CommonOps.addEquals(feedbackRegularizationCostToGo, tmpCostScalar);
-      */
+      CommonOps.multTransA(-1.0, dynamicRelaxationTask.linearTerm, dynamicRelaxationSolution, tmpCostScalar);
+      CommonOps.addEquals(dynamicRelaxationCostToGo, tmpCostScalar);
 
       // residual cost
       CommonOps.addEquals(costToGo, solverInputResidualCost);
-      //CommonOps.addEquals(footstepCostToGo, footstepResidualCost);
-      //CommonOps.addEquals(footstepRegularizationCostToGo, footstepRegularizationResidualCost);
+      CommonOps.addEquals(footstepCostToGo, footstepTaskInput.residualCost);
       CommonOps.addEquals(feedbackCostToGo, feedbackTaskInput.residualCost);
-      //CommonOps.addEquals(feedbackRegularizationCostToGo, feedbackRegularizationResidualCost);
       CommonOps.addEquals(dynamicRelaxationCostToGo, dynamicRelaxationTask.residualCost);
    }
 
@@ -697,19 +669,9 @@ public class ICPOptimizationSolver
       return footstepCostToGo.get(0, 0);
    }
 
-   public double getFootstepRegularizationCostToGo()
-   {
-      return footstepRegularizationCostToGo.get(0, 0);
-   }
-
    public double getFeedbackCostToGo()
    {
       return feedbackCostToGo.get(0, 0);
-   }
-
-   public double getFeedbackRegularizationCostToGo()
-   {
-      return feedbackRegularizationCostToGo.get(0, 0);
    }
 
    public double getDynamicRelaxationCostToGo()
