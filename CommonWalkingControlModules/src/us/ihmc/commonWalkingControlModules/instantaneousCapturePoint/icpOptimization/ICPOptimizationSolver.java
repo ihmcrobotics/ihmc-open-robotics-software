@@ -78,6 +78,8 @@ public class ICPOptimizationSolver
    private final DenseMatrix64F feedbackCostToGo;
    private final DenseMatrix64F dynamicRelaxationCostToGo;
 
+   private final DenseMatrix64F referenceICPReconstruction = new DenseMatrix64F(2, 1);
+
    protected final int maximumNumberOfFootstepsToConsider;
    private static final int maximumNumberOfReachabilityVertices = 4;
 
@@ -460,6 +462,8 @@ public class ICPOptimizationSolver
 
          if (computeCostToGo)
             computeCostToGo();
+
+         reconstructReferenceICPPosition();
       }
    }
 
@@ -645,6 +649,23 @@ public class ICPOptimizationSolver
       CommonOps.addEquals(dynamicRelaxationCostToGo, dynamicRelaxationTask.residualCost);
    }
 
+   private final DenseMatrix64F tmpVector = new DenseMatrix64F(2, 1);
+   private void reconstructReferenceICPPosition()
+   {
+      referenceICPReconstruction.set(finalICPRecursion);
+      CommonOps.subtractEquals(referenceICPReconstruction, cmpConstantEffect);
+      CommonOps.subtractEquals(referenceICPReconstruction, dynamicRelaxationSolution);
+
+      for (int i = 0; i < indexHandler.getNumberOfFootstepsToConsider(); i++)
+      {
+         tmpVector.set(0, 0, footstepLocationSolution.get(2 * i));
+         tmpVector.set(1, 0, footstepLocationSolution.get(2 * i + 1));
+         CommonOps.scale(footstepRecursionMultipliers.get(i).get(0, 0), tmpVector);
+
+         CommonOps.subtractEquals(referenceICPReconstruction, tmpVector);
+      }
+   }
+
    public void getFootstepSolutionLocation(int footstepIndex, FramePoint2d footstepLocationToPack)
    {
       footstepLocationToPack.setToZero(worldFrame);
@@ -657,6 +678,12 @@ public class ICPOptimizationSolver
       cmpFeedbackDifferenceToPack.setToZero(worldFrame);
       cmpFeedbackDifferenceToPack.setX(feedbackDeltaSolution.get(0, 0));
       cmpFeedbackDifferenceToPack.setY(feedbackDeltaSolution.get(1, 0));
+   }
+
+   public void getReconstructedReferenceICPPosition(FramePoint2d reconstructedReferenceICP)
+   {
+      reconstructedReferenceICP.setX(referenceICPReconstruction.get(0, 0));
+      reconstructedReferenceICP.setY(referenceICPReconstruction.get(1, 0));
    }
 
    public double getCostToGo()
