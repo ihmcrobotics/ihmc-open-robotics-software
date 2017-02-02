@@ -4,7 +4,6 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.qpInput.*;
 import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSolver;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector2d;
@@ -18,6 +17,7 @@ public class ICPOptimizationSolver
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final double betaSmoothing = 0.01;
+   private static final double betaMinimum = 0.0001; //// TODO: 2/2/17  
 
    private final ICPQPIndexHandler indexHandler;
    private final ICPQPInputCalculator inputCalculator;
@@ -83,8 +83,6 @@ public class ICPOptimizationSolver
    private static final int maximumNumberOfReachabilityVertices = 4;
 
    protected int numberOfFootstepsToConsider;
-   protected int numberOfCMPVertices = 0;
-   protected int numberOfReachabilityVertices = 0;
    protected int numberOfFreeVariables = 0;
    protected int numberOfFootstepVariables = 0;
    protected int numberOfLagrangeMultipliers = 2;
@@ -168,21 +166,53 @@ public class ICPOptimizationSolver
       activeSetSolver = new SimpleEfficientActiveSetQPSolver();
    }
 
-   public void setNumberOfCMPVertices(int numberOfCMPVertices)
+   public void resetSupportPolygonConstraint()
    {
-      this.numberOfCMPVertices = numberOfCMPVertices;
-      indexHandler.setNumberOfCMPVertices(numberOfCMPVertices);
-
       cmpLocationConstraint.reset();
+      indexHandler.resetSupportPolygonConstraint();
    }
 
-   public void setNumberOfReachabilityVertices(int numberOfReachabilityVertices)
+   private final FramePoint tmpPoint = new FramePoint();
+   public void addSupportPolygonVertex(FramePoint2d vertexLocation, ReferenceFrame frame, double xBuffer, double yBuffer)
    {
-      indexHandler.setNumberOfReachabilityVertices(numberOfReachabilityVertices);
-      this.numberOfReachabilityVertices = numberOfReachabilityVertices;
+      tmpPoint.setToZero(frame);
+      tmpPoint.setXY(vertexLocation);
 
-      reachabilityConstraint.reset();
+      if (tmpPoint.getX() > 0.0)
+         tmpPoint.setX(tmpPoint.getX() + xBuffer);
+      else
+         tmpPoint.setX(tmpPoint.getX() - xBuffer);
+
+      if (tmpPoint.getY() > 0.0)
+         tmpPoint.setY(tmpPoint.getY() + yBuffer);
+      else
+         tmpPoint.setY(tmpPoint.getY() - yBuffer);
+
+      tmpPoint.changeFrame(worldFrame);
+
+      cmpLocationConstraint.addVertex(tmpPoint);
+      indexHandler.registerCMPVertex();
    }
+
+   public void resetReachabilityConstraint()
+   {
+      reachabilityConstraint.reset();
+      indexHandler.resetReachabilityConstraint();
+   }
+
+   public void addReachabilityVertex(FramePoint2d vertexLocation, ReferenceFrame frame)
+   {
+      tmpPoint.setToZero(frame);
+      tmpPoint.setXY(vertexLocation);
+      tmpPoint.changeFrame(worldFrame);
+
+      reachabilityConstraint.addVertex(tmpPoint);
+      indexHandler.registerReachabilityVertex();
+   }
+
+
+
+
 
    public void submitProblemConditions(int numberOfFootstepsToConsider, boolean useStepAdjustment)
    {
@@ -200,12 +230,12 @@ public class ICPOptimizationSolver
       numberOfLagrangeMultipliers = 2;
       numberOfFreeVariables = numberOfFootstepVariables + 2;
 
-      if (numberOfCMPVertices > 0)
+      if (indexHandler.getNumberOfCMPVertices() > 0)
          numberOfLagrangeMultipliers += 3;
 
       numberOfFreeVariables += 2;
 
-      if (numberOfReachabilityVertices > 0)
+      if (indexHandler.getNumberOfReachabilityVertices() > 0)
          numberOfLagrangeMultipliers += 3;
 
       reset();
@@ -264,6 +294,9 @@ public class ICPOptimizationSolver
 
    private void reshape()
    {
+      int numberOfCMPVertices = indexHandler.getNumberOfCMPVertices();
+      int numberOfReachabilityVertices = indexHandler.getNumberOfReachabilityVertices();
+
       solverInput_H.reshape(numberOfFreeVariables + numberOfCMPVertices + numberOfReachabilityVertices, numberOfFreeVariables + numberOfCMPVertices + numberOfReachabilityVertices);
       solverInput_h.reshape(numberOfFreeVariables + numberOfCMPVertices + numberOfReachabilityVertices, 1);
 
@@ -295,19 +328,9 @@ public class ICPOptimizationSolver
 
    public void setFootstepAdjustmentConditions(int footstepIndex, double recursionMultiplier, double xWeight, double yWeight, FramePoint2d referenceFootstepLocation)
    {
-      setFootstepRecursionMutliplier(footstepIndex, recursionMultiplier);
-      setFootstepWeight(footstepIndex, xWeight, yWeight);
-      setReferenceFootstepLocation(footstepIndex, referenceFootstepLocation);
-   }
-
-   private void setFootstepRecursionMutliplier(int footstepIndex, double recursionMultiplier)
-   {
       CommonOps.setIdentity(identity);
       MatrixTools.setMatrixBlock(footstepRecursionMultipliers.get(footstepIndex), 0, 0, identity, 0, 0, 2, 2, recursionMultiplier);
-   }
 
-   protected void setFootstepWeight(int footstepIndex, double xWeight, double yWeight)
-   {
       xWeight = Math.max(minimumFootstepWeight, xWeight);
       yWeight = Math.max(minimumFootstepWeight, yWeight);
 
@@ -315,14 +338,41 @@ public class ICPOptimizationSolver
       identity.set(0, 0, xWeight);
       identity.set(1, 1, yWeight);
       MatrixTools.setMatrixBlock(footstepWeights.get(footstepIndex), 0, 0, identity, 0, 0, 2, 2, 1.0);
-   }
 
-   private void setReferenceFootstepLocation(int footstepIndex, FramePoint2d referenceFootstepLocation)
-   {
       referenceFootstepLocation.changeFrame(worldFrame);
       referenceFootstepLocations.get(footstepIndex).set(0, 0, referenceFootstepLocation.getX());
       referenceFootstepLocations.get(footstepIndex).set(1, 0, referenceFootstepLocation.getY());
    }
+
+   public void setFootstepRegularizationWeight(double regularizationWeight)
+   {
+      CommonOps.setIdentity(footstepRegularizationWeight);
+      CommonOps.scale(regularizationWeight, footstepRegularizationWeight);
+
+      hasFootstepRegularizationTerm = true;
+   }
+
+   public void resetFootstepRegularization(int footstepIndex, FramePoint2d previousFootstepLocation)
+   {
+      previousFootstepLocation.changeFrame(worldFrame);
+      previousFootstepLocations.get(footstepIndex).set(0, 0, previousFootstepLocation.getX());
+      previousFootstepLocations.get(footstepIndex).set(1, 0, previousFootstepLocation.getY());
+   }
+
+   protected void addStepAdjustmentTask()
+   {
+      for (int i = 0; i < numberOfFootstepsToConsider; i++)
+      {
+         inputCalculator.computeFootstepTask(i, footstepTaskInput, footstepWeights.get(i), referenceFootstepLocations.get(i));
+
+         if (hasFootstepRegularizationTerm)
+            inputCalculator.computeFootstepRegularizationTask(i, footstepTaskInput, footstepRegularizationWeight, previousFootstepLocations.get(i));
+      }
+
+      inputCalculator.submitFootstepTask(footstepTaskInput, solverInput_H, solverInput_h);
+   }
+
+
 
    public void setFeedbackConditions(double feedbackWeight, double feedbackGain, double dynamicRelaxationWeight)
    {
@@ -354,55 +404,16 @@ public class ICPOptimizationSolver
       hasFeedbackRegularizationTerm = true;
    }
 
-   public void setFootstepRegularizationWeight(double regularizationWeight)
-   {
-      CommonOps.setIdentity(footstepRegularizationWeight);
-      CommonOps.scale(regularizationWeight, footstepRegularizationWeight);
-
-      hasFootstepRegularizationTerm = true;
-   }
-
-   public void resetFootstepRegularization(int footstepIndex, FramePoint2d previousFootstepLocation)
-   {
-      previousFootstepLocation.changeFrame(worldFrame);
-      previousFootstepLocations.get(footstepIndex).set(0, 0, previousFootstepLocation.getX());
-      previousFootstepLocations.get(footstepIndex).set(1, 0, previousFootstepLocation.getY());
-   }
-
    public void resetFeedbackRegularization()
    {
       previousFeedbackDeltaSolution.zero();
    }
 
-   private final FramePoint tmpPoint = new FramePoint();
-   public void addSupportPolygonVertex(FramePoint2d vertexLocation, ReferenceFrame frame, double xBuffer, double yBuffer)
-   {
-      tmpPoint.setToZero(frame);
-      tmpPoint.setXY(vertexLocation);
 
-      if (tmpPoint.getX() > 0.0)
-         tmpPoint.setX(tmpPoint.getX() + xBuffer);
-      else
-         tmpPoint.setX(tmpPoint.getX() - xBuffer);
 
-      if (tmpPoint.getY() > 0.0)
-         tmpPoint.setY(tmpPoint.getY() + yBuffer);
-      else
-         tmpPoint.setY(tmpPoint.getY() - yBuffer);
 
-      tmpPoint.changeFrame(worldFrame);
 
-      cmpLocationConstraint.addVertex(tmpPoint);
-   }
 
-   public void addReachabilityVertex(FramePoint2d vertexLocation, ReferenceFrame frame)
-   {
-      tmpPoint.setToZero(frame);
-      tmpPoint.setXY(vertexLocation);
-      tmpPoint.changeFrame(worldFrame);
-
-      reachabilityConstraint.addVertex(tmpPoint);
-   }
 
    public void compute(FramePoint2d finalICPRecursion, FramePoint2d cmpConstantEffect, FramePoint2d currentICP, FramePoint2d perfectCMP) throws NoConvergenceException
    {
@@ -426,10 +437,10 @@ public class ICPOptimizationSolver
       addFeedbackTask();
       addDynamicRelaxationTask();
 
-      if (numberOfCMPVertices > 0)
+      if (indexHandler.getNumberOfCMPVertices() > 0)
          addCMPLocationConstraint();
 
-      if (numberOfReachabilityVertices > 0)
+      if (indexHandler.getNumberOfReachabilityVertices() > 0)
          addReachabilityConstraint();
 
       if (useStepAdjustment)
@@ -486,19 +497,6 @@ public class ICPOptimizationSolver
    {
       inputCalculator.computeDynamicRelaxationTask(dynamicRelaxationTask, dynamicRelaxationWeight);
       inputCalculator.submitDynamicRelaxationTask(dynamicRelaxationTask, solverInput_H, solverInput_h);
-   }
-
-   protected void addStepAdjustmentTask()
-   {
-      for (int i = 0; i < numberOfFootstepsToConsider; i++)
-      {
-         inputCalculator.computeFootstepTask(i, footstepTaskInput, footstepWeights.get(i), referenceFootstepLocations.get(i));
-
-         if (hasFootstepRegularizationTerm)
-            inputCalculator.computeFootstepRegularizationTask(i, footstepTaskInput, footstepRegularizationWeight, previousFootstepLocations.get(i));
-      }
-
-      inputCalculator.submitFootstepTask(footstepTaskInput, solverInput_H, solverInput_h);
    }
 
    private void addCMPLocationConstraint()
@@ -633,7 +631,7 @@ public class ICPOptimizationSolver
       tmpFootstepCost.zero();
       tmpFeedbackCost.zero();
 
-      tmpCost.reshape(numberOfFreeVariables + numberOfCMPVertices + numberOfReachabilityVertices, 1);
+      tmpCost.reshape(numberOfFreeVariables + indexHandler.getNumberOfCMPVertices() + indexHandler.getNumberOfReachabilityVertices(), 1);
       tmpFootstepCost.reshape(numberOfFootstepVariables, 1);
       tmpFeedbackCost.reshape(2, 1);
 

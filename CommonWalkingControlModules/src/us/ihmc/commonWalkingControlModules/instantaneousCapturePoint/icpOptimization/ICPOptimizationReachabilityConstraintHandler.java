@@ -40,7 +40,7 @@ public class ICPOptimizationReachabilityConstraintHandler
    private final FramePoint2d tempVertex = new FramePoint2d();
    public void updateReachabilityConstraintForSingleSupport(RobotSide supportSide, ICPOptimizationSolver solver)
    {
-      solver.setNumberOfReachabilityVertices(4);
+      solver.resetReachabilityConstraint();
 
       double lateralInnerLimit = lateralReachabilityInnerLimit.getDoubleValue();
       double lateralOuterLimit = lateralReachabilityOuterLimit.getDoubleValue();
@@ -69,6 +69,6 @@ public class ICPOptimizationReachabilityConstraintHandler
 
    public void updateReachabilityConstraintForDoubleSupport(ICPOptimizationSolver solver)
    {
-      solver.setNumberOfReachabilityVertices(0);
+      solver.resetReachabilityConstraint();
    }
 }

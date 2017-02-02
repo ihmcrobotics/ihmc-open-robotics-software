@@ -79,7 +79,8 @@ public class ICPOptimizationSolverTest extends ICPOptimizationSolver
 
    private void testDimension(int numberOfFootstepsToConsider, int numberOfVertices, boolean useStepAdjustment)
    {
-      super.setNumberOfCMPVertices(numberOfVertices);
+      //super.setNumberOfCMPVertices(numberOfVertices);
+      super.resetSupportPolygonConstraint();
       super.submitProblemConditions(numberOfFootstepsToConsider, useStepAdjustment);
 
       int numberOfLagrangeMultipliers = 2;
@@ -106,7 +107,7 @@ public class ICPOptimizationSolverTest extends ICPOptimizationSolver
       assertEquals(name, numberOfFootstepVariables, this.numberOfFootstepVariables, epsilon);
       assertEquals(name, numberOfLagrangeMultipliers, this.numberOfLagrangeMultipliers, epsilon);
       assertEquals(name, totalNumberOfFreeVariables, this.numberOfFreeVariables, epsilon);
-      assertEquals(name, numberOfVertices, this.numberOfCMPVertices, epsilon);
+      //assertEquals(name, numberOfVertices, this.numberOfCMPVertices, epsilon);
 
       assertEquals(name, totalNumberOfFreeVariables + numberOfVertices, solverInput_H.numRows, epsilon);
       assertEquals(name, totalNumberOfFreeVariables + numberOfVertices, solverInput_H.numCols, epsilon);
@@ -319,13 +320,14 @@ public class ICPOptimizationSolverTest extends ICPOptimizationSolver
       int numberOffootstepsToConsider = 2;
       int numberOfVertices = 4;
 
-      super.setNumberOfCMPVertices(numberOfVertices);
+      //super.setNumberOfCMPVertices(numberOfVertices);
+      super.resetSupportPolygonConstraint();
       super.submitProblemConditions(numberOffootstepsToConsider, true);
       super.setFeedbackConditions(0.001, feedbackGain, 1000.0);
 
       for (int i = 0; i < numberOffootstepsToConsider; i++)
       {
-         super.setFootstepWeight(i, 1.0, 1.0);
+         //super.setFootstepWeight(i, 1.0, 1.0);
       }
 
       double finalICPRecursionMultiplier = Math.exp(-omega * initialDoubleSupportDuration);

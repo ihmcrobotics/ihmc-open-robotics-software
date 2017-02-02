@@ -38,7 +38,7 @@ public class ICPOptimizationCMPConstraintHandler
       int numberOfVertices = 0;
       for (RobotSide robotSide : RobotSide.values)
          numberOfVertices += bipedSupportPolygons.getFootPolygonInMidFeetZUp(robotSide).getNumberOfVertices();
-      solver.setNumberOfCMPVertices(numberOfVertices);
+      solver.resetSupportPolygonConstraint();
 
       numberOfVertices = 0;
       for (RobotSide robotSide : RobotSide.values)
@@ -59,7 +59,8 @@ public class ICPOptimizationCMPConstraintHandler
    public void updateCMPConstraintForSingleSupport(RobotSide supportSide, ICPOptimizationSolver solver)
    {
       FrameConvexPolygon2d supportPolygon = bipedSupportPolygons.getFootPolygonInSoleFrame(supportSide);
-      solver.setNumberOfCMPVertices(supportPolygon.getNumberOfVertices());
+      solver.resetSupportPolygonConstraint();
+
       for (int i = 0; i < supportPolygon.getNumberOfVertices(); i++)
       {
          supportPolygon.getFrameVertex(i, tempVertex);

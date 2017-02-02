@@ -19,6 +19,42 @@ public class ICPQPIndexHandler
    {
    }
 
+   public void resetConstraints()
+   {
+      numberOfCMPVertices = 0;
+      numberOfReachabilityVertices = 0;
+   }
+
+   public void resetSupportPolygonConstraint()
+   {
+      numberOfCMPVertices = 0;
+   }
+
+   public void resetReachabilityConstraint()
+   {
+      numberOfReachabilityVertices = 0;
+   }
+
+   public void registerCMPVertex()
+   {
+      numberOfCMPVertices++;
+   }
+
+   public int getNumberOfCMPVertices()
+   {
+      return numberOfCMPVertices;
+   }
+
+   public void registerReachabilityVertex()
+   {
+      numberOfReachabilityVertices++;
+   }
+
+   public int getNumberOfReachabilityVertices()
+   {
+      return numberOfReachabilityVertices;
+   }
+
    public void setNumberOfCMPVertices(int numberOfCMPVertices)
    {
       this.numberOfCMPVertices = numberOfCMPVertices;
@@ -27,6 +63,11 @@ public class ICPQPIndexHandler
    public void setNumberOfReachabilityVertices(int numberOfReachabilityVertices)
    {
       this.numberOfReachabilityVertices = numberOfReachabilityVertices;
+   }
+
+   public void incrementFootstepsToConsider()
+   {
+      numberOfFootstepsToConsider++;
    }
 
    public void submitProblemConditions(int numberOfFootstepsToConsider, boolean useStepAdjustment)
