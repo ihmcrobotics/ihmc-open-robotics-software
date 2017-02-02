@@ -209,7 +209,7 @@ public class IHMCMOCAPLocalizationModule implements MocapRigidbodiesListener, Pa
 
    private void sendPelvisTransformToController(MocapRigidBody pelvisRigidBody)
    {
-      mocapToPelvisFrameConverter.getPelvisTransformFromMocapRigidBody(pelvisRigidBody, pelvisTransform);
+      mocapToPelvisFrameConverter.computePelvisToWorldTransform(pelvisRigidBody, pelvisTransform);
       setPelvisYoVariables(pelvisTransform);
 
       if(latestRobotConfigurationData != null)
