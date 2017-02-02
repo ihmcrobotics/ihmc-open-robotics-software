@@ -168,12 +168,7 @@ public class HexapodSimulationController implements RobotController
 
    private MomentumOptimizationSettings getMomentumOptimizationSettings()
    {
-      MomentumOptimizationSettings momentumOptimizationSettings = new HexapodMomentumOptimizationSettings();
-      momentumOptimizationSettings.setNumberOfBasisVectorsPerContactPoint(4);
-      momentumOptimizationSettings.setNumberOfContactableBodies(6);
-      momentumOptimizationSettings.setNumberOfContactPointsPerContactableBody(1);
-
-      return momentumOptimizationSettings;
+      return new HexapodMomentumOptimizationSettings();
    }
 
    @Override
