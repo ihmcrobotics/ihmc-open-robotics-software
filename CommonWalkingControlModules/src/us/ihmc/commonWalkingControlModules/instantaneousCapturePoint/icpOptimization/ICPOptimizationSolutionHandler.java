@@ -42,9 +42,7 @@ public class ICPOptimizationSolutionHandler
 
    private final DoubleYoVariable controllerCostToGo;
    private final DoubleYoVariable controllerFootstepCostToGo;
-   private final DoubleYoVariable controllerFootstepRegularizationCostToGo;
    private final DoubleYoVariable controllerFeedbackCostToGo;
-   private final DoubleYoVariable controllerFeedbackRegularizationCostToGo;
    private final DoubleYoVariable controllerDynamicRelaxationCostToGo;
 
    private final FootstepRecursionMultiplierCalculator footstepRecursionMultiplierCalculator;
@@ -67,9 +65,7 @@ public class ICPOptimizationSolutionHandler
 
       controllerCostToGo = new DoubleYoVariable("costToGo", registry);
       controllerFootstepCostToGo = new DoubleYoVariable("footstepCostToGo", registry);
-      controllerFootstepRegularizationCostToGo = new DoubleYoVariable("footstepRegularizationCostToGo", registry);
       controllerFeedbackCostToGo = new DoubleYoVariable("feedbackCostToGo", registry);
-      controllerFeedbackRegularizationCostToGo = new DoubleYoVariable("feedbackRegularizationCostToGo", registry);
       controllerDynamicRelaxationCostToGo = new DoubleYoVariable("dynamicRelaxationCostToGo", registry);
 
       footstepDeadband = new DoubleYoVariable("footstepDeadband", registry);
@@ -80,8 +76,8 @@ public class ICPOptimizationSolutionHandler
       footstepDeadband.set(icpOptimizationParameters.getAdjustmentDeadband());
       footstepSolutionResolution.set(icpOptimizationParameters.getFootstepSolutionResolution());
 
-      //if (yoGraphicsListRegistry != null)
-      //   setupVisualizers(yoGraphicsListRegistry, visualize);
+      if (yoGraphicsListRegistry != null)
+         setupVisualizers(yoGraphicsListRegistry, visualize);
    }
 
    private void setupVisualizers(YoGraphicsListRegistry yoGraphicsListRegistry, boolean visualize)
@@ -124,9 +120,7 @@ public class ICPOptimizationSolutionHandler
    {
       controllerCostToGo.set(solver.getCostToGo());
       controllerFootstepCostToGo.set(solver.getFootstepCostToGo());
-      controllerFootstepRegularizationCostToGo.set(solver.getFootstepRegularizationCostToGo());
       controllerFeedbackCostToGo.set(solver.getFeedbackCostToGo());
-      controllerFeedbackRegularizationCostToGo.set(solver.getFeedbackRegularizationCostToGo());
       controllerDynamicRelaxationCostToGo.set(solver.getDynamicRelaxationCostToGo());
    }
 

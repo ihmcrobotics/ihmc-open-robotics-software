@@ -24,8 +24,8 @@ import java.util.ArrayList;
 
 public class ICPOptimizationController
 {
-   private static final boolean VISUALIZE = false;
-   private static final boolean COMPUTE_COST_TO_GO = false;
+   private static final boolean VISUALIZE = true;
+   private static final boolean COMPUTE_COST_TO_GO = true;
 
    private static final String yoNamePrefix = "controller";
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -90,8 +90,10 @@ public class ICPOptimizationController
    private final DoubleYoVariable lateralFootstepWeight = new DoubleYoVariable(yoNamePrefix + "LateralFootstepWeight", registry);
    private final YoFramePoint2d scaledFootstepWeights = new YoFramePoint2d(yoNamePrefix + "ScaledFootstepWeights", worldFrame, registry);
 
-   private final DoubleYoVariable feedbackForwardWeight = new DoubleYoVariable(yoNamePrefix + "FeedbackForwardWeight", registry);
-   private final DoubleYoVariable feedbackLateralWeight = new DoubleYoVariable(yoNamePrefix + "FeedbackLateralWeight", registry);
+   private final DoubleYoVariable swingFeedbackForwardWeight = new DoubleYoVariable(yoNamePrefix + "SwingFeedbackForwardWeight", registry);
+   private final DoubleYoVariable swingFeedbackLateralWeight = new DoubleYoVariable(yoNamePrefix + "SwingFeedbackLateralWeight", registry);
+   private final DoubleYoVariable transferFeedbackForwardWeight = new DoubleYoVariable(yoNamePrefix + "TransferFeedbackForwardWeight", registry);
+   private final DoubleYoVariable transferFeedbackLateralWeight = new DoubleYoVariable(yoNamePrefix + "TransferFeedbackLateralWeight", registry);
    private final YoFramePoint2d scaledFeedbackWeight = new YoFramePoint2d(yoNamePrefix + "ScaledFeedbackWeight", worldFrame, registry);
 
    private final DoubleYoVariable footstepRegularizationWeight = new DoubleYoVariable(yoNamePrefix + "FootstepRegularizationWeight", registry);
@@ -159,8 +161,10 @@ public class ICPOptimizationController
       forwardFootstepWeight.set(icpOptimizationParameters.getForwardFootstepWeight());
       lateralFootstepWeight.set(icpOptimizationParameters.getLateralFootstepWeight());
       footstepRegularizationWeight.set(icpOptimizationParameters.getFootstepRegularizationWeight());
-      feedbackForwardWeight.set(icpOptimizationParameters.getFeedbackForwardWeight());
-      feedbackLateralWeight.set(icpOptimizationParameters.getFeedbackLateralWeight());
+      swingFeedbackForwardWeight.set(icpOptimizationParameters.getSingleSupportFeedbackForwardWeight());
+      swingFeedbackLateralWeight.set(icpOptimizationParameters.getSingleSupportFeedbackLateralWeight());
+      transferFeedbackForwardWeight.set(icpOptimizationParameters.getDoubleSupportFeedbackForwardWeight());
+      transferFeedbackLateralWeight.set(icpOptimizationParameters.getDoubleSupportFeedbackLateralWeight());
       feedbackRegularizationWeight.set(icpOptimizationParameters.getFeedbackRegularizationWeight());
       feedbackOrthogonalGain.set(icpOptimizationParameters.getFeedbackOrthogonalGain());
       feedbackParallelGain.set(icpOptimizationParameters.getFeedbackParallelGain());
@@ -622,7 +626,11 @@ public class ICPOptimizationController
    private void scaleFeedbackWeightWithGain()
    {
       ReferenceFrame soleFrame = contactableFeet.get(supportSide.getEnumValue()).getSoleFrame();
-      ICPOptimizationControllerHelper.transformWeightsToWorldFrame(feedbackWeights, feedbackForwardWeight, feedbackLateralWeight, soleFrame);
+
+      if (isInTransfer.getBooleanValue())
+         ICPOptimizationControllerHelper.transformWeightsToWorldFrame(feedbackWeights, transferFeedbackForwardWeight, transferFeedbackLateralWeight, soleFrame);
+      else
+         ICPOptimizationControllerHelper.transformWeightsToWorldFrame(feedbackWeights, swingFeedbackForwardWeight, swingFeedbackLateralWeight, soleFrame);
 
       scaledFeedbackWeight.set(feedbackWeights);
 

@@ -183,12 +183,12 @@ public class ICPOptimizationControllerTest
          return 0.0001;
       }
 
-      @Override public double getFeedbackForwardWeight()
+      @Override public double getSingleSupportFeedbackForwardWeight()
       {
          return 2.0;
       }
 
-      @Override public double getFeedbackLateralWeight()
+      @Override public double getSingleSupportFeedbackLateralWeight()
       {
          return 2.0;
       }
