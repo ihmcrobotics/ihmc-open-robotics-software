@@ -434,7 +434,7 @@ public class ICPOptimizationController
 
    private void setConditionsForFeedbackOnlyControl()
    {
-      solver.submitProblemConditions(0, false);
+      solver.resetFootstepConditions();
 
       setFeedbackConditions();
 
@@ -458,9 +458,7 @@ public class ICPOptimizationController
          reachabilityConstraintHandler.updateReachabilityConstraintForSingleSupport(supportSide.getEnumValue(), solver);
       }
 
-      solver.submitProblemConditions(numberOfFootstepsToConsider, localUseStepAdjustment);
-
-      setFeedbackConditions();
+      solver.resetFootstepConditions();
 
       if (useFeedbackRegularization)
          solver.setFeedbackRegularizationWeight(feedbackRegularizationWeight.getDoubleValue() / controlDT);
@@ -473,6 +471,8 @@ public class ICPOptimizationController
          if (useFootstepRegularization)
             solver.setFootstepRegularizationWeight(scaledFootstepRegularizationWeight.getDoubleValue() / controlDT);
       }
+
+      setFeedbackConditions();
 
       double clippedTimeRemaining = Math.max(minimumTimeRemaining.getDoubleValue(), timeRemainingInState.getDoubleValue());
 
@@ -493,6 +493,7 @@ public class ICPOptimizationController
       if (!localUseStepAdjustment)
          dynamicRelaxationWeight = dynamicRelaxationWeight / dynamicRelaxationDoubleSupportWeightModifier;
 
+      solver.resetFeedbackConditions();
       solver.setFeedbackConditions(scaledFeedbackWeight.getX(), scaledFeedbackWeight.getY(), feedbackGains.getX(), feedbackGains.getY(), dynamicRelaxationWeight);
    }
 

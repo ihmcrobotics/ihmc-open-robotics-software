@@ -9,11 +9,17 @@ public class ICPQPIndexHandler
    private int numberOfFootstepVariables = 0;
    private int numberOfLagrangeMultipliers = 2;
 
+   private int problemSize;
+   private int numberOfEqualityConstraints;
+   private int numberOfInequalityConstraints;
+
    private int feedbackCMPIndex;
    private int dynamicRelaxationIndex;
    private int cmpConstraintIndex;
    private int reachabilityConstraintIndex;
    private int lagrangeMultiplierIndex;
+
+   private boolean useStepAdjustment;
 
    public ICPQPIndexHandler()
    {
@@ -45,6 +51,11 @@ public class ICPQPIndexHandler
       return numberOfCMPVertices;
    }
 
+   public boolean constraintCMP()
+   {
+      return numberOfCMPVertices > 0;
+   }
+
    public void registerReachabilityVertex()
    {
       numberOfReachabilityVertices++;
@@ -55,19 +66,31 @@ public class ICPQPIndexHandler
       return numberOfReachabilityVertices;
    }
 
-   public void setNumberOfCMPVertices(int numberOfCMPVertices)
+   public boolean constrainReachability()
    {
-      this.numberOfCMPVertices = numberOfCMPVertices;
+      return numberOfReachabilityVertices > 0;
    }
 
-   public void setNumberOfReachabilityVertices(int numberOfReachabilityVertices)
+   public void resetFootsteps()
    {
-      this.numberOfReachabilityVertices = numberOfReachabilityVertices;
+      useStepAdjustment = false;
+      numberOfFootstepsToConsider = 0;
    }
 
-   public void incrementFootstepsToConsider()
+   public void registerFootstep()
    {
+      useStepAdjustment = true;
       numberOfFootstepsToConsider++;
+   }
+
+   public int getNumberOfFootstepsToConsider()
+   {
+      return numberOfFootstepsToConsider;
+   }
+
+   public boolean useStepAdjustment()
+   {
+      return useStepAdjustment;
    }
 
    public void submitProblemConditions(int numberOfFootstepsToConsider, boolean useStepAdjustment)
@@ -77,7 +100,14 @@ public class ICPQPIndexHandler
       else
          this.numberOfFootstepsToConsider = numberOfFootstepsToConsider;
 
-      numberOfFootstepVariables = 2 * this.numberOfFootstepsToConsider;
+      this.useStepAdjustment = useStepAdjustment;
+
+      computeProblemSize();
+   }
+
+   public void computeProblemSize()
+   {
+      numberOfFootstepVariables = 2 * numberOfFootstepsToConsider;
 
       numberOfLagrangeMultipliers = 2;
       numberOfFreeVariables = numberOfFootstepVariables + 2;
@@ -96,6 +126,25 @@ public class ICPQPIndexHandler
       cmpConstraintIndex = dynamicRelaxationIndex + 2;
       reachabilityConstraintIndex = cmpConstraintIndex + numberOfCMPVertices;
       lagrangeMultiplierIndex = reachabilityConstraintIndex + numberOfReachabilityVertices;
+
+      problemSize = numberOfFreeVariables + numberOfCMPVertices + numberOfReachabilityVertices;
+      numberOfEqualityConstraints = numberOfLagrangeMultipliers;
+      numberOfInequalityConstraints = numberOfCMPVertices + numberOfReachabilityVertices;
+   }
+
+   public int getProblemSize()
+   {
+      return problemSize;
+   }
+
+   public int getNumberOfEqualityConstraints()
+   {
+      return numberOfEqualityConstraints;
+   }
+
+   public int getNumberOfInequalityConstraints()
+   {
+      return numberOfInequalityConstraints;
    }
 
    public int getFootstepStartIndex()
@@ -136,5 +185,10 @@ public class ICPQPIndexHandler
    public int getNumberOfFootstepVariables()
    {
       return numberOfFootstepVariables;
+   }
+
+   public int getNumberOfFreeVariables()
+   {
+      return numberOfFreeVariables;
    }
 }

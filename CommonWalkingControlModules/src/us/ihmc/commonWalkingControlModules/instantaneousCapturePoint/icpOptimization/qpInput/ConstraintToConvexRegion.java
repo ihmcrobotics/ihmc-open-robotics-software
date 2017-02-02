@@ -12,6 +12,7 @@ import java.util.ArrayList;
 public class ConstraintToConvexRegion
 {
    public final DenseMatrix64F smoothingCost;
+
    public final DenseMatrix64F indexSelectionMatrix = CommonOps.identity(2, 2);
 
    public final DenseMatrix64F dynamics_Aeq;
@@ -30,6 +31,7 @@ public class ConstraintToConvexRegion
    private int numberOfVertices = 0;
 
    private double smoothingWeight = 0.001;
+   private double vertexMinimum = 0.0;
 
    public ConstraintToConvexRegion(int maximumNumberOfVertices)
    {
@@ -124,6 +126,11 @@ public class ConstraintToConvexRegion
       this.smoothingWeight = smoothingWeight;
    }
 
+   public void setVertexMinimum(double vertexMinimum)
+   {
+      this.vertexMinimum = vertexMinimum;
+   }
+
    public void formulateConstraint()
    {
       reshape();
@@ -134,7 +141,9 @@ public class ConstraintToConvexRegion
          dynamics_Aeq.set(i, 1, vertexLocations.get(i).get(0, 1));
 
          sum_Aeq.set(i, 0, 1.0);
+
          Aineq.set(i, i, -1.0);
+         bineq.set(i, 0, -vertexMinimum);
       }
       sum_beq.set(0, 0, 1.0);
 
