@@ -933,7 +933,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    @Override
    public MomentumOptimizationSettings getMomentumOptimizationSettings()
    {
-      MomentumOptimizationSettings momentumOptimizationSettings = new MomentumOptimizationSettings();
+      MomentumOptimizationSettings momentumOptimizationSettings = new AtlasMomentumOptimizationSettings();
       momentumOptimizationSettings.scaleForceWeights(Math.pow(jointMap.getModelScale(), jointMap.getMassScalePower()));
       return momentumOptimizationSettings;
    }

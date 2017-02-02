@@ -8,8 +8,6 @@ import javax.vecmath.Vector3d;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
-import us.ihmc.robotics.partNames.NeckJointName;
-import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.DRCRobotModel.RobotTarget;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -23,6 +21,8 @@ import us.ihmc.robotics.controllers.YoPIDGains;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.partNames.NeckJointName;
+import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
@@ -936,7 +936,7 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    @Override
    public MomentumOptimizationSettings getMomentumOptimizationSettings()
    {
-      MomentumOptimizationSettings momentumOptimizationSettings = new MomentumOptimizationSettings();
+      MomentumOptimizationSettings momentumOptimizationSettings = new ValkyrieMomentumOptimizationSettings();
       Vector3d handTaskspaceCotnrolAngularWeights = new Vector3d(0.5, 0.5, 0.5);
       Vector3d handTaskspaceCotnrolLinearWeights = new Vector3d(5.0, 5.0, 5.0);
       momentumOptimizationSettings.setHandTaskspaceControlWeights(handTaskspaceCotnrolAngularWeights, handTaskspaceCotnrolLinearWeights);

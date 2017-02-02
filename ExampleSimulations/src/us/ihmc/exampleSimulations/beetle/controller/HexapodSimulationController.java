@@ -81,7 +81,7 @@ public class HexapodSimulationController implements RobotController
       this.referenceFrames = new HexapodReferenceFrames(fullRobotModel, RhinoBeetlePhysicalProperties.getOffsetsFromJointBeforeFootToSoleAlignedWithWorld());
       this.twistCalculator = new TwistCalculator(worldFrame, fullRobotModel.getElevator());
       setupPlaneContactStateUpdaters(fullRobotModel, sdfRobot);
-      
+
       highLevelController = new HexapodHighLevelControlManager(fullRobotModel, referenceFrames, twistCalculator, contactStateUpdaters, jointsToControl, idParameters, vmcParameters, yoGraphicsListRegistry, controllerDt, registry);
 
       FeedbackControlCommandList feedbackControlCommandList = createFeedbackControlTemplate();
@@ -168,7 +168,7 @@ public class HexapodSimulationController implements RobotController
 
    private MomentumOptimizationSettings getMomentumOptimizationSettings()
    {
-      MomentumOptimizationSettings momentumOptimizationSettings = new MomentumOptimizationSettings();
+      MomentumOptimizationSettings momentumOptimizationSettings = new HexapodMomentumOptimizationSettings();
       momentumOptimizationSettings.setNumberOfBasisVectorsPerContactPoint(4);
       momentumOptimizationSettings.setNumberOfContactableBodies(6);
       momentumOptimizationSettings.setNumberOfContactPointsPerContactableBody(1);
@@ -229,7 +229,7 @@ public class HexapodSimulationController implements RobotController
       controllerCore.submitControllerCoreCommand(controllerCoreCommandList);
       controllerCore.compute();
       outputWriter.write();
-      
+
       totalTimeToCompleteTick.set(System.nanoTime() - startTime);
       totalTimeToCompleteTickInSeconds.set(TimeTools.nanoSecondstoSeconds(System.nanoTime() - startTime));
    }
