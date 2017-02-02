@@ -45,7 +45,7 @@ public class MocapToPelvisFrameConverterVisualTest
    @After
    public void destroySimulationAndRecycleMemory()
    {
-      if (simulationTestingParameters.getKeepSCSUp())
+      if (true || simulationTestingParameters.getKeepSCSUp())
       {
          ThreadTools.sleepForever();
       }
