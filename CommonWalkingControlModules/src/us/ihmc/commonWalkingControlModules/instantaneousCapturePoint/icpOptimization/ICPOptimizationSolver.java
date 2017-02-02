@@ -498,14 +498,13 @@ public class ICPOptimizationSolver
       if (hasFeedbackRegularizationTerm)
          inputCalculator.computeFeedbackRegularizationTask(feedbackTaskInput, feedbackRegularizationWeight, previousFeedbackDeltaSolution);
 
-      indexHandler.submitFeedbackTask(feedbackTaskInput, solverInput_H, solverInput_h);
+      inputCalculator.submitFeedbackTask(feedbackTaskInput, solverInput_H, solverInput_h);
    }
 
    protected void addDynamicRelaxationTask()
    {
       inputCalculator.computeDynamicRelaxationTask(dynamicRelaxationTask, dynamicRelaxationWeight);
-
-      indexHandler.submitDynamicRelaxationTask(dynamicRelaxationTask, solverInput_H, solverInput_h);
+      inputCalculator.submitDynamicRelaxationTask(dynamicRelaxationTask, solverInput_H, solverInput_h);
    }
 
    protected void addStepAdjustmentTask()
@@ -518,8 +517,7 @@ public class ICPOptimizationSolver
             inputCalculator.computeFootstepRegularizationTask(i, footstepTaskInput, footstepRegularizationWeight, previousFootstepLocations.get(i));
       }
 
-      MatrixTools.addMatrixBlock(solverInput_H, 0, 0, footstepTaskInput.quadraticTerm, 0, 0, numberOfFootstepVariables, numberOfFootstepVariables, 1.0);
-      MatrixTools.addMatrixBlock(solverInput_h, 0, 0, footstepTaskInput.linearTerm, 0, 0, numberOfFootstepVariables, 1, 1.0);
+      inputCalculator.submitFootstepTask(footstepTaskInput, solverInput_H, solverInput_h);
    }
 
    private void addCMPLocationConstraint()
@@ -549,7 +547,7 @@ public class ICPOptimizationSolver
 
    private void addReachabilityConstraint()
    {
-      reachabilityConstraint.setIndexOfVariableToConstrain(indexHandler.getFootstepIndex());
+      reachabilityConstraint.setIndexOfVariableToConstrain(indexHandler.getFootstepStartIndex());
       reachabilityConstraint.setSmoothingWeight(betaSmoothing);
       reachabilityConstraint.formulateConstraint();
 
@@ -557,7 +555,7 @@ public class ICPOptimizationSolver
       int reachabilityConstraintIndex = indexHandler.getReachabilityConstraintIndex();
       MatrixTools.setMatrixBlock(solverInput_H, reachabilityConstraintIndex, reachabilityConstraintIndex, cmpLocationConstraint.smoothingCost, 0, 0, numberOfVertices, numberOfVertices, 1.0);
 
-      MatrixTools.setMatrixBlock(solverInput_Aeq, indexHandler.getFootstepIndex(), currentEqualityConstraintIndex, reachabilityConstraint.indexSelectionMatrix, 0, 0, 2, 2, 1.0);
+      MatrixTools.setMatrixBlock(solverInput_Aeq, indexHandler.getFootstepStartIndex(), currentEqualityConstraintIndex, reachabilityConstraint.indexSelectionMatrix, 0, 0, 2, 2, 1.0);
       MatrixTools.setMatrixBlock(solverInput_Aeq, reachabilityConstraintIndex, currentEqualityConstraintIndex, reachabilityConstraint.dynamics_Aeq, 0, 0, numberOfVertices, 2, 1.0);
       MatrixTools.setMatrixBlock(solverInput_beq, currentEqualityConstraintIndex, 0, reachabilityConstraint.dynamics_beq, 0, 0, 2, 1, 1.0);
 

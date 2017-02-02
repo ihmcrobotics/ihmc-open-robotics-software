@@ -99,7 +99,6 @@ public class ICPOptimizationController
 
    private final DoubleYoVariable feedbackOrthogonalGain = new DoubleYoVariable(yoNamePrefix + "FeedbackOrthogonalGain", registry);
    private final DoubleYoVariable feedbackParallelGain = new DoubleYoVariable(yoNamePrefix + "FeedbackParallelGain", registry);
-   private final YoFramePoint2d yoFeedbackGains = new YoFramePoint2d(yoNamePrefix + "EquivalentFeedbackGains", worldFrame, registry);
 
    private final DoubleYoVariable remainingTimeToStopAdjusting = new DoubleYoVariable(yoNamePrefix + "RemainingTimeToStopAdjusting", registry);
 
@@ -128,8 +127,6 @@ public class ICPOptimizationController
    private boolean localUseFootstepRegularization;
 
    private boolean localScaleUpcomingStepWeights;
-
-   private final Vector2dZUpFrame icpVelocityDirectionFrame;
 
    public ICPOptimizationController(CapturePointPlannerParameters icpPlannerParameters, ICPOptimizationParameters icpOptimizationParameters,
          WalkingControllerParameters walkingControllerParameters, BipedSupportPolygons bipedSupportPolygons,
@@ -202,8 +199,6 @@ public class ICPOptimizationController
          upcomingFootstepLocations.add(new YoFramePoint2d("upcomingFootstepLocation" + i, worldFrame, registry));
          footstepSolutions.add(new YoFramePoint2d("footstepSolutionLocation" + i, worldFrame, registry));
       }
-
-      icpVelocityDirectionFrame = new Vector2dZUpFrame("icpVelocityDirectionFrame", worldFrame);
 
       parentRegistry.addChild(registry);
    }
@@ -478,8 +473,6 @@ public class ICPOptimizationController
       inputHandler.computeStanceCMPProjection(stanceCMPProjection, clippedTimeRemaining, localUseTwoCMPs, isInTransfer.getBooleanValue(), localUseInitialICP, omega0);
       inputHandler.computeBeginningOfStateICPProjection(beginningOfStateICPProjection, beginningOfStateICP.getFrameTuple2d());
 
-      inputHandler.computeStanceCMPProjection(stanceCMPProjection, clippedTimeRemaining, localUseTwoCMPs, isInTransfer.getBooleanValue(), localUseInitialICP, omega0);
-
       inputHandler.computeCMPOffsetRecursionEffect(cmpOffsetRecursionEffect, upcomingFootstepLocations, numberOfFootstepsToConsider);
       if (!localUseTwoCMPs)
       {
@@ -492,78 +485,13 @@ public class ICPOptimizationController
    private final FrameVector2d feedbackGains = new FrameVector2d();
    private void setFeedbackConditions()
    {
-      getTransformedFeedbackGains(feedbackGains);
+      ICPOptimizationControllerHelper.transformFeedbackGains(feedbackGains, desiredICPVelocity, feedbackParallelGain, feedbackOrthogonalGain);
 
       double dynamicRelaxationWeight = this.dynamicRelaxationWeight.getDoubleValue();
       if (!localUseStepAdjustment)
          dynamicRelaxationWeight = dynamicRelaxationWeight / dynamicRelaxationDoubleSupportWeightModifier;
 
       solver.setFeedbackConditions(scaledFeedbackWeight.getX(), scaledFeedbackWeight.getY(), feedbackGains.getX(), feedbackGains.getY(), dynamicRelaxationWeight);
-   }
-
-   private final RigidBodyTransform transformTranspose = new RigidBodyTransform();
-   private final Matrix3d rotation = new Matrix3d();
-   private final Matrix3d rotationTranspose = new Matrix3d();
-   private final Matrix3d gainsMatrix = new Matrix3d();
-   private final Matrix3d gainsMatrixTransformed = new Matrix3d();
-
-   private void getTransformedFeedbackGains(FrameVector2d feedbackGainsToPack)
-   {
-      double epsilonZeroICPVelocity = 1e-5;
-
-      if (desiredICPVelocity.lengthSquared() > MathTools.square(epsilonZeroICPVelocity))
-      {
-         icpVelocityDirectionFrame.setXAxis(desiredICPVelocity);
-         RigidBodyTransform transform = icpVelocityDirectionFrame.getTransformToWorldFrame();
-
-         transform.getRotation(rotation);
-         rotationTranspose.set(rotation);
-         rotationTranspose.transpose();
-         transformTranspose.setRotation(rotationTranspose);
-
-         gainsMatrix.setZero();
-         gainsMatrix.setElement(0, 0, 1.0 + feedbackParallelGain.getDoubleValue());
-         gainsMatrix.setElement(1, 1, 1.0 + feedbackOrthogonalGain.getDoubleValue());
-
-         gainsMatrixTransformed.set(rotation);
-         gainsMatrixTransformed.mul(gainsMatrix);
-         gainsMatrixTransformed.mul(rotationTranspose);
-
-         feedbackGainsToPack.setToZero(worldFrame);
-         feedbackGainsToPack.setX(gainsMatrixTransformed.getElement(0, 0));
-         feedbackGainsToPack.setY(gainsMatrixTransformed.getElement(1, 1));
-      }
-      else
-      {
-         feedbackGainsToPack.setToZero(worldFrame);
-         feedbackGainsToPack.set(feedbackOrthogonalGain.getDoubleValue(), feedbackOrthogonalGain.getDoubleValue());
-      }
-      yoFeedbackGains.set(feedbackGainsToPack);
-   }
-
-   private final Matrix3d weightsMatrix = new Matrix3d();
-   private final Matrix3d weightsMatrixTransformed = new Matrix3d();
-
-   private void getTransformedWeights(FrameVector2d weightsToPack, double forwardWeight, double lateralWeight)
-   {
-      RigidBodyTransform transform = contactableFeet.get(supportSide.getEnumValue()).getSoleFrame().getTransformToWorldFrame();
-
-      transform.getRotation(rotation);
-      rotationTranspose.set(rotation);
-      rotation.transpose();
-      transformTranspose.setRotation(rotationTranspose);
-
-      weightsMatrix.setZero();
-      weightsMatrix.setElement(0, 0, forwardWeight);
-      weightsMatrix.setElement(1, 1, lateralWeight);
-
-      weightsMatrixTransformed.set(rotation);
-      weightsMatrixTransformed.mul(weightsMatrix);
-      weightsMatrixTransformed.mul(rotationTranspose);
-
-      weightsToPack.setToZero(worldFrame);
-      weightsToPack.setX(weightsMatrixTransformed.getElement(0, 0));
-      weightsToPack.setY(weightsMatrixTransformed.getElement(1, 1));
    }
 
    private final FramePose footstepPose = new FramePose();
@@ -625,7 +553,8 @@ public class ICPOptimizationController
    private final FrameVector2d footstepWeights = new FrameVector2d();
    private void submitFootstepConditionsToSolver(int footstepIndex)
    {
-      getTransformedWeights(footstepWeights, forwardFootstepWeight.getDoubleValue(), lateralFootstepWeight.getDoubleValue());
+      ReferenceFrame soleFrame = contactableFeet.get(supportSide.getEnumValue()).getSoleFrame();
+      ICPOptimizationControllerHelper.transformWeightsToWorldFrame(footstepWeights, forwardFootstepWeight, lateralFootstepWeight, soleFrame);
       scaledFootstepWeights.set(footstepWeights);
 
       if (localScaleUpcomingStepWeights)
@@ -682,7 +611,6 @@ public class ICPOptimizationController
       }
    }
 
-
    private void scaleStepRegularizationWeightWithTime()
    {
       if (scaleStepRegularizationWeightWithTime.getBooleanValue())
@@ -699,12 +627,14 @@ public class ICPOptimizationController
    private final FrameVector2d feedbackWeights = new FrameVector2d();
    private void scaleFeedbackWeightWithGain()
    {
-      getTransformedWeights(feedbackWeights, feedbackForwardWeight.getDoubleValue(), feedbackLateralWeight.getDoubleValue());
+      ReferenceFrame soleFrame = contactableFeet.get(supportSide.getEnumValue()).getSoleFrame();
+      ICPOptimizationControllerHelper.transformWeightsToWorldFrame(feedbackWeights, feedbackForwardWeight, feedbackLateralWeight, soleFrame);
+
       scaledFeedbackWeight.set(feedbackWeights);
 
       if (scaleFeedbackWeightWithGain.getBooleanValue())
       {
-         getTransformedFeedbackGains(feedbackGains);
+         ICPOptimizationControllerHelper.transformFeedbackGains(feedbackGains, desiredICPVelocity, feedbackParallelGain, feedbackOrthogonalGain);
 
          double alpha = Math.sqrt(Math.pow(feedbackGains.getX(), 2) + Math.pow(feedbackGains.getY(), 2));
          scaledFeedbackWeight.scale(1.0 / alpha);
@@ -729,43 +659,5 @@ public class ICPOptimizationController
    public boolean wasFootstepAdjusted()
    {
       return solutionHandler.wasFootstepAdjusted();
-   }
-
-   private class Vector2dZUpFrame extends ReferenceFrame
-   {
-      private static final long serialVersionUID = -1810366869361449743L;
-      private final FrameVector2d xAxis;
-      private final Vector3d x = new Vector3d();
-      private final Vector3d y = new Vector3d();
-      private final Vector3d z = new Vector3d();
-      private final Matrix3d rotation = new Matrix3d();
-
-      public Vector2dZUpFrame(String string, ReferenceFrame parentFrame)
-      {
-         super(string, parentFrame);
-         xAxis = new FrameVector2d(parentFrame);
-      }
-
-      public void setXAxis(FrameVector2d xAxis)
-      {
-         this.xAxis.setIncludingFrame(xAxis);
-         this.xAxis.changeFrame(parentFrame);
-         this.xAxis.normalize();
-         update();
-      }
-
-      @Override
-      protected void updateTransformToParent(RigidBodyTransform transformToParent)
-      {
-         x.set(xAxis.getX(), xAxis.getY(), 0.0);
-         z.set(0.0, 0.0, 1.0);
-         y.cross(z, x);
-
-         rotation.setColumn(0, x);
-         rotation.setColumn(1, y);
-         rotation.setColumn(2, z);
-
-         transformToParent.setRotationAndZeroTranslation(rotation);
-      }
    }
 }
