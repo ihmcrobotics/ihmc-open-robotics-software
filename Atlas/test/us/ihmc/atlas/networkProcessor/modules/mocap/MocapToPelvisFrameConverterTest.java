@@ -79,8 +79,7 @@ public class MocapToPelvisFrameConverterTest
    public void testFrameConversionForRandomPelvisMotion()
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
-      long startTime = System.currentTimeMillis();
-
+      
       ReferenceFrame initialPelvisFrame = ReferenceFrame.generateRandomReferenceFrame("initialPelvisFrame", random, ReferenceFrame.getWorldFrame());
       ReferenceFrame mocapFrame = ReferenceFrame.generateRandomReferenceFrame("mocapFrame", random, ReferenceFrame.getWorldFrame());
       MocapRigidBody mocapRigidBody = createMocapRigidBody(initialPelvisFrame, mocapFrame);
@@ -97,10 +96,6 @@ public class MocapToPelvisFrameConverterTest
          RigidBodyTransform actualPelvisToWorldTransform = randomPelvisFrame.getTransformToWorldFrame();
          assertTrue(actualPelvisToWorldTransform.epsilonEquals(computedPelvisToWorldTransform, 1e-5));
       }
-
-      long stopTime = System.currentTimeMillis();
-      long timeDiff = stopTime - startTime;
-      System.out.println("time diff: " + timeDiff);
    }
 
    private MocapRigidBody createMocapRigidBody(ReferenceFrame pelvisFrame, ReferenceFrame mocapFrame)
