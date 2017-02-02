@@ -47,9 +47,7 @@ public class ICPOptimizationSolver
    protected final ArrayList<DenseMatrix64F> previousFootstepLocations = new ArrayList<>();
 
    protected final DenseMatrix64F finalICPRecursion = new DenseMatrix64F(2, 1);
-   protected final DenseMatrix64F cmpOffsetRecursionEffect = new DenseMatrix64F(2, 1);
-   protected final DenseMatrix64F stanceCMPProjection = new DenseMatrix64F(2, 1);
-   protected final DenseMatrix64F initialICPProjection = new DenseMatrix64F(2, 1);
+   protected final DenseMatrix64F cmpConstantEffect = new DenseMatrix64F(2, 1);
    protected final DenseMatrix64F currentICP = new DenseMatrix64F(2, 1);
    protected final DenseMatrix64F referenceICP = new DenseMatrix64F(2, 1);
    protected final DenseMatrix64F perfectCMP = new DenseMatrix64F(2, 1);
@@ -96,8 +94,9 @@ public class ICPOptimizationSolver
    private int currentEqualityConstraintIndex;
    private int currentInequalityConstraintIndex;
 
+   private final boolean computeCostToGo;
+
    private boolean useStepAdjustment = true;
-   private boolean useTwoCMPs = false;
 
    private boolean hasFootstepRegularizationTerm = false;
    private boolean hasFeedbackRegularizationTerm = false;
@@ -105,13 +104,9 @@ public class ICPOptimizationSolver
    private final double minimumFootstepWeight;
    private final double minimumFeedbackWeight;
 
-   public ICPOptimizationSolver(ICPOptimizationParameters icpOptimizationParameters, int maximumNumberOfCMPVertices)
+   public ICPOptimizationSolver(ICPOptimizationParameters icpOptimizationParameters, int maximumNumberOfCMPVertices, boolean computeCostToGo)
    {
-      this(icpOptimizationParameters, maximumNumberOfCMPVertices, null);
-   }
-
-   public ICPOptimizationSolver(ICPOptimizationParameters icpOptimizationParameters, int maximumNumberOfCMPVertices, YoVariableRegistry parentRegistry)
-   {
+      this.computeCostToGo = computeCostToGo;
       indexHandler = new ICPQPIndexHandler();
       inputCalculator = new ICPQPInputCalculator(indexHandler);
 
@@ -189,12 +184,11 @@ public class ICPOptimizationSolver
       reachabilityConstraint.reset();
    }
 
-   public void submitProblemConditions(int numberOfFootstepsToConsider, boolean useStepAdjustment, boolean useTwoCMPs)
+   public void submitProblemConditions(int numberOfFootstepsToConsider, boolean useStepAdjustment)
    {
       indexHandler.submitProblemConditions(numberOfFootstepsToConsider, useStepAdjustment);
 
       this.useStepAdjustment = useStepAdjustment;
-      this.useTwoCMPs = useTwoCMPs;
 
       if (!useStepAdjustment)
          this.numberOfFootstepsToConsider = 0;
@@ -246,8 +240,7 @@ public class ICPOptimizationSolver
       }
 
       finalICPRecursion.zero();
-      initialICPProjection.zero();
-      cmpOffsetRecursionEffect.zero();
+      cmpConstantEffect.zero();
       currentICP.zero();
       referenceICP.zero();
       perfectCMP.zero();
@@ -411,16 +404,12 @@ public class ICPOptimizationSolver
       reachabilityConstraint.addVertex(tmpPoint);
    }
 
-   public void compute(FramePoint2d finalICPRecursion, FramePoint2d cmpOffsetRecursionEffect, FramePoint2d currentICP, FramePoint2d perfectCMP,
-         FramePoint2d stanceCMPProjection, FramePoint2d initialICPProjection) throws NoConvergenceException
+   public void compute(FramePoint2d finalICPRecursion, FramePoint2d cmpConstantEffect, FramePoint2d currentICP, FramePoint2d perfectCMP) throws NoConvergenceException
    {
       finalICPRecursion.changeFrame(worldFrame);
+      cmpConstantEffect.changeFrame(worldFrame);
       currentICP.changeFrame(worldFrame);
       perfectCMP.changeFrame(worldFrame);
-      stanceCMPProjection.changeFrame(worldFrame);
-
-      if (cmpOffsetRecursionEffect != null)
-         cmpOffsetRecursionEffect.changeFrame(worldFrame);
 
       this.finalICPRecursion.set(0, 0, finalICPRecursion.getX());
       this.finalICPRecursion.set(1, 0, finalICPRecursion.getY());
@@ -431,18 +420,8 @@ public class ICPOptimizationSolver
       this.perfectCMP.set(0, 0, perfectCMP.getX());
       this.perfectCMP.set(1, 0, perfectCMP.getY());
 
-      this.stanceCMPProjection.set(0, 0, stanceCMPProjection.getX());
-      this.stanceCMPProjection.set(1, 0, stanceCMPProjection.getY());
-
-      this.initialICPProjection.set(0, 0, initialICPProjection.getX());
-      this.initialICPProjection.set(1, 0, initialICPProjection.getY());
-
-
-      if (useTwoCMPs)
-      {
-         this.cmpOffsetRecursionEffect.set(0, 0, cmpOffsetRecursionEffect.getX());
-         this.cmpOffsetRecursionEffect.set(1, 0, cmpOffsetRecursionEffect.getY());
-      }
+      this.cmpConstantEffect.set(0, 0, cmpConstantEffect.getX());
+      this.cmpConstantEffect.set(1, 0, cmpConstantEffect.getY());
 
       addFeedbackTask();
       addDynamicRelaxationTask();
@@ -483,11 +462,13 @@ public class ICPOptimizationSolver
             extractFootstepSolutions(footstepLocationSolution);
             setPreviousFootstepSolution(footstepLocationSolution);
          }
-            extractFeedbackDeltaSolution(feedbackDeltaSolution);
-            extractDynamicRelaxationSolution(dynamicRelaxationSolution);
-            setPreviousFeedbackDeltaSolution(feedbackDeltaSolution);
 
-         computeCostToGo();
+         extractFeedbackDeltaSolution(feedbackDeltaSolution);
+         extractDynamicRelaxationSolution(dynamicRelaxationSolution);
+         setPreviousFeedbackDeltaSolution(feedbackDeltaSolution);
+
+         if (computeCostToGo)
+            computeCostToGo();
       }
    }
 
@@ -571,8 +552,8 @@ public class ICPOptimizationSolver
 
    private void addDynamicConstraint()
    {
-      inputCalculator.computeDynamicsConstraint(dynamicsConstraintInput, currentICP, finalICPRecursion, stanceCMPProjection, initialICPProjection, useTwoCMPs,
-            cmpOffsetRecursionEffect, feedbackGain, useStepAdjustment, numberOfFootstepsToConsider, footstepRecursionMultipliers);
+      inputCalculator.computeDynamicsConstraint(dynamicsConstraintInput, currentICP, finalICPRecursion, cmpConstantEffect,
+            feedbackGain, useStepAdjustment, numberOfFootstepsToConsider, footstepRecursionMultipliers);
 
       MatrixTools.setMatrixBlock(solverInput_Aeq, 0, currentEqualityConstraintIndex, dynamicsConstraintInput.Aeq, 0, 0, numberOfFreeVariables, 2, 1.0);
       MatrixTools.setMatrixBlock(solverInput_beq, currentEqualityConstraintIndex, 0, dynamicsConstraintInput.beq, 0, 0, 2, 1, 1.0);

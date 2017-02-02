@@ -29,7 +29,7 @@ public class ICPOptimizationSolverTest extends ICPOptimizationSolver
 
    public ICPOptimizationSolverTest()
    {
-      super(icpOptimizationParameters, 20, rootRegistry);
+      super(icpOptimizationParameters, 20, false);
       rootRegistry.clear();
    }
 
@@ -66,24 +66,21 @@ public class ICPOptimizationSolverTest extends ICPOptimizationSolver
    {
       for (int i = 1; i < this.maximumNumberOfFootstepsToConsider; i++)
       {
-         testDimension(i, 0, false, true, false);
-         testDimension(i, 0, true, true, false);
-         testDimension(i, 0, true, false, false);
+         testDimension(i, 0, false);
+         testDimension(i, 0, true);
 
-         testDimension(i, 4, false, true, false);
-         testDimension(i, 4, true, true, false);
-         testDimension(i, 4, true, false, false);
+         testDimension(i, 4, false);
+         testDimension(i, 4, true);
 
-         testDimension(i, 8, false, true, false);
-         testDimension(i, 8, true, true, false);
-         testDimension(i, 8, true, false, false);
+         testDimension(i, 8, false);
+         testDimension(i, 8, true);
       }
    }
 
-   private void testDimension(int numberOfFootstepsToConsider, int numberOfVertices, boolean useStepAdjustment, boolean useFeedback, boolean useTwoCMPs)
+   private void testDimension(int numberOfFootstepsToConsider, int numberOfVertices, boolean useStepAdjustment)
    {
       super.setNumberOfCMPVertices(numberOfVertices);
-      super.submitProblemConditions(numberOfFootstepsToConsider, useStepAdjustment, useTwoCMPs);
+      super.submitProblemConditions(numberOfFootstepsToConsider, useStepAdjustment);
 
       int numberOfLagrangeMultipliers = 2;
       int numberOfFootstepVariables = 0;
@@ -104,7 +101,7 @@ public class ICPOptimizationSolverTest extends ICPOptimizationSolver
       if (numberOfVertices > 0)
          numberOfLagrangeMultipliers += 3;
 
-      String name = "Number of Steps: " + numberOfFootstepsToConsider + ". Use step adjustment: " + useStepAdjustment + ". Use Feedback: " + useFeedback;
+      String name = "Number of Steps: " + numberOfFootstepsToConsider + ". Use step adjustment: " + useStepAdjustment;
 
       assertEquals(name, numberOfFootstepVariables, this.numberOfFootstepVariables, epsilon);
       assertEquals(name, numberOfLagrangeMultipliers, this.numberOfLagrangeMultipliers, epsilon);
@@ -206,18 +203,16 @@ public class ICPOptimizationSolverTest extends ICPOptimizationSolver
    @Test(timeout = 2000)
    public void testConditionError()
    {
-      testCondition(0, true, true);
-      testCondition(0, true, false);
-      testCondition(0, false, true);
-      testCondition(0, false, false);
+      testCondition(0, true);
+      testCondition(0, false);
    }
 
-   public void testCondition(int numberOfFootstepsToConsider, boolean useStepAdjustment, boolean useTwoCMPs)
+   public void testCondition(int numberOfFootstepsToConsider, boolean useStepAdjustment)
    {
       boolean hasError = false;
       try
       {
-         super.submitProblemConditions(numberOfFootstepsToConsider, useStepAdjustment, useTwoCMPs);
+         super.submitProblemConditions(numberOfFootstepsToConsider, useStepAdjustment);
       }
       catch (RuntimeException e)
       {
@@ -241,7 +236,7 @@ public class ICPOptimizationSolverTest extends ICPOptimizationSolver
 
       int numberOffootstepsToConsider = 0;
 
-      super.submitProblemConditions(numberOffootstepsToConsider, true, true);
+      super.submitProblemConditions(numberOffootstepsToConsider, true);
       super.setFeedbackConditions(0.001, feedbackGain, 1000.0);
 
       double finalICPRecursionMultiplier = Math.exp(-omega * initialDoubleSupportDuration);
@@ -257,6 +252,10 @@ public class ICPOptimizationSolverTest extends ICPOptimizationSolver
       FramePoint2d cmpProjection = new FramePoint2d();
       FramePoint2d initialICPProjection = new FramePoint2d();
 
+      FramePoint2d cmpConstantEffect = new FramePoint2d();
+      cmpConstantEffect.add(cmpProjection);
+      cmpConstantEffect.add(initialICPProjection);
+
       cmpProjection.set(perfectCMP);
       cmpProjection.scale(cmpProjectionMultiplier);
 
@@ -268,7 +267,7 @@ public class ICPOptimizationSolverTest extends ICPOptimizationSolver
 
       try
       {
-         this.compute(finalICPRecursion, null, currentICP, perfectCMP, cmpProjection, initialICPProjection);
+         this.compute(finalICPRecursion, cmpConstantEffect, currentICP, perfectCMP);
       }
       catch (NoConvergenceException e)
       {
@@ -321,7 +320,7 @@ public class ICPOptimizationSolverTest extends ICPOptimizationSolver
       int numberOfVertices = 4;
 
       super.setNumberOfCMPVertices(numberOfVertices);
-      super.submitProblemConditions(numberOffootstepsToConsider, true, true);
+      super.submitProblemConditions(numberOffootstepsToConsider, true);
       super.setFeedbackConditions(0.001, feedbackGain, 1000.0);
 
       for (int i = 0; i < numberOffootstepsToConsider; i++)
@@ -342,6 +341,10 @@ public class ICPOptimizationSolverTest extends ICPOptimizationSolver
       FramePoint2d cmpProjection = new FramePoint2d();
       FramePoint2d initialICPProjection = new FramePoint2d();
 
+      FramePoint2d cmpConstantEffect = new FramePoint2d();
+      cmpConstantEffect.add(cmpProjection);
+      cmpConstantEffect.add(initialICPProjection);
+
       cmpProjection.set(perfectCMP);
       cmpProjection.scale(cmpProjectionMultiplier);
 
@@ -352,7 +355,7 @@ public class ICPOptimizationSolverTest extends ICPOptimizationSolver
 
       try
       {
-         this.compute(finalICPRecursion, null, currentICP, perfectCMP, cmpProjection, initialICPProjection);
+         this.compute(finalICPRecursion, cmpConstantEffect, currentICP, perfectCMP);
       }
       catch (NoConvergenceException e)
       {
@@ -403,11 +406,11 @@ public class ICPOptimizationSolverTest extends ICPOptimizationSolver
       {
          int feedbackIndex = 2 * numberOfFootstepsToConsider;
 
-         super.submitProblemConditions(numberOfFootstepsToConsider, true, true);
+         super.submitProblemConditions(numberOfFootstepsToConsider, true);
          super.setFeedbackConditions(feedbackWeight, feedbackGain, 1000.0);
 
          checkFeedbackMatrices(feedbackWeight, feedbackGain);
-         testDimension(numberOfFootstepsToConsider, numberOfVertices, true, true, false);
+         testDimension(numberOfFootstepsToConsider, numberOfVertices, true);
 
          super.addFeedbackTask();
 
@@ -433,8 +436,8 @@ public class ICPOptimizationSolverTest extends ICPOptimizationSolver
 
       for (int numberOfFootstepsToConsider = 1; numberOfFootstepsToConsider < maximumNumberOfFootstepsToConsider; numberOfFootstepsToConsider++)
       {
-         super.submitProblemConditions(numberOfFootstepsToConsider, true, false); //, false);
-         testDimension(numberOfFootstepsToConsider, numberOfVertices, true, true, false);
+         super.submitProblemConditions(numberOfFootstepsToConsider, true); //, false);
+         testDimension(numberOfFootstepsToConsider, numberOfVertices, true);
 
          RobotSide stepSide = RobotSide.LEFT;
 
@@ -491,8 +494,8 @@ public class ICPOptimizationSolverTest extends ICPOptimizationSolver
 
       for (int numberOfFootstepsToConsider = 1; numberOfFootstepsToConsider < maximumNumberOfFootstepsToConsider; numberOfFootstepsToConsider++)
       {
-         super.submitProblemConditions(numberOfFootstepsToConsider, true, false);
-         testDimension(numberOfFootstepsToConsider, numberOfVertices, true, true, false);
+         super.submitProblemConditions(numberOfFootstepsToConsider, true);
+         testDimension(numberOfFootstepsToConsider, numberOfVertices, true);
 
          RobotSide stepSide = RobotSide.LEFT;
 
@@ -566,7 +569,7 @@ public class ICPOptimizationSolverTest extends ICPOptimizationSolver
 
       for (int numberOfFootstepsToConsider = 1; numberOfFootstepsToConsider < maximumNumberOfFootstepsToConsider; numberOfFootstepsToConsider++)
       {
-         super.submitProblemConditions(numberOfFootstepsToConsider, true, false);
+         super.submitProblemConditions(numberOfFootstepsToConsider, true);
 
          RobotSide stepSide = RobotSide.LEFT;
 

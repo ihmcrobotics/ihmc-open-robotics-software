@@ -66,9 +66,9 @@ public class ICPQPInputCalculator
    }
 
    private static final DenseMatrix64F identity = CommonOps.identity(2, 2);
+
    public void computeDynamicsConstraint(ICPEqualityConstraintInput icpEqualityInput, DenseMatrix64F currentICP, DenseMatrix64F finalICPRecursion,
-         DenseMatrix64F stanceCMPProjection, DenseMatrix64F initialICPProjection, boolean useTwoCMPs, DenseMatrix64F cmpOffsetRecursionEffect,
-         DenseMatrix64F feedbackGain, boolean useStepAdjustment, int numberOfSteps, ArrayList<DenseMatrix64F> footstepRecursionMultipliers)
+         DenseMatrix64F cmpConstantEffect, DenseMatrix64F feedbackGain, boolean useStepAdjustment, int numberOfSteps, ArrayList<DenseMatrix64F> footstepRecursionMultipliers)
    {
       MatrixTools.setMatrixBlock(icpEqualityInput.Aeq, indexHandler.getDynamicRelaxationIndex(), 0, identity, 0, 0, 2, 2, 1.0);
 
@@ -84,11 +84,7 @@ public class ICPQPInputCalculator
       }
 
       CommonOps.subtractEquals(currentICP, finalICPRecursion);
-      CommonOps.subtractEquals(currentICP, stanceCMPProjection);
-      CommonOps.subtractEquals(currentICP, initialICPProjection);
-
-      if (useTwoCMPs)
-         CommonOps.subtractEquals(currentICP, cmpOffsetRecursionEffect);
+      CommonOps.subtractEquals(currentICP, cmpConstantEffect);
 
       MatrixTools.setMatrixBlock(icpEqualityInput.beq, 0, 0, currentICP, 0, 0, 2, 1, 1.0);
    }
