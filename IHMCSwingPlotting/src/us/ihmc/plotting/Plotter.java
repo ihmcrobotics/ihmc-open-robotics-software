@@ -1,11 +1,13 @@
 package us.ihmc.plotting;
 
+import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
+import java.awt.Stroke;
 import java.awt.Toolkit;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
@@ -74,6 +76,8 @@ public class Plotter implements PlotterInterface
    
    private final Plotter2DAdapter plotter2dAdapter;
    private final Graphics2DAdapter graphics2dAdapter;
+   private final Stroke normalStroke;
+   private final Stroke dashedStroke;
    
    private final Vector2d metersToPixels = new Vector2d(50.0, 50.0);
    private final Rectangle visibleRectangle = new Rectangle();
@@ -108,10 +112,10 @@ public class Plotter implements PlotterInterface
    
    public Plotter()
    {
-      this(PlotterColors.simulationConstructionSetStyle());
+      this(PlotterColors.simulationConstructionSetStyle(), false);
    }
    
-   public Plotter(PlotterColors plotterColors)
+   public Plotter(PlotterColors plotterColors, boolean highQuality)
    {
       this.plotterColors = plotterColors;
       
@@ -207,6 +211,15 @@ public class Plotter implements PlotterInterface
       
       updateFrames();
       
+      normalStroke = new BasicStroke(1.0f);
+      if (highQuality)
+      {
+         dashedStroke = new BasicStroke(1.0f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 1.0f, new float[] {3.0f}, 0.0f);
+      }
+      else
+      {
+         dashedStroke = new BasicStroke(1.0f);
+      }
       plotter2dAdapter = new Plotter2DAdapter(metersFrame, screenFrame, pixelsFrame);
       graphics2dAdapter = new Graphics2DAdapter(plotter2dAdapter);
       
@@ -312,7 +325,7 @@ public class Plotter implements PlotterInterface
             {
                nthGridLineFromOrigin++;
             }
-            applyColorForGridline(graphics2d, nthGridLineFromOrigin);
+            applyParametersForGridline(graphics2d, nthGridLineFromOrigin);
    
             gridLinePencil.changeFrame(pixelsFrame);
             gridSize.changeFrame(pixelsFrame);
@@ -358,7 +371,7 @@ public class Plotter implements PlotterInterface
             {
                nthGridLineFromOrigin++;
             }
-            applyColorForGridline(graphics2d, nthGridLineFromOrigin);
+            applyParametersForGridline(graphics2d, nthGridLineFromOrigin);
    
             gridLinePencil.changeFrame(pixelsFrame);
             gridSize.changeFrame(pixelsFrame);
@@ -393,6 +406,7 @@ public class Plotter implements PlotterInterface
       
       // paint grid centerline
       origin.changeFrame(pixelsFrame);
+      graphics2d.setStroke(normalStroke);
       graphics2d.setColor(plotterColors.getGridAxisColor());
       tempGridLine.set(origin.getX(), origin.getY(), 1.0, 0.0);
       graphics2d.drawLine(pixelsFrame, tempGridLine);
@@ -502,18 +516,21 @@ public class Plotter implements PlotterInterface
       return gridSizePixels;
    }
 
-   private void applyColorForGridline(final Plotter2DAdapter graphics2d, int nthGridLineFromOrigin)
+   private void applyParametersForGridline(final Plotter2DAdapter graphics2d, int nthGridLineFromOrigin)
    {
       if (nthGridLineFromOrigin % 10 == 0)
       {
+         graphics2d.setStroke(normalStroke);
          graphics2d.setColor(plotterColors.getGridEveryTenColor());
       }
       else if (nthGridLineFromOrigin % 5 == 0)
       {
+         graphics2d.setStroke(dashedStroke);
          graphics2d.setColor(plotterColors.getGridEveryFiveColor());
       }
       else
       {
+         graphics2d.setStroke(dashedStroke);
          graphics2d.setColor(plotterColors.getGridEveryOneColor());
       }
    }
