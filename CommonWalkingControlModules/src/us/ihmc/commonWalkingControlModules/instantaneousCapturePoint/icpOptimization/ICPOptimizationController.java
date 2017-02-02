@@ -6,7 +6,6 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
-import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -21,13 +20,13 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.exceptions.NoConvergenceException;
 import us.ihmc.tools.io.printing.PrintTools;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Vector3d;
 import java.util.ArrayList;
 
 public class ICPOptimizationController
 {
    private static final boolean VISUALIZE = false;
+   private static final boolean COMPUTE_COST_TO_GO = false;
+
    private static final String yoNamePrefix = "controller";
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -77,6 +76,7 @@ public class ICPOptimizationController
    private final FramePoint2d cmpOffsetRecursionEffect = new FramePoint2d();
    private final FramePoint2d stanceCMPProjection = new FramePoint2d();
    private final FramePoint2d beginningOfStateICPProjection = new FramePoint2d();
+   private final FramePoint2d cmpConstantEffects = new FramePoint2d();
 
    private final YoFramePoint2d beginningOfStateICP = new YoFramePoint2d(yoNamePrefix + "BeginningOfStateICP", worldFrame, registry);
 
@@ -125,7 +125,6 @@ public class ICPOptimizationController
    private boolean localUseFeedbackRegularization;
    private boolean localUseStepAdjustment;
    private boolean localUseFootstepRegularization;
-
    private boolean localScaleUpcomingStepWeights;
 
    public ICPOptimizationController(CapturePointPlannerParameters icpPlannerParameters, ICPOptimizationParameters icpOptimizationParameters,
@@ -145,7 +144,7 @@ public class ICPOptimizationController
       for (RobotSide robotSide : RobotSide.values)
          totalVertices += contactableFeet.get(robotSide).getTotalNumberOfContactPoints();
 
-      solver = new ICPOptimizationSolver(icpOptimizationParameters, totalVertices, registry);
+      solver = new ICPOptimizationSolver(icpOptimizationParameters, totalVertices, COMPUTE_COST_TO_GO);
 
       useTwoCMPsInControl.set(icpPlannerParameters.useTwoCMPsPerSupport());
 
@@ -242,6 +241,16 @@ public class ICPOptimizationController
       }
    }
 
+   public void submitRemainingTimeInSwingUnderDisturbance(double remainingTimeForSwing)
+   {
+      if (swingSpeedUpEnabled.getBooleanValue() && remainingTimeForSwing < timeRemainingInState.getDoubleValue())
+      {
+         double speedUpTime = timeRemainingInState.getDoubleValue() - remainingTimeForSwing;
+         this.speedUpTime.add(speedUpTime);
+      }
+   }
+
+
    public void initializeForStanding(double initialTime)
    {
       this.initialTime.set(initialTime);
@@ -261,17 +270,12 @@ public class ICPOptimizationController
 
    public void initializeForTransfer(double initialTime, RobotSide transferToSide, double omega0)
    {
-      this.initialTime.set(initialTime);
       this.transferToSide.set(transferToSide);
       if (transferToSide == null)
          transferToSide = RobotSide.LEFT;
       isInTransfer.set(true);
 
-      beginningOfStateICP.set(solutionHandler.getControllerReferenceICP());
-
-      int numberOfFootstepsToConsider = clipNumberOfFootstepsToConsiderToProblem(this.numberOfFootstepsToConsider.getIntegerValue());
-
-      setProblemBooleans();
+      int numberOfFootstepsToConsider = initializeContactChange(initialTime);
 
       footstepRecursionMultiplierCalculator.resetTimes();
       if (isInitialTransfer.getBooleanValue())
@@ -287,30 +291,24 @@ public class ICPOptimizationController
 
       inputHandler.initializeForDoubleSupport(isStanding.getBooleanValue(), localUseTwoCMPs, transferToSide, omega0);
 
-      if (localUseFootstepRegularization)
-         resetFootstepRegularizationTask();
-      if (localUseFeedbackRegularization)
-         solver.resetFeedbackRegularization();
-
       cmpConstraintHandler.updateCMPConstraintForDoubleSupport(solver);
       reachabilityConstraintHandler.updateReachabilityConstraintForDoubleSupport(solver);
-
-      speedUpTime.set(0.0);
    }
 
+   /**
+    * Notifies the icp optimization controller that teh robot is now in single support
+    * @param initialTime controller time at the start of the current single support phase
+    * @param supportSide sets the side of the support foot for the upcoming single support
+    * @param omega0 current inverted pendulum natural frequency
+    */
    public void initializeForSingleSupport(double initialTime, RobotSide supportSide, double omega0)
    {
-      this.initialTime.set(initialTime);
       this.supportSide.set(supportSide);
       isStanding.set(false);
       isInTransfer.set(false);
       isInitialTransfer.set(false);
 
-      beginningOfStateICP.set(solutionHandler.getControllerReferenceICP());
-
-      int numberOfFootstepsToConsider = clipNumberOfFootstepsToConsiderToProblem(this.numberOfFootstepsToConsider.getIntegerValue());
-
-      setProblemBooleans();
+      int numberOfFootstepsToConsider = initializeContactChange(initialTime);
 
       footstepRecursionMultiplierCalculator.resetTimes();
       footstepRecursionMultiplierCalculator.submitTimes(0, 0.0, singleSupportDuration.getDoubleValue());
@@ -324,15 +322,28 @@ public class ICPOptimizationController
 
       inputHandler.initializeForSingleSupport(localUseTwoCMPs, supportSide, omega0);
 
+      cmpConstraintHandler.updateCMPConstraintForSingleSupport(supportSide, solver);
+      reachabilityConstraintHandler.updateReachabilityConstraintForSingleSupport(supportSide, solver);
+   }
+
+   private int initializeContactChange(double initialTime)
+   {
+      int numberOfFootstepsToConsider = clipNumberOfFootstepsToConsiderToProblem(this.numberOfFootstepsToConsider.getIntegerValue());
+
+      this.initialTime.set(initialTime);
+      speedUpTime.set(0.0);
+
+      setProblemBooleans();
+
+      beginningOfStateICP.set(solutionHandler.getControllerReferenceICP());
+
       if (localUseFootstepRegularization)
          resetFootstepRegularizationTask();
       if (localUseFeedbackRegularization)
          solver.resetFeedbackRegularization();
 
-      cmpConstraintHandler.updateCMPConstraintForSingleSupport(supportSide, solver);
-      reachabilityConstraintHandler.updateReachabilityConstraintForSingleSupport(supportSide, solver);
 
-      speedUpTime.set(0.0);
+      return numberOfFootstepsToConsider;
    }
 
    private void setProblemBooleans()
@@ -342,7 +353,6 @@ public class ICPOptimizationController
       localUseStepAdjustment = useStepAdjustment.getBooleanValue();
       localUseFootstepRegularization = useFootstepRegularization.getBooleanValue();
       localUseFeedbackRegularization = useFeedbackRegularization.getBooleanValue();
-
       localScaleUpcomingStepWeights = scaleUpcomingStepWeights.getBooleanValue();
    }
 
@@ -377,7 +387,7 @@ public class ICPOptimizationController
       NoConvergenceException noConvergenceException = null;
       try
       {
-         solver.compute(finalICPRecursion, cmpOffsetRecursionEffect, currentICP, referenceCMP, stanceCMPProjection, beginningOfStateICPProjection);
+         solver.compute(finalICPRecursion, cmpConstantEffects, currentICP, referenceCMP);
       }
       catch (NoConvergenceException e)
       {
@@ -402,7 +412,9 @@ public class ICPOptimizationController
             solutionHandler.extractFootstepSolutions(footstepSolutions, upcomingFootstepLocations, upcomingFootsteps, numberOfFootstepsToConsider, solver);
 
          solver.getCMPFeedbackDifference(desiredCMPDelta);
-         solutionHandler.updateCostsToGo(solver);
+
+         if (COMPUTE_COST_TO_GO)
+            solutionHandler.updateCostsToGo(solver);
       }
 
       if (isStanding.getBooleanValue())
@@ -428,7 +440,7 @@ public class ICPOptimizationController
 
    private void setConditionsForFeedbackOnlyControl()
    {
-      solver.submitProblemConditions(0, false, false);
+      solver.submitProblemConditions(0, false);
 
       setFeedbackConditions();
 
@@ -436,6 +448,7 @@ public class ICPOptimizationController
       cmpOffsetRecursionEffect.setToZero();
       stanceCMPProjection.setToZero();
       beginningOfStateICPProjection.setToZero();
+      cmpConstantEffects.setToZero();
    }
 
    private int setConditionsForSteppingControl(int numberOfFootstepsToConsider, double omega0)
@@ -451,7 +464,7 @@ public class ICPOptimizationController
          reachabilityConstraintHandler.updateReachabilityConstraintForSingleSupport(supportSide.getEnumValue(), solver);
       }
 
-      solver.submitProblemConditions(numberOfFootstepsToConsider, localUseStepAdjustment, localUseTwoCMPs);
+      solver.submitProblemConditions(numberOfFootstepsToConsider, localUseStepAdjustment);
 
       setFeedbackConditions();
 
@@ -468,16 +481,11 @@ public class ICPOptimizationController
       }
 
       double clippedTimeRemaining = Math.max(minimumTimeRemaining.getDoubleValue(), timeRemainingInState.getDoubleValue());
+
       inputHandler.update(localUseTwoCMPs, omega0);
       inputHandler.computeFinalICPRecursion(finalICPRecursion, numberOfFootstepsToConsider, localUseTwoCMPs, isInTransfer.getBooleanValue(), omega0);
-      inputHandler.computeStanceCMPProjection(stanceCMPProjection, clippedTimeRemaining, localUseTwoCMPs, isInTransfer.getBooleanValue(), localUseInitialICP, omega0);
-      inputHandler.computeBeginningOfStateICPProjection(beginningOfStateICPProjection, beginningOfStateICP.getFrameTuple2d());
-
-      inputHandler.computeCMPOffsetRecursionEffect(cmpOffsetRecursionEffect, upcomingFootstepLocations, numberOfFootstepsToConsider);
-      if (!localUseTwoCMPs)
-      {
-         cmpOffsetRecursionEffect.setToZero();
-      }
+      inputHandler.computeCMPConstantEffects(cmpConstantEffects, beginningOfStateICP.getFrameTuple2d(), upcomingFootstepLocations, clippedTimeRemaining, omega0,
+            numberOfFootstepsToConsider, localUseTwoCMPs, isInTransfer.getBooleanValue(), localUseInitialICP);
 
       return numberOfFootstepsToConsider;
    }
@@ -599,15 +607,6 @@ public class ICPOptimizationController
             remainingTime = singleSupportDuration.getDoubleValue() - timeInCurrentState.getDoubleValue();
 
          timeRemainingInState.set(remainingTime);
-      }
-   }
-
-   public void submitRemainingTimeInSwingUnderDisturbance(double remainingTimeForSwing)
-   {
-      if (swingSpeedUpEnabled.getBooleanValue() && remainingTimeForSwing < timeRemainingInState.getDoubleValue())
-      {
-         double speedUpTime = timeRemainingInState.getDoubleValue() - remainingTimeForSwing;
-         this.speedUpTime.add(speedUpTime);
       }
    }
 
