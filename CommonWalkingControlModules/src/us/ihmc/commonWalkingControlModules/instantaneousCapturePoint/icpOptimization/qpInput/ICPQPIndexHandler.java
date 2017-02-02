@@ -1,5 +1,8 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.qpInput;
 
+import org.ejml.data.DenseMatrix64F;
+import us.ihmc.robotics.linearAlgebra.MatrixTools;
+
 public class ICPQPIndexHandler
 {
    private int numberOfFootstepsToConsider;
@@ -30,14 +33,9 @@ public class ICPQPIndexHandler
       this.numberOfReachabilityVertices = numberOfReachabilityVertices;
    }
 
-   public void submitProblemConditions(int numberOfFootstepsToConsider, boolean useStepAdjustment, boolean useFeedback, boolean useTwoCMPs)
+   public void submitProblemConditions(int numberOfFootstepsToConsider, boolean useStepAdjustment)
    {
-      if (!useFeedback && (!useStepAdjustment || numberOfFootstepsToConsider < 1))
-      {
-         throw new RuntimeException("No possible feedback mechanism available.");
-      }
-
-      if (useFeedback && !useStepAdjustment)
+      if (!useStepAdjustment)
          this.numberOfFootstepsToConsider = 0;
       else
          this.numberOfFootstepsToConsider = numberOfFootstepsToConsider;
@@ -46,23 +44,14 @@ public class ICPQPIndexHandler
 
       numberOfLagrangeMultipliers = 2;
       numberOfFreeVariables = numberOfFootstepVariables + 2;
-      if (useFeedback)
-      {
-         feedbackCMPIndex = numberOfFootstepVariables;
-         dynamicRelaxationIndex = feedbackCMPIndex + 2;
 
-         if (numberOfCMPVertices > 0)
-            numberOfLagrangeMultipliers += 3;
+      feedbackCMPIndex = numberOfFootstepVariables;
+      dynamicRelaxationIndex = feedbackCMPIndex + 2;
 
-         numberOfFreeVariables += 2;
-      }
-      else
-      {
-         numberOfCMPVertices = 0;
+      if (numberOfCMPVertices > 0)
+         numberOfLagrangeMultipliers += 3;
 
-         feedbackCMPIndex = 0;
-         dynamicRelaxationIndex = numberOfFootstepVariables;
-      }
+      numberOfFreeVariables += 2;
 
       if (numberOfReachabilityVertices > 0)
          numberOfLagrangeMultipliers += 3;
@@ -100,5 +89,17 @@ public class ICPQPIndexHandler
    public int getLagrangeMultiplierIndex()
    {
       return lagrangeMultiplierIndex;
+   }
+
+   public void submitFeedbackTask(ICPQPInput icpQPInput, DenseMatrix64F solverInput_H, DenseMatrix64F solverInput_h)
+   {
+      MatrixTools.addMatrixBlock(solverInput_H, feedbackCMPIndex, feedbackCMPIndex, icpQPInput.quadraticTerm, 0, 0, 2, 2, 1.0);
+      MatrixTools.addMatrixBlock(solverInput_h, feedbackCMPIndex, 0, icpQPInput.linearTerm, 0, 0, 2, 1, 1.0);
+   }
+
+   public void submitDynamicRelaxationTask(ICPQPInput icpQPInput, DenseMatrix64F solverInput_H, DenseMatrix64F solverInput_h)
+   {
+      MatrixTools.addMatrixBlock(solverInput_H, dynamicRelaxationIndex, dynamicRelaxationIndex, icpQPInput.quadraticTerm, 0, 0, 2, 2, 1.0);
+      MatrixTools.addMatrixBlock(solverInput_h, dynamicRelaxationIndex, 0, icpQPInput.linearTerm, 0, 0, 2, 1, 1.0);
    }
 }
