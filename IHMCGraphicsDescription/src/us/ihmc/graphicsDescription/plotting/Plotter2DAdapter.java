@@ -46,7 +46,7 @@ public class Plotter2DAdapter
    private final PixelsReferenceFrame pixelsFrame;
    private final PixelsReferenceFrame screenFrame;
 
-   private final PlotterPoint2d[] pointBin = new PlotterPoint2d[10];
+   private final PlotterPoint2d[] pointBin = new PlotterPoint2d[50];
    private final PlotterVector2d[] vectorBin = new PlotterVector2d[pointBin.length];
    private final int[][] tempPoints = new int[2][pointBin.length];
 
