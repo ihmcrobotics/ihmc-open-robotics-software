@@ -7,6 +7,7 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
+import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.trajectories.YoMinimumJerkTrajectory;
 import us.ihmc.robotics.robotController.RobotController;
@@ -66,10 +67,10 @@ public class WDIPeterPlanarWalkerController implements RobotController
 
    private FiniteStateMachineBuilder<ControllerState, ControllerEvent> stateMachineBuilder;
    private FiniteStateMachine<ControllerState, ControllerEvent> stateMachine;
-   private final DoubleYoVariable timestamp;
+   private final YoVariable<?> timestamp;
    private final YoPlanarWalkerTimedStep stepCommand;
 
-   public WDIPeterPlanarWalkerController(PeterPlanarWalkerRobot robot, double deltaT, RobotSide side, DoubleYoVariable timestamp)
+   public WDIPeterPlanarWalkerController(PeterPlanarWalkerRobot robot, double deltaT, RobotSide side, YoVariable<?> timestamp)
    {
       String prefix = side.getLowerCaseName();
       this.robot = robot;
@@ -147,11 +148,14 @@ public class WDIPeterPlanarWalkerController implements RobotController
          //controlKneeToMaintainBodyHeight(supportLeg);
          controlKneeToPosition(supportLeg, desiredKneeStance.getDoubleValue(), 0.0);
 
-         if (initalizedKneeExtension.getBooleanValue() && robot.isFootOnGround(swingLeg.getEnumValue()))
-         {
+//         if (initalizedKneeExtension.getBooleanValue() && robot.isFootOnGround(swingLeg.getEnumValue()))
+//         {
             return ControllerEvent.TIMEOUT;
-         }
-         return null;
+//         }
+//         else
+//         {
+//            return null;
+//         }
       }
 
       @Override
@@ -177,7 +181,7 @@ public class WDIPeterPlanarWalkerController implements RobotController
       @Override
       public ControllerEvent process()
       {
-         double currentTime = timestamp.getDoubleValue();
+         double currentTime = timestamp.getValueAsDouble();
          double liftOffTime = stepCommand.getTimeInterval().getStartTime();
          double touchDownTime = stepCommand.getTimeInterval().getEndTime();
          double timeInCurrentState = currentTime - liftOffTime;
@@ -215,7 +219,7 @@ public class WDIPeterPlanarWalkerController implements RobotController
          PIDController pidController = hipControllers.get(swingLeg);
          double controlEffort = pidController.compute(currentHipAngle, desiredHipAngle, currentHipAngleRate, 0.0, deltaT);
          robot.setHipTorque(swingLeg, controlEffort);
-         
+
          if (currentTime >= touchDownTime)
          {
             return ControllerEvent.TIMEOUT;
