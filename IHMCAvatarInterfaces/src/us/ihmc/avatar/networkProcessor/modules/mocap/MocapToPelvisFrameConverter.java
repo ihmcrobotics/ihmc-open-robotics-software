@@ -10,6 +10,9 @@ import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 import java.util.ArrayList;
 
+
+// SMcCrory 2/1/2017 - this module is specific to localization tests performed on Atlas given a certain marker configuration
+
 public class MocapToPelvisFrameConverter
 {
    private boolean initialized = false;
