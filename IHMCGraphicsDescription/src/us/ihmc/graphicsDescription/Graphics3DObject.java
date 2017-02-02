@@ -1,6 +1,5 @@
 package us.ihmc.graphicsDescription;
 
-import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.net.URL;
 import java.util.ArrayList;
@@ -21,7 +20,26 @@ import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.exceptions.ShapeNotSupportedException;
 import us.ihmc.graphicsDescription.input.SelectedListener;
-import us.ihmc.graphicsDescription.instructions.*;
+import us.ihmc.graphicsDescription.instructions.ArcTorusGraphics3DInstruction;
+import us.ihmc.graphicsDescription.instructions.CapsuleGraphics3DInstruction;
+import us.ihmc.graphicsDescription.instructions.ConeGraphics3DInstruction;
+import us.ihmc.graphicsDescription.instructions.CubeGraphics3DInstruction;
+import us.ihmc.graphicsDescription.instructions.CylinderGraphics3DInstruction;
+import us.ihmc.graphicsDescription.instructions.EllipsoidGraphics3DInstruction;
+import us.ihmc.graphicsDescription.instructions.ExtrudedPolygonGraphics3DInstruction;
+import us.ihmc.graphicsDescription.instructions.Graphics3DAddExtrusionInstruction;
+import us.ihmc.graphicsDescription.instructions.Graphics3DAddHeightMapInstruction;
+import us.ihmc.graphicsDescription.instructions.Graphics3DAddMeshDataInstruction;
+import us.ihmc.graphicsDescription.instructions.Graphics3DAddModelFileInstruction;
+import us.ihmc.graphicsDescription.instructions.Graphics3DInstruction;
+import us.ihmc.graphicsDescription.instructions.Graphics3DPrimitiveInstruction;
+import us.ihmc.graphicsDescription.instructions.HemiEllipsoidGraphics3DInstruction;
+import us.ihmc.graphicsDescription.instructions.PolygonGraphics3DInstruction;
+import us.ihmc.graphicsDescription.instructions.PrimitiveGraphics3DInstruction;
+import us.ihmc.graphicsDescription.instructions.PyramidCubeGraphics3DInstruction;
+import us.ihmc.graphicsDescription.instructions.SphereGraphics3DInstruction;
+import us.ihmc.graphicsDescription.instructions.TruncatedConeGraphics3DInstruction;
+import us.ihmc.graphicsDescription.instructions.WedgeGraphics3DInstruction;
 import us.ihmc.graphicsDescription.instructions.primitives.Graphics3DIdentityInstruction;
 import us.ihmc.graphicsDescription.instructions.primitives.Graphics3DRotateInstruction;
 import us.ihmc.graphicsDescription.instructions.primitives.Graphics3DScaleInstruction;
@@ -277,13 +295,13 @@ public class Graphics3DObject
 
       return graphics3DScale;
    }
-   
-   
+
+
    /**
     * Scales the origin coordinate system by the specified scale factor. This will scale existing
-    * graphics and all graphics added after calling this function till identity() is called. 
-    * 
-    * 
+    * graphics and all graphics added after calling this function till identity() is called.
+    *
+    *
     * @param scaleFactor Factor by which the graphics object system is scaled.  For example, 0.5 would
     * reduce future objects size by 50% whereas 2 would double it.
     * @return
@@ -292,22 +310,22 @@ public class Graphics3DObject
    {
       preScale(new Vector3d(scaleFactor, scaleFactor, scaleFactor));
    }
-   
+
    /**
     * Scales the origin coordinate system by the specified scale factor. This will scale existing
     * graphics and all graphics added after calling this function. The components of the vector indicate
     * scale factors in each dimension.
-    * 
+    *
     * @param scaleFactors Vector3d describing the scaling factors in each dimension
     * @return
     */
    public void preScale(Vector3d scaleFactors)
    {
-      
-      
+
+
       ArrayList<Graphics3DPrimitiveInstruction> newInstructions = new ArrayList<>();
       newInstructions.add(new Graphics3DScaleInstruction(scaleFactors));
-      
+
       for(int i = 0; i < graphics3DInstructions.size(); i++)
       {
          Graphics3DPrimitiveInstruction instruction = graphics3DInstructions.get(i);
@@ -318,7 +336,7 @@ public class Graphics3DObject
 
          }
       }
-      
+
       graphics3DInstructions = newInstructions;
    }
 
@@ -1122,7 +1140,8 @@ public class Graphics3DObject
       for (int i = 0; i < numberOfConvexPolygons; i++)
       {
          ConvexPolygon2d convexPolygon = planarRegion.getConvexPolygon(i);
-         addPolygon(convexPolygon, appearances[i % appearances.length]);
+         MeshDataHolder meshDataHolder = MeshDataGenerator.ExtrudedPolygon(convexPolygon, 0.005);
+         addInstruction(new Graphics3DAddMeshDataInstruction(meshDataHolder, appearances[i % appearances.length]));
       }
 
       transform.invert();
