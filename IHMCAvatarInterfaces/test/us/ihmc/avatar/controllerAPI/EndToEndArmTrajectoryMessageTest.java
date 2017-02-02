@@ -49,7 +49,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
 {
    private static boolean DEBUG = false;
 
-   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+   protected static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
 
    private DRCSimulationTestHelper drcSimulationTestHelper;
 

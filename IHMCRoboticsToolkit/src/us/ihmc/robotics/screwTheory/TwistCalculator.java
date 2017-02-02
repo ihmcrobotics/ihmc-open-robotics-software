@@ -1,16 +1,19 @@
 package us.ihmc.robotics.screwTheory;
 
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
+import java.util.HashMap;
+import java.util.List;
+
+import org.apache.commons.lang3.mutable.MutableInt;
+
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 /**
  * This class is a tool that can be used to compute the twist of each
  * {@code RigidBody} composing a rigid-body system.
  * <p>
  * A new twist calculator can be constructed via the constructor {@link #TwistCalculator(ReferenceFrame, RigidBody)}.
- * Every time the system's state is changing, the twist calculator can be updated via {@link #compute()}.
+ * Every time the system's state is changing, the twist calculator can be notified via {@link #compute()}.
  * Finally, the twist of any rigid-body can be obtained as follows:
  * <ul>
  *    <li> {@link #getTwistOfBody(Twist, RigidBody)} provides the twist of any rigid-body with respect to the {@code inertialFrame}.
@@ -19,15 +22,6 @@ import java.util.LinkedHashMap;
  * </ul>
  * </p>
  */
-/*
- * FIXME There is no test for this guy!
- * TODO The current implementation is somewhat risky as the List with all the joints has to be properly filled.
- * In addition to this potential issue, the TwistCalculator requires to recompute all the twists of all the rigid bodies
- * of the system, disregarding the actual usage of these twists.
- * 
- * A better implementation could use the method compute() to somehow mark the twists as outdated,
- * and only when the method getTwistOfRigidBody() or getRelativeTwist() the necessary twists are updated.
- */
 public class TwistCalculator 
 {
    /** The root body of the system for which this {@code TwistCalculator} is available. */
@@ -35,10 +29,33 @@ public class TwistCalculator
    /** Twist of the root body. */
    private final Twist rootTwist;
 
-   /** Internal storage of the twist of each body the system. */
-   private final LinkedHashMap<RigidBody, Twist> twists = new LinkedHashMap<RigidBody, Twist>();
-   /** All the joints of the system properly ordered, i.e. from root to end-effectors. */
-   private final ArrayList<InverseDynamicsJoint> allJoints = new ArrayList<InverseDynamicsJoint>();
+   /**
+    * Internal storage of the twist of each body the system.
+    * This is the map from rigid-bodies to indices to use with 
+    * {@code rigidBodiesWithAssignedTwist} and {@code assignedTwists}
+    * for retrieving their twist if already computed.
+    * If no twist has been computed yet, the index is equal to {@code -1}.
+    */
+   private final HashMap<RigidBody, MutableInt> rigidBodyToAssignedTwistIndex = new HashMap<>();
+   /**
+    * List of the rigid-bodies with an up-to-date.
+    * This list allows a garbage free clearance of the {@code rigidBodyToAssignedTwistIndex} map.
+    */
+   private final List<RigidBody> rigidBodiesWithAssignedTwist;
+   /**
+    * The list of up-to-date twists assigned to rigid-bodies.
+    * The association twist <-> rigid-body can be retrieved
+    * using the map  {@code rigidBodyToAssignedTwistIndex}.
+    */
+   private final List<Twist> assignedTwists;
+   /**
+    * List of out-of-date twists used to recycle memory.
+    */
+   private final List<Twist> unnassignedTwists = new ArrayList<>();
+
+   /**
+    * Temporary twist used for intermediate garbage free operations.
+    */
    private final Twist tempTwist = new Twist();
 
    /**
@@ -51,89 +68,64 @@ public class TwistCalculator
     */
    public TwistCalculator(ReferenceFrame inertialFrame, RigidBody body)
    {
-      this.rootBody = addAllPrecedingJoints(body);
+      this.rootBody = ScrewTools.getRootBody(body);
       this.rootTwist = new Twist(rootBody.getBodyFixedFrame(), inertialFrame, rootBody.getBodyFixedFrame());
-      addAllSucceedingJoints(body);
-      populateMapsAndLists(inertialFrame);
-   }
 
-   private void addAllSucceedingJoints(RigidBody body)
-   {
-      for (InverseDynamicsJoint inverseDynamicsJoint : body.getChildrenJoints())
-      {
-         if (inverseDynamicsJoint.getSuccessor() != null)
-         {
-            allJoints.add(inverseDynamicsJoint);
-            addAllSucceedingJoints(inverseDynamicsJoint.getSuccessor());
-         }
-      }
-   }
+      int numberOfRigidBodies = ScrewTools.computeSubtreeSuccessors(ScrewTools.computeSubtreeJoints(rootBody)).length;
+      while (unnassignedTwists.size() < numberOfRigidBodies)
+         unnassignedTwists.add(new Twist());
+      assignedTwists = new ArrayList<>(numberOfRigidBodies);
+      rigidBodiesWithAssignedTwist = new ArrayList<>(numberOfRigidBodies);
 
-   private RigidBody addAllPrecedingJoints(RigidBody body)
-   {
-      ArrayList<InverseDynamicsJoint> jointsTillRootBody = new ArrayList<InverseDynamicsJoint>();
-
-      RigidBody currentBody = body;
-      while (currentBody.getParentJoint() != null)
-      {
-         jointsTillRootBody.add(currentBody.getParentJoint());
-         currentBody = currentBody.getParentJoint().getPredecessor();
-      }
-
-      for (int i = jointsTillRootBody.size() - 1; i >= 0; i--)
-      {
-         allJoints.add(jointsTillRootBody.get(i));
-      }
-
-      return currentBody;
+      assignedTwists.add(rootTwist);
+      rigidBodiesWithAssignedTwist.add(rootBody);
+      rigidBodyToAssignedTwistIndex.put(rootBody, new MutableInt(0));
    }
 
    /**
-    * Updates the internal memory to the new system state (configuration and velocity).
+    * Notifies the system has changed state (configuration and velocity).
+    * <p>
     * This method has to be called once every time the system state has changed, and 
     * before calling the methods {@link #getTwistOfBody(Twist, RigidBody)} and
     * {@link #getRelativeTwist(Twist, RigidBody, RigidBody)}.
-    * <p>
-    * Starting from the root which has a constant twist {@link #rootTwist}, this
-    * method updates the twists by using the relation:
-    * <br> T<sup>s, s</sup><sub>i</sub> = T<sup>p, s</sup><sub>i</sub> + T<sup>s, s</sup><sub>p</sub> </br>
-    * where 's' is the {@code successorFrame}, 'p' the {@code predecessorFrame}, and
-    * 'i' the {@code inertialFrame}.
     * </p>
     */
+   // TODO rename to reset
    public void compute()
    {
-      twists.get(rootBody).set(rootTwist);
+      while (rigidBodiesWithAssignedTwist.size() > 1)
+         rigidBodyToAssignedTwistIndex.get(rigidBodiesWithAssignedTwist.remove(rigidBodiesWithAssignedTwist.size() - 1)).setValue(-1);
 
-      for (int jointIndex = 0; jointIndex < allJoints.size(); jointIndex++)
-      {
-         InverseDynamicsJoint joint = allJoints.get(jointIndex);
-         computeSuccessorTwist(joint);
-      }
-   }
+      while (assignedTwists.size() > 1)
+         unnassignedTwists.add(assignedTwists.remove(assignedTwists.size() - 1));
 
-   private void computeSuccessorTwist(InverseDynamicsJoint joint)
-   {
-      RigidBody predecessor = joint.getPredecessor();
-      RigidBody successor = joint.getSuccessor();
-      ReferenceFrame successorFrame = successor.getBodyFixedFrame();
-
-      joint.getSuccessorTwist(tempTwist);
-
-      Twist successorTwist = twists.get(successor);
-      successorTwist.set(twists.get(predecessor));
-      successorTwist.changeFrame(successorFrame);
-      successorTwist.add(tempTwist);
+      rigidBodyToAssignedTwistIndex.get(rootBody).setValue(0);
    }
 
    /**
-    * Packs the twist of the given {@code rigidBody}.
+    * Updates if necessary and packs the twist of the given {@code rigidBody}.
+    * <p>
     * The resulting twist is the twist of the {@code rigidBody.getBodyFixedFrame()}, with
     * respect to the {@code inertialFrame}, expressed in the {@code rigidBody.getBodyFixedFrame()}.
+    * </p>
     * <p>
     * WARNING: This method assumes that the internal memory of this {@code TwistCalculator}
     * is up-to-date.
-    * The update of the internal memory is done through the method {@link #compute()}.
+    * The user has to notify this calculator every time the system state has changed,
+    * this is done through the method {@link #compute()}.
+    * </p>
+    * <p>
+    * In the case the twist of the given {@code rigidBody} has been computed already
+    * no extra computation is done.
+    * However, if there is no up-to-date twist for this rigid-body, it is then
+    * updated by a recursive approach using the following relation:
+    * <br> T<sup>r, r</sup><sub>i</sub> = T<sup>p, r</sup><sub>i</sub> + T<sup>r, r</sup><sub>p</sub> </br>
+    * where 'r' is the {@code rigidBody} frame, 'p' the predecessor frame, and 'i' the inertial frame.
+    * <br>
+    * Starting from the given {@code rigidBody}, its twist can be updated using the
+    * twist of the predecessor to the parent joint. The twist of the
+    * predecessor is updated in the same manner.
+    * This is done recursively until the predecessor has an up-to-date twist or is the root body.
     * </p>
     * 
     * @param twistToPack the twist of the {@code rigidBody} to pack. Modified.
@@ -142,14 +134,16 @@ public class TwistCalculator
    // FIXME Change the method signature to have twistToPack as the last argument.
    public void getTwistOfBody(Twist twistToPack, RigidBody rigidBody)
    {
-      twistToPack.set(twists.get(rigidBody));
+      twistToPack.set(computeOrGetTwistOfBody(rigidBody));
    }
 
    /**
     * Computes and packs the twist of the given {@code body} relative to the
     * given {@code base}.
+    * <p>
     * The resulting twist is the twist of the {@code body.getBodyFixedFrame()}, with respect to 
     * {@code base.getBodyFixedFrame()}, expressed in {@code body.getBodyFixedFrame()}.
+    * </p>
     * <p>
     * WARNING: This method assumes that the internal memory of this {@code TwistCalculator}
     * is up-to-date.
@@ -157,7 +151,7 @@ public class TwistCalculator
     * </p>
     * <p>
     * The relative twist between the two rigid-bodies is calculated knowing
-    * their twists with respect to the inertial frame:
+    * their twists with respect to the inertial frame using the method {@link #getTwistOfBody(Twist, RigidBody)}:
     * <br> T<sup>b2, b2</sup><sub>b1</sub> = T<sup>b2, b2</sup><sub>i</sub> - T<sup>b1, b2</sup><sub>i</sub> </br>
     * with 'b1' being the {@code base}, 'b2' the {@code body}, and 'i' the {@code inertialFrame}.
     * </p>
@@ -169,8 +163,8 @@ public class TwistCalculator
    // FIXME Change the method signature to have twistToPack as the last argument.
    public void getRelativeTwist(Twist twistToPack, RigidBody base, RigidBody body)
    {
-      twistToPack.set(twists.get(body));
-      tempTwist.set(twists.get(base));
+      twistToPack.set(computeOrGetTwistOfBody(body));
+      tempTwist.set(computeOrGetTwistOfBody(base));
       tempTwist.changeFrame(twistToPack.getExpressedInFrame());
       twistToPack.sub(tempTwist);
    }
@@ -186,22 +180,111 @@ public class TwistCalculator
       return rootBody;
    }
 
-   private void populateMapsAndLists(ReferenceFrame inertialFrame)
+   /**
+    * Retrieves or computes the twist with respect to the inertial frame
+    * of the given {@code rigidBody}.
+    * <p>
+    * WARNING: The returned {@code Twist} object will remain associated
+    * with the given {@code rigidBody} and <b> should NOT be modified </b>.
+    * </p>
+    * <p>
+    * In the case the twist of the given {@code rigidBody} has been computed already
+    * no extra computation is done.
+    * However, if there is no up-to-date twist for this rigid-body, it is then
+    * updated by a recursive approach using the following relation:
+    * <br> T<sup>r, r</sup><sub>i</sub> = T<sup>p, r</sup><sub>i</sub> + T<sup>r, r</sup><sub>p</sub> </br>
+    * where 'r' is the {@code rigidBody} frame, 'p' the predecessor frame, and 'i' the inertial frame.
+    * <br>
+    * Starting from the given {@code rigidBody}, its twist can be updated using the
+    * twist of the predecessor to the parent joint. The twist of the
+    * predecessor is updated in the same manner.
+    * This is done recursively until the predecessor has an up-to-date twist or is the root body.
+    * </p>
+    * 
+    * @param rigidBody the rigid-body to get the twist of.
+    * @return the twist of the rigid-body with respect to the inertial frame.
+    */
+   private Twist computeOrGetTwistOfBody(RigidBody rigidBody)
    {
-      addTwist(inertialFrame, rootBody);
-      
-      for (InverseDynamicsJoint joint : allJoints)
-      {
-         if (joint.getSuccessor() != null)
-         {
-            addTwist(inertialFrame, joint.getSuccessor());
-         }
+      Twist twist = retrieveAssignedTwist(rigidBody);
+
+      if (twist == null)
+      { 
+         /*
+          * The body twist has not been computed yet.
+          * Going up toward the root until we get the
+          * twist of a rigidBody that is up-to-date, and then going back
+          * step-by-step to this body while updating twists.
+          */
+         ReferenceFrame bodyFrame = rigidBody.getBodyFixedFrame();
+         InverseDynamicsJoint parentJoint = rigidBody.getParentJoint();
+         RigidBody predecessor = parentJoint.getPredecessor();
+         Twist twistOfPredecessor = computeOrGetTwistOfBody(predecessor);
+         twist = assignAndGetEmptyTwist(rigidBody);
+
+         parentJoint.getSuccessorTwist(tempTwist);
+
+         twist.set(twistOfPredecessor);
+         twist.changeFrame(bodyFrame);
+         twist.add(tempTwist);
       }
+
+      return twist;
    }
-   
-   private void addTwist(ReferenceFrame inertialFrame, RigidBody body)
+
+   /**
+    * Retrieves in the internal memory, the up-to-date
+    * twist associated with the given {@code rigidBody}.
+    * 
+    * @param rigidBody the query.
+    * @return the up-to-date twist of the given {@code rigidBody},
+    *  returns {@code null} if no twist could be found.
+    */
+   private Twist retrieveAssignedTwist(RigidBody rigidBody)
    {
-   	ReferenceFrame bodyFixedFrame = body.getBodyFixedFrame();
-      twists.put(body, new Twist(bodyFixedFrame, inertialFrame, bodyFixedFrame));
+      MutableInt mutableIndex = rigidBodyToAssignedTwistIndex.get(rigidBody);
+
+      if (mutableIndex == null)
+      {
+         mutableIndex = new MutableInt(-1);
+         rigidBodyToAssignedTwistIndex.put(rigidBody, mutableIndex);
+      }
+
+      int assignedTwistIndex = mutableIndex.intValue();
+      if (assignedTwistIndex == -1)
+         return null;
+      else
+         return assignedTwists.get(assignedTwistIndex);
+   }
+
+   /**
+    * Assigned an empty twist to the given {@code rigidBody}
+    * and returns it.
+    * 
+    * @param rigidBody the rigid-body to assign a twist to.
+    * @return the twist newly assigned to the rigid-body.
+    */
+   private Twist assignAndGetEmptyTwist(RigidBody rigidBody)
+   {
+      Twist newAssignedTwist;
+
+      if (unnassignedTwists.isEmpty())
+         newAssignedTwist = new Twist();
+      else
+         newAssignedTwist = unnassignedTwists.remove(unnassignedTwists.size() - 1);
+
+      MutableInt mutableIndex = rigidBodyToAssignedTwistIndex.get(rigidBody);
+
+      if (mutableIndex == null)
+      {
+         mutableIndex = new MutableInt();
+         rigidBodyToAssignedTwistIndex.put(rigidBody, mutableIndex);
+      }
+
+      mutableIndex.setValue(assignedTwists.size());
+
+      rigidBodiesWithAssignedTwist.add(rigidBody);
+      assignedTwists.add(newAssignedTwist);
+      return newAssignedTwist;
    }
 }

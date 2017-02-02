@@ -85,7 +85,7 @@ public class BipedalStepAdjustmentCostCalculatorTest
          candidateFootstep.setPose(idealFootstep);
 
          double idealFootstepCost = stepAdjustmentCostCalculator.calculateCost(stanceFoot, swingStartFoot, idealFootstep, candidateFootstep, 1.0);
-         assertEquals(0.0, idealFootstepCost, 1e-7);
+         assertEquals(stepAdjustmentCostCalculator.getStepBaseCost(), idealFootstepCost, 1e-7);
       }
 
       int numberOfRandomXYTranslations = 1000;
@@ -104,7 +104,7 @@ public class BipedalStepAdjustmentCostCalculatorTest
          idealFootstep.setPosition(RandomTools.generateRandomPoint(random, 1.0, 1.0, 0.3));
          idealFootstep.setOrientation(RandomTools.generateRandomQuaternion(random));
 
-         FramePose candidateFootstep = new FramePose(worldFrame);         
+         FramePose candidateFootstep = new FramePose(worldFrame);
          candidateFootstep.set(idealFootstep);
 
          RigidBodyTransform transform = new RigidBodyTransform();
@@ -118,11 +118,11 @@ public class BipedalStepAdjustmentCostCalculatorTest
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test(timeout = 3000000)
+   @Test(timeout = 300000)
    public void testScoringFootsteps()
    {
       SimulationTestingParameters simulationTestingParameters = new SimulationTestingParameters();
-      simulationTestingParameters.setCreateGUI(!ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer());
+      simulationTestingParameters.setCreateGUI(false);//!ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer());
       Robot robot = new Robot("Test");
       SimulationConstructionSet scs = new SimulationConstructionSet(robot, simulationTestingParameters);
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
