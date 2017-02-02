@@ -1,18 +1,14 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization;
 
 import org.ejml.data.DenseMatrix64F;
-import org.ejml.data.Matrix;
 import org.ejml.ops.CommonOps;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.qpInput.*;
 import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSolver;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
-import us.ihmc.robotics.math.frames.YoFramePoint2d;
-import us.ihmc.robotics.math.frames.YoMatrix;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.tools.exceptions.NoConvergenceException;
 
@@ -20,18 +16,8 @@ import java.util.ArrayList;
 
 public class ICPOptimizationSolver
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-
-   private static final boolean DEBUG = false;
-   private final boolean localDebug;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final double betaSmoothing = 0.01;
-
-   private final YoMatrix yoWeightG;
-   private final YoMatrix yoWeightg;
-
-   private final YoMatrix yoSolver_Aeq;
-   private final YoMatrix yoSolver_beq;
 
    private final ICPQPIndexHandler indexHandler;
    private final ICPQPInputCalculator inputCalculator;
@@ -40,9 +26,9 @@ public class ICPOptimizationSolver
    protected final DenseMatrix64F solverInput_h;
    protected final DenseMatrix64F solverInputResidualCost;
 
-   private final FeedbackTaskInput feedbackTaskInput;
-   private final DynamicRelaxationTaskInput dynamicRelaxationTask;
-   private final FootstepTaskInput footstepTaskInput;
+   private final ICPQPInput feedbackTaskInput;
+   private final ICPQPInput dynamicRelaxationTask;
+   private final ICPQPInput footstepTaskInput;
 
    private final DynamicsConstraintInput dynamicsConstraintInput;
    private final ConstraintToConvexRegion cmpLocationConstraint;
@@ -96,7 +82,7 @@ public class ICPOptimizationSolver
    private final DenseMatrix64F dynamicRelaxationCostToGo;
 
    protected final int maximumNumberOfFootstepsToConsider;
-   private final int maximumNumberOfReachabilityVertices = 4;
+   private static final int maximumNumberOfReachabilityVertices = 4;
 
    protected int numberOfFootstepsToConsider;
    protected int numberOfCMPVertices = 0;
@@ -110,7 +96,6 @@ public class ICPOptimizationSolver
    private int currentEqualityConstraintIndex;
    private int currentInequalityConstraintIndex;
 
-   private boolean useFeedback = false;
    private boolean useStepAdjustment = true;
    private boolean useTwoCMPs = false;
 
@@ -119,8 +104,6 @@ public class ICPOptimizationSolver
 
    private final double minimumFootstepWeight;
    private final double minimumFeedbackWeight;
-
-   private final double feedbackWeightHardeningMultiplier;
 
    public ICPOptimizationSolver(ICPOptimizationParameters icpOptimizationParameters, int maximumNumberOfCMPVertices)
    {
@@ -137,8 +120,6 @@ public class ICPOptimizationSolver
       minimumFootstepWeight = icpOptimizationParameters.getMinimumFootstepWeight();
       minimumFeedbackWeight = icpOptimizationParameters.getMinimumFeedbackWeight();
 
-      feedbackWeightHardeningMultiplier = icpOptimizationParameters.getFeedbackWeightHardeningMultiplier();
-
       int maximumNumberOfFreeVariables = 2 * maximumNumberOfFootstepsToConsider + maximumNumberOfCMPVertices + maximumNumberOfReachabilityVertices + 4;
       int maximumNumberOfLagrangeMultipliers = 8;
 
@@ -146,9 +127,9 @@ public class ICPOptimizationSolver
       solverInput_h = new DenseMatrix64F(maximumNumberOfFreeVariables, 1);
       solverInputResidualCost = new DenseMatrix64F(1, 1);
 
-      feedbackTaskInput = new FeedbackTaskInput();
-      dynamicRelaxationTask = new DynamicRelaxationTaskInput();
-      footstepTaskInput = new FootstepTaskInput(maximumNumberOfFootstepsToConsider);
+      feedbackTaskInput = new ICPQPInput(2);
+      dynamicRelaxationTask = new ICPQPInput(2);
+      footstepTaskInput = new ICPQPInput(2 * maximumNumberOfFootstepsToConsider);
 
       dynamicsConstraintInput = new DynamicsConstraintInput(maximumNumberOfFreeVariables);
       cmpLocationConstraint = new ConstraintToConvexRegion(maximumNumberOfCMPVertices);
@@ -190,29 +171,6 @@ public class ICPOptimizationSolver
       dynamicRelaxationCostToGo = new DenseMatrix64F(1, 1);
 
       activeSetSolver = new SimpleEfficientActiveSetQPSolver();
-
-      if (parentRegistry != null && DEBUG)
-      {
-         localDebug = true;
-
-         yoWeightG = new YoMatrix("solverQuadraticCost", maximumNumberOfFreeVariables, maximumNumberOfFreeVariables, registry);
-         yoWeightg = new YoMatrix("solverLinearCost", maximumNumberOfFreeVariables, 1, registry);
-
-         yoSolver_Aeq = new YoMatrix("solver_Aeq", maximumNumberOfFreeVariables, maximumNumberOfLagrangeMultipliers, registry);
-         yoSolver_beq = new YoMatrix("solver_beq", maximumNumberOfLagrangeMultipliers, 1, registry);
-
-         parentRegistry.addChild(registry);
-      }
-      else
-      {
-         localDebug = false;
-
-         yoWeightG = null;
-         yoWeightg = null;
-
-         yoSolver_Aeq = null;
-         yoSolver_beq = null;
-      }
    }
 
    public void setNumberOfCMPVertices(int numberOfCMPVertices)
@@ -231,20 +189,14 @@ public class ICPOptimizationSolver
       reachabilityConstraint.reset();
    }
 
-   public void submitProblemConditions(int numberOfFootstepsToConsider, boolean useStepAdjustment, boolean useFeedback, boolean useTwoCMPs)
+   public void submitProblemConditions(int numberOfFootstepsToConsider, boolean useStepAdjustment, boolean useTwoCMPs)
    {
-      if (!useFeedback && (!useStepAdjustment || numberOfFootstepsToConsider < 1))
-      {
-         throw new RuntimeException("No possible feedback mechanism available.");
-      }
+      indexHandler.submitProblemConditions(numberOfFootstepsToConsider, useStepAdjustment);
 
-      indexHandler.submitProblemConditions(numberOfFootstepsToConsider, useStepAdjustment, useFeedback, useTwoCMPs);
-
-      this.useFeedback = useFeedback;
       this.useStepAdjustment = useStepAdjustment;
       this.useTwoCMPs = useTwoCMPs;
 
-      if (useFeedback && !useStepAdjustment)
+      if (!useStepAdjustment)
          this.numberOfFootstepsToConsider = 0;
       else
          this.numberOfFootstepsToConsider = numberOfFootstepsToConsider;
@@ -253,17 +205,11 @@ public class ICPOptimizationSolver
 
       numberOfLagrangeMultipliers = 2;
       numberOfFreeVariables = numberOfFootstepVariables + 2;
-      if (useFeedback)
-      {
-         if (numberOfCMPVertices > 0)
-            numberOfLagrangeMultipliers += 3;
 
-         numberOfFreeVariables += 2;
-      }
-      else
-      {
-         numberOfCMPVertices = 0;
-      }
+      if (numberOfCMPVertices > 0)
+         numberOfLagrangeMultipliers += 3;
+
+      numberOfFreeVariables += 2;
 
       if (numberOfReachabilityVertices > 0)
          numberOfLagrangeMultipliers += 3;
@@ -328,7 +274,9 @@ public class ICPOptimizationSolver
       solverInput_H.reshape(numberOfFreeVariables + numberOfCMPVertices + numberOfReachabilityVertices, numberOfFreeVariables + numberOfCMPVertices + numberOfReachabilityVertices);
       solverInput_h.reshape(numberOfFreeVariables + numberOfCMPVertices + numberOfReachabilityVertices, 1);
 
-      footstepTaskInput.reshape(numberOfFootstepsToConsider);
+      feedbackTaskInput.reshape(2);
+      dynamicRelaxationTask.reshape(2);
+      footstepTaskInput.reshape(2 * numberOfFootstepsToConsider);
 
       solverInput_Aeq.reshape(numberOfFreeVariables + numberOfCMPVertices + numberOfReachabilityVertices, numberOfLagrangeMultipliers);
       solverInput_AeqTrans.reshape(numberOfLagrangeMultipliers, numberOfFreeVariables + numberOfCMPVertices + numberOfReachabilityVertices);
@@ -411,18 +359,6 @@ public class ICPOptimizationSolver
       CommonOps.scale(regularizationWeight, feedbackRegularizationWeight);
 
       hasFeedbackRegularizationTerm = true;
-   }
-
-   public void setUseFeedbackWeightHardening()
-   {
-      double xWeight = feedbackWeight.get(0, 0);
-      double yWeight = feedbackWeight.get(1, 1);
-
-      xWeight *= (1.0 + feedbackWeightHardeningMultiplier * Math.abs(previousFeedbackDeltaSolution.get(0, 0)));
-      yWeight *= (1.0 + feedbackWeightHardeningMultiplier * Math.abs(previousFeedbackDeltaSolution.get(1, 0)));
-
-      feedbackWeight.set(0, 0, xWeight);
-      feedbackWeight.set(1, 1, yWeight);
    }
 
    public void setFootstepRegularizationWeight(double regularizationWeight)
@@ -508,14 +444,11 @@ public class ICPOptimizationSolver
          this.cmpOffsetRecursionEffect.set(1, 0, cmpOffsetRecursionEffect.getY());
       }
 
-      if (useFeedback)
-      {
-         addFeedbackTask();
-         addDynamicRelaxationTask();
+      addFeedbackTask();
+      addDynamicRelaxationTask();
 
-         if (numberOfCMPVertices > 0)
-            addCMPLocationConstraint();
-      }
+      if (numberOfCMPVertices > 0)
+         addCMPLocationConstraint();
 
       if (numberOfReachabilityVertices > 0)
          addReachabilityConstraint();
@@ -550,12 +483,9 @@ public class ICPOptimizationSolver
             extractFootstepSolutions(footstepLocationSolution);
             setPreviousFootstepSolution(footstepLocationSolution);
          }
-         if (useFeedback)
-         {
             extractFeedbackDeltaSolution(feedbackDeltaSolution);
             extractDynamicRelaxationSolution(dynamicRelaxationSolution);
             setPreviousFeedbackDeltaSolution(feedbackDeltaSolution);
-         }
 
          computeCostToGo();
       }
@@ -567,20 +497,15 @@ public class ICPOptimizationSolver
 
       if (hasFeedbackRegularizationTerm)
          inputCalculator.computeFeedbackRegularizationTask(feedbackTaskInput, feedbackRegularizationWeight, previousFeedbackDeltaSolution);
-;
 
-      int feedbackCMPIndex = indexHandler.getFeedbackCMPIndex();
-      MatrixTools.addMatrixBlock(solverInput_H, feedbackCMPIndex, feedbackCMPIndex, feedbackTaskInput.quadraticTerm, 0, 0, 2, 2, 1.0);
-      MatrixTools.addMatrixBlock(solverInput_h, feedbackCMPIndex, 0, feedbackTaskInput.linearTerm, 0, 0, 2, 1, 1.0);
+      indexHandler.submitFeedbackTask(feedbackTaskInput, solverInput_H, solverInput_h);
    }
 
    protected void addDynamicRelaxationTask()
    {
       inputCalculator.computeDynamicRelaxationTask(dynamicRelaxationTask, dynamicRelaxationWeight);
 
-      int dynamicRelaxationIndex = indexHandler.getDynamicRelaxationIndex();
-      MatrixTools.addMatrixBlock(solverInput_H, dynamicRelaxationIndex, dynamicRelaxationIndex, dynamicRelaxationTask.quadraticTerm, 0, 0, 2, 2, 1.0);
-      MatrixTools.addMatrixBlock(solverInput_h, dynamicRelaxationIndex, 0, dynamicRelaxationTask.linearTerm, 0, 0, 2, 1, 1.0);
+      indexHandler.submitDynamicRelaxationTask(dynamicRelaxationTask, solverInput_H, solverInput_h);
    }
 
    protected void addStepAdjustmentTask()
@@ -649,7 +574,7 @@ public class ICPOptimizationSolver
    private void addDynamicConstraint()
    {
       inputCalculator.computeDynamicsConstraint(dynamicsConstraintInput, currentICP, finalICPRecursion, stanceCMPProjection, initialICPProjection, useTwoCMPs,
-            cmpOffsetRecursionEffect, useFeedback, feedbackGain, useStepAdjustment, numberOfFootstepsToConsider, footstepRecursionMultipliers);
+            cmpOffsetRecursionEffect, feedbackGain, useStepAdjustment, numberOfFootstepsToConsider, footstepRecursionMultipliers);
 
       MatrixTools.setMatrixBlock(solverInput_Aeq, 0, currentEqualityConstraintIndex, dynamicsConstraintInput.Aeq, 0, 0, numberOfFreeVariables, 2, 1.0);
       MatrixTools.setMatrixBlock(solverInput_beq, currentEqualityConstraintIndex, 0, dynamicsConstraintInput.beq, 0, 0, 2, 1, 1.0);
@@ -668,14 +593,6 @@ public class ICPOptimizationSolver
       CommonOps.scale(-1.0, solverInput_h);
 
       activeSetSolver.clear();
-
-      if (localDebug)
-      {
-         yoWeightG.set(solverInput_H);
-         yoWeightg.set(solverInput_h);
-         yoSolver_Aeq.set(solverInput_Aeq);
-         yoSolver_beq.set(solverInput_beq);
-      }
 
       activeSetSolver.setQuadraticCostFunction(solverInput_H, solverInput_h, 0.0);
       activeSetSolver.setLinearEqualityConstraints(solverInput_AeqTrans, solverInput_beq);

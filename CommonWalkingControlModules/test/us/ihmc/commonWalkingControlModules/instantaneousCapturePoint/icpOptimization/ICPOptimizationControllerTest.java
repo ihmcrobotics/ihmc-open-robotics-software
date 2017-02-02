@@ -192,6 +192,7 @@ public class ICPOptimizationControllerTest
       {
          return 2.0;
       }
+
       @Override public double getFeedbackRegularizationWeight()
       {
          return 0.0001;
@@ -232,11 +233,6 @@ public class ICPOptimizationControllerTest
          return false;
       }
 
-      @Override public boolean useFeedback()
-      {
-         return true;
-      }
-
       @Override public boolean useFeedbackRegularization()
       {
          return true;
@@ -250,11 +246,6 @@ public class ICPOptimizationControllerTest
       @Override public boolean useFootstepRegularization()
       {
          return true;
-      }
-
-      @Override public boolean useFeedbackWeightHardening()
-      {
-         return false;
       }
 
       @Override public boolean useICPFromBeginningOfState()
@@ -276,11 +267,6 @@ public class ICPOptimizationControllerTest
       public double getMinimumTimeRemaining()
       {
          return 0.001;
-      }
-
-      @Override public double getFeedbackWeightHardeningMultiplier()
-      {
-         return 1.0;
       }
 
       @Override public double getDoubleSupportMaxCMPForwardExit()

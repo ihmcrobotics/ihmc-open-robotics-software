@@ -104,12 +104,6 @@ public abstract class ICPOptimizationParameters
    public abstract boolean scaleUpcomingStepWeights();
 
    /**
-    * Enabling this boolean enables the use of CMP feedback for stabilization.
-    * Should almost always be set to true.
-    */
-   public abstract boolean useFeedback();
-
-   /**
     * Enabling this boolean enables the use of feedback regularization, found in {@link #getFeedbackRegularizationWeight()}.
     */
    public abstract boolean useFeedbackRegularization();
@@ -123,12 +117,6 @@ public abstract class ICPOptimizationParameters
     * Enabling this boolean enables the use of step adjustment regularization, found in {@link #getFootstepRegularizationWeight()}.
     */
    public abstract boolean useFootstepRegularization();
-
-   /**
-    * Enabling this boolean enables has the optimization increase the weight with respect to the previous amount of CMP feedback.
-    * Effectively causes the weight to be a nonlinear, convex weight, while maintaining its quadratic form in execution.
-    */
-   public abstract boolean useFeedbackWeightHardening();
 
    /**
     * This boolean determines whether the ICP setpoints remain smooth.
@@ -155,11 +143,6 @@ public abstract class ICPOptimizationParameters
     * This makes sure the problem maintains a "nice" form.
     */
    public abstract double getMinimumTimeRemaining();
-
-   /**
-    * The amount to increase the weight on CMP feedback by, used in {@link #useFeedbackWeightHardening()}.
-    */
-   public abstract double getFeedbackWeightHardeningMultiplier();
 
    /**
     * Maximum forward distance the CMP is allowed to exit the support polygon.
@@ -206,15 +189,6 @@ public abstract class ICPOptimizationParameters
     */
    public abstract double getRemainingTimeToStopAdjusting();
    
-   /**
-    * This method determines whether or not to use a discontinuous deadband.
-    * If set true, the value of the deadband is not subtracted out, as normally done.
-    */
-   public boolean useDiscontinuousDeadband()
-   {
-      return false;
-   }
-
    /**
     * This method sets what the minimum change in the current footstep is allowed to be.
     * Works in tandem with the footstep regularization parameter.

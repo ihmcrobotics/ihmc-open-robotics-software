@@ -37,11 +37,9 @@ public class ICPOptimizationController
 
    private final BooleanYoVariable useTwoCMPsInControl = new BooleanYoVariable("useTwoCMPsInControl", registry);
    private final BooleanYoVariable useInitialICP = new BooleanYoVariable("useInitialICP", registry);
-   private final BooleanYoVariable useFeedback = new BooleanYoVariable("useFeedback", registry);
    private final BooleanYoVariable useStepAdjustment = new BooleanYoVariable("useStepAdjustment", registry);
    private final BooleanYoVariable useFootstepRegularization = new BooleanYoVariable("useFootstepRegularization", registry);
    private final BooleanYoVariable useFeedbackRegularization = new BooleanYoVariable("useFeedbackRegularization", registry);
-   private final BooleanYoVariable useFeedbackWeightHardening = new BooleanYoVariable("useFeedbackWeightHardening", registry);
 
    private final BooleanYoVariable scaleStepRegularizationWeightWithTime = new BooleanYoVariable("scaleStepRegularizationWeightWithTime", registry);
    private final BooleanYoVariable scaleFeedbackWeightWithGain = new BooleanYoVariable("scaleFeedbackWeightWithGain", registry);
@@ -125,9 +123,7 @@ public class ICPOptimizationController
 
    private boolean localUseTwoCMPs;
    private boolean localUseInitialICP;
-   private boolean localUseFeedback;
    private boolean localUseFeedbackRegularization;
-   private boolean localUseFeedbackWeightHardening;
    private boolean localUseStepAdjustment;
    private boolean localUseFootstepRegularization;
 
@@ -157,11 +153,9 @@ public class ICPOptimizationController
       useTwoCMPsInControl.set(icpPlannerParameters.useTwoCMPsPerSupport());
 
       useInitialICP.set(icpOptimizationParameters.useICPFromBeginningOfState());
-      useFeedback.set(icpOptimizationParameters.useFeedback());
       useStepAdjustment.set(icpOptimizationParameters.useStepAdjustment());
       useFootstepRegularization.set(icpOptimizationParameters.useFootstepRegularization());
       useFeedbackRegularization.set(icpOptimizationParameters.useFeedbackRegularization());
-      useFeedbackWeightHardening.set(icpOptimizationParameters.useFeedbackWeightHardening());
 
       scaleStepRegularizationWeightWithTime.set(icpOptimizationParameters.scaleStepRegularizationWeightWithTime());
       scaleFeedbackWeightWithGain.set(icpOptimizationParameters.scaleFeedbackWeightWithGain());
@@ -350,11 +344,9 @@ public class ICPOptimizationController
    {
       localUseTwoCMPs = useTwoCMPsInControl.getBooleanValue();
       localUseInitialICP = useInitialICP.getBooleanValue();
-      localUseFeedback = useFeedback.getBooleanValue();
       localUseStepAdjustment = useStepAdjustment.getBooleanValue();
       localUseFootstepRegularization = useFootstepRegularization.getBooleanValue();
       localUseFeedbackRegularization = useFeedbackRegularization.getBooleanValue();
-      localUseFeedbackWeightHardening = useFeedbackWeightHardening.getBooleanValue();
 
       localScaleUpcomingStepWeights = scaleUpcomingStepWeights.getBooleanValue();
    }
@@ -441,7 +433,7 @@ public class ICPOptimizationController
 
    private void setConditionsForFeedbackOnlyControl()
    {
-      solver.submitProblemConditions(0, false, true, false);
+      solver.submitProblemConditions(0, false, false);
 
       setFeedbackConditions();
 
@@ -464,18 +456,12 @@ public class ICPOptimizationController
          reachabilityConstraintHandler.updateReachabilityConstraintForSingleSupport(supportSide.getEnumValue(), solver);
       }
 
-      solver.submitProblemConditions(numberOfFootstepsToConsider, localUseStepAdjustment, localUseFeedback, localUseTwoCMPs);
+      solver.submitProblemConditions(numberOfFootstepsToConsider, localUseStepAdjustment, localUseTwoCMPs);
 
-      if (localUseFeedback)
-      {
-         setFeedbackConditions();
+      setFeedbackConditions();
 
-         if (localUseFeedbackWeightHardening)
-            solver.setUseFeedbackWeightHardening();
-
-         if (localUseFeedbackRegularization)
-            solver.setFeedbackRegularizationWeight(feedbackRegularizationWeight.getDoubleValue() / controlDT);
-      }
+      if (localUseFeedbackRegularization)
+         solver.setFeedbackRegularizationWeight(feedbackRegularizationWeight.getDoubleValue() / controlDT);
 
       if (localUseStepAdjustment && !isInTransfer.getBooleanValue())
       {

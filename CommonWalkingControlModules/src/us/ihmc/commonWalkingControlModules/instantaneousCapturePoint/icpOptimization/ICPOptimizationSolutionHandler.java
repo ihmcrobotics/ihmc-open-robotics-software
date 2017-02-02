@@ -38,7 +38,6 @@ public class ICPOptimizationSolutionHandler
    private final DoubleYoVariable footstepDeadband;
    private final DoubleYoVariable footstepSolutionResolution;
 
-   private final BooleanYoVariable useDiscontinuousDeadband;
    private final BooleanYoVariable footstepWasAdjusted;
 
    private final DoubleYoVariable controllerCostToGo;
@@ -76,13 +75,10 @@ public class ICPOptimizationSolutionHandler
       footstepDeadband = new DoubleYoVariable("footstepDeadband", registry);
       footstepSolutionResolution = new DoubleYoVariable("footstepSolutionResolution", registry);
 
-      useDiscontinuousDeadband = new BooleanYoVariable("useDiscontinuousDeadband", registry);
       footstepWasAdjusted = new BooleanYoVariable("footstepWasAdjusted", registry);
 
       footstepDeadband.set(icpOptimizationParameters.getAdjustmentDeadband());
       footstepSolutionResolution.set(icpOptimizationParameters.getFootstepSolutionResolution());
-
-      useDiscontinuousDeadband.set(icpOptimizationParameters.useDiscontinuousDeadband());
 
       //if (yoGraphicsListRegistry != null)
       //   setupVisualizers(yoGraphicsListRegistry, visualize);
@@ -197,15 +193,12 @@ public class ICPOptimizationSolutionHandler
       }
       else
       {
-         if (!useDiscontinuousDeadband.getBooleanValue())
-         {
-            tmpVector.setIncludingFrame(solutionAdjustment);
-            tmpVector.normalize();
-            tmpVector.scale(deadband);
+         tmpVector.setIncludingFrame(solutionAdjustment);
+         tmpVector.normalize();
+         tmpVector.scale(deadband);
 
-            solutionLocation.changeFrame(deadbandFrame);
-            solutionLocation.sub(tmpVector);
-         }
+         solutionLocation.changeFrame(deadbandFrame);
+         solutionLocation.sub(tmpVector);
       }
 
       solutionLocation.changeFrame(worldFrame);
