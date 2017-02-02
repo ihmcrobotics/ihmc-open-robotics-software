@@ -328,7 +328,6 @@ public class TaskspaceChestControlState extends ChestControlState
    @Override
    public void doTransitionOutOfAction()
    {
-      orientationTrajectoryGenerator.clear();
    }
 
    public void getDesiredOrientation(FrameOrientation desiredOrientationToPack)
