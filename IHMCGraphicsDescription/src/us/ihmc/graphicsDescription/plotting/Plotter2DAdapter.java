@@ -69,6 +69,7 @@ public class Plotter2DAdapter
    public void setGraphics2d(Graphics2D graphics2d)
    {
       this.graphics2d = graphics2d;
+      this.graphics2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
    }
    
    public Graphics getGraphicsContext()
