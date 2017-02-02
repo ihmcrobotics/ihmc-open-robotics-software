@@ -1,39 +1,38 @@
 package us.ihmc.ihmcPerception.blob;
 
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Graphics2D;
+import boofcv.gui.image.ImagePanel;
+import boofcv.gui.image.ShowImages;
+import org.opencv.core.*;
+import org.opencv.imgcodecs.Imgcodecs;
+import org.opencv.imgproc.Imgproc;
+import org.opencv.imgproc.Moments;
+import org.opencv.videoio.VideoCapture;
+import us.ihmc.ihmcPerception.OpenCVTools;
+import us.ihmc.tools.FormattingTools;
+import us.ihmc.tools.nativelibraries.NativeLibraryLoader;
+import us.ihmc.tools.time.Timer;
+
+import javax.imageio.ImageIO;
+import javax.vecmath.Point2f;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-
-import javax.imageio.ImageIO;
-import javax.vecmath.Point2f;
-
-import org.opencv.core.Core;
-import org.opencv.core.CvType;
-import org.opencv.core.Mat;
-import org.opencv.core.MatOfByte;
-import org.opencv.core.Size;
-import org.opencv.imgcodecs.Imgcodecs;
-import org.opencv.imgproc.Imgproc;
-import org.opencv.imgproc.Moments;
-import org.opencv.videoio.VideoCapture;
-
-import boofcv.gui.image.ImagePanel;
-import boofcv.gui.image.ShowImages;
-import us.ihmc.ihmcPerception.OpenCVTools;
-import us.ihmc.tools.FormattingTools;
-import us.ihmc.tools.nativelibraries.NativeLibraryLoader;
-import us.ihmc.tools.time.Timer;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Taken from https://github.com/Itseez/opencv/blob/master/samples/android/color-blob-detection/src/org/opencv/samples/colorblobdetect/ColorBlobDetector.java
  */
 public class ColorBlobDetector
 {
+
+   List<MatOfPoint> contours = new ArrayList<>();
+   Mat hierarchy = new Mat();
+
+
    static
    {
       NativeLibraryLoader.loadLibrary("org.opencv", OpenCVTools.OPEN_CV_LIBRARY_NAME);
@@ -45,7 +44,7 @@ public class ColorBlobDetector
    public static final HueSaturationValueRange YELLOW_TAPE_BALL = new HueSaturationValueRange(30, 70, 50, 110, 150, 255);
    public static final int YELLOW_TAPE_BALL_SIZE = 4;
    public static final int TIGA_ORANGE_PING_PONG_BALL_SIZE = 5;
-   
+
    public static Mat convertBufferedImageToHSV(BufferedImage bufferedImage)
    {
       Mat matImage;
@@ -138,7 +137,6 @@ public class ColorBlobDetector
    {
       convertImageFromRGBToHSV(image, image);
       thresholdImage(image, image, hsvRange);
-      morphologicallyOpen(image, size);
       morphologicallyClose(image, size);
       return findBlobFromThresholdImage(image);
    }
@@ -209,6 +207,10 @@ public class ColorBlobDetector
          g2d.setColor(Color.BLUE);
          g2d.drawOval((int) (ballLocation.getX() * bufferedImage.getWidth()), (int) ((1.0 - ballLocation.getY()) * bufferedImage.getHeight()), 5, 5);
          g2d.dispose();
+
+         //draw around color
+         Scalar CONTOUR_COLOR = new Scalar(255,0,0,255);
+         //Imgproc.drawContours(image, contours, -1, CONTOUR_COLOR);
          
          if (imagePanel == null)
          {

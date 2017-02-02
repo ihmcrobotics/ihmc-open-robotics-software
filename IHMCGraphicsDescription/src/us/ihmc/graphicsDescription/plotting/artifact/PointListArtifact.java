@@ -20,7 +20,7 @@ public class PointListArtifact extends Artifact
    private Color historyColor = Color.BLUE;
    int medianFilterSize = 20;
    int meanFilterSize = 999;
-   private int size = 10;
+   private double size = 10;
    
    private final Point2d tempPoint = new Point2d();
    private final Vector2d tempRadii = new Vector2d();
@@ -60,7 +60,7 @@ public class PointListArtifact extends Artifact
       }
    }
 
-   public void setSize(int size)
+   public void setSize(double size)
    {
       this.size = size;
    }

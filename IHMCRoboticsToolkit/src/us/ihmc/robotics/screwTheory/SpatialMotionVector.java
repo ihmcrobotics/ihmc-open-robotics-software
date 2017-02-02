@@ -54,6 +54,22 @@ public abstract class SpatialMotionVector
    }
 
    /**
+    * @param bodyFrame what we're specifying the motion of
+    * @param baseFrame with respect to what we're specifying the motion
+    * @param linearPart linear part of the spatial motion vector expressed in the {@code expressedInFrame} to use.
+    * @param angularPart angular part of the spatial motion vector expressed in the {@code expressedInFrame} to use.
+    * @throws ReferenceFrameMismatchException if the linear and angular parts are not expressed in the same reference frame.
+    */
+   public SpatialMotionVector(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, FrameVector linearPart, FrameVector angularPart)
+   {
+      linearPart.checkReferenceFrameMatch(angularPart);
+
+      this.angularPart = new Vector3d();
+      this.linearPart = new Vector3d();
+      set(bodyFrame, baseFrame, linearPart.getReferenceFrame(), linearPart, angularPart);
+   }
+
+   /**
     * Construct using a Matrix ([angular; linear])
     */
    public SpatialMotionVector(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame, DenseMatrix64F matrix)

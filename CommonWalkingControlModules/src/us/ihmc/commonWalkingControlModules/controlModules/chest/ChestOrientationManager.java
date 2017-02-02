@@ -93,8 +93,6 @@ public class ChestOrientationManager
          }
          stateMachine.addState(fromState);
       }
-
-      stateMachine.setCurrentState(ChestControlMode.TASKSPACE);
    }
 
    public void setWeights(double jointspace, Vector3d taskspace)
@@ -107,9 +105,11 @@ public class ChestOrientationManager
    {
       if (hasBeenInitialized.getBooleanValue())
          return;
-
       hasBeenInitialized.set(true);
-      holdCurrentOrientation();
+
+      initialOrientation.setToZero(chestFrame);
+      taskspaceChestControlState.holdOrientation(initialOrientation);
+      requestState(taskspaceChestControlState.getStateEnum());
    }
 
    public void holdCurrentOrientation()
