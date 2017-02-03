@@ -18,7 +18,7 @@ public class MocapToPelvisFrameConverter
 
    private static final double ballRadius = 0.006;
    private static final Vector3d markerPlateOriginInPelvisFrame = new Vector3d(0.1719, 0.0, 0.11324);
-   private static final Vector3d plateOriginToMarker2InPelvisFrame = new Vector3d(0.005 + ballRadius, 44.445, 0.0);
+   private static final Vector3d plateOriginToMarker2InPelvisFrame = new Vector3d(0.005 + ballRadius, 0.044445, 0.0);
    private static final RigidBodyTransform pelvisToMarker2Transform = new RigidBodyTransform();
 
    static
@@ -26,7 +26,7 @@ public class MocapToPelvisFrameConverter
       Vector3d marker2PositionInPelvisFrame = new Vector3d(markerPlateOriginInPelvisFrame);
       marker2PositionInPelvisFrame.add(plateOriginToMarker2InPelvisFrame);
       pelvisToMarker2Transform.setTranslation(marker2PositionInPelvisFrame);
-      pelvisToMarker2Transform.invert();
+      pelvisToMarker2Transform.invert();      
    }
 
    public MocapToPelvisFrameConverter()
