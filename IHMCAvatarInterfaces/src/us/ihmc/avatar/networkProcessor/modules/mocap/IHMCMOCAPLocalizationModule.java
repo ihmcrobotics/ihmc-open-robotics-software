@@ -184,18 +184,18 @@ public class IHMCMOCAPLocalizationModule implements MocapRigidbodiesListener, Pa
       mocapToPelvisFrameConverter.computePelvisToWorldTransform(pelvisRigidBody, pelvisToWorldTransform);
       setPelvisYoVariables(pelvisToWorldTransform);
 
-      if(latestRobotConfigurationData != null)
-      {
-         TimeStampedTransform3D timestampedTransform = new TimeStampedTransform3D(pelvisToWorldTransform, latestRobotConfigurationData.getTimestamp());
-         StampedPosePacket stampedPosePacket = new StampedPosePacket(Integer.toString(PELVIS_ID), timestampedTransform, 1.0);
-         
-         stampedPosePacket.setDestination(PacketDestination.CONTROLLER.ordinal());
-         packetCommunicator.send(stampedPosePacket);      
-      }
-      else
-      {
-         System.err.println("Haven't received timestamp from controller, ignoring mocap data");
-      }
+//      if(latestRobotConfigurationData != null)
+//      {
+//         TimeStampedTransform3D timestampedTransform = new TimeStampedTransform3D(pelvisToWorldTransform, latestRobotConfigurationData.getTimestamp());
+//         StampedPosePacket stampedPosePacket = new StampedPosePacket(Integer.toString(PELVIS_ID), timestampedTransform, 1.0);
+//         
+//         stampedPosePacket.setDestination(PacketDestination.CONTROLLER.ordinal());
+//         packetCommunicator.send(stampedPosePacket);      
+//      }
+//      else
+//      {
+//         System.err.println("Haven't received timestamp from controller, ignoring mocap data");
+//      }
    }
    
    @Override
