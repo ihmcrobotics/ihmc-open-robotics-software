@@ -46,11 +46,11 @@ public class IHMCMOCAPLocalizationModule implements MocapRigidbodiesListener, Pa
    private final YoVariableRegistry yoVariableRegistry = new YoVariableRegistry(getClass().getSimpleName());
    private final YoVariableServer yoVariableServer;
    private final FullHumanoidRobotModel fullRobotModel;
-   private final RigidBodyTransform pelvisTransform = new RigidBodyTransform();
+   private final RigidBodyTransform pelvisToWorldTransform = new RigidBodyTransform();
    
    private final Vector3f pelvisTranslation = new Vector3f();
    private final Quat4f pelvisOrientation = new Quat4f(0.0f, 0.0f, 0.0f, 1.0f);
-   private final ReferenceFrame pelvisFrame = new ReferenceFrame("pelvisFrame", ReferenceFrame.getWorldFrame())
+   private final ReferenceFrame pelvisFrameFromRobotConfigurationDataPacket = new ReferenceFrame("pelvisFrame", ReferenceFrame.getWorldFrame())
          {
             private static final long serialVersionUID = 116774591450076114L;
 
@@ -144,9 +144,9 @@ public class IHMCMOCAPLocalizationModule implements MocapRigidbodiesListener, Pa
 
       if(!mocapToPelvisFrameConverter.isInitialized() && latestRobotConfigurationData != null)
       {
-         ReferenceFrame pelvisFrame = fullRobotModel.getPelvis().getBodyFixedFrame();
+         pelvisFrameFromRobotConfigurationDataPacket.update();
          MocapRigidBody pelvisRigidBody = getPelvisRigidBody(listOfRigidbodies);
-         mocapToPelvisFrameConverter.initialize(pelvisFrame, pelvisRigidBody);
+         mocapToPelvisFrameConverter.initialize(pelvisFrameFromRobotConfigurationDataPacket, pelvisRigidBody);
       }
       else if(latestRobotConfigurationData == null)
       {
@@ -209,12 +209,12 @@ public class IHMCMOCAPLocalizationModule implements MocapRigidbodiesListener, Pa
 
    private void sendPelvisTransformToController(MocapRigidBody pelvisRigidBody)
    {
-      mocapToPelvisFrameConverter.computePelvisToWorldTransform(pelvisRigidBody, pelvisTransform);
-      setPelvisYoVariables(pelvisTransform);
+      mocapToPelvisFrameConverter.computePelvisToWorldTransform(pelvisRigidBody, pelvisToWorldTransform);
+      setPelvisYoVariables(pelvisToWorldTransform);
 
       if(latestRobotConfigurationData != null)
       {
-         TimeStampedTransform3D timestampedTransform = new TimeStampedTransform3D(pelvisTransform, latestRobotConfigurationData.getTimestamp());
+         TimeStampedTransform3D timestampedTransform = new TimeStampedTransform3D(pelvisToWorldTransform, latestRobotConfigurationData.getTimestamp());
          StampedPosePacket stampedPosePacket = new StampedPosePacket(Integer.toString(PELVIS_ID), timestampedTransform, 1.0);
          
          stampedPosePacket.setDestination(PacketDestination.CONTROLLER.ordinal());
@@ -228,17 +228,17 @@ public class IHMCMOCAPLocalizationModule implements MocapRigidbodiesListener, Pa
    
    private void updateMarkerPoints()
    {
-      pelvisFrame.update();
+      pelvisFrameFromRobotConfigurationDataPacket.update();
       
-      marker1Point.setToZero(pelvisFrame);
-      marker2Point.setToZero(pelvisFrame);
-      marker3Point.setToZero(pelvisFrame);
-      marker4Point.setToZero(pelvisFrame);
+      marker1Point.setToZero(pelvisFrameFromRobotConfigurationDataPacket);
+      marker2Point.setToZero(pelvisFrameFromRobotConfigurationDataPacket);
+      marker3Point.setToZero(pelvisFrameFromRobotConfigurationDataPacket);
+      marker4Point.setToZero(pelvisFrameFromRobotConfigurationDataPacket);
       
-      marker1Point.set(mocapToPelvisFrameConverter.getMarkerOffsetInPelvisFrame(1));
-      marker2Point.set(mocapToPelvisFrameConverter.getMarkerOffsetInPelvisFrame(2));
-      marker3Point.set(mocapToPelvisFrameConverter.getMarkerOffsetInPelvisFrame(3));
-      marker4Point.set(mocapToPelvisFrameConverter.getMarkerOffsetInPelvisFrame(4));
+      marker1Point.set(MocapToPelvisFrameConverter.getMarkerOffsetInPelvisFrame(1));
+      marker2Point.set(MocapToPelvisFrameConverter.getMarkerOffsetInPelvisFrame(2));
+      marker3Point.set(MocapToPelvisFrameConverter.getMarkerOffsetInPelvisFrame(3));
+      marker4Point.set(MocapToPelvisFrameConverter.getMarkerOffsetInPelvisFrame(4));
       
       marker1Point.changeFrame(ReferenceFrame.getWorldFrame());
       marker2Point.changeFrame(ReferenceFrame.getWorldFrame());
