@@ -1,8 +1,7 @@
-package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization;
+package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.newProjectionAndRecursionMultipliers;
 
-import org.ejml.data.DenseMatrix64F;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.projectionAndRecursionMultipliers.*;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.projectionAndRecursionMultipliers.*;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint2d;
@@ -11,7 +10,7 @@ import us.ihmc.robotics.math.frames.YoFramePoint2d;
 
 import java.util.ArrayList;
 
-public class FootstepRecursionMultiplierCalculator
+public class NewStateMultiplierCalculator
 {
    private static final String namePrefix = "controller";
 
@@ -20,14 +19,8 @@ public class FootstepRecursionMultiplierCalculator
    private final ArrayList<DoubleYoVariable> doubleSupportDurations = new ArrayList<>();
    private final ArrayList<DoubleYoVariable> singleSupportDurations = new ArrayList<>();
 
-   private final FinalICPRecursionMultiplier finalICPRecursionMultiplier;
-   private final CMPRecursionMultipliers cmpRecursionMultipliers;
-   private final StanceCMPProjectionMultipliers stanceCMPProjectionMultipliers;
-   private final RemainingStanceCMPProjectionMultipliers remainingStanceCMPProjectionMultipliers;
-   private final CurrentStateProjectionMultiplier currentStateProjectionMultiplier;
-   private final InitialICPProjectionMultiplier initialICPProjectionMultiplier;
-
-   private final DoubleYoVariable doubleSupportSplitFraction;
+   private final DoubleYoVariable defaultDoubleSupportSplitFraction;
+   private final DoubleYoVariable upcomingDoubleSupportSplitFraction;
    private final DoubleYoVariable exitCMPDurationInPercentOfStepTime;
 
    private final DoubleYoVariable maximumSplineDuration;
@@ -39,24 +32,35 @@ public class FootstepRecursionMultiplierCalculator
    private final DoubleYoVariable startOfSplineTime;
    private final DoubleYoVariable endOfSplineTime;
 
+   private final NewFinalICPRecursionMultiplier finalICPRecursionMultiplier;
+   private final NewStanceExitCMPRecursionMultiplier stanceExitCMPRecursionMultiplier;
+   private final NewStanceEntryCMPRecursionMultiplier stanceEntryCMPRecursionMultiplier;
+   private final NewExitCMPRecursionMultiplier exitCMPRecursionMultiplier;
+   private final NewEntryCMPRecursionMultiplier entryCMPRecursionMultiplier;
+
+   /*
+   private final NewFinalICPCurrentMultiplier finalICPCurrentMultiplier;
+   private final NewExitCMPCurrentMultiplier exitCMPCurrentMultiplier;
+   private final NewEntryCMPCurrentMultiplier entryCMPCurrentMultiplier;
+   private final NewInitialICPCurrentMultiplier initialICPCurrentMultiplier;
+   private final NewInitialICPVelocityCurrentMultiplier initialICPVelocityCurrentMultiplier;
+   */
+
    private final int maxNumberOfFootstepsToConsider;
 
-   public FootstepRecursionMultiplierCalculator(CapturePointPlannerParameters icpPlannerParameters, DoubleYoVariable exitCMPDurationInPercentOfStepTime,
+   public NewStateMultiplierCalculator(CapturePointPlannerParameters icpPlannerParameters, DoubleYoVariable exitCMPDurationInPercentOfStepTime,
          DoubleYoVariable doubleSupportSplitFraction, int maxNumberOfFootstepsToConsider, YoVariableRegistry parentRegistry)
    {
       this.maxNumberOfFootstepsToConsider = maxNumberOfFootstepsToConsider;
       this.exitCMPDurationInPercentOfStepTime = exitCMPDurationInPercentOfStepTime;
-      this.doubleSupportSplitFraction = doubleSupportSplitFraction;
+      this.defaultDoubleSupportSplitFraction = doubleSupportSplitFraction;
+      this.upcomingDoubleSupportSplitFraction = doubleSupportSplitFraction;
 
       for (int i = 0; i < maxNumberOfFootstepsToConsider; i++)
       {
          doubleSupportDurations.add(new DoubleYoVariable("recursionCalculatorDoubleSupportDuration" + i, registry));
          singleSupportDurations.add(new DoubleYoVariable("recursionCalculatorSingleSupportDuration" + i, registry));
       }
-
-      cmpRecursionMultipliers = new CMPRecursionMultipliers("", maxNumberOfFootstepsToConsider, doubleSupportSplitFraction,
-            exitCMPDurationInPercentOfStepTime, registry);
-      stanceCMPProjectionMultipliers = new StanceCMPProjectionMultipliers("", doubleSupportSplitFraction, exitCMPDurationInPercentOfStepTime, registry);
 
       maximumSplineDuration = new DoubleYoVariable(namePrefix + "MaximumSplineDuration", registry);
       minimumSplineDuration = new DoubleYoVariable(namePrefix + "MinimumSplineDuration", registry);
@@ -72,13 +76,11 @@ public class FootstepRecursionMultiplierCalculator
       startOfSplineTime = new DoubleYoVariable(namePrefix + "StartOfSplineTime", registry);
       endOfSplineTime = new DoubleYoVariable(namePrefix + "EndOfSplineTime", registry);
 
-      remainingStanceCMPProjectionMultipliers = new RemainingStanceCMPProjectionMultipliers(doubleSupportSplitFraction,
-               exitCMPDurationInPercentOfStepTime, startOfSplineTime, endOfSplineTime, totalTrajectoryTime, registry);
-      currentStateProjectionMultiplier = new CurrentStateProjectionMultiplier(registry, doubleSupportSplitFraction, startOfSplineTime, endOfSplineTime,
-            totalTrajectoryTime);
-      initialICPProjectionMultiplier = new InitialICPProjectionMultiplier(registry, startOfSplineTime, endOfSplineTime, totalTrajectoryTime);
-
-      finalICPRecursionMultiplier = new FinalICPRecursionMultiplier(registry, doubleSupportSplitFraction);
+      finalICPRecursionMultiplier = new NewFinalICPRecursionMultiplier(namePrefix, exitCMPDurationInPercentOfStepTime, registry);
+      stanceExitCMPRecursionMultiplier = new NewStanceExitCMPRecursionMultiplier(namePrefix, exitCMPDurationInPercentOfStepTime, registry);
+      stanceEntryCMPRecursionMultiplier = new NewStanceEntryCMPRecursionMultiplier(namePrefix, exitCMPDurationInPercentOfStepTime, registry);
+      exitCMPRecursionMultiplier = new NewExitCMPRecursionMultiplier(namePrefix, maxNumberOfFootstepsToConsider, exitCMPDurationInPercentOfStepTime, registry);
+      entryCMPRecursionMultiplier = new NewEntryCMPRecursionMultiplier(namePrefix, maxNumberOfFootstepsToConsider, exitCMPDurationInPercentOfStepTime, registry);
 
       parentRegistry.addChild(registry);
    }
@@ -98,6 +100,7 @@ public class FootstepRecursionMultiplierCalculator
       singleSupportDurations.get(footstepIndex).set(singleSupportDuration);
    }
 
+   /*
    public void reset()
    {
       cmpRecursionMultipliers.reset();
@@ -136,6 +139,7 @@ public class FootstepRecursionMultiplierCalculator
 
    private void updateSegmentedSingleSupportTrajectory(boolean isInTransfer)
    {
+      /
       if (!isInTransfer)
       {
          double doubleSupportDuration = doubleSupportDurations.get(0).getDoubleValue();
@@ -184,17 +188,17 @@ public class FootstepRecursionMultiplierCalculator
 
    public double getCMPRecursionExitMultiplier(int footstepIndex)
    {
-      return cmpRecursionMultipliers.getExitMultiplier(footstepIndex);
+      //return cmpRecursionMultipliers.getExitMultiplier(footstepIndex);
    }
 
    public double getCMPRecursionEntryMultiplier(int footstepIndex)
    {
-      return cmpRecursionMultipliers.getEntryMultiplier(footstepIndex);
+      //return cmpRecursionMultipliers.getEntryMultiplier(footstepIndex);
    }
 
    public double getFinalICPRecursionMultiplier()
    {
-      return finalICPRecursionMultiplier.getDoubleValue();
+      //return finalICPRecursionMultiplier.getDoubleValue();
    }
 
    public double getStanceExitCMPProjectionMultiplier()
@@ -330,4 +334,5 @@ public class FootstepRecursionMultiplierCalculator
          referenceICPVelocityToPack.add(tmpPoint);
       }
    }
+   */
 }

@@ -3,6 +3,10 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimiz
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.projectionAndRecursionMultipliers.FootstepRecursionMultiplierCalculator;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
@@ -74,10 +78,13 @@ public class ICPOptimizationController
    private final YoFrameVector2d controllerFeedbackCMPDelta = new YoFrameVector2d(yoNamePrefix + "FeedbackCMPDelta", worldFrame, registry);
    private final YoFrameVector2d icpError = new YoFrameVector2d("icpError", "", worldFrame, registry);
 
+   private final YoFramePoint2d yoReconstructedICP = new YoFramePoint2d("reconstructedICP", "", worldFrame, registry);
+   private final YoFrameVector2d reconstructedICPError = new YoFrameVector2d("reconstructedICPError", "", worldFrame, registry);
+   private final YoFrameVector2d reconstructedCMPDelta = new YoFrameVector2d("reconstructedCMPDelta", "", worldFrame, registry);
+   private final YoFrameVector2d modifiedReconstructedICPError = new YoFrameVector2d("modifiedReconstructedICPError", "", worldFrame, registry);
+   private final YoFramePoint2d dynamicRelaxation = new YoFramePoint2d("dynamicRelaxation", "", worldFrame, registry);
+
    private final FramePoint2d finalICPRecursion = new FramePoint2d();
-   private final FramePoint2d cmpOffsetRecursionEffect = new FramePoint2d();
-   private final FramePoint2d stanceCMPProjection = new FramePoint2d();
-   private final FramePoint2d beginningOfStateICPProjection = new FramePoint2d();
    private final FramePoint2d cmpConstantEffects = new FramePoint2d();
 
    private final YoFramePoint2d beginningOfStateICP = new YoFramePoint2d(yoNamePrefix + "BeginningOfStateICP", worldFrame, registry);
@@ -203,6 +210,14 @@ public class ICPOptimizationController
       }
 
       parentRegistry.addChild(registry);
+
+      if (VISUALIZE)
+      {
+         String name = "ICPOptimization";
+         YoGraphicPosition referenceICP = new YoGraphicPosition("controllerReconstructedICP", yoReconstructedICP, 0.02, YoAppearance.Red(), GraphicType.BALL_WITH_ROTATED_CROSS);
+         yoGraphicsListRegistry.registerArtifact(name, referenceICP.createArtifact());
+         yoGraphicsListRegistry.registerYoGraphic(name, referenceICP);
+      }
    }
 
    public void setStepDurations(double doubleSupportDuration, double singleSupportDuration)
@@ -354,8 +369,12 @@ public class ICPOptimizationController
       localScaleUpcomingStepWeights = scaleUpcomingStepWeights.getBooleanValue();
    }
 
+   private final FramePoint2d dynRelax = new FramePoint2d();
+   private final FramePoint2d reconstructedICP = new FramePoint2d();
    private final FramePoint2d desiredCMP = new FramePoint2d();
    private final FrameVector2d desiredCMPDelta = new FrameVector2d();
+
+   private final boolean useReconstruction = false;
 
    public void compute(double currentTime, FramePoint2d desiredICP, FrameVector2d desiredICPVelocity, FramePoint2d currentICP, double omega0)
    {
@@ -426,14 +445,38 @@ public class ICPOptimizationController
       }
 
       solutionHandler.getControllerReferenceCMP(desiredCMP);
+      solver.getReconstructedReferenceICPPosition(reconstructedICP);
+      solver.getDynamicRelaxation(dynRelax);
+
+      yoReconstructedICP.set(reconstructedICP);
 
       icpError.set(currentICP);
       icpError.sub(solutionHandler.getControllerReferenceICP());
 
-      desiredCMP.add(desiredCMPDelta);
+      reconstructedICPError.set(currentICP);
+      reconstructedICPError.sub(reconstructedICP);
 
+      reconstructedCMPDelta.setX(feedbackGains.getX() * reconstructedICPError.getX());
+      reconstructedCMPDelta.setY(feedbackGains.getY() * reconstructedICPError.getY());
+
+
+      modifiedReconstructedICPError.set(reconstructedICPError);
+      modifiedReconstructedICPError.add(dynRelax);
+
+      dynamicRelaxation.set(dynRelax);
+
+
+      if (useReconstruction)
+      {
+         desiredCMP.add(reconstructedCMPDelta.getFrameTuple2d());
+         controllerFeedbackCMPDelta.set(reconstructedCMPDelta);
+      }
+      else
+      {
+         desiredCMP.add(desiredCMPDelta);
+         controllerFeedbackCMPDelta.set(desiredCMPDelta);
+      }
       controllerFeedbackCMP.set(desiredCMP);
-      controllerFeedbackCMPDelta.set(desiredCMPDelta);
    }
 
    private void setConditionsForFeedbackOnlyControl()
@@ -443,9 +486,6 @@ public class ICPOptimizationController
       setFeedbackConditions();
 
       finalICPRecursion.set(desiredICP);
-      cmpOffsetRecursionEffect.setToZero();
-      stanceCMPProjection.setToZero();
-      beginningOfStateICPProjection.setToZero();
       cmpConstantEffects.setToZero();
    }
 
