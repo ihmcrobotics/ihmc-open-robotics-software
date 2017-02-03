@@ -29,7 +29,7 @@ public class HexapodHighLevelControlManager
    private final ControlledBodiesCommand controlledBodiesCommand = new ControlledBodiesCommand();
    private final ControllerCoreCommand controllerCoreCommandList;
    private final EnumYoVariable<WholeBodyControllerCoreMode> controllerCoreMode = new EnumYoVariable<>("controllerCoreMode", registry, WholeBodyControllerCoreMode.class);
-   private final BodySpatialManager bodySpatialManager;
+   private final HexapodBodySpatialManager bodySpatialManager;
    private final ArrayList<HighLevelJointManager> jointControllers = new ArrayList<>();
    private final HexapodMomentumController hexapodMomentumController;
    private final HexapodStepController stepController;
@@ -51,7 +51,7 @@ public class HexapodHighLevelControlManager
       RigidBody pelvis = fullRobotModel.getPelvis();
       String bodyName = pelvis.getName();
 
-      bodySpatialManager = new BodySpatialManager(bodyName, fullRobotModel, referenceFrames, controllerDt, yoGraphicsListRegistry, registry);
+      bodySpatialManager = new HexapodBodySpatialManager(bodyName, fullRobotModel, referenceFrames, controllerDt, yoGraphicsListRegistry, registry);
       stepController = new HexapodStepController("HexapodStepController", fullRobotModel, twistCalculator, contactStateUpdaters, yoGraphicsListRegistry, controllerDt, registry, referenceFrames);
       hexapodMomentumController = new HexapodMomentumController("HexapodMomentumController", referenceFrames, fullRobotModel, controllerDt, registry, yoGraphicsListRegistry);
       
