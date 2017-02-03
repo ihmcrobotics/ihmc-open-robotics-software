@@ -653,8 +653,8 @@ public class ICPOptimizationSolver
    private void reconstructReferenceICPPosition()
    {
       referenceICPReconstruction.set(finalICPRecursion);
-      CommonOps.subtractEquals(referenceICPReconstruction, cmpConstantEffect);
-      CommonOps.subtractEquals(referenceICPReconstruction, dynamicRelaxationSolution);
+      CommonOps.addEquals(referenceICPReconstruction, cmpConstantEffect);
+      //CommonOps.addEquals(referenceICPReconstruction, dynamicRelaxationSolution);
 
       for (int i = 0; i < indexHandler.getNumberOfFootstepsToConsider(); i++)
       {
@@ -662,7 +662,7 @@ public class ICPOptimizationSolver
          tmpVector.set(1, 0, footstepLocationSolution.get(2 * i + 1));
          CommonOps.scale(footstepRecursionMultipliers.get(i).get(0, 0), tmpVector);
 
-         CommonOps.subtractEquals(referenceICPReconstruction, tmpVector);
+         CommonOps.addEquals(referenceICPReconstruction, tmpVector);
       }
    }
 
@@ -680,10 +680,16 @@ public class ICPOptimizationSolver
       cmpFeedbackDifferenceToPack.setY(feedbackDeltaSolution.get(1, 0));
    }
 
-   public void getReconstructedReferenceICPPosition(FramePoint2d reconstructedReferenceICP)
+   public void getReconstructedReferenceICPPosition(FramePoint2d reconstructedReferenceICPToPack)
    {
-      reconstructedReferenceICP.setX(referenceICPReconstruction.get(0, 0));
-      reconstructedReferenceICP.setY(referenceICPReconstruction.get(1, 0));
+      reconstructedReferenceICPToPack.setX(referenceICPReconstruction.get(0, 0));
+      reconstructedReferenceICPToPack.setY(referenceICPReconstruction.get(1, 0));
+   }
+
+   public void getDynamicRelaxation(FramePoint2d dynamicRelaxationToPack)
+   {
+      dynamicRelaxationToPack.setX(dynamicRelaxationSolution.get(0, 0));
+      dynamicRelaxationToPack.setY(dynamicRelaxationSolution.get(1, 0));
    }
 
    public double getCostToGo()
