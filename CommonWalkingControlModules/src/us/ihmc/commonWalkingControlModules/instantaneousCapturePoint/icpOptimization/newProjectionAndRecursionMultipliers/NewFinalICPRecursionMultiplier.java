@@ -26,6 +26,12 @@ public class NewFinalICPRecursionMultiplier extends DoubleYoVariable
       if (numberOfStepsToConsider > singleSupportDurations.size())
          throw new RuntimeException("Single Support Durations list is not long enough");
 
+      if (numberOfStepsToConsider == 0)
+      {
+         this.set(1.0);
+         return;
+      }
+
       if (useTwoCMPs)
       {
          double firstStepTime = doubleSupportDurations.get(0).getDoubleValue() + singleSupportDurations.get(0).getDoubleValue();

@@ -88,7 +88,7 @@ public class NewExitCMPRecursionMultiplier
       }
    }
 
-   public double getEntryMultiplier(int footstepIndex)
+   public double getExitMultiplier(int footstepIndex)
    {
       return exitMultipliers.get(footstepIndex).getDoubleValue();
    }

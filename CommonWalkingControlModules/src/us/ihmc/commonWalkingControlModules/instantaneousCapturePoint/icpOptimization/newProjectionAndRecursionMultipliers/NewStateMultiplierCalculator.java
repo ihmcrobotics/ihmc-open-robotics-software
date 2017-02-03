@@ -100,6 +100,54 @@ public class NewStateMultiplierCalculator
       singleSupportDurations.get(footstepIndex).set(singleSupportDuration);
    }
 
+   public void resetRecursionMultipliers()
+   {
+      finalICPRecursionMultiplier.reset();
+      stanceExitCMPRecursionMultiplier.reset();
+      stanceEntryCMPRecursionMultiplier.reset();
+      exitCMPRecursionMultiplier.reset();
+      entryCMPRecursionMultiplier.reset();
+   }
+
+   public void computeRecursionMultipliers(int numberOfStepsToConsider, boolean isInTransfer, boolean useTwoCMPs, double omega0)
+   {
+      resetRecursionMultipliers();
+
+      if (numberOfStepsToConsider > maxNumberOfFootstepsToConsider)
+         throw new RuntimeException("Requesting too many steps.");
+
+      finalICPRecursionMultiplier.compute(numberOfStepsToConsider, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega0);
+      stanceExitCMPRecursionMultiplier.compute(numberOfStepsToConsider, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega0);
+      stanceEntryCMPRecursionMultiplier.compute(numberOfStepsToConsider, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega0);
+      exitCMPRecursionMultiplier.compute(numberOfStepsToConsider, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega0);
+      entryCMPRecursionMultiplier.compute(numberOfStepsToConsider, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega0);
+   }
+
+   public double getFinalICPRecursionMultiplier()
+   {
+      return finalICPRecursionMultiplier.getDoubleValue();
+   }
+
+   public double getStanceExitCMPRecursionMultiplier()
+   {
+      return stanceExitCMPRecursionMultiplier.getExitMultiplier();
+   }
+
+   public double getStanceEntryCMPRecursionMultiplier()
+   {
+      return stanceEntryCMPRecursionMultiplier.getEntryMultiplier();
+   }
+
+   public double getExitCMPRecursionMultiplier(int footstepIndex)
+   {
+      return exitCMPRecursionMultiplier.getExitMultiplier(footstepIndex);
+   }
+
+   public double getEntryCMPRecursionMultiplier(int footstepIndex)
+   {
+      return entryCMPRecursionMultiplier.getEntryMultiplier(footstepIndex);
+   }
+
    /*
    public void reset()
    {
