@@ -77,34 +77,6 @@ public class IHMCMOCAPLocalizationModule implements MocapRigidbodiesListener, Pa
    private final DoubleYoVariable computedPelvisYaw = new DoubleYoVariable("computedPelvisYaw", yoVariableRegistry);
    private final DoubleYoVariable computedPelvisPitch = new DoubleYoVariable("computedPelvisPitch", yoVariableRegistry);
    private final DoubleYoVariable computedPelvisRoll = new DoubleYoVariable( "computedPelvisRoll", yoVariableRegistry);
-   
-   private final FramePoint marker1Point = new FramePoint(ReferenceFrame.getWorldFrame());
-   private final FramePoint marker2Point = new FramePoint(ReferenceFrame.getWorldFrame());
-   private final FramePoint marker3Point = new FramePoint(ReferenceFrame.getWorldFrame());
-   private final FramePoint marker4Point = new FramePoint(ReferenceFrame.getWorldFrame());
-   
-   private final DoubleYoVariable pelvisTranslationX = new DoubleYoVariable("pelvisTranslationX", yoVariableRegistry);
-   private final DoubleYoVariable pelvisTranslationY = new DoubleYoVariable("pelvisTranslationY", yoVariableRegistry);
-   private final DoubleYoVariable pelvisTranslationZ = new DoubleYoVariable("pelvisTranslationZ", yoVariableRegistry);
-   private final DoubleYoVariable pelvisYaw = new DoubleYoVariable("pelvisYaw", yoVariableRegistry);
-   private final DoubleYoVariable pelvisPitch = new DoubleYoVariable("pelvisPitch", yoVariableRegistry);
-   private final DoubleYoVariable pelvisRoll = new DoubleYoVariable("pelvisRoll", yoVariableRegistry);
-   
-   private final DoubleYoVariable marker1PositionX = new DoubleYoVariable("marker1PositionX", yoVariableRegistry);
-   private final DoubleYoVariable marker1PositionY = new DoubleYoVariable("marker1PositionY", yoVariableRegistry);
-   private final DoubleYoVariable marker1PositionZ = new DoubleYoVariable("marker1PositionZ", yoVariableRegistry);
-
-   private final DoubleYoVariable marker2PositionX = new DoubleYoVariable("marker2PositionX", yoVariableRegistry);
-   private final DoubleYoVariable marker2PositionY = new DoubleYoVariable("marker2PositionY", yoVariableRegistry);
-   private final DoubleYoVariable marker2PositionZ = new DoubleYoVariable("marker2PositionZ", yoVariableRegistry);
-
-   private final DoubleYoVariable marker3PositionX = new DoubleYoVariable("marker3PositionX", yoVariableRegistry);
-   private final DoubleYoVariable marker3PositionY = new DoubleYoVariable("marker3PositionY", yoVariableRegistry);
-   private final DoubleYoVariable marker3PositionZ = new DoubleYoVariable("marker3PositionZ", yoVariableRegistry);
-
-   private final DoubleYoVariable marker4PositionX = new DoubleYoVariable("marker4PositionX", yoVariableRegistry);
-   private final DoubleYoVariable marker4PositionY = new DoubleYoVariable("marker4PositionY", yoVariableRegistry);
-   private final DoubleYoVariable marker4PositionZ = new DoubleYoVariable("marker4PositionZ", yoVariableRegistry);
 
    public IHMCMOCAPLocalizationModule(DRCRobotModel drcRobotModel) 
    {
@@ -226,53 +198,6 @@ public class IHMCMOCAPLocalizationModule implements MocapRigidbodiesListener, Pa
       }
    }
    
-   private void updateMarkerPoints()
-   {
-      pelvisFrameFromRobotConfigurationDataPacket.update();
-      
-      marker1Point.setToZero(pelvisFrameFromRobotConfigurationDataPacket);
-      marker2Point.setToZero(pelvisFrameFromRobotConfigurationDataPacket);
-      marker3Point.setToZero(pelvisFrameFromRobotConfigurationDataPacket);
-      marker4Point.setToZero(pelvisFrameFromRobotConfigurationDataPacket);
-      
-      marker1Point.set(MocapToPelvisFrameConverter.getMarkerOffsetInPelvisFrame(1));
-      marker2Point.set(MocapToPelvisFrameConverter.getMarkerOffsetInPelvisFrame(2));
-      marker3Point.set(MocapToPelvisFrameConverter.getMarkerOffsetInPelvisFrame(3));
-      marker4Point.set(MocapToPelvisFrameConverter.getMarkerOffsetInPelvisFrame(4));
-      
-      marker1Point.changeFrame(ReferenceFrame.getWorldFrame());
-      marker2Point.changeFrame(ReferenceFrame.getWorldFrame());
-      marker3Point.changeFrame(ReferenceFrame.getWorldFrame());
-      marker4Point.changeFrame(ReferenceFrame.getWorldFrame());
-      
-      marker1PositionX.set(marker1Point.getX());
-      marker1PositionY.set(marker1Point.getY());
-      marker1PositionZ.set(marker1Point.getZ());
-
-      marker2PositionX.set(marker2Point.getX());
-      marker2PositionY.set(marker2Point.getY());
-      marker2PositionZ.set(marker2Point.getZ());
-
-      marker3PositionX.set(marker3Point.getX());
-      marker3PositionY.set(marker3Point.getY());
-      marker3PositionZ.set(marker3Point.getZ());
-
-      marker4PositionX.set(marker4Point.getX());
-      marker4PositionY.set(marker4Point.getY());
-      marker4PositionZ.set(marker4Point.getZ());
-      
-      pelvisTranslationX.set(pelvisTranslation.getX());
-      pelvisTranslationY.set(pelvisTranslation.getY());
-      pelvisTranslationZ.set(pelvisTranslation.getZ());
-      
-      double[] pelvisYPR = new double[3];
-      RotationTools.convertQuaternionToYawPitchRoll(pelvisOrientation, pelvisYPR);
-      
-      pelvisYaw.set(pelvisYPR[0]);
-      pelvisPitch.set(pelvisYPR[1]);
-      pelvisRoll.set(pelvisYPR[2]);
-   }
-   
    @Override
    public void receivedPacket(RobotConfigurationData packet)
    {      
@@ -299,7 +224,6 @@ public class IHMCMOCAPLocalizationModule implements MocapRigidbodiesListener, Pa
       rootJoint.setRotation(pelvisOrientation.getX(), pelvisOrientation.getY(), pelvisOrientation.getZ(), pelvisOrientation.getW());
       
       rootJoint.getPredecessor().updateFramesRecursively();   
-      updateMarkerPoints();
       yoVariableServer.update(System.currentTimeMillis());
    }   
 }
