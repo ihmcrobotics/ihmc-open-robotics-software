@@ -464,6 +464,9 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
       return frameName;
    }
    
+   /**
+    * @deprecated Creates garbage without warning. - dcalvert
+    */
    public RigidBodyTransform getTransformToDesiredFrame(ReferenceFrame desiredFrame)
    {
       RigidBodyTransform ret = new RigidBodyTransform();
@@ -472,6 +475,9 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
       return ret;
    }
    
+   /**
+    * @deprecated Creates garbage without warning. - dcalvert
+    */
    public RigidBodyTransform getTransformToWorldFrame()
    {
       RigidBodyTransform ret = new RigidBodyTransform();
