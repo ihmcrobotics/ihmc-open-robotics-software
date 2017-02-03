@@ -1,10 +1,10 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import gnu.trove.map.hash.THashMap;
 import us.ihmc.robotics.nameBasedHashCode.NameBasedHashCodeTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
@@ -22,7 +22,7 @@ public class GeometricJacobianHolder
 {
    public static final long NULL_JACOBIAN_ID = NameBasedHashCodeTools.NULL_HASHCODE;
 
-   private final Map<Long, GeometricJacobian> nameBasedHashCodeToJacobianMap = new HashMap<>();
+   private final Map<Long, GeometricJacobian> nameBasedHashCodeToJacobianMap = new THashMap<>();
    private final List<GeometricJacobian> geometricJacobians = new ArrayList<GeometricJacobian>();
    private final InverseDynamicsJoint[] temporaryToStoreJointPath = new InverseDynamicsJoint[30];
 
