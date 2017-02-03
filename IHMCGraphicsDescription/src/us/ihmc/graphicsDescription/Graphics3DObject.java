@@ -673,7 +673,7 @@ public class Graphics3DObject
 
    public CapsuleGraphics3DInstruction addCapsule(double radius, double height, AppearanceDefinition capsuleAppearance)
    {
-      CapsuleGraphics3DInstruction capsuleInstruction = new CapsuleGraphics3DInstruction(height - 2.0, radius, radius, radius, CAPSULE_RESOLUTION);
+      CapsuleGraphics3DInstruction capsuleInstruction = new CapsuleGraphics3DInstruction(height - 2.0 * radius, radius, radius, radius, CAPSULE_RESOLUTION);
       capsuleInstruction.setAppearance(capsuleAppearance);
       graphics3DInstructions.add(capsuleInstruction);
       return capsuleInstruction;
