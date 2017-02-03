@@ -4,12 +4,8 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 
-import javax.vecmath.Vector3d;
-
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
-import us.ihmc.robotics.partNames.NeckJointName;
-import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.DRCRobotModel.RobotTarget;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -23,6 +19,8 @@ import us.ihmc.robotics.controllers.YoPIDGains;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.partNames.NeckJointName;
+import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
@@ -936,15 +934,7 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    @Override
    public MomentumOptimizationSettings getMomentumOptimizationSettings()
    {
-      MomentumOptimizationSettings momentumOptimizationSettings = new MomentumOptimizationSettings();
-      Vector3d handTaskspaceCotnrolAngularWeights = new Vector3d(0.5, 0.5, 0.5);
-      Vector3d handTaskspaceCotnrolLinearWeights = new Vector3d(5.0, 5.0, 5.0);
-      momentumOptimizationSettings.setHandTaskspaceControlWeights(handTaskspaceCotnrolAngularWeights, handTaskspaceCotnrolLinearWeights);
-      // The weight for the head needs to be pretty high to counter the privileged configuration task.
-      // This seems to be specific to Val's, probably because of its particular kinematics.
-      // Shouldn't affect the rest of the body as long as the head is controlled w.r.t. to the chest.
-      momentumOptimizationSettings.setHeadWeights(5.0, 500.0, 50.0);
-      return momentumOptimizationSettings;
+      return new ValkyrieMomentumOptimizationSettings();
    }
 
    @Override

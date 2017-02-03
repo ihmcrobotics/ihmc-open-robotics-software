@@ -174,7 +174,7 @@ public class DRCNetworkProcessor
       if (!params.isKinematicsToolboxEnabled())
          return;
 
-      new KinematicsToolboxModule(robotModel.createFullRobotModel(), robotModel.getLogModelProvider(), params.isKinematicsToolboxVisualizerEnabled());
+      new KinematicsToolboxModule(robotModel, params.isKinematicsToolboxVisualizerEnabled());
 
       PacketCommunicator kinematicsToolboxCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.KINEMATICS_TOOLBOX_MODULE_PORT, NET_CLASS_LIST);
       packetRouter.attachPacketCommunicator(PacketDestination.KINEMATICS_TOOLBOX_MODULE, kinematicsToolboxCommunicator);
@@ -190,7 +190,7 @@ public class DRCNetworkProcessor
          return;
 
       FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
-      
+
       new FootstepPlanningToolboxModule(robotModel, fullRobotModel, null, params.isFootstepPlanningToolboxVisualizerEnabled());
 
       PacketCommunicator footstepPlanningToolboxCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.FOOTSTEP_PLANNING_TOOLBOX_MODULE_PORT, NET_CLASS_LIST);
