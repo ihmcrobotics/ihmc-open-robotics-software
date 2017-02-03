@@ -33,7 +33,7 @@ public class RhinoBeetleVirtualModelControlParameters implements HexapodControll
    private final Vector3d linearWeight = new Vector3d(1.0, 1.0, 10.0);
    private final Vector3d angularWeight = new Vector3d(1.0, 1.0, 1.0);
    private final YoSymmetricSE3PIDGains bodySpatialGains;
-   private final double bodyProportionalGains = 2000.0;
+   private final double bodyProportionalGains = 8000.0;
    private final double bodyDampingRatio = 3.0;
    private final YoFrameVector bodySpatialLinearQPWeight;
    private final YoFrameVector bodySpatialAngularQPWeight;
@@ -74,13 +74,13 @@ public class RhinoBeetleVirtualModelControlParameters implements HexapodControll
    @Override
    public double getSwingXYProportionalGain()
    {
-      return 1000.0;
+      return 8000.0;
    }
 
    @Override
    public double getSwingZProportionalGain()
    {
-      return 2000.0;
+      return 6000.0;
    }
 
    @Override
