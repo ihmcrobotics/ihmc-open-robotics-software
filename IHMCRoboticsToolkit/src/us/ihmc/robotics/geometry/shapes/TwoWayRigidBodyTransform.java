@@ -18,27 +18,26 @@ class TwoWayRigidBodyTransform
    private final RigidBodyTransform forwardTransform;
    private final RigidBodyTransform backwardTransform;
    
-   private boolean forwardTransformIsOutOfDate;
-   private boolean backwardTransformIsOutOfDate;
+   private boolean forwardTransformIsOutOfDate = false;
+   private boolean backwardTransformIsOutOfDate = false;
    
    public TwoWayRigidBodyTransform()
    {
       forwardTransform = new RigidBodyTransform();
       backwardTransform = new RigidBodyTransform();
-      
-      forwardTransformIsOutOfDate = false;
-      backwardTransformIsOutOfDate = false;
    }
    
    public void setForwardTransform(RigidBodyTransform forwardTransform)
    {
       this.forwardTransform.set(forwardTransform);
+      forwardTransformIsOutOfDate = false;
       backwardTransformIsOutOfDate = true;
    }
    
    public void setBackwardTransform(RigidBodyTransform backwardTransform)
    {
       this.backwardTransform.set(backwardTransform);
+      backwardTransformIsOutOfDate = false;
       forwardTransformIsOutOfDate = true;
    }
    
@@ -66,6 +65,7 @@ class TwoWayRigidBodyTransform
       {
          forwardTransform.set(backwardTransform);
          forwardTransform.invert();
+         forwardTransformIsOutOfDate = false;
       }
    }
    
@@ -75,9 +75,20 @@ class TwoWayRigidBodyTransform
       {
          backwardTransform.set(forwardTransform);
          backwardTransform.invert();
+         backwardTransformIsOutOfDate = false;
       }
    }
-   
+
+   public boolean isForwardTransformOutOfDate()
+   {
+      return forwardTransformIsOutOfDate;
+   }
+
+   public boolean isBackwardTransformOutOfDate()
+   {
+      return backwardTransformIsOutOfDate;
+   }
+
    public void transformForward(Transformable transformable)
    {
       ensureForwardTransformUpToDate();
