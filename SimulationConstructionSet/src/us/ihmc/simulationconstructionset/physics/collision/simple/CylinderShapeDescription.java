@@ -59,13 +59,17 @@ public class CylinderShapeDescription<T extends CylinderShapeDescription<T>> imp
       return copy;
    }
 
-   public void setTransform(RigidBodyTransform transform2)
+   public void setTransform(RigidBodyTransform transform)
    {
-      this.transform.set(this.transform);
-      this.supportingVertexHolder.setTransform(transform);
+      this.transform.set(transform);
+      setSupportingVertexAndCylinder3dTransformFromThisAndConsistencyTransform();
+   }
 
-      this.cylinder3d.setTransform(cylinderConsistencyTransform);
-      this.cylinder3d.applyTransform(transform);
+   private void setSupportingVertexAndCylinder3dTransformFromThisAndConsistencyTransform()
+   {
+      supportingVertexHolder.setTransform(transform);
+      this.cylinder3d.setTransform(this.transform);
+      this.cylinder3d.applyTransform(cylinderConsistencyTransform);
    }
 
    public double getSmoothingRadius()
@@ -77,10 +81,7 @@ public class CylinderShapeDescription<T extends CylinderShapeDescription<T>> imp
    public void applyTransform(RigidBodyTransform transformToWorld)
    {
       transform.multiply(transformToWorld, transform);
-      supportingVertexHolder.setTransform(transform);
-
-      this.cylinder3d.setTransform(cylinderConsistencyTransform);
-      this.cylinder3d.applyTransform(transform);
+      setSupportingVertexAndCylinder3dTransformFromThisAndConsistencyTransform();
    }
 
    @Override
@@ -88,12 +89,11 @@ public class CylinderShapeDescription<T extends CylinderShapeDescription<T>> imp
    {
       this.radius = cylinder.getRadius();
       this.height = cylinder.getHeight();
+      cylinderConsistencyTransform.setTranslation(0.0, 0.0, -height / 2.0);
 
       cylinder.getTransform(this.transform);
-      supportingVertexHolder.setTransform(transform);
 
-      this.cylinder3d.setTransform(cylinderConsistencyTransform);
-      this.cylinder3d.applyTransform(transform);
+      setSupportingVertexAndCylinder3dTransformFromThisAndConsistencyTransform();
    }
 
    public SupportingVertexHolder getSupportingVertexHolder()
