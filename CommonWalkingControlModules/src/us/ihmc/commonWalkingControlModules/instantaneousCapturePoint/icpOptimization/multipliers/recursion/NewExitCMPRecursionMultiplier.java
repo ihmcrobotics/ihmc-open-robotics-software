@@ -1,29 +1,29 @@
-package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.newProjectionAndRecursionMultipliers;
+package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.recursion;
 
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 
 import java.util.ArrayList;
 
-public class NewEntryCMPRecursionMultiplier
+public class NewExitCMPRecursionMultiplier
 {
-   private static final String name = "CMPEntryRecursionMultiplier";
+   private static final String name = "CMPExitRecursionMultiplier";
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final ArrayList<DoubleYoVariable> entryMultipliers = new ArrayList<>();
+   private final ArrayList<DoubleYoVariable> exitMultipliers = new ArrayList<>();
    private final DoubleYoVariable exitCMPDurationInPercentOfStepTime;
 
    private final int maximumNumberOfFootstepsToConsider;
 
-   public NewEntryCMPRecursionMultiplier(String namePrefix, int maximumNumberOfFootstepsToConsider, DoubleYoVariable exitCMPDurationInPercentOfStepTime,
+   public NewExitCMPRecursionMultiplier(String namePrefix, int maximumNumberOfFootstepsToConsider, DoubleYoVariable exitCMPDurationInPercentOfStepTime,
          YoVariableRegistry parentRegistry)
    {
       this.maximumNumberOfFootstepsToConsider = maximumNumberOfFootstepsToConsider;
       this.exitCMPDurationInPercentOfStepTime = exitCMPDurationInPercentOfStepTime;
 
       for (int i = 0; i < maximumNumberOfFootstepsToConsider; i++)
-         entryMultipliers.add(new DoubleYoVariable(namePrefix + name + i, registry));
+         exitMultipliers.add(new DoubleYoVariable(namePrefix + name + i, registry));
 
       parentRegistry.addChild(registry);
    }
@@ -31,7 +31,7 @@ public class NewEntryCMPRecursionMultiplier
    public void reset()
    {
       for (int i = 0; i < maximumNumberOfFootstepsToConsider; i++)
-         entryMultipliers.get(i).set(0.0);
+         exitMultipliers.get(i).set(0.0);
    }
 
    public void compute(int numberOfStepsToConsider, ArrayList<DoubleYoVariable> doubleSupportDurations, ArrayList<DoubleYoVariable> singleSupportDurations,
@@ -52,7 +52,7 @@ public class NewEntryCMPRecursionMultiplier
    {
       for (int i = 0; i < numberOfStepsToConsider; i++)
       {
-         entryMultipliers.get(i).set(0.0);
+         exitMultipliers.get(i).set(0.0); //// TODO: 2/3/17  
       }
    }
 
@@ -77,18 +77,19 @@ public class NewEntryCMPRecursionMultiplier
          double previousStepDuration = singleSupportDurations.get(i).getDoubleValue() + doubleSupportDurations.get(0).getDoubleValue();
 
          double timeSpentOnEntryCMP = (1.0 - exitCMPDurationInPercentOfStepTime.getDoubleValue()) * steppingDuration;
+         double timeSpentOnExitCMP = exitCMPDurationInPercentOfStepTime.getDoubleValue() * steppingDuration;
 
          if (i > 0)
             recursionTime += previousStepDuration;
 
-         double entryRecursion = Math.exp(-omega0 * recursionTime) * (1.0 - Math.exp(-omega0 * timeSpentOnEntryCMP));
+         double exitRecursion = Math.exp(-omega0 * (recursionTime + timeSpentOnEntryCMP)) * (1.0 - Math.exp(-omega0 * timeSpentOnExitCMP));
 
-         entryMultipliers.get(i).set(entryRecursion);
+         exitMultipliers.get(i).set(exitRecursion);
       }
    }
 
-   public double getEntryMultiplier(int footstepIndex)
+   public double getExitMultiplier(int footstepIndex)
    {
-      return entryMultipliers.get(footstepIndex).getDoubleValue();
+      return exitMultipliers.get(footstepIndex).getDoubleValue();
    }
 }

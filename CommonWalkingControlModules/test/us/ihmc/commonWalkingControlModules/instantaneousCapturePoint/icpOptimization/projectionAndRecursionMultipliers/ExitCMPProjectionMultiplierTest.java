@@ -4,9 +4,8 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import org.junit.Assert;
 import org.junit.Test;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.projectionAndRecursionMultipliers.ExitCMPProjectionMultiplier;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.projectionAndRecursionMultipliers.interpolation.CubicProjectionDerivativeMatrix;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.projectionAndRecursionMultipliers.interpolation.CubicProjectionMatrix;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.projectionAndRecursionMultipliers.interpolation.CubicDerivativeMatrix;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.projectionAndRecursionMultipliers.interpolation.CubicMatrix;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.projectionAndRecursionMultipliers.stateMatrices.swing.SwingExitCMPProjectionMatrix;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.projectionAndRecursionMultipliers.stateMatrices.transfer.TransferExitCMPProjectionMatrix;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -183,8 +182,8 @@ public class ExitCMPProjectionMultiplierTest
             startOfSplineTime, endOfSplineTime, totalTrajectoryTime);
       TransferExitCMPProjectionMatrix transferExitCMPProjectionMatrix = new TransferExitCMPProjectionMatrix(doubleSupportSplitRatio);
 
-      CubicProjectionMatrix cubicProjectionMatrix = new CubicProjectionMatrix();
-      CubicProjectionDerivativeMatrix cubicProjectionDerivativeMatrix = new CubicProjectionDerivativeMatrix();
+      CubicMatrix cubicMatrix = new CubicMatrix();
+      CubicDerivativeMatrix cubicDerivativeMatrix = new CubicDerivativeMatrix();
 
       int iters = 100;
       for (int i = 0; i < iters; i++)
@@ -218,17 +217,17 @@ public class ExitCMPProjectionMultiplierTest
 
          transferExitCMPProjectionMatrix.compute(currentDoubleSupport, false, omega0, false);
 
-         cubicProjectionDerivativeMatrix.setSegmentDuration(currentDoubleSupport);
-         cubicProjectionDerivativeMatrix.update(timeRemaining);
-         cubicProjectionMatrix.setSegmentDuration(currentDoubleSupport);
-         cubicProjectionMatrix.update(timeRemaining);
+         cubicDerivativeMatrix.setSegmentDuration(currentDoubleSupport);
+         cubicDerivativeMatrix.update(timeRemaining);
+         cubicMatrix.setSegmentDuration(currentDoubleSupport);
+         cubicMatrix.update(timeRemaining);
 
          DenseMatrix64F positionMatrixOut = new DenseMatrix64F(1, 1);
          DenseMatrix64F velocityMatrixOut = new DenseMatrix64F(1, 1);
-         CommonOps.mult(cubicProjectionMatrix, transferExitCMPProjectionMatrix, positionMatrixOut);
-         CommonOps.mult(cubicProjectionMatrix, transferExitCMPProjectionMatrix, positionMatrixOut);
-         CommonOps.mult(cubicProjectionDerivativeMatrix, transferExitCMPProjectionMatrix, velocityMatrixOut);
-         CommonOps.mult(cubicProjectionDerivativeMatrix, transferExitCMPProjectionMatrix, velocityMatrixOut);
+         CommonOps.mult(cubicMatrix, transferExitCMPProjectionMatrix, positionMatrixOut);
+         CommonOps.mult(cubicMatrix, transferExitCMPProjectionMatrix, positionMatrixOut);
+         CommonOps.mult(cubicDerivativeMatrix, transferExitCMPProjectionMatrix, velocityMatrixOut);
+         CommonOps.mult(cubicDerivativeMatrix, transferExitCMPProjectionMatrix, velocityMatrixOut);
 
          multiplier.compute(doubleSupportDurations, singleSupportDurations, timeRemaining, false, true, omega0, false);
 
@@ -265,8 +264,8 @@ public class ExitCMPProjectionMultiplierTest
             startOfSplineTime, endOfSplineTime, totalTrajectoryTime);
       TransferExitCMPProjectionMatrix transferExitCMPProjectionMatrix = new TransferExitCMPProjectionMatrix(doubleSupportSplitRatio);
 
-      CubicProjectionMatrix cubicProjectionMatrix = new CubicProjectionMatrix();
-      CubicProjectionDerivativeMatrix cubicProjectionDerivativeMatrix = new CubicProjectionDerivativeMatrix();
+      CubicMatrix cubicMatrix = new CubicMatrix();
+      CubicDerivativeMatrix cubicDerivativeMatrix = new CubicDerivativeMatrix();
 
       int iters = 100;
       for (int i = 0; i < iters; i++)
@@ -300,17 +299,17 @@ public class ExitCMPProjectionMultiplierTest
 
          transferExitCMPProjectionMatrix.compute(currentDoubleSupport, false, omega0, true);
 
-         cubicProjectionDerivativeMatrix.setSegmentDuration(currentDoubleSupport);
-         cubicProjectionDerivativeMatrix.update(timeRemaining);
-         cubicProjectionMatrix.setSegmentDuration(currentDoubleSupport);
-         cubicProjectionMatrix.update(timeRemaining);
+         cubicDerivativeMatrix.setSegmentDuration(currentDoubleSupport);
+         cubicDerivativeMatrix.update(timeRemaining);
+         cubicMatrix.setSegmentDuration(currentDoubleSupport);
+         cubicMatrix.update(timeRemaining);
 
          DenseMatrix64F positionMatrixOut = new DenseMatrix64F(1, 1);
          DenseMatrix64F velocityMatrixOut = new DenseMatrix64F(1, 1);
-         CommonOps.mult(cubicProjectionMatrix, transferExitCMPProjectionMatrix, positionMatrixOut);
-         CommonOps.mult(cubicProjectionMatrix, transferExitCMPProjectionMatrix, positionMatrixOut);
-         CommonOps.mult(cubicProjectionDerivativeMatrix, transferExitCMPProjectionMatrix, velocityMatrixOut);
-         CommonOps.mult(cubicProjectionDerivativeMatrix, transferExitCMPProjectionMatrix, velocityMatrixOut);
+         CommonOps.mult(cubicMatrix, transferExitCMPProjectionMatrix, positionMatrixOut);
+         CommonOps.mult(cubicMatrix, transferExitCMPProjectionMatrix, positionMatrixOut);
+         CommonOps.mult(cubicDerivativeMatrix, transferExitCMPProjectionMatrix, velocityMatrixOut);
+         CommonOps.mult(cubicDerivativeMatrix, transferExitCMPProjectionMatrix, velocityMatrixOut);
 
          multiplier.compute(doubleSupportDurations, singleSupportDurations, timeRemaining, false, true, omega0, true);
 
@@ -648,8 +647,8 @@ public class ExitCMPProjectionMultiplierTest
             startOfSplineTime, endOfSplineTime, totalTrajectoryTime);
       SwingExitCMPProjectionMatrix swingExitCMPProjectionMatrix = new SwingExitCMPProjectionMatrix(doubleSupportSplitRatio,
             exitCMPDurationInPercentOfSteptime, startOfSplineTime, endOfSplineTime, totalTrajectoryTime);
-      CubicProjectionMatrix cubicProjectionMatrix = new CubicProjectionMatrix();
-      CubicProjectionDerivativeMatrix cubicProjectionDerivativeMatrix = new CubicProjectionDerivativeMatrix();
+      CubicMatrix cubicMatrix = new CubicMatrix();
+      CubicDerivativeMatrix cubicDerivativeMatrix = new CubicDerivativeMatrix();
 
       int iters = 100;
       for (int i = 0; i < iters; i++)
@@ -688,15 +687,15 @@ public class ExitCMPProjectionMultiplierTest
 
          swingExitCMPProjectionMatrix.compute(upcomingDoubleSupport, currentDoubleSupport, singleSupport, omega0, false);
 
-         cubicProjectionDerivativeMatrix.setSegmentDuration(segmentLength);
-         cubicProjectionDerivativeMatrix.update(timeRemainingInSegment);
-         cubicProjectionMatrix.setSegmentDuration(segmentLength);
-         cubicProjectionMatrix.update(timeRemainingInSegment);
+         cubicDerivativeMatrix.setSegmentDuration(segmentLength);
+         cubicDerivativeMatrix.update(timeRemainingInSegment);
+         cubicMatrix.setSegmentDuration(segmentLength);
+         cubicMatrix.update(timeRemainingInSegment);
 
          DenseMatrix64F positionMatrixOut = new DenseMatrix64F(1, 1);
          DenseMatrix64F velocityMatrixOut = new DenseMatrix64F(1, 1);
-         CommonOps.mult(cubicProjectionMatrix, swingExitCMPProjectionMatrix, positionMatrixOut);
-         CommonOps.mult(cubicProjectionDerivativeMatrix, swingExitCMPProjectionMatrix, velocityMatrixOut);
+         CommonOps.mult(cubicMatrix, swingExitCMPProjectionMatrix, positionMatrixOut);
+         CommonOps.mult(cubicDerivativeMatrix, swingExitCMPProjectionMatrix, velocityMatrixOut);
 
          multiplier.compute(doubleSupportDurations, singleSupportDurations, timeRemaining, true, false, omega0, false);
 
@@ -733,8 +732,8 @@ public class ExitCMPProjectionMultiplierTest
             startOfSplineTime, endOfSplineTime, totalTrajectoryTime);
       SwingExitCMPProjectionMatrix swingExitCMPProjectionMatrix = new SwingExitCMPProjectionMatrix(doubleSupportSplitRatio,
             exitCMPDurationInPercentOfSteptime, startOfSplineTime, endOfSplineTime, totalTrajectoryTime);
-      CubicProjectionMatrix cubicProjectionMatrix = new CubicProjectionMatrix();
-      CubicProjectionDerivativeMatrix cubicProjectionDerivativeMatrix = new CubicProjectionDerivativeMatrix();
+      CubicMatrix cubicMatrix = new CubicMatrix();
+      CubicDerivativeMatrix cubicDerivativeMatrix = new CubicDerivativeMatrix();
 
       int iters = 100;
       for (int i = 0; i < iters; i++)
@@ -773,15 +772,15 @@ public class ExitCMPProjectionMultiplierTest
 
          swingExitCMPProjectionMatrix.compute(upcomingDoubleSupport, currentDoubleSupport, singleSupport, omega0, true);
 
-         cubicProjectionDerivativeMatrix.setSegmentDuration(segmentLength);
-         cubicProjectionDerivativeMatrix.update(timeRemainingInSegment);
-         cubicProjectionMatrix.setSegmentDuration(segmentLength);
-         cubicProjectionMatrix.update(timeRemainingInSegment);
+         cubicDerivativeMatrix.setSegmentDuration(segmentLength);
+         cubicDerivativeMatrix.update(timeRemainingInSegment);
+         cubicMatrix.setSegmentDuration(segmentLength);
+         cubicMatrix.update(timeRemainingInSegment);
 
          DenseMatrix64F positionMatrixOut = new DenseMatrix64F(1, 1);
          DenseMatrix64F velocityMatrixOut = new DenseMatrix64F(1, 1);
-         CommonOps.mult(cubicProjectionMatrix, swingExitCMPProjectionMatrix, positionMatrixOut);
-         CommonOps.mult(cubicProjectionDerivativeMatrix, swingExitCMPProjectionMatrix, velocityMatrixOut);
+         CommonOps.mult(cubicMatrix, swingExitCMPProjectionMatrix, positionMatrixOut);
+         CommonOps.mult(cubicDerivativeMatrix, swingExitCMPProjectionMatrix, velocityMatrixOut);
 
          multiplier.compute(doubleSupportDurations, singleSupportDurations, timeRemaining, true, false, omega0, true);
 
@@ -818,8 +817,8 @@ public class ExitCMPProjectionMultiplierTest
             startOfSplineTime, endOfSplineTime, totalTrajectoryTime);
       TransferExitCMPProjectionMatrix transferExitCMPProjectionMatrix = new TransferExitCMPProjectionMatrix(doubleSupportSplitRatio);
 
-      CubicProjectionMatrix cubicProjectionMatrix = new CubicProjectionMatrix();
-      CubicProjectionDerivativeMatrix cubicProjectionDerivativeMatrix = new CubicProjectionDerivativeMatrix();
+      CubicMatrix cubicMatrix = new CubicMatrix();
+      CubicDerivativeMatrix cubicDerivativeMatrix = new CubicDerivativeMatrix();
 
       int iters = 100;
       for (int i = 0; i < iters; i++)
@@ -853,15 +852,15 @@ public class ExitCMPProjectionMultiplierTest
 
          transferExitCMPProjectionMatrix.compute(currentDoubleSupport, true, omega0, false);
 
-         cubicProjectionDerivativeMatrix.setSegmentDuration(currentDoubleSupport);
-         cubicProjectionDerivativeMatrix.update(timeRemaining);
-         cubicProjectionMatrix.setSegmentDuration(currentDoubleSupport);
-         cubicProjectionMatrix.update(timeRemaining);
+         cubicDerivativeMatrix.setSegmentDuration(currentDoubleSupport);
+         cubicDerivativeMatrix.update(timeRemaining);
+         cubicMatrix.setSegmentDuration(currentDoubleSupport);
+         cubicMatrix.update(timeRemaining);
 
          DenseMatrix64F positionMatrixOut = new DenseMatrix64F(1, 1);
          DenseMatrix64F velocityMatrixOut = new DenseMatrix64F(1, 1);
-         CommonOps.mult(cubicProjectionMatrix, transferExitCMPProjectionMatrix, positionMatrixOut);
-         CommonOps.mult(cubicProjectionDerivativeMatrix, transferExitCMPProjectionMatrix, velocityMatrixOut);
+         CommonOps.mult(cubicMatrix, transferExitCMPProjectionMatrix, positionMatrixOut);
+         CommonOps.mult(cubicDerivativeMatrix, transferExitCMPProjectionMatrix, velocityMatrixOut);
 
          multiplier.compute(doubleSupportDurations, singleSupportDurations, timeRemaining, true, true, omega0, false);
 
@@ -898,8 +897,8 @@ public class ExitCMPProjectionMultiplierTest
             startOfSplineTime, endOfSplineTime, totalTrajectoryTime);
       TransferExitCMPProjectionMatrix transferExitCMPProjectionMatrix = new TransferExitCMPProjectionMatrix(doubleSupportSplitRatio);
 
-      CubicProjectionMatrix cubicProjectionMatrix = new CubicProjectionMatrix();
-      CubicProjectionDerivativeMatrix cubicProjectionDerivativeMatrix = new CubicProjectionDerivativeMatrix();
+      CubicMatrix cubicMatrix = new CubicMatrix();
+      CubicDerivativeMatrix cubicDerivativeMatrix = new CubicDerivativeMatrix();
 
       int iters = 100;
       for (int i = 0; i < iters; i++)
@@ -933,15 +932,15 @@ public class ExitCMPProjectionMultiplierTest
 
          transferExitCMPProjectionMatrix.compute(currentDoubleSupport, true, omega0, true);
 
-         cubicProjectionDerivativeMatrix.setSegmentDuration(currentDoubleSupport);
-         cubicProjectionDerivativeMatrix.update(timeRemaining);
-         cubicProjectionMatrix.setSegmentDuration(currentDoubleSupport);
-         cubicProjectionMatrix.update(timeRemaining);
+         cubicDerivativeMatrix.setSegmentDuration(currentDoubleSupport);
+         cubicDerivativeMatrix.update(timeRemaining);
+         cubicMatrix.setSegmentDuration(currentDoubleSupport);
+         cubicMatrix.update(timeRemaining);
 
          DenseMatrix64F positionMatrixOut = new DenseMatrix64F(1, 1);
          DenseMatrix64F velocityMatrixOut = new DenseMatrix64F(1, 1);
-         CommonOps.mult(cubicProjectionMatrix, transferExitCMPProjectionMatrix, positionMatrixOut);
-         CommonOps.mult(cubicProjectionDerivativeMatrix, transferExitCMPProjectionMatrix, velocityMatrixOut);
+         CommonOps.mult(cubicMatrix, transferExitCMPProjectionMatrix, positionMatrixOut);
+         CommonOps.mult(cubicDerivativeMatrix, transferExitCMPProjectionMatrix, velocityMatrixOut);
 
          multiplier.compute(doubleSupportDurations, singleSupportDurations, timeRemaining, true, true, omega0, true);
 

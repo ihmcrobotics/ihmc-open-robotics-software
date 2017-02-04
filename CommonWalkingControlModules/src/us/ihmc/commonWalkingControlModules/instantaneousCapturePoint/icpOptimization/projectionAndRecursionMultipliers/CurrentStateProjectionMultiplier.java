@@ -2,8 +2,8 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimiz
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.projectionAndRecursionMultipliers.interpolation.CubicProjectionDerivativeMatrix;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.projectionAndRecursionMultipliers.interpolation.CubicProjectionMatrix;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.projectionAndRecursionMultipliers.interpolation.CubicDerivativeMatrix;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.projectionAndRecursionMultipliers.interpolation.CubicMatrix;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.projectionAndRecursionMultipliers.stateMatrices.swing.SwingStateEndRecursionMatrix;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.projectionAndRecursionMultipliers.stateMatrices.transfer.TransferStateEndRecursionMatrix;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -13,8 +13,8 @@ import java.util.ArrayList;
 
 public class CurrentStateProjectionMultiplier
 {
-   private final CubicProjectionMatrix cubicProjectionMatrix;
-   private final CubicProjectionDerivativeMatrix cubicProjectionDerivativeMatrix;
+   private final CubicMatrix cubicMatrix;
+   private final CubicDerivativeMatrix cubicDerivativeMatrix;
 
    private final TransferStateEndRecursionMatrix transferStateEndRecursionMatrix;
    private final SwingStateEndRecursionMatrix swingStateEndRecursionMatrix;
@@ -45,8 +45,8 @@ public class CurrentStateProjectionMultiplier
       transferStateEndRecursionMatrix = new TransferStateEndRecursionMatrix();
       swingStateEndRecursionMatrix = new SwingStateEndRecursionMatrix(doubleSupportSplitRatio, startOfSplineTime, endOfSplineTime, totalTrajectoryTime);
 
-      cubicProjectionMatrix = new CubicProjectionMatrix();
-      cubicProjectionDerivativeMatrix = new CubicProjectionDerivativeMatrix();
+      cubicMatrix = new CubicMatrix();
+      cubicDerivativeMatrix = new CubicDerivativeMatrix();
    }
 
    public void reset()
@@ -104,11 +104,11 @@ public class CurrentStateProjectionMultiplier
 
       double splineDuration = doubleSupportDurations.get(0).getDoubleValue();
 
-      cubicProjectionDerivativeMatrix.setSegmentDuration(splineDuration);
-      cubicProjectionDerivativeMatrix.update(timeRemaining);
-      cubicProjectionMatrix.setSegmentDuration(splineDuration);
-      cubicProjectionMatrix.update(timeRemaining);
-      CommonOps.mult(cubicProjectionMatrix, transferStateEndRecursionMatrix, matrixOut);
+      cubicDerivativeMatrix.setSegmentDuration(splineDuration);
+      cubicDerivativeMatrix.update(timeRemaining);
+      cubicMatrix.setSegmentDuration(splineDuration);
+      cubicMatrix.update(timeRemaining);
+      CommonOps.mult(cubicMatrix, transferStateEndRecursionMatrix, matrixOut);
 
       return matrixOut.get(0, 0);
    }
@@ -163,12 +163,12 @@ public class CurrentStateProjectionMultiplier
       double timeRemainingInSpline = timeRemaining - lastSegmentDuration;
       double splineDuration = endOfSplineTime.getDoubleValue() - startOfSplineTime.getDoubleValue();
 
-      cubicProjectionDerivativeMatrix.setSegmentDuration(splineDuration);
-      cubicProjectionDerivativeMatrix.update(timeRemainingInSpline);
-      cubicProjectionMatrix.setSegmentDuration(splineDuration);
-      cubicProjectionMatrix.update(timeRemainingInSpline);
+      cubicDerivativeMatrix.setSegmentDuration(splineDuration);
+      cubicDerivativeMatrix.update(timeRemainingInSpline);
+      cubicMatrix.setSegmentDuration(splineDuration);
+      cubicMatrix.update(timeRemainingInSpline);
 
-      CommonOps.mult(cubicProjectionMatrix, swingStateEndRecursionMatrix, matrixOut);
+      CommonOps.mult(cubicMatrix, swingStateEndRecursionMatrix, matrixOut);
 
       return matrixOut.get(0, 0);
    }
@@ -180,7 +180,7 @@ public class CurrentStateProjectionMultiplier
 
    private double computeInTransferVelocity()
    {
-      CommonOps.mult(cubicProjectionDerivativeMatrix, transferStateEndRecursionMatrix, matrixOut);
+      CommonOps.mult(cubicDerivativeMatrix, transferStateEndRecursionMatrix, matrixOut);
 
       return matrixOut.get(0, 0);
    }
@@ -209,7 +209,7 @@ public class CurrentStateProjectionMultiplier
 
    private double computeSecondSegmentVelocityProjection()
    {
-      CommonOps.mult(cubicProjectionDerivativeMatrix, swingStateEndRecursionMatrix, matrixOut);
+      CommonOps.mult(cubicDerivativeMatrix, swingStateEndRecursionMatrix, matrixOut);
 
       return matrixOut.get(0, 0);
    }
