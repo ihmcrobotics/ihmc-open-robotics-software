@@ -36,9 +36,9 @@ public class NewStateEndCurrentMultiplier
 
    private final boolean projectForward;
 
-   public NewStateEndCurrentMultiplier(YoVariableRegistry registry, DoubleYoVariable exitCMPRatio, DoubleYoVariable upcomingDoubleSupportSplitRatio,
-         DoubleYoVariable defaultDoubleSupportSplitRatio, DoubleYoVariable startOfSplineTime, DoubleYoVariable endOfSplineTime, DoubleYoVariable totalTrajectoryTime,
-         boolean projectForward)
+   public NewStateEndCurrentMultiplier(DoubleYoVariable upcomingDoubleSupportSplitRatio, DoubleYoVariable defaultDoubleSupportSplitRatio,
+         DoubleYoVariable exitCMPRatio, DoubleYoVariable startOfSplineTime, DoubleYoVariable endOfSplineTime, DoubleYoVariable totalTrajectoryTime,
+         boolean projectForward, YoVariableRegistry registry)
    {
       positionMultiplier = new DoubleYoVariable("StateEndCurrentMultiplier", registry);
       velocityMultiplier = new DoubleYoVariable("StateEndCurrentVelocityMultiplier", registry);

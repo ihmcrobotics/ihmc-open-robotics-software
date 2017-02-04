@@ -34,9 +34,9 @@ public class NewInitialICPCurrentMultiplier
 
    private final boolean projectForward;
 
-   public NewInitialICPCurrentMultiplier(YoVariableRegistry registry, DoubleYoVariable exitCMPRatio, DoubleYoVariable upcomingDoubleSupportSplitRatio,
-         DoubleYoVariable defaultDoubleSupportSplitRatio, DoubleYoVariable startOfSplineTime, DoubleYoVariable endOfSplineTime, DoubleYoVariable totalTrajectoryTime,
-         boolean projectForward)
+   public NewInitialICPCurrentMultiplier(DoubleYoVariable upcomingDoubleSupportSplitRatio, DoubleYoVariable defaultDoubleSupportSplitRatio,
+         DoubleYoVariable exitCMPRatio, DoubleYoVariable startOfSplineTime, DoubleYoVariable endOfSplineTime, DoubleYoVariable totalTrajectoryTime,
+         boolean projectForward, YoVariableRegistry registry)
    {
       positionMultiplier = new DoubleYoVariable("InitialICPCurrentMultiplier", registry);
       velocityMultiplier = new DoubleYoVariable("InitialICPCurrentVelocityMultiplier", registry);
