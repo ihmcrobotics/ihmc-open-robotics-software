@@ -206,6 +206,8 @@ public class VelocityFootRotationCalculator implements FootRotationCalculator
       this.currentDesiredFootstep.setPose(currentDesiredFootstep);
    }
 
+   @SuppressWarnings("unused")
+   @Override
    public void compute(FramePoint2d desiredCoP, FramePoint2d centerOfPressure)
    {
       footPolygonInWorldFrame.setIncludingFrameAndUpdate(footPolygonInSoleFrame);
@@ -290,16 +292,19 @@ public class VelocityFootRotationCalculator implements FootRotationCalculator
       }
    }
 
+   @Override
    public boolean isFootRotating()
    {
       return yoIsFootRotating.getBooleanValue();
    }
 
+   @Override
    public void getLineOfRotation(FrameLine2d lineOfRotationToPack)
    {
       lineOfRotationToPack.setIncludingFrame(lineOfRotationInSoleFrame);
    }
 
+   @Override
    public void reset()
    {
       yoLineOfRotation.setToNaN();
