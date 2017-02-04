@@ -31,8 +31,8 @@ public class NewExitCMPCurrentMultiplier
    private final DoubleYoVariable positionMultiplier;
    private final DoubleYoVariable velocityMultiplier;
 
-   public NewExitCMPCurrentMultiplier(YoVariableRegistry registry, DoubleYoVariable upcomingDoubleSupportSplitRatio,
-         DoubleYoVariable exitCMPRatio, DoubleYoVariable startOfSplineTime, DoubleYoVariable endOfSplineTime, DoubleYoVariable totalTrajectoryTime)
+   public NewExitCMPCurrentMultiplier( DoubleYoVariable upcomingDoubleSupportSplitRatio, DoubleYoVariable exitCMPRatio, DoubleYoVariable startOfSplineTime,
+         DoubleYoVariable endOfSplineTime, DoubleYoVariable totalTrajectoryTime, YoVariableRegistry registry)
    {
       positionMultiplier = new DoubleYoVariable("ExitCMPCurrentMultiplier", registry);
       velocityMultiplier = new DoubleYoVariable("ExitCMPCurrentVelocityMultiplier", registry);

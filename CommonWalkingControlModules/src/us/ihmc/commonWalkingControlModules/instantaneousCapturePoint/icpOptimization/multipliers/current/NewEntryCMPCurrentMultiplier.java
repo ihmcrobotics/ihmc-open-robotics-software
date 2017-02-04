@@ -20,7 +20,7 @@ public class NewEntryCMPCurrentMultiplier
    private final NewSwingEntryCMPMatrix swingEntryCMPMatrix;
 
    private final DoubleYoVariable exitCMPRatio;
-   private final DoubleYoVariable doubleSupportSplitRatio;
+   private final DoubleYoVariable defaultDoubleSupportSplitRatio;
 
    private final DoubleYoVariable startOfSplineTime;
    private final DoubleYoVariable endOfSplineTime;
@@ -33,14 +33,14 @@ public class NewEntryCMPCurrentMultiplier
 
    private final boolean projectForward;
 
-   public NewEntryCMPCurrentMultiplier(YoVariableRegistry registry, DoubleYoVariable doubleSupportSplitRatio,
-         DoubleYoVariable exitCMPRatio, DoubleYoVariable startOfSplineTime, DoubleYoVariable endOfSplineTime, DoubleYoVariable totalTrajectoryTime, boolean projectForward)
+   public NewEntryCMPCurrentMultiplier(DoubleYoVariable defaultDoubleSupportSplitRatio, DoubleYoVariable exitCMPRatio, DoubleYoVariable startOfSplineTime,
+         DoubleYoVariable endOfSplineTime, DoubleYoVariable totalTrajectoryTime, boolean projectForward, YoVariableRegistry registry)
    {
       positionMultiplier = new DoubleYoVariable("EntryCMPCurrentMultiplier", registry);
       velocityMultiplier = new DoubleYoVariable("EntryCMPVelocityCurrentMultiplier", registry);
 
       this.exitCMPRatio = exitCMPRatio;
-      this.doubleSupportSplitRatio = doubleSupportSplitRatio;
+      this.defaultDoubleSupportSplitRatio = defaultDoubleSupportSplitRatio;
 
       this.startOfSplineTime = startOfSplineTime;
       this.endOfSplineTime = endOfSplineTime;
@@ -51,7 +51,7 @@ public class NewEntryCMPCurrentMultiplier
       cubicMatrix = new CubicMatrix();
       cubicDerivativeMatrix = new CubicDerivativeMatrix();
 
-      transferEntryCMPMatrix = new NewTransferEntryCMPMatrix(doubleSupportSplitRatio);
+      transferEntryCMPMatrix = new NewTransferEntryCMPMatrix(defaultDoubleSupportSplitRatio);
       swingEntryCMPMatrix = new NewSwingEntryCMPMatrix(startOfSplineTime);
    }
 
@@ -170,7 +170,7 @@ public class NewEntryCMPCurrentMultiplier
          double stepDuration = doubleSupportDuration + singleSupportDuration;
 
          double timeSpentOnEntryCMP = (1.0 - exitCMPRatio.getDoubleValue()) * stepDuration;
-         double endOfDoubleSupportDuration = doubleSupportSplitRatio.getDoubleValue() * doubleSupportDuration;
+         double endOfDoubleSupportDuration = defaultDoubleSupportSplitRatio.getDoubleValue() * doubleSupportDuration;
          double initialSingleSupportDuration = timeSpentOnEntryCMP - endOfDoubleSupportDuration;
 
          double timeRemaining = initialSingleSupportDuration - timeInState;

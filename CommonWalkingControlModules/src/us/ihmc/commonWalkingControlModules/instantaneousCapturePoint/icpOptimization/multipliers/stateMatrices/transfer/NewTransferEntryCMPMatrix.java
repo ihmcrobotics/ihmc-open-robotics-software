@@ -7,13 +7,13 @@ import java.util.ArrayList;
 
 public class NewTransferEntryCMPMatrix extends DenseMatrix64F
 {
-   private final DoubleYoVariable doubleSupportSplitRatio;
+   private final DoubleYoVariable defaultDoubleSupportSplitRatio;
 
-   public NewTransferEntryCMPMatrix(DoubleYoVariable doubleSupportSplitRatio)
+   public NewTransferEntryCMPMatrix(DoubleYoVariable defaultDoubleSupportSplitRatio)
    {
       super(4, 1);
 
-      this.doubleSupportSplitRatio = doubleSupportSplitRatio;
+      this.defaultDoubleSupportSplitRatio = defaultDoubleSupportSplitRatio;
    }
 
    public void reset()
@@ -32,7 +32,7 @@ public class NewTransferEntryCMPMatrix extends DenseMatrix64F
 
       if (useTwoCMPs)
       {
-         double endOfDoubleSupportDuration = (1.0 - doubleSupportSplitRatio.getDoubleValue()) * doubleSupportDuration;
+         double endOfDoubleSupportDuration = (1.0 - defaultDoubleSupportSplitRatio.getDoubleValue()) * doubleSupportDuration;
 
          double endOfDoubleSupportProjection = Math.exp(omega0 * endOfDoubleSupportDuration);
 
