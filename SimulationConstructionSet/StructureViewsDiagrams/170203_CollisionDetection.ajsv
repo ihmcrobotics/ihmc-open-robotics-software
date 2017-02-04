@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--AgileJ Ltd. (http://www.agilej.com)--><ajsv>
+    <diagram creationDate="2017-Feb-04 10:03" licenseGrade="multi" licenseeName="Tracie_Moore" licenseeOrganization="Personal" populationMethod="manual" version="1.9.0.v20160922-0809">
+        <filterScript>
+
+// no filter script yet defined for this class diagram
+// use CTRL+SPACE for completion suggestions
+hide all fields
+hide all methods
+
+</filterScript>
+        <class className="us.ihmc.simulationconstructionset.physics.collision.simple.PolytopeShapeDescription" modelMemberId="us.ihmc.simulationconstructionset.physics.collision.simple.PolytopeShapeDescription" project="SimulationConstructionSet" xLocation="1214" yLocation="863"/>
+        <class className="us.ihmc.simulationconstructionset.physics.collision.simple.CapsuleShapeDescription" modelMemberId="us.ihmc.simulationconstructionset.physics.collision.simple.CapsuleShapeDescription" project="SimulationConstructionSet" xLocation="1224" yLocation="1022"/>
+        <class className="us.ihmc.simulationconstructionset.physics.collision.simple.SphereShapeDescription" modelMemberId="us.ihmc.simulationconstructionset.physics.collision.simple.SphereShapeDescription" project="SimulationConstructionSet" xLocation="1229" yLocation="947"/>
+        <class className="us.ihmc.geometry.polytope.GilbertJohnsonKeerthiCollisionDetectorListener" modelMemberId="us.ihmc.geometry.polytope.GilbertJohnsonKeerthiCollisionDetectorListener" project="IHMCGeometry" xLocation="9" yLocation="767"/>
+        <class className="us.ihmc.geometry.polytope.GilbertJohnsonKeerthiCollisionDetectorTest" modelMemberId="us.ihmc.geometry.polytope.GilbertJohnsonKeerthiCollisionDetectorTest" project="IHMCGeometry" xLocation="-43" yLocation="442"/>
+        <class className="us.ihmc.geometry.polytope.GilbertJohnsonKeerthiCollisionDetector" modelMemberId="us.ihmc.geometry.polytope.GilbertJohnsonKeerthiCollisionDetector" project="IHMCGeometry" xLocation="78" yLocation="668"/>
+        <class className="us.ihmc.geometry.polytope.ExpandingPolytopeAlgorithmListener" modelMemberId="us.ihmc.geometry.polytope.ExpandingPolytopeAlgorithmListener" project="IHMCGeometry" xLocation="726" yLocation="787"/>
+        <class className="us.ihmc.geometry.polytope.ExpandingPolytopeAlgorithmTest" modelMemberId="us.ihmc.geometry.polytope.ExpandingPolytopeAlgorithmTest" project="IHMCGeometry" xLocation="399" yLocation="441"/>
+        <class className="us.ihmc.simulationconstructionset.physics.SimpleCollisionShapeWithLink" modelMemberId="us.ihmc.simulationconstructionset.physics.SimpleCollisionShapeWithLink" project="SimulationConstructionSet" xLocation="1214" yLocation="659"/>
+        <class className="us.ihmc.robotics.robotDescription.CapsuleDescriptionReadOnly" modelMemberId="us.ihmc.robotics.robotDescription.CapsuleDescriptionReadOnly" project="IHMCRobotDescription" xLocation="225" yLocation="1004"/>
+        <class className="us.ihmc.simulationconstructionset.physics.collision.simple.SimpleCollisionShapeFactory" modelMemberId="us.ihmc.simulationconstructionset.physics.collision.simple.SimpleCollisionShapeFactory" project="SimulationConstructionSet" xLocation="1286" yLocation="370"/>
+        <class className="us.ihmc.geometry.polytope.ExpandingPolytopeAlgorithm" modelMemberId="us.ihmc.geometry.polytope.ExpandingPolytopeAlgorithm" project="IHMCGeometry" xLocation="764" yLocation="657"/>
+        <class className="us.ihmc.simulationconstructionset.physics.collision.simple.SimpleCollisionDetectorTest" modelMemberId="us.ihmc.simulationconstructionset.physics.collision.simple.SimpleCollisionDetectorTest" project="SimulationConstructionSet" xLocation="749" yLocation="267"/>
+        <class className="us.ihmc.robotics.robotDescription.ConvexShapeDescription" modelMemberId="us.ihmc.robotics.robotDescription.ConvexShapeDescription" project="IHMCRobotDescription" xLocation="258" yLocation="1109"/>
+        <class className="us.ihmc.robotics.robotDescription.CollisionMeshDescription" modelMemberId="us.ihmc.robotics.robotDescription.CollisionMeshDescription" project="IHMCRobotDescription" xLocation="793" yLocation="912"/>
+        <class className="us.ihmc.simulationconstructionset.physics.collision.simple.SimpleCollisionDetector" modelMemberId="us.ihmc.simulationconstructionset.physics.collision.simple.SimpleCollisionDetector" project="SimulationConstructionSet" xLocation="827" yLocation="408"/>
+        <class className="us.ihmc.simulationconstructionset.physics.CollisionShape" modelMemberId="us.ihmc.simulationconstructionset.physics.CollisionShape" project="SimulationConstructionSet" xLocation="1237" yLocation="554"/>
+    </diagram>
+</ajsv>
