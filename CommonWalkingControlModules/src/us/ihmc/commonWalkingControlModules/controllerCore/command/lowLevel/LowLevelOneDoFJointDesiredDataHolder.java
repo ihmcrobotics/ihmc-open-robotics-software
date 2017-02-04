@@ -1,10 +1,10 @@
 package us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import gnu.trove.map.hash.THashMap;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
 public class LowLevelOneDoFJointDesiredDataHolder implements LowLevelOneDoFJointDesiredDataHolderReadOnly
@@ -26,7 +26,7 @@ public class LowLevelOneDoFJointDesiredDataHolder implements LowLevelOneDoFJoint
          unusedData.add(new LowLevelJointData());
 
       jointsWithDesiredData = new ArrayList<>(initialCapacity);
-      lowLevelJointDataMap = new HashMap<>(initialCapacity);
+      lowLevelJointDataMap = new THashMap<>(initialCapacity);
    }
 
    public void clear()
