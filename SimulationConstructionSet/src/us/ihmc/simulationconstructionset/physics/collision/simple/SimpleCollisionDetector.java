@@ -558,7 +558,7 @@ public class SimpleCollisionDetector implements ScsCollisionDetector
             getNormalToFace(vertexOne, vertexTwo, vertexThree, directionVector);
             tryAddingASimplexPointInThisSupportDirection(directionVector, supportingVertexHolderOne, supportingVertexHolderTwo, simplex);
 
-            if (computeTripleProduct(simplex) < 1e-10)
+            if ((simplex.getNumberOfPoints() == 4) && (computeTripleProduct(simplex) < 1e-10))
             {
                return false;
             }
