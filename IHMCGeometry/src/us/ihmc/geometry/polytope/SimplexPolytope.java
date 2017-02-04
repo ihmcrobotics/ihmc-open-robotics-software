@@ -849,7 +849,7 @@ public class SimplexPolytope
    //
    //
    //   }
-
+   
    private void projectOriginOntoFace(Point3d vertexOne, Point3d vertexTwo, Point3d vertexThree, Point3d closestPointToOrigin)
    {
       // Using barycentric coordinates as described in https://www.cs.ubc.ca/~heidrich/Papers/JGT.05.pdf
