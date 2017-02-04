@@ -270,8 +270,8 @@ public class VelocityFootRotationCalculator implements FootRotationCalculator
          lineOfRotationInSoleFrame.set(centerOfRotation, angularVelocity2d);
          lineOfRotationInWorldFrame.setIncludingFrame(lineOfRotationInSoleFrame);
          lineOfRotationInWorldFrame.changeFrameAndProjectToXYPlane(worldFrame);
-         frameConvexPolygonWithLineIntersector2d.intersect(footPolygonInWorldFrame, lineOfRotationInWorldFrame);
 
+         frameConvexPolygonWithLineIntersector2d.intersect(footPolygonInWorldFrame, lineOfRotationInWorldFrame);
          if (frameConvexPolygonWithLineIntersector2d.getIntersectionResult() == IntersectionResult.NO_INTERSECTION
                || frameConvexPolygonWithLineIntersector2d.getIntersectionResult() == IntersectionResult.POINT_INTERSECTION
                || frameConvexPolygonWithLineIntersector2d.getIntersectionPointOne()
