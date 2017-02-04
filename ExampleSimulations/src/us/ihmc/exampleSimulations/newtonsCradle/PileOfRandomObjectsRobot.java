@@ -23,9 +23,16 @@ public class PileOfRandomObjectsRobot
 {
    private final ArrayList<Robot> robots = new ArrayList<Robot>();
 
+   private double xExtents = 1.5;
+   private double yExtents = 1.5;
+
+   private double zMin = 0.2;
+   private double zMax = 6.0;
+
+   private int numberOfObjects = 200;
+
    public PileOfRandomObjectsRobot()
    {
-      int numberOfObjects = 200;
       Random random = new Random(1886L);
 
       createFallingObjects(numberOfObjects, random);
@@ -65,11 +72,11 @@ public class PileOfRandomObjectsRobot
 
          floatingJointDescription.setLink(link);
          robotDescription.addRootJoint(floatingJointDescription);
-
-         double xyExtents = 1.5; //0.25;
-         double x = RandomTools.generateRandomDouble(random, -xyExtents, xyExtents);
-         double y = RandomTools.generateRandomDouble(random, -xyExtents, xyExtents);
-         double z = RandomTools.generateRandomDouble(random, 0.2, 6.0);
+         
+         double x = RandomTools.generateRandomDouble(random, -xExtents, xExtents);
+         double y = RandomTools.generateRandomDouble(random, -yExtents, yExtents);
+         
+         double z = RandomTools.generateRandomDouble(random, zMin, zMax);
 
          double angleExtents = Math.PI / 2.0;
          double yaw = RandomTools.generateRandomDouble(random, -angleExtents, angleExtents);
