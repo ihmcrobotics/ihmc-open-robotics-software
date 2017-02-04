@@ -623,9 +623,9 @@ public class SimpleCollisionDetector implements ScsCollisionDetector
    private double computeTripleProduct(SimplexPolytope simplex)
    {
       Point3d pointOne = simplex.getPoint(0);
-      Point3d pointTwo = simplex.getPoint(0);
-      Point3d pointThree = simplex.getPoint(0);
-      Point3d pointFour = simplex.getPoint(0);
+      Point3d pointTwo = simplex.getPoint(1);
+      Point3d pointThree = simplex.getPoint(2);
+      Point3d pointFour = simplex.getPoint(3);
 
       tempVector12.sub(pointTwo, pointOne);
       tempVector13.sub(pointThree, pointOne);
