@@ -57,6 +57,7 @@ import us.ihmc.robotics.dataStructures.registry.NameSpace;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariableList;
+import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateMachinesJPanel;
 import us.ihmc.robotics.time.GlobalTimer;
 import us.ihmc.robotics.time.RealTimeRateEnforcer;
@@ -1953,6 +1954,18 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       }
 
       jFrame.repaint();
+   }
+
+   /**
+    * Adds a robot to the simulation using the given RobotDescription
+    * @param robotDescription
+    * @return Robot that was created and added.
+    */
+   public Robot addRobot(RobotDescription robotDescription)
+   {
+      RobotFromDescription robot = new RobotFromDescription(robotDescription);
+      addRobot(robot);
+      return robot; 
    }
 
    /**
