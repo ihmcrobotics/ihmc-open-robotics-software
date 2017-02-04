@@ -14,7 +14,7 @@ public class Simulator implements java.io.Serializable
    private static final long serialVersionUID = -3492879446149849938L;
 
    private final SimulationSynchronizer simulationSynchronizer;
-   private final Robot[] robots;
+   private Robot[] robots;
 
    private double DT;
    private ArrayList<Script> scripts = null;
@@ -33,6 +33,11 @@ public class Simulator implements java.io.Serializable
       this.DT = dt;
 
       //    this.time = time;
+   }
+
+   public void setRobots(Robot[] robots)
+   {
+      this.robots = robots;
    }
 
    public void setDT(double simulateDT)
