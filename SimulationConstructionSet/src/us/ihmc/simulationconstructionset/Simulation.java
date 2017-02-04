@@ -232,107 +232,81 @@ public class Simulation implements YoVariableHolder, Serializable // Runnable,
 
    public void setRobots(Robot[] robots)
    {
-      // Set the robot:
       this.robots = robots;
+      mySimulator = new Simulator(simulationSynchronizer, robots, SIMULATION_DT);
+      this.setDT(SIMULATION_DT, RECORD_FREQ);
 
       if (robots != null)
       {
-         // Create a simulator:
-         mySimulator = new Simulator(simulationSynchronizer, robots, SIMULATION_DT);
-
-         // Set the default DT
-         this.setDT(SIMULATION_DT, RECORD_FREQ);
-
-         try
+         for (Robot robot : robots)
          {
-            //          myDataBuffer.addVariable(time);
-            //          myCombinedVarList.addVariable(time);
-
-            for (Robot robot : robots)
-            {
-               myDataBuffer.addVariables(robot.getAllVariables());
-               myCombinedVarList.addVariables(robot.getAllVariables());
-            }
-
+            addVariablesFromARobot(robot);
          }
-         catch (RepeatDataBufferEntryException ex)
-         {
-            System.err.println("Found repeat YoVariable in the robot Variables");
-            ex.printStackTrace();
-            System.exit(-1);
-         }
-
-         //       robVarList = rob.getVars();
-         //       myCombinedVarList.addVariables(robVarList);
-
-         //       try
-         //       {
-         //          myDataBuffer.addVariables(robVarList.getVariables());
-         //       }
-         //       catch (RepeatDataBufferEntryException ex)
-         //       {
-         //          System.err.println("Found repeat YoVariable in the robot Variables");
-         //          ex.printStackTrace();
-         //          System.exit(-1);
-         //       }
       }
 
-      //    else robVarList = new VarList("null");
+      myDataBuffer.copyValuesThrough();
+      updateRobots(robots);
+   }
+   
+   public void addRobot(Robot robot)
+   {
+      Robot[] newRobots;
+      if (robots == null)
+      {
+         newRobots = new Robot[]{robot};
+      }
+      else
+      {
+         newRobots = new Robot[robots.length + 1];
+         for (int i=0; i<robots.length; i++)
+         {
+            newRobots[i] = robots[i];
+         }
+         
+         newRobots[newRobots.length - 1] = robot;
+      }
 
-      //    //RobotController controller = null;
-      //    if (rob != null)
-      //    {
-      //      //controller = rob.getController();
-      //
-      //      ArrayList<VarList> controllerVarLists = rob.getControllerVarLists();
-      //      for (VarList controllerVarList : controllerVarLists)
-      //      {
-      //         if (controllerVarList != null)
-      //         {
-      //            myCombinedVarList.addVariables(controllerVarList);
-      //
-      //            try
-      //            {
-      //               myDataBuffer.addVariables(controllerVarList.getVariables());
-      //            }
-      //            catch (RepeatDataBufferEntryException ex1)
-      //            {
-      //               System.err.println("Found repeat YoVariable in the controller Variables");
-      //               ex1.printStackTrace();
-      //               System.exit(-1);
-      //            }
-      //         }
-      //      }
-      //    }
-
-      //    if (rob != null)
-      //    {
-      //      gcVarList = rob.getGroundContactVarList();
-      //      if (gcVarList != null)
-      //      {
-      //        myCombinedVarList.addVariables(gcVarList);
-      //        try
-      //        {
-      //           myDataBuffer.addVariables(gcVarList.getVariables());
-      //        }
-      //        catch (RepeatDataBufferEntryException ex2)
-      //        {
-      //           System.err.println("Found repeat YoVariable in the ground contact Variables");
-      //           ex2.printStackTrace();
-      //           System.exit(-1);
-      //        }
-      //     }
+      this.robots = newRobots;
+      
+      if (mySimulator == null)
+      {
+         mySimulator = new Simulator(simulationSynchronizer, robots, SIMULATION_DT);
+      }
+      else
+      {
+         mySimulator.setRobots(robots);
+      }
+      
+      this.setDT(SIMULATION_DT, RECORD_FREQ);
+      addVariablesFromARobot(robot);
 
       myDataBuffer.copyValuesThrough();
+      updateRobots(robots);
+   }
 
-      //    }
-
+   private void updateRobots(Robot[] robots)
+   {
       if (robots != null)
       {
          for (Robot robot : robots)
          {
             robot.update();
          }
+      }
+   }
+
+   private void addVariablesFromARobot(Robot robot)
+   {
+      try
+      {
+         myDataBuffer.addVariables(robot.getAllVariables());
+         myCombinedVarList.addVariables(robot.getAllVariables());
+      }
+      catch (RepeatDataBufferEntryException ex)
+      {
+         System.err.println("Found repeat YoVariable in the robot Variables");
+         ex.printStackTrace();
+         System.exit(-1);
       }
    }
 
