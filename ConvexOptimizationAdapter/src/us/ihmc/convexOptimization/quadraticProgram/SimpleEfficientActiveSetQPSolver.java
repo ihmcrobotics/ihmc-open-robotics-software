@@ -608,14 +608,32 @@ public class SimpleEfficientActiveSetQPSolver implements SimpleActiveSetQPSolver
       if (!activeSetWasModified)
          return false;
 
-      activeInequalityIndices.addAll(inequalityIndicesToAddToActiveSet);
-      activeInequalityIndices.removeAll(inequalityIndicesToRemoveFromActiveSet);
+      for (int i = 0; i < inequalityIndicesToAddToActiveSet.size(); i++)
+      {
+         activeInequalityIndices.add(inequalityIndicesToAddToActiveSet.get(i));
+      }
+      for (int i = 0; i < inequalityIndicesToRemoveFromActiveSet.size(); i++)
+      {
+         activeInequalityIndices.remove(inequalityIndicesToRemoveFromActiveSet.get(i));
+      }
 
-      activeLowerBoundIndices.addAll(lowerBoundIndicesToAddToActiveSet);
-      activeLowerBoundIndices.removeAll(lowerBoundIndicesToRemoveFromActiveSet);
+      for (int i = 0; i < lowerBoundIndicesToAddToActiveSet.size(); i++)
+      {
+         activeLowerBoundIndices.add(lowerBoundIndicesToAddToActiveSet.get(i));
+      }
+      for (int i = 0; i < lowerBoundIndicesToRemoveFromActiveSet.size(); i++)
+      {
+         activeLowerBoundIndices.remove(lowerBoundIndicesToRemoveFromActiveSet.get(i));
+      }
 
-      activeUpperBoundIndices.addAll(upperBoundIndicesToAddToActiveSet);
-      activeUpperBoundIndices.removeAll(upperBoundIndicesToRemoveFromActiveSet);
+      for (int i = 0; i < upperBoundIndicesToAddToActiveSet.size(); i++)
+      {
+         activeUpperBoundIndices.add(upperBoundIndicesToAddToActiveSet.get(i));
+      }
+      for (int i = 0; i < upperBoundIndicesToRemoveFromActiveSet.size(); i++)
+      {
+         activeUpperBoundIndices.remove(upperBoundIndicesToRemoveFromActiveSet.get(i));
+      }
 
       // Add active set constraints as equality constraints:
       int sizeOfActiveSet = activeInequalityIndices.size();
