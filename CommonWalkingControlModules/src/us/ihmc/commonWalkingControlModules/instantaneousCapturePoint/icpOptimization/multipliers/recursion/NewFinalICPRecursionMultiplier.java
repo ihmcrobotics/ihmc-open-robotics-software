@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.newProjectionAndRecursionMultipliers;
+package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.recursion;
 
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;

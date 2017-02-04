@@ -4,14 +4,14 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import us.ihmc.robotics.MathTools;
 
-public class CubicProjectionMatrix extends DenseMatrix64F
+public class CubicMatrix extends DenseMatrix64F
 {
    private final CubicSplineCoefficientMatrix cubicSplineCoefficientMatrix = new CubicSplineCoefficientMatrix();
    private final CubicTimeMatrix cubicTimeMatrix = new CubicTimeMatrix();
 
    private double duration;
 
-   public CubicProjectionMatrix()
+   public CubicMatrix()
    {
       super(1, 4);
    }
