@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!--AgileJ Ltd. (http://www.agilej.com)--><ajsv>
-    <diagram creationDate="2017-Feb-04 10:03" licenseGrade="multi" licenseeName="Tracie_Moore" licenseeOrganization="Personal" populationMethod="manual" version="1.9.0.v20160922-0809">
+    <diagram creationDate="2017-Feb-04 11:55" licenseGrade="multi" licenseeName="Tracie_Moore" licenseeOrganization="Personal" populationMethod="manual" version="1.9.0.v20160922-0809">
         <filterScript>
 
 // no filter script yet defined for this class diagram
@@ -24,6 +24,7 @@ hide all methods
         <class className="us.ihmc.simulationconstructionset.physics.collision.simple.SimpleCollisionDetectorTest" modelMemberId="us.ihmc.simulationconstructionset.physics.collision.simple.SimpleCollisionDetectorTest" project="SimulationConstructionSet" xLocation="749" yLocation="267"/>
         <class className="us.ihmc.robotics.robotDescription.ConvexShapeDescription" modelMemberId="us.ihmc.robotics.robotDescription.ConvexShapeDescription" project="IHMCRobotDescription" xLocation="258" yLocation="1109"/>
         <class className="us.ihmc.robotics.robotDescription.CollisionMeshDescription" modelMemberId="us.ihmc.robotics.robotDescription.CollisionMeshDescription" project="IHMCRobotDescription" xLocation="793" yLocation="912"/>
+        <class className="us.ihmc.exampleSimulations.collidingArms.CollidingArmsSimulation" modelMemberId="us.ihmc.exampleSimulations.collidingArms.CollidingArmsSimulation" project="ExampleSimulations" xLocation="226" yLocation="297"/>
         <class className="us.ihmc.simulationconstructionset.physics.collision.simple.SimpleCollisionDetector" modelMemberId="us.ihmc.simulationconstructionset.physics.collision.simple.SimpleCollisionDetector" project="SimulationConstructionSet" xLocation="827" yLocation="408"/>
         <class className="us.ihmc.simulationconstructionset.physics.CollisionShape" modelMemberId="us.ihmc.simulationconstructionset.physics.CollisionShape" project="SimulationConstructionSet" xLocation="1237" yLocation="554"/>
     </diagram>
