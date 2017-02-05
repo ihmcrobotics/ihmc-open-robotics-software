@@ -25,11 +25,29 @@ public class FrameConvexPolygonWithLineIntersector2d
       intersectionResult = IntersectionResult.NO_INTERSECTION;
    }
 
-   public void intersect(FrameConvexPolygon2d frameConvexPolygon2d, FrameLine2d frameLine2d)
+   public void intersectWithLine(FrameConvexPolygon2d frameConvexPolygon2d, FrameLine2d frameLine2d)
    {
       int intersectionTypeInt = ConvexPolygon2dCalculator.intersectionWithLine(frameLine2d.getLine2d(), intersectionPointOne.getPoint(),
                                                                                intersectionPointTwo.getPoint(), frameConvexPolygon2d.getConvexPolygon2d());
       
+      packIntersectionType(intersectionTypeInt);
+   }
+   
+   /**
+    * There is actually no ray class at the moment, so we use a FrameLine2d.
+    * 
+    * TODO: Make ray classes and use them. @dcalvert
+    */
+   public void intersectWithRay(FrameConvexPolygon2d frameConvexPolygon2d, FrameLine2d frameRay2d)
+   {
+      int intersectionTypeInt = ConvexPolygon2dCalculator.intersectionWithRay(frameRay2d.getLine2d(), intersectionPointOne.getPoint(),
+                                                                               intersectionPointTwo.getPoint(), frameConvexPolygon2d.getConvexPolygon2d());
+      
+      packIntersectionType(intersectionTypeInt);
+   }
+
+   private void packIntersectionType(int intersectionTypeInt)
+   {
       switch (intersectionTypeInt)
       {
       case 0:

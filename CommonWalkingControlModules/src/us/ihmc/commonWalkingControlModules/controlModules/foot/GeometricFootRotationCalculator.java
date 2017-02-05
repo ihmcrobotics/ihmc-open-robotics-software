@@ -185,7 +185,7 @@ public class GeometricFootRotationCalculator implements FootRotationCalculator
          footPolygonInWorld.changeFrameAndProjectToXYPlane(worldFrame);
 
          
-         frameConvexPolygonWithLineIntersector2d.intersect(footPolygonInWorld, lineOfRotationInWorldFrame);
+         frameConvexPolygonWithLineIntersector2d.intersectWithLine(footPolygonInWorld, lineOfRotationInWorldFrame);
          if (frameConvexPolygonWithLineIntersector2d.getIntersectionResult() == IntersectionResult.NO_INTERSECTION
                || frameConvexPolygonWithLineIntersector2d.getIntersectionResult() == IntersectionResult.POINT_INTERSECTION
                || frameConvexPolygonWithLineIntersector2d.getIntersectionPointOne()
