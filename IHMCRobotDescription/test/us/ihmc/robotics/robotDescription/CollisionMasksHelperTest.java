@@ -115,6 +115,10 @@ public class CollisionMasksHelperTest
       assertEquals(0b1000, objectFour.getCollisionMask());
       assertEquals(0b010, objectFive.getCollisionMask());
       assertEquals(0b010, objectSix.getCollisionMask());
+      
+      helper.addToCollisionMasks("GroupFour", 0b1100000);
+      assertEquals(0b1100010, objectFive.getCollisionMask());
+      assertEquals(0b1100010, objectSix.getCollisionMask());
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)

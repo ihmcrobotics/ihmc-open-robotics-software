@@ -46,6 +46,12 @@ public class CollisionMasksHelper
       addToCollisionMasks(groupTwo, bitOne);
    }
 
+   public void addToCollisionMasks(String name, int collisionMaskToAdd)
+   {
+      ArrayList<? extends CollisionMaskHolder> group = groups.get(name);
+      this.addToCollisionMasks(group, collisionMaskToAdd);
+   }
+
    public void setAsSelfCollidingGroup(String name)
    {
       ArrayList<? extends CollisionMaskHolder> group = groups.get(name);
@@ -88,6 +94,5 @@ public class CollisionMasksHelper
          collisionMaskHolder.setCollisionMask(collisionMaskHolder.getCollisionMask() & (0xffffffff ^ groupBitsToRemoveFromCollisionMasks));
       }
    }
-
 
 }
