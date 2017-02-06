@@ -78,7 +78,7 @@ public class GroundAsABoxRobot extends Robot
       //    baseJoint.setVelocity(0.0, 0.0, 1.0);
 
       baseLink.setLinkGraphics(baseLinkGraphics);
-      baseLink.setCollisionMesh(collisonMeshDescription);
+      baseLink.addCollisionMesh(collisonMeshDescription);
 
       baseJoint.setLink(baseLink);
       this.addRootJoint(baseJoint);

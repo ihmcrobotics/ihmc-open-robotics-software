@@ -115,6 +115,16 @@ public class SimpleCollisionDetector implements ScsCollisionDetector
             CollisionShape objectTwo = collisionObjects.get(j);
             CollisionShapeDescription<?> descriptionTwo = objectTwo.getTransformedCollisionShapeDescription();
 
+            if ((objectOne.getGroupMask() & objectTwo.getCollisionMask()) == 0x00)
+            {
+               continue;
+            }
+            
+            if ((objectTwo.getGroupMask() & objectOne.getCollisionMask()) == 0x00)
+            {
+               continue;
+            }
+
             boolean areColliding = false;
 
             //TODO: Make this shorter and more efficient...

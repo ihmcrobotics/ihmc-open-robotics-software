@@ -81,9 +81,9 @@ public class GdxCollisionDetector implements ScsCollisionDetector
    @Override
    public void removeShape(Link link)
    {
-      BulletCollisionShapeWithLink info = (BulletCollisionShapeWithLink) link.getCollisionShape();
-      collisionWorld.removeCollisionObject(info);
-      allShapes.remove(info);
+//      BulletCollisionShapeWithLink info = (BulletCollisionShapeWithLink) link.getCollisionShape();
+//      collisionWorld.removeCollisionObject(info);
+//      allShapes.remove(info);
    }
 
    @Override

@@ -23,7 +23,7 @@ public class SingleBallRobotDescription extends RobotDescription
 
       CollisionMeshDescription collisionMesh = new CollisionMeshDescription();
       collisionMesh.addSphere(radius);
-      ballLink.setCollisionMesh(collisionMesh);
+      ballLink.addCollisionMesh(collisionMesh);
 
       rootJoint.setLink(ballLink);
       this.addRootJoint(rootJoint);
