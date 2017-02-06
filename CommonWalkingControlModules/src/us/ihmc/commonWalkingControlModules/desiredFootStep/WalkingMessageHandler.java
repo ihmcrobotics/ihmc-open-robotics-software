@@ -142,6 +142,8 @@ public class WalkingMessageHandler
          Footstep newFootstep = createFootstep(command.getFootstep(i));
          upcomingFootsteps.add(newFootstep);
       }
+
+      checkTimings(upcomingFootsteps);
       updateVisualization();
    }
 
@@ -536,6 +538,9 @@ public class WalkingMessageHandler
       if (footstepData.hasTimings())
          footstep.setTimings(footstepData.getSwingTime(), footstepData.getTransferTime());
 
+      if (footstepData.hasAbsoluteTime())
+         footstep.setAbsoluteTime(footstepData.getSwingStartTime());
+
       footstep.setTrajectoryType(trajectoryType);
       footstep.setSwingHeight(footstepData.getSwingHeight());
       switch (footstepData.getOrigin())
@@ -549,5 +554,35 @@ public class WalkingMessageHandler
          throw new RuntimeException("Should not get there.");
       }
       return footstep;
+   }
+
+   private void checkTimings(List<Footstep> footstepList)
+   {
+      if (footstepList.isEmpty())
+         return;
+
+      boolean timingsValid = footstepList.get(0).hasAbsoluteTime();
+      boolean atLeastOneFootstepHadTiming = footstepList.get(0).hasAbsoluteTime();
+
+      double lastTime = footstepList.get(0).getSwingStartTime();
+      timingsValid = timingsValid && lastTime > 0.0;
+      for (int footstepIdx = 1; footstepIdx < footstepList.size(); footstepIdx++)
+      {
+         Footstep footstep = footstepList.get(footstepIdx);
+         boolean timeIncreasing = footstep.getSwingStartTime() > lastTime;
+         timingsValid = timingsValid && footstep.hasAbsoluteTime() && timeIncreasing;
+         atLeastOneFootstepHadTiming = atLeastOneFootstepHadTiming || footstep.hasAbsoluteTime();
+
+         lastTime = footstep.getSwingStartTime();
+         if (!timingsValid)
+            break;
+      }
+
+      if (atLeastOneFootstepHadTiming && !timingsValid)
+      {
+         PrintTools.warn("Recieved footstep data with invalid timings. Using swing and transfer times instead.");
+         for (int footstepIdx = 1; footstepIdx < footstepList.size(); footstepIdx++)
+            footstepList.get(footstepIdx).removeAbsoluteTime();
+      }
    }
 }
