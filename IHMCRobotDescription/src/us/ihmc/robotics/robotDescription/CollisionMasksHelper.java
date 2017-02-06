@@ -7,21 +7,26 @@ public class CollisionMasksHelper
 {
    private final LinkedHashMap<String, ArrayList<? extends CollisionMaskHolder>> groups = new LinkedHashMap<>();
    private final LinkedHashMap<ArrayList<? extends CollisionMaskHolder>, Integer> groupBits = new LinkedHashMap<>();
-   private int largestBit = 0x01;
+   private int nextGroupBitMask = 0x01;
 
    public void addCollisionGroup(String name, ArrayList<? extends CollisionMaskHolder> group)
    {
-      if (largestBit == 0)
+      if (nextGroupBitMask == 0)
       {
          throw new RuntimeException("Number of groups at maximum of 32!");
       }
 
       this.groups.put(name, group);
-      int groupBit = largestBit;
+      int groupBit = nextGroupBitMask;
       this.groupBits.put(group, groupBit);
 
       addToCollisionGroups(group, groupBit);
-      largestBit = largestBit << 1;
+      nextGroupBitMask = nextGroupBitMask << 1;
+   }
+
+   public int getNextGroupBitMask()
+   {
+      return nextGroupBitMask;
    }
 
    public ArrayList<? extends CollisionMaskHolder> getCollisionGroup(String name)
@@ -83,5 +88,6 @@ public class CollisionMasksHelper
          collisionMaskHolder.setCollisionMask(collisionMaskHolder.getCollisionMask() & (0xffffffff ^ groupBitsToRemoveFromCollisionMasks));
       }
    }
+
 
 }
