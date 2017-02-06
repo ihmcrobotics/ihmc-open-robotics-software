@@ -495,7 +495,7 @@ public class Simulation implements YoVariableHolder, Serializable // Runnable,
 
       //      collisionDetector = new GdxCollisionDetector(100.0);
       collisionDetector = new SimpleCollisionDetector();
-      ((SimpleCollisionDetector) collisionDetector).setUseSimpleSpeedupMethod();
+//      ((SimpleCollisionDetector) collisionDetector).setUseSimpleSpeedupMethod();
 
       CollisionShapeFactory collisionShapeFactory = collisionDetector.getShapeFactory();
       collisionShapeFactory.setMargin(0.002);
@@ -521,10 +521,14 @@ public class Simulation implements YoVariableHolder, Serializable // Runnable,
    {
       Link link = joint.getLink();
       link.enableCollisions(registry);
-      CollisionMeshDescription collisionMeshDescription = link.getCollisionMeshDescription();
-      if (collisionMeshDescription != null)
+      ArrayList<CollisionMeshDescription> collisionMeshDescriptions = link.getCollisionMeshDescriptions();
+      
+      if (collisionMeshDescriptions != null)
       {
-         collisionShapeFactory.addCollisionMeshDescription(link, collisionMeshDescription);
+         for (int i=0; i<collisionMeshDescriptions.size(); i++)
+         {
+            collisionShapeFactory.addCollisionMeshDescription(link, collisionMeshDescriptions.get(i));
+         }
       }
 
       ArrayList<Joint> childrenJoints = joint.getChildrenJoints();
