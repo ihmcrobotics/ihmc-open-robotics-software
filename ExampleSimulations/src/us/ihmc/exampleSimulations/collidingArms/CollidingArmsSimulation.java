@@ -1,7 +1,11 @@
 package us.ihmc.exampleSimulations.collidingArms;
 
+import java.util.ArrayList;
+
 import javax.vecmath.Vector3d;
 
+import us.ihmc.exampleSimulations.newtonsCradle.GroundAsABoxRobot;
+import us.ihmc.exampleSimulations.newtonsCradle.PileOfRandomObjectsRobot;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.robotics.robotDescription.CollisionMasksHelper;
 import us.ihmc.simulationconstructionset.PinJoint;
@@ -17,8 +21,8 @@ public class CollidingArmsSimulation
 
    public CollidingArmsSimulation()
    {
-      Vector3d offsetOne = new Vector3d(-0.6, 0.0, 0.0);
-      Vector3d offsetTwo = new Vector3d(0.6, 0.0, 0.0);
+      Vector3d offsetOne = new Vector3d(-0.8, 0.0, 0.0);
+      Vector3d offsetTwo = new Vector3d(0.8, 0.0, 0.0);
       
       CollidingArmRobotDescription armOneDescription = new CollidingArmRobotDescription("ArmOne", offsetOne);
       CollidingArmRobotDescription armTwoDescription = new CollidingArmRobotDescription("ArmTwo", offsetTwo);
@@ -60,16 +64,31 @@ public class CollidingArmsSimulation
       helper.setToCollideWithGroup("UpperArmTwo", "BaseTwo");
       
       
+      int nextGroupBitMask = helper.getNextGroupBitMask();
+      
+      
 //      armOne.setGravity(0.0);
 //      armTwo.setGravity(0.0);
       
-//      PileOfRandomObjectsRobot pileOfRandomObjectsRobot = new PileOfRandomObjectsRobot();
-//      ArrayList<Robot> robots = pileOfRandomObjectsRobot.getRobots();
-//      for (Robot robot : robots)
-//      {
-//         scs.addRobot(robot);
-//      }
+      PileOfRandomObjectsRobot pileOfRandomObjectsRobot = new PileOfRandomObjectsRobot();
+      pileOfRandomObjectsRobot.setGroupAndCollisionMask(0xffff, 0xffff);
+      pileOfRandomObjectsRobot.setNumberOfObjects(10);
+      pileOfRandomObjectsRobot.setXYExtents(1.0, 1.0);
+      pileOfRandomObjectsRobot.setZMinAndMax(1.0, 2.0);
+      ArrayList<Robot> robots = pileOfRandomObjectsRobot.createAndGetRobots();
+      for (Robot robot : robots)
+      {
+         scs.addRobot(robot);
+      }
 
+      Robot groundRobot = new GroundAsABoxRobot(false, nextGroupBitMask, 0xff);
+      scs.addRobot(groundRobot);
+
+      helper.addToCollisionMasks("LowerArmOne", nextGroupBitMask);
+      helper.addToCollisionMasks("LowerArmTwo", nextGroupBitMask);
+      
+      
+      scs.setGroundVisible(false);
 //      SingleBallRobotDescription ball = new SingleBallRobotDescription("ballOne", 0.1, 0.1);
 //      Robot ballRobot = scs.addRobot(ball);
 //      FloatingJoint ballJoint = (FloatingJoint) ballRobot.getRootJoints().get(0);
