@@ -11,6 +11,9 @@ public class SimpleCollisionShape implements CollisionShape
    private final CollisionShapeDescription transformedCollisionShapeDescription;
    private final RigidBodyTransform transformToWorld = new RigidBodyTransform();
 
+   private int groupMask = 0x00;
+   private int collisionMask = 0x00;
+   
    private boolean isGround = false;
 
    public SimpleCollisionShape(CollisionShapeDescription collisionShapeDescription)
@@ -38,15 +41,27 @@ public class SimpleCollisionShape implements CollisionShape
    }
 
    @Override
-   public int getGroupMask()
+   public int getCollisionGroup()
    {
-      return 0xFFFF;
+      return groupMask;
    }
 
    @Override
    public int getCollisionMask()
    {
-      return 0xFFFF;
+      return collisionMask;
+   }
+   
+   @Override
+   public void setCollisionGroup(int groupMask)
+   {
+      this.groupMask = groupMask; 
+   }
+
+   @Override
+   public void setCollisionMask(int collisionMask)
+   {
+      this.collisionMask = collisionMask;
    }
 
    @Override
