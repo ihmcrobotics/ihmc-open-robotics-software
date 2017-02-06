@@ -52,6 +52,10 @@ public class Footstep
    private double swingTime = Double.NaN;
    private double transferTime = Double.NaN;
 
+   // swing start time if absolute timing for the footstep is requested
+   private boolean hasAbsoluteTime = false;
+   private double swingStartTime = Double.NaN;
+
    public Footstep(RigidBody endEffector, RobotSide robotSide, ReferenceFrame soleFrame, PoseReferenceFrame poseReferenceFrame, boolean trustHeight)
    {
       this(createAutomaticID(endEffector), endEffector, robotSide, soleFrame, poseReferenceFrame, trustHeight);
@@ -531,6 +535,28 @@ public class Footstep
       return swingTime + transferTime;
    }
 
+   public void setAbsoluteTime(double swingStartTime)
+   {
+      hasAbsoluteTime = true;
+      this.swingStartTime = swingStartTime;
+   }
+
+   public boolean hasAbsoluteTime()
+   {
+      return hasAbsoluteTime;
+   }
+
+   public double getSwingStartTime()
+   {
+      return swingStartTime;
+   }
+
+   public void removeAbsoluteTime()
+   {
+      hasAbsoluteTime = false;
+      swingStartTime = Double.NaN;
+   }
+
    public boolean epsilonEquals(Footstep otherFootstep, double epsilon)
    {
       boolean arePosesEqual = ankleReferenceFrame.epsilonEquals(otherFootstep.ankleReferenceFrame, epsilon);
@@ -556,7 +582,11 @@ public class Footstep
          sameTimings = sameTimings && MathTools.epsilonEquals(transferTime, otherFootstep.transferTime, epsilon);
       }
 
-      return arePosesEqual && bodiesHaveTheSameName && sameRobotSide && isTrustHeightTheSame && sameWaypoints && sameTimings;
+      boolean sameAbsoluteTime = hasAbsoluteTime == otherFootstep.hasAbsoluteTime;
+      if (hasAbsoluteTime)
+         sameAbsoluteTime = sameAbsoluteTime && MathTools.epsilonEquals(swingStartTime, otherFootstep.swingStartTime, epsilon);
+
+      return arePosesEqual && bodiesHaveTheSameName && sameRobotSide && isTrustHeightTheSame && sameWaypoints && sameTimings && sameAbsoluteTime;
    }
 
    public String toString()
