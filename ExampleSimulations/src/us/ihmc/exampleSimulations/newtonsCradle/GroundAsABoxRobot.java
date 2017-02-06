@@ -21,6 +21,11 @@ public class GroundAsABoxRobot extends Robot
 
    public GroundAsABoxRobot(boolean addWalls)
    {
+      this(addWalls, 0xffffffff, 0xffffffff);
+   }
+   
+   public GroundAsABoxRobot(boolean addWalls, int collisionGroup, int collisionMask)
+   {
       super("GroundAsABoxRobot");
       NullJoint baseJoint = new NullJoint("base", new Vector3d(), this);
 
@@ -41,6 +46,8 @@ public class GroundAsABoxRobot extends Robot
       collisonMeshDescription.addCubeReferencedAtBottomMiddle(floorLength, floorWidth, floorThickness);
       collisonMeshDescription.setIsGround(true);
 
+      collisonMeshDescription.setCollisionGroup(collisionGroup);
+      collisonMeshDescription.setCollisionMask(collisionMask);
 //      CollisionShapeDescription<?> groundShapeDescription = collisionShapeFactory.createBox(floorLength / 2.0, floorWidth / 2.0, floorThickness / 2.0);
 //      RigidBodyTransform shapeToLinkTransform = new RigidBodyTransform();
 //      shapeToLinkTransform.setTranslation(new Vector3d(-0.0, 0.0, 0.0));
