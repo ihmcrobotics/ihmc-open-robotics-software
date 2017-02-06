@@ -105,6 +105,9 @@ public class GroundAsABoxRobot extends Robot
       collisonMeshDescription.addCubeReferencedAtBottomMiddle(floorLength, floorWidth, floorThickness);
       collisonMeshDescription.setIsGround(true);
 
+      collisonMeshDescription.setCollisionGroup(0xffffffff);
+      collisonMeshDescription.setCollisionMask(0xffffffff);
+
 //      groundShapeDescription = collisionShapeFactory.createBox(floorLength / 2.0,  / 2.0, floorThickness / 2.0);
 //      shapeToLinkTransform = new RigidBodyTransform();
 //      shapeToLinkTransform.setRotationEulerAndZeroTranslation(new Vector3d(xRotation, yRotation, 0.0));
