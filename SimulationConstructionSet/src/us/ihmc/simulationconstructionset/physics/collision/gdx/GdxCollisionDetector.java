@@ -347,7 +347,7 @@ public class GdxCollisionDetector implements ScsCollisionDetector
       }
 
       @Override
-      public int getGroupMask()
+      public int getCollisionGroup()
       {
          return getBroadphaseHandle().getCollisionFilterGroup() & 0xFFFF;
       }
@@ -403,6 +403,20 @@ public class GdxCollisionDetector implements ScsCollisionDetector
       public void setIsGround(boolean isGround)
       {
          this.isGround = isGround;
+      }
+
+      @Override
+      public void setCollisionGroup(int groupMask)
+      {
+         // TODO Auto-generated method stub
+         
+      }
+
+      @Override
+      public void setCollisionMask(int collisionMask)
+      {
+         // TODO Auto-generated method stub
+         
       }
    }
 
