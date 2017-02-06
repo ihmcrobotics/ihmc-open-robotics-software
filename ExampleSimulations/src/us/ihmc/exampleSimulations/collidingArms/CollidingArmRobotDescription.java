@@ -48,11 +48,11 @@ public class CollidingArmRobotDescription extends RobotDescription
 
    private final double handRadius = 0.12;
 
-   private final ArrayList<CollisionMeshDescription> armGroup = new ArrayList<>();
-   private final ArrayList<CollisionMeshDescription> baseGroup = new ArrayList<>();
-   private final ArrayList<CollisionMeshDescription> upperArmGroup = new ArrayList<>();
-   private final ArrayList<CollisionMeshDescription> lowerArmGroup = new ArrayList<>();
-   
+   private final ArrayList<CollisionMeshDescription> armCollisionGroup = new ArrayList<>();
+   private final ArrayList<CollisionMeshDescription> baseCollisionGroup = new ArrayList<>();
+   private final ArrayList<CollisionMeshDescription> upperArmCollisionGroup = new ArrayList<>();
+   private final ArrayList<CollisionMeshDescription> lowerArmCollisionGroup = new ArrayList<>();
+
    public CollidingArmRobotDescription(String name, Vector3d baseOffset)
    {
       super(name);
@@ -73,8 +73,8 @@ public class CollidingArmRobotDescription extends RobotDescription
 
       CollisionMeshDescription baseCollisionMesh = new CollisionMeshDescription();
       baseCollisionMesh.addCylinderReferencedAtBottomMiddle(baseRadius, baseHeight);
-      armGroup.add(baseCollisionMesh);
-      baseGroup.add(baseCollisionMesh);
+      armCollisionGroup.add(baseCollisionMesh);
+      baseCollisionGroup.add(baseCollisionMesh);
       baseLink.addCollisionMesh(baseCollisionMesh);
 
       baseJoint.setLink(baseLink);
@@ -97,8 +97,10 @@ public class CollidingArmRobotDescription extends RobotDescription
 
       CollisionMeshDescription upperArmCollisionMesh = new CollisionMeshDescription();
       upperArmCollisionMesh.addCylinderReferencedAtBottomMiddle(upperArmRadius, upperArmLength - elbowMotorRadius);
+      armCollisionGroup.add(upperArmCollisionMesh);
+      upperArmCollisionGroup.add(upperArmCollisionMesh);
       upperArm.addCollisionMesh(upperArmCollisionMesh);
-      
+
       shoulderJoint.setLink(upperArm);
       baseJoint.addJoint(shoulderJoint);
 
@@ -121,10 +123,33 @@ public class CollidingArmRobotDescription extends RobotDescription
       lowerArmCollisionMesh.addCylinderReferencedAtBottomMiddle(lowerArmRadius, lowerArmLength - elbowMotorRadius);
       lowerArmCollisionMesh.translate(0.0, 0.0, lowerArmLength);
       lowerArmCollisionMesh.addSphere(handRadius);
+
+      armCollisionGroup.add(lowerArmCollisionMesh);
+      lowerArmCollisionGroup.add(lowerArmCollisionMesh);
       lowerArm.addCollisionMesh(lowerArmCollisionMesh);
 
       elbowJoint.setLink(lowerArm);
       shoulderJoint.addJoint(elbowJoint);
+   }
+
+   public ArrayList<CollisionMeshDescription> getArmCollisionGroup()
+   {
+      return armCollisionGroup;
+   }
+
+   public ArrayList<CollisionMeshDescription> getBaseCollisionGroup()
+   {
+      return baseCollisionGroup;
+   }
+
+   public ArrayList<CollisionMeshDescription> getUpperArmCollisionGroup()
+   {
+      return upperArmCollisionGroup;
+   }
+
+   public ArrayList<CollisionMeshDescription> getLowerArmCollisionGroup()
+   {
+      return lowerArmCollisionGroup;
    }
 
 }

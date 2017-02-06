@@ -3,7 +3,7 @@ package us.ihmc.exampleSimulations.collidingArms;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.graphicsDescription.Graphics3DObject;
-import us.ihmc.simulationconstructionset.FloatingJoint;
+import us.ihmc.robotics.robotDescription.CollisionMasksHelper;
 import us.ihmc.simulationconstructionset.PinJoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -35,6 +35,30 @@ public class CollidingArmsSimulation
      
       Robot armOne = scs.addRobot(armOneDescription);
       Robot armTwo = scs.addRobot(armTwoDescription);
+      
+      
+      CollisionMasksHelper helper = new CollisionMasksHelper();
+      
+      helper.addCollisionGroup("ArmOne", armOneDescription.getArmCollisionGroup());
+      helper.addCollisionGroup("ArmTwo", armTwoDescription.getArmCollisionGroup());
+      
+      helper.addCollisionGroup("BaseOne", armOneDescription.getBaseCollisionGroup());
+      helper.addCollisionGroup("BaseTwo", armTwoDescription.getBaseCollisionGroup());
+
+      helper.addCollisionGroup("UpperArmOne", armOneDescription.getUpperArmCollisionGroup());
+      helper.addCollisionGroup("UpperArmTwo", armTwoDescription.getUpperArmCollisionGroup());
+      
+      helper.addCollisionGroup("LowerArmOne", armOneDescription.getLowerArmCollisionGroup());
+      helper.addCollisionGroup("LowerArmTwo", armTwoDescription.getLowerArmCollisionGroup());
+
+      
+      helper.setToCollideWithGroup("ArmOne", "ArmTwo");
+      helper.setToCollideWithGroup("LowerArmOne", "BaseOne");
+      helper.setToCollideWithGroup("LowerArmTwo", "BaseTwo");
+
+      helper.setToCollideWithGroup("UpperArmOne", "BaseOne");
+      helper.setToCollideWithGroup("UpperArmTwo", "BaseTwo");
+      
       
 //      armOne.setGravity(0.0);
 //      armTwo.setGravity(0.0);
