@@ -1070,7 +1070,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    @Override
    public boolean useOptimizationBasedICPController()
    {
-      return true;
+      return false;
    }
 
    /** {@inheritDoc} */
