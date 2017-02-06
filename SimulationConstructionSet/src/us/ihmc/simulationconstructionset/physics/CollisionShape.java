@@ -1,12 +1,13 @@
 package us.ihmc.simulationconstructionset.physics;
 
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.robotDescription.CollisionMaskHolder;
 
 /**
  * Object containing collision data for a specific instance of a shape.
  *
  */
-public interface CollisionShape
+public interface CollisionShape extends CollisionMaskHolder
 {
    /**
     * Returns true if the shape is not mobile and part of the environment.
@@ -18,16 +19,6 @@ public interface CollisionShape
     * @param isGround
     */
    public abstract void setIsGround(boolean isGround);
-
-   /**
-    * Bit field indicating which groups the shape belongs to
-    */
-   public abstract int getGroupMask();
-
-   /**
-    * Bit field indicating which groups the shape can collide against
-    */
-   public abstract int getCollisionMask();
 
    //   /**
    //    * Returns the distance a point is from the surface of the shape.  Positive values are outside and negative values are inside.
