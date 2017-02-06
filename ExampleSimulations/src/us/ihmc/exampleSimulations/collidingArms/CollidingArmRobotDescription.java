@@ -15,6 +15,8 @@ import us.ihmc.robotics.robotDescription.RobotDescription;
 
 public class CollidingArmRobotDescription extends RobotDescription
 {
+   private final double maxJointSpeed = 12.0;
+
    private final double baseMass = 1.0;
    private final double baseRadius = 0.4;
    private final double baseHeight = 0.10;
@@ -29,7 +31,7 @@ public class CollidingArmRobotDescription extends RobotDescription
 
    private final double upperArmMass = 1.0;
    private final double upperArmRadius = 0.05;
-   private final double upperArmLength = 0.8;
+   private final double upperArmLength = 0.75;
 
    private final double upperArmRadiusOfGyrationX = upperArmRadius;
    private final double upperArmRadiusOfGyrationY = upperArmRadius;
@@ -40,7 +42,7 @@ public class CollidingArmRobotDescription extends RobotDescription
 
    private final double lowerArmMass = 1.0;
    private final double lowerArmRadius = 0.03;
-   private final double lowerArmLength = 0.6;
+   private final double lowerArmLength = 0.85;
 
    private final double lowerArmRadiusOfGyrationX = lowerArmRadius;
    private final double lowerArmRadiusOfGyrationY = lowerArmRadius;
@@ -78,6 +80,7 @@ public class CollidingArmRobotDescription extends RobotDescription
       baseLink.addCollisionMesh(baseCollisionMesh);
 
       baseJoint.setLink(baseLink);
+      baseJoint.setVelocityLimits(maxJointSpeed, 1000.0);
       this.addRootJoint(baseJoint);
 
       // Upper Arm:
@@ -102,6 +105,7 @@ public class CollidingArmRobotDescription extends RobotDescription
       upperArm.addCollisionMesh(upperArmCollisionMesh);
 
       shoulderJoint.setLink(upperArm);
+      shoulderJoint.setVelocityLimits(maxJointSpeed, 1000.0);
       baseJoint.addJoint(shoulderJoint);
 
       // Lower arm:
@@ -129,6 +133,7 @@ public class CollidingArmRobotDescription extends RobotDescription
       lowerArm.addCollisionMesh(lowerArmCollisionMesh);
 
       elbowJoint.setLink(lowerArm);
+      elbowJoint.setVelocityLimits(maxJointSpeed, 1000.0);
       shoulderJoint.addJoint(elbowJoint);
    }
 
