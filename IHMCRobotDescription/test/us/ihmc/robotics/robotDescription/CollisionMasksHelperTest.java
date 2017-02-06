@@ -24,6 +24,7 @@ public class CollisionMasksHelperTest
       CollisionMeshDescription objectSix = new CollisionMeshDescription();
 
       CollisionMasksHelper helper = new CollisionMasksHelper();
+      assertEquals(1, helper.getNextGroupBitMask());
 
       ArrayList<CollisionMaskHolder> groupOne = new ArrayList<>();
 
@@ -88,6 +89,7 @@ public class CollisionMasksHelperTest
       ArrayList<CollisionMaskHolder> groupFive = new ArrayList<>();
       groupFive.add(objectSix);
       helper.addCollisionGroup("GroupFive", groupFive);
+      assertEquals(32, helper.getNextGroupBitMask());
       assertEquals(0b11000, objectSix.getCollisionGroup());
 
       assertEquals(groupOne, helper.getCollisionGroup("GroupOne"));
