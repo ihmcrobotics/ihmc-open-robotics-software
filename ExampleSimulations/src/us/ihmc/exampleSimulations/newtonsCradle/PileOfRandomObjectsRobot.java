@@ -5,7 +5,6 @@ import java.util.Random;
 
 import javax.vecmath.Vector3d;
 
-import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.robotics.random.RandomTools;
@@ -15,13 +14,16 @@ import us.ihmc.robotics.robotDescription.LinkDescription;
 import us.ihmc.robotics.robotDescription.LinkGraphicsDescription;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.simulationconstructionset.FloatingJoint;
-import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.RobotFromDescription;
 
 public class PileOfRandomObjectsRobot
 {
    private final ArrayList<Robot> robots = new ArrayList<Robot>();
+   private int collisionGroup = 0xffffffff;
+   private int collisionMask = 0xffffffff;
+
+   private final Random random = new Random(1886L);
 
    private double xExtents = 1.5;
    private double yExtents = 1.5;
@@ -33,13 +35,32 @@ public class PileOfRandomObjectsRobot
 
    public PileOfRandomObjectsRobot()
    {
-      Random random = new Random(1886L);
-
-      createFallingObjects(numberOfObjects, random);
-      //      createBoardFrame(collisionShapeFactory, random);
+   }
+   
+   public void setGroupAndCollisionMask(int collisionGroup, int collisionMask)
+   {
+      this.collisionGroup = collisionGroup;
+      this.collisionMask = collisionMask;
    }
 
-   private void createFallingObjects(int numberOfObjects, Random random)
+   public void setNumberOfObjects(int numberOfObjects)
+   {
+      this.numberOfObjects = numberOfObjects;
+   }
+   
+   public void setXYExtents(double xExtents, double yExtents)
+   {
+      this.xExtents = xExtents;
+      this.yExtents = yExtents;
+   }
+   
+   public void setZMinAndMax(double zMin, double zMax)
+   {
+      this.zMin = zMin;
+      this.zMax = zMax;
+   }
+
+   private void createFallingObjects()
    {
       for (int i = 0; i < numberOfObjects; i++)
       {
@@ -94,68 +115,68 @@ public class PileOfRandomObjectsRobot
       }
    }
 
-   private void createBoardFrame(Random random)
-   {
-      double boardZ = 0.14;
+//   private void createBoardFrame(Random random)
+//   {
+//      double boardZ = 0.14;
+//
+//      FloatingJoint board0 = createContainerBoard("board0", random);
+//      board0.setPosition(0.51, 0.0, boardZ);
+//      board0.setYawPitchRoll(Math.PI / 2.0, 0.0, 0.0);
+//
+//      FloatingJoint board1 = createContainerBoard("board1", random);
+//      board1.setPosition(0.0, 0.35, boardZ);
+//      board1.setYawPitchRoll(0.0, 0.0, 0.0);
+//
+//      FloatingJoint board2 = createContainerBoard("board2", random);
+//      board2.setPosition(0.0, -0.35, boardZ);
+//      board2.setYawPitchRoll(0.0, 0.0, 0.0);
+//
+//      FloatingJoint board3 = createContainerBoard("board3", random);
+//      board3.setPosition(-0.51, 0.0, boardZ);
+//      board3.setYawPitchRoll(Math.PI / 2.0, 0.0, 0.0);
+//   }
 
-      FloatingJoint board0 = createContainerBoard("board0", random);
-      board0.setPosition(0.51, 0.0, boardZ);
-      board0.setYawPitchRoll(Math.PI / 2.0, 0.0, 0.0);
+//   private FloatingJoint createContainerBoard(String name, Random random)
+//   {
+//      Robot robot = new Robot(name);
+//
+//      Vector3d offset = new Vector3d(0.0, 0.0, 0.0);
+//      FloatingJoint floatingJoint = new FloatingJoint(name, offset, robot);
+//
+//      Link link = createContainerBoardLink(name, random, robot);
+//      floatingJoint.setLink(link);
+//      robot.addRootJoint(floatingJoint);
+//      this.robots.add(robot);
+//
+//      return floatingJoint;
+//   }
 
-      FloatingJoint board1 = createContainerBoard("board1", random);
-      board1.setPosition(0.0, 0.35, boardZ);
-      board1.setYawPitchRoll(0.0, 0.0, 0.0);
-
-      FloatingJoint board2 = createContainerBoard("board2", random);
-      board2.setPosition(0.0, -0.35, boardZ);
-      board2.setYawPitchRoll(0.0, 0.0, 0.0);
-
-      FloatingJoint board3 = createContainerBoard("board3", random);
-      board3.setPosition(-0.51, 0.0, boardZ);
-      board3.setYawPitchRoll(Math.PI / 2.0, 0.0, 0.0);
-   }
-
-   private FloatingJoint createContainerBoard(String name, Random random)
-   {
-      Robot robot = new Robot(name);
-
-      Vector3d offset = new Vector3d(0.0, 0.0, 0.0);
-      FloatingJoint floatingJoint = new FloatingJoint(name, offset, robot);
-
-      Link link = createContainerBoardLink(name, random, robot);
-      floatingJoint.setLink(link);
-      robot.addRootJoint(floatingJoint);
-      this.robots.add(robot);
-
-      return floatingJoint;
-   }
-
-   private Link createContainerBoardLink(String name, Random random, Robot robot)
-   {
-      double objectWidth = 0.2;
-      double objectLength = 0.8;
-      double objectHeight = 0.2;
-      double objectMass = 10.0;
-
-      Link link = new Link(name);
-      link.setMassAndRadiiOfGyration(objectMass, objectLength / 2.0, objectWidth / 2.0, objectHeight / 2.0);
-      link.setComOffset(0.0, 0.0, 0.0);
-
-      Graphics3DObject linkGraphics = new Graphics3DObject();
-      linkGraphics.translate(0.0, 0.0, -objectHeight / 2.0);
-      AppearanceDefinition randomColor = YoAppearance.Aquamarine();
-
-      linkGraphics.addCube(objectLength, objectWidth, objectHeight, randomColor);
-      link.setLinkGraphics(linkGraphics);
-
-      CollisionMeshDescription collisionMeshDescription = new CollisionMeshDescription();
-      collisionMeshDescription.addCubeReferencedAtCenter(objectLength, objectWidth, objectHeight);
-      collisionMeshDescription.setCollisionGroup(0xff);
-      collisionMeshDescription.setCollisionMask(0xff);
-      link.addCollisionMesh(collisionMeshDescription);
-
-      return link;
-   }
+//   private Link createContainerBoardLink(String name, Random random, Robot robot)
+//   {
+//      double objectWidth = 0.2;
+//      double objectLength = 0.8;
+//      double objectHeight = 0.2;
+//      double objectMass = 10.0;
+//
+//      Link link = new Link(name);
+//      link.setMassAndRadiiOfGyration(objectMass, objectLength / 2.0, objectWidth / 2.0, objectHeight / 2.0);
+//      link.setComOffset(0.0, 0.0, 0.0);
+//
+//      Graphics3DObject linkGraphics = new Graphics3DObject();
+//      linkGraphics.translate(0.0, 0.0, -objectHeight / 2.0);
+//      AppearanceDefinition randomColor = YoAppearance.Aquamarine();
+//
+//      linkGraphics.addCube(objectLength, objectWidth, objectHeight, randomColor);
+//      link.setLinkGraphics(linkGraphics);
+//
+//      CollisionMeshDescription collisionMeshDescription = new CollisionMeshDescription();
+//      collisionMeshDescription.addCubeReferencedAtCenter(objectLength, objectWidth, objectHeight);
+//      collisionMeshDescription.setCollisionGroup(0xff);
+//      collisionMeshDescription.setCollisionMask(0xff);
+//      link.addCollisionMesh(collisionMeshDescription);
+//
+//      return link;
+//   }
 
    private LinkDescription createRandomBox(Random random, int i)
    {
@@ -176,8 +197,8 @@ public class PileOfRandomObjectsRobot
 
       CollisionMeshDescription collisionMesh = new CollisionMeshDescription();
       collisionMesh.addCubeReferencedAtCenter(objectLength, objectWidth, objectHeight);
-      collisionMesh.setCollisionGroup(0xff);
-      collisionMesh.setCollisionMask(0xff);
+      collisionMesh.setCollisionGroup(collisionGroup);
+      collisionMesh.setCollisionMask(collisionMask);
       link.addCollisionMesh(collisionMesh);
 
       return link;
@@ -199,8 +220,8 @@ public class PileOfRandomObjectsRobot
 
       CollisionMeshDescription collisionMesh = new CollisionMeshDescription();
       collisionMesh.addSphere(objectRadius);
-      collisionMesh.setCollisionGroup(0xff);
-      collisionMesh.setCollisionMask(0xff);
+      collisionMesh.setCollisionGroup(collisionGroup);
+      collisionMesh.setCollisionMask(collisionMask);
       link.addCollisionMesh(collisionMesh);
 
       return link;
@@ -223,8 +244,8 @@ public class PileOfRandomObjectsRobot
 
       CollisionMeshDescription collisionMesh = new CollisionMeshDescription();
       collisionMesh.addCapsule(objectRadius, objectHeight);
-      collisionMesh.setCollisionGroup(0xff);
-      collisionMesh.setCollisionMask(0xff);
+      collisionMesh.setCollisionGroup(collisionGroup);
+      collisionMesh.setCollisionMask(collisionMask);
       link.addCollisionMesh(collisionMesh);
 
       return link;
@@ -249,15 +270,16 @@ public class PileOfRandomObjectsRobot
 
       CollisionMeshDescription collisionMesh = new CollisionMeshDescription();
       collisionMesh.addCylinderReferencedAtCenter(objectRadius, objectHeight);
-      collisionMesh.setCollisionGroup(0xff);
-      collisionMesh.setCollisionMask(0xff);
+      collisionMesh.setCollisionGroup(collisionGroup);
+      collisionMesh.setCollisionMask(collisionMask);
       link.addCollisionMesh(collisionMesh);
 
       return link;
    }
 
-   public ArrayList<Robot> getRobots()
+   public ArrayList<Robot> createAndGetRobots()
    {
+      this.createFallingObjects();
       return robots;
    }
 
