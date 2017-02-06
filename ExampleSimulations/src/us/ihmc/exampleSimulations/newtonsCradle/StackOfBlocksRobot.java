@@ -78,7 +78,7 @@ public class StackOfBlocksRobot
 
       CollisionMeshDescription collisionMeshDescription = new CollisionMeshDescription();
       collisionMeshDescription.addCubeReferencedAtCenter(objectLength, objectWidth, objectHeight);
-      link.setCollisionMesh(collisionMeshDescription);
+      link.addCollisionMesh(collisionMeshDescription);
       return link;
    }
 

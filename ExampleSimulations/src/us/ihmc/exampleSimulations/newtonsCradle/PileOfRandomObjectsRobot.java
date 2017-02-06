@@ -150,7 +150,7 @@ public class PileOfRandomObjectsRobot
 
       CollisionMeshDescription collisionMeshDescription = new CollisionMeshDescription();
       collisionMeshDescription.addCubeReferencedAtCenter(objectLength, objectWidth, objectHeight);
-      link.setCollisionMesh(collisionMeshDescription);
+      link.addCollisionMesh(collisionMeshDescription);
 
       return link;
    }
@@ -174,7 +174,7 @@ public class PileOfRandomObjectsRobot
 
       CollisionMeshDescription collisionMesh = new CollisionMeshDescription();
       collisionMesh.addCubeReferencedAtCenter(objectLength, objectWidth, objectHeight);
-      link.setCollisionMesh(collisionMesh);
+      link.addCollisionMesh(collisionMesh);
 
       return link;
    }
@@ -195,7 +195,7 @@ public class PileOfRandomObjectsRobot
 
       CollisionMeshDescription collisionMesh = new CollisionMeshDescription();
       collisionMesh.addSphere(objectRadius);
-      link.setCollisionMesh(collisionMesh);
+      link.addCollisionMesh(collisionMesh);
 
       return link;
    }
@@ -217,7 +217,7 @@ public class PileOfRandomObjectsRobot
 
       CollisionMeshDescription collisionMesh = new CollisionMeshDescription();
       collisionMesh.addCapsule(objectRadius, objectHeight);
-      link.setCollisionMesh(collisionMesh);
+      link.addCollisionMesh(collisionMesh);
 
       return link;
    }
@@ -241,7 +241,7 @@ public class PileOfRandomObjectsRobot
 
       CollisionMeshDescription collisionMesh = new CollisionMeshDescription();
       collisionMesh.addCylinderReferencedAtCenter(objectRadius, objectHeight);
-      link.setCollisionMesh(collisionMesh);
+      link.addCollisionMesh(collisionMesh);
 
       return link;
    }

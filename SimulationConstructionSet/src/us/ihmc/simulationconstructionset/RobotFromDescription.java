@@ -462,8 +462,12 @@ public class RobotFromDescription extends Robot implements OneDegreeOfFreedomJoi
       LinkGraphicsDescription linkGraphics = linkDescription.getLinkGraphics();
       link.setLinkGraphics(linkGraphics);
 
-      CollisionMeshDescription collisonMeshDescription = linkDescription.getCollisionMesh();
-      link.setCollisionMesh(collisonMeshDescription);
+      ArrayList<CollisionMeshDescription> collisonMeshDescriptions = linkDescription.getCollisionMeshes();
+      
+      for (int i=0; i<collisonMeshDescriptions.size(); i++)
+      {
+         link.addCollisionMesh(collisonMeshDescriptions.get(i));
+      }
 
       return link;
    }
