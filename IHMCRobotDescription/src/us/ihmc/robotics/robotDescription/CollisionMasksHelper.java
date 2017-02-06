@@ -5,11 +5,11 @@ import java.util.LinkedHashMap;
 
 public class CollisionMasksHelper
 {
-   private final LinkedHashMap<String, ArrayList<CollisionMaskHolder>> groups = new LinkedHashMap<>();
-   private final LinkedHashMap<ArrayList<CollisionMaskHolder>, Integer> groupBits = new LinkedHashMap<>();
+   private final LinkedHashMap<String, ArrayList<? extends CollisionMaskHolder>> groups = new LinkedHashMap<>();
+   private final LinkedHashMap<ArrayList<? extends CollisionMaskHolder>, Integer> groupBits = new LinkedHashMap<>();
    private int largestBit = 0x01;
 
-   public void addCollisionGroup(String name, ArrayList<CollisionMaskHolder> group)
+   public void addCollisionGroup(String name, ArrayList<? extends CollisionMaskHolder> group)
    {
       if (largestBit == 0)
       {
@@ -24,15 +24,15 @@ public class CollisionMasksHelper
       largestBit = largestBit << 1;
    }
 
-   public ArrayList<CollisionMaskHolder> getCollisionGroup(String name)
+   public ArrayList<? extends CollisionMaskHolder> getCollisionGroup(String name)
    {
       return groups.get(name);
    }
 
    public void setToCollideWithGroup(String groupOneName, String groupTwoName)
    {
-      ArrayList<CollisionMaskHolder> groupOne = groups.get(groupOneName);
-      ArrayList<CollisionMaskHolder> groupTwo = groups.get(groupTwoName);
+      ArrayList<? extends CollisionMaskHolder> groupOne = groups.get(groupOneName);
+      ArrayList<? extends CollisionMaskHolder> groupTwo = groups.get(groupTwoName);
 
       Integer bitOne = groupBits.get(groupOne);
       Integer bitTwo = groupBits.get(groupTwo);
@@ -43,7 +43,7 @@ public class CollisionMasksHelper
 
    public void setAsSelfCollidingGroup(String name)
    {
-      ArrayList<CollisionMaskHolder> group = groups.get(name);
+      ArrayList<? extends CollisionMaskHolder> group = groups.get(name);
       Integer groupBit = groupBits.get(group);
 
       addToCollisionMasks(group, groupBit);
@@ -51,13 +51,13 @@ public class CollisionMasksHelper
 
    public void setAsNonSelfCollidingGroup(String name)
    {
-      ArrayList<CollisionMaskHolder> group = groups.get(name);
+      ArrayList<? extends CollisionMaskHolder> group = groups.get(name);
       Integer groupBit = groupBits.get(group);
 
       removeFromCollisionMasks(group, groupBit);
    }
 
-   private void addToCollisionGroups(ArrayList<CollisionMaskHolder> group, int groupBitsToAddToGroupMasks)
+   private void addToCollisionGroups(ArrayList<? extends CollisionMaskHolder> group, int groupBitsToAddToGroupMasks)
    {
       for (int i = 0; i < group.size(); i++)
       {
@@ -66,7 +66,7 @@ public class CollisionMasksHelper
       }
    }
 
-   private void addToCollisionMasks(ArrayList<CollisionMaskHolder> group, Integer groupBitsToAddToCollisionMasks)
+   private void addToCollisionMasks(ArrayList<? extends CollisionMaskHolder> group, Integer groupBitsToAddToCollisionMasks)
    {
       for (int i = 0; i < group.size(); i++)
       {
@@ -75,7 +75,7 @@ public class CollisionMasksHelper
       }
    }
 
-   private void removeFromCollisionMasks(ArrayList<CollisionMaskHolder> group, Integer groupBitsToRemoveFromCollisionMasks)
+   private void removeFromCollisionMasks(ArrayList<? extends CollisionMaskHolder> group, Integer groupBitsToRemoveFromCollisionMasks)
    {
       for (int i = 0; i < group.size(); i++)
       {
