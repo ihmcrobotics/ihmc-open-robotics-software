@@ -150,6 +150,8 @@ public class PileOfRandomObjectsRobot
 
       CollisionMeshDescription collisionMeshDescription = new CollisionMeshDescription();
       collisionMeshDescription.addCubeReferencedAtCenter(objectLength, objectWidth, objectHeight);
+      collisionMeshDescription.setCollisionGroup(0xff);
+      collisionMeshDescription.setCollisionMask(0xff);
       link.addCollisionMesh(collisionMeshDescription);
 
       return link;
@@ -174,6 +176,8 @@ public class PileOfRandomObjectsRobot
 
       CollisionMeshDescription collisionMesh = new CollisionMeshDescription();
       collisionMesh.addCubeReferencedAtCenter(objectLength, objectWidth, objectHeight);
+      collisionMesh.setCollisionGroup(0xff);
+      collisionMesh.setCollisionMask(0xff);
       link.addCollisionMesh(collisionMesh);
 
       return link;
@@ -195,6 +199,8 @@ public class PileOfRandomObjectsRobot
 
       CollisionMeshDescription collisionMesh = new CollisionMeshDescription();
       collisionMesh.addSphere(objectRadius);
+      collisionMesh.setCollisionGroup(0xff);
+      collisionMesh.setCollisionMask(0xff);
       link.addCollisionMesh(collisionMesh);
 
       return link;
@@ -217,6 +223,8 @@ public class PileOfRandomObjectsRobot
 
       CollisionMeshDescription collisionMesh = new CollisionMeshDescription();
       collisionMesh.addCapsule(objectRadius, objectHeight);
+      collisionMesh.setCollisionGroup(0xff);
+      collisionMesh.setCollisionMask(0xff);
       link.addCollisionMesh(collisionMesh);
 
       return link;
@@ -241,6 +249,8 @@ public class PileOfRandomObjectsRobot
 
       CollisionMeshDescription collisionMesh = new CollisionMeshDescription();
       collisionMesh.addCylinderReferencedAtCenter(objectRadius, objectHeight);
+      collisionMesh.setCollisionGroup(0xff);
+      collisionMesh.setCollisionMask(0xff);
       link.addCollisionMesh(collisionMesh);
 
       return link;
