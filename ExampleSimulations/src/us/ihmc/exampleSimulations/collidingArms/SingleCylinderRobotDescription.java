@@ -24,7 +24,7 @@ public class SingleCylinderRobotDescription extends RobotDescription
 
       CollisionMeshDescription collisionMesh = new CollisionMeshDescription();
       collisionMesh.addCylinderReferencedAtCenter(radius, height);
-      link.setCollisionMesh(collisionMesh);
+      link.addCollisionMesh(collisionMesh);
 
       rootJoint.setLink(link);
       this.addRootJoint(rootJoint);
