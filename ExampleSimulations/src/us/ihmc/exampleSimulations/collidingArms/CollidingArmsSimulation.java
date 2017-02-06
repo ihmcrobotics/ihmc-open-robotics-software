@@ -21,6 +21,8 @@ public class CollidingArmsSimulation
 
    public CollidingArmsSimulation()
    {
+      double dt = 0.001;
+      
       Vector3d offsetOne = new Vector3d(-0.8, 0.0, 0.0);
       Vector3d offsetTwo = new Vector3d(0.8, 0.0, 0.0);
       
@@ -40,6 +42,11 @@ public class CollidingArmsSimulation
       Robot armOne = scs.addRobot(armOneDescription);
       Robot armTwo = scs.addRobot(armTwoDescription);
       
+      CollidingArmController controllerOne = new CollidingArmController(armOne, dt);
+      CollidingArmController controllerTwo = new CollidingArmController(armTwo, dt);
+      
+      armOne.setController(controllerOne);
+      armTwo.setController(controllerTwo);
       
       CollisionMasksHelper helper = new CollisionMasksHelper();
       
@@ -71,8 +78,9 @@ public class CollidingArmsSimulation
 //      armTwo.setGravity(0.0);
       
       PileOfRandomObjectsRobot pileOfRandomObjectsRobot = new PileOfRandomObjectsRobot();
+      pileOfRandomObjectsRobot.setSizeScale(2.0);
       pileOfRandomObjectsRobot.setGroupAndCollisionMask(0xffff, 0xffff);
-      pileOfRandomObjectsRobot.setNumberOfObjects(10);
+      pileOfRandomObjectsRobot.setNumberOfObjects(100);
       pileOfRandomObjectsRobot.setXYExtents(1.0, 1.0);
       pileOfRandomObjectsRobot.setZMinAndMax(1.0, 2.0);
       ArrayList<Robot> robots = pileOfRandomObjectsRobot.createAndGetRobots();
@@ -115,7 +123,7 @@ public class CollidingArmsSimulation
       CollisionHandler collisionHandler = new DefaultCollisionHandler(coefficientOfRestitution, coefficientOfFriction);
       scs.initializeCollisionDetectionAndHandling(collisionVisualizer, collisionHandler);
 
-      scs.setDT(0.001, 1);
+      scs.setDT(dt, 1);
       scs.setFastSimulate(true);
 //      scs.setGroundVisible(false);
       

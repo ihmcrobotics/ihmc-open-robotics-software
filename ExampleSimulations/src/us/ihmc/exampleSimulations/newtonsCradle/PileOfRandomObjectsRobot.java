@@ -31,12 +31,25 @@ public class PileOfRandomObjectsRobot
    private double zMin = 0.2;
    private double zMax = 6.0;
 
+   private double sizeScale = 1.0;
+   private double massScale = 1.0;
+
    private int numberOfObjects = 200;
 
    public PileOfRandomObjectsRobot()
    {
    }
-   
+
+   public void setSizeScale(double sizeScale)
+   {
+      this.sizeScale = sizeScale;
+   }
+
+   public void setMassScale(double massScale)
+   {
+      this.massScale = massScale;
+   }
+
    public void setGroupAndCollisionMask(int collisionGroup, int collisionMask)
    {
       this.collisionGroup = collisionGroup;
@@ -47,13 +60,13 @@ public class PileOfRandomObjectsRobot
    {
       this.numberOfObjects = numberOfObjects;
    }
-   
+
    public void setXYExtents(double xExtents, double yExtents)
    {
       this.xExtents = xExtents;
       this.yExtents = yExtents;
    }
-   
+
    public void setZMinAndMax(double zMin, double zMax)
    {
       this.zMin = zMin;
@@ -65,7 +78,7 @@ public class PileOfRandomObjectsRobot
       for (int i = 0; i < numberOfObjects; i++)
       {
          RobotDescription robotDescription = new RobotDescription("RandomRobot" + i);
-//         Robot robot = new Robot("RandomRobot" + i);
+         //         Robot robot = new Robot("RandomRobot" + i);
 
          Vector3d offset = new Vector3d(0.0, 0.0, 0.0);
          FloatingJointDescription floatingJointDescription = new FloatingJointDescription("object" + i);
@@ -93,10 +106,10 @@ public class PileOfRandomObjectsRobot
 
          floatingJointDescription.setLink(link);
          robotDescription.addRootJoint(floatingJointDescription);
-         
+
          double x = RandomTools.generateRandomDouble(random, -xExtents, xExtents);
          double y = RandomTools.generateRandomDouble(random, -yExtents, yExtents);
-         
+
          double z = RandomTools.generateRandomDouble(random, zMin, zMax);
 
          double angleExtents = Math.PI / 2.0;
@@ -115,75 +128,75 @@ public class PileOfRandomObjectsRobot
       }
    }
 
-//   private void createBoardFrame(Random random)
-//   {
-//      double boardZ = 0.14;
-//
-//      FloatingJoint board0 = createContainerBoard("board0", random);
-//      board0.setPosition(0.51, 0.0, boardZ);
-//      board0.setYawPitchRoll(Math.PI / 2.0, 0.0, 0.0);
-//
-//      FloatingJoint board1 = createContainerBoard("board1", random);
-//      board1.setPosition(0.0, 0.35, boardZ);
-//      board1.setYawPitchRoll(0.0, 0.0, 0.0);
-//
-//      FloatingJoint board2 = createContainerBoard("board2", random);
-//      board2.setPosition(0.0, -0.35, boardZ);
-//      board2.setYawPitchRoll(0.0, 0.0, 0.0);
-//
-//      FloatingJoint board3 = createContainerBoard("board3", random);
-//      board3.setPosition(-0.51, 0.0, boardZ);
-//      board3.setYawPitchRoll(Math.PI / 2.0, 0.0, 0.0);
-//   }
+   //   private void createBoardFrame(Random random)
+   //   {
+   //      double boardZ = 0.14;
+   //
+   //      FloatingJoint board0 = createContainerBoard("board0", random);
+   //      board0.setPosition(0.51, 0.0, boardZ);
+   //      board0.setYawPitchRoll(Math.PI / 2.0, 0.0, 0.0);
+   //
+   //      FloatingJoint board1 = createContainerBoard("board1", random);
+   //      board1.setPosition(0.0, 0.35, boardZ);
+   //      board1.setYawPitchRoll(0.0, 0.0, 0.0);
+   //
+   //      FloatingJoint board2 = createContainerBoard("board2", random);
+   //      board2.setPosition(0.0, -0.35, boardZ);
+   //      board2.setYawPitchRoll(0.0, 0.0, 0.0);
+   //
+   //      FloatingJoint board3 = createContainerBoard("board3", random);
+   //      board3.setPosition(-0.51, 0.0, boardZ);
+   //      board3.setYawPitchRoll(Math.PI / 2.0, 0.0, 0.0);
+   //   }
 
-//   private FloatingJoint createContainerBoard(String name, Random random)
-//   {
-//      Robot robot = new Robot(name);
-//
-//      Vector3d offset = new Vector3d(0.0, 0.0, 0.0);
-//      FloatingJoint floatingJoint = new FloatingJoint(name, offset, robot);
-//
-//      Link link = createContainerBoardLink(name, random, robot);
-//      floatingJoint.setLink(link);
-//      robot.addRootJoint(floatingJoint);
-//      this.robots.add(robot);
-//
-//      return floatingJoint;
-//   }
+   //   private FloatingJoint createContainerBoard(String name, Random random)
+   //   {
+   //      Robot robot = new Robot(name);
+   //
+   //      Vector3d offset = new Vector3d(0.0, 0.0, 0.0);
+   //      FloatingJoint floatingJoint = new FloatingJoint(name, offset, robot);
+   //
+   //      Link link = createContainerBoardLink(name, random, robot);
+   //      floatingJoint.setLink(link);
+   //      robot.addRootJoint(floatingJoint);
+   //      this.robots.add(robot);
+   //
+   //      return floatingJoint;
+   //   }
 
-//   private Link createContainerBoardLink(String name, Random random, Robot robot)
-//   {
-//      double objectWidth = 0.2;
-//      double objectLength = 0.8;
-//      double objectHeight = 0.2;
-//      double objectMass = 10.0;
-//
-//      Link link = new Link(name);
-//      link.setMassAndRadiiOfGyration(objectMass, objectLength / 2.0, objectWidth / 2.0, objectHeight / 2.0);
-//      link.setComOffset(0.0, 0.0, 0.0);
-//
-//      Graphics3DObject linkGraphics = new Graphics3DObject();
-//      linkGraphics.translate(0.0, 0.0, -objectHeight / 2.0);
-//      AppearanceDefinition randomColor = YoAppearance.Aquamarine();
-//
-//      linkGraphics.addCube(objectLength, objectWidth, objectHeight, randomColor);
-//      link.setLinkGraphics(linkGraphics);
-//
-//      CollisionMeshDescription collisionMeshDescription = new CollisionMeshDescription();
-//      collisionMeshDescription.addCubeReferencedAtCenter(objectLength, objectWidth, objectHeight);
-//      collisionMeshDescription.setCollisionGroup(0xff);
-//      collisionMeshDescription.setCollisionMask(0xff);
-//      link.addCollisionMesh(collisionMeshDescription);
-//
-//      return link;
-//   }
+   //   private Link createContainerBoardLink(String name, Random random, Robot robot)
+   //   {
+   //      double objectWidth = 0.2;
+   //      double objectLength = 0.8;
+   //      double objectHeight = 0.2;
+   //      double objectMass = 10.0;
+   //
+   //      Link link = new Link(name);
+   //      link.setMassAndRadiiOfGyration(objectMass, objectLength / 2.0, objectWidth / 2.0, objectHeight / 2.0);
+   //      link.setComOffset(0.0, 0.0, 0.0);
+   //
+   //      Graphics3DObject linkGraphics = new Graphics3DObject();
+   //      linkGraphics.translate(0.0, 0.0, -objectHeight / 2.0);
+   //      AppearanceDefinition randomColor = YoAppearance.Aquamarine();
+   //
+   //      linkGraphics.addCube(objectLength, objectWidth, objectHeight, randomColor);
+   //      link.setLinkGraphics(linkGraphics);
+   //
+   //      CollisionMeshDescription collisionMeshDescription = new CollisionMeshDescription();
+   //      collisionMeshDescription.addCubeReferencedAtCenter(objectLength, objectWidth, objectHeight);
+   //      collisionMeshDescription.setCollisionGroup(0xff);
+   //      collisionMeshDescription.setCollisionMask(0xff);
+   //      link.addCollisionMesh(collisionMeshDescription);
+   //
+   //      return link;
+   //   }
 
    private LinkDescription createRandomBox(Random random, int i)
    {
-      double objectLength = RandomTools.generateRandomDouble(random, 0.04, 0.1);
-      double objectWidth = RandomTools.generateRandomDouble(random, 0.04, 0.2);
-      double objectHeight = RandomTools.generateRandomDouble(random, 0.04, 0.1);
-      double objectMass = RandomTools.generateRandomDouble(random, 0.2, 1.0);
+      double objectLength = sizeScale * RandomTools.generateRandomDouble(random, 0.04, 0.1);
+      double objectWidth = sizeScale * RandomTools.generateRandomDouble(random, 0.04, 0.2);
+      double objectHeight = sizeScale * RandomTools.generateRandomDouble(random, 0.04, 0.1);
+      double objectMass = massScale * RandomTools.generateRandomDouble(random, 0.2, 1.0);
 
       LinkDescription link = new LinkDescription("object" + i);
       link.setMassAndRadiiOfGyration(objectMass, objectLength / 2.0, objectWidth / 2.0, objectHeight / 2.0);
@@ -206,8 +219,8 @@ public class PileOfRandomObjectsRobot
 
    private LinkDescription createRandomSphere(Random random, int i)
    {
-      double objectRadius = RandomTools.generateRandomDouble(random, 0.01, 0.05);
-      double objectMass = RandomTools.generateRandomDouble(random, 0.2, 1.0);
+      double objectRadius = sizeScale * RandomTools.generateRandomDouble(random, 0.01, 0.05);
+      double objectMass = massScale * RandomTools.generateRandomDouble(random, 0.2, 1.0);
 
       LinkDescription link = new LinkDescription("object" + i);
       link.setMassAndRadiiOfGyration(objectMass, objectRadius / 2.0, objectRadius / 2.0, objectRadius / 2.0);
@@ -229,9 +242,9 @@ public class PileOfRandomObjectsRobot
 
    private LinkDescription createRandomCapsule(Random random, int i)
    {
-      double objectRadius = RandomTools.generateRandomDouble(random, 0.01, 0.05);
-      double objectHeight = 2.0 * objectRadius + RandomTools.generateRandomDouble(random, 0.02, 0.05);
-      double objectMass = RandomTools.generateRandomDouble(random, 0.2, 1.0);
+      double objectRadius = sizeScale * RandomTools.generateRandomDouble(random, 0.01, 0.05);
+      double objectHeight = sizeScale * 2.0 * objectRadius + RandomTools.generateRandomDouble(random, 0.02, 0.05);
+      double objectMass = massScale * RandomTools.generateRandomDouble(random, 0.2, 1.0);
 
       LinkDescription link = new LinkDescription("object" + i);
       link.setMassAndRadiiOfGyration(objectMass, objectRadius / 2.0, objectRadius / 2.0, objectHeight / 2.0);
@@ -253,9 +266,9 @@ public class PileOfRandomObjectsRobot
 
    private LinkDescription createRandomCylinder(Random random, int i)
    {
-      double objectHeight = RandomTools.generateRandomDouble(random, 0.05, 0.15);
-      double objectRadius = RandomTools.generateRandomDouble(random, 0.01, 0.10);
-      double objectMass = RandomTools.generateRandomDouble(random, 0.2, 1.0);
+      double objectHeight = sizeScale * RandomTools.generateRandomDouble(random, 0.05, 0.15);
+      double objectRadius = sizeScale * RandomTools.generateRandomDouble(random, 0.01, 0.10);
+      double objectMass = massScale * RandomTools.generateRandomDouble(random, 0.2, 1.0);
 
       LinkDescription link = new LinkDescription("object" + i);
       link.setMassAndRadiiOfGyration(objectMass, objectRadius / 2.0, objectRadius / 2.0, objectHeight / 2.0);
