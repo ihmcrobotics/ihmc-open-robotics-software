@@ -34,7 +34,6 @@ public class RhinoBeetleSimpleSimulation
    private static final double CONTROLLER_DT = 0.001;
    private static final boolean SHOW_EXPORT_TORQUE_AND_SPEED = true;
 
-
    public RhinoBeetleSimpleSimulation()
    {
       RhinoBeetleModelFactory modelFactory = new RhinoBeetleModelFactory();
