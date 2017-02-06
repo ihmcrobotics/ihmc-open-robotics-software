@@ -3,7 +3,6 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimiz
 import org.ejml.data.DenseMatrix64F;
 import org.junit.Assert;
 import org.junit.Test;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.projectionAndRecursionMultipliers.stateMatrices.swing.SwingEntryCMPProjectionMatrix;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
@@ -12,7 +11,7 @@ import us.ihmc.tools.testing.JUnitTools;
 import java.util.ArrayList;
 import java.util.Random;
 
-public class NewSwingExitCMPMatrixTest
+public class NewSwingStateEndMatrixTest
 {
    private static final double epsilon = 0.00001;
 
@@ -26,11 +25,11 @@ public class NewSwingExitCMPMatrixTest
       DoubleYoVariable exitCMPDurationInPercentOfStepTime = new DoubleYoVariable("exitCMPDurationInPercentOfStepTime", registry);
       DoubleYoVariable startOfSplineTime = new DoubleYoVariable("startOfSplineTime", registry);
 
-      NewSwingExitCMPMatrix swingExitCMPMatrix = new NewSwingExitCMPMatrix(doubleSupportSplitRatio,
+      NewSwingStateEndMatrix swingStateEndMatrix = new NewSwingStateEndMatrix(doubleSupportSplitRatio,
             exitCMPDurationInPercentOfStepTime, startOfSplineTime);
 
-      Assert.assertEquals("", 4, swingExitCMPMatrix.numRows);
-      Assert.assertEquals("", 1, swingExitCMPMatrix.numCols);
+      Assert.assertEquals("", 4, swingStateEndMatrix.numRows);
+      Assert.assertEquals("", 1, swingStateEndMatrix.numCols);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 1.0)
@@ -56,7 +55,7 @@ public class NewSwingExitCMPMatrixTest
       doubleSupportDurations.add(new DoubleYoVariable("upcomingDoubleSupportDuration", registry));
       singleSupportDurations.add(new DoubleYoVariable("singleSupportDuration", registry));
 
-      NewSwingExitCMPMatrix swingExitCMPMatrix = new NewSwingExitCMPMatrix(doubleSupportSplitRatio, exitCMPDurationInPercentOfStepTime, endOfSplineTime);
+      NewSwingStateEndMatrix swingStateEndMatrix = new NewSwingStateEndMatrix(doubleSupportSplitRatio, exitCMPDurationInPercentOfStepTime, endOfSplineTime);
 
       for (int i = 0; i < iters; i++)
       {
@@ -88,24 +87,21 @@ public class NewSwingExitCMPMatrixTest
 
          double upcomingInitialDoubleSupportDuration = splitRatio * upcomingDoubleSupportDuration;
          double timeSpentOnExitCMP = exitRatio * (singleSupportDuration + doubleSupportDuration);
+
          double projectionTime = endOfSpline - singleSupportDuration + timeSpentOnExitCMP - upcomingInitialDoubleSupportDuration;
          double projection = Math.exp(omega0 * projectionTime);
 
-         swingExitCMPMatrix.compute(doubleSupportDurations, singleSupportDurations, omega0);
+         swingStateEndMatrix.compute(doubleSupportDurations, singleSupportDurations, omega0);
 
          shouldBe.zero();
-         shouldBe.set(2, 0, 1.0 - projection);
-         shouldBe.set(3, 0, -omega0 * projection);
+         shouldBe.set(2, 0, projection);
+         shouldBe.set(3, 0, omega0 * projection);
 
-         JUnitTools.assertMatrixEquals(name, shouldBe, swingExitCMPMatrix, epsilon);
-
-         swingExitCMPMatrix.reset();
-         swingExitCMPMatrix.compute(doubleSupportDurations, singleSupportDurations, omega0);
-         JUnitTools.assertMatrixEquals(name, shouldBe, swingExitCMPMatrix, epsilon);
+         JUnitTools.assertMatrixEquals(name, shouldBe, swingStateEndMatrix, epsilon);
 
          shouldBe.zero();
-         swingExitCMPMatrix.reset();
-         JUnitTools.assertMatrixEquals(name, shouldBe, swingExitCMPMatrix, epsilon);
+         swingStateEndMatrix.reset();
+         JUnitTools.assertMatrixEquals(name, shouldBe, swingStateEndMatrix, epsilon);
       }
    }
 }

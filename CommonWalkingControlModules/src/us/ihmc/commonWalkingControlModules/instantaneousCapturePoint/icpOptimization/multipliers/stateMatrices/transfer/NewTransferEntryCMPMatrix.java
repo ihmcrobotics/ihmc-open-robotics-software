@@ -38,8 +38,8 @@ public class NewTransferEntryCMPMatrix extends DenseMatrix64F
 
          double stepProjection = (1.0 - endOfDoubleSupportProjection);
 
-         set(3, 0, stepProjection);
-         set(4, 0, -omega0 * endOfDoubleSupportProjection);
+         set(2, 0, stepProjection);
+         set(3, 0, -omega0 * endOfDoubleSupportProjection);
       }
       else
       {

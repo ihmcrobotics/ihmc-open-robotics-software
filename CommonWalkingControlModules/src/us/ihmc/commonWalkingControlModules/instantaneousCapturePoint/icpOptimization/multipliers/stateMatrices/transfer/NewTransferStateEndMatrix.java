@@ -36,8 +36,8 @@ public class NewTransferStateEndMatrix extends DenseMatrix64F
 
          double endOfDoubleSupportProjection = Math.exp(omega0 * endOfDoubleSupportDuration);
 
-         set(3, 0, endOfDoubleSupportProjection);
-         set(4, 0, omega0 * endOfDoubleSupportProjection);
+         set(2, 0, endOfDoubleSupportProjection);
+         set(3, 0, omega0 * endOfDoubleSupportProjection);
       }
       else
       {
