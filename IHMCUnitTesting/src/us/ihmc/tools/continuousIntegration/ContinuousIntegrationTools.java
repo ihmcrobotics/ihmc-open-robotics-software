@@ -4,9 +4,9 @@ public class ContinuousIntegrationTools
 {
    public static boolean isRunningOnContinuousIntegrationServer()
    {
-      String isBamboo = System.getenv("IS_BAMBOO");
-      
-      if (isBamboo == null || !isBamboo.equals("true"))
+      String runningOnContinuousIntegrationServer = System.getenv("RUNNING_ON_CONTINUOUS_INTEGRATION_SERVER");
+
+      if (runningOnContinuousIntegrationServer == null || !runningOnContinuousIntegrationServer.equals("true"))
       {
          return false;
       }
