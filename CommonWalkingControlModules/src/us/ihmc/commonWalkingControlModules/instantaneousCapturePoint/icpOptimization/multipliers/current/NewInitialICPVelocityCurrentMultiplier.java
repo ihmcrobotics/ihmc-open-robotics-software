@@ -27,7 +27,7 @@ public class NewInitialICPVelocityCurrentMultiplier
    public NewInitialICPVelocityCurrentMultiplier(YoVariableRegistry registry)
    {
       positionMultiplier = new DoubleYoVariable("InitialICPVelocityCurrentMultiplier", registry);
-      velocityMultiplier = new DoubleYoVariable("InitialICPCVelocityurrentVelocityMultiplier", registry);
+      velocityMultiplier = new DoubleYoVariable("InitialICPCVelocityCurrentVelocityMultiplier", registry);
 
       cubicMatrix = new CubicMatrix();
       cubicDerivativeMatrix = new CubicDerivativeMatrix();
