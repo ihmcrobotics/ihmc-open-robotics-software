@@ -64,4 +64,9 @@ public class MocapToPelvisFrameConverter
       pelvisPose.changeFrame(ReferenceFrame.getWorldFrame());
       pelvisPose.getRigidBodyTransform(pelvisToWorldTransformToPack);
    }
+
+   public static RigidBodyTransform getPelvisToMarker2Transform()
+   {
+      return pelvisToMarker2Transform;
+   }
 }
