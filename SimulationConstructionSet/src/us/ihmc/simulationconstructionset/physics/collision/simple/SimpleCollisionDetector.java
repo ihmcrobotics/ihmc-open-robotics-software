@@ -13,7 +13,6 @@ import us.ihmc.geometry.polytope.SupportingVertexHolder;
 import us.ihmc.robotics.geometry.BoundingBox3d;
 import us.ihmc.robotics.geometry.LineSegment3d;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.physics.CollisionShape;
 import us.ihmc.simulationconstructionset.physics.CollisionShapeDescription;
 import us.ihmc.simulationconstructionset.physics.CollisionShapeFactory;
@@ -27,25 +26,10 @@ public class SimpleCollisionDetector implements ScsCollisionDetector
    // Temporary variables for computation:
    private final Point3d centerOne = new Point3d();
    private final Point3d centerTwo = new Point3d();
-   private final Vector3d centerToCenterVector = new Vector3d();
-
    private final Vector3d tempVector = new Vector3d();
-
-   private double objectSmoothingRadius = 0.00003;
 
    public SimpleCollisionDetector()
    {
-      this(0.00003);
-   }
-
-   public SimpleCollisionDetector(double objectSmoothingRadius)
-   {
-      this.objectSmoothingRadius = objectSmoothingRadius;
-   }
-
-   public void setObjectSmoothingRadius(double objectSmoothingRadius)
-   {
-      this.objectSmoothingRadius = objectSmoothingRadius;
    }
 
    @Override
@@ -57,18 +41,6 @@ public class SimpleCollisionDetector implements ScsCollisionDetector
    public CollisionShapeFactory getShapeFactory()
    {
       return new SimpleCollisionShapeFactory(this);
-   }
-
-   @Override
-   public void removeShape(Link link)
-   {
-   }
-
-   @Override
-   public CollisionShape lookupCollisionShape(Link link)
-   {
-      //TODO: What should we be doing here?
-      return null;
    }
 
    private final Random random = new Random(1776L);
