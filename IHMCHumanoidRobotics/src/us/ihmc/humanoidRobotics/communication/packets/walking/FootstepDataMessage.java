@@ -16,6 +16,7 @@ import us.ihmc.communication.ros.generators.RosMessagePacket;
 import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
 import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
+import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
@@ -169,6 +170,11 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
 
    public FootstepDataMessage(Footstep footstep)
    {
+      this(footstep, null);
+   }
+
+   public FootstepDataMessage(Footstep footstep, FootstepTiming timing)
+   {
       origin = FootstepOrigin.AT_ANKLE_FRAME;
       robotSide = footstep.getRobotSide();
       location = new Point3d();
@@ -206,9 +212,12 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
             trajectoryWaypoints[i] = new Point3d(footstep.getSwingWaypoints().get(i));
       }
 
-      hasTimings = footstep.hasTimings();
-      swingTime = footstep.getSwingTime();
-      transferTime = footstep.getTransferTime();
+      if (timing != null)
+      {
+         hasTimings = true;
+         swingTime = timing.getSwingTime();
+         transferTime = timing.getTransferTime();
+      }
    }
 
    public FootstepOrigin getOrigin()

@@ -9,7 +9,6 @@ import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 
-import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
@@ -46,15 +45,6 @@ public class Footstep
    // foot trajectory generation
    public TrajectoryType trajectoryType = TrajectoryType.DEFAULT;
    public double swingHeight = 0;
-
-   // swing and transfer (before the step) time can be specified individually for a footstep
-   private boolean hasTimings = false;
-   private double swingTime = Double.NaN;
-   private double transferTime = Double.NaN;
-
-   // swing start time if absolute timing for the footstep is requested
-   private boolean hasAbsoluteTime = false;
-   private double swingStartTime = Double.NaN;
 
    public Footstep(RigidBody endEffector, RobotSide robotSide, ReferenceFrame soleFrame, PoseReferenceFrame poseReferenceFrame, boolean trustHeight)
    {
@@ -508,55 +498,6 @@ public class Footstep
       this.scriptedFootstep = scriptedFootstep;
    }
 
-   public void setTimings(double swingTime, double transferTime)
-   {
-      hasTimings = true;
-      this.swingTime = swingTime;
-      this.transferTime = transferTime;
-   }
-
-   public boolean hasTimings()
-   {
-      return hasTimings;
-   }
-
-   public double getSwingTime()
-   {
-      return swingTime;
-   }
-
-   public double getTransferTime()
-   {
-      return transferTime;
-   }
-
-   public double getStepTime()
-   {
-      return swingTime + transferTime;
-   }
-
-   public void setAbsoluteTime(double swingStartTime)
-   {
-      hasAbsoluteTime = true;
-      this.swingStartTime = swingStartTime;
-   }
-
-   public boolean hasAbsoluteTime()
-   {
-      return hasAbsoluteTime;
-   }
-
-   public double getSwingStartTime()
-   {
-      return swingStartTime;
-   }
-
-   public void removeAbsoluteTime()
-   {
-      hasAbsoluteTime = false;
-      swingStartTime = Double.NaN;
-   }
-
    public boolean epsilonEquals(Footstep otherFootstep, double epsilon)
    {
       boolean arePosesEqual = ankleReferenceFrame.epsilonEquals(otherFootstep.ankleReferenceFrame, epsilon);
@@ -575,18 +516,7 @@ public class Footstep
          }
       }
 
-      boolean sameTimings = hasTimings == otherFootstep.hasTimings;
-      if (hasTimings)
-      {
-         sameTimings = sameTimings && MathTools.epsilonEquals(swingTime, otherFootstep.swingTime, epsilon);
-         sameTimings = sameTimings && MathTools.epsilonEquals(transferTime, otherFootstep.transferTime, epsilon);
-      }
-
-      boolean sameAbsoluteTime = hasAbsoluteTime == otherFootstep.hasAbsoluteTime;
-      if (hasAbsoluteTime)
-         sameAbsoluteTime = sameAbsoluteTime && MathTools.epsilonEquals(swingStartTime, otherFootstep.swingStartTime, epsilon);
-
-      return arePosesEqual && bodiesHaveTheSameName && sameRobotSide && isTrustHeightTheSame && sameWaypoints && sameTimings && sameAbsoluteTime;
+      return arePosesEqual && bodiesHaveTheSameName && sameRobotSide && isTrustHeightTheSame && sameWaypoints;
    }
 
    public String toString()
