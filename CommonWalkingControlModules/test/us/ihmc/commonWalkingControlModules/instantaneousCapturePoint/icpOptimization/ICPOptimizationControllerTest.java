@@ -317,11 +317,6 @@ public class ICPOptimizationControllerTest
 
    private static final CapturePointPlannerParameters icpPlannerParameters = new CapturePointPlannerParameters()
    {
-      @Override public double getDoubleSupportInitialTransferDuration()
-      {
-         return 1.0;
-      }
-
       @Override public double getEntryCMPInsideOffset()
       {
          return 0;

@@ -16,13 +16,6 @@ public class ValkyrieCapturePointPlannerParameters extends CapturePointPlannerPa
 
    /** {@inheritDoc} */
    @Override
-   public double getDoubleSupportInitialTransferDuration()
-   {
-      return runningOnRealRobot ? 2.0 : 1.0;
-   }
-
-   /** {@inheritDoc} */
-   @Override
    public double getAdditionalTimeForSingleSupport()
    {
       return 0.1;
