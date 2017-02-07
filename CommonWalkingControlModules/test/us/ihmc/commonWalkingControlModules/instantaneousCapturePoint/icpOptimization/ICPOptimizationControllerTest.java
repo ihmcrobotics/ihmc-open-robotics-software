@@ -65,8 +65,6 @@ public class ICPOptimizationControllerTest
       ICPOptimizationController icpOptimizationController = new ICPOptimizationController(icpPlannerParameters, icpOptimizationParameters, null, bipedSupportPolygons,
             contactableFeet, 0.001, registry, null);
       icpOptimizationController.setStepDurations(doubleSupportDuration, singleSupportDuration);
-      icpPlanner.setDefaultSingleSupportTime(singleSupportDuration);
-      icpPlanner.setDefaultDoubleSupportTime(doubleSupportDuration);
       icpPlanner.setOmega0(omega.getDoubleValue());
 
       icpPlanner.clearPlan();
@@ -76,7 +74,8 @@ public class ICPOptimizationControllerTest
       double stepWidth = 0.1;
       FootstepTestHelper footstepTestHelper = new FootstepTestHelper(contactableFeet, ankleFrames);
       List<Footstep> footsteps = footstepTestHelper.createFootsteps(stepWidth, stepLength, 3);
-      FootstepTiming defaultTiming = new FootstepTiming(1.2, 0.6);
+      FootstepTiming defaultTiming = new FootstepTiming(singleSupportDuration, doubleSupportDuration);
+      icpPlanner.setFinalTransferTime(doubleSupportDuration);
 
       for (int i = 0; i < footsteps.size(); i++)
       {
