@@ -328,7 +328,7 @@ public abstract class SCSCollisionDetectorTest
 
          CollisionShape shapeA = contacts.getShapeA();
          CollisionShape shapeB = contacts.getShapeB();
-         assertTrue((shapeA.getCollisionMask() & shapeB.getGroupMask()) != 0 || (shapeB.getCollisionMask() & shapeA.getGroupMask()) != 0);
+         assertTrue((shapeA.getCollisionMask() & shapeB.getCollisionGroup()) != 0 || (shapeB.getCollisionMask() & shapeA.getCollisionGroup()) != 0);
       }
 
       @Override

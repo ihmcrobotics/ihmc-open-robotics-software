@@ -206,7 +206,7 @@ public class RobotDescriptionTest
       childLinkThree.setLinkGraphics(childGraphicsThree);
 
       CollisionMeshDescription childMeshThree = new CollisionMeshDescription();
-      childLinkThree.setCollisionMesh(childMeshThree);
+      childLinkThree.addCollisionMesh(childMeshThree);
 
       childJointThree.setLink(childLinkThree);
 
@@ -233,13 +233,13 @@ public class RobotDescriptionTest
 
       assertNull(robotDescription.getJointDescription("noSuchJoint"));
       assertNull(robotDescription.getGraphicsObject("noSuchJoint"));
-      assertNull(robotDescription.getCollisionObject("noSuchJoint"));
+      assertNull(robotDescription.getCollisionObjects("noSuchJoint"));
 
       Graphics3DObject linkGraphicsCheck = robotDescription.getGraphicsObject("childJointThree");
       assertTrue(linkGraphicsCheck == childGraphicsThree);
 
-      CollisionMeshDescription collisionMeshCheck = robotDescription.getCollisionObject("childJointThree");
-      assertTrue(collisionMeshCheck == childMeshThree);
+      ArrayList<CollisionMeshDescription> collisionMeshCheck = robotDescription.getCollisionObjects("childJointThree");
+      assertTrue(collisionMeshCheck.get(0) == childMeshThree);
 
    }
 
