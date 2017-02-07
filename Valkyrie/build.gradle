@@ -161,6 +161,7 @@ task deployLocal(dependsOn: jar) {
    doLast {
       def dest = new File(System.properties['user.home'], directory)
       def lib = new File(dest, 'lib')
+      lib.deleteDir();
       lib.mkdirs();
 
       configurations.runtime.each {
@@ -199,6 +200,7 @@ task deploy(dependsOn: ['jar']) {
 
       ssh.run {
          session(remotes.valkyrieRealtimeComputer) {
+            execute("rm -rf " + directory + "/lib")
             execute("mkdir -p " + directory + "/lib")
             execute("mkdir -p " + directory + "/Configurations")
 
@@ -218,6 +220,7 @@ task deploy(dependsOn: ['jar']) {
          }
 
          session(remotes.valkyrieNonRealtimeComputer) {
+            execute("rm -rf " + directory + "/lib")
             execute("mkdir -p " + directory + "/lib")
             execute("mkdir -p " + directory + "/Configurations")
 
