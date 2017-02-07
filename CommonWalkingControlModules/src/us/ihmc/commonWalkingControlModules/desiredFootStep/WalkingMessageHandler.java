@@ -427,7 +427,7 @@ public class WalkingMessageHandler
    public double getNextTransferTime()
    {
       if (upcomingFootstepTimings.isEmpty())
-         return Double.NaN;
+         return getDefaultTransferTime();
       return upcomingFootstepTimings.get(0).getTransferTime();
    }
 
@@ -439,7 +439,7 @@ public class WalkingMessageHandler
    public double getNextSwingTime()
    {
       if (upcomingFootstepTimings.isEmpty())
-         return Double.NaN;
+         return getDefaultSwingTime();
       return upcomingFootstepTimings.get(0).getSwingTime();
    }
 
@@ -456,7 +456,7 @@ public class WalkingMessageHandler
    public double getNextStepTime()
    {
       if (upcomingFootstepTimings.isEmpty())
-         return Double.NaN;
+         return getDefaultStepTime();
       return upcomingFootstepTimings.get(0).getStepTime();
    }
 
