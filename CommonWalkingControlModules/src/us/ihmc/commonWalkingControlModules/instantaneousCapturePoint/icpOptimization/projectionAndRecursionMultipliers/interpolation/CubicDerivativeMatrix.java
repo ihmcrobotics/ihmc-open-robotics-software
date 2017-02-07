@@ -30,6 +30,11 @@ public class CubicDerivativeMatrix extends DenseMatrix64F
    public void update(double timeRemaining)
    {
       double timeInCurrentState = duration - timeRemaining;
+      update(timeInCurrentState, true);
+   }
+
+   public void update(double timeInCurrentState, boolean usingCurrentTime)
+   {
       timeInCurrentState = MathTools.clipToMinMax(timeInCurrentState, 0.0, duration);
       cubicTimeMatrix.setCurrentTime(timeInCurrentState);
 

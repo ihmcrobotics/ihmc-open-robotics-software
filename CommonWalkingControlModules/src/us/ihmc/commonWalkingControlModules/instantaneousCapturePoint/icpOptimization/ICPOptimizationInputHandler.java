@@ -254,10 +254,10 @@ public class ICPOptimizationInputHandler
    private final FramePoint2d cmpOffsetRecursionEffect = new FramePoint2d();
 
    public void computeCMPConstantEffects(FramePoint2d cmpConstantEffectsToPack, FramePoint2d beginningOfStateICP, FrameVector2d beginningOfStateICPVelocity,
-         ArrayList<YoFramePoint2d> upcomingFootstepLocations, double timeRemaining, double omega0, int numberOfFootstepsToConsider, boolean useTwoCMPs,
+         ArrayList<YoFramePoint2d> upcomingFootstepLocations, double timeRemaining, double timeInState, double omega0, int numberOfFootstepsToConsider, boolean useTwoCMPs,
          boolean isInTransfer, boolean useInitialICP)
    {
-      computeStanceCMPProjection(stanceCMPProjection, timeRemaining, useTwoCMPs, isInTransfer, useInitialICP, omega0);
+      computeStanceCMPProjection(stanceCMPProjection, timeRemaining, timeInState, useTwoCMPs, isInTransfer, useInitialICP, omega0);
       computeBeginningOfStateICPProjection(beginningOfStateICPProjection, beginningOfStateICP);
       computeBeginningOfStateICPVelocityProjection(beginningOfStateICPVelocityProjection, beginningOfStateICPVelocity);
 
@@ -278,12 +278,12 @@ public class ICPOptimizationInputHandler
    private final FramePoint2d stanceEntryCMP2d = new FramePoint2d(worldFrame);
    private final FramePoint2d stanceExitCMP2d = new FramePoint2d(worldFrame);
 
-   private void computeStanceCMPProjection(FramePoint2d stanceCMPProjectionToPack, double timeRemainingInState, boolean useTwoCMPs, boolean isInTransfer,
+   private void computeStanceCMPProjection(FramePoint2d stanceCMPProjectionToPack, double timeRemainingInState, double timeInCurrentState, boolean useTwoCMPs, boolean isInTransfer,
          boolean useInitialICP, double omega0)
    {
       if (useNewMultiplierCalculator)
       {
-         stateMultiplierCalculator.computeCurrentMultipliers(timeRemainingInState, useTwoCMPs, isInTransfer, omega0);
+         stateMultiplierCalculator.computeCurrentMultipliers(timeInCurrentState, useTwoCMPs, isInTransfer, omega0);
       }
       else
       {

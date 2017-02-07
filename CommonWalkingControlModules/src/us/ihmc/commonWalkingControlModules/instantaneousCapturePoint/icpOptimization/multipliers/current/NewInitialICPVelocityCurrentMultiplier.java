@@ -51,11 +51,11 @@ public class NewInitialICPVelocityCurrentMultiplier
       return velocityMultiplier.getDoubleValue();
    }
 
-   public void compute(ArrayList<DoubleYoVariable> doubleSupportDurations, double timeRemaining, boolean isInTransfer)
+   public void compute(ArrayList<DoubleYoVariable> doubleSupportDurations, double timeInState, boolean isInTransfer)
    {
       double positionMultiplier, velocityMultiplier;
       if (isInTransfer)
-         positionMultiplier = computeInTransfer(doubleSupportDurations, timeRemaining);
+         positionMultiplier = computeInTransfer(doubleSupportDurations, timeInState);
       else
          positionMultiplier = 0.0;
       this.positionMultiplier.set(positionMultiplier);
@@ -68,16 +68,16 @@ public class NewInitialICPVelocityCurrentMultiplier
       this.velocityMultiplier.set(velocityMultiplier);
    }
 
-   private double computeInTransfer(ArrayList<DoubleYoVariable> doubleSupportDurations, double timeRemaining)
+   private double computeInTransfer(ArrayList<DoubleYoVariable> doubleSupportDurations, double timeInState)
    {
       transferInitialICPVelocityMatrix.compute();
 
       double splineDuration = doubleSupportDurations.get(0).getDoubleValue();
 
       cubicDerivativeMatrix.setSegmentDuration(splineDuration);
-      cubicDerivativeMatrix.update(timeRemaining);
+      cubicDerivativeMatrix.update(timeInState, true);
       cubicMatrix.setSegmentDuration(splineDuration);
-      cubicMatrix.update(timeRemaining);
+      cubicMatrix.update(timeInState, true);
 
       CommonOps.mult(cubicMatrix, transferInitialICPVelocityMatrix, matrixOut);
 
