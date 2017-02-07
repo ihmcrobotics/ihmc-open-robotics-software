@@ -257,7 +257,7 @@ public class IMUYawDriftEstimator implements YawDriftProvider
          // Save the estimated drift for the next stance.
          if (numberOfFeetTrusted.getIntegerValue() == numberOfFeet)
          {
-            previouslyEstimatedYawDrift.add(estimatedFilteredYawDrift.getDoubleValue());
+            previouslyEstimatedYawDrift.set(totalEstimatedYawDrift.getDoubleValue());
          }
       }
 
