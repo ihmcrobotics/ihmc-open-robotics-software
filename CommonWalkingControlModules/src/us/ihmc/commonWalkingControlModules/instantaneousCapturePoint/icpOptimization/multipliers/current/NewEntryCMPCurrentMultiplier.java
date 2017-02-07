@@ -37,7 +37,7 @@ public class NewEntryCMPCurrentMultiplier
          DoubleYoVariable endOfSplineTime, DoubleYoVariable totalTrajectoryTime, boolean projectForward, YoVariableRegistry registry)
    {
       positionMultiplier = new DoubleYoVariable("EntryCMPCurrentMultiplier", registry);
-      velocityMultiplier = new DoubleYoVariable("EntryCMPVelocityCurrentMultiplier", registry);
+      velocityMultiplier = new DoubleYoVariable("EntryCMPCurrentVelocityMultiplier", registry);
 
       this.exitCMPRatio = exitCMPRatio;
       this.defaultDoubleSupportSplitRatio = defaultDoubleSupportSplitRatio;

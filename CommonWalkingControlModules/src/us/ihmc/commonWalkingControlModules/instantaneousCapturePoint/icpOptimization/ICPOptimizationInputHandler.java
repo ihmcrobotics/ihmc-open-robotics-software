@@ -162,15 +162,23 @@ public class ICPOptimizationInputHandler
    {
       double steppingDuration = doubleSupportDuration.getDoubleValue() + singleSupportDuration.getDoubleValue();
       if (useTwoCMPs)
+      {
          CapturePointTools.computeDesiredCornerPoints(entryCornerPoints, exitCornerPoints, referenceCMPsCalculator.getEntryCMPs(), referenceCMPsCalculator.getExitCMPs(),
                steppingDuration, exitCMPDurationInPercentOfStepTime.getDoubleValue(), omega0);
+      }
       else
+      {
          CapturePointTools.computeDesiredCornerPoints(entryCornerPoints, referenceCMPsCalculator.getEntryCMPs(), false, steppingDuration, omega0);
-
+      }
    }
 
-   public void update(boolean useTwoCMPs, double omega0)
+   public void update(boolean useTwoCMPs, RobotSide supportSide, boolean isStanding, boolean isInTransfer, double omega0)
    {
+      referenceCMPsCalculator.setUseTwoCMPsPerSupport(useTwoCMPs);
+      if (isInTransfer)
+         referenceCMPsCalculator.computeReferenceCMPsStartingFromDoubleSupport(isStanding, supportSide);
+      else
+         referenceCMPsCalculator.computeReferenceCMPsStartingFromSingleSupport(supportSide);
       referenceCMPsCalculator.update();
       updateCornerPoints(useTwoCMPs, omega0);
    }
@@ -213,11 +221,15 @@ public class ICPOptimizationInputHandler
          if (numberOfFootstepsToConsider == 0)
          {
             if (isInTransfer)
+            {
                CapturePointTools.computeDesiredCapturePointPosition(omega0, doubleSupportTimeSpentBeforeEntryCornerPoint, entryCornerPoints.get(1),
                      referenceCMPsCalculator.getEntryCMPs().get(1), finalICP);
+            }
             else
+            {
                CapturePointTools.computeDesiredCapturePointPosition(omega0, timeToSpendOnFinalCMPBeforeDoubleSupport, exitCornerPoints.get(0),
                      referenceCMPsCalculator.getExitCMPs().get(0), finalICP);
+            }
          }
          else
          {
@@ -228,11 +240,15 @@ public class ICPOptimizationInputHandler
                stepIndexToPoll = numberOfFootstepsToConsider;
 
             if (useTwoCMPs)
+            {
                CapturePointTools.computeDesiredCapturePointPosition(omega0, timeToSpendOnFinalCMPBeforeDoubleSupport, exitCornerPoints.get(stepIndexToPoll),
                      referenceCMPsCalculator.getExitCMPs().get(stepIndexToPoll), finalICP);
+            }
             else
+            {
                CapturePointTools.computeDesiredCapturePointPosition(omega0, doubleSupportTimeSpentBeforeEntryCornerPoint, entryCornerPoints.get(stepIndexToPoll),
                      referenceCMPsCalculator.getEntryCMPs().get(stepIndexToPoll), finalICP);
+            }
          }
       }
    }

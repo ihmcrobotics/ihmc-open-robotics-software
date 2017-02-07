@@ -13,7 +13,7 @@ import java.util.ArrayList;
 
 public class NewStateMultiplierCalculator
 {
-   private static final boolean PROJECT_FORWARD = false;
+   private static final boolean PROJECT_FORWARD = true;
    private static final String namePrefix = "controller";
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
@@ -298,7 +298,7 @@ public class NewStateMultiplierCalculator
       referenceICPToPack.scale(stateEndCurrentMultiplier.getPositionMultiplier());
 
       referenceICPVelocityToPack.set(predictedICPCornerPoint);
-      referenceICPToPack.scale(stateEndCurrentMultiplier.getVelocityMultiplier());
+      referenceICPVelocityToPack.scale(stateEndCurrentMultiplier.getVelocityMultiplier());
 
       if (!entryCMP.containsNaN())
       {
