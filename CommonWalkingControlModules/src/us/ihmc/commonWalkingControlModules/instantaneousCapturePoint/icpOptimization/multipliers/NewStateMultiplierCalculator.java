@@ -166,7 +166,7 @@ public class NewStateMultiplierCalculator
       stateEndCurrentMultiplier.reset();
    }
 
-   public void computeCurrentMultipliers(double timeRemaining, boolean useTwoCMPs, boolean isInTransfer, double omega0)
+   public void computeCurrentMultipliers(double timeInState, boolean useTwoCMPs, boolean isInTransfer, double omega0)
    {
       resetCurrentMultipliers();
 
@@ -175,13 +175,11 @@ public class NewStateMultiplierCalculator
          updateSegmentedSingleSupportTrajectory(isInTransfer);
       }
 
-      Math.max(timeRemaining, 0.0);
-
-      exitCMPCurrentMultiplier.compute(doubleSupportDurations, singleSupportDurations, timeRemaining, useTwoCMPs, isInTransfer, omega0);
-      entryCMPCurrentMultiplier.compute(doubleSupportDurations, singleSupportDurations, timeRemaining, useTwoCMPs, isInTransfer, omega0);
-      initialICPCurrentMultiplier.compute(doubleSupportDurations, singleSupportDurations, timeRemaining, useTwoCMPs, isInTransfer, omega0);
-      initialICPVelocityCurrentMultiplier.compute(doubleSupportDurations, timeRemaining, isInTransfer);
-      stateEndCurrentMultiplier.compute(doubleSupportDurations, singleSupportDurations, timeRemaining, useTwoCMPs, isInTransfer, omega0);
+      exitCMPCurrentMultiplier.compute(doubleSupportDurations, singleSupportDurations, timeInState, useTwoCMPs, isInTransfer, omega0);
+      entryCMPCurrentMultiplier.compute(doubleSupportDurations, singleSupportDurations, timeInState, useTwoCMPs, isInTransfer, omega0);
+      initialICPCurrentMultiplier.compute(doubleSupportDurations, singleSupportDurations, timeInState, useTwoCMPs, isInTransfer, omega0);
+      initialICPVelocityCurrentMultiplier.compute(doubleSupportDurations, timeInState, isInTransfer);
+      stateEndCurrentMultiplier.compute(doubleSupportDurations, singleSupportDurations, timeInState, useTwoCMPs, isInTransfer, omega0);
    }
 
    private void updateSegmentedSingleSupportTrajectory(boolean isInTransfer)

@@ -89,7 +89,7 @@ public class NewInitialICPVelocityCurrentMultiplierTest
          CommonOps.mult(positionMatrix, initialICPMatrix, position);
          CommonOps.mult(velocityMatrix, initialICPMatrix, velocity);
 
-         initialICPVelocityCurrentMultiplier.compute(doubleSupportDurations, timeRemaining, isInTransfer);
+         initialICPVelocityCurrentMultiplier.compute(doubleSupportDurations, timeInCurrentState, isInTransfer);
 
          Assert.assertEquals(position.get(0, 0), initialICPVelocityCurrentMultiplier.getPositionMultiplier(), epsilon);
          Assert.assertEquals(velocity.get(0, 0), initialICPVelocityCurrentMultiplier.getVelocityMultiplier(), epsilon);

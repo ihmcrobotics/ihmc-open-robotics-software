@@ -71,18 +71,18 @@ public class NewEntryCMPCurrentMultiplier
       return velocityMultiplier.getDoubleValue();
    }
 
-   public void compute(ArrayList<DoubleYoVariable> doubleSupportDurations, ArrayList<DoubleYoVariable> singleSupportDurations, double timeRemaining,
+   public void compute(ArrayList<DoubleYoVariable> doubleSupportDurations, ArrayList<DoubleYoVariable> singleSupportDurations, double timeInState,
          boolean useTwoCMPs, boolean isInTransfer, double omega0)
    {
       double positionMultiplier, velocityMultiplier;
       if (isInTransfer)
       {
-         positionMultiplier = computeInTransfer(doubleSupportDurations, timeRemaining, useTwoCMPs, omega0);
+         positionMultiplier = computeInTransfer(doubleSupportDurations, timeInState, useTwoCMPs, omega0);
       }
       else
       {
          if (useTwoCMPs)
-            positionMultiplier = computeSegmentedSwing(doubleSupportDurations, singleSupportDurations, timeRemaining, omega0);
+            positionMultiplier = computeSegmentedSwing(doubleSupportDurations, singleSupportDurations, timeInState, omega0);
          else
             positionMultiplier = computeInSwingOneCMP();
       }
@@ -95,7 +95,7 @@ public class NewEntryCMPCurrentMultiplier
       else
       {
          if (useTwoCMPs)
-            velocityMultiplier = computeSegmentedSwingVelocity(timeRemaining, omega0);
+            velocityMultiplier = computeSegmentedSwingVelocity(timeInState, omega0);
          else
             velocityMultiplier = computeInSwingOneCMPVelocity();
       }
@@ -106,16 +106,16 @@ public class NewEntryCMPCurrentMultiplier
 
 
 
-   private double computeInTransfer(ArrayList<DoubleYoVariable> doubleSupportDurations, double timeRemaining, boolean useTwoCMPs, double omega0)
+   private double computeInTransfer(ArrayList<DoubleYoVariable> doubleSupportDurations, double timeInState, boolean useTwoCMPs, double omega0)
    {
       transferEntryCMPMatrix.compute(doubleSupportDurations, useTwoCMPs, omega0);
 
       double splineDuration = doubleSupportDurations.get(0).getDoubleValue();
 
       cubicDerivativeMatrix.setSegmentDuration(splineDuration);
-      cubicDerivativeMatrix.update(timeRemaining);
+      cubicDerivativeMatrix.update(timeInState, true);
       cubicMatrix.setSegmentDuration(splineDuration);
-      cubicMatrix.update(timeRemaining);
+      cubicMatrix.update(timeInState, true);
 
       CommonOps.mult(cubicMatrix, transferEntryCMPMatrix, matrixOut);
 
@@ -145,16 +145,14 @@ public class NewEntryCMPCurrentMultiplier
 
 
    private double computeSegmentedSwing(ArrayList<DoubleYoVariable> doubleSupportDurations, ArrayList<DoubleYoVariable> singleSupportDurations,
-         double timeRemaining, double omega0)
+         double timeInState, double omega0)
    {
-      double timeInState = totalTrajectoryTime.getDoubleValue() - timeRemaining;
-
       if (timeInState < startOfSplineTime.getDoubleValue())
          return computeSwingFirstSegment(doubleSupportDurations, singleSupportDurations, timeInState, omega0);
       else if (timeInState >= endOfSplineTime.getDoubleValue())
          return computeSwingThirdSegment();
       else
-         return computeSwingSecondSegment(timeRemaining, omega0);
+         return computeSwingSecondSegment(timeInState, omega0);
    }
 
 
@@ -183,19 +181,18 @@ public class NewEntryCMPCurrentMultiplier
       }
    }
 
-   private double computeSwingSecondSegment(double timeRemaining, double omega0)
+   private double computeSwingSecondSegment(double timeInState, double omega0)
    {
       swingEntryCMPMatrix.compute(omega0);
 
-      double lastSegmentDuration = totalTrajectoryTime.getDoubleValue() - endOfSplineTime.getDoubleValue();
-      double timeRemainingInSpline = timeRemaining - lastSegmentDuration;
+      double timeInSpline = timeInState - startOfSplineTime.getDoubleValue();
       double splineDuration = endOfSplineTime.getDoubleValue() - startOfSplineTime.getDoubleValue();
 
       cubicMatrix.setSegmentDuration(splineDuration);
-      cubicMatrix.update(timeRemainingInSpline);
+      cubicMatrix.update(timeInSpline, true);
 
       cubicDerivativeMatrix.setSegmentDuration(splineDuration);
-      cubicDerivativeMatrix.update(timeRemainingInSpline);
+      cubicDerivativeMatrix.update(timeInSpline, true);
 
       CommonOps.mult(cubicMatrix, swingEntryCMPMatrix, matrixOut);
 
@@ -210,10 +207,8 @@ public class NewEntryCMPCurrentMultiplier
 
 
 
-   private double computeSegmentedSwingVelocity(double timeRemaining, double omega0)
+   private double computeSegmentedSwingVelocity(double timeInState, double omega0)
    {
-      double timeInState = totalTrajectoryTime.getDoubleValue() - timeRemaining;
-
       if (timeInState < startOfSplineTime.getDoubleValue())
          return computeSwingFirstSegmentVelocity(omega0);
       else if (timeInState >= endOfSplineTime.getDoubleValue())

@@ -75,9 +75,8 @@ public class NewExitCMPCurrentMultiplierTest
          double doubleSupportDuration = doubleSupportDurations.get(0).getDoubleValue();
 
          double timeInCurrentState = random.nextDouble() * doubleSupportDuration;
-         double timeRemaining = doubleSupportDuration - timeInCurrentState;
 
-         exitCMPCurrentMultiplier.compute(doubleSupportDurations, singleSupportDurations, timeRemaining, useTwoCMPs, isInTransfer, omega);
+         exitCMPCurrentMultiplier.compute(doubleSupportDurations, singleSupportDurations, timeInCurrentState, useTwoCMPs, isInTransfer, omega);
 
          Assert.assertEquals(0.0, exitCMPCurrentMultiplier.getPositionMultiplier(), epsilon);
          Assert.assertEquals(0.0, exitCMPCurrentMultiplier.getVelocityMultiplier(), epsilon);
@@ -146,9 +145,8 @@ public class NewExitCMPCurrentMultiplierTest
          boolean useTwoCMPs = true;
 
          double timeInCurrentState = random.nextDouble() * startOfSpline;
-         double timeRemaining = singleSupportDuration - timeInCurrentState;
 
-         exitCMPCurrentMultiplier.compute(doubleSupportDurations, singleSupportDurations, timeRemaining, useTwoCMPs, isInTransfer, omega);
+         exitCMPCurrentMultiplier.compute(doubleSupportDurations, singleSupportDurations, timeInCurrentState, useTwoCMPs, isInTransfer, omega);
 
          Assert.assertEquals(0.0, exitCMPCurrentMultiplier.getPositionMultiplier(), epsilon);
          Assert.assertEquals(0.0, exitCMPCurrentMultiplier.getVelocityMultiplier(), epsilon);
@@ -238,7 +236,7 @@ public class NewExitCMPCurrentMultiplierTest
          CommonOps.mult(cubicMatrix, exitCMPMatrix, positionMatrixOut);
          CommonOps.mult(cubicDerivativeMatrix, exitCMPMatrix, velocityMatrixOut);
 
-         exitCMPCurrentMultiplier.compute(doubleSupportDurations, singleSupportDurations, timeRemaining, useTwoCMPs, isInTransfer, omega);
+         exitCMPCurrentMultiplier.compute(doubleSupportDurations, singleSupportDurations, timeInCurrentState, useTwoCMPs, isInTransfer, omega);
 
          Assert.assertEquals("iter = " + iter, positionMatrixOut.get(0, 0), exitCMPCurrentMultiplier.getPositionMultiplier(), epsilon);
          Assert.assertEquals("iter = " + iter, velocityMatrixOut.get(0, 0), exitCMPCurrentMultiplier.getVelocityMultiplier(), epsilon);
@@ -306,13 +304,12 @@ public class NewExitCMPCurrentMultiplierTest
          boolean useTwoCMPs = true;
 
          double timeInCurrentState = random.nextDouble() * (singleSupportDuration - endOfSpline) + endOfSpline;
-         double timeRemaining = singleSupportDuration - timeInCurrentState;
 
          double timeSpentOnExitCMP = exitRatio * (singleSupportDuration + doubleSupportDurations.get(0).getDoubleValue());
          double upcomingInitialDoubleSupportDuration = upcomingSplit * doubleSupportDurations.get(1).getDoubleValue();
 
 
-         exitCMPCurrentMultiplier.compute(doubleSupportDurations, singleSupportDurations, timeRemaining, useTwoCMPs, isInTransfer, omega);
+         exitCMPCurrentMultiplier.compute(doubleSupportDurations, singleSupportDurations, timeInCurrentState, useTwoCMPs, isInTransfer, omega);
 
          double projectionTime = timeInCurrentState - singleSupportDuration + timeSpentOnExitCMP - upcomingInitialDoubleSupportDuration;
          double projection = Math.exp(omega * projectionTime);
