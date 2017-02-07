@@ -161,6 +161,8 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
       this.hasTimings = footstepData.hasTimings;
       this.swingTime = footstepData.swingTime;
       this.transferTime = footstepData.transferTime;
+      this.hasAbsoluteTime = footstepData.hasAbsoluteTime;
+      this.swingStartTime = footstepData.swingStartTime;
    }
 
    public FootstepDataMessage clone()
@@ -343,6 +345,12 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
    public boolean hasAbsoluteTime()
    {
       return hasAbsoluteTime;
+   }
+
+   public void removeAbsoluteTime()
+   {
+      hasAbsoluteTime = false;
+      this.swingStartTime = 0.0;
    }
 
    public double getSwingStartTime()
