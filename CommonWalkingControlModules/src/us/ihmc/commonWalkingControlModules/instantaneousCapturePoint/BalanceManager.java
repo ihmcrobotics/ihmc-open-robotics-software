@@ -168,8 +168,7 @@ public class BalanceManager
       icpPlanner = new ICPPlannerWithTimeFreezer(bipedSupportPolygons, contactableFeet, capturePointPlannerParameters, registry, yoGraphicsListRegistry);
       icpPlanner.setMinimumSingleSupportTimeForDisturbanceRecovery(minimumSwingTimeForDisturbanceRecovery);
       icpPlanner.setOmega0(momentumBasedController.getOmega0());
-      icpPlanner.setDefaultSingleSupportTime(walkingControllerParameters.getDefaultSwingTime());
-      icpPlanner.setDefaultDoubleSupportTime(walkingControllerParameters.getDefaultTransferTime());
+      icpPlanner.setFinalTransferTime(walkingControllerParameters.getDefaultTransferTime());
 
       safeDistanceFromSupportEdgesToStopCancelICPPlan.set(0.05);
       distanceToShrinkSupportPolygonWhenHoldingCurrent.set(0.08);
@@ -593,13 +592,11 @@ public class BalanceManager
 
    private void setDefaultDoubleSupportTime(double defaultDoubleSupportTime)
    {
-      icpPlanner.setDefaultDoubleSupportTime(defaultDoubleSupportTime);
       linearMomentumRateOfChangeControlModule.setDoubleSupportDuration(defaultDoubleSupportTime);
    }
 
    private void setDefaultSingleSupportTime(double defaultSingleSupportTime)
    {
-      icpPlanner.setDefaultSingleSupportTime(defaultSingleSupportTime);
       linearMomentumRateOfChangeControlModule.setSingleSupportDuration(defaultSingleSupportTime);
    }
 
