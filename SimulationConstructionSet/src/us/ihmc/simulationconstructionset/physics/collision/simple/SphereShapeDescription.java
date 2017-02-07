@@ -2,6 +2,7 @@ package us.ihmc.simulationconstructionset.physics.collision.simple;
 
 import javax.vecmath.Point3d;
 
+import us.ihmc.robotics.geometry.BoundingBox3d;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.simulationconstructionset.physics.CollisionShapeDescription;
 
@@ -9,11 +10,13 @@ public class SphereShapeDescription<T extends SphereShapeDescription<T>> impleme
 {
    private double radius;
    private Point3d center = new Point3d();
+   private final BoundingBox3d boundingBox = new BoundingBox3d(Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
 
    public SphereShapeDescription(double radius, Point3d center)
    {
       this.radius = radius;
       this.center.set(center);
+//      computeBoundingBox();
    }
 
    @Override
@@ -38,12 +41,25 @@ public class SphereShapeDescription<T extends SphereShapeDescription<T>> impleme
    {
       this.radius = sphereShapeDescription.getRadius();
       sphereShapeDescription.getCenter(this.center);
+//      computeBoundingBox();
    }
 
    @Override
    public void applyTransform(RigidBodyTransform transform)
    {
       transform.transform(center);
+//      computeBoundingBox();
+   }
+
+   private void computeBoundingBox()
+   {
+      boundingBox.set(center.getX() - radius, center.getY() - radius, center.getZ() - radius, center.getX() + radius, center.getY() + radius, center.getZ() + radius);
+   }
+
+   @Override
+   public BoundingBox3d getBoundingBox()
+   {
+      return boundingBox;
    }
 
 }

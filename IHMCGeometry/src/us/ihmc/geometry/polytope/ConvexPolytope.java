@@ -5,11 +5,13 @@ import java.util.ArrayList;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
+import us.ihmc.robotics.geometry.BoundingBox3d;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 public class ConvexPolytope implements SupportingVertexHolder
 {
    private final ArrayList<PolytopeVertex> vertices = new ArrayList<>();
+   private final BoundingBox3d boundingBox = new BoundingBox3d(Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
 
    public ConvexPolytope()
    {
@@ -21,6 +23,11 @@ public class ConvexPolytope implements SupportingVertexHolder
       {
          this.vertices.add(new PolytopeVertex(vertex));
       }
+   }
+
+   public BoundingBox3d getBoundingBox()
+   {
+      return boundingBox;
    }
 
    public void copyVerticesFrom(ConvexPolytope polytope)

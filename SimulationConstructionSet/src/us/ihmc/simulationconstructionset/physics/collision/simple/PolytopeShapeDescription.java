@@ -1,6 +1,7 @@
 package us.ihmc.simulationconstructionset.physics.collision.simple;
 
 import us.ihmc.geometry.polytope.ConvexPolytope;
+import us.ihmc.robotics.geometry.BoundingBox3d;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.simulationconstructionset.physics.CollisionShapeDescription;
 
@@ -48,6 +49,12 @@ public class PolytopeShapeDescription<T extends PolytopeShapeDescription<T>> imp
    public double getSmoothingRadius()
    {
       return smoothingRadius;
+   }
+
+   @Override
+   public BoundingBox3d getBoundingBox()
+   {
+      return polytope.getBoundingBox();
    }
 
 }

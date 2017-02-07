@@ -4,6 +4,7 @@ import javax.vecmath.Point3d;
 
 import us.ihmc.geometry.polytope.CylinderSupportingVertexHolder;
 import us.ihmc.geometry.polytope.SupportingVertexHolder;
+import us.ihmc.robotics.geometry.BoundingBox3d;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.shapes.Cylinder3d;
 import us.ihmc.simulationconstructionset.physics.CollisionShapeDescription;
@@ -18,6 +19,8 @@ public class CylinderShapeDescription<T extends CylinderShapeDescription<T>> imp
    private final RigidBodyTransform transform = new RigidBodyTransform();
 
    private final RigidBodyTransform cylinderConsistencyTransform = new RigidBodyTransform();
+
+   private final BoundingBox3d boundingBox = new BoundingBox3d(Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
 
    //TODO: Get rid of this redundancy. Make cylinder definitions consistent...
    private final Cylinder3d cylinder3d;
@@ -105,5 +108,11 @@ public class CylinderShapeDescription<T extends CylinderShapeDescription<T>> imp
    {
       closestPointOnCylinderToPack.set(pointToProject);
       cylinder3d.orthogonalProjection(closestPointOnCylinderToPack);
+   }
+
+   @Override
+   public BoundingBox3d getBoundingBox()
+   {
+      return boundingBox;
    }
 }

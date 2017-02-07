@@ -1,5 +1,6 @@
 package us.ihmc.simulationconstructionset.physics;
 
+import us.ihmc.robotics.geometry.BoundingBox3d;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 /**
@@ -12,4 +13,5 @@ public interface CollisionShapeDescription<T extends CollisionShapeDescription<T
    public abstract void setFrom(T collisionShapeDescription);
    public abstract void applyTransform(RigidBodyTransform transformToWorld);
    public abstract CollisionShapeDescription<T> copy();
+   public abstract BoundingBox3d getBoundingBox();
 }

@@ -10,6 +10,7 @@ import us.ihmc.geometry.polytope.ExpandingPolytopeAlgorithm;
 import us.ihmc.geometry.polytope.GilbertJohnsonKeerthiCollisionDetector;
 import us.ihmc.geometry.polytope.SimplexPolytope;
 import us.ihmc.geometry.polytope.SupportingVertexHolder;
+import us.ihmc.robotics.geometry.BoundingBox3d;
 import us.ihmc.robotics.geometry.LineSegment3d;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.simulationconstructionset.Link;
@@ -121,6 +122,14 @@ public class SimpleCollisionDetector implements ScsCollisionDetector
             }
             
             if ((objectTwo.getCollisionGroup() & objectOne.getCollisionMask()) == 0x00)
+            {
+               continue;
+            }
+
+            BoundingBox3d boundingBoxOne = objectOne.getBoundingBox();
+            BoundingBox3d boundingBoxTwo = objectTwo.getBoundingBox();
+
+            if (!boundingBoxOne.intersects(boundingBoxTwo))
             {
                continue;
             }
