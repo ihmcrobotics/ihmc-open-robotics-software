@@ -92,9 +92,9 @@ public class SimpleCollisionShape implements CollisionShape
    }
 
    @Override
-   public BoundingBox3d getBoundingBox()
+   public void getBoundingBox(BoundingBox3d boundingBoxToPack)
    {
-      return transformedCollisionShapeDescription.getBoundingBox();
+      transformedCollisionShapeDescription.getBoundingBox(boundingBoxToPack);
    }
 
 }

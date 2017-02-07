@@ -87,6 +87,9 @@ public class SimpleCollisionDetector implements ScsCollisionDetector
       this.useSimpleSpeedupMethod = true;
    }
 
+   private final BoundingBox3d boundingBoxOne = new BoundingBox3d(0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+   private final BoundingBox3d boundingBoxTwo = new BoundingBox3d(0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+
    @Override
    public void performCollisionDetection(CollisionDetectionResult result)
    {
@@ -126,8 +129,8 @@ public class SimpleCollisionDetector implements ScsCollisionDetector
                continue;
             }
 
-            BoundingBox3d boundingBoxOne = objectOne.getBoundingBox();
-            BoundingBox3d boundingBoxTwo = objectTwo.getBoundingBox();
+            objectOne.getBoundingBox(boundingBoxOne);
+            objectTwo.getBoundingBox(boundingBoxTwo);
 
             if (!boundingBoxOne.intersects(boundingBoxTwo))
             {
@@ -443,6 +446,7 @@ public class SimpleCollisionDetector implements ScsCollisionDetector
       double sphereRadius = descriptionOne.getRadius();
       double polytopeSmoothingRadius = descriptionTwo.getSmoothingRadius();
 
+      //TODO: Remove trash generation...
       SupportingVertexHolder sphereAsSupportingVertexHolder = new SupportingVertexHolder()
       {
          @Override

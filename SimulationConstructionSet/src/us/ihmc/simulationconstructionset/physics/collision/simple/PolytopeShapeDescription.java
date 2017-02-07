@@ -52,9 +52,9 @@ public class PolytopeShapeDescription<T extends PolytopeShapeDescription<T>> imp
    }
 
    @Override
-   public BoundingBox3d getBoundingBox()
+   public void getBoundingBox(BoundingBox3d boundingBoxToPack)
    {
-      return polytope.getBoundingBox();
+      polytope.getBoundingBox(boundingBoxToPack);
    }
 
 }

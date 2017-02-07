@@ -298,9 +298,9 @@ public class GdxCollisionDetector implements ScsCollisionDetector
       }
 
       @Override
-      public BoundingBox3d getBoundingBox()
+      public void getBoundingBox(BoundingBox3d boundingBoxToPack)
       {
-         return boundingBox;
+         boundingBoxToPack.set(boundingBox);
       }
    }
 
@@ -430,9 +430,9 @@ public class GdxCollisionDetector implements ScsCollisionDetector
       }
 
       @Override
-      public BoundingBox3d getBoundingBox()
+      public void getBoundingBox(BoundingBox3d boundingBoxToPack)
       {
-         return boundingBox;
+         boundingBoxToPack.set(boundingBox);
       }
    }
 

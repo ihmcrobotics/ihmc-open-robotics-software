@@ -1,6 +1,7 @@
 package us.ihmc.simulationconstructionset.physics.collision.simple;
 
 import javax.vecmath.Point3d;
+import javax.vecmath.Vector3d;
 
 import us.ihmc.geometry.polytope.CylinderSupportingVertexHolder;
 import us.ihmc.geometry.polytope.SupportingVertexHolder;
@@ -21,6 +22,7 @@ public class CylinderShapeDescription<T extends CylinderShapeDescription<T>> imp
    private final RigidBodyTransform cylinderConsistencyTransform = new RigidBodyTransform();
 
    private final BoundingBox3d boundingBox = new BoundingBox3d(Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
+   private boolean boundingBoxNeedsUpdating = true;
 
    //TODO: Get rid of this redundancy. Make cylinder definitions consistent...
    private final Cylinder3d cylinder3d;
@@ -36,6 +38,8 @@ public class CylinderShapeDescription<T extends CylinderShapeDescription<T>> imp
 
       cylinderConsistencyTransform.setTranslation(0.0, 0.0, -height / 2.0);
       cylinder3d.setTransform(cylinderConsistencyTransform);
+      
+      boundingBoxNeedsUpdating = true;
    }
 
    public double getRadius()
@@ -73,6 +77,7 @@ public class CylinderShapeDescription<T extends CylinderShapeDescription<T>> imp
       supportingVertexHolder.setTransform(transform);
       this.cylinder3d.setTransform(this.transform);
       this.cylinder3d.applyTransform(cylinderConsistencyTransform);
+      boundingBoxNeedsUpdating = true;
    }
 
    public double getSmoothingRadius()
@@ -111,8 +116,44 @@ public class CylinderShapeDescription<T extends CylinderShapeDescription<T>> imp
    }
 
    @Override
-   public BoundingBox3d getBoundingBox()
+   public void getBoundingBox(BoundingBox3d boundingBoxToPack)
    {
-      return boundingBox;
+      if (boundingBoxNeedsUpdating)
+      {
+         updateBoundingBox();
+         boundingBoxNeedsUpdating = false;
+      }
+      boundingBoxToPack.set(boundingBox);
+   }
+
+   private final Vector3d supportDirectionForBoundingBox = new Vector3d();
+
+   private void updateBoundingBox()
+   {
+      supportDirectionForBoundingBox.set(1.0, 0.0, 0.0);
+      Point3d supportingVertex = supportingVertexHolder.getSupportingVertex(supportDirectionForBoundingBox);
+      double xMax = supportingVertex.getX();
+      
+      supportDirectionForBoundingBox.set(-1.0, 0.0, 0.0);
+      supportingVertex = supportingVertexHolder.getSupportingVertex(supportDirectionForBoundingBox);
+      double xMin = supportingVertex.getX();
+      
+      supportDirectionForBoundingBox.set(0.0, 1.0, 0.0);
+      supportingVertex = supportingVertexHolder.getSupportingVertex(supportDirectionForBoundingBox);
+      double yMax = supportingVertex.getY();
+      
+      supportDirectionForBoundingBox.set(0.0, -1.0, 0.0);
+      supportingVertex = supportingVertexHolder.getSupportingVertex(supportDirectionForBoundingBox);
+      double yMin = supportingVertex.getY();
+      
+      supportDirectionForBoundingBox.set(0.0, 0.0, 1.0);
+      supportingVertex = supportingVertexHolder.getSupportingVertex(supportDirectionForBoundingBox);
+      double zMax = supportingVertex.getZ();
+      
+      supportDirectionForBoundingBox.set(0.0, 0.0, -1.0);
+      supportingVertex = supportingVertexHolder.getSupportingVertex(supportDirectionForBoundingBox);
+      double zMin = supportingVertex.getZ();
+      
+      boundingBox.set(xMin, yMin, zMin, xMax, yMax, zMax);
    }
 }
