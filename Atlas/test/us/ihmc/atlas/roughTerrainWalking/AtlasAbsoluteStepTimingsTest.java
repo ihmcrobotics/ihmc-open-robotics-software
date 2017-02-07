@@ -24,6 +24,14 @@ public class AtlasAbsoluteStepTimingsTest extends AvatarAbsoluteStepTimingsTest
    }
 
    @Override
+   @ContinuousIntegrationTest(estimatedDuration = 75.0)
+   @Test(timeout = 500000)
+   public void testMinimumTransferTimeIsRespected() throws SimulationExceededMaximumTimeException
+   {
+      super.testMinimumTransferTimeIsRespected();
+   }
+
+   @Override
    public DRCRobotModel getRobotModel()
    {
       return new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, DRCRobotModel.RobotTarget.SCS, false);
