@@ -10,7 +10,6 @@ import org.ejml.ops.CommonOps;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootOrientationGains;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootPositionGains;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootSE3Gains;
-import us.ihmc.robotics.controllers.PDGainsInterface;
 import us.ihmc.robotics.controllers.SE3PIDGainsInterface;
 import us.ihmc.robotics.controllers.YoPDGains;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
@@ -18,7 +17,6 @@ import us.ihmc.robotics.controllers.YoSymmetricSE3PIDGains;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
 
 public class RhinoBeetleVirtualModelControlParameters implements HexapodControllerParameters
@@ -26,7 +24,6 @@ public class RhinoBeetleVirtualModelControlParameters implements HexapodControll
    private final String name = "vmcParams_";
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
    
-   private final HashMap<String, YoPDGains> jointGains = new HashMap<>();
    private final YoSE3PIDGainsInterface footGains;
    
    //body spatial feeback controller params
@@ -114,9 +111,9 @@ public class RhinoBeetleVirtualModelControlParameters implements HexapodControll
    }
 
    @Override
-   public PDGainsInterface getJointGains(OneDoFJoint joint)
+   public double getTransferTime()
    {
-      return jointGains.get(joint.getName());
+      // TODO Auto-generated method stub
+      return 0;
    }
-
 }
