@@ -15,9 +15,11 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WalkingHighLevelHumanoidController;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPPlannerWithTimeFreezer;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage.FootstepOrigin;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -80,6 +82,51 @@ public abstract class AvatarAbsoluteStepTimingsTest implements MultiRobotTestInt
       }
 
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(3.0));
+   }
+
+
+   public void testMinimumTransferTimeIsRespected() throws SimulationExceededMaximumTimeException
+   {
+      String className = getClass().getSimpleName();
+      FlatGroundEnvironment environment = new FlatGroundEnvironment();
+      DRCStartingLocation startingLocation = DRCObstacleCourseStartingLocation.DEFAULT;
+      DRCRobotModel robotModel = getRobotModel();
+      drcSimulationTestHelper = new DRCSimulationTestHelper(environment, className, startingLocation, simulationTestingParameters, robotModel);
+      ThreadTools.sleep(1000);
+      SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
+      scs.setCameraPosition(8.0, -8.0, 5.0);
+      scs.setCameraFix(1.5, 0.0, 0.8);
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5));
+
+      FootstepDataListMessage footsteps = new FootstepDataListMessage(0.6, 0.3, 0.1);
+      double minimumTransferTime = getRobotModel().getWalkingControllerParameters().getMinimumTransferTime();
+
+      // add very fast footstep:
+      {
+         RobotSide side = RobotSide.LEFT;
+         double y = side == RobotSide.LEFT ? 0.15 : -0.15;
+         Point3d location = new Point3d(0.0, y, 0.0);
+         Quat4d orientation = new Quat4d(0.0, 0.0, 0.0, 1.0);
+         FootstepDataMessage footstepData = new FootstepDataMessage(side, location, orientation);
+         footstepData.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
+         footstepData.setAbsoluteTime(minimumTransferTime / 2.0);
+         footsteps.add(footstepData);
+      }
+
+      drcSimulationTestHelper.send(footsteps);
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(minimumTransferTime / 2.0));
+      checkTransferTimes(scs, minimumTransferTime);
+   }
+
+   private void checkTransferTimes(SimulationConstructionSet scs, double minimumTransferTime)
+   {
+      DoubleYoVariable firstTransferTime = getDoubleYoVariable(scs, "icpPlannerTransferTime0", ICPPlannerWithTimeFreezer.class.getSimpleName());
+      assertTrue("Executing transfer that is faster then allowed.", firstTransferTime.getDoubleValue() >= minimumTransferTime);
+   }
+
+   private static DoubleYoVariable getDoubleYoVariable(SimulationConstructionSet scs, String name, String namespace)
+   {
+      return getYoVariable(scs, name, namespace, DoubleYoVariable.class);
    }
 
    private WalkingStateEnum getWalkingState(SimulationConstructionSet scs)
