@@ -18,7 +18,7 @@ import java.util.Set;
 
 import static org.junit.Assert.*;
 
-@ContinuousIntegrationPlan(categories = IntegrationCategory.CODE_QUALITY)
+@ContinuousIntegrationPlan(categories = IntegrationCategory.HEALTH)
 public class PacketCodeQualityTest
 {
 	@ContinuousIntegrationTest(estimatedDuration = 0.1)
