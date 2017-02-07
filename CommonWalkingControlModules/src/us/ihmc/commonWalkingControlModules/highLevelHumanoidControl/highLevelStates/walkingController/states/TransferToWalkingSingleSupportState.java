@@ -15,10 +15,12 @@ public class TransferToWalkingSingleSupportState extends TransferState
 
    public TransferToWalkingSingleSupportState(RobotSide transferToSide, WalkingMessageHandler walkingMessageHandler,
          HighLevelHumanoidControllerToolbox momentumBasedController, HighLevelControlManagerFactory managerFactory,
-         WalkingFailureDetectionControlModule failureDetectionControlModule, YoVariableRegistry parentRegistry)
+         WalkingFailureDetectionControlModule failureDetectionControlModule, double minimumTransferTime, YoVariableRegistry parentRegistry)
    {
       super(transferToSide, WalkingStateEnum.getWalkingTransferState(transferToSide), walkingMessageHandler, momentumBasedController, managerFactory,
             failureDetectionControlModule, parentRegistry);
+
+      this.minimumTransferTime.set(minimumTransferTime);
    }
 
    @Override

@@ -586,7 +586,7 @@ public abstract class ICPOptimizationPushRecoveryTest
       setupCamera(scs);
       swingTime = getRobotModel().getWalkingControllerParameters().getDefaultSwingTime();
       transferTime = getRobotModel().getWalkingControllerParameters().getDefaultTransferTime();
-      initialTransferTime = getRobotModel().getCapturePointPlannerParameters().getDoubleSupportInitialTransferDuration();
+      initialTransferTime = getRobotModel().getWalkingControllerParameters().getDefaultInitialTransferTime();
       ThreadTools.sleep(1000);
    }
 
