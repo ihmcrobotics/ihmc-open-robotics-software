@@ -307,6 +307,10 @@ public class ICPPlanner
       isDoubleSupport.set(true);
       this.initialTime.set(initialTime);
 
+      int numberOfFootstepRegistered = referenceCMPsCalculator.getNumberOfFootstepRegistered();
+      if (numberOfFootstepRegistered < numberFootstepsToConsider.getIntegerValue())
+         transferTimes.get(numberOfFootstepRegistered).set(finalTransferTime.getDoubleValue());
+
       updateTransferPlan();
    }
 
@@ -430,6 +434,10 @@ public class ICPPlanner
       isInitialTransfer.set(false);
       isDoubleSupport.set(false);
       this.initialTime.set(initialTime);
+
+      int numberOfFootstepRegistered = referenceCMPsCalculator.getNumberOfFootstepRegistered();
+      if (numberOfFootstepRegistered < numberFootstepsToConsider.getIntegerValue())
+         transferTimes.get(numberOfFootstepRegistered).set(finalTransferTime.getDoubleValue());
 
       updateSingleSupportPlan();
    }
