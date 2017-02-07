@@ -11,7 +11,10 @@ import us.ihmc.robotics.geometry.RigidBodyTransform;
 public class ConvexPolytope implements SupportingVertexHolder
 {
    private final ArrayList<PolytopeVertex> vertices = new ArrayList<>();
-   private final BoundingBox3d boundingBox = new BoundingBox3d(Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
+
+   private boolean boundingBoxNeedsUpdating = false;
+   private final BoundingBox3d boundingBox = new BoundingBox3d(Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY,
+                                                               Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
 
    public ConvexPolytope()
    {
@@ -23,11 +26,54 @@ public class ConvexPolytope implements SupportingVertexHolder
       {
          this.vertices.add(new PolytopeVertex(vertex));
       }
+
+      boundingBoxNeedsUpdating = true;
    }
 
-   public BoundingBox3d getBoundingBox()
+   public void getBoundingBox(BoundingBox3d boundingBoxToPack)
    {
-      return boundingBox;
+      if (boundingBoxNeedsUpdating)
+      {
+         updateBoundingBox();
+         boundingBoxNeedsUpdating = false;
+      }
+
+      boundingBoxToPack.set(boundingBox);
+   }
+
+   private void updateBoundingBox()
+   {
+      double xMin = Double.POSITIVE_INFINITY;
+      double yMin = Double.POSITIVE_INFINITY;
+      double zMin = Double.POSITIVE_INFINITY;
+
+      double xMax = Double.NEGATIVE_INFINITY;
+      double yMax = Double.NEGATIVE_INFINITY;
+      double zMax = Double.NEGATIVE_INFINITY;
+
+      for (int i = 0; i < vertices.size(); i++)
+      {
+         PolytopeVertex polytopeVertex = vertices.get(i);
+         double x = polytopeVertex.getX();
+         double y = polytopeVertex.getY();
+         double z = polytopeVertex.getZ();
+
+         if (x < xMin)
+            xMin = x;
+         if (y < yMin)
+            yMin = y;
+         if (z < zMin)
+            zMin = z;
+
+         if (x > xMax)
+            xMax = x;
+         if (y > yMax)
+            yMax = y;
+         if (z > zMax)
+            zMax = z;
+      }
+
+      boundingBox.set(xMin, yMin, zMin, xMax, yMax, zMax);
    }
 
    public void copyVerticesFrom(ConvexPolytope polytope)
@@ -43,6 +89,8 @@ public class ConvexPolytope implements SupportingVertexHolder
       {
          this.vertices.get(i).setPosition(polytope.vertices.get(i));
       }
+
+      boundingBoxNeedsUpdating = true;
    }
 
    public ArrayList<PolytopeVertex> getVertices()
@@ -56,12 +104,15 @@ public class ConvexPolytope implements SupportingVertexHolder
       {
          addVertex(polytopePoints[i]);
       }
+
+      boundingBoxNeedsUpdating = true;
    }
 
    public PolytopeVertex addVertex(Point3d position)
    {
       PolytopeVertex vertex = new PolytopeVertex(position);
       vertices.add(vertex);
+      boundingBoxNeedsUpdating = true;
       return vertex;
    }
 
@@ -69,6 +120,7 @@ public class ConvexPolytope implements SupportingVertexHolder
    {
       PolytopeVertex vertex = new PolytopeVertex(x, y, z);
       vertices.add(vertex);
+      boundingBoxNeedsUpdating = true;
       return vertex;
    }
 
@@ -76,6 +128,7 @@ public class ConvexPolytope implements SupportingVertexHolder
    {
       PolytopeVertex vertex = new PolytopeVertex(xyzValues[0], xyzValues[1], xyzValues[2]);
       vertices.add(vertex);
+      boundingBoxNeedsUpdating = true;
       return vertex;
    }
 
@@ -153,12 +206,15 @@ public class ConvexPolytope implements SupportingVertexHolder
          PolytopeVertex polytopeVertex = vertices.get(i);
          polytopeVertex.applyTransform(transform);
       }
+
+      boundingBoxNeedsUpdating = true;
    }
 
    @Override
    public Point3d getSupportingVertex(Vector3d supportDirection)
    {
       // Naive implementation. Just search through all of them.
+      // TODO: Smart downhill march along edges. But will require always having the edges...
 
       double maxDotSquared = Double.NEGATIVE_INFINITY;
       PolytopeVertex bestVertex = null;

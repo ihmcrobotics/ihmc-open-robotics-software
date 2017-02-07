@@ -13,5 +13,5 @@ public interface CollisionShapeDescription<T extends CollisionShapeDescription<T
    public abstract void setFrom(T collisionShapeDescription);
    public abstract void applyTransform(RigidBodyTransform transformToWorld);
    public abstract CollisionShapeDescription<T> copy();
-   public abstract BoundingBox3d getBoundingBox();
+   public abstract void getBoundingBox(BoundingBox3d boundingBoxToPack);
 }

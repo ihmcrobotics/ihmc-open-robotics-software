@@ -12,13 +12,16 @@ public class BoxShapeDescription<T extends BoxShapeDescription<T>> implements Co
 
    private final RigidBodyTransform transform = new RigidBodyTransform();
 
-   private final BoundingBox3d boundingBox = new BoundingBox3d(Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
+   private final BoundingBox3d boundingBox = new BoundingBox3d(Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY,
+                                                               Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
+   private boolean boundingBoxNeedsUpdating = true;
 
    public BoxShapeDescription(double halfLengthX, double halfWidthY, double halfHeightZ)
    {
       this.halfLengthX = halfLengthX;
       this.halfWidthY = halfWidthY;
       this.halfHeightZ = halfHeightZ;
+      boundingBoxNeedsUpdating = true;
    }
 
    @Override
@@ -48,14 +51,13 @@ public class BoxShapeDescription<T extends BoxShapeDescription<T>> implements Co
    public void getTransform(RigidBodyTransform transformToPack)
    {
       transformToPack.set(transform);
-//      boundingBox.set(-halfLengthX, -halfWidthY, -halfHeightZ, halfLengthX, halfWidthY, halfHeightZ);
-//      boundingBox.transform
    }
 
    @Override
    public void applyTransform(RigidBodyTransform transformToWorld)
    {
       transform.multiply(transformToWorld, transform);
+      boundingBoxNeedsUpdating = true;
    }
 
    @Override
@@ -66,12 +68,23 @@ public class BoxShapeDescription<T extends BoxShapeDescription<T>> implements Co
       this.halfHeightZ = box.getHalfHeightZ();
 
       box.getTransform(this.transform);
-      this.boundingBox.set(box.getBoundingBox());
+      boundingBoxNeedsUpdating = true;
    }
 
    @Override
-   public BoundingBox3d getBoundingBox()
+   public void getBoundingBox(BoundingBox3d boundingBoxToPack)
    {
-      return boundingBox;
+      if (boundingBoxNeedsUpdating)
+      {
+         updateBoundingBox();
+         boundingBoxNeedsUpdating = false;
+      }
+      boundingBoxToPack.set(boundingBox);
+   }
+
+   private void updateBoundingBox()
+   {
+      // TODO Implement and Test Me!
+      
    }
 }

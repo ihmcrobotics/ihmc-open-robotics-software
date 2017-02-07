@@ -39,6 +39,6 @@ public interface CollisionShape extends CollisionMaskHolder
 
    public abstract CollisionShapeDescription<?> getTransformedCollisionShapeDescription();
 
-   public abstract BoundingBox3d getBoundingBox();
+   public abstract void getBoundingBox(BoundingBox3d boundingBoxToPack);
 
 }

@@ -10,19 +10,23 @@ public class SphereShapeDescription<T extends SphereShapeDescription<T>> impleme
 {
    private double radius;
    private Point3d center = new Point3d();
-   private final BoundingBox3d boundingBox = new BoundingBox3d(Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
+
+   private final BoundingBox3d boundingBox = new BoundingBox3d(Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY,
+                                                               Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
+   private boolean boundingBoxNeedsUpdating = true;
 
    public SphereShapeDescription(double radius, Point3d center)
    {
       this.radius = radius;
       this.center.set(center);
-//      computeBoundingBox();
+      boundingBoxNeedsUpdating = true;
    }
 
    @Override
    public SphereShapeDescription<T> copy()
    {
       SphereShapeDescription<T> copy = new SphereShapeDescription<T>(radius, center);
+      boundingBoxNeedsUpdating = true;
       return copy;
    }
 
@@ -41,25 +45,32 @@ public class SphereShapeDescription<T extends SphereShapeDescription<T>> impleme
    {
       this.radius = sphereShapeDescription.getRadius();
       sphereShapeDescription.getCenter(this.center);
-//      computeBoundingBox();
+      boundingBoxNeedsUpdating = true;
    }
 
    @Override
    public void applyTransform(RigidBodyTransform transform)
    {
       transform.transform(center);
-//      computeBoundingBox();
-   }
-
-   private void computeBoundingBox()
-   {
-      boundingBox.set(center.getX() - radius, center.getY() - radius, center.getZ() - radius, center.getX() + radius, center.getY() + radius, center.getZ() + radius);
+      boundingBoxNeedsUpdating = true;
    }
 
    @Override
-   public BoundingBox3d getBoundingBox()
+   public void getBoundingBox(BoundingBox3d boundingBoxToPack)
    {
-      return boundingBox;
+      if (boundingBoxNeedsUpdating)
+      {
+         updateBoundingBox();
+         boundingBoxNeedsUpdating = false;
+      }
+
+      boundingBoxToPack.set(boundingBox);
+   }
+
+   private void updateBoundingBox()
+   {
+      boundingBox.set(center.getX() - radius, center.getY() - radius, center.getZ() - radius, center.getX() + radius, center.getY() + radius,
+                      center.getZ() + radius);
    }
 
 }
