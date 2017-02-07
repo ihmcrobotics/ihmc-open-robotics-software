@@ -170,9 +170,9 @@ public class NewInitialICPCurrentMultiplierTest
          initialICPCurrentMultiplier.compute(doubleSupportDurations, singleSupportDurations, timeRemaining, useTwoCMPs, isInTransfer, omega);
 
          double projection = Math.exp(omega * timeInCurrentState);
-         Assert.assertEquals(1.0 - projection, initialICPCurrentMultiplier.getPositionMultiplier(), epsilon);
+         Assert.assertEquals(projection, initialICPCurrentMultiplier.getPositionMultiplier(), epsilon);
 
-         Assert.assertEquals(- omega * projection, initialICPCurrentMultiplier.getVelocityMultiplier(), epsilon);
+         Assert.assertEquals(omega * projection, initialICPCurrentMultiplier.getVelocityMultiplier(), epsilon);
       }
    }
 
