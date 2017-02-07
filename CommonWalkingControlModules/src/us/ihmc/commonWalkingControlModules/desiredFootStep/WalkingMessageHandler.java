@@ -575,7 +575,7 @@ public class WalkingMessageHandler
    {
       FootstepTiming timing = new FootstepTiming();
       if (footstep.hasTimings())
-         timing.setTimings(timing.getSwingTime(), timing.getTransferTime());
+         timing.setTimings(footstep.getSwingTime(), footstep.getTransferTime());
       else
       {
          if (upcomingFootstepTimings.isEmpty())
