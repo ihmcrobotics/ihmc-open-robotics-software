@@ -156,7 +156,7 @@ public class GeneralizedSDFRobotModel implements GraphicsObjectsHolder
    }
 
    @Override
-   public CollisionMeshDescription getCollisionObject(String name)
+   public ArrayList<CollisionMeshDescription> getCollisionObjects(String name)
    {
       // TODO: SDF collision stuff to RobotDescription collision stuff.
       for(SDFLinkHolder linkHolder : rootLinks)
@@ -164,14 +164,19 @@ public class GeneralizedSDFRobotModel implements GraphicsObjectsHolder
          if(linkHolder.getName().equals(name))
          {
             SDFGraphics3DObject sdfGraphics3DObject = new SDFGraphics3DObject(linkHolder.getCollisions(), resourceDirectories);
-            CollisionMeshDescription collisionMeshDescription = new CollisionMeshDescription();
-            return collisionMeshDescription;
+            ArrayList<CollisionMeshDescription> collisionMeshDescriptions = new ArrayList<CollisionMeshDescription>();
+            
+            //TODO: Figure out and add the collision meshes...
+            return collisionMeshDescriptions;
          }
       }
 
       SDFGraphics3DObject sdfGraphics3DObject = new SDFGraphics3DObject(joints.get(name).getChildLinkHolder().getCollisions(), resourceDirectories);
       CollisionMeshDescription collisionMeshDescription = new CollisionMeshDescription();
-      return collisionMeshDescription;
+      
+      ArrayList<CollisionMeshDescription> collisionMeshDescriptions = new ArrayList<CollisionMeshDescription>();
+      //TODO: Figure out and add the collision meshes...
+      return collisionMeshDescriptions;
    }
 
    @Override
