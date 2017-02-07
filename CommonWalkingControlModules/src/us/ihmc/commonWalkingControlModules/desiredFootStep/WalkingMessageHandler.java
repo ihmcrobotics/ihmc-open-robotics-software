@@ -73,11 +73,23 @@ public class WalkingMessageHandler
 
    private final FootstepListVisualizer footstepListVisualizer;
 
+   private final DoubleYoVariable yoTime;
+   private final DoubleYoVariable footstepDataListRecievedTime = new DoubleYoVariable("footstepDataListRecievedTime", registry);
+
    public WalkingMessageHandler(double defaultTransferTime, double defaultSwingTime, double defaultInitialTransferTime, SideDependentList<? extends ContactablePlaneBody> contactableFeet,
          StatusMessageOutputManager statusOutputManager, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
    {
+      this(defaultTransferTime, defaultSwingTime, defaultInitialTransferTime, contactableFeet, statusOutputManager, null, yoGraphicsListRegistry, parentRegistry);
+   }
+
+   public WalkingMessageHandler(double defaultTransferTime, double defaultSwingTime, double defaultInitialTransferTime, SideDependentList<? extends ContactablePlaneBody> contactableFeet,
+         StatusMessageOutputManager statusOutputManager, DoubleYoVariable yoTime, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
+   {
       this.contactableFeet = contactableFeet;
       this.statusOutputManager = statusOutputManager;
+
+      this.yoTime = yoTime;
+      footstepDataListRecievedTime.setToNaN();
 
       this.defaultTransferTime.set(defaultTransferTime);
       this.finalTransferTime.set(defaultTransferTime);
@@ -118,6 +130,8 @@ public class WalkingMessageHandler
             currentFootstepIndex.set(0);
             clearFootTrajectory();
             currentNumberOfFootsteps.set(command.getNumberOfFootsteps());
+            if (yoTime != null)
+               footstepDataListRecievedTime.set(yoTime.getDoubleValue());
             break;
          case QUEUE:
             currentNumberOfFootsteps.add(command.getNumberOfFootsteps());
@@ -584,7 +598,7 @@ public class WalkingMessageHandler
             timing.setTimings(defaultSwingTime.getDoubleValue(), defaultTransferTime.getDoubleValue());
       }
       if (footstep.hasAbsoluteTime())
-         timing.setAbsoluteTime(timing.getSwingStartTime());
+         timing.setAbsoluteTime(timing.getSwingStartTime(), footstepDataListRecievedTime.getDoubleValue());
       return timing;
    }
 

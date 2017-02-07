@@ -6,6 +6,7 @@ public class FootstepTiming
    private double transferTime = Double.NaN;
    private boolean hasAbsoluteTime = false;
    private double swingStartTime = Double.NaN;
+   private double executionStartTime = Double.NaN;
 
    public FootstepTiming()
    {
@@ -42,10 +43,11 @@ public class FootstepTiming
       return hasAbsoluteTime;
    }
 
-   public void setAbsoluteTime(double swingStartTime)
+   public void setAbsoluteTime(double swingStartTime, double executionStartTime)
    {
       hasAbsoluteTime = true;
       this.swingStartTime = swingStartTime;
+      this.executionStartTime = executionStartTime;
    }
 
    public void removeAbsoluteTime()
@@ -59,11 +61,17 @@ public class FootstepTiming
       return swingStartTime;
    }
 
+   public double getExecutionStartTime()
+   {
+      return executionStartTime;
+   }
+
    public void set(FootstepTiming other)
    {
       swingTime = other.swingTime;
       transferTime = other.transferTime;
       hasAbsoluteTime = other.hasAbsoluteTime;
       swingStartTime = other.swingStartTime;
+      executionStartTime = other.executionStartTime;
    }
 }

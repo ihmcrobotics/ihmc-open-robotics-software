@@ -163,7 +163,7 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
       double defaultTransferTime = walkingControllerParameters.getDefaultTransferTime();
       double defaultSwingTime = walkingControllerParameters.getDefaultSwingTime();
       double defaultInitialTransferTime = capturePointPlannerParameters.getDoubleSupportInitialTransferDuration();
-      walkingMessageHandler = new WalkingMessageHandler(defaultTransferTime, defaultSwingTime, defaultInitialTransferTime, feet, statusOutputManager, yoGraphicsListRegistry, registry);
+      walkingMessageHandler = new WalkingMessageHandler(defaultTransferTime, defaultSwingTime, defaultInitialTransferTime, feet, statusOutputManager, yoTime, yoGraphicsListRegistry, registry);
 
       commandConsumer = new WalkingCommandConsumer(commandInputManager, statusOutputManager, momentumBasedController, walkingMessageHandler, managerFactory, walkingControllerParameters, registry);
 

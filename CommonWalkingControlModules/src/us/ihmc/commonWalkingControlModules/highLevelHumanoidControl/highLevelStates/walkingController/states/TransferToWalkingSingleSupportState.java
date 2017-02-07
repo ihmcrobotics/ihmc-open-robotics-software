@@ -4,11 +4,15 @@ import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectio
 import us.ihmc.commonWalkingControlModules.desiredFootStep.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
+import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class TransferToWalkingSingleSupportState extends TransferState
 {
+   private final DoubleYoVariable minimumTransferTime = new DoubleYoVariable("minimumTransferTime", registry);
+
    public TransferToWalkingSingleSupportState(RobotSide transferToSide, WalkingMessageHandler walkingMessageHandler,
          HighLevelHumanoidControllerToolbox momentumBasedController, HighLevelControlManagerFactory managerFactory,
          WalkingFailureDetectionControlModule failureDetectionControlModule, YoVariableRegistry parentRegistry)
@@ -33,6 +37,8 @@ public class TransferToWalkingSingleSupportState extends TransferState
       else
          pelvisOrientationManager.setToHoldCurrentDesiredInSupportFoot(transferToSide);
 
+      adjustTimings();
+
       for (int i = 0; i < 3; i++)
          balanceManager.addFootstepToPlan(walkingMessageHandler.peek(i), walkingMessageHandler.peekTiming(i));
       balanceManager.setICPPlanTransferToSide(transferToSide);
@@ -40,5 +46,24 @@ public class TransferToWalkingSingleSupportState extends TransferState
       double defaultTransferTime = walkingMessageHandler.getDefaultTransferTime();
       double finalTransferTime = walkingMessageHandler.getFinalTransferTime();
       balanceManager.initializeICPPlanForTransfer(defaultSwingTime, defaultTransferTime, finalTransferTime);
+   }
+
+   private void adjustTimings()
+   {
+      FootstepTiming stepTiming = walkingMessageHandler.peekTiming(0);
+      double originalSwingTime = stepTiming.getSwingTime();
+
+      if (!stepTiming.hasAbsoluteTime())
+         return;
+
+      double currentTime = momentumBasedController.getYoTime().getDoubleValue();
+      double timeInFootstepPlan = currentTime - stepTiming.getExecutionStartTime();
+      double adjustedTransferTime = stepTiming.getSwingStartTime() - timeInFootstepPlan;
+
+      // make sure transfer does not get too short
+      adjustedTransferTime = Math.max(adjustedTransferTime, minimumTransferTime.getDoubleValue());
+
+      // keep swing times and only adjust transfers for now
+      stepTiming.setTimings(originalSwingTime, adjustedTransferTime);
    }
 }
