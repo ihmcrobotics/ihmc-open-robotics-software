@@ -598,7 +598,7 @@ public class WalkingMessageHandler
             timing.setTimings(defaultSwingTime.getDoubleValue(), defaultTransferTime.getDoubleValue());
       }
       if (footstep.hasAbsoluteTime())
-         timing.setAbsoluteTime(timing.getSwingStartTime(), footstepDataListRecievedTime.getDoubleValue());
+         timing.setAbsoluteTime(footstep.getSwingStartTime(), footstepDataListRecievedTime.getDoubleValue());
       return timing;
    }
 
