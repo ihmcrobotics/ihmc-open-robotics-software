@@ -1266,19 +1266,6 @@ public class SimulationConstructionSetUsingDirectCallsTest
    {
       ScsCollisionDetector scsCollisionDetector = new ScsCollisionDetector()
       {
-
-         @Override
-         public void removeShape(Link link)
-         {
-
-         }
-
-         @Override
-         public CollisionShape lookupCollisionShape(Link link)
-         {
-            return null;
-         }
-
          @Override
          public void initialize()
          {

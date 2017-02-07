@@ -80,27 +80,6 @@ public class GdxCollisionDetector implements ScsCollisionDetector
    }
 
    @Override
-   public void removeShape(Link link)
-   {
-//      BulletCollisionShapeWithLink info = (BulletCollisionShapeWithLink) link.getCollisionShape();
-//      collisionWorld.removeCollisionObject(info);
-//      allShapes.remove(info);
-   }
-
-   @Override
-   public CollisionShape lookupCollisionShape(Link link)
-   {
-      for (int i = 0; i < allShapes.size(); i++)
-      {
-         BulletCollisionShapeWithLink info = allShapes.get(i);
-         if (info.link == link)
-            return info;
-      }
-
-      throw new RuntimeException("Can't find matching shape");
-   }
-
-   @Override
    public void performCollisionDetection(CollisionDetectionResult result)
    {
       Vector3d world = new Vector3d();
