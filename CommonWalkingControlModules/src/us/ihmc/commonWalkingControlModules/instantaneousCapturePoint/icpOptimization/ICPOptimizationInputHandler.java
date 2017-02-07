@@ -172,13 +172,8 @@ public class ICPOptimizationInputHandler
       }
    }
 
-   public void update(boolean useTwoCMPs, RobotSide supportSide, boolean isStanding, boolean isInTransfer, double omega0)
+   public void update(boolean useTwoCMPs, double omega0)
    {
-      referenceCMPsCalculator.setUseTwoCMPsPerSupport(useTwoCMPs);
-      if (isInTransfer)
-         referenceCMPsCalculator.computeReferenceCMPsStartingFromDoubleSupport(isStanding, supportSide);
-      else
-         referenceCMPsCalculator.computeReferenceCMPsStartingFromSingleSupport(supportSide);
       referenceCMPsCalculator.update();
       updateCornerPoints(useTwoCMPs, omega0);
    }
@@ -299,17 +294,33 @@ public class ICPOptimizationInputHandler
       {
          if (isInTransfer)
          {
-            FramePoint previousStanceExitCMP = referenceCMPsCalculator.getExitCMPs().get(0).getFrameTuple();
-            FramePoint stanceEntryCMP = referenceCMPsCalculator.getEntryCMPs().get(1).getFrameTuple();
-            FramePoint stanceExitCMP = referenceCMPsCalculator.getExitCMPs().get(1).getFrameTuple();
+            if (useNewMultiplierCalculator)
+            {
+               FramePoint stanceEntryCMP = referenceCMPsCalculator.getEntryCMPs().get(1).getFrameTuple();
+               FramePoint stanceExitCMP = referenceCMPsCalculator.getExitCMPs().get(1).getFrameTuple();
 
-            previousStanceExitCMP2d.setByProjectionOntoXYPlane(previousStanceExitCMP);
-            stanceEntryCMP2d.setByProjectionOntoXYPlane(stanceEntryCMP);
-            stanceExitCMP2d.setByProjectionOntoXYPlane(stanceExitCMP);
+               previousStanceExitCMP2d.setToZero();
+               stanceEntryCMP2d.setByProjectionOntoXYPlane(stanceEntryCMP);
+               stanceExitCMP2d.setByProjectionOntoXYPlane(stanceExitCMP);
 
-            this.previousStanceExitCMP.set(previousStanceExitCMP2d);
-            this.stanceEntryCMP.set(stanceEntryCMP2d);
-            this.stanceExitCMP.set(stanceExitCMP2d);
+               this.previousStanceExitCMP.set(previousStanceExitCMP2d);
+               this.stanceEntryCMP.set(stanceEntryCMP2d);
+               this.stanceExitCMP.set(stanceExitCMP2d);
+            }
+            else
+            {
+               FramePoint previousStanceExitCMP = referenceCMPsCalculator.getExitCMPs().get(0).getFrameTuple();
+               FramePoint stanceEntryCMP = referenceCMPsCalculator.getEntryCMPs().get(1).getFrameTuple();
+               FramePoint stanceExitCMP = referenceCMPsCalculator.getExitCMPs().get(1).getFrameTuple();
+
+               previousStanceExitCMP2d.setByProjectionOntoXYPlane(previousStanceExitCMP);
+               stanceEntryCMP2d.setByProjectionOntoXYPlane(stanceEntryCMP);
+               stanceExitCMP2d.setByProjectionOntoXYPlane(stanceExitCMP);
+
+               this.previousStanceExitCMP.set(previousStanceExitCMP2d);
+               this.stanceEntryCMP.set(stanceEntryCMP2d);
+               this.stanceExitCMP.set(stanceExitCMP2d);
+            }
          }
          else
          {
