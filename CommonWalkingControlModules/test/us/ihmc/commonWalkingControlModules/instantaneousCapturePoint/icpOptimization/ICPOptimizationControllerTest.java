@@ -1,15 +1,20 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.vecmath.Point2d;
+
 import org.junit.Test;
+
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepTestHelper;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPPlanner;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationController;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
 import us.ihmc.humanoidRobotics.footstep.FootSpoof;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
+import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint2d;
@@ -23,10 +28,6 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.io.printing.PrintTools;
-
-import javax.vecmath.Point2d;
-import java.util.ArrayList;
-import java.util.List;
 
 public class ICPOptimizationControllerTest
 {
@@ -64,8 +65,6 @@ public class ICPOptimizationControllerTest
       ICPOptimizationController icpOptimizationController = new ICPOptimizationController(icpPlannerParameters, icpOptimizationParameters, null, bipedSupportPolygons,
             contactableFeet, 0.001, registry, null);
       icpOptimizationController.setStepDurations(doubleSupportDuration, singleSupportDuration);
-      icpPlanner.setDefaultSingleSupportTime(singleSupportDuration);
-      icpPlanner.setDefaultDoubleSupportTime(doubleSupportDuration);
       icpPlanner.setOmega0(omega.getDoubleValue());
 
       icpPlanner.clearPlan();
@@ -75,11 +74,13 @@ public class ICPOptimizationControllerTest
       double stepWidth = 0.1;
       FootstepTestHelper footstepTestHelper = new FootstepTestHelper(contactableFeet, ankleFrames);
       List<Footstep> footsteps = footstepTestHelper.createFootsteps(stepWidth, stepLength, 3);
+      FootstepTiming defaultTiming = new FootstepTiming(singleSupportDuration, doubleSupportDuration);
+      icpPlanner.setFinalTransferTime(doubleSupportDuration);
 
       for (int i = 0; i < footsteps.size(); i++)
       {
          icpOptimizationController.addFootstepToPlan(footsteps.get(i));
-         icpPlanner.addFootstepToPlan(footsteps.get(i));
+         icpPlanner.addFootstepToPlan(footsteps.get(i), defaultTiming);
       }
 
       RobotSide supportSide = footsteps.get(0).getRobotSide().getOppositeSide();
