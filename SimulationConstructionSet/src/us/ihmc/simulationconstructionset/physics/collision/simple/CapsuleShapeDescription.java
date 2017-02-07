@@ -1,5 +1,6 @@
 package us.ihmc.simulationconstructionset.physics.collision.simple;
 
+import us.ihmc.robotics.geometry.BoundingBox3d;
 import us.ihmc.robotics.geometry.LineSegment3d;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.simulationconstructionset.physics.CollisionShapeDescription;
@@ -8,6 +9,7 @@ public class CapsuleShapeDescription<T extends CapsuleShapeDescription<T>> imple
 {
    private double radius;
    private LineSegment3d lineSegment = new LineSegment3d();
+   private final BoundingBox3d boundingBox = new BoundingBox3d(Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
 
    public CapsuleShapeDescription(double radius, LineSegment3d lineSegment)
    {
@@ -50,6 +52,12 @@ public class CapsuleShapeDescription<T extends CapsuleShapeDescription<T>> imple
    public void applyTransform(RigidBodyTransform transform)
    {
       lineSegment.applyTransform(transform);
+   }
+
+   @Override
+   public BoundingBox3d getBoundingBox()
+   {
+      return boundingBox;
    }
 
 }

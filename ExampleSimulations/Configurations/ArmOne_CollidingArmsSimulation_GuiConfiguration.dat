@@ -84,6 +84,18 @@
 			<MinScaling>0.0</MinScaling>
 		</GraphConfig>
 	</Graph>
+	<Graph>
+		<Variables>root.GroundAsABoxRobot.t</Variables>
+		<GraphConfiguration>
+			<Name>config8</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
 </GraphGroup>
 <Entry Boxes Tab Pane>
 <EntryBoxTab>
@@ -109,9 +121,9 @@ Tab0
 
 <Current View>Normal View</Current View>
  <Canvas 1> 
- <Camera X>3.2463445084621996</Camera X>
- <Camera Y>-11.154844869055141</Camera Y>
- <Camera Z>9.740686866461335</Camera Z>
+ <Camera X>0.0</Camera X>
+ <Camera Y>-8.0</Camera Y>
+ <Camera Z>1.4</Camera Z>
  <Dolly data> 
  <Position X>2.0</Position X>
  <Position Y>12.0</Position Y>

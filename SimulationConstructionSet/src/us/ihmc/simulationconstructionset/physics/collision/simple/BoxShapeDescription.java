@@ -1,5 +1,6 @@
 package us.ihmc.simulationconstructionset.physics.collision.simple;
 
+import us.ihmc.robotics.geometry.BoundingBox3d;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.simulationconstructionset.physics.CollisionShapeDescription;
 
@@ -10,6 +11,8 @@ public class BoxShapeDescription<T extends BoxShapeDescription<T>> implements Co
    private double halfHeightZ;
 
    private final RigidBodyTransform transform = new RigidBodyTransform();
+
+   private final BoundingBox3d boundingBox = new BoundingBox3d(Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
 
    public BoxShapeDescription(double halfLengthX, double halfWidthY, double halfHeightZ)
    {
@@ -23,6 +26,7 @@ public class BoxShapeDescription<T extends BoxShapeDescription<T>> implements Co
    {
       BoxShapeDescription<T> copy = new BoxShapeDescription<T>(halfLengthX, halfWidthY, halfHeightZ);
       copy.transform.set(this.transform);
+      copy.boundingBox.set(this.boundingBox);
       return copy;
    }
 
@@ -44,6 +48,8 @@ public class BoxShapeDescription<T extends BoxShapeDescription<T>> implements Co
    public void getTransform(RigidBodyTransform transformToPack)
    {
       transformToPack.set(transform);
+//      boundingBox.set(-halfLengthX, -halfWidthY, -halfHeightZ, halfLengthX, halfWidthY, halfHeightZ);
+//      boundingBox.transform
    }
 
    @Override
@@ -60,5 +66,12 @@ public class BoxShapeDescription<T extends BoxShapeDescription<T>> implements Co
       this.halfHeightZ = box.getHalfHeightZ();
 
       box.getTransform(this.transform);
+      this.boundingBox.set(box.getBoundingBox());
+   }
+
+   @Override
+   public BoundingBox3d getBoundingBox()
+   {
+      return boundingBox;
    }
 }
