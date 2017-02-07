@@ -19,12 +19,12 @@ public class NewEntryCMPCurrentMultiplier
    private final NewTransferEntryCMPMatrix transferEntryCMPMatrix;
    private final NewSwingEntryCMPMatrix swingEntryCMPMatrix;
 
-   private final DoubleYoVariable exitCMPRatio;
-   private final DoubleYoVariable defaultDoubleSupportSplitRatio;
+   public final DoubleYoVariable exitCMPRatio;
+   public final DoubleYoVariable defaultDoubleSupportSplitRatio;
 
-   private final DoubleYoVariable startOfSplineTime;
-   private final DoubleYoVariable endOfSplineTime;
-   private final DoubleYoVariable totalTrajectoryTime;
+   public final DoubleYoVariable startOfSplineTime;
+   public final DoubleYoVariable endOfSplineTime;
+   public final DoubleYoVariable totalTrajectoryTime;
 
    private final DenseMatrix64F matrixOut = new DenseMatrix64F(1, 1);
 
@@ -170,12 +170,12 @@ public class NewEntryCMPCurrentMultiplier
          double stepDuration = doubleSupportDuration + singleSupportDuration;
 
          double timeSpentOnEntryCMP = (1.0 - exitCMPRatio.getDoubleValue()) * stepDuration;
-         double endOfDoubleSupportDuration = defaultDoubleSupportSplitRatio.getDoubleValue() * doubleSupportDuration;
+         double endOfDoubleSupportDuration = (1.0 - defaultDoubleSupportSplitRatio.getDoubleValue()) * doubleSupportDuration;
          double initialSingleSupportDuration = timeSpentOnEntryCMP - endOfDoubleSupportDuration;
 
-         double timeRemaining = initialSingleSupportDuration - timeInState;
+         double projectionTime = timeInState - initialSingleSupportDuration;
 
-         return 1.0 - Math.exp(-omega0 * timeRemaining);
+         return 1.0 - Math.exp(omega0 * projectionTime);
       }
       else
       {
