@@ -172,10 +172,15 @@ public class ICPOptimizationInputHandler
       }
    }
 
-   public void update(boolean useTwoCMPs, double omega0)
+   public void update(double timeRemainingInState, double timeInCurrentState, boolean useTwoCMPs, boolean isInTransfer, boolean useInitialICP, double omega0)
    {
       referenceCMPsCalculator.update();
       updateCornerPoints(useTwoCMPs, omega0);
+
+      if (useNewMultiplierCalculator)
+         stateMultiplierCalculator.computeCurrentMultipliers(timeInCurrentState, useTwoCMPs, isInTransfer, omega0);
+      else
+         footstepRecursionMultiplierCalculator.computeRemainingProjectionMultipliers(timeRemainingInState, useTwoCMPs, isInTransfer, omega0, useInitialICP);
    }
 
    public void computeFinalICPRecursion(FramePoint2d finalICPRecursionToPack, int numberOfFootstepsToConsider, boolean useTwoCMPs, boolean isInTransfer, double omega0)
@@ -254,10 +259,9 @@ public class ICPOptimizationInputHandler
    private final FramePoint2d cmpOffsetRecursionEffect = new FramePoint2d();
 
    public void computeCMPConstantEffects(FramePoint2d cmpConstantEffectsToPack, FramePoint2d beginningOfStateICP, FrameVector2d beginningOfStateICPVelocity,
-         ArrayList<YoFramePoint2d> upcomingFootstepLocations, double timeRemaining, double timeInState, double omega0, int numberOfFootstepsToConsider, boolean useTwoCMPs,
-         boolean isInTransfer, boolean useInitialICP)
+         ArrayList<YoFramePoint2d> upcomingFootstepLocations, int numberOfFootstepsToConsider, boolean useTwoCMPs, boolean isInTransfer)
    {
-      computeStanceCMPProjection(stanceCMPProjection, timeRemaining, timeInState, useTwoCMPs, isInTransfer, useInitialICP, omega0);
+      computeStanceCMPProjection(stanceCMPProjection, useTwoCMPs, isInTransfer);
       computeBeginningOfStateICPProjection(beginningOfStateICPProjection, beginningOfStateICP);
       computeBeginningOfStateICPVelocityProjection(beginningOfStateICPVelocityProjection, beginningOfStateICPVelocity);
 
@@ -278,18 +282,8 @@ public class ICPOptimizationInputHandler
    private final FramePoint2d stanceEntryCMP2d = new FramePoint2d(worldFrame);
    private final FramePoint2d stanceExitCMP2d = new FramePoint2d(worldFrame);
 
-   private void computeStanceCMPProjection(FramePoint2d stanceCMPProjectionToPack, double timeRemainingInState, double timeInCurrentState, boolean useTwoCMPs, boolean isInTransfer,
-         boolean useInitialICP, double omega0)
+   private void computeStanceCMPProjection(FramePoint2d stanceCMPProjectionToPack, boolean useTwoCMPs, boolean isInTransfer)
    {
-      if (useNewMultiplierCalculator)
-      {
-         stateMultiplierCalculator.computeCurrentMultipliers(timeInCurrentState, useTwoCMPs, isInTransfer, omega0);
-      }
-      else
-      {
-         footstepRecursionMultiplierCalculator.computeRemainingProjectionMultipliers(timeRemainingInState, useTwoCMPs, isInTransfer, omega0, useInitialICP);
-      }
-
       if (useTwoCMPs)
       {
          if (isInTransfer)
