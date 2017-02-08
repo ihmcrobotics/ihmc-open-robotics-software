@@ -14,12 +14,12 @@ import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.screwTheory.InverseDynamicsCalculator;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
-import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationCalculator;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
@@ -76,9 +76,9 @@ public class WholeBodyControlCoreToolbox
       this.geometricJacobianHolder = geometricJacobianHolder;
       this.contactablePlaneBodies = contactablePlaneBodies;
       this.yoGraphicsListRegistry = yoGraphicsListRegistry;
-      this.nBasisVectorsPerContactPoint = momentumOptimizationSettings.getNumberOfBasisVectorsPerContactPoint();    
+      this.nBasisVectorsPerContactPoint = momentumOptimizationSettings.getNumberOfBasisVectorsPerContactPoint();
       this.nContactPointsPerContactableBody = momentumOptimizationSettings.getNumberOfContactPointsPerContactableBody();
-      this.nContactableBodies = momentumOptimizationSettings.getNumberOfContactableBodies();              
+      this.nContactableBodies = momentumOptimizationSettings.getNumberOfContactableBodies();
       this.rhoSize = momentumOptimizationSettings.getRhoSize();
 
       if (contactablePlaneBodies != null)
@@ -119,9 +119,8 @@ public class WholeBodyControlCoreToolbox
 
    public static WholeBodyControlCoreToolbox createForInverseKinematicsOnly(FullRobotModel fullRobotModel, InverseDynamicsJoint[] controlledJoints,
          JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters, CommonHumanoidReferenceFrames referenceFrames, double controlDT,
-         GeometricJacobianHolder geometricJacobianHolder, TwistCalculator twistCalculator)
+         GeometricJacobianHolder geometricJacobianHolder, TwistCalculator twistCalculator, MomentumOptimizationSettings momentumOptimizationSettings)
    {
-      MomentumOptimizationSettings momentumOptimizationSettings = new MomentumOptimizationSettings();
       WholeBodyControlCoreToolbox ret = new WholeBodyControlCoreToolbox(fullRobotModel, null, controlledJoints, momentumOptimizationSettings,
             jointPrivilegedConfigurationParameters, referenceFrames, controlDT, Double.NaN, geometricJacobianHolder, twistCalculator, null, null, null);
       return ret;

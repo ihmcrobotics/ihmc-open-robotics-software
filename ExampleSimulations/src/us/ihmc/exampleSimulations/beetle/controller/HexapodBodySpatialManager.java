@@ -23,7 +23,7 @@ import us.ihmc.robotics.screwTheory.RigidBody;
  * Controls the linear Velocity of the body in body z up frame
  * Controls the angular velocity of the body in body frame
  */
-public class BodySpatialManager
+public class HexapodBodySpatialManager
 {
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
@@ -47,7 +47,7 @@ public class BodySpatialManager
    private final Vector3d linearWeight = new Vector3d();
    private final Vector3d angularWeight = new Vector3d();
 
-   public BodySpatialManager(String prefix, FullRobotModel fullRobotModel, HexapodReferenceFrames referenceFrames, double controllerDt,
+   public HexapodBodySpatialManager(String prefix, FullRobotModel fullRobotModel, HexapodReferenceFrames referenceFrames, double controllerDt,
          YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
    {
       this.controllerDt = controllerDt;

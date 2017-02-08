@@ -339,6 +339,11 @@ public class DRCSimulationTestHelper
    {
       scs.getRootRegistry().addChild(childRegistry);
    }
+   
+   public YoVariableRegistry getYovariableRegistry()
+   {
+      return scs.getRootRegistry();
+   }
 
    public void createVideo(String simplifiedRobotModelName, int callStackHeight)
    {

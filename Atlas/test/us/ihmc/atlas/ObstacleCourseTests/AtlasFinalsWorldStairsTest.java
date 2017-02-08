@@ -57,8 +57,6 @@ public class AtlasFinalsWorldStairsTest
    @After
    public void destroySimulationAndRecycleMemory()
    {
-      simulationTestingParameters.setKeepSCSUp(true);
-
       if (simulationTestingParameters.getKeepSCSUp())
       {
          ThreadTools.sleepForever();
