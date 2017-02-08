@@ -139,14 +139,6 @@ public abstract class ICPOptimizationParameters
    public abstract boolean useFootstepRegularization();
 
    /**
-    * This boolean determines whether the ICP setpoints remain smooth.
-    * Setting it false will cause the reference trajectories to always start from their nominal starting position, rather than what the
-    * ICP location was at the beginning of the state.
-    * Setting it true maintains smoothness, but can result in some poor reference trajectories if the adjustment was large enough.
-    */
-   public abstract boolean useICPFromBeginningOfState();
-
-   /**
     * The minimum value to allow the footstep weight {@link #getFootstepWeight()} to be set to.
     * Ensures that the costs remain positive-definite, and improves the solution numerics.
     */
