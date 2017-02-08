@@ -763,11 +763,6 @@ public class ICPPlanner
       finalTransferTime.set(time);
    }
 
-   public void clearFinalTransferTime()
-   {
-      finalTransferTime.setToNaN();
-   }
-
    public void setMinimumSingleSupportTimeForDisturbanceRecovery(double minTime)
    {
       minSwingTime.set(minTime);
