@@ -13,6 +13,7 @@ import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.PinJoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.physics.CollisionArbiter;
 import us.ihmc.simulationconstructionset.physics.CollisionHandler;
 import us.ihmc.simulationconstructionset.physics.CollisionShapeDescription;
 import us.ihmc.simulationconstructionset.physics.CollisionShapeFactory;
@@ -20,6 +21,7 @@ import us.ihmc.simulationconstructionset.physics.ScsCollisionDetector;
 import us.ihmc.simulationconstructionset.physics.ScsPhysics;
 import us.ihmc.simulationconstructionset.physics.collision.DefaultCollisionHandler;
 import us.ihmc.simulationconstructionset.physics.collision.gdx.GdxCollisionDetector;
+import us.ihmc.simulationconstructionset.physics.collision.simple.DoNothingCollisionArbiter;
 import us.ihmc.simulationconstructionset.physics.visualize.DefaultCollisionVisualizer;
 
 public class CollisionExampleFixedArm
@@ -229,7 +231,9 @@ public class CollisionExampleFixedArm
       CollisionHandler collisionHandler = doublePendulum.getCollisionHandler();
       collisionHandler.addListener(visualize);
 
-      sim.initPhysics(new ScsPhysics(null, doublePendulum.getCollisionDetector(), collisionHandler, visualize));
+      CollisionArbiter collisionArbiter = new DoNothingCollisionArbiter();
+
+      sim.initPhysics(new ScsPhysics(null, doublePendulum.getCollisionDetector(), collisionArbiter, collisionHandler, visualize));
 
       Thread myThread = new Thread(sim);
       myThread.start();
