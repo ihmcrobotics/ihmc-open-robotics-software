@@ -13,11 +13,7 @@ public class SimpleContactWrapper implements Contacts
    private CollisionShape shapeA;
    private CollisionShape shapeB;
 
-   // TODO: Make a contact point class and have an array of them, rather than this silliness:
-   private final ArrayList<Point3d> worldA = new ArrayList<Point3d>();
-   private final ArrayList<Point3d> worldB = new ArrayList<Point3d>();
-   private final ArrayList<Vector3d> normalA = new ArrayList<Vector3d>();
-   private final ArrayList<Double> distances = new ArrayList<Double>();
+   private final ArrayList<SingleContact> contacts = new ArrayList<>();
 
    public SimpleContactWrapper(CollisionShape shapeA, CollisionShape shapeB)
    {
@@ -38,17 +34,14 @@ public class SimpleContactWrapper implements Contacts
 
    public void clear()
    {
-      worldA.clear();
-      worldB.clear();
-      normalA.clear();
-      distances.clear();
+      contacts.clear();
    }
 
    @Override
-   public void addAll(Contacts contacts)
+   public void addAll(Contacts contactsToAdd)
    {
-      CollisionShape shapeA = contacts.getShapeA();
-      CollisionShape shapeB = contacts.getShapeB();
+      CollisionShape shapeA = contactsToAdd.getShapeA();
+      CollisionShape shapeB = contactsToAdd.getShapeB();
 
       boolean switched = (shapeA == this.shapeB);
 
@@ -67,70 +60,73 @@ public class SimpleContactWrapper implements Contacts
          }
       }
 
-      int numberOfContacts = contacts.getNumberOfContacts();
+      int numberOfContacts = contactsToAdd.getNumberOfContacts();
 
       for (int i = 0; i < numberOfContacts; i++)
       {
+         SingleContact singleContact = new SingleContact();
+         
          Point3d worldAPoint = new Point3d();
-         contacts.getWorldA(i, worldAPoint);
-         worldA.add(worldAPoint);
+         contactsToAdd.getWorldA(i, worldAPoint);
 
          Point3d worldBPoint = new Point3d();
-         contacts.getWorldB(i, worldBPoint);
-         worldB.add(worldBPoint);
+         contactsToAdd.getWorldB(i, worldBPoint);
 
          Vector3d normalAVector = new Vector3d();
 
-         contacts.getWorldNormal(i, normalAVector);
+         contactsToAdd.getWorldNormal(i, normalAVector);
          if (switched)
          {
             normalAVector.scale(-1.0);
          }
-         normalA.add(normalAVector);
 
-         distances.add(contacts.getDistance(i));
+         double distance = contactsToAdd.getDistance(i);
+         
+         singleContact.set(worldAPoint, worldBPoint, normalAVector, distance);
+         contacts.add(singleContact);
       }
 
    }
 
    public void addContact(Point3d pointA, Point3d pointB, Vector3d normalA, double distance)
    {
-      this.worldA.add(pointA);
-      this.worldB.add(pointB);
-      this.normalA.add(normalA);
-      this.distances.add(distance);
+      SingleContact singleContact = new SingleContact();
+      singleContact.set(pointA, pointB, normalA, distance);
+      this.contacts.add(singleContact);
    }
 
    @Override
    public int getNumberOfContacts()
    {
-      return worldA.size();
+      return contacts.size();
    }
 
    @Override
    public void getWorldA(int which, Point3d location)
    {
-      Point3d point3d = worldA.get(which);
-      location.set(point3d);
+      SingleContact singleContact = contacts.get(which);
+      singleContact.getWorldA(location);
    }
 
    @Override
    public void getWorldB(int which, Point3d location)
    {
-      Point3d point3d = worldB.get(which);
-      location.set(point3d);
+      SingleContact singleContact = contacts.get(which);
+      singleContact.getWorldB(location);
    }
 
    @Override
    public double getDistance(int which)
    {
-      return distances.get(which);
+      SingleContact singleContact = contacts.get(which);
+      return singleContact.getDistance();
    }
 
    @Override
    public void getWorldNormal(int which, Vector3d normalToPack)
    {
-      normalToPack.set(normalA.get(which));
+      SingleContact singleContact = contacts.get(which);
+      singleContact.getNormalA(normalToPack);
    }
 
    @Override
