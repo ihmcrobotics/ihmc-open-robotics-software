@@ -52,7 +52,7 @@ public class NewExitCMPRecursionMultiplier
    {
       for (int i = 0; i < numberOfStepsToConsider; i++)
       {
-         exitMultipliers.get(i).set(0.0); //// TODO: 2/3/17  
+         exitMultipliers.get(i).set(0.0);
       }
    }
 
@@ -74,17 +74,15 @@ public class NewExitCMPRecursionMultiplier
       for (int i = 0; i < numberOfStepsToConsider; i++)
       {
          double steppingDuration = singleSupportDurations.get(i + 1).getDoubleValue() + doubleSupportDurations.get(i + 1).getDoubleValue();
-         double previousStepDuration = singleSupportDurations.get(i).getDoubleValue() + doubleSupportDurations.get(0).getDoubleValue();
 
          double timeSpentOnEntryCMP = (1.0 - exitCMPDurationInPercentOfStepTime.getDoubleValue()) * steppingDuration;
          double timeSpentOnExitCMP = exitCMPDurationInPercentOfStepTime.getDoubleValue() * steppingDuration;
 
-         if (i > 0)
-            recursionTime += previousStepDuration;
-
          double exitRecursion = Math.exp(-omega0 * (recursionTime + timeSpentOnEntryCMP)) * (1.0 - Math.exp(-omega0 * timeSpentOnExitCMP));
 
          exitMultipliers.get(i).set(exitRecursion);
+
+         recursionTime += steppingDuration;
       }
    }
 
