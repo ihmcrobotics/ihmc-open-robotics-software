@@ -167,6 +167,7 @@ public class WalkingMessageHandler
 
       if (!checkTimings(upcomingFootstepTimings))
          clearFootsteps();
+      updateTransferTimes(upcomingFootstepTimings);
 
       updateVisualization();
    }
@@ -602,6 +603,32 @@ public class WalkingMessageHandler
       if (footstep.hasAbsoluteTime())
          timing.setAbsoluteTime(footstep.getSwingStartTime(), footstepDataListRecievedTime.getDoubleValue());
       return timing;
+   }
+
+   private void updateTransferTimes(List<FootstepTiming> upcomingFootstepTimings)
+   {
+      if (upcomingFootstepTimings.isEmpty())
+         return;
+
+      FootstepTiming firstTiming = upcomingFootstepTimings.get(0);
+      if (!firstTiming.hasAbsoluteTime())
+         return;
+
+      double lastSwingStart = firstTiming.getSwingStartTime();
+      double lastSwingTime = firstTiming.getSwingTime();
+      firstTiming.setTimings(lastSwingTime, lastSwingStart);
+
+      for (int footstepIdx = 1; footstepIdx < upcomingFootstepTimings.size(); footstepIdx++)
+      {
+         FootstepTiming timing = upcomingFootstepTimings.get(footstepIdx);
+         double swingStart = timing.getSwingStartTime();
+         double swingTime = timing.getSwingTime();
+         double transferTime = swingStart - (lastSwingStart + lastSwingTime);
+         timing.setTimings(swingTime, transferTime);
+
+         lastSwingStart = swingStart;
+         lastSwingTime = swingTime;
+      }
    }
 
    private boolean checkTimings(List<FootstepTiming> upcomingFootstepTimings)
