@@ -26,7 +26,6 @@ public class TransferToWalkingSingleSupportState extends TransferState
    @Override
    public void doTransitionIntoAction()
    {
-      // to ensure that the swing starts at the desired absolute time this will adjust the transfer time
       adjustTimings();
 
       super.doTransitionIntoAction();
