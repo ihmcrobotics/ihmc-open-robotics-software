@@ -4,9 +4,6 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPoly
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.StateMultiplierCalculator;
-import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
@@ -28,8 +25,9 @@ import java.util.ArrayList;
 
 public class ICPOptimizationController
 {
-   private static final boolean VISUALIZE = true;
-   private static final boolean COMPUTE_COST_TO_GO = true;
+   private static final boolean VISUALIZE = false;
+   private static final boolean COMPUTE_COST_TO_GO = false;
+   private static final boolean RECONSTRUCT_CMP_FROM_UNCLIPPED = true;
 
    private static final String yoNamePrefix = "controller";
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -75,11 +73,6 @@ public class ICPOptimizationController
    private final YoFramePoint2d controllerFeedbackCMP = new YoFramePoint2d(yoNamePrefix + "FeedbackCMP", worldFrame, registry);
    private final YoFrameVector2d controllerFeedbackCMPDelta = new YoFrameVector2d(yoNamePrefix + "FeedbackCMPDelta", worldFrame, registry);
    private final YoFrameVector2d icpError = new YoFrameVector2d("icpError", "", worldFrame, registry);
-
-   private final YoFramePoint2d yoReconstructedICP = new YoFramePoint2d("reconstructedICP", "", worldFrame, registry);
-   private final YoFrameVector2d reconstructedICPError = new YoFrameVector2d("reconstructedICPError", "", worldFrame, registry);
-   private final YoFrameVector2d reconstructedCMPDelta = new YoFrameVector2d("reconstructedCMPDelta", "", worldFrame, registry);
-   private final YoFrameVector2d modifiedReconstructedICPError = new YoFrameVector2d("modifiedReconstructedICPError", "", worldFrame, registry);
    private final YoFramePoint2d dynamicRelaxation = new YoFramePoint2d("dynamicRelaxation", "", worldFrame, registry);
 
    private final FramePoint2d finalICPRecursion = new FramePoint2d();
@@ -91,6 +84,7 @@ public class ICPOptimizationController
    private final ArrayList<Footstep> upcomingFootsteps = new ArrayList<>();
    private final ArrayList<YoFramePoint2d> upcomingFootstepLocations = new ArrayList<>();
    private final ArrayList<YoFramePoint2d> footstepSolutions = new ArrayList<>();
+   private final ArrayList<FramePoint2d> unclippedFootstepSolutions = new ArrayList<>();
 
    private final DoubleYoVariable forwardFootstepWeight = new DoubleYoVariable(yoNamePrefix + "ForwardFootstepWeight", registry);
    private final DoubleYoVariable lateralFootstepWeight = new DoubleYoVariable(yoNamePrefix + "LateralFootstepWeight", registry);
@@ -204,17 +198,10 @@ public class ICPOptimizationController
       {
          upcomingFootstepLocations.add(new YoFramePoint2d("upcomingFootstepLocation" + i, worldFrame, registry));
          footstepSolutions.add(new YoFramePoint2d("footstepSolutionLocation" + i, worldFrame, registry));
+         unclippedFootstepSolutions.add(new FramePoint2d(worldFrame));
       }
 
       parentRegistry.addChild(registry);
-
-      if (VISUALIZE && yoGraphicsListRegistry != null)
-      {
-         String name = "ICPOptimization";
-         YoGraphicPosition referenceICP = new YoGraphicPosition("controllerReconstructedICP", yoReconstructedICP, 0.02, YoAppearance.Red(), GraphicType.BALL_WITH_ROTATED_CROSS);
-         yoGraphicsListRegistry.registerArtifact(name, referenceICP.createArtifact());
-         yoGraphicsListRegistry.registerYoGraphic(name, referenceICP);
-      }
    }
 
    public void setStepDurations(double doubleSupportDuration, double singleSupportDuration)
@@ -253,6 +240,7 @@ public class ICPOptimizationController
          inputHandler.addFootstepToPlan(footstep);
 
          footstepSolutions.get(upcomingFootsteps.size() - 1).set(tmpFramePoint2d);
+         unclippedFootstepSolutions.get(upcomingFootsteps.size() - 1).set(tmpFramePoint2d);
       }
    }
 
@@ -368,11 +356,8 @@ public class ICPOptimizationController
    }
 
    private final FramePoint2d dynRelax = new FramePoint2d();
-   private final FramePoint2d reconstructedICP = new FramePoint2d();
    private final FramePoint2d desiredCMP = new FramePoint2d();
    private final FrameVector2d desiredCMPDelta = new FrameVector2d();
-
-   private final boolean useReconstruction = false;
 
    public void compute(double currentTime, FramePoint2d desiredICP, FrameVector2d desiredICPVelocity, FramePoint2d currentICP, double omega0)
    {
@@ -424,7 +409,7 @@ public class ICPOptimizationController
          numberOfIterations.set(solver.getNumberOfIterations());
 
          if (localUseStepAdjustment)
-            solutionHandler.extractFootstepSolutions(footstepSolutions, upcomingFootstepLocations, upcomingFootsteps, numberOfFootstepsToConsider, solver);
+            solutionHandler.extractFootstepSolutions(footstepSolutions, unclippedFootstepSolutions, upcomingFootstepLocations, upcomingFootsteps, numberOfFootstepsToConsider, solver);
 
          solver.getCMPFeedbackDifference(desiredCMPDelta);
 
@@ -438,42 +423,24 @@ public class ICPOptimizationController
       }
       else
       {
-         solutionHandler.computeReferenceFromSolutions(footstepSolutions, inputHandler, beginningOfStateICP, beginningOfStateICPVelocity, omega0, numberOfFootstepsToConsider);
+         if (RECONSTRUCT_CMP_FROM_UNCLIPPED)
+            solutionHandler.computeReferenceFromSolutions(unclippedFootstepSolutions, inputHandler, beginningOfStateICP, beginningOfStateICPVelocity, omega0, numberOfFootstepsToConsider);
+         else
+            solutionHandler.yoComputeReferenceFromSolutions(footstepSolutions, inputHandler, beginningOfStateICP, beginningOfStateICPVelocity, omega0, numberOfFootstepsToConsider);
+
          solutionHandler.computeNominalValues(upcomingFootstepLocations, inputHandler, beginningOfStateICP, beginningOfStateICPVelocity, omega0, numberOfFootstepsToConsider);
       }
 
       solutionHandler.getControllerReferenceCMP(desiredCMP);
-      solver.getReconstructedReferenceICPPosition(reconstructedICP);
       solver.getDynamicRelaxation(dynRelax);
-
-      yoReconstructedICP.set(reconstructedICP);
 
       icpError.set(currentICP);
       icpError.sub(solutionHandler.getControllerReferenceICP());
 
-      reconstructedICPError.set(currentICP);
-      reconstructedICPError.sub(reconstructedICP);
-
-      reconstructedCMPDelta.setX(feedbackGains.getX() * reconstructedICPError.getX());
-      reconstructedCMPDelta.setY(feedbackGains.getY() * reconstructedICPError.getY());
-
-
-      modifiedReconstructedICPError.set(reconstructedICPError);
-      modifiedReconstructedICPError.add(dynRelax);
-
       dynamicRelaxation.set(dynRelax);
 
-
-      if (useReconstruction)
-      {
-         desiredCMP.add(reconstructedCMPDelta.getFrameTuple2d());
-         controllerFeedbackCMPDelta.set(reconstructedCMPDelta);
-      }
-      else
-      {
-         desiredCMP.add(desiredCMPDelta);
-         controllerFeedbackCMPDelta.set(desiredCMPDelta);
-      }
+      desiredCMP.add(desiredCMPDelta);
+      controllerFeedbackCMPDelta.set(desiredCMPDelta);
       controllerFeedbackCMP.set(desiredCMP);
    }
 
