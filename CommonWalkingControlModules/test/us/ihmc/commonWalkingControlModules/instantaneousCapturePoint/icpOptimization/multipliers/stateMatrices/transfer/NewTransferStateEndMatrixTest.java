@@ -66,9 +66,7 @@ public class NewTransferStateEndMatrixTest
          double projectionTime = (1.0 - splitRatio) * doubleSupportDuration;
          double projection = Math.exp(omega0 * projectionTime);
 
-         boolean useTwoCMPs = true;
-
-         stateEndMatrix.compute(doubleSupportDurations, omega0, useTwoCMPs);
+         stateEndMatrix.compute(doubleSupportDurations, omega0);
 
          shouldBe.zero();
          shouldBe.set(2, 0, projection);
