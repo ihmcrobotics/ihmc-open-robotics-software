@@ -4166,7 +4166,7 @@ public class GeometryTools
     * </p>
     * 
     * @param pointOnPlane1 a point on the first plane. Not modified.
-    * @param planeNormal1 the normal of the first plane. Not modifed.
+    * @param planeNormal1 the normal of the first plane. Not modified.
     * @param pointOnPlane2 a point on the second plane. Not modified.
     * @param planeNormal2 the normal of the second plane. Not modified.
     * @param angleEpsilon tolerance on the angle in radians to determine if the plane normals are collinear. 
@@ -4180,6 +4180,17 @@ public class GeometryTools
          return false;
       else
          return distanceFromPointToPlane(pointOnPlane2, pointOnPlane1, planeNormal1) < distanceEpsilon;
+   }
+
+   /**
+    * Rotates the given {@code tupleOriginal} tuple by an angle {@code yaw} and stores the result in the tuple {@code tupleTransformed}.
+    * 
+    * @param yaw the angle in radians by which {@code tupleToTransform} should be rotated.
+    * @param tupleToTransform the tuple to transform. Modified.
+    */
+   public static void rotateTuple2d(double yaw, Tuple2d tupleToTransform)
+   {
+      rotateTuple2d(yaw, tupleToTransform, tupleToTransform);
    }
 
    /**
