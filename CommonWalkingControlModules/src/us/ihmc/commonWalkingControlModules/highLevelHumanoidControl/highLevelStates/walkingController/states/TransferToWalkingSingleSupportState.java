@@ -70,6 +70,12 @@ public class TransferToWalkingSingleSupportState extends TransferState
       // make sure transfer does not get too short
       adjustedTransferTime = Math.max(adjustedTransferTime, minimumTransferTime.getDoubleValue());
 
+      // GW - possible improvement:
+      // If the adjustment is capped by the minimum transfer time adjust also the upcoming transfer times here. That
+      // would make the ICP plan for the upcoming steps more accurate. However, if the given original transfer times
+      // are correctly set this might be a minimal improvement that makes step timing more complicated and difficult
+      // to debug. If we have big adjustments a lot we should revisit this.
+
       // keep swing times and only adjust transfers for now
       stepTiming.setTimings(originalSwingTime, adjustedTransferTime);
    }
