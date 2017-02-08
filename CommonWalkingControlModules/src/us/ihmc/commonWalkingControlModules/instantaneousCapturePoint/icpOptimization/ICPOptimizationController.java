@@ -158,7 +158,6 @@ public class ICPOptimizationController
 
       solver = new ICPOptimizationSolver(icpOptimizationParameters, totalVertices, COMPUTE_COST_TO_GO);
 
-
       useStepAdjustment.set(icpOptimizationParameters.useStepAdjustment());
 
       useTwoCMPs = icpPlannerParameters.useTwoCMPsPerSupport();
@@ -227,7 +226,7 @@ public class ICPOptimizationController
 
       parentRegistry.addChild(registry);
 
-      if (VISUALIZE)
+      if (VISUALIZE && yoGraphicsListRegistry != null)
       {
          String name = "ICPOptimization";
          YoGraphicPosition referenceICP = new YoGraphicPosition("controllerReconstructedICP", yoReconstructedICP, 0.02, YoAppearance.Red(), GraphicType.BALL_WITH_ROTATED_CROSS);
