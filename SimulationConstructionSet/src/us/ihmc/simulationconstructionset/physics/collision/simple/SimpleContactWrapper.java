@@ -18,10 +18,6 @@ public class SimpleContactWrapper implements Contacts
    private final ArrayList<Vector3d> normalA = new ArrayList<Vector3d>();
    private final ArrayList<Double> distances = new ArrayList<Double>();
 
-   public SimpleContactWrapper()
-   {
-   }
-
    public SimpleContactWrapper(CollisionShape shapeA, CollisionShape shapeB)
    {
       this.shapeA = shapeA;
@@ -34,17 +30,6 @@ public class SimpleContactWrapper implements Contacts
       worldB.clear();
       normalA.clear();
       distances.clear();
-   }
-
-   public void set(CollisionShape shapeA, CollisionShape shapeB, SimpleContactWrapper contacts)
-   {
-
-   }
-
-   public void setShapes(CollisionShape shapeA, CollisionShape shapeB)
-   {
-      this.shapeA = shapeA;
-      this.shapeB = shapeB;
    }
 
    public void addContact(Point3d pointA, Point3d pointB, Vector3d normalA, double distance)
