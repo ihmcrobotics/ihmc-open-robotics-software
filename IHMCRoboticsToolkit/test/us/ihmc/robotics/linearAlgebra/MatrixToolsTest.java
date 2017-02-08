@@ -1,27 +1,31 @@
 package us.ihmc.robotics.linearAlgebra;
 
-import georegression.geometry.ConvertRotation3D_F64;
-import georegression.struct.EulerType;
-import georegression.struct.point.Point3D_F64;
-import georegression.struct.se.Se3_F64;
-import georegression.transform.se.SePointOps_F64;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Random;
+
+import javax.vecmath.Point3d;
+
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import org.ejml.ops.MatrixFeatures;
 import org.ejml.ops.RandomMatrices;
 import org.junit.Test;
+
+import georegression.geometry.ConvertRotation3D_F64;
+import georegression.struct.EulerType;
+import georegression.struct.point.Point3D_F64;
+import georegression.struct.se.Se3_F64;
+import georegression.transform.se.SePointOps_F64;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-
-import javax.vecmath.Point3d;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Random;
-
-import static org.junit.Assert.*;
 
 public class MatrixToolsTest
 {

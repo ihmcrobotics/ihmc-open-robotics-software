@@ -1,18 +1,20 @@
 package us.ihmc.robotics.screwTheory;
 
+import java.util.ArrayList;
+import java.util.Random;
+
+import javax.vecmath.Vector3d;
+
 import org.ejml.alg.dense.linsol.LinearSolverSafe;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.factory.LinearSolverFactory;
 import org.ejml.interfaces.linsol.LinearSolver;
 import org.junit.Test;
+
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-
-import javax.vecmath.Vector3d;
-import java.util.ArrayList;
-import java.util.Random;
 
 public class DesiredJointAccelerationCalculatorTest
 {

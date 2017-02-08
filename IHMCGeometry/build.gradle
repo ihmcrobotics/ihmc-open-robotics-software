@@ -48,6 +48,8 @@ dependencies {
    compile group: 'org.ejml', name: 'core', version: '0.28'
    compile group: 'org.ejml', name: 'dense64', version: '0.28'
    compile "net.sf.trove4j:trove4j:3.0.3"
+    
+    testCompile group: 'us.ihmc', name: 'IHMCContinuousIntegrationFramework', version: '0.9.1'
 
    compile ihmc.getProjectDependency(":IHMCRoboticsToolkit")
    testCompile ihmc.getProjectDependency(":IHMCUnitTesting")

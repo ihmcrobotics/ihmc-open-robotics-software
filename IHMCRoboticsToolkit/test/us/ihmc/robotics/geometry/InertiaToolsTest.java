@@ -1,18 +1,19 @@
 package us.ihmc.robotics.geometry;
 
-import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
-import us.ihmc.robotics.random.RandomTools;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Vector3d;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Random;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import javax.vecmath.Matrix3d;
+import javax.vecmath.Vector3d;
+
+import org.junit.Test;
+
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.robotics.random.RandomTools;
 
 public class InertiaToolsTest
 {

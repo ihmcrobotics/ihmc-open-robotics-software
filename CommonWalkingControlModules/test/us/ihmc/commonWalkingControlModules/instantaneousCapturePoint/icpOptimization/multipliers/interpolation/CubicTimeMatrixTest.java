@@ -1,10 +1,11 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.interpolation;
 
+import java.util.Random;
+
 import org.junit.Assert;
 import org.junit.Test;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
-import java.util.Random;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public class CubicTimeMatrixTest
 {

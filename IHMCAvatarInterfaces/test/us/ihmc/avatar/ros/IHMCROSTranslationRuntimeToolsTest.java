@@ -1,23 +1,23 @@
 package us.ihmc.avatar.ros;
 
-import org.junit.Test;
-import org.reflections.Reflections;
-import org.ros.internal.message.Message;
+import static org.junit.Assert.assertTrue;
 
-import us.ihmc.avatar.ros.IHMCROSTranslationRuntimeTools;
-import us.ihmc.communication.packets.Packet;
-import us.ihmc.communication.ros.generators.RosMessagePacket;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations;
-import us.ihmc.tools.continuousIntegration.IntegrationCategory;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
-import us.ihmc.tools.io.printing.PrintTools;
-
-import java.lang.reflect.*;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Modifier;
 import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
 
-import static org.junit.Assert.*;
+import org.junit.Test;
+import org.reflections.Reflections;
+import org.ros.internal.message.Message;
+
+import us.ihmc.communication.packets.Packet;
+import us.ihmc.communication.ros.generators.RosMessagePacket;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.continuousIntegration.IntegrationCategory;
+import us.ihmc.tools.io.printing.PrintTools;
 
 /**
  * @author Doug Stephen <a href="mailto:dstephen@ihmc.us">(dstephen@ihmc.us)</a>

@@ -6,11 +6,12 @@ import static java.lang.Math.atan2;
 import static java.lang.Math.sqrt;
 import static org.junit.Assert.assertEquals;
 
-import org.junit.Test;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations;
-
 import java.util.Random;
+
+import org.junit.Test;
+
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 
 public class YoVariableSideFourbarCalculatorWithDerivativesTest
 {

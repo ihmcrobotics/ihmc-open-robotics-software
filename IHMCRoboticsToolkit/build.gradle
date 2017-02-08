@@ -43,6 +43,8 @@ dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.11'
     testCompile group: 'org.jfree', name: 'jfreechart', version: '1.0.17'
     testCompile group: 'org.jfree', name: 'jcommon', version: '1.0.21'
+    
+    testCompile group: 'us.ihmc', name: 'IHMCContinuousIntegrationFramework', version: '0.9.1'
 
     compile group: 'javax.vecmath', name: 'vecmath', version: '1.5.2'
     compile group: 'org.ejml', name: 'denseC64', version: '0.28'
