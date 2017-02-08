@@ -21,6 +21,8 @@ import us.ihmc.simulationconstructionset.physics.collision.CollisionDetectionRes
 
 public class SimpleCollisionDetector implements ScsCollisionDetector
 {
+   private boolean VERBOSE = false;
+
    private final ArrayList<CollisionShape> collisionObjects = new ArrayList<CollisionShape>();
 
    // Temporary variables for computation:
@@ -64,7 +66,11 @@ public class SimpleCollisionDetector implements ScsCollisionDetector
 
    @Override
    public void performCollisionDetection(CollisionDetectionResult result)
-   {
+   {      
+      int boundingBoxChecks = 0;
+      int collisionChecks = 0;
+      int numberOfCollisions = 0;
+      
       int numberOfObjects = collisionObjects.size();
 
       if (useSimpleSpeedupMethod && (haveCollided == null))
@@ -104,11 +110,13 @@ public class SimpleCollisionDetector implements ScsCollisionDetector
             objectOne.getBoundingBox(boundingBoxOne);
             objectTwo.getBoundingBox(boundingBoxTwo);
 
+            boundingBoxChecks++;
             if (!boundingBoxOne.intersects(boundingBoxTwo))
             {
                continue;
             }
-
+            
+            collisionChecks++;
             boolean areColliding = false;
 
             //TODO: Make this shorter and more efficient...
@@ -209,6 +217,8 @@ public class SimpleCollisionDetector implements ScsCollisionDetector
 
             if (areColliding)
             {
+               numberOfCollisions++;
+
                if (useSimpleSpeedupMethod) haveCollided[i][j] = true;
                //               ArrayList<CollisionShape> arrayList = collidingPairs.get(objectOne);
                //               if (arrayList == null)
@@ -223,6 +233,13 @@ public class SimpleCollisionDetector implements ScsCollisionDetector
                //               }
             }
          }
+      }
+      
+      if (VERBOSE)
+      {
+         System.out.println("\nboundingBoxChecks = " + boundingBoxChecks);
+         System.out.println("collisionChecks = " + collisionChecks);
+         System.out.println("numberOfCollisions = " + numberOfCollisions);
       }
    }
 
