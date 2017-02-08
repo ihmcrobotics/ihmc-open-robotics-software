@@ -43,7 +43,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 
 public class ICPPlanner
 {
-   private static final boolean VISUALIZE = false;
+   private static final boolean VISUALIZE = true;
    private static final double ICP_CORNER_POINT_SIZE = 0.004;
 
    protected final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
