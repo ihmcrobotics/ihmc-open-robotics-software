@@ -45,14 +45,22 @@ public class NewEntryCMPRecursionMultiplier
       if (useTwoCMPs)
          computeWithTwoCMPs(numberOfStepsToConsider, doubleSupportDurations, singleSupportDurations, isInTransfer, omega0);
       else
-         computeWithOneCMP(numberOfStepsToConsider);
+         computeWithOneCMP(numberOfStepsToConsider, doubleSupportDurations, singleSupportDurations, omega0);
    }
 
-   private void computeWithOneCMP(int numberOfStepsToConsider)
+   private void computeWithOneCMP(int numberOfStepsToConsider, ArrayList<DoubleYoVariable> doubleSupportDurations, ArrayList<DoubleYoVariable> singleSupportDurations,
+         double omega0)
    {
+      double recursionTime = doubleSupportDurations.get(0).getDoubleValue() + singleSupportDurations.get(0).getDoubleValue();
+
       for (int i = 0; i < numberOfStepsToConsider; i++)
       {
-         entryMultipliers.get(i).set(0.0);
+         double steppingDuration = doubleSupportDurations.get(i + 1).getDoubleValue() + singleSupportDurations.get(i + 1).getDoubleValue();
+
+         double entryRecursion = Math.exp(-omega0 * recursionTime) * (1.0 - Math.exp(-omega0 * steppingDuration));
+         entryMultipliers.get(i).set(entryRecursion);
+
+         recursionTime += steppingDuration;
       }
    }
 
@@ -74,16 +82,14 @@ public class NewEntryCMPRecursionMultiplier
       for (int i = 0; i < numberOfStepsToConsider; i++)
       {
          double steppingDuration = singleSupportDurations.get(i + 1).getDoubleValue() + doubleSupportDurations.get(i + 1).getDoubleValue();
-         double previousStepDuration = singleSupportDurations.get(i).getDoubleValue() + doubleSupportDurations.get(0).getDoubleValue();
 
          double timeSpentOnEntryCMP = (1.0 - exitCMPDurationInPercentOfStepTime.getDoubleValue()) * steppingDuration;
-
-         if (i > 0)
-            recursionTime += previousStepDuration;
 
          double entryRecursion = Math.exp(-omega0 * recursionTime) * (1.0 - Math.exp(-omega0 * timeSpentOnEntryCMP));
 
          entryMultipliers.get(i).set(entryRecursion);
+
+         recursionTime += steppingDuration;
       }
    }
 

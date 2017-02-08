@@ -18,6 +18,11 @@ public class NewFinalICPRecursionMultiplier extends DoubleYoVariable
       this.exitCMPDurationInPercentOfStepTime = exitCMPDurationInPercentOfStepTime;
    }
 
+   public void reset()
+   {
+      this.set(0.0);
+   }
+
    public void compute(int numberOfStepsToConsider, ArrayList<DoubleYoVariable> doubleSupportDurations, ArrayList<DoubleYoVariable> singleSupportDurations,
          boolean useTwoCMPs, boolean isInTransfer, double omega0)
    {
@@ -33,33 +38,45 @@ public class NewFinalICPRecursionMultiplier extends DoubleYoVariable
       }
 
       if (useTwoCMPs)
-      {
-         double firstStepTime = doubleSupportDurations.get(0).getDoubleValue() + singleSupportDurations.get(0).getDoubleValue();
-         double currentTimeSpentOnExitCMP = exitCMPDurationInPercentOfStepTime.getDoubleValue() * firstStepTime;
-
-         double recursionTime;
-
-         if (isInTransfer)
-            recursionTime = firstStepTime;
-         else
-            recursionTime = currentTimeSpentOnExitCMP;
-
-         for (int i = 0; i < numberOfStepsToConsider; i++)
-         {
-            recursionTime += singleSupportDurations.get(i + 1).getDoubleValue() + doubleSupportDurations.get(i + 1).getDoubleValue();
-         }
-
-         double icpRecursion = Math.exp(-omega0 * recursionTime);
-         this.set(icpRecursion);
-      }
+         computeWithTwoCMPs(numberOfStepsToConsider, doubleSupportDurations, singleSupportDurations, isInTransfer, omega0);
       else
-      {
-         // // TODO: 2/3/17  
-      }
+         computeWithOneCMP(numberOfStepsToConsider, doubleSupportDurations, singleSupportDurations, omega0);
    }
 
-   public void reset()
+   private void computeWithOneCMP(int numberOfStepsToConsider, ArrayList<DoubleYoVariable> doubleSupportDurations, ArrayList<DoubleYoVariable> singleSupportDurations,
+         double omega0)
    {
-      this.set(0.0);
+      double recursionTime = doubleSupportDurations.get(0).getDoubleValue() + singleSupportDurations.get(0).getDoubleValue();
+
+      for (int i = 0; i < numberOfStepsToConsider; i++)
+         recursionTime += singleSupportDurations.get(i + 1).getDoubleValue() + doubleSupportDurations.get(i + 1).getDoubleValue();
+
+      double icpRecursion = Math.exp(-omega0 * recursionTime);
+      this.set(icpRecursion);
+
+   }
+
+   private void computeWithTwoCMPs(int numberOfStepsToConsider, ArrayList<DoubleYoVariable> doubleSupportDurations, ArrayList<DoubleYoVariable> singleSupportDurations,
+         boolean isInTransfer, double omega0)
+   {
+      double firstStepTime = doubleSupportDurations.get(0).getDoubleValue() + singleSupportDurations.get(0).getDoubleValue();
+      double currentTimeSpentOnExitCMP = exitCMPDurationInPercentOfStepTime.getDoubleValue() * firstStepTime;
+
+      double recursionTime;
+
+      if (isInTransfer)
+         recursionTime = firstStepTime;
+      else
+         recursionTime = currentTimeSpentOnExitCMP;
+
+      for (int i = 0; i < numberOfStepsToConsider; i++)
+      {
+         recursionTime += singleSupportDurations.get(i + 1).getDoubleValue() + doubleSupportDurations.get(i + 1).getDoubleValue();
+      }
+
+      double icpRecursion = Math.exp(-omega0 * recursionTime);
+      this.set(icpRecursion);
+
    }
 }
+

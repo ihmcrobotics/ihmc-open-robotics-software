@@ -15,7 +15,7 @@ public class NewFinalICPRecursionMultiplierTest
 
    @ContinuousIntegrationTest(estimatedDuration = 1.0)
    @Test(timeout = 21000)
-   public void testOneStepCalculation()
+   public void testOneStepTwoCMPCalculation()
    {
       YoVariableRegistry registry = new YoVariableRegistry("registry");
       DoubleYoVariable exitCMPRatio = new DoubleYoVariable("exitCMPRatio", registry);
@@ -68,6 +68,308 @@ public class NewFinalICPRecursionMultiplierTest
 
          finalICPMultiplier = Math.exp(-omega * (currentStepDuration + upcomingStepDuration));
          Assert.assertEquals(finalICPMultiplier, finalICPRecursionMultiplier.getDoubleValue(), epsilon);
+      }
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 1.0)
+   @Test(timeout = 21000)
+   public void testOneStepOneCMPCalculation()
+   {
+      YoVariableRegistry registry = new YoVariableRegistry("registry");
+      DoubleYoVariable exitCMPRatio = new DoubleYoVariable("exitCMPRatio", registry);
+      DoubleYoVariable yoOmega = new DoubleYoVariable("omega", registry);
+
+      double omega = 3.0;
+      yoOmega.set(omega);
+
+      int maxSteps = 5;
+      int iters = 100;
+
+      Random random = new Random();
+      ArrayList<DoubleYoVariable> doubleSupportDurations = new ArrayList<>();
+      ArrayList<DoubleYoVariable> singleSupportDurations = new ArrayList<>();
+
+      for (int i = 0 ; i < maxSteps + 1; i++)
+      {
+         doubleSupportDurations.add(new DoubleYoVariable("doubleSupportDuration" + i, registry));
+         singleSupportDurations.add(new DoubleYoVariable("singleSupportDuration" + i, registry));
+      }
+
+      NewFinalICPRecursionMultiplier finalICPRecursionMultiplier = new NewFinalICPRecursionMultiplier("", exitCMPRatio, registry);
+
+      for (int iter = 0; iter < iters; iter++)
+      {
+         double exitRatio = 0.7 * random.nextDouble();
+         exitCMPRatio.set(exitRatio);
+
+         for (int step = 0; step < maxSteps; step++)
+         {
+            doubleSupportDurations.get(step).set(2.0 * random.nextDouble());
+            singleSupportDurations.get(step).set(5.0 * random.nextDouble());
+         }
+
+         boolean isInTransfer = false;
+         boolean useTwoCMPs = false;
+
+         finalICPRecursionMultiplier.compute(1, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
+
+         double currentStepDuration = doubleSupportDurations.get(0).getDoubleValue() + singleSupportDurations.get(0).getDoubleValue();
+         double upcomingStepDuration = doubleSupportDurations.get(1).getDoubleValue() + singleSupportDurations.get(1).getDoubleValue();
+
+         double finalICPMultiplier = Math.exp(-omega * (currentStepDuration + upcomingStepDuration));
+         Assert.assertEquals(finalICPMultiplier, finalICPRecursionMultiplier.getDoubleValue(), epsilon);
+
+         // setup for in transfer
+         isInTransfer = true;
+         finalICPRecursionMultiplier.compute(1, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
+
+         Assert.assertEquals(finalICPMultiplier, finalICPRecursionMultiplier.getDoubleValue(), epsilon);
+      }
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 1.0)
+   @Test(timeout = 21000)
+   public void testTwoStepTwoCMPCalculation()
+   {
+      YoVariableRegistry registry = new YoVariableRegistry("registry");
+      DoubleYoVariable exitCMPRatio = new DoubleYoVariable("exitCMPRatio", registry);
+      DoubleYoVariable yoOmega = new DoubleYoVariable("omega", registry);
+
+      double omega = 3.0;
+      yoOmega.set(omega);
+
+      int maxSteps = 5;
+      int iters = 100;
+
+      Random random = new Random();
+      ArrayList<DoubleYoVariable> doubleSupportDurations = new ArrayList<>();
+      ArrayList<DoubleYoVariable> singleSupportDurations = new ArrayList<>();
+
+      for (int i = 0 ; i < maxSteps + 1; i++)
+      {
+         doubleSupportDurations.add(new DoubleYoVariable("doubleSupportDuration" + i, registry));
+         singleSupportDurations.add(new DoubleYoVariable("singleSupportDuration" + i, registry));
+      }
+
+      NewFinalICPRecursionMultiplier finalICPRecursionMultiplier = new NewFinalICPRecursionMultiplier("", exitCMPRatio, registry);
+
+      for (int iter = 0; iter < iters; iter++)
+      {
+         double exitRatio = 0.7 * random.nextDouble();
+         exitCMPRatio.set(exitRatio);
+
+         for (int step = 0; step < maxSteps; step++)
+         {
+            doubleSupportDurations.get(step).set(2.0 * random.nextDouble());
+            singleSupportDurations.get(step).set(5.0 * random.nextDouble());
+         }
+
+         boolean isInTransfer = false;
+         boolean useTwoCMPs = true;
+
+         finalICPRecursionMultiplier.compute(2, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
+
+         double currentStepDuration = doubleSupportDurations.get(0).getDoubleValue() + singleSupportDurations.get(0).getDoubleValue();
+         double nextStepDuration = doubleSupportDurations.get(1).getDoubleValue() + singleSupportDurations.get(1).getDoubleValue();
+         double nextNextStepDuration = doubleSupportDurations.get(2).getDoubleValue() + singleSupportDurations.get(2).getDoubleValue();
+         double currentTimeSpentOnExitCMP = exitRatio * currentStepDuration;
+
+         double finalICPMultiplier = Math.exp(-omega * (currentTimeSpentOnExitCMP + nextStepDuration + nextNextStepDuration));
+         Assert.assertEquals(finalICPMultiplier, finalICPRecursionMultiplier.getDoubleValue(), epsilon);
+
+         // setup for in transfer
+         isInTransfer = true;
+         finalICPRecursionMultiplier.compute(2, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
+
+         finalICPMultiplier = Math.exp(-omega * (currentStepDuration + nextStepDuration + nextNextStepDuration));
+         Assert.assertEquals(finalICPMultiplier, finalICPRecursionMultiplier.getDoubleValue(), epsilon);
+      }
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 1.0)
+   @Test(timeout = 21000)
+   public void testTwoStepOneCMPCalculation()
+   {
+      YoVariableRegistry registry = new YoVariableRegistry("registry");
+      DoubleYoVariable exitCMPRatio = new DoubleYoVariable("exitCMPRatio", registry);
+      DoubleYoVariable yoOmega = new DoubleYoVariable("omega", registry);
+
+      double omega = 3.0;
+      yoOmega.set(omega);
+
+      int maxSteps = 5;
+      int iters = 100;
+
+      Random random = new Random();
+      ArrayList<DoubleYoVariable> doubleSupportDurations = new ArrayList<>();
+      ArrayList<DoubleYoVariable> singleSupportDurations = new ArrayList<>();
+
+      for (int i = 0 ; i < maxSteps + 1; i++)
+      {
+         doubleSupportDurations.add(new DoubleYoVariable("doubleSupportDuration" + i, registry));
+         singleSupportDurations.add(new DoubleYoVariable("singleSupportDuration" + i, registry));
+      }
+
+      NewFinalICPRecursionMultiplier finalICPRecursionMultiplier = new NewFinalICPRecursionMultiplier("", exitCMPRatio, registry);
+
+      for (int iter = 0; iter < iters; iter++)
+      {
+         double exitRatio = 0.7 * random.nextDouble();
+         exitCMPRatio.set(exitRatio);
+
+         for (int step = 0; step < maxSteps; step++)
+         {
+            doubleSupportDurations.get(step).set(2.0 * random.nextDouble());
+            singleSupportDurations.get(step).set(5.0 * random.nextDouble());
+         }
+
+         boolean isInTransfer = false;
+         boolean useTwoCMPs = false;
+
+         finalICPRecursionMultiplier.compute(2, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
+
+         double currentStepDuration = doubleSupportDurations.get(0).getDoubleValue() + singleSupportDurations.get(0).getDoubleValue();
+         double nextStepDuration = doubleSupportDurations.get(1).getDoubleValue() + singleSupportDurations.get(1).getDoubleValue();
+         double nextNextStepDuration = doubleSupportDurations.get(2).getDoubleValue() + singleSupportDurations.get(2).getDoubleValue();
+
+         double finalICPMultiplier = Math.exp(-omega * (currentStepDuration + nextStepDuration + nextNextStepDuration));
+         Assert.assertEquals(finalICPMultiplier, finalICPRecursionMultiplier.getDoubleValue(), epsilon);
+
+         // setup for in transfer
+         isInTransfer = true;
+         finalICPRecursionMultiplier.compute(2, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
+
+         Assert.assertEquals(finalICPMultiplier, finalICPRecursionMultiplier.getDoubleValue(), epsilon);
+      }
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 1.0)
+   @Test(timeout = 21000)
+   public void testNStepTwoCMPCalculation()
+   {
+      YoVariableRegistry registry = new YoVariableRegistry("registry");
+      DoubleYoVariable exitCMPRatio = new DoubleYoVariable("exitCMPRatio", registry);
+      DoubleYoVariable yoOmega = new DoubleYoVariable("omega", registry);
+
+      double omega = 3.0;
+      yoOmega.set(omega);
+
+      int maxSteps = 5;
+      int iters = 100;
+
+      Random random = new Random();
+      ArrayList<DoubleYoVariable> doubleSupportDurations = new ArrayList<>();
+      ArrayList<DoubleYoVariable> singleSupportDurations = new ArrayList<>();
+
+      for (int i = 0 ; i < maxSteps + 1; i++)
+      {
+         doubleSupportDurations.add(new DoubleYoVariable("doubleSupportDuration" + i, registry));
+         singleSupportDurations.add(new DoubleYoVariable("singleSupportDuration" + i, registry));
+      }
+
+      NewFinalICPRecursionMultiplier finalICPRecursionMultiplier = new NewFinalICPRecursionMultiplier("", exitCMPRatio, registry);
+
+      for (int j = 1; j < maxSteps; j++)
+      {
+         for (int iter = 0; iter < iters; iter++)
+         {
+            double exitRatio = 0.7 * random.nextDouble();
+            exitCMPRatio.set(exitRatio);
+
+            for (int step = 0; step < maxSteps; step++)
+            {
+               doubleSupportDurations.get(step).set(2.0 * random.nextDouble());
+               singleSupportDurations.get(step).set(5.0 * random.nextDouble());
+            }
+
+            boolean isInTransfer = false;
+            boolean useTwoCMPs = true;
+
+            finalICPRecursionMultiplier.compute(j, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
+
+            double currentStepDuration = doubleSupportDurations.get(0).getDoubleValue() + singleSupportDurations.get(0).getDoubleValue();
+            double recursionTime = exitRatio * currentStepDuration;
+
+            for (int i = 0; i < j; i++)
+               recursionTime += doubleSupportDurations.get(i + 1).getDoubleValue() + singleSupportDurations.get(i + 1).getDoubleValue();
+
+            double finalICPMultiplier = Math.exp(-omega * recursionTime);
+            Assert.assertEquals(finalICPMultiplier, finalICPRecursionMultiplier.getDoubleValue(), epsilon);
+
+            // setup for in transfer
+            isInTransfer = true;
+            finalICPRecursionMultiplier.compute(j, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
+
+            recursionTime = currentStepDuration;
+            for (int i = 0; i < j; i++)
+               recursionTime += doubleSupportDurations.get(i + 1).getDoubleValue() + singleSupportDurations.get(i + 1).getDoubleValue();
+
+            finalICPMultiplier = Math.exp(-omega * recursionTime);
+            Assert.assertEquals(finalICPMultiplier, finalICPRecursionMultiplier.getDoubleValue(), epsilon);
+         }
+      }
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 1.0)
+   @Test(timeout = 21000)
+   public void testNStepOneCMPCalculation()
+   {
+      YoVariableRegistry registry = new YoVariableRegistry("registry");
+      DoubleYoVariable exitCMPRatio = new DoubleYoVariable("exitCMPRatio", registry);
+      DoubleYoVariable yoOmega = new DoubleYoVariable("omega", registry);
+
+      double omega = 3.0;
+      yoOmega.set(omega);
+
+      int maxSteps = 5;
+      int iters = 100;
+
+      Random random = new Random();
+      ArrayList<DoubleYoVariable> doubleSupportDurations = new ArrayList<>();
+      ArrayList<DoubleYoVariable> singleSupportDurations = new ArrayList<>();
+
+      for (int i = 0 ; i < maxSteps + 1; i++)
+      {
+         doubleSupportDurations.add(new DoubleYoVariable("doubleSupportDuration" + i, registry));
+         singleSupportDurations.add(new DoubleYoVariable("singleSupportDuration" + i, registry));
+      }
+
+      NewFinalICPRecursionMultiplier finalICPRecursionMultiplier = new NewFinalICPRecursionMultiplier("", exitCMPRatio, registry);
+
+      for (int j = 1; j < maxSteps; j++)
+      {
+         for (int iter = 0; iter < iters; iter++)
+         {
+            double exitRatio = 0.7 * random.nextDouble();
+            exitCMPRatio.set(exitRatio);
+
+            for (int step = 0; step < maxSteps; step++)
+            {
+               doubleSupportDurations.get(step).set(2.0 * random.nextDouble());
+               singleSupportDurations.get(step).set(5.0 * random.nextDouble());
+            }
+
+            boolean isInTransfer = false;
+            boolean useTwoCMPs = false;
+
+            finalICPRecursionMultiplier.compute(j, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
+
+            double currentStepDuration = doubleSupportDurations.get(0).getDoubleValue() + singleSupportDurations.get(0).getDoubleValue();
+            double recursionTime = currentStepDuration;
+            for (int i = 0; i < j; i++)
+            {
+               recursionTime += doubleSupportDurations.get(i + 1).getDoubleValue() + singleSupportDurations.get(i + 1).getDoubleValue();
+            }
+
+            double finalICPMultiplier = Math.exp(-omega * recursionTime);
+            Assert.assertEquals(finalICPMultiplier, finalICPRecursionMultiplier.getDoubleValue(), epsilon);
+
+            // setup for in transfer
+            isInTransfer = true;
+            finalICPRecursionMultiplier.compute(j, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
+
+            Assert.assertEquals(finalICPMultiplier, finalICPRecursionMultiplier.getDoubleValue(), epsilon);
+         }
       }
    }
 

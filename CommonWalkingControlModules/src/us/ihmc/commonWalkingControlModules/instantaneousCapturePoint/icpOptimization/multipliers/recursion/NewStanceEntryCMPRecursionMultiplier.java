@@ -32,26 +32,27 @@ public class NewStanceEntryCMPRecursionMultiplier
    public void compute(int numberOfFootstepsToConsider, ArrayList<DoubleYoVariable> doubleSupportDurations, ArrayList<DoubleYoVariable> singleSupportDurations,
          boolean useTwoCMPs, boolean isInTransfer, double omega0)
    {
-      if (useTwoCMPs)
-         computeWithTwoCMPs(numberOfFootstepsToConsider, doubleSupportDurations, singleSupportDurations, isInTransfer, omega0);
-      else
-         computeWithOneCMP();
-   }
-
-   private void computeWithOneCMP()
-   {
-      entryMultiplier.set(0.0);
-   }
-
-   private void computeWithTwoCMPs(int numberOfFootstepsToConsider, ArrayList<DoubleYoVariable> doubleSupportDurations, ArrayList<DoubleYoVariable> singleSupportDurations,
-         boolean isInTransfer, double omega0)
-   {
       if (numberOfFootstepsToConsider == 0)
       {
          this.entryMultiplier.set(0.0);
          return;
       }
 
+      if (useTwoCMPs)
+         computeWithTwoCMPs(doubleSupportDurations, singleSupportDurations, isInTransfer, omega0);
+      else
+         computeWithOneCMP(doubleSupportDurations, singleSupportDurations, omega0);
+   }
+
+   private void computeWithOneCMP(ArrayList<DoubleYoVariable> doubleSupportDurations, ArrayList<DoubleYoVariable> singleSupportDurations, double omega0)
+   {
+      double firstStepTime = doubleSupportDurations.get(0).getDoubleValue() + singleSupportDurations.get(0).getDoubleValue();
+      double entryMultiplier = 1.0 - Math.exp(-omega0 * firstStepTime);
+      this.entryMultiplier.set(entryMultiplier);
+   }
+
+   private void computeWithTwoCMPs(ArrayList<DoubleYoVariable> doubleSupportDurations, ArrayList<DoubleYoVariable> singleSupportDurations, boolean isInTransfer, double omega0)
+   {
       double firstStepTime = doubleSupportDurations.get(0).getDoubleValue() + singleSupportDurations.get(0).getDoubleValue();
       double timeSpentOnEntryCMP = (1.0 - exitCMPDurationInPercentOfStepTime.getDoubleValue()) * firstStepTime;
 
