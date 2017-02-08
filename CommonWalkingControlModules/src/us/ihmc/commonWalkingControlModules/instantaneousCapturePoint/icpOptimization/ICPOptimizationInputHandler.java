@@ -87,7 +87,7 @@ public class ICPOptimizationInputHandler
          exitOffsets.add(new FrameVector2d(worldFrame));
       }
 
-      if (yoGraphicsListRegistry != null)
+      if (visualize && yoGraphicsListRegistry != null)
          setupVisualizers(yoGraphicsListRegistry, visualize);
    }
 
