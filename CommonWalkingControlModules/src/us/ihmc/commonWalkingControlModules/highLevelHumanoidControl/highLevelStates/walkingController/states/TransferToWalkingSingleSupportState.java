@@ -26,6 +26,9 @@ public class TransferToWalkingSingleSupportState extends TransferState
    @Override
    public void doTransitionIntoAction()
    {
+      // to ensure that the swing starts at the desired absolute time this will adjust the transfer time
+      adjustTimings();
+
       super.doTransitionIntoAction();
 
       boolean initialTransfer = isInitialTransfer();
@@ -39,8 +42,6 @@ public class TransferToWalkingSingleSupportState extends TransferState
       else
          pelvisOrientationManager.setToHoldCurrentDesiredInSupportFoot(transferToSide);
 
-      adjustTimings();
-
       for (int i = 0; i < 3; i++)
          balanceManager.addFootstepToPlan(walkingMessageHandler.peek(i), walkingMessageHandler.peekTiming(i));
       balanceManager.setICPPlanTransferToSide(transferToSide);
@@ -50,6 +51,10 @@ public class TransferToWalkingSingleSupportState extends TransferState
       balanceManager.initializeICPPlanForTransfer(defaultSwingTime, defaultTransferTime, finalTransferTime);
    }
 
+   /**
+    * This method checks if the upcoming step has a desired absolute start time. If that is the case the transfer time is
+    * adjusted such that the swing starts at the correct time.
+    */
    private void adjustTimings()
    {
       FootstepTiming stepTiming = walkingMessageHandler.peekTiming(0);
