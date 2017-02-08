@@ -248,11 +248,6 @@ public class ICPOptimizationControllerTest
          return true;
       }
 
-      @Override public boolean useICPFromBeginningOfState()
-      {
-         return true;
-      }
-
       @Override public double getMinimumFootstepWeight()
       {
          return 0.0001;
