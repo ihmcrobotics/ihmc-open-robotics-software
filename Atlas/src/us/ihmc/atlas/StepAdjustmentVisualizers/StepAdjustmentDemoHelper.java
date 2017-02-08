@@ -194,7 +194,7 @@ public class StepAdjustmentDemoHelper
       setupCamera(scs);
       swingTime = robotModel.getWalkingControllerParameters().getDefaultSwingTime();
       transferTime = robotModel.getWalkingControllerParameters().getDefaultTransferTime();
-      initialTransferTime = robotModel.getCapturePointPlannerParameters().getDoubleSupportInitialTransferDuration();
+      initialTransferTime = robotModel.getWalkingControllerParameters().getDefaultInitialTransferTime();
       ThreadTools.sleep(1000);
    }
 
