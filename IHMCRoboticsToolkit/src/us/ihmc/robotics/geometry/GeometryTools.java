@@ -4181,6 +4181,24 @@ public class GeometryTools
       else
          return distanceFromPointToPlane(pointOnPlane2, pointOnPlane1, planeNormal1) < distanceEpsilon;
    }
+   
+   /**
+    * Rotates the given {@code tupleOriginal} tuple by an angle {@code yaw} and stores the result in the tuple.
+    * 
+    * @param yaw the angle in radians by which {@code tupleOriginal} should be rotated.
+    * @param tupleToRotate the original tuple. Not modified.
+    */
+   public static void rotateTuple2d(double yaw, Tuple2d tupleToRotate)
+   {
+      double cos = Math.cos(yaw);
+      double sin = Math.sin(yaw);
+      
+      double x = tupleToRotate.getX();
+      double y = tupleToRotate.getY();
+      
+      tupleToRotate.setX(cos * x - sin * y);
+      tupleToRotate.setY(sin * x + cos * y);
+   }
 
    /**
     * Rotates the given {@code tupleOriginal} tuple by an angle {@code yaw} and stores the result in the tuple {@code tupleTransformed}.
