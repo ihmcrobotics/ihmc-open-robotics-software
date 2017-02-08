@@ -4203,17 +4203,6 @@ public class GeometryTools
    /**
     * Rotates the given {@code tupleOriginal} tuple by an angle {@code yaw} and stores the result in the tuple {@code tupleTransformed}.
     * 
-    * @param yaw the angle in radians by which {@code tupleToTransform} should be rotated.
-    * @param tupleToTransform the tuple to transform. Modified.
-    */
-   public static void rotateTuple2d(double yaw, Tuple2d tupleToTransform)
-   {
-      rotateTuple2d(yaw, tupleToTransform, tupleToTransform);
-   }
-
-   /**
-    * Rotates the given {@code tupleOriginal} tuple by an angle {@code yaw} and stores the result in the tuple {@code tupleTransformed}.
-    * 
     * @param yaw the angle in radians by which {@code tupleOriginal} should be rotated.
     * @param tupleOriginal the original tuple. Not modified.
     * @param tupleTransformed the tuple in which the transformed {@code original} is stored. Modified.
