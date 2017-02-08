@@ -29,8 +29,7 @@ public class HexapodHighLevelControlManager
    private final ControlledBodiesCommand controlledBodiesCommand = new ControlledBodiesCommand();
    private final ControllerCoreCommand controllerCoreCommandList;
    private final EnumYoVariable<WholeBodyControllerCoreMode> controllerCoreMode = new EnumYoVariable<>("controllerCoreMode", registry, WholeBodyControllerCoreMode.class);
-   private final BodySpatialManager bodySpatialManager;
-   private final ArrayList<HighLevelJointManager> jointControllers = new ArrayList<>();
+   private final HexapodBodySpatialManager bodySpatialManager;
    private final HexapodMomentumController hexapodMomentumController;
    private final HexapodStepController stepController;
 
@@ -51,19 +50,10 @@ public class HexapodHighLevelControlManager
       RigidBody pelvis = fullRobotModel.getPelvis();
       String bodyName = pelvis.getName();
 
-      bodySpatialManager = new BodySpatialManager(bodyName, fullRobotModel, referenceFrames, controllerDt, yoGraphicsListRegistry, registry);
+      bodySpatialManager = new HexapodBodySpatialManager(bodyName, fullRobotModel, referenceFrames, controllerDt, yoGraphicsListRegistry, registry);
       stepController = new HexapodStepController("HexapodStepController", fullRobotModel, twistCalculator, contactStateUpdaters, yoGraphicsListRegistry, controllerDt, registry, referenceFrames);
       hexapodMomentumController = new HexapodMomentumController("HexapodMomentumController", referenceFrames, fullRobotModel, controllerDt, registry, yoGraphicsListRegistry);
       
-      if(jointsToControl != null)
-      {
-         for(String jointName : jointsToControl)
-         {
-            OneDoFJoint joint = fullRobotModel.getOneDoFJointByName(jointName);
-            HighLevelJointManager jointManager = new HighLevelJointManager(jointName, joint, registry);
-            jointControllers.add(jointManager);
-         }
-      }
       parentRegistry.addChild(registry);
    }
 
@@ -72,10 +62,6 @@ public class HexapodHighLevelControlManager
       bodySpatialManager.initialize();
       stepController.initialize();
       hexapodMomentumController.initialize();
-      for(HighLevelJointManager jointManager : jointControllers)
-      {
-         jointManager.initialize();
-      }
    }
 
    private final FrameVector linearVelocity = new FrameVector();
@@ -93,12 +79,6 @@ public class HexapodHighLevelControlManager
       stepController.doControl(currentParameters, linearVelocity, angularVelocity);
       hexapodMomentumController.doControl();
       
-      for(HighLevelJointManager jointManager : jointControllers)
-      {
-         jointManager.doControl(currentParameters);
-         controllerCoreCommandList.addFeedbackControlCommand(jointManager.getJointspaceFeedbackControlCommand());
-      }
-
       controllerCoreCommandList.addVirtualModelControlCommand(hexapodMomentumController.getMomentumRateCommand());
       controllerCoreCommandList.addVirtualModelControlCommand(hexapodMomentumController.getMomentumRateCommand());
       controllerCoreCommandList.addVirtualModelControlCommand(stepController.getContactStates());
@@ -128,12 +108,6 @@ public class HexapodHighLevelControlManager
    {
       controllerCoreCommandList.clear();
       FeedbackControlCommandList ret = new FeedbackControlCommandList();
-      
-//      for(HighLevelJointManager jointManager : jointControllers)
-//      {
-//         addBodiesToControl(jointManager.getRigidBodiesToControl());
-//         ret.addCommand(jointManager.getJointspaceFeedbackControlCommand());
-//      }
       
       addBodiesToControl(bodySpatialManager.getRigidBodiesToControl());
       addBodiesToControl(stepController.getRigidBodiesToControl());

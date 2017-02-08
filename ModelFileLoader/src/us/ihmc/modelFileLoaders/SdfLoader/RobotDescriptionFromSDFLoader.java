@@ -208,7 +208,7 @@ public class RobotDescriptionFromSDFLoader
       if (useCollisionMeshes)
       {
          CollisionMeshDescription collisionMeshDescription = new SDFCollisionMeshDescription(link.getCollisions(), rotationTransform);
-         scsLink.setCollisionMesh(collisionMeshDescription);
+         scsLink.addCollisionMesh(collisionMeshDescription);
       }
 
       if (link.getVisuals() != null)

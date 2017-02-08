@@ -1,7 +1,5 @@
 package us.ihmc.exampleSimulations.beetle.parameters;
 
-import java.util.HashMap;
-
 import javax.vecmath.Vector3d;
 
 import org.ejml.data.DenseMatrix64F;
@@ -10,15 +8,12 @@ import org.ejml.ops.CommonOps;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootOrientationGains;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootPositionGains;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootSE3Gains;
-import us.ihmc.robotics.controllers.PDGainsInterface;
 import us.ihmc.robotics.controllers.SE3PIDGainsInterface;
-import us.ihmc.robotics.controllers.YoPDGains;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.controllers.YoSymmetricSE3PIDGains;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
 
 public class RhinoBeetleInverseDynamicsParameters implements HexapodControllerParameters
@@ -27,7 +22,6 @@ public class RhinoBeetleInverseDynamicsParameters implements HexapodControllerPa
    private final String name = "idParams_";
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
    
-   private final HashMap<String, YoPDGains> jointGains = new HashMap<>();
    private final YoSE3PIDGainsInterface footGains;
    
    //body spatial feeback controller params
@@ -69,6 +63,12 @@ public class RhinoBeetleInverseDynamicsParameters implements HexapodControllerPa
    public double getSwingTime()
    {
       return 0.6;
+   }
+   
+   @Override
+   public double getTransferTime()
+   {
+      return 0.4;
    }
 
    @Override
@@ -112,11 +112,4 @@ public class RhinoBeetleInverseDynamicsParameters implements HexapodControllerPa
    {
       return footGains;
    }
-
-   @Override
-   public PDGainsInterface getJointGains(OneDoFJoint joint)
-   {
-      return jointGains.get(joint.getName());
-   }
-
 }

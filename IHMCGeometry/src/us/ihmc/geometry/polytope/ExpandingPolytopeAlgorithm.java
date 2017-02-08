@@ -81,6 +81,11 @@ public class ExpandingPolytopeAlgorithm
       //TODO: Get rid of this if you can...
       if (Math.abs(tripleProduct) < 1e-10)
       {
+         System.err.println("pointOne = " + pointOne);
+         System.err.println("pointTwo = " + pointTwo);
+         System.err.println("pointThree = " + pointThree);
+         System.err.println("pointFour = " + pointFour);
+         
          throw new RuntimeException("tripleProduct < 1e-10");
       }
       

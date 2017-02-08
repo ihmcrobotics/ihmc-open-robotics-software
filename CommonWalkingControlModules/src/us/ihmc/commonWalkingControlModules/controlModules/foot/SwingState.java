@@ -182,8 +182,7 @@ public class SwingState extends AbstractUnconstrainedState
          swingTrajectoryGenerator = null;
 
          positionTrajectoryGenerators.add(swingTrajectoryGeneratorNew);
-         pushRecoveryPositionTrajectoryGenerator = setupPushRecoveryTrajectoryGenerator(swingTimeProvider, registry, namePrefix,
-               pushRecoveryPositionTrajectoryGenerators, yoGraphicsListRegistry, swingTrajectoryGeneratorNew, touchdownTrajectoryGenerator);
+         pushRecoveryPositionTrajectoryGenerator = swingTrajectoryGeneratorNew;
       }
       else
       {
@@ -317,6 +316,12 @@ public class SwingState extends AbstractUnconstrainedState
       {
          if (!doContinuousReplanning.getBooleanValue())
          {
+            if (useNewSwingTrajectoyOptimization)
+            {
+               finalConfigurationProvider.getPosition(finalPosition);
+               touchdownVelocityProvider.get(finalVelocity);
+               swingTrajectoryGeneratorNew.setFinalConditions(finalPosition, finalVelocity);
+            }
             pushRecoveryPositionTrajectoryGenerator.initialize();
             this.replanTrajectory.set(false);
             trajectoryWasReplanned = true;
