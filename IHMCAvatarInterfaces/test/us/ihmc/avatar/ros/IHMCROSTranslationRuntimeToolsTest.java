@@ -14,8 +14,8 @@ import org.ros.internal.message.Message;
 
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.tools.io.printing.PrintTools;
 
@@ -25,7 +25,7 @@ import us.ihmc.tools.io.printing.PrintTools;
 @ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
 public class IHMCROSTranslationRuntimeToolsTest
 {
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 24.4)
+   @ContinuousIntegrationTest(estimatedDuration = 24.4)
    @Test(timeout = 120000)
    public void testBidirectionalConversionWithRandomConstructors()
    {
