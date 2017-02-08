@@ -42,7 +42,7 @@ import us.ihmc.tools.thread.ThreadTools;
 
 public abstract class AvatarAbsoluteStepTimingsTest implements MultiRobotTestInterface
 {
-   private static SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+   protected static SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
    static
    {
       simulationTestingParameters.setRunMultiThreaded(false);
