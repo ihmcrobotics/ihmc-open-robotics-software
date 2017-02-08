@@ -70,7 +70,22 @@ public class NewtonsCradleSimulation
    public static void createStackOfBouncyBallsSimulation()
    {
       ArrayList<Robot> robots = new ArrayList<>();
-      StackOfBouncyBallsRobot robot = new StackOfBouncyBallsRobot();
+      
+      // Set to true for a large stack of same sized balls for object stacking evaluations.
+      boolean stackOfSameSizedBalls = false;
+      
+      int numberOfBalls = 4;
+      double radiusScaleFactor = 0.6;
+      double massScaleFactor = 0.2;
+      
+      if (stackOfSameSizedBalls)
+      {
+         numberOfBalls = 40;
+         radiusScaleFactor = 1.0;
+         massScaleFactor = 1.0;
+      }
+      
+      StackOfBouncyBallsRobot robot = new StackOfBouncyBallsRobot(numberOfBalls, radiusScaleFactor, massScaleFactor);
       robots.add(robot);
 
       Robot groundRobot = new GroundAsABoxRobot();
