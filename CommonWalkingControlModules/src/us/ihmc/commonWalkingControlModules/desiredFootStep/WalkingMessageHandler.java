@@ -630,5 +630,12 @@ public class WalkingMessageHandler
          for (int footstepIdx = 1; footstepIdx < upcomingFootstepTimings.size(); footstepIdx++)
             upcomingFootstepTimings.get(footstepIdx).removeAbsoluteTime();
       }
+
+      if (atLeastOneFootstepHadTiming && yoTime == null)
+      {
+         PrintTools.warn("Recieved absolute footstep timings but " + getClass().getSimpleName() + " was created with no yoTime.");
+         for (int footstepIdx = 1; footstepIdx < upcomingFootstepTimings.size(); footstepIdx++)
+            upcomingFootstepTimings.get(footstepIdx).removeAbsoluteTime();
+      }
    }
 }
