@@ -18,6 +18,7 @@ public class ICPOptimizationSolver
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final double betaSmoothing = 0.01;
    private static final double betaMinimum = 0.0001;
+   private static final double contactBetaRegularization = 0.0;
 
    private final ICPQPIndexHandler indexHandler;
    private final ICPQPInputCalculator inputCalculator;
@@ -44,7 +45,6 @@ public class ICPOptimizationSolver
 
    protected final ArrayList<DenseMatrix64F> footstepRecursionMultipliers = new ArrayList<>();
    protected final ArrayList<DenseMatrix64F> referenceFootstepLocations = new ArrayList<>();
-   protected final ArrayList<DenseMatrix64F> previousFootstepLocations = new ArrayList<>();
 
    protected final DenseMatrix64F finalICPRecursion = new DenseMatrix64F(2, 1);
    protected final DenseMatrix64F cmpConstantEffect = new DenseMatrix64F(2, 1);
@@ -67,7 +67,10 @@ public class ICPOptimizationSolver
    protected final DenseMatrix64F footstepLocationSolution;
    protected final DenseMatrix64F feedbackDeltaSolution;
    protected final DenseMatrix64F dynamicRelaxationSolution;
+
+   private final DenseMatrix64F previousCMPConstraintSolution;
    protected final DenseMatrix64F previousFeedbackDeltaSolution;
+   protected final ArrayList<DenseMatrix64F> previousFootstepLocations = new ArrayList<>();
 
    private final DenseMatrix64F tmpCost;
    private final DenseMatrix64F tmpFootstepCost;
@@ -145,7 +148,9 @@ public class ICPOptimizationSolver
       footstepLocationSolution = new DenseMatrix64F(2 * maximumNumberOfFootstepsToConsider, 1);
       feedbackDeltaSolution = new DenseMatrix64F(2, 1);
       dynamicRelaxationSolution = new DenseMatrix64F(2, 1);
+
       previousFeedbackDeltaSolution = new DenseMatrix64F(2, 1);
+      previousCMPConstraintSolution = new DenseMatrix64F(maximumNumberOfCMPVertices, 1);
 
       tmpCost = new DenseMatrix64F(maximumNumberOfFreeVariables + maximumNumberOfLagrangeMultipliers, 1);
       tmpFootstepCost = new DenseMatrix64F(2 * maximumNumberOfFootstepsToConsider, 1);
@@ -270,6 +275,7 @@ public class ICPOptimizationSolver
       freeVariableSolution.reshape(problemSize, 1);
       lagrangeMultiplierSolution.reshape(numberOfEqualityConstraints, 1);
       footstepLocationSolution.reshape(2 * numberOfFootstepsToConsider, 1);
+      previousCMPConstraintSolution.reshape(indexHandler.getNumberOfCMPVertices(), 1);
    }
 
    public void resetFeedbackConditions()
@@ -421,7 +427,7 @@ public class ICPOptimizationSolver
       addFeedbackTask();
       addDynamicRelaxationTask();
 
-      if (indexHandler.constraintCMP())
+      if (indexHandler.constrainCMP())
          addCMPLocationConstraint();
 
       if (indexHandler.constrainReachability())
@@ -457,8 +463,11 @@ public class ICPOptimizationSolver
          }
 
          extractFeedbackDeltaSolution(feedbackDeltaSolution);
-         extractDynamicRelaxationSolution(dynamicRelaxationSolution);
          setPreviousFeedbackDeltaSolution(feedbackDeltaSolution);
+         extractDynamicRelaxationSolution(dynamicRelaxationSolution);
+
+         if (indexHandler.constrainCMP())
+            setPreviousCMPConstraintSolution();
 
          if (computeCostToGo)
             computeCostToGo();
@@ -489,11 +498,14 @@ public class ICPOptimizationSolver
       cmpLocationConstraint.setIndexOfVariableToConstrain(indexHandler.getFeedbackCMPIndex());
       cmpLocationConstraint.setSmoothingWeight(betaSmoothing);
       cmpLocationConstraint.setVertexMinimum(betaMinimum);
+      cmpLocationConstraint.setRegularizationWeight(contactBetaRegularization);
+      cmpLocationConstraint.setPreviousVertexSolution(previousCMPConstraintSolution);
       cmpLocationConstraint.formulateConstraint();
 
       int numberOfVertices = cmpLocationConstraint.getNumberOfVertices();
       int cmpContstraintIndex = indexHandler.getCMPConstraintIndex();
-      MatrixTools.setMatrixBlock(solverInput_H, cmpContstraintIndex, cmpContstraintIndex, cmpLocationConstraint.smoothingCost, 0, 0, numberOfVertices, numberOfVertices, 1.0);
+      MatrixTools.addMatrixBlock(solverInput_H, cmpContstraintIndex, cmpContstraintIndex, cmpLocationConstraint.quadraticTerm, 0, 0, numberOfVertices, numberOfVertices, 1.0);
+      MatrixTools.addMatrixBlock(solverInput_h, cmpContstraintIndex, 0, cmpLocationConstraint.linearTerm, 0, 0, numberOfVertices, 1, 1.0);
 
       MatrixTools.setMatrixBlock(solverInput_Aeq, cmpLocationConstraint.getIndexOfVariableToConstrain(), currentEqualityConstraintIndex, cmpLocationConstraint.indexSelectionMatrix, 0, 0, 2, 2, 1.0);
       MatrixTools.setMatrixBlock(solverInput_Aeq, cmpContstraintIndex, currentEqualityConstraintIndex, cmpLocationConstraint.dynamics_Aeq, 0, 0, numberOfVertices, 2, 1.0);
@@ -518,7 +530,8 @@ public class ICPOptimizationSolver
 
       int numberOfVertices = reachabilityConstraint.getNumberOfVertices();
       int reachabilityConstraintIndex = indexHandler.getReachabilityConstraintIndex();
-      MatrixTools.setMatrixBlock(solverInput_H, reachabilityConstraintIndex, reachabilityConstraintIndex, cmpLocationConstraint.smoothingCost, 0, 0, numberOfVertices, numberOfVertices, 1.0);
+      MatrixTools.addMatrixBlock(solverInput_H, reachabilityConstraintIndex, reachabilityConstraintIndex, reachabilityConstraint.quadraticTerm, 0, 0, numberOfVertices, numberOfVertices, 1.0);
+      MatrixTools.addMatrixBlock(solverInput_h, reachabilityConstraintIndex, 0, reachabilityConstraint.linearTerm, 0, 0, numberOfVertices, 1, 1.0);
 
       MatrixTools.setMatrixBlock(solverInput_Aeq, indexHandler.getFootstepStartIndex(), currentEqualityConstraintIndex, reachabilityConstraint.indexSelectionMatrix, 0, 0, 2, 2, 1.0);
       MatrixTools.setMatrixBlock(solverInput_Aeq, reachabilityConstraintIndex, currentEqualityConstraintIndex, reachabilityConstraint.dynamics_Aeq, 0, 0, numberOfVertices, 2, 1.0);
@@ -597,7 +610,12 @@ public class ICPOptimizationSolver
 
    private void setPreviousFeedbackDeltaSolution(DenseMatrix64F feedbackDeltaSolution)
    {
-      MatrixTools.setMatrixBlock(previousFeedbackDeltaSolution, 0, 0, feedbackDeltaSolution, 0, 0, 2, 1, 1.0);
+      previousFeedbackDeltaSolution.set(feedbackDeltaSolution);
+   }
+
+   private void setPreviousCMPConstraintSolution()
+   {
+      MatrixTools.setMatrixBlock(previousCMPConstraintSolution, 0, 0, solution, indexHandler.getCMPConstraintIndex(), 0, indexHandler.getNumberOfCMPVertices(), 1, 1.0);
    }
 
    private final DenseMatrix64F tmpCostScalar = new DenseMatrix64F(1, 1);
