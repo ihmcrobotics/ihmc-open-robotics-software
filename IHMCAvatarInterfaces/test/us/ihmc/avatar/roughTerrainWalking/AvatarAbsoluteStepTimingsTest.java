@@ -2,6 +2,9 @@ package us.ihmc.avatar.roughTerrainWalking;
 
 import static org.junit.Assert.assertTrue;
 
+import java.util.List;
+import java.util.Random;
+
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 
@@ -13,6 +16,7 @@ import us.ihmc.avatar.DRCStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WalkingHighLevelHumanoidController;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPPlannerWithTimeFreezer;
@@ -23,24 +27,35 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.simulationconstructionset.ExternalForcePoint;
+import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
+import us.ihmc.simulationconstructionset.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationconstructionset.util.environments.FlatGroundEnvironment;
+import us.ihmc.simulationconstructionset.util.environments.SelectableObjectListener;
+import us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObject3D;
+import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.tools.thread.ThreadTools;
 
 public abstract class AvatarAbsoluteStepTimingsTest implements MultiRobotTestInterface
 {
-   private SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+   private static SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+   static
+   {
+      simulationTestingParameters.setRunMultiThreaded(false);
+   }
+
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
-   private static final int TICK_EPSILON = 5;
+   private static final int TICK_EPSILON = 2;
 
    public void testTakingStepsWithAbsoluteTimings() throws SimulationExceededMaximumTimeException
    {
       String className = getClass().getSimpleName();
-      FlatGroundEnvironment environment = new FlatGroundEnvironment();
+      CommonAvatarEnvironmentInterface environment = new TestingEnvironment();
       DRCStartingLocation startingLocation = DRCObstacleCourseStartingLocation.DEFAULT;
       DRCRobotModel robotModel = getRobotModel();
       drcSimulationTestHelper = new DRCSimulationTestHelper(environment, className, startingLocation, simulationTestingParameters, robotModel);
@@ -53,12 +68,18 @@ public abstract class AvatarAbsoluteStepTimingsTest implements MultiRobotTestInt
       double swingStartInterval = 1.125;
       int steps = 20;
 
-      FootstepDataListMessage footsteps = new FootstepDataListMessage(0.6, 0.3, 0.1);
+      WalkingControllerParameters walkingControllerParameters = getRobotModel().getWalkingControllerParameters();
+      double stepWidth = (walkingControllerParameters.getMinStepWidth() + walkingControllerParameters.getMaxStepWidth()) / 2.0;
+      double stepLength = walkingControllerParameters.getDefaultStepLength() / 2.0;
+      double swingTime = walkingControllerParameters.getDefaultSwingTime();
+      double transferTime = walkingControllerParameters.getDefaultTransferTime();
+      double finalTransferTime = walkingControllerParameters.getDefaultFinalTransferTime();
+      FootstepDataListMessage footsteps = new FootstepDataListMessage(swingTime, transferTime, finalTransferTime);
       for (int stepIndex = 0; stepIndex < steps; stepIndex++)
       {
          RobotSide side = stepIndex % 2 == 0 ? RobotSide.LEFT : RobotSide.RIGHT;
-         double y = side == RobotSide.LEFT ? 0.15 : -0.15;
-         Point3d location = new Point3d(0.0, y, 0.0);
+         double y = side == RobotSide.LEFT ? stepWidth / 2.0 : -stepWidth / 2.0;
+         Point3d location = new Point3d((double) stepIndex * stepLength, y, 0.0);
          Quat4d orientation = new Quat4d(0.0, 0.0, 0.0, 1.0);
          FootstepDataMessage footstepData = new FootstepDataMessage(side, location, orientation);
          footstepData.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
@@ -142,6 +163,58 @@ public abstract class AvatarAbsoluteStepTimingsTest implements MultiRobotTestInt
       if (!clazz.isInstance(uncheckedVariable))
          throw new RuntimeException("YoVariable " + name + " is not of type " + clazz.getSimpleName());
       return clazz.cast(uncheckedVariable);
+   }
+
+   public class TestingEnvironment implements CommonAvatarEnvironmentInterface
+   {
+      private final CombinedTerrainObject3D terrain;
+      private final Random random = new Random(19389481L);
+
+      public TestingEnvironment()
+      {
+         WalkingControllerParameters walkingControllerParameters = getRobotModel().getWalkingControllerParameters();
+         double flatArea = walkingControllerParameters.getDefaultStepLength() * 1.0;
+         double maxElevation = walkingControllerParameters.getMinSwingHeightFromStanceFoot() * 0.5;
+
+         terrain = new CombinedTerrainObject3D(getClass().getSimpleName());
+         terrain.addBox(-0.5, -1.0, flatArea, 1.0, -0.01, 0.0);
+
+         for (int i = 0; i < 50; i++)
+         {
+            double xStart = flatArea + (double) i * flatArea;
+            double height = maxElevation * 2.0 * (random.nextDouble() - 0.5);
+            double length = flatArea;
+            terrain.addBox(xStart, -1.0, xStart + length, 1.0, height - 0.01, height);
+         }
+      }
+
+      @Override
+      public TerrainObject3D getTerrainObject3D()
+      {
+         return terrain;
+      }
+
+      @Override
+      public List<? extends Robot> getEnvironmentRobots()
+      {
+         return null;
+      }
+
+      @Override
+      public void createAndSetContactControllerToARobot()
+      {
+      }
+
+      @Override
+      public void addContactPoints(List<? extends ExternalForcePoint> externalForcePoints)
+      {
+      }
+
+      @Override
+      public void addSelectableListenerToSelectables(SelectableObjectListener selectedListener)
+      {
+      }
+
    }
 
    @Before

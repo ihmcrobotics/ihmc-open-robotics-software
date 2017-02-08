@@ -84,7 +84,7 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
 
    @RosExportedField(documentation = "Boolean that determines whether the controller should attemp at keeping absolute timings for the execution of this footstep."
          + " This means that a time for foot lift-off (end of toe off) needs to be specified. The timing is set with respect to the start of the execution of the"
-         + " FootstepDataList that this footstep is part of.")
+         + " FootstepDataList that this footstep is part of. Note, that if you choose to use absolute timings transfer times you set in this message will be ignored.")
    public boolean hasAbsoluteTime = false;
    @RosExportedField(documentation = "If using absolute timings this is the time at which the controller will start the swing. The time is with respect to the time"
          + " at which the controller recieves the walking command. The value of this time must be increasing throughout a FootstepDataListMessage, otherwise it is"
