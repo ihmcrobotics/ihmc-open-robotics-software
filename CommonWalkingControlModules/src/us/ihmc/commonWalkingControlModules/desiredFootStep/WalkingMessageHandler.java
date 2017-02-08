@@ -165,7 +165,9 @@ public class WalkingMessageHandler
          upcomingFootstepTimings.add(newFootstepTiming);
       }
 
-      checkTimings(upcomingFootstepTimings);
+      if (!checkTimings(upcomingFootstepTimings))
+         clearFootsteps();
+
       updateVisualization();
    }
 
@@ -602,10 +604,15 @@ public class WalkingMessageHandler
       return timing;
    }
 
-   private void checkTimings(List<FootstepTiming> upcomingFootstepTimings)
+   private boolean checkTimings(List<FootstepTiming> upcomingFootstepTimings)
    {
+      // TODO: This is somewhat duplicated in the PacketValidityChecker.
+      // The reason it has to be here is that this also checks that the timings are monotonically increasing if messages
+      // are queued. It also rejects the message if this class was not created with time in which case absolute footstep
+      // timings can not be executed.
+
       if (upcomingFootstepTimings.isEmpty())
-         return;
+         return true;
 
       boolean timingsValid = upcomingFootstepTimings.get(0).hasAbsoluteTime();
       boolean atLeastOneFootstepHadTiming = upcomingFootstepTimings.get(0).hasAbsoluteTime();
@@ -627,15 +634,15 @@ public class WalkingMessageHandler
       if (atLeastOneFootstepHadTiming && !timingsValid)
       {
          PrintTools.warn("Recieved footstep data with invalid timings. Using swing and transfer times instead.");
-         for (int footstepIdx = 1; footstepIdx < upcomingFootstepTimings.size(); footstepIdx++)
-            upcomingFootstepTimings.get(footstepIdx).removeAbsoluteTime();
+         return false;
       }
 
       if (atLeastOneFootstepHadTiming && yoTime == null)
       {
          PrintTools.warn("Recieved absolute footstep timings but " + getClass().getSimpleName() + " was created with no yoTime.");
-         for (int footstepIdx = 1; footstepIdx < upcomingFootstepTimings.size(); footstepIdx++)
-            upcomingFootstepTimings.get(footstepIdx).removeAbsoluteTime();
+         return false;
       }
+
+      return true;
    }
 }
