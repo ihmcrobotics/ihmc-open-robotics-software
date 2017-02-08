@@ -13,6 +13,7 @@ public class SimpleContactWrapper implements Contacts
    private CollisionShape shapeA;
    private CollisionShape shapeB;
 
+   // TODO: Make a contact point class and have an array of them, rather than this silliness:
    private final ArrayList<Point3d> worldA = new ArrayList<Point3d>();
    private final ArrayList<Point3d> worldB = new ArrayList<Point3d>();
    private final ArrayList<Vector3d> normalA = new ArrayList<Vector3d>();
@@ -24,12 +25,72 @@ public class SimpleContactWrapper implements Contacts
       this.shapeB = shapeB;
    }
 
+   @Override
+   public void set(Contacts collision)
+   {
+      clear();
+
+      this.shapeA = collision.getShapeA();
+      this.shapeB = collision.getShapeB();
+
+      addAll(collision);
+   }
+
    public void clear()
    {
       worldA.clear();
       worldB.clear();
       normalA.clear();
       distances.clear();
+   }
+
+   @Override
+   public void addAll(Contacts contacts)
+   {
+      CollisionShape shapeA = contacts.getShapeA();
+      CollisionShape shapeB = contacts.getShapeB();
+
+      boolean switched = (shapeA == this.shapeB);
+
+      if (switched)
+      {
+         if (this.shapeA != shapeB)
+         {
+            throw new RuntimeException();
+         }
+      }
+      else
+      {
+         if ((this.shapeA != shapeA) || (this.shapeB != shapeB))
+         {
+            throw new RuntimeException();
+         }
+      }
+
+      int numberOfContacts = contacts.getNumberOfContacts();
+
+      for (int i = 0; i < numberOfContacts; i++)
+      {
+         Point3d worldAPoint = new Point3d();
+         contacts.getWorldA(i, worldAPoint);
+         worldA.add(worldAPoint);
+
+         Point3d worldBPoint = new Point3d();
+         contacts.getWorldB(i, worldBPoint);
+         worldB.add(worldBPoint);
+
+         Vector3d normalAVector = new Vector3d();
+
+         contacts.getWorldNormal(i, normalAVector);
+         if (switched)
+         {
+            normalAVector.scale(-1.0);
+         }
+         normalA.add(normalAVector);
+
+         distances.add(contacts.getDistance(i));
+      }
+
    }
 
    public void addContact(Point3d pointA, Point3d pointB, Vector3d normalA, double distance)

@@ -14,10 +14,12 @@ import us.ihmc.robotics.dataStructures.variable.YoVariableList;
 import us.ihmc.robotics.robotDescription.CollisionMeshDescription;
 import us.ihmc.simulationconstructionset.DataBuffer.RepeatDataBufferEntryException;
 import us.ihmc.simulationconstructionset.graphics.GraphicsRobot;
+import us.ihmc.simulationconstructionset.physics.CollisionArbiter;
 import us.ihmc.simulationconstructionset.physics.CollisionHandler;
 import us.ihmc.simulationconstructionset.physics.CollisionShapeFactory;
 import us.ihmc.simulationconstructionset.physics.ScsCollisionDetector;
 import us.ihmc.simulationconstructionset.physics.ScsPhysics;
+import us.ihmc.simulationconstructionset.physics.collision.simple.ExperimentalCollisionArbiter;
 import us.ihmc.simulationconstructionset.physics.collision.simple.SimpleCollisionDetector;
 import us.ihmc.simulationconstructionset.physics.visualize.DefaultCollisionVisualizer;
 import us.ihmc.simulationconstructionset.scripts.Script;
@@ -55,7 +57,7 @@ public class Simulation implements YoVariableHolder, Serializable // Runnable,
 
    public void initPhysics(ScsPhysics physics)
    {
-      mySimulator.setCollisions(physics.collisionDetector, physics.collisionHandler, physics.visualize);
+      mySimulator.setCollisions(physics.collisionDetector, physics.collisionArbiter, physics.collisionHandler, physics.visualize);
 
       for (Robot robot : robots)
       {
@@ -486,7 +488,11 @@ public class Simulation implements YoVariableHolder, Serializable // Runnable,
       if (collisionVisualizer != null) collisionHandler.addListener(collisionVisualizer);
 
       collisionDetector.initialize();
-      this.initPhysics(new ScsPhysics(null, collisionDetector, collisionHandler, collisionVisualizer));
+      
+//      CollisionArbiter collisionArbiter = new DoNothingCollisionArbiter();
+      CollisionArbiter collisionArbiter = new ExperimentalCollisionArbiter();
+
+      this.initPhysics(new ScsPhysics(null, collisionDetector, collisionArbiter, collisionHandler, collisionVisualizer));
    }
 
    private static ScsCollisionDetector createCollisionShapesFromLinks(Robot[] robots)

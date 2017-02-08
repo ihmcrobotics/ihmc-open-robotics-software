@@ -286,8 +286,8 @@ public class NewtonsCradleSimulation
 //            createStackOfBouncyBallsSimulation();
 //            createBoxDownRampSimulation();
 //            createRowOfDominosSimulation();
-//      createStackOfBlocksSimulation();
-      createPileOfRandomObjectsSimulation();
+      createStackOfBlocksSimulation();
+//      createPileOfRandomObjectsSimulation();
    }
 
 }
