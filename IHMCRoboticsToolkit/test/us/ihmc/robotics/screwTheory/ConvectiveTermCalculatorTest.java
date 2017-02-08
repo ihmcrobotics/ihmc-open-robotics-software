@@ -1,11 +1,13 @@
 package us.ihmc.robotics.screwTheory;
 
-import org.junit.Test;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import java.util.Random;
 
 import javax.vecmath.Vector3d;
-import java.util.Random;
+
+import org.junit.Test;
+
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 /**
  * @author twan

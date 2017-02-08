@@ -1,14 +1,15 @@
 package us.ihmc.quadrupedRobotics.util;
 
-import org.apache.commons.lang3.mutable.MutableDouble;
-import org.junit.Test;
-import java.util.ArrayList;
-
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations;
-
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertEquals;
+
+import java.util.ArrayList;
+
+import org.apache.commons.lang3.mutable.MutableDouble;
+import org.junit.Test;
+
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
 
 public class PreallocatedListTest
 {

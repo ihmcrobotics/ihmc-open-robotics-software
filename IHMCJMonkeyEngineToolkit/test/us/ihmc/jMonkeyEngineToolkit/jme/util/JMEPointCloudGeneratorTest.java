@@ -2,17 +2,16 @@
 
 import java.util.Random;
 
+import com.jme3.scene.Node;
+
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.structure.Graphics3DNode;
 import us.ihmc.jMonkeyEngineToolkit.Graphics3DWorld;
 import us.ihmc.jMonkeyEngineToolkit.jme.JMEGraphics3DAdapter;
-import us.ihmc.jMonkeyEngineToolkit.jme.util.JMEPointCloudGenerator;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.lidar.LidarScan;
 import us.ihmc.robotics.lidar.LidarScanParameters;
 import us.ihmc.robotics.random.RandomTools;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-
-import com.jme3.scene.Node;
 
 public class JMEPointCloudGeneratorTest
 {

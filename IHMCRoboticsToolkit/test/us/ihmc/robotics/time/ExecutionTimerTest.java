@@ -1,13 +1,13 @@
 package us.ihmc.robotics.time;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.util.Random;
 
 import org.junit.Test;
 
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations;
 
 public class ExecutionTimerTest
 {

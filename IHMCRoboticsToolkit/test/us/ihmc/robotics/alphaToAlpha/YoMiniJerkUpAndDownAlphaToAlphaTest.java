@@ -1,11 +1,12 @@
 package us.ihmc.robotics.alphaToAlpha;
 
+import static org.junit.Assert.assertEquals;
+
 import org.junit.Test;
+
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations;
-
-import static org.junit.Assert.*;
 
 /**
  * Created by Peter on 9/11/2016.

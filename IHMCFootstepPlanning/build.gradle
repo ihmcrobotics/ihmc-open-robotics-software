@@ -37,6 +37,8 @@ dependencies {
 	compile "javax.vecmath:vecmath:1.5.2"
 	compile "org.ejml:core:0.29"
 	compile "org.ejml:dense64:0.29"
+    
+    testCompile group: 'us.ihmc', name: 'IHMCContinuousIntegrationFramework', version: '0.9.1'
 	
 	compile ihmc.getProjectDependency(":IHMCRoboticsToolkit")
 	compile ihmc.getProjectDependency(":IHMCGraphicsDescription")

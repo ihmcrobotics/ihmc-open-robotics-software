@@ -1,15 +1,13 @@
 package us.ihmc.robotics.math.filters;
 
+import java.util.Random;
+
 import org.junit.Assert;
 import org.junit.Test;
 
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.math.filters.DeltaLimitedYoVariable;
 import us.ihmc.robotics.random.RandomTools;
-
-import static us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.*;
-
-import java.util.Random;
 
 /**
  *

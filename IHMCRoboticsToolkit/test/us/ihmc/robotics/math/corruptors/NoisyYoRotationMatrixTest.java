@@ -6,11 +6,9 @@ import javax.vecmath.Matrix3d;
 
 import org.junit.Test;
 
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.RotationTools;
-import us.ihmc.robotics.math.corruptors.NoiseType;
-import us.ihmc.robotics.math.corruptors.NoisyYoRotationMatrix;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.testing.JUnitTools;
 
 public class NoisyYoRotationMatrixTest
