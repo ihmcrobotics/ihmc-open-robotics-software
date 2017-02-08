@@ -37,7 +37,7 @@ public class YoSpline3DTest
       
       FramePoint expected = new FramePoint(worldFrame, 49.0, 61.0, 16.0);
       cubic.compute(3.0);
-      FramePoint actual = cubic.getPosition();
+      FramePoint actual = cubic.getPositionCopy();
       
       for (Direction direction : Direction.values())
       {
@@ -66,7 +66,7 @@ public class YoSpline3DTest
 	   
 	   FramePoint expected = new FramePoint(worldFrame, -0.59375, -3.9375, 0.15625);
 	   quintic.compute(0.5);
-	   FramePoint actual = quintic.getPosition();
+	   FramePoint actual = quintic.getPositionCopy();
 	      
 	   for (Direction direction : Direction.values())
 	   {
@@ -84,10 +84,10 @@ public class YoSpline3DTest
 	   double t = 2 * (random.nextDouble() - 1);
 	   double dt = 1e-9;
 	   spline.compute(t);
-	   FrameVector actual = spline.getVelocity();
-	   FramePoint pos1 = spline.getPosition();
+	   FrameVector actual = spline.getVelocityCopy();
+	   FramePoint pos1 = spline.getPositionCopy();
 	   spline.compute(t + dt);
-	   FramePoint pos2 = spline.getPosition();
+	   FramePoint pos2 = spline.getPositionCopy();
 	   FrameVector numerical = new FrameVector(worldFrame, (pos2.getX() - pos1.getX()) / dt, (pos2.getY() - pos1.getY()) / dt, (pos2.getZ() - pos1.getZ()) / dt);
 	   assertEquals(numerical.getX(), actual.getX(), 1e-5);
 	   assertEquals(numerical.getY(), actual.getY(), 1e-5);
@@ -104,10 +104,10 @@ public class YoSpline3DTest
 	   double t = 2 * (random.nextDouble() - 1);
 	   double dt = 1e-9;
 	   spline.compute(t);
-	   FrameVector actual = spline.getAcceleration();
-	   FrameVector vel1 = spline.getVelocity();
+	   FrameVector actual = spline.getAccelerationCopy();
+	   FrameVector vel1 = spline.getVelocityCopy();
 	   spline.compute(t + dt);
-	   FrameVector vel2 = spline.getVelocity();
+	   FrameVector vel2 = spline.getVelocityCopy();
 	   FrameVector numerical = new FrameVector(worldFrame, (vel2.getX() - vel1.getX()) / dt, (vel2.getY() - vel1.getY()) / dt, (vel2.getZ() - vel1.getZ()) / dt);
 	   assertEquals(numerical.getX(), actual.getX(), Math.abs(actual.getX()) * 1e-5);
 	   assertEquals(numerical.getY(), actual.getY(), Math.abs(actual.getY()) * 1e-5);

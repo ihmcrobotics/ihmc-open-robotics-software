@@ -7,8 +7,6 @@ import java.lang.annotation.Target;
 
 public class ContinuousIntegrationAnnotations
 {
-   public static final Double defaultEstimatedDuration = 0.1;
-   
    @Retention(RetentionPolicy.RUNTIME)
    @Target(ElementType.TYPE)
    public @interface ContinuousIntegrationPlan

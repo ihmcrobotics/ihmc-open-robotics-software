@@ -26,13 +26,14 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
 import us.ihmc.tools.thread.ThreadTools;
 
 public class SimplePlanarRegionBipedalAnytimeFootstepPlannerTest
 {
    private final boolean visualize = false;
 
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 20.0)
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(categoriesOverride = IntegrationCategory.IN_DEVELOPMENT, estimatedDuration = 20.0)
    @Test(timeout = 300000)
    public void testSameResultsAsNormalPlannerWhenUsedAsANormalPlanner()
    {

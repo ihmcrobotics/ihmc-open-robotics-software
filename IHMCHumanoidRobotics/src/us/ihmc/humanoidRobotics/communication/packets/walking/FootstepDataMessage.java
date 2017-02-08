@@ -16,6 +16,7 @@ import us.ihmc.communication.ros.generators.RosMessagePacket;
 import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
 import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
+import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
@@ -80,6 +81,15 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
    public double swingTime = Double.NaN;
    @RosExportedField(documentation = "Specifies the transfer time before this step.")
    public double transferTime = Double.NaN;
+
+   @RosExportedField(documentation = "Boolean that determines whether the controller should attemp at keeping absolute timings for the execution of this footstep."
+         + " This means that a time for foot lift-off (end of toe off) needs to be specified. The timing is set with respect to the start of the execution of the"
+         + " FootstepDataList that this footstep is part of. Note, that if you choose to use absolute timings transfer times you set in this message will be ignored.")
+   public boolean hasAbsoluteTime = false;
+   @RosExportedField(documentation = "If using absolute timings this is the time at which the controller will start the swing. The time is with respect to the time"
+         + " at which the controller recieves the walking command. The value of this time must be increasing throughout a FootstepDataListMessage, otherwise it is"
+         + " ignored.")
+   public double swingStartTime = 0.0;
 
    /**
     * Empty constructor for serialization.
@@ -151,6 +161,8 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
       this.hasTimings = footstepData.hasTimings;
       this.swingTime = footstepData.swingTime;
       this.transferTime = footstepData.transferTime;
+      this.hasAbsoluteTime = footstepData.hasAbsoluteTime;
+      this.swingStartTime = footstepData.swingStartTime;
    }
 
    public FootstepDataMessage clone()
@@ -159,6 +171,11 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
    }
 
    public FootstepDataMessage(Footstep footstep)
+   {
+      this(footstep, null);
+   }
+
+   public FootstepDataMessage(Footstep footstep, FootstepTiming timing)
    {
       origin = FootstepOrigin.AT_ANKLE_FRAME;
       robotSide = footstep.getRobotSide();
@@ -197,9 +214,12 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
             trajectoryWaypoints[i] = new Point3d(footstep.getSwingWaypoints().get(i));
       }
 
-      hasTimings = footstep.hasTimings();
-      swingTime = footstep.getSwingTime();
-      transferTime = footstep.getTransferTime();
+      if (timing != null)
+      {
+         hasTimings = true;
+         swingTime = timing.getSwingTime();
+         transferTime = timing.getTransferTime();
+      }
    }
 
    public FootstepOrigin getOrigin()
@@ -316,6 +336,28 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
       return transferTime;
    }
 
+   public void setAbsoluteTime(double swingStartTime)
+   {
+      hasAbsoluteTime = true;
+      this.swingStartTime = swingStartTime;
+   }
+
+   public boolean hasAbsoluteTime()
+   {
+      return hasAbsoluteTime;
+   }
+
+   public void removeAbsoluteTime()
+   {
+      hasAbsoluteTime = false;
+      this.swingStartTime = 0.0;
+   }
+
+   public double getSwingStartTime()
+   {
+      return swingStartTime;
+   }
+
    public String toString()
    {
       String ret = "";
@@ -416,7 +458,11 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
          sameTimings = sameTimings && MathTools.epsilonEquals(transferTime, footstepData.transferTime, epsilon);
       }
 
-      return robotSideEquals && locationEquals && orientationEquals && contactPointsEqual && trajectoryWaypointsEqual && sameTimings;
+      boolean sameAbsoluteTime = hasAbsoluteTime == footstepData.hasAbsoluteTime;
+      if (hasAbsoluteTime)
+         sameAbsoluteTime = sameAbsoluteTime && MathTools.epsilonEquals(swingStartTime, footstepData.swingStartTime, epsilon);
+
+      return robotSideEquals && locationEquals && orientationEquals && contactPointsEqual && trajectoryWaypointsEqual && sameTimings && sameAbsoluteTime;
    }
 
    public FootstepDataMessage transform(RigidBodyTransform transform)
@@ -464,6 +510,12 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
          hasTimings = true;
          this.swingTime = RandomTools.generateRandomDoubleInRange(random, 0.05, 2.0);
          this.transferTime = RandomTools.generateRandomDoubleInRange(random, 0.05, 2.0);
+      }
+
+      if (random.nextBoolean())
+      {
+         hasAbsoluteTime = true;
+         this.swingStartTime = RandomTools.generateRandomDoubleInRange(random, 0.0, 50.0);
       }
 
       if (trajectoryType == TrajectoryType.CUSTOM)

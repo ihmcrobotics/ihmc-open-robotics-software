@@ -14,7 +14,7 @@ import us.ihmc.tools.continuousIntegration.IntegrationCategory;
 import us.ihmc.wholeBodyController.AdditionalSimulationContactPoints;
 import us.ihmc.wholeBodyController.FootContactPoints;
 
-@ContinuousIntegrationPlan(categories = {IntegrationCategory.SLOW})
+@ContinuousIntegrationPlan(categories = {IntegrationCategory.SLOW, IntegrationCategory.VIDEO})
 public class AtlasPointyRocksEnvironmentContactsTest extends HumanoidPointyRocksEnvironmentContactsTest
 {
    private final AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, DRCRobotModel.RobotTarget.SCS, false);
@@ -40,7 +40,7 @@ public class AtlasPointyRocksEnvironmentContactsTest extends HumanoidPointyRocks
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 137.5, categoriesOverride = {IntegrationCategory.SLOW, IntegrationCategory.VIDEO})
+   @ContinuousIntegrationTest(estimatedDuration = 137.5, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT}) // moved to in develop until we have polygon to polygon contacts
    @Test(timeout = 690000)
    public void testWalkingOnLinesInEnvironment() throws SimulationExceededMaximumTimeException
    {
@@ -48,7 +48,7 @@ public class AtlasPointyRocksEnvironmentContactsTest extends HumanoidPointyRocks
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 69.7, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT, IntegrationCategory.VIDEO})
+   @ContinuousIntegrationTest(estimatedDuration = 69.7, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT}) // moved to in develop until we have polygon to polygon contacts
    @Test(timeout = 350000)
    public void testWalkingOnPointInEnvironment() throws SimulationExceededMaximumTimeException
    {

@@ -3,7 +3,6 @@ package us.ihmc.robotics.geometry;
 import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector2d;
-import javax.vecmath.Vector3d;
 
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.transformables.TransformablePoint2d;
@@ -430,14 +429,8 @@ public class Line2d implements Geometry2d<Line2d>
    @Override
    public void applyTransformAndProjectToXYPlane(RigidBodyTransform transform)
    {
-      Point3d resultPoint = new Point3d(point.getX(), point.getY(), 0.0);
-      transform.transform(resultPoint);
-
-      Vector3d resultVector = new Vector3d(normalizedVector.getX(), normalizedVector.getY(), 0.0);
-      transform.transform(resultVector);
-
-      point.set(resultPoint.getX(), resultPoint.getY());
-      normalizedVector.set(resultVector.getX(), resultVector.getY());
+      point.applyTransform(transform, false);
+      normalizedVector.applyTransform(transform, false);
    }
 
    @Override

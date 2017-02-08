@@ -4,6 +4,7 @@ import org.ejml.data.DenseMatrix64F;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.ReferenceFrameMismatchException;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -14,7 +15,8 @@ import javax.vecmath.Vector3d;
 
 public class Twist extends SpatialMotionVector
 {
-   private Vector3d tempVector = new Vector3d();    // to store intermediate results
+   private Vector3d freeVector = new Vector3d();    // to store intermediate results
+   private RigidBodyTransform freeTransform = new RigidBodyTransform();
 
    public Twist()
    {
@@ -42,6 +44,18 @@ public class Twist extends SpatialMotionVector
    public Twist(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame, Vector3d linearVelocity, Vector3d angularVelocity)
    {
       super(bodyFrame, baseFrame, expressedInFrame, linearVelocity, angularVelocity);
+   }
+
+   /**
+    * @param bodyFrame what we're specifying the motion of
+    * @param baseFrame with respect to what we're specifying the motion
+    * @param linearPart linear part of the spatial motion vector expressed in the {@code expressedInFrame} to use.
+    * @param angularPart angular part of the spatial motion vector expressed in the {@code expressedInFrame} to use.
+    * @throws ReferenceFrameMismatchException if the linear and angular parts are not expressed in the same reference frame.
+    */
+   public Twist(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, FrameVector linearVelocity, FrameVector angularVelocity)
+   {
+      super(bodyFrame, baseFrame, linearVelocity, angularVelocity);
    }
 
    /**
@@ -116,8 +130,8 @@ public class Twist extends SpatialMotionVector
       }
       else
       {
-         RigidBodyTransform transform = expressedInFrame.getTransformToDesiredFrame(baseFrame);
-         transform.transform(vectorToPack);    // only does rotation
+         expressedInFrame.getTransformToDesiredFrame(freeTransform, baseFrame);
+         freeTransform.transform(vectorToPack);    // only does rotation
       }
    }
 
@@ -142,10 +156,10 @@ public class Twist extends SpatialMotionVector
       }
       else
       {
-         RigidBodyTransform transformFromBody = bodyFrame.getTransformToDesiredFrame(expressedInFrame);
-         transformFromBody.getTranslation(tempVector);
+         bodyFrame.getTransformToDesiredFrame(freeTransform, expressedInFrame);
+         freeTransform.getTranslation(freeVector);
 
-         linearVelocityAtBodyOriginToPack.cross(angularPart, tempVector);    // omega x p
+         linearVelocityAtBodyOriginToPack.cross(angularPart, freeVector);    // omega x p
          linearVelocityAtBodyOriginToPack.add(linearPart);    // omega x p + v
       }
 
@@ -155,8 +169,8 @@ public class Twist extends SpatialMotionVector
       }
       else
       {
-         RigidBodyTransform transformToBase = expressedInFrame.getTransformToDesiredFrame(baseFrame);
-         transformToBase.transform(linearVelocityAtBodyOriginToPack);    // only does rotation
+         expressedInFrame.getTransformToDesiredFrame(freeTransform, baseFrame);
+         freeTransform.transform(linearVelocityAtBodyOriginToPack);    // only does rotation
       }
    }
 
@@ -178,10 +192,10 @@ public class Twist extends SpatialMotionVector
       baseFrame.checkReferenceFrameMatch(expressedInFrame);
       pointFixedInBodyFrame.checkReferenceFrameMatch(baseFrame);
 
-      pointFixedInBodyFrame.get(tempVector);
+      pointFixedInBodyFrame.get(freeVector);
 
       linearVelocityToPack.setToZero(expressedInFrame);
-      linearVelocityToPack.cross(angularPart, tempVector);
+      linearVelocityToPack.cross(angularPart, freeVector);
       linearVelocityToPack.add(linearPart);
    }
 
@@ -194,10 +208,10 @@ public class Twist extends SpatialMotionVector
       baseFrame.checkReferenceFrameMatch(expressedInFrame);
       point2dFixedInBodyFrame.checkReferenceFrameMatch(baseFrame);
 
-      point2dFixedInBodyFrame.get(tempVector);
+      point2dFixedInBodyFrame.get(freeVector);
 
       linearVelocityToPack.setToZero(expressedInFrame);
-      linearVelocityToPack.cross(angularPart, tempVector);
+      linearVelocityToPack.cross(angularPart, freeVector);
       linearVelocityToPack.add(linearPart);
    }
 
@@ -221,8 +235,6 @@ public class Twist extends SpatialMotionVector
       this.baseFrame = newBaseFrame;
    }
 
-   private RigidBodyTransform temporaryTransformToDesiredFrame = new RigidBodyTransform();
-
    /**
     * Changes the reference frame in which this spatial motion vector is expressed
     * See Duindam, Port-Based Modeling and Control for Efficient Bipedal Walking Robots, page 25, lemma 2.8 (c)
@@ -239,14 +251,14 @@ public class Twist extends SpatialMotionVector
       // non-trivial case
       // essentially using the Adjoint operator, Ad_H = [R, 0; tilde(p) * R, R] (Matlab notation), but without creating a 6x6 matrix
       // compute the relevant rotations and translations
-      expressedInFrame.getTransformToDesiredFrame(temporaryTransformToDesiredFrame, newReferenceFrame);
-      temporaryTransformToDesiredFrame.getTranslation(tempVector);    // p
+      expressedInFrame.getTransformToDesiredFrame(freeTransform, newReferenceFrame);
+      freeTransform.getTranslation(freeVector);    // p
 
       // transform the velocities so that they are expressed in newReferenceFrame
-      temporaryTransformToDesiredFrame.transform(angularPart);    // only rotates, since we're passing in a vector
-      temporaryTransformToDesiredFrame.transform(linearPart);
-      tempVector.cross(tempVector, angularPart);    // p x omega
-      linearPart.add(tempVector);
+      freeTransform.transform(angularPart);    // only rotates, since we're passing in a vector
+      freeTransform.transform(linearPart);
+      freeVector.cross(freeVector, angularPart);    // p x omega
+      linearPart.add(freeVector);
 
       // change this spatial motion vector's expressedInFrame to newReferenceFrame
       this.expressedInFrame = newReferenceFrame;
@@ -331,12 +343,12 @@ public class Twist extends SpatialMotionVector
       this.baseFrame = baseFrame;
       this.expressedInFrame = expressedInFrame;
 
-      this.tempVector.cross(offset, axisOfRotation);
-      this.tempVector.scale(angularVelocityMagnitude);
+      this.freeVector.cross(offset, axisOfRotation);
+      this.freeVector.scale(angularVelocityMagnitude);
 
       this.linearPart = new Vector3d(axisOfRotation);
       this.linearPart.scale(linearVelocityMagnitude);
-      this.linearPart.add(tempVector);
+      this.linearPart.add(freeVector);
 
       this.angularPart = new Vector3d(axisOfRotation);
       this.angularPart.scale(angularVelocityMagnitude);

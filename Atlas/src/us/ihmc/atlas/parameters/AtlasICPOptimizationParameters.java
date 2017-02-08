@@ -149,13 +149,6 @@ public class AtlasICPOptimizationParameters extends ICPOptimizationParameters
 
    /** {@inheritDoc} */
    @Override
-   public boolean useICPFromBeginningOfState()
-   {
-      return true;
-   }
-
-   /** {@inheritDoc} */
-   @Override
    public double getMinimumFootstepWeight()
    {
       return 0.0001;

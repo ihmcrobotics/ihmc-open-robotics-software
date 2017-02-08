@@ -1,11 +1,10 @@
 package us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import gnu.trove.list.array.TDoubleArrayList;
+import gnu.trove.map.hash.TLongObjectHashMap;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -16,8 +15,8 @@ public class PrivilegedConfigurationCommand implements InverseKinematicsCommand<
    private final int initialCapacity = 40;
    private final List<String> jointNames = new ArrayList<>(initialCapacity);
    private final List<OneDoFJoint> joints = new ArrayList<>(initialCapacity);
-   private final TDoubleArrayList privilegedOneDoFJointConfigurations = new TDoubleArrayList(initialCapacity);
-   private final Map<String, PrivilegedConfigurationOption> privilegedOneDoFJointConfigurationOptions = new HashMap<>(initialCapacity);
+   private final TDoubleArrayList privilegedOneDoFJointConfigurations;
+   private final TLongObjectHashMap<PrivilegedConfigurationOption> privilegedOneDoFJointConfigurationOptions;
 
    private final List<RigidBody> bases = new ArrayList<>();
    private final List<RigidBody> endEffectors = new ArrayList<>();
@@ -27,7 +26,7 @@ public class PrivilegedConfigurationCommand implements InverseKinematicsCommand<
    public enum PrivilegedConfigurationOption
    {
       AT_CURRENT, AT_MID_RANGE, AT_ZERO
-   };
+   }
 
    private PrivilegedConfigurationOption defaultOption;
    private double weight = Double.NaN;
@@ -38,6 +37,9 @@ public class PrivilegedConfigurationCommand implements InverseKinematicsCommand<
 
    public PrivilegedConfigurationCommand()
    {
+      privilegedOneDoFJointConfigurations = new TDoubleArrayList(initialCapacity);
+      privilegedOneDoFJointConfigurationOptions = new TLongObjectHashMap<PrivilegedConfigurationOption>(initialCapacity);
+      
       clear();
    }
 
@@ -106,7 +108,7 @@ public class PrivilegedConfigurationCommand implements InverseKinematicsCommand<
       joints.add(joint);
       jointNames.add(joint.getName());
       privilegedOneDoFJointConfigurations.add(privilegedConfiguration);
-      privilegedOneDoFJointConfigurationOptions.put(joint.getName(), null);
+      privilegedOneDoFJointConfigurationOptions.put(joint.nameBasedHashCode(), null);
    }
 
    public void addJoint(OneDoFJoint joint, PrivilegedConfigurationOption privilegedConfiguration)
@@ -115,7 +117,7 @@ public class PrivilegedConfigurationCommand implements InverseKinematicsCommand<
       joints.add(joint);
       jointNames.add(joint.getName());
       privilegedOneDoFJointConfigurations.add(Double.NaN);
-      privilegedOneDoFJointConfigurationOptions.put(joint.getName(), privilegedConfiguration);
+      privilegedOneDoFJointConfigurationOptions.put(joint.nameBasedHashCode(), privilegedConfiguration);
    }
 
    public void applyPrivilegedConfigurationToSubChain(RigidBody base, RigidBody endEffector)
@@ -138,7 +140,7 @@ public class PrivilegedConfigurationCommand implements InverseKinematicsCommand<
          joints.add(joint);
          jointNames.add(other.jointNames.get(i));
          privilegedOneDoFJointConfigurations.add(other.privilegedOneDoFJointConfigurations.get(i));
-         privilegedOneDoFJointConfigurationOptions.put(joint.getName(), other.privilegedOneDoFJointConfigurationOptions.get(joint.getName()));
+         privilegedOneDoFJointConfigurationOptions.put(joint.nameBasedHashCode(), other.privilegedOneDoFJointConfigurationOptions.get(joint.nameBasedHashCode()));
       }
    }
 
@@ -224,7 +226,7 @@ public class PrivilegedConfigurationCommand implements InverseKinematicsCommand<
 
    public PrivilegedConfigurationOption getPrivilegedConfigurationOption(int jointIndex)
    {
-      return privilegedOneDoFJointConfigurationOptions.get(joints.get(jointIndex).getName());
+      return privilegedOneDoFJointConfigurationOptions.get(joints.get(jointIndex).nameBasedHashCode());
    }
 
    public int getNumberOfJoints()

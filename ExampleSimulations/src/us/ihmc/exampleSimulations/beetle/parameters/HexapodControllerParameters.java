@@ -11,6 +11,8 @@ import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
 public interface HexapodControllerParameters
 {
+   double getTransferTime();
+
    double getSwingTime();
 
    double getSwingXYProportionalGain();
@@ -26,7 +28,4 @@ public interface HexapodControllerParameters
    DenseMatrix64F getBodySpatialSelectionMatrix();
 
    YoSE3PIDGainsInterface getFootGains();
-
-   PDGainsInterface getJointGains(OneDoFJoint joint);
-
 }

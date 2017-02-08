@@ -80,7 +80,6 @@ public class FootstepVisualizer
    public void hide()
    {
       yoFootstepPose.setToNaN();
-      yoFoothold.hide();
    }
 
    public RobotSide getRobotSide()

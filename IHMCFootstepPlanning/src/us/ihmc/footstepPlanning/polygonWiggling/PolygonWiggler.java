@@ -17,7 +17,7 @@ import us.ihmc.tools.io.printing.PrintTools;
 public class PolygonWiggler
 {
    private static final boolean DEBUG = false;
-   private static final boolean coldStart = false;
+   private static final boolean coldStart = true;
 
    /**
     * Returns a transform that will move the given polygon into the convex hull of a planar region.
