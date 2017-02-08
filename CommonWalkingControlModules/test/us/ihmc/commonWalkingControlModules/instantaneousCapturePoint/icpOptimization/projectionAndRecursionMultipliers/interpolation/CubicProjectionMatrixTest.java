@@ -4,7 +4,6 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import org.junit.Assert;
 import org.junit.Test;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.projectionAndRecursionMultipliers.interpolation.CubicProjectionMatrix;
 import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.testing.JUnitTools;
 
@@ -18,17 +17,17 @@ public class CubicProjectionMatrixTest
    @Test(timeout = 21000)
    public void testCreationSize()
    {
-      CubicProjectionMatrix cubicProjectionMatrix = new CubicProjectionMatrix();
+      CubicMatrix cubicMatrix = new CubicMatrix();
 
-      Assert.assertEquals("", 4, cubicProjectionMatrix.numCols);
-      Assert.assertEquals("", 1, cubicProjectionMatrix.numRows);
+      Assert.assertEquals("", 4, cubicMatrix.numCols);
+      Assert.assertEquals("", 1, cubicMatrix.numRows);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 1.0)
    @Test(timeout = 21000)
    public void testSegmentDuration()
    {
-      CubicProjectionMatrix cubicProjectionMatrix = new CubicProjectionMatrix();
+      CubicMatrix cubicMatrix = new CubicMatrix();
 
       Random random = new Random();
       int iters = 100;
@@ -37,9 +36,9 @@ public class CubicProjectionMatrixTest
       {
          double duration = 10.0 * random.nextDouble();
 
-         cubicProjectionMatrix.setSegmentDuration(duration);
+         cubicMatrix.setSegmentDuration(duration);
 
-         Assert.assertEquals(duration, cubicProjectionMatrix.getSegmentDuration(), epsilon);
+         Assert.assertEquals(duration, cubicMatrix.getSegmentDuration(), epsilon);
       }
    }
 
@@ -47,7 +46,7 @@ public class CubicProjectionMatrixTest
    @Test(timeout = 21000)
    public void testCalculation()
    {
-      CubicProjectionMatrix cubicProjectionMatrix = new CubicProjectionMatrix();
+      CubicMatrix cubicMatrix = new CubicMatrix();
 
       DenseMatrix64F cubicSplineMatrix = new DenseMatrix64F(4, 4);
       DenseMatrix64F cubicTimeMatrix = new DenseMatrix64F(1, 4);
@@ -62,8 +61,8 @@ public class CubicProjectionMatrixTest
          double time = duration * random.nextDouble();
          double timeRemaining = duration - time;
 
-         cubicProjectionMatrix.setSegmentDuration(duration);
-         cubicProjectionMatrix.update(timeRemaining);
+         cubicMatrix.setSegmentDuration(duration);
+         cubicMatrix.update(timeRemaining);
 
          cubicSplineMatrix.zero();
          cubicTimeMatrix.zero();
@@ -96,7 +95,7 @@ public class CubicProjectionMatrixTest
 
          CommonOps.mult(cubicTimeMatrix, cubicSplineMatrix, shouldBe);
 
-         JUnitTools.assertMatrixEquals(shouldBe, cubicProjectionMatrix, epsilon);
+         JUnitTools.assertMatrixEquals(shouldBe, cubicMatrix, epsilon);
       }
    }
 }

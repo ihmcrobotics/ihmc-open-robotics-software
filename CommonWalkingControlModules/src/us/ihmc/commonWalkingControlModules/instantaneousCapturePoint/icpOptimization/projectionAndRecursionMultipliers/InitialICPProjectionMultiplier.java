@@ -2,11 +2,9 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimiz
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.projectionAndRecursionMultipliers.interpolation.CubicProjectionDerivativeMatrix;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.projectionAndRecursionMultipliers.interpolation.CubicProjectionMatrix;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.projectionAndRecursionMultipliers.stateMatrices.swing.SwingExitCMPProjectionMatrix;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.projectionAndRecursionMultipliers.interpolation.CubicDerivativeMatrix;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.projectionAndRecursionMultipliers.interpolation.CubicMatrix;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.projectionAndRecursionMultipliers.stateMatrices.swing.SwingInitialICPProjectionMatrix;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.projectionAndRecursionMultipliers.stateMatrices.transfer.TransferExitCMPProjectionMatrix;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.projectionAndRecursionMultipliers.stateMatrices.transfer.TransferInitialICPProjectionMatrix;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -15,8 +13,8 @@ import java.util.ArrayList;
 
 public class InitialICPProjectionMultiplier
 {
-   private final CubicProjectionMatrix cubicProjectionMatrix;
-   private final CubicProjectionDerivativeMatrix cubicProjectionDerivativeMatrix;
+   private final CubicMatrix cubicMatrix;
+   private final CubicDerivativeMatrix cubicDerivativeMatrix;
 
    private final TransferInitialICPProjectionMatrix transferInitialICPProjectionMatrix;
    private final SwingInitialICPProjectionMatrix swingInitialICPProjectionMatrix;
@@ -39,8 +37,8 @@ public class InitialICPProjectionMultiplier
       this.endOfSplineTime = endOfSplineTime;
       this.totalTrajectoryTime = totalTrajectoryTime;
 
-      cubicProjectionMatrix = new CubicProjectionMatrix();
-      cubicProjectionDerivativeMatrix = new CubicProjectionDerivativeMatrix();
+      cubicMatrix = new CubicMatrix();
+      cubicDerivativeMatrix = new CubicDerivativeMatrix();
 
       transferInitialICPProjectionMatrix = new TransferInitialICPProjectionMatrix();
       swingInitialICPProjectionMatrix = new SwingInitialICPProjectionMatrix(startOfSplineTime);
@@ -102,12 +100,12 @@ public class InitialICPProjectionMultiplier
 
          double splineDuration = doubleSupportDurations.get(0).getDoubleValue();
 
-         cubicProjectionDerivativeMatrix.setSegmentDuration(splineDuration);
-         cubicProjectionDerivativeMatrix.update(timeRemaining);
-         cubicProjectionMatrix.setSegmentDuration(splineDuration);
-         cubicProjectionMatrix.update(timeRemaining);
+         cubicDerivativeMatrix.setSegmentDuration(splineDuration);
+         cubicDerivativeMatrix.update(timeRemaining);
+         cubicMatrix.setSegmentDuration(splineDuration);
+         cubicMatrix.update(timeRemaining);
 
-         CommonOps.mult(cubicProjectionMatrix, transferInitialICPProjectionMatrix, matrixOut);
+         CommonOps.mult(cubicMatrix, transferInitialICPProjectionMatrix, matrixOut);
 
          return matrixOut.get(0, 0);
       }
@@ -133,7 +131,7 @@ public class InitialICPProjectionMultiplier
 
    private double computeInTransferVelocity()
    {
-      CommonOps.mult(cubicProjectionDerivativeMatrix, transferInitialICPProjectionMatrix, matrixOut);
+      CommonOps.mult(cubicDerivativeMatrix, transferInitialICPProjectionMatrix, matrixOut);
 
       return matrixOut.get(0, 0);
    }
@@ -177,12 +175,12 @@ public class InitialICPProjectionMultiplier
          double timeRemainingInSpline = timeRemaining - lastSegmentDuration;
          double splineDuration = endOfSplineTime.getDoubleValue() - startOfSplineTime.getDoubleValue();
 
-         cubicProjectionDerivativeMatrix.setSegmentDuration(splineDuration);
-         cubicProjectionDerivativeMatrix.update(timeRemainingInSpline);
-         cubicProjectionMatrix.setSegmentDuration(splineDuration);
-         cubicProjectionMatrix.update(timeRemainingInSpline);
+         cubicDerivativeMatrix.setSegmentDuration(splineDuration);
+         cubicDerivativeMatrix.update(timeRemainingInSpline);
+         cubicMatrix.setSegmentDuration(splineDuration);
+         cubicMatrix.update(timeRemainingInSpline);
 
-         CommonOps.mult(cubicProjectionMatrix, swingInitialICPProjectionMatrix, matrixOut);
+         CommonOps.mult(cubicMatrix, swingInitialICPProjectionMatrix, matrixOut);
 
          return matrixOut.get(0, 0);
       }
@@ -216,7 +214,7 @@ public class InitialICPProjectionMultiplier
 
    private double computeSecondSegmentVelocityProjection()
    {
-      CommonOps.mult(cubicProjectionDerivativeMatrix, swingInitialICPProjectionMatrix, matrixOut);
+      CommonOps.mult(cubicDerivativeMatrix, swingInitialICPProjectionMatrix, matrixOut);
 
       return matrixOut.get(0, 0);
    }

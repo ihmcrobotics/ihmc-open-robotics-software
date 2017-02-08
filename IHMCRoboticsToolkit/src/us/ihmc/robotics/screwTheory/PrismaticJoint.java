@@ -50,6 +50,18 @@ public class PrismaticJoint extends OneDoFJoint
    }
 
    @Override
+   public FrameVector getJointAxis()
+   {
+      return new FrameVector(jointAxis);
+   }
+
+   @Override
+   public void getJointAxis(FrameVector axisToPack)
+   {
+      axisToPack.setIncludingFrame(jointAxis);
+   }
+
+   @Override
    public boolean isPassiveJoint()
    {
       return false;

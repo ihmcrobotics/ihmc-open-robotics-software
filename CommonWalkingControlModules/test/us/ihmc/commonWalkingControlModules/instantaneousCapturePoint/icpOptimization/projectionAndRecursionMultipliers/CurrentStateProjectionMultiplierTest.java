@@ -4,9 +4,8 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import org.junit.Assert;
 import org.junit.Test;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.projectionAndRecursionMultipliers.CurrentStateProjectionMultiplier;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.projectionAndRecursionMultipliers.interpolation.CubicProjectionDerivativeMatrix;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.projectionAndRecursionMultipliers.interpolation.CubicProjectionMatrix;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.projectionAndRecursionMultipliers.interpolation.CubicDerivativeMatrix;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.projectionAndRecursionMultipliers.interpolation.CubicMatrix;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.projectionAndRecursionMultipliers.stateMatrices.swing.SwingStateEndRecursionMatrix;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.projectionAndRecursionMultipliers.stateMatrices.transfer.TransferStateEndRecursionMatrix;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -199,8 +198,8 @@ public class CurrentStateProjectionMultiplierTest
             startOfSplineTime, endOfSplineTime, totalTrajectoryTime);
       TransferStateEndRecursionMatrix transferStateEndRecursionMatrix = new TransferStateEndRecursionMatrix();
 
-      CubicProjectionMatrix cubicProjectionMatrix = new CubicProjectionMatrix();
-      CubicProjectionDerivativeMatrix cubicProjectionDerivativeMatrix = new CubicProjectionDerivativeMatrix();
+      CubicMatrix cubicMatrix = new CubicMatrix();
+      CubicDerivativeMatrix cubicDerivativeMatrix = new CubicDerivativeMatrix();
 
       int iters = 100;
       for (int i = 0; i < iters; i++)
@@ -235,15 +234,15 @@ public class CurrentStateProjectionMultiplierTest
 
          transferStateEndRecursionMatrix.compute(currentDoubleSupport, omega0, true);
 
-         cubicProjectionDerivativeMatrix.setSegmentDuration(currentDoubleSupport);
-         cubicProjectionDerivativeMatrix.update(timeRemaining);
-         cubicProjectionMatrix.setSegmentDuration(currentDoubleSupport);
-         cubicProjectionMatrix.update(timeRemaining);
+         cubicDerivativeMatrix.setSegmentDuration(currentDoubleSupport);
+         cubicDerivativeMatrix.update(timeRemaining);
+         cubicMatrix.setSegmentDuration(currentDoubleSupport);
+         cubicMatrix.update(timeRemaining);
 
          DenseMatrix64F positionMatrixOut = new DenseMatrix64F(1, 1);
          DenseMatrix64F velocityMatrixOut = new DenseMatrix64F(1, 1);
-         CommonOps.mult(cubicProjectionMatrix, transferStateEndRecursionMatrix, positionMatrixOut);
-         CommonOps.mult(cubicProjectionDerivativeMatrix, transferStateEndRecursionMatrix, velocityMatrixOut);
+         CommonOps.mult(cubicMatrix, transferStateEndRecursionMatrix, positionMatrixOut);
+         CommonOps.mult(cubicDerivativeMatrix, transferStateEndRecursionMatrix, velocityMatrixOut);
 
          multiplier.compute(doubleSupportDurations, singleSupportDurations, timeRemaining, false, true, omega0, true);
 
@@ -285,8 +284,8 @@ public class CurrentStateProjectionMultiplierTest
             startOfSplineTime, endOfSplineTime, totalTrajectoryTime);
       TransferStateEndRecursionMatrix transferStateEndRecursionMatrix = new TransferStateEndRecursionMatrix();
 
-      CubicProjectionMatrix cubicProjectionMatrix = new CubicProjectionMatrix();
-      CubicProjectionDerivativeMatrix cubicProjectionDerivativeMatrix = new CubicProjectionDerivativeMatrix();
+      CubicMatrix cubicMatrix = new CubicMatrix();
+      CubicDerivativeMatrix cubicDerivativeMatrix = new CubicDerivativeMatrix();
 
       int iters = 100;
       for (int i = 0; i < iters; i++)
@@ -321,15 +320,15 @@ public class CurrentStateProjectionMultiplierTest
 
          transferStateEndRecursionMatrix.compute(currentDoubleSupport, omega0, false);
 
-         cubicProjectionDerivativeMatrix.setSegmentDuration(currentDoubleSupport);
-         cubicProjectionDerivativeMatrix.update(timeRemaining);
-         cubicProjectionMatrix.setSegmentDuration(currentDoubleSupport);
-         cubicProjectionMatrix.update(timeRemaining);
+         cubicDerivativeMatrix.setSegmentDuration(currentDoubleSupport);
+         cubicDerivativeMatrix.update(timeRemaining);
+         cubicMatrix.setSegmentDuration(currentDoubleSupport);
+         cubicMatrix.update(timeRemaining);
 
          DenseMatrix64F positionMatrixOut = new DenseMatrix64F(1, 1);
          DenseMatrix64F velocityMatrixOut = new DenseMatrix64F(1, 1);
-         CommonOps.mult(cubicProjectionMatrix, transferStateEndRecursionMatrix, positionMatrixOut);
-         CommonOps.mult(cubicProjectionDerivativeMatrix, transferStateEndRecursionMatrix, velocityMatrixOut);
+         CommonOps.mult(cubicMatrix, transferStateEndRecursionMatrix, positionMatrixOut);
+         CommonOps.mult(cubicDerivativeMatrix, transferStateEndRecursionMatrix, velocityMatrixOut);
 
          multiplier.compute(doubleSupportDurations, singleSupportDurations, timeRemaining, false, true, omega0, false);
 
@@ -676,8 +675,8 @@ public class CurrentStateProjectionMultiplierTest
 
       SwingStateEndRecursionMatrix swingStateEndRecursionMatrix = new SwingStateEndRecursionMatrix(defaultDoubleSupportSplitRatio, upcomingDoubleSupportSplitRatio,
             startOfSplineTime, endOfSplineTime, totalTrajectoryTime);
-      CubicProjectionMatrix cubicProjectionMatrix = new CubicProjectionMatrix();
-      CubicProjectionDerivativeMatrix cubicProjectionDerivativeMatrix = new CubicProjectionDerivativeMatrix();
+      CubicMatrix cubicMatrix = new CubicMatrix();
+      CubicDerivativeMatrix cubicDerivativeMatrix = new CubicDerivativeMatrix();
       int iters = 100;
       for (int i = 0; i < iters; i++)
       {
@@ -716,15 +715,15 @@ public class CurrentStateProjectionMultiplierTest
 
          swingStateEndRecursionMatrix.compute(doubleSupportDurations, singleSupportDurations, omega0, false);
 
-         cubicProjectionDerivativeMatrix.setSegmentDuration(segmentLength);
-         cubicProjectionDerivativeMatrix.update(timeRemainingInSegment);
-         cubicProjectionMatrix.setSegmentDuration(segmentLength);
-         cubicProjectionMatrix.update(timeRemainingInSegment);
+         cubicDerivativeMatrix.setSegmentDuration(segmentLength);
+         cubicDerivativeMatrix.update(timeRemainingInSegment);
+         cubicMatrix.setSegmentDuration(segmentLength);
+         cubicMatrix.update(timeRemainingInSegment);
 
          DenseMatrix64F positionMatrixOut = new DenseMatrix64F(1, 1);
          DenseMatrix64F velocityMatrixOut = new DenseMatrix64F(1, 1);
-         CommonOps.mult(cubicProjectionMatrix, swingStateEndRecursionMatrix, positionMatrixOut);
-         CommonOps.mult(cubicProjectionDerivativeMatrix, swingStateEndRecursionMatrix, velocityMatrixOut);
+         CommonOps.mult(cubicMatrix, swingStateEndRecursionMatrix, positionMatrixOut);
+         CommonOps.mult(cubicDerivativeMatrix, swingStateEndRecursionMatrix, velocityMatrixOut);
 
          multiplier.compute(doubleSupportDurations, singleSupportDurations, timeRemaining, true, false, omega0, false);
 
@@ -767,8 +766,8 @@ public class CurrentStateProjectionMultiplierTest
 
       SwingStateEndRecursionMatrix swingStateEndRecursionMatrix = new SwingStateEndRecursionMatrix(defaultDoubleSupportSplitRatio, upcomingDoubleSupportSplitRatio,
             startOfSplineTime, endOfSplineTime, totalTrajectoryTime);
-      CubicProjectionMatrix cubicProjectionMatrix = new CubicProjectionMatrix();
-      CubicProjectionDerivativeMatrix cubicProjectionDerivativeMatrix = new CubicProjectionDerivativeMatrix();
+      CubicMatrix cubicMatrix = new CubicMatrix();
+      CubicDerivativeMatrix cubicDerivativeMatrix = new CubicDerivativeMatrix();
       int iters = 100;
       for (int i = 0; i < iters; i++)
       {
@@ -807,15 +806,15 @@ public class CurrentStateProjectionMultiplierTest
 
          swingStateEndRecursionMatrix.compute(doubleSupportDurations, singleSupportDurations, omega0, true);
 
-         cubicProjectionDerivativeMatrix.setSegmentDuration(segmentLength);
-         cubicProjectionDerivativeMatrix.update(timeRemainingInSegment);
-         cubicProjectionMatrix.setSegmentDuration(segmentLength);
-         cubicProjectionMatrix.update(timeRemainingInSegment);
+         cubicDerivativeMatrix.setSegmentDuration(segmentLength);
+         cubicDerivativeMatrix.update(timeRemainingInSegment);
+         cubicMatrix.setSegmentDuration(segmentLength);
+         cubicMatrix.update(timeRemainingInSegment);
 
          DenseMatrix64F positionMatrixOut = new DenseMatrix64F(1, 1);
          DenseMatrix64F velocityMatrixOut = new DenseMatrix64F(1, 1);
-         CommonOps.mult(cubicProjectionMatrix, swingStateEndRecursionMatrix, positionMatrixOut);
-         CommonOps.mult(cubicProjectionDerivativeMatrix, swingStateEndRecursionMatrix, velocityMatrixOut);
+         CommonOps.mult(cubicMatrix, swingStateEndRecursionMatrix, positionMatrixOut);
+         CommonOps.mult(cubicDerivativeMatrix, swingStateEndRecursionMatrix, velocityMatrixOut);
 
          multiplier.compute(doubleSupportDurations, singleSupportDurations, timeRemaining, true, false, omega0, true);
 
@@ -857,8 +856,8 @@ public class CurrentStateProjectionMultiplierTest
             startOfSplineTime, endOfSplineTime, totalTrajectoryTime);
       TransferStateEndRecursionMatrix transferStateEndRecursionMatrix = new TransferStateEndRecursionMatrix();
 
-      CubicProjectionMatrix cubicProjectionMatrix = new CubicProjectionMatrix();
-      CubicProjectionDerivativeMatrix cubicProjectionDerivativeMatrix = new CubicProjectionDerivativeMatrix();
+      CubicMatrix cubicMatrix = new CubicMatrix();
+      CubicDerivativeMatrix cubicDerivativeMatrix = new CubicDerivativeMatrix();
 
       int iters = 100;
       for (int i = 0; i < iters; i++)
@@ -893,15 +892,15 @@ public class CurrentStateProjectionMultiplierTest
 
          transferStateEndRecursionMatrix.compute(currentDoubleSupport, omega0, false);
 
-         cubicProjectionDerivativeMatrix.setSegmentDuration(currentDoubleSupport);
-         cubicProjectionDerivativeMatrix.update(timeRemaining);
-         cubicProjectionMatrix.setSegmentDuration(currentDoubleSupport);
-         cubicProjectionMatrix.update(timeRemaining);
+         cubicDerivativeMatrix.setSegmentDuration(currentDoubleSupport);
+         cubicDerivativeMatrix.update(timeRemaining);
+         cubicMatrix.setSegmentDuration(currentDoubleSupport);
+         cubicMatrix.update(timeRemaining);
 
          DenseMatrix64F positionMatrixOut = new DenseMatrix64F(1, 1);
          DenseMatrix64F velocityMatrixOut = new DenseMatrix64F(1, 1);
-         CommonOps.mult(cubicProjectionMatrix, transferStateEndRecursionMatrix, positionMatrixOut);
-         CommonOps.mult(cubicProjectionDerivativeMatrix, transferStateEndRecursionMatrix, velocityMatrixOut);
+         CommonOps.mult(cubicMatrix, transferStateEndRecursionMatrix, positionMatrixOut);
+         CommonOps.mult(cubicDerivativeMatrix, transferStateEndRecursionMatrix, velocityMatrixOut);
 
          multiplier.compute(doubleSupportDurations, singleSupportDurations, timeRemaining, true, true, omega0, false);
 
@@ -943,8 +942,8 @@ public class CurrentStateProjectionMultiplierTest
             startOfSplineTime, endOfSplineTime, totalTrajectoryTime);
       TransferStateEndRecursionMatrix transferStateEndRecursionMatrix = new TransferStateEndRecursionMatrix();
 
-      CubicProjectionMatrix cubicProjectionMatrix = new CubicProjectionMatrix();
-      CubicProjectionDerivativeMatrix cubicProjectionDerivativeMatrix = new CubicProjectionDerivativeMatrix();
+      CubicMatrix cubicMatrix = new CubicMatrix();
+      CubicDerivativeMatrix cubicDerivativeMatrix = new CubicDerivativeMatrix();
 
       int iters = 100;
       for (int i = 0; i < iters; i++)
@@ -979,15 +978,15 @@ public class CurrentStateProjectionMultiplierTest
 
          transferStateEndRecursionMatrix.compute(currentDoubleSupport, omega0, true);
 
-         cubicProjectionDerivativeMatrix.setSegmentDuration(currentDoubleSupport);
-         cubicProjectionDerivativeMatrix.update(timeRemaining);
-         cubicProjectionMatrix.setSegmentDuration(currentDoubleSupport);
-         cubicProjectionMatrix.update(timeRemaining);
+         cubicDerivativeMatrix.setSegmentDuration(currentDoubleSupport);
+         cubicDerivativeMatrix.update(timeRemaining);
+         cubicMatrix.setSegmentDuration(currentDoubleSupport);
+         cubicMatrix.update(timeRemaining);
 
          DenseMatrix64F positionMatrixOut = new DenseMatrix64F(1, 1);
          DenseMatrix64F velocityMatrixOut = new DenseMatrix64F(1, 1);
-         CommonOps.mult(cubicProjectionMatrix, transferStateEndRecursionMatrix, positionMatrixOut);
-         CommonOps.mult(cubicProjectionDerivativeMatrix, transferStateEndRecursionMatrix, velocityMatrixOut);
+         CommonOps.mult(cubicMatrix, transferStateEndRecursionMatrix, positionMatrixOut);
+         CommonOps.mult(cubicDerivativeMatrix, transferStateEndRecursionMatrix, velocityMatrixOut);
 
          multiplier.compute(doubleSupportDurations, singleSupportDurations, timeRemaining, true, true, omega0, true);
 

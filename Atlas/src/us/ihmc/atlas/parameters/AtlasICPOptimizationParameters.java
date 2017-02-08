@@ -42,23 +42,37 @@ public class AtlasICPOptimizationParameters extends ICPOptimizationParameters
 
    /** {@inheritDoc} */
    @Override
-   public double getFeedbackForwardWeight()
+   public double getSingleSupportFeedbackForwardWeight()
    {
       return runningOnRealRobot ? 0.5 : 0.5;
    }
 
    /** {@inheritDoc} */
    @Override
-   public double getFeedbackLateralWeight()
+   public double getDoubleSupportFeedbackForwardWeight()
+   {
+      return runningOnRealRobot ? 0.5 : 0.1;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public double getSingleSupportFeedbackLateralWeight()
    {
       return 0.5;
    }
 
    /** {@inheritDoc} */
    @Override
+   public double getDoubleSupportFeedbackLateralWeight()
+   {
+      return runningOnRealRobot ? 0.5 : 0.1;
+   }
+
+   /** {@inheritDoc} */
+   @Override
    public double getFeedbackRegularizationWeight()
    {
-      return runningOnRealRobot ? 0.0001 : 0.001;
+      return runningOnRealRobot ? 0.0001 : 0.00005;
    }
 
    /** {@inheritDoc} */
@@ -89,6 +103,8 @@ public class AtlasICPOptimizationParameters extends ICPOptimizationParameters
       return runningOnRealRobot ? 1.0 : 1.0;
    }
 
+
+
    /** {@inheritDoc} */
    @Override
    public boolean scaleStepRegularizationWeightWithTime()
@@ -112,13 +128,6 @@ public class AtlasICPOptimizationParameters extends ICPOptimizationParameters
 
    /** {@inheritDoc} */
    @Override
-   public boolean useFeedback()
-   {
-      return true;
-   }
-
-   /** {@inheritDoc} */
-   @Override
    public boolean useFeedbackRegularization()
    {
       return true;
@@ -136,13 +145,6 @@ public class AtlasICPOptimizationParameters extends ICPOptimizationParameters
    public boolean useFootstepRegularization()
    {
       return true;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public boolean useFeedbackWeightHardening()
-   {
-      return false;
    }
 
    /** {@inheritDoc} */
@@ -171,13 +173,6 @@ public class AtlasICPOptimizationParameters extends ICPOptimizationParameters
    public double getMinimumTimeRemaining()
    {
       return 0.0001;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public double getFeedbackWeightHardeningMultiplier()
-   {
-      return 20.0;
    }
 
    /** {@inheritDoc} */
@@ -222,13 +217,6 @@ public class AtlasICPOptimizationParameters extends ICPOptimizationParameters
       return -2.0;
    }
    
-   /** {@inheritDoc} */
-   @Override
-   public boolean useDiscontinuousDeadband()
-   {
-      return false;
-   }
-
    /** {@inheritDoc} */
    @Override
    public double getLateralReachabilityOuterLimit()

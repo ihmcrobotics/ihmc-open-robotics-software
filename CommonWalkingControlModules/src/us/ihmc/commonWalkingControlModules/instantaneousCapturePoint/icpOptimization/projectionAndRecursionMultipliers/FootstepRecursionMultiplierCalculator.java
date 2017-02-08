@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization;
+package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.projectionAndRecursionMultipliers;
 
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.projectionAndRecursionMultipliers.*;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
@@ -21,9 +21,12 @@ public class FootstepRecursionMultiplierCalculator
 
    private final FinalICPRecursionMultiplier finalICPRecursionMultiplier;
    private final CMPRecursionMultipliers cmpRecursionMultipliers;
+
    private final StanceCMPProjectionMultipliers stanceCMPProjectionMultipliers;
    private final RemainingStanceCMPProjectionMultipliers remainingStanceCMPProjectionMultipliers;
+
    private final CurrentStateProjectionMultiplier currentStateProjectionMultiplier;
+
    private final InitialICPProjectionMultiplier initialICPProjectionMultiplier;
 
    private final DoubleYoVariable defaultDoubleSupportSplitFraction;

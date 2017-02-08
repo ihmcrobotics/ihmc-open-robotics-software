@@ -127,19 +127,19 @@ public class WalkingCommandConsumer
       chestOrientationManager.handleGoHomeCommand(command);
    }
 
-   public void consumePelvisCommands(WalkingState currentState)
+   public void consumePelvisCommands(WalkingState currentState, boolean allowMotionRegardlessOfState)
    {
       if (commandInputManager.isNewCommandAvailable(PelvisOrientationTrajectoryCommand.class))
       {
          PelvisOrientationTrajectoryCommand newestCommand = commandInputManager.pollNewestCommand(PelvisOrientationTrajectoryCommand.class);
-         if (currentState.isStateSafeToConsumePelvisTrajectoryCommand())
+         if (allowMotionRegardlessOfState || currentState.isStateSafeToConsumePelvisTrajectoryCommand())
             pelvisOrientationManager.handlePelvisOrientationTrajectoryCommands(newestCommand);
       }
 
       if (commandInputManager.isNewCommandAvailable(PelvisTrajectoryCommand.class))
       {
          PelvisTrajectoryCommand command = commandInputManager.pollNewestCommand(PelvisTrajectoryCommand.class);
-         if (currentState.isStateSafeToConsumePelvisTrajectoryCommand())
+         if (allowMotionRegardlessOfState || currentState.isStateSafeToConsumePelvisTrajectoryCommand())
          {
             pelvisOrientationManager.handlePelvisTrajectoryCommand(command);
             balanceManager.handlePelvisTrajectoryCommand(command);
@@ -148,7 +148,7 @@ public class WalkingCommandConsumer
       }
    }
 
-   public void consumeManipulationCommands(WalkingState currentState)
+   public void consumeManipulationCommands(WalkingState currentState, boolean allowMotionRegardlessOfState)
    {
       if (manipulationControlModule == null)
          return;
@@ -167,7 +167,7 @@ public class WalkingCommandConsumer
       List<ArmDesiredAccelerationsCommand> armDesiredAccelerationCommands = commandInputManager.pollNewCommands(ArmDesiredAccelerationsCommand.class);
       List<HandComplianceControlParametersCommand> handComplianceCommands = commandInputManager.pollNewCommands(HandComplianceControlParametersCommand.class);
 
-      if (currentState.isStateSafeToConsumeManipulationCommands())
+      if (allowMotionRegardlessOfState || currentState.isStateSafeToConsumeManipulationCommands())
       {
          manipulationControlModule.handleHandTrajectoryCommands(handTrajectoryCommands);
          manipulationControlModule.handleArmTrajectoryCommands(armTrajectoryCommands);
