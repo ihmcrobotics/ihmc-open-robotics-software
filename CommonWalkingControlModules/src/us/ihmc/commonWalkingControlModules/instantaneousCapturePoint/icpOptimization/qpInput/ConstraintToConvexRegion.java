@@ -11,7 +11,13 @@ import java.util.ArrayList;
 
 public class ConstraintToConvexRegion
 {
-   public final DenseMatrix64F smoothingCost;
+   public final DenseMatrix64F quadraticTerm;
+   public final DenseMatrix64F linearTerm;
+
+   public final DenseMatrix64F regularizationWeightMatrix;
+
+   public final DenseMatrix64F previousVertexSolution;
+   private final DenseMatrix64F tmpObjective;
 
    public final DenseMatrix64F indexSelectionMatrix = CommonOps.identity(2, 2);
 
@@ -31,14 +37,20 @@ public class ConstraintToConvexRegion
    private int numberOfVertices = 0;
 
    private double smoothingWeight = 0.001;
+   private double regularizationWeight = 0.0;
    private double vertexMinimum = 0.0;
 
    public ConstraintToConvexRegion(int maximumNumberOfVertices)
    {
       this.maximumNumberOfVertices = maximumNumberOfVertices;
 
-      smoothingCost = new DenseMatrix64F(maximumNumberOfVertices, maximumNumberOfVertices);
+      quadraticTerm = new DenseMatrix64F(maximumNumberOfVertices, maximumNumberOfVertices);
+      linearTerm = new DenseMatrix64F(maximumNumberOfVertices, 1);
+      regularizationWeightMatrix = new DenseMatrix64F(maximumNumberOfVertices, maximumNumberOfVertices);
       CommonOps.scale(-1.0, indexSelectionMatrix);
+
+      previousVertexSolution = new DenseMatrix64F(maximumNumberOfVertices, 1);
+      tmpObjective = new DenseMatrix64F(maximumNumberOfVertices, 1);
 
       dynamics_Aeq = new DenseMatrix64F(maximumNumberOfVertices, 2);
       dynamics_beq = new DenseMatrix64F(2, 1);
@@ -55,7 +67,10 @@ public class ConstraintToConvexRegion
 
    public void reset()
    {
-      smoothingCost.zero();
+      quadraticTerm.zero();
+      linearTerm.zero();
+
+      regularizationWeightMatrix.zero();
 
       dynamics_Aeq.zero();
       dynamics_beq.zero();
@@ -73,7 +88,10 @@ public class ConstraintToConvexRegion
 
    private void reshape()
    {
-      smoothingCost.reshape(numberOfVertices, numberOfVertices);
+      quadraticTerm.reshape(numberOfVertices, numberOfVertices);
+      linearTerm.reshape(numberOfVertices, 1);
+
+      regularizationWeightMatrix.reshape(numberOfVertices, numberOfVertices);
 
       dynamics_Aeq.reshape(numberOfVertices, 2);
       sum_Aeq.reshape(numberOfVertices, 1);
@@ -131,6 +149,16 @@ public class ConstraintToConvexRegion
       this.vertexMinimum = vertexMinimum;
    }
 
+   public void setRegularizationWeight(double regularizationWeight)
+   {
+      this.regularizationWeight = regularizationWeight;
+   }
+
+   public void setPreviousVertexSolution(DenseMatrix64F previousVertexSolution)
+   {
+      this.previousVertexSolution.set(previousVertexSolution);
+   }
+
    public void formulateConstraint()
    {
       reshape();
@@ -147,8 +175,31 @@ public class ConstraintToConvexRegion
       }
       sum_beq.set(0, 0, 1.0);
 
-      CommonOps.setIdentity(smoothingCost);
-      CommonOps.scale(smoothingWeight, smoothingCost);
+      setSmoothingCost();
+
+      if (previousVertexSolution.getNumRows() == numberOfVertices)
+         addFeedbackRegularizationTask();
+   }
+
+   private void setSmoothingCost()
+   {
+      CommonOps.setIdentity(quadraticTerm);
+      CommonOps.scale(smoothingWeight, quadraticTerm);
+   }
+
+   private void addFeedbackRegularizationTask()
+   {
+      CommonOps.setIdentity(regularizationWeightMatrix);
+      CommonOps.scale(regularizationWeight, regularizationWeightMatrix);
+
+      MatrixTools.addMatrixBlock(quadraticTerm, 0, 0, regularizationWeightMatrix, 0, 0, 2, 2, 1.0);
+
+      tmpObjective.zero();
+      tmpObjective.reshape(numberOfVertices, 1);
+      tmpObjective.set(previousVertexSolution);
+      CommonOps.mult(regularizationWeightMatrix, tmpObjective, tmpObjective);
+
+      MatrixTools.addMatrixBlock(linearTerm, 0, 0, tmpObjective, 0, 0, 2, 1, 1.0);
    }
 
    public int getNumberOfVertices()

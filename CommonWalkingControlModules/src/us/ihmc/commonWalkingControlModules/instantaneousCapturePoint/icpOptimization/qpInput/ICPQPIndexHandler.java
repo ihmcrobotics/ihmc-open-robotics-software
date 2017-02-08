@@ -51,7 +51,7 @@ public class ICPQPIndexHandler
       return numberOfCMPVertices;
    }
 
-   public boolean constraintCMP()
+   public boolean constrainCMP()
    {
       return numberOfCMPVertices > 0;
    }

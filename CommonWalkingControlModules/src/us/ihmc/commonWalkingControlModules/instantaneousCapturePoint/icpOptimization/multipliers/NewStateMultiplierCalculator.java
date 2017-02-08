@@ -5,6 +5,7 @@ import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimiza
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.recursion.*;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
@@ -32,6 +33,7 @@ public class NewStateMultiplierCalculator
    private final DoubleYoVariable timeSpentOnFinalCMP;
    private final DoubleYoVariable startOfSplineTime;
    private final DoubleYoVariable endOfSplineTime;
+   private final IntegerYoVariable currentSwingSegment;
 
    private final NewFinalICPRecursionMultiplier finalICPRecursionMultiplier;
    private final NewStanceExitCMPRecursionMultiplier stanceExitCMPRecursionMultiplier;
@@ -73,6 +75,8 @@ public class NewStateMultiplierCalculator
       timeSpentOnFinalCMP = new DoubleYoVariable(namePrefix + "TimeSpentOnFinalCMP", registry);
       startOfSplineTime = new DoubleYoVariable(namePrefix + "StartOfSplineTime", registry);
       endOfSplineTime = new DoubleYoVariable(namePrefix + "EndOfSplineTime", registry);
+      currentSwingSegment = new IntegerYoVariable(namePrefix + "CurrentSegment", registry);
+
 
       finalICPRecursionMultiplier = new NewFinalICPRecursionMultiplier(namePrefix, exitCMPDurationInPercentOfStepTime, registry);
       stanceExitCMPRecursionMultiplier = new NewStanceExitCMPRecursionMultiplier(namePrefix, exitCMPDurationInPercentOfStepTime, registry);
@@ -172,7 +176,7 @@ public class NewStateMultiplierCalculator
 
       if (useTwoCMPs)
       {
-         updateSegmentedSingleSupportTrajectory(isInTransfer);
+         updateSegmentedSingleSupportTrajectory(timeInState, isInTransfer);
       }
 
       exitCMPCurrentMultiplier.compute(doubleSupportDurations, singleSupportDurations, timeInState, useTwoCMPs, isInTransfer, omega0);
@@ -182,7 +186,7 @@ public class NewStateMultiplierCalculator
       stateEndCurrentMultiplier.compute(doubleSupportDurations, singleSupportDurations, timeInState, useTwoCMPs, isInTransfer, omega0);
    }
 
-   private void updateSegmentedSingleSupportTrajectory(boolean isInTransfer)
+   private void updateSegmentedSingleSupportTrajectory(double timeInState, boolean isInTransfer)
    {
       if (!isInTransfer)
       {
@@ -219,15 +223,25 @@ public class NewStateMultiplierCalculator
          }
          this.startOfSplineTime.set(startOfSplineTime);
          this.endOfSplineTime.set(endOfSplineTime);
+
+         if (timeInState <= startOfSplineTime)
+            currentSwingSegment.set(1);
+         else if (timeInState >= endOfSplineTime)
+            currentSwingSegment.set(3);
+         else
+            currentSwingSegment.set(2);
       }
       else
       {
+         currentSwingSegment.set(0);
+
          timeSpentOnInitialCMP.set(Double.NaN);
          timeSpentOnFinalCMP.set(Double.NaN);
          totalTrajectoryTime.set(Double.NaN);
          startOfSplineTime.set(Double.NaN);
          endOfSplineTime.set(Double.NaN);
       }
+
    }
 
    public double getExitCMPCurrentMultiplier()
@@ -300,10 +314,12 @@ public class NewStateMultiplierCalculator
 
       if (!entryCMP.containsNaN())
       {
+         tmpPoint.setToZero();
          tmpPoint.set(entryCMP);
          tmpPoint.scale(entryCMPCurrentMultiplier.getPositionMultiplier());
          referenceICPToPack.add(tmpPoint);
 
+         tmpPoint.setToZero();
          tmpPoint.set(entryCMP);
          tmpPoint.scale(entryCMPCurrentMultiplier.getVelocityMultiplier());
          referenceICPVelocityToPack.add(tmpPoint);
@@ -311,10 +327,12 @@ public class NewStateMultiplierCalculator
 
       if (!exitCMP.containsNaN())
       {
+         tmpPoint.setToZero();
          tmpPoint.set(exitCMP);
          tmpPoint.scale(exitCMPCurrentMultiplier.getPositionMultiplier());
          referenceICPToPack.add(tmpPoint);
 
+         tmpPoint.setToZero();
          tmpPoint.set(exitCMP);
          tmpPoint.scale(exitCMPCurrentMultiplier.getVelocityMultiplier());
          referenceICPVelocityToPack.add(tmpPoint);
@@ -322,10 +340,12 @@ public class NewStateMultiplierCalculator
 
       if (!initialICP.containsNaN())
       {
+         tmpPoint.setToZero();
          tmpPoint.set(initialICP);
          tmpPoint.scale(initialICPCurrentMultiplier.getPositionMultiplier());
          referenceICPToPack.add(tmpPoint);
 
+         tmpPoint.setToZero();
          tmpPoint.set(initialICP);
          tmpPoint.scale(initialICPCurrentMultiplier.getVelocityMultiplier());
          referenceICPVelocityToPack.add(tmpPoint);
@@ -333,11 +353,13 @@ public class NewStateMultiplierCalculator
 
       if (!initialICPVelocity.containsNaN())
       {
-         tmpPoint.set(initialICP);
+         tmpPoint.setToZero();
+         tmpPoint.set(initialICPVelocity);
          tmpPoint.scale(initialICPVelocityCurrentMultiplier.getPositionMultiplier());
          referenceICPToPack.add(tmpPoint);
 
-         tmpPoint.set(initialICP);
+         tmpPoint.setToZero();
+         tmpPoint.set(initialICPVelocity);
          tmpPoint.scale(initialICPVelocityCurrentMultiplier.getVelocityMultiplier());
          referenceICPVelocityToPack.add(tmpPoint);
       }
