@@ -81,7 +81,7 @@ public class PileOfRandomObjectsRobot
          //         Robot robot = new Robot("RandomRobot" + i);
 
          Vector3d offset = new Vector3d(0.0, 0.0, 0.0);
-         FloatingJointDescription floatingJointDescription = new FloatingJointDescription("object" + i);
+         FloatingJointDescription floatingJointDescription = new FloatingJointDescription("object" + i, "object" + i);
          floatingJointDescription.setOffsetFromParentJoint(offset);
 
          LinkDescription link;
