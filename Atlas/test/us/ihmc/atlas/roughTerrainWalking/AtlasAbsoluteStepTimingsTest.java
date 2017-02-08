@@ -17,15 +17,15 @@ public class AtlasAbsoluteStepTimingsTest extends AvatarAbsoluteStepTimingsTest
 {
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 75.0)
-   @Test(timeout = 500000)
+   @Test(timeout = 200000)
    public void testTakingStepsWithAbsoluteTimings() throws SimulationExceededMaximumTimeException
    {
       super.testTakingStepsWithAbsoluteTimings();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 75.0)
-   @Test(timeout = 500000)
+   @ContinuousIntegrationTest(estimatedDuration = 20.0)
+   @Test(timeout = 100000)
    public void testMinimumTransferTimeIsRespected() throws SimulationExceededMaximumTimeException
    {
       super.testMinimumTransferTimeIsRespected();
