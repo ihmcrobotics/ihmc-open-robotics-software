@@ -18,7 +18,7 @@ public class CubicProjectionDerivativeMatrixTest
    @Test(timeout = 21000)
    public void testCreationSize()
    {
-      CubicProjectionDerivativeMatrix cubicProjectionMatrix = new CubicProjectionDerivativeMatrix();
+      CubicDerivativeMatrix cubicProjectionMatrix = new CubicDerivativeMatrix();
 
       Assert.assertEquals("", 4, cubicProjectionMatrix.numCols);
       Assert.assertEquals("", 1, cubicProjectionMatrix.numRows);
@@ -28,7 +28,7 @@ public class CubicProjectionDerivativeMatrixTest
    @Test(timeout = 21000)
    public void testSegmentDuration()
    {
-      CubicProjectionDerivativeMatrix cubicProjectionMatrix = new CubicProjectionDerivativeMatrix();
+      CubicDerivativeMatrix cubicProjectionMatrix = new CubicDerivativeMatrix();
 
       Random random = new Random();
       int iters = 100;
@@ -47,7 +47,7 @@ public class CubicProjectionDerivativeMatrixTest
    @Test(timeout = 21000)
    public void testCalculation()
    {
-      CubicProjectionDerivativeMatrix cubicProjectionMatrix = new CubicProjectionDerivativeMatrix();
+      CubicDerivativeMatrix cubicProjectionMatrix = new CubicDerivativeMatrix();
 
       DenseMatrix64F cubicSplineMatrix = new DenseMatrix64F(4, 4);
       DenseMatrix64F cubicTimeMatrix = new DenseMatrix64F(1, 4);

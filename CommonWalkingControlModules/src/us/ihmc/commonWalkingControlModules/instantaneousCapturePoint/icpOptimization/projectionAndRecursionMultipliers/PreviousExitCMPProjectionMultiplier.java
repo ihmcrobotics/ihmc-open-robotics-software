@@ -2,8 +2,8 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimiz
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.projectionAndRecursionMultipliers.interpolation.CubicProjectionDerivativeMatrix;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.projectionAndRecursionMultipliers.interpolation.CubicProjectionMatrix;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.projectionAndRecursionMultipliers.interpolation.CubicDerivativeMatrix;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.projectionAndRecursionMultipliers.interpolation.CubicMatrix;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.projectionAndRecursionMultipliers.stateMatrices.transfer.TransferPreviousExitCMPProjectionMatrix;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -12,8 +12,8 @@ import java.util.ArrayList;
 
 public class PreviousExitCMPProjectionMultiplier
 {
-   private final CubicProjectionMatrix cubicProjectionMatrix;
-   private final CubicProjectionDerivativeMatrix cubicProjectionDerivativeMatrix;
+   private final CubicMatrix cubicMatrix;
+   private final CubicDerivativeMatrix cubicDerivativeMatrix;
    private final TransferPreviousExitCMPProjectionMatrix transferPreviousExitCMPProjectionMatrix;
 
    private final DenseMatrix64F matrixOut = new DenseMatrix64F(1, 1);
@@ -26,8 +26,8 @@ public class PreviousExitCMPProjectionMultiplier
       positionMultiplier = new DoubleYoVariable("PreviousExitCMPProjectionMultiplier", registry);
       velocityMultiplier = new DoubleYoVariable("PreviousExitCMPProjectionVelocityMultiplier", registry);
 
-      cubicProjectionMatrix = new CubicProjectionMatrix();
-      cubicProjectionDerivativeMatrix = new CubicProjectionDerivativeMatrix();
+      cubicMatrix = new CubicMatrix();
+      cubicDerivativeMatrix = new CubicDerivativeMatrix();
       transferPreviousExitCMPProjectionMatrix = new TransferPreviousExitCMPProjectionMatrix(doubleSupportSplitRatio);
    }
 
@@ -71,19 +71,19 @@ public class PreviousExitCMPProjectionMultiplier
 
       double splineDuration = doubleSupportDurations.get(0).getDoubleValue();
 
-      cubicProjectionDerivativeMatrix.setSegmentDuration(splineDuration);
-      cubicProjectionDerivativeMatrix.update(timeRemaining);
-      cubicProjectionMatrix.setSegmentDuration(splineDuration);
-      cubicProjectionMatrix.update(timeRemaining);
+      cubicDerivativeMatrix.setSegmentDuration(splineDuration);
+      cubicDerivativeMatrix.update(timeRemaining);
+      cubicMatrix.setSegmentDuration(splineDuration);
+      cubicMatrix.update(timeRemaining);
 
-      CommonOps.mult(cubicProjectionMatrix, transferPreviousExitCMPProjectionMatrix, matrixOut);
+      CommonOps.mult(cubicMatrix, transferPreviousExitCMPProjectionMatrix, matrixOut);
 
       return matrixOut.get(0, 0);
    }
 
    private double computeInTransferVelocity()
    {
-      CommonOps.mult(cubicProjectionDerivativeMatrix, transferPreviousExitCMPProjectionMatrix, matrixOut);
+      CommonOps.mult(cubicDerivativeMatrix, transferPreviousExitCMPProjectionMatrix, matrixOut);
 
       return matrixOut.get(0, 0);
    }

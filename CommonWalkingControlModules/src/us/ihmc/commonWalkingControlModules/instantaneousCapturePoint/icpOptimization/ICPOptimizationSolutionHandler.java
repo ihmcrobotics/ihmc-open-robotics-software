@@ -1,5 +1,7 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization;
 
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.NewStateMultiplierCalculator;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.projectionAndRecursionMultipliers.FootstepRecursionMultiplierCalculator;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.CapturePointTools;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
@@ -16,6 +18,7 @@ import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
+import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.frames.YoFrameVector2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
@@ -38,23 +41,25 @@ public class ICPOptimizationSolutionHandler
    private final DoubleYoVariable footstepDeadband;
    private final DoubleYoVariable footstepSolutionResolution;
 
-   private final BooleanYoVariable useDiscontinuousDeadband;
    private final BooleanYoVariable footstepWasAdjusted;
    private final YoFrameVector2d footstepAdjustment;
 
    private final DoubleYoVariable controllerCostToGo;
    private final DoubleYoVariable controllerFootstepCostToGo;
-   private final DoubleYoVariable controllerFootstepRegularizationCostToGo;
    private final DoubleYoVariable controllerFeedbackCostToGo;
-   private final DoubleYoVariable controllerFeedbackRegularizationCostToGo;
    private final DoubleYoVariable controllerDynamicRelaxationCostToGo;
 
    private final FootstepRecursionMultiplierCalculator footstepRecursionMultiplierCalculator;
+   private final NewStateMultiplierCalculator stateMultiplierCalculator;
+   private final boolean useNewMultiplierCalculator;
 
    public ICPOptimizationSolutionHandler(ICPOptimizationParameters icpOptimizationParameters, FootstepRecursionMultiplierCalculator footstepRecursionMultiplierCalculator,
-         boolean visualize, YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
+         NewStateMultiplierCalculator stateMultiplierCalculator, boolean visualize, boolean useNewMultiplierCalculator,
+         YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.footstepRecursionMultiplierCalculator = footstepRecursionMultiplierCalculator;
+      this.stateMultiplierCalculator = stateMultiplierCalculator;
+      this.useNewMultiplierCalculator = useNewMultiplierCalculator;
 
       actualEndOfStateICP = new YoFramePoint2d("actualEndOfStateICP", worldFrame, registry);
 
@@ -69,25 +74,20 @@ public class ICPOptimizationSolutionHandler
 
       controllerCostToGo = new DoubleYoVariable("costToGo", registry);
       controllerFootstepCostToGo = new DoubleYoVariable("footstepCostToGo", registry);
-      controllerFootstepRegularizationCostToGo = new DoubleYoVariable("footstepRegularizationCostToGo", registry);
       controllerFeedbackCostToGo = new DoubleYoVariable("feedbackCostToGo", registry);
-      controllerFeedbackRegularizationCostToGo = new DoubleYoVariable("feedbackRegularizationCostToGo", registry);
       controllerDynamicRelaxationCostToGo = new DoubleYoVariable("dynamicRelaxationCostToGo", registry);
 
       footstepDeadband = new DoubleYoVariable("footstepDeadband", registry);
       footstepSolutionResolution = new DoubleYoVariable("footstepSolutionResolution", registry);
 
-      useDiscontinuousDeadband = new BooleanYoVariable("useDiscontinuousDeadband", registry);
       footstepWasAdjusted = new BooleanYoVariable("footstepWasAdjusted", registry);
       footstepAdjustment = new YoFrameVector2d("footstepAdjustment", worldFrame, registry);
 
       footstepDeadband.set(icpOptimizationParameters.getAdjustmentDeadband());
       footstepSolutionResolution.set(icpOptimizationParameters.getFootstepSolutionResolution());
 
-      useDiscontinuousDeadband.set(icpOptimizationParameters.useDiscontinuousDeadband());
-
-      //if (yoGraphicsListRegistry != null)
-      //   setupVisualizers(yoGraphicsListRegistry, visualize);
+      if (yoGraphicsListRegistry != null)
+         setupVisualizers(yoGraphicsListRegistry, visualize);
    }
 
    private void setupVisualizers(YoGraphicsListRegistry yoGraphicsListRegistry, boolean visualize)
@@ -130,9 +130,7 @@ public class ICPOptimizationSolutionHandler
    {
       controllerCostToGo.set(solver.getCostToGo());
       controllerFootstepCostToGo.set(solver.getFootstepCostToGo());
-      controllerFootstepRegularizationCostToGo.set(solver.getFootstepRegularizationCostToGo());
       controllerFeedbackCostToGo.set(solver.getFeedbackCostToGo());
-      controllerFeedbackRegularizationCostToGo.set(solver.getFeedbackRegularizationCostToGo());
       controllerDynamicRelaxationCostToGo.set(solver.getDynamicRelaxationCostToGo());
    }
 
@@ -203,15 +201,12 @@ public class ICPOptimizationSolutionHandler
       }
       else
       {
-         if (!useDiscontinuousDeadband.getBooleanValue())
-         {
-            tmpVector.setIncludingFrame(solutionAdjustment);
-            tmpVector.normalize();
-            tmpVector.scale(deadband);
+         tmpVector.setIncludingFrame(solutionAdjustment);
+         tmpVector.normalize();
+         tmpVector.scale(deadband);
 
-            solutionLocation.changeFrame(deadbandFrame);
-            solutionLocation.sub(tmpVector);
-         }
+         solutionLocation.changeFrame(deadbandFrame);
+         solutionLocation.sub(tmpVector);
       }
 
       solutionLocation.changeFrame(worldFrame);
@@ -237,19 +232,31 @@ public class ICPOptimizationSolutionHandler
    private final FramePoint2d finalICP2d = new FramePoint2d();
 
    public void computeReferenceFromSolutions(ArrayList<YoFramePoint2d> footstepSolutions, ICPOptimizationInputHandler inputHandler,
-         YoFramePoint2d beginningOfStateICP, double omega0, int numberOfFootstepsToConsider)
+         YoFramePoint2d beginningOfStateICP, YoFrameVector2d beginningOfStateICPVelocity, double omega0, int numberOfFootstepsToConsider)
    {
       computeReferenceFromSolutions(footstepSolutions, inputHandler.getEntryOffsets(), inputHandler.getExitOffsets(), inputHandler.getPreviousStanceExitCMP(),
-            inputHandler.getStanceEntryCMP(), inputHandler.getStanceExitCMP(), inputHandler.getFinalICP(), beginningOfStateICP, omega0, numberOfFootstepsToConsider);
+            inputHandler.getStanceEntryCMP(), inputHandler.getStanceExitCMP(), inputHandler.getFinalICP(), beginningOfStateICP, beginningOfStateICPVelocity,
+            omega0, numberOfFootstepsToConsider);
    }
 
    public void computeReferenceFromSolutions(ArrayList<YoFramePoint2d> footstepSolutions, ArrayList<FrameVector2d> entryOffsets, ArrayList<FrameVector2d> exitOffsets,
          FramePoint2d previousStanceExitCMP, FramePoint2d stanceEntryCMP, FramePoint2d stanceExitCMP, FramePoint finalICP, YoFramePoint2d beginningOfStateICP,
-         double omega0, int numberOfFootstepsToConsider)
+         YoFrameVector2d beginningOfStateICPVelocity, double omega0, int numberOfFootstepsToConsider)
    {
       finalICP.getFrameTuple2d(finalICP2d);
-      footstepRecursionMultiplierCalculator.computeICPPoints(finalICP2d, footstepSolutions, entryOffsets, exitOffsets, previousStanceExitCMP, stanceEntryCMP,
-            stanceExitCMP, beginningOfStateICP.getFrameTuple2d(), numberOfFootstepsToConsider, tmpEndPoint, tmpReferencePoint, tmpReferenceVelocity);
+      if (useNewMultiplierCalculator)
+      {
+         stateMultiplierCalculator.reconstructICPCornerPoint(tmpEndPoint, finalICP2d, footstepSolutions, entryOffsets, exitOffsets, stanceEntryCMP, stanceExitCMP,
+               numberOfFootstepsToConsider);
+         stateMultiplierCalculator.reconstructReferenceICP(tmpReferencePoint, tmpReferenceVelocity, tmpEndPoint, stanceEntryCMP, stanceExitCMP,
+                     beginningOfStateICP.getFrameTuple2d(), beginningOfStateICPVelocity.getFrameTuple2d());
+      }
+      else
+      {
+         footstepRecursionMultiplierCalculator
+               .computeICPPoints(finalICP2d, footstepSolutions, entryOffsets, exitOffsets, previousStanceExitCMP, stanceEntryCMP, stanceExitCMP,
+                     beginningOfStateICP.getFrameTuple2d(), numberOfFootstepsToConsider, tmpEndPoint, tmpReferencePoint, tmpReferenceVelocity);
+      }
 
       CapturePointTools.computeDesiredCentroidalMomentumPivot(tmpReferencePoint, tmpReferenceVelocity, omega0, tmpCMP);
 
@@ -260,20 +267,30 @@ public class ICPOptimizationSolutionHandler
    }
 
    public void computeNominalValues(ArrayList<YoFramePoint2d> upcomingFootstepLocations, ICPOptimizationInputHandler inputHandler,
-         YoFramePoint2d beginningOfStateICP, double omega0, int numberOfFootstepsToConsider)
+         YoFramePoint2d beginningOfStateICP, YoFrameVector2d beginningOfStateICPVelocity, double omega0, int numberOfFootstepsToConsider)
    {
       computeNominalValues(upcomingFootstepLocations, inputHandler.getEntryOffsets(), inputHandler.getExitOffsets(), inputHandler.getPreviousStanceExitCMP(),
-            inputHandler.getStanceEntryCMP(), inputHandler.getStanceExitCMP(), inputHandler.getFinalICP(), beginningOfStateICP, omega0, numberOfFootstepsToConsider);
+            inputHandler.getStanceEntryCMP(), inputHandler.getStanceExitCMP(), inputHandler.getFinalICP(), beginningOfStateICP, beginningOfStateICPVelocity,
+            omega0, numberOfFootstepsToConsider);
    }
 
    public void computeNominalValues(ArrayList<YoFramePoint2d> upcomingFootstepLocations, ArrayList<FrameVector2d> entryOffsets, ArrayList<FrameVector2d> exitOffsets,
          FramePoint2d previousStanceExitCMP, FramePoint2d stanceEntryCMP, FramePoint2d stanceExitCMP, FramePoint finalICP, YoFramePoint2d beginningOfStateICP,
-         double omega0, int numberOfFootstepsToConsider)
+         YoFrameVector2d beginningOfStateICPVelocity, double omega0, int numberOfFootstepsToConsider)
    {
       finalICP.getFrameTuple2d(finalICP2d);
-      footstepRecursionMultiplierCalculator.computeICPPoints(finalICP2d, upcomingFootstepLocations, entryOffsets, exitOffsets,
-            previousStanceExitCMP, stanceEntryCMP, stanceExitCMP, beginningOfStateICP.getFrameTuple2d(), numberOfFootstepsToConsider, tmpEndPoint,
-            tmpReferencePoint, tmpReferenceVelocity);
+      if (useNewMultiplierCalculator)
+      {
+         stateMultiplierCalculator.reconstructICPCornerPoint(tmpEndPoint, finalICP2d, upcomingFootstepLocations, entryOffsets, exitOffsets, stanceEntryCMP, stanceExitCMP, numberOfFootstepsToConsider);
+         stateMultiplierCalculator.reconstructReferenceICP(tmpReferencePoint, tmpReferenceVelocity, tmpEndPoint, stanceEntryCMP, stanceExitCMP,
+               beginningOfStateICP.getFrameTuple2d(), beginningOfStateICPVelocity.getFrameTuple2d());
+      }
+      else
+      {
+         footstepRecursionMultiplierCalculator
+               .computeICPPoints(finalICP2d, upcomingFootstepLocations, entryOffsets, exitOffsets, previousStanceExitCMP, stanceEntryCMP, stanceExitCMP,
+                     beginningOfStateICP.getFrameTuple2d(), numberOfFootstepsToConsider, tmpEndPoint, tmpReferencePoint, tmpReferenceVelocity);
+      }
 
       CapturePointTools.computeDesiredCentroidalMomentumPivot(tmpReferencePoint, tmpReferenceVelocity, omega0, tmpCMP);
 
@@ -298,6 +315,11 @@ public class ICPOptimizationSolutionHandler
    public FramePoint2d getControllerReferenceICP()
    {
       return controllerReferenceICP.getFrameTuple2d();
+   }
+
+   public FrameVector2d getControllerReferenceICPVelocity()
+   {
+      return controllerReferenceICPVelocity.getFrameTuple2d();
    }
 
    public void getControllerReferenceCMP(FramePoint2d framePointToPack)

@@ -107,6 +107,8 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
 
    private final BooleanYoVariable enablePushRecoveryOnFailure = new BooleanYoVariable("enablePushRecoveryOnFailure", registry);
 
+   private final BooleanYoVariable allowUpperBodyMotionDuringLocomotion = new BooleanYoVariable("allowUpperBodyMotionDuringLocomotion", registry);
+
    private final CommandInputManager commandInputManager;
    private final StatusMessageOutputManager statusOutputManager;
    private final WalkingCommandConsumer commandConsumer;
@@ -151,6 +153,7 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
       this.commandInputManager = commandInputManager;
       this.statusOutputManager = statusOutputManager;
 
+      allowUpperBodyMotionDuringLocomotion.set(walkingControllerParameters.allowUpperBodyMotionDuringLocomotion());
 
       hasWalkingControllerBeenInitialized.set(false);
 
@@ -495,8 +498,8 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
       commandConsumer.consumeStopAllTrajectoryCommands();
       commandConsumer.consumeFootCommands();
       commandConsumer.consumeAbortWalkingCommands(abortWalkingRequested);
-      commandConsumer.consumePelvisCommands(currentState);
-      commandConsumer.consumeManipulationCommands(currentState);
+      commandConsumer.consumePelvisCommands(currentState, allowUpperBodyMotionDuringLocomotion.getBooleanValue());
+      commandConsumer.consumeManipulationCommands(currentState, allowUpperBodyMotionDuringLocomotion.getBooleanValue());
       commandConsumer.handleAutomaticManipulationAbortOnICPError(currentState);
 
       updateFailureDetection();
