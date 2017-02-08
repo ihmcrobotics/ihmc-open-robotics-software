@@ -21,30 +21,21 @@ public class NewTransferStateEndMatrix extends DenseMatrix64F
       zero();
    }
 
-   public void compute(ArrayList<DoubleYoVariable> doubleSupportDurations, double omega0, boolean useTwoCMPs)
+   public void compute(ArrayList<DoubleYoVariable> doubleSupportDurations, double omega0)
    {
-      compute(doubleSupportDurations.get(0).getDoubleValue(), omega0, useTwoCMPs);
+      compute(doubleSupportDurations.get(0).getDoubleValue(), omega0);
    }
 
-   public void compute(double doubleSupportDuration, double omega0, boolean useTwoCMPs)
+   public void compute(double doubleSupportDuration, double omega0)
    {
       zero();
 
-      if (useTwoCMPs)
-      {
-         double endOfDoubleSupportDuration = (1.0 - defaultDoubleSupportSplitRatio.getDoubleValue()) * doubleSupportDuration;
+      double endOfDoubleSupportDuration = (1.0 - defaultDoubleSupportSplitRatio.getDoubleValue()) * doubleSupportDuration;
 
-         double endOfDoubleSupportProjection = Math.exp(omega0 * endOfDoubleSupportDuration);
+      double endOfDoubleSupportProjection = Math.exp(omega0 * endOfDoubleSupportDuration);
 
-         set(2, 0, endOfDoubleSupportProjection);
-         set(3, 0, omega0 * endOfDoubleSupportProjection);
-      }
-      else
-      {
-         // // TODO: 2/3/17  
-      }
-
+      set(2, 0, endOfDoubleSupportProjection);
+      set(3, 0, omega0 * endOfDoubleSupportProjection);
    }
-
 }
 

@@ -81,7 +81,7 @@ public class NewStateEndCurrentMultiplier
 
       if (isInTransfer)
       {
-         positionMultiplier = computeInTransfer(doubleSupportDurations, omega0, timeInState, useTwoCMPs);
+         positionMultiplier = computeInTransfer(doubleSupportDurations, omega0, timeInState);
       }
       else
       {
@@ -107,9 +107,9 @@ public class NewStateEndCurrentMultiplier
       this.velocityMultiplier.set(velocityMultiplier);
    }
 
-   private double computeInTransfer(ArrayList<DoubleYoVariable> doubleSupportDurations, double omega0, double timeInState, boolean useTwoCMPs)
+   private double computeInTransfer(ArrayList<DoubleYoVariable> doubleSupportDurations, double omega0, double timeInState)
    {
-      transferStateEndMatrix.compute(doubleSupportDurations, omega0, useTwoCMPs);
+      transferStateEndMatrix.compute(doubleSupportDurations, omega0);
 
       double splineDuration = doubleSupportDurations.get(0).getDoubleValue();
 
@@ -142,8 +142,6 @@ public class NewStateEndCurrentMultiplier
 
    private double computeInSwingOneCMP(double upcomingDoubleSupportDuration, double doubleSupportDuration, double singleSupportDuration, double timeInState, double omega0)
    {
-      //double timeInState = totalTrajectoryTime.getDoubleValue() - timeRemaining;
-
       double stepDuration = doubleSupportDuration + singleSupportDuration;
       double timeSpentOnExitCMP = exitCMPRatio.getDoubleValue() * stepDuration;
       double upcomingInitialDoubleSupportDuration = upcomingDoubleSupportSplitRatio.getDoubleValue() * upcomingDoubleSupportDuration;

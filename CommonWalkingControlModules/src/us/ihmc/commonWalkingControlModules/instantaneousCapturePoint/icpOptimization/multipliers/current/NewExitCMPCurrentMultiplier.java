@@ -77,7 +77,7 @@ public class NewExitCMPCurrentMultiplier
          if (useTwoCMPs)
             positionMultiplier = computeSegmentedSwing(doubleSupportDurations, singleSupportDurations, timeInState, omega0);
          else
-            positionMultiplier = computeInSwingOneCMP(doubleSupportDurations, singleSupportDurations, timeInState, omega0);
+            positionMultiplier = computeInSwingOneCMP();
       }
       this.positionMultiplier.set(positionMultiplier);
 
@@ -90,7 +90,7 @@ public class NewExitCMPCurrentMultiplier
          if (useTwoCMPs)
             velocityMultiplier = computeSegmentedSwingVelocity(timeInState, omega0);
          else
-            velocityMultiplier = computeInSwingOneCMPVelocity(omega0);
+            velocityMultiplier = computeInSwingOneCMPVelocity();
       }
 
       this.velocityMultiplier.set(velocityMultiplier);
@@ -101,20 +101,9 @@ public class NewExitCMPCurrentMultiplier
       return 0.0;
    }
 
-   private double computeInSwingOneCMP(ArrayList<DoubleYoVariable> doubleSupportDurations, ArrayList<DoubleYoVariable> singleSupportDurations,
-         double timeInState, double omega0)
+   private double computeInSwingOneCMP()
    {
-      double upcomingDoubleSupportDuration = doubleSupportDurations.get(1).getDoubleValue();
-      double currentDoubleSupportDuration = doubleSupportDurations.get(0).getDoubleValue();
-      double singleSupportDuration = singleSupportDurations.get(0).getDoubleValue();
-      double stepDuration = currentDoubleSupportDuration + singleSupportDuration;
-
-      double upcomingInitialDoubleSupportDuration = upcomingDoubleSupportSplitRatio.getDoubleValue() * upcomingDoubleSupportDuration;
-      double timeSpentOnExitCMP = exitCMPRatio.getDoubleValue() * stepDuration;
-
-      double duration = timeInState - singleSupportDuration + timeSpentOnExitCMP - upcomingInitialDoubleSupportDuration;
-
-      return 1.0 - Math.exp(omega0 * duration);
+      return 0.0;
    }
 
    private double computeInTransferVelocity()
@@ -122,9 +111,9 @@ public class NewExitCMPCurrentMultiplier
       return 0.0;
    }
 
-   private double computeInSwingOneCMPVelocity(double omega0)
+   private double computeInSwingOneCMPVelocity()
    {
-      return omega0 * (positionMultiplier.getDoubleValue() - 1.0);
+      return 0.0;
    }
 
    private double computeSegmentedSwing(ArrayList<DoubleYoVariable> doubleSupportDurations, ArrayList<DoubleYoVariable> singleSupportDurations,
@@ -168,7 +157,17 @@ public class NewExitCMPCurrentMultiplier
    private double computeSwingThirdSegment(ArrayList<DoubleYoVariable> doubleSupportDurations, ArrayList<DoubleYoVariable> singleSupportDurations,
          double timeInState, double omega0)
    {
-      return computeInSwingOneCMP(doubleSupportDurations, singleSupportDurations, timeInState, omega0);
+      double upcomingDoubleSupportDuration = doubleSupportDurations.get(1).getDoubleValue();
+      double currentDoubleSupportDuration = doubleSupportDurations.get(0).getDoubleValue();
+      double singleSupportDuration = singleSupportDurations.get(0).getDoubleValue();
+      double stepDuration = currentDoubleSupportDuration + singleSupportDuration;
+
+      double upcomingInitialDoubleSupportDuration = upcomingDoubleSupportSplitRatio.getDoubleValue() * upcomingDoubleSupportDuration;
+      double timeSpentOnExitCMP = exitCMPRatio.getDoubleValue() * stepDuration;
+
+      double duration = timeInState - singleSupportDuration + timeSpentOnExitCMP - upcomingInitialDoubleSupportDuration;
+
+      return 1.0 - Math.exp(omega0 * duration);
    }
 
 

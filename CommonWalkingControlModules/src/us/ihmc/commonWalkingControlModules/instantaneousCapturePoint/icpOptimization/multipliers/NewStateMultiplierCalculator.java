@@ -86,8 +86,8 @@ public class NewStateMultiplierCalculator
 
       exitCMPCurrentMultiplier = new NewExitCMPCurrentMultiplier(upcomingDoubleSupportSplitFraction, exitCMPDurationInPercentOfStepTime, startOfSplineTime,
             endOfSplineTime, totalTrajectoryTime, registry);
-      entryCMPCurrentMultiplier = new NewEntryCMPCurrentMultiplier(defaultDoubleSupportSplitFraction, exitCMPDurationInPercentOfStepTime, startOfSplineTime,
-            endOfSplineTime, totalTrajectoryTime, PROJECT_FORWARD, registry);
+      entryCMPCurrentMultiplier = new NewEntryCMPCurrentMultiplier(upcomingDoubleSupportSplitFraction, defaultDoubleSupportSplitFraction,
+            exitCMPDurationInPercentOfStepTime, startOfSplineTime, endOfSplineTime, totalTrajectoryTime, PROJECT_FORWARD, registry);
       initialICPCurrentMultiplier = new NewInitialICPCurrentMultiplier(upcomingDoubleSupportSplitFraction, defaultDoubleSupportSplitFraction,
             exitCMPDurationInPercentOfStepTime, startOfSplineTime, endOfSplineTime, totalTrajectoryTime, PROJECT_FORWARD, registry);
       initialICPVelocityCurrentMultiplier = new NewInitialICPVelocityCurrentMultiplier(registry);

@@ -66,9 +66,7 @@ public class NewTransferEntryCMPMatrixTest
          double endOfDoubleSupportDuration = (1 - splitRatio) * doubleSupportDuration;
          double projection = Math.exp(omega0 * endOfDoubleSupportDuration);
 
-         boolean useTwoCMPs = true;
-
-         transferEntryCMPMatrix.compute(doubleSupportDurations, useTwoCMPs, omega0);
+         transferEntryCMPMatrix.compute(doubleSupportDurations, omega0);
 
          shouldBe.zero();
          shouldBe.set(2, 0, 1.0 - projection);
