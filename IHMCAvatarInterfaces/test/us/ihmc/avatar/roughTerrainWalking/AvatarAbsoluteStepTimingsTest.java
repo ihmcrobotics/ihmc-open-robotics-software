@@ -42,7 +42,7 @@ import us.ihmc.tools.thread.ThreadTools;
 
 public abstract class AvatarAbsoluteStepTimingsTest implements MultiRobotTestInterface
 {
-   protected static SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+   protected final static SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
    static
    {
       simulationTestingParameters.setRunMultiThreaded(false);
@@ -239,6 +239,5 @@ public abstract class AvatarAbsoluteStepTimingsTest implements MultiRobotTestInt
       }
 
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
-      simulationTestingParameters = null;
    }
 }
