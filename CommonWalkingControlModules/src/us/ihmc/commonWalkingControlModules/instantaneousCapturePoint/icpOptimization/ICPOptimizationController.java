@@ -408,8 +408,10 @@ public class ICPOptimizationController
 
       if (useFootstepRegularization)
          resetFootstepRegularizationTask();
+      /*
       if (useFeedbackRegularization)
          solver.resetFeedbackRegularization();
+         */
 
       return numberOfFootstepsToConsider;
    }
@@ -571,10 +573,10 @@ public class ICPOptimizationController
 
       double clippedTimeRemaining = Math.max(minimumTimeRemaining.getDoubleValue(), timeRemainingInState.getDoubleValue());
 
-      inputHandler.update(useTwoCMPs, omega0);
+      inputHandler.update(clippedTimeRemaining, timeInCurrentState.getDoubleValue(), useTwoCMPs, isInTransfer.getBooleanValue(), useInitialICP, omega0);
       inputHandler.computeFinalICPRecursion(finalICPRecursion, numberOfFootstepsToConsider, useTwoCMPs, isInTransfer.getBooleanValue(), omega0);
       inputHandler.computeCMPConstantEffects(cmpConstantEffects, beginningOfStateICP.getFrameTuple2d(), beginningOfStateICPVelocity.getFrameTuple2d(),
-            upcomingFootstepLocations, clippedTimeRemaining, timeInCurrentState.getDoubleValue(), omega0, numberOfFootstepsToConsider, useTwoCMPs, isInTransfer.getBooleanValue(), useInitialICP);
+            upcomingFootstepLocations, numberOfFootstepsToConsider, useTwoCMPs, isInTransfer.getBooleanValue());
 
       return numberOfFootstepsToConsider;
    }
