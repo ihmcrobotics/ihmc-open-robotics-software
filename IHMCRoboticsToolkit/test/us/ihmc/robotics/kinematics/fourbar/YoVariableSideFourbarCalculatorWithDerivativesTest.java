@@ -10,7 +10,7 @@ import java.util.Random;
 
 import org.junit.Test;
 
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 
 public class YoVariableSideFourbarCalculatorWithDerivativesTest
@@ -19,7 +19,7 @@ public class YoVariableSideFourbarCalculatorWithDerivativesTest
    private static final boolean PRINT = false;
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSquare()
    {
@@ -32,7 +32,7 @@ public class YoVariableSideFourbarCalculatorWithDerivativesTest
       assertEquals(PI / 2, calculator.getAngleCDA(), eps);
    }
 
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSquareDer()
    {
@@ -45,7 +45,7 @@ public class YoVariableSideFourbarCalculatorWithDerivativesTest
       assertEquals(-1, calculator.getAngleDtCDA(), eps);
    }
 
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testParallelogram()
    {
@@ -62,7 +62,7 @@ public class YoVariableSideFourbarCalculatorWithDerivativesTest
       assertEquals(-1, calculator.getAngleDtCDA(), eps);
    }
 
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testRandomQuadrilatteral()
    {
@@ -108,7 +108,7 @@ public class YoVariableSideFourbarCalculatorWithDerivativesTest
       assertEquals(D, calculator.getAngleCDA(), eps);
    }
 
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testMasterAngleComputations()
    {

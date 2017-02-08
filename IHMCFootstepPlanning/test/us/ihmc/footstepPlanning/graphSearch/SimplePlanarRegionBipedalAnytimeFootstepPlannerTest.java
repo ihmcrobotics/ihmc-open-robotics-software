@@ -7,7 +7,7 @@ import javax.vecmath.Point3d;
 
 import org.junit.Test;
 
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlanner;
@@ -33,7 +33,7 @@ public class SimplePlanarRegionBipedalAnytimeFootstepPlannerTest
 {
    private final boolean visualize = false;
 
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(categoriesOverride = IntegrationCategory.IN_DEVELOPMENT, estimatedDuration = 20.0)
+   @ContinuousIntegrationTest(categoriesOverride = IntegrationCategory.IN_DEVELOPMENT, estimatedDuration = 20.0)
    @Test(timeout = 300000)
    public void testSameResultsAsNormalPlannerWhenUsedAsANormalPlanner()
    {

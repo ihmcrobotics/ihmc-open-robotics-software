@@ -9,11 +9,11 @@ import java.util.ArrayList;
 import org.apache.commons.lang3.mutable.MutableDouble;
 import org.junit.Test;
 
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public class PreallocatedListTest
 {
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testCapacity()
    {
@@ -27,7 +27,7 @@ public class PreallocatedListTest
       assertEquals(doubleList.capacity(), 10);
    }
 
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testDefaultElementFactory()
    {
@@ -97,7 +97,7 @@ public class PreallocatedListTest
       assertEquals(doubleList.get(9).doubleValue(), 9.0, epsilon);
    }
 
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testPreallocatedListConstructor()
    {

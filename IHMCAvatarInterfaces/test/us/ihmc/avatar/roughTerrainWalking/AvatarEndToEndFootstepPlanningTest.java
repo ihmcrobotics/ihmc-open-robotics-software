@@ -22,7 +22,7 @@ import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.packets.PlanarRegionsListMessage;
 import us.ihmc.communication.util.NetworkPorts;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
 import us.ihmc.footstepPlanning.polygonSnapping.PlanarRegionsListExamples;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -172,7 +172,7 @@ public abstract class AvatarEndToEndFootstepPlanningTest implements MultiRobotTe
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 300000)
    public void testAnytimePlannerBehaviorOverRoughTerrain() throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
    {
@@ -220,7 +220,7 @@ public abstract class AvatarEndToEndFootstepPlanningTest implements MultiRobotTe
       assertBodyIsCloseToXYLocation(planarGoalPoint, 0.6);
    }
 
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 300000)
    public void testAnytimeBehaviorOverIncrementalTerrain() throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
    {

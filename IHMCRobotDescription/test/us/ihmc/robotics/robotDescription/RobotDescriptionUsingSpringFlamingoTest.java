@@ -6,7 +6,7 @@ import javax.vecmath.Vector3d;
 
 import org.junit.Test;
 
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.robotics.Axis;
@@ -56,7 +56,7 @@ public class RobotDescriptionUsingSpringFlamingoTest
    private static final double FOOT_BEHIND = FOOT_X - FOOT_FORWARD;
    private static final double HIP_OFFSET_Y = 0.12;
 
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 300)
+   @ContinuousIntegrationTest(estimatedDuration = 300)
    @Test(timeout = 1000)
    public void testUsingSpringFlamingoRobotDescription()
    {

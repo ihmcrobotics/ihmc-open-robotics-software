@@ -8,7 +8,7 @@ import java.util.ArrayList;
 
 import org.junit.Test;
 
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 
@@ -16,7 +16,7 @@ public class YoPreallocatedListTest
 {
    YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testCapacity()
    {
@@ -39,7 +39,7 @@ public class YoPreallocatedListTest
       assertEquals(doubleList.capacity(), 10);
    }
 
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testDefaultElementFactory()
    {
@@ -110,7 +110,7 @@ public class YoPreallocatedListTest
       assertEquals(doubleList.get(9).getDoubleValue(), 9.0, epsilon);
    }
 
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testPreallocatedListConstructor()
    {
