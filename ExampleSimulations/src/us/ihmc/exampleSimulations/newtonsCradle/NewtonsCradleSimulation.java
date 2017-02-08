@@ -154,7 +154,7 @@ public class NewtonsCradleSimulation
    public static void createPileOfRandomObjectsSimulation()
    {
       PileOfRandomObjectsRobot pileOfRandomObjectsRobot = new PileOfRandomObjectsRobot();
-      ArrayList<Robot> robots = pileOfRandomObjectsRobot.getRobots();
+      ArrayList<Robot> robots = pileOfRandomObjectsRobot.createAndGetRobots();
 
       Robot groundRobot = new GroundAsABoxRobot(true);
       robots.add(groundRobot);

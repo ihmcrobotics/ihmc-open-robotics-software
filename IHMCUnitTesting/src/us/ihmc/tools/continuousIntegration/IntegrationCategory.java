@@ -1,6 +1,7 @@
 package us.ihmc.tools.continuousIntegration;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public enum IntegrationCategory
 {
@@ -10,8 +11,7 @@ public enum IntegrationCategory
    
    // Active, not load balanced
    COMPILE("Compile", false, false),
-   CODE_QUALITY("CodeQuality", false, false),
-   HEALTH("RepoHealth", false, false),
+   HEALTH("Health", false, false),
    
    // Load balanced (i.e A, B, C suites)
    FAST("Fast", true, false),
@@ -30,9 +30,9 @@ public enum IntegrationCategory
    
    static
    {
-      ArrayList<IntegrationCategory> notExcludedCategories = new ArrayList<>();
-      ArrayList<IntegrationCategory> balancedCategories = new ArrayList<>();
-      ArrayList<IntegrationCategory> notBalancedCategories = new ArrayList<>();
+      List<IntegrationCategory> notExcludedCategories = new ArrayList<>();
+      List<IntegrationCategory> balancedCategories = new ArrayList<>();
+      List<IntegrationCategory> notBalancedCategories = new ArrayList<>();
       for (IntegrationCategory category : values)
       {
          if (!category.isExcluded())

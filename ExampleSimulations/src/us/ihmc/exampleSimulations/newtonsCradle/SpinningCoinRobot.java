@@ -128,7 +128,9 @@ public class SpinningCoinRobot
 
       CollisionMeshDescription collisionMeshDescription = new CollisionMeshDescription();
       collisionMeshDescription.addCylinderReferencedAtCenter(coinRadius, coinWidth);
-      link.setCollisionMesh(collisionMeshDescription);
+      collisionMeshDescription.setCollisionGroup(0xff);
+      collisionMeshDescription.setCollisionMask(0xff);
+      link.addCollisionMesh(collisionMeshDescription);
 
       return link;
    }

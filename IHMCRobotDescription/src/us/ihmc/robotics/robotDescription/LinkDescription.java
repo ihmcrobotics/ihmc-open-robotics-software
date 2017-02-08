@@ -25,7 +25,7 @@ public class LinkDescription
    private final Matrix3d principalAxesRotation = new Matrix3d();
 
    private LinkGraphicsDescription linkGraphics;
-   private CollisionMeshDescription collisionMesh;
+   private ArrayList<CollisionMeshDescription> collisionMeshes = new ArrayList<>();
 
    public LinkDescription(String name)
    {
@@ -47,14 +47,14 @@ public class LinkDescription
       this.linkGraphics = linkGraphics;
    }
 
-   public CollisionMeshDescription getCollisionMesh()
+   public ArrayList<CollisionMeshDescription> getCollisionMeshes()
    {
-      return collisionMesh;
+      return collisionMeshes;
    }
 
-   public void setCollisionMesh(CollisionMeshDescription collisionMesh)
+   public void addCollisionMesh(CollisionMeshDescription collisionMesh)
    {
-      this.collisionMesh = collisionMesh;
+      this.collisionMeshes.add(collisionMesh);
    }
 
    public double getMass()
@@ -378,9 +378,13 @@ public class LinkDescription
       {
          linkGraphics.preScale(factor);
       }
-      if(collisionMesh != null)
+      
+      if(collisionMeshes != null)
       {
-         collisionMesh.scale(factor);
+         for (int i=0; i<collisionMeshes.size(); i++)
+         {
+            collisionMeshes.get(i).scale(factor);
+         }
       }
       
       

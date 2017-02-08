@@ -292,9 +292,33 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
       return viewportPanel;
    }
 
+   public void addRobot(Robot robot)
+   {
+      boolean wereAlreadySet = (this.robots != null);
+
+      if (!wereAlreadySet)
+      {
+         setRobots(new Robot[]{robot});
+         return;
+      }
+      
+      Robot[] newRobots = new Robot[robots.length + 1];
+      for (int i=0; i<robots.length; i++)
+      {
+         newRobots[i] = robots[i];
+      }
+      newRobots[newRobots.length-1] = robot;
+      this.robots = newRobots;
+      
+      robot.getCameraMountList(cameraMountList);
+      createGraphicsRobot(robot);
+   }
+
    public void setRobots(Robot[] robots)
    {
-      if (this.robots != null)
+      boolean wereAlreadySet = (this.robots != null);
+      
+      if (wereAlreadySet)
       {
          throw new RuntimeException("robots != null. Can only setRobots once!");
       }
@@ -838,12 +862,17 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
       {
          for (Robot robot : robots)
          {
-            GraphicsRobot graphicsRobot = new GraphicsRobot(robot);
-            graphicsUpdatables.add(graphicsRobot);
-            graphicsRobots.put(robot, graphicsRobot);
-            graphics3dAdapter.addRootNode(graphicsRobot.getRootNode());
+            createGraphicsRobot(robot);
          }
       }
+   }
+
+   private void createGraphicsRobot(Robot robot)
+   {
+      GraphicsRobot graphicsRobot = new GraphicsRobot(robot);
+      graphicsUpdatables.add(graphicsRobot);
+      graphicsRobots.put(robot, graphicsRobot);
+      graphics3dAdapter.addRootNode(graphicsRobot.getRootNode());
    }
 
    public ViewportPanel createViewportPanel()
@@ -3166,7 +3195,6 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
                graphicsUpdatable.update();
             }
          }
-
       }
    }
    

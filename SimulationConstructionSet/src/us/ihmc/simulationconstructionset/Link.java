@@ -14,7 +14,6 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.InertiaTools;
 import us.ihmc.robotics.robotDescription.CollisionMeshDescription;
-import us.ihmc.simulationconstructionset.physics.CollisionShape;
 import us.ihmc.simulationconstructionset.robotdefinition.LinkDefinitionFixedFrame;
 
 /**
@@ -44,8 +43,7 @@ public class Link implements java.io.Serializable
    public Vector3d comOffset = new Vector3d();
 
    private Graphics3DObject linkGraphics;
-   private CollisionMeshDescription collisionMeshDescription;
-   private CollisionShape collision;
+   private ArrayList<CollisionMeshDescription> collisionMeshDescriptions;
 
    public Link(LinkDefinitionFixedFrame linkDefinition)
    {
@@ -361,9 +359,14 @@ public class Link implements java.io.Serializable
       this.linkGraphics = linkGraphics;
    }
 
-   public void setCollisionMesh(CollisionMeshDescription collisionMeshDescription)
+   public void addCollisionMesh(CollisionMeshDescription collisionMeshDescription)
    {
-      this.collisionMeshDescription = collisionMeshDescription;
+      if (collisionMeshDescriptions == null)
+      {
+         collisionMeshDescriptions = new ArrayList<CollisionMeshDescription>();
+      }
+      
+      this.collisionMeshDescriptions.add(collisionMeshDescription);
    }
 
    /**
@@ -376,9 +379,9 @@ public class Link implements java.io.Serializable
       return linkGraphics;
    }
 
-   public CollisionMeshDescription getCollisionMeshDescription()
+   public ArrayList<CollisionMeshDescription> getCollisionMeshDescriptions()
    {
-      return collisionMeshDescription;
+      return collisionMeshDescriptions;
    }
 
    //TODO: Get this stuff out of here. Put it in Joint maybe?
@@ -555,11 +558,6 @@ public class Link implements java.io.Serializable
    public void getComOffset(Vector3d comOffsetRet)
    {
       comOffsetRet.set(this.comOffset);
-   }
-
-   public CollisionShape getCollisionShape()
-   {
-      return collision;
    }
 
    public Joint getParentJoint()

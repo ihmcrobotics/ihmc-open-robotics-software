@@ -36,6 +36,7 @@ public class DampedLeastSquaresSolver implements LinearSolver<DenseMatrix64F>
       this.alpha = alpha;
    }
 
+   @Override
    public boolean setA(DenseMatrix64F A)
    {
       this.A.set(A);
@@ -43,11 +44,13 @@ public class DampedLeastSquaresSolver implements LinearSolver<DenseMatrix64F>
       return true;
    }
 
+   @Override
    public double quality()
    {
       return CommonOps.det(A);
    }
 
+   @Override
    public void solve(DenseMatrix64F b, DenseMatrix64F x)
    {
       if (alpha == 0)
@@ -67,6 +70,7 @@ public class DampedLeastSquaresSolver implements LinearSolver<DenseMatrix64F>
       }
    }
 
+   @Override
    public void invert(DenseMatrix64F A_inv)
    {
       if (alpha == 0)
@@ -86,16 +90,19 @@ public class DampedLeastSquaresSolver implements LinearSolver<DenseMatrix64F>
       }
    }
 
+   @Override
    public boolean modifiesA()
    {
       return false;
    }
 
+   @Override
    public boolean modifiesB()
    {
       return false;
    }
    
+   @SuppressWarnings("unchecked")
    @Override
    public SingularValueDecomposition<DenseMatrix64F> getDecomposition() {
        return null;

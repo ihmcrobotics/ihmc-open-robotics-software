@@ -31,7 +31,7 @@ public class ContinuousIntegrationSuite extends Suite
       
       try
       {
-         filter(new TestPlanFilter(getTestSuiteTarget(clazz)));
+         filter(new CategoryFilter(getSuiteCategory(clazz)));
       }
       catch (NoTestsRemainException e)
       {
@@ -39,28 +39,28 @@ public class ContinuousIntegrationSuite extends Suite
       }
    }
    
-   private static class TestPlanFilter extends Filter
+   private static class CategoryFilter extends Filter
    {
-      private final IntegrationCategory target;
+      private final IntegrationCategory integrationCategory;
       
-      public TestPlanFilter(IntegrationCategory target)
+      public CategoryFilter(IntegrationCategory integrationCategory)
       {
-         this.target = target;
+         this.integrationCategory = integrationCategory;
       }
       
       @Override
       public boolean shouldRun(Description description)
       {
-         IntegrationCategory[] directTargets = getDirectTargets(description);
-         if (directTargets != null)
+         IntegrationCategory[] directCategories = getDirectCategories(description);
+         if (directCategories != null)
          {
-            boolean containsTarget = Arrays.asList(directTargets).contains(target);
+            boolean containsCategory = Arrays.asList(directCategories).contains(integrationCategory);
             
             if (description.isTest())
             {
-               return containsTarget;
+               return containsCategory;
             }
-            else if (containsTarget)
+            else if (containsCategory)
             {
                return true;
             }
@@ -70,11 +70,11 @@ public class ContinuousIntegrationSuite extends Suite
             IntegrationCategory[] parentTargets = getParentTargets(description);
             if (parentTargets != null)
             {
-               return Arrays.asList(parentTargets).contains(target);
+               return Arrays.asList(parentTargets).contains(integrationCategory);
             }
          }
          
-         if (target.equals(IntegrationCategory.defaultCategory))
+         if (integrationCategory.equals(IntegrationCategory.defaultCategory))
          {
             return true;
          }
@@ -92,7 +92,7 @@ public class ContinuousIntegrationSuite extends Suite
       @Override
       public String describe()
       {
-         return "Filter for tests in " + target.getName() + ".";
+         return "Filter for tests in " + integrationCategory.getName() + ".";
       }
       
       private IntegrationCategory[] getParentTargets(Description description)
@@ -101,30 +101,30 @@ public class ContinuousIntegrationSuite extends Suite
          if (testClass != null)
          {
             Description parentDescription = Description.createSuiteDescription(testClass);
-            return getDirectTargets(parentDescription);
+            return getDirectCategories(parentDescription);
          }
          
          return null;
       }
       
-      private IntegrationCategory[] getDirectTargets(Description description)
+      private IntegrationCategory[] getDirectCategories(Description description)
       {
-         ContinuousIntegrationTest deployableTestMethod = description.getAnnotation(ContinuousIntegrationTest.class);
-         if (deployableTestMethod != null && deployableTestMethod.categoriesOverride().length > 0)
+         ContinuousIntegrationTest testMethodAnnotation = description.getAnnotation(ContinuousIntegrationTest.class);
+         if (testMethodAnnotation != null && testMethodAnnotation.categoriesOverride().length > 0)
          {
-            return deployableTestMethod.categoriesOverride();
+            return testMethodAnnotation.categoriesOverride();
          }
-         ContinuousIntegrationPlan deployableTestClass = description.getAnnotation(ContinuousIntegrationPlan.class);
-         if (deployableTestClass != null && deployableTestClass.categories().length > 0)
+         ContinuousIntegrationPlan testClassAnnotation = description.getAnnotation(ContinuousIntegrationPlan.class);
+         if (testClassAnnotation != null && testClassAnnotation.categories().length > 0)
          {
-            return deployableTestClass.categories();
+            return testClassAnnotation.categories();
          }
          
          return null;
       }
    }
    
-   private IntegrationCategory getTestSuiteTarget(Class<?> clazz)
+   private IntegrationCategory getSuiteCategory(Class<?> clazz)
    {
       ContinuousIntegrationSuiteCategory annotation = clazz.getAnnotation(ContinuousIntegrationSuiteCategory.class);
       return annotation == null ? null : annotation.value();
