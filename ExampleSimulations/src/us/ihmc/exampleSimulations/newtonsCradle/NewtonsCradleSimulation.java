@@ -2,12 +2,21 @@ package us.ihmc.exampleSimulations.newtonsCradle;
 
 import java.util.ArrayList;
 
+import javax.vecmath.Point3d;
+
+import us.ihmc.exampleSimulations.collidingArms.SingleBoxRobotDescription;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.robotics.geometry.shapes.Box3d;
+import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.simulationconstructionset.RobotFromDescription;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.physics.CollisionHandler;
 import us.ihmc.simulationconstructionset.physics.collision.DefaultCollisionHandler;
 import us.ihmc.simulationconstructionset.physics.visualize.DefaultCollisionVisualizer;
+import us.ihmc.simulationconstructionset.util.LinearStickSlipGroundContactModel;
+import us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObject3D;
 import us.ihmc.tools.thread.ThreadTools;
 
 public class NewtonsCradleSimulation
@@ -87,6 +96,61 @@ public class NewtonsCradleSimulation
       scs.initializeCollisionDetectionAndHandling(collisionVisualizer, collisionHandler);
       scs.startOnAThread();
    }
+   
+   public static void createBoxDownRampSimulation()
+   {
+      ArrayList<Robot> robots = new ArrayList<>();
+      double mass = 1.0;
+      double xLength = 0.2;
+      double yWidth = 0.2;
+      double zHeight = 0.1;
+      SingleBoxRobotDescription singleBoxRobotDescription = new SingleBoxRobotDescription("BoxOne", mass, xLength, yWidth, zHeight, 0xff, 0xff);
+      RobotFromDescription boxRobot = new RobotFromDescription(singleBoxRobotDescription);
+      
+      FloatingJoint rootJoint = (FloatingJoint) boxRobot.getRootJoints().get(0);
+      rootJoint.setPosition(0.0, 0.0, 0.1);
+      robots.add(boxRobot);
+
+      double groundAngle = 0.0; //Math.PI/64.0;
+      Robot groundRobot = new GroundAsABoxRobot(groundAngle , false, 0xffff, 0xffff);
+      robots.add(groundRobot);
+
+      Robot[] robotArray = new Robot[robots.size()];
+      robots.toArray(robotArray);
+
+      CombinedTerrainObject3D boxTerrain = new CombinedTerrainObject3D("BoxTerrain");
+      Box3d box = new Box3d(2.0, 1.0, 0.1);
+      box.setPosition(new Point3d(0.0, 1.0, 0.0));
+      box.setYawPitchRoll(0.0, groundAngle, 0.0);
+      boxTerrain.addRotatableBox(box, YoAppearance.Blue());
+      
+      LinearStickSlipGroundContactModel groundContactModel = new LinearStickSlipGroundContactModel(boxRobot, boxRobot.getRobotsYoVariableRegistry());
+      groundContactModel.setGroundProfile3D(boxTerrain);
+
+      groundContactModel.setAlphaStickSlip(0.7, 0.6);
+      groundContactModel.enableSlipping();
+      groundContactModel.enableSurfaceNormal();
+      boxRobot.setGroundContactModel(groundContactModel);
+      
+      
+      SimulationConstructionSet scs = new SimulationConstructionSet(robotArray);
+      scs.setDT(0.0001, 100);
+      scs.setGroundVisible(false);
+      scs.addStaticLinkGraphics(boxTerrain.getLinkGraphics());
+
+      DefaultCollisionVisualizer collisionVisualizer = new DefaultCollisionVisualizer(0.1, 0.1, scs, 100);
+
+      double coefficientOfRestitution = 0.3;
+      double coefficientOfFriction = 0.7;
+      CollisionHandler collisionHandler = new DefaultCollisionHandler(coefficientOfRestitution, coefficientOfFriction);
+      //      CollisionHandler collisionHandler = new SpringCollisionHandler(2.0, 1.1, 1.1, robot.getRobotsYoVariableRegistry());
+      //      CollisionHandler collisionHandler = new SpringCollisionHandler(1, 1000, 10.0, robot.getRobotsYoVariableRegistry());
+      //      CollisionHandler collisionHandler = new DefaultCollisionHandler(0.98, 0.1, robot);
+      //      CollisionHandler collisionHandler = new DefaultCollisionHandler(0.3, 0.7, robot);
+
+      scs.initializeCollisionDetectionAndHandling(collisionVisualizer, collisionHandler);
+      scs.startOnAThread();
+   }
 
    public static void createRowOfDominosSimulation()
    {
@@ -102,6 +166,7 @@ public class NewtonsCradleSimulation
 
       SimulationConstructionSet scs = new SimulationConstructionSet(robotArray);
       scs.setDT(0.0001, 100);
+      scs.setFastSimulate(true);
       scs.setGroundVisible(false);
 
       //      DefaultCollisionVisualize collisionVisualizer = new DefaultCollisionVisualize(100.0, 100.0, scs, 100);
@@ -204,6 +269,7 @@ public class NewtonsCradleSimulation
 //            createNewtonsCradleSimulation();
 //    createSpinningCoinSimulation();
 //            createStackOfBouncyBallsSimulation();
+//            createBoxDownRampSimulation();
 //            createRowOfDominosSimulation();
 //      createStackOfBlocksSimulation();
       createPileOfRandomObjectsSimulation();
