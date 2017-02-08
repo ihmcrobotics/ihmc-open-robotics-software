@@ -21,7 +21,7 @@ public class FootstepTiming
    }
 
    /**
-    * Sets the {@link swingTime} and {@link transferTime} of the footstep.
+    * Sets the {@link #swingTime} and {@link #transferTime} of the footstep.
     */
    public void setTimings(double swingTime, double transferTime)
    {
@@ -46,7 +46,7 @@ public class FootstepTiming
    }
 
    /**
-    * Returns the sum of {@link swingTime} and {@link transferTime}. This is the total time the step takes from
+    * Returns the sum of {@link #swingTime} and {@link #transferTime}. This is the total time the step takes from
     * beginning of transferring weight to the stance foot to the touch-down of the swing foot.
     */
    public double getStepTime()
