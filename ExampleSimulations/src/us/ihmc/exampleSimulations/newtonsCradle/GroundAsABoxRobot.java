@@ -5,6 +5,7 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.robotDescription.CollisionMeshDescription;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.NullJoint;
@@ -23,8 +24,13 @@ public class GroundAsABoxRobot extends Robot
    {
       this(addWalls, 0xffffffff, 0xffffffff);
    }
-   
+
    public GroundAsABoxRobot(boolean addWalls, int collisionGroup, int collisionMask)
+   {
+      this(0.0, addWalls, collisionGroup, collisionMask);
+   }
+
+   public GroundAsABoxRobot(double groundAngle, boolean addWalls, int collisionGroup, int collisionMask)
    {
       super("GroundAsABoxRobot");
       NullJoint baseJoint = new NullJoint("base", new Vector3d(), this);
@@ -39,10 +45,12 @@ public class GroundAsABoxRobot extends Robot
 
       Graphics3DObject baseLinkGraphics = new Graphics3DObject();
       baseLinkGraphics.translate(0.0, 0.0, -floorThickness);
+      baseLinkGraphics.rotate(groundAngle, Axis.Y);
       baseLinkGraphics.addCube(floorLength, floorWidth, floorThickness, YoAppearance.Green());
 
       CollisionMeshDescription collisonMeshDescription = new CollisionMeshDescription();
       collisonMeshDescription.translate(0.0, 0.0, -floorThickness);
+      collisonMeshDescription.rotate(groundAngle, Axis.Y);
       collisonMeshDescription.addCubeReferencedAtBottomMiddle(floorLength, floorWidth, floorThickness);
       collisonMeshDescription.setIsGround(true);
 
