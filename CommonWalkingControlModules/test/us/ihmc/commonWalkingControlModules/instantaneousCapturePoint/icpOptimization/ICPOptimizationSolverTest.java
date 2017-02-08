@@ -2,10 +2,14 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimiz
 
 import static org.junit.Assert.assertEquals;
 
+import java.util.ArrayList;
+import java.util.Random;
+
+import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import org.junit.Assert;
-import org.ejml.data.DenseMatrix64F;
 import org.junit.Test;
+
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePoint2d;
@@ -15,9 +19,6 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.exceptions.NoConvergenceException;
 import us.ihmc.tools.testing.JUnitTools;
-
-import java.util.ArrayList;
-import java.util.Random;
 
 public class ICPOptimizationSolverTest extends ICPOptimizationSolver
 {
@@ -834,11 +835,6 @@ public class ICPOptimizationSolverTest extends ICPOptimizationSolver
 
    private static final CapturePointPlannerParameters icpPlannerParameters = new CapturePointPlannerParameters()
    {
-      @Override public double getDoubleSupportInitialTransferDuration()
-      {
-         return 1.0;
-      }
-
       @Override public double getEntryCMPInsideOffset()
       {
          return 0;

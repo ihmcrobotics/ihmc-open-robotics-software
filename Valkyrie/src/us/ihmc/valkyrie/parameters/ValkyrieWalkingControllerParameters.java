@@ -760,6 +760,13 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
 
    /** @inheritDoc */
    @Override
+   public double getDefaultInitialTransferTime()
+   {
+      return (target == DRCRobotModel.RobotTarget.REAL_ROBOT) ? 2.0 : 1.0;
+   }
+
+   /** @inheritDoc */
+   @Override
    public double getSpineYawLimit()
    {
       return Math.PI / 4.0;

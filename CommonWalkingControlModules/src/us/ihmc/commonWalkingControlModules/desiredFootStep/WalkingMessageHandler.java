@@ -73,11 +73,23 @@ public class WalkingMessageHandler
 
    private final FootstepListVisualizer footstepListVisualizer;
 
+   private final DoubleYoVariable yoTime;
+   private final DoubleYoVariable footstepDataListRecievedTime = new DoubleYoVariable("footstepDataListRecievedTime", registry);
+
    public WalkingMessageHandler(double defaultTransferTime, double defaultSwingTime, double defaultInitialTransferTime, SideDependentList<? extends ContactablePlaneBody> contactableFeet,
          StatusMessageOutputManager statusOutputManager, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
    {
+      this(defaultTransferTime, defaultSwingTime, defaultInitialTransferTime, contactableFeet, statusOutputManager, null, yoGraphicsListRegistry, parentRegistry);
+   }
+
+   public WalkingMessageHandler(double defaultTransferTime, double defaultSwingTime, double defaultInitialTransferTime, SideDependentList<? extends ContactablePlaneBody> contactableFeet,
+         StatusMessageOutputManager statusOutputManager, DoubleYoVariable yoTime, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
+   {
       this.contactableFeet = contactableFeet;
       this.statusOutputManager = statusOutputManager;
+
+      this.yoTime = yoTime;
+      footstepDataListRecievedTime.setToNaN();
 
       this.defaultTransferTime.set(defaultTransferTime);
       this.finalTransferTime.set(defaultTransferTime);
@@ -118,6 +130,8 @@ public class WalkingMessageHandler
             currentFootstepIndex.set(0);
             clearFootTrajectory();
             currentNumberOfFootsteps.set(command.getNumberOfFootsteps());
+            if (yoTime != null)
+               footstepDataListRecievedTime.set(yoTime.getDoubleValue());
             break;
          case QUEUE:
             currentNumberOfFootsteps.add(command.getNumberOfFootsteps());
@@ -151,7 +165,9 @@ public class WalkingMessageHandler
          upcomingFootstepTimings.add(newFootstepTiming);
       }
 
-      checkTimings(upcomingFootstepTimings);
+      if (!checkTimings(upcomingFootstepTimings))
+         clearFootsteps();
+
       updateVisualization();
    }
 
@@ -584,14 +600,19 @@ public class WalkingMessageHandler
             timing.setTimings(defaultSwingTime.getDoubleValue(), defaultTransferTime.getDoubleValue());
       }
       if (footstep.hasAbsoluteTime())
-         timing.setAbsoluteTime(timing.getSwingStartTime());
+         timing.setAbsoluteTime(footstep.getSwingStartTime(), footstepDataListRecievedTime.getDoubleValue());
       return timing;
    }
 
-   private void checkTimings(List<FootstepTiming> upcomingFootstepTimings)
+   private boolean checkTimings(List<FootstepTiming> upcomingFootstepTimings)
    {
+      // TODO: This is somewhat duplicated in the PacketValidityChecker.
+      // The reason it has to be here is that this also checks that the timings are monotonically increasing if messages
+      // are queued. It also rejects the message if this class was not created with time in which case absolute footstep
+      // timings can not be executed.
+
       if (upcomingFootstepTimings.isEmpty())
-         return;
+         return true;
 
       boolean timingsValid = upcomingFootstepTimings.get(0).hasAbsoluteTime();
       boolean atLeastOneFootstepHadTiming = upcomingFootstepTimings.get(0).hasAbsoluteTime();
@@ -613,8 +634,15 @@ public class WalkingMessageHandler
       if (atLeastOneFootstepHadTiming && !timingsValid)
       {
          PrintTools.warn("Recieved footstep data with invalid timings. Using swing and transfer times instead.");
-         for (int footstepIdx = 1; footstepIdx < upcomingFootstepTimings.size(); footstepIdx++)
-            upcomingFootstepTimings.get(footstepIdx).removeAbsoluteTime();
+         return false;
       }
+
+      if (atLeastOneFootstepHadTiming && yoTime == null)
+      {
+         PrintTools.warn("Recieved absolute footstep timings but " + getClass().getSimpleName() + " was created with no yoTime.");
+         return false;
+      }
+
+      return true;
    }
 }
