@@ -10,6 +10,7 @@ import javax.vecmath.Quat4d;
 
 import org.junit.Test;
 
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -17,13 +18,12 @@ import us.ihmc.robotics.math.QuaternionCalculus;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.ScrewTestTools.RandomFloatingChain;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public class TwistCalculatorTest
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.01)
    @Test(timeout = 30000)
    public void testWithChainComposedOfPrismaticJoints() throws Exception
    {
@@ -60,7 +60,7 @@ public class TwistCalculatorTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.01)
    @Test(timeout = 30000)
    public void testWithChainComposedOfRevoluteJointsAssertAngularVelocityOnly() throws Exception
    {
@@ -99,7 +99,7 @@ public class TwistCalculatorTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.02)
    @Test(timeout = 30000)
    public void testWithTreeComposedOfPrismaticJoints() throws Exception
    {
@@ -145,7 +145,7 @@ public class TwistCalculatorTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testWithTreeComposedOfRevoluteJointsAssertAngularVelocity() throws Exception
    {
@@ -193,7 +193,7 @@ public class TwistCalculatorTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.01)
    @Test(timeout = 30000)
    public void testWithChainRobotAgainstFiniteDifference() throws Exception
    {
@@ -239,7 +239,7 @@ public class TwistCalculatorTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.03)
    @Test(timeout = 30000)
    public void testWithTreeRobotAgainstFiniteDifference() throws Exception
    {
@@ -285,7 +285,7 @@ public class TwistCalculatorTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.05)
    @Test(timeout = 30000)
    public void testWithFloatingJointRobotAgainstFiniteDifference() throws Exception
    {
@@ -344,6 +344,79 @@ public class TwistCalculatorTest
       }
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 1.4)
+   @Test(timeout = 30000)
+   public void testRelativeTwistWithFloatingJointRobotAgainstFiniteDifference() throws Exception
+   {
+      Random random = new Random(435345L);
+
+      int numberOfRevoluteJoints = 100;
+      RandomFloatingChain floatingChain = new RandomFloatingChain(random, numberOfRevoluteJoints);
+      SixDoFJoint floatingJoint = floatingChain.getRootJoint();
+      List<RevoluteJoint> revoluteJoints = floatingChain.getRevoluteJoints();
+      List<InverseDynamicsJoint> joints = floatingChain.getInverseDynamicsJoints();
+      List<InverseDynamicsJoint> jointsInFuture = Arrays.asList(ScrewTools.cloneJointPath(joints.toArray(new InverseDynamicsJoint[numberOfRevoluteJoints + 1])));
+      SixDoFJoint floatingJointInFuture = (SixDoFJoint) jointsInFuture.get(0);
+      List<RevoluteJoint> revoluteJointsInFuture = ScrewTools.filterJoints(jointsInFuture, RevoluteJoint.class);
+
+      TwistCalculator twistCalculator = new TwistCalculator(worldFrame, joints.get(0).getPredecessor());
+
+      double dt = 1.0e-8;
+
+      for (int i = 0; i < 50; i++)
+      {
+         floatingJoint.setRotation(RandomTools.generateRandomQuaternion(random));
+         floatingJoint.setPosition(RandomTools.generateRandomPoint3d(random, -10.0, 10.0));
+         Twist floatingJointTwist = Twist.generateRandomTwist(random, floatingJoint.getFrameAfterJoint(), floatingJoint.getFrameBeforeJoint(), floatingJoint.getFrameAfterJoint());
+         floatingJoint.setJointTwist(floatingJointTwist);
+
+         floatingJointInFuture.setJointPositionVelocityAndAcceleration(floatingJoint);
+         ScrewTestTools.integrateVelocities(floatingJointInFuture, dt);
+
+         ScrewTestTools.setRandomPositions(revoluteJoints, random, -1.0, 1.0);
+         ScrewTestTools.setRandomVelocities(revoluteJoints, random, -1.0, 1.0);
+
+         for (int jointIndex = 0; jointIndex < numberOfRevoluteJoints; jointIndex++)
+         {
+            double q = revoluteJoints.get(jointIndex).getQ() + dt * revoluteJoints.get(jointIndex).getQd();
+            revoluteJointsInFuture.get(jointIndex).setQ(q);
+         }
+
+         floatingJoint.updateFramesRecursively();
+         floatingJointInFuture.updateFramesRecursively();
+
+         twistCalculator.compute();
+
+         for (int jointIndex = 0; jointIndex < numberOfRevoluteJoints + 1; jointIndex++)
+         {
+            InverseDynamicsJoint joint = joints.get(jointIndex);
+            RigidBody body = joint.getSuccessor();
+            Twist actualTwist = new Twist();
+            twistCalculator.getTwistOfBody(actualTwist, body);
+
+            ReferenceFrame bodyFrame = body.getBodyFixedFrame();
+            ReferenceFrame bodyFrameInFuture = jointsInFuture.get(jointIndex).getSuccessor().getBodyFixedFrame();
+            Twist expectedTwist = computeExpectedTwistByFiniteDifference(dt, bodyFrame, bodyFrameInFuture);
+
+            assertTwistEquals(expectedTwist, actualTwist, 1.0e-5);
+
+            // Assert relative twist
+            for (int baseJointIndex = 0; baseJointIndex < numberOfRevoluteJoints + 1; baseJointIndex++)
+            {
+               RigidBody base = joints.get(baseJointIndex).getSuccessor();
+               Twist actualRelativeTwist = new Twist();
+               twistCalculator.getRelativeTwist(actualRelativeTwist, base, body);
+
+               ReferenceFrame baseFrame = base.getBodyFixedFrame();
+               ReferenceFrame baseFrameInFuture = jointsInFuture.get(baseJointIndex).getSuccessor().getBodyFixedFrame();
+               Twist expectedRelativeTwist = computeExpectedRelativeTwistByFiniteDifference(dt, bodyFrame, bodyFrameInFuture, baseFrame, baseFrameInFuture);
+
+               assertTwistEquals(expectedRelativeTwist, actualRelativeTwist, 1.0e-5);
+            }
+         }
+      }
+   }
+
    public static void assertTwistEquals(Twist expectedTwist, Twist actualTwist, double epsilon) throws AssertionError
    {
       try
@@ -360,16 +433,29 @@ public class TwistCalculatorTest
    {
       Twist expectedTwist = new Twist(bodyFrame, worldFrame, bodyFrame);
 
-      FramePoint bodyPosition = new FramePoint(bodyFrame);
-      bodyPosition.changeFrame(worldFrame);
-      FramePoint bodyPositionInFuture = new FramePoint(bodyFrameInFuture);
-      bodyPositionInFuture.changeFrame(worldFrame);
-      
-      FrameVector bodyLinearVelocity = new FrameVector(worldFrame);
-      bodyLinearVelocity.subAndScale(1.0 / dt, bodyPositionInFuture, bodyPosition);
-      bodyLinearVelocity.changeFrame(bodyFrame);
+      FrameVector bodyLinearVelocity = computeLinearVelocityByFiniteDifference(dt, bodyFrame, bodyFrameInFuture);
       expectedTwist.setLinearPart(bodyLinearVelocity);
 
+      FrameVector bodyAngularVelocity = computeAngularVelocityByFiniteDifference(dt, bodyFrame, bodyFrameInFuture);
+      expectedTwist.setAngularPart(bodyAngularVelocity);
+      return expectedTwist;
+   }
+
+   private Twist computeExpectedRelativeTwistByFiniteDifference(double dt, ReferenceFrame bodyFrame, ReferenceFrame bodyFrameInFuture, ReferenceFrame baseFrame, ReferenceFrame baseFrameInFuture)
+   {
+      Twist bodyTwist = computeExpectedTwistByFiniteDifference(dt, bodyFrame, bodyFrameInFuture);
+      bodyTwist.changeFrame(bodyFrame);
+      Twist baseTwist = computeExpectedTwistByFiniteDifference(dt, baseFrame, baseFrameInFuture);
+      baseTwist.changeFrame(bodyFrame);
+
+      Twist relativeTwist = new Twist(bodyFrame, baseFrame, bodyFrame);
+      relativeTwist.set(bodyTwist);
+      relativeTwist.sub(baseTwist);
+      return relativeTwist;
+   }
+
+   private FrameVector computeAngularVelocityByFiniteDifference(double dt, ReferenceFrame bodyFrame, ReferenceFrame bodyFrameInFuture)
+   {
       FrameOrientation bodyOrientation = new FrameOrientation(bodyFrame);
       bodyOrientation.changeFrame(worldFrame);
       FrameOrientation bodyOrientationInFuture = new FrameOrientation(bodyFrameInFuture);
@@ -382,7 +468,37 @@ public class TwistCalculatorTest
       quaternionCalculus.computeAngularVelocityInWorldFrame(bodyOrientation.getQuaternion(), qDot, bodyAngularVelocity.getVector());
 
       bodyAngularVelocity.changeFrame(bodyFrame);
-      expectedTwist.setAngularPart(bodyAngularVelocity);
-      return expectedTwist;
+      return bodyAngularVelocity;
+   }
+
+   private FrameVector computeLinearVelocityByFiniteDifference(double dt, ReferenceFrame bodyFrame, ReferenceFrame bodyFrameInFuture)
+   {
+      FramePoint bodyPosition = new FramePoint(bodyFrame);
+      bodyPosition.changeFrame(worldFrame);
+      FramePoint bodyPositionInFuture = new FramePoint(bodyFrameInFuture);
+      bodyPositionInFuture.changeFrame(worldFrame);
+      
+      FrameVector bodyLinearVelocity = new FrameVector(worldFrame);
+      bodyLinearVelocity.subAndScale(1.0 / dt, bodyPositionInFuture, bodyPosition);
+      bodyLinearVelocity.changeFrame(bodyFrame);
+      return bodyLinearVelocity;
+   }
+
+   public static void main(String[] args)
+   {
+      Random random = new Random();
+      int numberOfJoints = 5;
+      List<RevoluteJoint> randomChainRobot = ScrewTestTools.createRandomChainRobot(numberOfJoints, random);
+      TwistCalculator twistCalculator = new TwistCalculator(worldFrame, randomChainRobot.get(0).getPredecessor());
+
+      Twist dummyTwist = new Twist();
+
+      while (true)
+      {
+         twistCalculator.compute();
+
+         for (int i = 0; i < 100; i++)
+            twistCalculator.getTwistOfBody(dummyTwist, randomChainRobot.get(random.nextInt(numberOfJoints)).getSuccessor());
+      }
    }
 }

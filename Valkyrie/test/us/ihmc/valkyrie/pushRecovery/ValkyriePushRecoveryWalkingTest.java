@@ -4,13 +4,12 @@ import org.junit.Test;
 
 import us.ihmc.avatar.DRCPushRecoveryWalkingTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.robotics.controllers.ControllerFailureException;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
-import us.ihmc.tools.continuousIntegration.IntegrationCategory;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 @ContinuousIntegrationPlan(categories = {IntegrationCategory.SLOW, IntegrationCategory.VIDEO})
 public class ValkyriePushRecoveryWalkingTest extends DRCPushRecoveryWalkingTest
@@ -26,76 +25,67 @@ public class ValkyriePushRecoveryWalkingTest extends DRCPushRecoveryWalkingTest
    {
       return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.VALKYRIE);
    }
-   
-   // cropped to 1.5 - 6.3 seconds
-   @Override
-   @ContinuousIntegrationTest(estimatedDuration = 50.0, categoriesOverride = IntegrationCategory.EXCLUDE)
-   @Test(timeout = 300000)
-   public void testForVideo() throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
-   {
-      super.testForVideo();
-   }
-   
+
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 26.7)
    @Test(timeout = 130000)
-   public void testPushLeftEarlySwing() throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
+   public void testPushLeftEarlySwing() throws SimulationExceededMaximumTimeException
    {
       super.testPushLeftEarlySwing();
    }
-   
+
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 30.2)
    @Test(timeout = 150000)
-   public void testPushLeftInitialTransferState() throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
+   public void testPushLeftInitialTransferState() throws SimulationExceededMaximumTimeException
    {
       super.testPushLeftInitialTransferState();
    }
-   
+
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 44.5)
    @Test(timeout = 220000)
-   public void testPushRightInitialTransferState() throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
+   public void testPushRightInitialTransferState() throws SimulationExceededMaximumTimeException
    {
       super.testPushRightInitialTransferState();
    }
-   
+
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 44.5)
    @Test(timeout = 220000)
-   public void testPushRightLateSwing() throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
+   public void testPushRightLateSwing() throws SimulationExceededMaximumTimeException
    {
       super.testPushRightLateSwing();
    }
-   
+
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 44.5)
    @Test(timeout = 220000)
-   public void testPushRightThenLeftMidSwing() throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
+   public void testPushRightThenLeftMidSwing() throws SimulationExceededMaximumTimeException
    {
       super.testPushRightThenLeftMidSwing();
    }
-   
+
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 31.2)
    @Test(timeout = 160000)
-   public void testPushRightTransferState() throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
+   public void testPushRightTransferState() throws SimulationExceededMaximumTimeException
    {
       super.testPushRightTransferState();
    }
-   
+
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 29.3)
    @Test(timeout = 150000)
-   public void testPushTowardsTheBack() throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
+   public void testPushTowardsTheBack() throws SimulationExceededMaximumTimeException
    {
       super.testPushTowardsTheBack();
    }
-   
+
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 29.0)
    @Test(timeout = 150000)
-   public void testPushTowardsTheFront() throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
+   public void testPushTowardsTheFront() throws SimulationExceededMaximumTimeException
    {
       super.testPushTowardsTheFront();
    }

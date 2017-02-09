@@ -57,6 +57,7 @@ import us.ihmc.robotics.dataStructures.registry.NameSpace;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariableList;
+import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateMachinesJPanel;
 import us.ihmc.robotics.time.GlobalTimer;
 import us.ihmc.robotics.time.RealTimeRateEnforcer;
@@ -416,7 +417,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
          this.dynamicGraphicMenuManager = null;
       }
 
-      mySimulation = simulation;
+      this.mySimulation = simulation;
       this.myDataBuffer = mySimulation.getDataBuffer();
       this.simulationSynchronizer = mySimulation.getSimulationSynchronizer();
 
@@ -1953,6 +1954,54 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       }
 
       jFrame.repaint();
+   }
+
+   /**
+    * Adds a robot to the simulation using the given RobotDescription
+    * @param robotDescription
+    * @return Robot that was created and added.
+    */
+   public Robot addRobot(RobotDescription robotDescription)
+   {
+      RobotFromDescription robot = new RobotFromDescription(robotDescription);
+      addRobot(robot);
+      return robot; 
+   }
+
+   /**
+    * Adds a robot to this simulation.
+    * @param robot
+    */
+   public void addRobot(Robot robot)
+   {
+      //TODO: Clean this up and clean up setRobot too.
+      
+      YoVariableRegistry robotsYoVariableRegistry = robot.getRobotsYoVariableRegistry();
+      YoVariableRegistry parentRegistry = robotsYoVariableRegistry.getParent();
+      if (parentRegistry != null)
+      {
+         throw new RuntimeException("SimulationConstructionSet.addRobot(). Trying to add robot registry as child to root registry, but it already has a parent registry: " + parentRegistry);
+      }
+
+      boolean notifyListeners = false; // TODO: This is very hackish. If listeners are on, then the variables will be added to the data buffer. But mySimulation.setRobots() in a few lines does that...
+      rootRegistry.addChild(robotsYoVariableRegistry, notifyListeners);
+
+      mySimulation.addRobot(robot);
+
+      // recomputeTiming();
+      this.robots = mySimulation.getRobots();
+
+      if (myGUI != null)
+      {
+         myGUI.addRobot(robot);
+
+         ArrayList<RewoundListener> simulationRewoundListeners = robot.getSimulationRewoundListeners();
+         for (RewoundListener simulationRewoundListener : simulationRewoundListeners)
+         {
+            myDataBuffer.attachSimulationRewoundListener(simulationRewoundListener);
+         }
+         // *** JJC a add variable search panel was removed from here.
+      }
    }
 
    /**

@@ -53,6 +53,8 @@ dependencies {
     compile "org.boofcv:io:0.24.1"
     compile "org.boofcv:recognition:0.24.1"
     compile "us.ihmc:IHMCNativeLibraryLoader:1.0"
+    
+    testCompile group: 'us.ihmc', name: 'IHMCContinuousIntegrationFramework', version: '0.9.1'
 
     compile ihmc.getProjectDependency(":IHMCRobotModels")
 	compile ihmc.getProjectDependency(":IHMCCommunication")

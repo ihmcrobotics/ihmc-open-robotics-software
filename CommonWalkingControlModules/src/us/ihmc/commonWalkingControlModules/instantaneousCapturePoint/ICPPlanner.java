@@ -1,6 +1,9 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint;
 
-import static us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.CapturePointTools.*;
+import static us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.CapturePointTools.computeDesiredCapturePointPosition;
+import static us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.CapturePointTools.computeDesiredCapturePointVelocity;
+import static us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.CapturePointTools.computeDesiredCornerPointsDoubleSupport;
+import static us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.CapturePointTools.computeDesiredCornerPointsSingleSupport;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,12 +13,13 @@ import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerPar
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.CapturePointTools;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
+import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -39,7 +43,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 
 public class ICPPlanner
 {
-   private static final boolean VISUALIZE = false;
+   private static final boolean VISUALIZE = true;
    private static final double ICP_CORNER_POINT_SIZE = 0.004;
 
    protected final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
@@ -51,10 +55,7 @@ public class ICPPlanner
    private final BooleanYoVariable isInitialTransfer = new BooleanYoVariable(namePrefix + "IsInitialTransfer", registry);
    private final BooleanYoVariable isDoubleSupport = new BooleanYoVariable(namePrefix + "IsDoubleSupport", registry);
    private final DoubleYoVariable timeInCurrentState = new DoubleYoVariable(namePrefix + "TimeInCurrentState", registry);
-   private final DoubleYoVariable defaultTransferTime = new DoubleYoVariable(namePrefix + "DefaultTransferTime", registry);
-   private final DoubleYoVariable defaultSwingTime = new DoubleYoVariable(namePrefix + "DefaultSwingTime", registry);
    private final DoubleYoVariable minSwingTime = new DoubleYoVariable(namePrefix + "MinSwingTime", registry);
-   private final DoubleYoVariable defaultInitialTransferTime = new DoubleYoVariable(namePrefix + "DefaultInitialTransferTime", registry);
    private final DoubleYoVariable finalTransferTime = new DoubleYoVariable(namePrefix + "FinalTransferTime", registry);
    private final DoubleYoVariable transferTimeSplitFraction = new DoubleYoVariable(namePrefix + "TransferTimeSplitFraction", registry);
    private final DoubleYoVariable initialTime = new DoubleYoVariable(namePrefix + "InitialTime", registry);
@@ -119,7 +120,6 @@ public class ICPPlanner
       icpSingleSupportTrajectoryGenerator.setMaximumSplineDuration(icpPlannerParameters.getMaxDurationForSmoothingEntryToExitCMPSwitch());
       icpSingleSupportTrajectoryGenerator.setMinimumTimeToSpendOnExitCMP(icpPlannerParameters.getMinTimeToSpendOnExitCMPInSingleSupport());
 
-      defaultInitialTransferTime.set(icpPlannerParameters.getDoubleSupportInitialTransferDuration());
       numberFootstepsToConsider.set(icpPlannerParameters.getNumberOfFootstepsToConsider());
       transferTimeSplitFraction.set(icpPlannerParameters.getDoubleSupportSplitFraction());
       swingTimeSplitFraction.set(icpPlannerParameters.getTimeSpentOnExitCMPInPercentOfStepTime());
@@ -239,31 +239,15 @@ public class ICPPlanner
          transferToSide.set(robotSide.getOppositeSide());
    }
 
-   public void addFootstepToPlan(Footstep footstep)
+   public void addFootstepToPlan(Footstep footstep, FootstepTiming timing)
    {
       if (footstep == null)
          return;
 
       referenceCMPsCalculator.addUpcomingFootstep(footstep);
-
-      boolean hasTimings = footstep.hasTimings();
       int footstepIndex = referenceCMPsCalculator.getNumberOfFootstepRegistered() - 1;
-
-      if (hasTimings)
-      {
-         swingTimes.get(footstepIndex).set(footstep.getSwingTime());
-         transferTimes.get(footstepIndex).set(footstep.getTransferTime());
-      }
-      else
-      {
-         swingTimes.get(footstepIndex).setToNaN();
-
-         boolean isFirstFootstep = referenceCMPsCalculator.getNumberOfFootstepRegistered() == 1;
-         if (isStanding.getBooleanValue() && isFirstFootstep)
-            transferTimes.get(0).set(defaultInitialTransferTime.getDoubleValue());
-         else
-            transferTimes.get(footstepIndex).setToNaN();
-      }
+      swingTimes.get(footstepIndex).set(timing.getSwingTime());
+      transferTimes.get(footstepIndex).set(timing.getTransferTime());
    }
 
    public void setDesiredCapturePointState(FramePoint currentDesiredCapturePointPosition, FrameVector currentDesiredCapturePointVelocity)
@@ -314,10 +298,7 @@ public class ICPPlanner
       isStanding.set(true);
       isDoubleSupport.set(true);
       this.initialTime.set(initialTime);
-      if (finalTransferTime.isNaN())
-         transferTimes.get(0).set(defaultTransferTime.getDoubleValue());
-      else
-         transferTimes.get(0).set(finalTransferTime.getDoubleValue());
+      transferTimes.get(0).set(finalTransferTime.getDoubleValue());
       updateTransferPlan();
    }
 
@@ -325,6 +306,11 @@ public class ICPPlanner
    {
       isDoubleSupport.set(true);
       this.initialTime.set(initialTime);
+
+      int numberOfFootstepRegistered = referenceCMPsCalculator.getNumberOfFootstepRegistered();
+      if (numberOfFootstepRegistered < numberFootstepsToConsider.getIntegerValue())
+         transferTimes.get(numberOfFootstepRegistered).set(finalTransferTime.getDoubleValue());
+
       updateTransferPlan();
    }
 
@@ -338,8 +324,6 @@ public class ICPPlanner
       ReferenceFrame transferToSoleFrame = soleZUpFrames.get(transferToSide);
 
       icpSingleSupportTrajectoryGenerator.hideVisualization();
-
-      setUnknownTimesToDefault();
 
       referenceCMPsCalculator.setUseTwoCMPsPerSupport(useTwoConstantCMPsPerSupport.getBooleanValue());
       referenceCMPsCalculator.computeReferenceCMPsStartingFromDoubleSupport(isStanding.getBooleanValue(), transferToSide);
@@ -451,14 +435,16 @@ public class ICPPlanner
       isDoubleSupport.set(false);
       this.initialTime.set(initialTime);
 
+      int numberOfFootstepRegistered = referenceCMPsCalculator.getNumberOfFootstepRegistered();
+      if (numberOfFootstepRegistered < numberFootstepsToConsider.getIntegerValue())
+         transferTimes.get(numberOfFootstepRegistered).set(finalTransferTime.getDoubleValue());
+
       updateSingleSupportPlan();
    }
 
    private void updateSingleSupportPlan()
    {
       RobotSide supportSide = this.supportSide.getEnumValue();
-
-      setUnknownTimesToDefault();
 
       referenceCMPsCalculator.setUseTwoCMPsPerSupport(useTwoConstantCMPsPerSupport.getBooleanValue());
       referenceCMPsCalculator.computeReferenceCMPsStartingFromSingleSupport(supportSide);
@@ -504,17 +490,6 @@ public class ICPPlanner
       entryCornerPoints.get(0).changeFrame(supportSoleFrame);
       singleSupportFinalICP.changeFrame(worldFrame);
       changeFrameOfRemainingCornerPoints(1, worldFrame);
-   }
-
-   private void setUnknownTimesToDefault()
-   {
-      for (int i = 0; i < swingTimes.size(); i++)
-      {
-         if (swingTimes.get(i).isNaN())
-            swingTimes.get(i).set(defaultSwingTime.getDoubleValue());
-         if (transferTimes.get(i).isNaN())
-            transferTimes.get(i).set(defaultTransferTime.getDoubleValue());
-      }
    }
 
    private void setCornerPointsToNaN()
@@ -570,7 +545,8 @@ public class ICPPlanner
       // Ensure that we don't shift the time by more than what's remaining
       deltaTimeToBeAccounted = Math.min(deltaTimeToBeAccounted, computeAndReturnTimeRemaining(time));
       // Ensure the time shift won't imply a single support that's crazy short
-      deltaTimeToBeAccounted = Math.min(deltaTimeToBeAccounted, defaultSwingTime.getDoubleValue() - minSwingTime.getDoubleValue());
+      double currentSwingTime = swingTimes.get(0).getDoubleValue();
+      deltaTimeToBeAccounted = Math.min(deltaTimeToBeAccounted, currentSwingTime - minSwingTime.getDoubleValue());
 
       initialTime.sub(deltaTimeToBeAccounted);
    }
@@ -656,7 +632,8 @@ public class ICPPlanner
          referenceCMPsCalculator.getNextEntryCMP(tempConstantCMP);
          singleSupportInitialICP.getFrameTupleIncludingFrame(tempICP);
          tempICP.changeFrame(worldFrame);
-         timeInCurrentState = MathTools.clipToMinMax(timeInCurrentState, 0.0, defaultSwingTime.getDoubleValue());
+         double currentSwingTime = swingTimes.get(0).getDoubleValue();
+         timeInCurrentState = MathTools.clipToMinMax(timeInCurrentState, 0.0, currentSwingTime);
          CapturePointTools.computeDesiredCapturePointPosition(omega0.getDoubleValue(), timeInCurrentState, tempICP, tempConstantCMP, desiredCapturePointPosition);
          CapturePointTools.computeDesiredCapturePointVelocity(omega0.getDoubleValue(), timeInCurrentState, tempICP, tempConstantCMP, desiredCapturePointVelocity);
          CapturePointTools.computeDesiredCapturePointAcceleration(omega0.getDoubleValue(), timeInCurrentState, tempICP, tempConstantCMP, desiredCapturePointAcceleration);
@@ -781,39 +758,14 @@ public class ICPPlanner
       return remainingTime.getDoubleValue();
    }
 
-   public void setDefaultInitialDoubleSupportTime(double time)
-   {
-      defaultInitialTransferTime.set(time);
-   }
-
-   public void setDefaultDoubleSupportTime(double time)
-   {
-      defaultTransferTime.set(time);
-   }
-
-   public void setDefaultSingleSupportTime(double time)
-   {
-      defaultSwingTime.set(time);
-   }
-
    public void setFinalTransferTime(double time)
    {
       finalTransferTime.set(time);
    }
 
-   public void clearFinalTransferTime()
-   {
-      finalTransferTime.setToNaN();
-   }
-
    public void setMinimumSingleSupportTimeForDisturbanceRecovery(double minTime)
    {
       minSwingTime.set(minTime);
-   }
-
-   public double getDefaultInitialTransferTime()
-   {
-      return defaultInitialTransferTime.getDoubleValue();
    }
 
    public void setTransferTimeSplitFraction(double transferTimeSplitFraction)
