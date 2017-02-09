@@ -237,7 +237,7 @@ public abstract class DRCPushRecoveryTest
 
       // push parameters:
       Vector3d forceDirection = new Vector3d(-1.0, 0.0, 0.0);
-      double magnitude = 80.0 * getForceScale();
+      double magnitude = 160.0 * getForceScale();
       double duration = 3.0;
       pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
 
