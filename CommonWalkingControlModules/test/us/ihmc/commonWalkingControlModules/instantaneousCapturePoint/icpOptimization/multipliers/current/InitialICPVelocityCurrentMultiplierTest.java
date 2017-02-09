@@ -76,12 +76,11 @@ public class InitialICPVelocityCurrentMultiplierTest
          double doubleSupportDuration = doubleSupportDurations.get(0).getDoubleValue();
 
          double timeInCurrentState = random.nextDouble() * doubleSupportDuration;
-         double timeRemaining = doubleSupportDuration - timeInCurrentState;
 
          positionMatrix.setSegmentDuration(doubleSupportDuration);
          velocityMatrix.setSegmentDuration(doubleSupportDuration);
-         positionMatrix.update(timeRemaining);
-         velocityMatrix.update(timeRemaining);
+         positionMatrix.update(timeInCurrentState);
+         velocityMatrix.update(timeInCurrentState);
 
          initialICPMatrix.compute();
 
@@ -152,12 +151,11 @@ public class InitialICPVelocityCurrentMultiplierTest
          double doubleSupportDuration = doubleSupportDurations.get(0).getDoubleValue();
 
          double timeInCurrentState = random.nextDouble() * doubleSupportDuration;
-         double timeRemaining = doubleSupportDuration - timeInCurrentState;
 
          positionMatrix.setSegmentDuration(doubleSupportDuration);
          velocityMatrix.setSegmentDuration(doubleSupportDuration);
-         positionMatrix.update(timeRemaining);
-         velocityMatrix.update(timeRemaining);
+         positionMatrix.update(timeInCurrentState);
+         velocityMatrix.update(timeInCurrentState);
 
          initialICPMatrix.compute();
 

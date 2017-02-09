@@ -82,12 +82,11 @@ public class EntryCMPCurrentMultiplierTest
          double doubleSupportDuration = doubleSupportDurations.get(0).getDoubleValue();
 
          double timeInCurrentState = random.nextDouble() * doubleSupportDuration;
-         double timeRemaining = doubleSupportDuration - timeInCurrentState;
 
          positionMatrix.setSegmentDuration(doubleSupportDuration);
          velocityMatrix.setSegmentDuration(doubleSupportDuration);
-         positionMatrix.update(timeRemaining);
-         velocityMatrix.update(timeRemaining);
+         positionMatrix.update(timeInCurrentState);
+         velocityMatrix.update(timeInCurrentState);
 
          entryCMPMatrix.compute(doubleSupportDurations, omega);
 
@@ -163,12 +162,11 @@ public class EntryCMPCurrentMultiplierTest
          double doubleSupportDuration = doubleSupportDurations.get(0).getDoubleValue();
 
          double timeInCurrentState = random.nextDouble() * doubleSupportDuration;
-         double timeRemaining = doubleSupportDuration - timeInCurrentState;
 
          positionMatrix.setSegmentDuration(doubleSupportDuration);
          velocityMatrix.setSegmentDuration(doubleSupportDuration);
-         positionMatrix.update(timeRemaining);
-         velocityMatrix.update(timeRemaining);
+         positionMatrix.update(timeInCurrentState);
+         velocityMatrix.update(timeInCurrentState);
 
          entryCMPMatrix.compute(doubleSupportDurations, omega);
 
@@ -325,14 +323,12 @@ public class EntryCMPCurrentMultiplierTest
          boolean useTwoCMPs = true;
 
          double timeInCurrentState = random.nextDouble() * (endOfSpline - startOfSpline) + startOfSpline;
-         double timeRemaining = singleSupportDuration - timeInCurrentState;
 
          cubicMatrix.setSegmentDuration(endOfSpline - startOfSpline);
          cubicDerivativeMatrix.setSegmentDuration(endOfSpline - startOfSpline);
 
-         double endingSegmentDuration = singleSupportDuration - endOfSpline;
-         cubicMatrix.update(timeRemaining - endingSegmentDuration);
-         cubicDerivativeMatrix.update(timeRemaining - endingSegmentDuration);
+         cubicMatrix.update(timeInCurrentState - startOfSpline);
+         cubicDerivativeMatrix.update(timeInCurrentState - startOfSpline);
 
          entryCMPMatrix.compute(omega);
          CommonOps.mult(cubicMatrix, entryCMPMatrix, positionMatrixOut);
