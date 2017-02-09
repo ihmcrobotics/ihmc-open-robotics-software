@@ -51,7 +51,7 @@ public class SimpleSE3TrajectoryPointTest
       double time = 3.4;
       Point3d position = new Point3d(1.0, 2.1, 3.7);
       TransformableQuat4d orientation = new TransformableQuat4d(new Quat4d(0.1, 0.22, 0.34, 0.56));
-      orientation.normalizeAndLimitToPiMinusPi();
+      orientation.normalize();
 
       Vector3d linearVelocity = new Vector3d(-0.4, 1.2, 3.3);
       Vector3d angularVelocity = new Vector3d(1.7, 8.4, 2.2);

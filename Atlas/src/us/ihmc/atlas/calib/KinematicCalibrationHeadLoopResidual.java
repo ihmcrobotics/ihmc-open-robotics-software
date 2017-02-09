@@ -1,29 +1,23 @@
 package us.ihmc.atlas.calib;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import boofcv.abst.fiducial.calib.CalibrationDetectorChessboard;
+import boofcv.alg.geo.PerspectiveOps;
+import boofcv.struct.calib.IntrinsicParameters;
+import georegression.struct.point.Point2D_F64;
+import org.ddogleg.optimization.functions.FunctionNtoM;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotModels.FullRobotModel;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.partNames.LimbName;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
-
-import org.ddogleg.optimization.functions.FunctionNtoM;
-
-import boofcv.abst.calib.PlanarCalibrationDetector;
-import boofcv.alg.geo.PerspectiveOps;
-import boofcv.struct.calib.IntrinsicParameters;
-import georegression.struct.point.Point2D_F64;
-import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.robotics.partNames.LimbName;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import java.util.*;
 
 /**
  *
@@ -43,7 +37,7 @@ public class KinematicCalibrationHeadLoopResidual implements FunctionNtoM
    Map<String, Double> qoffset = new HashMap<>(), qbuffer = new HashMap<>();
 
    IntrinsicParameters intrinsic;
-   PlanarCalibrationDetector calibGrid;
+   CalibrationDetectorChessboard calibGrid;
 
    // normial orientation of the target.  only rotation around y is optimized
    public static final Matrix3d TARGET_LEFT_ROT = new Matrix3d(
@@ -61,7 +55,7 @@ public class KinematicCalibrationHeadLoopResidual implements FunctionNtoM
    public KinematicCalibrationHeadLoopResidual(FullHumanoidRobotModel fullRobotModel,
                                                boolean isLeft,
                                                IntrinsicParameters intrinsic,
-                                               PlanarCalibrationDetector calibGrid,
+                                               CalibrationDetectorChessboard calibGrid,
                                                ArrayList<Map<String, Object>> qdata,
                                                ArrayList<Map<String, Double>> q)
    {

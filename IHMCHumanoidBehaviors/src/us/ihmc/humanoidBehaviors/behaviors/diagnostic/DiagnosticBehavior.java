@@ -14,6 +14,7 @@ import org.ejml.data.DenseMatrix64F;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.partNames.LimbName;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.ArmTrajectoryBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.ChestTrajectoryBehavior;
@@ -29,7 +30,7 @@ import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SleepBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.TurnInPlaceBehavior;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
-import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
+import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidBehaviors.taskExecutor.ArmTrajectoryTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.ChestOrientationTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.FootTrajectoryTask;
@@ -89,7 +90,6 @@ import us.ihmc.robotics.screwTheory.ScrewTestTools;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.SpatialMotionVector;
 import us.ihmc.robotics.time.TimeTools;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.tools.taskExecutor.NullTask;
 import us.ihmc.tools.taskExecutor.PipeLine;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
@@ -105,7 +105,7 @@ public class DiagnosticBehavior extends AbstractBehavior
    private final PipeLine<AbstractBehavior> pipeLine = new PipeLine<>();
 
    /** FIXME Should have a packet from the controller to let know when it is ready to execute commands. */
-   private final ConcurrentListeningQueue<CapturabilityBasedStatus> inputListeningQueue = new ConcurrentListeningQueue<CapturabilityBasedStatus>();
+   private final ConcurrentListeningQueue<CapturabilityBasedStatus> inputListeningQueue = new ConcurrentListeningQueue<CapturabilityBasedStatus>(40);
    private final BooleanYoVariable diagnosticBehaviorEnabled;
    private final BooleanYoVariable hasControllerWakenUp;
    private final BooleanYoVariable automaticDiagnosticRoutineRequested;
@@ -127,7 +127,7 @@ public class DiagnosticBehavior extends AbstractBehavior
    private final WalkToLocationBehavior walkToLocationBehavior;
    private final PelvisHeightTrajectoryBehavior pelvisHeightTrajectoryBehavior;
    private final TurnInPlaceBehavior turnInPlaceBehavior;
-   
+
    private final SleepBehavior sleepBehavior;
 
    private final DoubleYoVariable yoTime;
@@ -242,7 +242,7 @@ public class DiagnosticBehavior extends AbstractBehavior
    private final DoubleYoVariable bootyShakeTime = new DoubleYoVariable("diagnosticBehaviorButtyShakeTime", registry);
 
    public DiagnosticBehavior(FullHumanoidRobotModel fullRobotModel, EnumYoVariable<RobotSide> supportLeg, HumanoidReferenceFrames referenceFrames,
-         DoubleYoVariable yoTime, BooleanYoVariable yoDoubleSupport, OutgoingCommunicationBridgeInterface outgoingCommunicationBridge,
+         DoubleYoVariable yoTime, BooleanYoVariable yoDoubleSupport, CommunicationBridgeInterface outgoingCommunicationBridge,
          WholeBodyControllerParameters wholeBodyControllerParameters, YoFrameConvexPolygon2d yoSupportPolygon, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       super(outgoingCommunicationBridge);
@@ -408,8 +408,8 @@ public class DiagnosticBehavior extends AbstractBehavior
          currentHandOrientations.put(robotSide, currentHandOrientation);
       }
 
-      this.attachControllerListeningQueue(inputListeningQueue, CapturabilityBasedStatus.class);
-      
+      this.attachNetworkListeningQueue(inputListeningQueue, CapturabilityBasedStatus.class);
+
       sleepBehavior = new SleepBehavior(outgoingCommunicationBridge, yoTime);
    }
 
@@ -450,7 +450,7 @@ public class DiagnosticBehavior extends AbstractBehavior
          FramePoint tempPoint = new FramePoint(hand.getParentJoint().getFrameAfterJoint());
          tempPoint.changeFrame(armJoints[1].getFrameAfterJoint());
          FrameVector tempVector = new FrameVector(tempPoint);
-         MathTools.roundToGivenPrecision(tempVector.getVector(), 1.0e-2);
+         MathTools.floorToGivenPrecision(tempVector.getVector(), 1.0e-2);
          tempVector.normalize();
 
          Vector3d expectedArmZeroConfiguration = new Vector3d(0.0, robotSide.negateIfRightSide(1.0), 0.0);
@@ -462,7 +462,7 @@ public class DiagnosticBehavior extends AbstractBehavior
          else
          {
             AxisAngle4d rotation = new AxisAngle4d();
-            GeometryTools.getRotationBasedOnNormal(rotation, tempVector.getVector(), expectedArmZeroConfiguration);
+            GeometryTools.getAxisAngleFromFirstToSecondVector(expectedArmZeroConfiguration, tempVector.getVector(), rotation);
             armZeroJointAngleConfigurationOffset.setRotation(rotation);
          }
 
@@ -1826,12 +1826,12 @@ public class DiagnosticBehavior extends AbstractBehavior
 
          pipeLine.submitTaskForPallelPipesStage(armTrajectoryBehaviors.get(flyingSide),
                new ArmTrajectoryTask(flyingMessage, armTrajectoryBehaviors.get(flyingSide)));
-         
+
          pipeLine.submitTaskForPallelPipesStage(armTrajectoryBehaviors.get(flyingSide),createSleepTask( sleepTimeBetweenPoses.getDoubleValue()));
-         
-         
-         
-         
+
+
+
+
 
       }
 
@@ -2336,7 +2336,7 @@ public class DiagnosticBehavior extends AbstractBehavior
       else
       {
          pipeLine.submitSingleTaskStage(footPoseTask);
-         pipeLine.submitSingleTaskStage(createSleepTask( sleepTimeBetweenPoses.getDoubleValue()));         
+         pipeLine.submitSingleTaskStage(createSleepTask( sleepTimeBetweenPoses.getDoubleValue()));
       }
    }
 
@@ -2350,7 +2350,7 @@ public class DiagnosticBehavior extends AbstractBehavior
    }
 
    @Override
-   public void initialize()
+   public void onBehaviorEntered()
    {
    }
 
@@ -2709,7 +2709,7 @@ public class DiagnosticBehavior extends AbstractBehavior
             TimeStampedTransform3D timeStampedTransform3D = new TimeStampedTransform3D(pelvisTransformWithOffset, timestamp);
             StampedPosePacket stampedPosePacket = new StampedPosePacket("/pelvis", timeStampedTransform3D, 1.0);
 
-            outgoingCommunicationBridge.sendPacketToController(stampedPosePacket);
+            communicationBridge.sendPacketToController(stampedPosePacket);
 
             previousIcpPacketSentTime.set(yoTime.getDoubleValue());
          }
@@ -2752,34 +2752,11 @@ public class DiagnosticBehavior extends AbstractBehavior
       }
    }
 
-   @Override
-   protected void passReceivedNetworkProcessorObjectToChildBehaviors(Object object)
-   {
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         handTrajectoryBehaviors.get(robotSide).consumeObjectFromNetworkProcessor(object);
-         armTrajectoryBehaviors.get(robotSide).consumeObjectFromNetworkProcessor(object);
-         footstepListBehavior.consumeObjectFromNetworkProcessor(object);
-         walkToLocationBehavior.consumeObjectFromNetworkProcessor(object);
-         turnInPlaceBehavior.consumeObjectFromNetworkProcessor(object);
-      }
-   }
+
+
 
    @Override
-   protected void passReceivedControllerObjectToChildBehaviors(Object object)
-   {
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         handTrajectoryBehaviors.get(robotSide).consumeObjectFromController(object);
-         armTrajectoryBehaviors.get(robotSide).consumeObjectFromController(object);
-         footstepListBehavior.consumeObjectFromController(object);
-         walkToLocationBehavior.consumeObjectFromController(object);
-         turnInPlaceBehavior.consumeObjectFromController(object);
-      }
-   }
-
-   @Override
-   public void abort()
+   public void onBehaviorAborted()
    {
       pipeLine.clearAll();
    }
@@ -2787,7 +2764,7 @@ public class DiagnosticBehavior extends AbstractBehavior
 
 
    @Override
-   public void pause()
+   public void onBehaviorPaused()
    {
       isPaused.set(true);
       pelvisTrajectoryBehavior.pause();
@@ -2800,7 +2777,7 @@ public class DiagnosticBehavior extends AbstractBehavior
    }
 
    @Override
-   public void resume()
+   public void onBehaviorResumed()
    {
       isPaused.set(false);
       pelvisTrajectoryBehavior.resume();
@@ -2814,11 +2791,11 @@ public class DiagnosticBehavior extends AbstractBehavior
 
    private BehaviorAction createSleepTask(double sleepTime)
    {
-      SleepBehavior sleepBehavior = new SleepBehavior(outgoingCommunicationBridge, yoTime);
+      SleepBehavior sleepBehavior = new SleepBehavior(communicationBridge, yoTime);
       SleepTask sleepTask = new SleepTask(sleepBehavior,sleepTime);
       return sleepTask;
    }
-   
+
    @Override
    public boolean isDone()
    {
@@ -2826,9 +2803,9 @@ public class DiagnosticBehavior extends AbstractBehavior
    }
 
    @Override
-   public void doPostBehaviorCleanup()
+   public void onBehaviorExited()
    {
    }
 
-   
+
 }

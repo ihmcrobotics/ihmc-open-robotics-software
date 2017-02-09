@@ -23,11 +23,23 @@ public class FootstepTools
       return generateFootstepFromFootstepData(footstepData, contactableBody, -1);
    }
 
+   public static Footstep generateFootstepFromFootstepData(FootstepDataMessage footstepData, ReferenceFrame soleFrame, RigidBody rigidBody)
+   {
+      return generateFootstepFromFootstepData(footstepData, soleFrame, rigidBody, -1);
+   }
+
    public static Footstep generateFootstepFromFootstepData(FootstepDataMessage footstepData, ContactablePlaneBody contactableBody, int index)
+   {
+      ReferenceFrame soleFrame = contactableBody.getSoleFrame();
+      RigidBody rigidBody = contactableBody.getRigidBody();
+      return generateFootstepFromFootstepData(footstepData, soleFrame, rigidBody, index);
+   }
+
+   public static Footstep generateFootstepFromFootstepData(FootstepDataMessage footstepData, ReferenceFrame soleFrame, RigidBody rigidBody, int index)
    {
       FramePose footstepPose = new FramePose(worldFrame, footstepData.getLocation(), footstepData.getOrientation());
       PoseReferenceFrame footstepPoseFrame = new PoseReferenceFrame("footstepPoseFrame", footstepPose);
-      
+
       List<Point2d> contactPoints = footstepData.getPredictedContactPoints();
       if (contactPoints != null && contactPoints.size() == 0)
          contactPoints = null;
@@ -35,9 +47,6 @@ public class FootstepTools
 
       RobotSide robotSide = footstepData.getRobotSide();
       TrajectoryType trajectoryType = footstepData.getTrajectoryType();
-
-      ReferenceFrame soleFrame = contactableBody.getSoleFrame();
-      RigidBody rigidBody = contactableBody.getRigidBody();
 
       Footstep footstep;
 
@@ -49,8 +58,8 @@ public class FootstepTools
          footstep = new Footstep(id, rigidBody, robotSide, soleFrame, footstepPoseFrame, true, contactPoints);
       }
 
-      footstep.trajectoryType = trajectoryType;
-      footstep.swingHeight = footstepData.swingHeight;
+      footstep.setTrajectoryType(trajectoryType);
+      footstep.setSwingHeight(footstepData.swingHeight);
       switch (footstepData.getOrigin())
       {
       case AT_ANKLE_FRAME:

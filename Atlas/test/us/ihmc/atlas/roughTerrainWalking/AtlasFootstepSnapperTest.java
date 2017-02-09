@@ -10,14 +10,14 @@ import org.junit.Test;
 
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.FootstepParameters;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
+import us.ihmc.graphicsDescription.Graphics3DObject;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.humanoidRobotics.footstep.FootSpoof;
 import us.ihmc.humanoidRobotics.footstep.footstepSnapper.AtlasFootstepSnappingParameters;
 import us.ihmc.humanoidRobotics.footstep.footstepSnapper.ConvexHullFootstepSnapper;
-import us.ihmc.humanoidRobotics.footstep.footstepSnapper.FootstepSnapperTest;
+import us.ihmc.humanoidRobotics.footstep.footstepSnapper.FootstepSnapperSimulationTest;
 import us.ihmc.humanoidRobotics.footstep.footstepSnapper.FootstepSnappingParameters;
 import us.ihmc.humanoidRobotics.footstep.footstepSnapper.SimpleFootstepValueFunction;
 import us.ihmc.robotics.geometry.BoundingBox2d;
@@ -30,7 +30,7 @@ import us.ihmc.tools.thread.ThreadTools;
 /**
  * Created by agrabertilton on 3/4/15.
  */
-public class AtlasFootstepSnapperTest extends FootstepSnapperTest
+public class AtlasFootstepSnapperTest extends FootstepSnapperSimulationTest
 {
 	@ContinuousIntegrationTest(estimatedDuration = 0.5)
    @Test(timeout = 30000)

@@ -9,7 +9,7 @@ import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 
 import us.ihmc.simulationconstructionset.gui.GraphArrayPanel;
-import us.ihmc.simulationconstructionset.gui.MyFileFilter;
+import us.ihmc.tools.gui.MyFileFilter;
 
 public class SaveGraphConfigurationDialogGenerator implements SaveGraphConfigurationDialogConstructor
 {
@@ -45,16 +45,19 @@ public class SaveGraphConfigurationDialogGenerator implements SaveGraphConfigura
       }
    }
 
+   @Override
    public void setCurrentDirectory(File dir)
    {
       dataFileChooser.setCurrentDirectory(dir);
    }
 
+   @Override
    public void setCurrentDirectory(String dir)
    {
       dataFileChooser.setCurrentDirectory(new File(dir));
    }
 
+   @Override
    public void constructDialog()
    {
       guiEnablerAndDisabler.disableGUIComponents();

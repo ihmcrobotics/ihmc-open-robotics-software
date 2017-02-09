@@ -1,0 +1,141 @@
+buildscript {
+  repositories {
+    maven {
+      url "https://plugins.gradle.org/m2/"
+    }
+  }
+  dependencies {
+    classpath "gradle.plugin.us.ihmc.gradle:ihmc-build:0.0.19"
+    classpath "org.hidetake:gradle-ssh-plugin:2.1.1"
+  }
+}
+
+apply plugin: "us.ihmc.gradle.ihmc-build"
+apply plugin: "org.hidetake.ssh"
+
+if (!rootProject.name.equals('IHMCOpenRoboticsSoftware')) {
+   evaluationDependsOn(':IHMCOpenRoboticsSoftware')
+}
+
+
+compileJava {
+    sourceCompatibility = "1.8"
+    targetCompatibility = "1.8"
+}
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+version = "${getOpenRoboticsSoftwareProject().version}"
+project.ext.fullVersion = "${getOpenRoboticsSoftwareProject().ext.fullVersion}"
+project.ext.vcsUrl = "${getOpenRoboticsSoftwareProject().ext.vcsUrl}"
+project.ext.licenseURL = "http://www.apache.org/licenses/LICENSE-2.0.txt"
+project.ext.licenseName = "Apache License, Version 2.0"
+project.ext.bintrayLicenseName = "Apache-2.0"
+
+apply plugin: 'application'
+
+repositories ihmc.ihmcDefaultArtifactProxies()
+
+repositories {
+    mavenLocal()
+    jcenter()
+    mavenCentral()
+    maven {
+        url "http://artifactory.ihmc.us/artifactory/thirdparty/"
+    }
+}
+
+def strings = ['ihmc', 'robotics']
+ihmc.configureForIHMCOpenSourceBintrayPublish(false, "mavenJava", "maven-release", strings)
+
+dependencies {
+   testCompile group: 'junit', name: 'junit', version: '4.11'
+   compile group: 'javax.vecmath', name: 'vecmath', version: '1.5.2'
+
+   compile group: 'net.sf.trove4j', name: 'trove4j', version: '3.0.3'
+   compile group: 'com.martiansoftware', name: 'jsap', version: '2.1'
+   compile group: 'net.sourceforge.jmatio', name: 'jmatio', version: '1.0'
+   compile group: 'us.ihmc', name: 'IHMCVideoCodecs', version: '2.0.12'
+   
+   compile ihmc.getProjectDependency(":ModelFileLoader")
+   compile ihmc.getProjectDependency(":SimulationConstructionSet")
+   compile ihmc.getProjectDependency(":IHMCCommunication")
+   compile ihmc.getProjectDependency(":IHMCJavaFXToolkit")
+   compile ihmc.getProjectDependency(":IHMCJavaToolkit")
+   compile ihmc.getProjectDependency(":IHMCHumanoidRobotics")
+   compile ihmc.getProjectDependency(":IHMCRoboticsToolkit")
+   compile ihmc.getProjectDependency(":IHMCGraphicsDescription")
+    compile ihmc.getProjectDependency(":IHMCRobotDescription")
+   compile ihmc.getProjectDependency(":IHMCRobotDataLogger")
+}
+
+mainClassName = hasProperty('mainClass') ? mainClass : "us.ihmc.robotDataVisualizer.visualizer.SCSVisualizer"
+
+jar {
+   manifest {
+      attributes(
+              "Created-By": "IHMC Gradle Build Script",
+              "Implementation-Title": project.name,
+              "Implementation-Version": project.version,
+              "Implementation-Vendor": "IHMC",
+
+              "Bundle-Name": project.name,
+              "Bundle-Version": project.version,
+              "Bundle-License": "${project.ext.licenseURL}",
+              "Bundle-Vendor": "IHMC")
+   }
+}
+
+task viewerStartScripts(type: CreateStartScripts) {
+   outputDir = file("build/scripts")
+   mainClassName = "us.ihmc.robotDataVisualizer.gui.GUICaptureViewer"
+   applicationName = "IHMCGUICaptureViewer"
+   classpath = project.configurations.runtime + jar.outputs.files
+}
+
+distributions {
+   guiCaptureViewer {
+      baseName = "IHMCGUICaptureViewer"
+      contents {
+         into('lib') {
+            from project.configurations.runtime + jar.outputs.files
+         }
+
+         into('bin') {
+            from viewerStartScripts
+            include "IHMCGUICaptureViewer*"
+         }
+      }
+   }
+}
+task setupDeployViewerRemote << {
+   def deployViewerUserValue = project.hasProperty("deployViewerUser") ? project.deployViewerUser : "invalid"
+   def deployViewerPasswordValue = project.hasProperty("deployViewerPassword") ? project.deployViewerPassword : "invalid"
+   def deployViewerHostValue = project.hasProperty("deployViewerHost") ? project.deployViewerHost : "invalid"
+
+   remotes.create('deployViewerTarget') {
+      host = deployViewerHostValue
+      user = deployViewerUserValue
+      password = deployViewerPasswordValue
+      knownHosts = allowAnyHosts
+   }
+}
+
+
+task deployViewer(dependsOn: [guiCaptureViewerDistTar, setupDeployViewerRemote]) << {
+   ssh.run {
+      session(remotes.deployViewerTarget) {
+         project.logger.lifecycle("Copying GUI Capture Viewer distribution tarball to remote host")
+         def distTarFile = guiCaptureViewerDistTar.outputs.files.singleFile
+         put from: distTarFile, into: "."
+
+         project.logger.lifecycle("Untarring distribution on remote host")
+         execute "tar xf ./${distTarFile.name}"
+         project.logger.lifecycle("Removing tarball from remote host")
+         execute "rm -f ./${distTarFile.name}"
+         project.logger.lifecycle("Moving GUI Capture Viewer distribution in to place")
+         execute "mv ./${distTarFile.name.replace(".tar", "")} IHMCGUICaptureViewer"
+         project.logger.lifecycle("GUI Capture Viewer deployment to remote host complete!")
+      }
+   }
+}

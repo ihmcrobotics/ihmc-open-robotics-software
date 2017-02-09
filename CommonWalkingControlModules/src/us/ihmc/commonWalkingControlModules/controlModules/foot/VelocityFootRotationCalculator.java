@@ -2,9 +2,11 @@ package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
 import java.awt.Color;
 
+import us.ihmc.graphicsDescription.plotting.artifact.Artifact;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactLineSegment2d;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
-import us.ihmc.plotting.artifact.Artifact;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -16,6 +18,8 @@ import us.ihmc.robotics.geometry.FrameLineSegment2d;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.geometry.algorithms.FrameConvexPolygonWithLineIntersector2d;
+import us.ihmc.robotics.geometry.algorithms.FrameConvexPolygonWithLineIntersector2d.IntersectionResult;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFramePoint2d;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector2d;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
@@ -25,8 +29,6 @@ import us.ihmc.robotics.math.frames.YoFrameLineSegment2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifactLineSegment2d;
 
 /**
  * The FootRotationCalculator is a tool to detect if the foot is rotating around a steady line of rotation.
@@ -119,6 +121,7 @@ public class VelocityFootRotationCalculator implements FootRotationCalculator
    private final Twist bodyTwist = new Twist();
    private final FrameConvexPolygon2d footPolygonInSoleFrame = new FrameConvexPolygon2d();
    private final FrameConvexPolygon2d footPolygonInWorldFrame = new FrameConvexPolygon2d();
+   private final FrameConvexPolygonWithLineIntersector2d frameConvexPolygonWithLineIntersector2d = new FrameConvexPolygonWithLineIntersector2d();
 
    public VelocityFootRotationCalculator(String namePrefix, double dt, ContactablePlaneBody rotatingFoot, TwistCalculator twistCalculator,
          ExplorationParameters explorationParameters, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
@@ -203,6 +206,8 @@ public class VelocityFootRotationCalculator implements FootRotationCalculator
       this.currentDesiredFootstep.setPose(currentDesiredFootstep);
    }
 
+   @SuppressWarnings("unused")
+   @Override
    public void compute(FramePoint2d desiredCoP, FramePoint2d centerOfPressure)
    {
       footPolygonInWorldFrame.setIncludingFrameAndUpdate(footPolygonInSoleFrame);
@@ -265,15 +270,19 @@ public class VelocityFootRotationCalculator implements FootRotationCalculator
          lineOfRotationInSoleFrame.set(centerOfRotation, angularVelocity2d);
          lineOfRotationInWorldFrame.setIncludingFrame(lineOfRotationInSoleFrame);
          lineOfRotationInWorldFrame.changeFrameAndProjectToXYPlane(worldFrame);
-         FramePoint2d[] intersections = footPolygonInWorldFrame.intersectionWith(lineOfRotationInWorldFrame);
 
-         if (intersections == null || intersections.length == 1 || intersections[0].epsilonEquals(intersections[1], 1.0e-3))
+         frameConvexPolygonWithLineIntersector2d.intersectWithLine(footPolygonInWorldFrame, lineOfRotationInWorldFrame);
+         if (frameConvexPolygonWithLineIntersector2d.getIntersectionResult() == IntersectionResult.NO_INTERSECTION
+               || frameConvexPolygonWithLineIntersector2d.getIntersectionResult() == IntersectionResult.POINT_INTERSECTION
+               || frameConvexPolygonWithLineIntersector2d.getIntersectionPointOne()
+                                                         .epsilonEquals(frameConvexPolygonWithLineIntersector2d.getIntersectionPointTwo(), 1e-3))
          {
             yoLineOfRotation.setToNaN();
          }
          else
          {
-            lineSegmentOfRotation.setIncludingFrame(intersections);
+            lineSegmentOfRotation.setIncludingFrame(frameConvexPolygonWithLineIntersector2d.getIntersectionPointOne(),
+                                                    frameConvexPolygonWithLineIntersector2d.getIntersectionPointTwo());
             yoLineOfRotation.setFrameLineSegment2d(lineSegmentOfRotation);
          }
       }
@@ -283,16 +292,19 @@ public class VelocityFootRotationCalculator implements FootRotationCalculator
       }
    }
 
+   @Override
    public boolean isFootRotating()
    {
       return yoIsFootRotating.getBooleanValue();
    }
 
+   @Override
    public void getLineOfRotation(FrameLine2d lineOfRotationToPack)
    {
       lineOfRotationToPack.setIncludingFrame(lineOfRotationInSoleFrame);
    }
 
+   @Override
    public void reset()
    {
       yoLineOfRotation.setToNaN();

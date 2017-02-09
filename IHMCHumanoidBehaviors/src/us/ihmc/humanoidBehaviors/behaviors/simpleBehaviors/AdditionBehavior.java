@@ -1,7 +1,7 @@
 package us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors;
 
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
-import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
+import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 
 public class AdditionBehavior extends AbstractBehavior
 {
@@ -12,12 +12,12 @@ public class AdditionBehavior extends AbstractBehavior
    double value2;
    double result;
 
-   public AdditionBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge)
+   public AdditionBehavior(CommunicationBridgeInterface outgoingCommunicationBridge)
    {
       super(outgoingCommunicationBridge);
    }
 
-   public AdditionBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, double value1, double value2)
+   public AdditionBehavior(CommunicationBridgeInterface outgoingCommunicationBridge, double value1, double value2)
    {
       super(outgoingCommunicationBridge);
 
@@ -56,9 +56,8 @@ public class AdditionBehavior extends AbstractBehavior
    }
 
    @Override
-   public void doPostBehaviorCleanup()
+   public void onBehaviorExited()
    {
-      super.doPostBehaviorCleanup();
       numbersSet = false;
       mathComplete = false;
    }
@@ -66,5 +65,25 @@ public class AdditionBehavior extends AbstractBehavior
    public boolean hasInputBeenSet()
    {
       return numbersSet;
+   }
+
+   @Override
+   public void onBehaviorEntered()
+   {
+   }
+
+   @Override
+   public void onBehaviorAborted()
+   {
+   }
+
+   @Override
+   public void onBehaviorPaused()
+   {
+   }
+
+   @Override
+   public void onBehaviorResumed()
+   {
    }
 }

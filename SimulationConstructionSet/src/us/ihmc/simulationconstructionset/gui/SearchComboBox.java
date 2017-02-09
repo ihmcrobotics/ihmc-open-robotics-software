@@ -7,12 +7,11 @@ import javax.swing.JComboBox;
 
 class SearchComboBox implements ActionListener
 {
-
-	public void actionPerformed(ActionEvent e)
-	{
-		JComboBox comboBox = (JComboBox)e.getSource();
-        String searchType = (String)comboBox.getSelectedItem();
-        System.out.println("Search Type : " + searchType);
-	}
-
+   @Override
+   public void actionPerformed(ActionEvent e)
+   {
+      JComboBox comboBox = (JComboBox) e.getSource();
+      String searchType = (String) comboBox.getSelectedItem();
+      System.out.println("Search Type : " + searchType);
+   }
 }

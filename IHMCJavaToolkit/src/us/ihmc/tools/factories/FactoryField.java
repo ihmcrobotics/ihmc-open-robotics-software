@@ -3,6 +3,7 @@ package us.ihmc.tools.factories;
 public abstract class FactoryField<T>
 {
    protected boolean hasBeenSet = false;
+   protected boolean disposed = false;
    protected String fieldName;
    protected T fieldValue = null;
    
@@ -13,12 +14,16 @@ public abstract class FactoryField<T>
    
    public void set(T fieldValue)
    {
+      checkNotDisposed();
+      
       hasBeenSet = true;
       this.fieldValue = fieldValue;
    }
    
    public T get()
    {
+      checkNotDisposed();
+      
       if (!hasBeenSet)
       {
          throw new FactoryFieldNotSetException(fieldName);
@@ -26,6 +31,19 @@ public abstract class FactoryField<T>
       else
       {
          return fieldValue;
+      }
+   }
+   
+   public void dispose()
+   {
+      disposed = true;
+   }
+   
+   protected void checkNotDisposed()
+   {
+      if (disposed)
+      {
+         throw new FactoryDisposedException();
       }
    }
 }

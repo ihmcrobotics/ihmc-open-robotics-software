@@ -4,7 +4,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
-import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
+import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -22,7 +22,7 @@ public class ChestTrajectoryBehavior extends AbstractBehavior
    private final DoubleYoVariable trajectoryTime;
    private final BooleanYoVariable trajectoryTimeHasElapsed;
 
-   public ChestTrajectoryBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, DoubleYoVariable yoTime)
+   public ChestTrajectoryBehavior(CommunicationBridgeInterface outgoingCommunicationBridge, DoubleYoVariable yoTime)
    {
       super(outgoingCommunicationBridge);
 
@@ -55,7 +55,7 @@ public class ChestTrajectoryBehavior extends AbstractBehavior
       if (!isPaused.getBooleanValue() && !isAborted.getBooleanValue())
       {
          outgoingChestTrajectoryMessage.setDestination(PacketDestination.UI);
-         sendPacketToNetworkProcessor(outgoingChestTrajectoryMessage);
+         sendPacket(outgoingChestTrajectoryMessage);
          sendPacketToController(outgoingChestTrajectoryMessage);
          hasPacketBeenSent.set(true);
          startTime.set(yoTime.getDoubleValue());
@@ -64,7 +64,7 @@ public class ChestTrajectoryBehavior extends AbstractBehavior
    }
 
    @Override
-   public void initialize()
+   public void onBehaviorEntered()
    {
       hasPacketBeenSent.set(false);
       
@@ -75,7 +75,7 @@ public class ChestTrajectoryBehavior extends AbstractBehavior
    }
 
    @Override
-   public void doPostBehaviorCleanup()
+   public void onBehaviorExited()
    {
       hasPacketBeenSent.set(false);
       outgoingChestTrajectoryMessage = null;
@@ -114,5 +114,20 @@ public class ChestTrajectoryBehavior extends AbstractBehavior
    public boolean hasInputBeenSet()
    {
       return outgoingChestTrajectoryMessage != null;
+   }
+
+   @Override
+   public void onBehaviorAborted()
+   {
+   }
+
+   @Override
+   public void onBehaviorPaused()
+   {
+   }
+
+   @Override
+   public void onBehaviorResumed()
+   {
    }
 }

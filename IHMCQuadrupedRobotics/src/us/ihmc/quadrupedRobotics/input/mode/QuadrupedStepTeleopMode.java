@@ -11,16 +11,14 @@ import net.java.games.input.Event;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.quadrupedRobotics.communication.packets.BodyOrientationPacket;
 import us.ihmc.quadrupedRobotics.communication.packets.ComPositionPacket;
-import us.ihmc.quadrupedRobotics.communication.packets.QuadrupedForceControllerEventPacket;
 import us.ihmc.quadrupedRobotics.communication.packets.QuadrupedTimedStepPacket;
-import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerRequestedEvent;
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedTaskSpaceEstimator.Estimates;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.input.value.InputValueIntegrator;
-import us.ihmc.quadrupedRobotics.params.DoubleArrayParameter;
-import us.ihmc.quadrupedRobotics.params.DoubleParameter;
-import us.ihmc.quadrupedRobotics.params.IntegerParameter;
-import us.ihmc.quadrupedRobotics.params.ParameterFactory;
+import us.ihmc.robotics.dataStructures.parameter.DoubleArrayParameter;
+import us.ihmc.robotics.dataStructures.parameter.DoubleParameter;
+import us.ihmc.robotics.dataStructures.parameter.IntegerParameter;
+import us.ihmc.robotics.dataStructures.parameter.ParameterFactory;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStep;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedXGaitPlanner;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedXGaitSettings;
@@ -104,6 +102,9 @@ public class QuadrupedStepTeleopMode implements QuadrupedTeleopMode
    @Override
    public void onInputEvent(Map<XBoxOneMapping, Double> channels, Estimates estimates, Event event)
    {
+      if (event.getValue() < 0.5)
+         return;
+
       // Each button steps a different foot. The step length is determined by the left stick forward/back.
       RobotQuadrant quadrantToStep;
       switch (XBoxOneMapping.getMapping(event))
@@ -185,13 +186,10 @@ public class QuadrupedStepTeleopMode implements QuadrupedTeleopMode
       TimeInterval timeInterval = new TimeInterval(0.0, singleStepSwingDuration.get());
       timeInterval.shiftInterval(singleStepShiftDuration.get());
 
-      QuadrupedTimedStep step = new QuadrupedTimedStep(quadrant, goalPosition.getPoint(), groundClearance, timeInterval, false);
+      QuadrupedTimedStep step = new QuadrupedTimedStep(quadrant, goalPosition.getPoint(), groundClearance, timeInterval);
       List<QuadrupedTimedStep> steps = Collections.singletonList(step);
-      QuadrupedTimedStepPacket timedStepPacket = new QuadrupedTimedStepPacket(steps);
+      QuadrupedTimedStepPacket timedStepPacket = new QuadrupedTimedStepPacket(steps, false);
       packetCommunicator.send(timedStepPacket);
-
-      QuadrupedForceControllerEventPacket eventPacket = new QuadrupedForceControllerEventPacket(QuadrupedForceControllerRequestedEvent.REQUEST_STEP);
-      packetCommunicator.send(eventPacket);
    }
 
    private void sendXGaitFootsteps(QuadrupedXGaitSettings xGaitSettings, Vector3d planarVelocity, int numberOfSteps)
@@ -216,13 +214,9 @@ public class QuadrupedStepTeleopMode implements QuadrupedTeleopMode
       for (int i = 0; i < numberOfSteps; i++)
       {
          steps.get(i).setGroundClearance(defaultGroundClearance.get());
-         steps.get(i).setAbsolute(false);
       }
 
-      QuadrupedTimedStepPacket timedStepPacket = new QuadrupedTimedStepPacket(steps);
+      QuadrupedTimedStepPacket timedStepPacket = new QuadrupedTimedStepPacket(steps, false);
       packetCommunicator.send(timedStepPacket);
-
-      QuadrupedForceControllerEventPacket eventPacket = new QuadrupedForceControllerEventPacket(QuadrupedForceControllerRequestedEvent.REQUEST_STEP);
-      packetCommunicator.send(eventPacket);
    }
 }

@@ -23,9 +23,6 @@ import javax.swing.JPanel;
  */
 public class HumanAssistedTestFrame extends JFrame
 {
-   /**
-    *
-    */
    private static final long serialVersionUID = -6270384898459053226L;
    private final GoodButton goodButton;
    private final BadButton badButton;
@@ -92,6 +89,7 @@ public class HumanAssistedTestFrame extends JFrame
          this.addActionListener(this);
       }
 
+      @Override
       public void actionPerformed(ActionEvent e)
       {
          hasBeenPressed = true;
@@ -119,6 +117,7 @@ public class HumanAssistedTestFrame extends JFrame
          this.addActionListener(this);
       }
 
+      @Override
       public void actionPerformed(ActionEvent e)
       {
          hasBeenPressed = true;

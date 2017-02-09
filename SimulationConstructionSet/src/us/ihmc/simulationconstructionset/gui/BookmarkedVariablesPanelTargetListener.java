@@ -21,15 +21,18 @@ public class BookmarkedVariablesPanelTargetListener implements DropTargetListene
       this.bookmarkedVariablesPanel = bookmarkedVariablesPanel;
    }
 
+   @Override
    public void dragEnter(DropTargetDragEvent dtde)
    {
    }
 
+   @Override
    public void dragExit(DropTargetEvent dte)
    {
       this.bookmarkedVariablesPanel.setCursor(notDroppableCursor);
    }
 
+   @Override
    public void dragOver(DropTargetDragEvent dtde)
    {
       YoGraph.setRecipientOfDrag(bookmarkedVariablesPanel);
@@ -46,13 +49,14 @@ public class BookmarkedVariablesPanelTargetListener implements DropTargetListene
       }
    }
 
+   @Override
    public void drop(DropTargetDropEvent dtde)
    {
       YoGraph.setRecipientOfDrag(bookmarkedVariablesPanel);
 
       if ((YoGraph.getSourceOfDrag() == null) ||!YoGraph.getSourceOfDrag().equals(bookmarkedVariablesPanel))
       {
-         YoVariable v = bookmarkedVariablesPanel.getSelectedVariableHolder().getSelectedVariable();
+         YoVariable<?> v = bookmarkedVariablesPanel.getSelectedVariableHolder().getSelectedVariable();
          if (v != null)
             bookmarkedVariablesPanel.bookmarkVariable(v);
       }
@@ -63,6 +67,7 @@ public class BookmarkedVariablesPanelTargetListener implements DropTargetListene
       }
    }
 
+   @Override
    public void dropActionChanged(DropTargetDragEvent dtde)
    {
       YoGraph.setActionPerformedByDragAndDrop(dtde.getDropAction());

@@ -1,18 +1,17 @@
 package us.ihmc.exampleSimulations.skippy;
 
-import java.rmi.registry.Registry;
 import java.util.ArrayList;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
-import com.vividsolutions.jts.math.Vector3D;
-
-import us.ihmc.graphics3DAdapter.GroundProfile3D;
-import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
+import us.ihmc.graphicsDescription.Graphics3DObject;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.referenceFrames.TransformReferenceFrame;
@@ -126,7 +125,8 @@ public class SkippyRobot extends Robot
    private ExternalForcePoint balanceForce;
    public static ExternalForcePoint glueDownToGroundPoint;
 
-   private final double initialBodySidewaysLean = 0.0 * Math.PI / 48.0; //0.2
+//   private final double initialBodySidewaysLean = 0.13783;   //Limit sideways lean for IcpBasedControl to balance
+   private final double initialBodySidewaysLean = 0.0; //Limit sideways lean for FeedbackPostureControl to balance
    private final double initialShoulderJointAngle = 0.0 * Math.PI / 6.0;
    private final double initialYawIfSkippy = 0.0* Math.PI * 0.8;
 
@@ -206,12 +206,12 @@ public class SkippyRobot extends Robot
          this.addRootJoint(rootJointIfSkippy);
 
          RigidBodyTransform transform = new RigidBodyTransform();
-         transform.setRotationEulerAndZeroTranslation(Math.PI / 7.0 - 2.0 * Math.PI / 8.0, -initialBodySidewaysLean, initialYawIfSkippy);
-         transform.setTranslation(new Vector3d(0.0, 0.0, 2.0-0.15975+0.0032));
+         transform.setRotationEulerAndZeroTranslation(/*0.0*/Math.PI / 7.0 - 2.0 * Math.PI / 8.0, -initialBodySidewaysLean, initialYawIfSkippy);
+         transform.setTranslation(new Vector3d(0.0, 0.0, /*2.0*/2.0-0.15975+0.0032));
          rootJointIfSkippy.setRotationAndTranslation(transform);
 
          shoulderJoint = new PinJoint("shoulderJoint", new Vector3d(0.0, 0.0, TORSO_LENGTH / 2), this, Axis.Y);
-         shoulderJoint.setDamping(0.1);
+         shoulderJoint.setDamping(0.0);
          shoulderJoint.setInitialState(initialShoulderJointAngle, 0.0);
          Link arms = createArmsTippy();
          shoulderJoint.setLink(arms);
@@ -224,8 +224,8 @@ public class SkippyRobot extends Robot
          rootJointIfSkippy.addJoint(shoulderJoint);
 
          hipJoint = new PinJoint("hip", new Vector3d(0.0, 0.0, -TORSO_LENGTH / 2.0), this, Axis.X);
-         hipJoint.setDamping(0.0);//2.5);//0.1);
-         hipJoint.setInitialState(2.0 * Math.PI / 8.0, 0.0);
+         hipJoint.setDamping(0.0);
+         hipJoint.setInitialState(/*0.0*/2.0 * Math.PI / 8.0, 0.0);
          Link leg = createLegSkippy();
          hipJoint.setLink(leg);
 
@@ -272,8 +272,9 @@ public class SkippyRobot extends Robot
       // create a LinkGraphics object to manipulate the visual representation of the link
       Graphics3DObject linkGraphics = new Graphics3DObject();
       linkGraphics.addCube(LEG_CUBE_LENGTH, LEG_CUBE_LENGTH, LEG_LENGTH, YoAppearance.Crimson());
-
-      // associate the linkGraphics object with the link object
+      /*
+       * Associate the linkGraphics object with the link object
+       */
       leg.setLinkGraphics(linkGraphics);
 
       if (SHOW_MOI_ELLIPSOIDS)
@@ -295,9 +296,17 @@ public class SkippyRobot extends Robot
       // create a LinkGraphics object to manipulate the visual representation of the link
       Graphics3DObject linkGraphics = new Graphics3DObject();
       linkGraphics.translate(0.0, 0.0, -LEG_LENGTH);
-      linkGraphics.addCube(LEG_CUBE_LENGTH, LEG_CUBE_LENGTH, LEG_LENGTH, YoAppearance.Glass(0.75));//White());//
-
-      // associate the linkGraphics object with the link object
+      linkGraphics.addCube(LEG_CUBE_LENGTH, LEG_CUBE_LENGTH, LEG_LENGTH, YoAppearance.Blue());
+      /*
+       * Joint
+       */
+      linkGraphics.identity();
+      linkGraphics.rotate(Math.PI / 2.0, Axis.Y);
+      linkGraphics.translate(0.0, 0.0, -LEG_CUBE_LENGTH);
+      linkGraphics.addCylinder(2*LEG_CUBE_LENGTH, 2*LEG_CUBE_LENGTH/3, YoAppearance.LightSteelBlue());
+      /*
+       * Associate the linkGraphics object with the link object
+       */
       leg.setLinkGraphics(linkGraphics);
 
       if (SHOW_MOI_ELLIPSOIDS)
@@ -318,7 +327,9 @@ public class SkippyRobot extends Robot
       Graphics3DObject linkGraphics = new Graphics3DObject();
       linkGraphics.addCylinder(TORSO_LENGTH, TORSO_RADIUS, YoAppearance.Glass(0.75));
       linkGraphics.addSphere(0.10, YoAppearance.White());
-
+      /*
+       * Associate the linkGraphics object with the link object
+       */
       torso.setLinkGraphics(linkGraphics);
 
       if (SHOW_MOI_ELLIPSOIDS)
@@ -339,7 +350,9 @@ public class SkippyRobot extends Robot
       Graphics3DObject linkGraphics = new Graphics3DObject();
       linkGraphics.translate(0.0, 0.0, -TORSO_LENGTH / 2);
       linkGraphics.addCylinder(TORSO_LENGTH, TORSO_RADIUS, YoAppearance.Blue());
-
+      /*
+       * Associate the linkGraphics object with the link object
+       */
       torso.setLinkGraphics(linkGraphics);
 
       if (SHOW_MOI_ELLIPSOIDS)
@@ -361,6 +374,16 @@ public class SkippyRobot extends Robot
       linkGraphics.rotate(Math.toRadians(90), Axis.Y);
       linkGraphics.translate(0.0, 0.0, -SHOULDER_LENGTH / 2.0);
       linkGraphics.addCylinder(SHOULDER_LENGTH, SHOULDER_RADIUS, YoAppearance.Red());
+      /*
+       * Joint
+       */
+      linkGraphics.rotate(Math.PI/2,Axis.Y);
+      linkGraphics.rotate(Math.PI/2,Axis.X);
+      linkGraphics.translate(-SHOULDER_LENGTH/2, 0.0, -LEG_CUBE_LENGTH);
+      linkGraphics.addCylinder(2*LEG_CUBE_LENGTH, 2*LEG_CUBE_LENGTH/3, YoAppearance.LightSteelBlue());
+      /*
+       * Associate the linkGraphics object with the link object
+       */
       arms.setLinkGraphics(linkGraphics);
 
       if (SHOW_MOI_ELLIPSOIDS)
@@ -395,7 +418,7 @@ public class SkippyRobot extends Robot
    {
       return rootJointIfSkippy;
    }
-   
+
    public void setRootJointForce(double x, double y, double z)
    {
       rootJointForce.setForce(x, y, z);
@@ -445,7 +468,7 @@ public class SkippyRobot extends Robot
    {
       return footGroundContactPoint.getPositionPoint();
    }
-   
+
    public void computeFootContactForce(Vector3d tempForce){
 	  footGroundContactPoint.getForce(tempForce);
    }
@@ -480,8 +503,8 @@ public class SkippyRobot extends Robot
       this.bodyZUpFrame.setTransformAndUpdate(transform);
       return bodyZUpFrame;
    }
-   
-   public double getGravityt(){
+
+   public double getGravity(){
       return this.getGravityZ();
    }
 
@@ -510,7 +533,53 @@ public class SkippyRobot extends Robot
    public DoubleYoVariable getQd_hip()
    {
       // TODO Auto-generated method stub
+      return hipJoint.getQDYoVariable();
+   }
+   public DoubleYoVariable getQdd_hip()
+   {
+      // TODO Auto-generated method stub
       return hipJoint.getQDDYoVariable();
+   }
+
+   Point3d tempCOMPosition = new Point3d();
+   Vector3d tempLinearMomentum = new Vector3d();
+   Vector3d tempAngularMomentum = new Vector3d();
+   /**
+    * Computes the CoM position and velocity and the ICP
+    */
+   public void computeComAndICP(FramePoint comToPack, FrameVector comVelocityToPack, FramePoint icpToPack, FrameVector angularMomentumToPack)
+   {
+      double totalMass = computeCOMMomentum(tempCOMPosition, tempLinearMomentum, tempAngularMomentum);
+      angularMomentumToPack.set(tempAngularMomentum);
+
+      comToPack.set(tempCOMPosition);
+      tempLinearMomentum.scale(1.0 / totalMass);
+      comVelocityToPack.set(tempLinearMomentum);
+
+      double omega0 = Math.sqrt(comToPack.getZ() / Math.abs(getGravity()));
+
+      icpToPack.scaleAdd(omega0, comVelocityToPack, comToPack);
+      icpToPack.setZ(0.0);
+   }
+
+   Vector3d tempJointAxis = new Vector3d();
+   RigidBodyTransform transformJointToWorld = new RigidBodyTransform();
+   public void getHipJointAxis(FrameVector hipAxisToPack)
+   {
+      hipJoint.getJointAxis(tempJointAxis);
+      hipJoint.getTransformToWorld(transformJointToWorld);
+      transformJointToWorld.transform(tempJointAxis);
+      hipAxisToPack.set(tempJointAxis);
+      hipAxisToPack.normalize();
+   }
+
+   public void getShoulderJointAxis(FrameVector shoulderAxisToPack)
+   {
+      shoulderJoint.getJointAxis(tempJointAxis);
+      shoulderJoint.getTransformToWorld(transformJointToWorld);
+      transformJointToWorld.transform(tempJointAxis);
+      shoulderAxisToPack.set(tempJointAxis);
+      shoulderAxisToPack.normalize();
    }
 
 }

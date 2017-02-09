@@ -10,11 +10,11 @@ import org.junit.Test;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
+import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.examples.FallingBrickRobot;
-import us.ihmc.simulationconstructionset.robotController.RobotController;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.tools.continuousIntegration.IntegrationCategory;
 import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
@@ -48,6 +48,7 @@ public class YoEntryBoxTest
       {
       }
 
+      @Override
       public void attachRobot(Robot robot)
       {
          registry = new YoVariableRegistry("controllerRegistry");
@@ -64,25 +65,30 @@ public class YoEntryBoxTest
          time = robot.getYoTime();
       }
 
+      @Override
       public void initialize()
       {
       }
 
+      @Override
       public YoVariableRegistry getYoVariableRegistry()
       {
          return registry;
       }
 
+      @Override
       public String getName()
       {
          return name;
       }
 
+      @Override
       public String getDescription()
       {
          return name;
       }
 
+      @Override
       public void doControl()
       {
          switch (badGreekVariable.getEnumValue())

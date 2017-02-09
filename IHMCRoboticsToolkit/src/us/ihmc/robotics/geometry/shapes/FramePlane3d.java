@@ -24,6 +24,11 @@ public class FramePlane3d extends AbstractReferenceFrameHolder
    private final Point3d temporaryPointB = new Point3d();
    private final Point3d temporaryPointC = new Point3d();
 
+   public FramePlane3d()
+   {
+      this(ReferenceFrame.getWorldFrame());
+   }
+   
    public FramePlane3d(ReferenceFrame referenceFrame, Plane3d plane3d)
    {
       this.referenceFrame = referenceFrame;
@@ -74,6 +79,11 @@ public class FramePlane3d extends AbstractReferenceFrameHolder
       getNormal(returnVector);
       return returnVector;
    }
+   
+   public Vector3d getNormal()
+   {
+      return plane3d.getNormal();
+   }
 
    public void setNormal(double x, double y, double z)
    {
@@ -97,6 +107,11 @@ public class FramePlane3d extends AbstractReferenceFrameHolder
       FramePoint pointToReturn = new FramePoint(this.getReferenceFrame());
       this.getPoint(pointToReturn);
       return pointToReturn;
+   }
+   
+   public Point3d getPoint()
+   {
+      return plane3d.getPoint();
    }
 
    public void setPoint(double x, double y, double z)
@@ -148,6 +163,51 @@ public class FramePlane3d extends AbstractReferenceFrameHolder
       return plane3d.isOnOrBelow(pointToTest.getPoint());
    }
 
+   /**
+    * Tests if the two planes are parallel by testing if their normals are collinear.
+    * The latter is done given a tolerance on the angle between the two normal axes in the range ]0; <i>pi</i>/2[.
+    * 
+    * <p>
+    * Edge cases:
+    * <ul>
+    *    <li> if the length of either normal is below {@code 1.0E-7}, this method fails and returns {@code false}.
+    * </ul>
+    * </p>
+    * 
+    * @param otherPlane the other plane to do the test with. Not modified.
+    * @param angleEpsilon tolerance on the angle in radians.
+    * @return {@code true} if the two planes are parallel, {@code false} otherwise.
+    */
+   public boolean isParallel(FramePlane3d otherPlane, double angleEpsilon)
+   {
+      checkReferenceFrameMatch(otherPlane);
+      return plane3d.isParallel(otherPlane.plane3d, angleEpsilon);
+   }
+
+   /**
+    * Tests if this plane and the given plane are coincident:
+    * <ul>
+    *    <li> {@code this.normal} and {@code otherPlane.normal} are collinear given the tolerance {@code angleEpsilon}.
+    *    <li> the distance of {@code otherPlane.point} from the this plane is less than {@code distanceEpsilon}.
+    * </ul>
+    * <p>
+    * Edge cases:
+    * <ul>
+    *    <li> if the length of either normal is below {@code 1.0E-7}, this method fails and returns {@code false}.
+    * </ul>
+    * </p>
+    * 
+    * @param otherPlane the other plane to do the test with. Not modified.
+    * @param angleEpsilon tolerance on the angle in radians to determine if the plane normals are collinear. 
+    * @param distanceEpsilon tolerance on the distance to determine if {@code otherPlane.point} belongs to this plane.
+    * @return {@code true} if the two planes are coincident, {@code false} otherwise.
+    */
+   public boolean isCoincident(FramePlane3d otherPlane, double angleEpsilon, double distanceEpsilon)
+   {
+      checkReferenceFrameMatch(otherPlane);
+      return plane3d.isCoincident(otherPlane.plane3d, angleEpsilon, distanceEpsilon);
+   }
+
    public FramePoint orthogonalProjectionCopy(FramePoint point)
    {
       checkReferenceFrameMatch(point);
@@ -194,6 +254,13 @@ public class FramePlane3d extends AbstractReferenceFrameHolder
    {
       plane3d.applyTransform(transformation);
    }
+
+   public void setIncludingFrame(ReferenceFrame referenceFrame, double pointX, double pointY, double pointZ, double normalX, double normalY, double normalZ)
+   {
+      this.referenceFrame = referenceFrame;
+      plane3d.setPoint(pointX, pointY, pointZ);
+      plane3d.setNormal(normalX, normalY, normalZ);
+   }
    
    public void getIntersectionWithLine(FramePoint pointToPack, FrameLine line)
    {
@@ -201,7 +268,7 @@ public class FramePlane3d extends AbstractReferenceFrameHolder
 	   checkReferenceFrameMatch(pointToPack.getReferenceFrame());
 	   
 	   Point3d intersectionToPack = new Point3d();
-	   plane3d.getIntersectionWithLine(intersectionToPack, line.getOrigin(), line.getDirection());
+	   plane3d.getIntersectionWithLine(intersectionToPack, line.getPoint(), line.getNormalizedVector());
 	   pointToPack.set(intersectionToPack);
    }
 

@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Random;
 
 import javax.vecmath.Point2d;
+import javax.vecmath.Point2f;
 import javax.vecmath.Point3d;
 import javax.vecmath.Tuple2d;
 
@@ -71,6 +72,48 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
    public ConvexPolygon2d(List<Point2d> vertices)
    {
       this(vertices, vertices.size());
+   }
+
+   /**
+    * Creates an empty convex polygon, adds N new vertices using an array of {@code Point2d}, updates the vertices so they are clockwise ordered, and initializes some essential numbers such as the centroid.
+    * @param vertices {@code Point2d[]} the array of points that is used to creates the vertices.
+    * @param numberOfVertices int that is used to determine the number of vertices of the polygon.
+    * Note the: {@code vertices.length} can be greater or equal to numberOfVertices.
+    */
+   public ConvexPolygon2d(Point2d[] vertices, int numberOfVertices)
+   {
+      setAndUpdate(vertices, numberOfVertices);
+   }
+
+   /**
+    * Creates an empty convex polygon, adds N new vertices using an array of {@code Point2d}, updates the vertices so they are clockwise ordered, and initializes some essential numbers such as the centroid.
+    * @param vertices {@code Point2d[]} the array of points that is used to creates the vertices.
+    * The number of vertices of this polygon will be equal to the length of the point array.
+    */
+   public ConvexPolygon2d(Point2d[] vertices)
+   {
+      this(vertices, vertices.length);
+   }
+
+   /**
+    * Creates an empty convex polygon, adds N new vertices using an array of {@code Point2f}, updates the vertices so they are clockwise ordered, and initializes some essential numbers such as the centroid.
+    * @param vertices {@code Point2f[]} the array of points that is used to creates the vertices.
+    * @param numberOfVertices int that is used to determine the number of vertices of the polygon.
+    * Note the: {@code vertices.length} can be greater or equal to numberOfVertices.
+    */
+   public ConvexPolygon2d(Point2f[] vertices, int numberOfVertices)
+   {
+      setAndUpdate(vertices, numberOfVertices);
+   }
+
+   /**
+    * Creates an empty convex polygon, adds N new vertices using an array of {@code Point2f}, updates the vertices so they are clockwise ordered, and initializes some essential numbers such as the centroid.
+    * @param vertices {@code Point2f[]} the array of points that is used to creates the vertices.
+    * The number of vertices of this polygon will be equal to the length of the point array.
+    */
+   public ConvexPolygon2d(Point2f[] vertices)
+   {
+      this(vertices, vertices.length);
    }
 
    /**
@@ -171,6 +214,18 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
    /**
     * Add a vertex to this polygon.
     * Note that this method recycles memory.
+    * @param vertex {@code Point2f} the new vertex.
+    */
+   public void addVertex(Point2f vertex)
+   {
+      isUpToDate = false;
+      setOrCreate(vertex, numberOfVertices);
+      numberOfVertices++;
+   }
+
+   /**
+    * Add a vertex to this polygon.
+    * Note that this method recycles memory.
     * @param x {@code double} first coordinate of the new vertex.
     * @param y {@code double} second coordinate of the new vertex.
     */
@@ -201,6 +256,19 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
     * @param numberOfVertices {@code int} that is used to determine the number of vertices to add to this polygon. Note the: {@code vertices.length} can be greater or equal to numberOfVertices.
     */
    public void addVertices(Point2d[] vertices, int numberOfVertices)
+   {
+      isUpToDate = false;
+      for (int i = 0; i < numberOfVertices; i++)
+         addVertex(vertices[i]);
+   }
+
+   /**
+    * Adds N new vertices to this polygon using an array of {@code Point2f}.
+    * Note that this method recycles memory.
+    * @param vertices {@code Point2f[]} the list of new vertices.
+    * @param numberOfVertices {@code int} that is used to determine the number of vertices to add to this polygon. Note the: {@code vertices.length} can be greater or equal to numberOfVertices.
+    */
+   public void addVertices(Point2f[] vertices, int numberOfVertices)
    {
       isUpToDate = false;
       for (int i = 0; i < numberOfVertices; i++)
@@ -248,6 +316,11 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
    }
 
    private void setOrCreate(Point2d point2d, int i)
+   {
+      setOrCreate(point2d.getX(), point2d.getY(), i);
+   }
+
+   private void setOrCreate(Point2f point2d, int i)
    {
       setOrCreate(point2d.getX(), point2d.getY(), i);
    }
@@ -316,6 +389,21 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
     * @param numberOfVertices {@code int} that is used to determine the number of vertices of the polygon. Note the: {@code vertices.length} can be greater or equal to numberOfVertices.
     */
    public void setAndUpdate(Point2d[] vertices, int numberOfVertices)
+   {
+      clear();
+      addVertices(vertices, numberOfVertices);
+      update();
+   }
+
+   /**
+    * This method does:
+    * 1- {@code clear()};
+    * 2- {@code addVertices(vertices, numberOfVertices)};
+    * 3- {@code update()}.
+    * @param vertices {@code Point2f[]} the list of points that is used to creates the vertices.
+    * @param numberOfVertices {@code int} that is used to determine the number of vertices of the polygon. Note the: {@code vertices.length} can be greater or equal to numberOfVertices.
+    */
+   public void setAndUpdate(Point2f[] vertices, int numberOfVertices)
    {
       clear();
       addVertices(vertices, numberOfVertices);

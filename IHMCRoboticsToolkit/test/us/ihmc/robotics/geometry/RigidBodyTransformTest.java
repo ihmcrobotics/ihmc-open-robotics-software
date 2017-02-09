@@ -32,6 +32,7 @@ import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.testing.JUnitTools;
+import us.ihmc.tools.testing.MutationTestingTools;
 
 public class RigidBodyTransformTest
 {
@@ -39,7 +40,7 @@ public class RigidBodyTransformTest
 
    private final int nTests = 200;
 
-   
+
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void TestSetRotationAndZeroTranslationWithAxisAngle4d()
@@ -50,7 +51,7 @@ public class RigidBodyTransformTest
 
       double epsilonAssert = 1e-8;
       AxisAngleComparisonMode comparisonMode = AxisAngleComparisonMode.IGNORE_FLIPPED_AXES_ROTATION_DIRECTION_AND_COMPLETE_ROTATIONS;
-      
+
       double[] thetaTest = generateArrayOfTestAnglesMinus2PiToPiButExcludePlusMinusPi();
 
       for (double theta : thetaTest)
@@ -80,7 +81,7 @@ public class RigidBodyTransformTest
       }
 
       for (double theta : thetaTest)
-      {         
+      {
          axisAngle.setX(Math.cos(theta));
          axisAngle.setY(0);
          axisAngle.setZ(Math.sin(theta));
@@ -164,7 +165,7 @@ public class RigidBodyTransformTest
       AxisAngleComparisonMode comparisonMode = AxisAngleComparisonMode.IGNORE_FLIPPED_AXES_ROTATION_DIRECTION_AND_COMPLETE_ROTATIONS;
 
       double[] thetaTest = generateArrayOfTestAnglesMinus2PiToPiButExcludePlusMinusPi();
-      
+
       for (double theta : thetaTest)
       {
          axisAngle.setX(Math.sin(theta));
@@ -210,7 +211,7 @@ public class RigidBodyTransformTest
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
-   public void TestCreateTransformWithAxisAngle4fEpsilonToPiMinusEpsilon() 
+   public void TestCreateTransformWithAxisAngle4fEpsilonToPiMinusEpsilon()
    {
       Random random = new Random();
       AxisAngle4f axisAngle = new AxisAngle4f();
@@ -277,7 +278,7 @@ public class RigidBodyTransformTest
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
-   public void TestCreateTransformWithAxisAngle4fAndRandomVector3fEpsilonToPiMinusEpsilon()  
+   public void TestCreateTransformWithAxisAngle4fAndRandomVector3fEpsilonToPiMinusEpsilon()
    {
       Random random = new Random();
       AxisAngle4f axisAngle = new AxisAngle4f();
@@ -417,7 +418,7 @@ public class RigidBodyTransformTest
       }
 
    }
-	
+
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void TestNormalize()
@@ -871,23 +872,23 @@ public class RigidBodyTransformTest
    public void TestGetRotationAxisAngle4d()
    {
       double epsilonAssert = 1e-6;
-      
+
       Random random = new Random(100L);
-      
+
       RigidBodyTransform rotationTransform = new RigidBodyTransform();
-      
+
       Vector3d axisActual = RandomTools.generateRandomVector(random);
       axisActual.scale(1.0 / axisActual.length());
-      
+
       Vector3d axisComputed = new Vector3d();
 
       AxisAngle4d axisAngleActual = new AxisAngle4d();
       AxisAngle4d axisAngleToPack = new AxisAngle4d();
 
       double[] anglesToTest;
-      
+
       int numberOfPassedTests = 0;
-      
+
       for (int i=0; i<2; i++)
       {
          if (i==0)
@@ -899,23 +900,23 @@ public class RigidBodyTransformTest
          {
             anglesToTest = new double[]{-3.0*Math.PI, -2.0*Math.PI, -Math.PI, -0.5*Math.PI, 0.0, 0.5*Math.PI, Math.PI, 2.0*Math.PI, 3.0*Math.PI};
          }
-         
+
          for (double angleActual : anglesToTest)
          {
             axisAngleActual.set(axisActual, angleActual);
             rotationTransform.setRotationAndZeroTranslation(axisAngleActual);
 
             rotationTransform.getRotation(axisAngleToPack);
-            
+
             double angleComputed = axisAngleToPack.getAngle();
             axisComputed.set(axisAngleToPack.getX(), axisAngleToPack.getY(), axisAngleToPack.getZ());
-            
+
             double angleDifference = AngleTools.computeAngleDifferenceMinusPiToPi(angleActual, angleComputed);
 
             if ( Math.abs(angleDifference) > epsilonAssert)
             {
                boolean rotationAxisIsFlipped = MathTools.epsilonEquals(axisComputed.dot(axisActual), -1.0, epsilonAssert);
-               
+
                String errorMsg = "Computed rotation angle, " + Math.toDegrees(angleComputed) + " degrees, does not equal actual rotation angle, "
                      + Math.toDegrees(angleActual) + "degrees \n and computed rotation axis: " + axisComputed + "\n is not a flipped version of actual axis: "
                      + axisActual + "\n Number of Passed Tests: " + numberOfPassedTests + "\n";
@@ -923,10 +924,10 @@ public class RigidBodyTransformTest
                assertTrue(errorMsg, rotationAxisIsFlipped);
             }
             numberOfPassedTests++;
-         } 
+         }
       }
 
-      
+
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -2356,7 +2357,7 @@ public class RigidBodyTransformTest
          JUnitTools.assertPoint3fEquals("", point, point2, 1e-6);
       }
    }
-   
+
    private boolean checkOrthogonality(RigidBodyTransform transform)
    {
       Matrix3d matrix = new Matrix3d();
@@ -2741,7 +2742,7 @@ public class RigidBodyTransformTest
    }
 
    private double[] generateArrayOfTestAnglesMinus2PiToPiButExcludePlusMinusPi()
-   {      
+   {
       return AngleTools.generateArrayOfTestAngles(nTests, 0.0, true, false);
    }
 
@@ -2783,6 +2784,13 @@ public class RigidBodyTransformTest
       {
          throw new AssertionError("expected:\n<" + expectedTransform + ">\n but was:\n<" + actualTransform + ">");
       }
+   }
+
+   public static void main(String[] args)
+   {
+      String targetTests = "us.ihmc.robotics.geometry.RigidBodyTransformTest";
+      String targetClasses = "us.ihmc.robotics.geometry.RigidBodyTransform";
+      MutationTestingTools.doPITMutationTestAndOpenResult(targetTests, targetClasses);
    }
 
 }

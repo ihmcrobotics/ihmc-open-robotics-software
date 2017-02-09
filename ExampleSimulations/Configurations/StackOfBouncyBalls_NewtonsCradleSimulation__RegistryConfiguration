@@ -1,0 +1,6 @@
+root*false*false
+root.StackOfBouncyBalls*false*false
+root.GroundAsABoxRobot*false*false
+root.DefaultCollisionVisualizer*false*false
+root.DefaultCollisionVisualizer.CollisionOneBalls*false*false
+root.DefaultCollisionVisualizer.CollisionTwoBalls*false*false

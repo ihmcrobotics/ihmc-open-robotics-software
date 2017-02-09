@@ -45,25 +45,29 @@ import javax.swing.JTextField;
 import javax.swing.JWindow;
 import javax.swing.SwingUtilities;
 import javax.vecmath.Color3f;
+import javax.vecmath.Tuple3d;
 
-import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
-import us.ihmc.graphics3DAdapter.Graphics3DBackgroundScaleMode;
-import us.ihmc.graphics3DAdapter.HeightMap;
-import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
-import us.ihmc.graphics3DAdapter.camera.CameraConfigurationList;
-import us.ihmc.graphics3DAdapter.camera.CameraMountList;
-import us.ihmc.graphics3DAdapter.camera.CameraTrackingAndDollyPositionHolder;
-import us.ihmc.graphics3DAdapter.camera.CaptureDevice;
-import us.ihmc.graphics3DAdapter.camera.ClassicCameraController;
-import us.ihmc.graphics3DAdapter.camera.OffscreenBufferVideoServer;
-import us.ihmc.graphics3DAdapter.camera.RenderedSceneHandler;
-import us.ihmc.graphics3DAdapter.camera.TrackingDollyCameraController;
-import us.ihmc.graphics3DAdapter.camera.ViewportAdapter;
-import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
-import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
-import us.ihmc.graphics3DAdapter.input.SelectedListener;
-import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
-import us.ihmc.graphics3DAdapter.structure.Graphics3DNodeType;
+import us.ihmc.graphicsDescription.Graphics3DObject;
+import us.ihmc.graphicsDescription.HeightMap;
+import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
+import us.ihmc.graphicsDescription.input.SelectedListener;
+import us.ihmc.graphicsDescription.structure.Graphics3DNode;
+import us.ihmc.graphicsDescription.structure.Graphics3DNodeType;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphic;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.jMonkeyEngineToolkit.Graphics3DAdapter;
+import us.ihmc.jMonkeyEngineToolkit.Graphics3DBackgroundScaleMode;
+import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
+import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfigurationList;
+import us.ihmc.jMonkeyEngineToolkit.camera.CameraMountList;
+import us.ihmc.jMonkeyEngineToolkit.camera.CameraTrackingAndDollyPositionHolder;
+import us.ihmc.jMonkeyEngineToolkit.camera.CaptureDevice;
+import us.ihmc.jMonkeyEngineToolkit.camera.ClassicCameraController;
+import us.ihmc.jMonkeyEngineToolkit.camera.OffscreenBufferVideoServer;
+import us.ihmc.jMonkeyEngineToolkit.camera.RenderedSceneHandler;
+import us.ihmc.jMonkeyEngineToolkit.camera.TrackingDollyCameraController;
+import us.ihmc.jMonkeyEngineToolkit.camera.ViewportAdapter;
 import us.ihmc.robotics.dataStructures.YoVariableHolder;
 import us.ihmc.robotics.dataStructures.registry.NameSpace;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -114,11 +118,9 @@ import us.ihmc.simulationconstructionset.synchronization.SimulationSynchronizer;
 import us.ihmc.simulationconstructionset.util.SimpleFileReader;
 import us.ihmc.simulationconstructionset.util.SimpleFileWriter;
 import us.ihmc.simulationconstructionset.util.ground.FlatGroundProfile;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphic;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsList;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.tools.TimestampProvider;
 import us.ihmc.tools.gui.GraphicsUpdatable;
+import us.ihmc.tools.io.xml.XMLReaderUtility;
 import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
 
 public class StandardSimulationGUI implements SelectGraphConfigurationCommandExecutor, GraphGroupSelector, EntryBoxGroupSelector, CameraSelector,
@@ -210,6 +212,9 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
    
    private CloseableAndDisposableRegistry closeableAndDisposableRegistry = new CloseableAndDisposableRegistry();
    
+   private List<String> panelsSelectedEarly = new ArrayList<>();
+   private boolean scsWindowOpened = false;
+   
    public StandardSimulationGUI(Graphics3DAdapter graphics3dAdapter, SimulationSynchronizer simulationSynchronizer, AllCommandsExecutor allCommandsExecutor,
          AllDialogConstructorsHolder allDialogConstructorsHolder, SimulationConstructionSet sim, YoVariableHolder yoVariableHolder, Robot[] robots,
          DataBuffer buffer, VarGroupList varGroupList, JApplet jApplet, YoVariableRegistry rootRegistry)
@@ -287,9 +292,33 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
       return viewportPanel;
    }
 
+   public void addRobot(Robot robot)
+   {
+      boolean wereAlreadySet = (this.robots != null);
+
+      if (!wereAlreadySet)
+      {
+         setRobots(new Robot[]{robot});
+         return;
+      }
+      
+      Robot[] newRobots = new Robot[robots.length + 1];
+      for (int i=0; i<robots.length; i++)
+      {
+         newRobots[i] = robots[i];
+      }
+      newRobots[newRobots.length-1] = robot;
+      this.robots = newRobots;
+      
+      robot.getCameraMountList(cameraMountList);
+      createGraphicsRobot(robot);
+   }
+
    public void setRobots(Robot[] robots)
    {
-      if (this.robots != null)
+      boolean wereAlreadySet = (this.robots != null);
+      
+      if (wereAlreadySet)
       {
          throw new RuntimeException("robots != null. Can only setRobots once!");
       }
@@ -476,7 +505,6 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
             initGUI(heightMap);
             showGUI();
          }
-
       });
    }
 
@@ -594,6 +622,16 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
                // The search interface needs to be revamped, making sure it uses InvokeLater when necessary
                // All other deadlocks in the SCS code need to be removed.
 
+            }
+            
+            @Override
+            public void windowOpened(WindowEvent e)
+            {
+               scsWindowOpened = true;
+               for (String earlySelection : panelsSelectedEarly)
+               {
+                  selectPanel(earlySelection);
+               }
             }
          });
          jFrame.addComponentListener(new ComponentAdapter()
@@ -813,6 +851,8 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
          YoVariablePanelJPopupMenu varPanelJPopupMenu = new YoVariablePanelJPopupMenu(myGraphArrayPanel, myEntryBoxArrayPanel, selectedVariableHolder, yoVariableExplorerTabbedPane,
                bookmarkedVariablesHolder);
          yoVariableExplorerTabbedPane.setVarPanelJPopupMenu(varPanelJPopupMenu);
+         
+         //sim.addExtraJpanel(new JavaFX3DPlotter().getPanel(), "3D Plotter");
       }
    }
 
@@ -822,12 +862,17 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
       {
          for (Robot robot : robots)
          {
-            GraphicsRobot graphicsRobot = new GraphicsRobot(robot);
-            graphicsUpdatables.add(graphicsRobot);
-            graphicsRobots.put(robot, graphicsRobot);
-            graphics3dAdapter.addRootNode(graphicsRobot.getRootNode());
+            createGraphicsRobot(robot);
          }
       }
+   }
+
+   private void createGraphicsRobot(Robot robot)
+   {
+      GraphicsRobot graphicsRobot = new GraphicsRobot(robot);
+      graphicsUpdatables.add(graphicsRobot);
+      graphicsRobots.put(robot, graphicsRobot);
+      graphics3dAdapter.addRootNode(graphicsRobot.getRootNode());
    }
 
    public ViewportPanel createViewportPanel()
@@ -1431,9 +1476,19 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
       viewportPanel.setCameraFix(fixX, fixY, fixZ);
    }
 
+   public void setCameraFix(Tuple3d cameraFix)
+   {
+      viewportPanel.setCameraFix(cameraFix);
+   }
+
    public void setCameraPosition(double posX, double posY, double posZ)
    {
       viewportPanel.setCameraPosition(posX, posY, posZ);
+   }
+
+   public void setCameraPosition(Tuple3d cameraPosition)
+   {
+      viewportPanel.setCameraPosition(cameraPosition);      
    }
 
    public boolean allowTickUpdatesNow()
@@ -1986,6 +2041,12 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
    @Override
    public void selectPanel(String panelName)
    {
+      if (!scsWindowOpened)
+      {
+         panelsSelectedEarly.add(panelName);
+         return;
+      }
+      
       for (int i = 0; i < standardGUIActions.extraPanelsMenu.getItemCount(); i++)
       {
          if (standardGUIActions.extraPanelsMenu.getItem(i).getText().equals(panelName))
@@ -3134,7 +3195,6 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
                graphicsUpdatable.update();
             }
          }
-
       }
    }
    
@@ -3181,4 +3241,5 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
    {
       mainPanel.add(viewportPanel); //TODO: Why is this here? 
    }
+
 }

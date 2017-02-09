@@ -303,7 +303,7 @@ public class ConvexPolygon2dCalculator
          {
             Point2d edgeStart = polygon.getVertex(i);
             Point2d edgeEnd = polygon.getNextVertex(i);
-            double distanceToEdgeLine = GeometryTools.distanceFromPointToLine(pointX, pointY, edgeStart.x, edgeStart.y, edgeEnd.x, edgeEnd.y);
+            double distanceToEdgeLine = GeometryTools.distanceFromPointToLine(pointX, pointY, edgeStart.x, edgeStart.y, edgeEnd.x - edgeStart.x, edgeEnd.y - edgeStart.y);
 
             boolean pointOutside = canObserverSeeEdge(i, pointX, pointY, polygon);
             if (!pointOutside)
@@ -388,7 +388,7 @@ public class ConvexPolygon2dCalculator
       Point2d vertexTwo = polygon.getNextVertex(edgeIndex);
       double edgeVectorX = vertexTwo.x - vertexOne.x;
       double edgeVectorY = vertexTwo.y - vertexOne.y;
-      return Line2d.isPointOnSideOfLine(observerX, observerY, edgeVectorX, edgeVectorY, vertexOne.x, vertexOne.y, RobotSide.LEFT);
+      return GeometryTools.isPointOnSideOfLine(observerX, observerY, vertexOne.x, vertexOne.y, edgeVectorX, edgeVectorY, RobotSide.LEFT);
    }
 
    /**

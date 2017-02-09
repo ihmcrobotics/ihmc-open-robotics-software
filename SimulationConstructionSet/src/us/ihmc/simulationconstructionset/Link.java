@@ -8,12 +8,12 @@ import javax.vecmath.Vector3d;
 
 import org.ejml.data.DenseMatrix64F;
 
-import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
-import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
+import us.ihmc.graphicsDescription.Graphics3DObject;
+import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.InertiaTools;
-import us.ihmc.simulationconstructionset.physics.CollisionShape;
+import us.ihmc.robotics.robotDescription.CollisionMeshDescription;
 import us.ihmc.simulationconstructionset.robotdefinition.LinkDefinitionFixedFrame;
 
 /**
@@ -43,10 +43,7 @@ public class Link implements java.io.Serializable
    public Vector3d comOffset = new Vector3d();
 
    private Graphics3DObject linkGraphics;
-   private CollisionShape collision;
-
-   // external force applied to center of mass
-   protected ExternalForcePoint ef_centerOfMass;
+   private ArrayList<CollisionMeshDescription> collisionMeshDescriptions;
 
    public Link(LinkDefinitionFixedFrame linkDefinition)
    {
@@ -113,6 +110,7 @@ public class Link implements java.io.Serializable
     *
     * @return String representation of this link.
     */
+   @Override
    public String toString()
    {
       StringBuffer retBuffer = new StringBuffer();
@@ -227,9 +225,9 @@ public class Link implements java.io.Serializable
    protected void setParentJoint(Joint joint)
    {
       this.parentJoint = joint;
-      if (ef_collision != null) {
+      if (ef_collision != null)
+      {
          joint.addExternalForcePoint(ef_collision);
-         joint.addExternalForcePoint(ef_centerOfMass);
       }
    }
 
@@ -361,6 +359,16 @@ public class Link implements java.io.Serializable
       this.linkGraphics = linkGraphics;
    }
 
+   public void addCollisionMesh(CollisionMeshDescription collisionMeshDescription)
+   {
+      if (collisionMeshDescriptions == null)
+      {
+         collisionMeshDescriptions = new ArrayList<CollisionMeshDescription>();
+      }
+      
+      this.collisionMeshDescriptions.add(collisionMeshDescription);
+   }
+
    /**
     * Retrieves the LinkGraphics object representing this link.
     *
@@ -371,9 +379,14 @@ public class Link implements java.io.Serializable
       return linkGraphics;
    }
 
+   public ArrayList<CollisionMeshDescription> getCollisionMeshDescriptions()
+   {
+      return collisionMeshDescriptions;
+   }
+
+   //TODO: Get this stuff out of here. Put it in Joint maybe?
 // ///////////// Collision Stuff Here /////////////
 
-   protected double maxVelocity;
    public ExternalForcePoint ef_collision;
 
    /**
@@ -381,13 +394,11 @@ public class Link implements java.io.Serializable
     * @param maxVelocity Maximum velocity of any point on the link. Used for improving collision detection performance.
     * @param polyTree PolyTree defining collision geometry.
     */
-   public void enableCollisions( double maxVelocity, YoVariableRegistry registry)
+   public void enableCollisions(YoVariableRegistry registry)
    {
-      this.maxVelocity = maxVelocity;
       this.ef_collision = new ExternalForcePoint(this.name + "ef_collision", registry);
-      this.ef_centerOfMass = new ExternalForcePoint(this.name + "ef_centerOfMass", registry);
+      if (parentJoint != null) parentJoint.addExternalForcePoint(ef_collision);
    }
-
 
    // ////////// Graphics from Mass Properties Here ///////////////////////
 
@@ -549,16 +560,6 @@ public class Link implements java.io.Serializable
       comOffsetRet.set(this.comOffset);
    }
 
-   public ExternalForcePoint getCenterOfMassForce()
-   {
-      return ef_centerOfMass;
-   }
-
-   public CollisionShape getCollisionShape()
-   {
-      return collision;
-   }
-
    public Joint getParentJoint()
    {
       return parentJoint;
@@ -572,5 +573,6 @@ public class Link implements java.io.Serializable
          System.err.println("Warning: Inertia may be too small for Link " + getName() + " for stable simulation. principalMomentsOfInertia = " + principalMomentsOfInertia);
       }
    }
+
 
 }

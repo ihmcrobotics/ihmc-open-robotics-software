@@ -4,7 +4,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
-import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
+import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootTrajectoryMessage;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -20,7 +20,7 @@ public class FootTrajectoryBehavior extends AbstractBehavior
    private final BooleanYoVariable trajectoryTimeElapsed;
    private final BooleanYoVariable doubleSupport;
 
-   public FootTrajectoryBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, DoubleYoVariable yoTime, BooleanYoVariable yoDoubleSupport)
+   public FootTrajectoryBehavior(CommunicationBridgeInterface outgoingCommunicationBridge, DoubleYoVariable yoTime, BooleanYoVariable yoDoubleSupport)
    {
       super(outgoingCommunicationBridge);
 
@@ -70,7 +70,7 @@ public class FootTrajectoryBehavior extends AbstractBehavior
    }
 
    @Override
-   public void initialize()
+   public void onBehaviorEntered()
    {
       hasPacketBeenSent.set(false);
       
@@ -81,7 +81,7 @@ public class FootTrajectoryBehavior extends AbstractBehavior
    }
 
    @Override
-   public void doPostBehaviorCleanup()
+   public void onBehaviorExited()
    {
       hasPacketBeenSent.set(false);
       outgoingFootTrajectoryMessage = null;
@@ -104,6 +104,21 @@ public class FootTrajectoryBehavior extends AbstractBehavior
          trajectoryTimeElapsed.set(yoTime.getDoubleValue() - startTime.getDoubleValue() > trajectoryTime.getDoubleValue());
 
       return trajectoryTimeElapsed.getBooleanValue() && !isPaused.getBooleanValue();
+   }
+
+   @Override
+   public void onBehaviorAborted()
+   {
+   }
+
+   @Override
+   public void onBehaviorPaused()
+   {
+   }
+
+   @Override
+   public void onBehaviorResumed()
+   {
    }
 
    

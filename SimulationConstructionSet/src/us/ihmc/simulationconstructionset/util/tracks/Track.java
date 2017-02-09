@@ -5,13 +5,13 @@ import java.util.ArrayList;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
-import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.simulationconstructionset.FunctionToIntegrate;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.graphicsDescription.Graphics3DObject;
+import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -332,6 +332,7 @@ public class Track implements FunctionToIntegrate
 
    private double[] derivativeVector = new double[1];
 
+   @Override
    public double[] computeDerivativeVector()
    {
       // +++JEP OPTIMIZE
@@ -345,11 +346,13 @@ public class Track implements FunctionToIntegrate
       return derivativeVector;
    }
 
+   @Override
    public int getVectorSize()
    {
       return 1;
    }
 
+   @Override
    public DoubleYoVariable[] getOutputVariables()
    {
       return new DoubleYoVariable[] {track_linear_position};

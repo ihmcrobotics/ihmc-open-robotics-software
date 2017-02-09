@@ -1,13 +1,13 @@
 package us.ihmc.steppr.logProcessor;
 
-import us.ihmc.darpaRoboticsChallenge.logProcessor.LogDataProcessorFunction;
+import us.ihmc.avatar.logProcessor.LogDataProcessorFunction;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.dataStructures.YoVariableHolder;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.math.filters.HysteresisFilteredYoVariable;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
 public class StepprKneeHysterisisCompensationLogProcessor implements LogDataProcessorFunction
 {

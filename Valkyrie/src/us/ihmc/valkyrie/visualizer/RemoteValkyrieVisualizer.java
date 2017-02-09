@@ -6,12 +6,12 @@ import java.util.Arrays;
 
 import javax.swing.JComboBox;
 
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.communication.configuration.NetworkParameterKeys;
 import us.ihmc.communication.configuration.NetworkParameters;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.robotDataCommunication.YoVariableClient;
-import us.ihmc.robotDataCommunication.visualizer.SCSVisualizer;
-import us.ihmc.robotDataCommunication.visualizer.SCSVisualizerStateListener;
+import us.ihmc.robotDataLogger.YoVariableClient;
+import us.ihmc.robotDataVisualizer.visualizer.SCSVisualizer;
+import us.ihmc.robotDataVisualizer.visualizer.SCSVisualizerStateListener;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
@@ -40,6 +40,7 @@ public class RemoteValkyrieVisualizer implements SCSVisualizerStateListener
       valkyrieRobotModel = new ValkyrieRobotModel(DRCRobotModel.RobotTarget.REAL_ROBOT, false);
 
       SCSVisualizer scsVisualizer = new SCSVisualizer(BUFFER_SIZE);
+      scsVisualizer.setDisplayOneInNPackets(3);
       scsVisualizer.addSCSVisualizerStateListener(this);
       scsVisualizer.setShowOverheadView(false);
 

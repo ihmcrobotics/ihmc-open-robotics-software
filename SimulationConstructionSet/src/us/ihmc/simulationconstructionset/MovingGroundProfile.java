@@ -2,7 +2,7 @@ package us.ihmc.simulationconstructionset;
 
 import javax.vecmath.Vector3d;
 
-import us.ihmc.graphics3DAdapter.GroundProfile3D;
+import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 
 public interface MovingGroundProfile extends GroundProfile3D
 {

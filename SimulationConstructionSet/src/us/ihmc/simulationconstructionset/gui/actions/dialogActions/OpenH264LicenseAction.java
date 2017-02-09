@@ -21,6 +21,7 @@ public class OpenH264LicenseAction extends AbstractAction
 
    }
    
+   @Override
    public void actionPerformed(ActionEvent e)
    {
       OpenH264Downloader.showAboutCiscoDialog();

@@ -17,7 +17,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 import us.ihmc.commonWalkingControlModules.virtualModelControl.VirtualModelControlSolution;
 import us.ihmc.commonWalkingControlModules.virtualModelControl.VirtualModelController;
 import us.ihmc.commonWalkingControlModules.visualizer.WrenchVisualizer;
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -354,7 +354,7 @@ public class WholeBodyVirtualModelControlSolver
 
       tmpWrench.setToZero(accelerationVector.getBodyFrame(), accelerationVector.getExpressedInFrame());
 
-      conversionInertias.get(controlledBody).computeDynamicWrenchInBodyCoordinates(tmpWrench, accelerationVector, tmpTwist);
+      conversionInertias.get(controlledBody).computeDynamicWrenchInBodyCoordinates(accelerationVector, tmpTwist, tmpWrench);
 
       tmpWrench.changeBodyFrameAttachedToSameBody(controlledBody.getBodyFixedFrame());
       tmpWrench.changeFrame(ReferenceFrame.getWorldFrame());

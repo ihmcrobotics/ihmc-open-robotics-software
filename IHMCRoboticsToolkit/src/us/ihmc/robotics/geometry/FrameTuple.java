@@ -34,7 +34,7 @@ public abstract class FrameTuple<S extends FrameTuple<S, T>, T extends Tuple3d &
    public FrameTuple(ReferenceFrame referenceFrame, T tuple, String name)
    {
       super(referenceFrame, tuple);
-      
+
       if (DEBUG)
       {
          if (referenceFrame == null)
@@ -76,18 +76,31 @@ public abstract class FrameTuple<S extends FrameTuple<S, T>, T extends Tuple3d &
       checkReferenceFrameMatch(frameTuple);
       this.tuple.set(frameTuple.tuple);
    }
-   
+
+   @Override
    public final void set(Tuple3d tuple)
    {
       this.tuple.set(tuple);
    }
 
+   public final void set(Tuple3f tuple)
+   {
+      this.tuple.set(tuple);
+   }
+
+   @Override
    public final void setIncludingFrame(ReferenceFrame referenceFrame, Tuple3d tuple)
    {
       this.referenceFrame = referenceFrame;
       set(tuple);
    }
-   
+
+   public final void setIncludingFrame(ReferenceFrame referenceFrame, Tuple3f tuple)
+   {
+      this.referenceFrame = referenceFrame;
+      set(tuple);
+   }
+
    /**
     * Set the x and y components of this frameTuple to tuple2d.x and tuple2d.y respectively, and sets the z component to zero.
     * @param tuple2d
@@ -188,6 +201,11 @@ public abstract class FrameTuple<S extends FrameTuple<S, T>, T extends Tuple3d &
       return tuple.getZ();
    }
 
+   public double distanceFromZero()
+   {
+      return Math.sqrt(tuple.getX() * tuple.getX() + tuple.getY() * tuple.getY() + tuple.getZ() * tuple.getZ());
+   }
+
    /**
     * Returns a Point3d copy of the tuple in this FrameTuple.
     *
@@ -208,6 +226,7 @@ public abstract class FrameTuple<S extends FrameTuple<S, T>, T extends Tuple3d &
       return new Vector3d(this.tuple);
    }
 
+   @Override
    public final void get(Tuple3d tuple3dToPack)
    {
       tuple3dToPack.set(tuple);
@@ -224,12 +243,13 @@ public abstract class FrameTuple<S extends FrameTuple<S, T>, T extends Tuple3d &
       tuple.set(0.0, 0.0, 0.0);
    }
 
+   @Override
    public final void setToZero(ReferenceFrame referenceFrame)
    {
       setToZero();
       this.referenceFrame = referenceFrame;
    }
-   
+
    /**
     * Sets this tuple to the location of the origin of passed in referenceFrame.
     */
@@ -246,6 +266,7 @@ public abstract class FrameTuple<S extends FrameTuple<S, T>, T extends Tuple3d &
       this.tuple.set(Double.NaN, Double.NaN, Double.NaN);
    }
 
+   @Override
    public final void setToNaN(ReferenceFrame referenceFrame)
    {
       this.tuple.set(Double.NaN, Double.NaN, Double.NaN);
@@ -263,7 +284,7 @@ public abstract class FrameTuple<S extends FrameTuple<S, T>, T extends Tuple3d &
    {
       return Double.isNaN(tuple.getX()) || Double.isNaN(tuple.getY()) || Double.isNaN(tuple.getZ());
    }
-   
+
    public final boolean containsInfinity()
    {
       return Double.isInfinite(tuple.getX()) || Double.isInfinite(tuple.getY()) || Double.isInfinite(tuple.getZ());
@@ -573,11 +594,11 @@ public abstract class FrameTuple<S extends FrameTuple<S, T>, T extends Tuple3d &
     */
    public final boolean epsilonEquals(Tuple3d tuple1, double threshold)
    {
-      if(tuple1 == null)
+      if (tuple1 == null)
       {
          return false;
       }
-      
+
       return tuple.epsilonEquals(tuple1, threshold);
    }
 
@@ -590,11 +611,11 @@ public abstract class FrameTuple<S extends FrameTuple<S, T>, T extends Tuple3d &
     */
    public final boolean epsilonEquals(FrameTuple<?, ?> frameTuple1, double threshold)
    {
-      if(frameTuple1 == null)
+      if (frameTuple1 == null)
       {
          return false;
       }
-      
+
       checkReferenceFrameMatch(frameTuple1);
 
       return epsilonEquals(frameTuple1.tuple, threshold);
@@ -608,11 +629,11 @@ public abstract class FrameTuple<S extends FrameTuple<S, T>, T extends Tuple3d &
     */
    public final boolean epsilonEquals(Tuple2d tuple1, double threshold)
    {
-      if(tuple1 == null)
+      if (tuple1 == null)
       {
          return false;
       }
-      
+
       double diff;
 
       diff = tuple.getX() - tuple1.getX();
@@ -645,11 +666,11 @@ public abstract class FrameTuple<S extends FrameTuple<S, T>, T extends Tuple3d &
     */
    public final boolean epsilonEquals(FrameTuple2d<?, ?> frameTuple2d, double threshold)
    {
-      if(frameTuple2d == null)
+      if (frameTuple2d == null)
       {
          return false;
       }
-      
+
       checkReferenceFrameMatch(frameTuple2d);
 
       return epsilonEquals(frameTuple2d.tuple, threshold);
@@ -667,7 +688,7 @@ public abstract class FrameTuple<S extends FrameTuple<S, T>, T extends Tuple3d &
 
    public final double[] toArray()
    {
-      return new double[] { tuple.getX(), tuple.getY(), tuple.getZ() };
+      return new double[] {tuple.getX(), tuple.getY(), tuple.getZ()};
    }
 
    /**

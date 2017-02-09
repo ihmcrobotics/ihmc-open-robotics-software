@@ -5,7 +5,7 @@ buildscript {
     }
   }
   dependencies {
-    classpath "gradle.plugin.us.ihmc.gradle:ihmc-build:0.0.18"
+    classpath "gradle.plugin.us.ihmc.gradle:ihmc-build:0.0.19"
   }
 }
 
@@ -17,7 +17,7 @@ if (!rootProject.name.equals('IHMCOpenRoboticsSoftware')) {
     evaluationDependsOn(':IHMCOpenRoboticsSoftware')
 }
 
-sourceCompatibility = 1.7
+sourceCompatibility = 1.8
 version = "${getOpenRoboticsSoftwareProject().version}"
 project.ext.fullVersion = "${getOpenRoboticsSoftwareProject().ext.fullVersion}"
 project.ext.vcsUrl = "${getOpenRoboticsSoftwareProject().ext.vcsUrl}"
@@ -47,7 +47,7 @@ repositories {
     jcenter()
     mavenCentral()
     maven {
-        url "https://bengal.ihmc.us/nexus/content/repositories/thirdparty/"
+        url "http://artifactory.ihmc.us/artifactory/thirdparty/"
     }
 }
 
@@ -65,10 +65,8 @@ dependencies {
     compile group: 'us.ihmc.thirdparty.jinput', name: 'jinput', version: '160414'
     compile group: 'org.xerial.snappy', name: 'snappy-java', version: '1.1.1-M1'
     compile group: 'com.google.guava', name: 'guava', version: '18.0'
+    compile group: 'javax.vecmath', name: 'vecmath', version: '1.5.2'
 
-//    testCompile group: 'org.pitest', name: 'pitest', version: '1.1.9'
-//    testCompile group: 'org.pitest', name: 'pitest-command-line', version: '1.1.9'
-    testCompile group: 'javax.vecmath', name: 'vecmath', version: '1.5.2'
     testCompile ihmc.getProjectDependency(":IHMCUnitTesting")
 }
 

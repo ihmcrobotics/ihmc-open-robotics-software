@@ -4,9 +4,11 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
+import us.ihmc.robotics.math.functionGenerator.YoFunctionGenerator;
+import us.ihmc.robotics.math.functionGenerator.YoFunctionGeneratorMode;
+import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.robotController.RobotController;
 
 public class YoFunctionGeneratorVisualizer implements RobotController
 {
@@ -48,21 +50,25 @@ public class YoFunctionGeneratorVisualizer implements RobotController
       hasBeenReset.set(true);
    }
    
+   @Override
    public void initialize()
    {
       
    }
 
+   @Override
    public YoVariableRegistry getYoVariableRegistry()
    {
       return registry;
    }
 
+   @Override
    public String getName()
    {
       return null;
    }
 
+   @Override
    public String getDescription()
    {
       return null;
@@ -74,6 +80,7 @@ public class YoFunctionGeneratorVisualizer implements RobotController
    }
    
    
+   @Override
    public void doControl()
    {
       if (!hasBeenReset.getBooleanValue() && !mode.getEnumValue().equals(YoFunctionGeneratorMode.OFF) && yoFunctionGenerator.getMode().equals(YoFunctionGeneratorMode.OFF))

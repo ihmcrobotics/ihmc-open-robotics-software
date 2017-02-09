@@ -5,7 +5,7 @@ buildscript {
     }
   }
   dependencies {
-    classpath "gradle.plugin.us.ihmc.gradle:ihmc-build:0.0.18"
+    classpath "gradle.plugin.us.ihmc.gradle:ihmc-build:0.0.19"
   }
 }
 
@@ -17,7 +17,7 @@ if (!rootProject.name.equals('IHMCOpenRoboticsSoftware')) {
     evaluationDependsOn(':IHMCOpenRoboticsSoftware')
 }
 
-sourceCompatibility = 1.7
+sourceCompatibility = 1.8
 version = "${getOpenRoboticsSoftwareProject().version}"
 project.ext.fullVersion = "${getOpenRoboticsSoftwareProject().ext.fullVersion}"
 project.ext.vcsUrl = "${getOpenRoboticsSoftwareProject().ext.vcsUrl}"
@@ -32,7 +32,7 @@ repositories {
     jcenter()
     mavenCentral()
     maven {
-        url "https://bengal.ihmc.us/nexus/content/repositories/thirdparty/"
+        url "http://artifactory.ihmc.us/artifactory/thirdparty/"
     }
 }
 
@@ -43,15 +43,13 @@ dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.11'
     testCompile group: 'org.jfree', name: 'jfreechart', version: '1.0.17'
     testCompile group: 'org.jfree', name: 'jcommon', version: '1.0.21'
-//    testCompile group: 'org.pitest', name: 'pitest', version: '1.1.9'
-//    testCompile group: 'org.pitest', name: 'pitest-command-line', version: '1.1.9'
 
     compile group: 'javax.vecmath', name: 'vecmath', version: '1.5.2'
     compile group: 'org.ejml', name: 'denseC64', version: '0.28'
     compile group: 'com.esotericsoftware.kryo', name: 'kryo', version: '2.20'
     compile group: 'com.github.quickhull3d', name: 'quickhull3d', version: '1.0.0'
     compile group: 'net.sf.trove4j', name: 'trove4j', version: '3.0.3'
-    compile group: 'org.georegression', name: 'georegression', version: '0.8'
+    compile group: 'org.georegression', name: 'georegression', version: '0.11'
     compile group: 'org.ddogleg', name: 'ddogleg', version: '0.7'
     compile group: 'gov.nist.math', name: 'jama', version: '1.0.3'
     compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
@@ -59,6 +57,8 @@ dependencies {
     compile group: 'jgraph', name: 'jgraph', version: '5.13.0.0'
     compile group: 'org.ejml', name: 'core', version: '0.28'
     compile group: 'org.ejml', name: 'dense64', version: '0.28'
+    compile group: 'org.javassist', name: 'javassist', version: '3.18.1-GA'
+    compile group: 'com.google.guava', name: 'guava', version: '18.0'
 
     // NOTE: IHMCRoboticsToolkit should not depend on any other IHMC project(!), especially it should not depend on IHMCJavaToolkit.
 

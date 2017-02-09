@@ -2,10 +2,10 @@ package us.ihmc.humanoidRobotics.communication.packets.walking;
 
 import java.util.Random;
 
-import us.ihmc.communication.ros.generators.RosMessagePacket;
-import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.VisualizablePacket;
+import us.ihmc.communication.ros.generators.RosExportedField;
+import us.ihmc.communication.ros.generators.RosMessagePacket;
 import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 import us.ihmc.humanoidRobotics.communication.packets.TrajectoryPoint1DMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.OneDoFJointTrajectoryMessage;
@@ -93,7 +93,7 @@ public class NeckTrajectoryMessage extends Packet<NeckTrajectoryMessage> impleme
    {
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
       jointTrajectoryMessages = new OneDoFJointTrajectoryMessage[numberOfJoints];
-      for (int i = 0; i < numberOfTrajectoryPoints; i++)
+      for (int i = 0; i < numberOfJoints; i++)
          jointTrajectoryMessages[i] = new OneDoFJointTrajectoryMessage(numberOfTrajectoryPoints);
    }
 

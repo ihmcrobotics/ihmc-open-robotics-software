@@ -7,9 +7,10 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
 import org.ejml.data.DenseMatrix64F;
+import org.ejml.ops.CommonOps;
 
-import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
+import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.robotics.geometry.InertiaTools;
 
 public class LinkDescription
@@ -24,7 +25,7 @@ public class LinkDescription
    private final Matrix3d principalAxesRotation = new Matrix3d();
 
    private LinkGraphicsDescription linkGraphics;
-   private CollisionMeshDescription collisionMesh;
+   private ArrayList<CollisionMeshDescription> collisionMeshes = new ArrayList<>();
 
    public LinkDescription(String name)
    {
@@ -46,14 +47,14 @@ public class LinkDescription
       this.linkGraphics = linkGraphics;
    }
 
-   public CollisionMeshDescription getCollisionMesh()
+   public ArrayList<CollisionMeshDescription> getCollisionMeshes()
    {
-      return collisionMesh;
+      return collisionMeshes;
    }
 
-   public void setCollisionMesh(CollisionMeshDescription collisionMesh)
+   public void addCollisionMesh(CollisionMeshDescription collisionMesh)
    {
-      this.collisionMesh = collisionMesh;
+      this.collisionMeshes.add(collisionMesh);
    }
 
    public double getMass()
@@ -117,6 +118,17 @@ public class LinkDescription
       }
 
       return momentOfInertia;
+   }
+
+   public void setMassAndRadiiOfGyration(double mass, double radiusOfGyrationX, double radiusOfGyrationY, double radiusOfGyrationZ)
+   {
+      this.mass = mass;
+
+      double Ixx = mass * (radiusOfGyrationY * radiusOfGyrationY + radiusOfGyrationZ * radiusOfGyrationZ);
+      double Iyy = mass * (radiusOfGyrationX * radiusOfGyrationX + radiusOfGyrationZ * radiusOfGyrationZ);
+      double Izz = mass * (radiusOfGyrationX * radiusOfGyrationX + radiusOfGyrationY * radiusOfGyrationY);
+
+      setMomentOfInertia(Ixx, Iyy, Izz);
    }
 
    public void getMomentOfInertia(DenseMatrix64F momentOfInertiaToPack)
@@ -343,6 +355,40 @@ public class LinkDescription
    public void computePrincipalMomentsOfInertia()
    {
       InertiaTools.computePrincipalMomentsOfInertia(momentOfInertia, principalAxesRotation, principalMomentsOfInertia);
+   }
+
+   public void scale(double factor, double massScalePower, boolean scaleInertia)
+   {
+      // Center of mass offset scales with the scaling factor
+      centerOfMassOffset.scale(factor);
+      
+      // Mass scales with factor^massScalePower. massScalePower is 3 when considering constant density
+      
+      if(scaleInertia)
+      {
+         mass = Math.pow(factor, massScalePower) * mass;
+         // The components of the inertia matrix are defined with int(r^2 dm). So they scale factor ^ (2 + massScalePower)
+         double inertiaScale = Math.pow(factor, massScalePower + 2);
+         CommonOps.scale(inertiaScale, momentOfInertia);
+         computePrincipalMomentsOfInertia();
+      }
+      
+      
+      if(linkGraphics != null)
+      {
+         linkGraphics.preScale(factor);
+      }
+      
+      if(collisionMeshes != null)
+      {
+         for (int i=0; i<collisionMeshes.size(); i++)
+         {
+            collisionMeshes.get(i).scale(factor);
+         }
+      }
+      
+      
+      
    }
 
 }

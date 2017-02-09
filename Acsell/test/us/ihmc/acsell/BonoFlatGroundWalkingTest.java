@@ -2,11 +2,11 @@ package us.ihmc.acsell;
 
 import org.junit.Test;
 
-import us.ihmc.darpaRoboticsChallenge.DRCFlatGroundWalkingTest;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.DRCFlatGroundWalkingTest;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.robotics.controllers.ControllerFailureException;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
-import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureException;
 import us.ihmc.steppr.parameters.BonoRobotModel;
 import us.ihmc.tools.continuousIntegration.IntegrationCategory;
 import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;

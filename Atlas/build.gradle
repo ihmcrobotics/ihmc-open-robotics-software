@@ -5,7 +5,7 @@ buildscript {
     }
   }
   dependencies {
-    classpath "gradle.plugin.us.ihmc.gradle:ihmc-build:0.0.18"
+    classpath "gradle.plugin.us.ihmc.gradle:ihmc-build:0.0.19"
   }
 }
 
@@ -15,7 +15,7 @@ if (!rootProject.name.equals('IHMCOpenRoboticsSoftware')) {
     evaluationDependsOn(':IHMCOpenRoboticsSoftware')
 }
 
-sourceCompatibility = 1.7
+sourceCompatibility = 1.8
 version = "${getOpenRoboticsSoftwareProject().version}"
 project.ext.fullVersion = "${getOpenRoboticsSoftwareProject().ext.fullVersion}"
 project.ext.vcsUrl = "${getOpenRoboticsSoftwareProject().ext.vcsUrl}"
@@ -30,8 +30,11 @@ repositories {
     jcenter()
     mavenCentral()
     maven {
-        url "https://bengal.ihmc.us/nexus/content/repositories/thirdparty"
+        url "http://artifactory.ihmc.us/artifactory/thirdparty/"
     }
+   maven {
+        url "http://artifactory.ihmc.us/artifactory/releases/"
+   }
 }
 
 def strings = ['ihmc', 'robotics']
@@ -42,7 +45,7 @@ dependencies {
     testCompile group: 'com.thoughtworks.xstream', name: 'xstream', version: '1.4.7'
 
     compile group: 'javax.vecmath', name: 'vecmath', version: '1.5.2'
-    compile group: 'org.georegression', name: 'georegression', version: '0.8'
+    compile group: 'org.georegression', name: 'georegression', version: '0.11'
     compile group: 'org.ddogleg', name: 'ddogleg', version: '0.7'
     compile group: 'org.apache.xmlgraphics', name: 'batik-dom', version: '1.7'
     compile group: 'org.apache.ant', name: 'ant', version: '1.9.0'
@@ -51,26 +54,26 @@ dependencies {
     compile group: 'org.ros.rosjava_core', name: 'rosjava', version: '0.2.1'
     compile group: 'org.ejml', name: 'core', version: '0.28'
     compile group: 'org.ejml', name: 'dense64', version: '0.28'
-    compile group: 'org.boofcv', name: 'io', version: '0.19'
-    compile group: 'org.boofcv', name: 'ip', version: '0.19'
-    compile group: 'org.boofcv', name: 'geo', version: '0.19'
-    compile group: 'org.boofcv', name: 'calibration', version: '0.19'
-    compile group: 'org.boofcv', name: 'visualize', version: '0.19'
+    compile group: 'org.boofcv', name: 'io', version: '0.24.1'
+    compile group: 'org.boofcv', name: 'ip', version: '0.24.1'
+    compile group: 'org.boofcv', name: 'geo', version: '0.24.1'
+    compile group: 'org.boofcv', name: 'calibration', version: '0.24.1'
+    compile group: 'org.boofcv', name: 'visualize', version: '0.24.1'
     compile group: 'org.ros.rosjava_bootstrap', name: 'message_generation', version: '0.2.1'
     compile group: 'com.esotericsoftware.kryo', name: 'kryo', version: '2.20'
     compile group: 'us.ihmc.thirdparty.jme', name: 'jme3-core', version: '3.1.0-internal4'
     compile group: 'com.github.wendykierp', name: 'JTransforms', version: '3.1'
-//    compile group: 'org.projectbubo', name: 'ProjectBUBO', version: '160309'
     compile group: 'org.ros.rosjava_messages', name: 'sensor_msgs', version: '1.11.7'
     compile group: 'org.ros.rosjava_messages', name: 'multisense_ros', version: '3.4.2'
     compile group: 'us.ihmc.thirdparty.org.opencv', name: 'opencv', version: '3.1.0-160510'
     compile 'org.ros.rosjava_messages:geometry_msgs:1.11.9'
+    compile "org.boofcv:recognition:0.24.1"
 
     compile ihmc.getProjectDependency(":IHMCHumanoidBehaviors")
     compile ihmc.getProjectDependency(":Vicon")
     compile ihmc.getProjectDependency(":CommonWalkingControlModules")
-    compile ihmc.getProjectDependency(":DarpaRoboticsChallenge")
-    compile ihmc.getProjectDependency(":Graphics3DAdapter")
+    compile ihmc.getProjectDependency(":IHMCAvatarInterfaces")
+    compile ihmc.getProjectDependency(":IHMCJMonkeyEngineToolkit")
     compile ihmc.getProjectDependency(":IHMCHumanoidRobotics")
     compile ihmc.getProjectDependency(":IHMCCommunication")
     compile ihmc.getProjectDependency(":IHMCJavaToolkit")
@@ -78,20 +81,23 @@ dependencies {
     compile ihmc.getProjectDependency(":IHMCRoboticsToolkit")
     compile ihmc.getProjectDependency(":IHMCROSTools")
     compile ihmc.getProjectDependency(":IHMCWholeBodyController")
-    compile ihmc.getProjectDependency(":RobotDataCommunication")
+    compile ihmc.getProjectDependency(":IHMCRobotDataLogger")
     compile ihmc.getProjectDependency(":RobotiqHandDrivers")
-    compile ihmc.getProjectDependency(":SDFLoader")
+    compile ihmc.getProjectDependency(":ModelFileLoader")
     compile ihmc.getProjectDependency(":SensorProcessing")
     compile ihmc.getProjectDependency(":SimulationConstructionSet")
-    compile ihmc.getProjectDependency(":IHMCGraphics3DDescription")
+    compile ihmc.getProjectDependency(":IHMCGraphicsDescription")
     compile ihmc.getProjectDependency(":IHMCRobotDescription")
     compile ihmc.getProjectDependency(":IHMCRobotModels")
+    compile ihmc.getProjectDependency(":IHMCSimulationToolkit")
+    compile ihmc.getProjectDependency(":IHMCRobotDataVisualizer")
 
     testCompile ihmc.getProjectDependency(":IHMCUnitTesting")
     testCompile ihmc.getProjectTestDependency(":CommonWalkingControlModules")
-    testCompile ihmc.getProjectTestDependency(":DarpaRoboticsChallenge")
+    testCompile ihmc.getProjectTestDependency(":IHMCAvatarInterfaces")
     testCompile ihmc.getProjectTestDependency(":IHMCHumanoidRobotics")
     testCompile ihmc.getProjectTestDependency(":SensorProcessing")
+    testCompile ihmc.getProjectTestDependency(":IHMCSimulationToolkit")
 }
 
 apply plugin: 'application'
@@ -141,11 +147,11 @@ startScripts {
         simWindowsScriptVisualizer.text = windowsScript.text.replace("IHMCAtlasAPI", "IHMCRemoteAtlasVisualizer").replace("AtlasROSAPINetworkProcessor", "RemoteAtlasVisualizer")
 
         def simUnixScriptLogger = file(outputDir.canonicalPath + "/IHMCLogger")
-        simUnixScriptLogger.text = unixScript.text.replace("IHMCAtlasAPI", "IHMCLogger").replace("us.ihmc.atlas.AtlasROSAPINetworkProcessor", "us.ihmc.robotDataCommunication.logger.YoVariableLoggerDispatcher")
+        simUnixScriptLogger.text = unixScript.text.replace("IHMCAtlasAPI", "IHMCLogger").replace("us.ihmc.atlas.AtlasROSAPINetworkProcessor", "us.ihmc.robotDataLogger.logger.YoVariableLoggerDispatcher")
         simUnixScriptLogger.setExecutable(true)
 
         def simWindowsScriptLogger = file(outputDir.canonicalPath + "/IHMCLogger.bat")
-        simWindowsScriptLogger.text = windowsScript.text.replace("IHMCAtlasAPI", "IHMCLogger").replace("us.ihmc.atlas.AtlasROSAPINetworkProcessor", "us.ihmc.robotDataCommunication.logger.YoVariableLoggerDispatcher")
+        simWindowsScriptLogger.text = windowsScript.text.replace("IHMCAtlasAPI", "IHMCLogger").replace("us.ihmc.atlas.AtlasROSAPINetworkProcessor", "us.ihmc.robotDataLogger.logger.YoVariableLoggerDispatcher")
 
         def simUnixScriptGazebo = file(outputDir.canonicalPath + "/IHMCAtlasGazeboController")
         simUnixScriptGazebo.text = unixScript.text.replace("IHMCAtlasAPI", "IHMCAtlasGazeboController").replace("us.ihmc.atlas.AtlasROSAPINetworkProcessor", "us.ihmc.atlas.gazebo.AtlasGazeboControllerFactory")

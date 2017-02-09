@@ -11,6 +11,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.StampedPosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.LocalizationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.PelvisPoseErrorPacket;
@@ -18,6 +19,7 @@ import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCo
 import us.ihmc.humanoidRobotics.communication.subscribers.TimeStampedTransformBuffer;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.RotationTools;
@@ -31,11 +33,10 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.continuousIntegration.IntegrationCategory;
 import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
 
 @ContinuousIntegrationPlan(categories={IntegrationCategory.FAST})
 public class NewPelvisPoseHistoryCorrectionTest
@@ -122,7 +123,6 @@ public class NewPelvisPoseHistoryCorrectionTest
    {
       externalPelvisPoseCreator = new ExternalPelvisPoseCreator();
       pelvisCorrector = new NewPelvisPoseHistoryCorrection(sixDofPelvisJoint, estimatorDT, registry, pelvisBufferSize, yoGraphicsListRegistry, externalPelvisPoseCreator);
-      pelvisCorrector.setDeadZoneSizes(0.0, 0.0, 0.0, 0.0);
    }
    
    private void generatePelvisWayPoints()
@@ -244,6 +244,8 @@ public class NewPelvisPoseHistoryCorrectionTest
 
    
    private BooleanYoVariable isRotationCorrectionEnabled;
+   private DoubleYoVariable maximumErrorTranslation;
+   private DoubleYoVariable maximumErrorAngleInDegrees;
    
    @ContinuousIntegrationTest(estimatedDuration = 0.8)
    @Test(timeout = 30000)
@@ -251,6 +253,10 @@ public class NewPelvisPoseHistoryCorrectionTest
    {
       isRotationCorrectionEnabled = (BooleanYoVariable) registry.getVariable("ClippedSpeedOffsetErrorInterpolator", "isRotationCorrectionEnabled");
       isRotationCorrectionEnabled.set(false);
+      maximumErrorTranslation = (DoubleYoVariable) registry.getVariable("ClippedSpeedOffsetErrorInterpolator", "maximumErrorTranslation");
+      maximumErrorTranslation.set(Double.MAX_VALUE);
+      maximumErrorAngleInDegrees = (DoubleYoVariable) registry.getVariable("ClippedSpeedOffsetErrorInterpolator", "maximumErrorAngleInDegrees");
+      maximumErrorAngleInDegrees.set(Double.MAX_VALUE);
       
       generatePelvisWayPoints();
       generateSmallIcpOffsetsAroundPelvis();

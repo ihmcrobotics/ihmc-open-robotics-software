@@ -8,7 +8,6 @@ import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.quadrupedRobotics.communication.packets.QuadrupedTimedStepPacket;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStep;
-import us.ihmc.quadrupedRobotics.util.TimeInterval;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -20,8 +19,10 @@ import us.ihmc.robotics.robotSide.RobotQuadrant;
 
 public class QuadrupedPreplannedStepInputProvider
 {
-   private final AtomicReference<QuadrupedTimedStepPacket> timedStepPacket;
-   
+   private final AtomicReference<QuadrupedTimedStepPacket> inputTimedStepPacket;
+   private final QuadrupedTimedStepPacket emptyTimedStepPacket;
+   private final QuadrupedTimedStepPacket debugTimedStepPacket;
+
    private final EnumYoVariable<RobotQuadrant> yoTimedStepQuadrant;
    private final DoubleYoVariable yoTimedStepDuration;
    private final DoubleYoVariable yoTimedStepGroundClearance;
@@ -29,7 +30,9 @@ public class QuadrupedPreplannedStepInputProvider
 
    public QuadrupedPreplannedStepInputProvider(GlobalDataProducer globalDataProducer, YoVariableRegistry registry)
    {
-      timedStepPacket = new AtomicReference<>(new QuadrupedTimedStepPacket());
+      inputTimedStepPacket = new AtomicReference<>(new QuadrupedTimedStepPacket());
+      emptyTimedStepPacket = new QuadrupedTimedStepPacket();
+      debugTimedStepPacket = new QuadrupedTimedStepPacket(Collections.singletonList(new QuadrupedTimedStep()), false);
 
       yoTimedStepQuadrant = new EnumYoVariable<>("timedStepQuadrant", registry, RobotQuadrant.class);
       yoTimedStepDuration = new DoubleYoVariable("timedStepDuration", registry);
@@ -50,7 +53,7 @@ public class QuadrupedPreplannedStepInputProvider
             @Override
             public void receivedPacket(QuadrupedTimedStepPacket packet)
             {
-               timedStepPacket.set(packet);
+               inputTimedStepPacket.set(packet);
             }
          });
       }
@@ -63,24 +66,30 @@ public class QuadrupedPreplannedStepInputProvider
          @Override
          public void variableChanged(YoVariable<?> v)
          {
-            QuadrupedTimedStep quadrupedTimedStep = new QuadrupedTimedStep(yoTimedStepQuadrant.getEnumValue(), yoTimedStepGoalPosition.getPoint3dCopy(),
-                                                                           yoTimedStepGroundClearance.getDoubleValue(),
-                                                                           new TimeInterval(0.5, 0.5 + yoTimedStepDuration.getDoubleValue()), false);
-            timedStepPacket.set(new QuadrupedTimedStepPacket(Collections.singletonList(quadrupedTimedStep)));
+            debugTimedStepPacket.getSteps().get(0).setRobotQuadrant(yoTimedStepQuadrant.getEnumValue());
+            debugTimedStepPacket.getSteps().get(0).setGroundClearance(yoTimedStepGroundClearance.getDoubleValue());
+            debugTimedStepPacket.getSteps().get(0).setGoalPosition(yoTimedStepGoalPosition.getFrameTuple().getPoint());
+            debugTimedStepPacket.getSteps().get(0).getTimeInterval().setInterval(0.5, 0.5 + yoTimedStepDuration.getDoubleValue());
+            inputTimedStepPacket.set(debugTimedStepPacket);
          }
       });
    }
 
    public boolean isStepPlanAvailable()
    {
-      ArrayList<QuadrupedTimedStep> steps = timedStepPacket.get().get();
+      ArrayList<QuadrupedTimedStep> steps = inputTimedStepPacket.get().getSteps();
       return (steps.size() > 0);
    }
 
-   public ArrayList<QuadrupedTimedStep> getAndClearStepPlan()
+   public boolean isStepPlanExpressedInAbsoluteTime()
    {
-      ArrayList<QuadrupedTimedStep> steps = timedStepPacket.get().get();
-      timedStepPacket.set(new QuadrupedTimedStepPacket());
+      return inputTimedStepPacket.get().isExpressedInAbsoluteTime();
+   }
+
+   public ArrayList<QuadrupedTimedStep> getAndClearSteps()
+   {
+      ArrayList<QuadrupedTimedStep> steps = inputTimedStepPacket.get().getSteps();
+      inputTimedStepPacket.set(emptyTimedStepPacket);
       return steps;
    }
 }

@@ -1,7 +1,7 @@
 package us.ihmc.sensorProcessing.calibration;
 
+import georegression.geometry.ConvertRotation3D_F64;
 import georegression.geometry.GeometryMath_F64;
-import georegression.geometry.RotationMatrixGenerator;
 import georegression.struct.GeoTuple3D_F64;
 import georegression.struct.plane.PlaneNormal3D_F64;
 import georegression.struct.so.Quaternion_F64;
@@ -77,7 +77,7 @@ public class ComputeLidarToCamera
 
       alg.getMotionSrcToDst().print();
       alg.getMotionSrcToDst().invert(null).print();
-      Quaternion_F64 q = RotationMatrixGenerator.matrixToQuaternion(alg.getMotionSrcToDst().getR(),null);
+      Quaternion_F64 q = ConvertRotation3D_F64.matrixToQuaternion(alg.getMotionSrcToDst().getR(), null);
       System.out.println(q);
 
    }

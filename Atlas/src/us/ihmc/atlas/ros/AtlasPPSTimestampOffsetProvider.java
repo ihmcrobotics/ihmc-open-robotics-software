@@ -4,7 +4,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import multisense_ros.StampedPps;
 import us.ihmc.atlas.parameters.AtlasSensorInformation;
-import us.ihmc.darpaRoboticsChallenge.ros.DRCROSPPSTimestampOffsetProvider;
+import us.ihmc.avatar.ros.DRCROSPPSTimestampOffsetProvider;
 import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.utilities.ros.RosMainNode;

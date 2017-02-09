@@ -20,11 +20,11 @@ import java.util.EnumMap;
 
 import javax.vecmath.Vector3d;
 
-import us.ihmc.humanoidRobotics.HumanoidFloatingRootJointRobot;
+import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.robotics.partNames.ArmJointName;
-import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
 public class MultiContactDRCRobotInitialSetup implements DRCRobotInitialSetup<HumanoidFloatingRootJointRobot>

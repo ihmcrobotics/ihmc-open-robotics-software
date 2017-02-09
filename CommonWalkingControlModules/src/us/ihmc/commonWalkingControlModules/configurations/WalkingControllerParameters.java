@@ -4,21 +4,24 @@ import java.util.LinkedHashMap;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
-import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.ExplorationParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoPDGains;
+import us.ihmc.robotics.controllers.YoPIDGains;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
 
 public abstract class WalkingControllerParameters implements HeadOrientationControllerParameters, SteppingParameters
 {
+   protected JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters;
+
    public abstract SideDependentList<RigidBodyTransform> getDesiredHandPosesWithRespectToChestFrame();
 
    public abstract String[] getDefaultChestOrientationControlJointNames();
@@ -45,16 +48,49 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
 
    public abstract double getTimeToGetPreparedForLocomotion();
 
+   /**
+    * Boolean to enable transitions to the toe off contact state, if the appropriate conditions are satisfied.
+    * @return boolean (true = Allow Toe Off, false = Don't Allow Toe Off)
+    */
    public abstract boolean doToeOffIfPossible();
 
    public abstract boolean doToeOffIfPossibleInSingleSupport();
 
    public abstract boolean checkECMPLocationToTriggerToeOff();
 
+   /**
+    * Minimum stance length in double support to enable toe off.
+    * @return threshold stance length in meters
+    */
    public abstract double getMinStepLengthForToeOff();
 
+   /**
+    * If the leading foot is above this value in height, it is one of the last checks that says whether or not to
+    * switch the contact state to toe off for the trailing foot.
+    * @return threshold height in meters for stepping up to cause toe off
+    */
+   public double getMinStepHeightForToeOff()
+   {
+      return 0.10;
+   }
+
+   /**
+    * To enable that feature, {@link WalkingControllerParameters#doToeOffIfPossible()} return true is required. John parameter
+    */
    public abstract boolean doToeOffWhenHittingAnkleLimit();
 
+   /**
+    * Ankle limit that triggers {@link WalkingControllerParameters#doToeOffWhenHittingAnkleLimit()}.
+    * The minimum limit is taken between the returned value and the joint limit.
+    */
+   public double getAnkleLowerLimitToTriggerToeOff()
+   {
+      return -1.0;
+   }
+   /**
+    * Sets the maximum pitch of the foot during toe off to be fed into the whole-body controller
+    * @return maximum pitch angle
+    */
    public abstract double getMaximumToeOffAngle();
 
    public abstract boolean doToeTouchdownIfPossible();
@@ -67,6 +103,10 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
 
    public abstract boolean allowShrinkingSingleSupportFootPolygon();
 
+   /**
+    * Attempts to speed up the swing state to match the desired ICP to the current ICP.
+    * @return boolean (true = allow speed up, false = don't allow speed up)
+    */
    public abstract boolean allowDisturbanceRecoveryBySpeedingUpSwing();
 
    public abstract boolean allowAutomaticManipulationAbort();
@@ -75,6 +115,7 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
 
    /**
     * Determines whether to use the ICP Optimization controller or a standard ICP proportional controller (new feature to be tested with Atlas)
+    * @return boolean (true = use ICP Optimization, false = use ICP Proportional Controller)
     */
    public abstract boolean useOptimizationBasedICPController();
 
@@ -94,6 +135,12 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
 
    public abstract YoOrientationPIDGainsInterface createChestControlGains(YoVariableRegistry registry);
 
+   /** The gains used when the spine joints are controlled directly instead of the chest orientation */
+   public YoPIDGains createSpineControlGains(YoVariableRegistry registry)
+   {
+      return null;
+   }
+
    public abstract YoSE3PIDGainsInterface createSwingFootControlGains(YoVariableRegistry registry);
 
    public abstract YoSE3PIDGainsInterface createHoldPositionFootControlGains(YoVariableRegistry registry);
@@ -104,7 +151,43 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
 
    public abstract double getSwingHeightMaxForPushRecoveryTrajectory();
 
+   /**
+    * Specifies if the arm controller should be switching
+    * to chest frame or jointspace only if necessary.
+    * This is particularly useful when manipulation was performed
+    * with respect to world during standing to prevent "leaving a hand behind"
+    * when the robot starts walking.
+    * 
+    * @return whether the manipulation control should get prepared
+    *  for walking.
+    */
    public abstract boolean doPrepareManipulationForLocomotion();
+
+   /**
+    * Specifies if the pelvis orientation controller should
+    * be initialized before starting to walk.
+    * When the controller is initialized, the pelvis will
+    * smoothly cancel out the user orientation offset on
+    * the first transfer of a walking sequence.
+    * 
+    * @return whether the pelvis orientation control should get prepared
+    *  for walking.
+    */
+   public boolean doPreparePelvisForLocomotion()
+   {
+      return true;
+   }
+
+   /**
+    * Specifies whether upper-body motion is allowed when the robot is walking
+    * or during any exchange support.
+    * 
+    * @return whether the upper-body can be moved during walking or not.
+    */
+   public boolean allowUpperBodyMotionDuringLocomotion()
+   {
+      return false;
+   }
 
    public abstract boolean controlHeadAndHandsWithSliders();
 
@@ -262,9 +345,115 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
     * Returns a ratio to multiply the swing foot velocity adjustment when the swing trajectory is modified online.
     * 0.0 will eliminate any velocity adjustment.
     * 1.0 will make it try to move to the new trajectory in 1 dt.
+    * @return damping ratio (0.0 to 1.0)
     */
    public double getSwingFootVelocityAdjustmentDamping()
    {
       return 0.0;
+   }
+
+   public double getMinSwingHeightFromStanceFoot()
+   {
+      return 0.1;
+   }
+
+   /**
+    * Determines whether the swing of the robot controls the toe point of the foot for better tracking or not.
+    * (new feature to be tested with Atlas)
+    */
+   public boolean controlToeDuringSwing()
+   {
+      return false;
+   }
+
+   /**
+    * Returns the parameters used in the privileged configuration handler.
+    */
+   public JointPrivilegedConfigurationParameters getJointPrivilegedConfigurationParameters()
+   {
+      if (jointPrivilegedConfigurationParameters == null)
+         jointPrivilegedConfigurationParameters = new JointPrivilegedConfigurationParameters();
+
+      return jointPrivilegedConfigurationParameters;
+   }
+
+   /**
+    * Determines whether or not to attempt to directly control the height.
+    * If true, the height will be controlled by controlling either the pelvis or the center of mass height.
+    * If false, the height will be controlled inside the nullspace by trying to achieve the desired
+    * privileged configuration in the legs.
+    * @return boolean (true = control height with momentum, false = do not control height with momentum)
+    */
+   public boolean controlHeightWithMomentum()
+   {
+      return true;
+   }
+
+   /**
+    * Determines whether or not to attempt to use straight legs when controlling the height in the nullspace.
+    * This will not do anything noticeable unless {@link WalkingControllerParameters#controlHeightWithMomentum()} returns true.
+    * @return boolean (true = try and straighten, false = do not try and straighten)
+    */
+   public boolean attemptToStraightenLegs()
+   {
+      return false;
+   }
+
+   /**
+    * Returns a percent of the swing state to switch the privileged configuration to having straight knees
+    * @return ratio of swing state (0.0 to 1.0)
+    */
+   public double getPercentOfSwingToStraightenLeg()
+   {
+      return 0.8;
+   }
+
+   /**
+    * In transfer, this is the maximum distance from the ICP to the leading foot support polygon to allow toe-off.
+    * If it is further than this, do not allow toe-off, as more control authority is needed from the trailing foot.
+    * @return ICP proximity in meters
+    */
+   public double getICPProximityToLeadingFootForToeOff()
+   {
+      return 0.0;
+   }
+
+   /**
+    * In swing, this determines maximum distance from the ICP to the leading foot support polygon to allow toe-off.
+    * This distance is determined by finding the stance length, and multiplying it by the returned variable.
+    * If it is further than this, do not allow toe-off, as more control authority is needed from the trailing foot.
+    * @return percent of stance length for proximity
+    */
+   public double getICPPercentOfStanceForSSToeOff()
+   {
+      return 0.0;
+   }
+
+   /**
+    * This is the duration used to straighten the desire privileged configuration of the stance leg's knee.
+    * @return time in seconds for straightening
+    */
+   public double getDurationForStanceLegStraightening()
+   {
+      return 1.3;
+   }
+
+   /**
+    * Angle used by the privileged configuration that is defined as straight for the knees.
+    * @return angle in radians
+    */
+   public double getStraightKneeAngle()
+   {
+      return 0.05;
+   }
+
+   /**
+    * If a step up or a step down is executed, the swing trajectory will switch to the obstacle clearance
+    * mode. The value defined here determines the threshold for the height difference between current foot
+    * position and step position that causes this switch.
+    */
+   public double getMinHeightDifferenceForStepUpOrDown()
+   {
+      return 0.04;
    }
 }

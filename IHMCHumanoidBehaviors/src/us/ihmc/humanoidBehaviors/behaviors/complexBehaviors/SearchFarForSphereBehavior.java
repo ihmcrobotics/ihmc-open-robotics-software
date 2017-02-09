@@ -10,7 +10,7 @@ import us.ihmc.humanoidBehaviors.behaviors.primitives.AtlasPrimitiveActions;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SphereDetectionBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.WaitForUserValidationBehavior;
-import us.ihmc.humanoidBehaviors.communication.BehaviorCommunicationBridge;
+import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidBehaviors.stateMachine.StateMachineBehavior;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataFilterParameters;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataStateCommand.LidarState;
@@ -21,7 +21,7 @@ public class SearchFarForSphereBehavior extends StateMachineBehavior<SearchFarSt
 {
    public enum SearchFarState
    {
-      ENABLE_LIDAR, SETUP_LIDAR, CLEAR_LIDAR, SEARCHING, VALIDATING
+      ENABLE_LIDAR, SETUP_LIDAR, CLEAR_LIDAR, SEARCHING_FOR_SPHERE, VALIDATING
    }
 
    private final SphereDetectionBehavior initialSphereDetectionBehavior;
@@ -31,7 +31,7 @@ public class SearchFarForSphereBehavior extends StateMachineBehavior<SearchFarSt
    private final AtlasPrimitiveActions atlasPrimitiveActions;
 
    public SearchFarForSphereBehavior(DoubleYoVariable yoTime, PickUpBallBehaviorCoactiveElementBehaviorSide coactiveElement,
-         HumanoidReferenceFrames referenceFrames, BehaviorCommunicationBridge outgoingCommunicationBridge, boolean requireUserValidation,
+         HumanoidReferenceFrames referenceFrames, CommunicationBridge outgoingCommunicationBridge, boolean requireUserValidation,
          AtlasPrimitiveActions atlasPrimitiveActions)
    {
       super("SearchForSpehereFar", SearchFarState.class, yoTime, outgoingCommunicationBridge);
@@ -39,13 +39,12 @@ public class SearchFarForSphereBehavior extends StateMachineBehavior<SearchFarSt
       this.coactiveElement = coactiveElement;
       this.requireUserValidation = requireUserValidation;
 
+      
       initialSphereDetectionBehavior = new SphereDetectionBehavior(outgoingCommunicationBridge, referenceFrames);
 
-      addChildBehavior(initialSphereDetectionBehavior);
 
       waitForUserValidationBehavior = new WaitForUserValidationBehavior(outgoingCommunicationBridge, coactiveElement.validClicked,
             coactiveElement.validAcknowledged);
-      addChildBehavior(waitForUserValidationBehavior);
       setupStateMachine();
    }
 
@@ -83,13 +82,13 @@ public class SearchFarForSphereBehavior extends StateMachineBehavior<SearchFarSt
 
       //SEARCH FOR BALL *******************************************
 
-      BehaviorAction<SearchFarState> findBallTask = new BehaviorAction<SearchFarState>(SearchFarState.SEARCHING, initialSphereDetectionBehavior)
+      BehaviorAction<SearchFarState> findBallTask = new BehaviorAction<SearchFarState>(SearchFarState.SEARCHING_FOR_SPHERE, initialSphereDetectionBehavior)
       {
          @Override
          protected void setBehaviorInput()
          {
             TextToSpeechPacket p1 = new TextToSpeechPacket("LOOKING FOR BALL");
-            sendPacketToNetworkProcessor(p1);
+            sendPacket(p1);
             coactiveElement.searchingForBall.set(true);
             coactiveElement.foundBall.set(false);
             coactiveElement.ballX.set(0);
@@ -123,7 +122,7 @@ public class SearchFarForSphereBehavior extends StateMachineBehavior<SearchFarSt
 
       statemachine.addStateWithDoneTransition(enableLidarTask, SearchFarState.SETUP_LIDAR);
       statemachine.addStateWithDoneTransition(setLidarMediumRangeTask, SearchFarState.CLEAR_LIDAR);
-      statemachine.addStateWithDoneTransition(clearLidarTask, SearchFarState.SEARCHING);
+      statemachine.addStateWithDoneTransition(clearLidarTask, SearchFarState.SEARCHING_FOR_SPHERE);
 
       if (requireUserValidation)
       {
@@ -133,7 +132,7 @@ public class SearchFarForSphereBehavior extends StateMachineBehavior<SearchFarSt
 
       else
          statemachine.addState(findBallTask);
-      statemachine.setCurrentState(SearchFarState.ENABLE_LIDAR);
+      statemachine.setStartState(SearchFarState.ENABLE_LIDAR);
 
    }
 
@@ -146,6 +145,11 @@ public class SearchFarForSphereBehavior extends StateMachineBehavior<SearchFarSt
    public Point3d getBallLocation()
    {
       return initialSphereDetectionBehavior.getBallLocation();
+   }
+
+   @Override
+   public void onBehaviorExited()
+   {
    }
 
 }

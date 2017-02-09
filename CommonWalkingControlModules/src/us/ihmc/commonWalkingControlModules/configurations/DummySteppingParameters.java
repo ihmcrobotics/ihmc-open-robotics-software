@@ -148,4 +148,10 @@ public class DummySteppingParameters implements SteppingParameters
    {
       return 0.0;
    }
+
+   @Override
+   public double getMinSwingHeightFromStanceFoot()
+   {
+      return 0.1;
+   }
 }

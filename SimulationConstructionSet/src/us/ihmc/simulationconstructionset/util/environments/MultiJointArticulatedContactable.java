@@ -2,15 +2,15 @@ package us.ihmc.simulationconstructionset.util.environments;
 
 import java.util.ArrayList;
 
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.util.ground.Contactable;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicVector;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
 public abstract class MultiJointArticulatedContactable implements Contactable
 {
@@ -139,6 +139,7 @@ public abstract class MultiJointArticulatedContactable implements Contactable
       return allGroundContactPoints.get(jointIndex).get(contactPointIndex);
    }
    
+   @Override
    public void updateContactPoints()
    {
       robot.update();

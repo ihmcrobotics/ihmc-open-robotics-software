@@ -1,7 +1,7 @@
 package us.ihmc.exampleSimulations.simpleDynamicWalkingExample;
 
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
 public class Step6Simulation
 {

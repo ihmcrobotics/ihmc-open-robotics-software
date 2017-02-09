@@ -2,11 +2,11 @@ package us.ihmc.simulationconstructionset.util.perturbance;
 
 import java.util.Random;
 
-import us.ihmc.simulationconstructionset.robotController.RobotController;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.robotController.RobotController;
 
 public class RandomExternalForceApplier implements RobotController
 {
@@ -28,6 +28,7 @@ public class RandomExternalForceApplier implements RobotController
       this.currentDisturbanceForce = new YoFrameVector("currentDisturbanceForce", "", ReferenceFrame.getWorldFrame(), registry);
    }
 
+   @Override
    public void doControl()
    {
       computeCurrentDisturbanceForce();
@@ -43,20 +44,24 @@ public class RandomExternalForceApplier implements RobotController
       currentDisturbanceForce.scale(maximalDisturbanceMagnitude.getDoubleValue());
    }
 
+   @Override
    public YoVariableRegistry getYoVariableRegistry()
    {
       return registry;
    }
 
+   @Override
    public String getName()
    {
       return this.name;
    }
    
+   @Override
    public void initialize()
    {      
    }
 
+   @Override
    public String getDescription()
    {
       return getName();

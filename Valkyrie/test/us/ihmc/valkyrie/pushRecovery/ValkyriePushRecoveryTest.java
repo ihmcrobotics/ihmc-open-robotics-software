@@ -2,8 +2,8 @@ package us.ihmc.valkyrie.pushRecovery;
 
 import org.junit.Test;
 
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.pushRecovery.DRCPushRecoveryTest;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.pushRecovery.DRCPushRecoveryTest;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.tools.continuousIntegration.IntegrationCategory;
 import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
@@ -59,7 +59,7 @@ public class ValkyriePushRecoveryTest extends DRCPushRecoveryTest
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 46.3, categoriesOverride = IntegrationCategory.IN_DEVELOPMENT)
+   @ContinuousIntegrationTest(estimatedDuration = 46.3, categoriesOverride = IntegrationCategory.SLOW)
    @Test(timeout = 230000)
    public void testPushWhileInSwing() throws SimulationExceededMaximumTimeException
    {

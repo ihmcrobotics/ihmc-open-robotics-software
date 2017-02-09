@@ -1,10 +1,8 @@
 package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
-import java.util.ArrayList;
-
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
-import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
+import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -13,7 +11,6 @@ import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 
 public class AtlasPrimitiveActions 
 {
-   ArrayList<AbstractBehavior> allPrimitives = new ArrayList<>();
    //ALL Primitive Behaviors Go In Here. Talk To John Carff before changing this.
    public final ArmTrajectoryBehavior leftArmTrajectoryBehavior;
    public final ArmTrajectoryBehavior rightArmTrajectoryBehavior;
@@ -40,13 +37,21 @@ public class AtlasPrimitiveActions
    public final SetLidarParametersBehavior setLidarParametersBehavior;
    public final WalkToLocationBehavior walkToLocationBehavior;
    public final WholeBodyInverseKinematicsBehavior wholeBodyBehavior;
+   public final WalkToLocationPlannedBehavior walkToLocationPlannedBehavior;
    private final YoVariableRegistry behaviorRegistry;
+   
+   public HumanoidReferenceFrames referenceFrames;
 
-   public AtlasPrimitiveActions(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, FullHumanoidRobotModel fullRobotModel,
+   public AtlasPrimitiveActions(CommunicationBridge outgoingCommunicationBridge, FullHumanoidRobotModel fullRobotModel,
          HumanoidReferenceFrames referenceFrames, WalkingControllerParameters walkingControllerParameters, DoubleYoVariable yoTime,
          WholeBodyControllerParameters wholeBodyControllerParameters, YoVariableRegistry behaviorRegistry)
    {
+      this.referenceFrames = referenceFrames;
       this.behaviorRegistry = behaviorRegistry;
+      
+      walkToLocationPlannedBehavior = new WalkToLocationPlannedBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrames, walkingControllerParameters, yoTime);
+      addPrimitive(walkToLocationPlannedBehavior);
+      
       leftArmTrajectoryBehavior = new ArmTrajectoryBehavior("left", outgoingCommunicationBridge, yoTime);
       addPrimitive(leftArmTrajectoryBehavior);
 
@@ -96,19 +101,15 @@ public class AtlasPrimitiveActions
       addPrimitive(setLidarParametersBehavior);
       walkToLocationBehavior = new WalkToLocationBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrames, walkingControllerParameters);
       addPrimitive(walkToLocationBehavior);
-      wholeBodyBehavior = new WholeBodyInverseKinematicsBehavior("atlas", wholeBodyControllerParameters, yoTime, outgoingCommunicationBridge);
+      wholeBodyBehavior = new WholeBodyInverseKinematicsBehavior("atlas", wholeBodyControllerParameters, yoTime, outgoingCommunicationBridge, fullRobotModel);
       addPrimitive(wholeBodyBehavior);
 
    }
    private void addPrimitive(AbstractBehavior behavior)
    {
-      allPrimitives.add(behavior);
       behaviorRegistry.addChild(behavior.getYoVariableRegistry());
    }
    
-   public ArrayList<AbstractBehavior> getAllPrimitiveBehaviors()
-   {
-      return allPrimitives;
-   }
+
 
 }

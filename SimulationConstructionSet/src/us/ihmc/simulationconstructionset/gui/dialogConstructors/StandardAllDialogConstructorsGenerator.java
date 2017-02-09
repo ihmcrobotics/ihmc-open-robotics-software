@@ -22,8 +22,6 @@ import us.ihmc.simulationconstructionset.videos.ExportVideo;
 
 public class StandardAllDialogConstructorsGenerator implements AllDialogConstructorsHolder
 {
-   private static final boolean USE_CSV_INSTEAD_OF_MATLAB = false;
-   
    private ExportDataDialogConstructor exportDataDialogConstructor;
    private ImportDataDialogConstructor importDataDialogConstructor;
    
@@ -79,15 +77,7 @@ public class StandardAllDialogConstructorsGenerator implements AllDialogConstruc
       this.saveGraphConfigurationDialogConstructor = new SaveGraphConfigurationDialogGenerator(sim, frame, myGraphArrayPanel);
       this.loadGraphGroupDialogConstructor = new LoadGraphGroupDialogGenerator(sim, myGUI, myGUI, frame, myGraphArrayPanel);
       
-      ExportGraphsToFileConstructor exportGraphsToFileConstructor;
-      if (USE_CSV_INSTEAD_OF_MATLAB)
-      {
-         exportGraphsToFileConstructor = new CsvExportGraphsToFileGenerator(sim, frame, myGraphArrayPanel, myGUI);
-      }
-      else
-      {
-         exportGraphsToFileConstructor = new MatlabExportGraphsToFileGenerator(sim, frame, myGraphArrayPanel, myGUI);
-      }
+      ExportGraphsToFileConstructor exportGraphsToFileConstructor = new ExportGraphsToFileGenerator(sim, frame, myGraphArrayPanel, myGUI);
       this.exportGraphsToFileConstructor = exportGraphsToFileConstructor;
 
       this.saveRobotConfigurationDialogConstructor = new SaveRobotConfigurationDialogGenerator(sim, frame);
@@ -104,93 +94,111 @@ public class StandardAllDialogConstructorsGenerator implements AllDialogConstruc
       this.aboutDialogConstructor = new AboutDialogGenerator(frame);
    }
    
+   @Override
    public AboutDialogConstructor getAboutDialogConstructor()
    {
       return aboutDialogConstructor;
    }
 
+   @Override
    public CameraPropertiesDialogConstructor getCameraPropertiesDialogConstructor()
    {
       return cameraPropertiesDialogConstructor;
    }
 
+   @Override
    public DataBufferPropertiesDialogConstructor getDataBufferPropertiesDialogConstructor()
    {
       return dataBufferPropertiesDialogConstructor;
    }
 
+   @Override
    public ExportDataDialogConstructor getExportDataDialogConstructor()
    {
       return exportDataDialogConstructor;
    }
 
+   @Override
    public ExportSnapshotDialogConstructor getExportSnapshotDialogConstructor()
    {
       return exportSnapshotDialogConstructor;
    }
 
+   @Override
    public ImportDataDialogConstructor getImportDataDialogConstructor()
    {
       return importDataDialogConstructor;
    }
 
+   @Override
    public LoadConfigurationDialogConstructor getLoadConfigurationDialogConstructor()
    {
       return loadConfigurationDialogConstructor;
    }
 
+   @Override
    public MediaCaptureDialogConstructor getMediaCaptureDialogConstructor()
    {
       return mediaCaptureDialogConstructor;
    }
 
+   @Override
    public PlaybackPropertiesDialogConstructor getPlaybackPropertiesDialogConstructor()
    {
       return playbackPropertiesDialogConstructor;
    }
 
+   @Override
    public PrintGraphsDialogConstructor getPrintGraphsDialogConstructor()
    {
       return printGraphsDialogConstructor;
    }
 
+   @Override
    public ResizeViewportDialogConstructor getResizeViewportDialogConstructor()
    {
       return resizeViewportDialogConstructor;
    }
 
+   @Override
    public SaveConfigurationDialogConstructor getSaveConfigurationDialogConstructor()
    {
       return saveConfigurationDialogConstructor;
    }
 
+   @Override
    public SaveGraphConfigurationDialogConstructor getSaveGraphConfigurationDialogConstructor()
    {
       return saveGraphConfigurationDialogConstructor;
    }
    
+   @Override
    public LoadGraphGroupDialogConstructor getLoadGraphGroupDialogConstructor()
    {
       return loadGraphGroupDialogConstructor;
    }
    
+   @Override
    public ExportGraphsToFileConstructor getExportGraphsToFileConstructor()
    {
       return exportGraphsToFileConstructor;
    }
 
 
+   @Override
    public SaveRobotConfigurationDialogConstructor getSaveRobotConfigurationDialogConstructor()
    {
       return saveRobotConfigurationDialogConstructor;
    }
 
+   @Override
    public ExportSimulationTo3DMaxDialogConstructor getExportSimulationTo3DMaxDialogConstructor()
    {
       return exportSimulationTo3DMaxDialogConstructor;
    }
 
    private boolean alreadyClosing = false;
+   @Override
    public void closeAndDispose()
    {
       if (alreadyClosing) return;

@@ -1,8 +1,10 @@
 package us.ihmc.quadrupedRobotics.estimator;
 
-import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
-import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
+import us.ihmc.graphicsDescription.Graphics3DObject;
+import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicShape;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -14,8 +16,6 @@ import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicShape;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
@@ -159,6 +159,37 @@ public class GroundPlaneEstimator
    }
 
    /**
+    * Clear the list of ground contact points.
+    */
+   public void clearContactPoints()
+   {
+      groundPlanePoints.clear();
+   }
+
+   /**
+    * Add a point to the list of ground contact points.
+    * @param contactPoint : ground contact point in world frame
+    */
+   public void addContactPoint(Point3d contactPoint)
+   {
+      groundPlanePoints.add(contactPoint);
+   }
+
+   /**
+    * Estimate the ground plane given the current list of ground contact points.
+    */
+   public void compute()
+   {
+      planeFitter.fitPlaneToPoints(groundPlanePoints, groundPlane);
+      groundPlane.getNormal(groundPlaneNormal);
+      yoGroundPlaneNormal.set(groundPlaneNormal);
+      groundPlane.getPoint(groundPlanePoint);
+      yoGroundPlanePoint.set(groundPlanePoint);
+      yoGroundPlaneOrientation.setYawPitchRoll(0.0, getPitch(), getRoll());
+   }
+
+   /**
+    * Set the list of ground contact points and compute the ground plane.
     * @param contactPoints : list of ground contact points
     */
    public void compute(List<FramePoint> contactPoints)
@@ -174,7 +205,8 @@ public class GroundPlaneEstimator
    }
 
    /**
-    * @param contactPoints : contact points during quad support
+    * Set the list of ground contact points and compute the ground plane.
+    * @param contactPoints : quadrant dependent list of contact points
     */
    public void compute(QuadrantDependentList<FramePoint> contactPoints)
    {
@@ -185,15 +217,5 @@ public class GroundPlaneEstimator
          groundPlanePoints.add(contactPoints.get(robotQuadrant).getPoint());
       }
       compute();
-   }
-
-   private void compute()
-   {
-      planeFitter.fitPlaneToPoints(groundPlanePoints, groundPlane);
-      groundPlane.getNormal(groundPlaneNormal);
-      yoGroundPlaneNormal.set(groundPlaneNormal);
-      groundPlane.getPoint(groundPlanePoint);
-      yoGroundPlanePoint.set(groundPlanePoint);
-      yoGroundPlaneOrientation.setYawPitchRoll(0.0, getPitch(), getRoll());
    }
 }

@@ -3,15 +3,15 @@ package us.ihmc.simulationconstructionset;
 import java.util.ArrayList;
 import java.util.List;
 
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
-import us.ihmc.simulationconstructionset.robotController.RobotController;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicReferenceFrame;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsList;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -44,26 +44,31 @@ public class JointAxisVisualizer implements RobotController
       yoGraphicsListRegistry.registerYoGraphicsList(yoGraphicsList);
    }
    
+   @Override
    public void initialize()
    {
       doControl();
    }
 
+   @Override
    public YoVariableRegistry getYoVariableRegistry()
    {
       return registry;
    }
 
+   @Override
    public String getName()
    {
       return name;
    }
 
+   @Override
    public String getDescription()
    {
       return getName();
    }
 
+   @Override
    public void doControl()
    {
       for (int i = 0; i < dynamicGraphicReferenceFrames.size(); i++)

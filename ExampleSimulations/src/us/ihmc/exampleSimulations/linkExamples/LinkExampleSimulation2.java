@@ -1,12 +1,10 @@
 package us.ihmc.exampleSimulations.linkExamples;
 
-//package us.ihmc.exampleSimulations.DoublePendulum;
-//package us.ihmc.exampleSimulations.linkExamples;
-import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
-import us.ihmc.graphics3DAdapter.graphics.MeshDataGenerator;
-import us.ihmc.graphics3DAdapter.graphics.MeshDataHolder;
-import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
+import us.ihmc.graphicsDescription.Graphics3DObject;
+import us.ihmc.graphicsDescription.MeshDataGenerator;
+import us.ihmc.graphicsDescription.MeshDataHolder;
+import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;

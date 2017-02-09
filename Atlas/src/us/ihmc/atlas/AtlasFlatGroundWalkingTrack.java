@@ -2,15 +2,15 @@ package us.ihmc.atlas;
 
 import com.martiansoftware.jsap.JSAPException;
 
-import us.ihmc.humanoidRobotics.HumanoidFloatingRootJointRobot;
-import us.ihmc.darpaRoboticsChallenge.DRCFlatGroundWalkingTrack;
-import us.ihmc.darpaRoboticsChallenge.DRCGuiInitialSetup;
-import us.ihmc.darpaRoboticsChallenge.DRCSCSInitialSetup;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
-import us.ihmc.darpaRoboticsChallenge.util.OscillateFeetPerturber;
-import us.ihmc.graphics3DAdapter.GroundProfile3D;
+import us.ihmc.avatar.DRCFlatGroundWalkingTrack;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.initialSetup.DRCGuiInitialSetup;
+import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
+import us.ihmc.avatar.initialSetup.DRCSCSInitialSetup;
+import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.simulationToolkit.controllers.OscillateFeetPerturber;
+import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.ground.BumpyGroundProfile;
 import us.ihmc.simulationconstructionset.util.ground.FlatGroundProfile;
@@ -67,7 +67,7 @@ public class AtlasFlatGroundWalkingTrack
    private static void createOscillateFeetPerturber(DRCFlatGroundWalkingTrack drcFlatGroundWalkingTrack)
    {
       SimulationConstructionSet simulationConstructionSet = drcFlatGroundWalkingTrack.getSimulationConstructionSet();
-      HumanoidFloatingRootJointRobot robot = drcFlatGroundWalkingTrack.getDrcSimulation().getRobot();
+      HumanoidFloatingRootJointRobot robot = drcFlatGroundWalkingTrack.getAvatarSimulation().getHumanoidFloatingRootJointRobot();
 
       int ticksPerPerturbation = 10;
       OscillateFeetPerturber oscillateFeetPerturber = new OscillateFeetPerturber(robot, simulationConstructionSet.getDT() * ((double) ticksPerPerturbation));

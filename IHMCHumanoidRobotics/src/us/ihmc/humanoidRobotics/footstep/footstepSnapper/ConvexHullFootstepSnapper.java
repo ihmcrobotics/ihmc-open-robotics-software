@@ -76,7 +76,6 @@ public class ConvexHullFootstepSnapper implements FootstepSnapper
       }
    }
 
-
    private static final boolean RECORD_BAD_FOOTSTEPS = false;
 
    // Generates Footsteps using grid without a mask
@@ -149,15 +148,14 @@ public class ConvexHullFootstepSnapper implements FootstepSnapper
 
    @Override
    public Footstep generateFootstepWithoutHeightMap(FramePose2d footPose2d, RigidBody foot, ReferenceFrame soleFrame, RobotSide robotSide, double height,
-           Vector3d planeNormal)
+         Vector3d planeNormal)
    {
       return simpleSnapper.generateFootstepWithoutHeightMap(footPose2d, foot, soleFrame, robotSide, height, planeNormal);
    }
 
    @Override
    public Footstep generateSnappedFootstep(double soleX, double soleY, double yaw, RigidBody foot, ReferenceFrame soleFrame, RobotSide robotSide,
-           HeightMapWithPoints heightMap)
-           throws InsufficientDataException
+         HeightMapWithPoints heightMap) throws InsufficientDataException
    {
       FramePose2d footPose2d = new FramePose2d(ReferenceFrame.getWorldFrame(), new Point2d(soleX, soleY), yaw);
 
@@ -165,7 +163,7 @@ public class ConvexHullFootstepSnapper implements FootstepSnapper
    }
 
    public Footstep generateFootstepUsingHeightMap(FramePose2d footPose2d, RigidBody foot, ReferenceFrame soleFrame, RobotSide robotSide,
-           List<Point3d> pointList, double defaultHeight)
+         List<Point3d> pointList, double defaultHeight)
    {
       Footstep toReturn = generateFootstepWithoutHeightMap(footPose2d, foot, soleFrame, robotSide, 0.0, new Vector3d(0.0, 0.0, 1.0));
       snapFootstep(toReturn, pointList, defaultHeight);
@@ -175,8 +173,7 @@ public class ConvexHullFootstepSnapper implements FootstepSnapper
 
    @Override
    public Footstep generateFootstepUsingHeightMap(FramePose2d footPose2d, RigidBody foot, ReferenceFrame soleFrame, RobotSide robotSide,
-           HeightMapWithPoints heightMap)
-           throws InsufficientDataException
+         HeightMapWithPoints heightMap) throws InsufficientDataException
    {
       Footstep toReturn = generateFootstepWithoutHeightMap(footPose2d, foot, soleFrame, robotSide, 0.0, new Vector3d(0.0, 0.0, 1.0));
       snapFootstep(toReturn, heightMap);
@@ -185,7 +182,8 @@ public class ConvexHullFootstepSnapper implements FootstepSnapper
    }
 
    @Override
-   public Footstep.FootstepType snapFootstep(Footstep footstep, HeightMapWithPoints heightMap){
+   public Footstep.FootstepType snapFootstep(Footstep footstep, HeightMapWithPoints heightMap)
+   {
       FootstepDataMessage originalFootstep = new FootstepDataMessage(footstep);
 
       //set to the sole pose
@@ -199,7 +197,8 @@ public class ConvexHullFootstepSnapper implements FootstepSnapper
 
       //get the footstep
       Footstep.FootstepType type = snapFootstep(originalFootstep, heightMap);
-      if (type == Footstep.FootstepType.FULL_FOOTSTEP && originalFootstep.getPredictedContactPoints() != null){
+      if (type == Footstep.FootstepType.FULL_FOOTSTEP && originalFootstep.getPredictedContactPoints() != null)
+      {
          throw new RuntimeException(this.getClass().getSimpleName() + "Full Footstep should have null contact points");
       }
       footstep.setPredictedContactPointsFromPoint2ds(originalFootstep.getPredictedContactPoints());
@@ -223,20 +222,21 @@ public class ConvexHullFootstepSnapper implements FootstepSnapper
       if (!useMask)
       {
          pointList = heightMap.getAllPointsWithinArea(position.getX(), position.getY(), parameters.getBoundingSquareSizeLength(),
-                 parameters.getBoundingSquareSizeLength());
+               parameters.getBoundingSquareSizeLength());
       }
       else
       {
          footstepMask.setPositionAndYaw(position.getX(), position.getY(), yaw);
          pointList = heightMap.getAllPointsWithinArea(position.getX(), position.getY(), parameters.getBoundingSquareSizeLength(),
-                 parameters.getBoundingSquareSizeLength(), footstepMask);
+               parameters.getBoundingSquareSizeLength(), footstepMask);
       }
 
       double height = heightMap.getHeightAtPoint(position.getX(), position.getY());
       return snapFootstep(footstep, pointList, height);
    }
 
-   public Footstep.FootstepType snapFootstep(Footstep footstep, List<Point3d> pointList, double defaultHeight){
+   public Footstep.FootstepType snapFootstep(Footstep footstep, List<Point3d> pointList, double defaultHeight)
+   {
       FootstepDataMessage originalFootstep = new FootstepDataMessage(footstep);
 
       //set to the sole pose
@@ -269,7 +269,7 @@ public class ConvexHullFootstepSnapper implements FootstepSnapper
       // bad list of points
       double height;
       Vector3d surfaceNormal = new Vector3d();
-      if (pointList.isEmpty())
+      if (pointList == null || pointList.isEmpty())
       {
          height = defaultHeight;
          surfaceNormal.set(0.0, 0.0, 1.0);
@@ -345,7 +345,8 @@ public class ConvexHullFootstepSnapper implements FootstepSnapper
 
       for (Point3d point : pointList)
       {
-         if ((Double.isInfinite(height) || Double.isNaN(height)) || ((point.getZ() > height) &&!Double.isInfinite(point.getZ()) && !Double.isNaN(point.getZ())))
+         if ((Double.isInfinite(height) || Double.isNaN(height))
+               || ((point.getZ() > height) && !Double.isInfinite(point.getZ()) && !Double.isNaN(point.getZ())))
          {
             height = point.getZ();
          }
@@ -385,7 +386,6 @@ public class ConvexHullFootstepSnapper implements FootstepSnapper
       double yaw = RotationTools.computeYaw(orientation);
       addLowerBoundaryPointsToHullPointList(convexHullPointsList, position.getX(), position.getY(), yaw);
 
-
       // Convert from points to possible support polygons
       QuickHull3dWrapper quickHull = new QuickHull3dWrapper();
       try
@@ -401,7 +401,7 @@ public class ConvexHullFootstepSnapper implements FootstepSnapper
 
       List<HullFace> faces = quickHull.getFaces();
 
-//    double distanceTolerance = quickHull.getDistanceTolerance();
+      //    double distanceTolerance = quickHull.getDistanceTolerance();
       double distanceTolerance = parameters.getZDistanceTolerance();
 
       // get the orientations and heights corresponding to those faces
@@ -426,7 +426,8 @@ public class ConvexHullFootstepSnapper implements FootstepSnapper
          face.getPlane(facePlane);
          Quat4d newOrientation = new Quat4d();
          RotationTools.computeQuaternionFromYawAndZNormal(yaw, facePlane.getNormalCopy(), newOrientation);
-         FootstepDataMessage currentFaceFootstep = new FootstepDataMessage(footstep.getRobotSide(), new Point3d(x, y, facePlane.getZOnPlane(x, y)), newOrientation);
+         FootstepDataMessage currentFaceFootstep = new FootstepDataMessage(footstep.getRobotSide(), new Point3d(x, y, facePlane.getZOnPlane(x, y)),
+               newOrientation);
          currentPredictedContactPoints = getPredictedContactPointsForFootstep(currentFaceFootstep, points, distanceTolerance);
 
          if ((currentPredictedContactPoints == null) || (currentPredictedContactPoints.size() < 3))
@@ -556,8 +557,9 @@ public class ConvexHullFootstepSnapper implements FootstepSnapper
       if (cropNumber == 4)
       {
          finalSupportPoints = reduceListOfPointsToFourFootstepBased(supportPoints);
-//         finalSupportPoints = reduceListOfPointsByArea(supportPoints, cropNumber);
-      }else
+         //         finalSupportPoints = reduceListOfPointsByArea(supportPoints, cropNumber);
+      }
+      else
       {
          finalSupportPoints = reduceListOfPointsByArea(supportPoints, cropNumber);
       }
@@ -622,7 +624,6 @@ public class ConvexHullFootstepSnapper implements FootstepSnapper
       }
    }
 
-
    public class VertexAreaComparator implements Comparator<VertexData>
    {
       @Override
@@ -636,7 +637,6 @@ public class ConvexHullFootstepSnapper implements FootstepSnapper
          return 1;
       }
    }
-
 
    public ArrayList<Point2d> reduceListOfPointsByArea(List<Point2d> listOfPoints, int maxNumPoints)
    {
@@ -689,7 +689,8 @@ public class ConvexHullFootstepSnapper implements FootstepSnapper
       ArrayList<Point2d> finalListOfSupportPoints = new ArrayList<Point2d>();
       //for each vertex of the basePolygon, find the closest point inside the support polygon.
       int size = basePolygon.getNumberOfVertices();
-      for (int i = 0; i < size; i++){
+      for (int i = 0; i < size; i++)
+      {
          Point2d vertex = basePolygon.getVertex(i);
          Point2d correspondingSupportPoint = getPointInPolygonNearestPoint(supportPolygon, vertex);
          finalListOfSupportPoints.add(correspondingSupportPoint);
@@ -697,7 +698,8 @@ public class ConvexHullFootstepSnapper implements FootstepSnapper
       return finalListOfSupportPoints;
    }
 
-   private Point2d getPointInPolygonNearestPoint(ConvexPolygon2d polygon, Point2d point2d){
+   private Point2d getPointInPolygonNearestPoint(ConvexPolygon2d polygon, Point2d point2d)
+   {
       LineSegment2d closestEdge = new LineSegment2d();
       polygon.getClosestEdge(closestEdge, point2d);
       return closestEdge.getClosestPointOnLineSegmentCopy(point2d);

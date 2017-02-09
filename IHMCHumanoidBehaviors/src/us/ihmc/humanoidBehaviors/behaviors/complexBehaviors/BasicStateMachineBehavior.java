@@ -5,7 +5,7 @@ import javax.vecmath.Point2d;
 import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.BasicStateMachineBehavior.BasicStates;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.AtlasPrimitiveActions;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
-import us.ihmc.humanoidBehaviors.communication.BehaviorCommunicationBridge;
+import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidBehaviors.stateMachine.StateMachineBehavior;
 import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage.BodyPart;
@@ -24,7 +24,7 @@ public class BasicStateMachineBehavior extends StateMachineBehavior<BasicStates>
       ENABLE_LIDAR, CLEAR_LIDAR, WALK_TO_LOCATION_AND_HOME_ARM, BEHAVIOR_COMPLETE
    }
 
-   public BasicStateMachineBehavior(String name, DoubleYoVariable yoTime, BehaviorCommunicationBridge outgoingCommunicationBridge,
+   public BasicStateMachineBehavior(String name, DoubleYoVariable yoTime, CommunicationBridge outgoingCommunicationBridge,
          AtlasPrimitiveActions atlasPrimitiveActions)
    {
       super(name, BasicStates.class, yoTime, outgoingCommunicationBridge);
@@ -54,7 +54,13 @@ public class BasicStateMachineBehavior extends StateMachineBehavior<BasicStates>
       statemachine.addStateWithDoneTransition(enableLidarTask, BasicStates.CLEAR_LIDAR);
       statemachine.addStateWithDoneTransition(clearLidarTask, BasicStates.WALK_TO_LOCATION_AND_HOME_ARM);
       statemachine.addState(walkToBallTaskAndHomeArm);
+      statemachine.setStartState(BasicStates.ENABLE_LIDAR);
 
+   }
+
+   @Override
+   public void onBehaviorExited()
+   {
    }
 
 }

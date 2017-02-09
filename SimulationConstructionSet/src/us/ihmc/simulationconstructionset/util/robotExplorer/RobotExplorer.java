@@ -128,6 +128,7 @@ public class RobotExplorer
       buffer.append("momentOfInertia = \n" + momentOfInertia + "\n");
    }
    
+   @Override
    public String toString()
    {
       StringBuffer buffer = new StringBuffer();

@@ -6,14 +6,14 @@ import java.util.List;
 
 import org.apache.commons.lang3.mutable.MutableInt;
 
-import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceRGBColor;
+import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
+import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
 public class FootstepListVisualizer
 {
@@ -49,6 +49,15 @@ public class FootstepListVisualizer
    }
 
    private final SideDependentList<MutableInt> counters = new SideDependentList<MutableInt>(new MutableInt(0), new MutableInt(0));
+
+   public void updateFirstFootstep(Footstep firstFootstep)
+   {
+      RobotSide robotSide = firstFootstep.getRobotSide();
+      if (counters.get(robotSide).intValue() < 1)
+         return;
+
+      footstepVisualizers.get(robotSide).get(0).update(firstFootstep);
+   }
 
    public void update(List<Footstep> footsteps)
    {

@@ -22,11 +22,11 @@ public class NetworkPorts
    public static final NetworkPorts RIGHT_HAND_PORT = new NetworkPorts(5004);
 
    // Network manager ports
-   public static final NetworkPorts BEHAVIOUR_MODULE_PORT = new NetworkPorts(6001); 
+   public static final NetworkPorts BEHAVIOUR_MODULE_PORT = new NetworkPorts(6001);
    public static final NetworkPorts UI_MODULE = new NetworkPorts(6002);
    public static final NetworkPorts SENSOR_MANAGER = new NetworkPorts(6003);
    public static final NetworkPorts LEFT_HAND_MANAGER_PORT = new NetworkPorts(6004);
-   public static final NetworkPorts RIGHT_HAND_MANAGER_PORT = new NetworkPorts(6005); 
+   public static final NetworkPorts RIGHT_HAND_MANAGER_PORT = new NetworkPorts(6005);
    public static final NetworkPorts ROS_MODULE = new NetworkPorts(6006);
    public static final NetworkPorts ROS_API_COMMUNICATOR = new NetworkPorts(6007);
    public static final NetworkPorts MOCAP_MODULE = new NetworkPorts(6008);
@@ -38,10 +38,16 @@ public class NetworkPorts
    public static final NetworkPorts FACE_TRACKING = new NetworkPorts(6014);
    public static final NetworkPorts AUDIO_MODULE_PORT = new NetworkPorts(6015);
    public static final NetworkPorts TOUCH_MODULE_PORT = new NetworkPorts(6016);
-   public static final NetworkPorts KINEMATICS_TOOLBOX_MODULE_PORT = new NetworkPorts(6017); 
-   public static final NetworkPorts COACTIVE_ELEMENTS_PORT = new NetworkPorts(6018); 
+   public static final NetworkPorts KINEMATICS_TOOLBOX_MODULE_PORT = new NetworkPorts(6017);
+   public static final NetworkPorts COACTIVE_ELEMENTS_PORT = new NetworkPorts(6018);
    /** Port for the robot environment awareness module. Not yet available in the open source repo. */
-   public static final NetworkPorts REA_MODULE_PORT = new NetworkPorts(6019); 
+   public static final NetworkPorts REA_MODULE_PORT = new NetworkPorts(6019);
+   public static final NetworkPorts FOOTSTEP_PLANNING_TOOLBOX_MODULE_PORT = new NetworkPorts(6020);
+   public static final NetworkPorts HEIGHT_QUADTREE_TOOLBOX_MODULE_PORT = new NetworkPorts(6021);
+   public static final NetworkPorts REA_MODULE_UI_PORT = new NetworkPorts(6022);
+   public static final NetworkPorts LIDAR_SCAN_LOGGER_PORT = new NetworkPorts(6023);
+   public static final NetworkPorts VALVE_DETECTOR_SERVER_PORT = new NetworkPorts(6024);
+   public static final NetworkPorts VALVE_DETECTOR_FEEDBACK_PORT = new NetworkPorts(6025);
 
    // Mission control ports
    public static final NetworkPorts MISSION_CONTROL_SERVER_PORT = new NetworkPorts(2046);
@@ -62,14 +68,14 @@ public class NetworkPorts
    {
       return new NetworkPorts(random.nextInt(65535 - 1025) + 1025);
    }
-   
+
    private final int port;
 
    private NetworkPorts(int port)
    {
       this.port = port;
    }
-   
+
    public int getPort()
    {
       return port;

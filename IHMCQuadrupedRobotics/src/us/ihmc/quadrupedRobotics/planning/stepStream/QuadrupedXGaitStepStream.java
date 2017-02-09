@@ -1,23 +1,25 @@
 package us.ihmc.quadrupedRobotics.planning.stepStream;
 
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
-import us.ihmc.quadrupedRobotics.params.DoubleParameter;
-import us.ihmc.quadrupedRobotics.params.ParameterFactory;
+import us.ihmc.robotics.dataStructures.parameter.DoubleParameter;
+import us.ihmc.robotics.dataStructures.parameter.ParameterFactory;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStep;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedXGaitPlanner;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedXGaitSettings;
+import us.ihmc.quadrupedRobotics.planning.YoQuadrupedTimedStep;
 import us.ihmc.quadrupedRobotics.providers.QuadrupedPlanarVelocityInputProvider;
 import us.ihmc.quadrupedRobotics.providers.QuadrupedXGaitSettingsInputProvider;
 import us.ihmc.quadrupedRobotics.util.PreallocatedList;
+import us.ihmc.quadrupedRobotics.util.YoPreallocatedList;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.EndDependentList;
 import us.ihmc.robotics.robotSide.RobotEnd;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
-
 import javax.vecmath.Vector3d;
 import java.util.ArrayList;
 
@@ -31,45 +33,56 @@ public class QuadrupedXGaitStepStream implements QuadrupedStepStream
 
    private final QuadrupedPlanarVelocityInputProvider planarVelocityProvider;
    private final QuadrupedXGaitSettingsInputProvider xGaitSettingsProvider;
-   private final QuadrupedXGaitSettings xGaitSettings;
-   private final QuadrupedXGaitPlanner xGaitStepPlanner;
-   private final ArrayList<QuadrupedTimedStep> xGaitPreviewSteps;
-   private final EndDependentList<QuadrupedTimedStep> xGaitCurrentSteps;
    private final FramePoint supportCentroid;
    private final ReferenceFrame supportFrame;
    private final ReferenceFrame bodyZUpFrame;
    private final ReferenceFrame worldFrame;
    private final double controlDT;
    private final DoubleYoVariable timestamp;
-   private final FrameOrientation bodyOrientation;
-   private double bodyYaw;
-   private final PreallocatedList<QuadrupedTimedStep> stepSequence;
+
+   private final DoubleYoVariable bodyYaw;
+   private final YoFrameOrientation bodyOrientation;
+   private final QuadrupedXGaitSettings xGaitSettings;
+   private final QuadrupedXGaitPlanner xGaitStepPlanner;
+   private final EndDependentList<YoQuadrupedTimedStep> xGaitCurrentSteps;
+   private final ArrayList<YoQuadrupedTimedStep> xGaitPreviewSteps;
+   private final YoPreallocatedList<YoQuadrupedTimedStep> stepSequence;
 
    public QuadrupedXGaitStepStream(QuadrupedPlanarVelocityInputProvider planarVelocityProvider, QuadrupedXGaitSettingsInputProvider xGaitSettingsProvider,
          QuadrupedReferenceFrames referenceFrames, double controlDT, DoubleYoVariable timestamp, YoVariableRegistry parentRegistry)
    {
       this.planarVelocityProvider = planarVelocityProvider;
       this.xGaitSettingsProvider = xGaitSettingsProvider;
-      this.xGaitSettings = new QuadrupedXGaitSettings();
-      this.xGaitStepPlanner = new QuadrupedXGaitPlanner();
-      this.xGaitPreviewSteps = new ArrayList<>(NUMBER_OF_PREVIEW_STEPS);
-      this.xGaitCurrentSteps = new EndDependentList<>();
-      for (int i = 0; i < NUMBER_OF_PREVIEW_STEPS; i++)
-      {
-         xGaitPreviewSteps.add(new QuadrupedTimedStep());
-      }
-      for (RobotEnd robotEnd : RobotEnd.values)
-      {
-         xGaitCurrentSteps.set(robotEnd, new QuadrupedTimedStep());
-      }
       this.supportCentroid = new FramePoint();
       this.supportFrame = referenceFrames.getCenterOfFeetZUpFrameAveragingLowestZHeightsAcrossEnds();
       this.bodyZUpFrame = referenceFrames.getBodyZUpFrame();
       this.worldFrame = ReferenceFrame.getWorldFrame();
       this.controlDT = controlDT;
       this.timestamp = timestamp;
-      this.bodyOrientation = new FrameOrientation();
-      this.stepSequence = new PreallocatedList<>(QuadrupedTimedStep.class, NUMBER_OF_PREVIEW_STEPS + 2);
+
+      this.bodyYaw = new DoubleYoVariable("bodyYaw", registry);
+      this.bodyOrientation = new YoFrameOrientation("bodyOrientation", worldFrame, registry);
+      this.xGaitSettings = new QuadrupedXGaitSettings();
+      this.xGaitStepPlanner = new QuadrupedXGaitPlanner();
+      this.xGaitCurrentSteps = new EndDependentList<>();
+      for (RobotEnd robotEnd : RobotEnd.values)
+      {
+         xGaitCurrentSteps.set(robotEnd, new YoQuadrupedTimedStep("currentStep" + robotEnd.getCamelCaseNameForMiddleOfExpression(), registry));
+      }
+      this.xGaitPreviewSteps = new ArrayList<>(NUMBER_OF_PREVIEW_STEPS);
+      for (int i = 0; i < NUMBER_OF_PREVIEW_STEPS; i++)
+      {
+         xGaitPreviewSteps.add(new YoQuadrupedTimedStep("previewStep" + i, registry));
+      }
+      this.stepSequence = new YoPreallocatedList<>("stepSequence", registry, NUMBER_OF_PREVIEW_STEPS + 2,
+            new YoPreallocatedList.DefaultElementFactory<YoQuadrupedTimedStep>()
+            {
+               @Override
+               public YoQuadrupedTimedStep createDefaultElement(String prefix, YoVariableRegistry registry)
+               {
+                  return new YoQuadrupedTimedStep(prefix, registry);
+               }
+            });
 
       if (parentRegistry != null)
       {
@@ -95,17 +108,17 @@ public class QuadrupedXGaitStepStream implements QuadrupedStepStream
    public void onEntry()
    {
       // initialize body orientation
-      bodyOrientation.setToZero(bodyZUpFrame);
-      bodyOrientation.changeFrame(worldFrame);
-      bodyYaw = bodyOrientation.getYaw();
+      bodyOrientation.setFromReferenceFrame(bodyZUpFrame);
+      bodyYaw.set(bodyOrientation.getYaw().getDoubleValue());
 
       // initialize step queue
       updateXGaitSettings();
       supportCentroid.setToZero(supportFrame);
+      double initialYaw = bodyYaw.getDoubleValue();
       double initialTime = timestamp.getDoubleValue() + initialStepDelayParameter.get();
       Vector3d initialVelocity = planarVelocityProvider.get();
       RobotQuadrant initialQuadrant = (xGaitSettings.getEndPhaseShift() < 90) ? RobotQuadrant.HIND_LEFT : RobotQuadrant.FRONT_LEFT;
-      xGaitStepPlanner.computeInitialPlan(xGaitPreviewSteps, initialVelocity, initialQuadrant, supportCentroid, initialTime, bodyYaw, xGaitSettings);
+      xGaitStepPlanner.computeInitialPlan(xGaitPreviewSteps, initialVelocity, initialQuadrant, supportCentroid, initialTime, initialYaw, xGaitSettings);
       for (int i = 0; i < 2; i++)
       {
          RobotEnd robotEnd = xGaitPreviewSteps.get(i).getRobotQuadrant().getEnd();
@@ -120,9 +133,8 @@ public class QuadrupedXGaitStepStream implements QuadrupedStepStream
       double currentTime = timestamp.getDoubleValue();
 
       // update body orientation
-      bodyYaw += planarVelocityProvider.get().getZ() * controlDT;
-      bodyOrientation.changeFrame(worldFrame);
-      bodyOrientation.setYawPitchRoll(bodyYaw, 0.0, 0.0);
+      bodyYaw.add(planarVelocityProvider.get().getZ() * controlDT);
+      bodyOrientation.setYawPitchRoll(bodyYaw.getDoubleValue(), 0.0, 0.0);
 
       // update xgait current steps
       for (int i = 0; i < xGaitPreviewSteps.size(); i++)
@@ -130,14 +142,15 @@ public class QuadrupedXGaitStepStream implements QuadrupedStepStream
          QuadrupedTimedStep xGaitPreviewStep = xGaitPreviewSteps.get(i);
          if (xGaitPreviewStep.getTimeInterval().getStartTime() <= currentTime)
          {
-            xGaitCurrentSteps.get(xGaitPreviewStep.getRobotEnd()).set(xGaitPreviewStep);
+            xGaitCurrentSteps.get(xGaitPreviewStep.getRobotQuadrant().getEnd()).set(xGaitPreviewStep);
          }
       }
 
       // update xgait preview steps
       updateXGaitSettings();
+      double currentYaw = bodyYaw.getDoubleValue();
       Vector3d inputVelocity = planarVelocityProvider.get();
-      xGaitStepPlanner.computeOnlinePlan(xGaitPreviewSteps, xGaitCurrentSteps, inputVelocity, currentTime, bodyYaw, xGaitSettings);
+      xGaitStepPlanner.computeOnlinePlan(xGaitPreviewSteps, xGaitCurrentSteps, inputVelocity, currentTime, currentYaw, xGaitSettings);
 
       // update step sequence
       stepSequence.clear();
@@ -168,11 +181,11 @@ public class QuadrupedXGaitStepStream implements QuadrupedStepStream
    @Override
    public void getBodyOrientation(FrameOrientation bodyOrientation)
    {
-      bodyOrientation.set(this.bodyOrientation);
+      bodyOrientation.setIncludingFrame(this.bodyOrientation.getFrameOrientation());
    }
 
    @Override
-   public PreallocatedList<QuadrupedTimedStep> getSteps()
+   public PreallocatedList<? extends QuadrupedTimedStep> getSteps()
    {
       return stepSequence;
    }

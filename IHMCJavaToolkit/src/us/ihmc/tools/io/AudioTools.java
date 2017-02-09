@@ -8,6 +8,9 @@ import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
 import javax.sound.sampled.DataLine;
+import javax.sound.sampled.LineUnavailableException;
+
+import us.ihmc.tools.io.printing.PrintTools;
 
 public class AudioTools
 {
@@ -17,7 +20,7 @@ public class AudioTools
     * and over again on top of itself.
     */
    public static void playFirstNotRunningClip(Clip[] clips)
-   {      
+   {
       for (int i = 0; i < clips.length; i++)
       {
          if (clips[i].isRunning())
@@ -25,26 +28,26 @@ public class AudioTools
             continue;
          }
          else
-         {            
+         {
             clips[i].setFramePosition(0);
             clips[i].start();
             return;
          }
       }
    }
-   
+
    /**
     * Play a clip once. Will do nothing if clip is already playing.
     */
    public static void playSoundOnce(Clip clip)
    {      
-      if (clip.isRunning())
+      if (clip == null || clip.isRunning())
          return;
       
       clip.setFramePosition(0);
       clip.start();
    }
-   
+
    public static Clip loadSoundClip(InputStream is)
    {
       try
@@ -59,7 +62,7 @@ public class AudioTools
          info = new DataLine.Info(Clip.class, format);
          clip = (Clip) AudioSystem.getLine(info);
          clip.open(stream);
-         
+
          return clip;
       }
       catch (Exception e)
@@ -68,7 +71,7 @@ public class AudioTools
          return null;
       }
    }
-   
+
    public static Clip loadSoundClip(URL url)
    {
       try
@@ -83,8 +86,13 @@ public class AudioTools
          info = new DataLine.Info(Clip.class, format);
          clip = (Clip) AudioSystem.getLine(info);
          clip.open(stream);
-         
+
          return clip;
+      }
+      catch (LineUnavailableException e)
+      {
+//         PrintTools.warn("Plug in a speaker to hear sounds.");
+         return null;
       }
       catch (Exception e)
       {

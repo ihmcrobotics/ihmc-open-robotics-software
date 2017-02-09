@@ -1,45 +1,52 @@
 package us.ihmc.humanoidBehaviors.behaviors.behaviorServices;
 
-import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
+import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.tools.thread.ThreadTools;
 
-public abstract class ThreadedBehaviorService extends BehaviorService implements Runnable
+public abstract class ThreadedBehaviorService extends BehaviorService
 {   
    private boolean running = false;
    private boolean paused = false;
    private final String threadName;
    
-   public ThreadedBehaviorService(String threadName, AbstractBehavior behaviorInterface)
+   public ThreadedBehaviorService(String threadName, CommunicationBridgeInterface communicationBridge)
    {
-      super(behaviorInterface);
+      super(threadName, communicationBridge);
       
       this.threadName = threadName;
    }
    
    @Override
-   public void initialize()
+   public void run()
    {
       if (!running)
       {
          running = true;
          paused = false;
          
-         ThreadTools.startAThread(this, threadName);
+         ThreadTools.startAThread(new Run(), threadName);
+      }
+      else if (paused)
+      {
+         paused = false;
       }
    }
    
-   @Override
-   public void run()
+   private class Run implements Runnable
    {
-      while (running)
+      @Override
+      public void run()
       {
-         if (!paused)
+         while (running)
          {
-            doThreadAction();
-         }
-         else
-         {
-            ThreadTools.sleep(300L);
+            if (!paused)
+            {
+               doThreadAction();
+            }
+            else
+            {
+               ThreadTools.sleep(300L);
+            }
          }
       }
    }
@@ -51,16 +58,12 @@ public abstract class ThreadedBehaviorService extends BehaviorService implements
    }
    
    @Override
-   public void resume()
-   {
-      paused = false;
-   }
-   
-   @Override
-   public void stop()
+   public void destroy()
    {
       running = false;
    }
    
    public abstract void doThreadAction();
+   
+   public abstract void initialize();
 }

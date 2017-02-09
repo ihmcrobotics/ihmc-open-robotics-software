@@ -25,13 +25,14 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
-import us.ihmc.robotDataCommunication.YoVariableHandshakeParser;
-import us.ihmc.robotDataCommunication.logger.LogPropertiesReader;
-import us.ihmc.robotDataCommunication.logger.MultiVideoDataPlayer;
-import us.ihmc.robotDataCommunication.logger.YoVariableLogPlaybackRobot;
-import us.ihmc.robotDataCommunication.logger.YoVariableLoggerListener;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
+import us.ihmc.robotDataLogger.YoVariableHandshakeParser;
+import us.ihmc.robotDataLogger.logger.LogPropertiesReader;
+import us.ihmc.robotDataLogger.logger.YoVariableLoggerListener;
+import us.ihmc.robotDataVisualizer.logger.MultiVideoDataPlayer;
+import us.ihmc.robotDataVisualizer.logger.YoVariableLogPlaybackRobot;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.robotDescription.RobotDescription;
@@ -44,7 +45,6 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.SimulationDoneListener;
 import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.tools.gui.SwingUtils;
 import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.tools.thread.ThreadTools;
@@ -354,7 +354,7 @@ public class AtlasMultiDataExporter implements SimulationDoneListener
       handshakeStream.readFully(handshakeData);
       handshakeStream.close();
 
-      parser = new YoVariableHandshakeParser("logged", true);
+      parser = new YoVariableHandshakeParser("logged");
       parser.parseFrom(handshakeData);
 
 //      boolean useCollisionMeshes = false;

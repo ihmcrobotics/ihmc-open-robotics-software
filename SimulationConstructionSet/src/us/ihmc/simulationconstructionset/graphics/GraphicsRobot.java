@@ -4,10 +4,11 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 
-import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
-import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
-import us.ihmc.graphics3DAdapter.structure.Graphics3DNodeType;
+import us.ihmc.graphicsDescription.Graphics3DObject;
+import us.ihmc.graphicsDescription.structure.Graphics3DNode;
+import us.ihmc.graphicsDescription.structure.Graphics3DNodeType;
 import us.ihmc.robotics.kinematics.CommonJoint;
+import us.ihmc.robotics.robotDescription.CollisionMeshDescription;
 import us.ihmc.robotics.robotDescription.GraphicsObjectsHolder;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -65,6 +66,7 @@ public class GraphicsRobot implements GraphicsUpdatable
    }
 
 
+   @Override
    public void update()
    {
       for (int i = 0; i < graphicsJoints.size(); i++)
@@ -95,7 +97,6 @@ public class GraphicsRobot implements GraphicsUpdatable
 
    private GraphicsJoint createJoint(Joint joint, Graphics3DNodeType nodeType)
    {
-
       GraphicsJoint graphicsJoint = new GraphicsJoint(joint.getName(), joint, joint.getLink().getLinkGraphics(), nodeType);
       allJoints.put(joint, graphicsJoint);
       graphicsJoints.add(graphicsJoint);
@@ -107,7 +108,7 @@ public class GraphicsRobot implements GraphicsUpdatable
       Graphics3DObject graphics3DObject;
       if(useCollisionMeshes)
       {
-         graphics3DObject = graphicsObjectsHolder.getCollisionObject(inverseDynamicsJoint.getName());
+         graphics3DObject = generateGraphics3DObjectFromCollisionMeshes(graphicsObjectsHolder.getCollisionObjects(inverseDynamicsJoint.getName()));
       }
       else
       {
@@ -121,6 +122,13 @@ public class GraphicsRobot implements GraphicsUpdatable
       graphicsJoints.add(graphicsJoint);
       return graphicsJoint;
    }
+
+   private Graphics3DObject generateGraphics3DObjectFromCollisionMeshes(ArrayList<CollisionMeshDescription> collisionObjects)
+   {
+      System.err.println("Need to implement " + getClass().getSimpleName() + ".generateGraphics3DObjectFromCollisionMesh()!");
+      return null;
+   }
+
 
    private void addInverseDynamicsJoints(List<InverseDynamicsJoint> joints, GraphicsJoint parentJoint, GraphicsObjectsHolder graphicsObjectsHolder, boolean useCollisionMeshes)
    {

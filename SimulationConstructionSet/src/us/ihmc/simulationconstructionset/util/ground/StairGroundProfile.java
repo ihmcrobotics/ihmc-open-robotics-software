@@ -42,6 +42,7 @@ public class StairGroundProfile extends GroundProfileFromHeightMap
       this.boundingBox = new BoundingBox3d(xMin, yMin, zMin, xMax, yMax, zMax);
    }
 
+   @Override
    public double heightAndNormalAt(double x, double y, double z, Vector3d normalToPack)
    {
       double height = heightAt(x, y, z);
@@ -50,6 +51,7 @@ public class StairGroundProfile extends GroundProfileFromHeightMap
       return height;
    }
 
+   @Override
    public double heightAt(double x, double y, double z)
    {
       int stairNumber = (int) Math.ceil((x - startStairsAtX / groundXStep));    // the ceil ensures that the fist step is always at x = 0.0, which simplifies initial robot setup
@@ -66,6 +68,7 @@ public class StairGroundProfile extends GroundProfileFromHeightMap
       normal.set(0.0, 0.0, 1.0);
    }
 
+   @Override
    public BoundingBox3d getBoundingBox()
    {
       return boundingBox;

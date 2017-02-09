@@ -51,14 +51,16 @@ public class BookmarkedVariablesPanel extends YoVariableListPanel
       this.setDropTarget(new DropTarget(this, new BookmarkedVariablesPanelTargetListener(this)));
       bookmarkedVariablesHolder.addBookmarkedVariableAddedListener(new BookmarkedVariableAddedListener()
       {
-         public void bookmarkAdded(YoVariable variable)
+         @Override
+         public void bookmarkAdded(YoVariable<?> variable)
          {
             addVariable(variable);
          }
       });
       bookmarkedVariablesHolder.addBookmarkedVariableRemovedListener(new BookmarkedVariableRemovedListener()
       {
-         public void bookmarkRemoved(YoVariable variable)
+         @Override
+         public void bookmarkRemoved(YoVariable<?> variable)
          {
             removeVariable(variable);
          }
@@ -74,6 +76,7 @@ public class BookmarkedVariablesPanel extends YoVariableListPanel
          JMenuItem removeVarible = new JMenuItem("Remove Variable");
          removeVarible.addActionListener(new ActionListener()
          {
+            @Override
             public void actionPerformed(ActionEvent e)
             {
                if (selectedVariableHolder.getSelectedVariable() != null)
@@ -97,7 +100,7 @@ public class BookmarkedVariablesPanel extends YoVariableListPanel
       return selectedVariableHolder;
    }
 
-   public void bookmarkVariable(YoVariable variable)
+   public void bookmarkVariable(YoVariable<?> variable)
    {
       bookmarkedVariablesHolder.addBookmark(variable);
    }

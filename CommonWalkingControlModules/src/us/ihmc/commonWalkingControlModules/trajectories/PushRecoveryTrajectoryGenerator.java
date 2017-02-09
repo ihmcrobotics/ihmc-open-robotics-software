@@ -1,5 +1,7 @@
 package us.ihmc.commonWalkingControlModules.trajectories;
 
+import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -13,8 +15,6 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.trajectories.providers.DoubleProvider;
 import us.ihmc.robotics.trajectories.providers.PositionProvider;
 import us.ihmc.robotics.trajectories.providers.VectorProvider;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.BagOfBalls;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
 /**
  *

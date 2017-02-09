@@ -6,8 +6,6 @@ import static org.junit.Assert.assertTrue;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
-import org.junit.Test;
-
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.Link;
@@ -18,7 +16,6 @@ import us.ihmc.simulationconstructionset.physics.CollisionShapeDescription;
 import us.ihmc.simulationconstructionset.physics.CollisionShapeFactory;
 import us.ihmc.simulationconstructionset.physics.Contacts;
 import us.ihmc.simulationconstructionset.physics.ScsCollisionDetector;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 /**
  * Tests compliance to the {@link us.ihmc.simulationconstructionset.physics.ScsCollisionDetector}
@@ -31,8 +28,6 @@ public abstract class SCSCollisionDetectorTest
    /**
     * Make a small object and see if it detects the collision correctly.  Small objects aren't already handled correctly
     */
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 300000)
    public void testSmallBox()
    {
       double epsilon = 0.001;
@@ -87,8 +82,6 @@ public abstract class SCSCollisionDetectorTest
       result.clear();
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test(timeout = 300000)
    public void testUnitBox()
    {
       // add a bit of separation to ensure they don't collide
@@ -137,9 +130,6 @@ public abstract class SCSCollisionDetectorTest
       result.clear();
    }
 
-
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test(timeout = 300000)
    public void testBoxCloseButNoCollisions()
    {
       ScsCollisionDetector collisionDetector = createCollisionDetector();
@@ -181,8 +171,6 @@ public abstract class SCSCollisionDetectorTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 300000)
    public void testBoxBarelyCollisions()
    {
       ScsCollisionDetector collisionDetector = createCollisionDetector();
@@ -234,10 +222,6 @@ public abstract class SCSCollisionDetectorTest
       }
    }
 
-
-
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 300000)
    public void collisionMask_hit()
    {
       ScsCollisionDetector collisionDetector = createCollisionDetector();
@@ -263,9 +247,6 @@ public abstract class SCSCollisionDetectorTest
    /**
     * Makes sure the offset from the link is handled correctly
     */
-
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 300000)
    public void checkCollisionShape_offset()
    {
       ScsCollisionDetector collisionDetector = createCollisionDetector();
@@ -312,7 +293,7 @@ public abstract class SCSCollisionDetectorTest
 
       CollisionShapeFactory factory = collisionDetector.getShapeFactory();
       factory.setMargin(0.0000002);
-      CollisionShapeDescription shapeDesc = factory.createBox(radiusX, radiusY, radiusZ);
+      CollisionShapeDescription<?> shapeDesc = factory.createBox(radiusX, radiusY, radiusZ);
       factory.addShape(link, shapeToLink, shapeDesc, false, collisionGroup, collisionMask);
 
       joint.setLink(link);
@@ -347,7 +328,7 @@ public abstract class SCSCollisionDetectorTest
 
          CollisionShape shapeA = contacts.getShapeA();
          CollisionShape shapeB = contacts.getShapeB();
-         assertTrue((shapeA.getCollisionMask() & shapeB.getGroupMask()) != 0 || (shapeB.getCollisionMask() & shapeA.getGroupMask()) != 0);
+         assertTrue((shapeA.getCollisionMask() & shapeB.getCollisionGroup()) != 0 || (shapeB.getCollisionMask() & shapeA.getCollisionGroup()) != 0);
       }
 
       @Override
@@ -361,7 +342,4 @@ public abstract class SCSCollisionDetectorTest
       cubeJoint.setPosition(x, y, z);
       cubeJoint.getRobot().update();
    }
-
-
-
 }

@@ -8,6 +8,7 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 // TODO delete if not used
+@SuppressWarnings("serial")
 public class WrenchContactPoint extends ExternalForcePoint
 {
 

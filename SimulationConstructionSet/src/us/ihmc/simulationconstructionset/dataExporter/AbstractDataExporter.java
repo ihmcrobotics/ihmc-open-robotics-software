@@ -1,6 +1,6 @@
 package us.ihmc.simulationconstructionset.dataExporter;
 
-
+import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -17,9 +17,14 @@ import us.ihmc.tools.time.DateTools;
 
 public abstract class AbstractDataExporter implements ActionListener
 {
+   public abstract ArrayList<Color> getDataVsTimeColorsToCycle();
+
+   public abstract ArrayList<Color> getDataVsDataColorsToCycle();
+
    public abstract ArrayList<String> getDataVsTimeVariableNames();
+
    public abstract ArrayList<String[]> getDataVsDataVariableNames();
-   
+
    private final SimulationConstructionSet scs;
    private final String name;
    private final String subdirectoryName;
@@ -44,6 +49,7 @@ public abstract class AbstractDataExporter implements ActionListener
       this.rootClassForDirectory = rootClassForDirectory;
    }
 
+   @Override
    public void actionPerformed(ActionEvent e)
    {
       File simulationRootDirectory = DataExporterDirectoryFinder.findSimulationRootLocation(rootClassForDirectory);
@@ -60,9 +66,9 @@ public abstract class AbstractDataExporter implements ActionListener
 
       // Crop the Buffer to In/Out. This is important because of how we use the DataBuffer later and we assume that in point is at index=0:
       scs.cropBuffer();
-      
+
       // For some reason external YoVariable Visualizers freeze up if we do scs.gotoInPointNow(). Not sure why.
-//      scs.gotoInPointNow();
+      //      scs.gotoInPointNow();
 
       // confirm directory structure is correct
       if (simulationRootDirectory == null)
@@ -95,9 +101,9 @@ public abstract class AbstractDataExporter implements ActionListener
 
       //            if (optionsPanel.saveReadMe())
       //            {
-                     System.out.println("Saving ReadMe");
-                     readmeWriter.writeReadMe(dataAndVideosTagDirectory, tagName, -1);
-                     System.out.println("Done Saving ReadMe");
+      System.out.println("Saving ReadMe");
+      readmeWriter.writeReadMe(dataAndVideosTagDirectory, tagName, -1);
+      System.out.println("Done Saving ReadMe");
       //            }
 
       //            if (optionsPanel.saveData())
@@ -121,7 +127,9 @@ public abstract class AbstractDataExporter implements ActionListener
          boolean createGraphsPDF = false;
 
          ArrayList<String> dataVsTimeVariableNames = getDataVsTimeVariableNames();
+         ArrayList<Color> dataVsTimeColors = getDataVsTimeColorsToCycle();
 
+         int colorIndex = 0;
          for (String variableName : dataVsTimeVariableNames)
          {
             YoVariable<?> variable = scs.getVariable(variableName);
@@ -130,13 +138,19 @@ public abstract class AbstractDataExporter implements ActionListener
                System.err.println("Couldn't find variable named " + variableName);
                continue;
             }
-            graphCreator.createDataVsTimeGraph(graphDirectory, tagName, variable, createGraphsJPG, createGraphsPDF);
+            graphCreator.createDataVsTimeGraph(graphDirectory, tagName, variable, createGraphsJPG, createGraphsPDF, dataVsTimeColors.get(colorIndex));
+            colorIndex++;
+            if (colorIndex >= dataVsTimeColors.size())
+               colorIndex = 0;
          }
-         
+
          ArrayList<String[]> dataVsDataVariableNames = getDataVsDataVariableNames();
+         ArrayList<Color> dataVDataColors = getDataVsDataColorsToCycle();
+
+         colorIndex = 0;
          for (String[] variableNames : dataVsDataVariableNames)
          {
-            if (variableNames.length != 2) 
+            if (variableNames.length != 2)
             {
                System.err.println(getClass().getSimpleName() + ": Must have exactly 2 variable names in getDataVsDataVariableNames()");
                continue;
@@ -150,16 +164,19 @@ public abstract class AbstractDataExporter implements ActionListener
                System.err.println("Couldn't find variable named " + variableNames[0]);
                continue;
             }
-            
+
             if (variableTwo == null)
             {
                System.err.println("Couldn't find variable named " + variableNames[1]);
                continue;
             }
 
-            graphCreator.createDataOneVsDataTwoGraph(graphDirectory, tagName, variableOne, variableTwo, createGraphsJPG, createGraphsPDF);
+            graphCreator.createDataOneVsDataTwoGraph(graphDirectory, tagName, variableOne, variableTwo, createGraphsJPG, createGraphsPDF,
+                  dataVDataColors.get(colorIndex));
+            colorIndex++;
+            if (colorIndex >= dataVsTimeColors.size())
+               colorIndex = 0;
          }
-
 
          System.out.println("done creating variable graphs");
       }
@@ -187,14 +204,14 @@ public abstract class AbstractDataExporter implements ActionListener
       scs.writeData(file);
    }
 
-//   /**
-//    * Create video from current viewport using the file path and file header
-//    * @param dataAndVideosTagDirectory
-//    * @param fileHeader
-//    */
-//   private void createVideo(File dataAndVideosTagDirectory, String fileHeader)
-//   {
-//      File video = new File(dataAndVideosTagDirectory, fileHeader + "_Video.mov");
-//      scs.getStandardSimulationGUI().getViewportPanel().getStandardGUIActions().createVideo(video);
-//   }
+   //   /**
+   //    * Create video from current viewport using the file path and file header
+   //    * @param dataAndVideosTagDirectory
+   //    * @param fileHeader
+   //    */
+   //   private void createVideo(File dataAndVideosTagDirectory, String fileHeader)
+   //   {
+   //      File video = new File(dataAndVideosTagDirectory, fileHeader + "_Video.mov");
+   //      scs.getStandardSimulationGUI().getViewportPanel().getStandardGUIActions().createVideo(video);
+   //   }
 }

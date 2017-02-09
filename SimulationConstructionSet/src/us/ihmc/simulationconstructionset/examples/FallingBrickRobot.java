@@ -2,26 +2,24 @@ package us.ihmc.simulationconstructionset.examples;
 
 import javax.vecmath.Vector3d;
 
-import us.ihmc.graphics3DAdapter.GroundProfile3D;
-import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
-import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
+import us.ihmc.graphicsDescription.Graphics3DObject;
+import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.GroundContactModel;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.Robot;
-import us.ihmc.simulationconstructionset.robotController.RobotController;
 import us.ihmc.simulationconstructionset.util.LinearGroundContactModel;
 import us.ihmc.simulationconstructionset.util.ground.WavyGroundProfile;
 
 public class FallingBrickRobot extends Robot implements RobotController
 {
-   private static final long serialVersionUID = 773713164696806099L;
-  
    private static final double BASE_H = 0.1, BASE_W = 0.2, BASE_L = 0.3;
    private static final double B1 = BASE_H / 2.0;
    private static final double M1 = 1.7;
@@ -172,6 +170,7 @@ public class FallingBrickRobot extends Robot implements RobotController
       energy = new DoubleYoVariable("energy", registry);
    }
 
+   @Override
    public void doControl()
    {
       energy.set(M1 * G * q_z.getDoubleValue() + 0.5 * M1 * qd_x.getDoubleValue() * qd_x.getDoubleValue() + 0.5 * M1 * qd_y.getDoubleValue() * qd_y.getDoubleValue() + 0.5 * M1 * qd_z.getDoubleValue() * qd_z.getDoubleValue()
@@ -183,15 +182,18 @@ public class FallingBrickRobot extends Robot implements RobotController
 
    }
 
+   @Override
    public YoVariableRegistry getYoVariableRegistry()
    {
       return registry;
    }
    
+   @Override
    public void initialize()
    {      
    }
 
+   @Override
    public String getDescription()
    {
       return getName();

@@ -4,12 +4,13 @@ import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerToolbox;
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.*;
+import us.ihmc.quadrupedRobotics.controller.forceDevelopment.QuadrupedTimedStepController;
 import us.ihmc.quadrupedRobotics.estimator.GroundPlaneEstimator;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
-import us.ihmc.quadrupedRobotics.params.DoubleArrayParameter;
-import us.ihmc.quadrupedRobotics.params.DoubleParameter;
-import us.ihmc.quadrupedRobotics.params.ParameterFactory;
+import us.ihmc.robotics.dataStructures.parameter.DoubleArrayParameter;
+import us.ihmc.robotics.dataStructures.parameter.DoubleParameter;
+import us.ihmc.robotics.dataStructures.parameter.ParameterFactory;
 import us.ihmc.quadrupedRobotics.planning.ContactState;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStep;
 import us.ihmc.quadrupedRobotics.planning.trajectory.PiecewiseForwardDcmTrajectory;
@@ -18,9 +19,9 @@ import us.ihmc.quadrupedRobotics.planning.trajectory.ThreeDoFMinimumJerkTrajecto
 import us.ihmc.quadrupedRobotics.providers.QuadrupedPostureInputProviderInterface;
 import us.ihmc.quadrupedRobotics.providers.QuadrupedPlanarVelocityInputProvider;
 import us.ihmc.quadrupedRobotics.providers.QuadrupedXGaitSettingsInputProvider;
-import us.ihmc.quadrupedRobotics.state.FiniteStateMachine;
-import us.ihmc.quadrupedRobotics.state.FiniteStateMachineBuilder;
-import us.ihmc.quadrupedRobotics.state.FiniteStateMachineState;
+import us.ihmc.robotics.stateMachines.eventBasedStateMachine.FiniteStateMachine;
+import us.ihmc.robotics.stateMachines.eventBasedStateMachine.FiniteStateMachineBuilder;
+import us.ihmc.robotics.stateMachines.eventBasedStateMachine.FiniteStateMachineState;
 import us.ihmc.quadrupedRobotics.util.TimeInterval;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -138,7 +139,8 @@ public class QuadrupedDcmBasedTrotController implements QuadrupedController
       comPositionController = controllerToolbox.getComPositionController();
       bodyOrientationControllerSetpoints = new QuadrupedBodyOrientationController.Setpoints();
       bodyOrientationController = controllerToolbox.getBodyOrientationController();
-      timedStepController = controllerToolbox.getTimedStepController();
+      timedStepController = new QuadrupedTimedStepController(controllerToolbox.getSolePositionController(), runtimeEnvironment.getRobotTimestamp(), registry,
+            runtimeEnvironment.getGraphicsListRegistry());
 
       // task space controllers
       taskSpaceEstimates = new QuadrupedTaskSpaceEstimator.Estimates();
@@ -411,6 +413,7 @@ public class QuadrupedDcmBasedTrotController implements QuadrupedController
       private final FramePoint dcmPositionAtEoS;
       private final FramePoint footholdPosition;
       private final QuadrupedTimedStep timedStep;
+      private final Point3d timedStepGoalPosition;
       private final QuadrantDependentList<Point3d> timedStepGoalPositionAtSoS;
 
       public DoubleSupportState(RobotQuadrant hindSupportQuadrant, RobotQuadrant frontSupportQuadrant)
@@ -426,6 +429,7 @@ public class QuadrupedDcmBasedTrotController implements QuadrupedController
          dcmPositionAtEoS = new FramePoint();
          footholdPosition = new FramePoint();
          timedStep = new QuadrupedTimedStep();
+         timedStepGoalPosition = new Point3d();
          timedStepGoalPositionAtSoS = new QuadrantDependentList<>();
          for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
          {
@@ -474,7 +478,7 @@ public class QuadrupedDcmBasedTrotController implements QuadrupedController
             timedStep.getTimeInterval().setEndTime(initialTime + doubleSupportDurationParameter.get());
             timedStep.setGoalPosition(footholdPosition);
             timedStepController.addStep(timedStep);
-            timedStepGoalPositionAtSoS.get(swingQuadrants[i]).set(timedStep.getGoalPosition());
+            timedStep.getGoalPosition(timedStepGoalPositionAtSoS.get(swingQuadrants[i]));
 
             // initialize ground plane points
             groundPlanePositions.get(swingQuadrants[i]).setIncludingFrame(taskSpaceEstimates.getSolePosition(swingQuadrants[i]));
@@ -499,8 +503,9 @@ public class QuadrupedDcmBasedTrotController implements QuadrupedController
          for (int i = 0; i < 2; i++)
          {
             QuadrupedTimedStep step = timedStepController.getCurrentStep(swingQuadrants[i]);
-            step.getGoalPosition().set(dcmPositionEstimate.getX() - dcmPositionSetpoint.getX(), dcmPositionEstimate.getY() - dcmPositionSetpoint.getY(), 0.0);
-            step.getGoalPosition().add(timedStepGoalPositionAtSoS.get(swingQuadrants[i]));
+            timedStepGoalPosition.set(dcmPositionEstimate.getX() - dcmPositionSetpoint.getX(), dcmPositionEstimate.getY() - dcmPositionSetpoint.getY(), 0.0);
+            timedStepGoalPosition.add(timedStepGoalPositionAtSoS.get(swingQuadrants[i]));
+            step.setGoalPosition(timedStepGoalPosition);
          }
 
          // trigger touch down event

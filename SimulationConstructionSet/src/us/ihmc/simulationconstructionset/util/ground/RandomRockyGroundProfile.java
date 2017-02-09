@@ -148,6 +148,7 @@ public class RandomRockyGroundProfile extends GroundProfileFromHeightMap
       return ((x > 0) && (x < fieldLength) && (y > 0) && (y < fieldLength));
    }
 
+   @Override
    public double heightAndNormalAt(double x, double y, double z, Vector3d normalToPack)
    {
       double height = heightAt(x, y, z);
@@ -156,6 +157,7 @@ public class RandomRockyGroundProfile extends GroundProfileFromHeightMap
       return height;
    }
    
+   @Override
    public double heightAt(double x_world, double y_world, double z_world)
    {
       int xPos1 = (int) Math.floor((x_world - boundingBox.getXMin()) / resolution);
@@ -220,6 +222,7 @@ public class RandomRockyGroundProfile extends GroundProfileFromHeightMap
 
    }
 
+   @Override
    public BoundingBox3d getBoundingBox()
    {
       return boundingBox;

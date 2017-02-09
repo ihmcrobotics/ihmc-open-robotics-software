@@ -10,13 +10,13 @@ import com.martiansoftware.jsap.JSAPResult;
 import com.martiansoftware.jsap.Switch;
 
 import us.ihmc.atlas.ros.RosAtlasAuxiliaryRobotDataPublisher;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.networkProcessor.DRCNetworkModuleParameters;
+import us.ihmc.avatar.networkProcessor.DRCNetworkProcessor;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.util.NetworkPorts;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkModuleParameters;
-import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkProcessor;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
 
@@ -59,6 +59,8 @@ public class AtlasNetworkProcessor
         networkModuleParams.enableSensorModule(true);
         networkModuleParams.enableBehaviorVisualizer(true);
         networkModuleParams.setDrillDetectionModuleEnabled(true);
+        networkModuleParams.enableRobotEnvironmentAwerenessModule(true);
+        networkModuleParams.enableHeightQuadTreeToolbox(true);
         networkModuleParams.enableKinematicsToolboxVisualizer(ENABLE_KINEMATICS_TOOLBOX_SERVER);
 
         URI rosuri = NetworkParameters.getROSURI();

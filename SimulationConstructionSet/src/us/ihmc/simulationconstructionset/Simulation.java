@@ -3,17 +3,23 @@ package us.ihmc.simulationconstructionset;
 import java.io.Serializable;
 import java.util.ArrayList;
 
-import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
-import us.ihmc.graphics3DAdapter.HeightMap;
+import us.ihmc.graphicsDescription.HeightMap;
+import us.ihmc.jMonkeyEngineToolkit.Graphics3DAdapter;
 import us.ihmc.robotics.dataStructures.YoVariableHolder;
 import us.ihmc.robotics.dataStructures.listener.RewoundListener;
 import us.ihmc.robotics.dataStructures.registry.NameSpace;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariableList;
+import us.ihmc.robotics.robotDescription.CollisionMeshDescription;
 import us.ihmc.simulationconstructionset.DataBuffer.RepeatDataBufferEntryException;
 import us.ihmc.simulationconstructionset.graphics.GraphicsRobot;
+import us.ihmc.simulationconstructionset.physics.CollisionHandler;
+import us.ihmc.simulationconstructionset.physics.CollisionShapeFactory;
+import us.ihmc.simulationconstructionset.physics.ScsCollisionDetector;
 import us.ihmc.simulationconstructionset.physics.ScsPhysics;
+import us.ihmc.simulationconstructionset.physics.collision.simple.SimpleCollisionDetector;
+import us.ihmc.simulationconstructionset.physics.visualize.DefaultCollisionVisualizer;
 import us.ihmc.simulationconstructionset.scripts.Script;
 import us.ihmc.simulationconstructionset.synchronization.SimulationSynchronizer;
 import us.ihmc.simulationconstructionset.util.ground.FlatGroundProfile;
@@ -106,46 +112,55 @@ public class Simulation implements YoVariableHolder, Serializable // Runnable,
       this.mySimulator.addScript(script);
    }
 
+   @Override
    public ArrayList<YoVariable<?>> getAllVariables()
    {
       return myDataBuffer.getAllVariables();
    }
 
+   @Override
    public YoVariable<?>[] getAllVariablesArray()
    {
       return myDataBuffer.getAllVariablesArray();
    }
 
+   @Override
    public YoVariable<?> getVariable(String varname)
    {
       return myDataBuffer.getVariable(varname);
    }
 
+   @Override
    public boolean hasUniqueVariable(String varname)
    {
       return myDataBuffer.hasUniqueVariable(varname);
    }
 
+   @Override
    public YoVariable<?> getVariable(String nameSpace, String varname)
    {
       return myDataBuffer.getVariable(nameSpace, varname);
    }
 
+   @Override
    public boolean hasUniqueVariable(String nameSpace, String varname)
    {
       return myDataBuffer.hasUniqueVariable(nameSpace, varname);
    }
 
+   @Override
    public ArrayList<YoVariable<?>> getVariables(String nameSpace, String varname)
    {
       return myDataBuffer.getVariables(nameSpace, varname);
    }
 
+   @Override
    public ArrayList<YoVariable<?>> getVariables(String varname)
    {
       return myDataBuffer.getVariables(varname);
    }
 
+   @Override
    public ArrayList<YoVariable<?>> getVariables(NameSpace nameSpace)
    {
       return myDataBuffer.getVariables(nameSpace);
@@ -217,107 +232,81 @@ public class Simulation implements YoVariableHolder, Serializable // Runnable,
 
    public void setRobots(Robot[] robots)
    {
-      // Set the robot:
       this.robots = robots;
+      mySimulator = new Simulator(simulationSynchronizer, robots, SIMULATION_DT);
+      this.setDT(SIMULATION_DT, RECORD_FREQ);
 
       if (robots != null)
       {
-         // Create a simulator:
-         mySimulator = new Simulator(simulationSynchronizer, robots, SIMULATION_DT);
-
-         // Set the default DT
-         this.setDT(SIMULATION_DT, RECORD_FREQ);
-
-         try
+         for (Robot robot : robots)
          {
-            //          myDataBuffer.addVariable(time);
-            //          myCombinedVarList.addVariable(time);
-
-            for (Robot robot : robots)
-            {
-               myDataBuffer.addVariables(robot.getAllVariables());
-               myCombinedVarList.addVariables(robot.getAllVariables());
-            }
-
+            addVariablesFromARobot(robot);
          }
-         catch (RepeatDataBufferEntryException ex)
-         {
-            System.err.println("Found repeat YoVariable in the robot Variables");
-            ex.printStackTrace();
-            System.exit(-1);
-         }
-
-         //       robVarList = rob.getVars();
-         //       myCombinedVarList.addVariables(robVarList);
-
-         //       try
-         //       {
-         //          myDataBuffer.addVariables(robVarList.getVariables());
-         //       }
-         //       catch (RepeatDataBufferEntryException ex)
-         //       {
-         //          System.err.println("Found repeat YoVariable in the robot Variables");
-         //          ex.printStackTrace();
-         //          System.exit(-1);
-         //       }
       }
 
-      //    else robVarList = new VarList("null");
+      myDataBuffer.copyValuesThrough();
+      updateRobots(robots);
+   }
+   
+   public void addRobot(Robot robot)
+   {
+      Robot[] newRobots;
+      if (robots == null)
+      {
+         newRobots = new Robot[]{robot};
+      }
+      else
+      {
+         newRobots = new Robot[robots.length + 1];
+         for (int i=0; i<robots.length; i++)
+         {
+            newRobots[i] = robots[i];
+         }
+         
+         newRobots[newRobots.length - 1] = robot;
+      }
 
-      //    //RobotController controller = null;
-      //    if (rob != null)
-      //    {
-      //      //controller = rob.getController();
-      //
-      //      ArrayList<VarList> controllerVarLists = rob.getControllerVarLists();
-      //      for (VarList controllerVarList : controllerVarLists)
-      //      {
-      //         if (controllerVarList != null)
-      //         {
-      //            myCombinedVarList.addVariables(controllerVarList);
-      //
-      //            try
-      //            {
-      //               myDataBuffer.addVariables(controllerVarList.getVariables());
-      //            }
-      //            catch (RepeatDataBufferEntryException ex1)
-      //            {
-      //               System.err.println("Found repeat YoVariable in the controller Variables");
-      //               ex1.printStackTrace();
-      //               System.exit(-1);
-      //            }
-      //         }
-      //      }
-      //    }
-
-      //    if (rob != null)
-      //    {
-      //      gcVarList = rob.getGroundContactVarList();
-      //      if (gcVarList != null)
-      //      {
-      //        myCombinedVarList.addVariables(gcVarList);
-      //        try
-      //        {
-      //           myDataBuffer.addVariables(gcVarList.getVariables());
-      //        }
-      //        catch (RepeatDataBufferEntryException ex2)
-      //        {
-      //           System.err.println("Found repeat YoVariable in the ground contact Variables");
-      //           ex2.printStackTrace();
-      //           System.exit(-1);
-      //        }
-      //     }
+      this.robots = newRobots;
+      
+      if (mySimulator == null)
+      {
+         mySimulator = new Simulator(simulationSynchronizer, robots, SIMULATION_DT);
+      }
+      else
+      {
+         mySimulator.setRobots(robots);
+      }
+      
+      this.setDT(SIMULATION_DT, RECORD_FREQ);
+      addVariablesFromARobot(robot);
 
       myDataBuffer.copyValuesThrough();
+      updateRobots(robots);
+   }
 
-      //    }
-
+   private void updateRobots(Robot[] robots)
+   {
       if (robots != null)
       {
          for (Robot robot : robots)
          {
             robot.update();
          }
+      }
+   }
+
+   private void addVariablesFromARobot(Robot robot)
+   {
+      try
+      {
+         myDataBuffer.addVariables(robot.getAllVariables());
+         myCombinedVarList.addVariables(robot.getAllVariables());
+      }
+      catch (RepeatDataBufferEntryException ex)
+      {
+         System.err.println("Found repeat YoVariable in the robot Variables");
+         ex.printStackTrace();
+         System.exit(-1);
       }
    }
 
@@ -488,6 +477,65 @@ public class Simulation implements YoVariableHolder, Serializable // Runnable,
    public SimulationSynchronizer getSimulationSynchronizer()
    {
       return simulationSynchronizer;
+   }
+
+   public void initializeCollisionDetectionAndHandling(DefaultCollisionVisualizer collisionVisualizer, CollisionHandler collisionHandler)
+   {
+      ScsCollisionDetector collisionDetector = createCollisionShapesFromLinks(robots);
+
+      if (collisionVisualizer != null) collisionHandler.addListener(collisionVisualizer);
+
+      collisionDetector.initialize();
+      this.initPhysics(new ScsPhysics(null, collisionDetector, collisionHandler, collisionVisualizer));
+   }
+
+   private static ScsCollisionDetector createCollisionShapesFromLinks(Robot[] robots)
+   {
+      ScsCollisionDetector collisionDetector;
+
+      //      collisionDetector = new GdxCollisionDetector(100.0);
+      collisionDetector = new SimpleCollisionDetector();
+//      ((SimpleCollisionDetector) collisionDetector).setUseSimpleSpeedupMethod();
+
+      CollisionShapeFactory collisionShapeFactory = collisionDetector.getShapeFactory();
+      collisionShapeFactory.setMargin(0.002);
+
+      for (Robot robot : robots)
+      {
+         createCollisionShapesFromLinks(robot, collisionShapeFactory, robot.getRobotsYoVariableRegistry());
+      }
+
+      return collisionDetector;
+   }
+
+   private static void createCollisionShapesFromLinks(Robot robot, CollisionShapeFactory collisionShapeFactory, YoVariableRegistry registry)
+   {
+      ArrayList<Joint> rootJoints = robot.getRootJoints();
+      for (Joint rootJoint : rootJoints)
+      {
+         createCollisionShapesFromLinksRecursively(rootJoint, collisionShapeFactory, registry);
+      }
+   }
+
+   private static void createCollisionShapesFromLinksRecursively(Joint joint, CollisionShapeFactory collisionShapeFactory, YoVariableRegistry registry)
+   {
+      Link link = joint.getLink();
+      link.enableCollisions(registry);
+      ArrayList<CollisionMeshDescription> collisionMeshDescriptions = link.getCollisionMeshDescriptions();
+      
+      if (collisionMeshDescriptions != null)
+      {
+         for (int i=0; i<collisionMeshDescriptions.size(); i++)
+         {
+            collisionShapeFactory.addCollisionMeshDescription(link, collisionMeshDescriptions.get(i));
+         }
+      }
+
+      ArrayList<Joint> childrenJoints = joint.getChildrenJoints();
+      for (Joint childJoint : childrenJoints)
+      {
+         createCollisionShapesFromLinksRecursively(childJoint, collisionShapeFactory, registry);
+      }
    }
 
 }

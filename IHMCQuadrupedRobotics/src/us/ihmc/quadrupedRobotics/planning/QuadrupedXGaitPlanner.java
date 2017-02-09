@@ -13,19 +13,22 @@ import java.util.List;
 public class QuadrupedXGaitPlanner
 {
    private final FramePoint goalPosition;
+   private final FramePoint goalPositionAdjustment;
    private final QuadrantDependentList<FramePoint> xGaitRectangle;
    private final FramePose xGaitRectanglePose;
    private final FramePose xGaitRectanglePoseAtSoS;
    private final PoseReferenceFrame xGaitRectangleFrame;
    private final EndDependentList<QuadrupedTimedStep> pastSteps;
+   private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    public QuadrupedXGaitPlanner()
    {
       goalPosition = new FramePoint();
+      goalPositionAdjustment = new FramePoint();
       xGaitRectangle = new QuadrantDependentList<>();
-      xGaitRectanglePose = new FramePose(ReferenceFrame.getWorldFrame());
-      xGaitRectanglePoseAtSoS = new FramePose(ReferenceFrame.getWorldFrame());
-      xGaitRectangleFrame = new PoseReferenceFrame("xGaitRectangleFrame", ReferenceFrame.getWorldFrame());
+      xGaitRectanglePose = new FramePose(worldFrame);
+      xGaitRectanglePoseAtSoS = new FramePose(worldFrame);
+      xGaitRectangleFrame = new PoseReferenceFrame("xGaitRectangleFrame", worldFrame);
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          xGaitRectangle.set(robotQuadrant, new FramePoint(xGaitRectangleFrame));
@@ -35,7 +38,7 @@ public class QuadrupedXGaitPlanner
       pastSteps.put(RobotEnd.HIND, new QuadrupedTimedStep());
    }
 
-   public void computeInitialPlan(List<QuadrupedTimedStep> plannedSteps, Vector3d planarVelocity, RobotQuadrant initialStepQuadrant,
+   public void computeInitialPlan(List<? extends QuadrupedTimedStep> plannedSteps, Vector3d planarVelocity, RobotQuadrant initialStepQuadrant,
          FramePoint supportCentroidAtSoS, double timeAtSoS, double yawAtSoS, QuadrupedXGaitSettings xGaitSettings)
    {
       // initialize nominal support rectangle
@@ -47,7 +50,7 @@ public class QuadrupedXGaitPlanner
          xGaitRectangle.get(robotQuadrant).setZ(0);
       }
       ReferenceFrame supportCentroidFrame = supportCentroidAtSoS.getReferenceFrame();
-      supportCentroidAtSoS.changeFrame(ReferenceFrame.getWorldFrame());
+      supportCentroidAtSoS.changeFrame(worldFrame);
       xGaitRectanglePoseAtSoS.setPosition(supportCentroidAtSoS);
       xGaitRectanglePoseAtSoS.setYawPitchRoll(yawAtSoS, 0, 0);
       supportCentroidAtSoS.changeFrame(supportCentroidFrame);
@@ -101,8 +104,8 @@ public class QuadrupedXGaitPlanner
       }
    }
 
-   public void computeOnlinePlan(List<QuadrupedTimedStep> plannedSteps, EndDependentList<QuadrupedTimedStep> latestSteps, Vector3d planarVelocity,
-         double currentTime, double currentYaw, QuadrupedXGaitSettings xGaitSettings)
+   public void computeOnlinePlan(List<? extends QuadrupedTimedStep> plannedSteps, EndDependentList<? extends QuadrupedTimedStep> latestSteps,
+         Vector3d planarVelocity, double currentTime, double currentYaw, QuadrupedXGaitSettings xGaitSettings)
    {
       // initialize latest step
       QuadrupedTimedStep latestStep;
@@ -172,14 +175,23 @@ public class QuadrupedXGaitPlanner
 
          // compute step goal position
          RobotQuadrant stepQuadrant = latestStep.getRobotQuadrant();
-         goalPosition.setIncludingFrame(xGaitRectangle.get(stepQuadrant));
-         goalPosition.changeFrame(ReferenceFrame.getWorldFrame());
+         goalPositionAdjustment.setIncludingFrame(xGaitRectangle.get(stepQuadrant));
+         goalPositionAdjustment.changeFrame(worldFrame);
+
+         // compute step goal adjustment
+         FramePoint nominalGoalPosition = xGaitRectangle.get(stepQuadrant);
+         nominalGoalPosition.changeFrame(worldFrame);
+         latestStep.getGoalPosition(goalPositionAdjustment);
+         goalPositionAdjustment.changeFrame(worldFrame);
+         goalPositionAdjustment.sub(nominalGoalPosition);
 
          // compensate for position error
          for (int i = 0; i < plannedSteps.size(); i++)
          {
-            plannedSteps.get(i).getGoalPosition().add(latestStep.getGoalPosition());
-            plannedSteps.get(i).getGoalPosition().sub(goalPosition.getPoint());
+            plannedSteps.get(i).getGoalPosition(goalPosition);
+            goalPosition.changeFrame(worldFrame);
+            goalPosition.add(goalPositionAdjustment);
+            plannedSteps.get(i).setGoalPosition(goalPosition);
          }
       }
    }
