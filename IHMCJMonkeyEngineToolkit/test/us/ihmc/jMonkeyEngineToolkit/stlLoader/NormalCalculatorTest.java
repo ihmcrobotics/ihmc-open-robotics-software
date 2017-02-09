@@ -24,13 +24,9 @@ import java.io.InputStream;
 
 import org.junit.Test;
 
-import us.ihmc.jMonkeyEngineToolkit.stlLoader.NormalCalculator;
-import us.ihmc.jMonkeyEngineToolkit.stlLoader.STLReader;
-import us.ihmc.jMonkeyEngineToolkit.stlLoader.STLReaderFactory;
-import us.ihmc.jMonkeyEngineToolkit.stlLoader.Triangle;
-import us.ihmc.tools.continuousIntegration.IntegrationCategory;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.IntegrationCategory;
 
 /**
  * Test the normal calculation routine based on the normals in the the teapotBinary.STL model.
