@@ -25,14 +25,15 @@ public class ExperimentalCollisionArbiter implements CollisionArbiter
          CollisionShape shapeA = collision.getShapeA();
          CollisionShape shapeB = collision.getShapeB();
          
-         Contacts shapeABContacts = getOrCreateContacts(shapeA, shapeB);
+         SimpleContactWrapper shapeABContacts = getOrCreateContacts(shapeA, shapeB);
 
+//         shapeABContacts.addAllReplaceNearby(collision);
 //         shapeABContacts.addAll(collision);
          shapeABContacts.set(collision);
       }
    }
 
-   private Contacts getOrCreateContacts(CollisionShape shapeA, CollisionShape shapeB)
+   private SimpleContactWrapper getOrCreateContacts(CollisionShape shapeA, CollisionShape shapeB)
    {
       LinkedHashMap<CollisionShape, SimpleContactWrapper> shapeAContacts = contactMap.get(shapeA);
       LinkedHashMap<CollisionShape, SimpleContactWrapper> shapeBContacts = contactMap.get(shapeB);

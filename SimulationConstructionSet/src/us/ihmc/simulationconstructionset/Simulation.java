@@ -19,7 +19,7 @@ import us.ihmc.simulationconstructionset.physics.CollisionHandler;
 import us.ihmc.simulationconstructionset.physics.CollisionShapeFactory;
 import us.ihmc.simulationconstructionset.physics.ScsCollisionDetector;
 import us.ihmc.simulationconstructionset.physics.ScsPhysics;
-import us.ihmc.simulationconstructionset.physics.collision.simple.ExperimentalCollisionArbiter;
+import us.ihmc.simulationconstructionset.physics.collision.simple.DoNothingCollisionArbiter;
 import us.ihmc.simulationconstructionset.physics.collision.simple.SimpleCollisionDetector;
 import us.ihmc.simulationconstructionset.physics.visualize.DefaultCollisionVisualizer;
 import us.ihmc.simulationconstructionset.scripts.Script;
@@ -489,8 +489,8 @@ public class Simulation implements YoVariableHolder, Serializable // Runnable,
 
       collisionDetector.initialize();
       
-//      CollisionArbiter collisionArbiter = new DoNothingCollisionArbiter();
-      CollisionArbiter collisionArbiter = new ExperimentalCollisionArbiter();
+      CollisionArbiter collisionArbiter = new DoNothingCollisionArbiter();
+//      CollisionArbiter collisionArbiter = new ExperimentalCollisionArbiter();
 
       this.initPhysics(new ScsPhysics(null, collisionDetector, collisionArbiter, collisionHandler, collisionVisualizer));
    }
@@ -526,7 +526,9 @@ public class Simulation implements YoVariableHolder, Serializable // Runnable,
    private static void createCollisionShapesFromLinksRecursively(Joint joint, CollisionShapeFactory collisionShapeFactory, YoVariableRegistry registry)
    {
       Link link = joint.getLink();
-      link.enableCollisions(registry);
+      
+      //TODO: Pass the number of contacts around instead of just using 8 here...
+      link.enableCollisions(8, registry);
       ArrayList<CollisionMeshDescription> collisionMeshDescriptions = link.getCollisionMeshDescriptions();
       
       if (collisionMeshDescriptions != null)

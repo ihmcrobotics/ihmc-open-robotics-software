@@ -15,7 +15,7 @@ import us.ihmc.simulationconstructionset.physics.CollisionHandler;
 import us.ihmc.simulationconstructionset.physics.CollisionShapeWithLink;
 import us.ihmc.simulationconstructionset.physics.Contacts;
 
-public class DefaultCollisionHandler implements CollisionHandler
+public class HybridImpulseSpringDamperCollisionHandler implements CollisionHandler
 {
    private double velocityForMicrocollision = 0.01; //0.1; //0.1;//0.01;
    private int numberOfCyclesPerContactPair = 1;///4
@@ -38,7 +38,7 @@ public class DefaultCollisionHandler implements CollisionHandler
    // Coefficient of friction
    private final double mu;
 
-   public DefaultCollisionHandler(double epsilon, double mu)
+   public HybridImpulseSpringDamperCollisionHandler(double epsilon, double mu)
    {
       this(new Random(), epsilon, mu);
    }
@@ -49,7 +49,7 @@ public class DefaultCollisionHandler implements CollisionHandler
     * @param mu coefficient of friction
     * @param robot Robot model
     */
-   public DefaultCollisionHandler(Random random, double epsilon, double mu)
+   public HybridImpulseSpringDamperCollisionHandler(Random random, double epsilon, double mu)
    {
       this.random = random;
       this.epsilon = epsilon;
@@ -81,6 +81,12 @@ public class DefaultCollisionHandler implements CollisionHandler
          CollisionShapeWithLink shape2 = (CollisionShapeWithLink) shapesInContact.getShapeB();
          handleLocal(shape1, shape2, shapesInContact);
       }
+      
+      for (int i=0; i<pairsToProcess.size(); i++)
+      {
+         CollisionExternalForcePointPair collisionExternalForcePointPair = pairsToProcess.get(i);
+         collisionExternalForcePointPair.performSpringDamper();
+      }
    }
 
    private final ArrayList<Contacts> shapesInContactList = new ArrayList<Contacts>();
@@ -94,6 +100,8 @@ public class DefaultCollisionHandler implements CollisionHandler
 
    private final ArrayList<Integer> indices = new ArrayList<Integer>();
 
+   private final ArrayList<CollisionExternalForcePointPair> pairsToProcess = new ArrayList<>();
+   
    private void handleLocal(CollisionShapeWithLink shape1, CollisionShapeWithLink shape2, Contacts contacts)
    {
       boolean shapeOneIsGround = shape1.isGround();
@@ -151,9 +159,29 @@ public class DefaultCollisionHandler implements CollisionHandler
          Link linkOne = shape1.getLink();
          Link linkTwo = shape2.getLink();
 
-         ExternalForcePoint externalForcePointOne = linkOne.getCollisionExternalForcePointPairs().get(0).getExternalForcePoint();
-         ExternalForcePoint externalForcePointTwo = linkTwo.getCollisionExternalForcePointPairs().get(0).getExternalForcePoint();
+         ArrayList<CollisionExternalForcePointPair> collisionExternalForcePointPairsOne = linkOne.getCollisionExternalForcePointPairs();
+         ArrayList<CollisionExternalForcePointPair> collisionExternalForcePointPairsTwo = linkTwo.getCollisionExternalForcePointPairs();
 
+         CollisionExternalForcePointPair collisionExternalForcePointPairOne = collisionExternalForcePointPairsOne.get(0);
+         CollisionExternalForcePointPair collisionExternalForcePointPairTwo = collisionExternalForcePointPairsTwo.get(0);
+
+         ExternalForcePoint externalForcePointOne = collisionExternalForcePointPairOne.getExternalForcePoint();
+         ExternalForcePoint externalForcePointTwo = collisionExternalForcePointPairTwo.getExternalForcePoint();
+
+         if (collisionExternalForcePointPairOne.getMatchingPair() == null)
+         {
+            collisionExternalForcePointPairOne.setPositionInWorld(point1);
+            collisionExternalForcePointPairTwo.setPositionInWorld(point2);
+            
+            collisionExternalForcePointPairOne.setMatchingPair(collisionExternalForcePointPairTwo);
+            collisionExternalForcePointPairTwo.setMatchingPair(collisionExternalForcePointPairOne);
+
+            collisionExternalForcePointPairOne.setSurfaceNormalInWorld(normal);
+            collisionExternalForcePointPairTwo.setSurfaceNormalInWorld(negative_normal);
+            
+            pairsToProcess.add(collisionExternalForcePointPairOne);
+         }
+         
          // +++JEP: For now. Make more efficient later. Don't need an ef_point really...
          externalForcePointOne.setOffsetWorld(point1.getX(), point1.getY(), point1.getZ()); // Put the external force points in the right places.
          externalForcePointTwo.setOffsetWorld(point2.getX(), point2.getY(), point2.getZ());

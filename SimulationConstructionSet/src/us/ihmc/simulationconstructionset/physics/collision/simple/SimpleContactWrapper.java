@@ -65,7 +65,7 @@ public class SimpleContactWrapper implements Contacts
       for (int i = 0; i < numberOfContacts; i++)
       {
          SingleContact singleContact = new SingleContact();
-         
+
          Point3d worldAPoint = new Point3d();
          contactsToAdd.getWorldA(i, worldAPoint);
 
@@ -75,18 +75,109 @@ public class SimpleContactWrapper implements Contacts
          Vector3d normalAVector = new Vector3d();
 
          contactsToAdd.getWorldNormal(i, normalAVector);
+
+         double distance = contactsToAdd.getDistance(i);
+
          if (switched)
          {
             normalAVector.scale(-1.0);
+            singleContact.set(worldBPoint, worldAPoint, normalAVector, distance);
+         }
+         else
+         {
+            singleContact.set(worldAPoint, worldBPoint, normalAVector, distance);
          }
 
-         double distance = contactsToAdd.getDistance(i);
-         
-         singleContact.set(worldAPoint, worldBPoint, normalAVector, distance);
          contacts.add(singleContact);
       }
 
    }
+   
+   
+   public void addAllReplaceNearby(Contacts contactsToAdd)
+   {  
+      CollisionShape shapeA = contactsToAdd.getShapeA();
+      CollisionShape shapeB = contactsToAdd.getShapeB();
+
+      boolean switched = (shapeA == this.shapeB);
+
+      if (switched)
+      {
+         if (this.shapeA != shapeB)
+         {
+            throw new RuntimeException();
+         }
+      }
+      else
+      {
+         if ((this.shapeA != shapeA) || (this.shapeB != shapeB))
+         {
+            throw new RuntimeException();
+         }
+      }
+
+      int numberOfContacts = contactsToAdd.getNumberOfContacts();
+
+      for (int i = 0; i < numberOfContacts; i++)
+      {
+         // Find nearby one:
+         SingleContact singleContact = null;
+
+         for (int j=0; j<contacts.size(); j++)
+         {
+            SingleContact singleContactToCheck = contacts.get(j);
+            
+            Point3d worldAToCheck = new Point3d();
+            singleContactToCheck.getWorldA(worldAToCheck);
+            
+            Point3d worldAPoint = new Point3d();
+            if (switched)
+            {
+               contactsToAdd.getWorldB(i, worldAPoint);
+            }
+            else
+            {
+               contactsToAdd.getWorldA(i, worldAPoint);
+            }
+
+            if (worldAToCheck.distance(worldAPoint) < 0.003)
+            {
+               singleContact = singleContactToCheck;
+            }
+         }
+         
+         if (singleContact == null)
+         {
+            singleContact = new SingleContact();
+            contacts.add(singleContact);
+         }
+
+         Point3d worldAPoint = new Point3d();
+         contactsToAdd.getWorldA(i, worldAPoint);
+
+         Point3d worldBPoint = new Point3d();
+         contactsToAdd.getWorldB(i, worldBPoint);
+
+         Vector3d normalAVector = new Vector3d();
+
+         contactsToAdd.getWorldNormal(i, normalAVector);
+
+         double distance = contactsToAdd.getDistance(i);
+
+         if (switched)
+         {
+            normalAVector.scale(-1.0);
+            singleContact.set(worldBPoint, worldAPoint, normalAVector, distance);
+         }
+         else
+         {
+            singleContact.set(worldAPoint, worldBPoint, normalAVector, distance);
+         }
+
+      }
+
+   }
+
 
    public void addContact(Point3d pointA, Point3d pointB, Vector3d normalA, double distance)
    {
