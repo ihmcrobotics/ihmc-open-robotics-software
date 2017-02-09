@@ -22,6 +22,7 @@ import us.ihmc.robotics.math.frames.YoFrameVector2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.tools.exceptions.NoConvergenceException;
 import us.ihmc.tools.io.printing.PrintTools;
 
@@ -117,6 +118,8 @@ public class ICPOptimizationController
    private final boolean useDifferentSplitRatioForBigAdjustment;
    private final double minimumTimeOnInitialCMPForBigAdjustment;
 
+   private final ExecutionTimer qpSolverTimer = new ExecutionTimer("icpQPSolverTimer", 0.5, registry);
+   private final ExecutionTimer controllerTimer = new ExecutionTimer("icpControllerTimer", 0.5, registry);
    private final ICPOptimizationSolver solver;
 
    private final StateMultiplierCalculator stateMultiplierCalculator;
@@ -376,6 +379,8 @@ public class ICPOptimizationController
 
    public void compute(double currentTime, FramePoint2d desiredICP, FrameVector2d desiredICPVelocity, FramePoint2d currentICP, double omega0)
    {
+      controllerTimer.startMeasurement();
+
       desiredICP.changeFrame(worldFrame);
       desiredICPVelocity.changeFrame(worldFrame);
       currentICP.changeFrame(worldFrame);
@@ -402,7 +407,9 @@ public class ICPOptimizationController
       NoConvergenceException noConvergenceException = null;
       try
       {
+         qpSolverTimer.startMeasurement();
          solver.compute(finalICPRecursion, cmpConstantEffects, currentICP, referenceCMP);
+         qpSolverTimer.stopMeasurement();
       }
       catch (NoConvergenceException e)
       {
@@ -460,6 +467,8 @@ public class ICPOptimizationController
       desiredCMP.add(desiredCMPDelta);
       controllerFeedbackCMPDelta.set(desiredCMPDelta);
       controllerFeedbackCMP.set(desiredCMP);
+
+      controllerTimer.stopMeasurement();
    }
 
    private void setConditionsForFeedbackOnlyControl()
