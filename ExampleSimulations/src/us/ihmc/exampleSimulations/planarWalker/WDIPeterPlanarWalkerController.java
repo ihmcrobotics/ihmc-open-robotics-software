@@ -8,17 +8,15 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 public class WDIPeterPlanarWalkerController implements RobotController
 {
    private YoVariableRegistry registry = new YoVariableRegistry("Controller");
-   private double deltaT;
    SideDependentList<PeterPlanarWalkerStateMachine> walkerStateMachine;
    
    public WDIPeterPlanarWalkerController(PeterPlanarWalkerRobot robot, double deltaT)
    {
-      this.deltaT = deltaT;
       walkerStateMachine = new SideDependentList<>();
             
       for(RobotSide robotSide : RobotSide.values)
       {
-         walkerStateMachine.set(robotSide, new PeterPlanarWalkerStateMachine(robot, deltaT, robotSide, robot.getYoTime()));
+         walkerStateMachine.set(robotSide, new PeterPlanarWalkerStateMachine(robot, deltaT, robotSide, robot.getYoTime(), registry));
       }
    }
 
@@ -31,7 +29,7 @@ public class WDIPeterPlanarWalkerController implements RobotController
    @Override
    public YoVariableRegistry getYoVariableRegistry()
    {
-      return null; 
+      return registry; 
    }
 
    @Override
@@ -49,5 +47,9 @@ public class WDIPeterPlanarWalkerController implements RobotController
    @Override
    public void doControl()
    {
+      for(RobotSide robotSide : RobotSide.values)
+      {
+         walkerStateMachine.get(robotSide).getStateMachine().process();
+      }
    }
 }
