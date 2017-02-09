@@ -379,7 +379,10 @@ public class GeometricJacobian implements NameBasedHashCodeHolder
       List<Twist> ret = new ArrayList<Twist>(size);
       for (List<Twist> twistList : unitTwistMap.values())
       {
-         ret.addAll(twistList);
+         for (int i = 0; i < twistList.size(); i++)
+         {
+            ret.add(twistList.get(i));
+         }
       }
 
       return ret;

@@ -108,11 +108,16 @@ public abstract class PacketValidityChecker
          return errorMessage;
       }
 
+      boolean timingsValid = true;
+      boolean atLeastOneFootstepHadTiming = false;
+      double lastTime = 0.0;
+
       if (packetToCheck.getDataList() != null)
       {
          for (int arrayListIndex = 0; arrayListIndex < packetToCheck.getDataList().size(); arrayListIndex++)
          {
-            String footstepDataListErrorMessage = validateFootstepDataMessage(packetToCheck.getDataList().get(arrayListIndex));
+            FootstepDataMessage footstepData = packetToCheck.getDataList().get(arrayListIndex);
+            String footstepDataListErrorMessage = validateFootstepDataMessage(footstepData);
 
             if (footstepDataListErrorMessage != null)
             {
@@ -120,7 +125,17 @@ public abstract class PacketValidityChecker
                return errorMessage;
             }
 
+            boolean timeIncreasing = footstepData.getSwingStartTime() > lastTime;
+            timingsValid = timingsValid && footstepData.hasAbsoluteTime() && timeIncreasing;
+            atLeastOneFootstepHadTiming = atLeastOneFootstepHadTiming || footstepData.hasAbsoluteTime();
+            lastTime = footstepData.getSwingStartTime();
          }
+      }
+
+      if (atLeastOneFootstepHadTiming && !timingsValid)
+      {
+         String errorMessage = "footstepDataList contained at least one footstep with absolute timing but the timing was invalid.";
+         return errorMessage;
       }
 
       return null;

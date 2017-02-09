@@ -14,6 +14,7 @@ import javax.vecmath.Vector3d;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
+import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
 import us.ihmc.modelFileLoaders.ModelFileLoaderConversionsHelper;
 import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.AbstractSDFMesh;
 import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFGeometry;
@@ -107,6 +108,16 @@ public class SDFGraphics3DObject extends LinkGraphicsDescription
 
                   appearance = mat;
                }
+            }
+
+            if (sdfVisual.getTransparency() != null)
+            {
+               // An appearance must exist in order to set a transparency value, whether a material was defined above or not.
+               if (appearance == null)
+               {
+                  appearance = new YoAppearanceRGBColor(DEFAULT_APPEARANCE.getColor(), 0.0);
+               }
+               appearance.setTransparency(Double.parseDouble(sdfVisual.getTransparency()));
             }
 
             SDFGeometry geometry = sdfVisual.getGeometry();

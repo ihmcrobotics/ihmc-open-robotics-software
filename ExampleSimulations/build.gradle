@@ -45,6 +45,8 @@ dependencies {
     compile group: 'org.ejml', name: 'core', version: '0.28'
     compile "org.apache.commons:commons-lang3:3.4"
     compile "us.ihmc.thirdparty.jinput:jinput:160414"
+    
+    testCompile group: 'us.ihmc', name: 'IHMCContinuousIntegrationFramework', version: '0.9.1'
 
 	compile ihmc.getProjectDependency(":ModelFileLoader")
     compile ihmc.getProjectDependency(":IHMCJavaToolkit")

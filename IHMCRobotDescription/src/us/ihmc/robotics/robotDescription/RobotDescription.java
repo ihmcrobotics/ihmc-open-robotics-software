@@ -70,13 +70,13 @@ public class RobotDescription implements RobotDescriptionNode, GraphicsObjectsHo
    }
 
    @Override
-   public CollisionMeshDescription getCollisionObject(String name)
+   public ArrayList<CollisionMeshDescription> getCollisionObjects(String name)
    {
       JointDescription jointDescription = getJointDescription(name);
       if (jointDescription == null)
          return null;
 
-      return jointDescription.getLink().getCollisionMesh();
+      return jointDescription.getLink().getCollisionMeshes();
    }
 
    @Override

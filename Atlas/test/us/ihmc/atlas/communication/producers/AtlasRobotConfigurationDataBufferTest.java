@@ -1,12 +1,12 @@
 package us.ihmc.atlas.communication.producers;
 
-import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.continuousIntegration.IntegrationCategory;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBufferTest;
-import us.ihmc.tools.continuousIntegration.IntegrationCategory;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 
 @ContinuousIntegrationPlan(categories = IntegrationCategory.FLAKY)
 public class AtlasRobotConfigurationDataBufferTest extends RobotConfigurationDataBufferTest

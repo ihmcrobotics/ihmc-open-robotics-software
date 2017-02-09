@@ -1,15 +1,16 @@
 package us.ihmc.robotics.geometry;
 
-import org.junit.Test;
+import static org.junit.Assert.assertEquals;
 
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.tools.testing.JUnitTools;
+import java.util.Random;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
-import java.util.Random;
 
-import static org.junit.Assert.assertEquals;
+import org.junit.Test;
+
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.tools.testing.JUnitTools;
 
 public class LineSegment3dTest
 {
