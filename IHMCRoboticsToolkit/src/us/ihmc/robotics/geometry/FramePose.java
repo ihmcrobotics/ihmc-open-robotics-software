@@ -5,21 +5,23 @@ import java.util.Random;
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Point3d;
+import javax.vecmath.Point3f;
 import javax.vecmath.Quat4d;
+import javax.vecmath.Quat4f;
 import javax.vecmath.Tuple3d;
+import javax.vecmath.Tuple3f;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.geometry.transformables.Pose;
+import us.ihmc.robotics.geometry.transformables.TransformablePoint3d;
+import us.ihmc.robotics.geometry.transformables.TransformableQuat4d;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class FramePose extends AbstractFrameObject<FramePose, Pose>
 {
    private final Pose pose;
-
-   private final Vector3d tempVector = new Vector3d();
-   private final Matrix3d tempMatrix = new Matrix3d();
 
    public FramePose()
    {
@@ -117,8 +119,13 @@ public class FramePose extends AbstractFrameObject<FramePose, Pose>
       setPosition(position);
       setOrientation(orientation);
    }
-   
+
    public void setPose(Tuple3d position, Quat4d orientation)
+   {
+      pose.setPose(position, orientation);
+   }
+
+   public void setPose(Tuple3f position, Quat4f orientation)
    {
       pose.setPose(position, orientation);
    }
@@ -130,10 +137,7 @@ public class FramePose extends AbstractFrameObject<FramePose, Pose>
 
    public void setPose(RigidBodyTransform transform)
    {
-      transform.getTranslation(tempVector);
-      pose.setPosition(tempVector);
-      transform.getRotation(tempMatrix);
-      pose.setOrientation(tempMatrix);
+      pose.setPose(transform);
    }
 
    public void setPoseIncludingFrame(FramePose framePose)
@@ -155,13 +159,15 @@ public class FramePose extends AbstractFrameObject<FramePose, Pose>
       this.referenceFrame = referenceFrame;
    }
 
+   public void setPoseIncludingFrame(ReferenceFrame referenceFrame, Point3f position, Quat4f orientation)
+   {
+      setPose(position, orientation);
+      this.referenceFrame = referenceFrame;
+   }
+
    public void setPoseIncludingFrame(ReferenceFrame referenceFrame, RigidBodyTransform transform)
    {
-      transform.getTranslation(tempVector);
-      pose.setPosition(tempVector);
-      transform.getRotation(tempMatrix);
-      pose.setOrientation(tempMatrix);
-      
+      pose.setPose(transform);
       this.referenceFrame = referenceFrame;
    }
 
@@ -179,6 +185,11 @@ public class FramePose extends AbstractFrameObject<FramePose, Pose>
    public void setPosition(double x, double y, double z)
    {
       this.pose.setPosition(x, y, z);
+   }
+
+   public void setOrientation(double qx, double qy, double qz, double qs)
+   {
+      this.pose.setOrientation(qx, qy, qz, qs);
    }
 
    public void setOrientation(Quat4d orientation)
@@ -217,6 +228,7 @@ public class FramePose extends AbstractFrameObject<FramePose, Pose>
       pose.setXY(position2d.getPoint());
    }
 
+   @Override
    public void setToZero(ReferenceFrame referenceFrame)
    {
       super.setToZero();
@@ -251,6 +263,11 @@ public class FramePose extends AbstractFrameObject<FramePose, Pose>
       getPositionIncludingFrame(framePointToPack);
       getOrientationIncludingFrame(orientationToPack);
    }
+   
+   public TransformablePoint3d getPositionUnsafe()
+   {
+      return pose.getPositionUnsafe();
+   }
 
    public void getPosition(Tuple3d tupleToPack)
    {
@@ -265,6 +282,11 @@ public class FramePose extends AbstractFrameObject<FramePose, Pose>
    public void getRigidBodyTransform(RigidBodyTransform transformToPack)
    {
       pose.getRigidBodyTransform(transformToPack);
+   }
+   
+   public TransformableQuat4d getOrientationUnsafe()
+   {
+      return pose.getOrientationUnsafe();
    }
    
    public void getOrientation(Matrix3d matrixToPack)
@@ -338,6 +360,7 @@ public class FramePose extends AbstractFrameObject<FramePose, Pose>
       
       if (!lockPosition)
       {
+         Vector3d tempVector = new Vector3d();
          this.getPosition(tempVector);
          axisRotationTransform.transform(tempVector);
          this.setPosition(tempVector);
@@ -604,6 +627,7 @@ public class FramePose extends AbstractFrameObject<FramePose, Pose>
       return pose.epsilonEquals(other.pose, positionErrorMargin, orientationErrorMargin);
    }
 
+   @Override
    public boolean epsilonEquals(FramePose other, double epsilon)
    {
       return pose.epsilonEquals(other.pose, epsilon);

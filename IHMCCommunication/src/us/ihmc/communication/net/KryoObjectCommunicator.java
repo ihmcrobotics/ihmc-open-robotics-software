@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.swing.JFrame;
 import javax.swing.JScrollPane;
@@ -22,7 +23,7 @@ import com.esotericsoftware.kryonet.Listener;
 
 public abstract class KryoObjectCommunicator implements NetworkedObjectCommunicator
 {
-
+   private final AtomicBoolean throwExceptionForUnregisteredPackets = new AtomicBoolean(true);
    private final LinkedHashMap<Class<?>, ExecutorService> listenerExecutors = new LinkedHashMap<Class<?>, ExecutorService>();
    private final LinkedHashMap<Class<?>, ArrayList<ObjectConsumer<?>>> listeners = new LinkedHashMap<Class<?>, ArrayList<ObjectConsumer<?>>>();
 
@@ -146,12 +147,19 @@ public abstract class KryoObjectCommunicator implements NetworkedObjectCommunica
 
       if (!listeners.containsKey(object.getClass()))
       {
-         throw new RuntimeException(object.getClass().getSimpleName() + " not registered with ObjectCommunicator");
+         if (throwExceptionForUnregisteredPackets.get())
+            throw new RuntimeException(object.getClass().getSimpleName() + " not registered with ObjectCommunicator");
+         else
+            return -1;
       }
       int bytesSend = sendTCP(object);
       updateDataRateTable(object, bytesSend);
-      
       return bytesSend;
+   }
+
+   public void throwExceptionForUnregisteredPackets(boolean value)
+   {
+      throwExceptionForUnregisteredPackets.set(value);
    }
 
    private void updateDataRateTable(Object object, int bytesSend)

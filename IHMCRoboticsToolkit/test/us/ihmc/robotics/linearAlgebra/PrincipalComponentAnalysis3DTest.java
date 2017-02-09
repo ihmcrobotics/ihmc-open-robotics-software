@@ -24,7 +24,7 @@ import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.Cont
 public class PrincipalComponentAnalysis3DTest
 {
    private static final boolean DEBUG = true;
-   private static final double EPSILON_HIGH_PRECISION = 1.0e-12;
+   private static final double EPSILON_HIGH_PRECISION = 5.0e-7;
    private static final double EPSILON_LOW_PRECISION = 2.0e-3;
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -147,9 +147,9 @@ public class PrincipalComponentAnalysis3DTest
          assertEquals(0.0, estimatedVariance.getY(), EPSILON_HIGH_PRECISION);
          assertEquals(0.0, estimatedVariance.getZ(), EPSILON_HIGH_PRECISION);
 
-         assertEquals(expectedVarianceAlongPrincipalAxis, MathTools.square(estimatedScaledPrincipalVector.length()) / numberOfPoints, EPSILON_HIGH_PRECISION);
-         assertEquals(0.0, MathTools.square(estimatedScaledSecondaryVector.length()) / numberOfPoints, EPSILON_HIGH_PRECISION);
-         assertEquals(0.0, MathTools.square(estimatedScaledThirdVector.length()) / numberOfPoints, EPSILON_HIGH_PRECISION);
+         assertEquals(expectedVarianceAlongPrincipalAxis, estimatedScaledPrincipalVector.length(), EPSILON_HIGH_PRECISION);
+         assertEquals(0.0, estimatedScaledSecondaryVector.length(), EPSILON_HIGH_PRECISION);
+         assertEquals(0.0, estimatedScaledThirdVector.length(), EPSILON_HIGH_PRECISION);
 
          estimatedScaledPrincipalVector.normalize();
          assertTrue(expectedPrincipalAxis.epsilonEquals(estimatedScaledPrincipalVector, EPSILON_HIGH_PRECISION));
@@ -324,9 +324,9 @@ public class PrincipalComponentAnalysis3DTest
          assertEquals(expectedVariance.getY(), estimatedVariance.getY(), EPSILON_HIGH_PRECISION);
          assertEquals(0.0, estimatedVariance.getZ(), EPSILON_HIGH_PRECISION);
 
-         assertEquals(expectedVariance.getX(), MathTools.square(estimatedScaledPrincipalVector.length()) / numberOfPoints, EPSILON_HIGH_PRECISION);
-         assertEquals(expectedVariance.getY(), MathTools.square(estimatedScaledSecondaryVector.length()) / numberOfPoints, EPSILON_HIGH_PRECISION);
-         assertEquals(0.0, MathTools.square(estimatedScaledThirdVector.length()) / numberOfPoints, EPSILON_HIGH_PRECISION);
+         assertEquals(expectedVariance.getX(), estimatedScaledPrincipalVector.length(), EPSILON_HIGH_PRECISION);
+         assertEquals(expectedVariance.getY(), estimatedScaledSecondaryVector.length(), EPSILON_HIGH_PRECISION);
+         assertEquals(0.0, estimatedScaledThirdVector.length(), EPSILON_HIGH_PRECISION);
 
          estimatedScaledPrincipalVector.normalize();
          assertTrue(expectedPrincipalAxis.epsilonEquals(estimatedScaledPrincipalVector, EPSILON_LOW_PRECISION));
@@ -517,9 +517,9 @@ public class PrincipalComponentAnalysis3DTest
          assertEquals(expectedVariance.getY(), estimatedVariance.getY(), EPSILON_HIGH_PRECISION);
          assertEquals(expectedVariance.getZ(), estimatedVariance.getZ(), EPSILON_HIGH_PRECISION);
 
-         assertEquals(expectedVariance.getX(), MathTools.square(estimatedScaledPrincipalVector.length()) / numberOfPoints, EPSILON_HIGH_PRECISION);
-         assertEquals(expectedVariance.getY(), MathTools.square(estimatedScaledSecondaryVector.length()) / numberOfPoints, EPSILON_HIGH_PRECISION);
-         assertEquals(expectedVariance.getZ(), MathTools.square(estimatedScaledThirdVector.length()) / numberOfPoints, EPSILON_HIGH_PRECISION);
+         assertEquals(expectedVariance.getX(), estimatedScaledPrincipalVector.length(), EPSILON_HIGH_PRECISION);
+         assertEquals(expectedVariance.getY(), estimatedScaledSecondaryVector.length(), EPSILON_HIGH_PRECISION);
+         assertEquals(expectedVariance.getZ(), estimatedScaledThirdVector.length(), EPSILON_HIGH_PRECISION);
 
          estimatedScaledPrincipalVector.normalize();
          assertTrue(expectedPrincipalAxis.epsilonEquals(estimatedScaledPrincipalVector, EPSILON_LOW_PRECISION));

@@ -12,7 +12,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
-import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
+import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.WalkToGoalBehaviorPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
@@ -30,7 +30,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 /**
  * WalkToLocation with path-planning algorithm to avoid keepout regions
- * 
+ *
  * @author Alex Graber-Tilton
  *
  */
@@ -40,9 +40,9 @@ public class WalkToGoalBehavior extends AbstractBehavior {
 	private final DoubleYoVariable yoTime;
 	private double searchStartTime = 0;
 
-	private final ConcurrentListeningQueue<WalkToGoalBehaviorPacket> inputListeningQueue = new ConcurrentListeningQueue<WalkToGoalBehaviorPacket>();
-	private final ConcurrentListeningQueue<FootstepPathPlanPacket> plannedPathListeningQueue = new ConcurrentListeningQueue<FootstepPathPlanPacket>();
-	private final ConcurrentListeningQueue<FootstepStatus> footstepStatusQueue  = new ConcurrentListeningQueue<FootstepStatus>();;
+	private final ConcurrentListeningQueue<WalkToGoalBehaviorPacket> inputListeningQueue = new ConcurrentListeningQueue<WalkToGoalBehaviorPacket>(20);
+	private final ConcurrentListeningQueue<FootstepPathPlanPacket> plannedPathListeningQueue = new ConcurrentListeningQueue<FootstepPathPlanPacket>(20);
+	private final ConcurrentListeningQueue<FootstepStatus> footstepStatusQueue  = new ConcurrentListeningQueue<FootstepStatus>(100);
 	private final BooleanYoVariable isDone;
 	private final BooleanYoVariable hasInputBeenSet;
 	private final FullHumanoidRobotModel fullRobotModel;
@@ -62,7 +62,7 @@ public class WalkToGoalBehavior extends AbstractBehavior {
 	private final BooleanYoVariable executeUnknownFirstStep = new BooleanYoVariable("executeUnknownFirstStep", registry);
 
 //	private ArrayList<FootstepData> footsteps = new ArrayList<FootstepData>();
-	
+
 	private FootstepDataMessage currentLocation;
 	private FootstepDataMessage predictedLocation;
 	private FootstepPathPlanPacket currentPlan;
@@ -72,7 +72,7 @@ public class WalkToGoalBehavior extends AbstractBehavior {
    private RobotSide lastSide = null;
 
 
-	public WalkToGoalBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, FullHumanoidRobotModel fullRobotModel, DoubleYoVariable yoTime, double ankleHeight)
+	public WalkToGoalBehavior(CommunicationBridgeInterface outgoingCommunicationBridge, FullHumanoidRobotModel fullRobotModel, DoubleYoVariable yoTime, double ankleHeight)
 	{
 		super(outgoingCommunicationBridge);
 		DEBUG.set(true);
@@ -84,9 +84,9 @@ public class WalkToGoalBehavior extends AbstractBehavior {
 
 		this.fullRobotModel = fullRobotModel;
 
-		this.attachNetworkProcessorListeningQueue(inputListeningQueue, WalkToGoalBehaviorPacket.class);
-		this.attachNetworkProcessorListeningQueue(plannedPathListeningQueue, FootstepPathPlanPacket.class);
-		this.attachControllerListeningQueue(footstepStatusQueue, FootstepStatus.class);
+		this.attachNetworkListeningQueue(inputListeningQueue, WalkToGoalBehaviorPacket.class);
+		this.attachNetworkListeningQueue(plannedPathListeningQueue, FootstepPathPlanPacket.class);
+		this.attachNetworkListeningQueue(footstepStatusQueue, FootstepStatus.class);
 	}
 
 	@Override
@@ -105,7 +105,7 @@ public class WalkToGoalBehavior extends AbstractBehavior {
 		}
 		if (checkForNewPlan()){
 			return;
-		}		
+		}
 		if (checkForStepCompleted()){
 			return;
 		}
@@ -125,7 +125,7 @@ public class WalkToGoalBehavior extends AbstractBehavior {
 
       }
 	}
-	
+
 	private boolean checkForNewPlan(){
 		//return true if new packet, else return false.
 		FootstepPathPlanPacket newestPacket = plannedPathListeningQueue.poll();
@@ -143,10 +143,10 @@ public class WalkToGoalBehavior extends AbstractBehavior {
 				System.out.println("Plan is not Valid!");
 			}
 			return true;
-		}		
+		}
 		return false;
 	}
-	
+
 	private void visualizePlan(FootstepPathPlanPacket plan){
 		if (plan.pathPlan == null || plan.pathPlan.size() == 0) return;
 		int size = plan.pathPlan.size();
@@ -154,16 +154,16 @@ public class WalkToGoalBehavior extends AbstractBehavior {
 		planVisualizationPacket.footstepData = new ArrayList<FootstepDataMessage>();
 		planVisualizationPacket.footstepOrder = new int[size];
 		planVisualizationPacket.flag = new byte[size];
-		
+
 		for (int i = 0; i < size; i++){
 			planVisualizationPacket.footstepData.add(adjustFootstepForAnkleHeight(plan.pathPlan.get(i)));
 			planVisualizationPacket.footstepOrder[i] = i;
 			planVisualizationPacket.flag[i] = (byte) (plan.footstepUnknown.get(i) ? 0 : 2);
 		}
 		planVisualizationPacket.setDestination(PacketDestination.NETWORK_PROCESSOR);
-		sendPacketToNetworkProcessor(planVisualizationPacket);
+		sendPacket(planVisualizationPacket);
 	}
-	
+
 	private boolean planValid(FootstepPathPlanPacket plan){
 		if (plan == null) return false;
 		if (!plan.goalsValid) return false;
@@ -179,13 +179,13 @@ public class WalkToGoalBehavior extends AbstractBehavior {
 		waitingForValidPlan.set(false);
 		return true;
 	}
-	
+
 	private boolean checkForStepCompleted(){
 		//return true if there was a new packet, otherwise return false.
 		FootstepStatus newestPacket = footstepStatusQueue.poll();
 		if (newestPacket != null){
 			//TODO: update current location and predicted location from the feedback
-			if (newestPacket.status == Status.STARTED){ 
+			if (newestPacket.status == Status.STARTED){
 				stepCompleted.set(false);
 				debugPrintln("Number of requested steps: " + stepsRequested.size());
 				debugPrintln("footstep index: " + newestPacket.footstepIndex);
@@ -212,7 +212,7 @@ public class WalkToGoalBehavior extends AbstractBehavior {
 		}
 		return false;
 	}
-	
+
 	private void processNextStep(){
 		if (!planValid(currentPlan)){
 			debugPrintln("current plan is invalid, waiting for new plan");
@@ -232,12 +232,12 @@ public class WalkToGoalBehavior extends AbstractBehavior {
 		currentPlan.footstepUnknown.remove(0);
 		//element 1 is now element 0
 		if (currentPlan.footstepUnknown.get(0) && !executeUnknownFirstStep.getBooleanValue()) return;
-		
+
 		sendStepsToController();
 		stepCompleted.set(false);
-		
+
 	}
-	
+
 	private boolean atGoal(){
 		if (currentLocation == null) return false;
 		for (FootstepDataMessage goal : goalFootsteps){
@@ -262,22 +262,22 @@ public class WalkToGoalBehavior extends AbstractBehavior {
 	private void requestFootstepPlan()
 	{
 		FootstepPlanRequestPacket footstepPlanRequestPacket = new FootstepPlanRequestPacket(FootstepPlanRequestPacket.RequestType.START_SEARCH, startFootstep,startYaw,goalFootsteps, 10);
-		outgoingCommunicationBridge.sendPacketToNetworkProcessor(footstepPlanRequestPacket);
+		communicationBridge.sendPacket(footstepPlanRequestPacket);
 		waitingForValidPlan.set(true);
 	}
 
 	private void requestSearchStop(){
 		FootstepPlanRequestPacket stopSearchRequestPacket = new FootstepPlanRequestPacket(FootstepPlanRequestPacket.RequestType.STOP_SEARCH,new FootstepDataMessage(), 0.0, null);
-		outgoingCommunicationBridge.sendPacketToNetworkProcessor(stopSearchRequestPacket);
+		communicationBridge.sendPacket(stopSearchRequestPacket);
 		waitingForValidPlan.set(false);
 	}
-	
+
 	private void sendUpdateStart(FootstepDataMessage updatedLocation){
 		if (updatedLocation.orientation.epsilonEquals(new Quat4d(), .003)) return;
 		FootstepPlanRequestPacket updateStartPacket = new FootstepPlanRequestPacket(FootstepPlanRequestPacket.RequestType.UPDATE_START, updatedLocation, RotationTools.computeYaw(updatedLocation.orientation), null, 10);
-		outgoingCommunicationBridge.sendPacketToNetworkProcessor(updateStartPacket);
+		communicationBridge.sendPacket(updateStartPacket);
 	}
-	
+
 	private void sendStepsToController(){
 		int size = currentPlan.footstepUnknown.size();
 		FootstepDataListMessage outgoingFootsteps = new FootstepDataListMessage();
@@ -304,7 +304,7 @@ public class WalkToGoalBehavior extends AbstractBehavior {
       sendPacketToController(outgoingFootsteps);
       expectedIndex = 0;
     }
-	
+
 	private FootstepDataMessage adjustFootstepForAnkleHeight(FootstepDataMessage footstep){
 		FootstepDataMessage copy = new FootstepDataMessage(footstep);
 		Point3d ankleOffset = new Point3d(0, 0, ankleHeight);
@@ -314,7 +314,7 @@ public class WalkToGoalBehavior extends AbstractBehavior {
 		copy.getLocation().add(ankleOffset);
 		return copy;
 	}
-	
+
 	private void checkForNewInputs()
 	{
 		WalkToGoalBehaviorPacket newestPacket = inputListeningQueue.poll();
@@ -365,7 +365,7 @@ public class WalkToGoalBehavior extends AbstractBehavior {
 		double yOffset = robotYOffset * Math.cos(thetaGoal);
 
 		goalFootsteps.clear();
-		//set left foot goal 
+		//set left foot goal
       /*
 		Quat4d leftGoalOrientation = new Quat4d();
 		RotationFunctions.setQuaternionBasedOnYawPitchRoll(leftGoalOrientation, thetaGoal, 0,0);
@@ -380,7 +380,7 @@ public class WalkToGoalBehavior extends AbstractBehavior {
 	}
 
 	@Override
-	public void initialize()
+	public void onBehaviorEntered()
 	{
 		stepCompleted.set(true);
 		hasNewPlan.set(false);
@@ -395,7 +395,7 @@ public class WalkToGoalBehavior extends AbstractBehavior {
 
 
 	@Override
-	public void abort()
+	public void onBehaviorAborted()
 	{
 		requestSearchStop();
       sendPacketToController(new PauseWalkingMessage(true));
@@ -405,7 +405,7 @@ public class WalkToGoalBehavior extends AbstractBehavior {
 
 
 	@Override
-	public void pause()
+	public void onBehaviorPaused()
 	{
 
       isPaused.set(true);
@@ -413,7 +413,7 @@ public class WalkToGoalBehavior extends AbstractBehavior {
 	}
 
 	@Override
-	public void resume()
+	public void onBehaviorResumed()
 	{
 		isPaused.set(false);
       sendPacketToController(new PauseWalkingMessage(false));
@@ -426,7 +426,7 @@ public class WalkToGoalBehavior extends AbstractBehavior {
 	}
 
 	@Override
-	public void doPostBehaviorCleanup()
+	public void onBehaviorExited()
 	{
 		isPaused.set(false);
 		isAborted.set(false);
@@ -445,7 +445,7 @@ public class WalkToGoalBehavior extends AbstractBehavior {
 	{
 		return hasInputBeenSet.getBooleanValue();
 	}
-	
+
 	public void debugPrintln(String string){
 		if (DEBUG.getBooleanValue()) System.out.println(string);
 	}

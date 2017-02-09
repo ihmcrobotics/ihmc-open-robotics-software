@@ -34,8 +34,11 @@ public class TransferToWalkingSingleSupportState extends TransferState
          pelvisOrientationManager.setToHoldCurrentDesiredInSupportFoot(transferToSide);
 
       for (int i = 0; i < 3; i++)
-         balanceManager.addFootstepToPlan(walkingMessageHandler.peek(i));
+         balanceManager.addFootstepToPlan(walkingMessageHandler.peek(i), walkingMessageHandler.peekTiming(i));
       balanceManager.setICPPlanTransferToSide(transferToSide);
-      balanceManager.initializeICPPlanForTransfer();
+      double defaultSwingTime = walkingMessageHandler.getDefaultSwingTime();
+      double defaultTransferTime = walkingMessageHandler.getDefaultTransferTime();
+      double finalTransferTime = walkingMessageHandler.getFinalTransferTime();
+      balanceManager.initializeICPPlanForTransfer(defaultSwingTime, defaultTransferTime, finalTransferTime);
    }
 }

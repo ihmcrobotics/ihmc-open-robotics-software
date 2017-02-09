@@ -14,15 +14,15 @@ import java.util.StringTokenizer;
 
 import javax.swing.JFileChooser;
 
-import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
+import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
 import us.ihmc.simulationconstructionset.GraphConfiguration;
 import us.ihmc.simulationconstructionset.gui.dialogConstructors.GUIEnablerAndDisabler;
+import us.ihmc.tools.io.xml.XMLReaderUtility;
 
 public class GUIConfigurationSaveAndLoad
 {
    private JFileChooser dataFileChooser;
    private StandardSimulationGUI myGUI;
-   private final GUIEnablerAndDisabler guiEnablerAndDisabler;
 
    private boolean loadGraphGroups = true;
    private boolean loadEntryBoxes = true;
@@ -34,7 +34,6 @@ public class GUIConfigurationSaveAndLoad
    public GUIConfigurationSaveAndLoad(GUIEnablerAndDisabler guiEnablerAndDisabler, StandardSimulationGUI myGUI)
    {
       super();
-      this.guiEnablerAndDisabler = guiEnablerAndDisabler;
       this.myGUI = myGUI;
    }
 

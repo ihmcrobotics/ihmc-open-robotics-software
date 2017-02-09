@@ -1,8 +1,6 @@
 package us.ihmc.robotics.math.trajectories.waypoints;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.util.Random;
 
@@ -19,7 +17,6 @@ import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.frameObjects.FrameSO3Waypoint;
-import us.ihmc.robotics.geometry.interfaces.SO3WaypointInterface;
 import us.ihmc.robotics.geometry.transformables.SO3Waypoint;
 import us.ihmc.robotics.geometry.transformables.TransformableQuat4d;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SO3TrajectoryPointInterface;
@@ -49,7 +46,7 @@ public class FrameSO3TrajectoryPointTest
 
       double time = 3.4;
       TransformableQuat4d orientation = new TransformableQuat4d(new Quat4d(0.1, 0.22, 0.34, 0.56));
-      orientation.normalizeAndLimitToPiMinusPi();
+      orientation.normalize();
 
       Vector3d angularVelocity = new Vector3d(1.7, 8.4, 2.2);
 

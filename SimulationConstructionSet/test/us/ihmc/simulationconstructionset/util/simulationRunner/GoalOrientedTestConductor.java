@@ -88,15 +88,16 @@ public class GoalOrientedTestConductor implements VariableChangedListener
          }
          else if (terminalGoalsNotMeeting.isEmpty() && waypointGoalsNotMet.isEmpty())
          {
-            createSuccessMessage();
+            printSuccessMessage();
             stop();
          }
       }
    }
    
-   private void createSuccessMessage()
+   private void printSuccessMessage()
    {
       StringBuffer message = new StringBuffer();
+      message.append("Success:");
       for (YoVariableTestGoal goal : sustainGoals)
       {
          message.append("\nGoal sustained: ");
@@ -114,11 +115,33 @@ public class GoalOrientedTestConductor implements VariableChangedListener
       }
       PrintTools.info(this, message.toString());
    }
+   
+   private void printSimulatingMessage()
+   {
+      StringBuffer message = new StringBuffer();
+      message.append("Simulating with goals:");
+      for (YoVariableTestGoal goal : sustainGoals)
+      {
+         message.append("\nSustain goal: ");
+         message.append(goal.toString());
+      }
+      for (YoVariableTestGoal goal : waypointGoals)
+      {
+         message.append("\nWaypoint goal: ");
+         message.append(goal.toString());
+      }
+      for (YoVariableTestGoal goal : terminalGoals)
+      {
+         message.append("\nTerminal goal: ");
+         message.append(goal.toString());
+      }
+      PrintTools.info(this, message.toString());
+   }
 
    private void createAssertionFailedException()
    {
       StringBuffer message = new StringBuffer();
-      
+      message.append("Assertion failed:");
       for (YoVariableTestGoal goal : sustainGoalsNotMeeting)
       {
          message.append("\nGoal not sustained: ");
@@ -153,15 +176,19 @@ public class GoalOrientedTestConductor implements VariableChangedListener
       assertionFailedMessage = null;
       yoTimeChangedListenerActive = true;
       
+      printSimulatingMessage();
+      
       scs.simulate();
       
       while (scs.isSimulating())
       {
-         ThreadTools.sleep(100);
+         Thread.yield();
       }
       
       if (assertionFailedMessage != null)
       {
+         concludeTesting();
+         
          throw new AssertionFailedError(assertionFailedMessage);
       }
    }

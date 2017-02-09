@@ -2,37 +2,37 @@ package us.ihmc.tools.time;
 
 public class Timer
 {
-   private double currentTime = 0.0;
-   private double lastTime = 0.0;
-   private double deltaTime = 0.0;
-   private double startTime = 0.0;
-   private long numLaps = 0;
-   private double deltaSum = 0.0;
+   private double currentTime;
+   private double lastTime;
+   private double deltaTime;
+   private double startTime;
+   private long numLaps;
+   private double deltaSum;
    
    public Timer start()
    {
-      startTime = cpu();
-      lastTime = startTime;
+      reset();
       
       return this;
    }
    
    public void resetLap()
    {
-      lastTime = cpu();
+      lastTime = now();
    }
 
    public void reset()
    {
-      start();
+      startTime = now();
+      lastTime = startTime;
       
-      deltaSum = 0.0;
       numLaps = 0;
+      deltaSum = 0.0;
    }
 
    public double lap()
    {
-      currentTime = cpu();
+      currentTime = now();
       deltaTime = currentTime - lastTime;
       lastTime = currentTime;
 
@@ -45,25 +45,20 @@ public class Timer
    
    public double averageLap()
    {
-      double averageLap = Double.NaN;
-      
-      if (numLaps > 0)
-         averageLap = deltaSum / numLaps;
-      
-      return averageLap;
+      return deltaSum / numLaps;
    }
    
    public double totalElapsed()
    {
-      return cpu() - startTime;
+      return now() - startTime;
    }
    
    public double lapElapsed()
    {
-      return cpu() - lastTime;
+      return now() - lastTime;
    }
    
-   public static double cpu()
+   private double now()
    {
       return System.nanoTime() / 1e9;
    }

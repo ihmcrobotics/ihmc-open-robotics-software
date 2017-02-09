@@ -1,22 +1,5 @@
 package us.ihmc.atlas;
 
-import static us.ihmc.robotics.partNames.ArmJointName.ELBOW_PITCH;
-import static us.ihmc.robotics.partNames.ArmJointName.ELBOW_ROLL;
-import static us.ihmc.robotics.partNames.ArmJointName.FIRST_WRIST_PITCH;
-import static us.ihmc.robotics.partNames.ArmJointName.SECOND_WRIST_PITCH;
-import static us.ihmc.robotics.partNames.ArmJointName.SHOULDER_ROLL;
-import static us.ihmc.robotics.partNames.ArmJointName.SHOULDER_YAW;
-import static us.ihmc.robotics.partNames.ArmJointName.WRIST_ROLL;
-import static us.ihmc.robotics.partNames.LegJointName.ANKLE_PITCH;
-import static us.ihmc.robotics.partNames.LegJointName.ANKLE_ROLL;
-import static us.ihmc.robotics.partNames.LegJointName.HIP_PITCH;
-import static us.ihmc.robotics.partNames.LegJointName.HIP_ROLL;
-import static us.ihmc.robotics.partNames.LegJointName.HIP_YAW;
-import static us.ihmc.robotics.partNames.LegJointName.KNEE_PITCH;
-import static us.ihmc.robotics.partNames.NeckJointName.PROXIMAL_NECK_PITCH;
-import static us.ihmc.robotics.partNames.SpineJointName.SPINE_PITCH;
-import static us.ihmc.robotics.partNames.SpineJointName.SPINE_ROLL;
-import static us.ihmc.robotics.partNames.SpineJointName.SPINE_YAW;
 import static us.ihmc.atlas.ros.AtlasOrderedJointMap.back_bkx;
 import static us.ihmc.atlas.ros.AtlasOrderedJointMap.back_bky;
 import static us.ihmc.atlas.ros.AtlasOrderedJointMap.back_bkz;
@@ -36,6 +19,23 @@ import static us.ihmc.atlas.ros.AtlasOrderedJointMap.l_leg_hpy;
 import static us.ihmc.atlas.ros.AtlasOrderedJointMap.l_leg_hpz;
 import static us.ihmc.atlas.ros.AtlasOrderedJointMap.l_leg_kny;
 import static us.ihmc.atlas.ros.AtlasOrderedJointMap.neck_ry;
+import static us.ihmc.robotics.partNames.ArmJointName.ELBOW_PITCH;
+import static us.ihmc.robotics.partNames.ArmJointName.ELBOW_ROLL;
+import static us.ihmc.robotics.partNames.ArmJointName.FIRST_WRIST_PITCH;
+import static us.ihmc.robotics.partNames.ArmJointName.SECOND_WRIST_PITCH;
+import static us.ihmc.robotics.partNames.ArmJointName.SHOULDER_ROLL;
+import static us.ihmc.robotics.partNames.ArmJointName.SHOULDER_YAW;
+import static us.ihmc.robotics.partNames.ArmJointName.WRIST_ROLL;
+import static us.ihmc.robotics.partNames.LegJointName.ANKLE_PITCH;
+import static us.ihmc.robotics.partNames.LegJointName.ANKLE_ROLL;
+import static us.ihmc.robotics.partNames.LegJointName.HIP_PITCH;
+import static us.ihmc.robotics.partNames.LegJointName.HIP_ROLL;
+import static us.ihmc.robotics.partNames.LegJointName.HIP_YAW;
+import static us.ihmc.robotics.partNames.LegJointName.KNEE_PITCH;
+import static us.ihmc.robotics.partNames.NeckJointName.PROXIMAL_NECK_PITCH;
+import static us.ihmc.robotics.partNames.SpineJointName.SPINE_PITCH;
+import static us.ihmc.robotics.partNames.SpineJointName.SPINE_ROLL;
+import static us.ihmc.robotics.partNames.SpineJointName.SPINE_YAW;
 
 import java.util.EnumMap;
 import java.util.HashSet;
@@ -47,22 +47,23 @@ import javax.vecmath.Vector3d;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
+import us.ihmc.atlas.parameters.AtlasContactPointParameters;
+import us.ihmc.avatar.drcRobot.NewRobotPhysicalProperties;
+import us.ihmc.jMonkeyEngineToolkit.jme.util.JMEDataTypeUtils;
+import us.ihmc.robotics.controllers.YoPDGains;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.JointRole;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.partNames.LimbName;
 import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
-import us.ihmc.atlas.parameters.AtlasContactPointParameters;
-import us.ihmc.atlas.parameters.AtlasPhysicalProperties;
-import us.ihmc.graphics3DAdapter.jme.util.JMEDataTypeUtils;
-import us.ihmc.robotics.controllers.YoPDGains;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
+import us.ihmc.wholeBodyController.FootContactPoints;
 
 public class AtlasJointMap implements DRCRobotJointMap
 {
@@ -102,16 +103,23 @@ public class AtlasJointMap implements DRCRobotJointMap
 
    private final AtlasContactPointParameters contactPointParameters;
    private final AtlasRobotVersion atlasVersion;
-   
+   private final NewRobotPhysicalProperties atlasPhysicalProperties;
+
    private final SideDependentList<String> nameOfJointsBeforeThighs = new SideDependentList<>();
    private final SideDependentList<String> nameOfJointsBeforeHands = new SideDependentList<>();
-   
+
    private final String[] jointNamesBeforeFeet = new String[2];
 
-   public AtlasJointMap(AtlasRobotVersion atlasVersion)
+
+   public AtlasJointMap(AtlasRobotVersion atlasVersion, NewRobotPhysicalProperties atlasPhysicalProperties)
+   {
+      this(atlasVersion, atlasPhysicalProperties, null);
+   }
+
+   public AtlasJointMap(AtlasRobotVersion atlasVersion, NewRobotPhysicalProperties atlasPhysicalProperties, FootContactPoints simulationContactPoints)
    {
       this.atlasVersion = atlasVersion;
-
+      this.atlasPhysicalProperties = atlasPhysicalProperties;
       for (RobotSide robotSide : RobotSide.values)
       {
          String[] forcedSideJointNames = forcedSideDependentJointNames.get(robotSide);
@@ -170,14 +178,14 @@ public class AtlasJointMap implements DRCRobotJointMap
       }
 
       boolean createFootContactPoints = true;
-      contactPointParameters = new AtlasContactPointParameters(this, atlasVersion, createFootContactPoints);
-      
+      contactPointParameters = new AtlasContactPointParameters(this, atlasVersion, createFootContactPoints, simulationContactPoints);
+
       for (RobotSide robtSide : RobotSide.values)
       {
          nameOfJointsBeforeThighs.put(robtSide, legJointStrings.get(robtSide).get(HIP_PITCH));
          nameOfJointsBeforeHands.put(robtSide, armJointStrings.get(robtSide).get(SECOND_WRIST_PITCH));
       }
-      
+
       jointNamesBeforeFeet[0] = getJointBeforeFootName(RobotSide.LEFT);
       jointNamesBeforeFeet[1] = getJointBeforeFootName(RobotSide.RIGHT);
    }
@@ -288,13 +296,13 @@ public class AtlasJointMap implements DRCRobotJointMap
    {
       return legJointStrings.get(robotSide).get(ANKLE_ROLL);
    }
-   
+
    @Override
    public String getJointBeforeHandName(RobotSide robotSide)
    {
       return nameOfJointsBeforeHands.get(robotSide);
    }
-   
+
    @Override
    public AtlasContactPointParameters getContactPointParameters()
    {
@@ -328,7 +336,7 @@ public class AtlasJointMap implements DRCRobotJointMap
    public Set<String> getLastSimulatedJoints()
    {
       HashSet<String> lastSimulatedJoints = new HashSet<>();
-      
+
       if(!atlasVersion.getHandModel().isHandSimulated())
       {
          for (RobotSide robotSide : RobotSide.values)
@@ -346,16 +354,23 @@ public class AtlasJointMap implements DRCRobotJointMap
    @Override
    public RigidBodyTransform getSoleToAnkleFrameTransform(RobotSide robotSide)
    {
-      return AtlasPhysicalProperties.soleToAnkleFrameTransforms.get(robotSide);
+      return atlasPhysicalProperties.getSoleToAnkleFrameTransforms().get(robotSide);
    }
 
    @Override
    public RigidBodyTransform getHandControlFrameToWristTransform(RobotSide robotSide)
    {
       RigidBodyTransform attachmentPlateToPalm = JMEDataTypeUtils.jmeTransformToTransform3D(atlasVersion.getOffsetFromAttachmentPlate(robotSide));
-      RigidBodyTransform attachmentPlateToWrist = AtlasPhysicalProperties.handAttachmentPlateToWristTransforms.get(robotSide);
+      RigidBodyTransform attachmentPlateToWrist = atlasPhysicalProperties.getHandAttachmentPlateToWristTransforms().get(robotSide);
       RigidBodyTransform handControlFrameToWristTranform = new RigidBodyTransform();
       handControlFrameToWristTranform.multiply(attachmentPlateToWrist, attachmentPlateToPalm);
+
+      Vector3d translation = new Vector3d();
+      handControlFrameToWristTranform.getTranslation(translation);
+      translation.scale(getModelScale());
+      handControlFrameToWristTranform.setTranslation(translation);
+
+
       return handControlFrameToWristTranform;
 //      return AtlasPhysicalProperties.handAttachmentPlateToWristTransforms.get(robotSide);
    }
@@ -395,7 +410,7 @@ public class AtlasJointMap implements DRCRobotJointMap
    {
       return pelvisName;
    }
-   
+
    @Override
    public String[] getJointNamesBeforeFeet()
    {
@@ -418,7 +433,7 @@ public class AtlasJointMap implements DRCRobotJointMap
          {
             return robotSide;
          }
-         
+
          String endOfArm = armJointStrings.get(robotSide).get(SECOND_WRIST_PITCH);
          if(endOfArm != null && endOfArm.equals(joineNameBeforeEndEffector))
          {
@@ -426,6 +441,28 @@ public class AtlasJointMap implements DRCRobotJointMap
          }
       }
       throw new IllegalArgumentException(joineNameBeforeEndEffector + " was not listed as an end effector in " + this.getClass().getSimpleName());
+   }
+
+   @Override
+   public double getModelScale()
+   {
+      return atlasPhysicalProperties.getModelScale();
+   }
+
+   @Override
+   public double getMassScalePower()
+   {
+      return atlasPhysicalProperties.getMassScalePower();
+   }
+
+   public NewRobotPhysicalProperties getPhysicalProperties()
+   {
+      return atlasPhysicalProperties;
+   }
+
+   public String[] getHighInertiaForStableSimulationJoints()
+   {
+      return new String[] { "hokuyo_joint" };
    }
 }
 

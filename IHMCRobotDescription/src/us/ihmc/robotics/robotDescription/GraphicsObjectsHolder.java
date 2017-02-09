@@ -1,12 +1,13 @@
 package us.ihmc.robotics.robotDescription;
 
 
-import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
+import java.util.ArrayList;
+
+import us.ihmc.graphicsDescription.Graphics3DObject;
 
 public interface GraphicsObjectsHolder
 {
-   public abstract Graphics3DObject getCollisionObject(String name);
-
+   public abstract ArrayList<CollisionMeshDescription> getCollisionObjects(String name);
    public abstract Graphics3DObject getGraphicsObject(String name);
 }
 

@@ -2,7 +2,7 @@ package us.ihmc.robotiq.data;
 
 import java.util.Arrays;
 
-import us.ihmc.darpaRoboticsChallenge.handControl.packetsAndConsumers.HandSensorData;
+import us.ihmc.avatar.handControl.packetsAndConsumers.HandSensorData;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class RobotiqHandSensorData implements HandSensorData

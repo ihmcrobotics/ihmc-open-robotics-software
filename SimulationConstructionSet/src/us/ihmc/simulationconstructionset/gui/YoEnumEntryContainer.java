@@ -7,8 +7,6 @@ import java.awt.event.FocusEvent;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedHashMap;
 
 import javax.swing.BoxLayout;
 import javax.swing.JComboBox;
@@ -24,31 +22,30 @@ public class YoEnumEntryContainer implements YoVariableEntryContainer, ActionLis
    private static final int ENTRY_BOX_HEIGHT = YoEntryBox.COMPONENT_HEIGHT;
    private static final int HORIZONTAL_LABEL_BORDER = 6;
    private static final int MAX_TOTAL_LENGTH = YoEntryBox.MAX_COMPONENT_LENGTH;
-   private static final int MAX_LABEL_LENGTH = 130;
    private static final int HORIZONTAL_ENTRYBOX_SLOP = 6;
    private static final int COMBO_BOX_MIN_LENGTH = 28;
    
-   private final String[] enumValues;
    private EnumYoVariable<?> variableInThisBox;
 //   private LinkedHashMap<E, String> enumToNameMap;
 //   private LinkedHashMap<Integer, E> indexToEnumMap;
 //   private LinkedHashMap<E, Integer> enumToIndexMap;
    private YoEntryBox yoEntryBox;
    private JLabel label;
-   private JComboBox comboBox;
+   private JComboBox<String> comboBox;
 
 
    protected YoEnumEntryContainer(String[] enumValues)
    {
-      this.enumValues = enumValues;
    }
 
-   public YoVariable getVariable()
+   @Override
+   public YoVariable<?> getVariable()
    {
       return variableInThisBox;
    }
 
 
+   @Override
    public synchronized void update(YoEntryBox yoEntryBox)
    {
       if (!comboBox.hasFocus())
@@ -61,13 +58,15 @@ public class YoEnumEntryContainer implements YoVariableEntryContainer, ActionLis
       }
    }
 
+   @Override
    public void actionPerformed(YoEntryBox yoEntryBox, ActionEvent evt)
    {
 //      System.out.println("YoEnumEntryContainer: someone gave me an actionPerformed!");
    }
 
 
-   public void removeVariable(YoVariable variable)
+   @Override
+   public void removeVariable(YoVariable<?> variable)
    {
       if (getVariable() == variable)
          variableInThisBox = null;
@@ -77,13 +76,14 @@ public class YoEnumEntryContainer implements YoVariableEntryContainer, ActionLis
    }
 
 
+   @Override
    public void setup(YoEntryBox yoEntryBox)
    {
       this.yoEntryBox = yoEntryBox;
       label = new JLabel(YoEntryBox.DEFAULT_UNBOUND_ENTRY_BOX_LABEL);
 //      label.setName(YoEntryBox.DEFAULT_UNBOUND_ENTRY_BOX_LABEL);
       label.setHorizontalAlignment(SwingConstants.RIGHT);
-      comboBox = new JComboBox(new String[]{YoEntryBox.DEFAULT_UNBOUND_ENTRY_BOX_LABEL});
+      comboBox = new JComboBox<String>(new String[]{YoEntryBox.DEFAULT_UNBOUND_ENTRY_BOX_LABEL});
       this.yoEntryBox = yoEntryBox;
 
       BoxLayout mgr = new BoxLayout(yoEntryBox, BoxLayout.X_AXIS);
@@ -92,6 +92,7 @@ public class YoEnumEntryContainer implements YoVariableEntryContainer, ActionLis
       yoEntryBox.add(comboBox);
    }
 
+   @Override
    public void shutdown(YoEntryBox yoEntryBox)
    {
       variableInThisBox = null;
@@ -101,8 +102,8 @@ public class YoEnumEntryContainer implements YoVariableEntryContainer, ActionLis
       comboBox = null;
    }
 
-   @SuppressWarnings("unchecked")
-   public void bindToVariable(YoEntryBox yoEntryBox, YoVariable variable)
+   @Override
+   public void bindToVariable(YoEntryBox yoEntryBox, YoVariable<?> variable)
    {
       if (variable instanceof EnumYoVariable<?>)
       {
@@ -139,7 +140,7 @@ public class YoEnumEntryContainer implements YoVariableEntryContainer, ActionLis
       calculateStringFoldingParameters(stringCollection);
       String[] stringsArray = new String[stringCollection.size()];
       stringCollection.toArray(stringsArray);
-      comboBox = new JComboBox(stringsArray);
+      comboBox = new JComboBox<String>(stringsArray);
 
       comboBox.setSelectedIndex(getIndexOf(variableInThisBox.getOrdinal()));
       yoEntryBox.add(comboBox);
@@ -168,19 +169,23 @@ public class YoEnumEntryContainer implements YoVariableEntryContainer, ActionLis
       return comboBox.getFontMetrics(comboBox.getFont()).stringWidth(string);
    }
 
+   @Override
    public boolean isEventSource(YoEntryBox yoEntryBox, FocusEvent evt)
    {
       return evt.getSource().equals(comboBox);
    }
 
+   @Override
    public void focusLost(YoEntryBox yoEntryBox)
    {
    }
 
+   @Override
    public void focusGained(YoEntryBox yoEntryBox)
    {
    }
 
+   @Override
    public void actionPerformed(ActionEvent e)
    {
       int selectedIndex = comboBox.getSelectedIndex();

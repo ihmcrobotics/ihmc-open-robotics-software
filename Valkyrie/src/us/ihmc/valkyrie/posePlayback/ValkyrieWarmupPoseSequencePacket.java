@@ -5,13 +5,13 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import us.ihmc.avatar.posePlayback.PlaybackPose;
+import us.ihmc.avatar.posePlayback.PlaybackPoseSequence;
+import us.ihmc.avatar.posePlayback.PlaybackPoseSequenceReader;
+import us.ihmc.avatar.posePlayback.PosePlaybackPacket;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.partNames.LegJointName;
-import us.ihmc.darpaRoboticsChallenge.posePlayback.PlaybackPose;
-import us.ihmc.darpaRoboticsChallenge.posePlayback.PlaybackPoseSequence;
-import us.ihmc.darpaRoboticsChallenge.posePlayback.PlaybackPoseSequenceReader;
-import us.ihmc.darpaRoboticsChallenge.posePlayback.PosePlaybackPacket;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.valkyrie.configuration.YamlWithIncludesLoader;

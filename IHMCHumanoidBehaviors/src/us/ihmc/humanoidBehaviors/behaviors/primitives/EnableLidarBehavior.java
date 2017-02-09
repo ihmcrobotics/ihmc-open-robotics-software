@@ -1,7 +1,7 @@
 package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
-import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
+import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataStateCommand;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataStateCommand.LidarState;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -12,7 +12,7 @@ public class EnableLidarBehavior extends AbstractBehavior
    private DepthDataStateCommand enableLidarPacket;
    private LidarState lidarState;
 
-   public EnableLidarBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge)
+   public EnableLidarBehavior(CommunicationBridgeInterface outgoingCommunicationBridge)
    {
       super(outgoingCommunicationBridge);
 
@@ -23,7 +23,7 @@ public class EnableLidarBehavior extends AbstractBehavior
    {
       
          enableLidarPacket = new DepthDataStateCommand(lidarState);
-
+         
          if (!packetHasBeenSent.getBooleanValue() && (enableLidarPacket != null))
          {
             sendPacketToNetworkProcessor();
@@ -40,13 +40,14 @@ public class EnableLidarBehavior extends AbstractBehavior
    {
       if (!isPaused.getBooleanValue() && !isAborted.getBooleanValue())
       {
-         sendPacketToNetworkProcessor(enableLidarPacket);
+         System.out.println("EnableLidarBehavior: sending enable packet");
+         sendPacket(enableLidarPacket);
          packetHasBeenSent.set(true);
       }
    }
 
    @Override
-   public void initialize()
+   public void onBehaviorEntered()
    {
       packetHasBeenSent.set(false);
 
@@ -55,7 +56,7 @@ public class EnableLidarBehavior extends AbstractBehavior
    }
 
    @Override
-   public void doPostBehaviorCleanup()
+   public void onBehaviorExited()
    {
       packetHasBeenSent.set(false);
 
@@ -67,6 +68,21 @@ public class EnableLidarBehavior extends AbstractBehavior
    public boolean isDone()
    {
       return packetHasBeenSent.getBooleanValue() && !isPaused.getBooleanValue();
+   }
+
+   @Override
+   public void onBehaviorAborted()
+   {
+   }
+
+   @Override
+   public void onBehaviorPaused()
+   {
+   }
+
+   @Override
+   public void onBehaviorResumed()
+   {
    }
 
   

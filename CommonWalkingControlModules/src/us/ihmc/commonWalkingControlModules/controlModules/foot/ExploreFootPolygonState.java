@@ -8,6 +8,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.CenterOfPressureCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
@@ -36,6 +37,7 @@ public class ExploreFootPolygonState extends AbstractFootControlState
 
    private final FrameConvexPolygon2d supportPolygon = new FrameConvexPolygon2d();
 
+   private final InverseDynamicsCommandList inverseDynamicsCommandList = new InverseDynamicsCommandList();
    private final CenterOfPressureCommand centerOfPressureCommand = new CenterOfPressureCommand();
 
    private final FramePoint2d cop = new FramePoint2d();
@@ -336,11 +338,18 @@ public class ExploreFootPolygonState extends AbstractFootControlState
    @Override
    public InverseDynamicsCommand<?> getInverseDynamicsCommand()
    {
+      inverseDynamicsCommandList.clear();
       if (getTimeInCurrentState() > recoverTime.getDoubleValue() && !done)
       {
-         return centerOfPressureCommand;
+         inverseDynamicsCommandList.addCommand(centerOfPressureCommand);
       }
-      return null;
+
+      if (attemptToStraightenLegs)
+         inverseDynamicsCommandList.addCommand(straightLegsPrivilegedConfigurationCommand);
+      else
+         inverseDynamicsCommandList.addCommand(bentLegsPrivilegedConfigurationCommand);
+
+      return inverseDynamicsCommandList;
    }
 
    @Override

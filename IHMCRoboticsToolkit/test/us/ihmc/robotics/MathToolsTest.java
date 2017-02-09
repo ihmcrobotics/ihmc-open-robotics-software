@@ -353,6 +353,20 @@ public class MathToolsTest
       double max = 0.9;
       MathTools.isInsideBoundsInclusive(5.0, min, max);
    }
+   
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @Test(timeout = 30000)
+   public void testIsBoundedByMethods()
+   {
+      assertTrue(MathTools.isBoundedByExclusive(1.0, -1.0, 0.0));
+      assertTrue(MathTools.isBoundedByExclusive(-1.0, 1.0, 0.0));
+      assertFalse(MathTools.isBoundedByExclusive(-1.0, 1.0, -1.0));
+      assertFalse(MathTools.isBoundedByExclusive(-1.0, 1.0, 1.0));
+      assertTrue(MathTools.isBoundedByInclusive(-1.0, 1.0, -1.0));
+      assertTrue(MathTools.isBoundedByInclusive(-1.0, 1.0, 1.0));
+      assertTrue(MathTools.isPreciselyBoundedByInclusive(-1.0, 1.0, 1.0, 1e-12));
+      assertFalse(MathTools.isPreciselyBoundedByExclusive(-1.0, 1.0, 1.0, 1e-12));
+   }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
@@ -604,38 +618,90 @@ public class MathToolsTest
    @Test(timeout = 30000)
    public void testIsGreaterThan()
    {
-      assertTrue(MathTools.isGreaterThan(2.00011000, 2.00010000, 8));
-      assertFalse(MathTools.isGreaterThan(2.00011000, 2.00010000, 4));
+      assertTrue(MathTools.isSignificantlyGreaterThan(2.00011000, 2.00010000, 8));
+      assertFalse(MathTools.isSignificantlyGreaterThan(2.00011000, 2.00010000, 4));
+      
+      assertTrue(MathTools.isPreciselyGreaterThan(2.00011000, 2.00010000, 1e-8));
+      assertFalse(MathTools.isPreciselyGreaterThan(2.00011000, 2.00010000, 1e-3));
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testIsGreaterThanOrEqualTo()
    {
-      assertTrue(MathTools.isGreaterThanOrEqualTo(2.00011000, 2.00010000, 8));
-      assertTrue(MathTools.isGreaterThanOrEqualTo(2.00011000, 2.00010000, 4));
-      assertTrue(MathTools.isGreaterThanOrEqualTo(2.00019000, 2.00020000, 4));
-      assertFalse(MathTools.isGreaterThanOrEqualTo(2.00019000, 2.00020000, 5));
+      assertTrue(MathTools.isSignificantlyGreaterThanOrEqualTo(2.00011000, 2.00010000, 8));
+      assertTrue(MathTools.isSignificantlyGreaterThanOrEqualTo(2.00011000, 2.00010000, 4));
+      assertTrue(MathTools.isSignificantlyGreaterThanOrEqualTo(2.00019000, 2.00020000, 4));
+      assertTrue(MathTools.isSignificantlyGreaterThanOrEqualTo(2.00019000, 2.00020000, 5));
+      
+      assertTrue(MathTools.isPreciselyGreaterThanOrEqualTo(2.00011000, 2.00010000, 1e-8));
+      assertTrue(MathTools.isPreciselyGreaterThanOrEqualTo(2.00011000, 2.00010000, 1e-3));
+      assertTrue(MathTools.isPreciselyGreaterThanOrEqualTo(2.00019000, 2.00020000, 1e-3));
+      assertTrue(MathTools.isPreciselyGreaterThanOrEqualTo(2.00019000, 2.00020000, 1e-4));
+      assertTrue(MathTools.isPreciselyGreaterThanOrEqualTo(2.00020000, 2.00019000, 1e-5));
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testIsLessThan()
    {
-      assertFalse(MathTools.isLessThan(2.00011000, 2.00010000, 8));
-      assertFalse(MathTools.isLessThan(2.00011000, 2.00010000, 4));
-      assertFalse(MathTools.isLessThan(2.00019000, 2.00020000, 4));
-      assertTrue(MathTools.isLessThan(2.00019000, 2.00020000, 5));
+      assertFalse(MathTools.isPreciselyLessThan(2.00011000, 2.00010000, 1e-8));
+      assertFalse(MathTools.isPreciselyLessThan(2.00011000, 2.00010000, 1e-4));
+      assertFalse(MathTools.isPreciselyLessThan(2.00019000, 2.00020000, 1e-4));
+      assertTrue(MathTools.isPreciselyLessThan(2.00019000, 2.00020000, 1e-5));
+      
+      assertFalse(MathTools.isSignificantlyLessThan(2.00011000, 2.00010000, 1));
+      assertFalse(MathTools.isSignificantlyLessThan(2.00011000, 2.00010000, 5));
+      assertFalse(MathTools.isSignificantlyLessThan(2.00019000, 2.00020000, 5));
+      assertTrue(MathTools.isSignificantlyLessThan(2.00019000, 2.00020000, 6));
+   }
+   
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @Test(timeout = 30000)
+   public void testRoundToPrecision()
+   {
+      assertEquals("not equal", 100.0, MathTools.roundToPrecision(123.45, 100.0), 0.0);
+      assertEquals("not equal", 120.0, MathTools.roundToPrecision(123.45, 10.0), 0.0);
+      assertEquals("not equal", 123.0, MathTools.roundToPrecision(123.45, 1.0), 0.0);
+      assertEquals("not equal", 123.5, MathTools.roundToPrecision(123.45, 0.1), 0.0);
+      assertEquals("not equal", 123.45, MathTools.roundToPrecision(123.45, 0.01), 0.0);
+      assertEquals("not equal", 123.45, MathTools.roundToPrecision(123.46, 0.05), 0.0);
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testRoundToSignificantFigures()
+   {
+      assertEquals("not equal", 100.0, MathTools.roundToSignificantFigures(123.45, 1), 0.0);
+      assertEquals("not equal", 120.0, MathTools.roundToSignificantFigures(123.45, 2), 0.0);
+      assertEquals("not equal", 123.0, MathTools.roundToSignificantFigures(123.45, 3), 0.0);
+      assertEquals("not equal", 123.5, MathTools.roundToSignificantFigures(123.45, 4), 0.0);
+      assertEquals("not equal", 123.45, MathTools.roundToSignificantFigures(123.45, 5), 0.0);
+      assertEquals("not equal", 123.45, MathTools.roundToSignificantFigures(123.45, 6), 0.0);
+      
+      assertEquals("not equal", 0.0001, MathTools.roundToSignificantFigures(0.00011, 1), 0.0);
+      
+      System.out.println("Double.MIN_VALUE: " + Double.MIN_VALUE);
+      System.out.println("Double.MAX_VALUE: " + Double.MAX_VALUE);
+      System.out.println("Integer.MAX_VALUE: " + Integer.MAX_VALUE);
+      // test the limits
+      assertEquals("not equal", 1.0000000000000001E-307, MathTools.roundToSignificantFigures(1e-307, 0), 0.0);
+      assertEquals("not equal", 0.0, MathTools.roundToSignificantFigures(1.79e-308, 0), 0.0);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testIsLessThanOrEqualTo()
    {
-      assertFalse(MathTools.isLessThanOrEqualTo(2.00011000, 2.00010000, 8));
-      assertTrue(MathTools.isLessThanOrEqualTo(2.00011000, 2.00010000, 4));
-      assertTrue(MathTools.isLessThanOrEqualTo(2.00019000, 2.00020000, 4));
-      assertTrue(MathTools.isLessThanOrEqualTo(2.00019000, 2.00020000, 5));
+      assertFalse(MathTools.isSignificantlyLessThanOrEqualTo(2.00011000, 2.00010000, 8));
+      assertTrue(MathTools.isSignificantlyLessThanOrEqualTo(2.00011000, 2.00010000, 4));
+      assertTrue(MathTools.isSignificantlyLessThanOrEqualTo(2.00019000, 2.00020000, 4));
+      assertTrue(MathTools.isSignificantlyLessThanOrEqualTo(2.00019000, 2.00020000, 5));
+      
+      assertFalse(MathTools.isPreciselyLessThanOrEqualTo(2.00011000, 2.00010000, 1e-8));
+      assertTrue(MathTools.isPreciselyLessThanOrEqualTo(2.00011000, 2.00010000, 1e-4));
+      assertTrue(MathTools.isPreciselyLessThanOrEqualTo(2.00019000, 2.00020000, 1e-4));
+      assertTrue(MathTools.isPreciselyLessThanOrEqualTo(2.00019000, 2.00020000, 1e-6));
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -687,70 +753,6 @@ public class MathToolsTest
    {
       Random rand = new Random();
       MathTools.lcm(rand.nextLong());
-   }
-
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
-   public void testArePointsInOrderColinear()
-   {
-      Point3d startPoint = new Point3d(0.0, 0.0, 0.0);
-      Point3d middlePoint = new Point3d(1.0, 1.0, 1.0);
-      Point3d endPoint = new Point3d(2.0, 2.0, 2.0);
-      boolean expectedReturn = true;
-      double epsilon = 1e-10;
-      boolean actualReturn = GeometryTools.arePointsInOrderAndColinear(startPoint, middlePoint, endPoint, epsilon);
-      assertEquals("return value", expectedReturn, actualReturn);
-
-      /** @todo fill in the test code */
-   }
-
-   @ContinuousIntegrationTest(estimatedDuration = 0.2)
-   @Test(timeout = 30000)
-   public void testArePointsInOrderColinear2()
-   {
-      Random random = new Random(100L);
-      double scale = 10.0;
-
-      // these points should pass
-      int numberOfTests = 1000;
-      for (int i = 0; i < numberOfTests; i++)
-      {
-         double x, y, z;
-         x = scale * (random.nextDouble() - 0.5);
-         y = scale * (random.nextDouble() - 0.5);
-         z = scale * (random.nextDouble() - 0.5);
-         Point3d start = new Point3d(x, y, z);
-
-         x = scale * (random.nextDouble() - 0.5);
-         y = scale * (random.nextDouble() - 0.5);
-         z = scale * (random.nextDouble() - 0.5);
-         Point3d end = new Point3d(x, y, z);
-
-         Vector3d startToEnd = new Vector3d(end);
-         startToEnd.sub(start);
-
-         double epsilon = 1e-10;
-         if (startToEnd.length() < epsilon)
-            continue;
-         else
-         {
-            for (int j = 0; j < numberOfTests; j++)
-            {
-               double percentAlong = 0.99 * random.nextDouble();
-               Vector3d adder = new Vector3d(startToEnd);
-               adder.scale(percentAlong);
-
-               Point3d middle = new Point3d(start);
-               middle.add(adder);
-
-               boolean inOrder = GeometryTools.arePointsInOrderAndColinear(start, middle, end, epsilon);
-               if (!inOrder)
-               {
-                  fail("FAILED: start=" + start + ", middle=" + middle + ", end=" + end);
-               }
-            }
-         }
-      }
    }
 
 // @DeployableTestMethod(estimatedDuration = 0.1)
@@ -847,19 +849,19 @@ public class MathToolsTest
    {
       double longDouble = 0.12345678910111213;
 
-      double roundedNumber = MathTools.roundToGivenPrecision(longDouble, 1e-7);
+      double roundedNumber = MathTools.floorToGivenPrecision(longDouble, 1e-7);
       assertEquals(roundedNumber, 0.1234567, 1e-14);
 
-      roundedNumber = MathTools.roundToGivenPrecision(longDouble, 1e-3);
+      roundedNumber = MathTools.floorToGivenPrecision(longDouble, 1e-3);
       assertEquals(roundedNumber, 0.123, 1e-14);
 
       Vector3d preciseVector = new Vector3d(0.12345678910111213, 100.12345678910111213, 1000.12345678910111213);
       Vector3d roundedVector = new Vector3d(preciseVector);
 
-      MathTools.roundToGivenPrecision(roundedVector, 1e-7);
+      MathTools.floorToGivenPrecision(roundedVector, 1e-7);
       JUnitTools.assertTuple3dEquals(new Vector3d(0.1234567, 100.1234567, 1000.1234567), roundedVector, 1e-12);
 
-      MathTools.roundToGivenPrecision(roundedVector, 1e-3);
+      MathTools.floorToGivenPrecision(roundedVector, 1e-3);
       JUnitTools.assertTuple3dEquals(new Vector3d(0.123, 100.123, 1000.123), roundedVector, 1e-14);
    }
 

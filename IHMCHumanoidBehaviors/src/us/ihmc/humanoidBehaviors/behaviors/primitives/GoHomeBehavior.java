@@ -4,7 +4,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
-import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
+import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.StopAllTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage.BodyPart;
@@ -29,12 +29,12 @@ public class GoHomeBehavior extends AbstractBehavior
    protected final BooleanYoVariable hasInputBeenSet;
    private final BooleanYoVariable isDone;
 
-   public GoHomeBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, DoubleYoVariable yoTime)
+   public GoHomeBehavior(CommunicationBridgeInterface outgoingCommunicationBridge, DoubleYoVariable yoTime)
    {
       this(null, outgoingCommunicationBridge, yoTime);
    }
 
-   public GoHomeBehavior(String namePrefix, OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, DoubleYoVariable yoTime)
+   public GoHomeBehavior(String namePrefix, CommunicationBridgeInterface outgoingCommunicationBridge, DoubleYoVariable yoTime)
    {
       super(namePrefix, outgoingCommunicationBridge);
 
@@ -90,7 +90,7 @@ public class GoHomeBehavior extends AbstractBehavior
          outgoingMessage.setDestination(PacketDestination.BROADCAST);
 
          sendPacketToController(outgoingMessage);
-         sendPacketToNetworkProcessor(outgoingMessage);
+         sendPacket(outgoingMessage);
 
          hasPacketBeenSent.set(true);
 
@@ -110,7 +110,7 @@ public class GoHomeBehavior extends AbstractBehavior
    }
 
    @Override
-   public void initialize()
+   public void onBehaviorEntered()
    {
       hasInputBeenSet.set(false);
       hasPacketBeenSent.set(false);
@@ -126,7 +126,7 @@ public class GoHomeBehavior extends AbstractBehavior
    }
 
    @Override
-   public void doPostBehaviorCleanup()
+   public void onBehaviorExited()
    {
       hasPacketBeenSent.set(false);
       outgoingMessage = null;
@@ -143,14 +143,14 @@ public class GoHomeBehavior extends AbstractBehavior
    }
 
    @Override
-   public void abort()
+   public void onBehaviorAborted()
    {
       stopArmMotion();
       isAborted.set(true);
    }
 
    @Override
-   public void pause()
+   public void onBehaviorPaused()
    {
       if (isPaused.getBooleanValue())
       {
@@ -164,7 +164,7 @@ public class GoHomeBehavior extends AbstractBehavior
    }
 
    @Override
-   public void resume()
+   public void onBehaviorResumed()
    {
       if (!isPaused.getBooleanValue())
       {

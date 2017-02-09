@@ -3,8 +3,8 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSt
 import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.controlModules.ChestOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.PelvisOrientationManager;
+import us.ihmc.commonWalkingControlModules.controlModules.chest.ChestOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.controlModules.head.HeadOrientationManager;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.WalkingMessageHandler;
@@ -17,6 +17,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHuma
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.AbortWalkingCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.AdjustFootstepCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ArmDesiredAccelerationsCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ArmTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.AutomaticManipulationAbortCommand;
@@ -34,6 +35,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PauseWalking
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisHeightTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisOrientationTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SpineTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ManipulationAbortedStatus;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -105,6 +107,8 @@ public class WalkingCommandConsumer
    {
       if (commandInputManager.isNewCommandAvailable(ChestTrajectoryCommand.class))
          chestOrientationManager.handleChestTrajectoryCommand(commandInputManager.pollNewestCommand(ChestTrajectoryCommand.class));
+      if (commandInputManager.isNewCommandAvailable(SpineTrajectoryCommand.class))
+         chestOrientationManager.handleSpineTrajectoryCommand(commandInputManager.pollNewestCommand(SpineTrajectoryCommand.class));
    }
 
    public void consumePelvisHeightCommands()
@@ -126,19 +130,19 @@ public class WalkingCommandConsumer
       chestOrientationManager.handleGoHomeCommand(command);
    }
 
-   public void consumePelvisCommands(WalkingState currentState)
+   public void consumePelvisCommands(WalkingState currentState, boolean allowMotionRegardlessOfState)
    {
       if (commandInputManager.isNewCommandAvailable(PelvisOrientationTrajectoryCommand.class))
       {
          PelvisOrientationTrajectoryCommand newestCommand = commandInputManager.pollNewestCommand(PelvisOrientationTrajectoryCommand.class);
-         if (currentState.isStateSafeToConsumePelvisTrajectoryCommand())
+         if (allowMotionRegardlessOfState || currentState.isStateSafeToConsumePelvisTrajectoryCommand())
             pelvisOrientationManager.handlePelvisOrientationTrajectoryCommands(newestCommand);
       }
 
       if (commandInputManager.isNewCommandAvailable(PelvisTrajectoryCommand.class))
       {
          PelvisTrajectoryCommand command = commandInputManager.pollNewestCommand(PelvisTrajectoryCommand.class);
-         if (currentState.isStateSafeToConsumePelvisTrajectoryCommand())
+         if (allowMotionRegardlessOfState || currentState.isStateSafeToConsumePelvisTrajectoryCommand())
          {
             pelvisOrientationManager.handlePelvisTrajectoryCommand(command);
             balanceManager.handlePelvisTrajectoryCommand(command);
@@ -147,7 +151,7 @@ public class WalkingCommandConsumer
       }
    }
 
-   public void consumeManipulationCommands(WalkingState currentState)
+   public void consumeManipulationCommands(WalkingState currentState, boolean allowMotionRegardlessOfState)
    {
       if (manipulationControlModule == null)
          return;
@@ -166,7 +170,7 @@ public class WalkingCommandConsumer
       List<ArmDesiredAccelerationsCommand> armDesiredAccelerationCommands = commandInputManager.pollNewCommands(ArmDesiredAccelerationsCommand.class);
       List<HandComplianceControlParametersCommand> handComplianceCommands = commandInputManager.pollNewCommands(HandComplianceControlParametersCommand.class);
 
-      if (currentState.isStateSafeToConsumeManipulationCommands())
+      if (allowMotionRegardlessOfState || currentState.isStateSafeToConsumeManipulationCommands())
       {
          manipulationControlModule.handleHandTrajectoryCommands(handTrajectoryCommands);
          manipulationControlModule.handleArmTrajectoryCommands(armTrajectoryCommands);
@@ -241,9 +245,10 @@ public class WalkingCommandConsumer
       if (commandInputManager.isNewCommandAvailable(FootstepDataListCommand.class))
       {
          walkingMessageHandler.handleFootstepDataListCommand(commandInputManager.pollNewestCommand(FootstepDataListCommand.class));
-         balanceManager.setDoubleSupportTime(walkingMessageHandler.getTransferTime());
-         balanceManager.setSingleSupportTime(walkingMessageHandler.getSwingTime());
       }
+
+      if (commandInputManager.isNewCommandAvailable(AdjustFootstepCommand.class))
+         walkingMessageHandler.handleAdjustFootstepCommand(commandInputManager.pollNewestCommand(AdjustFootstepCommand.class));
    }
 
    public void consumeAbortWalkingCommands(BooleanYoVariable abortWalkingRequested)

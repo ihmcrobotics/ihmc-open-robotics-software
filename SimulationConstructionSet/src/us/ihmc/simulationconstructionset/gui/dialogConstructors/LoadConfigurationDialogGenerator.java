@@ -16,12 +16,12 @@ import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
-import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
+import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.gui.GUIConfigurationSaveAndLoad;
-import us.ihmc.simulationconstructionset.gui.MyFileFilter;
 import us.ihmc.simulationconstructionset.gui.StandardSimulationGUI;
-import us.ihmc.simulationconstructionset.gui.XMLReaderUtility;
+import us.ihmc.tools.gui.MyFileFilter;
+import us.ihmc.tools.io.xml.XMLReaderUtility;
 
 public class LoadConfigurationDialogGenerator implements LoadConfigurationDialogConstructor
 {
@@ -60,6 +60,7 @@ public class LoadConfigurationDialogGenerator implements LoadConfigurationDialog
          final JCheckBox graphGroups = new JCheckBox("Load Graph Groups", loadGraphGroups);
          graphGroups.addActionListener(new ActionListener()
          {
+            @Override
             public void actionPerformed(ActionEvent e)
             {
                loadGraphGroups = graphGroups.isSelected();
@@ -71,6 +72,7 @@ public class LoadConfigurationDialogGenerator implements LoadConfigurationDialog
          final JCheckBox entryBoxes = new JCheckBox("Load Entry Boxes", loadEntryBoxes);
          entryBoxes.addActionListener(new ActionListener()
          {
+            @Override
             public void actionPerformed(ActionEvent e)
             {
                loadEntryBoxes = entryBoxes.isSelected();
@@ -82,6 +84,7 @@ public class LoadConfigurationDialogGenerator implements LoadConfigurationDialog
          final JCheckBox viewPorts = new JCheckBox("Load Extra View Ports", loadViewPorts);
          viewPorts.addActionListener(new ActionListener()
          {
+            @Override
             public void actionPerformed(ActionEvent e)
             {
                loadViewPorts = viewPorts.isSelected();
@@ -93,6 +96,7 @@ public class LoadConfigurationDialogGenerator implements LoadConfigurationDialog
          final JCheckBox graphWindows = new JCheckBox("Load Graph Windows", loadGraphWindows);
          graphWindows.addActionListener(new ActionListener()
          {
+            @Override
             public void actionPerformed(ActionEvent e)
             {
                loadGraphWindows = graphWindows.isSelected();
@@ -104,6 +108,7 @@ public class LoadConfigurationDialogGenerator implements LoadConfigurationDialog
          final JCheckBox loadjpanels = new JCheckBox("Load Extra JPanels", loadJPanels);
          loadjpanels.addActionListener(new ActionListener()
          {
+            @Override
             public void actionPerformed(ActionEvent e)
             {
                loadJPanels = loadjpanels.isSelected();
@@ -115,6 +120,7 @@ public class LoadConfigurationDialogGenerator implements LoadConfigurationDialog
          final JCheckBox multiviews = new JCheckBox("Load Multiple Views", loadMultiViews);
          multiviews.addActionListener(new ActionListener()
          {
+            @Override
             public void actionPerformed(ActionEvent e)
             {
                loadMultiViews = multiviews.isSelected();
@@ -143,16 +149,19 @@ public class LoadConfigurationDialogGenerator implements LoadConfigurationDialog
       }
    }
 
+   @Override
    public void setCurrentDirectory(File dir)
    {
       dataFileChooser.setCurrentDirectory(dir);
    }
 
+   @Override
    public void setCurrentDirectory(String dir)
    {
       dataFileChooser.setCurrentDirectory(new File(dir));
    }
 
+   @Override
    public void constructDialog()
    {
       load();
@@ -179,6 +188,7 @@ public class LoadConfigurationDialogGenerator implements LoadConfigurationDialog
     * you need to wait a few seconds until SCS has started before
     * calling this method with the desired GUI config.
     */
+   @Override
    public synchronized void loadGUIConfigurationFile(File file)
    {
       String fileEnding = ".guiConf";

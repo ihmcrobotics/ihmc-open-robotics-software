@@ -6,7 +6,7 @@ import java.util.ArrayList;
 
 import javax.swing.JCheckBoxMenuItem;
 
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphic;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphic;
 
 public class DynamicGraphicCheckBoxMenuItem extends JCheckBoxMenuItem implements ItemListener
 {
@@ -15,7 +15,12 @@ public class DynamicGraphicCheckBoxMenuItem extends JCheckBoxMenuItem implements
 
    public DynamicGraphicCheckBoxMenuItem(String label, ArrayList<YoGraphic> yoGraphics)
    {
-      super(label, true);
+      this(label, yoGraphics, true);
+   }
+
+   public DynamicGraphicCheckBoxMenuItem(String label, ArrayList<YoGraphic> yoGraphics, boolean selectedState)
+   {
+      super(label, selectedState);
       this.yoGraphics = yoGraphics;
       this.addItemListener(this);
    }
@@ -25,6 +30,7 @@ public class DynamicGraphicCheckBoxMenuItem extends JCheckBoxMenuItem implements
       this.yoGraphics.addAll(yoGraphics);
    }
 
+   @Override
    public void itemStateChanged(ItemEvent ie)
    {
       if (ie.getStateChange() == ItemEvent.SELECTED)

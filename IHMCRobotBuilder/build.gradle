@@ -5,7 +5,7 @@ buildscript {
 		}
 	}
 	dependencies {
-		classpath "gradle.plugin.us.ihmc.gradle:ihmc-build:0.0.18"
+		classpath "gradle.plugin.us.ihmc.gradle:ihmc-build:0.0.19"
 	}
 }
 
@@ -32,7 +32,7 @@ repositories {
 	jcenter()
 	mavenCentral()
 	maven {
-		url "https://bengal.ihmc.us/nexus/content/repositories/thirdparty/"
+		url "http://artifactory.ihmc.us/artifactory/thirdparty/"
 	}
 }
 
@@ -46,9 +46,9 @@ dependencies {
 	compile group: 'io.javaslang', name: 'javaslang', version: '2.0.3'
 	compile ihmc.getProjectDependency(":IHMCJavaFXToolkit")
 	compile ihmc.getProjectDependency(":IHMCRobotDescription")
-	compile ihmc.getProjectDependency(":SDFLoader")
-	compile ihmc.getProjectDependency(":IHMCGraphics3DDescription")
-	compile ihmc.getProjectDependency(":Graphics3DAdapter")
+	compile ihmc.getProjectDependency(":ModelFileLoader")
+	compile ihmc.getProjectDependency(":IHMCGraphicsDescription")
+	compile ihmc.getProjectDependency(":IHMCJMonkeyEngineToolkit")
 
 
 	testCompile ihmc.getProjectDependency(":IHMCUnitTesting")

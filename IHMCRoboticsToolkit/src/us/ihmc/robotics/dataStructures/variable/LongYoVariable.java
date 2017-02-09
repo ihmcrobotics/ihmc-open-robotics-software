@@ -96,6 +96,7 @@ public class LongYoVariable extends YoVariable<LongYoVariable>
       return val == value;
    }
 
+   @Override
    public void setValueFromDouble(double doubleValue, boolean notifyListeners)
    {
       set(convertFromDoubleToLong(doubleValue), notifyListeners);
@@ -106,11 +107,13 @@ public class LongYoVariable extends YoVariable<LongYoVariable>
       return Math.round(doubleValue);
    }
 
+   @Override
    public double getValueAsDouble()
    {
       return val;
    }
 
+   @Override
    public String toString()
    {
       StringBuffer retBuffer = new StringBuffer();
@@ -126,11 +129,13 @@ public class LongYoVariable extends YoVariable<LongYoVariable>
     *
     * @param stringBuffer StringBuffer to which the value will be appended
     */
+   @Override
    public void getValueString(StringBuffer stringBuffer)
    {
       stringBuffer.append(val);
    }
    
+   @Override
    public void getValueStringFromDouble(StringBuffer stringBuffer, double doubleValue)
    {
       stringBuffer.append(convertFromDoubleToLong(doubleValue));
@@ -160,5 +165,11 @@ public class LongYoVariable extends YoVariable<LongYoVariable>
    public boolean setValue(LongYoVariable value, boolean notifyListeners)
    {
       return set(value.getLongValue(), notifyListeners);
+   }
+
+   @Override
+   public boolean isZero()
+   {
+      return getLongValue() == 0l;
    }
 }

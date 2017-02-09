@@ -1,0 +1,61 @@
+%!PS-Adobe-3.0
+%%Creator: BoofCV
+%%DocumentMedia: Plain 510.2362204724409 510.2362204724409 75 white ( )
+%%Title: 50 w=12.0 cm
+%%DocumentData: Clean7Bit
+%%LanguageLevel: 2
+%%EndComments
+%%BeginProlog
+%%EndProlog
+%%Pages: 1
+  /iw 170.0787401574803 def
+  /ow 340.1574803149606 def
+  /wb 85.03937007874015 def
+  /bb 85.03937007874015 def
+  /b0 wb def
+  /b1 { wb bb add} def
+  /b2 { b1 170.0787401574803 add} def
+  /b3 { b2 bb add} def
+
+  /sl 42.519685039370074 def
+  /w0 0 def
+  /w1 { w0 sl add} def
+  /w2 { w1 sl add} def
+  /w3 { w2 sl add} def
+  /box {newpath moveto sl 0 rlineto 0 sl rlineto sl neg 0 rlineto closepath fill} def
+  /drawImage000 {
+% Block corner used to identify orientation
+  0 0 box
+  w2 w0 box
+  w2 w1 box
+  w3 w1 box
+} def
+%%Page: 1 1
+
+ 1.0 setgray
+ newpath 0 0 moveto 510.236220 0 rlineto 0 setlinewidth stroke
+ newpath 0 0 moveto 0 510.236220 lineto 0 setlinewidth stroke
+ newpath 510.236220 0 moveto 510.236220 510.236220 lineto 0 setlinewidth stroke
+ newpath 0 510.236220 moveto 510.236220 510.236220 lineto 0 setlinewidth stroke
+ 0.0 setgray
+
+ /drawBorder
+{
+ newpath b0 b0 moveto 0 ow rlineto bb 0 rlineto 0 -1 ow mul rlineto closepath fill
+ newpath b1 b2 moveto iw 0 rlineto 0 bb rlineto -1 iw mul 0 rlineto closepath fill
+ newpath b1 b0 moveto iw 0 rlineto 0 bb rlineto -1 iw mul 0 rlineto closepath fill
+ newpath b2 b0 moveto 0 ow rlineto bb 0 rlineto 0 -1 ow mul rlineto closepath fill
+} def
+  /originX 0.0 def
+  /originY 0.0 def
+  originX originY translate
+
+  drawBorder
+% Center then draw the image
+  b1 b1 translate
+  drawImage000
+% Undo translations
+  -1 b1 mul -1 b1 mul translate
+  -1 originX mul -1 originY mul translate
+  showpage
+%%EOF

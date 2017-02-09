@@ -31,10 +31,10 @@ import us.ihmc.robotics.math.trajectories.providers.YoVelocityProvider;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
-import us.ihmc.robotics.stateMachines.GenericStateMachine;
-import us.ihmc.robotics.stateMachines.StateMachineTools;
-import us.ihmc.robotics.stateMachines.StateTransition;
-import us.ihmc.robotics.stateMachines.StateTransitionCondition;
+import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.GenericStateMachine;
+import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateMachineTools;
+import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransition;
+import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransitionCondition;
 import us.ihmc.tools.io.printing.PrintTools;
 
 public class FootControlModule
@@ -282,9 +282,9 @@ public class FootControlModule
          exploreFootPolygonState.setWeights(defaultAngularFootWeight, defaultLinearFootWeight);
    }
 
-   public void replanTrajectory(Footstep footstep, double swingTime)
+   public void replanTrajectory(Footstep footstep, double swingTime, boolean continuousReplan)
    {
-      swingState.replanTrajectory(footstep, swingTime);
+      swingState.replanTrajectory(footstep, swingTime, continuousReplan);
    }
 
    public void requestTouchdownForDisturbanceRecovery()
@@ -471,6 +471,28 @@ public class FootControlModule
    public double requestSwingSpeedUp(double speedUpFactor)
    {
       return swingState.requestSwingSpeedUp(speedUpFactor);
+   }
+
+   /**
+    * Set whether or not the privileged configuration will attempt to straighten the legs.
+    * Unless {@link WalkingControllerParameters#controlHeightWithMomentum()} is disabled to allow the height to change
+    * Linked to the variable {@link WalkingControllerParameters#attemptToStraightenLegs()}.
+    * in the nullspace, it will not be apparent that the controller will try and straighten the legs.
+    * @param attemptToStraightenLegs
+    */
+   public void setAttemptToStraightenLegs(boolean attemptToStraightenLegs)
+   {
+      swingState.setAttemptToStraightenLegs(attemptToStraightenLegs);
+      moveViaWaypointsState.setAttemptToStraightenLegs(attemptToStraightenLegs);
+      onToesState.setAttemptToStraightenLegs(attemptToStraightenLegs);
+      if (supportState != null)
+         supportState.setAttemptToStraightenLegs(attemptToStraightenLegs);
+      if (supportStateNew != null)
+         supportStateNew.setAttemptToStraightenLegs(attemptToStraightenLegs);
+      if (holdPositionState != null)
+         holdPositionState.setAttemptToStraightenLegs(attemptToStraightenLegs);
+      if (exploreFootPolygonState != null)
+         exploreFootPolygonState.setAttemptToStraightenLegs(attemptToStraightenLegs);
    }
 
    public void setExitCMPForToeOff(FramePoint exitCMP)

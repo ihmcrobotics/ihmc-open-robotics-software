@@ -3,16 +3,12 @@ package us.ihmc.quadrupedRobotics.providers;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.quadrupedRobotics.communication.packets.*;
-import us.ihmc.quadrupedRobotics.params.DoubleArrayParameter;
-import us.ihmc.quadrupedRobotics.params.DoubleParameter;
-import us.ihmc.quadrupedRobotics.params.ParameterFactory;
+import us.ihmc.robotics.dataStructures.parameter.DoubleParameter;
+import us.ihmc.robotics.dataStructures.parameter.ParameterFactory;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedXGaitSettings;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-
-import javax.vecmath.Vector3d;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class QuadrupedXGaitSettingsInputProvider
 {
@@ -24,7 +20,7 @@ public class QuadrupedXGaitSettingsInputProvider
    private final DoubleParameter defaultStepGroundClearanceParameter = parameterFactory.createDouble("defaultStepGroundClearance", 0.1);
    private final DoubleParameter defaultStepDurationParameter = parameterFactory.createDouble("defaultStepDurationParameter", 0.33);
    private final DoubleParameter defaultEndDoubleSupportDurationParameter = parameterFactory.createDouble("defaultEndDoubleSupportDuration", 0.0);
-   private final DoubleParameter defaultEndPhaseShiftParameter = parameterFactory.createDouble("defaultEndPhaseShift", 90);
+   private final DoubleParameter defaultEndPhaseShiftParameter = parameterFactory.createDouble("defaultEndPhaseShift", 180);
    private final DoubleParameter stanceLengthLowerLimitParameter = parameterFactory.createDouble("stanceLengthLowerLimit", 0.8);
    private final DoubleParameter stanceLengthUpperLimitParameter = parameterFactory.createDouble("stanceLengthUpperLimit", 1.4);
    private final DoubleParameter stanceWidthLowerLimitParameter = parameterFactory.createDouble("stanceWidthLowerLimit", 0.1);

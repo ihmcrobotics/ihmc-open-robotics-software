@@ -3,7 +3,6 @@ package us.ihmc.robotics.geometry;
 import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector2d;
-import javax.vecmath.Vector3d;
 
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.transformables.TransformablePoint2d;
@@ -351,74 +350,23 @@ public class Line2d implements Geometry2d<Line2d>
       return normalizedVector.dot(line.getNormalizedVector()) < 1e-7;
    }
 
-   private final double[] tempAlphaBeta = new double[2];
    @Override
    public Point2d intersectionWith(Line2d secondLine)
    {
-      double x0 = point.getX();
-      double y0 = point.getY();
-
-      double vx0 = normalizedVector.getX();
-      double vy0 = normalizedVector.getY();
-
-      double x1 = secondLine.point.getX();
-      double y1 = secondLine.point.getY();
-
-      double vx1 = secondLine.normalizedVector.getX();
-      double vy1 = secondLine.normalizedVector.getY();
-
-      GeometryTools.intersection(x0, y0, vx0, vy0, x1, y1, vx1, vy1, tempAlphaBeta);
-      if (Double.isNaN(tempAlphaBeta[0]))
-         return null;
-
-      Point2d returnPoint2d = new Point2d(x0 + vx0 * tempAlphaBeta[0], y0 + vy0 * tempAlphaBeta[0]);
-
-      return returnPoint2d;
+      return GeometryTools.getIntersectionBetweenTwoLines(point, normalizedVector, secondLine.point, secondLine.normalizedVector);
    }
 
-   public boolean intersectionWith(Point2d intersectionToPack, Line2d secondLine)
+   public boolean intersectionWith(Line2d secondLine, Point3d intersectionToPack)
    {
-      double x0 = point.getX();
-      double y0 = point.getY();
-
-      double vx0 = normalizedVector.getX();
-      double vy0 = normalizedVector.getY();
-
-      double x1 = secondLine.point.getX();
-      double y1 = secondLine.point.getY();
-
-      double vx1 = secondLine.normalizedVector.getX();
-      double vy1 = secondLine.normalizedVector.getY();
-
-      GeometryTools.intersection(x0, y0, vx0, vy0, x1, y1, vx1, vy1, tempAlphaBeta);
-      if (Double.isNaN(tempAlphaBeta[0]))
-         return false;
-
-      intersectionToPack.set(x0 + vx0 * tempAlphaBeta[0], y0 + vy0 * tempAlphaBeta[0]);
-
-      return true;
+      boolean success = GeometryTools.getIntersectionBetweenTwoLines(point, normalizedVector, secondLine.point, secondLine.normalizedVector, tempPoint2d);
+      if (success)
+         intersectionToPack.set(tempPoint2d.getX(), tempPoint2d.getY(), intersectionToPack.getZ());
+      return success;
    }
 
-   public void intersectionWith(Line2d line, Point3d intersectionToPack)
+   public boolean intersectionWith(Line2d secondLine, Point2d intersectionToPack)
    {
-      intersectionWith(line.getPoint().getX(), line.getPoint().getY(), line.getNormalizedVector().getX(), line.getNormalizedVector().getY());
-      intersectionToPack.set(tempPoint2d.getX(), tempPoint2d.getY(), intersectionToPack.getZ());
-   }
-
-   public void intersectionWith(Line2d line, Point2d intersectionToPack)
-   {
-      intersectionWith(line.getPoint().getX(), line.getPoint().getY(), line.getNormalizedVector().getX(), line.getNormalizedVector().getY());
-      intersectionToPack.set(tempPoint2d);
-   }
-
-   private Point2d intersectionWith(double x1, double y1, double vx1, double vy1)
-   {
-      GeometryTools.intersection(point.getX(), point.getY(), normalizedVector.getX(), normalizedVector.getY(), x1, y1, vx1, vy1, tempAlphaBeta);
-      if (Double.isNaN(tempAlphaBeta[0]))
-         throw new RuntimeException("Lines are parallel");
-
-      tempPoint2d.set(point.getX() + normalizedVector.getX() * tempAlphaBeta[0], point.getY() + normalizedVector.getY() * tempAlphaBeta[0]);
-      return tempPoint2d;
+      return GeometryTools.getIntersectionBetweenTwoLines(point, normalizedVector, secondLine.point, secondLine.normalizedVector, intersectionToPack);
    }
 
    @Override
@@ -481,14 +429,8 @@ public class Line2d implements Geometry2d<Line2d>
    @Override
    public void applyTransformAndProjectToXYPlane(RigidBodyTransform transform)
    {
-      Point3d resultPoint = new Point3d(point.getX(), point.getY(), 0.0);
-      transform.transform(resultPoint);
-
-      Vector3d resultVector = new Vector3d(normalizedVector.getX(), normalizedVector.getY(), 0.0);
-      transform.transform(resultVector);
-
-      point.set(resultPoint.getX(), resultPoint.getY());
-      normalizedVector.set(resultVector.getX(), resultVector.getY());
+      point.applyTransform(transform, false);
+      normalizedVector.applyTransform(transform, false);
    }
 
    @Override
@@ -539,19 +481,7 @@ public class Line2d implements Geometry2d<Line2d>
 
    private boolean isPointOnSideOfLine(double x, double y, RobotSide side)
    {
-      return isPointOnSideOfLine(x, y, normalizedVector.getX(), normalizedVector.getY(), point.getX(), point.getY(), side);
-   }
-
-   /**
-    * Checks whether a point is on the specified side of a line. If the direction of the line is zero this will return false.
-    */
-   public static boolean isPointOnSideOfLine(double pointX, double pointY, double directionX, double directionY, double pointOnLineX, double pointOnLineY,
-         RobotSide side)
-   {
-      double pointToPointX = pointX - pointOnLineX;
-      double pointToPointY = pointY - pointOnLineY;
-      double crossProduct = directionX * pointToPointY - pointToPointX * directionY;
-      return side.negateIfRightSide(crossProduct) > 0.0;
+      return GeometryTools.isPointOnSideOfLine(x, y, point, normalizedVector, side);
    }
 
    /**
@@ -651,45 +581,36 @@ public class Line2d implements Geometry2d<Line2d>
       }
    }
 
-
    /**
-    * Compute the orthogonal projection of the given point and modify it to store the result.
+    * Computes the orthogonal projection of the given 2D point on this 2D line.
+    * 
+    * @param point2d the point to project on this line. Modified.
     */
    @Override
    public void orthogonalProjection(Point2d point2d)
    {
-//    Point2d[] endPoints = lineSegment.endpoints;
-      Point2d endPoint = point;
-
-      double vx0 = point2d.getX() - endPoint.getX();
-      double vy0 = point2d.getY() - endPoint.getY();
-
-      double vx1 = normalizedVector.getX();
-      double vy1 = normalizedVector.getY();
-
-      double dot = vx0 * vx1 + vy0 * vy1;
-      double lengthSquared = vx1 * vx1 + vy1 * vy1;
-
-      double alpha = dot / lengthSquared;
-
-//    if (alpha < 0.0) alpha = 0.0;
-//    if (alpha > 1.0) alpha = 1.0;
-
-      double x = endPoint.getX() + alpha * vx1;
-      double y = endPoint.getY() + alpha * vy1;
-
-      point2d.setX(x);
-      point2d.setY(y);
+      GeometryTools.getOrthogonalProjectionOnLine(point2d, point, normalizedVector, point2d);
    }
 
-// TODO move to Line2d
+   /**
+    * Computes the orthogonal projection of the given 2D point on this 2D line.
+    * <p>
+    * WARNING: This method generates garbage.
+    * </p>
+    * 
+    * @param point2d the point to compute the projection of. Not modified.
+    * @return the projection of the point onto the line or {@code null} if the method failed.
+    */
    @Override
-   public Point2d orthogonalProjectionCopy(Point2d point)
+   public Point2d orthogonalProjectionCopy(Point2d point2d)
    {
-      Point2d copy = new Point2d(point);
-      orthogonalProjection(copy);
+      Point2d projection = new Point2d();
 
-      return copy;
+      boolean success = GeometryTools.getOrthogonalProjectionOnLine(point2d, point, normalizedVector, projection);
+      if (!success)
+         return null;
+      else
+         return projection;
    }
 
    public boolean equals(Line2d otherLine)

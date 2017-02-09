@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint;
 
-import static us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance.Purple;
+import static us.ihmc.graphicsDescription.appearance.YoAppearance.Purple;
 
 import javax.vecmath.Vector3d;
 
@@ -10,6 +10,9 @@ import org.ejml.ops.CommonOps;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.WrenchDistributorTools;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPosition;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -28,9 +31,6 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.SpatialForceVector;
 import us.ihmc.sensorProcessing.frames.ReferenceFrames;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifactPosition;
 
 public abstract class LinearMomentumRateOfChangeControlModule
 {
@@ -52,6 +52,8 @@ public abstract class LinearMomentumRateOfChangeControlModule
    protected final MomentumRateCommand momentumRateCommand = new MomentumRateCommand();
    protected final SpatialForceVector desiredMomentumRate = new SpatialForceVector();
    protected final DenseMatrix64F linearAndAngularZSelectionMatrix = CommonOps.identity(6);
+   protected final DenseMatrix64F linearXYSelectionMatrix = CommonOps.identity(6);
+   protected final DenseMatrix64F linearXYAndAngularZSelectionMatrix = CommonOps.identity(6);
 
    protected double omega0 = 0.0;
    protected double totalMass;
@@ -76,6 +78,8 @@ public abstract class LinearMomentumRateOfChangeControlModule
    protected final FrameConvexPolygon2d safeArea = new FrameConvexPolygon2d();
 
    protected final BooleanYoVariable desiredCMPinSafeArea;
+
+   private boolean controlHeightWithMomentum;
 
    protected final YoFramePoint2d yoUnprojectedDesiredCMP;
    protected final YoFrameConvexPolygon2d yoSafeAreaPolygon;
@@ -124,6 +128,15 @@ public abstract class LinearMomentumRateOfChangeControlModule
 
       MatrixTools.removeRow(linearAndAngularZSelectionMatrix, 0);
       MatrixTools.removeRow(linearAndAngularZSelectionMatrix, 0);
+
+      MatrixTools.removeRow(linearXYSelectionMatrix, 5); // remove height
+      MatrixTools.removeRow(linearXYSelectionMatrix, 0);
+      MatrixTools.removeRow(linearXYSelectionMatrix, 0);
+      MatrixTools.removeRow(linearXYSelectionMatrix, 0);
+
+      MatrixTools.removeRow(linearXYAndAngularZSelectionMatrix, 5); // remove height
+      MatrixTools.removeRow(linearXYAndAngularZSelectionMatrix, 0);
+      MatrixTools.removeRow(linearXYAndAngularZSelectionMatrix, 0);
 
       angularMomentumRateWeight.set(defaultAngularMomentumRateWeight);
       linearMomentumRateWeight.set(defaultLinearMomentumRateWeight);
@@ -297,11 +310,16 @@ public abstract class LinearMomentumRateOfChangeControlModule
          desiredMomentumRate.setToZero(centerOfMassFrame);
          desiredMomentumRate.setLinearPart(linearMomentumRateOfChange);
          momentumRateCommand.set(desiredMomentumRate);
-         momentumRateCommand.setSelectionMatrix(linearAndAngularZSelectionMatrix);
+         if (!controlHeightWithMomentum)
+            momentumRateCommand.setSelectionMatrix(linearXYAndAngularZSelectionMatrix);
+         else
+            momentumRateCommand.setSelectionMatrix(linearAndAngularZSelectionMatrix);
       }
       else
       {
          momentumRateCommand.setLinearMomentumRateOfChange(linearMomentumRateOfChange);
+         if (!controlHeightWithMomentum)
+            momentumRateCommand.setSelectionMatrix(linearXYSelectionMatrix);
       }
 
       momentumRateCommand.setWeights(angularMomentumRateWeight.getX(), angularMomentumRateWeight.getY(), angularMomentumRateWeight.getZ(),
@@ -332,6 +350,16 @@ public abstract class LinearMomentumRateOfChangeControlModule
    public void setPerfectCMP(FramePoint2d perfectCMP)
    {
       this.perfectCMP.setIncludingFrame(perfectCMP);
+   }
+
+   /**
+    * Sets whether or not to include the momentum rate of change in the vertical direction in the whole body optimization.
+    * If false, it will be controlled by attempting to drive the legs to a certain position in the null space
+    * @param controlHeightWithMomentum boolean variable on whether or not to control the height with momentum.
+    */
+   public void setControlHeightWithMomentum(boolean controlHeightWithMomentum)
+   {
+      this.controlHeightWithMomentum = controlHeightWithMomentum;
    }
 
    public abstract void setDoubleSupportDuration(double doubleSupportDuration);

@@ -37,21 +37,25 @@ public abstract class ContactableRobot extends Robot implements Contactable
          this.contactableRobot = robot;
       }
 
+      @Override
       public boolean isClose(Point3d pointInWorldToCheck)
       {
          return contactableRobot.isClose(pointInWorldToCheck);
       }
 
+      @Override
       public boolean isPointOnOrInside(Point3d pointInWorldToCheck)
       {
          return contactableRobot.isPointOnOrInside(pointInWorldToCheck);
       }
 
+      @Override
       public void closestIntersectionAndNormalAt(Point3d intersectionToPack, Vector3d normalToPack, Point3d pointInWorldToCheck)
       {
          contactableRobot.closestIntersectionAndNormalAt(intersectionToPack, normalToPack, pointInWorldToCheck);
       }
 
+      @Override
       public Joint getJoint()
       {
          return contactableRobot.getFloatingJoint();
@@ -65,21 +69,25 @@ public abstract class ContactableRobot extends Robot implements Contactable
             addDynamicGraphicForceVectorsForceVectors);
    }
 
+   @Override
    public int getAndLockAvailableContactPoint()
    {
       return articulatedContactable.getAndLockAvailableContactPoint();
    }
 
+   @Override
    public void unlockContactPoint(GroundContactPoint groundContactPoint)
    {
       articulatedContactable.unlockContactPoint(groundContactPoint);
    }
 
+   @Override
    public GroundContactPoint getLockedContactPoint(int contactPointIndex)
    {
       return articulatedContactable.getLockedContactPoint(contactPointIndex);
    }
 
+   @Override
    public void updateContactPoints()
    {
       articulatedContactable.updateContactPoints();

@@ -13,8 +13,8 @@ import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerReques
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedTaskSpaceEstimator;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.input.value.InputValueIntegrator;
-import us.ihmc.quadrupedRobotics.params.DoubleParameter;
-import us.ihmc.quadrupedRobotics.params.ParameterFactory;
+import us.ihmc.robotics.dataStructures.parameter.DoubleParameter;
+import us.ihmc.robotics.dataStructures.parameter.ParameterFactory;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedXGaitSettings;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.tools.inputDevices.joystick.mapping.XBoxOneMapping;
@@ -45,8 +45,8 @@ public class QuadrupedXGaitTeleopMode implements QuadrupedTeleopMode
    private final DoubleParameter defaultStanceWidthParameter = parameterFactory.createDouble("defaultStanceWidth", 0.35);
    private final DoubleParameter defaultStepGroundClearanceParameter = parameterFactory.createDouble("defaultStepGroundClearance", 0.075);
    private final DoubleParameter defaultStepDurationParameter = parameterFactory.createDouble("defaultStepDurationParameter", 0.35);
-   private final DoubleParameter defaultEndDoubleSupportDurationParameter = parameterFactory.createDouble("defaultEndDoubleSupportDuration", 0.0);
-   private final DoubleParameter defaultEndPhaseShiftParameter = parameterFactory.createDouble("defaultEndPhaseShift", 90);
+   private final DoubleParameter defaultEndDoubleSupportDurationParameter = parameterFactory.createDouble("defaultEndDoubleSupportDuration", 0.1);
+   private final DoubleParameter defaultEndPhaseShiftParameter = parameterFactory.createDouble("defaultEndPhaseShift", 180);
 
    private final PacketCommunicator packetCommunicator;
    private final QuadrupedReferenceFrames referenceFrames;
@@ -123,7 +123,7 @@ public class QuadrupedXGaitTeleopMode implements QuadrupedTeleopMode
       packetCommunicator.send(comPositionPacket);
 
       double deltaTrigger = (channels.get(XBoxOneMapping.LEFT_TRIGGER) - channels.get(XBoxOneMapping.RIGHT_TRIGGER));
-      xGaitSettings.setEndDoubleSupportDuration(MathTools.clipToMinMax(xGaitSettings.getEndDoubleSupportDuration() + deltaTrigger * deltaDoubleSupportParameter.get(), 0, 1));
+      xGaitSettings.setEndDoubleSupportDuration(MathTools.clipToMinMax(xGaitSettings.getEndDoubleSupportDuration() + deltaTrigger * deltaDoubleSupportParameter.get(), 0.1, 1));
       QuadrupedXGaitSettingsPacket settingsPacket = new QuadrupedXGaitSettingsPacket(xGaitSettings);
       packetCommunicator.send(settingsPacket);
    }
@@ -134,7 +134,7 @@ public class QuadrupedXGaitTeleopMode implements QuadrupedTeleopMode
       switch (XBoxOneMapping.getMapping(event))
       {
       case A:
-         if (channels.get(XBoxOneMapping.A) > 0.5)
+         if (event.getValue() > 0.5)
          {
             QuadrupedForceControllerEventPacket eventPacket = new QuadrupedForceControllerEventPacket(QuadrupedForceControllerRequestedEvent.REQUEST_STAND);
             packetCommunicator.send(eventPacket);
@@ -142,7 +142,7 @@ public class QuadrupedXGaitTeleopMode implements QuadrupedTeleopMode
          }
          break;
       case X:
-         if (channels.get(XBoxOneMapping.X) > 0.5)
+         if (event.getValue() > 0.5)
          {
             xGaitSettings.setEndPhaseShift(180);
             QuadrupedXGaitSettingsPacket settingsPacket = new QuadrupedXGaitSettingsPacket(xGaitSettings);
@@ -153,7 +153,7 @@ public class QuadrupedXGaitTeleopMode implements QuadrupedTeleopMode
          }
          break;
       case Y:
-         if (channels.get(XBoxOneMapping.Y) > 0.5)
+         if (event.getValue() > 0.5)
          {
             xGaitSettings.setEndPhaseShift(90);
             QuadrupedXGaitSettingsPacket settingsPacket = new QuadrupedXGaitSettingsPacket(xGaitSettings);
@@ -164,7 +164,7 @@ public class QuadrupedXGaitTeleopMode implements QuadrupedTeleopMode
          }
          break;
       case B:
-         if (channels.get(XBoxOneMapping.B) > 0.5)
+         if (event.getValue() > 0.5)
          {
             xGaitSettings.setEndPhaseShift(0);
             QuadrupedXGaitSettingsPacket settingsPacket = new QuadrupedXGaitSettingsPacket(xGaitSettings);
@@ -175,7 +175,7 @@ public class QuadrupedXGaitTeleopMode implements QuadrupedTeleopMode
          }
          break;
       case LEFT_BUMPER:
-         if (channels.get(XBoxOneMapping.LEFT_BUMPER) > 0.5)
+         if (event.getValue() > 0.5)
          {
             xGaitSettings.setEndPhaseShift(MathTools.clipToMinMax(xGaitSettings.getEndPhaseShift() + deltaPhaseShiftParameter.get(), 0, 359));
             QuadrupedXGaitSettingsPacket settingsPacket = new QuadrupedXGaitSettingsPacket(xGaitSettings);
@@ -183,7 +183,7 @@ public class QuadrupedXGaitTeleopMode implements QuadrupedTeleopMode
          }
          break;
       case RIGHT_BUMPER:
-         if (channels.get(XBoxOneMapping.RIGHT_BUMPER) > 0.5)
+         if (event.getValue() > 0.5)
          {
             xGaitSettings.setEndPhaseShift(MathTools.clipToMinMax(xGaitSettings.getEndPhaseShift() - deltaPhaseShiftParameter.get(), 0, 359));
             QuadrupedXGaitSettingsPacket settingsPacket = new QuadrupedXGaitSettingsPacket(xGaitSettings);
@@ -191,11 +191,11 @@ public class QuadrupedXGaitTeleopMode implements QuadrupedTeleopMode
          }
          break;
       case DPAD:
-         if (channels.get(XBoxOneMapping.DPAD) == 0.5)
+         if (event.getValue() == 0.5)
          {
             xGaitSettings.setStanceWidth(xGaitSettings.getStanceWidth() + deltaStanceWidthParameter.get());
          }
-         if (channels.get(XBoxOneMapping.DPAD) == 1.0)
+         if (event.getValue() == 1.0)
          {
             xGaitSettings.setStanceWidth(xGaitSettings.getStanceWidth() - deltaStanceWidthParameter.get());
          }

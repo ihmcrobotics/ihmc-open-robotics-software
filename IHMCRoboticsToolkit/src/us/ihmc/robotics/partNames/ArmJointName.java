@@ -4,7 +4,7 @@ import org.apache.commons.lang3.StringUtils;
 
 public enum ArmJointName
 {
-   SHOULDER_YAW, SHOULDER_ROLL, SHOULDER_PITCH, ELBOW_PITCH, WRIST_ROLL, FIRST_WRIST_PITCH, SECOND_WRIST_PITCH, ELBOW_ROLL, ELBOW_YAW;
+   CLAVICLE_ROLL, SHOULDER_YAW, SHOULDER_ROLL, SHOULDER_PITCH, ELBOW_PITCH, WRIST_ROLL, FIRST_WRIST_PITCH, SECOND_WRIST_PITCH, ELBOW_ROLL, ELBOW_YAW, WRIST_YAW;
 
    public static final ArmJointName[] values = values();
    
@@ -12,6 +12,10 @@ public enum ArmJointName
    {
       switch (this)
       {
+         case CLAVICLE_ROLL:
+         {
+            return "clavicleRoll";
+         }
          case SHOULDER_YAW :
          {
             return "shoulderYaw";
@@ -56,6 +60,9 @@ public enum ArmJointName
          {
             return "secondWristPitch";
          }
+         
+         case WRIST_YAW:
+            return "wristYaw";
 
          default :
          {

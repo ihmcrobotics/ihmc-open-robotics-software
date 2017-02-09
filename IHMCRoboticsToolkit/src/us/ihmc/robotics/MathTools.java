@@ -1,6 +1,5 @@
 package us.ihmc.robotics;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -9,6 +8,7 @@ import javax.vecmath.Tuple3d;
 
 import org.ejml.data.DenseMatrix64F;
 
+import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.Direction;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.screwTheory.SpatialMotionVector;
@@ -514,6 +514,22 @@ public class MathTools
          throw new RuntimeException("Argument " + argument + " greater than: " + desired);
    }
 
+   public static void checkIfEqual(double val, double desired, double epsilon)
+   {
+      if (!(Math.abs(val - desired) < epsilon))
+      {
+         throw new RuntimeException("Argument " + val + " does not equal desired " + desired);
+      }
+   }
+
+   public static void checkIfEqual(int val, int desired)
+   {
+      if (val != desired)
+      {
+         throw new RuntimeException("Argument " + val + " does not equal desired " + desired);
+      }
+   }
+
    public static double square(double x)
    {
       return x * x;
@@ -540,51 +556,81 @@ public class MathTools
       return ret;
    }
 
-   public static void checkIfEqual(double val, double desired, double epsilon)
+   public static boolean isSignificantlyGreaterThan(double numberOne, double numberTwo, int significantFigures)
    {
-      if (!(Math.abs(val - desired) < epsilon))
+      return roundToSignificantFigures(numberOne, significantFigures) > roundToSignificantFigures(numberTwo, significantFigures);
+   }
+   
+   public static boolean isPreciselyGreaterThan(double numberOne, double numberTwo, double precision)
+   {
+      return roundToPrecision(numberOne, precision) > roundToPrecision(numberTwo, precision);
+   }
+   
+   public static boolean isSignificantlyGreaterThanOrEqualTo(double numberOne, double numberTwo, int significantFigures)
+   {
+      return roundToSignificantFigures(numberOne, significantFigures) >= roundToSignificantFigures(numberTwo, significantFigures);
+   }
+   
+   public static boolean isPreciselyGreaterThanOrEqualTo(double numberOne, double numberTwo, double precision)
+   {
+      return roundToPrecision(numberOne, precision) >= roundToPrecision(numberTwo, precision);
+   }
+
+   public static boolean isSignificantlyLessThan(double numberOne, double numberTwo, int significantFigures)
+   {
+      return roundToSignificantFigures(numberOne, significantFigures) < roundToSignificantFigures(numberTwo, significantFigures);
+   }
+   
+   public static boolean isPreciselyLessThan(double numberOne, double numberTwo, double precision)
+   {
+      return roundToPrecision(numberOne, precision) < roundToPrecision(numberTwo, precision);
+   }
+   
+   public static boolean isSignificantlyLessThanOrEqualTo(double numberOne, double numberTwo, int significantFigures)
+   {
+      return roundToSignificantFigures(numberOne, significantFigures) <= roundToSignificantFigures(numberTwo, significantFigures);
+   }
+   
+   public static boolean isPreciselyLessThanOrEqualTo(double numberOne, double numberTwo, double precision)
+   {
+      return roundToPrecision(numberOne, precision) <= roundToPrecision(numberTwo, precision);
+   }
+   
+   public static boolean isPreciselyBoundedByInclusive(double boundaryOne, double boundaryTwo, double number, double precision)
+   {
+      return isBoundedByInclusive(roundToPrecision(boundaryOne, precision), roundToPrecision(boundaryTwo, precision), roundToPrecision(number, precision));
+   }
+   
+   public static boolean isPreciselyBoundedByExclusive(double boundaryOne, double boundaryTwo, double number, double precision)
+   {
+      return isBoundedByExclusive(roundToPrecision(boundaryOne, precision), roundToPrecision(boundaryTwo, precision), roundToPrecision(number, precision));
+   }
+   
+   public static boolean isBoundedByInclusive(double boundaryOne, double boundaryTwo, double number)
+   {
+      if (boundaryOne < boundaryTwo)
       {
-         throw new RuntimeException("Argument " + val + " does not equal desired " + desired);
+         return number >= boundaryOne && number <= boundaryTwo;
+      }
+      else // (boundaryOne >= boundaryTwo)
+      {
+         return number >= boundaryTwo && number <= boundaryOne;
       }
    }
-
-   public static boolean isGreaterThan(double value, double valueToCompareAgainst, int precision)
+   
+   public static boolean isBoundedByExclusive(double boundaryOne, double boundaryTwo, double number)
    {
-      BigDecimal valueBigDecimal = new BigDecimal(value).setScale(precision, BigDecimal.ROUND_HALF_UP);
-      BigDecimal valueToCompareAgainstBigDecimal = new BigDecimal(valueToCompareAgainst).setScale(precision, BigDecimal.ROUND_HALF_UP);
-
-      return (valueBigDecimal.doubleValue() > valueToCompareAgainstBigDecimal.doubleValue());
-   }
-
-   public static boolean isGreaterThanOrEqualTo(double value, double valueToCompareAgainst, int precision)
-   {
-      BigDecimal valueBigDecimal = new BigDecimal(value).setScale(precision, BigDecimal.ROUND_HALF_UP);
-      BigDecimal valueToCompareAgainstBigDecimal = new BigDecimal(valueToCompareAgainst).setScale(precision, BigDecimal.ROUND_HALF_UP);
-
-      return (valueBigDecimal.doubleValue() >= valueToCompareAgainstBigDecimal.doubleValue());
-   }
-
-   public static boolean isLessThan(double value, double valueToCompareAgainst, int precision)
-   {
-      BigDecimal valueBigDecimal = new BigDecimal(value).setScale(precision, BigDecimal.ROUND_HALF_UP);
-      BigDecimal valueToCompareAgainstBigDecimal = new BigDecimal(valueToCompareAgainst).setScale(precision, BigDecimal.ROUND_HALF_UP);
-
-      return (valueBigDecimal.doubleValue() < valueToCompareAgainstBigDecimal.doubleValue());
-   }
-
-   public static boolean isLessThanOrEqualTo(double value, double valueToCompareAgainst, int precision)
-   {
-      BigDecimal valueBigDecimal = new BigDecimal(value).setScale(precision, BigDecimal.ROUND_HALF_UP);
-      BigDecimal valueToCompareAgainstBigDecimal = new BigDecimal(valueToCompareAgainst).setScale(precision, BigDecimal.ROUND_HALF_UP);
-
-      return (valueBigDecimal.doubleValue() <= valueToCompareAgainstBigDecimal.doubleValue());
-   }
-
-   public static void checkIfEqual(int val, int desired)
-   {
-      if (val != desired)
+      if (boundaryOne < boundaryTwo)
       {
-         throw new RuntimeException("Argument " + val + " does not equal desired " + desired);
+         return number > boundaryOne && number < boundaryTwo;
+      }
+      else if (boundaryOne > boundaryTwo)
+      {
+         return number > boundaryTwo && number < boundaryOne;
+      }
+      else // (boundaryOne == boundaryTwo)
+      {
+         return false;
       }
    }
 
@@ -717,21 +763,66 @@ public class MathTools
       return lcm(a[0], lcm(b));
    }
 
-   public static double roundToGivenPrecision(double value, double precisionFactor)
+   public static double floorToGivenPrecision(double value, double precisionFactor)
    {
       long longValue = (long) (value / precisionFactor); 
       double roundedValue = ((double) longValue) * precisionFactor;
       return roundedValue;
    }
 
-   public static void roundToGivenPrecision(Tuple3d tuple3d, double precision)
+   public static void floorToGivenPrecision(Tuple3d tuple3d, double precision)
    {
-      tuple3d.setX(roundToGivenPrecision(tuple3d.getX(), precision));
-      tuple3d.setY(roundToGivenPrecision(tuple3d.getY(), precision));
-      tuple3d.setZ(roundToGivenPrecision(tuple3d.getZ(), precision));
+      tuple3d.setX(floorToGivenPrecision(tuple3d.getX(), precision));
+      tuple3d.setY(floorToGivenPrecision(tuple3d.getY(), precision));
+      tuple3d.setZ(floorToGivenPrecision(tuple3d.getZ(), precision));
       
    }
+
+   public static double roundToPrecision(double value, double precision)
+   {
+      double adjustmentFactor = (value > 0.0) ? 0.5 * precision : -0.5 * precision;
+      long longValue = (long) ((value + adjustmentFactor) / precision);
+      double roundedValue = ((double) longValue) * precision;
+      return roundedValue;
+   }
+
+   public static void roundToGivenPrecision(Tuple3d tuple3d, double precision)
+   {
+      tuple3d.setX(roundToPrecision(tuple3d.getX(), precision));
+      tuple3d.setY(roundToPrecision(tuple3d.getY(), precision));
+      tuple3d.setZ(roundToPrecision(tuple3d.getZ(), precision));
+   }
+
+   public static double roundToGivenPrecisionForAngle(double angleValue, double precisionFactor)
+   {
+      double centeredAngleValue = AngleTools.trimAngleMinusPiToPi(angleValue + 0.5 * precisionFactor);
+      long longValue = (long) (centeredAngleValue / precisionFactor);
+      double roundedValue = ((double) longValue) * precisionFactor;
+      return AngleTools.trimAngleMinusPiToPi(roundedValue);
+   }
+
+   public static void roundToGivenPrecisionForAngles(Tuple3d tuple3d, double precision)
+   {
+      tuple3d.setX(roundToGivenPrecisionForAngle(tuple3d.getX(), precision));
+      tuple3d.setY(roundToGivenPrecisionForAngle(tuple3d.getY(), precision));
+      tuple3d.setZ(roundToGivenPrecisionForAngle(tuple3d.getZ(), precision));
+   }
    
+   public static double roundToSignificantFigures(double number, int significantFigures)
+   {
+      if (Math.abs(number) < Double.MIN_VALUE)
+      {
+         return 0.0;
+      }
+   
+      final double log10 = Math.ceil(Math.log10(Math.abs(number)));
+      final int power = significantFigures - (int) log10;
+   
+      final double magnitude = Math.pow(10, power);
+      final long shifted = Math.round(number * magnitude);
+      return shifted / magnitude;
+   }
+
    public static int orderOfMagnitude(double number)
    {
       return (int) Math.floor(Math.log10(Math.abs(number)));

@@ -7,7 +7,10 @@ import java.util.Map;
 
 import javax.vecmath.Vector3d;
 
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPosition;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -33,9 +36,6 @@ import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifactPosition;
 
 
 /**
@@ -302,11 +302,9 @@ public class PelvisKinematicsBasedLinearStateCalculator
          tempFrameVector.sub(tempFramePoint, tempPosition); // Delta from previous to new foot position
          copPositionsInWorld.get(trustedFoot).add(tempFrameVector); // New CoP position
       }
-      else
-      {
-         footPositionInWorld.set(rootJointPosition);
-         footPositionInWorld.sub(footToRootJointPosition);
-      }
+
+      footPositionInWorld.set(rootJointPosition);
+      footPositionInWorld.sub(footToRootJointPosition);
    }
 
    /**

@@ -13,26 +13,28 @@ import com.martiansoftware.jsap.JSAPException;
 import com.martiansoftware.jsap.JSAPResult;
 import com.martiansoftware.jsap.Switch;
 
-import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
+import us.ihmc.modelFileLoaders.SdfLoader.GeneralizedSDFRobotModel;
+import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
+import us.ihmc.avatar.DRCStartingLocation;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.factory.AvatarSimulation;
+import us.ihmc.avatar.initialSetup.DRCGuiInitialSetup;
+import us.ihmc.avatar.networkProcessor.DRCNetworkModuleParameters;
+import us.ihmc.avatar.networkProcessor.modules.uiConnector.UiPacketToRosMsgRedirector;
+import us.ihmc.avatar.networkProcessor.time.SimulationRosClockPPSTimestampOffsetProvider;
+import us.ihmc.avatar.rosAPI.ThePeoplesGloriousNetworkProcessor;
+import us.ihmc.avatar.simulationStarter.DRCSimulationStarter;
 import us.ihmc.communication.PacketRouter;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.communication.net.LocalObjectCommunicator;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.util.NetworkPorts;
-import us.ihmc.darpaRoboticsChallenge.DRCGuiInitialSetup;
-import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
-import us.ihmc.darpaRoboticsChallenge.DRCSimulationFactory;
-import us.ihmc.darpaRoboticsChallenge.DRCSimulationStarter;
-import us.ihmc.darpaRoboticsChallenge.DRCStartingLocation;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkModuleParameters;
-import us.ihmc.darpaRoboticsChallenge.networkProcessor.modules.uiConnector.UiPacketToRosMsgRedirector;
-import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.SimulationRosClockPPSTimestampOffsetProvider;
-import us.ihmc.darpaRoboticsChallenge.rosAPI.ThePeoplesGloriousNetworkProcessor;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
 import us.ihmc.utilities.ros.subscriber.RosTopicSubscriberInterface;
 import us.ihmc.valkyrie.parameters.ValkyrieContactPointParameters;
+import us.ihmc.wholeBodyController.AdditionalSimulationContactPoints;
+import us.ihmc.wholeBodyController.FootContactPoints;
 
 public class OpenHumanoidsSimulator
 {
@@ -42,7 +44,7 @@ public class OpenHumanoidsSimulator
    private static final boolean REDIRECT_UI_PACKETS_TO_ROS = false;
    private static final String DEFAULT_TF_PREFIX = null;
    private SDFEnvironment environment = null;
-   private DRCSimulationFactory drcSimulationFactory;
+   private AvatarSimulation avatarSimulation;
    private boolean rosShutDown = false;
 
    class RosIPABAPISubscriber extends AbstractRosTopicSubscriber<std_msgs.String>
@@ -70,27 +72,27 @@ public class OpenHumanoidsSimulator
    public OpenHumanoidsSimulator(String model, DRCStartingLocation startingLocation, String nameSpace, String tfPrefix,
          boolean runAutomaticDiagnosticRoutine, boolean disableViz, boolean extra_sim_points, Collection<Class> additionalPacketTypes) throws IOException
    {
-	      ValkyrieRobotModel robotModel = new ValkyrieRobotModel(DRCRobotModel.RobotTarget.SCS, false, model);
+         FootContactPoints simulationContactPoints = null;
+         if (extra_sim_points)
+         {
+            simulationContactPoints = new AdditionalSimulationContactPoints(8, 3, false, true);
+            System.out.println("Added extra foot contact points.");
+         }
+	      ValkyrieRobotModel robotModel = new ValkyrieRobotModel(DRCRobotModel.RobotTarget.SCS, false, model, simulationContactPoints);
 
 	      //TODO: Get this stuff from the RobotDescription rather than the SDF stuff...
 	      GeneralizedSDFRobotModel generalizedSDFRobotModel = robotModel.getGeneralizedRobotModel();
 
-	      if(load_sdf_contacts)
+	      if (load_sdf_contacts)
 	      {
-	    	  ValkyrieContactPointParameters contactPointParameters = (ValkyrieContactPointParameters) robotModel.getContactPointParameters();
-		      contactPointParameters.setupContactPointsFromRobotModel(generalizedSDFRobotModel, replace_contacts);
-	      }
-	      if(extra_sim_points)
-	      {
-	        ValkyrieContactPointParameters contactPointParameters = (ValkyrieContactPointParameters) robotModel.getContactPointParameters();
-	        contactPointParameters.addMoreFootContactPointsSimOnly(8, 3, false);
-	        System.out.println("Added extra foot contact points.");
+	         ValkyrieContactPointParameters contactPointParameters = (ValkyrieContactPointParameters) robotModel.getContactPointParameters();
+	         contactPointParameters.setupContactPointsFromRobotModel(generalizedSDFRobotModel, replace_contacts);
 	      }
 
 	      environment = new SDFEnvironment();
 
-	   	  DRCSimulationStarter simulationStarter = new DRCSimulationStarter(robotModel, environment);
-		  simulationStarter.setRunMultiThreaded(true);
+	      DRCSimulationStarter simulationStarter = new DRCSimulationStarter(robotModel, environment);
+	      simulationStarter.setRunMultiThreaded(true);
 
 		  DRCNetworkModuleParameters networkProcessorParameters = new DRCNetworkModuleParameters();
 
@@ -122,7 +124,7 @@ public class OpenHumanoidsSimulator
 		  simulationStarter.setStartingLocation(startingLocation);
 		  simulationStarter.setInitializeEstimatorToActual(true);
 		  simulationStarter.startSimulation(networkProcessorParameters, false);
-		  simulationStarter.getDRCSimulationFactory().getSimulationConstructionSet().hideAllDynamicGraphicObjects();
+		  simulationStarter.getAvatarSimulation().getSimulationConstructionSet().hideAllDynamicGraphicObjects();
 
 
 		  if (REDIRECT_UI_PACKETS_TO_ROS)
@@ -142,7 +144,7 @@ public class OpenHumanoidsSimulator
 
 		  new ThePeoplesGloriousNetworkProcessor(rosUri, rosAPI_communicator, sensorCommunicator, ppsOffsetProvider, robotModel, nameSpace, tfPrefix, additionalPacketTypes, subscribers, null);
 
-		  drcSimulationFactory = simulationStarter.getDRCSimulationFactory();
+		  avatarSimulation = simulationStarter.getAvatarSimulation();
    }
 
    private void processCommand(String command)
@@ -175,14 +177,14 @@ public class OpenHumanoidsSimulator
    public void simulate()
    {
 	   System.out.println("Starting simulation");
-	   drcSimulationFactory.simulate();
+	   avatarSimulation.simulate();
    }
 
    public void loadEnvironment(String filename)
    {
 	   System.out.println("Loading environment from '"+filename+"'");
 	   environment.load(filename);
-	   drcSimulationFactory.updateEnvironment(environment);
+	   avatarSimulation.updateEnvironment(environment);
    }
 
    public static boolean extra_sim_points = false;

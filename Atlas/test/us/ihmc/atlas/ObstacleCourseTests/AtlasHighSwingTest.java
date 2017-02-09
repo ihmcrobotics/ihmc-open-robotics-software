@@ -2,8 +2,8 @@ package us.ihmc.atlas.ObstacleCourseTests;
 
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.obstacleCourseTests.DRCHighSwingTest;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.obstacleCourseTests.DRCHighSwingTest;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 
 /**

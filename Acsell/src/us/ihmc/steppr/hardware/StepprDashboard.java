@@ -42,7 +42,7 @@ public class StepprDashboard extends JPanel implements PlaybackListener
    public static void createDashboard(final SimulationConstructionSet scs, YoVariableHolder registry)
    {
       StepprDashboard stepprDashboard = new StepprDashboard(registry);
-      scs.addExtraJpanel(stepprDashboard, "Dashboard");
+      scs.addExtraJpanel(stepprDashboard, "Dashboard", true);
       scs.attachPlaybackListener(stepprDashboard);
       
       JButton showDashboard = new JButton("Show dashboard");
@@ -57,7 +57,6 @@ public class StepprDashboard extends JPanel implements PlaybackListener
       });
       
       scs.addButton(showDashboard);
-      scs.getStandardSimulationGUI().selectPanel("Dashboard");
    }
    
    private StepprDashboard(YoVariableHolder yoVariableHolder)

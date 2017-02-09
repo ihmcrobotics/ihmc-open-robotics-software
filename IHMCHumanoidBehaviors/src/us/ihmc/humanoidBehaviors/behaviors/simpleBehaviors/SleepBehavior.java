@@ -1,67 +1,69 @@
 package us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors;
 
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
-import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
+import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.time.YoTimer;
 
 public class SleepBehavior extends AbstractBehavior
 {
+   private final DoubleYoVariable sleepTime;
+   private final YoTimer timer;
 
-   protected final DoubleYoVariable yoTime;
-   protected double behaviorDoneTime = Double.NaN;
-   protected double sleepTime = Double.MIN_VALUE;
-
-   public SleepBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, DoubleYoVariable yoTime)
+   public SleepBehavior(CommunicationBridgeInterface outgoingCommunicationBridge, DoubleYoVariable yoTime)
    {
-      super(outgoingCommunicationBridge);
-      this.yoTime = yoTime;
+      this(outgoingCommunicationBridge, yoTime, 1.0);
    }
 
-   public SleepBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, DoubleYoVariable yoTime, double sleepTime)
+   public SleepBehavior(CommunicationBridgeInterface outgoingCommunicationBridge, DoubleYoVariable yoTime, double sleepTime)
    {
       super(outgoingCommunicationBridge);
-      this.yoTime = yoTime;
-      this.sleepTime = sleepTime;
+
+      this.sleepTime = new DoubleYoVariable("sleepTime", registry);
+      this.sleepTime.set(sleepTime);
+
+      timer = new YoTimer(yoTime);
    }
 
    @Override
    public void doControl()
    {
-      if (hasInputBeenSet())
-      {
-         if (Double.isNaN(behaviorDoneTime))
-         {
-            behaviorDoneTime = yoTime.getDoubleValue();
-         }
-      }
    }
 
    public void setSleepTime(double sleepTime)
    {
-      this.sleepTime = sleepTime;
+      this.sleepTime.set(sleepTime);
    }
 
    @Override
-   public void doPostBehaviorCleanup()
+   public void onBehaviorExited()
    {
-      super.doPostBehaviorCleanup();
-      sleepTime = Double.MIN_VALUE;
-
    }
 
    @Override
    public boolean isDone()
    {
-      if (!hasInputBeenSet())
-      {
-         return false;
-      }
-      boolean sleepTimeAchieved = yoTime.getDoubleValue() > behaviorDoneTime + sleepTime;
-      return sleepTimeAchieved;
+      return (timer.totalElapsed() > sleepTime.getDoubleValue());
    }
 
-   public boolean hasInputBeenSet()
+   @Override
+   public void onBehaviorEntered()
    {
-      return sleepTime != Double.MIN_VALUE;
+      timer.reset();
+   }
+
+   @Override
+   public void onBehaviorAborted()
+   {
+   }
+
+   @Override
+   public void onBehaviorPaused()
+   {
+   }
+
+   @Override
+   public void onBehaviorResumed()
+   {
    }
 }

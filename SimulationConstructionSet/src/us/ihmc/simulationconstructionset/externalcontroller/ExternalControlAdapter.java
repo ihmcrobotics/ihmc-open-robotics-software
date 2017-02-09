@@ -3,6 +3,7 @@ package us.ihmc.simulationconstructionset.externalcontroller;
 import java.util.ArrayList;
 
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.FloatingPlanarJoint;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
@@ -10,7 +11,6 @@ import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.PinJoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SliderJoint;
-import us.ihmc.simulationconstructionset.robotController.RobotController;
 import us.ihmc.simulationconstructionset.robotdefinition.RobotDefinitionFixedFrame;
 
 public class ExternalControlAdapter implements RobotController
@@ -53,6 +53,7 @@ public class ExternalControlAdapter implements RobotController
    }
 
 
+   @Override
    public void doControl()
    {
       // System.out.println("do control start");
@@ -134,6 +135,7 @@ public class ExternalControlAdapter implements RobotController
    }
 
 
+   @Override
    public YoVariableRegistry getYoVariableRegistry()
    {
       return registry;
@@ -180,15 +182,18 @@ public class ExternalControlAdapter implements RobotController
 
    }
 
+   @Override
    public String getName()
    {
       return name;
    }
    
+   @Override
    public void initialize()
    {      
    }
 
+   @Override
    public String getDescription()
    {
       return getName();

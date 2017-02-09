@@ -5,7 +5,7 @@ buildscript {
     }
   }
   dependencies {
-    classpath "gradle.plugin.us.ihmc.gradle:ihmc-build:0.0.18"
+    classpath "gradle.plugin.us.ihmc.gradle:ihmc-build:0.0.19"
   }
 }
 
@@ -13,7 +13,7 @@ apply plugin: "us.ihmc.gradle.ihmc-build"
 
 if(!rootProject.name.equals('IHMCOpenRoboticsSoftware')) { evaluationDependsOn(':IHMCOpenRoboticsSoftware') }
 
-sourceCompatibility = 1.7
+sourceCompatibility = 1.8
 version = "${getOpenRoboticsSoftwareProject().version}"
 project.ext.fullVersion = "${getOpenRoboticsSoftwareProject().ext.fullVersion}"
 project.ext.vcsUrl = "${getOpenRoboticsSoftwareProject().ext.vcsUrl}"
@@ -28,7 +28,7 @@ repositories {
    jcenter()
    mavenCentral()
 	maven {
-		url "https://bengal.ihmc.us/nexus/content/repositories/thirdparty/"
+		url "http://artifactory.ihmc.us/artifactory/thirdparty/"
 	}
 }
 
@@ -43,8 +43,6 @@ dependencies {
     compile group: 'org.ejml', name: 'core', version: '0.28'
 
     testCompile group: 'org.apache.commons', name: 'commons-math3', version: '3.3'
-//	testCompile group: 'org.pitest', name: 'pitest', version: '1.1.9'
-//	compile group: 'com.google.caliper', name: 'caliper', version: '1.0-beta-2'
 }
 
 jar {

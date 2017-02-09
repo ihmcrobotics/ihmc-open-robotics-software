@@ -1,50 +1,23 @@
 package us.ihmc.atlas.calib;
 
-import static java.lang.Double.parseDouble;
-
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Graphics2D;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
-import java.awt.image.BufferedImage;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
-
-import javax.imageio.ImageIO;
-import javax.swing.ImageIcon;
-import javax.swing.JCheckBox;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
-import org.ddogleg.optimization.FactoryOptimization;
-import org.ddogleg.optimization.UnconstrainedLeastSquares;
-import org.ddogleg.optimization.UtilOptimize;
-
-import boofcv.abst.calib.ConfigChessboard;
-import boofcv.abst.calib.PlanarDetectorChessboard;
+import boofcv.abst.fiducial.calib.CalibrationDetectorChessboard;
+import boofcv.abst.fiducial.calib.ConfigChessboard;
 import boofcv.alg.geo.PerspectiveOps;
-import boofcv.factory.calib.FactoryPlanarCalibrationTarget;
+import boofcv.factory.calib.FactoryCalibrationTarget;
 import boofcv.io.UtilIO;
 import boofcv.struct.calib.IntrinsicParameters;
 import georegression.struct.point.Point2D_F64;
 import georegression.struct.point.Vector3D_F64;
 import georegression.struct.se.Se3_F64;
-import us.ihmc.robotics.partNames.LimbName;
+import org.ddogleg.optimization.FactoryOptimization;
+import org.ddogleg.optimization.UnconstrainedLeastSquares;
+import org.ddogleg.optimization.UtilOptimize;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceRGBColor;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
@@ -52,12 +25,28 @@ import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePose;
+import us.ihmc.robotics.partNames.LimbName;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.simulationconstructionset.IndexChangedListener;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicCoordinateSystem;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition;
+
+import javax.imageio.ImageIO;
+import javax.swing.*;
+import javax.vecmath.Matrix3d;
+import javax.vecmath.Point3d;
+import javax.vecmath.Vector3d;
+import java.awt.*;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.awt.image.BufferedImage;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.*;
+
+import static java.lang.Double.parseDouble;
 
 public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
 {   
@@ -83,7 +72,7 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
    private boolean alignCamera = true;
 
    private IntrinsicParameters intrinsic;
-   private PlanarDetectorChessboard calibGrid = FactoryPlanarCalibrationTarget.detectorChessboard(new ConfigChessboard(
+   private CalibrationDetectorChessboard calibGrid = FactoryCalibrationTarget.detectorChessboard(new ConfigChessboard(
          DetectChessboardInKinematicsData.boardWidth, DetectChessboardInKinematicsData.boardHeight, 0.03));
 
    public AtlasHeadLoopKinematicCalibrator(DRCRobotModel robotModel)
@@ -126,8 +115,7 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
       JPanel panel = new JPanel(new BorderLayout());
       final JLabel lblDisplay = new JLabel("", iiDisplay, JLabel.CENTER);
       panel.add(lblDisplay, BorderLayout.CENTER);
-      scs.addExtraJpanel(panel, "Image");
-      scs.getStandardSimulationGUI().selectPanel("Image");
+      scs.addExtraJpanel(panel, "Image", true);
       scs.getDataBuffer().attachIndexChangedListener(new IndexChangedListener()
       {
          @Override
@@ -141,7 +129,6 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
                scsAlignCameraToRobotCamera();
          }
       });
-      //scs.getStandardSimulationGUI().selectPanel("Image");
 
       //Set Camera Info
       String intrinsicFile = "../DarpaRoboticsChallenge/data/calibration_images/intrinsic_ros.xml";

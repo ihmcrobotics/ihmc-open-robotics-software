@@ -4,7 +4,9 @@ import java.util.ArrayList;
 import java.util.EnumMap;
 
 import gnu.trove.list.array.TDoubleArrayList;
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -17,14 +19,11 @@ import us.ihmc.robotics.lists.GenericTypeBuilder;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
-import us.ihmc.robotics.math.trajectories.PositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.robotics.math.trajectories.waypoints.PolynomialOrder;
 import us.ihmc.robotics.math.trajectories.waypoints.TrajectoryPointOptimizer;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.referenceFrames.XYPlaneFrom3PointsFrame;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.BagOfBalls;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
 /**
  * Wrapper for TrajectoryPointOptimizer for the generation of swing trajectories. This is more efficient then
@@ -37,7 +36,7 @@ import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegi
  * @author gwiedebach
  *
  */
-public class Position2dOptimizedSwingTrajectoryGenerator implements PositionTrajectoryGenerator
+public class Position2dOptimizedSwingTrajectoryGenerator implements WaypointTrajectoryGenerator
 {
    private static final int maxWaypoints = 12;
    private static final int dimensions = 2;
@@ -180,6 +179,7 @@ public class Position2dOptimizedSwingTrajectoryGenerator implements PositionTraj
       waypointPositions.add();
    }
 
+   @Override
    public void setEndpointConditions(FramePoint initialPosition, FrameVector initialVelocity, FramePoint finalPosition, FrameVector finalVelocity)
    {
       this.initialPosition.setIncludingFrame(initialPosition);
@@ -220,6 +220,7 @@ public class Position2dOptimizedSwingTrajectoryGenerator implements PositionTraj
       optimizer.setEndPoints(initialPositionArray, initialVelocityArray, finalPositionArray, finalVelocityArray);
    }
 
+   @Override
    public void setWaypoints(ArrayList<FramePoint> waypointPositions)
    {
       if (waypointPositions.size() > maxWaypoints)
@@ -360,6 +361,7 @@ public class Position2dOptimizedSwingTrajectoryGenerator implements PositionTraj
       getAcceleration(accelerationToPack);
    }
 
+   @Override
    public void informDone()
    {
       desiredPosition.setToZero(true);
@@ -375,6 +377,23 @@ public class Position2dOptimizedSwingTrajectoryGenerator implements PositionTraj
    @Override
    public void hideVisualization()
    {
+      if (trajectoryViz == null)
+         return;
+      trajectoryViz.hideAll();
+   }
+
+   @Override
+   public double getMaxSpeed()
+   {
+      // TODO Auto-generated method stub
+      return Double.NaN;
+   }
+
+   @Override
+   public void computeMaxSpeed()
+   {
+      // TODO Auto-generated method stub
+
    }
 
 }

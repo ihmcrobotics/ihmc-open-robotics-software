@@ -2,11 +2,11 @@ package us.ihmc.simulationconstructionset.util.dataProcessors;
 
 import javax.vecmath.Vector3d;
 
-import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.PinJoint;
 import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.graphicsDescription.Graphics3DObject;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 
@@ -35,7 +35,6 @@ public class TwoLinkRobotForTesting extends Robot
    private final PinJoint elbowJoint;
    private DoubleYoVariable bodyPitch;
 
-   @SuppressWarnings("deprecation")
    public TwoLinkRobotForTesting()
    {
       super("TwoLink");

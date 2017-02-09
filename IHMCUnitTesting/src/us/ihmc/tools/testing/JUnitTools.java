@@ -272,52 +272,52 @@ public class JUnitTools
    
    public static void assertVector3dEquals(String message, Vector3d expected, Vector3d actual, double delta)
    {
-      assertEquals(message,expected.getX(), actual.getX(),delta);
-      assertEquals(message,expected.getY(), actual.getY(),delta);
-      assertEquals(message, expected.getZ(), actual.getZ(), delta);
+      assertEquals(message + " [X component]",expected.getX(), actual.getX(),delta);
+      assertEquals(message + " [Y component]",expected.getY(), actual.getY(),delta);
+      assertEquals(message + " [Z component]", expected.getZ(), actual.getZ(), delta);
    }
    
    public static void assertPoint3dEquals(String message, Point3d expected, Point3d actual, double delta)
    {
-      assertEquals(message,expected.getX(), actual.getX(),delta);
-      assertEquals(message,expected.getY(), actual.getY(),delta);
-      assertEquals(message,expected.getZ(), actual.getZ(),delta);
+      assertEquals(message + " [X component]",expected.getX(), actual.getX(),delta);
+      assertEquals(message + " [Y component]",expected.getY(), actual.getY(),delta);
+      assertEquals(message + " [Z component]",expected.getZ(), actual.getZ(),delta);
    }
    
    public static void assertPoint2dEquals(String message, Point2d expected, Point2d actual, double delta)
    {
-      assertEquals(message, expected.getX(), actual.getX(), delta);
-      assertEquals(message, expected.getY(), actual.getY(), delta);
+      assertEquals(message + " [X component]", expected.getX(), actual.getX(), delta);
+      assertEquals(message + " [Y component]", expected.getY(), actual.getY(), delta);
    }
    
    public static void assertPoint3fEquals(String message, Point3f expected, Point3f actual, double delta)
    {
-      assertEquals(message,expected.getX(), actual.getX(),delta);
-      assertEquals(message,expected.getY(), actual.getY(),delta);
-      assertEquals(message, expected.getZ(), actual.getZ(), delta);
+      assertEquals(message + " [X component]",expected.getX(), actual.getX(),delta);
+      assertEquals(message + " [Y component]",expected.getY(), actual.getY(),delta);
+      assertEquals(message + " [Z component]", expected.getZ(), actual.getZ(), delta);
    }
    
    public static void assertVector3fEquals(String message, Vector3f expected, Vector3f actual, double delta)
    {
-      assertEquals(message,expected.getX(), actual.getX(),delta);
-      assertEquals(message,expected.getY(), actual.getY(),delta);
-      assertEquals(message, expected.getZ(), actual.getZ(), delta);
+      assertEquals(message + " [X component]",expected.getX(), actual.getX(),delta);
+      assertEquals(message + " [Y component]",expected.getY(), actual.getY(),delta);
+      assertEquals(message + " [Z component]", expected.getZ(), actual.getZ(), delta);
    }
    
    public static void assertVector4dEquals(String message, Vector4d expected, Vector4d actual, double delta)
    {
-      assertEquals(message,expected.getX(), actual.getX(),delta);
-      assertEquals(message,expected.getY(), actual.getY(),delta);
-      assertEquals(message,expected.getZ(), actual.getZ(),delta);
-      assertEquals(message,expected.getW(), actual.getW(),delta);
+      assertEquals(message + " [X component]",expected.getX(), actual.getX(),delta);
+      assertEquals(message + " [Y component]",expected.getY(), actual.getY(),delta);
+      assertEquals(message + " [Z component]",expected.getZ(), actual.getZ(),delta);
+      assertEquals(message + " [W component]",expected.getW(), actual.getW(),delta);
    }
    
    public static void assertVector4fEquals(String message, Vector4f expected, Vector4f actual, double delta)
    {
-      assertEquals(message,expected.getX(), actual.getX(),delta);
-      assertEquals(message,expected.getY(), actual.getY(),delta);
-      assertEquals(message,expected.getZ(), actual.getZ(),delta);
-      assertEquals(message, expected.getW(), actual.getW(), delta);
+      assertEquals(message + " [X component]",expected.getX(), actual.getX(),delta);
+      assertEquals(message + " [Y component]",expected.getY(), actual.getY(),delta);
+      assertEquals(message + " [Z component]",expected.getZ(), actual.getZ(),delta);
+      assertEquals(message + " [W component]", expected.getW(), actual.getW(), delta);
    }
 
    /**
@@ -381,20 +381,41 @@ public class JUnitTools
          fail("Object not serializable: class not found");
       }
    }
-   
+
    public static void assertQuaternionsEqual(Quat4f expectedQuaternion, Quat4f actualQuaternion, double epsilon)
    {
-      assertQuaternionsEqual(new Quat4d(expectedQuaternion), new Quat4d(actualQuaternion), epsilon);
+      assertQuaternionsEqual(expectedQuaternion, actualQuaternion, epsilon, true);
    }
-   
+
+   public static void assertQuaternionsEqual(Quat4f expectedQuaternion, Quat4f actualQuaternion, double epsilon, boolean allowOppositeSigns)
+   {
+      assertQuaternionsEqual(new Quat4d(expectedQuaternion), new Quat4d(actualQuaternion), epsilon, allowOppositeSigns);
+   }
+
    public static void assertQuaternionsEqual(Quat4d expectedQuaternion, Quat4d actualQuaternion, double epsilon)
    {
+      assertQuaternionsEqual(expectedQuaternion, actualQuaternion, epsilon, true);
+   }
+
+   public static void assertQuaternionsEqual(Quat4d expectedQuaternion, Quat4d actualQuaternion, double epsilon, boolean allowOppositeSigns)
+   {
+      double negativeOneIfOppositeSigns = 1.0;
+
+      if (allowOppositeSigns)
+      {
+         boolean oppositeSigns = areOppositeSigns(expectedQuaternion, actualQuaternion);
+         if (oppositeSigns )
+         {
+            negativeOneIfOppositeSigns = -1.0;
+         }
+      }
+
       try
       {
-         assertEquals(expectedQuaternion.getW(), actualQuaternion.getW(), epsilon);
-         assertEquals(expectedQuaternion.getX(), actualQuaternion.getX(), epsilon);
-         assertEquals(expectedQuaternion.getY(), actualQuaternion.getY(), epsilon);
-         assertEquals(expectedQuaternion.getZ(), actualQuaternion.getZ(), epsilon);
+         assertEquals(negativeOneIfOppositeSigns * expectedQuaternion.getW(), actualQuaternion.getW(), epsilon);
+         assertEquals(negativeOneIfOppositeSigns * expectedQuaternion.getX(), actualQuaternion.getX(), epsilon);
+         assertEquals(negativeOneIfOppositeSigns * expectedQuaternion.getY(), actualQuaternion.getY(), epsilon);
+         assertEquals(negativeOneIfOppositeSigns * expectedQuaternion.getZ(), actualQuaternion.getZ(), epsilon);
       }
       catch (AssertionError e)
       {
@@ -402,6 +423,14 @@ public class JUnitTools
       }
    }
    
+   private static boolean areOppositeSigns(Quat4d quaternionOne, Quat4d quaternionTwo)
+   {
+      if ((quaternionOne.getW() < 0.0) && (quaternionTwo.getW() > 0.0)) return true;
+      if ((quaternionOne.getW() > 0.0) && (quaternionTwo.getW() < 0.0)) return true;
+
+      return false;
+   }
+
    public static void assertQuaternionsEqualUsingDifference(Quat4d q1, Quat4d q2, double epsilon)
    {
       try

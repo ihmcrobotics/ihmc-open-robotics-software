@@ -6,7 +6,6 @@ import java.awt.event.KeyEvent;
 import javax.swing.AbstractAction;
 
 import us.ihmc.simulationconstructionset.gui.dialogConstructors.ExportGraphsToFileConstructor;
-import us.ihmc.simulationconstructionset.gui.dialogConstructors.PrintGraphsDialogConstructor;
 
 public class ExportGraphsToFileAction extends AbstractAction
 {
@@ -35,6 +34,7 @@ public class ExportGraphsToFileAction extends AbstractAction
       constructor = null;
    }
 
+   @Override
    public void actionPerformed(ActionEvent e)
    {
       constructor.constructDialog();

@@ -5,7 +5,7 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 import us.ihmc.communication.packets.PacketDestination;
-import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
+import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidRobotics.communication.packets.walking.EndEffectorLoadBearingMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.EndEffectorLoadBearingMessage.EndEffector;
 import us.ihmc.humanoidRobotics.communication.packets.walking.EndEffectorLoadBearingMessage.LoadBearingRequest;
@@ -18,7 +18,7 @@ public class EndEffectorLoadBearingBehaviorTest
    @Test(timeout = 30000)
    public void testSetInput()
    {
-      OutgoingCommunicationBridgeInterface outgoingCommunicationBridge = null;
+      CommunicationBridgeInterface outgoingCommunicationBridge = null;
       EndEffectorLoadBearingBehavior endEffectorLoadBearingBehavior = new EndEffectorLoadBearingBehavior(outgoingCommunicationBridge);
 
       EndEffectorLoadBearingMessage message = new EndEffectorLoadBearingMessage(RobotSide.LEFT, EndEffector.FOOT, LoadBearingRequest.LOAD);

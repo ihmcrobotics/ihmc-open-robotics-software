@@ -10,10 +10,11 @@ import us.ihmc.robotics.lists.RecyclingArrayList;
 
 public class FootstepDataListCommand implements Command<FootstepDataListCommand, FootstepDataListMessage>
 {
-   private double swingTime;
-   private double transferTime = 0.0;
+   private double defaultSwingTime;
+   private double defaultTransferTime;
+   private double finalTransferTime;
    private ExecutionMode executionMode = ExecutionMode.OVERRIDE;
-   private final RecyclingArrayList<FootstepDataControllerCommand> footsteps = new RecyclingArrayList<>(30, FootstepDataControllerCommand.class);
+   private final RecyclingArrayList<FootstepDataCommand> footsteps = new RecyclingArrayList<>(30, FootstepDataCommand.class);
 
    public FootstepDataListCommand()
    {
@@ -23,8 +24,9 @@ public class FootstepDataListCommand implements Command<FootstepDataListCommand,
    @Override
    public void clear()
    {
-      swingTime = 0.0;
-      transferTime = 0.0;
+      defaultSwingTime = 0.0;
+      defaultTransferTime = 0.0;
+      finalTransferTime = 0.0;
       footsteps.clear();
    }
 
@@ -33,8 +35,9 @@ public class FootstepDataListCommand implements Command<FootstepDataListCommand,
    {
       clear();
 
-      swingTime = message.swingTime;
-      transferTime = message.transferTime;
+      defaultSwingTime = message.defaultSwingTime;
+      defaultTransferTime = message.defaultTransferTime;
+      finalTransferTime = message.finalTransferTime;
       executionMode = message.executionMode;
       ArrayList<FootstepDataMessage> dataList = message.getDataList();
       if (dataList != null)
@@ -49,10 +52,11 @@ public class FootstepDataListCommand implements Command<FootstepDataListCommand,
    {
       clear();
 
-      swingTime = other.swingTime;
-      transferTime = other.transferTime;
+      defaultSwingTime = other.defaultSwingTime;
+      defaultTransferTime = other.defaultTransferTime;
+      finalTransferTime = other.finalTransferTime;
       executionMode = other.executionMode;
-      RecyclingArrayList<FootstepDataControllerCommand> otherFootsteps = other.getFootsteps();
+      RecyclingArrayList<FootstepDataCommand> otherFootsteps = other.getFootsteps();
       if (otherFootsteps != null)
       {
          for (int i = 0; i < otherFootsteps.size(); i++)
@@ -65,19 +69,19 @@ public class FootstepDataListCommand implements Command<FootstepDataListCommand,
       clear();
    }
 
-   public void addFootstep(FootstepDataControllerCommand footstep)
+   public void addFootstep(FootstepDataCommand footstep)
    {
       footsteps.add().set(footstep);
    }
 
    public void setSwingTime(double swingTime)
    {
-      this.swingTime = swingTime;
+      this.defaultSwingTime = swingTime;
    }
 
    public void setTransferTime(double transferTime)
    {
-      this.transferTime = transferTime;
+      this.defaultTransferTime = transferTime;
    }
 
    public void setExecutionMode(ExecutionMode executionMode)
@@ -85,14 +89,19 @@ public class FootstepDataListCommand implements Command<FootstepDataListCommand,
       this.executionMode = executionMode;
    }
 
-   public double getSwingTime()
+   public double getDefaultSwingTime()
    {
-      return swingTime;
+      return defaultSwingTime;
    }
 
-   public double getTransferTime()
+   public double getDefaultTransferTime()
    {
-      return transferTime;
+      return defaultTransferTime;
+   }
+
+   public double getFinalTransferTime()
+   {
+      return finalTransferTime;
    }
 
    public ExecutionMode getExecutionMode()
@@ -100,7 +109,7 @@ public class FootstepDataListCommand implements Command<FootstepDataListCommand,
       return executionMode;
    }
 
-   public RecyclingArrayList<FootstepDataControllerCommand> getFootsteps()
+   public RecyclingArrayList<FootstepDataCommand> getFootsteps()
    {
       return footsteps;
    }
@@ -110,7 +119,7 @@ public class FootstepDataListCommand implements Command<FootstepDataListCommand,
       footsteps.remove(footstepIndex);
    }
 
-   public FootstepDataControllerCommand getFootstep(int footstepIndex)
+   public FootstepDataCommand getFootstep(int footstepIndex)
    {
       return footsteps.get(footstepIndex);
    }

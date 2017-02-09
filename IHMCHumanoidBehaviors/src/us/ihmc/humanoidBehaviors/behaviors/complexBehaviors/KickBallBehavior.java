@@ -13,7 +13,7 @@ import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BlobFilteredSphereDet
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SphereDetectionBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.WaitForUserValidationBehavior;
 import us.ihmc.humanoidBehaviors.coactiveDesignFramework.CoactiveElement;
-import us.ihmc.humanoidBehaviors.communication.BehaviorCommunicationBridge;
+import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidBehaviors.stateMachine.BehaviorStateMachine;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.ihmcPerception.vision.HSVValue;
@@ -59,7 +59,7 @@ public class KickBallBehavior extends AbstractBehavior
 
    private final KickBallBehaviorCoactiveElementBehaviorSide coactiveElement;
 
-   public KickBallBehavior(BehaviorCommunicationBridge behaviorCommunicationBridge, DoubleYoVariable yoTime, BooleanYoVariable yoDoubleSupport,
+   public KickBallBehavior(CommunicationBridge behaviorCommunicationBridge, DoubleYoVariable yoTime, BooleanYoVariable yoDoubleSupport,
          FullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames, WholeBodyControllerParameters wholeBodyControllerParameters)
    {
       super(behaviorCommunicationBridge);
@@ -77,16 +77,16 @@ public class KickBallBehavior extends AbstractBehavior
       }
       else
       {
-         sphereDetectionBehavior = new SphereDetectionBehavior(outgoingCommunicationBridge, referenceFrames);
+         sphereDetectionBehavior = new SphereDetectionBehavior(communicationBridge, referenceFrames);
       }
 
       behaviors.add(sphereDetectionBehavior);
 
-      walkToLocationBehavior = new WalkToLocationBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrames,
+      walkToLocationBehavior = new WalkToLocationBehavior(communicationBridge, fullRobotModel, referenceFrames,
             wholeBodyControllerParameters.getWalkingControllerParameters());
       behaviors.add(walkToLocationBehavior);
 
-      kickBehavior = new KickBehavior(outgoingCommunicationBridge, yoTime, yoDoubleSupport, fullRobotModel, referenceFrames);
+      kickBehavior = new KickBehavior(communicationBridge, yoTime, yoDoubleSupport, fullRobotModel, referenceFrames);
       behaviors.add(kickBehavior);
 
       for (AbstractBehavior behavior : behaviors)
@@ -101,7 +101,7 @@ public class KickBallBehavior extends AbstractBehavior
          registry.addChild(coactiveElement.getUserInterfaceWritableYoVariableRegistry());
          registry.addChild(coactiveElement.getMachineWritableYoVariableRegistry());
 
-         waitForUserValidationBehavior = new WaitForUserValidationBehavior(outgoingCommunicationBridge, coactiveElement.validClicked,
+         waitForUserValidationBehavior = new WaitForUserValidationBehavior(communicationBridge, coactiveElement.validClicked,
                coactiveElement.validAcknowledged);
          behaviors.add(waitForUserValidationBehavior);
 
@@ -220,17 +220,15 @@ public class KickBallBehavior extends AbstractBehavior
    }
 
    @Override
-   public void initialize()
+   public void onBehaviorEntered()
    {
-      super.initialize();
       setupPipelineForKick();
    }
 
    @Override
-   public void doPostBehaviorCleanup()
+   public void onBehaviorExited()
    {
 
-      super.doPostBehaviorCleanup();
       pipelineSetUp = false;
       if (CREATE_COACTIVE_ELEMENT)
       {
@@ -241,28 +239,26 @@ public class KickBallBehavior extends AbstractBehavior
       }
       for (AbstractBehavior behavior : behaviors)
       {
-         behavior.doPostBehaviorCleanup();
+         behavior.onBehaviorExited();
       }
    }
 
    @Override
-   public void abort()
+   public void onBehaviorAborted()
    {
-      super.abort();
-      doPostBehaviorCleanup();
+      onBehaviorExited();
       this.pipeLine.clearAll();
 
       for (AbstractBehavior behavior : behaviors)
       {
-         behavior.abort();
+         behavior.onBehaviorAborted();
       }
       
    }
 
    @Override
-   public void pause()
+   public void onBehaviorPaused()
    {
-      super.pause();
       for (AbstractBehavior behavior : behaviors)
       {
          behavior.pause();
@@ -275,26 +271,7 @@ public class KickBallBehavior extends AbstractBehavior
       return pipeLine.isDone();
    }
 
-   @Override
-   protected void passReceivedNetworkProcessorObjectToChildBehaviors(Object object)
-   {
-      for (AbstractBehavior behavior : behaviors)
-      {
-         behavior.consumeObjectFromNetworkProcessor(object);
-      }
-   }
-
-   @Override
-   protected void passReceivedControllerObjectToChildBehaviors(Object object)
-   {
-      for (AbstractBehavior behavior : behaviors)
-      {
-         behavior.consumeObjectFromController(object);
-      }
-   }
-
-  
-
+   
 
    public boolean isUseBlobFiltering()
    {
@@ -323,5 +300,10 @@ public class KickBallBehavior extends AbstractBehavior
       {
          return 0;
       }
+   }
+
+   @Override
+   public void onBehaviorResumed()
+   {
    }
 }

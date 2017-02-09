@@ -44,6 +44,11 @@ public class FullRobotModelFromDescription implements FullRobotModel
 
    private final Map<Enum<?>, RigidBody> endEffectors = new HashMap<>();
 
+   public FullRobotModelFromDescription(FullRobotModelFromDescription modelToCopy)
+   {
+      this(modelToCopy.description, modelToCopy.sdfJointNameMap, modelToCopy.sensorLinksToTrack);
+   }
+   
    public FullRobotModelFromDescription(RobotDescription description, JointNameMap sdfJointNameMap, String[] sensorLinksToTrack)
    {
       this(description, sdfJointNameMap, sensorLinksToTrack, false);
@@ -319,12 +324,15 @@ public class FullRobotModelFromDescription implements FullRobotModel
 
    protected void checkLinkIsNeededForSensor(InverseDynamicsJoint joint, JointDescription jointDescription)
    {
-      for(int i = 0; i < sensorLinksToTrack.length; i++)
+      if(sensorLinksToTrack != null)
       {
-         if(sensorLinksToTrack[i].equalsIgnoreCase(jointDescription.getName()));
+         for(int i = 0; i < sensorLinksToTrack.length; i++)
          {
-            sensorFrames.put(jointDescription.getName(),joint.getFrameAfterJoint());
-         }
+            if(sensorLinksToTrack[i].equalsIgnoreCase(jointDescription.getName()));
+            {
+               sensorFrames.put(jointDescription.getName(),joint.getFrameAfterJoint());
+            }
+         }         
       }
    }
 

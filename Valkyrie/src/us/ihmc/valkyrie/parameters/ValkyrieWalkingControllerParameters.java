@@ -4,25 +4,23 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 
-import javax.vecmath.Vector3d;
-
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
-import us.ihmc.robotics.partNames.NeckJointName;
-import us.ihmc.robotics.partNames.SpineJointName;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.DRCRobotModel.RobotTarget;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootOrientationGains;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootSE3Gains;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel.RobotTarget;
 import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoPDGains;
 import us.ihmc.robotics.controllers.YoPIDGains;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.partNames.NeckJointName;
+import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
@@ -114,7 +112,7 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    @Override
    public boolean doToeOffIfPossible()
    {
-      return !(target == DRCRobotModel.RobotTarget.REAL_ROBOT);
+      return true;
    }
 
    @Override
@@ -126,7 +124,7 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    @Override
    public boolean checkECMPLocationToTriggerToeOff()
    {
-      return true;
+      return target != RobotTarget.REAL_ROBOT;
    }
 
    @Override
@@ -183,7 +181,7 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    @Override
    public boolean allowDisturbanceRecoveryBySpeedingUpSwing()
    {
-      return false;
+      return target == DRCRobotModel.RobotTarget.REAL_ROBOT;
    }
 
    @Override
@@ -195,13 +193,13 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    @Override
    public double getICPErrorThresholdToSpeedUpSwing()
    {
-      return Double.POSITIVE_INFINITY;
+      return 0.05;
    }
 
    @Override
    public double getMinimumSwingTimeForDisturbanceRecovery()
    {
-      return getDefaultSwingTime();
+      return 0.70;
    }
 
    @Override
@@ -751,13 +749,13 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    @Override
    public double getDefaultTransferTime()
    {
-      return target == DRCRobotModel.RobotTarget.REAL_ROBOT ? 2.0 : 0.25;
+      return target == DRCRobotModel.RobotTarget.REAL_ROBOT ? 1.00 : 0.25;
    }
 
    @Override
    public double getDefaultSwingTime()
    {
-      return target == DRCRobotModel.RobotTarget.REAL_ROBOT ? 1.5 : 0.60;
+      return target == DRCRobotModel.RobotTarget.REAL_ROBOT ? 1.20 : 0.60;
    }
 
    /** @inheritDoc */
@@ -936,15 +934,7 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    @Override
    public MomentumOptimizationSettings getMomentumOptimizationSettings()
    {
-      MomentumOptimizationSettings momentumOptimizationSettings = new MomentumOptimizationSettings();
-      Vector3d handTaskspaceCotnrolAngularWeights = new Vector3d(0.5, 0.5, 0.5);
-      Vector3d handTaskspaceCotnrolLinearWeights = new Vector3d(5.0, 5.0, 5.0);
-      momentumOptimizationSettings.setHandTaskspaceControlWeights(handTaskspaceCotnrolAngularWeights, handTaskspaceCotnrolLinearWeights);
-      // The weight for the head needs to be pretty high to counter the privileged configuration task.
-      // This seems to be specific to Val's, probably because of its particular kinematics.
-      // Shouldn't affect the rest of the body as long as the head is controlled w.r.t. to the chest.
-      momentumOptimizationSettings.setHeadWeights(5.0, 500.0, 50.0);
-      return momentumOptimizationSettings;
+      return new ValkyrieMomentumOptimizationSettings();
    }
 
    @Override
@@ -1030,4 +1020,12 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
       // As there is no real need for it in sim, I'm leaving it on only for the real robot. (Sylvain)
       return target == RobotTarget.REAL_ROBOT;
    }
+
+   /** {@inheritDoc} */
+   @Override
+   public boolean useSwingTrajectoryOptimizer()
+   {
+      return true;
+   }
+
 }

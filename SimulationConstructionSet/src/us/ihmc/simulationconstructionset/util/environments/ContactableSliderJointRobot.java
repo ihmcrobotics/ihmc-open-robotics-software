@@ -12,7 +12,6 @@ import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 public abstract class ContactableSliderJointRobot extends Robot implements Contactable
 {
-   private static final long serialVersionUID = -337148945439165270L;
    private final InternalSingleJointArticulatedContactable articulatedContactable;
 
    public ContactableSliderJointRobot(String name)
@@ -39,21 +38,25 @@ public abstract class ContactableSliderJointRobot extends Robot implements Conta
          this.contactableRobot = robot;
       }
 
+      @Override
       public boolean isClose(Point3d pointInWorldToCheck)
       {
          return contactableRobot.isClose(pointInWorldToCheck);
       }
 
+      @Override
       public boolean isPointOnOrInside(Point3d pointInWorldToCheck)
       {
          return contactableRobot.isPointOnOrInside(pointInWorldToCheck);
       }
 
+      @Override
       public void closestIntersectionAndNormalAt(Point3d intersectionToPack, Vector3d normalToPack, Point3d pointInWorldToCheck)
       {
          contactableRobot.closestIntersectionAndNormalAt(intersectionToPack, normalToPack, pointInWorldToCheck);
       }
 
+      @Override
       public Joint getJoint()
       {
          return contactableRobot.getSliderJoint();
@@ -65,21 +68,25 @@ public abstract class ContactableSliderJointRobot extends Robot implements Conta
       articulatedContactable.createAvailableContactPoints(groupIdentifier, totalContactPointsAvailable, forceVectorScale, addDynamicGraphicForceVectorsForceVectors);
    }
 
+   @Override
    public int getAndLockAvailableContactPoint()
    {
       return articulatedContactable.getAndLockAvailableContactPoint();
    }
 
+   @Override
    public void unlockContactPoint(GroundContactPoint groundContactPoint)
    {
       articulatedContactable.unlockContactPoint(groundContactPoint);
    }
 
+   @Override
    public GroundContactPoint getLockedContactPoint(int contactPointIndex)
    {
       return articulatedContactable.getLockedContactPoint(contactPointIndex);
    }
 
+   @Override
    public void updateContactPoints()
    {
       articulatedContactable.updateContactPoints();

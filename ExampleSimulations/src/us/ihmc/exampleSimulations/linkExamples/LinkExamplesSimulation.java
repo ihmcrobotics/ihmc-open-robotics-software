@@ -3,15 +3,20 @@ package us.ihmc.exampleSimulations.linkExamples;
 import java.util.ArrayList;
 
 import javax.vecmath.Point2d;
+import javax.vecmath.Point3d;
+import javax.vecmath.Quat4d;
 
-import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
-import us.ihmc.graphics3DAdapter.graphics.MeshDataGenerator;
-import us.ihmc.graphics3DAdapter.graphics.MeshDataHolder;
-import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
+import us.ihmc.graphicsDescription.Graphics3DObject;
+import us.ihmc.graphicsDescription.MeshDataGenerator;
+import us.ihmc.graphicsDescription.MeshDataHolder;
+import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.input.SelectedListener;
+import us.ihmc.graphicsDescription.structure.Graphics3DNode;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.tools.inputDevices.keyboard.ModifierKeyInterface;
 
 public class LinkExamplesSimulation
 {
@@ -55,7 +60,21 @@ public class LinkExamplesSimulation
       sim.addStaticLink(exampleShapes);
 
       sim.setGroundVisible(false);
-      
+
+      SelectedListener selectedListener = new SelectedListener()
+      {
+         @Override
+         public void selected(Graphics3DNode graphics3dNode, ModifierKeyInterface modifierKeyInterface, Point3d location, Point3d cameraLocation, Quat4d cameraRotation)
+         {
+            Graphics3DObject sphere = new Graphics3DObject();
+            sphere.translate(location);
+            sphere.addSphere(0.01, YoAppearance.Red());
+            sim.addStaticLinkGraphics(sphere);
+         }
+      };
+
+      sim.attachSelectedListener(selectedListener);
+
       Thread myThread = new Thread(sim);
       myThread.start();
    }
@@ -116,32 +135,31 @@ public class LinkExamplesSimulation
       linkGraphics.addCoordinateSystem(COORD_LENGTH);
       linkGraphics.addPyramidCube(PYRAMID_CUBE_LX, PYRAMID_CUBE_LY, PYRAMID_CUBE_LZ, PYRAMID_CUBE_LH, YoAppearance.BlackMetalMaterial());
 
-      
+
       // Extruded Polygon
       linkGraphics.translate(-2.0 * OFFSET, OFFSET, 0.0);
       linkGraphics.addCoordinateSystem(COORD_LENGTH);
       ArrayList<Point2d> polygonPoints = new ArrayList<Point2d>();
       polygonPoints.add(new Point2d());
       polygonPoints.add(new Point2d(0.4, 0.0));
-      polygonPoints.add(new Point2d(0.3, 0.3));      
+      polygonPoints.add(new Point2d(0.3, 0.3));
       double height = 0.25;
       linkGraphics.addExtrudedPolygon(polygonPoints, height, YoAppearance.Purple());
-      
+
       // Mesh Data
       linkGraphics.translate(OFFSET, 0.0, 0.0);
       linkGraphics.addCoordinateSystem(COORD_LENGTH);
       MeshDataHolder meshData = MeshDataGenerator.Wedge(WEDGE_X, WEDGE_Y, WEDGE_Z);
       AppearanceDefinition meshAppearance = YoAppearance.Gold();
-      
-      boolean sharpenMeshData = true;
-      linkGraphics.addMeshData(meshData, sharpenMeshData , meshAppearance);
-      
+
+      linkGraphics.addMeshData(meshData, meshAppearance);
+
       // Gridded Polytope
 //      linkGraphics.translate(OFFSET, 0.0, 0.0);
 //      linkGraphics.addGriddedPolytope();
-      
+
       ret.setLinkGraphics(linkGraphics);
-      
+
       return ret;
    }
 

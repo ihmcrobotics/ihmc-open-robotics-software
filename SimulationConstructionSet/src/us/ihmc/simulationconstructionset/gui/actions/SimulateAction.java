@@ -27,6 +27,7 @@ public class SimulateAction extends AbstractAction
       AbstractActionTools.setupIconButton(this, iconFilename, shortKey, longDescription, shortDescription);
    }
 
+   @Override
    public void actionPerformed(ActionEvent actionEvent)
    {
       executor.simulate();

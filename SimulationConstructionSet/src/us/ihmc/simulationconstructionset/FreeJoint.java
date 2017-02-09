@@ -68,6 +68,7 @@ public class FreeJoint extends Joint
       return this.freeJointVars;
    }
 
+   @Override
    public void update()
    {
        setFreeTransform3D(this.jointTransform3D, xVar.getDoubleValue(), yVar.getDoubleValue(), zVar.getDoubleValue(), yawVar.getDoubleValue(), rollVar.getDoubleValue(), pitchVar.getDoubleValue());

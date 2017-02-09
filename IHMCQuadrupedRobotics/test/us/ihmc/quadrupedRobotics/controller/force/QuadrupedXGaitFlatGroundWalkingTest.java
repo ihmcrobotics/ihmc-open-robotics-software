@@ -12,7 +12,7 @@ import us.ihmc.quadrupedRobotics.QuadrupedTestBehaviors;
 import us.ihmc.quadrupedRobotics.QuadrupedTestFactory;
 import us.ihmc.quadrupedRobotics.QuadrupedTestGoals;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
-import us.ihmc.quadrupedRobotics.params.ParameterRegistry;
+import us.ihmc.robotics.dataStructures.parameter.ParameterRegistry;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
 import us.ihmc.robotics.testing.YoVariableTestGoal;
 import us.ihmc.simulationconstructionset.util.simulationRunner.GoalOrientedTestConductor;
@@ -57,9 +57,9 @@ public abstract class QuadrupedXGaitFlatGroundWalkingTest implements QuadrupedMu
    @Test(timeout = 30000)
    public void testWalkingForwardFast()
    {
-      QuadrupedTestBehaviors.standUp(conductor, variables);
-      QuadrupedTestBehaviors.squareUp(conductor, variables);
-      
+      QuadrupedTestBehaviors.readyXGait(conductor, variables);
+
+      variables.getXGaitEndPhaseShiftInput().set(90.0);
       variables.getUserTrigger().set(QuadrupedForceControllerRequestedEvent.REQUEST_XGAIT);
       variables.getYoPlanarVelocityInputX().set(1.0);
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
@@ -74,9 +74,9 @@ public abstract class QuadrupedXGaitFlatGroundWalkingTest implements QuadrupedMu
    @Test(timeout = 30000)
    public void testWalkingForwardSlow()
    {
-      QuadrupedTestBehaviors.standUp(conductor, variables);
-      QuadrupedTestBehaviors.squareUp(conductor, variables);
-      
+      QuadrupedTestBehaviors.readyXGait(conductor, variables);
+
+      variables.getXGaitEndPhaseShiftInput().set(90.0);
       variables.getUserTrigger().set(QuadrupedForceControllerRequestedEvent.REQUEST_XGAIT);
       variables.getYoPlanarVelocityInputX().set(0.1);
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
@@ -91,9 +91,9 @@ public abstract class QuadrupedXGaitFlatGroundWalkingTest implements QuadrupedMu
    @Test(timeout = 30000)
    public void testWalkingBackwardsFast()
    {
-      QuadrupedTestBehaviors.standUp(conductor, variables);
-      QuadrupedTestBehaviors.squareUp(conductor, variables);
-      
+      QuadrupedTestBehaviors.readyXGait(conductor, variables);
+
+      variables.getXGaitEndPhaseShiftInput().set(90.0);
       variables.getUserTrigger().set(QuadrupedForceControllerRequestedEvent.REQUEST_XGAIT);
       variables.getYoPlanarVelocityInputX().set(-1.0);
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
@@ -108,9 +108,9 @@ public abstract class QuadrupedXGaitFlatGroundWalkingTest implements QuadrupedMu
    @Test(timeout = 30000)
    public void testWalkingBackwardsSlow()
    {
-      QuadrupedTestBehaviors.standUp(conductor, variables);
-      QuadrupedTestBehaviors.squareUp(conductor, variables);
-      
+      QuadrupedTestBehaviors.readyXGait(conductor, variables);
+
+      variables.getXGaitEndPhaseShiftInput().set(90.0);
       variables.getUserTrigger().set(QuadrupedForceControllerRequestedEvent.REQUEST_XGAIT);
       variables.getYoPlanarVelocityInputX().set(-0.1);
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
@@ -125,9 +125,9 @@ public abstract class QuadrupedXGaitFlatGroundWalkingTest implements QuadrupedMu
    @Test(timeout = 30000)
    public void testWalkingInAForwardLeftCircle()
    {
-      QuadrupedTestBehaviors.standUp(conductor, variables);
-      QuadrupedTestBehaviors.squareUp(conductor, variables);
-      
+      QuadrupedTestBehaviors.readyXGait(conductor, variables);
+
+      variables.getXGaitEndPhaseShiftInput().set(90.0);
       variables.getUserTrigger().set(QuadrupedForceControllerRequestedEvent.REQUEST_XGAIT);
       variables.getYoPlanarVelocityInputX().set(0.6);
       variables.getYoPlanarVelocityInputZ().set(0.3);
@@ -146,9 +146,9 @@ public abstract class QuadrupedXGaitFlatGroundWalkingTest implements QuadrupedMu
    @Test(timeout = 30000)
    public void testWalkingInAForwardRightCircle()
    {
-      QuadrupedTestBehaviors.standUp(conductor, variables);
-      QuadrupedTestBehaviors.squareUp(conductor, variables);
-      
+      QuadrupedTestBehaviors.readyXGait(conductor, variables);
+
+      variables.getXGaitEndPhaseShiftInput().set(90.0);
       variables.getUserTrigger().set(QuadrupedForceControllerRequestedEvent.REQUEST_XGAIT);
       variables.getYoPlanarVelocityInputX().set(0.6);
       variables.getYoPlanarVelocityInputZ().set(-0.3);
@@ -167,9 +167,9 @@ public abstract class QuadrupedXGaitFlatGroundWalkingTest implements QuadrupedMu
    @Test(timeout = 30000)
    public void testWalkingInABackwardLeftCircle()
    {
-      QuadrupedTestBehaviors.standUp(conductor, variables);
-      QuadrupedTestBehaviors.squareUp(conductor, variables);
-      
+      QuadrupedTestBehaviors.readyXGait(conductor, variables);
+
+      variables.getXGaitEndPhaseShiftInput().set(90.0);
       variables.getUserTrigger().set(QuadrupedForceControllerRequestedEvent.REQUEST_XGAIT);
       variables.getYoPlanarVelocityInputX().set(-0.6);
       variables.getYoPlanarVelocityInputZ().set(-0.3);
@@ -188,9 +188,9 @@ public abstract class QuadrupedXGaitFlatGroundWalkingTest implements QuadrupedMu
    @Test(timeout = 30000)
    public void testWalkingInABackwardRightCircle()
    {
-      QuadrupedTestBehaviors.standUp(conductor, variables);
-      QuadrupedTestBehaviors.squareUp(conductor, variables);
-      
+      QuadrupedTestBehaviors.readyXGait(conductor, variables);
+
+      variables.getXGaitEndPhaseShiftInput().set(90.0);
       variables.getUserTrigger().set(QuadrupedForceControllerRequestedEvent.REQUEST_XGAIT);
       variables.getYoPlanarVelocityInputX().set(-0.6);
       variables.getYoPlanarVelocityInputZ().set(0.3);

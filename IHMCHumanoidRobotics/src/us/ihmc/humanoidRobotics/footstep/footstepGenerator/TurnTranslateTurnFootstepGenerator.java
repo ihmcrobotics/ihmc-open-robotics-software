@@ -1,7 +1,6 @@
 package us.ihmc.humanoidRobotics.footstep.footstepGenerator;
 
 import java.util.ArrayList;
-import java.util.Collection;
 
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
@@ -41,7 +40,7 @@ public class TurnTranslateTurnFootstepGenerator implements FootstepGenerator
       lastTurn = new TurnInPlaceFootstepGenerator(feet, soleFrames, endOrientation, pathType);
    }
 
-   public Collection<Footstep> generateDesiredFootstepList()
+   public ArrayList<Footstep> generateDesiredFootstepList()
    {
       ArrayList<Footstep> currentSegmentFootsteps;
       ArrayList<Footstep> completePath = null;

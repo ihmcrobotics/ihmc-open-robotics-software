@@ -15,6 +15,7 @@ import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FramePose2d;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -34,6 +35,7 @@ public class Footstep
    private final ReferenceFrame soleReferenceFrame;
 
    private final List<Point2d> predictedContactPoints = new ArrayList<>();
+   private final RecyclingArrayList<Point3d> swingWaypoints = new RecyclingArrayList<>(Point3d.class);
 
    private final boolean trustHeight;
    private boolean scriptedFootstep;
@@ -112,6 +114,18 @@ public class Footstep
    public void setTrajectoryType(TrajectoryType trajectoryType)
    {
       this.trajectoryType = trajectoryType;
+   }
+
+   public List<Point3d> getSwingWaypoints()
+   {
+      return swingWaypoints;
+   }
+
+   public void setSwingWaypoints(RecyclingArrayList<Point3d> trajectoryWaypoints)
+   {
+      swingWaypoints.clear();
+      for (int i = 0; i < trajectoryWaypoints.size(); i++)
+         swingWaypoints.add().set(trajectoryWaypoints.get(i));
    }
 
    public double getSwingHeight()
@@ -286,6 +300,11 @@ public class Footstep
       ankleReferenceFrame.setPoseAndUpdate(newPosition, newOrientation);
    }
 
+   public void setPose(Point3d newPosition, Quat4d newOrientation)
+   {
+      ankleReferenceFrame.setPoseAndUpdate(newPosition, newOrientation);
+   }
+
    private RigidBodyTransform transformFromAnkleToWorld;
 
    public void setSolePose(RigidBodyTransform transform)
@@ -308,6 +327,16 @@ public class Footstep
 
       newSolePoseInWorldFrame.getPose(transformFromSoleToWorld);
 
+      setSolePose(transformFromSoleToWorld);
+   }
+
+   public void setSolePose(Point3d positionInWorld, Quat4d orientationInWorld)
+   {
+      if (transformFromSoleToWorld == null)
+         transformFromSoleToWorld = new RigidBodyTransform();
+
+      transformFromSoleToWorld.setRotation(orientationInWorld);
+      transformFromSoleToWorld.setTranslation(positionInWorld.getX(), positionInWorld.getY(), positionInWorld.getZ());
       setSolePose(transformFromSoleToWorld);
    }
 
@@ -449,16 +478,6 @@ public class Footstep
       ankleReferenceFrame.getPosition2dIncludingFrame(framePoint2dToPack);
    }
 
-   public boolean epsilonEquals(Footstep otherFootstep, double epsilon)
-   {
-      boolean arePosesEqual = ankleReferenceFrame.epsilonEquals(otherFootstep.ankleReferenceFrame, epsilon);
-      boolean bodiesHaveTheSameName = endEffector.getName().equals(otherFootstep.endEffector.getName());
-      boolean sameRobotSide = robotSide == otherFootstep.robotSide;
-      boolean isTrustHeightTheSame = trustHeight == otherFootstep.trustHeight;
-
-      return arePosesEqual && bodiesHaveTheSameName && sameRobotSide && isTrustHeightTheSame;
-   }
-
    public void setFootstepType(FootstepType footstepType)
    {
       this.footstepType = footstepType;
@@ -467,17 +486,6 @@ public class Footstep
    public FootstepType getFootstepType()
    {
       return footstepType;
-   }
-
-   public String toString()
-   {
-      FrameOrientation frameOrientation = new FrameOrientation(ankleReferenceFrame);
-      frameOrientation.changeFrame(ReferenceFrame.getWorldFrame());
-
-      double[] ypr = frameOrientation.getYawPitchRoll();
-      String yawPitchRoll = "YawPitchRoll = " + Arrays.toString(ypr);
-
-      return "id: " + id + " - pose: " + ankleReferenceFrame + " - trustHeight = " + trustHeight + "\n\tYawPitchRoll= {" + yawPitchRoll + "}";
    }
 
    public boolean isScriptedFootstep()
@@ -490,4 +498,35 @@ public class Footstep
       this.scriptedFootstep = scriptedFootstep;
    }
 
+   public boolean epsilonEquals(Footstep otherFootstep, double epsilon)
+   {
+      boolean arePosesEqual = ankleReferenceFrame.epsilonEquals(otherFootstep.ankleReferenceFrame, epsilon);
+      boolean bodiesHaveTheSameName = endEffector.getName().equals(otherFootstep.endEffector.getName());
+      boolean sameRobotSide = robotSide == otherFootstep.robotSide;
+      boolean isTrustHeightTheSame = trustHeight == otherFootstep.trustHeight;
+
+      boolean sameWaypoints = swingWaypoints.size() == otherFootstep.swingWaypoints.size();
+      if (sameWaypoints)
+      {
+         for (int i = 0; i < swingWaypoints.size(); i++)
+         {
+            Point3d waypoint = swingWaypoints.get(i);
+            Point3d otherWaypoint = otherFootstep.swingWaypoints.get(i);
+            sameWaypoints = sameWaypoints && waypoint.epsilonEquals(otherWaypoint, epsilon);
+         }
+      }
+
+      return arePosesEqual && bodiesHaveTheSameName && sameRobotSide && isTrustHeightTheSame && sameWaypoints;
+   }
+
+   public String toString()
+   {
+      FrameOrientation frameOrientation = new FrameOrientation(ankleReferenceFrame);
+      frameOrientation.changeFrame(ReferenceFrame.getWorldFrame());
+
+      double[] ypr = frameOrientation.getYawPitchRoll();
+      String yawPitchRoll = "YawPitchRoll = " + Arrays.toString(ypr);
+
+      return "id: " + id + " - pose: " + ankleReferenceFrame + " - trustHeight = " + trustHeight + "\n\tYawPitchRoll= {" + yawPitchRoll + "}";
+   }
 }
