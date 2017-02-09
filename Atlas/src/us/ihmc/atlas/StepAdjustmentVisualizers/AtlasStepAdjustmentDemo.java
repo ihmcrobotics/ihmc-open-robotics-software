@@ -16,8 +16,8 @@ import javax.vecmath.Vector3d;
 public class AtlasStepAdjustmentDemo
 {
    private static StepScriptType stepScriptType = StepScriptType.FORWARD_FAST;
-   private static TestType testType = TestType.BIG_ADJUSTMENT;
-   private static PushDirection pushDirection = PushDirection.FORWARD;
+   private static TestType testType = TestType.FEEDBACK_ONLY;
+   private static PushDirection pushDirection = PushDirection.OUTWARD;
 
    private static String forwardFastScript = "scripts/stepAdjustment_forwardWalkingFast.xml";
    private static String forwardSlowScript = "scripts/stepAdjustment_forwardWalkingSlow.xml";
@@ -300,16 +300,16 @@ public class AtlasStepAdjustmentDemo
             switch(testType)
             {
             case BIG_ADJUSTMENT:
-               percentWeight = 0.83; //// TODO: 2/8/17
+               percentWeight = 0.97;
                break;
             case ADJUSTMENT_ONLY:
-               percentWeight = 0.33; //// TODO: 2/8/17
+               percentWeight = 0.29;
                break;
             case SPEED_UP_ONLY:
-               percentWeight = 0.52; //// TODO: 2/8/17
+               percentWeight = 0.52;
                break;
             default: // doesn't allow speed up or step adjustment
-               percentWeight = 0.25; //// TODO: 2/8/17
+               percentWeight = 0.25;
                break;
             }
             break;
@@ -319,16 +319,16 @@ public class AtlasStepAdjustmentDemo
             switch(testType)
             {
             case BIG_ADJUSTMENT:
-               percentWeight = 1.1; //// TODO: 2/8/17
+               percentWeight = 1.42;
                break;
             case ADJUSTMENT_ONLY:
-               percentWeight = 0.95; //// TODO: 2/8/17
+               percentWeight = 0.83;
                break;
             case SPEED_UP_ONLY:
-               percentWeight = 0.36; //// TODO: 2/8/17
+               percentWeight = 0.36;
                break;
             default: // doesn't allow speed up or step adjustment
-               percentWeight = 0.22; //// TODO: 2/8/17
+               percentWeight = 0.22;
                break;
             }
             break;
