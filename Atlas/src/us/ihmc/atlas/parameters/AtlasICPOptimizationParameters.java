@@ -172,28 +172,28 @@ public class AtlasICPOptimizationParameters extends ICPOptimizationParameters
    @Override
    public double getDoubleSupportMaxCMPForwardExit()
    {
-      return 0.001;
+      return 0.005;
    }
 
    /** {@inheritDoc} */
    @Override
    public double getDoubleSupportMaxCMPLateralExit()
    {
-      return 0.001;
+      return 0.005;
    }
 
    /** {@inheritDoc} */
    @Override
    public double getSingleSupportMaxCMPForwardExit()
    {
-      return 0.001;
+      return 0.005;
    }
 
    /** {@inheritDoc} */
    @Override
    public double getSingleSupportMaxCMPLateralExit()
    {
-      return 0.001;
+      return 0.005;
    }
 
    /** {@inheritDoc} */
@@ -201,6 +201,20 @@ public class AtlasICPOptimizationParameters extends ICPOptimizationParameters
    public double getAdjustmentDeadband()
    {
       return 0.03;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public double getDoubleSupportSplitFractionForBigAdjustment()
+   {
+      return runningOnRealRobot ? 0.3 : 0.2;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public double getMinimumTimeOnInitialCMPForBigAdjustment()
+   {
+      return runningOnRealRobot ? 0.15 : 0.1;
    }
 
    /** {@inheritDoc} */
