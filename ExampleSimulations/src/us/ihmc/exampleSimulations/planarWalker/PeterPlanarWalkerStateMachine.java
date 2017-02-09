@@ -30,32 +30,31 @@ public class PeterPlanarWalkerStateMachine
    private SideDependentList<PIDController> kneeControllers = new SideDependentList<PIDController>();
    private SideDependentList<PIDController> hipControllers = new SideDependentList<PIDController>();
 
-   private DoubleYoVariable desiredKneeExtension = new DoubleYoVariable("desiredKneeExtension", registry);
-   private DoubleYoVariable desiredPitch = new DoubleYoVariable("desiredPitch", registry);
-   private DoubleYoVariable desiredHeight = new DoubleYoVariable("desiredHeight", registry);
-   private DoubleYoVariable swingTime = new DoubleYoVariable("swingTime", registry);
-   private DoubleYoVariable desiredSwingLegHipAngle = new DoubleYoVariable("desiredSwingLegHipAngle", registry);
-   private DoubleYoVariable scaleForVelToAngle = new DoubleYoVariable("scaleForVelToAngle", registry);
-   private DoubleYoVariable desiredKneeStance = new DoubleYoVariable("desiredKneeStance", registry);
-   private DoubleYoVariable angleForCapture = new DoubleYoVariable("angleForCapture", registry);
-   private DoubleYoVariable feedForwardAngle = new DoubleYoVariable("feedForwardAngle", registry);
-   private DoubleYoVariable velocityErrorAngle = new DoubleYoVariable("velocityErrorAngle", registry);
-   private DoubleYoVariable feedForwardGain = new DoubleYoVariable("feedForwardGain", registry);
-   private DoubleYoVariable lastStepHipAngle = new DoubleYoVariable("lastStepHipAngle", registry);
-   private DoubleYoVariable stepToStepHipAngleDelta = new DoubleYoVariable("stepToStepHipAngleDelta", registry);
+   private DoubleYoVariable desiredKneeExtension;
+   private DoubleYoVariable desiredPitch;
+   private DoubleYoVariable desiredHeight;
+   private DoubleYoVariable swingTime;
+   private DoubleYoVariable desiredSwingLegHipAngle;
+   private DoubleYoVariable scaleForVelToAngle;
+   private DoubleYoVariable desiredKneeStance;
+   private DoubleYoVariable angleForCapture;
+   private DoubleYoVariable feedForwardAngle;
+   private DoubleYoVariable velocityErrorAngle;
+   private DoubleYoVariable feedForwardGain;
+   private DoubleYoVariable lastStepHipAngle;
+   private DoubleYoVariable stepToStepHipAngleDelta;
 
-   private DoubleYoVariable swingTimeForThisStep = new DoubleYoVariable("swingTimeForThisStep", registry);
-   private BooleanYoVariable initalizedKneeExtension = new BooleanYoVariable("initalizedKneeExtension", registry);
-   private BooleanYoVariable initalizedKneeDoubleExtension = new BooleanYoVariable("initalizedKneeDoubleExtension", registry);
+   private DoubleYoVariable swingTimeForThisStep;
+   private BooleanYoVariable initalizedKneeExtension;
+   private BooleanYoVariable initalizedKneeDoubleExtension;
 
-   private DoubleYoVariable kneeMoveStartTime = new DoubleYoVariable("kneeMoveStartTime", registry);
-   private DoubleYoVariable startingHipAngle = new DoubleYoVariable("startingHipAngle", registry);
-   private DoubleYoVariable maxVelocityErrorAngle = new DoubleYoVariable("maxVelocityErrorAngle", registry);
+   private DoubleYoVariable kneeMoveStartTime;
+   private DoubleYoVariable startingHipAngle;
+   private DoubleYoVariable maxVelocityErrorAngle;
 
-   private DoubleYoVariable desiredBodyVelocity = new DoubleYoVariable("desiredBodyVelocity", registry);
-   private DoubleYoVariable alphaFilterVariable = new DoubleYoVariable("alphaFilterVariable", registry);
-   private AlphaFilteredYoVariable filteredDesiredVelocity = new AlphaFilteredYoVariable("filteredDesiredVelocity", registry, alphaFilterVariable,
-                                                                                         desiredBodyVelocity);
+   private DoubleYoVariable desiredBodyVelocity;
+   private DoubleYoVariable alphaFilterVariable;
+   private AlphaFilteredYoVariable filteredDesiredVelocity;
 
    private YoMinimumJerkTrajectory trajectorySwingHip;
    private YoMinimumJerkTrajectory trajectorySwingKnee;
@@ -65,13 +64,39 @@ public class PeterPlanarWalkerStateMachine
    private final YoVariable<?> timestamp;
    private final YoPlanarWalkerTimedStep stepCommand;
 
-   public PeterPlanarWalkerStateMachine(PeterPlanarWalkerRobot robot, double deltaT, RobotSide robotSide, YoVariable<?> timestamp)
+   public PeterPlanarWalkerStateMachine(PeterPlanarWalkerRobot robot, double deltaT, RobotSide robotSide, YoVariable<?> timestamp, YoVariableRegistry parentRegistry)
    {
       String prefix = robotSide.getLowerCaseName();
       this.robot = robot;
       this.deltaT = deltaT;
       this.timestamp = timestamp;
       this.registry = new YoVariableRegistry(prefix + getClass().getSimpleName());
+      this.desiredKneeExtension = new DoubleYoVariable("desiredKneeExtension", registry);
+      this.desiredPitch = new DoubleYoVariable("desiredPitch", registry);
+      this.desiredHeight = new DoubleYoVariable("desiredHeight", registry);
+      this.swingTime = new DoubleYoVariable("swingTime", registry);
+      this.desiredSwingLegHipAngle = new DoubleYoVariable("desiredSwingLegHipAngle", registry);
+      this.scaleForVelToAngle = new DoubleYoVariable("scaleForVelToAngle", registry);
+      this.desiredKneeStance = new DoubleYoVariable("desiredKneeStance", registry);
+      this.angleForCapture = new DoubleYoVariable("angleForCapture", registry);
+      this.feedForwardAngle = new DoubleYoVariable("feedForwardAngle", registry);
+      this.velocityErrorAngle = new DoubleYoVariable("velocityErrorAngle", registry);
+      this.feedForwardGain = new DoubleYoVariable("feedForwardGain", registry);
+      this.lastStepHipAngle = new DoubleYoVariable("lastStepHipAngle", registry);
+      this.stepToStepHipAngleDelta = new DoubleYoVariable("stepToStepHipAngleDelta", registry);
+
+      this.swingTimeForThisStep = new DoubleYoVariable("swingTimeForThisStep", registry);
+      this.initalizedKneeExtension = new BooleanYoVariable("initalizedKneeExtension", registry);
+      this.initalizedKneeDoubleExtension = new BooleanYoVariable("initalizedKneeDoubleExtension", registry);
+
+      this.kneeMoveStartTime = new DoubleYoVariable("kneeMoveStartTime", registry);
+      this.startingHipAngle = new DoubleYoVariable("startingHipAngle", registry);
+      this.maxVelocityErrorAngle = new DoubleYoVariable("maxVelocityErrorAngle", registry);
+
+      this.desiredBodyVelocity = new DoubleYoVariable("desiredBodyVelocity", registry);
+      this.alphaFilterVariable = new DoubleYoVariable("alphaFilterVariable", registry);
+      this.filteredDesiredVelocity = new AlphaFilteredYoVariable("filteredDesiredVelocity", registry, alphaFilterVariable,
+                                                                   desiredBodyVelocity);
       this.stepCommand = new YoPlanarWalkerTimedStep(prefix + "StepCommand", registry);
 
       PIDController pidController = new PIDController(robotSide.getSideNameFirstLetter() + "_Knee", registry);
@@ -96,6 +121,7 @@ public class PeterPlanarWalkerStateMachine
       alphaFilterVariable.set(0.9999);
 
       initializeStateMachine(robotSide);
+      parentRegistry.addChild(registry);
    }
 
    private void initializeStateMachine(RobotSide supportLegSide)
@@ -283,6 +309,11 @@ public class PeterPlanarWalkerStateMachine
       double controlEffort = kneeControllers.get(robotSide).compute(kneePosition, desiredPosition, kneePositionRate, desiredVelocity, deltaT);
       robot.setKneeTorque(robotSide, controlEffort);
    }
+   
+   public FiniteStateMachine<ControllerState, ControllerEvent> getStateMachine()
+   {
+      return stateMachine;
+   }
 
    public enum ControllerState
    {
@@ -292,10 +323,5 @@ public class PeterPlanarWalkerStateMachine
    public enum ControllerEvent
    {
       TIMEOUT;
-   }
-
-   public YoVariableRegistry getYoVariableRegistry()
-   {
-      return registry;
    }
 }
