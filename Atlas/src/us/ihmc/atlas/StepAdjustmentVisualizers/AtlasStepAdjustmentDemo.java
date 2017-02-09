@@ -5,16 +5,18 @@ import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.robotics.controllers.ControllerFailureException;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransitionCondition;
+import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 
 import javax.vecmath.Vector3d;
 
 public class AtlasStepAdjustmentDemo
 {
    private static StepScriptType stepScriptType = StepScriptType.FORWARD_FAST;
-   private static TestType testType = TestType.ADJUSTMENT_ONLY;
-   private static PushDirection pushDirection = PushDirection.OUTWARD;
+   private static TestType testType = TestType.FEEDBACK_ONLY;
+   private static PushDirection pushDirection = PushDirection.FORWARD;
 
    private static String forwardFastScript = "scripts/stepAdjustment_forwardWalkingFast.xml";
    private static String forwardSlowScript = "scripts/stepAdjustment_forwardWalkingSlow.xml";
@@ -23,11 +25,9 @@ public class AtlasStepAdjustmentDemo
 
    private static double simulationTime = 10.0;
 
-   public AtlasStepAdjustmentDemo()
-   {
-   }
+   private final StepAdjustmentDemoHelper stepAdjustmentDemo;
 
-   public static void main(String[] args)
+   public AtlasStepAdjustmentDemo(StepScriptType stepScriptType, TestType testType, PushDirection pushDirection)
    {
       AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, DRCRobotModel.RobotTarget.SCS, false)
       {
@@ -68,6 +68,7 @@ public class AtlasStepAdjustmentDemo
                   switch(stepScriptType)
                   {
                   case FORWARD_FAST:
+                  case STATIONARY_FAST:
                      return 0.5;
                   default: // FORWARD_SLOW
                      return 0.6;
@@ -94,13 +95,10 @@ public class AtlasStepAdjustmentDemo
             switch(testType)
             {
             case BIG_ADJUSTMENT:
-               percentWeight = 1.1;
+               percentWeight = 0.96;
                break;
             case ADJUSTMENT_ONLY:
                percentWeight = 0.49;
-               break;
-            case NO_ADJUSTMENT:
-               percentWeight = 0.34;
                break;
             case SPEED_UP_ONLY:
                percentWeight = 0.56;
@@ -121,9 +119,6 @@ public class AtlasStepAdjustmentDemo
             case ADJUSTMENT_ONLY:
                percentWeight = 1.63;
                break;
-            case NO_ADJUSTMENT:
-               percentWeight = 0.3;
-               break;
             case SPEED_UP_ONLY:
                percentWeight = 0.47;
                break;
@@ -138,13 +133,10 @@ public class AtlasStepAdjustmentDemo
             switch(testType)
             {
             case BIG_ADJUSTMENT:
-               percentWeight = 0.75;
+               percentWeight = 0.73;
                break;
             case ADJUSTMENT_ONLY:
-               percentWeight = 0.55;
-               break;
-            case NO_ADJUSTMENT:
-               percentWeight = 0.32;
+               percentWeight = 0.65;
                break;
             case SPEED_UP_ONLY:
                percentWeight = 0.48;
@@ -163,10 +155,7 @@ public class AtlasStepAdjustmentDemo
                percentWeight = 1.65;
                break;
             case ADJUSTMENT_ONLY:
-               percentWeight = 1.0;
-               break;
-            case NO_ADJUSTMENT:
-               percentWeight = 0.45;
+               percentWeight = 0.86;
                break;
             case SPEED_UP_ONLY:
                percentWeight = 0.62;
@@ -189,19 +178,16 @@ public class AtlasStepAdjustmentDemo
             switch(testType)
             {
             case BIG_ADJUSTMENT:
-               percentWeight = 0.83;
+               percentWeight = 0.83; //// TODO: 2/8/17
                break;
             case ADJUSTMENT_ONLY:
-               percentWeight = 0.62;
-               break;
-            case NO_ADJUSTMENT:
-               percentWeight = 0.4;
+               percentWeight = 0.62; //// TODO: 2/8/17
                break;
             case SPEED_UP_ONLY:
-               percentWeight = 0.67;
+               percentWeight = 0.67; //// TODO: 2/8/17
                break;
             default: // doesn't allow speed up or step adjustment
-               percentWeight = 0.66;
+               percentWeight = 0.66; //// TODO: 2/8/17
                break;
             }
             break;
@@ -211,19 +197,16 @@ public class AtlasStepAdjustmentDemo
             switch(testType)
             {
             case BIG_ADJUSTMENT:
-               percentWeight = 1.22;
+               percentWeight = 1.22; //// TODO: 2/8/17
                break;
             case ADJUSTMENT_ONLY:
-               percentWeight = 1.04;
-               break;
-            case NO_ADJUSTMENT:
-               percentWeight = 0.31;
+               percentWeight = 1.04; //// TODO: 2/8/17
                break;
             case SPEED_UP_ONLY:
-               percentWeight = 0.48;
+               percentWeight = 0.48; //// TODO: 2/8/17
                break;
             default: // doesn't allow speed up or step adjustment
-               percentWeight = 0.49;
+               percentWeight = 0.49; //// TODO: 2/8/17
                break;
             }
             break;
@@ -233,19 +216,16 @@ public class AtlasStepAdjustmentDemo
             switch(testType)
             {
             case BIG_ADJUSTMENT:
-               percentWeight = 0.71;
+               percentWeight = 0.71; //// TODO: 2/8/17
                break;
             case ADJUSTMENT_ONLY:
-               percentWeight = 0.5;
-               break;
-            case NO_ADJUSTMENT:
-               percentWeight = 0.3; //// TODO: 1/30/17
+               percentWeight = 0.5; //// TODO: 2/8/17
                break;
             case SPEED_UP_ONLY:
-               percentWeight = 0.48;
+               percentWeight = 0.48; //// TODO: 2/8/17
                break;
             default: // doesn't allow speed up or step adjustment
-               percentWeight = 0.48;
+               percentWeight = 0.48; //// TODO: 2/8/17
                break;
             }
             break;
@@ -255,19 +235,16 @@ public class AtlasStepAdjustmentDemo
             switch(testType)
             {
             case BIG_ADJUSTMENT:
-               percentWeight = 1.85;
+               percentWeight = 1.85; //// TODO: 2/8/17
                break;
             case ADJUSTMENT_ONLY:
-               percentWeight = 1.7;
-               break;
-            case NO_ADJUSTMENT:
-               percentWeight = 0.25;
+               percentWeight = 1.7; //// TODO: 2/8/17
                break;
             case SPEED_UP_ONLY:
-               percentWeight = 0.87;
+               percentWeight = 0.87; //// TODO: 2/8/17
                break;
             default: // doesn't allow speed up or step adjustment
-               percentWeight = 0.87;
+               percentWeight = 0.87; //// TODO: 2/8/17
                break;
             }
             break;
@@ -284,19 +261,16 @@ public class AtlasStepAdjustmentDemo
             switch(testType)
             {
             case BIG_ADJUSTMENT:
-               percentWeight = 0.98;
+               percentWeight = 0.98; //// TODO: 2/8/17
                break;
             case ADJUSTMENT_ONLY:
-               percentWeight = 0.27;
-               break;
-            case NO_ADJUSTMENT:
-               percentWeight = 0.2;
+               percentWeight = 0.27; //// TODO: 2/8/17
                break;
             case SPEED_UP_ONLY:
-               percentWeight = 0.47;
+               percentWeight = 0.47; //// TODO: 2/8/17
                break;
             default: // doesn't allow speed up or step adjustment
-               percentWeight = 0.25;
+               percentWeight = 0.25; //// TODO: 2/8/17
                break;
             }
             break;
@@ -306,19 +280,16 @@ public class AtlasStepAdjustmentDemo
             switch(testType)
             {
             case BIG_ADJUSTMENT:
-               percentWeight = 1.08;
+               percentWeight = 1.08; //// TODO: 2/8/17
                break;
             case ADJUSTMENT_ONLY:
-               percentWeight = 0.86;
-               break;
-            case NO_ADJUSTMENT:
-               percentWeight = 0.16;
+               percentWeight = 0.86; //// TODO: 2/8/17
                break;
             case SPEED_UP_ONLY:
-               percentWeight = 0.33;
+               percentWeight = 0.33; //// TODO: 2/8/17
                break;
             default: // doesn't allow speed up or step adjustment
-               percentWeight = 0.26;
+               percentWeight = 0.26; //// TODO: 2/8/17
                break;
             }
             break;
@@ -328,19 +299,16 @@ public class AtlasStepAdjustmentDemo
             switch(testType)
             {
             case BIG_ADJUSTMENT:
-               percentWeight = 0.83;
+               percentWeight = 0.83; //// TODO: 2/8/17
                break;
             case ADJUSTMENT_ONLY:
-               percentWeight = 0.33;
-               break;
-            case NO_ADJUSTMENT:
-               percentWeight = 0.3; //// TODO: 1/30/17
+               percentWeight = 0.33; //// TODO: 2/8/17
                break;
             case SPEED_UP_ONLY:
-               percentWeight = 0.52;
+               percentWeight = 0.52; //// TODO: 2/8/17
                break;
             default: // doesn't allow speed up or step adjustment
-               percentWeight = 0.25;
+               percentWeight = 0.25; //// TODO: 2/8/17
                break;
             }
             break;
@@ -350,19 +318,16 @@ public class AtlasStepAdjustmentDemo
             switch(testType)
             {
             case BIG_ADJUSTMENT:
-               percentWeight = 1.41;
+               percentWeight = 1.1; //// TODO: 2/8/17
                break;
             case ADJUSTMENT_ONLY:
-               percentWeight = 0.95;
-               break;
-            case NO_ADJUSTMENT:
-               percentWeight = 0.2;
+               percentWeight = 0.95; //// TODO: 2/8/17
                break;
             case SPEED_UP_ONLY:
-               percentWeight = 0.36;
+               percentWeight = 0.36; //// TODO: 2/8/17
                break;
             default: // doesn't allow speed up or step adjustment
-               percentWeight = 0.22;
+               percentWeight = 0.22; //// TODO: 2/8/17
                break;
             }
             break;
@@ -371,8 +336,7 @@ public class AtlasStepAdjustmentDemo
       }
 
 
-      StepAdjustmentDemoHelper stepAdjustmentDemo = new StepAdjustmentDemoHelper(robotModel, script);
-
+      stepAdjustmentDemo = new StepAdjustmentDemoHelper(robotModel, script);
 
       // push parameters:
 
@@ -384,6 +348,29 @@ public class AtlasStepAdjustmentDemo
       // push timing:
       StateTransitionCondition pushCondition = stepAdjustmentDemo.getSingleSupportStartCondition(RobotSide.RIGHT);
       stepAdjustmentDemo.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
-      boolean success = stepAdjustmentDemo.simulateAndBlockAndCatchExceptions(simulationTime);
+   }
+
+   public void simulateAndBlock(double simulationTime) throws
+         BlockingSimulationRunner.SimulationExceededMaximumTimeException, ControllerFailureException
+   {
+      stepAdjustmentDemo.simulateAndBlock(simulationTime);
+   }
+
+   public void destroySimulation()
+   {
+      stepAdjustmentDemo.destroySimulation();
+   }
+
+   public static void main(String[] args)
+   {
+      AtlasStepAdjustmentDemo demo = new AtlasStepAdjustmentDemo(stepScriptType, testType, pushDirection);
+
+      try
+      {
+         demo.simulateAndBlock(simulationTime);
+      }
+      catch (Exception e)
+      {
+      }
    }
 }

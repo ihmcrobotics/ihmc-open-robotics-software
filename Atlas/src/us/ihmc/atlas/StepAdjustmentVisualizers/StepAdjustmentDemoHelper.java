@@ -146,6 +146,14 @@ public class StepAdjustmentDemoHelper
       blockingSimulationRunner.simulateAndBlock(simulationTime);
    }
 
+   public void destroySimulation()
+   {
+      blockingSimulationRunner.destroySimulation();
+      blockingSimulationRunner = null;
+
+      simulationStarter.close();
+   }
+
    public boolean simulateAndBlockAndCatchExceptions(double simulationTime)
    {
       try

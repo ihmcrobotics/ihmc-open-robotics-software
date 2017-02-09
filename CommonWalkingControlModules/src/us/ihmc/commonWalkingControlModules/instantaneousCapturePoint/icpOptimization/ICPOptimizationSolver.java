@@ -2,8 +2,6 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimiz
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.recursion.EntryCMPRecursionMultiplier;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.recursion.ExitCMPRecursionMultiplier;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.qpInput.*;
 import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSolver;
 import us.ihmc.robotics.geometry.FramePoint;
