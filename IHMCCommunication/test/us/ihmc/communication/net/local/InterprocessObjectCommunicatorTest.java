@@ -16,7 +16,7 @@ import org.junit.Test;
 
 import us.ihmc.communication.net.NetClassList;
 import us.ihmc.communication.net.ObjectConsumer;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public class InterprocessObjectCommunicatorTest
 {

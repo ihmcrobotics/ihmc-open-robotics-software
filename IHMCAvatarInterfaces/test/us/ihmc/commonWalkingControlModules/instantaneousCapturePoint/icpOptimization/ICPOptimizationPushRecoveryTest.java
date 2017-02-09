@@ -2,15 +2,23 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimiz
 
 import static org.junit.Assert.assertTrue;
 
+import java.io.InputStream;
+import java.util.Random;
+
+import javax.vecmath.Point3d;
+import javax.vecmath.Vector3d;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import us.ihmc.robotModels.FullHumanoidRobotModel;
+
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -24,13 +32,7 @@ import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters
 import us.ihmc.simulationconstructionset.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.thread.ThreadTools;
-
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-import java.io.InputStream;
-import java.util.Random;
 
 public abstract class ICPOptimizationPushRecoveryTest
 {
@@ -586,7 +588,7 @@ public abstract class ICPOptimizationPushRecoveryTest
       setupCamera(scs);
       swingTime = getRobotModel().getWalkingControllerParameters().getDefaultSwingTime();
       transferTime = getRobotModel().getWalkingControllerParameters().getDefaultTransferTime();
-      initialTransferTime = getRobotModel().getCapturePointPlannerParameters().getDoubleSupportInitialTransferDuration();
+      initialTransferTime = getRobotModel().getWalkingControllerParameters().getDefaultInitialTransferTime();
       ThreadTools.sleep(1000);
    }
 

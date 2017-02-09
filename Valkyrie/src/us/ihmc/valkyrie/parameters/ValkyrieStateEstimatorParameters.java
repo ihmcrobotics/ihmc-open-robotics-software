@@ -227,7 +227,7 @@ public class ValkyrieStateEstimatorParameters extends StateEstimatorParameters
    @Override
    public double getIMUYawDriftFilterFreqInHertz()
    {
-      return 1.0e-3;
+      return 0.4; // alpha = 0.995 with dt = 2ms
    }
 
    @Override

@@ -310,9 +310,9 @@ public class BagOfBalls
    public void hideAll()
    {
       index = 0;
-      for (YoGraphicPosition dynamicGraphicPosition : dynamicGraphicPositions)
+      for (int i = 0; i < dynamicGraphicPositions.size(); i++)
       {
-         dynamicGraphicPosition.setPositionToNaN();
+         dynamicGraphicPositions.get(i).setPositionToNaN();
       }
    }
 

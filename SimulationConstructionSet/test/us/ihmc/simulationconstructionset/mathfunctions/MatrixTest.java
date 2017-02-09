@@ -8,7 +8,7 @@ import java.util.Random;
 import org.junit.Test;
 
 import Jama.Matrix;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public class MatrixTest
 {

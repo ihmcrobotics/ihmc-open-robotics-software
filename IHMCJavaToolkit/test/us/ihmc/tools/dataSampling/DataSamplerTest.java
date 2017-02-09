@@ -9,8 +9,7 @@ import java.util.HashMap;
 import org.junit.Before;
 import org.junit.Test;
 
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.tools.dataSampling.DataSampler;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public class DataSamplerTest
 {

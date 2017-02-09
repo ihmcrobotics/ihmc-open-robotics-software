@@ -1,6 +1,14 @@
 package us.ihmc.robotics.referenceFrames;
 
+import java.util.ArrayList;
+import java.util.Random;
+
+import javax.vecmath.Matrix3d;
+import javax.vecmath.Vector3d;
+
 import org.junit.Test;
+
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.random.RandomTools;
@@ -10,13 +18,7 @@ import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTestTools;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.SixDoFJoint;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.testing.JUnitTools;
-
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Vector3d;
-import java.util.ArrayList;
-import java.util.Random;
 
 public class CenterOfMassReferenceFrameTest
 {

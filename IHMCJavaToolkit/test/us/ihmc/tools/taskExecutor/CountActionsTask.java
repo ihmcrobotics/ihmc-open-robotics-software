@@ -1,7 +1,5 @@
 package us.ihmc.tools.taskExecutor;
 
-import us.ihmc.tools.taskExecutor.Task;
-
 public class CountActionsTask implements Task
 {
    private int numberOfTimesTransitionIntoActionWasCalled = 0;

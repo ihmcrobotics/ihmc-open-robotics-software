@@ -69,4 +69,19 @@ public class PolytopeVertex
       return "{" + position.getX() + ", " + position.getY() + ", " + position.getZ() + "}";
    }
 
+   public double getX()
+   {
+      return position.getX();
+   }
+
+   public double getY()
+   {
+      return position.getY();
+   }
+
+   public double getZ()
+   {
+      return position.getZ();
+   }
+
 }

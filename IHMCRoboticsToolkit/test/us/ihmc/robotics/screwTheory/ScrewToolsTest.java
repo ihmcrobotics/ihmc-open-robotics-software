@@ -1,17 +1,10 @@
 package us.ihmc.robotics.screwTheory;
 
-import gnu.trove.list.array.TIntArrayList;
-import org.ejml.data.DenseMatrix64F;
-import org.junit.Before;
-import org.junit.Test;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.random.RandomTools;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.screwTheory.ScrewTestTools.RandomFloatingChain;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Vector3d;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -21,10 +14,19 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import javax.vecmath.Matrix3d;
+import javax.vecmath.Vector3d;
+
+import org.ejml.data.DenseMatrix64F;
+import org.junit.Before;
+import org.junit.Test;
+
+import gnu.trove.list.array.TIntArrayList;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.screwTheory.ScrewTestTools.RandomFloatingChain;
 
 public class ScrewToolsTest
 {

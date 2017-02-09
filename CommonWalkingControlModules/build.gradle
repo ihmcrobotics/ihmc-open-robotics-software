@@ -48,6 +48,8 @@ dependencies {
     compile group: 'us.ihmc', name: 'IHMCNativeLibraryLoader', version: '1.0'
     compile group: 'net.java.dev.jna', name: 'jna', version: '4.1.0'
     compile group: 'net.sf.trove4j', name: 'trove4j', version: '3.0.3'
+    
+    testCompile group: 'us.ihmc', name: 'IHMCContinuousIntegrationFramework', version: '0.9.1'
 
     compile ihmc.getProjectDependency(":IHMCRobotModels")
     compile ihmc.getProjectDependency(":SensorProcessing")

@@ -67,6 +67,7 @@ public class InverseDynamicsOptimizationControlModule
    private final Map<OneDoFJoint, DoubleYoVariable> jointMaximumAccelerations = new HashMap<>();
    private final Map<OneDoFJoint, DoubleYoVariable> jointMinimumAccelerations = new HashMap<>();
    private final DoubleYoVariable rhoMin = new DoubleYoVariable("rhoMin", registry);
+   private final MomentumModuleSolution momentumModuleSolution;
 
    private final BooleanYoVariable hasNotConvergedInPast = new BooleanYoVariable("hasNotConvergedInPast", registry);
    private final IntegerYoVariable hasNotConvergedCounts = new IntegerYoVariable("hasNotConvergedCounts", registry);
@@ -119,6 +120,8 @@ public class InverseDynamicsOptimizationControlModule
       }
 
       rhoMin.set(momentumOptimizationSettings.getRhoMin());
+      
+      momentumModuleSolution = new MomentumModuleSolution();
 
       qpSolver = new InverseDynamicsQPSolver(numberOfDoFs, rhoSize, registry);
       qpSolver.setAccelerationRegularizationWeight(momentumOptimizationSettings.getJointAccelerationWeight());
@@ -183,8 +186,11 @@ public class InverseDynamicsOptimizationControlModule
       SpatialForceVector centroidalMomentumRateSolution = motionQPInputCalculator.computeCentroidalMomentumRateFromSolution(qDDotSolution);
       Map<RigidBody, Wrench> externalWrenchSolution = externalWrenchHandler.getExternalWrenchMap();
       List<RigidBody> rigidBodiesWithExternalWrench = externalWrenchHandler.getRigidBodiesWithExternalWrench();
-      MomentumModuleSolution momentumModuleSolution = new MomentumModuleSolution(jointsToOptimizeFor, qDDotSolution, centroidalMomentumRateSolution,
-            externalWrenchSolution, rigidBodiesWithExternalWrench);
+      momentumModuleSolution.setCentroidalMomentumRateSolution(centroidalMomentumRateSolution);
+      momentumModuleSolution.setExternalWrenchSolution(externalWrenchSolution);
+      momentumModuleSolution.setJointAccelerations(qDDotSolution);
+      momentumModuleSolution.setJointsToOptimizeFor(jointsToOptimizeFor);
+      momentumModuleSolution.setRigidBodiesWithExternalWrench(rigidBodiesWithExternalWrench);
 
       if (noConvergenceException != null)
       {
