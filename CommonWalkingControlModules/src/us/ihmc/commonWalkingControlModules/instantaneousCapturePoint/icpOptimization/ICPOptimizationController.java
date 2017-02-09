@@ -92,10 +92,8 @@ public class ICPOptimizationController
    private final DoubleYoVariable lateralFootstepWeight = new DoubleYoVariable(yoNamePrefix + "LateralFootstepWeight", registry);
    private final YoFramePoint2d scaledFootstepWeights = new YoFramePoint2d(yoNamePrefix + "ScaledFootstepWeights", worldFrame, registry);
 
-   private final DoubleYoVariable swingFeedbackForwardWeight = new DoubleYoVariable(yoNamePrefix + "SwingFeedbackForwardWeight", registry);
-   private final DoubleYoVariable swingFeedbackLateralWeight = new DoubleYoVariable(yoNamePrefix + "SwingFeedbackLateralWeight", registry);
-   private final DoubleYoVariable transferFeedbackForwardWeight = new DoubleYoVariable(yoNamePrefix + "TransferFeedbackForwardWeight", registry);
-   private final DoubleYoVariable transferFeedbackLateralWeight = new DoubleYoVariable(yoNamePrefix + "TransferFeedbackLateralWeight", registry);
+   private final DoubleYoVariable feedbackForwardWeight = new DoubleYoVariable(yoNamePrefix + "FeedbackForwardWeight", registry);
+   private final DoubleYoVariable feedbackLateralWeight = new DoubleYoVariable(yoNamePrefix + "FeedbackLateralWeight", registry);
    private final YoFramePoint2d scaledFeedbackWeight = new YoFramePoint2d(yoNamePrefix + "ScaledFeedbackWeight", worldFrame, registry);
 
    private final DoubleYoVariable footstepRegularizationWeight = new DoubleYoVariable(yoNamePrefix + "FootstepRegularizationWeight", registry);
@@ -105,8 +103,6 @@ public class ICPOptimizationController
 
    private final DoubleYoVariable feedbackOrthogonalGain = new DoubleYoVariable(yoNamePrefix + "FeedbackOrthogonalGain", registry);
    private final DoubleYoVariable feedbackParallelGain = new DoubleYoVariable(yoNamePrefix + "FeedbackParallelGain", registry);
-
-   private final DoubleYoVariable remainingTimeToStopAdjusting = new DoubleYoVariable(yoNamePrefix + "RemainingTimeToStopAdjusting", registry);
 
    private final IntegerYoVariable numberOfIterations = new IntegerYoVariable(yoNamePrefix + "NumberOfIterations", registry);
    private final BooleanYoVariable hasNotConvergedInPast = new BooleanYoVariable(yoNamePrefix + "HasNotConvergedInPast", registry);
@@ -171,10 +167,8 @@ public class ICPOptimizationController
       forwardFootstepWeight.set(icpOptimizationParameters.getForwardFootstepWeight());
       lateralFootstepWeight.set(icpOptimizationParameters.getLateralFootstepWeight());
       footstepRegularizationWeight.set(icpOptimizationParameters.getFootstepRegularizationWeight());
-      swingFeedbackForwardWeight.set(icpOptimizationParameters.getSingleSupportFeedbackForwardWeight());
-      swingFeedbackLateralWeight.set(icpOptimizationParameters.getSingleSupportFeedbackLateralWeight());
-      transferFeedbackForwardWeight.set(icpOptimizationParameters.getDoubleSupportFeedbackForwardWeight());
-      transferFeedbackLateralWeight.set(icpOptimizationParameters.getDoubleSupportFeedbackLateralWeight());
+      feedbackForwardWeight.set(icpOptimizationParameters.getFeedbackForwardWeight());
+      feedbackLateralWeight.set(icpOptimizationParameters.getFeedbackLateralWeight());
       feedbackRegularizationWeight.set(icpOptimizationParameters.getFeedbackRegularizationWeight());
       feedbackOrthogonalGain.set(icpOptimizationParameters.getFeedbackOrthogonalGain());
       feedbackParallelGain.set(icpOptimizationParameters.getFeedbackParallelGain());
@@ -182,7 +176,6 @@ public class ICPOptimizationController
 
       minimumTimeRemaining.set(icpOptimizationParameters.getMinimumTimeRemaining());
 
-      remainingTimeToStopAdjusting.set(icpOptimizationParameters.getRemainingTimeToStopAdjusting());
       if (walkingControllerParameters != null)
          swingSpeedUpEnabled.set(walkingControllerParameters.allowDisturbanceRecoveryBySpeedingUpSwing());
       else
@@ -396,7 +389,7 @@ public class ICPOptimizationController
       computeTimeInCurrentState(currentTime);
       computeTimeRemainingInState();
 
-      int numberOfFootstepsToConsider = checkForEndingOfAdjustment(omega0);
+      int numberOfFootstepsToConsider = clipNumberOfFootstepsToConsiderToProblem(this.numberOfFootstepsToConsider.getIntegerValue());
 
       scaleStepRegularizationWeightWithTime();
       scaleFeedbackWeightWithGain();
@@ -529,43 +522,6 @@ public class ICPOptimizationController
       solver.setFeedbackConditions(scaledFeedbackWeight.getX(), scaledFeedbackWeight.getY(), feedbackGains.getX(), feedbackGains.getY(), dynamicRelaxationWeight);
    }
 
-   private final FramePose footstepPose = new FramePose();
-   private int checkForEndingOfAdjustment(double omega0)
-   {
-      int numberOfFootstepsToConsider = clipNumberOfFootstepsToConsiderToProblem(this.numberOfFootstepsToConsider.getIntegerValue());
-
-      if (timeRemainingInState.getDoubleValue() < remainingTimeToStopAdjusting.getDoubleValue() && localUseStepAdjustment && !isStanding.getBooleanValue() && !isInTransfer.getBooleanValue())
-      {
-         //record current locations
-         for (int i = 0; i < numberOfFootstepsToConsider; i++)
-         {
-            upcomingFootstepLocations.get(i).set(footstepSolutions.get(i));
-
-            Footstep footstep = upcomingFootsteps.get(i);
-            footstep.getPose(footstepPose);
-            footstepPose.setXYFromPosition2d(footstepSolutions.get(i).getFrameTuple2d());
-            footstep.setPose(footstepPose);
-
-            inputHandler.addFootstepToPlan(footstep);
-         }
-
-         localUseStepAdjustment = false;
-
-         numberOfFootstepsToConsider = clipNumberOfFootstepsToConsiderToProblem(this.numberOfFootstepsToConsider.getIntegerValue());
-
-         stateMultiplierCalculator.resetTimes();
-         stateMultiplierCalculator.submitTimes(0, 0.0, singleSupportDuration.getDoubleValue());
-
-         for (int i = 1; i < numberOfFootstepsToConsider + 1; i++)
-            stateMultiplierCalculator.submitTimes(i, doubleSupportDuration.getDoubleValue(), singleSupportDuration.getDoubleValue());
-         stateMultiplierCalculator.submitTimes(numberOfFootstepsToConsider + 1, doubleSupportDuration.getDoubleValue(), singleSupportDuration.getDoubleValue());
-
-         stateMultiplierCalculator.computeRecursionMultipliers(numberOfFootstepsToConsider, isInTransfer.getBooleanValue(), useTwoCMPs, omega0);
-      }
-
-      return numberOfFootstepsToConsider;
-   }
-
    private void resetFootstepRegularizationTask()
    {
       int numberOfFootstepsToConsider = clipNumberOfFootstepsToConsiderToProblem(this.numberOfFootstepsToConsider.getIntegerValue());
@@ -655,10 +611,7 @@ public class ICPOptimizationController
    {
       ReferenceFrame soleFrame = contactableFeet.get(supportSide.getEnumValue()).getSoleFrame();
 
-      if (isInTransfer.getBooleanValue())
-         ICPOptimizationControllerHelper.transformWeightsToWorldFrame(feedbackWeights, transferFeedbackForwardWeight, transferFeedbackLateralWeight, soleFrame);
-      else
-         ICPOptimizationControllerHelper.transformWeightsToWorldFrame(feedbackWeights, swingFeedbackForwardWeight, swingFeedbackLateralWeight, soleFrame);
+      ICPOptimizationControllerHelper.transformWeightsToWorldFrame(feedbackWeights, feedbackForwardWeight, feedbackLateralWeight, soleFrame);
 
       scaledFeedbackWeight.set(feedbackWeights);
 

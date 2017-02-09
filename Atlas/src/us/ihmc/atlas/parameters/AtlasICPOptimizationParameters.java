@@ -42,28 +42,14 @@ public class AtlasICPOptimizationParameters extends ICPOptimizationParameters
 
    /** {@inheritDoc} */
    @Override
-   public double getSingleSupportFeedbackForwardWeight()
+   public double getFeedbackLateralWeight()
    {
       return runningOnRealRobot ? 0.5 : 0.5;
    }
 
    /** {@inheritDoc} */
    @Override
-   public double getDoubleSupportFeedbackForwardWeight()
-   {
-      return runningOnRealRobot ? 0.5 : 0.1;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public double getSingleSupportFeedbackLateralWeight()
-   {
-      return 0.5;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public double getDoubleSupportFeedbackLateralWeight()
+   public double getFeedbackForwardWeight()
    {
       return runningOnRealRobot ? 0.5 : 0.1;
    }
@@ -207,7 +193,7 @@ public class AtlasICPOptimizationParameters extends ICPOptimizationParameters
    @Override
    public double getDoubleSupportSplitFractionForBigAdjustment()
    {
-      return runningOnRealRobot ? 0.3 : 0.2;
+      return runningOnRealRobot ? 0.25 : 0.2;
    }
 
    /** {@inheritDoc} */
@@ -217,13 +203,6 @@ public class AtlasICPOptimizationParameters extends ICPOptimizationParameters
       return runningOnRealRobot ? 0.15 : 0.1;
    }
 
-   /** {@inheritDoc} */
-   @Override
-   public double getRemainingTimeToStopAdjusting()
-   {
-      return -2.0;
-   }
-   
    /** {@inheritDoc} */
    @Override
    public double getLateralReachabilityOuterLimit()
