@@ -15,12 +15,11 @@ import org.junit.Test;
 
 import us.ihmc.communication.net.KryoStreamDeSerializer;
 import us.ihmc.communication.net.KryoStreamSerializer;
-import us.ihmc.humanoidRobotics.communication.packets.walking.CapturabilityBasedStatus;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.tools.UnitConversions;
-import us.ihmc.tools.continuousIntegration.IntegrationCategory;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.io.files.FileTools;
 import us.ihmc.tools.testing.JUnitTools;
 

@@ -1,5 +1,8 @@
 package us.ihmc.robotics.geometry.shapes;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import java.util.Random;
 
 import javax.vecmath.Matrix3d;
@@ -9,10 +12,11 @@ import javax.vecmath.Vector4d;
 
 import org.junit.Test;
 
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.math.Epsilons;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.testing.JUnitTools;
+import us.ihmc.tools.testing.MutationTestingTools;
 
 public class TwoWayRigidBodyTransformTest
 {
@@ -45,6 +49,48 @@ public class TwoWayRigidBodyTransformTest
       twoWayRigidBodyTransform.transformBackward(resultOrientation);
       
       JUnitTools.assertPoint3dEquals("not equal", originalPosition, resultPosition, Epsilons.ONE_TRILLIONTH);
+   }
+   
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testSomeMoreTransformations() throws Exception
+   {
+      TwoWayRigidBodyTransform twoWayRigidBodyTransform = new TwoWayRigidBodyTransform();
+      assertFalse(twoWayRigidBodyTransform.isForwardTransformOutOfDate());
+      assertFalse(twoWayRigidBodyTransform.isBackwardTransformOutOfDate());
+      
+      twoWayRigidBodyTransform.setForwardTransform(new RigidBodyTransform());
+      assertFalse(twoWayRigidBodyTransform.isForwardTransformOutOfDate());
+      assertTrue(twoWayRigidBodyTransform.isBackwardTransformOutOfDate());
+      
+      twoWayRigidBodyTransform.setBackwardTransform(new RigidBodyTransform());
+      assertTrue(twoWayRigidBodyTransform.isForwardTransformOutOfDate());
+      assertFalse(twoWayRigidBodyTransform.isBackwardTransformOutOfDate());
+      
+      twoWayRigidBodyTransform.setForwardTransform(new RigidBodyTransform());
+      assertFalse(twoWayRigidBodyTransform.isForwardTransformOutOfDate());
+      assertTrue(twoWayRigidBodyTransform.isBackwardTransformOutOfDate());
+      
+      RigidBodyTransform transform = new RigidBodyTransform();
+      transform.applyRotationX(0.9);
+      
+      twoWayRigidBodyTransform.setForwardTransform(transform);
+      assertFalse(twoWayRigidBodyTransform.isForwardTransformOutOfDate());
+      assertTrue(twoWayRigidBodyTransform.isBackwardTransformOutOfDate());
+      
+      RigidBodyTransform backwardTransformUnsafe = twoWayRigidBodyTransform.getBackwardTransformUnsafe();
+      transform.invert();
+      assertTrue(transform.epsilonEquals(backwardTransformUnsafe, 1e-10));
+      
+      transform = new RigidBodyTransform();
+      transform.applyRotationY(0.9);
+      twoWayRigidBodyTransform.setBackwardTransform(transform);
+      assertTrue(twoWayRigidBodyTransform.isForwardTransformOutOfDate());
+      assertFalse(twoWayRigidBodyTransform.isBackwardTransformOutOfDate());
+      
+      RigidBodyTransform forwardTransformUnsafe = twoWayRigidBodyTransform.getForwardTransformUnsafe();
+      transform.invert();
+      assertTrue(transform.epsilonEquals(forwardTransformUnsafe, 1e-10));
    }
    
    private void createRandomRotationMatrix(Matrix3d matrix, Random random)
@@ -127,4 +173,13 @@ public class TwoWayRigidBodyTransformTest
       vector.setY(random.nextDouble());
       vector.setZ(random.nextDouble());
    }
+   
+   
+   public static void main(String[] args)
+   {
+      String targetTests = TwoWayRigidBodyTransformTest.class.getName();
+      String targetClassesInSamePackage = TwoWayRigidBodyTransform.class.getName();
+      MutationTestingTools.doPITMutationTestAndOpenResult(targetTests, targetClassesInSamePackage);
+   }
+   
 }

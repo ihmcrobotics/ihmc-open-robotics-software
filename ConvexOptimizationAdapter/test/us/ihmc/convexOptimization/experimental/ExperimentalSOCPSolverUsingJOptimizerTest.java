@@ -11,8 +11,8 @@ import org.junit.Test;
 import com.joptimizer.functions.ConvexMultivariateRealFunction;
 import com.joptimizer.functions.LinearMultivariateRealFunction;
 
-import us.ihmc.tools.continuousIntegration.IntegrationCategory;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.IntegrationCategory;
 
 public class ExperimentalSOCPSolverUsingJOptimizerTest
 {

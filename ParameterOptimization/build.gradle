@@ -37,6 +37,8 @@ ihmc.configureForIHMCOpenSourceBintrayPublish(false, "mavenJava", "maven-release
 
 dependencies {
 	testCompile group: 'junit', name: 'junit', version: '4.11'
+    
+    testCompile group: 'us.ihmc', name: 'IHMCContinuousIntegrationFramework', version: '0.9.1'
 
 	compile ihmc.getProjectDependency(":IHMCRoboticsToolkit")
 	testCompile ihmc.getProjectDependency(":IHMCUnitTesting")

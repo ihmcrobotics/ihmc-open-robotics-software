@@ -1,7 +1,6 @@
 package us.ihmc.quadrupedRobotics.planning;
 
 import static org.junit.Assert.assertTrue;
-import static us.ihmc.tools.continuousIntegration.IntegrationCategory.FAST;
 
 import java.util.ArrayList;
 
@@ -10,18 +9,19 @@ import javax.vecmath.Vector3d;
 
 import org.junit.Test;
 
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.EndDependentList;
 import us.ihmc.robotics.robotSide.RobotEnd;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 
-@ContinuousIntegrationPlan(categories = FAST)
+@ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
 public class QuadrupedXGaitPlannerTest
 {
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout=300000)
    public void testInitialForwardVelocityPlan()
    {
@@ -82,7 +82,7 @@ public class QuadrupedXGaitPlannerTest
       }
    }
 
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout=300000)
    public void testOnlineForwardVelocityPlan()
    {

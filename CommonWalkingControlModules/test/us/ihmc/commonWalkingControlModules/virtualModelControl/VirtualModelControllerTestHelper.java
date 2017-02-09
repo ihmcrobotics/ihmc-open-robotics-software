@@ -1,12 +1,21 @@
 package us.ihmc.commonWalkingControlModules.virtualModelControl;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.EnumMap;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+
+import javax.vecmath.Matrix3d;
+import javax.vecmath.Point2d;
+import javax.vecmath.Quat4d;
+import javax.vecmath.Vector3d;
+
 import org.ejml.data.DenseMatrix64F;
 import org.junit.Assert;
-import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.robotics.partNames.LegJointName;
-import us.ihmc.robotics.partNames.NeckJointName;
-import us.ihmc.robotics.partNames.RobotSpecificJointNames;
-import us.ihmc.robotics.partNames.SpineJointName;
+
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ListOfPointsContactableFoot;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.GeometricJacobianHolder;
@@ -17,6 +26,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
+import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.controllers.PIDController;
 import us.ihmc.robotics.controllers.YoPIDGains;
@@ -28,27 +38,38 @@ import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.TransformTools;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.frames.YoWrench;
+import us.ihmc.robotics.partNames.LegJointName;
+import us.ihmc.robotics.partNames.NeckJointName;
+import us.ihmc.robotics.partNames.RobotSpecificJointNames;
+import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.referenceFrames.CenterOfMassReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.*;
+import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
+import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.robotics.screwTheory.RevoluteJoint;
+import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.robotics.screwTheory.RigidBodyInertia;
+import us.ihmc.robotics.screwTheory.ScrewTools;
+import us.ihmc.robotics.screwTheory.SixDoFJoint;
+import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.robotics.sensors.ContactSensorDefinition;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
-import us.ihmc.simulationconstructionset.*;
+import us.ihmc.simulationconstructionset.ExternalForcePoint;
+import us.ihmc.simulationconstructionset.FloatingJoint;
+import us.ihmc.simulationconstructionset.Joint;
+import us.ihmc.simulationconstructionset.Link;
+import us.ihmc.simulationconstructionset.PinJoint;
+import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.RobotTools.SCSRobotFromInverseDynamicsRobotModel;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.tools.testing.JUnitTools;
-
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Point2d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-import java.util.*;
 
 public class VirtualModelControllerTestHelper
 {

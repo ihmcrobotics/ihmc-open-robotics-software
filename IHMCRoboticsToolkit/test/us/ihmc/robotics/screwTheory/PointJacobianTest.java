@@ -1,21 +1,23 @@
 package us.ihmc.robotics.screwTheory;
 
+import static org.junit.Assert.assertTrue;
+
+import java.util.Random;
+
+import javax.vecmath.Vector3d;
+
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.factory.DecompositionFactory;
 import org.ejml.interfaces.decomposition.SingularValueDecomposition;
 import org.ejml.ops.CommonOps;
 import org.junit.Test;
+
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVectorTest;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.random.RandomTools;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-
-import javax.vecmath.Vector3d;
-import java.util.Random;
-
-import static org.junit.Assert.assertTrue;
 
 /**
  * @author twan

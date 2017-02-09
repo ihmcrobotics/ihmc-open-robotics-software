@@ -33,20 +33,6 @@ public class BambooTools
 
    private static boolean WRITE_LOG_FILE_ON_SUCCESS = false;
 
-   public static boolean isRunningOnBamboo()
-   {
-      String isBamboo = System.getenv("IS_BAMBOO");
-      
-      if (isBamboo == null || !isBamboo.equals("true"))
-      {
-         return false;
-      }
-      else
-      {
-         return true;
-      }
-   }
-
    public static boolean isNightlyBuild()
    {
       String buildType = System.getProperty("build.type");

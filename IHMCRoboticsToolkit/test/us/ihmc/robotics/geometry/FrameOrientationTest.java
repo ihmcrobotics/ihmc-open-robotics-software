@@ -13,8 +13,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.testing.JUnitTools;
 
 public class FrameOrientationTest

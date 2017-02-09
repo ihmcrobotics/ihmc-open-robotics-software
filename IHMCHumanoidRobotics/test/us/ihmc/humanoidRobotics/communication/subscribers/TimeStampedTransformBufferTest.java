@@ -9,12 +9,11 @@ import java.util.Random;
 
 import org.junit.Test;
 
-import us.ihmc.humanoidRobotics.communication.subscribers.TimeStampedTransformBuffer;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
 import us.ihmc.robotics.kinematics.TransformInterpolationCalculator;
 import us.ihmc.robotics.random.RandomTools;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public class TimeStampedTransformBufferTest
 {
