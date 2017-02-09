@@ -46,34 +46,14 @@ public abstract class ICPOptimizationParameters
     * This weight penalizes using a large amount of CMP control.
     * Setting this weight high will make the robot behave similar to using point feet control / minimal ankle torques and angular momentum.
     */
-   public abstract double getSingleSupportFeedbackForwardWeight();
+   public abstract double getFeedbackForwardWeight();
 
    /**
     * The weight for tracking the nominal desired CMP.
     * This weight penalizes using a large amount of CMP control.
     * Setting this weight high will make the robot behave similar to using point feet control / minimal ankle torques and angular momentum.
     */
-   public abstract double getSingleSupportFeedbackLateralWeight();
-
-   /**
-    * The weight for tracking the nominal desired CMP.
-    * This weight penalizes using a large amount of CMP control.
-    * Setting this weight high will make the robot behave similar to using point feet control / minimal ankle torques and angular momentum.
-    */
-   public double getDoubleSupportFeedbackForwardWeight()
-   {
-      return getSingleSupportFeedbackForwardWeight();
-   }
-
-   /**
-    * The weight for tracking the nominal desired CMP.
-    * This weight penalizes using a large amount of CMP control.
-    * Setting this weight high will make the robot behave similar to using point feet control / minimal ankle torques and angular momentum.
-    */
-   public double getDoubleSupportFeedbackLateralWeight()
-   {
-      return getSingleSupportFeedbackLateralWeight();
-   }
+   public abstract double getFeedbackLateralWeight();
 
    /**
     * Penalization on changes feedback CMP between control ticks.
@@ -194,12 +174,6 @@ public abstract class ICPOptimizationParameters
     * When it is outside the deadband, the deadband is subtracted from it.
     */
    public abstract double getAdjustmentDeadband();
-
-   /**
-    * This is the time to disable step adjustment.
-    * This is used to prevent there being step adjustment in the last portion of a step, when more change cannot be realized.
-    */
-   public abstract double getRemainingTimeToStopAdjusting();
 
    /**
     * Represents the amount of adjustment to define as big
