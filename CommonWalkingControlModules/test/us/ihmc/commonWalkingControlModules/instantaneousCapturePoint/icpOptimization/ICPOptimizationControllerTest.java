@@ -196,12 +196,12 @@ public class ICPOptimizationControllerTest
          return 0.0001;
       }
 
-      @Override public double getSingleSupportFeedbackForwardWeight()
+      @Override public double getFeedbackForwardWeight()
       {
          return 2.0;
       }
 
-      @Override public double getSingleSupportFeedbackLateralWeight()
+      @Override public double getFeedbackLateralWeight()
       {
          return 2.0;
       }
@@ -298,11 +298,6 @@ public class ICPOptimizationControllerTest
       }
 
       @Override public double getAdjustmentDeadband()
-      {
-         return 0.0;
-      }
-
-      @Override public double getRemainingTimeToStopAdjusting()
       {
          return 0.0;
       }

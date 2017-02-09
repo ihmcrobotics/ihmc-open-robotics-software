@@ -62,6 +62,8 @@ public class ICPOptimizationInputHandler
       this.singleSupportDuration = singleSupportDuration;
       this.exitCMPDurationInPercentOfStepTime = exitCMPDurationInPercentOfStepTime;
 
+      exitCMPDurationInPercentOfStepTime.set(icpPlannerParameters.getTimeSpentOnExitCMPInPercentOfStepTime());
+
       referenceCMPsCalculator = new ReferenceCentroidalMomentumPivotLocationsCalculator(namePrefix, bipedSupportPolygons, contactableFeet,
             maximumNumberOfFootstepsToConsider, registry);
       referenceCMPsCalculator.initializeParameters(icpPlannerParameters);

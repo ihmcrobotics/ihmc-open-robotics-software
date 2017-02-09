@@ -50,7 +50,8 @@ public class StateMultiplierCalculator
    private final int maxNumberOfFootstepsToConsider;
 
    public StateMultiplierCalculator(CapturePointPlannerParameters icpPlannerParameters, DoubleYoVariable exitCMPDurationInPercentOfStepTime,
-         DoubleYoVariable defaultDoubleSupportSplitFraction, DoubleYoVariable upcomingDoubleSupportSplitFraction, int maxNumberOfFootstepsToConsider, YoVariableRegistry parentRegistry)
+         DoubleYoVariable defaultDoubleSupportSplitFraction, DoubleYoVariable upcomingDoubleSupportSplitFraction, int maxNumberOfFootstepsToConsider,
+         YoVariableRegistry parentRegistry)
    {
       this.maxNumberOfFootstepsToConsider = maxNumberOfFootstepsToConsider;
       this.exitCMPDurationInPercentOfStepTime = exitCMPDurationInPercentOfStepTime;
