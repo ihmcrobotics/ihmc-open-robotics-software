@@ -1,24 +1,25 @@
 package us.ihmc.robotics.geometry.shapes;
 
-import org.junit.Assert;
-import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
-import us.ihmc.robotics.geometry.ConvexPolygon2d;
-import us.ihmc.robotics.geometry.HullFace;
-import us.ihmc.robotics.geometry.QuickHull3dWrapper;
-import us.ihmc.robotics.geometry.RotationTools;
-import us.ihmc.robotics.geometry.transformables.Pose;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
-import java.util.ArrayList;
-import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import org.junit.Assert;
+import org.junit.Test;
+
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.robotics.geometry.ConvexPolygon2d;
+import us.ihmc.robotics.geometry.HullFace;
+import us.ihmc.robotics.geometry.QuickHull3dWrapper;
+import us.ihmc.robotics.geometry.RotationTools;
+import us.ihmc.robotics.geometry.transformables.Pose;
 
 public class QuickHull3DWrapperTest
 {

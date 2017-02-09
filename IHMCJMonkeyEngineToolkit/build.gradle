@@ -52,6 +52,8 @@ dependencies {
         //Exclude incompatible version of jinput
         exclude group: 'net.java.jinput', module: 'jinput'
     }
+    
+    testCompile group: 'us.ihmc', name: 'IHMCContinuousIntegrationFramework', version: '0.9.1'
 
     compile group: 'com.vividsolutions', name: 'jts', version: '1.13'
     compile group: 'com.google.guava', name: 'guava', version: '18.0'

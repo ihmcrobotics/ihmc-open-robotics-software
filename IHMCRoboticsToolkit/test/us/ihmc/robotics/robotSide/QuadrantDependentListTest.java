@@ -1,14 +1,14 @@
 package us.ihmc.robotics.robotSide;
 
 import static org.junit.Assert.assertEquals;
-import static us.ihmc.tools.continuousIntegration.IntegrationCategory.FAST;
 
 import org.junit.Test;
 
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.IntegrationCategory;
 
-@ContinuousIntegrationPlan(categories = FAST)
+@ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
 public class QuadrantDependentListTest
 {
    @ContinuousIntegrationTest(estimatedDuration = 0.0)

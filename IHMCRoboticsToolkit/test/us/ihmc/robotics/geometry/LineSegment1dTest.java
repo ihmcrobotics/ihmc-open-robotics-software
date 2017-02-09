@@ -1,20 +1,21 @@
 package us.ihmc.robotics.geometry;
 
-import us.ihmc.robotics.geometry.LineSegment1d;
-import us.ihmc.robotics.random.RandomTools;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.tools.testing.MutationTestingTools;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
-import org.junit.Test;
+import java.util.Random;
 
 import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector2d;
 import javax.vecmath.Vector3d;
 
-import static org.junit.Assert.*;
+import org.junit.Test;
 
-import java.util.Random;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.tools.testing.MutationTestingTools;
 
 public class LineSegment1dTest
 {

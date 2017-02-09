@@ -1,12 +1,10 @@
 package us.ihmc.systemIdentification.frictionId.frictionModels;
 
+import static org.junit.Assert.assertEquals;
+
 import org.junit.Test;
 
-import us.ihmc.systemIdentification.frictionId.frictionModels.FrictionModel;
-import us.ihmc.systemIdentification.frictionId.frictionModels.NoCompensationFrictionModel;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-
-import static org.junit.Assert.assertEquals;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public class NoCompensationFrictionModelTest
 {

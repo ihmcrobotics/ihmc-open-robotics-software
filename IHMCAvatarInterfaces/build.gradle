@@ -63,6 +63,8 @@ dependencies {
 	compile group: 'com.github.wendykierp', name: 'JTransforms', version: '3.1'
 	compile group: 'org.reflections', name: 'reflections', version: '0.9.10'
 	compile group: 'us.ihmc', name: 'RobotEnvironmentAwareness', version: '0.2.2'
+    
+    testCompile group: 'us.ihmc', name: 'IHMCContinuousIntegrationFramework', version: '0.9.1'
 
 	compile ihmc.getProjectDependency(":IHMCROSTools")
 	compile ihmc.getProjectDependency(":CommonWalkingControlModules")
