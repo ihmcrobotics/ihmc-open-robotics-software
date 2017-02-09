@@ -16,6 +16,9 @@ public class StateEndCurrentMultiplier
    private final CubicMatrix cubicMatrix;
    private final CubicDerivativeMatrix cubicDerivativeMatrix;
 
+   private final boolean givenCubicMatrix;
+   private final boolean givenCubicDerivativeMatrix;
+
    private final TransferStateEndMatrix transferStateEndMatrix;
    private final SwingStateEndMatrix swingStateEndMatrix;
 
@@ -25,7 +28,6 @@ public class StateEndCurrentMultiplier
 
    private final DoubleYoVariable startOfSplineTime;
    private final DoubleYoVariable endOfSplineTime;
-   private final DoubleYoVariable totalTrajectoryTime;
 
    private final DenseMatrix64F matrixOut = new DenseMatrix64F(1, 1);
 
@@ -35,8 +37,14 @@ public class StateEndCurrentMultiplier
    private final boolean projectForward;
 
    public StateEndCurrentMultiplier(DoubleYoVariable upcomingDoubleSupportSplitRatio, DoubleYoVariable defaultDoubleSupportSplitRatio,
-         DoubleYoVariable exitCMPRatio, DoubleYoVariable startOfSplineTime, DoubleYoVariable endOfSplineTime, DoubleYoVariable totalTrajectoryTime,
-         boolean projectForward, YoVariableRegistry registry)
+         DoubleYoVariable exitCMPRatio, DoubleYoVariable startOfSplineTime, DoubleYoVariable endOfSplineTime, boolean projectForward, YoVariableRegistry registry)
+   {
+      this(upcomingDoubleSupportSplitRatio, defaultDoubleSupportSplitRatio, exitCMPRatio, startOfSplineTime, endOfSplineTime, null, null, projectForward, registry);
+   }
+
+   public StateEndCurrentMultiplier(DoubleYoVariable upcomingDoubleSupportSplitRatio, DoubleYoVariable defaultDoubleSupportSplitRatio,
+         DoubleYoVariable exitCMPRatio, DoubleYoVariable startOfSplineTime, DoubleYoVariable endOfSplineTime, CubicMatrix cubicMatrix,
+         CubicDerivativeMatrix cubicDerivativeMatrix, boolean projectForward, YoVariableRegistry registry)
    {
       positionMultiplier = new DoubleYoVariable("StateEndCurrentMultiplier", registry);
       velocityMultiplier = new DoubleYoVariable("StateEndCurrentVelocityMultiplier", registry);
@@ -47,12 +55,30 @@ public class StateEndCurrentMultiplier
 
       this.startOfSplineTime = startOfSplineTime;
       this.endOfSplineTime = endOfSplineTime;
-      this.totalTrajectoryTime = totalTrajectoryTime;
 
       this.projectForward = projectForward;
 
-      cubicMatrix = new CubicMatrix();
-      cubicDerivativeMatrix = new CubicDerivativeMatrix();
+      if (cubicMatrix == null)
+      {
+         this.cubicMatrix = new CubicMatrix();
+         givenCubicMatrix = false;
+      }
+      else
+      {
+         this.cubicMatrix = cubicMatrix;
+         givenCubicMatrix = true;
+      }
+
+      if (cubicDerivativeMatrix == null)
+      {
+         this.cubicDerivativeMatrix = new CubicDerivativeMatrix();
+         givenCubicDerivativeMatrix = false;
+      }
+      else
+      {
+         this.cubicDerivativeMatrix = cubicDerivativeMatrix;
+         givenCubicDerivativeMatrix = true;
+      }
 
       transferStateEndMatrix = new TransferStateEndMatrix(defaultDoubleSupportSplitRatio);
       swingStateEndMatrix = new SwingStateEndMatrix(upcomingDoubleSupportSplitRatio, exitCMPRatio, endOfSplineTime);
@@ -113,10 +139,17 @@ public class StateEndCurrentMultiplier
 
       double splineDuration = doubleSupportDurations.get(0).getDoubleValue();
 
-      cubicDerivativeMatrix.setSegmentDuration(splineDuration);
-      cubicDerivativeMatrix.update(timeInState, true);
-      cubicMatrix.setSegmentDuration(splineDuration);
-      cubicMatrix.update(timeInState, true);
+      if (!givenCubicDerivativeMatrix)
+      {
+         cubicDerivativeMatrix.setSegmentDuration(splineDuration);
+         cubicDerivativeMatrix.update(timeInState);
+      }
+
+      if (!givenCubicMatrix)
+      {
+         cubicMatrix.setSegmentDuration(splineDuration);
+         cubicMatrix.update(timeInState);
+      }
 
       CommonOps.mult(cubicMatrix, transferStateEndMatrix, matrixOut);
 
@@ -203,10 +236,16 @@ public class StateEndCurrentMultiplier
       double timeInSpline = timeInState - startOfSplineTime.getDoubleValue();
       double splineDuration = endOfSplineTime.getDoubleValue() - startOfSplineTime.getDoubleValue();
 
-      cubicDerivativeMatrix.setSegmentDuration(splineDuration);
-      cubicDerivativeMatrix.update(timeInSpline, true);
-      cubicMatrix.setSegmentDuration(splineDuration);
-      cubicMatrix.update(timeInSpline, true);
+      if (!givenCubicDerivativeMatrix)
+      {
+         cubicDerivativeMatrix.setSegmentDuration(splineDuration);
+         cubicDerivativeMatrix.update(timeInSpline);
+      }
+      if (!givenCubicMatrix)
+      {
+         cubicMatrix.setSegmentDuration(splineDuration);
+         cubicMatrix.update(timeInSpline);
+      }
 
       CommonOps.mult(cubicMatrix, swingStateEndMatrix, matrixOut);
 

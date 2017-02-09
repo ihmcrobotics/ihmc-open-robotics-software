@@ -60,10 +60,9 @@ public class CubicProjectionDerivativeMatrixTest
       {
          double duration = 10.0 * random.nextDouble();
          double time = duration * random.nextDouble();
-         double timeRemaining = duration - time;
 
          cubicProjectionMatrix.setSegmentDuration(duration);
-         cubicProjectionMatrix.update(timeRemaining);
+         cubicProjectionMatrix.update(time);
 
          cubicSplineMatrix.zero();
          cubicTimeMatrix.zero();
