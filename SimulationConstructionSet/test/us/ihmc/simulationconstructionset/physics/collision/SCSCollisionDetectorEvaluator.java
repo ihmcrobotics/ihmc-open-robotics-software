@@ -67,11 +67,11 @@ public class SCSCollisionDetectorEvaluator
 
       linkOne.setMass(mass);
       linkOne.setMomentOfInertia(0.1 * mass, 0.1 * mass, 0.1 * mass);
-      linkOne.enableCollisions(robot.getRobotsYoVariableRegistry());
+      linkOne.enableCollisions(4, robot.getRobotsYoVariableRegistry());
 
       linkTwo.setMass(mass);
       linkTwo.setMomentOfInertia(0.1 * mass, 0.1 * mass, 0.1 * mass);
-      linkTwo.enableCollisions(robot.getRobotsYoVariableRegistry());
+      linkTwo.enableCollisions(4, robot.getRobotsYoVariableRegistry());
 
       // Graphics
       Graphics3DObject linkOneGraphics = new Graphics3DObject();

@@ -21,6 +21,16 @@ import us.ihmc.tools.thread.ThreadTools;
 
 public class NewtonsCradleSimulation
 {
+   private static CollisionHandler createCollisionHandler(double coefficientOfRestitution, double coefficientOfFriction)
+   {
+      CollisionHandler collisionHandler =  new DefaultCollisionHandler(coefficientOfRestitution, coefficientOfFriction);
+      
+      //      CollisionHandler collisionHandler = new SpringCollisionHandler(2.0, 1.1, 1.1, robot.getRobotsYoVariableRegistry());
+      //      CollisionHandler collisionHandler = new SpringCollisionHandler(1, 1000, 10.0, robot.getRobotsYoVariableRegistry());
+      
+      return collisionHandler;
+   }
+
    public static void createNewtonsCradleSimulation()
    {
       NewtonsCradleRobot robot = new NewtonsCradleRobot();
@@ -28,9 +38,7 @@ public class NewtonsCradleSimulation
       SimulationConstructionSet scs = new SimulationConstructionSet(robot);
       scs.setDT(0.0001, 100);
 
-      //      CollisionHandler collisionHandler = new SpringCollisionHandler(2.0, 1.1, 1.1, robot.getRobotsYoVariableRegistry());
-      //      CollisionHandler collisionHandler = new SpringCollisionHandler(1, 1000, 10.0, robot.getRobotsYoVariableRegistry());
-      CollisionHandler collisionHandler = new DefaultCollisionHandler(0.99, 0.15);
+      CollisionHandler collisionHandler = createCollisionHandler(0.99, 0.15);
 
       DefaultCollisionVisualizer collisionVisualizer = new DefaultCollisionVisualizer(4.0, 4.0, scs, 100);
 
@@ -57,7 +65,7 @@ public class NewtonsCradleSimulation
 
       double epsilon = 0.3;
       double mu = 0.7;
-      CollisionHandler collisionHandler = new DefaultCollisionHandler(epsilon, mu);
+      CollisionHandler collisionHandler = createCollisionHandler(epsilon, mu);
       DefaultCollisionVisualizer collisionVisualizer = new DefaultCollisionVisualizer(10.0, 10.0, scs, 100);
 
       scs.initializeCollisionDetectionAndHandling(collisionVisualizer, collisionHandler);
@@ -102,7 +110,7 @@ public class NewtonsCradleSimulation
 
       double coefficientOfRestitution = 0.9;
       double coefficientOfFriction = 0.0;
-      CollisionHandler collisionHandler = new DefaultCollisionHandler(coefficientOfRestitution, coefficientOfFriction);
+      CollisionHandler collisionHandler = createCollisionHandler(coefficientOfRestitution, coefficientOfFriction);
       //      CollisionHandler collisionHandler = new SpringCollisionHandler(2.0, 1.1, 1.1, robot.getRobotsYoVariableRegistry());
       //      CollisionHandler collisionHandler = new SpringCollisionHandler(1, 1000, 10.0, robot.getRobotsYoVariableRegistry());
       //      CollisionHandler collisionHandler = new DefaultCollisionHandler(0.98, 0.1, robot);
@@ -157,7 +165,7 @@ public class NewtonsCradleSimulation
 
       double coefficientOfRestitution = 0.3;
       double coefficientOfFriction = 0.7;
-      CollisionHandler collisionHandler = new DefaultCollisionHandler(coefficientOfRestitution, coefficientOfFriction);
+      CollisionHandler collisionHandler = createCollisionHandler(coefficientOfRestitution, coefficientOfFriction);
       //      CollisionHandler collisionHandler = new SpringCollisionHandler(2.0, 1.1, 1.1, robot.getRobotsYoVariableRegistry());
       //      CollisionHandler collisionHandler = new SpringCollisionHandler(1, 1000, 10.0, robot.getRobotsYoVariableRegistry());
       //      CollisionHandler collisionHandler = new DefaultCollisionHandler(0.98, 0.1, robot);
@@ -166,6 +174,7 @@ public class NewtonsCradleSimulation
       scs.initializeCollisionDetectionAndHandling(collisionVisualizer, collisionHandler);
       scs.startOnAThread();
    }
+   
 
    public static void createRowOfDominosSimulation()
    {
@@ -192,7 +201,7 @@ public class NewtonsCradleSimulation
       //      CollisionHandler handler = new SpringCollisionHandler(2.0, 1.1, 1.1, robot.getRobotsYoVariableRegistry());
       //      CollisionHandler handler = new SpringCollisionHandler(1, 1000, 10.0, robot.getRobotsYoVariableRegistry());
       //      CollisionHandler handler = new DefaultCollisionHandler(0.98, 0.1, robot);
-      CollisionHandler collisionHandler = new DefaultCollisionHandler(coefficientOfRestitution, coefficientOfFriction);
+      CollisionHandler collisionHandler = createCollisionHandler(coefficientOfRestitution, coefficientOfFriction);
 
       scs.initializeCollisionDetectionAndHandling(collisionVisualizer, collisionHandler);
       scs.startOnAThread();
@@ -226,7 +235,7 @@ public class NewtonsCradleSimulation
 
       double coefficientOfRestitution = 0.3;
       double coefficientOfFriction = 0.7;
-      CollisionHandler collisionHandler = new DefaultCollisionHandler(coefficientOfRestitution, coefficientOfFriction);
+      CollisionHandler collisionHandler = createCollisionHandler(coefficientOfRestitution, coefficientOfFriction);
       scs.initializeCollisionDetectionAndHandling(collisionVisualizer, collisionHandler);
       scs.startOnAThread();
    }
@@ -255,7 +264,7 @@ public class NewtonsCradleSimulation
 
       double coefficientOfRestitution = 0.3;
       double coefficientOfFriction = 0.7;
-      CollisionHandler collisionHandler = new DefaultCollisionHandler(coefficientOfRestitution, coefficientOfFriction);
+      CollisionHandler collisionHandler = createCollisionHandler(coefficientOfRestitution, coefficientOfFriction);
       scs.initializeCollisionDetectionAndHandling(collisionVisualizer, collisionHandler);
 
       scs.setDT(0.00025, 10);
@@ -286,8 +295,8 @@ public class NewtonsCradleSimulation
 //            createStackOfBouncyBallsSimulation();
 //            createBoxDownRampSimulation();
 //            createRowOfDominosSimulation();
-      createStackOfBlocksSimulation();
-//      createPileOfRandomObjectsSimulation();
+//      createStackOfBlocksSimulation();
+      createPileOfRandomObjectsSimulation();
    }
 
 }
