@@ -46,34 +46,14 @@ public abstract class ICPOptimizationParameters
     * This weight penalizes using a large amount of CMP control.
     * Setting this weight high will make the robot behave similar to using point feet control / minimal ankle torques and angular momentum.
     */
-   public abstract double getSingleSupportFeedbackForwardWeight();
+   public abstract double getFeedbackForwardWeight();
 
    /**
     * The weight for tracking the nominal desired CMP.
     * This weight penalizes using a large amount of CMP control.
     * Setting this weight high will make the robot behave similar to using point feet control / minimal ankle torques and angular momentum.
     */
-   public abstract double getSingleSupportFeedbackLateralWeight();
-
-   /**
-    * The weight for tracking the nominal desired CMP.
-    * This weight penalizes using a large amount of CMP control.
-    * Setting this weight high will make the robot behave similar to using point feet control / minimal ankle torques and angular momentum.
-    */
-   public double getDoubleSupportFeedbackForwardWeight()
-   {
-      return getSingleSupportFeedbackForwardWeight();
-   }
-
-   /**
-    * The weight for tracking the nominal desired CMP.
-    * This weight penalizes using a large amount of CMP control.
-    * Setting this weight high will make the robot behave similar to using point feet control / minimal ankle torques and angular momentum.
-    */
-   public double getDoubleSupportFeedbackLateralWeight()
-   {
-      return getSingleSupportFeedbackLateralWeight();
-   }
+   public abstract double getFeedbackLateralWeight();
 
    /**
     * Penalization on changes feedback CMP between control ticks.
@@ -196,11 +176,41 @@ public abstract class ICPOptimizationParameters
    public abstract double getAdjustmentDeadband();
 
    /**
-    * This is the time to disable step adjustment.
-    * This is used to prevent there being step adjustment in the last portion of a step, when more change cannot be realized.
+    * Represents the amount of adjustment to define as big
     */
-   public abstract double getRemainingTimeToStopAdjusting();
-   
+   public boolean useDifferentSplitRatioForBigAdjustment()
+   {
+      return true;
+   }
+
+   /**
+    * Represents the amount of adjustment to define as big
+    */
+   public double getMagnitudeForBigAdjustment()
+   {
+      return 0.2;
+   }
+
+   /**
+    * Represents in percent of the current double support duration, how much time the transfer will spend before reaching the next entry CMP.
+    * The returned value should be between 0.0 and 1.0:
+    * <li> 0.0 is equivalent to spend the entire double support on the initial CMP (last entry CMP if using one CMP per support, last exit CMP otherwise), </li>
+    * <li> 1.0 is equivalent to spend the entire double support on the next entry CMP. </li>
+    * <p> A value close to 0.5 is preferable. </p>
+    */
+   public double getDoubleSupportSplitFractionForBigAdjustment()
+   {
+      return 0.5;
+   }
+
+   /**
+    * Represents the minimum time in transfer before reaching the next entry CMP.
+    */
+   public double getMinimumTimeOnInitialCMPForBigAdjustment()
+   {
+      return 0.15;
+   }
+
    /**
     * This method sets what the minimum change in the current footstep is allowed to be.
     * Works in tandem with the footstep regularization parameter.
