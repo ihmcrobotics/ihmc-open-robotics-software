@@ -121,6 +121,8 @@ public class ICPOptimizationController
 
    private final ExecutionTimer qpSolverTimer = new ExecutionTimer("icpQPSolverTimer", 0.5, registry);
    private final ExecutionTimer controllerTimer = new ExecutionTimer("icpControllerTimer", 0.5, registry);
+   private final ExecutionTimer conditionSettingTimer = new ExecutionTimer("icpConditionSettingTimer", 0.5, registry);
+   private final ExecutionTimer solutionReadingTimer = new ExecutionTimer("icpSolutionReadingTimer", 0.5, registry);
    private final ICPOptimizationSolver solver;
 
    private final StateMultiplierCalculator stateMultiplierCalculator;
@@ -308,7 +310,7 @@ public class ICPOptimizationController
 
       stateMultiplierCalculator.computeRecursionMultipliers(numberOfFootstepsToConsider, isInTransfer.getBooleanValue(), useTwoCMPs, omega0);
 
-      inputHandler.initializeForDoubleSupport(isStanding.getBooleanValue(), useTwoCMPs, transferToSide, omega0);
+      inputHandler.initializeForDoubleSupport(numberOfFootstepsToConsider, upcomingFootstepLocations, isStanding.getBooleanValue(), useTwoCMPs, transferToSide, omega0);
 
       cmpConstraintHandler.updateCMPConstraintForDoubleSupport(solver);
       reachabilityConstraintHandler.updateReachabilityConstraintForDoubleSupport(solver);
@@ -339,7 +341,7 @@ public class ICPOptimizationController
 
       stateMultiplierCalculator.computeRecursionMultipliers(numberOfFootstepsToConsider, isInTransfer.getBooleanValue(), useTwoCMPs, omega0);
 
-      inputHandler.initializeForSingleSupport(useTwoCMPs, supportSide, omega0);
+      inputHandler.initializeForSingleSupport(numberOfFootstepsToConsider, upcomingFootstepLocations, useTwoCMPs, supportSide, omega0);
 
       cmpConstraintHandler.updateCMPConstraintForSingleSupport(supportSide, solver);
       reachabilityConstraintHandler.updateReachabilityConstraintForSingleSupport(supportSide, solver);
@@ -400,10 +402,12 @@ public class ICPOptimizationController
       scaleStepRegularizationWeightWithTime();
       scaleFeedbackWeightWithGain();
 
+      conditionSettingTimer.startMeasurement();
       if (isStanding.getBooleanValue())
          setConditionsForFeedbackOnlyControl();
       else
          setConditionsForSteppingControl(numberOfFootstepsToConsider, omega0);
+      conditionSettingTimer.stopMeasurement();
 
       NoConvergenceException noConvergenceException = null;
       try
@@ -426,6 +430,7 @@ public class ICPOptimizationController
          noConvergenceException = e;
       }
 
+      solutionReadingTimer.startMeasurement();
       // don't pole the new solutions if there's a no convergence exception
       if (noConvergenceException == null)
       {
@@ -457,6 +462,7 @@ public class ICPOptimizationController
          if (useDifferentSplitRatioForBigAdjustment && !isInTransfer.getBooleanValue())
             computeUpcomingDoubleSupportSplitFraction(numberOfFootstepsToConsider, omega0);
       }
+      solutionReadingTimer.stopMeasurement();
 
       solutionHandler.getControllerReferenceCMP(desiredCMP);
       solver.getDynamicRelaxation(dynRelax);
@@ -486,9 +492,9 @@ public class ICPOptimizationController
    private int setConditionsForSteppingControl(int numberOfFootstepsToConsider, double omega0)
    {
       inputHandler.update(timeInCurrentState.getDoubleValue(), useTwoCMPs, isInTransfer.getBooleanValue(), omega0);
-      inputHandler.computeFinalICPRecursion(finalICPRecursion, numberOfFootstepsToConsider, useTwoCMPs, isInTransfer.getBooleanValue(), omega0);
+      inputHandler.computeFinalICPRecursion(finalICPRecursion);
       inputHandler.computeCMPConstantEffects(cmpConstantEffects, beginningOfStateICP.getFrameTuple2d(), beginningOfStateICPVelocity.getFrameTuple2d(),
-            upcomingFootstepLocations, numberOfFootstepsToConsider, useTwoCMPs, isInTransfer.getBooleanValue());
+            useTwoCMPs, isInTransfer.getBooleanValue());
 
       if (isInTransfer.getBooleanValue())
       {
