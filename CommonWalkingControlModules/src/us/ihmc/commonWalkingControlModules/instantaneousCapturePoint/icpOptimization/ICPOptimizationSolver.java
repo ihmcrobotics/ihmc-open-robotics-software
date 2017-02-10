@@ -553,7 +553,7 @@ public class ICPOptimizationSolver
       CommonOps.transpose(solverInput_Aeq, solverInput_AeqTrans);
       CommonOps.transpose(solverInput_Aineq, solverInput_AineqTrans);
 
-      activeSetSolver.setQuadraticCostFunction(solverInput_H, solverInput_h, 0.0);
+      activeSetSolver.setQuadraticCostFunction(solverInput_H, solverInput_h, 0.0, true);
       activeSetSolver.setLinearEqualityConstraints(solverInput_AeqTrans, solverInput_beq);
       activeSetSolver.setLinearInequalityConstraints(solverInput_AineqTrans, solverInput_bineq);
 
