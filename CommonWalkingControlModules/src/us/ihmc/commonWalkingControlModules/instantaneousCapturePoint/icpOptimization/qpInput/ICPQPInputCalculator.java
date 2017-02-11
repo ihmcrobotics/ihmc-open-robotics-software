@@ -105,7 +105,8 @@ public class ICPQPInputCalculator
    {
       int numberOfFootstepVariables = indexHandler.getNumberOfFootstepVariables();
 
-      MatrixTools.addMatrixBlock(solverInput_H, 0, 0, icpQPInput.quadraticTerm, 0, 0, numberOfFootstepVariables, numberOfFootstepVariables, 1.0);
-      MatrixTools.addMatrixBlock(solverInput_h, 0, 0, icpQPInput.linearTerm, 0, 0, numberOfFootstepVariables, 1, 1.0);
+      int footstepStartIndex = indexHandler.getFootstepStartIndex();
+      MatrixTools.addMatrixBlock(solverInput_H, 0, 0, icpQPInput.quadraticTerm, footstepStartIndex, 0, numberOfFootstepVariables, numberOfFootstepVariables, 1.0);
+      MatrixTools.addMatrixBlock(solverInput_h, 0, 0, icpQPInput.linearTerm, footstepStartIndex, 0, numberOfFootstepVariables, 1, 1.0);
    }
 }

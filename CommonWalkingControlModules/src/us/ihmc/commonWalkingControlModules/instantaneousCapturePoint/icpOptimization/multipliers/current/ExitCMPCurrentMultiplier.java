@@ -15,6 +15,9 @@ public class ExitCMPCurrentMultiplier
    private final CubicMatrix cubicMatrix;
    private final CubicDerivativeMatrix cubicDerivativeMatrix;
 
+   private final boolean givenCubicMatrix;
+   private final boolean givenCubicDerivativeMatrix;
+
    private final SwingExitCMPMatrix swingExitCMPMatrix;
 
    private final DoubleYoVariable exitCMPRatio;
@@ -22,7 +25,6 @@ public class ExitCMPCurrentMultiplier
 
    private final DoubleYoVariable startOfSplineTime;
    private final DoubleYoVariable endOfSplineTime;
-   private final DoubleYoVariable totalTrajectoryTime;
 
    private final DenseMatrix64F matrixOut = new DenseMatrix64F(1, 1);
 
@@ -30,7 +32,13 @@ public class ExitCMPCurrentMultiplier
    private final DoubleYoVariable velocityMultiplier;
 
    public ExitCMPCurrentMultiplier(DoubleYoVariable upcomingDoubleSupportSplitRatio, DoubleYoVariable exitCMPRatio, DoubleYoVariable startOfSplineTime,
-         DoubleYoVariable endOfSplineTime, DoubleYoVariable totalTrajectoryTime, YoVariableRegistry registry)
+         DoubleYoVariable endOfSplineTime, YoVariableRegistry registry)
+   {
+      this(upcomingDoubleSupportSplitRatio, exitCMPRatio, startOfSplineTime, endOfSplineTime, null, null, registry);
+   }
+
+   public ExitCMPCurrentMultiplier(DoubleYoVariable upcomingDoubleSupportSplitRatio, DoubleYoVariable exitCMPRatio, DoubleYoVariable startOfSplineTime,
+         DoubleYoVariable endOfSplineTime, CubicMatrix cubicMatrix, CubicDerivativeMatrix cubicDerivativeMatrix, YoVariableRegistry registry)
    {
       positionMultiplier = new DoubleYoVariable("ExitCMPCurrentMultiplier", registry);
       velocityMultiplier = new DoubleYoVariable("ExitCMPCurrentVelocityMultiplier", registry);
@@ -40,10 +48,28 @@ public class ExitCMPCurrentMultiplier
 
       this.startOfSplineTime = startOfSplineTime;
       this.endOfSplineTime = endOfSplineTime;
-      this.totalTrajectoryTime = totalTrajectoryTime;
 
-      cubicMatrix = new CubicMatrix();
-      cubicDerivativeMatrix = new CubicDerivativeMatrix();
+      if (cubicMatrix == null)
+      {
+         this.cubicMatrix = new CubicMatrix();
+         givenCubicMatrix = false;
+      }
+      else
+      {
+         this.cubicMatrix = cubicMatrix;
+         givenCubicMatrix = true;
+      }
+
+      if (cubicDerivativeMatrix == null)
+      {
+         this.cubicDerivativeMatrix = new CubicDerivativeMatrix();
+         givenCubicDerivativeMatrix = false;
+      }
+      else
+      {
+         this.cubicDerivativeMatrix = cubicDerivativeMatrix;
+         givenCubicDerivativeMatrix = true;
+      }
 
       swingExitCMPMatrix = new SwingExitCMPMatrix(upcomingDoubleSupportSplitRatio, exitCMPRatio, endOfSplineTime);
    }
@@ -144,10 +170,17 @@ public class ExitCMPCurrentMultiplier
       double timeInSpline = timeInState - startOfSplineTime.getDoubleValue();
       double splineDuration = endOfSplineTime.getDoubleValue() - startOfSplineTime.getDoubleValue();
 
-      cubicDerivativeMatrix.setSegmentDuration(splineDuration);
-      cubicDerivativeMatrix.update(timeInSpline, true);
-      cubicMatrix.setSegmentDuration(splineDuration);
-      cubicMatrix.update(timeInSpline, true);
+      if (!givenCubicDerivativeMatrix)
+      {
+         cubicDerivativeMatrix.setSegmentDuration(splineDuration);
+         cubicDerivativeMatrix.update(timeInSpline);
+      }
+
+      if (!givenCubicMatrix)
+      {
+         cubicMatrix.setSegmentDuration(splineDuration);
+         cubicMatrix.update(timeInSpline);
+      }
 
       CommonOps.mult(cubicMatrix, swingExitCMPMatrix, matrixOut);
 
