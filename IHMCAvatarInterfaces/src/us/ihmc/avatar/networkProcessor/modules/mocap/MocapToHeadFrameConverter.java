@@ -19,7 +19,7 @@ import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigura
  * This has an Atlas specific assumption!!!!!!!! 
  * This module uses the neck_ry joint as the bridge between mocap and robot
  */
-public class MocapToStateEstimatorFrameConverter
+public class MocapToHeadFrameConverter
 {
    HashMap<Integer, ReferenceFrame> mocapReferenceFrames = new HashMap<Integer, ReferenceFrame>();
    HashMap<Integer, RigidBodyTransform> mocapRigidBodyTransforms = new HashMap<Integer, RigidBodyTransform>();
@@ -63,7 +63,7 @@ public class MocapToStateEstimatorFrameConverter
       }
    };
    
-   public MocapToStateEstimatorFrameConverter(DRCRobotModel robotModel, PacketCommunicator mocapModulePacketCommunicator)
+   public MocapToHeadFrameConverter(DRCRobotModel robotModel, PacketCommunicator mocapModulePacketCommunicator)
    {
       FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
       robotDataReceiver = new HumanoidRobotDataReceiver(fullRobotModel, null);
