@@ -361,6 +361,8 @@ public class ICPOptimizationController
 
       if (useFootstepRegularization)
          resetFootstepRegularizationTask();
+
+      solver.resetOnContactChange();
       /*
       if (useFeedbackRegularization)
          solver.resetFeedbackRegularization();
