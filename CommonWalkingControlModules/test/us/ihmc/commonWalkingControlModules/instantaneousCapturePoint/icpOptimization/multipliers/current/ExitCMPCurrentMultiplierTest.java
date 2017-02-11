@@ -46,7 +46,7 @@ public class ExitCMPCurrentMultiplierTest
       }
 
       ExitCMPCurrentMultiplier exitCMPCurrentMultiplier = new ExitCMPCurrentMultiplier(upcomingSplitRatio, exitCMPRatio, startOfSplineTime, endOfSplineTime,
-            totalTrajectoryTime, registry);
+            registry);
 
       for (int iter = 0; iter < iters; iter++)
       {
@@ -108,7 +108,7 @@ public class ExitCMPCurrentMultiplierTest
       }
 
       ExitCMPCurrentMultiplier exitCMPCurrentMultiplier = new ExitCMPCurrentMultiplier(upcomingSplitRatio, exitCMPRatio, startOfSplineTime, endOfSplineTime,
-            totalTrajectoryTime, registry);
+            registry);
 
       for (int iter = 0; iter < iters; iter++)
       {
@@ -170,7 +170,7 @@ public class ExitCMPCurrentMultiplierTest
       }
 
       ExitCMPCurrentMultiplier exitCMPCurrentMultiplier = new ExitCMPCurrentMultiplier(upcomingSplitRatio, exitCMPRatio, startOfSplineTime, endOfSplineTime,
-            totalTrajectoryTime, registry);
+            registry);
 
 
       for (int iter = 0; iter < iters; iter++)
@@ -241,7 +241,7 @@ public class ExitCMPCurrentMultiplierTest
       }
 
       ExitCMPCurrentMultiplier exitCMPCurrentMultiplier = new ExitCMPCurrentMultiplier(upcomingSplitRatio, exitCMPRatio, startOfSplineTime, endOfSplineTime,
-            totalTrajectoryTime, registry);
+            registry);
 
       SwingExitCMPMatrix exitCMPMatrix = new SwingExitCMPMatrix(upcomingSplitRatio, exitCMPRatio, endOfSplineTime);
       CubicMatrix cubicMatrix = new CubicMatrix();
@@ -281,16 +281,13 @@ public class ExitCMPCurrentMultiplierTest
          boolean useTwoCMPs = true;
 
          double timeInCurrentState = random.nextDouble() * (endOfSpline - startOfSpline) + startOfSpline;
-         double timeRemaining = singleSupportDuration - timeInCurrentState;
 
          double splineDuration = endOfSpline - startOfSpline;
          cubicMatrix.setSegmentDuration(splineDuration);
          cubicDerivativeMatrix.setSegmentDuration(splineDuration);
 
-         double endingSegmentDuration = singleSupportDuration - endOfSpline;
-         double timeRemainingInSpline = timeRemaining - endingSegmentDuration;
-         cubicMatrix.update(timeRemainingInSpline);
-         cubicDerivativeMatrix.update(timeRemainingInSpline);
+         cubicMatrix.update(timeInCurrentState - startOfSpline);
+         cubicDerivativeMatrix.update(timeInCurrentState - startOfSpline);
 
          exitCMPMatrix.compute(doubleSupportDurations, singleSupportDurations, omega);
          CommonOps.mult(cubicMatrix, exitCMPMatrix, positionMatrixOut);
@@ -330,7 +327,7 @@ public class ExitCMPCurrentMultiplierTest
       }
 
       ExitCMPCurrentMultiplier exitCMPCurrentMultiplier = new ExitCMPCurrentMultiplier(upcomingSplitRatio, exitCMPRatio, startOfSplineTime, endOfSplineTime,
-            totalTrajectoryTime, registry);
+            registry);
 
       for (int iter = 0; iter < iters; iter++)
       {
@@ -406,7 +403,7 @@ public class ExitCMPCurrentMultiplierTest
       }
 
       ExitCMPCurrentMultiplier exitCMPCurrentMultiplier = new ExitCMPCurrentMultiplier(upcomingSplitRatio, exitCMPRatio, startOfSplineTime, endOfSplineTime,
-            totalTrajectoryTime, registry);
+            registry);
 
       for (int iter = 0; iter < iters; iter++)
       {
