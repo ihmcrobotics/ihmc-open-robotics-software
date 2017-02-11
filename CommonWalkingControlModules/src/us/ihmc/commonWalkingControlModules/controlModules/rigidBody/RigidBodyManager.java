@@ -8,6 +8,10 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolderReadOnly;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ChestTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.GoHomeCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SpineTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
@@ -93,7 +97,7 @@ public class RigidBodyManager
       // hold the position in the base reference frame using current desired
    }
 
-   public void handleStoptAllTrajectoryCommand()
+   public void handleStopAllTrajectoryCommand(StopAllTrajectoryCommand command)
    {
       // TODO: chest
       // stop executing trajectories and freeze the desireds
@@ -118,7 +122,7 @@ public class RigidBodyManager
       // if it is USER forward command to the user controller and activate it if necessary
    }
 
-   public void handleGoHomeCommand()
+   public void handleGoHomeCommand(GoHomeCommand command)
    {
       // TODO: chest
       // check if rigid body is in command
@@ -193,4 +197,18 @@ public class RigidBodyManager
       }
       return ret;
    }
+
+   // --- chest specific ---
+   public void handleChestTrajectoryCommand(ChestTrajectoryCommand command)
+   {
+      // TODO Auto-generated method stub
+   }
+
+   // --- chest specific ---
+   public void handleSpineTrajectoryCommand(SpineTrajectoryCommand command)
+   {
+      // TODO Auto-generated method stub
+
+   }
+
 }

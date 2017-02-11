@@ -1,14 +1,18 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories;
 
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.vecmath.Vector3d;
 
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.PelvisOrientationManager;
-import us.ihmc.commonWalkingControlModules.controlModules.chest.ChestOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.controlModules.head.HeadOrientationManager;
+import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyManager;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.ManipulationControlModule;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.BalanceManager;
@@ -21,6 +25,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.tools.io.printing.PrintTools;
 
 public class HighLevelControlManagerFactory
@@ -32,10 +37,11 @@ public class HighLevelControlManagerFactory
    private BalanceManager balanceManager;
    private CenterOfMassHeightManager centerOfMassHeightManager;
    private HeadOrientationManager headOrientationManager;
-   private ChestOrientationManager chestOrientationManager;
    private ManipulationControlModule manipulationControlModule;
    private FeetManager feetManager;
    private PelvisOrientationManager pelvisOrientationManager;
+
+   private final Map<String, RigidBodyManager> rigidBodyManagerMapByBodyName = new HashMap<>();
 
    private HighLevelHumanoidControllerToolbox momentumBasedController;
    private WalkingControllerParameters walkingControllerParameters;
@@ -138,27 +144,24 @@ public class HighLevelControlManagerFactory
       return headOrientationManager;
    }
 
-   public ChestOrientationManager getOrCreateChestOrientationManager()
+   public RigidBodyManager getOrCreateRigidBodyManager(RigidBody body)
    {
-      if (chestOrientationManager != null)
-         return chestOrientationManager;
-
-      FullRobotModel fullRobotModel = momentumBasedController.getFullRobotModel();
-
-      if (fullRobotModel.getChest() == null)
+      String bodyName = body.getName();
+      if (rigidBodyManagerMapByBodyName.containsKey(bodyName))
       {
-         robotMissingBodyWarning("chest", ChestOrientationManager.class);
-         return null;
+         RigidBodyManager manager = rigidBodyManagerMapByBodyName.get(bodyName);
+         if (manager != null)
+            return manager;
       }
 
-      if (!hasWalkingControllerParameters(ChestOrientationManager.class))
+      if (!hasWalkingControllerParameters(RigidBodyManager.class))
          return null;
-      if (!hasMomentumOptimizationSettings(ChestOrientationManager.class))
+      if (!hasMomentumOptimizationSettings(RigidBodyManager.class))
          return null;
 
-      Vector3d chestAngularWeight = momentumOptimizationSettings.getChestAngularWeight();
-      chestOrientationManager = new ChestOrientationManager(momentumBasedController, walkingControllerParameters, registry);
-      return chestOrientationManager;
+      RigidBodyManager manager = new RigidBodyManager(body, momentumBasedController, registry);
+      rigidBodyManagerMapByBodyName.put(bodyName, manager);
+      return manager;
    }
 
    public ManipulationControlModule getOrCreateManipulationControlModule()
@@ -300,8 +303,13 @@ public class HighLevelControlManagerFactory
          manipulationControlModule.initialize();
       if (headOrientationManager != null)
          headOrientationManager.initialize();
-      if (chestOrientationManager != null)
-         chestOrientationManager.initialize();
+
+      Collection<RigidBodyManager> bodyManagers = rigidBodyManagerMapByBodyName.values();
+      for (RigidBodyManager bodyManager : bodyManagers)
+      {
+         if (bodyManager != null)
+            bodyManager.initialize();
+      }
    }
 
    public FeedbackControlCommandList createFeedbackControlTemplate()
@@ -327,9 +335,11 @@ public class HighLevelControlManagerFactory
          ret.addCommand(headOrientationManager.createFeedbackControlTemplate());
       }
 
-      if (chestOrientationManager != null)
+      Collection<RigidBodyManager> bodyManagers = rigidBodyManagerMapByBodyName.values();
+      for (RigidBodyManager bodyManager : bodyManagers)
       {
-         ret.addCommand(chestOrientationManager.createFeedbackControlTemplate());
+         if (bodyManager != null)
+            ret.addCommand(bodyManager.createFeedbackControlTemplate());
       }
 
       if (pelvisOrientationManager != null)

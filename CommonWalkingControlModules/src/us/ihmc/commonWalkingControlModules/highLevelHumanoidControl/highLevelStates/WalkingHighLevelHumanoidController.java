@@ -5,9 +5,9 @@ import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerPar
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.PelvisOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
-import us.ihmc.commonWalkingControlModules.controlModules.chest.ChestOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.controlModules.head.HeadOrientationManager;
+import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyManager;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutputReadOnly;
@@ -76,12 +76,13 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
    private final HighLevelControlManagerFactory managerFactory;
 
    private final PelvisOrientationManager pelvisOrientationManager;
-   private final ChestOrientationManager chestOrientationManager;
    private final HeadOrientationManager headOrientationManager;
    private final ManipulationControlModule manipulationControlModule;
    private final FeetManager feetManager;
    private final BalanceManager balanceManager;
    private final CenterOfMassHeightManager comHeightManager;
+
+   private final RigidBodyManager chestManager;
 
    private final OneDoFJoint[] allOneDoFjoints;
 
@@ -142,9 +143,10 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
 
       this.pelvisOrientationManager = managerFactory.getOrCreatePelvisOrientationManager();
       this.headOrientationManager = managerFactory.getOrCreatedHeadOrientationManager();
-      this.chestOrientationManager = managerFactory.getOrCreateChestOrientationManager();
       this.manipulationControlModule = managerFactory.getOrCreateManipulationControlModule();
       this.feetManager = managerFactory.getOrCreateFeetManager();
+
+      this.chestManager = managerFactory.getOrCreateRigidBodyManager(fullRobotModel.getChest());
 
       this.walkingControllerParameters = walkingControllerParameters;
 
@@ -429,7 +431,7 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
          manipulationControlModule.holdCurrentArmConfiguration();
       }
 
-      chestOrientationManager.goToHomeFromCurrent(1.0);
+      chestManager.goToHomeFromCurrent(1.0);
 
       balanceManager.initialize();
       feetManager.initialize();
@@ -488,8 +490,6 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
 
       if (headOrientationManager != null)
          headOrientationManager.submitNewNeckJointDesiredConfiguration(controllerCoreOutput.getLowLevelOneDoFJointDesiredDataHolder());
-      if (chestOrientationManager != null)
-         chestOrientationManager.submitNewSpineJointDesiredConfiguration(controllerCoreOutput.getLowLevelOneDoFJointDesiredDataHolder());
 
       controllerCoreOutput.getLinearMomentumRate(achievedLinearMomentumRate);
       balanceManager.computeAchievedCMP(achievedLinearMomentumRate);
@@ -593,8 +593,8 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
          manipulationControlModule.doControl();
       if (headOrientationManager != null)
          headOrientationManager.compute();
-      if (chestOrientationManager != null)
-         chestOrientationManager.compute();
+      if (chestManager != null)
+         chestManager.compute();
       if (pelvisOrientationManager != null)
          pelvisOrientationManager.compute();
 
@@ -647,10 +647,10 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
          controllerCoreCommand.completeLowLevelJointData(headOrientationManager.getLowLevelJointDesiredData());
       }
 
-      if (chestOrientationManager != null)
+      if (chestManager != null)
       {
-         controllerCoreCommand.addFeedbackControlCommand(chestOrientationManager.getFeedbackControlCommand());
-         controllerCoreCommand.addInverseDynamicsCommand(chestOrientationManager.getInverseDynamicsCommand());
+         controllerCoreCommand.addFeedbackControlCommand(chestManager.getFeedbackControlCommand());
+         controllerCoreCommand.addInverseDynamicsCommand(chestManager.getInverseDynamicsCommand());
       }
 
       controllerCoreCommand.addFeedbackControlCommand(pelvisOrientationManager.getFeedbackControlCommand());
