@@ -89,8 +89,6 @@ public class AtlasICPOptimizationParameters extends ICPOptimizationParameters
       return runningOnRealRobot ? 1.0 : 1.0;
    }
 
-
-
    /** {@inheritDoc} */
    @Override
    public boolean scaleStepRegularizationWeightWithTime()
@@ -229,5 +227,12 @@ public class AtlasICPOptimizationParameters extends ICPOptimizationParameters
    public double getBackwardReachabilityLimit()
    {
       return -0.5;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public boolean useWarmStartInSolver()
+   {
+      return true;
    }
 }

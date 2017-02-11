@@ -2,6 +2,8 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimiz
 
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.current.*;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.interpolation.CubicDerivativeMatrix;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.interpolation.CubicMatrix;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.recursion.*;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -47,6 +49,9 @@ public class StateMultiplierCalculator
    private final InitialICPVelocityCurrentMultiplier initialICPVelocityCurrentMultiplier;
    private final StateEndCurrentMultiplier stateEndCurrentMultiplier;
 
+   private final CubicMatrix cubicMatrix;
+   private final CubicDerivativeMatrix cubicDerivativeMatrix;
+
    private final int maxNumberOfFootstepsToConsider;
 
    public StateMultiplierCalculator(CapturePointPlannerParameters icpPlannerParameters, DoubleYoVariable exitCMPDurationInPercentOfStepTime,
@@ -85,15 +90,19 @@ public class StateMultiplierCalculator
       exitCMPRecursionMultiplier = new ExitCMPRecursionMultiplier(namePrefix, maxNumberOfFootstepsToConsider, exitCMPDurationInPercentOfStepTime, registry);
       entryCMPRecursionMultiplier = new EntryCMPRecursionMultiplier(namePrefix, maxNumberOfFootstepsToConsider, exitCMPDurationInPercentOfStepTime, registry);
 
+      cubicMatrix = new CubicMatrix();
+      cubicDerivativeMatrix = new CubicDerivativeMatrix();
+
       exitCMPCurrentMultiplier = new ExitCMPCurrentMultiplier(upcomingDoubleSupportSplitFraction, exitCMPDurationInPercentOfStepTime, startOfSplineTime,
-            endOfSplineTime, totalTrajectoryTime, registry);
+            endOfSplineTime, cubicMatrix, cubicDerivativeMatrix, registry);
       entryCMPCurrentMultiplier = new EntryCMPCurrentMultiplier(upcomingDoubleSupportSplitFraction, defaultDoubleSupportSplitFraction,
-            exitCMPDurationInPercentOfStepTime, startOfSplineTime, endOfSplineTime, totalTrajectoryTime, PROJECT_FORWARD, registry);
-      initialICPCurrentMultiplier = new InitialICPCurrentMultiplier(upcomingDoubleSupportSplitFraction, defaultDoubleSupportSplitFraction,
-            exitCMPDurationInPercentOfStepTime, startOfSplineTime, endOfSplineTime, totalTrajectoryTime, PROJECT_FORWARD, registry);
-      initialICPVelocityCurrentMultiplier = new InitialICPVelocityCurrentMultiplier(registry);
+            exitCMPDurationInPercentOfStepTime, startOfSplineTime, endOfSplineTime, totalTrajectoryTime, cubicMatrix, cubicDerivativeMatrix, PROJECT_FORWARD,
+            registry);
+      initialICPCurrentMultiplier = new InitialICPCurrentMultiplier(defaultDoubleSupportSplitFraction, exitCMPDurationInPercentOfStepTime, startOfSplineTime,
+            endOfSplineTime, cubicMatrix, cubicDerivativeMatrix, PROJECT_FORWARD, registry);
+      initialICPVelocityCurrentMultiplier = new InitialICPVelocityCurrentMultiplier(cubicMatrix, cubicDerivativeMatrix, registry);
       stateEndCurrentMultiplier = new StateEndCurrentMultiplier(upcomingDoubleSupportSplitFraction, defaultDoubleSupportSplitFraction,
-            exitCMPDurationInPercentOfStepTime, startOfSplineTime, endOfSplineTime, totalTrajectoryTime, PROJECT_FORWARD, registry);
+            exitCMPDurationInPercentOfStepTime, startOfSplineTime, endOfSplineTime, cubicMatrix, cubicDerivativeMatrix, PROJECT_FORWARD, registry);
 
       parentRegistry.addChild(registry);
    }
@@ -171,14 +180,77 @@ public class StateMultiplierCalculator
       stateEndCurrentMultiplier.reset();
    }
 
+   public void initializeForDoubleSupport()
+   {
+      currentSwingSegment.set(0);
+
+      timeSpentOnInitialCMP.set(Double.NaN);
+      timeSpentOnFinalCMP.set(Double.NaN);
+      totalTrajectoryTime.set(Double.NaN);
+      startOfSplineTime.set(Double.NaN);
+      endOfSplineTime.set(Double.NaN);
+
+      double doubleSupportDuration = doubleSupportDurations.get(0).getDoubleValue();
+      cubicDerivativeMatrix.setSegmentDuration(doubleSupportDuration);
+      cubicMatrix.setSegmentDuration(doubleSupportDuration);
+   }
+
+   public void initializeForSingleSupport()
+   {
+      double doubleSupportDuration = doubleSupportDurations.get(0).getDoubleValue();
+      double steppingDuration = singleSupportDurations.get(0).getDoubleValue() + doubleSupportDuration;
+
+      double totalTimeSpentOnExitCMP = steppingDuration * exitCMPDurationInPercentOfStepTime.getDoubleValue();
+      double totalTimeSpentOnEntryCMP = steppingDuration * (1.0 - exitCMPDurationInPercentOfStepTime.getDoubleValue());
+
+      double doubleSupportTimeSpentBeforeEntryCornerPoint = doubleSupportDuration * defaultDoubleSupportSplitFraction.getDoubleValue();
+      double doubleSupportTimeSpentAfterEntryCornerPoint = doubleSupportDuration * (1.0 - defaultDoubleSupportSplitFraction.getDoubleValue());
+
+      double timeRemainingOnEntryCMP = totalTimeSpentOnEntryCMP - doubleSupportTimeSpentBeforeEntryCornerPoint;
+      double timeToSpendOnFinalCMPBeforeDoubleSupport = totalTimeSpentOnExitCMP - doubleSupportTimeSpentAfterEntryCornerPoint;
+
+      timeSpentOnInitialCMP.set(timeRemainingOnEntryCMP);
+      timeSpentOnFinalCMP.set(timeToSpendOnFinalCMPBeforeDoubleSupport);
+      totalTrajectoryTime.set(timeRemainingOnEntryCMP + timeToSpendOnFinalCMPBeforeDoubleSupport);
+
+      double alpha = 0.50;
+      double minTimeOnExitCMP = minimumTimeToSpendOnExitCMP.getDoubleValue();
+      minTimeOnExitCMP = Math.min(minTimeOnExitCMP, timeSpentOnFinalCMP.getDoubleValue() - alpha * minimumSplineDuration.getDoubleValue());
+
+      double startOfSplineTime = timeSpentOnInitialCMP.getDoubleValue() - alpha * maximumSplineDuration.getDoubleValue();
+      startOfSplineTime = Math.max(startOfSplineTime, 0.0);
+      this.startOfSplineTime.set(startOfSplineTime);
+
+      double endOfSplineTime = timeSpentOnInitialCMP.getDoubleValue() + (1.0 - alpha) * maximumSplineDuration.getDoubleValue();
+      endOfSplineTime = Math.min(endOfSplineTime, totalTrajectoryTime.getDoubleValue() - minTimeOnExitCMP);
+      if (endOfSplineTime > totalTrajectoryTime.getDoubleValue() - minTimeOnExitCMP)
+      {
+         endOfSplineTime = totalTrajectoryTime.getDoubleValue() - minTimeOnExitCMP;
+         startOfSplineTime = timeSpentOnInitialCMP.getDoubleValue() - (endOfSplineTime - timeSpentOnInitialCMP.getDoubleValue());
+      }
+      this.startOfSplineTime.set(startOfSplineTime);
+      this.endOfSplineTime.set(endOfSplineTime);
+
+      double splineDuration = endOfSplineTime - startOfSplineTime;
+      cubicMatrix.setSegmentDuration(splineDuration);
+      cubicDerivativeMatrix.setSegmentDuration(splineDuration);
+   }
+
    public void computeCurrentMultipliers(double timeInState, boolean useTwoCMPs, boolean isInTransfer, double omega0)
    {
       resetCurrentMultipliers();
 
-      if (useTwoCMPs)
-      {
-         updateSegmentedSingleSupportTrajectory(timeInState, isInTransfer);
-      }
+      if (useTwoCMPs && !isInTransfer)
+         updateSegmentedSingleSupportTrajectory(timeInState);
+
+      double timeInSpline;
+      if (isInTransfer)
+         timeInSpline = timeInState;
+      else
+         timeInSpline = timeInState - startOfSplineTime.getDoubleValue();
+
+      cubicMatrix.update(timeInSpline);
+      cubicDerivativeMatrix.update(timeInSpline);
 
       exitCMPCurrentMultiplier.compute(doubleSupportDurations, singleSupportDurations, timeInState, useTwoCMPs, isInTransfer, omega0);
       entryCMPCurrentMultiplier.compute(doubleSupportDurations, singleSupportDurations, timeInState, useTwoCMPs, isInTransfer, omega0);
@@ -187,62 +259,14 @@ public class StateMultiplierCalculator
       stateEndCurrentMultiplier.compute(doubleSupportDurations, singleSupportDurations, timeInState, useTwoCMPs, isInTransfer, omega0);
    }
 
-   private void updateSegmentedSingleSupportTrajectory(double timeInState, boolean isInTransfer)
+   private void updateSegmentedSingleSupportTrajectory(double timeInState)
    {
-      if (!isInTransfer)
-      {
-         double doubleSupportDuration = doubleSupportDurations.get(0).getDoubleValue();
-         double steppingDuration = singleSupportDurations.get(0).getDoubleValue() + doubleSupportDuration;
-
-         double totalTimeSpentOnExitCMP = steppingDuration * exitCMPDurationInPercentOfStepTime.getDoubleValue();
-         double totalTimeSpentOnEntryCMP = steppingDuration * (1.0 - exitCMPDurationInPercentOfStepTime.getDoubleValue());
-
-         double doubleSupportTimeSpentBeforeEntryCornerPoint = doubleSupportDuration * defaultDoubleSupportSplitFraction.getDoubleValue();
-         double doubleSupportTimeSpentAfterEntryCornerPoint = doubleSupportDuration * (1.0 - defaultDoubleSupportSplitFraction.getDoubleValue());
-
-         double timeRemainingOnEntryCMP = totalTimeSpentOnEntryCMP - doubleSupportTimeSpentBeforeEntryCornerPoint;
-         double timeToSpendOnFinalCMPBeforeDoubleSupport = totalTimeSpentOnExitCMP - doubleSupportTimeSpentAfterEntryCornerPoint;
-
-         timeSpentOnInitialCMP.set(timeRemainingOnEntryCMP);
-         timeSpentOnFinalCMP.set(timeToSpendOnFinalCMPBeforeDoubleSupport);
-         totalTrajectoryTime.set(timeRemainingOnEntryCMP + timeToSpendOnFinalCMPBeforeDoubleSupport);
-
-         double alpha = 0.50;
-         double minTimeOnExitCMP = minimumTimeToSpendOnExitCMP.getDoubleValue();
-         minTimeOnExitCMP = Math.min(minTimeOnExitCMP, timeSpentOnFinalCMP.getDoubleValue() - alpha * minimumSplineDuration.getDoubleValue());
-
-         double startOfSplineTime = timeSpentOnInitialCMP.getDoubleValue() - alpha * maximumSplineDuration.getDoubleValue();
-         startOfSplineTime = Math.max(startOfSplineTime, 0.0);
-         this.startOfSplineTime.set(startOfSplineTime);
-
-         double endOfSplineTime = timeSpentOnInitialCMP.getDoubleValue() + (1.0 - alpha) * maximumSplineDuration.getDoubleValue();
-         endOfSplineTime = Math.min(endOfSplineTime, totalTrajectoryTime.getDoubleValue() - minTimeOnExitCMP);
-         if (endOfSplineTime > totalTrajectoryTime.getDoubleValue() - minTimeOnExitCMP)
-         {
-            endOfSplineTime = totalTrajectoryTime.getDoubleValue() - minTimeOnExitCMP;
-            startOfSplineTime = timeSpentOnInitialCMP.getDoubleValue() - (endOfSplineTime - timeSpentOnInitialCMP.getDoubleValue());
-         }
-         this.startOfSplineTime.set(startOfSplineTime);
-         this.endOfSplineTime.set(endOfSplineTime);
-
-         if (timeInState <= startOfSplineTime)
-            currentSwingSegment.set(1);
-         else if (timeInState >= endOfSplineTime)
-            currentSwingSegment.set(3);
-         else
-            currentSwingSegment.set(2);
-      }
+      if (timeInState <= startOfSplineTime.getDoubleValue())
+         currentSwingSegment.set(1);
+      else if (timeInState >= endOfSplineTime.getDoubleValue())
+         currentSwingSegment.set(3);
       else
-      {
-         currentSwingSegment.set(0);
-
-         timeSpentOnInitialCMP.set(Double.NaN);
-         timeSpentOnFinalCMP.set(Double.NaN);
-         totalTrajectoryTime.set(Double.NaN);
-         startOfSplineTime.set(Double.NaN);
-         endOfSplineTime.set(Double.NaN);
-      }
-
+         currentSwingSegment.set(2);
    }
 
    public double getExitCMPCurrentMultiplier()

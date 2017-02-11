@@ -16,7 +16,7 @@ import javax.vecmath.Vector3d;
 public class AtlasStepAdjustmentDemo
 {
    private static StepScriptType stepScriptType = StepScriptType.FORWARD_FAST;
-   private static TestType testType = TestType.FEEDBACK_ONLY;
+   private static TestType testType = TestType.BIG_ADJUSTMENT;
    private static PushDirection pushDirection = PushDirection.OUTWARD;
 
    private static String forwardFastScript = "scripts/stepAdjustment_forwardWalkingFast.xml";

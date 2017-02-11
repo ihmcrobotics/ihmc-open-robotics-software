@@ -42,27 +42,22 @@ public class ICPOptimizationReachabilityConstraintHandler
    {
       solver.resetReachabilityConstraint();
 
-      double lateralInnerLimit = lateralReachabilityInnerLimit.getDoubleValue();
-      double lateralOuterLimit = lateralReachabilityOuterLimit.getDoubleValue();
-
-      lateralInnerLimit = supportSide.negateIfLeftSide(lateralInnerLimit);
-      lateralOuterLimit = supportSide.negateIfLeftSide(lateralOuterLimit);
+      double lateralInnerLimit = supportSide.negateIfLeftSide(lateralReachabilityInnerLimit.getDoubleValue());
+      double lateralOuterLimit = supportSide.negateIfLeftSide(lateralReachabilityOuterLimit.getDoubleValue());
 
       ReferenceFrame supportSoleFrame = bipedSupportPolygons.getSoleZUpFrames().get(supportSide);
 
       tempVertex.setToZero(supportSoleFrame);
+
       tempVertex.set(forwardReachabilityLimit.getDoubleValue(), lateralInnerLimit);
       solver.addReachabilityVertex(tempVertex, supportSoleFrame);
 
-      tempVertex.setToZero(supportSoleFrame);
       tempVertex.set(forwardReachabilityLimit.getDoubleValue(), lateralOuterLimit);
       solver.addReachabilityVertex(tempVertex, supportSoleFrame);
 
-      tempVertex.setToZero(supportSoleFrame);
       tempVertex.set(backwardReachabilityLimit.getDoubleValue(), lateralInnerLimit);
       solver.addReachabilityVertex(tempVertex, supportSoleFrame);
 
-      tempVertex.setToZero(supportSoleFrame);
       tempVertex.set(backwardReachabilityLimit.getDoubleValue(), lateralOuterLimit);
       solver.addReachabilityVertex(tempVertex, supportSoleFrame);
    }
