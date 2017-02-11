@@ -251,4 +251,13 @@ public abstract class ICPOptimizationParameters
    {
       return -0.3;
    }
+
+   /**
+    * Sets whether or not to use a warm start in the active set solver. This epxloits that the active set doesn't change often.
+    * @return Whether or not to use a warm start in the solver
+    */
+   public boolean useWarmStartInSolver()
+   {
+      return false;
+   }
 }

@@ -158,6 +158,7 @@ public class ICPOptimizationSolver
       dynamicRelaxationCostToGo = new DenseMatrix64F(1, 1);
 
       activeSetSolver = new SimpleEfficientActiveSetQPSolver();
+      activeSetSolver.setUseWarmStart(icpOptimizationParameters.useWarmStartInSolver());
    }
 
    public void resetSupportPolygonConstraint()
@@ -391,6 +392,10 @@ public class ICPOptimizationSolver
    }
 
 
+   public void resetOnContactChange()
+   {
+      activeSetSolver.resetActiveConstraints();;
+   }
 
 
 
