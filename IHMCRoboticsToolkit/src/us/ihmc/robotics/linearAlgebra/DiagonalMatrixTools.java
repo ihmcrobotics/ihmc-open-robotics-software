@@ -61,7 +61,7 @@ public class DiagonalMatrixTools
          throw new MatrixDimensionException("The results matrix does not have the desired dimensions");
       }
 
-      for (int row = 0; row < a.numRows; row++)
+      for (int row = 0; row < Math.min(a.numRows, a.numCols); row++)
       {
          for (int col = 0; col < b.numCols; col++)
          {
@@ -99,7 +99,7 @@ public class DiagonalMatrixTools
 
       for (int row = 0; row < a.numRows; row++)
       {
-         for (int col = 0; col < b.numCols; col++)
+         for (int col = 0; col < Math.min(b.numRows, b.numCols); col++)
          {
             c.unsafe_set(row, col, b.unsafe_get(col, col) * a.unsafe_get(row, col));
          }
