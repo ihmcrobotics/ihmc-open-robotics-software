@@ -9,6 +9,10 @@ import us.ihmc.footstepPlanning.FootstepPlanner;
 import us.ihmc.footstepPlanning.FootstepPlannerGoal;
 import us.ihmc.footstepPlanning.FootstepPlannerGoalType;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
+import us.ihmc.footstepPlanning.aStar.implementations.DistanceAndYawBasedCost;
+import us.ihmc.footstepPlanning.aStar.implementations.DistanceAndYawBasedHeuristics;
+import us.ihmc.footstepPlanning.aStar.implementations.SimpleNodeChecker;
+import us.ihmc.footstepPlanning.aStar.implementations.SimpleSideBasedExpansion;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
@@ -19,6 +23,9 @@ import us.ihmc.robotics.time.TimeTools;
 
 public class AStarFootstepPlanner implements FootstepPlanner
 {
+   private static final double DEFAULT_COST_PER_STEP = 0.01;
+   private static final double DEFAULT_YAW_WEIGHT = 0.1;
+
    private FootstepGraph graph;
    private SideDependentList<FootstepNode> goalNodes;
    private FootstepNode startNode;
@@ -209,5 +216,16 @@ public class AStarFootstepPlanner implements FootstepPlanner
       FootstepPlannerGoalType supportedGoalType = FootstepPlannerGoalType.POSE_BETWEEN_FEET;
       if (!(goal.getFootstepPlannerGoalType() == supportedGoalType))
          throw new RuntimeException("Planner does not support goals other then " + supportedGoalType);
+   }
+
+   public static AStarFootstepPlanner createDefaultPlanner(FootstepNodeVisualization viz)
+   {
+      SimpleNodeChecker nodeChecker = new SimpleNodeChecker();
+      SimpleSideBasedExpansion expansion = new SimpleSideBasedExpansion();
+
+      DistanceAndYawBasedHeuristics heuristics = new DistanceAndYawBasedHeuristics(DEFAULT_YAW_WEIGHT);
+      DistanceAndYawBasedCost stepCostCalculator = new DistanceAndYawBasedCost(DEFAULT_COST_PER_STEP, DEFAULT_YAW_WEIGHT);
+
+      return new AStarFootstepPlanner(nodeChecker, heuristics, expansion, stepCostCalculator, viz);
    }
 }

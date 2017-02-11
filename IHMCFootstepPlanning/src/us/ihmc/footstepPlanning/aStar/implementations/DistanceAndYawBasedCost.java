@@ -14,6 +14,15 @@ public class DistanceAndYawBasedCost implements FootstepCost
 {
    private static final double defaultStepWidth = 0.25;
 
+   private final double costPerStep;
+   private final double yawWeight;
+
+   public DistanceAndYawBasedCost(double costPerStep, double yawWeight)
+   {
+      this.costPerStep = costPerStep;
+      this.yawWeight = yawWeight;
+   }
+
    @Override
    public double compute(FootstepNode startNode, FootstepNode endNode)
    {
@@ -21,7 +30,7 @@ public class DistanceAndYawBasedCost implements FootstepCost
       Point2d endPoint = computeMidFootPoint(endNode);
       double euclideanDistance = startPoint.distance(endPoint);
       double yaw = AngleTools.computeAngleDifferenceMinusPiToPi(startNode.getYaw(), endNode.getYaw());
-      return euclideanDistance + Math.abs(yaw);
+      return euclideanDistance + yawWeight * Math.abs(yaw) + costPerStep;
    }
 
    public static Point2d computeMidFootPoint(FootstepNode node)

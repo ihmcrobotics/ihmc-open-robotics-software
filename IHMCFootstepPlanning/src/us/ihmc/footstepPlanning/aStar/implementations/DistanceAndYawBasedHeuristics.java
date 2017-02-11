@@ -8,6 +8,13 @@ import us.ihmc.robotics.geometry.AngleTools;
 
 public class DistanceAndYawBasedHeuristics extends CostToGoHeuristics
 {
+   private final double yawWeight;
+
+   public DistanceAndYawBasedHeuristics(double yawWeight)
+   {
+      this.yawWeight = yawWeight;
+   }
+
    @Override
    protected double computeHeuristics(FootstepNode node, FootstepNode goalNode)
    {
@@ -15,6 +22,6 @@ public class DistanceAndYawBasedHeuristics extends CostToGoHeuristics
       Point2d nodeMidFootPoint = DistanceAndYawBasedCost.computeMidFootPoint(node);
       double euclideanDistance = nodeMidFootPoint.distance(goalPoint);
       double yaw = AngleTools.computeAngleDifferenceMinusPiToPi(node.getYaw(), goalNode.getYaw());
-      return euclideanDistance + Math.abs(yaw);
+      return euclideanDistance + yawWeight * Math.abs(yaw);
    }
 }
