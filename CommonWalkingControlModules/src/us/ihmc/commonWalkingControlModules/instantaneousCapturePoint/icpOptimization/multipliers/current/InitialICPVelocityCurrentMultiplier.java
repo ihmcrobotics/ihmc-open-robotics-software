@@ -15,6 +15,9 @@ public class InitialICPVelocityCurrentMultiplier
    private final CubicMatrix cubicMatrix;
    private final CubicDerivativeMatrix cubicDerivativeMatrix;
 
+   private final boolean givenCubicMatrix;
+   private final boolean givenCubicDerivativeMatrix;
+
    private final TransferInitialICPVelocityMatrix transferInitialICPVelocityMatrix;
 
    private final DenseMatrix64F matrixOut = new DenseMatrix64F(1, 1);
@@ -24,11 +27,35 @@ public class InitialICPVelocityCurrentMultiplier
 
    public InitialICPVelocityCurrentMultiplier(YoVariableRegistry registry)
    {
+      this(null, null, registry);
+   }
+
+   public InitialICPVelocityCurrentMultiplier(CubicMatrix cubicMatrix, CubicDerivativeMatrix cubicDerivativeMatrix, YoVariableRegistry registry)
+   {
       positionMultiplier = new DoubleYoVariable("InitialICPVelocityCurrentMultiplier", registry);
       velocityMultiplier = new DoubleYoVariable("InitialICPCVelocityCurrentVelocityMultiplier", registry);
 
-      cubicMatrix = new CubicMatrix();
-      cubicDerivativeMatrix = new CubicDerivativeMatrix();
+      if (cubicMatrix == null)
+      {
+         this.cubicMatrix = new CubicMatrix();
+         givenCubicMatrix = false;
+      }
+      else
+      {
+         this.cubicMatrix = cubicMatrix;
+         givenCubicMatrix = true;
+      }
+
+      if (cubicDerivativeMatrix == null)
+      {
+         this.cubicDerivativeMatrix = new CubicDerivativeMatrix();
+         givenCubicDerivativeMatrix = false;
+      }
+      else
+      {
+         this.cubicDerivativeMatrix = cubicDerivativeMatrix;
+         givenCubicDerivativeMatrix = true;
+      }
 
       transferInitialICPVelocityMatrix = new TransferInitialICPVelocityMatrix();
    }
@@ -72,10 +99,17 @@ public class InitialICPVelocityCurrentMultiplier
 
       double splineDuration = doubleSupportDurations.get(0).getDoubleValue();
 
-      cubicDerivativeMatrix.setSegmentDuration(splineDuration);
-      cubicDerivativeMatrix.update(timeInState, true);
-      cubicMatrix.setSegmentDuration(splineDuration);
-      cubicMatrix.update(timeInState, true);
+      if (!givenCubicDerivativeMatrix)
+      {
+         cubicDerivativeMatrix.setSegmentDuration(splineDuration);
+         cubicDerivativeMatrix.update(timeInState);
+      }
+
+      if (!givenCubicMatrix)
+      {
+         cubicMatrix.setSegmentDuration(splineDuration);
+         cubicMatrix.update(timeInState);
+      }
 
       CommonOps.mult(cubicMatrix, transferInitialICPVelocityMatrix, matrixOut);
 

@@ -384,35 +384,6 @@ public abstract class ICPOptimizationPushRecoveryTest
       assertTrue(noExceptions);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration =  20.0)
-   @Test(timeout = 120000)
-   public void testPushICPOptimizationInwardPushInTransfer() throws SimulationExceededMaximumTimeException
-   {
-      setupTest(script);
-      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
-
-      // push timing:
-      StateTransitionCondition pushCondition = doubleSupportStartConditions.get(RobotSide.RIGHT);
-      double delay = 0.5 * transferTime;
-
-      // push parameters:
-      Vector3d forceDirection = new Vector3d(0.0, -1.0, 0.0);
-      double percentWeight = 0.17;
-      double magnitude = percentWeight * totalMass * 9.81;
-      double duration = 0.1;
-
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.7);
-      assertTrue(success);
-
-      pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
-
-      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime);
-
-      boolean noExceptions = caughtException == null;
-
-      assertTrue(success);
-      assertTrue(noExceptions);
-   }
 
    @ContinuousIntegrationTest(estimatedDuration =  20.0)
    @Test(timeout = 120000)

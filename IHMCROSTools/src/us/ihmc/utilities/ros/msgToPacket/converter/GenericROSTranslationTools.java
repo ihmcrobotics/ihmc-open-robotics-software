@@ -416,7 +416,7 @@ public class GenericROSTranslationTools
       setterMethod.setAccessible(true);
 
       Class<?> vecmathClass = field.getType();
-      Class<?> genericVecmathClass = Class.forName(vecmathClass.getGenericSuperclass().getTypeName());
+      Class<?> genericVecmathClass = (Class<?>) vecmathClass.getGenericSuperclass();
       String genericVecmathClassName = genericVecmathClass.getSimpleName();
       Method converterMethod = GenericROSTranslationTools.class.getMethod("convert" + genericVecmathClassName, genericVecmathClass);
       converterMethod.setAccessible(true);

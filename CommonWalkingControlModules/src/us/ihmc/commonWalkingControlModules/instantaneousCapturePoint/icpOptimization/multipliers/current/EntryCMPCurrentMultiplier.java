@@ -34,8 +34,19 @@ public class EntryCMPCurrentMultiplier
 
    private final boolean projectForward;
 
+   private final boolean givenCubicMatrix;
+   private final boolean givenCubicDerivativeMatrix;
+
    public EntryCMPCurrentMultiplier(DoubleYoVariable upcomingDoubleSupportSplitRatio, DoubleYoVariable defaultDoubleSupportSplitRatio, DoubleYoVariable exitCMPRatio,
          DoubleYoVariable startOfSplineTime, DoubleYoVariable endOfSplineTime, DoubleYoVariable totalTrajectoryTime, boolean projectForward, YoVariableRegistry registry)
+   {
+      this(upcomingDoubleSupportSplitRatio, defaultDoubleSupportSplitRatio, exitCMPRatio, startOfSplineTime, endOfSplineTime, totalTrajectoryTime, null, null,
+            projectForward, registry);
+   }
+
+   public EntryCMPCurrentMultiplier(DoubleYoVariable upcomingDoubleSupportSplitRatio, DoubleYoVariable defaultDoubleSupportSplitRatio, DoubleYoVariable exitCMPRatio,
+         DoubleYoVariable startOfSplineTime, DoubleYoVariable endOfSplineTime, DoubleYoVariable totalTrajectoryTime, CubicMatrix cubicMatrix,
+         CubicDerivativeMatrix cubicDerivativeMatrix, boolean projectForward, YoVariableRegistry registry)
    {
       positionMultiplier = new DoubleYoVariable("EntryCMPCurrentMultiplier", registry);
       velocityMultiplier = new DoubleYoVariable("EntryCMPCurrentVelocityMultiplier", registry);
@@ -50,8 +61,27 @@ public class EntryCMPCurrentMultiplier
 
       this.projectForward = projectForward;
 
-      cubicMatrix = new CubicMatrix();
-      cubicDerivativeMatrix = new CubicDerivativeMatrix();
+      if (cubicMatrix == null)
+      {
+         this.cubicMatrix = new CubicMatrix();
+         givenCubicMatrix = false;
+      }
+      else
+      {
+         this.cubicMatrix = cubicMatrix;
+         givenCubicMatrix = true;
+      }
+
+      if (cubicDerivativeMatrix == null)
+      {
+         this.cubicDerivativeMatrix = new CubicDerivativeMatrix();
+         givenCubicDerivativeMatrix = false;
+      }
+      else
+      {
+         this.cubicDerivativeMatrix = cubicDerivativeMatrix;
+         givenCubicDerivativeMatrix = true;
+      }
 
       transferEntryCMPMatrix = new TransferEntryCMPMatrix(defaultDoubleSupportSplitRatio);
       swingEntryCMPMatrix = new SwingEntryCMPMatrix(startOfSplineTime);
@@ -114,10 +144,17 @@ public class EntryCMPCurrentMultiplier
 
       double splineDuration = doubleSupportDurations.get(0).getDoubleValue();
 
-      cubicDerivativeMatrix.setSegmentDuration(splineDuration);
-      cubicDerivativeMatrix.update(timeInState, true);
-      cubicMatrix.setSegmentDuration(splineDuration);
-      cubicMatrix.update(timeInState, true);
+      if (!givenCubicDerivativeMatrix)
+      {
+         cubicDerivativeMatrix.setSegmentDuration(splineDuration);
+         cubicDerivativeMatrix.update(timeInState);
+      }
+
+      if (!givenCubicMatrix)
+      {
+         cubicMatrix.setSegmentDuration(splineDuration);
+         cubicMatrix.update(timeInState);
+      }
 
       CommonOps.mult(cubicMatrix, transferEntryCMPMatrix, matrixOut);
 
@@ -201,11 +238,17 @@ public class EntryCMPCurrentMultiplier
       double timeInSpline = timeInState - startOfSplineTime.getDoubleValue();
       double splineDuration = endOfSplineTime.getDoubleValue() - startOfSplineTime.getDoubleValue();
 
-      cubicMatrix.setSegmentDuration(splineDuration);
-      cubicMatrix.update(timeInSpline, true);
+      if (!givenCubicMatrix)
+      {
+         cubicMatrix.setSegmentDuration(splineDuration);
+         cubicMatrix.update(timeInSpline);
+      }
 
-      cubicDerivativeMatrix.setSegmentDuration(splineDuration);
-      cubicDerivativeMatrix.update(timeInSpline, true);
+      if (!givenCubicDerivativeMatrix)
+      {
+         cubicDerivativeMatrix.setSegmentDuration(splineDuration);
+         cubicDerivativeMatrix.update(timeInSpline);
+      }
 
       CommonOps.mult(cubicMatrix, swingEntryCMPMatrix, matrixOut);
 
