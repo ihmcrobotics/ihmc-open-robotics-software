@@ -3,6 +3,8 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimiz
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.qpInput.*;
+import us.ihmc.convexOptimization.quadraticProgram.SimpleActiveSetQPSolverInterface;
+import us.ihmc.convexOptimization.quadraticProgram.SimpleDiagonalActiveSetQPSolver;
 import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSolver;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
@@ -58,7 +60,7 @@ public class ICPOptimizationSolver
    protected final DenseMatrix64F dynamicRelaxationWeight = new DenseMatrix64F(2, 2);
    protected final DenseMatrix64F feedbackGain = new DenseMatrix64F(2, 2);
 
-   private final SimpleEfficientActiveSetQPSolver activeSetSolver;
+   private final SimpleActiveSetQPSolverInterface activeSetSolver;
 
    protected final DenseMatrix64F solution;
    protected final DenseMatrix64F freeVariableSolution;
@@ -157,7 +159,7 @@ public class ICPOptimizationSolver
       feedbackCostToGo = new DenseMatrix64F(1, 1);
       dynamicRelaxationCostToGo = new DenseMatrix64F(1, 1);
 
-      activeSetSolver = new SimpleEfficientActiveSetQPSolver();
+      activeSetSolver = new SimpleDiagonalActiveSetQPSolver();
       activeSetSolver.setUseWarmStart(icpOptimizationParameters.useWarmStartInSolver());
    }
 
@@ -558,7 +560,7 @@ public class ICPOptimizationSolver
       CommonOps.transpose(solverInput_Aeq, solverInput_AeqTrans);
       CommonOps.transpose(solverInput_Aineq, solverInput_AineqTrans);
 
-      activeSetSolver.setQuadraticCostFunction(solverInput_H, solverInput_h, 0.0, true);
+      activeSetSolver.setQuadraticCostFunction(solverInput_H, solverInput_h, 0.0);
       activeSetSolver.setLinearEqualityConstraints(solverInput_AeqTrans, solverInput_beq);
       activeSetSolver.setLinearInequalityConstraints(solverInput_AineqTrans, solverInput_bineq);
 

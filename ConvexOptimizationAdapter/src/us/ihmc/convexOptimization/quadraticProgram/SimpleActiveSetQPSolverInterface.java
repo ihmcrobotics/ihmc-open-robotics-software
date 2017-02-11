@@ -16,9 +16,6 @@ public interface SimpleActiveSetQPSolverInterface
 
    public abstract void setQuadraticCostFunction(DenseMatrix64F costQuadraticMatrix, DenseMatrix64F costLinearVector, double quadraticCostScalar);
 
-   public abstract void setQuadraticCostFunction(DenseMatrix64F costQuadraticMatrix, DenseMatrix64F costLinearVector, double quadraticCostScalar,
-         boolean quadraticCostMatrixIsDiagonal);
-
    public abstract double getObjectiveCost(DenseMatrix64F solutionMatrix);
 
    public abstract void setLinearEqualityConstraints(double[][] linearEqualityConstraintsAMatrix, double[] linearEqualityConstraintsBVector);
