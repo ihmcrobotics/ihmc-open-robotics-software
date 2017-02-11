@@ -9,10 +9,6 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.footstepPlanning.FootstepPlanner;
-import us.ihmc.footstepPlanning.aStar.implementations.DistanceAndYawBasedCost;
-import us.ihmc.footstepPlanning.aStar.implementations.DistanceAndYawBasedHeuristics;
-import us.ihmc.footstepPlanning.aStar.implementations.SimpleNodeChecker;
-import us.ihmc.footstepPlanning.aStar.implementations.SimpleSideBasedExpansion;
 import us.ihmc.footstepPlanning.flatGroundPlanning.FootstepPlannerOnFlatGroundTest;
 
 @ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
@@ -57,19 +53,9 @@ public class AStarOnFlatTest extends FootstepPlannerOnFlatGroundTest
    @Before
    public void createPlanner()
    {
-      // create planner
-      SimpleNodeChecker nodeChecker = new SimpleNodeChecker();
-      SimpleSideBasedExpansion expansion = new SimpleSideBasedExpansion();
-
-//      EuclidianDistanceHeuristics heuristics = new EuclidianDistanceHeuristics();
-//      EuclidianBasedCost stepCostCalculator = new EuclidianBasedCost();
-
-      DistanceAndYawBasedHeuristics heuristics = new DistanceAndYawBasedHeuristics();
-      DistanceAndYawBasedCost stepCostCalculator = new DistanceAndYawBasedCost();
-
       if (visualizePlanner)
          visualization = new FootstepNodeVisualization(1000, 1.0, null);
-      planner = new AStarFootstepPlanner(nodeChecker, heuristics, expansion, stepCostCalculator, visualization);
+      planner = AStarFootstepPlanner.createDefaultPlanner(visualization);
    }
 
    @After

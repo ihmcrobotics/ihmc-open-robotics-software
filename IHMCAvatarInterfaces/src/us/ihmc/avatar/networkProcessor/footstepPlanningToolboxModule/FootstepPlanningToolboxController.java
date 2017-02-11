@@ -26,10 +26,6 @@ import us.ihmc.footstepPlanning.FootstepPlannerGoal;
 import us.ihmc.footstepPlanning.FootstepPlannerGoalType;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.aStar.AStarFootstepPlanner;
-import us.ihmc.footstepPlanning.aStar.implementations.DistanceAndYawBasedCost;
-import us.ihmc.footstepPlanning.aStar.implementations.DistanceAndYawBasedHeuristics;
-import us.ihmc.footstepPlanning.aStar.implementations.SimpleNodeChecker;
-import us.ihmc.footstepPlanning.aStar.implementations.SimpleSideBasedExpansion;
 import us.ihmc.footstepPlanning.graphSearch.BipedalFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.PlanarRegionBipedalFootstepPlanner;
 import us.ihmc.footstepPlanning.graphSearch.PlanarRegionBipedalFootstepPlannerVisualizer;
@@ -82,7 +78,7 @@ public class FootstepPlanningToolboxController extends ToolboxController
    private final BooleanYoVariable requestedPlanarRegions = new BooleanYoVariable("RequestedPlanarRegions", registry);
    private final DoubleYoVariable toolboxTime = new DoubleYoVariable("ToolboxTime", registry);
    private final DoubleYoVariable timeReceivedPlanarRegion = new DoubleYoVariable("timeReceivedPlanarRegion", registry);
-   
+
    private final HumanoidReferenceFrames humanoidReferenceFrames;
    private final RobotContactPointParameters contactPointParameters;
    private final WalkingControllerParameters walkingControllerParameters;
@@ -112,23 +108,14 @@ public class FootstepPlanningToolboxController extends ToolboxController
 
       humanoidReferenceFrames = createHumanoidReferenceFrames(fullHumanoidRobotModel);
       footstepDataListWithSwingOverTrajectoriesAssembler = new FootstepDataListWithSwingOverTrajectoriesAssembler(humanoidReferenceFrames, walkingControllerParameters, parentRegistry, new YoGraphicsListRegistry());
-      
+
       plannerMap.put(Planners.PLANAR_REGION_BIPEDAL, createPlanarRegionBipedalPlanner(planningPolygonsInSoleFrame, controllerPolygonsInSoleFrame));
       plannerMap.put(Planners.PLAN_THEN_SNAP, new PlanThenSnapPlanner(new TurnWalkTurnPlanner(), planningPolygonsInSoleFrame));
-      plannerMap.put(Planners.A_STAR, createAStarPlanner());
+      plannerMap.put(Planners.A_STAR, AStarFootstepPlanner.createDefaultPlanner(null));
       activePlanner.set(Planners.A_STAR);
 
       usePlanarRegions.set(true);
       isDone.set(true);
-   }
-
-   private FootstepPlanner createAStarPlanner()
-   {
-      SimpleNodeChecker nodeChecker = new SimpleNodeChecker();
-      SimpleSideBasedExpansion expansion = new SimpleSideBasedExpansion();
-      DistanceAndYawBasedHeuristics heuristics = new DistanceAndYawBasedHeuristics();
-      DistanceAndYawBasedCost stepCostCalculator = new DistanceAndYawBasedCost();
-      return new AStarFootstepPlanner(nodeChecker, heuristics, expansion, stepCostCalculator);
    }
 
    private PlanarRegionBipedalFootstepPlanner createPlanarRegionBipedalPlanner(SideDependentList<ConvexPolygon2d> footPolygonsInSoleFrame, SideDependentList<ConvexPolygon2d> controllerPolygonsInSoleFrame)
@@ -274,7 +261,7 @@ public class FootstepPlanningToolboxController extends ToolboxController
          }
       };
    }
-   
+
    public HumanoidReferenceFrames createHumanoidReferenceFrames(FullHumanoidRobotModel fullHumanoidRobotModel)
    {
       ForceSensorDataHolder forceSensorDataHolder = new ForceSensorDataHolder(Arrays.asList(fullHumanoidRobotModel.getForceSensorDefinitions()));
