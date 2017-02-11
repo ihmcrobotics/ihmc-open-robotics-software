@@ -6,7 +6,6 @@ import org.ejml.interfaces.linsol.LinearSolver;
 import org.ejml.ops.CommonOps;
 
 import gnu.trove.list.array.TIntArrayList;
-import us.ihmc.robotics.linearAlgebra.DiagonalMatrixTools;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 
 /**
@@ -171,7 +170,6 @@ public class SimpleEfficientActiveSetQPSolver implements SimpleActiveSetQPSolver
 
       CommonOps.add(costQuadraticMatrix, symmetricCostQuadraticMatrix, symmetricCostQuadraticMatrix);
       CommonOps.scale(0.5, symmetricCostQuadraticMatrix);
-
       this.quadraticCostQMatrix.set(symmetricCostQuadraticMatrix);
       this.quadraticCostQVector.set(costLinearVector);
       this.quadraticCostScalar = quadraticCostScalar;
@@ -486,10 +484,10 @@ public class SimpleEfficientActiveSetQPSolver implements SimpleActiveSetQPSolver
          CommonOps.mult(CBar, QInverseATranspose, CBarQInverseATranspose);
 
          CBarQInverse.reshape(CBar.getNumRows(), QInverse.getNumCols());
-         DiagonalMatrixTools.postMult(CBar, QInverse, CBarQInverse);
+         CommonOps.mult(CBar, QInverse, CBarQInverse);
 
          QInverseCBarTranspose.reshape(QInverse.getNumRows(), CBarTranspose.getNumCols());
-         DiagonalMatrixTools.preMult(QInverse, CBarTranspose, QInverseCBarTranspose);
+         CommonOps.mult(QInverse, CBarTranspose, QInverseCBarTranspose);
 
          CBarQInverseCBarTranspose.reshape(CBar.getNumRows(), QInverseCBarTranspose.getNumCols());
          CommonOps.mult(CBar, QInverseCBarTranspose, CBarQInverseCBarTranspose);
