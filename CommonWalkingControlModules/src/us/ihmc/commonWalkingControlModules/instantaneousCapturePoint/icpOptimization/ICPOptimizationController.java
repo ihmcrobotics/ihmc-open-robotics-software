@@ -31,6 +31,7 @@ public class ICPOptimizationController
    private static final boolean VISUALIZE = false;
    private static final boolean COMPUTE_COST_TO_GO = false;
    private static final boolean RECONSTRUCT_CMP_FROM_UNCLIPPED = true;
+   private static final boolean DEBUG = false;
 
    private static final String yoNamePrefix = "controller";
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -120,6 +121,8 @@ public class ICPOptimizationController
 
    private final ExecutionTimer qpSolverTimer = new ExecutionTimer("icpQPSolverTimer", 0.5, registry);
    private final ExecutionTimer controllerTimer = new ExecutionTimer("icpControllerTimer", 0.5, registry);
+   private final ExecutionTimer conditionSettingTimer = new ExecutionTimer("icpConditionSettingTimer", 0.5, registry);
+   private final ExecutionTimer solutionReadingTimer = new ExecutionTimer("icpSolutionReadingTimer", 0.5, registry);
    private final ICPOptimizationSolver solver;
 
    private final StateMultiplierCalculator stateMultiplierCalculator;
@@ -205,7 +208,7 @@ public class ICPOptimizationController
 
       cmpConstraintHandler = new ICPOptimizationCMPConstraintHandler(bipedSupportPolygons, icpOptimizationParameters, registry);
       reachabilityConstraintHandler = new ICPOptimizationReachabilityConstraintHandler(bipedSupportPolygons, icpOptimizationParameters, registry);
-      solutionHandler = new ICPOptimizationSolutionHandler(icpOptimizationParameters, stateMultiplierCalculator, VISUALIZE, registry, yoGraphicsListRegistry);
+      solutionHandler = new ICPOptimizationSolutionHandler(icpOptimizationParameters, stateMultiplierCalculator, VISUALIZE, DEBUG, registry, yoGraphicsListRegistry);
       inputHandler = new ICPOptimizationInputHandler(icpPlannerParameters, bipedSupportPolygons, contactableFeet, maximumNumberOfFootstepsToConsider,
             stateMultiplierCalculator, doubleSupportDuration, singleSupportDuration, exitCMPDurationInPercentOfStepTime, VISUALIZE, registry, yoGraphicsListRegistry);
 
@@ -307,7 +310,7 @@ public class ICPOptimizationController
 
       stateMultiplierCalculator.computeRecursionMultipliers(numberOfFootstepsToConsider, isInTransfer.getBooleanValue(), useTwoCMPs, omega0);
 
-      inputHandler.initializeForDoubleSupport(isStanding.getBooleanValue(), useTwoCMPs, transferToSide, omega0);
+      inputHandler.initializeForDoubleSupport(numberOfFootstepsToConsider, upcomingFootstepLocations, isStanding.getBooleanValue(), useTwoCMPs, transferToSide, omega0);
 
       cmpConstraintHandler.updateCMPConstraintForDoubleSupport(solver);
       reachabilityConstraintHandler.updateReachabilityConstraintForDoubleSupport(solver);
@@ -338,7 +341,7 @@ public class ICPOptimizationController
 
       stateMultiplierCalculator.computeRecursionMultipliers(numberOfFootstepsToConsider, isInTransfer.getBooleanValue(), useTwoCMPs, omega0);
 
-      inputHandler.initializeForSingleSupport(useTwoCMPs, supportSide, omega0);
+      inputHandler.initializeForSingleSupport(numberOfFootstepsToConsider, upcomingFootstepLocations, useTwoCMPs, supportSide, omega0);
 
       cmpConstraintHandler.updateCMPConstraintForSingleSupport(supportSide, solver);
       reachabilityConstraintHandler.updateReachabilityConstraintForSingleSupport(supportSide, solver);
@@ -358,6 +361,8 @@ public class ICPOptimizationController
 
       if (useFootstepRegularization)
          resetFootstepRegularizationTask();
+
+      solver.resetOnContactChange();
       /*
       if (useFeedbackRegularization)
          solver.resetFeedbackRegularization();
@@ -399,10 +404,12 @@ public class ICPOptimizationController
       scaleStepRegularizationWeightWithTime();
       scaleFeedbackWeightWithGain();
 
+      conditionSettingTimer.startMeasurement();
       if (isStanding.getBooleanValue())
          setConditionsForFeedbackOnlyControl();
       else
          setConditionsForSteppingControl(numberOfFootstepsToConsider, omega0);
+      conditionSettingTimer.stopMeasurement();
 
       NoConvergenceException noConvergenceException = null;
       try
@@ -425,6 +432,7 @@ public class ICPOptimizationController
          noConvergenceException = e;
       }
 
+      solutionReadingTimer.startMeasurement();
       // don't pole the new solutions if there's a no convergence exception
       if (noConvergenceException == null)
       {
@@ -435,7 +443,7 @@ public class ICPOptimizationController
 
          solver.getCMPFeedbackDifference(desiredCMPDelta);
 
-         if (COMPUTE_COST_TO_GO)
+         if (COMPUTE_COST_TO_GO && DEBUG)
             solutionHandler.updateCostsToGo(solver);
       }
 
@@ -450,11 +458,13 @@ public class ICPOptimizationController
          else
             solutionHandler.yoComputeReferenceFromSolutions(footstepSolutions, inputHandler, beginningOfStateICP, beginningOfStateICPVelocity, omega0, numberOfFootstepsToConsider);
 
-         solutionHandler.computeNominalValues(upcomingFootstepLocations, inputHandler, beginningOfStateICP, beginningOfStateICPVelocity, omega0, numberOfFootstepsToConsider);
+         if (DEBUG)
+            solutionHandler.computeNominalValues(upcomingFootstepLocations, inputHandler, beginningOfStateICP, beginningOfStateICPVelocity, omega0, numberOfFootstepsToConsider);
 
          if (useDifferentSplitRatioForBigAdjustment && !isInTransfer.getBooleanValue())
             computeUpcomingDoubleSupportSplitFraction(numberOfFootstepsToConsider, omega0);
       }
+      solutionReadingTimer.stopMeasurement();
 
       solutionHandler.getControllerReferenceCMP(desiredCMP);
       solver.getDynamicRelaxation(dynRelax);
@@ -484,9 +494,9 @@ public class ICPOptimizationController
    private int setConditionsForSteppingControl(int numberOfFootstepsToConsider, double omega0)
    {
       inputHandler.update(timeInCurrentState.getDoubleValue(), useTwoCMPs, isInTransfer.getBooleanValue(), omega0);
-      inputHandler.computeFinalICPRecursion(finalICPRecursion, numberOfFootstepsToConsider, useTwoCMPs, isInTransfer.getBooleanValue(), omega0);
+      inputHandler.computeFinalICPRecursion(finalICPRecursion);
       inputHandler.computeCMPConstantEffects(cmpConstantEffects, beginningOfStateICP.getFrameTuple2d(), beginningOfStateICPVelocity.getFrameTuple2d(),
-            upcomingFootstepLocations, numberOfFootstepsToConsider, useTwoCMPs, isInTransfer.getBooleanValue());
+            useTwoCMPs, isInTransfer.getBooleanValue());
 
       if (isInTransfer.getBooleanValue())
       {

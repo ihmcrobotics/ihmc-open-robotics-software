@@ -47,8 +47,8 @@ public class InitialICPCurrentMultiplierTest
       }
 
       boolean projectCMPForward = false;
-      InitialICPCurrentMultiplier initialICPCurrentMultiplier = new InitialICPCurrentMultiplier(upcomingSplitRatio, defaultSplitRatio, exitCMPRatio,
-            startOfSplineTime, endOfSplineTime, totalTrajectoryTime, projectCMPForward, registry);
+      InitialICPCurrentMultiplier initialICPCurrentMultiplier = new InitialICPCurrentMultiplier(defaultSplitRatio, exitCMPRatio, startOfSplineTime, endOfSplineTime,
+            projectCMPForward, registry);
 
       TransferInitialICPMatrix initialICPMatrix = new TransferInitialICPMatrix();
 
@@ -82,12 +82,11 @@ public class InitialICPCurrentMultiplierTest
          double doubleSupportDuration = doubleSupportDurations.get(0).getDoubleValue();
 
          double timeInCurrentState = random.nextDouble() * doubleSupportDuration;
-         double timeRemaining = doubleSupportDuration - timeInCurrentState;
 
          positionMatrix.setSegmentDuration(doubleSupportDuration);
          velocityMatrix.setSegmentDuration(doubleSupportDuration);
-         positionMatrix.update(timeRemaining);
-         velocityMatrix.update(timeRemaining);
+         positionMatrix.update(timeInCurrentState);
+         velocityMatrix.update(timeInCurrentState);
 
          initialICPMatrix.compute();
 
@@ -128,8 +127,8 @@ public class InitialICPCurrentMultiplierTest
       }
 
       boolean projectCMPForward = false;
-      InitialICPCurrentMultiplier initialICPCurrentMultiplier = new InitialICPCurrentMultiplier(upcomingSplitRatio, defaultSplitRatio, exitCMPRatio,
-            startOfSplineTime, endOfSplineTime, totalTrajectoryTime, projectCMPForward, registry);
+      InitialICPCurrentMultiplier initialICPCurrentMultiplier = new InitialICPCurrentMultiplier(defaultSplitRatio, exitCMPRatio, startOfSplineTime, endOfSplineTime,
+            projectCMPForward, registry);
 
       TransferInitialICPMatrix initialICPMatrix = new TransferInitialICPMatrix();
 
@@ -163,12 +162,11 @@ public class InitialICPCurrentMultiplierTest
          double doubleSupportDuration = doubleSupportDurations.get(0).getDoubleValue();
 
          double timeInCurrentState = random.nextDouble() * doubleSupportDuration;
-         double timeRemaining = doubleSupportDuration - timeInCurrentState;
 
          positionMatrix.setSegmentDuration(doubleSupportDuration);
          velocityMatrix.setSegmentDuration(doubleSupportDuration);
-         positionMatrix.update(timeRemaining);
-         velocityMatrix.update(timeRemaining);
+         positionMatrix.update(timeInCurrentState);
+         velocityMatrix.update(timeInCurrentState);
 
          initialICPMatrix.compute();
 
@@ -209,8 +207,8 @@ public class InitialICPCurrentMultiplierTest
       }
 
       boolean projectCMPForward = true;
-      InitialICPCurrentMultiplier initialICPCurrentMultiplier = new InitialICPCurrentMultiplier(upcomingSplitRatio, defaultSplitRatio, exitCMPRatio,
-            startOfSplineTime, endOfSplineTime, totalTrajectoryTime, projectCMPForward, registry);
+      InitialICPCurrentMultiplier initialICPCurrentMultiplier = new InitialICPCurrentMultiplier(defaultSplitRatio, exitCMPRatio, startOfSplineTime, endOfSplineTime,
+            projectCMPForward, registry);
 
       for (int iter = 0; iter < iters; iter++)
       {
@@ -245,7 +243,6 @@ public class InitialICPCurrentMultiplierTest
 
 
          double timeInCurrentState = random.nextDouble() * startOfSpline;
-         double timeRemaining = singleSupportDuration - timeInCurrentState;
 
          initialICPCurrentMultiplier.compute(doubleSupportDurations, singleSupportDurations, timeInCurrentState, useTwoCMPs, isInTransfer, omega);
 
@@ -284,8 +281,8 @@ public class InitialICPCurrentMultiplierTest
       }
 
       boolean projectCMPForward = false;
-      InitialICPCurrentMultiplier initialICPCurrentMultiplier = new InitialICPCurrentMultiplier(upcomingSplitRatio, defaultSplitRatio, exitCMPRatio,
-            startOfSplineTime, endOfSplineTime, totalTrajectoryTime, projectCMPForward, registry);
+      InitialICPCurrentMultiplier initialICPCurrentMultiplier = new InitialICPCurrentMultiplier(defaultSplitRatio, exitCMPRatio, startOfSplineTime, endOfSplineTime,
+            projectCMPForward, registry);
 
       SwingInitialICPMatrix entryCMPMatrix = new SwingInitialICPMatrix(startOfSplineTime);
 
@@ -326,14 +323,12 @@ public class InitialICPCurrentMultiplierTest
          boolean useTwoCMPs = true;
 
          double timeInCurrentState = random.nextDouble() * (endOfSpline - startOfSpline) + startOfSpline;
-         double timeRemaining = singleSupportDuration - timeInCurrentState;
 
          cubicMatrix.setSegmentDuration(endOfSpline - startOfSpline);
          cubicDerivativeMatrix.setSegmentDuration(endOfSpline - startOfSpline);
 
-         double endingSegmentDuration = singleSupportDuration - endOfSpline;
-         cubicMatrix.update(timeRemaining - endingSegmentDuration);
-         cubicDerivativeMatrix.update(timeRemaining - endingSegmentDuration);
+         cubicMatrix.update(timeInCurrentState - startOfSpline);
+         cubicDerivativeMatrix.update(timeInCurrentState - startOfSpline);
 
          entryCMPMatrix.compute(omega);
          CommonOps.mult(cubicMatrix, entryCMPMatrix, positionMatrixOut);
@@ -374,8 +369,8 @@ public class InitialICPCurrentMultiplierTest
       }
 
       boolean projectCMPForward = true;
-      InitialICPCurrentMultiplier initialICPCurrentMultiplier = new InitialICPCurrentMultiplier(upcomingSplitRatio, defaultSplitRatio, exitCMPRatio,
-            startOfSplineTime, endOfSplineTime, totalTrajectoryTime, projectCMPForward, registry);
+      InitialICPCurrentMultiplier initialICPCurrentMultiplier = new InitialICPCurrentMultiplier(defaultSplitRatio, exitCMPRatio, startOfSplineTime, endOfSplineTime,
+            projectCMPForward, registry);
 
       for (int iter = 0; iter < iters; iter++)
       {
@@ -446,8 +441,8 @@ public class InitialICPCurrentMultiplierTest
       }
 
       boolean projectCMPForward = true;
-      InitialICPCurrentMultiplier initialICPCurrentMultiplier = new InitialICPCurrentMultiplier(upcomingSplitRatio, defaultSplitRatio, exitCMPRatio,
-            startOfSplineTime, endOfSplineTime, totalTrajectoryTime, projectCMPForward, registry);
+      InitialICPCurrentMultiplier initialICPCurrentMultiplier = new InitialICPCurrentMultiplier(defaultSplitRatio, exitCMPRatio, startOfSplineTime, endOfSplineTime,
+            projectCMPForward, registry);
 
       for (int iter = 0; iter < iters; iter++)
       {

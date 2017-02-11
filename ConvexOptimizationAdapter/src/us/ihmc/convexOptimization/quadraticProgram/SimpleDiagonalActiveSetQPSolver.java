@@ -1,29 +1,19 @@
 package us.ihmc.convexOptimization.quadraticProgram;
 
+import gnu.trove.list.array.TIntArrayList;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.factory.LinearSolverFactory;
 import org.ejml.interfaces.linsol.LinearSolver;
 import org.ejml.ops.CommonOps;
-
-import gnu.trove.list.array.TIntArrayList;
+import us.ihmc.robotics.linearAlgebra.DiagonalMatrixTools;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 
 /**
- * Solves a Quadratic Program using a simple active set method.
- * Does not work for problems where having multiple inequality constraints 
- * in the active set make the problem infeasible. Seems to work well for 
- * problems with benign inequality constraints, such as variable bounds.
- * 
- *  Algorithm is very fast when it can find a solution.
- * 
- * Uses the algorithm and naming convention found in MIT Paper
- * "An efficiently solvable quadratic program for stabilizing dynamic locomotion"
- * by Scott Kuindersma, Frank Permenter, and Russ Tedrake.
- * 
- * @author JerryPratt
+ * Utilizes the same procedure as the Simple Efficient Active Set QP Solver, but assumes that the
+ * quadratic cost matrix is diagonal.
  *
  */
-public class SimpleEfficientActiveSetQPSolver implements SimpleActiveSetQPSolverInterface
+public class SimpleDiagonalActiveSetQPSolver extends SimpleEfficientActiveSetQPSolver
 {
    private static final double epsilon = 1e-10;
 
@@ -47,7 +37,6 @@ public class SimpleEfficientActiveSetQPSolver implements SimpleActiveSetQPSolver
    private final TIntArrayList activeLowerBoundIndices = new TIntArrayList();
 
    // Some temporary matrices:
-   private final DenseMatrix64F symmetricCostQuadraticMatrix = new DenseMatrix64F(0, 0);
    private final DenseMatrix64F negativeQuadraticCostQVector = new DenseMatrix64F(0, 0);
 
    private final DenseMatrix64F linearInequalityConstraintsCheck = new DenseMatrix64F(0, 0);
@@ -101,6 +90,7 @@ public class SimpleEfficientActiveSetQPSolver implements SimpleActiveSetQPSolver
 
    private final LinearSolver<DenseMatrix64F> solver = LinearSolverFactory.linear(0);
 
+   private boolean quadraticCostMatrixIsDiagonal = false;
    private boolean useWarmStart = false;
 
    private int previousNumberOfVariables = 0;
@@ -165,12 +155,7 @@ public class SimpleEfficientActiveSetQPSolver implements SimpleActiveSetQPSolver
       if (costQuadraticMatrix.getNumRows() != costQuadraticMatrix.getNumCols())
          throw new RuntimeException("costQuadraticMatrix.getNumRows() != costQuadraticMatrix.getNumCols()");
 
-      symmetricCostQuadraticMatrix.reshape(costQuadraticMatrix.getNumCols(), costQuadraticMatrix.getNumRows());
-      CommonOps.transpose(costQuadraticMatrix, symmetricCostQuadraticMatrix);
-
-      CommonOps.add(costQuadraticMatrix, symmetricCostQuadraticMatrix, symmetricCostQuadraticMatrix);
-      CommonOps.scale(0.5, symmetricCostQuadraticMatrix);
-      this.quadraticCostQMatrix.set(symmetricCostQuadraticMatrix);
+      this.quadraticCostQMatrix.set(costQuadraticMatrix);
       this.quadraticCostQVector.set(costLinearVector);
       this.quadraticCostScalar = quadraticCostScalar;
    }
@@ -455,17 +440,16 @@ public class SimpleEfficientActiveSetQPSolver implements SimpleActiveSetQPSolver
       CommonOps.transpose(linearEqualityConstraintsAMatrix, ATranspose);
       QInverse.reshape(numberOfVariables, numberOfVariables);
 
-      solver.setA(quadraticCostQMatrix);
-      solver.invert(QInverse);
-
       AQInverse.reshape(numberOfEqualityConstraints, numberOfVariables);
       QInverseATranspose.reshape(numberOfVariables, numberOfEqualityConstraints);
       AQInverseATranspose.reshape(numberOfEqualityConstraints, numberOfEqualityConstraints);
 
+      DiagonalMatrixTools.invertDiagonalMatrix(quadraticCostQMatrix, QInverse);
+
       if (numberOfEqualityConstraints > 0)
       {
-         CommonOps.mult(linearEqualityConstraintsAMatrix, QInverse, AQInverse);
-         CommonOps.mult(QInverse, ATranspose, QInverseATranspose);
+         DiagonalMatrixTools.postMult(linearEqualityConstraintsAMatrix, QInverse, AQInverse);
+         DiagonalMatrixTools.preMult(QInverse, ATranspose, QInverseATranspose);
          CommonOps.mult(AQInverse, ATranspose, AQInverseATranspose);
       }
    }
@@ -484,10 +468,10 @@ public class SimpleEfficientActiveSetQPSolver implements SimpleActiveSetQPSolver
          CommonOps.mult(CBar, QInverseATranspose, CBarQInverseATranspose);
 
          CBarQInverse.reshape(CBar.getNumRows(), QInverse.getNumCols());
-         CommonOps.mult(CBar, QInverse, CBarQInverse);
+         DiagonalMatrixTools.postMult(CBar, QInverse, CBarQInverse);
 
          QInverseCBarTranspose.reshape(QInverse.getNumRows(), CBarTranspose.getNumCols());
-         CommonOps.mult(QInverse, CBarTranspose, QInverseCBarTranspose);
+         DiagonalMatrixTools.preMult(QInverse, CBarTranspose, QInverseCBarTranspose);
 
          CBarQInverseCBarTranspose.reshape(CBar.getNumRows(), QInverseCBarTranspose.getNumCols());
          CommonOps.mult(CBar, QInverseCBarTranspose, CBarQInverseCBarTranspose);
@@ -517,10 +501,10 @@ public class SimpleEfficientActiveSetQPSolver implements SimpleActiveSetQPSolver
          CommonOps.mult(CHat, QInverseATranspose, CHatQInverseATranspose);
 
          CHatQInverse.reshape(CHat.getNumRows(), QInverse.getNumCols());
-         CommonOps.mult(CHat, QInverse, CHatQInverse);
+         DiagonalMatrixTools.postMult(CHat, QInverse, CHatQInverse);
 
          QInverseCHatTranspose.reshape(QInverse.getNumRows(), CHatTranspose.getNumCols());
-         CommonOps.mult(QInverse, CHatTranspose, QInverseCHatTranspose);
+         DiagonalMatrixTools.preMult(QInverse, CHatTranspose, QInverseCHatTranspose);
 
          CHatQInverseCHatTranspose.reshape(CHat.getNumRows(), QInverseCHatTranspose.getNumCols());
          CommonOps.mult(CHat, QInverseCHatTranspose, CHatQInverseCHatTranspose);
@@ -766,8 +750,7 @@ public class SimpleEfficientActiveSetQPSolver implements SimpleActiveSetQPSolver
 
       if (numberOfAugmentedEqualityConstraints == 0)
       {
-         CommonOps.mult(QInverse, negativeQuadraticCostQVector, xSolutionToPack);
-         //         CommonOps.solve(quadraticCostQMatrix, negativeQuadraticCostQVector, xSolutionToPack);
+         DiagonalMatrixTools.preMult(QInverse, negativeQuadraticCostQVector, xSolutionToPack);
          return;
       }
 
@@ -842,7 +825,7 @@ public class SimpleEfficientActiveSetQPSolver implements SimpleActiveSetQPSolver
       CommonOps.scale(-1.0, tempVector);
       CommonOps.subtractEquals(tempVector, ATransposeMuAndCTransposeLambda);
 
-      CommonOps.mult(QInverse, tempVector, xSolutionToPack);
+      DiagonalMatrixTools.preMult(QInverse, tempVector, xSolutionToPack);
 
       int startRow = 0;
       int numberOfRows = numberOfOriginalEqualityConstraints;

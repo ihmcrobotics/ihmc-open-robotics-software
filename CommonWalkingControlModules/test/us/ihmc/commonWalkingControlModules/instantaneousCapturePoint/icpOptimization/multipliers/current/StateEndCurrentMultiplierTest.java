@@ -48,7 +48,7 @@ public class StateEndCurrentMultiplierTest
 
       boolean projectForward = true;
       StateEndCurrentMultiplier stateEndCurrentMultiplier = new StateEndCurrentMultiplier(upcomingSplitRatio, defaultSplitRatio, exitCMPRatio,
-            startOfSplineTime, endOfSplineTime, totalTrajectoryTime, projectForward, registry);
+            startOfSplineTime, endOfSplineTime, projectForward, registry);
 
       TransferStateEndMatrix stateEndMatrix = new TransferStateEndMatrix(defaultSplitRatio);
       CubicMatrix cubicMatrix = new CubicMatrix();
@@ -81,14 +81,13 @@ public class StateEndCurrentMultiplierTest
          double doubleSupportDuration = doubleSupportDurations.get(0).getDoubleValue();
 
          double timeInCurrentState = random.nextDouble() * doubleSupportDuration;
-         double timeRemaining = doubleSupportDuration - timeInCurrentState;
 
          stateEndCurrentMultiplier.compute(doubleSupportDurations, singleSupportDurations, timeInCurrentState, useTwoCMPs, isInTransfer, omega);
 
          cubicMatrix.setSegmentDuration(doubleSupportDuration);
          cubicDerivativeMatrix.setSegmentDuration(doubleSupportDuration);
-         cubicMatrix.update(timeRemaining);
-         cubicDerivativeMatrix.update(timeRemaining);
+         cubicMatrix.update(timeInCurrentState);
+         cubicDerivativeMatrix.update(timeInCurrentState);
 
          stateEndMatrix.compute(doubleSupportDuration, omega);
 
@@ -128,7 +127,7 @@ public class StateEndCurrentMultiplierTest
 
       boolean projectForward = true;
       StateEndCurrentMultiplier stateEndCurrentMultiplier = new StateEndCurrentMultiplier(upcomingSplitRatio, defaultSplitRatio, exitCMPRatio,
-            startOfSplineTime, endOfSplineTime, totalTrajectoryTime, projectForward, registry);
+            startOfSplineTime, endOfSplineTime, projectForward, registry);
 
       TransferStateEndMatrix stateEndMatrix = new TransferStateEndMatrix(defaultSplitRatio);
       CubicMatrix cubicMatrix = new CubicMatrix();
@@ -161,14 +160,13 @@ public class StateEndCurrentMultiplierTest
          double doubleSupportDuration = doubleSupportDurations.get(0).getDoubleValue();
 
          double timeInCurrentState = random.nextDouble() * doubleSupportDuration;
-         double timeRemaining = doubleSupportDuration - timeInCurrentState;
 
          stateEndCurrentMultiplier.compute(doubleSupportDurations, singleSupportDurations, timeInCurrentState, useTwoCMPs, isInTransfer, omega);
 
          cubicMatrix.setSegmentDuration(doubleSupportDuration);
          cubicDerivativeMatrix.setSegmentDuration(doubleSupportDuration);
-         cubicMatrix.update(timeRemaining);
-         cubicDerivativeMatrix.update(timeRemaining);
+         cubicMatrix.update(timeInCurrentState);
+         cubicDerivativeMatrix.update(timeInCurrentState);
 
          stateEndMatrix.compute(doubleSupportDuration, omega);
 
@@ -208,7 +206,7 @@ public class StateEndCurrentMultiplierTest
 
       boolean projectForward = true;
       StateEndCurrentMultiplier stateEndCurrentMultiplier = new StateEndCurrentMultiplier(upcomingSplitRatio, defaultSplitRatio, exitCMPRatio,
-            startOfSplineTime, endOfSplineTime, totalTrajectoryTime, projectForward, registry);
+            startOfSplineTime, endOfSplineTime, projectForward, registry);
 
       for (int iter = 0; iter < iters; iter++)
       {
@@ -242,7 +240,6 @@ public class StateEndCurrentMultiplierTest
          boolean useTwoCMPs = true;
 
          double timeInCurrentState = random.nextDouble() * startOfSpline;
-         double timeRemaining = singleSupportDuration - timeInCurrentState;
 
          stateEndCurrentMultiplier.compute(doubleSupportDurations, singleSupportDurations, timeInCurrentState, useTwoCMPs, isInTransfer, omega);
 
@@ -280,7 +277,7 @@ public class StateEndCurrentMultiplierTest
 
       boolean projectForward = true;
       StateEndCurrentMultiplier stateEndCurrentMultiplier = new StateEndCurrentMultiplier(upcomingSplitRatio, defaultSplitRatio, exitCMPRatio,
-            startOfSplineTime, endOfSplineTime, totalTrajectoryTime, projectForward, registry);
+            startOfSplineTime, endOfSplineTime, projectForward, registry);
 
       SwingStateEndMatrix stateEndMatrix = new SwingStateEndMatrix(upcomingSplitRatio, exitCMPRatio, endOfSplineTime);
       CubicMatrix cubicMatrix = new CubicMatrix();
@@ -326,8 +323,8 @@ public class StateEndCurrentMultiplierTest
          cubicDerivativeMatrix.setSegmentDuration(splineDuration);
 
          double timeInSpline = timeInCurrentState - startOfSpline;
-         cubicMatrix.update(timeInSpline, true);
-         cubicDerivativeMatrix.update(timeInSpline, true);
+         cubicMatrix.update(timeInSpline);
+         cubicDerivativeMatrix.update(timeInSpline);
 
          stateEndMatrix.compute(doubleSupportDurations, singleSupportDurations, omega);
          CommonOps.mult(cubicMatrix, stateEndMatrix, positionMatrixOut);
@@ -368,7 +365,7 @@ public class StateEndCurrentMultiplierTest
 
       boolean projectForward = true;
       StateEndCurrentMultiplier stateEndCurrentMultiplier = new StateEndCurrentMultiplier(upcomingSplitRatio, defaultSplitRatio, exitCMPRatio,
-            startOfSplineTime, endOfSplineTime, totalTrajectoryTime, projectForward, registry);
+            startOfSplineTime, endOfSplineTime, projectForward, registry);
 
       for (int iter = 0; iter < iters; iter++)
       {
@@ -444,7 +441,7 @@ public class StateEndCurrentMultiplierTest
 
       boolean projectForward = true;
       StateEndCurrentMultiplier stateEndCurrentMultiplier = new StateEndCurrentMultiplier(upcomingSplitRatio, defaultSplitRatio, exitCMPRatio,
-            startOfSplineTime, endOfSplineTime, totalTrajectoryTime, projectForward, registry);
+            startOfSplineTime, endOfSplineTime, projectForward, registry);
 
       for (int iter = 0; iter < iters; iter++)
       {
