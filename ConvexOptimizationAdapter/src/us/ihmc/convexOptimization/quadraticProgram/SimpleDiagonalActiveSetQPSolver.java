@@ -468,9 +468,9 @@ public class SimpleDiagonalActiveSetQPSolver extends SimpleEfficientActiveSetQPS
          CommonOps.mult(CBar, QInverseATranspose, CBarQInverseATranspose);
 
          CBarQInverse.reshape(CBar.getNumRows(), QInverse.getNumCols());
-         QInverseCBarTranspose.reshape(QInverse.getNumRows(), CBarTranspose.getNumCols());
-
          DiagonalMatrixTools.postMult(CBar, QInverse, CBarQInverse);
+
+         QInverseCBarTranspose.reshape(QInverse.getNumRows(), CBarTranspose.getNumCols());
          DiagonalMatrixTools.preMult(QInverse, CBarTranspose, QInverseCBarTranspose);
 
          CBarQInverseCBarTranspose.reshape(CBar.getNumRows(), QInverseCBarTranspose.getNumCols());
@@ -501,9 +501,9 @@ public class SimpleDiagonalActiveSetQPSolver extends SimpleEfficientActiveSetQPS
          CommonOps.mult(CHat, QInverseATranspose, CHatQInverseATranspose);
 
          CHatQInverse.reshape(CHat.getNumRows(), QInverse.getNumCols());
-         QInverseCHatTranspose.reshape(QInverse.getNumRows(), CHatTranspose.getNumCols());
-
          DiagonalMatrixTools.postMult(CHat, QInverse, CHatQInverse);
+
+         QInverseCHatTranspose.reshape(QInverse.getNumRows(), CHatTranspose.getNumCols());
          DiagonalMatrixTools.preMult(QInverse, CHatTranspose, QInverseCHatTranspose);
 
          CHatQInverseCHatTranspose.reshape(CHat.getNumRows(), QInverseCHatTranspose.getNumCols());
