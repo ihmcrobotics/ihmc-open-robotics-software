@@ -222,6 +222,23 @@ public class LineSegment3d implements GeometryObject<LineSegment3d>
    }
 
    /**
+    * Returns the square of the minimum distance between a point and this given line segment.
+    * <p>
+    * Edge cases:
+    * <ul>
+    *    <li> if {@code this.length() < Epsilons.ONE_TRILLIONTH}, this method returns the distance between {@code firstEndpoint} and the given {@code point}.
+    * </ul>
+    * </p>
+    *
+    * @param point 3D point to compute the distance from this line segment. Not modified.
+    * @return the minimum distance between the 3D point and this 3D line segment.
+    */
+   public double distanceSquared(Point3d point)
+   {
+      return GeometryTools.distanceFromPointToLineSegmentSquared(point, firstEndpoint, secondEndpoint);
+   }
+
+   /**
     * Returns the minimum distance between a point and this given line segment.
     * <p>
     * Edge cases:

@@ -172,7 +172,7 @@ public class CollisionExampleFixedArm
          CollisionShapeDescription shapeDesc = factory.createBox(size / 2.0, size / 2.0, size / 2.0);
          factory.addShape(ret, null, shapeDesc, false, 0xFFFFFFFF, 0xFFFFFFFF);
 
-         ret.enableCollisions(4, this.getRobotsYoVariableRegistry());
+         ret.enableCollisions(4, collisionHandler, this.getRobotsYoVariableRegistry());
          return ret;
       }
 
@@ -192,7 +192,7 @@ public class CollisionExampleFixedArm
          linkGraphics.translate(0.0, 0.0, 0.0);
          linkGraphics.addCube(width, width, height, YoAppearance.Beige());
          ground.setLinkGraphics(linkGraphics);
-         ground.enableCollisions(4, this.getRobotsYoVariableRegistry());
+         ground.enableCollisions(4, collisionHandler, this.getRobotsYoVariableRegistry());
 
          groundJoint.setLink(ground);
          groundJoint.setPositionAndVelocity(0.0, 0.0, -height, 0.0, 0.0, 0.0);
@@ -226,7 +226,7 @@ public class CollisionExampleFixedArm
       sim.setGroundVisible(false);
       sim.setCameraPosition(0, -40.0, 0);
 
-      DefaultCollisionVisualizer visualize = new DefaultCollisionVisualizer(0.1, 0.1, sim, 100);
+      DefaultCollisionVisualizer visualize = new DefaultCollisionVisualizer(0.1, 0.1, 0.01, sim, 100);
 
       CollisionHandler collisionHandler = doublePendulum.getCollisionHandler();
       collisionHandler.addListener(visualize);

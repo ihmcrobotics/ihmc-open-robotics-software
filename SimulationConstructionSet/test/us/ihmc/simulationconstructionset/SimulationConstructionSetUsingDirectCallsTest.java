@@ -1258,7 +1258,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
       ScsCollisionDetector collisionDetector = createScsCollisionDetector();
       CollisionArbiter collisionArbiter = new DoNothingCollisionArbiter();
       CollisionHandler collisionHandler = new DefaultCollisionHandler(0.3, 0.3);
-      DefaultCollisionVisualizer visualize = new DefaultCollisionVisualizer(0.1, 0.1, scs, 100);
+      DefaultCollisionVisualizer visualize = new DefaultCollisionVisualizer(0.1, 0.1, 0.01, scs, 100);
 
       ScsPhysics physics = new ScsPhysics(collisionConfigure, collisionDetector, collisionArbiter, collisionHandler, visualize);
 

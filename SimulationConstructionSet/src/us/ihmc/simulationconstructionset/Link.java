@@ -14,7 +14,7 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.InertiaTools;
 import us.ihmc.robotics.robotDescription.CollisionMeshDescription;
-import us.ihmc.simulationconstructionset.physics.collision.CollisionExternalForcePointPair;
+import us.ihmc.simulationconstructionset.physics.CollisionHandler;
 import us.ihmc.simulationconstructionset.robotdefinition.LinkDefinitionFixedFrame;
 
 /**
@@ -226,7 +226,7 @@ public class Link implements java.io.Serializable
    protected void setParentJoint(Joint joint)
    {
       this.parentJoint = joint;
-      if (this.collisionExternalForcePointPairs != null)
+      if (this.contactingExternalForcePoints != null)
       {
          throw new RuntimeException("Need to attach link to joint before enabling collisions!");
 //         joint.addExternalForcePoint(ef_collision);
@@ -390,11 +390,11 @@ public class Link implements java.io.Serializable
 // ///////////// Collision Stuff Here /////////////
 
 //   public ExternalForcePoint ef_collision;
-   private ArrayList<CollisionExternalForcePointPair> collisionExternalForcePointPairs;
+   private ArrayList<ContactingExternalForcePoint> contactingExternalForcePoints;
 
-   public ArrayList<CollisionExternalForcePointPair> getCollisionExternalForcePointPairs()
+   public ArrayList<ContactingExternalForcePoint> getContactingExternalForcePoints()
    {
-      return collisionExternalForcePointPairs;
+      return contactingExternalForcePoints;
    }
 
    /**
@@ -402,20 +402,23 @@ public class Link implements java.io.Serializable
     * @param maxVelocity Maximum velocity of any point on the link. Used for improving collision detection performance.
     * @param polyTree PolyTree defining collision geometry.
     */
-   public void enableCollisions(int maximumNumberOfPotentialContacts, YoVariableRegistry registry)
+   public void enableCollisions(int maximumNumberOfPotentialContacts, CollisionHandler collisionHandler, YoVariableRegistry registry)
    {
       if (parentJoint == null)
       {
          throw new RuntimeException("Need to attach link to joint before enabling collisions!");
       }
 
-      collisionExternalForcePointPairs = new ArrayList<>();
+      contactingExternalForcePoints = new ArrayList<>();
 
       for (int i=0; i<maximumNumberOfPotentialContacts; i++)
       {
-         CollisionExternalForcePointPair pair = new CollisionExternalForcePointPair(this.name, i, parentJoint, registry);
-         collisionExternalForcePointPairs.add(pair);
+         ContactingExternalForcePoint contactingExternalForcePoint = new ContactingExternalForcePoint(this.name + "ContactingPoint" + i, parentJoint, registry);
+         contactingExternalForcePoints.add(contactingExternalForcePoint);
+         parentJoint.addExternalForcePoint(contactingExternalForcePoint);
       }
+      
+      collisionHandler.addContactingExternalForcePoints(this, contactingExternalForcePoints);
    }
 
    // ////////// Graphics from Mass Properties Here ///////////////////////

@@ -29,7 +29,7 @@ public class RowOfDominosRobot extends Robot
       final DoubleYoVariable kineticEnergy = new DoubleYoVariable("kineticEnergy", this.getRobotsYoVariableRegistry());
       final DoubleYoVariable totalEnergy = new DoubleYoVariable("totalEnergy", this.getRobotsYoVariableRegistry());
 
-      int numberOfDominos = 30;
+      int numberOfDominos = 15; //30;
 
       double dominoWidth = 0.024;
       double dominoDepth = 0.0075;

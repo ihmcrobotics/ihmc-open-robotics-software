@@ -8,6 +8,7 @@ import java.util.Random;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
+import us.ihmc.simulationconstructionset.ContactingExternalForcePoint;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.Robot;
@@ -151,8 +152,8 @@ public class DefaultCollisionHandler implements CollisionHandler
          Link linkOne = shape1.getLink();
          Link linkTwo = shape2.getLink();
 
-         ExternalForcePoint externalForcePointOne = linkOne.getCollisionExternalForcePointPairs().get(0).getExternalForcePoint();
-         ExternalForcePoint externalForcePointTwo = linkTwo.getCollisionExternalForcePointPairs().get(0).getExternalForcePoint();
+         ExternalForcePoint externalForcePointOne = linkOne.getContactingExternalForcePoints().get(0);
+         ExternalForcePoint externalForcePointTwo = linkTwo.getContactingExternalForcePoints().get(0);
 
          // +++JEP: For now. Make more efficient later. Don't need an ef_point really...
          externalForcePointOne.setOffsetWorld(point1.getX(), point1.getY(), point1.getZ()); // Put the external force points in the right places.
@@ -285,5 +286,10 @@ public class DefaultCollisionHandler implements CollisionHandler
 
       this.maintenanceAfterCollisionDetection();
       }
+   }
+
+   @Override
+   public void addContactingExternalForcePoints(Link link, ArrayList<ContactingExternalForcePoint> contactingExternalForcePoints)
+   {      
    }
 }

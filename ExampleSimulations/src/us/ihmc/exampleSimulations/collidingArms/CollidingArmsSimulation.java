@@ -111,7 +111,7 @@ public class CollidingArmsSimulation
       PinJoint shoulderTwo = (PinJoint) armTwo.getRootJoints().get(0).getChildrenJoints().get(0);
       shoulderTwo.setInitialState(-0.1, 0.0);
 
-      DefaultCollisionVisualizer collisionVisualizer = new DefaultCollisionVisualizer(100.0, 100.0, scs, 1000);
+      DefaultCollisionVisualizer collisionVisualizer = new DefaultCollisionVisualizer(100.0, 100.0, 0.01, scs, 1000);
       //      DefaultCollisionVisualizer collisionVisualizer = null;
 
       double coefficientOfRestitution = 0.3;

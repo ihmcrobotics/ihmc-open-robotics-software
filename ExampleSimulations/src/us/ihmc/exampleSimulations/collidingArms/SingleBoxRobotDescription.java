@@ -29,6 +29,7 @@ public class SingleBoxRobotDescription extends RobotDescription
       collisionMesh.addCubeReferencedAtCenter(xLength, yWidth, zHeight);
       collisionMesh.setCollisionGroup(collisionGroup);
       collisionMesh.setCollisionMask(collisionMask);
+      collisionMesh.setEstimatedNumberOfContactPoints(16);
       link.addCollisionMesh(collisionMesh);
 
       for (int i = 0; i < 8; i++)
