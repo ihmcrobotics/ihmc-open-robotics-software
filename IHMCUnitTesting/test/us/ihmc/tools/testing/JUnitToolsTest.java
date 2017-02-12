@@ -26,7 +26,7 @@ import org.ejml.data.DenseMatrix64F;
 import org.junit.Test;
 
 import Jama.Matrix;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.thread.RunnableThatThrows;
 
 public class JUnitToolsTest

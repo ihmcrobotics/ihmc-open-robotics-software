@@ -1,14 +1,15 @@
 package us.ihmc.robotics.trajectories;
 
-import org.junit.Test;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import static junit.framework.Assert.assertEquals;
 
 import java.util.ArrayList;
 
-import static junit.framework.Assert.assertEquals;
+import org.junit.Test;
+
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 /**
  * Created by IntelliJ IDEA.

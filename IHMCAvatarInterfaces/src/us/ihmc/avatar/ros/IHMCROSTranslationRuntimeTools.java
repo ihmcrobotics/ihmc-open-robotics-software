@@ -9,10 +9,10 @@ import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 
-import geometry_msgs.Vector3;
 import org.ros.internal.message.Message;
 import org.ros.message.MessageFactory;
 
+import geometry_msgs.Vector3;
 import ihmc_msgs.ArmTrajectoryRosMessage;
 import ihmc_msgs.ChestTrajectoryRosMessage;
 import ihmc_msgs.FootTrajectoryRosMessage;
@@ -117,9 +117,14 @@ public class IHMCROSTranslationRuntimeTools
       ihmcMessage.setTrajectoryType(TrajectoryType.values()[message.getTrajectoryType()]);
       ihmcMessage.setUniqueId(message.getUniqueId());
 
-      if(message.getHasTimings())
+      if (message.getHasTimings())
       {
          ihmcMessage.setTimings(message.getSwingTime(), message.getTransferTime());
+      }
+
+      if (message.getHasAbsoluteTime())
+      {
+         ihmcMessage.setAbsoluteTime(message.getSwingStartTime());
       }
 
       ArrayList<Point2d> predictedContactPoints = new ArrayList<>();
@@ -265,6 +270,16 @@ public class IHMCROSTranslationRuntimeTools
       }
 
       message.setHasTimings(footstep.hasTimings);
+
+      if(footstep.hasAbsoluteTime)
+      {
+         message.setSwingStartTime(footstep.swingStartTime);
+      }
+      else
+      {
+         message.setSwingStartTime(0.0);
+      }
+      message.setHasAbsoluteTime(footstep.hasAbsoluteTime);
 
       List<Point2dRosMessage> predictedContatcPointsRos = new ArrayList<>();
       if (footstep.predictedContactPoints != null)

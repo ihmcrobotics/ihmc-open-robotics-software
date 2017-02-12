@@ -47,6 +47,7 @@ ihmc.configureForIHMCOpenSourceBintrayPublish(false, "mavenJava", "maven-release
 
 dependencies {
    testCompile group: 'junit', name: 'junit', version: '4.11'
+    testCompile group: 'us.ihmc', name: 'IHMCContinuousIntegrationFramework', version: '0.9.1'
 
    compile group: 'javax.vecmath', name: 'vecmath', version: '1.5.2'
    compile group: 'com.martiansoftware', name: 'jsap', version: '2.1'
@@ -160,6 +161,7 @@ task deployLocal(dependsOn: jar) {
    doLast {
       def dest = new File(System.properties['user.home'], directory)
       def lib = new File(dest, 'lib')
+      lib.deleteDir();
       lib.mkdirs();
 
       configurations.runtime.each {
@@ -198,6 +200,7 @@ task deploy(dependsOn: ['jar']) {
 
       ssh.run {
          session(remotes.valkyrieRealtimeComputer) {
+            execute("rm -rf " + directory + "/lib")
             execute("mkdir -p " + directory + "/lib")
             execute("mkdir -p " + directory + "/Configurations")
 
@@ -217,6 +220,7 @@ task deploy(dependsOn: ['jar']) {
          }
 
          session(remotes.valkyrieNonRealtimeComputer) {
+            execute("rm -rf " + directory + "/lib")
             execute("mkdir -p " + directory + "/lib")
             execute("mkdir -p " + directory + "/Configurations")
 

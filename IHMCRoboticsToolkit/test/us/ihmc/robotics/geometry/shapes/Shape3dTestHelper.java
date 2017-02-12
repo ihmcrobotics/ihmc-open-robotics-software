@@ -1,18 +1,19 @@
 package us.ihmc.robotics.geometry.shapes;
 
-import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.random.RandomTools;
-import us.ihmc.tools.testing.JUnitTools;
-
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-import java.util.Random;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+
+import java.util.Random;
+
+import javax.vecmath.Point3d;
+import javax.vecmath.Vector3d;
+
+import us.ihmc.robotics.MathTools;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.tools.testing.JUnitTools;
 
 public class Shape3dTestHelper
 {   

@@ -1,15 +1,15 @@
 package us.ihmc.valkyrie.simulation;
 
-import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
-import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.obstacleCourseTests.DRCPelvisLowGainsTest;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.continuousIntegration.IntegrationCategory;
+import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.screwTheory.InverseDynamicsCalculatorListener;
+import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
-import us.ihmc.tools.continuousIntegration.IntegrationCategory;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 
 

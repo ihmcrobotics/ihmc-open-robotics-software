@@ -9,8 +9,6 @@ import com.jme3.terrain.geomipmap.TerrainQuad;
 import com.jme3.terrain.heightmap.HeightMap;
 import com.jme3.terrain.heightmap.HillHeightMap;
 
-import us.ihmc.jMonkeyEngineToolkit.jme.JMERenderer;
-
 public class JMERainbowTerrainTextureTest extends SimpleApplication
 {
    int counter = 0;
