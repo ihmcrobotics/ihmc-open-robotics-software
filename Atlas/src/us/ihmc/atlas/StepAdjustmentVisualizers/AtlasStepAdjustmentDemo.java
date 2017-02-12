@@ -17,7 +17,7 @@ public class AtlasStepAdjustmentDemo
 {
    private static StepScriptType stepScriptType = StepScriptType.FORWARD_FAST;
    private static TestType testType = TestType.FEEDBACK_ONLY;
-   private static PushDirection pushDirection = PushDirection.BACKWARD_45;
+   private static PushDirection pushDirection = PushDirection.FORWARD_60;
 
    private static String forwardFastScript = "scripts/stepAdjustment_forwardWalkingFast.xml";
    private static String forwardSlowScript = "scripts/stepAdjustment_forwardWalkingSlow.xml";
@@ -335,6 +335,90 @@ public class AtlasStepAdjustmentDemo
             break;
          }
          break;
+      case FORWARD_60:
+         angle = Math.PI / 3.0;
+         forceDirection = new Vector3d(Math.cos(angle), -Math.sin(angle), 0.0);
+
+         switch (stepScriptType)
+         {
+         case FORWARD_SLOW:
+            script = forwardSlowScript;
+
+            switch(testType)
+            {
+            case BIG_ADJUSTMENT:
+               percentWeight = 0.9;
+               break;
+            case ADJUSTMENT_ONLY:
+               percentWeight = 0.35;
+               break;
+            case SPEED_UP_ONLY:
+               percentWeight = 0.54;
+               break;
+            default: // doesn't allow speed up or step adjustment
+               percentWeight = 0.28;
+               break;
+            }
+            break;
+         case STATIONARY_FAST:
+            script = stationaryFastScript;
+
+            switch(testType)
+            {
+            case BIG_ADJUSTMENT:
+               percentWeight = 1.72;
+               break;
+            case ADJUSTMENT_ONLY:
+               percentWeight = 0.96;
+               break;
+            case SPEED_UP_ONLY:
+               percentWeight = 0.46;
+               break;
+            default: // doesn't allow speed up or step adjustment
+               percentWeight = 0.27;
+               break;
+            }
+            break;
+         case STATIONARY_SLOW:
+            script = stationarySlowScript;
+
+            switch(testType)
+            {
+            case BIG_ADJUSTMENT:
+               percentWeight = 1.15;
+               break;
+            case ADJUSTMENT_ONLY:
+               percentWeight = 0.32;
+               break;
+            case SPEED_UP_ONLY:
+               percentWeight = 0.59;
+               break;
+            default: // doesn't allow speed up or step adjustment
+               percentWeight = 0.28;
+               break;
+            }
+            break;
+         default: // FORWARD_FAST
+            script = forwardFastScript;
+
+            switch(testType)
+            {
+            case BIG_ADJUSTMENT:
+               percentWeight = 1.35;
+               break;
+            case ADJUSTMENT_ONLY:
+               percentWeight = 0.94;
+               break;
+            case SPEED_UP_ONLY:
+               percentWeight = 0.39;
+               break;
+            default: // doesn't allow speed up or step adjustment
+               percentWeight = 0.25;
+               break;
+            }
+            break;
+         }
+         break;
       case BACKWARD_45:
          angle = Math.PI / 4.0;
          forceDirection = new Vector3d(-Math.cos(angle), -Math.sin(angle), 0.0);
@@ -419,6 +503,90 @@ public class AtlasStepAdjustmentDemo
             break;
          }
          break;
+      case FORWARD_30:
+         angle = Math.PI / 6.0;
+         forceDirection = new Vector3d(Math.cos(angle), -Math.sin(angle), 0.0);
+
+         switch (stepScriptType)
+         {
+         case FORWARD_SLOW:
+            script = forwardSlowScript;
+
+            switch(testType)
+            {
+            case BIG_ADJUSTMENT:
+               percentWeight = 1.1;
+               break;
+            case ADJUSTMENT_ONLY:
+               percentWeight = 0.49;
+               break;
+            case SPEED_UP_ONLY:
+               percentWeight = 0.90;
+               break;
+            default: // doesn't allow speed up or step adjustment
+               percentWeight = 0.45;
+               break;
+            }
+            break;
+         case STATIONARY_FAST:
+            script = stationaryFastScript;
+
+            switch(testType)
+            {
+            case BIG_ADJUSTMENT:
+               percentWeight = 1.94;
+               break;
+            case ADJUSTMENT_ONLY:
+               percentWeight = 1.41;
+               break;
+            case SPEED_UP_ONLY:
+               percentWeight = 0.57;
+               break;
+            default: // doesn't allow speed up or step adjustment
+               percentWeight = 0.46;
+               break;
+            }
+            break;
+         case STATIONARY_SLOW:
+            script = stationarySlowScript;
+
+            switch(testType)
+            {
+            case BIG_ADJUSTMENT:
+               percentWeight = 1.10;
+               break;
+            case ADJUSTMENT_ONLY:
+               percentWeight = 0.56;
+               break;
+            case SPEED_UP_ONLY:
+               percentWeight = 0.55;
+               break;
+            default: // doesn't allow speed up or step adjustment
+               percentWeight = 0.44;
+               break;
+            }
+            break;
+         default: // FORWARD_FAST
+            script = forwardFastScript;
+
+            switch(testType)
+            {
+            case BIG_ADJUSTMENT:
+               percentWeight = 1.52;
+               break;
+            case ADJUSTMENT_ONLY:
+               percentWeight = 0.9;
+               break;
+            case SPEED_UP_ONLY:
+               percentWeight = 0.62;
+               break;
+            default: // doesn't allow speed up or step adjustment
+               percentWeight = 0.41;
+               break;
+            }
+            break;
+         }
+         break;
       default: // OUTWARD
          forceDirection = new Vector3d(0.0, -1.0, 0.0);
 
@@ -471,7 +639,7 @@ public class AtlasStepAdjustmentDemo
                percentWeight = 0.97;
                break;
             case ADJUSTMENT_ONLY:
-               percentWeight = 0.29;
+               percentWeight = 0.29; //// TODO: 2/12/17
                break;
             case SPEED_UP_ONLY:
                percentWeight = 0.52;
