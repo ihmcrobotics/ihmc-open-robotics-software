@@ -73,4 +73,10 @@ public class SphereShapeDescription<T extends SphereShapeDescription<T>> impleme
                       center.getZ() + radius);
    }
 
+   @Override
+   public boolean isPointInside(Point3d pointInWorld)
+   {
+      return (center.distanceSquared(pointInWorld) <= radius * radius);
+   }
+
 }

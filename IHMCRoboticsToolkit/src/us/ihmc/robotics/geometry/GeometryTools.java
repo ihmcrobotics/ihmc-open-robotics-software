@@ -263,13 +263,35 @@ public class GeometryTools
     */
    public static double distanceFromPointToLineSegment(double pointX, double pointY, double lineSegmentStartX, double lineSegmentStartY, double lineSegmentEndX, double lineSegmentEndY)
    {
+      return Math.sqrt(distanceFromPointToLineSegmentSquared(pointX, pointY, lineSegmentStartX, lineSegmentStartY, lineSegmentEndX, lineSegmentEndY));
+   }
+
+   /**
+    * Returns the square of the minimum distance between a point and a given line segment.
+    * <p>
+    * Edge cases:
+    * <ul>
+    *    <li> if {@code lineSegmentStart.distanceSquared(lineSegmentEnd) < Epsilons.ONE_TRILLIONTH}, this method returns the distance between {@code lineSegmentStart} and the given {@code point}.
+    * </ul>
+    * </p>
+    *
+    * @param pointX x coordinate of point to be tested.
+    * @param pointY y coordinate of point to be tested.
+    * @param lineSegmentStartX the x-coordinate of the line segment first endpoint.
+    * @param lineSegmentStartY the y-coordinate of the line segment first endpoint.
+    * @param lineSegmentEndX the x-coordinate of the line segment second endpoint.
+    * @param lineSegmentEndY the y-coordinate of the line segment second endpoint.
+    * @return the square of the minimum distance between the 2D point and the 2D line segment.
+    */
+   public static double distanceFromPointToLineSegmentSquared(double pointX, double pointY, double lineSegmentStartX, double lineSegmentStartY, double lineSegmentEndX, double lineSegmentEndY)
+   {
       double percentage = getPercentageAlongLineSegment(pointX, pointY, lineSegmentStartX, lineSegmentStartY, lineSegmentEndX, lineSegmentEndY);
       percentage = MathTools.clipToMinMax(percentage, 0.0, 1.0);
 
       double projectionX = (1.0 - percentage) * lineSegmentStartX + percentage * lineSegmentEndX;
       double projectionY = (1.0 - percentage) * lineSegmentStartY + percentage * lineSegmentEndY;
 
-      return Math.sqrt(MathTools.square(projectionX - pointX) + MathTools.square(projectionY - pointY));
+      return MathTools.square(projectionX - pointX) + MathTools.square(projectionY - pointY);
    }
 
    /**
@@ -331,6 +353,27 @@ public class GeometryTools
     */
    public static double distanceFromPointToLineSegment(double pointX, double pointY, double pointZ, Point3d lineSegmentStart, Point3d lineSegmentEnd)
    {
+      return Math.sqrt(distanceFromPointToLineSegmentSquared(pointX, pointY, pointZ, lineSegmentStart, lineSegmentEnd));
+   }
+ 
+   /**
+    * Returns the square of the minimum distance between a point and a given line segment.
+    * <p>
+    * Edge cases:
+    * <ul>
+    *    <li> if {@code lineSegmentStart.distanceSquared(lineSegmentEnd) < Epsilons.ONE_TRILLIONTH}, this method returns the distance between {@code lineSegmentStart} and the given {@code point}.
+    * </ul>
+    * </p>
+    *
+    * @param pointX x-coordinate of point to be tested.
+    * @param pointY y-coordinate of point to be tested.
+    * @param pointZ z-coordinate of point to be tested.
+    * @param lineSegmentStart first endpoint of the line segment. Not modified.
+    * @param lineSegmentEnd second endpoint of the line segment. Not modified.
+    * @return the square of the minimum distance between the 3D point and the 3D line segment.
+    */
+   public static double distanceFromPointToLineSegmentSquared(double pointX, double pointY, double pointZ, Point3d lineSegmentStart, Point3d lineSegmentEnd)
+   {
       double percentage = getPercentageAlongLineSegment(pointX, pointY, pointZ, lineSegmentStart.getX(), lineSegmentStart.getY(), lineSegmentStart.getZ(),
                                                         lineSegmentEnd.getX(), lineSegmentEnd.getY(), lineSegmentEnd.getZ());
       percentage = MathTools.clipToMinMax(percentage, 0.0, 1.0);
@@ -339,7 +382,26 @@ public class GeometryTools
       double projectionY = (1.0 - percentage) * lineSegmentStart.getY() + percentage * lineSegmentEnd.getY();
       double projectionZ = (1.0 - percentage) * lineSegmentStart.getZ() + percentage * lineSegmentEnd.getZ();
 
-      return Math.sqrt(MathTools.square(projectionX - pointX) + MathTools.square(projectionY - pointY) + MathTools.square(projectionZ - pointZ));
+      return MathTools.square(projectionX - pointX) + MathTools.square(projectionY - pointY) + MathTools.square(projectionZ - pointZ);
+   }
+
+   /**
+    * Returns the square of the minimum distance between a point and a given line segment.
+    * <p>
+    * Edge cases:
+    * <ul>
+    *    <li> if {@code lineSegmentStart.distanceSquared(lineSegmentEnd) < Epsilons.ONE_TRILLIONTH}, this method returns the distance between {@code lineSegmentStart} and the given {@code point}.
+    * </ul>
+    * </p>
+    *
+    * @param point 3D point to compute the distance from the line segment. Not modified.
+    * @param lineSegmentStart first endpoint of the line segment. Not modified.
+    * @param lineSegmentEnd second endpoint of the line segment. Not modified.
+    * @return the square of the minimum distance between the 3D point and the 3D line segment.
+    */
+   public static double distanceFromPointToLineSegmentSquared(Point3d point, Point3d lineSegmentStart, Point3d lineSegmentEnd)
+   {
+      return distanceFromPointToLineSegmentSquared(point.getX(), point.getY(), point.getZ(), lineSegmentStart, lineSegmentEnd);
    }
 
    /**

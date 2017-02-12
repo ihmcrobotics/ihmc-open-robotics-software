@@ -281,6 +281,12 @@ public class GdxCollisionDetector implements ScsCollisionDetector
       {
          boundingBoxToPack.set(boundingBox);
       }
+
+      @Override
+      public boolean isPointInside(Point3d pointInWorld)
+      {
+         throw new RuntimeException("Implement me!");
+      }
    }
 
    /**

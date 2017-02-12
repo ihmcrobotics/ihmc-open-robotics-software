@@ -18,6 +18,18 @@ public class CollisionMeshDescription implements CollisionMaskHolder
    private int collisionGroup = 0x00;
    private int collisionMask = 0x00;
 
+   private int estimatedNumberOfContactPoints = 24;
+   
+   public void setEstimatedNumberOfContactPoints(int estimatedNumberOfContactPoints)
+   {
+      this.estimatedNumberOfContactPoints = estimatedNumberOfContactPoints;
+   }
+
+   public int getEstimatedNumberOfContactPoints()
+   {
+      return estimatedNumberOfContactPoints;
+   }
+
    public void addConvexShape(ConvexShapeDescription convexShapeDescription)
    {
       convexShapeDescriptions.add(convexShapeDescription);
