@@ -16,8 +16,8 @@ import javax.vecmath.Vector3d;
 public class AtlasStepAdjustmentDemo
 {
    private static StepScriptType stepScriptType = StepScriptType.FORWARD_FAST;
-   private static TestType testType = TestType.BIG_ADJUSTMENT;
-   private static PushDirection pushDirection = PushDirection.OUTWARD;
+   private static TestType testType = TestType.FEEDBACK_ONLY;
+   private static PushDirection pushDirection = PushDirection.BACKWARD_45;
 
    private static String forwardFastScript = "scripts/stepAdjustment_forwardWalkingFast.xml";
    private static String forwardSlowScript = "scripts/stepAdjustment_forwardWalkingSlow.xml";
@@ -246,6 +246,174 @@ public class AtlasStepAdjustmentDemo
                break;
             default: // doesn't allow speed up or step adjustment
                percentWeight = 0.86;
+               break;
+            }
+            break;
+         }
+         break;
+      case FORWARD_45:
+         double angle = Math.PI / 4.0;
+         forceDirection = new Vector3d(Math.cos(angle), -Math.sin(angle), 0.0);
+
+         switch (stepScriptType)
+         {
+         case FORWARD_SLOW:
+            script = forwardSlowScript;
+
+            switch(testType)
+            {
+            case BIG_ADJUSTMENT:
+               percentWeight = 0.98;
+               break;
+            case ADJUSTMENT_ONLY:
+               percentWeight = 0.41;
+               break;
+            case SPEED_UP_ONLY:
+               percentWeight = 0.69;
+               break;
+            default: // doesn't allow speed up or step adjustment
+               percentWeight = 0.34;
+               break;
+            }
+            break;
+         case STATIONARY_FAST:
+            script = stationaryFastScript;
+
+            switch(testType)
+            {
+            case BIG_ADJUSTMENT:
+               percentWeight = 1.76;
+               break;
+            case ADJUSTMENT_ONLY:
+               percentWeight = 1.33;
+               break;
+            case SPEED_UP_ONLY:
+               percentWeight = 0.55;
+               break;
+            default: // doesn't allow speed up or step adjustment
+               percentWeight = 0.32;
+               break;
+            }
+            break;
+         case STATIONARY_SLOW:
+            script = stationarySlowScript;
+
+            switch(testType)
+            {
+            case BIG_ADJUSTMENT:
+               percentWeight = 1.17;
+               break;
+            case ADJUSTMENT_ONLY:
+               percentWeight = 0.42;
+               break;
+            case SPEED_UP_ONLY:
+               percentWeight = 0.68;
+               break;
+            default: // doesn't allow speed up or step adjustment
+               percentWeight = 0.33;
+               break;
+            }
+            break;
+         default: // FORWARD_FAST
+            script = forwardFastScript;
+
+            switch(testType)
+            {
+            case BIG_ADJUSTMENT:
+               percentWeight = 1.47;
+               break;
+            case ADJUSTMENT_ONLY:
+               percentWeight = 0.92;
+               break;
+            case SPEED_UP_ONLY:
+               percentWeight = 0.46;
+               break;
+            default: // doesn't allow speed up or step adjustment
+               percentWeight = 0.3;
+               break;
+            }
+            break;
+         }
+         break;
+      case BACKWARD_45:
+         angle = Math.PI / 4.0;
+         forceDirection = new Vector3d(-Math.cos(angle), -Math.sin(angle), 0.0);
+
+         switch (stepScriptType)
+         {
+         case FORWARD_SLOW:
+            script = forwardSlowScript;
+
+            switch(testType)
+            {
+            case BIG_ADJUSTMENT:
+               percentWeight = 0.82;
+               break;
+            case ADJUSTMENT_ONLY:
+               percentWeight = 0.47;
+               break;
+            case SPEED_UP_ONLY:
+               percentWeight = 0.47;
+               break;
+            default: // doesn't allow speed up or step adjustment
+               percentWeight = 0.38;
+               break;
+            }
+            break;
+         case STATIONARY_FAST:
+            script = stationaryFastScript;
+
+            switch(testType)
+            {
+            case BIG_ADJUSTMENT:
+               percentWeight = 1.81;
+               break;
+            case ADJUSTMENT_ONLY:
+               percentWeight = 1.65;
+               break;
+            case SPEED_UP_ONLY:
+               percentWeight = 0.6;
+               break;
+            default: // doesn't allow speed up or step adjustment
+               percentWeight = 0.36;
+               break;
+            }
+            break;
+         case STATIONARY_SLOW:
+            script = stationarySlowScript;
+
+            switch(testType)
+            {
+            case BIG_ADJUSTMENT:
+               percentWeight = 1.14;
+               break;
+            case ADJUSTMENT_ONLY:
+               percentWeight = 0.54;
+               break;
+            case SPEED_UP_ONLY:
+               percentWeight = 0.61;
+               break;
+            default: // doesn't allow speed up or step adjustment
+               percentWeight = 0.37;
+               break;
+            }
+            break;
+         default: // FORWARD_FAST
+            script = forwardFastScript;
+
+            switch(testType)
+            {
+            case BIG_ADJUSTMENT:
+               percentWeight = 1.46;
+               break;
+            case ADJUSTMENT_ONLY:
+               percentWeight = 1.12;
+               break;
+            case SPEED_UP_ONLY:
+               percentWeight = 0.48;
+               break;
+            default: // doesn't allow speed up or step adjustment
+               percentWeight = 0.33;
                break;
             }
             break;
