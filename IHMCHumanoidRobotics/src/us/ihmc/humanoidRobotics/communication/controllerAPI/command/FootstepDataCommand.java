@@ -28,6 +28,9 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
    private double swingTime = Double.NaN;
    private double transferTime = Double.NaN;
 
+   private boolean hasAbsoluteTime = false;
+   private double swingStartTime = Double.NaN;
+
    public FootstepDataCommand()
    {
       clear();
@@ -48,6 +51,9 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
       hasTimings = false;
       swingTime = Double.NaN;
       transferTime = Double.NaN;
+
+      hasAbsoluteTime = false;
+      swingStartTime = Double.NaN;
    }
 
    @Override
@@ -77,6 +83,9 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
       hasTimings = message.hasTimings;
       swingTime = message.swingTime;
       transferTime = message.transferTime;
+
+      hasAbsoluteTime = message.hasAbsoluteTime;
+      swingStartTime = message.swingStartTime;
    }
 
    @Override
@@ -100,6 +109,9 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
       hasTimings = other.hasTimings;
       swingTime = other.swingTime;
       transferTime = other.transferTime;
+
+      hasAbsoluteTime = other.hasAbsoluteTime;
+      swingStartTime = other.swingStartTime;
    }
 
    public void setRobotSide(RobotSide robotSide)
@@ -188,6 +200,16 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
    public double getTransferTime()
    {
       return transferTime;
+   }
+
+   public boolean hasAbsoluteTime()
+   {
+      return hasAbsoluteTime;
+   }
+
+   public double getSwingStartTime()
+   {
+      return swingStartTime;
    }
 
    @Override

@@ -11,16 +11,16 @@ import javax.vecmath.Vector3d;
 
 import org.junit.Test;
 
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.footstepPlanning.graphSearch.BipedalFootstepPlannerNode;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations;
 import us.ihmc.tools.testing.JUnitTools;
 
 public class BipedalFootstepPlannerNodeTest
 {
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 300000)
    public void testEqualsAndHashMethodsWithHardCodedTransforms()
    {
@@ -60,7 +60,7 @@ public class BipedalFootstepPlannerNodeTest
       assertTrue(nodeA.hashCode() != nodeB.hashCode());
    }
 
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 300000)
    public void testEqualsAndHashMethodsWithRandomTransforms()
    {
@@ -86,7 +86,7 @@ public class BipedalFootstepPlannerNodeTest
       }
    }
 
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 300000)
    public void testRemovePitchAndRoll()
    {
@@ -135,7 +135,7 @@ public class BipedalFootstepPlannerNodeTest
 
    }
 
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 300000)
    public void testShiftInSoleFrame()
    {

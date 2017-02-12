@@ -1,12 +1,12 @@
 package us.ihmc.tools.io.logging;
 
-import org.junit.Test;
-
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import static org.junit.Assert.assertEquals;
 
 import java.util.logging.Level;
 
-import static org.junit.Assert.assertEquals;
+import org.junit.Test;
+
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public class LogToolsTest
 {

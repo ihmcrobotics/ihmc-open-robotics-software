@@ -4,6 +4,9 @@ import java.util.concurrent.Callable;
 
 import org.junit.Test;
 
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -11,21 +14,15 @@ import us.ihmc.graphicsDescription.structure.Graphics3DNode;
 import us.ihmc.graphicsDescription.structure.Graphics3DNodeType;
 import us.ihmc.jMonkeyEngineToolkit.GPULidarListener;
 import us.ihmc.jMonkeyEngineToolkit.Graphics3DFrameListener;
-import us.ihmc.jMonkeyEngineToolkit.jme.JMEGraphics3DAdapter;
-import us.ihmc.jMonkeyEngineToolkit.jme.JMEGraphics3DWorld;
-import us.ihmc.jMonkeyEngineToolkit.jme.JMERenderer;
 import us.ihmc.jMonkeyEngineToolkit.jme.lidar.JMEGPULidar;
 import us.ihmc.jMonkeyEngineToolkit.jme.util.JMELidarScanVisualizer;
 import us.ihmc.jMonkeyEngineToolkit.utils.FlatHeightMap;
 import us.ihmc.robotics.Axis;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.geometry.TransformTools;
+import us.ihmc.robotics.geometry.shapes.Sphere3d;
 import us.ihmc.robotics.lidar.LidarScan;
 import us.ihmc.robotics.lidar.LidarScanParameters;
-import us.ihmc.tools.continuousIntegration.IntegrationCategory;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.geometry.shapes.Sphere3d;
-import us.ihmc.robotics.geometry.TransformTools;
 
 @ContinuousIntegrationPlan(categories={IntegrationCategory.UI})
 public class JMEGPULidarParallelSceneGraphTest

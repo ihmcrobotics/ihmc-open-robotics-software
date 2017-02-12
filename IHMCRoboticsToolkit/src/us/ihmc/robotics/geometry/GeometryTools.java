@@ -4228,7 +4228,7 @@ public class GeometryTools
     * </p>
     * 
     * @param pointOnPlane1 a point on the first plane. Not modified.
-    * @param planeNormal1 the normal of the first plane. Not modifed.
+    * @param planeNormal1 the normal of the first plane. Not modified.
     * @param pointOnPlane2 a point on the second plane. Not modified.
     * @param planeNormal2 the normal of the second plane. Not modified.
     * @param angleEpsilon tolerance on the angle in radians to determine if the plane normals are collinear. 
@@ -4242,6 +4242,24 @@ public class GeometryTools
          return false;
       else
          return distanceFromPointToPlane(pointOnPlane2, pointOnPlane1, planeNormal1) < distanceEpsilon;
+   }
+   
+   /**
+    * Rotates the given {@code tupleOriginal} tuple by an angle {@code yaw} and stores the result in the tuple.
+    * 
+    * @param yaw the angle in radians by which {@code tupleOriginal} should be rotated.
+    * @param tupleToRotate the original tuple. Not modified.
+    */
+   public static void rotateTuple2d(double yaw, Tuple2d tupleToRotate)
+   {
+      double cos = Math.cos(yaw);
+      double sin = Math.sin(yaw);
+      
+      double x = tupleToRotate.getX();
+      double y = tupleToRotate.getY();
+      
+      tupleToRotate.setX(cos * x - sin * y);
+      tupleToRotate.setY(sin * x + cos * y);
    }
 
    /**
