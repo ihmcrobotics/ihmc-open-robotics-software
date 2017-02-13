@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories;
 
 import java.util.Collection;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -21,11 +22,14 @@ import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimiza
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage.BaseForControl;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.tools.io.printing.PrintTools;
 
 public class HighLevelControlManagerFactory
@@ -144,9 +148,9 @@ public class HighLevelControlManagerFactory
       return headOrientationManager;
    }
 
-   public RigidBodyManager getOrCreateRigidBodyManager(RigidBody body)
+   public RigidBodyManager getOrCreateRigidBodyManager(RigidBody bodyToControl, RigidBody rootBody)
    {
-      String bodyName = body.getName();
+      String bodyName = bodyToControl.getName();
       if (rigidBodyManagerMapByBodyName.containsKey(bodyName))
       {
          RigidBodyManager manager = rigidBodyManagerMapByBodyName.get(bodyName);
@@ -159,7 +163,20 @@ public class HighLevelControlManagerFactory
       if (!hasMomentumOptimizationSettings(RigidBodyManager.class))
          return null;
 
-      RigidBodyManager manager = new RigidBodyManager(body, momentumBasedController, registry);
+      CommonHumanoidReferenceFrames referenceFrames = momentumBasedController.getReferenceFrames();
+      FullHumanoidRobotModel fullRobotModel = momentumBasedController.getFullRobotModel();
+      Map<BaseForControl, ReferenceFrame> controlFrameMap = new EnumMap<>(BaseForControl.class);
+      controlFrameMap.put(BaseForControl.CHEST, fullRobotModel.getChest().getBodyFixedFrame());
+      controlFrameMap.put(BaseForControl.WALKING_PATH, referenceFrames.getMidFeetUnderPelvisFrame());
+      controlFrameMap.put(BaseForControl.WORLD, ReferenceFrame.getWorldFrame());
+
+      RigidBodyManager manager = new RigidBodyManager(bodyToControl, rootBody, momentumBasedController, walkingControllerParameters, controlFrameMap, registry);
+      double spineJointspaceWeight = momentumOptimizationSettings.getSpineJointspaceWeight();
+      Vector3d chestAngularWeight = momentumOptimizationSettings.getChestAngularWeight();
+      Vector3d chestLinearWeight = null;
+      double chestUserModeWeight = momentumOptimizationSettings.getHeadUserModeWeight();
+      manager.setWeights(spineJointspaceWeight, chestAngularWeight, chestLinearWeight, chestUserModeWeight);
+
       rigidBodyManagerMapByBodyName.put(bodyName, manager);
       return manager;
    }

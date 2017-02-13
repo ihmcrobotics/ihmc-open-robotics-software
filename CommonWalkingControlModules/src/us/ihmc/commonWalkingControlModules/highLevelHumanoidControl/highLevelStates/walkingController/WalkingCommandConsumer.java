@@ -41,6 +41,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.ManipulationAborte
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.screwTheory.RigidBody;
 
 public class WalkingCommandConsumer
 {
@@ -77,8 +78,11 @@ public class WalkingCommandConsumer
       this.commandInputManager = commandInputManager;
       this.statusMessageOutputManager = statusMessageOutputManager;
 
+      RigidBody chest = momentumBasedController.getFullRobotModel().getChest();
+      RigidBody pelvis = momentumBasedController.getFullRobotModel().getPelvis();
+
       pelvisOrientationManager = managerFactory.getOrCreatePelvisOrientationManager();
-      chestManager = managerFactory.getOrCreateRigidBodyManager(momentumBasedController.getFullRobotModel().getChest());
+      chestManager = managerFactory.getOrCreateRigidBodyManager(chest, pelvis);
       headOrientationManager = managerFactory.getOrCreatedHeadOrientationManager();
       manipulationControlModule = managerFactory.getOrCreateManipulationControlModule();
       feetManager = managerFactory.getOrCreateFeetManager();
@@ -107,9 +111,9 @@ public class WalkingCommandConsumer
    public void consumeChestCommands()
    {
       if (commandInputManager.isNewCommandAvailable(ChestTrajectoryCommand.class))
-         chestManager.handleChestTrajectoryCommand(commandInputManager.pollNewestCommand(ChestTrajectoryCommand.class));
+         chestManager.handleTaskspaceTrajectoryCommand(commandInputManager.pollNewestCommand(ChestTrajectoryCommand.class));
       if (commandInputManager.isNewCommandAvailable(SpineTrajectoryCommand.class))
-         chestManager.handleSpineTrajectoryCommand(commandInputManager.pollNewestCommand(SpineTrajectoryCommand.class));
+         chestManager.handleJointspaceTrajectoryCommand(commandInputManager.pollNewestCommand(SpineTrajectoryCommand.class));
    }
 
    public void consumePelvisHeightCommands()

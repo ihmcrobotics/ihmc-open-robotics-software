@@ -57,6 +57,7 @@ import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.GenericStateMachine;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.State;
@@ -146,7 +147,9 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
       this.manipulationControlModule = managerFactory.getOrCreateManipulationControlModule();
       this.feetManager = managerFactory.getOrCreateFeetManager();
 
-      this.chestManager = managerFactory.getOrCreateRigidBodyManager(fullRobotModel.getChest());
+      RigidBody chest = fullRobotModel.getChest();
+      RigidBody pelvis = fullRobotModel.getPelvis();
+      this.chestManager = managerFactory.getOrCreateRigidBodyManager(chest, pelvis);
 
       this.walkingControllerParameters = walkingControllerParameters;
 

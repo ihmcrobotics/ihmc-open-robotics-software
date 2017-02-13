@@ -54,4 +54,10 @@ public class RigidBodyUserControlState extends RigidBodyControlState
 
    }
 
+   public void setWeight(double userModeWeight)
+   {
+      // TODO Auto-generated method stub
+
+   }
+
 }

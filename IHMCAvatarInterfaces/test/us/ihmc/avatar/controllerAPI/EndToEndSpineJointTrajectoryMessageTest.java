@@ -274,8 +274,8 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
    private static BooleanYoVariable findOrientationControlEnabled(SimulationConstructionSet scs, RigidBody body)
    {
       String bodyName = body.getName();
-      String namespace = bodyName + "OrientationFBController";
-      String variable = bodyName + "IsOrientationFBControllerEnabled";
+      String namespace = bodyName + "SpatialFBController";
+      String variable = bodyName + "IsSpatialFBControllerEnabled";
       return getBooleanYoVariable(scs, variable, namespace);
    }
 

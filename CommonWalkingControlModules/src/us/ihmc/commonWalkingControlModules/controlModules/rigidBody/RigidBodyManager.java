@@ -2,44 +2,86 @@ package us.ihmc.commonWalkingControlModules.controlModules.rigidBody;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
+import javax.vecmath.Vector3d;
+
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolderReadOnly;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ChestTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.GoHomeCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SpineTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.JointspaceTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SE3TrajectoryControllerCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SO3TrajectoryControllerCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage.BaseForControl;
+import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
+import us.ihmc.robotics.controllers.YoPIDGains;
+import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
+import us.ihmc.robotics.geometry.FrameOrientation;
+import us.ihmc.robotics.geometry.FramePose;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.GenericStateMachine;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateMachineTools;
+import us.ihmc.tools.io.printing.PrintTools;
 
 public class RigidBodyManager
 {
+   private final String bodyName;
    private final YoVariableRegistry registry;
    private final GenericStateMachine<RigidBodyControlMode, RigidBodyControlState> stateMachine;
    private final EnumYoVariable<RigidBodyControlMode> requestedState;
+   private final BooleanYoVariable hasBeenInitialized;
 
    private final RigidBodyJointspaceControlState jointspaceControlState;
    private final RigidBodyTaskspaceControlState taskspaceControlState;
    private final RigidBodyUserControlState userControlState;
 
-   public RigidBodyManager(RigidBody body, HighLevelHumanoidControllerToolbox humanoidControllerToolbox, YoVariableRegistry parentRegistry)
+   private final double[] initialJointPositions;
+   private final FrameOrientation initialOrientation = new FrameOrientation();
+   private final FramePose initialPose = new FramePose();
+
+   private final OneDoFJoint[] jointsOriginal;
+   private final OneDoFJoint[] jointsAtDesiredPosition;
+
+   private final ReferenceFrame bodyFrame;
+
+   public RigidBodyManager(RigidBody bodyToControl, RigidBody rootBody, HighLevelHumanoidControllerToolbox humanoidControllerToolbox,
+         WalkingControllerParameters walkingControllerParameters, Map<BaseForControl, ReferenceFrame> controlFrameMap, YoVariableRegistry parentRegistry)
    {
-      String namePrefix = body.getName() + "Manager";
+      bodyName = bodyToControl.getName();
+      String namePrefix = bodyName + "Manager";
       registry = new YoVariableRegistry(namePrefix);
       DoubleYoVariable yoTime = humanoidControllerToolbox.getYoTime();
+      bodyFrame = bodyToControl.getBodyFixedFrame();
 
       stateMachine = new GenericStateMachine<>(namePrefix + "State", namePrefix + "SwitchTime", RigidBodyControlMode.class, yoTime, registry);
-      requestedState = new EnumYoVariable<>("chestRequestedControlMode", registry, RigidBodyControlMode.class, true);
+      requestedState = new EnumYoVariable<>(namePrefix + "RequestedControlMode", registry, RigidBodyControlMode.class, true);
+      hasBeenInitialized = new BooleanYoVariable(namePrefix + "Initialized", registry);
+      hasBeenInitialized.set(false);
 
-      jointspaceControlState = new RigidBodyJointspaceControlState();
-      taskspaceControlState = new RigidBodyTaskspaceControlState();
+      jointsOriginal = ScrewTools.createOneDoFJointPath(rootBody, bodyToControl);
+      jointsAtDesiredPosition = ScrewTools.cloneOneDoFJointPath(rootBody, bodyToControl);
+      initialJointPositions = new double[jointsOriginal.length];
+
+      // TODO: body specific
+      YoPIDGains jointspaceGains = walkingControllerParameters.createJointSpaceControlGains(registry);
+      YoOrientationPIDGainsInterface taskspaceOrientationGains = walkingControllerParameters.createChestControlGains(registry);
+      YoPositionPIDGainsInterface taskspacePositionGains = null;
+
+      RigidBody elevator = humanoidControllerToolbox.getFullRobotModel().getElevator();
+      jointspaceControlState = new RigidBodyJointspaceControlState(bodyName, jointsOriginal, jointspaceGains, yoTime, registry);
+      taskspaceControlState = new RigidBodyTaskspaceControlState(bodyToControl, rootBody, elevator, taskspaceOrientationGains, taskspacePositionGains, controlFrameMap, registry);
       userControlState = new RigidBodyUserControlState();
 
       setupStateMachine();
@@ -63,23 +105,30 @@ public class RigidBodyManager
       }
    }
 
-   public void setWeights()
+   public void setWeights(double jointspaceWeight, Vector3d taskspaceAngularWeight, Vector3d taskspaceLinearWeight, double userModeWeight)
    {
-      // TODO: hand, chest, head
-      // set QP weights for all the control states
+      jointspaceControlState.setWeight(jointspaceWeight);
+      taskspaceControlState.setWeights(taskspaceAngularWeight, taskspaceLinearWeight);
+      userControlState.setWeight(userModeWeight);
    }
 
    public void initialize()
    {
-      // TODO: hand, chest, head
-      // do some hold current position thing in one of the states using the current measured
+      if (hasBeenInitialized.getBooleanValue())
+         return;
+      hasBeenInitialized.set(true);
+
+      jointspaceControlState.holdCurrent();
+      requestState(jointspaceControlState.getStateEnum());
    }
 
-   public void compute() /* called doControl for hand */
+   public void compute()
    {
-      // TODO: hand, chest, head
-      // execute the state machine current state
-      // hand specific:
+      initialize();
+      stateMachine.checkTransitionConditions();
+      stateMachine.doAction();
+
+      // TODO hand specific:
       // - hold position if a joint becomes disabled
       // - handle joint acceleration integration commands
       // update command lists
@@ -99,20 +148,34 @@ public class RigidBodyManager
 
    public void handleStopAllTrajectoryCommand(StopAllTrajectoryCommand command)
    {
-      // TODO: chest
-      // stop executing trajectories and freeze the desireds
+      stateMachine.getCurrentState().handleStopAllTrajectoryCommand(command);
    }
 
-   public void handleTaskspaceTrajectoryCommand()
+   public void handleTaskspaceTrajectoryCommand(SO3TrajectoryControllerCommand<?, ?> command)
    {
-      // TODO: hand, chest, head
-      // forward command to the taskspace controller and activate it if necessary
+      computeDesiredOrientation(initialOrientation);
+      if (taskspaceControlState.handleOrientationTrajectoryCommand(command, initialOrientation))
+         requestState(taskspaceControlState.getStateEnum());
+      else
+         PrintTools.warn(getClass().getSimpleName() + " for " + bodyName + " recieved invalid orientation trajectory command.");
    }
 
-   public void handleJointspaceTrajectoryCommand()
+   public void handleTaskspaceTrajectoryCommand(SE3TrajectoryControllerCommand<?, ?> command)
    {
-      // TODO: hand, chest, head
-      // forward command to the jointspace controller and activate it if necessary
+      computeDesiredPose(initialPose);
+      if (taskspaceControlState.handlePoseTrajectoryCommand(command, initialPose))
+         requestState(taskspaceControlState.getStateEnum());
+      else
+         PrintTools.warn(getClass().getSimpleName() + " for " + bodyName + " recieved invalid pose trajectory command.");
+   }
+
+   public void handleJointspaceTrajectoryCommand(JointspaceTrajectoryCommand<?, ?> command)
+   {
+      computeDesiredJointPositions(initialJointPositions);
+      if (jointspaceControlState.handleTrajectoryCommand(command, initialJointPositions))
+         requestState(RigidBodyControlMode.JOINTSPACE);
+      else
+         PrintTools.warn(getClass().getSimpleName() + " for " + bodyName + " recieved invalid jointspace trajectory command.");
    }
 
    public void handleDesiredAccelerationsCommand()
@@ -176,6 +239,83 @@ public class RigidBodyManager
       return null;
    }
 
+   private void computeDesiredPose(FramePose desiredPoseToPack)
+   {
+      if (stateMachine.getCurrentStateEnum() == RigidBodyControlMode.TASKSPACE)
+      {
+         taskspaceControlState.getDesiredPose(desiredPoseToPack);
+      }
+      else
+      {
+         updateJointsAtDesiredPosition();
+         ReferenceFrame desiredEndEffectorFrame = jointsAtDesiredPosition[jointsAtDesiredPosition.length - 1].getSuccessor().getBodyFixedFrame();
+         desiredPoseToPack.setToZero(desiredEndEffectorFrame);
+      }
+
+      if (desiredPoseToPack.containsNaN())
+         desiredPoseToPack.setToZero(bodyFrame);
+   }
+
+   private void computeDesiredOrientation(FrameOrientation desiredOrientationToPack)
+   {
+      if (stateMachine.getCurrentStateEnum() == RigidBodyControlMode.TASKSPACE)
+      {
+         taskspaceControlState.getDesiredOrientation(desiredOrientationToPack);
+      }
+      else
+      {
+         updateJointsAtDesiredPosition();
+         ReferenceFrame desiredEndEffectorFrame = jointsAtDesiredPosition[jointsAtDesiredPosition.length - 1].getSuccessor().getBodyFixedFrame();
+         desiredOrientationToPack.setToZero(desiredEndEffectorFrame);
+      }
+
+      if (desiredOrientationToPack.containsNaN())
+         desiredOrientationToPack.setToZero(bodyFrame);
+   }
+
+   private void computeDesiredJointPositions(double[] desiredJointPositionsToPack)
+   {
+      if (stateMachine.getCurrentStateEnum() == RigidBodyControlMode.JOINTSPACE)
+      {
+         for (int i = 0; i < jointsOriginal.length; i++)
+            desiredJointPositionsToPack[i] = jointspaceControlState.getJointDesiredPosition(jointsOriginal[i]);
+      }
+      else
+      {
+         updateJointsAtDesiredPosition();
+         for (int i = 0; i < jointsAtDesiredPosition.length; i++)
+            desiredJointPositionsToPack[i] = jointsAtDesiredPosition[i].getQ();
+      }
+   }
+
+   private void updateJointsAtDesiredPosition()
+   {
+      if (stateMachine.getCurrentStateEnum() == RigidBodyControlMode.JOINTSPACE)
+      {
+         for (int i = 0; i < jointsAtDesiredPosition.length; i++)
+         {
+            jointsAtDesiredPosition[i].setQ(jointspaceControlState.getJointDesiredPosition(jointsOriginal[i]));
+            jointsAtDesiredPosition[i].setQd(jointspaceControlState.getJointDesiredVelocity(jointsOriginal[i]));
+         }
+      }
+      else
+      {
+         for (int i = 0; i < jointsAtDesiredPosition.length; i++)
+         {
+            jointsAtDesiredPosition[i].setQ(jointsOriginal[i].getQ());
+            jointsAtDesiredPosition[i].setQd(jointsOriginal[i].getQd());
+         }
+      }
+
+      jointsAtDesiredPosition[0].updateFramesRecursively();
+   }
+
+   private void requestState(RigidBodyControlMode state)
+   {
+      if (stateMachine.getCurrentStateEnum() != state)
+         requestedState.set(state);
+   }
+
    public InverseDynamicsCommand<?> getInverseDynamicsCommand()
    {
       return stateMachine.getCurrentState().getInverseDynamicsCommand();
@@ -196,19 +336,6 @@ public class RigidBodyManager
             ret.addCommand(state.getFeedbackControlCommand());
       }
       return ret;
-   }
-
-   // --- chest specific ---
-   public void handleChestTrajectoryCommand(ChestTrajectoryCommand command)
-   {
-      // TODO Auto-generated method stub
-   }
-
-   // --- chest specific ---
-   public void handleSpineTrajectoryCommand(SpineTrajectoryCommand command)
-   {
-      // TODO Auto-generated method stub
-
    }
 
 }
