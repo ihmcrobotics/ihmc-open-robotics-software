@@ -14,10 +14,12 @@ import us.ihmc.robotics.dataStructures.variable.YoVariableList;
 import us.ihmc.robotics.robotDescription.CollisionMeshDescription;
 import us.ihmc.simulationconstructionset.DataBuffer.RepeatDataBufferEntryException;
 import us.ihmc.simulationconstructionset.graphics.GraphicsRobot;
+import us.ihmc.simulationconstructionset.physics.CollisionArbiter;
 import us.ihmc.simulationconstructionset.physics.CollisionHandler;
 import us.ihmc.simulationconstructionset.physics.CollisionShapeFactory;
 import us.ihmc.simulationconstructionset.physics.ScsCollisionDetector;
 import us.ihmc.simulationconstructionset.physics.ScsPhysics;
+import us.ihmc.simulationconstructionset.physics.collision.simple.DoNothingCollisionArbiter;
 import us.ihmc.simulationconstructionset.physics.collision.simple.SimpleCollisionDetector;
 import us.ihmc.simulationconstructionset.physics.visualize.DefaultCollisionVisualizer;
 import us.ihmc.simulationconstructionset.scripts.Script;
@@ -55,7 +57,7 @@ public class Simulation implements YoVariableHolder, Serializable // Runnable,
 
    public void initPhysics(ScsPhysics physics)
    {
-      mySimulator.setCollisions(physics.collisionDetector, physics.collisionHandler, physics.visualize);
+      mySimulator.setCollisions(physics.collisionDetector, physics.collisionArbiter, physics.collisionHandler, physics.visualize);
 
       for (Robot robot : robots)
       {
@@ -481,15 +483,19 @@ public class Simulation implements YoVariableHolder, Serializable // Runnable,
 
    public void initializeCollisionDetectionAndHandling(DefaultCollisionVisualizer collisionVisualizer, CollisionHandler collisionHandler)
    {
-      ScsCollisionDetector collisionDetector = createCollisionShapesFromLinks(robots);
+      ScsCollisionDetector collisionDetector = createCollisionShapesFromLinks(robots, collisionHandler);
 
       if (collisionVisualizer != null) collisionHandler.addListener(collisionVisualizer);
 
       collisionDetector.initialize();
-      this.initPhysics(new ScsPhysics(null, collisionDetector, collisionHandler, collisionVisualizer));
+      
+      CollisionArbiter collisionArbiter = new DoNothingCollisionArbiter();
+//      CollisionArbiter collisionArbiter = new ExperimentalCollisionArbiter();
+
+      this.initPhysics(new ScsPhysics(null, collisionDetector, collisionArbiter, collisionHandler, collisionVisualizer));
    }
 
-   private static ScsCollisionDetector createCollisionShapesFromLinks(Robot[] robots)
+   private static ScsCollisionDetector createCollisionShapesFromLinks(Robot[] robots, CollisionHandler collisionHandler)
    {
       ScsCollisionDetector collisionDetector;
 
@@ -502,39 +508,44 @@ public class Simulation implements YoVariableHolder, Serializable // Runnable,
 
       for (Robot robot : robots)
       {
-         createCollisionShapesFromLinks(robot, collisionShapeFactory, robot.getRobotsYoVariableRegistry());
+         createCollisionShapesFromLinks(robot, collisionShapeFactory, collisionHandler, robot.getRobotsYoVariableRegistry());
       }
 
       return collisionDetector;
    }
 
-   private static void createCollisionShapesFromLinks(Robot robot, CollisionShapeFactory collisionShapeFactory, YoVariableRegistry registry)
+   private static void createCollisionShapesFromLinks(Robot robot, CollisionShapeFactory collisionShapeFactory, CollisionHandler collisionHandler, YoVariableRegistry registry)
    {
       ArrayList<Joint> rootJoints = robot.getRootJoints();
       for (Joint rootJoint : rootJoints)
       {
-         createCollisionShapesFromLinksRecursively(rootJoint, collisionShapeFactory, registry);
+         createCollisionShapesFromLinksRecursively(rootJoint, collisionShapeFactory, collisionHandler, registry);
       }
    }
 
-   private static void createCollisionShapesFromLinksRecursively(Joint joint, CollisionShapeFactory collisionShapeFactory, YoVariableRegistry registry)
+   private static void createCollisionShapesFromLinksRecursively(Joint joint, CollisionShapeFactory collisionShapeFactory, CollisionHandler collisionHandler, YoVariableRegistry registry)
    {
       Link link = joint.getLink();
-      link.enableCollisions(registry);
       ArrayList<CollisionMeshDescription> collisionMeshDescriptions = link.getCollisionMeshDescriptions();
-      
+
       if (collisionMeshDescriptions != null)
       {
+         int estimatedNumberOfContactPoints = 0;
+
          for (int i=0; i<collisionMeshDescriptions.size(); i++)
          {
-            collisionShapeFactory.addCollisionMeshDescription(link, collisionMeshDescriptions.get(i));
+            CollisionMeshDescription collisionMesh = collisionMeshDescriptions.get(i);
+            collisionShapeFactory.addCollisionMeshDescription(link, collisionMesh);
+            estimatedNumberOfContactPoints += collisionMesh.getEstimatedNumberOfContactPoints();
          }
+
+         link.enableCollisions(estimatedNumberOfContactPoints, collisionHandler, registry);
       }
 
       ArrayList<Joint> childrenJoints = joint.getChildrenJoints();
       for (Joint childJoint : childrenJoints)
       {
-         createCollisionShapesFromLinksRecursively(childJoint, collisionShapeFactory, registry);
+         createCollisionShapesFromLinksRecursively(childJoint, collisionShapeFactory, collisionHandler, registry);
       }
    }
 

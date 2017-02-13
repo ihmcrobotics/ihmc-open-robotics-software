@@ -118,4 +118,10 @@ public class CapsuleShapeDescription<T extends CapsuleShapeDescription<T>> imple
       boundingBox.set(xMin - radius, yMin - radius, zMin - radius, xMax + radius, yMax + radius, zMax + radius);
    }
 
+   @Override
+   public boolean isPointInside(Point3d pointInWorld)
+   {
+      return (lineSegment.distanceSquared(pointInWorld) <= radius * radius);
+   }
+
 }

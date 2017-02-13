@@ -52,5 +52,8 @@ public interface Contacts
     * @return true for normal being on A and false for B.
     */
    public boolean isNormalOnA();
+
+   public abstract void set(Contacts contacts);
+   public abstract void addAll(Contacts contacts);
 }
 

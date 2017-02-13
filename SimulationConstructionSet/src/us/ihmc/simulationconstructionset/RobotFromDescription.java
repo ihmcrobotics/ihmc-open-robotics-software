@@ -318,7 +318,7 @@ public class RobotFromDescription extends Robot implements OneDegreeOfFreedomJoi
          Vector3d offset = new Vector3d();
          floatingJointDescription.getOffsetFromParentJoint(offset);
 
-         joint = new FloatingJoint(jointDescription.getName(), offset, this, true);
+         joint = new FloatingJoint(jointDescription.getName(), floatingJointDescription.getJointVariableName(), offset, this, true);
       }
 
       else if (jointDescription instanceof FloatingPlanarJointDescription)

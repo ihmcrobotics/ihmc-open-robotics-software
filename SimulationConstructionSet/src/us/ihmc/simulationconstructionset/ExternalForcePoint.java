@@ -100,6 +100,8 @@ public class ExternalForcePoint extends KinematicPoint
       if (epsilon > 20.0)
          epsilon = 20.0;
 
+//      System.out.println("epsilon1 = " + epsilon);
+//      System.out.println("penetrationSquared1 = " + penetrationSquared);
       return resolveCollision(externalForcePointTwo, negative_normal, epsilon, mu, p_world);
    }
 
@@ -148,7 +150,7 @@ public class ExternalForcePoint extends KinematicPoint
 
    public boolean resolveCollision(Vector3d velocityOfOtherObjectInWorld, Vector3d collisionNormalInWorld, double epsilon, double mu, Vector3d impulseInWorldToPack)
    {
-//      System.out.println("Resolving collision with ground");
+//      System.out.println("Resolving normal collision with ground");
       boolean movingTogether = computeRotationAndRelativeVelocity(collisionNormalInWorld, velocityOfOtherObjectInWorld, impulseInWorldToPack);
       if (!movingTogether)
       {
@@ -177,6 +179,7 @@ public class ExternalForcePoint extends KinematicPoint
       boolean movingTogether = computeRotationAndRelativeVelocity(collisionNormalInWorld, velocityOfOtherObjectInWorld, impulseInWorldToPack);
       if (!movingTogether)
       {
+//         System.out.println("Not moving together...");
          return false;
       }
 

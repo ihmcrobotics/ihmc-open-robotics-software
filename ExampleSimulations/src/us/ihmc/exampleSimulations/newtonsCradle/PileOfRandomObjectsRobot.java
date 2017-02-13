@@ -23,6 +23,8 @@ public class PileOfRandomObjectsRobot
    private int collisionGroup = 0xffffffff;
    private int collisionMask = 0xffffffff;
 
+   private final int estimatedContactPointsPerShape = 16;
+
    private final Random random = new Random(1886L);
 
    private double xExtents = 1.5;
@@ -81,7 +83,7 @@ public class PileOfRandomObjectsRobot
          //         Robot robot = new Robot("RandomRobot" + i);
 
          Vector3d offset = new Vector3d(0.0, 0.0, 0.0);
-         FloatingJointDescription floatingJointDescription = new FloatingJointDescription("object" + i);
+         FloatingJointDescription floatingJointDescription = new FloatingJointDescription("object" + i, "object" + i);
          floatingJointDescription.setOffsetFromParentJoint(offset);
 
          LinkDescription link;
@@ -212,6 +214,7 @@ public class PileOfRandomObjectsRobot
       collisionMesh.addCubeReferencedAtCenter(objectLength, objectWidth, objectHeight);
       collisionMesh.setCollisionGroup(collisionGroup);
       collisionMesh.setCollisionMask(collisionMask);
+      collisionMesh.setEstimatedNumberOfContactPoints(estimatedContactPointsPerShape);
       link.addCollisionMesh(collisionMesh);
 
       return link;
@@ -235,6 +238,7 @@ public class PileOfRandomObjectsRobot
       collisionMesh.addSphere(objectRadius);
       collisionMesh.setCollisionGroup(collisionGroup);
       collisionMesh.setCollisionMask(collisionMask);
+      collisionMesh.setEstimatedNumberOfContactPoints(16);
       link.addCollisionMesh(collisionMesh);
 
       return link;
@@ -259,6 +263,7 @@ public class PileOfRandomObjectsRobot
       collisionMesh.addCapsule(objectRadius, objectHeight);
       collisionMesh.setCollisionGroup(collisionGroup);
       collisionMesh.setCollisionMask(collisionMask);
+      collisionMesh.setEstimatedNumberOfContactPoints(16);
       link.addCollisionMesh(collisionMesh);
 
       return link;
@@ -285,6 +290,7 @@ public class PileOfRandomObjectsRobot
       collisionMesh.addCylinderReferencedAtCenter(objectRadius, objectHeight);
       collisionMesh.setCollisionGroup(collisionGroup);
       collisionMesh.setCollisionMask(collisionMask);
+      collisionMesh.setEstimatedNumberOfContactPoints(16);
       link.addCollisionMesh(collisionMesh);
 
       return link;
