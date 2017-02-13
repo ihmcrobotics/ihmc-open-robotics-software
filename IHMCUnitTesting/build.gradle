@@ -42,7 +42,7 @@ dependencies {
    	compile group: 'org.pitest', name: 'pitest-command-line', version: '1.1.9'
     compile group: 'org.ejml', name: 'core', version: '0.30'
     
-    testCompile group: 'us.ihmc', name: 'IHMCContinuousIntegrationFramework', version: '0.9.1'
+    testCompile group: 'us.ihmc', name: 'IHMCContinuousIntegrationFramework', version: '0.9.3'
 
     testCompile group: 'org.apache.commons', name: 'commons-math3', version: '3.3'
 }

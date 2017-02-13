@@ -45,7 +45,7 @@ dependencies {
     compile group: 'org.ejml', name: 'simple', version: '0.30'
     compile group: 'org.ejml', name: 'dense64', version: '0.30'
     
-    testCompile group: 'us.ihmc', name: 'IHMCContinuousIntegrationFramework', version: '0.9.1'
+    testCompile group: 'us.ihmc', name: 'IHMCContinuousIntegrationFramework', version: '0.9.3'
 
     compile ihmc.getProjectDependency(":IHMCRoboticsToolkit")
 	
