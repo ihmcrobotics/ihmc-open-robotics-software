@@ -28,12 +28,12 @@ repositories {
       url  "http://dl.bintray.com/ihmcrobotics/maven-vendor" // Third-party libraries that we have vendored for various reasons
    }
 
-   /*  Nexus instance hosted at IHMC for some legacy vendored
-    *  dependencies we have not been able to vendor on Bintray yet.
-    *  This will be going away eventually.
+   /*  Artifactory instance hosted at IHMC for some legacy vendored
+    *  dependencies without live source access that can't be uploaded
+    *  to Bintray.
    */
    maven {
-   		url "https://bengal.ihmc.us/nexus/content/repositories/thirdparty/"
+   		url "https://artifactory.ihmc.us/artifactory/thirdparty/"
    }
 
    /* You will also need to add either jcenter() or mavenCentral() or both, depending on your preference */
