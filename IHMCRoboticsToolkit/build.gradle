@@ -47,7 +47,7 @@ dependencies {
     testCompile group: 'us.ihmc', name: 'IHMCContinuousIntegrationFramework', version: '0.9.1'
 
     compile group: 'javax.vecmath', name: 'vecmath', version: '1.5.2'
-    compile group: 'org.ejml', name: 'denseC64', version: '0.28'
+    compile group: 'org.ejml', name: 'denseC64', version: '0.30'
     compile group: 'com.esotericsoftware.kryo', name: 'kryo', version: '2.20'
     compile group: 'com.github.quickhull3d', name: 'quickhull3d', version: '1.0.0'
     compile group: 'net.sf.trove4j', name: 'trove4j', version: '3.0.3'
@@ -57,8 +57,8 @@ dependencies {
     compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
     compile group: 'org.apache.commons', name: 'commons-math3', version: '3.3'
     compile group: 'jgraph', name: 'jgraph', version: '5.13.0.0'
-    compile group: 'org.ejml', name: 'core', version: '0.28'
-    compile group: 'org.ejml', name: 'dense64', version: '0.28'
+    compile group: 'org.ejml', name: 'core', version: '0.30'
+    compile group: 'org.ejml', name: 'dense64', version: '0.30'
     compile group: 'org.javassist', name: 'javassist', version: '3.18.1-GA'
     compile group: 'com.google.guava', name: 'guava', version: '18.0'
 

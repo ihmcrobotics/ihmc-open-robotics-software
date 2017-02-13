@@ -40,8 +40,8 @@ dependencies {
 
     compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
     compile group: 'javax.vecmath', name: 'vecmath', version: '1.5.2'
-    compile group: 'org.ejml', name: 'dense64', version: '0.28'
-    compile group: 'org.ejml', name: 'core', version: '0.28'
+    compile group: 'org.ejml', name: 'dense64', version: '0.30'
+    compile group: 'org.ejml', name: 'core', version: '0.30'
     
     testCompile group: 'us.ihmc', name: 'IHMCContinuousIntegrationFramework', version: '0.9.1'
 

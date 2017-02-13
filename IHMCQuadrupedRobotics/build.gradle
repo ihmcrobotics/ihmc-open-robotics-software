@@ -42,9 +42,9 @@ dependencies {
     compile group: 'javax.vecmath', name: 'vecmath', version: '1.5.2'
     compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
     compile group: 'us.ihmc.thirdparty.jinput', name: 'jinput', version: '160414'
-    compile group: 'org.ejml', name: 'core', version: '0.28'
+    compile group: 'org.ejml', name: 'core', version: '0.30'
     compile group: 'net.sf.trove4j', name: 'trove4j', version: '3.0.3'
-    compile group: 'org.ejml', name: 'dense64', version: '0.28'
+    compile group: 'org.ejml', name: 'dense64', version: '0.30'
     compile group: 'com.google.guava', name: 'guava', version: '18.0'
     compile group: 'us.ihmc', name: 'IHMCRealtime', version: '1.1.2'
     
