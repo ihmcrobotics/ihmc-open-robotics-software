@@ -629,6 +629,18 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       return ret;
    }
 
+   /** {@inheritDoc} */
+   @Override
+   public YoPIDGains createJointSpaceControlGains(YoVariableRegistry registry)
+   {
+      YoPIDGains ret = new YoPIDGains("JointspacePIDGains", registry);
+
+      ret.setKp(10.0);
+      ret.setZeta(0.5);
+
+      return ret;
+   }
+
    @Override
    public YoSE3PIDGainsInterface createSwingFootControlGains(YoVariableRegistry registry)
    {

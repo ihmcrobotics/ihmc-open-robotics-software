@@ -141,6 +141,11 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
       return null;
    }
 
+   public YoPIDGains createJointSpaceControlGains(YoVariableRegistry registry)
+   {
+      return null;
+   }
+
    public abstract YoSE3PIDGainsInterface createSwingFootControlGains(YoVariableRegistry registry);
 
    public abstract YoSE3PIDGainsInterface createHoldPositionFootControlGains(YoVariableRegistry registry);
