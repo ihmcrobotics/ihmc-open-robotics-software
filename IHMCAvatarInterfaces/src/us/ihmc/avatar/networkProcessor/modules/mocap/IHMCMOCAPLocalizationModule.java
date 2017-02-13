@@ -17,18 +17,24 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
+import us.ihmc.communication.packets.PlanarRegionsListMessage;
 import us.ihmc.communication.util.NetworkPorts;
+import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
 import us.ihmc.humanoidRobotics.communication.packets.StampedPosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
+import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
@@ -57,6 +63,8 @@ public class IHMCMOCAPLocalizationModule implements MocapRigidbodiesListener, Pa
    private final YoVariableServer yoVariableServer;
    private final FullHumanoidRobotModel fullRobotModel;
    private final RigidBodyTransform pelvisToWorldTransform = new RigidBodyTransform();
+   private final PlanarRegionsListListener planarRegionsListListener = new PlanarRegionsListListener();
+   private final WalkingStatusManager walkingStatusManager = new WalkingStatusManager();
 
    private final Vector3f pelvisTranslation = new Vector3f();
    private final Quat4f pelvisOrientation = new Quat4f(0.0f, 0.0f, 0.0f, 1.0f);
@@ -71,7 +79,7 @@ public class IHMCMOCAPLocalizationModule implements MocapRigidbodiesListener, Pa
          transformToParent.setRotation(pelvisOrientation);
       }
    };
-
+   
    private final DoubleYoVariable markersPositionX = new DoubleYoVariable("markersPositionX", registry);
    private final DoubleYoVariable markersPositionY = new DoubleYoVariable("markersPositionY", registry);
    private final DoubleYoVariable markersPositionZ = new DoubleYoVariable("markersPositionZ", registry);
@@ -89,6 +97,7 @@ public class IHMCMOCAPLocalizationModule implements MocapRigidbodiesListener, Pa
    private final DoubleYoVariable computedPelvisRoll = new DoubleYoVariable("computedPelvisRoll", registry);
 
    private final BooleanYoVariable requestFootsteps = new BooleanYoVariable("requestFootsteps", registry);
+   private final BooleanYoVariable walkingAround = new BooleanYoVariable("walkingAround", registry);
    
    public IHMCMOCAPLocalizationModule(DRCRobotModel drcRobotModel)
    {
@@ -96,6 +105,8 @@ public class IHMCMOCAPLocalizationModule implements MocapRigidbodiesListener, Pa
       mocapDataClient.registerRigidBodiesListener(this);
 
       packetCommunicator.attachListener(RobotConfigurationData.class, this);
+      packetCommunicator.attachListener(PlanarRegionsListMessage.class, planarRegionsListListener);
+      packetCommunicator.attachListener(FootstepStatus.class, walkingStatusManager);
 
       PeriodicThreadScheduler scheduler = new PeriodicNonRealtimeThreadScheduler("MocapModuleScheduler");
       LogModelProvider logModelProvider = drcRobotModel.getLogModelProvider();
@@ -141,11 +152,19 @@ public class IHMCMOCAPLocalizationModule implements MocapRigidbodiesListener, Pa
       MocapRigidBody pelvisRigidBody = getPelvisRigidBody(listOfRigidbodies);
       sendPelvisTransformToController(pelvisRigidBody);
       setMarkersYoVariables(pelvisRigidBody);
-      
+            
       if (requestFootsteps.getBooleanValue())
       {
+         planarRegionsListListener.onWalkingStarted();
          startWalking();
+         walkingAround.set(true);
          requestFootsteps.set(false);
+      }
+      
+      if(walkingAround.getBooleanValue() && walkingStatusManager.doneWalking())
+      {
+         planarRegionsListListener.onWalkingStopped();
+         walkingAround.set(false);
       }
 
       yoVariableServer.update(System.currentTimeMillis());
@@ -261,8 +280,7 @@ public class IHMCMOCAPLocalizationModule implements MocapRigidbodiesListener, Pa
 
       FootstepDataListMessage footstepsListMessage = new FootstepDataListMessage(overallListOfSteps, 1.2, 0.8, ExecutionMode.QUEUE);
       footstepsListMessage.setDestination(PacketDestination.CONTROLLER);
-      packetCommunicator.send(footstepsListMessage);
-
+      walkingStatusManager.sendFootstepList(footstepsListMessage);
    }
 
    private ArrayList<FootstepDataMessage> createFootstepList(RobotSide robotSide, boolean isDirectionForward)
@@ -290,5 +308,63 @@ public class IHMCMOCAPLocalizationModule implements MocapRigidbodiesListener, Pa
          robotSide = robotSide.getOppositeSide();
       }
       return listOfSteps;
+   }
+   
+   private class PlanarRegionsListListener implements PacketConsumer<PlanarRegionsListMessage>
+   {
+      private PlanarRegionsListMessage latestPlanarRegionsListMessage;
+      private PlanarRegionsListMessage beforeWalkingPlanarRegionsListMessage;
+      private PlanarRegionsListMessage afterWalkingPlanarRegionsListMessage;
+      
+      @Override
+      public void receivedPacket(PlanarRegionsListMessage packet)
+      {         
+         this.latestPlanarRegionsListMessage = packet;
+      }
+      
+      public void onWalkingStarted()
+      {
+         beforeWalkingPlanarRegionsListMessage = latestPlanarRegionsListMessage;
+      }
+
+      public void onWalkingStopped()
+      {
+         afterWalkingPlanarRegionsListMessage = latestPlanarRegionsListMessage;
+      }
+      
+      public PlanarRegionsListMessage getPlanarRegionsBeforeWalking()
+      {
+         return beforeWalkingPlanarRegionsListMessage;
+      }
+
+      public PlanarRegionsListMessage getPlanarRegionsAfterWalking()
+      {
+         return afterWalkingPlanarRegionsListMessage;
+      }
+   }
+   
+   private class WalkingStatusManager implements PacketConsumer<FootstepStatus>
+   {
+      private final IntegerYoVariable footstepsCompleted = new IntegerYoVariable("footstepsCompleted", registry);
+      private final IntegerYoVariable numberOfFootstepsToTake = new IntegerYoVariable("numberOfFootstepsToTake", registry);
+      
+      @Override
+      public void receivedPacket(FootstepStatus packet)
+      {
+         if(packet.getStatus().equals(FootstepStatus.Status.COMPLETED))
+            footstepsCompleted.increment();
+      }
+      
+      public void sendFootstepList(FootstepDataListMessage footstepDataListMessage)
+      {
+         numberOfFootstepsToTake.set(footstepDataListMessage.getDataList().size());
+         footstepsCompleted.set(0);
+         packetCommunicator.send(footstepDataListMessage);
+      }
+      
+      public boolean doneWalking()
+      {
+         return footstepsCompleted.getIntegerValue() == numberOfFootstepsToTake.getIntegerValue();
+      }
    }
 }
