@@ -54,8 +54,6 @@ public class WholeBodyControlCoreToolbox
 
    private final YoFrameVector yoDesiredMomentumRateLinear;
    private final YoFrameVector yoAchievedMomentumRateLinear;
-   private final YoFrameVector yoDesiredMomentumRateAngular;
-   private final YoFrameVector yoAchievedMomentumRateAngular;
 
    private final YoFrameVector yoResidualRootJointForce;
    private final YoFrameVector yoResidualRootJointTorque;
@@ -99,15 +97,11 @@ public class WholeBodyControlCoreToolbox
       {
          this.yoDesiredMomentumRateLinear = new YoFrameVector("desiredMomentumRateLinear", referenceFrames.getCenterOfMassFrame(), registry);
          this.yoAchievedMomentumRateLinear = new YoFrameVector("achievedMomentumRateLinear", referenceFrames.getCenterOfMassFrame(), registry);
-         this.yoDesiredMomentumRateAngular = new YoFrameVector("desiredMomentumRateAngular", referenceFrames.getCenterOfMassFrame(), registry);
-         this.yoAchievedMomentumRateAngular = new YoFrameVector("achievedMomentumRateAngular", referenceFrames.getCenterOfMassFrame(), registry);
       }
       else
       {
          yoDesiredMomentumRateLinear = null;
          yoAchievedMomentumRateLinear = null;
-         yoDesiredMomentumRateAngular = null;
-         yoAchievedMomentumRateAngular = null;
       }
 
       this.yoResidualRootJointForce = new YoFrameVector("residualRootJointForce", ReferenceFrame.getWorldFrame(), registry);
@@ -245,16 +239,6 @@ public class WholeBodyControlCoreToolbox
    public YoFrameVector getYoAchievedMomentumRateLinear()
    {
       return yoAchievedMomentumRateLinear;
-   }
-
-   public YoFrameVector getYoDesiredMomentumRateAngular()
-   {
-      return yoDesiredMomentumRateAngular;
-   }
-
-   public YoFrameVector getYoAchievedMomentumRateAngular()
-   {
-      return yoAchievedMomentumRateAngular;
    }
 
    public YoFrameVector getYoResidualRootJointForce()
