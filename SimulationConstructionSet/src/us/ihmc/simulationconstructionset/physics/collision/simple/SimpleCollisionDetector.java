@@ -13,7 +13,6 @@ import us.ihmc.geometry.polytope.SupportingVertexHolder;
 import us.ihmc.robotics.geometry.BoundingBox3d;
 import us.ihmc.robotics.geometry.LineSegment3d;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.physics.CollisionShape;
 import us.ihmc.simulationconstructionset.physics.CollisionShapeDescription;
 import us.ihmc.simulationconstructionset.physics.CollisionShapeFactory;
@@ -22,30 +21,17 @@ import us.ihmc.simulationconstructionset.physics.collision.CollisionDetectionRes
 
 public class SimpleCollisionDetector implements ScsCollisionDetector
 {
+   private boolean VERBOSE = false;
+
    private final ArrayList<CollisionShape> collisionObjects = new ArrayList<CollisionShape>();
 
    // Temporary variables for computation:
    private final Point3d centerOne = new Point3d();
    private final Point3d centerTwo = new Point3d();
-   private final Vector3d centerToCenterVector = new Vector3d();
-
    private final Vector3d tempVector = new Vector3d();
-
-   private double objectSmoothingRadius = 0.00003;
 
    public SimpleCollisionDetector()
    {
-      this(0.00003);
-   }
-
-   public SimpleCollisionDetector(double objectSmoothingRadius)
-   {
-      this.objectSmoothingRadius = objectSmoothingRadius;
-   }
-
-   public void setObjectSmoothingRadius(double objectSmoothingRadius)
-   {
-      this.objectSmoothingRadius = objectSmoothingRadius;
    }
 
    @Override
@@ -57,18 +43,6 @@ public class SimpleCollisionDetector implements ScsCollisionDetector
    public CollisionShapeFactory getShapeFactory()
    {
       return new SimpleCollisionShapeFactory(this);
-   }
-
-   @Override
-   public void removeShape(Link link)
-   {
-   }
-
-   @Override
-   public CollisionShape lookupCollisionShape(Link link)
-   {
-      //TODO: What should we be doing here?
-      return null;
    }
 
    private final Random random = new Random(1776L);
@@ -92,7 +66,11 @@ public class SimpleCollisionDetector implements ScsCollisionDetector
 
    @Override
    public void performCollisionDetection(CollisionDetectionResult result)
-   {
+   {      
+      int boundingBoxChecks = 0;
+      int collisionChecks = 0;
+      int numberOfCollisions = 0;
+      
       int numberOfObjects = collisionObjects.size();
 
       if (useSimpleSpeedupMethod && (haveCollided == null))
@@ -132,11 +110,13 @@ public class SimpleCollisionDetector implements ScsCollisionDetector
             objectOne.getBoundingBox(boundingBoxOne);
             objectTwo.getBoundingBox(boundingBoxTwo);
 
+            boundingBoxChecks++;
             if (!boundingBoxOne.intersects(boundingBoxTwo))
             {
                continue;
             }
-
+            
+            collisionChecks++;
             boolean areColliding = false;
 
             //TODO: Make this shorter and more efficient...
@@ -237,6 +217,8 @@ public class SimpleCollisionDetector implements ScsCollisionDetector
 
             if (areColliding)
             {
+               numberOfCollisions++;
+
                if (useSimpleSpeedupMethod) haveCollided[i][j] = true;
                //               ArrayList<CollisionShape> arrayList = collidingPairs.get(objectOne);
                //               if (arrayList == null)
@@ -251,6 +233,13 @@ public class SimpleCollisionDetector implements ScsCollisionDetector
                //               }
             }
          }
+      }
+      
+      if (VERBOSE)
+      {
+         System.out.println("\nboundingBoxChecks = " + boundingBoxChecks);
+         System.out.println("collisionChecks = " + collisionChecks);
+         System.out.println("numberOfCollisions = " + numberOfCollisions);
       }
    }
 

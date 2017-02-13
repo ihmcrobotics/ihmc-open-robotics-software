@@ -3,10 +3,13 @@ package us.ihmc.simulationconstructionset.physics.collision;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.util.ArrayList;
+
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.simulationconstructionset.ContactingExternalForcePoint;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.Robot;
@@ -334,6 +337,11 @@ public abstract class SCSCollisionDetectorTest
       @Override
       public void handleCollisions(CollisionDetectionResult results)
       {
+      }
+
+      @Override
+      public void addContactingExternalForcePoints(Link link, ArrayList<ContactingExternalForcePoint> contactingExternalForcePoints)
+      {         
       }
    }
 

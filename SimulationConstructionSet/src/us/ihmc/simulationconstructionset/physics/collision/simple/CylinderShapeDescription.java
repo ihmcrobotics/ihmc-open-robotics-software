@@ -156,4 +156,10 @@ public class CylinderShapeDescription<T extends CylinderShapeDescription<T>> imp
       
       boundingBox.set(xMin, yMin, zMin, xMax, yMax, zMax);
    }
+
+   @Override
+   public boolean isPointInside(Point3d pointInWorld)
+   {
+      return cylinder3d.distance(pointInWorld) <= smoothingRadius;
+   }
 }

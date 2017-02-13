@@ -1,5 +1,7 @@
 package us.ihmc.simulationconstructionset.physics.collision.simple;
 
+import javax.vecmath.Point3d;
+
 import us.ihmc.robotics.geometry.BoundingBox3d;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.simulationconstructionset.physics.CollisionShapeDescription;
@@ -84,7 +86,12 @@ public class BoxShapeDescription<T extends BoxShapeDescription<T>> implements Co
 
    private void updateBoundingBox()
    {
-      // TODO Implement and Test Me!
-      
+      throw new RuntimeException("Implement Me!");      
+   }
+
+   @Override
+   public boolean isPointInside(Point3d pointInWorld)
+   {
+      throw new RuntimeException("Implement Me!");
    }
 }

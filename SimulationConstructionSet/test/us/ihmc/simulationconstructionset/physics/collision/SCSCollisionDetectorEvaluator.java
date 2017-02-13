@@ -15,6 +15,7 @@ import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.physics.CollisionHandler;
 import us.ihmc.simulationconstructionset.physics.CollisionShapeDescription;
 import us.ihmc.simulationconstructionset.physics.CollisionShapeFactory;
 import us.ihmc.simulationconstructionset.physics.Contacts;
@@ -65,13 +66,17 @@ public class SCSCollisionDetectorEvaluator
       // Set mass parameters
       double mass = 1.0;
 
+      double epsilon = 0.3;
+      double mu = 0.7;
+      CollisionHandler collisionHandler = new DefaultCollisionHandler(epsilon, mu);
+ 
       linkOne.setMass(mass);
       linkOne.setMomentOfInertia(0.1 * mass, 0.1 * mass, 0.1 * mass);
-      linkOne.enableCollisions(robot.getRobotsYoVariableRegistry());
+      linkOne.enableCollisions(4, collisionHandler, robot.getRobotsYoVariableRegistry());
 
       linkTwo.setMass(mass);
       linkTwo.setMomentOfInertia(0.1 * mass, 0.1 * mass, 0.1 * mass);
-      linkTwo.enableCollisions(robot.getRobotsYoVariableRegistry());
+      linkTwo.enableCollisions(4, collisionHandler, robot.getRobotsYoVariableRegistry());
 
       // Graphics
       Graphics3DObject linkOneGraphics = new Graphics3DObject();
