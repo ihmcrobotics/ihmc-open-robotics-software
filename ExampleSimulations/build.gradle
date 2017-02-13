@@ -41,8 +41,8 @@ dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.11'
 
     compile group: 'javax.vecmath', name: 'vecmath', version: '1.5.2'
-    compile group: 'org.ejml', name: 'dense64', version: '0.28'
-    compile group: 'org.ejml', name: 'core', version: '0.28'
+    compile group: 'org.ejml', name: 'dense64', version: '0.30'
+    compile group: 'org.ejml', name: 'core', version: '0.30'
     compile "org.apache.commons:commons-lang3:3.4"
     compile "us.ihmc.thirdparty.jinput:jinput:160414"
     
