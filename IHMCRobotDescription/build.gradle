@@ -43,7 +43,7 @@ dependencies {
     compile group: 'javax.vecmath', name: 'vecmath', version: '1.5.2'
     compile group: 'org.ejml', name: 'core', version: '0.30'
     
-    testCompile group: 'us.ihmc', name: 'IHMCContinuousIntegrationFramework', version: '0.9.1'
+    testCompile group: 'us.ihmc', name: 'IHMCContinuousIntegrationFramework', version: '0.9.3'
 
     compile ihmc.getProjectDependency(":IHMCRoboticsToolkit")
     compile ihmc.getProjectDependency(":IHMCGeometry")

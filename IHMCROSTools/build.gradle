@@ -69,7 +69,7 @@ dependencies {
     compile group: 'org.boofcv', name: 'geo', version: '0.24.1'
     compile group: 'org.reflections', name: 'reflections', version: '0.9.10'
     
-    testCompile group: 'us.ihmc', name: 'IHMCContinuousIntegrationFramework', version: '0.9.1'
+    testCompile group: 'us.ihmc', name: 'IHMCContinuousIntegrationFramework', version: '0.9.3'
 
 	compile group: 'org.ros.rosjava_core', name: 'rosjava', version: '0.2.1'
 	compile group: 'org.ros.rosjava_bootstrap', name: 'message_generation', version: '0.2.1'
