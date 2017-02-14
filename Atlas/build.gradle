@@ -95,6 +95,7 @@ dependencies {
     compile ihmc.getProjectDependency(":IHMCRobotDataVisualizer")
 
     testCompile ihmc.getProjectDependency(":IHMCUnitTesting")
+	testCompile ihmc.getProjectTestDependency(":IHMCJavaExtensions")
     testCompile ihmc.getProjectTestDependency(":CommonWalkingControlModules")
     testCompile ihmc.getProjectTestDependency(":IHMCAvatarInterfaces")
     testCompile ihmc.getProjectTestDependency(":IHMCHumanoidRobotics")

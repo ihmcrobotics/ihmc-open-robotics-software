@@ -70,6 +70,7 @@ dependencies {
     testCompile group: 'us.ihmc', name: 'IHMCContinuousIntegrationFramework', version: '0.9.3'
 
     testCompile ihmc.getProjectDependency(":IHMCUnitTesting")
+	testCompile ihmc.getProjectTestDependency(":IHMCJavaExtensions")
 }
 
 test.finalizedBy jacocoTestReport

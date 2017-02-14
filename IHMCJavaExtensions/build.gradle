@@ -23,6 +23,21 @@ project.ext.licenseURL = "http://www.apache.org/licenses/LICENSE-2.0.txt"
 project.ext.licenseName = "Apache License, Version 2.0"
 project.ext.bintrayLicenseName = "Apache-2.0"
 
+jar {
+    manifest {
+        attributes(
+                "Created-By": "IHMC Gradle Build Script",
+                "Implementation-Title": project.name,
+                "Implementation-Version": project.version,
+                "Implementation-Vendor": "IHMC",
+
+                "Bundle-Name": project.name,
+                "Bundle-Version": project.version,
+                "Bundle-License": "${project.ext.licenseURL}",
+                "Bundle-Vendor": "IHMC")
+    }
+}
+
 repositories ihmc.ihmcDefaultArtifactProxies()
 
 repositories {
@@ -39,31 +54,5 @@ ihmc.configureForIHMCOpenSourceBintrayPublish(false, "mavenJava", "maven-release
 
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.11'
-
-    compile group: 'javax.vecmath', name: 'vecmath', version: '1.5.2'
-    compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
-    compile 'net.sf.trove4j:trove4j:3.0.3'
-    
     testCompile group: 'us.ihmc', name: 'IHMCContinuousIntegrationFramework', version: '0.9.3'
-
-    compile ihmc.getProjectDependency(":IHMCJavaToolkit")
-    compile ihmc.getProjectDependency(":IHMCRoboticsToolkit")
-    testCompile ihmc.getProjectDependency(":IHMCUnitTesting")
-	testCompile ihmc.getProjectTestDependency(":IHMCJavaExtensions")
-    testCompile ihmc.getProjectTestDependency(":IHMCRoboticsToolkit")
-}
-
-jar {
-    manifest {
-        attributes(
-                "Created-By": "IHMC Gradle Build Script",
-                "Implementation-Title": project.name,
-                "Implementation-Version": project.version,
-                "Implementation-Vendor": "IHMC",
-
-                "Bundle-Name": project.name,
-                "Bundle-Version": project.version,
-                "Bundle-License": "${project.ext.licenseURL}",
-                "Bundle-Vendor": "IHMC")
-    }
 }

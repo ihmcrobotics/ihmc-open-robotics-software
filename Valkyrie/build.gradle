@@ -87,6 +87,7 @@ dependencies {
    compile ihmc.getProjectDependency(":IHMCSimulationToolkit")
 
    testCompile ihmc.getProjectDependency(":IHMCUnitTesting")
+	testCompile ihmc.getProjectTestDependency(":IHMCJavaExtensions")
    testCompile ihmc.getProjectTestDependency(":IHMCAvatarInterfaces")
 }
 
