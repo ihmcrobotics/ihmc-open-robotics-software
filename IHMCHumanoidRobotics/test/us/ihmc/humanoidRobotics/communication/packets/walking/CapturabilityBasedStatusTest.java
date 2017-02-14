@@ -19,14 +19,14 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
+import us.ihmc.testing.CommonPaths;
 import us.ihmc.tools.UnitConversions;
 import us.ihmc.tools.io.files.FileTools;
-import us.ihmc.tools.testing.JUnitTools;
 
 @ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
 public class CapturabilityBasedStatusTest
 {
-   private static final Path TEST_ROOT_PATH = JUnitTools.deriveTestResourcesPath(CapturabilityBasedStatusTest.class);
+   private static final Path TEST_ROOT_PATH = CommonPaths.deriveTestResourcesPath(CapturabilityBasedStatusTest.class);
 
    @Before
    public void setUp()

@@ -16,7 +16,7 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.RigidBodyTransformTest;
 import us.ihmc.robotics.random.RandomTools;
-import us.ihmc.tools.testing.JUnitTools;
+import us.ihmc.testing.Assertions;
 import us.ihmc.tools.thread.RunnableThatThrows;
 
 public class LidarScanTest
@@ -59,8 +59,9 @@ public class LidarScanTest
       final LidarScan lidarScan1 = new LidarScan(new LidarScanParameters(), new RigidBodyTransform(), new RigidBodyTransform(), ranges1, random.nextInt());
       final LidarScan lidarScan2 = new LidarScan(new LidarScanParameters(), new RigidBodyTransform(), new RigidBodyTransform(), ranges2, random.nextInt());
 
-      JUnitTools.assertExceptionThrown(AssertionError.class, new RunnableThatThrows()
+      Assertions.assertExceptionThrown(AssertionError.class, new RunnableThatThrows()
       {
+         @Override
          public void run() throws Throwable
          {
             assertLidarScanRangesEqual(lidarScan1, lidarScan2, 1e-7);
@@ -99,8 +100,9 @@ public class LidarScanTest
 
       final LidarScan lidarScan3 = new LidarScan(new LidarScanParameters(), randomTransform3, randomTransform4, ranges2);
 
-      JUnitTools.assertExceptionThrown(AssertionError.class, new RunnableThatThrows()
+      Assertions.assertExceptionThrown(AssertionError.class, new RunnableThatThrows()
       {
+         @Override
          public void run() throws Throwable
          {
             assertLidarScanTransformsEqual(lidarScan1, lidarScan3, 1e-7);

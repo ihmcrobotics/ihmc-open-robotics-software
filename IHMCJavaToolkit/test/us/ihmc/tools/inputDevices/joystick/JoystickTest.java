@@ -11,9 +11,9 @@ import net.java.games.input.Event;
 import net.java.games.input.test.ControllerReadTest;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
+import us.ihmc.testing.Assertions;
 import us.ihmc.tools.inputDevices.joystick.exceptions.JoystickNotFoundException;
 import us.ihmc.tools.inputDevices.joystick.virtualJoystick.VirtualJoystick;
-import us.ihmc.tools.testing.JUnitTools;
 import us.ihmc.tools.thread.RunnableThatThrows;
 
 public class JoystickTest
@@ -103,7 +103,7 @@ public class JoystickTest
    @Test(timeout = 30000)
    public void testFindNonExistentJoystick()
    {
-      JUnitTools.assertExceptionThrown(JoystickNotFoundException.class, new RunnableThatThrows()
+      Assertions.assertExceptionThrown(JoystickNotFoundException.class, new RunnableThatThrows()
       {
          @Override
          public void run() throws Throwable

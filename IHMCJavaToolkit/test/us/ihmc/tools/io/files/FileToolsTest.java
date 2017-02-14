@@ -23,12 +23,12 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.testing.CommonPaths;
 import us.ihmc.tools.io.printing.PrintTools;
-import us.ihmc.tools.testing.JUnitTools;
 
 public class FileToolsTest
 {
-   private static final Path FILE_TOOLS_TEST_PATH = JUnitTools.deriveTestResourcesPath(FileToolsTest.class);
+   private static final Path FILE_TOOLS_TEST_PATH = CommonPaths.deriveTestResourcesPath(FileToolsTest.class);
    private static final Path TEXT_DIRECTORY_PATH = FILE_TOOLS_TEST_PATH.resolve("exampleTextFiles");
    private static final Path JAVA_DIRECTORY_PATH = FILE_TOOLS_TEST_PATH.resolve("exampleJavaFiles");
    private static final Path EMPTY_DIRECTORY_PATH = FILE_TOOLS_TEST_PATH.resolve("exampleEmptyFiles");
