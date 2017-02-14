@@ -633,12 +633,24 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    @Override
    public YoPIDGains createJointSpaceControlGains(YoVariableRegistry registry)
    {
-      YoPIDGains ret = new YoPIDGains("JointspacePIDGains", registry);
+      YoPIDGains jointspaceControlGains = new YoPIDGains("Jointspace", registry);
 
-      ret.setKp(10.0);
-      ret.setZeta(0.5);
+      double kp = runningOnRealRobot ? 40.0 : 80.0;
+      double zeta = runningOnRealRobot ? 0.3 : 0.6;
+      double ki = 0.0;
+      double maxIntegralError = 0.0;
+      double maxAccel = runningOnRealRobot ? 20.0 : Double.POSITIVE_INFINITY;
+      double maxJerk = runningOnRealRobot ? 100.0 : Double.POSITIVE_INFINITY;
 
-      return ret;
+      jointspaceControlGains.setKp(kp);
+      jointspaceControlGains.setZeta(zeta);
+      jointspaceControlGains.setKi(ki);
+      jointspaceControlGains.setMaximumIntegralError(maxIntegralError);
+      jointspaceControlGains.setMaximumFeedback(maxAccel);
+      jointspaceControlGains.setMaximumFeedbackRate(maxJerk);
+      jointspaceControlGains.createDerivativeGainUpdater(true);
+
+      return jointspaceControlGains;
    }
 
    @Override
