@@ -60,6 +60,7 @@ dependencies {
 
     testCompile ihmc.getProjectTestDependency(":IHMCCommunication")
     testCompile ihmc.getProjectDependency(":IHMCUnitTesting")
+	testCompile ihmc.getProjectTestDependency(":IHMCJavaExtensions")
 }
 
 jar {

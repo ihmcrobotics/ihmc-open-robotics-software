@@ -90,6 +90,7 @@ dependencies {
     compile ihmc.getProjectDependency(":IHMCFootstepPlanning")
 
 	testCompile ihmc.getProjectDependency(":IHMCUnitTesting")
+	testCompile ihmc.getProjectTestDependency(":IHMCJavaExtensions")
 	testCompile ihmc.getProjectTestDependency(":IHMCFootstepPlanning")
 	testCompile ihmc.getProjectTestDependency(":IHMCHumanoidRobotics")
 }

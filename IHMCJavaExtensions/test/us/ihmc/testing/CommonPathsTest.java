@@ -9,7 +9,10 @@ import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
-public class CommonPathsTest
+/**
+ * Package private so external classes don't see these internal tests.
+ */
+/* package-private */ class CommonPathsTest
 {
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
