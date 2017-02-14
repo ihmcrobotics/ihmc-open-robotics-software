@@ -266,9 +266,7 @@ public class IHMCMOCAPLocalizationModule implements MocapRigidbodiesListener, Pa
 
    private void computeDriftTransform()
    {
-      RigidBodyTransform driftTransform = new RigidBodyTransform();
-      System.out.println(pelvisFrameFromRobotConfigurationDataPacket.getRootFrame());
-      mocapToPelvisFrameConverter.getMocapFrame().getTransformToDesiredFrame(driftTransform, pelvisFrameFromRobotConfigurationDataPacket);
+      RigidBodyTransform driftTransform = mocapToPelvisFrameConverter.getMocapFrame().getTransformToDesiredFrame(pelvisFrameFromRobotConfigurationDataPacket);
       
       Vector3d driftTranslation = new Vector3d();
       driftTransform.getTranslation(driftTranslation);
