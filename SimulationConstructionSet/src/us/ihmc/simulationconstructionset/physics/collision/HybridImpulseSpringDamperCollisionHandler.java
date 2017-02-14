@@ -35,18 +35,24 @@ public class HybridImpulseSpringDamperCollisionHandler implements CollisionHandl
    
    private double velocityForMicrocollision = 0.01; //0.1; //0.1;//0.01;
    private int numberOfCyclesPerContactPair = 1;///4
-   private double minDistanceToConsiderDifferent = 0.003; //0.002; //0.02;
-
-   private double maximumPenetrationToStart = 0.002;
-
+   private double minDistanceToConsiderDifferent = 0.02; //0.003; //0.002; //0.02;
+   private double percentMoveTowardTouchdownWhenSamePoint = 0.2; //0.05; //1.0; //0.05; 
+   
    private static final boolean DEBUG = false;
 
-   private static final boolean resolveCollisionWithAnImpact = true;
+   //TODO: Get maximumPenetrationToStart implemented for when useAverageNewCollisionTouchdownPoints = true;
+   private static final boolean useAverageNewCollisionTouchdownPoints = true; //false;
+   private double maximumPenetrationToStart = 0.002;
+
+   private static final boolean resolveCollisionWithAnImpact = false;
+   private static final boolean allowMicroCollisions = false;
+
    private static final boolean performSpringDamper = true;
    private static final boolean createNewContactPairs = true;
    private static final boolean slipTowardEachOtherIfSlipping = true;
 
    private static final boolean allowRecyclingOfPointsInUse = true;
+
 
    private final Random random;
 
@@ -96,6 +102,7 @@ public class HybridImpulseSpringDamperCollisionHandler implements CollisionHandl
          newCollisionBalls = new BagOfBalls(500, 0.001, "newCollisionBalls", YoAppearance.Black(), parentRegistry, yoGraphicsListRegistry);
          int maxNumberOfDynamicGraphicPositions = 500;
          contactingExternalForcePointsVisualizer = new ContactingExternalForcePointsVisualizer(maxNumberOfDynamicGraphicPositions, yoGraphicsListRegistry, parentRegistry);
+         contactingExternalForcePointsVisualizer.setForceVectorScale(0.1);
       }
       else
       {
@@ -485,23 +492,27 @@ public class HybridImpulseSpringDamperCollisionHandler implements CollisionHandl
                externalForcePointTwo = contactPointToConsiderTwo;
                contactPairAlreadyExists = true;
                
-               boolean areSlipping = areSlipping(contactPointToConsiderOne, contactPointToConsiderTwo);
+               boolean areSlipping = true; //areSlipping(contactPointToConsiderOne, contactPointToConsiderTwo);
 
                if (areSlipping)
                {
                   contactPointToConsiderOne.getPosition(positionOne);
                   slipVector.set(deltaVectorRemovingNormalComponentsOne);
-                  subtractOffNormalComponent(normal, slipVector);
-                  slipVector.scale(0.05);
+//                  subtractOffNormalComponent(normal, slipVector);
+                  slipVector.scale(percentMoveTowardTouchdownWhenSamePoint);
                   positionOne.sub(slipVector);
                   contactPointToConsiderOne.setOffsetWorld(positionOne);
 
                   contactPointToConsiderTwo.getPosition(positionTwo);         
                   slipVector.set(deltaVectorRemovingNormalComponentsTwo);
-                  subtractOffNormalComponent(normal, slipVector);
-                  slipVector.scale(0.05);
+//                  subtractOffNormalComponent(normal, slipVector);
+                  slipVector.scale(percentMoveTowardTouchdownWhenSamePoint);
                   positionTwo.sub(slipVector);
                   contactPointToConsiderTwo.setOffsetWorld(positionTwo);
+                  
+//                  contactPointToConsiderOne.setOffsetWorld(point1);
+//                  contactPointToConsiderTwo.setOffsetWorld(point2);
+
                }
 
                break;
@@ -569,15 +580,20 @@ public class HybridImpulseSpringDamperCollisionHandler implements CollisionHandl
             externalForcePointTwo.setSurfaceNormalInWorld(negative_normal);
 
             //TODO: What's best, setting the average of the collision points, or the actuals?
-            tempPoint.set(point1);
-            tempPoint.add(point2);
-            tempPoint.scale(0.5);
-            
-            externalForcePointOne.setOffsetWorld(tempPoint);
-            externalForcePointTwo.setOffsetWorld(tempPoint);
-            
-//            externalForcePointOne.setOffsetWorld(point1);
-//            externalForcePointTwo.setOffsetWorld(point2);
+            if (useAverageNewCollisionTouchdownPoints)
+            {
+               tempPoint.set(point1);
+               tempPoint.add(point2);
+               tempPoint.scale(0.5);
+
+               externalForcePointOne.setOffsetWorld(tempPoint);
+               externalForcePointTwo.setOffsetWorld(tempPoint);
+            }
+            else
+            {
+               externalForcePointOne.setOffsetWorld(point1);
+               externalForcePointTwo.setOffsetWorld(point2);
+            }
          }
          
          // Update the robot and its velocity:
@@ -604,9 +620,9 @@ public class HybridImpulseSpringDamperCollisionHandler implements CollisionHandl
             System.out.println("externalForcePointTwo = " + externalForcePointTwo);
          }
          
-         if (resolveCollisionWithAnImpact)
+         if ((resolveCollisionWithAnImpact) && (!contactPairAlreadyExists || !performSpringDamper))
          {
-            resolveCollisionWithAnImpact(shape1, shape2, shapeOneIsGround, shapeTwoIsGround, externalForcePointOne, externalForcePointTwo);
+            resolveCollisionWithAnImpact(shape1, shape2, shapeOneIsGround, shapeTwoIsGround, externalForcePointOne, externalForcePointTwo, allowMicroCollisions);
          }
 
       }
@@ -681,91 +697,84 @@ public class HybridImpulseSpringDamperCollisionHandler implements CollisionHandl
       }
    }
 
-private void resolveCollisionWithAnImpact(CollisionShapeWithLink shape1, CollisionShapeWithLink shape2, boolean shapeOneIsGround, boolean shapeTwoIsGround,
-                                          ContactingExternalForcePoint externalForcePointOne, ContactingExternalForcePoint externalForcePointTwo)
-{
+   private void resolveCollisionWithAnImpact(CollisionShapeWithLink shape1, CollisionShapeWithLink shape2, boolean shapeOneIsGround, boolean shapeTwoIsGround,
+                                             ContactingExternalForcePoint externalForcePointOne, ContactingExternalForcePoint externalForcePointTwo, boolean allowMicroCollisions)
    {
-   // Resolve the collision:
-   Vector3d p_world = new Vector3d();
+      Vector3d p_world = new Vector3d();
+      boolean collisionOccurred;
 
-   // +++JEP: epsilon, mu hardcoded on construction right now. Need to change that!
-
-   boolean collisionOccurred;
-
-
-
-   if (shapeTwoIsGround)
-   {
-//            System.out.println("shapeTwoIsGround");
-      Vector3d velocityWorld = new Vector3d(0.0, 0.0, 0.0);
-
-      if (externalForcePointOne.getVelocityVector().lengthSquared() > velocityForMicrocollision * velocityForMicrocollision)
+      if (shapeTwoIsGround)
       {
-         collisionOccurred = externalForcePointOne.resolveCollision(velocityWorld, negative_normal, epsilon, mu, p_world); // link1.epsilon, link1.mu, p_world);
-      }
+         //            System.out.println("shapeTwoIsGround");
+         Vector3d velocityWorld = new Vector3d(0.0, 0.0, 0.0);
 
+         if ((!allowMicroCollisions) || (externalForcePointOne.getVelocityVector().lengthSquared() > velocityForMicrocollision * velocityForMicrocollision))
+         {
+            collisionOccurred = externalForcePointOne.resolveCollision(velocityWorld, negative_normal, epsilon, mu, p_world); // link1.epsilon, link1.mu, p_world);
+         }
+
+         else
+         {
+            //               System.out.println("Microcollision");
+            double penetrationSquared = point1.distanceSquared(point2);
+            externalForcePointOne.resolveMicroCollision(penetrationSquared, velocityWorld, negative_normal, epsilon, mu, p_world);
+            collisionOccurred = true;
+         }
+      }
+      else if (shapeOneIsGround)
+      {
+         //            System.out.println("shapeOneIsGround");
+         Vector3d velocityWorld = new Vector3d(0.0, 0.0, 0.0);
+         if ((!allowMicroCollisions) || (externalForcePointTwo.getVelocityVector().lengthSquared() > velocityForMicrocollision * velocityForMicrocollision))
+         {
+            collisionOccurred = externalForcePointTwo.resolveCollision(velocityWorld, normal, epsilon, mu, p_world); // link1.epsilon, link1.mu, p_world);
+         }
+
+         else
+         {
+            //               System.out.println("Microcollision");
+            double penetrationSquared = point1.distanceSquared(point2);
+            externalForcePointTwo.resolveMicroCollision(penetrationSquared, velocityWorld, normal, epsilon, mu, p_world);
+            collisionOccurred = true;
+         }
+
+      }
       else
       {
-//               System.out.println("Microcollision");
-         double penetrationSquared = point1.distanceSquared(point2);
-         externalForcePointOne.resolveMicroCollision(penetrationSquared, velocityWorld, negative_normal, epsilon, mu, p_world);
-         collisionOccurred = true;
+         //            System.out.println("Two ef points");
+         Vector3d velocityVectorOne = externalForcePointOne.getVelocityVector();
+         Vector3d velocityVectorTwo = externalForcePointTwo.getVelocityVector();
+
+         Vector3d velocityDifference = new Vector3d();
+         velocityDifference.sub(velocityVectorTwo, velocityVectorOne);
+
+         if ((!allowMicroCollisions) || (velocityDifference.lengthSquared() > velocityForMicrocollision * velocityForMicrocollision))
+         {
+            //               System.out.println("Normal Collision");
+            collisionOccurred = externalForcePointOne.resolveCollision(externalForcePointTwo, negative_normal, epsilon, mu, p_world); // link1.epsilon, link1.mu, p_world);
+         }
+
+         else
+         {
+            //               System.out.println("MicroCollision");
+            double penetrationSquared = point1.distanceSquared(point2);
+            collisionOccurred = externalForcePointOne.resolveMicroCollision(penetrationSquared, externalForcePointTwo, negative_normal, epsilon, mu, p_world); // link1.epsilon, link1.mu, p_world);
+         }
       }
+
+      if (collisionOccurred)
+      {
+         for (CollisionHandlerListener listener : listeners)
+         {
+            //               System.out.println("collision occured. Visualizing it...");
+            //               System.out.println("externalForcePointOne = " + externalForcePointOne);
+            //               System.out.println("externalForcePointTwo = " + externalForcePointTwo);
+
+            listener.collision(shape1, shape2, externalForcePointOne, externalForcePointTwo, null, null);
+         }
+      }
+
    }
-   else if (shapeOneIsGround)
-   {
-//            System.out.println("shapeOneIsGround");
-      Vector3d velocityWorld = new Vector3d(0.0, 0.0, 0.0);
-      if (externalForcePointTwo.getVelocityVector().lengthSquared() > velocityForMicrocollision * velocityForMicrocollision)
-      {
-         collisionOccurred = externalForcePointTwo.resolveCollision(velocityWorld, normal, epsilon, mu, p_world); // link1.epsilon, link1.mu, p_world);
-      }
-
-      else
-      {
-//               System.out.println("Microcollision");
-         double penetrationSquared = point1.distanceSquared(point2);
-         externalForcePointTwo.resolveMicroCollision(penetrationSquared, velocityWorld, normal, epsilon, mu, p_world);
-         collisionOccurred = true;
-      }
-
-   }
-   else
-   {
-      //            System.out.println("Two ef points");
-      Vector3d velocityVectorOne = externalForcePointOne.getVelocityVector();
-      Vector3d velocityVectorTwo = externalForcePointTwo.getVelocityVector();
-
-      Vector3d velocityDifference = new Vector3d();
-      velocityDifference.sub(velocityVectorTwo, velocityVectorOne);
-
-      if (velocityDifference.lengthSquared() > velocityForMicrocollision * velocityForMicrocollision)
-      {
-//               System.out.println("Normal Collision");
-         collisionOccurred = externalForcePointOne.resolveCollision(externalForcePointTwo, negative_normal, epsilon, mu, p_world); // link1.epsilon, link1.mu, p_world);
-      }
-
-      else
-      {
-//               System.out.println("MicroCollision");
-         double penetrationSquared = point1.distanceSquared(point2);
-         collisionOccurred = externalForcePointOne.resolveMicroCollision(penetrationSquared, externalForcePointTwo, negative_normal, epsilon, mu, p_world); // link1.epsilon, link1.mu, p_world);
-      }
-   }
-
-   if (collisionOccurred)
-   {
-      for (CollisionHandlerListener listener : listeners)
-      {
-         //               System.out.println("collision occured. Visualizing it...");
-         //               System.out.println("externalForcePointOne = " + externalForcePointOne);
-         //               System.out.println("externalForcePointTwo = " + externalForcePointTwo);
-
-         listener.collision(shape1, shape2, externalForcePointOne, externalForcePointTwo, null, null);
-      }
-   }
-    }
-}
 
    private ArrayList<ContactingExternalForcePoint> getPointsThatAreContactingOtherLink(ArrayList<ContactingExternalForcePoint> contactingExternalForcePointsOne, Link linkTwo)
    {

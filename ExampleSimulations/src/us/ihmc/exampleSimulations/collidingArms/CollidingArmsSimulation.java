@@ -89,7 +89,8 @@ public class CollidingArmsSimulation
          scs.addRobot(robot);
       }
 
-      Robot groundRobot = new GroundAsABoxRobot(false, nextGroupBitMask, 0xff);
+      int estimatedNumberOfContactPoints = 100;
+      Robot groundRobot = new GroundAsABoxRobot(estimatedNumberOfContactPoints , false, nextGroupBitMask, 0xff);
       scs.addRobot(groundRobot);
 
       scs.setGroundVisible(false);

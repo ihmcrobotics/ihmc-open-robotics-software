@@ -17,20 +17,25 @@ public class GroundAsABoxRobot extends Robot
 
    public GroundAsABoxRobot()
    {
-      this(false);
+      this(40);
    }
-
-   public GroundAsABoxRobot(boolean addWalls)
+   
+   public GroundAsABoxRobot(int estimatedNumberOfContactPoints)
    {
-      this(addWalls, 0xffffffff, 0xffffffff);
+      this(estimatedNumberOfContactPoints, false);
    }
 
-   public GroundAsABoxRobot(boolean addWalls, int collisionGroup, int collisionMask)
+   public GroundAsABoxRobot(int estimatedNumberOfContactPoints, boolean addWalls)
    {
-      this(0.0, addWalls, collisionGroup, collisionMask);
+      this(estimatedNumberOfContactPoints, addWalls, 0xffffffff, 0xffffffff);
    }
 
-   public GroundAsABoxRobot(double groundAngle, boolean addWalls, int collisionGroup, int collisionMask)
+   public GroundAsABoxRobot(int estimatedNumberOfContactPoints, boolean addWalls, int collisionGroup, int collisionMask)
+   {
+      this(estimatedNumberOfContactPoints, 0.0, addWalls, collisionGroup, collisionMask);
+   }
+
+   public GroundAsABoxRobot(int estimatedNumberOfContactPoints, double groundAngle, boolean addWalls, int collisionGroup, int collisionMask)
    {
       super("GroundAsABoxRobot");
       NullJoint baseJoint = new NullJoint("base", new Vector3d(), this);
@@ -53,7 +58,7 @@ public class GroundAsABoxRobot extends Robot
       collisonMeshDescription.rotate(groundAngle, Axis.Y);
       collisonMeshDescription.addCubeReferencedAtBottomMiddle(floorLength, floorWidth, floorThickness);
       collisonMeshDescription.setIsGround(true);
-      collisonMeshDescription.setEstimatedNumberOfContactPoints(400);
+      collisonMeshDescription.setEstimatedNumberOfContactPoints(estimatedNumberOfContactPoints);
 
       collisonMeshDescription.setCollisionGroup(collisionGroup);
       collisonMeshDescription.setCollisionMask(collisionMask);

@@ -4,7 +4,9 @@ import java.util.ArrayList;
 
 import javax.vecmath.Point3d;
 
+import us.ihmc.exampleSimulations.collidingArms.SingleBallRobotDescription;
 import us.ihmc.exampleSimulations.collidingArms.SingleBoxRobotDescription;
+import us.ihmc.exampleSimulations.collidingArms.SingleCylinderRobotDescription;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -56,7 +58,8 @@ public class NewtonsCradleSimulation
       SpinningCoinRobot spinningCoinRobot = new SpinningCoinRobot();
       ArrayList<Robot> robots = spinningCoinRobot.getRobots();
 
-      Robot groundRobot = new GroundAsABoxRobot();
+      int estimatedNumberOfContactPoints = 32;
+      Robot groundRobot = new GroundAsABoxRobot(estimatedNumberOfContactPoints);
       robots.add(groundRobot);
 
       SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters(10000);
@@ -105,7 +108,8 @@ public class NewtonsCradleSimulation
       StackOfBouncyBallsRobot robot = new StackOfBouncyBallsRobot(numberOfBalls, radiusScaleFactor, massScaleFactor);
       robots.add(robot);
 
-      Robot groundRobot = new GroundAsABoxRobot();
+      int estimatedNumberOfContactPoints = 4;
+      Robot groundRobot = new GroundAsABoxRobot(estimatedNumberOfContactPoints);
       robots.add(groundRobot);
 
       Robot[] robotArray = new Robot[robots.size()];
@@ -150,7 +154,9 @@ public class NewtonsCradleSimulation
       robots.add(boxRobot);
 
       double groundAngle = Math.PI/8.0;
-      Robot groundRobot = new GroundAsABoxRobot(groundAngle , false, 0xffff, 0xffff);
+      
+      int estimatedNumberOfContactPoints = 32;
+      Robot groundRobot = new GroundAsABoxRobot(estimatedNumberOfContactPoints, groundAngle , false, 0xffff, 0xffff);
       robots.add(groundRobot);
 
       Robot[] robotArray = new Robot[robots.size()];
@@ -192,23 +198,99 @@ public class NewtonsCradleSimulation
       scs.startOnAThread();
    }
    
-
-   public static void createRowOfDominosSimulation()
+   public static void createRollingObjectsSimulation()
    {
       ArrayList<Robot> robots = new ArrayList<>();
-      RowOfDominosRobot robot = new RowOfDominosRobot();
-      robots.add(robot);
 
-      Robot groundRobot = new GroundAsABoxRobot();
+      double ballRadius = 0.2;
+      double cylinderRadius = 0.2;
+      double cylinderHeight = 0.5;
+      
+      SingleBallRobotDescription ballDescription = new SingleBallRobotDescription();
+      ballDescription.setName("ball");
+      ballDescription.setMass(1.0);
+      ballDescription.setRadius(ballRadius);
+      ballDescription.setCollisionGroup(0xffff);
+      ballDescription.setCollisionMask(0xffff);
+      ballDescription.setAppearance(YoAppearance.DarkCyan());
+      ballDescription.setAddStripes(true);
+      ballDescription.setStripeAppearance(YoAppearance.Gold());
+
+      RobotFromDescription ballRobot = new RobotFromDescription(ballDescription.createRobotDescription());
+      robots.add(ballRobot);
+      FloatingJoint ballRootJoint = (FloatingJoint) ballRobot.getRootJoints().get(0);
+      ballRootJoint.setPosition(0.0, 0.0, ballRadius * 1.02);
+      ballRootJoint.setVelocity(0.2, 0.0, 0.0);
+      
+      SingleCylinderRobotDescription cylinderDescription = new SingleCylinderRobotDescription();
+      cylinderDescription.setName("cylinder");
+      cylinderDescription.setMass(1.0);
+      cylinderDescription.setRadius(cylinderRadius);
+      cylinderDescription.setHeight(cylinderHeight);
+      cylinderDescription.setCollisionGroup(0xffff);
+      cylinderDescription.setCollisionMask(0xffff);
+      cylinderDescription.setAppearance(YoAppearance.DarkCyan());
+      cylinderDescription.setAddStripes(true);
+      cylinderDescription.setStripeAppearance(YoAppearance.Gold());
+
+      RobotFromDescription cylinderRobot = new RobotFromDescription(cylinderDescription.createRobotDescription());
+      robots.add(cylinderRobot);
+      FloatingJoint cylinderRootJoint = (FloatingJoint) cylinderRobot.getRootJoints().get(0);
+      cylinderRootJoint.setPosition(0.0, cylinderHeight * 2.0, cylinderRadius * 1.02);
+      cylinderRootJoint.setVelocity(0.2, 0.0, 0.0);
+      cylinderRootJoint.setYawPitchRoll(0.0, 0.0, Math.PI/2.00);
+
+      int estimatedNumberOfContactPoints = 200;
+      double groundAngle = 0.0;
+      boolean addWalls = false;
+      int collisionGroup = 0xffff;
+      int collisionMask = 0xffff;
+      
+      Robot groundRobot = new GroundAsABoxRobot(estimatedNumberOfContactPoints, groundAngle, addWalls, collisionGroup, collisionMask);
       robots.add(groundRobot);
 
       Robot[] robotArray = new Robot[robots.size()];
       robots.toArray(robotArray);
 
       SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters();
-      parameters.setDataBufferSize(32000);
+      parameters.setDataBufferSize(4000);
       SimulationConstructionSet scs = new SimulationConstructionSet(robotArray, parameters);
-      scs.setDT(0.0001, 2); //100);
+      scs.setDT(0.0002, 10);
+      scs.setFastSimulate(true);
+      scs.setGroundVisible(false);
+
+      DefaultCollisionVisualizer collisionVisualizer = new DefaultCollisionVisualizer(50.0, 100.0, 0.003, scs, 100);
+//      DefaultCollisionVisualizer collisionVisualizer = null;
+      YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
+
+      double coefficientOfRestitution = 0.3;
+      double coefficientOfFriction = 0.7;
+      CollisionHandler collisionHandler = createCollisionHandler(coefficientOfRestitution, coefficientOfFriction, scs.getRootRegistry(), yoGraphicsListRegistry);
+
+      scs.initializeCollisionDetectionAndHandling(collisionVisualizer, collisionHandler);
+      scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
+
+      scs.startOnAThread();
+   }
+
+   public static void createRowOfDominosSimulation()
+   {
+      ArrayList<Robot> robots = new ArrayList<>();
+      int numberOfDominos = 30;
+      RowOfDominosRobot robot = new RowOfDominosRobot(numberOfDominos);
+      robots.add(robot);
+
+      int estimatedNumberOfContactPoints = 200;
+      Robot groundRobot = new GroundAsABoxRobot(estimatedNumberOfContactPoints);
+      robots.add(groundRobot);
+
+      Robot[] robotArray = new Robot[robots.size()];
+      robots.toArray(robotArray);
+
+      SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters();
+      parameters.setDataBufferSize(4000);
+      SimulationConstructionSet scs = new SimulationConstructionSet(robotArray, parameters);
+      scs.setDT(0.0002, 10);
       scs.setFastSimulate(true);
       scs.setGroundVisible(false);
 
@@ -231,11 +313,12 @@ public class NewtonsCradleSimulation
 
    public static void createStackOfBlocksSimulation()
    {
-      int numberOfBlocks = 10;
+      int numberOfBlocks = 6;
       StackOfBlocksRobot stackOfBlocksRobot = new StackOfBlocksRobot(numberOfBlocks);
       ArrayList<Robot> robots = stackOfBlocksRobot.getRobots();
 
-      Robot groundRobot = new GroundAsABoxRobot();
+      int estimatedNumberOfContactPoints = 16;
+      Robot groundRobot = new GroundAsABoxRobot(estimatedNumberOfContactPoints);
       robots.add(groundRobot);
 
       boolean showGUI = true;
@@ -245,9 +328,10 @@ public class NewtonsCradleSimulation
 
       SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters();
       parameters.setCreateGUI(showGUI);
+      parameters.setDataBufferSize(32000);
 
       SimulationConstructionSet scs = new SimulationConstructionSet(robotArray, parameters);
-      scs.setDT(0.00025, 1);
+      scs.setDT(0.0001, 100);
       scs.setFastSimulate(false);
       scs.setGroundVisible(false);
       scs.setSimulateDuration(2.0);
@@ -268,9 +352,11 @@ public class NewtonsCradleSimulation
    public static void createPileOfRandomObjectsSimulation()
    {
       PileOfRandomObjectsRobot pileOfRandomObjectsRobot = new PileOfRandomObjectsRobot();
+      pileOfRandomObjectsRobot.setNumberOfObjects(50);
       ArrayList<Robot> robots = pileOfRandomObjectsRobot.createAndGetRobots();
 
-      Robot groundRobot = new GroundAsABoxRobot(true);
+      int estimatedNumberOfContactPoints = 200;
+      Robot groundRobot = new GroundAsABoxRobot(estimatedNumberOfContactPoints, true);
       robots.add(groundRobot);
 
       boolean showGUI = true;
@@ -323,7 +409,8 @@ public class NewtonsCradleSimulation
 //            createBoxDownRampSimulation();
 //            createRowOfDominosSimulation();
 //      createStackOfBlocksSimulation();
-      createPileOfRandomObjectsSimulation();
+      createRollingObjectsSimulation();
+//      createPileOfRandomObjectsSimulation();
    }
 
 }
