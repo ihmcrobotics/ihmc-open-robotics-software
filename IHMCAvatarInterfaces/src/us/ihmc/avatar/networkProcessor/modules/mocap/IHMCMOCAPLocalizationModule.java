@@ -86,6 +86,13 @@ public class IHMCMOCAPLocalizationModule implements MocapRigidbodiesListener, Pa
    private final DoubleYoVariable computedPelvisYaw = new DoubleYoVariable("computedPelvisYaw", registry);
    private final DoubleYoVariable computedPelvisPitch = new DoubleYoVariable("computedPelvisPitch", registry);
    private final DoubleYoVariable computedPelvisRoll = new DoubleYoVariable("computedPelvisRoll", registry);
+   
+   private final DoubleYoVariable mocapWorldToRobotWorldTransformX = new DoubleYoVariable("mocapWorldToRobotWorldTransformX", registry);
+   private final DoubleYoVariable mocapWorldToRobotWorldTransformY = new DoubleYoVariable("mocapWorldToRobotWorldTransformY", registry);
+   private final DoubleYoVariable mocapWorldToRobotWorldTransformZ = new DoubleYoVariable("mocapWorldToRobotWorldTransformZ", registry);
+   private final DoubleYoVariable mocapWorldToRobotWorldTransformYaw = new DoubleYoVariable("mocapWorldToRobotWorldTransformYaw", registry);
+   private final DoubleYoVariable mocapWorldToRobotWorldTransformPitch = new DoubleYoVariable("mocapWorldToRobotWorldTransformPitch", registry);
+   private final DoubleYoVariable mocapWorldToRobotWorldTransformRoll = new DoubleYoVariable("mocapWorldToRobotWorldTransformZRoll", registry);
 
    private final BooleanYoVariable requestFootsteps = new BooleanYoVariable("requestFootsteps", registry);
    private final BooleanYoVariable walkingAround = new BooleanYoVariable("walkingAround", registry);
@@ -250,11 +257,34 @@ public class IHMCMOCAPLocalizationModule implements MocapRigidbodiesListener, Pa
 
       rootJoint.setPosition(pelvisTranslation.getX(), pelvisTranslation.getY(), pelvisTranslation.getZ());
       rootJoint.setRotation(pelvisOrientation.getX(), pelvisOrientation.getY(), pelvisOrientation.getZ(), pelvisOrientation.getW());
+      
+      computeDriftTransform();
 
       rootJoint.getPredecessor().updateFramesRecursively();
       yoVariableServer.update(System.currentTimeMillis());
    }
 
+   private void computeDriftTransform()
+   {
+      RigidBodyTransform driftTransform = mocapToPelvisFrameConverter.getMocapFrame().getTransformToDesiredFrame(pelvisFrameFromRobotConfigurationDataPacket);
+      
+      Vector3d driftTranslation = new Vector3d();
+      driftTransform.getTranslation(driftTranslation);
+      
+      Quat4d driftRotation = new Quat4d();
+      driftTransform.getRotation(driftRotation);
+      double[] driftRotationYPR = new double[3];
+      RotationTools.convertQuaternionToYawPitchRoll(driftRotation, driftRotationYPR);
+      
+      mocapWorldToRobotWorldTransformX.set(driftTranslation.getX());
+      mocapWorldToRobotWorldTransformY.set(driftTranslation.getY());
+      mocapWorldToRobotWorldTransformZ.set(driftTranslation.getZ());
+      
+      mocapWorldToRobotWorldTransformYaw.set(driftRotationYPR[0]);
+      mocapWorldToRobotWorldTransformPitch.set(driftRotationYPR[1]);
+      mocapWorldToRobotWorldTransformRoll.set(driftRotationYPR[2]);      
+   }
+   
    public void startWalking()
    {
       ArrayList<FootstepDataMessage> listOfStepsForward = new ArrayList<>(8);
