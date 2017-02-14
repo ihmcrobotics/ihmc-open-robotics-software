@@ -3,7 +3,6 @@ package us.ihmc.testing;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.tools.thread.RunnableThatThrows;
 
 public class AssertionsTest
 {

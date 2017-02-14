@@ -17,7 +17,7 @@ import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.RigidBodyTransformTest;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.testing.Assertions;
-import us.ihmc.tools.thread.RunnableThatThrows;
+import us.ihmc.testing.RunnableThatThrows;
 
 public class LidarScanTest
 {

@@ -38,7 +38,7 @@ import us.ihmc.robotics.robotSide.RobotEnd;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.testing.Assertions;
-import us.ihmc.tools.thread.RunnableThatThrows;
+import us.ihmc.testing.RunnableThatThrows;
 
 @ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
 @VmOptions("-XX:-TieredCompilation")

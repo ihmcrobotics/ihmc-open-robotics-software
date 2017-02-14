@@ -12,9 +12,9 @@ import net.java.games.input.test.ControllerReadTest;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.testing.Assertions;
+import us.ihmc.testing.RunnableThatThrows;
 import us.ihmc.tools.inputDevices.joystick.exceptions.JoystickNotFoundException;
 import us.ihmc.tools.inputDevices.joystick.virtualJoystick.VirtualJoystick;
-import us.ihmc.tools.thread.RunnableThatThrows;
 
 public class JoystickTest
 {
