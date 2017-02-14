@@ -9,7 +9,7 @@ import us.ihmc.quadrupedRobotics.planning.gait.QuadrupedGaitCycle;
 import us.ihmc.quadrupedRobotics.planning.gait.QuadrupedSupportConfiguration;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.testing.Assertions;
-import us.ihmc.tools.thread.RunnableThatThrows;
+import us.ihmc.testing.RunnableThatThrows;
 
 public class QuadrupedGaitTypeTest
 {

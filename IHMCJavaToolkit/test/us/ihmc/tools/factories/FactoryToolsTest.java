@@ -4,7 +4,7 @@ import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.testing.Assertions;
-import us.ihmc.tools.thread.RunnableThatThrows;
+import us.ihmc.testing.RunnableThatThrows;
 
 public class FactoryToolsTest
 {
