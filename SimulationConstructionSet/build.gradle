@@ -83,6 +83,7 @@ dependencies {
     testCompile group: 'gov.nist.math', name: 'jama', version: '1.0.3'
 
 	testCompile ihmc.getProjectDependency(":IHMCUnitTesting")
+	testCompile ihmc.getProjectTestDependency(":IHMCRoboticsToolkit")
 	testCompile ihmc.getProjectTestDependency(":IHMCJavaExtensions")
 }
 

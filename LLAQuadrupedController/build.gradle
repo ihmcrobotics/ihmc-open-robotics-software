@@ -60,6 +60,7 @@ dependencies {
    compile ihmc.getProjectDependency(":IHMCRobotModels")
    
    testCompile ihmc.getProjectDependency(":IHMCUnitTesting")
+	testCompile ihmc.getProjectTestDependency(":IHMCRoboticsToolkit")
 	testCompile ihmc.getProjectTestDependency(":IHMCJavaExtensions")
    
 }
