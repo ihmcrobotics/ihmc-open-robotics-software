@@ -42,8 +42,8 @@ import us.ihmc.tools.io.printing.PrintTools;
 
 public class RigidBodyTaskspaceControlState extends RigidBodyControlState
 {
-   private static final int maxPoints = 200;
-   private static final int maxPointsInGenerator = 20;
+   public static final int maxPoints = 200;
+   public static final int maxPointsInGenerator = 20;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final YoVariableRegistry registry;
