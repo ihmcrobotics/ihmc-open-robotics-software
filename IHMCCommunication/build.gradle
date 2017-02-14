@@ -47,11 +47,15 @@ dependencies {
     compile group: 'org.boofcv', name: 'geo', version: '0.24.1'
     compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
     compile group: 'com.google.guava', name: 'guava', version: '18.0'
+    
+    testCompile group: 'us.ihmc', name: 'IHMCContinuousIntegrationFramework', version: '0.9.3'
 
 	compile ihmc.getProjectDependency(":IHMCJavaToolkit")
 	compile ihmc.getProjectDependency(":IHMCRoboticsToolkit")
 
 	testCompile ihmc.getProjectDependency(":IHMCUnitTesting")
+	testCompile ihmc.getProjectTestDependency(":IHMCRoboticsToolkit")
+	testCompile ihmc.getProjectTestDependency(":IHMCJavaExtensions")
 }
 jar {
     manifest {

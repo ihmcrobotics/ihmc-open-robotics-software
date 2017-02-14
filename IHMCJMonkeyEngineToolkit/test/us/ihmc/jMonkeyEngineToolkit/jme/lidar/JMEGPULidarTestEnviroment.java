@@ -1,5 +1,13 @@
 package us.ihmc.jMonkeyEngineToolkit.jme.lidar;
 
+import com.jme3.material.Material;
+import com.jme3.material.RenderState.BlendMode;
+import com.jme3.math.ColorRGBA;
+import com.jme3.renderer.queue.RenderQueue.Bucket;
+import com.jme3.scene.Geometry;
+import com.jme3.scene.Node;
+import com.jme3.scene.shape.Sphere;
+
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.structure.Graphics3DNode;
@@ -8,19 +16,10 @@ import us.ihmc.jMonkeyEngineToolkit.GPULidarScanBuffer;
 import us.ihmc.jMonkeyEngineToolkit.Graphics3DFrameListener;
 import us.ihmc.jMonkeyEngineToolkit.Graphics3DWorld;
 import us.ihmc.jMonkeyEngineToolkit.jme.JMEGraphics3DAdapter;
-import us.ihmc.jMonkeyEngineToolkit.jme.lidar.RayTracingLidar;
 import us.ihmc.jMonkeyEngineToolkit.utils.lidar.Graphics3DLidarScan;
 import us.ihmc.robotics.Axis;
-import us.ihmc.robotics.lidar.LidarScan;
 import us.ihmc.robotics.geometry.shapes.Sphere3d;
-
-import com.jme3.material.Material;
-import com.jme3.material.RenderState.BlendMode;
-import com.jme3.math.ColorRGBA;
-import com.jme3.renderer.queue.RenderQueue.Bucket;
-import com.jme3.scene.Geometry;
-import com.jme3.scene.Node;
-import com.jme3.scene.shape.Sphere;
+import us.ihmc.robotics.lidar.LidarScan;
 
 public class JMEGPULidarTestEnviroment implements Graphics3DFrameListener
 {

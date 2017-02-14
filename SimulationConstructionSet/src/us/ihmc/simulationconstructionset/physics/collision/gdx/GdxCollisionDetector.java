@@ -23,6 +23,7 @@ import com.badlogic.gdx.physics.bullet.collision.btManifoldPoint;
 import com.badlogic.gdx.physics.bullet.collision.btPersistentManifold;
 import com.badlogic.gdx.physics.bullet.collision.btSphereShape;
 
+import us.ihmc.robotics.geometry.BoundingBox3d;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.robotDescription.CollisionMeshDescription;
 import us.ihmc.simulationconstructionset.Link;
@@ -76,27 +77,6 @@ public class GdxCollisionDetector implements ScsCollisionDetector
    public CollisionShapeFactory getShapeFactory()
    {
       return factory;
-   }
-
-   @Override
-   public void removeShape(Link link)
-   {
-      BulletCollisionShapeWithLink info = (BulletCollisionShapeWithLink) link.getCollisionShape();
-      collisionWorld.removeCollisionObject(info);
-      allShapes.remove(info);
-   }
-
-   @Override
-   public CollisionShape lookupCollisionShape(Link link)
-   {
-      for (int i = 0; i < allShapes.size(); i++)
-      {
-         BulletCollisionShapeWithLink info = allShapes.get(i);
-         if (info.link == link)
-            return info;
-      }
-
-      throw new RuntimeException("Can't find matching shape");
    }
 
    @Override
@@ -259,6 +239,7 @@ public class GdxCollisionDetector implements ScsCollisionDetector
    {
       private btCollisionShape shape;
       private final RigidBodyTransform transform = new RigidBodyTransform();
+      private final BoundingBox3d boundingBox = new BoundingBox3d(Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
 
       public BulletShapeDescription(btCollisionShape shape)
       {
@@ -294,6 +275,18 @@ public class GdxCollisionDetector implements ScsCollisionDetector
       {
          transform.multiply(transformToWorld, transform);
       }
+
+      @Override
+      public void getBoundingBox(BoundingBox3d boundingBoxToPack)
+      {
+         boundingBoxToPack.set(boundingBox);
+      }
+
+      @Override
+      public boolean isPointInside(Point3d pointInWorld)
+      {
+         throw new RuntimeException("Implement me!");
+      }
    }
 
    /**
@@ -308,6 +301,8 @@ public class GdxCollisionDetector implements ScsCollisionDetector
       // transform from shapeToLink coordinate system
       private final RigidBodyTransform shapeToLink = new RigidBodyTransform();
       private final RigidBodyTransform transformToWorld = new RigidBodyTransform();
+
+      private final BoundingBox3d boundingBox = new BoundingBox3d(Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
 
       public BulletCollisionShapeWithLink(String name, BulletShapeDescription description, Link link, boolean isGround, RigidBodyTransform shapeToLink)
       {
@@ -347,7 +342,7 @@ public class GdxCollisionDetector implements ScsCollisionDetector
       }
 
       @Override
-      public int getGroupMask()
+      public int getCollisionGroup()
       {
          return getBroadphaseHandle().getCollisionFilterGroup() & 0xFFFF;
       }
@@ -403,6 +398,26 @@ public class GdxCollisionDetector implements ScsCollisionDetector
       public void setIsGround(boolean isGround)
       {
          this.isGround = isGround;
+      }
+
+      @Override
+      public void setCollisionGroup(int groupMask)
+      {
+         // TODO Auto-generated method stub
+         
+      }
+
+      @Override
+      public void setCollisionMask(int collisionMask)
+      {
+         // TODO Auto-generated method stub
+         
+      }
+
+      @Override
+      public void getBoundingBox(BoundingBox3d boundingBoxToPack)
+      {
+         boundingBoxToPack.set(boundingBox);
       }
    }
 

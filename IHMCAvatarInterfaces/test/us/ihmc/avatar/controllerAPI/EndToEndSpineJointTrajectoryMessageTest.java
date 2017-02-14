@@ -300,22 +300,22 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
 
    private static BooleanYoVariable getBooleanYoVariable(SimulationConstructionSet scs, String name, String namespace)
    {
-      return (BooleanYoVariable) getYoVariable(scs, name, namespace, BooleanYoVariable.class);
+      return getYoVariable(scs, name, namespace, BooleanYoVariable.class);
    }
 
    private static DoubleYoVariable getDoubleYoVariable(SimulationConstructionSet scs, String name, String namespace)
    {
-      return (DoubleYoVariable) getYoVariable(scs, name, namespace, DoubleYoVariable.class);
+      return getYoVariable(scs, name, namespace, DoubleYoVariable.class);
    }
 
-   private static YoVariable<?> getYoVariable(SimulationConstructionSet scs, String name, String namespace, Class<? extends YoVariable<?>> clazz)
+   private static <T extends YoVariable<T>> T getYoVariable(SimulationConstructionSet scs, String name, String namespace, Class<T> clazz)
    {
       YoVariable<?> uncheckedVariable = scs.getVariable(namespace, name);
       if (uncheckedVariable == null)
          throw new RuntimeException("Could not find yo variable: " + namespace + "/" + name + ".");
       if (!clazz.isInstance(uncheckedVariable))
          throw new RuntimeException("YoVariable " + name + " is not of type " + clazz.getSimpleName());
-      return uncheckedVariable;
+      return clazz.cast(uncheckedVariable);
    }
 
    private void setupTest() throws SimulationExceededMaximumTimeException

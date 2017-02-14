@@ -19,16 +19,17 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepListVisualizer;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
 import us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootTrajectoryMessage;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -48,7 +49,6 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.thread.ThreadTools;
 
 public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTestInterface
@@ -90,7 +90,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
          FootTrajectoryMessage footTrajectoryMessage = new FootTrajectoryMessage(robotSide, 0.0, desiredPosition, desiredOrientation);
          drcSimulationTestHelper.send(footTrajectoryMessage);
 
-         success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0 + getRobotModel().getCapturePointPlannerParameters().getDoubleSupportInitialTransferDuration());
+         success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0 + getRobotModel().getWalkingControllerParameters().getDefaultInitialTransferTime());
          assertTrue(success);
 
          // Now we can do the usual test.
@@ -120,7 +120,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
          footTrajectoryMessage = new FootTrajectoryMessage(robotSide, trajectoryTime, desiredPosition, desiredOrientation);
          drcSimulationTestHelper.send(footTrajectoryMessage);
 
-         success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0 + getRobotModel().getCapturePointPlannerParameters().getDoubleSupportInitialTransferDuration());
+         success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0 + getRobotModel().getWalkingControllerParameters().getDefaultInitialTransferTime());
          assertTrue(success);
       }
    }
@@ -157,7 +157,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
          FootTrajectoryMessage footTrajectoryMessage = new FootTrajectoryMessage(robotSide, 0.0, desiredPosition, desiredOrientation);
          drcSimulationTestHelper.send(footTrajectoryMessage);
 
-         success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getCapturePointPlannerParameters().getDoubleSupportInitialTransferDuration());
+         success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getWalkingControllerParameters().getDefaultInitialTransferTime());
          assertTrue(success);
 
          // Now we can do the usual test.
@@ -244,7 +244,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
          footTrajectoryMessage = new FootTrajectoryMessage(robotSide, trajectoryTime, desiredPosition, desiredOrientation);
          drcSimulationTestHelper.send(footTrajectoryMessage);
 
-         success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0 + getRobotModel().getCapturePointPlannerParameters().getDoubleSupportInitialTransferDuration());
+         success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0 + getRobotModel().getWalkingControllerParameters().getDefaultInitialTransferTime());
          assertTrue(success);
       }
    }
@@ -281,7 +281,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
          FootTrajectoryMessage footTrajectoryMessage = new FootTrajectoryMessage(robotSide, 0.0, desiredPosition, desiredOrientation);
          drcSimulationTestHelper.send(footTrajectoryMessage);
 
-         success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getCapturePointPlannerParameters().getDoubleSupportInitialTransferDuration());
+         success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getWalkingControllerParameters().getDefaultInitialTransferTime());
          assertTrue(success);
 
          // Now we can do the usual test.
@@ -395,7 +395,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
          footTrajectoryMessage = new FootTrajectoryMessage(robotSide, trajectoryTime, desiredPosition, desiredOrientation);
          drcSimulationTestHelper.send(footTrajectoryMessage);
 
-         success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(trajectoryTime + getRobotModel().getCapturePointPlannerParameters().getDoubleSupportInitialTransferDuration());
+         success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(trajectoryTime + getRobotModel().getWalkingControllerParameters().getDefaultInitialTransferTime());
          assertTrue(success);
       }
    }
@@ -432,7 +432,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
          FootTrajectoryMessage footTrajectoryMessage = new FootTrajectoryMessage(robotSide, 0.0, desiredPosition, desiredOrientation);
          drcSimulationTestHelper.send(footTrajectoryMessage);
 
-         success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getCapturePointPlannerParameters().getDoubleSupportInitialTransferDuration());
+         success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getWalkingControllerParameters().getDefaultInitialTransferTime());
          assertTrue(success);
 
          // Now we can do the usual test.
@@ -553,7 +553,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
          footTrajectoryMessage = new FootTrajectoryMessage(robotSide, trajectoryTime, desiredPosition, desiredOrientation);
          drcSimulationTestHelper.send(footTrajectoryMessage);
 
-         success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(trajectoryTime + getRobotModel().getCapturePointPlannerParameters().getDoubleSupportInitialTransferDuration());
+         success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(trajectoryTime + getRobotModel().getWalkingControllerParameters().getDefaultInitialTransferTime());
          assertTrue(success);
       }
    }
@@ -590,7 +590,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
          FootTrajectoryMessage footTrajectoryMessage = new FootTrajectoryMessage(robotSide, 0.0, desiredPosition, desiredOrientation);
          drcSimulationTestHelper.send(footTrajectoryMessage);
 
-         success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getCapturePointPlannerParameters().getDoubleSupportInitialTransferDuration());
+         success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getWalkingControllerParameters().getDefaultInitialTransferTime());
          assertTrue(success);
 
          // Now we can do the usual test.
@@ -689,7 +689,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
          footTrajectoryMessage = new FootTrajectoryMessage(robotSide, trajectoryTime, desiredPosition, desiredOrientation);
          drcSimulationTestHelper.send(footTrajectoryMessage);
 
-         success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(trajectoryTime + getRobotModel().getCapturePointPlannerParameters().getDoubleSupportInitialTransferDuration());
+         success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(trajectoryTime + getRobotModel().getWalkingControllerParameters().getDefaultInitialTransferTime());
          assertTrue(success);
       }
    }
@@ -726,7 +726,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
          FootTrajectoryMessage footTrajectoryMessage = new FootTrajectoryMessage(robotSide, 0.0, desiredPosition, desiredOrientation);
          drcSimulationTestHelper.send(footTrajectoryMessage);
 
-         success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getCapturePointPlannerParameters().getDoubleSupportInitialTransferDuration());
+         success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getWalkingControllerParameters().getDefaultInitialTransferTime());
          assertTrue(success);
 
          // Now we can do the usual test.
@@ -835,7 +835,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
          footTrajectoryMessage = new FootTrajectoryMessage(robotSide, trajectoryTime, desiredPosition, desiredOrientation);
          drcSimulationTestHelper.send(footTrajectoryMessage);
 
-         success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(trajectoryTime + getRobotModel().getCapturePointPlannerParameters().getDoubleSupportInitialTransferDuration());
+         success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(trajectoryTime + getRobotModel().getWalkingControllerParameters().getDefaultInitialTransferTime());
          assertTrue(success);
       }
    }

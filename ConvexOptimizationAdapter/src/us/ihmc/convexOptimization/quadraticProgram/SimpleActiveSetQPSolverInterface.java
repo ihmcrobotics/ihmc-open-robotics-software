@@ -26,6 +26,10 @@ public interface SimpleActiveSetQPSolverInterface
 
    public abstract void setLinearInequalityConstraints(DenseMatrix64F linearInequalityConstraintCMatrix, DenseMatrix64F linearInequalityConstraintDVector);
 
+   public abstract void setUseWarmStart(boolean useWarmStart);
+
+   public abstract void resetActiveConstraints();
+
    public abstract int solve(double[] solutionToPack, double[] lagrangeEqualityConstraintMultipliersToPack, double[] lagrangeInequalityConstraintMultipliersToPack, 
          double[] lagrangeLowerBoundMultipliersToPack, double[] lagrangeUpperBoundMultipliersToPack);
    

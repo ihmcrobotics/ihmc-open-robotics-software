@@ -12,14 +12,10 @@ import java.util.Random;
 import javax.vecmath.Tuple3d;
 import javax.vecmath.Vector3d;
 
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.junit.Test;
 
-import us.ihmc.tools.ArrayTools;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.tools.reflect.RecursiveObjectComparer;
-import us.ihmc.tools.reflect.StringFieldMatcher;
-
-import org.apache.commons.lang3.tuple.ImmutablePair;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 
 public class RecursiveObjectComparerTest

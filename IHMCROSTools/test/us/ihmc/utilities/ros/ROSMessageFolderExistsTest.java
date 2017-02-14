@@ -1,13 +1,8 @@
 package us.ihmc.utilities.ros;
 
-import static org.junit.Assert.assertTrue;
-
-import java.nio.file.Files;
-import java.nio.file.Paths;
-
 import org.junit.Test;
 
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public class ROSMessageFolderExistsTest
 {

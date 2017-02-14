@@ -199,4 +199,4 @@ root.RandomRobot196*false*false
 root.RandomRobot197*false*false
 root.RandomRobot198*false*false
 root.RandomRobot199*false*false
-root.BaseRobot*false*false
+root.GroundAsABoxRobot*false*false

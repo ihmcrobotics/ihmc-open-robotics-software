@@ -5,6 +5,7 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.robotDescription.CollisionMeshDescription;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.NullJoint;
@@ -21,6 +22,16 @@ public class GroundAsABoxRobot extends Robot
 
    public GroundAsABoxRobot(boolean addWalls)
    {
+      this(addWalls, 0xffffffff, 0xffffffff);
+   }
+
+   public GroundAsABoxRobot(boolean addWalls, int collisionGroup, int collisionMask)
+   {
+      this(0.0, addWalls, collisionGroup, collisionMask);
+   }
+
+   public GroundAsABoxRobot(double groundAngle, boolean addWalls, int collisionGroup, int collisionMask)
+   {
       super("GroundAsABoxRobot");
       NullJoint baseJoint = new NullJoint("base", new Vector3d(), this);
 
@@ -34,13 +45,18 @@ public class GroundAsABoxRobot extends Robot
 
       Graphics3DObject baseLinkGraphics = new Graphics3DObject();
       baseLinkGraphics.translate(0.0, 0.0, -floorThickness);
+      baseLinkGraphics.rotate(groundAngle, Axis.Y);
       baseLinkGraphics.addCube(floorLength, floorWidth, floorThickness, YoAppearance.Green());
 
       CollisionMeshDescription collisonMeshDescription = new CollisionMeshDescription();
       collisonMeshDescription.translate(0.0, 0.0, -floorThickness);
+      collisonMeshDescription.rotate(groundAngle, Axis.Y);
       collisonMeshDescription.addCubeReferencedAtBottomMiddle(floorLength, floorWidth, floorThickness);
       collisonMeshDescription.setIsGround(true);
+      collisonMeshDescription.setEstimatedNumberOfContactPoints(400);
 
+      collisonMeshDescription.setCollisionGroup(collisionGroup);
+      collisonMeshDescription.setCollisionMask(collisionMask);
 //      CollisionShapeDescription<?> groundShapeDescription = collisionShapeFactory.createBox(floorLength / 2.0, floorWidth / 2.0, floorThickness / 2.0);
 //      RigidBodyTransform shapeToLinkTransform = new RigidBodyTransform();
 //      shapeToLinkTransform.setTranslation(new Vector3d(-0.0, 0.0, 0.0));
@@ -78,7 +94,7 @@ public class GroundAsABoxRobot extends Robot
       //    baseJoint.setVelocity(0.0, 0.0, 1.0);
 
       baseLink.setLinkGraphics(baseLinkGraphics);
-      baseLink.setCollisionMesh(collisonMeshDescription);
+      baseLink.addCollisionMesh(collisonMeshDescription);
 
       baseJoint.setLink(baseLink);
       this.addRootJoint(baseJoint);

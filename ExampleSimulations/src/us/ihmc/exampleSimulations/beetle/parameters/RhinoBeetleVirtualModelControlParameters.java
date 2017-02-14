@@ -10,7 +10,6 @@ import org.ejml.ops.CommonOps;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootOrientationGains;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootPositionGains;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootSE3Gains;
-import us.ihmc.robotics.controllers.PDGainsInterface;
 import us.ihmc.robotics.controllers.SE3PIDGainsInterface;
 import us.ihmc.robotics.controllers.YoPDGains;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
@@ -18,7 +17,6 @@ import us.ihmc.robotics.controllers.YoSymmetricSE3PIDGains;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
 
 public class RhinoBeetleVirtualModelControlParameters implements HexapodControllerParameters
@@ -26,14 +24,13 @@ public class RhinoBeetleVirtualModelControlParameters implements HexapodControll
    private final String name = "vmcParams_";
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
    
-   private final HashMap<String, YoPDGains> jointGains = new HashMap<>();
    private final YoSE3PIDGainsInterface footGains;
    
    //body spatial feeback controller params
    private final Vector3d linearWeight = new Vector3d(1.0, 1.0, 10.0);
    private final Vector3d angularWeight = new Vector3d(1.0, 1.0, 1.0);
    private final YoSymmetricSE3PIDGains bodySpatialGains;
-   private final double bodyProportionalGains = 2000.0;
+   private final double bodyProportionalGains = 8000.0;
    private final double bodyDampingRatio = 3.0;
    private final YoFrameVector bodySpatialLinearQPWeight;
    private final YoFrameVector bodySpatialAngularQPWeight;
@@ -74,13 +71,13 @@ public class RhinoBeetleVirtualModelControlParameters implements HexapodControll
    @Override
    public double getSwingXYProportionalGain()
    {
-      return 1000.0;
+      return 8000.0;
    }
 
    @Override
    public double getSwingZProportionalGain()
    {
-      return 2000.0;
+      return 6000.0;
    }
 
    @Override
@@ -114,9 +111,9 @@ public class RhinoBeetleVirtualModelControlParameters implements HexapodControll
    }
 
    @Override
-   public PDGainsInterface getJointGains(OneDoFJoint joint)
+   public double getTransferTime()
    {
-      return jointGains.get(joint.getName());
+      // TODO Auto-generated method stub
+      return 0;
    }
-
 }

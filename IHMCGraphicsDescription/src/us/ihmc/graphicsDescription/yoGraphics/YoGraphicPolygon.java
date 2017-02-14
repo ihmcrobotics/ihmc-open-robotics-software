@@ -1,5 +1,7 @@
 package us.ihmc.graphicsDescription.yoGraphics;
 
+import javax.vecmath.Point2d;
+
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.MeshDataGenerator;
 import us.ihmc.graphicsDescription.MeshDataHolder;
@@ -21,6 +23,9 @@ import us.ihmc.tools.gui.GraphicsUpdatable;
 
 public class YoGraphicPolygon extends YoGraphicAbstractShape implements RemoteYoGraphic, GraphicsUpdatable
 {
+   private static final double DEFAULT_HEIGHT = 0.01;
+   private final double height;
+
    private YoFrameConvexPolygon2d yoFrameConvexPolygon2d;
    private final Graphics3DObject graphics3dObject;
    private final Graphics3DAddMeshDataInstruction instruction;
@@ -36,19 +41,19 @@ public class YoGraphicPolygon extends YoGraphicAbstractShape implements RemoteYo
    {
       this(name, convexPolygon2d, new YoFramePoint(namePrefix, nameSuffix, ReferenceFrame.getWorldFrame(), registry), new YoFrameOrientation(namePrefix, nameSuffix, ReferenceFrame.getWorldFrame(), registry), scale, appearance);
    }
-   
+
    public YoGraphicPolygon(String name, YoFrameConvexPolygon2d convexPolygon2d, YoVariableRegistry registry, double scale, AppearanceDefinition appearance)
    {
       this(name, convexPolygon2d, new YoFramePoint(name + "Position", ReferenceFrame.getWorldFrame(), registry), new YoFrameOrientation(name + "Orientation", ReferenceFrame.getWorldFrame(), registry), scale, appearance);
    }
-   
+
    public YoGraphicPolygon(String name, YoFramePose framePose, int maxNumberOfVertices, YoVariableRegistry registry, double scale,
                            AppearanceDefinition appearance)
    {
       this(name, new YoFrameConvexPolygon2d(name + "ConvexPolygon2d", ReferenceFrame.getWorldFrame(), maxNumberOfVertices, registry), framePose.getPosition(),
            framePose.getOrientation(), scale, appearance);
    }
-   
+
    public YoGraphicPolygon(String name, int maxNumberOfVertices, YoVariableRegistry registry, double scale, AppearanceDefinition appearance)
    {
       this(name, new YoFrameConvexPolygon2d(name + "ConvexPolygon2d", ReferenceFrame.getWorldFrame(), maxNumberOfVertices, registry),
@@ -58,17 +63,27 @@ public class YoGraphicPolygon extends YoGraphicAbstractShape implements RemoteYo
 
    public YoGraphicPolygon(String name, YoFrameConvexPolygon2d yoFrameConvexPolygon2d, YoFramePoint framePoint, YoFrameOrientation orientation, double scale, AppearanceDefinition appearance)
    {
+      this(name, yoFrameConvexPolygon2d, framePoint, orientation, scale, DEFAULT_HEIGHT, appearance);
+   }
+
+   public YoGraphicPolygon(String name, YoFrameConvexPolygon2d yoFrameConvexPolygon2d, YoFramePoint framePoint, YoFrameOrientation orientation, double scale, double height, AppearanceDefinition appearance)
+   {
       super(name, framePoint, orientation, scale);
+
+      if (yoFrameConvexPolygon2d.getNumberOfVertices() <= 0)
+         yoFrameConvexPolygon2d.setConvexPolygon2d(new ConvexPolygon2d(new Point2d[] {new Point2d()}));
 
       this.yoFrameConvexPolygon2d = yoFrameConvexPolygon2d;
       this.appearance = appearance;
+      this.height = height;
 
       graphics3dObject = new Graphics3DObject();
       graphics3dObject.setChangeable(true);
 
       ConvexPolygon2d convexPolygon2d = yoFrameConvexPolygon2d.getConvexPolygon2d();
-      MeshDataHolder meshDataHolder = MeshDataGenerator.ExtrudedPolygon(convexPolygon2d, 0.005);
+      MeshDataHolder meshDataHolder = MeshDataGenerator.ExtrudedPolygon(convexPolygon2d, height);
       instruction = new Graphics3DAddMeshDataInstruction(meshDataHolder, appearance);
+      graphics3dObject.addInstruction(instruction);
    }
 
    @Override
@@ -82,10 +97,10 @@ public class YoGraphicPolygon extends YoGraphicAbstractShape implements RemoteYo
    {
       if (yoFrameConvexPolygon2d.getHasChangedAndReset())
       {
-         instruction.setMesh(MeshDataGenerator.ExtrudedPolygon(yoFrameConvexPolygon2d.getConvexPolygon2d(), 0.005));
+         instruction.setMesh(MeshDataGenerator.ExtrudedPolygon(yoFrameConvexPolygon2d.getConvexPolygon2d(), height));
       }
    }
-   
+
    public void updateAppearance(AppearanceDefinition appearance)
    {
       instruction.setAppearance(appearance);
@@ -96,7 +111,7 @@ public class YoGraphicPolygon extends YoGraphicAbstractShape implements RemoteYo
       yoFrameConvexPolygon2d.setFrameConvexPolygon2d(frameConvexPolygon2d);
       update();
    }
-   
+
    public void updateConvexPolygon2d(ConvexPolygon2d convexPolygon2d)
    {
       yoFrameConvexPolygon2d.setConvexPolygon2d(convexPolygon2d);

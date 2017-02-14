@@ -11,15 +11,13 @@ import javax.vecmath.Vector3d;
 
 import org.junit.Test;
 
-import us.ihmc.jMonkeyEngineToolkit.jme.util.JMEDataTypeUtils;
-import us.ihmc.jMonkeyEngineToolkit.jme.util.JMEGeometryUtils;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.random.RandomTools;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-
 import com.jme3.math.Quaternion;
 import com.jme3.math.Transform;
 import com.jme3.math.Vector3f;
+
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.random.RandomTools;
 
 /**
  * Created with IntelliJ IDEA.

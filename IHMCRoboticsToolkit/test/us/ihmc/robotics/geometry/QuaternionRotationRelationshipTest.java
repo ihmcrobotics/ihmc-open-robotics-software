@@ -1,14 +1,15 @@
 package us.ihmc.robotics.geometry;
 
-import org.junit.Test;
-
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.tools.testing.JUnitTools;
+import java.util.Random;
 
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
-import java.util.Random;
+
+import org.junit.Test;
+
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.tools.testing.JUnitTools;
 
 public class QuaternionRotationRelationshipTest
 {

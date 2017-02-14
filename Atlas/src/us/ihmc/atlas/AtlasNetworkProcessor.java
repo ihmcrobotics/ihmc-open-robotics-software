@@ -24,6 +24,7 @@ public class AtlasNetworkProcessor
 {
    private static final boolean ENABLE_BEHAVIOR_MODULE = true;
    private static final boolean ENABLE_KINEMATICS_TOOLBOX_SERVER = true;
+   private static final boolean ENABLE_MOCAP_MODULE = true;
    private static String defaultRosNameSpace = "/ihmc_ros/atlas";
    
    public static void main(String[] args) throws URISyntaxException, JSAPException
@@ -62,6 +63,7 @@ public class AtlasNetworkProcessor
         networkModuleParams.enableRobotEnvironmentAwerenessModule(true);
         networkModuleParams.enableHeightQuadTreeToolbox(true);
         networkModuleParams.enableKinematicsToolboxVisualizer(ENABLE_KINEMATICS_TOOLBOX_SERVER);
+        networkModuleParams.enableMocapModule(ENABLE_MOCAP_MODULE);
 
         URI rosuri = NetworkParameters.getROSURI();
         if(rosuri != null)

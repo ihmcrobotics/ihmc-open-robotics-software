@@ -1,7 +1,10 @@
 package us.ihmc.quadrupedRobotics.geometry.supportPolygon;
 
-import static org.junit.Assert.*;
-import static us.ihmc.tools.continuousIntegration.IntegrationCategory.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Random;
 
@@ -17,8 +20,9 @@ import com.google.caliper.Benchmark;
 import com.google.caliper.api.VmOptions;
 import com.google.caliper.runner.CaliperMain;
 
-import us.ihmc.quadrupedRobotics.geometry.supportPolygon.EmptySupportPolygonException;
-import us.ihmc.quadrupedRobotics.geometry.supportPolygon.QuadrupedSupportPolygon;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
@@ -33,12 +37,10 @@ import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotEnd;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.tools.testing.JUnitTools;
-import us.ihmc.tools.thread.RunnableThatThrows;
+import us.ihmc.testing.Assertions;
+import us.ihmc.testing.RunnableThatThrows;
 
-@ContinuousIntegrationPlan(categories = FAST)
+@ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
 @VmOptions("-XX:-TieredCompilation")
 public class QuadrupedSupportPolygonTest
 {
@@ -101,7 +103,7 @@ public class QuadrupedSupportPolygonTest
    public void testVariousMethodsForCodeCoverage()
    {
       final QuadrupedSupportPolygon emptyPolygon = createEmptyPolygon();
-      JUnitTools.assertExceptionThrown(EmptySupportPolygonException.class, new RunnableThatThrows()
+      Assertions.assertExceptionThrown(EmptySupportPolygonException.class, new RunnableThatThrows()
       {
          @Override
          public void run() throws Throwable
@@ -109,7 +111,7 @@ public class QuadrupedSupportPolygonTest
             emptyPolygon.getFirstSupportingQuadrant();
          }
       });
-      JUnitTools.assertExceptionThrown(EmptySupportPolygonException.class, new RunnableThatThrows()
+      Assertions.assertExceptionThrown(EmptySupportPolygonException.class, new RunnableThatThrows()
       {
          @Override
          public void run() throws Throwable
@@ -119,7 +121,7 @@ public class QuadrupedSupportPolygonTest
       });
       
       final QuadrupedSupportPolygon fullPolygon = createSimplePolygon();
-      JUnitTools.assertExceptionThrown(RuntimeException.class, new RunnableThatThrows()
+      Assertions.assertExceptionThrown(RuntimeException.class, new RunnableThatThrows()
       {
          @Override
          public void run() throws Throwable
@@ -127,7 +129,7 @@ public class QuadrupedSupportPolygonTest
             fullPolygon.getLastNonSupportingQuadrant();
          }
       });
-      JUnitTools.assertExceptionThrown(RuntimeException.class, new RunnableThatThrows()
+      Assertions.assertExceptionThrown(RuntimeException.class, new RunnableThatThrows()
       {
          @Override
          public void run() throws Throwable
@@ -170,7 +172,7 @@ public class QuadrupedSupportPolygonTest
          assertEquals("not 3", 3, createPolygonWithoutLeg.getLegPairs().length);
       }
       
-      JUnitTools.assertExceptionThrown(UndefinedOperationException.class, new RunnableThatThrows()
+      Assertions.assertExceptionThrown(UndefinedOperationException.class, new RunnableThatThrows()
       {
          @Override
          public void run() throws Throwable
@@ -225,7 +227,7 @@ public class QuadrupedSupportPolygonTest
 
       poly.removeFootstep(RobotQuadrant.FRONT_RIGHT);
       
-      JUnitTools.assertExceptionThrown(UndefinedOperationException.class, new RunnableThatThrows()
+      Assertions.assertExceptionThrown(UndefinedOperationException.class, new RunnableThatThrows()
       {
          @Override
          public void run() throws Throwable
@@ -364,7 +366,7 @@ public class QuadrupedSupportPolygonTest
       assertEquals("not correct", RobotQuadrant.FRONT_RIGHT, polyNoFL.getNextClockwiseSupportingQuadrant(RobotQuadrant.HIND_LEFT));
       
       final QuadrupedSupportPolygon emptyPolygon = createEmptyPolygon();
-      JUnitTools.assertExceptionThrown(EmptySupportPolygonException.class, new RunnableThatThrows()
+      Assertions.assertExceptionThrown(EmptySupportPolygonException.class, new RunnableThatThrows()
       {
          @Override
          public void run() throws Throwable
@@ -372,7 +374,7 @@ public class QuadrupedSupportPolygonTest
             emptyPolygon.getNextCounterClockwiseSupportingQuadrant(RobotQuadrant.FRONT_LEFT);
          }
       });
-      JUnitTools.assertExceptionThrown(EmptySupportPolygonException.class, new RunnableThatThrows()
+      Assertions.assertExceptionThrown(EmptySupportPolygonException.class, new RunnableThatThrows()
       {
          @Override
          public void run() throws Throwable
@@ -401,7 +403,7 @@ public class QuadrupedSupportPolygonTest
       final QuadrupedSupportPolygon firstPoly = createSimplePolygon();
       final QuadrupedSupportPolygon secondPoly = createSimplePolygon();
       
-      JUnitTools.assertExceptionThrown(IllegalArgumentException.class, new RunnableThatThrows()
+      Assertions.assertExceptionThrown(IllegalArgumentException.class, new RunnableThatThrows()
       {
          @Override
          public void run() throws Throwable
@@ -420,7 +422,7 @@ public class QuadrupedSupportPolygonTest
       
       secondPoly.getFootstep(RobotQuadrant.FRONT_LEFT).add(1.0, 0.0, 0.0);
       secondPoly.getFootstep(RobotQuadrant.FRONT_RIGHT).add(1.0, 0.0, 0.0);
-      JUnitTools.assertExceptionThrown(IllegalArgumentException.class, new RunnableThatThrows()
+      Assertions.assertExceptionThrown(IllegalArgumentException.class, new RunnableThatThrows()
       {
          @Override
          public void run() throws Throwable
@@ -430,7 +432,7 @@ public class QuadrupedSupportPolygonTest
       });
       
       secondPoly.removeFootstep(RobotQuadrant.HIND_LEFT);
-      JUnitTools.assertExceptionThrown(IllegalArgumentException.class, new RunnableThatThrows()
+      Assertions.assertExceptionThrown(IllegalArgumentException.class, new RunnableThatThrows()
       {
          @Override
          public void run() throws Throwable
@@ -440,7 +442,7 @@ public class QuadrupedSupportPolygonTest
       });
       
       firstPoly.removeFootstep(RobotQuadrant.HIND_RIGHT);
-      JUnitTools.assertExceptionThrown(IllegalArgumentException.class, new RunnableThatThrows()
+      Assertions.assertExceptionThrown(IllegalArgumentException.class, new RunnableThatThrows()
       {
          @Override
          public void run() throws Throwable
@@ -654,7 +656,7 @@ public class QuadrupedSupportPolygonTest
       assertTrue("not shrunk correctly", poly.getFootstep(RobotQuadrant.FRONT_RIGHT).epsilonEquals(new Vector3d(0.80, 0.7, 0.0), 1e-7));
       
       final QuadrupedSupportPolygon createEmptyPolygon = createEmptyPolygon();
-      JUnitTools.assertExceptionThrown(UndefinedOperationException.class, new RunnableThatThrows()
+      Assertions.assertExceptionThrown(UndefinedOperationException.class, new RunnableThatThrows()
       {
          @Override
          public void run() throws Throwable
@@ -736,7 +738,7 @@ public class QuadrupedSupportPolygonTest
       poly5.translate(0.5, 0.0, 0.0);
       final QuadrupedSupportPolygon poly6 = new QuadrupedSupportPolygon();
       
-      JUnitTools.assertExceptionThrown(UndefinedOperationException.class, new RunnableThatThrows()
+      Assertions.assertExceptionThrown(UndefinedOperationException.class, new RunnableThatThrows()
       {
          @Override
          public void run() throws Throwable
@@ -750,7 +752,7 @@ public class QuadrupedSupportPolygonTest
       poly8.translate(0.5, 0.0, 0.0);
       final QuadrupedSupportPolygon poly9 = new QuadrupedSupportPolygon();
       
-      JUnitTools.assertExceptionThrown(UndefinedOperationException.class, new RunnableThatThrows()
+      Assertions.assertExceptionThrown(UndefinedOperationException.class, new RunnableThatThrows()
       {
          @Override
          public void run() throws Throwable
@@ -758,7 +760,7 @@ public class QuadrupedSupportPolygonTest
             poly7.getCommonTriangle2d(poly8, poly9, RobotQuadrant.FRONT_RIGHT);
          }
       });
-      JUnitTools.assertExceptionThrown(UndefinedOperationException.class, new RunnableThatThrows()
+      Assertions.assertExceptionThrown(UndefinedOperationException.class, new RunnableThatThrows()
       {
          @Override
          public void run() throws Throwable
@@ -767,7 +769,7 @@ public class QuadrupedSupportPolygonTest
          }
       });
       poly8.translate(-0.5, 0.0, 0.0);
-      JUnitTools.assertExceptionThrown(UndefinedOperationException.class, new RunnableThatThrows()
+      Assertions.assertExceptionThrown(UndefinedOperationException.class, new RunnableThatThrows()
       {
          @Override
          public void run() throws Throwable
@@ -781,7 +783,7 @@ public class QuadrupedSupportPolygonTest
       final QuadrupedSupportPolygon poly11 = createPolygonWithoutLeg(RobotQuadrant.HIND_LEFT);
       final QuadrupedSupportPolygon poly12 = new QuadrupedSupportPolygon();
       
-      JUnitTools.assertExceptionThrown(UndefinedOperationException.class, new RunnableThatThrows()
+      Assertions.assertExceptionThrown(UndefinedOperationException.class, new RunnableThatThrows()
       {
          @Override
          public void run() throws Throwable
@@ -879,7 +881,7 @@ public class QuadrupedSupportPolygonTest
       assertEquals("not -135", -135.0, BodeUnitsConverter.convertRadianToDegrees(poly3.getNominalYaw()), 1e-7);
       
       poly3.removeFootstep(RobotQuadrant.FRONT_RIGHT);
-      JUnitTools.assertExceptionThrown(UndefinedOperationException.class, new RunnableThatThrows()
+      Assertions.assertExceptionThrown(UndefinedOperationException.class, new RunnableThatThrows()
       {
          @Override
          public void run() throws Throwable
@@ -888,7 +890,7 @@ public class QuadrupedSupportPolygonTest
          }
       });
       poly3.removeFootstep(RobotQuadrant.HIND_LEFT);
-      JUnitTools.assertExceptionThrown(UndefinedOperationException.class, new RunnableThatThrows()
+      Assertions.assertExceptionThrown(UndefinedOperationException.class, new RunnableThatThrows()
       {
          @Override
          public void run() throws Throwable
@@ -897,7 +899,7 @@ public class QuadrupedSupportPolygonTest
          }
       });
       poly3.removeFootstep(RobotQuadrant.HIND_RIGHT);
-      JUnitTools.assertExceptionThrown(UndefinedOperationException.class, new RunnableThatThrows()
+      Assertions.assertExceptionThrown(UndefinedOperationException.class, new RunnableThatThrows()
       {
          @Override
          public void run() throws Throwable
@@ -905,14 +907,14 @@ public class QuadrupedSupportPolygonTest
             poly3.getNominalYawHindLegs();
          }
       });
-      JUnitTools.assertExceptionThrown(UndefinedOperationException.class, new RunnableThatThrows()
+      Assertions.assertExceptionThrown(UndefinedOperationException.class, new RunnableThatThrows()
       {
          @Override
          public void run() throws Throwable
          {
             poly3.getNominalRoll();
          }
-      });JUnitTools.assertExceptionThrown(UndefinedOperationException.class, new RunnableThatThrows()
+      });Assertions.assertExceptionThrown(UndefinedOperationException.class, new RunnableThatThrows()
       {
          @Override
          public void run() throws Throwable
@@ -929,7 +931,7 @@ public class QuadrupedSupportPolygonTest
       assertEquals("not -45", -45.0, BodeUnitsConverter.convertRadianToDegrees(rolled.getNominalRoll()), 1e-7);
       
       final QuadrupedSupportPolygon zeroedPolygon = createZeroedPolygon();
-      JUnitTools.assertExceptionThrown(UndefinedOperationException.class, new RunnableThatThrows()
+      Assertions.assertExceptionThrown(UndefinedOperationException.class, new RunnableThatThrows()
       {
          @Override
          public void run() throws Throwable
@@ -937,7 +939,7 @@ public class QuadrupedSupportPolygonTest
             zeroedPolygon.getNominalRoll();
          }
       });
-      JUnitTools.assertExceptionThrown(UndefinedOperationException.class, new RunnableThatThrows()
+      Assertions.assertExceptionThrown(UndefinedOperationException.class, new RunnableThatThrows()
       {
          @Override
          public void run() throws Throwable
@@ -967,7 +969,7 @@ public class QuadrupedSupportPolygonTest
       assertTrue("not midpoint", framePointToPack.epsilonEquals(new Point3d(0.0, 1.0, 0.0), 1e-7));
       poly1.removeFootstep(RobotQuadrant.FRONT_LEFT);
       final QuadrupedSupportPolygon poly2 = poly1;
-      JUnitTools.assertExceptionThrown(UndefinedOperationException.class, new RunnableThatThrows()
+      Assertions.assertExceptionThrown(UndefinedOperationException.class, new RunnableThatThrows()
       {
          @Override
          public void run() throws Throwable
@@ -983,7 +985,7 @@ public class QuadrupedSupportPolygonTest
       assertTrue("not midpoint", framePointToPack.epsilonEquals(new Point3d(0.0, 0.0, 0.0), 1e-7));
       poly1.removeFootstep(RobotQuadrant.HIND_LEFT);
       final QuadrupedSupportPolygon poly3 = poly1;
-      JUnitTools.assertExceptionThrown(UndefinedOperationException.class, new RunnableThatThrows()
+      Assertions.assertExceptionThrown(UndefinedOperationException.class, new RunnableThatThrows()
       {
          @Override
          public void run() throws Throwable
@@ -1008,7 +1010,7 @@ public class QuadrupedSupportPolygonTest
       assertEquals("not 1.0", 1.0, create3LegPolygon.getStanceLength(RobotSide.LEFT), 1e-7);
       
       final QuadrupedSupportPolygon createEmptyPolygon = createEmptyPolygon();
-      JUnitTools.assertExceptionThrown(UndefinedOperationException.class, new RunnableThatThrows()
+      Assertions.assertExceptionThrown(UndefinedOperationException.class, new RunnableThatThrows()
       {
          @Override
          public void run() throws Throwable
@@ -1054,14 +1056,14 @@ public class QuadrupedSupportPolygonTest
       final QuadrupedSupportPolygon createPitchedDownPolygon = createPitchedDownPolygon();
       assertFalse("trot", createPitchedDownPolygon.isValidTrotPolygon());
       
-      JUnitTools.assertExceptionThrown(RuntimeException.class, new RunnableThatThrows()
+      Assertions.assertExceptionThrown(RuntimeException.class, new RunnableThatThrows()
       {
          @Override
          public void run() throws Throwable
          {
             createPitchedDownPolygon.getRightTrotLeg();
          }
-      });JUnitTools.assertExceptionThrown(RuntimeException.class, new RunnableThatThrows()
+      });Assertions.assertExceptionThrown(RuntimeException.class, new RunnableThatThrows()
       {
          @Override
          public void run() throws Throwable
@@ -1101,7 +1103,7 @@ public class QuadrupedSupportPolygonTest
       success = poly.getCenterOfCircleOfRadiusInCornerOfTriangleAndCheckNotLargerThanInCircle(RobotQuadrant.HIND_LEFT, 0.5, centerToPack);
       assertFalse("success should be false", success);
       // test put non-existent quadrant in
-      JUnitTools.assertExceptionThrown(UndefinedOperationException.class, new RunnableThatThrows()
+      Assertions.assertExceptionThrown(UndefinedOperationException.class, new RunnableThatThrows()
       {
          @Override
          public void run() throws Throwable
@@ -1111,7 +1113,7 @@ public class QuadrupedSupportPolygonTest
       });
       poly.setFootstep(RobotQuadrant.FRONT_LEFT, new FramePoint());
       // test put 4-sided in triangle method
-      JUnitTools.assertExceptionThrown(UndefinedOperationException.class, new RunnableThatThrows()
+      Assertions.assertExceptionThrown(UndefinedOperationException.class, new RunnableThatThrows()
       {
          @Override
          public void run() throws Throwable
@@ -1122,7 +1124,7 @@ public class QuadrupedSupportPolygonTest
       // test size 2 quadrants
       poly.removeFootstep(RobotQuadrant.FRONT_LEFT);
       poly.removeFootstep(RobotQuadrant.HIND_RIGHT);
-      JUnitTools.assertExceptionThrown(UndefinedOperationException.class, new RunnableThatThrows()
+      Assertions.assertExceptionThrown(UndefinedOperationException.class, new RunnableThatThrows()
       {
          @Override
          public void run() throws Throwable
