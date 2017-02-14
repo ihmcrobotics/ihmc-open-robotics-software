@@ -66,8 +66,12 @@ dependencies {
     compile group: 'org.xerial.snappy', name: 'snappy-java', version: '1.1.1-M1'
     compile group: 'com.google.guava', name: 'guava', version: '18.0'
     compile group: 'javax.vecmath', name: 'vecmath', version: '1.5.2'
+    
+    testCompile group: 'us.ihmc', name: 'IHMCContinuousIntegrationFramework', version: '0.9.3'
 
     testCompile ihmc.getProjectDependency(":IHMCUnitTesting")
+	testCompile ihmc.getProjectTestDependency(":IHMCRoboticsToolkit")
+	testCompile ihmc.getProjectTestDependency(":IHMCJavaExtensions")
 }
 
 test.finalizedBy jacocoTestReport

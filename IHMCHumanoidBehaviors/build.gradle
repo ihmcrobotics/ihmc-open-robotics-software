@@ -41,8 +41,8 @@ dependencies {
 
 	compile group: 'javax.vecmath', name: 'vecmath', version: '1.5.2'
 	compile group: 'com.thoughtworks.xstream', name: 'xstream', version: '1.4.7'
-    compile group: 'org.ejml', name: 'core', version: '0.28'
-    compile group: 'org.ejml', name: 'dense64', version: '0.28'
+    compile group: 'org.ejml', name: 'core', version: '0.30'
+    compile group: 'org.ejml', name: 'dense64', version: '0.30'
     compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
     compile group: 'junit', name: 'junit', version: '4.11'
     compile group: 'org.georegression', name: 'georegression', version: '0.11'
@@ -53,6 +53,8 @@ dependencies {
     compile "org.boofcv:io:0.24.1"
     compile "org.boofcv:recognition:0.24.1"
     compile "us.ihmc:IHMCNativeLibraryLoader:1.0"
+    
+    testCompile group: 'us.ihmc', name: 'IHMCContinuousIntegrationFramework', version: '0.9.3'
 
     compile ihmc.getProjectDependency(":IHMCRobotModels")
 	compile ihmc.getProjectDependency(":IHMCCommunication")
@@ -69,6 +71,8 @@ dependencies {
     compile ihmc.getProjectDependency(":IHMCFootstepPlanning")
 	
     testCompile ihmc.getProjectDependency(":IHMCUnitTesting")
+	testCompile ihmc.getProjectTestDependency(":IHMCRoboticsToolkit")
+	testCompile ihmc.getProjectTestDependency(":IHMCJavaExtensions")
 }
 
 jar {

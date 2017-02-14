@@ -2,9 +2,9 @@ package us.ihmc.tools.factories;
 
 import org.junit.Test;
 
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.tools.testing.JUnitTools;
-import us.ihmc.tools.thread.RunnableThatThrows;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.testing.Assertions;
+import us.ihmc.testing.RunnableThatThrows;
 
 public class FactoryToolsTest
 {
@@ -17,7 +17,7 @@ public class FactoryToolsTest
       exampleFactory.setRequiredField2(1.0);
       exampleFactory.createObject();
       
-      JUnitTools.assertExceptionThrown(FactoryDisposedException.class, new RunnableThatThrows()
+      Assertions.assertExceptionThrown(FactoryDisposedException.class, new RunnableThatThrows()
       {
          @Override
          public void run() throws Throwable
@@ -34,7 +34,7 @@ public class FactoryToolsTest
       final ExampleValidFactory exampleFactory = new ExampleValidFactory();
       exampleFactory.setRequiredField1(1.0);
       
-      JUnitTools.assertExceptionThrown(FactoryFieldNotSetException.class, new RunnableThatThrows()
+      Assertions.assertExceptionThrown(FactoryFieldNotSetException.class, new RunnableThatThrows()
       {
          @Override
          public void run() throws Throwable
@@ -52,7 +52,7 @@ public class FactoryToolsTest
       exampleFactory.setRequiredField1(1.0);
       exampleFactory.setRequiredField2(1.0);
       
-      JUnitTools.assertExceptionThrown(NullPointerException.class, new RunnableThatThrows()
+      Assertions.assertExceptionThrown(NullPointerException.class, new RunnableThatThrows()
       {
          @Override
          public void run() throws Throwable

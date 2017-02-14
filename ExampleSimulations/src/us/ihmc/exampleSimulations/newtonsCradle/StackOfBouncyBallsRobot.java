@@ -16,6 +16,11 @@ public class StackOfBouncyBallsRobot extends Robot
 {
    public StackOfBouncyBallsRobot()
    {
+      this(4, 0.6, 0.2);
+   }
+
+   public StackOfBouncyBallsRobot(int numberOfBalls, double radiusScaleFactor, double massScaleFactor)
+   {
       super("StackOfBouncyBalls");
 
       double gravity = -9.81;
@@ -25,10 +30,6 @@ public class StackOfBouncyBallsRobot extends Robot
       final DoubleYoVariable potentialEnergy = new DoubleYoVariable("potentialEnergy", this.getRobotsYoVariableRegistry());
       final DoubleYoVariable kineticEnergy = new DoubleYoVariable("kineticEnergy", this.getRobotsYoVariableRegistry());
       final DoubleYoVariable totalEnergy = new DoubleYoVariable("totalEnergy", this.getRobotsYoVariableRegistry());
-
-      int numberOfBalls = 4;
-      double radiusScaleFactor = 0.6;
-      double massScaleFactor = 0.2;
 
       double largestBallRadius = 0.25;
       double largestBallMass = 2000.0;
@@ -61,7 +62,9 @@ public class StackOfBouncyBallsRobot extends Robot
 
          CollisionMeshDescription collisionMeshDescription = new CollisionMeshDescription();
          collisionMeshDescription.addSphere(ballRadius);
-         link.setCollisionMesh(collisionMeshDescription);
+         collisionMeshDescription.setCollisionGroup(0xff);
+         collisionMeshDescription.setCollisionMask(0xff);
+         link.addCollisionMesh(collisionMeshDescription);
 
          floatingJoint.setLink(link);
          this.addRootJoint(floatingJoint);

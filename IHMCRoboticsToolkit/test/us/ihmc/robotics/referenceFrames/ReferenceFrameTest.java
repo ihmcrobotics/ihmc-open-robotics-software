@@ -16,14 +16,15 @@ import javax.vecmath.Vector3d;
 
 import org.junit.Test;
 
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.RigidBodyTransformTest;
 import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.testing.Assertions;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.testing.JUnitTools;
 
 public class ReferenceFrameTest
@@ -605,7 +606,7 @@ public class ReferenceFrameTest
    {
       setUp();
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-      JUnitTools.assertSerializable(worldFrame);
+      Assertions.assertSerializable(worldFrame);
       tearDown();
 
       //NOTE:No other reference frame is serializable because of transform3D

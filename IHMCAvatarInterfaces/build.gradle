@@ -49,8 +49,8 @@ dependencies {
 	compile group: 'us.ihmc', name: 'IHMCRealtime', version: '1.1.2'
 	compile group: 'org.ros.rosjava_core', name: 'rosjava', version: '0.2.1'
 	compile group: 'org.ros.rosjava_bootstrap', name: 'message_generation', version: '0.2.1'
-	compile group: 'org.ejml', name: 'core', version: '0.28'
-	compile group: 'org.ejml', name: 'dense64', version: '0.28'
+	compile group: 'org.ejml', name: 'core', version: '0.30'
+	compile group: 'org.ejml', name: 'dense64', version: '0.30'
 	compile group: 'org.boofcv', name: 'geo', version: '0.24.1'
 	compile group: 'org.ros.rosjava_messages', name: 'std_msgs', version: '0.5.9'
 	compile group: 'org.ros.rosjava_messages', name: 'geometry_msgs', version: '1.11.7'
@@ -63,6 +63,8 @@ dependencies {
 	compile group: 'com.github.wendykierp', name: 'JTransforms', version: '3.1'
 	compile group: 'org.reflections', name: 'reflections', version: '0.9.10'
 	compile group: 'us.ihmc', name: 'RobotEnvironmentAwareness', version: '0.2.2'
+    
+    testCompile group: 'us.ihmc', name: 'IHMCContinuousIntegrationFramework', version: '0.9.3'
 
 	compile ihmc.getProjectDependency(":IHMCROSTools")
 	compile ihmc.getProjectDependency(":CommonWalkingControlModules")
@@ -88,6 +90,8 @@ dependencies {
     compile ihmc.getProjectDependency(":IHMCFootstepPlanning")
 
 	testCompile ihmc.getProjectDependency(":IHMCUnitTesting")
+	testCompile ihmc.getProjectTestDependency(":IHMCRoboticsToolkit")
+	testCompile ihmc.getProjectTestDependency(":IHMCJavaExtensions")
 	testCompile ihmc.getProjectTestDependency(":IHMCFootstepPlanning")
 	testCompile ihmc.getProjectTestDependency(":IHMCHumanoidRobotics")
 }

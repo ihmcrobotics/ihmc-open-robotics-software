@@ -1,16 +1,18 @@
 package us.ihmc.robotics.hyperCubeTree;
 
-import org.junit.Test;
-import us.ihmc.robotics.geometry.LineSegment3d;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-
-import javax.vecmath.Point3d;
-import java.util.List;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+
+import java.util.List;
+
+import javax.vecmath.Point3d;
+
+import org.junit.Test;
+
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.robotics.geometry.LineSegment3d;
 
 public class OctreeTest
 {

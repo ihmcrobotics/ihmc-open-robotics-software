@@ -29,7 +29,7 @@ public class RowOfDominosRobot extends Robot
       final DoubleYoVariable kineticEnergy = new DoubleYoVariable("kineticEnergy", this.getRobotsYoVariableRegistry());
       final DoubleYoVariable totalEnergy = new DoubleYoVariable("totalEnergy", this.getRobotsYoVariableRegistry());
 
-      int numberOfDominos = 30;
+      int numberOfDominos = 15; //30;
 
       double dominoWidth = 0.024;
       double dominoDepth = 0.0075;
@@ -60,7 +60,9 @@ public class RowOfDominosRobot extends Robot
 
          CollisionMeshDescription collisionMeshDescription = new CollisionMeshDescription();
          collisionMeshDescription.addCubeReferencedAtCenter(dominoDepth, dominoWidth, dominoHeight);
-         link.setCollisionMesh(collisionMeshDescription);
+         collisionMeshDescription.setCollisionGroup(0xff);
+         collisionMeshDescription.setCollisionMask(0xff);
+         link.addCollisionMesh(collisionMeshDescription);
 
          floatingJoint.setLink(link);
          this.addRootJoint(floatingJoint);
