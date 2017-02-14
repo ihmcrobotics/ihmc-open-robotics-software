@@ -54,6 +54,7 @@ import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.partNames.ArmJointName;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -149,7 +150,8 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
 
       RigidBody chest = fullRobotModel.getChest();
       RigidBody pelvis = fullRobotModel.getPelvis();
-      this.chestManager = managerFactory.getOrCreateRigidBodyManager(chest, pelvis);
+      ReferenceFrame pelvisZUpFrame = momentumBasedController.getPelvisZUpFrame();
+      this.chestManager = managerFactory.getOrCreateRigidBodyManager(chest, pelvis, pelvisZUpFrame);
 
       this.walkingControllerParameters = walkingControllerParameters;
 

@@ -41,6 +41,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.ManipulationAborte
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 
 public class WalkingCommandConsumer
@@ -80,9 +81,10 @@ public class WalkingCommandConsumer
 
       RigidBody chest = momentumBasedController.getFullRobotModel().getChest();
       RigidBody pelvis = momentumBasedController.getFullRobotModel().getPelvis();
+      ReferenceFrame pelvisZUpFrame = momentumBasedController.getPelvisZUpFrame();
 
       pelvisOrientationManager = managerFactory.getOrCreatePelvisOrientationManager();
-      chestManager = managerFactory.getOrCreateRigidBodyManager(chest, pelvis);
+      chestManager = managerFactory.getOrCreateRigidBodyManager(chest, pelvis, pelvisZUpFrame);
       headOrientationManager = managerFactory.getOrCreatedHeadOrientationManager();
       manipulationControlModule = managerFactory.getOrCreateManipulationControlModule();
       feetManager = managerFactory.getOrCreateFeetManager();

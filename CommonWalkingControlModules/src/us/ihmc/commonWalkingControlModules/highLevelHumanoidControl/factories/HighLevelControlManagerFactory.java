@@ -148,7 +148,7 @@ public class HighLevelControlManagerFactory
       return headOrientationManager;
    }
 
-   public RigidBodyManager getOrCreateRigidBodyManager(RigidBody bodyToControl, RigidBody rootBody)
+   public RigidBodyManager getOrCreateRigidBodyManager(RigidBody bodyToControl, RigidBody rootBody, ReferenceFrame rootFrame)
    {
       String bodyName = bodyToControl.getName();
       if (rigidBodyManagerMapByBodyName.containsKey(bodyName))
@@ -170,7 +170,7 @@ public class HighLevelControlManagerFactory
       controlFrameMap.put(BaseForControl.WALKING_PATH, referenceFrames.getMidFeetUnderPelvisFrame());
       controlFrameMap.put(BaseForControl.WORLD, ReferenceFrame.getWorldFrame());
 
-      RigidBodyManager manager = new RigidBodyManager(bodyToControl, rootBody, momentumBasedController, walkingControllerParameters, controlFrameMap, registry);
+      RigidBodyManager manager = new RigidBodyManager(bodyToControl, rootBody, momentumBasedController, walkingControllerParameters, controlFrameMap, rootFrame, registry);
       double spineJointspaceWeight = momentumOptimizationSettings.getSpineJointspaceWeight();
       Vector3d chestAngularWeight = momentumOptimizationSettings.getChestAngularWeight();
       Vector3d chestLinearWeight = null;

@@ -55,15 +55,18 @@ public class RigidBodyManager
    private final OneDoFJoint[] jointsAtDesiredPosition;
 
    private final ReferenceFrame bodyFrame;
+   private final ReferenceFrame rootFrame;
 
    public RigidBodyManager(RigidBody bodyToControl, RigidBody rootBody, HighLevelHumanoidControllerToolbox humanoidControllerToolbox,
-         WalkingControllerParameters walkingControllerParameters, Map<BaseForControl, ReferenceFrame> controlFrameMap, YoVariableRegistry parentRegistry)
+         WalkingControllerParameters walkingControllerParameters, Map<BaseForControl, ReferenceFrame> controlFrameMap, ReferenceFrame rootFrame,
+         YoVariableRegistry parentRegistry)
    {
       bodyName = bodyToControl.getName();
       String namePrefix = bodyName + "Manager";
       registry = new YoVariableRegistry(namePrefix);
       DoubleYoVariable yoTime = humanoidControllerToolbox.getYoTime();
       bodyFrame = bodyToControl.getBodyFixedFrame();
+      this.rootFrame = rootFrame;
 
       stateMachine = new GenericStateMachine<>(namePrefix + "State", namePrefix + "SwitchTime", RigidBodyControlMode.class, yoTime, registry);
       requestedState = new EnumYoVariable<>(namePrefix + "RequestedControlMode", registry, RigidBodyControlMode.class, true);
@@ -81,7 +84,8 @@ public class RigidBodyManager
 
       RigidBody elevator = humanoidControllerToolbox.getFullRobotModel().getElevator();
       jointspaceControlState = new RigidBodyJointspaceControlState(bodyName, jointsOriginal, jointspaceGains, yoTime, registry);
-      taskspaceControlState = new RigidBodyTaskspaceControlState(bodyToControl, rootBody, elevator, taskspaceOrientationGains, taskspacePositionGains, controlFrameMap, registry);
+      taskspaceControlState = new RigidBodyTaskspaceControlState(bodyToControl, rootBody, elevator, taskspaceOrientationGains, taskspacePositionGains,
+            controlFrameMap, rootFrame, yoTime, registry);
       userControlState = new RigidBodyUserControlState();
 
       setupStateMachine();
@@ -118,8 +122,7 @@ public class RigidBodyManager
          return;
       hasBeenInitialized.set(true);
 
-      jointspaceControlState.holdCurrent();
-      requestState(jointspaceControlState.getStateEnum());
+      holdInJointspace();
    }
 
    public void compute()
@@ -134,16 +137,42 @@ public class RigidBodyManager
       // update command lists
    }
 
-   public void holdInTaskspace()
+   public void holdOrientationInTaskspace()
    {
-      // TODO: hand, chest, head
-      // hold the position in the base reference frame using current desired
+      computeDesiredOrientation(initialOrientation);
+      initialOrientation.changeFrame(rootFrame);
+      taskspaceControlState.holdOrientation(initialOrientation);
+      requestState(taskspaceControlState.getStateEnum());
+   }
+
+   public void holdPoseInTaskspace()
+   {
+      computeDesiredPose(initialPose);
+      initialPose.changeFrame(rootFrame);
+      taskspaceControlState.holdPose(initialPose);
+      requestState(taskspaceControlState.getStateEnum());
    }
 
    public void holdInJointspace()
    {
-      // TODO: hand
-      // hold the position in the base reference frame using current desired
+      jointspaceControlState.holdCurrent();
+      requestState(jointspaceControlState.getStateEnum());
+   }
+
+   private void holdOrientation()
+   {
+      if (stateMachine.getCurrentStateEnum() == RigidBodyControlMode.TASKSPACE)
+         holdOrientationInTaskspace();
+      else
+         holdInJointspace();
+   }
+
+   private void holdPose()
+   {
+      if (stateMachine.getCurrentStateEnum() == RigidBodyControlMode.TASKSPACE)
+         holdPoseInTaskspace();
+      else
+         holdInJointspace();
    }
 
    public void handleStopAllTrajectoryCommand(StopAllTrajectoryCommand command)
@@ -154,19 +183,33 @@ public class RigidBodyManager
    public void handleTaskspaceTrajectoryCommand(SO3TrajectoryControllerCommand<?, ?> command)
    {
       computeDesiredOrientation(initialOrientation);
+      initialOrientation.changeFrame(command.getReferenceFrame());
+
       if (taskspaceControlState.handleOrientationTrajectoryCommand(command, initialOrientation))
+      {
          requestState(taskspaceControlState.getStateEnum());
+      }
       else
+      {
          PrintTools.warn(getClass().getSimpleName() + " for " + bodyName + " recieved invalid orientation trajectory command.");
+         holdOrientation();
+      }
    }
 
    public void handleTaskspaceTrajectoryCommand(SE3TrajectoryControllerCommand<?, ?> command)
    {
       computeDesiredPose(initialPose);
+      initialPose.changeFrame(command.getReferenceFrame());
+
       if (taskspaceControlState.handlePoseTrajectoryCommand(command, initialPose))
+      {
          requestState(taskspaceControlState.getStateEnum());
+      }
       else
+      {
          PrintTools.warn(getClass().getSimpleName() + " for " + bodyName + " recieved invalid pose trajectory command.");
+         holdPose();
+      }
    }
 
    public void handleJointspaceTrajectoryCommand(JointspaceTrajectoryCommand<?, ?> command)
