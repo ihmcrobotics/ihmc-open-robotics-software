@@ -65,7 +65,6 @@ dependencies {
     // NOTE: IHMCRoboticsToolkit should not depend on any other IHMC project(!), especially it should not depend on IHMCJavaToolkit.
 
     testCompile ihmc.getProjectDependency(":IHMCUnitTesting")
-	testCompile ihmc.getProjectTestDependency(":IHMCRoboticsToolkit")
 	testCompile ihmc.getProjectTestDependency(":IHMCJavaExtensions")
 }
 
