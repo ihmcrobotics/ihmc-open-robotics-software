@@ -49,7 +49,7 @@ public class ContactingExternalForcePointsVisualizer
          contactNormals.add(normalVector);
          YoGraphicVector contactNormalViz = new YoGraphicVector("contactNormalViz" + i, contactPointWorld, normalVector, YoAppearance.Gold());
          contactNormalViz.setDrawArrowhead(false);
-         contactNormalViz.setLineRadiusWhenOneMeterLong(0.01);
+         contactNormalViz.setLineRadiusWhenOneMeterLong(0.005);
          contactNormalsViz.add(contactNormalViz);
          yoGraphicsListRegistry.registerYoGraphic("contactPoints", contactNormalViz);
 

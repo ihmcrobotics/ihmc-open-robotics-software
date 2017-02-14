@@ -18,7 +18,7 @@ import us.ihmc.simulationconstructionset.Robot;
 
 public class RowOfDominosRobot extends Robot
 {
-   public RowOfDominosRobot()
+   public RowOfDominosRobot(int numberOfDominos)
    {
       super("RowOfDominosRobot");
 
@@ -28,8 +28,6 @@ public class RowOfDominosRobot extends Robot
       final DoubleYoVariable potentialEnergy = new DoubleYoVariable("potentialEnergy", this.getRobotsYoVariableRegistry());
       final DoubleYoVariable kineticEnergy = new DoubleYoVariable("kineticEnergy", this.getRobotsYoVariableRegistry());
       final DoubleYoVariable totalEnergy = new DoubleYoVariable("totalEnergy", this.getRobotsYoVariableRegistry());
-
-      int numberOfDominos = 15; //30;
 
       double dominoWidth = 0.024;
       double dominoDepth = 0.0075;

@@ -62,7 +62,7 @@ public class StackOfBlocksRobot
    private Link createBox(double objectHeight, Random random, int i, Robot robot)
    {
       double objectLength = 0.1;
-      double objectWidth = 0.05;
+      double objectWidth = 0.08;
       double objectMass = 0.2;
 
       Link link = new Link("object" + i);
