@@ -50,6 +50,7 @@ dependencies {
 
 	compile ihmc.getProjectDependency(":ModelFileLoader")
     compile ihmc.getProjectDependency(":IHMCJavaToolkit")
+    compile ihmc.getProjectDependency(":IHMCJavaExtensions")
     compile ihmc.getProjectDependency(":IHMCQuadrupedRobotics")
     compile ihmc.getProjectDependency(":SimulationConstructionSet")
     compile ihmc.getProjectDependency(":CommonWalkingControlModules")

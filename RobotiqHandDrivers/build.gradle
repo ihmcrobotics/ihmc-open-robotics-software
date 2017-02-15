@@ -56,6 +56,7 @@ dependencies {
 	compile ihmc.getProjectDependency(":SimulationConstructionSet")
 	compile ihmc.getProjectDependency(":IHMCWholeBodyController")
 	compile ihmc.getProjectDependency(":IHMCJavaToolkit")
+    compile ihmc.getProjectDependency(":IHMCJavaExtensions")
 	compile ihmc.getProjectDependency(":IHMCRoboticsToolkit")
 	compile ihmc.getProjectDependency(":IHMCGraphicsDescription")
 

@@ -55,6 +55,7 @@ dependencies {
 	compile ihmc.getProjectDependency(":SensorProcessing")
 	compile ihmc.getProjectDependency(":SimulationConstructionSet")
 	compile ihmc.getProjectDependency(":IHMCJavaToolkit")
+    compile ihmc.getProjectDependency(":IHMCJavaExtensions")
 	compile ihmc.getProjectDependency(":IHMCRoboticsToolkit")
 	compile ihmc.getProjectDependency(":IHMCRobotModels")
 	compile ihmc.getProjectDependency(":IHMCGraphicsDescription")

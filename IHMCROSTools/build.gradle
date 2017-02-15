@@ -86,6 +86,7 @@ dependencies {
 
  	compile ihmc.getProjectDependency(":IHMCCommunication")
 	compile ihmc.getProjectDependency(":IHMCJavaToolkit")
+    compile ihmc.getProjectDependency(":IHMCJavaExtensions")
 	compile ihmc.getProjectDependency(":IHMCRoboticsToolkit")
 
 	testCompile ihmc.getProjectDependency(":IHMCUnitTesting")
