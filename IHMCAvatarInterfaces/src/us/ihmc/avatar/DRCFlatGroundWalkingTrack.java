@@ -85,8 +85,16 @@ public class DRCFlatGroundWalkingTrack
       avatarSimulationFactory.setGuiInitialSetup(guiInitialSetup);
       avatarSimulationFactory.setHumanoidGlobalDataProducer(null);
       avatarSimulation = avatarSimulationFactory.createAvatarSimulation();
-
+      initialize();
       avatarSimulation.start();
+   }
+   
+   /**
+    * used to inject anything you need into scs before the sim starts
+    */
+   public void initialize()
+   {
+	   
    }
 
    public void attachControllerFailureListener(ControllerFailureListener listener)

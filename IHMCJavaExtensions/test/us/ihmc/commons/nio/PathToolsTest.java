@@ -1,4 +1,4 @@
-package us.ihmc.tools.io.files;
+package us.ihmc.commons.nio;
 
 import static org.junit.Assert.assertTrue;
 
@@ -12,13 +12,16 @@ import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
 import org.junit.Test;
 
+import us.ihmc.commons.nio.CommonPaths;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.tools.io.files.BasicPathVisitor;
+import us.ihmc.tools.io.files.FileTools;
+import us.ihmc.tools.io.files.PathTools;
 import us.ihmc.tools.io.printing.PrintTools;
-import us.ihmc.tools.testing.JUnitTools;
 
 public class PathToolsTest
 {
-   private static final Path TEST_RESOURCES_PATH = JUnitTools.deriveTestResourcesPath(PathToolsTest.class);
+   private static final Path TEST_RESOURCES_PATH = CommonPaths.deriveTestResourcesPath(PathToolsTest.class);
    private static final Path[] TEST_DIRECTORIES = {TEST_RESOURCES_PATH.resolve("testDir1"), TEST_RESOURCES_PATH.resolve("testDir2")};
    private static final Path[] TEST_FILES = {TEST_RESOURCES_PATH.resolve("testFile1.txt"), TEST_RESOURCES_PATH.resolve("testFile2.txt")};
    

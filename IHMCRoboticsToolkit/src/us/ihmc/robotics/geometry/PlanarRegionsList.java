@@ -228,4 +228,16 @@ public class PlanarRegionsList
 
       return new PlanarRegionsList(planarRegionsCopy);
    }
+   
+   /**
+    * Transforms the planar regions list
+    * @param rigidBodyTransform transform from current frame to desired frame
+    */
+   public void transform(RigidBodyTransform rigidBodyTransform)
+   {
+      for(int i = 0; i < regions.size(); i++)
+      {
+         regions.get(i).transform(rigidBodyTransform);
+      }
+   }
 }
