@@ -5,7 +5,6 @@ import us.ihmc.robotics.controllers.PIDController;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.trajectories.YoMinimumJerkTrajectory;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -30,7 +29,6 @@ public class PeterPlanarWalkerStateMachine
    private SideDependentList<PIDController> kneeControllers = new SideDependentList<PIDController>();
    private SideDependentList<PIDController> hipControllers = new SideDependentList<PIDController>();
 
-   private DoubleYoVariable desiredKneeExtension;
    private DoubleYoVariable desiredPitch;
    private DoubleYoVariable desiredHeight;
    private DoubleYoVariable swingTime;
@@ -44,7 +42,6 @@ public class PeterPlanarWalkerStateMachine
    private DoubleYoVariable lastStepHipAngle;
    private DoubleYoVariable stepToStepHipAngleDelta;
 
-   private DoubleYoVariable swingTimeForThisStep;
    private BooleanYoVariable initalizedKneeExtension;
    private BooleanYoVariable initalizedKneeDoubleExtension;
 
@@ -61,17 +58,16 @@ public class PeterPlanarWalkerStateMachine
 
    private FiniteStateMachineBuilder<ControllerState, ControllerEvent> stateMachineBuilder;
    private FiniteStateMachine<ControllerState, ControllerEvent> stateMachine;
-   private final YoVariable<?> timestamp;
-   private final YoPlanarWalkerTimedStep stepCommand;
+   private final DoubleYoVariable timestamp;
 
-   public PeterPlanarWalkerStateMachine(PeterPlanarWalkerRobot robot, double deltaT, RobotSide robotSide, YoVariable<?> timestamp, YoVariableRegistry parentRegistry)
+   public PeterPlanarWalkerStateMachine(PeterPlanarWalkerRobot robot, double deltaT, RobotSide robotSide, DoubleYoVariable timestamp,
+                                        YoVariableRegistry parentRegistry)
    {
       String prefix = robotSide.getLowerCaseName();
       this.robot = robot;
       this.deltaT = deltaT;
       this.timestamp = timestamp;
       this.registry = new YoVariableRegistry(prefix + getClass().getSimpleName());
-      this.desiredKneeExtension = new DoubleYoVariable("desiredKneeExtension", registry);
       this.desiredPitch = new DoubleYoVariable("desiredPitch", registry);
       this.desiredHeight = new DoubleYoVariable("desiredHeight", registry);
       this.swingTime = new DoubleYoVariable("swingTime", registry);
@@ -85,7 +81,6 @@ public class PeterPlanarWalkerStateMachine
       this.lastStepHipAngle = new DoubleYoVariable("lastStepHipAngle", registry);
       this.stepToStepHipAngleDelta = new DoubleYoVariable("stepToStepHipAngleDelta", registry);
 
-      this.swingTimeForThisStep = new DoubleYoVariable("swingTimeForThisStep", registry);
       this.initalizedKneeExtension = new BooleanYoVariable("initalizedKneeExtension", registry);
       this.initalizedKneeDoubleExtension = new BooleanYoVariable("initalizedKneeDoubleExtension", registry);
 
@@ -95,9 +90,7 @@ public class PeterPlanarWalkerStateMachine
 
       this.desiredBodyVelocity = new DoubleYoVariable("desiredBodyVelocity", registry);
       this.alphaFilterVariable = new DoubleYoVariable("alphaFilterVariable", registry);
-      this.filteredDesiredVelocity = new AlphaFilteredYoVariable("filteredDesiredVelocity", registry, alphaFilterVariable,
-                                                                   desiredBodyVelocity);
-      this.stepCommand = new YoPlanarWalkerTimedStep(prefix + "StepCommand", registry);
+      this.filteredDesiredVelocity = new AlphaFilteredYoVariable("filteredDesiredVelocity", registry, alphaFilterVariable, desiredBodyVelocity);
 
       PIDController pidController = new PIDController(robotSide.getSideNameFirstLetter() + "_Knee", registry);
       pidController.setProportionalGain(KNEE_DEFUALT_P_GAIN);
@@ -124,48 +117,61 @@ public class PeterPlanarWalkerStateMachine
       parentRegistry.addChild(registry);
    }
 
-   private void initializeStateMachine(RobotSide supportLegSide)
+   private void initializeStateMachine(RobotSide legSide)
    {
       stateMachineBuilder = new FiniteStateMachineBuilder(ControllerState.class, ControllerEvent.class, "stateMachineBuilder", registry);
 
-      stateMachineBuilder.addState(ControllerState.SUPPORT, new SupportState(supportLegSide));
-      stateMachineBuilder.addState(ControllerState.SWING, new SwingState(supportLegSide));
+      stateMachineBuilder.addState(ControllerState.SUPPORT, new SupportState(legSide));
+      stateMachineBuilder.addState(ControllerState.SWING, new SwingState(legSide));
       stateMachineBuilder.addTransition(ControllerEvent.TIMEOUT, ControllerState.SUPPORT, ControllerState.SWING);
       stateMachineBuilder.addTransition(ControllerEvent.TIMEOUT, ControllerState.SWING, ControllerState.SUPPORT);
 
-      stateMachine = stateMachineBuilder.build(ControllerState.SUPPORT);
+      if (legSide == RobotSide.RIGHT)
+      {
+         stateMachine = stateMachineBuilder.build(ControllerState.SUPPORT);
+      }
+      else
+      {
+         stateMachine = stateMachineBuilder.build(ControllerState.SWING);
+      }
    }
 
    private class SupportState implements FiniteStateMachineState<ControllerEvent>
    {
       private RobotSide supportLeg;
+      private YoVariableRegistry registry;
+      private DoubleYoVariable startTime;
+      private DoubleYoVariable timeInState;
 
       public SupportState(RobotSide robotSide)
       {
-         supportLeg = robotSide;
+         this.supportLeg = robotSide;
+         this.registry = new YoVariableRegistry(robotSide.getLowerCaseName() + "registry");
+         this.startTime = new DoubleYoVariable(robotSide.getLowerCaseName() + "startTime", registry);
+         this.timeInState = new DoubleYoVariable(robotSide.getLowerCaseName() + "timeInState", registry);
       }
 
       @Override
       public void onEntry()
       {
+         startTime.set(timestamp.getDoubleValue());
       }
 
       @Override
       public ControllerEvent process()
       {
-         double currentTime = timestamp.getValueAsDouble();
-         double liftOffTime = stepCommand.getTimeInterval().getStartTime();
-         double touchDownTime = stepCommand.getTimeInterval().getEndTime();
+         timeInState.set(timestamp.getDoubleValue() - startTime.getDoubleValue());
+         double supportTime = 0.4;
 
          controlHipToMaintainPitch(supportLeg);
 
          //add swing leg torque to stand leg
          addOppositeLegHipTorque(supportLeg);
 
-         //controlKneeToMaintainBodyHeight(supportLeg);
+         controlKneeToMaintainBodyHeight(supportLeg);
          controlKneeToPosition(supportLeg, desiredKneeStance.getDoubleValue(), 0.0);
 
-         if (currentTime >= liftOffTime && currentTime < touchDownTime)
+         if (timeInState.getDoubleValue() >= supportTime)
          {
             return ControllerEvent.TIMEOUT;
          }
@@ -184,51 +190,65 @@ public class PeterPlanarWalkerStateMachine
    private class SwingState implements FiniteStateMachineState<ControllerEvent>
    {
       private RobotSide swingLeg;
+      private YoVariableRegistry registry;
+      private DoubleYoVariable startTime;
+      private DoubleYoVariable timeInState;
 
       public SwingState(RobotSide robotSide)
       {
-         swingLeg = robotSide;
+         this.swingLeg = robotSide;
+         this.registry = new YoVariableRegistry(robotSide.getLowerCaseName() + "registry");
+         this.startTime = new DoubleYoVariable(robotSide.getLowerCaseName() + "startTime", registry);
+         this.timeInState = new DoubleYoVariable(robotSide.getLowerCaseName() + "timeInState", registry);
       }
 
       @Override
       public void onEntry()
       {
+         startTime.set(timestamp.getDoubleValue());
+         initalizedKneeExtension.set(false);
+         initalizedKneeDoubleExtension.set(false);
+         kneeMoveStartTime.set(0.0);
+
+         startingHipAngle.set(robot.getHipPosition(swingLeg));
+         double currentKneePosition = robot.getKneePosition(swingLeg);
+         double desiredRetractedPosition = 0.1;
+         trajectorySwingKnee.setParams(currentKneePosition, 0.0, 0.0, desiredRetractedPosition, 0.0, 0.0, 0.0, swingTime.getDoubleValue() / 2.0);
+
+         //retract knee
+         robot.setKneeTorque(swingLeg, -10.0);
       }
 
       @Override
       public ControllerEvent process()
       {
-         double currentTime = timestamp.getValueAsDouble();
-         double liftOffTime = stepCommand.getTimeInterval().getStartTime();
-         double touchDownTime = stepCommand.getTimeInterval().getEndTime();
-         double timeInCurrentState = currentTime - liftOffTime;
+         timeInState.set(timestamp.getDoubleValue() - startTime.getDoubleValue());
 
-         if ((timeInCurrentState > swingTimeForThisStep.getDoubleValue() / 2.0) && !initalizedKneeExtension.getBooleanValue())
+         if ((timeInState.getDoubleValue() > swingTime.getDoubleValue() / 2.0) && !initalizedKneeExtension.getBooleanValue())
          {
             double currentKneePosition = robot.getKneePosition(swingLeg);
-            trajectorySwingKnee.setParams(currentKneePosition, 0.0, 0.0, desiredKneeStance.getDoubleValue(), 0.0, 0.0, 0.0,
-                                          swingTimeForThisStep.getDoubleValue() / 2.0);
+            trajectorySwingKnee.setParams(currentKneePosition, 0.0, 0.0, desiredKneeStance.getDoubleValue(), 0.0, 0.0, 0.0, swingTime.getDoubleValue() / 2.0);
             initalizedKneeExtension.set(true);
-            kneeMoveStartTime.set(timeInCurrentState);
+            kneeMoveStartTime.set(timeInState.getDoubleValue());
          }
-         else if ((timeInCurrentState > swingTimeForThisStep.getDoubleValue() && !initalizedKneeDoubleExtension.getBooleanValue()))
+         else if ((timeInState.getDoubleValue() > swingTime.getDoubleValue() && !initalizedKneeDoubleExtension.getBooleanValue()))
          {
             double currentKneePosition = robot.getKneePosition(swingLeg);
             trajectorySwingKnee.setParams(currentKneePosition, 0.0, 0.0, desiredKneeStance.getDoubleValue() + 0.5, 0.0, 0.0, 0.0, 0.125);
             initalizedKneeDoubleExtension.set(true);
-            kneeMoveStartTime.set(timeInCurrentState);
+            kneeMoveStartTime.set(timeInState.getDoubleValue());
          }
 
-         trajectorySwingKnee.computeTrajectory(timeInCurrentState - kneeMoveStartTime.getDoubleValue());
+         trajectorySwingKnee.computeTrajectory(timeInState.getDoubleValue() - kneeMoveStartTime.getDoubleValue());
          double desiredKneePositon = trajectorySwingKnee.getPosition();
          double desiredKneeVelocity = trajectorySwingKnee.getVelocity();
          controlKneeToPosition(swingLeg, desiredKneePositon, desiredKneeVelocity);
 
          desiredSwingLegHipAngle.set(getDesireHipAngle());
          trajectorySwingHip.setParams(startingHipAngle.getDoubleValue(), 0.0, 0.0, desiredSwingLegHipAngle.getDoubleValue(), 0.0, 0.0, 0.0,
-                                      swingTimeForThisStep.getDoubleValue());
+                                      swingTime.getDoubleValue());
 
-         trajectorySwingHip.computeTrajectory(timeInCurrentState);
+         trajectorySwingHip.computeTrajectory(timeInState.getDoubleValue());
          double desiredHipAngle = trajectorySwingHip.getPosition();
          double currentHipAngle = robot.getHipPosition(swingLeg);
          double currentHipAngleRate = robot.getHipVelocity(swingLeg);
@@ -237,7 +257,7 @@ public class PeterPlanarWalkerStateMachine
          double controlEffort = pidController.compute(currentHipAngle, desiredHipAngle, currentHipAngleRate, 0.0, deltaT);
          robot.setHipTorque(swingLeg, controlEffort);
 
-         if (currentTime >= touchDownTime)
+         if (timeInState.getDoubleValue() >= swingTime.getDoubleValue())
          {
             return ControllerEvent.TIMEOUT;
          }
@@ -248,6 +268,7 @@ public class PeterPlanarWalkerStateMachine
       @Override
       public void onExit()
       {
+         lastStepHipAngle.set(desiredSwingLegHipAngle.getDoubleValue());
       }
    }
 
@@ -309,7 +330,7 @@ public class PeterPlanarWalkerStateMachine
       double controlEffort = kneeControllers.get(robotSide).compute(kneePosition, desiredPosition, kneePositionRate, desiredVelocity, deltaT);
       robot.setKneeTorque(robotSide, controlEffort);
    }
-   
+
    public FiniteStateMachine<ControllerState, ControllerEvent> getStateMachine()
    {
       return stateMachine;
