@@ -223,7 +223,7 @@ public class IHMCHumanoidBehaviorManager
             new PartialFootholdBehavior(behaviorCommunicationBridge));
 
       dispatcher.addBehavior(HumanoidBehaviorType.TEST_ICP_OPTIMIZATION,
-            new TestICPOptimizationBehavior(behaviorCommunicationBridge, referenceFrames));
+            new TestICPOptimizationBehavior(behaviorCommunicationBridge, referenceFrames, yoTime));
 
       dispatcher.addBehavior(HumanoidBehaviorType.EXAMPLE_BEHAVIOR,
             new ExampleComplexBehaviorStateMachine(behaviorCommunicationBridge, yoTime, atlasPrimitiveActions));
