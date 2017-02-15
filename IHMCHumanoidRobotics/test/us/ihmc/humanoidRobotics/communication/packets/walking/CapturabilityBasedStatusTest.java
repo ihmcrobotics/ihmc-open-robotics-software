@@ -13,13 +13,13 @@ import java.util.Random;
 import org.junit.Before;
 import org.junit.Test;
 
+import us.ihmc.commons.CommonPaths;
 import us.ihmc.communication.net.KryoStreamDeSerializer;
 import us.ihmc.communication.net.KryoStreamSerializer;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
-import us.ihmc.testing.CommonPaths;
 import us.ihmc.tools.UnitConversions;
 import us.ihmc.tools.io.files.FileTools;
 

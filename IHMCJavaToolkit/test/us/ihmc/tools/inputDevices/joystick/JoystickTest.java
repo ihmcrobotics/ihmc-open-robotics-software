@@ -10,9 +10,9 @@ import net.java.games.input.Component.Identifier;
 import net.java.games.input.Event;
 import net.java.games.input.test.ControllerReadTest;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.commons.Assertions;
+import us.ihmc.commons.RunnableThatThrows;
 import us.ihmc.continuousIntegration.IntegrationCategory;
-import us.ihmc.testing.Assertions;
-import us.ihmc.testing.RunnableThatThrows;
 import us.ihmc.tools.inputDevices.joystick.exceptions.JoystickNotFoundException;
 import us.ihmc.tools.inputDevices.joystick.virtualJoystick.VirtualJoystick;
 

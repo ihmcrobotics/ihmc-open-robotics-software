@@ -1,4 +1,4 @@
-package us.ihmc.testing;
+package us.ihmc.commons;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;

@@ -22,8 +22,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import us.ihmc.commons.CommonPaths;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.testing.CommonPaths;
 import us.ihmc.tools.io.printing.PrintTools;
 
 public class FileToolsTest

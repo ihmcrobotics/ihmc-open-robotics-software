@@ -8,9 +8,9 @@ import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.commons.Assertions;
+import us.ihmc.commons.RunnableThatThrows;
 import us.ihmc.continuousIntegration.IntegrationCategory;
-import us.ihmc.testing.Assertions;
-import us.ihmc.testing.RunnableThatThrows;
 
 @ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
 public class GradientTest

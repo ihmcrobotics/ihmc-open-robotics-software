@@ -1,4 +1,4 @@
-package us.ihmc.testing;
+package us.ihmc.commons;
 
 import org.junit.Test;
 
