@@ -435,8 +435,8 @@ public class FollowFiducialBehavior extends AbstractBehavior
    private FootstepDataListMessage createFootstepDataListFromPlan(FootstepPlan plan, int maxNumberOfStepsToTake)
    {
       FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
-      footstepDataListMessage.setSwingTime(0.5);
-      footstepDataListMessage.setTransferTime(0.1);
+      footstepDataListMessage.setDefaultSwingTime(0.5);
+      footstepDataListMessage.setDefaultTransferTime(0.1);
       int lastStepIndex = Math.min(maxNumberOfStepsToTake + 1, plan.getNumberOfSteps());
       for (int i = 1; i < lastStepIndex; i++)
       {

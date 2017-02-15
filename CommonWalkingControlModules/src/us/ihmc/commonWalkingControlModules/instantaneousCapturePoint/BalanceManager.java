@@ -1,6 +1,11 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint;
 
-import static us.ihmc.graphics3DDescription.appearance.YoAppearance.*;
+import static us.ihmc.graphicsDescription.appearance.YoAppearance.Beige;
+import static us.ihmc.graphicsDescription.appearance.YoAppearance.Black;
+import static us.ihmc.graphicsDescription.appearance.YoAppearance.BlueViolet;
+import static us.ihmc.graphicsDescription.appearance.YoAppearance.DarkRed;
+import static us.ihmc.graphicsDescription.appearance.YoAppearance.Purple;
+import static us.ihmc.graphicsDescription.appearance.YoAppearance.Yellow;
 
 import javax.vecmath.Vector3d;
 
@@ -13,16 +18,17 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.CapturePointTools;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicPosition;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicPosition.GraphicType;
-import us.ihmc.graphics3DDescription.yoGraphics.plotting.YoArtifactPosition;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPosition;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.GoHomeCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.packets.walking.CapturabilityBasedStatus;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
+import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.controllers.YoPDGains;
@@ -162,8 +168,7 @@ public class BalanceManager
       icpPlanner = new ICPPlannerWithTimeFreezer(bipedSupportPolygons, contactableFeet, capturePointPlannerParameters, registry, yoGraphicsListRegistry);
       icpPlanner.setMinimumSingleSupportTimeForDisturbanceRecovery(minimumSwingTimeForDisturbanceRecovery);
       icpPlanner.setOmega0(momentumBasedController.getOmega0());
-      icpPlanner.setSingleSupportTime(walkingControllerParameters.getDefaultSwingTime());
-      icpPlanner.setDoubleSupportTime(walkingControllerParameters.getDefaultTransferTime());
+      icpPlanner.setFinalTransferTime(walkingControllerParameters.getDefaultTransferTime());
 
       safeDistanceFromSupportEdgesToStopCancelICPPlan.set(0.05);
       distanceToShrinkSupportPolygonWhenHoldingCurrent.set(0.08);
@@ -237,9 +242,9 @@ public class BalanceManager
       linearMomentumRateOfChangeControlModule.setHighMomentumWeightForRecovery(highLinearWeight);
    }
 
-   public void addFootstepToPlan(Footstep footstep)
+   public void addFootstepToPlan(Footstep footstep, FootstepTiming timing)
    {
-      icpPlanner.addFootstepToPlan(footstep);
+      icpPlanner.addFootstepToPlan(footstep, timing);
       linearMomentumRateOfChangeControlModule.addFootstepToPlan(footstep);
    }
 
@@ -394,11 +399,6 @@ public class BalanceManager
       yoDesiredICPVelocity.getFrameTuple2dIncludingFrame(desiredICPVelocityToPack);
    }
 
-   public double getInitialTransferDuration()
-   {
-      return icpPlanner.getInitialTransferDuration();
-   }
-
    public MomentumRateCommand getInverseDynamicsCommand()
    {
       return linearMomentumRateOfChangeControlModule.getMomentumRateCommand();
@@ -447,36 +447,39 @@ public class BalanceManager
       pushRecoveryControlModule.initializeParametersForDoubleSupportPushRecovery();
    }
 
-   public void initializeICPPlanForSingleSupport(double swingTime, double transferTime)
+   public void initializeICPPlanForSingleSupport(double defaultSwingTime, double defaultTransferTime, double finalTransferTime)
    {
-      setSingleSupportTime(swingTime);
-      setDoubleSupportTime(transferTime);
+      setDefaultSingleSupportTime(defaultSwingTime);
+      setDefaultDoubleSupportTime(defaultTransferTime);
+      setFinalTransferTime(finalTransferTime);
       icpPlanner.initializeForSingleSupport(yoTime.getDoubleValue());
       linearMomentumRateOfChangeControlModule.initializeForSingleSupport();
    }
 
-   public void initializeICPPlanForStanding(double swingTime, double transferTime)
+   public void initializeICPPlanForStanding(double defaultSwingTime, double defaultTransferTime, double finalTransferTime)
    {
       if (holdICPToCurrentCoMLocationInNextDoubleSupport.getBooleanValue())
       {
          requestICPPlannerToHoldCurrentCoM();
          holdICPToCurrentCoMLocationInNextDoubleSupport.set(false);
       }
-      setSingleSupportTime(swingTime);
-      setDoubleSupportTime(transferTime);
+      setDefaultSingleSupportTime(defaultSwingTime);
+      setDefaultDoubleSupportTime(defaultTransferTime);
+      setFinalTransferTime(finalTransferTime);
       icpPlanner.initializeForStanding(yoTime.getDoubleValue());
       linearMomentumRateOfChangeControlModule.initializeForStanding();
    }
 
-   public void initializeICPPlanForTransfer(double swingTime, double transferTime)
+   public void initializeICPPlanForTransfer(double defaultSwingTime, double defaultTransferTime, double finalTransferTime)
    {
       if (holdICPToCurrentCoMLocationInNextDoubleSupport.getBooleanValue())
       {
          requestICPPlannerToHoldCurrentCoM();
          holdICPToCurrentCoMLocationInNextDoubleSupport.set(false);
       }
-      setSingleSupportTime(swingTime);
-      setDoubleSupportTime(transferTime);
+      setDefaultSingleSupportTime(defaultSwingTime);
+      setDefaultDoubleSupportTime(defaultTransferTime);
+      setFinalTransferTime(finalTransferTime);
       icpPlanner.initializeForTransfer(yoTime.getDoubleValue());
       linearMomentumRateOfChangeControlModule.initializeForTransfer();
    }
@@ -586,16 +589,19 @@ public class BalanceManager
       icpPlanner.holdCurrentICP(yoTime.getDoubleValue(), centerOfMassPosition);
    }
 
-   private void setDoubleSupportTime(double newDoubleSupportTime)
+   private void setDefaultDoubleSupportTime(double defaultDoubleSupportTime)
    {
-      icpPlanner.setDoubleSupportTime(newDoubleSupportTime);
-      linearMomentumRateOfChangeControlModule.setDoubleSupportDuration(newDoubleSupportTime);
+      linearMomentumRateOfChangeControlModule.setDoubleSupportDuration(defaultDoubleSupportTime);
    }
 
-   private void setSingleSupportTime(double newSingleSupportTime)
+   private void setDefaultSingleSupportTime(double defaultSingleSupportTime)
    {
-      icpPlanner.setSingleSupportTime(newSingleSupportTime);
-      linearMomentumRateOfChangeControlModule.setSingleSupportDuration(newSingleSupportTime);
+      linearMomentumRateOfChangeControlModule.setSingleSupportDuration(defaultSingleSupportTime);
+   }
+
+   private void setFinalTransferTime(double finalTransferTime)
+   {
+      icpPlanner.setFinalTransferTime(finalTransferTime);
    }
 
    /**

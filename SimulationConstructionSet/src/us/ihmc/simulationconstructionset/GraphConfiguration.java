@@ -4,15 +4,6 @@ import java.util.StringTokenizer;
 
 import us.ihmc.tools.io.xml.XMLReaderUtility;
 
-/**
- * <p>Title: SimulationConstructionSet</p>
- * <p>Description: </p>
- * <p>Copyright: Copyright (c) 2000</p>
- * <p>Company: Yobotics, Inc.</p>
- * @author not attributable
- * @version 1.0
- */
-
 public class GraphConfiguration
 {
    private final String name;

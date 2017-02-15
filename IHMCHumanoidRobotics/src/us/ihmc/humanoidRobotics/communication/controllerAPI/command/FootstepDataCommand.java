@@ -24,6 +24,13 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
    private final Quat4d orientation = new Quat4d();
    private final RecyclingArrayList<Point2d> predictedContactPoints = new RecyclingArrayList<>(4, Point2d.class);
 
+   private boolean hasTimings = false;
+   private double swingTime = Double.NaN;
+   private double transferTime = Double.NaN;
+
+   private boolean hasAbsoluteTime = false;
+   private double swingStartTime = Double.NaN;
+
    public FootstepDataCommand()
    {
       clear();
@@ -39,6 +46,14 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
       position.set(0.0, 0.0, 0.0);
       orientation.set(0.0, 0.0, 0.0, 1.0);
       predictedContactPoints.clear();
+      trajectoryWaypoints.clear();
+
+      hasTimings = false;
+      swingTime = Double.NaN;
+      transferTime = Double.NaN;
+
+      hasAbsoluteTime = false;
+      swingStartTime = Double.NaN;
    }
 
    @Override
@@ -64,6 +79,13 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
          for (int i = 0; i < originalPredictedContactPoints.size(); i++)
             predictedContactPoints.add().set(originalPredictedContactPoints.get(i));
       }
+
+      hasTimings = message.hasTimings;
+      swingTime = message.swingTime;
+      transferTime = message.transferTime;
+
+      hasAbsoluteTime = message.hasAbsoluteTime;
+      swingStartTime = message.swingStartTime;
    }
 
    @Override
@@ -83,6 +105,13 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
       predictedContactPoints.clear();
       for (int i = 0; i < otherPredictedContactPoints.size(); i++)
          predictedContactPoints.add().set(otherPredictedContactPoints.get(i));
+
+      hasTimings = other.hasTimings;
+      swingTime = other.swingTime;
+      transferTime = other.transferTime;
+
+      hasAbsoluteTime = other.hasAbsoluteTime;
+      swingStartTime = other.swingStartTime;
    }
 
    public void setRobotSide(RobotSide robotSide)
@@ -156,6 +185,31 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
    public RecyclingArrayList<Point2d> getPredictedContactPoints()
    {
       return predictedContactPoints;
+   }
+
+   public boolean hasTimings()
+   {
+      return hasTimings;
+   }
+
+   public double getSwingTime()
+   {
+      return swingTime;
+   }
+
+   public double getTransferTime()
+   {
+      return transferTime;
+   }
+
+   public boolean hasAbsoluteTime()
+   {
+      return hasAbsoluteTime;
+   }
+
+   public double getSwingStartTime()
+   {
+      return swingStartTime;
    }
 
    @Override

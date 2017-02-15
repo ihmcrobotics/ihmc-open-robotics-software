@@ -1,33 +1,32 @@
 package us.ihmc.avatar;
 
+import static org.junit.Assert.assertTrue;
+
+import javax.vecmath.Point3d;
+import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
 import org.junit.After;
 import org.junit.Before;
 
-import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.initialSetup.DRCGuiInitialSetup;
-import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
-import us.ihmc.avatar.initialSetup.DRCSCSInitialSetup;
+import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
-import us.ihmc.graphics3DAdapter.GroundProfile3D;
-import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage.FootstepOrigin;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotModels.visualizer.RobotVisualizer;
-import us.ihmc.robotics.controllers.ControllerFailureException;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
+import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.stateMachines.StateTransitionCondition;
+import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransitionCondition;
 import us.ihmc.simulationToolkit.controllers.PushRobotController;
-import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
-import us.ihmc.simulationconstructionset.util.ground.FlatGroundProfile;
-import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
+import us.ihmc.simulationconstructionset.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.io.printing.PrintTools;
@@ -36,22 +35,19 @@ import us.ihmc.tools.thread.ThreadTools;
 public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterface
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+   static
+   {
+      simulationTestingParameters.setRunMultiThreaded(false);
+   }
 
-   private BlockingSimulationRunner blockingSimulationRunner;
+   private DRCSimulationTestHelper drcSimulationTestHelper;
 
-   private DRCFlatGroundWalkingTrack drcFlatGroundWalkingTrack;
-
-   private static final boolean VISUALIZE_FORCE = false;
-
-   private double swingTime, transferTime;
+   private double swingTime = 0.6;
+   private double transferTime = 0.25;
 
    private SideDependentList<StateTransitionCondition> swingStartConditions = new SideDependentList<>();
-
    private SideDependentList<StateTransitionCondition> swingFinishConditions = new SideDependentList<>();
-
    private PushRobotController pushRobotController;
-
-   private RobotVisualizer robotVisualizer;
 
    @Before
    public void showMemoryUsageBeforeTest()
@@ -68,57 +64,18 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
       }
 
       // Do this here in case a test fails. That way the memory will be recycled.
-      if (blockingSimulationRunner != null)
+      if (drcSimulationTestHelper != null)
       {
-         blockingSimulationRunner.destroySimulation();
-         blockingSimulationRunner = null;
+         drcSimulationTestHelper.destroySimulation();
+         drcSimulationTestHelper = null;
       }
 
-      if (drcFlatGroundWalkingTrack != null)
-      {
-         drcFlatGroundWalkingTrack.destroySimulation();
-         drcFlatGroundWalkingTrack = null;
-      }
-
-      if (robotVisualizer != null)
-      {
-         robotVisualizer.close();
-         robotVisualizer = null;
-      }
-
-      pushRobotController = null;
-      swingStartConditions = null;
-      swingFinishConditions = null;
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-   public void testForVideo() throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
+   public void testPushLeftEarlySwing() throws SimulationExceededMaximumTimeException
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
-      DRCRobotModel robotModel = getRobotModel();
-      setupTest(robotModel);
-
-      // setup all parameters
-      Vector3d forceDirection = new Vector3d(0.0, 1.0, 0.0);
-      double magnitude = 150.0;
-      double duration = 0.5;
-      double percentInSwing = 0.05;
-      RobotSide side = RobotSide.LEFT;
-
-      // apply the push
-      testPush(forceDirection, magnitude, duration, percentInSwing, side, swingStartConditions, swingTime);
-      if (simulationTestingParameters.getCreateSCSVideos())
-      {
-         BambooTools.createVideoAndDataWithDateTimeClassMethodAndShareOnSharedDriveIfAvailable(robotModel.getSimpleRobotName(),
-               drcFlatGroundWalkingTrack.getSimulationConstructionSet(), 1);
-      }
-      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
-   }
-
-   public void testPushLeftEarlySwing() throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
-   {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
-      setupTest(getRobotModel());
+      setupTest();
 
       // setup all parameters
       Vector3d forceDirection = new Vector3d(0.0, 1.0, 0.0);
@@ -129,13 +86,11 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
 
       // apply the push
       testPush(forceDirection, magnitude, duration, percentInSwing, side, swingStartConditions, swingTime);
-      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-   public void testPushRightLateSwing() throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
+   public void testPushRightLateSwing() throws SimulationExceededMaximumTimeException
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
-      setupTest(getRobotModel());
+      setupTest();
 
       // setup all parameters
       Vector3d forceDirection = new Vector3d(0.0, 1.0, 0.0);
@@ -146,13 +101,11 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
 
       // apply the push
       testPush(forceDirection, magnitude, duration, percentInSwing, side, swingStartConditions, swingTime);
-      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-   public void testPushRightThenLeftMidSwing() throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
+   public void testPushRightThenLeftMidSwing() throws SimulationExceededMaximumTimeException
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
-      setupTest(getRobotModel());
+      setupTest();
 
       // setup all parameters
       Vector3d forceDirection = new Vector3d(0.0, -1.0, 0.0);
@@ -172,13 +125,11 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
 
       // apply the push
       testPush(forceDirection, magnitude, duration, percentInSwing, side, swingStartConditions, swingTime);
-      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-   public void testPushTowardsTheBack() throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
+   public void testPushTowardsTheBack() throws SimulationExceededMaximumTimeException
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
-      setupTest(getRobotModel());
+      setupTest();
 
       // setup all parameters
       Vector3d forceDirection = new Vector3d(-0.5, 1.0, 0.0);
@@ -189,13 +140,11 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
 
       // apply the push
       testPush(forceDirection, magnitude, duration, percentInSwing, side, swingStartConditions, swingTime);
-      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-   public void testPushTowardsTheFront() throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
+   public void testPushTowardsTheFront() throws SimulationExceededMaximumTimeException
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
-      setupTest(getRobotModel());
+      setupTest();
 
       // setup all parameters
       Vector3d forceDirection = new Vector3d(0.5, 1.0, 0.0);
@@ -206,13 +155,11 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
 
       // apply the push
       testPush(forceDirection, magnitude, duration, percentInSwing, side, swingStartConditions, swingTime);
-      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-   public void testPushRightInitialTransferState() throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
+   public void testPushRightInitialTransferState() throws SimulationExceededMaximumTimeException
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
-      setupTest(getRobotModel());
+      setupTest();
 
       // setup all parameters
       Vector3d forceDirection = new Vector3d(0.0, -1.0, 0.0);
@@ -233,13 +180,11 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
 
       // apply the push
       testPush(forceDirection, magnitude, duration, percentInSwing, side, swingStartConditions, swingTime);
-      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-   public void testPushLeftInitialTransferState() throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
+   public void testPushLeftInitialTransferState() throws SimulationExceededMaximumTimeException
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
-      setupTest(getRobotModel());
+      setupTest();
 
       // setup all parameters
       Vector3d forceDirection = new Vector3d(0.0, -1.0, 0.0);
@@ -260,13 +205,11 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
 
       // apply the push
       testPush(forceDirection, magnitude, duration, percentInSwing, side, swingStartConditions, swingTime);
-      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-   public void testPushRightTransferState() throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
+   public void testPushRightTransferState() throws SimulationExceededMaximumTimeException
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
-      setupTest(getRobotModel());
+      setupTest();
 
       // setup all parameters
       Vector3d forceDirection = new Vector3d(0.0, -1.0, 0.0);
@@ -281,35 +224,20 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
 
       // apply the push
       testPush(forceDirection, magnitude, duration, percentInTransferState, side, swingFinishConditions, transferTime);
-      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-   private void setupTest(DRCRobotModel robotModel) throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
+   private void setupTest() throws SimulationExceededMaximumTimeException
    {
-      boolean runMultiThreaded = false;
-      setupTrack(runMultiThreaded, robotModel);
-      FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
-      swingTime = robotModel.getWalkingControllerParameters().getDefaultSwingTime();
-      transferTime = robotModel.getWalkingControllerParameters().getDefaultTransferTime();
-      pushRobotController = new PushRobotController(drcFlatGroundWalkingTrack.getAvatarSimulation().getHumanoidFloatingRootJointRobot(), fullRobotModel);
-      SimulationConstructionSet scs = drcFlatGroundWalkingTrack.getSimulationConstructionSet();
-      CameraConfiguration cameraConfiguration = new CameraConfiguration("testCamera");
-      cameraConfiguration.setCameraFix(0.6, 0.0, 0.6);
-      cameraConfiguration.setCameraPosition(10.0, 3.0, 3.0);
-      cameraConfiguration.setCameraTracking(true, true, false, false);
-      scs.setupCamera(cameraConfiguration);
-      scs.selectCamera("testCamera");
-
-      if (VISUALIZE_FORCE)
-      {
-         scs.addYoGraphic(pushRobotController.getForceVisualizer());
-      }
-
-      blockingSimulationRunner = new BlockingSimulationRunner(scs, 1000.0);
+      FlatGroundEnvironment flatGround = new FlatGroundEnvironment();
+      DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
+      drcSimulationTestHelper = new DRCSimulationTestHelper(flatGround, "DRCSimpleFlatGroundScriptTest", selectedLocation, simulationTestingParameters, getRobotModel());
+      FullHumanoidRobotModel fullRobotModel = getRobotModel().createFullRobotModel();
+      pushRobotController = new PushRobotController(drcSimulationTestHelper.getRobot(), fullRobotModel);
+      SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
+      scs.addYoGraphic(pushRobotController.getForceVisualizer());
+      drcSimulationTestHelper.setupCameraForUnitTest(new Point3d(0.6, 0.0, 0.6), new Point3d(10.0, 3.0, 3.0));
 
       // get YoVariables
-      BooleanYoVariable walk = (BooleanYoVariable) scs.getVariable("ComponentBasedFootstepDataMessageGenerator", "walk");
-      BooleanYoVariable enable = (BooleanYoVariable) scs.getVariable("PushRecoveryControlModule", "enablePushRecovery");
       for (RobotSide robotSide : RobotSide.values)
       {
          String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
@@ -324,33 +252,46 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
          swingFinishConditions.put(robotSide, new DoubleSupportStartCondition(walkingState, robotSide));
       }
 
-      // simulate for a while
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
+      BooleanYoVariable enable = (BooleanYoVariable) scs.getVariable("PushRecoveryControlModule", "enablePushRecovery");
       enable.set(true);
-      walk.set(false);
-      blockingSimulationRunner.simulateAndBlock(1.0);
-      walk.set(true);
-      blockingSimulationRunner.simulateAndBlock(2.0);
    }
 
-   private void setupTrack(boolean runMultiThreaded, DRCRobotModel robotModel)
+   private void walkForward() throws SimulationExceededMaximumTimeException
    {
-      DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(true, false, simulationTestingParameters);
-      GroundProfile3D groundProfile = new FlatGroundProfile();
-      DRCSCSInitialSetup scsInitialSetup = new DRCSCSInitialSetup(groundProfile, robotModel.getSimulateDT());
-      scsInitialSetup.setInitializeEstimatorToActual(true);
-      scsInitialSetup.setDrawGroundProfile(true);
-      scsInitialSetup.setRunMultiThreaded(runMultiThreaded);
-      DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup = robotModel.getDefaultRobotInitialSetup(0.0, 0.0);
-      drcFlatGroundWalkingTrack = new DRCFlatGroundWalkingTrack(robotInitialSetup, guiInitialSetup, scsInitialSetup, true, false, robotModel);
+      double stepLength = 0.3;
+      double stepWidth = 0.14;
+      int steps = 10;
+
+      ReferenceFrame pelvisFrame = drcSimulationTestHelper.getSDFFullRobotModel().getPelvis().getBodyFixedFrame();
+
+      FootstepDataListMessage footsteps = new FootstepDataListMessage(swingTime, transferTime);
+      for (int i = 1; i <= steps; i++)
+      {
+         RobotSide robotSide = i%2 == 0 ? RobotSide.LEFT : RobotSide.RIGHT;
+         double footstepY = robotSide == RobotSide.LEFT ? stepWidth : -stepWidth;
+         double footstepX = stepLength * i;
+         FramePoint location = new FramePoint(pelvisFrame, footstepX, footstepY, 0.0);
+         location.changeFrame(ReferenceFrame.getWorldFrame());
+         location.setZ(0.0);
+         Quat4d orientation = new Quat4d(0.0, 0.0, 0.0, 1.0);
+         FootstepDataMessage footstepData = new FootstepDataMessage(robotSide, location.getPoint(), orientation);
+         footstepData.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
+         footsteps.add(footstepData);
+      }
+
+      drcSimulationTestHelper.send(footsteps);
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
    }
 
    private void testPush(Vector3d forceDirection, double magnitude, double duration, double percentInState, RobotSide side,
          SideDependentList<StateTransitionCondition> condition, double stateTime)
-               throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
+               throws SimulationExceededMaximumTimeException
    {
+      walkForward();
       double delay = stateTime * percentInState;
       pushRobotController.applyForceDelayed(condition.get(side), delay, forceDirection, magnitude, duration);
-      blockingSimulationRunner.simulateAndBlock(8.0);
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0));
    }
 
    private class SingleSupportStartCondition implements StateTransitionCondition

@@ -5,10 +5,10 @@ import java.util.List;
 
 import javax.vecmath.Point2d;
 
-import us.ihmc.graphics3DDescription.appearance.AppearanceDefinition;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicCoordinateSystem;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicPolygon;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolygon;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -80,7 +80,6 @@ public class FootstepVisualizer
    public void hide()
    {
       yoFootstepPose.setToNaN();
-      yoFoothold.hide();
    }
 
    public RobotSide getRobotSide()

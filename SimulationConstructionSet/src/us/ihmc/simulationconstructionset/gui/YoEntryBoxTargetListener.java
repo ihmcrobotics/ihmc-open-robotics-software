@@ -21,15 +21,18 @@ public class YoEntryBoxTargetListener implements DropTargetListener
       this.yoEntryBox = yoEntryBox;
    }
 
+   @Override
    public void dragEnter(DropTargetDragEvent dtde)
    {
    }
 
+   @Override
    public void dragExit(DropTargetEvent dte)
    {
       this.yoEntryBox.setCursor(notDroppableCursor);
    }
 
+   @Override
    public void dragOver(DropTargetDragEvent dtde)
    {
       YoGraph.setRecipientOfDrag(yoEntryBox);
@@ -47,13 +50,14 @@ public class YoEntryBoxTargetListener implements DropTargetListener
       }
    }
 
+   @Override
    public void drop(DropTargetDropEvent dtde)
    {
       YoGraph.setRecipientOfDrag(yoEntryBox);
 
       if ((YoGraph.getSourceOfDrag() == null) || (!YoGraph.getSourceOfDrag().equals(yoEntryBox) &&!(YoGraph.getSourceOfDrag() instanceof YoEntryBox)))
       {
-         YoVariable v = yoEntryBox.getSelectedVariableHolder().getSelectedVariable();
+         YoVariable<?> v = yoEntryBox.getSelectedVariableHolder().getSelectedVariable();
          if (v != null)
             yoEntryBox.addVariable(v);
       }
@@ -64,6 +68,7 @@ public class YoEntryBoxTargetListener implements DropTargetListener
       }
    }
 
+   @Override
    public void dropActionChanged(DropTargetDragEvent dtde)
    {
       YoGraph.setActionPerformedByDragAndDrop(dtde.getDropAction());

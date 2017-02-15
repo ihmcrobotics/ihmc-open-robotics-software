@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.graphics3DAdapter.GroundProfile3D;
+import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -137,16 +137,19 @@ public class LinearStickSlipGroundContactModel implements GroundContactModel
       this.groundBz.set(zDamping);
    }
 
+   @Override
    public void setGroundProfile3D(GroundProfile3D profile3D)
    {
       this.groundProfile3D = profile3D;
    }
 
+   @Override
    public GroundProfile3D getGroundProfile3D()
    {
       return groundProfile3D;
    }
 
+   @Override
    public void doGroundContact()
    {
       if (groundAlphaStick.getDoubleValue() < groundAlphaSlip.getDoubleValue())

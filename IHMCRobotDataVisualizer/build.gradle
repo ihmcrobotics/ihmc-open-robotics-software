@@ -57,15 +57,15 @@ dependencies {
    compile group: 'net.sourceforge.jmatio', name: 'jmatio', version: '1.0'
    compile group: 'us.ihmc', name: 'IHMCVideoCodecs', version: '2.0.12'
    
-   compile ihmc.getProjectDependency(":Plotting")
-   compile ihmc.getProjectDependency(":SDFLoader")
+   compile ihmc.getProjectDependency(":ModelFileLoader")
    compile ihmc.getProjectDependency(":SimulationConstructionSet")
    compile ihmc.getProjectDependency(":IHMCCommunication")
    compile ihmc.getProjectDependency(":IHMCJavaFXToolkit")
    compile ihmc.getProjectDependency(":IHMCJavaToolkit")
+    compile ihmc.getProjectDependency(":IHMCJavaExtensions")
    compile ihmc.getProjectDependency(":IHMCHumanoidRobotics")
    compile ihmc.getProjectDependency(":IHMCRoboticsToolkit")
-   compile ihmc.getProjectDependency(":IHMCGraphics3DDescription")
+   compile ihmc.getProjectDependency(":IHMCGraphicsDescription")
     compile ihmc.getProjectDependency(":IHMCRobotDescription")
    compile ihmc.getProjectDependency(":IHMCRobotDataLogger")
 }

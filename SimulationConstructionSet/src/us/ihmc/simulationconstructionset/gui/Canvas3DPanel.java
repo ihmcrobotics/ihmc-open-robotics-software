@@ -55,22 +55,27 @@ public class Canvas3DPanel extends JPanel implements MouseListener
       return view;
    }
 
+   @Override
    public void mouseClicked(MouseEvent evt)
    {
    }
 
+   @Override
    public void mouseEntered(MouseEvent evt)
    {
    }
 
+   @Override
    public void mouseExited(MouseEvent evt)
    {
    }
 
+   @Override
    public void mouseReleased(MouseEvent evt)
    {
    }
 
+   @Override
    public void mousePressed(MouseEvent evt)
    {
       // System.out.println("Mouse Pressed in Canvas3DPanel!" + view); //.getCamera());
@@ -116,6 +121,7 @@ public class Canvas3DPanel extends JPanel implements MouseListener
          this.runCommandsExecutor = runCommandsExecutor;
       }
 
+      @Override
       public void keyTyped(KeyEvent keyEvent)
       {
          if (keyEvent.getKeyChar() == ' ')
@@ -130,10 +136,12 @@ public class Canvas3DPanel extends JPanel implements MouseListener
 
       }
 
+      @Override
       public void keyReleased(KeyEvent e)
       {
       }
 
+      @Override
       public void keyPressed(KeyEvent e)
       {
       }

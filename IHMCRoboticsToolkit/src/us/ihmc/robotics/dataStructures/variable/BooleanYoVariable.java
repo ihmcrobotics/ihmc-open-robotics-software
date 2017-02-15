@@ -63,6 +63,7 @@ public class BooleanYoVariable extends YoVariable<BooleanYoVariable>
       return false;
    }
 
+   @Override
    public void setValueFromDouble(double value, boolean notifyListeners)
    {
       set(convertDoubleToBoolean(value), notifyListeners);
@@ -76,6 +77,7 @@ public class BooleanYoVariable extends YoVariable<BooleanYoVariable>
          return false;
    }
 
+   @Override
    public double getValueAsDouble()
    {
       double returnValue = 0.0;
@@ -88,6 +90,7 @@ public class BooleanYoVariable extends YoVariable<BooleanYoVariable>
       return returnValue;
    }
 
+   @Override
    public String toString()
    {
       StringBuffer retBuffer = new StringBuffer();
@@ -103,11 +106,13 @@ public class BooleanYoVariable extends YoVariable<BooleanYoVariable>
     *
     * @param stringBuffer StringBuffer to which the value will be appended
     */
+   @Override
    public void getValueString(StringBuffer stringBuffer)
    {
       stringBuffer.append(val);
    }
 
+   @Override
    public void getValueStringFromDouble(StringBuffer stringBuffer, double doubleValue)
    {
       stringBuffer.append(convertDoubleToBoolean(doubleValue));

@@ -64,6 +64,7 @@ public class YoWhiteBoardReadController implements RobotController, SensorProces
       this.readOnInitialize = readOnInitialize;
    }
 
+   @Override
    public void doControl()
    {
       if ((ticksTillNextRead == null) || (ticksTillNextRead.getIntegerValue() <= 0))
@@ -79,27 +80,32 @@ public class YoWhiteBoardReadController implements RobotController, SensorProces
       }
    }
 
+   @Override
    public YoVariableRegistry getYoVariableRegistry()
    {
       return registry;
    }
 
+   @Override
    public String getName()
    {
       return "YoWhiteBoardReadController";
    }
 
+   @Override
    public void initialize()
    {
       if (readOnInitialize)
          read(true);
    }
 
+   @Override
    public void update()
    {
       doControl();
    }
 
+   @Override
    public String getDescription()
    {
       return "YoWhiteBoardReadController";

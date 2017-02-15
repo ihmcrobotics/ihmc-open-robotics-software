@@ -274,8 +274,8 @@ public class FootStepPlannerToLocationBehavior extends AbstractBehavior
    private FootstepDataListMessage createFootstepDataListFromPlan(FootstepPlan plan, int maxNumberOfStepsToTake)
    {
       FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
-      footstepDataListMessage.setSwingTime(swingTime.getDoubleValue());
-      footstepDataListMessage.setTransferTime(transferTime.getDoubleValue());
+      footstepDataListMessage.setDefaultSwingTime(swingTime.getDoubleValue());
+      footstepDataListMessage.setDefaultTransferTime(transferTime.getDoubleValue());
       int lastStepIndex = Math.min(maxNumberOfStepsToTake + 1, plan.getNumberOfSteps());
       for (int i = 1; i < lastStepIndex; i++)
       {

@@ -57,6 +57,7 @@ public class DummyOneDegreeOfFreedomJoint extends OneDegreeOfFreedomJoint
       return this.jointVars;
    }
 
+   @Override
    protected void update()
    {
       this.jointTransform3D.setIdentity();

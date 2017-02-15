@@ -41,17 +41,34 @@ dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.11'
 
     compile group: 'javax.vecmath', name: 'vecmath', version: '1.5.2'
-    compile group: 'org.ejml', name: 'dense64', version: '0.28'
-    compile group: 'org.ejml', name: 'core', version: '0.28'
+    compile group: 'org.ejml', name: 'dense64', version: '0.30'
+    compile group: 'org.ejml', name: 'core', version: '0.30'
+    compile "org.apache.commons:commons-lang3:3.4"
+    compile "us.ihmc.thirdparty.jinput:jinput:160414"
+    
+    testCompile group: 'us.ihmc', name: 'ihmc-continuous-integration-framework', version: '0.9.4'
 
+	compile ihmc.getProjectDependency(":ModelFileLoader")
     compile ihmc.getProjectDependency(":IHMCJavaToolkit")
+    compile ihmc.getProjectDependency(":IHMCJavaExtensions")
+    compile ihmc.getProjectDependency(":IHMCQuadrupedRobotics")
     compile ihmc.getProjectDependency(":SimulationConstructionSet")
     compile ihmc.getProjectDependency(":CommonWalkingControlModules")
-    compile ihmc.getProjectDependency(":Graphics3DAdapter")
+    compile ihmc.getProjectDependency(":IHMCJMonkeyEngineToolkit")
     compile ihmc.getProjectDependency(":IHMCRoboticsToolkit")
     compile ihmc.getProjectDependency(":IHMCRobotDescription")
-    compile ihmc.getProjectDependency(":IHMCGraphics3DDescription")
+    compile ihmc.getProjectDependency(":IHMCGraphicsDescription")
+    compile ihmc.getProjectDependency(":ModelFileLoader")
+    
+    compile ihmc.getProjectDependency(":IHMCRobotDataLogger")
+    compile ihmc.getProjectDependency(":IHMCHumanoidRobotics")
+    compile ihmc.getProjectDependency(":SensorProcessing")
+    compile ihmc.getProjectDependency(":IHMCRobotModels")
+    compile ihmc.getProjectDependency(":IHMCSimulationToolkit")
+    
     testCompile ihmc.getProjectDependency(":IHMCUnitTesting")
+	testCompile ihmc.getProjectTestDependency(":IHMCRoboticsToolkit")
+	testCompile ihmc.getProjectTestDependency(":IHMCJavaExtensions")
 }
 
 jar {

@@ -11,9 +11,9 @@ import us.ihmc.communication.net.NetClassList;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.communication.util.NetworkPorts;
-import us.ihmc.graphics3DAdapter.GroundProfile3D;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.quadrupedRobotics.QuadrupedSimulationController;
 import us.ihmc.quadrupedRobotics.communication.QuadrupedGlobalDataProducer;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerManager;
@@ -63,7 +63,7 @@ import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
-import us.ihmc.simulationconstructionset.gui.tools.VisualizerUtils;
+import us.ihmc.simulationconstructionset.gui.tools.SimulationOverheadPlotterFactory;
 import us.ihmc.simulationconstructionset.util.LinearGroundContactModel;
 import us.ihmc.simulationconstructionset.util.ground.AlternatingSlopesGroundProfile;
 import us.ihmc.simulationconstructionset.util.ground.FlatGroundProfile;
@@ -249,7 +249,7 @@ public class QuadrupedSimulationFactory
 
    private void createHeadController()
    {
-      if (headControllerFactory.get() != null)
+      if (headControllerFactory.hasValue())
       {
          headControllerFactory.get().setControlDt(controlDT.get());
          headControllerFactory.get().setFullRobotModel(fullRobotModel.get());
@@ -313,7 +313,7 @@ public class QuadrupedSimulationFactory
 
    private void createGroundContactModel()
    {
-      if (providedGroundProfile3D.get() == null)
+      if (!providedGroundProfile3D.hasValue())
       {
          switch (groundContactModelType.get())
          {
@@ -400,10 +400,7 @@ public class QuadrupedSimulationFactory
 
    public SimulationConstructionSet createSimulation() throws IOException
    {
-      simulatedElasticityParameters.setDefaultValue(null);
       groundContactModelType.setDefaultValue(QuadrupedGroundContactModelType.FLAT);
-      headControllerFactory.setDefaultValue(null);
-      providedGroundProfile3D.setDefaultValue(null);
       usePushRobotController.setDefaultValue(false);
       footSwitchType.setDefaultValue(FootSwitchType.TouchdownBased);
       
@@ -440,12 +437,11 @@ public class QuadrupedSimulationFactory
          scs.setCameraTracking(useTrackAndDolly.get(), useTrackAndDolly.get(), useTrackAndDolly.get(), useTrackAndDolly.get());
          scs.setCameraDolly(useTrackAndDolly.get(), useTrackAndDolly.get(), useTrackAndDolly.get(), false);
          scs.setCameraDollyOffsets(4.0, 4.0, 1.0);
-         if (showPlotter.get())
-         {
-            VisualizerUtils.createOverheadPlotter(scs, false, "centerOfMass", yoGraphicsListRegistry);
-            VisualizerUtils.createOverheadPlotterInSeparateWindow(scs, false, "centerOfMass", yoGraphicsListRegistryForDetachedOverhead);
-            scs.getStandardSimulationGUI().selectPanel("Plotter");
-         }
+         SimulationOverheadPlotterFactory simulationOverheadPlotterFactory = scs.createSimulationOverheadPlotterFactory();
+         simulationOverheadPlotterFactory.setVariableNameToTrack("centerOfMass");
+         simulationOverheadPlotterFactory.addYoGraphicsListRegistries(yoGraphicsListRegistry);
+         simulationOverheadPlotterFactory.setShowOnStart(showPlotter.get());
+         simulationOverheadPlotterFactory.createOverheadPlotter();
       }
       
       FactoryTools.disposeFactory(this);
@@ -457,7 +453,7 @@ public class QuadrupedSimulationFactory
 
    private void setupJointElasticity()
    {
-      if(simulatedElasticityParameters.get() != null)
+      if(simulatedElasticityParameters.hasValue())
       {
          FloatingRootJointRobot floatingRootJointRobot = sdfRobot.get();
          SpringJointOutputWriter springJointOutputWriter = new SpringJointOutputWriter(floatingRootJointRobot, simulatedElasticityParameters.get(), simulationDT.get());

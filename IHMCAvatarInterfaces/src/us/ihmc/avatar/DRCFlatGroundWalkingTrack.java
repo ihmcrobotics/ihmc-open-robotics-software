@@ -14,7 +14,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Co
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MomentumBasedControllerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.WalkingProvider;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
-import us.ihmc.graphics3DDescription.HeightMap;
+import us.ihmc.graphicsDescription.HeightMap;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.robotics.controllers.ControllerFailureListener;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -85,8 +85,16 @@ public class DRCFlatGroundWalkingTrack
       avatarSimulationFactory.setGuiInitialSetup(guiInitialSetup);
       avatarSimulationFactory.setHumanoidGlobalDataProducer(null);
       avatarSimulation = avatarSimulationFactory.createAvatarSimulation();
-
+      initialize();
       avatarSimulation.start();
+   }
+   
+   /**
+    * used to inject anything you need into scs before the sim starts
+    */
+   public void initialize()
+   {
+	   
    }
 
    public void attachControllerFailureListener(ControllerFailureListener listener)

@@ -2,9 +2,9 @@ package us.ihmc.exampleSimulations.newtonsCradle;
 
 import javax.vecmath.Vector3d;
 
-import us.ihmc.graphics3DDescription.Graphics3DObject;
-import us.ihmc.graphics3DDescription.appearance.AppearanceDefinition;
-import us.ihmc.graphics3DDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.Graphics3DObject;
+import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.robotDescription.CollisionMeshDescription;
 import us.ihmc.simulationconstructionset.Link;
@@ -48,7 +48,9 @@ public class NewtonsCradleRobot extends Robot
          CollisionMeshDescription collisionMeshDescription = new CollisionMeshDescription();
          collisionMeshDescription.translate(0.0, 0.0, -stringLength);
          collisionMeshDescription.addSphere(ballRadius);
-         link.setCollisionMesh(collisionMeshDescription);
+         collisionMeshDescription.setCollisionGroup(0xff);
+         collisionMeshDescription.setCollisionMask(0xff);
+         link.addCollisionMesh(collisionMeshDescription);
 
          pinJoint.setLink(link);
          this.addRootJoint(pinJoint);

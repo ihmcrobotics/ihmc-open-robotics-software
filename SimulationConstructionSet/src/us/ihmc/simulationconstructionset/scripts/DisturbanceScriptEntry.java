@@ -23,6 +23,7 @@ public class DisturbanceScriptEntry implements Comparable<Object>
       this.duration = duration;
    }
 
+   @Override
    public int compareTo(Object disturbanceScriptEntry)
    {
       if (disturbanceScriptEntry == this)

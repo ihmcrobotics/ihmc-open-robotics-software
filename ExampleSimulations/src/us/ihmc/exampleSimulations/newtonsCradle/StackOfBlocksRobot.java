@@ -5,9 +5,9 @@ import java.util.Random;
 
 import javax.vecmath.Vector3d;
 
-import us.ihmc.graphics3DDescription.Graphics3DObject;
-import us.ihmc.graphics3DDescription.appearance.AppearanceDefinition;
-import us.ihmc.graphics3DDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.Graphics3DObject;
+import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.robotDescription.CollisionMeshDescription;
@@ -78,7 +78,9 @@ public class StackOfBlocksRobot
 
       CollisionMeshDescription collisionMeshDescription = new CollisionMeshDescription();
       collisionMeshDescription.addCubeReferencedAtCenter(objectLength, objectWidth, objectHeight);
-      link.setCollisionMesh(collisionMeshDescription);
+      collisionMeshDescription.setCollisionGroup(0xff);
+      collisionMeshDescription.setCollisionMask(0xff);
+      link.addCollisionMesh(collisionMeshDescription);
       return link;
    }
 

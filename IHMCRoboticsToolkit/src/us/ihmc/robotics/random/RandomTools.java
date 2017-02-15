@@ -157,7 +157,24 @@ public class RandomTools
    {
       return new Vector3d(random.nextDouble() - 0.5, random.nextDouble() - 0.5, random.nextDouble() - 0.5);
    }
-   
+
+   public static Vector3d generateRandomOrthogonalVector3d(Random random, Vector3d vectorToBeOrthogonalTo, boolean normalize)
+   {
+      Vector3d v1 = new Vector3d(vectorToBeOrthogonalTo.getY(), - vectorToBeOrthogonalTo.getX(), 0.0);
+      Vector3d v2 = new Vector3d(- vectorToBeOrthogonalTo.getZ(), 0.0, vectorToBeOrthogonalTo.getX());
+
+      Vector3d randomPerpendicular = new Vector3d();
+      double a = generateRandomDouble(random, 1.0);
+      double b = generateRandomDouble(random, 1.0);
+      randomPerpendicular.scaleAdd(a, v1, randomPerpendicular);
+      randomPerpendicular.scaleAdd(b, v2, randomPerpendicular);
+
+      if (normalize)
+         randomPerpendicular.normalize();
+
+      return randomPerpendicular;
+   }
+
    public static Vector3f generateRandomVector3f(Random random)
    {
       return new Vector3f(generateRandomVector(random));
@@ -170,6 +187,14 @@ public class RandomTools
       ret.scale(length);
 
       return ret;
+   }
+
+   public static Vector3d[] generateRandomVectorArray(Random random, int numberOfVectors, double length)
+   {
+      Vector3d[] vectors = new Vector3d[numberOfVectors];
+      for (int i = 0; i < numberOfVectors; i++)
+         vectors[i] = generateRandomVector(random, length);
+      return vectors;
    }
 
    public static Vector4d generateRandomVector4d(Random random, Tuple4d lowerBound, Tuple4d upperBound)

@@ -5,11 +5,11 @@ import java.util.ArrayList;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.graphics3DAdapter.GroundProfile3D;
-import us.ihmc.graphics3DDescription.Graphics3DObject;
-import us.ihmc.graphics3DDescription.HeightMap;
-import us.ihmc.graphics3DDescription.appearance.YoAppearance;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.graphicsDescription.Graphics3DObject;
+import us.ihmc.graphicsDescription.HeightMap;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
 import us.ihmc.simulationconstructionset.DynamicIntegrationMethod;
 import us.ihmc.simulationconstructionset.Robot;

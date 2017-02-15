@@ -18,6 +18,7 @@ public abstract class AbstractMultiButtonAction extends AbstractAction implement
       super(name);
    }
 
+   @Override
    public abstract void actionPerformed(ActionEvent e);
 
 

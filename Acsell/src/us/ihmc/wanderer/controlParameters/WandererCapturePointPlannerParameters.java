@@ -17,13 +17,6 @@ public class WandererCapturePointPlannerParameters extends CapturePointPlannerPa
 
    /** {@inheritDoc} */
    @Override
-   public double getDoubleSupportInitialTransferDuration()
-   {
-      return 1.0;
-   }
-
-   /** {@inheritDoc} */
-   @Override
    public double getEntryCMPInsideOffset()
    {
       return 0.005;

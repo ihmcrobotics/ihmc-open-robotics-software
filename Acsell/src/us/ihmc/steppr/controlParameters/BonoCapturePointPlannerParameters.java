@@ -17,13 +17,6 @@ public class BonoCapturePointPlannerParameters extends CapturePointPlannerParame
 
    /** {@inheritDoc} */
    @Override
-   public double getDoubleSupportInitialTransferDuration()
-   {
-      return 1.0;
-   }
-
-   /** {@inheritDoc} */
-   @Override
    public double getEntryCMPInsideOffset()
    {
       return 0.005;

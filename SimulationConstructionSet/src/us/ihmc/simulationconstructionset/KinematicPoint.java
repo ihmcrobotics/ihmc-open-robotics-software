@@ -39,6 +39,8 @@ public class KinematicPoint implements java.io.Serializable
 
    private KinematicPointUpdater kinematicPointUpdater;
 
+   private final YoVariableRegistry registry;
+
    protected final Vector3d
       offsetFromCOM = new Vector3d(), wXr = new Vector3d(), v_point = new Vector3d();
 
@@ -63,6 +65,7 @@ public class KinematicPoint implements java.io.Serializable
    public KinematicPoint(String name, Vector3d offset, YoVariableRegistry registry)
    {
       this.name = name;
+      this.registry = registry;
 
       position = new YoFramePoint(name + "_", "", ReferenceFrame.getWorldFrame(), registry);
       velocity = new YoFrameVector(name + "_d", "", ReferenceFrame.getWorldFrame(), registry);
@@ -109,6 +112,7 @@ public class KinematicPoint implements java.io.Serializable
       return parentJoint;
    }
 
+   @Override
    public String toString()
    {
       return ("name: " + name + " x: " + position.getX() + ", y: " + position.getY() + ", z: " + position.getZ());
@@ -261,5 +265,10 @@ public class KinematicPoint implements java.io.Serializable
    public YoFrameVector getYoVelocity()
    {
       return velocity;
+   }
+
+   public YoVariableRegistry getYoVariableRegistry()
+   {
+      return registry;
    }
 }

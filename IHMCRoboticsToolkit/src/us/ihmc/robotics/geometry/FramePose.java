@@ -14,6 +14,8 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.geometry.transformables.Pose;
+import us.ihmc.robotics.geometry.transformables.TransformablePoint3d;
+import us.ihmc.robotics.geometry.transformables.TransformableQuat4d;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
@@ -226,6 +228,7 @@ public class FramePose extends AbstractFrameObject<FramePose, Pose>
       pose.setXY(position2d.getPoint());
    }
 
+   @Override
    public void setToZero(ReferenceFrame referenceFrame)
    {
       super.setToZero();
@@ -260,6 +263,11 @@ public class FramePose extends AbstractFrameObject<FramePose, Pose>
       getPositionIncludingFrame(framePointToPack);
       getOrientationIncludingFrame(orientationToPack);
    }
+   
+   public TransformablePoint3d getPositionUnsafe()
+   {
+      return pose.getPositionUnsafe();
+   }
 
    public void getPosition(Tuple3d tupleToPack)
    {
@@ -274,6 +282,11 @@ public class FramePose extends AbstractFrameObject<FramePose, Pose>
    public void getRigidBodyTransform(RigidBodyTransform transformToPack)
    {
       pose.getRigidBodyTransform(transformToPack);
+   }
+   
+   public TransformableQuat4d getOrientationUnsafe()
+   {
+      return pose.getOrientationUnsafe();
    }
    
    public void getOrientation(Matrix3d matrixToPack)
@@ -614,6 +627,7 @@ public class FramePose extends AbstractFrameObject<FramePose, Pose>
       return pose.epsilonEquals(other.pose, positionErrorMargin, orientationErrorMargin);
    }
 
+   @Override
    public boolean epsilonEquals(FramePose other, double epsilon)
    {
       return pose.epsilonEquals(other.pose, epsilon);

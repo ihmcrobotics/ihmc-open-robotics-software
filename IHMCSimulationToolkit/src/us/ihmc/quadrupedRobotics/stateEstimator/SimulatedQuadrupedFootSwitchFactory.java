@@ -26,9 +26,7 @@ public class SimulatedQuadrupedFootSwitchFactory extends QuadrupedFootSwitchFact
    @Override
    protected void setupGroundContactPointFootSwitches(QuadrantDependentList<FootSwitchInterface> footSwitches, double totalRobotWeight)
    {
-      simulatedRobot.setDefaultValue(null);
-      
-      if (simulatedRobot.get() == null)
+      if (!simulatedRobot.hasValue())
       {
          PrintTools.warn(this, "simulatedRobot is null, creating touchdown based foot switches.");
          setupTouchdownBasedFootSwitches(footSwitches, totalRobotWeight);

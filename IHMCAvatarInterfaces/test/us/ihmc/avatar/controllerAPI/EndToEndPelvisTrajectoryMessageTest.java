@@ -20,7 +20,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
@@ -28,9 +27,11 @@ import us.ihmc.commonWalkingControlModules.controlModules.PelvisICPBasedTranslat
 import us.ihmc.commonWalkingControlModules.controlModules.PelvisOrientationManager;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonHumanoidReferenceFramesVisualizer;
 import us.ihmc.commonWalkingControlModules.trajectories.LookAheadCoMHeightTrajectoryGenerator;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.StopAllTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisTrajectoryMessage;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -38,6 +39,7 @@ import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.geometry.transformables.TransformablePoint2d;
+import us.ihmc.robotics.geometry.transformables.TransformableQuat4d;
 import us.ihmc.robotics.math.trajectories.CubicPolynomialTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsOrientationTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsPositionTrajectoryGenerator;
@@ -50,7 +52,6 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.testing.JUnitTools;
 import us.ihmc.tools.thread.ThreadTools;
 
@@ -129,9 +130,12 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       TransformablePoint2d desiredPosition2d = new TransformablePoint2d();
       desiredPosition2d.set(desiredPosition.getX(), desiredPosition.getY());
       desiredPosition2d.applyTransform(fromWorldToMidFeetZUpTransform);
+      TransformableQuat4d desiredOrientationCorrected = new TransformableQuat4d(desiredOrientation);
+      desiredOrientationCorrected.applyTransform(fromWorldToMidFeetZUpTransform);
 
       desiredPosition.setX(desiredPosition2d.getX());
       desiredPosition.setY(desiredPosition2d.getY());
+      desiredOrientation.set(desiredOrientationCorrected);
 
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0 + trajectoryTime);
       assertTrue(success);

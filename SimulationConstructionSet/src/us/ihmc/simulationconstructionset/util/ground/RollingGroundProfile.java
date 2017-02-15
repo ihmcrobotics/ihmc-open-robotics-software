@@ -6,11 +6,11 @@ import javax.vecmath.Vector3d;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.tools.thread.ThreadTools;
-import us.ihmc.graphics3DDescription.Graphics3DObject;
-import us.ihmc.graphics3DDescription.HeightMap;
-import us.ihmc.graphics3DDescription.MeshDataGenerator;
-import us.ihmc.graphics3DDescription.MeshDataHolder;
-import us.ihmc.graphics3DDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.Graphics3DObject;
+import us.ihmc.graphicsDescription.HeightMap;
+import us.ihmc.graphicsDescription.MeshDataGenerator;
+import us.ihmc.graphicsDescription.MeshDataHolder;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.robotics.geometry.BoundingBox3d;
 
 public class RollingGroundProfile extends GroundProfileFromHeightMap
@@ -45,11 +45,13 @@ public class RollingGroundProfile extends GroundProfileFromHeightMap
       boundingBox = new BoundingBox3d(new Point3d(xMin, yMin, zMin), new Point3d(xMax, yMax, zMax));
    }
 
+   @Override
    public BoundingBox3d getBoundingBox()
    {
       return boundingBox;
    }
 
+   @Override
    public double heightAt(double x, double y, double z)
    {
       double height = amplitude * Math.sin(2.0 * Math.PI * frequency * (x + offset));
@@ -70,6 +72,7 @@ public class RollingGroundProfile extends GroundProfileFromHeightMap
       normal.normalize();
    }
    
+   @Override
    public double heightAndNormalAt(double x, double y, double z, Vector3d normalToPack)
    {
       double heightAt = heightAt(x, y, z);

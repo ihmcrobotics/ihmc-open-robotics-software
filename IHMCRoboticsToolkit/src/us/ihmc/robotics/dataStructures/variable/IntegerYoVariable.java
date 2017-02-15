@@ -96,6 +96,7 @@ public class IntegerYoVariable extends YoVariable<IntegerYoVariable>
       return val == value;
    }
 
+   @Override
    public void setValueFromDouble(double doubleValue, boolean notifyListeners)
    {
       set(convertFromDoubleToInt(doubleValue), notifyListeners);
@@ -108,12 +109,14 @@ public class IntegerYoVariable extends YoVariable<IntegerYoVariable>
       //   return (new Double(doubleValue).intValue());
    }
 
+   @Override
    public double getValueAsDouble()
    {
       return val;
 
    }
 
+   @Override
    public String toString()
    {
       StringBuffer retBuffer = new StringBuffer();
@@ -129,12 +132,14 @@ public class IntegerYoVariable extends YoVariable<IntegerYoVariable>
     *
     * @param stringBuffer StringBuffer to which the value will be appended
     */
+   @Override
    public void getValueString(StringBuffer stringBuffer)
    {
       stringBuffer.append(val);
 
    }
    
+   @Override
    public void getValueStringFromDouble(StringBuffer stringBuffer, double doubleValue)
    {
       stringBuffer.append(convertFromDoubleToInt(doubleValue));

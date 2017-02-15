@@ -23,8 +23,8 @@ public class FootstepDataMessageConverter
          return null;
 
       FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
-      footstepDataListMessage.setSwingTime(swingTime);
-      footstepDataListMessage.setTransferTime(transferTime);
+      footstepDataListMessage.setDefaultSwingTime(swingTime);
+      footstepDataListMessage.setDefaultTransferTime(transferTime);
 
       for (int i = 0; i < footstepPlan.getNumberOfSteps(); i++)
       {

@@ -14,11 +14,12 @@ import javax.vecmath.Vector3d;
 import org.junit.Test;
 
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.CapturePointTools;
-import us.ihmc.graphics3DDescription.appearance.YoAppearance;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicPosition;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicPosition.GraphicType;
-import us.ihmc.graphics3DDescription.yoGraphics.plotting.YoArtifactPolygon;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -39,7 +40,6 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.gui.SimulationOverheadPlotter;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public class OneStepCaptureRegionCalculatorTest
 {
@@ -508,13 +508,11 @@ public class OneStepCaptureRegionCalculatorTest
       scs.attachPlaybackListener(simulationOverheadPlotter);
       JPanel simulationOverheadPlotterJPanel = simulationOverheadPlotter.getJPanel();
       String plotterName = "Plotter";
-      scs.addExtraJpanel(simulationOverheadPlotterJPanel, plotterName);
+      scs.addExtraJpanel(simulationOverheadPlotterJPanel, plotterName, true);
       JPanel plotterKeyJPanel = simulationOverheadPlotter.getJPanelKey();
 
       JScrollPane scrollPane = new JScrollPane(plotterKeyJPanel);
-      scs.addExtraJpanel(scrollPane, "Plotter Legend");
-
-      scs.getStandardSimulationGUI().selectPanel(plotterName);
+      scs.addExtraJpanel(scrollPane, "Plotter Legend", false);
 
       yoGraphicsListRegistry.update();
       scs.addYoGraphicsListRegistry(yoGraphicsListRegistry, false);

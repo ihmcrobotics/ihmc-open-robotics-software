@@ -7,6 +7,8 @@ import javax.vecmath.Point3d;
 
 import org.junit.Test;
 
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlanner;
 import us.ihmc.footstepPlanning.FootstepPlannerGoal;
@@ -25,14 +27,13 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations;
 import us.ihmc.tools.thread.ThreadTools;
 
 public class SimplePlanarRegionBipedalAnytimeFootstepPlannerTest
 {
    private final boolean visualize = false;
 
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 20.0)
+   @ContinuousIntegrationTest(categoriesOverride = IntegrationCategory.IN_DEVELOPMENT, estimatedDuration = 20.0)
    @Test(timeout = 300000)
    public void testSameResultsAsNormalPlannerWhenUsedAsANormalPlanner()
    {
@@ -161,10 +162,12 @@ public class SimplePlanarRegionBipedalAnytimeFootstepPlannerTest
       double startX = 0.0;
       double startY = 0.0;
       double cinderBlockSize = 0.4;
+      double cinderBlockHeight = 0.15;
       int courseWidthXInNumberOfBlocks = 21;
       int courseLengthYInNumberOfBlocks = 6;
-      PlanarRegionsList planarRegionsListOne = PlanarRegionsListExamples.generateCinderBlockField(startX, startY, cinderBlockSize, courseWidthXInNumberOfBlocks,
-                                                                                                  courseLengthYInNumberOfBlocks);
+      double heightVariation = 0.1;
+      PlanarRegionsList planarRegionsListOne = PlanarRegionsListExamples.generateCinderBlockField(startX, startY, cinderBlockSize, cinderBlockHeight, courseWidthXInNumberOfBlocks,
+                                                                                                  courseLengthYInNumberOfBlocks, heightVariation);
       planner.setPlanarRegions(planarRegionsListOne);
    }
    

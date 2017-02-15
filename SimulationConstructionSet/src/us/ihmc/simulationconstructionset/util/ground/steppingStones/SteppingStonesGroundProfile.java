@@ -25,6 +25,7 @@ public class SteppingStonesGroundProfile extends GroundProfileFromHeightMap
 
    private final ArrayList<SteppingStone> tempStonesIntersectingLocation = new ArrayList<SteppingStone>();
 
+   @Override
    public double heightAndNormalAt(double x, double y, double z, Vector3d normalToPack)
    {
       double height = heightAt(x, y, z);
@@ -33,6 +34,7 @@ public class SteppingStonesGroundProfile extends GroundProfileFromHeightMap
       return height;
    }
    
+   @Override
    public double heightAt(double x, double y, double z)
    {
       tempStonesIntersectingLocation.clear();
@@ -61,6 +63,7 @@ public class SteppingStonesGroundProfile extends GroundProfileFromHeightMap
       normal.setZ(1.0);
    }
    
+   @Override
    public BoundingBox3d getBoundingBox()
    {
       return boundingBox;

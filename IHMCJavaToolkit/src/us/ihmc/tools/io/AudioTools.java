@@ -91,7 +91,7 @@ public class AudioTools
       }
       catch (LineUnavailableException e)
       {
-         PrintTools.warn("Plug in a speaker to hear sounds.");
+//         PrintTools.warn("Plug in a speaker to hear sounds.");
          return null;
       }
       catch (Exception e)

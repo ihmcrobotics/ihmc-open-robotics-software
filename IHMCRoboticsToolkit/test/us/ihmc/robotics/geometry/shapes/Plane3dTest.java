@@ -1,16 +1,17 @@
 package us.ihmc.robotics.geometry.shapes;
 
-import org.junit.Test;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.tools.testing.JUnitTools;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import org.junit.Test;
+
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.tools.testing.JUnitTools;
 
 public class Plane3dTest
 {

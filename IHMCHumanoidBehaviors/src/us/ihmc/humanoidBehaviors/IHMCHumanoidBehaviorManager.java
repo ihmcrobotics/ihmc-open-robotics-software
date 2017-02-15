@@ -1,8 +1,11 @@
 package us.ihmc.humanoidBehaviors;
 
+import java.io.IOException;
+import java.util.Arrays;
+
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.util.NetworkPorts;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidBehaviors.behaviors.behaviorServices.FiducialDetectorBehaviorService;
 import us.ihmc.humanoidBehaviors.behaviors.behaviorServices.ObjectDetectorBehaviorService;
 import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.BasicPipeLineBehavior;
@@ -13,6 +16,7 @@ import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.TurnValveBehaviorSta
 import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.WalkThroughDoorBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.WalkToGoalBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.debug.PartialFootholdBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.debug.TestICPOptimizationBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.diagnostic.DiagnosticBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.examples.ExampleComplexBehaviorStateMachine;
 import us.ihmc.humanoidBehaviors.behaviors.fiducialLocation.FollowFiducialBehavior;
@@ -56,9 +60,6 @@ import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.util.PeriodicNonRealtimeThreadScheduler;
 import us.ihmc.util.PeriodicThreadScheduler;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
-
-import java.io.IOException;
-import java.util.Arrays;
 
 public class IHMCHumanoidBehaviorManager
 {
@@ -221,6 +222,9 @@ public class IHMCHumanoidBehaviorManager
       dispatcher.addBehavior(HumanoidBehaviorType.DEBUG_PARTIAL_FOOTHOLDS,
             new PartialFootholdBehavior(behaviorCommunicationBridge));
 
+      dispatcher.addBehavior(HumanoidBehaviorType.TEST_ICP_OPTIMIZATION,
+            new TestICPOptimizationBehavior(behaviorCommunicationBridge, referenceFrames, yoTime));
+
       dispatcher.addBehavior(HumanoidBehaviorType.EXAMPLE_BEHAVIOR,
             new ExampleComplexBehaviorStateMachine(behaviorCommunicationBridge, yoTime, atlasPrimitiveActions));
 
@@ -239,7 +243,9 @@ public class IHMCHumanoidBehaviorManager
                                                                         referenceFrames, objectDetectorBehaviorService));
       }
 
-      dispatcher.addBehavior(HumanoidBehaviorType.WALK_TO_GOAL_ANYTIME_PLANNER, new AnytimePlannerStateMachineBehavior(behaviorCommunicationBridge, yoTime, referenceFrames, logModelProvider, fullRobotModel, wholeBodyControllerParameters));
+      dispatcher.addBehavior(HumanoidBehaviorType.WALK_TO_GOAL_ANYTIME_PLANNER,
+                             new AnytimePlannerStateMachineBehavior(behaviorCommunicationBridge, yoTime, referenceFrames, logModelProvider, fullRobotModel,
+                                                                    wholeBodyControllerParameters, yoGraphicsListRegistry, fiducialDetectorBehaviorService, true));
 
       dispatcher.addBehavior(HumanoidBehaviorType.WALK_TO_LOCATION, new WalkToLocationBehavior(behaviorCommunicationBridge, fullRobotModel, referenceFrames,
             wholeBodyControllerParameters.getWalkingControllerParameters()));

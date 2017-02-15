@@ -25,6 +25,7 @@ public class AddCameraKeyAction extends AbstractAction
       this.putValue(Action.SHORT_DESCRIPTION, "Adds camera key.");
    }
 
+   @Override
    public void actionPerformed(ActionEvent actionEvent)
    {
       executor.addCameraKey();

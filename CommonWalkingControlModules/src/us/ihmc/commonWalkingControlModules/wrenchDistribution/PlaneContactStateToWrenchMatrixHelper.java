@@ -295,7 +295,7 @@ public class PlaneContactStateToWrenchMatrixHelper
       yoPlaneContactState.getContactNormalFrameVector(contactNormalVector);
       contactNormalVector.changeFrame(planeFrame);
       contactNormalVector.normalize();
-      GeometryTools.getRotationBasedOnNormal(normalContactVectorRotation, contactNormalVector.getVector());
+      GeometryTools.getAxisAngleFromZUpToVector(contactNormalVector.getVector(), normalContactVectorRotation);
       normalContactVectorRotationMatrixToPack.set(normalContactVectorRotation);
    }
 

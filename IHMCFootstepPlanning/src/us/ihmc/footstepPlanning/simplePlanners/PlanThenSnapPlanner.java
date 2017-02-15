@@ -26,11 +26,13 @@ public class PlanThenSnapPlanner implements FootstepPlanner
    private final FootstepPlanner internalPlanner;
    private final SideDependentList<ConvexPolygon2d> footPolygons;
    private PlanarRegionsList planarRegionsList;
+   private final SnapAndWiggleSingleStep snapAndWiggleSingleStep;
 
    public PlanThenSnapPlanner(FootstepPlanner internalPlanner, SideDependentList<ConvexPolygon2d> footPolygons)
    {
       this.internalPlanner = internalPlanner;
       this.footPolygons = footPolygons;
+      snapAndWiggleSingleStep = new SnapAndWiggleSingleStep();
    }
 
    @Override
@@ -61,68 +63,28 @@ public class PlanThenSnapPlanner implements FootstepPlanner
 
       if (planarRegionsList == null)
          return result;
+      
+      snapAndWiggleSingleStep.setPlanarRegions(planarRegionsList);
 
       int numberOfFootsteps = footstepPlan.getNumberOfSteps();
       for (int i=0; i<numberOfFootsteps; i++)
       {
          SimpleFootstep footstep = footstepPlan.getFootstep(i);
-
-         FramePose solePose = new FramePose();
-         footstep.getSoleFramePose(solePose);
-
-         PoseReferenceFrame soleFrameBeforeSnapping = new PoseReferenceFrame("SoleFrameBeforeSnapping", solePose);
-         FrameConvexPolygon2d footPolygon = new FrameConvexPolygon2d(soleFrameBeforeSnapping, footPolygons.get(footstep.getRobotSide()));
-         footPolygon.changeFrameAndProjectToXYPlane(ReferenceFrame.getWorldFrame()); // this works if the soleFrames are z up.
-
-         PlanarRegion regionToMoveTo = new PlanarRegion();
-         RigidBodyTransform snapTransform =
-               PlanarRegionsListPolygonSnapper.snapPolygonToPlanarRegionsList(footPolygon.getConvexPolygon2d(), planarRegionsList, regionToMoveTo);
-         if (snapTransform == null)
+         try
+         {
+            FramePose solePose = new FramePose();
+            footstep.getSoleFramePose(solePose);
+            ConvexPolygon2d footHold = snapAndWiggleSingleStep.snapAndWiggle(solePose, footPolygons.get(footstep.getRobotSide()));
+            footstep.setSoleFramePose(solePose);
+            if(footHold!=null)
+            {
+               footstep.setFoothold(footHold);
+            }
+         }
+         catch (Exception e)
+         {
             return FootstepPlanningResult.SNAPPING_FAILED;
-         solePose.setZ(0.0);
-         solePose.applyTransform(snapTransform);
-
-         RigidBodyTransform regionToWorld = new RigidBodyTransform();
-         regionToMoveTo.getTransformToWorld(regionToWorld);
-         PoseReferenceFrame regionFrame = new PoseReferenceFrame("RegionFrame", ReferenceFrame.getWorldFrame());
-         regionFrame.setPoseAndUpdate(regionToWorld);
-         PoseReferenceFrame soleFrameBeforeWiggle = new PoseReferenceFrame("SoleFrameBeforeWiggle", solePose);
-
-         RigidBodyTransform soleToRegion = soleFrameBeforeWiggle.getTransformToDesiredFrame(regionFrame);
-         ConvexPolygon2d footPolygonInRegion = new ConvexPolygon2d(footPolygons.get(footstep.getRobotSide()));
-         footPolygonInRegion.applyTransformAndProjectToXYPlane(soleToRegion);
-
-         wiggleParameters.deltaInside = 0.0;
-         RigidBodyTransform wiggleTransform = PolygonWiggler.wigglePolygonIntoConvexHullOfRegion(footPolygonInRegion, regionToMoveTo, wiggleParameters);
-         if (wiggleTransform == null)
-         {
-            wiggleParameters.deltaInside = -0.055;
-            wiggleTransform = PolygonWiggler.wigglePolygonIntoConvexHullOfRegion(footPolygonInRegion, regionToMoveTo, wiggleParameters);
          }
-
-         if (wiggleTransform == null)
-            solePose.setToNaN();
-         else
-         {
-            solePose.changeFrame(regionFrame);
-            solePose.applyTransform(wiggleTransform);
-            solePose.changeFrame(ReferenceFrame.getWorldFrame());
-         }
-
-         // fix the foothold
-         if (wiggleParameters.deltaInside != 0.0)
-         {
-            PoseReferenceFrame soleFrameAfterWiggle = new PoseReferenceFrame("SoleFrameAfterWiggle", solePose);
-            soleToRegion = soleFrameAfterWiggle.getTransformToDesiredFrame(regionFrame);
-            footPolygonInRegion.setAndUpdate(footPolygons.get(footstep.getRobotSide()));
-            footPolygonInRegion.applyTransformAndProjectToXYPlane(soleToRegion);
-            ConvexPolygon2d foothold = regionToMoveTo.getConvexHull().intersectionWith(footPolygonInRegion);
-            soleToRegion.invert();
-            foothold.applyTransformAndProjectToXYPlane(soleToRegion);
-            footstep.setFoothold(foothold);
-         }
-
-         footstep.setSoleFramePose(solePose);
       }
       return result;
    }

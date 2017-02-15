@@ -28,25 +28,30 @@ public class SimpleControllerToOptimize implements RobotController
       return listOfParametersToOptimize;
    }
    
+   @Override
    public void initialize()
    {      
    }
 
+   @Override
    public YoVariableRegistry getYoVariableRegistry()
    {
       return registry;
    }
 
+   @Override
    public String getName()
    {
       return "SimpleControllerToOptimize";
    }
 
+   @Override
    public String getDescription()
    {
       return getName();
    }
 
+   @Override
    public void doControl()
    {
       costFunction.set((2.0 - parameterOne.getDoubleValue()) * (2.0 - parameterOne.getDoubleValue()));

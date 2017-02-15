@@ -1,24 +1,26 @@
 package us.ihmc.robotics.screwTheory;
 
-import org.junit.Before;
-import org.junit.Test;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.random.RandomTools;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.tools.testing.JUnitTools;
+import static org.junit.Assert.assertTrue;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Vector3d;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
-import static org.junit.Assert.assertTrue;
+import javax.vecmath.Matrix3d;
+import javax.vecmath.Vector3d;
+
+import org.junit.Before;
+import org.junit.Test;
+
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.tools.testing.JUnitTools;
 
 public class CenterOfMassJacobianTest
 {

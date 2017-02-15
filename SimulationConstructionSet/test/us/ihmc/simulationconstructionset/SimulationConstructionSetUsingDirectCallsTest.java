@@ -31,18 +31,21 @@ import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
-import us.ihmc.graphics3DAdapter.camera.CaptureDevice;
-import us.ihmc.graphics3DAdapter.camera.ClassicCameraController;
-import us.ihmc.graphics3DAdapter.jme.JMEGraphics3DAdapter;
-import us.ihmc.graphics3DDescription.Graphics3DObject;
-import us.ihmc.graphics3DDescription.input.SelectedListener;
-import us.ihmc.graphics3DDescription.structure.Graphics3DNode;
-import us.ihmc.graphics3DDescription.structure.Graphics3DNodeType;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphic;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicVector;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsList;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.IntegrationCategory;
+import us.ihmc.graphicsDescription.Graphics3DObject;
+import us.ihmc.graphicsDescription.input.SelectedListener;
+import us.ihmc.graphicsDescription.structure.Graphics3DNode;
+import us.ihmc.graphicsDescription.structure.Graphics3DNodeType;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphic;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
+import us.ihmc.jMonkeyEngineToolkit.camera.CaptureDevice;
+import us.ihmc.jMonkeyEngineToolkit.camera.ClassicCameraController;
+import us.ihmc.jMonkeyEngineToolkit.jme.JMEGraphics3DAdapter;
 import us.ihmc.robotics.dataStructures.listener.RewoundListener;
 import us.ihmc.robotics.dataStructures.registry.NameSpace;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -60,19 +63,17 @@ import us.ihmc.simulationconstructionset.gui.StandardSimulationGUI;
 import us.ihmc.simulationconstructionset.gui.ViewportWindow;
 import us.ihmc.simulationconstructionset.gui.camera.CameraTrackAndDollyYoVariablesHolder;
 import us.ihmc.simulationconstructionset.gui.config.GraphGroupList;
+import us.ihmc.simulationconstructionset.physics.CollisionArbiter;
 import us.ihmc.simulationconstructionset.physics.CollisionHandler;
-import us.ihmc.simulationconstructionset.physics.CollisionShape;
 import us.ihmc.simulationconstructionset.physics.CollisionShapeFactory;
 import us.ihmc.simulationconstructionset.physics.ScsCollisionConfigure;
 import us.ihmc.simulationconstructionset.physics.ScsCollisionDetector;
 import us.ihmc.simulationconstructionset.physics.ScsPhysics;
 import us.ihmc.simulationconstructionset.physics.collision.CollisionDetectionResult;
 import us.ihmc.simulationconstructionset.physics.collision.DefaultCollisionHandler;
+import us.ihmc.simulationconstructionset.physics.collision.simple.DoNothingCollisionArbiter;
 import us.ihmc.simulationconstructionset.physics.visualize.DefaultCollisionVisualizer;
 import us.ihmc.simulationconstructionset.robotcommprotocol.RobotSocketConnection;
-import us.ihmc.tools.continuousIntegration.IntegrationCategory;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.inputDevices.keyboard.ModifierKeyInterface;
 import us.ihmc.tools.thread.ThreadTools;
 
@@ -505,7 +506,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
       assertFalse(isViewportHidden2);
 
       Component component = new Button();
-      scs.addExtraJpanel(component, simpleComponentName);
+      scs.addExtraJpanel(component, simpleComponentName, false);
       ThreadTools.sleep(THREAD_SLEEP_TIME);
       Component componentFromSCS =  scs.getExtraPanel(simpleComponentName);
       assertEquals(component, componentFromSCS);
@@ -1255,9 +1256,11 @@ public class SimulationConstructionSetUsingDirectCallsTest
    {
       ScsCollisionConfigure collisionConfigure = createScsCollisionConfigure();
       ScsCollisionDetector collisionDetector = createScsCollisionDetector();
+      CollisionArbiter collisionArbiter = new DoNothingCollisionArbiter();
       CollisionHandler collisionHandler = new DefaultCollisionHandler(0.3, 0.3);
-      DefaultCollisionVisualizer visualize = new DefaultCollisionVisualizer(0.1, 0.1, scs, 100);
-      ScsPhysics physics = new ScsPhysics(collisionConfigure, collisionDetector, collisionHandler, visualize);
+      DefaultCollisionVisualizer visualize = new DefaultCollisionVisualizer(0.1, 0.1, 0.01, scs, 100);
+
+      ScsPhysics physics = new ScsPhysics(collisionConfigure, collisionDetector, collisionArbiter, collisionHandler, visualize);
 
       return physics;
    }
@@ -1266,22 +1269,13 @@ public class SimulationConstructionSetUsingDirectCallsTest
    {
       ScsCollisionDetector scsCollisionDetector = new ScsCollisionDetector()
       {
-
-         public void removeShape(Link link)
-         {
-
-         }
-
-         public CollisionShape lookupCollisionShape(Link link)
-         {
-            return null;
-         }
-
+         @Override
          public void initialize()
          {
 
          }
 
+         @Override
          public CollisionShapeFactory getShapeFactory()
          {
             return null;
@@ -1323,11 +1317,13 @@ public class SimulationConstructionSetUsingDirectCallsTest
    {
       ToggleKeyPointModeCommandListener toggleKeyPointModeCommandListener = new ToggleKeyPointModeCommandListener()
       {
+         @Override
          public void updateKeyPointModeStatus()
          {
             toggleKeyPointModeCommandListenerHasBeenCalled.set(true);
          }
 
+         @Override
          public void closeAndDispose()
          {
          }
@@ -1348,6 +1344,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
    {
       SelectedListener selectedListener = new SelectedListener()
       {
+         @Override
          public void selected(Graphics3DNode graphics3dNode, ModifierKeyInterface modifierKeyInterface, Point3d location, Point3d cameraLocation,
                Quat4d cameraRotation)
          {
@@ -1362,6 +1359,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
    {
       DataProcessingFunction dataProcessingFunction = new DataProcessingFunction()
       {
+         @Override
          public void processData()
          {
             processDataHasBeenCalled.set(true);
@@ -1382,6 +1380,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
    {
       PlayCycleListener playCycleListener = new PlayCycleListener()
       {
+         @Override
          public void update(int tick)
          {
 
@@ -1525,11 +1524,13 @@ public class SimulationConstructionSetUsingDirectCallsTest
    {
       NewDataListener newDataListener = new NewDataListener()
       {
+         @Override
          public void newDataHasBeenSent()
          {
 
          }
 
+         @Override
          public void newDataHasBeenReceived()
          {
 
@@ -1649,16 +1650,19 @@ public class SimulationConstructionSetUsingDirectCallsTest
    {
       PlaybackListener listener = new PlaybackListener()
       {
+         @Override
          public void indexChanged(int newIndex, double newTime)
          {
 
          }
 
+         @Override
          public void play(double realTimeRate)
          {
             realTimeRateInSCS.set(realTimeRate);
          }
 
+         @Override
          public void stop()
          {
 
@@ -1672,6 +1676,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
    {
       SimulationDoneCriterion criterion = new SimulationDoneCriterion()
       {
+         @Override
          public boolean isSimulationDone()
          {
             return setSimulationDoneCriterion.getBooleanValue();
@@ -1685,11 +1690,13 @@ public class SimulationConstructionSetUsingDirectCallsTest
    {
       SimulationDoneListener listener = new SimulationDoneListener()
       {
+         @Override
          public void simulationDone()
          {
             simulationDoneListenerHasBeenNotified.set(true);
          }
 
+         @Override
          public void simulationDoneWithException(Throwable throwable)
          {
 
@@ -1807,9 +1814,8 @@ public class SimulationConstructionSetUsingDirectCallsTest
 
    private ExtraPanelConfiguration createExtraPanelConfigurationWithPanel(String name)
    {
-      ExtraPanelConfiguration extraPanelConfiguration = new ExtraPanelConfiguration(name);
       Button panel = new Button();
-      extraPanelConfiguration.setupPanel(panel);
+      ExtraPanelConfiguration extraPanelConfiguration = new ExtraPanelConfiguration(name, panel, false);
 
       return extraPanelConfiguration;
    }
@@ -1927,6 +1933,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
    {
       RewoundListener ret = new RewoundListener()
       {
+         @Override
          public void wasRewound()
          {
             simulationRewoundListenerHasBeenNotified.set(true);
@@ -1940,6 +1947,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
    {
       ExitActionListener ret = new ExitActionListener()
       {
+         @Override
          public void exitActionPerformed()
          {
             exitActionListenerHasBeenNotified.set(true);

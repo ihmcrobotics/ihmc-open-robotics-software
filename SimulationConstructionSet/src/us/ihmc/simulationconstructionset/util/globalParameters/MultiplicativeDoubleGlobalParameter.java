@@ -14,6 +14,7 @@ public class MultiplicativeDoubleGlobalParameter extends DoubleGlobalParameter
       update("computing initial value from parents.");
    }
 
+   @Override
    public void update(String comment)
    {
       double value = 1.0;

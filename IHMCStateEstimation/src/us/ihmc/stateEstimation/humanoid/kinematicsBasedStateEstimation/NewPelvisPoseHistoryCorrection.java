@@ -3,9 +3,9 @@ package us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.graphics3DDescription.appearance.YoAppearance;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicCoordinateSystem;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.StampedPosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.LocalizationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.PelvisPoseErrorPacket;
@@ -40,7 +40,7 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
    private static final boolean ENABLE_GRAPHICS = true;
    
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private static final boolean ENABLE_ROTATION_CORRECTION = false;  
+   private static final boolean ENABLE_ROTATION_CORRECTION = true;
    
    private static final double DEFAULT_BREAK_FREQUENCY = 0.6;
 
