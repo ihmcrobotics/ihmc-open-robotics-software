@@ -4,10 +4,7 @@ import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
-/**
- * Package private so external classes don't see these internal tests.
- */
-/* package-private */ class AssertionsTest
+public class AssertionsTest
 {
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)

@@ -1,34 +1,34 @@
 package us.ihmc.commons;
 
 import java.awt.Desktop;
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.Writer;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.nio.charset.Charset;
-import java.nio.file.FileVisitOption;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.SimpleFileVisitor;
-import java.nio.file.attribute.BasicFileAttributes;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.EnumSet;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.TimeUnit;
 
 import org.pitest.mutationtest.commandline.MutationCoverageReport;
 
+import us.ihmc.tools.io.files.BasicPathVisitor;
+import us.ihmc.tools.io.files.FileTools;
+import us.ihmc.tools.io.files.PathTools;
+
 public class MutationTestFacilitator
 {
+   private static final int NUMBER_OF_HOURS_BEFORE_EXPIRATION = 3;
    private static final String REPORT_DIRECTORY_NAME = "pit-reports";
 
    private Set<Class<?>> testClassesToRun = new HashSet<>();
@@ -91,6 +91,37 @@ public class MutationTestFacilitator
 
    public void doMutationTest()
    {
+      // Delete all entries older than three hours
+      PathTools.walkFlat(Paths.get(REPORT_DIRECTORY_NAME), new BasicPathVisitor()
+      {
+         @Override
+         public FileVisitResult visitPath(Path path, PathType pathType)
+         {
+            if (pathType == PathType.DIRECTORY)
+            {
+               String baseName = PathTools.getBaseName(path);
+               SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMddHHmm");
+               Date directoryDate = null;
+               try
+               {
+                  directoryDate = simpleDateFormat.parse(baseName);
+                  Date currentDate = new Date();
+                  long difference = currentDate.getTime() - directoryDate.getTime();
+                  if (TimeUnit.HOURS.convert(difference, TimeUnit.MILLISECONDS) > NUMBER_OF_HOURS_BEFORE_EXPIRATION)
+                  {
+                     FileTools.deleteDirectory(path);
+                  }
+               }
+               catch (ParseException e)
+               {
+                  e.printStackTrace();
+               }
+            }
+
+            return FileVisitResult.CONTINUE;
+         }
+      });
+
       if (testClassesToRun.isEmpty())
          throw new RuntimeException("No test classes to run!");
       if (classPathsToMutate.isEmpty())
@@ -138,7 +169,7 @@ public class MutationTestFacilitator
 
          System.out.println("Found last directory " + lastDirectoryName);
 
-         walkFlat(Paths.get(REPORT_DIRECTORY_NAME, lastDirectoryName), new BasicPathVisitor()
+         PathTools.walkFlat(Paths.get(REPORT_DIRECTORY_NAME, lastDirectoryName), new BasicPathVisitor()
          {
             @Override
             public FileVisitResult visitPath(Path path, PathType pathType)
@@ -150,13 +181,13 @@ public class MutationTestFacilitator
                   Path newPath = Paths.get(REPORT_DIRECTORY_NAME, lastDirectoryName, newPathName);
 
                   Path indexPath = Paths.get(REPORT_DIRECTORY_NAME, lastDirectoryName, "index.html");
-                  List<String> lines = readAllLines(indexPath);
+                  List<String> lines = FileTools.readAllLines(indexPath);
                   ArrayList<String> newLines = new ArrayList<>();
                   for (String originalLine : lines)
                   {
                      newLines.add(originalLine.replaceAll(longPathName, newPathName));
                   }
-                  writeAllLines(newLines, indexPath);
+                  FileTools.writeAllLines(newLines, indexPath);
 
                   try
                   {
@@ -202,7 +233,7 @@ public class MutationTestFacilitator
       mutationTestFacilitator.doMutationTest();
       mutationTestFacilitator.openResultInBrowser();
    }
-   
+
    public static void facilitateMutationTestForPackage(Class<?> testClass)
    {
       MutationTestFacilitator mutationTestFacilitator = new MutationTestFacilitator();
@@ -210,103 +241,5 @@ public class MutationTestFacilitator
       mutationTestFacilitator.addTestClassesToRun(testClass);
       mutationTestFacilitator.doMutationTest();
       mutationTestFacilitator.openResultInBrowser();
-   }
-
-   // COPIED FROM IHMCJAVATOOLKIT FOR DEPENDENCY REASONS
-
-   private static enum PathType
-   {
-      FILE, DIRECTORY,
-   }
-
-   private static abstract class BasicPathVisitor
-   {
-      public FileVisitResult visitPath(Path path, PathType pathType)
-      {
-         return FileVisitResult.CONTINUE;
-      }
-   }
-
-   private static void walkDepth(final Path directory, int maxDepth, final BasicPathVisitor basicFileVisitor)
-   {
-      try
-      {
-         Files.walkFileTree(directory, EnumSet.noneOf(FileVisitOption.class), maxDepth, new SimpleFileVisitor<Path>()
-         {
-            @Override
-            public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException
-            {
-               if (dir.equals(directory))
-                  return FileVisitResult.CONTINUE;
-
-               return basicFileVisitor.visitPath(dir, PathType.DIRECTORY);
-            }
-
-            @Override
-            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException
-            {
-               if (Files.isDirectory(file))
-               {
-                  return basicFileVisitor.visitPath(file, PathType.DIRECTORY);
-               }
-               {
-                  return basicFileVisitor.visitPath(file, PathType.FILE);
-               }
-            }
-         });
-      }
-      catch (IOException e)
-      {
-      }
-   }
-
-   private static void walkFlat(final Path directory, final BasicPathVisitor basicFileVisitor)
-   {
-      walkDepth(directory, 1, basicFileVisitor);
-   }
-
-   private static List<String> readAllLines(Path path)
-   {
-      try
-      {
-         return Files.readAllLines(path, Charset.forName("UTF-8"));
-      }
-      catch (IOException e)
-      {
-         e.printStackTrace();
-         return null;
-      }
-   }
-
-   private static void writeAllLines(List<String> lines, Path path)
-   {
-      PrintWriter printer = newPrintWriter(path);
-
-      for (String line : lines)
-      {
-         printer.println(line);
-      }
-
-      printer.close();
-   }
-
-   private static PrintWriter newPrintWriter(Path path)
-   {
-      return newPrintWriter(path, false);
-   }
-
-   private static PrintWriter newPrintWriter(Path path, boolean append)
-   {
-      try
-      {
-         Writer outWriter = new FileWriter(path.toFile(), append);
-         BufferedWriter bufferedWriter = new BufferedWriter(outWriter);
-         return new PrintWriter(bufferedWriter);
-      }
-      catch (IOException e)
-      {
-         e.printStackTrace();
-         return null;
-      }
    }
 }
