@@ -16,37 +16,43 @@ import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.tools.io.printing.PrintTools;
-import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.robotics.time.YoTimer;
 
 public class TestICPOptimizationBehavior extends AbstractBehavior
 {
    private final HumanoidReferenceFrames referenceFrames;
    private final DoubleYoVariable swingTime = new DoubleYoVariable("BehaviorSwingTime", registry);
+   private final DoubleYoVariable sleepTime = new DoubleYoVariable("BehaviorSleepTime", registry);
    private final DoubleYoVariable transferTime = new DoubleYoVariable("BehaviorTransferTime", registry);
    private final BooleanYoVariable stepInPlace = new BooleanYoVariable("StepInPlace", registry);
    private final BooleanYoVariable abortBehavior = new BooleanYoVariable("AbortBehavior", registry);
 
-   public TestICPOptimizationBehavior(CommunicationBridgeInterface communicationBridge, HumanoidReferenceFrames referenceFrames)
+   private final YoTimer timer;
+
+   public TestICPOptimizationBehavior(CommunicationBridgeInterface communicationBridge, HumanoidReferenceFrames referenceFrames, DoubleYoVariable yoTime)
    {
       super(communicationBridge);
       this.referenceFrames = referenceFrames;
-      
+
       swingTime.set(1.2);
       transferTime.set(0.6);
-      stepInPlace.set(true);
+      sleepTime.set(10.0);
+
+      timer = new YoTimer(yoTime);
    }
 
    @Override
    public void doControl()
    {
+      if (!(timer.totalElapsed() > sleepTime.getDoubleValue()))
+         return;
+
       FootstepDataListMessage footsteps = new FootstepDataListMessage(swingTime.getDoubleValue(), transferTime.getDoubleValue());
       footsteps.setExecutionMode(ExecutionMode.OVERRIDE);
       footsteps.setDestination(PacketDestination.BROADCAST);
-      
+
       ReferenceFrame leftSoleFrame = referenceFrames.getSoleFrame(RobotSide.LEFT);
       ReferenceFrame rightSoleFrame = referenceFrames.getSoleFrame(RobotSide.RIGHT);
       FramePoint rightFoot = new FramePoint(rightSoleFrame);
@@ -63,20 +69,23 @@ public class TestICPOptimizationBehavior extends AbstractBehavior
          sendPacket(new TextToSpeechPacket("Step forward."));
          stepPose.setX(0.3);
       }
-      
+      else
+      {
+         sendPacket(new TextToSpeechPacket("Step in place."));
+      }
+
       stepPose.changeFrame(ReferenceFrame.getWorldFrame());
-      
+
       Point3d location = new Point3d();
       Quat4d orientation = new Quat4d();
       stepPose.getPose(location, orientation);
-      
+
       FootstepDataMessage footstepData = new FootstepDataMessage(RobotSide.RIGHT, location, orientation);
       footstepData.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
       footsteps.add(footstepData);
-      
+
       sendPacket(footsteps);
-      sendPacket(new TextToSpeechPacket("Sleeping for 10 seconds."));
-      ThreadTools.sleep(10000);
+      timer.reset();
    }
 
    @Override
@@ -84,9 +93,7 @@ public class TestICPOptimizationBehavior extends AbstractBehavior
    {
       abortBehavior.set(false);
       stepInPlace.set(true);
-      
       sendPacket(new TextToSpeechPacket("Starting to step forward and backward with the right foot."));
-      ThreadTools.sleep(1000);
    }
 
    @Override
