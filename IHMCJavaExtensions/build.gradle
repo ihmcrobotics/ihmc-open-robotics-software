@@ -44,6 +44,8 @@ repositories {
     jcenter()
 }
 
+repositories ihmc.ihmcDefaultArtifactProxies()
+
 def strings = ['ihmc', 'robotics']
 ihmc.configureForIHMCOpenSourceBintrayPublish(false, "mavenJava", "maven-release", strings)
 
