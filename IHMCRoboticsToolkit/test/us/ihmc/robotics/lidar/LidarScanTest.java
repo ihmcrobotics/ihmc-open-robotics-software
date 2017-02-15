@@ -12,12 +12,12 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
+import us.ihmc.commons.Assertions;
+import us.ihmc.commons.RunnableThatThrows;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.RigidBodyTransformTest;
 import us.ihmc.robotics.random.RandomTools;
-import us.ihmc.testing.Assertions;
-import us.ihmc.testing.RunnableThatThrows;
 
 public class LidarScanTest
 {

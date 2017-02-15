@@ -10,7 +10,7 @@ import javax.vecmath.Vector3d;
 
 import org.junit.Test;
 
-import us.ihmc.tools.testing.MutationTestingTools;
+import us.ihmc.commons.MutationTestFacilitator;
 
 public class ExpandingPolytopeSilhouetteConstructorTest
 {
@@ -197,9 +197,7 @@ public class ExpandingPolytopeSilhouetteConstructorTest
 
    public static void main(String[] args)
    {
-      String targetTests = ExpandingPolytopeSilhouetteConstructorTest.class.getName();
-      String targetClassesInSamePackage = MutationTestingTools.createClassSelectorStringFromTargetString(targetTests);
-      MutationTestingTools.doPITMutationTestAndOpenResult(targetTests, targetClassesInSamePackage);
+      MutationTestFacilitator.facilitateMutationTestForClass(ExpandingPolytopeSilhouetteConstructor.class, ExpandingPolytopeSilhouetteConstructorTest.class);
    }
 
 }
