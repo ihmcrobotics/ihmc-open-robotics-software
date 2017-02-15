@@ -38,16 +38,13 @@ jar {
     }
 }
 
-repositories ihmc.ihmcDefaultArtifactProxies()
-
 repositories {
+    mavenCentral()
     mavenLocal()
     jcenter()
-    mavenCentral()
-    maven {
-        url "http://artifactory.ihmc.us/artifactory/thirdparty/"
-    }
 }
+
+repositories ihmc.ihmcDefaultArtifactProxies()
 
 def strings = ['ihmc', 'robotics']
 ihmc.configureForIHMCOpenSourceBintrayPublish(false, "mavenJava", "maven-release", strings)
