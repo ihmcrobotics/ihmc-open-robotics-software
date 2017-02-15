@@ -89,7 +89,7 @@ public class KinematicToolboxDiagnosticEnvironment
       parameters.enableKinematicsToolbox(true);
       parameters.enableKinematicsToolboxVisualizer(true);
       parameters.enableLocalControllerCommunicator(true);
-      parameters.enableMocapModule(false);
+      parameters.enableMocapModule(true);
       new DRCNetworkProcessor(drcRobotModel, parameters);
    }
 
