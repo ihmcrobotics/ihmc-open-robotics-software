@@ -46,6 +46,7 @@ public final class SpatialInertiaMatrix implements java.io.Serializable
 
    }
 
+   @Override
    public String toString()
    {
       return (A.toString() + B.toString() + C.toString() + D.toString() + "\n");

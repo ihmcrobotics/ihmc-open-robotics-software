@@ -59,16 +59,19 @@ public class SaveRobotConfigurationDialogGenerator implements SaveRobotConfigura
       }
    }
 
+   @Override
    public void setCurrentDirectory(File directory)
    {
       dataFileChooser.setCurrentDirectory(directory);
    }
 
+   @Override
    public void setCurrentDirectory(String directory)
    {
       dataFileChooser.setCurrentDirectory(new File(directory));
    }
 
+   @Override
    public void constructDialog()
    {
       if (dataFileChooser.showSaveDialog(frame) == JFileChooser.APPROVE_OPTION)

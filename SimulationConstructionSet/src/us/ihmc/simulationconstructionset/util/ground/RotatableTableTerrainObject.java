@@ -23,6 +23,7 @@ public class RotatableTableTerrainObject extends RotatableBoxTerrainObject
       addGraphics();
    }
 
+   @Override
    protected void addGraphics()
    {
       Matrix3d rotation = box.getRotationCopy();

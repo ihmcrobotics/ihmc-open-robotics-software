@@ -4,13 +4,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
-import us.ihmc.SdfLoader.JaxbSDFLoader;
-import us.ihmc.SdfLoader.SDFConversionsHelper;
-import us.ihmc.SdfLoader.SDFJointHolder;
-import us.ihmc.SdfLoader.SDFLinkHolder;
-import us.ihmc.SdfLoader.xmlDescription.Collision;
-import us.ihmc.SdfLoader.xmlDescription.SDFGeometry;
+import us.ihmc.modelFileLoaders.SdfLoader.*;
+import us.ihmc.modelFileLoaders.ModelFileLoaderConversionsHelper;
+import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.Collision;
+import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFGeometry;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
 import us.ihmc.ihmcPerception.depthData.collisionShapes.CollisionBox;
 import us.ihmc.ihmcPerception.depthData.collisionShapes.CollisionCylinder;
@@ -51,7 +48,7 @@ public class SDFCollisionBoxProvider implements CollisionBoxProvider
       for (Collision collision : holder.getCollisions())
       {
          SDFGeometry collisionGeometry = collision.getGeometry();
-         RigidBodyTransform visualPose = SDFConversionsHelper.poseToTransform(collision.getPose());
+         RigidBodyTransform visualPose = ModelFileLoaderConversionsHelper.poseToTransform(collision.getPose());
 
          CollisionShape mesh;
          if (collisionGeometry.getBox() != null)

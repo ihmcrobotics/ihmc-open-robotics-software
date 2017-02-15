@@ -43,16 +43,16 @@ int64 unique_id
 
 # This message utilizes "enums". Enum value information for this message follows.
 
-# "execution_mode" enum values:
-uint8 OVERRIDE=0 # This message will override the previous.
-uint8 QUEUE=1 # The previous message will first be executed before executing this message. When sending a series of queued messages, the very first has to be declared as OVERRIDE.
+# "robot_side" enum values:
+uint8 LEFT=0 # refers to the LEFT side of a robot
+uint8 RIGHT=1 # refers to the RIGHT side of a robot
 
 # "base_for_control" enum values:
 uint8 CHEST=0 # The hand is controlled with respect to the chest. In other words, the controlled hand moves along with the chest.
 uint8 WORLD=1 # The hand is controlled with respect to the estimated world. In other words, the controlled hand will remain fixed in world even if the robot starts moving.
 uint8 WALKING_PATH=2 # The hand is controlled with respect to the middle of the feet. In other words, the controlled hand moves along with the robot when walking but is not affected by swaying.
 
-# "robot_side" enum values:
-uint8 LEFT=0 # refers to the LEFT side of a robot
-uint8 RIGHT=1 # refers to the RIGHT side of a robot
+# "execution_mode" enum values:
+uint8 OVERRIDE=0 # This message will override the previous.
+uint8 QUEUE=1 # The previous message will first be executed before executing this message. When sending a series of queued messages, the very first has to be declared as OVERRIDE.
 

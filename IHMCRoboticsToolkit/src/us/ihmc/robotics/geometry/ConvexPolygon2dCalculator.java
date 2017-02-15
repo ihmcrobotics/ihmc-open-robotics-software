@@ -303,7 +303,7 @@ public class ConvexPolygon2dCalculator
          {
             Point2d edgeStart = polygon.getVertex(i);
             Point2d edgeEnd = polygon.getNextVertex(i);
-            double distanceToEdgeLine = GeometryTools.distanceFromPointToLine(pointX, pointY, edgeStart.x, edgeStart.y, edgeEnd.x, edgeEnd.y);
+            double distanceToEdgeLine = GeometryTools.distanceFromPointToLine(pointX, pointY, edgeStart.x, edgeStart.y, edgeEnd.x - edgeStart.x, edgeEnd.y - edgeStart.y);
 
             boolean pointOutside = canObserverSeeEdge(i, pointX, pointY, polygon);
             if (!pointOutside)

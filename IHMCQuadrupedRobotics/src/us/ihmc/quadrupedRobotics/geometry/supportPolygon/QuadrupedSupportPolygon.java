@@ -846,7 +846,7 @@ public class QuadrupedSupportPolygon implements Serializable
       {
          FramePoint pointOne = getFootstep(getFirstSupportingQuadrant());
          FramePoint pointTwo = getFootstep(getLastSupportingQuadrant());
-         return -Math.abs(GeometryTools.distanceFromPointToLine(x, y, pointOne.getX(), pointOne.getY(), pointTwo.getX(), pointTwo.getY()));
+         return -Math.abs(GeometryTools.distanceFromPointToLine(x, y, pointOne.getX(), pointOne.getY(), pointTwo.getX() - pointOne.getX(), pointTwo.getY() - pointOne.getY()));
       }
       else
       {
@@ -1033,7 +1033,7 @@ public class QuadrupedSupportPolygon implements Serializable
       v3p.normalize();
 
       // find intersection point of the two bisecting vectors
-      GeometryTools.getIntersectionBetweenTwoLines2d(intersectionToPack, tempPointListForInCirclePoint[1], v2p, tempPointListForInCirclePoint[2], v3p);
+      GeometryTools.getIntersectionBetweenTwoLines2d(tempPointListForInCirclePoint[1], v2p, tempPointListForInCirclePoint[2], v3p, intersectionToPack);
    }
 
    /**
@@ -1335,7 +1335,7 @@ public class QuadrupedSupportPolygon implements Serializable
       
       commonPolygonToPack.clear();
       FramePoint intersection = commonPolygonToPack.reviveFootstep(quadrantToAssignToIntersection);
-      GeometryTools.getIntersectionBetweenTwoLines2d(intersection, getFootstep(compareSwingLeg), direction1, polygonToCompare.getFootstep(thisSwingLeg), direction2);
+      GeometryTools.getIntersectionBetweenTwoLines2d(getFootstep(compareSwingLeg), direction1, polygonToCompare.getFootstep(thisSwingLeg), direction2, intersection);
       
       commonPolygonToPack.setFootstep(thisSwingLeg.getDiagonalOppositeQuadrant(), getFootstep(thisSwingLeg.getDiagonalOppositeQuadrant()));
       commonPolygonToPack.setFootstep(compareSwingLeg.getDiagonalOppositeQuadrant(), getFootstep(compareSwingLeg.getDiagonalOppositeQuadrant()));
@@ -1462,8 +1462,8 @@ public class QuadrupedSupportPolygon implements Serializable
          shrunkenShrinkEdgeFoot.add(shrinkDirection);
          shrunkenNextEdgeFoot.add(shrinkDirection);
          
-         GeometryTools.getIntersectionBetweenTwoLines2d(shrunkenShrinkEdgeFoot, shrunkenNextEdgeFoot, shrunkenShrinkEdgeFoot, originalPreviousEdgeFoot, originalShrinkEdgeFoot);
-         GeometryTools.getIntersectionBetweenTwoLines2d(shrunkenNextEdgeFoot, shrunkenShrinkEdgeFoot, shrunkenNextEdgeFoot, originalPreviousEdgeFoot, originalNextEdgeFoot);
+         GeometryTools.getIntersectionBetweenTwoLines2d(shrunkenNextEdgeFoot, shrunkenShrinkEdgeFoot, originalPreviousEdgeFoot, originalShrinkEdgeFoot, shrunkenShrinkEdgeFoot);
+         GeometryTools.getIntersectionBetweenTwoLines2d(shrunkenShrinkEdgeFoot, shrunkenNextEdgeFoot, originalPreviousEdgeFoot, originalNextEdgeFoot, shrunkenNextEdgeFoot);
       }
       else if (size() == 2)
       {
@@ -1657,7 +1657,7 @@ public class QuadrupedSupportPolygon implements Serializable
     */
    public double getDistanceFromP1ToTrotLineInDirection2d(RobotQuadrant trotQuadrant, FramePoint p1, FramePoint p2)
    {
-      boolean intersectionExists = GeometryTools.getIntersectionBetweenTwoLines2d(tempIntersection, p1, p2, getFootstep(trotQuadrant), getFootstep(trotQuadrant.getDiagonalOppositeQuadrant()));
+      boolean intersectionExists = GeometryTools.getIntersectionBetweenTwoLines2d(p1, p2, getFootstep(trotQuadrant), getFootstep(trotQuadrant.getDiagonalOppositeQuadrant()), tempIntersection);
 
       if (intersectionExists)
       {

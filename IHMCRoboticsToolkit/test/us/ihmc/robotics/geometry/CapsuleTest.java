@@ -1,16 +1,17 @@
 package us.ihmc.robotics.geometry;
 
-import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import java.util.ArrayList;
+import java.util.Random;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
-import static org.junit.Assert.*;
+import org.junit.Test;
 
-import java.util.ArrayList;
-import java.util.Random;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public class CapsuleTest
 {

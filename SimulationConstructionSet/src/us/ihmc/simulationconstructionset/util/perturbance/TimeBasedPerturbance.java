@@ -109,6 +109,7 @@ public class TimeBasedPerturbance implements RobotController
       yoGraphicsListRegistry.registerYoGraphic(name, perturbanceVisual);
    }
 
+   @Override
    public void doControl()
    {
       if (time.getDoubleValue() > timeToDoPerturbance.getDoubleValue())
@@ -148,20 +149,24 @@ public class TimeBasedPerturbance implements RobotController
 
    }
 
+   @Override
    public YoVariableRegistry getYoVariableRegistry()
    {
       return registry;
    }
 
+   @Override
    public String getName()
    {
       return this.name;
    }
    
+   @Override
    public void initialize()
    {      
    }
 
+   @Override
    public String getDescription()
    {
       return getName();

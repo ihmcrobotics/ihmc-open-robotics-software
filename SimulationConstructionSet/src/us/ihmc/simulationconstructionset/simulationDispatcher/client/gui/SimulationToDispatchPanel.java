@@ -42,6 +42,7 @@ public abstract class SimulationToDispatchPanel extends JPanel implements KeyLis
       anim.start();
    }
 
+   @Override
    public void run()
    {
       while (true)
@@ -84,23 +85,28 @@ public abstract class SimulationToDispatchPanel extends JPanel implements KeyLis
    }
 
 
+   @Override
    public void mousePressed(MouseEvent evt)
    {
    }
 
+   @Override
    public void mouseReleased(MouseEvent evt)
    {
    }
 
+   @Override
    public void mouseEntered(MouseEvent evt)
    {
    }
 
+   @Override
    public void mouseExited(MouseEvent evt)
    {
    }
 
 
+   @Override
    public void mouseClicked(MouseEvent evt)
    {
       int y = evt.getY();
@@ -176,14 +182,17 @@ public abstract class SimulationToDispatchPanel extends JPanel implements KeyLis
       return this.selectedSimulation;
    }
 
+   @Override
    public void keyTyped(KeyEvent evt)
    {
    }
 
+   @Override
    public void keyReleased(KeyEvent evt)
    {
    }
 
+   @Override
    public void keyPressed(KeyEvent keyEvent)
    {
       int code = keyEvent.getKeyCode();
@@ -205,6 +214,7 @@ public abstract class SimulationToDispatchPanel extends JPanel implements KeyLis
       this.repaint();
    }
 
+   @Override
    public void paintComponent(Graphics g)
    {
       super.paintComponent(g);

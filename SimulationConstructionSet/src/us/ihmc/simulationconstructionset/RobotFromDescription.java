@@ -53,10 +53,15 @@ public class RobotFromDescription extends Robot implements OneDegreeOfFreedomJoi
 
    public RobotFromDescription(RobotDescription description)
    {
-      super(description.getName());
-      constructRobotFromDescription(description);
+      this(description, true, true);
+   }
 
-//      System.out.println(this);
+   public RobotFromDescription(RobotDescription description, boolean enableDamping, boolean enableJointTorqueAndVelocityLimits)
+   {
+      super(description.getName());
+      constructRobotFromDescription(description, enableDamping, enableJointTorqueAndVelocityLimits);
+
+      //      System.out.println(this);
    }
 
    public Joint getJoint(String jointName)
@@ -115,20 +120,20 @@ public class RobotFromDescription extends Robot implements OneDegreeOfFreedomJoi
       return jointToGroundContactPointsMap.get(joint);
    }
 
-   private void constructRobotFromDescription(RobotDescription description)
+   private void constructRobotFromDescription(RobotDescription description, boolean enableDamping, boolean enableJointTorqueAndVelocityLimits)
    {
       ArrayList<JointDescription> rootJointDescriptions = description.getRootJoints();
 
       for (JointDescription rootJointDescription : rootJointDescriptions)
       {
-         Joint rootJoint = constructJointRecursively(rootJointDescription);
+         Joint rootJoint = constructJointRecursively(rootJointDescription, enableDamping, enableJointTorqueAndVelocityLimits);
          this.addRootJoint(rootJoint);
       }
    }
 
-   private Joint constructJointRecursively(JointDescription jointDescription)
+   private Joint constructJointRecursively(JointDescription jointDescription, boolean enableDamping, boolean enableJointTorqueAndVelocityLimits)
    {
-      Joint joint = createSingleJoint(jointDescription);
+      Joint joint = createSingleJoint(jointDescription, enableDamping, enableJointTorqueAndVelocityLimits);
 
       addGroundContactPoints(jointDescription, joint);
       addExternalForcePoints(jointDescription, joint);
@@ -145,7 +150,7 @@ public class RobotFromDescription extends Robot implements OneDegreeOfFreedomJoi
       ArrayList<JointDescription> childrenJoints = jointDescription.getChildrenJoints();
       for (JointDescription childJointDescription : childrenJoints)
       {
-         Joint childJoint = constructJointRecursively(childJointDescription);
+         Joint childJoint = constructJointRecursively(childJointDescription, enableDamping, enableJointTorqueAndVelocityLimits);
          joint.addJoint(childJoint);
       }
 
@@ -217,7 +222,8 @@ public class RobotFromDescription extends Robot implements OneDegreeOfFreedomJoi
       ArrayList<JointWrenchSensorDescription> jointWrenchSensorDescriptions = jointDescription.getWrenchSensors();
       for (JointWrenchSensorDescription jointWrenchSensorDescription : jointWrenchSensorDescriptions)
       {
-         JointWrenchSensor jointWrenchSensor = new JointWrenchSensor(jointWrenchSensorDescription.getName(), jointWrenchSensorDescription.getOffsetFromJoint(), this);
+         JointWrenchSensor jointWrenchSensor = new JointWrenchSensor(jointWrenchSensorDescription.getName(), jointWrenchSensorDescription.getOffsetFromJoint(),
+                                                                     this);
          joint.addJointWrenchSensor(jointWrenchSensor);
 
          wrenchSensorNameMap.put(jointWrenchSensor.getName(), jointWrenchSensor);
@@ -236,17 +242,17 @@ public class RobotFromDescription extends Robot implements OneDegreeOfFreedomJoi
 
          if (forceSensorDescription.useGroundContactPoints())
          {
-//               System.out.println("SDFRobot: Adding old-school force sensor to: " + joint.getName());
+            //               System.out.println("SDFRobot: Adding old-school force sensor to: " + joint.getName());
             ArrayList<GroundContactPoint> groundContactPoints = new ArrayList<GroundContactPoint>();
             //TODO: Not sure if you want all of the ground contact points from here down, or just the ones attached to this joint.
             joint.recursiveGetAllGroundContactPoints(groundContactPoints);
 
-            wrenchCalculator = new GroundContactPointBasedWrenchCalculator(
-                  forceSensorDescription.getName(), groundContactPoints, oneDegreeOfFreedomJoint, forceSensorDescription.getTransformToJoint());
+            wrenchCalculator = new GroundContactPointBasedWrenchCalculator(forceSensorDescription.getName(), groundContactPoints, oneDegreeOfFreedomJoint,
+                                                                           forceSensorDescription.getTransformToJoint());
          }
          else
          {
-//               System.out.println("SDFRobot: Adding force sensor to: " + joint.getName());
+            //               System.out.println("SDFRobot: Adding force sensor to: " + joint.getName());
 
             Vector3d offsetToPack = new Vector3d();
             forceSensorDescription.getTransformToJoint().getTranslation(offsetToPack);
@@ -266,7 +272,8 @@ public class RobotFromDescription extends Robot implements OneDegreeOfFreedomJoi
 
       for (GroundContactPointDescription groundContactPointDescription : groundContactPointDescriptions)
       {
-         GroundContactPoint groundContactPoint = new GroundContactPoint(groundContactPointDescription.getName(), groundContactPointDescription.getOffsetFromJoint(), this);
+         GroundContactPoint groundContactPoint = new GroundContactPoint(groundContactPointDescription.getName(),
+                                                                        groundContactPointDescription.getOffsetFromJoint(), this);
          joint.addGroundContactPoint(groundContactPoint);
 
          if (!jointToGroundContactPointsMap.containsKey(joint))
@@ -283,7 +290,8 @@ public class RobotFromDescription extends Robot implements OneDegreeOfFreedomJoi
 
       for (ExternalForcePointDescription ExternalForcePointDescription : ExternalForcePointDescriptions)
       {
-         ExternalForcePoint ExternalForcePoint = new ExternalForcePoint(ExternalForcePointDescription.getName(), ExternalForcePointDescription.getOffsetFromJoint(), this);
+         ExternalForcePoint ExternalForcePoint = new ExternalForcePoint(ExternalForcePointDescription.getName(),
+                                                                        ExternalForcePointDescription.getOffsetFromJoint(), this);
          joint.addExternalForcePoint(ExternalForcePoint);
       }
    }
@@ -299,7 +307,7 @@ public class RobotFromDescription extends Robot implements OneDegreeOfFreedomJoi
       }
    }
 
-   private Joint createSingleJoint(JointDescription jointDescription)
+   private Joint createSingleJoint(JointDescription jointDescription, boolean enableDamping, boolean enableJointTorqueAndVelocityLimits)
    {
       Joint joint;
 
@@ -310,7 +318,7 @@ public class RobotFromDescription extends Robot implements OneDegreeOfFreedomJoi
          Vector3d offset = new Vector3d();
          floatingJointDescription.getOffsetFromParentJoint(offset);
 
-         joint = new FloatingJoint(jointDescription.getName(), offset, this, true);
+         joint = new FloatingJoint(jointDescription.getName(), floatingJointDescription.getJointVariableName(), offset, this, true);
       }
 
       else if (jointDescription instanceof FloatingPlanarJointDescription)
@@ -346,9 +354,15 @@ public class RobotFromDescription extends Robot implements OneDegreeOfFreedomJoi
                pinJoint.setLimitStops(qMin, qMax, kLimit, bLimit);
             }
 
-            pinJoint.setDamping(pinJointDescription.getDamping());
-            pinJoint.setVelocityLimits(pinJointDescription.getVelocityLimit(), pinJointDescription.getVelocityDamping());
-            pinJoint.setStiction(pinJointDescription.getStiction());
+            if (enableDamping)
+            {
+               pinJoint.setDamping(pinJointDescription.getDamping());
+               pinJoint.setStiction(pinJointDescription.getStiction());
+            }
+            if (enableJointTorqueAndVelocityLimits)
+            {
+               pinJoint.setVelocityLimits(pinJointDescription.getVelocityLimit(), pinJointDescription.getVelocityDamping());
+            }
          }
          else
          {
@@ -381,9 +395,15 @@ public class RobotFromDescription extends Robot implements OneDegreeOfFreedomJoi
             pinJoint.setLimitStops(qMin, qMax, kLimit, bLimit);
          }
 
-         pinJoint.setDamping(pinJointDescription.getDamping());
-         pinJoint.setVelocityLimits(pinJointDescription.getVelocityLimit(), pinJointDescription.getVelocityDamping());
-         pinJoint.setStiction(pinJointDescription.getStiction());
+         if (enableDamping)
+         {
+            pinJoint.setDamping(pinJointDescription.getDamping());
+            pinJoint.setStiction(pinJointDescription.getStiction());
+         }
+         if (enableJointTorqueAndVelocityLimits)
+         {
+            pinJoint.setVelocityLimits(pinJointDescription.getVelocityLimit(), pinJointDescription.getVelocityDamping());
+         }
       }
       else if (jointDescription instanceof SliderJointDescription)
       {
@@ -420,7 +440,13 @@ public class RobotFromDescription extends Robot implements OneDegreeOfFreedomJoi
          joint.setDynamic(false);
       }
 
-      Link link = createLink(jointDescription.getLink());
+      LinkDescription linkDescription = jointDescription.getLink();
+
+      if (linkDescription == null)
+      {
+         throw new RuntimeException("LinkDescription is null for joint " + jointDescription.getName());
+      }
+      Link link = createLink(linkDescription);
       joint.setLink(link);
       return joint;
    }
@@ -436,8 +462,12 @@ public class RobotFromDescription extends Robot implements OneDegreeOfFreedomJoi
       LinkGraphicsDescription linkGraphics = linkDescription.getLinkGraphics();
       link.setLinkGraphics(linkGraphics);
 
-      CollisionMeshDescription collisonMeshDescription = linkDescription.getCollisionMesh();
-      link.setCollisionMesh(collisonMeshDescription);
+      ArrayList<CollisionMeshDescription> collisonMeshDescriptions = linkDescription.getCollisionMeshes();
+      
+      for (int i=0; i<collisonMeshDescriptions.size(); i++)
+      {
+         link.addCollisionMesh(collisonMeshDescriptions.get(i));
+      }
 
       return link;
    }

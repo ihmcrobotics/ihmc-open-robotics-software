@@ -14,6 +14,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
@@ -24,11 +25,7 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
-import us.ihmc.simulationconstructionset.util.simulationTesting.ReflectionSimulationComparer;
-import us.ihmc.simulationconstructionset.util.simulationTesting.SimpleRewindabilityComparisonScript;
-import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationComparisonScript;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public class ReflectionSimulationComparerTest
 {
@@ -180,25 +177,30 @@ public class ReflectionSimulationComparerTest
          this.isRewindable = isRewindable;
       }
 
+      @Override
       public void initialize()
       {         
       }
 
+      @Override
       public YoVariableRegistry getYoVariableRegistry()
       {
          return registry;
       }
 
+      @Override
       public String getName()
       {
          return "RewindableController";
       }
 
+      @Override
       public String getDescription()
       {
          return getName();
       }
 
+      @Override
       public void doControl()
       {
          counter.increment();

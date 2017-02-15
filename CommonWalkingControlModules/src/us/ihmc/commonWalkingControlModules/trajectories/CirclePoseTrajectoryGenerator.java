@@ -183,7 +183,7 @@ public class CirclePoseTrajectoryGenerator implements PoseTrajectoryGenerator
          {
             circleOrigin.get(localTranslation);
             rotationAxis.get(localRotationAxis);
-            GeometryTools.getRotationBasedOnNormal(localAxisAngle, localRotationAxis);
+            GeometryTools.getAxisAngleFromZUpToVector(localRotationAxis, localAxisAngle);
             transformToParent.set(localAxisAngle, localTranslation);
          }
       };

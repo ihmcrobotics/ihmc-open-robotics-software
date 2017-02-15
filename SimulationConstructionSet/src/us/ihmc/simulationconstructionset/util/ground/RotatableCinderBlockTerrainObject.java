@@ -17,6 +17,7 @@ public class RotatableCinderBlockTerrainObject extends RotatableBoxTerrainObject
       super(box, appearance);
    }
 
+   @Override
    protected void addGraphics()
    {      
       RigidBodyTransform transformCenterConventionToBottomConvention = box.getTransformCopy();

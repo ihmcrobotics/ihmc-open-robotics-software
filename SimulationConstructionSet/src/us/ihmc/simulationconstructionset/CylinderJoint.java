@@ -42,11 +42,13 @@ public class CylinderJoint extends PinJoint
    }
 
 
+   @Override
    public void addJoint(Joint nextJoint)
    {
       joint2.addJoint(nextJoint);
    }
 
+   @Override
    public void setLink(Link l)
    {
       // Set this joints real link to a null link and set the second Joints link to the given link...
@@ -59,26 +61,31 @@ public class CylinderJoint extends PinJoint
       joint2.setLink(l);
    }
 
+   @Override
    public void addCameraMount(CameraMount mount)
    {
       joint2.addCameraMount(mount);
    }
    
+   @Override
    public void addIMUMount(IMUMount mount)
    {
       joint2.addIMUMount(mount);
    }
 
+   @Override
    public void addKinematicPoint(KinematicPoint point)
    {
       joint2.addKinematicPoint(point);
    }
 
+   @Override
    public void addGroundContactPoint(GroundContactPoint point)
    {
       joint2.addGroundContactPoint(point);
    }
 
+   @Override
    public void addExternalForcePoint(ExternalForcePoint point)
    {
       joint2.addExternalForcePoint(point);
@@ -106,6 +113,7 @@ public class CylinderJoint extends PinJoint
       joint2.setInitialState(q2_init, qd2_init);
    }
 
+   @Override
    public void getState(double[] state)
    {
       state[0] = q.getDoubleValue();

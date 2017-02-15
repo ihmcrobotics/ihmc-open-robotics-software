@@ -10,8 +10,9 @@ import javax.vecmath.Vector3d;
 
 import org.junit.Test;
 
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.robotics.geometry.BoundingBox3d;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.testing.JUnitTools;
 import us.ihmc.tools.testing.MutationTestingTools;
 
@@ -104,7 +105,7 @@ public class ConvexPolytopeTest
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test//(timeout = 30000)
+   @Test(timeout = 30000)
    public void testPolytopeConstructor()
    {
       ConvexPolytope cubeOne = ConvexPolytopeConstructor.constructBoxWithCenterAtZero(100.0, 100.0, 0.5);
@@ -113,6 +114,71 @@ public class ConvexPolytopeTest
       ArrayList<PolytopeVertex[]> edges = cubeOne.getEdges();
 
       assertEquals(12, edges.size());
+   }
+   
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testBoundingBoxes()
+   {
+      ConvexPolytope polytope = new ConvexPolytope();
+      BoundingBox3d boundingBox = new BoundingBox3d(0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+      polytope.getBoundingBox(boundingBox);
+
+      assertTrue(boundingBox.getXMin() == Double.NEGATIVE_INFINITY);
+      assertTrue(boundingBox.getYMin() == Double.NEGATIVE_INFINITY);
+      assertTrue(boundingBox.getZMin() == Double.NEGATIVE_INFINITY);
+      assertTrue(boundingBox.getXMax() == Double.POSITIVE_INFINITY);
+      assertTrue(boundingBox.getYMax() == Double.POSITIVE_INFINITY);
+      assertTrue(boundingBox.getZMax() == Double.POSITIVE_INFINITY);
+      
+      PolytopeVertex vertexOne = polytope.addVertex(0.0, 0.0, 0.0);
+      PolytopeVertex vertexTwo = polytope.addVertex(1.0, 0.0, 0.0);
+      PolytopeVertex vertexThree = polytope.addVertex(1.0, 1.0, 0.0);
+      PolytopeVertex vertexFour = polytope.addVertex(0.0, 1.0, 0.0);
+
+      PolytopeVertex vertexFive = polytope.addVertex(new Point3d(0.0, 0.0, 1.0));
+      PolytopeVertex vertexSix = polytope.addVertex(new Point3d(1.0, 0.0, 1.0));
+      PolytopeVertex vertexSeven = polytope.addVertex(new Point3d(1.0, 1.0, 1.0));
+      PolytopeVertex vertexEight = polytope.addVertex(new Point3d(0.0, 1.0, 1.0));
+
+      polytope.addEdge(vertexOne, vertexTwo);
+      polytope.addEdge(vertexTwo, vertexThree);
+      polytope.addEdge(vertexThree, vertexFour);
+      polytope.addEdge(vertexFour, vertexOne);
+
+      polytope.addEdge(vertexFive, vertexSix);
+      polytope.addEdge(vertexSix, vertexSeven);
+      polytope.addEdge(vertexSeven, vertexEight);
+      polytope.addEdge(vertexEight, vertexFive);
+
+      polytope.addEdge(vertexOne, vertexFive);
+      polytope.addEdge(vertexTwo, vertexSix);
+      polytope.addEdge(vertexThree, vertexSeven);
+      polytope.addEdge(vertexFour, vertexEight);
+      
+      polytope.getBoundingBox(boundingBox);
+      
+      Point3d minimumPoint = new Point3d();
+      boundingBox.getMinPoint(minimumPoint);
+      
+      Point3d maximumPoint = new Point3d();
+      boundingBox.getMaxPoint(maximumPoint);
+      
+      JUnitTools.assertTuple3dEquals(new Point3d(0.0, 0.0, 0.0), minimumPoint, 1e-10);
+      JUnitTools.assertTuple3dEquals(new Point3d(1.0, 1.0, 1.0), maximumPoint, 1e-10);
+      
+      RigidBodyTransform transform = new RigidBodyTransform();
+      transform.setTranslation(10, 20, 30);
+      polytope.applyTransform(transform);
+      
+      polytope.getBoundingBox(boundingBox);
+      
+      boundingBox.getMinPoint(minimumPoint);
+      boundingBox.getMaxPoint(maximumPoint);
+      
+      JUnitTools.assertTuple3dEquals(new Point3d(10.0, 20.0, 30.0), minimumPoint, 1e-10);
+      JUnitTools.assertTuple3dEquals(new Point3d(11.0, 21.0, 31.0), maximumPoint, 1e-10);
+      
    }
 
    public static void main(String[] args)

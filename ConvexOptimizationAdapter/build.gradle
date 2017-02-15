@@ -42,15 +42,20 @@ dependencies {
     compile group: 'us.ihmc', name: 'IHMCOptimizerWrappers', version: '0.0.26'
     compile group: 'org.apache.commons', name: 'commons-math3', version: '3.3'
 	compile group: 'com.github.vincentfk', name:'joptimizer', version:'3.3.0'
-    compile group: 'org.ejml', name: 'core', version: '0.28'
-    compile group: 'org.ejml', name: 'dense64', version: '0.28'
+    compile group: 'org.ejml', name: 'core', version: '0.30'
+    compile group: 'org.ejml', name: 'dense64', version: '0.30'
     compile group: 'net.sf.trove4j', name: 'trove4j', version: '3.0.3'
     compile group: 'org.ojalgo', name: 'ojalgo', version: '40.0.0'
     
+    testCompile group: 'us.ihmc', name: 'ihmc-continuous-integration-framework', version: '0.9.4'
+    
     compile ihmc.getProjectDependency(":IHMCJavaToolkit")
+    compile ihmc.getProjectDependency(":IHMCJavaExtensions")
 	compile ihmc.getProjectDependency(":IHMCRoboticsToolkit")
 
     testCompile ihmc.getProjectDependency(":IHMCUnitTesting")
+	testCompile ihmc.getProjectTestDependency(":IHMCRoboticsToolkit")
+	testCompile ihmc.getProjectTestDependency(":IHMCJavaExtensions")
 }
 
 jar {

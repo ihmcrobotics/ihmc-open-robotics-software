@@ -12,18 +12,16 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
 
-import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.geometry.GeometryTools;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.testing.JUnitTools;
 
 public class MathToolsTest
@@ -753,70 +751,6 @@ public class MathToolsTest
    {
       Random rand = new Random();
       MathTools.lcm(rand.nextLong());
-   }
-
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
-   public void testArePointsInOrderColinear()
-   {
-      Point3d startPoint = new Point3d(0.0, 0.0, 0.0);
-      Point3d middlePoint = new Point3d(1.0, 1.0, 1.0);
-      Point3d endPoint = new Point3d(2.0, 2.0, 2.0);
-      boolean expectedReturn = true;
-      double epsilon = 1e-10;
-      boolean actualReturn = GeometryTools.arePointsInOrderAndColinear(startPoint, middlePoint, endPoint, epsilon);
-      assertEquals("return value", expectedReturn, actualReturn);
-
-      /** @todo fill in the test code */
-   }
-
-   @ContinuousIntegrationTest(estimatedDuration = 0.2)
-   @Test(timeout = 30000)
-   public void testArePointsInOrderColinear2()
-   {
-      Random random = new Random(100L);
-      double scale = 10.0;
-
-      // these points should pass
-      int numberOfTests = 1000;
-      for (int i = 0; i < numberOfTests; i++)
-      {
-         double x, y, z;
-         x = scale * (random.nextDouble() - 0.5);
-         y = scale * (random.nextDouble() - 0.5);
-         z = scale * (random.nextDouble() - 0.5);
-         Point3d start = new Point3d(x, y, z);
-
-         x = scale * (random.nextDouble() - 0.5);
-         y = scale * (random.nextDouble() - 0.5);
-         z = scale * (random.nextDouble() - 0.5);
-         Point3d end = new Point3d(x, y, z);
-
-         Vector3d startToEnd = new Vector3d(end);
-         startToEnd.sub(start);
-
-         double epsilon = 1e-10;
-         if (startToEnd.length() < epsilon)
-            continue;
-         else
-         {
-            for (int j = 0; j < numberOfTests; j++)
-            {
-               double percentAlong = 0.99 * random.nextDouble();
-               Vector3d adder = new Vector3d(startToEnd);
-               adder.scale(percentAlong);
-
-               Point3d middle = new Point3d(start);
-               middle.add(adder);
-
-               boolean inOrder = GeometryTools.arePointsInOrderAndColinear(start, middle, end, epsilon);
-               if (!inOrder)
-               {
-                  fail("FAILED: start=" + start + ", middle=" + middle + ", end=" + end);
-               }
-            }
-         }
-      }
    }
 
 // @DeployableTestMethod(estimatedDuration = 0.1)

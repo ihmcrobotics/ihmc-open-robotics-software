@@ -13,6 +13,7 @@ import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.PinJoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.physics.CollisionArbiter;
 import us.ihmc.simulationconstructionset.physics.CollisionHandler;
 import us.ihmc.simulationconstructionset.physics.CollisionShapeDescription;
 import us.ihmc.simulationconstructionset.physics.CollisionShapeFactory;
@@ -20,6 +21,7 @@ import us.ihmc.simulationconstructionset.physics.ScsCollisionDetector;
 import us.ihmc.simulationconstructionset.physics.ScsPhysics;
 import us.ihmc.simulationconstructionset.physics.collision.DefaultCollisionHandler;
 import us.ihmc.simulationconstructionset.physics.collision.gdx.GdxCollisionDetector;
+import us.ihmc.simulationconstructionset.physics.collision.simple.DoNothingCollisionArbiter;
 import us.ihmc.simulationconstructionset.physics.visualize.DefaultCollisionVisualizer;
 
 public class CollisionExampleFixedArm
@@ -170,7 +172,7 @@ public class CollisionExampleFixedArm
          CollisionShapeDescription shapeDesc = factory.createBox(size / 2.0, size / 2.0, size / 2.0);
          factory.addShape(ret, null, shapeDesc, false, 0xFFFFFFFF, 0xFFFFFFFF);
 
-         ret.enableCollisions(this.getRobotsYoVariableRegistry());
+         ret.enableCollisions(4, collisionHandler, this.getRobotsYoVariableRegistry());
          return ret;
       }
 
@@ -190,7 +192,7 @@ public class CollisionExampleFixedArm
          linkGraphics.translate(0.0, 0.0, 0.0);
          linkGraphics.addCube(width, width, height, YoAppearance.Beige());
          ground.setLinkGraphics(linkGraphics);
-         ground.enableCollisions(this.getRobotsYoVariableRegistry());
+         ground.enableCollisions(4, collisionHandler, this.getRobotsYoVariableRegistry());
 
          groundJoint.setLink(ground);
          groundJoint.setPositionAndVelocity(0.0, 0.0, -height, 0.0, 0.0, 0.0);
@@ -224,12 +226,14 @@ public class CollisionExampleFixedArm
       sim.setGroundVisible(false);
       sim.setCameraPosition(0, -40.0, 0);
 
-      DefaultCollisionVisualizer visualize = new DefaultCollisionVisualizer(0.1, 0.1, sim, 100);
+      DefaultCollisionVisualizer visualize = new DefaultCollisionVisualizer(0.1, 0.1, 0.01, sim, 100);
 
       CollisionHandler collisionHandler = doublePendulum.getCollisionHandler();
       collisionHandler.addListener(visualize);
 
-      sim.initPhysics(new ScsPhysics(null, doublePendulum.getCollisionDetector(), collisionHandler, visualize));
+      CollisionArbiter collisionArbiter = new DoNothingCollisionArbiter();
+
+      sim.initPhysics(new ScsPhysics(null, doublePendulum.getCollisionDetector(), collisionArbiter, collisionHandler, visualize));
 
       Thread myThread = new Thread(sim);
       myThread.start();

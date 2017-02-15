@@ -16,6 +16,7 @@ public class NullJointPhysics extends JointPhysics<NullJoint>
       super(owner);
    }
 
+   @Override
    protected void jointDependentChangeVelocity(double delta_qd)
    {
 //    qd.val += delta_qd;
@@ -35,11 +36,13 @@ public class NullJointPhysics extends JointPhysics<NullJoint>
     * }
     */
 
+   @Override
    protected void jointDependentSetAndGetRotation(Matrix3d Rh_i)
    {
       Rh_i.setIdentity();
    }
 
+   @Override
    protected void jointDependentFeatherstonePassOne()
    {
       // Torque Limits
@@ -54,6 +57,7 @@ public class NullJointPhysics extends JointPhysics<NullJoint>
 
    }
 
+   @Override
    protected void jointDependentSet_d_i()
    {
       d_i.set(owner.getLink().getComOffset());
@@ -64,6 +68,7 @@ public class NullJointPhysics extends JointPhysics<NullJoint>
 // private Vector3d temp1 = new Vector3d(), temp2 = new Vector3d(), temp3 = new Vector3d();
 // private Vector3d vel_i = new Vector3d();  // vel_i is the vector velocity of joint i (vel_i = q_dot_i * u_i)
 
+   @Override
    protected void jointDependentFeatherstonePassTwo(Vector3d w_h)
    {
       // Coriolis Forces:
@@ -94,14 +99,17 @@ public class NullJointPhysics extends JointPhysics<NullJoint>
    }
 
 
+   @Override
    protected void jointDependentFeatherstonePassFour(double Q, int passNumber)
    {
    }
 
+   @Override
    protected void jointDependentRecordK(int passNumber)
    {
    }
 
+   @Override
    public void recursiveEulerIntegrate(double stepSize)
    {
       // Recurse over the children:
@@ -114,6 +122,7 @@ public class NullJointPhysics extends JointPhysics<NullJoint>
 
    }
 
+   @Override
    public void recursiveRungeKuttaSum(double stepSize)
    {
       // Recurse over the children:
@@ -125,6 +134,7 @@ public class NullJointPhysics extends JointPhysics<NullJoint>
    }
 
 
+   @Override
    public void recursiveSaveTempState()
    {
       // Recurse over the children:
@@ -136,6 +146,7 @@ public class NullJointPhysics extends JointPhysics<NullJoint>
       }
    }
 
+   @Override
    public void recursiveRestoreTempState()
    {
       // Recurse over the children:
@@ -147,6 +158,7 @@ public class NullJointPhysics extends JointPhysics<NullJoint>
       }
    }
 
+   @Override
    protected boolean jointDependentVerifyReasonableAccelerations()
    {
       return true;

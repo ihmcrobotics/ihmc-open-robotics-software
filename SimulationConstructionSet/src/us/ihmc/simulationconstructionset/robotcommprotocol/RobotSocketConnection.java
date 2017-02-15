@@ -88,11 +88,13 @@ public class RobotSocketConnection implements RobotConnection, VariableChangedLi
       return ret;
    }
 
+   @Override
    public boolean isConnected()
    {
       return commandListener.isConnected();
    }
 
+   @Override
    public void pause()
    {
       if (!commandListener.isConnected())
@@ -100,6 +102,7 @@ public class RobotSocketConnection implements RobotConnection, VariableChangedLi
       robotProtocolListenerThread.pause();
    }
 
+   @Override
    public synchronized void attemptConnectionToHost()
    {
       if (!commandListener.isConnected())
@@ -243,6 +246,7 @@ public class RobotSocketConnection implements RobotConnection, VariableChangedLi
       }
    }
 
+   @Override
    public void doDisconnect()
    {
       disconnect();
@@ -271,6 +275,7 @@ public class RobotSocketConnection implements RobotConnection, VariableChangedLi
       }
    }
 
+   @Override
    public void disconnect()
    {
       if (commandListener.isConnected())
@@ -291,12 +296,14 @@ public class RobotSocketConnection implements RobotConnection, VariableChangedLi
 
    }
 
+   @Override
    public void setRecord(boolean record)
    {
       commandListener.setRecord(record);
    }
 
-   public void variableChanged(YoVariable variable)
+   @Override
+   public void variableChanged(YoVariable<?> variable)
    {
 //    System.out.println("commandListener.isConnected(): " + commandListener.isConnected());
 //    System.out.println("protocolListener: " + protocolListener);
@@ -307,6 +314,7 @@ public class RobotSocketConnection implements RobotConnection, VariableChangedLi
       }
    }
 
+   @Override
    public void registrySettingsChanged(ArrayList<YoVariableRegistry> changedRegistries)
    {
 //      sendRegistrySettings();
@@ -316,6 +324,7 @@ public class RobotSocketConnection implements RobotConnection, VariableChangedLi
       }
    }
 
+   @Override
    public void registrySettingsChanged()
    {
       sendRegistrySettings();

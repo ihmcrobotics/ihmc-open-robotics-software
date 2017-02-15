@@ -13,10 +13,10 @@ import javax.vecmath.Vector3d;
 import org.ejml.data.DenseMatrix64F;
 import org.junit.Test;
 
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.testing.JUnitTools;
 import us.ihmc.tools.testing.MutationTestingTools;
 
@@ -206,7 +206,7 @@ public class RobotDescriptionTest
       childLinkThree.setLinkGraphics(childGraphicsThree);
 
       CollisionMeshDescription childMeshThree = new CollisionMeshDescription();
-      childLinkThree.setCollisionMesh(childMeshThree);
+      childLinkThree.addCollisionMesh(childMeshThree);
 
       childJointThree.setLink(childLinkThree);
 
@@ -233,13 +233,13 @@ public class RobotDescriptionTest
 
       assertNull(robotDescription.getJointDescription("noSuchJoint"));
       assertNull(robotDescription.getGraphicsObject("noSuchJoint"));
-      assertNull(robotDescription.getCollisionObject("noSuchJoint"));
+      assertNull(robotDescription.getCollisionObjects("noSuchJoint"));
 
       Graphics3DObject linkGraphicsCheck = robotDescription.getGraphicsObject("childJointThree");
       assertTrue(linkGraphicsCheck == childGraphicsThree);
 
-      CollisionMeshDescription collisionMeshCheck = robotDescription.getCollisionObject("childJointThree");
-      assertTrue(collisionMeshCheck == childMeshThree);
+      ArrayList<CollisionMeshDescription> collisionMeshCheck = robotDescription.getCollisionObjects("childJointThree");
+      assertTrue(collisionMeshCheck.get(0) == childMeshThree);
 
    }
 

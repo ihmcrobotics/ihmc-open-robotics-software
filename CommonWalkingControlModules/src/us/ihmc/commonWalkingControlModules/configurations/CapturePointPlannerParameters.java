@@ -4,13 +4,13 @@ package us.ihmc.commonWalkingControlModules.configurations;
  * Parameters to tune the ICP (Instantaneous Capture Point) planner for each robot.
  * The ICP planner is a module that predicts the desired ICP trajectory accordingly to the upcoming footsteps.
  * This is one of the critical modules of the walking controller as the desired ICP is used to control the balance of the robot.
- * 
+ *
  * <p>
  * There is two different implementations of the ICP planner, which are referred as the old and new planners.
  * Both can predict the ICP trajectory by considering a constant CMP (Centroidal Momentum Pivot) location when in single support ({@link #useTwoCMPsPerSupport()} == false).
  * In this mode, the constant CMP location used in single support is referred as the entryCMP.
  * <p/>
- * 
+ *
  * <p>
  * When using the new ICP planner ({@link #useNewICPPlanner()} == true), there is the possibility to use a different mode for planning the ICP trajectory.
  * The mode considers for each single support, an initial CMP (referred here as entryCMP) location that is used at the beginning of single support, and a CMP location that is used at the end of single support (referred here as exitCMP).
@@ -21,9 +21,6 @@ package us.ihmc.commonWalkingControlModules.configurations;
  */
 public abstract class CapturePointPlannerParameters
 {
-   /** Refers to the duration of the first transfer when starting to walk. */
-   public abstract double getDoubleSupportInitialTransferDuration();
-
    private final double modelScale;
 
    protected CapturePointPlannerParameters()

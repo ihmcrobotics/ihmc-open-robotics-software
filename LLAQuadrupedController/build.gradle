@@ -43,12 +43,15 @@ dependencies {
 
    compile group: 'javax.vecmath', name: 'vecmath', version: '1.5.2'
    compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
+    
+    testCompile group: 'us.ihmc', name: 'ihmc-continuous-integration-framework', version: '0.9.4'
 
    compile ihmc.getProjectDependency(":IHMCQuadrupedRobotics")
    compile ihmc.getProjectDependency(":IHMCJavaToolkit")
+    compile ihmc.getProjectDependency(":IHMCJavaExtensions")
    compile ihmc.getProjectDependency(":IHMCRoboticsToolkit")
    compile ihmc.getProjectDependency(":IHMCCommunication")
-   compile ihmc.getProjectDependency(":SDFLoader")
+   compile ihmc.getProjectDependency(":ModelFileLoader")
    compile ihmc.getProjectDependency(":IHMCHumanoidRobotics")
    compile ihmc.getProjectDependency(":IHMCStateEstimation")
    compile ihmc.getProjectDependency(":IHMCGraphicsDescription")
@@ -58,6 +61,8 @@ dependencies {
    compile ihmc.getProjectDependency(":IHMCRobotModels")
    
    testCompile ihmc.getProjectDependency(":IHMCUnitTesting")
+	testCompile ihmc.getProjectTestDependency(":IHMCRoboticsToolkit")
+	testCompile ihmc.getProjectTestDependency(":IHMCJavaExtensions")
    
 }
 

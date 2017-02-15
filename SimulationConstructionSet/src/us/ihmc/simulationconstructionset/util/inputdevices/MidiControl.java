@@ -17,14 +17,14 @@ public class MidiControl
    public enum SliderType
    {
       BOOLEAN, ENUM, NUMBER, INT
-   };
+   }
 
    public SliderType sliderType;
 
    public enum ControlType
    {
       SLIDER, BUTTON, KNOB
-   };
+   }
 
    public ControlType controlType;
    public boolean notify = true;

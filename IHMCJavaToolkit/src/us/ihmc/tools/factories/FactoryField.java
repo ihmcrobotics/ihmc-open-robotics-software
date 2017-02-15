@@ -14,17 +14,17 @@ public abstract class FactoryField<T>
    
    public void set(T fieldValue)
    {
+      checkNotDisposed();
+      
       hasBeenSet = true;
       this.fieldValue = fieldValue;
    }
    
    public T get()
    {
-      if (disposed)
-      {
-         throw new FactoryDisposedException();
-      }
-      else if (!hasBeenSet)
+      checkNotDisposed();
+      
+      if (!hasBeenSet)
       {
          throw new FactoryFieldNotSetException(fieldName);
       }
@@ -37,5 +37,13 @@ public abstract class FactoryField<T>
    public void dispose()
    {
       disposed = true;
+   }
+   
+   protected void checkNotDisposed()
+   {
+      if (disposed)
+      {
+         throw new FactoryDisposedException();
+      }
    }
 }

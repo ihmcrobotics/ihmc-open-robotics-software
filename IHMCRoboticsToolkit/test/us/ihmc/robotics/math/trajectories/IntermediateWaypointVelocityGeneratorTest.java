@@ -1,11 +1,12 @@
 package us.ihmc.robotics.math.trajectories;
 
-import org.junit.Test;
-
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import java.util.ArrayList;
 
 import javax.vecmath.Vector3d;
-import java.util.ArrayList;
+
+import org.junit.Test;
+
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 
 public class IntermediateWaypointVelocityGeneratorTest

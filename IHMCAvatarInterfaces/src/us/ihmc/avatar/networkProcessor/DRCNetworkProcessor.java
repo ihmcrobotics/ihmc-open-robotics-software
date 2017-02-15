@@ -10,6 +10,7 @@ import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolbox
 import us.ihmc.avatar.networkProcessor.modules.MultisenseMocapManualCalibrationTestModule;
 import us.ihmc.avatar.networkProcessor.modules.RosModule;
 import us.ihmc.avatar.networkProcessor.modules.ZeroPoseMockRobotConfigurationDataPublisherModule;
+import us.ihmc.avatar.networkProcessor.modules.mocap.IHMCMOCAPLocalizationModule;
 import us.ihmc.avatar.networkProcessor.modules.uiConnector.UiConnectionModule;
 import us.ihmc.avatar.networkProcessor.quadTreeHeightMap.HeightQuadTreeToolboxModule;
 import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
@@ -48,7 +49,7 @@ public class DRCNetworkProcessor
          setupHandModules(robotModel, params);
          setupRosModule(robotModel, params);
          setupROSAPIModule(params);
-         setupMocapModule(params);
+         setupMocapModule(robotModel, params);
          setupZeroPoseRobotConfigurationPublisherModule(robotModel, params);
          setupMultisenseManualTestModule(robotModel, params);
          setupDrillDetectionModule(params);
@@ -173,7 +174,7 @@ public class DRCNetworkProcessor
       if (!params.isKinematicsToolboxEnabled())
          return;
 
-      new KinematicsToolboxModule(robotModel.createFullRobotModel(), robotModel.getLogModelProvider(), params.isKinematicsToolboxVisualizerEnabled());
+      new KinematicsToolboxModule(robotModel, params.isKinematicsToolboxVisualizerEnabled());
 
       PacketCommunicator kinematicsToolboxCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.KINEMATICS_TOOLBOX_MODULE_PORT, NET_CLASS_LIST);
       packetRouter.attachPacketCommunicator(PacketDestination.KINEMATICS_TOOLBOX_MODULE, kinematicsToolboxCommunicator);
@@ -189,7 +190,7 @@ public class DRCNetworkProcessor
          return;
 
       FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
-      
+
       new FootstepPlanningToolboxModule(robotModel, fullRobotModel, null, params.isFootstepPlanningToolboxVisualizerEnabled());
 
       PacketCommunicator footstepPlanningToolboxCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.FOOTSTEP_PLANNING_TOOLBOX_MODULE_PORT, NET_CLASS_LIST);
@@ -221,21 +222,21 @@ public class DRCNetworkProcessor
          printModuleConnectedDebugStatement(PacketDestination.MULTISENSE_TEST_MODULE, methodName);
       }
    }
-
-   private void setupMocapModule(DRCNetworkModuleParameters params)  throws IOException
+   
+   private void setupMocapModule(DRCRobotModel robotModel, DRCNetworkModuleParameters params)  throws IOException
    {
      if (params.isMocapModuleEnabled())
      {
-//        new MocapDetectedObjectModule(null, null, null);
-
-        PacketCommunicator mocapModuleCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.MOCAP_MODULE, NET_CLASS_LIST);
-        packetRouter.attachPacketCommunicator(PacketDestination.MOCAP_MODULE, mocapModuleCommunicator);
-        mocapModuleCommunicator.connect();
-
+        new IHMCMOCAPLocalizationModule(robotModel);
+        PacketCommunicator packetCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.MOCAP_MODULE, NET_CLASS_LIST);
+        packetRouter.attachPacketCommunicator(PacketDestination.MOCAP_MODULE, packetCommunicator);
+        packetCommunicator.connect();
+        
         String methodName = "setupMocapModule";
         printModuleConnectedDebugStatement(PacketDestination.MOCAP_MODULE, methodName);
      }
    }
+      
 
    private void setupHandModules(DRCRobotModel robotModel, DRCNetworkModuleParameters params) throws IOException
    {
@@ -314,7 +315,6 @@ public class DRCNetworkProcessor
          PacketCommunicator sensorSuiteManagerCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.SENSOR_MANAGER, NET_CLASS_LIST);
          packetRouter.attachPacketCommunicator(PacketDestination.SENSOR_MANAGER, sensorSuiteManagerCommunicator);
          sensorSuiteManagerCommunicator.connect();
-
 
          String methodName = "setupSensorModule ";
          printModuleConnectedDebugStatement(PacketDestination.SENSOR_MANAGER, methodName);

@@ -23,6 +23,7 @@ public class CreateNewViewportWindowAction extends AbstractAction
       this.putValue(Action.SHORT_DESCRIPTION, "Creates a new Viewport Window.");
    }
 
+   @Override
    public void actionPerformed(ActionEvent actionEvent)
    {
       executor.createNewViewportWindow();

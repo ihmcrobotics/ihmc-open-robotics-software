@@ -32,7 +32,7 @@ import us.ihmc.simulationconstructionset.PlaybackListener;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
-import us.ihmc.simulationconstructionset.gui.tools.VisualizerUtils;
+import us.ihmc.simulationconstructionset.gui.tools.SimulationOverheadPlotterFactory;
 
 public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionListener, SCSVisualizerStateListener
 {
@@ -262,7 +262,9 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
 
       yoGraphicsListRegistry = handshakeParser.getDynamicGraphicObjectsListRegistry();
       scs.addYoGraphicsListRegistry(yoGraphicsListRegistry, false);
-      VisualizerUtils.createOverheadPlotter(scs, showOverheadView, yoGraphicsListRegistry);
+      SimulationOverheadPlotterFactory simulationOverheadPlotterFactory = scs.createSimulationOverheadPlotterFactory();
+      simulationOverheadPlotterFactory.setShowOnStart(showOverheadView);
+      simulationOverheadPlotterFactory.addYoGraphicsListRegistries(yoGraphicsListRegistry);
 
       for (int i = 0; i < stateListeners.size(); i++)
       {

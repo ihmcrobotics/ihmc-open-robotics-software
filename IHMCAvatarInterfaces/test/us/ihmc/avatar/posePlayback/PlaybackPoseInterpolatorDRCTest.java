@@ -6,17 +6,11 @@ import java.util.Random;
 
 import org.junit.Test;
 
-import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.posePlayback.PlaybackPose;
-import us.ihmc.avatar.posePlayback.PlaybackPoseSequence;
-import us.ihmc.avatar.posePlayback.PlaybackPoseSequenceReader;
-import us.ihmc.avatar.posePlayback.PoseCheckerCallback;
-import us.ihmc.avatar.posePlayback.PoseInterpolatorPlaybacker;
-import us.ihmc.avatar.posePlayback.PosePlaybackExampleSequence;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 
 
 //TODO: update this test class to access poses via resource directory and undelete old pose files from svn

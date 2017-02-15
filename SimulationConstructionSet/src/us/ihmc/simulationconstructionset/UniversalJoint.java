@@ -42,11 +42,13 @@ public class UniversalJoint extends PinJoint
       return this.joint2;
    }
 
+   @Override
    public void addJoint(Joint nextJoint)
    {
       joint2.addJoint(nextJoint);
    }
 
+   @Override
    public void setLink(Link l)
    {
       // Set this joints real link to a null link and set the second Joints link to the given link...
@@ -59,26 +61,31 @@ public class UniversalJoint extends PinJoint
       joint2.setLink(l);
    }
 
+   @Override
    public void addCameraMount(CameraMount mount)
    {
       joint2.addCameraMount(mount);
    }
    
+   @Override
    public void addIMUMount(IMUMount mount)
    {
       joint2.addIMUMount(mount);
    }
 
+   @Override
    public void addKinematicPoint(KinematicPoint point)
    {
       joint2.addKinematicPoint(point);
    }
 
+   @Override
    public void addGroundContactPoint(GroundContactPoint point)
    {
       joint2.addGroundContactPoint(point);
    }
 
+   @Override
    public void addExternalForcePoint(ExternalForcePoint point)
    {
       joint2.addExternalForcePoint(point);
@@ -119,6 +126,7 @@ public class UniversalJoint extends PinJoint
          joint2.setDamping(b_damp);
    }
 
+   @Override
    public void setDamping(double b_damp)
    {
       super.setDamping(b_damp);
@@ -131,6 +139,7 @@ public class UniversalJoint extends PinJoint
       joint2.setInitialState(q2_init, qd2_init);
    }
 
+   @Override
    public void getState(double[] state)
    {
       state[0] = q.getDoubleValue();
@@ -139,16 +148,19 @@ public class UniversalJoint extends PinJoint
       state[3] = joint2.qd.getDoubleValue();
    }
 
+   @Override
    public void getRotationToWorld(Matrix3d rotation)
    {
       joint2.transformToNext.getRotation(rotation);
    }
 
+   @Override
    public void getRotationToWorld(Quat4d rotation)
    {
       joint2.transformToNext.getRotation(rotation);
    }
 
+   @Override
    public void getTranslationToWorld(Vector3d translation)
    {
       joint2.transformToNext.getTranslation(translation);

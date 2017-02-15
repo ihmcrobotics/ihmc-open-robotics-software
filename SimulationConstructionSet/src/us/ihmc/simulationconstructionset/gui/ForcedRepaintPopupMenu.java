@@ -2,6 +2,7 @@ package us.ihmc.simulationconstructionset.gui;
 
 import javax.swing.*;
 
+@SuppressWarnings("serial")
 public class ForcedRepaintPopupMenu extends JPopupMenu
 {
    public ForcedRepaintPopupMenu()

@@ -48,16 +48,19 @@ public class RepeatingGroundProfile implements GroundProfile3D
       return (Math.abs(yGlobal - yMin) % yDistance) + yMin;
    }
 
+   @Override
    public boolean isClose(double x, double y, double z)
    {
       return groundProfile.isClose(xLocal(x), yLocal(y), z);
    }
 
+   @Override
    public BoundingBox3d getBoundingBox()
    {
       return boundingBox;
    }
 
+   @Override
    public boolean checkIfInside(double x, double y, double z, Point3d intersectionToPack, Vector3d normalToPack)
    {
       double localX = xLocal(x);
@@ -66,6 +69,7 @@ public class RepeatingGroundProfile implements GroundProfile3D
       return groundProfile.checkIfInside(localX, localY, z, intersectionToPack, normalToPack);
    }
 
+   @Override
    public HeightMapWithNormals getHeightMapIfAvailable()
    {
       return heightMap;

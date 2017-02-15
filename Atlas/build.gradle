@@ -52,8 +52,8 @@ dependencies {
     compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
     compile group: 'com.martiansoftware', name: 'jsap', version: '2.1'
     compile group: 'org.ros.rosjava_core', name: 'rosjava', version: '0.2.1'
-    compile group: 'org.ejml', name: 'core', version: '0.28'
-    compile group: 'org.ejml', name: 'dense64', version: '0.28'
+    compile group: 'org.ejml', name: 'core', version: '0.30'
+    compile group: 'org.ejml', name: 'dense64', version: '0.30'
     compile group: 'org.boofcv', name: 'io', version: '0.24.1'
     compile group: 'org.boofcv', name: 'ip', version: '0.24.1'
     compile group: 'org.boofcv', name: 'geo', version: '0.24.1'
@@ -68,6 +68,8 @@ dependencies {
     compile group: 'us.ihmc.thirdparty.org.opencv', name: 'opencv', version: '3.1.0-160510'
     compile 'org.ros.rosjava_messages:geometry_msgs:1.11.9'
     compile "org.boofcv:recognition:0.24.1"
+    
+    testCompile group: 'us.ihmc', name: 'ihmc-continuous-integration-framework', version: '0.9.4'
 
     compile ihmc.getProjectDependency(":IHMCHumanoidBehaviors")
     compile ihmc.getProjectDependency(":Vicon")
@@ -77,13 +79,14 @@ dependencies {
     compile ihmc.getProjectDependency(":IHMCHumanoidRobotics")
     compile ihmc.getProjectDependency(":IHMCCommunication")
     compile ihmc.getProjectDependency(":IHMCJavaToolkit")
+    compile ihmc.getProjectDependency(":IHMCJavaExtensions")
     compile ihmc.getProjectDependency(":IHMCPerception")
     compile ihmc.getProjectDependency(":IHMCRoboticsToolkit")
     compile ihmc.getProjectDependency(":IHMCROSTools")
     compile ihmc.getProjectDependency(":IHMCWholeBodyController")
     compile ihmc.getProjectDependency(":IHMCRobotDataLogger")
     compile ihmc.getProjectDependency(":RobotiqHandDrivers")
-    compile ihmc.getProjectDependency(":SDFLoader")
+    compile ihmc.getProjectDependency(":ModelFileLoader")
     compile ihmc.getProjectDependency(":SensorProcessing")
     compile ihmc.getProjectDependency(":SimulationConstructionSet")
     compile ihmc.getProjectDependency(":IHMCGraphicsDescription")
@@ -93,6 +96,8 @@ dependencies {
     compile ihmc.getProjectDependency(":IHMCRobotDataVisualizer")
 
     testCompile ihmc.getProjectDependency(":IHMCUnitTesting")
+	testCompile ihmc.getProjectTestDependency(":IHMCRoboticsToolkit")
+	testCompile ihmc.getProjectTestDependency(":IHMCJavaExtensions")
     testCompile ihmc.getProjectTestDependency(":CommonWalkingControlModules")
     testCompile ihmc.getProjectTestDependency(":IHMCAvatarInterfaces")
     testCompile ihmc.getProjectTestDependency(":IHMCHumanoidRobotics")
