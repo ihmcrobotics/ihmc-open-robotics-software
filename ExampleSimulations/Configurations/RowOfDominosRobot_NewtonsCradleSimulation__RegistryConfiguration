@@ -1,2 +1,10 @@
 root*false*false
 root.RowOfDominosRobot*false*false
+root.GroundAsABoxRobot*false*false
+root.DefaultCollisionVisualizer*false*false
+root.DefaultCollisionVisualizer.CollisionOneBalls*false*false
+root.DefaultCollisionVisualizer.CollisionTwoBalls*false*false
+root.contactBallsBalls*false*false
+root.newCollisionBallsBalls*false*false
+root.ContactingExternalForcePointsVisualizer*false*false
+root.HybridImpulseSpringDamperCollisionHandler*false*false

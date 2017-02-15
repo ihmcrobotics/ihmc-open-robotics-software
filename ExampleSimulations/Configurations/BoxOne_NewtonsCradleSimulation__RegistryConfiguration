@@ -1,10 +1,6 @@
 root*false*false
-root.StackOfBlocksRobot0*false*false
-root.StackOfBlocksRobot1*false*false
-root.StackOfBlocksRobot2*false*false
-root.StackOfBlocksRobot3*false*false
-root.StackOfBlocksRobot4*false*false
-root.StackOfBlocksRobot5*false*false
+root.BoxOne*false*false
+root.BoxOne.LinearStickSlipGroundContactModel*false*false
 root.GroundAsABoxRobot*false*false
 root.DefaultCollisionVisualizer*false*false
 root.DefaultCollisionVisualizer.CollisionOneBalls*false*false

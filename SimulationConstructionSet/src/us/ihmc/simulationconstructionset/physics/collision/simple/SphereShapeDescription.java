@@ -1,6 +1,7 @@
 package us.ihmc.simulationconstructionset.physics.collision.simple;
 
 import javax.vecmath.Point3d;
+import javax.vecmath.Vector3d;
 
 import us.ihmc.robotics.geometry.BoundingBox3d;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
@@ -77,6 +78,21 @@ public class SphereShapeDescription<T extends SphereShapeDescription<T>> impleme
    public boolean isPointInside(Point3d pointInWorld)
    {
       return (center.distanceSquared(pointInWorld) <= radius * radius);
+   }
+
+   private final Vector3d tempVectorForRolling = new Vector3d();
+
+   @Override
+   public boolean rollContactIfRolling(Vector3d surfaceNormal, Point3d pointToRoll)
+   {
+      pointToRoll.set(center);
+      tempVectorForRolling.set(surfaceNormal);
+      tempVectorForRolling.normalize();
+      tempVectorForRolling.scale(radius);
+      pointToRoll.add(tempVectorForRolling);
+
+      //TODO: Not necessarily true all the time...
+      return true;
    }
 
 }

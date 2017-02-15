@@ -1,10 +1,7 @@
 root*false*false
-root.StackOfBlocksRobot0*false*false
-root.StackOfBlocksRobot1*false*false
-root.StackOfBlocksRobot2*false*false
-root.StackOfBlocksRobot3*false*false
-root.StackOfBlocksRobot4*false*false
-root.StackOfBlocksRobot5*false*false
+root.ball*false*false
+root.cylinder*false*false
+root.capsule*false*false
 root.GroundAsABoxRobot*false*false
 root.DefaultCollisionVisualizer*false*false
 root.DefaultCollisionVisualizer.CollisionOneBalls*false*false

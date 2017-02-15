@@ -100,6 +100,7 @@ public abstract class Shape3d<S extends Shape3d<S>> implements GeometryObject<S>
    {
       transformToShapeFrame(pointToCheck);
       boolean isInside = checkIfInsideShapeFrame(pointToCheck, closestPointOnSurfaceToPack, normalToPack);
+      //TODO: This modifies pointToCheck and transforms back. Should we make a temp variable instead, or are we trying to be Thread safe here?
       transformFromShapeFrame(pointToCheck);
       if (closestPointOnSurfaceToPack != null)
       {

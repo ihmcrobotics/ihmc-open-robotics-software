@@ -162,4 +162,11 @@ public class CylinderShapeDescription<T extends CylinderShapeDescription<T>> imp
    {
       return cylinder3d.distance(pointInWorld) <= smoothingRadius;
    }
+
+   @Override
+   public boolean rollContactIfRolling(Vector3d surfaceNormal, Point3d pointToRoll)
+   {
+      return cylinder3d.projectToBottomOfCurvedSurface(surfaceNormal, pointToRoll);
+   }
+
 }

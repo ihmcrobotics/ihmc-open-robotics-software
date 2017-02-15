@@ -1,6 +1,7 @@
 package us.ihmc.simulationconstructionset.physics.collision.simple;
 
 import javax.vecmath.Point3d;
+import javax.vecmath.Vector3d;
 
 import us.ihmc.robotics.geometry.BoundingBox3d;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
@@ -93,5 +94,11 @@ public class BoxShapeDescription<T extends BoxShapeDescription<T>> implements Co
    public boolean isPointInside(Point3d pointInWorld)
    {
       throw new RuntimeException("Implement Me!");
+   }
+
+   @Override
+   public boolean rollContactIfRolling(Vector3d surfaceNormal, Point3d pointToRoll)
+   {
+      throw new RuntimeException("Implement Me!");      
    }
 }
