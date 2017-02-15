@@ -43,7 +43,7 @@ import us.ihmc.tools.io.printing.PrintTools;
 public class RigidBodyTaskspaceControlState extends RigidBodyControlState
 {
    public static final int maxPoints = 200;
-   public static final int maxPointsInGenerator = 20;
+   public static final int maxPointsInGenerator = 5;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final YoVariableRegistry registry;
@@ -116,7 +116,7 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       lastCommandId.set(Packet.INVALID_MESSAGE_ID);
 
       spatialFeedbackControlCommand.set(elevator, bodyToControl);
-//      spatialFeedbackControlCommand.setPrimaryBase(rootBody);
+      spatialFeedbackControlCommand.setPrimaryBase(rootBody);
       spatialFeedbackControlCommand.setSelectionMatrixToIdentity();
       privilegedConfigurationCommand.applyPrivilegedConfigurationToSubChain(rootBody, bodyToControl);
 
