@@ -448,6 +448,9 @@ public class WalkOnTheEdgesManager
       isDesiredECMPOKForToeOff.set(false);
       isDesiredICPOKForToeOff.set(false);
 
+      isRearAnklePitchHittingLimit.set(false);
+      isRearAnklePitchHittingLimitFilt.set(false);
+
       doToeOff.set(false);
    }
 
