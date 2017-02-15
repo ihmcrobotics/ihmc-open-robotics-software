@@ -53,7 +53,7 @@ dependencies {
         exclude group: 'net.java.jinput', module: 'jinput'
     }
     
-    testCompile group: 'us.ihmc', name: 'IHMCContinuousIntegrationFramework', version: '0.9.3'
+    testCompile group: 'us.ihmc', name: 'ihmc-continuous-integration-framework', version: '0.9.4'
 
     compile group: 'com.vividsolutions', name: 'jts', version: '1.13'
     compile group: 'com.google.guava', name: 'guava', version: '18.0'

@@ -42,7 +42,7 @@ dependencies {
    compile group: 'us.ihmc.thirdparty.org.kc7bfi', name: 'jflac', version: '1.4.0'
    compile group: 'commons-io', name: 'commons-io', version: '2.4'
     
-    testCompile group: 'us.ihmc', name: 'IHMCContinuousIntegrationFramework', version: '0.9.3'
+    testCompile group: 'us.ihmc', name: 'ihmc-continuous-integration-framework', version: '0.9.4'
 
 	compile ihmc.getProjectDependency(":IHMCCommunication")
 	compile ihmc.getProjectDependency(":IHMCHumanoidRobotics")
