@@ -43,7 +43,7 @@ dependencies {
     compile group: 'org.ejml', name: 'dense64', version: '0.30'
     compile group: 'org.ejml', name: 'core', version: '0.30'
     
-    testCompile group: 'us.ihmc', name: 'IHMCContinuousIntegrationFramework', version: '0.9.3'
+    testCompile group: 'us.ihmc', name: 'ihmc-continuous-integration-framework', version: '0.9.4'
 
     compile ihmc.getProjectDependency(":IHMCHumanoidRobotics")
 	compile ihmc.getProjectDependency(":CommonWalkingControlModules")

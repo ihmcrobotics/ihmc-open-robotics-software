@@ -46,7 +46,7 @@ dependencies {
     compile group: 'org.jfree', name: 'jfreechart', version: '1.0.17'
     compile group: 'org.jfree', name: 'jcommon', version: '1.0.21'
     
-    testCompile group: 'us.ihmc', name: 'IHMCContinuousIntegrationFramework', version: '0.9.3'
+    testCompile group: 'us.ihmc', name: 'ihmc-continuous-integration-framework', version: '0.9.4'
 
     compile ihmc.getProjectDependency(":IHMCJavaToolkit")
     compile ihmc.getProjectDependency(":IHMCRoboticsToolkit")

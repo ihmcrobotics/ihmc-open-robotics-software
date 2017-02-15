@@ -64,7 +64,7 @@ dependencies {
 	compile group: 'org.reflections', name: 'reflections', version: '0.9.10'
 	compile group: 'us.ihmc', name: 'RobotEnvironmentAwareness', version: '0.2.2'
     
-    testCompile group: 'us.ihmc', name: 'IHMCContinuousIntegrationFramework', version: '0.9.3'
+    testCompile group: 'us.ihmc', name: 'ihmc-continuous-integration-framework', version: '0.9.4'
 
 	compile ihmc.getProjectDependency(":IHMCROSTools")
 	compile ihmc.getProjectDependency(":CommonWalkingControlModules")

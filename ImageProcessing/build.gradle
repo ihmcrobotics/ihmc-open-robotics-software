@@ -57,7 +57,7 @@ dependencies {
     compile group: 'org.boofcv', name: 'visualize', version: '0.24.1'
     compile "org.boofcv:recognition:0.24.1"
     
-    testCompile group: 'us.ihmc', name: 'IHMCContinuousIntegrationFramework', version: '0.9.3'
+    testCompile group: 'us.ihmc', name: 'ihmc-continuous-integration-framework', version: '0.9.4'
 
     compile ihmc.getProjectDependency(":IHMCRoboticsToolkit")
     testCompile ihmc.getProjectDependency(":IHMCUnitTesting")
