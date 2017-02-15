@@ -457,7 +457,13 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
       JUnitTools.assertQuaternionsEqual(desiredOrientation.getQuaternion(), controllerTrajectoryPoint.getOrientationCopy(), 1.0e-3);
       JUnitTools.assertVector3dEquals("", desiredAngularVelocity.getVector(), controllerTrajectoryPoint.getAngularVelocityCopy(), 1.0e-3);
 
-      assertNumberOfWaypoints(15, scs);
+      int maxPointsInGenerator = RigidBodyTaskspaceControlState.maxPointsInGenerator;
+      int pointsInLastTrajectory = totalPoints - Math.min((numberOfTrajectoryPoints + 1), maxPointsInGenerator); // fist set in generator
+      while (pointsInLastTrajectory > (maxPointsInGenerator - 1))
+         pointsInLastTrajectory -= (maxPointsInGenerator - 1); // keep filling the generator
+      pointsInLastTrajectory++;
+
+      assertNumberOfWaypoints(pointsInLastTrajectory, scs);
       assertControlErrorIsLow(scs, chest, 1.0e-2);
    }
 
