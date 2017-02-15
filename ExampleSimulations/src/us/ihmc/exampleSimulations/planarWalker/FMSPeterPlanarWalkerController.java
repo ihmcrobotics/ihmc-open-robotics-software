@@ -5,12 +5,12 @@ import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
-public class WDIPeterPlanarWalkerController implements RobotController
+public class FMSPeterPlanarWalkerController implements RobotController
 {
    private YoVariableRegistry registry = new YoVariableRegistry("Controller");
    SideDependentList<PeterPlanarWalkerStateMachine> walkerStateMachine;
    
-   public WDIPeterPlanarWalkerController(PeterPlanarWalkerRobot robot, double deltaT)
+   public FMSPeterPlanarWalkerController(PeterPlanarWalkerRobot robot, double deltaT)
    {
       walkerStateMachine = new SideDependentList<>();
             

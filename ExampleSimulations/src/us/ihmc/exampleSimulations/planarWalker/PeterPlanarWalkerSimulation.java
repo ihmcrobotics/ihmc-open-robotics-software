@@ -14,7 +14,7 @@ public class PeterPlanarWalkerSimulation
       YoVariableRegistry registry = robot.getRobotsYoVariableRegistry();
       
       PeterPlanarWalkerController walkerController = new PeterPlanarWalkerController(robot, simulationDT);
-//      WDIPeterPlanarWalkerController walkerController = new WDIPeterPlanarWalkerController(robot, simulationDT);
+//      FMSPeterPlanarWalkerController walkerController = new FMSPeterPlanarWalkerController(robot, simulationDT);
       robot.setController(walkerController);
     
       scs = new SimulationConstructionSet(robot);
