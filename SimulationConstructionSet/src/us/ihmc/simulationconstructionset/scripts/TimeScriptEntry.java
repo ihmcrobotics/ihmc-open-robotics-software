@@ -54,6 +54,7 @@ public class TimeScriptEntry implements Comparable<Object>
       varValuePairs.add(variableValuePair);
    }
 
+   @Override
    public int compareTo(Object timeScriptEntry)
    {
       if (timeScriptEntry == this)
@@ -109,6 +110,7 @@ public class TimeScriptEntry implements Comparable<Object>
          this.value = value;
       }
 
+      @Override
       public void setVariableToValue()
       {
          variable.set(value);
@@ -126,6 +128,7 @@ public class TimeScriptEntry implements Comparable<Object>
          this.value = value;
       }
 
+      @Override
       public void setVariableToValue()
       {
          variable.set(value);
@@ -143,6 +146,7 @@ public class TimeScriptEntry implements Comparable<Object>
          this.value = value;
       }
 
+      @Override
       public void setVariableToValue()
       {
          variable.set(value);
@@ -163,6 +167,7 @@ public class TimeScriptEntry implements Comparable<Object>
          this.value = value;
       }
 
+      @Override
       @SuppressWarnings("unchecked")
       public void setVariableToValue()
       {

@@ -48,8 +48,8 @@ dependencies {
     compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
     compile group: 'us.ihmc', name: 'IHMCNativeLibraryLoader', version: '1.0'
     compile group: 'org.georegression', name: 'georegression', version: '0.11'
-    compile group: 'org.ejml', name: 'core', version: '0.28'
-    compile group: 'org.ejml', name: 'dense64', version: '0.28'
+    compile group: 'org.ejml', name: 'core', version: '0.30'
+    compile group: 'org.ejml', name: 'dense64', version: '0.30'
     compile group: 'net.java.dev.jna', name: 'jna', version: '4.1.0'
     compile group: 'org.boofcv', name: 'geo', version: '0.24.1'
     compile group: 'org.boofcv', name: 'ip', version: '0.24.1'
@@ -73,6 +73,8 @@ dependencies {
     compile group: 'us.ihmc.ihmcPerception', name: 'valvenet', version: '0.0.4'
     compile group: 'us.ihmc.ihmcPerception', name: 'cuda', version: '7.5'
     compile "org.ddogleg:ddogleg:0.7"
+    
+    testCompile group: 'us.ihmc', name: 'ihmc-continuous-integration-framework', version: '0.9.4'
 
     compile ihmc.getProjectDependency(":SimulationConstructionSet")
     compile ihmc.getProjectDependency(":IHMCJMonkeyEngineToolkit")
@@ -83,9 +85,12 @@ dependencies {
     compile ihmc.getProjectDependency(":SensorProcessing")
     compile ihmc.getProjectDependency(":IHMCRobotModels")
     compile ihmc.getProjectDependency(":IHMCJavaToolkit")
+    compile ihmc.getProjectDependency(":IHMCJavaExtensions")
     compile ihmc.getProjectDependency(":IHMCRoboticsToolkit")
     compile ihmc.getProjectDependency(":IHMCGraphicsDescription")
     testCompile ihmc.getProjectDependency(":IHMCUnitTesting")
+	testCompile ihmc.getProjectTestDependency(":IHMCRoboticsToolkit")
+	testCompile ihmc.getProjectTestDependency(":IHMCJavaExtensions")
     testCompile ihmc.getProjectTestDependency(":SimulationConstructionSet")
 }
 jar {

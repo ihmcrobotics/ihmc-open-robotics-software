@@ -45,11 +45,13 @@ public class RollingGroundProfile extends GroundProfileFromHeightMap
       boundingBox = new BoundingBox3d(new Point3d(xMin, yMin, zMin), new Point3d(xMax, yMax, zMax));
    }
 
+   @Override
    public BoundingBox3d getBoundingBox()
    {
       return boundingBox;
    }
 
+   @Override
    public double heightAt(double x, double y, double z)
    {
       double height = amplitude * Math.sin(2.0 * Math.PI * frequency * (x + offset));
@@ -70,6 +72,7 @@ public class RollingGroundProfile extends GroundProfileFromHeightMap
       normal.normalize();
    }
    
+   @Override
    public double heightAndNormalAt(double x, double y, double z, Vector3d normalToPack)
    {
       double heightAt = heightAt(x, y, z);

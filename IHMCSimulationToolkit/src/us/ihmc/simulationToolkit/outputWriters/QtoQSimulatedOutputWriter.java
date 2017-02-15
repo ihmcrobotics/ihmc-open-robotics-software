@@ -6,15 +6,17 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotModels.OutputWriter;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
+import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 
-public class QtoQSimulatedOutputWriter implements OutputWriter
+public class QtoQSimulatedOutputWriter implements OutputWriter, RobotController
 {
+   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final String name;
    protected final FloatingRootJointRobot robot;
    protected ImmutablePair<FloatingJoint, FloatingInverseDynamicsJoint> rootJointPair;
@@ -80,5 +82,17 @@ public class QtoQSimulatedOutputWriter implements OutputWriter
          pinJoint.setQd(revoluteJoint.getQd());
          pinJoint.setQdd(revoluteJoint.getQdd());
       }
+   }
+
+   @Override
+   public YoVariableRegistry getYoVariableRegistry()
+   {
+      return registry;
+   }
+
+   @Override
+   public void doControl()
+   {
+      write();
    }
 }

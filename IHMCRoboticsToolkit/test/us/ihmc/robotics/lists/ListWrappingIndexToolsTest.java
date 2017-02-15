@@ -1,7 +1,16 @@
 package us.ihmc.robotics.lists;
 
-import static org.junit.Assert.*;
-import static us.ihmc.robotics.lists.ListWrappingIndexTools.*;
+import static org.junit.Assert.assertEquals;
+import static us.ihmc.robotics.lists.ListWrappingIndexTools.getNext;
+import static us.ihmc.robotics.lists.ListWrappingIndexTools.getPrevious;
+import static us.ihmc.robotics.lists.ListWrappingIndexTools.getWrap;
+import static us.ihmc.robotics.lists.ListWrappingIndexTools.next;
+import static us.ihmc.robotics.lists.ListWrappingIndexTools.previous;
+import static us.ihmc.robotics.lists.ListWrappingIndexTools.subLengthExclusive;
+import static us.ihmc.robotics.lists.ListWrappingIndexTools.subLengthInclusive;
+import static us.ihmc.robotics.lists.ListWrappingIndexTools.subListExclusive;
+import static us.ihmc.robotics.lists.ListWrappingIndexTools.subListInclusive;
+import static us.ihmc.robotics.lists.ListWrappingIndexTools.wrap;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -11,8 +20,7 @@ import java.util.Random;
 
 import org.junit.Test;
 
-import us.ihmc.robotics.lists.ListWrappingIndexTools;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.testing.MutationTestingTools;
 
 public class ListWrappingIndexToolsTest

@@ -1,7 +1,6 @@
 package us.ihmc.tools.inputDevices.joystick;
 
-import static org.junit.Assert.*;
-import static us.ihmc.tools.continuousIntegration.IntegrationCategory.*;
+import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
 
@@ -10,11 +9,12 @@ import org.junit.Test;
 import net.java.games.input.Component.Identifier;
 import net.java.games.input.Event;
 import net.java.games.input.test.ControllerReadTest;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.commons.Assertions;
+import us.ihmc.commons.RunnableThatThrows;
+import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.tools.inputDevices.joystick.exceptions.JoystickNotFoundException;
 import us.ihmc.tools.inputDevices.joystick.virtualJoystick.VirtualJoystick;
-import us.ihmc.tools.testing.JUnitTools;
-import us.ihmc.tools.thread.RunnableThatThrows;
 
 public class JoystickTest
 {
@@ -103,7 +103,7 @@ public class JoystickTest
    @Test(timeout = 30000)
    public void testFindNonExistentJoystick()
    {
-      JUnitTools.assertExceptionThrown(JoystickNotFoundException.class, new RunnableThatThrows()
+      Assertions.assertExceptionThrown(JoystickNotFoundException.class, new RunnableThatThrows()
       {
          @Override
          public void run() throws Throwable
@@ -116,7 +116,7 @@ public class JoystickTest
    boolean madCatz5Status = false;
    boolean madCatz1Status = false;
 
-   @ContinuousIntegrationTest(estimatedDuration = 10.0, categoriesOverride = MANUAL)
+   @ContinuousIntegrationTest(estimatedDuration = 10.0, categoriesOverride = IntegrationCategory.MANUAL)
    @Test(timeout = 300000)
    public void testCreateTwoJoysticks()
    {

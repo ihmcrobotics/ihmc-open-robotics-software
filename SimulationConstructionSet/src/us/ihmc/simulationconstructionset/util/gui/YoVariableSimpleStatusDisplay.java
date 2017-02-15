@@ -9,6 +9,7 @@ import javax.swing.JLabel;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.simulationconstructionset.NewDataListener;
 
+@SuppressWarnings("serial")
 public class YoVariableSimpleStatusDisplay extends JLabel implements NewDataListener
 {
    private final String trueString = "ON";
@@ -54,10 +55,12 @@ public class YoVariableSimpleStatusDisplay extends JLabel implements NewDataList
       return this;
    }
 
+   @Override
    public void newDataHasBeenSent()
    {
    }
 
+   @Override
    public void newDataHasBeenReceived()
    {
       handleStateChange();

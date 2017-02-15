@@ -23,6 +23,7 @@ import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.util.NetworkPorts;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataStateCommand;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataStateCommand.LidarState;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.PointCloudWorldPacket;
@@ -34,7 +35,6 @@ import us.ihmc.simulationconstructionset.util.environments.CommonAvatarEnvironme
 import us.ihmc.simulationconstructionset.util.environments.WallAtDistanceEnvironment;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.tools.thread.ThreadTools;
 
@@ -101,7 +101,7 @@ public abstract class HumanoidPointCloudDataReceiverTest implements MultiRobotTe
       DRCObstacleCourseStartingLocation startingLocation = DRCObstacleCourseStartingLocation.DEFAULT;
       CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface = new WallAtDistanceEnvironment(WALL_DISTANCE);
       testHelper = new DRCSimulationTestHelper(commonAvatarEnvironmentInterface, getClass().getSimpleName(), startingLocation, simulationTestingParameters,
-            getRobotModel(), drcNetworkModuleParameters, null, null, false, false, false, true);
+            getRobotModel(), drcNetworkModuleParameters, null, null, false, false, false, true, null);
       testHelper.setupCameraForUnitTest(new Point3d(1.8375, -0.16, 0.89), new Point3d(1.10, 8.30, 1.37));
 
       testHelper.simulateAndBlockAndCatchExceptions(1.1); // Wait for sim to initialize

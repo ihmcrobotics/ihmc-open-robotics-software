@@ -33,11 +33,11 @@ import us.ihmc.quadrupedRobotics.providers.QuadrupedPostureInputProviderInterfac
 import us.ihmc.quadrupedRobotics.providers.QuadrupedSoleWaypointInputProvider;
 import us.ihmc.quadrupedRobotics.providers.QuadrupedPreplannedStepInputProvider;
 import us.ihmc.quadrupedRobotics.providers.QuadrupedXGaitSettingsInputProvider;
-import us.ihmc.quadrupedRobotics.state.FiniteStateMachine;
-import us.ihmc.quadrupedRobotics.state.FiniteStateMachineBuilder;
-import us.ihmc.quadrupedRobotics.state.FiniteStateMachineState;
-import us.ihmc.quadrupedRobotics.state.FiniteStateMachineStateChangedListener;
-import us.ihmc.quadrupedRobotics.state.FiniteStateMachineYoVariableTrigger;
+import us.ihmc.robotics.stateMachines.eventBasedStateMachine.FiniteStateMachine;
+import us.ihmc.robotics.stateMachines.eventBasedStateMachine.FiniteStateMachineBuilder;
+import us.ihmc.robotics.stateMachines.eventBasedStateMachine.FiniteStateMachineState;
+import us.ihmc.robotics.stateMachines.eventBasedStateMachine.FiniteStateMachineStateChangedListener;
+import us.ihmc.robotics.stateMachines.eventBasedStateMachine.FiniteStateMachineYoVariableTrigger;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;

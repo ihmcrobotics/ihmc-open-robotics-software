@@ -99,6 +99,6 @@ public class YoWhiteBoardViewerGUI
       int sendPort = Integer.parseInt(args[1]);
       int receivePort = Integer.parseInt(args[2]);
 
-      YoWhiteBoardViewerGUI gui = new YoWhiteBoardViewerGUI(ipAddress, sendPort, receivePort);
+      new YoWhiteBoardViewerGUI(ipAddress, sendPort, receivePort);
    }
 }

@@ -13,6 +13,7 @@ public class FlatGroundTerrainObject extends FlatGroundProfile implements Terrai
       groundGraphics.addCube(20.0, 20.0, 0.03);
    }
    
+   @Override
    public Graphics3DObject getLinkGraphics()
    {
       return groundGraphics;

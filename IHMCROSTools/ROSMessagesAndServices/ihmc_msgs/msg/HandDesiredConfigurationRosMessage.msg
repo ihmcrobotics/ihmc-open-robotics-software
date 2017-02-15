@@ -17,10 +17,6 @@ int64 unique_id
 
 # This message utilizes "enums". Enum value information for this message follows.
 
-# "robot_side" enum values:
-uint8 LEFT=0 # refers to the LEFT side of a robot
-uint8 RIGHT=1 # refers to the RIGHT side of a robot
-
 # "hand_configuration" enum values:
 uint8 STOP=0 # stops the fingers at their current position
 uint8 OPEN=1 # fully opens the fingers
@@ -36,4 +32,8 @@ uint8 OPEN_FINGERS=10 # fully open all fingers except the thumb
 uint8 OPEN_THUMB=11 # fully open the thumb only
 uint8 CLOSE_FINGERS=12 # fully close all fingers except the thumb
 uint8 CLOSE_THUMB=13 # fully close the thumb only
+
+# "robot_side" enum values:
+uint8 LEFT=0 # refers to the LEFT side of a robot
+uint8 RIGHT=1 # refers to the RIGHT side of a robot
 

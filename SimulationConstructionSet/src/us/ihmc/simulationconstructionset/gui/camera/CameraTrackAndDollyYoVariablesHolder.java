@@ -37,6 +37,7 @@ public class CameraTrackAndDollyYoVariablesHolder implements CameraTrackingAndDo
 
    }
 
+   @Override
    public void getTrackingPosition(Point3d trackPositionToPack)
    {
       if (track_x_var != null)
@@ -53,6 +54,7 @@ public class CameraTrackAndDollyYoVariablesHolder implements CameraTrackingAndDo
       }
    }
 
+   @Override
    public void getDollyPosition(Point3d dollyPositionToPack)
    {
       if (dolly_x_var != null)
@@ -126,6 +128,7 @@ public class CameraTrackAndDollyYoVariablesHolder implements CameraTrackingAndDo
       this.field_of_view_var = field_of_view_var;
    }
 
+   @Override
    public double getFieldOfView()
    {
       if (field_of_view_var == null)
@@ -138,6 +141,7 @@ public class CameraTrackAndDollyYoVariablesHolder implements CameraTrackingAndDo
 
    
    
+   @Override
    public double getTrackingX()
    {
       if (track_x_var != null)
@@ -146,6 +150,7 @@ public class CameraTrackAndDollyYoVariablesHolder implements CameraTrackingAndDo
          return 0.0;
    }
 
+   @Override
    public double getTrackingY()
    {
       if (track_y_var != null)
@@ -154,6 +159,7 @@ public class CameraTrackAndDollyYoVariablesHolder implements CameraTrackingAndDo
          return 0.0;
    }
 
+   @Override
    public double getTrackingZ()
    {
       if (track_z_var != null)
@@ -162,6 +168,7 @@ public class CameraTrackAndDollyYoVariablesHolder implements CameraTrackingAndDo
          return 0.0;
    }
 
+   @Override
    public double getDollyX()
    {
       if (dolly_x_var != null)
@@ -170,6 +177,7 @@ public class CameraTrackAndDollyYoVariablesHolder implements CameraTrackingAndDo
          return 0.0;
    }
 
+   @Override
    public double getDollyY()
    {
       if (dolly_y_var != null)
@@ -178,6 +186,7 @@ public class CameraTrackAndDollyYoVariablesHolder implements CameraTrackingAndDo
          return 0.0;
    }
 
+   @Override
    public double getDollyZ()
    {
       if (dolly_z_var != null)
@@ -186,6 +195,7 @@ public class CameraTrackAndDollyYoVariablesHolder implements CameraTrackingAndDo
          return 0.0;
    }
 
+   @Override
    public void closeAndDispose()
    {
       track_x_var = track_y_var = track_z_var = dolly_x_var = dolly_y_var = dolly_z_var = null;

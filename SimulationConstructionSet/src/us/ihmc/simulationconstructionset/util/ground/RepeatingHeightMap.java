@@ -41,6 +41,7 @@ public class RepeatingHeightMap implements HeightMapWithNormals
       return (Math.abs(yGlobal - yMin) % yDistance) + yMin;
    }
    
+   @Override
    public double heightAndNormalAt(double x, double y, double z, Vector3d normalToPack)
    {
       double localX = xLocal(x);
@@ -49,11 +50,13 @@ public class RepeatingHeightMap implements HeightMapWithNormals
       return heightMap.heightAndNormalAt(localX, localY, z, normalToPack);
    }
    
+   @Override
    public double heightAt(double x, double y, double z)
    {      
       return heightMap.heightAt(xLocal(x), yLocal(y), z);
    }
    
+   @Override
    public BoundingBox3d getBoundingBox()
    {
       return boundingBox;

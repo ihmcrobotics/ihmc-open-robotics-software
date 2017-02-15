@@ -3,24 +3,24 @@
  */
 package us.ihmc.jMonkeyEngineToolkit.jme.util;
 
-import com.jme3.collision.CollisionResults;
-import com.jme3.math.Ray;
-import com.jme3.math.Vector3f;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+import javax.vecmath.Point3f;
+
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import com.jme3.collision.CollisionResults;
+import com.jme3.math.Ray;
+import com.jme3.math.Vector3f;
+
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.jMonkeyEngineToolkit.jme.JMERenderer;
-import us.ihmc.jMonkeyEngineToolkit.jme.util.JMELidarSpriteGenerator;
-import us.ihmc.tools.continuousIntegration.IntegrationCategory;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.thread.ThreadTools;
-
-import javax.vecmath.Point3f;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 @ContinuousIntegrationPlan(categories = { IntegrationCategory.UI })
 /**

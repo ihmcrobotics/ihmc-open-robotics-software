@@ -1,6 +1,6 @@
 package us.ihmc.multicastLogDataProtocol.modelLoaders;
 
-import us.ihmc.SdfLoader.SDFDescriptionMutator;
+import us.ihmc.modelFileLoaders.SdfLoader.SDFDescriptionMutator;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 
 public interface LogModelLoader

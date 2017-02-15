@@ -18,6 +18,7 @@ public class WavyGroundProfile implements GroundProfile3D, HeightMapWithNormals
    {
    }
 
+   @Override
    public double heightAndNormalAt(double x, double y, double z, Vector3d normalToPack)
    {
       double heightAt = heightAt(x, y, z);
@@ -25,6 +26,7 @@ public class WavyGroundProfile implements GroundProfile3D, HeightMapWithNormals
       return heightAt;
    }
    
+   @Override
    public double heightAt(double x, double y, double z)
    {
       if ((x > xMin) && (x < xMax) && (y > yMin) && (y < yMax))
@@ -53,6 +55,7 @@ public class WavyGroundProfile implements GroundProfile3D, HeightMapWithNormals
       surfaceNormalAt(x, y, z, normal);
    }
 
+   @Override
    public boolean checkIfInside(double x, double y, double z, Point3d intersectionToPack, Vector3d normalToPack)
    {
       closestIntersectionTo(x, y, z, intersectionToPack);
@@ -61,16 +64,19 @@ public class WavyGroundProfile implements GroundProfile3D, HeightMapWithNormals
       return (z < intersectionToPack.getZ());
    }
    
+   @Override
    public boolean isClose(double x, double y, double z)
    {
       return boundingBox.isInside(x, y, z);
    }
 
+   @Override
    public BoundingBox3d getBoundingBox()
    {
       return boundingBox;
    }
 
+   @Override
    public HeightMapWithNormals getHeightMapIfAvailable()
    {
       return this;

@@ -3,6 +3,7 @@ package us.ihmc.robotics.screwTheory;
 import org.ejml.data.DenseMatrix64F;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.ReferenceFrameMismatchException;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
@@ -50,6 +51,22 @@ public abstract class SpatialMotionVector
       this.angularPart = new Vector3d();
       this.linearPart = new Vector3d();
       set(bodyFrame, baseFrame, expressedInFrame, linearPart, angularPart);
+   }
+
+   /**
+    * @param bodyFrame what we're specifying the motion of
+    * @param baseFrame with respect to what we're specifying the motion
+    * @param linearPart linear part of the spatial motion vector expressed in the {@code expressedInFrame} to use.
+    * @param angularPart angular part of the spatial motion vector expressed in the {@code expressedInFrame} to use.
+    * @throws ReferenceFrameMismatchException if the linear and angular parts are not expressed in the same reference frame.
+    */
+   public SpatialMotionVector(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, FrameVector linearPart, FrameVector angularPart)
+   {
+      linearPart.checkReferenceFrameMatch(angularPart);
+
+      this.angularPart = new Vector3d();
+      this.linearPart = new Vector3d();
+      set(bodyFrame, baseFrame, linearPart.getReferenceFrame(), linearPart, angularPart);
    }
 
    /**
@@ -516,7 +533,7 @@ public abstract class SpatialMotionVector
     * @param epsilon  the threshold value  
     * @return true or false
     */
-   public boolean epsilonEquals(SpatialAccelerationVector spatialMotionVector, double epsilon)
+   public boolean epsilonEquals(SpatialMotionVector spatialMotionVector, double epsilon)
    {
       checkReferenceFramesMatch(spatialMotionVector);
       
@@ -526,16 +543,16 @@ public abstract class SpatialMotionVector
       return true;
    }
 
-   public void checkReferenceFramesMatch(SpatialAccelerationVector spatialMotionVector)
+   public void checkReferenceFramesMatch(SpatialMotionVector spatialMotionVector)
    {
       checkReferenceFramesMatch(spatialMotionVector.bodyFrame, spatialMotionVector.baseFrame, spatialMotionVector.expressedInFrame);
    }
    
    public void checkReferenceFramesMatch(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame)
    {
-      if (this.bodyFrame != bodyFrame) throw new RuntimeException("this.bodyFrame != bodyFrame");
-      if (this.baseFrame != baseFrame) throw new RuntimeException("this.baseFrame != baseFrame");
-      if (this.expressedInFrame != expressedInFrame) throw new RuntimeException("this.expressedInFrame != expressedInFrame");
+      if (this.bodyFrame != bodyFrame) throw new ReferenceFrameMismatchException("this.bodyFrame != bodyFrame");
+      if (this.baseFrame != baseFrame) throw new ReferenceFrameMismatchException("this.baseFrame != baseFrame");
+      if (this.expressedInFrame != expressedInFrame) throw new ReferenceFrameMismatchException("this.expressedInFrame != expressedInFrame");
    }
 
    ///CLOVER:OFF

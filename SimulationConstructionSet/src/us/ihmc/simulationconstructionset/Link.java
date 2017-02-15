@@ -14,7 +14,7 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.InertiaTools;
 import us.ihmc.robotics.robotDescription.CollisionMeshDescription;
-import us.ihmc.simulationconstructionset.physics.CollisionShape;
+import us.ihmc.simulationconstructionset.physics.CollisionHandler;
 import us.ihmc.simulationconstructionset.robotdefinition.LinkDefinitionFixedFrame;
 
 /**
@@ -44,8 +44,7 @@ public class Link implements java.io.Serializable
    public Vector3d comOffset = new Vector3d();
 
    private Graphics3DObject linkGraphics;
-   private CollisionMeshDescription collisionMeshDescription;
-   private CollisionShape collision;
+   private ArrayList<CollisionMeshDescription> collisionMeshDescriptions;
 
    public Link(LinkDefinitionFixedFrame linkDefinition)
    {
@@ -112,6 +111,7 @@ public class Link implements java.io.Serializable
     *
     * @return String representation of this link.
     */
+   @Override
    public String toString()
    {
       StringBuffer retBuffer = new StringBuffer();
@@ -226,9 +226,10 @@ public class Link implements java.io.Serializable
    protected void setParentJoint(Joint joint)
    {
       this.parentJoint = joint;
-      if (ef_collision != null)
+      if (this.contactingExternalForcePoints != null)
       {
-         joint.addExternalForcePoint(ef_collision);
+         throw new RuntimeException("Need to attach link to joint before enabling collisions!");
+//         joint.addExternalForcePoint(ef_collision);
       }
    }
 
@@ -360,9 +361,14 @@ public class Link implements java.io.Serializable
       this.linkGraphics = linkGraphics;
    }
 
-   public void setCollisionMesh(CollisionMeshDescription collisionMeshDescription)
+   public void addCollisionMesh(CollisionMeshDescription collisionMeshDescription)
    {
-      this.collisionMeshDescription = collisionMeshDescription;
+      if (collisionMeshDescriptions == null)
+      {
+         collisionMeshDescriptions = new ArrayList<CollisionMeshDescription>();
+      }
+      
+      this.collisionMeshDescriptions.add(collisionMeshDescription);
    }
 
    /**
@@ -375,25 +381,44 @@ public class Link implements java.io.Serializable
       return linkGraphics;
    }
 
-   public CollisionMeshDescription getCollisionMeshDescription()
+   public ArrayList<CollisionMeshDescription> getCollisionMeshDescriptions()
    {
-      return collisionMeshDescription;
+      return collisionMeshDescriptions;
    }
 
    //TODO: Get this stuff out of here. Put it in Joint maybe?
 // ///////////// Collision Stuff Here /////////////
 
-   public ExternalForcePoint ef_collision;
+//   public ExternalForcePoint ef_collision;
+   private ArrayList<ContactingExternalForcePoint> contactingExternalForcePoints;
+
+   public ArrayList<ContactingExternalForcePoint> getContactingExternalForcePoints()
+   {
+      return contactingExternalForcePoints;
+   }
 
    /**
     * Enables collisions for this link.
     * @param maxVelocity Maximum velocity of any point on the link. Used for improving collision detection performance.
     * @param polyTree PolyTree defining collision geometry.
     */
-   public void enableCollisions(YoVariableRegistry registry)
+   public void enableCollisions(int maximumNumberOfPotentialContacts, CollisionHandler collisionHandler, YoVariableRegistry registry)
    {
-      this.ef_collision = new ExternalForcePoint(this.name + "ef_collision", registry);
-      if (parentJoint != null) parentJoint.addExternalForcePoint(ef_collision);
+      if (parentJoint == null)
+      {
+         throw new RuntimeException("Need to attach link to joint before enabling collisions!");
+      }
+
+      contactingExternalForcePoints = new ArrayList<>();
+
+      for (int i=0; i<maximumNumberOfPotentialContacts; i++)
+      {
+         ContactingExternalForcePoint contactingExternalForcePoint = new ContactingExternalForcePoint(this.name + "ContactingPoint" + i, parentJoint, registry);
+         contactingExternalForcePoints.add(contactingExternalForcePoint);
+         parentJoint.addExternalForcePoint(contactingExternalForcePoint);
+      }
+      
+      collisionHandler.addContactingExternalForcePoints(this, contactingExternalForcePoints);
    }
 
    // ////////// Graphics from Mass Properties Here ///////////////////////
@@ -554,11 +579,6 @@ public class Link implements java.io.Serializable
    public void getComOffset(Vector3d comOffsetRet)
    {
       comOffsetRet.set(this.comOffset);
-   }
-
-   public CollisionShape getCollisionShape()
-   {
-      return collision;
    }
 
    public Joint getParentJoint()

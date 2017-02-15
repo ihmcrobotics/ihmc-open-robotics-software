@@ -18,11 +18,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.swing.JPanel;
+
 import org.junit.Test;
 
 import com.google.common.base.Defaults;
 
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.jMonkeyEngineToolkit.camera.CameraPropertiesHolder;
+import us.ihmc.simulationconstructionset.ExtraPanelConfiguration;
 import us.ihmc.simulationconstructionset.commands.AddCameraKeyCommandExecutor;
 import us.ihmc.simulationconstructionset.commands.AddKeyPointCommandExecutor;
 import us.ihmc.simulationconstructionset.commands.CreateNewGraphWindowCommandExecutor;
@@ -100,9 +106,6 @@ import us.ihmc.simulationconstructionset.gui.dialogConstructors.ResizeViewportDi
 import us.ihmc.simulationconstructionset.gui.dialogConstructors.SaveConfigurationDialogConstructor;
 import us.ihmc.simulationconstructionset.gui.dialogConstructors.SaveGraphConfigurationDialogConstructor;
 import us.ihmc.simulationconstructionset.gui.dialogConstructors.SaveRobotConfigurationDialogConstructor;
-import us.ihmc.tools.continuousIntegration.IntegrationCategory;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 @ContinuousIntegrationPlan(categories = { IntegrationCategory.UI})
 public class ActionsTest
@@ -489,7 +492,7 @@ public class ActionsTest
                  @Override
                  public void test(ExtraPanelSelector mock)
                  {
-                    callPublicMethods(new SelectExtraPanelAction(mock, "Test"));
+                    callPublicMethods(new SelectExtraPanelAction(mock, new ExtraPanelConfiguration("Test", new JPanel(), false)));
                  }
               })
               .assertMethodCalled("selectPanel", "Test")

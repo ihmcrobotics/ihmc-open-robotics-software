@@ -152,6 +152,7 @@ public class FloatingJoint extends Joint implements FloatingSCSJoint
       q_z.set(z);
    }
 
+   @Override
    public void setVelocity(Tuple3d velocity)
    {
       qd_x.set(velocity.getX());
@@ -219,6 +220,7 @@ public class FloatingJoint extends Joint implements FloatingSCSJoint
       q_qz.set(q.getZ());
    }
 
+   @Override
    public void setRotationAndTranslation(RigidBodyTransform transform)
    {
       Matrix3d rotationMatrix = new Matrix3d();
@@ -230,6 +232,7 @@ public class FloatingJoint extends Joint implements FloatingSCSJoint
       setPosition(translation);
    }
 
+   @Override
    public void setAngularVelocityInBody(Vector3d angularVelocityInBody)
    {
       qd_wx.set(angularVelocityInBody.getX());
@@ -258,12 +261,14 @@ public class FloatingJoint extends Joint implements FloatingSCSJoint
       zDot.set(qd_z.getDoubleValue());
    }
    
+   @Override
    public void getVelocity(FrameVector linearVelocityToPack)
    {
       linearVelocityToPack.setIncludingFrame(ReferenceFrame.getWorldFrame(), qd_x.getDoubleValue(), qd_y.getDoubleValue(), qd_z.getDoubleValue());
    }
    
 
+   @Override
    public void getAngularVelocity(FrameVector angularVelocityToPack, ReferenceFrame bodyFrame)
    {
       angularVelocityToPack.setIncludingFrame(bodyFrame, qd_wx.getDoubleValue(), qd_wy.getDoubleValue(), qd_wz.getDoubleValue());
@@ -482,6 +487,7 @@ public class FloatingJoint extends Joint implements FloatingSCSJoint
       return yawPitchRollToReturn;
    }
 
+   @Override
    public void update()
    {
       this.setFloatingTransform3D(this.jointTransform3D);

@@ -1,9 +1,8 @@
 package us.ihmc.robotics.geometry;
 
 import javax.vecmath.Point3d;
+import javax.vecmath.Vector3d;
 
-import us.ihmc.robotics.geometry.transformables.TransformableLineSegment3d;
-import us.ihmc.robotics.geometry.transformables.TransformablePoint3d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 /**
@@ -13,161 +12,185 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
  * 
  * @author dcalvert
  */
-public class FrameLineSegment extends AbstractFrameObject<FrameLineSegment, TransformableLineSegment3d>
+public class FrameLineSegment extends AbstractFrameObject<FrameLineSegment, LineSegment3d>
 {
-   /** Actual startPoint */
-   private final Point3d startPoint;
-   /** Actual endPoint */
-   private final Point3d endPoint;
-   
-   /** For temporary type-conversion! Not actual value */
-   private final LineSegment3d lineSegment3d = new LineSegment3d();
-   
+   private final LineSegment3d lineSegment3d;
+
+   public FrameLineSegment()
+   {
+      this(ReferenceFrame.getWorldFrame());
+   }
+
    public FrameLineSegment(ReferenceFrame referenceFrame)
    {
-      super(referenceFrame, new TransformableLineSegment3d());
-      
-      startPoint = getGeometryObject().getStartPoint();
-      endPoint = getGeometryObject().getEndPoint();
+      super(referenceFrame, new LineSegment3d());
+      lineSegment3d = getGeometryObject();
    }
-   
+
+   public FrameLineSegment(ReferenceFrame referenceFrame, Point3d firstEndpoint, Point3d secondEndpoint)
+   {
+      super(referenceFrame, new LineSegment3d(firstEndpoint, secondEndpoint));
+      lineSegment3d = getGeometryObject();
+   }
+
+   public void setFirstEndpoint(Point3d firstEndpoint)
+   {
+      lineSegment3d.setFirstEndpoint(firstEndpoint);
+   }
+
+   public void setFirstEndpoint(FramePoint firstEndpoint)
+   {
+      checkReferenceFrameMatch(firstEndpoint);
+      lineSegment3d.setFirstEndpoint(firstEndpoint.getPoint());
+   }
+
+   public void setSecondEndpoint(Point3d secondEndpoint)
+   {
+      lineSegment3d.setSecondEndpoint(secondEndpoint);
+   }
+
+   public void setSecondEndpoint(FramePoint secondEndpoint)
+   {
+      checkReferenceFrameMatch(secondEndpoint);
+      lineSegment3d.setSecondEndpoint(secondEndpoint.getPoint());
+   }
+
+   public void set(Point3d firstEndpoint, Point3d secondEndpoint)
+   {
+      setFirstEndpoint(firstEndpoint);
+      setSecondEndpoint(secondEndpoint);
+   }
+
+   public void set(FramePoint firstEndpoint, FramePoint secondEndpoint)
+   {
+      setFirstEndpoint(firstEndpoint);
+      setSecondEndpoint(secondEndpoint);
+   }
+
+   public void setIncludingFrame(FramePoint firstEndpoint, FramePoint secondEndpoint)
+   {
+      firstEndpoint.checkReferenceFrameMatch(secondEndpoint);
+      setToZero(firstEndpoint.getReferenceFrame());
+      set(firstEndpoint, secondEndpoint);
+   }
+
+   public void set(Point3d firstEndpoint, Vector3d fromFirstToSecondEndpoint)
+   {
+      lineSegment3d.set(firstEndpoint, fromFirstToSecondEndpoint);
+   }
+
+   public void set(FramePoint firstEndpoint, FrameVector fromFirstToSecondEndpoint)
+   {
+      checkReferenceFrameMatch(firstEndpoint);
+      checkReferenceFrameMatch(fromFirstToSecondEndpoint);
+      lineSegment3d.set(firstEndpoint.getPoint(), fromFirstToSecondEndpoint.getVector());
+   }
+
+   public void setIncludingFrame(FramePoint firstEndpoint, FrameVector fromFirstToSecondEndpoint)
+   {
+      firstEndpoint.checkReferenceFrameMatch(fromFirstToSecondEndpoint);
+      setToZero(firstEndpoint.getReferenceFrame());
+      set(firstEndpoint, fromFirstToSecondEndpoint);
+   }
+
    public double getDistance(FramePoint framePoint)
    {
       checkReferenceFrameMatch(framePoint);
-      
-      putValuesIntoLineSegment3d();
-      return lineSegment3d.distanceToAPoint(framePoint.getPoint());
+      return lineSegment3d.distance(framePoint.getPoint());
    }
-   
-   public void getPointAlongPercentageOfLineSegment(double percentage, FramePoint pointToPack)
-   {
-      if (percentage < 0.0 || percentage > 1.0)
-      {
-         throw new RuntimeException("Percentage must be between 0.0 and 1.0. Was: " + percentage);
-      }
-      
-      checkReferenceFrameMatch(pointToPack);
-      
-      pointToPack.set(endPoint);
-      pointToPack.sub(startPoint);
-      pointToPack.scale(percentage);
-      pointToPack.add(startPoint);
-   }
-   
-   public void getProjectionOntoLineSegment(FramePoint pointToProject, FramePoint projectedPointToPack)
+
+   public void orthogonalProjection(FramePoint pointToProject, FramePoint projectionToPack)
    {
       checkReferenceFrameMatch(pointToProject);
-      checkReferenceFrameMatch(projectedPointToPack);
-      
-      putValuesIntoLineSegment3d();
-      lineSegment3d.getProjectionOntoLineSegment(pointToProject.getPoint(), projectedPointToPack.getPoint());
+      checkReferenceFrameMatch(projectionToPack);
+      lineSegment3d.orthogonalProjection(pointToProject.getPoint(), projectionToPack.getPoint());
    }
-   
-   public double getLength()
+
+   public void pointBetweenEndPointsGivenPercantage(double percentage, FramePoint pointToPack)
    {
-      putValuesIntoLineSegment3d();
+      checkReferenceFrameMatch(pointToPack);
+      lineSegment3d.pointBetweenEndPointsGivenPercentage(percentage, pointToPack.getPoint());
+   }
+
+   public double length()
+   {
       return lineSegment3d.length();
    }
-   
+
    public boolean isBetweenEndpoints(FramePoint point, double epsilon)
    {
       checkReferenceFrameMatch(point);
-      putValuesIntoLineSegment3d();
       return lineSegment3d.isBetweenEndpoints(point.getPoint(), epsilon);
    }
-   
+
    public void getMidpoint(FramePoint midpointToPack)
    {
       checkReferenceFrameMatch(midpointToPack);
-      
-      midpointToPack.setX((startPoint.getX() + endPoint.getX()) / 2.0);
-      midpointToPack.setY((startPoint.getY() + endPoint.getY()) / 2.0);
-      midpointToPack.setZ((startPoint.getZ() + endPoint.getZ()) / 2.0);
+      lineSegment3d.getMidpoint(midpointToPack.getPoint());
+   }
+
+   public void getDirection(boolean normalize, FrameVector directionToPack)
+   {
+      checkReferenceFrameMatch(directionToPack);
+      lineSegment3d.getDirection(normalize, directionToPack.getVector());
+   }
+
+   public boolean firstEndpointContainsNaN()
+   {
+      return lineSegment3d.firstEndpointContainsNaN();
    }
    
-   public void getFrameVector(FrameVector startToEndVector)
+   public boolean secondEndpointContainsNaN()
    {
-      checkReferenceFrameMatch(startToEndVector);
-      
-      startToEndVector.setX(endPoint.getX() - startPoint.getX());
-      startToEndVector.setY(endPoint.getY() - startPoint.getY());
-      startToEndVector.setZ(endPoint.getZ() - startPoint.getZ());
+      return lineSegment3d.secondEndpointContainsNaN();
    }
-   
-   public void set(FramePoint startPoint, FrameVector segmentVector)
+
+   public Point3d getFirstEndpoint()
    {
-      checkReferenceFrameMatch(startPoint);
-      checkReferenceFrameMatch(segmentVector);
-      
-      setStartPointWithoutChecks(startPoint.getPoint());
-      
-      endPoint.set(this.startPoint);
-      endPoint.add(segmentVector.getVector());
+      return lineSegment3d.getFirstEndpoint();
    }
-   
-   public void setStartPoint(FramePoint startPoint)
+
+   public void getFirstEndpoint(FramePoint firstEndpointToPack)
    {
-      checkReferenceFrameMatch(startPoint);
-      
-      setWithoutChecks(startPoint.getPoint(), endPoint);
+      checkReferenceFrameMatch(firstEndpointToPack);
+      firstEndpointToPack.set(getFirstEndpoint());
    }
-   
-   public void setEndPoint(FramePoint endPoint)
+
+   public void getFirstEndpointIncludingFrame(FramePoint firstEndpointToPack)
    {
-      checkReferenceFrameMatch(endPoint);
-      
-      setWithoutChecks(startPoint, endPoint.getPoint());
+      firstEndpointToPack.setIncludingFrame(referenceFrame, getFirstEndpoint());
    }
-   
-   public void set(FramePoint startPoint, FramePoint endPoint)
+
+   public Point3d getSecondEndpoint()
    {
-      checkReferenceFrameMatch(startPoint);
-      checkReferenceFrameMatch(endPoint);
-      
-      setWithoutChecks(startPoint.getPoint(), endPoint.getPoint());
+      return lineSegment3d.getSecondEndpoint();
    }
-   
-   public void setStartPointWithoutChecks(Point3d startPoint)
+
+   public void getSecondEndpoint(FramePoint secondEndpointToPack)
    {
-      setWithoutChecks(startPoint, endPoint);
+      checkReferenceFrameMatch(secondEndpointToPack);
+      secondEndpointToPack.set(getSecondEndpoint());
    }
-   
-   public void setEndPointWithoutChecks(Point3d endPoint)
+
+   public void getSecondEndpointIncludingFrame(FramePoint secondEndpointToPack)
    {
-      setWithoutChecks(startPoint, endPoint);
+      secondEndpointToPack.setIncludingFrame(referenceFrame, getSecondEndpoint());
    }
-   
-   public void setWithoutChecks(Point3d startPoint, Point3d endPoint)
+
+   public void get(FramePoint firstEndpointToPack, FramePoint secondEndpointToPack)
    {
-      this.startPoint.set(startPoint.getX(), startPoint.getY(), startPoint.getZ());
-      this.endPoint.set(endPoint.getX(), endPoint.getY(), endPoint.getZ());
+      getFirstEndpoint(firstEndpointToPack);
+      getSecondEndpoint(secondEndpointToPack);
    }
-   
-   public TransformablePoint3d getStartPointUnsafe()
+
+   public void getIncludingFrame(FramePoint firstEndpointToPack, FramePoint secondEndpointToPack)
    {
-      return getGeometryObject().getStartPoint();
+      getFirstEndpointIncludingFrame(firstEndpointToPack);
+      getSecondEndpointIncludingFrame(secondEndpointToPack);
    }
-   
-   public TransformablePoint3d getEndPointUnsafe()
+
+   public LineSegment3d getLineSegment3d()
    {
-      return getGeometryObject().getEndPoint();
-   }
-   
-   public LineSegment3d getTemporaryLineSegment3d()
-   {
-      putValuesIntoLineSegment3d();
       return lineSegment3d;
-   }
-   
-   private void putValuesIntoLineSegment3d()
-   {
-      lineSegment3d.getPointA().set(startPoint.getX(), startPoint.getY(), startPoint.getZ());
-      lineSegment3d.getPointB().set(endPoint.getX(), endPoint.getY(), endPoint.getZ());
-   }
-   
-   private void getValuesFromLineSegment3d()
-   {
-      lineSegment3d.getPointA().get(startPoint);
-      lineSegment3d.getPointB().get(endPoint);
    }
 }

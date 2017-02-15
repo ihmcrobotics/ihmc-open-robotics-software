@@ -23,6 +23,7 @@ public class GraphicsDynamicGraphicsObject extends Graphics3DNode implements Gra
       if (closeableAndDisposableRegistry != null) closeableAndDisposableRegistry.registerCloseableAndDisposable(this);
    }
 
+   @Override
    public void update()
    {
       // IMPORTANT: can't do this here because it causes threading issues. Each thread is responsible for updating its own DynamicGraphicObjects!

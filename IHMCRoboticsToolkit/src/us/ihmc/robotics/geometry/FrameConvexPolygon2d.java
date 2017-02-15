@@ -992,6 +992,9 @@ public class FrameConvexPolygon2d extends FrameGeometry2d<FrameConvexPolygon2d, 
       plane3dToPack.setIncludingFrame(getReferenceFrame(), 0.0, 0.0, 0.0, 0.0, 0.0, 1.0);
    }
    
+   /**
+    * @deprecated Creates garbage. Use an instance of FrameConvexPolygonWithLineIntersector.
+    */
    @Override
    public FramePoint2d[] intersectionWith(FrameLine2d line)
    {

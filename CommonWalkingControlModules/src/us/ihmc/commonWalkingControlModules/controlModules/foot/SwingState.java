@@ -182,8 +182,7 @@ public class SwingState extends AbstractUnconstrainedState
          swingTrajectoryGenerator = null;
 
          positionTrajectoryGenerators.add(swingTrajectoryGeneratorNew);
-         pushRecoveryPositionTrajectoryGenerator = setupPushRecoveryTrajectoryGenerator(swingTimeProvider, registry, namePrefix,
-               pushRecoveryPositionTrajectoryGenerators, yoGraphicsListRegistry, swingTrajectoryGeneratorNew, touchdownTrajectoryGenerator);
+         pushRecoveryPositionTrajectoryGenerator = swingTrajectoryGeneratorNew;
       }
       else
       {
@@ -317,6 +316,12 @@ public class SwingState extends AbstractUnconstrainedState
       {
          if (!doContinuousReplanning.getBooleanValue())
          {
+            if (useNewSwingTrajectoyOptimization)
+            {
+               finalConfigurationProvider.getPosition(finalPosition);
+               touchdownVelocityProvider.get(finalVelocity);
+               swingTrajectoryGeneratorNew.setFinalConditions(finalPosition, finalVelocity);
+            }
             pushRecoveryPositionTrajectoryGenerator.initialize();
             this.replanTrajectory.set(false);
             trajectoryWasReplanned = true;
@@ -480,9 +485,14 @@ public class SwingState extends AbstractUnconstrainedState
    private void computeSwingTimeRemaining()
    {
       if (!currentTimeWithSwingSpeedUp.isNaN())
-         this.swingTimeRemaining.set(swingTimeProvider.getValue() - currentTimeWithSwingSpeedUp.getDoubleValue());
+      {
+         double swingTimeRemaining = (swingTimeProvider.getValue() - currentTimeWithSwingSpeedUp.getDoubleValue()) / swingTimeSpeedUpFactor.getDoubleValue();
+         this.swingTimeRemaining.set(swingTimeRemaining);
+      }
       else
+      {
          this.swingTimeRemaining.set(swingTimeProvider.getValue() - getTimeInCurrentState());
+      }
    }
 
    private void updatePrivilegedConfiguration()

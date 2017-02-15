@@ -18,7 +18,7 @@ public class QuadrupedPositionTestYoVariables extends QuadrupedTestYoVariables
    {
       super(scs);
       
-      userTrigger = (EnumYoVariable<QuadrupedPositionControllerRequestedEvent>) scs.getVariable("usertrigger");
+      userTrigger = (EnumYoVariable<QuadrupedPositionControllerRequestedEvent>) scs.getVariable("userTrigger");
       positionControllerState = (EnumYoVariable<QuadrupedPositionControllerState>) scs.getVariable("positionControllerState");
       swingDuration = (DoubleYoVariable) scs.getVariable("swingDuration");
       desiredCoMPositionZ = (DoubleYoVariable) scs.getVariable("desiredCoMPositionZ");

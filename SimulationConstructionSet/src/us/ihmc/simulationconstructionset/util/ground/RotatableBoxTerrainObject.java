@@ -73,17 +73,20 @@ public class RotatableBoxTerrainObject implements TerrainObject3D, HeightMapWith
    }
 
 
+   @Override
    public Graphics3DObject getLinkGraphics()
    {
       return linkGraphics;
 
    }
 
+   @Override
    public BoundingBox3d getBoundingBox()
    {
       return boundingBox;
    }
 
+   @Override
    public double heightAndNormalAt(double x, double y, double z, Vector3d normalToPack)
    {
       double heightAt = heightAt(x, y, z);
@@ -91,6 +94,7 @@ public class RotatableBoxTerrainObject implements TerrainObject3D, HeightMapWith
       return heightAt;
    }
    
+   @Override
    public double heightAt(double x, double y, double z)
    {
       // TODO: inefficient, magic epsilon
@@ -138,6 +142,7 @@ public class RotatableBoxTerrainObject implements TerrainObject3D, HeightMapWith
 
    public double getZMax() { return boundingBox.getZMax();}
 
+   @Override
    public boolean isClose(double x, double y, double z)
    {
       return boundingBox.isXYInside(x, y);
@@ -161,6 +166,7 @@ public class RotatableBoxTerrainObject implements TerrainObject3D, HeightMapWith
       box.checkIfInside(tempPoint, intersectionToPack, normalToPack);
    }
    
+   @Override
    public boolean checkIfInside(double x, double y, double z, Point3d intersectionToPack, Vector3d normalToPack)
    {
       tempPoint.set(x, y, z);
@@ -172,6 +178,7 @@ public class RotatableBoxTerrainObject implements TerrainObject3D, HeightMapWith
       return true;
    }
    
+   @Override
    public HeightMapWithNormals getHeightMapIfAvailable()
    {
       return this;

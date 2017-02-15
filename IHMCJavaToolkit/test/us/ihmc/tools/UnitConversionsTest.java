@@ -1,12 +1,12 @@
 package us.ihmc.tools;
 
-import org.junit.Test;
-import us.ihmc.tools.UnitConversions;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import static org.junit.Assert.assertEquals;
 
 import java.util.Random;
 
-import static org.junit.Assert.assertEquals;
+import org.junit.Test;
+
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public class UnitConversionsTest
 {
@@ -81,42 +81,6 @@ public class UnitConversionsTest
       {
          double psi = rand.nextDouble();
          assertEquals(psi * UnitConversions.PSI_TO_PASCALS, psi * 6894.75729, EPS);
-      }
-   }
-
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
-   public void kibibytesToBytes()
-   {
-      Random rand = new Random();
-      for (int i = 0; i < 1000; i++)
-      {
-         int kibibytes = rand.nextInt();
-         assertEquals(UnitConversions.kibibytesToBytes(kibibytes), kibibytes * 1024, EPS);
-      }
-   }
-   
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
-   public void megabytesToBytes()
-   {
-      Random rand = new Random();
-      for (int i = 0; i < 1000; i++)
-      {
-         int megabytes = rand.nextInt();
-         assertEquals(UnitConversions.megabytesToBytes(megabytes), megabytes * 1000000, EPS);
-      }
-   }
-   
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
-   public void mebibytesToBytes()
-   {
-      Random rand = new Random();
-      for (int i = 0; i < 1000; i++)
-      {
-         int mebibytes = rand.nextInt();
-         assertEquals(UnitConversions.mebibytesToBytes(mebibytes), mebibytes * 1048576, EPS);
       }
    }
 }

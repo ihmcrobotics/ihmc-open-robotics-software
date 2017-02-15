@@ -7,10 +7,10 @@ import java.util.ArrayList;
 
 import org.junit.Test;
 
-import us.ihmc.tools.testing.JUnitTools;
-import us.ihmc.tools.continuousIntegration.IntegrationCategory;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.commons.Assertions;
+import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.tools.thread.ThreadTools;
 
 @ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
@@ -102,7 +102,7 @@ public class DataObjectTransponderTest
    public void testSerializabilityOfInteger() throws IOException
    {
       Integer integer = new Integer(2);
-      JUnitTools.assertSerializable(integer);
+      Assertions.assertSerializable(integer);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -110,7 +110,7 @@ public class DataObjectTransponderTest
    public void testSerializabilityOfIntPacket() throws IOException
    {
       IntegerPacket intPacket = new IntegerPacket(2);
-      JUnitTools.assertSerializable(intPacket);
+      Assertions.assertSerializable(intPacket);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -118,7 +118,7 @@ public class DataObjectTransponderTest
    public void testSerializabilityOfStringPacket() throws IOException
    {
       StringPacket packet = new StringPacket("Buzzap!");
-      JUnitTools.assertSerializable(packet);
+      Assertions.assertSerializable(packet);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)

@@ -37,7 +37,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.gui.tools.VisualizerUtils;
+import us.ihmc.simulationconstructionset.gui.tools.SimulationOverheadPlotterFactory;
 import us.ihmc.tools.thread.ThreadTools;
 
 public class MidFootZUpSwingTargetGeneratorVisualizer implements RobotController
@@ -150,7 +150,9 @@ public class MidFootZUpSwingTargetGeneratorVisualizer implements RobotController
       }
 
       createGraphicsAndArtifacts(yoGraphicsListRegistry);
-      VisualizerUtils.createOverheadPlotter(scs, showOverheadView, yoGraphicsListRegistry);
+      SimulationOverheadPlotterFactory simulationOverheadPlotterFactory = scs.createSimulationOverheadPlotterFactory();
+      simulationOverheadPlotterFactory.setShowOnStart(showOverheadView);
+      simulationOverheadPlotterFactory.addYoGraphicsListRegistries(yoGraphicsListRegistry);
       scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
       scs.setDT(simulateDT, recordFrequency);
       scs.startOnAThread();

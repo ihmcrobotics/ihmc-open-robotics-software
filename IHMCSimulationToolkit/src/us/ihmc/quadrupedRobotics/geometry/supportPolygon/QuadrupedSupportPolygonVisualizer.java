@@ -26,7 +26,7 @@ import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.gui.tools.VisualizerUtils;
+import us.ihmc.simulationconstructionset.gui.tools.SimulationOverheadPlotterFactory;
 import us.ihmc.tools.thread.ThreadTools;
 
 public class QuadrupedSupportPolygonVisualizer implements RobotController
@@ -154,7 +154,11 @@ public class QuadrupedSupportPolygonVisualizer implements RobotController
       yoGraphicsListRegistry.registerArtifact("currentQuadSupportPolygonArtifact", currentQuadSupportPolygonArtifact);
 
       boolean showOverheadView = true;
-      VisualizerUtils.createOverheadPlotter(scs, showOverheadView, "centroidGraphic", yoGraphicsListRegistry);
+      SimulationOverheadPlotterFactory simulationOverheadPlotterFactory = scs.createSimulationOverheadPlotterFactory();
+      simulationOverheadPlotterFactory.setVariableNameToTrack("centroidGraphic");
+      simulationOverheadPlotterFactory.setShowOnStart(showOverheadView);
+      simulationOverheadPlotterFactory.addYoGraphicsListRegistries(yoGraphicsListRegistry);
+      simulationOverheadPlotterFactory.createOverheadPlotter();
       scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
       scs.setDT(simulateDT, recordFrequency);
       scs.startOnAThread();

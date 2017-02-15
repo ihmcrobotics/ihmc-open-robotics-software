@@ -129,6 +129,7 @@ public class YoGUIMessageFrame implements GlobalParameterChangedListener
       // jTabbedPane.setSize(100, 100);
       lockBox.addActionListener(new ActionListener()
       {
+         @Override
          public void actionPerformed(ActionEvent e)
          {
             if (locked)
@@ -319,6 +320,7 @@ public class YoGUIMessageFrame implements GlobalParameterChangedListener
       }
    }
 
+   @Override
    public void globalParameterCreated(GlobalParameter globalParameter)
    {
       appendParameterMessage(globalParameter.getShortName() + "= " + padWithSpacesOrTrim(globalParameter.getValueInStringFormat(), CHARACTERS_IN_VALUE_STRING)
@@ -326,6 +328,7 @@ public class YoGUIMessageFrame implements GlobalParameterChangedListener
    }
 
 
+   @Override
    public void booleanValueChanged(GlobalParameter globalParameter, String comment, boolean previousValue, boolean newValue)
    {
       appendParameterMessage(globalParameter.getShortName() + " GlobalParameter changed from   "
@@ -333,6 +336,7 @@ public class YoGUIMessageFrame implements GlobalParameterChangedListener
                              + padWithSpacesOrTrim(Boolean.toString(newValue), CHARACTERS_IN_VALUE_STRING) + " " + comment);
    }
 
+   @Override
    public void doubleValueChanged(GlobalParameter globalParameter, String comment, double previousValue, double newValue)
    {
       appendParameterMessage(globalParameter.getShortName() + " GlobalParameter changed from   "
@@ -340,6 +344,7 @@ public class YoGUIMessageFrame implements GlobalParameterChangedListener
                              + padWithSpacesOrTrim(Double.toString(newValue), CHARACTERS_IN_VALUE_STRING) + " " + comment);
    }
 
+   @Override
    public void integerValueChanged(GlobalParameter globalParameter, String comment, int previousValue, int newValue)
    {
       appendParameterMessage(globalParameter.getShortName() + " GlobalParameter changed from   "
@@ -347,6 +352,7 @@ public class YoGUIMessageFrame implements GlobalParameterChangedListener
                              + padWithSpacesOrTrim(Integer.toString(newValue), CHARACTERS_IN_VALUE_STRING) + " " + comment);
    }
 
+   @Override
    public void enumValueChanged(GlobalParameter globalParameter, String comment, Enum<?> previousValue, Enum<?> newValue)
    {
       appendParameterMessage(globalParameter.getShortName() + " GlobalParameter changed from   "
@@ -455,9 +461,5 @@ public class YoGUIMessageFrame implements GlobalParameterChangedListener
    }
 
    private enum TestEnum {A, B, C, WEWER, askdjaskdjasdjadajsdajsdjkasdlkj}
-
-   ;
-
-
 
 }

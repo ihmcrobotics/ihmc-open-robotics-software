@@ -58,6 +58,7 @@ public abstract class SingleJointArticulatedContactable implements Contactable
       }
    }
 
+   @Override
    public int getAndLockAvailableContactPoint()
    {
       for (int i = 0; i < allGroundContactPoints.size(); i++)
@@ -75,6 +76,7 @@ public abstract class SingleJointArticulatedContactable implements Contactable
       throw new RuntimeException("No contact points are available");
    }
 
+   @Override
    public void unlockContactPoint(GroundContactPoint groundContactPoint)
    {
       for (int i = 0; i < allGroundContactPoints.size(); i++)
@@ -96,6 +98,7 @@ public abstract class SingleJointArticulatedContactable implements Contactable
       }
    }
 
+   @Override
    public GroundContactPoint getLockedContactPoint(int contactPointIndex)
    {
       if (contactsAvailable.get(contactPointIndex).getBooleanValue())
@@ -106,6 +109,7 @@ public abstract class SingleJointArticulatedContactable implements Contactable
       return allGroundContactPoints.get(contactPointIndex);
    }
 
+   @Override
    public void updateContactPoints()
    {
       robot.update();

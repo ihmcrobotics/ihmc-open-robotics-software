@@ -68,10 +68,12 @@ public class SimpleCollisionShapeFactory implements CollisionShapeFactory
    }
 
    @Override
-   public CollisionShape addShape(Link link, RigidBodyTransform shapeToLink, CollisionShapeDescription<?> description, boolean isGround, int collisionGroup, int collisionMask)
+   public CollisionShape addShape(Link link, RigidBodyTransform shapeToLink, CollisionShapeDescription<?> description, boolean isGround, int groupMask, int collisionMask)
    {
       SimpleCollisionShapeWithLink collisionShape = new SimpleCollisionShapeWithLink(link, description, shapeToLink);
       collisionShape.setIsGround(isGround);
+      collisionShape.setCollisionGroup(groupMask);
+      collisionShape.setCollisionMask(collisionMask);
       detector.addShape(collisionShape);
 
       return collisionShape;
