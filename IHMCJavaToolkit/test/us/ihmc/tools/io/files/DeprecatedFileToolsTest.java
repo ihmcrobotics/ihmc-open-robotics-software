@@ -2,7 +2,6 @@ package us.ihmc.tools.io.files;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -16,19 +15,18 @@ import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.List;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import us.ihmc.commons.nio.CommonPaths;
+import us.ihmc.commons.nio.FileToolsTest;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.tools.io.printing.PrintTools;
-import us.ihmc.tools.testing.JUnitTools;
 
-public class FileToolsTest
+public class DeprecatedFileToolsTest
 {
-   private static final Path FILE_TOOLS_TEST_PATH = JUnitTools.deriveTestResourcesPath(FileToolsTest.class);
+   private static final Path FILE_TOOLS_TEST_PATH = CommonPaths.deriveTestResourcesPath(FileToolsTest.class);
    private static final Path TEXT_DIRECTORY_PATH = FILE_TOOLS_TEST_PATH.resolve("exampleTextFiles");
    private static final Path JAVA_DIRECTORY_PATH = FILE_TOOLS_TEST_PATH.resolve("exampleJavaFiles");
    private static final Path EMPTY_DIRECTORY_PATH = FILE_TOOLS_TEST_PATH.resolve("exampleEmptyFiles");
@@ -49,7 +47,7 @@ public class FileToolsTest
    private static final Path FILE_TOOLS_EXAMPLE_FILE1_PATH = TEXT_DIRECTORY_PATH.resolve(FILE_TOOLS_EXAMPLE_FILE1_TXT);
    private static final Path FILE_TOOLS_EXAMPLE_FILE2_PATH = TEXT_DIRECTORY_PATH.resolve(FILE_TOOLS_EXAMPLE_FILE2_TXT);
    private static final Path READ_ALL_LINES_PATH = FILE_TOOLS_TEST_PATH.resolve(TEST_READ_ALL_LINES_TXT);
-
+   
    @Before
    public void setUp()
    {
@@ -82,78 +80,7 @@ public class FileToolsTest
       }
    }
    
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
-   public void testReadAllLines()
-   {
-      List<String> lines = FileTools.readAllLines(READ_ALL_LINES_PATH);
-      
-      assertTrue(lines.get(0).equals("line1"));
-      assertTrue(lines.get(1).equals("line2"));
-      assertTrue(lines.get(2).equals("line3"));
-   }
-	
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
-   public void testReadAllBytesAndReadLinesFromBytesAndReplaceLine()
-   {
-      byte[] bytes = FileTools.readAllBytes(READ_ALL_LINES_PATH);
-      List<String> lines = FileTools.readLinesFromBytes(bytes);
-      
-      assertTrue(lines.get(0).equals("line1"));
-      assertTrue(lines.get(1).equals("line2"));
-      assertTrue(lines.get(2).equals("line3"));
-      
-      bytes = FileTools.replaceLineInFile(1, "line2Mod", bytes, lines);
-      lines = FileTools.readLinesFromBytes(bytes);
-
-      assertTrue(lines.get(0).equals("line1"));
-      assertTrue(lines.get(1).equals("line2Mod"));
-      assertTrue(lines.get(2).equals("line3"));
-   }
-
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
-   public void testTemporaryDirectoryPath()
-   {
-      String tempPath = FileTools.getTemporaryDirectoryPath().toString();
-      PrintTools.info(this, "Java temp directory: " + tempPath);
-      assertNotNull("Java temp directory is null.", tempPath);
-   }
-
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
-   public void testConcatenateFilesTogether()
-   {      
-      Path concatFile1 = FILE_TOOLS_EXAMPLE_FILE1_PATH;
-      Path concatFile2 = FILE_TOOLS_EXAMPLE_FILE2_PATH;
-      Path concatedFile = TEXT_DIRECTORY_PATH.resolve(FILE_TOOLS_EXAMPLE_FILE_CAT_TXT);
-
-      List<Path> filesToConcat = new ArrayList<Path>();
-      filesToConcat.add(concatFile1);
-      filesToConcat.add(concatFile2);
-
-      FileTools.concatenateFilesTogether(filesToConcat, concatedFile);
-
-      try
-      {
-         BufferedReader reader = FileTools.newBufferedReader(concatedFile);
-         assertEquals(EXAMPLE_FILE_1_TEXT_LINE_1, reader.readLine());
-         assertEquals(EXAMPLE_FILE_2_TEXT_LINE_1, reader.readLine());
-         assertEquals(EXAMPLE_FILE_2_TEXT_LINE_2, reader.readLine());
-         assertNull(reader.readLine());
-         reader.close();
-         
-         Files.delete(concatedFile);
-      }
-      catch (IOException e)
-      {
-         e.printStackTrace();
-         fail();
-      }
-   }
-	
-	private static void createTestFile1()
+   private static void createTestFile1()
    {
       PrintWriter writer = FileTools.newPrintWriter(FILE_TOOLS_EXAMPLE_FILE1_PATH);
       writer.println(EXAMPLE_FILE_1_TEXT_LINE_1);
@@ -208,10 +135,8 @@ public class FileToolsTest
       writer.print("line1\r\nline2\nline3\r");
       writer.close();
    }
-
-   // START DEPRECATED TESTS HERE
    
-	@SuppressWarnings("deprecation")
+   @SuppressWarnings("deprecation")
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGetBufferedReader()
@@ -222,7 +147,7 @@ public class FileToolsTest
    
       try
       {
-         BufferedReader reader = FileTools.getFileReader(testFile1.getAbsolutePath());
+         BufferedReader reader = DeprecatedFileTools.getFileReader(testFile1.getAbsolutePath());
          assertNotNull(reader);
          reader.close();
       }
@@ -238,15 +163,15 @@ public class FileToolsTest
       }
    }
 
-	@SuppressWarnings("deprecation")
+   @SuppressWarnings("deprecation")
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000, expected = FileNotFoundException.class)
    public void testGetBufferedReaderWithFileNotFoundException() throws FileNotFoundException
    {
-      FileTools.getFileReader(TEST_FILE_BAD_TXT);
+      DeprecatedFileTools.getFileReader(TEST_FILE_BAD_TXT);
    }
 
-	@SuppressWarnings("deprecation")
+   @SuppressWarnings("deprecation")
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGetFileWriter()
@@ -257,7 +182,7 @@ public class FileToolsTest
    
       try
       {
-         PrintWriter writer = FileTools.getFileWriter(testFile1.getAbsolutePath());
+         PrintWriter writer = DeprecatedFileTools.getFileWriter(testFile1.getAbsolutePath());
          assertNotNull(writer);
          writer.close();
       }
@@ -276,7 +201,7 @@ public class FileToolsTest
       createTestFile1();
    }
 
-	@SuppressWarnings("deprecation")
+   @SuppressWarnings("deprecation")
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGetFileWriterWithAppend()
@@ -287,7 +212,7 @@ public class FileToolsTest
    
       try
       {
-         PrintWriter writer = FileTools.getFileWriterWithAppend(testFile1.getAbsolutePath());
+         PrintWriter writer = DeprecatedFileTools.getFileWriterWithAppend(testFile1.getAbsolutePath());
          assertNotNull(writer);
          writer.close();
       }
@@ -306,7 +231,7 @@ public class FileToolsTest
       createTestFile1();
    }
 
-	@SuppressWarnings("deprecation")
+   @SuppressWarnings("deprecation")
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGetFileDataOutputStream()
@@ -317,7 +242,7 @@ public class FileToolsTest
    
       try
       {
-         DataOutputStream outStream = FileTools.getFileDataOutputStream(testFile1.getAbsolutePath());
+         DataOutputStream outStream = DeprecatedFileTools.getFileDataOutputStream(testFile1.getAbsolutePath());
          assertNotNull(outStream);
          outStream.close();
       }
@@ -336,7 +261,7 @@ public class FileToolsTest
       createTestFile1();
    }
 
-	@SuppressWarnings("deprecation")
+   @SuppressWarnings("deprecation")
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGetFileDataInputStream()
@@ -347,7 +272,7 @@ public class FileToolsTest
    
       try
       {
-         DataInputStream inStream = FileTools.getFileDataInputStream(testFile1.getAbsolutePath());
+         DataInputStream inStream = DeprecatedFileTools.getFileDataInputStream(testFile1.getAbsolutePath());
          assertNotNull(inStream);
          inStream.close();
       }
@@ -363,22 +288,22 @@ public class FileToolsTest
       }
    }
 
-	@SuppressWarnings("deprecation")
+   @SuppressWarnings("deprecation")
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000, expected = FileNotFoundException.class)
    public void testGetFileDataInputStreamWithFileNotFoundException() throws FileNotFoundException, IOException
    {
-      DataInputStream inStream = FileTools.getFileDataInputStream(TEST_FILE_BAD_TXT);
+      DataInputStream inStream = DeprecatedFileTools.getFileDataInputStream(TEST_FILE_BAD_TXT);
       inStream.close();
    }
 
-	@SuppressWarnings("deprecation")
+   @SuppressWarnings("deprecation")
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGetAllFilesInDirectoryRecursive()
    {
       File directory = FILE_TOOLS_TEST_PATH.toFile();
-      ArrayList<File> listOfFiles = FileTools.getAllFilesInDirectoryRecursive(directory);
+      ArrayList<File> listOfFiles = DeprecatedFileTools.getAllFilesInDirectoryRecursive(directory);
       ArrayList<String> listOfFileNames = new ArrayList<String>();
       String errorMessage = "listOfFileNames that were found: ";
       for (File f : listOfFiles)
@@ -397,7 +322,7 @@ public class FileToolsTest
    
       try
       {
-         FileTools.getAllFilesInDirectoryRecursive(notADirectoryExceptionTestFile);
+         DeprecatedFileTools.getAllFilesInDirectoryRecursive(notADirectoryExceptionTestFile);
       }
       catch (RuntimeException e)
       {
@@ -407,7 +332,7 @@ public class FileToolsTest
       assertTrue(thrown);
    }
 
-	@SuppressWarnings("deprecation")
+   @SuppressWarnings("deprecation")
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGetAllFilesInDirectoryWithSuffix()
@@ -415,8 +340,8 @@ public class FileToolsTest
       File textFileDirectory = TEXT_DIRECTORY_PATH.toFile();
       File notADirectoryExceptionTestFile = EXAMPLE_JAVA_FILE1_PATH.toFile();
       File javaFileDirectory = JAVA_DIRECTORY_PATH.toFile();
-      ArrayList<File> textFiles = FileTools.getAllFilesInDirectoryWithSuffix("txt", textFileDirectory);
-      ArrayList<File> javaFiles = FileTools.getAllFilesInDirectoryWithSuffix("java.txt", javaFileDirectory);
+      ArrayList<File> textFiles = DeprecatedFileTools.getAllFilesInDirectoryWithSuffix("txt", textFileDirectory);
+      ArrayList<File> javaFiles = DeprecatedFileTools.getAllFilesInDirectoryWithSuffix("java.txt", javaFileDirectory);
    
       ArrayList<String> listOfTextFileNames = new ArrayList<String>();
       String errorMessage = "listOfTextFileNames that were found: ";
@@ -449,7 +374,7 @@ public class FileToolsTest
       boolean thrown = false;
       try
       {
-         FileTools.getAllFilesInDirectoryWithSuffix("txt", notADirectoryExceptionTestFile);
+         DeprecatedFileTools.getAllFilesInDirectoryWithSuffix("txt", notADirectoryExceptionTestFile);
       }
       catch (RuntimeException e)
       {
@@ -461,7 +386,7 @@ public class FileToolsTest
       // test searching empty directory
       File emptyDirectory = EMPTY_DIRECTORY_PATH.toFile();
    
-      ArrayList<File> testEmptyDir = FileTools.getAllFilesInDirectoryWithSuffix("*", emptyDirectory);
+      ArrayList<File> testEmptyDir = DeprecatedFileTools.getAllFilesInDirectoryWithSuffix("*", emptyDirectory);
       assertEquals(0, testEmptyDir.size());
    }
 }

@@ -13,20 +13,20 @@ import java.util.Random;
 import org.junit.Before;
 import org.junit.Test;
 
+import us.ihmc.commons.Conversions;
+import us.ihmc.commons.nio.CommonPaths;
 import us.ihmc.communication.net.KryoStreamDeSerializer;
 import us.ihmc.communication.net.KryoStreamSerializer;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
-import us.ihmc.tools.UnitConversions;
 import us.ihmc.tools.io.files.FileTools;
-import us.ihmc.tools.testing.JUnitTools;
 
 @ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
 public class CapturabilityBasedStatusTest
 {
-   private static final Path TEST_ROOT_PATH = JUnitTools.deriveTestResourcesPath(CapturabilityBasedStatusTest.class);
+   private static final Path TEST_ROOT_PATH = CommonPaths.deriveTestResourcesPath(CapturabilityBasedStatusTest.class);
 
    @Before
    public void setUp()
@@ -38,10 +38,10 @@ public class CapturabilityBasedStatusTest
    @Test(timeout = 30000)
    public void testSerializeAndDeserialize() throws IOException
    {
-      KryoStreamSerializer kryoStreamSerializer = new KryoStreamSerializer(UnitConversions.megabytesToBytes(10));
+      KryoStreamSerializer kryoStreamSerializer = new KryoStreamSerializer(Conversions.megabytesToBytes(10));
       kryoStreamSerializer.registerClasses(new IHMCCommunicationKryoNetClassList());
 
-      KryoStreamDeSerializer kryoStreamDeSerializer = new KryoStreamDeSerializer(UnitConversions.megabytesToBytes(10));
+      KryoStreamDeSerializer kryoStreamDeSerializer = new KryoStreamDeSerializer(Conversions.megabytesToBytes(10));
       kryoStreamDeSerializer.registerClasses(new IHMCCommunicationKryoNetClassList());
 
       CapturabilityBasedStatus cbs = new CapturabilityBasedStatus(new Random());
@@ -60,10 +60,10 @@ public class CapturabilityBasedStatusTest
    public void testSerializeToFileAndDeserialize() throws IOException
    {
       Random random = new Random();
-      KryoStreamSerializer kryoStreamSerializer = new KryoStreamSerializer(UnitConversions.megabytesToBytes(10));
+      KryoStreamSerializer kryoStreamSerializer = new KryoStreamSerializer(Conversions.megabytesToBytes(10));
       kryoStreamSerializer.registerClasses(new IHMCCommunicationKryoNetClassList());
 
-      KryoStreamDeSerializer kryoStreamDeSerializer = new KryoStreamDeSerializer(UnitConversions.megabytesToBytes(10));
+      KryoStreamDeSerializer kryoStreamDeSerializer = new KryoStreamDeSerializer(Conversions.megabytesToBytes(10));
       kryoStreamDeSerializer.registerClasses(new IHMCCommunicationKryoNetClassList());
 
       CapturabilityBasedStatus cbs1 = new CapturabilityBasedStatus(random);
