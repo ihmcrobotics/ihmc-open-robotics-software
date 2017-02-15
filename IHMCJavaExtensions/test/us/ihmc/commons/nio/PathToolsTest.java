@@ -1,4 +1,4 @@
-package us.ihmc.tools.io.files;
+package us.ihmc.commons.nio;
 
 import static org.junit.Assert.assertTrue;
 
@@ -12,8 +12,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
 import org.junit.Test;
 
-import us.ihmc.commons.CommonPaths;
+import us.ihmc.commons.nio.CommonPaths;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.tools.io.files.BasicPathVisitor;
+import us.ihmc.tools.io.files.FileTools;
+import us.ihmc.tools.io.files.PathTools;
 import us.ihmc.tools.io.printing.PrintTools;
 
 public class PathToolsTest
