@@ -287,6 +287,12 @@ public class GdxCollisionDetector implements ScsCollisionDetector
       {
          throw new RuntimeException("Implement me!");
       }
+
+      @Override
+      public boolean rollContactIfRolling(Vector3d surfaceNormal, Point3d pointToRoll)
+      {
+         throw new RuntimeException("Implement me!");         
+      }
    }
 
    /**

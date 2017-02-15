@@ -1,6 +1,7 @@
 package us.ihmc.robotics.geometry.shapes;
 
 import javax.vecmath.Point3d;
+import javax.vecmath.Vector2d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.robotics.MathTools;
@@ -11,7 +12,7 @@ public class Cylinder3d extends Shape3d<Cylinder3d>
    private double radius;
    private double height;
    
-   private final Point3d temporaryPoint;
+   private final Point3d temporaryPoint = new Point3d();
 
    public static enum CylinderFaces {TOP, BOTTOM}
 
@@ -29,8 +30,6 @@ public class Cylinder3d extends Shape3d<Cylinder3d>
    {
       this.height = height;
       this.radius = radius;
-      
-      temporaryPoint = new Point3d();
    }
 
    public Cylinder3d(RigidBodyTransform transform, double height, double radius)
@@ -38,8 +37,6 @@ public class Cylinder3d extends Shape3d<Cylinder3d>
       setTransform(transform);
       this.height = height;
       this.radius = radius;
-      
-      temporaryPoint = new Point3d();
    }
 
    @Override
@@ -243,9 +240,56 @@ public class Cylinder3d extends Shape3d<Cylinder3d>
       }
    }
 
+   private final Point3d tempPointInWorldForProjectingToBottom = new Point3d();
+   private final Vector3d tempVectorInWorldForProjectingToBottom = new Vector3d();
+   
+   /**
+    * Projects the pointToProject to the bottom of a curved surface given the surfaceNormal defining how the curved surface is
+    * contacting another surface, as when the two surfaces roll on each other. 
+    * @param surfaceNormal defining another surface in which this object is in rolling contact on the other surface.
+    * @param pointToProject point to project to the bottom of the curved surface.
+    * @return true if the point was projected. Otherwise false.
+    */
+   public boolean projectToBottomOfCurvedSurface(Vector3d surfaceNormal, Point3d pointToProject)
+   {
+      //TODO: Should this method be in Shape3d, or not even be here at all? Not sure...
+      RigidBodyTransform transformToShapeFrame = getTransformToShapeFrameUnsafe();
+
+      tempPointInWorldForProjectingToBottom.set(pointToProject);
+      tempVectorInWorldForProjectingToBottom.set(surfaceNormal);
+      transformToShapeFrame.transform(tempPointInWorldForProjectingToBottom);
+      transformToShapeFrame.transform(tempVectorInWorldForProjectingToBottom);
+
+      boolean wasRolling = projectToBottomOfCurvedSurfaceInShapeFrame(tempVectorInWorldForProjectingToBottom, tempPointInWorldForProjectingToBottom);
+      RigidBodyTransform transformFromShapeFrame = getTransformFromShapeFrameUnsafe();
+      transformFromShapeFrame.transform(tempPointInWorldForProjectingToBottom);
+
+      pointToProject.set(tempPointInWorldForProjectingToBottom);
+      return wasRolling;
+   }
+
+   private final Vector2d tempVectorInShapeFrameForProjectingToBottom = new Vector2d();
+
+   private boolean projectToBottomOfCurvedSurfaceInShapeFrame(Vector3d normalInShapeFrame, Point3d pointToRollInShapeFrame)
+   {
+      double x = normalInShapeFrame.getX();
+      double y = normalInShapeFrame.getY();
+
+      if ((Math.abs(x) < 1e-7) && (Math.abs(y) < 1e-7))
+         return false;
+
+      tempVectorInShapeFrameForProjectingToBottom.set(x, normalInShapeFrame.getY());
+      tempVectorInShapeFrameForProjectingToBottom.normalize();
+      tempVectorInShapeFrameForProjectingToBottom.scale(radius);
+
+      pointToRollInShapeFrame.set(tempVectorInShapeFrameForProjectingToBottom.getX(), tempVectorInShapeFrameForProjectingToBottom.getY(), pointToRollInShapeFrame.getZ());
+      return true;
+   }
+
    @Override
    public String toString()
    {
       return "height = " + height + ", radius = " + radius + "\n";
    }
+
 }

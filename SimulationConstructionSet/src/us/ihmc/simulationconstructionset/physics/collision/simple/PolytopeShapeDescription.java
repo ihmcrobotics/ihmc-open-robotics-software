@@ -82,4 +82,15 @@ public class PolytopeShapeDescription<T extends PolytopeShapeDescription<T>> imp
       return detectorForCheckingPointInside.arePolytopesColliding(polytopeA, this.polytope, tempPointA, tempPointB);
    }
 
+   @Override
+   public boolean rollContactIfRolling(Vector3d surfaceNormal, Point3d pointToRoll)
+   {
+      if (smoothingRadius != 0.0)
+      {
+         throw new RuntimeException("Implement me for nonzero smoothing radius!");
+      }
+      
+      return false;
+   }
+
 }

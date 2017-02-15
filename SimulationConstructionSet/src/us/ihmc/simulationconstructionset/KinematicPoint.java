@@ -143,7 +143,9 @@ public class KinematicPoint implements java.io.Serializable
 
       setOffsetJoint(offsetPlus.getX(), offsetPlus.getY(), offsetPlus.getZ());
 //      System.out.println("Setting offset Joint: " + offsetPlus.getX() + ", " + offsetPlus.getY() + ", " + offsetPlus.getZ());
-
+ 
+      //TODO: Make sure all methods update the various variables so that a set followed by a get is consistent...
+      this.position.set(x, y, z);
    }
 
    public void updatePointVelocity(Matrix3d R0_i, Vector3d comOffset, Vector3d v_i, Vector3d w_i)
