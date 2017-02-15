@@ -2,7 +2,7 @@ package us.ihmc.exampleSimulations.recursivePendulum;
 
 import javax.vecmath.Vector3d;
 
-import us.ihmc.graphics3DDescription.Graphics3DObject;
+import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.robotics.Axis;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.PinJoint;

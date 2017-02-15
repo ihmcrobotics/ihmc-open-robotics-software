@@ -1,11 +1,11 @@
 package us.ihmc.robotiq.communication.registers;
 
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.robotiq.communication.registers.ObjectDetectionRegister.gDTA;
 import us.ihmc.robotiq.communication.registers.ObjectDetectionRegister.gDTB;
 import us.ihmc.robotiq.communication.registers.ObjectDetectionRegister.gDTC;
 import us.ihmc.robotiq.communication.registers.ObjectDetectionRegister.gDTS;
-import us.ihmc.tools.continuousIntegration.IntegrationCategory;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 
 @ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
 public class ObjectDetectionRegisterTest extends RobotiqInputRegisterTest

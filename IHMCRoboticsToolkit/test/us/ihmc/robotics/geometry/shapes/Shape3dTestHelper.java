@@ -1,18 +1,19 @@
 package us.ihmc.robotics.geometry.shapes;
 
-import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.random.RandomTools;
-import us.ihmc.tools.testing.JUnitTools;
-
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-import java.util.Random;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+
+import java.util.Random;
+
+import javax.vecmath.Point3d;
+import javax.vecmath.Vector3d;
+
+import us.ihmc.robotics.MathTools;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.tools.testing.JUnitTools;
 
 public class Shape3dTestHelper
 {   
@@ -21,7 +22,7 @@ public class Shape3dTestHelper
       
    }
    
-   public void runSimpleTests(Shape3d shape3d, Random random, int numberOfPoints)
+   public void runSimpleTests(Shape3d<?> shape3d, Random random, int numberOfPoints)
    {
       for (int i=0; i<numberOfPoints; i++)
       {
@@ -64,12 +65,14 @@ public class Shape3dTestHelper
       shape3d.applyTransform(transformInverse);
       shape3d.orthogonalProjection(pointToProjectAfterTransformAndInverse);
       
-      JUnitTools.assertTuple3dEquals(pointToProject, pointToProjectAfterTransform, 1e-10);
+      // This assertion appears to be incorrect. pointLikelyOutside stays the same but the shape is transformed
+      // We would expect it to project to a different point
+      // JUnitTools.assertTuple3dEquals(pointToProject, pointToProjectAfterTransform, 1e-10);
       JUnitTools.assertTuple3dEquals(pointToProject, pointToProjectAfterTransformAndInverse, 1e-10);
       
    }
    
-   private void runSomeTestsWithPointOutside(Shape3d shape3d, Point3d pointOutside)
+   private void runSomeTestsWithPointOutside(Shape3d<?> shape3d, Point3d pointOutside)
    {
       // Check to make sure the point is actually outside:
       Point3d pointOnSurface = new Point3d();
@@ -89,7 +92,7 @@ public class Shape3dTestHelper
       
    }
    
-   private void runSomeTestsWithPointInside(Shape3d shape3d, Point3d pointInside)
+   private void runSomeTestsWithPointInside(Shape3d<?> shape3d, Point3d pointInside)
    {
       // Check to make sure the point is actually inside:
       Point3d pointOnSurface = new Point3d();
@@ -103,7 +106,7 @@ public class Shape3dTestHelper
       runSomeTestsWithPointOnSurface(shape3d, pointOnSurface, surfaceNormal);
    }
    
-   private void runSomeTestsWithPointOnSurface(Shape3d shape3d, Point3d pointOnSurface, Vector3d surfaceNormal)
+   private void runSomeTestsWithPointOnSurface(Shape3d<?> shape3d, Point3d pointOnSurface, Vector3d surfaceNormal)
    {
       // If the surface normal is NaN, then that means it was projected or something. If it does not contain NaN, then it should be checked for validity.
       if (MathTools.containsNaN(surfaceNormal))

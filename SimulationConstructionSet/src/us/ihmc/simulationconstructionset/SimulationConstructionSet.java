@@ -34,21 +34,21 @@ import javax.vecmath.Tuple3d;
 
 import com.jme3.renderer.Camera;
 
-import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
-import us.ihmc.graphics3DAdapter.Graphics3DBackgroundScaleMode;
-import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
-import us.ihmc.graphics3DAdapter.camera.CaptureDevice;
-import us.ihmc.graphics3DAdapter.camera.RenderedSceneHandler;
-import us.ihmc.graphics3DDescription.Graphics3DObject;
-import us.ihmc.graphics3DDescription.HeightMap;
-import us.ihmc.graphics3DDescription.appearance.AppearanceDefinition;
-import us.ihmc.graphics3DDescription.appearance.YoAppearance;
-import us.ihmc.graphics3DDescription.input.SelectedListener;
-import us.ihmc.graphics3DDescription.structure.Graphics3DNode;
-import us.ihmc.graphics3DDescription.structure.Graphics3DNodeType;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphic;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsList;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.graphicsDescription.Graphics3DObject;
+import us.ihmc.graphicsDescription.HeightMap;
+import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.input.SelectedListener;
+import us.ihmc.graphicsDescription.structure.Graphics3DNode;
+import us.ihmc.graphicsDescription.structure.Graphics3DNodeType;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphic;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.jMonkeyEngineToolkit.Graphics3DAdapter;
+import us.ihmc.jMonkeyEngineToolkit.Graphics3DBackgroundScaleMode;
+import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
+import us.ihmc.jMonkeyEngineToolkit.camera.CaptureDevice;
+import us.ihmc.jMonkeyEngineToolkit.camera.RenderedSceneHandler;
 import us.ihmc.robotics.TickAndUpdatable;
 import us.ihmc.robotics.dataStructures.YoVariableHolder;
 import us.ihmc.robotics.dataStructures.listener.RewoundListener;
@@ -57,7 +57,8 @@ import us.ihmc.robotics.dataStructures.registry.NameSpace;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariableList;
-import us.ihmc.robotics.stateMachines.StateMachinesJPanel;
+import us.ihmc.robotics.robotDescription.RobotDescription;
+import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateMachinesJPanel;
 import us.ihmc.robotics.time.GlobalTimer;
 import us.ihmc.robotics.time.RealTimeRateEnforcer;
 import us.ihmc.simulationconstructionset.DataBuffer.RepeatDataBufferEntryException;
@@ -94,6 +95,7 @@ import us.ihmc.simulationconstructionset.gui.ViewportWindow;
 import us.ihmc.simulationconstructionset.gui.config.VarGroupList;
 import us.ihmc.simulationconstructionset.gui.dialogConstructors.GUIEnablerAndDisabler;
 import us.ihmc.simulationconstructionset.gui.hierarchyTree.NameSpaceHierarchyTree;
+import us.ihmc.simulationconstructionset.gui.tools.SimulationOverheadPlotterFactory;
 import us.ihmc.simulationconstructionset.physics.CollisionHandler;
 import us.ihmc.simulationconstructionset.physics.ScsPhysics;
 import us.ihmc.simulationconstructionset.physics.visualize.DefaultCollisionVisualizer;
@@ -415,7 +417,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
          this.dynamicGraphicMenuManager = null;
       }
 
-      mySimulation = simulation;
+      this.mySimulation = simulation;
       this.myDataBuffer = mySimulation.getDataBuffer();
       this.simulationSynchronizer = mySimulation.getSimulationSynchronizer();
 
@@ -465,28 +467,29 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
 
       mySimulation.getDataBuffer().copyValuesThrough(); // Copy the values through so that anything the user changed during initialization will be YoVariablized, and the default on all graphs.
 
-      attachPlaybackListener(new PlaybackListener() {
+      attachPlaybackListener(new PlaybackListener()
+      {
+         @Override
+         public void indexChanged(int newIndex, double newTime)
+         {
 
-		@Override
-		public void indexChanged(int newIndex, double newTime) {
+         }
 
+         @Override
+         public void stop()
+         {
+            if (myGUI != null && myGUI.getGraphics3dAdapter() != null)
+               myGUI.getGraphics3dAdapter().pause();
+         }
 
-		}
-
-		@Override
-		public void stop() {
-			if (myGUI != null && myGUI.getGraphics3dAdapter() != null)
-				myGUI.getGraphics3dAdapter().pause();
-
-		}
-
-		@Override
-		public void play(double realTimeRate) {
-			if (myGUI != null && myGUI.getGraphics3dAdapter() != null)
-				myGUI.getGraphics3dAdapter().play();
-
-		}
-	});
+         @Override
+         public void play(double realTimeRate)
+         {
+            if (myGUI != null && myGUI.getGraphics3dAdapter() != null)
+               myGUI.getGraphics3dAdapter().play();
+         }
+      });
+      
       if (robots != null)
       {
          for (Robot robot : robots)
@@ -1834,7 +1837,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
     * </p>
     *
     * @param cameraConfiguration CameraConfiguration
-    * @see us.ihmc.graphics3DAdapter.camera.CameraConfiguration CameraConfiguration
+    * @see us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration CameraConfiguration
     */
    public void setupCamera(CameraConfiguration cameraConfiguration)
    {
@@ -1951,6 +1954,54 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       }
 
       jFrame.repaint();
+   }
+
+   /**
+    * Adds a robot to the simulation using the given RobotDescription
+    * @param robotDescription
+    * @return Robot that was created and added.
+    */
+   public Robot addRobot(RobotDescription robotDescription)
+   {
+      RobotFromDescription robot = new RobotFromDescription(robotDescription);
+      addRobot(robot);
+      return robot; 
+   }
+
+   /**
+    * Adds a robot to this simulation.
+    * @param robot
+    */
+   public void addRobot(Robot robot)
+   {
+      //TODO: Clean this up and clean up setRobot too.
+      
+      YoVariableRegistry robotsYoVariableRegistry = robot.getRobotsYoVariableRegistry();
+      YoVariableRegistry parentRegistry = robotsYoVariableRegistry.getParent();
+      if (parentRegistry != null)
+      {
+         throw new RuntimeException("SimulationConstructionSet.addRobot(). Trying to add robot registry as child to root registry, but it already has a parent registry: " + parentRegistry);
+      }
+
+      boolean notifyListeners = false; // TODO: This is very hackish. If listeners are on, then the variables will be added to the data buffer. But mySimulation.setRobots() in a few lines does that...
+      rootRegistry.addChild(robotsYoVariableRegistry, notifyListeners);
+
+      mySimulation.addRobot(robot);
+
+      // recomputeTiming();
+      this.robots = mySimulation.getRobots();
+
+      if (myGUI != null)
+      {
+         myGUI.addRobot(robot);
+
+         ArrayList<RewoundListener> simulationRewoundListeners = robot.getSimulationRewoundListeners();
+         for (RewoundListener simulationRewoundListener : simulationRewoundListeners)
+         {
+            myDataBuffer.attachSimulationRewoundListener(simulationRewoundListener);
+         }
+         // *** JJC a add variable search panel was removed from here.
+      }
    }
 
    /**
@@ -4121,12 +4172,14 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       standardAllCommandsExecutor.toggleCameraKeyMode();
    }
 
-   public void addExtraJpanel(Component extraPanel, String name)
+   public void addExtraJpanel(Component extraPanel, String name, boolean showOnStart)
    {
-      ExtraPanelConfiguration extraPanelConfig = new ExtraPanelConfiguration(name);
-      extraPanelConfig.setupPanel(extraPanel);
-      extraPanelConfig.setName(name);
-      setupExtraPanel(extraPanelConfig);
+      setupExtraPanel(new ExtraPanelConfiguration(name, extraPanel, showOnStart));
+      
+      if (showOnStart)
+      {
+         getStandardSimulationGUI().selectPanel(name);
+      }
    }
 
    public void exportRobotDefinition(Robot robot, File chosenFile)
@@ -4325,6 +4378,13 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
             }
          }
       });
+   }
+   
+   public SimulationOverheadPlotterFactory createSimulationOverheadPlotterFactory()
+   {
+      SimulationOverheadPlotterFactory simulationOverheadPlotterFactory = new SimulationOverheadPlotterFactory();
+      simulationOverheadPlotterFactory.setSimulationConstructionSet(this);
+      return simulationOverheadPlotterFactory;
    }
 
    public void hideAllDynamicGraphicObjects()

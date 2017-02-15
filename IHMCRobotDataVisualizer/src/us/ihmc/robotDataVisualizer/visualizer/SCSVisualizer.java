@@ -13,9 +13,9 @@ import javax.swing.JLabel;
 import javax.swing.JToggleButton;
 
 import gnu.trove.map.hash.TObjectDoubleHashMap;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphic;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsList;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphic;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.multicastLogDataProtocol.control.LogHandshake;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.SDFModelLoader;
 import us.ihmc.robotDataLogger.YoVariableClient;
@@ -32,7 +32,7 @@ import us.ihmc.simulationconstructionset.PlaybackListener;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
-import us.ihmc.simulationconstructionset.gui.tools.VisualizerUtils;
+import us.ihmc.simulationconstructionset.gui.tools.SimulationOverheadPlotterFactory;
 
 public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionListener, SCSVisualizerStateListener
 {
@@ -262,7 +262,9 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
 
       yoGraphicsListRegistry = handshakeParser.getDynamicGraphicObjectsListRegistry();
       scs.addYoGraphicsListRegistry(yoGraphicsListRegistry, false);
-      VisualizerUtils.createOverheadPlotter(scs, showOverheadView, yoGraphicsListRegistry);
+      SimulationOverheadPlotterFactory simulationOverheadPlotterFactory = scs.createSimulationOverheadPlotterFactory();
+      simulationOverheadPlotterFactory.setShowOnStart(showOverheadView);
+      simulationOverheadPlotterFactory.addYoGraphicsListRegistries(yoGraphicsListRegistry);
 
       for (int i = 0; i < stateListeners.size(); i++)
       {

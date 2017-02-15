@@ -10,7 +10,7 @@ import javax.swing.JPanel;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commonWalkingControlModules.visualizer.CommonInertiaEllipsoidsVisualizer;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.simulationconstructionset.InverseDynamicsMechanismReferenceFrameVisualizer;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;

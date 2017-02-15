@@ -16,6 +16,7 @@ import us.ihmc.avatar.sensors.DRCRenderedSceneVideoHandler;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.HeadingAndVelocityEvaluationScriptParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelBehaviorFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MomentumBasedControllerFactory;
@@ -26,14 +27,14 @@ import us.ihmc.communication.net.LocalObjectCommunicator;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.util.NetworkPorts;
-import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
-import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
 import us.ihmc.humanoidBehaviors.behaviors.scripts.engine.ScriptBasedControllerCommandGenerator;
 import us.ihmc.humanoidRobotics.communication.packets.HighLevelStateMessage;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
+import us.ihmc.jMonkeyEngineToolkit.Graphics3DAdapter;
+import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
 import us.ihmc.robotDataVisualizer.logger.BehaviorVisualizer;
 import us.ihmc.robotics.controllers.ControllerFailureListener;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -83,6 +84,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
    private boolean cheatWithGroundHeightAtForFootstep = false;
 
    private PelvisPoseCorrectionCommunicatorInterface externalPelvisCorrectorSubscriber;
+   private HeadingAndVelocityEvaluationScriptParameters walkingScriptParameters;
 
    /**
     * The PacketCommunicator used as input of the controller is either equal to the output PacketCommunicator of the network processor or the behavior module if any.
@@ -376,6 +378,11 @@ public class DRCSimulationStarter implements SimulationStarterInterface
    {
       return scriptBasedControllerCommandGenerator;
    }
+   
+   public void setFlatGroundWalkingScriptParameters(HeadingAndVelocityEvaluationScriptParameters walkingScriptParameters)
+   {
+      this.walkingScriptParameters = walkingScriptParameters;
+   }
 
    private AvatarSimulation createAvatarSimulation()
    {
@@ -407,6 +414,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
       controllerFactory.createQueuedControllerCommandGenerator(controllerCommands);
 
       scriptBasedControllerCommandGenerator = new ScriptBasedControllerCommandGenerator(controllerCommands);
+      controllerFactory.setHeadingAndVelocityEvaluationScriptParameters(walkingScriptParameters);
 
       if (addFootstepMessageGenerator && cheatWithGroundHeightAtForFootstep)
          controllerFactory.createComponentBasedFootstepDataMessageGenerator(useHeadingAndVelocityScript, scsInitialSetup.getHeightMap());

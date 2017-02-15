@@ -146,12 +146,14 @@ public abstract class SimulatedIMURawSensorReader implements RawSensorReader
       compassList = new NoisyDoubleYoVariable[]{compassX, compassY, compassZ};
    }
 
+   @Override
    public void initialize()
    {
       initializeNoise();
       read();
    }
 
+   @Override
    public void read()
    {
       twistCalculator.compute();
@@ -233,16 +235,19 @@ public abstract class SimulatedIMURawSensorReader implements RawSensorReader
    
    protected abstract void simulateIMU();
 
+   @Override
    public YoVariableRegistry getYoVariableRegistry()
    {
       return registry;
    }
 
+   @Override
    public String getName()
    {
       return name;
    }
 
+   @Override
    public String getDescription()
    {
       return name;

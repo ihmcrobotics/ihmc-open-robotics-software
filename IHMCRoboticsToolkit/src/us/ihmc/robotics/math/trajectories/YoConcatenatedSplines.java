@@ -88,11 +88,11 @@ public class YoConcatenatedSplines
          else if (i == 1)
          {
             splines.get(0).compute(times[i]);
-            FrameVector pd0 = splines.get(0).getVelocity();
-            FrameVector pdd0 = splines.get(0).getAcceleration();
+            FrameVector pd0 = splines.get(0).getVelocityCopy();
+            FrameVector pdd0 = splines.get(0).getAccelerationCopy();
             splines.get(2).compute(times[i + 1]);
-            FrameVector pdf = splines.get(2).getVelocity();
-            FrameVector pddf = splines.get(2).getAcceleration();
+            FrameVector pdf = splines.get(2).getVelocityCopy();
+            FrameVector pddf = splines.get(2).getAccelerationCopy();
             spline.setQuintic(t0, tf, p0, pd0, pdd0, pf, pdf, pddf);
             splines.get(1).compute(splines.get(1).getT0());
          }
@@ -151,14 +151,14 @@ public class YoConcatenatedSplines
          else if (i == 0)
          {
             splines.get(1).compute(tf);
-            pf = splines.get(1).getPosition();
+            pf = splines.get(1).getPositionCopy();
             spline.setCubic(t0, tf, p0, pd0, pf, pdf);
          }
 
          else if (i == 4)
          {
             splines.get(3).compute(t0);
-            p0 = splines.get(3).getPosition();
+            p0 = splines.get(3).getPositionCopy();
             spline.setCubic(t0, tf, p0, pd0, pf, pdf);
          }
 
@@ -226,7 +226,7 @@ public class YoConcatenatedSplines
          else if (i == 0)
          {
             splines.get(1).compute(tf);
-            pf = splines.get(1).getPosition();
+            pf = splines.get(1).getPositionCopy();
             FrameVector pddf = zero;
             spline.setQuarticUsingFinalAcceleration(t0, tf, p0, pd0, pf, pdf, pddf);
          }
@@ -234,7 +234,7 @@ public class YoConcatenatedSplines
          else if (i == 4)
          {
             splines.get(3).compute(t0);
-            p0 = splines.get(3).getPosition();
+            p0 = splines.get(3).getPositionCopy();
             FrameVector pdd0 = zero;
             spline.setQuarticUsingInitialAcceleration(t0, tf, p0, pd0, pdd0, pf, pdf);
          }
@@ -283,16 +283,16 @@ public class YoConcatenatedSplines
          else if (i == 1)
          {
             splines.get(0).compute(t0);
-            FrameVector pdd0 = splines.get(0).getAcceleration();
+            FrameVector pdd0 = splines.get(0).getAccelerationCopy();
             spline.setQuarticUsingInitialAcceleration(t0, tf, p0, pd0, pdd0, pf, pdf);
          }
 
          else if (i == 2)
          {
             splines.get(1).compute(t0);
-            FrameVector pdd0 = splines.get(1).getAcceleration();
+            FrameVector pdd0 = splines.get(1).getAccelerationCopy();
             splines.get(3).compute(tf);
-            FrameVector pddf = splines.get(3).getAcceleration();
+            FrameVector pddf = splines.get(3).getAccelerationCopy();
             spline.setQuintic(t0, tf, p0, pd0, pdd0, pf, pdf, pddf);
          }
 
@@ -331,23 +331,23 @@ public class YoConcatenatedSplines
          else if (i == 1)
          {
             splines.get(0).compute(t0);
-            FrameVector pdd0 = splines.get(0).getAcceleration();
+            FrameVector pdd0 = splines.get(0).getAccelerationCopy();
             spline.setQuarticUsingInitialAcceleration(t0, tf, p0, pd0, pdd0, pf, pdf);
          }
 
          else if (i == 3)
          {
             splines.get(4).compute(tf);
-            FrameVector pddf = splines.get(4).getAcceleration();
+            FrameVector pddf = splines.get(4).getAccelerationCopy();
             spline.setQuarticUsingFinalAcceleration(t0, tf, p0, pd0, pf, pdf, pddf);
          }
 
          else if (i == 2)
          {
             splines.get(1).compute(t0);
-            FrameVector pdd0 = splines.get(1).getAcceleration();
+            FrameVector pdd0 = splines.get(1).getAccelerationCopy();
             splines.get(3).compute(tf);
-            FrameVector pddf = splines.get(3).getAcceleration();
+            FrameVector pddf = splines.get(3).getAccelerationCopy();
             spline.setQuintic(t0, tf, p0, pd0, pdd0, pf, pdf, pddf);
          }
 
@@ -385,9 +385,9 @@ public class YoConcatenatedSplines
          else if (i == 1)
          {
             splines.get(0).compute(t0);
-            FrameVector pdd0 = splines.get(0).getAcceleration();
+            FrameVector pdd0 = splines.get(0).getAccelerationCopy();
             splines.get(2).compute(tf);
-            FrameVector pddf = splines.get(2).getAcceleration();
+            FrameVector pddf = splines.get(2).getAccelerationCopy();
             spline.setQuintic(t0, tf, p0, pd0, pdd0, pf, pdf, pddf);
          }
 
@@ -430,9 +430,9 @@ public class YoConcatenatedSplines
          else if (i == 1)
          {
             splines.get(0).compute(t0);
-            FrameVector pdd0 = splines.get(0).getAcceleration();
+            FrameVector pdd0 = splines.get(0).getAccelerationCopy();
             splines.get(2).compute(tf);
-            FrameVector pddf = splines.get(2).getAcceleration();
+            FrameVector pddf = splines.get(2).getAccelerationCopy();
             spline.setQuintic(t0, tf, p0, pd0, pdd0, pf, pdf, pddf);
          }
 
@@ -477,9 +477,9 @@ public class YoConcatenatedSplines
          else if (i == 1)
          {
             splines.get(0).compute(t0);
-            FrameVector pdd0 = splines.get(0).getAcceleration();
+            FrameVector pdd0 = splines.get(0).getAccelerationCopy();
             splines.get(2).compute(tf);
-            FrameVector pddf = splines.get(2).getAcceleration();
+            FrameVector pddf = splines.get(2).getAccelerationCopy();
             spline.setQuintic(t0, tf, p0, pd0, pdd0, pf, pdf, pddf);
          }
 
@@ -525,9 +525,9 @@ public class YoConcatenatedSplines
          else if (i == 1)
          {
             splines.get(0).compute(t0);
-            FrameVector pdd0 = splines.get(0).getAcceleration();
+            FrameVector pdd0 = splines.get(0).getAccelerationCopy();
             splines.get(2).compute(tf);
-            FrameVector pddf = splines.get(2).getAcceleration();
+            FrameVector pddf = splines.get(2).getAccelerationCopy();
             spline.setSexticUsingWaypoint(t0, ghostTime, tf, p0, pd0, pdd0, ghostWaypoint, pf, pdf, pddf);
          }
 
@@ -587,9 +587,9 @@ public class YoConcatenatedSplines
          else if (i == 1)
          {
             splines.get(0).compute(t0);
-            FrameVector pdd0 = splines.get(0).getAcceleration();
+            FrameVector pdd0 = splines.get(0).getAccelerationCopy();
             splines.get(2).compute(tf);
-            FrameVector pddf = splines.get(2).getAcceleration();
+            FrameVector pddf = splines.get(2).getAccelerationCopy();
             spline.setQuintic(t0, tf, p0, pd0, pdd0, pf, pdf, pddf);
          }
 

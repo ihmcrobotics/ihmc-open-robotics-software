@@ -35,11 +35,13 @@ dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.11'
 
 	compile "javax.vecmath:vecmath:1.5.2"
-	compile "org.ejml:core:0.29"
-	compile "org.ejml:dense64:0.29"
+	compile "org.ejml:core:0.30"
+	compile "org.ejml:dense64:0.30"
+    
+    testCompile group: 'us.ihmc', name: 'ihmc-continuous-integration-framework', version: '0.9.4'
 	
 	compile ihmc.getProjectDependency(":IHMCRoboticsToolkit")
-	compile ihmc.getProjectDependency(":IHMCGraphics3DDescription")
+	compile ihmc.getProjectDependency(":IHMCGraphicsDescription")
 	compile ihmc.getProjectDependency(":ConvexOptimizationAdapter")
 	
 	testCompile ihmc.getProjectTestDependency(":SimulationConstructionSet")

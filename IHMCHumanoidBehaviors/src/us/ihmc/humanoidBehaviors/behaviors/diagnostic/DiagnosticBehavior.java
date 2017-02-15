@@ -14,7 +14,7 @@ import org.ejml.data.DenseMatrix64F;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.partNames.LimbName;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.ArmTrajectoryBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.ChestTrajectoryBehavior;
@@ -462,7 +462,7 @@ public class DiagnosticBehavior extends AbstractBehavior
          else
          {
             AxisAngle4d rotation = new AxisAngle4d();
-            GeometryTools.getRotationBasedOnNormal(rotation, tempVector.getVector(), expectedArmZeroConfiguration);
+            GeometryTools.getAxisAngleFromFirstToSecondVector(expectedArmZeroConfiguration, tempVector.getVector(), rotation);
             armZeroJointAngleConfigurationOffset.setRotation(rotation);
          }
 

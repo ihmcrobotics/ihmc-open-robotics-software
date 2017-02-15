@@ -5,8 +5,8 @@ import javax.vecmath.Vector3d;
 
 import org.junit.Test;
 
-import us.ihmc.graphics3DAdapter.GroundProfile3D;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 
 public class SlopedPlaneGroundProfileTest extends GroundProfileTest
 {

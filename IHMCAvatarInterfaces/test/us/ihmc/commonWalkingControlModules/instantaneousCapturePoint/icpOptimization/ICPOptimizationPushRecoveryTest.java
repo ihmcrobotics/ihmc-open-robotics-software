@@ -2,24 +2,29 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimiz
 
 import static org.junit.Assert.assertTrue;
 
+import java.io.InputStream;
+import java.util.Random;
+
+import javax.vecmath.Point3d;
+import javax.vecmath.Vector3d;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import us.ihmc.robotModels.FullHumanoidRobotModel;
+
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WalkingHighLevelHumanoidController;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.stateMachines.StateTransitionCondition;
+import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransitionCondition;
 import us.ihmc.simulationToolkit.controllers.PushRobotController;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
@@ -27,14 +32,7 @@ import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters
 import us.ihmc.simulationconstructionset.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.tools.thread.ThreadTools;
-
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-import java.io.InputStream;
-import java.util.Random;
 
 public abstract class ICPOptimizationPushRecoveryTest
 {
@@ -44,6 +42,7 @@ public abstract class ICPOptimizationPushRecoveryTest
 
    private static String script = "scripts/ExerciseAndJUnitScripts/icpOptimizationPushTestScript.xml";
    private static String yawScript = "scripts/ExerciseAndJUnitScripts/icpOptimizationPushTestScript.xml";
+   private static String slowStepScript = "scripts/ExerciseAndJUnitScripts/icpOptimizationPushTestScriptSlow.xml";
 
    private static double simulationTime = 10.0;
 
@@ -128,6 +127,30 @@ public abstract class ICPOptimizationPushRecoveryTest
 
    @ContinuousIntegrationTest(estimatedDuration =  20.0)
    @Test(timeout = 120000)
+   public void testPushICPOptimizationOutwardPushInSlowSwing() throws SimulationExceededMaximumTimeException
+   {
+      setupTest(slowStepScript);
+      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+
+      // push timing:
+      StateTransitionCondition pushCondition = singleSupportStartConditions.get(RobotSide.RIGHT);
+      double delay = 0.5 * swingTime;
+
+      // push parameters:
+      Vector3d forceDirection = new Vector3d(0.0, -1.0, 0.0);
+      double percentWeight = 0.13;
+      double magnitude = percentWeight * totalMass * 9.81;
+      double duration = 0.1;
+      pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime);
+      boolean noExceptions = caughtException == null;
+
+      assertTrue(success);
+      assertTrue(noExceptions);
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration =  20.0)
+   @Test(timeout = 120000)
    public void testPushICPOptimizationDiagonalOutwardPushInSwing() throws SimulationExceededMaximumTimeException
    {
       setupTest(script);
@@ -139,7 +162,7 @@ public abstract class ICPOptimizationPushRecoveryTest
 
       // push parameters:
       Vector3d forceDirection = new Vector3d(2.0, -1.0, 0.0);
-      double percentWeight = 0.40;
+      double percentWeight = 0.20;
       double magnitude = percentWeight * totalMass * 9.81;
       double duration = 0.1;
       pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
@@ -149,6 +172,7 @@ public abstract class ICPOptimizationPushRecoveryTest
       assertTrue(success);
       assertTrue(noExceptions);
    }
+
 
    @ContinuousIntegrationTest(estimatedDuration =  20.0)
    @Test(timeout = 120000)
@@ -360,35 +384,6 @@ public abstract class ICPOptimizationPushRecoveryTest
       assertTrue(noExceptions);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration =  20.0)
-   @Test(timeout = 120000)
-   public void testPushICPOptimizationInwardPushInTransfer() throws SimulationExceededMaximumTimeException
-   {
-      setupTest(script);
-      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
-
-      // push timing:
-      StateTransitionCondition pushCondition = doubleSupportStartConditions.get(RobotSide.RIGHT);
-      double delay = 0.5 * transferTime;
-
-      // push parameters:
-      Vector3d forceDirection = new Vector3d(0.0, -1.0, 0.0);
-      double percentWeight = 0.17;
-      double magnitude = percentWeight * totalMass * 9.81;
-      double duration = 0.1;
-
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.7);
-      assertTrue(success);
-
-      pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
-
-      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime);
-
-      boolean noExceptions = caughtException == null;
-
-      assertTrue(success);
-      assertTrue(noExceptions);
-   }
 
    @ContinuousIntegrationTest(estimatedDuration =  20.0)
    @Test(timeout = 120000)
@@ -404,6 +399,30 @@ public abstract class ICPOptimizationPushRecoveryTest
       // push parameters:
       Vector3d forceDirection = new Vector3d(1.0, 0.0, 0.0);
       double percentWeight = 0.29;
+      double magnitude = percentWeight * totalMass * 9.81;
+      double duration = 0.1;
+      pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime);
+      boolean noExceptions = caughtException == null;
+
+      assertTrue(success);
+      assertTrue(noExceptions);
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration =  20.0)
+   @Test(timeout = 120000)
+   public void testPushICPOptimizationForwardPushInSlowSwing() throws SimulationExceededMaximumTimeException
+   {
+      setupTest(slowStepScript);
+      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+
+      // push timing:
+      StateTransitionCondition pushCondition = singleSupportStartConditions.get(RobotSide.RIGHT);
+      double delay = 0.5 * swingTime;
+
+      // push parameters:
+      Vector3d forceDirection = new Vector3d(1.0, 0.0, 0.0);
+      double percentWeight = 0.23;
       double magnitude = percentWeight * totalMass * 9.81;
       double duration = 0.1;
       pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
@@ -540,7 +559,7 @@ public abstract class ICPOptimizationPushRecoveryTest
       setupCamera(scs);
       swingTime = getRobotModel().getWalkingControllerParameters().getDefaultSwingTime();
       transferTime = getRobotModel().getWalkingControllerParameters().getDefaultTransferTime();
-      initialTransferTime = getRobotModel().getCapturePointPlannerParameters().getDoubleSupportInitialTransferDuration();
+      initialTransferTime = getRobotModel().getWalkingControllerParameters().getDefaultInitialTransferTime();
       ThreadTools.sleep(1000);
    }
 

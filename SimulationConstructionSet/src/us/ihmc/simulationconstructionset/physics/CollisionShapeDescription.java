@@ -1,5 +1,8 @@
 package us.ihmc.simulationconstructionset.physics;
 
+import javax.vecmath.Point3d;
+
+import us.ihmc.robotics.geometry.BoundingBox3d;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 /**
@@ -12,4 +15,6 @@ public interface CollisionShapeDescription<T extends CollisionShapeDescription<T
    public abstract void setFrom(T collisionShapeDescription);
    public abstract void applyTransform(RigidBodyTransform transformToWorld);
    public abstract CollisionShapeDescription<T> copy();
+   public abstract void getBoundingBox(BoundingBox3d boundingBoxToPack);
+   public abstract boolean isPointInside(Point3d pointInWorld);
 }

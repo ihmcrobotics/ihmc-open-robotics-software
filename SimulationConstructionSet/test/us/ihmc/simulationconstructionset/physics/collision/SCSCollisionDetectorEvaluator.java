@@ -5,16 +5,17 @@ import java.util.ArrayList;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.graphics3DDescription.Graphics3DObject;
-import us.ihmc.graphics3DDescription.appearance.YoAppearance;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicPosition;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.graphicsDescription.Graphics3DObject;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.physics.CollisionHandler;
 import us.ihmc.simulationconstructionset.physics.CollisionShapeDescription;
 import us.ihmc.simulationconstructionset.physics.CollisionShapeFactory;
 import us.ihmc.simulationconstructionset.physics.Contacts;
@@ -65,13 +66,17 @@ public class SCSCollisionDetectorEvaluator
       // Set mass parameters
       double mass = 1.0;
 
+      double epsilon = 0.3;
+      double mu = 0.7;
+      CollisionHandler collisionHandler = new DefaultCollisionHandler(epsilon, mu);
+ 
       linkOne.setMass(mass);
       linkOne.setMomentOfInertia(0.1 * mass, 0.1 * mass, 0.1 * mass);
-      linkOne.enableCollisions(robot.getRobotsYoVariableRegistry());
+      linkOne.enableCollisions(4, collisionHandler, robot.getRobotsYoVariableRegistry());
 
       linkTwo.setMass(mass);
       linkTwo.setMomentOfInertia(0.1 * mass, 0.1 * mass, 0.1 * mass);
-      linkTwo.enableCollisions(robot.getRobotsYoVariableRegistry());
+      linkTwo.enableCollisions(4, collisionHandler, robot.getRobotsYoVariableRegistry());
 
       // Graphics
       Graphics3DObject linkOneGraphics = new Graphics3DObject();

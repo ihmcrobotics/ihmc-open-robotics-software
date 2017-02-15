@@ -107,6 +107,7 @@ public class SliderJoint extends OneDegreeOfFreedomJoint
     * the graphics are also updated, however, this is nolonger the primary means of
     * graphics updates.
     */
+   @Override
    protected void update()
    {
       this.setSliderTransform3D(this.jointTransform3D, physics.u_i, q.getDoubleValue());    // axis,q.val);
@@ -144,6 +145,7 @@ public class SliderJoint extends OneDegreeOfFreedomJoint
     *
     * @param b_damp new damping constant
     */
+   @Override
    public void setDamping(double b_damp)
    {
       if (tauDamping == null)
@@ -176,6 +178,7 @@ public class SliderJoint extends OneDegreeOfFreedomJoint
       setQd(qd_init);
    }
 
+   @Override
    public void setQ(double q)
    {
       if (Double.isNaN(q))
@@ -184,6 +187,7 @@ public class SliderJoint extends OneDegreeOfFreedomJoint
       this.q.set(q);
    }
 
+   @Override
    public void setQd(double qd)
    {
       if (Double.isNaN(qd))
@@ -209,6 +213,7 @@ public class SliderJoint extends OneDegreeOfFreedomJoint
     *
     * @param tau torque to be applied
     */
+   @Override
    public void setTau(double tau)
    {
       if (Double.isNaN(tau))
@@ -224,6 +229,7 @@ public class SliderJoint extends OneDegreeOfFreedomJoint
     *
     * @return YoVariable representing the current position
     */
+   @Override
    public DoubleYoVariable getQYoVariable()
    {
       return q;
@@ -245,6 +251,7 @@ public class SliderJoint extends OneDegreeOfFreedomJoint
     *
     * @return YoVariable representing the current velocity
     */
+   @Override
    public DoubleYoVariable getQDYoVariable()
    {
       return qd;
@@ -266,6 +273,7 @@ public class SliderJoint extends OneDegreeOfFreedomJoint
     *
     * @return YoVariable representing the current acceleration
     */
+   @Override
    public DoubleYoVariable getQDDYoVariable()
    {
       return qdd;
@@ -287,6 +295,7 @@ public class SliderJoint extends OneDegreeOfFreedomJoint
     *
     * @return YoVariable representing the currently applied torque
     */
+   @Override
    public DoubleYoVariable getTauYoVariable()
    {
       return tau;
@@ -360,6 +369,7 @@ public class SliderJoint extends OneDegreeOfFreedomJoint
       // return tTranslate;
    }
 
+   @Override
    public void setQdd(double qdd)
    {
    }

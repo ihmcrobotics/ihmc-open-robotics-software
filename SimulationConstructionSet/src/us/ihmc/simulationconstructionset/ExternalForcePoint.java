@@ -58,6 +58,7 @@ public class ExternalForcePoint extends KinematicPoint
       impulse = new YoFrameVector(name + "_p", "", ReferenceFrame.getWorldFrame(), registry);
    }
 
+   @Override
    public String toString()
    {
       return ("name: " + name + "x: " + getX() + ", y: " + getY() + ", z: " + getZ());
@@ -68,6 +69,7 @@ public class ExternalForcePoint extends KinematicPoint
       return ((force.getX() == 0.0) && (force.getY() == 0.0) && (force.getZ() == 0.0) && (moment.getX() == 0.0) && (moment.getY() == 0.0) && (moment.getZ() == 0.0));
    }
 
+   @Override
    public void reset()
    {
       super.reset();
@@ -98,6 +100,8 @@ public class ExternalForcePoint extends KinematicPoint
       if (epsilon > 20.0)
          epsilon = 20.0;
 
+//      System.out.println("epsilon1 = " + epsilon);
+//      System.out.println("penetrationSquared1 = " + penetrationSquared);
       return resolveCollision(externalForcePointTwo, negative_normal, epsilon, mu, p_world);
    }
 
@@ -146,7 +150,7 @@ public class ExternalForcePoint extends KinematicPoint
 
    public boolean resolveCollision(Vector3d velocityOfOtherObjectInWorld, Vector3d collisionNormalInWorld, double epsilon, double mu, Vector3d impulseInWorldToPack)
    {
-//      System.out.println("Resolving collision with ground");
+//      System.out.println("Resolving normal collision with ground");
       boolean movingTogether = computeRotationAndRelativeVelocity(collisionNormalInWorld, velocityOfOtherObjectInWorld, impulseInWorldToPack);
       if (!movingTogether)
       {
@@ -175,6 +179,7 @@ public class ExternalForcePoint extends KinematicPoint
       boolean movingTogether = computeRotationAndRelativeVelocity(collisionNormalInWorld, velocityOfOtherObjectInWorld, impulseInWorldToPack);
       if (!movingTogether)
       {
+//         System.out.println("Not moving together...");
          return false;
       }
 

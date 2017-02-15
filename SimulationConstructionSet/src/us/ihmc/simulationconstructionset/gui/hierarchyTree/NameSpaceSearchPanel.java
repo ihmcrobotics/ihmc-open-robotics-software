@@ -38,16 +38,19 @@ public class NameSpaceSearchPanel extends JPanel
          
          DocumentListener documentListener = new DocumentListener()
          {
+            @Override
             public void insertUpdate(DocumentEvent e)
             {
                filterNameSpaceTree();
             }
 
+            @Override
             public void removeUpdate(DocumentEvent e)
             {
                filterNameSpaceTree();
             }
 
+            @Override
             public void changedUpdate(DocumentEvent e)
             {
             }
@@ -58,6 +61,7 @@ public class NameSpaceSearchPanel extends JPanel
          this.add(searchTextField);
       }
       
+      @Override
       public void actionPerformed(ActionEvent arg0)
       {
          filterNameSpaceTree();

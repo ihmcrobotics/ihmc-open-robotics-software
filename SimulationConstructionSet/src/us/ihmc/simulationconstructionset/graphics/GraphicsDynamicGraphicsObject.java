@@ -1,8 +1,8 @@
 package us.ihmc.simulationconstructionset.graphics;
 
-import us.ihmc.graphics3DDescription.structure.Graphics3DNode;
-import us.ihmc.graphics3DDescription.structure.Graphics3DNodeType;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphic;
+import us.ihmc.graphicsDescription.structure.Graphics3DNode;
+import us.ihmc.graphicsDescription.structure.Graphics3DNodeType;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphic;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.tools.gui.GraphicsUpdatable;
 import us.ihmc.tools.thread.CloseableAndDisposable;
@@ -23,6 +23,7 @@ public class GraphicsDynamicGraphicsObject extends Graphics3DNode implements Gra
       if (closeableAndDisposableRegistry != null) closeableAndDisposableRegistry.registerCloseableAndDisposable(this);
    }
 
+   @Override
    public void update()
    {
       // IMPORTANT: can't do this here because it causes threading issues. Each thread is responsible for updating its own DynamicGraphicObjects!

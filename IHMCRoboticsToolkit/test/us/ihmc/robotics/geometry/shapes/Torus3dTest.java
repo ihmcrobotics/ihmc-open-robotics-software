@@ -1,18 +1,20 @@
 package us.ihmc.robotics.geometry.shapes;
 
-import org.junit.Test;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.tools.testing.JUnitTools;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
+import java.util.Random;
 
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
-import java.util.Random;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import org.junit.Test;
+
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.tools.testing.JUnitTools;
 
 public class Torus3dTest
 {
@@ -418,7 +420,7 @@ public class Torus3dTest
       testPointsInsideWhenOffsetBy(torus3d, 0.0, 0.0, translation);
 
       translation = (random.nextDouble() - 0.5) * 10.0;
-      double translationY = (random.nextDouble() - 0.5) * 10.0;;
+      double translationY = (random.nextDouble() - 0.5) * 10.0;
       double translationZ = (random.nextDouble() - 0.5) * 10.0;
 //      System.out.println("Torus3dTest:testTranslatedPointOnOrInside:" + translation + "," + translationY + "," + translationZ);
       transform.setTranslation(new Vector3d(translation, translationY, translationZ));
@@ -490,13 +492,13 @@ public class Torus3dTest
       RigidBodyTransform transformAppliedOnlyToCopy = new RigidBodyTransform();
       transformAppliedOnlyToCopy.setRotationPitchAndZeroTranslation(Math.PI / 4);
       torusCopy.applyTransform(transformAppliedOnlyToCopy);
-      assertFalse(torusCopy.getTransform().equals(torus.getTransform()));
+      assertFalse(torusCopy.getTransformUnsafe().equals(torus.getTransformUnsafe()));
       
       Torus3d torusCopyBySet = new Torus3d(5.0, 1.0);
       torusCopyBySet.set(torus);
       RigidBodyTransform transformAppliedOnlyToCopyBySet = new RigidBodyTransform();
       transformAppliedOnlyToCopyBySet.setRotationYawAndZeroTranslation(Math.PI / 5);
       torusCopyBySet.applyTransform(transformAppliedOnlyToCopyBySet);      
-      assertFalse(torusCopyBySet.getTransform().equals(torus.getTransform()));
+      assertFalse(torusCopyBySet.getTransformUnsafe().equals(torus.getTransformUnsafe()));
    }
 }

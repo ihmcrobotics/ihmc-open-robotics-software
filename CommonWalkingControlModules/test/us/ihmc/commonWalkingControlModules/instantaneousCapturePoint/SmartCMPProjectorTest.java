@@ -2,10 +2,10 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static us.ihmc.graphics3DDescription.appearance.YoAppearance.Beige;
-import static us.ihmc.graphics3DDescription.appearance.YoAppearance.Blue;
-import static us.ihmc.graphics3DDescription.appearance.YoAppearance.DarkRed;
-import static us.ihmc.graphics3DDescription.appearance.YoAppearance.LawnGreen;
+import static us.ihmc.graphicsDescription.appearance.YoAppearance.Beige;
+import static us.ihmc.graphicsDescription.appearance.YoAppearance.Blue;
+import static us.ihmc.graphicsDescription.appearance.YoAppearance.DarkRed;
+import static us.ihmc.graphicsDescription.appearance.YoAppearance.LawnGreen;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -25,11 +25,14 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.junit.Test;
 
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.SmartCMPProjector.ProjectionMethod;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicPosition.GraphicType;
-import us.ihmc.graphics3DDescription.yoGraphics.plotting.ArtifactList;
-import us.ihmc.graphics3DDescription.yoGraphics.plotting.YoArtifactPolygon;
-import us.ihmc.graphics3DDescription.yoGraphics.plotting.YoArtifactPosition;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.IntegrationCategory;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
+import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
+import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPosition;
 import us.ihmc.plotting.Plotter;
 import us.ihmc.plotting.PlotterShowHideMenu;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -40,9 +43,6 @@ import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.tools.continuousIntegration.IntegrationCategory;
 import us.ihmc.tools.testing.MutationTestingTools;
 
 @ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})

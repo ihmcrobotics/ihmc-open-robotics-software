@@ -16,11 +16,11 @@ import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage.FootstepOrigin;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -31,7 +31,6 @@ import us.ihmc.simulationconstructionset.robotController.SimpleRobotController;
 import us.ihmc.simulationconstructionset.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.thread.ThreadTools;
 
 public abstract class HumanoidMomentumRecoveryTest implements MultiRobotTestInterface
@@ -46,8 +45,6 @@ public abstract class HumanoidMomentumRecoveryTest implements MultiRobotTestInte
    private BooleanYoVariable allowUpperBodyMomentumInSingleSupport;
    private BooleanYoVariable allowUpperBodyMomentumInDoubleSupport;
    private BooleanYoVariable allowUsingHighMomentumWeight;
-
-   private DoubleYoVariable swingTime;
 
    private static final double doubleSupportPushMagnitude = 1000.0;
    private static final double doubleSupportPushDuration = 0.05;
@@ -167,11 +164,9 @@ public abstract class HumanoidMomentumRecoveryTest implements MultiRobotTestInte
 
    private boolean stepAndPush() throws SimulationExceededMaximumTimeException
    {
-      swingTime.set(3.0);
-
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
 
-      FootstepDataListMessage message = new FootstepDataListMessage();
+      FootstepDataListMessage message = new FootstepDataListMessage(3.0, 0.3);
       FootstepDataMessage footstepData = new FootstepDataMessage();
       RobotSide stepSide = RobotSide.LEFT;
 
@@ -230,8 +225,6 @@ public abstract class HumanoidMomentumRecoveryTest implements MultiRobotTestInte
       allowUpperBodyMomentumInSingleSupport = (BooleanYoVariable) drcSimulationTestHelper.getYoVariable("allowUpperBodyMomentumInSingleSupport");
       allowUpperBodyMomentumInDoubleSupport = (BooleanYoVariable) drcSimulationTestHelper.getYoVariable("allowUpperBodyMomentumInDoubleSupport");
       allowUsingHighMomentumWeight = (BooleanYoVariable) drcSimulationTestHelper.getYoVariable("allowUsingHighMomentumWeight");
-
-      swingTime = (DoubleYoVariable) drcSimulationTestHelper.getYoVariable("swingTime");
 
       ThreadTools.sleep(1000);
    }

@@ -12,9 +12,9 @@ import javax.vecmath.Vector3d;
 
 import org.junit.Test;
 
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.random.RandomTools;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.testing.JUnitTools;
 
 public class Cylinder3dTest
@@ -291,7 +291,7 @@ public class Cylinder3dTest
 
       Point3d pointToCheck = new Point3d(1.5, 0, 1);
       Vector3d expectedNormal = new Vector3d(1, 0, 0);
-      cylinder3d.checkIfInside(pointToCheck, closestPointToPack, normalToPack);
+      assertFalse(cylinder3d.checkIfInside(pointToCheck, closestPointToPack, normalToPack));
       assertEquals(expectedNormal, normalToPack);
    }
 

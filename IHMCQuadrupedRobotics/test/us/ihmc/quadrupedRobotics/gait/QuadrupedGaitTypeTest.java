@@ -4,12 +4,12 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
+import us.ihmc.commons.Assertions;
+import us.ihmc.commons.RunnableThatThrows;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.quadrupedRobotics.planning.gait.QuadrupedGaitCycle;
 import us.ihmc.quadrupedRobotics.planning.gait.QuadrupedSupportConfiguration;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.tools.testing.JUnitTools;
-import us.ihmc.tools.thread.RunnableThatThrows;
 
 public class QuadrupedGaitTypeTest
 {
@@ -40,7 +40,7 @@ public class QuadrupedGaitTypeTest
       assertEquals("not correct", 0.72, QuadrupedGaitCycle.BOUND.getRemainingSwingDuration(RobotQuadrant.HIND_RIGHT, 0.28), 1e-7);
       assertEquals("not correct", 0.35, QuadrupedGaitCycle.TRANSVERSE_GALLOP.getRemainingSwingDuration(RobotQuadrant.FRONT_LEFT, 0.0), 1e-7);
       
-      JUnitTools.assertExceptionThrown(RuntimeException.class, new RunnableThatThrows()
+      Assertions.assertExceptionThrown(RuntimeException.class, new RunnableThatThrows()
       {
          @Override
          public void run() throws Throwable

@@ -13,15 +13,15 @@ import javax.vecmath.Point2d;
 
 import org.junit.Test;
 
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.graphicsDescription.plotting.artifact.PolygonArtifact;
 import us.ihmc.plotting.PlotterPanel;
-import us.ihmc.plotting.artifact.PolygonArtifact;
-import us.ihmc.simulationconstructionset.util.ground.steppingStones.SteppingStones;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.robotics.geometry.BoundingBox2d;
 import us.ihmc.robotics.geometry.BoundingBoxKDTree2D;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.ConvexPolygon2dIntersectionSetCalculator;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
+import us.ihmc.simulationconstructionset.util.ground.steppingStones.SteppingStones;
 
 /**
  * <p>Title: </p>
@@ -459,6 +459,7 @@ public class FindTentativeListOfPolygonsIntersectingTargetPolygonTest
          JFrame f = new JFrame("Plotter Panel");
          f.addWindowListener(new WindowAdapter()
          {
+            @Override
             public void windowClosing(WindowEvent e)
             {
                System.exit(0);

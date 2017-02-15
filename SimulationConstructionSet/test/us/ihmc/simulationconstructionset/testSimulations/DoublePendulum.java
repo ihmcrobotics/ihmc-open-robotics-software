@@ -2,11 +2,11 @@ package us.ihmc.simulationconstructionset.testSimulations;
 
 import javax.vecmath.Vector3d;
 
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.robotics.Axis;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.PinJoint;
 import us.ihmc.simulationconstructionset.Robot;
-import us.ihmc.graphics3DDescription.appearance.YoAppearance;
-import us.ihmc.robotics.Axis;
 
 public class DoublePendulum extends Robot
 {

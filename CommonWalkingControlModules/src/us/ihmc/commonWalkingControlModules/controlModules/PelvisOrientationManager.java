@@ -62,7 +62,6 @@ public class PelvisOrientationManager
    private final SimpleOrientationTrajectoryGenerator pelvisOrientationTrajectoryGenerator;
 
    private final DoubleYoVariable initialPelvisOrientationOffsetTime = new DoubleYoVariable("initialPelvisOrientationOffsetTime", registry);
-   private final YoFrameQuaternion desiredPelvisOrientationOffset;
 
    private final MultipleWaypointsOrientationTrajectoryGenerator orientationOffsetTrajectoryGenerator;
 
@@ -138,8 +137,6 @@ public class PelvisOrientationManager
             transformToParent.setRotation(rotationToParent);
          }
       };
-
-      desiredPelvisOrientationOffset = new YoFrameQuaternion("desiredPelvis", "Offset", desiredPelvisFrame, registry);
 
       boolean allowMultipleFrames = true;
       orientationOffsetTrajectoryGenerator = new MultipleWaypointsOrientationTrajectoryGenerator("pelvisOffset", allowMultipleFrames,

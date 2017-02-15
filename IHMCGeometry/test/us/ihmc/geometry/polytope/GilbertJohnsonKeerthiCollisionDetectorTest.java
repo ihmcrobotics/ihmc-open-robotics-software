@@ -11,10 +11,10 @@ import javax.vecmath.Vector3d;
 
 import org.junit.Test;
 
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.robotics.geometry.LineSegment3d;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.random.RandomTools;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.testing.JUnitTools;
 import us.ihmc.tools.testing.MutationTestingTools;
 
@@ -864,7 +864,7 @@ public class GilbertJohnsonKeerthiCollisionDetectorTest
    {
       LineSegment3d lineSegment = new LineSegment3d(pointA, pointB);
       Point3d projectedPoint = new Point3d();
-      lineSegment.getProjectionOntoLineSegment(pointToProject, projectedPoint);
+      lineSegment.orthogonalProjection(pointToProject, projectedPoint);
 
       return projectedPoint;
    }

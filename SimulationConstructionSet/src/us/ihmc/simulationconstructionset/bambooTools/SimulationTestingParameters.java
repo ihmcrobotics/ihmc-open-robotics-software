@@ -22,6 +22,7 @@ public class SimulationTestingParameters extends SimulationConstructionSetParame
       return parametersToReturn;
    }
 
+   @Override
    public void setFromSystemProperties()
    {
       super.setFromSystemProperties();
@@ -115,6 +116,7 @@ public class SimulationTestingParameters extends SimulationConstructionSetParame
       this.keepSCSUp = keepSCSUp;
    }
 
+   @Override
    public String toString()
    {
       String st = super.toString();

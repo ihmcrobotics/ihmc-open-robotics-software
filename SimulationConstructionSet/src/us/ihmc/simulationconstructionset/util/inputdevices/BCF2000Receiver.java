@@ -33,10 +33,12 @@ public class BCF2000Receiver implements Receiver
       this.variableChangedListeners = variableChangedListeners;
    }
 
+   @Override
    public void close()
    {
    }
 
+   @Override
    public void send(MidiMessage message, long timeStamp)
    {
       if (message instanceof ShortMessage)

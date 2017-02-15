@@ -124,12 +124,14 @@ public class YoVariableToggler implements NewDataListener
          return getFalseString();
    }
 
+   @Override
    public void newDataHasBeenSent()
    {
       // TODO Auto-generated method stub
 
    }
 
+   @Override
    public void newDataHasBeenReceived()
    {
       checkForStateChange();

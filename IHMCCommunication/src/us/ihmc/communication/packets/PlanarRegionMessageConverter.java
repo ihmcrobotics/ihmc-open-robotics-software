@@ -65,7 +65,7 @@ public class PlanarRegionMessageConverter
 
       Vector3d regionOrigin = new Vector3d(planarRegionMessage.getRegionOrigin());
       Vector3d regionNormal = new Vector3d(planarRegionMessage.getRegionNormal());
-      AxisAngle4d regionOrientation = GeometryTools.getRotationBasedOnNormal(regionNormal);
+      AxisAngle4d regionOrientation = GeometryTools.getAxisAngleFromZUpToVector(regionNormal);
       transformToWorld.set(regionOrientation, regionOrigin);
 
       List<Point2f[]> messageHullsVertices = planarRegionMessage.getConcaveHullsVertices();

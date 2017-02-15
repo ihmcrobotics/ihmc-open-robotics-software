@@ -5,12 +5,12 @@ import java.util.ArrayList;
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.graphics3DDescription.appearance.YoAppearance;
-import us.ihmc.graphics3DDescription.yoGraphics.BagOfBalls;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicPosition;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicVector;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsList;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -239,7 +239,7 @@ public class InitialClearancePositionTrajectoryGenerator implements PositionTraj
       this.initialDirection.set(initialDirection);
       this.initialDirection.normalize();
       this.initialDirection.get(tempVector);
-      GeometryTools.getRotationBasedOnNormal(axisAngleToWorld, tempVector);
+      GeometryTools.getAxisAngleFromZUpToVector(tempVector, axisAngleToWorld);
       rotationPlane.setIncludingFrame(this.initialDirection.getReferenceFrame(), axisAngleToWorld);
 
       this.leaveDistance.set(leaveDistance);

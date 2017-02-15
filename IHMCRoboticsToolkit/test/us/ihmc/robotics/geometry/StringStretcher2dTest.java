@@ -1,20 +1,21 @@
 package us.ihmc.robotics.geometry;
 
-import org.junit.Test;
-
-import us.ihmc.robotics.random.RandomTools;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.tools.testing.JUnitTools;
-
-import javax.vecmath.Point2d;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+
+import javax.vecmath.Point2d;
+
+import org.junit.Test;
+
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.tools.testing.JUnitTools;
 
 public class StringStretcher2dTest
 {

@@ -8,7 +8,7 @@ import optiTrack.IHMCMocapDataClient;
 import optiTrack.MocapRigidBody;
 import optiTrack.MocapRigidbodiesListener;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.networkProcessor.modules.mocap.MocapToStateEstimatorFrameConverter;
+import us.ihmc.avatar.networkProcessor.modules.mocap.MocapToHeadFrameConverter;
 import us.ihmc.avatar.networkProcessor.modules.mocap.RosConnectedZeroPoseRobotConfigurationDataProducer;
 import us.ihmc.communication.net.NetClassList;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
@@ -30,7 +30,7 @@ public class MultisenseMocapManualCalibrationTestModule implements MocapRigidbod
    private final PacketCommunicator packetCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.MULTISENSE_MOCAP_MANUAL_CALIBRATION_TEST_MODULE, NETCLASSLIST);
    private final ArrayList<MultisensePointCloudReceiver> multisensePointCloudReceivers = new ArrayList<MultisensePointCloudReceiver>();
    private final RosConnectedZeroPoseRobotConfigurationDataProducer zeroPoseProducer;
-   private final MocapToStateEstimatorFrameConverter mocapToStateEstimatorFrameConverter;
+   private final MocapToHeadFrameConverter mocapToHeadFrameConverter;
    
    private final IHMCMocapDataClient mocapDataClient = new IHMCMocapDataClient();
    
@@ -47,7 +47,7 @@ public class MultisenseMocapManualCalibrationTestModule implements MocapRigidbod
    public MultisenseMocapManualCalibrationTestModule(DRCRobotModel robotModel, URI rosMasterURI)
    {
       RosMainNode rosMainNode = null;
-      mocapToStateEstimatorFrameConverter = new MocapToStateEstimatorFrameConverter(robotModel, packetCommunicator);
+      mocapToHeadFrameConverter = new MocapToHeadFrameConverter(robotModel, packetCommunicator);
       
       if (ENABLE_ZERO_POSE_CONFIGURATION_PUBLISHER)
       {
@@ -56,7 +56,7 @@ public class MultisenseMocapManualCalibrationTestModule implements MocapRigidbod
          zeroPoseProducer = null;
       }
       
-      mocapToStateEstimatorFrameConverter.setTransformFromMocapCentroidToHeadRoot(transformFromMocapCentroidToHeadRoot);
+      mocapToHeadFrameConverter.setTransformFromMocapCentroidToHeadRoot(transformFromMocapCentroidToHeadRoot);
       
       if(rosMasterURI != null)
       {
@@ -101,25 +101,25 @@ public class MultisenseMocapManualCalibrationTestModule implements MocapRigidbod
       {
          MocapRigidBody mocapObject = listOfRigidbodies.get(rigidBodyIndex);
          RigidBodyTransform pose = new RigidBodyTransform();
-         mocapObject.getPose(pose);
+         mocapObject.packPose(pose);
          int id = mocapObject.getId();
 
          if (id == MULTISENSE_MOCAP_ID)
          {
             //Set this to false to pause mocap updates. Remember to turn it back on before restarting
             boolean enableMocapUpdates = true;
-            mocapToStateEstimatorFrameConverter.enableMocapUpdates(enableMocapUpdates);
+            mocapToHeadFrameConverter.enableMocapUpdates(enableMocapUpdates);
             
             //manual calibration offsets from mocap jig misalignment
             //had to make pitch and roll negative to match frames of ui tool
             mocapCalibrationTransform.setRotationEulerAndZeroTranslation(Math.toRadians(0.0), Math.toRadians(0.0), Math.toRadians(0.0));
-            mocapToStateEstimatorFrameConverter.setMocapJigCalibrationTransform(mocapCalibrationTransform);
-            mocapToStateEstimatorFrameConverter.update(mocapObject);
+            mocapToHeadFrameConverter.setMocapJigCalibrationTransform(mocapCalibrationTransform);
+            mocapToHeadFrameConverter.update(mocapObject);
             
             RigidBodyTransform poseInStateEstimatorFrame = new RigidBodyTransform(pose);
             if(USE_ROBOT_FRAME)
             {
-               poseInStateEstimatorFrame = mocapToStateEstimatorFrameConverter.convertMocapPoseToRobotFrame(mocapObject);
+               poseInStateEstimatorFrame = mocapToHeadFrameConverter.convertMocapPoseToRobotFrame(mocapObject);
             }
             if (zeroPoseProducer != null)
             {
@@ -147,10 +147,10 @@ public class MultisenseMocapManualCalibrationTestModule implements MocapRigidbod
    private void sendDetectedObjectPacketToUi(MocapRigidBody mocapObject)
    {
       RigidBodyTransform pose = new RigidBodyTransform();
-      mocapObject.getPose(pose);
+      mocapObject.packPose(pose);
       if(USE_ROBOT_FRAME)
       {
-         pose = mocapToStateEstimatorFrameConverter.convertMocapPoseToRobotFrame(mocapObject);
+         pose = mocapToHeadFrameConverter.convertMocapPoseToRobotFrame(mocapObject);
       }
       DetectedObjectPacket detectedMocapObject = new DetectedObjectPacket(pose, mocapObject.getId());
       if(packetCommunicator.isConnected())

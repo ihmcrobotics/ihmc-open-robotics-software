@@ -7,11 +7,9 @@ import javax.vecmath.Vector3d;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
-import us.ihmc.commonWalkingControlModules.configurations.JointPrivilegedConfigurationParameters;
-import us.ihmc.robotics.partNames.NeckJointName;
-import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.atlas.AtlasJointMap;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.commonWalkingControlModules.configurations.JointPrivilegedConfigurationParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.ExplorationParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootOrientationGains;
@@ -58,7 +56,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    private final double minimumHeightAboveGround;// = 0.625;
    private double       nominalHeightAboveGround;// = 0.705;
    private final double maximumHeightAboveGround;// = 0.765 + 0.08;
-   
+
    private final AtlasJointMap jointMap;
    private final double massScale;
 
@@ -77,14 +75,14 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       this.jointMap = jointMap;
       this.massScale = Math.pow(jointMap.getModelScale(), jointMap.getMassScalePower());
 
-      
+
       min_leg_length_before_collapsing_single_support = jointMap.getModelScale() * 0.53;
       min_mechanical_leg_length = jointMap.getModelScale() * 0.420;
-      
-      minimumHeightAboveGround = jointMap.getModelScale() * ( 0.625 );        
-      nominalHeightAboveGround = jointMap.getModelScale() * ( 0.705 );        
-      maximumHeightAboveGround = jointMap.getModelScale() * ( 0.765 + 0.08 ); 
-      
+
+      minimumHeightAboveGround = jointMap.getModelScale() * ( 0.625 );
+      nominalHeightAboveGround = jointMap.getModelScale() * ( 0.705 );
+      maximumHeightAboveGround = jointMap.getModelScale() * ( 0.765 + 0.08 );
+
       runningOnRealRobot = target == DRCRobotModel.RobotTarget.REAL_ROBOT;
 
       jointPrivilegedConfigurationParameters = new AtlasJointPrivilegedConfigurationParameters(runningOnRealRobot);
@@ -124,7 +122,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    {
       return 0.10 * jointMap.getModelScale();
    }
-   
+
    @Override
    public double getTimeToGetPreparedForLocomotion()
    {
@@ -619,6 +617,18 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       return gains;
    }
 
+   /** {@inheritDoc} */
+   @Override
+   public YoPIDGains createSpineControlGains(YoVariableRegistry registry)
+   {
+      YoPIDGains ret = new YoPIDGains("Spine", registry);
+
+      ret.setKp(10.0);
+      ret.setZeta(0.5);
+
+      return ret;
+   }
+
    @Override
    public YoSE3PIDGainsInterface createSwingFootControlGains(YoVariableRegistry registry)
    {
@@ -923,9 +933,8 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    @Override
    public MomentumOptimizationSettings getMomentumOptimizationSettings()
    {
-      MomentumOptimizationSettings momentumOptimizationSettings = new MomentumOptimizationSettings();
-      momentumOptimizationSettings.scaleForceWeights(Math.pow(jointMap.getModelScale(), jointMap.getMassScalePower()));
-      return momentumOptimizationSettings;
+      double scale = Math.pow(jointMap.getModelScale(), jointMap.getMassScalePower());
+      return new AtlasMomentumOptimizationSettings(scale);
    }
 
    @Override
@@ -1104,6 +1113,6 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    @Override
    public double getICPProximityToLeadingFootForToeOff()
    {
-      return 0.0;
+      return 0.1;
    }
 }

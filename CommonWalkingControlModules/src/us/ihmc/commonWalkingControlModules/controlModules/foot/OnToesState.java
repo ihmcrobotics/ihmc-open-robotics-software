@@ -26,6 +26,7 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.geometry.algorithms.FrameConvexPolygonWithLineIntersector2d;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.math.trajectories.providers.YoVariableDoubleProvider;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -62,6 +63,7 @@ public class OnToesState extends AbstractFootControlState
    private final FramePoint2d exitCMP2d = new FramePoint2d();
    private final FrameVector2d exitCMPRayDirection2d = new FrameVector2d();
    private final FrameLine2d rayThroughExitCMP = new FrameLine2d();
+   private final FrameConvexPolygonWithLineIntersector2d frameConvexPolygonWithRayIntersector2d;
 
    private final TwistCalculator twistCalculator;
 
@@ -117,6 +119,7 @@ public class OnToesState extends AbstractFootControlState
       exitCMP2d.setToNaN(soleFrame);
       exitCMPRayDirection2d.setIncludingFrame(soleFrame, 1.0, 0.0);
       rayThroughExitCMP.setToNaN(soleFrame);
+      frameConvexPolygonWithRayIntersector2d = new FrameConvexPolygonWithLineIntersector2d();
    }
 
    public void setWeight(double weight)
@@ -225,8 +228,8 @@ public class OnToesState extends AbstractFootControlState
          rayOrigin = footPolygon.getCentroid();
 
       rayThroughExitCMP.set(rayOrigin, exitCMPRayDirection2d);
-      FramePoint2d[] intersectionWithRay = footPolygon.intersectionWithRayCopy(rayThroughExitCMP);
-      toeOffContactPoint2d.set(intersectionWithRay[0]);
+      frameConvexPolygonWithRayIntersector2d.intersectWithRay(footPolygon, rayThroughExitCMP);
+      toeOffContactPoint2d.set(frameConvexPolygonWithRayIntersector2d.getIntersectionPointOne());
 
       contactPointPosition.setXYIncludingFrame(toeOffContactPoint2d);
       contactPointPosition.changeFrame(contactableFoot.getRigidBody().getBodyFixedFrame());

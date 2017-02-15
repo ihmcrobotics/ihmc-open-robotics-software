@@ -20,6 +20,7 @@ public class SCSRobotGUICommunicatorComponents implements ExitActionListener, Do
    private JCheckBox recordCheckBox;
    private final RobotConnection connection;
 
+   @Override
    public void doDisconnect()
    {
       if (connectButton != null)
@@ -40,6 +41,7 @@ public class SCSRobotGUICommunicatorComponents implements ExitActionListener, Do
       // Add some buttons:
       EventDispatchThreadHelper.invokeAndWait(new Runnable()
       {
+         @Override
          public void run()
          {
             connectButton = new ConnectButton(connection);
@@ -61,6 +63,7 @@ public class SCSRobotGUICommunicatorComponents implements ExitActionListener, Do
       simulationConstructionSet.attachExitActionListener(this);
    }
 
+   @Override
    public void exitActionPerformed()
    {
       System.out.println("Disconnecting before exiting...");
@@ -77,6 +80,7 @@ public class SCSRobotGUICommunicatorComponents implements ExitActionListener, Do
          addActionListener(this);
       }
 
+      @Override
       public void actionPerformed(ActionEvent evt)
       {
          connection.pause();
@@ -94,6 +98,7 @@ public class SCSRobotGUICommunicatorComponents implements ExitActionListener, Do
          addActionListener(this);
       }
 
+      @Override
       public void actionPerformed(ActionEvent evt)
       {
          connection.setRecord(this.isSelected());
@@ -116,6 +121,7 @@ public class SCSRobotGUICommunicatorComponents implements ExitActionListener, Do
          addActionListener(this);
       }
 
+      @Override
       public void actionPerformed(ActionEvent evt)
       {
 

@@ -18,6 +18,7 @@ class GroundContactPointRobotSensor implements SensorInterface
       force = groundContactPoint.getYoForce();
    }
 
+   @Override
    public double[] getMessageValues()
    {
       return new double[]
@@ -29,6 +30,7 @@ class GroundContactPointRobotSensor implements SensorInterface
    }
 
 
+   @Override
    public String getYoVariableOrder()
    {
       String variableOrder = force.getYoX().getName() + "," + force.getYoY().getName() + "," + force.getYoZ().getName() + "," + position.getYoX().getName() + "," + position.getYoY().getName() + ","
@@ -38,6 +40,7 @@ class GroundContactPointRobotSensor implements SensorInterface
    }
 
 
+   @Override
    public int getNumberOfVariables()
    {
       // TODO Auto-generated method stub
@@ -45,6 +48,7 @@ class GroundContactPointRobotSensor implements SensorInterface
    }
 
 
+   @Override
    public void setTau(double tau)
    {
    }

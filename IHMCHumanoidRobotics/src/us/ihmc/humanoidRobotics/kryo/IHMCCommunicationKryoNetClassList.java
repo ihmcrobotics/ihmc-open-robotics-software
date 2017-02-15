@@ -16,8 +16,25 @@ import org.ejml.data.DenseMatrix64F;
 
 import boofcv.struct.calib.IntrinsicParameters;
 import us.ihmc.communication.net.NetClassList;
-import us.ihmc.communication.packets.*;
+import us.ihmc.communication.packets.BoundingBoxesPacket;
+import us.ihmc.communication.packets.ControllerCrashNotificationPacket;
+import us.ihmc.communication.packets.HeatMapPacket;
+import us.ihmc.communication.packets.IMUPacket;
+import us.ihmc.communication.packets.InvalidPacketNotificationPacket;
+import us.ihmc.communication.packets.KinematicsToolboxOutputStatus;
+import us.ihmc.communication.packets.LidarScanMessage;
+import us.ihmc.communication.packets.ObjectDetectorResultPacket;
+import us.ihmc.communication.packets.Packet;
+import us.ihmc.communication.packets.PacketDestination;
+import us.ihmc.communication.packets.PlanarRegionMessage;
+import us.ihmc.communication.packets.PlanarRegionsListMessage;
+import us.ihmc.communication.packets.RequestLidarScanMessage;
+import us.ihmc.communication.packets.RequestPlanarRegionsListMessage;
+import us.ihmc.communication.packets.SimulatedLidarScanPacket;
+import us.ihmc.communication.packets.TextToSpeechPacket;
+import us.ihmc.communication.packets.ToolboxStateMessage;
 import us.ihmc.communication.packets.ToolboxStateMessage.ToolboxState;
+import us.ihmc.communication.packets.UIPositionCheckerPacket;
 import us.ihmc.communication.producers.VideoSource;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.humanoidRobotics.communication.packets.DetectedObjectPacket;
@@ -154,6 +171,8 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisHeightTrajec
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisOrientationTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.SnapFootstepPacket;
+import us.ihmc.humanoidRobotics.communication.packets.walking.SpineTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.TrackingWeightsMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingControllerFailureStatusMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatusMessage;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.JointAnglesPacket;
@@ -243,11 +262,13 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketClass(HeadTrajectoryMessage.class);
       registerPacketClass(NeckTrajectoryMessage.class);
       registerPacketClass(ChestTrajectoryMessage.class);
+      registerPacketClass(SpineTrajectoryMessage.class);
       registerPacketClass(PelvisTrajectoryMessage.class);
       registerPacketClass(PelvisOrientationTrajectoryMessage.class);
       registerPacketClass(FootTrajectoryMessage.class);
       registerPacketClass(WholeBodyTrajectoryMessage.class);
       registerPacketClass(PelvisHeightTrajectoryMessage.class);
+      registerPacketClass(TrackingWeightsMessage.class);
       registerPacketClass(StopAllTrajectoryMessage.class);
       registerPacketClass(GoHomeMessage.class);
 
@@ -510,7 +531,7 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketClass(BatchedDesiredSteeringAngleAndSingleJointAnglePacket.class);
       registerPacketClass(TextToSpeechPacket.class);
       registerPacketField(VideoSource.class);
-      
+
       registerPacketField(TransformableQuat4d.class);
       registerPacketField(TransformablePoint3d.class);
 

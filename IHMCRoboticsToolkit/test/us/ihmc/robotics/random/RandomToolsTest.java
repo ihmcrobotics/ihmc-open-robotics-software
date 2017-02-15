@@ -1,16 +1,19 @@
 package us.ihmc.robotics.random;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Random;
 
+import javax.vecmath.Point3d;
 import javax.vecmath.Point3f;
+import javax.vecmath.Vector3d;
 
 import org.junit.Test;
 
-import us.ihmc.robotics.random.RandomTools;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public class RandomToolsTest
 {
@@ -102,7 +105,47 @@ public class RandomToolsTest
       double[] range1 = {0.0, 0.0, 0.0};
       double[] range2 = {12, 12, 12};
 
-      RandomTools.generateRandomPoint3d(random, range1, range2);
+      for (int i = 0; i < 25; i++)
+      {
+         Point3d point = RandomTools.generateRandomPoint3d(random, range1, range2);
+         assertTrue(range1[0] < point.getX() && point.getX() < range2[0]);
+         assertTrue(range1[1] < point.getY() && point.getY() < range2[1]);
+         assertTrue(range1[2] < point.getZ() && point.getZ() < range2[2]);
+      }
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testGenerateRandomVector3d()
+   {
+      Random random = new Random(4876L);
+      Point3d boundary1 = new Point3d(0.0, 0.0, 0.0);
+      Point3d boundary2 = new Point3d(12, 12, 12);
+
+      for (int i = 0; i < 25; i++)
+      {
+         Vector3d vector = RandomTools.generateRandomVector(random, boundary1, boundary2);
+         assertTrue(boundary1.getX() < vector.getX() && vector.getX() < boundary2.getX());
+         assertTrue(boundary1.getY() < vector.getY() && vector.getY() < boundary2.getY());
+         assertTrue(boundary1.getZ() < vector.getZ() && vector.getZ() < boundary2.getZ());
+      }
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testGenerateRandomOrthogonalVector3d()
+   {
+      Random random = new Random(4876L);
+
+      for (int i = 0; i < 100; i++)
+      {
+         double length = RandomTools.generateRandomDouble(random, 0.1, 100.0);
+         Vector3d vector = RandomTools.generateRandomVector(random, length);
+         Vector3d orthoVector = RandomTools.generateRandomOrthogonalVector3d(random, vector, true);
+
+         assertEquals(0.0, vector.dot(orthoVector), 1.0e-12);
+         assertEquals(1.0, orthoVector.length(), 1.0e-12);
+      }
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)

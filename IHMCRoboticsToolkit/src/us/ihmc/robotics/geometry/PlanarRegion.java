@@ -743,6 +743,12 @@ public class PlanarRegion
       convexHull.setAndUpdate(other.convexHull);
    }
 
+   public void setBoundingBoxEpsilon(double epsilon)
+   {
+      this.boundingBox3dInWorld.setEpsilonToGrow(epsilon);
+      updateBoundingBox();
+   }
+
    private void updateBoundingBox()
    {
       boundingBox3dInWorld.set(Double.NaN, Double.NaN, Double.NaN, Double.NaN, Double.NaN, Double.NaN);
@@ -826,4 +832,17 @@ public class PlanarRegion
       return new PlanarRegion(regionTransform, regionConvexPolygons);
    }
 
+   /**
+    * Transforms the planar region
+    * @param rigidBodyTransform transform from current frame to desired frame
+    */   
+   public void transform(RigidBodyTransform fromDesiredToCurrentTransform)
+   {
+      fromLocalToWorldTransform.multiply(fromDesiredToCurrentTransform);
+      fromWorldToLocalTransform.set(fromLocalToWorldTransform);
+      fromWorldToLocalTransform.invert();
+      
+      updateBoundingBox();
+      updateConvexHull();
+   }
 }

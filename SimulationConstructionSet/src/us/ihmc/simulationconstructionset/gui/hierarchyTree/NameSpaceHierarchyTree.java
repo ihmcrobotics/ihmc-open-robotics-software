@@ -82,6 +82,7 @@ public class NameSpaceHierarchyTree extends JScrollPane implements MouseListener
    private boolean needToSetupTree = true;
    private YoVariableRegistry topOfTreeRegistry;
    
+   @Override
    public void paintComponent(Graphics g)
    {
       if (needToSetupTree)
@@ -119,6 +120,7 @@ public class NameSpaceHierarchyTree extends JScrollPane implements MouseListener
       JMenuItem toggleVaribleSend = new JMenuItem("Toggle Variable Send");
       toggleVaribleSend.addActionListener(new ActionListener()
       {
+         @Override
          public void actionPerformed(ActionEvent e)
          {
             toggleVariableSend(e);
@@ -130,6 +132,7 @@ public class NameSpaceHierarchyTree extends JScrollPane implements MouseListener
       JMenuItem recursiveToggleVaribleSend = new JMenuItem("Recursive Toggle Variable Send");
       recursiveToggleVaribleSend.addActionListener(new ActionListener()
       {
+         @Override
          public void actionPerformed(ActionEvent e)
          {
             recursiveToggleVariableSend(e);
@@ -141,6 +144,7 @@ public class NameSpaceHierarchyTree extends JScrollPane implements MouseListener
       JMenuItem toggleVariableLog = new JMenuItem("Toggle Variable Log");
       toggleVariableLog.addActionListener(new ActionListener()
       {
+         @Override
          public void actionPerformed(ActionEvent e)
          {
             toggleVariableLog(e);
@@ -152,6 +156,7 @@ public class NameSpaceHierarchyTree extends JScrollPane implements MouseListener
       JMenuItem recursiveToggleVariableLog = new JMenuItem("Recursive Toggle Variable Log");
       recursiveToggleVariableLog.addActionListener(new ActionListener()
       {
+         @Override
          public void actionPerformed(ActionEvent e)
          {
             recursiveToggleVariableLog(e);
@@ -164,6 +169,7 @@ public class NameSpaceHierarchyTree extends JScrollPane implements MouseListener
       exportBinaryRegistryData.addActionListener(new ActionListener()
       {
          
+         @Override
          public void actionPerformed(ActionEvent e)
          {
             exportRegistryData(e, true);
@@ -176,6 +182,7 @@ public class NameSpaceHierarchyTree extends JScrollPane implements MouseListener
       exportASCIIRegistryData.addActionListener(new ActionListener()
       {
          
+         @Override
          public void actionPerformed(ActionEvent e)
          {
             exportRegistryData(e, false);
@@ -188,6 +195,7 @@ public class NameSpaceHierarchyTree extends JScrollPane implements MouseListener
       JMenuItem save = new JMenuItem("Save Configuration");
       save.addActionListener(new ActionListener()
       {
+         @Override
          public void actionPerformed(ActionEvent e)
          {
             saveConfiguration();
@@ -199,6 +207,7 @@ public class NameSpaceHierarchyTree extends JScrollPane implements MouseListener
       JMenuItem load = new JMenuItem("Load Configuration");
       load.addActionListener(new ActionListener()
       {
+         @Override
          public void actionPerformed(ActionEvent e)
          {
             loadConfiguration();
@@ -263,6 +272,7 @@ public class NameSpaceHierarchyTree extends JScrollPane implements MouseListener
       }
    }
 
+   @Override
    public void mouseClicked(MouseEvent arg0)
    {
       if (arg0.getClickCount() == 2)
@@ -280,14 +290,17 @@ public class NameSpaceHierarchyTree extends JScrollPane implements MouseListener
 
    }
 
+   @Override
    public void mouseEntered(MouseEvent arg0)
    {
    }
 
+   @Override
    public void mouseExited(MouseEvent arg0)
    {
    }
 
+   @Override
    public void mousePressed(MouseEvent arg0)
    {
       if (arg0.isPopupTrigger())
@@ -296,6 +309,7 @@ public class NameSpaceHierarchyTree extends JScrollPane implements MouseListener
       }
    }
 
+   @Override
    public void mouseReleased(MouseEvent arg0)
    {
       if (arg0.isPopupTrigger())
@@ -377,6 +391,7 @@ public class NameSpaceHierarchyTree extends JScrollPane implements MouseListener
       FileFilter filterFilter = new FileFilter()
       {
 
+         @Override
          public String getDescription()
          {
             if (binary)
@@ -385,6 +400,7 @@ public class NameSpaceHierarchyTree extends JScrollPane implements MouseListener
                return ".m";
          }
 
+         @Override
          public boolean accept(File f)
          {
             if (f.isDirectory())
@@ -446,10 +462,12 @@ public class NameSpaceHierarchyTree extends JScrollPane implements MouseListener
    }
   
 
+   @Override
    public void focusGained(FocusEvent e)
    {
    }
 
+   @Override
    public void focusLost(FocusEvent e)
    {
 //    popupMenu.setVisible(false);
@@ -572,6 +590,7 @@ public class NameSpaceHierarchyTree extends JScrollPane implements MouseListener
       }
    }
 
+   @Override
    public void createdNewRegistries()
    {
       top.removeAllChildren();

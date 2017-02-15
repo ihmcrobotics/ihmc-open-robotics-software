@@ -3,10 +3,13 @@ package us.ihmc.simulationconstructionset.physics.collision;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.util.ArrayList;
+
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.simulationconstructionset.ContactingExternalForcePoint;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.Robot;
@@ -328,12 +331,17 @@ public abstract class SCSCollisionDetectorTest
 
          CollisionShape shapeA = contacts.getShapeA();
          CollisionShape shapeB = contacts.getShapeB();
-         assertTrue((shapeA.getCollisionMask() & shapeB.getGroupMask()) != 0 || (shapeB.getCollisionMask() & shapeA.getGroupMask()) != 0);
+         assertTrue((shapeA.getCollisionMask() & shapeB.getCollisionGroup()) != 0 || (shapeB.getCollisionMask() & shapeA.getCollisionGroup()) != 0);
       }
 
       @Override
       public void handleCollisions(CollisionDetectionResult results)
       {
+      }
+
+      @Override
+      public void addContactingExternalForcePoints(Link link, ArrayList<ContactingExternalForcePoint> contactingExternalForcePoints)
+      {         
       }
    }
 

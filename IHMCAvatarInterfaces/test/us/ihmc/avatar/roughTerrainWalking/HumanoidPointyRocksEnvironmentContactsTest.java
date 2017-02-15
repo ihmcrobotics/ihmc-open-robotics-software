@@ -18,6 +18,8 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.ExploreFootPolygonState.ExplorationMethod;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.humanoidRobotics.communication.packets.TrajectoryPoint1DMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.OneDoFJointTrajectoryMessage;
@@ -37,8 +39,6 @@ import us.ihmc.simulationconstructionset.util.environments.PointyRocksWorld;
 import us.ihmc.simulationconstructionset.util.environments.PointyRocksWorld.PointyRocksType;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.tools.continuousIntegration.IntegrationCategory;
 import us.ihmc.tools.thread.ThreadTools;
 
 public abstract class HumanoidPointyRocksEnvironmentContactsTest implements MultiRobotTestInterface
@@ -48,8 +48,6 @@ public abstract class HumanoidPointyRocksEnvironmentContactsTest implements Mult
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
    private BooleanYoVariable doFootExplorationInTransferToStanding;
-   private DoubleYoVariable transferTime;
-   private DoubleYoVariable swingTime;
    private DoubleYoVariable percentageChickenSupport;
    private DoubleYoVariable timeBeforeExploring;
    private SideDependentList<BooleanYoVariable> autoCropToLineAfterExploration = new SideDependentList<>();
@@ -108,9 +106,10 @@ public abstract class HumanoidPointyRocksEnvironmentContactsTest implements Mult
       doFootExplorationInTransferToStanding.set(true);
       percentageChickenSupport.set(0.4);
       timeBeforeExploring.set(1.0);
-      transferTime.set(0.15);
-      swingTime.set(0.8);
       doToeOffIfPossible.set(false);
+
+      double swingTime = 0.8;
+      double transferTime = 0.15;
 
       ArrayList<FramePoint> stepLocations = world.getStepLocations();
       for (int i = 0; i < stepLocations.size(); i++)
@@ -121,7 +120,7 @@ public abstract class HumanoidPointyRocksEnvironmentContactsTest implements Mult
             doFootExplorationInTransferToStanding.set(false);
          }
 
-         FootstepDataListMessage message = new FootstepDataListMessage();
+         FootstepDataListMessage message = new FootstepDataListMessage(swingTime, transferTime);
          FootstepDataMessage footstepData = new FootstepDataMessage();
 
          Point3d position = stepLocations.get(i).getPointCopy();
@@ -181,9 +180,10 @@ public abstract class HumanoidPointyRocksEnvironmentContactsTest implements Mult
       doFootExplorationInTransferToStanding.set(true);
       percentageChickenSupport.set(0.3);
       timeBeforeExploring.set(1.0);
-      transferTime.set(0.15);
-      swingTime.set(0.4);
       doToeOffIfPossible.set(false);
+
+      double swingTime = 0.8;
+      double transferTime = 0.15;
 
       ArrayList<FramePoint> stepLocations = world.getStepLocations();
       for (int i = 0; i < stepLocations.size(); i++)
@@ -194,7 +194,7 @@ public abstract class HumanoidPointyRocksEnvironmentContactsTest implements Mult
             doFootExplorationInTransferToStanding.set(false);
          }
 
-         FootstepDataListMessage message = new FootstepDataListMessage();
+         FootstepDataListMessage message = new FootstepDataListMessage(swingTime, transferTime);
          FootstepDataMessage footstepData = new FootstepDataMessage();
 
          Point3d position = stepLocations.get(i).getPointCopy();
@@ -253,7 +253,7 @@ public abstract class HumanoidPointyRocksEnvironmentContactsTest implements Mult
             return location;
          }
       };
-      DRCRobotModel robotModel = getRobotModel(30, 15, onlyEdgeContacts);
+      DRCRobotModel robotModel = getRobotModel(15, 8, onlyEdgeContacts);
       drcSimulationTestHelper = new DRCSimulationTestHelper(environment, className, startingLocation, simulationTestingParameters, robotModel);
       drcSimulationTestHelper.getSimulationConstructionSet().hideAllDynamicGraphicObjects();
 
@@ -269,8 +269,6 @@ public abstract class HumanoidPointyRocksEnvironmentContactsTest implements Mult
 
       // get a bunch of relevant variables
       doFootExplorationInTransferToStanding = (BooleanYoVariable) drcSimulationTestHelper.getYoVariable("doFootExplorationInTransferToStanding");
-      transferTime = (DoubleYoVariable) drcSimulationTestHelper.getYoVariable("transferTime");
-      swingTime = (DoubleYoVariable) drcSimulationTestHelper.getYoVariable("swingTime");
       percentageChickenSupport = (DoubleYoVariable) drcSimulationTestHelper.getYoVariable("PercentageChickenSupport");
       timeBeforeExploring = (DoubleYoVariable) drcSimulationTestHelper.getYoVariable("ExplorationState_TimeBeforeExploring");
       for (RobotSide robotSide : RobotSide.values)

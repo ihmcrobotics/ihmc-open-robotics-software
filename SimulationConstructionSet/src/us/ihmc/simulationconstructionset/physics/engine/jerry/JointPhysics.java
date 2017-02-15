@@ -781,37 +781,50 @@ public abstract class JointPhysics< J extends Joint>
       //TODO: Commented out microcollisions for time being and replaced with penetration-based
       // epsilon increase. Need to make test cases and figure out exactly how we are going to 
       // do all of this...
+      boolean justUseSpringyEpsilonForMicroCollisions = true;
+      if (justUseSpringyEpsilonForMicroCollisions)
+      {
+         resolveMicroCollisionWithSpringyEpsilon(penetrationSquared, offsetFromCOM, Rk_coll, u_coll, epsilon, mu, p_coll);
+         return;
+      }
 
-//      computeKiCollision(offsetFromCOM, Rk_coll);
-//      collisionIntegrator.setup(Ki, u_coll, epsilon, mu);
-//      collisionIntegrator.computeMicroImpulse(p_coll);    // impulse is in collision coordinates.  Need to rotate into joint com coordinates:
-//
-//      if (Math.abs(Math.sqrt(p_coll.getX() * p_coll.getX() + p_coll.getY() * p_coll.getY()) / p_coll.getZ()) > mu)    // If slipping, just do it the normal way...
-//      {
+      computeKiCollision(offsetFromCOM, Rk_coll);
+      collisionIntegrator.setup(Ki, u_coll, epsilon, mu);
+      collisionIntegrator.computeMicroImpulse(p_coll);    // impulse is in collision coordinates.  Need to rotate into joint com coordinates:
+
+      if (Math.abs(Math.sqrt(p_coll.getX() * p_coll.getX() + p_coll.getY() * p_coll.getY()) / p_coll.getZ()) > mu)    // If slipping, just do it the normal way...
+      {
          // Slipping MicroCollision:
-//          System.out.println("Slipping Micro Collision:  " + p_coll);
-         // +++JEP: Adjust epsilon based on penetration...
-         epsilon = epsilon + 1000000.0 * penetrationSquared;
-         if (epsilon > 20.0)
-            epsilon = 20.0;
-
-//         System.out.println("epsilon = " + epsilon);
-//         System.out.println("penetrationSquared = " + penetrationSquared);
-         // if (epsilon > 1.2) System.out.print(epsilon + " ");
-
+//         System.out.println("Slipping Micro Collision:  " + p_coll);
          resolveCollision(offsetFromCOM, Rk_coll, u_coll, epsilon, mu, p_coll);
-//      }
-//      else
-//      {
-//          System.out.println("Non-Slipping Micro Collision:  " + p_coll);
-//         p_hat_k.top.set(p_coll);
-//         p_hat_k.bottom.set(0.0, 0.0, 0.0);
-//         k_X_hat_coll.transform(p_hat_k);    // p_k is now the impulse at the joint com.
-//
-//         propagateImpulse(p_hat_k);    // Propagate the impulse.  Mirtich p. 146, step E.
-//      }
+      }
+      else
+      {
+//         System.out.println("Non-Slipping Micro Collision:  " + p_coll);
+
+         p_hat_k.top.set(p_coll);
+         p_hat_k.bottom.set(0.0, 0.0, 0.0);
+         k_X_hat_coll.transform(p_hat_k);    // p_k is now the impulse at the joint com.
+
+         propagateImpulse(p_hat_k);    // Propagate the impulse.  Mirtich p. 146, step E.
+      }
 
 
+   }
+   
+   private void resolveMicroCollisionWithSpringyEpsilon(double penetrationSquared, Vector3d offsetFromCOM, Matrix3d Rk_coll, Vector3d u_coll, double epsilon, double mu,
+                                                        Vector3d p_coll)
+   {
+   // +++JEP: Adjust epsilon based on penetration...
+      epsilon = epsilon + 1000000.0 * penetrationSquared;
+      if (epsilon > 20.0)
+         epsilon = 20.0;
+
+//      System.out.println("epsilon2 = " + epsilon);
+//      System.out.println("penetrationSquared2 = " + penetrationSquared);
+      // if (epsilon > 1.2) System.out.print(epsilon + " ");
+
+      resolveCollision(offsetFromCOM, Rk_coll, u_coll, epsilon, mu, p_coll);
    }
 
    private SpatialVector delta_v_hat_null = new SpatialVector();
@@ -1888,6 +1901,7 @@ public abstract class JointPhysics< J extends Joint>
     */
    protected abstract void jointDependentChangeVelocity(double delta_qd);
 
+   @Override
    public String toString() {
 
       StringBuffer retBuffer = new StringBuffer();

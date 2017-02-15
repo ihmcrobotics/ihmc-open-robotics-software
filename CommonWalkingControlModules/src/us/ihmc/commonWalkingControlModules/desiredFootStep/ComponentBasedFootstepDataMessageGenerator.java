@@ -6,7 +6,7 @@ import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.*;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager.StatusMessageListener;
-import us.ihmc.graphics3DDescription.HeightMap;
+import us.ihmc.graphicsDescription.HeightMap;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
 import us.ihmc.humanoidRobotics.communication.packets.walking.*;
@@ -71,8 +71,8 @@ public class ComponentBasedFootstepDataMessageGenerator implements Updatable
       RobotSide supportLeg = nextSwingLeg.getEnumValue().getOppositeSide();
 
       FootstepDataListMessage footsteps = computeNextFootsteps(supportLeg);
-      footsteps.setSwingTime(swingTime.getDoubleValue());
-      footsteps.setTransferTime(transferTime.getDoubleValue());
+      footsteps.setDefaultSwingTime(swingTime.getDoubleValue());
+      footsteps.setDefaultTransferTime(transferTime.getDoubleValue());
       commandInputManager.submitMessage(footsteps);
 
       nextSwingLeg.set(supportLeg);

@@ -1,27 +1,31 @@
 package us.ihmc.robotics.geometry.shapes;
 
-import junit.framework.Assert;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.junit.Test;
-import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.geometry.Direction;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.geometry.RotationTools;
-import us.ihmc.robotics.geometry.shapes.Box3d.FaceName;
-import us.ihmc.robotics.random.RandomTools;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.tools.testing.JUnitTools;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.Random;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import javax.vecmath.Matrix3d;
+import javax.vecmath.Point3d;
+import javax.vecmath.Quat4d;
+import javax.vecmath.Vector3d;
+
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.junit.Test;
+
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.robotics.MathTools;
+import us.ihmc.robotics.geometry.Direction;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.geometry.RotationTools;
+import us.ihmc.robotics.geometry.shapes.Box3d.FaceName;
+import us.ihmc.robotics.math.Epsilons;
+import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.tools.testing.JUnitTools;
 
 public class Box3dTest
 {
@@ -43,7 +47,16 @@ public class Box3dTest
          double width = RandomTools.generateRandomDouble(random, 0.01, 10.0);
          double height = RandomTools.generateRandomDouble(random, 0.01, 10.0);
          Box3d box3d = new Box3d(transform, length, width, height);
-         testHelper.runSimpleTests(box3d, random, numberOfPoints);
+
+         try
+         {
+            testHelper.runSimpleTests(box3d, random, numberOfPoints);
+         }
+         catch (AssertionError e)
+         {
+            e.printStackTrace();
+            throw new AssertionError(e.getMessage());
+         }
       }
 
    }
@@ -59,10 +72,10 @@ public class Box3dTest
 
       assertEverythingDifferent(box1, box2, 1e-14);
       box2.set(box1);
-      assertEquals(box1, box2, 1e-14);
+      assertBoxEquals(box1, box2, 1e-14);
 
       // make sure we're not copying references:
-      box1.setTransform(RigidBodyTransform.generateRandomTransform(random));
+      box1.setFromTransform(RigidBodyTransform.generateRandomTransform(random));
       box1.setDimensions(random.nextDouble(), random.nextDouble(), random.nextDouble());
       assertEverythingDifferent(box1, box2, 1e-14);
    }
@@ -75,10 +88,10 @@ public class Box3dTest
       Box3d box1 = createRandomBox(random);
       Box3d box2 = new Box3d(box1);
 
-      assertEquals(box1, box2, 1e-14);
+      assertBoxEquals(box1, box2, 1e-14);
 
       // make sure we're not copying references:
-      box1.setTransform(RigidBodyTransform.generateRandomTransform(random));
+      box1.setFromTransform(RigidBodyTransform.generateRandomTransform(random));
       box1.setDimensions(random.nextDouble(), random.nextDouble(), random.nextDouble());
       assertEverythingDifferent(box1, box2, 1e-14);
    }
@@ -97,10 +110,10 @@ public class Box3dTest
       Box3d box1 = new Box3d(transform, length, width, height);
       Box3d box2 = new Box3d(transform, new double[] {length, width, height});
       Box3d box3 = new Box3d(length, width, height);
-      box3.setTransform(transform);
+      box3.setFromTransform(transform);
 
-      assertEquals(box1, box2, 0.0);
-      assertEquals(box1, box3, 0.0);
+      assertBoxEquals(box1, box2, 0.0);
+      assertBoxEquals(box1, box3, 0.0);
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -110,27 +123,27 @@ public class Box3dTest
       Random random = new Random(351235L);
       Box3d box = new Box3d();
       RigidBodyTransform transform = RigidBodyTransform.generateRandomTransform(random);
-      box.setTransform(transform);
+      box.setFromTransform(transform);
 
       RigidBodyTransform transformBack = new RigidBodyTransform();
       box.getTransform(transformBack);
-      assertTrue(transform.epsilonEquals(transformBack, 0.0));
-      assertTrue(transform.epsilonEquals(box.getTransformCopy(), 0.0));
+      assertTrue(transform.epsilonEquals(transformBack, Epsilons.ONE_TRILLIONTH));
+      assertTrue(transform.epsilonEquals(box.getTransformCopy(), Epsilons.ONE_TRILLIONTH));
 
       Matrix3d matrix = new Matrix3d();
       Vector3d vector = new Vector3d();
       transform.get(matrix, vector);
 
       Matrix3d matrixBack = new Matrix3d();
-      Vector3d vectorBack = new Vector3d();
+      Point3d pointBack = new Point3d();
 
       box.getRotation(matrixBack);
-      assertTrue(matrix.epsilonEquals(matrixBack, 0.0));
-      assertTrue(matrix.epsilonEquals(box.getRotationCopy(), 0.0));
+      assertTrue(matrix.epsilonEquals(matrixBack, Epsilons.ONE_TRILLIONTH));
+      assertTrue(matrix.epsilonEquals(box.getRotationCopy(), Epsilons.ONE_TRILLIONTH));
 
-      box.getCenter(vectorBack);
-      assertTrue(vector.epsilonEquals(vectorBack, 0.0));
-      assertTrue(vector.epsilonEquals(box.getCenterCopy(), 0.0));
+      box.getCenter(pointBack);
+      assertTrue(vector.epsilonEquals(pointBack, Epsilons.ONE_TRILLIONTH));
+      assertTrue(vector.epsilonEquals(box.getCenterCopy(), Epsilons.ONE_TRILLIONTH));
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -268,7 +281,7 @@ public class Box3dTest
             vertices[i] = new Point3d();
          }
 
-         double epsilon = 1e-14;
+         double epsilon = Epsilons.ONE_TRILLIONTH;
          double maxScale = 2.0;
          box.computeVertices(vertices);
          Point3d center = box.getCenterCopy();
@@ -324,7 +337,7 @@ public class Box3dTest
 
       box3d.computeVertices(vertices);
 
-      double epsilon = 1e-24;
+      double epsilon = Epsilons.ONE_TRILLIONTH;
       for (Point3d vertex : vertices)
       {
          Iterator<Point3d> iterator = expectedVertices.iterator();
@@ -336,7 +349,7 @@ public class Box3dTest
          }
       }
 
-      Assert.assertEquals(0, expectedVertices.size());
+      assertEquals(0, expectedVertices.size());
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -351,7 +364,7 @@ public class Box3dTest
       faces.add(new ImmutablePair<FaceName, FaceName>(FaceName.PLUSY, FaceName.MINUSY));
       faces.add(new ImmutablePair<FaceName, FaceName>(FaceName.PLUSZ, FaceName.MINUSZ));
 
-      double epsilon = 1e-14;
+      double epsilon = Epsilons.ONE_TRILLIONTH;
       for (int i = 0; i < nTests; i++)
       {
          Box3d box = createRandomBox(random);
@@ -361,14 +374,14 @@ public class Box3dTest
          {
             Vector3d firstNormal = box.getFace(pair.getLeft()).getNormalCopy();
             Vector3d secondNormal = box.getFace(pair.getRight()).getNormalCopy();
-            Assert.assertEquals(-1.0, firstNormal.dot(secondNormal), epsilon);
+            assertEquals(-1.0, firstNormal.dot(secondNormal), epsilon);
 
             for (ImmutablePair<FaceName, FaceName> otherPair : faces)
             {
                if (pair != otherPair)
                {
                   Vector3d otherNormal = box.getFace(otherPair.getLeft()).getNormalCopy();
-                  Assert.assertEquals(0.0, firstNormal.dot(otherNormal), epsilon);
+                  assertEquals(0.0, firstNormal.dot(otherNormal), epsilon);
 
                }
             }
@@ -394,18 +407,18 @@ public class Box3dTest
       double height = random.nextDouble();
 
       Box3d box = new Box3d(length, width, height);
-      box.setTranslation(new Vector3d(center));
+      box.setTranslation(new Point3d(center));
 
       for (int i = 0; i < nTests; i++)
       {
          Matrix3d rotation = new Matrix3d();
          rotation.set(RandomTools.generateRandomRotation(random));
          box.setRotation(rotation);
-         Assert.assertEquals(length, box.getLength(), 0.0);
-         Assert.assertEquals(width, box.getWidth(), 0.0);
-         Assert.assertEquals(height, box.getHeight(), 0.0);
-         JUnitTools.assertTuple3dEquals(center, box.getCenterCopy(), 0.0);
-         JUnitTools.assertMatrix3dEquals("", rotation, box.getRotationCopy(), 1e-14);
+         assertEquals(length, box.getLength(), Epsilons.ONE_TRILLIONTH);
+         assertEquals(width, box.getWidth(), Epsilons.ONE_TRILLIONTH);
+         assertEquals(height, box.getHeight(), Epsilons.ONE_TRILLIONTH);
+         JUnitTools.assertTuple3dEquals(center, box.getCenterCopy(), Epsilons.ONE_TRILLIONTH);
+         JUnitTools.assertMatrix3dEquals("", rotation, box.getRotationCopy(), Epsilons.ONE_TRILLIONTH);
          
          Collections.shuffle(faces);
          for (ImmutablePair<FaceName, Integer> face : faces)
@@ -415,7 +428,7 @@ public class Box3dTest
             
             Vector3d rotationMatrixColumn = new Vector3d();
             rotation.getColumn(face.getRight(), rotationMatrixColumn);
-            JUnitTools.assertTuple3dEquals(rotationMatrixColumn, normal, 1e-14);
+            JUnitTools.assertTuple3dEquals(rotationMatrixColumn, normal, Epsilons.ONE_TRILLIONTH);
          }
       }
    }
@@ -452,7 +465,7 @@ public class Box3dTest
 
             // check distance stuff:
             double epsilon = 1e-14;
-            Assert.assertEquals(box.distance(closestPoint), 0.0, epsilon);
+            assertEquals(box.distance(closestPoint), 0.0, epsilon);
             assertTrue(box.isInsideOrOnSurface(closestPoint, epsilon));
             assertTrue(box.isInsideOrOnSurface(projectedPoint, epsilon));
             if (box.isInsideOrOnSurface(point))
@@ -461,7 +474,7 @@ public class Box3dTest
             }
             else
             {
-               Assert.assertEquals(point.distance(projectedPoint), box.distance(point), epsilon);
+               assertEquals(point.distance(projectedPoint), box.distance(point), epsilon);
                JUnitTools.assertTuple3dEquals(projectedPoint, closestPoint, epsilon);
             }
             
@@ -496,15 +509,15 @@ public class Box3dTest
                   normalFromCrossProduct.cross(vector1, vector2);
                   normalFromCrossProduct.normalize();
 
-                  Assert.assertEquals(1.0, Math.abs(normalFromCrossProduct.dot(normal)), 1e-8);
+                  assertEquals(1.0, Math.abs(normalFromCrossProduct.dot(normal)), 1e-8);
                }
             }
          }
       }
    }
-
+	
 	@ContinuousIntegrationTest(estimatedDuration = 0.1)
-	@Test(timeout = 30000)
+   @Test(timeout = 30000)
    public void testApplyTransform()
    {
       Random random = new Random(562346L);
@@ -530,11 +543,39 @@ public class Box3dTest
          {
             Point3d point = getRandomConvexCombination(random, vertices);
             Point3d pointTransformed = new Point3d(point);
-            transform.transform(pointTransformed);
+            box.getTransformToShapeFrameUnsafe().transform(pointTransformed);
+            boxTransformed.getTransformFromShapeFrameUnsafe().transform(pointTransformed);
             
-            Assert.assertEquals(box.isInsideOrOnSurface(point), boxTransformed.isInsideOrOnSurface(pointTransformed));            
+            assertEquals(box.isInsideOrOnSurface(point), boxTransformed.isInsideOrOnSurface(pointTransformed));            
          }
       }
+   }
+	
+	@ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @Test(timeout = 30000)
+   public void testApplyTransform2()
+   {
+      Box3d box3d = new Box3d();
+      RigidBodyTransform transform = new RigidBodyTransform();
+      Point3d point = new Point3d();
+      point.set(1.0, 1.0, 1.0);
+      transform.setTranslation(point);
+      box3d.applyTransform(transform);
+      
+      box3d.getCenter(point);
+      JUnitTools.assertTuple3dEquals(new Point3d(1.0, 1.0, 1.0), point, Epsilons.ONE_TRILLIONTH);
+      
+      Quat4d quat = new Quat4d();
+      RotationTools.convertYawPitchRollToQuaternion(1.0, 1.0, 1.0, quat);
+      Quat4d quat2 = new Quat4d(quat);
+      transform.setRotationAndZeroTranslation(quat);
+      
+      box3d.applyTransform(transform);
+      
+      box3d.getPosition(point);
+      box3d.getOrientation(quat);
+      JUnitTools.assertTuple3dEquals(new Point3d(1.0, 1.0, 1.0), point, Epsilons.ONE_TRILLIONTH);
+      JUnitTools.assertQuaternionsEqual(quat2, quat, Epsilons.ONE_TRILLIONTH);
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -556,9 +597,9 @@ public class Box3dTest
          box.getRotation(rotation);
          
          double epsilon = 1e-14;
-         Assert.assertEquals(yaw, RotationTools.computeYaw(rotation), epsilon);
-         Assert.assertEquals(pitch, RotationTools.computePitch(rotation), epsilon);
-         Assert.assertEquals(roll, RotationTools.computeRoll(rotation), epsilon);
+         assertEquals(yaw, RotationTools.computeYaw(rotation), epsilon);
+         assertEquals(pitch, RotationTools.computePitch(rotation), epsilon);
+         assertEquals(roll, RotationTools.computeRoll(rotation), epsilon);
       }
    }
 
@@ -582,13 +623,13 @@ public class Box3dTest
       }
    }
 
-   private static void assertEquals(Box3d box1, Box3d box2, double epsilon)
+   private static void assertBoxEquals(Box3d box1, Box3d box2, double epsilon)
    {
       assertTrue(box1.getTransformCopy().epsilonEquals(box2.getTransformCopy(), epsilon));
 
       for (Direction direction : Direction.values())
       {
-         Assert.assertEquals(box1.getDimension(direction), box2.getDimension(direction), epsilon);
+         assertEquals(box1.getDimension(direction), box2.getDimension(direction), epsilon);
       }
    }
    

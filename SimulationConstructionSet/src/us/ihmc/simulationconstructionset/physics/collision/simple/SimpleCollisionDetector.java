@@ -10,9 +10,9 @@ import us.ihmc.geometry.polytope.ExpandingPolytopeAlgorithm;
 import us.ihmc.geometry.polytope.GilbertJohnsonKeerthiCollisionDetector;
 import us.ihmc.geometry.polytope.SimplexPolytope;
 import us.ihmc.geometry.polytope.SupportingVertexHolder;
+import us.ihmc.robotics.geometry.BoundingBox3d;
 import us.ihmc.robotics.geometry.LineSegment3d;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.physics.CollisionShape;
 import us.ihmc.simulationconstructionset.physics.CollisionShapeDescription;
 import us.ihmc.simulationconstructionset.physics.CollisionShapeFactory;
@@ -21,30 +21,17 @@ import us.ihmc.simulationconstructionset.physics.collision.CollisionDetectionRes
 
 public class SimpleCollisionDetector implements ScsCollisionDetector
 {
+   private boolean VERBOSE = false;
+
    private final ArrayList<CollisionShape> collisionObjects = new ArrayList<CollisionShape>();
 
    // Temporary variables for computation:
    private final Point3d centerOne = new Point3d();
    private final Point3d centerTwo = new Point3d();
-   private final Vector3d centerToCenterVector = new Vector3d();
-
    private final Vector3d tempVector = new Vector3d();
-
-   private double objectSmoothingRadius = 0.00003;
 
    public SimpleCollisionDetector()
    {
-      this(0.00003);
-   }
-
-   public SimpleCollisionDetector(double objectSmoothingRadius)
-   {
-      this.objectSmoothingRadius = objectSmoothingRadius;
-   }
-
-   public void setObjectSmoothingRadius(double objectSmoothingRadius)
-   {
-      this.objectSmoothingRadius = objectSmoothingRadius;
    }
 
    @Override
@@ -56,18 +43,6 @@ public class SimpleCollisionDetector implements ScsCollisionDetector
    public CollisionShapeFactory getShapeFactory()
    {
       return new SimpleCollisionShapeFactory(this);
-   }
-
-   @Override
-   public void removeShape(Link link)
-   {
-   }
-
-   @Override
-   public CollisionShape lookupCollisionShape(Link link)
-   {
-      //TODO: What should we be doing here?
-      return null;
    }
 
    private final Random random = new Random(1776L);
@@ -86,9 +61,16 @@ public class SimpleCollisionDetector implements ScsCollisionDetector
       this.useSimpleSpeedupMethod = true;
    }
 
+   private final BoundingBox3d boundingBoxOne = new BoundingBox3d(0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+   private final BoundingBox3d boundingBoxTwo = new BoundingBox3d(0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+
    @Override
    public void performCollisionDetection(CollisionDetectionResult result)
-   {
+   {      
+      int boundingBoxChecks = 0;
+      int collisionChecks = 0;
+      int numberOfCollisions = 0;
+      
       int numberOfObjects = collisionObjects.size();
 
       if (useSimpleSpeedupMethod && (haveCollided == null))
@@ -115,6 +97,26 @@ public class SimpleCollisionDetector implements ScsCollisionDetector
             CollisionShape objectTwo = collisionObjects.get(j);
             CollisionShapeDescription<?> descriptionTwo = objectTwo.getTransformedCollisionShapeDescription();
 
+            if ((objectOne.getCollisionGroup() & objectTwo.getCollisionMask()) == 0x00)
+            {
+               continue;
+            }
+            
+            if ((objectTwo.getCollisionGroup() & objectOne.getCollisionMask()) == 0x00)
+            {
+               continue;
+            }
+
+            objectOne.getBoundingBox(boundingBoxOne);
+            objectTwo.getBoundingBox(boundingBoxTwo);
+
+            boundingBoxChecks++;
+            if (!boundingBoxOne.intersects(boundingBoxTwo))
+            {
+               continue;
+            }
+            
+            collisionChecks++;
             boolean areColliding = false;
 
             //TODO: Make this shorter and more efficient...
@@ -215,6 +217,8 @@ public class SimpleCollisionDetector implements ScsCollisionDetector
 
             if (areColliding)
             {
+               numberOfCollisions++;
+
                if (useSimpleSpeedupMethod) haveCollided[i][j] = true;
                //               ArrayList<CollisionShape> arrayList = collidingPairs.get(objectOne);
                //               if (arrayList == null)
@@ -229,6 +233,13 @@ public class SimpleCollisionDetector implements ScsCollisionDetector
                //               }
             }
          }
+      }
+      
+      if (VERBOSE)
+      {
+         System.out.println("\nboundingBoxChecks = " + boundingBoxChecks);
+         System.out.println("collisionChecks = " + collisionChecks);
+         System.out.println("numberOfCollisions = " + numberOfCollisions);
       }
    }
 
@@ -290,7 +301,7 @@ public class SimpleCollisionDetector implements ScsCollisionDetector
       double sphereRadius = descriptionTwo.getRadius();
       descriptionTwo.getCenter(centerOfSphere);
 
-      lineSegmentOne.getProjectionOntoLineSegment(centerOfSphere, closestPointOnOne);
+      lineSegmentOne.orthogonalProjection(centerOfSphere, closestPointOnOne);
 
       double distanceSquared = centerOfSphere.distanceSquared(closestPointOnOne);
 
@@ -424,6 +435,7 @@ public class SimpleCollisionDetector implements ScsCollisionDetector
       double sphereRadius = descriptionOne.getRadius();
       double polytopeSmoothingRadius = descriptionTwo.getSmoothingRadius();
 
+      //TODO: Remove trash generation...
       SupportingVertexHolder sphereAsSupportingVertexHolder = new SupportingVertexHolder()
       {
          @Override
@@ -452,8 +464,8 @@ public class SimpleCollisionDetector implements ScsCollisionDetector
             SupportingVertexHolder descriptionTwo, double smoothingRadiusTwo, CollisionDetectionResult result)
       {
       descriptionOne.getLineSegment(tempLineSegment);
-      final Point3d tempSegmentPointOne = tempLineSegment.getPointA();
-      final Point3d tempSegmentPointTwo = tempLineSegment.getPointB();
+      final Point3d tempSegmentPointOne = tempLineSegment.getFirstEndpoint();
+      final Point3d tempSegmentPointTwo = tempLineSegment.getSecondEndpoint();
 
       double capsuleRadius = descriptionOne.getRadius();
 
@@ -525,12 +537,59 @@ public class SimpleCollisionDetector implements ScsCollisionDetector
          // Need to first compute the intersecting regions...
 
          SimplexPolytope simplex = gjkCollisionDetector.getSimplex();
-         //TODO: Add points to the simplex when it is not a tetrahedral...
-         //TODO: Find more than one point per object...
 
-         //         System.out.println("simplex points = " + simplex.getNumberOfPoints());
+         if (simplex.getNumberOfPoints() == 1)
+         {
+            // Point at the origin. Likely exact point to point contact, so we can just ignore till a little more penetration.
+            return false;
+         }
+         
+         if (simplex.getNumberOfPoints() == 2)
+         {
+            // For now just try adding vertices in a few directions until you do have 4 vertices to start EPA with...
+            // Try the direction perpendicular to the line segment:
+            Point3d vertexOne = simplex.getPoint(0);
+            Point3d vertexTwo = simplex.getPoint(1);
+            
+            Vector3d directionVector = new Vector3d();
+            
+            getNormalToLineSegment(vertexOne, vertexTwo, directionVector);
+            tryAddingASimplexPointInThisSupportDirection(directionVector, supportingVertexHolderOne, supportingVertexHolderTwo, simplex);
+         }
+         
+         if (simplex.getNumberOfPoints() == 3)
+         {  
+            // For now just try adding vertices in a few directions until you do have 4 vertices to start EPA with...
+            // Try the direction perpendicular to the surface:
+            Point3d vertexOne = simplex.getPoint(0);
+            Point3d vertexTwo = simplex.getPoint(1);
+            Point3d vertexThree = simplex.getPoint(2);
+            
+            Vector3d directionVector = new Vector3d();
+            
+            getNormalToFace(vertexOne, vertexTwo, vertexThree, directionVector);
+            tryAddingASimplexPointInThisSupportDirection(directionVector, supportingVertexHolderOne, supportingVertexHolderTwo, simplex);
 
-         if (simplex.getNumberOfPoints() == 4)
+            if ((simplex.getNumberOfPoints() == 4) && (computeTripleProduct(simplex) < 1e-10))
+            {
+               return false;
+            }
+         }
+         
+         if (simplex.getNumberOfPoints() != 4)
+          {
+             System.err.println("\n-------------------\nTroublesome Polytopes!: ");
+             System.err.println("simplex = ");
+             System.err.println(simplex);
+             System.err.println("polytopeOneCopy = ");
+             System.err.println(supportingVertexHolderOne);
+             System.err.println("polytopeTwoCopy = ");
+             System.err.println(supportingVertexHolderTwo);
+             return false;
+          }
+            
+            
+//         if (simplex.getNumberOfPoints() == 4)
          {
             expandingPolytopeAlgorithm.setPolytopes(simplex, supportingVertexHolderOne, supportingVertexHolderTwo);
             try
@@ -567,6 +626,78 @@ public class SimpleCollisionDetector implements ScsCollisionDetector
 
       return false;
    }
+   
+   private final Vector3d tempVector12 = new Vector3d();
+   private final Vector3d tempVector13 = new Vector3d();
+   private final Vector3d tempVector14 = new Vector3d();
+   private final Vector3d tempVector12Cross13 = new Vector3d();
+
+   private double computeTripleProduct(SimplexPolytope simplex)
+   {
+      Point3d pointOne = simplex.getPoint(0);
+      Point3d pointTwo = simplex.getPoint(1);
+      Point3d pointThree = simplex.getPoint(2);
+      Point3d pointFour = simplex.getPoint(3);
+
+      tempVector12.sub(pointTwo, pointOne);
+      tempVector13.sub(pointThree, pointOne);
+      tempVector14.sub(pointFour, pointOne);
+      tempVector12Cross13.cross(tempVector12, tempVector13);
+      double tripleProduct = tempVector12Cross13.dot(tempVector14);
+      
+      return tripleProduct;
+   }
+
+   private void getNormalToLineSegment(Point3d vertexOne, Point3d vertexTwo, Vector3d normalToPack)
+   {
+      Vector3d tempVector1 = new Vector3d();
+      Vector3d tempVector2 = new Vector3d();
+      
+      tempVector1.sub(vertexTwo, vertexOne);
+      
+      double xMagnitude = Math.abs(tempVector1.getX());
+      double yMagnitude = Math.abs(tempVector1.getY());
+      double zMagnitude = Math.abs(tempVector1.getZ());
+      
+      if ((xMagnitude < yMagnitude) && (xMagnitude < zMagnitude))
+      {
+         tempVector2.set(1.0, 0.0, 0.0);
+      }
+      else if (yMagnitude < zMagnitude)
+      {
+         tempVector2.set(0.0, 1.0, 0.0);
+      }
+      else 
+      {
+         tempVector2.set(0.0, 0.0, 1.0);
+      }
+      
+      normalToPack.cross(tempVector1, tempVector2);
+   }
+   
+   private void getNormalToFace(Point3d vertexOne, Point3d vertexTwo, Point3d vertexThree, Vector3d normalToPack)
+   {
+      Vector3d tempVector1 = new Vector3d();
+      Vector3d tempVector2 = new Vector3d();
+      
+      tempVector1.sub(vertexTwo, vertexOne);
+      tempVector2.sub(vertexThree, vertexOne);
+      
+      normalToPack.cross(tempVector1, tempVector2);
+   }
+
+   private boolean tryAddingASimplexPointInThisSupportDirection(Vector3d supportDirection, SupportingVertexHolder supportingVertexHolderOne, SupportingVertexHolder supportingVertexHolderTwo,
+                                                             SimplexPolytope simplex)
+   {
+      Point3d supportingVertexOne = supportingVertexHolderOne.getSupportingVertex(supportDirection);
+      supportDirection.negate();
+      Point3d supportingVertexTwo = supportingVertexHolderTwo.getSupportingVertex(supportDirection);
+      
+      Point3d simplexPointToAdd = new Point3d(supportingVertexOne);
+      simplexPointToAdd.sub(supportingVertexTwo);
+      
+      return simplex.addVertex(simplexPointToAdd, supportingVertexOne, supportingVertexTwo);
+   }
 
    public void addShape(CollisionShape collisionShape)
    {
@@ -580,10 +711,10 @@ public class SimpleCollisionDetector implements ScsCollisionDetector
    public void getClosestPointsOnLineSegments(LineSegment3d segmentOne, LineSegment3d segmentTwo, Point3d closestPointOnOneToPack,
          Point3d closestPointOnTwoToPack)
    {
-      Point3d p0 = segmentOne.getPointA();
-      Point3d p1 = segmentOne.getPointB();
-      Point3d q0 = segmentTwo.getPointA();
-      Point3d q1 = segmentTwo.getPointB();
+      Point3d p0 = segmentOne.getFirstEndpoint();
+      Point3d p1 = segmentOne.getSecondEndpoint();
+      Point3d q0 = segmentTwo.getFirstEndpoint();
+      Point3d q1 = segmentTwo.getSecondEndpoint();
 
       uVector.sub(p1, p0);
       vVector.sub(q1, q0);

@@ -3,12 +3,12 @@ package us.ihmc.commonWalkingControlModules.trajectories;
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.graphics3DDescription.appearance.YoAppearance;
-import us.ihmc.graphics3DDescription.yoGraphics.BagOfBalls;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicPosition;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicVector;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsList;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -190,7 +190,7 @@ public class FinalApproachPositionTrajectoryGenerator extends PositionTrajectory
       this.finalDirection.normalize();
       this.finalDirection.get(tempVector);
       tempVector.negate();
-      GeometryTools.getRotationBasedOnNormal(axisAngleToWorld, tempVector);
+      GeometryTools.getAxisAngleFromZUpToVector(tempVector, axisAngleToWorld);
       rotationPlane.setIncludingFrame(this.finalDirection.getReferenceFrame(), axisAngleToWorld);
 
       this.approachDistance.set(approachDistance);

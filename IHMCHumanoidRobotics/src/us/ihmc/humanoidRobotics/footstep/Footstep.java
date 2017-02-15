@@ -478,16 +478,6 @@ public class Footstep
       ankleReferenceFrame.getPosition2dIncludingFrame(framePoint2dToPack);
    }
 
-   public boolean epsilonEquals(Footstep otherFootstep, double epsilon)
-   {
-      boolean arePosesEqual = ankleReferenceFrame.epsilonEquals(otherFootstep.ankleReferenceFrame, epsilon);
-      boolean bodiesHaveTheSameName = endEffector.getName().equals(otherFootstep.endEffector.getName());
-      boolean sameRobotSide = robotSide == otherFootstep.robotSide;
-      boolean isTrustHeightTheSame = trustHeight == otherFootstep.trustHeight;
-
-      return arePosesEqual && bodiesHaveTheSameName && sameRobotSide && isTrustHeightTheSame;
-   }
-
    public void setFootstepType(FootstepType footstepType)
    {
       this.footstepType = footstepType;
@@ -496,17 +486,6 @@ public class Footstep
    public FootstepType getFootstepType()
    {
       return footstepType;
-   }
-
-   public String toString()
-   {
-      FrameOrientation frameOrientation = new FrameOrientation(ankleReferenceFrame);
-      frameOrientation.changeFrame(ReferenceFrame.getWorldFrame());
-
-      double[] ypr = frameOrientation.getYawPitchRoll();
-      String yawPitchRoll = "YawPitchRoll = " + Arrays.toString(ypr);
-
-      return "id: " + id + " - pose: " + ankleReferenceFrame + " - trustHeight = " + trustHeight + "\n\tYawPitchRoll= {" + yawPitchRoll + "}";
    }
 
    public boolean isScriptedFootstep()
@@ -519,4 +498,35 @@ public class Footstep
       this.scriptedFootstep = scriptedFootstep;
    }
 
+   public boolean epsilonEquals(Footstep otherFootstep, double epsilon)
+   {
+      boolean arePosesEqual = ankleReferenceFrame.epsilonEquals(otherFootstep.ankleReferenceFrame, epsilon);
+      boolean bodiesHaveTheSameName = endEffector.getName().equals(otherFootstep.endEffector.getName());
+      boolean sameRobotSide = robotSide == otherFootstep.robotSide;
+      boolean isTrustHeightTheSame = trustHeight == otherFootstep.trustHeight;
+
+      boolean sameWaypoints = swingWaypoints.size() == otherFootstep.swingWaypoints.size();
+      if (sameWaypoints)
+      {
+         for (int i = 0; i < swingWaypoints.size(); i++)
+         {
+            Point3d waypoint = swingWaypoints.get(i);
+            Point3d otherWaypoint = otherFootstep.swingWaypoints.get(i);
+            sameWaypoints = sameWaypoints && waypoint.epsilonEquals(otherWaypoint, epsilon);
+         }
+      }
+
+      return arePosesEqual && bodiesHaveTheSameName && sameRobotSide && isTrustHeightTheSame && sameWaypoints;
+   }
+
+   public String toString()
+   {
+      FrameOrientation frameOrientation = new FrameOrientation(ankleReferenceFrame);
+      frameOrientation.changeFrame(ReferenceFrame.getWorldFrame());
+
+      double[] ypr = frameOrientation.getYawPitchRoll();
+      String yawPitchRoll = "YawPitchRoll = " + Arrays.toString(ypr);
+
+      return "id: " + id + " - pose: " + ankleReferenceFrame + " - trustHeight = " + trustHeight + "\n\tYawPitchRoll= {" + yawPitchRoll + "}";
+   }
 }
