@@ -205,66 +205,35 @@ public class NewtonsCradleSimulation
       ArrayList<Robot> robots = new ArrayList<>();
 
       double ballRadius = 0.2;
+      double ballMass = 1.0;
+      double ballRadiusOfGyrationPercent = 1.0;
+
       double cylinderRadius = 0.2;
       double cylinderHeight = 0.5;
-      
+      double cylinderMass = 1.0;
+      double cylinderRadiusOfGyrationPercent = 1.0;
+
       double capsuleRadius = 0.2;
       double capsuleHeight = 0.1 + 2.0 * capsuleRadius;
+      double capsuleMass = 1.0;
+      double capsuleRadiusOfGyrationPercent = 1.0;
 
       double initialVelocity = 1.0;
 
-      SingleBallRobotDescription ballDescription = new SingleBallRobotDescription();
-      ballDescription.setName("ball");
-      ballDescription.setMass(1.0);
-      ballDescription.setRadius(ballRadius);
-      ballDescription.setCollisionGroup(0xffff);
-      ballDescription.setCollisionMask(0xffff);
-      ballDescription.setAppearance(YoAppearance.DarkCyan());
-      ballDescription.setAddStripes(true);
-      ballDescription.setStripeAppearance(YoAppearance.Gold());
-
-      RobotFromDescription ballRobot = new RobotFromDescription(ballDescription.createRobotDescription());
+      RobotFromDescription ballRobot = createASingleBallRobot(ballRadius, ballMass, ballRadiusOfGyrationPercent);
       robots.add(ballRobot);
       FloatingJoint ballRootJoint = (FloatingJoint) ballRobot.getRootJoints().get(0);
       ballRootJoint.setPosition(-1.0, -2.0 * ballRadius - cylinderHeight, ballRadius * 1.02);
       ballRootJoint.setVelocity(initialVelocity, 0.0, 0.0);
       
-      SingleCylinderRobotDescription cylinderDescription = new SingleCylinderRobotDescription();
-      cylinderDescription.setName("cylinder");
-      cylinderDescription.setMass(1.0);
-      cylinderDescription.setRadius(cylinderRadius);
-      cylinderDescription.setHeight(cylinderHeight);
-      cylinderDescription.setCollisionGroup(0xffff);
-      cylinderDescription.setCollisionMask(0xffff);
-      cylinderDescription.setAppearance(YoAppearance.DarkCyan());
-      cylinderDescription.setAddStripes(true);
-      cylinderDescription.setStripeAppearance(YoAppearance.Gold());
-
-      RobotFromDescription cylinderRobot = new RobotFromDescription(cylinderDescription.createRobotDescription());
+      RobotFromDescription cylinderRobot = createASingleCylinderRobot(cylinderRadius, cylinderHeight, cylinderMass, cylinderRadiusOfGyrationPercent);
       robots.add(cylinderRobot);
       FloatingJoint cylinderRootJoint = (FloatingJoint) cylinderRobot.getRootJoints().get(0);
       cylinderRootJoint.setPosition(-1.0, 0.0, cylinderRadius * 1.02);
       cylinderRootJoint.setVelocity(initialVelocity, 0.0, 0.0);
       cylinderRootJoint.setYawPitchRoll(0.0, 0.0, Math.PI/2.0);
       
-      SingleCapsuleRobotDescription capsuleDescription = new SingleCapsuleRobotDescription();
-      capsuleDescription.setName("capsule");
-      capsuleDescription.setMass(1.0);
-      capsuleDescription.setRadius(capsuleRadius);
-      capsuleDescription.setHeight(capsuleHeight);
-      capsuleDescription.setCollisionGroup(0xffff);
-      capsuleDescription.setCollisionMask(0xffff);
-      
-      AppearanceDefinition capsuleAppearance = YoAppearance.DarkCyan();
-      capsuleAppearance.setTransparency(0.5);
-      capsuleDescription.setAppearance(capsuleAppearance);
-      capsuleDescription.setAddStripes(true);
-      
-      capsuleAppearance = YoAppearance.Gold();
-      capsuleAppearance.setTransparency(0.5);
-      capsuleDescription.setStripeAppearance(capsuleAppearance);
-
-      RobotFromDescription capsuleRobot = new RobotFromDescription(capsuleDescription.createRobotDescription());
+      RobotFromDescription capsuleRobot = createASingleCapsuleRobot(capsuleRadius, capsuleHeight, capsuleMass, capsuleRadiusOfGyrationPercent);
       robots.add(capsuleRobot);
       FloatingJoint capsuleRootJoint = (FloatingJoint) capsuleRobot.getRootJoints().get(0);
       capsuleRootJoint.setPosition(-1.0, cylinderHeight/2.0 + capsuleHeight/2.0 + capsuleRadius, capsuleRadius * 1.02);
@@ -302,6 +271,68 @@ public class NewtonsCradleSimulation
       scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
 
       scs.startOnAThread();
+   }
+
+   private static RobotFromDescription createASingleCapsuleRobot(double capsuleRadius, double capsuleHeight, double capsuleMass,
+                                                                 double capsuleRadiusOfGyrationPercent)
+   {
+      SingleCapsuleRobotDescription capsuleDescription = new SingleCapsuleRobotDescription();
+      capsuleDescription.setName("capsule");
+      capsuleDescription.setMass(capsuleMass);
+      capsuleDescription.setRadius(capsuleRadius);
+      capsuleDescription.setHeight(capsuleHeight);
+      capsuleDescription.setRadiusOfGyrationPercent(capsuleRadiusOfGyrationPercent);
+
+      capsuleDescription.setCollisionGroup(0xffff);
+      capsuleDescription.setCollisionMask(0xffff);
+      
+      AppearanceDefinition capsuleAppearance = YoAppearance.DarkCyan();
+      capsuleAppearance.setTransparency(0.5);
+      capsuleDescription.setAppearance(capsuleAppearance);
+      capsuleDescription.setAddStripes(true);
+      
+      capsuleAppearance = YoAppearance.Gold();
+      capsuleAppearance.setTransparency(0.5);
+      capsuleDescription.setStripeAppearance(capsuleAppearance);
+
+      RobotFromDescription capsuleRobot = new RobotFromDescription(capsuleDescription.createRobotDescription());
+      return capsuleRobot;
+   }
+
+   private static RobotFromDescription createASingleCylinderRobot(double cylinderRadius, double cylinderHeight, double cylinderMass,
+                                                                  double cylinderRadiusOfGyrationPercent)
+   {
+      SingleCylinderRobotDescription cylinderDescription = new SingleCylinderRobotDescription();
+      cylinderDescription.setName("cylinder");
+      cylinderDescription.setMass(cylinderMass);
+      cylinderDescription.setRadius(cylinderRadius);
+      cylinderDescription.setHeight(cylinderHeight);
+      cylinderDescription.setRadiusOfGyrationPercent(cylinderRadiusOfGyrationPercent);
+
+      cylinderDescription.setCollisionGroup(0xffff);
+      cylinderDescription.setCollisionMask(0xffff);
+      cylinderDescription.setAppearance(YoAppearance.DarkCyan());
+      cylinderDescription.setAddStripes(true);
+      cylinderDescription.setStripeAppearance(YoAppearance.Gold());
+      RobotFromDescription cylinderRobot = new RobotFromDescription(cylinderDescription.createRobotDescription());
+      return cylinderRobot;
+   }
+
+   private static RobotFromDescription createASingleBallRobot(double ballRadius, double ballMass, double radiusOfGyrationPercent)
+   {
+      SingleBallRobotDescription ballDescription = new SingleBallRobotDescription();
+      ballDescription.setName("ball");
+      ballDescription.setMass(ballMass);
+      ballDescription.setRadius(ballRadius);
+      ballDescription.setRadiusOfGyrationPercent(radiusOfGyrationPercent);
+
+      ballDescription.setCollisionGroup(0xffff);
+      ballDescription.setCollisionMask(0xffff);
+      ballDescription.setAppearance(YoAppearance.DarkCyan());
+      ballDescription.setAddStripes(true);
+      ballDescription.setStripeAppearance(YoAppearance.Gold());
+      RobotFromDescription ballRobot = new RobotFromDescription(ballDescription.createRobotDescription());
+      return ballRobot;
    }
 
    public static void createRowOfDominosSimulation()
