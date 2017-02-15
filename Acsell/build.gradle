@@ -73,6 +73,7 @@ dependencies {
    compile ihmc.getProjectDependency(":IHMCPerception")
    compile ihmc.getProjectDependency(":IHMCWholeBodyController")
    compile ihmc.getProjectDependency(":IHMCJavaToolkit")
+    compile ihmc.getProjectDependency(":IHMCJavaExtensions")
    compile ihmc.getProjectDependency(":IHMCRoboticsToolkit")
    compile ihmc.getProjectDependency(":IHMCRobotDescription")
    compile ihmc.getProjectDependency(":IHMCRobotModels")

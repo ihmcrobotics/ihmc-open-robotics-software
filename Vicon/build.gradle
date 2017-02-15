@@ -41,6 +41,7 @@ dependencies {
     compile group: 'javax.vecmath', name: 'vecmath', version: '1.5.2'
 
     compile ihmc.getProjectDependency(":IHMCJavaToolkit")
+    compile ihmc.getProjectDependency(":IHMCJavaExtensions")
     compile ihmc.getProjectDependency(":IHMCCommunication")
     compile ihmc.getProjectDependency(":IHMCRoboticsToolkit")
     compile ihmc.getProjectDependency(":SimulationConstructionSet")
