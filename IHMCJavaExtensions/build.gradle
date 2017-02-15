@@ -38,15 +38,10 @@ jar {
     }
 }
 
-repositories ihmc.ihmcDefaultArtifactProxies()
-
 repositories {
+    mavenCentral()
     mavenLocal()
     jcenter()
-    mavenCentral()
-    maven {
-        url "http://artifactory.ihmc.us/artifactory/thirdparty/"
-    }
 }
 
 def strings = ['ihmc', 'robotics']
