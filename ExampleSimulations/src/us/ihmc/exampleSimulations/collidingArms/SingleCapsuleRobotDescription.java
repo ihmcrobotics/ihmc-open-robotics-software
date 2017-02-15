@@ -15,6 +15,8 @@ public class SingleCapsuleRobotDescription
    private double mass = 0.6;
    private double radius = 0.2;
    private double height = 0.5;
+   private double radiusOfGyrationPercent = 1.0;
+
    private int collisionGroup = 0xffff;
    private int collisionMask = 0xffff;
    private AppearanceDefinition appearance = YoAppearance.Aqua();
@@ -43,6 +45,11 @@ public class SingleCapsuleRobotDescription
    public void setHeight(double height)
    {
       this.height = height;
+   }
+
+   public void setRadiusOfGyrationPercent(double radiusOfGyrationPercent)
+   {
+      this.radiusOfGyrationPercent = radiusOfGyrationPercent;
    }
 
    public void setCollisionGroup(int collisionGroup)
@@ -81,7 +88,7 @@ public class SingleCapsuleRobotDescription
 
       FloatingJointDescription rootJoint = new FloatingJointDescription("capsule", name);
       LinkDescription capsuleLink = new LinkDescription("capsuleLink");
-      capsuleLink.setMassAndRadiiOfGyration(mass, radius, radius, height);
+      capsuleLink.setMassAndRadiiOfGyration(mass, radiusOfGyrationPercent * radius, radiusOfGyrationPercent * radius, radiusOfGyrationPercent * height);
 
       LinkGraphicsDescription linkGraphics = new LinkGraphicsDescription();
 //      linkGraphics.translate(0.0, 0.0, -height / 2.0);

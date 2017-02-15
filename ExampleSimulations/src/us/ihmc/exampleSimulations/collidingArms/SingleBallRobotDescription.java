@@ -14,6 +14,8 @@ public class SingleBallRobotDescription
    private String name;
    private double mass = 0.6;
    private double radius = 0.2;
+   private double radiusOfGyrationPercent = 1.0;
+
    private int collisionGroup = 0xffff;
    private int collisionMask = 0xffff;
    private AppearanceDefinition appearance = YoAppearance.Red();
@@ -37,6 +39,11 @@ public class SingleBallRobotDescription
    public void setRadius(double radius)
    {
       this.radius = radius;
+   }
+
+   public void setRadiusOfGyrationPercent(double radiusOfGyrationPercent)
+   {
+      this.radiusOfGyrationPercent = radiusOfGyrationPercent;
    }
 
    public void setCollisionGroup(int collisionGroup)
@@ -75,7 +82,7 @@ public class SingleBallRobotDescription
 
       FloatingJointDescription rootJoint = new FloatingJointDescription("ball", name);
       LinkDescription ballLink = new LinkDescription("ballLink");
-      ballLink.setMassAndRadiiOfGyration(mass, radius, radius, radius);
+      ballLink.setMassAndRadiiOfGyration(mass, radiusOfGyrationPercent * radius, radiusOfGyrationPercent * radius, radiusOfGyrationPercent * radius);
 
       LinkGraphicsDescription linkGraphics = new LinkGraphicsDescription();
       linkGraphics.addSphere(radius, appearance);
