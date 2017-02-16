@@ -7,12 +7,12 @@ import java.io.PrintStream;
 
 import org.junit.Test;
 
+import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.continuousIntegration.IntegrationCategory;
 
 public class PrintToolsTest
 {
-	@ContinuousIntegrationTest(estimatedDuration = 0.0, categoriesOverride = IntegrationCategory.EXCLUDE)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testPrintTools() throws Exception
    {
@@ -31,5 +31,10 @@ public class PrintToolsTest
       System.out.println("ByteArrayOutputStream.toString(): " + byteArrayOutputStream.toString());
       
       assertTrue("PrintTools didn't work.", byteArrayOutputStream.toString().startsWith("[INFO] (PrintToolsTest.java:25): Test log tools!"));
+   }
+	
+	public static void main(String[] args)
+   {
+      MutationTestFacilitator.facilitateMutationTestForClass(PrintTools.class, PrintToolsTest.class);
    }
 }
