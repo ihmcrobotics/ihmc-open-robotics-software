@@ -9,6 +9,7 @@ import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.List;
 
+import us.ihmc.commons.Conversions;
 import us.ihmc.robotDataLogger.LogIndex;
 import us.ihmc.robotDataLogger.jointState.JointState;
 import us.ihmc.robotDataLogger.logger.LogPropertiesReader;
@@ -21,7 +22,6 @@ import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.dataStructures.variable.LongYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.robotDescription.RobotDescription;
-import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.tools.compression.SnappyUtils;
@@ -204,7 +204,7 @@ public class YoVariableLogPlaybackRobot extends VisualizerRobot implements Rewou
          }
 
          timestamp.set(logLongArray.get());
-         robotTime.set(TimeTools.nanoSecondstoSeconds(timestamp.getLongValue() - initialTimestamp));
+         robotTime.set(Conversions.nanoSecondstoSeconds(timestamp.getLongValue() - initialTimestamp));
 
          for (int i = 0; i < variables.size(); i++)
          {

@@ -6,6 +6,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
+import us.ihmc.commons.Conversions;
 import us.ihmc.footstepPlanning.AnytimeFootstepPlanner;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlannerGoal;
@@ -20,7 +21,6 @@ import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.tools.thread.ThreadTools;
 
@@ -291,7 +291,7 @@ public class SimplePlanarRegionBipedalAnytimeFootstepPlanner extends PlanarRegio
             stack.clear();
 
          long timeInNano = System.nanoTime();
-         if (TimeTools.nanoSecondstoSeconds(timeInNano - planningStartTime.getLongValue()) > timeout.getDoubleValue())
+         if (Conversions.nanoSecondstoSeconds(timeInNano - planningStartTime.getLongValue()) > timeout.getDoubleValue())
             stack.clear();
       }
 

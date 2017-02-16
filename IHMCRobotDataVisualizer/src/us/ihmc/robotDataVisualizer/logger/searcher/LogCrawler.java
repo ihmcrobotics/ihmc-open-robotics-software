@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 
+import us.ihmc.commons.Conversions;
 import us.ihmc.modelFileLoaders.SdfLoader.GeneralizedSDFRobotModel;
 import us.ihmc.modelFileLoaders.SdfLoader.RobotDescriptionFromSDFLoader;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.SDFModelLoader;
@@ -14,7 +15,6 @@ import us.ihmc.robotDataLogger.logger.YoVariableLoggerListener;
 import us.ihmc.robotDataLogger.logger.converters.LogFormatUpdater;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.robotDescription.RobotDescription;
-import us.ihmc.robotics.time.TimeTools;
 
 public class LogCrawler implements Runnable
 {
@@ -111,7 +111,7 @@ public class LogCrawler implements Runnable
       {
          robot.close();
          long endTime = System.currentTimeMillis();
-         System.out.println("Finished searching " + logFileName + ", took " + TimeTools.milliSecondsToMinutes(endTime - startTime) + " minutes");
+         System.out.println("Finished searching " + logFileName + ", took " + Conversions.milliSecondsToMinutes(endTime - startTime) + " minutes");
          playbackListener.onFinish();
       }
    }

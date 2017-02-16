@@ -14,6 +14,7 @@ import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.WrenchBasedFootSwitch;
+import us.ihmc.commons.Conversions;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -32,7 +33,6 @@ import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
-import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.sensorProcessing.diagnostic.DiagnosticParameters;
 import us.ihmc.sensorProcessing.diagnostic.DiagnosticParameters.DiagnosticEnvironment;
 import us.ihmc.sensorProcessing.diagnostic.DiagnosticSensorProcessingConfiguration;
@@ -268,7 +268,7 @@ public class AutomatedDiagnosticSimulationFactory implements RobotController
 
       outputWriter.writeAfterController(0);
       long endTime = System.nanoTime();
-      controllerTime.set(TimeTools.nanoSecondstoSeconds(endTime - startTime));
+      controllerTime.set(Conversions.nanoSecondstoSeconds(endTime - startTime));
       averageControllerTime.update();
    }
 

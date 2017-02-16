@@ -2,12 +2,12 @@ package us.ihmc.acsell;
 
 import javax.vecmath.Vector3d;
 
+import us.ihmc.commons.Conversions;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotModels.visualizer.RobotVisualizer;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.tools.io.printing.PrintTools;
 
 /**
@@ -82,7 +82,7 @@ public class CostOfTransportCalculator implements RobotVisualizer
       int currentSample = sampleIndex(index);
       int historicSample = sampleIndex(index + 1);
       
-      this.robotTime[currentSample] = TimeTools.nanoSecondstoSeconds(timestamp);
+      this.robotTime[currentSample] = Conversions.nanoSecondstoSeconds(timestamp);
       this.totalWork[currentSample] = totalWorkVariable.getDoubleValue();
       
       fullRobotModel.getRootJoint().getTranslation(position);

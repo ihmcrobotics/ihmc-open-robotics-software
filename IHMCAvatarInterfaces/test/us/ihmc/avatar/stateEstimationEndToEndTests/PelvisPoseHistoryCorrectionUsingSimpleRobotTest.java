@@ -11,6 +11,7 @@ import javax.vecmath.Vector4d;
 
 import org.junit.Test;
 
+import us.ihmc.commons.Conversions;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.humanoidRobotics.communication.packets.StampedPosePacket;
@@ -29,7 +30,6 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SixDoFJoint;
-import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.Robot;
@@ -291,7 +291,7 @@ public class PelvisPoseHistoryCorrectionUsingSimpleRobotTest
    private void setupCorrector()
    {
       externalPelvisPoseCreator = new ExternalPelvisPoseCreator();
-      PelvisPoseHistoryCorrection pelvisCorrector = new PelvisPoseHistoryCorrection(sixDofPelvisJoint, TimeTools.nanoSecondstoSeconds(1000000), registry, 100,
+      PelvisPoseHistoryCorrection pelvisCorrector = new PelvisPoseHistoryCorrection(sixDofPelvisJoint, Conversions.nanoSecondstoSeconds(1000000), registry, 100,
             externalPelvisPoseCreator);
       PelvisPoseHistoryCorrectorController robotController = new PelvisPoseHistoryCorrectorController(pelvisCorrector, simulationConstructionSet);
       robot.setController(robotController);
@@ -372,21 +372,21 @@ public class PelvisPoseHistoryCorrectionUsingSimpleRobotTest
          targetYaw = RotationTools.computeYaw(targetRotation);
          error.set(targetTranslation.getX(), targetTranslation.getY(), targetTranslation.getZ(), targetYaw);
 
-         long timeStamp = TimeTools.secondsToNanoSeconds(simulationConstructionSet.getTime());
+         long timeStamp = Conversions.secondsToNanoSeconds(simulationConstructionSet.getTime());
          TimeStampedTransform3D timeStampedTransform = new TimeStampedTransform3D(targets[i], timeStamp);
          StampedPosePacket posePacket = new StampedPosePacket("/pelvis", timeStampedTransform, 1.0);
 
-         success &= simulateAndBlockAndCatchExceptions(TimeTools.nanoSecondstoSeconds(1000000) * 3);
+         success &= simulateAndBlockAndCatchExceptions(Conversions.nanoSecondstoSeconds(1000000) * 3);
          externalPelvisPoseCreator.setNewestPose(posePacket);
 
          while (translationClippedAlphaValue.getDoubleValue() > 0.2 || rotationClippedAlphaValue.getDoubleValue() > 0.2)
          {
-            success &= simulateAndBlockAndCatchExceptions(TimeTools.nanoSecondstoSeconds(1000000) * 3);
+            success &= simulateAndBlockAndCatchExceptions(Conversions.nanoSecondstoSeconds(1000000) * 3);
          }
 
          while (translationClippedAlphaValue.getDoubleValue() < 0.9999999 && rotationClippedAlphaValue.getDoubleValue() <0.9999999)
          {
-            success &= simulateAndBlockAndCatchExceptions(TimeTools.nanoSecondstoSeconds(1000000) * 100);
+            success &= simulateAndBlockAndCatchExceptions(Conversions.nanoSecondstoSeconds(1000000) * 100);
          }
 
          double xError = Math.abs(correctedPelvis_x.getDoubleValue() - error.getX());
@@ -438,21 +438,21 @@ public class PelvisPoseHistoryCorrectionUsingSimpleRobotTest
          targetYaw = RotationTools.computeYaw(targetRotation);
          error.set(targetTranslation.getX(), targetTranslation.getY(), targetTranslation.getZ(), targetYaw);
          
-         long timeStamp = TimeTools.secondsToNanoSeconds(simulationConstructionSet.getTime());
+         long timeStamp = Conversions.secondsToNanoSeconds(simulationConstructionSet.getTime());
          TimeStampedTransform3D timeStampedTransform = new TimeStampedTransform3D(targets[i], timeStamp);
          StampedPosePacket posePacket = new StampedPosePacket("/pelvis", timeStampedTransform, 1.0);
          
-         success &= simulateAndBlockAndCatchExceptions(TimeTools.nanoSecondstoSeconds(1000000) * 3);
+         success &= simulateAndBlockAndCatchExceptions(Conversions.nanoSecondstoSeconds(1000000) * 3);
          externalPelvisPoseCreator.setNewestPose(posePacket);
 
          while (translationClippedAlphaValue.getDoubleValue() > 0.2)
          {
-            success &= simulateAndBlockAndCatchExceptions(TimeTools.nanoSecondstoSeconds(1000000) * 3);
+            success &= simulateAndBlockAndCatchExceptions(Conversions.nanoSecondstoSeconds(1000000) * 3);
          }
          
          while (translationClippedAlphaValue.getDoubleValue() < 0.9999999)
          {
-            success &= simulateAndBlockAndCatchExceptions(TimeTools.nanoSecondstoSeconds(1000000) * 100);
+            success &= simulateAndBlockAndCatchExceptions(Conversions.nanoSecondstoSeconds(1000000) * 100);
          }
          
          double xError = Math.abs(correctedPelvis_x.getDoubleValue() - error.getX());
@@ -504,21 +504,21 @@ public class PelvisPoseHistoryCorrectionUsingSimpleRobotTest
 
          robotPose.setTranslation(i, i, i);
 
-         long timeStamp = TimeTools.secondsToNanoSeconds(simulationConstructionSet.getTime());
+         long timeStamp = Conversions.secondsToNanoSeconds(simulationConstructionSet.getTime());
          TimeStampedTransform3D timeStampedTransform = new TimeStampedTransform3D(targets[i], timeStamp);
          StampedPosePacket posePacket = new StampedPosePacket("/pelvis", timeStampedTransform, 1.0);
 
-         success &= simulateAndBlockAndCatchExceptions(TimeTools.nanoSecondstoSeconds(1000000) * 3);
+         success &= simulateAndBlockAndCatchExceptions(Conversions.nanoSecondstoSeconds(1000000) * 3);
          externalPelvisPoseCreator.setNewestPose(posePacket);
 
          while (translationClippedAlphaValue.getDoubleValue() > 0.2 || rotationClippedAlphaValue.getDoubleValue() > 0.2)
          {
-            success &= simulateAndBlockAndCatchExceptions(TimeTools.nanoSecondstoSeconds(1000000) * 3);
+            success &= simulateAndBlockAndCatchExceptions(Conversions.nanoSecondstoSeconds(1000000) * 3);
          }
 
          while (translationClippedAlphaValue.getDoubleValue() < 0.9999999 && rotationClippedAlphaValue.getDoubleValue() < 0.9999999)
          {
-            success &= simulateAndBlockAndCatchExceptions(TimeTools.nanoSecondstoSeconds(1000000) * 100);
+            success &= simulateAndBlockAndCatchExceptions(Conversions.nanoSecondstoSeconds(1000000) * 100);
          }
 
          double xError = Math.abs(correctedPelvis_x.getDoubleValue() - error.getX());
@@ -572,21 +572,21 @@ public class PelvisPoseHistoryCorrectionUsingSimpleRobotTest
          
          robotPose.setTranslation(i, i, i);
          
-         long timeStamp = TimeTools.secondsToNanoSeconds(simulationConstructionSet.getTime());
+         long timeStamp = Conversions.secondsToNanoSeconds(simulationConstructionSet.getTime());
          TimeStampedTransform3D timeStampedTransform = new TimeStampedTransform3D(targets[i], timeStamp);
          StampedPosePacket posePacket = new StampedPosePacket("/pelvis", timeStampedTransform, 1.0);
          
-         success &= simulateAndBlockAndCatchExceptions(TimeTools.nanoSecondstoSeconds(1000000) * 3);
+         success &= simulateAndBlockAndCatchExceptions(Conversions.nanoSecondstoSeconds(1000000) * 3);
          externalPelvisPoseCreator.setNewestPose(posePacket);
          
          while (translationClippedAlphaValue.getDoubleValue() > 0.2)
          {
-            success &= simulateAndBlockAndCatchExceptions(TimeTools.nanoSecondstoSeconds(1000000) * 3);
+            success &= simulateAndBlockAndCatchExceptions(Conversions.nanoSecondstoSeconds(1000000) * 3);
          }
          
          while (translationClippedAlphaValue.getDoubleValue() < 0.9999999)
          {
-            success &= simulateAndBlockAndCatchExceptions(TimeTools.nanoSecondstoSeconds(1000000) * 100);
+            success &= simulateAndBlockAndCatchExceptions(Conversions.nanoSecondstoSeconds(1000000) * 100);
          }
          
          double xError = Math.abs(correctedPelvis_x.getDoubleValue() - error.getX());
@@ -639,21 +639,21 @@ public class PelvisPoseHistoryCorrectionUsingSimpleRobotTest
 
          robotPose.setTranslation(i, i, i / numTargets);
 
-         long timeStamp = TimeTools.secondsToNanoSeconds(simulationConstructionSet.getTime());
+         long timeStamp = Conversions.secondsToNanoSeconds(simulationConstructionSet.getTime());
          TimeStampedTransform3D timeStampedTransform = new TimeStampedTransform3D(targets[i], timeStamp);
          StampedPosePacket posePacket = new StampedPosePacket("/pelvis", timeStampedTransform, 1.0);
 
-         success &= simulateAndBlockAndCatchExceptions(TimeTools.nanoSecondstoSeconds(1000000) * 3);
+         success &= simulateAndBlockAndCatchExceptions(Conversions.nanoSecondstoSeconds(1000000) * 3);
          externalPelvisPoseCreator.setNewestPose(posePacket);
 
          while (translationClippedAlphaValue.getDoubleValue() > 0.2 || rotationClippedAlphaValue.getDoubleValue() > 0.2)
          {
-            success &= simulateAndBlockAndCatchExceptions(TimeTools.nanoSecondstoSeconds(1000000) * 3);
+            success &= simulateAndBlockAndCatchExceptions(Conversions.nanoSecondstoSeconds(1000000) * 3);
          }
 
          while (translationClippedAlphaValue.getDoubleValue() < 0.9999999 && rotationClippedAlphaValue.getDoubleValue() < 0.9999999)
          {
-            success &= simulateAndBlockAndCatchExceptions(TimeTools.nanoSecondstoSeconds(1000000) * 100);
+            success &= simulateAndBlockAndCatchExceptions(Conversions.nanoSecondstoSeconds(1000000) * 100);
          }
 
          double xError = Math.abs(correctedPelvis_x.getDoubleValue() - error.getX());
@@ -708,21 +708,21 @@ public class PelvisPoseHistoryCorrectionUsingSimpleRobotTest
          
          robotPose.setTranslation(i, i, i / numTargets);
          
-         long timeStamp = TimeTools.secondsToNanoSeconds(simulationConstructionSet.getTime());
+         long timeStamp = Conversions.secondsToNanoSeconds(simulationConstructionSet.getTime());
          TimeStampedTransform3D timeStampedTransform = new TimeStampedTransform3D(targets[i], timeStamp);
          StampedPosePacket posePacket = new StampedPosePacket("/pelvis", timeStampedTransform, 1.0);
          
-         success &= simulateAndBlockAndCatchExceptions(TimeTools.nanoSecondstoSeconds(1000000) * 3);
+         success &= simulateAndBlockAndCatchExceptions(Conversions.nanoSecondstoSeconds(1000000) * 3);
          externalPelvisPoseCreator.setNewestPose(posePacket);
          
          while (translationClippedAlphaValue.getDoubleValue() > 0.2)
          {
-            success &= simulateAndBlockAndCatchExceptions(TimeTools.nanoSecondstoSeconds(1000000) * 3);
+            success &= simulateAndBlockAndCatchExceptions(Conversions.nanoSecondstoSeconds(1000000) * 3);
          }
          
          while (translationClippedAlphaValue.getDoubleValue() < 0.9999999)
          {
-            success &= simulateAndBlockAndCatchExceptions(TimeTools.nanoSecondstoSeconds(1000000) * 100);
+            success &= simulateAndBlockAndCatchExceptions(Conversions.nanoSecondstoSeconds(1000000) * 100);
          }
          
          double xError = Math.abs(correctedPelvis_x.getDoubleValue() - error.getX());
@@ -868,7 +868,7 @@ public class PelvisPoseHistoryCorrectionUsingSimpleRobotTest
       {
          refFrame.update();
          sixDofPelvisJoint.setPositionAndRotation(robotPose);
-         pelvisPoseHistoryCorrection.doControl(TimeTools.secondsToNanoSeconds(scs.getTime()));
+         pelvisPoseHistoryCorrection.doControl(Conversions.secondsToNanoSeconds(scs.getTime()));
          floatingJoint.setRotationAndTranslation(sixDofPelvisJoint.getJointTransform3D());
       }
    }

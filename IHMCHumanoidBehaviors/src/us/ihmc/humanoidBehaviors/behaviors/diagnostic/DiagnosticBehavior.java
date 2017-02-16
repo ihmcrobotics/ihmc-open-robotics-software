@@ -14,6 +14,7 @@ import org.ejml.data.DenseMatrix64F;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.partNames.LimbName;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commons.Conversions;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.ArmTrajectoryBehavior;
@@ -89,7 +90,6 @@ import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTestTools;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.SpatialMotionVector;
-import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.tools.taskExecutor.NullTask;
 import us.ihmc.tools.taskExecutor.PipeLine;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
@@ -2677,13 +2677,13 @@ public class DiagnosticBehavior extends AbstractBehavior
    {
       RigidBodyTransform lastPelvisPoseInWorldFrame = new RigidBodyTransform();
       lastPelvisPoseInWorldFrame.set(fullRobotModel.getPelvis().getBodyFixedFrame().getTransformToWorldFrame());
-      stateEstimatorPelvisPoseBuffer.put(lastPelvisPoseInWorldFrame, TimeTools.secondsToNanoSeconds(yoTime.getDoubleValue()));
+      stateEstimatorPelvisPoseBuffer.put(lastPelvisPoseInWorldFrame, Conversions.secondsToNanoSeconds(yoTime.getDoubleValue()));
 
       if (isIcpOffsetSenderEnabled.getBooleanValue())
       {
          if (yoTime.getDoubleValue() > previousIcpPacketSentTime.getDoubleValue() + 1.0)
          {
-            long timestamp = TimeTools.secondsToNanoSeconds(yoTime.getDoubleValue() - icpTimeDelay.getDoubleValue());
+            long timestamp = Conversions.secondsToNanoSeconds(yoTime.getDoubleValue() - icpTimeDelay.getDoubleValue());
 
             TimeStampedTransform3D pelvisTimeStampedTransformInThePast = new TimeStampedTransform3D();
             stateEstimatorPelvisPoseBuffer.findTransform(timestamp, pelvisTimeStampedTransformInThePast);

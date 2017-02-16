@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Random;
 
-import us.ihmc.robotics.time.TimeTools;
+import us.ihmc.commons.Conversions;
 
 public class BenchmarkFieldOrArrayAccess
 {
@@ -66,8 +66,8 @@ public class BenchmarkFieldOrArrayAccess
             System.out.println("Test " + i + " returned " + testValue);
          }
          
-         res += "Writing " + ITERATIONS + " of " + clazz.getSimpleName() + " averaged " + TimeTools.nanoSecondstoSeconds(writeTime/(TESTS - TESTS/2)) + "s" + System.lineSeparator();
-         res += "Reading " + ITERATIONS + " of " + clazz.getSimpleName() + " averaged " + TimeTools.nanoSecondstoSeconds(readTime/(TESTS - TESTS/2)) + "s" + System.lineSeparator();
+         res += "Writing " + ITERATIONS + " of " + clazz.getSimpleName() + " averaged " + Conversions.nanoSecondstoSeconds(writeTime/(TESTS - TESTS/2)) + "s" + System.lineSeparator();
+         res += "Reading " + ITERATIONS + " of " + clazz.getSimpleName() + " averaged " + Conversions.nanoSecondstoSeconds(readTime/(TESTS - TESTS/2)) + "s" + System.lineSeparator();
          
       }
       

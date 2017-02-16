@@ -8,13 +8,13 @@ import javax.vecmath.Vector3d;
 
 import org.apache.commons.lang3.tuple.Pair;
 
+import us.ihmc.commons.Conversions;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
-import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.AuxiliaryRobotData;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing;
@@ -161,7 +161,7 @@ public class SimulatedSensorHolderAndReader implements SensorReader
          sensorProcessing.setForceSensorValue(forceTorqueSensors.get(i).getLeft(), forceTorqueSensor.getWrench());
       }
 
-      long timestamp = TimeTools.secondsToNanoSeconds(yoTime.getDoubleValue());
+      long timestamp = Conversions.secondsToNanoSeconds(yoTime.getDoubleValue());
       sensorProcessing.startComputation(timestamp, timestamp, -1);
 
       step.increment();

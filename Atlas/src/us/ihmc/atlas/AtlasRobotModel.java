@@ -40,6 +40,7 @@ import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameter
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
+import us.ihmc.commons.Conversions;
 import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.FootstepPlanningParameterization;
 import us.ihmc.humanoidRobotics.footstep.footstepSnapper.AtlasFootstepSnappingParameters;
@@ -59,7 +60,6 @@ import us.ihmc.robotics.robotController.OutputProcessor;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.robotiq.control.RobotiqHandCommandManager;
 import us.ihmc.robotiq.model.RobotiqHandModel;
 import us.ihmc.robotiq.simulatedHand.SimulatedRobotiqHandsController;
@@ -87,7 +87,7 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    private final DRCRobotModel.RobotTarget target;
 
    private static final long ESTIMATOR_DT_IN_NS = 1000000;
-   private static final double ESTIMATOR_DT = TimeTools.nanoSecondstoSeconds(ESTIMATOR_DT_IN_NS);
+   private static final double ESTIMATOR_DT = Conversions.nanoSecondstoSeconds(ESTIMATOR_DT_IN_NS);
    private static final double CONTROL_DT = 0.004;    // 0.006;
 
    private static final double ATLAS_ONBOARD_SAMPLINGFREQ = 1000.0;

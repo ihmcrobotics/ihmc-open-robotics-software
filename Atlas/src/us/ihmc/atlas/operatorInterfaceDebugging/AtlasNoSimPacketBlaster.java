@@ -14,6 +14,7 @@ import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.commons.Conversions;
 import us.ihmc.communication.net.NetStateListener;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.util.NetworkPorts;
@@ -25,7 +26,6 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
-import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.robotiq.data.RobotiqHandSensorData;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.tools.io.printing.PrintTools;
@@ -106,7 +106,7 @@ public class AtlasNoSimPacketBlaster implements Runnable
 
       RobotConfigurationData robotConfigurationData = new RobotConfigurationData(joints, forceSensorDefinitions, null, imuDefinitions);
 
-      robotConfigurationData.setTimestamp(random.nextInt(1800) * TimeTools.milliSecondsToNanoSeconds(100));
+      robotConfigurationData.setTimestamp(random.nextInt(1800) * Conversions.milliSecondsToNanoSeconds(100));
 
       robotConfigurationData.jointAngles = new float[numberOfJoints];
       for (int i = 0; i < numberOfJoints; i++)
