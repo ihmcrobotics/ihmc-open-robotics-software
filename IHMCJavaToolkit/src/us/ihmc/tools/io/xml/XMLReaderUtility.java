@@ -5,6 +5,9 @@ import java.util.StringTokenizer;
 import javax.vecmath.Color3f;
 import javax.vecmath.Matrix3d;
 
+/**
+ * TODO This class needs be replaced by a proper XML library. @dcalvert
+ */
 public class XMLReaderUtility
 {
    public static int getEndIndexOfSubString(int start, String fullString, String target)
