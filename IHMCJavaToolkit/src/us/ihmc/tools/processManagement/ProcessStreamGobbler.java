@@ -30,6 +30,7 @@ public class ProcessStreamGobbler extends Thread
          this.processPrintingPrefix = "[Process: " + processName + "] ";
          Runtime.getRuntime().addShutdownHook(new Thread(new Runnable()
          {            
+            @Override
             public void run()
             {
                // TODO Auto-generated method stub
@@ -37,6 +38,7 @@ public class ProcessStreamGobbler extends Thread
          }));
       }
 
+      @Override
       public void run()
       {
          try

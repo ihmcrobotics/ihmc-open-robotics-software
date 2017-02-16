@@ -5,7 +5,6 @@ import java.lang.reflect.Field;
 
 public class UnixProcessKiller
 {
-
    public static boolean isUnixProcess(Process process)
    {
       if (process.getClass().getName().equals("java.lang.UNIXProcess"))
@@ -20,10 +19,9 @@ public class UnixProcessKiller
    {
       try
       {
-//         System.out.println(process.getClass().getName());
          if (process.getClass().getName().equals("java.lang.UNIXProcess"))
          {
-            Class cl = process.getClass();
+            Class<?> cl = process.getClass();
             Field field = cl.getDeclaredField("pid");
             field.setAccessible(true);
             Object pidObject = field.get(process);
