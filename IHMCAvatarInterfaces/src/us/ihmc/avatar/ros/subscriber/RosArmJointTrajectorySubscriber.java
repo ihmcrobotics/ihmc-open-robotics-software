@@ -5,11 +5,11 @@ import java.util.ArrayList;
 import trajectory_msgs.JointTrajectory;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.partNames.ArmJointName;
+import us.ihmc.commons.Conversions;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
 
 public class RosArmJointTrajectorySubscriber extends AbstractRosTopicSubscriber<trajectory_msgs.JointTrajectory>
@@ -69,7 +69,7 @@ public class RosArmJointTrajectorySubscriber extends AbstractRosTopicSubscriber<
          }
          
          long nsecs = rosMessage.getPoints().get(waypointIndex).getTimeFromStart().totalNsecs();
-         double time = TimeTools.nanoSecondstoSeconds(nsecs);
+         double time = Conversions.nanoSecondstoSeconds(nsecs);
          
          for (int jointIndex = 0; jointIndex < numberOfJoints; jointIndex++)
          {

@@ -11,6 +11,7 @@ import javax.vecmath.Tuple3d;
 
 import org.ejml.data.DenseMatrix64F;
 
+import us.ihmc.commons.Conversions;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
@@ -32,7 +33,6 @@ import us.ihmc.robotics.sensors.CenterOfMassDataHolder;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
-import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.sensorProcessing.imu.FusedIMUSensor;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
@@ -232,7 +232,7 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
          reinitializeStateEstimator.set(false);
          initialize();
       }
-      yoTime.set(TimeTools.nanoSecondstoSeconds(sensorOutputMapReadOnly.getTimestamp()));
+      yoTime.set(Conversions.nanoSecondstoSeconds(sensorOutputMapReadOnly.getTimestamp()));
 
       if (fusedIMUSensor != null)
          fusedIMUSensor.update();

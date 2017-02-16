@@ -7,6 +7,7 @@ import java.util.Map.Entry;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
+import us.ihmc.commons.Conversions;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.LongYoVariable;
@@ -22,7 +23,6 @@ import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
-import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.AuxiliaryRobotData;
 import us.ihmc.sensorProcessing.frames.ReferenceFrames;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
@@ -127,7 +127,7 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorO
       updateReferenceFrames();
       readAndUpdateRootJointAngularAndLinearVelocity();
 
-      long timestamp = TimeTools.secondsToNanoSeconds(robot.getTime());
+      long timestamp = Conversions.secondsToNanoSeconds(robot.getTime());
       this.timestamp.set(timestamp);
       this.visionSensorTimestamp.set(timestamp);
       this.sensorHeadPPSTimetamp.set(timestamp);

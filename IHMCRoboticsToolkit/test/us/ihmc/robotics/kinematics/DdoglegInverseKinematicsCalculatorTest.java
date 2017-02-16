@@ -12,13 +12,13 @@ import javax.vecmath.Vector3d;
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 import org.junit.Test;
 
+import us.ihmc.commons.Conversions;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.screwTheory.RevoluteJoint;
 import us.ihmc.robotics.screwTheory.ScrewTestTools;
-import us.ihmc.robotics.time.TimeTools;
 
 /**
  * @author twan
@@ -71,7 +71,7 @@ public class DdoglegInverseKinematicsCalculatorTest
 
          if (i > 500)
          {
-            timeStatistics.addValue(TimeTools.nanoSecondstoSeconds(solutionTime));
+            timeStatistics.addValue(Conversions.nanoSecondstoSeconds(solutionTime));
             iterationStatistics.addValue(calculator.getNumberOfIterations());
          }
       }
@@ -114,7 +114,7 @@ public class DdoglegInverseKinematicsCalculatorTest
          calculator.solve(desiredTransform);
          long tf = System.nanoTime();
          long solutionTime = tf - t0;
-         timeStatistics.addValue(TimeTools.nanoSecondstoSeconds(solutionTime));
+         timeStatistics.addValue(Conversions.nanoSecondstoSeconds(solutionTime));
          iterationStatistics.addValue(calculator.getNumberOfIterations());
 
          RigidBodyTransform solvedTransform = jacobian.getEndEffectorFrame().getTransformToDesiredFrame(jacobian.getBaseFrame());

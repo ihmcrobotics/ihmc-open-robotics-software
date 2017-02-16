@@ -3,6 +3,7 @@ package us.ihmc.quadrupedRobotics.controller.force;
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicReference;
 
+import us.ihmc.commons.Conversions;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.quadrupedRobotics.communication.packets.QuadrupedForceControllerEventPacket;
@@ -44,7 +45,6 @@ import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.robotController.OutputProcessor;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
-import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 
 /**
@@ -145,14 +145,14 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
          stateImpl.onEntry();
          for (int i = 0; i < iterations; i++)
          {
-            robotTimestamp.add(TimeTools.milliSecondsToSeconds(1));
+            robotTimestamp.add(Conversions.milliSecondsToSeconds(1));
             stateImpl.process();
          }
          stateImpl.onExit();
          
          for (int i = 0; i < iterations; i++)
          {
-            robotTimestamp.add(TimeTools.milliSecondsToSeconds(1));
+            robotTimestamp.add(Conversions.milliSecondsToSeconds(1));
             stateImpl.onEntry();
             stateImpl.onExit();
          }

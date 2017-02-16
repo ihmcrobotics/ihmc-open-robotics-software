@@ -7,6 +7,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.WrenchBasedFootSwitch;
+import us.ihmc.commons.Conversions;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
@@ -22,7 +23,6 @@ import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.robotics.sensors.*;
 import us.ihmc.robotics.time.ExecutionTimer;
-import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.rosControl.EffortJointHandle;
 import us.ihmc.rosControl.wholeRobot.*;
 import us.ihmc.sensorProcessing.diagnostic.DiagnosticParameters.DiagnosticEnvironment;
@@ -222,7 +222,7 @@ public class ValkyrieAutomatedDiagnosticController extends IHMCWholeRobotControl
       estimatorDesiredJointDataHolder.updateFromModel();
       sensorReader.writeCommandsToRobot();
       
-      diagnosticControllerTime.set(TimeTools.nanoSecondstoSeconds(time - startTime.getLongValue()));
+      diagnosticControllerTime.set(Conversions.nanoSecondstoSeconds(time - startTime.getLongValue()));
 
       yoVariableServer.update(time);
 
