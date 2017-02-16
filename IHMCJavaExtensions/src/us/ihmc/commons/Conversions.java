@@ -19,8 +19,8 @@ public class Conversions
    /**
     * Convert kibibytes (KiB) to bytes (B).
     * 
-    * @param kibibytes
-    * @return bytes
+    * @param kibibytes number of kibibytes
+    * @return bytes number of bytes
     */
    public static int kibibytesToBytes(int kibibytes)
    {
@@ -30,8 +30,8 @@ public class Conversions
    /**
     * Convert kilobytes (KB) to bytes (B).
     * 
-    * @param kilobytes
-    * @return bytes
+    * @param kilobytes number of kilobytes
+    * @return bytes number of bytes
     */
    public static int kilobytesToBytes(int kilobytes)
    {
@@ -41,8 +41,8 @@ public class Conversions
    /**
     * Convert mebibytes (MiB) to bytes (B).
     * 
-    * @param mebibytes
-    * @return bytes
+    * @param mebibytes number of mebibytes
+    * @return bytes number of bytes
     */
    public static int mebibytesToBytes(int mebibytes)
    {
@@ -52,8 +52,8 @@ public class Conversions
    /**
     * Convert megabytes (MB) to bytes (B).
     * 
-    * @param megabytes
-    * @return bytes
+    * @param megabytes number of megabytes
+    * @return bytes number of bytes
     */
    public static int megabytesToBytes(int megabytes)
    {
