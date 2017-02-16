@@ -2,6 +2,7 @@ package us.ihmc.exampleSimulations.collidingArms;
 
 import javax.vecmath.Vector3d;
 
+import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.robotics.robotDescription.CollisionMeshDescription;
 import us.ihmc.robotics.robotDescription.FloatingJointDescription;
@@ -10,19 +11,84 @@ import us.ihmc.robotics.robotDescription.LinkDescription;
 import us.ihmc.robotics.robotDescription.LinkGraphicsDescription;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 
-public class SingleBoxRobotDescription extends RobotDescription
+public class SingleBoxRobotDescription
 {
-   public SingleBoxRobotDescription(String name, double mass, double xLength, double yWidth, double zHeight, int collisionGroup, int collisionMask)
-   {
-      super(name);
+   private String name;
+   private double mass = 0.6;
+   private double xLength = 0.2;
+   private double yWidth = 0.5;
+   private double zHeight = 0.5;
+   private double radiusOfGyrationPercent = 1.0;
 
-      FloatingJointDescription rootJoint = new FloatingJointDescription("box");
+   private int collisionGroup = 0xffff;
+   private int collisionMask = 0xffff;
+   private AppearanceDefinition appearance = YoAppearance.Aqua();
+
+   public SingleBoxRobotDescription()
+   {
+   }
+
+   public void setName(String name)
+   {
+      this.name = name;
+   }
+
+   public void setMass(double mass)
+   {
+      this.mass = mass;
+   }
+
+   public void setXLength(double xLength)
+   {
+      this.xLength = xLength;
+   }
+
+   public void setYWidth(double yWidth)
+   {
+      this.yWidth = yWidth;
+   }
+
+   public void setZHeight(double zHeight)
+   {
+      this.zHeight = zHeight;
+   }
+
+   public void setRadiusOfGyrationPercent(double radiusOfGyrationPercent)
+   {
+      this.radiusOfGyrationPercent = radiusOfGyrationPercent;
+   }
+
+   public void setCollisionGroup(int collisionGroup)
+   {
+      this.collisionGroup = collisionGroup;
+   }
+
+   public void setCollisionMask(int collisionMask)
+   {
+      this.collisionMask = collisionMask;
+   }
+
+   public AppearanceDefinition getAppearance()
+   {
+      return appearance;
+   }
+
+   public void setAppearance(AppearanceDefinition appearance)
+   {
+      this.appearance = appearance;
+   }
+
+   public RobotDescription createRobotDescription()
+   {
+      RobotDescription robotDescription = new RobotDescription(name);
+
+      FloatingJointDescription rootJoint = new FloatingJointDescription("box", name);
       LinkDescription link = new LinkDescription("boxLink");
-      link.setMassAndRadiiOfGyration(mass, xLength, yWidth, zHeight);
+      link.setMassAndRadiiOfGyration(mass, radiusOfGyrationPercent * xLength, radiusOfGyrationPercent * yWidth, radiusOfGyrationPercent * zHeight);
 
       LinkGraphicsDescription linkGraphics = new LinkGraphicsDescription();
       linkGraphics.translate(0.0, 0.0, -zHeight / 2.0);
-      linkGraphics.addCube(xLength, yWidth, zHeight, YoAppearance.Red());
+      linkGraphics.addCube(xLength, yWidth, zHeight, appearance);
       link.setLinkGraphics(linkGraphics);
 
       CollisionMeshDescription collisionMesh = new CollisionMeshDescription();
@@ -59,7 +125,9 @@ public class SingleBoxRobotDescription extends RobotDescription
       }
 
       rootJoint.setLink(link);
-      this.addRootJoint(rootJoint);
+      robotDescription.addRootJoint(rootJoint);
+
+      return robotDescription;
    }
 
 }
