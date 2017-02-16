@@ -1,6 +1,5 @@
 package us.ihmc.tools.processManagement;
 
-
 public class UnsignedByteTools
 {
    public static int toInt(byte unsignedByte)
@@ -12,6 +11,4 @@ public class UnsignedByteTools
    {
       return (byte) value;
    }
-   
-   
 }
