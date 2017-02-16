@@ -1,8 +1,5 @@
 package us.ihmc.tools.thread;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PrintStream;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
@@ -12,11 +9,6 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.SystemUtils;
-
-import us.ihmc.tools.io.StreamGobbler;
 
 public class ThreadTools
 {
