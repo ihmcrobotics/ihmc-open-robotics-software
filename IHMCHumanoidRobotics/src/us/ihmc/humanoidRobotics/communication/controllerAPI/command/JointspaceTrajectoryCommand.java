@@ -86,4 +86,12 @@ public abstract class JointspaceTrajectoryCommand<T extends JointspaceTrajectory
    {
       return jointTrajectoryInputs.get(jointIndex);
    }
+
+   /** {@inheritDoc}} */
+   @Override
+   public void addTimeOffset(double timeOffsetToAdd)
+   {
+      for (int i = 0; i < jointTrajectoryInputs.size(); i++)
+         jointTrajectoryInputs.get(i).addTimeOffset(timeOffsetToAdd);
+   }
 }

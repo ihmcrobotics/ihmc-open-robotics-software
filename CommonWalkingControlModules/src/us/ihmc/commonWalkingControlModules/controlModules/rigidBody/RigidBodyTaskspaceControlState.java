@@ -11,10 +11,8 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
-import us.ihmc.communication.packets.Packet;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SE3TrajectoryControllerCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SO3TrajectoryControllerCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage.BaseForControl;
 import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
@@ -23,7 +21,6 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
-import us.ihmc.robotics.dataStructures.variable.LongYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
@@ -46,9 +43,6 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
    public static final int maxPointsInGenerator = 5;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private final YoVariableRegistry registry;
-   private final String warningPrefix;
-
    private final SpatialFeedbackControlCommand spatialFeedbackControlCommand = new SpatialFeedbackControlCommand();
    private final PrivilegedConfigurationCommand privilegedConfigurationCommand = new PrivilegedConfigurationCommand();
    private final DenseMatrix64F selectionMatrix = new DenseMatrix64F(Twist.SIZE, Twist.SIZE);
@@ -60,8 +54,6 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
    private final Vector3d angularWeight = new Vector3d();
    private final Vector3d linearWeight = new Vector3d();
 
-   private final BooleanYoVariable trajectoryStopped;
-   private final BooleanYoVariable trajectoryDone;
    private final BooleanYoVariable trackingOrientation;
    private final BooleanYoVariable trackingPosition;
 
@@ -81,39 +73,25 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
 
    private final RecyclingArrayList<FrameSE3TrajectoryPoint> pointQueue = new RecyclingArrayList<>(maxPoints, FrameSE3TrajectoryPoint.class);
    private final FrameSE3TrajectoryPoint lastPointAdded = new FrameSE3TrajectoryPoint();
-   private final DoubleYoVariable yoTime;
-   private final DoubleYoVariable trajectoryStartTime;
-   private final LongYoVariable lastCommandId;
 
    private final ReferenceFrame rootFrame;
 
-   public RigidBodyTaskspaceControlState(RigidBody bodyToControl, RigidBody rootBody, RigidBody elevator, YoOrientationPIDGainsInterface orientationGains,
+   public RigidBodyTaskspaceControlState(String bodyName, RigidBody bodyToControl, RigidBody rootBody, RigidBody elevator, YoOrientationPIDGainsInterface orientationGains,
          YoPositionPIDGainsInterface positionGains, Map<BaseForControl, ReferenceFrame> controlFrameMap, ReferenceFrame rootFrame, DoubleYoVariable yoTime,
          YoVariableRegistry parentRegistry)
    {
-      super(RigidBodyControlMode.TASKSPACE);
+      super(RigidBodyControlMode.TASKSPACE, bodyName, yoTime);
       this.orientationGains = orientationGains;
       this.positionGains = positionGains;
-      this.yoTime = yoTime;
       this.rootFrame = rootFrame;
 
-      String bodyName = bodyToControl.getName();
-      registry = new YoVariableRegistry(bodyName + "TaskspaceControlModule");
-
       String prefix = bodyName + "Taskspace";
-      warningPrefix = getClass().getSimpleName() + " for " + bodyName + ": ";
-      trajectoryStopped = new BooleanYoVariable(prefix + "TrajectoryStopped", registry);
-      trajectoryDone = new BooleanYoVariable(prefix + "TrajectoryDone", registry);
       trackingOrientation = new BooleanYoVariable(prefix + "TrackingOrientation", registry);
       trackingPosition = new BooleanYoVariable(prefix + "TrackingPosition", registry);
-      trajectoryStartTime = new DoubleYoVariable(prefix + "TrajectoryStartTime", registry);
 
       numberOfPointsInQueue = new IntegerYoVariable(prefix + "NumberOfPointsInQueue", registry);
       numberOfPointsInGenerator = new IntegerYoVariable(prefix + "NumberOfPointsInGenerator", registry);
       numberOfPoints = new IntegerYoVariable(prefix + "NumberOfPoints", registry);
-
-      lastCommandId = new LongYoVariable(prefix + "LastCommandId", registry);
-      lastCommandId.set(Packet.INVALID_MESSAGE_ID);
 
       spatialFeedbackControlCommand.set(elevator, bodyToControl);
       spatialFeedbackControlCommand.setPrimaryBase(rootBody);
@@ -152,15 +130,9 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
    }
 
    @Override
-   public void handleStopAllTrajectoryCommand(StopAllTrajectoryCommand command)
-   {
-      trajectoryStopped.set(command.isStopAllTrajectory());
-   }
-
-   @Override
    public void doAction()
    {
-      double timeInTrajectory = yoTime.getDoubleValue() - trajectoryStartTime.getDoubleValue();
+      double timeInTrajectory = getTimeInTrajectory();
       if (!trajectoryDone.getBooleanValue() && orientationTrajectoryGenerator.isDone())
          fillAndReinitializeTrajectories();
 
@@ -258,7 +230,8 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
 
    public void holdOrientation(FrameOrientation initialOrientation)
    {
-      overrideTrajectory(Packet.INVALID_MESSAGE_ID);
+      overrideTrajectory();
+      resetLastCommandId();
       queueInitialPoint(initialOrientation);
 
       selectionMatrix.reshape(Twist.SIZE, Twist.SIZE);
@@ -274,7 +247,8 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
 
    public void holdPose(FramePose initialPose)
    {
-      overrideTrajectory(Packet.INVALID_MESSAGE_ID);
+      overrideTrajectory();
+      resetLastCommandId();
       queueInitialPoint(initialPose);
 
       selectionMatrix.reshape(Twist.SIZE, Twist.SIZE);
@@ -291,11 +265,9 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       if (!checkOrientationGainsAndWeights())
          return false;
 
-      if (command.getCommandId() == Packet.INVALID_MESSAGE_ID)
-      {
-         PrintTools.warn(warningPrefix + "Recieved packet with invalid ID.");
+      if (!handleCommandInternal(command))
          return false;
-      }
+
       boolean override = command.getExecutionMode() == ExecutionMode.OVERRIDE;
       if (!override && (trackingPosition.getBooleanValue() && trackingOrientation.getBooleanValue()))
       {
@@ -305,19 +277,9 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
 
       if (override || isEmpty())
       {
-         overrideTrajectory(command.getCommandId());
+         overrideTrajectory();
          if (command.getTrajectoryPoint(0).getTime() > 0.0)
             queueInitialPoint(initialOrientation);
-      }
-      else
-      {
-         if (command.getPreviousCommandId() != lastCommandId.getLongValue())
-         {
-            PrintTools.warn(warningPrefix + "Unexpected command ID.");
-            return false;
-         }
-         lastCommandId.set(command.getCommandId());
-         command.addTimeOffset(getLastTrajectoryPointTime());
       }
 
       for (int i = 0; i < command.getNumberOfTrajectoryPoints(); i++)
@@ -333,8 +295,6 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       for (int i = 0; i < 3; i++)
          MatrixTools.removeRow(selectionMatrix, 3);
 
-      trajectoryStopped.set(false);
-      trajectoryDone.set(false);
       trackingOrientation.set(true);
       trackingPosition.set(false);
       return true;
@@ -345,11 +305,8 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       if (!checkPoseGainsAndWeights())
          return false;
 
-      if (command.getCommandId() == Packet.INVALID_MESSAGE_ID)
-      {
-         PrintTools.warn(warningPrefix + "Recieved packet with invalid ID.");
+      if (!handleCommandInternal(command))
          return false;
-      }
 
       boolean override = command.getExecutionMode() == ExecutionMode.OVERRIDE;
       if (!override && (!trackingPosition.getBooleanValue() && trackingOrientation.getBooleanValue()))
@@ -360,19 +317,9 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
 
       if (override || isEmpty())
       {
-         overrideTrajectory(command.getCommandId());
+         overrideTrajectory();
          if (command.getTrajectoryPoint(0).getTime() > 1.0e-5)
             queueInitialPoint(initialPose);
-      }
-      else
-      {
-         if (command.getPreviousCommandId() != lastCommandId.getLongValue())
-         {
-            PrintTools.warn(warningPrefix + "Unexpected command ID.");
-            return false;
-         }
-         lastCommandId.set(command.getCommandId());
-         command.addTimeOffset(getLastTrajectoryPointTime());
       }
 
       for (int i = 0; i < command.getNumberOfTrajectoryPoints(); i++)
@@ -386,8 +333,6 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       selectionMatrix.reshape(Twist.SIZE, Twist.SIZE);
       CommonOps.setIdentity(selectionMatrix);
 
-      trajectoryStopped.set(false);
-      trajectoryDone.set(false);
       trackingOrientation.set(true);
       trackingPosition.set(true);
       return true;
@@ -417,15 +362,8 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       return spatialFeedbackControlCommand;
    }
 
-   private boolean checkTime(double time)
-   {
-      boolean timeValid = time > getLastTrajectoryPointTime();
-      if (!timeValid)
-         PrintTools.warn(warningPrefix + "Time in trajectory must be strictly increasing.");
-      return timeValid;
-   }
-
-   private double getLastTrajectoryPointTime()
+   @Override
+   public double getLastTrajectoryPointTime()
    {
       if (isEmpty())
       {
@@ -441,9 +379,18 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       }
    }
 
-   private boolean isEmpty()
+   @Override
+   public boolean isEmpty()
    {
       return pointQueue.isEmpty() && orientationTrajectoryGenerator.isDone();
+   }
+
+   private boolean checkTime(double time)
+   {
+      boolean timeValid = time > getLastTrajectoryPointTime();
+      if (!timeValid)
+         PrintTools.warn(warningPrefix + "Time in trajectory must be strictly increasing.");
+      return timeValid;
    }
 
    private boolean queuePoint(FrameSE3TrajectoryPoint trajectoryPoint)
@@ -498,13 +445,11 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       return false;
    }
 
-   private void overrideTrajectory(long commandId)
+   private void overrideTrajectory()
    {
       orientationTrajectoryGenerator.clear();
       positionTrajectoryGenerator.clear();
       pointQueue.clear();
-      trajectoryStartTime.set(yoTime.getDoubleValue());
-      lastCommandId.set(commandId);
    }
 
    private boolean checkPoseGainsAndWeights()

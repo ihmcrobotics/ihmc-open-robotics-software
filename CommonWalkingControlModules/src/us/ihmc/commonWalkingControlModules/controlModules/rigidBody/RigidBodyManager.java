@@ -84,9 +84,9 @@ public class RigidBodyManager
 
       RigidBody elevator = humanoidControllerToolbox.getFullRobotModel().getElevator();
       jointspaceControlState = new RigidBodyJointspaceControlState(bodyName, jointsOriginal, jointspaceGains, yoTime, registry);
-      taskspaceControlState = new RigidBodyTaskspaceControlState(bodyToControl, rootBody, elevator, taskspaceOrientationGains, taskspacePositionGains,
+      taskspaceControlState = new RigidBodyTaskspaceControlState(bodyName, bodyToControl, rootBody, elevator, taskspaceOrientationGains, taskspacePositionGains,
             controlFrameMap, rootFrame, yoTime, registry);
-      userControlState = new RigidBodyUserControlState();
+      userControlState = new RigidBodyUserControlState(bodyName, yoTime);
 
       setupStateMachine();
       parentRegistry.addChild(registry);

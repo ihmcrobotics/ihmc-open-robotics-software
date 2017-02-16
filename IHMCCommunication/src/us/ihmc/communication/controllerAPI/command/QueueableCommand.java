@@ -107,4 +107,9 @@ public abstract class QueueableCommand<C extends QueueableCommand<C, M>, M exten
    {
       return executionMode != null;
    }
+
+   /**
+    * Used to offset the trajectory in case it is queued.
+    */
+   public abstract void addTimeOffset(double timeOffset);
 }

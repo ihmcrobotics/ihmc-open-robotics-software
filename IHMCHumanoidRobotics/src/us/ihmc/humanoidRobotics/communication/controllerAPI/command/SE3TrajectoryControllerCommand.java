@@ -84,20 +84,19 @@ public abstract class SE3TrajectoryControllerCommand<T extends SE3TrajectoryCont
       return executionModeValid() && trajectoryPointList.getNumberOfTrajectoryPoints() > 0;
    }
 
+   /** {@inheritDoc}} */
+   @Override
+   public void addTimeOffset(double timeOffsetToAdd)
+   {
+      trajectoryPointList.addTimeOffset(timeOffsetToAdd);
+   }
+
    /**
     * Convenience method for accessing {@link #trajectoryPointList}. To get the list use {@link #getTrajectoryPointList()}.
     */
    public int getNumberOfTrajectoryPoints()
    {
       return trajectoryPointList.getNumberOfTrajectoryPoints();
-   }
-
-   /**
-    * Convenience method for accessing {@link #trajectoryPointList}. To get the list use {@link #getTrajectoryPointList()}.
-    */
-   public void addTimeOffset(double timeOffsetToAdd)
-   {
-      trajectoryPointList.addTimeOffset(timeOffsetToAdd);
    }
 
    /**
