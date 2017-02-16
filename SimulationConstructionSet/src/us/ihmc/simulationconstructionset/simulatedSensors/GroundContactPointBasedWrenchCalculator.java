@@ -34,7 +34,8 @@ public class GroundContactPointBasedWrenchCalculator implements WrenchCalculator
    private final PoseReferenceFrame sensorFrame;
 
    public GroundContactPointBasedWrenchCalculator(String forceSensorName, List<GroundContactPoint> contactPoints,
-         OneDegreeOfFreedomJoint forceTorqueSensorJoint, RigidBodyTransform transformToParentJoint)
+                                                  OneDegreeOfFreedomJoint forceTorqueSensorJoint, RigidBodyTransform transformToParentJoint,
+                                                  YoVariableRegistry registry)
    {
       this.forceSensorName = forceSensorName;
       this.contactPoints = contactPoints;
@@ -44,7 +45,6 @@ public class GroundContactPointBasedWrenchCalculator implements WrenchCalculator
 
       for (int i = 0; i < this.contactPoints.size(); i++)
       {
-         YoVariableRegistry registry = contactPoints.get(i).getYoVariableRegistry();
          if (registry != null)
          {
             String contactPointName = contactPoints.get(i).getName();

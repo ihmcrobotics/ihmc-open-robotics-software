@@ -24,6 +24,18 @@ public class ConversionsTest
    
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
+   public void kilobytesToBytes()
+   {
+      Random rand = new Random();
+      for (int i = 0; i < 1000; i++)
+      {
+         int kilobytes = rand.nextInt();
+         assertEquals(Conversions.kilobytesToBytes(kilobytes), kilobytes * 1000, 1e-12);
+      }
+   }
+   
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void megabytesToBytes()
    {
       Random rand = new Random();
@@ -44,5 +56,10 @@ public class ConversionsTest
          int mebibytes = rand.nextInt();
          assertEquals(Conversions.mebibytesToBytes(mebibytes), mebibytes * 1048576, 1e-12);
       }
+   }
+   
+   public static void main(String[] args)
+   {
+      MutationTestFacilitator.facilitateMutationTestForClass(Conversions.class, ConversionsTest.class);
    }
 }

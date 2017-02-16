@@ -14,6 +14,7 @@ import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.robotics.Axis;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
@@ -44,7 +45,7 @@ public class GroundContactPointBasedWrenchCalculatorTest
       robot.update();
       
       
-      calculator = new GroundContactPointBasedWrenchCalculator(joint.getName(), contactPoints, joint, new RigidBodyTransform());
+      calculator = new GroundContactPointBasedWrenchCalculator(joint.getName(), contactPoints, joint, new RigidBodyTransform(), new YoVariableRegistry("dummy1"));
       
       
       point0.setForce(new Vector3d(0.0, 0.0, 1.0));
@@ -65,7 +66,7 @@ public class GroundContactPointBasedWrenchCalculatorTest
       robot.update();
       
 
-      calculator = new GroundContactPointBasedWrenchCalculator(joint.getName(), contactPoints, joint2, new RigidBodyTransform());
+      calculator = new GroundContactPointBasedWrenchCalculator(joint.getName(), contactPoints, joint2, new RigidBodyTransform(), new YoVariableRegistry("dummy2"));
       point0.setForce(new Vector3d(-1.0, 1.0, 0.0));
       point1.setForce(new Vector3d(-1.0, 1.0, 0.0));
       
@@ -93,7 +94,7 @@ public class GroundContactPointBasedWrenchCalculatorTest
       RigidBodyTransform transformToJoint = new RigidBodyTransform();
       transformToJoint.setTranslation(new Vector3d(-1.0, -1.0, 0.0));
 
-      calculator = new GroundContactPointBasedWrenchCalculator(joint.getName(), contactPoints, joint3, transformToJoint);
+      calculator = new GroundContactPointBasedWrenchCalculator(joint.getName(), contactPoints, joint3, transformToJoint, new YoVariableRegistry("dummy3"));
 
       calculator.calculate();
       wholeWrench = calculator.getWrench();
