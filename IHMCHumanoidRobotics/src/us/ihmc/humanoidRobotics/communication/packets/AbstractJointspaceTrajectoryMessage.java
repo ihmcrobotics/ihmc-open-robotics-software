@@ -3,10 +3,11 @@ package us.ihmc.humanoidRobotics.communication.packets;
 import java.util.Random;
 
 import us.ihmc.communication.packets.Packet;
+import us.ihmc.communication.packets.QueueableMessage;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.OneDoFJointTrajectoryMessage;
 
-public abstract class AbstractJointspaceTrajectoryMessage<T extends AbstractJointspaceTrajectoryMessage<T>> extends Packet<T>
+public abstract class AbstractJointspaceTrajectoryMessage<T extends AbstractJointspaceTrajectoryMessage<T>> extends QueueableMessage<T>
 {
    @RosExportedField(documentation = "List of points in the trajectory.")
    public OneDoFJointTrajectoryMessage[] jointTrajectoryMessages;

@@ -1,20 +1,19 @@
 package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
+import javax.vecmath.Quat4d;
+import javax.vecmath.Vector3d;
+
 import org.ejml.data.DenseMatrix64F;
 
-import us.ihmc.communication.controllerAPI.command.Command;
-import us.ihmc.communication.packets.Packet;
+import us.ihmc.communication.controllerAPI.command.QueueableCommand;
 import us.ihmc.humanoidRobotics.communication.packets.AbstractSO3TrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
+import us.ihmc.robotics.math.trajectories.waypoints.FrameSO3TrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSO3TrajectoryPointList;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
-public abstract class SO3TrajectoryControllerCommand<T extends SO3TrajectoryControllerCommand<T, M>, M extends AbstractSO3TrajectoryMessage<M>>
-      extends FrameSO3TrajectoryPointList implements Command<T, M>
+public abstract class SO3TrajectoryControllerCommand<T extends SO3TrajectoryControllerCommand<T, M>, M extends AbstractSO3TrajectoryMessage<M>> extends QueueableCommand<T, M>
 {
-   private long commandId = Packet.VALID_MESSAGE_DEFAULT_ID;
-   private ExecutionMode executionMode = ExecutionMode.OVERRIDE;
-   private long previousCommandId = Packet.INVALID_MESSAGE_ID;
+   private final FrameSO3TrajectoryPointList trajectoryPointList = new FrameSO3TrajectoryPointList();
    private final DenseMatrix64F selectionMatrix = new DenseMatrix64F(3,6);
 
    public SO3TrajectoryControllerCommand()
@@ -25,10 +24,8 @@ public abstract class SO3TrajectoryControllerCommand<T extends SO3TrajectoryCont
    @Override
    public void clear()
    {
-      super.clear();
-      commandId = Packet.VALID_MESSAGE_DEFAULT_ID;
-      executionMode = ExecutionMode.OVERRIDE;
-      previousCommandId = Packet.INVALID_MESSAGE_ID;
+      clearQueuableCommandVariables();
+      trajectoryPointList.clear();
       selectionMatrix.reshape(3, 6);
       selectionMatrix.zero();
       for (int i = 0; i < 3; i++)
@@ -37,13 +34,10 @@ public abstract class SO3TrajectoryControllerCommand<T extends SO3TrajectoryCont
       }
    }
 
-   @Override
    public void clear(ReferenceFrame referenceFrame)
    {
-      super.clear(referenceFrame);
-      commandId = Packet.VALID_MESSAGE_DEFAULT_ID;
-      executionMode = ExecutionMode.OVERRIDE;
-      previousCommandId = Packet.INVALID_MESSAGE_ID;
+      clearQueuableCommandVariables();
+      trajectoryPointList.clear(referenceFrame);
       selectionMatrix.reshape(3, 6);
       selectionMatrix.zero();
       for (int i = 0; i < 3; i++)
@@ -55,8 +49,18 @@ public abstract class SO3TrajectoryControllerCommand<T extends SO3TrajectoryCont
    @Override
    public void set(T other)
    {
-      setIncludingFrame(other);
+      trajectoryPointList.setIncludingFrame(other.getTrajectoryPointList());
       setPropertiesOnly(other);
+   }
+
+   /**
+    * Allows setting this orientation {@link #SO3TrajectoryControllerCommand} trajectory command from a pose {@link #SE3TrajectoryControllerCommand}
+    * trajectory command.
+    */
+   public void set(SE3TrajectoryControllerCommand<?, ?> command)
+   {
+      getTrajectoryPointList().setIncludingFrame(command.getTrajectoryPointList());
+      setQueueqableCommandVariables(command);
    }
 
    /**
@@ -65,60 +69,116 @@ public abstract class SO3TrajectoryControllerCommand<T extends SO3TrajectoryCont
     */
    public void setPropertiesOnly(T other)
    {
-      commandId = other.getCommandId();
-      executionMode = other.getExecutionMode();
-      previousCommandId = other.getPreviousCommandId();
+      setQueueqableCommandVariables(other);
       selectionMatrix.set(other.getSelectionMatrix());
    }
 
    @Override
    public void set(M message)
    {
-      message.getTrajectoryPoints(this);
-      commandId = message.getUniqueId();
-      executionMode = message.getExecutionMode();
-      previousCommandId = message.getPreviousMessageId();
+      message.getTrajectoryPoints(trajectoryPointList);
+      setQueueqableCommandVariables(message);
       message.getSelectionMatrix(selectionMatrix);
    }
 
-   public void setCommandId(long commandId)
+   public void setTrajectoryPointList(FrameSO3TrajectoryPointList trajectoryPointList)
    {
-      this.commandId = commandId;
+      this.trajectoryPointList.setIncludingFrame(trajectoryPointList);
    }
 
-   public void setExecutionMode(ExecutionMode executionMode)
-   {
-      this.executionMode = executionMode;
-   }
-
-   public void setPreviousCommandId(long previousCommandId)
-   {
-      this.previousCommandId = previousCommandId;
-   }
-
-   public long getCommandId()
-   {
-      return commandId;
-   }
-
-   public ExecutionMode getExecutionMode()
-   {
-      return executionMode;
-   }
-
-   public long getPreviousCommandId()
-   {
-      return previousCommandId;
-   }
-   
    public DenseMatrix64F getSelectionMatrix()
    {
       return selectionMatrix;
    }
 
+   public FrameSO3TrajectoryPointList getTrajectoryPointList()
+   {
+      return trajectoryPointList;
+   }
+
    @Override
    public boolean isCommandValid()
    {
-      return executionMode != null && getNumberOfTrajectoryPoints() > 0;
+      return executionModeValid() && trajectoryPointList.getNumberOfTrajectoryPoints() > 0;
+   }
+
+   /**
+    * Convenience method for accessing {@link #trajectoryPointList}. To get the list use {@link #getTrajectoryPointList()}.
+    */
+   public int getNumberOfTrajectoryPoints()
+   {
+      return trajectoryPointList.getNumberOfTrajectoryPoints();
+   }
+
+   /**
+    * Convenience method for accessing {@link #trajectoryPointList}. To get the list use {@link #getTrajectoryPointList()}.
+    */
+   public void addTimeOffset(double timeOffsetToAdd)
+   {
+      trajectoryPointList.addTimeOffset(timeOffsetToAdd);
+   }
+
+   /**
+    * Convenience method for accessing {@link #trajectoryPointList}. To get the list use {@link #getTrajectoryPointList()}.
+    */
+   public void subtractTimeOffset(double timeOffsetToSubtract)
+   {
+      trajectoryPointList.subtractTimeOffset(timeOffsetToSubtract);
+   }
+
+   /**
+    * Convenience method for accessing {@link #trajectoryPointList}. To get the list use {@link #getTrajectoryPointList()}.
+    */
+   public void addTrajectoryPoint(double time, Quat4d orientation, Vector3d angularVelocity)
+   {
+      trajectoryPointList.addTrajectoryPoint(time, orientation, angularVelocity);
+   }
+
+   /**
+    * Convenience method for accessing {@link #trajectoryPointList}. To get the list use {@link #getTrajectoryPointList()}.
+    */
+   public void addTrajectoryPoint(FrameSO3TrajectoryPoint trajectoryPoint)
+   {
+      trajectoryPointList.addTrajectoryPoint(trajectoryPoint);
+   }
+
+   /**
+    * Convenience method for accessing {@link #trajectoryPointList}. To get the list use {@link #getTrajectoryPointList()}.
+    */
+   public FrameSO3TrajectoryPoint getTrajectoryPoint(int trajectoryPointIndex)
+   {
+      return trajectoryPointList.getTrajectoryPoint(trajectoryPointIndex);
+   }
+
+   /**
+    * Convenience method for accessing {@link #trajectoryPointList}. To get the list use {@link #getTrajectoryPointList()}.
+    */
+   public FrameSO3TrajectoryPoint getLastTrajectoryPoint()
+   {
+      return trajectoryPointList.getLastTrajectoryPoint();
+   }
+
+   /**
+    * Convenience method for accessing {@link #trajectoryPointList}. To get the list use {@link #getTrajectoryPointList()}.
+    */
+   public void changeFrame(ReferenceFrame referenceFrame)
+   {
+      trajectoryPointList.changeFrame(referenceFrame);
+   }
+
+   /**
+    * Convenience method for accessing {@link #trajectoryPointList}. To get the list use {@link #getTrajectoryPointList()}.
+    */
+   public ReferenceFrame getReferenceFrame()
+   {
+      return trajectoryPointList.getReferenceFrame();
+   }
+
+   /**
+    * Convenience method for accessing {@link #trajectoryPointList}. To get the list use {@link #getTrajectoryPointList()}.
+    */
+   public void checkReferenceFrameMatch(ReferenceFrame frame)
+   {
+      trajectoryPointList.checkReferenceFrameMatch(frame);
    }
 }
