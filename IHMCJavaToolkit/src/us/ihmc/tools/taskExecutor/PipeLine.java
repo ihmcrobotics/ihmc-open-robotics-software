@@ -1,6 +1,5 @@
 package us.ihmc.tools.taskExecutor;
 
-import java.util.ArrayDeque;
 import java.util.List;
 
 /**

@@ -46,6 +46,7 @@ public abstract class ProcessSpawner
    {
       Runtime.getRuntime().addShutdownHook(new Thread(new Runnable()
       {
+         @Override
          public void run()
          {
             shutdown();
@@ -74,6 +75,7 @@ public abstract class ProcessSpawner
    {
       new Thread(new Runnable()
       {
+         @Override
          public void run()
          {
             try

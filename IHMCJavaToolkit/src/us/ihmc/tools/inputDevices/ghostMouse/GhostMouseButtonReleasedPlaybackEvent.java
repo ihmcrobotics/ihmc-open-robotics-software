@@ -27,12 +27,14 @@ public class GhostMouseButtonReleasedPlaybackEvent implements GhostMousePlayback
       this(coordinates[0], coordinates[1], mouseButton);
    }
       
+   @Override
    public void playback(java.awt.Robot awtRobot, double playbackSpeed)
    {
       awtRobot.mouseMove(x, y);
       awtRobot.mouseRelease(mouseButton.getInputEventMask());
    }
    
+   @Override
    public String toString()
    {
       return "{" + mouseButton.toShortString() + "Mouse up (" + x + "," + y + ")}";

@@ -15,14 +15,15 @@ public class GhostMouseMovePlaybackEvent implements GhostMousePlaybackEvent
       this(coordinates[0], coordinates[1]);
    }
    
+   @Override
    public void playback(java.awt.Robot awtRobot, double playbackSpeed)
    {
       awtRobot.mouseMove(x, y);
    }
    
+   @Override
    public String toString()
    {
       return "{Move (" + x + "," + y + ")}";
    }
-
 }

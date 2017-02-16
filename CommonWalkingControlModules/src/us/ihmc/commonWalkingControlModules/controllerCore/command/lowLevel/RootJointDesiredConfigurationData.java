@@ -10,7 +10,6 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.SixDoFJoint;
 
 public class RootJointDesiredConfigurationData implements RootJointDesiredConfigurationDataReadOnly
 {

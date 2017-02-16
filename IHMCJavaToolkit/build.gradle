@@ -40,22 +40,27 @@ jar {
     }
 }
 
-repositories ihmc.ihmcDefaultArtifactProxies()
-
 repositories {
+    mavenCentral()
     mavenLocal()
     jcenter()
-    mavenCentral()
     maven {
         url "http://artifactory.ihmc.us/artifactory/thirdparty/"
     }
 }
+
+repositories ihmc.ihmcDefaultArtifactProxies()
 
 def strings = ['ihmc', 'robotics']
 ihmc.configureForIHMCOpenSourceBintrayPublish(false, "mavenJava", "maven-release", strings)
 
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.11'
+    testCompile group: 'us.ihmc', name: 'ihmc-continuous-integration-framework', version: '0.9.4'
+
+    testCompile ihmc.getProjectDependency(":IHMCUnitTesting")
+	testCompile ihmc.getProjectTestDependency(":IHMCRoboticsToolkit")
+	testCompile ihmc.getProjectTestDependency(":IHMCJavaExtensions")
 
     compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
     compile group: 'commons-io', name: 'commons-io', version: '2.4'
@@ -67,9 +72,7 @@ dependencies {
     compile group: 'com.google.guava', name: 'guava', version: '18.0'
     compile group: 'javax.vecmath', name: 'vecmath', version: '1.5.2'
     
-    testCompile group: 'us.ihmc', name: 'IHMCContinuousIntegrationFramework', version: '0.9.1'
-
-    testCompile ihmc.getProjectDependency(":IHMCUnitTesting")
+	compile ihmc.getProjectDependency(":IHMCJavaExtensions")
 }
 
 test.finalizedBy jacocoTestReport
