@@ -427,7 +427,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
         chestTrajectoryPointList.addTrajectoryPoint(1.0, new Quat4d(0.2, 0.0, 0.0, 1.0), new Vector3d());
         chestTrajectoryPointList.addTrajectoryPoint(2.0, new Quat4d(-0.2, 0.0, 0.0, 1.0), new Vector3d());
         chestTrajectoryPointList.addTrajectoryPoint(3.0, new Quat4d(0.0, 0.0, 0.0, 1.0), new Vector3d());
-        chestCommand.setIncludingFrame(chestTrajectoryPointList);
+        chestCommand.setTrajectoryPointList(chestTrajectoryPointList);
         queuedControllerCommands.add(chestCommand);
 
         // Some more steps:
@@ -473,7 +473,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
         footPointList.addTrajectoryPoint(1.0, new Point3d(1.1, -0.2, 0.25), new Quat4d(0.0, 0.0, 0.0, 1.0), new Vector3d(), new Vector3d());
         footPointList.addTrajectoryPoint(2.0, new Point3d(1.1, -0.2, 0.35), new Quat4d(0.0, 0.0, 0.0, 1.0), new Vector3d(), new Vector3d());
 
-        footTrajectoryCommand.setIncludingFrame(footPointList);
+        footTrajectoryCommand.setTrajectoryPointList(footPointList);
         footTrajectoryCommand.setRobotSide(RobotSide.RIGHT);
         queuedControllerCommands.add(footTrajectoryCommand);
 
@@ -524,7 +524,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
         footPointList.addTrajectoryPoint(3.0, new Point3d(0.0, -0.2, 0.25), new Quat4d(0.0, 0.0, 0.0, 1.0), new Vector3d(), new Vector3d());
         footPointList.addTrajectoryPoint(4.0, new Point3d(0.0, -0.2, 0.15), new Quat4d(0.0, 0.0, 0.0, 1.0), new Vector3d(), new Vector3d());
 
-        footTrajectoryCommand.setIncludingFrame(footPointList);
+        footTrajectoryCommand.setTrajectoryPointList(footPointList);
         footTrajectoryCommand.setRobotSide(RobotSide.RIGHT);
         queuedControllerCommands.add(footTrajectoryCommand);
 
@@ -539,7 +539,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
         footPointList.addTrajectoryPoint(3.0, new Point3d(0.0, -0.2, 0.15), new Quat4d(0.0, 0.0, 0.1, 1.0), new Vector3d(), new Vector3d());
         footPointList.addTrajectoryPoint(4.0, new Point3d(0.0, -0.2, 0.15), new Quat4d(0.0, 0.1, 0.0, 1.0), new Vector3d(), new Vector3d());
 
-        footTrajectoryCommand.setIncludingFrame(footPointList);
+        footTrajectoryCommand.setTrajectoryPointList(footPointList);
         footTrajectoryCommand.setRobotSide(RobotSide.RIGHT);
         queuedControllerCommands.add(footTrajectoryCommand);
 

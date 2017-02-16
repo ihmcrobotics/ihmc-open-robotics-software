@@ -8,14 +8,6 @@ public class PelvisOrientationTrajectoryCommand extends SO3TrajectoryControllerC
    {
    }
 
-   public void set(PelvisTrajectoryCommand pelvisTrajectoryCommand)
-   {
-      setIncludingFrame(pelvisTrajectoryCommand);
-      setCommandId(pelvisTrajectoryCommand.getCommandId());
-      setExecutionMode(pelvisTrajectoryCommand.getExecutionMode());
-      setPreviousCommandId(pelvisTrajectoryCommand.getPreviousCommandId());
-   }
-
    @Override
    public Class<PelvisOrientationTrajectoryMessage> getMessageClass()
    {
