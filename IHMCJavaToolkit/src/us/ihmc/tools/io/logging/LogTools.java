@@ -1,7 +1,6 @@
 package us.ihmc.tools.io.logging;
 
 import java.util.logging.ConsoleHandler;
-import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
