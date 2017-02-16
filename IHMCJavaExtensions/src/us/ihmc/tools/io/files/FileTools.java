@@ -8,7 +8,6 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -24,30 +23,16 @@ import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.io.FileUtils;
 
-import us.ihmc.tools.UnitConversions;
+import us.ihmc.commons.Conversions;
 
 public class FileTools
 {
-   public static final byte CARRIAGE_RETURN = '\r';
-   public static final byte LINE_FEED = '\n';
-   private static final String RESOURCES_FOLDER_NAME = "resources";
-   
-   public static Path deriveResourcesPath(Class<?> clazz)
-   {
-      List<String> pathNames = new ArrayList<String>();
-      
-      String[] packageNames = clazz.getPackage().getName().split("\\.");
-      
-      pathNames.addAll(Arrays.asList(packageNames));
-      pathNames.add(StringUtils.uncapitalize(clazz.getSimpleName()));
-      
-      return Paths.get(RESOURCES_FOLDER_NAME, pathNames.toArray(new String[0]));
-   }
+   private static final byte CARRIAGE_RETURN = '\r';
+   private static final byte NEWLINE = '\n';
    
    public static List<String> readLinesFromBytes(byte[] bytes)
    {
@@ -98,12 +83,12 @@ public class FileTools
          }
          
          if (fileBytes.length > fileBytesIndex + 1 &&
-             fileBytes[fileBytesIndex] == CARRIAGE_RETURN && fileBytes[fileBytesIndex + 1] == LINE_FEED)
+             fileBytes[fileBytesIndex] == CARRIAGE_RETURN && fileBytes[fileBytesIndex + 1] == NEWLINE)
          {
             newBytes[newBytesIndex++] = fileBytes[fileBytesIndex++];
             newBytes[newBytesIndex++] = fileBytes[fileBytesIndex++];
          }
-         else if (fileBytesIndex < fileBytes.length && (fileBytes[fileBytesIndex] == CARRIAGE_RETURN || fileBytes[fileBytesIndex] == LINE_FEED))
+         else if (fileBytesIndex < fileBytes.length && (fileBytes[fileBytesIndex] == CARRIAGE_RETURN || fileBytes[fileBytesIndex] == NEWLINE))
          {
             newBytes[newBytesIndex++] = fileBytes[fileBytesIndex++];
          }
@@ -247,7 +232,7 @@ public class FileTools
    
    public static DataOutputStream getFileDataOutputStream(Path file)
    {
-      return getFileDataOutputStream(file, UnitConversions.kibibytesToBytes(8));
+      return getFileDataOutputStream(file, Conversions.kibibytesToBytes(8));
    }
    
    public static DataOutputStream getFileDataOutputStream(Path file, int bufferSize)
@@ -265,7 +250,7 @@ public class FileTools
    
    public static DataInputStream getFileDataInputStream(Path file)
    {
-      return getFileDataInputStream(file, UnitConversions.kibibytesToBytes(8));
+      return getFileDataInputStream(file, Conversions.kibibytesToBytes(8));
    }
    
    public static DataInputStream getFileDataInputStream(Path file, int bufferSize)
@@ -286,119 +271,8 @@ public class FileTools
       return Paths.get(System.getProperty("java.io.tmpdir"));
    }
    
-   // START DEPRECATED METHODS HERE
-
-   /**
-    * @deprecated Use FileTools.newBufferedReader(path). See <a href="http://docs.oracle.com/javase/tutorial/essential/io/fileio.html">File I/O (Featuring NIO.2)</a>
-    */
-   public static BufferedReader getFileReader(String filename) throws FileNotFoundException
+   public static void deleteDirectory(Path directoryPath)
    {
-      return new BufferedReader(new InputStreamReader(new FileInputStream(filename)));
-   }
-
-   /**
-    * @deprecated Use FileTools.newPrintWriter(path). See <a href="http://docs.oracle.com/javase/tutorial/essential/io/fileio.html">File I/O (Featuring NIO.2)</a>
-    */
-   public static PrintWriter getFileWriter(String filename) throws FileNotFoundException, IOException
-   {
-      return new PrintWriter(new BufferedWriter(new FileWriter(filename)));
-   }
-
-   /**
-    * @deprecated Use Use FileTools.newPrintWriter(path, true). See <a href="http://docs.oracle.com/javase/tutorial/essential/io/fileio.html">File I/O (Featuring NIO.2)</a>
-    */
-   public static PrintWriter getFileWriterWithAppend(String filename) throws FileNotFoundException, IOException
-   {
-      return new PrintWriter(new BufferedWriter(new FileWriter(filename, true)));
-   }
-
-   /**
-    * @deprecated Use FileTools.getFileDataOutputStream(path). See <a href="http://docs.oracle.com/javase/tutorial/essential/io/fileio.html">File I/O (Featuring NIO.2)</a>
-    */
-   public static DataOutputStream getFileDataOutputStream(String filename) throws FileNotFoundException, IOException
-   {
-      return new DataOutputStream(new BufferedOutputStream(new FileOutputStream(filename)));
-   }
-
-   /**
-    * @deprecated Use FileTools.getFileDataInputStream(path). See <a href="http://docs.oracle.com/javase/tutorial/essential/io/fileio.html">File I/O (Featuring NIO.2)</a>
-    */
-   public static DataInputStream getFileDataInputStream(String filename) throws FileNotFoundException, IOException
-   {
-      return new DataInputStream(new BufferedInputStream(new FileInputStream(filename)));
-   }
-
-   /**
-    * Gets all files in the directory
-    * through recursive calls
-    * 
-    * @deprecated Use PathTools.walkRecursively(directory, basicFileVisitor). See <a href="http://docs.oracle.com/javase/tutorial/essential/io/fileio.html">File I/O (Featuring NIO.2)</a>
-    *
-    * @param directory File
-    * @return ArrayList
-    */
-   public static ArrayList<File> getAllFilesInDirectoryRecursive(File directory)
-   {      
-      return getAllFilesInDirectoryRecursiveRegex(".*", directory);
-   }
-
-   /**
-    * @deprecated Use PathTools.findAllPathsRecursivelyThatMatchRegex(rootPath, regex). See <a href="http://docs.oracle.com/javase/tutorial/essential/io/fileio.html">File I/O (Featuring NIO.2)</a>
-    */
-   public static ArrayList<File> getAllFilesInDirectoryRecursiveRegex(String regex, File directory)
-   {
-   // File[] files = new File[0];
-      if (!directory.isDirectory())
-      {
-         throw new IllegalArgumentException(directory.getAbsolutePath() + " is not a directory");
-      }
-   
-      ArrayList<File> ret = new ArrayList<File>();
-      File[] contents = directory.listFiles();
-      for (File file : contents)
-      {
-         if (!file.isHidden())
-         {
-            if (file.isDirectory())
-            {
-               ret.addAll(getAllFilesInDirectoryRecursiveRegex(regex, file));
-            }
-            else
-            {
-               if (file.getName().matches(regex))
-                  ret.add(file);
-            }
-         }
-      }
-   
-      return ret;
-   }
-
-   /**
-    * @deprecated Use PathTools.findAllPathsRecursivelyThatMatchRegex(rootPath, regex). See <a href="http://docs.oracle.com/javase/tutorial/essential/io/fileio.html">File I/O (Featuring NIO.2)</a>
-    */
-   public static ArrayList<File> getAllFilesInDirectoryWithSuffix(String suffix, File directory)
-   {
-      if (directory.getName().equals(""))
-         directory = new File(".");
-
-      if (!directory.isDirectory())
-      {
-         throw new RuntimeException("This method can only be called with a directory: " + directory.toString());
-      }
-
-      ArrayList<File> allValidFiles = new ArrayList<File>();
-
-      File[] allFiles = directory.listFiles();
-      if ((allFiles == null) || (allFiles.length <= 0))
-         return allValidFiles;
-
-      for (File file : allFiles)
-      {
-         if (file.getName().endsWith(suffix) &&!file.isDirectory())
-            allValidFiles.add(file);
-      }
-
-      return allValidFiles;
+      FileUtils.deleteQuietly(directoryPath.toFile());
    }
 }

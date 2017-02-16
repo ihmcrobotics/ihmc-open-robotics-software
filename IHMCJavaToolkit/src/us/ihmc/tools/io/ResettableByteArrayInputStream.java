@@ -32,6 +32,7 @@ public class ResettableByteArrayInputStream extends ByteArrayInputStream
       return count;
    }
 
+   @Override
    public void close() throws IOException
    {
       reset();

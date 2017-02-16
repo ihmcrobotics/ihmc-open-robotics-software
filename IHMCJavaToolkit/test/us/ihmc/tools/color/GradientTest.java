@@ -8,9 +8,9 @@ import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.commons.Assertions;
+import us.ihmc.commons.RunnableThatThrows;
 import us.ihmc.continuousIntegration.IntegrationCategory;
-import us.ihmc.tools.testing.JUnitTools;
-import us.ihmc.tools.thread.RunnableThatThrows;
 
 @ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
 public class GradientTest
@@ -40,7 +40,7 @@ public class GradientTest
       assertTrue("Color[" + 3 + "] not correct: " + gradient[3], gradient[3].equals(new Color(153, 153, 102)));
       assertTrue("Color[" + 4 + "] not correct: " + gradient[4], gradient[4].equals(new Color(204, 204, 51)));
       
-      JUnitTools.assertExceptionThrown(IllegalArgumentException.class, new RunnableThatThrows()
+      Assertions.assertExceptionThrown(IllegalArgumentException.class, new RunnableThatThrows()
       {
          @Override
          public void run() throws Throwable

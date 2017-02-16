@@ -1,5 +1,6 @@
 package us.ihmc.graphicsDescription.yoGraphics;
 
+import java.awt.Color;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
@@ -19,6 +20,7 @@ import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.instructions.Graphics3DAddMeshDataInstruction;
 import us.ihmc.graphicsDescription.plotting.artifact.Artifact;
+import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -132,6 +134,12 @@ public class YoGraphicPlanarRegionsList extends YoGraphic implements RemoteYoGra
     * When there is no mesh to render, {@link #currentRegionId} equals to {@code -1}.
     */
    private final YoFramePoseUsingQuaternions currentRegionPose;
+   /**
+    * Stores custom colors for planar regions.
+    * When constructed without using custom colors, {@link #planarRegionsColorBuffer} is {@code null}
+    * and random colors are used.
+    */   
+   private final IntegerYoVariable[] planarRegionsColorBuffer;
 
    private final Graphics3DObject graphics3dObject;
    private final List<Graphics3DAddMeshDataInstruction> meshBuffer;
@@ -145,6 +153,19 @@ public class YoGraphicPlanarRegionsList extends YoGraphic implements RemoteYoGra
     * @param registry
     */
    public YoGraphicPlanarRegionsList(String name, int vertexBufferSize, int meshBufferSize, YoVariableRegistry registry)
+   {
+      this(name, vertexBufferSize, meshBufferSize, false, -1, registry);
+   }
+
+   /**
+    * Create a {@link YoGraphic} for rendering {@link PlanarRegionsList}s.
+    * 
+    * @param name
+    * @param vertexBufferSize
+    * @param meshBufferSize
+    * @param registry
+    */
+   public YoGraphicPlanarRegionsList(String name, int vertexBufferSize, int meshBufferSize, boolean useCustomColors, int numberOfPlanarRegions, YoVariableRegistry registry)
    {
       super(name);
 
@@ -178,6 +199,19 @@ public class YoGraphicPlanarRegionsList extends YoGraphic implements RemoteYoGra
 
       for (int polygonIndex = 0; polygonIndex < meshBufferSize; polygonIndex++)
          meshBuffer.add(graphics3dObject.addMeshData(null, YoAppearance.AliceBlue()));
+      
+      if(useCustomColors)
+      {
+         planarRegionsColorBuffer = new IntegerYoVariable[numberOfPlanarRegions];
+         for(int i = 0; i < numberOfPlanarRegions; i++)
+         {
+            planarRegionsColorBuffer[i] = new IntegerYoVariable("customColor" + i, registry);
+         }
+      }
+      else
+      {
+         planarRegionsColorBuffer = null;
+      }
    }
 
    /**
@@ -242,6 +276,19 @@ public class YoGraphicPlanarRegionsList extends YoGraphic implements RemoteYoGra
 
       for (int polygonIndex = 0; polygonIndex < meshBufferSize; polygonIndex++)
          meshBuffer.add(graphics3dObject.addMeshData(null, YoAppearance.AliceBlue()));
+      
+      if(yoVariables.length > variableIndex)
+      {
+         int numberOfPlanarRegions = yoVariables.length - variableIndex;
+         planarRegionsColorBuffer = new IntegerYoVariable[numberOfPlanarRegions];
+         
+         for(int i = 0; i < numberOfPlanarRegions; i++)
+            planarRegionsColorBuffer[i] = (IntegerYoVariable) yoVariables[variableIndex++];    
+      }
+      else
+      {
+         planarRegionsColorBuffer = null;
+      }
    }
 
    /**
@@ -285,7 +332,12 @@ public class YoGraphicPlanarRegionsList extends YoGraphic implements RemoteYoGra
    private AppearanceDefinition getCurrentAppearance()
    {
       AppearanceDefinition appearance;
-      if (regionIdToAppearance.containsKey(currentRegionId.getIntegerValue()))
+      if(planarRegionsColorBuffer != null)
+      {
+         int requestedColorRGB = planarRegionsColorBuffer[currentMeshIndex.getIntegerValue()].getIntegerValue();
+         appearance = YoAppearance.RGBColorFromHex(requestedColorRGB);
+      }
+      else if (regionIdToAppearance.containsKey(currentRegionId.getIntegerValue()))
       {
          appearance = regionIdToAppearance.get(currentRegionId.getIntegerValue());
       }
@@ -401,6 +453,26 @@ public class YoGraphicPlanarRegionsList extends YoGraphic implements RemoteYoGra
 
    private final RigidBodyTransform regionTransform = new RigidBodyTransform();
    private final Deque<PlanarRegionsList> planarRegionsListsDeque = new ArrayDeque<>();
+
+   /**
+    * Submit a new list of planar regions to eventually render.
+    * This method does NOT update any YoVariables and does not update any graphics.
+    * Once a list of planar regions is submitted, the method {@link #processPlanarRegionsListQueue()} has to be called every update tick in the caller.
+    * @param planarRegionsList the list of planar regions to be eventually rendered.
+    * @param requestedAppearance appearance to render the planar regions
+    */   
+   public void submitPlanarRegionsListToRender(PlanarRegionsList planarRegionsList, Color requestedColor)
+   {
+      for(int i = 0; i < planarRegionsList.getNumberOfPlanarRegions(); i++)
+      {
+         int index = i + currentMeshIndex.getIntegerValue();         
+         if(index < 0 || index >= planarRegionsColorBuffer.length)
+            break;
+         planarRegionsColorBuffer[index].set(requestedColor.getRGB());
+      }
+      
+      submitPlanarRegionsListToRender(planarRegionsList);
+   }
 
    /**
     * Submit a new list of planar regions to eventually render.

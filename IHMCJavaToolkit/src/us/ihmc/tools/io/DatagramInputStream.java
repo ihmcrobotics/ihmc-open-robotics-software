@@ -51,6 +51,7 @@ public class DatagramInputStream extends InputStream
    /**
     * This will block once out of data and need to wait for a new DatagramPacket.
     */
+   @Override
    public int read() throws IOException
    {
       refreshByteInputStreamIfNecessaryByReadingNewDatagram();
@@ -61,6 +62,7 @@ public class DatagramInputStream extends InputStream
    /**
     * This will block once out of data and need to wait for a new DatagramPacket.
     */
+   @Override
    public int read(byte b[]) throws IOException
    {
       refreshByteInputStreamIfNecessaryByReadingNewDatagram();
@@ -71,6 +73,7 @@ public class DatagramInputStream extends InputStream
    /**
     * This will block once out of data and need to wait for a new DatagramPacket.
     */
+   @Override
    public int read(byte b[], int offset, int length) throws IOException
    {
       refreshByteInputStreamIfNecessaryByReadingNewDatagram();
@@ -128,6 +131,7 @@ public class DatagramInputStream extends InputStream
 
    }
    
+   @Override
    public void close()
    {
       if (datagramSocketToListenOn != null)

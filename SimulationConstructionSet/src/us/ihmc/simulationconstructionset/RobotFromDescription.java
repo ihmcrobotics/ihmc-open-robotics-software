@@ -248,7 +248,7 @@ public class RobotFromDescription extends Robot implements OneDegreeOfFreedomJoi
             joint.recursiveGetAllGroundContactPoints(groundContactPoints);
 
             wrenchCalculator = new GroundContactPointBasedWrenchCalculator(forceSensorDescription.getName(), groundContactPoints, oneDegreeOfFreedomJoint,
-                                                                           forceSensorDescription.getTransformToJoint());
+                                                                           forceSensorDescription.getTransformToJoint(), yoVariableRegistry);
          }
          else
          {
@@ -463,8 +463,8 @@ public class RobotFromDescription extends Robot implements OneDegreeOfFreedomJoi
       link.setLinkGraphics(linkGraphics);
 
       ArrayList<CollisionMeshDescription> collisonMeshDescriptions = linkDescription.getCollisionMeshes();
-      
-      for (int i=0; i<collisonMeshDescriptions.size(); i++)
+
+      for (int i = 0; i < collisonMeshDescriptions.size(); i++)
       {
          link.addCollisionMesh(collisonMeshDescriptions.get(i));
       }

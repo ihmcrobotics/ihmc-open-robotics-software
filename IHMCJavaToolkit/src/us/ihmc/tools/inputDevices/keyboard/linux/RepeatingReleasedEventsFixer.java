@@ -35,6 +35,7 @@ public class RepeatingReleasedEventsFixer implements AWTEventListener
       Toolkit.getDefaultToolkit().removeAWTEventListener(this);
    }
 
+   @Override
    public void eventDispatched(AWTEvent event)
    {
       assert event instanceof KeyEvent : "Shall only listen to KeyEvents, so no other events shall come here";
@@ -127,7 +128,8 @@ public class RepeatingReleasedEventsFixer implements AWTEventListener
          _map.remove(Integer.valueOf(_originalKeyEvent.getKeyCode()));
       }
 
-      public void actionPerformed(@SuppressWarnings("unused") ActionEvent e)
+      @Override
+      public void actionPerformed(ActionEvent e)
       {
          assert assertEDT();
 
@@ -167,9 +169,10 @@ public class RepeatingReleasedEventsFixer implements AWTEventListener
    /**
     * Dead simple extension of {@link KeyEvent} that implements {@link Reposted}.
     */
+   @SuppressWarnings("serial")
    public static class RepostedKeyEvent extends KeyEvent implements Reposted
    {
-      public RepostedKeyEvent(@SuppressWarnings("hiding") Component source, @SuppressWarnings("hiding") int id, long when, int modifiers, int keyCode, char keyChar, int keyLocation)
+      public RepostedKeyEvent(Component source, int id, long when, int modifiers, int keyCode, char keyChar, int keyLocation)
       {
          super(source, id, when, modifiers, keyCode, keyChar, keyLocation);
       }

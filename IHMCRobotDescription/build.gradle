@@ -41,14 +41,16 @@ dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.11'
 
     compile group: 'javax.vecmath', name: 'vecmath', version: '1.5.2'
-    compile group: 'org.ejml', name: 'core', version: '0.28'
+    compile group: 'org.ejml', name: 'core', version: '0.30'
     
-    testCompile group: 'us.ihmc', name: 'IHMCContinuousIntegrationFramework', version: '0.9.1'
+    testCompile group: 'us.ihmc', name: 'ihmc-continuous-integration-framework', version: '0.9.4'
 
     compile ihmc.getProjectDependency(":IHMCRoboticsToolkit")
     compile ihmc.getProjectDependency(":IHMCGeometry")
     compile ihmc.getProjectDependency(":IHMCGraphicsDescription")
     testCompile ihmc.getProjectDependency(":IHMCUnitTesting")
+	testCompile ihmc.getProjectTestDependency(":IHMCRoboticsToolkit")
+	testCompile ihmc.getProjectTestDependency(":IHMCJavaExtensions")
     testCompile ihmc.getProjectTestDependency(":IHMCRoboticsToolkit")
 }
 

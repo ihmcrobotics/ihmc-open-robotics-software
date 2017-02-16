@@ -7,6 +7,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Scanner;
 
+import us.ihmc.commons.Conversions;
 import us.ihmc.communication.configuration.NetworkParameterKeys;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.communication.net.KryoStreamSerializer;
@@ -16,7 +17,6 @@ import us.ihmc.communication.packetCommunicator.interfaces.GlobalPacketConsumer;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
-import us.ihmc.tools.UnitConversions;
 import us.ihmc.tools.io.files.FileTools;
 import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.tools.time.DateTools;
@@ -39,7 +39,7 @@ public class AtlasUIPacketRecorder
       
       IHMCCommunicationKryoNetClassList netClassList = new IHMCCommunicationKryoNetClassList();
       
-      final KryoStreamSerializer kryoStreamSerializer = new KryoStreamSerializer(UnitConversions.megabytesToBytes(10));
+      final KryoStreamSerializer kryoStreamSerializer = new KryoStreamSerializer(Conversions.megabytesToBytes(10));
       kryoStreamSerializer.registerClasses(netClassList);
       
       PacketCommunicator packetClient = PacketCommunicator.createTCPPacketCommunicatorClient(NetworkParameters.getHost(NetworkParameterKeys.networkManager), NetworkPorts.NETWORK_PROCESSOR_TO_UI_TCP_PORT, netClassList);

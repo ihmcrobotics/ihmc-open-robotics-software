@@ -26,6 +26,7 @@ public class TextAreaOutputStream extends OutputStream
       final String text = sb.toString();
       SwingUtilities.invokeLater(new Runnable()
       {
+         @Override
          public void run()
          {
             textArea.append(text);

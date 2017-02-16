@@ -55,6 +55,4 @@ public class StringAndRegularExpressionMatcher
       
       return false;
    }
-   
-   
 }

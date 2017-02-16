@@ -20,6 +20,7 @@ public class MyFileFilter extends javax.swing.filechooser.FileFilter
       this.description = description;
    }
 
+   @Override
    public boolean accept(File f)
    {
       if (f.isDirectory())
@@ -34,6 +35,7 @@ public class MyFileFilter extends javax.swing.filechooser.FileFilter
       return false;
    }
 
+   @Override
    public String getDescription()
    {
       return description;

@@ -1,4 +1,4 @@
-package us.ihmc.tools.thread;
+package us.ihmc.commons;
 
 public interface RunnableThatThrows
 {

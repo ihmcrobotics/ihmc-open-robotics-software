@@ -2,20 +2,7 @@ package us.ihmc.tools.testing;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Matrix3d;
@@ -41,42 +28,9 @@ import javax.vecmath.Vector4f;
 import org.ejml.data.DenseMatrix64F;
 
 import Jama.Matrix;
-import us.ihmc.tools.thread.RunnableThatThrows;
 
 public class JUnitTools
 {
-   private static final String TEST_RESOURCES_FOLDER_NAME = "testResources";
-   
-   public static Path deriveTestResourcesPath(Class<?> clazz)
-   {
-      List<String> pathNames = new ArrayList<String>();
-      
-      String[] packageNames = clazz.getPackage().getName().split("\\.");
-      
-      pathNames.addAll(Arrays.asList(packageNames));
-      pathNames.add(Character.toLowerCase(clazz.getSimpleName().charAt(0)) + clazz.getSimpleName().substring(1));
-      
-      return Paths.get(TEST_RESOURCES_FOLDER_NAME, pathNames.toArray(new String[0]));
-   }
-   
-   public static void assertExceptionThrown(Class<? extends Throwable> exceptionType, RunnableThatThrows methodToRun)
-   {
-      boolean thrown = false;
-      
-      try
-      {
-         methodToRun.run();
-      }
-      catch (Throwable throwable)
-      {
-         assertTrue("Exception type mismatch: Expected: " + exceptionType.getName() + " Actual: " + throwable.getClass().getName(), exceptionType.getName().equals(throwable.getClass().getName()));
-         
-         thrown = true;
-      }
-      
-      assertTrue("Exception not thrown", thrown);
-   }
-
    public static void assertTuple3dEquals(Tuple3d expected, Tuple3d actual, double delta)
    {
       assertTuple3dEquals("", expected, actual, delta);
@@ -348,37 +302,6 @@ public class JUnitTools
       for (int i = 0; i < expectedDoubleArray.length; i++)
       {
          assertEquals("Array disagree at index " + i + " :", expectedDoubleArray[i], actualDoubleArray[i], epsilon);
-      }
-   }
-
-   public static void assertSerializable(Serializable serializable)
-   {
-      assertSerializable(serializable, false);
-   }
-
-   public static void assertSerializable(Serializable serializable, boolean testEquals)
-   {
-      try
-      {
-         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-         ObjectOutputStream objectOutputStream = new ObjectOutputStream(byteArrayOutputStream);
-         objectOutputStream.writeObject(serializable);
-
-         ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(byteArrayOutputStream.toByteArray());
-         ObjectInputStream objectInputStream = new ObjectInputStream(byteArrayInputStream);
-         Object object = objectInputStream.readObject();
-         if (testEquals)
-         {
-            assertTrue(object.equals(serializable));
-         }
-      }
-      catch (IOException e)
-      {
-         fail("Object not serializable");
-      }
-      catch (ClassNotFoundException ce)
-      {
-         fail("Object not serializable: class not found");
       }
    }
 

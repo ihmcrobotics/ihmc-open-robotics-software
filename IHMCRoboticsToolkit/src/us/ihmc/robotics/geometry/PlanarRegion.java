@@ -832,4 +832,17 @@ public class PlanarRegion
       return new PlanarRegion(regionTransform, regionConvexPolygons);
    }
 
+   /**
+    * Transforms the planar region
+    * @param rigidBodyTransform transform from current frame to desired frame
+    */   
+   public void transform(RigidBodyTransform fromDesiredToCurrentTransform)
+   {
+      fromLocalToWorldTransform.multiply(fromDesiredToCurrentTransform);
+      fromWorldToLocalTransform.set(fromLocalToWorldTransform);
+      fromWorldToLocalTransform.invert();
+      
+      updateBoundingBox();
+      updateConvexHull();
+   }
 }
