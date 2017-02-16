@@ -3,6 +3,7 @@ package us.ihmc.exampleSimulations.newtonsCradle;
 import java.util.ArrayList;
 
 import javax.vecmath.Point3d;
+import javax.vecmath.Vector3d;
 
 import us.ihmc.exampleSimulations.collidingArms.SingleBallRobotDescription;
 import us.ihmc.exampleSimulations.collidingArms.SingleBoxRobotDescription;
@@ -148,8 +149,16 @@ public class NewtonsCradleSimulation
       double xLength = 0.2;
       double yWidth = 0.2;
       double zHeight = 0.1;
-      SingleBoxRobotDescription singleBoxRobotDescription = new SingleBoxRobotDescription("BoxOne", mass, xLength, yWidth, zHeight, 0xff, 0xff);
-      RobotFromDescription boxRobot = new RobotFromDescription(singleBoxRobotDescription);
+      SingleBoxRobotDescription singleBoxRobotDescription = new SingleBoxRobotDescription();
+      singleBoxRobotDescription.setName("BoxOne");
+      singleBoxRobotDescription.setMass(mass);
+      singleBoxRobotDescription.setCollisionGroup(0xff);
+      singleBoxRobotDescription.setCollisionMask(0xff);
+      singleBoxRobotDescription.setXLength(xLength);
+      singleBoxRobotDescription.setYWidth(yWidth);
+      singleBoxRobotDescription.setZHeight(zHeight);
+      
+      RobotFromDescription boxRobot = new RobotFromDescription(singleBoxRobotDescription.createRobotDescription());
       
       FloatingJoint rootJoint = (FloatingJoint) boxRobot.getRootJoints().get(0);
       rootJoint.setPosition(0.0, 0.0, 0.15);
@@ -226,7 +235,7 @@ public class NewtonsCradleSimulation
       ballRootJoint.setPosition(-1.0, -2.0 * ballRadius - cylinderHeight, ballRadius * 1.02);
       ballRootJoint.setVelocity(initialVelocity, 0.0, 0.0);
       
-      RobotFromDescription cylinderRobot = createASingleCylinderRobot(cylinderRadius, cylinderHeight, cylinderMass, cylinderRadiusOfGyrationPercent);
+      RobotFromDescription cylinderRobot = createASingleCylinderRobot("cylinder", cylinderRadius, cylinderHeight, cylinderMass, cylinderRadiusOfGyrationPercent);
       robots.add(cylinderRobot);
       FloatingJoint cylinderRootJoint = (FloatingJoint) cylinderRobot.getRootJoints().get(0);
       cylinderRootJoint.setPosition(-1.0, 0.0, cylinderRadius * 1.02);
@@ -273,6 +282,139 @@ public class NewtonsCradleSimulation
       scs.startOnAThread();
    }
 
+   public static void createSpinningAndDroppingObjectsSimulation()
+   {
+      ArrayList<Robot> robots = new ArrayList<>();
+
+      double ballRadius = 0.2;
+      double ballMass = 1.0;
+      double ballRadiusOfGyrationPercent = 1.0;
+
+      double cylinderRadius = 0.25;
+      double cylinderHeight = 0.1;
+      double cylinderMass = 1.0;
+      double cylinderRadiusOfGyrationPercent = 1.0;
+
+      double capsuleSegmentHeight = 0.05;//0.2;//0.3;
+      double capsuleRadius = 0.2;
+      double capsuleHeight = capsuleSegmentHeight + 2.0 * capsuleRadius;
+      double capsuleMass = 1.0;
+      double capsuleRadiusOfGyrationPercent = 0.8;
+
+      double boxXLength = 0.2;
+      double boxYWidth = capsuleSegmentHeight;
+      double boxZHeight = 2.0 * capsuleRadius;
+      double boxMass = 1.0;
+      double boxRadiusOfGyrationPercent = 0.8;
+
+      double initialPitch = -Math.PI/8.0;
+      double initialCapsuleRoll = -Math.PI/32.0;
+      double initialBoxRoll = -Math.PI/64.0;
+      double initialVelocity = 0.0;
+      double initialRotationalVelocity = 2.0;
+
+      RobotFromDescription ballRobot = createASingleBallRobot(ballRadius, ballMass, ballRadiusOfGyrationPercent);
+      robots.add(ballRobot);
+      FloatingJoint ballRootJoint = (FloatingJoint) ballRobot.getRootJoints().get(0);
+      ballRootJoint.setPosition(-1.0, -3.0 * ballRadius - cylinderHeight, ballRadius * 1.02);
+      ballRootJoint.setVelocity(initialVelocity, 0.0, 0.0);
+      ballRootJoint.setAngularVelocityInBody(new Vector3d(0.0, 0.0, initialRotationalVelocity));
+
+      RobotFromDescription cylinderRobot = createASingleCylinderRobot("cylinder", cylinderRadius, cylinderHeight, cylinderMass, cylinderRadiusOfGyrationPercent);
+      robots.add(cylinderRobot);
+      FloatingJoint cylinderRootJoint = (FloatingJoint) cylinderRobot.getRootJoints().get(0);
+      cylinderRootJoint.setPosition(-1.0, 0.0, cylinderHeight/2.0 * 1.05 + cylinderRadius * Math.abs(Math.sin(initialPitch)));
+      cylinderRootJoint.setVelocity(initialVelocity, 0.0, 0.0);
+      cylinderRootJoint.setYawPitchRoll(0.0, initialPitch, 0.0);
+      cylinderRootJoint.setAngularVelocityInBody(new Vector3d(initialRotationalVelocity, 0.0, 0.0));
+      
+      RobotFromDescription cylinderRobotTwo = createASingleCylinderRobot("cylinderTwo", cylinderRadius, cylinderHeight, cylinderMass, cylinderRadiusOfGyrationPercent);
+      robots.add(cylinderRobotTwo);
+      FloatingJoint cylinderRootJointTwo = (FloatingJoint) cylinderRobotTwo.getRootJoints().get(0);
+      cylinderRootJointTwo.setPosition(0.0, 0.0, cylinderHeight/2.0 * 1.05 + cylinderRadius * Math.abs(Math.sin(initialPitch)));
+      cylinderRootJointTwo.setVelocity(initialVelocity, 0.0, 0.0);
+      cylinderRootJointTwo.setYawPitchRoll(0.0, 0.0, 0.0);
+      cylinderRootJointTwo.setAngularVelocityInBody(new Vector3d(0.0, 0.0, initialRotationalVelocity));
+      
+      RobotFromDescription cylinderRobotThree = createASingleCylinderRobot("cylinderThree", cylinderRadius, cylinderHeight, cylinderMass, cylinderRadiusOfGyrationPercent);
+      robots.add(cylinderRobotThree);
+      FloatingJoint cylinderRootJointThree = (FloatingJoint) cylinderRobotThree.getRootJoints().get(0);
+      cylinderRootJointThree.setPosition(0.0, -cylinderRadius * 3.0, cylinderHeight/2.0 * 1.05 + cylinderRadius * Math.abs(Math.sin(initialPitch)));
+      cylinderRootJointThree.setVelocity(initialVelocity, 0.0, 0.0);
+      cylinderRootJointThree.setYawPitchRoll(0.0, initialPitch, 0.0);
+      cylinderRootJointThree.setAngularVelocityInBody(new Vector3d(0.0, 0.0, 0.0));
+      
+      RobotFromDescription capsuleRobot = createASingleCapsuleRobot(capsuleRadius, capsuleHeight, capsuleMass, capsuleRadiusOfGyrationPercent);
+      robots.add(capsuleRobot);
+      FloatingJoint capsuleRootJoint = (FloatingJoint) capsuleRobot.getRootJoints().get(0);
+      capsuleRootJoint.setPosition(-1.0, cylinderRadius + capsuleHeight/2.0 + capsuleRadius, capsuleRadius * 1.02 + capsuleSegmentHeight/2.0 * Math.sin(Math.abs(initialCapsuleRoll)));
+      capsuleRootJoint.setVelocity(initialVelocity, 0.0, 0.0);
+      capsuleRootJoint.setYawPitchRoll(0.0, 0.0, Math.PI/2.0 + initialCapsuleRoll);
+      capsuleRootJoint.setAngularVelocityInBody(new Vector3d(0.0, 0.0, 0.0));
+
+      RobotFromDescription boxRobot = createASingleBoxRobot(boxXLength, boxYWidth, boxZHeight, boxMass, boxRadiusOfGyrationPercent);
+      robots.add(boxRobot);
+      FloatingJoint boxRootJoint = (FloatingJoint) boxRobot.getRootJoints().get(0);
+      boxRootJoint.setPosition(0.0, 2.0 * cylinderRadius + boxYWidth, boxZHeight/2.0 * 1.05 + boxYWidth/2.0 * Math.sin(Math.abs(initialBoxRoll)));
+      boxRootJoint.setVelocity(initialVelocity, 0.0, 0.0);
+      boxRootJoint.setYawPitchRoll(0.0, 0.0, initialBoxRoll);
+      boxRootJoint.setAngularVelocityInBody(new Vector3d(0.0, 0.0, 0.0));
+      
+      int estimatedNumberOfContactPoints = 30;
+      double groundAngle = 0.0;
+      boolean addWalls = false;
+      int collisionGroup = 0xffff;
+      int collisionMask = 0xffff;
+      
+      Robot groundRobot = new GroundAsABoxRobot(estimatedNumberOfContactPoints, groundAngle, addWalls, collisionGroup, collisionMask);
+      robots.add(groundRobot);
+
+      Robot[] robotArray = new Robot[robots.size()];
+      robots.toArray(robotArray);
+
+      SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters();
+      parameters.setDataBufferSize(8000);
+      SimulationConstructionSet scs = new SimulationConstructionSet(robotArray, parameters);
+      scs.setDT(0.0001, 10);
+      scs.setFastSimulate(true);
+      scs.setGroundVisible(false);
+
+      DefaultCollisionVisualizer collisionVisualizer = new DefaultCollisionVisualizer(50.0, 100.0, 0.003, scs, 100);
+//      DefaultCollisionVisualizer collisionVisualizer = null;
+      YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
+
+      double coefficientOfRestitution = 0.3;
+      double coefficientOfFriction = 0.4;
+      CollisionHandler collisionHandler = createCollisionHandler(coefficientOfRestitution, coefficientOfFriction, scs.getRootRegistry(), yoGraphicsListRegistry);
+
+      scs.initializeCollisionDetectionAndHandling(collisionVisualizer, collisionHandler);
+      scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
+
+      scs.startOnAThread();
+   }
+
+   private static RobotFromDescription createASingleBoxRobot(double boxXLength, double boxYWidth, double boxZHeight, double boxMass,
+                                                             double boxRadiusOfGyrationPercent)
+   {
+      SingleBoxRobotDescription boxDescription = new SingleBoxRobotDescription();
+      boxDescription.setName("box");
+      boxDescription.setMass(boxMass);
+      boxDescription.setXLength(boxXLength);
+      boxDescription.setYWidth(boxYWidth);
+      boxDescription.setZHeight(boxZHeight);
+      boxDescription.setRadiusOfGyrationPercent(boxRadiusOfGyrationPercent);
+
+      boxDescription.setCollisionGroup(0xffff);
+      boxDescription.setCollisionMask(0xffff);
+
+      AppearanceDefinition boxAppearance = YoAppearance.DarkCyan();
+//      boxAppearance.setTransparency(0.5);
+      boxDescription.setAppearance(boxAppearance);
+
+      RobotFromDescription boxRobot = new RobotFromDescription(boxDescription.createRobotDescription());
+      return boxRobot;
+   }
+
    private static RobotFromDescription createASingleCapsuleRobot(double capsuleRadius, double capsuleHeight, double capsuleMass,
                                                                  double capsuleRadiusOfGyrationPercent)
    {
@@ -287,23 +429,23 @@ public class NewtonsCradleSimulation
       capsuleDescription.setCollisionMask(0xffff);
       
       AppearanceDefinition capsuleAppearance = YoAppearance.DarkCyan();
-      capsuleAppearance.setTransparency(0.5);
+//      capsuleAppearance.setTransparency(0.5);
       capsuleDescription.setAppearance(capsuleAppearance);
       capsuleDescription.setAddStripes(true);
       
       capsuleAppearance = YoAppearance.Gold();
-      capsuleAppearance.setTransparency(0.5);
+//      capsuleAppearance.setTransparency(0.5);
       capsuleDescription.setStripeAppearance(capsuleAppearance);
 
       RobotFromDescription capsuleRobot = new RobotFromDescription(capsuleDescription.createRobotDescription());
       return capsuleRobot;
    }
 
-   private static RobotFromDescription createASingleCylinderRobot(double cylinderRadius, double cylinderHeight, double cylinderMass,
+   private static RobotFromDescription createASingleCylinderRobot(String name, double cylinderRadius, double cylinderHeight, double cylinderMass,
                                                                   double cylinderRadiusOfGyrationPercent)
    {
       SingleCylinderRobotDescription cylinderDescription = new SingleCylinderRobotDescription();
-      cylinderDescription.setName("cylinder");
+      cylinderDescription.setName(name);
       cylinderDescription.setMass(cylinderMass);
       cylinderDescription.setRadius(cylinderRadius);
       cylinderDescription.setHeight(cylinderHeight);
@@ -471,7 +613,8 @@ public class NewtonsCradleSimulation
 //            createBoxDownRampSimulation();
 //            createRowOfDominosSimulation();
 //      createStackOfBlocksSimulation();
-      createRollingObjectsSimulation();
+//      createRollingObjectsSimulation();
+      createSpinningAndDroppingObjectsSimulation();
 //      createPileOfRandomObjectsSimulation();
    }
 

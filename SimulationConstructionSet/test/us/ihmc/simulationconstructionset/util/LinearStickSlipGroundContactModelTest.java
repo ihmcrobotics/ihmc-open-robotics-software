@@ -18,12 +18,71 @@ import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.simulationconstructionset.GroundContactPointsHolder;
+import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.ground.FlatGroundProfile;
 import us.ihmc.simulationconstructionset.util.ground.SlopedPlaneGroundProfile;
 import us.ihmc.tools.testing.JUnitTools;
+import us.ihmc.tools.thread.ThreadTools;
 
 public class LinearStickSlipGroundContactModelTest
 {
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout=300000)
+   public void testNonlinearZForce()
+   {
+      boolean visualize = false;
+      
+      SimulationConstructionSet scs = null;
+      YoVariableRegistry registry;
+
+      if (visualize)
+      {
+         scs = new SimulationConstructionSet(new Robot("TestZForce"));
+         registry = scs.getRootRegistry();
+      }
+      else
+      {
+         registry = new YoVariableRegistry("TestRegistry");
+      }
+
+      GroundContactPoint groundContactPoint = new GroundContactPoint("testPoint", registry);
+      GroundContactPointsHolder pointsHolder = createGroundContactPointsHolder(groundContactPoint);
+
+      LinearStickSlipGroundContactModel groundContactModel = new LinearStickSlipGroundContactModel(pointsHolder, registry);
+      groundContactModel.disableSlipping();
+
+      if (visualize)
+      {
+         scs.startOnAThread();
+      }
+
+      for (double z = 0.00001; z>-0.02; z = z - 0.00001)
+      {
+         Point3d position = new Point3d(0.0, 0.0, z);
+         Vector3d velocity = new Vector3d(0.0, 0.0, 0.0);
+
+         groundContactPoint.setPosition(position);
+         groundContactPoint.setVelocity(velocity);
+
+         groundContactModel.enableSurfaceNormal();
+         groundContactModel.doGroundContact();
+
+         Vector3d force = new Vector3d();
+         groundContactPoint.getForce(force);
+         
+         if (visualize)
+         {
+            scs.tickAndUpdate();
+         }
+      }
+
+      if (visualize)
+      {
+         ThreadTools.sleepForever();
+      }
+   }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)

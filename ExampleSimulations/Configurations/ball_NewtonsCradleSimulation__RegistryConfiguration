@@ -1,7 +1,10 @@
 root*false*false
 root.ball*false*false
 root.cylinder*false*false
+root.cylinderTwo*false*false
+root.cylinderThree*false*false
 root.capsule*false*false
+root.box*false*false
 root.GroundAsABoxRobot*false*false
 root.DefaultCollisionVisualizer*false*false
 root.DefaultCollisionVisualizer.CollisionOneBalls*false*false

@@ -43,7 +43,7 @@ public class HybridImpulseSpringDamperCollisionHandler implements CollisionHandl
    private static final boolean DEBUG = false;
 
    //TODO: Get maximumPenetrationToStart implemented for when useAverageNewCollisionTouchdownPoints = true;
-   private static final boolean useAverageNewCollisionTouchdownPoints = true; //false;
+   private static final boolean useAverageNewCollisionTouchdownPoints = false; //true; //false;
    private double maximumPenetrationToStart = 0.002;
 
    private static final boolean resolveCollisionWithAnImpact = false;
