@@ -53,32 +53,35 @@ public class IHMCMOCAPLocalizationModule implements MocapRigidbodiesListener, Pa
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final YoVariableServer yoVariableServer;
    private final FullHumanoidRobotModel fullRobotModel;
-   private final RigidBodyTransform pelvisToWorldTransform = new RigidBodyTransform();
    private final PlanarRegionsListListener planarRegionsListListener = new PlanarRegionsListListener();
    private final WalkingStatusManager walkingStatusManager = new WalkingStatusManager();
 
-   private final Vector3f pelvisTranslation = new Vector3f();
-   private final Quat4f pelvisOrientation = new Quat4f(0.0f, 0.0f, 0.0f, 1.0f);
-   private final ReferenceFrame pelvisFrameFromRobotConfigurationDataPacket = new ReferenceFrame("pelvisFrame", ReferenceFrame.getWorldFrame())
+   private final Vector3f pelvisTranslationFromRobotConfigurationData = new Vector3f();
+   private final Quat4f pelvisOrientationFromRobotConfigurationData = new Quat4f(0.0f, 0.0f, 0.0f, 1.0f);
+   private final ReferenceFrame pelvisFrameFromRobotConfigurationDataPacket = new ReferenceFrame("pelvisFrameFromRobotConfigurationDataPacket", ReferenceFrame.getWorldFrame())
    {
       private static final long serialVersionUID = 116774591450076114L;
 
       @Override
       protected void updateTransformToParent(RigidBodyTransform transformToParent)
       {
-         transformToParent.setTranslation(pelvisTranslation);
-         transformToParent.setRotation(pelvisOrientation);
+         transformToParent.setTranslation(pelvisTranslationFromRobotConfigurationData);
+         transformToParent.setRotation(pelvisOrientationFromRobotConfigurationData);
       }
    };
    
-   private final DoubleYoVariable markersPositionX = new DoubleYoVariable("markersPositionX", registry);
-   private final DoubleYoVariable markersPositionY = new DoubleYoVariable("markersPositionY", registry);
-   private final DoubleYoVariable markersPositionZ = new DoubleYoVariable("markersPositionZ", registry);
+   private RigidBodyTransform pelvisToWorldFromMocapData = new RigidBodyTransform();
+   private final ReferenceFrame pelvisFrameFromMocap = new ReferenceFrame("pelvisFrameFromMocap", ReferenceFrame.getWorldFrame())
+   {
+      private static final long serialVersionUID = 116774591450076114L;
 
-   private final DoubleYoVariable markersYaw = new DoubleYoVariable("markersYaw", registry);
-   private final DoubleYoVariable markersPitch = new DoubleYoVariable("markersPitch", registry);
-   private final DoubleYoVariable markersRoll = new DoubleYoVariable("markersRoll", registry);
-
+      @Override
+      protected void updateTransformToParent(RigidBodyTransform transformToParent)
+      {
+         transformToParent.set(pelvisToWorldFromMocapData);
+      }
+   };   
+   
    private final DoubleYoVariable computedPelvisPositionX = new DoubleYoVariable("computedPelvisPositionX", registry);
    private final DoubleYoVariable computedPelvisPositionY = new DoubleYoVariable("computedPelvisPositionY", registry);
    private final DoubleYoVariable computedPelvisPositionZ = new DoubleYoVariable("computedPelvisPositionZ", registry);
@@ -92,7 +95,7 @@ public class IHMCMOCAPLocalizationModule implements MocapRigidbodiesListener, Pa
    private final DoubleYoVariable mocapWorldToRobotWorldTransformZ = new DoubleYoVariable("mocapWorldToRobotWorldTransformZ", registry);
    private final DoubleYoVariable mocapWorldToRobotWorldTransformYaw = new DoubleYoVariable("mocapWorldToRobotWorldTransformYaw", registry);
    private final DoubleYoVariable mocapWorldToRobotWorldTransformPitch = new DoubleYoVariable("mocapWorldToRobotWorldTransformPitch", registry);
-   private final DoubleYoVariable mocapWorldToRobotWorldTransformRoll = new DoubleYoVariable("mocapWorldToRobotWorldTransformZRoll", registry);
+   private final DoubleYoVariable mocapWorldToRobotWorldTransformRoll = new DoubleYoVariable("mocapWorldToRobotWorldTransformRoll", registry);
 
    private final BooleanYoVariable requestFootsteps = new BooleanYoVariable("requestFootsteps", registry);
    private final BooleanYoVariable walkingAround = new BooleanYoVariable("walkingAround", registry);
@@ -149,8 +152,7 @@ public class IHMCMOCAPLocalizationModule implements MocapRigidbodiesListener, Pa
 
       MocapRigidBody pelvisRigidBody = getPelvisRigidBody(listOfRigidbodies);
       sendPelvisTransformToController(pelvisRigidBody);
-      setMarkersYoVariables(pelvisRigidBody);
-            
+      
       if (requestFootsteps.getBooleanValue())
       {
          planarRegionsListListener.onWalkingStarted();
@@ -179,21 +181,7 @@ public class IHMCMOCAPLocalizationModule implements MocapRigidbodiesListener, Pa
 
       return null;
    }
-
-   private void setMarkersYoVariables(MocapRigidBody mocapRigidBody)
-   {
-      markersPositionX.set(mocapRigidBody.xPosition);
-      markersPositionY.set(mocapRigidBody.yPosition);
-      markersPositionZ.set(mocapRigidBody.zPosition);
-
-      double[] yawPitchRoll = new double[3];
-      RotationTools.convertQuaternionToYawPitchRoll(mocapRigidBody.getOrientation(), yawPitchRoll);
-
-      markersYaw.set(yawPitchRoll[0]);
-      markersPitch.set(yawPitchRoll[1]);
-      markersRoll.set(yawPitchRoll[2]);
-   }
-
+   
    private void setPelvisYoVariables(RigidBodyTransform pelvisTransform)
    {
       Vector3d pelvisTranslation = new Vector3d();
@@ -216,8 +204,8 @@ public class IHMCMOCAPLocalizationModule implements MocapRigidbodiesListener, Pa
 
    private void sendPelvisTransformToController(MocapRigidBody pelvisRigidBody)
    {
-      mocapToPelvisFrameConverter.computePelvisToWorldTransform(pelvisRigidBody, pelvisToWorldTransform);
-      setPelvisYoVariables(pelvisToWorldTransform);
+      mocapToPelvisFrameConverter.computePelvisToWorldTransform(pelvisRigidBody, pelvisToWorldFromMocapData);
+      setPelvisYoVariables(pelvisToWorldFromMocapData);
 
       //      if(latestRobotConfigurationData != null)
       //      {
@@ -252,11 +240,11 @@ public class IHMCMOCAPLocalizationModule implements MocapRigidbodiesListener, Pa
          oneDoFJoints[i].setTau(newJointTorques[i]);
       }
 
-      pelvisTranslation.set(packet.getPelvisTranslation());
-      pelvisOrientation.set(packet.getPelvisOrientation());
+      pelvisTranslationFromRobotConfigurationData.set(packet.getPelvisTranslation());
+      pelvisOrientationFromRobotConfigurationData.set(packet.getPelvisOrientation());
 
-      rootJoint.setPosition(pelvisTranslation.getX(), pelvisTranslation.getY(), pelvisTranslation.getZ());
-      rootJoint.setRotation(pelvisOrientation.getX(), pelvisOrientation.getY(), pelvisOrientation.getZ(), pelvisOrientation.getW());
+      rootJoint.setPosition(pelvisTranslationFromRobotConfigurationData.getX(), pelvisTranslationFromRobotConfigurationData.getY(), pelvisTranslationFromRobotConfigurationData.getZ());
+      rootJoint.setRotation(pelvisOrientationFromRobotConfigurationData.getX(), pelvisOrientationFromRobotConfigurationData.getY(), pelvisOrientationFromRobotConfigurationData.getZ(), pelvisOrientationFromRobotConfigurationData.getW());
       
       computeDriftTransform();
 
@@ -267,7 +255,9 @@ public class IHMCMOCAPLocalizationModule implements MocapRigidbodiesListener, Pa
    private void computeDriftTransform()
    {
       RigidBodyTransform driftTransform = new RigidBodyTransform();
-      mocapToPelvisFrameConverter.getMocapFrame().getTransformToDesiredFrame(driftTransform, pelvisFrameFromRobotConfigurationDataPacket);
+      pelvisFrameFromMocap.update();
+      pelvisFrameFromRobotConfigurationDataPacket.update();
+      pelvisFrameFromMocap.getTransformToDesiredFrame(driftTransform, pelvisFrameFromRobotConfigurationDataPacket);
       
       Vector3d driftTranslation = new Vector3d();
       driftTransform.getTranslation(driftTranslation);

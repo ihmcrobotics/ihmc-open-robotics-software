@@ -97,8 +97,8 @@ public class WholeBodyVirtualModelControlSolver
       virtualModelController = new VirtualModelController(toolbox.getGeometricJacobianHolder(), controlRootBody, controlledOneDoFJoints, registry,
             toolbox.getYoGraphicsListRegistry());
 
-      yoDesiredMomentumRateAngular = new YoFrameVector("desiredMomentumRateAngular", toolbox.getCenterOfMassFrame(), registry);
-      yoAchievedMomentumRateAngular = new YoFrameVector("achievedMomentumRateAngular", toolbox.getCenterOfMassFrame(), registry);
+      yoDesiredMomentumRateAngular = toolbox.getYoDesiredMomentumRateAngular();
+      yoAchievedMomentumRateAngular = toolbox.getYoAchievedMomentumRateAngular();
 
       if (toolbox.getControlledBodies() != null)
       {

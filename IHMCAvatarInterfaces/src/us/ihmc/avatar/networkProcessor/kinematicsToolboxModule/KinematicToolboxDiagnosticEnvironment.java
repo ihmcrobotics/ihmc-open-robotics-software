@@ -83,7 +83,7 @@ public class KinematicToolboxDiagnosticEnvironment
             poseCommunicator.write();
          }
       }, 1, TimeUnit.MILLISECONDS);
-      
+
       DRCNetworkModuleParameters parameters = new DRCNetworkModuleParameters();
       parameters.enableUiModule(true);
       parameters.enableKinematicsToolbox(true);
@@ -174,7 +174,7 @@ public class KinematicToolboxDiagnosticEnvironment
    }
 
    private long timestamp = 0L;
-   
+
    private SensorOutputMapReadOnly initializeSensorOutputMapReadOnly()
    {
       return new SensorOutputMapReadOnly()

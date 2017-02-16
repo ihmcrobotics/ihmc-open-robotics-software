@@ -16,7 +16,7 @@ import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.TurnValveBehaviorSta
 import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.WalkThroughDoorBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.WalkToGoalBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.debug.PartialFootholdBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.debug.TestVariableSwingTimeBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.debug.TestICPOptimizationBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.diagnostic.DiagnosticBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.examples.ExampleComplexBehaviorStateMachine;
 import us.ihmc.humanoidBehaviors.behaviors.fiducialLocation.FollowFiducialBehavior;
@@ -222,8 +222,8 @@ public class IHMCHumanoidBehaviorManager
       dispatcher.addBehavior(HumanoidBehaviorType.DEBUG_PARTIAL_FOOTHOLDS,
             new PartialFootholdBehavior(behaviorCommunicationBridge));
 
-      dispatcher.addBehavior(HumanoidBehaviorType.TEST_VARIABLE_SWING_TIME,
-            new TestVariableSwingTimeBehavior(behaviorCommunicationBridge, referenceFrames));
+      dispatcher.addBehavior(HumanoidBehaviorType.TEST_ICP_OPTIMIZATION,
+            new TestICPOptimizationBehavior(behaviorCommunicationBridge, referenceFrames, yoTime));
 
       dispatcher.addBehavior(HumanoidBehaviorType.EXAMPLE_BEHAVIOR,
             new ExampleComplexBehaviorStateMachine(behaviorCommunicationBridge, yoTime, atlasPrimitiveActions));
