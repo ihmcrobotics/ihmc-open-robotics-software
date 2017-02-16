@@ -97,6 +97,7 @@ public class IHMCMOCAPLocalizationModule implements MocapRigidbodiesListener, Pa
    private final DoubleYoVariable mocapWorldToRobotWorldTransformPitch = new DoubleYoVariable("mocapWorldToRobotWorldTransformPitch", registry);
    private final DoubleYoVariable mocapWorldToRobotWorldTransformRoll = new DoubleYoVariable("mocapWorldToRobotWorldTransformRoll", registry);
 
+   private final BooleanYoVariable requestReInitialization = new BooleanYoVariable("requestReInitialization", registry);
    private final BooleanYoVariable requestFootsteps = new BooleanYoVariable("requestFootsteps", registry);
    private final BooleanYoVariable walkingAround = new BooleanYoVariable("walkingAround", registry);
    
@@ -140,14 +141,18 @@ public class IHMCMOCAPLocalizationModule implements MocapRigidbodiesListener, Pa
 
       if (!mocapToPelvisFrameConverter.isInitialized() && latestRobotConfigurationData != null)
       {
-         pelvisFrameFromRobotConfigurationDataPacket.update();
-         MocapRigidBody pelvisRigidBody = getPelvisRigidBody(listOfRigidbodies);
-         mocapToPelvisFrameConverter.initialize(pelvisFrameFromRobotConfigurationDataPacket, pelvisRigidBody);
+         initializeMocapFrameConverter(listOfRigidbodies);
       }
       else if (latestRobotConfigurationData == null)
       {
          PrintTools.info("Waiting for robot configuration data");
          return;
+      }
+      
+      if(requestReInitialization.getBooleanValue())
+      {
+         initializeMocapFrameConverter(listOfRigidbodies);
+         requestReInitialization.set(false);
       }
 
       MocapRigidBody pelvisRigidBody = getPelvisRigidBody(listOfRigidbodies);
@@ -168,6 +173,14 @@ public class IHMCMOCAPLocalizationModule implements MocapRigidbodiesListener, Pa
       }
      
       yoVariableServer.update(System.currentTimeMillis());
+   }
+   
+   private void initializeMocapFrameConverter(ArrayList<MocapRigidBody> listOfRigidbodies)
+   {
+      pelvisFrameFromRobotConfigurationDataPacket.update();
+      MocapRigidBody pelvisRigidBody = getPelvisRigidBody(listOfRigidbodies);
+      mocapToPelvisFrameConverter.initialize(pelvisFrameFromRobotConfigurationDataPacket, pelvisRigidBody);
+      
    }
 
    private MocapRigidBody getPelvisRigidBody(ArrayList<MocapRigidBody> listOfRigidbodies)

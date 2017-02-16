@@ -234,9 +234,14 @@ public class DRCNetworkProcessor
         
         String methodName = "setupMocapModule";
         printModuleConnectedDebugStatement(PacketDestination.MOCAP_MODULE, methodName);
+        
+        PrintTools.info("\n\n trying to connect mocap viz server \n\n");
+        PacketCommunicator mocapVizPacketCommunicator = PacketCommunicator.createTCPPacketCommunicatorServer(NetworkPorts.MOCAP_MODULE_VIZ, NET_CLASS_LIST);
+        mocapVizPacketCommunicator.connect();
+        PrintTools.info("\n\n mocap vis packet communicator connected \n\n");
+        packetRouter.attachPacketCommunicator(PacketDestination.MOCAP_MODULE_VIZ, mocapVizPacketCommunicator);
      }
    }
-      
 
    private void setupHandModules(DRCRobotModel robotModel, DRCNetworkModuleParameters params) throws IOException
    {
