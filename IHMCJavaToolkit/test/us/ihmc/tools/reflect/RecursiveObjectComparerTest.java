@@ -411,6 +411,7 @@ public class RecursiveObjectComparerTest
          this.value = value;
       }
       
+      @Override
       public String toString()
       {
          return "name = " + name + ", value = " + value;
@@ -555,6 +556,7 @@ public class RecursiveObjectComparerTest
    
    private class ObjectWithADoubleArrayBuried
    {
+      @SuppressWarnings("unused")
       private ObjectWithADoubleArray grave;
       
       public ObjectWithADoubleArrayBuried(double[] xToSet)
@@ -565,6 +567,7 @@ public class RecursiveObjectComparerTest
    
    private class ObjectWithADoubleArray
    {
+      @SuppressWarnings("unused")
       private double[] x;
       
       public ObjectWithADoubleArray(double[] xToSet)
