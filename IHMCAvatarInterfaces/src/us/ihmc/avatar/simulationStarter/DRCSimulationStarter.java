@@ -113,7 +113,17 @@ public class DRCSimulationStarter implements SimulationStarterInterface
 
    private final ConcurrentLinkedQueue<Command<?, ?>> controllerCommands = new ConcurrentLinkedQueue<>();
 
+   public DRCSimulationStarter(DRCRobotModel robotModel, DRCSCSInitialSetup scsInitialSetup)
+   {
+      this(robotModel, null, scsInitialSetup);
+   }
+   
    public DRCSimulationStarter(DRCRobotModel robotModel, CommonAvatarEnvironmentInterface environment)
+   {
+      this(robotModel, environment, null);
+   }
+   
+   public DRCSimulationStarter(DRCRobotModel robotModel, CommonAvatarEnvironmentInterface environment, DRCSCSInitialSetup scsInitialSetup)
    {
       this.robotModel = robotModel;
       this.environment = environment;
@@ -123,10 +133,17 @@ public class DRCSimulationStarter implements SimulationStarterInterface
 
       this.createSCSSimulatedSensors = true;
 
-      scsInitialSetup = new DRCSCSInitialSetup(environment, robotModel.getSimulateDT());
-      scsInitialSetup.setInitializeEstimatorToActual(false);
-      scsInitialSetup.setTimePerRecordTick(robotModel.getControllerDT());
-      scsInitialSetup.setRunMultiThreaded(true);
+      if(scsInitialSetup == null)
+      {
+         this.scsInitialSetup = new DRCSCSInitialSetup(environment, robotModel.getSimulateDT());
+         this.scsInitialSetup.setInitializeEstimatorToActual(false);
+         this.scsInitialSetup.setTimePerRecordTick(robotModel.getControllerDT());
+         this.scsInitialSetup.setRunMultiThreaded(true);
+      }
+      else
+      {
+         this.scsInitialSetup = scsInitialSetup;
+      }
 
       this.walkingControllerParameters = robotModel.getWalkingControllerParameters();
       this.armControllerParameters = robotModel.getArmControllerParameters();
