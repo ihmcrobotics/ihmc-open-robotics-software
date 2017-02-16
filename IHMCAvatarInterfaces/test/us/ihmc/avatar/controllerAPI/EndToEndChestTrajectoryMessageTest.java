@@ -218,7 +218,7 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
 
       assertNumberOfWaypoints(numberOfTrajectoryPoints + 1, scs);
 
-      for (int trajectoryPointIndex = 0; trajectoryPointIndex < numberOfTrajectoryPoints; trajectoryPointIndex++)
+      for (int trajectoryPointIndex = 0; trajectoryPointIndex < RigidBodyTaskspaceControlState.maxPointsInGenerator - 1; trajectoryPointIndex++)
       {
          double time = chestTrajectoryMessage.getTrajectoryPoint(trajectoryPointIndex).getTime();
          SimpleSO3TrajectoryPoint controllerTrajectoryPoint = findTrajectoryPoint(trajectoryPointIndex + 1, scs);
@@ -759,6 +759,12 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
       return numberOfWaypoints;
    }
 
+   public static int findControllerNumberOfWaypointsInGenerator(SimulationConstructionSet scs)
+   {
+      int numberOfWaypoints = ((IntegerYoVariable) scs.getVariable("utorsoTaskspaceControlModule", "utorsoTaskspaceNumberOfPointsInGenerator")).getIntegerValue();
+      return numberOfWaypoints;
+   }
+
    public static Vector3d findControlErrorRotationVector(SimulationConstructionSet scs, RigidBody chest)
    {
       String chestPrefix = chest.getName();
@@ -783,12 +789,6 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
       simpleSO3TrajectoryPoint.setOrientation(findQuat4d(orientationTrajectoryName, orientationName, suffix, scs));
       simpleSO3TrajectoryPoint.setAngularVelocity(findVector3d(orientationTrajectoryName, angularVelocityName, suffix, scs));
       return simpleSO3TrajectoryPoint;
-   }
-
-   public static SimpleSO3TrajectoryPoint findLastTrajectoryPoint(SimulationConstructionSet scs)
-   {
-      int numberOfWaypoints = findControllerNumberOfWaypoints(scs);
-      return findTrajectoryPoint(numberOfWaypoints - 1, scs);
    }
 
    public static SimpleSO3TrajectoryPoint findCurrentDesiredTrajectoryPoint(SimulationConstructionSet scs)

@@ -2,21 +2,14 @@ package us.ihmc.commonWalkingControlModules.controlModules.rigidBody;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 
 public class RigidBodyUserControlState extends RigidBodyControlState
 {
 
-   public RigidBodyUserControlState()
+   public RigidBodyUserControlState(String bodyName, DoubleYoVariable yoTime)
    {
-      super(RigidBodyControlMode.USER);
-   }
-
-   @Override
-   public void handleStopAllTrajectoryCommand(StopAllTrajectoryCommand command)
-   {
-      // TODO Auto-generated method stub
-
+      super(RigidBodyControlMode.USER, bodyName, yoTime);
    }
 
    @Override
@@ -58,6 +51,20 @@ public class RigidBodyUserControlState extends RigidBodyControlState
    {
       // TODO Auto-generated method stub
 
+   }
+
+   @Override
+   public boolean isEmpty()
+   {
+      // TODO Auto-generated method stub
+      return false;
+   }
+
+   @Override
+   public double getLastTrajectoryPointTime()
+   {
+      // TODO Auto-generated method stub
+      return 0;
    }
 
 }
