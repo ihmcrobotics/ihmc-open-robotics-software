@@ -50,7 +50,7 @@ public class YoArtifactPosition extends YoArtifact
       graphics.setColor(color);
       graphics.setStroke(STROKE);
       
-      legendRadii.set(LEGEND_RADIUS, LEGEND_RADIUS);
+      legendRadii.set((double) LEGEND_RADIUS, (double) LEGEND_RADIUS);
       
       switch (graphicType)
       {

@@ -464,7 +464,7 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
    void updateCentroidAndArea()
    {
       area = 0.0;
-      centroid.set(0, 0);
+      centroid.set(0.0, 0.0);
 
       if (hasAtLeastThreeVertices())
       {
