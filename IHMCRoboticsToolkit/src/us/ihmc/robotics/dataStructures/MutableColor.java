@@ -26,9 +26,9 @@ public class MutableColor
       set(x, y, z);
    }
 
-   public MutableColor(float[] fs)
+   public MutableColor(float[] color)
    {
-      // TODO Auto-generated constructor stub
+      set(color[0], color[1], color[2]);
    }
 
    public void set(MutableColor other)

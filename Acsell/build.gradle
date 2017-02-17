@@ -48,7 +48,7 @@ dependencies {
    testCompile group: 'junit', name: 'junit', version: '4.11'
    testCompile ihmc.getProjectTestDependency(":IHMCAvatarInterfaces")
 
-   compile group: 'us.ihmc', name: 'euclid-core', version: '0.3-alpha'
+   compile group: 'us.ihmc', name: 'euclid-core', version: '0.3.1-alpha'
    compile group: 'us.ihmc', name: 'IHMCRealtime', version: '1.1.2'
    compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
    compile group: 'us.ihmc.thirdparty.jinput', name: 'jinput', version: '160414'

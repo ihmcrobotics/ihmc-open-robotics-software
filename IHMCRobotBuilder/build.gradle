@@ -44,7 +44,7 @@ dependencies {
     
     testCompile group: 'us.ihmc', name: 'ihmc-continuous-integration-framework', version: '0.9.4'
 
-	compile group: 'us.ihmc', name: 'euclid-core', version: '0.3-alpha'
+	compile group: 'us.ihmc', name: 'euclid-core', version: '0.3.1-alpha'
 	compile group: 'io.javaslang', name: 'javaslang', version: '2.0.3'
 	compile ihmc.getProjectDependency(":IHMCJavaFXToolkit")
 	compile ihmc.getProjectDependency(":IHMCRobotDescription")
