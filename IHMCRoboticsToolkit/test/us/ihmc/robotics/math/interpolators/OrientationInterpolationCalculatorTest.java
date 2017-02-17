@@ -62,7 +62,7 @@ public class OrientationInterpolationCalculatorTest
 
          RotationMatrix orientationTranspose = new RotationMatrix(interpolatedOrientation0Matrix);
          orientationTranspose.transpose();
-         RotationMatrix omegaTilde = new RotationMatrix(interpolatedOrientationMatrixDot);
+         Matrix3D omegaTilde = new Matrix3D(interpolatedOrientationMatrixDot);
          omegaTilde.multiply(orientationTranspose);
          assertTrue(omegaTilde.isMatrixSkewSymmetric(1.0e-3));
 

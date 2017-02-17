@@ -42,7 +42,7 @@ public class YoFrameQuaternionTest
 
       AxisAngle axisAngle4dActual = new AxisAngle();
       yoFrameQuaternion.get(axisAngle4dActual);
-      AxisAngle axisAngle4dExpected = new AxisAngle(0.0, 1.0, 0.0, 0.0);
+      AxisAngle axisAngle4dExpected = new AxisAngle(1.0, 0.0, 0.0, 0.0);
       assertTrue(axisAngle4dActual.epsilonEquals(axisAngle4dExpected, EPS));
 
       RotationMatrix matrix3dActual = new RotationMatrix();
