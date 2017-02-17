@@ -1,6 +1,8 @@
 package us.ihmc.atlas.parameters;
 
+import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.Map;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
@@ -23,7 +25,6 @@ import us.ihmc.robotics.controllers.YoPIDGains;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.controllers.YoSymmetricSE3PIDGains;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -60,6 +61,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    private final double massScale;
 
    private ExplorationParameters explorationParameters = null;
+   private Map<String, YoPIDGains> jointspaceGains = null;
 
    private final JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters;
 
@@ -630,9 +632,10 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
 
    /** {@inheritDoc} */
    @Override
-   public YoPIDGains createJointSpaceControlGains(YoVariableRegistry registry)
+   public Map<String, YoPIDGains> getOrCreateJointSpaceControlGains(YoVariableRegistry registry)
    {
-      YoPIDGains jointspaceControlGains = new YoPIDGains("Jointspace", registry);
+      if (jointspaceGains != null)
+         return jointspaceGains;
 
       double kp = runningOnRealRobot ? 40.0 : 80.0;
       double zeta = runningOnRealRobot ? 0.3 : 0.6;
@@ -641,15 +644,21 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       double maxAccel = runningOnRealRobot ? 20.0 : Double.POSITIVE_INFINITY;
       double maxJerk = runningOnRealRobot ? 100.0 : Double.POSITIVE_INFINITY;
 
-      jointspaceControlGains.setKp(kp);
-      jointspaceControlGains.setZeta(zeta);
-      jointspaceControlGains.setKi(ki);
-      jointspaceControlGains.setMaximumIntegralError(maxIntegralError);
-      jointspaceControlGains.setMaximumFeedback(maxAccel);
-      jointspaceControlGains.setMaximumFeedbackRate(maxJerk);
-      jointspaceControlGains.createDerivativeGainUpdater(true);
+      YoPIDGains defaultJointspaceControlGains = new YoPIDGains("DefaultJointspace", registry);
+      defaultJointspaceControlGains.setKp(kp);
+      defaultJointspaceControlGains.setZeta(zeta);
+      defaultJointspaceControlGains.setKi(ki);
+      defaultJointspaceControlGains.setMaximumIntegralError(maxIntegralError);
+      defaultJointspaceControlGains.setMaximumFeedback(maxAccel);
+      defaultJointspaceControlGains.setMaximumFeedbackRate(maxJerk);
+      defaultJointspaceControlGains.createDerivativeGainUpdater(true);
 
-      return jointspaceControlGains;
+      jointspaceGains = new HashMap<>();
+      jointspaceGains.put(jointMap.getSpineJointName(SpineJointName.SPINE_YAW), defaultJointspaceControlGains);
+      jointspaceGains.put(jointMap.getSpineJointName(SpineJointName.SPINE_PITCH), defaultJointspaceControlGains);
+      jointspaceGains.put(jointMap.getSpineJointName(SpineJointName.SPINE_ROLL), defaultJointspaceControlGains);
+
+      return jointspaceGains;
    }
 
    @Override
@@ -956,8 +965,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    @Override
    public MomentumOptimizationSettings getMomentumOptimizationSettings()
    {
-      double scale = Math.pow(jointMap.getModelScale(), jointMap.getMassScalePower());
-      return new AtlasMomentumOptimizationSettings(scale);
+      return new AtlasMomentumOptimizationSettings(jointMap);
    }
 
    @Override

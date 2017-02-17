@@ -16,6 +16,7 @@ import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage.BaseForControl;
 import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
+import us.ihmc.robotics.controllers.YoSymmetricSE3PIDGains;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -56,6 +57,11 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
    private final BooleanYoVariable trackingOrientation;
    private final BooleanYoVariable trackingPosition;
 
+   private final BooleanYoVariable hasOrientaionGains;
+   private final BooleanYoVariable hasAngularWeight;
+   private final BooleanYoVariable hasPositionGains;
+   private final BooleanYoVariable hasLinearWeight;
+
    private final IntegerYoVariable numberOfPointsInQueue;
    private final IntegerYoVariable numberOfPointsInGenerator;
    private final IntegerYoVariable numberOfPoints;
@@ -75,18 +81,18 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
 
    private final ReferenceFrame rootFrame;
 
-   public RigidBodyTaskspaceControlState(String bodyName, RigidBody bodyToControl, RigidBody rootBody, RigidBody elevator, YoOrientationPIDGainsInterface orientationGains,
-         YoPositionPIDGainsInterface positionGains, Map<BaseForControl, ReferenceFrame> controlFrameMap, ReferenceFrame rootFrame, DoubleYoVariable yoTime,
-         YoVariableRegistry parentRegistry)
+   public RigidBodyTaskspaceControlState(String bodyName, RigidBody bodyToControl, RigidBody rootBody, RigidBody elevator,
+         Map<BaseForControl, ReferenceFrame> controlFrameMap, ReferenceFrame rootFrame, DoubleYoVariable yoTime, YoVariableRegistry parentRegistry)
    {
       super(RigidBodyControlMode.TASKSPACE, bodyName, yoTime);
-      this.orientationGains = orientationGains;
-      this.positionGains = positionGains;
       this.rootFrame = rootFrame;
 
       String prefix = bodyName + "Taskspace";
       trackingOrientation = new BooleanYoVariable(prefix + "TrackingOrientation", registry);
       trackingPosition = new BooleanYoVariable(prefix + "TrackingPosition", registry);
+
+      orientationGains = new YoSymmetricSE3PIDGains(prefix + "OrientationGains", registry);
+      positionGains = new YoSymmetricSE3PIDGains(prefix + "PositionGains", registry);
 
       numberOfPointsInQueue = new IntegerYoVariable(prefix + "NumberOfPointsInQueue", registry);
       numberOfPointsInGenerator = new IntegerYoVariable(prefix + "NumberOfPointsInGenerator", registry);
@@ -111,6 +117,11 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       positionTrajectoryGenerator.registerNewTrajectoryFrame(rootFrame);
       orientationTrajectoryGenerator.registerNewTrajectoryFrame(rootFrame);
 
+      hasOrientaionGains = new BooleanYoVariable(prefix + "HasOrientaionGains", registry);
+      hasAngularWeight = new BooleanYoVariable(prefix + "HasAngularWeights", registry);
+      hasPositionGains = new BooleanYoVariable(prefix + "HasPositionGains", registry);
+      hasLinearWeight = new BooleanYoVariable(prefix + "HasLinearWeights", registry);
+
       pointQueue.clear();
       parentRegistry.addChild(registry);
    }
@@ -118,14 +129,49 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
    public void setWeights(Vector3D angularWeight, Vector3D linearWeight)
    {
       if (angularWeight != null)
+      {
          yoAngularWeight.set(angularWeight);
+         hasAngularWeight.set(true);
+      }
       else
+      {
          yoAngularWeight.setToZero();
+         hasAngularWeight.set(false);
+      }
 
       if (linearWeight != null)
+      {
          yoLinearWeight.set(linearWeight);
+         hasLinearWeight.set(true);
+      }
       else
+      {
          yoLinearWeight.setToZero();
+         hasLinearWeight.set(false);
+      }
+   }
+
+   public void setGains(YoOrientationPIDGainsInterface orientationGains, YoPositionPIDGainsInterface positionGains)
+   {
+      if (orientationGains != null)
+      {
+         this.orientationGains.set(orientationGains);
+         hasOrientaionGains.set(true);
+      }
+      else
+      {
+         hasOrientaionGains.set(false);
+      }
+
+      if (positionGains != null)
+      {
+         this.positionGains.set(positionGains);
+         hasPositionGains.set(true);
+      }
+      else
+      {
+         hasPositionGains.set(false);
+      }
    }
 
    @Override
@@ -459,14 +505,14 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
    private boolean checkOrientationGainsAndWeights()
    {
       boolean success = true;
-      if (yoAngularWeight.containsNaN())
+      if (!hasAngularWeight.getBooleanValue())
       {
-         PrintTools.warn(warningPrefix + "Orientation weights are NaN.");
+         PrintTools.warn(warningPrefix + "Missing angular weight.");
          success = false;
       }
-      if (orientationGains == null)
+      if (!hasOrientaionGains.getBooleanValue())
       {
-         PrintTools.warn(warningPrefix + "Orientation gains are null.");
+         PrintTools.warn(warningPrefix + "Missing orientation gains.");
          success = false;
       }
       return success;
@@ -475,14 +521,14 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
    private boolean checkPositionGainsAndWeights()
    {
       boolean success = true;
-      if (yoLinearWeight.containsNaN())
+      if (!hasLinearWeight.getBooleanValue())
       {
-         PrintTools.warn(warningPrefix + "Position weights are NaN.");
+         PrintTools.warn(warningPrefix + "Missing linear weight.");
          success = false;
       }
-      if (positionGains == null)
+      if (!hasPositionGains.getBooleanValue())
       {
-         PrintTools.warn(warningPrefix + "Position gains are null.");
+         PrintTools.warn(warningPrefix + "Missing position gains.");
          success = false;
       }
       return success;

@@ -770,7 +770,7 @@ public class WandererWalkingControllerParameters extends WalkingControllerParame
    @Override
    public MomentumOptimizationSettings getMomentumOptimizationSettings()
    {
-      MomentumOptimizationSettings momentumOptimizationSettings = new WandererMomentumOptimizationSettings();
+      MomentumOptimizationSettings momentumOptimizationSettings = new WandererMomentumOptimizationSettings(jointMap);
       return momentumOptimizationSettings;
    }
 

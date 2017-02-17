@@ -771,7 +771,7 @@ public class BonoWalkingControllerParameters extends WalkingControllerParameters
    @Override
    public MomentumOptimizationSettings getMomentumOptimizationSettings()
    {
-      return new BonoMomentumOptimizationSettings();
+      return new BonoMomentumOptimizationSettings(jointMap);
    }
 
    @Override

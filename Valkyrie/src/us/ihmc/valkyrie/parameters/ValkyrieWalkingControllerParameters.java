@@ -941,7 +941,7 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    @Override
    public MomentumOptimizationSettings getMomentumOptimizationSettings()
    {
-      return new ValkyrieMomentumOptimizationSettings();
+      return new ValkyrieMomentumOptimizationSettings(jointMap);
    }
 
    @Override
