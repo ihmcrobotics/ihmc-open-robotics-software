@@ -1302,6 +1302,7 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
       xAxis.normalize();
       zAxis.set(0.0, 0.0, 1.0);
       yAxis.cross(zAxis, xAxis);
+      yAxis.normalize();
       zAxis.cross(xAxis, yAxis);
 
       rotationMatrix.setColumns(xAxis, yAxis, zAxis);
