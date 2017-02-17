@@ -44,17 +44,17 @@ public class PolarisRobot extends Robot
 //   private static final Matrix3d checkerBoardToWheelRotation = new Matrix3d(   0.7561 , -0.0023 ,  0.6545 ,
 //         -0.0074,   0.9999,   0.0121,
 //         -0.6544,  -0.0140,   0.7560);
-   
+
    //Tingfan 05252013
    private static final Vector3D checkerBoardToWheelTranslation = new Vector3D(-0.0992, 0.3762, 0.6109 );
-   private static final RotationMatrix checkerBoardToWheelRotation = new RotationMatrix(
-		   0.7693 , -0.0024 ,  0.6389, 
-		   -0.0024 ,  1.0000  , 0.0066, 
-		   -0.6389 , -0.0066,   0.7693 );
+   private static final RotationMatrix checkerBoardToWheelRotation = new RotationMatrix();
+   static
+   {
+      checkerBoardToWheelRotation.setAndNormalize(0.7693 , -0.0024 ,  0.6389, 
+                                                  -0.0024 ,  1.0000  , 0.0066, 
+                                                  -0.6389 , -0.0066,   0.7693 );
+   }
 
-
-
-   
    private static final RigidBodyTransform checkerBoardToWheel = new RigidBodyTransform(checkerBoardToWheelRotation, checkerBoardToWheelTranslation);
    private static final RigidBodyTransform wheelToCheckerBoard = new RigidBodyTransform();
 
