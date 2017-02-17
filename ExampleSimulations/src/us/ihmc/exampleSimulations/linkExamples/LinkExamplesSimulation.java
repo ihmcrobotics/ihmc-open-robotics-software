@@ -2,10 +2,9 @@ package us.ihmc.exampleSimulations.linkExamples;
 
 import java.util.ArrayList;
 
-import javax.vecmath.Point2d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.MeshDataGenerator;
 import us.ihmc.graphicsDescription.MeshDataHolder;
@@ -64,7 +63,7 @@ public class LinkExamplesSimulation
       SelectedListener selectedListener = new SelectedListener()
       {
          @Override
-         public void selected(Graphics3DNode graphics3dNode, ModifierKeyInterface modifierKeyInterface, Point3d location, Point3d cameraLocation, Quat4d cameraRotation)
+         public void selected(Graphics3DNode graphics3dNode, ModifierKeyInterface modifierKeyInterface, Point3DReadOnly location, Point3DReadOnly cameraLocation, QuaternionReadOnly cameraRotation)
          {
             Graphics3DObject sphere = new Graphics3DObject();
             sphere.translate(location);
@@ -139,10 +138,10 @@ public class LinkExamplesSimulation
       // Extruded Polygon
       linkGraphics.translate(-2.0 * OFFSET, OFFSET, 0.0);
       linkGraphics.addCoordinateSystem(COORD_LENGTH);
-      ArrayList<Point2d> polygonPoints = new ArrayList<Point2d>();
-      polygonPoints.add(new Point2d());
-      polygonPoints.add(new Point2d(0.4, 0.0));
-      polygonPoints.add(new Point2d(0.3, 0.3));
+      ArrayList<Point2D> polygonPoints = new ArrayList<Point2D>();
+      polygonPoints.add(new Point2D());
+      polygonPoints.add(new Point2D(0.4, 0.0));
+      polygonPoints.add(new Point2D(0.3, 0.3));
       double height = 0.25;
       linkGraphics.addExtrudedPolygon(polygonPoints, height, YoAppearance.Purple());
 

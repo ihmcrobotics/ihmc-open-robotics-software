@@ -1,13 +1,12 @@
 package us.ihmc.simulationconstructionset;
 
-import javax.vecmath.AxisAngle4d;
-import javax.vecmath.Vector3d;
-
-import us.ihmc.simulationconstructionset.physics.engine.jerry.DummyOneDegreeOfFreedomJointPhysics;
+import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariableList;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.simulationconstructionset.physics.engine.jerry.DummyOneDegreeOfFreedomJointPhysics;
 
 public class DummyOneDegreeOfFreedomJoint extends OneDegreeOfFreedomJoint
 {
@@ -34,12 +33,12 @@ public class DummyOneDegreeOfFreedomJoint extends OneDegreeOfFreedomJoint
 
    private YoVariableList jointVars;
 
-   public DummyOneDegreeOfFreedomJoint(String jname, Vector3d offset, Robot rob, Vector3d u_hat)
+   public DummyOneDegreeOfFreedomJoint(String jname, Vector3D offset, Robot rob, Vector3D u_hat)
    {
       super(jname, offset, rob);
       physics = new DummyOneDegreeOfFreedomJointPhysics(this);
 
-      physics.u_i = new Vector3d();
+      physics.u_i = new Vector3D();
       physics.u_i.set(u_hat);
       physics.u_i.normalize();
 
@@ -63,14 +62,14 @@ public class DummyOneDegreeOfFreedomJoint extends OneDegreeOfFreedomJoint
       this.jointTransform3D.setIdentity();
    }
 
-   protected void setPinTransform3D(RigidBodyTransform t1, Vector3d u_i) // int rotAxis)
+   protected void setPinTransform3D(RigidBodyTransform t1, Vector3D u_i) // int rotAxis)
    {
       setPinTransform3D(t1, u_i, 0.0); // rotAxis, 0.0);
    }
 
-   private AxisAngle4d axisAngle = new AxisAngle4d();
+   private AxisAngle axisAngle = new AxisAngle();
 
-   protected void setPinTransform3D(RigidBodyTransform t1, Vector3d u_i, double rotAng)
+   protected void setPinTransform3D(RigidBodyTransform t1, Vector3D u_i, double rotAng)
    {
       t1.setIdentity();
 

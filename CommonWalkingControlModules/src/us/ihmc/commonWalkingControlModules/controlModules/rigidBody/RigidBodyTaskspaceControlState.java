@@ -2,8 +2,6 @@ package us.ihmc.commonWalkingControlModules.controlModules.rigidBody;
 
 import java.util.Map;
 
-import javax.vecmath.Vector3d;
-
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
@@ -11,6 +9,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SE3TrajectoryControllerCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SO3TrajectoryControllerCommand;
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
@@ -51,8 +50,8 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
    private final YoPositionPIDGainsInterface positionGains;
    private final YoFrameVector yoAngularWeight;
    private final YoFrameVector yoLinearWeight;
-   private final Vector3d angularWeight = new Vector3d();
-   private final Vector3d linearWeight = new Vector3d();
+   private final Vector3D angularWeight = new Vector3D();
+   private final Vector3D linearWeight = new Vector3D();
 
    private final BooleanYoVariable trackingOrientation;
    private final BooleanYoVariable trackingPosition;
@@ -116,7 +115,7 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       parentRegistry.addChild(registry);
    }
 
-   public void setWeights(Vector3d angularWeight, Vector3d linearWeight)
+   public void setWeights(Vector3D angularWeight, Vector3D linearWeight)
    {
       if (angularWeight != null)
          yoAngularWeight.set(angularWeight);

@@ -1,9 +1,8 @@
 package us.ihmc.utilities.ros.publisher;
 
-import geometry_msgs.Vector3;
-
 import org.ros.message.Time;
 
+import geometry_msgs.Vector3;
 import std_msgs.Header;
 
 

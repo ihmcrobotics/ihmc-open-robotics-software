@@ -3,17 +3,17 @@ package us.ihmc.jMonkeyEngineToolkit.jme.lidar;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import us.ihmc.robotics.lidar.LidarScan;
-import us.ihmc.robotics.lidar.LidarScanParameters;
+import com.jme3.collision.CollisionResult;
+import com.jme3.collision.CollisionResults;
+import com.jme3.math.Ray;
+
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.jMonkeyEngineToolkit.Graphics3DWorld;
 import us.ihmc.jMonkeyEngineToolkit.jme.JMEGraphics3DAdapter;
 import us.ihmc.jMonkeyEngineToolkit.jme.util.JMEDataTypeUtils;
 import us.ihmc.jMonkeyEngineToolkit.jme.util.JMEGeometryUtils;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-
-import com.jme3.collision.CollisionResult;
-import com.jme3.collision.CollisionResults;
-import com.jme3.math.Ray;
+import us.ihmc.robotics.lidar.LidarScan;
+import us.ihmc.robotics.lidar.LidarScanParameters;
 
 public class RayTracingLidar
 {

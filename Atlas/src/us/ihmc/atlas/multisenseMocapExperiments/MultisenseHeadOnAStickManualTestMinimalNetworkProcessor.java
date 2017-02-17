@@ -5,8 +5,6 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicReference;
 
-import javax.vecmath.Point3d;
-
 import com.martiansoftware.jsap.JSAPException;
 
 import optiTrack.IHMCMocapDataClient;
@@ -20,9 +18,10 @@ import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.communication.net.NetClassList;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.util.NetworkPorts;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.PointCloudWorldPacket;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.subscriber.RosPointCloudSubscriber;
 
@@ -72,7 +71,7 @@ public class MultisenseHeadOnAStickManualTestMinimalNetworkProcessor  extends Ro
    public void onNewMessage(PointCloud2 pointCloud)
    {
       UnpackedPointCloud pointCloudData = unpackPointsAndIntensities(pointCloud);
-      Point3d[] points = pointCloudData.getPoints();
+      Point3D[] points = pointCloudData.getPoints();
       orientationTransformFromLeftOpticalFrameToZUp.setRotationEulerAndZeroTranslation(-Math.PI/2, 0.0, -Math.PI/2);
       
       rpyCalibrationOffset.setRotationEulerAndZeroTranslation(Math.toRadians(-1.4), Math.toRadians(0.5), Math.toRadians(2.0));

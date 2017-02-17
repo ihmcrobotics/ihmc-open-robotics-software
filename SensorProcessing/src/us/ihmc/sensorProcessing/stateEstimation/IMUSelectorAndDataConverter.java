@@ -2,34 +2,33 @@ package us.ihmc.sensorProcessing.stateEstimation;
 
 import java.util.Collection;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Vector3d;
-
 import us.ihmc.controlFlow.AbstractControlFlowElement;
 import us.ihmc.controlFlow.ControlFlowGraph;
 import us.ihmc.controlFlow.ControlFlowInputPort;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
-import us.ihmc.sensorProcessing.controlFlowPorts.YoFrameQuaternionControlFlowOutputPort;
-import us.ihmc.sensorProcessing.controlFlowPorts.YoFrameVectorControlFlowOutputPort;
-import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
-import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.AngularVelocitySensorConfiguration;
-import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.OrientationSensorConfiguration;
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
+import us.ihmc.sensorProcessing.controlFlowPorts.YoFrameQuaternionControlFlowOutputPort;
+import us.ihmc.sensorProcessing.controlFlowPorts.YoFrameVectorControlFlowOutputPort;
+import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
+import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.AngularVelocitySensorConfiguration;
+import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.OrientationSensorConfiguration;
 
 
 public class IMUSelectorAndDataConverter extends AbstractControlFlowElement
 {
-   private final ControlFlowInputPort<Matrix3d> orientationInputPort;
-   private final ControlFlowInputPort<Vector3d> angularVelocityInputPort;
+   private final ControlFlowInputPort<RotationMatrix> orientationInputPort;
+   private final ControlFlowInputPort<Vector3D> angularVelocityInputPort;
    private final ControlFlowInputPort<FullInverseDynamicsStructure> inverseDynamicsStructureInputPort;
 
    private final ControlFlowOutputPort<FrameOrientation> orientationOutputPort;
@@ -79,8 +78,8 @@ public class IMUSelectorAndDataConverter extends AbstractControlFlowElement
       
       this.registry = registry;
 
-      ControlFlowOutputPort<Matrix3d> orientationSensorOutputPort = selectedOrientationSensorConfiguration.getOutputPort();
-      ControlFlowOutputPort<Vector3d> angularVelocitySensorOutputPort = selectedAngularVelocitySensorConfiguration.getOutputPort();
+      ControlFlowOutputPort<RotationMatrix> orientationSensorOutputPort = selectedOrientationSensorConfiguration.getOutputPort();
+      ControlFlowOutputPort<Vector3D> angularVelocitySensorOutputPort = selectedAngularVelocitySensorConfiguration.getOutputPort();
 
       this.orientationInputPort = createInputPort("orientationInputPort");
       this.angularVelocityInputPort = createInputPort("angularVelocityInputPort");
@@ -129,7 +128,7 @@ public class IMUSelectorAndDataConverter extends AbstractControlFlowElement
 
    private final RigidBodyTransform transformFromIMUToWorld = new RigidBodyTransform();
    private final RigidBodyTransform transformFromEstimationToWorld = new RigidBodyTransform();
-   private final Matrix3d rotationFromEstimationToWorld = new Matrix3d();
+   private final RotationMatrix rotationFromEstimationToWorld = new RotationMatrix();
    
    private final double[] estimationFrameYawPitchRoll = new double[3];
    
@@ -139,7 +138,8 @@ public class IMUSelectorAndDataConverter extends AbstractControlFlowElement
 
       estimationFrame.getTransformToDesiredFrame(transformFromEstimationFrameToIMUFrame, orientationMeasurementFrame);
       
-      transformFromEstimationToWorld.multiply(transformFromIMUToWorld, transformFromEstimationFrameToIMUFrame);
+      transformFromEstimationToWorld.set(transformFromIMUToWorld);
+      transformFromEstimationToWorld.multiply(transformFromEstimationFrameToIMUFrame);
       transformFromEstimationToWorld.getRotation(rotationFromEstimationToWorld);
       tempOrientationEstimationFrame.setIncludingFrame(ReferenceFrame.getWorldFrame(), rotationFromEstimationToWorld);
       
@@ -153,7 +153,7 @@ public class IMUSelectorAndDataConverter extends AbstractControlFlowElement
    
    private void convertAngularVelocityAndSetOnOutputPort()
    {
-      Vector3d measuredAngularVelocityVector3d = angularVelocityInputPort.getData();
+      Vector3D measuredAngularVelocityVector3d = angularVelocityInputPort.getData();
       TwistCalculator twistCalculator = inverseDynamicsStructureInputPort.getData().getTwistCalculator();
 
       twistCalculator.getRelativeTwist(tempRelativeTwistOrientationMeasFrameToEstFrame, angularVelocityMeasurementLink, estimationLink);

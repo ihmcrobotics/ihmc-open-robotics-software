@@ -17,7 +17,6 @@ import java.util.PriorityQueue;
 
 import javax.imageio.ImageIO;
 import javax.vecmath.Point2i;
-import javax.vecmath.Vector3d;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
@@ -25,7 +24,8 @@ import com.jme3.math.FastMath;
 
 import boofcv.gui.image.ImagePanel;
 import boofcv.gui.image.ShowImages;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.tools.UnitConversions;
 
 public class LineModDetector
@@ -94,7 +94,7 @@ public class LineModDetector
       return mask;
    }
 
-   ArrayList<Vector3d> generateTrainingCameraPoses(float maxLevel)
+   ArrayList<Vector3D> generateTrainingCameraPoses(float maxLevel)
    {
       PriorityQueue<ImmutablePair<Integer, int[]>> triangles = new PriorityQueue<ImmutablePair<Integer, int[]>>(1,new Comparator<ImmutablePair<Integer, int[]>>()
       {
@@ -105,14 +105,14 @@ public class LineModDetector
          }
       });
 
-      ArrayList<Vector3d> vertex = new ArrayList<>();
+      ArrayList<Vector3D> vertex = new ArrayList<>();
 
       //first triangle
-      vertex.add(new Vector3d(1, 0, 0));
-      vertex.add(new Vector3d(0, 1, 0));
-      vertex.add(new Vector3d(0, 0, 1));
-      vertex.add(new Vector3d(-1, 0, 0));
-      vertex.add(new Vector3d(0, -1, 0));
+      vertex.add(new Vector3D(1, 0, 0));
+      vertex.add(new Vector3D(0, 1, 0));
+      vertex.add(new Vector3D(0, 0, 1));
+      vertex.add(new Vector3D(-1, 0, 0));
+      vertex.add(new Vector3D(0, -1, 0));
       //vertex.add(new Vector3d(0, 0, -1));
       triangles.add(new ImmutablePair<Integer, int[]>(0, new int[] { 0, 1, 2 }));
       triangles.add(new ImmutablePair<Integer, int[]>(0, new int[] { 1, 3, 2 }));
@@ -125,9 +125,9 @@ public class LineModDetector
          ImmutablePair<Integer, int[]> largestTriangle = triangles.remove();
          int currentLevel = largestTriangle.getLeft();
          int[] oldVertex = largestTriangle.getRight();
-         Vector3d p0 = new Vector3d();
-         Vector3d p1 = new Vector3d();
-         Vector3d p2 = new Vector3d();
+         Vector3D p0 = new Vector3D();
+         Vector3D p1 = new Vector3D();
+         Vector3D p2 = new Vector3D();
          p0.add(vertex.get(oldVertex[0]), vertex.get(oldVertex[1]));
          p0.normalize();
          p1.add(vertex.get(oldVertex[1]), vertex.get(oldVertex[2]));
@@ -147,11 +147,11 @@ public class LineModDetector
 
       }
 
-      Collections.sort(vertex, new Comparator<Vector3d>()
+      Collections.sort(vertex, new Comparator<Vector3D>()
       {
 
          @Override
-         public int compare(Vector3d o1, Vector3d o2)
+         public int compare(Vector3D o1, Vector3D o2)
          {
             if (Double.compare(o1.getX(), o2.getX()) == 0)
             {
@@ -180,9 +180,9 @@ public class LineModDetector
       long millitimeStartTraining = System.currentTimeMillis();
       byteFeatures.clear();
 
-      ArrayList<Vector3d> viewPoints = generateTrainingCameraPoses(coarseLevel);
+      ArrayList<Vector3D> viewPoints = generateTrainingCameraPoses(coarseLevel);
 
-      for (Vector3d viewpoint : viewPoints)
+      for (Vector3D viewpoint : viewPoints)
       {
          float yaw = (float) Math.atan2(viewpoint.getY(), viewpoint.getX());
          float pitch = (float) Math.asin(viewpoint.getZ());
@@ -265,8 +265,8 @@ public class LineModDetector
 
    void drawDetectionOnImage(LineModDetection bestDetection, BufferedImage image)
    {
-      Vector3d rollPatchYaw = new Vector3d();
-      bestDetection.template.transform.getEulerXYZ(rollPatchYaw);
+      Vector3D rollPatchYaw = new Vector3D();
+      bestDetection.template.transform.getRotationEuler(rollPatchYaw);
    
       //draw border
       Graphics2D g2 = image.createGraphics();
@@ -276,15 +276,15 @@ public class LineModDetector
       g2.drawLine(bestDetection.x, bestDetection.y, bestDetection.x, (int)(bestDetection.getScaledHeight()+ bestDetection.y));
    
       //
-      Vector3d rollPitchYaw=  new Vector3d();
-      bestDetection.template.transform.getEulerXYZ(rollPatchYaw);
+      Vector3D rollPitchYaw=  new Vector3D();
+      bestDetection.template.transform.getRotationEuler(rollPatchYaw);
       rollPatchYaw.scale(1/UnitConversions.DEG_TO_RAD);
       System.out.println("orientation="+rollPatchYaw);
    
       //
-      Vector3d xAxis = new Vector3d(50.0, 0.0 ,0.0);
-      Vector3d yAxis = new Vector3d(0.0, 50.0 ,0.0);
-      Vector3d zAxis = new Vector3d(0.0, 0.0 ,50.0);
+      Vector3D xAxis = new Vector3D(50.0, 0.0 ,0.0);
+      Vector3D yAxis = new Vector3D(0.0, 50.0 ,0.0);
+      Vector3D zAxis = new Vector3D(0.0, 0.0 ,50.0);
       RigidBodyTransform transform = new RigidBodyTransform(bestDetection.template.transform);
       RigidBodyTransform spaceToImage = new RigidBodyTransform(new double[]
             {
@@ -293,7 +293,7 @@ public class LineModDetector
               -1.0, 0.0,  0.0, 0.0
             });
       transform.invert();
-      spaceToImage.multiply(spaceToImage,transform);
+      spaceToImage.multiply(transform);
       
       
       spaceToImage.transform(xAxis);
@@ -343,8 +343,8 @@ public class LineModDetector
          LineModDetection bestDetection = detector.detectObjectAndEstimatePose(testCloud, detections);
          if(bestDetection!=null)
          {
-            Vector3d rollPitchYaw = new Vector3d();
-            bestDetection.template.transform.getEulerXYZ(rollPitchYaw);
+            Vector3D rollPitchYaw = new Vector3D();
+            bestDetection.template.transform.getRotationEuler(rollPitchYaw);
             System.out.println("estimated " + rollPitchYaw.getZ()/UnitConversions.DEG_TO_RAD + " groundtruth " + groundTruthAngle/UnitConversions.DEG_TO_RAD);
             
             BufferedImage image = testCloud.getRGBImage();

@@ -2,9 +2,9 @@ package us.ihmc.utilities.ros.publisher;
 
 import org.ros.message.Time;
 
+import boofcv.struct.calib.IntrinsicParameters;
 import sensor_msgs.CameraInfo;
 import std_msgs.Header;
-import boofcv.struct.calib.IntrinsicParameters;
 
 public class RosCameraInfoPublisher extends RosTopicPublisher<CameraInfo>
 {

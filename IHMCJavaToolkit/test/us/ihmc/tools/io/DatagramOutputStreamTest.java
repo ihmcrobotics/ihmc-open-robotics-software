@@ -45,6 +45,7 @@ public class DatagramOutputStreamTest
       runATest(1984, throwOutStalePackets, expectedMessagesToReceive);
    }
   
+   @SuppressWarnings("resource")
    private void runATest(int port, boolean throwOutStalePackets, int[] expectedMessagesToReceive) throws IOException
    {
       DatagramOutputStream datagramOutputStream = new DatagramOutputStream(port, "localhost");
@@ -133,13 +134,13 @@ public class DatagramOutputStreamTest
       {
          assertEquals(expectedReceivedMessages[i], (int) messagesReceived.get(i));
       }
-
    }
 
    private void startSendingRandomMessagesOnAThread(final DataOutputStream dataOutputStream, final int messagesToSend)
    {
       Thread thread = new Thread("Random Message Sender")
       {
+         @Override
          public void run()
          {
             int messageNumber = 0;
@@ -173,11 +174,9 @@ public class DatagramOutputStreamTest
                {
                }
             }
-
          }
       };
 
       thread.start();
    }
-
 }

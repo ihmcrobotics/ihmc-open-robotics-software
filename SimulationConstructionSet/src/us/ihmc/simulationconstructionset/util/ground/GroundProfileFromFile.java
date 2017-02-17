@@ -6,18 +6,17 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.StringTokenizer;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.jMonkeyEngineToolkit.HeightMapWithNormals;
+import us.ihmc.robotics.geometry.BoundingBox3d;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.KDTree;
-import us.ihmc.robotics.geometry.BoundingBox3d;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 
 //Ground file must be a point cloud with 1 cm resolution
@@ -141,7 +140,7 @@ public class GroundProfileFromFile extends GroundProfileFromHeightMap
     */
    public static double[][] loadPoints3D(BufferedReader bufferedReader, RigidBodyTransform transform3D, VariableType[] variableOrder)
    {
-      Point3d point3d = new Point3d();
+      Point3D point3d = new Point3D();
       double[] values = new double[3];
 
       try
@@ -224,7 +223,7 @@ public class GroundProfileFromFile extends GroundProfileFromHeightMap
    }
 
    @Override
-   public double heightAndNormalAt(double x, double y, double z, Vector3d normalToPack)
+   public double heightAndNormalAt(double x, double y, double z, Vector3D normalToPack)
    {
       double height = heightAt(x, y, z);
       surfaceNormalAt(x, y, z, normalToPack);
@@ -260,7 +259,7 @@ public class GroundProfileFromFile extends GroundProfileFromHeightMap
     */
 
 
-   public void surfaceNormalAt(double x, double y, double z, Vector3d vector3d)
+   public void surfaceNormalAt(double x, double y, double z, Vector3D vector3d)
    {
       vector3d.set(0.0, 0.0, 1.0);
    }

@@ -4,10 +4,19 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Vector3d;
-
-import us.ihmc.robotics.screwTheory.*;
+import us.ihmc.euclid.matrix.Matrix3D;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
+import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.robotics.screwTheory.RevoluteJoint;
+import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.robotics.screwTheory.ScrewTools;
+import us.ihmc.robotics.screwTheory.SixDoFJoint;
+import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
+import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.Joint;
@@ -15,9 +24,6 @@ import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.PinJoint;
 import us.ihmc.simulationconstructionset.Robot;
-import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 public class InverseDynamicsJointsFromSCSRobotGenerator
 {   
@@ -44,12 +50,12 @@ public class InverseDynamicsJointsFromSCSRobotGenerator
          // Link parameters:
          Link link = polledJoint.getLink();  
 
-         Matrix3d momentOfInertia = new Matrix3d();
+         Matrix3D momentOfInertia = new Matrix3D();
          link.getMomentOfInertia(momentOfInertia);
          
          double mass = link.getMass();
          
-         Vector3d comOffset = new Vector3d();
+         Vector3D comOffset = new Vector3D();
          link.getComOffset(comOffset);
                   
          RigidBody parentIDBody = getParentIDBody(polledJoint, elevator);
@@ -67,10 +73,10 @@ public class InverseDynamicsJointsFromSCSRobotGenerator
          {
             PinJoint currentJoint = (PinJoint) polledJoint;
             
-            Vector3d jointAxis = new Vector3d();
+            Vector3D jointAxis = new Vector3D();
             currentJoint.getJointAxis(jointAxis);
             
-            Vector3d jointOffset = new Vector3d();
+            Vector3D jointOffset = new Vector3D();
             currentJoint.getOffset(jointOffset); 
     
             RevoluteJoint currentIDJoint = ScrewTools.addRevoluteJoint(currentJoint.getName(), parentIDBody, jointOffset, jointAxis);

@@ -11,13 +11,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JFrame;
-import javax.vecmath.Point2d;
 
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.plotting.Plotter;
 import us.ihmc.robotics.geometry.Line2d;
 import us.ihmc.robotics.trajectories.ParametricSplineTrajectory;
@@ -79,7 +79,7 @@ public class JointSpaceBasedSwingTrajectorySolverTest
 
       if (VISUALIZE)
       {
-         List<Point2d> positionValues = new ArrayList<Point2d>();
+         List<Point2D> positionValues = new ArrayList<Point2D>();
          int discretization = 100;
          double time;
          double position;
@@ -87,7 +87,7 @@ public class JointSpaceBasedSwingTrajectorySolverTest
          {
             time = startTime + (endTime - startTime) * (i * 1.0 / discretization);
             position = (trajectory.getPositions(time))[0];
-            positionValues.add(new Point2d(time, position));
+            positionValues.add(new Point2D(time, position));
          }
 
          plotValues(positionValues);
@@ -166,11 +166,11 @@ public class JointSpaceBasedSwingTrajectorySolverTest
       if (VISUALIZE)
       {
          List<double[]> positionValues = new ArrayList<double[]>();
-         ArrayList<Point2d> pelvisPositions = new ArrayList<Point2d>();
+         ArrayList<Point2D> pelvisPositions = new ArrayList<Point2D>();
 
          int discretization = 100;
          double time;
-         Point2d cartesianPosition = new Point2d();
+         Point2D cartesianPosition = new Point2D();
          double[] currentPositions;
          double[] currentVelocities;
          double[] currentAcceleratinos;
@@ -185,7 +185,7 @@ public class JointSpaceBasedSwingTrajectorySolverTest
          for (int i = 0; i <= discretization; i++)
          {
             time = startTime + (endTime - startTime) * (i * 1.0 / discretization);
-            pelvisPositions.add(new Point2d(startPelvis + (endPelvis - startPelvis) * (i * 1.0 / discretization), 0));
+            pelvisPositions.add(new Point2D(startPelvis + (endPelvis - startPelvis) * (i * 1.0 / discretization), 0));
             currentPositions = trajectory.getPositions(time);
             currentVelocities = trajectory.getVelocities(time);
             currentAcceleratinos = trajectory.getAccelerations(time);
@@ -250,13 +250,13 @@ public class JointSpaceBasedSwingTrajectorySolverTest
       }
    }
 
-   private void visualizeInvertedPendulum(double length1, double length2, ArrayList<Point2d> hipPositions, List<double[]> jointAngles)
+   private void visualizeInvertedPendulum(double length1, double length2, ArrayList<Point2D> hipPositions, List<double[]> jointAngles)
    {
       assertTrue(hipPositions.size() == jointAngles.size());
       Plotter p = new Plotter();
-      Point2d hipPosition = new Point2d();
-      Point2d kneePosition = new Point2d();
-      Point2d anklePosition = new Point2d();
+      Point2D hipPosition = new Point2D();
+      Point2D kneePosition = new Point2D();
+      Point2D anklePosition = new Point2D();
 
       int index = 0;
       for (double[] jointAngleSet : jointAngles)
@@ -269,7 +269,7 @@ public class JointSpaceBasedSwingTrajectorySolverTest
 
          p.createAndAddLineArtifact("Femur" + index, new Line2d(hipPosition, kneePosition), Color.black);
          p.createAndAddLineArtifact("Shin" + index, new Line2d(kneePosition, anklePosition), Color.gray);
-         p.createAndAddPointArtifact("Ankle" + index, new Point2d(anklePosition), Color.blue);
+         p.createAndAddPointArtifact("Ankle" + index, new Point2D(anklePosition), Color.blue);
 
          index++;
       }
@@ -288,16 +288,16 @@ public class JointSpaceBasedSwingTrajectorySolverTest
       f.setVisible(true);
    }
 
-   private void plotValues(List<Point2d> points)
+   private void plotValues(List<Point2D> points)
    {
       plotValues(points, Color.blue);
    }
 
-   private void plotValues(List<Point2d> points, Color color)
+   private void plotValues(List<Point2D> points, Color color)
    {
       Plotter p = new Plotter();
       int index = 0;
-      for (Point2d point : points)
+      for (Point2D point : points)
       {
          p.createAndAddPointArtifact("Point" + (index++), point, color);
       }

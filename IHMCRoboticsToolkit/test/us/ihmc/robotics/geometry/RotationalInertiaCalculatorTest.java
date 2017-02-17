@@ -4,12 +4,11 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.Random;
 
-import javax.vecmath.Matrix3d;
-
 import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.MathTools;
 
@@ -79,7 +78,7 @@ public class RotationalInertiaCalculatorTest
          assertEquals(mass * (3.0 * radius * radius + height * height) / 12.0, inCircleAxis1, DELTA);
          assertEquals(0.5 * mass * radius * radius, mainAxis, DELTA);
          
-         Matrix3d rotationMatrix = RotationalInertiaCalculator.getRotationalInertiaMatrixOfSolidCylinder(mass, radius, height, axis);
+         Matrix3D rotationMatrix = RotationalInertiaCalculator.getRotationalInertiaMatrixOfSolidCylinder(mass, radius, height, axis);
          assertEquals(IxxIyyIzz[0], rotationMatrix.getM00(), DELTA);
          assertEquals(IxxIyyIzz[1], rotationMatrix.getM11(), DELTA);
          assertEquals(IxxIyyIzz[2], rotationMatrix.getM22(), DELTA);
@@ -140,7 +139,7 @@ public class RotationalInertiaCalculatorTest
 		   double Iyy = mass * (MathTools.square(xRadius) + MathTools.square(zRadius)) / 5.0;
 		   double Izz = mass * (MathTools.square(yRadius) + MathTools.square(xRadius)) / 5.0;
 		   
-		   Matrix3d inertiaTensor = RotationalInertiaCalculator.getRotationalInertiaMatrixOfSolidEllipsoid(mass, xRadius, yRadius, zRadius);
+		   Matrix3D inertiaTensor = RotationalInertiaCalculator.getRotationalInertiaMatrixOfSolidEllipsoid(mass, xRadius, yRadius, zRadius);
 
 		   assertEquals(Ixx, inertiaTensor.getM00(), DELTA);
 		   assertEquals(Iyy, inertiaTensor.getM11(), DELTA);
@@ -207,7 +206,7 @@ public class RotationalInertiaCalculatorTest
 		   double yRadius = randomPositiveDouble();
 		   double zRadius = randomPositiveDouble();
 		   
-		   Matrix3d rotationalInertia = RotationalInertiaCalculator.getRotationalInertiaFromRadiiOfGyration(mass, xRadius, yRadius, zRadius);
+		   Matrix3D rotationalInertia = RotationalInertiaCalculator.getRotationalInertiaFromRadiiOfGyration(mass, xRadius, yRadius, zRadius);
 
 		   assertEquals(mass * (MathTools.square(yRadius) + MathTools.square(zRadius)), rotationalInertia.getM00(), DELTA);
 		   assertEquals(mass * (MathTools.square(zRadius) + MathTools.square(xRadius)), rotationalInertia.getM11(), DELTA);

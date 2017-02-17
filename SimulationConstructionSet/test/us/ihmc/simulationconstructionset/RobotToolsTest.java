@@ -4,11 +4,10 @@ import static org.junit.Assert.assertNotNull;
 
 import java.util.Random;
 
-import javax.vecmath.Vector3d;
-
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.screwTheory.ScrewTestTools;
 import us.ihmc.robotics.screwTheory.ScrewTestTools.RandomFloatingChain;
 import us.ihmc.simulationconstructionset.RobotTools.SCSRobotFromInverseDynamicsRobotModel;
@@ -19,7 +18,7 @@ public class RobotToolsTest
    {
       Random random = new Random();
 
-      Vector3d[] jointAxes = {new Vector3d(1.0, 0.0, 0.0)};
+      Vector3D[] jointAxes = {new Vector3D(1.0, 0.0, 0.0)};
       ScrewTestTools.RandomFloatingChain randomFloatingChain = new ScrewTestTools.RandomFloatingChain(random, jointAxes);
 
       randomFloatingChain.setRandomPositionsAndVelocities(random);

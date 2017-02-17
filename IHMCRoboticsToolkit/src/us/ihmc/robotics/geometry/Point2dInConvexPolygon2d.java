@@ -1,7 +1,7 @@
 package us.ihmc.robotics.geometry;
 
-import javax.vecmath.Point2d;
-import javax.vecmath.Vector2d;
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.Vector2D;
 
 /**
  * A Point2d in ConvexPolygon coordinate is defined by  (eccentricity, angle) similar to the polar coordinate system
@@ -10,11 +10,11 @@ import javax.vecmath.Vector2d;
  * @author tingfan
  *
  */
-public class Point2dInConvexPolygon2d extends Point2d
+public class Point2dInConvexPolygon2d extends Point2D
 {
    private static final long serialVersionUID = 5818978949209007789L;
    protected  ConvexPolygon2d polygon;
-   private final Point2d origin = new Point2d(0,0);
+   private final Point2D origin = new Point2D(0,0);
 
 
    public Point2dInConvexPolygon2d(ConvexPolygon2d polygon, double x, double y)
@@ -38,7 +38,7 @@ public class Point2dInConvexPolygon2d extends Point2d
 
    public void setAngle(double angle)
    {
-      Point2d point = findEdgePoint(angle);
+      Point2D point = findEdgePoint(angle);
       point.scale(getEccentricity());
       set(point);
    }
@@ -51,21 +51,21 @@ public class Point2dInConvexPolygon2d extends Point2d
 
    public double getEccentricity()
    {
-      Point2d edgePoint = findEdgePoint(getX(), getY());
+      Point2D edgePoint = findEdgePoint(getX(), getY());
       return Math.max(1e-3, distance(origin) / edgePoint.distance(origin));
    }
 
-   private Point2d findEdgePoint(double angle)
+   private Point2D findEdgePoint(double angle)
    {
       return findEdgePoint(Math.cos(angle), Math.sin(angle));
    }
 
-   private Point2d findEdgePoint(double x, double y)
+   private Point2D findEdgePoint(double x, double y)
    {
       if (x==0 && y==0)
          x=1; //as eccentricity=0
-      Line2d ray = new Line2d(new Point2d(0,0), new Vector2d(x,y));
-      Point2d[] edgePoints = polygon.intersectionWithRayCopy(ray);
+      Line2d ray = new Line2d(new Point2D(0,0), new Vector2D(x,y));
+      Point2D[] edgePoints = polygon.intersectionWithRayCopy(ray);
       if(edgePoints.length!=1)
          throw new RuntimeException("intersecting points should be 1, but we get" + edgePoints.length);
       return edgePoints[0];

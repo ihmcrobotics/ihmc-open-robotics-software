@@ -1,9 +1,9 @@
 package us.ihmc.robotics.trajectories;
 
+import java.util.Arrays;
+
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
-
-import java.util.Arrays;
 
 /**
  * Created by agrabertilton on 2/10/15.

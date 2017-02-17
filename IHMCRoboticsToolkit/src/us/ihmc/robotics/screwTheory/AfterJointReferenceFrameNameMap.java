@@ -1,9 +1,9 @@
 package us.ihmc.robotics.screwTheory;
 
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-
 import java.util.LinkedHashMap;
 import java.util.List;
+
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class AfterJointReferenceFrameNameMap
 {

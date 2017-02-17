@@ -1,19 +1,19 @@
 package us.ihmc.sensorProcessing.imu;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Matrix3f;
-import javax.vecmath.Vector3d;
-import javax.vecmath.Vector3f;
-
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
-import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
-import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
-import us.ihmc.robotics.sensors.IMUDefinition;
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.robotics.sensors.IMUDefinition;
+import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
+import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 
 public class IMUSensor implements IMUSensorReadOnly
 {
@@ -21,10 +21,10 @@ public class IMUSensor implements IMUSensorReadOnly
 
    private final ReferenceFrame measurementFrame;
    private final RigidBody measurementLink;
-   
-   private final Matrix3d orientationMeasurement = new Matrix3d();
-   private final Vector3d angularVelocityMeasurement = new Vector3d();
-   private final Vector3d linearAccelerationMeasurement = new Vector3d();
+
+   private final RotationMatrix orientationMeasurement = new RotationMatrix();
+   private final Vector3D angularVelocityMeasurement = new Vector3D();
+   private final Vector3D linearAccelerationMeasurement = new Vector3D();
 
    private final DenseMatrix64F orientationNoiseCovariance;
    private final DenseMatrix64F angularVelocityNoiseCovariance;
@@ -61,86 +61,92 @@ public class IMUSensor implements IMUSensorReadOnly
       }
    }
 
+   @Override
    public String getSensorName()
    {
       return sensorName;
    }
 
+   @Override
    public ReferenceFrame getMeasurementFrame()
    {
       return measurementFrame;
    }
 
+   @Override
    public RigidBody getMeasurementLink()
    {
       return measurementLink;
    }
 
-   public void setOrientationMeasurement(Matrix3d newOrientation)
+   public void setOrientationMeasurement(RotationMatrixReadOnly newOrientation)
    {
       orientationMeasurement.set(newOrientation);
    }
 
-   public void setAngularVelocityMeasurement(Vector3d newAngularOrientation)
+   public void setAngularVelocityMeasurement(Vector3DReadOnly newAngularOrientation)
    {
       angularVelocityMeasurement.set(newAngularOrientation);
    }
 
-   public void setLinearAccelerationMeasurement(Vector3d newLinearAcceleration)
+   public void setLinearAccelerationMeasurement(Vector3DReadOnly newLinearAcceleration)
    {
       linearAccelerationMeasurement.set(newLinearAcceleration);
    }
 
-   @Override public void getOrientationMeasurement(Matrix3f orientationToPack)
-   {
-      orientationToPack.set(orientationMeasurement);
-   }
-
-   @Override public void getAngularVelocityMeasurement(Vector3f angularVelocityToPack)
+   @Override
+   public void getAngularVelocityMeasurement(Vector3DBasics angularVelocityToPack)
    {
       angularVelocityToPack.set(angularVelocityMeasurement);
    }
 
-   @Override public void getLinearAccelerationMeasurement(Vector3f linearAccelerationToPack)
+   @Override
+   public void getLinearAccelerationMeasurement(Vector3DBasics linearAccelerationToPack)
    {
       linearAccelerationToPack.set(linearAccelerationMeasurement);
    }
 
-   public void getOrientationMeasurement(Matrix3d orientationToPack)
+   @Override
+   public void getOrientationMeasurement(RotationMatrix orientationToPack)
    {
       orientationToPack.set(orientationMeasurement);
    }
 
-   public void getAngularVelocityMeasurement(Vector3d angularVelocityToPack)
+   public void getAngularVelocityMeasurement(Vector3D angularVelocityToPack)
    {
       angularVelocityToPack.set(angularVelocityMeasurement);
    }
 
-   public void getLinearAccelerationMeasurement(Vector3d linearAccelerationToPack)
+   public void getLinearAccelerationMeasurement(Vector3D linearAccelerationToPack)
    {
       linearAccelerationToPack.set(linearAccelerationMeasurement);
    }
 
+   @Override
    public void getOrientationNoiseCovariance(DenseMatrix64F noiseCovarianceToPack)
    {
       noiseCovarianceToPack.set(orientationNoiseCovariance);
    }
 
+   @Override
    public void getAngularVelocityNoiseCovariance(DenseMatrix64F noiseCovarianceToPack)
    {
       noiseCovarianceToPack.set(angularVelocityNoiseCovariance);
    }
 
+   @Override
    public void getAngularVelocityBiasProcessNoiseCovariance(DenseMatrix64F biasProcessNoiseCovarianceToPack)
    {
       biasProcessNoiseCovarianceToPack.set(angularVelocityBiasProcessNoiseCovariance);
    }
 
+   @Override
    public void getLinearAccelerationNoiseCovariance(DenseMatrix64F noiseCovarianceToPack)
    {
       noiseCovarianceToPack.set(linearAccelerationNoiseCovariance);
    }
 
+   @Override
    public void getLinearAccelerationBiasProcessNoiseCovariance(DenseMatrix64F biasProcessNoiseCovarianceToPack)
    {
       biasProcessNoiseCovarianceToPack.set(linearAccelerationBiasProcessNoiseCovariance);

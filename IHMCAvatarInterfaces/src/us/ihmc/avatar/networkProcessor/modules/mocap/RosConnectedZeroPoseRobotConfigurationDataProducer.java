@@ -4,9 +4,6 @@ import java.net.URI;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicReference;
 
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
 import org.ros.message.MessageListener;
 import org.ros.namespace.GraphName;
 import org.ros.node.AbstractNodeMain;
@@ -17,13 +14,15 @@ import org.ros.node.NodeMainExecutor;
 import org.ros.node.topic.Subscriber;
 
 import sensor_msgs.JointState;
-import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.IMUPacket;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
@@ -117,8 +116,8 @@ public class RosConnectedZeroPoseRobotConfigurationDataProducer extends Abstract
       robotConfigurationData.setTimestamp(totalNsecs);
       if(pelvisPoseInMocapFrame != null)
       {
-         Vector3d translation = new Vector3d();
-         Quat4d orientation = new Quat4d();
+         Vector3D translation = new Vector3D();
+         Quaternion orientation = new Quaternion();
          pelvisPoseInMocapFrame.getTranslation(translation);
          pelvisPoseInMocapFrame.getRotation(orientation);
          robotConfigurationData.setRootTranslation(translation);
@@ -137,7 +136,8 @@ public class RosConnectedZeroPoseRobotConfigurationDataProducer extends Abstract
    {
       RigidBodyTransform pelvisPose = new RigidBodyTransform();
       RigidBodyTransform transformFromHeadToPelvis = pelvisFrame.getTransformToDesiredFrame(headFrame);
-      pelvisPose.multiply(headPose, transformFromHeadToPelvis);
+      pelvisPose.set(headPose);
+      pelvisPose.multiply(transformFromHeadToPelvis);
       atomicPelvisPose.set(pelvisPose);
    }
 

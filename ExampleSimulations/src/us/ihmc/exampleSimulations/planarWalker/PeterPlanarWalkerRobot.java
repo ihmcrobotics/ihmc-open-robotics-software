@@ -1,7 +1,6 @@
 package us.ihmc.exampleSimulations.planarWalker;
 
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.robotics.Axis;
@@ -52,7 +51,7 @@ public class PeterPlanarWalkerRobot extends Robot
       for (RobotSide robotSide : RobotSide.values())
       {
 
-         PinJoint hipJoint = new PinJoint(robotSide.getSideNameFirstLetter() + "Hip", new Vector3d(0.0, robotSide.negateIfRightSide(hipOffsetY), 0.0), this,
+         PinJoint hipJoint = new PinJoint(robotSide.getSideNameFirstLetter() + "Hip", new Vector3D(0.0, robotSide.negateIfRightSide(hipOffsetY), 0.0), this,
                Axis.Y);
          hipJoints.put(robotSide, hipJoint);
          hipJoint.setDynamic(true);
@@ -63,7 +62,7 @@ public class PeterPlanarWalkerRobot extends Robot
 
          /************************************************************/
 
-         SliderJoint kneeJoint = new SliderJoint(robotSide.getSideNameFirstLetter() + "Knee", new Vector3d(0.0, 0.0, -upperLinkLength), this, new Vector3d(0.0,
+         SliderJoint kneeJoint = new SliderJoint(robotSide.getSideNameFirstLetter() + "Knee", new Vector3D(0.0, 0.0, -upperLinkLength), this, new Vector3D(0.0,
                0.0, -1.0)); //TODO change offset depending on height
          kneeJoints.put(robotSide, kneeJoint);
          kneeJoint.setDynamic(true);
@@ -74,7 +73,7 @@ public class PeterPlanarWalkerRobot extends Robot
 
          /*************************************************************/
 
-         GroundContactPoint contactPoint = new GroundContactPoint(robotSide.getSideNameFirstLetter() + "Foot", new Vector3d(0.0, 0.0, 0.0), this);
+         GroundContactPoint contactPoint = new GroundContactPoint(robotSide.getSideNameFirstLetter() + "Foot", new Vector3D(0.0, 0.0, 0.0), this);
          gCpoints.set(robotSide, contactPoint);
          kneeJoints.get(robotSide).addGroundContactPoint(contactPoint);
          Graphics3DObject graphics = kneeJoints.get(robotSide).getLink().getLinkGraphics();
@@ -242,7 +241,7 @@ public class PeterPlanarWalkerRobot extends Robot
       Link body = new Link("body");
       body.setMassAndRadiiOfGyration(bodyMass, bodyLength, bodyWidth, bodyHeight);
 
-      body.setComOffset(new Vector3d(0.0, 0.0, 0.0));
+      body.setComOffset(new Vector3D(0.0, 0.0, 0.0));
       Graphics3DObject graphics = new Graphics3DObject();
       graphics.addCube(0.4, 0.2, 0.1, YoAppearance.AliceBlue());
       graphics.addCoordinateSystem(0.6);

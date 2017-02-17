@@ -1,9 +1,11 @@
 package us.ihmc.robotics.math.trajectories.waypoints;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -37,7 +39,7 @@ public class YoFrameSE3TrajectoryPoint extends YoFrameTrajectoryPoint<YoFrameSE3
    }
 
    @Override
-   public void setPosition(Point3d position)
+   public void setPosition(Point3DReadOnly position)
    {
       this.position.set(position);
    }
@@ -48,7 +50,7 @@ public class YoFrameSE3TrajectoryPoint extends YoFrameTrajectoryPoint<YoFrameSE3
    }
 
    @Override
-   public void setOrientation(Quat4d orientation)
+   public void setOrientation(QuaternionReadOnly orientation)
    {
       this.orientation.set(orientation);
    }
@@ -59,7 +61,7 @@ public class YoFrameSE3TrajectoryPoint extends YoFrameTrajectoryPoint<YoFrameSE3
    }
 
    @Override
-   public void setLinearVelocity(Vector3d linearVelocity)
+   public void setLinearVelocity(Vector3DReadOnly linearVelocity)
    {
       this.linearVelocity.set(linearVelocity);
    }
@@ -70,7 +72,7 @@ public class YoFrameSE3TrajectoryPoint extends YoFrameTrajectoryPoint<YoFrameSE3
    }
 
    @Override
-   public void setAngularVelocity(Vector3d angularVelocity)
+   public void setAngularVelocity(Vector3DReadOnly angularVelocity)
    {
       this.angularVelocity.set(angularVelocity);
    }
@@ -87,7 +89,7 @@ public class YoFrameSE3TrajectoryPoint extends YoFrameTrajectoryPoint<YoFrameSE3
       getYoValuesFromFrameWaypoint();
    }
 
-   public void set(double time, Point3d position, Quat4d orientation, Vector3d linearVelocity, Vector3d angularVelocity)
+   public void set(double time, Point3DReadOnly position, QuaternionReadOnly orientation, Vector3DReadOnly linearVelocity, Vector3DReadOnly angularVelocity)
    {
       this.time.set(time);
       this.position.set(position);
@@ -189,25 +191,25 @@ public class YoFrameSE3TrajectoryPoint extends YoFrameTrajectoryPoint<YoFrameSE3
    }
 
    @Override
-   public void getPosition(Point3d positionToPack)
+   public void getPosition(Point3DBasics positionToPack)
    {
       position.get(positionToPack);
    }
 
    @Override
-   public void getOrientation(Quat4d orientationToPack)
+   public void getOrientation(QuaternionBasics orientationToPack)
    {
       orientation.get(orientationToPack);
    }
 
    @Override
-   public void getLinearVelocity(Vector3d linearVelocityToPack)
+   public void getLinearVelocity(Vector3DBasics linearVelocityToPack)
    {
       linearVelocity.get(linearVelocityToPack);
    }
 
    @Override
-   public void getAngularVelocity(Vector3d angularVelocityToPack)
+   public void getAngularVelocity(Vector3DBasics angularVelocityToPack)
    {
       angularVelocity.get(angularVelocityToPack);
    }

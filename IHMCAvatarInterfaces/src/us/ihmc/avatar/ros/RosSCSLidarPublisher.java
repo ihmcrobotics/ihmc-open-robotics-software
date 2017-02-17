@@ -2,11 +2,11 @@ package us.ihmc.avatar.ros;
 
 import org.ros.message.Time;
 
-import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.communication.net.ObjectCommunicator;
 import us.ihmc.communication.net.ObjectConsumer;
 import us.ihmc.communication.packets.SimulatedLidarScanPacket;
 import us.ihmc.humanoidRobotics.kryo.PPSTimestampOffsetProvider;
+import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.sensorProcessing.parameters.DRCRobotLidarParameters;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.publisher.RosLidarPublisher;

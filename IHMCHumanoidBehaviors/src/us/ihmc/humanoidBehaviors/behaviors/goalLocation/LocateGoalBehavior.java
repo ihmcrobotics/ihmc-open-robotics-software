@@ -1,15 +1,13 @@
 package us.ihmc.humanoidBehaviors.behaviors.goalLocation;
 
-import us.ihmc.communication.packets.TextToSpeechPacket;
-import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.goalLocation.GoalDetectorBehaviorService;
-import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
-import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.tools.io.printing.PrintTools;
-
-import javax.vecmath.Point3d;
 import java.text.DecimalFormat;
 import java.util.concurrent.atomic.AtomicBoolean;
+
+import us.ihmc.communication.packets.TextToSpeechPacket;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
+import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
+import us.ihmc.robotics.geometry.FramePose;
 
 public class LocateGoalBehavior extends AbstractBehavior
 {
@@ -32,7 +30,7 @@ public class LocateGoalBehavior extends AbstractBehavior
       if (detectorBehaviorService.getGoalHasBeenLocated())
       {
          detectorBehaviorService.getReportedGoalPoseWorldFrame(foundFiducialPose);
-         Point3d position = new Point3d();
+         Point3D position = new Point3D();
          foundFiducialPose.getPosition(position);
 
          double x = position.getX(), y = position.getY(), z = position.getZ();

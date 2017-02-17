@@ -2,16 +2,15 @@ package us.ihmc.simulationconstructionset.util.ground;
 
 import static org.junit.Assert.assertEquals;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
 import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
-import us.ihmc.tools.testing.JUnitTools;
+import us.ihmc.euclid.tools.EuclidCoreTestTools;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 
 @ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
 public class RotatableRampTerrainObjectTest
@@ -20,54 +19,54 @@ public class RotatableRampTerrainObjectTest
    private RotatableRampTerrainObject simpleRampTranslated, ramp90Translated;
    private double epsilon = 1e-12;
    
-   private Point3d pointsOnSimpleRamp[] =
+   private Point3D pointsOnSimpleRamp[] =
    {
-      new Point3d(0, 0, 0), new Point3d(1, 0, 1), new Point3d(0.5, 0, 0.5), new Point3d(0.5, -1, 0.5), new Point3d(0.5, 1, 0.5), new Point3d(1, 1, 1),
-      new Point3d(1,-1,1)
+      new Point3D(0, 0, 0), new Point3D(1, 0, 1), new Point3D(0.5, 0, 0.5), new Point3D(0.5, -1, 0.5), new Point3D(0.5, 1, 0.5), new Point3D(1, 1, 1),
+      new Point3D(1,-1,1)
    };
    
-   private Point3d strictlyInternalPointsOnSimpleRampDown[] =
+   private Point3D strictlyInternalPointsOnSimpleRampDown[] =
    {
-      new Point3d(0.001, 0.0, 0.999), new Point3d(0.999, 0, 0.001), new Point3d(0.5, 0, 0.5), 
-      new Point3d(0.5, -0.999, 0.5),  new Point3d(0.5, 0.999, 0.5), 
-      new Point3d(0.999, 0.999, 0.001)
+      new Point3D(0.001, 0.0, 0.999), new Point3D(0.999, 0, 0.001), new Point3D(0.5, 0, 0.5), 
+      new Point3D(0.5, -0.999, 0.5),  new Point3D(0.5, 0.999, 0.5), 
+      new Point3D(0.999, 0.999, 0.001)
    };
    
-   private Point3d pointsOnOtherRampFaces[] = {new Point3d(1, 0, 0.5), new Point3d(0.5, 1, 0.25), new Point3d(0.5, -1, 0.25)};
-   private Vector3d expectedSimpleSurfaceNormal = new Vector3d(-1, 0, 1);
-   private Vector3d expectedSimpleSurfaceNormalOnOtherFaces[] = {new Vector3d(1, 0, 0), new Vector3d(0, 1, 0), new Vector3d(0, -1, 0)};
-   private Point3d pointsOnOtherRampFacesSlopeDown[] = {new Point3d(0, 0, 0.5), new Point3d(0.5, 1, 0.25), new Point3d(0.5, -1, 0.25)};
-   private Vector3d expectedSimpleSurfaceNormalSlopeDown = new Vector3d(1, 0, 1);
-   private Vector3d expectedSimpleSurfaceNormalOnOtherFacesSlopeDown[] = {new Vector3d(-1, 0, 0), new Vector3d(0, 1, 0), new Vector3d(0, -1, 0)};
+   private Point3D pointsOnOtherRampFaces[] = {new Point3D(1, 0, 0.5), new Point3D(0.5, 1, 0.25), new Point3D(0.5, -1, 0.25)};
+   private Vector3D expectedSimpleSurfaceNormal = new Vector3D(-1, 0, 1);
+   private Vector3D expectedSimpleSurfaceNormalOnOtherFaces[] = {new Vector3D(1, 0, 0), new Vector3D(0, 1, 0), new Vector3D(0, -1, 0)};
+   private Point3D pointsOnOtherRampFacesSlopeDown[] = {new Point3D(0, 0, 0.5), new Point3D(0.5, 1, 0.25), new Point3D(0.5, -1, 0.25)};
+   private Vector3D expectedSimpleSurfaceNormalSlopeDown = new Vector3D(1, 0, 1);
+   private Vector3D expectedSimpleSurfaceNormalOnOtherFacesSlopeDown[] = {new Vector3D(-1, 0, 0), new Vector3D(0, 1, 0), new Vector3D(0, -1, 0)};
 
-   private Point3d pointsOnRamp90[] =
+   private Point3D pointsOnRamp90[] =
    {
-      new Point3d(0, 0, 0.5), new Point3d(1, 0, 0.5), new Point3d(-1, 0, 0.5),
-      new Point3d(0, -0.49, 0.01),  new Point3d(1, -0.5, 0), new Point3d(-0.99, -0.499, 0.001),
-      new Point3d(0.5, 0.25, 0.75), new Point3d(0.9, 0.4, 0.9), new Point3d(1.0, 0.4, 0.9), new Point3d(1.0, 0.45, 0.95), new Point3d(1.0, 0.499, 0.999),
-      new Point3d(0, 0.5, 1), new Point3d(-1, 0.5, 1), new Point3d(0.9, 0.5,1)//, new Point3d(0.909, 0.5,1),//, new Point3d(1, 0.5, 1)
+      new Point3D(0, 0, 0.5), new Point3D(1, 0, 0.5), new Point3D(-1, 0, 0.5),
+      new Point3D(0, -0.49, 0.01),  new Point3D(1, -0.5, 0), new Point3D(-0.99, -0.499, 0.001),
+      new Point3D(0.5, 0.25, 0.75), new Point3D(0.9, 0.4, 0.9), new Point3D(1.0, 0.4, 0.9), new Point3D(1.0, 0.45, 0.95), new Point3D(1.0, 0.499, 0.999),
+      new Point3D(0, 0.5, 1), new Point3D(-1, 0.5, 1), new Point3D(0.9, 0.5,1)//, new Point3D(0.909, 0.5,1),//, new Point3D(1, 0.5, 1)
       
    };
    
-   private Point3d pointsOnRamp90Translated[] =
+   private Point3D pointsOnRamp90Translated[] =
    {
-      new Point3d(0, 0, 0.5), new Point3d(-0.99, -0.499, 0.001),
-      new Point3d(0.9, 0.4, 0.9)      
+      new Point3D(0, 0, 0.5), new Point3D(-0.99, -0.499, 0.001),
+      new Point3D(0.9, 0.4, 0.9)      
    };
    
-   private Point3d pointsOnRamp90PassingHeightCornerCases[] =
+   private Point3D pointsOnRamp90PassingHeightCornerCases[] =
    {
-      new Point3d(-1, -0.5, 0), new Point3d(0, -0.5, 0)
+      new Point3D(-1, -0.5, 0), new Point3D(0, -0.5, 0)
       
    };
-   private Point3d pointsOnRamp90withNumericalRotationError[] =
+   private Point3D pointsOnRamp90withNumericalRotationError[] =
    {
-         new Point3d(0.909, 0.5,1), new Point3d(1, 0.5, 1)
+         new Point3D(0.909, 0.5,1), new Point3D(1, 0.5, 1)
       
    };
-   private Vector3d expectedSurfaceNormalRamp90 = new Vector3d(0, -1, 1);
-   private Point3d pointsOnOtherFacesRamp90[] = {new Point3d(0, 0.5, 0.5), new Point3d(1, 0, 0.25), new Point3d(-1, 0, 0.25)};
-   private Vector3d expectedSurfaceNormalOnOtherFacesRamp90[] = {new Vector3d(0, 1, 0), new Vector3d(1, 0, 0), new Vector3d(-1, 0, 0)};
+   private Vector3D expectedSurfaceNormalRamp90 = new Vector3D(0, -1, 1);
+   private Point3D pointsOnOtherFacesRamp90[] = {new Point3D(0, 0.5, 0.5), new Point3D(1, 0, 0.25), new Point3D(-1, 0, 0.25)};
+   private Vector3D expectedSurfaceNormalOnOtherFacesRamp90[] = {new Vector3D(0, 1, 0), new Vector3D(1, 0, 0), new Vector3D(-1, 0, 0)};
    
    private static double transX=3.0;
    private static double transY=2.0;
@@ -158,7 +157,7 @@ public class RotatableRampTerrainObjectTest
             expectedSurfaceNormalOnOtherFacesRamp90, pointsOnOtherFacesRamp90);
    }
 
-   private void testHeightAtRampForAnyRamp(Point3d[] pointsOnRamp, RotatableRampTerrainObject ramp)
+   private void testHeightAtRampForAnyRamp(Point3D[] pointsOnRamp, RotatableRampTerrainObject ramp)
    {
       for (int i = 0; i < pointsOnRamp.length; i++)
       {
@@ -167,7 +166,7 @@ public class RotatableRampTerrainObjectTest
       }
    }
 
-   private void testHeightAtRampForAnyRampWithTranslation(Point3d[] pointsOnRamp, RotatableRampTerrainObject ramp, Vector3d translation)
+   private void testHeightAtRampForAnyRampWithTranslation(Point3D[] pointsOnRamp, RotatableRampTerrainObject ramp, Vector3D translation)
    {
       for (int i = 0; i < pointsOnRamp.length; i++)
       {
@@ -181,42 +180,42 @@ public class RotatableRampTerrainObjectTest
 	@Test(timeout=300000)
    public void testHeightAtTranslation()
    {
-      testHeightAtRampForAnyRampWithTranslation(pointsOnSimpleRamp, simpleRampTranslated, new Vector3d(transX,transY,0));
+      testHeightAtRampForAnyRampWithTranslation(pointsOnSimpleRamp, simpleRampTranslated, new Vector3D(transX,transY,0));
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testHeightAt90Translation()
    {
-      testHeightAtRampForAnyRampWithTranslation(pointsOnRamp90Translated, ramp90Translated, new Vector3d(transX,transY,0));
+      testHeightAtRampForAnyRampWithTranslation(pointsOnRamp90Translated, ramp90Translated, new Vector3D(transX,transY,0));
    }
 
 
    private void testSurfaceNormalsForAnyRampFace(RotatableRampTerrainObject ramp, 
-         Vector3d expectedRampSurfaceNormal, Point3d[] pointsOnRamp)
+         Vector3D expectedRampSurfaceNormal, Point3D[] pointsOnRamp)
  {
     expectedRampSurfaceNormal.normalize();
 
     for (int i = 0; i < pointsOnRamp.length; i++)
     {
-       Vector3d normal = new Vector3d();
+       Vector3D normal = new Vector3D();
        ramp.surfaceNormalAt(pointsOnRamp[i].getX(), pointsOnRamp[i].getY(), pointsOnRamp[i].getZ(), normal);
        String message = "Normal for point " + pointsOnRamp[i].getX() + " " + pointsOnRamp[i].getY() + " " + pointsOnRamp[i].getZ();
-       JUnitTools.assertTuple3dEquals(message, expectedRampSurfaceNormal, normal, epsilon);
+       EuclidCoreTestTools.assertTuple3DEquals(message, expectedRampSurfaceNormal, normal, epsilon);
     }
  }
  
    private void testSurfaceNormalsForAnyOtherRampSides(RotatableRampTerrainObject ramp,
-         Vector3d[] expectedSurfaceNormalOnOtherFaces, Point3d[] pointsOnOtherRampFaces)
+         Vector3D[] expectedSurfaceNormalOnOtherFaces, Point3D[] pointsOnOtherRampFaces)
  {
     for (int i = 0; i < pointsOnOtherRampFaces.length; i++)
     {
        expectedSurfaceNormalOnOtherFaces[i].normalize();
-       Vector3d normal = new Vector3d();
+       Vector3D normal = new Vector3D();
        ramp.surfaceNormalAt(pointsOnOtherRampFaces[i].getX(), pointsOnOtherRampFaces[i].getY(), pointsOnOtherRampFaces[i].getZ(), normal);
        String message = "Normal for point " + pointsOnOtherRampFaces[i].getX() + " " + pointsOnOtherRampFaces[i].getY() + " "
                         + pointsOnOtherRampFaces[i].getZ();
-       JUnitTools.assertTuple3dEquals(message, expectedSurfaceNormalOnOtherFaces[i], normal, epsilon);
+       EuclidCoreTestTools.assertTuple3DEquals(message, expectedSurfaceNormalOnOtherFaces[i], normal, epsilon);
     }
  }
  

@@ -3,7 +3,8 @@ package us.ihmc.humanoidRobotics.communication.packets;
 import java.util.Random;
 
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 
 public class DetectedObjectPacket extends Packet<DetectedObjectPacket>
 {
@@ -22,7 +23,7 @@ public class DetectedObjectPacket extends Packet<DetectedObjectPacket>
 
    public DetectedObjectPacket(Random random)
    {
-      pose = RigidBodyTransform.generateRandomTransform(random);
+      pose = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
       id = random.nextInt(255);
    }
    

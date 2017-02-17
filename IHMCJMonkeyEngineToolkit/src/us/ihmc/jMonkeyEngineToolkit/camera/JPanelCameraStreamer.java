@@ -7,10 +7,12 @@ import java.awt.image.BufferedImage;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
 
 import boofcv.struct.calib.IntrinsicParameters;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 
 
 public class JPanelCameraStreamer extends JPanel implements CameraStreamer
@@ -34,12 +36,12 @@ public class JPanelCameraStreamer extends JPanel implements CameraStreamer
 
    }
 
-   public synchronized void updateImage(BufferedImage bufferedImage, Point3d cameraPosition, Quat4d cameraOrientation, IntrinsicParameters intrinsicParamaters)
+   public synchronized void updateImage(BufferedImage bufferedImage, Point3DReadOnly cameraPosition, QuaternionReadOnly cameraOrientation, IntrinsicParameters intrinsicParamaters)
    {
       updateImage(bufferedImage);
    }
    
-   public synchronized void updateImage(BufferedImage bufferedImage, long timeStamp, Point3d cameraPosition, Quat4d cameraOrientation, double fov)
+   public synchronized void updateImage(BufferedImage bufferedImage, long timeStamp, Point3DReadOnly cameraPosition, QuaternionReadOnly cameraOrientation, double fov)
    {
       updateImage(bufferedImage);
    }
@@ -70,14 +72,14 @@ public class JPanelCameraStreamer extends JPanel implements CameraStreamer
    }
 
 
-   public Point3d getCameraPosition()
+   public Point3D getCameraPosition()
    {
       // TODO Auto-generated method stub
       return null;
    }
 
 
-   public Quat4d getCameraOrientation()
+   public Quaternion getCameraOrientation()
    {
       // TODO Auto-generated method stub
       return null;

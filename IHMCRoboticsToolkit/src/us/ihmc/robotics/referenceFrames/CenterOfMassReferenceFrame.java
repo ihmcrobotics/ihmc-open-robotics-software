@@ -1,18 +1,17 @@
 package us.ihmc.robotics.referenceFrames;
 
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.screwTheory.CenterOfMassCalculator;
 import us.ihmc.robotics.screwTheory.RigidBody;
-
-import javax.vecmath.Vector3d;
 
 public class CenterOfMassReferenceFrame extends ReferenceFrame
 {
    private static final long serialVersionUID = 97944957592733289L;
    private final CenterOfMassCalculator centerOfMassCalculator;
    private final FramePoint centerOfMass;
-   private final Vector3d centerOfMassVector3d = new Vector3d();
+   private final Vector3D centerOfMassVector3d = new Vector3D();
 
    public CenterOfMassReferenceFrame(String frameName, ReferenceFrame parentFrame, RigidBody rootBody)
    {

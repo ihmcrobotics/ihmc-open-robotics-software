@@ -1,7 +1,7 @@
 package us.ihmc.valkyrie.parameters;
 
-import javax.vecmath.Matrix3d;
-
+import us.ihmc.euclid.matrix.Matrix3D;
+import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
 import us.ihmc.robotics.controllers.GainCalculator;
 import us.ihmc.robotics.controllers.MatrixUpdater;
 import us.ihmc.robotics.controllers.OrientationPIDGainsInterface;
@@ -58,9 +58,9 @@ public class YoValkyrieHeadPIDGains implements YoOrientationPIDGainsInterface
    }
 
    @Override
-   public Matrix3d createProportionalGainMatrix()
+   public Matrix3DReadOnly createProportionalGainMatrix()
    {
-      Matrix3d proportionalGainMatrix = new Matrix3d();
+      Matrix3D proportionalGainMatrix = new Matrix3D();
 
       proportionalXGain.addVariableChangedListener(new MatrixUpdater(0, 0, proportionalGainMatrix));
       proportionalYZGain.addVariableChangedListener(new MatrixUpdater(1, 1, proportionalGainMatrix));
@@ -73,9 +73,9 @@ public class YoValkyrieHeadPIDGains implements YoOrientationPIDGainsInterface
    }
 
    @Override
-   public Matrix3d createDerivativeGainMatrix()
+   public Matrix3DReadOnly createDerivativeGainMatrix()
    {
-      Matrix3d derivativeGainMatrix = new Matrix3d();
+      Matrix3D derivativeGainMatrix = new Matrix3D();
 
       derivativeXGain.addVariableChangedListener(new MatrixUpdater(0, 0, derivativeGainMatrix));
       derivativeYZGain.addVariableChangedListener(new MatrixUpdater(1, 1, derivativeGainMatrix));
@@ -88,9 +88,9 @@ public class YoValkyrieHeadPIDGains implements YoOrientationPIDGainsInterface
    }
 
    @Override
-   public Matrix3d createIntegralGainMatrix()
+   public Matrix3DReadOnly createIntegralGainMatrix()
    {
-      return new Matrix3d();
+      return new Matrix3D();
    }
 
    public void createDerivativeGainUpdater(boolean updateNow)

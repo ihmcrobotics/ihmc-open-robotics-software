@@ -1,6 +1,6 @@
 package us.ihmc.robotics.robotDescription;
 
-import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.lidar.LidarScanParameters;
 
 public class LidarSensorDescription extends SensorDescription

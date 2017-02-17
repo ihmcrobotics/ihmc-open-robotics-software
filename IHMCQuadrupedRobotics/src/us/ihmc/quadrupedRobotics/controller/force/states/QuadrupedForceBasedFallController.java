@@ -26,7 +26,7 @@ import us.ihmc.robotics.dataStructures.parameter.ParameterFactory;
 import us.ihmc.robotics.dataStructures.parameter.DoubleParameter;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
-import javax.vecmath.Vector3d;
+import us.ihmc.euclid.tuple3D.Vector3D;
 
 public class QuadrupedForceBasedFallController implements QuadrupedController
 {
@@ -71,7 +71,7 @@ public class QuadrupedForceBasedFallController implements QuadrupedController
    private final QuadrupedTaskSpaceEstimator taskSpaceEstimator;
    private final QuadrupedReferenceFrames referenceFrames;
    private final FramePoint solePositionSetpoint;
-   private final Vector3d zeroVelocity;
+   private final Vector3D zeroVelocity;
    private FullQuadrupedRobotModel fullRobotModel;
 
    public QuadrupedForceBasedFallController(QuadrupedRuntimeEnvironment environment, QuadrupedForceControllerToolbox controllerToolbox)
@@ -88,7 +88,7 @@ public class QuadrupedForceBasedFallController implements QuadrupedController
          quadrupedSoleWaypointList.get(quadrant).add(new SoleWaypoint());
          quadrupedSoleWaypointList.get(quadrant).add(new SoleWaypoint());
       }
-      zeroVelocity = new Vector3d(0, 0, 0);
+      zeroVelocity = new Vector3D(0, 0, 0);
       taskSpaceControllerCommands = new QuadrupedTaskSpaceController.Commands();
       taskSpaceControllerSettings = new QuadrupedTaskSpaceController.Settings();
       this.taskSpaceController = controllerToolbox.getTaskSpaceController();

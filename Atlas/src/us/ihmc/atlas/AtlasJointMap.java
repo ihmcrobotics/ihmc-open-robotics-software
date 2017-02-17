@@ -43,16 +43,15 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
 
-import javax.vecmath.Vector3d;
-
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import us.ihmc.atlas.parameters.AtlasContactPointParameters;
 import us.ihmc.avatar.drcRobot.NewRobotPhysicalProperties;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.jMonkeyEngineToolkit.jme.util.JMEDataTypeUtils;
 import us.ihmc.robotics.controllers.YoPDGains;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.JointRole;
 import us.ihmc.robotics.partNames.LegJointName;
@@ -310,7 +309,7 @@ public class AtlasJointMap implements DRCRobotJointMap
    }
 
    @Override
-   public List<ImmutablePair<String, Vector3d>> getJointNameGroundContactPointMap()
+   public List<ImmutablePair<String, Vector3D>> getJointNameGroundContactPointMap()
    {
       return contactPointParameters.getJointNameGroundContactPointMap();
    }
@@ -363,9 +362,10 @@ public class AtlasJointMap implements DRCRobotJointMap
       RigidBodyTransform attachmentPlateToPalm = JMEDataTypeUtils.jmeTransformToTransform3D(atlasVersion.getOffsetFromAttachmentPlate(robotSide));
       RigidBodyTransform attachmentPlateToWrist = atlasPhysicalProperties.getHandAttachmentPlateToWristTransforms().get(robotSide);
       RigidBodyTransform handControlFrameToWristTranform = new RigidBodyTransform();
-      handControlFrameToWristTranform.multiply(attachmentPlateToWrist, attachmentPlateToPalm);
+      handControlFrameToWristTranform.set(attachmentPlateToWrist);
+      handControlFrameToWristTranform.multiply(attachmentPlateToPalm);
 
-      Vector3d translation = new Vector3d();
+      Vector3D translation = new Vector3D();
       handControlFrameToWristTranform.getTranslation(translation);
       translation.scale(getModelScale());
       handControlFrameToWristTranform.setTranslation(translation);

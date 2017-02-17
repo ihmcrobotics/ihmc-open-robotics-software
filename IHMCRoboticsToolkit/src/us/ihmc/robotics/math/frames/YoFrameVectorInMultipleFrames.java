@@ -3,8 +3,7 @@ package us.ihmc.robotics.math.frames;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
@@ -17,7 +16,7 @@ public class YoFrameVectorInMultipleFrames extends YoFrameVector implements YoMu
    private final YoMultipleFramesHelper multipleFramesHelper;
 
    private final FrameVector frameVector = new FrameVector();
-   private final Vector3d vector = new Vector3d();
+   private final Vector3D vector = new Vector3D();
 
    private final String namePrefix;
    private final YoVariableRegistry registry;

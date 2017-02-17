@@ -5,8 +5,8 @@ import java.io.IOException;
 
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
-import javax.vecmath.Point3d;
 
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
@@ -142,8 +142,8 @@ public class PosePlaybackSCSBridge
 
    private class CenterOfMassGraphicUpdater implements Runnable
    {
-      private final Point3d comPoint = new Point3d();
-      private final Point3d comPoint2d = new Point3d();
+      private final Point3D comPoint = new Point3D();
+      private final Point3D comPoint2d = new Point3D();
 
       public void run()
       {

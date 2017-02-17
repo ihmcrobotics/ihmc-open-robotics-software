@@ -9,9 +9,6 @@ import java.util.ArrayList;
 import java.util.Random;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.DRCStartingLocation;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -31,6 +28,8 @@ import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.util.NetworkPorts;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidBehaviors.behaviors.scripts.engine.ScriptBasedControllerCommandGenerator;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
@@ -366,12 +365,12 @@ public class DRCSimulationTestHelper
       return ret;
    }
 
-   public void setupCameraForUnitTest(Point3d cameraFix, Point3d cameraPosition)
+   public void setupCameraForUnitTest(Point3D cameraFix, Point3D cameraPosition)
    {
       CameraConfiguration cameraConfiguration = new CameraConfiguration("testCamera");
 
       Random randomForSlightlyMovingCameraSoThatYouTubeVideosAreDifferent = new Random();
-      Vector3d randomCameraOffset = RandomTools.generateRandomVector(randomForSlightlyMovingCameraSoThatYouTubeVideosAreDifferent, 0.05);
+      Vector3D randomCameraOffset = RandomTools.generateRandomVector(randomForSlightlyMovingCameraSoThatYouTubeVideosAreDifferent, 0.05);
       cameraFix.add(randomCameraOffset);
 
       cameraConfiguration.setCameraFix(cameraFix);
@@ -389,7 +388,7 @@ public class DRCSimulationTestHelper
 
    public static void assertRobotsRootJointIsInBoundingBox(BoundingBox3d boundingBox, HumanoidFloatingRootJointRobot robot)
    {
-      Point3d position = new Point3d();
+      Point3D position = new Point3D();
       robot.getRootJoint().getPosition(position);
       boolean inside = boundingBox.isInside(position);
       if (!inside)
@@ -453,7 +452,7 @@ public class DRCSimulationTestHelper
       {
          for(int i = 0; i<footForceSensors.get(robotSide).size(); i++)
          {
-            ForceSensorHysteresisCreator forceSensorSignalCorruptor = new ForceSensorHysteresisCreator(sdfRobot.computeCenterOfMass(new Point3d()),
+            ForceSensorHysteresisCreator forceSensorSignalCorruptor = new ForceSensorHysteresisCreator(sdfRobot.computeCenterOfMass(new Point3D()),
                   footForceSensors.get(robotSide).get(i).getName(), footForceSensors.get(robotSide).get(i));
 
             footForceSensorSignalCorruptors.add(forceSensorSignalCorruptor);

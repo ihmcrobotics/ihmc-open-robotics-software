@@ -9,11 +9,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import javax.vecmath.AxisAngle4d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -27,6 +22,11 @@ import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidBehaviors.IHMCHumanoidBehaviorManager;
 import us.ihmc.humanoidBehaviors.behaviors.diagnostic.DiagnosticBehavior;
@@ -58,7 +58,6 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FramePose2d;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -253,7 +252,7 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
 
-      PelvisOrientationTrajectoryMessage pelvisPosePacket = createPelvisOrientationTrajectoryMessage(new Vector3d(0.0, 1.0, 0.0), Math.toRadians(5.0));
+      PelvisOrientationTrajectoryMessage pelvisPosePacket = createPelvisOrientationTrajectoryMessage(new Vector3D(0.0, 1.0, 0.0), Math.toRadians(5.0));
       FramePose desiredPelvisPose = new FramePose();
       desiredPelvisPose.setOrientation(pelvisPosePacket.getLastTrajectoryPoint().orientation);
 
@@ -308,7 +307,7 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
       if (DEBUG)
       {
          ArrayList<Footstep> footsteps = walkToLocationBehavior.getFootSteps();
-         Point3d footstepPositionInWorld = new Point3d();
+         Point3D footstepPositionInWorld = new Point3D();
          for (Footstep footStep : footsteps)
          {
             footStep.getPositionInWorldFrame(footstepPositionInWorld);
@@ -537,10 +536,10 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
       return ret;
    }
 
-   private PelvisOrientationTrajectoryMessage createPelvisOrientationTrajectoryMessage(Vector3d rotationAxis, double rotationAngle)
+   private PelvisOrientationTrajectoryMessage createPelvisOrientationTrajectoryMessage(Vector3D rotationAxis, double rotationAngle)
    {
-      AxisAngle4d desiredPelvisAxisAngle = new AxisAngle4d(rotationAxis, rotationAngle);
-      Quat4d desiredPelvisQuat = new Quat4d();
+      AxisAngle desiredPelvisAxisAngle = new AxisAngle(rotationAxis, rotationAngle);
+      Quaternion desiredPelvisQuat = new Quaternion();
       desiredPelvisQuat.set(desiredPelvisAxisAngle);
 
       PelvisOrientationTrajectoryMessage pelvisOrientationTrajectoryMessage = new PelvisOrientationTrajectoryMessage(3.0, desiredPelvisQuat);

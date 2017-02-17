@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Random;
 
 import javax.swing.JFrame;
-import javax.vecmath.Point2d;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
@@ -22,6 +21,7 @@ import org.jfree.util.ShapeUtilities;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.tuple2D.Point2D;
 
 public class InPlaceConvexHullCalculator2dTest
 {
@@ -33,8 +33,8 @@ public class InPlaceConvexHullCalculator2dTest
    public void testRandomV1()
    {
       int iterations = 5000;
-      ArrayList<Point2d> points = new ArrayList<Point2d>();
-      ArrayList<Point2d> inPlaceHull = new ArrayList<Point2d>();
+      ArrayList<Point2D> points = new ArrayList<Point2D>();
+      ArrayList<Point2D> inPlaceHull = new ArrayList<Point2D>();
 
       long optClock = 0;
       long inPlaceClock = 0;
@@ -47,12 +47,12 @@ public class InPlaceConvexHullCalculator2dTest
          {
             double x = rand.nextDouble();
             double y = rand.nextDouble();
-            points.add(new Point2d(x, y));
-            inPlaceHull.add(new Point2d(x, y));
+            points.add(new Point2D(x, y));
+            inPlaceHull.add(new Point2D(x, y));
          }
 
          optClock -= System.nanoTime();
-         List<Point2d> hull = ConvexHullCalculator2d.getConvexHullCopy(points);
+         List<Point2D> hull = ConvexHullCalculator2d.getConvexHullCopy(points);
          optClock += System.nanoTime();
 
          inPlaceClock -= System.nanoTime();
@@ -79,8 +79,8 @@ public class InPlaceConvexHullCalculator2dTest
    public void testRandomV2()
    {
       int iterations = 5000;
-      ArrayList<Point2d> points = new ArrayList<Point2d>();
-      ArrayList<Point2d> inPlaceHull = new ArrayList<Point2d>();
+      ArrayList<Point2D> points = new ArrayList<Point2D>();
+      ArrayList<Point2D> inPlaceHull = new ArrayList<Point2D>();
 
       long optClock = 0;
       long inPlaceClock = 0;
@@ -93,12 +93,12 @@ public class InPlaceConvexHullCalculator2dTest
          {
             double x = rand.nextDouble();
             double y = rand.nextDouble();
-            points.add(new Point2d(x, y));
-            inPlaceHull.add(new Point2d(x, y));
+            points.add(new Point2D(x, y));
+            inPlaceHull.add(new Point2D(x, y));
          }
 
          optClock -= System.nanoTime();
-         List<Point2d> hull = ConvexHullCalculator2d.getConvexHullCopy(points);
+         List<Point2D> hull = ConvexHullCalculator2d.getConvexHullCopy(points);
          optClock += System.nanoTime();
 
          inPlaceClock -= System.nanoTime();
@@ -121,7 +121,7 @@ public class InPlaceConvexHullCalculator2dTest
       System.out.println(optClock / 1000000 + " " + inPlaceClock / 1000000);
    }
 
-   private void printForDebug(ArrayList<Point2d> points, int newSize, List<Point2d> hull, int iterations)
+   private void printForDebug(ArrayList<Point2D> points, int newSize, List<Point2D> hull, int iterations)
    {
       if (DEBUG)
       {
@@ -139,7 +139,7 @@ public class InPlaceConvexHullCalculator2dTest
       }
    }
 
-   public static void plot(List<Point2d> points)
+   public static void plot(List<Point2D> points)
    {
       double[][] data = new double[2][points.size()];
       for (int i = 0; i < points.size(); i++)
@@ -178,13 +178,13 @@ public class InPlaceConvexHullCalculator2dTest
 	@Test(timeout = 30000)
    public void testConvexCounterclockwise()
    {
-      ArrayList<Point2d> points = new ArrayList<Point2d>();
-      points.add(new Point2d(-1, -1));
-      points.add(new Point2d(1, -1));
-      points.add(new Point2d(1, 1));
-      points.add(new Point2d(-1, 1));
+      ArrayList<Point2D> points = new ArrayList<Point2D>();
+      points.add(new Point2D(-1, -1));
+      points.add(new Point2D(1, -1));
+      points.add(new Point2D(1, 1));
+      points.add(new Point2D(-1, 1));
 
-      List<Point2d> hull = ConvexHullCalculator2d.getConvexHullCopy(points);
+      List<Point2D> hull = ConvexHullCalculator2d.getConvexHullCopy(points);
       int originalSize = points.size();
       int newSize = InPlaceConvexHullCalculator2d.inPlaceGiftWrapConvexHull2d(points, originalSize);
       
@@ -196,13 +196,13 @@ public class InPlaceConvexHullCalculator2dTest
 	@Test(timeout = 30000)
    public void testFirstPointSelection()
    {
-      ArrayList<Point2d> points = new ArrayList<Point2d>();
-      points.add(new Point2d(1, -1));
-      points.add(new Point2d(-1, -1));
-      points.add(new Point2d(1, 1));
-      points.add(new Point2d(-1, 1));
+      ArrayList<Point2D> points = new ArrayList<Point2D>();
+      points.add(new Point2D(1, -1));
+      points.add(new Point2D(-1, -1));
+      points.add(new Point2D(1, 1));
+      points.add(new Point2D(-1, 1));
 
-      List<Point2d> hull = ConvexHullCalculator2d.getConvexHullCopy(points);
+      List<Point2D> hull = ConvexHullCalculator2d.getConvexHullCopy(points);
       int originalSize = points.size();
       int newSize = InPlaceConvexHullCalculator2d.inPlaceGiftWrapConvexHull2d(points, originalSize);
 

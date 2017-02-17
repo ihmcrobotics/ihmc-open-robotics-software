@@ -1,12 +1,12 @@
 package us.ihmc.simulationconstructionset.util.perturbance;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 
 
 public interface ForcePerturbable
 {
-   public abstract void setForcePerturbance(Vector3d force, double duration);
+   public abstract void setForcePerturbance(Vector3D force, double duration);
    public abstract void resetPerturbanceForceIfNecessary(); // need to do it this way because of thread issues.
-   public abstract Point3d getForcePerturbanceApplicationPoint();
+   public abstract Point3D getForcePerturbanceApplicationPoint();
 }

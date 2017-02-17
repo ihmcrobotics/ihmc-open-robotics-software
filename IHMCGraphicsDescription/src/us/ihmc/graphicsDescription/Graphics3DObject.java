@@ -5,17 +5,19 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.vecmath.AxisAngle4d;
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Point2d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Point3f;
-import javax.vecmath.Quat4d;
-import javax.vecmath.TexCoord2f;
-import javax.vecmath.Tuple3d;
-import javax.vecmath.Vector3d;
-import javax.vecmath.Vector3f;
-
+import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.matrix.Matrix3D;
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Point3D32;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.Vector3D32;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.exceptions.ShapeNotSupportedException;
@@ -50,7 +52,6 @@ import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.InertiaTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.shapes.Shape3d;
 import us.ihmc.robotics.geometry.shapes.Sphere3d;
 import us.ihmc.tools.inputDevices.keyboard.ModifierKeyInterface;
@@ -136,7 +137,7 @@ public class Graphics3DObject
       this.graphics3DInstructions.addAll(graphics3DObject.getGraphics3DInstructions());
    }
 
-   public void combine(Graphics3DObject Graphics3DObject, Vector3d offset)
+   public void combine(Graphics3DObject Graphics3DObject, Vector3D offset)
    {
       this.identity();
       this.translate(offset);
@@ -164,8 +165,8 @@ public class Graphics3DObject
 
    public void transform(RigidBodyTransform transform)
    {
-      Matrix3d rotation = new Matrix3d();
-      Vector3d translation = new Vector3d();
+      RotationMatrix rotation = new RotationMatrix();
+      Vector3D translation = new Vector3D();
       transform.get(rotation, translation);
 
       translate(translation);
@@ -197,7 +198,7 @@ public class Graphics3DObject
     *
     * @param translation Tuple3d representing the translation.
     */
-   public void translate(Tuple3d translation)
+   public void translate(Tuple3DReadOnly translation)
    {
       graphics3DInstructions.add(new Graphics3DTranslateInstruction(translation));
    }
@@ -215,14 +216,14 @@ public class Graphics3DObject
 
    public void rotate(double rotationAngle, Axis rotationAxis)
    {
-      Matrix3d rot = new Matrix3d();
+      RotationMatrix rot = new RotationMatrix();
 
       if (rotationAxis == Axis.X)
-         rot.rotX(rotationAngle);
+         rot.setToRollMatrix(rotationAngle);
       else if (rotationAxis == Axis.Y)
-         rot.rotY(rotationAngle);
+         rot.setToPitchMatrix(rotationAngle);
       else if (rotationAxis == Axis.Z)
-         rot.rotZ(rotationAngle);
+         rot.setToYawMatrix(rotationAngle);
 
       rotate(rot);
    }
@@ -237,9 +238,9 @@ public class Graphics3DObject
     * @param rotationAngle the angle to rotate around the specified axis in radians.
     * @param rotationAxis Vector3d describing the axis of rotation.
     */
-   public void rotate(double rotationAngle, Vector3d rotationAxis)
+   public void rotate(double rotationAngle, Vector3D rotationAxis)
    {
-      AxisAngle4d rotationAxisAngle = new AxisAngle4d(rotationAxis, rotationAngle);
+      AxisAngle rotationAxisAngle = new AxisAngle(rotationAxis, rotationAngle);
 
       rotate(rotationAxisAngle);
    }
@@ -253,14 +254,14 @@ public class Graphics3DObject
     *
     * @param rotationMatrix Matrix3d describing the rotation to be applied.
     */
-   public void rotate(Matrix3d rotationMatrix)
+   public void rotate(RotationMatrix rotationMatrix)
    {
       graphics3DInstructions.add(new Graphics3DRotateInstruction(rotationMatrix));
    }
 
-   public void rotate(AxisAngle4d rotationAxisAngle)
+   public void rotate(AxisAngle rotationAxisAngle)
    {
-      Matrix3d rotation = new Matrix3d();
+      RotationMatrix rotation = new RotationMatrix();
       rotation.set(rotationAxisAngle);
       rotate(rotation);
    }
@@ -276,7 +277,7 @@ public class Graphics3DObject
     */
    public Graphics3DScaleInstruction scale(double scaleFactor)
    {
-      return scale(new Vector3d(scaleFactor, scaleFactor, scaleFactor));
+      return scale(new Vector3D(scaleFactor, scaleFactor, scaleFactor));
    }
 
    /**
@@ -288,7 +289,7 @@ public class Graphics3DObject
     * @param scaleFactors Vector3d describing the scaling factors in each dimension.
     * @return
     */
-   public Graphics3DScaleInstruction scale(Vector3d scaleFactors)
+   public Graphics3DScaleInstruction scale(Vector3D scaleFactors)
    {
       Graphics3DScaleInstruction graphics3DScale = new Graphics3DScaleInstruction(scaleFactors);
       graphics3DInstructions.add(graphics3DScale);
@@ -308,7 +309,7 @@ public class Graphics3DObject
     */
    public void preScale(double scaleFactor)
    {
-      preScale(new Vector3d(scaleFactor, scaleFactor, scaleFactor));
+      preScale(new Vector3D(scaleFactor, scaleFactor, scaleFactor));
    }
 
    /**
@@ -319,7 +320,7 @@ public class Graphics3DObject
     * @param scaleFactors Vector3d describing the scaling factors in each dimension
     * @return
     */
-   public void preScale(Vector3d scaleFactors)
+   public void preScale(Vector3D scaleFactors)
    {
 
 
@@ -692,7 +693,7 @@ public class Graphics3DObject
    {
       if (meshData == null)
       {
-         meshData = new MeshDataHolder(new Point3f[0], new TexCoord2f[0], new int[0], new Vector3f[0]);
+         meshData = new MeshDataHolder(new Point3D32[0], new TexCoord2f[0], new int[0], new Vector3D32[0]);
          meshData.setName("nullMesh");
       }
       Graphics3DAddMeshDataInstruction instruction = new Graphics3DAddMeshDataInstruction(meshData, meshAppearance);
@@ -1041,7 +1042,7 @@ public class Graphics3DObject
       return pyradmidCubeInstruction;
    }
 
-   public PolygonGraphics3DInstruction addPolygon(ArrayList<Point3d> polygonPoints)
+   public PolygonGraphics3DInstruction addPolygon(ArrayList<Point3D> polygonPoints)
    {
       return addPolygon(polygonPoints, DEFAULT_APPEARANCE);
    }
@@ -1055,7 +1056,7 @@ public class Graphics3DObject
     * @param polygonPoints ArrayList containing the points.
     * @param yoAppearance Appearance to be used with the new polygon.  See {@link YoAppearance YoAppearance} for implementations.
     */
-   public PolygonGraphics3DInstruction addPolygon(ArrayList<Point3d> polygonPoints, AppearanceDefinition yoAppearance)
+   public PolygonGraphics3DInstruction addPolygon(ArrayList<Point3D> polygonPoints, AppearanceDefinition yoAppearance)
    {
       PolygonGraphics3DInstruction graphicsInstruction = new PolygonGraphics3DInstruction(polygonPoints);
       graphicsInstruction.setAppearance(yoAppearance);
@@ -1072,13 +1073,13 @@ public class Graphics3DObject
     */
    public PolygonGraphics3DInstruction addPolygon(ConvexPolygon2d convexPolygon2d, AppearanceDefinition yoAppearance)
    {
-      ArrayList<Point3d> polygonPoints = new ArrayList<Point3d>();
+      ArrayList<Point3D> polygonPoints = new ArrayList<Point3D>();
       int numPoints = convexPolygon2d.getNumberOfVertices();
 
       for (int i = 0; i < numPoints; i++)
       {
-         Point2d planarPoint = convexPolygon2d.getVertex(i);
-         polygonPoints.add(new Point3d(planarPoint.getX(), planarPoint.getY(), 0.0));
+         Point2DReadOnly planarPoint = convexPolygon2d.getVertex(i);
+         polygonPoints.add(new Point3D(planarPoint.getX(), planarPoint.getY(), 0.0));
       }
 
       return addPolygon(polygonPoints, yoAppearance);
@@ -1154,9 +1155,9 @@ public class Graphics3DObject
     * inserting points will produce unpredictable results, clockwise direction determines the
     * side that is drawn.
     *
-    * @param polygonPoint Array containing Point3d's to be used when generating the shape.
+    * @param polygonPoint Array containing Point3D's to be used when generating the shape.
     */
-   public Graphics3DAddMeshDataInstruction addPolygon(Point3d[] polygonPoint)
+   public Graphics3DAddMeshDataInstruction addPolygon(Point3D[] polygonPoint)
    {
       return addPolygon(polygonPoint, DEFAULT_APPEARANCE);
    }
@@ -1170,14 +1171,14 @@ public class Graphics3DObject
     * @param polygonPoints Array containing the points
     * @param yoAppearance Appearance to be used with the new polygon.  See {@link AppearanceDefinition} for implementations.
     */
-   public Graphics3DAddMeshDataInstruction addPolygon(Point3d[] polygonPoints, AppearanceDefinition yoAppearance)
+   public Graphics3DAddMeshDataInstruction addPolygon(Point3D[] polygonPoints, AppearanceDefinition yoAppearance)
    {
       MeshDataHolder meshData = MeshDataGenerator.Polygon(polygonPoints);
 
       return addMeshData(meshData, yoAppearance);
    }
 
-   public Graphics3DAddMeshDataInstruction addPolygon(AppearanceDefinition yoAppearance, Point3d... polygonPoints)
+   public Graphics3DAddMeshDataInstruction addPolygon(AppearanceDefinition yoAppearance, Point3D... polygonPoints)
    {
       return addPolygon(polygonPoints, yoAppearance);
    }
@@ -1189,7 +1190,7 @@ public class Graphics3DObject
 
    public ExtrudedPolygonGraphics3DInstruction addExtrudedPolygon(ConvexPolygon2d convexPolygon2d, double height, AppearanceDefinition appearance)
    {
-      ArrayList<Point2d> polygonPoints = new ArrayList<Point2d>();
+      ArrayList<Point2DReadOnly> polygonPoints = new ArrayList<>();
       for (int i = 0; i < convexPolygon2d.getNumberOfVertices(); i++)
       {
          polygonPoints.add(convexPolygon2d.getVertex(i));
@@ -1201,12 +1202,12 @@ public class Graphics3DObject
       return extrudedPolygonInstruction;
    }
 
-   public ExtrudedPolygonGraphics3DInstruction addExtrudedPolygon(List<Point2d> polygonPoints, double height)
+   public ExtrudedPolygonGraphics3DInstruction addExtrudedPolygon(List<Point2D> polygonPoints, double height)
    {
       return addExtrudedPolygon(polygonPoints, height, DEFAULT_APPEARANCE);
    }
 
-   public ExtrudedPolygonGraphics3DInstruction addExtrudedPolygon(List<Point2d> polygonPoints, double height, AppearanceDefinition appearance)
+   public ExtrudedPolygonGraphics3DInstruction addExtrudedPolygon(List<Point2D> polygonPoints, double height, AppearanceDefinition appearance)
    {
       ExtrudedPolygonGraphics3DInstruction graphicsInstruction = new ExtrudedPolygonGraphics3DInstruction(polygonPoints, height);
       graphicsInstruction.setAppearance(appearance);
@@ -1238,10 +1239,10 @@ public class Graphics3DObject
       return instruction;
    }
 
-   public void createInertiaEllipsoid(Matrix3d momentOfInertia, Vector3d comOffset, double mass, AppearanceDefinition appearance)
+   public void createInertiaEllipsoid(Matrix3D momentOfInertia, Vector3D comOffset, double mass, AppearanceDefinition appearance)
    {
-      Vector3d principalMomentsOfInertia = new Vector3d(momentOfInertia.getM00(), momentOfInertia.getM11(), momentOfInertia.getM22());
-      Vector3d ellipsoidRadii = InertiaTools.getInertiaEllipsoidRadii(principalMomentsOfInertia, mass);
+      Vector3D principalMomentsOfInertia = new Vector3D(momentOfInertia.getM00(), momentOfInertia.getM11(), momentOfInertia.getM22());
+      Vector3D ellipsoidRadii = InertiaTools.getInertiaEllipsoidRadii(principalMomentsOfInertia, mass);
 
       this.translate(comOffset);
       this.addEllipsoid(ellipsoidRadii.getX(), ellipsoidRadii.getY(), ellipsoidRadii.getZ(), appearance);
@@ -1261,8 +1262,8 @@ public class Graphics3DObject
       return instruction;
    }
 
-   public void notifySelectedListeners(Graphics3DNode graphics3dNode, ModifierKeyInterface modifierKeyHolder, Point3d location, Point3d cameraPosition,
-         Quat4d cameraRotation)
+   public void notifySelectedListeners(Graphics3DNode graphics3dNode, ModifierKeyInterface modifierKeyHolder, Point3DReadOnly location, Point3DReadOnly cameraPosition,
+         QuaternionReadOnly cameraRotation)
    {
       if (selectedListeners != null)
       {

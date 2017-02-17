@@ -13,6 +13,7 @@ import javax.swing.JLabel;
 import javax.swing.JToggleButton;
 
 import gnu.trove.map.hash.TObjectDoubleHashMap;
+import us.ihmc.commons.Conversions;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphic;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -24,7 +25,6 @@ import us.ihmc.robotDataLogger.YoVariablesUpdatedListener;
 import us.ihmc.robotDataLogger.jointState.JointState;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
-import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.simulationconstructionset.DataBuffer;
 import us.ihmc.simulationconstructionset.ExitActionListener;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
@@ -86,7 +86,7 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
    @Override
    public void receivedTimestampAndData(long timestamp, ByteBuffer buffer)
    {
-      long delay = TimeTools.nanoSecondsToMillis(lastTimestamp - timestamp);
+      long delay = Conversions.nanoSecondsToMillis(lastTimestamp - timestamp);
       delayValue.setText(delayFormat.format(delay));
 
       if (recording)
@@ -95,7 +95,7 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
          {
             jointUpdaters.get(i).update();
          }
-         scs.setTime(TimeTools.nanoSecondstoSeconds(timestamp));
+         scs.setTime(Conversions.nanoSecondstoSeconds(timestamp));
          scs.tickAndUpdate();
       }
    }

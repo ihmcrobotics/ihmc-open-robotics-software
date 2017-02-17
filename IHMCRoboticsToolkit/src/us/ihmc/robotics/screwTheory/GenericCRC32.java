@@ -6,11 +6,11 @@ import java.nio.IntBuffer;
 import java.nio.LongBuffer;
 import java.util.zip.CRC32;
 
-import javax.vecmath.Tuple2d;
-import javax.vecmath.Tuple3d;
-import javax.vecmath.Tuple4d;
-
 import org.ejml.data.DenseMatrix64F;
+
+import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
+import us.ihmc.euclid.tuple4D.interfaces.Tuple4DReadOnly;
 
 
 
@@ -42,22 +42,22 @@ public class GenericCRC32 extends CRC32
       update(byteArray);
    }
    
-   public void update(Tuple2d value)
+   public void update(Tuple2DReadOnly value)
    {
       update(value.getX());
       update(value.getY());
    }
    
-   public void update(Tuple3d value)
+   public void update(Tuple3DReadOnly value)
    {
       update(value.getX());
       update(value.getY());
       update(value.getZ());
    }
    
-   public void update(Tuple4d value)
+   public void update(Tuple4DReadOnly value)
    {
-      update(value.getW());
+      update(value.getS());
       update(value.getX());
       update(value.getY());
       update(value.getZ());

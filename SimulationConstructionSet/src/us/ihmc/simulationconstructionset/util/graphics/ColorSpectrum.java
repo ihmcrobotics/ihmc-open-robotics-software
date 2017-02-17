@@ -2,11 +2,10 @@ package us.ihmc.simulationconstructionset.util.graphics;
 
 import java.awt.Color;
 
-import javax.vecmath.Color3f;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
+import us.ihmc.robotics.dataStructures.MutableColor;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
@@ -473,8 +472,8 @@ public class ColorSpectrum
       
       
       Graphics3DObject linkGraphics = new Graphics3DObject();
-      linkGraphics.translate(new Vector3d(cubeX, cubeY ,CUBE_HEIGHT));
-      linkGraphics.addCube(cubeSize, cubeSize, cubeSize, new YoAppearanceRGBColor(new Color3f(color), 0.0));
+      linkGraphics.translate(new Vector3D(cubeX, cubeY ,CUBE_HEIGHT));
+      linkGraphics.addCube(cubeSize, cubeSize, cubeSize, new YoAppearanceRGBColor(new MutableColor(color), 0.0));
       
       scs.addStaticLinkGraphics(linkGraphics);
    }

@@ -3,9 +3,8 @@ package us.ihmc.commonWalkingControlModules.bipedSupportPolygons;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.vecmath.Point2d;
-
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -144,7 +143,7 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
       return contactPoints;
    }
 
-   public void setContactPoints(List<Point2d> contactPointLocations)
+   public void setContactPoints(List<Point2D> contactPointLocations)
    {
       int contactPointLocationsSize = contactPointLocations.size();
 
@@ -153,7 +152,7 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
 
       for (int i = 0; i < contactPointLocationsSize; i++)
       {
-         Point2d contactPointLocation = contactPointLocations.get(i);
+         Point2D contactPointLocation = contactPointLocations.get(i);
          YoContactPoint yoContactPoint = contactPoints.get(i);
 
          yoContactPoint.setPosition2d(contactPointLocation);

@@ -1,19 +1,19 @@
 package us.ihmc.ihmcPerception.camera;
 
-import geometry_msgs.Transform;
 import org.ros.message.Time;
+
+import geometry_msgs.Transform;
 import transform_provider.TransformProvider;
 import transform_provider.TransformProviderRequest;
 import transform_provider.TransformProviderResponse;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorParameters;
 import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.RosServiceClient;
-
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
 
 public class ROSHeadTransformFrame extends ReferenceFrame implements Runnable
 {
@@ -45,8 +45,8 @@ public class ROSHeadTransformFrame extends ReferenceFrame implements Runnable
          response = client.call(request);
       }
       Transform transform = response.getTransform().getTransform();
-      Vector3d translation = new Vector3d(transform.getTranslation().getX(), transform.getTranslation().getY(), transform.getTranslation().getZ());
-      Quat4d rotation = new Quat4d(transform.getRotation().getX(), transform.getRotation().getY(), transform.getRotation().getZ(), transform.getRotation()
+      Vector3D translation = new Vector3D(transform.getTranslation().getX(), transform.getTranslation().getY(), transform.getTranslation().getZ());
+      Quaternion rotation = new Quaternion(transform.getRotation().getX(), transform.getRotation().getY(), transform.getRotation().getZ(), transform.getRotation()
             .getW());
 
       synchronized (headToCameraTransform)

@@ -4,14 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import javax.vecmath.Vector3d;
-
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolderReadOnly;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.GoHomeCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.JointspaceTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SE3TrajectoryControllerCommand;
@@ -109,7 +108,7 @@ public class RigidBodyManager
       }
    }
 
-   public void setWeights(double jointspaceWeight, Vector3d taskspaceAngularWeight, Vector3d taskspaceLinearWeight, double userModeWeight)
+   public void setWeights(double jointspaceWeight, Vector3D taskspaceAngularWeight, Vector3D taskspaceLinearWeight, double userModeWeight)
    {
       jointspaceControlState.setWeight(jointspaceWeight);
       taskspaceControlState.setWeights(taskspaceAngularWeight, taskspaceLinearWeight);

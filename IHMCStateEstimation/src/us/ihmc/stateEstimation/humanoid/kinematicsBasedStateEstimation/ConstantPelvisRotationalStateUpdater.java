@@ -1,7 +1,6 @@
 package us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation;
 
-import javax.vecmath.Quat4d;
-
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -44,7 +43,7 @@ public class ConstantPelvisRotationalStateUpdater implements PelvisRotationalSta
       updateRootJointOrientationAndAngularVelocity();
    }
 
-   private final Quat4d rootJointOrientation = new Quat4d();
+   private final Quaternion rootJointOrientation = new Quaternion();
    private final Twist twistRootBodyRelativeToWorld = new Twist();
 
    @Override

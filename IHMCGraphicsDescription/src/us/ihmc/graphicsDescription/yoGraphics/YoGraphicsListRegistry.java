@@ -3,10 +3,10 @@ package us.ihmc.graphicsDescription.yoGraphics;
 import java.util.ArrayList;
 import java.util.List;
 
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.plotting.artifact.Artifact;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.PlotterInterface;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.tools.gui.GraphicsUpdatable;
 
 public class YoGraphicsListRegistry
@@ -358,7 +358,8 @@ public class YoGraphicsListRegistry
    private void updateRootTransform()
    {
            
-      rootTransform.multiply(simulatedRootToWorldTransform, controllerWorldToRootTransform);
+      rootTransform.set(simulatedRootToWorldTransform);
+      rootTransform.multiply(controllerWorldToRootTransform);
       
       for(int i = 0; i < yoGraphicsLists.size(); i++)
       {
@@ -391,7 +392,7 @@ public class YoGraphicsListRegistry
     */
    public void setControllerTransformToWorld(RigidBodyTransform transformToWorld)
    {
-      this.controllerWorldToRootTransform.invert(transformToWorld);
+      this.controllerWorldToRootTransform.setAndInvert(transformToWorld);
       if(updateInSimulationThread)
       {
          updateRootTransform();

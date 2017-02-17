@@ -1,8 +1,7 @@
 package us.ihmc.sensorProcessing.simulatedSensors;
 
-import us.ihmc.sensorProcessing.sensorProcessors.SensorRawOutputMapReadOnly;
-import us.ihmc.sensorProcessing.communication.packets.dataobjects.AuxiliaryRobotData;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
+import us.ihmc.sensorProcessing.sensorProcessors.SensorRawOutputMapReadOnly;
 
 public interface SensorReader extends AuxiliaryRobotDataProvider
 {

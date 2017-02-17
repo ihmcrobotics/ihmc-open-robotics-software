@@ -1,10 +1,11 @@
 package us.ihmc.robotics.geometry;
 
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.Transform;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-
-import javax.vecmath.Point2d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
 
 public class FramePose2d extends AbstractReferenceFrameHolder implements FrameObject<FramePose2d>
 {
@@ -37,7 +38,7 @@ public class FramePose2d extends AbstractReferenceFrameHolder implements FrameOb
       this.referenceFrame = position.getReferenceFrame();
    }
 
-   public FramePose2d(ReferenceFrame referenceFrame, Point2d position, double orientation)
+   public FramePose2d(ReferenceFrame referenceFrame, Point2DReadOnly position, double orientation)
    {
       this.position = new FramePoint2d(referenceFrame, position);
       this.orientation = new FrameOrientation2d(referenceFrame, orientation);
@@ -60,7 +61,7 @@ public class FramePose2d extends AbstractReferenceFrameHolder implements FrameOb
    public void getPose(RigidBodyTransform transformToPack)
    {
       orientation.getTransform3D(transformToPack);
-      transformToPack.setTranslation(new Vector3d(position.getX(), position.getY(), 0.0));
+      transformToPack.setTranslation(new Vector3D(position.getX(), position.getY(), 0.0));
    }
 
    public void set(FramePose2d pose)
@@ -86,15 +87,15 @@ public class FramePose2d extends AbstractReferenceFrameHolder implements FrameOb
       this.position.set(position);
    }
 
-   private final Vector3d tempVector = new Vector3d();
-   private final Quat4d tempQuat = new Quat4d();
+   private final Vector3D tempVector = new Vector3D();
+   private final Quaternion tempQuat = new Quaternion();
    
    public void setPose(RigidBodyTransform transformToWorld)
    {
       transformToWorld.getTranslation(tempVector);
       transformToWorld.getRotation(tempQuat);
 
-      setPoseIncludingFrame(ReferenceFrame.getWorldFrame(), tempVector.getX(), tempVector.getY(), RotationTools.computeYaw(tempQuat));
+      setPoseIncludingFrame(ReferenceFrame.getWorldFrame(), tempVector.getX(), tempVector.getY(), tempQuat.getYaw());
    }
    
    public void setPoseIncludingFrame(ReferenceFrame referenceFrame, double x, double y, double yaw)
@@ -162,7 +163,7 @@ public class FramePose2d extends AbstractReferenceFrameHolder implements FrameOb
    }
    
    @Override
-   public void changeFrameUsingTransform(ReferenceFrame desiredFrame, RigidBodyTransform transformToNewFrame)
+   public void changeFrameUsingTransform(ReferenceFrame desiredFrame, Transform transformToNewFrame)
    {
       position.changeFrameUsingTransform(desiredFrame, transformToNewFrame);
       orientation.changeFrameUsingTransform(desiredFrame, transformToNewFrame);
@@ -171,7 +172,7 @@ public class FramePose2d extends AbstractReferenceFrameHolder implements FrameOb
    }
 
    @Override
-   public void applyTransform(RigidBodyTransform transform)
+   public void applyTransform(Transform transform)
    {
       position.applyTransform(transform);
       orientation.applyTransform(transform);

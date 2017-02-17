@@ -18,6 +18,8 @@
 
 package us.ihmc.sensorProcessing.bubo.clouds.fit.s2s.general;
 
+import java.util.List;
+
 import georegression.fitting.se.MotionSe2PointSVD_F64;
 import georegression.metric.UtilAngle;
 import georegression.struct.point.Point2D_F64;
@@ -27,8 +29,6 @@ import us.ihmc.sensorProcessing.bubo.clouds.fit.Lrf2dScanToScan;
 import us.ihmc.sensorProcessing.bubo.desc.sensors.lrf2d.Lrf2dParam;
 import us.ihmc.sensorProcessing.bubo.desc.sensors.lrf2d.Lrf2dPrecomputedTrig;
 import us.ihmc.sensorProcessing.bubo.struct.StoppingCondition;
-
-import java.util.List;
 
 
 /**

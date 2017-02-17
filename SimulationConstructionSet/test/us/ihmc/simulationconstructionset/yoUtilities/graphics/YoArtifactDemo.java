@@ -2,8 +2,7 @@ package us.ihmc.simulationconstructionset.yoUtilities.graphics;
 
 import java.awt.Color;
 
-import javax.vecmath.Point2d;
-
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.graphicsDescription.plotting.artifact.LineArtifact;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactLine2d;
@@ -92,9 +91,9 @@ public class YoArtifactDemo
       point13.set(-0.2, 3.0);
       
       
-      plotter.addArtifact(new LineArtifact("01", new Point2d(0, 0), new Point2d(1, 1)));
-      plotter.addArtifact(new LineArtifact("02", new Point2d(1, 1), new Point2d(2, 0)));
-      plotter.addArtifact(new LineArtifact("03", new Point2d(2, 0), new Point2d(3, 1)));
+      plotter.addArtifact(new LineArtifact("01", new Point2D(0, 0), new Point2D(1, 1)));
+      plotter.addArtifact(new LineArtifact("02", new Point2D(1, 1), new Point2D(2, 0)));
+      plotter.addArtifact(new LineArtifact("03", new Point2D(2, 0), new Point2D(3, 1)));
       plotter.addArtifact(new YoArtifactOval("circle", center, radii, Color.RED));
       plotter.addArtifact(new YoArtifactLineSegment2d("lineSegment1", lineSegment, Color.DARK_GRAY, 0.1, 0.1));
       plotter.addArtifact(new YoArtifactLine2d("line1", line, Color.GREEN));

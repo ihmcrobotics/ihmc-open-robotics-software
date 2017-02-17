@@ -2,11 +2,11 @@ package us.ihmc.robotics.geometry;
 
 import static org.junit.Assert.assertTrue;
 
-import javax.vecmath.Vector3d;
-
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.Axis;
 import us.ihmc.tools.testing.MutationTestingTools;
 
@@ -35,7 +35,7 @@ public class RigidBodyTransformGeneratorTest
       assertTrue(transform.epsilonEquals(expectedTransform, 1e-10));
 
       generator.identity();
-      generator.translate(new Vector3d(-3.0, 9.0, 11.0));
+      generator.translate(new Vector3D(-3.0, 9.0, 11.0));
       expectedTransform = new RigidBodyTransform();
       expectedTransform.setTranslation(-3.0, 9.0, 11.0);
       generator.getRigidyBodyTransform(transform);
@@ -76,7 +76,7 @@ public class RigidBodyTransformGeneratorTest
       RigidBodyTransformGenerator generator = new RigidBodyTransformGenerator();
 
       generator.translate(3.3, 4.4, 5.5);
-      generator.rotateEuler(new Vector3d(0.67, 0.89, 0.34));
+      generator.rotateEuler(new Vector3D(0.67, 0.89, 0.34));
       RigidBodyTransform expectedTransform = new RigidBodyTransform();
       expectedTransform.setRotationEulerAndZeroTranslation(0.67, 0.89, 0.34);
       expectedTransform.setTranslation(3.3, 4.4, 5.5);
@@ -113,14 +113,14 @@ public class RigidBodyTransformGeneratorTest
       assertTrue(transform.epsilonEquals(expectedTransform, 1e-10));
 
       generator.identity();
-      generator.translateThenRotateEuler(new Vector3d(1.0, 0.0, 0.0), new Vector3d(0.0, -Math.PI / 2.0, 0.0));
+      generator.translateThenRotateEuler(new Vector3D(1.0, 0.0, 0.0), new Vector3D(0.0, -Math.PI / 2.0, 0.0));
 
-      Transform3d translateThenRotate = new Transform3d();
-      translateThenRotate.setRotationEulerAndZeroTranslation(0.0, -0.0, Math.PI / 2.0);
+      RigidBodyTransform translateThenRotate = new RigidBodyTransform();
+      translateThenRotate.setRotationEuler(0.0, -0.0, Math.PI / 2.0);
       translateThenRotate.setTranslation(2.0, 0.0, 0.0);
       generator.translateThenRotate(translateThenRotate);
 
-      generator.translateThenRotateEuler(new Vector3d(3.0, 0.0, 0.0), new Vector3d(0.0, 0.0, 0.0));
+      generator.translateThenRotateEuler(new Vector3D(3.0, 0.0, 0.0), new Vector3D(0.0, 0.0, 0.0));
       transform = generator.getRigidBodyTransformCopy();
       assertTrue(transform.epsilonEquals(expectedTransform, 1e-10));
 

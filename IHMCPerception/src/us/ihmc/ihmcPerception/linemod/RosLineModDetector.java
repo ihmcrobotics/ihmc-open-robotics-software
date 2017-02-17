@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 import javax.swing.JFrame;
-import javax.vecmath.Point3d;
+import us.ihmc.euclid.tuple3D.Point3D;
 
 import boofcv.gui.image.ImagePanel;
 import boofcv.gui.image.ShowImages;
@@ -84,7 +84,7 @@ public class RosLineModDetector extends LineModDetector
             if (cloud.getWidth() > 1200)
             {
                int ptr = 0;
-               Point3d[] points = new Point3d[(cloud.getWidth() / 2) * (cloud.getHeight() / 2)];
+               Point3D[] points = new Point3D[(cloud.getWidth() / 2) * (cloud.getHeight() / 2)];
                Color[] pointColors = new Color[(cloud.getWidth() / 2) * (cloud.getHeight() / 2)];
                for (int j = 0; j < cloud.getHeight(); j += 2)
                   for (int i = 0; i < cloud.getWidth(); i += 2)

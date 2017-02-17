@@ -2,8 +2,7 @@ package us.ihmc.exampleSimulations.collidingArms;
 
 import java.util.ArrayList;
 
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.exampleSimulations.newtonsCradle.GroundAsABoxRobot;
 import us.ihmc.exampleSimulations.newtonsCradle.PileOfRandomObjectsRobot;
 import us.ihmc.graphicsDescription.Graphics3DObject;
@@ -23,8 +22,8 @@ public class CollidingArmsSimulation
    {
       double dt = 0.001;
 
-      Vector3d offsetOne = new Vector3d(-0.8, 0.0, 0.0);
-      Vector3d offsetTwo = new Vector3d(0.8, 0.0, 0.0);
+      Vector3D offsetOne = new Vector3D(-0.8, 0.0, 0.0);
+      Vector3D offsetTwo = new Vector3D(0.8, 0.0, 0.0);
 
       CollidingArmRobotDescription armOneDescription = new CollidingArmRobotDescription("ArmOne", offsetOne);
       CollidingArmRobotDescription armTwoDescription = new CollidingArmRobotDescription("ArmTwo", offsetTwo);
@@ -89,7 +88,8 @@ public class CollidingArmsSimulation
          scs.addRobot(robot);
       }
 
-      Robot groundRobot = new GroundAsABoxRobot(false, nextGroupBitMask, 0xff);
+      int estimatedNumberOfContactPoints = 100;
+      Robot groundRobot = new GroundAsABoxRobot(estimatedNumberOfContactPoints , false, nextGroupBitMask, 0xff);
       scs.addRobot(groundRobot);
 
       scs.setGroundVisible(false);

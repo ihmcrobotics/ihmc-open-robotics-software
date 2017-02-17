@@ -1,19 +1,18 @@
 package us.ihmc.robotics.referenceFrames;
 
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Vector3d;
 
 public class PointXAxisAtPositionFrame extends ReferenceFrame
 {
    private static final long serialVersionUID = -3583775854419464525L;
    private final FramePoint positionToPointAt;
-   private final Vector3d xAxis = new Vector3d();
-   private final Vector3d yAxis = new Vector3d();
-   private final Vector3d zAxis = new Vector3d(0.0, 0.0, 1.0);
-   private final Matrix3d rotationMatrix = new Matrix3d();
+   private final Vector3D xAxis = new Vector3D();
+   private final Vector3D yAxis = new Vector3D();
+   private final Vector3D zAxis = new Vector3D(0.0, 0.0, 1.0);
+   private final RotationMatrix rotationMatrix = new RotationMatrix();
 
    public PointXAxisAtPositionFrame(String name, ReferenceFrame originFrame)
    {
@@ -35,9 +34,7 @@ public class PointXAxisAtPositionFrame extends ReferenceFrame
       xAxis.normalize();
       yAxis.cross(zAxis, xAxis);
 
-      rotationMatrix.setColumn(0, xAxis);
-      rotationMatrix.setColumn(1, yAxis);
-      rotationMatrix.setColumn(2, zAxis);
+      rotationMatrix.setColumns(xAxis, yAxis, zAxis);
       transformToParent.setRotation(rotationMatrix);
    }
 }

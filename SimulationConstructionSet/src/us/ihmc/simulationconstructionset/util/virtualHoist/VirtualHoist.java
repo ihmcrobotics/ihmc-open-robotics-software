@@ -3,18 +3,17 @@ package us.ihmc.simulationconstructionset.util.virtualHoist;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
-import us.ihmc.simulationconstructionset.ExternalForcePoint;
-import us.ihmc.simulationconstructionset.Joint;
-import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotController.RobotController;
+import us.ihmc.simulationconstructionset.ExternalForcePoint;
+import us.ihmc.simulationconstructionset.Joint;
+import us.ihmc.simulationconstructionset.Robot;
 
 public class VirtualHoist implements RobotController
 {
@@ -42,13 +41,13 @@ public class VirtualHoist implements RobotController
 
    private final double updateDT;
 
-   public VirtualHoist(Joint jointToAttachHoist, Robot robot, ArrayList<Vector3d> hoistPointPositions, double updateDT)
+   public VirtualHoist(Joint jointToAttachHoist, Robot robot, ArrayList<Vector3D> hoistPointPositions, double updateDT)
    {
       this.updateDT = updateDT;
 
       for (int i = 0; i < hoistPointPositions.size(); i++)
       {
-         Vector3d hoistPointPosition = hoistPointPositions.get(i);
+         Vector3D hoistPointPosition = hoistPointPositions.get(i);
          ExternalForcePoint externalForcePoint = new ExternalForcePoint("ef_hoist" + i, hoistPointPosition, robot.getRobotsYoVariableRegistry());
          externalForcePoints.add(externalForcePoint);
          jointToAttachHoist.addExternalForcePoint(externalForcePoint);
@@ -76,7 +75,7 @@ public class VirtualHoist implements RobotController
       teepeeLocation.set(0.0, 0.0, 1.25);
    }
 
-   public void setTeepeeLocation(Point3d teepeeLocation)
+   public void setTeepeeLocation(Point3D teepeeLocation)
    {
       this.teepeeLocation.set(teepeeLocation);
    }
@@ -128,7 +127,7 @@ public class VirtualHoist implements RobotController
 
    public void putHoistOverRobot()
    {
-      setTeepeeLocation(new Point3d(q_x.getDoubleValue(), q_y.getDoubleValue(), q_z.getDoubleValue() + 0.5));
+      setTeepeeLocation(new Point3D(q_x.getDoubleValue(), q_y.getDoubleValue(), q_z.getDoubleValue() + 0.5));
    }
 
    public double getHoistHeight()
@@ -161,10 +160,10 @@ public class VirtualHoist implements RobotController
          teepeeLocation.getYoZ().sub(hoistUpDownSpeed.getDoubleValue() * updateDT);
       }
 
-      Point3d teepeePosition = teepeeLocation.getPoint3dCopy();
-      Point3d pointPosition = new Point3d();
-      Vector3d forceVector = new Vector3d();
-      Vector3d velocityVector = new Vector3d();
+      Point3D teepeePosition = teepeeLocation.getPoint3dCopy();
+      Point3D pointPosition = new Point3D();
+      Vector3D forceVector = new Vector3D();
+      Vector3D velocityVector = new Vector3D();
 
       for (int i = 0; i < externalForcePoints.size(); i++)
       {

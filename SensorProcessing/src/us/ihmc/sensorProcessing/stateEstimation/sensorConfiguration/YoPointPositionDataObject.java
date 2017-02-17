@@ -1,6 +1,6 @@
 package us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration;
 
-import javax.vecmath.Point3d;
+import us.ihmc.euclid.tuple3D.Point3D;
 
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -44,14 +44,14 @@ public class YoPointPositionDataObject extends PointPositionDataObject
    }
 
    @Override
-   public Point3d getMeasurementPointInWorldFrame()
+   public Point3D getMeasurementPointInWorldFrame()
    {
       yoMeasurementPointInWorldFrame.get(positionOfMeasurementPointInWorldFrame);
       return super.getMeasurementPointInWorldFrame();
    }
 
    @Override
-   public Point3d getMeasurementPointInBodyFrame()
+   public Point3D getMeasurementPointInBodyFrame()
    {
       yoMeasurementPointInBodyFrame.get(measurementPointInBodyFrame);
       return super.getMeasurementPointInBodyFrame();

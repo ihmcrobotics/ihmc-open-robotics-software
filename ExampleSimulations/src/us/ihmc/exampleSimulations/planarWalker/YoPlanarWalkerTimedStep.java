@@ -1,15 +1,9 @@
 package us.ihmc.exampleSimulations.planarWalker;
 
-import javax.vecmath.Point3d;
-
 import us.ihmc.quadrupedRobotics.util.TimeInterval;
 import us.ihmc.quadrupedRobotics.util.YoTimeInterval;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class YoPlanarWalkerTimedStep extends PlanarWalkerTimedStep

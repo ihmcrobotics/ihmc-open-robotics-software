@@ -5,8 +5,6 @@ import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.vecmath.Vector3d;
-
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -22,6 +20,7 @@ import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimiza
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage.BaseForControl;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
@@ -101,8 +100,8 @@ public class HighLevelControlManagerFactory
          return null;
 
       balanceManager = new BalanceManager(momentumBasedController, walkingControllerParameters, capturePointPlannerParameters, icpOptimizationParameters, registry);
-      Vector3d linearMomentumWeight = momentumOptimizationSettings.getLinearMomentumWeight();
-      Vector3d angularMomentumWeight = momentumOptimizationSettings.getAngularMomentumWeight();
+      Vector3D linearMomentumWeight = momentumOptimizationSettings.getLinearMomentumWeight();
+      Vector3D angularMomentumWeight = momentumOptimizationSettings.getAngularMomentumWeight();
       balanceManager.setMomentumWeight(angularMomentumWeight, linearMomentumWeight);
       balanceManager.setHighMomentumWeightForRecovery(momentumOptimizationSettings.getHighLinearMomentumWeightForRecovery());
       return balanceManager;
@@ -172,8 +171,8 @@ public class HighLevelControlManagerFactory
 
       RigidBodyManager manager = new RigidBodyManager(bodyToControl, rootBody, momentumBasedController, walkingControllerParameters, controlFrameMap, rootFrame, registry);
       double spineJointspaceWeight = momentumOptimizationSettings.getSpineJointspaceWeight();
-      Vector3d chestAngularWeight = momentumOptimizationSettings.getChestAngularWeight();
-      Vector3d chestLinearWeight = null;
+      Vector3D chestAngularWeight = momentumOptimizationSettings.getChestAngularWeight();
+      Vector3D chestLinearWeight = null;
       double chestUserModeWeight = momentumOptimizationSettings.getHeadUserModeWeight();
       manager.setWeights(spineJointspaceWeight, chestAngularWeight, chestLinearWeight, chestUserModeWeight);
 
@@ -215,8 +214,8 @@ public class HighLevelControlManagerFactory
 
       manipulationControlModule = new ManipulationControlModule(armControllerParameters, momentumBasedController, registry);
       double handJointspaceWeight = momentumOptimizationSettings.getHandJointspaceWeight();
-      Vector3d handAngularTaskspaceWeight = momentumOptimizationSettings.getHandAngularTaskspaceWeight();
-      Vector3d handLinearTaskspaceWeight = momentumOptimizationSettings.getHandLinearTaskspaceWeight();
+      Vector3D handAngularTaskspaceWeight = momentumOptimizationSettings.getHandAngularTaskspaceWeight();
+      Vector3D handLinearTaskspaceWeight = momentumOptimizationSettings.getHandLinearTaskspaceWeight();
       double handUserModeWeight = momentumOptimizationSettings.getHandUserModeWeight();
       manipulationControlModule.setWeights(handJointspaceWeight, handAngularTaskspaceWeight, handLinearTaskspaceWeight, handUserModeWeight);
       return manipulationControlModule;
@@ -235,10 +234,10 @@ public class HighLevelControlManagerFactory
          return null;
 
       feetManager = new FeetManager(momentumBasedController, walkingControllerParameters, registry);
-      Vector3d highLinearFootWeight = momentumOptimizationSettings.getHighLinearFootWeight();
-      Vector3d highAngularFootWeight = momentumOptimizationSettings.getHighAngularFootWeight();
-      Vector3d defaultLinearFootWeight = momentumOptimizationSettings.getDefaultLinearFootWeight();
-      Vector3d defaultAngularFootWeight = momentumOptimizationSettings.getDefaultAngularFootWeight();
+      Vector3D highLinearFootWeight = momentumOptimizationSettings.getHighLinearFootWeight();
+      Vector3D highAngularFootWeight = momentumOptimizationSettings.getHighAngularFootWeight();
+      Vector3D defaultLinearFootWeight = momentumOptimizationSettings.getDefaultLinearFootWeight();
+      Vector3D defaultAngularFootWeight = momentumOptimizationSettings.getDefaultAngularFootWeight();
       feetManager.setWeights(highAngularFootWeight, highLinearFootWeight, defaultAngularFootWeight, defaultLinearFootWeight);
       return feetManager;
    }

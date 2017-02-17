@@ -1,12 +1,12 @@
 package us.ihmc.avatar.polaris;
 
-import javax.vecmath.AxisAngle4d;
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.matrix.Matrix3D;
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.robotics.Axis;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.Link;
@@ -44,17 +44,17 @@ public class PolarisRobot extends Robot
 //   private static final Matrix3d checkerBoardToWheelRotation = new Matrix3d(   0.7561 , -0.0023 ,  0.6545 ,
 //         -0.0074,   0.9999,   0.0121,
 //         -0.6544,  -0.0140,   0.7560);
-   
+
    //Tingfan 05252013
-   private static final Vector3d checkerBoardToWheelTranslation = new Vector3d(-0.0992, 0.3762, 0.6109 );
-   private static final Matrix3d checkerBoardToWheelRotation = new Matrix3d(
-		   0.7693 , -0.0024 ,  0.6389, 
-		   -0.0024 ,  1.0000  , 0.0066, 
-		   -0.6389 , -0.0066,   0.7693 );
+   private static final Vector3D checkerBoardToWheelTranslation = new Vector3D(-0.0992, 0.3762, 0.6109 );
+   private static final RotationMatrix checkerBoardToWheelRotation = new RotationMatrix();
+   static
+   {
+      checkerBoardToWheelRotation.setAndNormalize(0.7693 , -0.0024 ,  0.6389, 
+                                                  -0.0024 ,  1.0000  , 0.0066, 
+                                                  -0.6389 , -0.0066,   0.7693 );
+   }
 
-
-
-   
    private static final RigidBodyTransform checkerBoardToWheel = new RigidBodyTransform(checkerBoardToWheelRotation, checkerBoardToWheelTranslation);
    private static final RigidBodyTransform wheelToCheckerBoard = new RigidBodyTransform();
 
@@ -68,11 +68,11 @@ public class PolarisRobot extends Robot
       polarisLink.setLinkGraphics(polarisLinkGraphics);
 
       polarisLink.setMass(1.0);
-      polarisLink.setComOffset(new Vector3d());
-      Matrix3d inertia = RotationalInertiaCalculator.getRotationalInertiaMatrixOfSolidCylinder(1.0, 1.0, 1.0, Axis.Z);
+      polarisLink.setComOffset(new Vector3D());
+      Matrix3D inertia = RotationalInertiaCalculator.getRotationalInertiaMatrixOfSolidCylinder(1.0, 1.0, 1.0, Axis.Z);
       polarisLink.setMomentOfInertia(inertia);
 
-      floatingJoint = new FloatingJoint(name + "Base", name, new Vector3d(), this);
+      floatingJoint = new FloatingJoint(name + "Base", name, new Vector3D(), this);
       floatingJoint.setRotationAndTranslation(rootJointTransform);
       floatingJoint.setLink(polarisLink);
       floatingJoint.setDynamic(false);
@@ -84,10 +84,10 @@ public class PolarisRobot extends Robot
       wheelLink.setLinkGraphics(wheelGraphics);
 
       wheelLink.setMass(1.0);
-      wheelLink.setComOffset(new Vector3d());
+      wheelLink.setComOffset(new Vector3D());
       wheelLink.setMomentOfInertia(inertia);
       
-      FloatingJoint wheelJoint = new FloatingJoint(name + "WheelJoint", "wheelJoint", new Vector3d(), this);
+      FloatingJoint wheelJoint = new FloatingJoint(name + "WheelJoint", "wheelJoint", new Vector3D(), this);
       wheelJoint.setRotationAndTranslation(PolarisRobot.wheelToCarTransform);
       wheelJoint.setLink(wheelLink);
       wheelJoint.setDynamic(false);
@@ -96,12 +96,12 @@ public class PolarisRobot extends Robot
       Link checkerBoardLink = new Link(name + "CheckerBoardLink");
       Graphics3DObject checkerBoardGraphics = new Graphics3DObject();
       // value of 2.68 corresponds to real board with grid size of 3.35cm
-      checkerBoardGraphics.scale(new Vector3d(2.68, 2.68, 0.1));
+      checkerBoardGraphics.scale(new Vector3D(2.68, 2.68, 0.1));
       checkerBoardGraphics.addModelFile(checkerBoardModelFile);
       checkerBoardLink.setLinkGraphics(checkerBoardGraphics);
       
-      FloatingJoint checkerBoardJoint = new FloatingJoint(name + "CheckerBoardJoint", "checkerboardJoint" , new Vector3d(), this);
-      checkerBoardJoint.setRotationAndTranslation(new RigidBodyTransform(new AxisAngle4d(new Vector3d(0.0, 1.0, 0.0), - Math.PI / 2.0), new Vector3d(1.1, -0.5, 1.3)));
+      FloatingJoint checkerBoardJoint = new FloatingJoint(name + "CheckerBoardJoint", "checkerboardJoint" , new Vector3D(), this);
+      checkerBoardJoint.setRotationAndTranslation(new RigidBodyTransform(new AxisAngle(new Vector3D(0.0, 1.0, 0.0), - Math.PI / 2.0), new Vector3D(1.1, -0.5, 1.3)));
       checkerBoardJoint.setLink(checkerBoardLink);
       checkerBoardJoint.setDynamic(false);
       floatingJoint.addJoint(checkerBoardJoint);
@@ -113,12 +113,12 @@ public class PolarisRobot extends Robot
    {
       Link faceLink = new Link("FaceLink");
       Graphics3DObject faceGraphics = new Graphics3DObject();
-      faceGraphics.scale(new Vector3d(3.0, 3.0, 0.1));
+      faceGraphics.scale(new Vector3D(3.0, 3.0, 0.1));
       faceGraphics.addModelFile("models/GFE/ihmc/face_cube.dae");
       faceLink.setLinkGraphics(faceGraphics);
       
-      FloatingJoint faceJoint = new FloatingJoint("FaceJoint", "faceJoint" , new Vector3d(), this);
-      faceJoint.setRotationAndTranslation(new RigidBodyTransform(new AxisAngle4d(new Vector3d(0.0, 1.0, 0.0), - Math.PI / 2.0), new Vector3d(1.1, 0.0, 1.3)));
+      FloatingJoint faceJoint = new FloatingJoint("FaceJoint", "faceJoint" , new Vector3D(), this);
+      faceJoint.setRotationAndTranslation(new RigidBodyTransform(new AxisAngle(new Vector3D(0.0, 1.0, 0.0), - Math.PI / 2.0), new Vector3D(1.1, 0.0, 1.3)));
       faceJoint.setLink(faceLink);
       faceJoint.setDynamic(false);
       floatingJoint.addJoint(faceJoint);
@@ -127,8 +127,8 @@ public class PolarisRobot extends Robot
    static
    {
       wheelToCarTransform.setTranslation(wheelToCarX, wheelToCarY, wheelToCarZ);
-      Matrix3d rotation = new Matrix3d();
-      rotation.rotY(Math.toRadians(steeringWheelPitchInDegrees));
+      RotationMatrix rotation = new RotationMatrix();
+      rotation.setToPitchMatrix(Math.toRadians(steeringWheelPitchInDegrees));
       wheelToCarTransform.setRotation(rotation);
       
       carToWheelTransform.set(wheelToCarTransform);

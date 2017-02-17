@@ -1,11 +1,10 @@
 package us.ihmc.humanoidRobotics.communication.toolbox.heightQuadTree.command;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Point3f;
-import javax.vecmath.Quat4d;
-
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.packets.LidarScanMessage;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Point3D32;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.lists.RecyclingArrayList;
@@ -14,7 +13,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 public class LidarScanCommand implements Command<LidarScanCommand, LidarScanMessage>
 {
    private long timestamp = -1L;
-   private final RecyclingArrayList<Point3f> scan = new RecyclingArrayList<>(Point3f.class);
+   private final RecyclingArrayList<Point3D32> scan = new RecyclingArrayList<>(Point3D32.class);
    private final ReferenceFrame pointCloudFrame = ReferenceFrame.getWorldFrame();
    private final FramePose lidarPose = new FramePose();
 
@@ -48,7 +47,7 @@ public class LidarScanCommand implements Command<LidarScanCommand, LidarScanMess
 
       while (index < newPointCloud.length)
       {
-         Point3f point = scan.add();
+         Point3D32 point = scan.add();
          point.setX(newPointCloud[index++]);
          point.setY(newPointCloud[index++]);
          point.setZ(newPointCloud[index++]);
@@ -60,12 +59,12 @@ public class LidarScanCommand implements Command<LidarScanCommand, LidarScanMess
       return scan.size();
    }
 
-   public void getPoint(int index, Point3f pointToPack)
+   public void getPoint(int index, Point3D32 pointToPack)
    {
       pointToPack.set(scan.get(index));
    }
 
-   public void getPoint(int index, Point3d pointToPack)
+   public void getPoint(int index, Point3D pointToPack)
    {
       pointToPack.set(scan.get(index));
    }
@@ -75,12 +74,12 @@ public class LidarScanCommand implements Command<LidarScanCommand, LidarScanMess
       framePointToPack.setIncludingFrame(pointCloudFrame, scan.get(index));
    }
 
-   public void getLidarPosition(Point3d positionToPack)
+   public void getLidarPosition(Point3D positionToPack)
    {
       lidarPose.getPosition(positionToPack);
    }
    
-   public void getLidarOrientation(Quat4d orientationToPack)
+   public void getLidarOrientation(Quaternion orientationToPack)
    {
       lidarPose.getOrientation(orientationToPack);
    }

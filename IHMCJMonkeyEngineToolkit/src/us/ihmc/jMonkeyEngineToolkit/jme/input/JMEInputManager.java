@@ -1,24 +1,5 @@
 package us.ihmc.jMonkeyEngineToolkit.jme.input;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-
-import us.ihmc.graphicsDescription.structure.Graphics3DNode;
-import us.ihmc.jMonkeyEngineToolkit.input.SelectedListenerHolder;
-import us.ihmc.jMonkeyEngineToolkit.jme.JMECamera;
-import us.ihmc.jMonkeyEngineToolkit.jme.JMEGraphics3DNode;
-import us.ihmc.jMonkeyEngineToolkit.jme.JMERenderer;
-import us.ihmc.jMonkeyEngineToolkit.jme.util.JMEDataTypeUtils;
-import us.ihmc.jMonkeyEngineToolkit.jme.util.JMEGeometryUtils;
-import us.ihmc.tools.inputDevices.keyboard.Key;
-import us.ihmc.tools.inputDevices.keyboard.KeyListenerHolder;
-import us.ihmc.tools.inputDevices.keyboard.ModifierKeyHolder;
-import us.ihmc.tools.inputDevices.mouse.MouseButton;
-import us.ihmc.tools.inputDevices.mouse.MouseListenerHolder;
-import us.ihmc.tools.inputDevices.mouse3DJoystick.Mouse3DJoystick;
-import us.ihmc.tools.inputDevices.mouse3DJoystick.Mouse3DListener;
-import us.ihmc.tools.inputDevices.mouse3DJoystick.Mouse3DListenerHolder;
-
 import com.google.common.collect.BiMap;
 import com.jme3.collision.CollisionResult;
 import com.jme3.collision.CollisionResults;
@@ -34,6 +15,24 @@ import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.queue.RenderQueue.Bucket;
 import com.jme3.scene.Node;
+
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
+import us.ihmc.graphicsDescription.structure.Graphics3DNode;
+import us.ihmc.jMonkeyEngineToolkit.input.SelectedListenerHolder;
+import us.ihmc.jMonkeyEngineToolkit.jme.JMECamera;
+import us.ihmc.jMonkeyEngineToolkit.jme.JMEGraphics3DNode;
+import us.ihmc.jMonkeyEngineToolkit.jme.JMERenderer;
+import us.ihmc.jMonkeyEngineToolkit.jme.util.JMEDataTypeUtils;
+import us.ihmc.jMonkeyEngineToolkit.jme.util.JMEGeometryUtils;
+import us.ihmc.tools.inputDevices.keyboard.Key;
+import us.ihmc.tools.inputDevices.keyboard.KeyListenerHolder;
+import us.ihmc.tools.inputDevices.keyboard.ModifierKeyHolder;
+import us.ihmc.tools.inputDevices.mouse.MouseButton;
+import us.ihmc.tools.inputDevices.mouse.MouseListenerHolder;
+import us.ihmc.tools.inputDevices.mouse3DJoystick.Mouse3DJoystick;
+import us.ihmc.tools.inputDevices.mouse3DJoystick.Mouse3DListener;
+import us.ihmc.tools.inputDevices.mouse3DJoystick.Mouse3DListenerHolder;
 
 public class JMEInputManager implements AnalogListener, ActionListener, Mouse3DListener
 {
@@ -128,9 +127,9 @@ public class JMEInputManager implements AnalogListener, ActionListener, Mouse3DL
                   Vector3f location3f = new Vector3f(closest.getContactPoint());
                   JMEGeometryUtils.transformFromJMECoordinatesToZup(location3f);
 
-                  Point3d location = JMEDataTypeUtils.jmeVector3fToJ3DPoint3d(location3f);
-                  Point3d cameraLocation = jmeCamera.getCameraPosition();
-                  Quat4d cameraRotation = jmeCamera.getCameraRotation();
+                  Point3D location = JMEDataTypeUtils.jmeVector3fToJ3DPoint3d(location3f);
+                  Point3D cameraLocation = jmeCamera.getCameraPosition();
+                  QuaternionBasics cameraRotation = jmeCamera.getCameraRotation();
 
                   Graphics3DNode graphics3dNode = null;
                   if (parentNode != null)

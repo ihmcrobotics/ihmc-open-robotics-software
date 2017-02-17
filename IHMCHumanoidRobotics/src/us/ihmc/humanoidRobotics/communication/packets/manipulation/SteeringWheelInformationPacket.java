@@ -1,9 +1,8 @@
 package us.ihmc.humanoidRobotics.communication.packets.manipulation;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
 import us.ihmc.communication.packets.Packet;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -11,9 +10,9 @@ public class SteeringWheelInformationPacket extends Packet<SteeringWheelInformat
 {
    public RobotSide robotSide;
 
-   public Point3d steeringWheelCenter;
-   public Vector3d steeringWheelRotationAxis;
-   public Vector3d steeringWheelZeroAxis;
+   public Point3D steeringWheelCenter;
+   public Vector3D steeringWheelRotationAxis;
+   public Vector3D steeringWheelZeroAxis;
 
    public double steeringWheelRadius;
    public double desiredSteeringSpeed;
@@ -24,7 +23,7 @@ public class SteeringWheelInformationPacket extends Packet<SteeringWheelInformat
    {
    }
 
-   public SteeringWheelInformationPacket(RobotSide robotSide, Point3d steeringWheelCenter, Vector3d steeringWheelRotationAxis, Vector3d steeringWheelZeroAxis,
+   public SteeringWheelInformationPacket(RobotSide robotSide, Point3D steeringWheelCenter, Vector3D steeringWheelRotationAxis, Vector3D steeringWheelZeroAxis,
          double steeringWheelRadius, double graspOffsetFromControlFrame, double desiredSteeringSpeed, int steeringWheelId)
    {
       this.robotSide = robotSide;
@@ -42,17 +41,17 @@ public class SteeringWheelInformationPacket extends Packet<SteeringWheelInformat
       return robotSide;
    }
 
-   public Point3d getSteeringWheelCenter()
+   public Point3D getSteeringWheelCenter()
    {
       return steeringWheelCenter;
    }
 
-   public Vector3d getSteeringWheelRotationAxis()
+   public Vector3D getSteeringWheelRotationAxis()
    {
       return steeringWheelRotationAxis;
    }
 
-   public Vector3d getSteeringWheelZeroAxis()
+   public Vector3D getSteeringWheelZeroAxis()
    {
       return steeringWheelZeroAxis;
    }
@@ -82,17 +81,17 @@ public class SteeringWheelInformationPacket extends Packet<SteeringWheelInformat
       this.robotSide = robotSide;
    }
 
-   public void setSteeringWheelCenter(Point3d steeringWheelCenter)
+   public void setSteeringWheelCenter(Point3D steeringWheelCenter)
    {
       this.steeringWheelCenter = steeringWheelCenter;
    }
 
-   public void setSteeringWheelRotationAxis(Vector3d steeringWheelRotationAxis)
+   public void setSteeringWheelRotationAxis(Vector3D steeringWheelRotationAxis)
    {
       this.steeringWheelRotationAxis = steeringWheelRotationAxis;
    }
 
-   public void setSteeringWheelZeroAxis(Vector3d steeringWheelZeroAxis)
+   public void setSteeringWheelZeroAxis(Vector3D steeringWheelZeroAxis)
    {
       this.steeringWheelZeroAxis = steeringWheelZeroAxis;
    }

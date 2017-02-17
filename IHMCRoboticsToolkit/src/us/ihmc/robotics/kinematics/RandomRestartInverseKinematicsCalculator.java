@@ -1,13 +1,14 @@
 package us.ihmc.robotics.kinematics;
 
+import java.util.Random;
+
 import org.ejml.data.DenseMatrix64F;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
+
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.ScrewTestTools;
 import us.ihmc.robotics.screwTheory.ScrewTools;
-
-import java.util.Random;
 
 public class RandomRestartInverseKinematicsCalculator implements InverseKinematicsCalculator
 {

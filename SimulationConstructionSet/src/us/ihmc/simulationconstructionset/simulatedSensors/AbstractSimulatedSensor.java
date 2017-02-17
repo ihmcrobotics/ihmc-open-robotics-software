@@ -1,8 +1,8 @@
 package us.ihmc.simulationconstructionset.simulatedSensors;
 
-import us.ihmc.simulationconstructionset.SimulatedSensor;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.jMonkeyEngineToolkit.Graphics3DAdapter;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.simulationconstructionset.SimulatedSensor;
 
 public abstract class AbstractSimulatedSensor implements SimulatedSensor
 {

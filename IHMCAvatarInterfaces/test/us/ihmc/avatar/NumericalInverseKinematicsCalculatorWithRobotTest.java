@@ -6,13 +6,13 @@ import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.Random;
 
-import javax.vecmath.AxisAngle4d;
-
 import org.junit.Test;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.jointAnglesWriter.JointAnglesWriter;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -22,7 +22,6 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.kinematics.DdoglegInverseKinematicsCalculator;
 import us.ihmc.robotics.kinematics.InverseKinematicsCalculator;
 import us.ihmc.robotics.kinematics.InverseKinematicsStepListener;
@@ -293,7 +292,7 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
       FrameOrientation errorOrientation = new FrameOrientation();
       errorOrientation.setOrientationFromOneToTwo(handEndEffectorOrientationFK, handEndEffectorOrientationIK);
 
-      AxisAngle4d axisAngle = new AxisAngle4d();
+      AxisAngle axisAngle = new AxisAngle();
       errorOrientation.getAxisAngle(axisAngle);
       orientationError.set(axisAngle.getAngle());
 

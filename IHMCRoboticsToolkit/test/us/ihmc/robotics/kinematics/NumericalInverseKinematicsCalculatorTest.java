@@ -5,20 +5,19 @@ import static org.junit.Assert.fail;
 import java.util.List;
 import java.util.Random;
 
-import javax.vecmath.AxisAngle4d;
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Vector3d;
-
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 import org.junit.Test;
 
+import us.ihmc.commons.Conversions;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.screwTheory.RevoluteJoint;
 import us.ihmc.robotics.screwTheory.ScrewTestTools;
-import us.ihmc.robotics.time.TimeTools;
 
 /**
  * @author twan
@@ -26,9 +25,9 @@ import us.ihmc.robotics.time.TimeTools;
  */
 public class NumericalInverseKinematicsCalculatorTest
 {
-   private static final Vector3d X = new Vector3d(1.0, 0.0, 0.0);
-   private static final Vector3d Y = new Vector3d(0.0, 1.0, 0.0);
-   private static final Vector3d Z = new Vector3d(0.0, 0.0, 1.0);
+   private static final Vector3D X = new Vector3D(1.0, 0.0, 0.0);
+   private static final Vector3D Y = new Vector3D(0.0, 1.0, 0.0);
+   private static final Vector3D Z = new Vector3D(0.0, 0.0, 1.0);
    private static final boolean DEBUG = false;
 
    /*
@@ -40,7 +39,7 @@ public class NumericalInverseKinematicsCalculatorTest
    public void testInfeasible()
    {
       Random random = new Random(1235125L);
-      Vector3d[] jointAxes = new Vector3d[]
+      Vector3D[] jointAxes = new Vector3D[]
       {
          X, Y, Z, Y, Y, X
       };
@@ -59,10 +58,10 @@ public class NumericalInverseKinematicsCalculatorTest
       {
          setRandomPositions(random, revoluteJoints, Math.PI);
 
-         AxisAngle4d axisAngle = RandomTools.generateRandomRotation(random);
-         Matrix3d rotation = new Matrix3d();
+         AxisAngle axisAngle = RandomTools.generateRandomRotation(random);
+         RotationMatrix rotation = new RotationMatrix();
          rotation.set(axisAngle);
-         Vector3d translation = RandomTools.generateRandomVector(random, 50.0);
+         Vector3D translation = RandomTools.generateRandomVector(random, 50.0);
          RigidBodyTransform desiredTransform = new RigidBodyTransform(rotation, translation);
 
          long t0 = System.nanoTime();
@@ -70,7 +69,7 @@ public class NumericalInverseKinematicsCalculatorTest
          long tf = System.nanoTime();
          long solutionTime = tf - t0;
 
-         timeStatistics.addValue(TimeTools.nanoSecondstoSeconds(solutionTime));
+         timeStatistics.addValue(Conversions.nanoSecondstoSeconds(solutionTime));
          iterationStatistics.addValue(calculator.getNumberOfIterations());
       }
 
@@ -82,7 +81,7 @@ public class NumericalInverseKinematicsCalculatorTest
    public void testForwardThenInverse()
    {
       Random random = new Random(125125L);
-      Vector3d[] jointAxes = new Vector3d[]
+      Vector3D[] jointAxes = new Vector3D[]
       {
          X, Y, Z, Y, Y, X
       };
@@ -112,7 +111,7 @@ public class NumericalInverseKinematicsCalculatorTest
          calculator.solve(desiredTransform);
          long tf = System.nanoTime();
          long solutionTime = tf - t0;
-         timeStatistics.addValue(TimeTools.nanoSecondstoSeconds(solutionTime));
+         timeStatistics.addValue(Conversions.nanoSecondstoSeconds(solutionTime));
          iterationStatistics.addValue(calculator.getNumberOfIterations());
 
          RigidBodyTransform solvedTransform = jacobian.getEndEffectorFrame().getTransformToDesiredFrame(jacobian.getBaseFrame());

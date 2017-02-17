@@ -3,8 +3,7 @@ package us.ihmc.graphicsDescription.plotting.artifact;
 import java.awt.Font;
 import java.io.PrintWriter;
 
-import javax.vecmath.Point2d;
-
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.graphicsDescription.plotting.Graphics2DAdapter;
 import us.ihmc.graphicsDescription.plotting.Plotter2DAdapter;
 
@@ -17,7 +16,7 @@ public class TextArtifact extends Artifact
    private int xPixelOffset = 0;
    private int yPixelOffset = 0;
    
-   private final Point2d tempPoint = new Point2d();
+   private final Point2D tempPoint = new Point2D();
 
    public TextArtifact(String id, String text, double x1, double y1)
    {
@@ -89,7 +88,7 @@ public class TextArtifact extends Artifact
    }
 
    @Override
-   public void drawLegend(Plotter2DAdapter graphics, Point2d origin)
+   public void drawLegend(Plotter2DAdapter graphics, Point2D origin)
    {
       graphics.setColor(color);
       graphics.setFont(font);

@@ -3,8 +3,7 @@ package us.ihmc.robotics.math.frames;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.vecmath.Quat4d;
-
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -14,7 +13,7 @@ public class YoFrameQuaternionInMultipleFrames extends YoFrameQuaternion impleme
    private final YoMultipleFramesHelper multipleFramesHelper;
 
    private final FrameOrientation frameOrientation = new FrameOrientation();
-   private final Quat4d quaternion = new Quat4d();
+   private final Quaternion quaternion = new Quaternion();
 
    public YoFrameQuaternionInMultipleFrames(String namePrefix, YoVariableRegistry registry, ReferenceFrame... referenceFrames)
    {

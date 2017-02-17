@@ -1,12 +1,12 @@
 package us.ihmc.jMonkeyEngineToolkit.camera;
 
-import javax.vecmath.Point3d;
+import us.ihmc.euclid.tuple3D.Point3D;
 
 public interface CameraTrackingAndDollyPositionHolder
 {
-   public abstract void getTrackingPosition(Point3d trackPositionToPack);
+   public abstract void getTrackingPosition(Point3D trackPositionToPack);
    
-   public abstract void getDollyPosition(Point3d dollyPositionToPack);
+   public abstract void getDollyPosition(Point3D dollyPositionToPack);
    
    public abstract double getTrackingX();
 

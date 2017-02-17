@@ -1,8 +1,7 @@
 package us.ihmc.simulationconstructionset.util.ground;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.jMonkeyEngineToolkit.HeightMapWithNormals;
 import us.ihmc.robotics.Axis;
@@ -32,20 +31,20 @@ public class SimpleTableTerrainObject implements TerrainObject3D, HeightMapWithN
       double zMin = Math.min(zStart, zEnd);
       double zMax = Math.max(zStart, zEnd);
 
-      Point3d minPoint = new Point3d(xMin, yMin, zMin);
-      Point3d maxPoint = new Point3d(xMax, yMax, zMax);
+      Point3D minPoint = new Point3D(xMin, yMin, zMin);
+      Point3D maxPoint = new Point3D(xMax, yMax, zMax);
 
       boundingBox = new BoundingBox3d(minPoint, maxPoint);
 
       linkGraphics = new Graphics3DObject();
 
       linkGraphics.translate((xStart + xEnd) / 2.0, (yStart + yEnd) / 2.0, zMin + TABLE_THICKNESS / 2);
-      linkGraphics.scale(new Vector3d(TABLE_LENGTH, TABLE_WIDTH, TABLE_THICKNESS));
+      linkGraphics.scale(new Vector3D(TABLE_LENGTH, TABLE_WIDTH, TABLE_THICKNESS));
       linkGraphics.addModelFile("models/plasticTableTop.obj");
 
       if (TABLE_LENGTH < TABLE_WIDTH)
          linkGraphics.rotate(Math.PI / 2, Axis.Z);
-      linkGraphics.scale(new Vector3d(1, 1, boundingBox.getZMax() / TABLE_THICKNESS));
+      linkGraphics.scale(new Vector3D(1, 1, boundingBox.getZMax() / TABLE_THICKNESS));
       linkGraphics.addModelFile("models/FoldingTableLegs.obj");
    }
 
@@ -65,7 +64,7 @@ public class SimpleTableTerrainObject implements TerrainObject3D, HeightMapWithN
    }
 
    @Override
-   public double heightAndNormalAt(double x, double y, double z, Vector3d normalToPack)
+   public double heightAndNormalAt(double x, double y, double z, Vector3D normalToPack)
    {
       double heightAt = heightAt(x, y, z);
       surfaceNormalAt(x, y, heightAt, normalToPack);
@@ -92,14 +91,14 @@ public class SimpleTableTerrainObject implements TerrainObject3D, HeightMapWithN
       return false;
    }
 
-   public void closestIntersectionTo(double x, double y, double z, Point3d intersection)
+   public void closestIntersectionTo(double x, double y, double z, Point3D intersection)
    {
       intersection.setX(x);
       intersection.setY(y);
       intersection.setZ(heightAt(x, y, z));
    }
 
-   public void surfaceNormalAt(double x, double y, double z, Vector3d normal)
+   public void surfaceNormalAt(double x, double y, double z, Vector3D normal)
    {
       double threshhold = 0.015;
       normal.setX(0.0);
@@ -138,7 +137,7 @@ public class SimpleTableTerrainObject implements TerrainObject3D, HeightMapWithN
       }
    }
 
-   public void closestIntersectionAndNormalAt(double x, double y, double z, Point3d intersection, Vector3d normal)
+   public void closestIntersectionAndNormalAt(double x, double y, double z, Point3D intersection, Vector3D normal)
    {
       intersection.setX(x);    // Go Straight Up for now...
       intersection.setY(y);
@@ -148,7 +147,7 @@ public class SimpleTableTerrainObject implements TerrainObject3D, HeightMapWithN
    }
    
    @Override
-   public boolean checkIfInside(double x, double y, double z, Point3d intersectionToPack, Vector3d normalToPack)
+   public boolean checkIfInside(double x, double y, double z, Point3D intersectionToPack, Vector3D normalToPack)
    {
       intersectionToPack.setX(x);    // Go Straight Up for now...
       intersectionToPack.setY(y);

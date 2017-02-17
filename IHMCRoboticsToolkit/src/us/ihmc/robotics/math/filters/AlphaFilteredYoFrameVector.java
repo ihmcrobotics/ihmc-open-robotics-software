@@ -1,7 +1,6 @@
 package us.ihmc.robotics.math.filters;
 
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -105,7 +104,7 @@ public class AlphaFilteredYoFrameVector extends YoFrameVector implements Process
       z.update(zUnfiltered);
    }
 
-   public void update(Vector3d vectorUnfiltered)
+   public void update(Vector3D vectorUnfiltered)
    {
       x.update(vectorUnfiltered.getX());
       y.update(vectorUnfiltered.getY());

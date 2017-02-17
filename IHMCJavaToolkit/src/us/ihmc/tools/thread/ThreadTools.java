@@ -1,8 +1,5 @@
 package us.ihmc.tools.thread;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PrintStream;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
@@ -12,11 +9,6 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.SystemUtils;
-
-import us.ihmc.tools.io.StreamGobbler;
 
 public class ThreadTools
 {
@@ -61,108 +53,6 @@ public class ThreadTools
       {
          ThreadTools.sleep(1000);
       }
-   }
-   
-   /**
-    * Runs commands in your native command line environment.
-    * <p>
-    * This method supports Linux, Mac, and Windows with different behavior for each. Redirects console stdout
-    * and stderr to System.out. Note on Windows: Use & to string commands together. ex. 'dir & cd .. & dir'
-    * </p>
-    * <p>
-    * Fails if command is not valid, /bin/bash does not exist, or using a weird OS.
-    * </p>
-    * 
-    * @param commandLine  command to run (Unix ex. "ls -a; nano a.txt") (Windows ex. "dir & cd .. & dir")
-    * @param commandOutput  command output will be copied to this steam upon completion
-    * @return The process that was started, waited for, and whose output was copied to System.out.
-    * Returns when command finishes
-    */
-   public static void runCommandLine(String commandLine, OutputStream commandOutput)
-   {    
-      String[] commands = null;
-      
-      if(SystemUtils.IS_OS_WINDOWS)
-      {
-         commands = new String[] {"cmd.exe", "/c", commandLine};
-      }
-      else if (SystemUtils.IS_OS_MAC)
-      {
-         commands = new String[] {"/bin/bash", "-l", "-c", commandLine}; // TODO Fix me
-      }
-      else if (SystemUtils.IS_OS_LINUX)
-      {
-         commands = new String[] {"/bin/bash", "-l", "-c", commandLine};
-      }
-      else
-      {
-         return;
-      }
-      
-      ProcessBuilder processBuilder = new ProcessBuilder(commands);
-      if (commandOutput == System.out)
-         processBuilder.inheritIO();
-      processBuilder.redirectErrorStream(true);
-
-      try
-      {
-         Process process = processBuilder.start();
-         process.waitFor();
-         IOUtils.copy(process.getInputStream(), commandOutput);
-      }
-      catch (IOException | InterruptedException e)
-      {
-         e.printStackTrace();
-      }
-   }
-   
-   /**
-    * Runs commands in your native command line environment.
-    * 
-    * @see {@link #runCommandLine(String, OutputStream)}
-    */
-   public static void runCommandLine(String commandLine)
-   {
-      runCommandLine(commandLine, System.out);
-   }
-
-   // the following method and class were jacked from:
-   // http://www.javaworld.com/javaworld/jw-12-2000/jw-1229-traps.html?page=3
-   // thank you javaworld, you've changed my life!
-   public static Process runCommand(String command, PrintStream outputStream, PrintStream errorStream)
-   {
-      try
-      {
-         Runtime runtime = Runtime.getRuntime();
-         System.out.println("Execing " + command);
-         Process process = runtime.exec(command);
-
-         // any error message?
-         StreamGobbler errorGobbler = new StreamGobbler(process.getErrorStream(), errorStream);
-
-         // any output?
-         StreamGobbler outputGobbler = new StreamGobbler(process.getInputStream(), outputStream);
-
-         outputGobbler.setDaemon(true);
-         errorGobbler.setDaemon(true);
-
-         // kick them off
-         errorGobbler.start();
-         outputGobbler.start();
-
-         return process;
-
-         //
-         //// any error???
-         // int exitVal = proc.waitFor();
-         // System.out.println("ExitValue: " + exitVal);
-      }
-      catch (Throwable t)
-      {
-         t.printStackTrace();
-      }
-
-      return null;
    }
    
    public static void startAThread(Runnable runnable, String threadName)

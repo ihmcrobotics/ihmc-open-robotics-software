@@ -1,13 +1,12 @@
 package us.ihmc.exampleSimulations.beetle.parameters;
 
-import javax.vecmath.Vector3d;
-
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootOrientationGains;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootPositionGains;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootSE3Gains;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.controllers.SE3PIDGainsInterface;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.controllers.YoSymmetricSE3PIDGains;
@@ -25,8 +24,8 @@ public class RhinoBeetleInverseDynamicsParameters implements HexapodControllerPa
    private final YoSE3PIDGainsInterface footGains;
    
    //body spatial feeback controller params
-   private final Vector3d linearWeight = new Vector3d(1.0, 1.0, 2.0);
-   private final Vector3d angularWeight = new Vector3d(1.0, 1.0, 1.0);
+   private final Vector3D linearWeight = new Vector3D(1.0, 1.0, 2.0);
+   private final Vector3D angularWeight = new Vector3D(1.0, 1.0, 1.0);
    private final YoSymmetricSE3PIDGains bodySpatialGains;
    private final double bodyProportionalGains = 500.0;
    private final double bodyDampingRatio = 1.1;
@@ -90,13 +89,13 @@ public class RhinoBeetleInverseDynamicsParameters implements HexapodControllerPa
    }
 
    @Override
-   public void getBodySpatialLinearQPWeight(Vector3d linearWeight)
+   public void getBodySpatialLinearQPWeight(Vector3D linearWeight)
    {
       bodySpatialLinearQPWeight.get(linearWeight);
    }
 
    @Override
-   public void getBodySpatialAngularQPWeight(Vector3d angularWeight)
+   public void getBodySpatialAngularQPWeight(Vector3D angularWeight)
    {
       bodySpatialAngularQPWeight.get(angularWeight);
    }

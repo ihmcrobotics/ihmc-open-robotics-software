@@ -1,11 +1,10 @@
 package us.ihmc.robotics.hyperCubeTree;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
-import us.ihmc.robotics.random.RandomTools;
-
 import java.util.Random;
+
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.robotics.random.RandomTools;
 
 public class HyperCubeTreeStaticTestingUtilities
 {
@@ -20,15 +19,15 @@ public class HyperCubeTreeStaticTestingUtilities
       double radiusToShootFrom = shootingDistance;
       for (int k = 0; k < numberOfLidarBullets; k++)
       {
-         Vector3d vector3d = RandomTools.generateRandomVector(rand, 1.0);
+         Vector3D vector3d = RandomTools.generateRandomVector(rand, 1.0);
          vector3d.get(vectorAsArray);
          for (int j = 0; j < 3; j++)
          {
             startPointAsArray[j] = vectorAsArray[j] * radiusToShootFrom + centerAsArray[j];
             endPointAsArray[j] = vectorAsArray[j] * radius + centerAsArray[j];
          }
-         Point3d start = new Point3d(startPointAsArray);
-         Point3d end = new Point3d(endPointAsArray);
+         Point3D start = new Point3D(startPointAsArray);
+         Point3D end = new Point3D(endPointAsArray);
          tree.putLidarAtGraduallyMoreAccurateResolution(start, end);
       }
 //      tree.mergeIfPossible();

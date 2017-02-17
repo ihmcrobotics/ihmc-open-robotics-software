@@ -5,8 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.vecmath.Vector2d;
-
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
@@ -14,6 +12,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreTo
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.CenterOfPressureCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
+import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -145,8 +144,8 @@ public class WrenchMatrixCalculator
       helper.setCenterOfPressureCommand(command);
    }
 
-   private final Vector2d tempDeisredCoPWeight = new Vector2d();
-   private final Vector2d tempCoPRateWeight = new Vector2d();
+   private final Vector2D tempDeisredCoPWeight = new Vector2D();
+   private final Vector2D tempCoPRateWeight = new Vector2D();
 
    public void computeMatrices()
    {

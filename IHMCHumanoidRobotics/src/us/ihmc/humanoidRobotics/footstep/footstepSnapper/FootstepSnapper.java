@@ -2,10 +2,9 @@ package us.ihmc.humanoidRobotics.footstep.footstepSnapper;
 
 import java.util.List;
 
-import javax.vecmath.Point2d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.dataStructures.HeightMapWithPoints;
@@ -37,11 +36,11 @@ public interface FootstepSnapper
     * @param height the height to set the foot at
     * @param planeNormal the z normal of the foot
     */
-   public void adjustFootstepWithoutHeightmap(FootstepDataMessage footstep, double height, Vector3d planeNormal);
-   public abstract void adjustFootstepWithoutHeightmap (Footstep footstep, double height, Vector3d planeNormal);
-   public abstract Footstep generateFootstepWithoutHeightMap(FramePose2d desiredSolePosition, RigidBody foot, ReferenceFrame soleFrame, RobotSide robotSide, double height, Vector3d planeNormal);
+   public void adjustFootstepWithoutHeightmap(FootstepDataMessage footstep, double height, Vector3D planeNormal);
+   public abstract void adjustFootstepWithoutHeightmap (Footstep footstep, double height, Vector3D planeNormal);
+   public abstract Footstep generateFootstepWithoutHeightMap(FramePose2d desiredSolePosition, RigidBody foot, ReferenceFrame soleFrame, RobotSide robotSide, double height, Vector3D planeNormal);
 
-   public abstract void setMask(List<Point2d> footShape);
+   public abstract void setMask(List<Point2D> footShape);
    public abstract void setUseMask(boolean useMask, double kernelMaskSafetyBuffer, double boundingBoxDimension);
-   public abstract List<Point3d> getPointList();
+   public abstract List<Point3D> getPointList();
 }

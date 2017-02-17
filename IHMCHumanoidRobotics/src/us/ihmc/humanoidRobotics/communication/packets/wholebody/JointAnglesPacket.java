@@ -1,14 +1,14 @@
 package us.ihmc.humanoidRobotics.communication.packets.wholebody;
 
+import java.util.Arrays;
+import java.util.Random;
+
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.VisualizablePacket;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.ArrayTools;
 import us.ihmc.tools.FormattingTools;
-
-import java.util.Arrays;
-import java.util.Random;
 
 public class JointAnglesPacket extends Packet<JointAnglesPacket> implements VisualizablePacket
 {

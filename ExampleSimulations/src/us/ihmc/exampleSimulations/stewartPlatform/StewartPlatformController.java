@@ -1,7 +1,6 @@
 package us.ihmc.exampleSimulations.stewartPlatform;
 
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.robotController.RobotController;
@@ -143,7 +142,7 @@ public class StewartPlatformController implements RobotController
    }
 
    private ForceDistribution forceDistribution;
-   private Vector3d[] a_hat = new Vector3d[6], b = new Vector3d[6];
+   private Vector3D[] a_hat = new Vector3D[6], b = new Vector3D[6];
    private double[] act_forces = new double[6];
 
    public void initControl()
@@ -220,8 +219,8 @@ public class StewartPlatformController implements RobotController
 
       for (int i = 0; i < 6; i++)
       {
-         a_hat[i] = new Vector3d();
-         b[i] = new Vector3d();
+         a_hat[i] = new Vector3D();
+         b[i] = new Vector3D();
       }
    }
 
@@ -251,7 +250,7 @@ public class StewartPlatformController implements RobotController
       distributeForces();
    }
 
-   Vector3d tempVec = new Vector3d();
+   Vector3D tempVec = new Vector3D();
 
    public void distributeForces()
    {

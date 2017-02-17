@@ -3,11 +3,6 @@ package us.ihmc.avatar.networkProcessor.quadTreeHeightMap;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
-import javax.vecmath.Point2d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4f;
-import javax.vecmath.Vector3f;
-
 import org.apache.commons.lang3.mutable.MutableBoolean;
 
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
@@ -16,6 +11,11 @@ import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.RequestLidarScanMessage;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D32;
+import us.ihmc.euclid.tuple4D.Quaternion32;
 import us.ihmc.humanoidRobotics.communication.packets.walking.CapturabilityBasedStatus;
 import us.ihmc.humanoidRobotics.communication.toolbox.heightQuadTree.command.HeightQuadTreeToolboxRequestCommand;
 import us.ihmc.humanoidRobotics.communication.toolbox.heightQuadTree.command.LidarScanCommand;
@@ -25,7 +25,6 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.lists.FrameTupleArrayList;
 import us.ihmc.robotics.quadTree.Box;
 import us.ihmc.robotics.quadTree.QuadTreeForGroundParameters;
@@ -68,7 +67,7 @@ public class HeightQuadTreeToolboxController extends ToolboxController
    private final OneDoFJoint[] oneDoFJoints;
    private final PacketCommunicator packetCommunicator;
 
-   private final Point2d robotPosition2d = new Point2d();
+   private final Point2D robotPosition2d = new Point2D();
    private final double quadTreeMessageMaxRadius = 5.0;
 
    public HeightQuadTreeToolboxController(FullHumanoidRobotModel fullRobotModel, PacketCommunicator packetCommunicator, CommandInputManager commandInputManager,
@@ -147,7 +146,7 @@ public class HeightQuadTreeToolboxController extends ToolboxController
       if (DEBUG)
          PrintTools.debug("Received new point cloud. Number of points: " + newPointClouds.get(0).getNumberOfPoints());
 
-      Point3d lidarPosition = new Point3d();
+      Point3D lidarPosition = new Point3D();
 
       for (int pointCloudIndex = 0; pointCloudIndex < newPointClouds.size(); pointCloudIndex++)
       {
@@ -177,7 +176,7 @@ public class HeightQuadTreeToolboxController extends ToolboxController
       {
          if (DEBUG)
             PrintTools.debug("QuadTree has changed, sending packet");
-         Point3d rootJointPosition = new Point3d();
+         Point3D rootJointPosition = new Point3D();
          rootJoint.getTranslation(rootJointPosition);
          robotPosition2d.set(rootJointPosition.getX(), rootJointPosition.getY());
          reportMessage(HeightQuadTreeMessageConverter.convertQuadTreeForGround(quadTree, robotPosition2d, quadTreeMessageMaxRadius));
@@ -201,10 +200,10 @@ public class HeightQuadTreeToolboxController extends ToolboxController
             oneDoFJoints[i].setQ(newJointAngles[i]);
          }
 
-         Vector3f translation = robotConfigurationData.getPelvisTranslation();
+         Vector3D32 translation = robotConfigurationData.getPelvisTranslation();
          rootJoint.setPosition(translation.getX(), translation.getY(), translation.getZ());
-         Quat4f orientation = robotConfigurationData.getPelvisOrientation();
-         rootJoint.setRotation(orientation.getX(), orientation.getY(), orientation.getZ(), orientation.getW());
+         Quaternion32 orientation = robotConfigurationData.getPelvisOrientation();
+         rootJoint.setRotation(orientation.getX(), orientation.getY(), orientation.getZ(), orientation.getS());
          rootJoint.getPredecessor().updateFramesRecursively();
       }
 

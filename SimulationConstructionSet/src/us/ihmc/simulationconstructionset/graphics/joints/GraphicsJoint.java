@@ -1,10 +1,10 @@
 package us.ihmc.simulationconstructionset.graphics.joints;
 
-import us.ihmc.robotics.kinematics.CommonJoint;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.structure.Graphics3DNode;
 import us.ihmc.graphicsDescription.structure.Graphics3DNodeType;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.kinematics.CommonJoint;
 
 public class GraphicsJoint extends Graphics3DNode
 {

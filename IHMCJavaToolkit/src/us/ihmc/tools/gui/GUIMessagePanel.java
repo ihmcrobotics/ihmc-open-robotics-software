@@ -40,6 +40,7 @@ public class GUIMessagePanel extends JPanel
       this.add(jScrollPane, BorderLayout.CENTER);
    }
 
+   @Override
    public String getName()
    {
       return name;

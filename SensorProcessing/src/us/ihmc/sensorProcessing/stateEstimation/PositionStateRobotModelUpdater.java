@@ -1,18 +1,23 @@
 package us.ihmc.sensorProcessing.stateEstimation;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
 import us.ihmc.controlFlow.ControlFlowInputPort;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
-import us.ihmc.robotics.screwTheory.*;
-import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.screwTheory.CenterOfMassCalculator;
+import us.ihmc.robotics.screwTheory.CenterOfMassJacobian;
+import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
+import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.robotics.screwTheory.ScrewTools;
+import us.ihmc.robotics.screwTheory.Twist;
+import us.ihmc.robotics.screwTheory.TwistCalculator;
+import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 
 public class PositionStateRobotModelUpdater implements Runnable
 {
@@ -124,7 +129,7 @@ public class PositionStateRobotModelUpdater implements Runnable
    }
 
    private final FramePoint tempCenterOfMassPositionState = new FramePoint(ReferenceFrame.getWorldFrame());
-   private final Matrix3d tempOrientationStateReconstructMatrix = new Matrix3d();
+   private final RotationMatrix tempOrientationStateReconstructMatrix = new RotationMatrix();
    private final FrameOrientation tempOrientationStateReconstruct = new FrameOrientation(ReferenceFrame.getWorldFrame());
    private final RigidBodyTransform tempEstimationLinkToWorld = new RigidBodyTransform();
    private final RigidBodyTransform tempRootJointToWorld = new RigidBodyTransform();
@@ -141,9 +146,9 @@ public class PositionStateRobotModelUpdater implements Runnable
    }
 
    private final FramePoint tempCenterOfMassBody = new FramePoint(ReferenceFrame.getWorldFrame());
-   private final Vector3d tempCenterOfMassBodyVector3d = new Vector3d();
-   private final Point3d tempEstimationLinkPosition = new Point3d();
-   private final Vector3d tempEstimationLinkPositionVector3d = new Vector3d();
+   private final Vector3D tempCenterOfMassBodyVector3d = new Vector3D();
+   private final Point3D tempEstimationLinkPosition = new Point3D();
+   private final Vector3D tempEstimationLinkPositionVector3d = new Vector3D();
 
    private void computeEstimationLinkToWorldTransform(ReferenceFrame estimationFrame, RigidBodyTransform estimationLinkToWorldToPack, FramePoint centerOfMassWorld,
            FrameOrientation estimationLinkOrientation)

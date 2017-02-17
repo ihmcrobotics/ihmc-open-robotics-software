@@ -1,16 +1,15 @@
 package us.ihmc.humanoidRobotics.communication.packets.walking;
 
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
+import java.util.Random;
 
-import us.ihmc.communication.ros.generators.RosMessagePacket;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.VisualizablePacket;
+import us.ihmc.communication.ros.generators.RosMessagePacket;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.AbstractSO3TrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-
-import java.util.Random;
 
 @RosMessagePacket(documentation =
       "This message commands the controller to move in taskspace the pelvis to the desired orientation while going through the specified trajectory points."
@@ -55,7 +54,7 @@ public class PelvisOrientationTrajectoryMessage extends AbstractSO3TrajectoryMes
     * @param trajectoryTime how long it takes to reach the desired pose.
     * @param desiredOrientation desired pelvis orientation expressed in world frame.
     */
-   public PelvisOrientationTrajectoryMessage(double trajectoryTime, Quat4d desiredOrientation)
+   public PelvisOrientationTrajectoryMessage(double trajectoryTime, Quaternion desiredOrientation)
    {
       super(trajectoryTime, desiredOrientation);
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
@@ -64,7 +63,7 @@ public class PelvisOrientationTrajectoryMessage extends AbstractSO3TrajectoryMes
    /**
     * Use this constructor to build a message with more than one trajectory point.
     * Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
-    * This constructor only allocates memory for the trajectory points, you need to call {@link #setTrajectoryPoint(int, double, Quat4d, Vector3d)} for each trajectory point afterwards.
+    * This constructor only allocates memory for the trajectory points, you need to call {@link #setTrajectoryPoint(int, double, Quaternion, Vector3D)} for each trajectory point afterwards.
     * @param numberOfTrajectoryPoints number of trajectory points that will be sent to the controller.
     */
    public PelvisOrientationTrajectoryMessage(int numberOfTrajectoryPoints)

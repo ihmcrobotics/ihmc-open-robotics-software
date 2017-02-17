@@ -5,10 +5,6 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.InputStream;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -20,6 +16,9 @@ import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WalkingHighLevelHumanoidController;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootTrajectoryMessage;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -101,7 +100,7 @@ public abstract class DRCPushRecoveryTest
       double delay = 0.5 * swingTime;
 
       // push parameters:
-      Vector3d forceDirection = new Vector3d(0.0, -1.0, 0.0);
+      Vector3D forceDirection = new Vector3D(0.0, -1.0, 0.0);
       double magnitude = 600.0 * getForceScale();
       double duration = 0.1;
       pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
@@ -121,7 +120,7 @@ public abstract class DRCPushRecoveryTest
       double delay = 0.5 * swingTime;
 
       // push parameters:
-      Vector3d forceDirection = new Vector3d(0.0, -1.0, 0.0);
+      Vector3D forceDirection = new Vector3D(0.0, -1.0, 0.0);
       double magnitude = 550.0 * getForceScale();
       double duration = 0.1;
       pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
@@ -140,7 +139,7 @@ public abstract class DRCPushRecoveryTest
       double delay = 0.25 * swingTime;
 
       // push parameters:
-      Vector3d forceDirection = new Vector3d(0.0, -1.0, 0.0);
+      Vector3D forceDirection = new Vector3D(0.0, -1.0, 0.0);
       double magnitude = 450.0 * getForceScale();
       double duration = 0.1;
       pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
@@ -159,7 +158,7 @@ public abstract class DRCPushRecoveryTest
       double delay = 0.5 * transferTime;
 
       // push parameters:
-      Vector3d forceDirection = new Vector3d(0.0, 1.0, 0.0);
+      Vector3D forceDirection = new Vector3D(0.0, 1.0, 0.0);
       double magnitude = 450.0 * getForceScale();
       double duration = 0.1;
       pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
@@ -178,7 +177,7 @@ public abstract class DRCPushRecoveryTest
       double delay = 1.0;
 
       // push parameters:
-      Vector3d forceDirection = new Vector3d(1.0, 0.0, 0.0);
+      Vector3D forceDirection = new Vector3D(1.0, 0.0, 0.0);
       double magnitude = 350.0 * getForceScale();
       double duration = 0.15;
       pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
@@ -197,7 +196,7 @@ public abstract class DRCPushRecoveryTest
       double delay = 1.0;
 
       // push parameters:
-      Vector3d forceDirection = new Vector3d(1.0, 0.0, 0.0);
+      Vector3D forceDirection = new Vector3D(1.0, 0.0, 0.0);
       double magnitude = 350.0 * getForceScale();
       double duration = 0.15;
       pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
@@ -216,7 +215,7 @@ public abstract class DRCPushRecoveryTest
       double delay = 0.0;
 
       // push parameters:
-      Vector3d forceDirection = new Vector3d(1.0, 0.0, 0.0);
+      Vector3D forceDirection = new Vector3D(1.0, 0.0, 0.0);
       forceDirection.normalize();
       double magnitude = 100.0 * getForceScale();
       double duration = 1.0;
@@ -236,7 +235,7 @@ public abstract class DRCPushRecoveryTest
       double delay = 0.0;
 
       // push parameters:
-      Vector3d forceDirection = new Vector3d(-1.0, 0.0, 0.0);
+      Vector3D forceDirection = new Vector3D(-1.0, 0.0, 0.0);
       double magnitude = 160.0 * getForceScale();
       double duration = 3.0;
       pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
@@ -256,7 +255,7 @@ public abstract class DRCPushRecoveryTest
       double delay = 0.0;
 
       // push parameters:
-      Vector3d forceDirection = new Vector3d(-1.0, 0.0, 0.0);
+      Vector3D forceDirection = new Vector3D(-1.0, 0.0, 0.0);
       double magnitude = 100.0 * getForceScale();
       double duration = 1.0;
       pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
@@ -275,7 +274,7 @@ public abstract class DRCPushRecoveryTest
       double delay = 0.0;
 
       // push parameters:
-      Vector3d forceDirection = new Vector3d(1.0, 0.0, 0.0);
+      Vector3D forceDirection = new Vector3D(1.0, 0.0, 0.0);
       forceDirection.normalize();
       double magnitude = 100.0 * getForceScale();
       double duration = 1.0;
@@ -295,7 +294,7 @@ public abstract class DRCPushRecoveryTest
       double delay = 0.0;
 
       // push parameters:
-      Vector3d forceDirection = new Vector3d(-1.0, 0.0, 0.0);
+      Vector3D forceDirection = new Vector3D(-1.0, 0.0, 0.0);
       double magnitude = 100.0 * getForceScale();
       double duration = 1.0;
       pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
@@ -313,8 +312,8 @@ public abstract class DRCPushRecoveryTest
             drcSimulationTestHelper.getAvatarSimulation().getControllerFullRobotModel().getEndEffectorFrame(footSide, LimbName.LEG));
       footPose.changeFrame(ReferenceFrame.getWorldFrame());
       footPose.translate(0.0, 0.0, 0.2);
-      Point3d desiredFootPosition = new Point3d();
-      Quat4d desiredFootOrientation = new Quat4d();
+      Point3D desiredFootPosition = new Point3D();
+      Quaternion desiredFootOrientation = new Quaternion();
       footPose.getPose(desiredFootPosition, desiredFootOrientation);
       FootTrajectoryMessage footPosePacket = new FootTrajectoryMessage(footSide, 0.6, desiredFootPosition, desiredFootOrientation);
       drcSimulationTestHelper.send(footPosePacket);
@@ -325,7 +324,7 @@ public abstract class DRCPushRecoveryTest
       double delay = 0.0;
 
       // push parameters:
-      Vector3d forceDirection = new Vector3d(0.0, 1.0, 0.0);
+      Vector3D forceDirection = new Vector3D(0.0, 1.0, 0.0);
       double magnitude = 180.0 * getForceScale();
       double duration = 0.2;
       pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
@@ -378,8 +377,8 @@ public abstract class DRCPushRecoveryTest
 
    private void setupCamera(SimulationConstructionSet scs)
    {
-      Point3d cameraFix = new Point3d(0.0, 0.0, 0.89);
-      Point3d cameraPosition = new Point3d(10.0, 2.0, 1.37);
+      Point3D cameraFix = new Point3D(0.0, 0.0, 0.89);
+      Point3D cameraPosition = new Point3D(10.0, 2.0, 1.37);
       drcSimulationTestHelper.setupCameraForUnitTest(cameraFix, cameraPosition);
    }
 

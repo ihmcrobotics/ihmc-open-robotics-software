@@ -2,8 +2,7 @@ package us.ihmc.simulationconstructionset.util.environments;
 
 import java.util.List;
 
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObject3D;
@@ -22,7 +21,7 @@ public class FiducialsFlatGroundEnvironment implements CommonAvatarEnvironmentIn
       double radius = 3.0;
       for (Fiducial fiducial : Fiducial.values)
       {
-         Vector3d position = new Vector3d(radius * Math.cos(angle), radius * Math.sin(angle), 1.7);
+         Vector3D position = new Vector3D(radius * Math.cos(angle), radius * Math.sin(angle), 1.7);
          CombinedTerrainObject3D fiducualTerrainObject = DefaultCommonAvatarEnvironment.addFiducial(position, angle, fiducial);
          combinedTerrainObject.addTerrainObject(fiducualTerrainObject);
 

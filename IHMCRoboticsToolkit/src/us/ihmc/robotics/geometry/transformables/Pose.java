@@ -1,22 +1,25 @@
 package us.ihmc.robotics.geometry.transformables;
 
-import javax.vecmath.AxisAngle4d;
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Point2d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Point3f;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Quat4f;
-import javax.vecmath.Tuple3d;
-import javax.vecmath.Tuple3f;
-
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.geometry.interfaces.GeometryObject;
+import us.ihmc.euclid.axisAngle.interfaces.AxisAngleBasics;
+import us.ihmc.euclid.axisAngle.interfaces.AxisAngleReadOnly;
+import us.ihmc.euclid.interfaces.GeometryObject;
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.Transform;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
+import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 
 public class Pose implements GeometryObject<Pose>
 {
-   private final TransformablePoint3d position;
-   private final TransformableQuat4d orientation;
+   private final Point3D position;
+   private final Quaternion orientation;
 
    public Pose(Pose pose)
    {
@@ -25,34 +28,22 @@ public class Pose implements GeometryObject<Pose>
 
    public Pose()
    {
-      this.position = new TransformablePoint3d();
-      this.orientation = new TransformableQuat4d();
-   }
-   
-   public Pose(Point3d position, Quat4d orientation)
-   {
-      this.position = new TransformablePoint3d(position);
-      this.orientation = new TransformableQuat4d(orientation);
-   }
-   
-   public Pose(Point3f position, Quat4f orientation)
-   {
-      this.position = new TransformablePoint3d(position);
-      this.orientation = new TransformableQuat4d(orientation);
+      this.position = new Point3D();
+      this.orientation = new Quaternion();
    }
    
    public Pose(RigidBodyTransform transform)
    {
-      position = new TransformablePoint3d();
-      orientation = new TransformableQuat4d();
+      position = new Point3D();
+      orientation = new Quaternion();
       
       setPose(transform);
    }
 
-   public Pose(TransformablePoint3d position, TransformableQuat4d orientation)
+   public Pose(Point3DReadOnly position, QuaternionReadOnly orientation)
    {
-      this.position = new TransformablePoint3d(position);
-      this.orientation = new TransformableQuat4d(orientation);
+      this.position = new Point3D(position);
+      this.orientation = new Quaternion(orientation);
    }
 
    public void setX(double x)
@@ -90,7 +81,7 @@ public class Pose implements GeometryObject<Pose>
       position.set(x, y, z);
    }
 
-   public void translate(Tuple3d translation)
+   public void translate(Tuple3DReadOnly translation)
    {
       position.add(translation);
    }
@@ -102,12 +93,12 @@ public class Pose implements GeometryObject<Pose>
       position.setZ(position.getZ() + z);
    }
 
-   public TransformablePoint3d getPoint()
+   public Point3DReadOnly getPoint()
    {
       return position;
    }
 
-   public TransformableQuat4d getOrientation()
+   public QuaternionReadOnly getOrientation()
    {
       return orientation;
    }
@@ -151,7 +142,7 @@ public class Pose implements GeometryObject<Pose>
    }
 
    @Override
-   public void applyTransform(RigidBodyTransform transform)
+   public void applyTransform(Transform transform)
    {
       this.position.applyTransform(transform);
       this.orientation.applyTransform(transform);
@@ -180,35 +171,24 @@ public class Pose implements GeometryObject<Pose>
       transform.getRotation(orientation);
    }
 
-   public void setPose(Tuple3d position, Quat4d orientation)
+   public void setPose(Tuple3DReadOnly position, QuaternionReadOnly orientation)
    {
       setPosition(position);
       setOrientation(orientation);
    }
 
-   public void setPose(Tuple3f position, Quat4f orientation)
+   public void setPose(Tuple3DReadOnly position, AxisAngleReadOnly orientation)
    {
       setPosition(position);
       setOrientation(orientation);
    }
 
-   public void setPose(Tuple3d position, AxisAngle4d orientation)
-   {
-      setPosition(position);
-      setOrientation(orientation);
-   }
-
-   public void setPosition(Tuple3d position)
+   public void setPosition(Tuple3DReadOnly position)
    {
       this.position.set(position);
    }
 
-   public void setPosition(Tuple3f position)
-   {
-      this.position.set(position);
-   }
-
-   public void setXY(Point2d point)
+   public void setXY(Point2DReadOnly point)
    {
       setX(point.getX());
       setY(point.getY());     
@@ -219,12 +199,12 @@ public class Pose implements GeometryObject<Pose>
       transformToPack.set(orientation, position);
    }
    
-   public TransformablePoint3d getPositionUnsafe()
+   public Point3D getPositionUnsafe()
    {
       return position;
    }
    
-   public void getPosition(Tuple3d tupleToPack)
+   public void getPosition(Tuple3DBasics tupleToPack)
    {
       tupleToPack.set(position); 
    }
@@ -239,42 +219,37 @@ public class Pose implements GeometryObject<Pose>
       this.orientation.set(qx, qy, qz, qs);
    }
 
-   public void setOrientation(Quat4d quaternion)
+   public void setOrientation(QuaternionReadOnly quaternion)
    {
-      this.orientation.setOrientation(quaternion);
+      this.orientation.set(quaternion);
    }
 
-   public void setOrientation(Quat4f quaternion)
+   public void setOrientation(RotationMatrixReadOnly matrix3d)
    {
-      this.orientation.setOrientation(quaternion);
-   }
-   
-   public void setOrientation(Matrix3d matrix3d)
-   {
-      this.orientation.setOrientation(matrix3d);
+      this.orientation.set(matrix3d);
    }
 
-   public void setOrientation(AxisAngle4d axisAngle4d)
+   public void setOrientation(AxisAngleReadOnly axisAngle4d)
    {
-      this.orientation.setOrientation(axisAngle4d);
+      this.orientation.set(axisAngle4d);
    }
    
-   public TransformableQuat4d getOrientationUnsafe()
+   public Quaternion getOrientationUnsafe()
    {
       return orientation;
    }
 
-   public void getOrientation(Matrix3d matrixToPack)
+   public void getOrientation(RotationMatrix matrixToPack)
    {
       matrixToPack.set(orientation);    
    }
 
-   public void getOrientation(Quat4d quaternionToPack)
+   public void getOrientation(QuaternionBasics quaternionToPack)
    {
       quaternionToPack.set(orientation);
    }
    
-   public void getOrientation(AxisAngle4d axisAngleToPack)
+   public void getOrientation(AxisAngleBasics axisAngleToPack)
    {
       axisAngleToPack.set(orientation);
    }

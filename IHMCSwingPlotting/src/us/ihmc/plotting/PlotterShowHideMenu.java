@@ -20,8 +20,8 @@ import java.util.HashMap;
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
-import javax.vecmath.Point2d;
 
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.graphicsDescription.plotting.artifact.Artifact;
 import us.ihmc.graphicsDescription.plotting.artifact.ArtifactsChangedListener;
 
@@ -37,7 +37,7 @@ public class PlotterShowHideMenu extends JPanel implements ArtifactsChangedListe
 
    private HashMap<String, ArrayList<JCheckBox>> boxesByLabel = new HashMap<>();
    
-   private Point2d drawOrigin = new Point2d();
+   private Point2D drawOrigin = new Point2D();
 
    public PlotterShowHideMenu(Plotter plotter)
    {

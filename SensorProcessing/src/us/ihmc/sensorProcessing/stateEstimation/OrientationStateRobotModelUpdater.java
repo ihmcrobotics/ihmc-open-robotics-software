@@ -1,18 +1,20 @@
 package us.ihmc.sensorProcessing.stateEstimation;
 
-import javax.vecmath.Matrix3d;
-
 import us.ihmc.controlFlow.AbstractControlFlowElement;
 import us.ihmc.controlFlow.ControlFlowGraph;
 import us.ihmc.controlFlow.ControlFlowInputPort;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.controlFlow.ControlFlowPort;
-import us.ihmc.robotics.screwTheory.*;
-import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
+import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.robotics.screwTheory.Twist;
+import us.ihmc.robotics.screwTheory.TwistCalculator;
+import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 
 public class OrientationStateRobotModelUpdater extends AbstractControlFlowElement implements Runnable
 {
@@ -128,7 +130,7 @@ public class OrientationStateRobotModelUpdater extends AbstractControlFlowElemen
 
       computeEstimationLinkToWorldTransform(tempEstimationLinkToWorld, tempOrientationEstimatinLink);
       computeRootJointToWorldTransform(rootJoint, estimationFrame, tempRootJointToWorld, tempEstimationLinkToWorld);
-      Matrix3d rootJointRotation = new Matrix3d();
+      RotationMatrix rootJointRotation = new RotationMatrix();
       tempRootJointToWorld.getRotation(rootJointRotation);
 
       rootJoint.setRotation(rootJointRotation);

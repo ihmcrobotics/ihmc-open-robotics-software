@@ -1,5 +1,11 @@
 package us.ihmc.jMonkeyEngineToolkit.jme.util;
 
+import java.awt.Color;
+import java.util.ArrayList;
+import java.util.Random;
+import java.util.concurrent.Callable;
+import java.util.concurrent.atomic.AtomicReference;
+
 import com.jme3.collision.Collidable;
 import com.jme3.collision.CollisionResult;
 import com.jme3.collision.CollisionResults;
@@ -10,20 +16,14 @@ import com.jme3.renderer.queue.RenderQueue.ShadowMode;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 
+import us.ihmc.euclid.tuple3D.Point3D32;
+import us.ihmc.euclid.tuple3D.Vector3D32;
 import us.ihmc.jMonkeyEngineToolkit.Updatable;
 import us.ihmc.jMonkeyEngineToolkit.jme.JMERenderer;
 
-import javax.vecmath.Point3f;
-import javax.vecmath.Vector3f;
-import java.awt.*;
-import java.util.ArrayList;
-import java.util.Random;
-import java.util.concurrent.Callable;
-import java.util.concurrent.atomic.AtomicReference;
-
 public class JMELidarSpriteGenerator extends Node implements Updatable
 {
-   private static final Point3f ORIGIN = new Point3f();
+   private static final Point3D32 ORIGIN = new Point3D32();
    protected JMERenderer jmeRenderer;
    protected Node thisObject = this;
    protected Geometry pointCloudGeometry;
@@ -34,7 +34,7 @@ public class JMELidarSpriteGenerator extends Node implements Updatable
    protected ArrayList<ColorRGBA> colorList = new ArrayList<ColorRGBA>();
    private Random random = new Random();
 
-   protected final AtomicReference<Point3f[]> pointSource = new AtomicReference<>();
+   protected final AtomicReference<Point3D32[]> pointSource = new AtomicReference<>();
 
    public JMELidarSpriteGenerator(JMERenderer jmeRenderer)
    {
@@ -64,16 +64,16 @@ public class JMELidarSpriteGenerator extends Node implements Updatable
       });
    }
 
-   public ArrayList<ColorRGBA> generateColors(Point3f[] points)
+   public ArrayList<ColorRGBA> generateColors(Point3D32[] points)
    {
       colorList.clear();
       float distance = 3f;
       float calcDistance = 0;
       int c;
 
-      for (Point3f current : points)
+      for (Point3D32 current : points)
       {
-         calcDistance = ORIGIN.distance(current);
+         calcDistance = (float) ORIGIN.distance(current);
          c = Color.HSBtoRGB((calcDistance % distance) / distance, 1.0f, 1.0f);
 
          if (defaultColor == null)
@@ -111,7 +111,7 @@ public class JMELidarSpriteGenerator extends Node implements Updatable
       pointCloudGenerator.setSizeCM(resolution);
    }
 
-   public void updatePoints(Point3f[] source)
+   public void updatePoints(Point3D32[] source)
    {
       this.pointSource.set(source);
       newCloudAvailable = true;
@@ -127,7 +127,7 @@ public class JMELidarSpriteGenerator extends Node implements Updatable
          //System.out.println("test3");
 
          newCloudAvailable = false;
-         Point3f[] pointSource = this.pointSource.get();
+         Point3D32[] pointSource = this.pointSource.get();
 
          if (pointSource == null)
          {
@@ -195,12 +195,12 @@ public class JMELidarSpriteGenerator extends Node implements Updatable
          Ray ray = (Ray) other;
          if ((ray.direction != null) && (ray.origin != null) && (ray.direction.lengthSquared() != 0))
          {
-            Point3f origin = new Point3f(ray.getOrigin().x, ray.getOrigin().y, ray.getOrigin().z);
-            Vector3f dir = new Vector3f(ray.getDirection().x, ray.getDirection().y, ray.getDirection().z);
-            Point3f nearest = getNearestIntersection(origin, dir, getLidarResolution(), geom.getWorldTransform());
+            Point3D32 origin = new Point3D32(ray.getOrigin().x, ray.getOrigin().y, ray.getOrigin().z);
+            Vector3D32 dir = new Vector3D32(ray.getDirection().x, ray.getDirection().y, ray.getDirection().z);
+            Point3D32 nearest = getNearestIntersection(origin, dir, getLidarResolution(), geom.getWorldTransform());
             if (nearest != null)
             {
-               CollisionResult collRes = new CollisionResult(geom, new com.jme3.math.Vector3f(nearest.getX(), nearest.getY(), nearest.getZ()), origin.distance(nearest), 0);
+               CollisionResult collRes = new CollisionResult(geom, new com.jme3.math.Vector3f(nearest.getX32(), nearest.getY32(), nearest.getZ32()), (float) origin.distance(nearest), 0);
                collRes.setContactNormal(new com.jme3.math.Vector3f(0, 0, 1));
                results.addCollision(collRes);
 
@@ -223,34 +223,34 @@ public class JMELidarSpriteGenerator extends Node implements Updatable
     * @param resolution lidar resolution
     * @return closest point or null if the ray did not hit any lidar point
     */
-   public Point3f getNearestIntersection(Point3f origin, Vector3f direction, double resolution, Transform pointTransform)
+   public Point3D32 getNearestIntersection(Point3D32 origin, Vector3D32 direction, double resolution, Transform pointTransform)
    {
-      Point3f[] points = pointSource.get();
+      Point3D32[] points = pointSource.get();
       direction.normalize();
       float dx, dy, dz, dot;
       double distanceToLine, distance;
 
       double nearestDistance = Double.POSITIVE_INFINITY;
-      Point3f nearestPoint = null;
+      Point3D32 nearestPoint = null;
 
-      for (Point3f p1 : points)
+      for (Point3D32 p1 : points)
       {
-         com.jme3.math.Vector3f p = new com.jme3.math.Vector3f(p1.getX(), p1.getY(), p1.getZ());
+         com.jme3.math.Vector3f p = new com.jme3.math.Vector3f(p1.getX32(), p1.getY32(), p1.getZ32());
          pointTransform.transformVector(p, p);
 
-         dx = origin.getX() - p.x;
-         dy = origin.getY() - p.y;
-         dz = origin.getZ() - p.z;
+         dx = origin.getX32() - p.x;
+         dy = origin.getY32() - p.y;
+         dz = origin.getZ32() - p.z;
 
-         dot = dx * direction.getX() + dy * direction.getY() + dz * direction.getZ();
+         dot = dx * direction.getX32() + dy * direction.getY32() + dz * direction.getZ32();
 
-         dx = dx - dot * direction.getX();
-         dy = dy - dot * direction.getY();
-         dz = dz - dot * direction.getZ();
+         dx = dx - dot * direction.getX32();
+         dy = dy - dot * direction.getY32();
+         dz = dz - dot * direction.getZ32();
 
          distanceToLine = (dx * dx + dy * dy + dz * dz);
 
-         Point3f curpt = new Point3f(p.x, p.y, p.z);
+         Point3D32 curpt = new Point3D32(p.x, p.y, p.z);
 
          if (distanceToLine < resolution * resolution)
          {

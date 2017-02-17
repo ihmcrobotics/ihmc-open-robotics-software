@@ -1,9 +1,9 @@
 package us.ihmc.robotics.controllers;
 
-import javax.vecmath.Matrix3d;
-
+import us.ihmc.euclid.matrix.Matrix3D;
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -20,9 +20,9 @@ public class EuclideanPositionController implements PositionController
    private final YoFrameVector positionErrorCumulated;
    private final YoFrameVector velocityError;
 
-   private final Matrix3d proportionalGainMatrix;
-   private final Matrix3d derivativeGainMatrix;
-   private final Matrix3d integralGainMatrix;
+   private final Matrix3DReadOnly proportionalGainMatrix;
+   private final Matrix3DReadOnly derivativeGainMatrix;
+   private final Matrix3DReadOnly integralGainMatrix;
 
    private final ReferenceFrame bodyFrame;
    private final FrameVector proportionalTerm;
@@ -169,7 +169,7 @@ public class EuclideanPositionController implements PositionController
       proportionalGainMatrix.transform(proportionalTerm.getVector());
    }
 
-   private final Matrix3d tempMatrix = new Matrix3d();
+   private final Matrix3D tempMatrix = new Matrix3D();
    private void computeDerivativeTerm(FrameVector desiredVelocity, FrameVector currentVelocity)
    {
       desiredVelocity.changeFrame(bodyFrame);

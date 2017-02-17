@@ -1,17 +1,16 @@
 package us.ihmc.graphicsDescription.instructions.primitives;
 
-import javax.vecmath.Matrix3d;
-
+import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.graphicsDescription.instructions.Graphics3DPrimitiveInstruction;
 
 public class Graphics3DRotateInstruction implements Graphics3DPrimitiveInstruction
 {
-   private Matrix3d rot;
-   public Graphics3DRotateInstruction(Matrix3d rot)
+   private RotationMatrix rot;
+   public Graphics3DRotateInstruction(RotationMatrix rot)
    {
       this.rot = rot;
    }
-   public Matrix3d getRotationMatrix()
+   public RotationMatrix getRotationMatrix()
    {
       return rot;
    }

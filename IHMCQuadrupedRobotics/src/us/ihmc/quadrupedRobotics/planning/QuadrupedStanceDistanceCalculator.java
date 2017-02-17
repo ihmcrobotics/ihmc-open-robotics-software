@@ -1,17 +1,17 @@
 package us.ihmc.quadrupedRobotics.planning;
 
 import org.apache.commons.lang3.mutable.MutableDouble;
+
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
-
-import javax.vecmath.Point3d;
 
 public class QuadrupedStanceDistanceCalculator
 {
    private QuadrantDependentList<QuadrantDependentList<MutableDouble>> quadrupedDistanceMatrixA;
    private QuadrantDependentList<QuadrantDependentList<MutableDouble>> quadrupedDistanceMatrixB;
-   private Point3d solePointA;
-   private Point3d solePointB;
+   private Point3D solePointA;
+   private Point3D solePointB;
 
    public QuadrupedStanceDistanceCalculator()
    {
@@ -27,11 +27,11 @@ public class QuadrupedStanceDistanceCalculator
             quadrupedDistanceMatrixB.get(quadrantA).set(quadrantB, new MutableDouble(0.0));
          }
       }
-      solePointA = new Point3d();
-      solePointB = new Point3d();
+      solePointA = new Point3D();
+      solePointB = new Point3D();
    }
 
-   public double computeMaxDifference(QuadrantDependentList<Point3d> solePositionsA, QuadrantDependentList<Point3d> solePositionsB)
+   public double computeMaxDifference(QuadrantDependentList<Point3D> solePositionsA, QuadrantDependentList<Point3D> solePositionsB)
    {
       setupQuadrupedDistanceMatrix(quadrupedDistanceMatrixA, solePositionsA);
       setupQuadrupedDistanceMatrix(quadrupedDistanceMatrixB, solePositionsB);
@@ -52,13 +52,13 @@ public class QuadrupedStanceDistanceCalculator
       return maxDifference;
    }
 
-   public boolean epsilonEquals(QuadrantDependentList<Point3d> solePositionsA, QuadrantDependentList<Point3d> solePositionsB, double epsilon)
+   public boolean epsilonEquals(QuadrantDependentList<Point3D> solePositionsA, QuadrantDependentList<Point3D> solePositionsB, double epsilon)
    {
       return computeMaxDifference(solePositionsA, solePositionsB) < epsilon;
    }
 
    private void setupQuadrupedDistanceMatrix(QuadrantDependentList<QuadrantDependentList<MutableDouble>> quadrupedDistanceMatrix,
-         QuadrantDependentList<Point3d> quadrupedSolePositionList)
+         QuadrantDependentList<Point3D> quadrupedSolePositionList)
    {
       for (RobotQuadrant quadrantA : RobotQuadrant.values())
       {

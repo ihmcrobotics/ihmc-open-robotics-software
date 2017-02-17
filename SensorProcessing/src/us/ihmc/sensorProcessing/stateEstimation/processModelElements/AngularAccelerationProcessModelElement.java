@@ -1,17 +1,16 @@
 package us.ihmc.sensorProcessing.stateEstimation.processModelElements;
 
-import javax.vecmath.Vector3d;
-
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.controlFlow.ControlFlowInputPort;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
-import us.ihmc.sensorProcessing.stateEstimation.TimeDomain;
-import us.ihmc.robotics.linearAlgebra.MatrixTools;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.sensorProcessing.stateEstimation.TimeDomain;
 
 public class AngularAccelerationProcessModelElement extends AbstractProcessModelElement
 {
@@ -21,7 +20,7 @@ public class AngularAccelerationProcessModelElement extends AbstractProcessModel
    private final FrameVector angularAcceleration;
    private final FrameVector angularAccelerationDelta;
    private final ReferenceFrame estimationFrame;
-   private final Vector3d angularAccelerationVector3d = new Vector3d();
+   private final Vector3D angularAccelerationVector3d = new Vector3D();
 
    public AngularAccelerationProcessModelElement(String name, ReferenceFrame estimationFrame, YoVariableRegistry registry,
            ControlFlowOutputPort<FrameVector> angularAccelerationStatePort, ControlFlowInputPort<FrameVector> angularAccelerationInputPort)

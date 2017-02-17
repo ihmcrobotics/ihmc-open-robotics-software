@@ -4,15 +4,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Point3d;
-
-import us.ihmc.robotics.partNames.LimbName;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFramePose;
+import us.ihmc.robotics.partNames.LimbName;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -43,14 +42,14 @@ public class AtlasWristLoopKinematicCalibrator extends AtlasCalibrationDataViewe
    private void debugPrint(int index)
    {
       CalibUtil.setRobotModelFromData(fullRobotModel, q.get(index));
-      FramePose leftEE = new FramePose(fullRobotModel.getEndEffectorFrame(RobotSide.LEFT, LimbName.ARM), new Point3d(+0.00179, +0.13516, +0.01176), CalibUtil.quat0);
-      FramePose rightEE = new FramePose(fullRobotModel.getEndEffectorFrame(RobotSide.RIGHT, LimbName.ARM), new Point3d(+0.00179,-0.13516, -0.01176), CalibUtil.quat0);
+      FramePose leftEE = new FramePose(fullRobotModel.getEndEffectorFrame(RobotSide.LEFT, LimbName.ARM), new Point3D(+0.00179, +0.13516, +0.01176), CalibUtil.quat0);
+      FramePose rightEE = new FramePose(fullRobotModel.getEndEffectorFrame(RobotSide.RIGHT, LimbName.ARM), new Point3D(+0.00179,-0.13516, -0.01176), CalibUtil.quat0);
 
       leftEE.changeFrame(ReferenceFrame.getWorldFrame());
       rightEE.changeFrame(ReferenceFrame.getWorldFrame());
       {
-         Matrix3d leftEEOrientation = new Matrix3d();
-         Matrix3d rightEEOrientation = new Matrix3d();
+         RotationMatrix leftEEOrientation = new RotationMatrix();
+         RotationMatrix rightEEOrientation = new RotationMatrix();
          leftEE.getOrientation(leftEEOrientation);
          rightEE.getOrientation(rightEEOrientation);
          System.out.println("r_axLeft: " + CalibUtil.matrix3dToAxisAngle3d(leftEEOrientation));

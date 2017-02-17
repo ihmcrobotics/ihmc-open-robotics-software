@@ -1,18 +1,18 @@
 package us.ihmc.graphicsDescription.instructions;
 
-import javax.vecmath.Point3d;
+import us.ihmc.euclid.tuple3D.Point3D;
 import java.util.List;
 
 public class PolygonGraphics3DInstruction extends PrimitiveGraphics3DInstruction
 {
-   private final List<Point3d> polygonPoints;
+   private final List<Point3D> polygonPoints;
 
-   public PolygonGraphics3DInstruction(List<Point3d> polygonPoints)
+   public PolygonGraphics3DInstruction(List<Point3D> polygonPoints)
    {
       this.polygonPoints = polygonPoints;
    }
 
-   public List<Point3d> getPolygonPoints()
+   public List<Point3D> getPolygonPoints()
    {
       return polygonPoints;
    }

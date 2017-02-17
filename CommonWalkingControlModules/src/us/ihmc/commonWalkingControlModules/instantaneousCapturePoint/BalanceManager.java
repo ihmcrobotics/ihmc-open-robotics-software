@@ -7,8 +7,6 @@ import static us.ihmc.graphicsDescription.appearance.YoAppearance.DarkRed;
 import static us.ihmc.graphicsDescription.appearance.YoAppearance.Purple;
 import static us.ihmc.graphicsDescription.appearance.YoAppearance.Yellow;
 
-import javax.vecmath.Vector3d;
-
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.captureRegion.PushRecoveryControlModule;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
@@ -18,6 +16,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.CapturePointTools;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -227,17 +226,17 @@ public class BalanceManager
       parentRegistry.addChild(registry);
    }
 
-   public void setMomentumWeight(Vector3d linearWeight)
+   public void setMomentumWeight(Vector3D linearWeight)
    {
       linearMomentumRateOfChangeControlModule.setMomentumWeight(linearWeight);
    }
 
-   public void setMomentumWeight(Vector3d angularWeight, Vector3d linearWeight)
+   public void setMomentumWeight(Vector3D angularWeight, Vector3D linearWeight)
    {
       linearMomentumRateOfChangeControlModule.setMomentumWeight(angularWeight, linearWeight);
    }
 
-   public void setHighMomentumWeightForRecovery(Vector3d highLinearWeight)
+   public void setHighMomentumWeightForRecovery(Vector3D highLinearWeight)
    {
       linearMomentumRateOfChangeControlModule.setHighMomentumWeightForRecovery(highLinearWeight);
    }

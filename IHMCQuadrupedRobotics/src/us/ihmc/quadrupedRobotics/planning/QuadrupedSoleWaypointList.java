@@ -1,15 +1,14 @@
 package us.ihmc.quadrupedRobotics.planning;
 
+import java.util.ArrayList;
+
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-import java.util.ArrayList;
-
 public class QuadrupedSoleWaypointList extends QuadrantDependentList<ArrayList<SoleWaypoint>>
 {
-   private QuadrantDependentList<Point3d> quadrantDependentSolePositionList;
+   private QuadrantDependentList<Point3D> quadrantDependentSolePositionList;
 
    public QuadrupedSoleWaypointList()
    {
@@ -62,7 +61,7 @@ public class QuadrupedSoleWaypointList extends QuadrantDependentList<ArrayList<S
       return get(key).size();
    }
 
-   public QuadrantDependentList<Point3d> getQuadrantDependantSolePosition(int index)
+   public QuadrantDependentList<Point3D> getQuadrantDependantSolePosition(int index)
    {
       for (RobotQuadrant quadrant : RobotQuadrant.values())
       {

@@ -1,23 +1,23 @@
 package us.ihmc.ihmcPerception.depthData;
 
-import us.ihmc.robotics.geometry.RigidBodyTransform;
+import java.util.ArrayList;
+
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.tools.time.Timer;
-
-import javax.vecmath.Point3d;
-import java.util.ArrayList;
 
 public class AsyncPointCloudReceiver implements PointCloudDataReceiverInterface
 {
    private final boolean DEBUG = false;
    private Timer timer = DEBUG ? new Timer().start() : null;
 
-   private volatile ArrayList<Point3d> pointsInWorldFrame;
+   private volatile ArrayList<Point3D> pointsInWorldFrame;
    private volatile double groundHeight;
    private volatile long timestamp;
 
    @Override
-   public void receivedPointCloudData(ReferenceFrame scanFrame, ReferenceFrame lidarFrame, long[] timestamps, ArrayList<Point3d> points,
+   public void receivedPointCloudData(ReferenceFrame scanFrame, ReferenceFrame lidarFrame, long[] timestamps, ArrayList<Point3D> points,
          PointCloudSource... sources)
    {
       if(DEBUG)
@@ -33,7 +33,7 @@ public class AsyncPointCloudReceiver implements PointCloudDataReceiverInterface
 
 
          double localGroundHeight = Double.MAX_VALUE;
-         for(Point3d point : points)
+         for(Point3D point : points)
          {
             lidarTransform.transform(point);
             if(point.getZ() < localGroundHeight) localGroundHeight = point.getZ();
@@ -48,7 +48,7 @@ public class AsyncPointCloudReceiver implements PointCloudDataReceiverInterface
       }
    }
 
-   public synchronized ArrayList<Point3d> getPointsInWorldFrame()
+   public synchronized ArrayList<Point3D> getPointsInWorldFrame()
    {
       return pointsInWorldFrame;
    }

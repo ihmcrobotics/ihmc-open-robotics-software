@@ -1,13 +1,12 @@
 package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.communication.controllerAPI.command.QueueableCommand;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.AbstractSE3TrajectoryMessage;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3TrajectoryPointList;
@@ -110,7 +109,7 @@ public abstract class SE3TrajectoryControllerCommand<T extends SE3TrajectoryCont
    /**
     * Convenience method for accessing {@link #trajectoryPointList}. To get the list use {@link #getTrajectoryPointList()}.
     */
-   public void addTrajectoryPoint(double time, Point3d position, Quat4d orientation, Vector3d linearVelocity, Vector3d angularVelocity)
+   public void addTrajectoryPoint(double time, Point3D position, Quaternion orientation, Vector3D linearVelocity, Vector3D angularVelocity)
    {
       trajectoryPointList.addTrajectoryPoint(time, position, orientation, linearVelocity, angularVelocity);
    }

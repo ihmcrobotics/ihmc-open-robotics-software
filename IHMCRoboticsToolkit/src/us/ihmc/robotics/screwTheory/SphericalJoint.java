@@ -2,21 +2,22 @@ package us.ihmc.robotics.screwTheory;
 
 import java.util.ArrayList;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Quat4d;
-
 import org.ejml.data.DenseMatrix64F;
 
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.RotationTools;
-import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class SphericalJoint extends AbstractInverseDynamicsJoint
 {
    private final FloatingInverseDynamicsJointReferenceFrame afterJointFrame;
-   private final Quat4d jointRotation = new Quat4d();
+   private final Quaternion jointRotation = new Quaternion();
    private final FrameVector jointAngularVelocity;
    private final FrameVector jointAngularAcceleration;
    private final FrameVector jointAngularAccelerationDesired;
@@ -128,22 +129,19 @@ public class SphericalJoint extends AbstractInverseDynamicsJoint
 
    public void setRotation(double yaw, double pitch, double roll)
    {
-      RotationTools.convertYawPitchRollToQuaternion(yaw, pitch, roll, jointRotation);
+      jointRotation.setYawPitchRoll(yaw, pitch, roll);
       this.afterJointFrame.setRotation(jointRotation);
    }
 
-   public void setRotation(Quat4d jointRotation)
+   public void setRotation(QuaternionReadOnly jointRotation)
    {
       this.jointRotation.set(jointRotation);
       this.afterJointFrame.setRotation(jointRotation);
    }
 
-   public void setRotation(Matrix3d jointRotation)
+   public void setRotation(RotationMatrixReadOnly jointRotation)
    {
-      RotationTools.convertMatrixToQuaternion(jointRotation, this.jointRotation);
-
-      // DON'T USE THIS: the method in Quat4d is flawed and doesn't work for some rotation matrices!
-//      this.jointRotation.set(jointRotation);
+      this.jointRotation.set(jointRotation);
       this.afterJointFrame.setRotation(this.jointRotation);
    }
 
@@ -167,19 +165,19 @@ public class SphericalJoint extends AbstractInverseDynamicsJoint
       this.jointTorque.set(jointTorque);
    }
 
-   public void getRotation(Quat4d rotationToPack)
+   public void getRotation(QuaternionBasics rotationToPack)
    {
       rotationToPack.set(jointRotation);
    }
 
-   public void getRotation(Matrix3d rotationToPack)
+   public void getRotation(RotationMatrix rotationToPack)
    {
       rotationToPack.set(jointRotation);
    }
 
-   public void getRotation(double[] yawPitchRoll)
+   public void getRotation(double[] yawPitchRollToPack)
    {
-      RotationTools.convertQuaternionToYawPitchRoll(jointRotation, yawPitchRoll);
+      jointRotation.getYawPitchRoll(yawPitchRollToPack);
    }
 
    public void getJointTorque(FrameVector jointTorqueToPack)
@@ -234,13 +232,13 @@ public class SphericalJoint extends AbstractInverseDynamicsJoint
    @Override
    public void getConfigurationMatrix(DenseMatrix64F matrix, int rowStart)
    {
-      MatrixTools.insertQuat4dIntoEJMLVector(matrix, jointRotation, rowStart);
+      jointRotation.get(rowStart, matrix);
    }
 
    @Override
    public void setConfiguration(DenseMatrix64F matrix, int rowStart)
    {
-      MatrixTools.extractQuat4dFromEJMLVector(jointRotation, matrix, rowStart);
+      jointRotation.set(rowStart, matrix);
       this.afterJointFrame.setRotation(jointRotation);
    }
 

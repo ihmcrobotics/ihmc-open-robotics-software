@@ -1,23 +1,28 @@
 package us.ihmc.atlas.calib;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.ddogleg.optimization.functions.FunctionNtoM;
+
 import boofcv.abst.fiducial.calib.CalibrationDetectorChessboard;
 import boofcv.alg.geo.PerspectiveOps;
 import boofcv.struct.calib.IntrinsicParameters;
 import georegression.struct.point.Point2D_F64;
-import org.ddogleg.optimization.functions.FunctionNtoM;
+import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.partNames.LimbName;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
-
-import javax.vecmath.AxisAngle4d;
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-import java.util.*;
 
 /**
  *
@@ -40,12 +45,12 @@ public class KinematicCalibrationHeadLoopResidual implements FunctionNtoM
    CalibrationDetectorChessboard calibGrid;
 
    // normial orientation of the target.  only rotation around y is optimized
-   public static final Matrix3d TARGET_LEFT_ROT = new Matrix3d(
+   public static final RotationMatrix TARGET_LEFT_ROT = new RotationMatrix(
          -1.0, 0.0, 0.0,
          0.0, 0.0, 1.0,
          0.0, 1.0, 0.0);
 
-   public static final Matrix3d TARGET_RIGHT_ROT = new Matrix3d(
+   public static final RotationMatrix TARGET_RIGHT_ROT = new RotationMatrix(
           0, 1, 0,
           0, 0,-1,
          -1, 0, 0);
@@ -128,16 +133,17 @@ public class KinematicCalibrationHeadLoopResidual implements FunctionNtoM
    public static RigidBodyTransform computeTargetToEE(double param[], int offset, boolean isLeft)
    {
       // Apply rotation around Y to the nominal rotation
-      Vector3d tran = new Vector3d();
+      Vector3D tran = new Vector3D();
 
       tran.set(param[offset], param[offset + 1], param[offset + 2]);
-      AxisAngle4d axisY = new AxisAngle4d(new Vector3d(0, 1, 0), param[offset + 3]);
-      Matrix3d matAxisY = new Matrix3d();
+      AxisAngle axisY = new AxisAngle(new Vector3D(0, 1, 0), param[offset + 3]);
+      RotationMatrix matAxisY = new RotationMatrix();
       matAxisY.set(axisY);
 
-      Matrix3d rotFull = new Matrix3d();
-      Matrix3d targetRotation = isLeft ? TARGET_LEFT_ROT : TARGET_RIGHT_ROT;
-      rotFull.mul(matAxisY, targetRotation);
+      RotationMatrix rotFull = new RotationMatrix();
+      RotationMatrix targetRotation = isLeft ? TARGET_LEFT_ROT : TARGET_RIGHT_ROT;
+      rotFull.set(matAxisY);
+      rotFull.multiply(targetRotation);
 
       RigidBodyTransform targetToEE = new RigidBodyTransform();
       targetToEE.setTranslation(tran);
@@ -166,7 +172,7 @@ public class KinematicCalibrationHeadLoopResidual implements FunctionNtoM
          Point2D_F64 p = calibGrid.getLayout().get(i);
 
          // convert to camera frame
-         Point3d p3 = new Point3d(p.x, p.y, 0);
+         Point3D p3 = new Point3D(p.x, p.y, 0);
          targetToCamera.transform(p3);
 
          // convert to pixels

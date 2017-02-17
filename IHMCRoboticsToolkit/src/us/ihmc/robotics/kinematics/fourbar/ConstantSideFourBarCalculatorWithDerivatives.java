@@ -1,10 +1,14 @@
 package us.ihmc.robotics.kinematics.fourbar;
 
-import us.ihmc.robotics.MathTools;
-
-import static java.lang.Math.*;
+import static java.lang.Math.PI;
+import static java.lang.Math.abs;
+import static java.lang.Math.cos;
+import static java.lang.Math.min;
+import static java.lang.Math.sin;
 import static us.ihmc.robotics.MathTools.clipToMinMax;
 import static us.ihmc.robotics.geometry.GeometryTools.getUnknownTriangleSideLengthByLawOfCosine;
+
+import us.ihmc.robotics.MathTools;
 
 public class ConstantSideFourBarCalculatorWithDerivatives implements FourbarCalculatorWithDerivatives
 {

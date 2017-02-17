@@ -1,6 +1,6 @@
 package us.ihmc.robotics.trajectories;
 
-import javax.vecmath.Point2d;
+import us.ihmc.euclid.tuple2D.Point2D;
 
 /**
  * <p>Title: </p>
@@ -16,7 +16,7 @@ import javax.vecmath.Point2d;
  */
 public interface CurveGenerator
 {
-   public abstract Point2d getPointGivenX(double xValue);
+   public abstract Point2D getPointGivenX(double xValue);
 
    public abstract double getDerivative(double xValue);
 
@@ -24,7 +24,7 @@ public interface CurveGenerator
 
    public abstract double getXmax();
 
-   public abstract Point2d[] getArrayOfPoints(int numberOfPointsToReturn);
+   public abstract Point2D[] getArrayOfPoints(int numberOfPointsToReturn);
 
-   public abstract void setArrayOfPoints(Point2d[] newArrayOfPoints);
+   public abstract void setArrayOfPoints(Point2D[] newArrayOfPoints);
 }

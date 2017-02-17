@@ -1,10 +1,9 @@
 package us.ihmc.simulationconstructionset.util.ground;
 
-import javax.vecmath.Point2d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector2d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.jMonkeyEngineToolkit.HeightMapWithNormals;
@@ -14,24 +13,24 @@ import us.ihmc.robotics.geometry.BoundingBox3d;
 
 public class BalanceBeamTerrainObject implements TerrainObject3D, HeightMapWithNormals
 {
-   private final Point2d origin;
+   private final Point2D origin;
    private final BoundingBox3d boundingBox;
-   private final Vector2d direction;
+   private final Vector2D direction;
    private final double width;
 
-   private final Vector2d tempVector = new Vector2d();
+   private final Vector2D tempVector = new Vector2D();
    private final Graphics3DObject linkGraphics;
    private final double heightAboveGround;
 
-   public BalanceBeamTerrainObject(Point2d origin, double back, double forward, Vector2d direction, double width, double heightAboveGround, AppearanceDefinition appearance)
+   public BalanceBeamTerrainObject(Point2D origin, double back, double forward, Vector2D direction, double width, double heightAboveGround, AppearanceDefinition appearance)
    {
-      Point2d pForward = new Point2d(direction);
+      Point2D pForward = new Point2D(direction);
       pForward.scale(forward);
 
-      Point2d pBack = new Point2d(direction);
+      Point2D pBack = new Point2D(direction);
       pBack.scale(-back);
 
-      this.origin = new Point2d(origin);
+      this.origin = new Point2D(origin);
       double xMin = Math.min(pForward.getX(), pBack.getX());
       double xMax = Math.max(pForward.getX(), pBack.getX());
       double yMin = Math.min(pForward.getY(), pBack.getY());
@@ -39,8 +38,8 @@ public class BalanceBeamTerrainObject implements TerrainObject3D, HeightMapWithN
       double zMin = Double.NEGATIVE_INFINITY;
       double zMax = zMin + heightAboveGround;
       
-      Point3d minPoint = new Point3d(xMin, yMin, zMin);
-      Point3d maxPoint = new Point3d(xMax, yMax, zMax);
+      Point3D minPoint = new Point3D(xMin, yMin, zMin);
+      Point3D maxPoint = new Point3D(xMax, yMax, zMax);
       
       this.boundingBox = new BoundingBox3d(minPoint, maxPoint);
       
@@ -58,7 +57,7 @@ public class BalanceBeamTerrainObject implements TerrainObject3D, HeightMapWithN
    }
 
    @Override
-   public double heightAndNormalAt(double x, double y, double z, Vector3d normalToPack)
+   public double heightAndNormalAt(double x, double y, double z, Vector3D normalToPack)
    {
       double heightAt = this.heightAt(x, y, z);
       this.surfaceNormalAt(x, y, z, normalToPack);
@@ -89,20 +88,20 @@ public class BalanceBeamTerrainObject implements TerrainObject3D, HeightMapWithN
       }
    }
 
-   public void surfaceNormalAt(double x, double y, double z, Vector3d normal)
+   public void surfaceNormalAt(double x, double y, double z, Vector3D normal)
    {
       normal.set(0.0, 0.0, 1.0);
    }
 
 
-   public void closestIntersectionTo(double x, double y, double z, Point3d intersection)
+   public void closestIntersectionTo(double x, double y, double z, Point3D intersection)
    {
       intersection.setX(x);    // Go Straight Up for now...
       intersection.setY(y);
       intersection.setZ(heightAt(x, y, z));
    }
 
-   public void closestIntersectionAndNormalAt(double x, double y, double z, Point3d intersection, Vector3d normal)
+   public void closestIntersectionAndNormalAt(double x, double y, double z, Point3D intersection, Vector3D normal)
    {
       intersection.setX(x);    // Go Straight Up for now...
       intersection.setY(y);
@@ -113,7 +112,7 @@ public class BalanceBeamTerrainObject implements TerrainObject3D, HeightMapWithN
 
 
    @Override
-   public boolean checkIfInside(double x, double y, double z, Point3d intersectionToPack, Vector3d normalToPack)
+   public boolean checkIfInside(double x, double y, double z, Point3D intersectionToPack, Vector3D normalToPack)
    {
       intersectionToPack.set(x, y, heightAt(x, y, z));
       surfaceNormalAt(x, y, z, normalToPack);

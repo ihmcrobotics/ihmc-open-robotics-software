@@ -3,9 +3,8 @@ package us.ihmc.geometry.polytope;
 import java.util.PriorityQueue;
 import java.util.Set;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import gnu.trove.map.hash.THashMap;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 
@@ -14,8 +13,8 @@ public class ExpandingPolytopeAlgorithm
    private final PriorityQueue<ExpandingPolytopeEntry> triangleEntryQueue = new PriorityQueue<ExpandingPolytopeEntry>();
    private final ExpandingPolytopeEdgeList edgeList = new ExpandingPolytopeEdgeList();
 
-   private final THashMap<Point3d, Point3d> correspondingPointsOnA = new THashMap<>();
-   private final THashMap<Point3d, Point3d> correspondingPointsOnB = new THashMap<>();
+   private final THashMap<Point3D, Point3D> correspondingPointsOnA = new THashMap<>();
+   private final THashMap<Point3D, Point3D> correspondingPointsOnB = new THashMap<>();
 
    private boolean polytopeIsRightHanded;
    private SupportingVertexHolder polytopeA;
@@ -27,10 +26,10 @@ public class ExpandingPolytopeAlgorithm
 
    private final RecyclingArrayList<ExpandingPolytopeEntry> polytopeEntryPool = new RecyclingArrayList<>(ExpandingPolytopeEntry.class);
 
-   private final Vector3d tempVector12 = new Vector3d();
-   private final Vector3d tempVector13 = new Vector3d();
-   private final Vector3d tempVector14 = new Vector3d();
-   private final Vector3d tempVector12Cross13 = new Vector3d();
+   private final Vector3D tempVector12 = new Vector3D();
+   private final Vector3D tempVector13 = new Vector3D();
+   private final Vector3D tempVector14 = new Vector3D();
+   private final Vector3D tempVector12Cross13 = new Vector3D();
 
    public ExpandingPolytopeAlgorithm(double epsilonRelative)
    {
@@ -58,10 +57,10 @@ public class ExpandingPolytopeAlgorithm
       if (numberOfPoints != 4)
          throw new RuntimeException("Implement for non tetrahedral simplex");
 
-      Point3d pointOne = simplex.getPoint(0);
-      Point3d pointTwo = simplex.getPoint(1);
-      Point3d pointThree = simplex.getPoint(2);
-      Point3d pointFour = simplex.getPoint(3);
+      Point3D pointOne = simplex.getPoint(0);
+      Point3D pointTwo = simplex.getPoint(1);
+      Point3D pointThree = simplex.getPoint(2);
+      Point3D pointFour = simplex.getPoint(3);
 
       tempVector12.sub(pointTwo, pointOne);
       tempVector13.sub(pointThree, pointOne);
@@ -142,12 +141,12 @@ public class ExpandingPolytopeAlgorithm
       }
    }
 
-   private final Vector3d supportDirection = new Vector3d();
+   private final Vector3D supportDirection = new Vector3D();
 
-   public void computeExpandedPolytope(Vector3d separatingVectorToPack, Point3d closestPointOnA, Point3d closestPointOnB)
+   public void computeExpandedPolytope(Vector3D separatingVectorToPack, Point3D closestPointOnA, Point3D closestPointOnB)
    {
       double mu = Double.POSITIVE_INFINITY; // Upper bound for the square penetration depth.
-      Vector3d closestPointToOrigin = null;
+      Vector3D closestPointToOrigin = null;
       ExpandingPolytopeEntry closestTriangleToOrigin = null;
 
       int numberOfIterations = 0;
@@ -188,11 +187,11 @@ public class ExpandingPolytopeAlgorithm
                supportDirection.set(closestPointToOrigin);
             }
             
-            Point3d supportingVertexA = polytopeA.getSupportingVertex(supportDirection);
+            Point3D supportingVertexA = polytopeA.getSupportingVertex(supportDirection);
             supportDirection.negate();
-            Point3d supportingVertexB = polytopeB.getSupportingVertex(supportDirection);
+            Point3D supportingVertexB = polytopeB.getSupportingVertex(supportDirection);
 
-            Vector3d w = new Vector3d();
+            Vector3D w = new Vector3D();
             w.sub(supportingVertexA, supportingVertexB);
 
             if (listener != null)
@@ -223,14 +222,14 @@ public class ExpandingPolytopeAlgorithm
                // edgeList now is the entire silhouette of the current polytope as seen from w.
 
                ExpandingPolytopeEntry firstNewEntry = null;
-               Point3d wPoint = new Point3d(w);
+               Point3D wPoint = new Point3D(w);
                correspondingPointsOnA.put(wPoint, supportingVertexA);
                correspondingPointsOnB.put(wPoint, supportingVertexB);
 
                int numberOfEdges = edgeList.getNumberOfEdges();
 
                //TODO: Recycle the trash here...
-               THashMap<Point3d, ExpandingPolytopeEntry[]> mapFromStitchVertexToTriangles = new THashMap<>();
+               THashMap<Point3D, ExpandingPolytopeEntry[]> mapFromStitchVertexToTriangles = new THashMap<>();
 
                for (int edgeIndex = 0; edgeIndex < numberOfEdges; edgeIndex++)
                {
@@ -240,8 +239,8 @@ public class ExpandingPolytopeAlgorithm
                   int sentryEdgeIndex = edge.getEdgeIndex();
                   int nextIndex = (sentryEdgeIndex + 1) % 3;
 
-                  Point3d sentryVertexOne = sentry.getVertex(sentryEdgeIndex);
-                  Point3d sentryVertexTwo = sentry.getVertex(nextIndex);
+                  Point3D sentryVertexOne = sentry.getVertex(sentryEdgeIndex);
+                  Point3D sentryVertexTwo = sentry.getVertex(nextIndex);
 
 //                  ExpandingPolytopeEntry newEntry = polytopeEntryPool.add();
 //                  newEntry.reset(sentryVertexTwo, sentryVertexOne, wPoint);
@@ -287,9 +286,9 @@ public class ExpandingPolytopeAlgorithm
                }
 
                // Stich em up:
-               Set<Point3d> keySet = mapFromStitchVertexToTriangles.keySet();
+               Set<Point3D> keySet = mapFromStitchVertexToTriangles.keySet();
 
-               for (Point3d stitchVertex : keySet)
+               for (Point3D stitchVertex : keySet)
                {
                   ExpandingPolytopeEntry[] trianglesToStitch = mapFromStitchVertexToTriangles.get(stitchVertex);
                   if ((trianglesToStitch[0] == null) || (trianglesToStitch[1] == null))
@@ -343,8 +342,8 @@ public class ExpandingPolytopeAlgorithm
       }
    }
 
-   private ExpandingPolytopeEntry[] getOrCreateTwoTriangleArray(THashMap<Point3d, ExpandingPolytopeEntry[]> mapFromStitchVertexToTriangles,
-         Point3d sentryVertexOne)
+   private ExpandingPolytopeEntry[] getOrCreateTwoTriangleArray(THashMap<Point3D, ExpandingPolytopeEntry[]> mapFromStitchVertexToTriangles,
+         Point3D sentryVertexOne)
    {
       ExpandingPolytopeEntry[] twoTriangleArray = mapFromStitchVertexToTriangles.get(sentryVertexOne);
       if (twoTriangleArray == null)
@@ -356,20 +355,20 @@ public class ExpandingPolytopeAlgorithm
       return twoTriangleArray;
    }
 
-   private final Point3d tempPoint = new Point3d();
+   private final Point3D tempPoint = new Point3D();
 
-   private void computeClosestPointsOnAAndB(ExpandingPolytopeEntry closestTriangleToOrigin, Point3d closestPointOnA, Point3d closestPointOnB)
+   private void computeClosestPointsOnAAndB(ExpandingPolytopeEntry closestTriangleToOrigin, Point3D closestPointOnA, Point3D closestPointOnB)
    {
       closestPointOnA.set(0.0, 0.0, 0.0);
       closestPointOnB.set(0.0, 0.0, 0.0);
 
       for (int i = 0; i < 3; i++)
       {
-         Point3d vertex = closestTriangleToOrigin.getVertex(i);
+         Point3D vertex = closestTriangleToOrigin.getVertex(i);
          double lambda = closestTriangleToOrigin.getLambda(i);
 
-         Point3d pointOnA = correspondingPointsOnA.get(vertex);
-         Point3d pointOnB = correspondingPointsOnB.get(vertex);
+         Point3D pointOnA = correspondingPointsOnA.get(vertex);
+         Point3D pointOnB = correspondingPointsOnB.get(vertex);
 
          tempPoint.set(pointOnA);
          tempPoint.scale(lambda);

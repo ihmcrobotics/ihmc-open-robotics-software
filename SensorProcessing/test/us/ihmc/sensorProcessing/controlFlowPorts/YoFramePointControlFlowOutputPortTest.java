@@ -5,13 +5,12 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Random;
 
-import javax.vecmath.Vector3d;
-
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.controlFlow.ControlFlowElement;
 import us.ihmc.controlFlow.NullControlFlowElement;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.random.RandomTools;
@@ -40,7 +39,7 @@ public class YoFramePointControlFlowOutputPortTest
       
       for (int i = 0; i < 1000; i++)
       {
-         Vector3d vector = RandomTools.generateRandomVector(rand, RandomTools.generateRandomDouble(rand, Double.MIN_VALUE, Double.MAX_VALUE));
+         Vector3D vector = RandomTools.generateRandomVector(rand, RandomTools.generateRandomDouble(rand, Double.MIN_VALUE, Double.MAX_VALUE));
          FramePoint dataIn = new FramePoint(frame, vector);
          controlFlowOutputPort.setData(dataIn);
          FramePoint dataOut = controlFlowOutputPort.getData();

@@ -18,9 +18,9 @@
 
 package us.ihmc.sensorProcessing.bubo.clouds.fit.s2s.general;
 
-import georegression.struct.point.Point2D_F64;
-
 import java.util.List;
+
+import georegression.struct.point.Point2D_F64;
 
 
 /**

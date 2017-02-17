@@ -3,15 +3,13 @@ package us.ihmc.humanoidRobotics.communication.packets.manipulation;
 import java.util.Arrays;
 import java.util.Random;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
 import us.ihmc.communication.packets.Packet;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.geometry.TransformTools;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -21,9 +19,9 @@ public class HandstepPacket extends Packet<HandstepPacket> implements Transforma
 {
    // Must be public for efficient serialization.
    public RobotSide robotSide;
-   public Point3d location;
-   public Quat4d orientation;
-   public Vector3d surfaceNormal;
+   public Point3D location;
+   public Quaternion orientation;
+   public Vector3D surfaceNormal;
    public double swingTrajectoryTime;
 
    public HandstepPacket()
@@ -31,67 +29,67 @@ public class HandstepPacket extends Packet<HandstepPacket> implements Transforma
       // Must have null constructor for efficient serialization.
    }
 
-   public HandstepPacket(RobotSide robotSide, Point3d location, Quat4d orientation, Vector3d surfaceNormal, double swingTrajectoryTime)
+   public HandstepPacket(RobotSide robotSide, Point3D location, Quaternion orientation, Vector3D surfaceNormal, double swingTrajectoryTime)
    {
       this.robotSide = robotSide;
       this.location = location;
       this.orientation = orientation;
       this.surfaceNormal = surfaceNormal;
       this.swingTrajectoryTime = swingTrajectoryTime;
-      RotationTools.checkQuaternionNormalized(this.orientation);
+      orientation.checkIfUnitary();
    }
 
    public HandstepPacket(HandstepPacket handstepPacket)
    {
       this.robotSide = handstepPacket.robotSide;
-      this.location = new Point3d(handstepPacket.location);
-      this.orientation = new Quat4d(handstepPacket.orientation);
-      this.surfaceNormal = new Vector3d(handstepPacket.surfaceNormal);
-      RotationTools.checkQuaternionNormalized(this.orientation);
+      this.location = new Point3D(handstepPacket.location);
+      this.orientation = new Quaternion(handstepPacket.orientation);
+      this.surfaceNormal = new Vector3D(handstepPacket.surfaceNormal);
+      orientation.checkIfUnitary();
    }
 
-   public Point3d getLocation()
+   public Point3D getLocation()
    {
       return location;
    }
 
-   public void getLocation(Point3d locationToPack)
+   public void getLocation(Point3D locationToPack)
    {
       locationToPack.set(location);
    }
 
-   public void setLocation(Point3d location)
+   public void setLocation(Point3D location)
    {
       this.location.set(location);
    }
 
-   public Quat4d getOrientation()
+   public Quaternion getOrientation()
    {
       return orientation;
    }
 
-   public void getOrientation(Quat4d orientationToPack)
+   public void getOrientation(Quaternion orientationToPack)
    {
       orientationToPack.set(this.orientation);
    }
 
-   public Vector3d getSurfaceNormal()
+   public Vector3D getSurfaceNormal()
    {
       return surfaceNormal;
    }
 
-   public void getSurfaceNormal(Vector3d surfaceNormalToPack)
+   public void getSurfaceNormal(Vector3D surfaceNormalToPack)
    {
       surfaceNormalToPack.set(this.surfaceNormal);
    }
 
-   public void setOrientation(Quat4d orientation)
+   public void setOrientation(Quaternion orientation)
    {
       this.orientation.set(orientation);
-      RotationTools.checkQuaternionNormalized(this.orientation);
+      orientation.checkIfUnitary();
    }
 
-   public void setSurfaceNormal(Vector3d surfaceNormal)
+   public void setSurfaceNormal(Vector3D surfaceNormal)
    {
       this.surfaceNormal.set(surfaceNormal);
 
@@ -133,8 +131,8 @@ public class HandstepPacket extends Packet<HandstepPacket> implements Transforma
       boolean orientationEquals = orientation.epsilonEquals(handstepPacket.orientation, epsilon);
       if (!orientationEquals)
       {
-         Quat4d temp = new Quat4d();
-         temp.negate(orientation);
+         Quaternion temp = new Quaternion();
+         temp.setAndNegate(orientation);
          orientationEquals = temp.epsilonEquals(handstepPacket.orientation, epsilon);
       }
 
@@ -148,7 +146,7 @@ public class HandstepPacket extends Packet<HandstepPacket> implements Transforma
       // String rigidBodyName;
       ret.robotSide = this.getRobotSide();
 
-      // Point3d location;
+      // Point3D location;
       ret.location = TransformTools.getTransformedPoint(this.getLocation(), transform);
 
       // Quat4d orientation;

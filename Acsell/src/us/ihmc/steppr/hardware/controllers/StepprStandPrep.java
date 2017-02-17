@@ -2,6 +2,7 @@ package us.ihmc.steppr.hardware.controllers;
 
 import java.util.EnumMap;
 
+import us.ihmc.commons.Conversions;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.controllers.PDController;
@@ -11,7 +12,6 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.steppr.hardware.StepprJoint;
 import us.ihmc.tools.maps.EnumDoubleMap;
 
@@ -104,7 +104,7 @@ public class StepprStandPrep implements StepprController
          break;
 
       case INITIALIZE:
-         initialTime.set(TimeTools.nanoSecondstoSeconds(timestamp));
+         initialTime.set(Conversions.nanoSecondstoSeconds(timestamp));
          trajectory.setCubic(0.0, trajectoryTime, 0.0, 0.0, 1.0, 0.0);
 
          for (StepprJoint joint : StepprJoint.values)
@@ -116,7 +116,7 @@ public class StepprStandPrep implements StepprController
          break;
 
       case EXECUTE:
-         double timeInTrajectory = MathTools.clipToMinMax(TimeTools.nanoSecondstoSeconds(timestamp) - initialTime.getDoubleValue(), 0, trajectoryTime);
+         double timeInTrajectory = MathTools.clipToMinMax(Conversions.nanoSecondstoSeconds(timestamp) - initialTime.getDoubleValue(), 0, trajectoryTime);
          trajectory.compute(timeInTrajectory);
          double positionScale = trajectory.getPosition();
 

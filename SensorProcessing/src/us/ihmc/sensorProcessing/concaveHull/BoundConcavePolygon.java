@@ -19,14 +19,6 @@ package us.ihmc.sensorProcessing.concaveHull;
 
 
 
-import georegression.geometry.GeometryMath_F64;
-import georegression.metric.ClosestPoint3D_F64;
-import georegression.struct.plane.PlaneGeneral3D_F64;
-import georegression.struct.point.Point2D_F64;
-import georegression.struct.point.Point3D_F64;
-import georegression.struct.point.Vector2D_F64;
-import georegression.struct.point.Vector3D_F64;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,6 +26,14 @@ import org.ddogleg.struct.FastQueue;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.factory.DecompositionFactory;
 import org.ejml.interfaces.decomposition.EigenDecomposition;
+
+import georegression.geometry.GeometryMath_F64;
+import georegression.metric.ClosestPoint3D_F64;
+import georegression.struct.plane.PlaneGeneral3D_F64;
+import georegression.struct.point.Point2D_F64;
+import georegression.struct.point.Point3D_F64;
+import georegression.struct.point.Vector2D_F64;
+import georegression.struct.point.Vector3D_F64;
 
 /**
  * Given an equation for a plane and a set of points which belong to the plane, find a bounding rectangle which

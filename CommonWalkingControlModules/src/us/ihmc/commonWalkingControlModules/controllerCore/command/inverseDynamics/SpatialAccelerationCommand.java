@@ -6,6 +6,7 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -13,8 +14,6 @@ import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
 import us.ihmc.robotics.screwTheory.SpatialMotionVector;
 import us.ihmc.robotics.screwTheory.Twist;
-
-import javax.vecmath.Vector3d;
 
 public class SpatialAccelerationCommand implements InverseDynamicsCommand<SpatialAccelerationCommand>
 {
@@ -102,7 +101,7 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
       }
    }
 
-   public void setAngularWeights(Vector3d angular)
+   public void setAngularWeights(Vector3D angular)
    {
       weightVector.set(0, 0, angular.getX());
       weightVector.set(1, 0, angular.getY());
@@ -111,7 +110,7 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
       hasWeight = angular.getX() != HARD_CONSTRAINT && angular.getY() != HARD_CONSTRAINT && angular.getZ() != HARD_CONSTRAINT;
    }
 
-   public void setWeights(Vector3d angular, Vector3d linear)
+   public void setWeights(Vector3D angular, Vector3D linear)
    {
       weightVector.set(0, 0, angular.getX());
       weightVector.set(1, 0, angular.getY());

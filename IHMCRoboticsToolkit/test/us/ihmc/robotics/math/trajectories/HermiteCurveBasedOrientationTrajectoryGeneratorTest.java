@@ -5,12 +5,11 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Random;
 
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -38,12 +37,12 @@ public class HermiteCurveBasedOrientationTrajectoryGeneratorTest
       FrameVector currentAngularAcceleration = new FrameVector();
 
       FrameOrientation orientationFromIntegration = new FrameOrientation();
-      Vector3d angularVelocityVector = new Vector3d();
-      Quat4d quaternionFromIntegration = new Quat4d();
-      Quat4d integratedAngularVelocity = new Quat4d();
+      Vector3D angularVelocityVector = new Vector3D();
+      Quaternion quaternionFromIntegration = new Quaternion();
+      Quaternion integratedAngularVelocity = new Quaternion();
 
       FrameVector angularVelocityFromIntegration = new FrameVector();
-      Vector3d integratedAngularAcceleration = new Vector3d();
+      Vector3D integratedAngularAcceleration = new Vector3D();
 
       HermiteCurveBasedOrientationTrajectoryGenerator traj = new HermiteCurveBasedOrientationTrajectoryGenerator("traj", worldFrame, new YoVariableRegistry("null"));
       traj.setTrajectoryTime(trajectoryTime);
@@ -72,7 +71,7 @@ public class HermiteCurveBasedOrientationTrajectoryGeneratorTest
             currentAngularVelocity.get(angularVelocityVector);
             RotationTools.integrateAngularVelocity(angularVelocityVector, dt, integratedAngularVelocity);
             orientationFromIntegration.getQuaternion(quaternionFromIntegration);
-            quaternionFromIntegration.mul(integratedAngularVelocity, quaternionFromIntegration);
+            quaternionFromIntegration.multiply(integratedAngularVelocity, quaternionFromIntegration);
             orientationFromIntegration.set(quaternionFromIntegration);
 
             currentAngularAcceleration.get(integratedAngularAcceleration);
@@ -229,9 +228,9 @@ public class HermiteCurveBasedOrientationTrajectoryGeneratorTest
          FrameVector currentAngularVelocity = new FrameVector();
          FrameVector currentAngularAcceleration = new FrameVector();
 
-         Quat4d currentQuaternion = new Quat4d();
-         Quat4d previousQuaternion = new Quat4d();
-         Vector3d delta = new Vector3d();
+         Quaternion currentQuaternion = new Quaternion();
+         Quaternion previousQuaternion = new Quaternion();
+         Vector3D delta = new Vector3D();
 
          FrameOrientation previousOrientation = new FrameOrientation();
          FrameVector previousAngularVelocity = new FrameVector();
@@ -253,9 +252,9 @@ public class HermiteCurveBasedOrientationTrajectoryGeneratorTest
 
             currentOrientation.getQuaternion(currentQuaternion);
             previousOrientation.getQuaternion(previousQuaternion);
-            if (quaternionCalculus.dot(currentQuaternion, previousQuaternion) < 0.0)
+            if (currentQuaternion.dot(previousQuaternion) < 0.0)
                previousQuaternion.negate();
-            currentQuaternion.mulInverse(previousQuaternion);
+            currentQuaternion.multiplyConjugateOther(previousQuaternion);
             quaternionCalculus.log(currentQuaternion, delta);
             double velocityFD = delta.length() / dt;
             maxVelocityRecorded = Math.max(maxVelocityRecorded, velocityFD);
@@ -338,9 +337,9 @@ public class HermiteCurveBasedOrientationTrajectoryGeneratorTest
          FrameVector currentAngularVelocity = new FrameVector();
          FrameVector currentAngularAcceleration = new FrameVector();
 
-         Quat4d currentQuaternion = new Quat4d();
-         Quat4d previousQuaternion = new Quat4d();
-         Vector3d delta = new Vector3d();
+         Quaternion currentQuaternion = new Quaternion();
+         Quaternion previousQuaternion = new Quaternion();
+         Vector3D delta = new Vector3D();
 
          FrameOrientation previousOrientation = new FrameOrientation();
          FrameVector previousAngularVelocity = new FrameVector();
@@ -362,9 +361,9 @@ public class HermiteCurveBasedOrientationTrajectoryGeneratorTest
 
             currentOrientation.getQuaternion(currentQuaternion);
             previousOrientation.getQuaternion(previousQuaternion);
-            if (quaternionCalculus.dot(currentQuaternion, previousQuaternion) < 0.0)
+            if (currentQuaternion.dot(previousQuaternion) < 0.0)
                previousQuaternion.negate();
-            currentQuaternion.mulInverse(previousQuaternion);
+            currentQuaternion.multiplyConjugateOther(previousQuaternion);
             quaternionCalculus.log(currentQuaternion, delta);
             double velocityFD = delta.length() / dt;
             maxVelocityRecorded = Math.max(maxVelocityRecorded, velocityFD);
@@ -423,7 +422,7 @@ public class HermiteCurveBasedOrientationTrajectoryGeneratorTest
       double qx = frameOrientation.getQuaternionCopy().getX();
       double qy = frameOrientation.getQuaternionCopy().getY();
       double qz = frameOrientation.getQuaternionCopy().getZ();
-      double qs = frameOrientation.getQuaternionCopy().getW();
+      double qs = frameOrientation.getQuaternionCopy().getS();
       return " = new FrameOrientation(worldFrame, " + qx + ", " + qy + ", " + qz + ", " + qs + ");";
    }
 

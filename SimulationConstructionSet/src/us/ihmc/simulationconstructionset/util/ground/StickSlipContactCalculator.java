@@ -1,33 +1,32 @@
 package us.ihmc.simulationconstructionset.util.ground;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
 
 public class StickSlipContactCalculator
 {
-   private final Point3d contactAPosition = new Point3d();
-   private final Point3d contactBPosition = new Point3d();
+   private final Point3D contactAPosition = new Point3D();
+   private final Point3D contactBPosition = new Point3D();
 
-   private final Vector3d contactAVelocity = new Vector3d();
-   private final Vector3d contactBVelocity = new Vector3d();
+   private final Vector3D contactAVelocity = new Vector3D();
+   private final Vector3D contactBVelocity = new Vector3D();
 
-   private final Vector3d velocityDifference = new Vector3d();
+   private final Vector3D velocityDifference = new Vector3D();
 
-   private final Point3d contactableClosestPoint = new Point3d();
-   private final Vector3d contactableSurfaceNormal = new Vector3d();
+   private final Point3D contactableClosestPoint = new Point3D();
+   private final Vector3D contactableSurfaceNormal = new Vector3D();
 
-   private final Vector3d contactForceDirection = new Vector3d();
+   private final Vector3D contactForceDirection = new Vector3D();
 
-   private final Vector3d contactForceFromSpring = new Vector3d();
-   private final Vector3d contactForceFromDamper = new Vector3d();
-   private final Vector3d totalContactForce = new Vector3d();
+   private final Vector3D contactForceFromSpring = new Vector3D();
+   private final Vector3D contactForceFromDamper = new Vector3D();
+   private final Vector3D totalContactForce = new Vector3D();
 
-   private final Vector3d normalContactForce = new Vector3d();
-   private final Vector3d parallelContactForce = new Vector3d();
-   private final Vector3d slipVector = new Vector3d();
+   private final Vector3D normalContactForce = new Vector3D();
+   private final Vector3D parallelContactForce = new Vector3D();
+   private final Vector3D slipVector = new Vector3D();
 
    public void doContactMade(ExternalForcePoint contactPointA, Contactable contactableB, GroundContactPoint contactPointB)
    {

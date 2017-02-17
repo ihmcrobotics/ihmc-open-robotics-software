@@ -2,10 +2,9 @@ package us.ihmc.jMonkeyEngineToolkit.camera;
 
 import java.awt.image.BufferedImage;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-
 import boofcv.struct.calib.IntrinsicParameters;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 
 public interface VideoProvider
 {
@@ -13,8 +12,8 @@ public interface VideoProvider
 
    public IntrinsicParameters getIntrinsicParameters();
 
-   public Quat4d getCameraOrientation();
+   public Quaternion getCameraOrientation();
 
-   public Point3d getCameraPosition();
+   public Point3D getCameraPosition();
 
 }

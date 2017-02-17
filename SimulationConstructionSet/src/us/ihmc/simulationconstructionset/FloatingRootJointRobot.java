@@ -1,16 +1,13 @@
 package us.ihmc.simulationconstructionset;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Tuple3d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotDescription.RobotDescription;
-import us.ihmc.simulationconstructionset.FloatingJoint;
-import us.ihmc.simulationconstructionset.RobotFromDescription;
 import us.ihmc.tools.FormattingTools;
 
 public class FloatingRootJointRobot extends RobotFromDescription
@@ -29,13 +26,13 @@ public class FloatingRootJointRobot extends RobotFromDescription
 
       rootJoint = (FloatingJoint) this.getRootJoints().get(0);
 
-      Point3d centerOfMass = new Point3d();
+      Point3D centerOfMass = new Point3D();
       double totalMass = computeCenterOfMass(centerOfMass);
       if (DEBUG)
          System.out.println("SDFRobot: Total robot mass: " + FormattingTools.getFormattedDecimal3D(totalMass) + " (kg)");
    }
 
-   public Quat4d getRootJointToWorldRotationQuaternion()
+   public Quaternion getRootJointToWorldRotationQuaternion()
    {
       return rootJoint.getQuaternion();
    }
@@ -45,7 +42,7 @@ public class FloatingRootJointRobot extends RobotFromDescription
       rootJoint.getTransformToWorld(transform);
    }
 
-   public void setPositionInWorld(Tuple3d offset)
+   public void setPositionInWorld(Tuple3DBasics offset)
    {
       rootJoint.setPosition(offset);
    }
@@ -55,17 +52,17 @@ public class FloatingRootJointRobot extends RobotFromDescription
       rootJoint.setYawPitchRoll(yaw, pitch, roll);
    }
 
-   public void setOrientation(Quat4d quaternion)
+   public void setOrientation(Quaternion quaternion)
    {
       rootJoint.setQuaternion(quaternion);
    }
 
-   public void setAngularVelocity(Vector3d velocity)
+   public void setAngularVelocity(Vector3D velocity)
    {
       rootJoint.setAngularVelocityInBody(velocity);
    }
 
-   public void setLinearVelocity(Vector3d velocity)
+   public void setLinearVelocity(Vector3D velocity)
    {
       rootJoint.setVelocity(velocity);
    }
@@ -85,34 +82,34 @@ public class FloatingRootJointRobot extends RobotFromDescription
 
    public FrameVector getRootJointAngularVelocityInRootJointFrame(ReferenceFrame rootJointFrame)
    {
-      Vector3d angularVelocity = rootJoint.getAngularVelocityInBody();
+      Vector3D angularVelocity = rootJoint.getAngularVelocityInBody();
       return new FrameVector(rootJointFrame, angularVelocity);
    }
 
-   public Vector3d getPositionInWorld()
+   public Vector3D getPositionInWorld()
    {
-      Vector3d position = new Vector3d();
+      Vector3D position = new Vector3D();
       getPositionInWorld(position);
 
       return position;
    }
 
-   public void getPositionInWorld(Vector3d vectorToPack)
+   public void getPositionInWorld(Vector3D vectorToPack)
    {
       rootJoint.getPosition(vectorToPack);
    }
 
-   public void getVelocityInWorld(Vector3d vectorToPack)
+   public void getVelocityInWorld(Vector3D vectorToPack)
    {
       rootJoint.getVelocity(vectorToPack);
    }
 
-   public void getOrientationInWorld(Quat4d quaternionToPack)
+   public void getOrientationInWorld(Quaternion quaternionToPack)
    {
       rootJoint.getQuaternion(quaternionToPack);
    }
 
-   public void getAngularVelocityInBody(Vector3d vectorToPack)
+   public void getAngularVelocityInBody(Vector3D vectorToPack)
    {
       rootJoint.getAngularVelocityInBody(vectorToPack);
    }

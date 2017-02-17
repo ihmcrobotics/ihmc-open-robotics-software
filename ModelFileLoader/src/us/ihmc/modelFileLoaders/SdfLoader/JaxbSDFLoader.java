@@ -14,11 +14,11 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFModel;
 import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFRoot;
 import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFWorld;
 import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFWorld.Road;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.partNames.JointNameMap;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.sensors.ContactSensorType;

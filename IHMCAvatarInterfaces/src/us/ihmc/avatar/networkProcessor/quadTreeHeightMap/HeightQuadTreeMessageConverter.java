@@ -2,8 +2,7 @@ package us.ihmc.avatar.networkProcessor.quadTreeHeightMap;
 
 import java.util.ArrayList;
 
-import javax.vecmath.Point2d;
-
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.humanoidRobotics.communication.packets.heightQuadTree.HeightQuadTreeMessage;
 import us.ihmc.humanoidRobotics.communication.packets.heightQuadTree.HeightQuadTreeNodeMessage;
 import us.ihmc.robotics.quadTree.Box;
@@ -17,7 +16,7 @@ public class HeightQuadTreeMessageConverter
       return convertQuadTreeForGround(quadTreeToConvert, null, Double.POSITIVE_INFINITY);
    }
 
-   public static HeightQuadTreeMessage convertQuadTreeForGround(QuadTreeForGround quadTreeToConvert, Point2d boundingCircleCenter, double boundingCircleRadius)
+   public static HeightQuadTreeMessage convertQuadTreeForGround(QuadTreeForGround quadTreeToConvert, Point2D boundingCircleCenter, double boundingCircleRadius)
    {
       QuadTreeForGroundNode rootNode = quadTreeToConvert.getRootNode();
       HeightQuadTreeNodeMessage rootNodeMessage = new HeightQuadTreeNodeMessage();
@@ -35,7 +34,7 @@ public class HeightQuadTreeMessageConverter
    }
 
 
-   private static void fullDepthCopy(QuadTreeForGroundNode original, Point2d boundingCircleCenter, double boundingCircleRadius, HeightQuadTreeNodeMessage copyToPack)
+   private static void fullDepthCopy(QuadTreeForGroundNode original, Point2D boundingCircleCenter, double boundingCircleRadius, HeightQuadTreeNodeMessage copyToPack)
    {
       boolean isLeaf = original.getLeaf() != null;
 
@@ -74,7 +73,7 @@ public class HeightQuadTreeMessageConverter
       }
    }
 
-   private static boolean isAncestorOfAtLeastOneLeafInsideBoundingCircle(QuadTreeForGroundNode node, Point2d boundingCircleCenter, double boundingCircleRadius)
+   private static boolean isAncestorOfAtLeastOneLeafInsideBoundingCircle(QuadTreeForGroundNode node, Point2D boundingCircleCenter, double boundingCircleRadius)
    {
       if (node.getLeaf() != null)
          return isInsideBoundingCircle(node.getBounds().centreX, node.getBounds().centreY, boundingCircleCenter, boundingCircleRadius);
@@ -94,7 +93,7 @@ public class HeightQuadTreeMessageConverter
       return false;
    }
 
-   private static boolean isInsideBoundingCircle(double x, double y, Point2d boundingCircleCenter, double boundingCircleRadius)
+   private static boolean isInsideBoundingCircle(double x, double y, Point2D boundingCircleCenter, double boundingCircleRadius)
    {
       double dx = x - boundingCircleCenter.getX();
       double dy = y - boundingCircleCenter.getY();

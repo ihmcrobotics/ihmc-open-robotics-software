@@ -2,14 +2,13 @@ package us.ihmc.valkyrieRosControl;
 
 import java.util.List;
 
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.AuxiliaryRobotData;
@@ -42,9 +41,9 @@ public class ValkyrieRosControlSensorReader implements SensorReader, JointTorque
    private final List<YoIMUHandleHolder> yoIMUHandleHolders;
    private final List<YoForceTorqueSensorHandle> yoForceTorqueSensorHandles;
 
-   private final Vector3d linearAcceleration = new Vector3d();
-   private final Vector3d angularVelocity = new Vector3d();
-   private final Quat4d orientation = new Quat4d();
+   private final Vector3D linearAcceleration = new Vector3D();
+   private final Vector3D angularVelocity = new Vector3D();
+   private final Quaternion orientation = new Quaternion();
 
    private final DenseMatrix64F torqueForce = new DenseMatrix64F(6, 1);
 

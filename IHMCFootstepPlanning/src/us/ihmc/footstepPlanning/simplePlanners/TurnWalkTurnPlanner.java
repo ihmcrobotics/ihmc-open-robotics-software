@@ -2,8 +2,7 @@ package us.ihmc.footstepPlanning.simplePlanners;
 
 import java.util.ArrayList;
 
-import javax.vecmath.Point2d;
-
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlanner;
 import us.ihmc.footstepPlanning.FootstepPlannerGoal;
@@ -78,7 +77,7 @@ public class TurnWalkTurnPlanner implements FootstepPlanner
       ArrayList<FramePose2d> footstepList = new ArrayList<>();
 
       // turn
-      Point2d robotOffsetFromStanceFoot = new Point2d(0.0, lastStepSide.negateIfLeftSide(turningStepWidth / 2.0));
+      Point2D robotOffsetFromStanceFoot = new Point2D(0.0, lastStepSide.negateIfLeftSide(turningStepWidth / 2.0));
       FramePose2d robotPose = new FramePose2d(stanceFootFrame, robotOffsetFromStanceFoot, 0.0);
       FramePose2d robotPoseInWorld = new FramePose2d(robotPose);
       robotPoseInWorld.changeFrame(ReferenceFrame.getWorldFrame());
@@ -94,7 +93,7 @@ public class TurnWalkTurnPlanner implements FootstepPlanner
       FramePose2d stanceFootPose = new FramePose2d(stanceFootFrame);
       stanceFootPose.changeFrame(goalPose.getReferenceFrame());
       double turningAngle = AngleTools.trimAngleMinusPiToPi(goalPose.getYaw() - stanceFootPose.getYaw());
-      FramePoint2d pointToTurnAbout = new FramePoint2d(stanceFootFrame, new Point2d(0.0, lastStepSide.negateIfLeftSide(STRAIGHT_STEP_WIDTH / 2.0)));
+      FramePoint2d pointToTurnAbout = new FramePoint2d(stanceFootFrame, new Point2D(0.0, lastStepSide.negateIfLeftSide(STRAIGHT_STEP_WIDTH / 2.0)));
       addTurnInPlace(footstepList, turningAngle, pointToTurnAbout);
 
       // square up

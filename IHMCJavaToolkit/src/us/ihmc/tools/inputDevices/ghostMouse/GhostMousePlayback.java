@@ -165,6 +165,7 @@ public class GhostMousePlayback
       }
    }
 
+   @Override
    public String toString()
    {
       String ret = "";

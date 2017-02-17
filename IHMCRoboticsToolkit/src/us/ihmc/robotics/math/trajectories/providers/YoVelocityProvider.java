@@ -1,7 +1,6 @@
 package us.ihmc.robotics.math.trajectories.providers;
 
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -33,7 +32,7 @@ public class YoVelocityProvider implements VectorProvider
       this.frameVector.set(frameVector);
    }
    
-   public void set(Vector3d vector)
+   public void set(Vector3D vector)
    {
       this.frameVector.set(vector);
    }

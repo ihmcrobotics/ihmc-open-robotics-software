@@ -1,8 +1,7 @@
 package us.ihmc.robotics.hyperCubeTree;
 
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.robotics.geometry.LineSegment3d;
-
-import javax.vecmath.Point2d;
 
 public class LineSegmentSearchVolume extends HyperVolume
 {
@@ -37,7 +36,7 @@ public class LineSegmentSearchVolume extends HyperVolume
       }
       return ret;
    }
-   public LineSegmentSearchVolume(Point2d point1, Point2d point2)
+   public LineSegmentSearchVolume(Point2D point1, Point2D point2)
    {
       this(new double[]{point1.getX(),point1.getY()},new double[]{point2.getX(),point2.getY()});
    }

@@ -18,14 +18,15 @@
 
 package us.ihmc.sensorProcessing.bubo.clouds.detect.wrapper;
 
+import java.util.List;
+
+import org.ddogleg.fitting.modelset.ModelFitter;
+
 import georegression.fitting.plane.FitPlane3D_F64;
 import georegression.geometry.UtilPlane3D_F64;
 import georegression.struct.plane.PlaneGeneral3D_F64;
 import georegression.struct.plane.PlaneNormal3D_F64;
 import georegression.struct.point.Point3D_F64;
-import org.ddogleg.fitting.modelset.ModelFitter;
-
-import java.util.List;
 
 /**
  * The optimal plane can be estimated exactly using SVD.  This class is a wrapper which allows it
