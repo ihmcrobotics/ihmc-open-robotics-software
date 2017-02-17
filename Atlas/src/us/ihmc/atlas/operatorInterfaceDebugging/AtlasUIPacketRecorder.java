@@ -8,6 +8,8 @@ import java.nio.file.Paths;
 import java.util.Scanner;
 
 import us.ihmc.commons.Conversions;
+import us.ihmc.commons.exception.DefaultExceptionHandler;
+import us.ihmc.commons.nio.WriteOption;
 import us.ihmc.communication.configuration.NetworkParameterKeys;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.communication.net.KryoStreamSerializer;
@@ -35,7 +37,7 @@ public class AtlasUIPacketRecorder
       scanner.nextLine();
       
       final DataOutputStream fileDataOutputStream = FileTools.getFileDataOutputStream(getPacketRecordingFilePath());
-      final PrintWriter timeWriter = FileTools.newPrintWriter(getPacketTimingPath());
+      final PrintWriter timeWriter = FileTools.newPrintWriter(getPacketTimingPath(), WriteOption.TRUNCATE, DefaultExceptionHandler.PRINT_STACKTRACE);
       
       IHMCCommunicationKryoNetClassList netClassList = new IHMCCommunicationKryoNetClassList();
       

@@ -15,6 +15,8 @@ import com.jmatio.io.MatFileWriter;
 import com.jmatio.types.MLArray;
 import com.jmatio.types.MLDouble;
 
+import us.ihmc.commons.exception.DefaultExceptionHandler;
+import us.ihmc.commons.nio.WriteOption;
 import us.ihmc.graphicsDescription.dataBuffer.DataEntry;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.simulationconstructionset.DataBuffer;
@@ -129,7 +131,7 @@ public class ExportGraphsToFileGenerator implements ExportGraphsToFileConstructo
       }
       
       
-      PrintWriter writer = FileTools.newPrintWriter(chosenFile.toPath());
+      PrintWriter writer = FileTools.newPrintWriter(chosenFile.toPath(), WriteOption.TRUNCATE, DefaultExceptionHandler.PRINT_STACKTRACE);
       
       for (DataEntry dataEntry : entriesToExport)
       {
