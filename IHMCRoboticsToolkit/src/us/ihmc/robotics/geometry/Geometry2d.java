@@ -1,8 +1,10 @@
 package us.ihmc.robotics.geometry;
 
-import javax.vecmath.Point2d;
-
-import us.ihmc.robotics.geometry.interfaces.GeometryObject;
+import us.ihmc.euclid.interfaces.GeometryObject;
+import us.ihmc.euclid.transform.interfaces.Transform;
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 
 /**
  * <p>Title: </p>
@@ -19,9 +21,9 @@ import us.ihmc.robotics.geometry.interfaces.GeometryObject;
 public interface Geometry2d<T extends Geometry2d<T>> extends GeometryObject<T>
 {
    // Orthogonal projection:
-   public void orthogonalProjection(Point2d tuple);
+   public void orthogonalProjection(Point2DBasics tuple);
 
-   public Point2d orthogonalProjectionCopy(Point2d point);
+   public Point2D orthogonalProjectionCopy(Point2DReadOnly point);
 
    // Intersection:
    public Object intersectionWith(Line2d line);
@@ -31,7 +33,7 @@ public interface Geometry2d<T extends Geometry2d<T>> extends GeometryObject<T>
    public Object intersectionWith(ConvexPolygon2d convexPolygon);
 
    // Distance:
-   public double distance(Point2d point2d);
+   public double distance(Point2DReadOnly point2d);
 
    public double distance(Line2d line);
 
@@ -41,9 +43,11 @@ public interface Geometry2d<T extends Geometry2d<T>> extends GeometryObject<T>
 
    // Extra Transformations for being 2d:
 
-   public void applyTransformAndProjectToXYPlane(RigidBodyTransform transform);
+   public void applyTransformAndProjectToXYPlane(Transform transform);
 
-   public Geometry2d applyTransformCopy(RigidBodyTransform transform);
+   public Geometry2d applyTransformCopy(Transform transform);
 
-   public Geometry2d applyTransformAndProjectToXYPlaneCopy(RigidBodyTransform transform);
+   public Geometry2d applyTransformAndProjectToXYPlaneCopy(Transform transform);
+
+   void applyTransform(Transform transform);
 }

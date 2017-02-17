@@ -18,10 +18,10 @@
 
 package us.ihmc.sensorProcessing.bubo.clouds.detect.alg;
 
-import org.ddogleg.fitting.modelset.DistanceFromModel;
-
 import java.util.List;
 import java.util.Stack;
+
+import org.ddogleg.fitting.modelset.DistanceFromModel;
 
 /**
  * <p>

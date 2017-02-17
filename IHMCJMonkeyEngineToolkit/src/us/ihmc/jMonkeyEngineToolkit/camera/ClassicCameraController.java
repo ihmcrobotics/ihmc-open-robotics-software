@@ -3,18 +3,19 @@ package us.ihmc.jMonkeyEngineToolkit.camera;
 import java.util.ArrayList;
 
 import javax.swing.JFrame;
-import javax.vecmath.AxisAngle4d;
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
 
+import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.input.SelectedListener;
 import us.ihmc.graphicsDescription.structure.Graphics3DNode;
 import us.ihmc.jMonkeyEngineToolkit.Graphics3DAdapter;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.shapes.Sphere3d;
 import us.ihmc.tools.inputDevices.keyboard.Key;
 import us.ihmc.tools.inputDevices.keyboard.KeyListener;
@@ -64,8 +65,8 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
    private boolean up = false;
    private boolean down = false;
 
-   private ArrayList<Point3d> storedCameraPositions = new ArrayList<Point3d>(0);
-   private ArrayList<Point3d> storedFixPositions = new ArrayList<Point3d>(0);
+   private ArrayList<Point3D> storedCameraPositions = new ArrayList<Point3D>(0);
+   private ArrayList<Point3D> storedFixPositions = new ArrayList<Point3D>(0);
    private int storedPositionIndex = 0;
    private boolean transitioning = false;
 
@@ -78,8 +79,8 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
    private double fixZSpeed;
    private long lastTransitionTime;
 
-   private ArrayList<Point3d> keyFrameCamPos = new ArrayList<Point3d>(0);
-   private ArrayList<Point3d> keyFrameFixPos = new ArrayList<Point3d>(0);
+   private ArrayList<Point3D> keyFrameCamPos = new ArrayList<Point3D>(0);
+   private ArrayList<Point3D> keyFrameFixPos = new ArrayList<Point3D>(0);
    private ArrayList<Integer> keyFrameTimes = new ArrayList<Integer>(0);
    
    private Graphics3DNode fixPointNode = new Graphics3DNode("cameraFixPoint", new Graphics3DObject(new Sphere3d(0.01), YoAppearance.RGBColor(1.0, 0.0, 0.0, 0.5)));
@@ -580,8 +581,8 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
 
    public void addKeyFrame(int i, int time)
    {
-      keyFrameCamPos.add(i, new Point3d(camX, camY, camZ));
-      keyFrameFixPos.add(i, new Point3d(fixX, fixY, fixZ));
+      keyFrameCamPos.add(i, new Point3D(camX, camY, camZ));
+      keyFrameFixPos.add(i, new Point3D(fixX, fixY, fixZ));
       keyFrameTimes.add(i, time);
    }
 
@@ -743,10 +744,10 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
       this.camZ = cz;
    }
 
-   private Vector3d v3d = new Vector3d();
+   private Vector3D v3d = new Vector3D();
    private RigidBodyTransform t3d = new RigidBodyTransform();
-   private Vector3d rotVector = new Vector3d();
-   private AxisAngle4d rotAxisAngle4d = new AxisAngle4d();
+   private Vector3D rotVector = new Vector3D();
+   private AxisAngle rotAxisAngle4d = new AxisAngle();
 
    public void doMouseDraggedLeft(double dx, double dy)
    {
@@ -771,7 +772,7 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
       delZ0 = camZ - fixZ;
 
       // v3d.set(delX0, delY0, delZ0);
-      rotVector.cross(new Vector3d(0.0, 0.0, -1.0), v3d);
+      rotVector.cross(new Vector3D(0.0, 0.0, -1.0), v3d);
       rotAxisAngle4d.set(rotVector, dy * rotate_factor / 4.0);
 
       t3d.setRotationAndZeroTranslation(rotAxisAngle4d);
@@ -827,7 +828,7 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
       delY0 = camY - fixY;
       delZ0 = camZ - fixZ;
 
-      rotVector.cross(new Vector3d(0.0, 0.0, -1.0), v3d);
+      rotVector.cross(new Vector3D(0.0, 0.0, -1.0), v3d);
       rotAxisAngle4d.set(rotVector, dy * rotate_factor / 4.0);
 
       t3d.setRotationAndZeroTranslation(rotAxisAngle4d);
@@ -872,7 +873,7 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
       // v3d.set(delX0, delY0, delZ0);
 
       rotVector.set(-1.0, 0.0, 0.0);
-      rotVector.cross(new Vector3d(0.0, 0.0, -1.0), v3d);
+      rotVector.cross(new Vector3D(0.0, 0.0, -1.0), v3d);
       rotAxisAngle4d.set(rotVector, dy * rotate_camera_factor / 4.0);
 
       t3d.setRotationAndZeroTranslation(rotAxisAngle4d);
@@ -924,9 +925,9 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
 
       else
       {
-         Vector3d v3d = new Vector3d(camX - fixX, camY - fixY, camZ - fixZ);
+         Vector3D v3d = new Vector3D(camX - fixX, camY - fixY, camZ - fixZ);
 
-         Vector3d offsetVec = new Vector3d(v3d);
+         Vector3D offsetVec = new Vector3D(v3d);
 
          // offsetVec.normalize();
          offsetVec.scale(dy * zoom_factor);
@@ -1265,8 +1266,8 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
 
    public void storePosition()
    {
-      storedCameraPositions.add(new Point3d(getCamX(), getCamY(), getCamZ()));
-      storedFixPositions.add(new Point3d(getFixX(), getFixY(), getFixZ()));
+      storedCameraPositions.add(new Point3D(getCamX(), getCamY(), getCamZ()));
+      storedFixPositions.add(new Point3D(getFixX(), getFixY(), getFixZ()));
    }
 
    @Override
@@ -1275,10 +1276,10 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
       
    }
 
-   private Matrix3d rotationMatrix = new Matrix3d();
-   private Vector3d positionOffset = new Vector3d();
+   private RotationMatrix rotationMatrix = new RotationMatrix();
+   private Vector3D positionOffset = new Vector3D();
 
-   private Vector3d zAxis = new Vector3d(), yAxis = new Vector3d(), xAxis = new Vector3d();
+   private Vector3D zAxis = new Vector3D(), yAxis = new Vector3D(), xAxis = new Vector3D();
 
    @Override
    public void computeTransform(RigidBodyTransform currXform)
@@ -1303,9 +1304,7 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
       yAxis.cross(zAxis, xAxis);
       zAxis.cross(xAxis, yAxis);
 
-      rotationMatrix.setColumn(0, xAxis);
-      rotationMatrix.setColumn(1, yAxis);
-      rotationMatrix.setColumn(2, zAxis);
+      rotationMatrix.setColumns(xAxis, yAxis, zAxis);
 
       currXform.setRotationAndZeroTranslation(rotationMatrix);
       currXform.setTranslation(positionOffset);
@@ -1426,11 +1425,12 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
    }
 
    @Override
-   public void selected(Graphics3DNode graphics3dNode, ModifierKeyInterface modifierKeyHolder, Point3d location, Point3d cameraLocation, Quat4d cameraRotation)
+   public void selected(Graphics3DNode graphics3dNode, ModifierKeyInterface modifierKeyInterface, Point3DReadOnly location, Point3DReadOnly cameraLocation,
+                        QuaternionReadOnly cameraRotation)
    {
       if (shouldAcceptDeviceInput())
       {
-         if (modifierKeyHolder.isKeyPressed(Key.SHIFT))
+         if (modifierKeyInterface.isKeyPressed(Key.SHIFT))
          {
             if (!isTracking() || !isTrackingX())
                setFixX(location.getX());

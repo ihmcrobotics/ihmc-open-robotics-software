@@ -3,9 +3,8 @@ package us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -54,10 +53,10 @@ public class FootstepTestHelper
 
    private Footstep createFootstep(RobotSide robotSide, double x, double y)
    {
-      return createFootstep(robotSide, new Point3d(x, y, 0.0), new Quat4d(0.0, 0.0, 0.0, 1.0));
+      return createFootstep(robotSide, new Point3D(x, y, 0.0), new Quaternion(0.0, 0.0, 0.0, 1.0));
    }
 
-   public Footstep createFootstep(RobotSide robotSide, Point3d position, Quat4d orientation)
+   public Footstep createFootstep(RobotSide robotSide, Point3D position, Quaternion orientation)
    {
       FramePose footstepPose = new FramePose();
       footstepPose.setPose(position, orientation);
@@ -65,7 +64,7 @@ public class FootstepTestHelper
       return createFootstep(robotSide, footstepPose);
    }
 
-   public Footstep createFootstep(RobotSide robotSide, Point3d position, double[] orientationYawPitchRoll)
+   public Footstep createFootstep(RobotSide robotSide, Point3D position, double[] orientationYawPitchRoll)
    {
       FramePose footstepPose = new FramePose();
       footstepPose.setPosition(position);

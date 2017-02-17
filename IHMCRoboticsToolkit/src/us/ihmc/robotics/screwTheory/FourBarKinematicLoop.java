@@ -1,11 +1,13 @@
 package us.ihmc.robotics.screwTheory;
 
-import javax.vecmath.Vector2d;
-import javax.vecmath.Vector3d;
+import java.util.ArrayList;
+import java.util.Collections;
 
 import org.ejml.data.DenseMatrix64F;
-
 import org.ejml.ops.CommonOps;
+
+import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.AngleTools;
@@ -14,9 +16,6 @@ import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.kinematics.fourbar.ConstantSideFourBarCalculatorWithDerivatives;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-
-import java.util.ArrayList;
-import java.util.Collections;
 
 public class FourBarKinematicLoop
 {
@@ -45,7 +44,7 @@ public class FourBarKinematicLoop
    private final String name;
    private final RevoluteJoint masterJointA;
    private final PassiveRevoluteJoint passiveJointB, passiveJointC, passiveJointD, fourBarOutputJoint;
-   private final Vector3d jointDInJointABeforeFrame;
+   private final Vector3D jointDInJointABeforeFrame;
 
    private final ConstantSideFourBarCalculatorWithDerivatives fourBarCalculator;
 
@@ -74,14 +73,14 @@ public class FourBarKinematicLoop
     *
     */
    public FourBarKinematicLoop(String name, RevoluteJoint masterJointA, PassiveRevoluteJoint passiveJointB, PassiveRevoluteJoint passiveJointC,
-         PassiveRevoluteJoint passiveJointD, Vector3d jointDInJointABeforeFrame, boolean recomputeJointLimits)
+         PassiveRevoluteJoint passiveJointD, Vector3D jointDInJointABeforeFrame, boolean recomputeJointLimits)
    {
       this.name = name;
       this.masterJointA = masterJointA;
       this.passiveJointB = passiveJointB;
       this.passiveJointC = passiveJointC;
       this.passiveJointD = passiveJointD;
-      this.jointDInJointABeforeFrame = new Vector3d(jointDInJointABeforeFrame);
+      this.jointDInJointABeforeFrame = new Vector3D(jointDInJointABeforeFrame);
 
       // Rotation axis
       FrameVector masterJointAxis = masterJointA.getJointAxis();
@@ -243,10 +242,10 @@ public class FourBarKinematicLoop
       jointCAxis.changeFrame(frameBeforeFourBarWithZAlongJointAxis);
       jointDAxis.changeFrame(frameBeforeFourBarWithZAlongJointAxis);
 
-      Vector2d tempVectorAB = new Vector2d();
-      Vector2d tempVectorBC = new Vector2d();
-      Vector2d tempVectorCD = new Vector2d();
-      Vector2d tempVectorDA = new Vector2d();
+      Vector2D tempVectorAB = new Vector2D();
+      Vector2D tempVectorBC = new Vector2D();
+      Vector2D tempVectorCD = new Vector2D();
+      Vector2D tempVectorDA = new Vector2D();
 
       vectorABProjected.get(tempVectorAB);
       vectorBCProjected.get(tempVectorBC);

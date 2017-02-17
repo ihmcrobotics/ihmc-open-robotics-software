@@ -1,7 +1,7 @@
 package us.ihmc.geometry.polytope;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 
 public interface ExpandingPolytopeAlgorithmListener
 {
@@ -9,7 +9,7 @@ public interface ExpandingPolytopeAlgorithmListener
 
    public abstract void polledEntryToExpand(ExpandingPolytopeEntry triangleEntryToExpand);
 
-   public abstract void computedSupportingVertices(Point3d supportingVertexA, Point3d supportingVertexB, Vector3d w);
+   public abstract void computedSupportingVertices(Point3D supportingVertexA, Point3D supportingVertexB, Vector3D w);
 
    public abstract void computedCloseEnough(double vDotW, double lengthSquared, double mu, boolean closeEnough);
 
@@ -21,5 +21,5 @@ public interface ExpandingPolytopeAlgorithmListener
 
    public abstract void expandedPolytope(ExpandingPolytopeEntry firstNewEntry);
 
-   public abstract void foundMinimumPenetrationVector(Vector3d minimumPenetrationVector, Point3d closestPointOnA, Point3d closestPointOnB);
+   public abstract void foundMinimumPenetrationVector(Vector3D minimumPenetrationVector, Point3D closestPointOnA, Point3D closestPointOnB);
 }

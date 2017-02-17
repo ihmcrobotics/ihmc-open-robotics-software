@@ -4,14 +4,13 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.vecmath.Point2d;
-
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ListOfPointsContactableFoot;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ListOfPointsContactablePlaneBody;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -23,13 +22,13 @@ import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 public class ContactableBodiesFactory
 {
    private SideDependentList<String> namesOfJointsBeforeHands = null;
-   private SideDependentList<List<Point2d>> handContactPoints = null;
+   private SideDependentList<List<Point2D>> handContactPoints = null;
    private SideDependentList<RigidBodyTransform> handContactPointTransforms = null;
 
-   private SideDependentList<? extends List<Point2d>> footContactPoints = null;
-   private SideDependentList<? extends Point2d> toeContactPoints = null;
+   private SideDependentList<? extends List<Point2D>> footContactPoints = null;
+   private SideDependentList<? extends Point2D> toeContactPoints = null;
 
-   public void addHandContactParameters(SideDependentList<String> namesOfJointsBeforeHands, SideDependentList<List<Point2d>> handContactPoints,
+   public void addHandContactParameters(SideDependentList<String> namesOfJointsBeforeHands, SideDependentList<List<Point2D>> handContactPoints,
          SideDependentList<RigidBodyTransform> handContactPointTransforms)
    {
       this.namesOfJointsBeforeHands = namesOfJointsBeforeHands;
@@ -37,7 +36,7 @@ public class ContactableBodiesFactory
       this.handContactPointTransforms = handContactPointTransforms;
    }
 
-   public void addFootContactParameters(SideDependentList<? extends List<Point2d>> footContactPoints, SideDependentList<? extends Point2d> toeContactPoints)
+   public void addFootContactParameters(SideDependentList<? extends List<Point2D>> footContactPoints, SideDependentList<? extends Point2D> toeContactPoints)
    {
       this.footContactPoints = footContactPoints;
       this.toeContactPoints = toeContactPoints;
@@ -79,8 +78,8 @@ public class ContactableBodiesFactory
       {
          RigidBody foot = fullRobotModel.getFoot(robotSide);
          ReferenceFrame soleFrame = referenceFrames.getSoleFrame(robotSide);
-         List<Point2d> contactPointsInSoleFrame = footContactPoints.get(robotSide);
-         Point2d toeOffContactPoint = toeContactPoints.get(robotSide);
+         List<Point2D> contactPointsInSoleFrame = footContactPoints.get(robotSide);
+         Point2D toeOffContactPoint = toeContactPoints.get(robotSide);
          ListOfPointsContactableFoot footContactableBody = new ListOfPointsContactableFoot(foot, soleFrame, contactPointsInSoleFrame, toeOffContactPoint);
          footContactableBodies.put(robotSide, footContactableBody);
       }
@@ -105,7 +104,7 @@ public class ContactableBodiesFactory
    }
 
    private final static ListOfPointsContactablePlaneBody createListOfPointsContactablePlaneBody(String name, RigidBody body,
-         RigidBodyTransform contactPointsTransform, List<Point2d> contactPoints)
+         RigidBodyTransform contactPointsTransform, List<Point2D> contactPoints)
    {
       ReferenceFrame parentFrame = body.getParentJoint().getFrameAfterJoint();
       ReferenceFrame contactPointsFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent(name, parentFrame, contactPointsTransform);

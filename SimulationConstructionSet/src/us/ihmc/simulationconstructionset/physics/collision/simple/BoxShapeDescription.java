@@ -1,10 +1,9 @@
 package us.ihmc.simulationconstructionset.physics.collision.simple;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.geometry.BoundingBox3d;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.simulationconstructionset.physics.CollisionShapeDescription;
 
 public class BoxShapeDescription<T extends BoxShapeDescription<T>> implements CollisionShapeDescription<T>
@@ -59,7 +58,7 @@ public class BoxShapeDescription<T extends BoxShapeDescription<T>> implements Co
    @Override
    public void applyTransform(RigidBodyTransform transformToWorld)
    {
-      transform.multiply(transformToWorld, transform);
+      transform.preMultiply(transformToWorld);
       boundingBoxNeedsUpdating = true;
    }
 
@@ -91,13 +90,13 @@ public class BoxShapeDescription<T extends BoxShapeDescription<T>> implements Co
    }
 
    @Override
-   public boolean isPointInside(Point3d pointInWorld)
+   public boolean isPointInside(Point3D pointInWorld)
    {
       throw new RuntimeException("Implement Me!");
    }
 
    @Override
-   public boolean rollContactIfRolling(Vector3d surfaceNormal, Point3d pointToRoll)
+   public boolean rollContactIfRolling(Vector3D surfaceNormal, Point3D pointToRoll)
    {
       throw new RuntimeException("Implement Me!");      
    }

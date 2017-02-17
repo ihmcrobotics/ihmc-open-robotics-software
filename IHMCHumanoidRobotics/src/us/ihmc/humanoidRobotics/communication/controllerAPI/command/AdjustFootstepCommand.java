@@ -2,11 +2,10 @@ package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
 import java.util.List;
 
-import javax.vecmath.Point2d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-
 import us.ihmc.communication.controllerAPI.command.Command;
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.walking.AdjustFootstepMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage.FootstepOrigin;
 import us.ihmc.robotics.lists.RecyclingArrayList;
@@ -16,9 +15,9 @@ public class AdjustFootstepCommand implements Command<AdjustFootstepCommand, Adj
 {
    private RobotSide robotSide;
    private FootstepOrigin origin;
-   private final Point3d adjustedPosition = new Point3d();
-   private final Quat4d adjustedOrientation = new Quat4d();
-   private final RecyclingArrayList<Point2d> predictedContactPoints = new RecyclingArrayList<>(4, Point2d.class);
+   private final Point3D adjustedPosition = new Point3D();
+   private final Quaternion adjustedOrientation = new Quaternion();
+   private final RecyclingArrayList<Point2D> predictedContactPoints = new RecyclingArrayList<>(4, Point2D.class);
 
    public AdjustFootstepCommand()
    {
@@ -42,7 +41,7 @@ public class AdjustFootstepCommand implements Command<AdjustFootstepCommand, Adj
       origin = message.getOrigin();
       adjustedPosition.set(message.getLocation());
       adjustedOrientation.set(message.getOrientation());
-      List<Point2d> originalPredictedContactPoints = message.getPredictedContactPoints();
+      List<Point2D> originalPredictedContactPoints = message.getPredictedContactPoints();
       predictedContactPoints.clear();
       if (originalPredictedContactPoints != null)
       {
@@ -58,7 +57,7 @@ public class AdjustFootstepCommand implements Command<AdjustFootstepCommand, Adj
       origin = other.origin;
       adjustedPosition.set(other.adjustedPosition);
       adjustedOrientation.set(other.adjustedOrientation);
-      RecyclingArrayList<Point2d> otherPredictedContactPoints = other.predictedContactPoints;
+      RecyclingArrayList<Point2D> otherPredictedContactPoints = other.predictedContactPoints;
       predictedContactPoints.clear();
       for (int i = 0; i < otherPredictedContactPoints.size(); i++)
          predictedContactPoints.add().set(otherPredictedContactPoints.get(i));
@@ -69,7 +68,7 @@ public class AdjustFootstepCommand implements Command<AdjustFootstepCommand, Adj
       this.robotSide = robotSide;
    }
 
-   public void setPose(Point3d position, Quat4d orientation)
+   public void setPose(Point3D position, Quaternion orientation)
    {
       this.adjustedPosition.set(position);
       this.adjustedOrientation.set(orientation);
@@ -80,7 +79,7 @@ public class AdjustFootstepCommand implements Command<AdjustFootstepCommand, Adj
       this.origin = origin;
    }
 
-   public void setPredictedContactPoints(RecyclingArrayList<Point2d> predictedContactPoints)
+   public void setPredictedContactPoints(RecyclingArrayList<Point2D> predictedContactPoints)
    {
       this.predictedContactPoints.clear();
       for(int i = 0; i < predictedContactPoints.size(); i++)
@@ -97,17 +96,17 @@ public class AdjustFootstepCommand implements Command<AdjustFootstepCommand, Adj
       return origin;
    }
 
-   public Point3d getPosition()
+   public Point3D getPosition()
    {
       return adjustedPosition;
    }
 
-   public Quat4d getOrientation()
+   public Quaternion getOrientation()
    {
       return adjustedOrientation;
    }
 
-   public RecyclingArrayList<Point2d> getPredictedContactPoints()
+   public RecyclingArrayList<Point2D> getPredictedContactPoints()
    {
       return predictedContactPoints;
    }

@@ -2,8 +2,8 @@ package us.ihmc.tools.io.xml;
 
 import java.util.StringTokenizer;
 
-import javax.vecmath.Color3f;
-import javax.vecmath.Matrix3d;
+import us.ihmc.euclid.matrix.Matrix3D;
+import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
 
 /**
  * TODO This class needs be replaced by a proper XML library. @dcalvert
@@ -137,7 +137,7 @@ public class XMLReaderUtility
       }
    }
 
-   public static javax.vecmath.Vector3d parseVector3d(String vector)
+   public static us.ihmc.euclid.tuple3D.Vector3D parseVector3d(String vector)
    {
       if (vector == null)
          return null;
@@ -147,7 +147,7 @@ public class XMLReaderUtility
       StringTokenizer tokenizer = new StringTokenizer(vector, ",");
       try
       {
-         return new javax.vecmath.Vector3d(new double[] {Double.parseDouble(tokenizer.nextToken()), Double.parseDouble(tokenizer.nextToken()),
+         return new us.ihmc.euclid.tuple3D.Vector3D(new double[] {Double.parseDouble(tokenizer.nextToken()), Double.parseDouble(tokenizer.nextToken()),
                  Double.parseDouble(tokenizer.nextToken())});
       }
       catch (Exception e)
@@ -158,20 +158,20 @@ public class XMLReaderUtility
       }
    }
 
-   public static String matrix3DToString(Matrix3d matrix3D)
+   public static String matrix3DToString(Matrix3DReadOnly matrix3D)
    {
       String ret = matrix3D.toString().replaceAll("\n", ", ");
 
       return ret.substring(0, ret.length() - 2);
    }
 
-   public static Matrix3d parseMatrix3d(String matrix3d)
+   public static Matrix3D parseMatrix3d(String matrix3d)
    {
       matrix3d = matrix3d.replaceAll(" ", "");
       StringTokenizer tokenizer = new StringTokenizer(matrix3d, ",");
       try
       {
-         Matrix3d m = new Matrix3d(Double.parseDouble(tokenizer.nextToken()), Double.parseDouble(tokenizer.nextToken()),
+         Matrix3D m = new Matrix3D(Double.parseDouble(tokenizer.nextToken()), Double.parseDouble(tokenizer.nextToken()),
                                    Double.parseDouble(tokenizer.nextToken()), Double.parseDouble(tokenizer.nextToken()),
                                    Double.parseDouble(tokenizer.nextToken()), Double.parseDouble(tokenizer.nextToken()),
                                    Double.parseDouble(tokenizer.nextToken()), Double.parseDouble(tokenizer.nextToken()),
@@ -185,20 +185,6 @@ public class XMLReaderUtility
       }
 
       return null;
-   }
-
-   public static Color3f parseColor3f(String color)
-   {
-      try
-      {
-         StringTokenizer s = new StringTokenizer(color, ",");
-
-         return new Color3f(new float[] {Float.parseFloat(s.nextToken()), Float.parseFloat(s.nextToken()), Float.parseFloat(s.nextToken())});
-      }
-      catch (Exception e)
-      {
-         return null;
-      }
    }
 
    public static String replaceAll(String source, String toReplace, String replacement)

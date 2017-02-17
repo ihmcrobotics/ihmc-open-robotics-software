@@ -1,6 +1,7 @@
 package us.ihmc.simulationconstructionset.gui;
 
 import org.jtransforms.fft.DoubleFFT_1D;
+
 import us.ihmc.robotics.linearDynamicSystems.BodeUnitsConverter;
 import us.ihmc.robotics.linearDynamicSystems.TransferFunction;
 

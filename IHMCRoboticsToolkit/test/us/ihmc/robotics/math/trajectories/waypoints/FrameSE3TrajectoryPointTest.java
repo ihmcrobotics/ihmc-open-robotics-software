@@ -6,22 +6,20 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Random;
 
-import javax.vecmath.AxisAngle4d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.frameObjects.FrameSE3Waypoint;
 import us.ihmc.robotics.geometry.transformables.SE3Waypoint;
-import us.ihmc.robotics.geometry.transformables.TransformableQuat4d;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SE3TrajectoryPointInterface;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
@@ -37,22 +35,22 @@ public class FrameSE3TrajectoryPointTest
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
       PoseReferenceFrame poseFrame = new PoseReferenceFrame("poseFrame", new FramePose(worldFrame));
 
-      FramePoint poseFramePosition = new FramePoint(worldFrame, new Point3d(0.5, 7.7, 9.2));
+      FramePoint poseFramePosition = new FramePoint(worldFrame, new Point3D(0.5, 7.7, 9.2));
       poseFrame.setPositionAndUpdate(poseFramePosition);
 
-      FrameOrientation poseOrientation = new FrameOrientation(worldFrame, new AxisAngle4d(1.2, 3.9, 4.7, 2.2));
+      FrameOrientation poseOrientation = new FrameOrientation(worldFrame, new AxisAngle(1.2, 3.9, 4.7, 2.2));
       poseFrame.setOrientationAndUpdate(poseOrientation);
 
       FrameSE3TrajectoryPoint frameSE3TrajectoryPoint = new FrameSE3TrajectoryPoint(worldFrame);
       SimpleSE3TrajectoryPoint simpleTrajectoryPoint = new SimpleSE3TrajectoryPoint();
 
       double time = 3.4;
-      Point3d position = new Point3d(1.0, 2.1, 3.7);
-      TransformableQuat4d orientation = new TransformableQuat4d(new Quat4d(0.1, 0.22, 0.34, 0.56));
+      Point3D position = new Point3D(1.0, 2.1, 3.7);
+      Quaternion orientation = new Quaternion(new Quaternion(0.1, 0.22, 0.34, 0.56));
       orientation.normalize();
 
-      Vector3d linearVelocity = new Vector3d(-0.4, 1.2, 3.3);
-      Vector3d angularVelocity = new Vector3d(1.7, 8.4, 2.2);
+      Vector3D linearVelocity = new Vector3D(-0.4, 1.2, 3.3);
+      Vector3D angularVelocity = new Vector3D(1.7, 8.4, 2.2);
 
       simpleTrajectoryPoint.set(time, position, orientation, linearVelocity, angularVelocity);
       frameSE3TrajectoryPoint.setIncludingFrame(worldFrame, simpleTrajectoryPoint);
@@ -392,10 +390,10 @@ public class FrameSE3TrajectoryPointTest
       assertTrue(expectedLinearVelocity.epsilonEquals(testedFrameSE3TrajectoryPoint.getGeometryObject().getEuclideanWaypoint().getLinearVelocity(), epsilon));
       assertTrue(expectedAngularVelocity.epsilonEquals(testedFrameSE3TrajectoryPoint.getGeometryObject().getSO3Waypoint().getAngularVelocity(), epsilon));
 
-      Point3d actualPosition = new Point3d();
-      Quat4d actualOrientation = new Quat4d();
-      Vector3d actualLinearVelocity = new Vector3d();
-      Vector3d actualAngularVelocity = new Vector3d();
+      Point3D actualPosition = new Point3D();
+      Quaternion actualOrientation = new Quaternion();
+      Vector3D actualLinearVelocity = new Vector3D();
+      Vector3D actualAngularVelocity = new Vector3D();
 
       testedFrameSE3TrajectoryPoint.getPosition(actualPosition);
       testedFrameSE3TrajectoryPoint.getOrientation(actualOrientation);
@@ -450,12 +448,12 @@ public class FrameSE3TrajectoryPointTest
       SimpleSE3TrajectoryPoint simpleTrajectoryPoint = new SimpleSE3TrajectoryPoint();
 
       double time = 3.4;
-      Point3d position = new Point3d(1.0, 2.1, 3.7);
-      TransformableQuat4d orientation = new TransformableQuat4d(new Quat4d(0.1, 0.22, 0.34, 0.56));
+      Point3D position = new Point3D(1.0, 2.1, 3.7);
+      Quaternion orientation = new Quaternion(new Quaternion(0.1, 0.22, 0.34, 0.56));
       orientation.normalize();
 
-      Vector3d linearVelocity = new Vector3d(-0.4, 1.2, 3.3);
-      Vector3d angularVelocity = new Vector3d(1.7, 8.4, 2.2);
+      Vector3D linearVelocity = new Vector3D(-0.4, 1.2, 3.3);
+      Vector3D angularVelocity = new Vector3D(1.7, 8.4, 2.2);
 
       simpleTrajectoryPoint.set(time, position, orientation, linearVelocity, angularVelocity);
       FrameSE3TrajectoryPoint.setIncludingFrame(worldFrame, simpleTrajectoryPoint);
@@ -505,10 +503,10 @@ public class FrameSE3TrajectoryPointTest
       FrameSE3TrajectoryPoint.getAngularVelocity(angularVelocity);
 
       // Make sure they are all equal to zero:
-      assertTrue(position.epsilonEquals(new Point3d(), 1e-10));
-      assertTrue(orientation.epsilonEquals(new TransformableQuat4d(), 1e-10));
-      assertTrue(linearVelocity.epsilonEquals(new Vector3d(), 1e-10));
-      assertTrue(angularVelocity.epsilonEquals(new Vector3d(), 1e-10));
+      assertTrue(position.epsilonEquals(new Point3D(), 1e-10));
+      assertTrue(orientation.epsilonEquals(new Quaternion(), 1e-10));
+      assertTrue(linearVelocity.epsilonEquals(new Vector3D(), 1e-10));
+      assertTrue(angularVelocity.epsilonEquals(new Vector3D(), 1e-10));
 
       time = 9.9;
       pointForVerification.set(3.9, 2.2, 1.1);
@@ -579,7 +577,7 @@ public class FrameSE3TrajectoryPointTest
 
       double time = 3.4;
       FramePoint position = new FramePoint(worldFrame, 1.0, 2.1, 3.7);
-      FrameOrientation orientation = new FrameOrientation(worldFrame, new Quat4d(0.1, 0.22, 0.34, 0.56));
+      FrameOrientation orientation = new FrameOrientation(worldFrame, new Quaternion(0.1, 0.22, 0.34, 0.56));
 
       FrameVector linearVelocity = new FrameVector(worldFrame, -0.4, 1.2, 3.3);
       FrameVector angularVelocity = new FrameVector(worldFrame, 1.7, 8.4, 2.2);
@@ -592,10 +590,10 @@ public class FrameSE3TrajectoryPointTest
 
       PoseReferenceFrame poseFrame = new PoseReferenceFrame("poseFrame", new FramePose(worldFrame));
 
-      FramePoint poseFramePosition = new FramePoint(worldFrame, new Point3d(0.5, 7.7, 9.2));
+      FramePoint poseFramePosition = new FramePoint(worldFrame, new Point3D(0.5, 7.7, 9.2));
       poseFrame.setPositionAndUpdate(poseFramePosition);
 
-      FrameOrientation poseOrientation = new FrameOrientation(worldFrame, new AxisAngle4d(1.2, 3.9, 4.7, 2.2));
+      FrameOrientation poseOrientation = new FrameOrientation(worldFrame, new AxisAngle(1.2, 3.9, 4.7, 2.2));
       poseFrame.setOrientationAndUpdate(poseOrientation);
 
       frameSE3TrajectoryPoint.changeFrame(poseFrame);

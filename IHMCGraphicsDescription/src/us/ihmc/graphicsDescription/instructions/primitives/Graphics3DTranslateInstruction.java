@@ -1,15 +1,15 @@
 package us.ihmc.graphicsDescription.instructions.primitives;
 
-import javax.vecmath.Tuple3d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.graphicsDescription.instructions.Graphics3DPrimitiveInstruction;
 
 public class Graphics3DTranslateInstruction implements Graphics3DPrimitiveInstruction
 {
-   private Vector3d translation = new Vector3d();
+   private Vector3D translation = new Vector3D();
 
-   public Graphics3DTranslateInstruction(Tuple3d translation)
+   public Graphics3DTranslateInstruction(Tuple3DReadOnly translation)
    {
       this.translation.set(translation);
    }
@@ -19,7 +19,7 @@ public class Graphics3DTranslateInstruction implements Graphics3DPrimitiveInstru
       translation.set(tx, ty, tz);
    }
 
-   public Vector3d getTranslation()
+   public Vector3D getTranslation()
    {
       return translation;
    }

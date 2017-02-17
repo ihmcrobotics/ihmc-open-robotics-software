@@ -1,9 +1,8 @@
 package us.ihmc.robotics.screwTheory;
 
+import us.ihmc.euclid.matrix.Matrix3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Vector3d;
 
 public class CompositeRigidBodyInertia extends GeneralizedRigidBodyInertia
 {   
@@ -12,7 +11,7 @@ public class CompositeRigidBodyInertia extends GeneralizedRigidBodyInertia
       super();
    }
 
-   public CompositeRigidBodyInertia(ReferenceFrame frame, Matrix3d massMomentOfInertia, double mass)
+   public CompositeRigidBodyInertia(ReferenceFrame frame, Matrix3D massMomentOfInertia, double mass)
    {
       super(frame, massMomentOfInertia, mass);
    }
@@ -22,7 +21,7 @@ public class CompositeRigidBodyInertia extends GeneralizedRigidBodyInertia
       super(frame, Ixx, Iyy, Izz, mass);
    }
 
-   public CompositeRigidBodyInertia(ReferenceFrame frame, Matrix3d massMomentOfInertia, double mass, Vector3d crossPart)
+   public CompositeRigidBodyInertia(ReferenceFrame frame, Matrix3D massMomentOfInertia, double mass, Vector3D crossPart)
    {
       super(frame, massMomentOfInertia, mass, crossPart);
    }

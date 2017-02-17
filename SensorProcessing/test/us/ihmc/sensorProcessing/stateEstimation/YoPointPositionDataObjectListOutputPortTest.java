@@ -12,9 +12,10 @@ import org.junit.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.controlFlow.ControlFlowElement;
 import us.ihmc.controlFlow.NullControlFlowElement;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.AfterJointReferenceFrameNameMap;
@@ -39,7 +40,7 @@ public class YoPointPositionDataObjectListOutputPortTest
       int nFrames = 10;
       for (int i = 0; i < nFrames; i++)
       {
-         RigidBodyTransform transformToParent = RigidBodyTransform.generateRandomTransform(random);
+         RigidBodyTransform transformToParent = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
          ReferenceFrame frame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent("frame" + i, ReferenceFrame.getWorldFrame(), transformToParent);
          frame.update();
          frames.add(frame);

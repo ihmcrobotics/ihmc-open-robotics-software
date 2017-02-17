@@ -1,8 +1,7 @@
 package us.ihmc.simulationconstructionset;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -34,12 +33,12 @@ public class GroundContactPoint extends ExternalForcePoint
       this(name, null, registry);
    }
 
-   public GroundContactPoint(String name, Vector3d offset, Robot robot)
+   public GroundContactPoint(String name, Vector3D offset, Robot robot)
    {
       this(name, offset, robot.getRobotsYoVariableRegistry());
    }
    
-   public GroundContactPoint(String name, Vector3d offset, YoVariableRegistry registry)
+   public GroundContactPoint(String name, Vector3D offset, YoVariableRegistry registry)
    {
       super(name, offset, registry);
 
@@ -104,7 +103,7 @@ public class GroundContactPoint extends ExternalForcePoint
       else setNotInContact();
    }
 
-   public void getTouchdownLocation(Point3d touchdownLocationToPack)
+   public void getTouchdownLocation(Point3D touchdownLocationToPack)
    {
       touchdownLocation.get(touchdownLocationToPack);
    }
@@ -119,7 +118,7 @@ public class GroundContactPoint extends ExternalForcePoint
       return fs;
    }
 
-   public void setTouchdownLocation(Point3d touchdownLocation)
+   public void setTouchdownLocation(Point3D touchdownLocation)
    {
       this.touchdownLocation.set(touchdownLocation);
    }
@@ -130,12 +129,12 @@ public class GroundContactPoint extends ExternalForcePoint
    }
 
    
-   public void getSurfaceNormal(Vector3d vectorToPack)
+   public void getSurfaceNormal(Vector3D vectorToPack)
    {
       surfaceNormal.get(vectorToPack);
    }
 
-   public void setSurfaceNormal(Vector3d surfaceNormal)
+   public void setSurfaceNormal(Vector3D surfaceNormal)
    {
       this.surfaceNormal.set(surfaceNormal);
    }

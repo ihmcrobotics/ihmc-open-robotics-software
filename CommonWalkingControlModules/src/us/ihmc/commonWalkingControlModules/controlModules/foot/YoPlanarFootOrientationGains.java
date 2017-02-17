@@ -1,12 +1,15 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
-import us.ihmc.robotics.controllers.*;
+import us.ihmc.euclid.matrix.Matrix3D;
+import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
+import us.ihmc.robotics.controllers.GainCalculator;
+import us.ihmc.robotics.controllers.MatrixUpdater;
+import us.ihmc.robotics.controllers.OrientationPIDGainsInterface;
+import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
-
-import javax.vecmath.Matrix3d;
 
 public class YoPlanarFootOrientationGains implements YoOrientationPIDGainsInterface
 {
@@ -50,9 +53,9 @@ public class YoPlanarFootOrientationGains implements YoOrientationPIDGainsInterf
    }
 
    @Override
-   public Matrix3d createProportionalGainMatrix()
+   public Matrix3DReadOnly createProportionalGainMatrix()
    {
-      Matrix3d proportionalGainMatrix = new Matrix3d();
+      Matrix3D proportionalGainMatrix = new Matrix3D();
 
       proportionalYGain.addVariableChangedListener(new MatrixUpdater(1, 1, proportionalGainMatrix));
       proportionalYGain.notifyVariableChangedListeners();
@@ -61,9 +64,9 @@ public class YoPlanarFootOrientationGains implements YoOrientationPIDGainsInterf
    }
 
    @Override
-   public Matrix3d createDerivativeGainMatrix()
+   public Matrix3DReadOnly createDerivativeGainMatrix()
    {
-      Matrix3d derivativeGainMatrix = new Matrix3d();
+      Matrix3D derivativeGainMatrix = new Matrix3D();
 
       derivativeYGain.addVariableChangedListener(new MatrixUpdater(1, 1, derivativeGainMatrix));
       derivativeYGain.notifyVariableChangedListeners();
@@ -72,9 +75,9 @@ public class YoPlanarFootOrientationGains implements YoOrientationPIDGainsInterf
    }
 
    @Override
-   public Matrix3d createIntegralGainMatrix()
+   public Matrix3DReadOnly createIntegralGainMatrix()
    {
-      return new Matrix3d();
+      return new Matrix3D();
    }
 
    public void createDerivativeGainUpdater(boolean updateNow)

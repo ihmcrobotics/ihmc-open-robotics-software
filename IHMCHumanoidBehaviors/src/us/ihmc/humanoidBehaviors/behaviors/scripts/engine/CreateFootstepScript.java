@@ -7,10 +7,9 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.EnumMap;
 
-import javax.vecmath.Point2d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.walking.EndOfScriptCommand;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
@@ -44,33 +43,33 @@ public class CreateFootstepScript
    private static final double lineWidth = 0.02;
    private static final double ankleHeight = 0.084;
 
-   private static final Point2d[] contactPointsFull = {
-         new Point2d(footLength/2.0, -footWidth/2.0),
-         new Point2d(footLength/2.0, footWidth/2.0),
-         new Point2d(-footLength/2.0, footWidth/2.0),
-         new Point2d(-footLength/2.0, -footWidth/2.0)};
-   private static final Point2d[] contactPointsLineFrontToBack = {
-         new Point2d(footLength/2.0, -lineWidth/2.0),
-         new Point2d(footLength/2.0, lineWidth/2.0),
-         new Point2d(-footLength/2.0, lineWidth/2.0),
-         new Point2d(-footLength/2.0, -lineWidth/2.0)};
-   private static final Point2d[] contactPointsLineSideToSide = {
-         new Point2d(lineWidth/2.0, -footWidth/2.0),
-         new Point2d(lineWidth/2.0, footWidth/2.0),
-         new Point2d(-lineWidth/2.0, footWidth/2.0),
-         new Point2d(-lineWidth/2.0, -footWidth/2.0)};
-   private static final Point2d[] contactPointsHalfFront = {
-         new Point2d(footLength/2.0, -footWidth/2.0),
-         new Point2d(footLength/2.0, footWidth/2.0),
-         new Point2d(0.0, footWidth/2.0),
-         new Point2d(0.0, -footWidth/2.0)};
-   private static final Point2d[] contactPointsHalfBack = {
-         new Point2d(0.0, -footWidth/2.0),
-         new Point2d(0.0, footWidth/2.0),
-         new Point2d(-footLength/2.0, footWidth/2.0),
-         new Point2d(-footLength/2.0, -footWidth/2.0)};
+   private static final Point2D[] contactPointsFull = {
+         new Point2D(footLength/2.0, -footWidth/2.0),
+         new Point2D(footLength/2.0, footWidth/2.0),
+         new Point2D(-footLength/2.0, footWidth/2.0),
+         new Point2D(-footLength/2.0, -footWidth/2.0)};
+   private static final Point2D[] contactPointsLineFrontToBack = {
+         new Point2D(footLength/2.0, -lineWidth/2.0),
+         new Point2D(footLength/2.0, lineWidth/2.0),
+         new Point2D(-footLength/2.0, lineWidth/2.0),
+         new Point2D(-footLength/2.0, -lineWidth/2.0)};
+   private static final Point2D[] contactPointsLineSideToSide = {
+         new Point2D(lineWidth/2.0, -footWidth/2.0),
+         new Point2D(lineWidth/2.0, footWidth/2.0),
+         new Point2D(-lineWidth/2.0, footWidth/2.0),
+         new Point2D(-lineWidth/2.0, -footWidth/2.0)};
+   private static final Point2D[] contactPointsHalfFront = {
+         new Point2D(footLength/2.0, -footWidth/2.0),
+         new Point2D(footLength/2.0, footWidth/2.0),
+         new Point2D(0.0, footWidth/2.0),
+         new Point2D(0.0, -footWidth/2.0)};
+   private static final Point2D[] contactPointsHalfBack = {
+         new Point2D(0.0, -footWidth/2.0),
+         new Point2D(0.0, footWidth/2.0),
+         new Point2D(-footLength/2.0, footWidth/2.0),
+         new Point2D(-footLength/2.0, -footWidth/2.0)};
 
-   private static final EnumMap<ContactType, Point2d[]> contactPointMap = new EnumMap<>(ContactType.class);
+   private static final EnumMap<ContactType, Point2D[]> contactPointMap = new EnumMap<>(ContactType.class);
    static
    {
       contactPointMap.put(ContactType.FULL, contactPointsFull);
@@ -145,18 +144,18 @@ public class CreateFootstepScript
       RobotSide robotSide = idx%2 == 0 ? RobotSide.LEFT : RobotSide.RIGHT;
       double x = Math.floor((double)(idx+2) / 2.0) * stepLength;
       double y = robotSide == RobotSide.RIGHT ? -stepWidth : 0.0;
-      Point2d[] contactPoints = contactPointMap.get(contactType);
+      Point2D[] contactPoints = contactPointMap.get(contactType);
 
       // set robot side
       footstep.robotSide = robotSide;
       // set pose
-      footstep.location = new Point3d(x, y, ankleHeight);
-      footstep.orientation = new Quat4d(0.0, 0.0, 0.0, 1.0);
+      footstep.location = new Point3D(x, y, ankleHeight);
+      footstep.orientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
       // set contact points
       footstep.predictedContactPoints = new ArrayList<>();
       for (int i = 0; i < contactPoints.length; i++)
       {
-         Point2d contactPoint = new Point2d(contactPoints[i]);
+         Point2D contactPoint = new Point2D(contactPoints[i]);
          footstep.predictedContactPoints.add(contactPoint);
       }
 

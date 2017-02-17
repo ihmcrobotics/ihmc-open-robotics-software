@@ -1,17 +1,17 @@
 package us.ihmc.robotics.screwTheory;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.factory.LinearSolverFactory;
-import org.ejml.interfaces.linsol.LinearSolver;
-import org.ejml.ops.CommonOps;
-import org.ejml.ops.SpecializedOps;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.ejml.data.DenseMatrix64F;
+import org.ejml.factory.LinearSolverFactory;
+import org.ejml.interfaces.linsol.LinearSolver;
+import org.ejml.ops.CommonOps;
+import org.ejml.ops.SpecializedOps;
 
 /**
  *

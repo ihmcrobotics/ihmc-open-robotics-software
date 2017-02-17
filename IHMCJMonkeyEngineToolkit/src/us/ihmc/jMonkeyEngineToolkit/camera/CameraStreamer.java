@@ -2,16 +2,21 @@ package us.ihmc.jMonkeyEngineToolkit.camera;
 
 import java.awt.image.BufferedImage;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 
 public interface CameraStreamer
 {
    public long getTimeStamp();
-   public Point3d getCameraPosition();
-   public Quat4d getCameraOrientation();
+
+   public Point3DReadOnly getCameraPosition();
+
+   public QuaternionReadOnly getCameraOrientation();
+
    public double getFieldOfView();
-   public void updateImage(BufferedImage bufferedImage, long timeStamp, Point3d cameraPosition, Quat4d cameraOrientation, double fov);
+
+   public void updateImage(BufferedImage bufferedImage, long timeStamp, Point3DReadOnly cameraPosition, QuaternionReadOnly cameraOrientation, double fov);
+
    public boolean isReadyForNewData();
 
 }

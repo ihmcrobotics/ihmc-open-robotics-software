@@ -2,10 +2,6 @@ package us.ihmc.jMonkeyEngineToolkit.graphics;
 
 import java.util.ArrayList;
 
-import us.ihmc.graphicsDescription.Graphics3DObject;
-import us.ihmc.graphicsDescription.MeshDataGenerator;
-import us.ihmc.graphicsDescription.MeshDataHolder;
-import us.ihmc.graphicsDescription.instructions.CubeGraphics3DInstruction;
 import us.ihmc.graphicsDescription.instructions.Graphics3DAddExtrusionInstruction;
 import us.ihmc.graphicsDescription.instructions.Graphics3DAddHeightMapInstruction;
 import us.ihmc.graphicsDescription.instructions.Graphics3DAddMeshDataInstruction;

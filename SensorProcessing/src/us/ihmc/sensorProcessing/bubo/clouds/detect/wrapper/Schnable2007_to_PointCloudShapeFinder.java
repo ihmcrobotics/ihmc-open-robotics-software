@@ -18,17 +18,21 @@
 
 package us.ihmc.sensorProcessing.bubo.clouds.detect.wrapper;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.ddogleg.struct.FastQueue;
+
 import georegression.geometry.UtilPoint3D_F64;
 import georegression.struct.point.Point3D_F64;
 import georegression.struct.shapes.Box3D_F64;
 import us.ihmc.sensorProcessing.bubo.clouds.detect.CloudShapeTypes;
 import us.ihmc.sensorProcessing.bubo.clouds.detect.PointCloudShapeFinder;
-import us.ihmc.sensorProcessing.bubo.clouds.detect.alg.*;
-
-import org.ddogleg.struct.FastQueue;
-
-import java.util.ArrayList;
-import java.util.List;
+import us.ihmc.sensorProcessing.bubo.clouds.detect.alg.ApproximateSurfaceNormals;
+import us.ihmc.sensorProcessing.bubo.clouds.detect.alg.FoundShape;
+import us.ihmc.sensorProcessing.bubo.clouds.detect.alg.PointCloudShapeDetectionSchnabel2007;
+import us.ihmc.sensorProcessing.bubo.clouds.detect.alg.PointVectorNN;
+import us.ihmc.sensorProcessing.bubo.clouds.detect.alg.PostProcessShapes;
 
 /**
  * Wrapper which allows {@link us.ihmc.sensorProcessing.bubo.clouds.detect.alg.PointCloudShapeDetectionSchnabel2007} into

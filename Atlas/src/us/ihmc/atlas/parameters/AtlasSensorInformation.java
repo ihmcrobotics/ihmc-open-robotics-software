@@ -3,13 +3,12 @@ package us.ihmc.atlas.parameters;
 import java.util.ArrayList;
 import java.util.EnumMap;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Vector3d;
-
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -182,20 +181,20 @@ public class AtlasSensorInformation implements DRCRobotSensorInformation
 
    private void setupHeadIMUFrames() {
 		for (DRCRobotModel.RobotTarget target : DRCRobotModel.RobotTarget.values()) {
-			Matrix3d headIMUBasisWhenLevel;
+			RotationMatrix headIMUBasisWhenLevel;
 			if (target == DRCRobotModel.RobotTarget.REAL_ROBOT) {
 				// each column is the unit vector of X,Y,Z axis in world frame
-				headIMUBasisWhenLevel = new Matrix3d( 0, 0, 1,
+				headIMUBasisWhenLevel = new RotationMatrix( 0, 0, 1,
 						                              0,  1, 0,
 						                             -1,  0, 0);
 
 			} else {
-				headIMUBasisWhenLevel = new Matrix3d(1, 0, 0, 0, 1, 0, 0, 0, 1);
+				headIMUBasisWhenLevel = new RotationMatrix(1, 0, 0, 0, 1, 0, 0, 0, 1);
 
 			}
 			headIMUFramesWhenLevel.put(target, ReferenceFrame .constructBodyFrameWithUnchangingTransformToParent(
 							"head_imu", ReferenceFrame.getWorldFrame(),
-							new RigidBodyTransform(headIMUBasisWhenLevel, new Vector3d())));
+							new RigidBodyTransform(headIMUBasisWhenLevel, new Vector3D())));
 		}
 
 	}

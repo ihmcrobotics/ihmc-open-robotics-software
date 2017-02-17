@@ -1,13 +1,13 @@
 package us.ihmc.robotics.robotDescription;
 
-import javax.vecmath.Vector3d;
+import us.ihmc.euclid.tuple3D.Vector3D;
 
 public class KinematicPointDescription
 {
    private String name;
-   private Vector3d offsetFromJoint = new Vector3d();
+   private Vector3D offsetFromJoint = new Vector3D();
 
-   public KinematicPointDescription(String name, Vector3d offsetFromJoint)
+   public KinematicPointDescription(String name, Vector3D offsetFromJoint)
    {
       this.setName(name);
       this.offsetFromJoint.set(offsetFromJoint);
@@ -23,17 +23,17 @@ public class KinematicPointDescription
       this.name = name;
    }
 
-   public void getOffsetFromJoint(Vector3d offsetFromJointToPack)
+   public void getOffsetFromJoint(Vector3D offsetFromJointToPack)
    {
       offsetFromJointToPack.set(offsetFromJoint);
    }
 
-   public Vector3d getOffsetFromJoint()
+   public Vector3D getOffsetFromJoint()
    {
       return offsetFromJoint;
    }
 
-   public void setOffsetFromJoint(Vector3d offsetFromJoint)
+   public void setOffsetFromJoint(Vector3D offsetFromJoint)
    {
       this.offsetFromJoint.set(offsetFromJoint);
    }

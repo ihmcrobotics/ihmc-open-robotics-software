@@ -8,8 +8,8 @@ import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 
 import javax.swing.JFileChooser;
-import javax.vecmath.Point3d;
 
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.robotics.quadTree.Box;
 import us.ihmc.sensorProcessing.pointClouds.combinationQuadTreeOctTree.QuadTreeForGroundReaderAndWriter;
 
@@ -35,7 +35,7 @@ public class PointMapCropping
       try
       {
          QuadTreeForGroundReaderAndWriter quadTreeForGroundReaderAndWriter = new QuadTreeForGroundReaderAndWriter();
-         ArrayList<Point3d> points = quadTreeForGroundReaderAndWriter.readPointsFromFile(filename, skipPoints, maxNumberOfPoints, bounds, maxZ);
+         ArrayList<Point3D> points = quadTreeForGroundReaderAndWriter.readPointsFromFile(filename, skipPoints, maxNumberOfPoints, bounds, maxZ);
 
          JFileChooser outputChooser = new JFileChooser();
          outputChooser.setDialogTitle("Specify a file to save");
@@ -48,7 +48,7 @@ public class PointMapCropping
 
          BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(fileOut)));
 
-         for (Point3d point : points){
+         for (Point3D point : points){
             bufferedWriter.write(point.toString() + System.lineSeparator());
          }
 

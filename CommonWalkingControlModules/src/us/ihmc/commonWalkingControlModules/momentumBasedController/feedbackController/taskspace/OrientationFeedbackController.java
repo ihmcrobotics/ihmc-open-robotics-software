@@ -1,7 +1,5 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.taskspace;
 
-import javax.vecmath.AxisAngle4d;
-
 import us.ihmc.commonWalkingControlModules.controlModules.RigidBodyOrientationControlModule;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox.Space;
@@ -10,6 +8,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreTo
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OrientationFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerInterface;
+import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
@@ -49,7 +48,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
    private final FrameVector feedForwardAngularAcceleration = new FrameVector();
    private final FrameVector desiredAngularAcceleration = new FrameVector();
 
-   private final AxisAngle4d tempAxisAngle = new AxisAngle4d();
+   private final AxisAngle tempAxisAngle = new AxisAngle();
 
    private final SpatialAccelerationCommand output = new SpatialAccelerationCommand();
 

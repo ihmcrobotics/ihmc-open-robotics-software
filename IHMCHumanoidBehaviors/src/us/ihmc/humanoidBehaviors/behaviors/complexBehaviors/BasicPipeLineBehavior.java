@@ -1,7 +1,6 @@
 package us.ihmc.humanoidBehaviors.behaviors.complexBehaviors;
 
-import javax.vecmath.Point2d;
-
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.ClearLidarBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.EnableLidarBehavior;
@@ -82,7 +81,7 @@ public class BasicPipeLineBehavior extends AbstractBehavior
          protected void setBehaviorInput()
          {
             currentState = BasicStates.WALK_TO_LOCATION_AND_HOME_ARM;
-            FramePose2d poseToWalkTo = new FramePose2d(ReferenceFrame.getWorldFrame(), new Point2d(0, 0), 0);
+            FramePose2d poseToWalkTo = new FramePose2d(ReferenceFrame.getWorldFrame(), new Point2D(0, 0), 0);
             walkToLocationBehavior.setTarget(poseToWalkTo);
          }
 

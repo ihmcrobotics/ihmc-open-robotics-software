@@ -2,16 +2,15 @@ package us.ihmc.humanoidRobotics.communication.packets.sensing;
 
 import java.util.Random;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-
 import boofcv.struct.calib.IntrinsicParameters;
 import us.ihmc.communication.packets.HighBandwidthPacket;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.producers.VideoSource;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.geometry.TransformTools;
 import us.ihmc.robotics.random.RandomTools;
@@ -22,8 +21,8 @@ public class VideoPacket extends Packet<VideoPacket> implements TransformableDat
    public VideoSource videoSource;
    public long timeStamp;
    public byte[] data;
-   public Point3d position;
-   public Quat4d orientation;
+   public Point3D position;
+   public Quaternion orientation;
    public IntrinsicParameters intrinsicParameters;
    
    public VideoPacket()
@@ -31,12 +30,12 @@ public class VideoPacket extends Packet<VideoPacket> implements TransformableDat
       
    }
 
-   public VideoPacket(VideoSource videoSource, long timeStamp, byte[] data, Point3d position, Quat4d orientation, IntrinsicParameters intrinsicParameters)
+   public VideoPacket(VideoSource videoSource, long timeStamp, byte[] data, Point3D position, Quaternion orientation, IntrinsicParameters intrinsicParameters)
    {
       this(videoSource, timeStamp, data, position, orientation, intrinsicParameters, null);
    }
 
-   public VideoPacket(VideoSource videoSource, long timeStamp, byte[] data, Point3d position, Quat4d orientation, IntrinsicParameters intrinsicParameters,
+   public VideoPacket(VideoSource videoSource, long timeStamp, byte[] data, Point3D position, Quaternion orientation, IntrinsicParameters intrinsicParameters,
          PacketDestination packetDestination)
    {
       if(packetDestination != null)
@@ -69,12 +68,12 @@ public class VideoPacket extends Packet<VideoPacket> implements TransformableDat
       return intrinsicParameters;
    }
 
-   public Point3d getPosition()
+   public Point3D getPosition()
    {
       return position;
    }
 
-   public Quat4d getOrientation()
+   public Quaternion getOrientation()
    {
       return orientation;
    }
@@ -122,8 +121,8 @@ public class VideoPacket extends Packet<VideoPacket> implements TransformableDat
    @Override
    public VideoPacket transform(RigidBodyTransform transform)
    {
-      Point3d newPoint = TransformTools.getTransformedPoint(getPosition(), transform);
-      Quat4d newOrientation = TransformTools.getTransformedQuat(getOrientation(), transform);
+      Point3D newPoint = TransformTools.getTransformedPoint(getPosition(), transform);
+      Quaternion newOrientation = TransformTools.getTransformedQuat(getOrientation(), transform);
 
       return new VideoPacket(getVideoSource(), getTimeStamp(), getData(), newPoint, newOrientation, getIntrinsicParameters());
    }
@@ -150,8 +149,8 @@ public class VideoPacket extends Packet<VideoPacket> implements TransformableDat
       byte[] data = new byte[length];
       random.nextBytes(data);
 
-      Point3d position = RandomTools.generateRandomPoint(random, 2.0, 2.0, 1.0);
-      Quat4d orientation = RandomTools.generateRandomQuaternion(random);
+      Point3D position = RandomTools.generateRandomPoint(random, 2.0, 2.0, 1.0);
+      Quaternion orientation = RandomTools.generateRandomQuaternion(random);
 
       this.timeStamp = 0;
       this.videoSource = VideoSource.MULTISENSE_LEFT_EYE;

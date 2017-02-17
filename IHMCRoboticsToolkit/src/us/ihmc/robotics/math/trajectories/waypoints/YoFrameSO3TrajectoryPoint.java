@@ -1,8 +1,9 @@
 package us.ihmc.robotics.math.trajectories.waypoints;
 
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -28,7 +29,7 @@ public class YoFrameSO3TrajectoryPoint extends YoFrameTrajectoryPoint<YoFrameSO3
    }
 
    @Override
-   public void setOrientation(Quat4d orientation)
+   public void setOrientation(QuaternionReadOnly orientation)
    {
       this.orientation.set(orientation);
    }
@@ -39,7 +40,7 @@ public class YoFrameSO3TrajectoryPoint extends YoFrameTrajectoryPoint<YoFrameSO3
    }
 
    @Override
-   public void setAngularVelocity(Vector3d angularVelocity)
+   public void setAngularVelocity(Vector3DReadOnly angularVelocity)
    {
       this.angularVelocity.set(angularVelocity);
    }
@@ -55,7 +56,7 @@ public class YoFrameSO3TrajectoryPoint extends YoFrameTrajectoryPoint<YoFrameSO3
       getYoValuesFromFrameWaypoint();
    }
 
-   public void set(double time, Quat4d orientation, Vector3d angularVelocity)
+   public void set(double time, QuaternionReadOnly orientation, Vector3DReadOnly angularVelocity)
    {
       this.time.set(time);
       this.orientation.set(orientation);
@@ -117,13 +118,13 @@ public class YoFrameSO3TrajectoryPoint extends YoFrameTrajectoryPoint<YoFrameSO3
    }
 
    @Override
-   public void getOrientation(Quat4d orientationToPack)
+   public void getOrientation(QuaternionBasics orientationToPack)
    {
       orientation.get(orientationToPack);
    }
 
    @Override
-   public void getAngularVelocity(Vector3d angularVelocityToPack)
+   public void getAngularVelocity(Vector3DBasics angularVelocityToPack)
    {
       angularVelocity.get(angularVelocityToPack);
    }

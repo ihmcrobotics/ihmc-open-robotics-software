@@ -9,8 +9,8 @@ import java.util.ArrayList;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
-import javax.vecmath.Tuple3d;
 
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.jMonkeyEngineToolkit.Graphics3DAdapter;
 import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
 import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfigurationList;
@@ -413,7 +413,7 @@ public class ViewportPanel extends JPanel implements CameraSelector, ActiveCamer
       activeView.getCameraController().setFixPosition(fixX, fixY, fixZ);
    }
 
-   public void setCameraFix(Tuple3d cameraFix)
+   public void setCameraFix(Tuple3DBasics cameraFix)
    {
       activeView.getCameraController().setFixPosition(cameraFix.getX(), cameraFix.getY(), cameraFix.getZ());      
    }
@@ -423,7 +423,7 @@ public class ViewportPanel extends JPanel implements CameraSelector, ActiveCamer
       activeView.getCameraController().setCameraPosition(posX, posY, posZ);
    }
 
-   public void setCameraPosition(Tuple3d cameraPosition)
+   public void setCameraPosition(Tuple3DBasics cameraPosition)
    {
       activeView.getCameraController().setCameraPosition(cameraPosition.getX(), cameraPosition.getY(), cameraPosition.getZ());      
    }

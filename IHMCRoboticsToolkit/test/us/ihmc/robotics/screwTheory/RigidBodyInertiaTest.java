@@ -7,9 +7,6 @@ import static org.junit.Assert.fail;
 import java.util.Arrays;
 import java.util.Random;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Vector3d;
-
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.factory.DecompositionFactory;
 import org.ejml.interfaces.decomposition.EigenDecomposition;
@@ -19,7 +16,10 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.euclid.matrix.Matrix3D;
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.tools.testing.JUnitTools;
@@ -49,7 +49,7 @@ public class RigidBodyInertiaTest
          {
             transformToParent.setRotationEulerAndZeroTranslation(1.0, 2.0, 3.0);
             RigidBodyTransform translation = new RigidBodyTransform();
-            translation.setTranslation(new Vector3d(3.0, 4.0, 5.0));
+            translation.setTranslation(new Vector3D(3.0, 4.0, 5.0));
             transformToParent.multiply(translation);
          }
       };
@@ -63,7 +63,7 @@ public class RigidBodyInertiaTest
          {
             transformToParent.setRotationEulerAndZeroTranslation(1.0, 2.0, 3.0);
             RigidBodyTransform translation = new RigidBodyTransform();
-            translation.setTranslation(new Vector3d(3.0, 4.0, 5.0));
+            translation.setTranslation(new Vector3D(3.0, 4.0, 5.0));
             transformToParent.multiply(translation);
          }
       };
@@ -149,10 +149,10 @@ public class RigidBodyInertiaTest
    public void testSantiyIfChangeFramePurelyRotational()
    {
       inertia = new RigidBodyInertia(rotatedOnlyFrame, getRandomSymmetricPositiveDefiniteMatrix(), getRandomPositiveNumber());
-      Matrix3d massMomentOfInertiaBeforeChange = inertia.getMassMomentOfInertiaPartCopy();
+      Matrix3D massMomentOfInertiaBeforeChange = inertia.getMassMomentOfInertiaPartCopy();
 
       inertia.changeFrame(worldFrame);
-      Matrix3d massMomentOfInertiaAfterChange = inertia.getMassMomentOfInertiaPartCopy();
+      Matrix3D massMomentOfInertiaAfterChange = inertia.getMassMomentOfInertiaPartCopy();
 
       if (!inertia.isCrossPartZero())
       {
@@ -168,17 +168,17 @@ public class RigidBodyInertiaTest
       return random.nextDouble() + 0.5;    // to make absolutely sure that the mass will be strictly greater than zero
    }
 
-   private Vector3d getRandomVector()
+   private Vector3D getRandomVector()
    {
-      return new Vector3d(random.nextDouble() - 0.5, random.nextDouble() - 0.5, random.nextDouble() - 0.5);
+      return new Vector3D(random.nextDouble() - 0.5, random.nextDouble() - 0.5, random.nextDouble() - 0.5);
    }
 
-   private Matrix3d getRandomSymmetricPositiveDefiniteMatrix()
+   private Matrix3D getRandomSymmetricPositiveDefiniteMatrix()
    {
       // Wikipedia: a Hermitian (special case: symmetric) matrix is positive definite if:
       // There exists a unique lower triangular matrix L, with strictly positive diagonal elements, that allows the factorization of M into M = LL*.
 
-      Matrix3d lowerTriangular = new Matrix3d();
+      Matrix3D lowerTriangular = new Matrix3D();
       lowerTriangular.setM00(getRandomPositiveNumber());
 
       lowerTriangular.setM10(random.nextDouble() - 0.5);
@@ -188,8 +188,8 @@ public class RigidBodyInertiaTest
       lowerTriangular.setM21(random.nextDouble() - 0.5);
       lowerTriangular.setM22(getRandomPositiveNumber());
 
-      Matrix3d ret = new Matrix3d(lowerTriangular);
-      ret.mulTransposeRight(ret, lowerTriangular);
+      Matrix3D ret = new Matrix3D(lowerTriangular);
+      ret.multiplyTransposeOther(lowerTriangular);
 
       checkIsSymmetric(ret, 1e-8);
       checkEigenValuesRealAndPositive(ret, 1e-10);
@@ -201,17 +201,17 @@ public class RigidBodyInertiaTest
     * @param matrix matrix to check for symmetry
     * @param epsilon numerical tolerance
     */
-   private static void checkIsSymmetric(Matrix3d matrix, double epsilon)
+   private static void checkIsSymmetric(Matrix3D matrix, double epsilon)
    {
       assertEquals(0.0, matrix.getM01() - matrix.getM10(), epsilon);
       assertEquals(0.0, matrix.getM02() - matrix.getM20(), epsilon);
       assertEquals(0.0, matrix.getM12() - matrix.getM21(), epsilon);
    }
 
-   private static void checkEigenValuesRealAndPositive(Matrix3d matrix, double epsilon)
+   private static void checkEigenValuesRealAndPositive(Matrix3D matrix, double epsilon)
    {
       DenseMatrix64F denseMatrix = new DenseMatrix64F(3, 3);
-      MatrixTools.setDenseMatrixFromMatrix3d(0, 0, matrix, denseMatrix);
+      matrix.get(denseMatrix);
       EigenDecomposition<DenseMatrix64F> eig = DecompositionFactory.eig(3, false);
       eig.decompose(denseMatrix);
 
@@ -225,13 +225,13 @@ public class RigidBodyInertiaTest
       }
    }
 
-   private static void assertEigenValuesPositiveAndEqual(Matrix3d matrix1, Matrix3d matrix2, double epsilon)
+   private static void assertEigenValuesPositiveAndEqual(Matrix3D matrix1, Matrix3D matrix2, double epsilon)
    {
       DenseMatrix64F denseMatrix1 = new DenseMatrix64F(3, 3);
-      MatrixTools.setDenseMatrixFromMatrix3d(0, 0, matrix1, denseMatrix1);
+      matrix1.get(denseMatrix1);
 
       DenseMatrix64F denseMatrix2 = new DenseMatrix64F(3, 3);
-      MatrixTools.setDenseMatrixFromMatrix3d(0, 0, matrix2, denseMatrix2);
+      matrix2.get(denseMatrix2);
 
       EigenDecomposition<DenseMatrix64F> eig1 = DecompositionFactory.eig(3, false);
       eig1.decompose(denseMatrix1);
@@ -275,20 +275,20 @@ public class RigidBodyInertiaTest
 
    private static DenseMatrix64F adjoint(RigidBodyTransform transform)
    {
-      Matrix3d rotation = new Matrix3d();
+      RotationMatrix rotation = new RotationMatrix();
       transform.getRotation(rotation);
 
-      Vector3d translation = new Vector3d();
+      Vector3D translation = new Vector3D();
       transform.getTranslation(translation);
 
-      Matrix3d translationTilde = new Matrix3d();
-      MatrixTools.toTildeForm(translationTilde, translation);
+      Matrix3D translationTilde = new Matrix3D();
+      translationTilde.setToTildeForm(translation);
 
       DenseMatrix64F rotationDense = new DenseMatrix64F(3, 3);
-      MatrixTools.setDenseMatrixFromMatrix3d(0, 0, rotation, rotationDense);
+      rotation.get(rotationDense);
 
       DenseMatrix64F translationTildeDense = new DenseMatrix64F(3, 3);
-      MatrixTools.setDenseMatrixFromMatrix3d(0, 0, translationTilde, translationTildeDense);
+      translationTilde.get(translationTildeDense);
 
       DenseMatrix64F ret = new DenseMatrix64F(6, 6);
 

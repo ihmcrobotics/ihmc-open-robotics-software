@@ -3,15 +3,13 @@ package us.ihmc.commonWalkingControlModules.wrenchDistribution;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.vecmath.Vector3d;
-
 import org.ejml.data.DenseMatrix64F;
 
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.Wrench;
 
@@ -23,7 +21,7 @@ public class WrenchDistributorTools
       force.changeFrame(referenceFrame);
 
       // r x f + tauN
-      Vector3d torque = new Vector3d();
+      Vector3D torque = new Vector3D();
       torque.setX(cop.getY() * force.getZ());
       torque.setY(-cop.getX() * force.getZ());
       torque.setZ(cop.getX() * force.getY() - cop.getY() * force.getX() + normalTorque);
@@ -94,7 +92,7 @@ public class WrenchDistributorTools
       {
          FrameVector normalizedSupportVector = normalizedSupportVectors.get(i);
          normalizedSupportVector.changeFrame(referenceFrame);
-         MatrixTools.setDenseMatrixFromTuple3d(supportVectorMatrixBlock, normalizedSupportVector.getVector(), 0, i);
+         normalizedSupportVector.getVector().get(0, i, supportVectorMatrixBlock);
       }
    }
 

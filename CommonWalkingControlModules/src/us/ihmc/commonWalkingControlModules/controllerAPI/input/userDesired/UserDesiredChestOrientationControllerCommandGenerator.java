@@ -1,8 +1,7 @@
 package us.ihmc.commonWalkingControlModules.controllerAPI.input.userDesired;
 
-import javax.vecmath.Vector3d;
-
 import us.ihmc.communication.controllerAPI.CommandInputManager;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ChestTrajectoryCommand;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -37,7 +36,7 @@ public class UserDesiredChestOrientationControllerCommandGenerator
                userDesiredChestOrientation.getFrameOrientationIncludingFrame(frameOrientation);
 
                ChestTrajectoryCommand chestTrajectoryControllerCommand = new ChestTrajectoryCommand();
-               chestTrajectoryControllerCommand.addTrajectoryPoint(userDesiredChestTrajectoryTime.getDoubleValue(), frameOrientation.getQuaternionCopy(), new Vector3d());
+               chestTrajectoryControllerCommand.addTrajectoryPoint(userDesiredChestTrajectoryTime.getDoubleValue(), frameOrientation.getQuaternionCopy(), new Vector3D());
                controllerCommandInputManager.submitCommand(chestTrajectoryControllerCommand);
 
                userDoChestOrientation.set(false);

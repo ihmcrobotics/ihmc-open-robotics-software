@@ -1,26 +1,42 @@
 package us.ihmc.simulationconstructionset.gui.hierarchyTree;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
-import us.ihmc.simulationconstructionset.commands.WriteDataCommandExecutor;
-import us.ihmc.simulationconstructionset.gui.EventDispatchThreadHelper;
-import us.ihmc.simulationconstructionset.gui.RegularExpression;
-import us.ihmc.simulationconstructionset.gui.ForcedRepaintPopupMenu;
-import us.ihmc.simulationconstructionset.robotcommprotocol.CreatedNewRegistriesListener;
-import us.ihmc.simulationconstructionset.robotcommprotocol.RegistrySettingsChangedListener;
-import us.ihmc.simulationconstructionset.util.SimpleFileReader;
-import us.ihmc.simulationconstructionset.util.SimpleFileWriter;
-
-import javax.swing.*;
-import javax.swing.filechooser.FileFilter;
-import javax.swing.tree.*;
-import java.awt.*;
-import java.awt.event.*;
+import java.awt.Component;
+import java.awt.Graphics;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.LinkedHashMap;
 import java.util.StringTokenizer;
+
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JMenuItem;
+import javax.swing.JPopupMenu;
+import javax.swing.JScrollPane;
+import javax.swing.JTree;
+import javax.swing.filechooser.FileFilter;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreeNode;
+import javax.swing.tree.TreePath;
+import javax.swing.tree.TreeSelectionModel;
+
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.simulationconstructionset.commands.WriteDataCommandExecutor;
+import us.ihmc.simulationconstructionset.gui.EventDispatchThreadHelper;
+import us.ihmc.simulationconstructionset.gui.ForcedRepaintPopupMenu;
+import us.ihmc.simulationconstructionset.gui.RegularExpression;
+import us.ihmc.simulationconstructionset.robotcommprotocol.CreatedNewRegistriesListener;
+import us.ihmc.simulationconstructionset.robotcommprotocol.RegistrySettingsChangedListener;
+import us.ihmc.simulationconstructionset.util.SimpleFileReader;
+import us.ihmc.simulationconstructionset.util.SimpleFileWriter;
 
 public class NameSpaceHierarchyTree extends JScrollPane implements MouseListener, FocusListener, CreatedNewRegistriesListener
 {

@@ -1,16 +1,16 @@
 package us.ihmc.quadrupedRobotics.providers;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 
 public interface QuadrupedPostureInputProviderInterface
 {
-   Point3d getComPositionInput();
+   Point3D getComPositionInput();
 
-   Vector3d getComVelocityInput();
+   Vector3D getComVelocityInput();
 
-   Quat4d getBodyOrientationInput();
+   Quaternion getBodyOrientationInput();
 
-   Vector3d getBodyAngularRateInput();
+   Vector3D getBodyAngularRateInput();
 }

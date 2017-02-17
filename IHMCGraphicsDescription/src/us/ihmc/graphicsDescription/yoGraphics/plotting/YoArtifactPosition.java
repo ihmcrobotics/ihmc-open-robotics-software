@@ -3,9 +3,8 @@ package us.ihmc.graphicsDescription.yoGraphics.plotting;
 import java.awt.BasicStroke;
 import java.awt.Color;
 
-import javax.vecmath.Point2d;
-import javax.vecmath.Vector2d;
-
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.graphicsDescription.plotting.Graphics2DAdapter;
 import us.ihmc.graphicsDescription.plotting.Plotter2DAdapter;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
@@ -20,11 +19,11 @@ public class YoArtifactPosition extends YoArtifact
    private static final BasicStroke STROKE = new BasicStroke(1.2f);
    
    private final YoFramePoint2d point;
-   private final Vector2d radii = new Vector2d();
+   private final Vector2D radii = new Vector2D();
    private final GraphicType graphicType;
    
-   private final Point2d tempPoint = new Point2d();
-   private final Vector2d legendRadii = new Vector2d();
+   private final Point2D tempPoint = new Point2D();
+   private final Vector2D legendRadii = new Vector2D();
 
    public YoArtifactPosition(String namePrefix, String nameSuffix, GraphicType type, Color color, double radius, YoVariableRegistry registry)
    {
@@ -46,7 +45,7 @@ public class YoArtifactPosition extends YoArtifact
    }
 
    @Override
-   public void drawLegend(Plotter2DAdapter graphics, Point2d origin)
+   public void drawLegend(Plotter2DAdapter graphics, Point2D origin)
    {
       graphics.setColor(color);
       graphics.setStroke(STROKE);
@@ -174,7 +173,7 @@ public class YoArtifactPosition extends YoArtifact
       return point.getYoY();
    }
    
-   public void setPosition(Point2d point2d)
+   public void setPosition(Point2D point2d)
    {
       point.set(point2d);
    }

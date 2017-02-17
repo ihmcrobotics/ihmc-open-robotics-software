@@ -1,13 +1,13 @@
 package us.ihmc.robotics.geometry.shapes;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.robotics.geometry.Direction;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.transformables.Pose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
@@ -94,20 +94,20 @@ public class FrameBox3d extends FrameShape3d<FrameBox3d, Box3d>
       return ret;
    }
 
-   public void getRotation(Matrix3d rotationMatrixToPack)
+   public void getRotation(RotationMatrix rotationMatrixToPack)
    {
       this.box3d.getOrientation(rotationMatrixToPack);
    }
 
-   public Matrix3d getRotationCopy()
+   public RotationMatrix getRotationCopy()
    {
-      Matrix3d ret = new Matrix3d();
+      RotationMatrix ret = new RotationMatrix();
       getRotation(ret);
 
       return ret;
    }
 
-   public void setPose(Point3d position, Quat4d orientation)
+   public void setPose(Point3DReadOnly position, QuaternionReadOnly orientation)
    {
       box3d.setPose(position, orientation);
    }
@@ -143,7 +143,7 @@ public class FrameBox3d extends FrameShape3d<FrameBox3d, Box3d>
       box3d.scale(scale);
    }
 
-   public void computeVertices(Point3d[] vertices)
+   public void computeVertices(Point3D[] vertices)
    {
       box3d.computeVertices(vertices);
    }

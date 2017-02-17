@@ -2,20 +2,19 @@ package us.ihmc.humanoidRobotics.communication.packets.manipulation;
 
 import java.util.Random;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-
 import us.ihmc.communication.packets.Packet;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.geometry.TransformTools;
 import us.ihmc.robotics.random.RandomTools;
 
 public class TorusPosePacket extends Packet<TorusPosePacket> implements TransformableDataObject<TorusPosePacket>
 {
-   public Point3d position;
-   public Quat4d orientation;
+   public Point3D position;
+   public Quaternion orientation;
    public double fingerHoleRadius;
 
    public int index = 0;
@@ -25,19 +24,19 @@ public class TorusPosePacket extends Packet<TorusPosePacket> implements Transfor
       // Empty constructor for deserialization
    }
 
-   public TorusPosePacket(Point3d position, Quat4d orientation, double fingerHoleRadius)
+   public TorusPosePacket(Point3D position, Quaternion orientation, double fingerHoleRadius)
    {
       this.orientation = orientation;
       this.position = position;
       this.fingerHoleRadius = fingerHoleRadius;
    }
 
-   public Quat4d getOrientation()
+   public Quaternion getOrientation()
    {
       return orientation;
    }
 
-   public Point3d getPosition()
+   public Point3D getPosition()
    {
       return position;
    }
@@ -85,8 +84,8 @@ public class TorusPosePacket extends Packet<TorusPosePacket> implements Transfor
 
    public TorusPosePacket(Random random)
    {
-      Point3d point = new Point3d();
-      Quat4d quat = new Quat4d();
+      Point3D point = new Point3D();
+      Quaternion quat = new Quaternion();
 
       point.set(RandomTools.generateRandomPoint(random, 0.288, 0.288, 0.288));    // magic numbers so point will not exceed XYZ_MIN / MAX in TorusPosePacketSerializer
       quat.set(RandomTools.generateRandomRotation(random));

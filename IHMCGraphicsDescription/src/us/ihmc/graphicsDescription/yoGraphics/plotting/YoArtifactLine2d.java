@@ -3,8 +3,7 @@ package us.ihmc.graphicsDescription.yoGraphics.plotting;
 import java.awt.BasicStroke;
 import java.awt.Color;
 
-import javax.vecmath.Point2d;
-
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.graphicsDescription.plotting.Graphics2DAdapter;
 import us.ihmc.graphicsDescription.plotting.Plotter2DAdapter;
 import us.ihmc.robotics.geometry.Line2d;
@@ -36,7 +35,7 @@ public class YoArtifactLine2d extends YoArtifact
    }
 
    @Override
-   public void drawLegend(Plotter2DAdapter graphics, Point2d origin)
+   public void drawLegend(Plotter2DAdapter graphics, Point2D origin)
    {
       graphics.setColor(color);
       graphics.setStroke(STROKE);

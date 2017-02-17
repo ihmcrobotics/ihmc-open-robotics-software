@@ -1,10 +1,10 @@
 package us.ihmc.avatar.networkProcessor.quadTreeHeightMap;
 
-import javax.vecmath.Point2d;
-import javax.vecmath.Vector2d;
-
 import org.apache.commons.lang3.mutable.MutableDouble;
 import org.apache.commons.lang3.mutable.MutableObject;
+
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.Vector2D;
 
 public class HeightQuadTreeSearchTools
 {
@@ -180,14 +180,14 @@ public class HeightQuadTreeSearchTools
 
    public interface RayActionRule
    {
-      public boolean doAction(double distanceFromOrigin, Point2d nodeCenter);
+      public boolean doAction(double distanceFromOrigin, Point2D nodeCenter);
    }
 
-   public static Point2d adjustCoordinatesToResolution(double x, double y, double resolution)
+   public static Point2D adjustCoordinatesToResolution(double x, double y, double resolution)
    {
       x = adjustCoordinatesToResolution(x, resolution);
       y = adjustCoordinatesToResolution(y, resolution);
-      return new Point2d(x, y);
+      return new Point2D(x, y);
    }
 
    public static double adjustCoordinatesToResolution(double coord, double resolution)
@@ -197,19 +197,19 @@ public class HeightQuadTreeSearchTools
       return Math.copySign(output, coord);
    }
 
-   public static void doActionOnRayKeys(HeightQuadTreeNode root, Point2d origin, Vector2d direction, double maxRange, RayActionRule actionRule,
+   public static void doActionOnRayKeys(HeightQuadTreeNode root, Point2D origin, Vector2D direction, double maxRange, RayActionRule actionRule,
          double resolution)
    {
       // see "A Faster Voxel Traversal Algorithm for Ray Tracing" by Amanatides & Woo
       // basically: DDA in 3D
-      origin = adjustCoordinatesToResolution(origin.x, origin.y, resolution);
+      origin = adjustCoordinatesToResolution(origin.getX(), origin.getY(), resolution);
 
       double[] directionArray = new double[2];
       double[] originArray = new double[2];
       double[] step = new double[2];
       double[] tMax = new double[2];
       double[] tDelta = new double[2];
-      Point2d currentPosition = new Point2d();
+      Point2D currentPosition = new Point2D();
       double[] currentPositionArray = new double[2];
 
       // Initialization phase -------------------------------------------------------

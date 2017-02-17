@@ -1,8 +1,8 @@
 package us.ihmc.robotics.math.frames;
 
-import javax.vecmath.Quat4d;
-import javax.vecmath.Tuple3d;
-
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.Settable;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -11,7 +11,6 @@ import us.ihmc.robotics.geometry.AbstractReferenceFrameHolder;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class YoFramePoseUsingQuaternions extends AbstractReferenceFrameHolder implements Settable<YoFramePoseUsingQuaternions>
@@ -145,7 +144,7 @@ public class YoFramePoseUsingQuaternions extends AbstractReferenceFrameHolder im
       position.set(framePoint, notifyListeners);
    }
 
-   public void setPosition(Tuple3d position)
+   public void setPosition(Tuple3DBasics position)
    {
       this.position.set(position);
    }
@@ -161,7 +160,7 @@ public class YoFramePoseUsingQuaternions extends AbstractReferenceFrameHolder im
       orientation.set(frameOrientation, notifyListeners);
    }
 
-   public void setOrientation(Quat4d quaternion)
+   public void setOrientation(Quaternion quaternion)
    {
       orientation.set(quaternion);
    }
@@ -267,7 +266,7 @@ public class YoFramePoseUsingQuaternions extends AbstractReferenceFrameHolder im
       return getPosition().getZ();
    }
 
-   public void getOrientation(Quat4d quaternionToPack)
+   public void getOrientation(Quaternion quaternionToPack)
    {
       getOrientation().get(quaternionToPack);
    }

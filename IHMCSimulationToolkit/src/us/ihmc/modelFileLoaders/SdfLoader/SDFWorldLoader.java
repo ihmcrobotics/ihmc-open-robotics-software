@@ -1,13 +1,5 @@
 package us.ihmc.modelFileLoaders.SdfLoader;
 
-import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFWorld.Road;
-import us.ihmc.graphicsDescription.Graphics3DObject;
-import us.ihmc.graphicsDescription.HeightMap;
-import us.ihmc.graphicsDescription.structure.Graphics3DNode;
-import us.ihmc.graphicsDescription.structure.Graphics3DNodeType;
-import us.ihmc.jMonkeyEngineToolkit.jme.JMEGeneratedHeightMap;
-
-import javax.xml.bind.JAXBException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -17,6 +9,15 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map.Entry;
+
+import javax.xml.bind.JAXBException;
+
+import us.ihmc.graphicsDescription.Graphics3DObject;
+import us.ihmc.graphicsDescription.HeightMap;
+import us.ihmc.graphicsDescription.structure.Graphics3DNode;
+import us.ihmc.graphicsDescription.structure.Graphics3DNodeType;
+import us.ihmc.jMonkeyEngineToolkit.jme.JMEGeneratedHeightMap;
+import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFWorld.Road;
 
 public class SDFWorldLoader
 {

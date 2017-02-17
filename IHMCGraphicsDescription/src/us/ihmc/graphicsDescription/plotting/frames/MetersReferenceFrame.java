@@ -1,8 +1,7 @@
 package us.ihmc.graphicsDescription.plotting.frames;
 
-import javax.vecmath.Vector2d;
-
-import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 @SuppressWarnings("serial")
@@ -29,7 +28,7 @@ public abstract class MetersReferenceFrame extends PlotterReferenceFrame
       super(frameName, parentFrame, transformToParent, isBodyCenteredFrame, isWorldFrame, isZupFrame, PlotterFrameSpace.METERS, spaceConverter);
    }
    
-   public Vector2d getConversionToMeters()
+   public Vector2D getConversionToMeters()
    {
       return getSpaceConverter().getConversionToSpace(PlotterFrameSpace.METERS);
    }

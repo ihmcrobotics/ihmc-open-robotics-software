@@ -2,9 +2,8 @@ package us.ihmc.exampleSimulations.beetle.planning;
 
 import java.awt.Color;
 
-import javax.vecmath.Point2d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.exampleSimulations.beetle.referenceFrames.HexapodReferenceFrames;
 import us.ihmc.graphicsDescription.plotting.artifact.CircleArtifact;
 import us.ihmc.graphicsDescription.plotting.artifact.LineArtifact;
@@ -54,7 +53,7 @@ public class FootStepPlanner
    private final RigidBody pelvis;
    private final Twist twistToPack = new Twist();
    private FrameVector angularVelocity = new FrameVector();
-   private Vector3d perpindicularToCenterOfMassVelocity = new Vector3d();
+   private Vector3D perpindicularToCenterOfMassVelocity = new Vector3D();
    private FramePoint centerOfTurn = new FramePoint();
 
    private final CircleArtifact turnRadiusVisual = new CircleArtifact("turnRadiusVisual", 0.0, 0.0, 0.0, false);
@@ -105,7 +104,7 @@ public class FootStepPlanner
          ReferenceFrame footFrame = referenceFrames.getFootFrame(robotSextant);
          temp.setToZero(footFrame);
          temp.changeFrame(bodyZUpFrame);
-         Vector3d offsetFromBodyToFoot = new Vector3d();
+         Vector3D offsetFromBodyToFoot = new Vector3D();
          temp.get(offsetFromBodyToFoot);
          YoFrameVector yoOffset = new YoFrameVector(prefix + robotSextant.name() + "offsetFromBodyToFoot", bodyZUpFrame, registry);
          yoOffset.set(offsetFromBodyToFoot);
@@ -136,7 +135,7 @@ public class FootStepPlanner
 
    FrameVector offsetFromBodyToFoot = new FrameVector();
 
-   private final Point2d startPoint = new Point2d();
+   private final Point2D startPoint = new Point2D();
    private final FramePoint2d frameEndPoint = new FramePoint2d();
    private final FramePoint bodyPositionProjectedInFuture = new FramePoint();
    private final FrameOrientation rotationAtEnd = new FrameOrientation();

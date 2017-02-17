@@ -3,12 +3,11 @@ package us.ihmc.humanoidRobotics.communication.packets.sensing;
 import java.util.ArrayList;
 import java.util.Random;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Point3f;
-
 import us.ihmc.communication.packets.HighBandwidthPacket;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PacketDestination;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Point3D32;
 @HighBandwidthPacket
 public class PointCloudWorldPacket extends Packet<PointCloudWorldPacket>
 {
@@ -47,51 +46,51 @@ public class PointCloudWorldPacket extends Packet<PointCloudWorldPacket>
       setDestination(PacketDestination.BROADCAST);
    }
    
-   public void setGroundQuadTreeSupport(Point3d[] pointCloud)
+   public void setGroundQuadTreeSupport(Point3D[] pointCloud)
    {
       groundQuadTreeSupport = new float[pointCloud.length*3];
       for (int i = 0; i < pointCloud.length; i++)
       {
-         Point3d point = pointCloud[i];
+         Point3D point = pointCloud[i];
          groundQuadTreeSupport[3 * i] = (float) point.getX();
          groundQuadTreeSupport[3 * i + 1] = (float) point.getY();
          groundQuadTreeSupport[3 * i + 2] = (float) point.getZ();
       }
    }
    
-   public void setDecayingWorldScan(Point3d[] pointCloud)
+   public void setDecayingWorldScan(Point3D[] pointCloud)
    {
       decayingWorldScan = new float[pointCloud.length*3];
       for (int i = 0; i < pointCloud.length; i++)
       {
-         Point3d point = pointCloud[i];
+         Point3D point = pointCloud[i];
          decayingWorldScan[3 * i] = (float) point.getX();
          decayingWorldScan[3 * i + 1] = (float) point.getY();
          decayingWorldScan[3 * i + 2] = (float) point.getZ();
       }
    }
 
-   public void setDecayingWorldScan(ArrayList<Point3d> pointCloud)
+   public void setDecayingWorldScan(ArrayList<Point3D> pointCloud)
    {
       decayingWorldScan = new float[pointCloud.size()*3];
       for (int i = 0; i < pointCloud.size(); i++)
       {
-         Point3d point = pointCloud.get(i);
+         Point3D point = pointCloud.get(i);
          decayingWorldScan[3 * i] = (float) point.getX();
          decayingWorldScan[3 * i + 1] = (float) point.getY();
          decayingWorldScan[3 * i + 2] = (float) point.getZ();
       }
    }
 
-   public Point3f[] getGroundQuadTreeSupport()
+   public Point3D32[] getGroundQuadTreeSupport()
    {
       
       int numberOfPoints = groundQuadTreeSupport.length/3;
       
-      Point3f[] points = new Point3f[numberOfPoints];
+      Point3D32[] points = new Point3D32[numberOfPoints];
       for(int i = 0; i < numberOfPoints; i++)
       {
-         Point3f point = new Point3f();
+         Point3D32 point = new Point3D32();
          point.setX(groundQuadTreeSupport[3 * i]);
          point.setY(groundQuadTreeSupport[3 * i + 1]);
          point.setZ(groundQuadTreeSupport[3 * i + 2]);
@@ -101,14 +100,14 @@ public class PointCloudWorldPacket extends Packet<PointCloudWorldPacket>
       return points;
    }
 
-   public Point3f[] getDecayingWorldScan()
+   public Point3D32[] getDecayingWorldScan()
    {
       int numberOfPoints = decayingWorldScan.length/3;
       
-      Point3f[] points = new Point3f[numberOfPoints];
+      Point3D32[] points = new Point3D32[numberOfPoints];
       for(int i = 0; i < numberOfPoints; i++)
       {
-         Point3f point = new Point3f();
+         Point3D32 point = new Point3D32();
          point.setX(decayingWorldScan[3 * i]);
          point.setY(decayingWorldScan[3 * i + 1]);
          point.setZ(decayingWorldScan[3 * i + 2]);

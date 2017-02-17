@@ -1,12 +1,13 @@
 package us.ihmc.robotics.linearDynamicSystems;
 
-import Jama.EigenvalueDecomposition;
-import Jama.Matrix;
+import java.util.ArrayList;
+
 import org.ejml.data.CDenseMatrix64F;
 import org.ejml.ops.CCommonOps;
-import us.ihmc.robotics.dataStructures.ComplexNumber;
 
-import java.util.ArrayList;
+import Jama.EigenvalueDecomposition;
+import Jama.Matrix;
+import us.ihmc.robotics.dataStructures.ComplexNumber;
 
 public class EigenvalueDecomposer
 {

@@ -1,7 +1,6 @@
 package us.ihmc.quadrupedRobotics.planning.trajectory;
 
-import javax.vecmath.Point2d;
-
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -64,7 +63,7 @@ public class QuadrupedSwingTrajectoryGenerator
       alphaSlopeAtStart.set(1.5);
 
       //stretchedSlowAtEndAlphaToAlphaFunction = new StretchedSlowAtEndAlphaToAlphaFunction(alphaSlopeAtStart.getDoubleValue());
-      Point2d[] listOfPoints = new Point2d[] {new Point2d(0.0, 0.0), new Point2d(0.6, 0.8), new Point2d(1.0, 1.0)};
+      Point2D[] listOfPoints = new Point2D[] {new Point2D(0.0, 0.0), new Point2D(0.6, 0.8), new Point2D(1.0, 1.0)};
       alphaToAlphaFunction = new MultipleSegmentConstantSlope(listOfPoints);
 
 

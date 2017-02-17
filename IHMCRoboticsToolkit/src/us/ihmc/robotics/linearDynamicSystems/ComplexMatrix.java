@@ -1,8 +1,9 @@
 package us.ihmc.robotics.linearDynamicSystems;
 
-import Jama.Matrix;
 import org.ejml.data.CDenseMatrix64F;
 import org.ejml.ops.CCommonOps;
+
+import Jama.Matrix;
 import us.ihmc.robotics.dataStructures.ComplexNumber;
 
 public class ComplexMatrix

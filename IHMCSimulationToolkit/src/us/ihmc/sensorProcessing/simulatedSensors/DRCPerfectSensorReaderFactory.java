@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.sensors.ContactSensorHolder;
@@ -14,6 +13,7 @@ import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.sensorProcessing.model.DesiredJointDataHolder;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
 import us.ihmc.simulationconstructionset.FloatingJoint;
+import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.IMUMount;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.simulatedSensors.WrenchCalculatorInterface;

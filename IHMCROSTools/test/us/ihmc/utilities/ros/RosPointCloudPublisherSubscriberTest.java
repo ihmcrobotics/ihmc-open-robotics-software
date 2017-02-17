@@ -9,15 +9,14 @@ import java.net.URISyntaxException;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-import javax.vecmath.Color3f;
-import javax.vecmath.Point3d;
-
 import org.junit.Test;
 
 import sensor_msgs.PointCloud2;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.robotics.dataStructures.MutableColor;
 import us.ihmc.utilities.ros.publisher.RosPointCloudPublisher;
 import us.ihmc.utilities.ros.subscriber.RosPointCloudSubscriber;
 import us.ihmc.utilities.ros.types.PointType;
@@ -46,9 +45,9 @@ public class RosPointCloudPublisherSubscriberTest extends IHMCRosTestWithRosCore
       // Test Data
       String testTopic = "/cloudTest";
       final String testFrameId = "/testFrame";
-      final Point3d[] testPoints = new Point3d[] {new Point3d(1.0, 2.0, 3.0)};
+      final Point3D[] testPoints = new Point3D[] {new Point3D(1.0, 2.0, 3.0)};
       final float[] testIntensities = new float[] {1.0f};
-      final Color3f[] testColor = new Color3f[] {new Color3f(1.0f, 2.0f, 3.0f)};
+      final MutableColor[] testColor = new MutableColor[] {new MutableColor(1.0f, 2.0f, 3.0f)};
 
 
       // setup publisher

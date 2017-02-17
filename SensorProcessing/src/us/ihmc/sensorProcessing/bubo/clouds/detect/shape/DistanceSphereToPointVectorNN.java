@@ -18,14 +18,14 @@
 
 package us.ihmc.sensorProcessing.bubo.clouds.detect.shape;
 
+import java.util.List;
+
+import org.ddogleg.fitting.modelset.DistanceFromModel;
+
 import georegression.metric.Distance3D_F64;
 import georegression.struct.point.Vector3D_F64;
 import georegression.struct.shapes.Sphere3D_F64;
 import us.ihmc.sensorProcessing.bubo.clouds.detect.alg.PointVectorNN;
-
-import org.ddogleg.fitting.modelset.DistanceFromModel;
-
-import java.util.List;
 
 /**
  * Euclidean distance from a {@link georegression.struct.plane.PlaneGeneral3D_F64} for use with {@link us.ihmc.sensorProcessing.bubo.clouds.detect.alg.PointCloudShapeDetectionSchnabel2007}.

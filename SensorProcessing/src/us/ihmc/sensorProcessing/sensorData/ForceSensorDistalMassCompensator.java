@@ -1,7 +1,5 @@
 package us.ihmc.sensorProcessing.sensorData;
 
-import us.ihmc.robotics.sensors.ForceSensorData;
-import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -16,6 +14,8 @@ import us.ihmc.robotics.screwTheory.CenterOfMassCalculator;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.Wrench;
+import us.ihmc.robotics.sensors.ForceSensorData;
+import us.ihmc.robotics.sensors.ForceSensorDefinition;
 
 public class ForceSensorDistalMassCompensator
 {

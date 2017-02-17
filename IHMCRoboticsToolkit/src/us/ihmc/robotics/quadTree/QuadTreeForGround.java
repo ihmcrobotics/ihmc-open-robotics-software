@@ -1,8 +1,9 @@
 package us.ihmc.robotics.quadTree;
 
-import javax.vecmath.Point3d;
 import java.util.ArrayList;
 import java.util.Collection;
+
+import us.ihmc.euclid.tuple3D.Point3D;
 
 /**
  * A quad tree for representing ground height maps.
@@ -23,7 +24,7 @@ public class QuadTreeForGround
    private final Box bounds;
 
    private final QuadTreeForGroundParameters quadTreeParameters;
-   private final Point3d nearestPointForHeightAt = new Point3d();
+   private final Point3D nearestPointForHeightAt = new Point3D();
    private final QuadTreeForGroundPointLimiter pointLimiter;
    
    
@@ -80,7 +81,7 @@ public class QuadTreeForGround
          QuadTreeForGroundLeaf leaf = node.getLeaf();
          if (leaf != null)
          {
-            Point3d averagePoint = leaf.getAveragePoint();
+            Point3D averagePoint = leaf.getAveragePoint();
             x = averagePoint.getX();
             y = averagePoint.getY();
             z = averagePoint.getZ();
@@ -139,17 +140,17 @@ public class QuadTreeForGround
       
    }
 
-   public synchronized void getClosestPoint(double xQuery, double yQuery, Point3d pointToPack)
+   public synchronized void getClosestPoint(double xQuery, double yQuery, Point3D pointToPack)
    {
       root.getClosestPoint(xQuery, yQuery, pointToPack);
    }
 
-   public synchronized void getAllPointsWithinDistance(double x, double y, double distance, ArrayList<Point3d> pointsWithinDistanceToPack)
+   public synchronized void getAllPointsWithinDistance(double x, double y, double distance, ArrayList<Point3D> pointsWithinDistanceToPack)
    {
       this.root.getAllPointsWithinDistance(x, y, distance, pointsWithinDistanceToPack);
    }
 
-   public synchronized void getAllPointsWithinBounds(Box bounds, ArrayList<Point3d> pointsWithinBoundsToPack)
+   public synchronized void getAllPointsWithinBounds(Box bounds, ArrayList<Point3D> pointsWithinBoundsToPack)
    {
       this.root.getAllPointsWithBounds(bounds, pointsWithinBoundsToPack);
    }
@@ -194,12 +195,12 @@ public class QuadTreeForGround
       return root.getDefaultHeightWhenNoPoints();
    }
 
-   public synchronized void getStoredPoints(Collection<Point3d> points)
+   public synchronized void getStoredPoints(Collection<Point3D> points)
    {
       root.getAllSubTreePoints(points);
    }
 
-   public synchronized void getCellAverageStoredPoints(Collection<Point3d> points)
+   public synchronized void getCellAverageStoredPoints(Collection<Point3D> points)
    {
       root.getCellAverageSubTreePoints(points);
    }

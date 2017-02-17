@@ -1,8 +1,7 @@
 package us.ihmc.humanoidBehaviors.behaviors.examples;
 
-import javax.vecmath.Point3f;
-
 import us.ihmc.communication.packets.TextToSpeechPacket;
+import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
@@ -34,7 +33,7 @@ public class GetLidarScanExampleBehavior extends AbstractBehavior
       }
    }
 
-   protected void processPointCloud(Point3f[] points)
+   protected void processPointCloud(Point3D32[] points)
    {
       scanNumber++;
 

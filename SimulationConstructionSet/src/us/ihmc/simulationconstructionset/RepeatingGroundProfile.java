@@ -1,12 +1,11 @@
 package us.ihmc.simulationconstructionset;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
-import us.ihmc.simulationconstructionset.util.ground.RepeatingHeightMap;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.jMonkeyEngineToolkit.HeightMapWithNormals;
 import us.ihmc.robotics.geometry.BoundingBox3d;
+import us.ihmc.simulationconstructionset.util.ground.RepeatingHeightMap;
 
 public class RepeatingGroundProfile implements GroundProfile3D
 {
@@ -61,7 +60,7 @@ public class RepeatingGroundProfile implements GroundProfile3D
    }
 
    @Override
-   public boolean checkIfInside(double x, double y, double z, Point3d intersectionToPack, Vector3d normalToPack)
+   public boolean checkIfInside(double x, double y, double z, Point3D intersectionToPack, Vector3D normalToPack)
    {
       double localX = xLocal(x);
       double localY = yLocal(y);

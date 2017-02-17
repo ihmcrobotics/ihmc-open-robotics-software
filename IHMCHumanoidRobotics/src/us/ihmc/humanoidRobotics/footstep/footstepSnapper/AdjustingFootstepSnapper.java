@@ -3,19 +3,18 @@ package us.ihmc.humanoidRobotics.footstep.footstepSnapper;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Point2d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.dataStructures.HeightMapWithPoints;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FramePose2d;
 import us.ihmc.robotics.geometry.InsufficientDataException;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -40,7 +39,7 @@ public class AdjustingFootstepSnapper implements FootstepSnapper
    }
 
    @Override
-   public void setMask(List<Point2d> footShape)
+   public void setMask(List<Point2D> footShape)
    {
       convexHullFootstepSnapper.setMask(footShape);
    }
@@ -52,7 +51,7 @@ public class AdjustingFootstepSnapper implements FootstepSnapper
    }
 
    @Override
-   public List<Point3d> getPointList()
+   public List<Point3D> getPointList()
    {
       return convexHullFootstepSnapper.getPointList();
    }
@@ -69,13 +68,13 @@ public class AdjustingFootstepSnapper implements FootstepSnapper
    }
 
    @Override
-   public void adjustFootstepWithoutHeightmap(FootstepDataMessage footstep, double height, Vector3d planeNormal)
+   public void adjustFootstepWithoutHeightmap(FootstepDataMessage footstep, double height, Vector3D planeNormal)
    {
       convexHullFootstepSnapper.adjustFootstepWithoutHeightmap(footstep, height, planeNormal);
    }
 
    @Override
-   public void adjustFootstepWithoutHeightmap(Footstep footstep, double height, Vector3d planeNormal)
+   public void adjustFootstepWithoutHeightmap(Footstep footstep, double height, Vector3D planeNormal)
    {
       convexHullFootstepSnapper.adjustFootstepWithoutHeightmap(footstep, height, planeNormal);
    }
@@ -83,7 +82,7 @@ public class AdjustingFootstepSnapper implements FootstepSnapper
 
    @Override
    public Footstep generateFootstepWithoutHeightMap(FramePose2d desiredSolePosition, RigidBody foot, ReferenceFrame soleFrame, RobotSide robotSide,
-           double height, Vector3d planeNormal)
+           double height, Vector3D planeNormal)
    {
       return convexHullFootstepSnapper.generateFootstepWithoutHeightMap(desiredSolePosition, foot, soleFrame, robotSide, height, planeNormal);
    }
@@ -93,7 +92,7 @@ public class AdjustingFootstepSnapper implements FootstepSnapper
            HeightMapWithPoints heightMap)
            throws InsufficientDataException
    {
-      FramePose2d footPose2d = new FramePose2d(ReferenceFrame.getWorldFrame(), new Point2d(soleX, soleY), yaw);
+      FramePose2d footPose2d = new FramePose2d(ReferenceFrame.getWorldFrame(), new Point2D(soleX, soleY), yaw);
 
       return generateFootstepUsingHeightMap(footPose2d, foot, soleFrame, robotSide, heightMap);
    }
@@ -114,12 +113,12 @@ public class AdjustingFootstepSnapper implements FootstepSnapper
    public Footstep.FootstepType snapFootstep(Footstep footstep, HeightMapWithPoints heightMap){
       FootstepDataMessage originalFootstep = new FootstepDataMessage(footstep);
       //set to the sole pose
-      Vector3d position = new Vector3d();
-      Quat4d orientation = new Quat4d();
+      Vector3D position = new Vector3D();
+      Quaternion orientation = new Quaternion();
       RigidBodyTransform solePose = new RigidBodyTransform();
       footstep.getSolePose(solePose);
       solePose.get(orientation, position);
-      originalFootstep.setLocation(new Point3d(position));
+      originalFootstep.setLocation(new Point3D(position));
       originalFootstep.setOrientation(orientation);
 
       //get the footstep
@@ -153,14 +152,14 @@ public class AdjustingFootstepSnapper implements FootstepSnapper
 
       FootstepDataMessage originalFootstepFound = new FootstepDataMessage(footstep);
 
-      Vector3d position = new Vector3d();
-      Matrix3d orientation = new Matrix3d();
-      Vector3d zOrientation = new Vector3d();
+      Vector3D position = new Vector3D();
+      RotationMatrix orientation = new RotationMatrix();
+      Vector3D zOrientation = new Vector3D();
 
       position.set(originalFootstepFound.getLocation());
       orientation.set(originalFootstepFound.getOrientation());
       orientation.getColumn(2, zOrientation);
-      double originalYaw = RotationTools.computeYaw(originalFootstepFound.getOrientation());
+      double originalYaw = originalFootstepFound.getOrientation().getYaw();
 
       double[] angleOffsets;
       if (angleAdjustment > 0)
@@ -172,8 +171,8 @@ public class AdjustingFootstepSnapper implements FootstepSnapper
          angleOffsets = new double[] {0.0};
       }
 
-      ArrayList<Point2d> possiblePositions = new ArrayList<Point2d>();
-      Point2d originalPosition = new Point2d(position.getX(), position.getY());
+      ArrayList<Point2D> possiblePositions = new ArrayList<Point2D>();
+      Point2D originalPosition = new Point2D(position.getX(), position.getY());
       possiblePositions.add(originalPosition);
 
       if (distanceAdjustment > 0)
@@ -181,7 +180,7 @@ public class AdjustingFootstepSnapper implements FootstepSnapper
          for (int i = 0; i < 8; i++)
          {
             double angle = Math.PI / 4 * i + originalYaw;
-            possiblePositions.add(new Point2d(originalPosition.getX() + Math.cos(angle) * distanceAdjustment,
+            possiblePositions.add(new Point2D(originalPosition.getX() + Math.cos(angle) * distanceAdjustment,
                                               originalPosition.getY() + Math.sin(angle) * distanceAdjustment));
          }
       }
@@ -191,7 +190,7 @@ public class AdjustingFootstepSnapper implements FootstepSnapper
       FramePose2d newDesiredSolePosition = new FramePose2d(desiredSolePosition);
       for (int i = 0; i < angleOffsets.length; i++)
       {
-         for (Point2d point2d : possiblePositions)
+         for (Point2D point2d : possiblePositions)
          {
             if (isOriginalPosition)
             {

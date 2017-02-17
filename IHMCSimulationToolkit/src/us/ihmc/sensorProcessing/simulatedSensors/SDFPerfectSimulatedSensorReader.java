@@ -8,11 +8,11 @@ import java.util.Map.Entry;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import us.ihmc.commons.Conversions;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.LongYoVariable;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotController.RawSensorReader;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;

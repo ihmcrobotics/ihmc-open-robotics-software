@@ -1,10 +1,9 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states;
 
-import javax.vecmath.AxisAngle4d;
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Vector3d;
-
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
+import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HandComplianceControlParametersCommand;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -12,7 +11,6 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector;
 import us.ihmc.robotics.math.filters.DeadzoneYoFrameVector;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -208,9 +206,9 @@ public class HandCompliantControlHelper
       applyCorrection(desiredPosition, desiredOrientation);
    }
 
-   private final AxisAngle4d angularDisplacementAsAxisAngle = new AxisAngle4d();
-   private final Matrix3d angularDisplacementAsMatrix = new Matrix3d();
-   private final Matrix3d correctedRotationMatrix = new Matrix3d();
+   private final AxisAngle angularDisplacementAsAxisAngle = new AxisAngle();
+   private final RotationMatrix angularDisplacementAsMatrix = new RotationMatrix();
+   private final RotationMatrix correctedRotationMatrix = new RotationMatrix();
 
    private final FrameVector tempForceVector = new FrameVector();
    private final FrameVector tempTorqueVector = new FrameVector();
@@ -282,10 +280,11 @@ public class HandCompliantControlHelper
       desiredPosition.sub(totalLinearCorrection);
 
       totalAngularCorrection.negate();
-      RotationTools.convertRotationVectorToAxisAngle(totalAngularCorrection.getVector(), angularDisplacementAsAxisAngle);
+      angularDisplacementAsAxisAngle.set(totalAngularCorrection.getVector());
       angularDisplacementAsMatrix.set(angularDisplacementAsAxisAngle);
       desiredOrientation.getMatrix3d(correctedRotationMatrix);
-      correctedRotationMatrix.mul(angularDisplacementAsMatrix, correctedRotationMatrix);
+      correctedRotationMatrix.set(angularDisplacementAsMatrix);
+      correctedRotationMatrix.multiply(correctedRotationMatrix);
       desiredOrientation.set(correctedRotationMatrix);
 
       desiredPosition.changeFrame(originalFrame);
@@ -339,7 +338,7 @@ public class HandCompliantControlHelper
       }
    }
 
-   public void setDesiredForceOfHandOntoExternalEnvironment(Vector3d desiredForce)
+   public void setDesiredForceOfHandOntoExternalEnvironment(Vector3D desiredForce)
    {
       if (desiredForce == null)
       {
@@ -352,7 +351,7 @@ public class HandCompliantControlHelper
       }
    }
 
-   public void setDesiredTorqueOfHandOntoExternalEnvironment(Vector3d desiredTorque)
+   public void setDesiredTorqueOfHandOntoExternalEnvironment(Vector3D desiredTorque)
    {
       if (desiredTorque == null)
       {

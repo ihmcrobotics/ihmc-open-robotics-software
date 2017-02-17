@@ -3,17 +3,10 @@ package us.ihmc.atlas;
 import java.util.LinkedHashMap;
 import java.util.List;
 
-import javax.vecmath.Matrix3d;
-
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import com.jme3.math.Transform;
 
-import us.ihmc.modelFileLoaders.SdfLoader.*;
-import us.ihmc.modelFileLoaders.ModelFileLoaderConversionsHelper;
-import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFGeometry;
-import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFSensor;
-import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFVisual;
 import us.ihmc.atlas.initialSetup.AtlasSimInitialSetup;
 import us.ihmc.atlas.parameters.AtlasArmControllerParameters;
 import us.ihmc.atlas.parameters.AtlasCapturePointPlannerParameters;
@@ -41,19 +34,34 @@ import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerPar
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
 import us.ihmc.commons.Conversions;
+import us.ihmc.euclid.matrix.Matrix3D;
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.FootstepPlanningParameterization;
 import us.ihmc.humanoidRobotics.footstep.footstepSnapper.AtlasFootstepSnappingParameters;
 import us.ihmc.humanoidRobotics.footstep.footstepSnapper.FootstepSnappingParameters;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
 import us.ihmc.jMonkeyEngineToolkit.jme.util.JMEGeometryUtils;
+import us.ihmc.modelFileLoaders.ModelFileLoaderConversionsHelper;
+import us.ihmc.modelFileLoaders.SdfLoader.DRCRobotSDFLoader;
+import us.ihmc.modelFileLoaders.SdfLoader.GeneralizedSDFRobotModel;
+import us.ihmc.modelFileLoaders.SdfLoader.JaxbSDFLoader;
+import us.ihmc.modelFileLoaders.SdfLoader.RobotDescriptionFromSDFLoader;
+import us.ihmc.modelFileLoaders.SdfLoader.SDFContactSensor;
+import us.ihmc.modelFileLoaders.SdfLoader.SDFDescriptionMutator;
+import us.ihmc.modelFileLoaders.SdfLoader.SDFForceSensor;
+import us.ihmc.modelFileLoaders.SdfLoader.SDFJointHolder;
+import us.ihmc.modelFileLoaders.SdfLoader.SDFLinkHolder;
+import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFGeometry;
+import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFSensor;
+import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFVisual;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.SDFLogModelProvider;
 import us.ihmc.robotDataLogger.logger.LogSettings;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFromDescription;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.robotController.OutputProcessor;
@@ -578,7 +586,7 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
                double iyy = 1.5;
                double iyz = 0.0;
                double izz = 0.5;
-               modifyLinkInertia(linkHolder, new Matrix3d(ixx, ixy, ixz, ixy, iyy, iyz, ixz, iyz, izz));
+               modifyLinkInertia(linkHolder, new Matrix3D(ixx, ixy, ixz, ixy, iyy, iyz, ixz, iyz, izz));
             }
 
             addChestIMU(linkHolder);
@@ -880,7 +888,7 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
       linkHolder.setInertialFrameWithRespectToLinkFrame(ModelFileLoaderConversionsHelper.poseToTransform(pose));
    }
 
-   private void modifyLinkInertia(SDFLinkHolder linkHolder, Matrix3d inertia)
+   private void modifyLinkInertia(SDFLinkHolder linkHolder, Matrix3D inertia)
    {
       linkHolder.setInertia(inertia);
    }

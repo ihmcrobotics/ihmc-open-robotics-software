@@ -1,15 +1,20 @@
 package us.ihmc.atlas.multisenseBlobExperiments;
 
-import boofcv.gui.image.ImagePanel;
-import boofcv.gui.image.ShowImages;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+
+import javax.swing.JFrame;
+import javax.swing.SwingUtilities;
+
 import org.opencv.core.Point;
 import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
-import us.ihmc.atlas.AtlasRobotModel;
-import us.ihmc.atlas.AtlasRobotModelFactory;
-import us.ihmc.atlas.AtlasRobotVersion;
-import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.networkProcessor.modules.ZeroPoseMockRobotConfigurationDataPublisherModule;
+
+import boofcv.gui.image.ImagePanel;
+import boofcv.gui.image.ShowImages;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
@@ -22,13 +27,6 @@ import us.ihmc.ihmcPerception.vision.shapes.OpenCVColoredCircularBlobDetectorFac
 import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.subscriber.RosCompressedImageSubscriber;
-
-import javax.swing.*;
-import java.awt.image.BufferedImage;
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.ArrayList;
 
 public class MultiSenseBlobDetectionTestModule
 {

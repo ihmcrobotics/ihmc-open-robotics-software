@@ -1,8 +1,8 @@
 package us.ihmc.robotics.sensors;
 
-import us.ihmc.robotics.screwTheory.Wrench;
-
 import java.util.List;
+
+import us.ihmc.robotics.screwTheory.Wrench;
 
 public interface ForceSensorDataHolderReadOnly
 {

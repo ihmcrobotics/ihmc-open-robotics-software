@@ -2,28 +2,28 @@ package us.ihmc.quadrupedRobotics.communication.packets;
 
 import us.ihmc.communication.packets.Packet;
 
-import javax.vecmath.Point3d;
+import us.ihmc.euclid.tuple3D.Point3D;
 
 public class ComPositionPacket extends Packet<ComPositionPacket>
 {
-   private Point3d position;
+   private Point3D position;
 
    public ComPositionPacket()
    {
-      this.position = new Point3d();
+      this.position = new Point3D();
    }
 
-   public ComPositionPacket(Point3d position)
+   public ComPositionPacket(Point3D position)
    {
-      this.position = new Point3d(position);
+      this.position = new Point3D(position);
    }
 
    public ComPositionPacket(double x, double y, double z)
    {
-      this.position = new Point3d(x, y, z);
+      this.position = new Point3D(x, y, z);
    }
 
-   public void get(Point3d position)
+   public void get(Point3D position)
    {
       position.set(this.position);
    }

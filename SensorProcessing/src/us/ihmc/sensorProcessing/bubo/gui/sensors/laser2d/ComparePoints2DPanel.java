@@ -18,12 +18,14 @@
 
 package us.ihmc.sensorProcessing.bubo.gui.sensors.laser2d;
 
-import georegression.struct.point.Point2D_F64;
-import us.ihmc.sensorProcessing.bubo.gui.SpacialDisplay;
-
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.util.ArrayList;
 import java.util.List;
+
+import georegression.struct.point.Point2D_F64;
+import us.ihmc.sensorProcessing.bubo.gui.SpacialDisplay;
 
 /**
  * Displays multiple sets of 2D points in color

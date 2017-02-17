@@ -18,14 +18,14 @@
 
 package us.ihmc.sensorProcessing.bubo.clouds.detect.alg;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.ddogleg.fitting.modelset.DistanceFromModel;
 import org.ddogleg.fitting.modelset.ModelCodec;
 import org.ddogleg.fitting.modelset.ModelFitter;
 
 import us.ihmc.sensorProcessing.bubo.clouds.detect.shape.CheckShapeParameters;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Finds a locally optimal best fit set of points and model parameters to a shape in a point cloud with nearest-neighbor

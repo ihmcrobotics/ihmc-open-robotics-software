@@ -1,6 +1,11 @@
 package us.ihmc.atlas;
 
-import com.martiansoftware.jsap.*;
+import com.martiansoftware.jsap.FlaggedOption;
+import com.martiansoftware.jsap.JSAP;
+import com.martiansoftware.jsap.JSAPException;
+import com.martiansoftware.jsap.JSAPResult;
+import com.martiansoftware.jsap.Switch;
+
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.visualization.GainControllerSliderBoard;
 import us.ihmc.avatar.visualization.WalkControllerSliderBoard;

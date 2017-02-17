@@ -2,14 +2,14 @@ package us.ihmc.javaFXToolkit.shapes;
 
 import java.util.Random;
 
-import javax.vecmath.Point2d;
-
 import javafx.application.Application;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Material;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.MeshView;
 import javafx.stage.Stage;
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.graphicsDescription.MeshDataGenerator;
 import us.ihmc.javaFXToolkit.graphics.JavaFXMeshDataInterpreter;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
@@ -49,7 +49,7 @@ public class MeshDataGeneratorVisualizer extends Application
       sphere.setTranslateX(0.5);
       view3dFactory.addNodeToView(sphere);
 
-      Point2d[] polygonVertices = createPolygon();
+      Point2DReadOnly[] polygonVertices = createPolygon();
       MeshView extrudedPolygon = new MeshView(JavaFXMeshDataInterpreter.interpretMeshData(MeshDataGenerator.ExtrudedPolygon(polygonVertices, 0.1)));
       extrudedPolygon.setMaterial(defaultMaterial);
       extrudedPolygon.setTranslateX(2.0);
@@ -122,13 +122,13 @@ public class MeshDataGeneratorVisualizer extends Application
       primaryStage.show();
    }
 
-   private Point2d[] createPolygon()
+   private Point2DReadOnly[] createPolygon()
    {
       int numberOfPoints = 20;
 
       ConvexPolygon2d polygon = new ConvexPolygon2d();
 
-      Point2d randomVertex = new Point2d();
+      Point2D randomVertex = new Point2D();
       Random random = new Random(234523L);
 
       while (polygon.getNumberOfVertices() < numberOfPoints)
@@ -138,7 +138,7 @@ public class MeshDataGeneratorVisualizer extends Application
          polygon.update();
       }
 
-      Point2d[] vertices = new Point2d[numberOfPoints];
+      Point2DReadOnly[] vertices = new Point2D[numberOfPoints];
       int reverseIndex = numberOfPoints;
       for (int i = 0; i < polygon.getNumberOfVertices(); i++)
          vertices[i] = polygon.getVertex(--reverseIndex);

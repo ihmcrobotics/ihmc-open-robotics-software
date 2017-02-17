@@ -1,6 +1,6 @@
 package us.ihmc.robotics.partNames;
 
-import javax.vecmath.Vector3d;
+import us.ihmc.euclid.tuple3D.Vector3D;
 
 /**
  * Enum for Leg Joint Names. The user should not assume any ordering, or assume anything about the total
@@ -155,7 +155,7 @@ public enum LegJointName
       return getPascalCaseName();
    }
 
-   public Vector3d getJointAxis()
+   public Vector3D getJointAxis()
    {
       switch (this)
       {
@@ -188,18 +188,18 @@ public enum LegJointName
       return getPascalCaseName();
    }
 
-   private static Vector3d xAxis()
+   private static Vector3D xAxis()
    {
-      return new Vector3d(1.0, 0.0, 0.0);
+      return new Vector3D(1.0, 0.0, 0.0);
    }
 
-   private static Vector3d yAxis()
+   private static Vector3D yAxis()
    {
-      return new Vector3d(0.0, 1.0, 0.0);
+      return new Vector3D(0.0, 1.0, 0.0);
    }
 
-   private static Vector3d zAxis()
+   private static Vector3D zAxis()
    {
-      return new Vector3d(0.0, 0.0, 1.0);
+      return new Vector3D(0.0, 0.0, 1.0);
    }
 }

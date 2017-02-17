@@ -6,9 +6,8 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Random;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -58,12 +57,12 @@ public class HybridImpulseSpringDamperCollisionHandler implements CollisionHandl
 
    private final Random random;
 
-   private final Vector3d normal = new Vector3d();
-   private final Vector3d negative_normal = new Vector3d();
+   private final Vector3D normal = new Vector3D();
+   private final Vector3D negative_normal = new Vector3D();
 
-   private final Point3d point1 = new Point3d();
-   private final Point3d point2 = new Point3d();
-   private final Point3d tempPoint = new Point3d();
+   private final Point3D point1 = new Point3D();
+   private final Point3D point2 = new Point3D();
+   private final Point3D tempPoint = new Point3D();
 
    private List<CollisionHandlerListener> listeners = new ArrayList<CollisionHandlerListener>();
 
@@ -151,7 +150,7 @@ public class HybridImpulseSpringDamperCollisionHandler implements CollisionHandl
             int numberOfContacts = shapesInContact.getNumberOfContacts();
             for (int j=0; j<numberOfContacts; j++)
             {
-               Point3d locationA = new Point3d();
+               Point3D locationA = new Point3D();
                shapesInContact.getWorldA(j, locationA);
                newCollisionBalls.setBall(locationA);
             }
@@ -216,10 +215,10 @@ public class HybridImpulseSpringDamperCollisionHandler implements CollisionHandl
       }
    }
 
-   private final Point3d positionOne = new Point3d();
-   private final Point3d positionTwo = new Point3d();
-   private final Vector3d slipVector = new Vector3d();
-   private final Vector3d tempNormal = new Vector3d();
+   private final Point3D positionOne = new Point3D();
+   private final Point3D positionTwo = new Point3D();
+   private final Vector3D slipVector = new Vector3D();
+   private final Vector3D tempNormal = new Vector3D();
    
    private void slipTowardEachOtherIfSlipping(ContactingExternalForcePoint contactingExternalForcePointOne,
                                               ContactingExternalForcePoint contactingExternalForcePointTwo)
@@ -281,13 +280,13 @@ public class HybridImpulseSpringDamperCollisionHandler implements CollisionHandl
 
    private void performSpringDamper(ContactingExternalForcePoint contactingExternalForcePointOne, ContactingExternalForcePoint contactingExternalForcePointTwo)
    {
-      Point3d position = new Point3d();
-      Vector3d velocity = new Vector3d();
-      Vector3d normal = new Vector3d();
+      Point3D position = new Point3D();
+      Vector3D velocity = new Vector3D();
+      Vector3D normal = new Vector3D();
 
-      Point3d matchingPosition = new Point3d();
-      Vector3d matchingVelocity = new Vector3d();
-      Vector3d matchingNormal = new Vector3d();
+      Point3D matchingPosition = new Point3D();
+      Vector3D matchingVelocity = new Vector3D();
+      Vector3D matchingNormal = new Vector3D();
  
       contactingExternalForcePointOne.getPosition(position);
       contactingExternalForcePointOne.getVelocity(velocity);
@@ -297,8 +296,8 @@ public class HybridImpulseSpringDamperCollisionHandler implements CollisionHandl
       contactingExternalForcePointTwo.getVelocity(matchingVelocity);
       contactingExternalForcePointTwo.getSurfaceNormalInWorld(matchingNormal);
 
-      Vector3d positionDifference = new Vector3d();
-      Vector3d velocityDifference = new Vector3d();
+      Vector3D positionDifference = new Vector3D();
+      Vector3D velocityDifference = new Vector3D();
       
       positionDifference.set(matchingPosition);
       positionDifference.sub(position);
@@ -306,8 +305,8 @@ public class HybridImpulseSpringDamperCollisionHandler implements CollisionHandl
       velocityDifference.set(matchingVelocity);
       velocityDifference.sub(velocity);
       
-      Vector3d springForce = new Vector3d();
-      Vector3d damperForce = new Vector3d();
+      Vector3D springForce = new Vector3D();
+      Vector3D damperForce = new Vector3D();
 
       springForce.set(positionDifference);
       springForce.scale(kpCollision.getDoubleValue());
@@ -315,14 +314,14 @@ public class HybridImpulseSpringDamperCollisionHandler implements CollisionHandl
       damperForce.set(velocityDifference);
       damperForce.scale(kdCollision.getDoubleValue());
       
-      Vector3d totalForce = new Vector3d();
+      Vector3D totalForce = new Vector3D();
       totalForce.set(springForce);
       totalForce.add(damperForce);
       
-      Vector3d forceAlongNormal = new Vector3d(normal);
+      Vector3D forceAlongNormal = new Vector3D(normal);
       forceAlongNormal.scale(totalForce.dot(normal)/(normal.dot(normal)));
       
-      Vector3d forcePerpendicularToNormal = new Vector3d(totalForce);
+      Vector3D forcePerpendicularToNormal = new Vector3D(totalForce);
       forcePerpendicularToNormal.sub(forceAlongNormal);
       
 //      System.out.println("forceAlongNormal = " + forceAlongNormal);
@@ -481,12 +480,12 @@ public class HybridImpulseSpringDamperCollisionHandler implements CollisionHandl
             ContactingExternalForcePoint contactPointToConsiderOne = pointsThatAreContactingShapeTwo.get(k);
             ContactingExternalForcePoint contactPointToConsiderTwo = allContactingExternalForcePoints.get(contactPointToConsiderOne.getIndexOfContactingPair());
  
-            Vector3d deltaVectorRemovingNormalComponentsOne = new Vector3d(contactPointToConsiderOne.getPositionPoint());
+            Vector3D deltaVectorRemovingNormalComponentsOne = new Vector3D(contactPointToConsiderOne.getPositionPoint());
             deltaVectorRemovingNormalComponentsOne.sub(point1);
             subtractOffNormalComponent(normal, deltaVectorRemovingNormalComponentsOne);
             double distanceToConsiderOne = deltaVectorRemovingNormalComponentsOne.length();
             
-            Vector3d deltaVectorRemovingNormalComponentsTwo = new Vector3d(contactPointToConsiderTwo.getPositionPoint());
+            Vector3D deltaVectorRemovingNormalComponentsTwo = new Vector3D(contactPointToConsiderTwo.getPositionPoint());
             deltaVectorRemovingNormalComponentsTwo.sub(point2);
             subtractOffNormalComponent(normal, deltaVectorRemovingNormalComponentsTwo);            
             double distanceToConsiderTwo = deltaVectorRemovingNormalComponentsTwo.length();
@@ -638,9 +637,9 @@ public class HybridImpulseSpringDamperCollisionHandler implements CollisionHandl
       }
    }
 
-   private final Vector3d normalComponent = new Vector3d();
+   private final Vector3D normalComponent = new Vector3D();
 
-   private Vector3d subtractOffNormalComponent(Vector3d normal, Vector3d vectorToRemoveNormalComponent)
+   private Vector3D subtractOffNormalComponent(Vector3D normal, Vector3D vectorToRemoveNormalComponent)
    {
       //TODO: If normal is already unit vector, don't need to divide by normal.dot(normal);
       double percentOfNormalComponent = vectorToRemoveNormalComponent.dot(normal)/(normal.dot(normal));
@@ -650,11 +649,11 @@ public class HybridImpulseSpringDamperCollisionHandler implements CollisionHandl
       return vectorToRemoveNormalComponent;
    }
 
-   private final Point3d tempPositionForRollingOne = new Point3d();
-   private final Vector3d tempSurfaceNormalForRolllingOne = new Vector3d();
-   private final Point3d tempPositionForRollingTwo = new Point3d();
-   private final Vector3d tempSurfaceNormalForRolllingTwo = new Vector3d();
-   private final Vector3d tempVectorForRolling = new Vector3d();
+   private final Point3D tempPositionForRollingOne = new Point3D();
+   private final Vector3D tempSurfaceNormalForRolllingOne = new Vector3D();
+   private final Point3D tempPositionForRollingTwo = new Point3D();
+   private final Vector3D tempSurfaceNormalForRolllingTwo = new Vector3D();
+   private final Vector3D tempVectorForRolling = new Vector3D();
 
    private void rollContactPointsIfRolling(ArrayList<ContactingExternalForcePoint> pointsThatAreContactingShapeTwo)
    {
@@ -711,12 +710,12 @@ public class HybridImpulseSpringDamperCollisionHandler implements CollisionHandl
    }
 
    private final ArrayList<ContactingExternalForcePoint> pointsToRemove = new ArrayList<>();
-   private final Point3d positionOneToConsider = new Point3d();
-   private final Point3d positionTwoToConsider = new Point3d();
-   private final Vector3d tempVector = new Vector3d();
+   private final Point3D positionOneToConsider = new Point3D();
+   private final Point3D positionTwoToConsider = new Point3D();
+   private final Vector3D tempVector = new Vector3D();
 
-   private void removeContactOnPointsThatAreOutsideCollisionSandwhich(ArrayList<ContactingExternalForcePoint> pointsThatAreContactingShapeTwo, Point3d point1,
-                                                                      Vector3d normal, Point3d point2, Vector3d negativeNormal)
+   private void removeContactOnPointsThatAreOutsideCollisionSandwhich(ArrayList<ContactingExternalForcePoint> pointsThatAreContactingShapeTwo, Point3D point1,
+                                                                      Vector3D normal, Point3D point2, Vector3D negativeNormal)
    {
       pointsToRemove.clear();
       
@@ -754,7 +753,7 @@ public class HybridImpulseSpringDamperCollisionHandler implements CollisionHandl
       pointsThatAreContactingShapeTwo.removeAll(pointsToRemove);
    }
 
-   private void setSurfaceNormalToMatchNewCollision(ArrayList<ContactingExternalForcePoint> pointsThatAreContactingShapeTwo, Vector3d normal, Vector3d negativeNormal)
+   private void setSurfaceNormalToMatchNewCollision(ArrayList<ContactingExternalForcePoint> pointsThatAreContactingShapeTwo, Vector3D normal, Vector3D negativeNormal)
    {
       for (int k=0; k<pointsThatAreContactingShapeTwo.size(); k++)
       {
@@ -769,13 +768,13 @@ public class HybridImpulseSpringDamperCollisionHandler implements CollisionHandl
    private void resolveCollisionWithAnImpact(CollisionShapeWithLink shape1, CollisionShapeWithLink shape2, boolean shapeOneIsGround, boolean shapeTwoIsGround,
                                              ContactingExternalForcePoint externalForcePointOne, ContactingExternalForcePoint externalForcePointTwo, boolean allowMicroCollisions)
    {
-      Vector3d p_world = new Vector3d();
+      Vector3D p_world = new Vector3D();
       boolean collisionOccurred;
 
       if (shapeTwoIsGround)
       {
          //            System.out.println("shapeTwoIsGround");
-         Vector3d velocityWorld = new Vector3d(0.0, 0.0, 0.0);
+         Vector3D velocityWorld = new Vector3D(0.0, 0.0, 0.0);
 
          if ((!allowMicroCollisions) || (externalForcePointOne.getVelocityVector().lengthSquared() > velocityForMicrocollision * velocityForMicrocollision))
          {
@@ -793,7 +792,7 @@ public class HybridImpulseSpringDamperCollisionHandler implements CollisionHandl
       else if (shapeOneIsGround)
       {
          //            System.out.println("shapeOneIsGround");
-         Vector3d velocityWorld = new Vector3d(0.0, 0.0, 0.0);
+         Vector3D velocityWorld = new Vector3D(0.0, 0.0, 0.0);
          if ((!allowMicroCollisions) || (externalForcePointTwo.getVelocityVector().lengthSquared() > velocityForMicrocollision * velocityForMicrocollision))
          {
             collisionOccurred = externalForcePointTwo.resolveCollision(velocityWorld, normal, epsilon, mu, p_world); // link1.epsilon, link1.mu, p_world);
@@ -811,10 +810,10 @@ public class HybridImpulseSpringDamperCollisionHandler implements CollisionHandl
       else
       {
          //            System.out.println("Two ef points");
-         Vector3d velocityVectorOne = externalForcePointOne.getVelocityVector();
-         Vector3d velocityVectorTwo = externalForcePointTwo.getVelocityVector();
+         Vector3D velocityVectorOne = externalForcePointOne.getVelocityVector();
+         Vector3D velocityVectorTwo = externalForcePointTwo.getVelocityVector();
 
-         Vector3d velocityDifference = new Vector3d();
+         Vector3D velocityDifference = new Vector3D();
          velocityDifference.sub(velocityVectorTwo, velocityVectorOne);
 
          if ((!allowMicroCollisions) || (velocityDifference.lengthSquared() > velocityForMicrocollision * velocityForMicrocollision))

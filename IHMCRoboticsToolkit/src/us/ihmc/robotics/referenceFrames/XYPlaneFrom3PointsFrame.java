@@ -1,10 +1,9 @@
 package us.ihmc.robotics.referenceFrames;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 public class XYPlaneFrom3PointsFrame extends ReferenceFrame
 {
@@ -16,10 +15,10 @@ public class XYPlaneFrom3PointsFrame extends ReferenceFrame
    private final FramePoint p2 = new FramePoint(world);
    private final FramePoint p3 = new FramePoint(world);
 
-   private final Matrix3d rotation = new Matrix3d();
-   private final Vector3d eX = new Vector3d();
-   private final Vector3d eY = new Vector3d();
-   private final Vector3d eZ = new Vector3d();
+   private final RotationMatrix rotation = new RotationMatrix();
+   private final Vector3D eX = new Vector3D();
+   private final Vector3D eY = new Vector3D();
+   private final Vector3D eZ = new Vector3D();
 
    public XYPlaneFrom3PointsFrame(ReferenceFrame parentFrame, String name)
    {
@@ -47,9 +46,7 @@ public class XYPlaneFrom3PointsFrame extends ReferenceFrame
       eZ.normalize();
       eY.cross(eZ, eX);
 
-      rotation.setColumn(0, eX);
-      rotation.setColumn(1, eY);
-      rotation.setColumn(2, eZ);
+      rotation.setColumns(eX, eY, eZ);
 
       transformToParent.setRotationAndZeroTranslation(rotation);
       transformToParent.setTranslation(p1.getX(), p1.getY(), p1.getZ());

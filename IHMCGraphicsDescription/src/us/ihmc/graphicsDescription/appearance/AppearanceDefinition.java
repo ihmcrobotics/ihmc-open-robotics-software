@@ -2,7 +2,7 @@ package us.ihmc.graphicsDescription.appearance;
 
 import java.awt.Color;
 
-import javax.vecmath.Color3f;
+import us.ihmc.robotics.dataStructures.MutableColor;
 
 public interface AppearanceDefinition
 {
@@ -10,7 +10,7 @@ public interface AppearanceDefinition
 
    public double getTransparency();
    
-   public Color3f getColor();
+   public MutableColor getColor();
    
    public Color getAwtColor();
 }

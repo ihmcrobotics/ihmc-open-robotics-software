@@ -2,11 +2,6 @@ package us.ihmc.ihmcPerception.fiducialDetector;
 
 import java.awt.image.BufferedImage;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
 import boofcv.abst.fiducial.FiducialDetector;
 import boofcv.factory.fiducial.ConfigFiducialBinary;
 import boofcv.factory.fiducial.FactoryFiducial;
@@ -20,6 +15,11 @@ import georegression.geometry.ConvertRotation3D_F64;
 import georegression.struct.EulerType;
 import georegression.struct.se.Se3_F64;
 import us.ihmc.communication.producers.JPEGDecompressor;
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.VideoPacket;
@@ -30,8 +30,6 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.LongYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.math.filters.GlitchFilteredBooleanYoVariable;
 import us.ihmc.robotics.math.frames.YoFramePoseUsingQuaternions;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -42,10 +40,10 @@ public class FiducialDetectorFromCameraImages
    private boolean visualize = true;
 
    private final Se3_F64 fiducialToCamera = new Se3_F64();
-   private final Matrix3d fiducialRotationMatrix = new Matrix3d();
-   private final Quat4d tempFiducialRotationQuat = new Quat4d();
+   private final RotationMatrix fiducialRotationMatrix = new RotationMatrix();
+   private final Quaternion tempFiducialRotationQuat = new Quaternion();
    private final FramePose tempFiducialDetectorFrame = new FramePose();
-   private final Vector3d cameraRigidPosition = new Vector3d();
+   private final Vector3D cameraRigidPosition = new Vector3D();
    private final double[] eulerAngles = new double[3];
    private final RigidBodyTransform cameraRigidTransform = new RigidBodyTransform();
 
@@ -120,18 +118,7 @@ public class FiducialDetectorFromCameraImages
          @Override
          protected void updateTransformToParent(RigidBodyTransform transformToParent)
          {
-            transformToParent.setM00(0.0);
-            transformToParent.setM01(0.0);
-            transformToParent.setM02(1.0);
-            transformToParent.setM03(0.0);
-            transformToParent.setM10(-1.0);
-            transformToParent.setM11(0.0);
-            transformToParent.setM12(0.0);
-            transformToParent.setM13(0.0);
-            transformToParent.setM20(0.0);
-            transformToParent.setM21(-1.0);
-            transformToParent.setM22(0.0);
-            transformToParent.setM23(0.0);
+            transformToParent.set(0.0, 0.0, 1.0, 0.0, -1.0, 0.0, 0.0, 0.0, 0.0, -1.0, 0.0, 0.0);
          }
       };
 
@@ -189,7 +176,7 @@ public class FiducialDetectorFromCameraImages
       detect(latestUnmodifiedCameraImage, videoPacket.getPosition(), videoPacket.getOrientation());
    }
 
-   public void detect(BufferedImage bufferedImage, Point3d cameraPositionInWorld, Quat4d cameraOrientationInWorldXForward)
+   public void detect(BufferedImage bufferedImage, Point3D cameraPositionInWorld, Quaternion cameraOrientationInWorldXForward)
    {
       synchronized (expectedFiducialSizeChangedConch)
       {
@@ -234,7 +221,7 @@ public class FiducialDetectorFromCameraImages
             detectorEulerRotZ.set(eulerAngles[2]);
 
             fiducialRotationMatrix.set(fiducialToCamera.getR().data);
-            RotationTools.convertMatrixToQuaternion(fiducialRotationMatrix, tempFiducialRotationQuat);
+            tempFiducialRotationQuat.set(fiducialRotationMatrix);
 
             tempFiducialDetectorFrame.setToZero(detectorReferenceFrame);
             tempFiducialDetectorFrame.setOrientation(tempFiducialRotationQuat);

@@ -1,35 +1,36 @@
 package us.ihmc.robotics.geometry;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 
 public class Ray3d 
 {
-   private final Point3d point;
-   private final Vector3d vector;
+   private final Point3D point;
+   private final Vector3D vector;
    
    public static Ray3d transformRay3d(Ray3d ray3d, RigidBodyTransform transformToHere)
    {
-      Point3d transformedPoint = new Point3d();
-      Vector3d transformedVector = new Vector3d();
+      Point3D transformedPoint = new Point3D();
+      Vector3D transformedVector = new Vector3D();
       transformToHere.transform(ray3d.getPoint(), transformedPoint);
       transformToHere.transform(ray3d.getVector(), transformedVector);
 
       return new Ray3d(transformedPoint, transformedVector);
    }
 
-   public Ray3d(Point3d point, Vector3d vector)
+   public Ray3d(Point3D point, Vector3D vector)
    {
       this.point = point;
       this.vector = vector;
    }
 
-   public Point3d getPoint()
+   public Point3D getPoint()
    {
       return point;
    }
 
-   public Vector3d getVector()
+   public Vector3D getVector()
    {
       return vector;
    }

@@ -1,6 +1,7 @@
 package us.ihmc.simulationconstructionset.util.inputdevices.sliderboardVisualizer;
 
-import javax.swing.*;
+import javax.swing.ImageIcon;
+import javax.swing.JLabel;
 
 public class VisualizerIcon
 {

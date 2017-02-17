@@ -18,6 +18,9 @@
 
 package us.ihmc.sensorProcessing.bubo.clouds.detect.alg;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import georegression.fitting.cylinder.CodecCylinder3D_F64;
 import georegression.fitting.cylinder.FitCylinderToPoints_F64;
 import georegression.fitting.cylinder.ModelManagerCylinder3D_F64;
@@ -27,11 +30,13 @@ import georegression.fitting.sphere.CodecSphere3D_F64;
 import georegression.fitting.sphere.FitSphereToPoints_F64;
 import georegression.fitting.sphere.ModelManagerSphere3D_F64;
 import us.ihmc.sensorProcessing.bubo.clouds.detect.CloudShapeTypes;
-import us.ihmc.sensorProcessing.bubo.clouds.detect.shape.*;
+import us.ihmc.sensorProcessing.bubo.clouds.detect.shape.DistanceCylinderToPointVectorNN;
+import us.ihmc.sensorProcessing.bubo.clouds.detect.shape.DistancePlaneToPointVectorNN;
+import us.ihmc.sensorProcessing.bubo.clouds.detect.shape.DistanceSphereToPointVectorNN;
+import us.ihmc.sensorProcessing.bubo.clouds.detect.shape.GenerateCylinderPointVector;
+import us.ihmc.sensorProcessing.bubo.clouds.detect.shape.GeneratePlanePointVector;
+import us.ihmc.sensorProcessing.bubo.clouds.detect.shape.GenerateSpherePointVector;
 import us.ihmc.sensorProcessing.bubo.clouds.detect.wrapper.PlaneGeneralSvd_to_ModelFitter;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Tuning parameters for {@link PointCloudShapeDetectionSchnabel2007}

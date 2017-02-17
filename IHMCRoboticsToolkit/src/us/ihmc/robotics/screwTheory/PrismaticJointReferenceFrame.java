@@ -1,17 +1,16 @@
 package us.ihmc.robotics.screwTheory;
 
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-
-import javax.vecmath.Vector3d;
 
 public class PrismaticJointReferenceFrame extends OneDoFJointReferenceFrame
 {
    private static final long serialVersionUID = -1982346476164458546L;
-   private final Vector3d axis;
+   private final Vector3D axis;
    private double position; // TODO: YoVariablize
-   private Vector3d tempTranslation = new Vector3d();
+   private Vector3D tempTranslation = new Vector3D();
 
    public PrismaticJointReferenceFrame(String frameName, ReferenceFrame parentFrame, FrameVector axis)
    {

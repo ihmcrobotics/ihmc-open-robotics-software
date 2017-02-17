@@ -1,7 +1,6 @@
 package us.ihmc.exampleSimulations.collidingArms;
 
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.robotics.robotDescription.CollisionMeshDescription;
@@ -120,7 +119,7 @@ public class SingleBoxRobotDescription
          }
 
          GroundContactPointDescription groundContactPoint = new GroundContactPointDescription("gc_"
-               + i, new Vector3d(xSign * xLength / 2.0, ySign * yWidth / 2.0, zSign * zHeight / 2.0));
+               + i, new Vector3D(xSign * xLength / 2.0, ySign * yWidth / 2.0, zSign * zHeight / 2.0));
          rootJoint.addGroundContactPoint(groundContactPoint);
       }
 

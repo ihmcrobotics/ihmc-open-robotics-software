@@ -3,12 +3,11 @@ package us.ihmc.quadrupedRobotics.estimator.referenceFrames;
 import java.util.EnumMap;
 import java.util.Map;
 
-import javax.vecmath.Quat4d;
-
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.partNames.QuadrupedJointName;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.quadrupedRobotics.geometry.supportPolygon.QuadrupedSupportPolygon;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -31,7 +30,7 @@ public class QuadrupedReferenceFrames extends CommonQuadrupedReferenceFrames
    private final FullRobotModel fullRobotModel;
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private static final Quat4d IDENTITY_QUATERNION = new Quat4d();
+   private static final Quaternion IDENTITY_QUATERNION = new Quaternion();
 
    private final ReferenceFrame bodyFrame, rootJointFrame;
    private final ZUpFrame bodyZUpFrame;

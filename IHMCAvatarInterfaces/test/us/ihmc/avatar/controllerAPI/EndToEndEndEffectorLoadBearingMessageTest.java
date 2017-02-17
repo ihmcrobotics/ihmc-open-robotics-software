@@ -3,9 +3,6 @@ package us.ihmc.avatar.controllerAPI;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -16,6 +13,8 @@ import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.walking.EndEffectorLoadBearingMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.EndEffectorLoadBearingMessage.EndEffector;
 import us.ihmc.humanoidRobotics.communication.packets.walking.EndEffectorLoadBearingMessage.LoadBearingRequest;
@@ -61,8 +60,8 @@ public abstract class EndToEndEndEffectorLoadBearingMessageTest implements Multi
          FramePose footPoseCloseToActual = new FramePose(fullRobotModel.getEndEffectorFrame(robotSide, LimbName.LEG));
          footPoseCloseToActual.setPosition(0.0, 0.0, 0.05);
          footPoseCloseToActual.changeFrame(ReferenceFrame.getWorldFrame());
-         Point3d desiredPosition = new Point3d();
-         Quat4d desiredOrientation = new Quat4d();
+         Point3D desiredPosition = new Point3D();
+         Quaternion desiredOrientation = new Quaternion();
          footPoseCloseToActual.getPose(desiredPosition, desiredOrientation);
 
          FootTrajectoryMessage footTrajectoryMessage = new FootTrajectoryMessage(robotSide, 0.0, desiredPosition, desiredOrientation);

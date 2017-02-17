@@ -5,7 +5,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import javax.vecmath.Vector3d;
+import us.ihmc.euclid.tuple3D.Vector3D;
 
 import net.java.games.input.Event;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
@@ -161,7 +161,7 @@ public class QuadrupedStepTeleopMode implements QuadrupedTeleopMode
          double xVelocity = channels.get(XBoxOneMapping.LEFT_STICK_Y) * xVelocityMax;
          double yVelocity = channels.get(XBoxOneMapping.LEFT_STICK_X) * yVelocityMax;
          double yawRate = channels.get(XBoxOneMapping.RIGHT_STICK_X) * yawRateMax;
-         Vector3d planarVelocity = new Vector3d(xVelocity, yVelocity, yawRate);
+         Vector3D planarVelocity = new Vector3D(xVelocity, yVelocity, yawRate);
          sendXGaitFootsteps(xGaitSettings, planarVelocity, xGaitStepPlanSize.get());
       }
    }
@@ -192,7 +192,7 @@ public class QuadrupedStepTeleopMode implements QuadrupedTeleopMode
       packetCommunicator.send(timedStepPacket);
    }
 
-   private void sendXGaitFootsteps(QuadrupedXGaitSettings xGaitSettings, Vector3d planarVelocity, int numberOfSteps)
+   private void sendXGaitFootsteps(QuadrupedXGaitSettings xGaitSettings, Vector3D planarVelocity, int numberOfSteps)
    {
       ReferenceFrame supportFrame = referenceFrames.getCenterOfFeetZUpFrameAveragingLowestZHeightsAcrossEnds();
       FramePoint supportCentroid = new FramePoint();

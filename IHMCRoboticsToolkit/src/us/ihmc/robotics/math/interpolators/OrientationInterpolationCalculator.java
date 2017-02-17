@@ -1,8 +1,7 @@
 package us.ihmc.robotics.math.interpolators;
 
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.QuaternionCalculus;
@@ -13,11 +12,11 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 public class OrientationInterpolationCalculator
 {
    // This calculator needs to be instantiated to create the following variables storing intermediate results.
-   private final Quat4d startRotationQuaternion = new Quat4d();
-   private final Quat4d endRotationQuaternion = new Quat4d();
-   private final Quat4d relativeRotationQuaternion = new Quat4d();
+   private final Quaternion startRotationQuaternion = new Quaternion();
+   private final Quaternion endRotationQuaternion = new Quaternion();
+   private final Quaternion relativeRotationQuaternion = new Quaternion();
 
-   private final Vector3d angularVelocity = new Vector3d();
+   private final Vector3D angularVelocity = new Vector3D();
 
    private final QuaternionCalculus quaternionCalculus = new QuaternionCalculus();
 
@@ -89,18 +88,18 @@ public class OrientationInterpolationCalculator
       computeAngularVelocity(angularAccelerationToPack, startOrientation, endOrientation, alphaDoubleDot); // it's really the same computation...
    }
 
-   private void computeAngularVelocity(Vector3d angularVelocityToPack, Quat4d startRotationQuaternion, Quat4d endRotationQuaternion, double alphaDot)
+   private void computeAngularVelocity(Vector3D angularVelocityToPack, Quaternion startRotationQuaternion, Quaternion endRotationQuaternion, double alphaDot)
    {
-      if (quaternionCalculus.dot(startRotationQuaternion, endRotationQuaternion) < 0.0)
+      if (startRotationQuaternion.dot(endRotationQuaternion) < 0.0)
          endRotationQuaternion.negate();
 
       // compute relative orientation: orientation of interpolated frame w.r.t. start frame
       relativeRotationQuaternion.set(startRotationQuaternion); // R_W_S: orientation of start w.r.t. world
       relativeRotationQuaternion.conjugate(); // R_S_W: orientation of world w.r.t. start
-      relativeRotationQuaternion.mul(endRotationQuaternion); // R_S_I = R_S_W * R_W_I: orientation of interpolated w.r.t. start
+      relativeRotationQuaternion.multiply(endRotationQuaternion); // R_S_I = R_S_W * R_W_I: orientation of interpolated w.r.t. start
 
       quaternionCalculus.log(relativeRotationQuaternion, angularVelocityToPack);
       angularVelocityToPack.scale(alphaDot);
-      quaternionCalculus.transform(endRotationQuaternion, angularVelocityToPack);
+      endRotationQuaternion.transform(angularVelocityToPack);
    }
 }

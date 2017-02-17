@@ -3,12 +3,12 @@ package us.ihmc.avatar.ros.subscriber;
 import java.util.ArrayList;
 
 import trajectory_msgs.JointTrajectory;
-import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
 

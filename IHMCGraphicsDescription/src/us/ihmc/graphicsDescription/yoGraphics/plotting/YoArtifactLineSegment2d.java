@@ -3,9 +3,9 @@ package us.ihmc.graphicsDescription.yoGraphics.plotting;
 import java.awt.BasicStroke;
 import java.awt.Color;
 
-import javax.vecmath.Point2d;
-import javax.vecmath.Vector2d;
-
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple2D.interfaces.Tuple2DBasics;
 import us.ihmc.graphicsDescription.plotting.Graphics2DAdapter;
 import us.ihmc.graphicsDescription.plotting.Plotter2DAdapter;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -21,7 +21,7 @@ public class YoArtifactLineSegment2d extends YoArtifact
 
    private final YoFrameLineSegment2d lineSegment;
    
-   private final Point2d tempFirstEndpoint = new Point2d();
+   private final Point2D tempFirstEndpoint = new Point2D();
    private final LineSegment2d tempLineSegment = new LineSegment2d();
    private final ConvexPolygon2d tempArrowPolygon = new ConvexPolygon2d(new double[][] {{0.0, 0.0}, {0.0, 0.0}, {0.0, 0.0}});
    
@@ -30,8 +30,8 @@ public class YoArtifactLineSegment2d extends YoArtifact
    // Arrow only object
    private double arrowHeadWidth;
    private double arrowHeadHeight;
-   private Vector2d arrowHeadVector;
-   private Vector2d arrowHeadLateralVector;
+   private Vector2D arrowHeadVector;
+   private Vector2D arrowHeadLateralVector;
    
    public YoArtifactLineSegment2d(String name, YoFramePoint2d startPoint, YoFramePoint2d endPoint, Color color, double arrowHeadWidth, double arrowHeadHeight)
    {
@@ -69,8 +69,8 @@ public class YoArtifactLineSegment2d extends YoArtifact
    {
       this.arrowHeadWidth = arrowHeadWidth;
       this.arrowHeadHeight = arrowHeadHeight;
-      arrowHeadVector = new Vector2d();
-      arrowHeadLateralVector = new Vector2d();
+      arrowHeadVector = new Vector2D();
+      arrowHeadLateralVector = new Vector2D();
    }
    
    @Override
@@ -99,22 +99,22 @@ public class YoArtifactLineSegment2d extends YoArtifact
          arrowHeadVector.scale(arrowHeadHeight);
          arrowHeadLateralVector.scale(arrowHeadWidth / 2.0);
          
-         tempArrowPolygon.getVertex(0).set(lineSegment.getSecondEndpointX(), lineSegment.getSecondEndpointY());
+         ((Tuple2DBasics) tempArrowPolygon.getVertex(0)).set(lineSegment.getSecondEndpointX(), lineSegment.getSecondEndpointY());
          
-         tempArrowPolygon.getVertex(1).set(lineSegment.getSecondEndpointX(), lineSegment.getSecondEndpointY());
-         tempArrowPolygon.getVertex(1).sub(arrowHeadVector);
-         tempArrowPolygon.getVertex(1).sub(arrowHeadLateralVector);
+         ((Tuple2DBasics) tempArrowPolygon.getVertex(1)).set(lineSegment.getSecondEndpointX(), lineSegment.getSecondEndpointY());
+         ((Tuple2DBasics) tempArrowPolygon.getVertex(1)).sub(arrowHeadVector);
+         ((Tuple2DBasics) tempArrowPolygon.getVertex(1)).sub(arrowHeadLateralVector);
          
-         tempArrowPolygon.getVertex(2).set(lineSegment.getSecondEndpointX(), lineSegment.getSecondEndpointY());
-         tempArrowPolygon.getVertex(2).sub(arrowHeadVector);
-         tempArrowPolygon.getVertex(2).add(arrowHeadLateralVector);
+         ((Tuple2DBasics) tempArrowPolygon.getVertex(2)).set(lineSegment.getSecondEndpointX(), lineSegment.getSecondEndpointY());
+         ((Tuple2DBasics) tempArrowPolygon.getVertex(2)).sub(arrowHeadVector);
+         ((Tuple2DBasics) tempArrowPolygon.getVertex(2)).add(arrowHeadLateralVector);
          
          graphics.drawPolygonFilled(tempArrowPolygon);
       }
    }
 
    @Override
-   public void drawLegend(Plotter2DAdapter graphics, Point2d origin)
+   public void drawLegend(Plotter2DAdapter graphics, Point2D origin)
    {
       graphics.setColor(color);
       graphics.setStroke(STROKE);

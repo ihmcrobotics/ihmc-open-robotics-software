@@ -1,13 +1,14 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.qpInput;
 
+import java.util.ArrayList;
+
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
+
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-
-import java.util.ArrayList;
 
 public class ConstraintToConvexRegion
 {

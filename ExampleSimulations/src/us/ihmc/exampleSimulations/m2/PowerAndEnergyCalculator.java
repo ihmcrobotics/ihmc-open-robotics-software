@@ -1,7 +1,6 @@
 package us.ihmc.exampleSimulations.m2;
 
-import javax.vecmath.Point3d;
-
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
@@ -184,7 +183,7 @@ public class PowerAndEnergyCalculator implements RobotController
       runningTime.set(currentTime - startTime);
 
       // Need to calculate motor current for all joints
-      Point3d comPoint = new Point3d();
+      Point3D comPoint = new Point3D();
       totalMass.set(m2Robot.computeCenterOfMass(comPoint));
       
       calculateEfficiencies();

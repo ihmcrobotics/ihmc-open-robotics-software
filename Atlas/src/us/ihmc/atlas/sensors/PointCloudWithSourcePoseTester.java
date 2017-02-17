@@ -3,12 +3,10 @@ package us.ihmc.atlas.sensors;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-
 import geometry_msgs.Point;
 import geometry_msgs.Quaternion;
 import scan_to_cloud.PointCloud2WithSource;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
 
@@ -30,10 +28,10 @@ public class PointCloudWithSourcePoseTester extends AbstractRosTopicSubscriber<P
    {
       System.out.println(cloudHolder.getCloud().getWidth());
       Point translation = cloudHolder.getTranslation();
-      Point3d position = new Point3d(translation.getX(), translation.getY(),translation.getZ());
+      Point3D position = new Point3D(translation.getX(), translation.getY(),translation.getZ());
       System.out.println(position);
       Quaternion orientation = cloudHolder.getOrientation();
-      Quat4d quaternion = new Quat4d(orientation.getX(), orientation.getY(), orientation.getZ(), orientation.getW());
+      us.ihmc.euclid.tuple4D.Quaternion quaternion = new us.ihmc.euclid.tuple4D.Quaternion(orientation.getX(), orientation.getY(), orientation.getZ(), orientation.getW());
       System.out.println(quaternion);
    }
    

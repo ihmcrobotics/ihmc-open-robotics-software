@@ -1,13 +1,25 @@
 package us.ihmc.simulationconstructionset.gui;
 
-import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
-
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.*;
+import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.text.NumberFormat;
 import java.util.ArrayList;
+
+import javax.swing.JLabel;
+import javax.swing.JMenuItem;
+import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
+import javax.swing.JTextField;
+import javax.swing.SwingConstants;
+import javax.swing.TransferHandler;
+
+import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
+import us.ihmc.robotics.dataStructures.variable.YoVariable;
 
 
 public class YoEntryBoxNew extends JPanel implements MouseListener, ActionListener, FocusListener

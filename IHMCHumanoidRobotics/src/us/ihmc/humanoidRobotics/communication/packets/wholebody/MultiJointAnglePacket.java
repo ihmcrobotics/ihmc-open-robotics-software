@@ -1,10 +1,10 @@
 package us.ihmc.humanoidRobotics.communication.packets.wholebody;
 
+import java.util.Random;
+
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.VisualizablePacket;
 import us.ihmc.robotics.random.RandomTools;
-
-import java.util.Random;
 
 public class MultiJointAnglePacket extends Packet<MultiJointAnglePacket> implements VisualizablePacket
 {

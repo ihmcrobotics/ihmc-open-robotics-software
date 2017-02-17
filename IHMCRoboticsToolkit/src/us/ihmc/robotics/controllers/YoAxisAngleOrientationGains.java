@@ -1,7 +1,7 @@
 package us.ihmc.robotics.controllers;
 
-import javax.vecmath.Matrix3d;
-
+import us.ihmc.euclid.matrix.Matrix3D;
+import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 
@@ -64,9 +64,9 @@ public class YoAxisAngleOrientationGains implements YoOrientationPIDGainsInterfa
    }
 
    @Override
-   public Matrix3d createProportionalGainMatrix()
+   public Matrix3DReadOnly createProportionalGainMatrix()
    {
-      Matrix3d proportionalGainMatrix = new Matrix3d();
+      Matrix3D proportionalGainMatrix = new Matrix3D();
 
       for (int i = 0; i < 3; i++)
       {
@@ -78,9 +78,9 @@ public class YoAxisAngleOrientationGains implements YoOrientationPIDGainsInterfa
    }
 
    @Override
-   public Matrix3d createDerivativeGainMatrix()
+   public Matrix3DReadOnly createDerivativeGainMatrix()
    {
-      Matrix3d derivativeGainMatrix = new Matrix3d();
+      Matrix3D derivativeGainMatrix = new Matrix3D();
 
       for (int i = 0; i < 3; i++)
       {
@@ -92,9 +92,9 @@ public class YoAxisAngleOrientationGains implements YoOrientationPIDGainsInterfa
    }
 
    @Override
-   public Matrix3d createIntegralGainMatrix()
+   public Matrix3DReadOnly createIntegralGainMatrix()
    {
-      Matrix3d integralGainMatrix = new Matrix3d();
+      Matrix3D integralGainMatrix = new Matrix3D();
 
       for (int i = 0; i < 3; i++)
       {

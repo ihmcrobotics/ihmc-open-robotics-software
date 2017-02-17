@@ -1,14 +1,13 @@
 package us.ihmc.simulationconstructionset.util.environments;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.NullJoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.util.ground.Contactable;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 public abstract class ContactableStaticRobot extends Robot implements Contactable
 {
@@ -33,19 +32,19 @@ public abstract class ContactableStaticRobot extends Robot implements Contactabl
       }
 
       @Override
-      public boolean isClose(Point3d pointInWorldToCheck)
+      public boolean isClose(Point3D pointInWorldToCheck)
       {
          return contactableRobot.isClose(pointInWorldToCheck);
       }
 
       @Override
-      public boolean isPointOnOrInside(Point3d pointInWorldToCheck)
+      public boolean isPointOnOrInside(Point3D pointInWorldToCheck)
       {
          return contactableRobot.isPointOnOrInside(pointInWorldToCheck);
       }
 
       @Override
-      public void closestIntersectionAndNormalAt(Point3d intersectionToPack, Vector3d normalToPack, Point3d pointInWorldToCheck)
+      public void closestIntersectionAndNormalAt(Point3D intersectionToPack, Vector3D normalToPack, Point3D pointInWorldToCheck)
       {
          contactableRobot.closestIntersectionAndNormalAt(intersectionToPack, normalToPack, pointInWorldToCheck);
       }

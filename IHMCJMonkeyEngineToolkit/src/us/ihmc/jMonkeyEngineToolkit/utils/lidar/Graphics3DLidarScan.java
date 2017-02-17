@@ -1,20 +1,17 @@
 package us.ihmc.jMonkeyEngineToolkit.utils.lidar;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-import javax.vecmath.Vector3f;
-
+import us.ihmc.euclid.transform.AffineTransform;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D32;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.structure.Graphics3DNode;
 import us.ihmc.graphicsDescription.structure.Graphics3DNodeType;
 import us.ihmc.jMonkeyEngineToolkit.Graphics3DWorld;
 import us.ihmc.robotics.Axis;
-import us.ihmc.robotics.lidar.LidarScan;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.shapes.Sphere3d;
-import us.ihmc.robotics.geometry.Transform3d;
+import us.ihmc.robotics.lidar.LidarScan;
 
 public class Graphics3DLidarScan
 {
@@ -70,19 +67,19 @@ public class Graphics3DLidarScan
          {
             if ((lidarScan.getRange(i) < minRange) || (lidarScan.getRange(i) > maxRange))
             {
-               points[i].setTransform(new Transform3d(new Matrix3d(), new Vector3d(), 0));
+               points[i].setTransform(new AffineTransform());
             }
             else
             {
                RigidBodyTransform pointTransform = new RigidBodyTransform();
 
-               Point3d p = new Point3d(lidarScan.getRange(i) + (SPHERE_RADIUS * 1.1), 0.0, 0.0);
+               Point3D p = new Point3D(lidarScan.getRange(i) + (SPHERE_RADIUS * 1.1), 0.0, 0.0);
                RigidBodyTransform transform = new RigidBodyTransform();
                lidarScan.getInterpolatedTransform(i, transform);
                transform.multiply(lidarScan.getSweepTransform(i));
                transform.transform(p);
 
-               pointTransform.setTranslation(new Vector3f(p));
+               pointTransform.setTranslation(new Vector3D32(p));
 
                points[i].setTransform(pointTransform);
             }

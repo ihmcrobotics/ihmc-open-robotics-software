@@ -1,14 +1,13 @@
 package us.ihmc.humanoidBehaviors.behaviors.roughTerrain;
 
-import javax.vecmath.AxisAngle4d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Tuple3d;
-
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.RequestPlanarRegionsListMessage;
 import us.ihmc.communication.packets.RequestPlanarRegionsListMessage.RequestType;
 import us.ihmc.communication.packets.TextToSpeechPacket;
+import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.examples.GetUserValidationBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.goalLocation.FindGoalBehavior;
@@ -26,7 +25,6 @@ import us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataStateComm
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HeadTrajectoryMessage;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -172,7 +170,7 @@ public class WalkOverTerrainStateMachineBehavior extends StateMachineBehavior<Wa
          {
             FramePose goalPose = new FramePose();
             lookForGoalBehavior.getGoalPose(goalPose);
-            Tuple3d goalPosition = new Point3d();
+            Tuple3DBasics goalPosition = new Point3D();
             goalPose.getPosition(goalPosition);
 
             String xString = FormattingTools.getFormattedToSignificantFigures(goalPosition.getX(), 3);
@@ -300,8 +298,8 @@ public class WalkOverTerrainStateMachineBehavior extends StateMachineBehavior<Wa
             @Override
             protected void setBehaviorInput()
             {
-               AxisAngle4d orientationAxisAngle = new AxisAngle4d(0.0, 1.0, 0.0, Math.PI / 4.0);
-               Quat4d headOrientation = new Quat4d();
+               AxisAngle orientationAxisAngle = new AxisAngle(0.0, 1.0, 0.0, Math.PI / 4.0);
+               Quaternion headOrientation = new Quaternion();
                headOrientation.set(orientationAxisAngle);
                HeadTrajectoryMessage headTrajectoryMessage = new HeadTrajectoryMessage(0.5, headOrientation);
                atlasPrimitiveActions.headTrajectoryBehavior.setInput(headTrajectoryMessage);
@@ -313,8 +311,8 @@ public class WalkOverTerrainStateMachineBehavior extends StateMachineBehavior<Wa
             @Override
             protected void setBehaviorInput()
             {
-               AxisAngle4d orientationAxisAngle = new AxisAngle4d(0.0, 1.0, 0.0, Math.PI / 2.0);
-               Quat4d headOrientation = new Quat4d();
+               AxisAngle orientationAxisAngle = new AxisAngle(0.0, 1.0, 0.0, Math.PI / 2.0);
+               Quaternion headOrientation = new Quaternion();
                headOrientation.set(orientationAxisAngle);
                HeadTrajectoryMessage headTrajectoryMessage = new HeadTrajectoryMessage(2.0, headOrientation);
                atlasPrimitiveActions.headTrajectoryBehavior.setInput(headTrajectoryMessage);

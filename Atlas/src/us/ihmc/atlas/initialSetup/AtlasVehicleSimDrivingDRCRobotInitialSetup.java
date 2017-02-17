@@ -16,10 +16,9 @@ import static us.ihmc.atlas.ros.AtlasOrderedJointMap.r_leg_aky;
 import static us.ihmc.atlas.ros.AtlasOrderedJointMap.r_leg_hpy;
 import static us.ihmc.atlas.ros.AtlasOrderedJointMap.r_leg_kny;
 
-import javax.vecmath.Vector3d;
-
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
@@ -28,7 +27,7 @@ public class AtlasVehicleSimDrivingDRCRobotInitialSetup implements DRCRobotIniti
 
    private double groundZ;
    private final RigidBodyTransform rootToWorld = new RigidBodyTransform();
-   private final Vector3d offset = new Vector3d();
+   private final Vector3D offset = new Vector3D();
 
    public AtlasVehicleSimDrivingDRCRobotInitialSetup(double groundZ)
    {
@@ -72,12 +71,12 @@ public class AtlasVehicleSimDrivingDRCRobotInitialSetup implements DRCRobotIniti
       robot.setOrientation(Math.PI / 2.0, forwardLean, 0.0);
    }
    
-   public void getOffset(Vector3d offsetToPack)
+   public void getOffset(Vector3D offsetToPack)
    {
       offsetToPack.set(offset);
    }
 
-   public void setOffset(Vector3d offset)
+   public void setOffset(Vector3D offset)
    {
       this.offset.set(offset);
    }

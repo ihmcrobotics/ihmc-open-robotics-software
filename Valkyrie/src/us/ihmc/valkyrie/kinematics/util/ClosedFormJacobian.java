@@ -1,12 +1,11 @@
 package us.ihmc.valkyrie.kinematics.util;
 
-import javax.vecmath.Vector3d;
-
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.data.RowD1Matrix64F;
 import org.ejml.ops.CommonOps;
 import org.ejml.simple.SimpleMatrix;
 
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.valkyrie.kinematics.transmissions.PushRodTransmissionJoint;
 
 public class ClosedFormJacobian
@@ -26,20 +25,20 @@ public class ClosedFormJacobian
    private final DenseMatrix64F transform_2_0 = SimpleMatrix.identity(4).getMatrix();
    private final DenseMatrix64F transform_1_0 = SimpleMatrix.identity(4).getMatrix();
    
-   private final Vector3d m11v = new Vector3d();
-   private final Vector3d m12v = new Vector3d();
-   private final Vector3d m21v = new Vector3d();
-   private final Vector3d m22v = new Vector3d();
+   private final Vector3D m11v = new Vector3D();
+   private final Vector3D m12v = new Vector3D();
+   private final Vector3D m21v = new Vector3D();
+   private final Vector3D m22v = new Vector3D();
    
-   private final Vector3d radius5UpperDOF = new Vector3d();
-   private final Vector3d radius6UpperDOF = new Vector3d();
-   private final Vector3d unitForceVector5UpperDOF = new Vector3d();
-   private final Vector3d unitForceVector6UpperDOF = new Vector3d();
+   private final Vector3D radius5UpperDOF = new Vector3D();
+   private final Vector3D radius6UpperDOF = new Vector3D();
+   private final Vector3D unitForceVector5UpperDOF = new Vector3D();
+   private final Vector3D unitForceVector6UpperDOF = new Vector3D();
    
-   private final Vector3d radius5LowerDOF = new Vector3d();
-   private final Vector3d radius6LowerDOF = new Vector3d();
-   private final Vector3d unitForceVector5LowerDOF = new Vector3d();
-   private final Vector3d unitForceVector6LowerDOF = new Vector3d();
+   private final Vector3D radius5LowerDOF = new Vector3D();
+   private final Vector3D radius6LowerDOF = new Vector3D();
+   private final Vector3D unitForceVector5LowerDOF = new Vector3D();
+   private final Vector3D unitForceVector6LowerDOF = new Vector3D();
    
    private PushRodTransmissionJoint pushRodTransmissionJoint;
    

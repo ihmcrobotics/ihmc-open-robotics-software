@@ -21,8 +21,6 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 
 import javax.swing.AbstractAction;
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
 
 import org.fest.swing.edt.FailOnThreadViolationRepaintManager;
 import org.junit.After;
@@ -35,7 +33,6 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.graphicsDescription.Graphics3DObject;
-import us.ihmc.graphicsDescription.input.SelectedListener;
 import us.ihmc.graphicsDescription.structure.Graphics3DNode;
 import us.ihmc.graphicsDescription.structure.Graphics3DNodeType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphic;
@@ -74,7 +71,6 @@ import us.ihmc.simulationconstructionset.physics.collision.DefaultCollisionHandl
 import us.ihmc.simulationconstructionset.physics.collision.simple.DoNothingCollisionArbiter;
 import us.ihmc.simulationconstructionset.physics.visualize.DefaultCollisionVisualizer;
 import us.ihmc.simulationconstructionset.robotcommprotocol.RobotSocketConnection;
-import us.ihmc.tools.inputDevices.keyboard.ModifierKeyInterface;
 import us.ihmc.tools.thread.ThreadTools;
 
 @ContinuousIntegrationPlan(categories = {IntegrationCategory.UI})
@@ -1338,21 +1334,6 @@ public class SimulationConstructionSetUsingDirectCallsTest
          assertFalse(two);
       else
          assertTrue(two);
-   }
-
-   private SelectedListener createSelectedListener()
-   {
-      SelectedListener selectedListener = new SelectedListener()
-      {
-         @Override
-         public void selected(Graphics3DNode graphics3dNode, ModifierKeyInterface modifierKeyInterface, Point3d location, Point3d cameraLocation,
-               Quat4d cameraRotation)
-         {
-
-         }
-      };
-
-      return selectedListener;
    }
 
    private DataProcessingFunction createDataProcessingFunction()

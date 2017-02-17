@@ -1,10 +1,10 @@
 package us.ihmc.robotics.geometry;
 
-import javax.vecmath.AxisAngle4d;
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
+import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 
 /**
  * This class provides methods to generate points evenly distributed on a sphere.
@@ -17,18 +17,18 @@ import javax.vecmath.Vector3d;
 public class SpiralBasedAlgorithm
 {
 
-   public static Point3d[] generatePointsOnSphere(double sphereRadius, int numberOfPointsToGenerate)
+   public static Point3D[] generatePointsOnSphere(double sphereRadius, int numberOfPointsToGenerate)
    {
-      return generatePointsOnSphere(new Point3d(), sphereRadius, numberOfPointsToGenerate, computeMagicDeltaN(numberOfPointsToGenerate));
+      return generatePointsOnSphere(new Point3D(), sphereRadius, numberOfPointsToGenerate, computeMagicDeltaN(numberOfPointsToGenerate));
    }
 
-   public static Point3d[] generatePointsOnSphere(double sphereRadius, int numberOfPointsToGenerate, double deltaN)
+   public static Point3D[] generatePointsOnSphere(double sphereRadius, int numberOfPointsToGenerate, double deltaN)
    {
-      return generatePointsOnSphere(new Point3d(), sphereRadius, numberOfPointsToGenerate, deltaN);
+      return generatePointsOnSphere(new Point3D(), sphereRadius, numberOfPointsToGenerate, deltaN);
    }
 
 
-   public static Point3d[] generatePointsOnSphere(Point3d sphereOrigin, double sphereRadius, int numberOfPointsToGenerate)
+   public static Point3D[] generatePointsOnSphere(Point3D sphereOrigin, double sphereRadius, int numberOfPointsToGenerate)
    {
       return generatePointsOnSphere(sphereOrigin, sphereRadius, numberOfPointsToGenerate, computeMagicDeltaN(numberOfPointsToGenerate));
    }
@@ -37,14 +37,14 @@ public class SpiralBasedAlgorithm
     * Generates a number of points uniformly distributed over the surface of a sphere using a spiral-based approach.
     * This algorithm can be found in the paper: "Distributing Many Points on a Sphere" by E.B. Saff and B.J. Kuijlaars. (PDF version was on Google on the 02/13/2015).
     */
-   public static Point3d[] generatePointsOnSphere(Point3d sphereOrigin, double sphereRadius, int numberOfPointsToGenerate, double deltaN)
+   public static Point3D[] generatePointsOnSphere(Point3D sphereOrigin, double sphereRadius, int numberOfPointsToGenerate, double deltaN)
    {
-      Point3d[] pointsOnSphere = new Point3d[numberOfPointsToGenerate];
+      Point3D[] pointsOnSphere = new Point3D[numberOfPointsToGenerate];
 
       double phi;
       double previousPhi = 0.0;
 
-      pointsOnSphere[0] = new Point3d();
+      pointsOnSphere[0] = new Point3D();
       pointsOnSphere[0].set(0.0, 0.0, -sphereRadius);
       pointsOnSphere[0].add(sphereOrigin);
 
@@ -56,7 +56,7 @@ public class SpiralBasedAlgorithm
          AngleTools.trimAngleMinusPiToPi(phi);
 
          double rSinTheta = sphereRadius * Math.sin(theta);
-         pointsOnSphere[planeIndex] = new Point3d();
+         pointsOnSphere[planeIndex] = new Point3D();
          pointsOnSphere[planeIndex].setX(rSinTheta * Math.cos(phi));
          pointsOnSphere[planeIndex].setY(rSinTheta * Math.sin(phi));
          pointsOnSphere[planeIndex].setZ(sphereRadius * Math.cos(theta));
@@ -65,33 +65,33 @@ public class SpiralBasedAlgorithm
          previousPhi = phi;
       }
 
-      pointsOnSphere[numberOfPointsToGenerate - 1] = new Point3d();
+      pointsOnSphere[numberOfPointsToGenerate - 1] = new Point3D();
       pointsOnSphere[numberOfPointsToGenerate - 1].set(0.0, 0.0, sphereRadius);
       pointsOnSphere[numberOfPointsToGenerate - 1].add(sphereOrigin);
 
       return pointsOnSphere;
    }
 
-   public static Quat4d[][] generateOrientations(int numberOfRays, int numberOfRotationsAroundRay)
+   public static Quaternion[][] generateOrientations(int numberOfRays, int numberOfRotationsAroundRay)
    {
       return generateOrientations(numberOfRays, numberOfRotationsAroundRay, computeMagicDeltaN(numberOfRays));
    }
 
-   public static Quat4d[][] generateOrientations(int numberOfRays, int numberOfRotationsAroundRay, double deltaN)
+   public static Quaternion[][] generateOrientations(int numberOfRays, int numberOfRotationsAroundRay, double deltaN)
    {
-      Quat4d[][] rotations = new Quat4d[numberOfRays][numberOfRotationsAroundRay];
+      Quaternion[][] rotations = new Quaternion[numberOfRays][numberOfRotationsAroundRay];
 
-      Point3d sphereOrigin = new Point3d();
-      Vector3d rayThroughSphere = new Vector3d();
-      Point3d[] pointsOnSphere = generatePointsOnSphere(0.01, numberOfRays, deltaN);
+      Point3D sphereOrigin = new Point3D();
+      Vector3D rayThroughSphere = new Vector3D();
+      Point3D[] pointsOnSphere = generatePointsOnSphere(0.01, numberOfRays, deltaN);
 
-      AxisAngle4d rotationForXAxisAlignedWithRay = new AxisAngle4d();
-      AxisAngle4d rotationAroundRay = new AxisAngle4d();
-      Matrix3d finalRotationMatrix = new Matrix3d();
-      Matrix3d rotationMatrixForXAxisAlignedWithRay = new Matrix3d();
-      Matrix3d rotationMatrixAroundRay = new Matrix3d();
+      AxisAngle rotationForXAxisAlignedWithRay = new AxisAngle();
+      AxisAngle rotationAroundRay = new AxisAngle();
+      RotationMatrix finalRotationMatrix = new RotationMatrix();
+      RotationMatrix rotationMatrixForXAxisAlignedWithRay = new RotationMatrix();
+      RotationMatrix rotationMatrixAroundRay = new RotationMatrix();
 
-      Vector3d xAxis = new Vector3d(1.0, 0.0, 0.0);
+      Vector3D xAxis = new Vector3D(1.0, 0.0, 0.0);
       double stepSizeAngleArounRay = 2.0 * Math.PI / numberOfRotationsAroundRay;
 
       for (int rayIndex = 0; rayIndex < numberOfRays; rayIndex++)
@@ -109,10 +109,10 @@ public class SpiralBasedAlgorithm
             rotationAroundRay.set(rayThroughSphere, angle);
             rotationMatrixAroundRay.set(rotationAroundRay);
 
-            finalRotationMatrix.mul(rotationMatrixAroundRay, rotationMatrixForXAxisAlignedWithRay);
+            finalRotationMatrix.set(rotationMatrixAroundRay);
+            finalRotationMatrix.multiply(rotationMatrixForXAxisAlignedWithRay);
 
-            Quat4d rotation = new Quat4d();
-            RotationTools.convertMatrixToQuaternion(finalRotationMatrix, rotation);
+            Quaternion rotation = new Quaternion(finalRotationMatrix);
             rotations[rayIndex][rotationAroundRayIndex] = rotation;
          }
       }

@@ -7,10 +7,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import javax.vecmath.Vector3d;
-
-import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -18,9 +14,12 @@ import us.ihmc.commons.Conversions;
 import us.ihmc.communication.net.NetStateListener;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.util.NetworkPorts;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandJointAnglePacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.PointCloudWorldPacket;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -117,7 +116,7 @@ public class AtlasNoSimPacketBlaster implements Runnable
       }
 
 //      robotConfigurationData.setRootTranslation(RandomTools.generateRandomVector(random, random.nextDouble() * 1000.0));
-      robotConfigurationData.setRootTranslation(new Vector3d(random.nextDouble(), random.nextDouble(), 1.0 * random.nextDouble()));
+      robotConfigurationData.setRootTranslation(new Vector3D(random.nextDouble(), random.nextDouble(), 1.0 * random.nextDouble()));
 //      robotConfigurationData.setRootTranslation(new Vector3d(0.0, 0.0, 1.0));
       robotConfigurationData.setRootOrientation(RandomTools.generateRandomQuaternion(random));
 
@@ -136,8 +135,8 @@ public class AtlasNoSimPacketBlaster implements Runnable
       
       PointCloudWorldPacket pointCloudWorldPacket = new PointCloudWorldPacket();
       pointCloudWorldPacket.setTimestamp(1);
-//      pointCloudWorldPacket.setDecayingWorldScan(new Point3d[100]);
-//      pointCloudWorldPacket.setGroundQuadTreeSupport(new Point3d[100]);
+//      pointCloudWorldPacket.setDecayingWorldScan(new Point3D[100]);
+//      pointCloudWorldPacket.setGroundQuadTreeSupport(new Point3D[100]);
       
       if (skip++ > 20)
       {

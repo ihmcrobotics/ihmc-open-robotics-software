@@ -1,6 +1,7 @@
 package us.ihmc.robotics.sensors;
 
 import org.ejml.data.DenseMatrix64F;
+
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.Wrench;

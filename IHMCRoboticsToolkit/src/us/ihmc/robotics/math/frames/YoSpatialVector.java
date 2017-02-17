@@ -1,9 +1,9 @@
 package us.ihmc.robotics.math.frames;
 
-import javax.vecmath.Vector3d;
-
 import org.apache.commons.lang3.StringUtils;
 
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameTuple;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -51,7 +51,7 @@ public class YoSpatialVector
       angularPart.set(yoSpacialVector.getExpressedInFrame(), yoSpacialVector.getAngularPartX(), yoSpacialVector.getAngularPartY(), yoSpacialVector.getAngularPartZ());
    }
    
-   public void setLinearPart(Vector3d vector3d)
+   public void setLinearPart(Vector3DReadOnly vector3d)
    {
       linearPart.set(vector3d);
    }
@@ -66,7 +66,7 @@ public class YoSpatialVector
       linearPart.set(yoFrameVector);
    }
    
-   public void setAngularPart(Vector3d vector3d)
+   public void setAngularPart(Vector3DReadOnly vector3d)
    {
       angularPart.set(vector3d);
    }

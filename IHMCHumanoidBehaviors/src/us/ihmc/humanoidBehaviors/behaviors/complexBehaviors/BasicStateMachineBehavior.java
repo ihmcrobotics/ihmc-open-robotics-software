@@ -1,7 +1,6 @@
 package us.ihmc.humanoidBehaviors.behaviors.complexBehaviors;
 
-import javax.vecmath.Point2d;
-
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.BasicStateMachineBehavior.BasicStates;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.AtlasPrimitiveActions;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
@@ -47,7 +46,7 @@ public class BasicStateMachineBehavior extends StateMachineBehavior<BasicStates>
 
             GoHomeMessage goHomeLeftArmMessage = new GoHomeMessage(BodyPart.ARM, RobotSide.LEFT, 2);
             atlasPrimitiveActions.leftArmGoHomeBehavior.setInput(goHomeLeftArmMessage);
-            FramePose2d poseToWalkTo = new FramePose2d(ReferenceFrame.getWorldFrame(), new Point2d(0, 0), 0);
+            FramePose2d poseToWalkTo = new FramePose2d(ReferenceFrame.getWorldFrame(), new Point2D(0, 0), 0);
             atlasPrimitiveActions.walkToLocationBehavior.setTarget(poseToWalkTo);
          }
       };

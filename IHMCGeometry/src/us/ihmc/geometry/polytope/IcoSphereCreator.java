@@ -2,9 +2,8 @@ package us.ihmc.geometry.polytope;
 
 import java.util.ArrayList;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import gnu.trove.map.hash.THashMap;
 
 /**
@@ -33,11 +32,11 @@ public class IcoSphereCreator
    private THashMap<Long, Integer> middlePointIndexCache = new THashMap<>();
 
    // add vertex to mesh, fix position to be on unit sphere, return index
-   private int addVertex(Point3d point)
+   private int addVertex(Point3D point)
    {
-      Vector3d vector = new Vector3d(point);
+      Vector3D vector = new Vector3D(point);
       vector.normalize();
-      point = new Point3d(vector);
+      point = new Point3D(vector);
 
       geometry.positions.add(point);
       return index++;
@@ -58,9 +57,9 @@ public class IcoSphereCreator
       }
 
       // not in cache, calculate it
-      Point3d point1 = this.geometry.positions.get(p1);
-      Point3d point2 = this.geometry.positions.get(p2);
-      Point3d middle = new Point3d((point1.getX() + point2.getX()) / 2.0, (point1.getY() + point2.getY()) / 2.0, (point1.getZ() + point2.getZ()) / 2.0);
+      Point3D point1 = this.geometry.positions.get(p1);
+      Point3D point2 = this.geometry.positions.get(p2);
+      Point3D middle = new Point3D((point1.getX() + point2.getX()) / 2.0, (point1.getY() + point2.getY()) / 2.0, (point1.getZ() + point2.getZ()) / 2.0);
 
       // add vertex makes sure point is on unit sphere
       int i = addVertex(middle);
@@ -79,20 +78,20 @@ public class IcoSphereCreator
       // create 12 vertices of a icosahedron
       double t = (1.0 + Math.sqrt(5.0)) / 2.0;
 
-      addVertex(new Point3d(-1, t, 0));
-      addVertex(new Point3d(1, t, 0));
-      addVertex(new Point3d(-1, -t, 0));
-      addVertex(new Point3d(1, -t, 0));
+      addVertex(new Point3D(-1, t, 0));
+      addVertex(new Point3D(1, t, 0));
+      addVertex(new Point3D(-1, -t, 0));
+      addVertex(new Point3D(1, -t, 0));
 
-      addVertex(new Point3d(0, -1, t));
-      addVertex(new Point3d(0, 1, t));
-      addVertex(new Point3d(0, -1, -t));
-      addVertex(new Point3d(0, 1, -t));
+      addVertex(new Point3D(0, -1, t));
+      addVertex(new Point3D(0, 1, t));
+      addVertex(new Point3D(0, -1, -t));
+      addVertex(new Point3D(0, 1, -t));
 
-      addVertex(new Point3d(t, 0, -1));
-      addVertex(new Point3d(t, 0, 1));
-      addVertex(new Point3d(-t, 0, -1));
-      addVertex(new Point3d(-t, 0, 1));
+      addVertex(new Point3D(t, 0, -1));
+      addVertex(new Point3D(t, 0, 1));
+      addVertex(new Point3D(-t, 0, -1));
+      addVertex(new Point3D(-t, 0, 1));
 
       // create 20 triangles of the icosahedron
       ArrayList<TriangleIndices> faces = new ArrayList<TriangleIndices>();

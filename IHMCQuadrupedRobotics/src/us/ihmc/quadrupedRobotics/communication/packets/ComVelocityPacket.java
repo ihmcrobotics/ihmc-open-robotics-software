@@ -2,28 +2,28 @@ package us.ihmc.quadrupedRobotics.communication.packets;
 
 import us.ihmc.communication.packets.Packet;
 
-import javax.vecmath.Vector3d;
+import us.ihmc.euclid.tuple3D.Vector3D;
 
 public class ComVelocityPacket extends Packet<ComVelocityPacket>
 {
-   private final Vector3d velocity;
+   private final Vector3D velocity;
 
    public ComVelocityPacket()
    {
-      this.velocity = new Vector3d();
+      this.velocity = new Vector3D();
    }
 
-   public ComVelocityPacket(Vector3d velocity)
+   public ComVelocityPacket(Vector3D velocity)
    {
-      this.velocity = new Vector3d(velocity);
+      this.velocity = new Vector3D(velocity);
    }
 
    public ComVelocityPacket(double vx, double vy, double vz)
    {
-      this.velocity = new Vector3d(vx, vy, vz);
+      this.velocity = new Vector3D(vx, vy, vz);
    }
 
-   public void get(Vector3d velocity)
+   public void get(Vector3D velocity)
    {
       velocity.set(this.velocity);
    }

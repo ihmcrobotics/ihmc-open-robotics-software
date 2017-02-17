@@ -29,11 +29,10 @@ import static us.ihmc.atlas.ros.AtlasOrderedJointMap.r_leg_hpy;
 import static us.ihmc.atlas.ros.AtlasOrderedJointMap.r_leg_hpz;
 import static us.ihmc.atlas.ros.AtlasOrderedJointMap.r_leg_kny;
 
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
@@ -42,7 +41,7 @@ public class VRCTask1InVehicleOnlyLHandAndLFootLoaded implements DRCRobotInitial
 
    private double groundZ;
    private final RigidBodyTransform rootToWorld = new RigidBodyTransform();
-   private final Vector3d offset = new Vector3d();
+   private final Vector3D offset = new Vector3D();
 
    public VRCTask1InVehicleOnlyLHandAndLFootLoaded(double groundZ)
    {
@@ -101,16 +100,16 @@ public class VRCTask1InVehicleOnlyLHandAndLFootLoaded implements DRCRobotInitial
 
       robot.getOneDegreeOfFreedomJoint("right_f3_j1").setQ(-1.57);
 
-      robot.setPositionInWorld(new Vector3d(-0.079, 0.3955, 0.9872));
-      robot.setOrientation(new Quat4d(-0.0672, -0.0334, 0.0296, 0.9967));
+      robot.setPositionInWorld(new Vector3D(-0.079, 0.3955, 0.9872));
+      robot.setOrientation(new Quaternion(-0.0672, -0.0334, 0.0296, 0.9967));
    }
    
-   public void getOffset(Vector3d offsetToPack)
+   public void getOffset(Vector3D offsetToPack)
    {
       offsetToPack.set(offset);
    }
 
-   public void setOffset(Vector3d offset)
+   public void setOffset(Vector3D offset)
    {
       this.offset.set(offset);
    }

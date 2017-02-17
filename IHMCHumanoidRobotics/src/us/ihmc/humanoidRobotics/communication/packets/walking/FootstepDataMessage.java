@@ -5,22 +5,20 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
-import javax.vecmath.Point2d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.ros.generators.RosEnumValueDocumentation;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
 import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.geometry.TransformTools;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -52,23 +50,23 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
    @RosExportedField(documentation = "Specifies which foot will swing to reach the foostep.")
    public RobotSide robotSide;
    @RosExportedField(documentation = "Specifies the position of the footstep. It is expressed in world frame.")
-   public Point3d location;
+   public Point3D location;
    @RosExportedField(documentation = "Specifies the orientation of the footstep. It is expressed in world frame.")
-   public Quat4d orientation;
+   public Quaternion orientation;
 
    @RosExportedField(documentation = "predictedContactPoints specifies the vertices of the expected contact polygon between the foot and\n"
          + "the world. A value of null or an empty list will default to using the entire foot. Contact points  are expressed in sole frame. This ordering does not matter.\n"
          + "For example: to tell the controller to use the entire foot, the predicted contact points would be:\n" + "predicted_contact_points:\n"
          + "- {x: 0.5 * foot_length, y: -0.5 * toe_width}\n" + "- {x: 0.5 * foot_length, y: 0.5 * toe_width}\n"
          + "- {x: -0.5 * foot_length, y: -0.5 * heel_width}\n" + "- {x: -0.5 * foot_length, y: 0.5 * heel_width}\n")
-   public ArrayList<Point2d> predictedContactPoints;
+   public ArrayList<Point2D> predictedContactPoints;
 
    @RosExportedField(documentation = "This contains information on what the swing trajectory should be for each step. Recomended is DEFAULT.\n")
    public TrajectoryType trajectoryType = TrajectoryType.DEFAULT;
 
    @RosExportedField(documentation = "In case the trajectory type is set to custom the swing waypoints can be specified here (As of Dec 2016 only two waypoints are supported).\n"
          + "The waypoints specify the sole position in the world frame.")
-   public Point3d[] trajectoryWaypoints = new Point3d[0];
+   public Point3D[] trajectoryWaypoints = new Point3D[0];
 
    @RosExportedField(documentation = "Contains information on how high the robot should step. This affects trajectory types default and obstacle clearance."
          + "Recommended values are between 0.1 (minimum swing height, default) and 0.25.\n")
@@ -99,22 +97,22 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
       origin = FootstepOrigin.AT_ANKLE_FRAME;
    }
 
-   public FootstepDataMessage(RobotSide robotSide, Point3d location, Quat4d orientation)
+   public FootstepDataMessage(RobotSide robotSide, Point3D location, Quaternion orientation)
    {
       this(robotSide, location, orientation, null);
    }
 
-   public FootstepDataMessage(RobotSide robotSide, Point3d location, Quat4d orientation, ArrayList<Point2d> predictedContactPoints)
+   public FootstepDataMessage(RobotSide robotSide, Point3D location, Quaternion orientation, ArrayList<Point2D> predictedContactPoints)
    {
       this(robotSide, location, orientation, predictedContactPoints, TrajectoryType.DEFAULT, 0.0);
    }
 
-   public FootstepDataMessage(RobotSide robotSide, Point3d location, Quat4d orientation, TrajectoryType trajectoryType, double swingHeight)
+   public FootstepDataMessage(RobotSide robotSide, Point3D location, Quaternion orientation, TrajectoryType trajectoryType, double swingHeight)
    {
       this(robotSide, location, orientation, null, trajectoryType, swingHeight);
    }
 
-   public FootstepDataMessage(RobotSide robotSide, Point3d location, Quat4d orientation, ArrayList<Point2d> predictedContactPoints,
+   public FootstepDataMessage(RobotSide robotSide, Point3D location, Quaternion orientation, ArrayList<Point2D> predictedContactPoints,
          TrajectoryType trajectoryType, double swingHeight)
    {
       origin = FootstepOrigin.AT_ANKLE_FRAME;
@@ -133,9 +131,9 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
    {
       this.origin = footstepData.origin;
       this.robotSide = footstepData.robotSide;
-      this.location = new Point3d(footstepData.location);
-      this.orientation = new Quat4d(footstepData.orientation);
-      RotationTools.checkQuaternionNormalized(this.orientation);
+      this.location = new Point3D(footstepData.location);
+      this.orientation = new Quaternion(footstepData.orientation);
+      this.orientation.checkIfUnitary();
       if (footstepData.predictedContactPoints == null || footstepData.predictedContactPoints.isEmpty())
       {
          this.predictedContactPoints = null;
@@ -143,9 +141,9 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
       else
       {
          this.predictedContactPoints = new ArrayList<>();
-         for (Point2d contactPoint : footstepData.predictedContactPoints)
+         for (Point2D contactPoint : footstepData.predictedContactPoints)
          {
-            this.predictedContactPoints.add(new Point2d(contactPoint));
+            this.predictedContactPoints.add(new Point2D(contactPoint));
          }
       }
       this.trajectoryType = footstepData.trajectoryType;
@@ -153,9 +151,9 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
 
       if (footstepData.trajectoryWaypoints != null)
       {
-         this.trajectoryWaypoints = new Point3d[footstepData.trajectoryWaypoints.length];
+         this.trajectoryWaypoints = new Point3D[footstepData.trajectoryWaypoints.length];
          for (int i = 0; i < footstepData.trajectoryWaypoints.length; i++)
-            trajectoryWaypoints[i] = new Point3d(footstepData.trajectoryWaypoints[i]);
+            trajectoryWaypoints[i] = new Point3D(footstepData.trajectoryWaypoints[i]);
       }
 
       this.hasTimings = footstepData.hasTimings;
@@ -179,12 +177,12 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
    {
       origin = FootstepOrigin.AT_ANKLE_FRAME;
       robotSide = footstep.getRobotSide();
-      location = new Point3d();
-      orientation = new Quat4d();
+      location = new Point3D();
+      orientation = new Quaternion();
       footstep.getPositionInWorldFrame(location);
       footstep.getOrientationInWorldFrame(orientation);
 
-      List<Point2d> footstepContactPoints = footstep.getPredictedContactPoints();
+      List<Point2D> footstepContactPoints = footstep.getPredictedContactPoints();
       if (footstepContactPoints != null)
       {
          if (predictedContactPoints == null)
@@ -195,9 +193,9 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
          {
             predictedContactPoints.clear();
          }
-         for (Point2d contactPoint : footstepContactPoints)
+         for (Point2D contactPoint : footstepContactPoints)
          {
-            predictedContactPoints.add((Point2d) contactPoint.clone());
+            predictedContactPoints.add(new Point2D(contactPoint));
          }
       }
       else
@@ -209,9 +207,9 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
 
       if (footstep.getSwingWaypoints().size() != 0)
       {
-         trajectoryWaypoints = new Point3d[footstep.getSwingWaypoints().size()];
+         trajectoryWaypoints = new Point3D[footstep.getSwingWaypoints().size()];
          for (int i = 0; i < footstep.getSwingWaypoints().size(); i++)
-            trajectoryWaypoints[i] = new Point3d(footstep.getSwingWaypoints().get(i));
+            trajectoryWaypoints[i] = new Point3D(footstep.getSwingWaypoints().get(i));
       }
 
       if (timing != null)
@@ -227,27 +225,27 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
       return origin;
    }
 
-   public ArrayList<Point2d> getPredictedContactPoints()
+   public ArrayList<Point2D> getPredictedContactPoints()
    {
       return predictedContactPoints;
    }
 
-   public Point3d getLocation()
+   public Point3D getLocation()
    {
       return location;
    }
 
-   public void getLocation(Point3d locationToPack)
+   public void getLocation(Point3D locationToPack)
    {
       locationToPack.set(location);
    }
 
-   public Quat4d getOrientation()
+   public Quaternion getOrientation()
    {
       return orientation;
    }
 
-   public void getOrientation(Quat4d orientationToPack)
+   public void getOrientation(Quaternion orientationToPack)
    {
       orientationToPack.set(this.orientation);
    }
@@ -272,15 +270,15 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
       this.origin = origin;
    }
 
-   public void setLocation(Point3d location)
+   public void setLocation(Point3D location)
    {
-      if (this.location == null) this.location = new Point3d();
+      if (this.location == null) this.location = new Point3D();
       this.location.set(location);
    }
 
-   public void setOrientation(Quat4d orientation)
+   public void setOrientation(Quaternion orientation)
    {
-      if (this.orientation == null) this.orientation = new Quat4d();
+      if (this.orientation == null) this.orientation = new Quaternion();
       this.orientation.set(orientation);
    }
 
@@ -289,7 +287,7 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
       this.swingHeight = swingHeight;
    }
 
-   public void setPredictedContactPoints(ArrayList<Point2d> predictedContactPoints)
+   public void setPredictedContactPoints(ArrayList<Point2D> predictedContactPoints)
    {
       this.predictedContactPoints = predictedContactPoints;
    }
@@ -304,12 +302,12 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
       this.trajectoryType = trajectoryType;
    }
 
-   public Point3d[] getTrajectoryWaypoints()
+   public Point3D[] getTrajectoryWaypoints()
    {
       return trajectoryWaypoints;
    }
 
-   public void setTrajectoryWaypoints(Point3d[] trajectoryWaypoints)
+   public void setTrajectoryWaypoints(Point3D[] trajectoryWaypoints)
    {
       this.trajectoryWaypoints = trajectoryWaypoints;
    }
@@ -398,8 +396,8 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
       boolean orientationEquals = orientation.epsilonEquals(footstepData.orientation, epsilon);
       if (!orientationEquals)
       {
-         Quat4d temp = new Quat4d();
-         temp.negate(orientation);
+         Quaternion temp = new Quaternion();
+         temp.setAndNegate(orientation);
          orientationEquals = temp.epsilonEquals(footstepData.orientation, epsilon);
       }
 
@@ -418,8 +416,8 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
          {
             for (int i = 0; i < size; i++)
             {
-               Point2d pointOne = predictedContactPoints.get(i);
-               Point2d pointTwo = footstepData.predictedContactPoints.get(i);
+               Point2D pointOne = predictedContactPoints.get(i);
+               Point2D pointTwo = footstepData.predictedContactPoints.get(i);
 
                if (!(pointOne.distanceSquared(pointTwo) < 1e-7))
                   contactPointsEqual = false;
@@ -442,8 +440,8 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
          {
             for (int i = 0; i < size; i++)
             {
-               Point3d pointOne = trajectoryWaypoints[i];
-               Point3d pointTwo = footstepData.trajectoryWaypoints[i];
+               Point3D pointOne = trajectoryWaypoints[i];
+               Point3D pointTwo = footstepData.trajectoryWaypoints[i];
 
                if (!(pointOne.distanceSquared(pointTwo) < 1e-7))
                   trajectoryWaypointsEqual = false;
@@ -469,7 +467,7 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
    {
       FootstepDataMessage ret = this.clone();
 
-      // Point3d location;
+      // Point3D location;
       ret.location = TransformTools.getTransformedPoint(this.getLocation(), transform);
 
       // Quat4d orientation;
@@ -499,7 +497,7 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
 
       for (int i = 0; i < numberOfPredictedContactPoints; i++)
       {
-         predictedContactPoints.add(new Point2d(random.nextDouble(), random.nextDouble()));
+         predictedContactPoints.add(new Point2D(random.nextDouble(), random.nextDouble()));
       }
 
       this.trajectoryType = trajectoryTypes[randomOrdinal];
@@ -520,7 +518,7 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
 
       if (trajectoryType == TrajectoryType.CUSTOM)
       {
-         trajectoryWaypoints = new Point3d[2];
+         trajectoryWaypoints = new Point3D[2];
          trajectoryWaypoints[0] = RandomTools.generateRandomPoint3d(random, -10.0, 10.0);
          trajectoryWaypoints[1] = RandomTools.generateRandomPoint3d(random, -10.0, 10.0);
       }

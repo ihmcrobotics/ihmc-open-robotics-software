@@ -1,11 +1,10 @@
 package us.ihmc.simulationconstructionset.physics.collision.simple;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.geometry.BoundingBox3d;
 import us.ihmc.robotics.geometry.LineSegment3d;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.simulationconstructionset.physics.CollisionShapeDescription;
 
 public class CapsuleShapeDescription<T extends CapsuleShapeDescription<T>> implements CollisionShapeDescription<T>
@@ -86,7 +85,7 @@ public class CapsuleShapeDescription<T extends CapsuleShapeDescription<T>> imple
    @Override
    public void applyTransform(RigidBodyTransform transformToWorld)
    {
-      transform.multiply(transformToWorld, transform);
+      transform.preMultiply(transformToWorld);
       lineSegment.applyTransform(transformToWorld);
       boundingBoxNeedsUpdating = true;
    }
@@ -104,8 +103,8 @@ public class CapsuleShapeDescription<T extends CapsuleShapeDescription<T>> imple
 
    private void updateBoundingBox()
    {
-      Point3d firstEndpoint = lineSegment.getFirstEndpoint();
-      Point3d secondEndpoint = lineSegment.getSecondEndpoint();
+      Point3D firstEndpoint = lineSegment.getFirstEndpoint();
+      Point3D secondEndpoint = lineSegment.getSecondEndpoint();
 
       double xMin, yMin, zMin, xMax, yMax, zMax;
 
@@ -146,20 +145,20 @@ public class CapsuleShapeDescription<T extends CapsuleShapeDescription<T>> imple
    }
 
    @Override
-   public boolean isPointInside(Point3d pointInWorld)
+   public boolean isPointInside(Point3D pointInWorld)
    {
       return (lineSegment.distanceSquared(pointInWorld) <= radius * radius);
    }
 
-   private final Point3d tempPointForRollingWorldFrame = new Point3d();
-   private final Point3d tempPointForRollingShapeFrame = new Point3d();
-   private final Vector3d tempVectorForRollingWorldFrame = new Vector3d();
-   private final Vector3d tempVectorForRollingShapeFrame = new Vector3d();
-   private final Vector3d tempVectorTwoForRollingShapeFrame = new Vector3d();
+   private final Point3D tempPointForRollingWorldFrame = new Point3D();
+   private final Point3D tempPointForRollingShapeFrame = new Point3D();
+   private final Vector3D tempVectorForRollingWorldFrame = new Vector3D();
+   private final Vector3D tempVectorForRollingShapeFrame = new Vector3D();
+   private final Vector3D tempVectorTwoForRollingShapeFrame = new Vector3D();
 //   private final LineSegment3d tempLineSegmentForRollingWorldFrame = new LineSegment3d();
 
    @Override
-   public boolean rollContactIfRolling(Vector3d surfaceNormal, Point3d pointToRoll)
+   public boolean rollContactIfRolling(Vector3D surfaceNormal, Point3D pointToRoll)
    {
       tempTransform.set(transform);
       tempTransform.invert();
@@ -180,7 +179,7 @@ public class CapsuleShapeDescription<T extends CapsuleShapeDescription<T>> imple
       return isRolling;
    }
    
-   public boolean rollContactIfRollingShapeFrame(Vector3d surfaceNormalInShapeFrame, Point3d pointToRollInShapeFrame)
+   public boolean rollContactIfRollingShapeFrame(Vector3D surfaceNormalInShapeFrame, Point3D pointToRollInShapeFrame)
    {
       //TODO: This assumes shape frame has the capsule being along the z axis and middle of capsule at 0, 0...
       //TODO: If we don't want to assume that, we should just do everything in world frame then and use the vectors and dot products, etc.

@@ -1,30 +1,32 @@
 package us.ihmc.robotics.geometry;
 
-import javax.vecmath.Point2d;
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 
 public class BoundingBox2d
 {
-   protected final Point2d minPoint;
-   protected final Point2d maxPoint;
+   protected final Point2D minPoint;
+   protected final Point2D maxPoint;
 
-   public BoundingBox2d(Point2d min, Point2d max)
+   public BoundingBox2d(Point2DReadOnly min, Point2DReadOnly max)
    {
-      this.minPoint = new Point2d(min);
-      this.maxPoint = new Point2d(max);
+      this.minPoint = new Point2D(min);
+      this.maxPoint = new Point2D(max);
       checkPoint();
    }
 
    public BoundingBox2d(double[] min, double[] max)
    {
-      this.minPoint = new Point2d(min);
-      this.maxPoint = new Point2d(max);
+      this.minPoint = new Point2D(min);
+      this.maxPoint = new Point2D(max);
       checkPoint();
    }
 
    public BoundingBox2d(double minX, double minY, double maxX, double maxY)
    {
-      this.minPoint = new Point2d(minX, minY);
-      this.maxPoint = new Point2d(maxX, maxY);
+      this.minPoint = new Point2D(minX, minY);
+      this.maxPoint = new Point2D(maxX, maxY);
       checkPoint();
    }
 
@@ -43,8 +45,8 @@ public class BoundingBox2d
 
    public BoundingBox2d()
    {
-      minPoint = new Point2d();
-      maxPoint = new Point2d();
+      minPoint = new Point2D();
+      maxPoint = new Point2D();
    }
 
    public void set(double minX, double minY, double maxX, double maxY)
@@ -61,27 +63,27 @@ public class BoundingBox2d
       checkPoint();
    }
 
-   public void getMinPoint(Point2d min)
+   public void getMinPoint(Point2DBasics min)
    {
       min.set(this.minPoint);
    }
 
-   public void getMaxPoint(Point2d max)
+   public void getMaxPoint(Point2DBasics max)
    {
       max.set(this.maxPoint);
    }
 
-   public Point2d getMaxPoint()
+   public Point2DReadOnly getMaxPoint()
    {
       return maxPoint;
    }
 
-   public Point2d getMinPoint()
+   public Point2DReadOnly getMinPoint()
    {
       return minPoint;
    }
 
-   public void getCenterPointCopy(Point2d center)
+   public void getCenterPointCopy(Point2DBasics center)
    {
       center.set((minPoint.getX() + maxPoint.getX()) / 2.0, (minPoint.getY() + maxPoint.getY()) / 2.0);
    }
@@ -124,7 +126,7 @@ public class BoundingBox2d
    }
 
    // TODO isInside is not consistent with the other methods (> vs. >=)
-   public boolean isInside(Point2d point2d)
+   public boolean isInside(Point2DReadOnly point2d)
    {
       if (point2d.getY() < minPoint.getY())
       {
@@ -154,7 +156,7 @@ public class BoundingBox2d
       return ((maxPoint.getX() >= r.minPoint.getX()) && (r.maxPoint.getX() >= minPoint.getX()) && (maxPoint.getY() >= r.minPoint.getY()) && (r.maxPoint.getY() >= minPoint.getY()));
    }
 
-   public void getPointGivenParameters(Point2d point, double xParameter, double yParameter)
+   public void getPointGivenParameters(Point2DBasics point, double xParameter, double yParameter)
    {
       point.setX(minPoint.getX() + xParameter * (maxPoint.getX() - minPoint.getX()));
       point.setY(minPoint.getY() + yParameter * (maxPoint.getY() - minPoint.getY()));

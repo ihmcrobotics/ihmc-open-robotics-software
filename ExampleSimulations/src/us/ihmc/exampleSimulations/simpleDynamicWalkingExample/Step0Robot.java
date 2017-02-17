@@ -1,7 +1,6 @@
 package us.ihmc.exampleSimulations.simpleDynamicWalkingExample;
 
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
@@ -44,7 +43,7 @@ public class Step0Robot extends Robot
       this.setGravity(0.0, 0.0, -9.81);
 
       // (A) Body Joint
-      bodyJoint = new FloatingJoint("body", new Vector3d(0.0, 0.0, 0.0), this);
+      bodyJoint = new FloatingJoint("body", new Vector3D(0.0, 0.0, 0.0), this);
       bodyJoint.setDynamic(true);
       Link bodyLink = body();
       bodyJoint.setLink(bodyLink);
@@ -52,7 +51,7 @@ public class Step0Robot extends Robot
       bodyJoint.setPosition(0.0, 0.0, legHeight);
       
       // (B) Upper Joint
-      hipJoint = new PinJoint("hip", new Vector3d(0.0, 0.0, 0.0), this, Axis.Y);
+      hipJoint = new PinJoint("hip", new Vector3D(0.0, 0.0, 0.0), this, Axis.Y);
       hipJoint.setDynamic(true);
       Link upperLink = upperLink();
       hipJoint.setLink(upperLink);
@@ -60,7 +59,7 @@ public class Step0Robot extends Robot
 
       // (C) Lower Joint
       //kneeJoint = new SliderJoint("knee", new Vector3d(0.0, 0.0, -upperLinkLength + 0.6), this, Axis.Z);
-      kneeJoint = new SliderJoint("knee", new Vector3d(0.0, 0.0, -upperLinkLength), this, Axis.Z);
+      kneeJoint = new SliderJoint("knee", new Vector3D(0.0, 0.0, -upperLinkLength), this, Axis.Z);
       kneeJoint.setDynamic(true);
       //kneeJoint.setLimitStops(0.2, 0.8, 1e9, 1e2);
       kneeJoint.setLimitStops(0.0, 0.6, 1e9, 1e2);
@@ -70,7 +69,7 @@ public class Step0Robot extends Robot
   
 
       // (D) Ground contact points
-      GroundContactPoint contactPoint = new GroundContactPoint("Foot", new Vector3d(0.0, 0.0, -lowerLinkLength), this);
+      GroundContactPoint contactPoint = new GroundContactPoint("Foot", new Vector3D(0.0, 0.0, -lowerLinkLength), this);
       kneeJoint.addGroundContactPoint(contactPoint);
       
       // (E) Ground Model (If no GroundProfile is specified, then a flat ground will be simulated.)

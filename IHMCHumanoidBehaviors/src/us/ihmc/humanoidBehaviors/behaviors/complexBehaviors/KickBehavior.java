@@ -2,10 +2,8 @@ package us.ihmc.humanoidBehaviors.behaviors.complexBehaviors;
 
 import java.util.ArrayList;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-
-import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.EndEffectorLoadBearingBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.FootTrajectoryBehavior;
@@ -16,6 +14,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.EndEffectorLoadBea
 import us.ihmc.humanoidRobotics.communication.packets.walking.EndEffectorLoadBearingMessage.EndEffector;
 import us.ihmc.humanoidRobotics.communication.packets.walking.EndEffectorLoadBearingMessage.LoadBearingRequest;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
@@ -142,8 +141,8 @@ public class KickBehavior extends AbstractBehavior
    private void submitFootPose(RobotSide robotSide, FramePose desiredFootPose)
    {
       desiredFootPose.changeFrame(worldFrame);
-      Point3d desiredFootPosition = new Point3d();
-      Quat4d desiredFootOrientation = new Quat4d();
+      Point3D desiredFootPosition = new Point3D();
+      Quaternion desiredFootOrientation = new Quaternion();
       desiredFootPose.getPose(desiredFootPosition, desiredFootOrientation);
       FootTrajectoryTask task = new FootTrajectoryTask(robotSide, desiredFootPosition, desiredFootOrientation, footTrajectoryBehavior,
             trajectoryTime.getDoubleValue());

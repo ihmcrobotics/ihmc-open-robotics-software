@@ -1,9 +1,11 @@
 package us.ihmc.robotics.geometry.yoFrameObjects;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.frameObjects.FrameSE3Waypoint;
 import us.ihmc.robotics.geometry.interfaces.SE3WaypointInterface;
@@ -33,25 +35,25 @@ public class YoFrameSE3Waypoint extends YoFrameWaypoint<YoFrameSE3Waypoint, Fram
    }
 
    @Override
-   public void setPosition(Point3d position)
+   public void setPosition(Point3DReadOnly position)
    {
       this.position.set(position);
    }
 
    @Override
-   public void setLinearVelocity(Vector3d linearVelocity)
+   public void setLinearVelocity(Vector3DReadOnly linearVelocity)
    {
       this.linearVelocity.set(linearVelocity);
    }
 
    @Override
-   public void setOrientation(Quat4d orientation)
+   public void setOrientation(QuaternionReadOnly orientation)
    {
       this.orientation.set(orientation);
    }
 
    @Override
-   public void setAngularVelocity(Vector3d angularVelocity)
+   public void setAngularVelocity(Vector3DReadOnly angularVelocity)
    {
       this.angularVelocity.set(angularVelocity);
    }
@@ -113,25 +115,25 @@ public class YoFrameSE3Waypoint extends YoFrameWaypoint<YoFrameSE3Waypoint, Fram
    }
 
    @Override
-   public void getPosition(Point3d positionToPack)
+   public void getPosition(Point3DBasics positionToPack)
    {
       position.get(positionToPack);
    }
 
    @Override
-   public void getOrientation(Quat4d orientationToPack)
+   public void getOrientation(QuaternionBasics orientationToPack)
    {
       orientation.get(orientationToPack);
    }
 
    @Override
-   public void getLinearVelocity(Vector3d linearVelocityToPack)
+   public void getLinearVelocity(Vector3DBasics linearVelocityToPack)
    {
       linearVelocity.get(linearVelocityToPack);
    }
 
    @Override
-   public void getAngularVelocity(Vector3d angularVelocityToPack)
+   public void getAngularVelocity(Vector3DBasics angularVelocityToPack)
    {
       angularVelocity.get(angularVelocityToPack);
    }
@@ -143,10 +145,8 @@ public class YoFrameSE3Waypoint extends YoFrameWaypoint<YoFrameSE3Waypoint, Fram
       EuclideanWaypoint euclideanWaypoint = simpleWaypoint.getEuclideanWaypoint();
       SO3Waypoint so3Waypoint = simpleWaypoint.getSO3Waypoint();
 
-      position.get(euclideanWaypoint.getPosition());
-      orientation.get(so3Waypoint.getOrientation());
-      linearVelocity.get(euclideanWaypoint.getLinearVelocity());
-      angularVelocity.get(so3Waypoint.getAngularVelocity());
+      euclideanWaypoint.set(position.getFrameTuple().getPoint(), linearVelocity.getFrameTuple().getVector());
+      so3Waypoint.set(orientation.getFrameOrientation().getQuaternion(), angularVelocity.getFrameTuple().getVector());
    }
 
    @Override

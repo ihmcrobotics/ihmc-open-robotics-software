@@ -5,27 +5,26 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Random;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.tools.EuclidCoreTestTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.SpatialForceVector;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.testing.JUnitTools;
 
 public class CenterOfPressureResolverTest
 {
@@ -47,15 +46,15 @@ public class CenterOfPressureResolverTest
    @Test(timeout = 30000)
    public void testCenterOfPressureResolverSimpleCaseWithNoTorque()
    {
-      Point3d groundPoint = new Point3d();
-      Vector3d groundNormal = new Vector3d(0.0, 0.0, 1.0);
+      Point3D groundPoint = new Point3D();
+      Vector3D groundNormal = new Vector3D(0.0, 0.0, 1.0);
 
-      Point3d centerOfMassPoint = new Point3d(0.0, 0.0, 1.0);
+      Point3D centerOfMassPoint = new Point3D(0.0, 0.0, 1.0);
 
-      Vector3d centerOfMassForce = new Vector3d(1.0, 2.0, 1.0);
-      Vector3d centerOfMassTorque = new Vector3d(0.0, 0.0, 0.0);
+      Vector3D centerOfMassForce = new Vector3D(1.0, 2.0, 1.0);
+      Vector3D centerOfMassTorque = new Vector3D(0.0, 0.0, 0.0);
 
-      Vector3d expectedCenterOfPressure = new Vector3d(-1.0, -2.0, 0.0);
+      Vector3D expectedCenterOfPressure = new Vector3D(-1.0, -2.0, 0.0);
 
       double expectedNormalTorque = 0.0;
 
@@ -67,15 +66,15 @@ public class CenterOfPressureResolverTest
    @Test(timeout = 30000)
    public void testCenterOfPressureResolverSimpleCaseWithVerticalForce()
    {
-      Point3d groundPoint = new Point3d();
-      Vector3d groundNormal = new Vector3d(0.0, 0.0, 1.0);
+      Point3D groundPoint = new Point3D();
+      Vector3D groundNormal = new Vector3D(0.0, 0.0, 1.0);
 
-      Point3d centerOfMassPoint = new Point3d(0.0, 0.0, 1.0);
+      Point3D centerOfMassPoint = new Point3D(0.0, 0.0, 1.0);
 
-      Vector3d centerOfMassForce = new Vector3d(0.0, 0.0, 1.0);
-      Vector3d centerOfMassTorque = new Vector3d(1.0, 2.0, 3.0);
+      Vector3D centerOfMassForce = new Vector3D(0.0, 0.0, 1.0);
+      Vector3D centerOfMassTorque = new Vector3D(1.0, 2.0, 3.0);
 
-      Vector3d expectedCenterOfPressure = new Vector3d(-2.0, 1.0, 0.0);
+      Vector3D expectedCenterOfPressure = new Vector3D(-2.0, 1.0, 0.0);
 
       double expectedNormalTorque = 3.0;
 
@@ -87,15 +86,15 @@ public class CenterOfPressureResolverTest
    @Test(timeout = 30000)
    public void testCenterOfPressureResolverNoForceInZ()
    {
-      Point3d groundPoint = new Point3d();
-      Vector3d groundNormal = new Vector3d(0.0, 0.0, 1.0);
+      Point3D groundPoint = new Point3D();
+      Vector3D groundNormal = new Vector3D(0.0, 0.0, 1.0);
 
-      Point3d centerOfMassPoint = new Point3d(0.0, 0.0, 1.0);
+      Point3D centerOfMassPoint = new Point3D(0.0, 0.0, 1.0);
 
-      Vector3d centerOfMassForce = new Vector3d(1.0, 0.0, 0.0);
-      Vector3d centerOfMassTorque = new Vector3d(0.1, 0.2, 0.3);
+      Vector3D centerOfMassForce = new Vector3D(1.0, 0.0, 0.0);
+      Vector3D centerOfMassTorque = new Vector3D(0.1, 0.2, 0.3);
 
-      Vector3d expectedCenterOfPressure = new Vector3d(Double.NaN, Double.NaN, Double.NaN);
+      Vector3D expectedCenterOfPressure = new Vector3D(Double.NaN, Double.NaN, Double.NaN);
 
       double expectedNormalTorque = 0.3;
 
@@ -112,19 +111,19 @@ public class CenterOfPressureResolverTest
 
       for (int i = 0; i < numberOfTests; i++)
       {
-         Point3d groundPoint = RandomTools.generateRandomPoint(random, 1.0, 1.0, 0.2);
+         Point3D groundPoint = RandomTools.generateRandomPoint(random, 1.0, 1.0, 0.2);
 
-         Vector3d groundNormal = RandomTools.generateRandomVector(random);
+         Vector3D groundNormal = RandomTools.generateRandomVector(random);
          groundNormal.setZ(1.0);
          groundNormal.normalize();
 
-         Point3d centerOfMassPoint = RandomTools.generateRandomPoint(random, 1.0, 1.0, 0.2);
+         Point3D centerOfMassPoint = RandomTools.generateRandomPoint(random, 1.0, 1.0, 0.2);
          centerOfMassPoint.setZ(1.2);
 
-         Vector3d centerOfMassForce = RandomTools.generateRandomVector(random, 100.0);
+         Vector3D centerOfMassForce = RandomTools.generateRandomVector(random, 100.0);
          centerOfMassForce.setZ(127.0);
 
-         Vector3d centerOfMassTorque = new Vector3d(0.0, 0.0, 0.0);
+         Vector3D centerOfMassTorque = new Vector3D(0.0, 0.0, 0.0);
 
          PoseReferenceFrame centerOfMassFrame = createTranslatedZUpFrame("centerOfMassFrame", centerOfMassPoint);
          SpatialForceVector spatialForceVector = new SpatialForceVector(centerOfMassFrame, centerOfMassForce, centerOfMassTorque);
@@ -135,7 +134,7 @@ public class CenterOfPressureResolverTest
          double normalTorqueResolvedAtCenterOfPressure = centerOfPressureAndNormalTorque.getRight();
          centerOfPressure.changeFrame(worldFrame);
 
-         Point3d copPoint3d = new Point3d();
+         Point3D copPoint3d = new Point3D();
          centerOfPressure.get(copPoint3d);
          PoseReferenceFrame centerOfPressurePlaneFrame = createPlaneFrame("groundPlaneFrame", copPoint3d, groundNormal);
          spatialForceVector.changeFrame(centerOfPressurePlaneFrame);
@@ -146,7 +145,7 @@ public class CenterOfPressureResolverTest
          forceResolvedInCenterOfPressureFrame.changeFrame(worldFrame);
 
          // Forces should be the same, after rotated into the same frame:
-         JUnitTools.assertTuple3dEquals(centerOfMassForce, forceResolvedInCenterOfPressureFrame.getVectorCopy(), 1e-7);
+         EuclidCoreTestTools.assertTuple3DEquals(centerOfMassForce, forceResolvedInCenterOfPressureFrame.getVectorCopy(), 1e-7);
 
          // Torque should have no components in x and y resolved at the Center of Pressure:
          assertEquals(0.0, torqueResolvedInCenterOfPressureFrame.getX(), 1e-7);
@@ -155,8 +154,8 @@ public class CenterOfPressureResolverTest
       }
    }
 
-   private static void computeAndVerifyCenterOfPressureAndNormalTorque(Point3d groundPoint, Vector3d groundNormal, Point3d centerOfMassPoint,
-         Vector3d centerOfMassForce, Vector3d centerOfMassTorque, Vector3d expectedCenterOfPressure, double expectedNormalTorque)
+   private static void computeAndVerifyCenterOfPressureAndNormalTorque(Point3D groundPoint, Vector3D groundNormal, Point3D centerOfMassPoint,
+         Vector3D centerOfMassForce, Vector3D centerOfMassTorque, Vector3D expectedCenterOfPressure, double expectedNormalTorque)
    {
       PoseReferenceFrame centerOfMassFrame = createTranslatedZUpFrame("centerOfMassFrame", centerOfMassPoint);
       SpatialForceVector spatialForceVector = new SpatialForceVector(centerOfMassFrame, centerOfMassForce, centerOfMassTorque);
@@ -178,7 +177,7 @@ public class CenterOfPressureResolverTest
       assertEquals(expectedNormalTorque, normalTorque, 1e-7);
    }
 
-   private static ImmutablePair<FramePoint, Double> computeCenterOfPressureAndNormalTorque(Point3d groundPoint, Vector3d groundNormal,
+   private static ImmutablePair<FramePoint, Double> computeCenterOfPressureAndNormalTorque(Point3D groundPoint, Vector3D groundNormal,
          ReferenceFrame centerOfMassFrame, SpatialForceVector spatialForceVector)
    {
       CenterOfPressureResolver centerOfPressureResolver = new CenterOfPressureResolver();
@@ -193,12 +192,12 @@ public class CenterOfPressureResolverTest
       return new ImmutablePair<FramePoint, Double>(centerOfPressure, normalTorqueAtCenterOfPressure);
    }
 
-   private static PoseReferenceFrame createPlaneFrame(String name, Point3d planeReferencePoint, Vector3d planeSurfaceNormal)
+   private static PoseReferenceFrame createPlaneFrame(String name, Point3D planeReferencePoint, Vector3D planeSurfaceNormal)
    {
       PoseReferenceFrame planeFrame = new PoseReferenceFrame(name, ReferenceFrame.getWorldFrame());
-      Matrix3d rotationFromNormal = computeRotationFromNormal(planeSurfaceNormal);
+      RotationMatrix rotationFromNormal = computeRotationFromNormal(planeSurfaceNormal);
 
-      RigidBodyTransform transform3D = new RigidBodyTransform(rotationFromNormal, new Vector3d(planeReferencePoint));
+      RigidBodyTransform transform3D = new RigidBodyTransform(rotationFromNormal, new Vector3D(planeReferencePoint));
       FramePose framePose = new FramePose(ReferenceFrame.getWorldFrame(), transform3D);
 
       planeFrame.setPoseAndUpdate(framePose);
@@ -206,11 +205,11 @@ public class CenterOfPressureResolverTest
       return planeFrame;
    }
 
-   private static PoseReferenceFrame createTranslatedZUpFrame(String name, Point3d frameCenterPoint)
+   private static PoseReferenceFrame createTranslatedZUpFrame(String name, Point3D frameCenterPoint)
    {
       PoseReferenceFrame translatedZUpFrame = new PoseReferenceFrame(name, ReferenceFrame.getWorldFrame());
       RigidBodyTransform transform3D = new RigidBodyTransform();
-      transform3D.setTranslation(new Vector3d(frameCenterPoint));
+      transform3D.setTranslation(new Vector3D(frameCenterPoint));
 
       FramePose framePose = new FramePose(ReferenceFrame.getWorldFrame(), transform3D);
       translatedZUpFrame.setPoseAndUpdate(framePose);
@@ -218,16 +217,16 @@ public class CenterOfPressureResolverTest
       return translatedZUpFrame;
    }
 
-   private static Matrix3d computeRotationFromNormal(Vector3d normal)
+   private static RotationMatrix computeRotationFromNormal(Vector3D normal)
    {
       // Won't work if normal is 1,0,0
 
-      Vector3d zAxis = new Vector3d(normal);
+      Vector3D zAxis = new Vector3D(normal);
       zAxis.normalize();
 
-      Vector3d xAxis = new Vector3d(1.0, 0.0, 0.0);
+      Vector3D xAxis = new Vector3D(1.0, 0.0, 0.0);
 
-      Vector3d yAxis = new Vector3d();
+      Vector3D yAxis = new Vector3D();
       yAxis.cross(normal, xAxis);
       yAxis.normalize();
 
@@ -237,7 +236,7 @@ public class CenterOfPressureResolverTest
       zAxis.cross(xAxis, yAxis);
       zAxis.normalize();
 
-      Matrix3d rotation = new Matrix3d(xAxis.getX(), xAxis.getY(), xAxis.getZ(), yAxis.getX(), yAxis.getY(), yAxis.getZ(), zAxis.getX(), zAxis.getY(),
+      RotationMatrix rotation = new RotationMatrix(xAxis.getX(), xAxis.getY(), xAxis.getZ(), yAxis.getX(), yAxis.getY(), yAxis.getZ(), zAxis.getX(), zAxis.getY(),
             zAxis.getZ());
       return rotation;
    }

@@ -1,9 +1,9 @@
 package us.ihmc.robotics.geometry;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.Axis;
 
 /**
@@ -62,13 +62,15 @@ public class RigidBodyTransformGenerator
    public void translate(double x, double y, double z)
    {
       tempTransform.setTranslationAndIdentityRotation(x, y, z);
-      transform.multiply(transform, tempTransform);
+      transform.set(transform);
+      transform.multiply(tempTransform);
    }
 
-   public void translate(Vector3d translationVector)
+   public void translate(Vector3D translationVector)
    {
       tempTransform.setTranslationAndIdentityRotation(translationVector);
-      transform.multiply(transform, tempTransform);
+      transform.set(transform);
+      transform.multiply(tempTransform);
    }
 
    public void rotate(double rotationAngle, Axis axis)
@@ -92,44 +94,51 @@ public class RigidBodyTransformGenerator
       }
 
       }
-      transform.multiply(transform, tempTransform);
+      transform.set(transform);
+      transform.multiply(tempTransform);
    }
 
    public void rotateEuler(double rotateX, double rotateY, double rotateZ)
    {
       tempTransform.setRotationEulerAndZeroTranslation(rotateX, rotateY, rotateZ);
-      transform.multiply(transform, tempTransform);
+      transform.set(transform);
+      transform.multiply(tempTransform);
    }
 
-   public void rotateEuler(Vector3d eulerAngles)
+   public void rotateEuler(Vector3D eulerAngles)
    {
       tempTransform.setRotationEulerAndZeroTranslation(eulerAngles);
-      transform.multiply(transform, tempTransform);
+      transform.set(transform);
+      transform.multiply(tempTransform);
    }
 
-   public void rotate(Matrix3d rotationMatrix)
+   public void rotate(RotationMatrix rotationMatrix)
    {
       tempTransform.setRotationAndZeroTranslation(rotationMatrix);
-      transform.multiply(transform, tempTransform);
+      transform.set(transform);
+      transform.multiply(tempTransform);
    }
 
-   public void rotate(Quat4d rotationQuaternion)
+   public void rotate(Quaternion rotationQuaternion)
    {
       tempTransform.setRotationAndZeroTranslation(rotationQuaternion);
-      transform.multiply(transform, tempTransform);
+      transform.set(transform);
+      transform.multiply(tempTransform);
    }
 
    public void translateThenRotate(RigidBodyTransform translateThenRotateTransform)
    {
       tempTransform.set(translateThenRotateTransform);
-      transform.multiply(transform, tempTransform);
+      transform.set(transform);
+      transform.multiply(tempTransform);
    }
 
-   public void translateThenRotateEuler(Vector3d translationVector, Vector3d eulerAngles)
+   public void translateThenRotateEuler(Vector3D translationVector, Vector3D eulerAngles)
    {
       tempTransform.setRotationEulerAndZeroTranslation(eulerAngles);
       tempTransform.setTranslation(translationVector);
-      transform.multiply(transform, tempTransform);
+      transform.set(transform);
+      transform.multiply(tempTransform);
    }
 
 }

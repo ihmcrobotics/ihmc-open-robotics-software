@@ -1,5 +1,17 @@
 package us.ihmc.ihmcPerception;
 
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+
+import javax.imageio.ImageIO;
+
+import org.opencv.core.Mat;
+import org.opencv.core.MatOfByte;
+import org.opencv.imgcodecs.Imgcodecs;
+import org.opencv.videoio.VideoCapture;
+
 import boofcv.abst.fiducial.FiducialDetector;
 import boofcv.factory.fiducial.ConfigFiducialBinary;
 import boofcv.factory.fiducial.FactoryFiducial;
@@ -13,17 +25,7 @@ import boofcv.struct.calib.IntrinsicParameters;
 import boofcv.struct.image.GrayF32;
 import boofcv.struct.image.ImageType;
 import georegression.struct.se.Se3_F64;
-import org.opencv.core.Mat;
-import org.opencv.core.MatOfByte;
-import org.opencv.imgcodecs.Imgcodecs;
-import org.opencv.videoio.VideoCapture;
 import us.ihmc.tools.nativelibraries.NativeLibraryLoader;
-
-import javax.imageio.ImageIO;
-import java.awt.*;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
 
 public class USBFiducialDetector
 {

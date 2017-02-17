@@ -1,13 +1,13 @@
 package us.ihmc.robotics.quadTree;
 
-import javax.vecmath.Point3d;
+import us.ihmc.euclid.tuple3D.Point3D;
 
 public class PointAndDistance
 {
-   private final Point3d point;
+   private final Point3D point;
    private double distance;
 
-   public PointAndDistance(Point3d point, double distance)
+   public PointAndDistance(Point3D point, double distance)
    {
       this.point = point;
       this.distance = distance;
@@ -18,12 +18,12 @@ public class PointAndDistance
       return distance;
    }
    
-   public Point3d getPoint()
+   public Point3D getPoint()
    {
       return point;
    }
    
-   public void setPoint(Point3d point)
+   public void setPoint(Point3D point)
    {
       this.point.set(point);
    }

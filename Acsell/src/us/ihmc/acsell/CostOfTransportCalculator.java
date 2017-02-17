@@ -1,8 +1,7 @@
 package us.ihmc.acsell;
 
-import javax.vecmath.Vector3d;
-
 import us.ihmc.commons.Conversions;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotModels.visualizer.RobotVisualizer;
@@ -46,7 +45,7 @@ public class CostOfTransportCalculator implements RobotVisualizer
    
    private long index = 0;
    
-   private final Vector3d position = new Vector3d();
+   private final Vector3D position = new Vector3D();
    
    public CostOfTransportCalculator(double robotMass, double gravity, double measurementTime, double dt, RobotVisualizer superVisualizer)
    {

@@ -1,9 +1,8 @@
 package us.ihmc.exampleSimulations.simpleDynamicWalkingExample;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.controllers.PIDController;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -34,10 +33,10 @@ public class Step5Controller implements RobotController
    private DoubleYoVariable hipTau;
    private DoubleYoVariable ankleTau;
 
-   Point3d bodyPositionToPack = new Point3d(); //global so that it is created only once to avoid generating garbage
-   private Quat4d rotationToPack = new Quat4d();
+   Point3D bodyPositionToPack = new Point3D(); //global so that it is created only once to avoid generating garbage
+   private Quaternion rotationToPack = new Quaternion();
    private double ffComponent = -38.0 * 9.81;
-   private Vector3d velocityToPack = new Vector3d();
+   private Vector3D velocityToPack = new Vector3D();
 
    
    // Controllers and Gains

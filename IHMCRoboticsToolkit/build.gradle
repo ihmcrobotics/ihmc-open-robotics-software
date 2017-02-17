@@ -48,7 +48,7 @@ dependencies {
     testCompile ihmc.getProjectDependency(":IHMCUnitTesting")
 	testCompile ihmc.getProjectTestDependency(":IHMCJavaExtensions")
 
-    compile group: 'javax.vecmath', name: 'vecmath', version: '1.5.2'
+    compile group: 'us.ihmc', name: 'euclid-core', version: '0.3-alpha'
     compile group: 'org.ejml', name: 'denseC64', version: '0.30'
     compile group: 'com.esotericsoftware.kryo', name: 'kryo', version: '2.20'
     compile group: 'com.github.quickhull3d', name: 'quickhull3d', version: '1.0.0'

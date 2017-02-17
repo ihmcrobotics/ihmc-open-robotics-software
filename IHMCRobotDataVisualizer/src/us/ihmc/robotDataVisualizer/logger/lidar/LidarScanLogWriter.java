@@ -175,14 +175,14 @@ public class LidarScanLogWriter
       {
          logDataOutputStream.writeLong(lidarScanMessage.robotTimestamp);
 
-         logDataOutputStream.writeFloat(lidarScanMessage.lidarPosition.x);
-         logDataOutputStream.writeFloat(lidarScanMessage.lidarPosition.y);
-         logDataOutputStream.writeFloat(lidarScanMessage.lidarPosition.z);
+         logDataOutputStream.writeFloat(lidarScanMessage.lidarPosition.getX32());
+         logDataOutputStream.writeFloat(lidarScanMessage.lidarPosition.getY32());
+         logDataOutputStream.writeFloat(lidarScanMessage.lidarPosition.getZ32());
 
-         logDataOutputStream.writeFloat(lidarScanMessage.lidarOrientation.x);
-         logDataOutputStream.writeFloat(lidarScanMessage.lidarOrientation.y);
-         logDataOutputStream.writeFloat(lidarScanMessage.lidarOrientation.z);
-         logDataOutputStream.writeFloat(lidarScanMessage.lidarOrientation.w);
+         logDataOutputStream.writeFloat(lidarScanMessage.lidarOrientation.getX32());
+         logDataOutputStream.writeFloat(lidarScanMessage.lidarOrientation.getY32());
+         logDataOutputStream.writeFloat(lidarScanMessage.lidarOrientation.getZ32());
+         logDataOutputStream.writeFloat(lidarScanMessage.lidarOrientation.getS32());
 
          logDataOutputStream.writeInt(lidarScanMessage.scan.length);
 

@@ -1,7 +1,6 @@
 package us.ihmc.exampleSimulations.newtonsCradle;
 
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -48,7 +47,7 @@ public class StackOfBouncyBallsRobot extends Robot
             ballMass = ballMass * massScaleFactor;
          }
 
-         Vector3d offset = new Vector3d(0.0, 0.0, 0.0);
+         Vector3D offset = new Vector3D(0.0, 0.0, 0.0);
          FloatingJoint floatingJoint = new FloatingJoint("ball" + i, "ball" + i, offset, this);
 
          Link link = new Link("ball" + i);
@@ -86,7 +85,7 @@ public class StackOfBouncyBallsRobot extends Robot
          @Override
          public double[] computeDerivativeVector()
          {
-            Vector3d linearMomentum = new Vector3d();
+            Vector3D linearMomentum = new Vector3D();
             computeLinearMomentum(linearMomentum);
             kineticEnergy.set(computeTranslationalKineticEnergy());
             potentialEnergy.set(computeGravitationalPotentialEnergy());
