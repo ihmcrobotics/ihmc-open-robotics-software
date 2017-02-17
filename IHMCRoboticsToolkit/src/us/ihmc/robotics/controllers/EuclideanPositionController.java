@@ -1,5 +1,6 @@
 package us.ihmc.robotics.controllers;
 
+import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -168,7 +169,7 @@ public class EuclideanPositionController implements PositionController
       proportionalGainMatrix.transform(proportionalTerm.getVector());
    }
 
-   private final RotationMatrix tempMatrix = new RotationMatrix();
+   private final Matrix3D tempMatrix = new Matrix3D();
    private void computeDerivativeTerm(FrameVector desiredVelocity, FrameVector currentVelocity)
    {
       desiredVelocity.changeFrame(bodyFrame);
