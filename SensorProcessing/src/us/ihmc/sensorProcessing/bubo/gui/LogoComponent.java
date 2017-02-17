@@ -18,9 +18,13 @@
 
 package us.ihmc.sensorProcessing.bubo.gui;
 
-import javax.swing.*;
-import java.awt.*;
+import java.awt.AlphaComposite;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
+
+import javax.swing.JComponent;
 
 /**
  * Used for displaying logos

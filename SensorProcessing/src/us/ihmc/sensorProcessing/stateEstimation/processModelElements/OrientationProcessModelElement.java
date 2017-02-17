@@ -1,22 +1,20 @@
 package us.ihmc.sensorProcessing.stateEstimation.processModelElements;
 
 
-import javax.vecmath.AxisAngle4d;
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.controlFlow.ControlFlowOutputPort;
-import us.ihmc.sensorProcessing.stateEstimation.TimeDomain;
-import us.ihmc.robotics.linearAlgebra.MatrixTools;
+import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.matrix.Matrix3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.geometry.RotationTools;
+import us.ihmc.sensorProcessing.stateEstimation.TimeDomain;
 
 public class OrientationProcessModelElement extends AbstractProcessModelElement
 {
@@ -24,13 +22,13 @@ public class OrientationProcessModelElement extends AbstractProcessModelElement
    private final ControlFlowOutputPort<FrameVector> angularVelocityPort;
    private final ControlFlowOutputPort<FrameOrientation> orientationPort;
 
-   private final Vector3d angularVelocity = new Vector3d();
-   private final Vector3d tempRotationVector = new Vector3d();
-   private final AxisAngle4d tempAxisAngle = new AxisAngle4d();
-   private final Matrix3d tempMatrix3d = new Matrix3d();
+   private final Vector3D angularVelocity = new Vector3D();
+   private final Vector3D tempRotationVector = new Vector3D();
+   private final AxisAngle tempAxisAngle = new AxisAngle();
+   private final Matrix3D tempMatrix3d = new Matrix3D();
 
-   private final Quat4d quaternionDelta = new Quat4d();
-   private final Quat4d quaternion = new Quat4d();
+   private final Quaternion quaternionDelta = new Quaternion();
+   private final Quaternion quaternion = new Quaternion();
    private final FrameOrientation orientation = new FrameOrientation(ReferenceFrame.getWorldFrame());
 
    public OrientationProcessModelElement(ControlFlowOutputPort<FrameVector> angularVelocityPort, ControlFlowOutputPort<FrameOrientation> orientationPort,
@@ -55,8 +53,8 @@ public class OrientationProcessModelElement extends AbstractProcessModelElement
    {
       angularVelocityPort.getData().get(angularVelocity);
       angularVelocity.scale(-0.5);
-      MatrixTools.toTildeForm(tempMatrix3d, angularVelocity);
-      MatrixTools.setDenseMatrixFromMatrix3d(0, 0, tempMatrix3d, stateMatrixBlocks.get(orientationPort));
+      tempMatrix3d.setToTildeForm(angularVelocity);
+      tempMatrix3d.get(stateMatrixBlocks.get(orientationPort));
    }
 
    private void computeAngularVelocityStateMatrixBlock()
@@ -72,10 +70,10 @@ public class OrientationProcessModelElement extends AbstractProcessModelElement
       tempRotationVector.set(angularVelocity);
       tempRotationVector.scale(dt);
 
-      RotationTools.convertRotationVectorToAxisAngle(tempRotationVector, tempAxisAngle);
+      tempAxisAngle.set(tempRotationVector);
 
       quaternionDelta.set(tempAxisAngle);
-      quaternion.mul(quaternionDelta);
+      quaternion.multiply(quaternionDelta);
       quaternion.normalize();    // the previous operation should preserve norm, so this might not be necessary every step
       orientation.set(quaternion);
       orientationPort.setData(orientation);
@@ -85,9 +83,9 @@ public class OrientationProcessModelElement extends AbstractProcessModelElement
    {
       orientationPort.getData().getQuaternion(quaternion);
       MatrixTools.extractTuple3dFromEJMLVector(tempRotationVector, correction, 0);
-      RotationTools.convertRotationVectorToAxisAngle(tempRotationVector, tempAxisAngle);
+      tempAxisAngle.set(tempRotationVector);
       quaternionDelta.set(tempAxisAngle);
-      quaternion.mul(quaternionDelta);
+      quaternion.multiply(quaternionDelta);
       orientation.set(quaternion);
       orientationPort.setData(orientation);
    }

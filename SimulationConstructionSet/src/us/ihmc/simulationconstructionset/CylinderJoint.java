@@ -1,7 +1,6 @@
 package us.ihmc.simulationconstructionset;
 
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.Axis;
 
 /**
@@ -22,11 +21,11 @@ public class CylinderJoint extends PinJoint
    private static final long serialVersionUID = -1979031212754263175L;
    private SliderJoint joint2;
 
-   public CylinderJoint(String rotName, String transName, Vector3d offset, Robot rob, Axis jaxis)
+   public CylinderJoint(String rotName, String transName, Vector3D offset, Robot rob, Axis jaxis)
    {
       super(rotName, offset, rob, jaxis);
 
-      joint2 = new SliderJoint(transName, new Vector3d(), rob, jaxis);
+      joint2 = new SliderJoint(transName, new Vector3D(), rob, jaxis);
 
       // super.addJoint(joint2); // This crashes.  Instead, add the joint manually:
 

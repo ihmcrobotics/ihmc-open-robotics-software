@@ -3,12 +3,6 @@ package us.ihmc.avatar.networkProcessor.modules.mocap;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Quat4f;
-import javax.vecmath.Vector3d;
-import javax.vecmath.Vector3f;
-
 import optiTrack.MocapDataClient;
 import optiTrack.MocapRigidBody;
 import optiTrack.MocapRigidbodiesListener;
@@ -17,6 +11,13 @@ import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.util.NetworkPorts;
+import us.ihmc.euclid.rotationConversion.YawPitchRollConversion;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.Vector3D32;
+import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.tuple4D.Quaternion32;
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
@@ -29,8 +30,6 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
@@ -58,8 +57,8 @@ public class IHMCMOCAPLocalizationModule implements MocapRigidbodiesListener, Pa
    private final MocapPlanarRegionsListManager planarRegionsListManager;
    private final WalkingStatusManager walkingStatusManager = new WalkingStatusManager();
 
-   private final Vector3f pelvisTranslationFromRobotConfigurationData = new Vector3f();
-   private final Quat4f pelvisOrientationFromRobotConfigurationData = new Quat4f(0.0f, 0.0f, 0.0f, 1.0f);
+   private final Vector3D32 pelvisTranslationFromRobotConfigurationData = new Vector3D32();
+   private final Quaternion32 pelvisOrientationFromRobotConfigurationData = new Quaternion32(0.0f, 0.0f, 0.0f, 1.0f);
    private final ReferenceFrame pelvisFrameFromRobotConfigurationDataPacket = new ReferenceFrame("pelvisFrameFromRobotConfigurationDataPacket", ReferenceFrame.getWorldFrame())
    {
       private static final long serialVersionUID = 116774591450076114L;
@@ -200,14 +199,14 @@ public class IHMCMOCAPLocalizationModule implements MocapRigidbodiesListener, Pa
    
    private void setPelvisYoVariables(RigidBodyTransform pelvisTransform)
    {
-      Vector3d pelvisTranslation = new Vector3d();
+      Vector3D pelvisTranslation = new Vector3D();
       double[] yawPitchRoll = new double[3];
 
       pelvisTransform.getTranslation(pelvisTranslation);
 
-      Quat4d pelvisRotation = new Quat4d();
+      Quaternion pelvisRotation = new Quaternion();
       pelvisTransform.getRotation(pelvisRotation);
-      RotationTools.convertQuaternionToYawPitchRoll(pelvisRotation, yawPitchRoll);
+      YawPitchRollConversion.convertQuaternionToYawPitchRoll(pelvisRotation, yawPitchRoll);
 
       computedPelvisPositionX.set(pelvisTranslation.getX());
       computedPelvisPositionY.set(pelvisTranslation.getY());
@@ -260,7 +259,7 @@ public class IHMCMOCAPLocalizationModule implements MocapRigidbodiesListener, Pa
       pelvisOrientationFromRobotConfigurationData.set(packet.getPelvisOrientation());
 
       rootJoint.setPosition(pelvisTranslationFromRobotConfigurationData.getX(), pelvisTranslationFromRobotConfigurationData.getY(), pelvisTranslationFromRobotConfigurationData.getZ());
-      rootJoint.setRotation(pelvisOrientationFromRobotConfigurationData.getX(), pelvisOrientationFromRobotConfigurationData.getY(), pelvisOrientationFromRobotConfigurationData.getZ(), pelvisOrientationFromRobotConfigurationData.getW());
+      rootJoint.setRotation(pelvisOrientationFromRobotConfigurationData.getX(), pelvisOrientationFromRobotConfigurationData.getY(), pelvisOrientationFromRobotConfigurationData.getZ(), pelvisOrientationFromRobotConfigurationData.getS());
       
       computeDriftTransform();
 
@@ -275,13 +274,13 @@ public class IHMCMOCAPLocalizationModule implements MocapRigidbodiesListener, Pa
       pelvisFrameFromRobotConfigurationDataPacket.update();
       pelvisFrameFromMocap.getTransformToDesiredFrame(driftTransform, pelvisFrameFromRobotConfigurationDataPacket);
       
-      Vector3d driftTranslation = new Vector3d();
+      Vector3D driftTranslation = new Vector3D();
       driftTransform.getTranslation(driftTranslation);
       
-      Quat4d driftRotation = new Quat4d();
+      Quaternion driftRotation = new Quaternion();
       driftTransform.getRotation(driftRotation);
       double[] driftRotationYPR = new double[3];
-      RotationTools.convertQuaternionToYawPitchRoll(driftRotation, driftRotationYPR);
+      YawPitchRollConversion.convertQuaternionToYawPitchRoll(driftRotation, driftRotationYPR);
       
       mocapWorldToRobotWorldTransformX.set(driftTranslation.getX());
       mocapWorldToRobotWorldTransformY.set(driftTranslation.getY());
@@ -318,7 +317,7 @@ public class IHMCMOCAPLocalizationModule implements MocapRigidbodiesListener, Pa
       for (int i = 0; i < listOfSteps.size(); i++)
       {
          double y = robotSide == RobotSide.LEFT ? 0.15 : -0.15;
-         Point3d position = new Point3d();
+         Point3D position = new Point3D();
          position.setY(y);
 
          if (isDirectionForward)
@@ -331,7 +330,7 @@ public class IHMCMOCAPLocalizationModule implements MocapRigidbodiesListener, Pa
             position.setX(startingPoint -i * 0.2 - 0.2);
          }
 
-         FootstepDataMessage footStep = new FootstepDataMessage(robotSide, position, new Quat4d(0.0, 0.0, 0.0, 1.0));
+         FootstepDataMessage footStep = new FootstepDataMessage(robotSide, position, new Quaternion(0.0, 0.0, 0.0, 1.0));
          listOfSteps.set(i, footStep);
          robotSide = robotSide.getOppositeSide();
       }

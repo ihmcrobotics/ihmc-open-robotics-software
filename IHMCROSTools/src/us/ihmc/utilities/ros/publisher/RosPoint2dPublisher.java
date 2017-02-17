@@ -1,9 +1,7 @@
 package us.ihmc.utilities.ros.publisher;
 
 import ihmc_msgs.Point2dRosMessage;
-
-import javax.vecmath.Point2d;
-import javax.vecmath.Point2f;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 
 /**
  *
@@ -24,12 +22,7 @@ public class RosPoint2dPublisher extends RosTopicPublisher<Point2dRosMessage>
       publish(message);
    }
 
-   public void publish(Point2f point2f)
-   {
-      publish(point2f.getX(), point2f.getY());
-   }
-
-   public void publish(Point2d point2d)
+   public void publish(Point2DBasics point2d)
    {
       publish((float) point2d.getX(), (float) point2d.getY());
    }

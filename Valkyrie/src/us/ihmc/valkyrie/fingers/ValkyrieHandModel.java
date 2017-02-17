@@ -1,8 +1,8 @@
 package us.ihmc.valkyrie.fingers;
 
-import us.ihmc.robotics.partNames.FingerName;
 import us.ihmc.avatar.handControl.packetsAndConsumers.HandModel;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandJointName;
+import us.ihmc.robotics.partNames.FingerName;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class ValkyrieHandModel implements HandModel

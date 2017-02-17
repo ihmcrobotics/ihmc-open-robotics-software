@@ -1,9 +1,5 @@
 package us.ihmc.jMonkeyEngineToolkit.jme.terrain;
 
-import us.ihmc.graphicsDescription.HeightMap;
-import us.ihmc.jMonkeyEngineToolkit.jme.util.JMEGeometryUtils;
-import us.ihmc.robotics.geometry.BoundingBox3d;
-
 import com.jme3.asset.AssetManager;
 import com.jme3.material.Material;
 import com.jme3.math.Vector2f;
@@ -12,6 +8,10 @@ import com.jme3.scene.Node;
 import com.jme3.terrain.geomipmap.TerrainQuad;
 import com.jme3.texture.Texture;
 import com.jme3.texture.Texture.WrapMode;
+
+import us.ihmc.graphicsDescription.HeightMap;
+import us.ihmc.jMonkeyEngineToolkit.jme.util.JMEGeometryUtils;
+import us.ihmc.robotics.geometry.BoundingBox3d;
 
 public class JMEHeightMapTerrain
 {

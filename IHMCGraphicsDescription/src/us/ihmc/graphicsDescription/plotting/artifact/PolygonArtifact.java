@@ -4,9 +4,9 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.vecmath.Point2d;
-import javax.vecmath.Vector2d;
-
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.graphicsDescription.plotting.Graphics2DAdapter;
 import us.ihmc.graphicsDescription.plotting.Plotter2DAdapter;
 import us.ihmc.robotics.geometry.BoundingBox2d;
@@ -14,12 +14,12 @@ import us.ihmc.robotics.geometry.ConvexPolygon2d;
 
 public class PolygonArtifact extends Artifact
 {
-   private ArrayList<Point2d> points = new ArrayList<Point2d>();
+   private ArrayList<Point2DReadOnly> points = new ArrayList<>();
    private boolean FILL_POLYGON = false;
    
    private final ConvexPolygon2d tempPolygon = new ConvexPolygon2d();
-   private final Point2d tempPoint = new Point2d();
-   private final Vector2d tempRadii = new Vector2d();
+   private final Point2D tempPoint = new Point2D();
+   private final Vector2D tempRadii = new Vector2D();
 
    public PolygonArtifact(String id)
    {
@@ -42,7 +42,7 @@ public class PolygonArtifact extends Artifact
       this.color = color;
    }
 
-   public PolygonArtifact(String id, boolean fill, Color color, List<Point2d> points)
+   public PolygonArtifact(String id, boolean fill, Color color, List<Point2D> points)
    {
       super(id);
       setLevel(2);
@@ -77,13 +77,13 @@ public class PolygonArtifact extends Artifact
       setLevel(2);
       FILL_POLYGON = fill;
       this.color = color;
-      Point2d minPoint = new Point2d();
+      Point2D minPoint = new Point2D();
       boundingBox2d.getMinPoint(minPoint);
-      Point2d maxPoint = new Point2d();
+      Point2D maxPoint = new Point2D();
       boundingBox2d.getMaxPoint(maxPoint);
-      Point2d leftUpper = new Point2d(minPoint.getX(), maxPoint.getY());
-      Point2d rightLower = new Point2d(maxPoint.getX(), minPoint.getY());
-      ArrayList<Point2d> points = new ArrayList<Point2d>();
+      Point2D leftUpper = new Point2D(minPoint.getX(), maxPoint.getY());
+      Point2D rightLower = new Point2D(maxPoint.getX(), minPoint.getY());
+      ArrayList<Point2D> points = new ArrayList<Point2D>();
       points.add(minPoint);
       points.add(leftUpper);
       points.add(maxPoint);
@@ -91,7 +91,7 @@ public class PolygonArtifact extends Artifact
       setPoints(points);
    }
 
-   public void setPoints(List<Point2d> points)
+   public void setPoints(List<Point2D> points)
    {
       this.points.clear();
       this.points.addAll(points);
@@ -104,7 +104,7 @@ public class PolygonArtifact extends Artifact
          this.points.add(polygon.getVertex(i));
    }
 
-   public void addPoint(Point2d point)
+   public void addPoint(Point2D point)
    {
       this.points.add(point);
    }
@@ -114,7 +114,7 @@ public class PolygonArtifact extends Artifact
       this.points.clear();
    }
 
-   public ArrayList<Point2d> getPoints()
+   public ArrayList<Point2DReadOnly> getPoints()
    {
       return this.points;
    }
@@ -139,7 +139,7 @@ public class PolygonArtifact extends Artifact
       if (points.isEmpty())
          return;
       
-      ArrayList<Point2d> pointsCopy = new ArrayList<>(points);
+      ArrayList<Point2DReadOnly> pointsCopy = new ArrayList<>(points);
       
       if (pointsCopy.size() == 1)
       {
@@ -164,7 +164,7 @@ public class PolygonArtifact extends Artifact
    }
 
    @Override
-   public void drawLegend(Plotter2DAdapter graphics, Point2d origin)
+   public void drawLegend(Plotter2DAdapter graphics, Point2D origin)
    {
       graphics.drawString(graphics.getScreenFrame(), "Polygon", origin);
    }

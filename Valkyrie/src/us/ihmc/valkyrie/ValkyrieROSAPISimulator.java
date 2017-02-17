@@ -4,9 +4,9 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
-import com.martiansoftware.jsap.JSAPException;
-
 import org.ros.internal.message.Message;
+
+import com.martiansoftware.jsap.JSAPException;
 
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.DRCStartingLocation;

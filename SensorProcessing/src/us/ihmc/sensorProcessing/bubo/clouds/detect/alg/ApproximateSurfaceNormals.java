@@ -18,14 +18,15 @@
 
 package us.ihmc.sensorProcessing.bubo.clouds.detect.alg;
 
-import georegression.fitting.plane.FitPlane3D_F64;
-import georegression.struct.point.Point3D_F64;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.ddogleg.nn.FactoryNearestNeighbor;
 import org.ddogleg.nn.NearestNeighbor;
 import org.ddogleg.struct.FastQueue;
 
-import java.util.ArrayList;
-import java.util.List;
+import georegression.fitting.plane.FitPlane3D_F64;
+import georegression.struct.point.Point3D_F64;
 
 /**
  * Given a point cloud, estimate the tangent to the surface at each point and record the nearest neighbors.

@@ -1,16 +1,15 @@
 package us.ihmc.communication.packets;
 
-import javax.vecmath.Quat4f;
-import javax.vecmath.Vector3f;
-
+import us.ihmc.euclid.tuple3D.Vector3D32;
+import us.ihmc.euclid.tuple4D.Quaternion32;
 import us.ihmc.robotics.MathTools;
 
 
 public class IMUPacket extends Packet<IMUPacket>
 {
-   public Vector3f linearAcceleration = new Vector3f();
-   public Quat4f orientation = new Quat4f();
-   public Vector3f angularVelocity = new Vector3f();
+   public Vector3D32 linearAcceleration = new Vector3D32();
+   public Quaternion32 orientation = new Quaternion32();
+   public Vector3D32 angularVelocity = new Vector3D32();
 
    public double time;
 
@@ -18,12 +17,12 @@ public class IMUPacket extends Packet<IMUPacket>
    {
    }
 
-   public void set(Vector3f linearAcceleration, Quat4f orientation, Vector3f angularVelocity)
+   public void set(Vector3D32 linearAcceleration, Quaternion32 orientation, Vector3D32 angularVelocity)
    {
       set(linearAcceleration, orientation, angularVelocity, 0.0);
    }
 
-   public void set(Vector3f linearAcceleration, Quat4f orientation, Vector3f angularVelocity, double time)
+   public void set(Vector3D32 linearAcceleration, Quaternion32 orientation, Vector3D32 angularVelocity, double time)
    {
       this.linearAcceleration.set(linearAcceleration);
       this.orientation.set(orientation);
@@ -31,17 +30,17 @@ public class IMUPacket extends Packet<IMUPacket>
       this.time = time;
    }
 
-   public Vector3f getLinearAcceleration()
+   public Vector3D32 getLinearAcceleration()
    {
       return linearAcceleration;
    }
 
-   public Quat4f getOrientation()
+   public Quaternion32 getOrientation()
    {
       return orientation;
    }
 
-   public Vector3f getAngularVelocity()
+   public Vector3D32 getAngularVelocity()
    {
       return angularVelocity;
    }

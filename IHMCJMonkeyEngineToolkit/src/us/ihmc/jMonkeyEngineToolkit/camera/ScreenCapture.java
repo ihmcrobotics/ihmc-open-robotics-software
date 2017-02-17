@@ -8,8 +8,9 @@ import java.io.InputStream;
 import java.io.Serializable;
 
 import javax.imageio.ImageIO;
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
+
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 
 
 public class ScreenCapture implements Serializable
@@ -25,11 +26,11 @@ public class ScreenCapture implements Serializable
    }
    private byte[] bytesOut = null;
    private final int height, width;
-   private final Point3d location;
-   private final Quat4d rotation;
+   private final Point3D location;
+   private final Quaternion rotation;
    private float fov;
 
-   public ScreenCapture(BufferedImage bufferedImage, Point3d location, Quat4d rotation, float fov)
+   public ScreenCapture(BufferedImage bufferedImage, Point3D location, Quaternion rotation, float fov)
    {
       this.height = bufferedImage.getHeight();
       this.width = bufferedImage.getWidth();
@@ -50,12 +51,12 @@ public class ScreenCapture implements Serializable
       // bi.getRGB(0, 0, _width, _height, _bytesOut, 0, _width);
    }
 
-   public Point3d getLocation()
+   public Point3D getLocation()
    {
       return location;
    }
 
-   public Quat4d getRotation()
+   public Quaternion getRotation()
    {
       return rotation;
    }

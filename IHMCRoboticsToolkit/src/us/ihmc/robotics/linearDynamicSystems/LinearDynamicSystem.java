@@ -1,12 +1,12 @@
 package us.ihmc.robotics.linearDynamicSystems;
 
+import java.util.ArrayList;
+//~--- JDK imports ------------------------------------------------------------
+
 //~--- non-JDK imports --------------------------------------------------------
 
 import Jama.Matrix;
 import us.ihmc.robotics.dataStructures.Polynomial;
-
-import java.util.ArrayList;
-//~--- JDK imports ------------------------------------------------------------
 
 public class LinearDynamicSystem {
     private final Matrix                 matrixA;

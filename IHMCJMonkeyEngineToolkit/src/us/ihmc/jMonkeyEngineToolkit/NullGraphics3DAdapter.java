@@ -6,10 +6,9 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.net.URL;
 
-import javax.vecmath.Color3f;
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.HeightMap;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.input.SelectedListener;
@@ -18,7 +17,7 @@ import us.ihmc.jMonkeyEngineToolkit.camera.CameraController;
 import us.ihmc.jMonkeyEngineToolkit.camera.CameraStreamer;
 import us.ihmc.jMonkeyEngineToolkit.camera.CaptureDevice;
 import us.ihmc.jMonkeyEngineToolkit.camera.ViewportAdapter;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.dataStructures.MutableColor;
 import us.ihmc.robotics.lidar.LidarScanParameters;
 import us.ihmc.tools.inputDevices.keyboard.KeyListener;
 import us.ihmc.tools.inputDevices.mouse.MouseListener;
@@ -58,9 +57,9 @@ public class NullGraphics3DAdapter implements Graphics3DAdapter
             return new double[1][1];
          }
 
-         public Point3d getWorldCoordinatesFromScreenCoordinates(float f, float g, double z)
+         public Point3D getWorldCoordinatesFromScreenCoordinates(float f, float g, double z)
          {
-            return new Point3d();
+            return new Point3D();
          }
 
          public double getPhysicalWidth()
@@ -154,15 +153,15 @@ public class NullGraphics3DAdapter implements Graphics3DAdapter
                   return (float) Math.PI;
                }
 
-               public Quat4d getCameraRotation()
+               public Quaternion getCameraRotation()
                {
                   // TODO Auto-generated method stub
-                  return new Quat4d();
+                  return new Quaternion();
                }
 
-               public Point3d getCameraPosition()
+               public Point3D getCameraPosition()
                {
-                  return new Point3d();
+                  return new Point3D();
                }
             };
          }
@@ -211,7 +210,7 @@ public class NullGraphics3DAdapter implements Graphics3DAdapter
    {
    }
 
-   public void setBackgroundColor(Color3f color)
+   public void setBackgroundColor(MutableColor color)
    {
    }
 

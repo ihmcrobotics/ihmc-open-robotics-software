@@ -14,25 +14,26 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Vector3d;
-
 import org.ejml.data.DenseMatrix64F;
 import org.junit.Before;
 import org.junit.Test;
 
 import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.euclid.matrix.Matrix3D;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.ScrewTestTools.RandomFloatingChain;
 
 public class ScrewToolsTest
 {
-   private static final Vector3d X = new Vector3d(1.0, 0.0, 0.0);
-   private static final Vector3d Y = new Vector3d(0.0, 1.0, 0.0);
-   private static final Vector3d Z = new Vector3d(0.0, 0.0, 1.0);
+   private static final Vector3D X = new Vector3D(1.0, 0.0, 0.0);
+   private static final Vector3D Y = new Vector3D(0.0, 1.0, 0.0);
+   private static final Vector3D Z = new Vector3D(0.0, 0.0, 1.0);
 
    private RigidBody elevator;
    private Random random;
@@ -94,13 +95,13 @@ public class ScrewToolsTest
    {
       joints = new ArrayList<RevoluteJoint>();
 
-      Vector3d[] jointAxes1 = {X, Y, Z, Y, X};
+      Vector3D[] jointAxes1 = {X, Y, Z, Y, X};
       ScrewTestTools.createRandomChainRobot("chainA", joints, elevator, jointAxes1, random);
 
-      Vector3d[] jointAxes2 = {Z, X, Y, X, X};
+      Vector3D[] jointAxes2 = {Z, X, Y, X, X};
       ScrewTestTools.createRandomChainRobot("chainB", joints, elevator, jointAxes2, random);
 
-      Vector3d[] jointAxes3 = {Y, Y, X, X, X};
+      Vector3D[] jointAxes3 = {Y, Y, X, X, X};
       ScrewTestTools.createRandomChainRobot("chainC", joints, elevator, jointAxes3, random);
    }
 
@@ -133,7 +134,7 @@ public class ScrewToolsTest
 	@Test(timeout = 30000)
    public void testAddRevoluteJoint_String_RigidBody_Vector3d_Vector3d()
    {
-      Vector3d[] jointAxes = {X, Y, Z, Y, X};
+      Vector3D[] jointAxes = {X, Y, Z, Y, X};
       RandomFloatingChain chain = new RandomFloatingChain(random, jointAxes);
       chain.setRandomPositionsAndVelocities(random);
 
@@ -148,8 +149,8 @@ public class ScrewToolsTest
 
       String jointName = "joint";
       RigidBody parentBody = bodiesArray[bodiesArray.length - 1];
-      Vector3d jointOffset = RandomTools.generateRandomVector(random, 5.0);
-      Vector3d jointAxis = RandomTools.generateRandomVector(random, 5.0);
+      Vector3D jointOffset = RandomTools.generateRandomVector(random, 5.0);
+      Vector3D jointAxis = RandomTools.generateRandomVector(random, 5.0);
 
       RevoluteJoint joint = ScrewTools.addRevoluteJoint(jointName, parentBody, jointOffset, jointAxis);
 
@@ -164,8 +165,8 @@ public class ScrewToolsTest
    {
       String jointName = "joint";
       RigidBody parentBody = new RigidBody(null, null);
-      RigidBodyTransform transformToParent = RigidBodyTransform.generateRandomTransform(random);
-      Vector3d jointAxis = RandomTools.generateRandomVector(random, 5.0);
+      RigidBodyTransform transformToParent = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
+      Vector3D jointAxis = RandomTools.generateRandomVector(random, 5.0);
 
       RevoluteJoint joint = ScrewTools.addRevoluteJoint(jointName, parentBody, transformToParent, jointAxis);
 
@@ -180,8 +181,8 @@ public class ScrewToolsTest
    {
       String jointName = "joint";
       RigidBody parentBody = new RigidBody(null, null);
-      Vector3d jointOffset = RandomTools.generateRandomVector(random, 5.0);
-      Vector3d jointAxis = RandomTools.generateRandomVector(random, 5.0);
+      Vector3D jointOffset = RandomTools.generateRandomVector(random, 5.0);
+      Vector3D jointAxis = RandomTools.generateRandomVector(random, 5.0);
 
       PrismaticJoint joint = ScrewTools.addPrismaticJoint(jointName, parentBody, jointOffset, jointAxis);
 
@@ -195,8 +196,8 @@ public class ScrewToolsTest
    {
       String jointName = "joint";
       RigidBody parentBody = new RigidBody(null, null);
-      RigidBodyTransform transformToParent = RigidBodyTransform.generateRandomTransform(random);
-      Vector3d jointAxis = RandomTools.generateRandomVector(random, 5.0);
+      RigidBodyTransform transformToParent = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
+      Vector3D jointAxis = RandomTools.generateRandomVector(random, 5.0);
 
       PrismaticJoint joint = ScrewTools.addPrismaticJoint(jointName, parentBody, transformToParent, jointAxis);
 
@@ -211,7 +212,7 @@ public class ScrewToolsTest
       String name = "body";
       RigidBody predecessor = new RigidBody("Predecessor", theFrame);
       PlanarJoint parentJoint = new PlanarJoint(name, predecessor, theFrame);
-      Matrix3d momentOfInertia = new Matrix3d();
+      Matrix3D momentOfInertia = new Matrix3D();
       double mass = random.nextDouble();
 
       RigidBody body = ScrewTools.addRigidBody(name, parentJoint, momentOfInertia, mass, X);
@@ -227,7 +228,7 @@ public class ScrewToolsTest
       String name = "body";
       RigidBody predecessor = new RigidBody("Predecessor", theFrame);
       PlanarJoint parentJoint = new PlanarJoint(name, predecessor, theFrame);
-      Matrix3d momentOfInertia = new Matrix3d();
+      Matrix3D momentOfInertia = new Matrix3D();
       double mass = random.nextDouble();
       RigidBodyTransform inertiaPose = new RigidBodyTransform();
 
@@ -533,7 +534,7 @@ public class ScrewToolsTest
 	@Test(timeout = 30000)
    public void testPackJointVelocitiesMatrix_Array()
    {
-      Vector3d[] jointAxes = {X, Y, Z, Y, X};
+      Vector3D[] jointAxes = {X, Y, Z, Y, X};
       RandomFloatingChain chain = new RandomFloatingChain(random, jointAxes);
       InverseDynamicsJoint[] jointsArray = ScrewTools.computeSubtreeJoints(chain.getElevator());
 
@@ -556,7 +557,7 @@ public class ScrewToolsTest
 	@Test(timeout = 30000)
    public void testPackJointVelocitiesMatrix_Iterable()
    {
-      Vector3d[] jointAxes = {X, Y, Z, Y, X};
+      Vector3D[] jointAxes = {X, Y, Z, Y, X};
       RandomFloatingChain chain = new RandomFloatingChain(random, jointAxes);
       InverseDynamicsJoint[] jointsArray = ScrewTools.computeSubtreeJoints(chain.getElevator());
       ArrayList<InverseDynamicsJoint> jointsList = new ArrayList<InverseDynamicsJoint>();
@@ -584,7 +585,7 @@ public class ScrewToolsTest
 	@Test(timeout = 30000)
    public void testPackDesiredJointAccelerationsMatrix()
    {
-      Vector3d[] jointAxes = {X, Y, Z, Y, X};
+      Vector3D[] jointAxes = {X, Y, Z, Y, X};
       RandomFloatingChain chain = new RandomFloatingChain(random, jointAxes);
       InverseDynamicsJoint[] jointsArray = ScrewTools.computeSubtreeJoints(chain.getElevator());
 
@@ -607,7 +608,7 @@ public class ScrewToolsTest
 	@Test(timeout = 30000)
    public void testComputeDegreesOfFreedom_Array()
    {
-      Vector3d[] jointAxes = {X, Y, Z, Y, X};
+      Vector3D[] jointAxes = {X, Y, Z, Y, X};
       RandomFloatingChain chain = new RandomFloatingChain(random, jointAxes);
       chain.setRandomPositionsAndVelocities(random);
 
@@ -628,7 +629,7 @@ public class ScrewToolsTest
 	@Test(timeout = 30000)
    public void testComputeDegreesOfFreedom_Iterable()
    {
-      Vector3d[] jointAxes = {X, Y, Z, Y, X};
+      Vector3D[] jointAxes = {X, Y, Z, Y, X};
       RandomFloatingChain chain = new RandomFloatingChain(random, jointAxes);
       chain.setRandomPositionsAndVelocities(random);
 
@@ -650,7 +651,7 @@ public class ScrewToolsTest
 	@Test(timeout = 30000)
    public void testCreateGravitationalSpatialAcceleration()
    {
-      Vector3d[] jointAxes = {X, Y, Z, Y, X};
+      Vector3D[] jointAxes = {X, Y, Z, Y, X};
       RandomFloatingChain chain = new RandomFloatingChain(random, jointAxes);
       chain.setRandomPositionsAndVelocities(random);
 
@@ -658,12 +659,12 @@ public class ScrewToolsTest
       SpatialAccelerationVector result = ScrewTools.
             createGravitationalSpatialAcceleration(chain.getElevator(), gravity);
 
-      Vector3d angularPart = result.getAngularPart();
-      Vector3d zeroes = new Vector3d(0.0, 0.0, 0.0);
+      Vector3DReadOnly angularPart = result.getAngularPart();
+      Vector3D zeroes = new Vector3D(0.0, 0.0, 0.0);
 
       assertTrue(angularPart.epsilonEquals(zeroes, epsilon));
 
-      Vector3d linearPart = result.getLinearPart();
+      Vector3DReadOnly linearPart = result.getLinearPart();
       assertEquals(zeroes.getX(), linearPart.getX(), epsilon);
       assertEquals(zeroes.getY(), linearPart.getY(), epsilon);
       assertEquals(gravity, linearPart.getZ(), epsilon);
@@ -673,7 +674,7 @@ public class ScrewToolsTest
 	@Test(timeout = 30000)
    public void testSetDesiredAccelerations()
    {
-      Vector3d[] jointAxes = {X, Y, Z, Y, X};
+      Vector3D[] jointAxes = {X, Y, Z, Y, X};
       RandomFloatingChain chain = new RandomFloatingChain(random, jointAxes);
       InverseDynamicsJoint[] jointsArray = ScrewTools.computeSubtreeJoints(chain.getElevator());
 
@@ -705,7 +706,7 @@ public class ScrewToolsTest
 	@Test(timeout = 30000)
    public void testSetVelocities()
    {
-      Vector3d[] jointAxes = {X, Y, Z, Y, X};
+      Vector3D[] jointAxes = {X, Y, Z, Y, X};
       RandomFloatingChain chain = new RandomFloatingChain(random, jointAxes);
       InverseDynamicsJoint[] jointsArray = ScrewTools.computeSubtreeJoints(chain.getElevator());
 
@@ -737,7 +738,7 @@ public class ScrewToolsTest
 	@Test(timeout = 30000)
    public void testComputeIndicesForJoint()
    {
-      Vector3d[] jointAxes = {X, Y, Z, Y, X};
+      Vector3D[] jointAxes = {X, Y, Z, Y, X};
       RandomFloatingChain chain = new RandomFloatingChain(random, jointAxes);
       InverseDynamicsJoint[] jointsArr = ScrewTools.computeSubtreeJoints(chain.getElevator());
       InverseDynamicsJoint rootJoint = jointsArr[0];
@@ -759,7 +760,7 @@ public class ScrewToolsTest
 	@Test(timeout = 30000)
    public void testExtractRevoluteJoints()
    {
-      Vector3d[] jointAxes = {X, Y, Z, Y, X};
+      Vector3D[] jointAxes = {X, Y, Z, Y, X};
       RandomFloatingChain chain = new RandomFloatingChain(random, jointAxes);
       InverseDynamicsJoint[] jointsArr = ScrewTools.computeSubtreeJoints(chain.getElevator());
 
@@ -775,7 +776,7 @@ public class ScrewToolsTest
 	@Test(timeout = 30000)
    public void testComputeNumberOfJointsOfType()
    {
-      Vector3d[] jointAxes = {X, Y, Z, Y, X};
+      Vector3D[] jointAxes = {X, Y, Z, Y, X};
       RandomFloatingChain chain = new RandomFloatingChain(random, jointAxes);
       InverseDynamicsJoint[] jointsArr = ScrewTools.computeSubtreeJoints(chain.getElevator());
 
@@ -790,7 +791,7 @@ public class ScrewToolsTest
 	@Test(timeout = 30000)
    public void testFilterJoints()
    {
-      Vector3d[] jointAxes = {X, Y, Z, Y, X};
+      Vector3D[] jointAxes = {X, Y, Z, Y, X};
       RandomFloatingChain chain = new RandomFloatingChain(random, jointAxes);
       InverseDynamicsJoint[] jointsArr = ScrewTools.computeSubtreeJoints(chain.getElevator());
 
@@ -820,7 +821,7 @@ public class ScrewToolsTest
 	@Test(timeout = 30000)
    public void testFilterJoints_dest()
    {
-      Vector3d[] jointAxes = {X, Y, Z, Y, X};
+      Vector3D[] jointAxes = {X, Y, Z, Y, X};
       RandomFloatingChain chain = new RandomFloatingChain(random, jointAxes);
       InverseDynamicsJoint[] jointsArr = ScrewTools.computeSubtreeJoints(chain.getElevator());
 
@@ -903,7 +904,7 @@ public class ScrewToolsTest
 	@Test(timeout = 30000)
    public void testAddExternalWrenches()
    {
-      Vector3d[] jointAxes = {X, Y, Z, Y, X};
+      Vector3D[] jointAxes = {X, Y, Z, Y, X};
       RandomFloatingChain chain = new RandomFloatingChain(random, jointAxes);
       InverseDynamicsJoint[] jointsArray = ScrewTools.computeSubtreeJoints(chain.getElevator());
 
@@ -914,8 +915,7 @@ public class ScrewToolsTest
       RigidBody rigidBody2 = jointsArray[0].getSuccessor(); //rootBody
       RigidBody rigidBody3 = jointsArray[4].getSuccessor(); //testBody3
 
-      ReferenceFrame frame1 = ReferenceFrame.constructFrameWithUnchangingTransformToParent("frame1", theFrame, RigidBodyTransform
-            .generateRandomTransform(random));
+      ReferenceFrame frame1 = ReferenceFrame.constructFrameWithUnchangingTransformToParent("frame1", theFrame, EuclidCoreRandomTools.generateRandomRigidBodyTransform(random));
 
       Wrench externalWrench1 = new Wrench(rigidBody1.getBodyFixedFrame(), theFrame, RandomTools.generateRandomDoubleArray(random, 6, 100.0));
       Wrench externalWrench2 = new Wrench(rigidBody3.getBodyFixedFrame(), theFrame, RandomTools.generateRandomDoubleArray(random, 6, 100.0));

@@ -6,13 +6,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import com.martiansoftware.jsap.JSAPException;
-
-import ihmc_msgs.HandDesiredConfigurationRosMessage;
 import org.ros.internal.message.Message;
 import org.ros.message.MessageFactory;
 import org.ros.node.NodeConfiguration;
 
+import com.martiansoftware.jsap.JSAPException;
+
+import ihmc_msgs.HandDesiredConfigurationRosMessage;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.DRCStartingLocation;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;

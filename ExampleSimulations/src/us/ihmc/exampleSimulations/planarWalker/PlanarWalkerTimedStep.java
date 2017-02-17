@@ -1,7 +1,6 @@
 package us.ihmc.exampleSimulations.planarWalker;
 
-import javax.vecmath.Point3d;
-
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.quadrupedRobotics.util.TimeInterval;
 import us.ihmc.quadrupedRobotics.util.TimeIntervalProvider;
 import us.ihmc.robotics.MathTools;
@@ -13,14 +12,14 @@ public class PlanarWalkerTimedStep implements TimeIntervalProvider
 {
    private RobotSide robotSide;
    private final TimeInterval timeInterval;
-   private Point3d goalPosition;
+   private Point3D goalPosition;
    private double groundClearance;
 
    public PlanarWalkerTimedStep()
    {
       this.robotSide = RobotSide.RIGHT;
       this.timeInterval = new TimeInterval(0.5, 1.0);
-      this.goalPosition = new Point3d(0.0, 0.0, 0.0);
+      this.goalPosition = new Point3D(0.0, 0.0, 0.0);
       this.groundClearance = 0.0;
    }
 
@@ -33,7 +32,7 @@ public class PlanarWalkerTimedStep implements TimeIntervalProvider
       setTimeInterval(timeInterval);
    }
 
-   public PlanarWalkerTimedStep(RobotSide robotSide, Point3d goalPosition, double groundClearance, TimeInterval timeInterval)
+   public PlanarWalkerTimedStep(RobotSide robotSide, Point3D goalPosition, double groundClearance, TimeInterval timeInterval)
    {
       this();
       setRobotSide(robotSide);
@@ -75,14 +74,14 @@ public class PlanarWalkerTimedStep implements TimeIntervalProvider
    /**
     * Unsafe for external use.
     */
-   protected Point3d getGoalPosition()
+   protected Point3D getGoalPosition()
    {
       return goalPosition;
    }
 
-   public void getGoalPosition(Point3d goalPosition)
+   public void getGoalPosition(Point3D goalPosition)
    {
-      this.goalPosition.get(goalPosition);
+      goalPosition.set(this.goalPosition);
    }
 
    public void getGoalPosition(FramePoint goalPosition)
@@ -93,7 +92,7 @@ public class PlanarWalkerTimedStep implements TimeIntervalProvider
       goalPosition.changeFrame(originalFrame);
    }
 
-   public void setGoalPosition(Point3d goalPosition)
+   public void setGoalPosition(Point3D goalPosition)
    {
       this.goalPosition.set(goalPosition);
    }

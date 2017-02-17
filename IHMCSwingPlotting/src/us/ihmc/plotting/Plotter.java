@@ -21,10 +21,11 @@ import java.util.Vector;
 import javax.swing.BorderFactory;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
-import javax.vecmath.Point2d;
-import javax.vecmath.Vector2d;
-import javax.vecmath.Vector3d;
 
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.plotting.Graphics2DAdapter;
 import us.ihmc.graphicsDescription.plotting.Plotter2DAdapter;
 import us.ihmc.graphicsDescription.plotting.PlotterColors;
@@ -41,7 +42,6 @@ import us.ihmc.graphicsDescription.plotting.frames.PlotterSpaceConverter;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.PlotterInterface;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.Line2d;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.tools.FormattingTools;
 import us.ihmc.tools.io.printing.PrintTools;
@@ -79,7 +79,7 @@ public class Plotter implements PlotterInterface
    private final Stroke normalStroke;
    private final Stroke dashedStroke;
    
-   private final Vector2d metersToPixels = new Vector2d(50.0, 50.0);
+   private final Vector2D metersToPixels = new Vector2D(50.0, 50.0);
    private final Rectangle visibleRectangle = new Rectangle();
    private final Dimension preferredSize = new Dimension(500, 500);
    private final PlotterVector2d gridSize;
@@ -91,7 +91,7 @@ public class Plotter implements PlotterInterface
    private final MetersReferenceFrame metersFrame;
    
    private double screenRotation = 0.0;
-   private final Vector3d tempTranslation = new Vector3d();
+   private final Vector3D tempTranslation = new Vector3D();
    private final Line2d tempGridLine = new Line2d();
    private final PlotterPoint2d screenPosition;
    private final PlotterPoint2d upperLeftCorner;
@@ -145,10 +145,10 @@ public class Plotter implements PlotterInterface
       
       spaceConverter = new PlotterSpaceConverter()
       {
-         private Vector2d scaleVector = new Vector2d();
+         private Vector2D scaleVector = new Vector2D();
          
          @Override
-         public Vector2d getConversionToSpace(PlotterFrameSpace plotterFrameType)
+         public Vector2D getConversionToSpace(PlotterFrameSpace plotterFrameType)
          {
             if (plotterFrameType == PlotterFrameSpace.METERS)
             {
@@ -176,12 +176,14 @@ public class Plotter implements PlotterInterface
             screenPosition.changeFrame(pixelsFrame);
             transformToParent.setIdentity();
             tempTranslation.set(screenPosition.getX() + getPlotterWidthPixels() / 2.0, screenPosition.getY() - getPlotterHeightPixels() / 2.0, 0.0);
-            transformToParent.applyTranslation(tempTranslation);
-            transformToParent.applyRotationZ(screenRotation);
+            transformToParent.transform(tempTranslation);
+            transformToParent.setTranslation(tempTranslation);
+            transformToParent.appendYawRotation(screenRotation);
             tempTranslation.set(-getPlotterWidthPixels() / 2.0, getPlotterHeightPixels() / 2.0, 0.0);
-            transformToParent.applyTranslation(tempTranslation);
-            transformToParent.applyRotationY(Math.PI);
-            transformToParent.applyRotationZ(Math.PI);
+            transformToParent.transform(tempTranslation);
+            transformToParent.setTranslation(tempTranslation);
+            transformToParent.appendPitchRotation(Math.PI);
+            transformToParent.appendYawRotation(Math.PI);
          }
       };
       metersFrame = new MetersReferenceFrame("metersFrame", ReferenceFrame.getWorldFrame(), spaceConverter)
@@ -909,7 +911,7 @@ public class Plotter implements PlotterInterface
       return lineArtifact;
    }
 
-   public PointListArtifact createAndAddPointArtifact(String name, Point2d point, Color color)
+   public PointListArtifact createAndAddPointArtifact(String name, Point2D point, Color color)
    {
       PointListArtifact pointArtifact = new PointListArtifact(name, point);
       pointArtifact.setColor(color);

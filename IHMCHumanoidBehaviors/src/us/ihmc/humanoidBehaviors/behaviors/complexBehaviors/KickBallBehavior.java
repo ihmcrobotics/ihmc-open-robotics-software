@@ -2,9 +2,7 @@ package us.ihmc.humanoidBehaviors.behaviors.complexBehaviors;
 
 import java.util.ArrayList;
 
-import javax.vecmath.Point2d;
-
-import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.coactiveElements.KickBallBehaviorCoactiveElementBehaviorSide;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.WalkToLocationBehavior;
@@ -18,6 +16,7 @@ import us.ihmc.humanoidBehaviors.stateMachine.BehaviorStateMachine;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.ihmcPerception.vision.HSVValue;
 import us.ihmc.ihmcPerception.vision.shapes.HSVRange;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint2d;
@@ -215,7 +214,7 @@ public class KickBallBehavior extends AbstractBehavior
       double walkingYaw = Math.atan2(walkingDirection.getY(), walkingDirection.getX());
       double x = ballPosition2d.getX() - walkingDirection.getX() * standingDistance;
       double y = ballPosition2d.getY() - walkingDirection.getY() * standingDistance;
-      FramePose2d poseToWalkTo = new FramePose2d(worldFrame, new Point2d(x, y), walkingYaw);
+      FramePose2d poseToWalkTo = new FramePose2d(worldFrame, new Point2D(x, y), walkingYaw);
       return poseToWalkTo;
    }
 
@@ -278,7 +277,7 @@ public class KickBallBehavior extends AbstractBehavior
       return USE_BLOB_FILTERING;
    }
 
-   public Point2d getBlobLocation()
+   public Point2D getBlobLocation()
    {
       if (USE_BLOB_FILTERING)
       {

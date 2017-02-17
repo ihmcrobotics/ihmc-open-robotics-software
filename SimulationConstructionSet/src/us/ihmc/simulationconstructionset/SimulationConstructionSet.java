@@ -29,11 +29,10 @@ import javax.swing.JMenuBar;
 import javax.swing.JOptionPane;
 import javax.swing.JRadioButton;
 import javax.swing.JTextField;
-import javax.vecmath.Color3f;
-import javax.vecmath.Tuple3d;
 
 import com.jme3.renderer.Camera;
 
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.HeightMap;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
@@ -50,6 +49,7 @@ import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
 import us.ihmc.jMonkeyEngineToolkit.camera.CaptureDevice;
 import us.ihmc.jMonkeyEngineToolkit.camera.RenderedSceneHandler;
 import us.ihmc.robotics.TickAndUpdatable;
+import us.ihmc.robotics.dataStructures.MutableColor;
 import us.ihmc.robotics.dataStructures.YoVariableHolder;
 import us.ihmc.robotics.dataStructures.listener.RewoundListener;
 import us.ihmc.robotics.dataStructures.listener.YoVariableRegistryChangedListener;
@@ -1132,7 +1132,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
     *
     * @param cameraFix coordinates of the fix point.
     */
-   public void setCameraFix(Tuple3d cameraFix)
+   public void setCameraFix(Tuple3DBasics cameraFix)
    {
       if (myGUI != null)
       {
@@ -1160,7 +1160,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
     *
     * @param cameraPosition coordinates of the camera.
     */
-   public void setCameraPosition(Tuple3d cameraPosition)
+   public void setCameraPosition(Tuple3DBasics cameraPosition)
    {
       if (myGUI != null)
       {
@@ -2154,16 +2154,16 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
     */
    public void setBackgroundColor(Color color)
    {
-      setBackgroundColor(new Color3f(color));
+      setBackgroundColor(new MutableColor(color));
    }
 
    /**
     * Set the specified background color
     *
     * @param color Color3f
-    * @see Color3f
+    * @see MutableColor
     */
-   public void setBackgroundColor(Color3f color)
+   public void setBackgroundColor(MutableColor color)
    {
       if (myGUI != null)
       {

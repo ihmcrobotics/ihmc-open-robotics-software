@@ -5,10 +5,10 @@ import static us.ihmc.robotics.math.frames.YoFrameVariableNameTools.createName;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 
+import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.interfaces.OneDoFWaypointInterface;
 
 public class YoOneDoFWaypoint implements OneDoFWaypointInterface<YoOneDoFWaypoint>
@@ -127,7 +127,7 @@ public class YoOneDoFWaypoint implements OneDoFWaypointInterface<YoOneDoFWaypoin
    }
 
    @Override
-   public void applyTransform(RigidBodyTransform transform)
+   public void applyTransform(Transform transform)
    {
       // Do nothing since simple numbers here.
    }

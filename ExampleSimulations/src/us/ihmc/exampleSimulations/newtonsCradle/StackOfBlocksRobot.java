@@ -3,21 +3,15 @@ package us.ihmc.exampleSimulations.newtonsCradle;
 import java.util.ArrayList;
 import java.util.Random;
 
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.robotDescription.CollisionMeshDescription;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.Robot;
-import us.ihmc.simulationconstructionset.physics.CollisionShapeDescription;
-import us.ihmc.simulationconstructionset.physics.CollisionShapeFactory;
-import us.ihmc.simulationconstructionset.physics.ScsCollisionDetector;
-import us.ihmc.simulationconstructionset.physics.collision.simple.SimpleCollisionDetector;
 
 public class StackOfBlocksRobot
 {
@@ -37,7 +31,7 @@ public class StackOfBlocksRobot
       {
          Robot robot = new Robot("StackOfBlocksRobot" + i);
 
-         Vector3d offset = new Vector3d(0.0, 0.0, 0.0);
+         Vector3D offset = new Vector3D(0.0, 0.0, 0.0);
          FloatingJoint floatingJoint = new FloatingJoint("object" + i, "object" + i, offset, robot);
          Link link = createBox(objectHeight, random, i, robot);
 

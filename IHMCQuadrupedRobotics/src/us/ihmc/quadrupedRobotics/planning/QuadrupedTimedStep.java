@@ -1,7 +1,6 @@
 package us.ihmc.quadrupedRobotics.planning;
 
-import javax.vecmath.Point3d;
-
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.quadrupedRobotics.util.TimeInterval;
 import us.ihmc.quadrupedRobotics.util.TimeIntervalProvider;
 import us.ihmc.robotics.MathTools;
@@ -13,14 +12,14 @@ public class QuadrupedTimedStep implements TimeIntervalProvider
 {
    private RobotQuadrant robotQuadrant;
    private final TimeInterval timeInterval;
-   private Point3d goalPosition;
+   private Point3D goalPosition;
    private double groundClearance;
 
    public QuadrupedTimedStep()
    {
       this.robotQuadrant = RobotQuadrant.FRONT_RIGHT;
       this.timeInterval = new TimeInterval(0.5, 1.0);
-      this.goalPosition = new Point3d(0.0, 0.0, 0.0);
+      this.goalPosition = new Point3D(0.0, 0.0, 0.0);
       this.groundClearance = 0.0;
    }
 
@@ -33,7 +32,7 @@ public class QuadrupedTimedStep implements TimeIntervalProvider
       setTimeInterval(timeInterval);
    }
 
-   public QuadrupedTimedStep(RobotQuadrant robotQuadrant, Point3d goalPosition, double groundClearance, TimeInterval timeInterval)
+   public QuadrupedTimedStep(RobotQuadrant robotQuadrant, Point3D goalPosition, double groundClearance, TimeInterval timeInterval)
    {
       this();
       setRobotQuadrant(robotQuadrant);
@@ -75,14 +74,14 @@ public class QuadrupedTimedStep implements TimeIntervalProvider
    /**
     * Unsafe for external use.
     */
-   protected Point3d getGoalPosition()
+   protected Point3D getGoalPosition()
    {
       return goalPosition;
    }
 
-   public void getGoalPosition(Point3d goalPosition)
+   public void getGoalPosition(Point3D goalPosition)
    {
-      this.goalPosition.get(goalPosition);
+      goalPosition.set(this.goalPosition);
    }
 
    public void getGoalPosition(FramePoint goalPosition)
@@ -93,7 +92,7 @@ public class QuadrupedTimedStep implements TimeIntervalProvider
       goalPosition.changeFrame(originalFrame);
    }
 
-   public void setGoalPosition(Point3d goalPosition)
+   public void setGoalPosition(Point3D goalPosition)
    {
       this.goalPosition.set(goalPosition);
    }

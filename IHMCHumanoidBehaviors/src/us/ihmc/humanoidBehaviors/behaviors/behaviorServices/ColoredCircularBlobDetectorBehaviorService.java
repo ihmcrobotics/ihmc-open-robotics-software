@@ -4,8 +4,6 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.vecmath.Point2d;
-
 import org.opencv.core.Point;
 import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
@@ -13,6 +11,7 @@ import org.opencv.imgproc.Imgproc;
 import us.ihmc.communication.producers.JPEGCompressor;
 import us.ihmc.communication.producers.JPEGDecompressor;
 import us.ihmc.communication.producers.VideoSource;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.VideoPacket;
@@ -34,8 +33,8 @@ public class ColoredCircularBlobDetectorBehaviorService extends ThreadedBehavior
    private final JPEGCompressor jpegCompressor = new JPEGCompressor();
 
    private final OpenCVColoredCircularBlobDetector openCVColoredCircularBlobDetector;
-   private final Point2d latestBallPosition2d = new Point2d();
-   private final List<Point2d> latestBallPositionSet = new ArrayList<>();
+   private final Point2D latestBallPosition2d = new Point2D();
+   private final List<Point2D> latestBallPositionSet = new ArrayList<>();
    private BufferedImage latestUnmodifiedCameraImage;
    private final Object ballListConch = new Object();
 
@@ -69,7 +68,7 @@ public class ColoredCircularBlobDetectorBehaviorService extends ThreadedBehavior
 
          for(int i = 0; i < circles.size(); i++)
          {
-            Point2d vecCenter = circles.get(i).getCenter();
+            Point2D vecCenter = circles.get(i).getCenter();
             Point openCvCenter = new Point(vecCenter.getX(), vecCenter.getY());
             int circleRadius = (int) circles.get(i).getRadius();
             Imgproc.circle(openCVColoredCircularBlobDetector.getCurrentCameraFrameMatInBGR(), openCvCenter, circleRadius, circleColor, 1);
@@ -92,7 +91,7 @@ public class ColoredCircularBlobDetectorBehaviorService extends ThreadedBehavior
             latestBallPositionSet.clear();
             for (HoughCircleResult houghCircleResult : circles)
             {
-               latestBallPositionSet.add(new Point2d(houghCircleResult.getCenter()));
+               latestBallPositionSet.add(new Point2D(houghCircleResult.getCenter()));
             }
          }
       }
@@ -107,12 +106,12 @@ public class ColoredCircularBlobDetectorBehaviorService extends ThreadedBehavior
       openCVColoredCircularBlobDetector.addHSVRange(hsvRange);
    }
 
-   public List<Point2d> getLatestBallPositionSet()
+   public List<Point2D> getLatestBallPositionSet()
    {
       return latestBallPositionSet;
    }
 
-   public Point2d getLatestBallPosition2d()
+   public Point2D getLatestBallPosition2d()
    {
       return latestBallPosition2d;
    }

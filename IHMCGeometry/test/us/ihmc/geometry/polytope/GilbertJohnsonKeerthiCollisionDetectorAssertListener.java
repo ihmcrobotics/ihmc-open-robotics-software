@@ -4,8 +4,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 
 public class GilbertJohnsonKeerthiCollisionDetectorAssertListener implements GilbertJohnsonKeerthiCollisionDetectorListener
 {
@@ -17,13 +17,13 @@ public class GilbertJohnsonKeerthiCollisionDetectorAssertListener implements Gil
    }
 
    @Override
-   public void addedVertexToSimplex(SimplexPolytope simplex, Point3d vertexOnSimplex, Point3d vertexOnA, Point3d vertexOnB)
+   public void addedVertexToSimplex(SimplexPolytope simplex, Point3D vertexOnSimplex, Point3D vertexOnA, Point3D vertexOnB)
    {
       // TODO Auto-generated method stub
    }
 
    @Override
-   public void foundClosestPointOnSimplex(SimplexPolytope simplex, Point3d closestPointToOrigin)
+   public void foundClosestPointOnSimplex(SimplexPolytope simplex, Point3D closestPointToOrigin)
    {
       int numberOfPoints = simplex.getNumberOfPoints();
 
@@ -31,7 +31,7 @@ public class GilbertJohnsonKeerthiCollisionDetectorAssertListener implements Gil
 
       for (int i = 0; i < numberOfPoints; i++)
       {
-         Point3d point = simplex.getPoint(i);
+         Point3D point = simplex.getPoint(i);
          double lambda = simplex.getLambda(point);
 
          if ((lambda < 0.0 - 1e-7) || (lambda > 1.0 + 1e-7))
@@ -62,20 +62,20 @@ public class GilbertJohnsonKeerthiCollisionDetectorAssertListener implements Gil
 
       for (int i = numberOfPoints; i < 4; i++)
       {
-         Point3d point = simplex.getPoint(i);
+         Point3D point = simplex.getPoint(i);
          assertNull(point);
       }
    }
 
    @Override
-   public void foundCollision(SimplexPolytope simplex, Point3d pointOnAToPack, Point3d pointOnBToPack)
+   public void foundCollision(SimplexPolytope simplex, Point3D pointOnAToPack, Point3D pointOnBToPack)
    {
       // TODO Auto-generated method stub
 
    }
 
    @Override
-   public void foundSupportPoints(SimplexPolytope simplex, Point3d supportingPointOnA, Point3d supportingPointOnB, Vector3d supportPointOnSimplex)
+   public void foundSupportPoints(SimplexPolytope simplex, Point3D supportingPointOnA, Point3D supportingPointOnB, Vector3D supportPointOnSimplex)
    {
       // TODO Auto-generated method stub
 
@@ -89,21 +89,21 @@ public class GilbertJohnsonKeerthiCollisionDetectorAssertListener implements Gil
    }
 
    @Override
-   public void metStoppingConditionForNoIntersection(double vDotP, double percentCloser, Point3d pointOnAToPack, Point3d pointOnBToPack)
+   public void metStoppingConditionForNoIntersection(double vDotP, double percentCloser, Point3D pointOnAToPack, Point3D pointOnBToPack)
    {
       // TODO Auto-generated method stub
 
    }
 
    @Override
-   public void tooManyIterationsStopping(SimplexPolytope simplex, Point3d pointOnAToPack, Point3d pointOnBToPack)
+   public void tooManyIterationsStopping(SimplexPolytope simplex, Point3D pointOnAToPack, Point3D pointOnBToPack)
    {
       // TODO Auto-generated method stub
 
    }
 
    @Override
-   public void metStoppingConditionForNoIntersection(Point3d pointOnAToPack, Point3d pointOnBToPack)
+   public void metStoppingConditionForNoIntersection(Point3D pointOnAToPack, Point3D pointOnBToPack)
    {
       // TODO Auto-generated method stub
 

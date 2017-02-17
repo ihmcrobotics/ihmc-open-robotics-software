@@ -8,7 +8,7 @@ import georegression.struct.so.Quaternion_F64;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
-import javax.vecmath.Vector3d;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -55,7 +55,7 @@ public class CameraLogger
    public void log( BufferedImage image , long timeStamp )
    {
       DenseMatrix64F R = CommonOps.identity(3, 3);
-      Vector3d T = new Vector3d();
+      Vector3D T = new Vector3D();
 //            Matrix3d Rm = new Matrix3d();
 //            rosTransformFromHeadBaseToCamera.get(Rm);
 //            MatrixTools.matrix3DToDenseMatrix(Rm,R,0,0);

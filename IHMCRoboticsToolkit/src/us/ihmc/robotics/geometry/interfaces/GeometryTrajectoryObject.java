@@ -1,5 +1,7 @@
 package us.ihmc.robotics.geometry.interfaces;
 
+import us.ihmc.euclid.interfaces.GeometryObject;
+
 public interface GeometryTrajectoryObject<P extends GeometryObject<P>, V extends GeometryObject<V>>
 {
    public abstract void getPosition(P positionToPack);

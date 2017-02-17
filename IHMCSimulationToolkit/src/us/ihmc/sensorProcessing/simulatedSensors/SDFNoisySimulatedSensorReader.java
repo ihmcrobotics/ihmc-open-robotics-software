@@ -2,13 +2,12 @@ package us.ihmc.sensorProcessing.simulatedSensors;
 
 import java.util.Random;
 
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 
 public class SDFNoisySimulatedSensorReader extends SDFPerfectSimulatedSensorReader
 {
@@ -19,10 +18,10 @@ public class SDFNoisySimulatedSensorReader extends SDFPerfectSimulatedSensorRead
    private double positionNoiseStd = 0.01;
 
    private final Random rand = new Random(124381L);
-   private final Quat4d rotationError = new Quat4d();
-   private final Vector3d positionError = new Vector3d();
-   private final Quat4d rotationFilter = new Quat4d();
-   private final Vector3d positionFilter = new Vector3d();
+   private final Quaternion rotationError = new Quaternion();
+   private final Vector3D positionError = new Vector3D();
+   private final Quaternion rotationFilter = new Quaternion();
+   private final Vector3D positionFilter = new Vector3D();
 
    public SDFNoisySimulatedSensorReader(FloatingRootJointRobot robot, FullRobotModel fullRobotModel, CommonHumanoidReferenceFrames referenceFrames)
    {
@@ -48,10 +47,7 @@ public class SDFNoisySimulatedSensorReader extends SDFPerfectSimulatedSensorRead
    protected void packRootTransform(FloatingRootJointRobot robot, RigidBodyTransform transformToPack)
    {
       super.packRootTransform(robot, transformToPack);
-      rotationError.setW(1);
-      rotationError.setX(rand.nextGaussian() * quaternionNoiseStd);
-      rotationError.setY(rand.nextGaussian() * quaternionNoiseStd);
-      rotationError.setZ(rand.nextGaussian() * quaternionNoiseStd);
+      rotationError.set(rand.nextGaussian() * quaternionNoiseStd, rand.nextGaussian() * quaternionNoiseStd, rand.nextGaussian() * quaternionNoiseStd, 1);
       rotationError.normalize();
 
       positionError.setX(rand.nextGaussian() * positionNoiseStd);
@@ -62,10 +58,11 @@ public class SDFNoisySimulatedSensorReader extends SDFPerfectSimulatedSensorRead
       if (addNoiseFiltering)
       {
          double alpha = noiseFilterAlpha;
-         rotationFilter.scale(1 - alpha);
-         rotationError.scale(alpha);
-         rotationFilter.add(rotationError);
-         rotationFilter.normalize();
+         // TODO reimplement me
+//         rotationFilter.scale(1 - alpha);
+//         rotationError.scale(alpha);
+//         rotationFilter.add(rotationError);
+//         rotationFilter.normalize();
 
          positionFilter.scale(1 - alpha);
          positionError.scale(alpha);

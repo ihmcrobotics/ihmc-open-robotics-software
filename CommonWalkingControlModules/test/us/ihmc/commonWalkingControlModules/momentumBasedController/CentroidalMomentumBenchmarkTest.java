@@ -4,13 +4,12 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Random;
 
-import javax.vecmath.Vector3d;
-
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.CenterOfMassReferenceFrame;
@@ -50,7 +49,7 @@ public class CentroidalMomentumBenchmarkTest
 
       ArrayList<RevoluteJoint> joints = new ArrayList<>();
       int numberOfJoints = 34;
-      Vector3d[] jointAxes = new Vector3d[numberOfJoints];
+      Vector3D[] jointAxes = new Vector3D[numberOfJoints];
       for (int i = 0; i < numberOfJoints; i++)
          jointAxes[i] = RandomTools.generateRandomVector(random, 1.0);
 

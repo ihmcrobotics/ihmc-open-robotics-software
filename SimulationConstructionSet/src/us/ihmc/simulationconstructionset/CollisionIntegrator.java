@@ -1,8 +1,8 @@
 package us.ihmc.simulationconstructionset;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.matrix.Matrix3D;
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.numericalMethods.QuarticRootFinder;
 
 
@@ -25,7 +25,7 @@ public class CollisionIntegrator implements java.io.Serializable
    private static final double
       PZ_STEP_SIZE_MIN = 1.0E-7, PZ_STEP_SIZE_MAX = 10.0;
 
-   private Matrix3d K, K_inv = new Matrix3d();
+   private Matrix3D K, K_inv = new Matrix3D();
 
    // private Vector3d r1, r2, u1, u2;
    private double epsilon, mu;
@@ -33,8 +33,8 @@ public class CollisionIntegrator implements java.io.Serializable
    private boolean stableSticking;
    private boolean amStuck;    // , hadBadCompression;
 
-   private Vector3d u0 = new Vector3d();
-   Vector3d Kx = new Vector3d(), Ky = new Vector3d(), Kz = new Vector3d();
+   private Vector3D u0 = new Vector3D();
+   Vector3D Kx = new Vector3D(), Ky = new Vector3D(), Kz = new Vector3D();
 
    public CollisionIntegrator()
    {
@@ -141,15 +141,15 @@ public class CollisionIntegrator implements java.io.Serializable
        */
 
 
-      Matrix3d K_test = new Matrix3d(1.9795607798930628, -0.23966928371230545, 0.2574790610887272, -0.23966928371230545, 0.06310349438764432,
+      Matrix3D K_test = new Matrix3D(1.9795607798930628, -0.23966928371230545, 0.2574790610887272, -0.23966928371230545, 0.06310349438764432,
                                      -0.012154180483161334, 0.2574790610887272, -0.012154180483161352, 0.19089180777144152);
 
       double mu = 0.7, epsilon = 3.0;    // .0;
-      Vector3d u0_test = new Vector3d(-0.46351582426916077, 0.061475623099959374, -4.4499062468302507E-4);
+      Vector3D u0_test = new Vector3D(-0.46351582426916077, 0.061475623099959374, -4.4499062468302507E-4);
 
 
 
-      Matrix3d K_test_inv = new Matrix3d(K_test);
+      Matrix3D K_test_inv = new Matrix3D(K_test);
       K_test_inv.invert();
       System.out.println("K_test_inv: " + K_test_inv);
 
@@ -158,17 +158,17 @@ public class CollisionIntegrator implements java.io.Serializable
 
       // System.out.println("Beta for this K is :  " + integrator.solveBeta(K_test, mu));
 
-      Vector3d final_output = new Vector3d();
+      Vector3D final_output = new Vector3D();
       integrator.integrate(final_output);
 
       System.out.println("u0: " + u0_test);
 
       System.out.println("final ux: " + final_output.getX() + ", uy: " + final_output.getY() + ", uz: " + final_output.getZ());    // + ", Wz: " + final_output[3]);
-      Vector3d delta_u = new Vector3d();
+      Vector3D delta_u = new Vector3D();
       delta_u.sub(final_output, u0_test);
       System.out.println("delta_u: " + delta_u);
 
-      Vector3d impulse = new Vector3d(delta_u);
+      Vector3D impulse = new Vector3D(delta_u);
       K_test_inv.transform(impulse);
       System.out.println("Impulse:  " + impulse);
 
@@ -176,9 +176,9 @@ public class CollisionIntegrator implements java.io.Serializable
    }
 
    @SuppressWarnings("unused")
-   private Matrix3d K_pseudo = new Matrix3d(), K_trans = new Matrix3d();
+   private RotationMatrix K_pseudo = new RotationMatrix(), K_trans = new RotationMatrix();
 
-   public void setup(Matrix3d K, Vector3d u0, double epsilon, double mu)
+   public void setup(Matrix3D K, Vector3D u0, double epsilon, double mu)
    {
       collisionRungeKutta.setAdaptive();
       collisionRungeKutta.setStepSize(H_START);
@@ -249,10 +249,10 @@ public class CollisionIntegrator implements java.io.Serializable
       // hadBadCompression = false;
    }
 
-   private final Vector3d u_final = new Vector3d();
-   private final Vector3d delta_u = new Vector3d();
+   private final Vector3D u_final = new Vector3D();
+   private final Vector3D delta_u = new Vector3D();
 
-   public void computeImpulse(Vector3d impulse)
+   public void computeImpulse(Vector3D impulse)
    {
       // System.out.println("K: " + K);
       // System.out.println("u0: " + u0);
@@ -276,7 +276,7 @@ public class CollisionIntegrator implements java.io.Serializable
 
    }
 
-   public void computeMicroImpulse(Vector3d impulse)
+   public void computeMicroImpulse(Vector3D impulse)
    {
       // Figure out impulse to stop u0 in its tracks and reverse it...
 
@@ -294,12 +294,12 @@ public class CollisionIntegrator implements java.io.Serializable
    }
 
 
-   private Vector3d zeta_B = new Vector3d();
+   private Vector3D zeta_B = new Vector3D();
    double[] pz_output = new double[4];
    double[] compression_output = new double[4];
    double[] restitution_output = new double[4];
 
-   public void integrate(Vector3d u_fin)
+   public void integrate(Vector3D u_fin)
    {
       double ux = u0.getX(), uy = u0.getY(), uz = u0.getZ(), Wz = 0.0;
 
@@ -552,7 +552,7 @@ public class CollisionIntegrator implements java.io.Serializable
    private double[] solutions = new double[4];
    private QuarticRootFinder rootFinder = new QuarticRootFinder();
 
-   private double solveBeta(Matrix3d K, double mu)
+   private double solveBeta(Matrix3D K, double mu)
    {
       // Mirtich p. 83;
 //      @SuppressWarnings("unused")
@@ -736,7 +736,7 @@ public class CollisionIntegrator implements java.io.Serializable
 
    }
 
-   Vector3d zeta = new Vector3d();
+   Vector3D zeta = new Vector3D();
 
    @SuppressWarnings("serial")
    private class PZDerivativeVector implements CollisionDerivativeVector

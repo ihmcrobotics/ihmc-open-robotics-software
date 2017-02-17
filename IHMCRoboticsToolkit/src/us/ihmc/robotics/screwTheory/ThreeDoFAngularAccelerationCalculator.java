@@ -3,8 +3,8 @@ package us.ihmc.robotics.screwTheory;
 import org.ejml.alg.dense.mult.SubmatrixOps;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
+
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.linearAlgebra.MatrixTools;
 
 public class ThreeDoFAngularAccelerationCalculator
 {
@@ -49,7 +49,7 @@ public class ThreeDoFAngularAccelerationCalculator
       jacobian.compute();
       SpatialAccelerationVector jacobianDerivativeTerm = new SpatialAccelerationVector();
       jointAccelerationCalculator.computeJacobianDerivativeTerm(jacobianDerivativeTerm);
-      MatrixTools.setDenseMatrixFromTuple3d(jacobianDerivativeTermMatrix, jacobianDerivativeTerm.getAngularPartCopy(), 0, 0);
+      jacobianDerivativeTerm.getAngularPart().get(jacobianDerivativeTermMatrix);
       CommonOps.subtractEquals(biasedAccelerationMatrix, jacobianDerivativeTermMatrix);
 
       SubmatrixOps.setSubMatrix(jacobian.getJacobianMatrix(), angularJacobian, 0, 0, 0, 0, angularJacobian.getNumRows(), angularJacobian.getNumCols());

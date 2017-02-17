@@ -2,25 +2,24 @@ package us.ihmc.communication.packets;
 
 import java.util.List;
 
-import javax.vecmath.Point2f;
-import javax.vecmath.Point3f;
-import javax.vecmath.Vector3f;
-
+import us.ihmc.euclid.tuple2D.Point2D32;
+import us.ihmc.euclid.tuple3D.Point3D32;
+import us.ihmc.euclid.tuple3D.Vector3D32;
 import us.ihmc.robotics.geometry.PlanarRegion;
 
 public class PlanarRegionMessage extends Packet<PlanarRegionMessage>
 {
    public int regionId = PlanarRegion.NO_REGION_ID;
-   public Point3f regionOrigin;
-   public Vector3f regionNormal;
-   public List<Point2f[]> concaveHullsVertices;
-   public List<Point2f[]> convexPolygonsVertices;
+   public Point3D32 regionOrigin;
+   public Vector3D32 regionNormal;
+   public List<Point2D32[]> concaveHullsVertices;
+   public List<Point2D32[]> convexPolygonsVertices;
 
    public PlanarRegionMessage()
    {
    }
 
-   public PlanarRegionMessage(Point3f regionOrigin, Vector3f regionNormal, List<Point2f[]> concaveHullsVertices, List<Point2f[]> convexPolygonsVertices)
+   public PlanarRegionMessage(Point3D32 regionOrigin, Vector3D32 regionNormal, List<Point2D32[]> concaveHullsVertices, List<Point2D32[]> convexPolygonsVertices)
    {
       this.regionOrigin = regionOrigin;
       this.regionNormal = regionNormal;
@@ -38,22 +37,22 @@ public class PlanarRegionMessage extends Packet<PlanarRegionMessage>
       return regionId;
    }
 
-   public Point3f getRegionOrigin()
+   public Point3D32 getRegionOrigin()
    {
       return regionOrigin;
    }
 
-   public Vector3f getRegionNormal()
+   public Vector3D32 getRegionNormal()
    {
       return regionNormal;
    }
 
-   public List<Point2f[]> getConcaveHullsVertices()
+   public List<Point2D32[]> getConcaveHullsVertices()
    {
       return concaveHullsVertices;
    }
 
-   public List<Point2f[]> getConvexPolygonsVertices()
+   public List<Point2D32[]> getConvexPolygonsVertices()
    {
       return convexPolygonsVertices;
    }
@@ -74,16 +73,16 @@ public class PlanarRegionMessage extends Packet<PlanarRegionMessage>
 
       for (int hullIndex = 0; hullIndex < concaveHullsVertices.size(); hullIndex++)
       {
-         Point2f[] thisHull = concaveHullsVertices.get(hullIndex);
-         Point2f[] otherHull = other.concaveHullsVertices.get(hullIndex);
+         Point2D32[] thisHull = concaveHullsVertices.get(hullIndex);
+         Point2D32[] otherHull = other.concaveHullsVertices.get(hullIndex);
 
          if (thisHull.length != otherHull.length)
             return false;
 
          for (int vertexIndex = 0; vertexIndex < thisHull.length; vertexIndex++)
          {
-            Point2f thisVertex = thisHull[vertexIndex];
-            Point2f otherVertex = otherHull[vertexIndex];
+            Point2D32 thisVertex = thisHull[vertexIndex];
+            Point2D32 otherVertex = otherHull[vertexIndex];
             if (!thisVertex.epsilonEquals(otherVertex, (float) epsilon))
                return false;
          }
@@ -91,8 +90,8 @@ public class PlanarRegionMessage extends Packet<PlanarRegionMessage>
 
       for (int polygonIndex = 0; polygonIndex < convexPolygonsVertices.size(); polygonIndex++)
       {
-         Point2f[] thisPolygon = convexPolygonsVertices.get(polygonIndex);
-         Point2f[] otherPolygon = other.convexPolygonsVertices.get(polygonIndex);
+         Point2D32[] thisPolygon = convexPolygonsVertices.get(polygonIndex);
+         Point2D32[] otherPolygon = other.convexPolygonsVertices.get(polygonIndex);
 
          if (thisPolygon.length != otherPolygon.length)
             return false;

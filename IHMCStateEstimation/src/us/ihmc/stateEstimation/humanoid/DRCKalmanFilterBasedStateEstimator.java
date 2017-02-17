@@ -1,9 +1,8 @@
 package us.ihmc.stateEstimation.humanoid;
 
-import javax.vecmath.Quat4d;
-import javax.vecmath.Tuple3d;
-
 import us.ihmc.controlFlow.ControlFlowGraph;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -67,7 +66,7 @@ public class DRCKalmanFilterBasedStateEstimator implements DRCStateEstimatorInte
       doControl();
    }
    
-   public void initializeEstimatorToActual(Tuple3d initialCoMPosition, Quat4d initialEstimationLinkOrientation)
+   public void initializeEstimatorToActual(Tuple3DReadOnly initialCoMPosition, QuaternionReadOnly initialEstimationLinkOrientation)
    {
       // Setting the initial CoM Position here.
       FramePoint estimatedCoMPosition = new FramePoint();

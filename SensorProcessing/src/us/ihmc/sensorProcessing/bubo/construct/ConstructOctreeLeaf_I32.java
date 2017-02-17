@@ -18,12 +18,12 @@
 
 package us.ihmc.sensorProcessing.bubo.construct;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import georegression.metric.Intersection3D_I32;
 import georegression.struct.point.Point3D_I32;
 import georegression.struct.shapes.Box3D_I32;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Constructs an octree by adding points to the smallest possible leaf which contains

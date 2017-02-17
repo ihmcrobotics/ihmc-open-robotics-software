@@ -1,8 +1,8 @@
 package us.ihmc.robotics.screwTheory;
 
-import org.apache.commons.lang3.tuple.ImmutablePair;
-
 import java.util.ArrayList;
+
+import org.apache.commons.lang3.tuple.ImmutablePair;
 
 public abstract class AbstractInverseDynamicsCopier
 {  

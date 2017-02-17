@@ -3,15 +3,14 @@ package us.ihmc.modelFileLoaders.SdfLoader;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.matrix.Matrix3D;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.modelFileLoaders.ModelFileLoaderConversionsHelper;
 import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.Collision;
 import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFLink;
 import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFSensor;
 import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFVisual;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 
 public class SDFLinkHolder
@@ -21,7 +20,7 @@ public class SDFLinkHolder
    private final RigidBodyTransform transformToModelReferenceFrame;
    private double mass;
    private final RigidBodyTransform inertialFrameWithRespectToLinkFrame;
-   private final Matrix3d inertia;
+   private final Matrix3D inertia;
 
    private double contactKp = 0.0;
    private double contactKd = 0.0;
@@ -37,7 +36,7 @@ public class SDFLinkHolder
 
 
    // Calculated
-   private final Vector3d CoMOffset = new Vector3d();
+   private final Vector3D CoMOffset = new Vector3D();
 
    public SDFLinkHolder(SDFLink sdfLink)
    {
@@ -54,7 +53,7 @@ public class SDFLinkHolder
      {
         inertialFrameWithRespectToLinkFrame = new RigidBodyTransform();
         mass = 0.0;
-        inertia = new Matrix3d();
+        inertia = new Matrix3D();
      }
      visuals = sdfLink.getVisuals();
 
@@ -95,23 +94,24 @@ public class SDFLinkHolder
          modelFrameToJointFrame.set(joint.getTransformFromChildLink()); // H_4^3
       }
       RigidBodyTransform jointFrameToModelFrame = new RigidBodyTransform();    // H_3^4
-      jointFrameToModelFrame.invert(modelFrameToJointFrame);
+      jointFrameToModelFrame.setAndInvert(modelFrameToJointFrame);
       RigidBodyTransform modelFrameToInertialFrame = inertialFrameWithRespectToLinkFrame;    // H_4^5
 
       RigidBodyTransform jointFrameToInertialFrame = new RigidBodyTransform();
-      jointFrameToInertialFrame.multiply(jointFrameToModelFrame, modelFrameToInertialFrame);
+      jointFrameToInertialFrame.set(jointFrameToModelFrame);
+      jointFrameToInertialFrame.multiply(modelFrameToInertialFrame);
 
-      Vector3d CoMOffset = new Vector3d();
-      Matrix3d inertialFrameRotation = new Matrix3d();
+      Vector3D CoMOffset = new Vector3D();
+      Matrix3D inertialFrameRotation = new Matrix3D();
 
       jointFrameToInertialFrame.get(inertialFrameRotation, CoMOffset);
 
       if(!inertialFrameRotation.epsilonEquals(MatrixTools.IDENTITY, 1e-5))
       {
          inertialFrameRotation.transpose();
-         inertia.mul(inertialFrameRotation);
+         inertia.multiply(inertialFrameRotation);
          inertialFrameRotation.transpose();
-         inertialFrameRotation.mul(inertia);
+         inertialFrameRotation.multiply(inertia);
 
          inertia.set(inertialFrameRotation);
 //         inertia.set(InertiaTools.rotate(inertialFrameRotation, inertia));
@@ -161,12 +161,12 @@ public class SDFLinkHolder
       return mass;
    }
 
-   public Matrix3d getInertia()
+   public Matrix3D getInertia()
    {
       return inertia;
    }
 
-   public Vector3d getCoMOffset()
+   public Vector3D getCoMOffset()
    {
       return CoMOffset;
    }
@@ -206,7 +206,7 @@ public class SDFLinkHolder
       this.inertialFrameWithRespectToLinkFrame.set(newTransform);
    }
 
-   public void setInertia(Matrix3d inertia)
+   public void setInertia(Matrix3D inertia)
    {
       this.inertia.set(inertia);
    }

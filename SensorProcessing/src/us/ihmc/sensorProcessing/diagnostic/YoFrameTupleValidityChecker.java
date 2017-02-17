@@ -2,8 +2,7 @@ package us.ihmc.sensorProcessing.diagnostic;
 
 import java.util.EnumMap;
 
-import javax.vecmath.Tuple3d;
-
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.Direction;
 import us.ihmc.robotics.math.frames.YoFrameTuple;
@@ -56,7 +55,7 @@ public class YoFrameTupleValidityChecker implements DiagnosticUpdatable
          validityCheckers.get(direction).update();
    }
 
-   public void update(Tuple3d newInputValue)
+   public void update(Tuple3DBasics newInputValue)
    {
       validityCheckers.get(Direction.X).update(newInputValue.getX());
       validityCheckers.get(Direction.Y).update(newInputValue.getY());

@@ -1,14 +1,14 @@
 package optiTrack;
 
-import javax.vecmath.Vector3d;
+import us.ihmc.euclid.tuple3D.Vector3D;
 
 public class MocapMarker
 {
    private int id;
-   private Vector3d position;
+   private Vector3D position;
    private float markerSize;
 
-   public MocapMarker(int id, Vector3d position, float markerSize)
+   public MocapMarker(int id, Vector3D position, float markerSize)
    {
       this.id = id;
       this.position = position;
@@ -20,7 +20,7 @@ public class MocapMarker
       return id;
    }
 
-   public Vector3d getPosition()
+   public Vector3D getPosition()
    {
       return position;
    }

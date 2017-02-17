@@ -1,11 +1,10 @@
 package us.ihmc.acsell.initialSetup;
 
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
@@ -20,8 +19,8 @@ public class BonoInitialSetup implements DRCRobotInitialSetup<HumanoidFloatingRo
    private double groundZ;
    private double initialYaw;
    private final RigidBodyTransform rootToWorld = new RigidBodyTransform();
-   private final Vector3d offset = new Vector3d();
-   private final Quat4d rotation = new Quat4d();
+   private final Vector3D offset = new Vector3D();
+   private final Quaternion rotation = new Quaternion();
 
    public BonoInitialSetup(double groundZ, double initialYaw)
    {
@@ -65,12 +64,12 @@ public class BonoInitialSetup implements DRCRobotInitialSetup<HumanoidFloatingRo
       robot.update();
    }
    
-   public void getOffset(Vector3d offsetToPack)
+   public void getOffset(Vector3D offsetToPack)
    {
       offsetToPack.set(offset);
    }
 
-   public void setOffset(Vector3d offset)
+   public void setOffset(Vector3D offset)
    {
       this.offset.set(offset);
    }

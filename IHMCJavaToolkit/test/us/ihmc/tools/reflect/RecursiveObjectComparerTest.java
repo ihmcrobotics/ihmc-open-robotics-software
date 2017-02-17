@@ -9,13 +9,12 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Random;
 
-import javax.vecmath.Tuple3d;
-import javax.vecmath.Vector3d;
-
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 
 
 public class RecursiveObjectComparerTest
@@ -321,8 +320,8 @@ public class RecursiveObjectComparerTest
 	@Test(timeout = 30000)
    public void testNaNVector() throws IllegalArgumentException, IllegalAccessException
    {
-      Vector3d object1 = new Vector3d(Double.NaN, Double.NaN, Double.NaN);
-      Vector3d object2 = new Vector3d(Double.NaN, Double.NaN, Double.NaN);
+      Vector3D object1 = new Vector3D(Double.NaN, Double.NaN, Double.NaN);
+      Vector3D object2 = new Vector3D(Double.NaN, Double.NaN, Double.NaN);
       compareAndAssert(object1, object2, true);
    }
 
@@ -360,13 +359,13 @@ public class RecursiveObjectComparerTest
 	@Test(timeout = 30000)
    public void testIgnoreSomeFields() throws IllegalArgumentException, IllegalAccessException, SecurityException, NoSuchFieldException
    {
-      Vector3d firstObject = new Vector3d(0.1, 0.2, 0.3);
-      Vector3d secondObject = new Vector3d(0.1, 0.5, 0.3);
+      Vector3D firstObject = new Vector3D(0.1, 0.2, 0.3);
+      Vector3D secondObject = new Vector3D(0.1, 0.5, 0.3);
       
 //      StringAndRegularExpressionMatcher fieldsToIgnore = new StringAndRegularExpressionMatcher();
 //      fieldsToIgnore.addExactStringToMatch("public double javax.vecmath.Tuple3d.y");
 //      
-      Field yField = Tuple3d.class.getDeclaredField("y");
+      Field yField = Tuple3DBasics.class.getDeclaredField("y");
       ArrayList<Field> fieldsToIgnore = new ArrayList<Field>();
       fieldsToIgnore.add(yField);
       

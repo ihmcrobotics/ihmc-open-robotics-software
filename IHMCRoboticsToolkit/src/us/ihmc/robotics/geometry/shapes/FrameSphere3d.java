@@ -1,7 +1,6 @@
 package us.ihmc.robotics.geometry.shapes;
 
-import javax.vecmath.Point3d;
-
+import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
@@ -38,7 +37,7 @@ public class FrameSphere3d extends FrameShape3d<FrameSphere3d, Sphere3d>
       sphere.getCenter(centerToPack.getPoint());
    }
    
-   public void getCenter(Point3d centerToPack)
+   public void getCenter(Point3DBasics centerToPack)
    {
       sphere.getCenter(centerToPack);
    }

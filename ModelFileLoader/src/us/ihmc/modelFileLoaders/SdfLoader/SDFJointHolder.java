@@ -3,12 +3,11 @@ package us.ihmc.modelFileLoaders.SdfLoader;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.modelFileLoaders.ModelFileLoaderConversionsHelper;
 import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFJoint;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.tools.io.printing.PrintTools;
 
 public class SDFJointHolder
@@ -18,7 +17,7 @@ public class SDFJointHolder
    // Data from SDF
    private final String name;
    private final SDFJointType type;
-   private final Vector3d axisInModelFrame;
+   private final Vector3D axisInModelFrame;
    
    private final boolean hasLimits;
    private final double upperLimit;
@@ -42,10 +41,10 @@ public class SDFJointHolder
 
    //Calculated 
    private RigidBodyTransform transformToParentJoint = null;
-   private final Matrix3d linkRotation = new Matrix3d();
-   private final Vector3d offsetFromParentJoint = new Vector3d();
-   private final Vector3d axisInParentFrame = new Vector3d();
-   private final Vector3d axisInJointFrame = new Vector3d();
+   private final RotationMatrix linkRotation = new RotationMatrix();
+   private final Vector3D offsetFromParentJoint = new Vector3D();
+   private final Vector3D axisInParentFrame = new Vector3D();
+   private final Vector3D axisInJointFrame = new Vector3D();
    
    private double contactKp;
    private double contactKd;
@@ -199,17 +198,20 @@ public class SDFJointHolder
       RigidBodyTransform modelToParentJoint = new RigidBodyTransform();
       RigidBodyTransform modelToChildJoint = new RigidBodyTransform();
 
-      modelToParentJoint.multiply(modelToParentLink, parentLinkToParentJoint);
+      modelToParentJoint.set(modelToParentLink);
+      modelToParentJoint.multiply(parentLinkToParentJoint);
       
       modelToChildLink.getRotation(linkRotation);
       
-      modelToChildJoint.multiply(modelToChildLink, transformFromChildLink);
+      modelToChildJoint.set(modelToChildLink);
+      modelToChildJoint.multiply(transformFromChildLink);
 
       RigidBodyTransform parentJointToModel = new RigidBodyTransform();
-      parentJointToModel.invert(modelToParentJoint);
+      parentJointToModel.setAndInvert(modelToParentJoint);
 
       RigidBodyTransform parentJointToChildJoint = new RigidBodyTransform();
-      parentJointToChildJoint.multiply(parentJointToModel, modelToChildJoint);
+      parentJointToChildJoint.set(parentJointToModel);
+      parentJointToChildJoint.multiply(modelToChildJoint);
 
       transformToParentJoint = parentJointToChildJoint;
       
@@ -233,7 +235,7 @@ public class SDFJointHolder
       return type;
    }
 
-   public Vector3d getAxisInModelFrame()
+   public Vector3D getAxisInModelFrame()
    {
       return axisInModelFrame;
    }
@@ -313,22 +315,22 @@ public class SDFJointHolder
       return velocityLimit;
    }
    
-   public Matrix3d getLinkRotation()
+   public RotationMatrix getLinkRotation()
    {
       return linkRotation;
    }
    
-   public Vector3d getOffsetFromParentJoint()
+   public Vector3D getOffsetFromParentJoint()
    {
       return offsetFromParentJoint;
    }
    
-   public Vector3d getAxisInParentFrame()
+   public Vector3D getAxisInParentFrame()
    {
       return axisInParentFrame;
    }
    
-   public Vector3d getAxisInJointFrame()
+   public Vector3D getAxisInJointFrame()
    {
       return axisInJointFrame;
    }

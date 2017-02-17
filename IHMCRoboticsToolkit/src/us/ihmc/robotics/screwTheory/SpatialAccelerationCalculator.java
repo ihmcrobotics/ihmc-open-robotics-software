@@ -1,12 +1,12 @@
 package us.ihmc.robotics.screwTheory;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.ReferenceFrameMismatchException;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
 
 /**
  * This class is a tool that can be used to compute the spatial acceleration

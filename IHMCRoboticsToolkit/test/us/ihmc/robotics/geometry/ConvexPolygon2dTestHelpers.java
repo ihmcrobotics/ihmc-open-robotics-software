@@ -3,8 +3,8 @@ package us.ihmc.robotics.geometry;
 import java.util.ArrayList;
 import java.util.Random;
 
-import javax.vecmath.Point2d;
-
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class ConvexPolygon2dTestHelpers
@@ -569,7 +569,7 @@ public class ConvexPolygon2dTestHelpers
       return ret;
    }
 
-   public static LineSegment2d[] getNearestEdges(Point2d testPoint, ConvexPolygon2d polygon)
+   public static LineSegment2d[] getNearestEdges(Point2D testPoint, ConvexPolygon2d polygon)
    {
       int[] tempTwoIndices = new int[2];
 
@@ -595,7 +595,7 @@ public class ConvexPolygon2dTestHelpers
       return ret;
    }
 
-   private static int getNearestEdgeIndices(Point2d pointToProject, int[] indicesToPack, ConvexPolygon2d polygon)
+   private static int getNearestEdgeIndices(Point2D pointToProject, int[] indicesToPack, ConvexPolygon2d polygon)
    {
       int[] tempTwoIndices = new int[2];
 
@@ -677,10 +677,10 @@ public class ConvexPolygon2dTestHelpers
     * @param observerPoint2d point that is compared with the edge.
     * @return true if the observer point is located at the left outside of the edge.
     */
-   private static boolean isEdgeFullyToTheLeftOfObserver(int edgeIndex, Point2d observerPoint2d, ConvexPolygon2d polygon)
+   private static boolean isEdgeFullyToTheLeftOfObserver(int edgeIndex, Point2D observerPoint2d, ConvexPolygon2d polygon)
    {
-      Point2d vertex = polygon.getVertex(edgeIndex);
-      Point2d nextVertex = polygon.getNextVertex(edgeIndex);
+      Point2DReadOnly vertex = polygon.getVertex(edgeIndex);
+      Point2DReadOnly nextVertex = polygon.getNextVertex(edgeIndex);
 
       // Vector perpendicular to the edge and pointing outside the polygon
       double edgeNormalX = -(nextVertex.getY() - vertex.getY());
@@ -703,10 +703,10 @@ public class ConvexPolygon2dTestHelpers
     * @param observerPoint2d point that is compared with the edge.
     * @return true if the observer point is located at the right outside of the edge.
     */
-   private static boolean isEdgeFullyToTheRight(int edgeIndex, Point2d observerPoint2d, ConvexPolygon2d polygon)
+   private static boolean isEdgeFullyToTheRight(int edgeIndex, Point2D observerPoint2d, ConvexPolygon2d polygon)
    {
-      Point2d vertex = polygon.getVertex(edgeIndex);
-      Point2d nextVertex = polygon.getNextVertex(edgeIndex);
+      Point2DReadOnly vertex = polygon.getVertex(edgeIndex);
+      Point2DReadOnly nextVertex = polygon.getNextVertex(edgeIndex);
 
       // Vector perpendicular to the edge and pointing outside the polygon
       double edgeNormalX = -(nextVertex.getY() - vertex.getY());

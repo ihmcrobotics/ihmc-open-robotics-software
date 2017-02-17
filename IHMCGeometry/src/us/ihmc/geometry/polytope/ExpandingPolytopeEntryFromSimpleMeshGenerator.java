@@ -2,7 +2,7 @@ package us.ihmc.geometry.polytope;
 
 import java.util.ArrayList;
 
-import javax.vecmath.Point3d;
+import us.ihmc.euclid.tuple3D.Point3D;
 
 import gnu.trove.map.hash.THashMap;
 
@@ -11,20 +11,20 @@ public class ExpandingPolytopeEntryFromSimpleMeshGenerator
 
    public ExpandingPolytopeEntry generateExpandingPolytope(SimpleTriangleMesh mesh)
    {
-      ArrayList<Point3d> positions = mesh.positions;
+      ArrayList<Point3D> positions = mesh.positions;
       ArrayList<Integer> triangleIndices = mesh.triangleIndices;
 
       int numberOfTriangles = triangleIndices.size() / 3;
 
-      THashMap<Point3d, ArrayList<ExpandingPolytopeEntry>> entriesContainingThisVertexMap = new THashMap<>();
+      THashMap<Point3D, ArrayList<ExpandingPolytopeEntry>> entriesContainingThisVertexMap = new THashMap<>();
 
       ArrayList<ExpandingPolytopeEntry> entries = new ArrayList<>();
 
       for (int i = 0; i < numberOfTriangles; i++)
       {
-         Point3d pointOne = positions.get(triangleIndices.get(i * 3));
-         Point3d pointTwo = positions.get(triangleIndices.get(i * 3 + 1));
-         Point3d pointThree = positions.get(triangleIndices.get(i * 3 + 2));
+         Point3D pointOne = positions.get(triangleIndices.get(i * 3));
+         Point3D pointTwo = positions.get(triangleIndices.get(i * 3 + 1));
+         Point3D pointThree = positions.get(triangleIndices.get(i * 3 + 2));
 
          ExpandingPolytopeEntry entry = new ExpandingPolytopeEntry(pointOne, pointTwo, pointThree);
          entries.add(entry);
@@ -41,7 +41,7 @@ public class ExpandingPolytopeEntryFromSimpleMeshGenerator
 
          for (int i = 0; i < 3; i++)
          {
-            Point3d vertex = entryToLinkUp.getVertex(i);
+            Point3D vertex = entryToLinkUp.getVertex(i);
             ArrayList<ExpandingPolytopeEntry> entryiesContainingThisVertex = entriesContainingThisVertexMap.get(vertex);
 
             for (ExpandingPolytopeEntry entry : entryiesContainingThisVertex)
@@ -59,11 +59,11 @@ public class ExpandingPolytopeEntryFromSimpleMeshGenerator
       return entries.get(0);
    }
 
-   private void addToMap(THashMap<Point3d, ArrayList<ExpandingPolytopeEntry>> entriesContainingThisVertexMap, ExpandingPolytopeEntry entry)
+   private void addToMap(THashMap<Point3D, ArrayList<ExpandingPolytopeEntry>> entriesContainingThisVertexMap, ExpandingPolytopeEntry entry)
    {
       for (int vertexIndex = 0; vertexIndex < 3; vertexIndex++)
       {
-         Point3d vertex = entry.getVertex(vertexIndex);
+         Point3D vertex = entry.getVertex(vertexIndex);
 
          ArrayList<ExpandingPolytopeEntry> arrayList = entriesContainingThisVertexMap.get(vertex);
          if (arrayList == null)

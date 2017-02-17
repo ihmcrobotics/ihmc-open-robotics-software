@@ -1,8 +1,7 @@
 package us.ihmc.exampleSimulations.newtonsCradle;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.robotics.Axis;
@@ -38,7 +37,7 @@ public class GroundAsABoxRobot extends Robot
    public GroundAsABoxRobot(int estimatedNumberOfContactPoints, double groundAngle, boolean addWalls, int collisionGroup, int collisionMask)
    {
       super("GroundAsABoxRobot");
-      NullJoint baseJoint = new NullJoint("base", new Vector3d(), this);
+      NullJoint baseJoint = new NullJoint("base", new Vector3D(), this);
 
       //    FloatingJoint baseJoint = new FloatingJoint("base", new Vector3d(), this);
       baseLink = new Link("base");
@@ -111,18 +110,18 @@ public class GroundAsABoxRobot extends Robot
          double offsetX, double offsetY, double xRotation, double yRotation)
    {
       baseLinkGraphics.identity();
-      baseLinkGraphics.translate(new Vector3d(offsetX, offsetY, -floorThickness));
-      Matrix3d rotationMatrixX = new Matrix3d();
-      rotationMatrixX.rotX(xRotation);
+      baseLinkGraphics.translate(new Vector3D(offsetX, offsetY, -floorThickness));
+      RotationMatrix rotationMatrixX = new RotationMatrix();
+      rotationMatrixX.setToRollMatrix(xRotation);
       baseLinkGraphics.rotate(rotationMatrixX);
-      Matrix3d rotationMatrixY = new Matrix3d();
-      rotationMatrixY.rotY(yRotation);
+      RotationMatrix rotationMatrixY = new RotationMatrix();
+      rotationMatrixY.setToPitchMatrix(yRotation);
       baseLinkGraphics.rotate(rotationMatrixY);
       baseLinkGraphics.addCube(floorLength, floorWidth, floorThickness, YoAppearance.Green());
 
       collisonMeshDescription.identity();
       collisonMeshDescription.translate(offsetX, offsetY, -floorThickness);
-      collisonMeshDescription.rotateEuler(new Vector3d(xRotation, yRotation, 0.0));
+      collisonMeshDescription.rotateEuler(new Vector3D(xRotation, yRotation, 0.0));
       collisonMeshDescription.addCubeReferencedAtBottomMiddle(floorLength, floorWidth, floorThickness);
       collisonMeshDescription.setIsGround(true);
 

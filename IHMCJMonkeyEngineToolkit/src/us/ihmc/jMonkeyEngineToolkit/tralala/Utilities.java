@@ -21,8 +21,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import jme3tools.optimize.GeometryBatchFactory;
-
 import com.jme3.asset.AssetManager;
 import com.jme3.material.Material;
 import com.jme3.material.RenderState.BlendMode;
@@ -45,6 +43,8 @@ import com.jme3.scene.shape.Line;
 import com.jme3.scene.shape.Quad;
 import com.jme3.texture.Texture;
 import com.jme3.util.BufferUtils;
+
+import jme3tools.optimize.GeometryBatchFactory;
 
 public final class Utilities
 {

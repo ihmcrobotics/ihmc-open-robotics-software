@@ -4,21 +4,20 @@ import java.lang.reflect.Array;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.vecmath.Point3f;
-import javax.vecmath.TexCoord2f;
-import javax.vecmath.Tuple2f;
-import javax.vecmath.Tuple3f;
-import javax.vecmath.Vector3f;
-
 import org.apache.commons.lang3.tuple.Pair;
 
 import gnu.trove.list.array.TIntArrayList;
 import javafx.scene.shape.MeshView;
 import javafx.scene.shape.TriangleMesh;
 import javafx.scene.shape.VertexFormat;
+import us.ihmc.euclid.tuple2D.interfaces.Tuple2DBasics;
+import us.ihmc.euclid.tuple3D.Point3D32;
+import us.ihmc.euclid.tuple3D.Vector3D32;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.graphicsDescription.MeshDataBuilder;
 import us.ihmc.graphicsDescription.MeshDataGenerator;
 import us.ihmc.graphicsDescription.MeshDataHolder;
+import us.ihmc.graphicsDescription.TexCoord2f;
 
 /**
  * This class an automated interpretation of {@link MeshDataHolder} into JavaFX {@link TriangleMesh} usable via {@link MeshView}.
@@ -51,16 +50,16 @@ public class JavaFXMeshDataInterpreter
       if (meshData == null || meshData.getTriangleIndices().length == 0)
          return null;
 
-      Point3f[] vertices = meshData.getVertices();
+      Point3D32[] vertices = meshData.getVertices();
       TexCoord2f[] texturePoints = meshData.getTexturePoints();
       int[] triangleIndices = meshData.getTriangleIndices();
-      Vector3f[] normals = meshData.getVertexNormals();
+      Vector3D32[] normals = meshData.getVertexNormals();
       TIntArrayList facesIndices = new TIntArrayList();
 
       if (optimizeMesh)
       {
-         Pair<int[], Point3f[]> filterDuplicateVertices = filterDuplicates(triangleIndices, vertices);
-         Pair<int[], Vector3f[]> filterDuplicateNormals = filterDuplicates(triangleIndices, normals);
+         Pair<int[], Point3D32[]> filterDuplicateVertices = filterDuplicates(triangleIndices, vertices);
+         Pair<int[], Vector3D32[]> filterDuplicateNormals = filterDuplicates(triangleIndices, normals);
          Pair<int[], TexCoord2f[]> filterDuplicateTex = filterDuplicates(triangleIndices, texturePoints);
          vertices = filterDuplicateVertices.getRight();
          normals = filterDuplicateNormals.getRight();
@@ -122,27 +121,27 @@ public class JavaFXMeshDataInterpreter
       return Pair.of(filteredIndices, filteredValue);
    }
 
-   private static float[] convertToFloatArray(Tuple3f[] tuple3fs)
+   private static float[] convertToFloatArray(Tuple3DBasics[] tuple3fs)
    {
       float[] array = new float[3 * tuple3fs.length];
       int index = 0;
-      for (Tuple3f tuple : tuple3fs)
+      for (Tuple3DBasics tuple : tuple3fs)
       {
-         array[index++] = tuple.getX();
-         array[index++] = tuple.getY();
-         array[index++] = tuple.getZ();
+         array[index++] = tuple.getX32();
+         array[index++] = tuple.getY32();
+         array[index++] = tuple.getZ32();
       }
       return array;
    }
 
-   private static float[] convertToFloatArray(Tuple2f[] tuple2fs)
+   private static float[] convertToFloatArray(Tuple2DBasics[] tuple2fs)
    {
       float[] array = new float[2 * tuple2fs.length];
       int index = 0;
-      for (Tuple2f tuple : tuple2fs)
+      for (Tuple2DBasics tuple : tuple2fs)
       {
-         array[index++] = tuple.getX();
-         array[index++] = tuple.getY();
+         array[index++] = tuple.getX32();
+         array[index++] = tuple.getY32();
       }
       return array;
    }

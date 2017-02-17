@@ -1,8 +1,8 @@
 package us.ihmc.robotics.functionApproximation;
 
-import Jama.Matrix;
-
 import java.util.ArrayList;
+
+import Jama.Matrix;
 
 /**
  * <p>Title:LinearRegression </p>

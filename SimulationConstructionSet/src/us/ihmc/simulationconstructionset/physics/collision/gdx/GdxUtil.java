@@ -1,12 +1,11 @@
 package us.ihmc.simulationconstructionset.physics.collision.gdx;
 
-import javax.vecmath.Point3d;
-
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.bullet.linearmath.btVector3;
 
-import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
 
 /**
  * @author Peter Abeles
@@ -25,14 +24,14 @@ public class GdxUtil
       dst.setAsTranspose(src.getValues());
    }
 
-   public static void convert(btVector3 src, Point3d dst)
+   public static void convert(btVector3 src, Point3D dst)
    {
       dst.setX(src.x());
       dst.setY(src.y());
       dst.setZ(src.z());
    }
 
-   public static void convert(Vector3 src, Point3d dst)
+   public static void convert(Vector3 src, Point3D dst)
    {
       dst.setX(src.x);
       dst.setY(src.y);

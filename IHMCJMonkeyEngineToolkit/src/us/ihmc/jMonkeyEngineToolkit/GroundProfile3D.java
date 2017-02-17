@@ -1,8 +1,7 @@
 package us.ihmc.jMonkeyEngineToolkit;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.geometry.BoundingBox3d;
 
 public interface GroundProfile3D
@@ -11,7 +10,7 @@ public interface GroundProfile3D
 
    /**
     * <p>isClose is used as an optimization pass. This method is used to check whether or not
-    * it's even necessary to perform more mathematically intense checks like {@link #checkIfInside(double, double, double, Point3d, Vector3d)}
+    * it's even necessary to perform more mathematically intense checks like {@link #checkIfInside(double, double, double, Point3D, Vector3D)}
     * or {@link us.ihmc.jMonkeyEngineToolkit.HeightMapWithNormals#heightAt(double, double, double)}.</p>
     *
     * <p>
@@ -30,7 +29,7 @@ public interface GroundProfile3D
    /**
     * Returns true if inside the ground object. If inside, must pack the intersection and normal. If not inside, packing those is optional.
     */
-   public abstract boolean checkIfInside(double x, double y, double z, Point3d intersectionToPack, Vector3d normalToPack);
+   public abstract boolean checkIfInside(double x, double y, double z, Point3D intersectionToPack, Vector3D normalToPack);
    
    public abstract HeightMapWithNormals getHeightMapIfAvailable();
 }

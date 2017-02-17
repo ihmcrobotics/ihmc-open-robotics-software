@@ -1,11 +1,16 @@
 package us.ihmc.robotics.kinematics;
 
+import java.util.LinkedHashMap;
+import java.util.Random;
+
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import org.ejml.ops.NormOps;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.geometry.RotationTools;
-import us.ihmc.robotics.linearAlgebra.MatrixTools;
+
+import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
@@ -14,12 +19,6 @@ import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.SpatialMotionVector;
-
-import javax.vecmath.AxisAngle4d;
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Vector3d;
-import java.util.LinkedHashMap;
-import java.util.Random;
 
 /**
  * @author twan
@@ -41,11 +40,11 @@ public class NumericalInverseKinematicsCalculator implements InverseKinematicsCa
 
    private final RigidBodyTransform actualTransform = new RigidBodyTransform();
    private final RigidBodyTransform errorTransform = new RigidBodyTransform();
-   private final AxisAngle4d errorAxisAngle = new AxisAngle4d();
-   private final Matrix3d errorRotationMatrix = new Matrix3d();
-   private final Vector3d errorRotationVector = new Vector3d();
-   private final Vector3d axis = new Vector3d();
-   private final Vector3d errorTranslationVector = new Vector3d();
+   private final AxisAngle errorAxisAngle = new AxisAngle();
+   private final RotationMatrix errorRotationMatrix = new RotationMatrix();
+   private final Vector3D errorRotationVector = new Vector3D();
+   private final Vector3D axis = new Vector3D();
+   private final Vector3D errorTranslationVector = new Vector3D();
 
    private final DenseMatrix64F spatialError = new DenseMatrix64F(SpatialMotionVector.SIZE, 1);
    private final DenseMatrix64F jointAnglesCorrection;
@@ -206,11 +205,11 @@ public class NumericalInverseKinematicsCalculator implements InverseKinematicsCa
       jacobian.compute();
       jacobian.getEndEffectorFrame().getTransformToDesiredFrame(actualTransform, jacobian.getBaseFrame());
 
-      errorTransform.invert(desiredTransform);
+      errorTransform.setAndInvert(desiredTransform);
       errorTransform.multiply(actualTransform);
 
       errorTransform.getRotation(errorRotationMatrix);
-      RotationTools.convertMatrixToAxisAngle(errorRotationMatrix, errorAxisAngle);
+      errorAxisAngle.set(errorRotationMatrix);
 
       axis.set(errorAxisAngle.getX(), errorAxisAngle.getY(), errorAxisAngle.getZ());
       errorRotationVector.set(axis);
@@ -219,8 +218,8 @@ public class NumericalInverseKinematicsCalculator implements InverseKinematicsCa
       
       errorTransform.getTranslation(errorTranslationVector);
       
-      MatrixTools.setDenseMatrixFromTuple3d(spatialError, errorRotationVector, 0, 0);
-      MatrixTools.setDenseMatrixFromTuple3d(spatialError, errorTranslationVector, 3, 0);
+      errorRotationVector.get(0, 0, spatialError);
+      errorTranslationVector.get(3, 0, spatialError);
    }
 
    private void computeJointAngleCorrection(DenseMatrix64F spatialError)

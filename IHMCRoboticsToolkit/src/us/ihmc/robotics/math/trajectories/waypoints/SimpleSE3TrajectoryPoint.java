@@ -3,11 +3,16 @@ package us.ihmc.robotics.math.trajectories.waypoints;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
-import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.Transform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.robotics.geometry.interfaces.EuclideanWaypointInterface;
 import us.ihmc.robotics.geometry.interfaces.SE3WaypointInterface;
 import us.ihmc.robotics.geometry.interfaces.SO3WaypointInterface;
@@ -24,8 +29,8 @@ public class SimpleSE3TrajectoryPoint extends SimpleTrajectoryPoint<SE3Waypoint,
       super(new SE3Waypoint());
    }
 
-   public SimpleSE3TrajectoryPoint(double time, Point3d position, Quat4d orientation, Vector3d linearVelocity,
-         Vector3d angularVelocity)
+   public SimpleSE3TrajectoryPoint(double time, Point3DReadOnly position, QuaternionReadOnly orientation, Vector3DReadOnly linearVelocity,
+         Vector3DReadOnly angularVelocity)
    {
       this();
       this.set(time, position, orientation, linearVelocity, angularVelocity);
@@ -38,30 +43,30 @@ public class SimpleSE3TrajectoryPoint extends SimpleTrajectoryPoint<SE3Waypoint,
    }
 
    @Override
-   public void setPosition(Point3d position)
+   public void setPosition(Point3DReadOnly position)
    {
       waypointData.setPosition(position);
    }
 
    @Override
-   public void setOrientation(Quat4d orientation)
+   public void setOrientation(QuaternionReadOnly orientation)
    {
       waypointData.setOrientation(orientation);
    }
 
    @Override
-   public void setLinearVelocity(Vector3d linearVelocity)
+   public void setLinearVelocity(Vector3DReadOnly linearVelocity)
    {
       waypointData.setLinearVelocity(linearVelocity);
    }
 
    @Override
-   public void setAngularVelocity(Vector3d angularVelocity)
+   public void setAngularVelocity(Vector3DReadOnly angularVelocity)
    {
       waypointData.setAngularVelocity(angularVelocity);
    }
 
-   public void set(double time, Point3d position, Quat4d orientation, Vector3d linearVelocity, Vector3d angularVelocity)
+   public void set(double time, Point3DReadOnly position, QuaternionReadOnly orientation, Vector3DReadOnly linearVelocity, Vector3DReadOnly angularVelocity)
    {
       setTime(time);
       waypointData.set(position, orientation, linearVelocity, angularVelocity);
@@ -140,30 +145,30 @@ public class SimpleSE3TrajectoryPoint extends SimpleTrajectoryPoint<SE3Waypoint,
    }
 
    @Override
-   public void getPosition(Point3d positionToPack)
+   public void getPosition(Point3DBasics positionToPack)
    {
       waypointData.getPosition(positionToPack);
    }
 
    @Override
-   public void getOrientation(Quat4d orientationToPack)
+   public void getOrientation(QuaternionBasics orientationToPack)
    {
       waypointData.getOrientation(orientationToPack);
    }
 
    @Override
-   public void getLinearVelocity(Vector3d linearVelocityToPack)
+   public void getLinearVelocity(Vector3DBasics linearVelocityToPack)
    {
       waypointData.getLinearVelocity(linearVelocityToPack);
    }
 
    @Override
-   public void getAngularVelocity(Vector3d angularVelocityToPack)
+   public void getAngularVelocity(Vector3DBasics angularVelocityToPack)
    {
       waypointData.getAngularVelocity(angularVelocityToPack);
    }
 
-   public double get(Point3d positionToPack, Quat4d orientationToPack, Vector3d linearVelocityToPack, Vector3d angularVelocityToPack)
+   public double get(Point3DBasics positionToPack, QuaternionBasics orientationToPack, Vector3DBasics linearVelocityToPack, Vector3DBasics angularVelocityToPack)
    {
       waypointData.get(positionToPack, orientationToPack, linearVelocityToPack, angularVelocityToPack);
       return getTime();
@@ -254,7 +259,7 @@ public class SimpleSE3TrajectoryPoint extends SimpleTrajectoryPoint<SE3Waypoint,
    }
 
    @Override
-   public void applyTransform(RigidBodyTransform transform)
+   public void applyTransform(Transform transform)
    {
       waypointData.applyTransform(transform);
    }
@@ -278,30 +283,30 @@ public class SimpleSE3TrajectoryPoint extends SimpleTrajectoryPoint<SE3Waypoint,
       return waypointData.getSO3Waypoint();
    }
 
-   public Point3d getPositionCopy()
+   public Point3D getPositionCopy()
    {
-      Point3d positionCopy = new Point3d();
+      Point3D positionCopy = new Point3D();
       getPosition(positionCopy);
       return positionCopy;
    }
 
-   public Quat4d getOrientationCopy()
+   public Quaternion getOrientationCopy()
    {
-      Quat4d orientationCopy = new Quat4d();
+      Quaternion orientationCopy = new Quaternion();
       getOrientation(orientationCopy);
       return orientationCopy;
    }
 
-   public Vector3d getLinearVelocityCopy()
+   public Vector3D getLinearVelocityCopy()
    {
-      Vector3d linearVelocityCopy = new Vector3d();
+      Vector3D linearVelocityCopy = new Vector3D();
       getLinearVelocity(linearVelocityCopy);
       return linearVelocityCopy;
    }
 
-   public Vector3d getAngularVelocityCopy()
+   public Vector3D getAngularVelocityCopy()
    {
-      Vector3d getAngularVelocityCopy = new Vector3d();
+      Vector3D getAngularVelocityCopy = new Vector3D();
       getAngularVelocity(getAngularVelocityCopy);
       return getAngularVelocityCopy;
    }

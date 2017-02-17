@@ -1,7 +1,6 @@
 package us.ihmc.commonWalkingControlModules.sensors.footSwitch;
 
-import javax.vecmath.Point3d;
-
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -82,7 +81,7 @@ public class KinematicsBasedFootSwitch implements FootSwitchInterface
 
    FramePoint tmpFramePoint = new FramePoint();
 
-   private Point3d getPointInWorld(ReferenceFrame frame)
+   private Point3D getPointInWorld(ReferenceFrame frame)
    {
       tmpFramePoint.setToZero(frame);
       tmpFramePoint.changeFrame(ReferenceFrame.getWorldFrame());

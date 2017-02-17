@@ -5,19 +5,18 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Random;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Tuple3d;
-import javax.vecmath.Vector3d;
-
 import org.ejml.data.DenseMatrix64F;
 
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -172,7 +171,7 @@ public class DRCInverseDynamicsCalculatorTestHelper
       rootJointPosition.changeFrame(ReferenceFrame.getWorldFrame());
 
       rootJointExternalForcePoint.setOffsetWorld(rootJointPosition.getPointCopy());
-      Vector3d offsetInJoint = rootJointExternalForcePoint.getOffsetCopy();
+      Vector3D offsetInJoint = rootJointExternalForcePoint.getOffsetCopy();
 
       ArrayList<OneDegreeOfFreedomJoint> oneDegreeOfFreedomJoints = new ArrayList<OneDegreeOfFreedomJoint>();
       robot.getAllOneDegreeOfFreedomJoints(oneDegreeOfFreedomJoints);
@@ -293,17 +292,17 @@ public class DRCInverseDynamicsCalculatorTestHelper
       computedRootJointForces.set(rootJointForce);
       computedRootJointTorques.set(rootJointTorque);
 
-      Vector3d simulatedRootJointForce = new Vector3d();
-      Vector3d simulatedRootJointTorque = new Vector3d();
+      Vector3D simulatedRootJointForce = new Vector3D();
+      Vector3D simulatedRootJointTorque = new Vector3D();
 
       rootJointExternalForcePoint.getForce(simulatedRootJointForce);
       rootJointExternalForcePoint.getMoment(simulatedRootJointTorque);
 
-      Vector3d forceErrorVector = rootJointForce.getVectorCopy();
+      Vector3D forceErrorVector = rootJointForce.getVectorCopy();
       forceErrorVector.sub(simulatedRootJointForce);
       double rootJointForceError = forceErrorVector.length();
 
-      Vector3d torqueErrorVector = rootJointTorque.getVectorCopy();
+      Vector3D torqueErrorVector = rootJointTorque.getVectorCopy();
       torqueErrorVector.sub(simulatedRootJointTorque);
       double rootJointTorqueError = forceErrorVector.length();
 
@@ -382,16 +381,16 @@ public class DRCInverseDynamicsCalculatorTestHelper
       FloatingJoint floatingJoint = robot.getRootJoint();
       FloatingJoint otherFloatingJoint = otherRobot.getRootJoint();
 
-      Tuple3d position = new Point3d();
-      Tuple3d velocity = new Vector3d();
+      Tuple3DBasics position = new Point3D();
+      Tuple3DBasics velocity = new Vector3D();
       otherFloatingJoint.getPositionAndVelocity(position, velocity);
       floatingJoint.setPositionAndVelocity(position, velocity);
 
-      Quat4d rotation = new Quat4d();
+      Quaternion rotation = new Quaternion();
       otherFloatingJoint.getQuaternion(rotation);
       floatingJoint.setQuaternion(rotation);
 
-      Vector3d angularVelocityInBody = otherFloatingJoint.getAngularVelocityInBody();
+      Vector3D angularVelocityInBody = otherFloatingJoint.getAngularVelocityInBody();
       floatingJoint.setAngularVelocityInBody(angularVelocityInBody);
 
       ArrayList<OneDegreeOfFreedomJoint> oneDegreeOfFreedomJoints = new ArrayList<OneDegreeOfFreedomJoint>();
@@ -517,8 +516,8 @@ public class DRCInverseDynamicsCalculatorTestHelper
 
          ExternalForcePoint footExternalForcePoint = feetExternalForcePoints.get(robotSide);
 
-         Vector3d externalForce = new Vector3d();
-         Vector3d externalMoment = new Vector3d();
+         Vector3D externalForce = new Vector3D();
+         Vector3D externalMoment = new Vector3D();
 
          footExternalForcePoint.getForce(externalForce);
          footExternalForcePoint.getMoment(externalMoment);
@@ -530,13 +529,13 @@ public class DRCInverseDynamicsCalculatorTestHelper
          externalForcePointForce.changeFrame(footFrame);
          externalForcePointMoment.changeFrame(footFrame);
 
-         Point3d position = new Point3d();
+         Point3D position = new Point3D();
          footExternalForcePoint.getPosition(position);
          FramePoint pointOfApplication = new FramePoint(ReferenceFrame.getWorldFrame(), position);
          pointOfApplication.changeFrame(footFrame);
 
-         Vector3d torqueFromLeverArm = new Vector3d();
-         Vector3d leverArm = pointOfApplication.getVectorCopy();
+         Vector3D torqueFromLeverArm = new Vector3D();
+         Vector3D leverArm = pointOfApplication.getVectorCopy();
          torqueFromLeverArm.cross(leverArm, externalForcePointForce.getVectorCopy());
 
          externalForcePointMoment.add(torqueFromLeverArm);
@@ -691,11 +690,11 @@ public class DRCInverseDynamicsCalculatorTestHelper
          GroundContactPoint otherGroundContactPoint = otherGroundContactPoints.get(i);
          GroundContactPoint groundContactPoint = groundContactPoints.get(i);
 
-         Vector3d force = new Vector3d();
+         Vector3D force = new Vector3D();
          otherGroundContactPoint.getForce(force);
          groundContactPoint.setForce(force);
 
-         Vector3d moment = new Vector3d();
+         Vector3D moment = new Vector3D();
          otherGroundContactPoint.getMoment(moment);
          groundContactPoint.setMoment(moment);
 

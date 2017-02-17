@@ -2,28 +2,28 @@ package us.ihmc.quadrupedRobotics.communication.packets;
 
 import us.ihmc.communication.packets.Packet;
 
-import javax.vecmath.Vector3d;
+import us.ihmc.euclid.tuple3D.Vector3D;
 
 public class BodyAngularRatePacket extends Packet<BodyAngularRatePacket>
 {
-   private final Vector3d velocity;
+   private final Vector3D velocity;
 
    public BodyAngularRatePacket()
    {
-      this.velocity = new Vector3d();
+      this.velocity = new Vector3D();
    }
 
-   public BodyAngularRatePacket(Vector3d velocity)
+   public BodyAngularRatePacket(Vector3D velocity)
    {
-      this.velocity = new Vector3d(velocity);
+      this.velocity = new Vector3D(velocity);
    }
 
    public BodyAngularRatePacket(double wx, double wy, double wz)
    {
-      this.velocity = new Vector3d(wx, wy, wz);
+      this.velocity = new Vector3D(wx, wy, wz);
    }
 
-   public void get(Vector3d velocity)
+   public void get(Vector3D velocity)
    {
       velocity.set(this.velocity);
    }

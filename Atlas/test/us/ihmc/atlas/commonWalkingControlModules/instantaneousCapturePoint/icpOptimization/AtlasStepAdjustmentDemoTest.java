@@ -3,18 +3,19 @@ package us.ihmc.atlas.commonWalkingControlModules.instantaneousCapturePoint.icpO
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
 import us.ihmc.atlas.StepAdjustmentVisualizers.AtlasStepAdjustmentDemo;
 import us.ihmc.atlas.StepAdjustmentVisualizers.PushDirection;
 import us.ihmc.atlas.StepAdjustmentVisualizers.StepScriptType;
 import us.ihmc.atlas.StepAdjustmentVisualizers.TestType;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.robotics.controllers.ControllerFailureException;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.tools.thread.ThreadTools;
 
 @ContinuousIntegrationPlan(categories = {IntegrationCategory.IN_DEVELOPMENT, IntegrationCategory.VIDEO})

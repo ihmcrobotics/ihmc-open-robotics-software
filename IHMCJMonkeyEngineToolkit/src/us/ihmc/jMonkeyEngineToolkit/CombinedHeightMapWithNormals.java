@@ -2,8 +2,7 @@ package us.ihmc.jMonkeyEngineToolkit;
 
 import java.util.ArrayList;
 
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.HeightMap;
 import us.ihmc.robotics.geometry.BoundingBox3d;
 
@@ -23,7 +22,7 @@ public class CombinedHeightMapWithNormals implements HeightMapWithNormals
    }
 
 
-   public double heightAndNormalAt(double x, double y, double z, Vector3d normalToPack)
+   public double heightAndNormalAt(double x, double y, double z, Vector3D normalToPack)
    {
       Double heightAt = Double.NEGATIVE_INFINITY;
       normalToPack.set(0.0, 0.0, 1.0);

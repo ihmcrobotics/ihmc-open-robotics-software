@@ -1,13 +1,12 @@
 package us.ihmc.simulationconstructionset;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Tuple3d;
-import javax.vecmath.Vector3d;
-import javax.vecmath.Vector4d;
-
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
+import us.ihmc.euclid.tuple4D.Vector4D;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -28,7 +27,7 @@ public class KinematicPoint implements java.io.Serializable
 
    public final String name;
 
-   private final Point3d temp = new Point3d();
+   private final Point3D temp = new Point3D();
 
    private final YoFramePoint position;
    private final YoFrameVector velocity;
@@ -41,11 +40,11 @@ public class KinematicPoint implements java.io.Serializable
 
    private final YoVariableRegistry registry;
 
-   protected final Vector3d
-      offsetFromCOM = new Vector3d(), wXr = new Vector3d(), v_point = new Vector3d();
+   protected final Vector3D
+      offsetFromCOM = new Vector3D(), wXr = new Vector3D(), v_point = new Vector3D();
 
    private RigidBodyTransform tempTransformFromWorldToJoint = new RigidBodyTransform();
-   private Vector4d offsetPlus = new Vector4d();
+   private Vector4D offsetPlus = new Vector4D();
 
    public KinematicPoint(String name, Robot robot)
    {
@@ -57,12 +56,12 @@ public class KinematicPoint implements java.io.Serializable
       this(name, null, registry);
    }
 
-   public KinematicPoint(String name, Vector3d offset, Robot robot)
+   public KinematicPoint(String name, Vector3D offset, Robot robot)
    {
       this(name, offset, robot.getRobotsYoVariableRegistry());
    }
 
-   public KinematicPoint(String name, Vector3d offset, YoVariableRegistry registry)
+   public KinematicPoint(String name, Vector3D offset, YoVariableRegistry registry)
    {
       this.name = name;
       this.registry = registry;
@@ -123,12 +122,12 @@ public class KinematicPoint implements java.io.Serializable
       this.offsetYoFrameVector.set(x, y, z);
    }
 
-   public void setOffsetJoint(Vector3d newOffset)
+   public void setOffsetJoint(Vector3D newOffset)
    {
       this.offsetYoFrameVector.set(newOffset);
    }
 
-   public void setOffsetWorld(Tuple3d offsetInWorld)
+   public void setOffsetWorld(Tuple3DBasics offsetInWorld)
    {
       setOffsetWorld(offsetInWorld.getX(), offsetInWorld.getY(), offsetInWorld.getZ());
    }
@@ -148,7 +147,7 @@ public class KinematicPoint implements java.io.Serializable
       this.position.set(x, y, z);
    }
 
-   public void updatePointVelocity(Matrix3d R0_i, Vector3d comOffset, Vector3d v_i, Vector3d w_i)
+   public void updatePointVelocity(RotationMatrix R0_i, Vector3D comOffset, Vector3D v_i, Vector3D w_i)
    {
       this.getOffset(offsetFromCOM);
       offsetFromCOM.sub(comOffset);
@@ -180,14 +179,14 @@ public class KinematicPoint implements java.io.Serializable
       return name;
    }
 
-   public void getOffset(Tuple3d offsetToPack)
+   public void getOffset(Tuple3DBasics offsetToPack)
    {
       offsetYoFrameVector.get(offsetToPack);
    }
 
-   public Vector3d getOffsetCopy()
+   public Vector3D getOffsetCopy()
    {
-      Vector3d ret = new Vector3d();
+      Vector3D ret = new Vector3D();
       getOffset(ret);
 
       return ret;
@@ -223,38 +222,38 @@ public class KinematicPoint implements java.io.Serializable
       return velocity.getZ();
    }
 
-   public void getPosition(Tuple3d positionToPack)
+   public void getPosition(Tuple3DBasics positionToPack)
    {
       position.get(positionToPack);
    }
 
-   public Point3d getPositionPoint()
+   public Point3D getPositionPoint()
    {
-      Point3d pointToReturn = new Point3d();
+      Point3D pointToReturn = new Point3D();
       getPosition(pointToReturn);
 
       return pointToReturn;
    }
 
-   public void getVelocity(Vector3d velocityToPack)
+   public void getVelocity(Vector3D velocityToPack)
    {
       velocity.get(velocityToPack);
    }
 
-   public Vector3d getVelocityVector()
+   public Vector3D getVelocityVector()
    {
-      Vector3d velocityToReturn = new Vector3d();
+      Vector3D velocityToReturn = new Vector3D();
       velocity.get(velocityToReturn);
 
       return velocityToReturn;
    }
 
-   public void setVelocity(Vector3d velocity)
+   public void setVelocity(Vector3D velocity)
    {
       this.velocity.set(velocity);
    }
 
-   public void setPosition(Point3d position)
+   public void setPosition(Point3D position)
    {
       this.position.set(position);
    }

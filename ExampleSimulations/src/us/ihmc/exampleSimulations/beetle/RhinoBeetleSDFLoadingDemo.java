@@ -4,9 +4,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.exampleSimulations.beetle.parameters.RhinoBeetleModelFactory;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
@@ -27,8 +26,8 @@ public class RhinoBeetleSDFLoadingDemo
    {
       RhinoBeetleModelFactory robotParameters = new RhinoBeetleModelFactory();
       FloatingRootJointRobot sdfRobot = robotParameters.createSdfRobot();
-      sdfRobot.setPositionInWorld(new Vector3d(0.0, 0.0, 1.0));
-      System.out.println(sdfRobot.computeCenterOfMass(new Point3d()));
+      sdfRobot.setPositionInWorld(new Vector3D(0.0, 0.0, 1.0));
+      System.out.println(sdfRobot.computeCenterOfMass(new Point3D()));
 
       if (SHOW_ELLIPSOIDS)
       {

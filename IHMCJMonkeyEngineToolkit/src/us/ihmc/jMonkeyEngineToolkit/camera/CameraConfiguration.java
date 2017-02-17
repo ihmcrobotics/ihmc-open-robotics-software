@@ -1,6 +1,6 @@
 package us.ihmc.jMonkeyEngineToolkit.camera;
 
-import javax.vecmath.Tuple3d;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 
 
 public class CameraConfiguration
@@ -117,12 +117,12 @@ public class CameraConfiguration
       this.dollyDZ = dollyDZ;
    }
 
-   public void setCameraFix(Tuple3d cameraFix)
+   public void setCameraFix(Tuple3DBasics cameraFix)
    {
       setCameraFix(cameraFix.getX(), cameraFix.getY(), cameraFix.getZ());
    }
 
-   public void setCameraPosition(Tuple3d cameraPosition)
+   public void setCameraPosition(Tuple3DBasics cameraPosition)
    {
       setCameraPosition(cameraPosition.getX(), cameraPosition.getY(), cameraPosition.getZ());
    }

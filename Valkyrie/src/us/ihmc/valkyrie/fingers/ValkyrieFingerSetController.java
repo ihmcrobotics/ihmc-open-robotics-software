@@ -3,8 +3,8 @@ package us.ihmc.valkyrie.fingers;
 import java.util.EnumMap;
 import java.util.LinkedHashMap;
 
-import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
+import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;

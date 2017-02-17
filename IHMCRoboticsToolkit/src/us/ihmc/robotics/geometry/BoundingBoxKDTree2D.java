@@ -1,8 +1,9 @@
 package us.ihmc.robotics.geometry;
 
-import javax.vecmath.Point2d;
 import java.util.ArrayList;
 import java.util.Arrays;
+
+import us.ihmc.euclid.tuple2D.Point2D;
 
 /**
  * <p>
@@ -204,9 +205,9 @@ public class BoundingBoxKDTree2D
 
       ArrayList<BoundingBox2d>[] returnList = new ArrayList[2];
 
-      Point2d center = new Point2d();
-      Point2d minPoint = new Point2d();
-      Point2d maxPoint = new Point2d();
+      Point2D center = new Point2D();
+      Point2D minPoint = new Point2D();
+      Point2D maxPoint = new Point2D();
 
       double[] midPointsX = new double[boundingBoxes.size()];
       for (int i = 0; i < boundingBoxes.size(); i++)
@@ -262,9 +263,9 @@ public class BoundingBoxKDTree2D
 
       ArrayList<BoundingBox2d>[] returnList = new ArrayList[2];
 
-      Point2d center = new Point2d();
-      Point2d minPoint = new Point2d();
-      Point2d maxPoint = new Point2d();
+      Point2D center = new Point2D();
+      Point2D minPoint = new Point2D();
+      Point2D maxPoint = new Point2D();
 
       double[] midPointsY = new double[boundingBoxes.size()];
       for (int i = 0; i < boundingBoxes.size(); i++)

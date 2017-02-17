@@ -6,9 +6,8 @@ import java.io.BufferedReader;
 import java.io.PrintWriter;
 import java.util.StringTokenizer;
 
-import javax.vecmath.Point2d;
-import javax.vecmath.Vector2d;
-
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.graphicsDescription.plotting.Graphics2DAdapter;
 import us.ihmc.graphicsDescription.plotting.Plotter2DAdapter;
 
@@ -22,8 +21,8 @@ public class CircleArtifact extends Artifact
    private double diameter;
    private boolean fill = true;
    
-   private final Point2d tempPoint = new Point2d();
-   private final Vector2d tempRadii = new Vector2d();
+   private final Point2D tempPoint = new Point2D();
+   private final Vector2D tempRadii = new Vector2D();
 
    public CircleArtifact(String id, double x, double y, double diameter, boolean fill)
    {
@@ -84,7 +83,7 @@ public class CircleArtifact extends Artifact
    }
 
    @Override
-   public void drawLegend(Plotter2DAdapter graphics, Point2d origin)
+   public void drawLegend(Plotter2DAdapter graphics, Point2D origin)
    {
       graphics.setColor(color);
       graphics.setStroke(STROKE);

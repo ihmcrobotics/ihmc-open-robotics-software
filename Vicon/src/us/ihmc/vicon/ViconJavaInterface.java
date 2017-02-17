@@ -1,7 +1,7 @@
 package us.ihmc.vicon;
 
-import javax.vecmath.Matrix3f;
-import javax.vecmath.Point3d;
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.tuple3D.Point3D;
 
 public class ViconJavaInterface
 {
@@ -19,7 +19,7 @@ public class ViconJavaInterface
 
    public static native String ViconGetMarkerName(int id);
 
-   public static native Point3d ViconGetMarker(String markerName);
+   public static native Point3D ViconGetMarker(String markerName);
 
    public static native int ViconGetNumBodies();
 
@@ -31,7 +31,7 @@ public class ViconJavaInterface
 
    public static native QuaternionPose ViconGetBodyQuaternion(String bodyName);
 
-   public static native Matrix3f ViconGetBodyRotationMatrix(String bodyName);
+   public static native RotationMatrix ViconGetBodyRotationMatrix(String bodyName);
 
    public static native double ViconGetFrameTimeStamp();
 
@@ -87,7 +87,7 @@ public class ViconJavaInterface
 //        for (int i = 0; i < numMarkers; i++)
 //        {
 //            String name = ViconGetMarkerName(i);
-//            Point3d position = ViconGetMarker(name);
+//            Point3D position = ViconGetMarker(name);
 //            System.out.println("marker " + i + " is " + name + ": " + position);
 //        }
 //

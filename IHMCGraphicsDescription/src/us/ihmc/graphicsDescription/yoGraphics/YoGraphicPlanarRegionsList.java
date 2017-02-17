@@ -7,20 +7,20 @@ import java.util.Deque;
 import java.util.List;
 import java.util.Random;
 
-import javax.vecmath.Point3f;
-import javax.vecmath.TexCoord2f;
-import javax.vecmath.Vector3f;
-
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
+import us.ihmc.euclid.transform.AffineTransform;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D32;
+import us.ihmc.euclid.tuple3D.Vector3D32;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.MeshDataHolder;
 import us.ihmc.graphicsDescription.ModifiableMeshDataHolder;
+import us.ihmc.graphicsDescription.TexCoord2f;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.instructions.Graphics3DAddMeshDataInstruction;
 import us.ihmc.graphicsDescription.plotting.artifact.Artifact;
-import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -29,8 +29,6 @@ import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.geometry.Transform3d;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFramePoseUsingQuaternions;
@@ -395,16 +393,16 @@ public class YoGraphicPlanarRegionsList extends YoGraphic implements RemoteYoGra
       if (numberOfTriangles <= 0)
          return null;
 
-      Point3f[] vertices = new Point3f[numberOfVertices];
+      Point3D32[] vertices = new Point3D32[numberOfVertices];
       TexCoord2f[] texturePoints = new TexCoord2f[numberOfVertices];
-      Vector3f[] vertexNormals = new Vector3f[numberOfVertices];
+      Vector3D32[] vertexNormals = new Vector3D32[numberOfVertices];
 
       RigidBodyTransform transform = new RigidBodyTransform();
       currentRegionPose.getPose(transform);
 
       for (int vertexIndex = 0; vertexIndex < numberOfVertices; vertexIndex++)
       {
-         Point3f vertex = new Point3f();
+         Point3D32 vertex = new Point3D32();
          vertexBuffer.get(vertexIndex + indexInVertexBuffer).get(vertex);
          transform.transform(vertex);
          vertices[vertexIndex] = vertex;
@@ -412,7 +410,7 @@ public class YoGraphicPlanarRegionsList extends YoGraphic implements RemoteYoGra
 
       for (int vertexIndex = 0; vertexIndex < numberOfVertices; vertexIndex++)
       {
-         Vector3f normal = new Vector3f();
+         Vector3D32 normal = new Vector3D32();
          normal.setX((float) transform.getM02());
          normal.setY((float) transform.getM12());
          normal.setZ((float) transform.getM22());
@@ -757,7 +755,7 @@ public class YoGraphicPlanarRegionsList extends YoGraphic implements RemoteYoGra
    }
 
    @Override
-   protected void computeRotationTranslation(Transform3d transform3d)
+   protected void computeRotationTranslation(AffineTransform transform3d)
    { // Dealing with the transform here.
       transform3d.setIdentity();
    }

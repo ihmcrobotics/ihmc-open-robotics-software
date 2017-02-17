@@ -1,9 +1,6 @@
 package us.ihmc.simulationconstructionset.physics;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
-import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.simulationconstructionset.Link;
 
 public interface CollisionShapeWithLink extends CollisionShape

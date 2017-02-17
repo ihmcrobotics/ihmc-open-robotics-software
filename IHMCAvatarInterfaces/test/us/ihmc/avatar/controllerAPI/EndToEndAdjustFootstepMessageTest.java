@@ -4,9 +4,6 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -20,6 +17,8 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepListVisualize
 import us.ihmc.commonWalkingControlModules.desiredFootStep.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.walking.AdjustFootstepMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
@@ -88,7 +87,7 @@ public abstract class EndToEndAdjustFootstepMessageTest implements MultiRobotTes
 
          private boolean checkedIfControllerAdjusted = false;
          private double delayBeforeChecking = 0.1;
-         private Point3d adjustedLocation = new Point3d();
+         private Point3D adjustedLocation = new Point3D();
 
          @Override
          public void doScript(double t)
@@ -102,7 +101,7 @@ public abstract class EndToEndAdjustFootstepMessageTest implements MultiRobotTes
                {
                   if (t >= swingInitialTime + delayBeforeAdjusting)
                   {
-                     Quat4d orientation = new Quat4d();
+                     Quaternion orientation = new Quaternion();
                      Pose nextFootstepPose = findNextFootstepPose(scs);
                      nextFootstepPose.getPosition(adjustedLocation);
                      nextFootstepPose.getOrientation(orientation);
@@ -169,9 +168,9 @@ public abstract class EndToEndAdjustFootstepMessageTest implements MultiRobotTes
       for (int i = 0; i < numberOfFootsteps; i++)
       {
          framePosition.add(stepLength, side.negateIfRightSide(stepWidth), 0.0);
-         Point3d position = new Point3d();
+         Point3D position = new Point3D();
          framePosition.get(position);
-         Quat4d orientation = new Quat4d(0.0, 0.0, 0.0, 1.0);
+         Quaternion orientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
          footstepDataListMessage.add(new FootstepDataMessage(side, position, orientation));
          side = side.getOppositeSide();
       }

@@ -2,16 +2,15 @@ package us.ihmc.humanoidRobotics.communication.packets.sensing;
 
 import java.util.Random;
 
-import javax.vecmath.Vector3d;
-
 import us.ihmc.communication.packets.Packet;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.random.RandomTools;
 
 public class HeadPosePacket extends Packet<HeadPosePacket>
 {
 	public double yaw, pitch, roll ;
-	public Vector3d measuredGravityInWorld;
+	public Vector3D measuredGravityInWorld;
 	public enum MeasurementStatus {UNSTABLE_WAIT, STABLE};
 	public MeasurementStatus status;
 	
@@ -28,7 +27,7 @@ public class HeadPosePacket extends Packet<HeadPosePacket>
 	
 	public HeadPosePacket()
 	{
-		measuredGravityInWorld = new Vector3d();
+		measuredGravityInWorld = new Vector3D();
 		reset();
 	}
 	

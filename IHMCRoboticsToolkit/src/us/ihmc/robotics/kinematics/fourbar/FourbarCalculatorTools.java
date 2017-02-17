@@ -1,16 +1,18 @@
 package us.ihmc.robotics.kinematics.fourbar;
 
-import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.random.RandomTools;
-
-import java.util.Random;
-
-import static java.lang.Math.*;
 import static java.lang.Math.abs;
+import static java.lang.Math.acos;
 import static java.lang.Math.atan2;
+import static java.lang.Math.pow;
+import static java.lang.Math.sqrt;
 import static us.ihmc.robotics.MathTools.checkIfInRange;
 import static us.ihmc.robotics.MathTools.cube;
 import static us.ihmc.robotics.MathTools.square;
+
+import java.util.Random;
+
+import us.ihmc.robotics.MathTools;
+import us.ihmc.robotics.random.RandomTools;
 
 public class FourbarCalculatorTools
 {

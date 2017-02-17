@@ -1,9 +1,8 @@
 package us.ihmc.valkyrie.parameters;
 
-import javax.vecmath.Vector3d;
-
 import us.ihmc.avatar.drcRobot.DRCRobotPhysicalProperties;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
@@ -29,7 +28,7 @@ public class ValkyriePhysicalProperties implements DRCRobotPhysicalProperties
       {
          RigidBodyTransform soleToAnkleFrame = new RigidBodyTransform();
 //         soleToAnkleFrame.setEuler(new Vector3d(0.0, +0.13, 0.0));
-         soleToAnkleFrame.setTranslation(new Vector3d(footLength / 2.0 - footBack, 0.0, -ValkyriePhysicalProperties.ankleHeight));
+         soleToAnkleFrame.setTranslation(new Vector3D(footLength / 2.0 - footBack, 0.0, -ValkyriePhysicalProperties.ankleHeight));
          soleToAnkleFrameTransforms.put(side, soleToAnkleFrame);
       }
    }

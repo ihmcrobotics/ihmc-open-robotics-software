@@ -1,31 +1,30 @@
 package us.ihmc.sensorProcessing.simulatedSensors;
 
-import javax.vecmath.AxisAngle4d;
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Quat4d;
-
 import us.ihmc.controlFlow.ControlFlowOutputPort;
-import us.ihmc.simulationconstructionset.IMUMount;
+import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.simulationconstructionset.IMUMount;
 
-public class SimulatedOrientationSensorFromRobot extends SimulatedSensor<Matrix3d>
+public class SimulatedOrientationSensorFromRobot extends SimulatedSensor<RotationMatrix>
 {
    private final IMUMount imuMount;
 
-   private final Quat4d tempQuaternionOne = new Quat4d();
-   private final Quat4d tempQuaternionTwo = new Quat4d();
+   private final Quaternion tempQuaternionOne = new Quaternion();
+   private final Quaternion tempQuaternionTwo = new Quaternion();
 
-   private final AxisAngle4d tempAxisAngle = new AxisAngle4d();
+   private final AxisAngle tempAxisAngle = new AxisAngle();
 
-   private final Matrix3d rotationMatrix = new Matrix3d();
+   private final RotationMatrix rotationMatrix = new RotationMatrix();
 
    private final YoFrameQuaternion yoFrameQuaternionPerfect, yoFrameQuaternionNoisy;
    private final DoubleYoVariable rotationAngleNoise;
 
-   private final ControlFlowOutputPort<Matrix3d> orientationOutputPort = createOutputPort("orientationOutputPort");
+   private final ControlFlowOutputPort<RotationMatrix> orientationOutputPort = createOutputPort("orientationOutputPort");
 
    public SimulatedOrientationSensorFromRobot(String name, IMUMount imuMount, YoVariableRegistry registry)
    {
@@ -49,7 +48,7 @@ public class SimulatedOrientationSensorFromRobot extends SimulatedSensor<Matrix3
       yoFrameQuaternionNoisy.get(tempQuaternionTwo);
 
       tempQuaternionTwo.inverse();
-      tempQuaternionOne.mul(tempQuaternionTwo);
+      tempQuaternionOne.multiply(tempQuaternionTwo);
 
       tempAxisAngle.set(tempQuaternionOne);
 
@@ -67,7 +66,7 @@ public class SimulatedOrientationSensorFromRobot extends SimulatedSensor<Matrix3
       // empty
    }
 
-   public ControlFlowOutputPort<Matrix3d> getOrientationOutputPort()
+   public ControlFlowOutputPort<RotationMatrix> getOrientationOutputPort()
    {
       return orientationOutputPort;
    }

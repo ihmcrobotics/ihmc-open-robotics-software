@@ -3,13 +3,12 @@ package us.ihmc.avatar.networkProcessor.footstepPlanningToolboxModule;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.vecmath.Point2d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.trajectories.SwingOverPlanarRegionsTrajectoryExpander;
 import us.ihmc.commonWalkingControlModules.trajectories.SwingOverPlanarRegionsTrajectoryExpander.SwingOverPlanarRegionsTrajectoryExpansionStatus;
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.SimpleFootstep;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -78,13 +77,13 @@ public class FootstepDataListWithSwingOverTrajectoriesAssembler
 
          simpleFootstep.getSoleFramePose(swingEndPose);
 
-         FootstepDataMessage footstepDataMessage = new FootstepDataMessage(simpleFootstep.getRobotSide(), new Point3d(swingEndPose.getPositionUnsafe()),
-                                                                           new Quat4d(swingEndPose.getOrientationUnsafe()));
+         FootstepDataMessage footstepDataMessage = new FootstepDataMessage(simpleFootstep.getRobotSide(), new Point3D(swingEndPose.getPositionUnsafe()),
+                                                                           new Quaternion(swingEndPose.getOrientationUnsafe()));
          footstepDataMessage.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
 
          double maxSpeedDimensionless = swingOverPlanarRegionsTrajectoryExpander.expandTrajectoryOverPlanarRegions(stanceFootPose, swingStartPose, swingEndPose, planarRegionsList);
          footstepDataMessage.setTrajectoryType(TrajectoryType.CUSTOM);
-         Point3d[] waypoints = new Point3d[] {new Point3d(), new Point3d()};
+         Point3D[] waypoints = new Point3D[] {new Point3D(), new Point3D()};
          swingOverPlanarRegionsTrajectoryExpander.getExpandedWaypoints().get(0).get(waypoints[0]);
          swingOverPlanarRegionsTrajectoryExpander.getExpandedWaypoints().get(1).get(waypoints[1]);
          footstepDataMessage.setTrajectoryWaypoints(waypoints);
@@ -98,10 +97,10 @@ public class FootstepDataListWithSwingOverTrajectoriesAssembler
                ConvexPolygonTools.limitVerticesConservative(partialFootholdPolygon, 4);
             }
 
-            ArrayList<Point2d> fourPartialFootholdCorners = new ArrayList<>();
+            ArrayList<Point2D> fourPartialFootholdCorners = new ArrayList<>();
             for (int j = 0; j < 4; j++)
             {
-               fourPartialFootholdCorners.add(new Point2d(partialFootholdPolygon.getVertex(j)));
+               fourPartialFootholdCorners.add(new Point2D(partialFootholdPolygon.getVertex(j)));
             }
 
             footstepDataMessage.setPredictedContactPoints(fourPartialFootholdCorners);
@@ -143,13 +142,13 @@ public class FootstepDataListWithSwingOverTrajectoriesAssembler
 
          footstep.getSolePose(swingEndPose);
 
-         FootstepDataMessage footstepDataMessage = new FootstepDataMessage(footstep.getRobotSide(), new Point3d(swingEndPose.getPositionUnsafe()),
-                                                                           new Quat4d(swingEndPose.getOrientationUnsafe()));
+         FootstepDataMessage footstepDataMessage = new FootstepDataMessage(footstep.getRobotSide(), new Point3D(swingEndPose.getPositionUnsafe()),
+                                                                           new Quaternion(swingEndPose.getOrientationUnsafe()));
          footstepDataMessage.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
 
          swingOverPlanarRegionsTrajectoryExpander.expandTrajectoryOverPlanarRegions(stanceFootPose, swingStartPose, swingEndPose, planarRegionsList);
          footstepDataMessage.setTrajectoryType(TrajectoryType.CUSTOM);
-         Point3d[] waypoints = new Point3d[] {new Point3d(), new Point3d()};
+         Point3D[] waypoints = new Point3D[] {new Point3D(), new Point3D()};
          swingOverPlanarRegionsTrajectoryExpander.getExpandedWaypoints().get(0).get(waypoints[0]);
          swingOverPlanarRegionsTrajectoryExpander.getExpandedWaypoints().get(1).get(waypoints[1]);
          footstepDataMessage.setTrajectoryWaypoints(waypoints);
@@ -165,10 +164,10 @@ public class FootstepDataListWithSwingOverTrajectoriesAssembler
                ConvexPolygonTools.limitVerticesConservative(partialFootholdPolygon, 4);
             }
 
-            ArrayList<Point2d> fourPartialFootholdCorners = new ArrayList<>();
+            ArrayList<Point2D> fourPartialFootholdCorners = new ArrayList<>();
             for (int j = 0; j < 4; j++)
             {
-               fourPartialFootholdCorners.add(new Point2d(partialFootholdPolygon.getVertex(j)));
+               fourPartialFootholdCorners.add(new Point2D(partialFootholdPolygon.getVertex(j)));
             }
 
             footstepDataMessage.setPredictedContactPoints(fourPartialFootholdCorners);

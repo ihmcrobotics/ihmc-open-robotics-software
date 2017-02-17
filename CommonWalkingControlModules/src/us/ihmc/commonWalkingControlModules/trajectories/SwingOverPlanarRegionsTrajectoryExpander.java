@@ -4,12 +4,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import javax.vecmath.AxisAngle4d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
+import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -21,7 +21,6 @@ import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.algorithms.SphereWithConvexPolygonIntersector;
 import us.ihmc.robotics.geometry.shapes.FrameSphere3d;
 import us.ihmc.robotics.geometry.shapes.Plane3d;
@@ -62,12 +61,12 @@ public class SwingOverPlanarRegionsTrajectoryExpander
    private final FrameConvexPolygon2d framePlanarRegion;
    private final TransformReferenceFrame planarRegionReferenceFrame;
    private final FramePoint midGroundPoint;
-   private final Vector3d waypointAdjustmentVector;
+   private final Vector3D waypointAdjustmentVector;
    private final Plane3d waypointAdjustmentPlane;
    private final Plane3d swingFloorPlane;
    private final Plane3d swingStartToeFacingSwingEndPlane;
    private final Plane3d swingEndHeelFacingSwingStartPlane;
-   private final AxisAngle4d axisAngle;
+   private final AxisAngle axisAngle;
    private final RigidBodyTransform rigidBodyTransform;
 
    // Boilerplate variables
@@ -130,12 +129,12 @@ public class SwingOverPlanarRegionsTrajectoryExpander
       framePlanarRegion = new FrameConvexPolygon2d();
       planarRegionReferenceFrame = new TransformReferenceFrame("planarRegionReferenceFrame", WORLD);
       midGroundPoint = new FramePoint();
-      waypointAdjustmentVector = new Vector3d();
+      waypointAdjustmentVector = new Vector3D();
       waypointAdjustmentPlane = new Plane3d();
       swingFloorPlane = new Plane3d();
       swingStartToeFacingSwingEndPlane = new Plane3d();
       swingEndHeelFacingSwingStartPlane = new Plane3d();
-      axisAngle = new AxisAngle4d();
+      axisAngle = new AxisAngle();
       rigidBodyTransform = new RigidBodyTransform();
 
       initialVelocity = new FrameVector(WORLD, 0.0, 0.0, 0.0);
@@ -249,7 +248,7 @@ public class SwingOverPlanarRegionsTrajectoryExpander
 
          footCollisionSphere.changeFrame(WORLD);
 
-         Point3d center = new Point3d();
+         Point3D center = new Point3D();
          footCollisionSphere.getCenter(center);
 
          for (int i = 0; i < planarRegionsList.getNumberOfPlanarRegions(); i++)

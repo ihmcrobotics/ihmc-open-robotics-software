@@ -1,8 +1,7 @@
 package us.ihmc.atlas.initialSetup;
 
-import javax.vecmath.Vector3d;
-
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
@@ -32,11 +31,11 @@ public class PushUpDRCRobotInitialSetup implements DRCRobotInitialSetup<Humanoid
       robot.setOrientation(0.0, bodyPitch , 0.0);
    }
    
-   public void getOffset(Vector3d offsetToPack)
+   public void getOffset(Vector3D offsetToPack)
    {
    }
 
-   public void setOffset(Vector3d offset)
+   public void setOffset(Vector3D offset)
    {
    }
 

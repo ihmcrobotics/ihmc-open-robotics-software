@@ -1,12 +1,12 @@
 package us.ihmc.exampleSimulations.jointLimits;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.matrix.Matrix3D;
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.robotics.Axis;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.InverseDynamicsCalculator;
@@ -43,12 +43,12 @@ public class JointLimitsRobot extends Robot
       // --- id robot ---
       ReferenceFrame elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevator", worldFrame, new RigidBodyTransform());
       elevator = new RigidBody("elevator", elevatorFrame);
-      idJoint = ScrewTools.addRevoluteJoint("idJoint", elevator, new Vector3d(0.0, 0.0, 0.0), new Vector3d(0.0, 1.0, 0.0));
-      Matrix3d inertia = RotationalInertiaCalculator.getRotationalInertiaMatrixOfSolidCylinder(mass, radius, length, Axis.Z);
-      RigidBody arm = ScrewTools.addRigidBody("arm", idJoint, inertia, mass, new Vector3d(0.0, 0.0, length/2.0));
+      idJoint = ScrewTools.addRevoluteJoint("idJoint", elevator, new Vector3D(0.0, 0.0, 0.0), new Vector3D(0.0, 1.0, 0.0));
+      Matrix3D inertia = RotationalInertiaCalculator.getRotationalInertiaMatrixOfSolidCylinder(mass, radius, length, Axis.Z);
+      RigidBody arm = ScrewTools.addRigidBody("arm", idJoint, inertia, mass, new Vector3D(0.0, 0.0, length/2.0));
 
       // --- scs robot ---
-      joint = new PinJoint("joint", new Vector3d(), this, Axis.Y);
+      joint = new PinJoint("joint", new Vector3D(), this, Axis.Y);
       joint.setLimitStops(lowerLimit, upperLimit, 1000.0, 10.0);
       joint.setDamping(0.5);
       joint.setLink(makeLink());
@@ -63,7 +63,7 @@ public class JointLimitsRobot extends Robot
    {
       Link link = new Link("link");
       link.setMass(mass);
-      link.setComOffset(new Vector3d(0.0, 0.0, length/2.0));
+      link.setComOffset(new Vector3D(0.0, 0.0, length/2.0));
       double ixx = mass/12.0 * (3.0 * radius*radius + length*length);
       double iyy = ixx;
       double izz = mass/2.0 * radius*radius;

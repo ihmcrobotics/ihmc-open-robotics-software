@@ -1,26 +1,25 @@
 package us.ihmc.steppr.hardware.state;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
 import us.ihmc.acsell.hardware.state.AcsellActuatorState;
 import us.ihmc.acsell.hardware.state.AcsellXSensState;
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.rotationConversion.YawPitchRollConversion;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.steppr.hardware.configuration.StepprCalibrationOffset;
 
 public class StepprUpperBodyOffsetCalculator
 {
    // Values from matlab/fitHardIron.m
-   private static final Vector3d magScale = new Vector3d(1.0 / 261.0, 1.0 / 243.0, 1.0 / 233.0);
-   private static final Vector3d magBias = new Vector3d(-64.1, 54.0, -269.0);
+   private static final Vector3D magScale = new Vector3D(1.0 / 261.0, 1.0 / 243.0, 1.0 / 233.0);
+   private static final Vector3D magBias = new Vector3D(-64.1, 54.0, -269.0);
 
-   private static final RigidBodyTransform accelAndGyroToZUpMatrix = new RigidBodyTransform(new Matrix3d(1, 0, 0, 0, 0, -1, 0, 1, 0), new Vector3d());
-   private static final RigidBodyTransform magToAccellMatrix = new RigidBodyTransform(new Matrix3d(0, 1, 0, 1, 0, 0, 0, 0, -1), new Vector3d());
+   private static final RigidBodyTransform accelAndGyroToZUpMatrix = new RigidBodyTransform(new RotationMatrix(1, 0, 0, 0, 0, -1, 0, 1, 0), new Vector3D());
+   private static final RigidBodyTransform magToAccellMatrix = new RigidBodyTransform(new RotationMatrix(0, 1, 0, 1, 0, 0, 0, 0, -1), new Vector3D());
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
@@ -31,11 +30,11 @@ public class StepprUpperBodyOffsetCalculator
 
    private final AcsellXSensState xsens;
 
-   private final Quat4d xsensQuat = new Quat4d();
-   private final Matrix3d xsensMatrix = new Matrix3d();
+   private final Quaternion xsensQuat = new Quaternion();
+   private final RotationMatrix xsensMatrix = new RotationMatrix();
 
-   private final Vector3d accel = new Vector3d();
-   private final Vector3d mag = new Vector3d();
+   private final Vector3D accel = new Vector3D();
+   private final Vector3D mag = new Vector3D();
 
    private final DoubleYoVariable q_calc_torso_x;
    private final DoubleYoVariable q_calc_torso_y;
@@ -94,7 +93,7 @@ public class StepprUpperBodyOffsetCalculator
       parentRegistry.addChild(registry);
    }
 
-   public void accel2quaternions(Vector3d a, double heading)
+   public void accel2quaternions(Vector3D a, double heading)
    {
       double g = a.length();
 
@@ -124,7 +123,7 @@ public class StepprUpperBodyOffsetCalculator
       xsens.getQuaternion(xsensQuat);
       xsensMatrix.set(xsensQuat);
 
-      RotationTools.convertQuaternionToYawPitchRoll(xsensQuat, yawPitchRoll);
+      YawPitchRollConversion.convertQuaternionToYawPitchRoll(xsensQuat, yawPitchRoll);
       xsens_yaw.update(yawPitchRoll[0]);
       xsens_pitch.update(yawPitchRoll[1]);
       xsens_roll.update(yawPitchRoll[2]);

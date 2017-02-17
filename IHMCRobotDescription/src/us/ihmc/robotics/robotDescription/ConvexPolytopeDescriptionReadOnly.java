@@ -1,7 +1,7 @@
 package us.ihmc.robotics.robotDescription;
 
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.geometry.polytope.ConvexPolytope;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 public class ConvexPolytopeDescriptionReadOnly implements ConvexShapeDescription
 {

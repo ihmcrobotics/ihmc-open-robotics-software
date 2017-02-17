@@ -8,8 +8,8 @@ import java.awt.Graphics2D;
 import java.util.ArrayList;
 
 import javax.swing.JPanel;
-import javax.vecmath.Point2d;
 
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.graphicsDescription.plotting.Plotter2DAdapter;
 import us.ihmc.graphicsDescription.plotting.artifact.Artifact;
 import us.ihmc.graphicsDescription.plotting.artifact.ArtifactsChangedListener;
@@ -20,7 +20,7 @@ public class PlotterLegendPanel extends JPanel implements ArtifactsChangedListen
    private ArrayList<Artifact> artifacts = new ArrayList<Artifact>();
    private final Plotter2DAdapter graphics2dAdapter;
    
-   private final Point2d drawOrigin = new Point2d();
+   private final Point2D drawOrigin = new Point2D();
 
    public PlotterLegendPanel(Plotter2DAdapter graphics2dAdapter)
    {

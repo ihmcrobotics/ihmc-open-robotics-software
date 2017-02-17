@@ -1,48 +1,46 @@
 package us.ihmc.quadrupedRobotics.communication.packets;
 
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.robotics.geometry.RotationTools;
-
-import javax.vecmath.Quat4d;
+import us.ihmc.euclid.tuple4D.Quaternion;
 
 public class BodyOrientationPacket extends Packet<BodyOrientationPacket>
 {
-   private Quat4d orientation;
+   private Quaternion orientation;
 
    public BodyOrientationPacket()
    {
-      this.orientation = new Quat4d();
+      this.orientation = new Quaternion();
    }
 
-   public BodyOrientationPacket(Quat4d orientation)
+   public BodyOrientationPacket(Quaternion orientation)
    {
-      this.orientation = new Quat4d(orientation);
+      this.orientation = new Quaternion(orientation);
    }
 
    public BodyOrientationPacket(double yaw, double pitch, double roll)
    {
-      this.orientation = new Quat4d();
-      RotationTools.convertYawPitchRollToQuaternion(yaw, pitch, roll, this.orientation);
+      this.orientation = new Quaternion();
+      this.orientation.setYawPitchRoll(yaw, pitch, roll);
    }
 
-   public void get(Quat4d orientation)
+   public void get(Quaternion orientation)
    {
       orientation.set(this.orientation);
    }
 
    public double getYaw()
    {
-      return RotationTools.computeYaw(this.orientation);
+      return this.orientation.getYaw();
    }
 
    public double getPitch()
    {
-      return RotationTools.computePitch(this.orientation);
+      return this.orientation.getPitch();
    }
 
    public double getRoll()
    {
-      return RotationTools.computeRoll(this.orientation);
+      return this.orientation.getRoll();
    }
 
    @Override public boolean epsilonEquals(BodyOrientationPacket other, double epsilon)

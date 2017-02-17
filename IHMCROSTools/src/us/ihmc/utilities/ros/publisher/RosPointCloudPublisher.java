@@ -1,13 +1,12 @@
 package us.ihmc.utilities.ros.publisher;
 
-import javax.vecmath.Color3f;
-import javax.vecmath.Point3d;
-
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.LittleEndianHeapChannelBuffer;
 import org.ros.message.Time;
 
 import sensor_msgs.PointCloud2;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.robotics.dataStructures.MutableColor;
 import us.ihmc.utilities.ros.types.PointType;
 
 public class RosPointCloudPublisher extends RosTopicPublisher<PointCloud2>
@@ -24,7 +23,7 @@ public class RosPointCloudPublisher extends RosTopicPublisher<PointCloud2>
    
 
 
-   public void publish(Point3d[] points, float[] intensities, String frameId)
+   public void publish(Point3D[] points, float[] intensities, String frameId)
    {
       PointCloud2 message = getMessage();
       message.getHeader().setFrameId(frameId);
@@ -53,7 +52,7 @@ public class RosPointCloudPublisher extends RosTopicPublisher<PointCloud2>
 
 
 
-   public void publish(Point3d[] points, Color3f[] colors, String frameId)
+   public void publish(Point3D[] points, MutableColor[] colors, String frameId)
    {
       PointCloud2 message = getMessage();
       message.getHeader().setFrameId(frameId);
@@ -84,7 +83,7 @@ public class RosPointCloudPublisher extends RosTopicPublisher<PointCloud2>
       
    }
 
-   public void publish(Point3d[] points, Color3f color, String frameId)
+   public void publish(Point3D[] points, MutableColor color, String frameId)
    {
       PointCloud2 message = getMessage();
       message.getHeader().setFrameId(frameId);

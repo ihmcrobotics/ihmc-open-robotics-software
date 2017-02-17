@@ -5,13 +5,14 @@ import static org.junit.Assert.fail;
 
 import java.util.Random;
 
-import javax.vecmath.Point2d;
-import javax.vecmath.Point3d;
-
 import org.junit.After;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
@@ -181,7 +182,7 @@ public class FramePoint2dTest extends FrameTuple2dTest<FramePoint2d>
 	@Test(timeout = 30000)
    public void testFramePoint2d_ReferenceFrame_Tuple2d()
    {
-      Point2d position = new Point2d(1.0, 2.0);
+      Point2D position = new Point2D(1.0, 2.0);
       FramePoint2d point = new FramePoint2d(worldFrame, position);
       assertEquals(null, point.getName());
       assertEquals(1.0, point.getX(), 1e-7);
@@ -192,7 +193,7 @@ public class FramePoint2dTest extends FrameTuple2dTest<FramePoint2d>
 	@Test(timeout = 30000)
    public void testFramePoint2d_ReferenceFrame_Tuple2d_String()
    {
-      Point2d position = new Point2d(1.0, 2.0);
+      Point2D position = new Point2D(1.0, 2.0);
       String name = "testPointOne";
       FramePoint2d point = new FramePoint2d(worldFrame, position, name);
       assertEquals("testPointOne", point.getName());
@@ -255,7 +256,7 @@ public class FramePoint2dTest extends FrameTuple2dTest<FramePoint2d>
    public void testGetPoint()
    {
       FramePoint2d point1 = new FramePoint2d(theFrame, 1.0, 2.0, "point1");
-      Point2d point2d = point1.getPoint();
+      Point2D point2d = point1.getPoint();
       assertEquals("Should be equal", point1.getX(), point2d.getX(), epsilon);
       assertEquals("Should be equal", point1.getY(), point2d.getY(), epsilon);
    }
@@ -289,10 +290,10 @@ public class FramePoint2dTest extends FrameTuple2dTest<FramePoint2d>
    {
       boolean requireTransformInPlane = false;
       Random random = new Random(398742498237598750L);
-      RigidBodyTransform transform = RigidBodyTransform.generateRandomTransform(random);
+      RigidBodyTransform transform = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
 
-      Point3d pointToTransform = RandomTools.generateRandomPoint(random, 100.0, 100.0, 0.0);
-      FramePoint2d pointToTest = new FramePoint2d(null, new Point2d(pointToTransform.getX(), pointToTransform.getY()));
+      Point3D pointToTransform = RandomTools.generateRandomPoint(random, 100.0, 100.0, 0.0);
+      FramePoint2d pointToTest = new FramePoint2d(null, new Point2D(pointToTransform.getX(), pointToTransform.getY()));
 
       transform.transform(pointToTransform);
       pointToTest.applyTransform(transform, requireTransformInPlane);
@@ -313,7 +314,7 @@ public class FramePoint2dTest extends FrameTuple2dTest<FramePoint2d>
       double[] matrix = { 6.0, 7.0, 0.0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1.0 };
       RigidBodyTransform transform2 = new RigidBodyTransform(matrix);
 
-      Point3d pointToTransform2 = new Point3d(matrix);
+      Point3D pointToTransform2 = new Point3D(matrix);
       FramePoint2d pointToTest2 = new FramePoint2d(null, matrix);
 
       transform2.transform(pointToTransform2);
@@ -329,10 +330,10 @@ public class FramePoint2dTest extends FrameTuple2dTest<FramePoint2d>
    public void testApplyTransform_Transform3D()
    {
       Random random = new Random(398742498237598750L);
-      RigidBodyTransform transform = RigidBodyTransform.generateRandomTransform(random);
+      RigidBodyTransform transform = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
 
-      Point3d pointToTransform = RandomTools.generateRandomPoint(random, 100.0, 100.0, 0.0);
-      FramePoint2d pointToTest = new FramePoint2d(null, new Point2d(pointToTransform.getX(), pointToTransform.getY()));
+      Point3D pointToTransform = RandomTools.generateRandomPoint(random, 100.0, 100.0, 0.0);
+      FramePoint2d pointToTest = new FramePoint2d(null, new Point2D(pointToTransform.getX(), pointToTransform.getY()));
 
       try
       {
@@ -438,7 +439,7 @@ public class FramePoint2dTest extends FrameTuple2dTest<FramePoint2d>
    {
       Random random = new Random(398742498237598750L);
       FramePoint2d frame = new FramePoint2d(aFrame);
-      RigidBodyTransform transform = RigidBodyTransform.generateRandomTransform(random);
+      RigidBodyTransform transform = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
       frame.changeFrameUsingTransform(theFrame, transform);
       frame.checkReferenceFrameMatch(theFrame);
    }

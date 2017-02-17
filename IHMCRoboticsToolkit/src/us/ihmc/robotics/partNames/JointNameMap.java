@@ -3,14 +3,9 @@ package us.ihmc.robotics.partNames;
 import java.util.List;
 import java.util.Set;
 
-import javax.vecmath.Vector3d;
-
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
-import us.ihmc.robotics.partNames.JointRole;
-import us.ihmc.robotics.partNames.NeckJointName;
-import us.ihmc.robotics.partNames.RobotSpecificJointNames;
-import us.ihmc.robotics.partNames.SpineJointName;
+import us.ihmc.euclid.tuple3D.Vector3D;
 
 public interface JointNameMap extends RobotSpecificJointNames
 {
@@ -49,7 +44,7 @@ public interface JointNameMap extends RobotSpecificJointNames
 
    String getHeadName();
 
-   List<ImmutablePair<String, Vector3d>> getJointNameGroundContactPointMap();
+   List<ImmutablePair<String, Vector3D>> getJointNameGroundContactPointMap();
 
    boolean isTorqueVelocityLimitsEnabled();
 

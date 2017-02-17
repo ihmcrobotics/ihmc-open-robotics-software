@@ -1,9 +1,8 @@
 package us.ihmc.sensorProcessing.stateEstimation.evaluation;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Vector3d;
-
 import us.ihmc.controlFlow.ControlFlowGraph;
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
@@ -328,9 +327,9 @@ public class ComposableStateEstimatorEvaluator
          boolean updateDesireds = false;
          generator.updateInverseDynamicsRobotModelFromRobot(updateRootJoints, updateDesireds);
 
-         Matrix3d rotationMatrix = new Matrix3d();
+         RotationMatrix rotationMatrix = new RotationMatrix();
          robot.getRootJoint().getRotationToWorld(rotationMatrix);
-         Vector3d angularVelocityInBody = robot.getRootJoint().getAngularVelocityInBody();
+         Vector3D angularVelocityInBody = robot.getRootJoint().getAngularVelocityInBody();
 
          FrameOrientation estimatedOrientation = new FrameOrientation(ReferenceFrame.getWorldFrame());
          orientationEstimator.getEstimatedOrientation(estimatedOrientation);

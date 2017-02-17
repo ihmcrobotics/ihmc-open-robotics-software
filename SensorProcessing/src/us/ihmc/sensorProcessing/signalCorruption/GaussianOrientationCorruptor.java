@@ -2,21 +2,20 @@ package us.ihmc.sensorProcessing.signalCorruption;
 
 import java.util.Random;
 
-import javax.vecmath.AxisAngle4d;
-import javax.vecmath.Matrix3d;
-
 import org.apache.commons.math3.util.FastMath;
 
+import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 
 
-public class GaussianOrientationCorruptor implements SignalCorruptor<Matrix3d>
+public class GaussianOrientationCorruptor implements SignalCorruptor<RotationMatrix>
 {
    private final YoVariableRegistry registry;
-   private final AxisAngle4d noiseAxisAngle = new AxisAngle4d();
-   private final Matrix3d noiseRotationMatrix = new Matrix3d();
+   private final AxisAngle noiseAxisAngle = new AxisAngle();
+   private final RotationMatrix noiseRotationMatrix = new RotationMatrix();
    private final Random random;
    private final DoubleYoVariable standardDeviation;
 
@@ -33,14 +32,14 @@ public class GaussianOrientationCorruptor implements SignalCorruptor<Matrix3d>
       this.standardDeviation.set(standardDeviation);
    }
 
-   public void corrupt(Matrix3d signal)
+   public void corrupt(RotationMatrix signal)
    {
       generateGaussianRotation(noiseAxisAngle, random, standardDeviation.getDoubleValue());
       noiseRotationMatrix.set(noiseAxisAngle);
-      signal.mul(noiseRotationMatrix);
+      signal.multiply(noiseRotationMatrix);
    }
 
-   private static void generateGaussianRotation(AxisAngle4d axisAngleToPack, Random random, double standardDeviation)
+   private static void generateGaussianRotation(AxisAngle axisAngleToPack, Random random, double standardDeviation)
    {
       /*
        * random direction obtained from

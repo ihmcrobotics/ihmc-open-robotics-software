@@ -1,12 +1,11 @@
 package us.ihmc.simulationconstructionset;
 
-import javax.vecmath.Vector3d;
-
-import us.ihmc.simulationconstructionset.physics.engine.jerry.SliderJointPhysics;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.simulationconstructionset.physics.engine.jerry.SliderJointPhysics;
 
 /**
  * Title:        Yobotics! Simulation Construction Set<p>
@@ -27,7 +26,7 @@ public class SliderJoint extends OneDegreeOfFreedomJoint
    public DoubleYoVariable tauJointLimit, tauDamping;
 
    // private int axis;
-   public Vector3d vTranslate = new Vector3d();
+   public Vector3D vTranslate = new Vector3D();
 
    public double q_min = Double.NEGATIVE_INFINITY, q_max = Double.POSITIVE_INFINITY, k_limit, b_limit, b_damp = 0.0, f_stiction = 0.0;
 
@@ -40,7 +39,7 @@ public class SliderJoint extends OneDegreeOfFreedomJoint
     * @param rob Robot to which this joint belongs
     * @param jaxis int representing the joint axis
     */
-   public SliderJoint(String jname, Vector3d offset, Robot rob, Axis jaxis)
+   public SliderJoint(String jname, Vector3D offset, Robot rob, Axis jaxis)
    {
       super(jname, offset, rob);
       physics = new SliderJointPhysics(this);
@@ -52,7 +51,7 @@ public class SliderJoint extends OneDegreeOfFreedomJoint
       qdd = new DoubleYoVariable("qdd_" + jname, "SliderJoint linear acceleration", registry);
       tau = new DoubleYoVariable("tau_" + jname, "SliderJoint torque", registry);
 
-      physics.u_i = new Vector3d();
+      physics.u_i = new Vector3D();
 
       if (jaxis == Axis.X)
       {
@@ -83,7 +82,7 @@ public class SliderJoint extends OneDegreeOfFreedomJoint
     * @param rob Robot to which this joint belongs
     * @param u_hat Vector3d defining the joint axis in world coordinates
     */
-   public SliderJoint(String jname, Vector3d offset, Robot rob, Vector3d u_hat)
+   public SliderJoint(String jname, Vector3D offset, Robot rob, Vector3D u_hat)
    {
       super(jname, offset, rob);
       physics = new SliderJointPhysics(this);
@@ -95,7 +94,7 @@ public class SliderJoint extends OneDegreeOfFreedomJoint
       qdd = new DoubleYoVariable("qdd_" + jname, "Slider joint linear acceleration", registry);
       tau = new DoubleYoVariable("tau_" + jname, "Slider joint torque", registry);
 
-      physics.u_i = new Vector3d(u_hat);
+      physics.u_i = new Vector3D(u_hat);
       physics.u_i.normalize();
 
       this.setSliderTransform3D(this.jointTransform3D, physics.u_i);
@@ -334,7 +333,7 @@ public class SliderJoint extends OneDegreeOfFreedomJoint
     * @param tTranslate Transform3D in which the calculated data will be stored.
     * @param u_i Vector3d representing the joint axis
     */
-   protected void setSliderTransform3D(RigidBodyTransform tTranslate, Vector3d u_i)    // int axis)
+   protected void setSliderTransform3D(RigidBodyTransform tTranslate, Vector3D u_i)    // int axis)
    {
       setSliderTransform3D(tTranslate, u_i, 0.0);    // axis, u_i);//0.0);
    }
@@ -346,7 +345,7 @@ public class SliderJoint extends OneDegreeOfFreedomJoint
     * @param u_i Vector3d representing the joint axis
     * @param transVal distance translated along the joint axis
     */
-   protected void setSliderTransform3D(RigidBodyTransform tTranslate, Vector3d u_i, double transVal)    // int axis, double transVal)
+   protected void setSliderTransform3D(RigidBodyTransform tTranslate, Vector3D u_i, double transVal)    // int axis, double transVal)
    {
       // double x=0.0,y=0.0,z=0.0;
 

@@ -1,14 +1,15 @@
 package us.ihmc.avatar.ros;
 
-import ihmc_msgs.Point2dRosMessage;
-import ihmc_msgs.SupportPolygonRosMessage;
+import java.util.List;
+
 import org.ros.message.MessageFactory;
 import org.ros.node.NodeConfiguration;
-import us.ihmc.utilities.ros.publisher.RosTopicPublisher;
 
-import javax.vecmath.Point2d;
-import javax.vecmath.Point2f;
-import java.util.List;
+import ihmc_msgs.Point2dRosMessage;
+import ihmc_msgs.SupportPolygonRosMessage;
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.Point2D32;
+import us.ihmc.utilities.ros.publisher.RosTopicPublisher;
 
 /**
  *
@@ -23,7 +24,7 @@ public class RosSupportPolygonPublisher extends RosTopicPublisher<SupportPolygon
       super(SupportPolygonRosMessage._TYPE, latched);
    }
 
-   public void publish(Point2d[] points, int numberOfVertices)
+   public void publish(Point2D[] points, int numberOfVertices)
    {
       SupportPolygonRosMessage message = getMessage();
       message.setNumberOfVertices(numberOfVertices);
@@ -39,7 +40,7 @@ public class RosSupportPolygonPublisher extends RosTopicPublisher<SupportPolygon
       publish(message);
    }
 
-   public void publish(Point2f[] points, int numberOfVertices)
+   public void publish(Point2D32[] points, int numberOfVertices)
    {
       SupportPolygonRosMessage message = getMessage();
       message.setNumberOfVertices(numberOfVertices);

@@ -1,22 +1,18 @@
 package us.ihmc.exampleSimulations.beetle.controller;
 
-import javax.vecmath.Vector3d;
-
-import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootOrientationGains;
-import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootPositionGains;
-import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootSE3Gains;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
 import us.ihmc.commonWalkingControlModules.trajectories.TwoWaypointSwingGenerator;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.exampleSimulations.beetle.footContact.SimulatedPlaneContactStateUpdater;
-import us.ihmc.exampleSimulations.beetle.parameters.RhinoBeetleJointNameMap;
 import us.ihmc.exampleSimulations.beetle.parameters.HexapodControllerParameters;
+import us.ihmc.exampleSimulations.beetle.parameters.RhinoBeetleJointNameMap;
 import us.ihmc.exampleSimulations.beetle.planning.FootStepPlanner;
 import us.ihmc.exampleSimulations.beetle.referenceFrames.HexapodReferenceFrames;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -25,7 +21,6 @@ import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.robotSide.RobotSextant;
 import us.ihmc.robotics.robotSide.SegmentDependentList;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -126,7 +121,7 @@ public class HexapodStepController
 
          SpatialFeedbackControlCommand spatialFeedbackControlCommand = new SpatialFeedbackControlCommand();
          spatialFeedbackControlCommand.set(fullRobotModel.getPelvis(), shinRigidBody);
-         spatialFeedbackControlCommand.setWeightsForSolver(new Vector3d(0.0, 0.0, 0.0), new Vector3d(100.0, 100.0, 100.0));
+         spatialFeedbackControlCommand.setWeightsForSolver(new Vector3D(0.0, 0.0, 0.0), new Vector3D(100.0, 100.0, 100.0));
          spatialFeedbackControlCommand.setControlFrameFixedInEndEffector(footInShinFrame);
          spatialFeedbackControlCommands.set(robotSextant, spatialFeedbackControlCommand);
 

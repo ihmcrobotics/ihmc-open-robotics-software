@@ -2,8 +2,8 @@ package us.ihmc.geometry.polytope;
 
 import java.util.ArrayList;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 
 /**
  * Data structure for the Expanding Polytope Algorithm described in "Collision Detection in Interactive 3D Environments"
@@ -12,8 +12,8 @@ import javax.vecmath.Vector3d;
  */
 public class ExpandingPolytopeEntry implements Comparable<ExpandingPolytopeEntry>
 {
-   private final Point3d[] triangleVertices = new Point3d[3];
-   private final Vector3d closestPointToOrigin = new Vector3d();
+   private final Point3D[] triangleVertices = new Point3D[3];
+   private final Vector3D closestPointToOrigin = new Vector3D();
    private final double[] lambdas = new double[3];
    private double distanceToOriginKey;
 
@@ -28,12 +28,12 @@ public class ExpandingPolytopeEntry implements Comparable<ExpandingPolytopeEntry
       
    }
 
-   public ExpandingPolytopeEntry(Point3d vertexOne, Point3d vertexTwo, Point3d vertexThree)
+   public ExpandingPolytopeEntry(Point3D vertexOne, Point3D vertexTwo, Point3D vertexThree)
    {
       reset(vertexOne, vertexTwo, vertexThree);
    }
 
-   public void reset(Point3d pointOne, Point3d pointTwo, Point3d pointThree)
+   public void reset(Point3D pointOne, Point3D pointTwo, Point3D pointThree)
    {
       this.obsolete = false;
       this.affinelyDependent = false;
@@ -67,7 +67,7 @@ public class ExpandingPolytopeEntry implements Comparable<ExpandingPolytopeEntry
       }
    }
 
-   public Point3d getVertex(int index)
+   public Point3D getVertex(int index)
    {
       return triangleVertices[index];
    }
@@ -116,7 +116,7 @@ public class ExpandingPolytopeEntry implements Comparable<ExpandingPolytopeEntry
       return obsolete;
    }
 
-   public Vector3d getClosestPointToOrigin()
+   public Vector3D getClosestPointToOrigin()
    {
       return closestPointToOrigin;
    }
@@ -141,13 +141,13 @@ public class ExpandingPolytopeEntry implements Comparable<ExpandingPolytopeEntry
       return adjacentTriangleEdgeIndices[index];
    }
 
-   private final Vector3d tempVector1 = new Vector3d();
-   private final Vector3d tempVector2 = new Vector3d();
-   private final Vector3d tempVector3 = new Vector3d();
-   private final Vector3d tempVector4 = new Vector3d();
-   private final Vector3d tempNormalVector1 = new Vector3d();
+   private final Vector3D tempVector1 = new Vector3D();
+   private final Vector3D tempVector2 = new Vector3D();
+   private final Vector3D tempVector3 = new Vector3D();
+   private final Vector3D tempVector4 = new Vector3D();
+   private final Vector3D tempNormalVector1 = new Vector3D();
 
-   private void projectOriginOntoFace(Point3d vertexOne, Point3d vertexTwo, Point3d vertexThree, Vector3d closestPointToOrigin, double[] lambdas)
+   private void projectOriginOntoFace(Point3D vertexOne, Point3D vertexTwo, Point3D vertexThree, Vector3D closestPointToOrigin, double[] lambdas)
    {
       // Using barycentric coordinates as described in https://www.cs.ubc.ca/~heidrich/Papers/JGT.05.pdf
       tempVector1.sub(vertexTwo, vertexOne);
@@ -241,7 +241,7 @@ public class ExpandingPolytopeEntry implements Comparable<ExpandingPolytopeEntry
 
    private void swapTrianglesToReverseClockwiseness(int i, int j)
    {
-      Point3d temp = triangleVertices[i];
+      Point3D temp = triangleVertices[i];
       triangleVertices[i] = triangleVertices[j];
       triangleVertices[j] = temp;
 
@@ -281,11 +281,11 @@ public class ExpandingPolytopeEntry implements Comparable<ExpandingPolytopeEntry
          if (adjacentTriangle.adjacentTriangleEdgeIndices[j] != i)
             throw new RuntimeException("Adjacent triangle was not connected properly!");
 
-         Point3d firstVertex = this.triangleVertices[i];
-         Point3d secondVertex = this.triangleVertices[(i + 1) % 3];
+         Point3D firstVertex = this.triangleVertices[i];
+         Point3D secondVertex = this.triangleVertices[(i + 1) % 3];
 
-         Point3d firstVertexOtherSide = adjacentTriangle.triangleVertices[j];
-         Point3d secondVertexOtherSide = adjacentTriangle.triangleVertices[(j + 1) % 3];
+         Point3D firstVertexOtherSide = adjacentTriangle.triangleVertices[j];
+         Point3D secondVertexOtherSide = adjacentTriangle.triangleVertices[(j + 1) % 3];
 
          if (firstVertex != secondVertexOtherSide)
             throw new RuntimeException("");

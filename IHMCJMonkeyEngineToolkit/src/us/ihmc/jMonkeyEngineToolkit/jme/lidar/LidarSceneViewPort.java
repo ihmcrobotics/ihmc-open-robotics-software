@@ -2,9 +2,6 @@ package us.ihmc.jMonkeyEngineToolkit.jme.lidar;
 
 import java.util.concurrent.Callable;
 
-import us.ihmc.jMonkeyEngineToolkit.jme.JMERenderer;
-import us.ihmc.tools.time.Timer;
-
 import com.jme3.math.FastMath;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
@@ -20,6 +17,9 @@ import com.jme3.texture.Texture;
 import com.jme3.texture.Texture.MagFilter;
 import com.jme3.texture.Texture.MinFilter;
 import com.jme3.texture.Texture2D;
+
+import us.ihmc.jMonkeyEngineToolkit.jme.JMERenderer;
+import us.ihmc.tools.time.Timer;
 
 public class LidarSceneViewPort implements SceneProcessor
 {

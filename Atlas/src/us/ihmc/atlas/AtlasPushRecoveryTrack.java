@@ -1,21 +1,20 @@
 package us.ihmc.atlas;
 
-import javax.vecmath.Vector3d;
-
 import com.martiansoftware.jsap.JSAPException;
 
-import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
-import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.avatar.DRCFlatGroundWalkingTrack;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.DRCGuiInitialSetup;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.initialSetup.DRCSCSInitialSetup;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.dataStructures.validation.YoVariableThreadAccessValidator;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.simulationToolkit.controllers.PushRobotController;
+import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
+import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.ground.FlatGroundProfile;
 
@@ -63,7 +62,7 @@ public class AtlasPushRecoveryTrack
       
       double defaultForceDurationInSeconds = 0.15;
       double defaultForceMagnitude = 400.0;
-      Vector3d defaultForceDirection = new Vector3d(1.0, 0.0, 0.0);
+      Vector3D defaultForceDirection = new Vector3D(1.0, 0.0, 0.0);
       
       SimulationConstructionSet scs = track.getSimulationConstructionSet();
       

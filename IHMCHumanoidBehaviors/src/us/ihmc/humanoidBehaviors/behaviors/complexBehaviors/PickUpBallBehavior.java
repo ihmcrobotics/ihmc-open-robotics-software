@@ -2,13 +2,11 @@ package us.ihmc.humanoidBehaviors.behaviors.complexBehaviors;
 
 import java.util.ArrayList;
 
-import javax.vecmath.AxisAngle4d;
-import javax.vecmath.Point2d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
-import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.communication.packets.TextToSpeechPacket;
+import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.coactiveElements.PickUpBallBehaviorCoactiveElementBehaviorSideOLD;
 import us.ihmc.humanoidBehaviors.behaviors.coactiveElements.PickUpBallBehaviorCoactiveElementOLD.PickUpBallBehaviorState;
@@ -41,6 +39,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage.Body
 import us.ihmc.humanoidRobotics.communication.packets.walking.HeadTrajectoryMessage;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.ihmcPerception.vision.shapes.HSVRange;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
@@ -270,12 +269,12 @@ public class PickUpBallBehavior extends AbstractBehavior
 
       //LOOK DOWN *******************************************
 
-      Vector3d axis = new Vector3d(0, 1, 0);
+      Vector3D axis = new Vector3D(0, 1, 0);
       double rotationDownAngle = 1.4;
 
-      AxisAngle4d desiredAxisAngle = new AxisAngle4d();
+      AxisAngle desiredAxisAngle = new AxisAngle();
       desiredAxisAngle.set(axis, rotationDownAngle);
-      Quat4d desiredHeadQuat = new Quat4d();
+      Quaternion desiredHeadQuat = new Quaternion();
       desiredHeadQuat.set(desiredAxisAngle);
 
       HeadTrajectoryMessage message = new HeadTrajectoryMessage(1, desiredHeadQuat);
@@ -296,9 +295,9 @@ public class PickUpBallBehavior extends AbstractBehavior
 
       double rotationUpAngle = 0;
 
-      AxisAngle4d desiredAxisUpAngle = new AxisAngle4d();
+      AxisAngle desiredAxisUpAngle = new AxisAngle();
       desiredAxisUpAngle.set(axis, rotationUpAngle);
-      Quat4d desiredHeadUpQuat = new Quat4d();
+      Quaternion desiredHeadUpQuat = new Quaternion();
       desiredHeadUpQuat.set(desiredAxisUpAngle);
 
       HeadTrajectoryMessage messageHeadUp = new HeadTrajectoryMessage(1, desiredHeadUpQuat);
@@ -630,7 +629,7 @@ public class PickUpBallBehavior extends AbstractBehavior
       double newX = ballPosition2d.getX() + (x - ballPosition2d.getX()) * Math.cos(rotationAngle) - (y - ballPosition2d.getY()) * Math.sin(rotationAngle);
       double newY = ballPosition2d.getY() + (x - ballPosition2d.getX()) * Math.sin(rotationAngle) + (y - ballPosition2d.getY()) * Math.cos(rotationAngle);
 
-      FramePose2d poseToWalkTo = new FramePose2d(worldFrame, new Point2d(newX, newY), walkingYaw);
+      FramePose2d poseToWalkTo = new FramePose2d(worldFrame, new Point2D(newX, newY), walkingYaw);
       return poseToWalkTo;
    }
 

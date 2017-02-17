@@ -3,18 +3,16 @@ package us.ihmc.atlas;
 import java.io.IOException;
 import java.util.AbstractMap;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+
+import org.ros.internal.message.Message;
+import org.ros.message.MessageFactory;
+import org.ros.node.NodeConfiguration;
 
 import com.martiansoftware.jsap.JSAPException;
 
 import ihmc_msgs.HandDesiredConfigurationRosMessage;
-import org.ros.internal.message.Message;
-import org.ros.message.MessageFactory;
-import org.ros.message.MessageFactoryProvider;
-import org.ros.node.NodeConfiguration;
-
 import us.ihmc.avatar.DRCStartingLocation;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.ros.ROSAPISimulator;

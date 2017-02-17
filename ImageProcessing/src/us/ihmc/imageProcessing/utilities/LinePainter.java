@@ -7,9 +7,8 @@ import java.awt.Graphics2D;
 import java.awt.Stroke;
 import java.util.ArrayList;
 
-import javax.vecmath.Point2d;
-import javax.vecmath.Vector2d;
-
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.robotics.geometry.Line2d;
 
 /**
@@ -49,12 +48,12 @@ public class LinePainter implements PostProcessor
       Graphics2D g2d = (Graphics2D) graphics;
       Stroke originalStroke = g2d.getStroke();
       g2d.setStroke(new BasicStroke(lineThickness));
-      Line2d xMin = new Line2d(new Point2d(0, 0), new Vector2d(1.0, 0.0));
-      Line2d xMax = new Line2d(new Point2d(0, imageHeight), new Vector2d(1.0, 0.0));
+      Line2d xMin = new Line2d(new Point2D(0, 0), new Vector2D(1.0, 0.0));
+      Line2d xMax = new Line2d(new Point2D(0, imageHeight), new Vector2D(1.0, 0.0));
       for (Line2d line : lines)
       {
-         Point2d p1 = line.intersectionWith(xMin);
-         Point2d p2 = line.intersectionWith(xMax);
+         Point2D p1 = line.intersectionWith(xMin);
+         Point2D p2 = line.intersectionWith(xMax);
          graphics.drawLine((int) p1.getX(), (int)p1.getY(), (int)p2.getX(), (int) p2.getY());
       }
 

@@ -1,6 +1,6 @@
 package us.ihmc.quadrupedRobotics.model;
 
-import javax.vecmath.Point3d;
+import us.ihmc.euclid.tuple3D.Point3D;
 
 import us.ihmc.robotics.partNames.QuadrupedJointName;
 
@@ -15,5 +15,5 @@ public interface QuadrupedSimulationInitialPositionParameters
     */
    public double getInitialJointPosition(QuadrupedJointName joint);
 
-   public Point3d getInitialBodyPosition();
+   public Point3D getInitialBodyPosition();
 }

@@ -8,7 +8,8 @@ import java.util.Random;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.random.RandomTools;
 
 public class TimeStampedTransform3DTest
@@ -34,7 +35,7 @@ public class TimeStampedTransform3DTest
    public void testConstructor()
    {
       Random random = new Random(3213620L);
-      RigidBodyTransform expectedTransform = RigidBodyTransform.generateRandomTransform(random);
+      RigidBodyTransform expectedTransform = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
       long expectedTimestamp = RandomTools.generateRandomInt(random, 132, 51568418);
       
 
@@ -65,14 +66,14 @@ public class TimeStampedTransform3DTest
       assertEquals("Timestamp is different from what was expected", expectedTimestamp, toBeTested.getTimeStamp());
       assertTrue("Transform is different from what was expected", expectedTransform.epsilonEquals(toBeTested.getTransform3D(), EPSILON));
 
-      expectedTransform = RigidBodyTransform.generateRandomTransform(random);
+      expectedTransform = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
       toBeTested.setTransform3D(expectedTransform);
 
       assertEquals("Timestamp is different from what was expected", expectedTimestamp, toBeTested.getTimeStamp());
       assertTrue("Transform is different from what was expected", expectedTransform.epsilonEquals(toBeTested.getTransform3D(), EPSILON));
 
       expectedTimestamp = RandomTools.generateRandomInt(random, 132, 51568418);
-      expectedTransform = RigidBodyTransform.generateRandomTransform(random);
+      expectedTransform = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
       TimeStampedTransform3D expectedTimeStampedTransform = new TimeStampedTransform3D(expectedTransform, expectedTimestamp);
 
       toBeTested.set(expectedTimeStampedTransform);

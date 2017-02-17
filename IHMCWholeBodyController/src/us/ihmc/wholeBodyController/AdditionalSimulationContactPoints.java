@@ -5,12 +5,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.vecmath.Point2d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Tuple2d;
-import javax.vecmath.Tuple3d;
-
-import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.interfaces.Tuple2DBasics;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
@@ -32,14 +31,14 @@ public class AdditionalSimulationContactPoints implements FootContactPoints
    }
 
    @Override
-   public Map<String, List<Tuple3d>> getSimulationContactPoints(double footLength, double footWidth, double toeWidth, DRCRobotJointMap jointMap,
+   public Map<String, List<Tuple3DBasics>> getSimulationContactPoints(double footLength, double footWidth, double toeWidth, DRCRobotJointMap jointMap,
          SideDependentList<RigidBodyTransform> soleToAnkleFrameTransforms)
    {
-      HashMap<String, List<Tuple3d>> ret = new HashMap<>();
+      HashMap<String, List<Tuple3DBasics>> ret = new HashMap<>();
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         ArrayList<Tuple3d> footContactPoints = new ArrayList<>();
+         ArrayList<Tuple3DBasics> footContactPoints = new ArrayList<>();
          String parentJointName = jointMap.getJointBeforeFootName(robotSide);
 
          double dx = 1.01 * footLength / (nContactPointsX - 1.0);
@@ -61,7 +60,7 @@ public class AdditionalSimulationContactPoints implements FootContactPoints
                double y = (iy - 1) * dy - yOffset;
                double z = 0.01 * ((xOffset - Math.abs(x))/xOffset + (yOffset - Math.abs(y))/yOffset);
 
-               Point3d contactPoint = new Point3d(x, y, z);
+               Point3D contactPoint = new Point3D(x, y, z);
                RigidBodyTransform transformToParentJointFrame = soleToAnkleFrameTransforms.get(robotSide);
                transformToParentJointFrame.transform(contactPoint);
                footContactPoints.add(contactPoint);
@@ -75,17 +74,17 @@ public class AdditionalSimulationContactPoints implements FootContactPoints
    }
 
    @Override
-   public SideDependentList<List<Tuple2d>> getControllerContactPoints(double footLength, double footWidth, double toeWidth)
+   public SideDependentList<List<Tuple2DBasics>> getControllerContactPoints(double footLength, double footWidth, double toeWidth)
    {
-      SideDependentList<List<Tuple2d>> ret = new SideDependentList<>();
+      SideDependentList<List<Tuple2DBasics>> ret = new SideDependentList<>();
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         ArrayList<Tuple2d> contactPoints = new ArrayList<>();
-         contactPoints.add(new Point2d(-footLength / 2.0, -footWidth / 2.0));
-         contactPoints.add(new Point2d(-footLength / 2.0, footWidth / 2.0));
-         contactPoints.add(new Point2d(footLength / 2.0, -toeWidth / 2.0));
-         contactPoints.add(new Point2d(footLength / 2.0, toeWidth / 2.0));
+         ArrayList<Tuple2DBasics> contactPoints = new ArrayList<>();
+         contactPoints.add(new Point2D(-footLength / 2.0, -footWidth / 2.0));
+         contactPoints.add(new Point2D(-footLength / 2.0, footWidth / 2.0));
+         contactPoints.add(new Point2D(footLength / 2.0, -toeWidth / 2.0));
+         contactPoints.add(new Point2D(footLength / 2.0, toeWidth / 2.0));
          ret.put(robotSide, contactPoints);
       }
 
@@ -93,12 +92,12 @@ public class AdditionalSimulationContactPoints implements FootContactPoints
    }
 
    @Override
-   public SideDependentList<Tuple2d> getToeOffContactPoints(double footLength, double footWidth, double toeWidth)
+   public SideDependentList<Tuple2DBasics> getToeOffContactPoints(double footLength, double footWidth, double toeWidth)
    {
-      SideDependentList<Tuple2d> ret = new SideDependentList<>();
+      SideDependentList<Tuple2DBasics> ret = new SideDependentList<>();
 
       for (RobotSide robotSide : RobotSide.values)
-         ret.put(robotSide, new Point2d(footLength / 2.0, 0.0));
+         ret.put(robotSide, new Point2D(footLength / 2.0, 0.0));
 
       return ret;
    }

@@ -1,7 +1,6 @@
 package us.ihmc.simulationconstructionset.util.perturbance;
 
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.MathTools;
 
 public class ParticleCollisionCalculator
@@ -22,13 +21,13 @@ public class ParticleCollisionCalculator
     * coefficientOfRestitution = 0 is a perfectly inelastic collision
     * coefficientOfRestitution = 1 is a perfectly elastic collision
     */
-   public static void handleCollision(Vector3d velocity1ToPack, Vector3d velocity2ToPack, double m1, double m2, double coefficientOfRestitution)
+   public static void handleCollision(Vector3D velocity1ToPack, Vector3D velocity2ToPack, double m1, double m2, double coefficientOfRestitution)
    {
       MathTools.checkIfInRange(coefficientOfRestitution, 0.0, 1.0);
       double totalMass = m1 + m2;
 
-      Vector3d v1 = velocity1ToPack;
-      Vector3d v2 = velocity2ToPack;
+      Vector3D v1 = velocity1ToPack;
+      Vector3D v2 = velocity2ToPack;
 
       double v1NewX = (coefficientOfRestitution * m2 * (v2.getX() - v1.getX()) + m1 * v1.getX() + m2 * v2.getX()) / totalMass;
       double v1NewY = (coefficientOfRestitution * m2 * (v2.getY() - v1.getY()) + m1 * v1.getY() + m2 * v2.getY()) / totalMass;

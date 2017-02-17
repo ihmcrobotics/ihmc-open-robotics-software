@@ -1,11 +1,23 @@
 package us.ihmc.robotbuilder;
 
+import java.io.File;
+
 import javafx.application.Application;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.*;
-import javafx.scene.control.*;
+import javafx.scene.Group;
+import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.PerspectiveCamera;
+import javafx.scene.Scene;
+import javafx.scene.SceneAntialiasing;
+import javafx.scene.SubScene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.ChoiceDialog;
+import javafx.scene.control.TreeItem;
+import javafx.scene.control.TreeView;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
@@ -16,6 +28,7 @@ import javafx.scene.transform.Translate;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javaslang.control.Option;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.javaFXToolkit.cameraControllers.SimpleCameraKeyboardEventHandler;
 import us.ihmc.javaFXToolkit.cameraControllers.SimpleCameraMouseEventHandler;
 import us.ihmc.robotbuilder.model.Loader;
@@ -26,9 +39,6 @@ import us.ihmc.robotbuilder.util.Util;
 import us.ihmc.robotics.robotDescription.JointDescription;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotDescription.RobotDescriptionNode;
-
-import javax.vecmath.Vector3d;
-import java.io.File;
 
 /**
  *
@@ -103,7 +113,7 @@ public class MainWindow extends Application {
 
         SubScene scene3d = new SubScene(group, view3D.getWidth(), view3D.getHeight(), true, SceneAntialiasing.DISABLED);
         scene3d.setFill(Color.BLACK);
-        PerspectiveCamera camera = Util.lookAtNodeFromDirection(group, 60, new Vector3d(1, 0, 0), new Vector3d(0, 1, 0));
+        PerspectiveCamera camera = Util.lookAtNodeFromDirection(group, 60, new Vector3D(1, 0, 0), new Vector3D(0, 1, 0));
         scene3d.setCamera(camera);
 
         SimpleCameraMouseEventHandler mouseController = new SimpleCameraMouseEventHandler(camera);
@@ -120,9 +130,9 @@ public class MainWindow extends Application {
         TreeAdapter<JointDescription> tree = Tree.of(description, JointDescription::getChildrenJoints);
         return Tree.map(tree, (node, children) -> {
                 Group jointGroup = new Group();
-                Vector3d offset = new Vector3d();
+                Vector3D offset = new Vector3D();
                 node.getValue().getOffsetFromParentJoint(offset);
-                jointGroup.getTransforms().add(new Translate(offset.x, offset.y, offset.z));
+                jointGroup.getTransforms().add(new Translate(offset.getX(), offset.getY(), offset.getZ()));
 
                 final PhongMaterial redMaterial = new PhongMaterial();
                 redMaterial.setDiffuseColor(Color.DARKRED);

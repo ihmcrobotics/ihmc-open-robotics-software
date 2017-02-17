@@ -5,20 +5,19 @@ import static org.junit.Assert.fail;
 
 import java.util.Random;
 
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.trajectories.providers.ConstantDoubleProvider;
 import us.ihmc.robotics.trajectories.providers.DoubleProvider;
@@ -30,7 +29,7 @@ public class VelocityConstrainedPoseTrajectoryGeneratorTest
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final ReferenceFrame frameA = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent("frameA", worldFrame,
-         RigidBodyTransform.generateRandomTransform(random));
+         EuclidCoreRandomTools.generateRandomRigidBodyTransform(random));
 
    private static final double EPSILON = 1e-10;
 
@@ -191,11 +190,11 @@ public class VelocityConstrainedPoseTrajectoryGeneratorTest
       FrameVector angularVelocity3 = new FrameVector();
       FrameVector angularAcceleration3 = new FrameVector();
 
-      Quat4d quat1 = new Quat4d();
-      Quat4d quat3 = new Quat4d();
-      Quat4d quatDelta = new Quat4d();
+      Quaternion quat1 = new Quaternion();
+      Quaternion quat3 = new Quaternion();
+      Quaternion quatDelta = new Quaternion();
       double angle, omega;
-      Vector3d vectorDelta = new Vector3d();
+      Vector3D vectorDelta = new Vector3D();
 
       FrameVector discreteAngularVelocity = new FrameVector();
       double FDdt = 5e-6;
@@ -225,10 +224,10 @@ public class VelocityConstrainedPoseTrajectoryGeneratorTest
          orientation1.getQuaternion(quat1);
 
          quat1.inverse();
-         quatDelta.mul(quat3, quat1);
+         quatDelta.multiply(quat3, quat1);
          quatDelta.normalize();
 
-         angle = Math.acos(quatDelta.getW()) * 2.0;
+         angle = Math.acos(quatDelta.getS()) * 2.0;
          omega = angle / (2.0 * FDdt);
 
          vectorDelta.set(quatDelta.getX(), quatDelta.getY(), quatDelta.getZ());
@@ -302,11 +301,11 @@ public class VelocityConstrainedPoseTrajectoryGeneratorTest
       FrameVector angularVelocity3 = new FrameVector();
       FrameVector angularAcceleration3 = new FrameVector();
 
-      Quat4d quat1 = new Quat4d();
-      Quat4d quat3 = new Quat4d();
-      Quat4d quatDelta = new Quat4d();
+      Quaternion quat1 = new Quaternion();
+      Quaternion quat3 = new Quaternion();
+      Quaternion quatDelta = new Quaternion();
       double angle, omega;
-      Vector3d vectorDelta = new Vector3d();
+      Vector3D vectorDelta = new Vector3D();
 
       FrameVector discreteAngularVelocity = new FrameVector();
       double FDdt = 5e-6;
@@ -336,10 +335,10 @@ public class VelocityConstrainedPoseTrajectoryGeneratorTest
          orientation1.getQuaternion(quat1);
 
          quat1.inverse();
-         quatDelta.mul(quat3, quat1);
+         quatDelta.multiply(quat3, quat1);
          quatDelta.normalize();
 
-         angle = Math.acos(quatDelta.getW()) * 2.0;
+         angle = Math.acos(quatDelta.getS()) * 2.0;
          omega = angle / (2.0 * FDdt);
 
          vectorDelta.set(quatDelta.getX(), quatDelta.getY(), quatDelta.getZ());

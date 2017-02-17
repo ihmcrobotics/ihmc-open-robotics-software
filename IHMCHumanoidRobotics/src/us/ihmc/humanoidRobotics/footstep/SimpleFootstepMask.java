@@ -2,8 +2,7 @@ package us.ihmc.humanoidRobotics.footstep;
 
 import java.util.ArrayList;
 
-import javax.vecmath.Point3d;
-
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -11,7 +10,7 @@ import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.InclusionFunction;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
-public class SimpleFootstepMask implements InclusionFunction<Point3d>
+public class SimpleFootstepMask implements InclusionFunction<Point3D>
 {
    private final static boolean DEBUG = false;
    private ReferenceFrame yawFrame2d;
@@ -39,7 +38,7 @@ public class SimpleFootstepMask implements InclusionFunction<Point3d>
       return x + Math.signum(x) * safetyBuffer;
    }
 
-   public boolean isIncluded(Point3d testInput)
+   public boolean isIncluded(Point3D testInput)
    {
       FramePoint test = new FramePoint(ReferenceFrame.getWorldFrame(),testInput);
       if (DEBUG)

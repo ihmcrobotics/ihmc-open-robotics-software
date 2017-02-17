@@ -1,11 +1,9 @@
 package us.ihmc.ihmcPerception.depthData;
 
-import javax.vecmath.Point3d;
-
-import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataFilterParameters;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -22,7 +20,7 @@ public class RobotDepthDataFilter extends DepthDataFilter
 
    
    @Override
-   public boolean isValidNearScan(Point3d point, Point3d lidarOrigin)
+   public boolean isValidNearScan(Point3D point, Point3D lidarOrigin)
    {
       boolean valid = super.isValidNearScan(point, lidarOrigin);
       valid &= point.getZ() > getMidFootPoint().getZ() + parameters.nearScanZMinAboveFeet;
@@ -34,7 +32,7 @@ public class RobotDepthDataFilter extends DepthDataFilter
 
    // TODO: isAheadOfPelvis must be commented out when debugging val currently
    @Override
-   public boolean isValidPoint(Point3d point, Point3d lidarOrigin)
+   public boolean isValidPoint(Point3D point, Point3D lidarOrigin)
    {
       boolean valid = super.isValidPoint(point, lidarOrigin);
 //      valid &= robotBoundingBoxes.isValidPoint(lidarOrigin, point);
@@ -44,9 +42,9 @@ public class RobotDepthDataFilter extends DepthDataFilter
    }
 
    @Override
-   public boolean isPossibleGround(Point3d point, Point3d lidarOrigin)
+   public boolean isPossibleGround(Point3D point, Point3D lidarOrigin)
    {
-      Point3d footAvg = getMidFootPoint();
+      Point3D footAvg = getMidFootPoint();
 
       double footZ = footAvg.getZ();
       footAvg.setZ(point.getZ());
@@ -60,11 +58,11 @@ public class RobotDepthDataFilter extends DepthDataFilter
       return (point.getZ() - footZ) < maxHeight;
    }
 
-   private Point3d getMidFootPoint()
+   private Point3D getMidFootPoint()
    {
       RigidBodyTransform temp = new RigidBodyTransform();
-      Point3d left = new Point3d();
-      Point3d avg = new Point3d();
+      Point3D left = new Point3D();
+      Point3D avg = new Point3D();
 
       fullRobotModel.getFoot(RobotSide.LEFT).getBodyFixedFrame().getTransformToDesiredFrame(temp, ReferenceFrame.getWorldFrame());
       temp.transform(left);
@@ -77,21 +75,21 @@ public class RobotDepthDataFilter extends DepthDataFilter
       return avg;
    }
 
-   private boolean isAheadOfPelvis(Point3d point)
+   private boolean isAheadOfPelvis(Point3D point)
    {
       RigidBodyTransform tf = new RigidBodyTransform();
       ReferenceFrame.getWorldFrame().getTransformToDesiredFrame(tf, fullRobotModel.getPelvis().getBodyFixedFrame());
-      Point3d tfPoint = new Point3d(point);
+      Point3D tfPoint = new Point3D(point);
       tf.transform(tfPoint);
 
       return tfPoint.getX() > parameters.xCutoffPelvis;
    }
 
-   private double getAngleToPelvis(Point3d point, Point3d lidarOrigin)
+   private double getAngleToPelvis(Point3D point, Point3D lidarOrigin)
    {
       RigidBodyTransform tf = new RigidBodyTransform();
       ReferenceFrame.getWorldFrame().getTransformToDesiredFrame(tf, fullRobotModel.getPelvis().getBodyFixedFrame());
-      Point3d tfPoint = new Point3d(point);
+      Point3D tfPoint = new Point3D(point);
       tf.transform(tfPoint);
 
       return Math.atan2(tfPoint.getY(), tfPoint.getX());

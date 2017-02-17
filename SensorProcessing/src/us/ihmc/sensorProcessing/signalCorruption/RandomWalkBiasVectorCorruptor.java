@@ -2,20 +2,19 @@ package us.ihmc.sensorProcessing.signalCorruption;
 
 import java.util.Random;
 
-import javax.vecmath.Tuple3d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 
-public class RandomWalkBiasVectorCorruptor implements SignalCorruptor<Tuple3d>
+public class RandomWalkBiasVectorCorruptor implements SignalCorruptor<Tuple3DBasics>
 {
    private final YoVariableRegistry registry;
    private final Random random;
-   private final Vector3d biasVector = new Vector3d();
+   private final Vector3D biasVector = new Vector3D();
    private final DoubleYoVariable standardDeviation;
    private final YoFrameVector biasYoFrameVector;
    private final double squareRootOfUpdateDT;
@@ -32,7 +31,7 @@ public class RandomWalkBiasVectorCorruptor implements SignalCorruptor<Tuple3d>
       parentRegistry.addChild(registry);
    }
 
-   public void corrupt(Tuple3d signal)
+   public void corrupt(Tuple3DBasics signal)
    {
       double std = standardDeviation.getDoubleValue();
       double biasUpdateX = std * random.nextGaussian() * squareRootOfUpdateDT;
@@ -50,7 +49,7 @@ public class RandomWalkBiasVectorCorruptor implements SignalCorruptor<Tuple3d>
       this.standardDeviation.set(standardDeviation);
    }
    
-   public void setBias(Vector3d bias)
+   public void setBias(Vector3D bias)
    {
       this.biasYoFrameVector.set(bias);
    }

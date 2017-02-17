@@ -7,18 +7,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Point2d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector2d;
-import javax.vecmath.Vector3d;
-
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.random.RandomTools;
 
 public class PrincipalComponentAnalysis3DTest
@@ -39,22 +37,22 @@ public class PrincipalComponentAnalysis3DTest
          {
             System.out.println("----------- Iteration #" + trialNumber + " ---------------------------");
          }
-         Point3d origin = RandomTools.generateRandomPoint(random, 1.0, 1.0, 1.0);
-         Point3d expectedMean = new Point3d();
+         Point3D origin = RandomTools.generateRandomPoint(random, 1.0, 1.0, 1.0);
+         Point3D expectedMean = new Point3D();
          double pointScatteringAmplitude = 5.0;
-         Vector3d expectedPrincipalAxis = RandomTools.generateRandomVector(random, 1.0);
+         Vector3D expectedPrincipalAxis = RandomTools.generateRandomVector(random, 1.0);
          double expectedVarianceAlongPrincipalAxis = 0.0;
          double expectedStandardDeviationAlongPrincipalAxis = 0.0;
 
          int numberOfPoints = RandomTools.generateRandomInt(random, 10, 500);
 
-         List<Point3d> listOfPoints = new ArrayList<>();
+         List<Point3D> listOfPoints = new ArrayList<>();
 
          // Variables to make the 1D-analysis of the data.
          List<Double> pointCloud1D = new ArrayList<>();
          double mean1D = 0.0;
 
-         Vector3d offsetFromOrigin = new Vector3d();
+         Vector3D offsetFromOrigin = new Vector3D();
 
          for (int i = 0; i < numberOfPoints; i++)
          {
@@ -62,7 +60,7 @@ public class PrincipalComponentAnalysis3DTest
             offsetFromOrigin.set(expectedPrincipalAxis);
             offsetFromOrigin.scale(nextGaussian);
 
-            Point3d newPoint = new Point3d();
+            Point3D newPoint = new Point3D();
             newPoint.set(origin);
             newPoint.add(offsetFromOrigin);
             listOfPoints.add(newPoint);
@@ -81,15 +79,15 @@ public class PrincipalComponentAnalysis3DTest
          }
          expectedStandardDeviationAlongPrincipalAxis = Math.sqrt(expectedVarianceAlongPrincipalAxis);
 
-         Point3d estimatedMean = new Point3d();
-         Vector3d estimatedPrincipalAxis = new Vector3d();
-         Vector3d estimatedSecondaryAxis = new Vector3d();
-         Vector3d estimatedThirdAxis = new Vector3d();
-         Vector3d estimatedVariance = new Vector3d();
-         Vector3d estimatedStandardDeviation = new Vector3d();
-         Vector3d estimatedScaledPrincipalVector = new Vector3d();
-         Vector3d estimatedScaledSecondaryVector = new Vector3d();
-         Vector3d estimatedScaledThirdVector = new Vector3d();
+         Point3D estimatedMean = new Point3D();
+         Vector3D estimatedPrincipalAxis = new Vector3D();
+         Vector3D estimatedSecondaryAxis = new Vector3D();
+         Vector3D estimatedThirdAxis = new Vector3D();
+         Vector3D estimatedVariance = new Vector3D();
+         Vector3D estimatedStandardDeviation = new Vector3D();
+         Vector3D estimatedScaledPrincipalVector = new Vector3D();
+         Vector3D estimatedScaledSecondaryVector = new Vector3D();
+         Vector3D estimatedScaledThirdVector = new Vector3D();
 
          PrincipalComponentAnalysis3D pca = new PrincipalComponentAnalysis3D();
          pca.setPointCloud(listOfPoints);
@@ -107,7 +105,7 @@ public class PrincipalComponentAnalysis3DTest
 
          if (DEBUG)
          {
-            Vector3d errorPrincipalAxis = new Vector3d();
+            Vector3D errorPrincipalAxis = new Vector3D();
             errorPrincipalAxis.sub(expectedPrincipalAxis, estimatedPrincipalAxis);
             System.out.println("Error for the principal axis: " + errorPrincipalAxis);
          }
@@ -116,7 +114,7 @@ public class PrincipalComponentAnalysis3DTest
 
          if (DEBUG)
          {
-            Vector3d errorMean = new Vector3d();
+            Vector3D errorMean = new Vector3D();
             errorMean.sub(expectedMean, estimatedMean);
             System.out.println("Error for the mean: " + errorMean);
          }
@@ -154,13 +152,13 @@ public class PrincipalComponentAnalysis3DTest
          estimatedScaledPrincipalVector.normalize();
          assertTrue(expectedPrincipalAxis.epsilonEquals(estimatedScaledPrincipalVector, EPSILON_HIGH_PRECISION));
 
-         Matrix3d rotationMatrix = new Matrix3d();
+         RotationMatrix rotationMatrix = new RotationMatrix();
          pca.getPrincipalFrameRotationMatrix(rotationMatrix);
          rotationMatrix.getColumn(0, estimatedPrincipalAxis);
          rotationMatrix.getColumn(1, estimatedSecondaryAxis);
          rotationMatrix.getColumn(2, estimatedThirdAxis);
 
-         assertTrue(RotationTools.isRotationMatrixProper(rotationMatrix));
+         assertTrue(rotationMatrix.isRotationMatrix());
          assertTrue(expectedPrincipalAxis.epsilonEquals(estimatedPrincipalAxis, EPSILON_HIGH_PRECISION));
       }
    }
@@ -177,34 +175,34 @@ public class PrincipalComponentAnalysis3DTest
          {
             System.out.println("----------- Iteration #" + trialNumber + " ---------------------------");
          }
-         Point3d origin = RandomTools.generateRandomPoint(random, 1.0, 1.0, 1.0);
-         Point3d expectedMean = new Point3d();
-         Vector2d pointScatteringAmplitude = new Vector2d(15.0, 1.0);
-         Vector3d expectedPrincipalAxis = RandomTools.generateRandomVector(random, 1.0);
+         Point3D origin = RandomTools.generateRandomPoint(random, 1.0, 1.0, 1.0);
+         Point3D expectedMean = new Point3D();
+         Vector2D pointScatteringAmplitude = new Vector2D(15.0, 1.0);
+         Vector3D expectedPrincipalAxis = RandomTools.generateRandomVector(random, 1.0);
          // Build the secondary vector such as it is orthogonal to the principal axis
-         Vector3d randomVector = RandomTools.generateRandomVector(random, 1.0);
-         Vector3d expectedSecondaryAxis = new Vector3d();
+         Vector3D randomVector = RandomTools.generateRandomVector(random, 1.0);
+         Vector3D expectedSecondaryAxis = new Vector3D();
          expectedSecondaryAxis.cross(expectedPrincipalAxis, randomVector);
          expectedSecondaryAxis.normalize();
-         Vector3d expectedThirdAxis = new Vector3d();
+         Vector3D expectedThirdAxis = new Vector3D();
          expectedThirdAxis.cross(expectedPrincipalAxis, expectedSecondaryAxis);
 
-         Vector2d expectedVariance = new Vector2d();
-         Vector2d expectedStandardDeviation = new Vector2d();
+         Vector2D expectedVariance = new Vector2D();
+         Vector2D expectedStandardDeviation = new Vector2D();
 
          int numberOfPoints = RandomTools.generateRandomInt(random, 5000, 10000);
 
-         List<Point3d> listOfPoints = new ArrayList<>();
+         List<Point3D> listOfPoints = new ArrayList<>();
 
          // Variables to make the 2D-analysis of the data in the principal frame.
-         List<Point2d> pointCloudProjectedOnPrincipalAxes = new ArrayList<>();
-         Point2d meanOnPrincipalAxes = new Point2d();
+         List<Point2D> pointCloudProjectedOnPrincipalAxes = new ArrayList<>();
+         Point2D meanOnPrincipalAxes = new Point2D();
 
-         Vector3d offsetFromOrigin = new Vector3d();
+         Vector3D offsetFromOrigin = new Vector3D();
 
          for (int i = 0; i < numberOfPoints; i++)
          {
-            Point3d newPoint = new Point3d();
+            Point3D newPoint = new Point3D();
             newPoint.set(origin);
 
             double nextGaussianForPrincipalAxis = pointScatteringAmplitude.getX() * (1.0 - 2.0 * random.nextDouble());
@@ -224,15 +222,15 @@ public class PrincipalComponentAnalysis3DTest
             expectedMean.setZ(expectedMean.getZ() + newPoint.getZ() / numberOfPoints);
          }
 
-         Point3d estimatedMean = new Point3d();
-         Vector3d estimatedPrincipalAxis = new Vector3d();
-         Vector3d estimatedSecondaryAxis = new Vector3d();
-         Vector3d estimatedThirdAxis = new Vector3d();
-         Vector3d estimatedVariance = new Vector3d();
-         Vector3d estimatedStandardDeviation = new Vector3d();
-         Vector3d estimatedScaledPrincipalVector = new Vector3d();
-         Vector3d estimatedScaledSecondaryVector = new Vector3d();
-         Vector3d estimatedScaledThirdVector = new Vector3d();
+         Point3D estimatedMean = new Point3D();
+         Vector3D estimatedPrincipalAxis = new Vector3D();
+         Vector3D estimatedSecondaryAxis = new Vector3D();
+         Vector3D estimatedThirdAxis = new Vector3D();
+         Vector3D estimatedVariance = new Vector3D();
+         Vector3D estimatedStandardDeviation = new Vector3D();
+         Vector3D estimatedScaledPrincipalVector = new Vector3D();
+         Vector3D estimatedScaledSecondaryVector = new Vector3D();
+         Vector3D estimatedScaledThirdVector = new Vector3D();
 
          PrincipalComponentAnalysis3D pca = new PrincipalComponentAnalysis3D();
          pca.setPointCloud(listOfPoints);
@@ -246,11 +244,11 @@ public class PrincipalComponentAnalysis3DTest
          // Compute the expected standard deviation and variance in the estimated principal frame
          for (int i = 0; i < numberOfPoints; i++)
          {
-            Vector3d vectorToPoint = new Vector3d();
+            Vector3D vectorToPoint = new Vector3D();
             vectorToPoint.set(listOfPoints.get(i));
             double dotProductOnPrincipalAxis = vectorToPoint.dot(estimatedPrincipalAxis);
             double dotProductOnSecondaryAxis = vectorToPoint.dot(estimatedSecondaryAxis);
-            pointCloudProjectedOnPrincipalAxes.add(new Point2d(dotProductOnPrincipalAxis, dotProductOnSecondaryAxis));
+            pointCloudProjectedOnPrincipalAxes.add(new Point2D(dotProductOnPrincipalAxis, dotProductOnSecondaryAxis));
             meanOnPrincipalAxes.setX(meanOnPrincipalAxes.getX() + dotProductOnPrincipalAxis / numberOfPoints);
             meanOnPrincipalAxes.setY(meanOnPrincipalAxes.getY() + dotProductOnSecondaryAxis / numberOfPoints);
          }
@@ -280,19 +278,19 @@ public class PrincipalComponentAnalysis3DTest
             System.out.println("Expected standard deviation: " + expectedStandardDeviation);
             System.out.println();
 
-            Vector3d errorPrincipalAxis = new Vector3d();
+            Vector3D errorPrincipalAxis = new Vector3D();
             errorPrincipalAxis.sub(expectedPrincipalAxis, estimatedPrincipalAxis);
             System.out.println("Error magnitude for the principal axis: " + errorPrincipalAxis.length());
 
-            Vector3d errorSecondaryAxis = new Vector3d();
+            Vector3D errorSecondaryAxis = new Vector3D();
             errorSecondaryAxis.sub(expectedSecondaryAxis, estimatedSecondaryAxis);
             System.out.println("Error magnitude for the secondary axis: " + errorSecondaryAxis.length());
 
-            Vector3d errorThirdAxis = new Vector3d();
+            Vector3D errorThirdAxis = new Vector3D();
             errorThirdAxis.sub(expectedThirdAxis, estimatedThirdAxis);
             System.out.println("Error magnitude for the third axis: " + errorThirdAxis.length());
 
-            Vector3d errorMean = new Vector3d();
+            Vector3D errorMean = new Vector3D();
             errorMean.sub(expectedMean, estimatedMean);
             System.out.println("Error for the mean: " + errorMean);
 
@@ -335,13 +333,13 @@ public class PrincipalComponentAnalysis3DTest
          assertTrue(expectedSecondaryAxis.epsilonEquals(estimatedScaledSecondaryVector, EPSILON_LOW_PRECISION));
          assertTrue(estimatedSecondaryAxis.epsilonEquals(estimatedScaledSecondaryVector, EPSILON_HIGH_PRECISION));
 
-         Matrix3d rotationMatrix = new Matrix3d();
+         RotationMatrix rotationMatrix = new RotationMatrix();
          pca.getPrincipalFrameRotationMatrix(rotationMatrix);
          rotationMatrix.getColumn(0, estimatedPrincipalAxis);
          rotationMatrix.getColumn(1, estimatedSecondaryAxis);
          rotationMatrix.getColumn(2, estimatedThirdAxis);
 
-         assertTrue(RotationTools.isRotationMatrixProper(rotationMatrix));
+         assertTrue(rotationMatrix.isRotationMatrix());
          assertTrue(expectedPrincipalAxis.epsilonEquals(estimatedPrincipalAxis, EPSILON_LOW_PRECISION));
          assertTrue(expectedSecondaryAxis.epsilonEquals(estimatedSecondaryAxis, EPSILON_LOW_PRECISION));
          assertTrue(estimatedPrincipalAxis.epsilonEquals(estimatedScaledPrincipalVector, EPSILON_HIGH_PRECISION));
@@ -361,34 +359,34 @@ public class PrincipalComponentAnalysis3DTest
          {
             System.out.println("----------- Iteration #" + trialNumber + " ---------------------------");
          }
-         Point3d origin = RandomTools.generateRandomPoint(random, 1.0, 1.0, 1.0);
-         Point3d expectedMean = new Point3d();
-         Vector3d pointScatteringAmplitude = new Vector3d(15.0, 1.0, 0.2);
-         Vector3d expectedPrincipalAxis = RandomTools.generateRandomVector(random, 1.0);
+         Point3D origin = RandomTools.generateRandomPoint(random, 1.0, 1.0, 1.0);
+         Point3D expectedMean = new Point3D();
+         Vector3D pointScatteringAmplitude = new Vector3D(15.0, 1.0, 0.2);
+         Vector3D expectedPrincipalAxis = RandomTools.generateRandomVector(random, 1.0);
          // Build the secondary vector such as it is orthogonal to the principal axis
-         Vector3d randomVector = RandomTools.generateRandomVector(random, 1.0);
-         Vector3d expectedSecondaryAxis = new Vector3d();
+         Vector3D randomVector = RandomTools.generateRandomVector(random, 1.0);
+         Vector3D expectedSecondaryAxis = new Vector3D();
          expectedSecondaryAxis.cross(expectedPrincipalAxis, randomVector);
          expectedSecondaryAxis.normalize();
-         Vector3d expectedThirdAxis = new Vector3d();
+         Vector3D expectedThirdAxis = new Vector3D();
          expectedThirdAxis.cross(expectedPrincipalAxis, expectedSecondaryAxis);
 
-         Vector3d expectedVariance = new Vector3d();
-         Vector3d expectedStandardDeviation = new Vector3d();
+         Vector3D expectedVariance = new Vector3D();
+         Vector3D expectedStandardDeviation = new Vector3D();
 
          int numberOfPoints = RandomTools.generateRandomInt(random, 5000, 10000);
 
-         List<Point3d> listOfPoints = new ArrayList<>();
+         List<Point3D> listOfPoints = new ArrayList<>();
 
          // Variables to make the 2D-analysis of the data in the principal frame.
-         List<Point3d> pointCloudProjectedOnPrincipalAxes = new ArrayList<>();
-         Point3d meanOnPrincipalAxes = new Point3d();
+         List<Point3D> pointCloudProjectedOnPrincipalAxes = new ArrayList<>();
+         Point3D meanOnPrincipalAxes = new Point3D();
 
-         Vector3d offsetFromOrigin = new Vector3d();
+         Vector3D offsetFromOrigin = new Vector3D();
 
          for (int i = 0; i < numberOfPoints; i++)
          {
-            Point3d newPoint = new Point3d();
+            Point3D newPoint = new Point3D();
             newPoint.set(origin);
 
             double nextGaussianForPrincipalAxis = pointScatteringAmplitude.getX() * (1.0 - 2.0 * random.nextDouble());
@@ -413,15 +411,15 @@ public class PrincipalComponentAnalysis3DTest
             expectedMean.setZ(expectedMean.getZ() + newPoint.getZ() / numberOfPoints);
          }
 
-         Point3d estimatedMean = new Point3d();
-         Vector3d estimatedPrincipalAxis = new Vector3d();
-         Vector3d estimatedSecondaryAxis = new Vector3d();
-         Vector3d estimatedThirdAxis = new Vector3d();
-         Vector3d estimatedVariance = new Vector3d();
-         Vector3d estimatedStandardDeviation = new Vector3d();
-         Vector3d estimatedScaledPrincipalVector = new Vector3d();
-         Vector3d estimatedScaledSecondaryVector = new Vector3d();
-         Vector3d estimatedScaledThirdVector = new Vector3d();
+         Point3D estimatedMean = new Point3D();
+         Vector3D estimatedPrincipalAxis = new Vector3D();
+         Vector3D estimatedSecondaryAxis = new Vector3D();
+         Vector3D estimatedThirdAxis = new Vector3D();
+         Vector3D estimatedVariance = new Vector3D();
+         Vector3D estimatedStandardDeviation = new Vector3D();
+         Vector3D estimatedScaledPrincipalVector = new Vector3D();
+         Vector3D estimatedScaledSecondaryVector = new Vector3D();
+         Vector3D estimatedScaledThirdVector = new Vector3D();
 
          PrincipalComponentAnalysis3D pca = new PrincipalComponentAnalysis3D();
          pca.setPointCloud(listOfPoints);
@@ -435,12 +433,12 @@ public class PrincipalComponentAnalysis3DTest
          // Compute the expected standard deviation and variance in the estimated principal frame
          for (int i = 0; i < numberOfPoints; i++)
          {
-            Vector3d vectorToPoint = new Vector3d();
+            Vector3D vectorToPoint = new Vector3D();
             vectorToPoint.set(listOfPoints.get(i));
             double dotProductOnPrincipalAxis = vectorToPoint.dot(estimatedPrincipalAxis);
             double dotProductOnSecondaryAxis = vectorToPoint.dot(estimatedSecondaryAxis);
             double dotProductOnThirdAxis = vectorToPoint.dot(estimatedThirdAxis);
-            pointCloudProjectedOnPrincipalAxes.add(new Point3d(dotProductOnPrincipalAxis, dotProductOnSecondaryAxis, dotProductOnThirdAxis));
+            pointCloudProjectedOnPrincipalAxes.add(new Point3D(dotProductOnPrincipalAxis, dotProductOnSecondaryAxis, dotProductOnThirdAxis));
             meanOnPrincipalAxes.setX(meanOnPrincipalAxes.getX() + dotProductOnPrincipalAxis / numberOfPoints);
             meanOnPrincipalAxes.setY(meanOnPrincipalAxes.getY() + dotProductOnSecondaryAxis / numberOfPoints);
             meanOnPrincipalAxes.setZ(meanOnPrincipalAxes.getZ() + dotProductOnThirdAxis / numberOfPoints);
@@ -473,19 +471,19 @@ public class PrincipalComponentAnalysis3DTest
             System.out.println("Expected standard deviation: " + expectedStandardDeviation);
             System.out.println();
 
-            Vector3d errorPrincipalAxis = new Vector3d();
+            Vector3D errorPrincipalAxis = new Vector3D();
             errorPrincipalAxis.sub(expectedPrincipalAxis, estimatedPrincipalAxis);
             System.out.println("Error magnitude for the principal axis: " + errorPrincipalAxis.length());
 
-            Vector3d errorSecondaryAxis = new Vector3d();
+            Vector3D errorSecondaryAxis = new Vector3D();
             errorSecondaryAxis.sub(expectedSecondaryAxis, estimatedSecondaryAxis);
             System.out.println("Error magnitude for the secondary axis: " + errorSecondaryAxis.length());
 
-            Vector3d errorThirdAxis = new Vector3d();
+            Vector3D errorThirdAxis = new Vector3D();
             errorThirdAxis.sub(expectedThirdAxis, estimatedThirdAxis);
             System.out.println("Error magnitude for the third axis: " + errorThirdAxis.length());
 
-            Vector3d errorMean = new Vector3d();
+            Vector3D errorMean = new Vector3D();
             errorMean.sub(expectedMean, estimatedMean);
             System.out.println("Error for the mean: " + errorMean);
 
@@ -531,13 +529,13 @@ public class PrincipalComponentAnalysis3DTest
          assertTrue(expectedThirdAxis.epsilonEquals(estimatedScaledThirdVector, EPSILON_LOW_PRECISION));
          assertTrue(estimatedThirdAxis.epsilonEquals(estimatedScaledThirdVector, EPSILON_HIGH_PRECISION));
 
-         Matrix3d rotationMatrix = new Matrix3d();
+         RotationMatrix rotationMatrix = new RotationMatrix();
          pca.getPrincipalFrameRotationMatrix(rotationMatrix);
          rotationMatrix.getColumn(0, estimatedPrincipalAxis);
          rotationMatrix.getColumn(1, estimatedSecondaryAxis);
          rotationMatrix.getColumn(2, estimatedThirdAxis);
 
-         assertTrue(RotationTools.isRotationMatrixProper(rotationMatrix));
+         assertTrue(rotationMatrix.isRotationMatrix());
          assertTrue(expectedPrincipalAxis.epsilonEquals(estimatedPrincipalAxis, EPSILON_LOW_PRECISION));
          assertTrue(estimatedPrincipalAxis.epsilonEquals(estimatedScaledPrincipalVector, EPSILON_HIGH_PRECISION));
          assertTrue(expectedSecondaryAxis.epsilonEquals(estimatedSecondaryAxis, EPSILON_LOW_PRECISION));
@@ -555,7 +553,7 @@ public class PrincipalComponentAnalysis3DTest
 	public void testNoData()
 	{
 	   PrincipalComponentAnalysis3D pca = new PrincipalComponentAnalysis3D();
-	   ArrayList<Point3d> listOfPoints = new ArrayList<>();
+	   ArrayList<Point3D> listOfPoints = new ArrayList<>();
 	   pca.setPointCloud(listOfPoints);
 	   pca.compute();
 	}
@@ -570,7 +568,7 @@ public class PrincipalComponentAnalysis3DTest
 	   Random random = new Random(1298490387L);
 
 	   PrincipalComponentAnalysis3D pca = new PrincipalComponentAnalysis3D();
-	   ArrayList<Point3d> listOfPoints = new ArrayList<>();
+	   ArrayList<Point3D> listOfPoints = new ArrayList<>();
 	   listOfPoints.add(RandomTools.generateRandomPoint(random, 10.0, 10.0, 10.0));
 	   pca.setPointCloud(listOfPoints);
 	   pca.compute();
@@ -586,7 +584,7 @@ public class PrincipalComponentAnalysis3DTest
 	   Random random = new Random(1298490387L);
 
 	   PrincipalComponentAnalysis3D pca = new PrincipalComponentAnalysis3D();
-	   ArrayList<Point3d> listOfPoints = new ArrayList<>();
+	   ArrayList<Point3D> listOfPoints = new ArrayList<>();
 	   listOfPoints.add(RandomTools.generateRandomPoint(random, 10.0, 10.0, 10.0));
 	   listOfPoints.add(RandomTools.generateRandomPoint(random, 10.0, 10.0, 10.0));
 	   pca.setPointCloud(listOfPoints);
@@ -603,20 +601,20 @@ public class PrincipalComponentAnalysis3DTest
 	public void testAllignedDataPointsOnY()
 	{
 	   Random random = new Random(129849038127L);
-	   Vector3d direction = new Vector3d(0.0, 1.0, 0.0);
+	   Vector3D direction = new Vector3D(0.0, 1.0, 0.0);
 	   direction.normalize();
 
 	   PrincipalComponentAnalysis3D pca = new PrincipalComponentAnalysis3D();
-	   ArrayList<Point3d> listOfPoints = new ArrayList<>();
+	   ArrayList<Point3D> listOfPoints = new ArrayList<>();
 
 	   for (int i = 0; i < 100; i++)
 	   {
-	      Point3d point = new Point3d(direction);
+	      Point3D point = new Point3D(direction);
 	      point.scale(5.0 * random.nextGaussian());
 	      listOfPoints.add(point);
 	   }
 
-	   Vector3d estimatedPrincipalAxis = new Vector3d();
+	   Vector3D estimatedPrincipalAxis = new Vector3D();
 	   pca.setPointCloud(listOfPoints);
 	   pca.compute();
 	   pca.getPrincipalVector(estimatedPrincipalAxis);

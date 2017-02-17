@@ -3,10 +3,10 @@ package us.ihmc.graphicsDescription.yoGraphics;
 import java.awt.Color;
 import java.util.ArrayList;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Tuple3d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.transform.AffineTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
@@ -17,12 +17,11 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.geometry.Transform3d;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFramePoint2dInMultipleFrames;
 import us.ihmc.robotics.math.frames.YoFramePointInMultipleFrames;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class YoGraphicPosition extends YoGraphic implements RemoteYoGraphic
 {
@@ -148,7 +147,7 @@ public class YoGraphicPosition extends YoGraphic implements RemoteYoGraphic
       setPosition(Double.NaN, Double.NaN, Double.NaN);
    }
 
-   public void setPosition(Tuple3d tuple3d)
+   public void setPosition(Tuple3DBasics tuple3d)
    {
       setPosition(tuple3d.getX(), tuple3d.getY(), tuple3d.getZ());
    }
@@ -161,7 +160,7 @@ public class YoGraphicPosition extends YoGraphic implements RemoteYoGraphic
          this.z.set(position.getZ());
    }
 
-   public void getPosition(Point3d point3d)
+   public void getPosition(Point3D point3d)
    {
       point3d.setX(this.getX());
       point3d.setY(this.getY());
@@ -291,9 +290,9 @@ public class YoGraphicPosition extends YoGraphic implements RemoteYoGraphic
       return linkGraphics;
    }
 
-   private Vector3d translationVector = new Vector3d();
+   private Vector3D translationVector = new Vector3D();
 
-   protected void computeRotationTranslation(Transform3d transform3D)
+   protected void computeRotationTranslation(AffineTransform transform3D)
    {
       transform3D.setIdentity();
 

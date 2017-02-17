@@ -5,6 +5,7 @@ import org.ejml.factory.DecompositionFactory;
 import org.ejml.interfaces.decomposition.SingularValueDecomposition;
 import org.ejml.ops.CommonOps;
 import org.ejml.ops.SingularOps;
+
 import us.ihmc.robotics.MathTools;
 
 public class NullspaceCalculator

@@ -4,10 +4,8 @@ import java.awt.Color;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-import javax.vecmath.Color3f;
-import javax.vecmath.Point3d;
-
 import sensor_msgs.PointCloud2;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.publisher.RosPointCloudPublisher;
 import us.ihmc.utilities.ros.publisher.RosTf2Publisher;
@@ -17,7 +15,7 @@ import us.ihmc.utilities.ros.types.PointType;
 
 public class RosPointCloudFilterRepublisher implements Runnable
 {
-   final Point3d origin = new Point3d();
+   final Point3D origin = new Point3D();
    RosMainNode mainNode;
    RosPointCloudPublisher publisher;
    RosPointCloudSubscriber subscriber;
@@ -79,7 +77,7 @@ public class RosPointCloudFilterRepublisher implements Runnable
 
    }
 
-   protected boolean includePoint(Point3d point, float intensity)
+   protected boolean includePoint(Point3D point, float intensity)
    {
       return point.distance(origin) < 1.0;
    }
@@ -87,7 +85,7 @@ public class RosPointCloudFilterRepublisher implements Runnable
    float[] hsbvals = new float[3];
    float pinkHue = 0.9893f;
 
-   protected boolean includePoint(Point3d point, Color color)
+   protected boolean includePoint(Point3D point, Color color)
    {
       Color.RGBtoHSB(color.getRed(),  color.getGreen(), color.getBlue(), hsbvals);
 

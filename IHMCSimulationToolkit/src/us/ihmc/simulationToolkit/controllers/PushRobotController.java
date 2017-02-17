@@ -4,13 +4,12 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.JButton;
-import javax.vecmath.Vector3d;
 
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphic;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -20,6 +19,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransitionCondition;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
+import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
 public class PushRobotController implements RobotController
@@ -40,16 +40,16 @@ public class PushRobotController implements RobotController
 
    private StateTransitionCondition pushCondition = null;
    private final ExternalForcePoint forcePoint;
-   private final Vector3d forceVector = new Vector3d();
+   private final Vector3D forceVector = new Vector3D();
    
    private final YoGraphicVector forceVisualizer;
    
    public PushRobotController(FloatingRootJointRobot pushableRobot, FullRobotModel fullRobotModel)
    {
-      this(pushableRobot, fullRobotModel.getChest().getParentJoint().getName(), new Vector3d(0, 0, 0.3));
+      this(pushableRobot, fullRobotModel.getChest().getParentJoint().getName(), new Vector3D(0, 0, 0.3));
    }
    
-   public PushRobotController(FloatingRootJointRobot pushableRobot, String jointNameToApplyForce, Vector3d forcePointOffset)
+   public PushRobotController(FloatingRootJointRobot pushableRobot, String jointNameToApplyForce, Vector3D forcePointOffset)
    {
       yoTime = pushableRobot.getYoTime();
       registry = new YoVariableRegistry(jointNameToApplyForce + "_" + getClass().getSimpleName());
@@ -93,7 +93,7 @@ public class PushRobotController implements RobotController
       pushForceMagnitude.set(magnitude);
    }
 
-   public void setPushForceDirection(Vector3d direction)
+   public void setPushForceDirection(Vector3D direction)
    {
       pushDirection.set(direction);
    }
@@ -125,12 +125,12 @@ public class PushRobotController implements RobotController
       }
    }
 
-   public void applyForce(Vector3d direction, double magnitude, double duration)
+   public void applyForce(Vector3D direction, double magnitude, double duration)
    {
       applyForceDelayed(null, 0.0, direction, magnitude, duration);
    }
 
-   public void applyForceDelayed(StateTransitionCondition pushCondition, double timeDelay, Vector3d direction, double magnitude, double duration)
+   public void applyForceDelayed(StateTransitionCondition pushCondition, double timeDelay, Vector3D direction, double magnitude, double duration)
    {
       this.pushCondition = pushCondition;
       setPushDuration(duration);

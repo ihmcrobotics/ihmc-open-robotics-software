@@ -4,20 +4,19 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
 import org.ejml.data.DenseMatrix64F;
 
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.simulationconstructionset.GroundContactPoint;
-import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.screwTheory.SpatialForceVector;
 import us.ihmc.robotics.screwTheory.Wrench;
+import us.ihmc.simulationconstructionset.GroundContactPoint;
+import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 
 public class GroundContactPointBasedWrenchCalculator implements WrenchCalculatorInterface
 {
@@ -60,12 +59,12 @@ public class GroundContactPointBasedWrenchCalculator implements WrenchCalculator
    }
 
    private final RigidBodyTransform transformToOriginFrame = new RigidBodyTransform();
-   private final Vector3d force = new Vector3d();
-   private final Point3d contactPointOriginFrame = new Point3d();
-   private final Vector3d contactVectorOriginFrame = new Vector3d();
-   private final Vector3d tau = new Vector3d();
+   private final Vector3D force = new Vector3D();
+   private final Point3D contactPointOriginFrame = new Point3D();
+   private final Vector3D contactVectorOriginFrame = new Vector3D();
+   private final Vector3D tau = new Vector3D();
 
-   private final Point3d tempContactPoint = new Point3d();
+   private final Point3D tempContactPoint = new Point3D();
 
    @Override
    public void calculate()

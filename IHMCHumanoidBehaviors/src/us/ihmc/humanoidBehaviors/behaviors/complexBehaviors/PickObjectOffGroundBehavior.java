@@ -1,8 +1,7 @@
 package us.ihmc.humanoidBehaviors.behaviors.complexBehaviors;
 
-import javax.vecmath.Point3d;
-
 import us.ihmc.communication.packets.TextToSpeechPacket;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.coactiveElements.PickUpBallBehaviorCoactiveElementBehaviorSide;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.AtlasPrimitiveActions;
@@ -29,7 +28,7 @@ public class PickObjectOffGroundBehavior extends AbstractBehavior
    private final PipeLine<AbstractBehavior> pipeLine = new PipeLine<>();
 
 
-   private Point3d grabLocation = null;
+   private Point3D grabLocation = null;
    private double objectRadius = 0;
    private final AtlasPrimitiveActions atlasPrimitiveActions;
 
@@ -120,7 +119,7 @@ public class PickObjectOffGroundBehavior extends AbstractBehavior
 
    }
 
-   public void setGrabLocation(Point3d grabLocation, double objectRadius)
+   public void setGrabLocation(Point3D grabLocation, double objectRadius)
    {
       this.grabLocation = grabLocation;
       this.objectRadius = objectRadius;

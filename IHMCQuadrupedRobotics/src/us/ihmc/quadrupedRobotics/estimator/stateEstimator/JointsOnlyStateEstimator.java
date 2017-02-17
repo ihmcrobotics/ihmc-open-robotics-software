@@ -1,9 +1,8 @@
 package us.ihmc.quadrupedRobotics.estimator.stateEstimator;
 
-import javax.vecmath.Quat4d;
-import javax.vecmath.Tuple3d;
-
 import us.ihmc.commons.Conversions;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
@@ -79,7 +78,7 @@ public class JointsOnlyStateEstimator implements DRCStateEstimatorInterface
    }
 
    @Override
-   public void initializeEstimatorToActual(Tuple3d initialCoMPosition, Quat4d initialEstimationLinkOrientation)
+   public void initializeEstimatorToActual(Tuple3DReadOnly initialCoMPosition, QuaternionReadOnly initialEstimationLinkOrientation)
    {
 
    }

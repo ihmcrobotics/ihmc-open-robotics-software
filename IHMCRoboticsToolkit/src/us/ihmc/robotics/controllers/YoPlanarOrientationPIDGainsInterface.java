@@ -1,16 +1,15 @@
 package us.ihmc.robotics.controllers;
 
+import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-
-import javax.vecmath.Matrix3d;
 
 public interface YoPlanarOrientationPIDGainsInterface extends OrientationPIDGainsInterface
 {
-   public abstract Matrix3d createProportionalGainMatrix();
+   public abstract RotationMatrix createProportionalGainMatrix();
 
-   public abstract Matrix3d createDerivativeGainMatrix();
+   public abstract RotationMatrix createDerivativeGainMatrix();
 
-   public abstract Matrix3d createIntegralGainMatrix();
+   public abstract RotationMatrix createIntegralGainMatrix();
 
    public abstract void setProportionalGains(double proportionalGainX);
 

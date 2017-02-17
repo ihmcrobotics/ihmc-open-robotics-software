@@ -7,9 +7,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
 
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
 import com.jme3.app.Application;
 import com.jme3.asset.AssetManager;
 import com.jme3.material.Material;
@@ -22,13 +19,33 @@ import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 
 import jme3tools.optimize.GeometryBatchFactory;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.HeightMap;
 import us.ihmc.graphicsDescription.MeshDataGenerator;
 import us.ihmc.graphicsDescription.MeshDataHolder;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
-import us.ihmc.graphicsDescription.instructions.*;
+import us.ihmc.graphicsDescription.instructions.ArcTorusGraphics3DInstruction;
+import us.ihmc.graphicsDescription.instructions.CapsuleGraphics3DInstruction;
+import us.ihmc.graphicsDescription.instructions.ConeGraphics3DInstruction;
+import us.ihmc.graphicsDescription.instructions.CubeGraphics3DInstruction;
+import us.ihmc.graphicsDescription.instructions.CylinderGraphics3DInstruction;
+import us.ihmc.graphicsDescription.instructions.EllipsoidGraphics3DInstruction;
+import us.ihmc.graphicsDescription.instructions.ExtrudedPolygonGraphics3DInstruction;
+import us.ihmc.graphicsDescription.instructions.Graphics3DAddExtrusionInstruction;
+import us.ihmc.graphicsDescription.instructions.Graphics3DAddHeightMapInstruction;
+import us.ihmc.graphicsDescription.instructions.Graphics3DAddMeshDataInstruction;
+import us.ihmc.graphicsDescription.instructions.Graphics3DAddModelFileInstruction;
+import us.ihmc.graphicsDescription.instructions.Graphics3DInstruction;
+import us.ihmc.graphicsDescription.instructions.HemiEllipsoidGraphics3DInstruction;
+import us.ihmc.graphicsDescription.instructions.PolygonGraphics3DInstruction;
+import us.ihmc.graphicsDescription.instructions.PrimitiveGraphics3DInstruction;
+import us.ihmc.graphicsDescription.instructions.PyramidCubeGraphics3DInstruction;
+import us.ihmc.graphicsDescription.instructions.SphereGraphics3DInstruction;
+import us.ihmc.graphicsDescription.instructions.TruncatedConeGraphics3DInstruction;
+import us.ihmc.graphicsDescription.instructions.WedgeGraphics3DInstruction;
 import us.ihmc.graphicsDescription.instructions.listeners.AppearanceChangedListener;
 import us.ihmc.graphicsDescription.instructions.listeners.ExtrusionChangedListener;
 import us.ihmc.graphicsDescription.instructions.listeners.MeshChangedListener;
@@ -40,7 +57,6 @@ import us.ihmc.jMonkeyEngineToolkit.graphics.Graphics3DInstructionExecutor;
 import us.ihmc.jMonkeyEngineToolkit.jme.terrain.JMEHeightMapTerrain;
 import us.ihmc.jMonkeyEngineToolkit.jme.util.JMEDataTypeUtils;
 import us.ihmc.jMonkeyEngineToolkit.tralala.ShapeUtilities;
-import us.ihmc.robotics.geometry.RotationTools;
 
 public class JMEGraphicsObject extends Graphics3DInstructionExecutor
 {
@@ -211,8 +227,7 @@ public class JMEGraphicsObject extends Graphics3DInstructionExecutor
    @Override
    protected void doRotateInstruction(Graphics3DRotateInstruction graphics3dObjectRotateMatrix)
    {
-      Quat4d quat4d = new Quat4d();
-      RotationTools.convertMatrixToQuaternion(graphics3dObjectRotateMatrix.getRotationMatrix(), quat4d);
+      QuaternionBasics quat4d = new us.ihmc.euclid.tuple4D.Quaternion(graphics3dObjectRotateMatrix.getRotationMatrix());
 
       // DON'T USE THIS: the method in Quat4d is flawed and doesn't work for some rotation matrices!
       //      quat4d.set(graphics3dObjectRotateMatrix.getRotationMatrix());
@@ -227,7 +242,7 @@ public class JMEGraphicsObject extends Graphics3DInstructionExecutor
    protected void doScaleInstruction(Graphics3DScaleInstruction graphics3dObjectScale)
    {
       Node scale = new Node();
-      Vector3d scaleFactor = graphics3dObjectScale.getScaleFactor();
+      Vector3D scaleFactor = graphics3dObjectScale.getScaleFactor();
       scale.setLocalScale((float) scaleFactor.getX(), (float) scaleFactor.getY(), (float) scaleFactor.getZ());
 
       currentNode.attachChild(scale);
@@ -241,7 +256,7 @@ public class JMEGraphicsObject extends Graphics3DInstructionExecutor
       graphics3dObjectScale.addChangeScaleListener(new ScaleChangedListener()
       {
 
-         public void setScale(final Vector3d scaleFactor)
+         public void setScale(final Vector3D scaleFactor)
          {
             checkIfNotImmutable();
             application.enqueue(new Callable<Object>()

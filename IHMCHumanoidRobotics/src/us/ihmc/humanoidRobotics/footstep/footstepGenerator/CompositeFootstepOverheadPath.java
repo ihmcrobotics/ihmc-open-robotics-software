@@ -1,10 +1,10 @@
 package us.ihmc.humanoidRobotics.footstep.footstepGenerator;
 
-import us.ihmc.robotics.geometry.FramePose2d;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import us.ihmc.robotics.geometry.FramePose2d;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 /**
  * Created by agrabertilton on 3/6/15.

@@ -3,9 +3,8 @@ package us.ihmc.sensorProcessing.sensorData;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
@@ -21,12 +20,12 @@ public class JointConfigurationGatherer
    private final ArrayList<OneDoFJoint> joints = new ArrayList<>();
 
    private final FloatingInverseDynamicsJoint rootJoint;
-   private final Vector3d rootTranslation = new Vector3d();
-   private final Quat4d rootOrientation = new Quat4d();
+   private final Vector3D rootTranslation = new Vector3D();
+   private final Quaternion rootOrientation = new Quaternion();
 
-   private final Vector3d rootLinearVelocity = new Vector3d();
-   private final Vector3d rootAngularVelocity = new Vector3d();
-   private final Vector3d rootLinearAcceleration = new Vector3d();
+   private final Vector3D rootLinearVelocity = new Vector3D();
+   private final Vector3D rootAngularVelocity = new Vector3D();
+   private final Vector3D rootLinearAcceleration = new Vector3D();
 
    private final ForceSensorDefinition[] forceSensorDefinitions;
    private final ArrayList<String> forceSensorNameList = new ArrayList<String>();

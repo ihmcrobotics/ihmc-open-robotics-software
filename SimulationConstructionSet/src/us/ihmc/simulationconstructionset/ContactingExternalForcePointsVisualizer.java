@@ -3,9 +3,8 @@ package us.ihmc.simulationconstructionset;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
@@ -78,8 +77,8 @@ public class ContactingExternalForcePointsVisualizer
       this.contactPoints.addAll(contactingExternalForcePoints);
    }
 
-   private final Point3d tempPoint = new Point3d();
-   private final Vector3d tempVector = new Vector3d();
+   private final Point3D tempPoint = new Point3D();
+   private final Vector3D tempVector = new Vector3D();
 
    public void update()
    {

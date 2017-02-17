@@ -1,7 +1,6 @@
 package us.ihmc.simulationconstructionset.util.graphics;
 
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -149,7 +148,7 @@ public class DynamicGraphicObjectEvaluation
                yoFramePolygon.setConvexPolygon2d(newYoPolygon);
                dynamicGraphicYoFramePolygon.update();
 
-               Vector3d eulerAngles = new Vector3d();
+               Vector3D eulerAngles = new Vector3D();
                yoFramePolygonOrientation.getEulerAngles(eulerAngles);
                eulerAngles.setY(eulerAngles.getY() + 0.1);
                yoFramePolygonOrientation.setEulerAngles(eulerAngles);

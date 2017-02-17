@@ -1,17 +1,17 @@
 package us.ihmc.controlFlow;
 
-import javax.vecmath.Point3d;
+import us.ihmc.euclid.tuple3D.Point3D;
 
 public class DataTypeFour
 {
-   private Point3d point;
+   private Point3D point;
    
-   public Point3d getPoint()
+   public Point3D getPoint()
    {
       return point;
    }
    
-   public void setPoint(Point3d point)
+   public void setPoint(Point3D point)
    {
       this.point = point;
    }

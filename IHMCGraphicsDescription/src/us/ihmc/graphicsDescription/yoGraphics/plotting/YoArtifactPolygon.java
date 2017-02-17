@@ -4,8 +4,7 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.geom.Rectangle2D;
 
-import javax.vecmath.Point2d;
-
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.graphicsDescription.plotting.Graphics2DAdapter;
 import us.ihmc.graphicsDescription.plotting.Plotter2DAdapter;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
@@ -22,7 +21,7 @@ public class YoArtifactPolygon extends YoArtifact
    private final boolean fill;
    private final BasicStroke stroke;
    
-   private final Point2d legendStringPosition = new Point2d();
+   private final Point2D legendStringPosition = new Point2D();
    
    public YoArtifactPolygon(String name, YoFrameConvexPolygon2d yoConvexPolygon2d, Color color, boolean fill)
    {
@@ -38,7 +37,7 @@ public class YoArtifactPolygon extends YoArtifact
    }
 
    @Override
-   public void drawLegend(Plotter2DAdapter graphics, Point2d origin)
+   public void drawLegend(Plotter2DAdapter graphics, Point2D origin)
    {
       graphics.setColor(color);
       String name = "Polygon";

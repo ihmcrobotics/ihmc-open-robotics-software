@@ -1,38 +1,35 @@
 package us.ihmc.communication.packets;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-
-import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 
 public class UIPositionCheckerPacket extends Packet<UIPositionCheckerPacket> implements VisualizablePacket
 {
-   public Point3d position = new Point3d();
-   public Quat4d orientation;
+   public Point3D position = new Point3D();
+   public Quaternion orientation;
 
    public UIPositionCheckerPacket()
    {
 
    }
 
-   public UIPositionCheckerPacket(Point3d position)
+   public UIPositionCheckerPacket(Point3D position)
    {
       this(position, null);
    }
 
-   public UIPositionCheckerPacket(Point3d position, Quat4d orientation)
+   public UIPositionCheckerPacket(Point3D position, Quaternion orientation)
    {
       this.position = position;
       this.orientation = orientation;
    }
 
-   public Point3d getPosition()
+   public Point3D getPosition()
    {
       return position;
    }
 
-   public Quat4d getOrientation()
+   public Quaternion getOrientation()
    {
       return orientation;
    }

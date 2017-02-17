@@ -8,12 +8,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import javax.vecmath.Point3d;
-
 import com.esotericsoftware.kryo.Kryo;
 
-import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -21,12 +17,15 @@ import us.ihmc.avatar.networkProcessor.time.DRCROSAlwaysZeroOffsetPPSTimestampOf
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.util.NetworkPorts;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataStateCommand.LidarState;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.PointCloudWorldPacket;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.humanoidRobotics.kryo.PPSTimestampOffsetProvider;
 import us.ihmc.ihmcPerception.depthData.PointCloudDataReceiver;
 import us.ihmc.ihmcPerception.depthData.PointCloudSource;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBuffer;
@@ -81,13 +80,13 @@ public class PointCloudDataReceiverSimulation implements Runnable, PacketConsume
          clone.setTimestamp(timestamp);
          robotConfigurationDataBuffer.receivedPacket(clone);
          
-         ArrayList<Point3d> points = new ArrayList<>(1000);
+         ArrayList<Point3D> points = new ArrayList<>(1000);
          long[] timestamps = new long[1000];
          Arrays.fill(timestamps, timestamp);
    
          for (int i = 0; i < 1000; i++)
          {
-            points.add(new Point3d(10.0 * random.nextDouble(), -10.0 + 10.0 * random.nextDouble(), -1.0 + 2.0 * random.nextDouble()));
+            points.add(new Point3D(10.0 * random.nextDouble(), -10.0 + 10.0 * random.nextDouble(), -1.0 + 2.0 * random.nextDouble()));
          }
    
          pointCloudDataReceiver.receivedPointCloudData(ReferenceFrame.getWorldFrame(), lidarFrame, timestamps, points, PointCloudSource.QUADTREE,

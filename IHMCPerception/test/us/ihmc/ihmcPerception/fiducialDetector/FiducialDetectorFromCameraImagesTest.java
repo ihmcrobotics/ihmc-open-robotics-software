@@ -2,10 +2,6 @@ package us.ihmc.ihmcPerception.fiducialDetector;
 
 import java.awt.image.BufferedImage;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
 import org.junit.Test;
 
 import boofcv.struct.calib.IntrinsicParameters;
@@ -14,6 +10,12 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
 import us.ihmc.continuousIntegration.IntegrationCategory;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -23,7 +25,6 @@ import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.testing.YoVariableTestGoal;
 import us.ihmc.simulationconstructionset.CameraMount;
@@ -90,12 +91,12 @@ public class FiducialDetectorFromCameraImagesTest
       RenderedSceneHandler videoDataServer = new RenderedSceneHandler()
       {
          @Override
-         public void updateImage(RobotSide robotSide, BufferedImage bufferedImage, long timeStamp, Point3d cameraPosition, Quat4d cameraOrientation, IntrinsicParameters intrinsicParameters)
+         public void updateImage(RobotSide robotSide, BufferedImage bufferedImage, long timeStamp, Point3DReadOnly cameraPosition, QuaternionReadOnly cameraOrientation, IntrinsicParameters intrinsicParameters)
          {
             FloatingJoint cameraJoint = (FloatingJoint) simpleRobotWithCamera.getRootJoints().get(0);
 
-            Point3d cameraPositionInWorld = new Point3d();
-            Quat4d cameraOrientationInWorldXForward = new Quat4d();
+            Point3D cameraPositionInWorld = new Point3D();
+            Quaternion cameraOrientationInWorldXForward = new Quaternion();
 
             cameraJoint.getPosition(cameraPositionInWorld);
             cameraJoint.getRotationToWorld(cameraOrientationInWorldXForward);
@@ -181,10 +182,10 @@ public class FiducialDetectorFromCameraImagesTest
             double vY = ampY * Math.sin(2.0 * Math.PI * freqY * t);
             double vZ = ampZ * Math.sin(2.0 * Math.PI * freqZ * t);
 
-            Vector3d linearVelocityInWorld = new Vector3d(vX, vY, vZ);
+            Vector3D linearVelocityInWorld = new Vector3D(vX, vY, vZ);
             floatingFiducialBoxRobot.setLinearVelocity(linearVelocityInWorld);
 
-            Vector3d angularVelocityInBody = new Vector3d(wX, wY, wZ);
+            Vector3D angularVelocityInBody = new Vector3D(wX, wY, wZ);
             floatingFiducialBoxRobot.setAngularVelocity(angularVelocityInBody);
          }
       });
@@ -220,7 +221,7 @@ public class FiducialDetectorFromCameraImagesTest
    private Robot createCameraRobot(double fieldOfView)
    {
       final Robot simpleRobotWithCamera = new Robot("SimpleRobotWithCamera");
-      FloatingJoint cameraJoint = new FloatingJoint("camera", "camera", new Vector3d(), simpleRobotWithCamera);
+      FloatingJoint cameraJoint = new FloatingJoint("camera", "camera", new Vector3D(), simpleRobotWithCamera);
       Link cameraLink = new Link("camera");
       cameraLink.setMassAndRadiiOfGyration(1.0, 0.1, 0.1, 0.1);
       Graphics3DObject cameraLinkGraphics = new Graphics3DObject();

@@ -1,9 +1,10 @@
 package us.ihmc.robotics.geometry;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Point3f;
-import javax.vecmath.Tuple3d;
-
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Point3D32;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.robotics.MathTools;
 
 public class BoundingBox3d
@@ -11,18 +12,18 @@ public class BoundingBox3d
    private static final double DEFAULT_EPSILON = 0.0;
    private double epsilon;
 
-   private final Point3d minPoint = new Point3d();
-   private final Point3d maxPoint = new Point3d();
+   private final Point3D minPoint = new Point3D();
+   private final Point3D maxPoint = new Point3D();
 
-   public static BoundingBox3d createUsingCenterAndPlusMinusVector(Point3d center, Tuple3d plusMinusVector)
+   public static BoundingBox3d createUsingCenterAndPlusMinusVector(Point3DReadOnly center, Tuple3DReadOnly plusMinusVector)
    {
       return createUsingCenterAndPlusMinusVector(center, plusMinusVector, DEFAULT_EPSILON);
    }
 
-   public static BoundingBox3d createUsingCenterAndPlusMinusVector(Point3d center, Tuple3d plusMinusVector, double epsilon)
+   public static BoundingBox3d createUsingCenterAndPlusMinusVector(Point3DReadOnly center, Tuple3DReadOnly plusMinusVector, double epsilon)
    {
-      Point3d minimumPoint = new Point3d(center);
-      Point3d maximumPoint = new Point3d(center);
+      Point3D minimumPoint = new Point3D(center);
+      Point3D maximumPoint = new Point3D(center);
 
       minimumPoint.sub(plusMinusVector);
       maximumPoint.add(plusMinusVector);
@@ -40,19 +41,19 @@ public class BoundingBox3d
       double maxY = Math.max(boundingBoxOne.maxPoint.getY() + boundingBoxOne.epsilon, boundingBoxTwo.maxPoint.getY() + boundingBoxTwo.epsilon);
       double maxZ = Math.max(boundingBoxOne.maxPoint.getZ() + boundingBoxOne.epsilon, boundingBoxTwo.maxPoint.getZ() + boundingBoxTwo.epsilon);
 
-      Point3d unionMin = new Point3d(minX, minY, minZ);
-      Point3d unionMax = new Point3d(maxX, maxY, maxZ);
+      Point3D unionMin = new Point3D(minX, minY, minZ);
+      Point3D unionMax = new Point3D(maxX, maxY, maxZ);
 
       return new BoundingBox3d(unionMin, unionMax, 0.0);
    }
 
-   public BoundingBox3d(Point3d min, Point3d max, double epsilon)
+   public BoundingBox3d(Point3DReadOnly min, Point3DReadOnly max, double epsilon)
    {
       this.epsilon = epsilon;
       set(min, max);
    }
 
-   public BoundingBox3d(Point3d min, Point3d max)
+   public BoundingBox3d(Point3DReadOnly min, Point3DReadOnly max)
    {
       this(min, max, DEFAULT_EPSILON);
    }
@@ -89,7 +90,7 @@ public class BoundingBox3d
       this(boundingBox, boundingBox.epsilon);
    }
 
-   public void set(Point3d min, Point3d max)
+   public void set(Point3DReadOnly min, Point3DReadOnly max)
    {
       minPoint.set(min);
       maxPoint.set(max);
@@ -130,13 +131,13 @@ public class BoundingBox3d
       verifyBounds();
    }
 
-   public void setMin(Point3d min)
+   public void setMin(Point3DReadOnly min)
    {
       minPoint.set(min);
       verifyBounds();
    }
 
-   public void setMax(Point3d max)
+   public void setMax(Point3DReadOnly max)
    {
       maxPoint.set(max);
       verifyBounds();
@@ -182,12 +183,12 @@ public class BoundingBox3d
       return maxPoint.getZ();
    }
 
-   public void getMinPoint(Point3d minToPack)
+   public void getMinPoint(Point3DBasics minToPack)
    {
       minToPack.set(minPoint);
    }
 
-   public void getMaxPoint(Point3d maxToPack)
+   public void getMaxPoint(Point3DBasics maxToPack)
    {
       maxToPack.set(maxPoint);
    }
@@ -202,7 +203,7 @@ public class BoundingBox3d
       maxPoint.get(maxToPack);
    }
 
-   public void getCenterPoint(Point3d centerToPack)
+   public void getCenterPoint(Point3DBasics centerToPack)
    {
       centerToPack.interpolate(minPoint, maxPoint, 0.5);
    }
@@ -255,12 +256,12 @@ public class BoundingBox3d
       return minPoint.getX() >= referenceX;
    }
 
-   public boolean isInside(Point3d point3d)
+   public boolean isInside(Point3D point3d)
    {
       return isInside(point3d.getX(), point3d.getY(), point3d.getZ());
    }
 
-   public boolean isInside(Point3f point3f)
+   public boolean isInside(Point3D32 point3f)
    {
       return isInside(point3f.getX(), point3f.getY(), point3f.getZ());
    }
@@ -325,7 +326,7 @@ public class BoundingBox3d
             && boundingBox.maxPoint.getY() >= minPoint.getY();
    }
 
-   public boolean intersects(Point3d start, Point3d end)
+   public boolean intersects(Point3DReadOnly start, Point3DReadOnly end)
    {
       double invXDir = 1 / (end.getX() - start.getX());
       double invYDir = 1 / (end.getY() - start.getY());
@@ -409,48 +410,47 @@ public class BoundingBox3d
       this.epsilon = epsilon;
    }
 
-   public void updateToIncludePoint(Tuple3d point)
+   public void updateToIncludePoint(Tuple3DReadOnly point)
    {
-      this.updateToIncludePoint(point.x, point.y, point.z);
+      this.updateToIncludePoint(point.getX(), point.getY(), point.getZ());
    }
 
    public void updateToIncludePoint(double x, double y, double z)
    {
-      if (Double.isNaN(this.minPoint.x) || (x < this.minPoint.x))
+      if (Double.isNaN(this.minPoint.getX()) || (x < this.minPoint.getX()))
       {
-         this.minPoint.x = x;
+         this.minPoint.setX(x);
       }
 
-      if (Double.isNaN(this.minPoint.y) || (y < this.minPoint.y))
+      if (Double.isNaN(this.minPoint.getY()) || (y < this.minPoint.getY()))
       {
-         this.minPoint.y = y;
+         this.minPoint.setY(y);
       }
 
-      if (Double.isNaN(this.minPoint.z) || (z < this.minPoint.z))
+      if (Double.isNaN(this.minPoint.getZ()) || (z < this.minPoint.getZ()))
       {
-         this.minPoint.z = z;
+         this.minPoint.setZ(z);
       }
 
-      if (Double.isNaN(this.maxPoint.x) || (x > this.maxPoint.x))
+      if (Double.isNaN(this.maxPoint.getX()) || (x > this.maxPoint.getX()))
       {
-         this.maxPoint.x = x;
+         this.maxPoint.setX(x);
       }
 
-      if (Double.isNaN(this.maxPoint.y) || (y > this.maxPoint.y))
+      if (Double.isNaN(this.maxPoint.getY()) || (y > this.maxPoint.getY()))
       {
-         this.maxPoint.y = y;
+         this.maxPoint.setY(y);
       }
 
-      if (Double.isNaN(this.maxPoint.z) || (z > this.maxPoint.z))
+      if (Double.isNaN(this.maxPoint.getZ()) || (z > this.maxPoint.getZ()))
       {
-         this.maxPoint.z = z;
+         this.maxPoint.setZ(z);
       }
    }
 
    public boolean containsNaN()
    {
-      return Double.isNaN(minPoint.getX()) || Double.isNaN(maxPoint.getX()) || Double.isNaN(minPoint.getY()) || Double.isNaN(maxPoint.getY()) || Double
-            .isNaN(minPoint.getZ()) || Double.isNaN(maxPoint.getZ());
+      return minPoint.containsNaN() || maxPoint.containsNaN();
    }
 
    @Override

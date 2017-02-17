@@ -1,14 +1,13 @@
 package us.ihmc.simulationconstructionset;
 
-import javax.vecmath.AxisAngle4d;
-import javax.vecmath.Vector3d;
-
-import us.ihmc.simulationconstructionset.physics.engine.jerry.PinJointPhysics;
-import us.ihmc.simulationconstructionset.torqueSpeedCurve.TorqueSpeedCurve;
+import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.simulationconstructionset.physics.engine.jerry.PinJointPhysics;
+import us.ihmc.simulationconstructionset.torqueSpeedCurve.TorqueSpeedCurve;
 
 /**
  *
@@ -31,7 +30,7 @@ public class PinJoint extends OneDegreeOfFreedomJoint
 {
    private static final long serialVersionUID = -8016564065453170730L;
 
-   private AxisAngle4d axisAngle = new AxisAngle4d();
+   private AxisAngle axisAngle = new AxisAngle();
    protected DoubleYoVariable q, qd, qdd,  tau;
 
    public DoubleYoVariable tauJointLimit, tauVelocityLimit, tauDamping;
@@ -55,7 +54,7 @@ public class PinJoint extends OneDegreeOfFreedomJoint
     * @param rob Robot to which this joint will belong
     * @param jaxis int representing the axis
     */
-   public PinJoint(String jname, Vector3d offset, Robot rob, Axis jaxis)
+   public PinJoint(String jname, Vector3D offset, Robot rob, Axis jaxis)
    {
       super(jname, offset, rob);
       physics = new PinJointPhysics(this);
@@ -64,7 +63,7 @@ public class PinJoint extends OneDegreeOfFreedomJoint
 
       initializeYoVariables(jname, registry);
 
-      this.physics.u_i = new Vector3d();
+      this.physics.u_i = new Vector3D();
 
       if (jaxis == Axis.X)
       {
@@ -95,7 +94,7 @@ public class PinJoint extends OneDegreeOfFreedomJoint
     * @param rob Robot to which this joint will belong
     * @param u_hat Vector3d representing the axis of rotation
     */
-   public PinJoint(String jname, Vector3d offset, Robot rob, Vector3d u_hat)
+   public PinJoint(String jname, Vector3D offset, Robot rob, Vector3D u_hat)
    {
       super(jname, offset, rob);
       physics = new PinJointPhysics(this);
@@ -104,7 +103,7 @@ public class PinJoint extends OneDegreeOfFreedomJoint
 
       initializeYoVariables(jname, registry);
 
-      physics.u_i = new Vector3d();
+      physics.u_i = new Vector3D();
       physics.u_i.set(u_hat);
       physics.u_i.normalize();
       setPinTransform3D(this.jointTransform3D, physics.u_i);
@@ -418,7 +417,7 @@ public class PinJoint extends OneDegreeOfFreedomJoint
     * @param t1 Transform3D in which the transform is to be stored
     * @param u_i Vector3d representing the joint axis
     */
-   protected void setPinTransform3D(RigidBodyTransform t1, Vector3d u_i)    // int rotAxis)
+   protected void setPinTransform3D(RigidBodyTransform t1, Vector3D u_i)    // int rotAxis)
    {
       setPinTransform3D(t1, u_i, 0.0);    // rotAxis, 0.0);
    }
@@ -430,7 +429,7 @@ public class PinJoint extends OneDegreeOfFreedomJoint
     * @param u_i Vector3d representing the joint axis
     * @param rotAng double specified rotation angle.
     */
-   protected void setPinTransform3D(RigidBodyTransform t1, Vector3d u_i, double rotAng)
+   protected void setPinTransform3D(RigidBodyTransform t1, Vector3D u_i, double rotAng)
    {
       t1.setIdentity();
       axisAngle.set(u_i, rotAng);

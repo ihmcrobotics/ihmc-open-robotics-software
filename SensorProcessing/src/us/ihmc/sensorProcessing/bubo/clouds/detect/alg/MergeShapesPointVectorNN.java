@@ -18,12 +18,12 @@
 
 package us.ihmc.sensorProcessing.bubo.clouds.detect.alg;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.ddogleg.fitting.modelset.DistanceFromModel;
 import org.ddogleg.struct.GrowQueue_B;
 import org.ddogleg.struct.GrowQueue_I32;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Given a set of shapes and points which are members of the shapes, identify shapes which are really the same

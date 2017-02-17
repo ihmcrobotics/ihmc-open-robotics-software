@@ -3,12 +3,11 @@ package us.ihmc.sensorProcessing.simulatedSensors;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Vector3d;
-
 import org.apache.commons.lang3.tuple.Pair;
 
 import us.ihmc.commons.Conversions;
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
@@ -131,7 +130,7 @@ public class SimulatedSensorHolderAndReader implements SensorReader
          SimulatedOrientationSensorFromRobot orientationSensor = orientationSensors.get(i).getRight();
          orientationSensor.startComputation();
          orientationSensor.waitUntilComputationIsDone();
-         Matrix3d value = orientationSensor.getOrientationOutputPort().getData();
+         RotationMatrix value = orientationSensor.getOrientationOutputPort().getData();
          sensorProcessing.setOrientationSensorValue(orientationSensors.get(i).getLeft(), value);
       }
 
@@ -140,7 +139,7 @@ public class SimulatedSensorHolderAndReader implements SensorReader
          SimulatedAngularVelocitySensorFromRobot angularVelocitySensor = angularVelocitySensors.get(i).getRight();
          angularVelocitySensor.startComputation();
          angularVelocitySensor.waitUntilComputationIsDone();
-         Vector3d value = angularVelocitySensor.getAngularVelocityOutputPort().getData();
+         Vector3D value = angularVelocitySensor.getAngularVelocityOutputPort().getData();
          sensorProcessing.setAngularVelocitySensorValue(angularVelocitySensors.get(i).getLeft(), value);
       }
 
@@ -150,7 +149,7 @@ public class SimulatedSensorHolderAndReader implements SensorReader
          SimulatedLinearAccelerationSensorFromRobot linearAccelerationSensor = linearAccelerationSensors.get(i).getRight();
          linearAccelerationSensor.startComputation();
          linearAccelerationSensor.waitUntilComputationIsDone();
-         Vector3d value = linearAccelerationSensor.getLinearAccelerationOutputPort().getData();
+         Vector3D value = linearAccelerationSensor.getLinearAccelerationOutputPort().getData();
          sensorProcessing.setLinearAccelerationSensorValue(linearAccelerationSensors.get(i).getLeft(), value);
       }
 

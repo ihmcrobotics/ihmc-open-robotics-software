@@ -2,11 +2,10 @@ package us.ihmc.sensorProcessing.pointClouds.combinationQuadTreeOctTree;
 
 import java.util.Collection;
 
-import javax.vecmath.Point3d;
-
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.robotics.dataStructures.HeightMapWithPoints;
 import us.ihmc.robotics.hyperCubeTree.HyperCubeTreeListener;
 import us.ihmc.robotics.quadTree.QuadTreeForGroundListener;
-import us.ihmc.robotics.dataStructures.HeightMapWithPoints;
 
 public interface QuadTreeHeightMapInterface extends HeightMapWithPoints
 {
@@ -26,8 +25,8 @@ public interface QuadTreeHeightMapInterface extends HeightMapWithPoints
 
 	public abstract boolean addToQuadtree(double x, double y, double z);
 	
-   public void getStoredPoints(Collection<Point3d> points);
-   public void getCellAverageStoredPoints(Collection<Point3d> points);
+   public void getStoredPoints(Collection<Point3D> points);
+   public void getCellAverageStoredPoints(Collection<Point3D> points);
 
    public abstract void lock();
 

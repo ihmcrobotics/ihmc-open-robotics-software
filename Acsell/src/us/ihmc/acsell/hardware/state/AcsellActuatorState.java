@@ -3,8 +3,6 @@ package us.ihmc.acsell.hardware.state;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
-import javax.vecmath.Vector3d;
-
 import us.ihmc.acsell.hardware.AcsellActuator;
 import us.ihmc.acsell.hardware.configuration.AcsellRobot;
 import us.ihmc.acsell.hardware.state.slowSensors.AcsellSlowSensor;
@@ -26,6 +24,7 @@ import us.ihmc.acsell.hardware.state.slowSensors.RawPhaseCurrentADTicks;
 import us.ihmc.acsell.hardware.state.slowSensors.SensorMCUTime;
 import us.ihmc.acsell.hardware.state.slowSensors.StatorHallSwitches;
 import us.ihmc.acsell.hardware.state.slowSensors.StrainSensor;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.LongYoVariable;
@@ -177,7 +176,7 @@ public class AcsellActuatorState
       return ((QuadratureControlEffort) slowSensors[10]).getValue();
    }
 
-   public void getIMUAccelerationVector(Vector3d vectorToPack)
+   public void getIMUAccelerationVector(Vector3D vectorToPack)
    {
       double x = ((IMUAccelSensor) slowSensors[18]).getValue();
       double y = ((IMUAccelSensor) slowSensors[19]).getValue();
@@ -185,7 +184,7 @@ public class AcsellActuatorState
       vectorToPack.set(x, y, z);
    }
 
-   public void getIMUMagnetoVector(Vector3d vectorToPack)
+   public void getIMUMagnetoVector(Vector3D vectorToPack)
    {
       double x = ((IMUMagSensor) slowSensors[24]).getValue();
       double y = ((IMUMagSensor) slowSensors[25]).getValue();

@@ -2,8 +2,8 @@ package us.ihmc.jMonkeyEngineToolkit;
 
 import java.util.concurrent.Callable;
 
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.structure.Graphics3DNode;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 public class GraphicsTransformUpdate implements Callable<Object>
 {

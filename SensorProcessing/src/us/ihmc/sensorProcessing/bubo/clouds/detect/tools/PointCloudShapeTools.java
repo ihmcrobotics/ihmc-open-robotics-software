@@ -18,6 +18,8 @@
 
 package us.ihmc.sensorProcessing.bubo.clouds.detect.tools;
 
+import org.ejml.data.DenseMatrix64F;
+
 import georegression.geometry.ConvertRotation3D_F64;
 import georegression.geometry.GeometryMath_F64;
 import georegression.struct.plane.PlaneNormal3D_F64;
@@ -26,7 +28,6 @@ import georegression.struct.point.Vector3D_F64;
 import georegression.struct.shapes.Cylinder3D_F64;
 import georegression.struct.shapes.Sphere3D_F64;
 import georegression.struct.so.Rodrigues_F64;
-import org.ejml.data.DenseMatrix64F;
 
 /**
  * Various tools for shapes in point clouds.
