@@ -1,6 +1,8 @@
 package us.ihmc.commonWalkingControlModules.configurations;
 
+import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.Map;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
@@ -141,9 +143,9 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
       return null;
    }
 
-   public YoPIDGains createJointSpaceControlGains(YoVariableRegistry registry)
+   public Map<String, YoPIDGains> getOrCreateJointSpaceControlGains(YoVariableRegistry registry)
    {
-      return null;
+      return new HashMap<String, YoPIDGains>();
    }
 
    public abstract YoSE3PIDGainsInterface createSwingFootControlGains(YoVariableRegistry registry);

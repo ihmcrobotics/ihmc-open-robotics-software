@@ -3,14 +3,17 @@ package us.ihmc.commonWalkingControlModules.controlModules.rigidBody;
 import java.util.HashMap;
 import java.util.Map;
 
+import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.commonWalkingControlModules.controlModules.ControllerCommandValidationTools;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.JointspaceFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.JointspaceTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
 import us.ihmc.robotics.controllers.YoPIDGains;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.lists.RecyclingArrayList;
@@ -28,30 +31,34 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
    // TODO: get rid of hash maps and use a simple array instead
    private final Map<OneDoFJoint, MultipleWaypointsTrajectoryGenerator> jointTrajectoryGenerators = new HashMap<>();
    private final Map<OneDoFJoint, RecyclingArrayList<SimpleTrajectoryPoint1D>> pointQueues = new HashMap<>();
+   private final Map<OneDoFJoint, JointspaceFeedbackControlCommand> feedbackControlCommands = new HashMap<>();
 
    private final Map<OneDoFJoint, IntegerYoVariable> numberOfPointsInQueue = new HashMap<>();
    private final Map<OneDoFJoint, IntegerYoVariable> numberOfPointsInGenerator = new HashMap<>();
    private final Map<OneDoFJoint, IntegerYoVariable> numberOfPoints = new HashMap<>();
 
-   private final SimpleTrajectoryPoint1D lastPointAdded = new SimpleTrajectoryPoint1D();
+   private final Map<OneDoFJoint, DoubleYoVariable> weights = new HashMap<>();
+   private final Map<OneDoFJoint, YoPIDGains> gains = new HashMap<>();
 
-   private final DoubleYoVariable weight;
-   private final YoPIDGains gains;
-   private final JointspaceFeedbackControlCommand feedbackControlCommand = new JointspaceFeedbackControlCommand();
+   private final BooleanYoVariable hasWeights;
+   private final BooleanYoVariable hasGains;
+
+   private final SimpleTrajectoryPoint1D lastPointAdded = new SimpleTrajectoryPoint1D();
+   private final FeedbackControlCommandList feedbackControlCommand = new FeedbackControlCommandList();
 
    private final OneDoFJoint[] jointsOriginal;
    private final int numberOfJoints;
 
-   public RigidBodyJointspaceControlState(String bodyName, OneDoFJoint[] jointsToControl, YoPIDGains gains, DoubleYoVariable yoTime, YoVariableRegistry parentRegistry)
+   public RigidBodyJointspaceControlState(String bodyName, OneDoFJoint[] jointsToControl, DoubleYoVariable yoTime, YoVariableRegistry parentRegistry)
    {
       super(RigidBodyControlMode.JOINTSPACE, bodyName, yoTime);
 
-      this.gains = gains;
       this.jointsOriginal = jointsToControl;
       numberOfJoints = jointsOriginal.length;
 
       String prefix = bodyName + "Jointspace";
-      weight = new DoubleYoVariable(prefix + "Weight", registry);
+      hasWeights = new BooleanYoVariable(prefix + "HasWeights", registry);
+      hasGains = new BooleanYoVariable(prefix + "HasGains", registry);
 
       for (int i = 0; i < jointsToControl.length; i++)
       {
@@ -64,7 +71,9 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
          pointQueue.clear();
          pointQueues.put(joint, pointQueue);
 
-         feedbackControlCommand.addJoint(joint, Double.NaN, Double.NaN, Double.NaN);
+         JointspaceFeedbackControlCommand jointControlCommand = new JointspaceFeedbackControlCommand();
+         jointControlCommand.addJoint(joint, Double.NaN, Double.NaN, Double.NaN);
+         feedbackControlCommands.put(joint, jointControlCommand);
 
          IntegerYoVariable numberOfPointsInQueue = new IntegerYoVariable(prefix + "_" + jointName + "_numberOfPointsInQueue", registry);
          IntegerYoVariable numberOfPointsInGenerator = new IntegerYoVariable(prefix + "_" + jointName + "_numberOfPointsInGenerator", registry);
@@ -72,14 +81,38 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
          this.numberOfPointsInQueue.put(joint, numberOfPointsInQueue);
          this.numberOfPointsInGenerator.put(joint, numberOfPointsInGenerator);
          this.numberOfPoints.put(joint, numberOfPoints);
+
+         DoubleYoVariable weight = new DoubleYoVariable(prefix + "_" + jointName + "_weight", registry);
+         weights.put(joint, weight);
       }
 
       parentRegistry.addChild(registry);
    }
 
-   public void setWeight(double weight)
+   public void setWeights(TObjectDoubleHashMap<String> weights)
    {
-      this.weight.set(weight);
+      hasWeights.set(true);
+      for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
+      {
+         OneDoFJoint joint = jointsOriginal[jointIdx];
+         if (weights.containsKey(joint.getName()))
+            this.weights.get(joint).set(weights.get(joint.getName()));
+         else
+            hasWeights.set(false);
+      }
+   }
+
+   public void setGains(Map<String, YoPIDGains> gains)
+   {
+      hasGains.set(true);
+      for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
+      {
+         OneDoFJoint joint = jointsOriginal[jointIdx];
+         if (gains.containsKey(joint.getName()))
+            this.gains.put(joint, gains.get(joint.getName()));
+         else
+            hasGains.set(false);
+      }
    }
 
    public void holdCurrent()
@@ -121,7 +154,11 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
          double desiredPosition = generator.getValue();
          double desiredVelocity = generator.getVelocity();
          double feedForwardAcceleration = generator.getAcceleration();
-         feedbackControlCommand.setOneDoFJoint(jointIdx, desiredPosition, desiredVelocity, feedForwardAcceleration);
+
+         JointspaceFeedbackControlCommand feedbackControlCommand = feedbackControlCommands.get(joint);
+         feedbackControlCommand.setOneDoFJoint(0, desiredPosition, desiredVelocity, feedForwardAcceleration);
+         feedbackControlCommand.setGains(gains.get(joint));
+         feedbackControlCommand.setWeightForSolver(weights.get(joint).getDoubleValue());
 
          IntegerYoVariable numberOfPointsInQueue = this.numberOfPointsInQueue.get(joint);
          IntegerYoVariable numberOfPointsInGenerator = this.numberOfPointsInGenerator.get(joint);
@@ -132,8 +169,6 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
       }
 
       trajectoryDone.set(allDone);
-      feedbackControlCommand.setGains(gains);
-      feedbackControlCommand.setWeightForSolver(weight.getDoubleValue());
    }
 
    private boolean fillAndReinitializeTrajectories(OneDoFJoint joint)
@@ -168,9 +203,9 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
 
    public boolean handleTrajectoryCommand(JointspaceTrajectoryCommand<?, ?> command, double[] initialJointPositions)
    {
-      if (gains == null)
+      if (!hasGains.getBooleanValue() || !hasWeights.getBooleanValue())
       {
-         PrintTools.warn(warningPrefix + "Can not send trajectory commands. Joint gains are null.");
+         PrintTools.warn(warningPrefix + "Can not send joint trajectory commands. Do not have all weights and gains set.");
          return false;
       }
 
@@ -272,8 +307,9 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
 
    private void overrideTrajectory()
    {
-      for (OneDoFJoint joint : jointsOriginal)
+      for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
       {
+         OneDoFJoint joint = jointsOriginal[jointIdx];
          jointTrajectoryGenerators.get(joint).clear();
          pointQueues.get(joint).clear();
       }
@@ -326,6 +362,10 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
    @Override
    public FeedbackControlCommand<?> getFeedbackControlCommand()
    {
+      feedbackControlCommand.clear();
+      for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
+         feedbackControlCommand.addCommand(feedbackControlCommands.get(jointsOriginal[jointIdx]));
+
       return feedbackControlCommand;
    }
 }

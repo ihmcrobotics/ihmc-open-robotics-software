@@ -5,6 +5,7 @@ import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
 
+import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -24,6 +25,9 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage.BaseForControl;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
+import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
+import us.ihmc.robotics.controllers.YoPIDGains;
+import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -170,11 +174,19 @@ public class HighLevelControlManagerFactory
       controlFrameMap.put(BaseForControl.WORLD, ReferenceFrame.getWorldFrame());
 
       RigidBodyManager manager = new RigidBodyManager(bodyToControl, rootBody, momentumBasedController, walkingControllerParameters, controlFrameMap, rootFrame, registry);
-      double spineJointspaceWeight = momentumOptimizationSettings.getSpineJointspaceWeight();
+
       Vector3D chestAngularWeight = momentumOptimizationSettings.getChestAngularWeight();
       Vector3D chestLinearWeight = null;
       double chestUserModeWeight = momentumOptimizationSettings.getHeadUserModeWeight();
-      manager.setWeights(spineJointspaceWeight, chestAngularWeight, chestLinearWeight, chestUserModeWeight);
+
+      YoOrientationPIDGainsInterface taskspaceOrientationGains = walkingControllerParameters.createChestControlGains(registry);
+      YoPositionPIDGainsInterface taskspacePositionGains = null;
+
+      TObjectDoubleHashMap<String> jointspaceWeights = momentumOptimizationSettings.getJointspaceWeights();
+      Map<String, YoPIDGains> jointspaceGains = walkingControllerParameters.getOrCreateJointSpaceControlGains(registry);
+
+      manager.setWeights(jointspaceWeights, chestAngularWeight, chestLinearWeight, chestUserModeWeight);
+      manager.setGains(jointspaceGains, taskspaceOrientationGains, taskspacePositionGains);
 
       rigidBodyManagerMapByBodyName.put(bodyName, manager);
       return manager;

@@ -1,5 +1,6 @@
 package us.ihmc.exampleSimulations.beetle.controller;
 
+import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -245,8 +246,9 @@ public class HexapodMomentumOptimizationSettings extends MomentumOptimizationSet
 
    /** @inheritDoc */
    @Override
-   public double getSpineJointspaceWeight()
+   public TObjectDoubleHashMap<String> getJointspaceWeights()
    {
-      return spineJointspaceWeight;
+      // TODO Auto-generated method stub
+      return null;
    }
 }

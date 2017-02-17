@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
@@ -76,15 +77,9 @@ public class RigidBodyManager
       jointsAtDesiredPosition = ScrewTools.cloneOneDoFJointPath(rootBody, bodyToControl);
       initialJointPositions = new double[jointsOriginal.length];
 
-      // TODO: body specific
-      YoPIDGains jointspaceGains = walkingControllerParameters.createJointSpaceControlGains(registry);
-      YoOrientationPIDGainsInterface taskspaceOrientationGains = walkingControllerParameters.createChestControlGains(registry);
-      YoPositionPIDGainsInterface taskspacePositionGains = null;
-
       RigidBody elevator = humanoidControllerToolbox.getFullRobotModel().getElevator();
-      jointspaceControlState = new RigidBodyJointspaceControlState(bodyName, jointsOriginal, jointspaceGains, yoTime, registry);
-      taskspaceControlState = new RigidBodyTaskspaceControlState(bodyName, bodyToControl, rootBody, elevator, taskspaceOrientationGains, taskspacePositionGains,
-            controlFrameMap, rootFrame, yoTime, registry);
+      jointspaceControlState = new RigidBodyJointspaceControlState(bodyName, jointsOriginal, yoTime, registry);
+      taskspaceControlState = new RigidBodyTaskspaceControlState(bodyName, bodyToControl, rootBody, elevator, controlFrameMap, rootFrame, yoTime, registry);
       userControlState = new RigidBodyUserControlState(bodyName, yoTime);
 
       setupStateMachine();
@@ -108,11 +103,19 @@ public class RigidBodyManager
       }
    }
 
-   public void setWeights(double jointspaceWeight, Vector3D taskspaceAngularWeight, Vector3D taskspaceLinearWeight, double userModeWeight)
+   public void setWeights(TObjectDoubleHashMap<String> jointspaceWeights, Vector3D taskspaceAngularWeight, Vector3D taskspaceLinearWeight,
+         double userModeWeight)
    {
-      jointspaceControlState.setWeight(jointspaceWeight);
+      jointspaceControlState.setWeights(jointspaceWeights);
       taskspaceControlState.setWeights(taskspaceAngularWeight, taskspaceLinearWeight);
       userControlState.setWeight(userModeWeight);
+   }
+
+   public void setGains(Map<String, YoPIDGains> jointspaceGains, YoOrientationPIDGainsInterface taskspaceOrientationGains,
+         YoPositionPIDGainsInterface taskspacePositionGains)
+   {
+      jointspaceControlState.setGains(jointspaceGains);
+      taskspaceControlState.setGains(taskspaceOrientationGains, taskspacePositionGains);
    }
 
    public void initialize()
