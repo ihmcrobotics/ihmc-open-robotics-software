@@ -2,8 +2,7 @@ package us.ihmc.exampleSimulations.selfStablePlanarRunner;
 
 import java.util.ArrayList;
 
-import javax.vecmath.Point3d;
-
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
@@ -52,7 +51,7 @@ public class SelfStablePlanarRunner_Simulation implements SimulationDoneListener
 		new SelfStablePlanarRunner_Robot("SelfStableRunner7",  1.5,  3.0*deltaY),
 	};
 
-	System.out.println("Robot mass: " + robots[0].computeCenterOfMass(new Point3d()));
+	System.out.println("Robot mass: " + robots[0].computeCenterOfMass(new Point3D()));
 
 	GroundContactModel[] groundModels = new GroundContactModel[robots.length];
 	initGroundProfile();

@@ -1,8 +1,8 @@
 package us.ihmc.robotics.math.trajectories.waypoints;
 
+import us.ihmc.euclid.interfaces.GeometryObject;
+import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.geometry.interfaces.GeometryObject;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.TrajectoryPointInterface;
 
 public class SimpleTrajectoryPoint<W extends GeometryObject<W>, T extends SimpleTrajectoryPoint<W, T>> implements TrajectoryPointInterface<T>
@@ -93,7 +93,7 @@ public class SimpleTrajectoryPoint<W extends GeometryObject<W>, T extends Simple
    }
 
    @Override
-   public void applyTransform(RigidBodyTransform transform)
+   public void applyTransform(Transform transform)
    {
       waypointData.applyTransform(transform);
    }

@@ -1,18 +1,24 @@
 package us.ihmc.robotics.geometry.shapes;
 
-import us.ihmc.robotics.geometry.transformables.TransformableVector3d;
+import java.io.Serializable;
+
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 
 /**
  * Extension of Vector3d where x, y, and z have aliases for
  * length, width, and height, respectively.
  */
-class Size3d extends TransformableVector3d
+class Size3d implements Vector3DBasics, Serializable
 {
    private static final long serialVersionUID = -6792410294569029172L;
 
+   private double length;
+   private double width;
+   private double height;
+
    public Size3d()
    {
-      super();
+      setToZero();
    }
 
    /**
@@ -20,7 +26,9 @@ class Size3d extends TransformableVector3d
    */
    public Size3d(double length, double width, double height)
    {
-      super(length, width, height);
+      this.length = length;
+      this.width = width;
+      this.height = height;
    }
 
    /**
@@ -77,5 +85,41 @@ class Size3d extends TransformableVector3d
    public void setLengthWidthHeight(double length, double width, double height)
    {
       set(length, width, height);
+   }
+
+   @Override
+   public void setX(double x)
+   {
+      length = x;
+   }
+
+   @Override
+   public void setY(double y)
+   {
+      width = y;
+   }
+
+   @Override
+   public void setZ(double z)
+   {
+      height = z;
+   }
+
+   @Override
+   public double getX()
+   {
+      return length;
+   }
+
+   @Override
+   public double getY()
+   {
+      return width;
+   }
+
+   @Override
+   public double getZ()
+   {
+      return height;
    }
 }

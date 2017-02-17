@@ -8,9 +8,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
 import org.ejml.data.DenseMatrix64F;
 import org.junit.After;
 import org.junit.Before;
@@ -19,6 +16,10 @@ import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyJointspaceControlState;
+import us.ihmc.euclid.tools.EuclidCoreTestTools;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.tuple4D.Vector4D;
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.OneDoFJointTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
@@ -44,7 +45,6 @@ import us.ihmc.simulationconstructionset.robotController.SimpleRobotController;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.io.printing.PrintTools;
-import us.ihmc.tools.testing.JUnitTools;
 import us.ihmc.tools.thread.ThreadTools;
 
 public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRobotTestInterface
@@ -379,7 +379,7 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
       RigidBody chestClone = spineClone[spineClone.length - 1].getSuccessor();
       FrameOrientation desiredRandomChestOrientation = new FrameOrientation(chestClone.getBodyFixedFrame());
       desiredRandomChestOrientation.changeFrame(ReferenceFrame.getWorldFrame());
-      Quat4d desiredOrientation = new Quat4d();
+      Quaternion desiredOrientation = new Quaternion();
       desiredRandomChestOrientation.getQuaternion(desiredOrientation);
       return new ChestTrajectoryMessage(trajectoryTime, desiredOrientation);
    }
@@ -432,15 +432,15 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
       double trajectoryTime = message.getLastTrajectoryPoint().getTime();
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(trajectoryTime + 5.0 * controllerDT));
 
-      Quat4d desired = new Quat4d();
+      Quaternion desired = new Quaternion();
       message.getLastTrajectoryPoint().getOrientation(desired);
       assertChestDesired(drcSimulationTestHelper.getSimulationConstructionSet(), desired);
    }
 
-   private static void assertChestDesired(SimulationConstructionSet scs, Quat4d desired)
+   private static void assertChestDesired(SimulationConstructionSet scs, Quaternion desired)
    {
-      Quat4d controllerDesired = EndToEndChestTrajectoryMessageTest.findControllerDesiredOrientation(scs);
-      JUnitTools.assertQuaternionsEqual(desired, controllerDesired, DESIRED_QUAT_EPSILON);
+      Quaternion controllerDesired = EndToEndChestTrajectoryMessageTest.findControllerDesiredOrientation(scs);
+      EuclidCoreTestTools.assertQuaternionEquals(desired, controllerDesired, DESIRED_QUAT_EPSILON);
    }
 
    private static void assertJointDesired(SimulationConstructionSet scs, OneDoFJoint joint, double desired)
@@ -626,11 +626,11 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
 
          if (!currentDesiredOrientation.containsNaN() && !previousDesiredOrientation.containsNaN())
          {
-            Quat4d previous = previousDesiredOrientation.getQuaternionCopy();
-            Quat4d current = currentDesiredOrientation.getQuaternionCopy();
-            Quat4d derivative = new Quat4d();
+            Quaternion previous = previousDesiredOrientation.getQuaternionCopy();
+            Quaternion current = currentDesiredOrientation.getQuaternionCopy();
+            Vector4D derivative = new Vector4D();
             quaternionCalculus.computeQDotByFiniteDifferenceCentral(previous, current, controllerDT, derivative);
-            Vector3d angularVelocity = new Vector3d();
+            Vector3D angularVelocity = new Vector3D();
             quaternionCalculus.computeAngularVelocityInWorldFrame(current, derivative, angularVelocity);
             double speed = angularVelocity.length();
             if (speed > maxSpeed.getDoubleValue())

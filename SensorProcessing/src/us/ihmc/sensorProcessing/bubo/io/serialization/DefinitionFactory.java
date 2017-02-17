@@ -18,7 +18,11 @@
 
 package us.ihmc.sensorProcessing.bubo.io.serialization;
 
-import georegression.struct.point.*;
+import georegression.struct.point.Point2D_F32;
+import georegression.struct.point.Point2D_F64;
+import georegression.struct.point.Point2D_I16;
+import georegression.struct.point.Point2D_I32;
+import georegression.struct.point.Point3D_F64;
 import georegression.struct.shapes.Rectangle2D_F64;
 
 /**

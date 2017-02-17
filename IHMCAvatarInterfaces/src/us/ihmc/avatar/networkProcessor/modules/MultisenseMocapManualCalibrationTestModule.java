@@ -13,10 +13,10 @@ import us.ihmc.avatar.networkProcessor.modules.mocap.RosConnectedZeroPoseRobotCo
 import us.ihmc.communication.net.NetClassList;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.util.NetworkPorts;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.communication.packets.DetectedObjectPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.MultisenseTest;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.utilities.ros.RosMainNode;
 
 public class MultisenseMocapManualCalibrationTestModule implements MocapRigidbodiesListener

@@ -1,6 +1,6 @@
 package us.ihmc.quadrupedRobotics.planning.chooser.swingLegChooser;
 
-import javax.vecmath.Vector3d;
+import us.ihmc.euclid.tuple3D.Vector3D;
 
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicEllipsoid;
@@ -43,7 +43,7 @@ public class LongestFeasibleStepChooser implements NextSwingLegChooser
          YoFramePoint footstepWorkspaceCenterFramePoint = new YoFramePoint(robotQuadrant + "FootstepWorkspaceFramePoint", ReferenceFrame.getWorldFrame(), registry);
          footstepWorkspaceCenterFramePoints.set(robotQuadrant, footstepWorkspaceCenterFramePoint);
          YoFrameOrientation footstepWorkspaceOrientation = new YoFrameOrientation(robotQuadrant + "FootstepWorkspaceOrientation", ReferenceFrame.getWorldFrame(), registry);
-         footstepWorkspaceYoEllipsoids.set(robotQuadrant, new YoGraphicEllipsoid(robotQuadrant + "YoEllipsoid", footstepWorkspaceCenterFramePoint, footstepWorkspaceOrientation, YoAppearance.Blue(), new Vector3d()));
+         footstepWorkspaceYoEllipsoids.set(robotQuadrant, new YoGraphicEllipsoid(robotQuadrant + "YoEllipsoid", footstepWorkspaceCenterFramePoint, footstepWorkspaceOrientation, YoAppearance.Blue(), new Vector3D()));
          yoGraphicsListRegistry.registerYoGraphic(robotQuadrant + "YoEllipsoidReg", footstepWorkspaceYoEllipsoids.get(robotQuadrant));
          footstepWorkspaceYoEllipsoids.get(robotQuadrant).showGraphicObject();
       }
@@ -71,7 +71,7 @@ public class LongestFeasibleStepChooser implements NextSwingLegChooser
          footstepWorkspaceCenterFramePoints.get(robotQuadrant).setAndMatchFrame(workspaceCenterPoint);
          
          // Update YoGraphicEllipsoids to footstep workspace
-         Vector3d radiiToPack = new Vector3d();
+         Vector3D radiiToPack = new Vector3D();
          actualFootstepWorkspaces.get(robotQuadrant).getEllipsoid3d().getRadii(radiiToPack);
          radiiToPack.setZ(0.001);
          footstepWorkspaceYoEllipsoids.get(robotQuadrant).setRadii(radiiToPack);
@@ -106,7 +106,7 @@ public class LongestFeasibleStepChooser implements NextSwingLegChooser
          
          // Construct a polygon moved and yawed by some scalar times the desired velocity and yaw
          QuadrupedSupportPolygon desiredPerfectPolygon = new QuadrupedSupportPolygon(actualPerfectPolygon);
-         Vector3d stepTranslation = new Vector3d(desiredVelocity.getVector());
+         Vector3D stepTranslation = new Vector3D(desiredVelocity.getVector());
          stepTranslation.scale(MYSTERIOUS_SCALAR);
          desiredPerfectPolygon.translate(stepTranslation);
          desiredPerfectPolygon.yawAboutCentroid(MYSTERIOUS_SCALAR * desiredYawRate);

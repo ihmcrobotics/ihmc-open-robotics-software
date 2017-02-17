@@ -5,9 +5,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.simulationconstructionset.ContactingExternalForcePoint;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.Link;
@@ -25,11 +24,11 @@ public class DefaultCollisionHandler implements CollisionHandler
 
    private final Random random;
 
-   private final Vector3d normal = new Vector3d();
-   private final Vector3d negative_normal = new Vector3d();
+   private final Vector3D normal = new Vector3D();
+   private final Vector3D negative_normal = new Vector3D();
 
-   private Point3d point1 = new Point3d();
-   private Point3d point2 = new Point3d();
+   private Point3D point1 = new Point3D();
+   private Point3D point2 = new Point3D();
 
    private List<CollisionHandlerListener> listeners = new ArrayList<CollisionHandlerListener>();
 
@@ -173,7 +172,7 @@ public class DefaultCollisionHandler implements CollisionHandler
          }
 
          // Resolve the collision:
-         Vector3d p_world = new Vector3d();
+         Vector3D p_world = new Vector3D();
 
          // +++JEP: epsilon, mu hardcoded on construction right now. Need to change that!
 
@@ -193,7 +192,7 @@ public class DefaultCollisionHandler implements CollisionHandler
          if (shapeTwoIsGround)
          {
 //            System.out.println("shapeTwoIsGround");
-            Vector3d velocityWorld = new Vector3d(0.0, 0.0, 0.0);
+            Vector3D velocityWorld = new Vector3D(0.0, 0.0, 0.0);
 
             if (externalForcePointOne.getVelocityVector().lengthSquared() > velocityForMicrocollision * velocityForMicrocollision)
             {
@@ -211,7 +210,7 @@ public class DefaultCollisionHandler implements CollisionHandler
          else if (shapeOneIsGround)
          {
 //            System.out.println("shapeOneIsGround");
-            Vector3d velocityWorld = new Vector3d(0.0, 0.0, 0.0);
+            Vector3D velocityWorld = new Vector3D(0.0, 0.0, 0.0);
             if (externalForcePointTwo.getVelocityVector().lengthSquared() > velocityForMicrocollision * velocityForMicrocollision)
             {
                collisionOccurred = externalForcePointTwo.resolveCollision(velocityWorld, normal, epsilon, mu, p_world); // link1.epsilon, link1.mu, p_world);
@@ -229,10 +228,10 @@ public class DefaultCollisionHandler implements CollisionHandler
          else
          {
             //            System.out.println("Two ef points");
-            Vector3d velocityVectorOne = externalForcePointOne.getVelocityVector();
-            Vector3d velocityVectorTwo = externalForcePointTwo.getVelocityVector();
+            Vector3D velocityVectorOne = externalForcePointOne.getVelocityVector();
+            Vector3D velocityVectorTwo = externalForcePointTwo.getVelocityVector();
 
-            Vector3d velocityDifference = new Vector3d();
+            Vector3D velocityDifference = new Vector3D();
             velocityDifference.sub(velocityVectorTwo, velocityVectorOne);
 
             if (velocityDifference.lengthSquared() > velocityForMicrocollision * velocityForMicrocollision)

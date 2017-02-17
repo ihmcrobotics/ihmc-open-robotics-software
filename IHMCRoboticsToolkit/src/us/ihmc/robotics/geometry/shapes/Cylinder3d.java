@@ -1,17 +1,21 @@
 package us.ihmc.robotics.geometry.shapes;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 public class Cylinder3d extends Shape3d<Cylinder3d>
 {
    private double radius;
    private double height;
    
-   private final Point3d temporaryPoint;
+   private final Point3D temporaryPoint = new Point3D();
 
    public static enum CylinderFaces {TOP, BOTTOM}
 
@@ -29,8 +33,6 @@ public class Cylinder3d extends Shape3d<Cylinder3d>
    {
       this.height = height;
       this.radius = radius;
-      
-      temporaryPoint = new Point3d();
    }
 
    public Cylinder3d(RigidBodyTransform transform, double height, double radius)
@@ -38,8 +40,6 @@ public class Cylinder3d extends Shape3d<Cylinder3d>
       setTransform(transform);
       this.height = height;
       this.radius = radius;
-      
-      temporaryPoint = new Point3d();
    }
 
    @Override
@@ -79,10 +79,10 @@ public class Cylinder3d extends Shape3d<Cylinder3d>
       switch (face)
       {
          case TOP :
-            plane = new Plane3d(new Point3d(0.0, 0.0, height), new Vector3d(0.0, 0.0, 1.0));
+            plane = new Plane3d(new Point3D(0.0, 0.0, height), new Vector3D(0.0, 0.0, 1.0));
             break;
          case BOTTOM :
-            plane = new Plane3d(new Point3d(0.0, 0.0, 0.0), new Vector3d(0.0, 0.0, 1.0));
+            plane = new Plane3d(new Point3D(0.0, 0.0, 0.0), new Vector3D(0.0, 0.0, 1.0));
             break;
          default :
             throw(new RuntimeException("Unrecognized cylinder face"));
@@ -119,7 +119,7 @@ public class Cylinder3d extends Shape3d<Cylinder3d>
    }
 
    @Override
-   protected boolean checkIfInsideShapeFrame(Point3d pointToCheck, Point3d closestPointOnSurfaceToPack, Vector3d normalToPack)
+   protected boolean checkIfInsideShapeFrame(Point3DReadOnly pointToCheck, Point3DBasics closestPointOnSurfaceToPack, Vector3DBasics normalToPack)
    {
       boolean insideOrOnSurfaceLocal = true;
       
@@ -198,7 +198,7 @@ public class Cylinder3d extends Shape3d<Cylinder3d>
    }
 
    @Override
-   protected double distanceShapeFrame(Point3d point)
+   protected double distanceShapeFrame(Point3DReadOnly point)
    {
       temporaryPoint.set(point);
       orthogonalProjectionShapeFrame(temporaryPoint);
@@ -206,7 +206,7 @@ public class Cylinder3d extends Shape3d<Cylinder3d>
    }
       
    @Override
-   protected boolean isInsideOrOnSurfaceShapeFrame(Point3d pointToCheck, double epsilonToGrowObject)
+   protected boolean isInsideOrOnSurfaceShapeFrame(Point3DReadOnly pointToCheck, double epsilonToGrowObject)
    {
       temporaryPoint.set(pointToCheck);
 
@@ -225,7 +225,7 @@ public class Cylinder3d extends Shape3d<Cylinder3d>
    }
 
    @Override
-   protected void orthogonalProjectionShapeFrame(Point3d pointToCheckAndPack)
+   protected void orthogonalProjectionShapeFrame(Point3DBasics pointToCheckAndPack)
    {
       if (pointToCheckAndPack.getZ() < 0.0)
          pointToCheckAndPack.setZ(0.0);
@@ -243,9 +243,56 @@ public class Cylinder3d extends Shape3d<Cylinder3d>
       }
    }
 
+   private final Point3D tempPointInWorldForProjectingToBottom = new Point3D();
+   private final Vector3D tempVectorInWorldForProjectingToBottom = new Vector3D();
+   
+   /**
+    * Projects the pointToProject to the bottom of a curved surface given the surfaceNormal defining how the curved surface is
+    * contacting another surface, as when the two surfaces roll on each other. 
+    * @param surfaceNormal defining another surface in which this object is in rolling contact on the other surface.
+    * @param pointToProject point to project to the bottom of the curved surface.
+    * @return true if the point was projected. Otherwise false.
+    */
+   public boolean projectToBottomOfCurvedSurface(Vector3DReadOnly surfaceNormal, Point3DBasics pointToProject)
+   {
+      //TODO: Should this method be in Shape3d, or not even be here at all? Not sure...
+      RigidBodyTransform transformToShapeFrame = getTransformToShapeFrameUnsafe();
+
+      tempPointInWorldForProjectingToBottom.set(pointToProject);
+      tempVectorInWorldForProjectingToBottom.set(surfaceNormal);
+      transformToShapeFrame.transform(tempPointInWorldForProjectingToBottom);
+      transformToShapeFrame.transform(tempVectorInWorldForProjectingToBottom);
+
+      boolean wasRolling = projectToBottomOfCurvedSurfaceInShapeFrame(tempVectorInWorldForProjectingToBottom, tempPointInWorldForProjectingToBottom);
+      RigidBodyTransform transformFromShapeFrame = getTransformFromShapeFrameUnsafe();
+      transformFromShapeFrame.transform(tempPointInWorldForProjectingToBottom);
+
+      pointToProject.set(tempPointInWorldForProjectingToBottom);
+      return wasRolling;
+   }
+
+   private final Vector2D tempVectorInShapeFrameForProjectingToBottom = new Vector2D();
+
+   private boolean projectToBottomOfCurvedSurfaceInShapeFrame(Vector3DReadOnly normalInShapeFrame, Point3DBasics pointToRollInShapeFrame)
+   {
+      double x = normalInShapeFrame.getX();
+      double y = normalInShapeFrame.getY();
+
+      if ((Math.abs(x) < 1e-7) && (Math.abs(y) < 1e-7))
+         return false;
+
+      tempVectorInShapeFrameForProjectingToBottom.set(x, normalInShapeFrame.getY());
+      tempVectorInShapeFrameForProjectingToBottom.normalize();
+      tempVectorInShapeFrameForProjectingToBottom.scale(radius);
+
+      pointToRollInShapeFrame.set(tempVectorInShapeFrameForProjectingToBottom.getX(), tempVectorInShapeFrameForProjectingToBottom.getY(), pointToRollInShapeFrame.getZ());
+      return true;
+   }
+
    @Override
    public String toString()
    {
       return "height = " + height + ", radius = " + radius + "\n";
    }
+
 }

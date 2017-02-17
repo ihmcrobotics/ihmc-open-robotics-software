@@ -1,8 +1,8 @@
 package us.ihmc.quadrupedRobotics.geometry.supportPolygon;
 
-import javax.vecmath.Point2d;
-import javax.vecmath.Vector3d;
+import us.ihmc.euclid.tuple3D.Vector3D;
 
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -59,7 +59,7 @@ public class YoQuadrupedSupportPolygon
       return quadrupedSupportPolygon.containsSameQuadrants(polygonToCompare);
    }
    
-   public void getBounds(Point2d minToPack, Point2d maxToPack)
+   public void getBounds(Point2D minToPack, Point2D maxToPack)
    {
       putYoValuesIntoSupportPolygon();
       quadrupedSupportPolygon.getBounds(minToPack, maxToPack);
@@ -389,7 +389,7 @@ public class YoQuadrupedSupportPolygon
       getYoValuesFromSupportPolygon(quadrupedSupportPolygon);
    }
    
-   public void translate(Vector3d translateBy)
+   public void translate(Vector3D translateBy)
    {
       putYoValuesIntoSupportPolygon();
       quadrupedSupportPolygon.translate(translateBy);

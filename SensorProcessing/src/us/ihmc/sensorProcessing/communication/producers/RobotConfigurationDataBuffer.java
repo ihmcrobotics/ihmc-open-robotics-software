@@ -5,10 +5,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
-import javax.vecmath.Quat4f;
-import javax.vecmath.Vector3f;
-
 import us.ihmc.communication.net.PacketConsumer;
+import us.ihmc.euclid.tuple3D.Vector3D32;
+import us.ihmc.euclid.tuple4D.Quaternion32;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
@@ -181,10 +180,10 @@ public class RobotConfigurationDataBuffer implements PacketConsumer<RobotConfigu
          fullRobotModelCache.allJoints[i].setQ(newJointAngles[i]);
       }
 
-      Vector3f translation = robotConfigurationData.getPelvisTranslation();
+      Vector3D32 translation = robotConfigurationData.getPelvisTranslation();
       rootJoint.setPosition(translation.getX(), translation.getY(), translation.getZ());
-      Quat4f orientation = robotConfigurationData.getPelvisOrientation();
-      rootJoint.setRotation(orientation.getX(), orientation.getY(), orientation.getZ(), orientation.getW());
+      Quaternion32 orientation = robotConfigurationData.getPelvisOrientation();
+      rootJoint.setRotation(orientation.getX(), orientation.getY(), orientation.getZ(), orientation.getS());
       rootJoint.getPredecessor().updateFramesRecursively();
 
       if (forceSensorDataHolder != null)

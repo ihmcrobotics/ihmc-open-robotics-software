@@ -1,10 +1,11 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.qpInput;
 
+import java.util.ArrayList;
+
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
-import us.ihmc.robotics.linearAlgebra.MatrixTools;
 
-import java.util.ArrayList;
+import us.ihmc.robotics.linearAlgebra.MatrixTools;
 
 public class ICPQPInputCalculator
 {

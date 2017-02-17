@@ -1,26 +1,25 @@
 package us.ihmc.sensorProcessing.simulatedSensors;
 
-import javax.vecmath.Tuple3d;
-import javax.vecmath.Vector3d;
-
 import us.ihmc.controlFlow.ControlFlowOutputPort;
-import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.PointVelocityDataObject;
-import us.ihmc.simulationconstructionset.KinematicPoint;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.PointVelocityDataObject;
+import us.ihmc.simulationconstructionset.KinematicPoint;
 
-public class SimulatedPointVelocitySensorFromRobot extends SimulatedSensor<Tuple3d>
+public class SimulatedPointVelocitySensorFromRobot extends SimulatedSensor<Tuple3DBasics>
 {
    private final KinematicPoint kinematicPoint;
    
    private final RigidBody rigidBody;
    private final ReferenceFrame bodyFrame;
    
-   private final Vector3d pointVelocity = new Vector3d();
+   private final Vector3D pointVelocity = new Vector3D();
    private final FramePoint measurementPointInBodyFrame = new FramePoint();
    private final FrameVector velocityOfMeasurementPointInWorldFrame = new FrameVector();
    

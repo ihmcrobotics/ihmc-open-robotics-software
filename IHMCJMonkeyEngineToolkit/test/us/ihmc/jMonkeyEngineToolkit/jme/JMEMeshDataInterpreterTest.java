@@ -2,8 +2,6 @@ package us.ihmc.jMonkeyEngineToolkit.jme;
 
 import static org.junit.Assert.assertEquals;
 
-import javax.vecmath.Point3f;
-
 import org.junit.Test;
 
 import com.jme3.math.Triangle;
@@ -13,6 +11,7 @@ import com.jme3.scene.Mesh;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
+import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.graphicsDescription.MeshDataGenerator;
 import us.ihmc.graphicsDescription.MeshDataHolder;
 
@@ -24,11 +23,11 @@ public class JMEMeshDataInterpreterTest
    @Test(timeout = 30000)
    public void testForASingleTriangle()
    {
-      Point3f[] vertices =
+      Point3D32[] vertices =
          {
-               new Point3f(0.1f, -1.0f, 0.2f),
-               new Point3f(0.8f, -0.3f, 0.2f),
-               new Point3f(-0.4f, 0.6f, 0.2f)
+               new Point3D32(0.1f, -1.0f, 0.2f),
+               new Point3D32(0.8f, -0.3f, 0.2f),
+               new Point3D32(-0.4f, 0.6f, 0.2f)
          };
       MeshDataHolder meshData = MeshDataGenerator.Polygon(vertices);
       Mesh interpretMeshData = JMEMeshDataInterpreter.interpretMeshData(meshData);
@@ -75,9 +74,9 @@ public class JMEMeshDataInterpreterTest
 
    }
 
-   private void assertJMEVectorEqualsPoint(Vector3f vector, Point3f point)
+   private void assertJMEVectorEqualsPoint(Vector3f vector, Point3D32 point)
    {
-      assertJMEVectorsEqual(vector, new Vector3f(point.getX(), point.getY(), point.getZ()));
+      assertJMEVectorsEqual(vector, new Vector3f(point.getX32(), point.getY32(), point.getZ32()));
    }
 
    private void assertJMEVectorsEqual(Vector3f vectorOne, Vector3f vectorTwo)

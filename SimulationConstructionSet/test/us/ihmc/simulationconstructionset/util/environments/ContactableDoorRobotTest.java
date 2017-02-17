@@ -3,13 +3,12 @@ package us.ihmc.simulationconstructionset.util.environments;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import javax.vecmath.Point3d;
-
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
@@ -34,16 +33,16 @@ public class ContactableDoorRobotTest
    public void testPointIsClose()
    {      
       double epsilon = 1e-4;
-      Point3d pos = new Point3d(5.0, -5.0, 10.0);
+      Point3D pos = new Point3D(5.0, -5.0, 10.0);
 
       ContactableDoorRobot door = createDefaultDoor(pos, 0);
       
-      Point3d tempPos = new Point3d(pos);
+      Point3D tempPos = new Point3D(pos);
       
-      assertFalse(door.isClose(new Point3d()));
-      assertFalse(door.isClose(new Point3d(1e4, -1e4, 1e4)));
+      assertFalse(door.isClose(new Point3D()));
+      assertFalse(door.isClose(new Point3D(1e4, -1e4, 1e4)));
       assertTrue(door.isPointOnOrInside(tempPos));
-      Point3d diagonal = new Point3d(
+      Point3D diagonal = new Point3D(
             tempPos.getX() + (1.0 - epsilon)*ContactableDoorRobot.DEFAULT_DOOR_DIMENSIONS.getX(), 
             tempPos.getY() + (1.0 - epsilon)*ContactableDoorRobot.DEFAULT_DOOR_DIMENSIONS.getY(), 
             tempPos.getZ() + (1.0 - epsilon)*ContactableDoorRobot.DEFAULT_DOOR_DIMENSIONS.getZ());
@@ -58,7 +57,7 @@ public class ContactableDoorRobotTest
       robots = new Robot[1];
       
       // create door   
-      Point3d pos = new Point3d(2.0, 1.0, 0.0);
+      Point3D pos = new Point3D(2.0, 1.0, 0.0);
       int id = 1;
       ContactableDoorRobot door = createDefaultDoor(pos, id);
       
@@ -92,7 +91,7 @@ public class ContactableDoorRobotTest
       }
    }
 
-   private ContactableDoorRobot createDefaultDoor(Point3d positionInWorld, int id)
+   private ContactableDoorRobot createDefaultDoor(Point3D positionInWorld, int id)
    {
       return new ContactableDoorRobot("robotDoor" + id, positionInWorld);
    }

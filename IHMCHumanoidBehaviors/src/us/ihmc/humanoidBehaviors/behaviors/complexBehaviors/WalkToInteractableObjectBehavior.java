@@ -1,10 +1,9 @@
 package us.ihmc.humanoidBehaviors.behaviors.complexBehaviors;
 
-import javax.vecmath.Point3d;
-
 import com.jme3.math.Quaternion;
 
 import us.ihmc.communication.packets.TextToSpeechPacket;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.WalkToInteractableObjectBehavior.WalkToObjectState;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.AtlasPrimitiveActions;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
@@ -94,7 +93,7 @@ public class WalkToInteractableObjectBehavior extends StateMachineBehavior<WalkT
 
             Quaternion q = new Quaternion(new float[] {0, 0, walkingYaw});
 
-            FramePose poseToWalkTo = new FramePose(ReferenceFrame.getWorldFrame(), new Point3d(walkToPoint1.getX(), walkToPoint1.getY(), 0),
+            FramePose poseToWalkTo = new FramePose(ReferenceFrame.getWorldFrame(), new Point3D(walkToPoint1.getX(), walkToPoint1.getY(), 0),
                   JMEDataTypeUtils.jMEQuaternionToVecMathQuat4d(q));
             atlasPrimitiveActions.walkToLocationPlannedBehavior.setTarget(poseToWalkTo);
          }
@@ -121,7 +120,7 @@ public class WalkToInteractableObjectBehavior extends StateMachineBehavior<WalkT
             float walkingYaw = (float) Math.atan2(walkingDirection.getY(), walkingDirection.getX());
             Quaternion q = new Quaternion(new float[] {0, 0, walkingYaw});
 
-            FramePose poseToWalkTo = new FramePose(ReferenceFrame.getWorldFrame(), new Point3d(walkToPoint2.getX(), walkToPoint2.getY(), 0),
+            FramePose poseToWalkTo = new FramePose(ReferenceFrame.getWorldFrame(), new Point3D(walkToPoint2.getX(), walkToPoint2.getY(), 0),
                   JMEDataTypeUtils.jMEQuaternionToVecMathQuat4d(q));
             atlasPrimitiveActions.walkToLocationPlannedBehavior.setTarget(poseToWalkTo);
          }

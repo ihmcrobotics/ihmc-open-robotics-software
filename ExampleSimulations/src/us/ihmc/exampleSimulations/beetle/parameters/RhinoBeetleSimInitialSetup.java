@@ -1,10 +1,9 @@
 package us.ihmc.exampleSimulations.beetle.parameters;
 
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSextant;
@@ -16,8 +15,8 @@ public class RhinoBeetleSimInitialSetup
    private double groundZ;
    private double initialYaw;
    private final RigidBodyTransform rootToWorld = new RigidBodyTransform();
-   private final Vector3d positionInWorld = new Vector3d();
-   private final Quat4d rotation = new Quat4d();
+   private final Vector3D positionInWorld = new Vector3D();
+   private final Quaternion rotation = new Quaternion();
    private boolean robotInitialized = false;
 
    public RhinoBeetleSimInitialSetup()

@@ -18,11 +18,11 @@
 
 package us.ihmc.sensorProcessing.bubo.clouds.detect.alg;
 
-import org.ddogleg.struct.FastQueue;
-import org.ddogleg.struct.GrowQueue_I32;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import org.ddogleg.struct.FastQueue;
+import org.ddogleg.struct.GrowQueue_I32;
 
 /**
  * todo comment

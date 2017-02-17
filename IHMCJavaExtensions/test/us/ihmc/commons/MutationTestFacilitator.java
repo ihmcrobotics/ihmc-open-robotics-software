@@ -22,6 +22,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.pitest.mutationtest.commandline.MutationCoverageReport;
 
+import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.tools.io.files.BasicPathVisitor;
 import us.ihmc.tools.io.files.FileTools;
 import us.ihmc.tools.io.files.PathTools;
@@ -229,7 +230,7 @@ public class MutationTestFacilitator
                   Path newPath = Paths.get(REPORT_DIRECTORY_NAME, lastDirectoryName, newPathName);
 
                   Path indexPath = Paths.get(REPORT_DIRECTORY_NAME, lastDirectoryName, "index.html");
-                  List<String> lines = FileTools.readAllLines(indexPath);
+                  List<String> lines = FileTools.readAllLines(indexPath, DefaultExceptionHandler.PRINT_STACKTRACE);
                   ArrayList<String> newLines = new ArrayList<>();
                   for (String originalLine : lines)
                   {

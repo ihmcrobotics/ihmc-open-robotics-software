@@ -1,11 +1,12 @@
 package us.ihmc.robotics.optimization;
 
+import java.util.Set;
+
 import org.ejml.alg.dense.mult.VectorVectorMult;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
-import us.ihmc.robotics.MathTools;
 
-import java.util.Set;
+import us.ihmc.robotics.MathTools;
 
 /**
  * @author twan

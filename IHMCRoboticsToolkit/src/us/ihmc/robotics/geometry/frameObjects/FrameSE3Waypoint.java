@@ -1,9 +1,12 @@
 package us.ihmc.robotics.geometry.frameObjects;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.robotics.geometry.AbstractFrameObject;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -33,7 +36,7 @@ public class FrameSE3Waypoint extends AbstractFrameObject<FrameSE3Waypoint, SE3W
    }
 
    @Override
-   public void setPosition(Point3d position)
+   public void setPosition(Point3DReadOnly position)
    {
       geometryObject.setPosition(position);
    }
@@ -45,7 +48,7 @@ public class FrameSE3Waypoint extends AbstractFrameObject<FrameSE3Waypoint, SE3W
    }
 
    @Override
-   public void setOrientation(Quat4d orientation)
+   public void setOrientation(QuaternionReadOnly orientation)
    {
       geometryObject.setOrientation(orientation);
    }
@@ -56,7 +59,7 @@ public class FrameSE3Waypoint extends AbstractFrameObject<FrameSE3Waypoint, SE3W
    }
 
    @Override
-   public void setLinearVelocity(Vector3d linearVelocity)
+   public void setLinearVelocity(Vector3DReadOnly linearVelocity)
    {
       geometryObject.setLinearVelocity(linearVelocity);
    }
@@ -68,7 +71,7 @@ public class FrameSE3Waypoint extends AbstractFrameObject<FrameSE3Waypoint, SE3W
    }
 
    @Override
-   public void setAngularVelocity(Vector3d angularVelocity)
+   public void setAngularVelocity(Vector3DReadOnly angularVelocity)
    {
       geometryObject.setAngularVelocity(angularVelocity);
    }
@@ -79,12 +82,12 @@ public class FrameSE3Waypoint extends AbstractFrameObject<FrameSE3Waypoint, SE3W
       geometryObject.setAngularVelocity(angularVelocity.getVector());
    }
 
-   public void set(Point3d position, Quat4d orientation, Vector3d linearVelocity, Vector3d angularVelocity)
+   public void set(Point3DReadOnly position, QuaternionReadOnly orientation, Vector3DReadOnly linearVelocity, Vector3DReadOnly angularVelocity)
    {
       geometryObject.set(position, orientation, linearVelocity, angularVelocity);
    }
 
-   public void setIncludingFrame(ReferenceFrame referenceFrame, Point3d position, Quat4d orientation, Vector3d linearVelocity, Vector3d angularVelocity)
+   public void setIncludingFrame(ReferenceFrame referenceFrame, Point3DReadOnly position, Quaternion orientation, Vector3DReadOnly linearVelocity, Vector3DReadOnly angularVelocity)
    {
       setToZero(referenceFrame);
       geometryObject.set(position, orientation, linearVelocity, angularVelocity);
@@ -200,7 +203,7 @@ public class FrameSE3Waypoint extends AbstractFrameObject<FrameSE3Waypoint, SE3W
    }
 
    @Override
-   public void getPosition(Point3d positionToPack)
+   public void getPosition(Point3DBasics positionToPack)
    {
       geometryObject.getPosition(positionToPack);
    }
@@ -218,7 +221,7 @@ public class FrameSE3Waypoint extends AbstractFrameObject<FrameSE3Waypoint, SE3W
    }
 
    @Override
-   public void getOrientation(Quat4d orientationToPack)
+   public void getOrientation(QuaternionBasics orientationToPack)
    {
       geometryObject.getOrientation(orientationToPack);
    }
@@ -236,7 +239,7 @@ public class FrameSE3Waypoint extends AbstractFrameObject<FrameSE3Waypoint, SE3W
    }
 
    @Override
-   public void getLinearVelocity(Vector3d linearVelocityToPack)
+   public void getLinearVelocity(Vector3DBasics linearVelocityToPack)
    {
       geometryObject.getLinearVelocity(linearVelocityToPack);
    }
@@ -254,7 +257,7 @@ public class FrameSE3Waypoint extends AbstractFrameObject<FrameSE3Waypoint, SE3W
    }
 
    @Override
-   public void getAngularVelocity(Vector3d angularVelocityToPack)
+   public void getAngularVelocity(Vector3DBasics angularVelocityToPack)
    {
       geometryObject.getAngularVelocity(angularVelocityToPack);
    }

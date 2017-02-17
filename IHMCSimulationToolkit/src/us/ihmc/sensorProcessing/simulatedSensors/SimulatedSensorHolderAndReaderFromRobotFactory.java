@@ -5,9 +5,14 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
+import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.robotics.sensors.ContactSensorHolder;
+import us.ihmc.robotics.sensors.ForceSensorDefinition;
+import us.ihmc.robotics.sensors.IMUDefinition;
+import us.ihmc.sensorProcessing.model.DesiredJointDataHolder;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
 import us.ihmc.sensorProcessing.signalCorruption.GaussianDoubleCorruptor;
 import us.ihmc.sensorProcessing.signalCorruption.GaussianOrientationCorruptor;
@@ -23,12 +28,6 @@ import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.simulatedSensors.WrenchCalculatorInterface;
-import us.ihmc.robotics.sensors.IMUDefinition;
-import us.ihmc.robotics.sensors.ContactSensorHolder;
-import us.ihmc.sensorProcessing.model.DesiredJointDataHolder;
-import us.ihmc.robotics.sensors.ForceSensorDefinition;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
 public class SimulatedSensorHolderAndReaderFromRobotFactory implements SensorReaderFactory
 {
@@ -197,7 +196,7 @@ public class SimulatedSensorHolderAndReaderFromRobotFactory implements SensorRea
 
             RandomWalkBiasVectorCorruptor biasVectorCorruptor = new RandomWalkBiasVectorCorruptor(1236L, sensorName, estimateDT, registry);
 
-            Vector3d initialAngularVelocityBias = new Vector3d();
+            Vector3D initialAngularVelocityBias = new Vector3D();
             sensorNoiseParameters.getInitialAngularVelocityBias(initialAngularVelocityBias);
             biasVectorCorruptor.setBias(initialAngularVelocityBias);
 
@@ -236,7 +235,7 @@ public class SimulatedSensorHolderAndReaderFromRobotFactory implements SensorRea
 
             RandomWalkBiasVectorCorruptor biasVectorCorruptor = new RandomWalkBiasVectorCorruptor(1286L, sensorName, estimateDT, registry);
 
-            Vector3d initialLinearAccelerationBias = new Vector3d();
+            Vector3D initialLinearAccelerationBias = new Vector3D();
             sensorNoiseParameters.getInitialLinearVelocityBias(initialLinearAccelerationBias);
             biasVectorCorruptor.setBias(initialLinearAccelerationBias);
 

@@ -1,13 +1,9 @@
 package us.ihmc.sensorProcessing.stateEstimation.evaluation;
 
-import javax.vecmath.AxisAngle4d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
-import us.ihmc.sensorProcessing.stateEstimation.StateEstimator;
-import us.ihmc.simulationconstructionset.Joint;
-import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.AngleTools;
@@ -18,6 +14,9 @@ import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.sensorProcessing.stateEstimation.StateEstimator;
+import us.ihmc.simulationconstructionset.Joint;
+import us.ihmc.simulationconstructionset.Robot;
 
 
 public class StateEstimatorErrorCalculator
@@ -66,23 +65,23 @@ public class StateEstimatorErrorCalculator
    {
       orientationEstimator.getEstimatedOrientation(estimatedOrientation);
      
-      Quat4d estimatedOrientationQuat4d = new Quat4d();
+      Quaternion estimatedOrientationQuat4d = new Quaternion();
       estimatedOrientation.getQuaternion(estimatedOrientationQuat4d);
 
-      Quat4d actualOrientation = new Quat4d();
+      Quaternion actualOrientation = new Quaternion();
       estimationJoint.getRotationToWorld(actualOrientation);
       
-      if (((estimatedOrientationQuat4d.getW() > 0.0) && (actualOrientation.getW() < 0.0)) || ((estimatedOrientationQuat4d.getW() < 0.0) && (actualOrientation.getW() > 0.0)))
+      if (((estimatedOrientationQuat4d.getS() > 0.0) && (actualOrientation.getS() < 0.0)) || ((estimatedOrientationQuat4d.getS() < 0.0) && (actualOrientation.getS() > 0.0)))
       {
          actualOrientation.negate();
       }
       
       perfectOrientation.set(actualOrientation);
       
-      Quat4d orientationErrorQuat4d = new Quat4d(actualOrientation);
-      orientationErrorQuat4d.mulInverse(estimatedOrientationQuat4d);
+      Quaternion orientationErrorQuat4d = new Quaternion(actualOrientation);
+      orientationErrorQuat4d.multiplyConjugateOther(estimatedOrientationQuat4d);
 
-      AxisAngle4d orientationErrorAxisAngle = new AxisAngle4d();
+      AxisAngle orientationErrorAxisAngle = new AxisAngle();
       orientationErrorAxisAngle.set(orientationErrorQuat4d);
 
       double errorAngle = AngleTools.trimAngleMinusPiToPi(orientationErrorAxisAngle.getAngle());
@@ -96,8 +95,8 @@ public class StateEstimatorErrorCalculator
    {
       orientationEstimator.getEstimatedAngularVelocity(estimatedAngularVelocityFrameVector);
       
-      Vector3d estimatedAngularVelocity = estimatedAngularVelocityFrameVector.getVectorCopy();
-      Vector3d actualAngularVelocity = new Vector3d();
+      Vector3D estimatedAngularVelocity = estimatedAngularVelocityFrameVector.getVectorCopy();
+      Vector3D actualAngularVelocity = new Vector3D();
       estimationJoint.physics.getAngularVelocityInBody(actualAngularVelocity);
 
       perfectAngularVelocity.set(actualAngularVelocity);
@@ -110,14 +109,14 @@ public class StateEstimatorErrorCalculator
    
    private void computeCoMPositionError()
    {
-      Point3d comPoint = new Point3d();
-      Vector3d linearVelocity = new Vector3d();
-      Vector3d angularMomentum = new Vector3d();
+      Point3D comPoint = new Point3D();
+      Vector3D linearVelocity = new Vector3D();
+      Vector3D angularMomentum = new Vector3D();
 
       robot.computeCOMMomentum(comPoint, linearVelocity, angularMomentum);
       perfectCoMPosition.set(comPoint);
       
-      Vector3d comError = new Vector3d();
+      Vector3D comError = new Vector3D();
       orientationEstimator.getEstimatedCoMPosition(estimatedCoMPosition);
       comError.set(estimatedCoMPosition.getPointCopy());
       comError.sub(comPoint);
@@ -132,16 +131,16 @@ public class StateEstimatorErrorCalculator
 
    private void computeCoMVelocityError()
    {
-      Point3d comPoint = new Point3d();
-      Vector3d linearVelocity = new Vector3d();
-      Vector3d angularMomentum = new Vector3d();
+      Point3D comPoint = new Point3D();
+      Vector3D linearVelocity = new Vector3D();
+      Vector3D angularMomentum = new Vector3D();
 
       double mass = robot.computeCOMMomentum(comPoint, linearVelocity, angularMomentum);
       linearVelocity.scale(1.0 / mass);
       perfectCoMVelocity.set(linearVelocity);
       
       orientationEstimator.getEstimatedCoMVelocity(estimatedCoMVelocityFrameVector);
-      Vector3d estimatedCoMVelocity = estimatedCoMVelocityFrameVector.getVectorCopy();
+      Vector3D estimatedCoMVelocity = estimatedCoMVelocityFrameVector.getVectorCopy();
 
       estimatedCoMVelocity.sub(linearVelocity);
       comVelocityError.set(estimatedCoMVelocity.length());
@@ -170,8 +169,8 @@ public class StateEstimatorErrorCalculator
    
    private void computePelvisPositionError()
    {
-      Vector3d actualPosition = new Vector3d();
-      Vector3d positionError = new Vector3d();
+      Vector3D actualPosition = new Vector3D();
+      Vector3D positionError = new Vector3D();
 
       estimationJoint.getTranslationToWorld(actualPosition);
       perfectPelvisPosition.set(actualPosition);
@@ -190,10 +189,10 @@ public class StateEstimatorErrorCalculator
 
    private void computePelvisVelocityError()
    {
-      Vector3d actualVelocity = new Vector3d();
-      Vector3d linearVelocityError = new Vector3d();
+      Vector3D actualVelocity = new Vector3D();
+      Vector3D linearVelocityError = new Vector3D();
 
-      estimationJoint.physics.getLinearVelocityInWorld(actualVelocity, new Vector3d());
+      estimationJoint.physics.getLinearVelocityInWorld(actualVelocity, new Vector3D());
       perfectPelvisLinearVelocity.set(actualVelocity);
       
       orientationEstimator.getEstimatedPelvisLinearVelocity(estimatedPelvisVelocityFrameVector);

@@ -10,8 +10,6 @@ import javax.sound.sampled.Clip;
 import javax.sound.sampled.DataLine;
 import javax.sound.sampled.LineUnavailableException;
 
-import us.ihmc.tools.io.printing.PrintTools;
-
 public class AudioTools
 {
    /**

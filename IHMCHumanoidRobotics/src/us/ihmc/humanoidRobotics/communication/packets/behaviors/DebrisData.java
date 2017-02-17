@@ -2,22 +2,22 @@ package us.ihmc.humanoidRobotics.communication.packets.behaviors;
 
 import java.util.Random;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.random.RandomTools;
 
 public class DebrisData extends Packet<DebrisData>
 {
 	public RigidBodyTransform debrisTransform;
-	public Vector3d graspVector;
-	public Point3d graspVectorPosition;
+	public Vector3D graspVector;
+	public Point3D graspVectorPosition;
 	
 	public DebrisData(Random random)
 	{
-	   debrisTransform = RigidBodyTransform.generateRandomTransform(random);
+	   debrisTransform = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
 	   graspVector = RandomTools.generateRandomVector(random);
 	   double max = Double.MAX_VALUE / 2;
       graspVectorPosition = RandomTools.generateRandomPoint(random, max, max, max);
@@ -27,7 +27,7 @@ public class DebrisData extends Packet<DebrisData>
 	{
 	}
 	
-	public DebrisData(RigidBodyTransform debrisTransform, Vector3d graspVector, Point3d graspVectorPosition)
+	public DebrisData(RigidBodyTransform debrisTransform, Vector3D graspVector, Point3D graspVectorPosition)
 	{
 		this.debrisTransform = debrisTransform;
 		this.graspVector = graspVector;
@@ -46,12 +46,12 @@ public class DebrisData extends Packet<DebrisData>
 		return debrisTransform;
 	}
 	
-	public Vector3d getGraspVector()
+	public Vector3D getGraspVector()
 	{
 		return graspVector;
 	}
 	
-	public Point3d getGraspVectorPosition()
+	public Point3D getGraspVectorPosition()
 	{
 		return graspVectorPosition;
 	}

@@ -1,11 +1,10 @@
 package us.ihmc.exampleSimulations.lidar;
 
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.robotics.Axis;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.lidar.LidarScanParameters;
 import us.ihmc.simulationconstructionset.CameraMount;
 import us.ihmc.simulationconstructionset.GimbalJoint;
@@ -26,7 +25,7 @@ public class ExampleLidarRobot extends Robot
       double height = 0.2;
       double radius = 0.05;
 
-      gimbalJoint = new GimbalJoint("gimbalZ", "gimbalX", "gimbalY", new Vector3d(0.0, 0.0, 1.0), this, Axis.Z, Axis.X, Axis.Y);
+      gimbalJoint = new GimbalJoint("gimbalZ", "gimbalX", "gimbalY", new Vector3D(0.0, 0.0, 1.0), this, Axis.Z, Axis.X, Axis.Y);
       Link link = new Link("lidar");
       link.setMassAndRadiiOfGyration(1.0, radius, radius, radius);
       Graphics3DObject linkGraphics = new Graphics3DObject();
@@ -34,11 +33,11 @@ public class ExampleLidarRobot extends Robot
       gimbalJoint.setLink(link);
       gimbalJoint.setDamping(1.0);
 
-      CameraMount robotCam = new CameraMount("camera", new Vector3d(radius + 0.001, 0.0, height / 2.0), this);
+      CameraMount robotCam = new CameraMount("camera", new Vector3D(radius + 0.001, 0.0, height / 2.0), this);
       gimbalJoint.addCameraMount(robotCam);
 
       RigidBodyTransform transform = new RigidBodyTransform();
-      transform.setTranslation(new Vector3d(radius + 0.001, 0.0, height / 2.0));
+      transform.setTranslation(new Vector3D(radius + 0.001, 0.0, height / 2.0));
       lidarScanParameters = new LidarScanParameters(720, (float) (-Math.PI / 2), (float) (Math.PI / 2), 0f, 0.1f, 30.0f, 0f);
       LidarMount lidarMount = new LidarMount(transform, lidarScanParameters, "lidar");
 

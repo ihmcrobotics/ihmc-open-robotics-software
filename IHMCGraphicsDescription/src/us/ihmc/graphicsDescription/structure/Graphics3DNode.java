@@ -4,15 +4,16 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.transform.AffineTransform;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.input.SelectedListener;
 import us.ihmc.robotics.Axis;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.geometry.Transform3d;
 import us.ihmc.robotics.geometry.TransformTools;
 import us.ihmc.tools.inputDevices.keyboard.ModifierKeyInterface;
 
@@ -21,7 +22,7 @@ public class Graphics3DNode
    private static final Graphics3DNodeType DEFAULT_NODE_TYPE = Graphics3DNodeType.JOINT;
    private final String name;
    private final Graphics3DNodeType nodeType;
-   private final Transform3d transform = new Transform3d();
+   private final AffineTransform transform = new AffineTransform();
 
    private Graphics3DObject graphicsObject;
    private boolean hasGraphicsObjectChanged = false;
@@ -55,14 +56,18 @@ public class Graphics3DNode
       this(name, DEFAULT_NODE_TYPE, null);
    }
 
-   public synchronized Transform3d getTransform()
+   public synchronized AffineTransform getTransform()
    {
       return transform;
    }
 
    public synchronized void setTransform(RigidBodyTransform transform)
    {
-//      assert(!RotationFunctions.isNaNorInf(transform));
+      this.transform.set(transform);
+   }
+
+   public synchronized void setTransform(AffineTransform transform)
+   {
       this.transform.set(transform);
    }
 
@@ -84,18 +89,17 @@ public class Graphics3DNode
 
    public void translate(double x, double y, double z)
    {
-      RigidBodyTransform translator = new RigidBodyTransform();
-      translator.setTranslationAndIdentityRotation(new Vector3d(x, y, z));
-
-      transform.multiply(translator);
+      Vector3D translation = new Vector3D(x, y, z);
+      transform.transform(translation);
+      transform.addTranslation(translation);
    }
-   
+
    public void translateTo(double x, double y, double z)
    {
-      translateTo(new Vector3d(x, y, z));
+      translateTo(new Vector3D(x, y, z));
    }
    
-   public void translateTo(Vector3d translation)
+   public void translateTo(Vector3D translation)
    {
       transform.setTranslationAndIdentityRotation(translation);
    }
@@ -105,9 +109,9 @@ public class Graphics3DNode
       TransformTools.rotate(transform, angle, axis);
    }
 
-   public Vector3d getTranslation()
+   public Vector3D getTranslation()
    {
-      Vector3d translation = new Vector3d();
+      Vector3D translation = new Vector3D();
       getTransform().getTranslation(translation);
 
       return translation;
@@ -168,7 +172,7 @@ public class Graphics3DNode
       return nodeType;
    }
 
-   public void notifySelectedListeners(ModifierKeyInterface modifierKeys, Point3d location, Point3d cameraPosition, Quat4d cameraRotation)
+   public void notifySelectedListeners(ModifierKeyInterface modifierKeys, Point3DReadOnly location, Point3DReadOnly cameraPosition, QuaternionReadOnly cameraRotation)
    {
       for (SelectedListener selectedListener : selectedListeners)
       {

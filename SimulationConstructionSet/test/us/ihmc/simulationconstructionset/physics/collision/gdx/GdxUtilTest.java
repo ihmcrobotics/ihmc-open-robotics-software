@@ -7,7 +7,7 @@ import org.junit.Test;
 import com.badlogic.gdx.math.Matrix4;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 
 /**
  * @author Peter Abeles

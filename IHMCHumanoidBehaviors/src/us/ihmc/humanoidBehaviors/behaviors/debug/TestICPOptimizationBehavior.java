@@ -1,10 +1,9 @@
 package us.ihmc.humanoidBehaviors.behaviors.debug;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.TextToSpeechPacket;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
@@ -76,8 +75,8 @@ public class TestICPOptimizationBehavior extends AbstractBehavior
 
       stepPose.changeFrame(ReferenceFrame.getWorldFrame());
 
-      Point3d location = new Point3d();
-      Quat4d orientation = new Quat4d();
+      Point3D location = new Point3D();
+      Quaternion orientation = new Quaternion();
       stepPose.getPose(location, orientation);
 
       FootstepDataMessage footstepData = new FootstepDataMessage(RobotSide.RIGHT, location, orientation);

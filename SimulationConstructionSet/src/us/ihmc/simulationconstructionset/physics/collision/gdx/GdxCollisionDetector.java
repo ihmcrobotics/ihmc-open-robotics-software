@@ -3,9 +3,6 @@ package us.ihmc.simulationconstructionset.physics.collision.gdx;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.bullet.Bullet;
@@ -23,8 +20,10 @@ import com.badlogic.gdx.physics.bullet.collision.btManifoldPoint;
 import com.badlogic.gdx.physics.bullet.collision.btPersistentManifold;
 import com.badlogic.gdx.physics.bullet.collision.btSphereShape;
 
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.geometry.BoundingBox3d;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.robotDescription.CollisionMeshDescription;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.physics.CollisionShape;
@@ -82,7 +81,7 @@ public class GdxCollisionDetector implements ScsCollisionDetector
    @Override
    public void performCollisionDetection(CollisionDetectionResult result)
    {
-      Vector3d world = new Vector3d();
+      Vector3D world = new Vector3D();
 
       for (int i = 0; i < allShapes.size(); i++)
       {
@@ -112,8 +111,8 @@ public class GdxCollisionDetector implements ScsCollisionDetector
          {
             btManifoldPoint contactPoint = contactManifold.getContactPoint(j);
 
-            Point3d pointOnA = new Point3d();
-            Point3d pointOnB = new Point3d();
+            Point3D pointOnA = new Point3D();
+            Point3D pointOnB = new Point3D();
 
             Vector3 a = new Vector3();
             contactPoint.getPositionWorldOnA(a);
@@ -130,7 +129,7 @@ public class GdxCollisionDetector implements ScsCollisionDetector
 
             contactPoint.getNormalWorldOnB(v);
 
-            Vector3d normalA = new Vector3d();
+            Vector3D normalA = new Vector3D();
             normalA.set(-v.x, -v.y, -v.z);
 
             simpleContact.addContact(pointOnA, pointOnB, normalA, distance);
@@ -273,7 +272,7 @@ public class GdxCollisionDetector implements ScsCollisionDetector
       @Override
       public void applyTransform(RigidBodyTransform transformToWorld)
       {
-         transform.multiply(transformToWorld, transform);
+         transform.preMultiply(transformToWorld);
       }
 
       @Override
@@ -283,9 +282,15 @@ public class GdxCollisionDetector implements ScsCollisionDetector
       }
 
       @Override
-      public boolean isPointInside(Point3d pointInWorld)
+      public boolean isPointInside(Point3D pointInWorld)
       {
          throw new RuntimeException("Implement me!");
+      }
+
+      @Override
+      public boolean rollContactIfRolling(Vector3D surfaceNormal, Point3D pointToRoll)
+      {
+         throw new RuntimeException("Implement me!");         
       }
    }
 
@@ -359,7 +364,8 @@ public class GdxCollisionDetector implements ScsCollisionDetector
          if (link != null)
          {
             link.getParentJoint().getTransformToWorld(tempTransform);
-            transformToWorldToPack.multiply(tempTransform, shapeToLink);
+            transformToWorldToPack.set(tempTransform);
+            transformToWorldToPack.multiply(shapeToLink);
          }
          else
          {

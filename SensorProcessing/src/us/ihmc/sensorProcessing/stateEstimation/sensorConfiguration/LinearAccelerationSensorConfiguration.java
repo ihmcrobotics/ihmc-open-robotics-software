@@ -1,16 +1,15 @@
 package us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration;
 
-import javax.vecmath.Vector3d;
-
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.controlFlow.ControlFlowOutputPort;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 
 public class LinearAccelerationSensorConfiguration
 {
-   private final ControlFlowOutputPort<Vector3d> outputPort;
+   private final ControlFlowOutputPort<Vector3D> outputPort;
    private final String name;
    private final RigidBody linearAccelerationMeasurementLink;
    private final ReferenceFrame linearAccelerationMeasurementFrame;
@@ -20,7 +19,7 @@ public class LinearAccelerationSensorConfiguration
    private final DenseMatrix64F linearAccelerationNoiseCovariance;
    private final DenseMatrix64F biasProcessNoiseCovariance;
 
-   public LinearAccelerationSensorConfiguration(ControlFlowOutputPort<Vector3d> outputPort, String name, RigidBody measurementLink,
+   public LinearAccelerationSensorConfiguration(ControlFlowOutputPort<Vector3D> outputPort, String name, RigidBody measurementLink,
            ReferenceFrame measurementFrame, double gravityZ, DenseMatrix64F linearAccelerationNoiseCovariance, DenseMatrix64F biasProcessNoiseCovariance)
    {
       this.outputPort = outputPort;
@@ -59,7 +58,7 @@ public class LinearAccelerationSensorConfiguration
       return name;
    }
 
-   public ControlFlowOutputPort<Vector3d> getOutputPort()
+   public ControlFlowOutputPort<Vector3D> getOutputPort()
    {
       return outputPort;
    }

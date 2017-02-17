@@ -1,13 +1,12 @@
 package us.ihmc.simulationconstructionset.util.ground;
 
-import javax.vecmath.Vector3d;
-
-import us.ihmc.robotics.geometry.shapes.Box3d;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.robotics.geometry.Direction;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.TransformTools;
+import us.ihmc.robotics.geometry.shapes.Box3d;
 
 public class TrussWithSimpleCollisions extends RotatableBoxTerrainObject
 {
@@ -19,7 +18,7 @@ public class TrussWithSimpleCollisions extends RotatableBoxTerrainObject
 	public TrussWithSimpleCollisions(double[] newPoint, double trussLength,
 			double trussSide, double courseAngleDeg, AppearanceDefinition color)
 	{
-		this(new Box3d(TransformTools.yawPitchDegreesTransform(new Vector3d(newPoint[0], newPoint[1], trussSide/2), courseAngleDeg, 0),
+		this(new Box3d(TransformTools.yawPitchDegreesTransform(new Vector3D(newPoint[0], newPoint[1], trussSide/2), courseAngleDeg, 0),
 				trussSide, trussLength, trussSide), color);
 	}
 //	// TODO Auto-generated constructor stub
@@ -36,7 +35,7 @@ public class TrussWithSimpleCollisions extends RotatableBoxTerrainObject
 ////	location.rotZ(Math.toRadians(yawDegrees));
 ////
 ////	Transform3D tilt = new Transform3D();
-////	tilt.rotY(-slopeRadians);
+////	tilt.setToPitchMatrix(-slopeRadians);
 ////	location.mul(tilt);
 ////
 ////	location.setTranslation(new Vector3d(xCenter, yCenter, zCenter));
@@ -51,7 +50,7 @@ public class TrussWithSimpleCollisions extends RotatableBoxTerrainObject
 //	//		location.rotZ(Math.toRadians(yawDegrees));
 //	//
 //	//		Transform3D tilt = new Transform3D();
-//	//		tilt.rotY(-slopeRadians);
+//	//		tilt.setToPitchMatrix(-slopeRadians);
 //	//		location.mul(tilt);
 //	//
 //	//		location.setTranslation(new Vector3d(xCenter, yCenter, zCenter));
@@ -79,7 +78,7 @@ public class TrussWithSimpleCollisions extends RotatableBoxTerrainObject
 		
 		double graphicSide=.291;
 		double graphicLength=1.524;
-		Vector3d vector = new Vector3d(box.getDimension(Direction.X)/graphicSide, box.getDimension(Direction.Y)/graphicLength, box.getDimension(Direction.Z)/graphicSide);
+		Vector3D vector = new Vector3D(box.getDimension(Direction.X)/graphicSide, box.getDimension(Direction.Y)/graphicLength, box.getDimension(Direction.Z)/graphicSide);
 
 		linkGraphics = new Graphics3DObject();
 		linkGraphics.transform(transformCenterConventionToBottomConvention);

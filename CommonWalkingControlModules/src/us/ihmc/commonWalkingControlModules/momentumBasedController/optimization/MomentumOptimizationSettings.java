@@ -1,15 +1,15 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization;
 
-import javax.vecmath.Vector2d;
-import javax.vecmath.Vector3d;
+import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 
 public abstract class MomentumOptimizationSettings
 {
-   public abstract Vector3d getLinearMomentumWeight();
+   public abstract Vector3D getLinearMomentumWeight();
 
-   public abstract Vector3d getHighLinearMomentumWeightForRecovery();
+   public abstract Vector3D getHighLinearMomentumWeightForRecovery();
 
-   public abstract Vector3d getAngularMomentumWeight();
+   public abstract Vector3D getAngularMomentumWeight();
 
    public abstract double getJointAccelerationWeight();
 
@@ -23,11 +23,11 @@ public abstract class MomentumOptimizationSettings
 
    public abstract double getRhoRateHighWeight();
 
-   public abstract Vector2d getCoPWeight();
+   public abstract Vector2D getCoPWeight();
 
-   public abstract Vector2d getCoPRateDefaultWeight();
+   public abstract Vector2D getCoPRateDefaultWeight();
 
-   public abstract Vector2d getCoPRateHighWeight();
+   public abstract Vector2D getCoPRateHighWeight();
 
    public abstract double getHeadUserModeWeight();
 
@@ -35,25 +35,25 @@ public abstract class MomentumOptimizationSettings
 
    public abstract double getHeadTaskspaceWeight();
 
-   public abstract Vector3d getChestAngularWeight();
+   public abstract Vector3D getChestAngularWeight();
 
-   public abstract Vector3d getPelvisAngularWeight();
+   public abstract Vector3D getPelvisAngularWeight();
 
-   public abstract Vector3d getDefaultLinearFootWeight();
+   public abstract Vector3D getDefaultLinearFootWeight();
 
-   public abstract Vector3d getDefaultAngularFootWeight();
+   public abstract Vector3D getDefaultAngularFootWeight();
 
-   public abstract Vector3d getHighLinearFootWeight();
+   public abstract Vector3D getHighLinearFootWeight();
 
-   public abstract Vector3d getHighAngularFootWeight();
+   public abstract Vector3D getHighAngularFootWeight();
 
    public abstract double getHandUserModeWeight();
 
    public abstract double getHandJointspaceWeight();
 
-   public abstract Vector3d getHandAngularTaskspaceWeight();
+   public abstract Vector3D getHandAngularTaskspaceWeight();
 
-   public abstract Vector3d getHandLinearTaskspaceWeight();
+   public abstract Vector3D getHandLinearTaskspaceWeight();
 
    public abstract int getNumberOfBasisVectorsPerContactPoint();
 

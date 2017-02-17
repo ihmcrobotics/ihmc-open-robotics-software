@@ -2,9 +2,10 @@ package us.ihmc.robotics.geometry.yoFrameObjects;
 
 import static us.ihmc.robotics.math.frames.YoFrameVariableNameTools.createName;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.ReferenceFrameHolder;
 import us.ihmc.robotics.geometry.frameObjects.FrameEuclideanWaypoint;
@@ -53,13 +54,13 @@ public class YoFrameEuclideanWaypoint extends YoFrameWaypoint<YoFrameEuclideanWa
    }
 
    @Override
-   public void setPosition(Point3d position)
+   public void setPosition(Point3DReadOnly position)
    {
       this.position.set(position);
    }
 
    @Override
-   public void setLinearVelocity(Vector3d linearVelocity)
+   public void setLinearVelocity(Vector3DReadOnly linearVelocity)
    {
       this.linearVelocity.set(linearVelocity);
    }
@@ -95,13 +96,13 @@ public class YoFrameEuclideanWaypoint extends YoFrameWaypoint<YoFrameEuclideanWa
    }
 
    @Override
-   public void getPosition(Point3d positionToPack)
+   public void getPosition(Point3DBasics positionToPack)
    {
       position.get(positionToPack);
    }
 
    @Override
-   public void getLinearVelocity(Vector3d linearVelocityToPack)
+   public void getLinearVelocity(Vector3DBasics linearVelocityToPack)
    {
       linearVelocity.get(linearVelocityToPack);
    }
@@ -110,8 +111,7 @@ public class YoFrameEuclideanWaypoint extends YoFrameWaypoint<YoFrameEuclideanWa
    protected void putYoValuesIntoFrameWaypoint()
    {
       EuclideanWaypoint simpleWaypoint = frameWaypoint.getGeometryObject();
-      position.get(simpleWaypoint.getPosition());
-      linearVelocity.get(simpleWaypoint.getLinearVelocity());
+      simpleWaypoint.set(position.getFrameTuple().getPoint(), linearVelocity.getFrameTuple().getVector());
    }
 
    @Override

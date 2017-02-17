@@ -1,7 +1,6 @@
 package us.ihmc.simulationconstructionset.util.perturbance;
 
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 
@@ -27,9 +26,9 @@ public class CollisionPerturbance implements DirectedPerturbance
    }
 
    @Override
-   public void perturb(Vector3d direction)
+   public void perturb(Vector3D direction)
    {
-      Vector3d ballVelocity = new Vector3d(direction);
+      Vector3D ballVelocity = new Vector3D(direction);
       if (ballVelocity.lengthSquared() > 0.0)
       {
          ballVelocity.normalize();

@@ -1,9 +1,8 @@
 package us.ihmc.atlas.parameters;
 
-import javax.vecmath.Vector2d;
-import javax.vecmath.Vector3d;
-
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
+import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 
 public class AtlasMomentumOptimizationSettings extends MomentumOptimizationSettings
 {
@@ -13,18 +12,18 @@ public class AtlasMomentumOptimizationSettings extends MomentumOptimizationSetti
    private static final double defaultRhoRateDefaultWeight = 0.002;
    private static final double defaultRhoRateHighWeight = 0.05;
 
-   private final Vector3d linearMomentumWeight = new Vector3d(0.05, 0.05, 0.01);
-   private final Vector3d highLinearMomentumWeightForRecovery = new Vector3d(0.5, 0.5, 0.05);
-   private final Vector3d angularMomentumWeight = new Vector3d(0.0, 0.0, 0.0);
+   private final Vector3D linearMomentumWeight = new Vector3D(0.05, 0.05, 0.01);
+   private final Vector3D highLinearMomentumWeightForRecovery = new Vector3D(0.5, 0.5, 0.05);
+   private final Vector3D angularMomentumWeight = new Vector3D(0.0, 0.0, 0.0);
 
-   private final Vector3d defaultAngularFootWeight = new Vector3d(0.5, 0.5, 0.5);
-   private final Vector3d defaultLinearFootWeight = new Vector3d(30.0, 30.0, 30.0);
-   private final Vector3d highAngularFootWeight = new Vector3d(5.0, 5.0, 5.0);
-   private final Vector3d highLinearFootWeight = new Vector3d(50.0, 50.0, 50.0);
+   private final Vector3D defaultAngularFootWeight = new Vector3D(0.5, 0.5, 0.5);
+   private final Vector3D defaultLinearFootWeight = new Vector3D(30.0, 30.0, 30.0);
+   private final Vector3D highAngularFootWeight = new Vector3D(5.0, 5.0, 5.0);
+   private final Vector3D highLinearFootWeight = new Vector3D(50.0, 50.0, 50.0);
 
-   private final Vector3d chestAngularWeight = new Vector3d(15.0, 10.0, 5.0);
+   private final Vector3D chestAngularWeight = new Vector3D(15.0, 10.0, 5.0);
    private final double spineJointspaceWeight = 1.0;
-   private final Vector3d pelvisAngularWeight = new Vector3d(5.0, 5.0, 5.0);
+   private final Vector3D pelvisAngularWeight = new Vector3D(5.0, 5.0, 5.0);
 
    private final int nBasisVectorsPerContactPoint = 4;
    private final int nContactPointsPerContactableBody = 4;
@@ -32,16 +31,16 @@ public class AtlasMomentumOptimizationSettings extends MomentumOptimizationSetti
 
    private final double jointAccelerationWeight = 0.005;
    private final double jointJerkWeight = 0.1;
-   private final Vector2d copWeight = new Vector2d(100.0, 200.0);
-   private final Vector2d copRateDefaultWeight = new Vector2d(20000.0, 20000.0);
-   private final Vector2d copRateHighWeight = new Vector2d(2500000.0, 10000000.0);
+   private final Vector2D copWeight = new Vector2D(100.0, 200.0);
+   private final Vector2D copRateDefaultWeight = new Vector2D(20000.0, 20000.0);
+   private final Vector2D copRateHighWeight = new Vector2D(2500000.0, 10000000.0);
    private final double headJointspaceWeight = 1.0;
    private final double headTaskspaceWeight = 1.0;
    private final double headUserModeWeight = 1.0;
    private final double handUserModeWeight = 50.0;
    private final double handJointspaceWeight = 1.0;
-   private final Vector3d handAngularTaskspaceWeight = new Vector3d(1.0, 1.0, 1.0);
-   private final Vector3d handLinearTaskspaceWeight = new Vector3d(1.0, 1.0, 1.0);
+   private final Vector3D handAngularTaskspaceWeight = new Vector3D(1.0, 1.0, 1.0);
+   private final Vector3D handLinearTaskspaceWeight = new Vector3D(1.0, 1.0, 1.0);
 
    private final double rhoWeight;
    private final double rhoMin;
@@ -67,21 +66,21 @@ public class AtlasMomentumOptimizationSettings extends MomentumOptimizationSetti
 
    /** @inheritDoc */
    @Override
-   public Vector3d getLinearMomentumWeight()
+   public Vector3D getLinearMomentumWeight()
    {
       return linearMomentumWeight;
    }
 
    /** @inheritDoc */
    @Override
-   public Vector3d getHighLinearMomentumWeightForRecovery()
+   public Vector3D getHighLinearMomentumWeightForRecovery()
    {
       return highLinearMomentumWeightForRecovery;
    }
 
    /** @inheritDoc */
    @Override
-   public Vector3d getAngularMomentumWeight()
+   public Vector3D getAngularMomentumWeight()
    {
       return angularMomentumWeight;
    }
@@ -130,21 +129,21 @@ public class AtlasMomentumOptimizationSettings extends MomentumOptimizationSetti
 
    /** @inheritDoc */
    @Override
-   public Vector2d getCoPWeight()
+   public Vector2D getCoPWeight()
    {
       return copWeight;
    }
 
    /** @inheritDoc */
    @Override
-   public Vector2d getCoPRateDefaultWeight()
+   public Vector2D getCoPRateDefaultWeight()
    {
       return copRateDefaultWeight;
    }
 
    /** @inheritDoc */
    @Override
-   public Vector2d getCoPRateHighWeight()
+   public Vector2D getCoPRateHighWeight()
    {
       return copRateHighWeight;
    }
@@ -172,42 +171,42 @@ public class AtlasMomentumOptimizationSettings extends MomentumOptimizationSetti
 
    /** @inheritDoc */
    @Override
-   public Vector3d getChestAngularWeight()
+   public Vector3D getChestAngularWeight()
    {
       return chestAngularWeight;
    }
 
    /** @inheritDoc */
    @Override
-   public Vector3d getPelvisAngularWeight()
+   public Vector3D getPelvisAngularWeight()
    {
       return pelvisAngularWeight;
    }
 
    /** @inheritDoc */
    @Override
-   public Vector3d getDefaultLinearFootWeight()
+   public Vector3D getDefaultLinearFootWeight()
    {
       return defaultLinearFootWeight;
    }
 
    /** @inheritDoc */
    @Override
-   public Vector3d getDefaultAngularFootWeight()
+   public Vector3D getDefaultAngularFootWeight()
    {
       return defaultAngularFootWeight;
    }
 
    /** @inheritDoc */
    @Override
-   public Vector3d getHighLinearFootWeight()
+   public Vector3D getHighLinearFootWeight()
    {
       return highLinearFootWeight;
    }
 
    /** @inheritDoc */
    @Override
-   public Vector3d getHighAngularFootWeight()
+   public Vector3D getHighAngularFootWeight()
    {
       return highAngularFootWeight;
    }
@@ -228,14 +227,14 @@ public class AtlasMomentumOptimizationSettings extends MomentumOptimizationSetti
 
    /** @inheritDoc */
    @Override
-   public Vector3d getHandAngularTaskspaceWeight()
+   public Vector3D getHandAngularTaskspaceWeight()
    {
       return handAngularTaskspaceWeight;
    }
 
    /** @inheritDoc */
    @Override
-   public Vector3d getHandLinearTaskspaceWeight()
+   public Vector3D getHandLinearTaskspaceWeight()
    {
       return handLinearTaskspaceWeight;
    }

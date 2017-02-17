@@ -1,7 +1,6 @@
 package us.ihmc.sensorProcessing.diagnostic;
 
-import javax.vecmath.Quat4d;
-
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 
@@ -55,12 +54,12 @@ public class YoFrameQuaternionValidityChecker implements DiagnosticUpdatable
          validityChecker.update();
    }
 
-   public void update(Quat4d newInputValue)
+   public void update(Quaternion newInputValue)
    {
       validityCheckers[0].update(newInputValue.getX());
       validityCheckers[1].update(newInputValue.getY());
       validityCheckers[2].update(newInputValue.getZ());
-      validityCheckers[3].update(newInputValue.getW());
+      validityCheckers[3].update(newInputValue.getS());
    }
 
    public void setupForLogging(String loggerName)

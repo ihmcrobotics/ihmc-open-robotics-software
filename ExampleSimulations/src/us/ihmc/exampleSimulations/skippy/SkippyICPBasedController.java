@@ -1,13 +1,12 @@
 package us.ihmc.exampleSimulations.skippy;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Point3d;
-
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.robotics.controllers.PIDController;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
@@ -141,16 +140,16 @@ public class SkippyICPBasedController extends SimpleRobotController
          double hipSetpointFeedback = kAngle.getDoubleValue() * (qHip - q_dHip);
          double shoulderSetpointFeedback = kAngle.getDoubleValue() * (skippy.getShoulderJoint().getQ() - shoulderSetpoint.getDoubleValue());
 
-         Matrix3d rotationMatrix = new Matrix3d();
+         RotationMatrix rotationMatrix = new RotationMatrix();
          skippy.getRootJoints().get(0).getRotationToWorld(rotationMatrix);
-         double yaw = RotationTools.computeYaw(rotationMatrix);
-         RotationTools.convertYawPitchRollToMatrix(yaw, 0.0, 0.0, rotationMatrix);
-         Point3d angleFeedback = new Point3d(hipSetpointFeedback, shoulderSetpointFeedback, 0.0);
+         double yaw = rotationMatrix.getYaw();
+         rotationMatrix.setYawPitchRoll(yaw, 0.0, 0.0);
+         Point3D angleFeedback = new Point3D(hipSetpointFeedback, shoulderSetpointFeedback, 0.0);
          rotationMatrix.invert();
          rotationMatrix.transform(angleFeedback);
 
-         desiredCMP.setY(desiredCMP.getY() - kMomentum.getDoubleValue() * angularMomentum.getX() + angleFeedback.x);
-         desiredCMP.setX(desiredCMP.getX() + kMomentum.getDoubleValue() * angularMomentum.getY() + angleFeedback.y);
+         desiredCMP.setY(desiredCMP.getY() - kMomentum.getDoubleValue() * angularMomentum.getX() + angleFeedback.getX());
+         desiredCMP.setX(desiredCMP.getX() + kMomentum.getDoubleValue() * angularMomentum.getY() + angleFeedback.getY());
 
          desiredGroundReaction.sub(com, desiredCMP);
          desiredGroundReaction.normalize();

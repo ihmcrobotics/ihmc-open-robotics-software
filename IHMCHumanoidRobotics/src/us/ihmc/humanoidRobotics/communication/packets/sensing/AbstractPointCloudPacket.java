@@ -3,15 +3,14 @@ package us.ihmc.humanoidRobotics.communication.packets.sensing;
 import java.util.ArrayList;
 import java.util.Random;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Point3f;
-
 import us.ihmc.communication.packets.Packet;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.robotics.random.RandomTools;
 
 public abstract class AbstractPointCloudPacket extends Packet<AbstractPointCloudPacket>
 {
-   public Point3d origin;
+   public Point3D origin;
    public float[] flatPoints;
    public long timeStamp;
    
@@ -32,9 +31,9 @@ public abstract class AbstractPointCloudPacket extends Packet<AbstractPointCloud
 	   }
    }
    
-   public AbstractPointCloudPacket(Point3d origin, Point3d[] pointCloud, long timeStamp)
+   public AbstractPointCloudPacket(Point3D origin, Point3D[] pointCloud, long timeStamp)
    {
-      this.origin = new Point3d(origin);
+      this.origin = new Point3D(origin);
       this.timeStamp = timeStamp;
       flatPoints = new float[pointCloud.length * 3];
       for (int i = 0; i < pointCloud.length; i++)
@@ -45,12 +44,12 @@ public abstract class AbstractPointCloudPacket extends Packet<AbstractPointCloud
       }
    }
 
-   public AbstractPointCloudPacket(Point3d origin, ArrayList<Point3d> pointCloud, long timeStamp)
+   public AbstractPointCloudPacket(Point3D origin, ArrayList<Point3D> pointCloud, long timeStamp)
    {
       this.origin = origin;
       this.timeStamp = timeStamp;
       flatPoints = new float[pointCloud.size() * 3];
-      Point3d point;
+      Point3D point;
       for (int i = 0; i < pointCloud.size(); i++)
       {
          point = pointCloud.get(i);
@@ -70,24 +69,24 @@ public abstract class AbstractPointCloudPacket extends Packet<AbstractPointCloud
       return timeStamp;
    }
 
-   public Point3f[] getPoints3f()
+   public Point3D32[] getPoints3f()
    {
-      Point3f[] points = new Point3f[flatPoints.length / 3];
+      Point3D32[] points = new Point3D32[flatPoints.length / 3];
 
       for (int i = 0; i < points.length; i++)
       {
-         points[i] = new Point3f(flatPoints[3 * i], flatPoints[3 * i + 1], flatPoints[3 * i + 2]);
+         points[i] = new Point3D32(flatPoints[3 * i], flatPoints[3 * i + 1], flatPoints[3 * i + 2]);
       }
       return points;
    }
 
-   public Point3d[] getPoints()
+   public Point3D[] getPoints()
    {
-      Point3d[] points = new Point3d[flatPoints.length / 3];
+      Point3D[] points = new Point3D[flatPoints.length / 3];
 
       for (int i = 0; i < points.length; i++)
       {
-         points[i] = new Point3d(flatPoints[3 * i], flatPoints[3 * i + 1], flatPoints[3 * i + 2]);
+         points[i] = new Point3D(flatPoints[3 * i], flatPoints[3 * i + 1], flatPoints[3 * i + 2]);
       }
       return points;
    }

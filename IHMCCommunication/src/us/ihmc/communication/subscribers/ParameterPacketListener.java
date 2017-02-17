@@ -1,9 +1,19 @@
 package us.ihmc.communication.subscribers;
 
 import us.ihmc.communication.net.PacketConsumer;
-import us.ihmc.communication.packets.*;
+import us.ihmc.communication.packets.ParameterListPacket;
+import us.ihmc.communication.packets.RequestParameterListPacket;
+import us.ihmc.communication.packets.SetBooleanParameterPacket;
+import us.ihmc.communication.packets.SetDoubleArrayParameterPacket;
+import us.ihmc.communication.packets.SetDoubleParameterPacket;
+import us.ihmc.communication.packets.SetStringParameterPacket;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
-import us.ihmc.robotics.dataStructures.parameter.*;
+import us.ihmc.robotics.dataStructures.parameter.BooleanParameter;
+import us.ihmc.robotics.dataStructures.parameter.DoubleArrayParameter;
+import us.ihmc.robotics.dataStructures.parameter.DoubleParameter;
+import us.ihmc.robotics.dataStructures.parameter.Parameter;
+import us.ihmc.robotics.dataStructures.parameter.ParameterRegistry;
+import us.ihmc.robotics.dataStructures.parameter.StringParameter;
 
 public class ParameterPacketListener
 {

@@ -1,11 +1,12 @@
 package us.ihmc.robotics.screwTheory;
 
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Vector3d;
 import java.util.List;
+
+import us.ihmc.euclid.matrix.Matrix3D;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class InverseDynamicsMechanismExplorer
 {
@@ -34,7 +35,7 @@ public class InverseDynamicsMechanismExplorer
       } 
       else
       {
-         Vector3d jointOffset = new Vector3d();
+         Vector3D jointOffset = new Vector3D();
          ReferenceFrame frameBeforeJoint = joint.getFrameBeforeJoint();
 
          ReferenceFrame frameAfterParentJoint = parentJoint.getFrameAfterJoint();
@@ -73,7 +74,7 @@ public class InverseDynamicsMechanismExplorer
    {
       Twist twist = new Twist();
       revoluteJoint.getUnitJointTwist(twist);
-      Vector3d jointAxis = twist.getAngularPart();
+      Vector3DReadOnly jointAxis = twist.getAngularPart();
       buffer.append("Joint axis = " + jointAxis + "\n");
       buffer.append("Joint is a Pin Joint.\n");
 
@@ -83,7 +84,7 @@ public class InverseDynamicsMechanismExplorer
    {
       Twist twist = new Twist();
       prismaticJoint.getUnitJointTwist(twist);
-      Vector3d jointAxis = twist.getLinearPart();
+      Vector3DReadOnly jointAxis = twist.getLinearPart();
       buffer.append("Joint axis = " + jointAxis + "\n");
       buffer.append("Joint is a Slider Joint.\n");
    }
@@ -101,11 +102,11 @@ public class InverseDynamicsMechanismExplorer
       {
          double mass = inertia.getMass();
 
-         Vector3d comOffset = new Vector3d();
+         Vector3D comOffset = new Vector3D();
          RigidBodyTransform comOffsetTransform = link.getBodyFixedFrame().getTransformToDesiredFrame(parentJoint.getFrameAfterJoint());
          comOffsetTransform.getTranslation(comOffset);
 
-         Matrix3d momentOfInertia = inertia.getMassMomentOfInertiaPartCopy();
+         Matrix3D momentOfInertia = inertia.getMassMomentOfInertiaPartCopy();
 
          buffer.append("Mass = " + mass + "\n");
          buffer.append("comOffset = " + comOffset + "\n");

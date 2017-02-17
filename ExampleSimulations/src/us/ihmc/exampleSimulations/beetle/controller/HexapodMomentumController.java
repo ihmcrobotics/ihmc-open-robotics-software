@@ -4,11 +4,12 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.exampleSimulations.beetle.referenceFrames.HexapodReferenceFrames;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -20,8 +21,6 @@ import us.ihmc.robotics.math.trajectories.StraightLineCartesianTrajectoryGenerat
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.CenterOfMassJacobian;
 
-import javax.vecmath.Vector3d;
-
 public class HexapodMomentumController
 {
    private final String name = getClass().getSimpleName();
@@ -31,8 +30,8 @@ public class HexapodMomentumController
    
    private final FrameVector linearMomentumRateOfChange = new FrameVector();
    private final FrameVector angularMomentumRateOfChange = new FrameVector();
-   private final Vector3d linearMomentumWeight = new Vector3d(0.8, 0.8, 0.8);
-   private final Vector3d angularMomentumWeight = new Vector3d(0.01, 0.01, 0.01);
+   private final Vector3D linearMomentumWeight = new Vector3D(0.8, 0.8, 0.8);
+   private final Vector3D angularMomentumWeight = new Vector3D(0.01, 0.01, 0.01);
    
    private final MomentumRateCommand momentumRateCommand = new MomentumRateCommand();
    private final DenseMatrix64F selectionMatrix = CommonOps.identity(6);

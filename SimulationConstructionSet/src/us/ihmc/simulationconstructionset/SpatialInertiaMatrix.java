@@ -1,8 +1,8 @@
 package us.ihmc.simulationconstructionset;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.matrix.Matrix3D;
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.simulationconstructionset.mathfunctions.Matrix;
 
 /**
@@ -22,13 +22,13 @@ public final class SpatialInertiaMatrix implements java.io.Serializable
     *
     */
    private static final long serialVersionUID = 1765931620079414651L;
-   public Matrix3d A = new Matrix3d(), B = new Matrix3d(), C = new Matrix3d(), D = new Matrix3d();
+   public Matrix3D A = new Matrix3D(), B = new Matrix3D(), C = new Matrix3D(), D = new Matrix3D();
 
    public SpatialInertiaMatrix()
    {
    }
 
-   private Vector3d IA_s_top = new Vector3d(), IB_s_bottom = new Vector3d(), IC_s_top = new Vector3d(), ID_s_bottom = new Vector3d();
+   private Vector3D IA_s_top = new Vector3D(), IB_s_bottom = new Vector3D(), IC_s_top = new Vector3D(), ID_s_bottom = new Vector3D();
 
    public double sIs(SpatialVector s)
    {
@@ -174,7 +174,7 @@ public final class SpatialInertiaMatrix implements java.io.Serializable
     * }
     */
 
-   public void setInitArticulatedInertia(double mass, Matrix3d Inertia)
+   public void setInitArticulatedInertia(double mass, Matrix3D Inertia)
    {
       A.setM00(0.0);
       A.setM01(0.0);
@@ -218,16 +218,16 @@ public final class SpatialInertiaMatrix implements java.io.Serializable
        */
    }
 
-   Matrix3d ONE3d = new Matrix3d(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0);
+   RotationMatrix ONE3d = new RotationMatrix(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0);
 
    public void oneMinus()
    {
       // For Mirtich p. 141.
 
-      A.mul(-1.0);
-      B.mul(-1.0);
-      C.mul(-1.0);
-      D.mul(-1.0);
+      A.scale(-1.0);
+      B.scale(-1.0);
+      C.scale(-1.0);
+      D.scale(-1.0);
 
       A.add(ONE3d);
       D.add(ONE3d);
@@ -260,10 +260,10 @@ public final class SpatialInertiaMatrix implements java.io.Serializable
    }
 
 
-   private Vector3d Atop = new Vector3d(), Bbot = new Vector3d(), Ctop = new Vector3d(), Dbot = new Vector3d();
-   private Vector3d botA = new Vector3d(), botB = new Vector3d(), topC = new Vector3d(), topD = new Vector3d();
-   private Vector3d v1 = new Vector3d(), v2 = new Vector3d(), v3 = new Vector3d(), v4 = new Vector3d();
-   private Matrix3d A_trans = new Matrix3d(), B_trans = new Matrix3d(), C_trans = new Matrix3d(), D_trans = new Matrix3d();
+   private Vector3D Atop = new Vector3D(), Bbot = new Vector3D(), Ctop = new Vector3D(), Dbot = new Vector3D();
+   private Vector3D botA = new Vector3D(), botB = new Vector3D(), topC = new Vector3D(), topD = new Vector3D();
+   private Vector3D v1 = new Vector3D(), v2 = new Vector3D(), v3 = new Vector3D(), v4 = new Vector3D();
+   private Matrix3D A_trans = new Matrix3D(), B_trans = new Matrix3D(), C_trans = new Matrix3D(), D_trans = new Matrix3D();
 
    public void IssI(SpatialInertiaMatrix I_hat_i, SpatialVector s_hat_i, double sIs)
    {
@@ -310,7 +310,7 @@ public final class SpatialInertiaMatrix implements java.io.Serializable
 
    }
 
-   public void setInnerMul(Matrix3d M, Vector3d v1, Vector3d v2)
+   public void setInnerMul(Matrix3D M, Vector3D v1, Vector3D v2)
    {
       M.setM00(v1.getX() * v2.getX());
       M.setM01(v1.getX() * v2.getY());

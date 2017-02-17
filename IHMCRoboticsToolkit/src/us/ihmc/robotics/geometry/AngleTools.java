@@ -2,10 +2,9 @@ package us.ihmc.robotics.geometry;
 
 import java.util.Random;
 
-import javax.vecmath.Quat4f;
-import javax.vecmath.Vector2d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion32;
 import us.ihmc.robotics.MathTools;
 
 public class AngleTools
@@ -25,19 +24,19 @@ public class AngleTools
       return AngleTools.shiftAngleToStartOfRange(angle, -PI);
    }
 
-   public static float getAngle(Quat4f q)
+   public static float getAngle(Quaternion32 q)
    {
-      return 2.0f * (float) Math.acos(q.getW());
+      return 2.0f * (float) Math.acos(q.getS());
    }
 
-   public static double angleMinusPiToPi(Vector2d startVector, Vector2d endVector)
+   public static double angleMinusPiToPi(Vector2D startVector, Vector2D endVector)
    {
       double absoluteAngle = Math.acos(startVector.dot(endVector) / startVector.length() / endVector.length());
 
-      Vector3d start3d = new Vector3d(startVector.getX(), startVector.getY(), 0.0);
-      Vector3d end3d = new Vector3d(endVector.getX(), endVector.getY(), 0.0);
+      Vector3D start3d = new Vector3D(startVector.getX(), startVector.getY(), 0.0);
+      Vector3D end3d = new Vector3D(endVector.getX(), endVector.getY(), 0.0);
 
-      Vector3d crossProduct = new Vector3d();
+      Vector3D crossProduct = new Vector3D();
       crossProduct.cross(start3d, end3d);
 
       if (crossProduct.getZ() >= 0.0)

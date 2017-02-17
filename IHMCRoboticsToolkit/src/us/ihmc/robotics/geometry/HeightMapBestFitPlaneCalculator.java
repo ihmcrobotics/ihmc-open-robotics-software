@@ -1,16 +1,16 @@
 package us.ihmc.robotics.geometry;
 
-import us.ihmc.robotics.dataStructures.HeightMapWithPoints;
-import us.ihmc.robotics.geometry.shapes.Plane3d;
-
-import javax.vecmath.Point2d;
-import javax.vecmath.Point3d;
 import java.util.ArrayList;
 import java.util.List;
 
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.robotics.dataStructures.HeightMapWithPoints;
+import us.ihmc.robotics.geometry.shapes.Plane3d;
+
 public class HeightMapBestFitPlaneCalculator
 {
-   private List<Point3d> pointList = new ArrayList<Point3d>();
+   private List<Point3D> pointList = new ArrayList<Point3D>();
 
    private final PlaneFitter planeFitter = new LeastSquaresZPlaneFitter();
 
@@ -18,7 +18,7 @@ public class HeightMapBestFitPlaneCalculator
    {
    }
 
-   public Plane3d calculatePlane(HeightMapWithPoints heightMap, Point2d center, double kernelSizeX, double kernelSizeY) throws InsufficientDataException
+   public Plane3d calculatePlane(HeightMapWithPoints heightMap, Point2D center, double kernelSizeX, double kernelSizeY) throws InsufficientDataException
    {
       if ((kernelSizeX == 0) || (kernelSizeY == 0))
          throw new RuntimeException("empty search region.");
@@ -29,7 +29,7 @@ public class HeightMapBestFitPlaneCalculator
       return ret;
    }
 
-   public Plane3d calculatePlane(HeightMapWithPoints heightMap, Point2d center, double xExtent, double yExtent, InclusionFunction<Point3d> kernelMask)
+   public Plane3d calculatePlane(HeightMapWithPoints heightMap, Point2D center, double xExtent, double yExtent, InclusionFunction<Point3D> kernelMask)
            throws InsufficientDataException
    {
       if ((xExtent == 0) || (yExtent == 0))
@@ -43,7 +43,7 @@ public class HeightMapBestFitPlaneCalculator
 
 
 
-   public List<Point3d> getPointList()
+   public List<Point3D> getPointList()
    {
       return this.pointList;
    }

@@ -3,24 +3,22 @@ package us.ihmc.javaFXToolkit.shapes;
 import java.util.Arrays;
 import java.util.List;
 
-import javax.vecmath.AxisAngle4d;
-import javax.vecmath.Point2d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Point3f;
-import javax.vecmath.TexCoord2f;
-import javax.vecmath.Tuple3d;
-import javax.vecmath.Tuple3f;
-import javax.vecmath.Vector3f;
-
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Material;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Mesh;
+import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Point3D32;
+import us.ihmc.euclid.tuple3D.Vector3D32;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.graphicsDescription.MeshDataGenerator;
 import us.ihmc.graphicsDescription.MeshDataHolder;
+import us.ihmc.graphicsDescription.TexCoord2f;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 /**
  * Based on a {@link JavaFXMeshBuilder}, this class can combine different meshes with different colors into a single mesh.
@@ -63,7 +61,7 @@ public class JavaFXMultiColorMeshBuilder
     * @param offset coordinate of the box center. Not modified.
     * @param color color of the box. Color accuracy depends on the color palette in use.
     */
-   public void addBox(double lx, double ly, double lz, Tuple3d offset, Color color)
+   public void addBox(double lx, double ly, double lz, Tuple3DBasics offset, Color color)
    {
       addMesh(MeshDataGenerator.Cube(lx, ly, lz, true, null), offset, color);
    }
@@ -88,7 +86,7 @@ public class JavaFXMultiColorMeshBuilder
     * @param offset coordinate of the box center. Not modified.
     * @param color color of the box. Color accuracy depends on the color palette in use.
     */
-   public void addBox(float lx, float ly, float lz, Tuple3f offset, Color color)
+   public void addBox(float lx, float ly, float lz, Tuple3DBasics offset, Color color)
    {
       addMesh(MeshDataGenerator.Cube(lx, ly, lz, true, null), offset, color);
    }
@@ -101,7 +99,7 @@ public class JavaFXMultiColorMeshBuilder
     * @param orientation axis-angle describing the cone orientation with respect to world. Not modified.
     * @param color color of the cone. Color accuracy depends on the color palette in use.
     */
-   public void addCone(double height, double radius, Tuple3d offset, AxisAngle4d orientation, Color color)
+   public void addCone(double height, double radius, Tuple3DBasics offset, AxisAngle orientation, Color color)
    {
       addMesh(MeshDataGenerator.Cone(height, radius, DEFAULT_RES), offset, orientation, color);
    }
@@ -113,7 +111,7 @@ public class JavaFXMultiColorMeshBuilder
     * @param offset coordinate of the cone's base center. Not modified.
     * @param color color of the cone. Color accuracy depends on the color palette in use.
     */
-   public void addCone(double height, double radius, Tuple3d offset, Color color)
+   public void addCone(double height, double radius, Tuple3DBasics offset, Color color)
    {
       addMesh(MeshDataGenerator.Cone(height, radius, DEFAULT_RES), offset, color);
    }
@@ -128,7 +126,7 @@ public class JavaFXMultiColorMeshBuilder
     */
    public void addCube(double size, double xOffset, double yOffset, double zOffset, Color color)
    {
-      addBox(size, size, size, new Point3d(xOffset, yOffset, zOffset), color);
+      addBox(size, size, size, new Point3D(xOffset, yOffset, zOffset), color);
    }
 
    /**
@@ -137,7 +135,7 @@ public class JavaFXMultiColorMeshBuilder
     * @param cubeOffset coordinates of the cube's center. Not modified.
     * @param color color of the cube. Color accuracy depends on the color palette in use.
     */
-   public void addCube(double size, Tuple3d pointsOffset, Color color)
+   public void addCube(double size, Tuple3DBasics pointsOffset, Color color)
    {
       addBox(size, size, size, pointsOffset, color);
    }
@@ -148,7 +146,7 @@ public class JavaFXMultiColorMeshBuilder
     * @param cubeOffset coordinates of the cube's center. Not modified.
     * @param color color of the cube. Color accuracy depends on the color palette in use.
     */
-   public void addCube(float size, Tuple3f pointsOffset, Color color)
+   public void addCube(float size, Tuple3DBasics pointsOffset, Color color)
    {
       addBox(size, size, size, pointsOffset, color);
    }
@@ -161,7 +159,7 @@ public class JavaFXMultiColorMeshBuilder
     * @param orientation axis-angle describing the cylinder orientation with respect to world. Not modified.
     * @param color color of the cylinder. Color accuracy depends on the color palette in use.
     */
-   public void addCylinder(double height, double radius, Tuple3d offset, AxisAngle4d orientation, Color color)
+   public void addCylinder(double height, double radius, Tuple3DBasics offset, AxisAngle orientation, Color color)
    {
       addMesh(MeshDataGenerator.Cylinder(radius, height, DEFAULT_RES), offset, orientation, color);
    }
@@ -173,7 +171,7 @@ public class JavaFXMultiColorMeshBuilder
     * @param offset coordinates of the cylinder's center. Not modified.
     * @param color color of the cylinder. Color accuracy depends on the color palette in use.
     */
-   public void addCylinder(double height, double radius, Tuple3d offset, Color color)
+   public void addCylinder(double height, double radius, Tuple3DBasics offset, Color color)
    {
       addMesh(MeshDataGenerator.Cylinder(radius, height, DEFAULT_RES), offset, color);
    }
@@ -244,10 +242,10 @@ public class JavaFXMultiColorMeshBuilder
       MeshDataHolder lineMeshData = MeshDataGenerator.Line(x0, y0, z0, xf, yf, zf, lineWidth);
       float expectedDistance = 2.0f * lineWidth * lineWidth;
 
-      Point3f[] vertices = lineMeshData.getVertices();
+      Point3D32[] vertices = lineMeshData.getVertices();
       TexCoord2f[] texturePoints = lineMeshData.getTexturePoints();
 
-      Point3f start = new Point3f(x0, y0, z0);
+      Point3D32 start = new Point3D32(x0, y0, z0);
 
       for (int i = 0; i < vertices.length; i++)
       {
@@ -267,7 +265,7 @@ public class JavaFXMultiColorMeshBuilder
     * @param lineWidth width of the line.
     * @param color color of the line. Color accuracy depends on the color palette in use.
     */
-   public void addLine(Tuple3d start, Tuple3d end, double lineWidth, Color color)
+   public void addLine(Tuple3DBasics start, Tuple3DBasics end, double lineWidth, Color color)
    {
       addLine(start.getX(), start.getY(), start.getZ(), end.getX(), end.getY(), end.getZ(), lineWidth, color);
    }
@@ -280,7 +278,7 @@ public class JavaFXMultiColorMeshBuilder
     * @param startColor color at the line start. Color accuracy depends on the color palette in use.
     * @param endColor color at the line end. Color accuracy depends on the color palette in use.
     */
-   public void addLine(Tuple3d start, Tuple3d end, double lineWidth, Color startColor, Color endColor)
+   public void addLine(Tuple3DBasics start, Tuple3DBasics end, double lineWidth, Color startColor, Color endColor)
    {
       addLine(start.getX(), start.getY(), start.getZ(), end.getX(), end.getY(), end.getZ(), lineWidth, startColor, endColor);
    }
@@ -292,7 +290,7 @@ public class JavaFXMultiColorMeshBuilder
     * @param lineWidth width of the line.
     * @param color color of the line. Color accuracy depends on the color palette in use.
     */
-   public void addLine(Tuple3f start, Tuple3f end, float lineWidth, Color color)
+   public void addLine(Tuple3DBasics start, Tuple3DBasics end, float lineWidth, Color color)
    {
       addLine(start.getX(), start.getY(), start.getZ(), end.getX(), end.getY(), end.getZ(), lineWidth, color);
    }
@@ -305,7 +303,7 @@ public class JavaFXMultiColorMeshBuilder
     * @param startColor color at the line start. Color accuracy depends on the color palette in use.
     * @param endColor color at the line end. Color accuracy depends on the color palette in use.
     */
-   public void addLine(Tuple3f start, Tuple3f end, float lineWidth, Color startColor, Color endColor)
+   public void addLine(Tuple3DBasics start, Tuple3DBasics end, float lineWidth, Color startColor, Color endColor)
    {
       addLine(start.getX(), start.getY(), start.getZ(), end.getX(), end.getY(), end.getZ(), lineWidth, startColor, endColor);
    }
@@ -327,7 +325,7 @@ public class JavaFXMultiColorMeshBuilder
     * @param orientation the axis-angle describing the rotation to apply to the given mesh. Not modified.
     * @param color color of the given mesh. Color accuracy depends on the color palette in use.
     */
-   public void addMesh(MeshDataHolder meshDataHolder, Tuple3d offset, AxisAngle4d orientation, Color color)
+   public void addMesh(MeshDataHolder meshDataHolder, Tuple3DBasics offset, AxisAngle orientation, Color color)
    {
       meshBuilder.addMesh(setColor(meshDataHolder, color), offset, orientation);
    }
@@ -338,18 +336,7 @@ public class JavaFXMultiColorMeshBuilder
     * @param offset the translation to apply to the given mesh. Not modified.
     * @param color color of the given mesh. Color accuracy depends on the color palette in use.
     */
-   public void addMesh(MeshDataHolder meshDataHolder, Tuple3d offset, Color color)
-   {
-      meshBuilder.addMesh(setColor(meshDataHolder, color), offset);
-   }
-
-   /**
-    * Translates then combines the given mesh with the mesh contained in this builder.
-    * @param meshDataHolder the mesh to translate and combine. Not Modified.
-    * @param offset the translation to apply to the given mesh. Not modified.
-    * @param color color of the given mesh. Color accuracy depends on the color palette in use.
-    */
-   public void addMesh(MeshDataHolder meshDataHolder, Tuple3f offset, Color color)
+   public void addMesh(MeshDataHolder meshDataHolder, Tuple3DBasics offset, Color color)
    {
       meshBuilder.addMesh(setColor(meshDataHolder, color), offset);
    }
@@ -361,22 +348,22 @@ public class JavaFXMultiColorMeshBuilder
     * @param color color of the multi-line. Color accuracy depends on the color palette in use.
     * @param close whether the end of the given array of points should be connected to the beginning or not.
     */
-   public void addMultiLine(List<Point3d> points, double lineWidth, Color color, boolean close)
+   public void addMultiLine(List<Point3D> points, double lineWidth, Color color, boolean close)
    {
       if (points.size() < 2)
          return;
 
       for (int i = 1; i < points.size(); i++)
       {
-         Point3d start = points.get(i - 1);
-         Point3d end = points.get(i);
+         Point3D start = points.get(i - 1);
+         Point3D end = points.get(i);
          addLine(start, end, lineWidth, color);
       }
 
       if (close)
       {
-         Point3d start = points.get(points.size() - 1);
-         Point3d end = points.get(0);
+         Point3D start = points.get(points.size() - 1);
+         Point3D end = points.get(0);
          addLine(start, end, lineWidth, color);
       }
    }
@@ -388,22 +375,22 @@ public class JavaFXMultiColorMeshBuilder
     * @param color color of the multi-line. Color accuracy depends on the color palette in use.
     * @param close whether the end of the given array of points should be connected to the beginning or not.
     */
-   public void addMultiLine(Point3d[] points, double lineWidth, Color color, boolean close)
+   public void addMultiLine(Point3D[] points, double lineWidth, Color color, boolean close)
    {
       if (points.length < 2)
          return;
 
       for (int i = 1; i < points.length; i++)
       {
-         Point3d start = points[i - 1];
-         Point3d end = points[i];
+         Point3D start = points[i - 1];
+         Point3D end = points[i];
          addLine(start, end, lineWidth, color);
       }
 
       if (close)
       {
-         Point3d start = points[points.length - 1];
-         Point3d end = points[0];
+         Point3D start = points[points.length - 1];
+         Point3D end = points[0];
          addLine(start, end, lineWidth, color);
       }
    }
@@ -416,18 +403,18 @@ public class JavaFXMultiColorMeshBuilder
     * @param color color of the multi-line. Color accuracy depends on the color palette in use.
     * @param close whether the end of the given array of points should be connected to the beginning or not.
     */
-   public void addMultiLine(RigidBodyTransform transformToWorld, List<Point2d> points, double lineWidth, Color color, boolean close)
+   public void addMultiLine(RigidBodyTransform transformToWorld, List<Point2D> points, double lineWidth, Color color, boolean close)
    {
       if (points.size() < 2)
          return;
 
-      Point3d start = new Point3d();
-      Point3d end = new Point3d();
+      Point3D start = new Point3D();
+      Point3D end = new Point3D();
 
       for (int i = 1; i < points.size(); i++)
       {
-         Point2d start2d = points.get(i - 1);
-         Point2d end2d = points.get(i);
+         Point2D start2d = points.get(i - 1);
+         Point2D end2d = points.get(i);
 
          start.set(start2d.getX(), start2d.getY(), 0.0);
          end.set(end2d.getX(), end2d.getY(), 0.0);
@@ -439,8 +426,8 @@ public class JavaFXMultiColorMeshBuilder
 
       if (close)
       {
-         Point2d start2d = points.get(points.size() - 1);
-         Point2d end2d = points.get(0);
+         Point2D start2d = points.get(points.size() - 1);
+         Point2D end2d = points.get(0);
 
          start.set(start2d.getX(), start2d.getY(), 0.0);
          end.set(end2d.getX(), end2d.getY(), 0.0);
@@ -459,7 +446,7 @@ public class JavaFXMultiColorMeshBuilder
     * @param color color of the multi-line. Color accuracy depends on the color palette in use.
     * @param close whether the end of the given array of points should be connected to the beginning or not.
     */
-   public void addMultiLine(RigidBodyTransform transformToWorld, Point2d[] points, double lineWidth, Color color, boolean close)
+   public void addMultiLine(RigidBodyTransform transformToWorld, Point2D[] points, double lineWidth, Color color, boolean close)
    {
       addMultiLine(transformToWorld, Arrays.asList(points), lineWidth, color, close);
    }
@@ -481,7 +468,7 @@ public class JavaFXMultiColorMeshBuilder
     * @param polygon the polygon 3D vertices.
     * @param color color of the polygon. Color accuracy depends on the color palette in use.
     */
-   public void addPolyon(List<Point3d> polygon, Color color)
+   public void addPolyon(List<Point3D> polygon, Color color)
    {
       addMesh(MeshDataGenerator.Polygon(polygon), color);
    }
@@ -492,7 +479,7 @@ public class JavaFXMultiColorMeshBuilder
     * @param offset the coordinate of the sphere. Not modified.
     * @param color color of the sphere. Color accuracy depends on the color palette in use.
     */
-   public void addSphere(double radius, Tuple3d offset, Color color)
+   public void addSphere(double radius, Tuple3DBasics offset, Color color)
    {
       addMesh(MeshDataGenerator.Sphere(radius, DEFAULT_RES, DEFAULT_RES), offset, color);
    }
@@ -513,7 +500,7 @@ public class JavaFXMultiColorMeshBuilder
     * @param offset the coordinate of the sphere. Not modified.
     * @param color color of the sphere. Color accuracy depends on the color palette in use.
     */
-   public void addSphere(float radius, Tuple3f offset, Color color)
+   public void addSphere(float radius, Tuple3DBasics offset, Color color)
    {
       addMesh(MeshDataGenerator.Sphere(radius, DEFAULT_RES, DEFAULT_RES), offset, color);
    }
@@ -524,7 +511,7 @@ public class JavaFXMultiColorMeshBuilder
     * @param offset coordinates of the center of the tetrahedron's circumscribed sphere. Not modified.
     * @param color color of the tetrahedron. Color accuracy depends on the color palette in use.
     */
-   public void addTetrahedron(double edgeLength, Tuple3d offset, Color color)
+   public void addTetrahedron(double edgeLength, Tuple3DBasics offset, Color color)
    {
       addMesh(MeshDataGenerator.Tetrahedron(edgeLength), offset, color);
    }
@@ -535,7 +522,7 @@ public class JavaFXMultiColorMeshBuilder
     * @param offset coordinates of the center of the tetrahedron's circumscribed sphere. Not modified.
     * @param color color of the tetrahedron. Color accuracy depends on the color palette in use.
     */
-   public void addTetrahedron(float edgeLength, Tuple3f offset, Color color)
+   public void addTetrahedron(float edgeLength, Tuple3DBasics offset, Color color)
    {
       addMesh(MeshDataGenerator.Tetrahedron(edgeLength), offset, color);
    }
@@ -587,9 +574,9 @@ public class JavaFXMultiColorMeshBuilder
    {
       if (input == null)
          return null;
-      Point3f[] vertices = input.getVertices();
+      Point3D32[] vertices = input.getVertices();
       int[] triangleIndices = input.getTriangleIndices();
-      Vector3f[] vertexNormals = input.getVertexNormals();
+      Vector3D32[] vertexNormals = input.getVertexNormals();
       TexCoord2f[] inputTexturePoints = input.getTexturePoints();
       TexCoord2f[] outputTexturePoints = new TexCoord2f[inputTexturePoints.length];
       float[] textureLocation = colorPalette.getTextureLocation(color);

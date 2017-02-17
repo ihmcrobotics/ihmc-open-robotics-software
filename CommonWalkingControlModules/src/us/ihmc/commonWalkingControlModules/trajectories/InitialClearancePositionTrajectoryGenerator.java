@@ -2,9 +2,9 @@ package us.ihmc.commonWalkingControlModules.trajectories;
 
 import java.util.ArrayList;
 
-import javax.vecmath.AxisAngle4d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
@@ -21,7 +21,6 @@ import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.GeometryTools;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.math.frames.YoFramePointInMultipleFrames;
 import us.ihmc.robotics.math.frames.YoFrameVectorInMultipleFrames;
 import us.ihmc.robotics.math.frames.YoMultipleFramesHolder;
@@ -59,7 +58,7 @@ public class InitialClearancePositionTrajectoryGenerator implements PositionTraj
    /** The tangential plane is the frame in which the trajectory can be expressed in 2D. It is tangential to the final direction vector. */
    private final ReferenceFrame tangentialPlane;
    private final FrameOrientation rotationPlane = new FrameOrientation();
-   private final AxisAngle4d axisAngleToWorld = new AxisAngle4d();
+   private final AxisAngle axisAngleToWorld = new AxisAngle();
 
    // For viz
    private final boolean visualize;
@@ -232,7 +231,7 @@ public class InitialClearancePositionTrajectoryGenerator implements PositionTraj
       this.finalPosition.set(finalPosition);
    }
 
-   private final Vector3d tempVector = new Vector3d();
+   private final Vector3D tempVector = new Vector3D();
 
    public void setInitialClearance(FrameVector initialDirection, double leaveDistance)
    {

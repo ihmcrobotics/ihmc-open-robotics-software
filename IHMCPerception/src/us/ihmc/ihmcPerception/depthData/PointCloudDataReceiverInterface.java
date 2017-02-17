@@ -2,12 +2,11 @@ package us.ihmc.ihmcPerception.depthData;
 
 import java.util.ArrayList;
 
-import javax.vecmath.Point3d;
-
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public interface PointCloudDataReceiverInterface
 {
-   void receivedPointCloudData(ReferenceFrame scanFrame, ReferenceFrame lidarFrame, long[] timestamps, ArrayList<Point3d> points, PointCloudSource... sources);
+   void receivedPointCloudData(ReferenceFrame scanFrame, ReferenceFrame lidarFrame, long[] timestamps, ArrayList<Point3D> points, PointCloudSource... sources);
 
 }

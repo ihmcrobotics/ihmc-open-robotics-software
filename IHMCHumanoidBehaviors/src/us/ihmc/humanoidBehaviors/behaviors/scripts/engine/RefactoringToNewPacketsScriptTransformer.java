@@ -34,7 +34,7 @@ public class RefactoringToNewPacketsScriptTransformer extends ScriptTransformer
 //
 //         FootTrajectoryMessage footTrajectoryMessage = new FootTrajectoryMessage(footPosePacket.getRobotSide(), 1);
 //         
-//         Point3d position = footPosePacket.position;
+//         Point3D position = footPosePacket.position;
 //         Quat4d orientation = footPosePacket.orientation;
 //         Vector3d linearVelocity = new Vector3d();
 //         Vector3d angularVelocity = new Vector3d();

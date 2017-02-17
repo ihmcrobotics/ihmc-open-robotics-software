@@ -1,12 +1,12 @@
 package us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class ControlledBodiesCommand implements InverseDynamicsCommand<ControlledBodiesCommand>
 {

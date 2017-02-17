@@ -1,15 +1,17 @@
 package us.ihmc.robotics.kinematics.fourbar;
 
-import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-
-import static java.lang.Math.*;
+import static java.lang.Math.PI;
+import static java.lang.Math.cos;
+import static java.lang.Math.min;
 import static java.lang.Math.sin;
 import static us.ihmc.robotics.MathTools.checkIfInRange;
 import static us.ihmc.robotics.MathTools.clipToMinMax;
 import static us.ihmc.robotics.MathTools.square;
 import static us.ihmc.robotics.geometry.GeometryTools.getUnknownTriangleSideLengthByLawOfCosine;
+
+import us.ihmc.robotics.MathTools;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 
 public class YoVariableSideFourbarCalculatorWithDerivatives implements FourbarCalculatorWithDerivatives
 {

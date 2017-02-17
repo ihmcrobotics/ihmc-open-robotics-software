@@ -6,9 +6,6 @@ import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import java.util.Random;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Vector3d;
-
 import org.ejml.data.DenseMatrix64F;
 import org.junit.Test;
 
@@ -18,6 +15,8 @@ import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.screwTheory.RevoluteJoint;
 import us.ihmc.robotics.screwTheory.ScrewTestTools;
 import us.ihmc.robotics.screwTheory.ScrewTestTools.RandomFloatingChain;
@@ -26,9 +25,9 @@ import us.ihmc.robotics.screwTheory.SixDoFJoint;
 @ContinuousIntegrationPlan(categories = IntegrationCategory.FLAKY)
 public class JointConfigurationDataSenderTest
 {
-   private static final Vector3d X = new Vector3d(1.0, 0.0, 0.0);
-   private static final Vector3d Y = new Vector3d(0.0, 1.0, 0.0);
-   private static final Vector3d Z = new Vector3d(0.0, 0.0, 1.0);
+   private static final Vector3D X = new Vector3D(1.0, 0.0, 0.0);
+   private static final Vector3D Y = new Vector3D(0.0, 1.0, 0.0);
+   private static final Vector3D Z = new Vector3D(0.0, 0.0, 1.0);
 
    private static final Random random = new Random(5842369L);
    private static final NetworkPorts TCP_PORT = NetworkPorts.createRandomTestPort(random);
@@ -39,7 +38,7 @@ public class JointConfigurationDataSenderTest
    public void test() throws InterruptedException, IOException
    {
       Random random = new Random(1274L);
-      Vector3d[] jointAxes = new Vector3d[] { X, Y, X, Z, X, Y };
+      Vector3D[] jointAxes = new Vector3D[] { X, Y, X, Z, X, Y };
 
       long seedForRobotCreation = 1251235L;
 
@@ -117,18 +116,18 @@ public class JointConfigurationDataSenderTest
 
    private boolean isConfigurationEqual(SixDoFJoint sixDoFJoint1, SixDoFJoint sixDoFJoint2, double epsilon)
    {
-      Matrix3d rotation1 = new Matrix3d();
+      RotationMatrix rotation1 = new RotationMatrix();
       sixDoFJoint1.getRotation(rotation1);
 
-      Matrix3d rotation2 = new Matrix3d();
+      RotationMatrix rotation2 = new RotationMatrix();
       sixDoFJoint2.getRotation(rotation2);
       if (!rotation1.epsilonEquals(rotation2, epsilon))
          return false;
 
-      Vector3d translation1 = new Vector3d();
+      Vector3D translation1 = new Vector3D();
       sixDoFJoint1.getTranslation(translation1);
 
-      Vector3d translation2 = new Vector3d();
+      Vector3D translation2 = new Vector3D();
       sixDoFJoint2.getTranslation(translation2);
 
       if (!translation1.epsilonEquals(translation2, epsilon))

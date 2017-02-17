@@ -1,12 +1,11 @@
 package us.ihmc.simulationconstructionset;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariableList;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 /**
  * Title:        Yobotics! Simulation Construction Set<p>
@@ -28,14 +27,14 @@ public class FreeJoint extends Joint
    private String xName, yName, zName, yawName, rollName, pitchName;
    private DoubleYoVariable xVar, yVar, zVar, yawVar, rollVar, pitchVar;
 
-   private Vector3d vTranslate = new Vector3d();
+   private Vector3D vTranslate = new Vector3D();
    private RigidBodyTransform tYaw = new RigidBodyTransform();
    private RigidBodyTransform tRoll = new RigidBodyTransform();
    private RigidBodyTransform tPitch = new RigidBodyTransform();
 
    YoVariableList freeJointVars;
 
-   public FreeJoint(String jname, Vector3d offset, Robot rob, String xName, String yName, String zName, String yawName, String rollName, String pitchName)
+   public FreeJoint(String jname, Vector3D offset, Robot rob, String xName, String yName, String zName, String yawName, String rollName, String pitchName)
    {
       super(jname, offset, rob, 6);
 
@@ -102,7 +101,7 @@ public class FreeJoint extends Joint
 
    }
 
-   public void jointDependentSetAndGetRotation(Matrix3d Rh_i)
+   public void jointDependentSetAndGetRotation(RotationMatrix Rh_i)
    {
       Rh_i.setIdentity();
    }
@@ -122,7 +121,7 @@ public class FreeJoint extends Joint
       System.err.println("Error!!!! FreeJoint.jointDependentSet_d_i should never be called!!!");
    }
 
-   public void jointDependentFeatherstonePassTwo(Vector3d w_h)
+   public void jointDependentFeatherstonePassTwo(Vector3D w_h)
    {
    }
 

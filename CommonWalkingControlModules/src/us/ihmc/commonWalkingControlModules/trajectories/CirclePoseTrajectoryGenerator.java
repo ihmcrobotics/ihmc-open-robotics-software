@@ -3,10 +3,10 @@ package us.ihmc.commonWalkingControlModules.trajectories;
 import static us.ihmc.robotics.geometry.AngleTools.computeAngleDifferenceMinusPiToPi;
 import static us.ihmc.robotics.geometry.AngleTools.trimAngleMinusPiToPi;
 
-import javax.vecmath.AxisAngle4d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
@@ -24,7 +24,6 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.GeometryTools;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
@@ -174,9 +173,9 @@ public class CirclePoseTrajectoryGenerator implements PoseTrajectoryGenerator
       {
          private static final long serialVersionUID = 9102217353690768074L;
 
-         private final Vector3d localTranslation = new Vector3d();
-         private final Vector3d localRotationAxis = new Vector3d();
-         private final AxisAngle4d localAxisAngle = new AxisAngle4d();
+         private final Vector3D localTranslation = new Vector3D();
+         private final Vector3D localRotationAxis = new Vector3D();
+         private final AxisAngle localAxisAngle = new AxisAngle();
 
          @Override
          protected void updateTransformToParent(RigidBodyTransform transformToParent)
@@ -244,7 +243,7 @@ public class CirclePoseTrajectoryGenerator implements PoseTrajectoryGenerator
     * @param circleCenterInTrajectoryFrame
     * @param circleNormalInTrajectoryFrame
     */
-   public void updateCircleFrame(Point3d circleCenterInTrajectoryFrame, Vector3d circleNormalInTrajectoryFrame)
+   public void updateCircleFrame(Point3D circleCenterInTrajectoryFrame, Vector3D circleNormalInTrajectoryFrame)
    {
       circleOrigin.set(circleCenterInTrajectoryFrame);
       rotationAxis.set(circleNormalInTrajectoryFrame);

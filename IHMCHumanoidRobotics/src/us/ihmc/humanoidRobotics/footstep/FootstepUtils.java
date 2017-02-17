@@ -2,14 +2,13 @@ package us.ihmc.humanoidRobotics.footstep;
 
 import java.util.List;
 
-import javax.vecmath.Point2d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -77,17 +76,17 @@ public class FootstepUtils
    
    public static FramePoint getCenterOfPredictedContactPointsInFootstep(Footstep footstep, RobotSide side, double centimetersForwardFromCenter, double centimetersInFromCenter)
    {
-      Point2d footstepCenter;
+      Point2D footstepCenter;
       
-      List<Point2d> predictedContactPoints = footstep.getPredictedContactPoints();
+      List<Point2D> predictedContactPoints = footstep.getPredictedContactPoints();
       if (predictedContactPoints != null)
       {
          ConvexPolygon2d contactPolygon = new ConvexPolygon2d(predictedContactPoints);
-         footstepCenter = contactPolygon.getCentroid();
+         footstepCenter = new Point2D(contactPolygon.getCentroid());
       }
       else
       {
-         footstepCenter = new Point2d();
+         footstepCenter = new Point2D();
       }
       
       footstepCenter.setX(footstepCenter.getX() + centimetersForwardFromCenter);
@@ -141,9 +140,9 @@ public class FootstepUtils
    public static double getHeading(ReferenceFrame ankleFrame)
    {
       RigidBodyTransform transform = ankleFrame.getTransformToDesiredFrame(worldFrame);
-      Vector3d xVector = new Vector3d(1.0, 0.0, 0.0);
+      Vector3D xVector = new Vector3D(1.0, 0.0, 0.0);
       transform.transform(xVector);
-      xVector.sub(new Vector3d(0.0, 0.0, -xVector.getZ()));
+      xVector.sub(new Vector3D(0.0, 0.0, -xVector.getZ()));
       xVector.normalize();
 
       if (Double.isNaN(xVector.getX()))
@@ -151,8 +150,8 @@ public class FootstepUtils
          throw new RuntimeException("FootstepUtils: Footsteps cannot face directly upwards");
       }
 
-      double cosTheta = xVector.dot(new Vector3d(1.0, 0.0, 0.0));
-      double sinTheta = xVector.dot(new Vector3d(0.0, 1.0, 0.0));
+      double cosTheta = xVector.dot(new Vector3D(1.0, 0.0, 0.0));
+      double sinTheta = xVector.dot(new Vector3D(0.0, 1.0, 0.0));
       double theta = Math.atan2(sinTheta, cosTheta);
 
       return theta;

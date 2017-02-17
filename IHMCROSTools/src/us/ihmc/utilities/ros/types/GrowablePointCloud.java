@@ -3,14 +3,14 @@ package us.ihmc.utilities.ros.types;
 import java.awt.Color;
 import java.util.ArrayList;
 
-import javax.vecmath.Color3f;
-import javax.vecmath.Point3d;
-
 import org.apache.commons.lang3.ArrayUtils;
+
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.robotics.dataStructures.MutableColor;
 
 public class GrowablePointCloud
 {
-   ArrayList<Point3d> points = new ArrayList<>();
+   ArrayList<Point3D> points = new ArrayList<>();
    ArrayList<Float> intensities = new ArrayList<>();
    ArrayList<Color> colors = new ArrayList<>();
 
@@ -21,25 +21,25 @@ public class GrowablePointCloud
       colors.clear();
    }
 
-   public void addPoint(Point3d p, Color color)
+   public void addPoint(Point3D p, Color color)
    {
       addPoint(p, (color.getRed()+color.getGreen()+color.getBlue())/3.0f, color);
    }
-   public void addPoint(Point3d p, float intensity)
+   public void addPoint(Point3D p, float intensity)
    {
       addPoint(p, intensity, new Color(255*intensity/6000, 255*intensity/6000,255*intensity/6000));
       
    }
-   public synchronized void addPoint(Point3d p, float intensity, Color color)
+   public synchronized void addPoint(Point3D p, float intensity, Color color)
    {
       points.add(p);
       intensities.add(intensity);
       colors.add(color);
    }
 
-   public Point3d[] getPoints()
+   public Point3D[] getPoints()
    {
-      return (Point3d[]) points.toArray(new Point3d[0]);
+      return (Point3D[]) points.toArray(new Point3D[0]);
    }
 
    public float[] getIntensities()
@@ -47,9 +47,9 @@ public class GrowablePointCloud
       return ArrayUtils.toPrimitive(intensities.toArray(new Float[0]));
    }
 
-   public Color3f[] getColors()
+   public MutableColor[] getColors()
    {
-      return (Color3f[]) colors.toArray(new Color3f[0]);
+      return (MutableColor[]) colors.toArray(new MutableColor[0]);
    }
    
    public int size()
@@ -57,9 +57,9 @@ public class GrowablePointCloud
       return points.size();
    }
    
-   public Point3d getMeanPoint()
+   public Point3D getMeanPoint()
    {
-      Point3d pointMean = new Point3d();
+      Point3D pointMean = new Point3D();
       for(int i=0;i<points.size();i++)
       {
          pointMean.add(points.get(i));

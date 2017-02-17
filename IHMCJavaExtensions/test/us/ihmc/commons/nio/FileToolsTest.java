@@ -18,6 +18,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.io.files.FileTools;
 import us.ihmc.tools.io.printing.PrintTools;
@@ -82,7 +83,7 @@ public class FileToolsTest
    @Test(timeout = 30000)
    public void testReadAllLines()
    {
-      List<String> lines = FileTools.readAllLines(READ_ALL_LINES_PATH);
+      List<String> lines = FileTools.readAllLines(READ_ALL_LINES_PATH, DefaultExceptionHandler.PRINT_STACKTRACE);
       
       assertTrue(lines.get(0).equals("line1"));
       assertTrue(lines.get(1).equals("line2"));

@@ -1,7 +1,6 @@
 package us.ihmc.commonWalkingControlModules.trajectories;
 
-import javax.vecmath.Point2d;
-
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
 
@@ -10,7 +9,7 @@ public class FourPointSpline1D
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private static final int numberOfCoefficients = 4; //10;
 
-   private final Point2d[] points = new Point2d[4];
+   private final Point2D[] points = new Point2D[4];
    private double[] endpointSlopes = new double[2];
    private double[] intermediateSlopes = new double[2];
    private YoPolynomial spline = new YoPolynomial("heightSpline", numberOfCoefficients, registry);
@@ -19,12 +18,12 @@ public class FourPointSpline1D
    {
       for (int i = 0; i < points.length; i++)
       {
-         points[i] = new Point2d();
+         points[i] = new Point2D();
       }
       parentRegistry.addChild(registry);
    }
 
-   public void setPoints(Point2d[] points, double[] endpointSlopes, double[] intermediateSlopes)
+   public void setPoints(Point2D[] points, double[] endpointSlopes, double[] intermediateSlopes)
    {
       // Assumes x values are increasing order:
 

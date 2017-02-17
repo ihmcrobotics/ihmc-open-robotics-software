@@ -2,9 +2,8 @@ package us.ihmc.simulationconstructionset.util;
 
 import java.util.ArrayList;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -30,8 +29,8 @@ public class CollisionGroundContactModel implements GroundContactModel, MovingGr
    private GroundProfile3D profile3D;
    private MovingGroundProfile movingProfile;
 
-   private final Vector3d tempForceOne = new Vector3d();
-   private final Vector3d tempForceTwo = new Vector3d();
+   private final Vector3D tempForceOne = new Vector3D();
+   private final Vector3D tempForceTwo = new Vector3D();
    // private boolean movingGround = false;
    private boolean microCollision;
 
@@ -87,9 +86,9 @@ public class CollisionGroundContactModel implements GroundContactModel, MovingGr
    {
    }
 
-   private Vector3d normalVector = new Vector3d(0.0, 0.0, 1.0);
-   private Vector3d velocityVector = new Vector3d(0.0, 0.0, 0.0);
-   private Vector3d p_world = new Vector3d();
+   private Vector3D normalVector = new Vector3D(0.0, 0.0, 1.0);
+   private Vector3D velocityVector = new Vector3D(0.0, 0.0, 0.0);
+   private Vector3D p_world = new Vector3D();
 
    boolean iterateForward = true;
 
@@ -136,7 +135,7 @@ public class CollisionGroundContactModel implements GroundContactModel, MovingGr
 
    }
 
-   private final Point3d closestIntersection = new Point3d();
+   private final Point3D closestIntersection = new Point3D();
 
    private void doGroundContact(GroundContactPoint gc)
    {

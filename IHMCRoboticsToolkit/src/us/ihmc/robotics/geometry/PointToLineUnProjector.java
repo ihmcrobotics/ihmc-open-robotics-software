@@ -1,21 +1,20 @@
 package us.ihmc.robotics.geometry;
 
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.robotics.MathTools;
-
-import javax.vecmath.Point2d;
-import javax.vecmath.Vector2d;
 
 public class PointToLineUnProjector
 {
-   Point2d pointA = new Point2d();
-   Vector2d difference = new Vector2d();
+   Point2D pointA = new Point2D();
+   Vector2D difference = new Vector2D();
    double zA;
    double zDifference;
    boolean useX = true;
    double qA;
    double qMult;
 
-   public void setLine(Point2d point0, Point2d point1, double point0z, double point1z)
+   public void setLine(Point2D point0, Point2D point1, double point0z, double point1z)
    {
       pointA.set(point0);
       difference.sub(point1, point0);

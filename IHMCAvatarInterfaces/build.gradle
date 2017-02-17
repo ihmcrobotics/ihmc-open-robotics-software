@@ -42,7 +42,7 @@ ihmc.configureForIHMCOpenSourceBintrayPublish(false, "mavenJava", "maven-release
 dependencies {
 	testCompile group: 'junit', name: 'junit', version: '4.11'
 
-	compile group: 'javax.vecmath', name: 'vecmath', version: '1.5.2'
+	compile group: 'us.ihmc', name: 'euclid-core', version: '0.3.1-alpha'
 	compile group: 'com.martiansoftware', name: 'jsap', version: '2.1'
 	compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
 	compile group: 'us.ihmc.thirdparty.jinput', name: 'jinput', version: '160414'

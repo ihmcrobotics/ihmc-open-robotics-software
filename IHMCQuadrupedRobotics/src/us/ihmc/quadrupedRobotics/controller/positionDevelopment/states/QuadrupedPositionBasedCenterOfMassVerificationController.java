@@ -3,7 +3,7 @@ package us.ihmc.quadrupedRobotics.controller.positionDevelopment.states;
 import java.awt.Color;
 import java.util.HashMap;
 
-import javax.vecmath.Vector3d;
+import us.ihmc.euclid.tuple3D.Vector3D;
 
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
@@ -328,7 +328,7 @@ public class QuadrupedPositionBasedCenterOfMassVerificationController implements
       }
    }
 
-   private final Vector3d desiredFootPositionForInverseKinematics = new Vector3d();
+   private final Vector3D desiredFootPositionForInverseKinematics = new Vector3D();
 
    private void useInverseKinematicsToGetJointPositionsAndStoreInFullRobotModel(FullRobotModel fullRobotModel)
    {

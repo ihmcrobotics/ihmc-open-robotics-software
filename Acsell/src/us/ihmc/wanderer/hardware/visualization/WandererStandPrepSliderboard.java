@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.EnumMap;
 
 import net.java.games.input.Component;
-import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.acsell.treadmill.TreadmillJoystickEventListener;
 import us.ihmc.acsell.treadmill.TreadmillSerialManager;
 import us.ihmc.robotDataLogger.YoVariableClient;
@@ -16,6 +15,7 @@ import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.IndexChangedListener;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.Robot;

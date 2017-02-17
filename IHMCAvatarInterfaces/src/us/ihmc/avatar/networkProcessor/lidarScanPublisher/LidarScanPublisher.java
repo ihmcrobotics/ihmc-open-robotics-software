@@ -12,10 +12,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Point3f;
-import javax.vecmath.Quat4f;
-
 import gnu.trove.list.array.TFloatArrayList;
 import scan_to_cloud.PointCloud2WithSource;
 import sensor_msgs.PointCloud2;
@@ -27,13 +23,16 @@ import us.ihmc.communication.packets.LidarScanMessage;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.RequestLidarScanMessage;
 import us.ihmc.communication.packets.SimulatedLidarScanPacket;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Point3D32;
+import us.ihmc.euclid.tuple4D.Quaternion32;
 import us.ihmc.humanoidRobotics.kryo.PPSTimestampOffsetProvider;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
 import us.ihmc.ihmcPerception.depthData.CollisionShapeTester;
 import us.ihmc.ihmcPerception.depthData.RosPointCloudReceiver;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.lidar.LidarScan;
 import us.ihmc.robotics.lidar.LidarScanParameters;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -147,7 +146,7 @@ public class LidarScanPublisher
          public void onNewMessage(PointCloud2 pointCloud)
          {
             UnpackedPointCloud pointCloudData = unpackPointsAndIntensities(pointCloud);
-            Point3d[] scanPoints = pointCloudData.getPoints();
+            Point3D[] scanPoints = pointCloudData.getPoints();
             long timestamp = pointCloud.getHeader().getStamp().totalNsecs();
 
             scanDataToPublish.set(new ScanData(timestamp, scanPoints));
@@ -164,7 +163,7 @@ public class LidarScanPublisher
          {
             PointCloud2 cloud = pointCloud.getCloud();
             UnpackedPointCloud pointCloudData = RosPointCloudReceiver.unpackPointsAndIntensities(cloud);
-            Point3d[] scanPoints = pointCloudData.getPoints();
+            Point3D[] scanPoints = pointCloudData.getPoints();
             long timestamp = cloud.getHeader().getStamp().totalNsecs();
 
             scanDataToPublish.set(new ScanData(timestamp, scanPoints));
@@ -187,7 +186,7 @@ public class LidarScanPublisher
             LidarScan scan = new LidarScan(lidarScanParameters, ranges, sensorId);
             // Set the world transforms to nothing, so points are in lidar scan frame
             scan.setWorldTransforms(identityTransform, identityTransform);
-            List<Point3d> scanPoints = scan.getAllPoints();
+            List<Point3D> scanPoints = scan.getAllPoints();
             long timestamp = packet.getScanStartTime();
 
             scanDataToPublish.set(new ScanData(timestamp, scanPoints));
@@ -256,13 +255,13 @@ public class LidarScanPublisher
                scanPointBuffer = scanData.getScanBuffer();
             }
 
-            Point3f lidarPosition;
-            Quat4f lidarOrientation;
+            Point3D32 lidarPosition;
+            Quaternion32 lidarOrientation;
 
             if (lidarSensorFrame != null)
             {
-               lidarPosition = new Point3f();
-               lidarOrientation = new Quat4f();
+               lidarPosition = new Point3D32();
+               lidarOrientation = new Quaternion32();
                lidarSensorFrame.getTransformToDesiredFrame(transformToWorld, worldFrame);
                transformToWorld.get(lidarOrientation, lidarPosition);
             }
@@ -278,7 +277,7 @@ public class LidarScanPublisher
       };
    }
    
-   private void sendLidarScanMessageToListeners(long timestamp, Point3f lidarPosition, Quat4f lidarOrientation, float[] scanPointBuffer, Set<PacketDestination> listeners)
+   private void sendLidarScanMessageToListeners(long timestamp, Point3D32 lidarPosition, Quaternion32 lidarOrientation, float[] scanPointBuffer, Set<PacketDestination> listeners)
    {
       LidarScanMessage message = new LidarScanMessage(timestamp, lidarPosition, lidarOrientation, scanPointBuffer);
 
@@ -293,8 +292,8 @@ public class LidarScanPublisher
          if (!iterator.hasNext())
             break;
 
-         lidarPosition = lidarPosition == null ? null : new Point3f(lidarPosition);
-         lidarOrientation = lidarOrientation == null ? null : new Quat4f(lidarOrientation);
+         lidarPosition = lidarPosition == null ? null : new Point3D32(lidarPosition);
+         lidarOrientation = lidarOrientation == null ? null : new Quaternion32(lidarOrientation);
          scanPointBuffer = Arrays.copyOf(scanPointBuffer, scanPointBuffer.length);
          message = new LidarScanMessage(timestamp, lidarPosition, lidarOrientation, scanPointBuffer);
       }
@@ -316,20 +315,20 @@ public class LidarScanPublisher
    private class ScanData
    {
       private final long timestamp;
-      private final Point3d[] scanPoints;
+      private final Point3D[] scanPoints;
       private final int numberOfScanPoints;
 
-      public ScanData(long timestamp, Point3d[] scanPoints)
+      public ScanData(long timestamp, Point3D[] scanPoints)
       {
          this.timestamp = timestamp;
          this.scanPoints = scanPoints;
          numberOfScanPoints = scanPoints.length;
       }
 
-      public ScanData(long timestamp, List<Point3d> scanPoints)
+      public ScanData(long timestamp, List<Point3D> scanPoints)
       {
          this.timestamp = timestamp;
-         this.scanPoints = scanPoints.toArray(new Point3d[0]);
+         this.scanPoints = scanPoints.toArray(new Point3D[0]);
          numberOfScanPoints = scanPoints.size();
       }
 
@@ -350,7 +349,7 @@ public class LidarScanPublisher
 
          for (int i = 0; i < numberOfScanPoints; i++)
          {
-            Point3d scanPoint = scanPoints[i];
+            Point3D scanPoint = scanPoints[i];
 
             if (collisionShapeTester.contains(scanPoint))
                continue;
@@ -369,7 +368,7 @@ public class LidarScanPublisher
 
          for (int i = 0; i < numberOfScanPoints; i++)
          {
-            Point3d scanPoint = scanPoints[i];
+            Point3D scanPoint = scanPoints[i];
 
             scanPointBuffer.add((float) scanPoint.getX());
             scanPointBuffer.add((float) scanPoint.getY());

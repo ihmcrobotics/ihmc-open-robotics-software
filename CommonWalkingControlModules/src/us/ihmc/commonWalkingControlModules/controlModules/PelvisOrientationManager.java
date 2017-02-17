@@ -2,9 +2,6 @@ package us.ihmc.commonWalkingControlModules.controlModules;
 
 import static us.ihmc.communication.packets.Packet.INVALID_MESSAGE_ID;
 
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.SolverWeightLevels;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OrientationFeedbackControlCommand;
@@ -12,6 +9,9 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.communication.controllerAPI.command.CommandArrayDeque;
 import us.ihmc.communication.packets.Packet;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.GoHomeCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisOrientationTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisTrajectoryCommand;
@@ -29,7 +29,6 @@ import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.trajectories.SimpleOrientationTrajectoryGenerator;
@@ -71,7 +70,7 @@ public class PelvisOrientationManager
 
    private final OrientationFeedbackControlCommand orientationFeedbackControlCommand = new OrientationFeedbackControlCommand();
    private final YoFrameVector yoPelvisAngularWeight = new YoFrameVector("pelvisWeight", null, registry);
-   private final Vector3d pelvisAngularWeight = new Vector3d();
+   private final Vector3D pelvisAngularWeight = new Vector3D();
 
    private final FrameOrientation tempOrientation = new FrameOrientation();
    private final FrameVector tempAngularVelocity = new FrameVector();
@@ -127,7 +126,7 @@ public class PelvisOrientationManager
       {
          private static final long serialVersionUID = -1472151257649344278L;
 
-         private final Quat4d rotationToParent = new Quat4d();
+         private final Quaternion rotationToParent = new Quaternion();
 
          @Override
          protected void updateTransformToParent(RigidBodyTransform transformToParent)
@@ -159,7 +158,7 @@ public class PelvisOrientationManager
       yoPelvisAngularWeight.set(weight, weight, weight);
    }
 
-   public void setWeights(Vector3d weight)
+   public void setWeights(Vector3D weight)
    {
       yoPelvisAngularWeight.set(weight);
    }

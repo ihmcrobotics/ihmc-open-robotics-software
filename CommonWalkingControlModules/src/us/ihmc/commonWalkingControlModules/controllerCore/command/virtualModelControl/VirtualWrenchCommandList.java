@@ -1,10 +1,10 @@
 package us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl;
 
-import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
-import us.ihmc.robotics.screwTheory.RigidBody;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
+import us.ihmc.robotics.screwTheory.RigidBody;
 
 public class VirtualWrenchCommandList
 {

@@ -2,20 +2,21 @@ package us.ihmc.quadrupedRobotics.providers;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-import us.ihmc.quadrupedRobotics.communication.packets.*;
+import us.ihmc.communication.net.PacketConsumer;
+import us.ihmc.communication.streamingData.GlobalDataProducer;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.quadrupedRobotics.communication.packets.BodyAngularRatePacket;
+import us.ihmc.quadrupedRobotics.communication.packets.BodyOrientationPacket;
+import us.ihmc.quadrupedRobotics.communication.packets.ComPositionPacket;
+import us.ihmc.quadrupedRobotics.communication.packets.ComVelocityPacket;
+import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.parameter.DoubleArrayParameter;
 import us.ihmc.robotics.dataStructures.parameter.DoubleParameter;
 import us.ihmc.robotics.dataStructures.parameter.ParameterFactory;
-import us.ihmc.communication.net.PacketConsumer;
-import us.ihmc.communication.streamingData.GlobalDataProducer;
-import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.geometry.RotationTools;
-
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
 
 public class QuadrupedPostureInputProvider implements QuadrupedPostureInputProviderInterface
 {
@@ -46,10 +47,10 @@ public class QuadrupedPostureInputProvider implements QuadrupedPostureInputProvi
    private final DoubleYoVariable yoBodyAngularRateInputX;
    private final DoubleYoVariable yoBodyAngularRateInputY;
    private final DoubleYoVariable yoBodyAngularRateInputZ;
-   private final Point3d comPositionInput;
-   private final Vector3d comVelocityInput;
-   private final Quat4d bodyOrientationInput;
-   private final Vector3d bodyAngularRateInput;
+   private final Point3D comPositionInput;
+   private final Vector3D comVelocityInput;
+   private final Quaternion bodyOrientationInput;
+   private final Vector3D bodyAngularRateInput;
 
    public QuadrupedPostureInputProvider(GlobalDataProducer globalDataProducer, YoVariableRegistry registry)
    {
@@ -69,10 +70,10 @@ public class QuadrupedPostureInputProvider implements QuadrupedPostureInputProvi
       yoBodyAngularRateInputX = new DoubleYoVariable("bodyAngularRateInputX", registry);
       yoBodyAngularRateInputY = new DoubleYoVariable("bodyAngularRateInputY", registry);
       yoBodyAngularRateInputZ = new DoubleYoVariable("bodyAngularRateInputZ", registry);
-      comPositionInput = new Point3d();
-      comVelocityInput = new Vector3d();
-      bodyOrientationInput = new Quat4d();
-      bodyAngularRateInput = new Vector3d();
+      comPositionInput = new Point3D();
+      comVelocityInput = new Vector3D();
+      bodyOrientationInput = new Quaternion();
+      bodyAngularRateInput = new Vector3D();
 
       // initialize com height
       yoComPositionInputZ.set(comHeightNominalParameter.get());
@@ -142,28 +143,28 @@ public class QuadrupedPostureInputProvider implements QuadrupedPostureInputProvi
    }
 
    @Override
-   public Point3d getComPositionInput()
+   public Point3D getComPositionInput()
    {
       comPositionInput.set(yoComPositionInputX.getDoubleValue(), yoComPositionInputY.getDoubleValue(), yoComPositionInputZ.getDoubleValue());
       return comPositionInput;
    }
 
    @Override
-   public Vector3d getComVelocityInput()
+   public Vector3D getComVelocityInput()
    {
       comVelocityInput.set(yoComVelocityInputX.getDoubleValue(), yoComVelocityInputY.getDoubleValue(), yoComVelocityInputZ.getDoubleValue());
       return comVelocityInput;
    }
 
    @Override
-   public Quat4d getBodyOrientationInput()
+   public Quaternion getBodyOrientationInput()
    {
-      RotationTools.convertYawPitchRollToQuaternion(yoBodyOrientationInputYaw.getDoubleValue(), yoBodyOrientationInputPitch.getDoubleValue(), yoBodyOrientationInputRoll.getDoubleValue(), bodyOrientationInput);
+      bodyOrientationInput.setYawPitchRoll(yoBodyOrientationInputYaw.getDoubleValue(), yoBodyOrientationInputPitch.getDoubleValue(), yoBodyOrientationInputRoll.getDoubleValue());
       return bodyOrientationInput;
    }
 
    @Override
-   public Vector3d getBodyAngularRateInput()
+   public Vector3D getBodyAngularRateInput()
    {
       bodyAngularRateInput.set(yoBodyAngularRateInputX.getDoubleValue(), yoBodyAngularRateInputY.getDoubleValue(), yoBodyAngularRateInputZ.getDoubleValue());
       return bodyAngularRateInput;

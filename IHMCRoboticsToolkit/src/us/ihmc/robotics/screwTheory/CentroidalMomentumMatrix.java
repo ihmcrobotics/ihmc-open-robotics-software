@@ -1,10 +1,10 @@
 package us.ihmc.robotics.screwTheory;
 
 import org.ejml.data.DenseMatrix64F;
+
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-
-import javax.vecmath.Vector3d;
 
 public class CentroidalMomentumMatrix
 {
@@ -16,7 +16,7 @@ public class CentroidalMomentumMatrix
    private final Momentum tempMomentum = new Momentum();
    private final Twist tempTwist = new Twist();
    private final DenseMatrix64F tempMatrix = new DenseMatrix64F(6, 1);
-   private final Vector3d zero = new Vector3d();
+   private final Vector3D zero = new Vector3D();
    private final boolean[][] isAncestorMapping;
 
    public CentroidalMomentumMatrix(RigidBody rootBody, ReferenceFrame centerOfMassFrame)

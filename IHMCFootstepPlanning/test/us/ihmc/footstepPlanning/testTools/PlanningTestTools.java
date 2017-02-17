@@ -2,10 +2,10 @@ package us.ihmc.footstepPlanning.testTools;
 
 import static org.junit.Assert.assertTrue;
 
-import javax.vecmath.Point2d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.footstepPlanning.AnytimeFootstepPlanner;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlanner;
@@ -26,7 +26,6 @@ import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePose;
@@ -166,7 +165,7 @@ public class PlanningTestTools
       FootstepPlannerGoal goal = new FootstepPlannerGoal();
       goal.setFootstepPlannerGoalType(FootstepPlannerGoalType.POSE_BETWEEN_FEET);
       goal.setGoalPoseBetweenFeet(goalPose);
-      goal.setXYGoal(new Point2d(goalPose.getX(), goalPose.getY()), 0.5);
+      goal.setXYGoal(new Point2D(goalPose.getX(), goalPose.getY()), 0.5);
 
       return runPlanner(planner, initialStanceFootPose, initialStanceSide, goal, planarRegionsList, assertPlannerReturnedResult);
    }
@@ -216,13 +215,13 @@ public class PlanningTestTools
       RobotSide stepSide = footstep.getRobotSide();
 
       double midFeetOffset = stepSide.negateIfLeftSide(0.125);
-      Vector3d goalOffset = new Vector3d(0.0, midFeetOffset , 0.0);
+      Vector3D goalOffset = new Vector3D(0.0, midFeetOffset , 0.0);
       RigidBodyTransform soleToWorld = new RigidBodyTransform();
       stepPose.getRigidBodyTransform(soleToWorld);
       soleToWorld.transform(goalOffset);
 
       FramePose achievedGoal = new FramePose(stepPose);
-      Point3d goalPosition = new Point3d();
+      Point3D goalPosition = new Point3D();
       achievedGoal.getPosition(goalPosition);
       goalPosition.add(goalOffset);
       achievedGoal.setPosition(goalPosition);

@@ -4,7 +4,7 @@ import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.util.Random;
 
-import javax.vecmath.Color3f;
+import us.ihmc.robotics.dataStructures.MutableColor;
 
 
 //http://www.wdvl.com/Graphics/Colour/  has some of the color names I'm using...
@@ -121,10 +121,10 @@ public class YoAppearance
 
    public static AppearanceDefinition Color(Color color)
    {
-      return Color(new Color3f(color));
+      return Color(new MutableColor(color));
    }
 
-   public static AppearanceDefinition Color(Color3f color)
+   public static AppearanceDefinition Color(MutableColor color)
    {
       return RGBColor(color.getX(), color.getY(), color.getZ());
    }

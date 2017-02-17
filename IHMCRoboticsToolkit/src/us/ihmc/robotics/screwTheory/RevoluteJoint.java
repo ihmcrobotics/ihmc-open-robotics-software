@@ -1,9 +1,8 @@
 package us.ihmc.robotics.screwTheory;
 
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-
-import javax.vecmath.Vector3d;
 
 public class RevoluteJoint extends OneDoFJoint
 {
@@ -14,7 +13,7 @@ public class RevoluteJoint extends OneDoFJoint
       super(name, predecessor, beforeJointFrame, new RevoluteJointReferenceFrame(name, beforeJointFrame, jointAxis));
       jointAxis.checkReferenceFrameMatch(beforeJointFrame);
       this.jointAxis = new FrameVector(jointAxis);
-      unitJointTwist = new Twist(afterJointFrame, beforeJointFrame, afterJointFrame, new Vector3d(), jointAxis.getVector());
+      unitJointTwist = new Twist(afterJointFrame, beforeJointFrame, afterJointFrame, new Vector3D(), jointAxis.getVector());
    }
 
    @Override
@@ -25,7 +24,7 @@ public class RevoluteJoint extends OneDoFJoint
       ReferenceFrame predecessorFrame = getPredecessor().getBodyFixedFrame();
       ReferenceFrame successorFrame = getSuccessor().getBodyFixedFrame();
 
-      unitJointTwist = new Twist(afterJointFrame, beforeJointFrame, afterJointFrame, new Vector3d(), jointAxis.getVector());
+      unitJointTwist = new Twist(afterJointFrame, beforeJointFrame, afterJointFrame, new Vector3D(), jointAxis.getVector());
 
       unitSuccessorTwist = new Twist(unitJointTwist);
       unitSuccessorTwist.changeBaseFrameNoRelativeTwist(predecessorFrame);
@@ -36,7 +35,7 @@ public class RevoluteJoint extends OneDoFJoint
       unitPredecessorTwist.invert();
       unitPredecessorTwist.changeFrame(predecessorFrame);
 
-      unitJointAcceleration = new SpatialAccelerationVector(afterJointFrame, beforeJointFrame, afterJointFrame, new Vector3d(), jointAxis.getVector());
+      unitJointAcceleration = new SpatialAccelerationVector(afterJointFrame, beforeJointFrame, afterJointFrame, new Vector3D(), jointAxis.getVector());
 
       unitSuccessorAcceleration = new SpatialAccelerationVector(unitJointAcceleration);
       unitSuccessorAcceleration.changeBaseFrameNoRelativeAcceleration(predecessorFrame);

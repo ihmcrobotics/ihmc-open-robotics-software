@@ -3,17 +3,17 @@ package us.ihmc.avatar;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
+import us.ihmc.commons.Conversions;
 import us.ihmc.communication.net.LocalObjectCommunicator;
 import us.ihmc.communication.net.ObjectCommunicator;
 import us.ihmc.communication.packets.SimulatedLidarScanPacket;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.jMonkeyEngineToolkit.GPULidar;
 import us.ihmc.jMonkeyEngineToolkit.GPULidarListener;
 import us.ihmc.jMonkeyEngineToolkit.Graphics3DAdapter;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.lidar.LidarScanParameters;
-import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.sensorProcessing.parameters.DRCRobotLidarParameters;
+import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.simulatedSensors.LidarMount;
 import us.ihmc.tools.TimestampProvider;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
@@ -79,7 +79,7 @@ public class DRCLidar
       public void scan(float[] scan, RigidBodyTransform lidarTransform, double time)
       {
          final SimulatedLidarScanPacket lidarScan = new SimulatedLidarScanPacket(lidarSensorId, new LidarScanParameters(lidarScanParameters,
-               TimeTools.secondsToNanoSeconds(time)), Arrays.copyOf(scan, scan.length));
+               Conversions.secondsToNanoSeconds(time)), Arrays.copyOf(scan, scan.length));
 
          objectCommunicator.consumeObject(lidarScan);
       }

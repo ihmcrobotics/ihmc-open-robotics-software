@@ -1,12 +1,9 @@
 package us.ihmc.robotDataVisualizer.visualizer;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Vector3d;
-
-import us.ihmc.robotDataLogger.jointState.JointState;
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotDataLogger.jointState.SixDoFState;
 import us.ihmc.simulationconstructionset.FloatingJoint;
-import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 
 public class SixDoFJointUpdater extends JointUpdater
 {
@@ -14,8 +11,8 @@ public class SixDoFJointUpdater extends JointUpdater
    private final FloatingJoint joint;
    private final SixDoFState jointState;
 
-   private final Matrix3d rotationMatrix = new Matrix3d();
-   private final Vector3d tempVector = new Vector3d();
+   private final RotationMatrix rotationMatrix = new RotationMatrix();
+   private final Vector3D tempVector = new Vector3D();
 
    public SixDoFJointUpdater(FloatingJoint joint, SixDoFState jointState)
    {

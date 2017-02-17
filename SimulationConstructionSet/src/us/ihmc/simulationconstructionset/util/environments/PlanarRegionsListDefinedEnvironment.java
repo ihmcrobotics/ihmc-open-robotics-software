@@ -1,5 +1,7 @@
 package us.ihmc.simulationconstructionset.util.environments;
 
+import java.util.List;
+
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
@@ -8,8 +10,6 @@ import us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObject3D;
 import us.ihmc.simulationconstructionset.util.ground.PlanarRegionTerrainObject;
 import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 import us.ihmc.tools.io.printing.PrintTools;
-
-import java.util.List;
 
 /**
  * @author Doug Stephen <a href="mailto:dstephen@ihmc.us">(dstephen@ihmc.us)</a>

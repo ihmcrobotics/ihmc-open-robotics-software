@@ -2,7 +2,7 @@ package us.ihmc.quadrupedRobotics.controller.force;
 
 import java.io.IOException;
 
-import javax.vecmath.Vector3d;
+import us.ihmc.euclid.tuple3D.Vector3D;
 
 import org.junit.After;
 import org.junit.Before;
@@ -99,49 +99,49 @@ public abstract class QuadrupedForceBasedStandControllerTest implements Quadrupe
       
       QuadrupedTestBehaviors.readyXGait(conductor, variables);
       
-      pusher.applyForce(new Vector3d(0.0, 1.0, 0.0), 30.0, 1.0);
+      pusher.applyForce(new Vector3D(0.0, 1.0, 0.0), 30.0, 1.0);
       
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 1.0));
       conductor.simulate();
       
-      pusher.applyForce(new Vector3d(-1.0, -1.0, 0.0), 50.0, 0.25);
+      pusher.applyForce(new Vector3D(-1.0, -1.0, 0.0), 50.0, 0.25);
       
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 0.25));
       conductor.simulate();
       
-      pusher.applyForce(new Vector3d(1.0, -1.0, 0.0), 50.0, 0.25);
+      pusher.applyForce(new Vector3D(1.0, -1.0, 0.0), 50.0, 0.25);
       
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 0.25));
       conductor.simulate();
       
-      pusher.applyForce(new Vector3d(1.0, 1.0, 0.0), 50.0, 0.25);
+      pusher.applyForce(new Vector3D(1.0, 1.0, 0.0), 50.0, 0.25);
       
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 0.25));
       conductor.simulate();
       
-      pusher.applyForce(new Vector3d(-1.0, 1.0, 0.0), 50.0, 0.25);
+      pusher.applyForce(new Vector3D(-1.0, 1.0, 0.0), 50.0, 0.25);
       
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 0.25));
       conductor.simulate();
       
-      pusher.applyForce(new Vector3d(0.0, 0.0, 1.0), 50.0, 1.0);
+      pusher.applyForce(new Vector3D(0.0, 0.0, 1.0), 50.0, 1.0);
       
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 1.0));
       conductor.simulate();
       
-      pusher.applyForce(new Vector3d(0.0, 0.0, -1.0), 50.0, 1.0);
+      pusher.applyForce(new Vector3D(0.0, 0.0, -1.0), 50.0, 1.0);
       
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 1.0));
       conductor.simulate();
       
-      pusher.applyForce(new Vector3d(0.0, 0.0, 1.0), 200.0, 0.5);
+      pusher.applyForce(new Vector3D(0.0, 0.0, 1.0), 200.0, 0.5);
       
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 1.0));
@@ -168,7 +168,7 @@ public abstract class QuadrupedForceBasedStandControllerTest implements Quadrupe
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 0.5));
       conductor.simulate();
       
-      pusher.applyForce(new Vector3d(-1.0, -0.1, 0.75), 700.0, 0.05);
+      pusher.applyForce(new Vector3D(-1.0, -0.1, 0.75), 700.0, 0.05);
       
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 2.0));
@@ -191,31 +191,31 @@ public abstract class QuadrupedForceBasedStandControllerTest implements Quadrupe
       
       QuadrupedTestBehaviors.readyXGait(conductor, variables);
       
-      pusher.applyForce(new Vector3d(0.0, 1.0, 0.0), 30.0, 1.0);
+      pusher.applyForce(new Vector3D(0.0, 1.0, 0.0), 30.0, 1.0);
       
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 2.0));
       conductor.simulate();
       
-      pusher.applyForce(new Vector3d(-1.0, -1.0, 0.0), 30.0, 1.0);
+      pusher.applyForce(new Vector3D(-1.0, -1.0, 0.0), 30.0, 1.0);
       
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 2.0));
       conductor.simulate();
       
-      pusher.applyForce(new Vector3d(0.0, 0.0, 1.0), 50.0, 1.0);
+      pusher.applyForce(new Vector3D(0.0, 0.0, 1.0), 50.0, 1.0);
       
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 2.0));
       conductor.simulate();
       
-      pusher.applyForce(new Vector3d(0.0, 0.0, -1.0), 50.0, 1.0);
+      pusher.applyForce(new Vector3D(0.0, 0.0, -1.0), 50.0, 1.0);
       
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 2.0));
       conductor.simulate();
       
-      pusher.applyForce(new Vector3d(0.0, 0.0, 1.0), 200.0, 0.5);
+      pusher.applyForce(new Vector3D(0.0, 0.0, 1.0), 200.0, 0.5);
       
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 2.0));

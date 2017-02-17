@@ -40,7 +40,7 @@ ihmc.configureForIHMCOpenSourceBintrayPublish(false, "mavenJava", "maven-release
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.11'
 
-    compile group: 'javax.vecmath', name: 'vecmath', version: '1.5.2'
+    compile group: 'us.ihmc', name: 'euclid-core', version: '0.3.1-alpha'
     compile group: 'org.ddogleg', name: 'ddogleg', version: '0.7'
     compile group: 'org.georegression', name: 'georegression', version: '0.11'
     compile group: 'org.jfree', name: 'jfreechart', version: '1.0.17'

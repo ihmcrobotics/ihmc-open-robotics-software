@@ -1,12 +1,11 @@
 package us.ihmc.avatar.testTools;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.RectangularContactableBody;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
@@ -50,8 +49,8 @@ public class ScriptedFootstepGenerator
          RobotSide robotSide = robotSides[i];
          double[][] footstepLocationAndOrientation = footstepLocationsAndOrientations[i];
          Footstep footstep = generateFootstepFromLocationAndOrientation(robotSide, footstepLocationAndOrientation);
-         Point3d location = new Point3d();
-         Quat4d orientation = new Quat4d();
+         Point3D location = new Point3D();
+         Quaternion orientation = new Quaternion();
          footstep.getPose(location, orientation);
          FootstepDataMessage footstepData = new FootstepDataMessage(robotSide, location, orientation);
          footstepDataList.add(footstepData);
@@ -72,7 +71,7 @@ public class ScriptedFootstepGenerator
    {
       ContactablePlaneBody foot = bipedFeet.get(robotSide);
       boolean trustHeight = true;
-      Quat4d quaternion = new Quat4d(orientation);
+      Quaternion quaternion = new Quaternion(orientation);
 
       FramePoint footstepPosition = new FramePoint(ReferenceFrame.getWorldFrame(), location);
       FrameOrientation footstepOrientation = new FrameOrientation(ReferenceFrame.getWorldFrame(), quaternion);
@@ -85,7 +84,7 @@ public class ScriptedFootstepGenerator
       return footstep;
    }
 
-   public Footstep generateFootstep(RobotSide robotSide, Point3d pointInWorldToStepTo, double footstepYaw, Vector3d surfaceNormal)
+   public Footstep generateFootstep(RobotSide robotSide, Point3D pointInWorldToStepTo, double footstepYaw, Vector3D surfaceNormal)
    {
       boolean trustHeight = true;
       ContactablePlaneBody foot = bipedFeet.get(robotSide);
@@ -93,9 +92,9 @@ public class ScriptedFootstepGenerator
       return generateFootstep(foot, robotSide, pointInWorldToStepTo, footstepYaw, surfaceNormal, trustHeight);
    }
 
-   private final Matrix3d tempMatrix3d = new Matrix3d();
+   private final RotationMatrix tempMatrix3d = new RotationMatrix();
 
-   public Footstep generateFootstep(ContactablePlaneBody foot, RobotSide robotSide, Point3d pointInWorldToStepTo, double footstepHeading, Vector3d surfaceNormal,
+   public Footstep generateFootstep(ContactablePlaneBody foot, RobotSide robotSide, Point3D pointInWorldToStepTo, double footstepHeading, Vector3D surfaceNormal,
                                     boolean trustHeight)
    {
       getRotationGivenNormalAndHeading(tempMatrix3d, surfaceNormal, footstepHeading);
@@ -135,11 +134,11 @@ public class ScriptedFootstepGenerator
       return bipedFeet;
    }
 
-   private final Vector3d tempXVector = new Vector3d();
-   private final Vector3d tempYVector = new Vector3d();
-   private final Vector3d tempZVector = new Vector3d();
+   private final Vector3D tempXVector = new Vector3D();
+   private final Vector3D tempYVector = new Vector3D();
+   private final Vector3D tempZVector = new Vector3D();
 
-   private void getRotationGivenNormalAndHeading(Matrix3d matrixToPack, Vector3d normal, double heading)
+   private void getRotationGivenNormalAndHeading(RotationMatrix matrixToPack, Vector3D normal, double heading)
    {
       if (Math.abs(normal.getZ()) < 1e-7)
          throw new RuntimeException("z component of normal must not be zero!");
@@ -157,8 +156,6 @@ public class ScriptedFootstepGenerator
       tempYVector.normalize();
       tempZVector.normalize();
 
-      matrixToPack.setColumn(0, tempXVector);
-      matrixToPack.setColumn(1, tempYVector);
-      matrixToPack.setColumn(2, tempZVector);
+      matrixToPack.setColumns(tempXVector, tempYVector, tempZVector);
    }
 }

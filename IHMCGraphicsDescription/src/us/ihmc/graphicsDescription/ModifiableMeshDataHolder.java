@@ -1,10 +1,8 @@
 package us.ihmc.graphicsDescription;
 
-import javax.vecmath.Point3f;
-import javax.vecmath.TexCoord2f;
-import javax.vecmath.Vector3f;
-
 import gnu.trove.list.array.TIntArrayList;
+import us.ihmc.euclid.tuple3D.Point3D32;
+import us.ihmc.euclid.tuple3D.Vector3D32;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 
 /**
@@ -14,10 +12,10 @@ import us.ihmc.robotics.lists.RecyclingArrayList;
  */
 public class ModifiableMeshDataHolder
 {
-   private final RecyclingArrayList<Point3f> vertices = new RecyclingArrayList<>(Point3f.class);
+   private final RecyclingArrayList<Point3D32> vertices = new RecyclingArrayList<>(Point3D32.class);
    private final RecyclingArrayList<TexCoord2f> texturePoints = new RecyclingArrayList<>(TexCoord2f.class);
    private final TIntArrayList triangleIndices = new TIntArrayList();
-   private final RecyclingArrayList<Vector3f> vertexNormals = new RecyclingArrayList<>(Vector3f.class);
+   private final RecyclingArrayList<Vector3D32> vertexNormals = new RecyclingArrayList<>(Vector3D32.class);
 
    /**
     * Creates an empty mesh.
@@ -44,10 +42,10 @@ public class ModifiableMeshDataHolder
     */
    public MeshDataHolder createMeshDataHolder()
    {
-      Point3f[] vertexArray = (Point3f[]) vertices.toArray(new Point3f[0]);
+      Point3D32[] vertexArray = (Point3D32[]) vertices.toArray(new Point3D32[0]);
       TexCoord2f[] texturePointArray = (TexCoord2f[]) texturePoints.toArray(new TexCoord2f[0]);
       int[] triangleIndexArray = triangleIndices.toArray();
-      Vector3f[] vertexNormalArray = (Vector3f[]) vertexNormals.toArray(new Vector3f[0]);
+      Vector3D32[] vertexNormalArray = (Vector3D32[]) vertexNormals.toArray(new Vector3D32[0]);
       return new MeshDataHolder(vertexArray, texturePointArray, triangleIndexArray, vertexNormalArray);
    }
 
@@ -60,7 +58,7 @@ public class ModifiableMeshDataHolder
    {
       if (meshDataHolder == null)
          return;
-      Point3f[] otherVertices = meshDataHolder.getVertices();
+      Point3D32[] otherVertices = meshDataHolder.getVertices();
       if (otherVertices == null || otherVertices.length < 3)
          return;
       int[] otherTriangleIndices = meshDataHolder.getTriangleIndices();
@@ -77,11 +75,11 @@ public class ModifiableMeshDataHolder
       {
          triangleIndices.add(otherTriangleIndices);
       }
-      for (Point3f vertex : otherVertices)
+      for (Point3D32 vertex : otherVertices)
          vertices.add().set(vertex);
       for (TexCoord2f texturePoint : meshDataHolder.getTexturePoints())
          texturePoints.add().set(texturePoint);
-      for (Vector3f normal : meshDataHolder.getVertexNormals())
+      for (Vector3D32 normal : meshDataHolder.getVertexNormals())
          vertexNormals.add().set(normal);
    }
 

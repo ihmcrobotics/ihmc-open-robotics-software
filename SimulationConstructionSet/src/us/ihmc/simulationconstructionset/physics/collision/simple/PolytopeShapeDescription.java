@@ -1,13 +1,12 @@
 package us.ihmc.simulationconstructionset.physics.collision.simple;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.geometry.polytope.ConvexPolytope;
 import us.ihmc.geometry.polytope.GilbertJohnsonKeerthiCollisionDetector;
 import us.ihmc.geometry.polytope.SupportingVertexHolder;
 import us.ihmc.robotics.geometry.BoundingBox3d;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.simulationconstructionset.physics.CollisionShapeDescription;
 
 public class PolytopeShapeDescription<T extends PolytopeShapeDescription<T>> implements CollisionShapeDescription<T>
@@ -63,23 +62,34 @@ public class PolytopeShapeDescription<T extends PolytopeShapeDescription<T>> imp
    }
 
    private static final GilbertJohnsonKeerthiCollisionDetector detectorForCheckingPointInside = new GilbertJohnsonKeerthiCollisionDetector();
-   private static final Point3d tempPointA = new Point3d();
-   private static final Point3d tempPointB = new Point3d();
+   private static final Point3D tempPointA = new Point3D();
+   private static final Point3D tempPointB = new Point3D();
    
    @Override
-   public boolean isPointInside(Point3d pointInWorld)
+   public boolean isPointInside(Point3D pointInWorld)
    {      
       //TODO: Reduce garbage generation here.
       SupportingVertexHolder polytopeA = new SupportingVertexHolder()
       {
          @Override
-         public Point3d getSupportingVertex(Vector3d supportDirection)
+         public Point3D getSupportingVertex(Vector3D supportDirection)
          {
             return pointInWorld;
          }
       };
  
       return detectorForCheckingPointInside.arePolytopesColliding(polytopeA, this.polytope, tempPointA, tempPointB);
+   }
+
+   @Override
+   public boolean rollContactIfRolling(Vector3D surfaceNormal, Point3D pointToRoll)
+   {
+      if (smoothingRadius != 0.0)
+      {
+         throw new RuntimeException("Implement me for nonzero smoothing radius!");
+      }
+      
+      return false;
    }
 
 }

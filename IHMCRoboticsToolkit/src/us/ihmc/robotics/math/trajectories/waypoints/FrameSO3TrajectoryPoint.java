@@ -3,9 +3,12 @@ package us.ihmc.robotics.math.trajectories.waypoints;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.frameObjects.FrameSO3Waypoint;
@@ -50,7 +53,7 @@ public class FrameSO3TrajectoryPoint extends FrameTrajectoryPoint<FrameSO3Trajec
    }
 
    @Override
-   public void setOrientation(Quat4d orientation)
+   public void setOrientation(QuaternionReadOnly orientation)
    {
       geometryObject.setOrientation(orientation);
    }
@@ -62,7 +65,7 @@ public class FrameSO3TrajectoryPoint extends FrameTrajectoryPoint<FrameSO3Trajec
    }
 
    @Override
-   public void setAngularVelocity(Vector3d angularVelocity)
+   public void setAngularVelocity(Vector3DReadOnly angularVelocity)
    {
       geometryObject.setAngularVelocity(angularVelocity);
    }
@@ -73,12 +76,12 @@ public class FrameSO3TrajectoryPoint extends FrameTrajectoryPoint<FrameSO3Trajec
       geometryObject.setAngularVelocity(angularVelocity.getVector());
    }
 
-   public void set(double time, Quat4d orientation, Vector3d angularVelocity)
+   public void set(double time, Quaternion orientation, Vector3D angularVelocity)
    {
       geometryObject.set(time, orientation, angularVelocity);
    }
 
-   public void setIncludingFrame(ReferenceFrame referenceFrame, double time, Quat4d orientation, Vector3d angularVelocity)
+   public void setIncludingFrame(ReferenceFrame referenceFrame, double time, QuaternionReadOnly orientation, Vector3DReadOnly angularVelocity)
    {
       setToZero(referenceFrame);
       geometryObject.set(time, orientation, angularVelocity);
@@ -167,14 +170,14 @@ public class FrameSO3TrajectoryPoint extends FrameTrajectoryPoint<FrameSO3Trajec
    {
       checkReferenceFrameMatch(frameSO3Waypoint);
  
-      Quat4d orientation = geometryObject.getOrientation();
-      Vector3d angularVelocity = geometryObject.getAngularVelocity();
+      QuaternionReadOnly orientation = geometryObject.getOrientation();
+      Vector3DReadOnly angularVelocity = geometryObject.getAngularVelocity();
 
       frameSO3Waypoint.set(orientation, angularVelocity);
    }
 
    @Override
-   public void getOrientation(Quat4d orientationToPack)
+   public void getOrientation(QuaternionBasics orientationToPack)
    {
       geometryObject.getOrientation(orientationToPack);
    }
@@ -199,7 +202,7 @@ public class FrameSO3TrajectoryPoint extends FrameTrajectoryPoint<FrameSO3Trajec
    }
 
    @Override
-   public void getAngularVelocity(Vector3d angularVelocityToPack)
+   public void getAngularVelocity(Vector3DBasics angularVelocityToPack)
    {
       geometryObject.getAngularVelocity(angularVelocityToPack);
    }
@@ -223,7 +226,7 @@ public class FrameSO3TrajectoryPoint extends FrameTrajectoryPoint<FrameSO3Trajec
       geometryObject.getAngularVelocity(angularVelocityToPack.getVector());
    }
 
-   public double get(Quat4d orientationToPack, Vector3d angularVelocityToPack)
+   public double get(QuaternionBasics orientationToPack, Vector3DBasics angularVelocityToPack)
    {
       getOrientation(orientationToPack);
       getAngularVelocity(angularVelocityToPack);

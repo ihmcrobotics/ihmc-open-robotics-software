@@ -1,7 +1,5 @@
 package us.ihmc.valkyrie.obstacleCourse;
 
-import javax.vecmath.Vector3d;
-
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -10,6 +8,7 @@ import us.ihmc.avatar.obstacleCourseTests.DRCObstacleCourseFlatTest;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
@@ -34,9 +33,9 @@ public class ValkyrieObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
    }
 
    @Override
-   protected Vector3d getFootSlipVector()
+   protected Vector3D getFootSlipVector()
    {
-      return new Vector3d(0.02, -0.02, 0.0);
+      return new Vector3D(0.02, -0.02, 0.0);
    }
 
    @Override

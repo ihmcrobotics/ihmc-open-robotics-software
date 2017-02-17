@@ -1,8 +1,7 @@
 package us.ihmc.humanoidRobotics.communication.packets.sensing;
 
-import javax.vecmath.Vector3d;
-
 import us.ihmc.communication.packets.Packet;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.MathTools;
 
 // see multisense_ros.RawImuData
@@ -10,11 +9,11 @@ import us.ihmc.robotics.MathTools;
 public class RawIMUPacket extends Packet<RawIMUPacket>
 {
    public long timestampInNanoSecond;
-   public Vector3d linearAcceleration;
+   public Vector3D linearAcceleration;
 
    public RawIMUPacket()
    {
-      linearAcceleration = new Vector3d();
+      linearAcceleration = new Vector3D();
       timestampInNanoSecond = 0;
    }
 

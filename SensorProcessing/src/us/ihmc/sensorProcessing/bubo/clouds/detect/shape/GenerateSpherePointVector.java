@@ -18,14 +18,14 @@
 
 package us.ihmc.sensorProcessing.bubo.clouds.detect.shape;
 
+import java.util.List;
+
 import georegression.metric.ClosestPoint3D_F64;
 import georegression.struct.line.LineParametric3D_F64;
 import georegression.struct.point.Vector3D_F64;
 import georegression.struct.shapes.Sphere3D_F64;
 import us.ihmc.sensorProcessing.bubo.clouds.detect.alg.ModelGeneratorCheck;
 import us.ihmc.sensorProcessing.bubo.clouds.detect.alg.PointVectorNN;
-
-import java.util.List;
 
 /**
  * Sphere estimation for use in {@link us.ihmc.sensorProcessing.bubo.clouds.detect.alg.PointCloudShapeDetectionSchnabel2007}.  The sphere is estimated

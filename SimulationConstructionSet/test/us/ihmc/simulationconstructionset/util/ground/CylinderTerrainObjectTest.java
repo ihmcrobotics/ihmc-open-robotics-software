@@ -3,16 +3,15 @@ package us.ihmc.simulationconstructionset.util.ground;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.tools.EuclidCoreTestTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.tools.testing.JUnitTools;
 
 public class CylinderTerrainObjectTest
 {
@@ -26,14 +25,14 @@ public class CylinderTerrainObjectTest
       double height = 1.3;
       double radius = 0.2;
       RigidBodyTransform location = new RigidBodyTransform();
-      location.setTranslation(new Vector3d(0.0, 0.0, height/2.0));
+      location.setTranslation(new Vector3D(0.0, 0.0, height/2.0));
 
       CylinderTerrainObject cylinderTerrainObject = new CylinderTerrainObject(location, height, radius, YoAppearance.Red());
       
-      Vector3d surfaceNormal = new Vector3d();
+      Vector3D surfaceNormal = new Vector3D();
       double heightAt = cylinderTerrainObject.heightAndNormalAt(0.0, 0.0, 0.0, surfaceNormal);
       assertEquals(height, heightAt, 1e-7);
-      JUnitTools.assertTuple3dEquals(new Vector3d(0.0, 0.0, 1.0), surfaceNormal, 1e-7);
+      EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(0.0, 0.0, 1.0), surfaceNormal, 1e-7);
       
       heightAt = cylinderTerrainObject.heightAndNormalAt(0.0, radius - 1e-7, 0.0, surfaceNormal);
       assertEquals(height, heightAt, 1e-7);
@@ -44,14 +43,14 @@ public class CylinderTerrainObjectTest
       heightAt = cylinderTerrainObject.heightAndNormalAt(radius + 1e-7, 0.0, 0.0, surfaceNormal);
       assertEquals(0.0, heightAt, 1e-7);
       
-      Point3d intersection = new Point3d();
+      Point3D intersection = new Point3D();
       boolean isInside = cylinderTerrainObject.checkIfInside(0.0, 0.0, height-0.01, intersection, surfaceNormal);
       
       assertTrue(isInside);
       
       //TODO: FIXME!!!
-      JUnitTools.assertTuple3dEquals(new Vector3d(0.0, 0.0, 1.0), surfaceNormal, 1e-7);
-      JUnitTools.assertTuple3dEquals(new Vector3d(0.0, 0.0, height), intersection, 1e-7);
+      EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(0.0, 0.0, 1.0), surfaceNormal, 1e-7);
+      EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(0.0, 0.0, height), intersection, 1e-7);
 
    }
 
@@ -64,7 +63,7 @@ public class CylinderTerrainObjectTest
       double height = 2.0;
       double radius = 1.0;
 
-      Vector3d translatedCenter = new Vector3d(5, 3, 1.5);
+      Vector3D translatedCenter = new Vector3D(5, 3, 1.5);
 
       AppearanceDefinition app = YoAppearance.Red();
 
@@ -99,7 +98,7 @@ public class CylinderTerrainObjectTest
 	@Test(timeout=300000)
    public void testHeightAtRot90TallHorizontalCylinderJustInsideAndOutside()
    {
-      Vector3d center = new Vector3d(0, 0, 0);
+      Vector3D center = new Vector3D(0, 0, 0);
       double slopeDegrees = 0.0;
       double yawDegrees = 0.0;
       double height = 2.0;
@@ -142,7 +141,7 @@ public class CylinderTerrainObjectTest
       double height = 2.0;
       double radius = 1.0;
 
-      Vector3d translatedCenter = new Vector3d(5, 3, 1.5);
+      Vector3D translatedCenter = new Vector3D(5, 3, 1.5);
 
       AppearanceDefinition app = YoAppearance.Red();
 
@@ -171,7 +170,7 @@ public class CylinderTerrainObjectTest
       double height = 2.0;
       double radius = 1.0;
 
-      Vector3d translatedCenter = new Vector3d(5, 3, 1.5);
+      Vector3D translatedCenter = new Vector3D(5, 3, 1.5);
 
       AppearanceDefinition app = YoAppearance.Red();
 
@@ -201,7 +200,7 @@ public class CylinderTerrainObjectTest
       double height = 2.0;
       double radius = 1.0;
 
-      Vector3d translatedCenter = new Vector3d(5, 3, 1.5);
+      Vector3D translatedCenter = new Vector3D(5, 3, 1.5);
       AppearanceDefinition app = YoAppearance.Red();
       CylinderTerrainObject translatedVerticalCylinder = new CylinderTerrainObject(translatedCenter, slopeDegrees, yawDegrees, height, radius, app);
 
@@ -228,7 +227,7 @@ public class CylinderTerrainObjectTest
       double height = 2.0;
       double radius = 1.0;
 
-      Vector3d translatedCenter = new Vector3d(5, 3, 1.5);
+      Vector3D translatedCenter = new Vector3D(5, 3, 1.5);
 
       AppearanceDefinition app = YoAppearance.Red();
 
@@ -252,7 +251,7 @@ public class CylinderTerrainObjectTest
 	@Test(timeout=300000)
    public void testHeightAtVerticalCylinderOutside()
    {
-      Vector3d center = new Vector3d(0, 0, 0);
+      Vector3D center = new Vector3D(0, 0, 0);
       double slopeDegrees = 0.0;
       double yawDegrees = 0.0;
       double height = 2.0;
@@ -291,7 +290,7 @@ public class CylinderTerrainObjectTest
 	@Test(timeout=300000)
    public void testHeightAtSlopedRotatedTwoSidesTop()
    {
-      Vector3d center = new Vector3d(0, 0, 0);
+      Vector3D center = new Vector3D(0, 0, 0);
       double slopeDegrees = 0.0;
       double yawDegrees = 0.0;
       double height = 2.0;
@@ -321,7 +320,7 @@ public class CylinderTerrainObjectTest
 	@Test(timeout=300000)
    public void testHeightAtSlopedRotatedTwoSidesBottom()
    {
-      Vector3d center = new Vector3d(0, 0, 0);
+      Vector3D center = new Vector3D(0, 0, 0);
       double slopeDegrees = 0.0;
       double yawDegrees = 0.0;
       double height = 2.0;
@@ -353,7 +352,7 @@ public class CylinderTerrainObjectTest
 	@Test(timeout=300000)
    public void testHeightAtSlopedRotatedEndAndSideTop()
    {
-      Vector3d center = new Vector3d(0, 0, 0);
+      Vector3D center = new Vector3D(0, 0, 0);
       double slopeDegrees = 0.0;
       double yawDegrees = 0.0;
       double height = 2.0;
@@ -382,7 +381,7 @@ public class CylinderTerrainObjectTest
 	@Test(timeout=300000)
    public void testHeightAtSlopedRotatedEndAndSideBottom()
    {
-      Vector3d center = new Vector3d(0, 0, 0);
+      Vector3D center = new Vector3D(0, 0, 0);
       double slopeDegrees = 0.0;
       double yawDegrees = 0.0;
       double height = 2.0;

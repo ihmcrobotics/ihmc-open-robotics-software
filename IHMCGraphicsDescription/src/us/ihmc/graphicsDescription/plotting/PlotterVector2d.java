@@ -1,7 +1,6 @@
 package us.ihmc.graphicsDescription.plotting;
 
-import javax.vecmath.Tuple2d;
-
+import us.ihmc.euclid.tuple2D.interfaces.Tuple2DBasics;
 import us.ihmc.graphicsDescription.plotting.frames.MetersReferenceFrame;
 import us.ihmc.graphicsDescription.plotting.frames.PixelsReferenceFrame;
 import us.ihmc.graphicsDescription.plotting.frames.PlotterReferenceFrame;
@@ -31,7 +30,7 @@ public class PlotterVector2d extends FrameVector2d
       super(referenceFrame, vector);
    }
 
-   public PlotterVector2d(PlotterReferenceFrame referenceFrame, Tuple2d tuple)
+   public PlotterVector2d(PlotterReferenceFrame referenceFrame, Tuple2DBasics tuple)
    {
       super(referenceFrame, tuple);
    }

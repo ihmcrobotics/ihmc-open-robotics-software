@@ -1,18 +1,17 @@
 package us.ihmc.robotics.screwTheory;
 
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.geometry.FrameOrientation2d;
 import us.ihmc.robotics.geometry.FramePose2d;
 import us.ihmc.robotics.geometry.FrameVector2d;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-
-import javax.vecmath.Vector3d;
 
 public class PlanarJointReferenceFrame extends ReferenceFrame
 {
    private static final long serialVersionUID = 1179880149506811812L;
    private double rotation = 0.0;
-   private final Vector3d translation = new Vector3d();
+   private final Vector3D translation = new Vector3D();
 
    public PlanarJointReferenceFrame(String frameName, ReferenceFrame parentFrame)
    {

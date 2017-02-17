@@ -2,16 +2,16 @@ package us.ihmc.graphicsDescription.appearance;
 
 import java.awt.Color;
 
-import javax.vecmath.Color3f;
-
 import org.apache.commons.lang3.NotImplementedException;
+
+import us.ihmc.robotics.dataStructures.MutableColor;
 
 public class YoAppearanceMaterial extends YoAppearanceTransparency
 {
-   private final Color3f diffuseColor = new Color3f();
-   private final Color3f specularColor = new Color3f();
+   private final MutableColor diffuseColor = new MutableColor();
+   private final MutableColor specularColor = new MutableColor();
    private float shininess;
-   private final Color3f ambientColor = new Color3f();
+   private final MutableColor ambientColor = new MutableColor();
 
    public void setDiffuseColor(float f, float g, float h)
    {
@@ -39,12 +39,12 @@ public class YoAppearanceMaterial extends YoAppearanceTransparency
       ambientColor.setZ(h);
    }
 
-   public Color3f getDiffuseColor()
+   public MutableColor getDiffuseColor()
    {
       return diffuseColor;
    }
 
-   public Color3f getSpecularColor()
+   public MutableColor getSpecularColor()
    {
       return specularColor;
    }
@@ -54,28 +54,28 @@ public class YoAppearanceMaterial extends YoAppearanceTransparency
       return shininess;
    }
 
-   public Color3f getAmbientColor()
+   public MutableColor getAmbientColor()
    {
       return ambientColor;
    }
    
-   public void setAmbientColor(Color3f color3f)
+   public void setAmbientColor(MutableColor color3f)
    {
       ambientColor.set(color3f);
    }
 
-   public void setDiffuseColor(Color3f color3f)
+   public void setDiffuseColor(MutableColor color3f)
    {
       diffuseColor.set(color3f);
    }
 
-   public void setSpecularColor(Color3f color3f)
+   public void setSpecularColor(MutableColor color3f)
    {
       specularColor.set(color3f);
    }
 
    @Override
-   public Color3f getColor()
+   public MutableColor getColor()
    {
       return diffuseColor;
    }

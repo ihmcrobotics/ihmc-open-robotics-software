@@ -1,8 +1,7 @@
 package us.ihmc.exampleSimulations.simpleDynamicWalkingExample;
 
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.controllers.PIDController;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -42,8 +41,8 @@ public class Step5WalkingController implements RobotController
    private DoubleYoVariable hipTau;
    private DoubleYoVariable ankleTau;
 
-   private Quat4d rotationToPack = new Quat4d();
-   private Vector3d velocityToPack = new Vector3d();
+   private Quaternion rotationToPack = new Quaternion();
+   private Vector3D velocityToPack = new Vector3D();
       
    private boolean heelOnTheFloor, toeOnTheFloor;
    private final DoubleYoVariable minSupportTime = new DoubleYoVariable("minSupportTime", controllerRegistry);
@@ -253,7 +252,7 @@ public class Step5WalkingController implements RobotController
    private DoubleYoVariable controlBodyPitch()
    {
       rob.getBodyPitch(rotationToPack);
-      double pitchFromQuaternion = RotationTools.computePitch(rotationToPack);
+      double pitchFromQuaternion = rotationToPack.getPitch();
 
       rob.getBodyAngularVel(velocityToPack);
       double bodyAngularVel = velocityToPack.getY();
@@ -265,7 +264,7 @@ public class Step5WalkingController implements RobotController
    private DoubleYoVariable controlBodyPitchSingleSupport()
    {
       rob.getBodyPitch(rotationToPack);
-      double pitchFromQuaternion = RotationTools.computePitch(rotationToPack);
+      double pitchFromQuaternion = rotationToPack.getPitch();
       
       rob.getBodyAngularVel(velocityToPack);
       double bodyAngularVel = velocityToPack.getY();

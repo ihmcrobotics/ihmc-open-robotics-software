@@ -1,12 +1,11 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
-import javax.vecmath.Point2d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -51,7 +50,7 @@ public class FootCoPOccupancyGrid
    private final DoubleYoVariable cellArea;
 
    private final ReferenceFrame soleFrame;
-   private final Point2d tempPoint = new Point2d();
+   private final Point2D tempPoint = new Point2D();
    private final FramePoint2d gridOrigin = new FramePoint2d();
    private final FrameConvexPolygon2d gridBoundaries = new FrameConvexPolygon2d();
 
@@ -546,9 +545,9 @@ public class FootCoPOccupancyGrid
 
    private final PrincipalComponentAnalysis3D pca = new PrincipalComponentAnalysis3D();
    private final DenseMatrix64F pointCloud = new DenseMatrix64F(0, 0);
-   private final Point3d tempPoint3d = new Point3d();
+   private final Point3D tempPoint3d = new Point3D();
    private final FramePoint2d lineOrigin = new FramePoint2d();
-   private final Vector3d tempVector3d = new Vector3d();
+   private final Vector3D tempVector3d = new Vector3D();
    private final FrameVector2d lineDirection = new FrameVector2d();
 
    private final FramePoint2d pointA = new FramePoint2d();

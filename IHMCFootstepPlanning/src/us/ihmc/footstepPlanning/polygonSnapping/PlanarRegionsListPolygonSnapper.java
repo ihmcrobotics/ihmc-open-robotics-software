@@ -2,13 +2,12 @@ package us.ihmc.footstepPlanning.polygonSnapping;
 
 import java.util.List;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 public class PlanarRegionsListPolygonSnapper
 {
@@ -45,11 +44,11 @@ public class PlanarRegionsListPolygonSnapper
 
       int numberOfIntersectingRegions = intersectingRegions.size();
 
-      Vector3d surfaceNormal = new Vector3d();
-      Vector3d highestSurfaceNormal = new Vector3d();
+      Vector3D surfaceNormal = new Vector3D();
+      Vector3D highestSurfaceNormal = new Vector3D();
       RigidBodyTransform highestTransform = null;
       double highestZ = Double.NEGATIVE_INFINITY;
-      Point3d highestVertexInWorld = new Point3d();
+      Point3D highestVertexInWorld = new Point3D();
       PlanarRegion highestPlanarRegion = null;
 
       for (int i = 0; i < numberOfIntersectingRegions; i++)

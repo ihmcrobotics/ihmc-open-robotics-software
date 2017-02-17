@@ -1,8 +1,14 @@
 package us.ihmc.robotics.screwTheory;
 
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-
-import javax.vecmath.*;
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 
 public interface FloatingInverseDynamicsJoint extends InverseDynamicsJoint
 {
@@ -10,25 +16,23 @@ public interface FloatingInverseDynamicsJoint extends InverseDynamicsJoint
 
    public abstract void setRotation(double yaw, double pitch, double roll);
 
-   public abstract void setRotation(Quat4d jointRotation);
+   public abstract void setRotation(QuaternionReadOnly jointRotation);
 
    public abstract void setRotation(double x, double y, double z, double w);
 
-   public abstract void setRotation(Matrix3d jointRotation);
+   public abstract void setRotation(RotationMatrixReadOnly jointRotation);
 
-   public abstract void setPosition(Tuple3d qTrans);
+   public abstract void setPosition(Tuple3DReadOnly qTrans);
 
    public abstract void setPosition(double x, double y, double z);
 
    public abstract void setPositionAndRotation(RigidBodyTransform transform);
 
-   public abstract void getTranslation(Tuple3d translationToPack);
+   public abstract void getTranslation(Tuple3DBasics translationToPack);
 
-   public abstract void getTranslation(Tuple3f translationToPack);
+   public abstract void getAngularVelocity(Vector3DBasics angularVelocityToPack);
 
-   public abstract void getAngularVelocity(Vector3d angularVelocityToPack);
-
-   public abstract void getLinearVelocity(Vector3d linearVelocityToPack);
+   public abstract void getLinearVelocity(Vector3DBasics linearVelocityToPack);
 
    public abstract void setJointTwist(Twist jointTwist);
 
@@ -38,23 +42,21 @@ public interface FloatingInverseDynamicsJoint extends InverseDynamicsJoint
 
    public abstract void setWrench(Wrench jointWrench);
 
-   public abstract void getRotation(Quat4d rotationToPack);
+   public abstract void getRotation(QuaternionBasics rotationToPack);
 
-   public abstract void getRotation(Quat4f rotationToPack);
-
-   public abstract void getRotation(Matrix3d rotationToPack);
+   public abstract void getRotation(RotationMatrix rotationToPack);
 
    public abstract void getRotation(double[] yawPitchRoll);
 
-   public abstract Tuple3d getTranslationForReading();
+   public abstract Tuple3DReadOnly getTranslationForReading();
 
-   public abstract Quat4d getRotationForReading();
+   public abstract QuaternionReadOnly getRotationForReading();
 
-   public abstract Vector3d getLinearVelocityForReading();
+   public abstract Vector3DReadOnly getLinearVelocityForReading();
 
-   public abstract Vector3d getAngularVelocityForReading();
+   public abstract Vector3DReadOnly getAngularVelocityForReading();
 
-   public abstract void getLinearAcceleration(Vector3d linearAccelerationToPack);
+   public abstract void getLinearAcceleration(Vector3DBasics linearAccelerationToPack);
 
    public abstract void getWrench(Wrench wrenchToPack);
 

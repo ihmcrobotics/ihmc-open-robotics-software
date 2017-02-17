@@ -1,13 +1,11 @@
 package us.ihmc.utilities.ros.publisher;
 
-import geometry_msgs.PoseStamped;
-
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
 import org.ros.message.Time;
 
+import geometry_msgs.PoseStamped;
 import std_msgs.Header;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 
 
 public class RosPoseStampedPublisher extends RosTopicPublisher<PoseStamped>
@@ -35,7 +33,7 @@ public class RosPoseStampedPublisher extends RosTopicPublisher<PoseStamped>
       }
    }
 
-   public void publish(String frameID, Vector3d pos, Quat4d rot, Time t)
+   public void publish(String frameID, Vector3D pos, Quaternion rot, Time t)
    {
       PoseStamped message = getMessage();
 
@@ -59,7 +57,7 @@ public class RosPoseStampedPublisher extends RosTopicPublisher<PoseStamped>
           message.getPose().getOrientation().setX(rot.getX());
           message.getPose().getOrientation().setY(rot.getY());
           message.getPose().getOrientation().setZ(rot.getZ());
-          message.getPose().getOrientation().setW(rot.getW());
+          message.getPose().getOrientation().setW(rot.getS());
       } else {
           message.getPose().getOrientation().setX(0.0);
           message.getPose().getOrientation().setY(0.0);

@@ -1,7 +1,7 @@
 package us.ihmc.geometry.polytope;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 
 public class PrintingGilbertJohnsonKeerthiCollisionDetectorListener implements GilbertJohnsonKeerthiCollisionDetectorListener
 {
@@ -15,7 +15,7 @@ public class PrintingGilbertJohnsonKeerthiCollisionDetectorListener implements G
    }
 
    @Override
-   public void addedVertexToSimplex(SimplexPolytope simplex, Point3d vertexOnSimplex, Point3d vertexOnA, Point3d vertexOnB)
+   public void addedVertexToSimplex(SimplexPolytope simplex, Point3D vertexOnSimplex, Point3D vertexOnA, Point3D vertexOnB)
    {
       System.out.println("\nAdded Vertex to Simplex. New simplex is: ");
       System.out.println(simplex);
@@ -23,14 +23,14 @@ public class PrintingGilbertJohnsonKeerthiCollisionDetectorListener implements G
    }
 
    @Override
-   public void foundClosestPointOnSimplex(SimplexPolytope simplex, Point3d closestPointToOrigin)
+   public void foundClosestPointOnSimplex(SimplexPolytope simplex, Point3D closestPointToOrigin)
    {
       System.out.println("\nFound closest point on Simplex: " + closestPointToOrigin);
-      System.out.println("Distance to origin is " + new Vector3d(closestPointToOrigin).length());
+      System.out.println("Distance to origin is " + new Vector3D(closestPointToOrigin).length());
    }
 
    @Override
-   public void foundCollision(SimplexPolytope simplex, Point3d pointOnA, Point3d pointOnB)
+   public void foundCollision(SimplexPolytope simplex, Point3D pointOnA, Point3D pointOnB)
    {
       System.out.println("\nFound a collision!");
       System.out.println("PointOnA: " + pointOnA);
@@ -38,7 +38,7 @@ public class PrintingGilbertJohnsonKeerthiCollisionDetectorListener implements G
    }
 
    @Override
-   public void foundSupportPoints(SimplexPolytope simplex, Point3d supportingVertexOnA, Point3d supportingVertexOnB, Vector3d supportingVertexOnSimplex)
+   public void foundSupportPoints(SimplexPolytope simplex, Point3D supportingVertexOnA, Point3D supportingVertexOnB, Vector3D supportingVertexOnSimplex)
    {
       System.out.println("\nFound supporting vertices");
       System.out.println("supportingVertexOnA: " + supportingVertexOnA);
@@ -54,7 +54,7 @@ public class PrintingGilbertJohnsonKeerthiCollisionDetectorListener implements G
    }
 
    @Override
-   public void metStoppingConditionForNoIntersection(double vDotP, double percentCloser, Point3d closestPointOnA, Point3d closestPointOnB)
+   public void metStoppingConditionForNoIntersection(double vDotP, double percentCloser, Point3D closestPointOnA, Point3D closestPointOnB)
    {
       System.out.println("\nMet Stopping Condition For No Intersection");
       System.out.println("closestPointOnA = " + closestPointOnA);
@@ -65,7 +65,7 @@ public class PrintingGilbertJohnsonKeerthiCollisionDetectorListener implements G
    }
 
    @Override
-   public void tooManyIterationsStopping(SimplexPolytope simplex, Point3d closestPointOnA, Point3d closestPointOnB)
+   public void tooManyIterationsStopping(SimplexPolytope simplex, Point3D closestPointOnA, Point3D closestPointOnB)
    {
       System.out.println("\nToo Many Iterations. No Intersection");
       System.out.println("closestPointOnA = " + closestPointOnA);
@@ -76,7 +76,7 @@ public class PrintingGilbertJohnsonKeerthiCollisionDetectorListener implements G
    }
 
    @Override
-   public void metStoppingConditionForNoIntersection(Point3d closestPointOnA, Point3d closestPointOnB)
+   public void metStoppingConditionForNoIntersection(Point3D closestPointOnA, Point3D closestPointOnB)
    {
       System.out.println("\nMet Stopping Condition For No Intersection");
       System.out.println("closestPointOnA = " + closestPointOnA);

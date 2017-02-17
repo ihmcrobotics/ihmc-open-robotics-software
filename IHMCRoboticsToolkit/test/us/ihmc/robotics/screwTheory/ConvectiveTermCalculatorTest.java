@@ -2,11 +2,10 @@ package us.ihmc.robotics.screwTheory;
 
 import java.util.Random;
 
-import javax.vecmath.Vector3d;
-
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 /**
@@ -15,16 +14,16 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
  */
 public class ConvectiveTermCalculatorTest
 {
-   private static final Vector3d X = new Vector3d(1.0, 0.0, 0.0);
-   private static final Vector3d Y = new Vector3d(0.0, 1.0, 0.0);
-   private static final Vector3d Z = new Vector3d(0.0, 0.0, 1.0);
+   private static final Vector3D X = new Vector3D(1.0, 0.0, 0.0);
+   private static final Vector3D Y = new Vector3D(0.0, 1.0, 0.0);
+   private static final Vector3D Z = new Vector3D(0.0, 0.0, 1.0);
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void test()
    {
       Random random = new Random(12512352L);
-      Vector3d[] jointAxes = new Vector3d[] {X, Y, Z, Y, Y, X};
+      Vector3D[] jointAxes = new Vector3D[] {X, Y, Z, Y, Y, X};
       ScrewTestTools.RandomFloatingChain randomFloatingChain = new ScrewTestTools.RandomFloatingChain(random, jointAxes);
       randomFloatingChain.setRandomPositionsAndVelocities(random);
       // zero accelerations

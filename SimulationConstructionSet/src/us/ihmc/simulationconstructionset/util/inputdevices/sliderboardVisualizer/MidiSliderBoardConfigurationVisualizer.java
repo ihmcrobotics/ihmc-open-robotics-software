@@ -1,9 +1,12 @@
 package us.ihmc.simulationconstructionset.util.inputdevices.sliderboardVisualizer;
 
-import javax.swing.*;
-import java.awt.*;
+import java.awt.Dimension;
 import java.util.HashMap;
 import java.util.Hashtable;
+
+import javax.swing.ImageIcon;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
 
 import us.ihmc.simulationconstructionset.util.inputdevices.MidiControl;
 import us.ihmc.simulationconstructionset.util.inputdevices.MidiControl.SliderType;

@@ -5,10 +5,6 @@ import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import java.util.Arrays;
 
-import javax.vecmath.Point2d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -24,6 +20,9 @@ import us.ihmc.communication.packets.PlanarRegionsListMessage;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.footstepPlanning.polygonSnapping.PlanarRegionsListExamples;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidBehaviors.behaviors.behaviorServices.ConstantGoalDetectorBehaviorService;
@@ -185,7 +184,7 @@ public abstract class AvatarEndToEndFootstepPlanningTest implements MultiRobotTe
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
 
-      Point3d goalPoint = new Point3d(3.0, 0.0, 0.0);
+      Point3D goalPoint = new Point3D(3.0, 0.0, 0.0);
       GoalDetectorBehaviorService goalDetectorBehaviorService = new ConstantGoalDetectorBehaviorService(referenceFrames, goalPoint,
                                                                                                         communicationBridge);
       boolean createYoVariableServerForPlannerVisualizer = LOCAL_MODE;
@@ -215,7 +214,7 @@ public abstract class AvatarEndToEndFootstepPlanningTest implements MultiRobotTe
          assertTrue(success);
       }
 
-      Point2d planarGoalPoint = new Point2d(goalPoint.getX(), goalPoint.getY());
+      Point2D planarGoalPoint = new Point2D(goalPoint.getX(), goalPoint.getY());
       // TODO figure out a better assertion method, the anytime planner uses a threshold of 0.5
       assertBodyIsCloseToXYLocation(planarGoalPoint, 0.6);
    }
@@ -227,7 +226,7 @@ public abstract class AvatarEndToEndFootstepPlanningTest implements MultiRobotTe
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       PlanarRegionsList stairsUp = PlanarRegionsListExamples.generateStairCase();
-      PlanarRegionsList stairsDown = PlanarRegionsListExamples.generateStairCase(new Vector3d(3.8, 0.0, 0.0), new Vector3d(Math.PI, Math.PI, 0.0));
+      PlanarRegionsList stairsDown = PlanarRegionsListExamples.generateStairCase(new Vector3D(3.8, 0.0, 0.0), new Vector3D(Math.PI, Math.PI, 0.0));
       PlanarRegionsList completeStairCase = new PlanarRegionsList();
 
       for(int i = 0; i < stairsUp.getNumberOfPlanarRegions(); i++)
@@ -242,7 +241,7 @@ public abstract class AvatarEndToEndFootstepPlanningTest implements MultiRobotTe
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
 
-      Point3d goalPoint = new Point3d(4.0, 0.0, 0.0);
+      Point3D goalPoint = new Point3D(4.0, 0.0, 0.0);
       GoalDetectorBehaviorService goalDetectorBehaviorService = new ConstantGoalDetectorBehaviorService(referenceFrames, goalPoint,
                                                                                                         communicationBridge);
       boolean createYoVariableServerForPlannerVisualizer = LOCAL_MODE;
@@ -283,12 +282,12 @@ public abstract class AvatarEndToEndFootstepPlanningTest implements MultiRobotTe
          assertTrue(success);
       }
 
-      Point2d planarGoalPoint = new Point2d(goalPoint.getX(), goalPoint.getY());
+      Point2D planarGoalPoint = new Point2D(goalPoint.getX(), goalPoint.getY());
       // TODO figure out a better assertion method, the anytime planner uses a threshold of 0.5
       assertBodyIsCloseToXYLocation(planarGoalPoint, 0.6);
    }
 
-   private void assertBodyIsCloseToXYLocation(Point2d point, double threshold)
+   private void assertBodyIsCloseToXYLocation(Point2D point, double threshold)
    {
       referenceFrames.updateFrames();
       ReferenceFrame bodyFrame = referenceFrames.getABodyAttachedZUpFrame();

@@ -8,14 +8,6 @@ import static us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsTraj
 import java.util.ArrayList;
 import java.util.Random;
 
-import javax.vecmath.Point2d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Tuple2d;
-import javax.vecmath.Tuple3d;
-import javax.vecmath.Vector2d;
-import javax.vecmath.Vector3d;
-
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import org.junit.After;
@@ -29,6 +21,14 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepListVisualize
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlMode;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.TaskspaceToJointspaceCalculator;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.tools.EuclidCoreTestTools;
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple2D.interfaces.Tuple2DBasics;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
@@ -64,7 +64,6 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.testing.JUnitTools;
 import us.ihmc.tools.thread.ThreadTools;
 
 public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTestInterface
@@ -106,8 +105,8 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
          FramePose desiredRandomHandPose = new FramePose(handClone.getBodyFixedFrame());
          desiredRandomHandPose.changeFrame(ReferenceFrame.getWorldFrame());
 
-         Point3d desiredPosition = new Point3d();
-         Quat4d desiredOrientation = new Quat4d();
+         Point3D desiredPosition = new Point3D();
+         Quaternion desiredOrientation = new Quaternion();
          desiredRandomHandPose.getPose(desiredPosition, desiredOrientation);
          HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(robotSide, BaseForControl.WORLD, trajectoryTime, desiredPosition,
                desiredOrientation);
@@ -180,10 +179,10 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
 
          for (int i = 0; i < numberOfTrajectoryPoints; i++)
          {
-            Point3d desiredPosition = new Point3d();
-            Vector3d desiredLinearVelocity = new Vector3d();
-            Quat4d desiredOrientation = new Quat4d();
-            Vector3d desiredAngularVelocity = new Vector3d();
+            Point3D desiredPosition = new Point3D();
+            Vector3D desiredLinearVelocity = new Vector3D();
+            Quaternion desiredOrientation = new Quaternion();
+            Vector3D desiredAngularVelocity = new Vector3D();
             tempOrientation.getQuaternion(desiredOrientation);
 
             double time = trajectoryPoints.get(i).get(desiredPosition, desiredLinearVelocity);
@@ -278,7 +277,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
          EuclideanTrajectoryPointCalculator euclideanTrajectoryPointCalculator = new EuclideanTrajectoryPointCalculator();
          euclideanTrajectoryPointCalculator.enableWeightMethod(2.0, 1.0);
 
-         Point3d[] pointsOnSphere = SpiralBasedAlgorithm.generatePointsOnSphere(radius, numberOfTrajectoryPoints);
+         Point3D[] pointsOnSphere = SpiralBasedAlgorithm.generatePointsOnSphere(radius, numberOfTrajectoryPoints);
 
          for (int i = 0; i < numberOfTrajectoryPoints; i++)
          {
@@ -297,10 +296,10 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
 
          for (int i = 0; i < numberOfTrajectoryPoints; i++)
          {
-            Point3d desiredPosition = new Point3d();
-            Vector3d desiredLinearVelocity = new Vector3d();
-            Quat4d desiredOrientation = new Quat4d();
-            Vector3d desiredAngularVelocity = new Vector3d();
+            Point3D desiredPosition = new Point3D();
+            Vector3D desiredLinearVelocity = new Vector3D();
+            Quaternion desiredOrientation = new Quaternion();
+            Vector3D desiredAngularVelocity = new Vector3D();
             tempOrientation.getQuaternion(desiredOrientation);
 
             double time = trajectoryPoints.get(i).get(desiredPosition, desiredLinearVelocity);
@@ -417,7 +416,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
          EuclideanTrajectoryPointCalculator euclideanTrajectoryPointCalculator = new EuclideanTrajectoryPointCalculator();
          euclideanTrajectoryPointCalculator.enableWeightMethod(2.0, 1.0);
 
-         Point3d[] pointsOnSphere = SpiralBasedAlgorithm.generatePointsOnSphere(radius, numberOfTrajectoryPoints * numberOfMessages);
+         Point3D[] pointsOnSphere = SpiralBasedAlgorithm.generatePointsOnSphere(radius, numberOfTrajectoryPoints * numberOfMessages);
 
          for (int i = 0; i < numberOfTrajectoryPoints * numberOfMessages; i++)
          {
@@ -448,10 +447,10 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
 
             for (int i = 0; i < numberOfTrajectoryPoints; i++)
             {
-               Point3d desiredPosition = new Point3d();
-               Vector3d desiredLinearVelocity = new Vector3d();
-               Quat4d desiredOrientation = new Quat4d();
-               Vector3d desiredAngularVelocity = new Vector3d();
+               Point3D desiredPosition = new Point3D();
+               Vector3D desiredLinearVelocity = new Vector3D();
+               Quaternion desiredOrientation = new Quaternion();
+               Vector3D desiredAngularVelocity = new Vector3D();
                tempOrientation.getQuaternion(desiredOrientation);
 
                double time = trajectoryPoints.get(calculatorIndex).get(desiredPosition, desiredLinearVelocity);
@@ -557,7 +556,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
          EuclideanTrajectoryPointCalculator euclideanTrajectoryPointCalculator = new EuclideanTrajectoryPointCalculator();
          euclideanTrajectoryPointCalculator.enableWeightMethod(2.0, 1.0);
 
-         Point3d[] pointsOnSphere = SpiralBasedAlgorithm.generatePointsOnSphere(radius, numberOfTrajectoryPoints * numberOfMessages);
+         Point3D[] pointsOnSphere = SpiralBasedAlgorithm.generatePointsOnSphere(radius, numberOfTrajectoryPoints * numberOfMessages);
 
          for (int i = 0; i < numberOfTrajectoryPoints * numberOfMessages; i++)
          {
@@ -594,10 +593,10 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
 
             for (int i = 0; i < numberOfTrajectoryPoints; i++)
             {
-               Point3d desiredPosition = new Point3d();
-               Vector3d desiredLinearVelocity = new Vector3d();
-               Quat4d desiredOrientation = new Quat4d();
-               Vector3d desiredAngularVelocity = new Vector3d();
+               Point3D desiredPosition = new Point3D();
+               Vector3D desiredLinearVelocity = new Vector3D();
+               Quaternion desiredOrientation = new Quaternion();
+               Vector3D desiredAngularVelocity = new Vector3D();
                tempOrientation.getQuaternion(desiredOrientation);
 
                double time = trajectoryPoints.get(calculatorIndex).get(desiredPosition, desiredLinearVelocity);
@@ -667,7 +666,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
          EuclideanTrajectoryPointCalculator euclideanTrajectoryPointCalculator = new EuclideanTrajectoryPointCalculator();
          euclideanTrajectoryPointCalculator.enableWeightMethod(2.0, 1.0);
 
-         Point3d[] pointsOnSphere = SpiralBasedAlgorithm.generatePointsOnSphere(radius, numberOfTrajectoryPoints * numberOfMessages);
+         Point3D[] pointsOnSphere = SpiralBasedAlgorithm.generatePointsOnSphere(radius, numberOfTrajectoryPoints * numberOfMessages);
 
          for (int i = 0; i < numberOfTrajectoryPoints * numberOfMessages; i++)
          {
@@ -698,10 +697,10 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
 
             for (int i = 0; i < numberOfTrajectoryPoints; i++)
             {
-               Point3d desiredPosition = new Point3d();
-               Vector3d desiredLinearVelocity = new Vector3d();
-               Quat4d desiredOrientation = new Quat4d();
-               Vector3d desiredAngularVelocity = new Vector3d();
+               Point3D desiredPosition = new Point3D();
+               Vector3D desiredLinearVelocity = new Vector3D();
+               Quaternion desiredOrientation = new Quaternion();
+               Vector3D desiredAngularVelocity = new Vector3D();
                tempOrientation.getQuaternion(desiredOrientation);
 
                double time = trajectoryPoints.get(calculatorIndex).get(desiredPosition, desiredLinearVelocity);
@@ -741,8 +740,8 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
          FramePose desiredRandomHandPose = new FramePose(handClone.getBodyFixedFrame());
          desiredRandomHandPose.changeFrame(ReferenceFrame.getWorldFrame());
 
-         Point3d desiredPosition = new Point3d();
-         Quat4d desiredOrientation = new Quat4d();
+         Point3D desiredPosition = new Point3D();
+         Quaternion desiredOrientation = new Quaternion();
          desiredRandomHandPose.getPose(desiredPosition, desiredOrientation);
          HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(robotSide, BaseForControl.WORLD, overrideTrajectoryTime, desiredPosition,
                desiredOrientation);
@@ -848,8 +847,8 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
          desiredRandomHandPose.changeFrame(ReferenceFrame.getWorldFrame());
          desiredRandomHandPose.translate(RandomTools.generateRandomVector(random, 0.2));
 
-         Point3d desiredPosition = new Point3d();
-         Quat4d desiredOrientation = new Quat4d();
+         Point3D desiredPosition = new Point3D();
+         Quaternion desiredOrientation = new Quaternion();
          desiredRandomHandPose.getPose(desiredPosition, desiredOrientation);
          HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(robotSide, BaseForControl.WORLD, trajectoryTime, desiredPosition,
                desiredOrientation);
@@ -890,7 +889,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
       }
    }
 
-   public static Point3d findControllerDesiredPosition(RobotSide robotSide, SimulationConstructionSet scs)
+   public static Point3D findControllerDesiredPosition(RobotSide robotSide, SimulationConstructionSet scs)
    {
       String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
       String handPrefix = sidePrefix + "Hand";
@@ -900,7 +899,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
       return findPoint3d(subTrajectoryName, currentPositionVarNamePrefix, scs);
    }
 
-   public static Quat4d findControllerDesiredOrientation(RobotSide robotSide, SimulationConstructionSet scs)
+   public static Quaternion findControllerDesiredOrientation(RobotSide robotSide, SimulationConstructionSet scs)
    {
       String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
       String handPrefix = sidePrefix + "Hand";
@@ -910,7 +909,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
       return findQuat4d(subTrajectoryName, currentOrientationVarNamePrefix, scs);
    }
 
-   public static Vector3d findControllerDesiredLinearVelocity(RobotSide robotSide, SimulationConstructionSet scs)
+   public static Vector3D findControllerDesiredLinearVelocity(RobotSide robotSide, SimulationConstructionSet scs)
    {
       String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
       String handPrefix = sidePrefix + "Hand";
@@ -920,7 +919,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
       return findVector3d(subTrajectoryName, currentLinearVelocityVarNamePrefix, scs);
    }
 
-   public static Vector3d findControllerDesiredAngularVelocity(RobotSide robotSide, SimulationConstructionSet scs)
+   public static Vector3D findControllerDesiredAngularVelocity(RobotSide robotSide, SimulationConstructionSet scs)
    {
       String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
       String handPrefix = sidePrefix + "Hand";
@@ -988,15 +987,15 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
       return simpleSE3TrajectoryPoint;
    }
 
-   public static void assertSingleWaypointExecuted(RobotSide robotSide, Point3d desiredPosition, Quat4d desiredOrientation, SimulationConstructionSet scs)
+   public static void assertSingleWaypointExecuted(RobotSide robotSide, Point3D desiredPosition, Quaternion desiredOrientation, SimulationConstructionSet scs)
    {
       assertNumberOfWaypoints(robotSide, 2, scs);
 
-      Point3d controllerDesiredPosition = findControllerDesiredPosition(robotSide, scs);
-      JUnitTools.assertTuple3dEquals(desiredPosition, controllerDesiredPosition, EPSILON_FOR_DESIREDS);
+      Point3D controllerDesiredPosition = findControllerDesiredPosition(robotSide, scs);
+      EuclidCoreTestTools.assertTuple3DEquals(desiredPosition, controllerDesiredPosition, EPSILON_FOR_DESIREDS);
 
-      Quat4d controllerDesiredOrientation = findControllerDesiredOrientation(robotSide, scs);
-      JUnitTools.assertQuaternionsEqual(desiredOrientation, controllerDesiredOrientation, EPSILON_FOR_DESIREDS);
+      Quaternion controllerDesiredOrientation = findControllerDesiredOrientation(robotSide, scs);
+      EuclidCoreTestTools.assertQuaternionEquals(desiredOrientation, controllerDesiredOrientation, EPSILON_FOR_DESIREDS);
    }
 
    public static void assertNumberOfWaypoints(RobotSide robotSide, int expectedNumberOfTrajectoryPoints, SimulationConstructionSet scs)
@@ -1005,73 +1004,73 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
       assertEquals(expectedNumberOfTrajectoryPoints, findNumberOfWaypointsForOrientation(robotSide, scs));
    }
 
-   public static Quat4d findQuat4d(String nameSpace, String varname, SimulationConstructionSet scs)
+   public static Quaternion findQuat4d(String nameSpace, String varname, SimulationConstructionSet scs)
    {
       return findQuat4d(nameSpace, varname, "", scs);
    }
 
-   public static Quat4d findQuat4d(String nameSpace, String prefix, String suffix, SimulationConstructionSet scs)
+   public static Quaternion findQuat4d(String nameSpace, String prefix, String suffix, SimulationConstructionSet scs)
    {
-      Quat4d quat4d = new Quat4d();
-      quat4d.setX(scs.getVariable(nameSpace, YoFrameVariableNameTools.createQxName(prefix, suffix)).getValueAsDouble());
-      quat4d.setY(scs.getVariable(nameSpace, YoFrameVariableNameTools.createQyName(prefix, suffix)).getValueAsDouble());
-      quat4d.setZ(scs.getVariable(nameSpace, YoFrameVariableNameTools.createQzName(prefix, suffix)).getValueAsDouble());
-      quat4d.setW(scs.getVariable(nameSpace, YoFrameVariableNameTools.createQsName(prefix, suffix)).getValueAsDouble());
-      return quat4d;
+      double x = scs.getVariable(nameSpace, YoFrameVariableNameTools.createQxName(prefix, suffix)).getValueAsDouble();
+      double y = scs.getVariable(nameSpace, YoFrameVariableNameTools.createQyName(prefix, suffix)).getValueAsDouble();
+      double z = scs.getVariable(nameSpace, YoFrameVariableNameTools.createQzName(prefix, suffix)).getValueAsDouble();
+      double s = scs.getVariable(nameSpace, YoFrameVariableNameTools.createQsName(prefix, suffix)).getValueAsDouble();
+      
+      return new Quaternion(x, y, z, s);
    }
 
-   public static Point3d findPoint3d(String nameSpace, String varname, SimulationConstructionSet scs)
+   public static Point3D findPoint3d(String nameSpace, String varname, SimulationConstructionSet scs)
    {
       return findPoint3d(nameSpace, varname, "", scs);
    }
 
-   public static Point3d findPoint3d(String nameSpace, String varnamePrefix, String varnameSuffix, SimulationConstructionSet scs)
+   public static Point3D findPoint3d(String nameSpace, String varnamePrefix, String varnameSuffix, SimulationConstructionSet scs)
    {
-      return new Point3d(findTuple3d(nameSpace, varnamePrefix, varnameSuffix, scs));
+      return new Point3D(findTuple3d(nameSpace, varnamePrefix, varnameSuffix, scs));
    }
 
-   public static Vector3d findVector3d(String nameSpace, String varname, SimulationConstructionSet scs)
+   public static Vector3D findVector3d(String nameSpace, String varname, SimulationConstructionSet scs)
    {
       return findVector3d(nameSpace, varname, "", scs);
    }
 
-   public static Vector3d findVector3d(String nameSpace, String varnamePrefix, String varnameSuffix, SimulationConstructionSet scs)
+   public static Vector3D findVector3d(String nameSpace, String varnamePrefix, String varnameSuffix, SimulationConstructionSet scs)
    {
-      return new Vector3d(findTuple3d(nameSpace, varnamePrefix, varnameSuffix, scs));
+      return new Vector3D(findTuple3d(nameSpace, varnamePrefix, varnameSuffix, scs));
    }
 
-   public static Tuple3d findTuple3d(String nameSpace, String prefix, String suffix, SimulationConstructionSet scs)
+   public static Tuple3DBasics findTuple3d(String nameSpace, String prefix, String suffix, SimulationConstructionSet scs)
    {
-      Tuple3d tuple3d = new Point3d();
+      Tuple3DBasics tuple3d = new Point3D();
       tuple3d.setX(scs.getVariable(nameSpace, YoFrameVariableNameTools.createXName(prefix, suffix)).getValueAsDouble());
       tuple3d.setY(scs.getVariable(nameSpace, YoFrameVariableNameTools.createYName(prefix, suffix)).getValueAsDouble());
       tuple3d.setZ(scs.getVariable(nameSpace, YoFrameVariableNameTools.createZName(prefix, suffix)).getValueAsDouble());
       return tuple3d;
    }
 
-   public static Point2d findPoint2d(String nameSpace, String varname, SimulationConstructionSet scs)
+   public static Point2D findPoint2d(String nameSpace, String varname, SimulationConstructionSet scs)
    {
       return findPoint2d(nameSpace, varname, "", scs);
    }
 
-   public static Point2d findPoint2d(String nameSpace, String varnamePrefix, String varnameSuffix, SimulationConstructionSet scs)
+   public static Point2D findPoint2d(String nameSpace, String varnamePrefix, String varnameSuffix, SimulationConstructionSet scs)
    {
-      return new Point2d(findTuple2d(nameSpace, varnamePrefix, varnameSuffix, scs));
+      return new Point2D(findTuple2d(nameSpace, varnamePrefix, varnameSuffix, scs));
    }
 
-   public static Vector2d findVector2d(String nameSpace, String varname, SimulationConstructionSet scs)
+   public static Vector2D findVector2d(String nameSpace, String varname, SimulationConstructionSet scs)
    {
       return findVector2d(nameSpace, varname, "", scs);
    }
 
-   public static Vector2d findVector2d(String nameSpace, String varnamePrefix, String varnameSuffix, SimulationConstructionSet scs)
+   public static Vector2D findVector2d(String nameSpace, String varnamePrefix, String varnameSuffix, SimulationConstructionSet scs)
    {
-      return new Vector2d(findTuple2d(nameSpace, varnamePrefix, varnameSuffix, scs));
+      return new Vector2D(findTuple2d(nameSpace, varnamePrefix, varnameSuffix, scs));
    }
 
-   public static Tuple2d findTuple2d(String nameSpace, String prefix, String suffix, SimulationConstructionSet scs)
+   public static Tuple2DBasics findTuple2d(String nameSpace, String prefix, String suffix, SimulationConstructionSet scs)
    {
-      Tuple2d tuple2d = new Point2d();
+      Tuple2DBasics tuple2d = new Point2D();
       tuple2d.setX(scs.getVariable(nameSpace, YoFrameVariableNameTools.createXName(prefix, suffix)).getValueAsDouble());
       tuple2d.setY(scs.getVariable(nameSpace, YoFrameVariableNameTools.createYName(prefix, suffix)).getValueAsDouble());
       return tuple2d;

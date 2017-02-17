@@ -1,20 +1,19 @@
 package us.ihmc.humanoidRobotics.communication.packets.sensing;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-
 import us.ihmc.communication.packets.Packet;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 
 public class LidarPosePacket extends Packet<LidarPosePacket>
 {
-   public Point3d position;
-   public Quat4d orientation;
+   public Point3D position;
+   public Quaternion orientation;
 
    public LidarPosePacket()
    {
    }
 
-   public LidarPosePacket(Point3d position, Quat4d orientation)
+   public LidarPosePacket(Point3D position, Quaternion orientation)
    {
       this.position = position;
       this.orientation = orientation;
@@ -23,21 +22,21 @@ public class LidarPosePacket extends Packet<LidarPosePacket>
    public LidarPosePacket(LidarPosePacket other)
    {
       if (other.position != null)
-         position = new Point3d(other.position);
+         position = new Point3D(other.position);
       else
          position = null;
       if (other.orientation != null)
-         orientation = new Quat4d(other.orientation);
+         orientation = new Quaternion(other.orientation);
       else
          orientation = null;
    }
 
-   public Point3d getPosition()
+   public Point3D getPosition()
    {
       return position;
    }
 
-   public Quat4d getOrientation()
+   public Quaternion getOrientation()
    {
       return orientation;
    }

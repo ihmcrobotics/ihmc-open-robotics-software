@@ -2,36 +2,39 @@ package us.ihmc.robotics.geometry.transformables;
 
 import java.text.NumberFormat;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
-import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.euclid.interfaces.GeometryObject;
+import us.ihmc.euclid.transform.interfaces.Transform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.geometry.interfaces.EuclideanWaypointInterface;
-import us.ihmc.robotics.geometry.interfaces.GeometryObject;
 import us.ihmc.robotics.math.trajectories.waypoints.WaypointToStringTools;
 
 public class EuclideanWaypoint implements GeometryObject<EuclideanWaypoint>, EuclideanWaypointInterface<EuclideanWaypoint>
 {
-   private final Point3d position = new Point3d();
-   private final Vector3d linearVelocity = new Vector3d();
+   private final Point3D position = new Point3D();
+   private final Vector3D linearVelocity = new Vector3D();
 
    public EuclideanWaypoint()
    {
    }
 
    @Override
-   public void setPosition(Point3d position)
+   public void setPosition(Point3DReadOnly position)
    {
       this.position.set(position);
    }
 
    @Override
-   public void setLinearVelocity(Vector3d linearVelocity)
+   public void setLinearVelocity(Vector3DReadOnly linearVelocity)
    {
       this.linearVelocity.set(linearVelocity);
    }
 
-   public void set(Point3d position, Vector3d linearVelocity)
+   public void set(Point3DReadOnly position, Vector3DReadOnly linearVelocity)
    {
       setPosition(position);
       setLinearVelocity(linearVelocity);
@@ -104,25 +107,25 @@ public class EuclideanWaypoint implements GeometryObject<EuclideanWaypoint>, Euc
    }
 
    @Override
-   public void getPosition(Point3d positionToPack)
+   public void getPosition(Point3DBasics positionToPack)
    {
       positionToPack.set(position);
    }
 
    @Override
-   public void getLinearVelocity(Vector3d linearVelocityToPack)
+   public void getLinearVelocity(Vector3DBasics linearVelocityToPack)
    {
       linearVelocityToPack.set(linearVelocity);
    }
 
-   public void get(Point3d positionToPack, Vector3d linearVelocityToPack)
+   public void get(Point3DBasics positionToPack, Vector3DBasics linearVelocityToPack)
    {
       getPosition(positionToPack);
       getLinearVelocity(linearVelocityToPack);
    }
 
    @Override
-   public void applyTransform(RigidBodyTransform transform)
+   public void applyTransform(Transform transform)
    {
       transform.transform(position);
       transform.transform(linearVelocity);
@@ -138,12 +141,12 @@ public class EuclideanWaypoint implements GeometryObject<EuclideanWaypoint>, Euc
       return true;
    }
 
-   public Point3d getPosition()
+   public Point3DReadOnly getPosition()
    {
       return position;
    }
 
-   public Vector3d getLinearVelocity()
+   public Vector3DReadOnly getLinearVelocity()
    {
       return linearVelocity;
    }

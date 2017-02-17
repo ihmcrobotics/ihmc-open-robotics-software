@@ -2,15 +2,15 @@ package us.ihmc.robotics.screwTheory;
 
 import java.util.Random;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Vector3d;
-
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.euclid.matrix.Matrix3D;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.tools.testing.JUnitTools;
@@ -24,18 +24,18 @@ public class MomentumTest
    {
       Random random = new Random(1776L);
       ReferenceFrame world = ReferenceFrame.getWorldFrame();
-      RigidBodyTransform transformToParent = RigidBodyTransform.generateRandomTransform(random);
+      RigidBodyTransform transformToParent = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
 
       // Transform3D transformToParent = new Transform3D();
 
       ReferenceFrame frame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("frame", world, transformToParent);
-      Matrix3d massMomentOfInertia = RandomTools.generateRandomDiagonalMatrix3d(random);
+      Matrix3D massMomentOfInertia = RandomTools.generateRandomDiagonalMatrix3d(random);
       double mass = random.nextDouble();
       GeneralizedRigidBodyInertia inertia = new CompositeRigidBodyInertia(frame, massMomentOfInertia, mass);
       inertia.changeFrame(world);
 
-      Vector3d linearVelocity = RandomTools.generateRandomVector(random);
-      Vector3d angularVelocity = RandomTools.generateRandomVector(random);
+      Vector3D linearVelocity = RandomTools.generateRandomVector(random);
+      Vector3D angularVelocity = RandomTools.generateRandomVector(random);
       Twist twist = new Twist(frame, world, world, linearVelocity, angularVelocity);
 
       DenseMatrix64F inertiaMatrix = new DenseMatrix64F(6, 6);

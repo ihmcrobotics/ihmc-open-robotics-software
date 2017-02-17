@@ -1,7 +1,6 @@
 package us.ihmc.quadrupedRobotics.planning.chooser.footstepChooser;
 
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.MockQuadrupedReferenceFrames;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -43,7 +42,7 @@ public class QuadrupedPathPreviewVisualizer implements RobotController
       desiredVelocity.setX(0.24);
 
       robot = new Robot("viz");
-      rootJoint = new FloatingJoint("floating", new Vector3d(), robot);
+      rootJoint = new FloatingJoint("floating", new Vector3D(), robot);
       robot.getRobotsYoVariableRegistry();
       robot.setController(this);
       scs.setRobot(robot);
@@ -62,11 +61,11 @@ public class QuadrupedPathPreviewVisualizer implements RobotController
          yoFootPositions.set(robotQuadrant, footPosition);
       }
       
-      yoFootPositions.get(RobotQuadrant.FRONT_LEFT).set(new Vector3d(0.12, 0.14, 0.0));
-      yoFootPositions.get(RobotQuadrant.HIND_LEFT).set(new Vector3d(-0.12, 0.14, 0.0));
+      yoFootPositions.get(RobotQuadrant.FRONT_LEFT).set(new Vector3D(0.12, 0.14, 0.0));
+      yoFootPositions.get(RobotQuadrant.HIND_LEFT).set(new Vector3D(-0.12, 0.14, 0.0));
 
-      yoFootPositions.get(RobotQuadrant.FRONT_RIGHT).set(new Vector3d(0.12, -0.14, 0.0));
-      yoFootPositions.get(RobotQuadrant.HIND_RIGHT).set(new Vector3d(-0.12, -0.14, 0.0));
+      yoFootPositions.get(RobotQuadrant.FRONT_RIGHT).set(new Vector3D(0.12, -0.14, 0.0));
+      yoFootPositions.get(RobotQuadrant.HIND_RIGHT).set(new Vector3D(-0.12, -0.14, 0.0));
       
       boolean showOverheadView = true;
       SimulationOverheadPlotterFactory simulationOverheadPlotterFactory = scs.createSimulationOverheadPlotterFactory();

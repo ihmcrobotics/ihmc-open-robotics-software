@@ -6,14 +6,15 @@ import static org.junit.Assert.fail;
 
 import java.util.Random;
 
-import javax.vecmath.Point2d;
-import javax.vecmath.Vector2d;
-import javax.vecmath.Vector3d;
-
 import org.junit.After;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
@@ -83,7 +84,7 @@ public class FrameVector2dTest extends FrameTuple2dTest<FrameVector2d>
    public void testFrameVector2d_ReferenceFrame_Tuple2d()
    {
       double x = 5.7, y = 56.3;
-      Point2d tuple = new Point2d(x, y);
+      Point2D tuple = new Point2D(x, y);
       FrameVector2d frame = new FrameVector2d(theFrame, tuple);
       assertEquals("Should be equal", frame.getX(), x, epsilon);
       assertEquals("Should be equal", frame.getY(), y, epsilon);
@@ -160,7 +161,7 @@ public class FrameVector2dTest extends FrameTuple2dTest<FrameVector2d>
       double x = 5.6, y = 45.67;
       String name = "woof";
       FrameVector2d frame = new FrameVector2d(aFrame, x, y, name);
-      Vector2d vector2d = frame.getVector();
+      Vector2D vector2d = frame.getVector();
       assertEquals("Should be equal", frame.getX(), vector2d.getX(), epsilon);
       assertEquals("Should be equal", frame.getY(), vector2d.getY(), epsilon);
    }
@@ -237,8 +238,8 @@ public class FrameVector2dTest extends FrameTuple2dTest<FrameVector2d>
       FrameVector2d frame2 = new FrameVector2d(theFrame, x2, y2);
       FrameVector2d frame3 = new FrameVector2d(aFrame, x3, y3);
       
-      Vector2d vector1 = new Vector2d(x1, y1);
-      Vector2d vector2 = new Vector2d(x2, y2);
+      Vector2D vector1 = new Vector2D(x1, y1);
+      Vector2D vector2 = new Vector2D(x2, y2);
 
       double result = frame1.angle(frame2);
       double resultVector = vector1.angle(vector2);
@@ -320,10 +321,10 @@ public class FrameVector2dTest extends FrameTuple2dTest<FrameVector2d>
    public void testApplyTransform_Transform3D()
    {  
       Random random = new Random(398742498237598750L);
-      RigidBodyTransform transform = RigidBodyTransform.generateRandomTransform(random);
+      RigidBodyTransform transform = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
 
-      Vector3d vectorToTransform = RandomTools.generateRandomVector(random, 0.0, 0.0, 0.0, 100.0, 100.0, 0.0);
-      FrameVector2d vectorToTest = new FrameVector2d(null, new Vector2d(vectorToTransform.getX(), vectorToTransform.getY())); 
+      Vector3D vectorToTransform = RandomTools.generateRandomVector(random, 0.0, 0.0, 0.0, 100.0, 100.0, 0.0);
+      FrameVector2d vectorToTest = new FrameVector2d(null, new Vector2D(vectorToTransform.getX(), vectorToTransform.getY())); 
 
       try
       {
@@ -338,7 +339,7 @@ public class FrameVector2dTest extends FrameTuple2dTest<FrameVector2d>
       double[] matrix = {6.0, 7.0, 0.0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1.0};
       RigidBodyTransform transform2 = new RigidBodyTransform(matrix);
 
-      Vector3d vectorToTransform2 = new Vector3d(matrix);
+      Vector3D vectorToTransform2 = new Vector3D(matrix);
       FrameVector2d vectorToTest2 = new FrameVector2d(null, matrix);
 
       transform2.transform(vectorToTransform2);
@@ -353,10 +354,10 @@ public class FrameVector2dTest extends FrameTuple2dTest<FrameVector2d>
    public void testApplyTransformCopy_Transform3D()
    {
       Random random = new Random(398742498237598750L);
-      RigidBodyTransform transform = RigidBodyTransform.generateRandomTransform(random);
+      RigidBodyTransform transform = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
 
-      Vector3d vectorToTransform = RandomTools.generateRandomVector(random, 0.0, 0.0, 0.0, 100.0, 100.0, 0.0);
-      FrameVector2d vectorToTest = new FrameVector2d(null, new Vector2d(vectorToTransform.getX(), vectorToTransform.getY())); 
+      Vector3D vectorToTransform = RandomTools.generateRandomVector(random, 0.0, 0.0, 0.0, 100.0, 100.0, 0.0);
+      FrameVector2d vectorToTest = new FrameVector2d(null, new Vector2D(vectorToTransform.getX(), vectorToTransform.getY())); 
 
       try
       {
@@ -371,7 +372,7 @@ public class FrameVector2dTest extends FrameTuple2dTest<FrameVector2d>
       double[] matrix = {6.0, 7.0, 0.0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1.0};
       RigidBodyTransform transform2 = new RigidBodyTransform(matrix);
 
-      Vector3d vectorToTransform2 = new Vector3d(matrix);
+      Vector3D vectorToTransform2 = new Vector3D(matrix);
       FrameVector2d vectorToTest2 = new FrameVector2d(null, matrix);
 
       transform2.transform(vectorToTransform2);
@@ -388,7 +389,7 @@ public class FrameVector2dTest extends FrameTuple2dTest<FrameVector2d>
       double[] matrix = {6.0, 7.0, 0.0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1.0};
       RigidBodyTransform transform = new RigidBodyTransform(matrix);
 
-      Vector3d vectorToTransform = new Vector3d(matrix);
+      Vector3D vectorToTransform = new Vector3D(matrix);
       FrameVector2d vectorToTest = new FrameVector2d(aFrame, matrix);
 
       transform.transform(vectorToTransform);

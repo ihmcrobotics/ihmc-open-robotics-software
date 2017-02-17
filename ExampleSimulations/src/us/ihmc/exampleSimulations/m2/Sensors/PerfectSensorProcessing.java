@@ -1,8 +1,7 @@
 package us.ihmc.exampleSimulations.m2.Sensors;
 
 
-import javax.vecmath.Point3d;
-
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.exampleSimulations.m2.ContactPointName;
 import us.ihmc.exampleSimulations.m2.JointName;
 import us.ihmc.exampleSimulations.m2.M2Robot;
@@ -425,12 +424,12 @@ public class PerfectSensorProcessing
 
       robot.updateYawPitchRoll();
 
-      Point3d[][] footPositions = new Point3d[groundContactFramePointsPositions.length][groundContactFramePointsPositions[0].length / 3];
+      Point3D[][] footPositions = new Point3D[groundContactFramePointsPositions.length][groundContactFramePointsPositions[0].length / 3];
       for (int j = 0; j < footPositions.length; j++)
       {
          for (int i = 0; i < footPositions[0].length; i++)
          {
-            footPositions[j][i] = new Point3d();
+            footPositions[j][i] = new Point3D();
             footPositions[j][i].setX(groundContactFramePointsPositions[j][i * 3 + 0].getDoubleValue());
             footPositions[j][i].setY(groundContactFramePointsPositions[j][i * 3 + 1].getDoubleValue());
             footPositions[j][i].setZ(groundContactFramePointsPositions[j][i * 3 + 2].getDoubleValue());
@@ -439,12 +438,12 @@ public class PerfectSensorProcessing
 
       processedSensors.setGroundContactPointsPositions(footPositions);
 
-      Point3d[][] footForces = new Point3d[groundContactFramePointsForces.length][groundContactFramePointsForces[0].length / 3];
+      Point3D[][] footForces = new Point3D[groundContactFramePointsForces.length][groundContactFramePointsForces[0].length / 3];
       for (int j = 0; j < footForces.length; j++)
       {
          for (int i = 0; i < footForces[0].length; i++)
          {
-            footForces[j][i] = new Point3d();
+            footForces[j][i] = new Point3D();
             footForces[j][i].setX(groundContactFramePointsForces[j][i * 3 + 0].getDoubleValue());
             footForces[j][i].setY(groundContactFramePointsForces[j][i * 3 + 1].getDoubleValue());
             footForces[j][i].setZ(groundContactFramePointsForces[j][i * 3 + 2].getDoubleValue());

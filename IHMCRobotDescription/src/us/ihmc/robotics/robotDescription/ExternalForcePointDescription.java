@@ -1,11 +1,11 @@
 package us.ihmc.robotics.robotDescription;
 
-import javax.vecmath.Vector3d;
+import us.ihmc.euclid.tuple3D.Vector3D;
 
 public class ExternalForcePointDescription extends KinematicPointDescription
 {
 
-   public ExternalForcePointDescription(String name, Vector3d offsetFromJoint)
+   public ExternalForcePointDescription(String name, Vector3D offsetFromJoint)
    {
       super(name, offsetFromJoint);
    }

@@ -2,9 +2,8 @@ package us.ihmc.avatar.logProcessor;
 
 import java.util.LinkedHashMap;
 
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.dataStructures.YoVariableHolder;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -149,17 +148,17 @@ public class LogDataRawSensorMap
       return rawJointTauMap.get(jointName).getDoubleValue();
    }
 
-   public void getRawIMUOrientation(String imuName, Quat4d orientationToPack)
+   public void getRawIMUOrientation(String imuName, Quaternion orientationToPack)
    {
       rawIMUOrientationMap.get(imuName).get(orientationToPack);
    }
 
-   public void getRawIMUAngularVelocity(String imuName, Vector3d angularVelocityToPack)
+   public void getRawIMUAngularVelocity(String imuName, Vector3D angularVelocityToPack)
    {
       rawIMUAngularVelocityMap.get(imuName).get(angularVelocityToPack);
    }
 
-   public void getRawIMULinearAcceleration(String imuName, Vector3d linearAccelerationToPack)
+   public void getRawIMULinearAcceleration(String imuName, Vector3D linearAccelerationToPack)
    {
       rawIMULinearAccelerationMap.get(imuName).get(linearAccelerationToPack);
    }

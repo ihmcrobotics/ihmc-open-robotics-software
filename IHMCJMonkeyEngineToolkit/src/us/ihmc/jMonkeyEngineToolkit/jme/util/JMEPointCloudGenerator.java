@@ -4,9 +4,6 @@ import java.nio.FloatBuffer;
 import java.util.Collection;
 import java.util.Iterator;
 
-import javax.vecmath.Point3f;
-import javax.vecmath.Tuple3f;
-
 import com.jme3.asset.AssetManager;
 import com.jme3.material.Material;
 import com.jme3.material.RenderState.BlendMode;
@@ -20,6 +17,9 @@ import com.jme3.scene.Mesh.Mode;
 import com.jme3.scene.Node;
 import com.jme3.scene.VertexBuffer;
 import com.jme3.util.BufferUtils;
+
+import us.ihmc.euclid.tuple3D.Point3D32;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 
 public class JMEPointCloudGenerator
 {
@@ -145,18 +145,18 @@ public class JMEPointCloudGenerator
       return generatePointCloudGraph(coords, null);
    }
    
-   public Node generatePointCloudGraph(Point3f[] pointCoordinates3d)
+   public Node generatePointCloudGraph(Point3D32[] pointCoordinates3d)
    {
       return generatePointCloudGraph(pointCoordinates3d, (ColorRGBA[]) null);
    }
    
-   public Node generatePointCloudGraph(Point3f[] pointCoordinates3d, ColorRGBA[] colorsRGBA)
+   public Node generatePointCloudGraph(Point3D32[] pointCoordinates3d, ColorRGBA[] colorsRGBA)
    {
       Vector3f[] vectorArray = new Vector3f[pointCoordinates3d.length];
       
       for (int i = 0; i < pointCoordinates3d.length; i++)
       {
-         vectorArray[i] = new Vector3f(pointCoordinates3d[i].getX(), pointCoordinates3d[i].getY(), pointCoordinates3d[i].getZ());
+         vectorArray[i] = new Vector3f(pointCoordinates3d[i].getX32(), pointCoordinates3d[i].getY32(), pointCoordinates3d[i].getZ32());
       }
 
       return generatePointCloudGraph(vectorArray, colorsRGBA);
@@ -169,7 +169,7 @@ public class JMEPointCloudGenerator
       return generatePointCloudGraph(coords, null);
    }
 
-   public <T extends Tuple3f> Node generatePointCloudGraph(Collection<T> pointCoordinates3d)
+   public <T extends Tuple3DBasics> Node generatePointCloudGraph(Collection<T> pointCoordinates3d)
    {
       FloatBuffer coords = BufferUtils.createFloatBuffer(3 * pointCoordinates3d.size());
       Iterator<T> it = pointCoordinates3d.iterator();
@@ -177,7 +177,7 @@ public class JMEPointCloudGenerator
       while (it.hasNext())
       {
          current = it.next();
-         coords.put(current.getX()).put(current.getY()).put(current.getZ());
+         coords.put(current.getX32()).put(current.getY32()).put(current.getZ32());
       }
 
       coords.rewind();
@@ -236,7 +236,7 @@ public class JMEPointCloudGenerator
       return generatePointCloudGraph(coords, colors);
    }
 
-   public Node generatePointCloudGraph(Point3f[] pointCloud, Collection<ColorRGBA> colorsRGBA) throws Exception
+   public Node generatePointCloudGraph(Point3D32[] pointCloud, Collection<ColorRGBA> colorsRGBA) throws Exception
    {
       if (colorsRGBA == null)
          throw new Exception("point cloud colors must not be null!");
@@ -245,11 +245,11 @@ public class JMEPointCloudGenerator
          throw new Exception("There should be a color value for each point, if colors are used!");
 
       FloatBuffer pointBuffer = BufferUtils.createFloatBuffer(3 * pointCloud.length);
-      for(Point3f point : pointCloud)
+      for(Point3D32 point : pointCloud)
       {
-         pointBuffer.put(point.getX());
-         pointBuffer.put(point.getY());
-         pointBuffer.put(point.getZ());
+         pointBuffer.put(point.getX32());
+         pointBuffer.put(point.getY32());
+         pointBuffer.put(point.getZ32());
       }
       pointBuffer.rewind();
 

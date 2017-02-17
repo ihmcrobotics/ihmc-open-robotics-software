@@ -2,7 +2,7 @@ package us.ihmc.quadrupedRobotics.planning.chooser.footstepChooser;
 
 import us.ihmc.quadrupedRobotics.controller.position.states.QuadrupedPositionBasedCrawlControllerParameters;
 
-import javax.vecmath.Vector2d;
+import us.ihmc.euclid.tuple2D.Vector2D;
 
 public class DefaultSwingTargetGeneratorParameters implements QuadrupedPositionBasedCrawlControllerParameters
 {
@@ -17,7 +17,7 @@ public class DefaultSwingTargetGeneratorParameters implements QuadrupedPositionB
    
    
    private final double comCloseToFinalDesiredTransitionRadius = 0.10;
-   private final Vector2d desiredCoMOffset = new Vector2d(0.0, 0.0);
+   private final Vector2D desiredCoMOffset = new Vector2D(0.0, 0.0);
    
    @Override
    public double getMinimumVelocityForFullSkew()
@@ -96,7 +96,7 @@ public class DefaultSwingTargetGeneratorParameters implements QuadrupedPositionB
    }
 
    @Override
-   public Vector2d getDefaultDesiredCoMOffset()
+   public Vector2D getDefaultDesiredCoMOffset()
    {
       return desiredCoMOffset;
    }

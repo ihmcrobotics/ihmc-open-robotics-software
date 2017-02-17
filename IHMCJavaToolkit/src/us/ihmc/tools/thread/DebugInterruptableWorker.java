@@ -16,6 +16,7 @@ public class DebugInterruptableWorker extends InterruptableWorker
       result = startNumber;
    }
 
+   @Override
    public STATE doWork()
    {
       while (!isInterrupted())
@@ -56,6 +57,7 @@ public class DebugInterruptableWorker extends InterruptableWorker
       }
    }
 
+   @Override
    public Object getCurrentResult()
    {
       return result;
@@ -178,6 +180,7 @@ public class DebugInterruptableWorker extends InterruptableWorker
          this.worker = worker;
       }
 
+      @Override
       public void run()
       {
          worker.setCurrentState(STATE.INTERRUPTED);
@@ -189,8 +192,6 @@ public class DebugInterruptableWorker extends InterruptableWorker
          catch (Exception e)
          {
          }
-         ;
       }
-
    }
 }

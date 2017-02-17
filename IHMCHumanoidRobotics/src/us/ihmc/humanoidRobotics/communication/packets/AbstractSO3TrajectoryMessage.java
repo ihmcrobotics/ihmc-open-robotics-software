@@ -2,18 +2,17 @@ package us.ihmc.humanoidRobotics.communication.packets;
 
 import java.util.Random;
 
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.communication.packets.QueueableMessage;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosIgnoredField;
+import us.ihmc.euclid.interfaces.Transformable;
+import us.ihmc.euclid.transform.interfaces.Transform;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.geometry.transformables.Transformable;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSO3TrajectoryPointList;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -52,9 +51,9 @@ public abstract class AbstractSO3TrajectoryMessage<T extends AbstractSO3Trajecto
       setExecutionMode(so3TrajectoryMessage.getExecutionMode(), so3TrajectoryMessage.getPreviousMessageId());
    }
 
-   public AbstractSO3TrajectoryMessage(double trajectoryTime, Quat4d desiredOrientation)
+   public AbstractSO3TrajectoryMessage(double trajectoryTime, Quaternion desiredOrientation)
    {
-      Vector3d zeroAngularVelocity = new Vector3d();
+      Vector3D zeroAngularVelocity = new Vector3D();
       taskspaceTrajectoryPoints = new SO3TrajectoryPointMessage[] {new SO3TrajectoryPointMessage(trajectoryTime, desiredOrientation, zeroAngularVelocity)};
    }
 
@@ -94,14 +93,14 @@ public abstract class AbstractSO3TrajectoryMessage<T extends AbstractSO3Trajecto
     * @param orientation define the desired 3D orientation to be reached at this trajectory point. It is expressed in world frame.
     * @param angularVelocity define the desired 3D angular velocity to be reached at this trajectory point. It is expressed in world frame.
     */
-   public final void setTrajectoryPoint(int trajectoryPointIndex, double time, Quat4d orientation, Vector3d angularVelocity)
+   public final void setTrajectoryPoint(int trajectoryPointIndex, double time, Quaternion orientation, Vector3D angularVelocity)
    {
       rangeCheck(trajectoryPointIndex);
       taskspaceTrajectoryPoints[trajectoryPointIndex] = new SO3TrajectoryPointMessage(time, orientation, angularVelocity);
    }
 
    @Override
-   public void applyTransform(RigidBodyTransform transform)
+   public void applyTransform(Transform transform)
    {
       for (int i = 0; i < getNumberOfTrajectoryPoints(); i++)
          taskspaceTrajectoryPoints[i].applyTransform(transform);

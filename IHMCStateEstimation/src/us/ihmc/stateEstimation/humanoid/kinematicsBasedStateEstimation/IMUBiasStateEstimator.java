@@ -9,10 +9,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.vecmath.AxisAngle4d;
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -62,8 +61,8 @@ public class IMUBiasStateEstimator implements IMUBiasProvider
 
    private final TwistCalculator twistCalculator;
 
-   private final Vector3d gravityVectorInWorld = new Vector3d();
-   private final Vector3d zUpVector = new Vector3d();
+   private final Vector3D gravityVectorInWorld = new Vector3D();
+   private final Vector3D zUpVector = new Vector3D();
 
    private final boolean isAccelerationIncludingGravity;
    private final double updateDT;
@@ -152,17 +151,17 @@ public class IMUBiasStateEstimator implements IMUBiasProvider
 
    private final Twist twist = new Twist();
 
-   private final Vector3d measurement = new Vector3d();
-   private final Vector3d measurementInWorld = new Vector3d();
-   private final Vector3d measurementNormalizedInWorld = new Vector3d();
-   private final Vector3d measurementMinusGravity = new Vector3d();
-   private final Vector3d measurementMinusGravityInWorld = new Vector3d();
-   private final Vector3d measurementBias = new Vector3d();
+   private final Vector3D measurement = new Vector3D();
+   private final Vector3D measurementInWorld = new Vector3D();
+   private final Vector3D measurementNormalizedInWorld = new Vector3D();
+   private final Vector3D measurementMinusGravity = new Vector3D();
+   private final Vector3D measurementMinusGravityInWorld = new Vector3D();
+   private final Vector3D measurementBias = new Vector3D();
 
-   private final Vector3d biasRotationAxis = new Vector3d();
-   private final AxisAngle4d biasAxisAngle = new AxisAngle4d();
-   private final Matrix3d orientationMeasurement = new Matrix3d();
-   private final Matrix3d orientationMeasurementTransposed = new Matrix3d();
+   private final Vector3D biasRotationAxis = new Vector3D();
+   private final AxisAngle biasAxisAngle = new AxisAngle();
+   private final RotationMatrix orientationMeasurement = new RotationMatrix();
+   private final RotationMatrix orientationMeasurementTransposed = new RotationMatrix();
 
    public void compute(List<RigidBody> trustedFeet)
    {
@@ -225,7 +224,7 @@ public class IMUBiasStateEstimator implements IMUBiasProvider
          if (isBiasEstimated.get(imuIndex).getBooleanValue())
          {
             imuSensor.getOrientationMeasurement(orientationMeasurement);
-            orientationMeasurementTransposed.transpose(orientationMeasurement);
+            orientationMeasurementTransposed.setAndTranspose(orientationMeasurement);
 
             imuSensor.getAngularVelocityMeasurement(measurement);
             angularVelocityBiases.get(imuIndex).update(measurement);
@@ -242,7 +241,7 @@ public class IMUBiasStateEstimator implements IMUBiasProvider
 
             if (isAccelerationIncludingGravity)
             {
-               measurementNormalizedInWorld.normalize(measurementInWorld);
+               measurementNormalizedInWorld.setAndNormalize(measurementInWorld);
 
                biasRotationAxis.cross(zUpVector, measurementNormalizedInWorld);
                double biasMagnitude = zUpVector.angle(measurementNormalizedInWorld);
@@ -283,7 +282,7 @@ public class IMUBiasStateEstimator implements IMUBiasProvider
    }
 
    @Override
-   public void getAngularVelocityBiasInIMUFrame(IMUSensorReadOnly imu, Vector3d angularVelocityBiasToPack)
+   public void getAngularVelocityBiasInIMUFrame(IMUSensorReadOnly imu, Vector3D angularVelocityBiasToPack)
    {
       Integer imuIndex = imuToIndexMap.get(imu);
       if (!enableIMUBiasCompensation.getBooleanValue() || imuIndex == null)
@@ -303,7 +302,7 @@ public class IMUBiasStateEstimator implements IMUBiasProvider
    }
 
    @Override
-   public void getAngularVelocityBiasInWorldFrame(IMUSensorReadOnly imu, Vector3d angularVelocityBiasToPack)
+   public void getAngularVelocityBiasInWorldFrame(IMUSensorReadOnly imu, Vector3D angularVelocityBiasToPack)
    {
       Integer imuIndex = imuToIndexMap.get(imu);
       if (!enableIMUBiasCompensation.getBooleanValue() || imuIndex == null)
@@ -323,7 +322,7 @@ public class IMUBiasStateEstimator implements IMUBiasProvider
    }
 
    @Override
-   public void getLinearAccelerationBiasInIMUFrame(IMUSensorReadOnly imu, Vector3d linearAccelerationBiasToPack)
+   public void getLinearAccelerationBiasInIMUFrame(IMUSensorReadOnly imu, Vector3D linearAccelerationBiasToPack)
    {
       Integer imuIndex = imuToIndexMap.get(imu);
       if (!enableIMUBiasCompensation.getBooleanValue() || imuIndex == null)
@@ -343,7 +342,7 @@ public class IMUBiasStateEstimator implements IMUBiasProvider
    }
 
    @Override
-   public void getLinearAccelerationBiasInWorldFrame(IMUSensorReadOnly imu, Vector3d linearAccelerationBiasToPack)
+   public void getLinearAccelerationBiasInWorldFrame(IMUSensorReadOnly imu, Vector3D linearAccelerationBiasToPack)
    {
       Integer imuIndex = imuToIndexMap.get(imu);
       if (!enableIMUBiasCompensation.getBooleanValue() || imuIndex == null)

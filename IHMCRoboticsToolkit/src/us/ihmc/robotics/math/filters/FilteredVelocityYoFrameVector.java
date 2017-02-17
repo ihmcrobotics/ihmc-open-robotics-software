@@ -1,7 +1,6 @@
 package us.ihmc.robotics.math.filters;
 
-import javax.vecmath.Tuple3d;
-
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameTuple;
@@ -98,7 +97,7 @@ public class FilteredVelocityYoFrameVector extends YoFrameVector
       zDot.update();
    }
 
-   public void update(Tuple3d tuple)
+   public void update(Tuple3DBasics tuple)
    {
       xDot.update(tuple.getX());
       yDot.update(tuple.getY());

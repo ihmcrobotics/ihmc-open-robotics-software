@@ -1,17 +1,19 @@
 package us.ihmc.robotics.geometry;
 
 import org.ejml.data.DenseMatrix64F;
+
+import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.transform.AffineTransform;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
-import javax.vecmath.AxisAngle4d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
 public class TransformTools
 {
-   public static Quat4d getTransformedQuat(Quat4d quat4d, RigidBodyTransform transform3D)
+   public static Quaternion getTransformedQuat(Quaternion quat4d, RigidBodyTransform transform3D)
    {
       ReferenceFrame ending = ReferenceFrame.constructARootFrame("ending", false, true, true);
       ReferenceFrame starting = ReferenceFrame.constructFrameWithUnchangingTransformToParent("starting", ending, transform3D, false, true, true);
@@ -22,7 +24,7 @@ public class TransformTools
       return start.getQuaternionCopy();
    }
 
-   public static Point3d getTransformedPoint(Point3d point3d, RigidBodyTransform transform3D)
+   public static Point3D getTransformedPoint(Point3D point3d, RigidBodyTransform transform3D)
    {
       ReferenceFrame ending = ReferenceFrame.constructARootFrame("ending", false, true, true);
       ReferenceFrame starting = ReferenceFrame.constructFrameWithUnchangingTransformToParent("starting", ending, transform3D, false, true, true);
@@ -33,7 +35,7 @@ public class TransformTools
       return framePoint.getPoint();
    }
 
-   public static Vector3d getTransformedVector(Vector3d vector3d, RigidBodyTransform transform3D)
+   public static Vector3D getTransformedVector(Vector3D vector3d, RigidBodyTransform transform3D)
    {
       ReferenceFrame ending = ReferenceFrame.constructARootFrame("ending", false, true, true);
       ReferenceFrame starting = ReferenceFrame.constructFrameWithUnchangingTransformToParent("starting", ending, transform3D, false, true, true);
@@ -47,8 +49,8 @@ public class TransformTools
    public static void main(String[] args)
    {
       RigidBodyTransform t = new RigidBodyTransform();
-      t.setTranslationAndIdentityRotation(new Vector3d(4.5, 6.6, 22));
-      System.out.println(getTransformedPoint(new Point3d(0.0, 1.0, 4.6), t));
+      t.setTranslationAndIdentityRotation(new Vector3D(4.5, 6.6, 22));
+      System.out.println(getTransformedPoint(new Point3D(0.0, 1.0, 4.6), t));
    }
 
    public static double getMaxLInfiniteDistance(RigidBodyTransform t1, RigidBodyTransform t2)
@@ -95,7 +97,7 @@ public class TransformTools
       return ret;
    }
 
-   public static RigidBodyTransform yawPitchDegreesTransform(Vector3d center, double yawCCWDegrees, double pitchDownDegrees)
+   public static RigidBodyTransform yawPitchDegreesTransform(Vector3D center, double yawCCWDegrees, double pitchDownDegrees)
    {
       RigidBodyTransform location = new RigidBodyTransform();
       location.setRotationYawAndZeroTranslation(Math.toRadians(yawCCWDegrees));
@@ -111,10 +113,10 @@ public class TransformTools
 
    public static RigidBodyTransform createTranslationTransform(double x, double y, double z)
    {
-      return createTranslationTransform(new Vector3d(x, y, z));
+      return createTranslationTransform(new Vector3D(x, y, z));
    }
 
-   public static RigidBodyTransform createTranslationTransform(Vector3d translation)
+   public static RigidBodyTransform createTranslationTransform(Vector3D translation)
    {
       RigidBodyTransform transform = new RigidBodyTransform();
       transform.setTranslation(translation);
@@ -124,10 +126,10 @@ public class TransformTools
 
    public static RigidBodyTransform createTransformFromTranslationAndEulerAngles(double x, double y, double z, double roll, double pitch, double yaw)
    {
-      return createTransformFromTranslationAndEulerAngles(new Vector3d(x, y, z), new Vector3d(roll, pitch, yaw));
+      return createTransformFromTranslationAndEulerAngles(new Vector3D(x, y, z), new Vector3D(roll, pitch, yaw));
    }
 
-   public static RigidBodyTransform createTransformFromTranslationAndEulerAngles(Vector3d translation, Vector3d eulerAngles)
+   public static RigidBodyTransform createTransformFromTranslationAndEulerAngles(Vector3D translation, Vector3D eulerAngles)
    {
       RigidBodyTransform transform = new RigidBodyTransform();
       transform.setRotationEulerAndZeroTranslation(eulerAngles);
@@ -140,7 +142,7 @@ public class TransformTools
    {
       RigidBodyTransform transform = new RigidBodyTransform(originalTransform);
 
-      Vector3d localZTranslation = new Vector3d(0.0, 0.0, magnitude);
+      Vector3D localZTranslation = new Vector3D(0.0, 0.0, magnitude);
       RigidBodyTransform postTranslation = new RigidBodyTransform();
       postTranslation.setTranslationAndIdentityRotation(localZTranslation);
       transform.multiply(postTranslation);
@@ -152,7 +154,7 @@ public class TransformTools
    {
       RigidBodyTransform transform = new RigidBodyTransform(originalTransform);
 
-      Vector3d localTranslation = new Vector3d(0.0, magnitude, 0.0);
+      Vector3D localTranslation = new Vector3D(0.0, magnitude, 0.0);
       RigidBodyTransform postTranslation = new RigidBodyTransform();
       postTranslation.setTranslationAndIdentityRotation(localTranslation);
       transform.multiply(postTranslation);
@@ -164,7 +166,7 @@ public class TransformTools
    {
       RigidBodyTransform transform = new RigidBodyTransform(originalTransform);
 
-      Vector3d localTranslation = new Vector3d(magnitude, 0.0, 0.0);
+      Vector3D localTranslation = new Vector3D(magnitude, 0.0, 0.0);
       RigidBodyTransform postTranslation = new RigidBodyTransform();
       postTranslation.setTranslationAndIdentityRotation(localTranslation);
       transform.multiply(postTranslation);
@@ -176,15 +178,35 @@ public class TransformTools
    {
       RigidBodyTransform transform = new RigidBodyTransform(originalTransform);
 
-      Vector3d localTranslation = new Vector3d(localX, localY, localZ);
+      Vector3D localTranslation = new Vector3D(localX, localY, localZ);
       RigidBodyTransform postTranslation = new RigidBodyTransform();
       postTranslation.setTranslationAndIdentityRotation(localTranslation);
       transform.multiply(postTranslation);
 
       return transform;
    }
-   
+
    public static void rotate(RigidBodyTransform transform, double angle, Axis axis)
+   {
+      RigidBodyTransform rotator = new RigidBodyTransform();
+
+      if (axis == Axis.X)
+      {
+         rotator.setRotationRollAndZeroTranslation(angle);
+      }
+      else if (axis == Axis.Y)
+      {
+         rotator.setRotationPitchAndZeroTranslation(angle);
+      }
+      else if (axis == Axis.Z)
+      {
+         rotator.setRotationYawAndZeroTranslation(angle);
+      }
+
+      transform.multiply(rotator);
+   }
+
+   public static void rotate(AffineTransform transform, double angle, Axis axis)
    {
       RigidBodyTransform rotator = new RigidBodyTransform();
 
@@ -218,14 +240,14 @@ public class TransformTools
    
    public static double getMagnitudeOfAngleOfRotation(RigidBodyTransform rigidBodyTransform)
    {
-      AxisAngle4d axisAngle4d = new AxisAngle4d();
+      AxisAngle axisAngle4d = new AxisAngle();
       rigidBodyTransform.getRotation(axisAngle4d);
       return Math.abs(axisAngle4d.getAngle());
    }
    
    public static double getMagnitudeOfTranslation(RigidBodyTransform rigidBodyTransform)
    {
-      Vector3d vector3d = new Vector3d();
+      Vector3D vector3d = new Vector3D();
       rigidBodyTransform.getTranslation(vector3d);
       return vector3d.length();
    }

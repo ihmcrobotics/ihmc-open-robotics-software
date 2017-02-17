@@ -3,8 +3,7 @@ package us.ihmc.graphicsDescription.plotting.artifact;
 import java.awt.BasicStroke;
 import java.awt.Color;
 
-import javax.vecmath.Point2d;
-
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.graphicsDescription.plotting.Graphics2DAdapter;
 import us.ihmc.graphicsDescription.plotting.Plotter2DAdapter;
 
@@ -15,16 +14,16 @@ import us.ihmc.graphicsDescription.plotting.Plotter2DAdapter;
  */
 public class PixelLineArtifact extends Artifact
 {
-   private Point2d pointOne;
-   private Point2d pointTwo;
+   private Point2D pointOne;
+   private Point2D pointTwo;
    private BasicStroke basicStroke;
    
-   public PixelLineArtifact(String id, Point2d pointOne, Point2d pointTwo)
+   public PixelLineArtifact(String id, Point2D pointOne, Point2D pointTwo)
    {
       this(id, pointOne, pointTwo, Color.BLACK, 1.0f);
    }
    
-   public PixelLineArtifact(String id, Point2d pointOne, Point2d pointTwo, Color color, float width)
+   public PixelLineArtifact(String id, Point2D pointOne, Point2D pointTwo, Color color, float width)
    {
       super(id);
       
@@ -48,7 +47,7 @@ public class PixelLineArtifact extends Artifact
    }
 
    @Override
-   public void drawLegend(Plotter2DAdapter graphics, Point2d origin)
+   public void drawLegend(Plotter2DAdapter graphics, Point2D origin)
    {
    }
 
@@ -57,12 +56,12 @@ public class PixelLineArtifact extends Artifact
    {
    }
 
-   public void setPointOne(Point2d pointOne)
+   public void setPointOne(Point2D pointOne)
    {
       this.pointOne = pointOne;
    }
 
-   public void setPointTwo(Point2d pointTwo)
+   public void setPointTwo(Point2D pointTwo)
    {
       this.pointTwo = pointTwo;
    }

@@ -4,8 +4,6 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Random;
 
-import javax.vecmath.Vector3d;
-
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.factory.DecompositionFactory;
 import org.ejml.interfaces.decomposition.SingularValueDecomposition;
@@ -13,10 +11,10 @@ import org.ejml.ops.CommonOps;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVectorTest;
-import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.random.RandomTools;
 
 /**
@@ -25,16 +23,16 @@ import us.ihmc.robotics.random.RandomTools;
  */
 public class PointJacobianTest
 {
-   private static final Vector3d X = new Vector3d(1.0, 0.0, 0.0);
-   private static final Vector3d Y = new Vector3d(0.0, 1.0, 0.0);
-   private static final Vector3d Z = new Vector3d(0.0, 0.0, 1.0);
+   private static final Vector3D X = new Vector3D(1.0, 0.0, 0.0);
+   private static final Vector3D Y = new Vector3D(0.0, 1.0, 0.0);
+   private static final Vector3D Z = new Vector3D(0.0, 0.0, 1.0);
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testVersusNumericalDifferentiation()
    {
       Random random = new Random(1252523L);
-      Vector3d[] jointAxes = new Vector3d[]
+      Vector3D[] jointAxes = new Vector3D[]
       {
          X, Y, Z, Y, Y, X
       };
@@ -59,7 +57,7 @@ public class PointJacobianTest
       DenseMatrix64F pointVelocityFromJacobianMatrix = new DenseMatrix64F(3, 1);
       CommonOps.mult(pointJacobian.getJacobianMatrix(), jointVelocities, pointVelocityFromJacobianMatrix);
       FrameVector pointVelocityFromJacobian = new FrameVector(pointJacobian.getFrame());
-      MatrixTools.denseMatrixToVector3d(pointVelocityFromJacobianMatrix, pointVelocityFromJacobian.getVector(), 0, 0);
+      pointVelocityFromJacobian.getVector().set(pointVelocityFromJacobianMatrix);
 
       FramePoint point2 = new FramePoint(point);
       point2.changeFrame(endEffector.getBodyFixedFrame());
@@ -79,7 +77,7 @@ public class PointJacobianTest
    public void testSingularValuesOfTwoPointJacobians()
    {
       Random random = new Random(12351235L);
-      Vector3d[] jointAxes = new Vector3d[]
+      Vector3D[] jointAxes = new Vector3D[]
       {
          X, Y, Z, Y, Y, X
       };

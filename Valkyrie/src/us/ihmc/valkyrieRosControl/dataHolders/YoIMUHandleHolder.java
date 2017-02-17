@@ -1,12 +1,10 @@
 package us.ihmc.valkyrieRosControl.dataHolders;
 
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.rosControl.wholeRobot.IMUHandle;
 
@@ -79,26 +77,23 @@ public class YoIMUHandleHolder
    }
 
 
-   public void packLinearAcceleration(Vector3d accelerationToPack)
+   public void packLinearAcceleration(Vector3D accelerationToPack)
    {
       accelerationToPack.setX(this.xdd.getDoubleValue());
       accelerationToPack.setY(this.ydd.getDoubleValue());
       accelerationToPack.setZ(this.zdd.getDoubleValue());
    }
    
-   public void packAngularVelocity(Vector3d angularVelocityToPack)
+   public void packAngularVelocity(Vector3D angularVelocityToPack)
    {
       angularVelocityToPack.setX(this.theta_x.getDoubleValue());
       angularVelocityToPack.setY(this.theta_y.getDoubleValue());
       angularVelocityToPack.setZ(this.theta_z.getDoubleValue());
    }
    
-   public void packOrientation(Quat4d orientationToPack)
+   public void packOrientation(Quaternion orientationToPack)
    {
-      orientationToPack.setW(q_w.getDoubleValue());
-      orientationToPack.setX(q_x.getDoubleValue());
-      orientationToPack.setY(q_y.getDoubleValue());
-      orientationToPack.setZ(q_z.getDoubleValue());
+      orientationToPack.set(q_w.getDoubleValue(), q_x.getDoubleValue(), q_y.getDoubleValue(), q_z.getDoubleValue());
    }
    
 }

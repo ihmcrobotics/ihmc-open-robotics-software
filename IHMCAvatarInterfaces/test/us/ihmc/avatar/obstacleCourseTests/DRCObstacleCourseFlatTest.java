@@ -6,11 +6,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Tuple3d;
-import javax.vecmath.Vector3d;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -24,6 +19,10 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.Handstep;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ChestTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataCommand;
@@ -115,8 +114,8 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
 
       assertTrue(success);
 
-      Point3d center = new Point3d(-8.956281888358388E-4, -3.722237566790175E-7, 0.8882009563211146);
-      Vector3d plusMinusVector = new Vector3d(0.2, 0.2, 0.5);
+      Point3D center = new Point3D(-8.956281888358388E-4, -3.722237566790175E-7, 0.8882009563211146);
+      Vector3D plusMinusVector = new Vector3D(0.2, 0.2, 0.5);
       BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 
@@ -156,8 +155,8 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
 
       assertTrue(success);
 
-      Point3d center = new Point3d(-8.956281888358388E-4, -3.722237566790175E-7, 0.8882009563211146);
-      Vector3d plusMinusVector = new Vector3d(0.2, 0.2, 0.5);
+      Point3D center = new Point3D(-8.956281888358388E-4, -3.722237566790175E-7, 0.8882009563211146);
+      Vector3D plusMinusVector = new Vector3D(0.2, 0.2, 0.5);
       BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 
@@ -200,8 +199,8 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
 
       assertTrue(success);
 
-      Point3d center = new Point3d(1.2315617729419353, 0.14530717103231391, 0.8358344340816537);
-      Vector3d plusMinusVector = new Vector3d(0.2, 0.2, 0.5);
+      Point3D center = new Point3D(1.2315617729419353, 0.14530717103231391, 0.8358344340816537);
+      Vector3D plusMinusVector = new Vector3D(0.2, 0.2, 0.5);
       BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 
@@ -261,8 +260,8 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
 
 	      assertTrue(success);
 
-	      Point3d center = new Point3d(0.24, 0.18, 0.8358344340816537);
-	      Vector3d plusMinusVector = new Vector3d(0.2, 0.2, 0.5);
+	      Point3D center = new Point3D(0.24, 0.18, 0.8358344340816537);
+	      Vector3D plusMinusVector = new Vector3D(0.2, 0.2, 0.5);
 	      BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
 	      drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 
@@ -295,29 +294,29 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
 	      FootstepDataListCommand footstepList = new FootstepDataListCommand();
          FootstepDataCommand footstepCommand = new FootstepDataCommand();
 
-         Point3d position = new Point3d(0.0, 0.2, 0.0);
-         Quat4d orientation = new Quat4d(0.0, 0.0, 0.0, 1.0);
+         Point3D position = new Point3D(0.0, 0.2, 0.0);
+         Quaternion orientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
          footstepCommand.setPose(position, orientation);
          footstepCommand.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
          footstepCommand.setRobotSide(RobotSide.LEFT);
          footstepList.addFootstep(footstepCommand);
 
-         position = new Point3d(0.3, -0.2, 0.0);
-         orientation = new Quat4d(0.0, 0.0, 0.0, 1.0);
+         position = new Point3D(0.3, -0.2, 0.0);
+         orientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
          footstepCommand.setPose(position, orientation);
          footstepCommand.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
          footstepCommand.setRobotSide(RobotSide.RIGHT);
          footstepList.addFootstep(footstepCommand);
 
-         position = new Point3d(0.8, 0.2, 0.0);
-         orientation = new Quat4d(0.0, 0.0, 0.0, 1.0);
+         position = new Point3D(0.8, 0.2, 0.0);
+         orientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
          footstepCommand.setPose(position, orientation);
          footstepCommand.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
          footstepCommand.setRobotSide(RobotSide.LEFT);
          footstepList.addFootstep(footstepCommand);
 
-         position = new Point3d(0.8, -0.2, 0.0);
-         orientation = new Quat4d(0.0, 0.0, 0.0, 1.0);
+         position = new Point3D(0.8, -0.2, 0.0);
+         orientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
          footstepCommand.setPose(position, orientation);
          footstepCommand.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
          footstepCommand.setRobotSide(RobotSide.RIGHT);
@@ -330,29 +329,29 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
 	      footstepList = new FootstepDataListCommand();
          footstepCommand = new FootstepDataCommand();
 
-         position = new Point3d(1.0, 0.2, 0.0);
-         orientation = new Quat4d(0.0, 0.0, 0.0, 1.0);
+         position = new Point3D(1.0, 0.2, 0.0);
+         orientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
          footstepCommand.setPose(position, orientation);
          footstepCommand.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
          footstepCommand.setRobotSide(RobotSide.LEFT);
          footstepList.addFootstep(footstepCommand);
 
-         position = new Point3d(1.3, -0.2, 0.0);
-         orientation = new Quat4d(0.0, 0.0, 0.0, 1.0);
+         position = new Point3D(1.3, -0.2, 0.0);
+         orientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
          footstepCommand.setPose(position, orientation);
          footstepCommand.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
          footstepCommand.setRobotSide(RobotSide.RIGHT);
          footstepList.addFootstep(footstepCommand);
 
-         position = new Point3d(1.8, 0.2, 0.0);
-         orientation = new Quat4d(0.0, 0.0, 0.0, 1.0);
+         position = new Point3D(1.8, 0.2, 0.0);
+         orientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
          footstepCommand.setPose(position, orientation);
          footstepCommand.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
          footstepCommand.setRobotSide(RobotSide.LEFT);
          footstepList.addFootstep(footstepCommand);
 
-         position = new Point3d(1.8, -0.2, 0.0);
-         orientation = new Quat4d(0.0, 0.0, 0.0, 1.0);
+         position = new Point3D(1.8, -0.2, 0.0);
+         orientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
          footstepCommand.setPose(position, orientation);
          footstepCommand.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
          footstepCommand.setRobotSide(RobotSide.RIGHT);
@@ -370,8 +369,8 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
 
 	      assertTrue(success);
 
-	      Point3d center = new Point3d(1.8, 0.0, 0.78);
-	      Vector3d plusMinusVector = new Vector3d(0.2, 0.2, 0.5);
+	      Point3D center = new Point3D(1.8, 0.0, 0.78);
+	      Vector3D plusMinusVector = new Vector3D(0.2, 0.2, 0.5);
 	      BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
 	      drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 
@@ -404,15 +403,15 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
         FootstepDataListCommand footstepList = new FootstepDataListCommand();
         FootstepDataCommand footstepCommand = new FootstepDataCommand();
 
-        Point3d position = new Point3d(0.3, 0.2, 0.0);
-        Quat4d orientation = new Quat4d(0.0, 0.0, 0.0, 1.0);
+        Point3D position = new Point3D(0.3, 0.2, 0.0);
+        Quaternion orientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
         footstepCommand.setPose(position, orientation);
         footstepCommand.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
         footstepCommand.setRobotSide(RobotSide.LEFT);
         footstepList.addFootstep(footstepCommand);
 
-        position = new Point3d(0.3, -0.2, 0.0);
-        orientation = new Quat4d(0.0, 0.0, 0.0, 1.0);
+        position = new Point3D(0.3, -0.2, 0.0);
+        orientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
         footstepCommand.setPose(position, orientation);
         footstepCommand.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
         footstepCommand.setRobotSide(RobotSide.RIGHT);
@@ -423,10 +422,10 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
         // Some chest motions. These will continue during the steps to come afterwards:
         ChestTrajectoryCommand chestCommand = new ChestTrajectoryCommand();
         FrameSO3TrajectoryPointList chestTrajectoryPointList = new FrameSO3TrajectoryPointList();
-        chestTrajectoryPointList.addTrajectoryPoint(0.0, new Quat4d(0.0, 0.0, 0.0, 1.0), new Vector3d());
-        chestTrajectoryPointList.addTrajectoryPoint(1.0, new Quat4d(0.2, 0.0, 0.0, 1.0), new Vector3d());
-        chestTrajectoryPointList.addTrajectoryPoint(2.0, new Quat4d(-0.2, 0.0, 0.0, 1.0), new Vector3d());
-        chestTrajectoryPointList.addTrajectoryPoint(3.0, new Quat4d(0.0, 0.0, 0.0, 1.0), new Vector3d());
+        chestTrajectoryPointList.addTrajectoryPoint(0.0, new Quaternion(0.0, 0.0, 0.0, 1.0), new Vector3D());
+        chestTrajectoryPointList.addTrajectoryPoint(1.0, new Quaternion(0.2, 0.0, 0.0, 1.0), new Vector3D());
+        chestTrajectoryPointList.addTrajectoryPoint(2.0, new Quaternion(-0.2, 0.0, 0.0, 1.0), new Vector3D());
+        chestTrajectoryPointList.addTrajectoryPoint(3.0, new Quaternion(0.0, 0.0, 0.0, 1.0), new Vector3D());
         chestCommand.setTrajectoryPointList(chestTrajectoryPointList);
         queuedControllerCommands.add(chestCommand);
 
@@ -434,29 +433,29 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
         footstepList = new FootstepDataListCommand();
         footstepCommand = new FootstepDataCommand();
 
-        position = new Point3d(0.65, 0.2, 0.0);
-        orientation = new Quat4d(0.0, 0.0, 0.0, 1.0);
+        position = new Point3D(0.65, 0.2, 0.0);
+        orientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
         footstepCommand.setPose(position, orientation);
         footstepCommand.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
         footstepCommand.setRobotSide(RobotSide.LEFT);
         footstepList.addFootstep(footstepCommand);
 
-        position = new Point3d(0.65, -0.2, 0.0);
-        orientation = new Quat4d(0.0, 0.0, 0.0, 1.0);
+        position = new Point3D(0.65, -0.2, 0.0);
+        orientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
         footstepCommand.setPose(position, orientation);
         footstepCommand.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
         footstepCommand.setRobotSide(RobotSide.RIGHT);
         footstepList.addFootstep(footstepCommand);
 
-        position = new Point3d(1.1, 0.2, 0.0);
-        orientation = new Quat4d(0.0, 0.0, 0.0, 1.0);
+        position = new Point3D(1.1, 0.2, 0.0);
+        orientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
         footstepCommand.setPose(position, orientation);
         footstepCommand.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
         footstepCommand.setRobotSide(RobotSide.LEFT);
         footstepList.addFootstep(footstepCommand);
 
-        position = new Point3d(1.1, -0.2, 0.0);
-        orientation = new Quat4d(0.0, 0.0, 0.0, 1.0);
+        position = new Point3D(1.1, -0.2, 0.0);
+        orientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
         footstepCommand.setPose(position, orientation);
         footstepCommand.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
         footstepCommand.setRobotSide(RobotSide.RIGHT);
@@ -468,10 +467,10 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
         FootTrajectoryCommand footTrajectoryCommand = new FootTrajectoryCommand();
 
         FrameSE3TrajectoryPointList footPointList = new FrameSE3TrajectoryPointList();
-        footPointList.addTrajectoryPoint(0.2, new Point3d(1.1, -0.2, 0.25), new Quat4d(0.0, 0.0, 0.0, 1.0), new Vector3d(), new Vector3d());
-        footPointList.addTrajectoryPoint(0.5, new Point3d(1.1, -0.2, 0.35), new Quat4d(0.0, 0.0, 0.0, 1.0), new Vector3d(), new Vector3d());
-        footPointList.addTrajectoryPoint(1.0, new Point3d(1.1, -0.2, 0.25), new Quat4d(0.0, 0.0, 0.0, 1.0), new Vector3d(), new Vector3d());
-        footPointList.addTrajectoryPoint(2.0, new Point3d(1.1, -0.2, 0.35), new Quat4d(0.0, 0.0, 0.0, 1.0), new Vector3d(), new Vector3d());
+        footPointList.addTrajectoryPoint(0.2, new Point3D(1.1, -0.2, 0.25), new Quaternion(0.0, 0.0, 0.0, 1.0), new Vector3D(), new Vector3D());
+        footPointList.addTrajectoryPoint(0.5, new Point3D(1.1, -0.2, 0.35), new Quaternion(0.0, 0.0, 0.0, 1.0), new Vector3D(), new Vector3D());
+        footPointList.addTrajectoryPoint(1.0, new Point3D(1.1, -0.2, 0.25), new Quaternion(0.0, 0.0, 0.0, 1.0), new Vector3D(), new Vector3D());
+        footPointList.addTrajectoryPoint(2.0, new Point3D(1.1, -0.2, 0.35), new Quaternion(0.0, 0.0, 0.0, 1.0), new Vector3D(), new Vector3D());
 
         footTrajectoryCommand.setTrajectoryPointList(footPointList);
         footTrajectoryCommand.setRobotSide(RobotSide.RIGHT);
@@ -485,8 +484,8 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
 
         assertTrue(success);
 
-        Point3d center = new Point3d(1.1, 0.22, 0.78);
-        Vector3d plusMinusVector = new Vector3d(0.2, 0.2, 0.5);
+        Point3D center = new Point3D(1.1, 0.22, 0.78);
+        Vector3D plusMinusVector = new Vector3D(0.2, 0.2, 0.5);
         BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
         drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 
@@ -519,10 +518,10 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
         FootTrajectoryCommand footTrajectoryCommand = new FootTrajectoryCommand();
 
         FrameSE3TrajectoryPointList footPointList = new FrameSE3TrajectoryPointList();
-        footPointList.addTrajectoryPoint(1.0, new Point3d(0.0, -0.2, 0.25), new Quat4d(0.0, 0.0, 0.0, 1.0), new Vector3d(), new Vector3d());
-        footPointList.addTrajectoryPoint(2.0, new Point3d(0.0, -0.2, 0.15), new Quat4d(0.0, 0.0, 0.0, 1.0), new Vector3d(), new Vector3d());
-        footPointList.addTrajectoryPoint(3.0, new Point3d(0.0, -0.2, 0.25), new Quat4d(0.0, 0.0, 0.0, 1.0), new Vector3d(), new Vector3d());
-        footPointList.addTrajectoryPoint(4.0, new Point3d(0.0, -0.2, 0.15), new Quat4d(0.0, 0.0, 0.0, 1.0), new Vector3d(), new Vector3d());
+        footPointList.addTrajectoryPoint(1.0, new Point3D(0.0, -0.2, 0.25), new Quaternion(0.0, 0.0, 0.0, 1.0), new Vector3D(), new Vector3D());
+        footPointList.addTrajectoryPoint(2.0, new Point3D(0.0, -0.2, 0.15), new Quaternion(0.0, 0.0, 0.0, 1.0), new Vector3D(), new Vector3D());
+        footPointList.addTrajectoryPoint(3.0, new Point3D(0.0, -0.2, 0.25), new Quaternion(0.0, 0.0, 0.0, 1.0), new Vector3D(), new Vector3D());
+        footPointList.addTrajectoryPoint(4.0, new Point3D(0.0, -0.2, 0.15), new Quaternion(0.0, 0.0, 0.0, 1.0), new Vector3D(), new Vector3D());
 
         footTrajectoryCommand.setTrajectoryPointList(footPointList);
         footTrajectoryCommand.setRobotSide(RobotSide.RIGHT);
@@ -534,10 +533,10 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
         footTrajectoryCommand = new FootTrajectoryCommand();
 
         footPointList = new FrameSE3TrajectoryPointList();
-        footPointList.addTrajectoryPoint(1.0, new Point3d(0.0, -0.2, 0.15), new Quat4d(0.1, 0.0, 0.0, 1.0), new Vector3d(), new Vector3d());
-        footPointList.addTrajectoryPoint(2.0, new Point3d(0.0, -0.2, 0.15), new Quat4d(0.0, 0.1, 0.0, 1.0), new Vector3d(), new Vector3d());
-        footPointList.addTrajectoryPoint(3.0, new Point3d(0.0, -0.2, 0.15), new Quat4d(0.0, 0.0, 0.1, 1.0), new Vector3d(), new Vector3d());
-        footPointList.addTrajectoryPoint(4.0, new Point3d(0.0, -0.2, 0.15), new Quat4d(0.0, 0.1, 0.0, 1.0), new Vector3d(), new Vector3d());
+        footPointList.addTrajectoryPoint(1.0, new Point3D(0.0, -0.2, 0.15), new Quaternion(0.1, 0.0, 0.0, 1.0), new Vector3D(), new Vector3D());
+        footPointList.addTrajectoryPoint(2.0, new Point3D(0.0, -0.2, 0.15), new Quaternion(0.0, 0.1, 0.0, 1.0), new Vector3D(), new Vector3D());
+        footPointList.addTrajectoryPoint(3.0, new Point3D(0.0, -0.2, 0.15), new Quaternion(0.0, 0.0, 0.1, 1.0), new Vector3D(), new Vector3D());
+        footPointList.addTrajectoryPoint(4.0, new Point3D(0.0, -0.2, 0.15), new Quaternion(0.0, 0.1, 0.0, 1.0), new Vector3D(), new Vector3D());
 
         footTrajectoryCommand.setTrajectoryPointList(footPointList);
         footTrajectoryCommand.setRobotSide(RobotSide.RIGHT);
@@ -551,8 +550,8 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
 
         assertTrue(success);
 
-        Point3d center = new Point3d(-0.1, 0.18, 0.78);
-        Vector3d plusMinusVector = new Vector3d(0.2, 0.2, 0.5);
+        Point3D center = new Point3D(-0.1, 0.18, 0.78);
+        Vector3D plusMinusVector = new Vector3D(0.2, 0.2, 0.5);
         BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
         drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 
@@ -601,8 +600,8 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
 
       assertTrue(success);
 
-      Point3d center = new Point3d(1.199355605426889, 0.15130115291430654, 0.8414863015120644);
-      Vector3d plusMinusVector = new Vector3d(0.2, 0.3, 0.5);
+      Point3D center = new Point3D(1.199355605426889, 0.15130115291430654, 0.8414863015120644);
+      Vector3D plusMinusVector = new Vector3D(0.2, 0.3, 0.5);
       BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 
@@ -652,8 +651,8 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
 
       assertTrue(success);
 
-      Point3d center = new Point3d(0.011508654344298094, -0.005208268357032689, 0.780662368979778);
-      Vector3d plusMinusVector = new Vector3d(0.2, 0.2, 0.5);
+      Point3D center = new Point3D(0.011508654344298094, -0.005208268357032689, 0.780662368979778);
+      Vector3D plusMinusVector = new Vector3D(0.2, 0.2, 0.5);
       BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 
@@ -687,8 +686,8 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
 
       assertTrue(success);
 
-      Point3d center = new Point3d(2.36472504931194, 0.012458249442189283, 0.7892313252995141);
-      Vector3d plusMinusVector = new Vector3d(0.2, 0.2, 0.5);
+      Point3D center = new Point3D(2.36472504931194, 0.012458249442189283, 0.7892313252995141);
+      Vector3D plusMinusVector = new Vector3D(0.2, 0.2, 0.5);
       BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 
@@ -732,8 +731,8 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
 
       assertTrue(success);
 
-      Point3d center = new Point3d(0.09590605437816137, 1.0379918543616593, 0.8383906558584916);
-      Vector3d plusMinusVector = new Vector3d(0.2, 0.2, 0.5);
+      Point3D center = new Point3D(0.09590605437816137, 1.0379918543616593, 0.8383906558584916);
+      Vector3D plusMinusVector = new Vector3D(0.2, 0.2, 0.5);
       BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 
@@ -779,8 +778,8 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
 
       assertTrue(success);
 
-      Point3d center = new Point3d(0.022704922237925088, 1.0831838988457891, 0.8389256934215261);
-      Vector3d plusMinusVector = new Vector3d(0.2, 0.2, 0.5);
+      Point3D center = new Point3D(0.022704922237925088, 1.0831838988457891, 0.8389256934215261);
+      Vector3D plusMinusVector = new Vector3D(0.2, 0.2, 0.5);
       BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 
@@ -798,8 +797,8 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
 
       drcSimulationTestHelper = new DRCSimulationTestHelper("DRCStandingTest", selectedLocation, simulationTestingParameters, getRobotModel());
 
-      Point3d cameraFix = new Point3d(3.25, 3.25, 1.02);
-      Point3d cameraPosition = new Point3d(6.35, 0.18, 0.97);
+      Point3D cameraFix = new Point3D(3.25, 3.25, 1.02);
+      Point3D cameraPosition = new Point3D(6.35, 0.18, 0.97);
       drcSimulationTestHelper.setupCameraForUnitTest(cameraFix, cameraPosition);
 
       setupCameraForWalkingUpToRamp();
@@ -887,8 +886,8 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
 
       assertTrue(success);
 
-      Point3d center = new Point3d(3.281440097950577, 0.08837997229569997, 0.7855496116044516);
-      Vector3d plusMinusVector = new Vector3d(0.2, 0.2, 0.5);
+      Point3D center = new Point3D(3.281440097950577, 0.08837997229569997, 0.7855496116044516);
+      Vector3D plusMinusVector = new Vector3D(0.2, 0.2, 0.5);
       BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 
@@ -926,8 +925,8 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
 
       assertTrue(success);
 
-      Point3d center = new Point3d(3.1200570722246437, 0.017275273114368033, 0.8697236867426688);
-      Vector3d plusMinusVector = new Vector3d(0.2, 0.2, 0.5);
+      Point3D center = new Point3D(3.1200570722246437, 0.017275273114368033, 0.8697236867426688);
+      Vector3D plusMinusVector = new Vector3D(0.2, 0.2, 0.5);
       BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 
@@ -976,8 +975,8 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
 
       assertTrue(success);
 
-      Point3d center = new Point3d(0.125, 0.03, 0.78);
-      Vector3d plusMinusVector = new Vector3d(0.2, 0.2, 0.5);
+      Point3D center = new Point3D(0.125, 0.03, 0.78);
+      Vector3D plusMinusVector = new Vector3D(0.2, 0.2, 0.5);
       BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 
@@ -986,24 +985,24 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
 
    private void setupCameraForWalkingUpToRamp()
    {
-      Point3d cameraFix = new Point3d(1.8375, -0.16, 0.89);
-      Point3d cameraPosition = new Point3d(1.10, 8.30, 1.37);
+      Point3D cameraFix = new Point3D(1.8375, -0.16, 0.89);
+      Point3D cameraPosition = new Point3D(1.10, 8.30, 1.37);
 
       drcSimulationTestHelper.setupCameraForUnitTest(cameraFix, cameraPosition);
    }
 
    private void setupCameraForSideStepSlipping()
    {
-      Point3d cameraFix = new Point3d(2.0, 0.4, 0.75);
-      Point3d cameraPosition = new Point3d(6.5, 0.4, 0.75);
+      Point3D cameraFix = new Point3D(2.0, 0.4, 0.75);
+      Point3D cameraPosition = new Point3D(6.5, 0.4, 0.75);
 
       drcSimulationTestHelper.setupCameraForUnitTest(cameraFix, cameraPosition);
    }
 
    private void setupCameraForTurningInPlaceAndPassingPI()
    {
-      Point3d cameraFix = new Point3d(0.036, 0.0, 0.89);
-      Point3d cameraPosition = new Point3d(-7, -0.3575, 1.276);
+      Point3D cameraFix = new Point3D(0.036, 0.0, 0.89);
+      Point3D cameraPosition = new Point3D(-7, -0.3575, 1.276);
 
       drcSimulationTestHelper.setupCameraForUnitTest(cameraFix, cameraPosition);
    }
@@ -1030,8 +1029,8 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
    private Handstep createHandstepForTesting(ScriptedHandstepGenerator scriptedHandstepGenerator)
    {
       RobotSide robotSide = RobotSide.LEFT;
-      Tuple3d position = new Point3d(0.6, 0.3, 1.0);
-      Vector3d surfaceNormal = new Vector3d(-1.0, 0.0, 0.0);
+      Tuple3DBasics position = new Point3D(0.6, 0.3, 1.0);
+      Vector3D surfaceNormal = new Vector3D(-1.0, 0.0, 0.0);
       double rotationAngleAboutNormal = 0.0;
       double swingTrajectoryTime = 1.0;
       return scriptedHandstepGenerator.createHandstep(robotSide, position, surfaceNormal, rotationAngleAboutNormal, swingTrajectoryTime);
@@ -1221,7 +1220,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       return scriptedFootstepGenerator.generateFootstepsFromLocationsAndOrientations(robotSides, footstepLocationsAndOrientations);
    }
 
-   protected abstract Vector3d getFootSlipVector();
+   protected abstract Vector3D getFootSlipVector();
 
    protected abstract double getFootSlipTimeDeltaAfterTouchdown();
 

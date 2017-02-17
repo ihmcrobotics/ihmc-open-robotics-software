@@ -1,11 +1,10 @@
 package us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity;
 
-import javax.vecmath.Matrix3d;
-
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameVector2d;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class RateBasedDesiredHeadingControlModule implements DesiredHeadingControlModule
@@ -109,7 +108,7 @@ public class RateBasedDesiredHeadingControlModule implements DesiredHeadingContr
          super("DesiredHeadingFrame", ReferenceFrame.getWorldFrame(), false, false, true);
       }
 
-      private final Matrix3d rotation = new Matrix3d();
+      private final RotationMatrix rotation = new RotationMatrix();
 
       @Override
       protected void updateTransformToParent(RigidBodyTransform transformToParent)
@@ -120,7 +119,7 @@ public class RateBasedDesiredHeadingControlModule implements DesiredHeadingContr
 
       public void setHeadingAngleAndUpdate(double headingAngle)
       {
-         rotation.rotZ(headingAngle);
+         rotation.setToYawMatrix(headingAngle);
          update();
       }
    }

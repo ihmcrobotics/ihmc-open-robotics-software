@@ -12,17 +12,16 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
 
-import javax.vecmath.Vector3d;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.tools.EuclidCoreTestTools;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.testing.JUnitTools;
 
 public class MathToolsTest
 {
@@ -103,11 +102,11 @@ public class MathToolsTest
       for (int i = 0; i < 1000; i++)
       {
          assertTrue(MathTools.isNumber(rand.nextDouble() * 1000.0));
-         assertFalse(MathTools.containsNaN(new Vector3d(rand.nextDouble() * 1000.0, rand.nextDouble() * 1000.0, rand.nextDouble() * 1000.0)));
+         assertFalse(MathTools.containsNaN(new Vector3D(rand.nextDouble() * 1000.0, rand.nextDouble() * 1000.0, rand.nextDouble() * 1000.0)));
       }
 
       assertFalse(MathTools.isNumber(Double.NaN));
-      assertTrue(MathTools.containsNaN(new Vector3d(Double.NaN, Double.NaN, Double.NaN)));
+      assertTrue(MathTools.containsNaN(new Vector3D(Double.NaN, Double.NaN, Double.NaN)));
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -853,14 +852,14 @@ public class MathToolsTest
       roundedNumber = MathTools.floorToGivenPrecision(longDouble, 1e-3);
       assertEquals(roundedNumber, 0.123, 1e-14);
 
-      Vector3d preciseVector = new Vector3d(0.12345678910111213, 100.12345678910111213, 1000.12345678910111213);
-      Vector3d roundedVector = new Vector3d(preciseVector);
+      Vector3D preciseVector = new Vector3D(0.12345678910111213, 100.12345678910111213, 1000.12345678910111213);
+      Vector3D roundedVector = new Vector3D(preciseVector);
 
       MathTools.floorToGivenPrecision(roundedVector, 1e-7);
-      JUnitTools.assertTuple3dEquals(new Vector3d(0.1234567, 100.1234567, 1000.1234567), roundedVector, 1e-12);
+      EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(0.1234567, 100.1234567, 1000.1234567), roundedVector, 1e-12);
 
       MathTools.floorToGivenPrecision(roundedVector, 1e-3);
-      JUnitTools.assertTuple3dEquals(new Vector3d(0.123, 100.123, 1000.123), roundedVector, 1e-14);
+      EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(0.123, 100.123, 1000.123), roundedVector, 1e-14);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -873,8 +872,8 @@ public class MathToolsTest
          assertTrue(MathTools.isFinite(rand.nextFloat() * 1000));
          assertFalse(MathTools.isFinite(rand.nextFloat() / 0.0));
 
-         assertTrue(MathTools.isFinite(new Vector3d(rand.nextDouble() * 1000, rand.nextDouble() * 1000, rand.nextDouble() * 1000)));
-         assertFalse(MathTools.isFinite(new Vector3d(rand.nextDouble() / 0.0, rand.nextDouble() / 0.0, rand.nextDouble() / 0.0)));
+         assertTrue(MathTools.isFinite(new Vector3D(rand.nextDouble() * 1000, rand.nextDouble() * 1000, rand.nextDouble() * 1000)));
+         assertFalse(MathTools.isFinite(new Vector3D(rand.nextDouble() / 0.0, rand.nextDouble() / 0.0, rand.nextDouble() / 0.0)));
 
       }
 

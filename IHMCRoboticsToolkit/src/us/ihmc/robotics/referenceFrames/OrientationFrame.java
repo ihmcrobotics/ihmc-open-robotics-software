@@ -1,7 +1,7 @@
 package us.ihmc.robotics.referenceFrames;
 
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 public class OrientationFrame extends ReferenceFrame
 {

@@ -1,9 +1,9 @@
 package us.ihmc.valkyrie.fingers;
 
-import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.RevoluteJoint;
+import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.PinJoint;
 
 public enum ValkyrieSimulatedFingerJoint

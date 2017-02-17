@@ -1,5 +1,6 @@
 package us.ihmc.quadrupedRobotics.planning;
 
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.quadrupedRobotics.util.TimeInterval;
 import us.ihmc.quadrupedRobotics.util.YoTimeInterval;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -9,8 +10,6 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
-
-import javax.vecmath.Point3d;
 
 public class YoQuadrupedTimedStep extends QuadrupedTimedStep
 {
@@ -62,13 +61,13 @@ public class YoQuadrupedTimedStep extends QuadrupedTimedStep
     * Unsafe for external use.
     */
    @Override
-   protected Point3d getGoalPosition()
+   protected Point3D getGoalPosition()
    {
       return this.goalPosition.getFrameTuple().getPoint();
    }
 
    @Override
-   public void getGoalPosition(Point3d goalPosition)
+   public void getGoalPosition(Point3D goalPosition)
    {
       goalPosition.set(this.goalPosition.getFrameTuple().getPoint());
    }
@@ -82,7 +81,7 @@ public class YoQuadrupedTimedStep extends QuadrupedTimedStep
    }
 
    @Override
-   public void setGoalPosition(Point3d goalPosition)
+   public void setGoalPosition(Point3D goalPosition)
    {
       this.goalPosition.set(goalPosition);
    }

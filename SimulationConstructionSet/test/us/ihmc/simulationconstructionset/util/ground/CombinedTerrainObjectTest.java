@@ -1,13 +1,12 @@
 package us.ihmc.simulationconstructionset.util.ground;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.tools.EuclidCoreTestTools;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
-import us.ihmc.tools.testing.JUnitTools;
 
 public class CombinedTerrainObjectTest
 {
@@ -19,12 +18,12 @@ public class CombinedTerrainObjectTest
    public void testTwoIntersectingBoxes()
    {
       CombinedTerrainObject3D combinedTerrainObject = new CombinedTerrainObject3D("Combined Terrain Object to Test");
-      Point3d pointToCheck = new Point3d();
-      Point3d expectedIntersection = new Point3d();
-      Vector3d expectedNormal = new Vector3d();
+      Point3D pointToCheck = new Point3D();
+      Point3D expectedIntersection = new Point3D();
+      Vector3D expectedNormal = new Vector3D();
 
-      Point3d resultIntersection = new Point3d();
-      Vector3d resultNormal = new Vector3d();
+      Point3D resultIntersection = new Point3D();
+      Vector3D resultNormal = new Vector3D();
       
       setupTwoIntersectingBoxesMadeFromPolygons(combinedTerrainObject);
       
@@ -33,13 +32,13 @@ public class CombinedTerrainObjectTest
       expectedNormal.set(0.0, 1.0, 0.0);
 
       combinedTerrainObject.checkIfInside(pointToCheck.getX(), pointToCheck.getY(), pointToCheck.getZ(), resultIntersection, resultNormal);
-      JUnitTools.assertTuple3dEquals(expectedIntersection, resultIntersection, 1e-4);
-      JUnitTools.assertTuple3dEquals(expectedNormal, resultNormal, 1e-4);
+      EuclidCoreTestTools.assertTuple3DEquals(expectedIntersection, resultIntersection, 1e-4);
+      EuclidCoreTestTools.assertTuple3DEquals(expectedNormal, resultNormal, 1e-4);
    }
 
    private void setupTwoIntersectingBoxesMadeFromPolygons(CombinedTerrainObject3D combinedTerrainObject)
    {
-      Vector3d normalVector = new Vector3d(0.0, 0.0, 1.0);
+      Vector3D normalVector = new Vector3D(0.0, 0.0, 1.0);
       double[][] firstVertices = {{0.0,0.0},{1.0,0.0},{1.0,1.0},{0.0,1.0}};
       ConvexPolygon2d firstConvexPolygon = new ConvexPolygon2d(firstVertices);
       RotatableConvexPolygonTerrainObject firstBox = new RotatableConvexPolygonTerrainObject(normalVector, firstConvexPolygon, 1.0);

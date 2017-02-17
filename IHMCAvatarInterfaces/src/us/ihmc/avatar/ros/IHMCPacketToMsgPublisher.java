@@ -1,13 +1,13 @@
 package us.ihmc.avatar.ros;
 
+import java.lang.reflect.InvocationTargetException;
+
 import org.ros.internal.message.Message;
 
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.utilities.ros.publisher.RosTopicPublisher;
-
-import java.lang.reflect.InvocationTargetException;
 
 public class IHMCPacketToMsgPublisher<T extends Message, U extends Packet> extends RosTopicPublisher<T> implements PacketConsumer<U>
 {

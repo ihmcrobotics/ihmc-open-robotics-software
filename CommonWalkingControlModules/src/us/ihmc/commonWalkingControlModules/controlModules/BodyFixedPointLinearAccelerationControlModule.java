@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.controlModules;
 
-import javax.vecmath.Matrix3d;
-
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
 import us.ihmc.robotics.controllers.PositionPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoEuclideanPositionGains;
 import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
@@ -31,9 +31,9 @@ public class BodyFixedPointLinearAccelerationControlModule
    private final YoFrameVector positionErrorCumulated;
    private final YoFrameVector velocityError;
 
-   private final Matrix3d proportionalGainMatrix;
-   private final Matrix3d derivativeGainMatrix;
-   private final Matrix3d integralGainMatrix;
+   private final Matrix3DReadOnly proportionalGainMatrix;
+   private final Matrix3DReadOnly derivativeGainMatrix;
+   private final Matrix3DReadOnly integralGainMatrix;
 
    private final FrameVector currentVelocity = new FrameVector();
 

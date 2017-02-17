@@ -2,18 +2,17 @@ package us.ihmc.humanoidRobotics.communication.packets.behaviors;
 
 import java.util.Random;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
 import us.ihmc.communication.packets.Packet;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class GraspCylinderPacket extends Packet<GraspCylinderPacket>
 {
    public RobotSide robotSide;
-   public Point3d graspPointInWorld;
-   public Vector3d cylinderLongAxisInWorld;
+   public Point3D graspPointInWorld;
+   public Vector3D cylinderLongAxisInWorld;
 
    public GraspCylinderPacket(Random random)
    {
@@ -26,7 +25,7 @@ public class GraspCylinderPacket extends Packet<GraspCylinderPacket>
    {
    }
 
-   public GraspCylinderPacket(RobotSide robotSide, Point3d graspPointInWorld, Vector3d cylinderLongAxisInWorld)
+   public GraspCylinderPacket(RobotSide robotSide, Point3D graspPointInWorld, Vector3D cylinderLongAxisInWorld)
    {
       this.robotSide = robotSide;
       this.graspPointInWorld = graspPointInWorld;
@@ -38,12 +37,12 @@ public class GraspCylinderPacket extends Packet<GraspCylinderPacket>
       return robotSide;
    }
 
-   public Point3d getGraspPointInWorld()
+   public Point3D getGraspPointInWorld()
    {
       return graspPointInWorld;
    }
 
-   public Vector3d getCylinderLongAxisInWorld()
+   public Vector3D getCylinderLongAxisInWorld()
    {
       return cylinderLongAxisInWorld;
    }

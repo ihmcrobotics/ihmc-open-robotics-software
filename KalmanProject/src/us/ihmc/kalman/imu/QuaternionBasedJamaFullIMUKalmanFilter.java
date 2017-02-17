@@ -1,10 +1,9 @@
 package us.ihmc.kalman.imu;
 
-import javax.vecmath.Quat4d;
-
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.geometry.RotationTools;
 
 /**
@@ -348,9 +347,9 @@ public class QuaternionBasedJamaFullIMUKalmanFilter implements QuaternionBasedFu
          -Math.atan2(a.get(1, 0), -a.get(2, 0)),    // Roll
       };
 
-      Quat4d quaternion = new Quat4d();
-      RotationTools.convertYawPitchRollToQuaternion(yawPitchRoll, quaternion);
-      quaternions[0] = quaternion.getW();
+      Quaternion quaternion = new Quaternion();
+      quaternion.setYawPitchRoll(yawPitchRoll);
+      quaternions[0] = quaternion.getS();
       quaternions[1] = quaternion.getX();
       quaternions[2] = quaternion.getY();
       quaternions[3] = quaternion.getZ();

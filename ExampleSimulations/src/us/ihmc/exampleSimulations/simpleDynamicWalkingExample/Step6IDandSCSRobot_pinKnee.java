@@ -3,12 +3,12 @@ package us.ihmc.exampleSimulations.simpleDynamicWalkingExample;
 import java.util.EnumMap;
 import java.util.LinkedHashMap;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
 import org.ejml.data.DenseMatrix64F;
 
+import us.ihmc.euclid.matrix.Matrix3D;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.exampleSimulations.simpleDynamicWalkingExample.RobotParameters.JointNames;
 import us.ihmc.exampleSimulations.simpleDynamicWalkingExample.RobotParameters.LinkNames;
 import us.ihmc.graphicsDescription.Graphics3DObject;
@@ -17,7 +17,6 @@ import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -49,7 +48,7 @@ public class Step6IDandSCSRobot_pinKnee extends Robot
    private final ReferenceFrame elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevator", worldFrame, new RigidBodyTransform());
    private FramePoint bodyPosition = new FramePoint();
 
-   private final Vector3d jointAxesPinJoints = new Vector3d(0.0, 1.0, 0.0); // rotate around Y-axis (for revolute joints)
+   private final Vector3D jointAxesPinJoints = new Vector3D(0.0, 1.0, 0.0); // rotate around Y-axis (for revolute joints)
    private final RigidBody elevator;
 
    private final SideDependentList<EnumMap<JointNames, OneDoFJoint>> allLegJoints = SideDependentList.createListOfEnumMaps(JointNames.class); // Includes the ankle!
@@ -81,8 +80,8 @@ public class Step6IDandSCSRobot_pinKnee extends Robot
    private double gcOffset = -footZ;
    private double gcRadius = 0.03;
 
-   Vector3d comOffsetBody = new Vector3d(0.0, 0.0, cubeZ / 2.0);
-   Vector3d comOffsetFoot = new Vector3d(footX/2.0 - 0.075 , 0.0, -footZ / 2.0); 
+   Vector3D comOffsetBody = new Vector3D(0.0, 0.0, cubeZ / 2.0);
+   Vector3D comOffsetFoot = new Vector3D(footX/2.0 - 0.075 , 0.0, -footZ / 2.0); 
 
    private double bodyZ, bodyX; //global so that it is created only once (avoid generating garbage)
    public DoubleYoVariable qd_x;
@@ -105,19 +104,19 @@ public class Step6IDandSCSRobot_pinKnee extends Robot
       for (RobotSide robotSide : RobotSide.values)
       {
          // HIP ID (location, joint, and rigidBody) 
-         Vector3d hipOffset = new Vector3d(0.0, robotSide.negateIfRightSide(hipOffsetY), 0.0);
+         Vector3D hipOffset = new Vector3D(0.0, robotSide.negateIfRightSide(hipOffsetY), 0.0);
          RevoluteJoint hipJointID = ScrewTools.addRevoluteJoint(JointNames.HIP.getName(), bodyJointID.getSuccessor(), hipOffset, jointAxesPinJoints); //The parent rigid body of the hip joint is: bodyJointID.getSuccessor()
          allLegJoints.get(robotSide).put(JointNames.HIP, hipJointID);
          createAndAttachCylinderRB(LinkNames.UPPER_LINK, JointNames.HIP, robotSide);
 
          // KNEE ID
-         Vector3d kneeOffset = new Vector3d(0.0, 0.0, kneeOffsetZ);
+         Vector3D kneeOffset = new Vector3D(0.0, 0.0, kneeOffsetZ);
          RevoluteJoint kneeJointID = ScrewTools.addRevoluteJoint(JointNames.KNEE.getName(), hipJointID.getSuccessor(), kneeOffset, jointAxesPinJoints);
          allLegJoints.get(robotSide).put(JointNames.KNEE, kneeJointID);
          createAndAttachCylinderRB(LinkNames.LOWER_LINK, JointNames.KNEE, robotSide);
 
          // ANKLE ID (location, joint, and rigidBody) 
-         Vector3d ankleOffset = new Vector3d(0.0, 0.0, ankleOffsetZ);
+         Vector3D ankleOffset = new Vector3D(0.0, 0.0, ankleOffsetZ);
          RevoluteJoint ankleJointID = ScrewTools.addRevoluteJoint(JointNames.ANKLE.getName(), kneeJointID.getSuccessor(), ankleOffset, jointAxesPinJoints); 
          allLegJoints.get(robotSide).put(JointNames.ANKLE, ankleJointID);
          createAndAttachFootRB(LinkNames.FOOT_LINK, JointNames.ANKLE, robotSide);
@@ -133,7 +132,7 @@ public class Step6IDandSCSRobot_pinKnee extends Robot
       for (RobotSide robotSide : RobotSide.values)
       {
          // HIP SCS
-         PinJoint hipJointSCS = new PinJoint(robotSide.getSideNameFirstLetter() + JointNames.HIP.getName(), new Vector3d(0.0,
+         PinJoint hipJointSCS = new PinJoint(robotSide.getSideNameFirstLetter() + JointNames.HIP.getName(), new Vector3D(0.0,
                robotSide.negateIfRightSide(hipOffsetY), 0.0), this, jointAxesPinJoints);
          hipJointSCS.setLimitStops(-0.75, 0.75, 1e3, 1e1); 
          //It is NOT necessary to set limits in the ID description because if the SCS description doesn't let the robot move passed a point the ID robot won't be able to pass it either
@@ -153,14 +152,14 @@ public class Step6IDandSCSRobot_pinKnee extends Robot
          createAndAttachCylinderLink(LinkNames.UPPER_LINK, JointNames.HIP, robotSide);
 
          // KNEE SCS
-         PinJoint kneeJointSCS = new PinJoint(robotSide.getSideNameFirstLetter() + JointNames.KNEE.getName(), new Vector3d(0.0, 0.0, kneeOffsetZ), this, jointAxesPinJoints);
+         PinJoint kneeJointSCS = new PinJoint(robotSide.getSideNameFirstLetter() + JointNames.KNEE.getName(), new Vector3D(0.0, 0.0, kneeOffsetZ), this, jointAxesPinJoints);
          kneeJointSCS.setLimitStops(-0.01, 1.8, 1e5, 1e3); 
          hipJointSCS.addJoint(kneeJointSCS);
          idToSCSLegJointMap.put(allLegJoints.get(robotSide).get(JointNames.KNEE), kneeJointSCS);
          createAndAttachCylinderLink(LinkNames.LOWER_LINK, JointNames.KNEE, robotSide);
 
          // ANKLE SCS
-         PinJoint ankleJointSCS = new PinJoint(robotSide.getSideNameFirstLetter() + JointNames.ANKLE.getName(), new Vector3d(0.0, 0.0, ankleOffsetZ), this,
+         PinJoint ankleJointSCS = new PinJoint(robotSide.getSideNameFirstLetter() + JointNames.ANKLE.getName(), new Vector3D(0.0, 0.0, ankleOffsetZ), this,
                jointAxesPinJoints);
          ankleJointSCS.setLimitStops(-0.7, 0.7, 1e3, 1e2); 
          
@@ -174,7 +173,7 @@ public class Step6IDandSCSRobot_pinKnee extends Robot
 
          // FEET SCS
          createAndAttachFootLink(LinkNames.FOOT_LINK, JointNames.ANKLE, robotSide);
-         GroundContactPoint gcHeel = new GroundContactPoint(robotSide.getSideNameFirstLetter() + "gcHeel", new Vector3d(-0.1, 0.0, gcOffset), this);
+         GroundContactPoint gcHeel = new GroundContactPoint(robotSide.getSideNameFirstLetter() + "gcHeel", new Vector3D(-0.1, 0.0, gcOffset), this);
          GCpointsHeel.set(robotSide, gcHeel);
          ankleJointSCS.addGroundContactPoint(gcHeel);
          Graphics3DObject graphicsGCheel = ankleJointSCS.getLink().getLinkGraphics();
@@ -187,7 +186,7 @@ public class Step6IDandSCSRobot_pinKnee extends Robot
             setFStoTrue(robotSide);
          }
 
-         GroundContactPoint gcToe = new GroundContactPoint(robotSide.getSideNameFirstLetter() + "gcToe", new Vector3d(0.4, 0.0, gcOffset), this);
+         GroundContactPoint gcToe = new GroundContactPoint(robotSide.getSideNameFirstLetter() + "gcToe", new Vector3D(0.4, 0.0, gcOffset), this);
          GCpointsToe.set(robotSide, gcToe);
          ankleJointSCS.addGroundContactPoint(gcToe);
          Graphics3DObject graphics = ankleJointSCS.getLink().getLinkGraphics();
@@ -217,9 +216,9 @@ public class Step6IDandSCSRobot_pinKnee extends Robot
     * Inertias
     */
 
-   private Matrix3d createInertiaMatrixBox(LinkNames linkName)
+   private Matrix3D createInertiaMatrixBox(LinkNames linkName)
    {
-      Matrix3d inertiaBox = new Matrix3d();
+      Matrix3D inertiaBox = new Matrix3D();
 
       if (linkName == LinkNames.BODY_LINK)
       {
@@ -233,9 +232,9 @@ public class Step6IDandSCSRobot_pinKnee extends Robot
       return inertiaBox;
    }
 
-   private Matrix3d createInertiaMatrixCylinder(LinkNames linkName)
+   private Matrix3D createInertiaMatrixCylinder(LinkNames linkName)
    {
-      Matrix3d inertiaCylinder = new Matrix3d();
+      Matrix3D inertiaCylinder = new Matrix3D();
       inertiaCylinder = RotationalInertiaCalculator.getRotationalInertiaMatrixOfSolidCylinder(RobotParameters.MASSES.get(linkName),
             RobotParameters.RADII.get(linkName), RobotParameters.LENGTHS.get(linkName), Axis.Z);
       return inertiaCylinder;
@@ -248,20 +247,20 @@ public class Step6IDandSCSRobot_pinKnee extends Robot
    /************************* ID ROBOT - Rigid bodies ********************************/
    private void createAndAttachBodyRB(LinkNames linkName, SixDoFJoint bodyJointID)
    {
-      Matrix3d inertiaBody = createInertiaMatrixBox(linkName);
+      Matrix3D inertiaBody = createInertiaMatrixBox(linkName);
       ScrewTools.addRigidBody(linkName.getName(), bodyJointID, inertiaBody, bodyMass, comOffsetBody);
    }
 
    private void createAndAttachCylinderRB(LinkNames linkName, JointNames jointName, RobotSide robotSide)
    {
-      Matrix3d inertiaCylinder = createInertiaMatrixCylinder(linkName);
-      Vector3d comOffsetCylinder = new Vector3d(0.0, 0.0, -RobotParameters.LENGTHS.get(linkName) / 2.0);
+      Matrix3D inertiaCylinder = createInertiaMatrixCylinder(linkName);
+      Vector3D comOffsetCylinder = new Vector3D(0.0, 0.0, -RobotParameters.LENGTHS.get(linkName) / 2.0);
       allLegRigidBodies.get(robotSide).put(linkName, ScrewTools.addRigidBody(linkName.getName(), allLegJoints.get(robotSide).get(jointName), inertiaCylinder, bodyMass, comOffsetCylinder));
    }
 
    private void createAndAttachFootRB(LinkNames linkName, JointNames jointName, RobotSide robotSide)
    {
-      Matrix3d inertiaBody = createInertiaMatrixBox(linkName);
+      Matrix3D inertiaBody = createInertiaMatrixBox(linkName);
       ScrewTools.addRigidBody(linkName.getName(), allLegJoints.get(robotSide).get(JointNames.KNEE), inertiaBody, footMass, comOffsetFoot); 
    }
 
@@ -269,7 +268,7 @@ public class Step6IDandSCSRobot_pinKnee extends Robot
    private void createAndAttachBodyLink(LinkNames linkName)
    {
       Link link = new Link(LinkNames.BODY_LINK.getName());
-      Matrix3d inertiaBody = createInertiaMatrixBox(linkName);
+      Matrix3D inertiaBody = createInertiaMatrixBox(linkName);
       link.setMomentOfInertia(inertiaBody);
       link.setMass(RobotParameters.MASSES.get(LinkNames.BODY_LINK));
       link.setComOffset(comOffsetBody);
@@ -285,10 +284,10 @@ public class Step6IDandSCSRobot_pinKnee extends Robot
    private void createAndAttachCylinderLink(LinkNames linkName, JointNames jointName, RobotSide robotSide)
    {
       Link link = new Link(linkName.getName());
-      Matrix3d inertiaCylinder = createInertiaMatrixCylinder(linkName);
+      Matrix3D inertiaCylinder = createInertiaMatrixCylinder(linkName);
       link.setMomentOfInertia(inertiaCylinder);
       link.setMass(RobotParameters.MASSES.get(linkName));
-      link.setComOffset(new Vector3d(0.0, 0.0, -RobotParameters.LENGTHS.get(linkName) / 2.0));
+      link.setComOffset(new Vector3D(0.0, 0.0, -RobotParameters.LENGTHS.get(linkName) / 2.0));
 
       Graphics3DObject linkGraphics = new Graphics3DObject();
       linkGraphics.addCylinder(-RobotParameters.LENGTHS.get(linkName), RobotParameters.RADII.get(linkName), RobotParameters.APPEARANCE.get(linkName));
@@ -301,7 +300,7 @@ public class Step6IDandSCSRobot_pinKnee extends Robot
    private void createAndAttachFootLink(LinkNames linkName, JointNames jointName, RobotSide robotSide)
    {
       Link link = new Link(LinkNames.FOOT_LINK.getName());
-      Matrix3d inertiaFoot = createInertiaMatrixBox(linkName);
+      Matrix3D inertiaFoot = createInertiaMatrixBox(linkName);
       link.setMomentOfInertia(inertiaFoot);
       link.setMass(RobotParameters.MASSES.get(LinkNames.FOOT_LINK));
       link.setComOffset(comOffsetFoot); 
@@ -403,28 +402,28 @@ public class Step6IDandSCSRobot_pinKnee extends Robot
       return bodyX;
    }
 
-   //   public void getBodyPoint(Point3d bodyPointToPack) // Example of GET TO PACK method
+   //   public void getBodyPoint(Point3D bodyPointToPack) // Example of GET TO PACK method
    //   {
-   //      Point3d bodyPoint = this.bodyPosition.getPoint();
+   //      Point3D bodyPoint = this.bodyPosition.getPoint();
    //      bodyPointToPack.set(bodyPoint);
    //   }
 
-   public void getBodyPitch(Quat4d rotationToPack)
+   public void getBodyPitch(Quaternion rotationToPack)
    {
       bodyJointID.getFrameAfterJoint().getRotation(rotationToPack);
    }
 
-   public void getBodyLinearVel(Vector3d linearVelocityToPack)
+   public void getBodyLinearVel(Vector3D linearVelocityToPack)
    {
       bodyJointID.getLinearVelocity(linearVelocityToPack);
    }
 
-   public void getBodyAngularVel(Vector3d angularVelocityToPack)
+   public void getBodyAngularVel(Vector3D angularVelocityToPack)
    {
       bodyJointID.getAngularVelocity(angularVelocityToPack);
    }
    
-   public double getBodyVelX(Vector3d linearVelocityToPack)
+   public double getBodyVelX(Vector3D linearVelocityToPack)
    {
      bodyJointID.getLinearVelocity(linearVelocityToPack);
      double velX = linearVelocityToPack.getX();

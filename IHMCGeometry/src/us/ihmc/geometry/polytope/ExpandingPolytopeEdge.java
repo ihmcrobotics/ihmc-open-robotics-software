@@ -1,6 +1,6 @@
 package us.ihmc.geometry.polytope;
 
-import javax.vecmath.Point3d;
+import us.ihmc.euclid.tuple3D.Point3D;
 
 public class ExpandingPolytopeEdge
 {
@@ -32,12 +32,12 @@ public class ExpandingPolytopeEdge
       return edgeIndex;
    }
    
-   public Point3d getStartPoint()
+   public Point3D getStartPoint()
    {
       return entry.getVertex(edgeIndex);
    }
    
-   public Point3d getEndPoint()
+   public Point3D getEndPoint()
    {
       return entry.getVertex((edgeIndex + 1) %3);
    }

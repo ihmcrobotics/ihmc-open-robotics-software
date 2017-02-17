@@ -1,5 +1,7 @@
 package us.ihmc.avatar.ros.subscriber;
 
+import java.lang.reflect.InvocationTargetException;
+
 import org.ros.internal.message.Message;
 
 import us.ihmc.avatar.ros.IHMCROSTranslationRuntimeTools;
@@ -7,8 +9,6 @@ import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.utilities.ros.msgToPacket.converter.RosEnumConversionException;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
-
-import java.lang.reflect.InvocationTargetException;
 
 public class IHMCMsgToPacketSubscriber<T extends Message> extends AbstractRosTopicSubscriber<T>
 {
