@@ -263,7 +263,8 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
 
    // private boolean keyPointToggle = false;
 
-   private boolean simulationThreadIsUpAndRunning = false;
+   private boolean hasSimulationThreadStarted = false;
+   private boolean isSimulationThreadRunning = false;
    private boolean isSimulating = false;
    private boolean simulateNoFasterThanRealTime = false;
    private final RealTimeRateEnforcer realTimeRateEnforcer = new RealTimeRateEnforcer();
@@ -1193,7 +1194,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
    {
       ThreadTools.startAThread(this, "Simulation Contruction Set");
 
-      while (!this.isSimulationThreadUpAndRunning())
+      while (!this.hasSimulationThreadStarted())
       {
          Thread.yield();
       }
@@ -2230,7 +2231,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
    public void run()
    {
       // myGUI.setupConfiguration("all", "all", "all", "all");
-
+      
       if (!TESTING_LOAD_STUFF)
       {
          if ((!defaultLoaded) && (myGUI != null))
@@ -2290,19 +2291,20 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
          {
             dynamicGraphicMenuManager.hideAllGraphics();
          }
-
       }
+
+      hasSimulationThreadStarted = true;
+      isSimulationThreadRunning = true;
 
       if (robots == null)
       {
+         isSimulationThreadRunning = false;
          return;
       }
 
       fastTicks = 0;
 
       // t = rob.getVariable("t");
-
-      simulationThreadIsUpAndRunning = true;
 
       // Three state loop, simulation is either playing, running, or waiting
       while (true)
@@ -2375,8 +2377,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
          // System.out.println("Tick" + foo);
       }
 
-      simulationThreadIsUpAndRunning = false;
-
+      isSimulationThreadRunning = false;
    }
 
    /**
@@ -2386,7 +2387,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
    {
       stopSimulationThread = true;
 
-      while (isSimulationThreadUpAndRunning())
+      while (isSimulationThreadRunning)
       {
          try
          {
@@ -2739,9 +2740,14 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
 
    }
 
-   public boolean isSimulationThreadUpAndRunning()
+   public boolean hasSimulationThreadStarted()
    {
-      return this.simulationThreadIsUpAndRunning;
+      return this.hasSimulationThreadStarted;
+   }
+
+   public boolean isSimulationThreadRunning()
+   {
+      return this.isSimulationThreadRunning;
    }
 
    /**

@@ -362,7 +362,7 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
       maxRotationVelocityClip.set(1.0);
       activatePelvisPoseHistoryCorrector(registry, true);
       simulationConstructionSet.simulate();
-      while (simulationConstructionSet.isSimulationThreadUpAndRunning())
+      while (simulationConstructionSet.isSimulationThreadRunning())
       {
          ThreadTools.sleep(100);
       }
