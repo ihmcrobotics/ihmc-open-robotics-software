@@ -12,6 +12,7 @@ import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
 import us.ihmc.robotics.controllers.YoPIDGains;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.waypoints.SimpleTrajectoryPoint1D;
@@ -27,6 +28,10 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
    // TODO: get rid of hash maps and use a simple array instead
    private final Map<OneDoFJoint, MultipleWaypointsTrajectoryGenerator> jointTrajectoryGenerators = new HashMap<>();
    private final Map<OneDoFJoint, RecyclingArrayList<SimpleTrajectoryPoint1D>> pointQueues = new HashMap<>();
+
+   private final Map<OneDoFJoint, IntegerYoVariable> numberOfPointsInQueue = new HashMap<>();
+   private final Map<OneDoFJoint, IntegerYoVariable> numberOfPointsInGenerator = new HashMap<>();
+   private final Map<OneDoFJoint, IntegerYoVariable> numberOfPoints = new HashMap<>();
 
    private final SimpleTrajectoryPoint1D lastPointAdded = new SimpleTrajectoryPoint1D();
 
@@ -60,6 +65,13 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
          pointQueues.put(joint, pointQueue);
 
          feedbackControlCommand.addJoint(joint, Double.NaN, Double.NaN, Double.NaN);
+
+         IntegerYoVariable numberOfPointsInQueue = new IntegerYoVariable(prefix + "_" + jointName + "_numberOfPointsInQueue", registry);
+         IntegerYoVariable numberOfPointsInGenerator = new IntegerYoVariable(prefix + "_" + jointName + "_numberOfPointsInGenerator", registry);
+         IntegerYoVariable numberOfPoints = new IntegerYoVariable(prefix + "_" + jointName + "_numberOfPoints", registry);
+         this.numberOfPointsInQueue.put(joint, numberOfPointsInQueue);
+         this.numberOfPointsInGenerator.put(joint, numberOfPointsInGenerator);
+         this.numberOfPoints.put(joint, numberOfPoints);
       }
 
       parentRegistry.addChild(registry);
@@ -110,6 +122,13 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
          double desiredVelocity = generator.getVelocity();
          double feedForwardAcceleration = generator.getAcceleration();
          feedbackControlCommand.setOneDoFJoint(jointIdx, desiredPosition, desiredVelocity, feedForwardAcceleration);
+
+         IntegerYoVariable numberOfPointsInQueue = this.numberOfPointsInQueue.get(joint);
+         IntegerYoVariable numberOfPointsInGenerator = this.numberOfPointsInGenerator.get(joint);
+         IntegerYoVariable numberOfPoints = this.numberOfPoints.get(joint);
+         numberOfPointsInQueue.set(pointQueues.get(joint).size());
+         numberOfPointsInGenerator.set(generator.getCurrentNumberOfWaypoints());
+         numberOfPoints.set(numberOfPointsInQueue.getIntegerValue() + numberOfPointsInGenerator.getIntegerValue());
       }
 
       trajectoryDone.set(allDone);

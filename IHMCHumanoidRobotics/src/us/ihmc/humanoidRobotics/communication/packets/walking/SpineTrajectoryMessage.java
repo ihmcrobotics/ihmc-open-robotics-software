@@ -14,6 +14,11 @@ public class SpineTrajectoryMessage extends AbstractJointspaceTrajectoryMessage<
       super(numberOfJoints, waypoints);
    }
 
+   public SpineTrajectoryMessage(int numberOfJoints)
+   {
+      super(numberOfJoints);
+   }
+
    public SpineTrajectoryMessage(double trajectoryTime, double[] jointDesireds)
    {
       super(trajectoryTime, jointDesireds);
