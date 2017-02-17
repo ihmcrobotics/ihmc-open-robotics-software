@@ -894,7 +894,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
       assertEquals(ticksIncrease, currentSCSIndex9, epsilon);
 
       scs.stopSimulationThread();
-      boolean isThreadRunningFromSCS = scs.isSimulationThreadUpAndRunning();
+      boolean isThreadRunningFromSCS = scs.isSimulationThreadRunning();
       assertFalse(isThreadRunningFromSCS);
 
       setInputAndOutputPointsWithoutCroppingInSCS(scs, inputPoint, outputPoint);

@@ -981,11 +981,6 @@ public class RobotTest
          int recordFrequency = 1;
          scs.setDT(simulateDT, recordFrequency);
          scs.startOnAThread();
-
-         while(!scs.isSimulationThreadUpAndRunning()) 
-         {
-            ThreadTools.sleep(100);
-         }
       }
       
       Vector3D angularMomentumStart = new Vector3D();
