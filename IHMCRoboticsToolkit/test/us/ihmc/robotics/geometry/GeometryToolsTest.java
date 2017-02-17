@@ -1745,10 +1745,7 @@ public class GeometryToolsTest
          Point3D c = new Point3D();
          c.add(bc, expectedB);
 
-         double epsilon = Epsilons.ONE_TRILLIONTH;
-
-         if (abcAngle < 0.002)
-            epsilon = Epsilons.ONE_TEN_BILLIONTH; // Loss of precision when ba and bc are almost collinear.
+         double epsilon = Epsilons.ONE_TEN_BILLIONTH;
 
          Point3D actualB = new Point3D();
          GeometryTools.getTopVertexOfIsoscelesTriangle(a, c, triangleNormal, abcAngle, actualB);
