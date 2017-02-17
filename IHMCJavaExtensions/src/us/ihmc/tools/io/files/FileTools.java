@@ -3,25 +3,24 @@ package us.ihmc.tools.io.files;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
-import java.io.Writer;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,20 +28,119 @@ import org.apache.commons.io.FileUtils;
 
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
+import us.ihmc.commons.nio.WriteOption;
 
+/**
+ * A collection of tools to bridge the NIO.2 and Apache Commons IO APIs.
+ * Includes some convenient tools that don't force the use of try-catch.
+ */
 public class FileTools
 {
+   /** A carriage return */
    private static final byte CARRIAGE_RETURN = '\r';
+   
+   /** A newline */
    private static final byte NEWLINE = '\n';
    
    /**
-    * Delete a directory quietly. A bridge from Java's NIO.2 to Apache Commons IO.
+    * Delete a file or directory quietly. A bridge from Java's NIO.2 to Apache Commons IO.
     * 
-    * @param directoryPath directory to be deleted
+    * @see {@link FileUtils#deleteQuietly(File)}
+    * 
+    * @param path file or directory to be deleted
     */
-   public static void deleteDirectory(Path directoryPath)
+   public static void deleteQuietly(Path path)
    {
-      FileUtils.deleteQuietly(directoryPath.toFile());
+      FileUtils.deleteQuietly(path.toFile());
+   }
+
+   /**
+    * Reads all lines from a file. Uses Java's NIO.2 API.
+    * 
+    * <p>WARNING: For use only when there is no meaningful way to handle failure.</p>
+    * 
+    * @see {@link Files#readAllLines()}
+    * 
+    * @param path file to read lines from
+    * @param exceptionHandler default exception handler
+    * @return list of strings
+    */
+   @SuppressWarnings("unchecked")
+   public static List<String> readAllLines(Path path, DefaultExceptionHandler exceptionHandler)
+   {
+      try
+      {
+         return Files.readAllLines(path);
+      }
+      catch (IOException ioException)
+      {
+         return (List<String>) exceptionHandler.handleException(ioException);
+      }
+   }
+
+   /**
+    * Write a list of Strings to lines in a file. Uses Java's NIO.2 API.
+    * 
+    * <p>WARNING: For use only when there is no meaningful way to handle failure.</p>
+    * 
+    * @param lines lines to be written
+    * @param path file
+    * @param writeOption append or truncate
+    * @param defaultExceptionHandler default exception handler
+    */
+   public static void writeAllLines(List<String> lines, Path path, WriteOption writeOption, DefaultExceptionHandler defaultExceptionHandler)
+   {
+      PrintWriter printer = newPrintWriter(path, writeOption, defaultExceptionHandler);
+      
+      for (String line : lines)
+      {
+         printer.println(line);
+      }
+      
+      printer.close();
+   }
+
+   /**
+    * Creates a new PrintWriter. Uses Java's NIO.2 API.
+    * 
+    * <p>WARNING: For use only when there is no meaningful way to handle failure.</p>
+    * 
+    * @param path file to open
+    * @param writeOption truncate or append
+    * @param defaultExceptionHandler default exception handler
+    * @return new print writer
+    */
+   public static PrintWriter newPrintWriter(Path path, WriteOption writeOption, DefaultExceptionHandler defaultExceptionHandler)
+   {
+      try
+      {
+         return newPrintWriter(path, writeOption);
+      }
+      catch (IOException ioException)
+      {
+         return (PrintWriter) defaultExceptionHandler.handleException(ioException);
+      }
+   }
+   /**
+    * Creates a new PrintWriter. Uses Java's NIO.2 API.
+    * 
+    * @see {@link Files#newBufferedWriter(Path)}
+    * 
+    * @param path file to open
+    * @param writeOption append or truncate
+    * @return new print writer
+    * @throws IOException 
+    */
+   public static PrintWriter newPrintWriter(Path path, WriteOption writeOption) throws IOException
+   {
+      if (writeOption == WriteOption.APPEND)
+      {
+         return new PrintWriter(Files.newBufferedWriter(path, StandardOpenOption.APPEND));
+      }
+      else // (writeOption == WriteOption.TRUNCATE)
+      {
+         return new PrintWriter(Files.newBufferedWriter(path));
+      }
    }
 
    public static List<String> readLinesFromBytes(byte[] bytes)
@@ -108,31 +206,6 @@ public class FileTools
       return newBytes;
    }
    
-   @SuppressWarnings("unchecked")
-   public static List<String> readAllLines(Path path, DefaultExceptionHandler exceptionHandler)
-   {
-      try
-      {
-         return Files.readAllLines(path, Charset.forName("UTF-8"));
-      }
-      catch (IOException e)
-      {
-         return (List<String>) exceptionHandler.handleException(e);
-      }
-   }
-   
-   public static void writeAllLines(List<String> lines, Path path)
-   {
-      PrintWriter printer = newPrintWriter(path);
-      
-      for (String line : lines)
-      {
-         printer.println(line);
-      }
-      
-      printer.close();
-   }
-   
    public static byte[] readAllBytes(Path path)
    {
       try
@@ -162,11 +235,6 @@ public class FileTools
       }
    }
    
-   public static PrintWriter newPrintWriter(Path path)
-   {
-      return newPrintWriter(path, false);
-   }
-   
    public static void write(Path path, byte[] bytes, OpenOption... options)
    {
       try
@@ -182,21 +250,6 @@ public class FileTools
    public static BufferedReader newBufferedReader(Path path) throws IOException
    {
       return Files.newBufferedReader(path, Charset.defaultCharset());
-   }
-   
-   public static PrintWriter newPrintWriter(Path path, boolean append)
-   {
-      try
-      {
-         Writer outWriter = new FileWriter(path.toFile(), append);
-         BufferedWriter bufferedWriter = new BufferedWriter(outWriter);
-         return new PrintWriter(bufferedWriter); 
-      }
-      catch (IOException e)
-      {
-         e.printStackTrace();
-         return null;
-      }
    }
    
    public static boolean checkIfSerializable(Object objectToTest)
