@@ -275,7 +275,7 @@ public class RotationToolsTest
       {
          double pi = Math.PI;
          double yaw = (random.nextDouble() - 0.5) * 2.0 * pi;
-         double pitch = (random.nextDouble() - 0.5) * pi;
+         double pitch = (random.nextDouble() - 0.5) * 0.5 * pi;
          double roll = (random.nextDouble() - 0.5) * 2.0 * pi;
          double[] yawPitchRoll = {yaw, pitch, roll};
 
@@ -443,44 +443,6 @@ public class RotationToolsTest
       RotationMatrix m2 = new RotationMatrix();
       m2.set(a);
 
-      assertTrue(m2.epsilonEquals(m, 1e-5));
-
-   }
-
-   /**
-    * Test that has for only purpose to highlight a bug in Java3d
-    */
-   @ContinuousIntegrationTest(estimatedDuration = 0.0, categoriesOverride = IntegrationCategory.EXCLUDE)
-   @Test(timeout = 10000)
-   public void testJava3dQuat4dSetMatrixBug2()
-   {
-      RotationMatrix m = new RotationMatrix(0.0, -1.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0);
-
-      Quaternion a = new Quaternion();
-      a.set(m);
-      RotationMatrix m2 = new RotationMatrix();
-      m2.set(a);
-
-      assertTrue(m2.epsilonEquals(m, 1e-5));
-
-   }
-
-   /**
-    * Test that has for only purpose to highlight a bug in Java3d
-    */
-   @ContinuousIntegrationTest(estimatedDuration = 0.0, categoriesOverride = IntegrationCategory.EXCLUDE)
-   @Test(timeout = 10000)
-   public void testJava3dAxisAngleSetMatrixBug2()
-   {
-      RotationMatrix m = new RotationMatrix(0.0, -1.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0);
-
-      AxisAngle a = new AxisAngle();
-      a.set(m);
-      RotationMatrix m2 = new RotationMatrix();
-      m2.set(a);
-
-      System.out.println(m);
-      System.out.println(m2);
       assertTrue(m2.epsilonEquals(m, 1e-5));
 
    }
