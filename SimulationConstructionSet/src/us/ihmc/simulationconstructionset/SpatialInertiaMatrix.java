@@ -263,7 +263,7 @@ public final class SpatialInertiaMatrix implements java.io.Serializable
    private Vector3D Atop = new Vector3D(), Bbot = new Vector3D(), Ctop = new Vector3D(), Dbot = new Vector3D();
    private Vector3D botA = new Vector3D(), botB = new Vector3D(), topC = new Vector3D(), topD = new Vector3D();
    private Vector3D v1 = new Vector3D(), v2 = new Vector3D(), v3 = new Vector3D(), v4 = new Vector3D();
-   private RotationMatrix A_trans = new RotationMatrix(), B_trans = new RotationMatrix(), C_trans = new RotationMatrix(), D_trans = new RotationMatrix();
+   private Matrix3D A_trans = new Matrix3D(), B_trans = new Matrix3D(), C_trans = new Matrix3D(), D_trans = new Matrix3D();
 
    public void IssI(SpatialInertiaMatrix I_hat_i, SpatialVector s_hat_i, double sIs)
    {
