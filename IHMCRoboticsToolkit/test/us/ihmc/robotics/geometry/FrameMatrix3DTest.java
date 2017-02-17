@@ -169,7 +169,7 @@ public class FrameMatrix3DTest
          }
       }
 
-      RotationMatrix matrixTested = new RotationMatrix();
+      Matrix3D matrixTested = new Matrix3D();
       frameMatrix3D.getMatrix(matrixTested);
       assertTrue(matrixTested.epsilonEquals(matrixExpected, EPSILON));
 
