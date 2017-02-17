@@ -60,7 +60,7 @@ public class PlotterLegendPanel extends JPanel implements ArtifactsChangedListen
          y = y + deltaY;
          g.setFont(f);
 
-         drawOrigin.set(artifactX, y);
+         drawOrigin.set((double) artifactX, (double) y);
          
          artifact.drawLegend(graphics2dAdapter, drawOrigin);
 
