@@ -28,12 +28,23 @@ import java.util.List;
 import org.apache.commons.io.FileUtils;
 
 import us.ihmc.commons.Conversions;
+import us.ihmc.commons.exception.DefaultExceptionHandler;
 
 public class FileTools
 {
    private static final byte CARRIAGE_RETURN = '\r';
    private static final byte NEWLINE = '\n';
    
+   /**
+    * Delete a directory quietly. A bridge from Java's NIO.2 to Apache Commons IO.
+    * 
+    * @param directoryPath directory to be deleted
+    */
+   public static void deleteDirectory(Path directoryPath)
+   {
+      FileUtils.deleteQuietly(directoryPath.toFile());
+   }
+
    public static List<String> readLinesFromBytes(byte[] bytes)
    {
       List<String> lines = new ArrayList<>();
@@ -97,7 +108,8 @@ public class FileTools
       return newBytes;
    }
    
-   public static List<String> readAllLines(Path path)
+   @SuppressWarnings("unchecked")
+   public static List<String> readAllLines(Path path, DefaultExceptionHandler exceptionHandler)
    {
       try
       {
@@ -105,8 +117,7 @@ public class FileTools
       }
       catch (IOException e)
       {
-         e.printStackTrace();
-         return null;
+         return (List<String>) exceptionHandler.handleException(e);
       }
    }
    
@@ -269,10 +280,5 @@ public class FileTools
    public static Path getTemporaryDirectoryPath()
    {
       return Paths.get(System.getProperty("java.io.tmpdir"));
-   }
-   
-   public static void deleteDirectory(Path directoryPath)
-   {
-      FileUtils.deleteQuietly(directoryPath.toFile());
    }
 }
