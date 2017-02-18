@@ -396,6 +396,7 @@ public abstract class PacketValidityChecker
             errorMessage = "The " + messageClassName + "'s " + i + "th waypoint " + errorMessage;
             return errorMessage;
          }
+         previousTrajectoryPoint = waypoint;
       }
 
       errorType = ObjectValidityChecker.validateEnum(handTrajectoryMessage.getRobotSide());
@@ -478,6 +479,7 @@ public abstract class PacketValidityChecker
             errorMessage = "The " + messageClassName + "'s " + i + "th waypoint " + errorMessage;
             return errorMessage;
          }
+         previousTrajectoryPoint = waypoint;
       }
 
       return null;
@@ -576,6 +578,7 @@ public abstract class PacketValidityChecker
             errorMessage = "The " + messageClassName + "'s " + i + "th waypoint " + errorMessage;
             return errorMessage;
          }
+         previousTrajectoryPoint = waypoint;
       }
 
       return null;
@@ -606,6 +609,7 @@ public abstract class PacketValidityChecker
             errorMessage = "The " + messageClassName + "'s " + i + "th waypoint " + errorMessage;
             return errorMessage;
          }
+         previousTrajectoryPoint = waypoint;
       }
 
       return null;
@@ -636,6 +640,7 @@ public abstract class PacketValidityChecker
             errorMessage = "The " + messageClassName + "'s " + i + "th waypoint " + errorMessage;
             return errorMessage;
          }
+         previousTrajectoryPoint = waypoint;
       }
 
       return null;
@@ -667,6 +672,7 @@ public abstract class PacketValidityChecker
             errorMessage = "The " + messageClassName + "'s " + i + "th waypoint " + errorMessage;
             return errorMessage;
          }
+         previousTrajectoryPoint = waypoint;
       }
 
       errorType = ObjectValidityChecker.validateEnum(footTrajectoryMessage.getRobotSide());
@@ -774,6 +780,7 @@ public abstract class PacketValidityChecker
             errorMessage = "The " + messageClassName + "'s " + i + "th waypoint " + errorMessage;
             return errorMessage;
          }
+         previousTrajectoryPoint = waypoint;
       }
 
       return null;
@@ -931,6 +938,7 @@ public abstract class PacketValidityChecker
          errorMessage = validateTrajectoryPoint1DMessage(waypoint, previousTrajectoryPoint, false);
          if (errorMessage != null)
             return "The " + i + "th " + errorMessage;
+         previousTrajectoryPoint = waypoint;
       }
 
       for (int waypointIndex = 0; waypointIndex < oneJointTrajectoryMessage.getNumberOfTrajectoryPoints(); waypointIndex++)
