@@ -33,7 +33,8 @@ public class HybridImpulseSpringDamperCollisionHandler implements CollisionHandl
 
    private final DoubleYoVariable kpCollision = new DoubleYoVariable("kpCollision", registry);
    private final DoubleYoVariable kdCollision = new DoubleYoVariable("kdCollision", registry);
-   
+   private final DoubleYoVariable pullingOutSpringHysteresisReduction = new DoubleYoVariable("pullingOutSpringHysteresisReduction", registry);
+ 
    private double velocityForMicrocollision = 0.01; //0.1; //0.1;//0.01;
    private int numberOfCyclesPerContactPair = 1;///4
    private double minDistanceToConsiderDifferent = 0.003; //0.003; //0.002; //0.02;
@@ -42,8 +43,10 @@ public class HybridImpulseSpringDamperCollisionHandler implements CollisionHandl
    private static final boolean DEBUG = false;
 
    //TODO: Get maximumPenetrationToStart implemented for when useAverageNewCollisionTouchdownPoints = true;
-   private static final boolean useAverageNewCollisionTouchdownPoints = false; //true; //false;
-   private double maximumPenetrationToStart = 0.002;
+   private static final boolean useAverageNewCollisionTouchdownPoints = true;
+   private double maximumPenetrationToStart = 0.001;
+
+   private static final boolean divideByNumberContacting = true; //true; //false;
 
    private static final boolean resolveCollisionWithAnImpact = false;
    private static final boolean allowMicroCollisions = false;
@@ -54,7 +57,6 @@ public class HybridImpulseSpringDamperCollisionHandler implements CollisionHandl
 
    private static final boolean allowRecyclingOfPointsInUse = true;
 
-
    private final Random random;
 
    private final Vector3D normal = new Vector3D();
@@ -63,6 +65,7 @@ public class HybridImpulseSpringDamperCollisionHandler implements CollisionHandl
    private final Point3D point1 = new Point3D();
    private final Point3D point2 = new Point3D();
    private final Point3D tempPoint = new Point3D();
+   private final Vector3D tempVectorForAveraging = new Vector3D();
 
    private List<CollisionHandlerListener> listeners = new ArrayList<CollisionHandlerListener>();
 
@@ -91,6 +94,7 @@ public class HybridImpulseSpringDamperCollisionHandler implements CollisionHandl
       
       kpCollision.set(2000.0);
       kdCollision.set(200.0);
+      pullingOutSpringHysteresisReduction.set(0.8);
       
       if (yoGraphicsListRegistry == null)
       {
@@ -287,29 +291,40 @@ public class HybridImpulseSpringDamperCollisionHandler implements CollisionHandl
       Point3D matchingPosition = new Point3D();
       Vector3D matchingVelocity = new Vector3D();
       Vector3D matchingNormal = new Vector3D();
- 
+
       contactingExternalForcePointOne.getPosition(position);
       contactingExternalForcePointOne.getVelocity(velocity);
       contactingExternalForcePointOne.getSurfaceNormalInWorld(normal);
-      
+
       contactingExternalForcePointTwo.getPosition(matchingPosition);
       contactingExternalForcePointTwo.getVelocity(matchingVelocity);
       contactingExternalForcePointTwo.getSurfaceNormalInWorld(matchingNormal);
 
       Vector3D positionDifference = new Vector3D();
       Vector3D velocityDifference = new Vector3D();
-      
+
       positionDifference.set(matchingPosition);
       positionDifference.sub(position);
-      
+
       velocityDifference.set(matchingVelocity);
       velocityDifference.sub(velocity);
-      
+
+      boolean pullingOut = false;
+      //TODO: Magic number here, but 0.0 causes lots of shaking when at rest...
+      if (velocityDifference.dot(normal) > 0.005)
+      {
+         pullingOut = true;
+      }
+
       Vector3D springForce = new Vector3D();
       Vector3D damperForce = new Vector3D();
 
       springForce.set(positionDifference);
       springForce.scale(kpCollision.getDoubleValue());
+      if (pullingOut)
+      {
+         springForce.scale(pullingOutSpringHysteresisReduction.getDoubleValue());
+      }
       
       damperForce.set(velocityDifference);
       damperForce.scale(kdCollision.getDoubleValue());
@@ -317,7 +332,16 @@ public class HybridImpulseSpringDamperCollisionHandler implements CollisionHandl
       Vector3D totalForce = new Vector3D();
       totalForce.set(springForce);
       totalForce.add(damperForce);
-      
+
+      double numberOfPointsContacting = (double) contactingExternalForcePointOne.getNumberOfPointsInContactWithSameShape();
+      if (numberOfPointsContacting < 1.0) numberOfPointsContacting = 1.0;
+
+//      System.out.println("numberOfPointsContacting = " + numberOfPointsContacting);
+      if (divideByNumberContacting)
+      {
+         totalForce.scale(1.0/numberOfPointsContacting);
+      }
+
       Vector3D forceAlongNormal = new Vector3D(normal);
       forceAlongNormal.scale(totalForce.dot(normal)/(normal.dot(normal)));
       
@@ -385,6 +409,7 @@ public class HybridImpulseSpringDamperCollisionHandler implements CollisionHandl
    private final ArrayList<Integer> indices = new ArrayList<Integer>();
    
    private final LinkedHashSet<Robot> robotsThatAreInContactntact = new LinkedHashSet<>();
+   private final Vector3D tempForce = new Vector3D();
 
    private void handleLocal(CollisionShapeWithLink shape1, CollisionShapeWithLink shape2, Contacts contacts)
    {
@@ -465,8 +490,34 @@ public class HybridImpulseSpringDamperCollisionHandler implements CollisionHandl
          }
          // Find first one attached to other part:
          boolean contactPairAlreadyExists = false;
+         ArrayList<ContactingExternalForcePoint> pointsThatAreContactingShapeOne = getPointsThatAreContactingOtherLink(contactingExternalForcePointsTwo, linkOne);
          ArrayList<ContactingExternalForcePoint> pointsThatAreContactingShapeTwo = getPointsThatAreContactingOtherLink(contactingExternalForcePointsOne, linkTwo);
+
+//         int pointsThatAreHoldingWeight = 0;
+//
+//         for (int k=0; k<pointsThatAreContactingShapeOne.size(); k++)
+//         {
+//            pointsThatAreContactingShapeOne.get(k).getForce(tempForce);
+//            if (tempForce.lengthSquared() > 0.5 * 0.5) pointsThatAreHoldingWeight++;
+//         }
+//         System.out.println("pointsThatAreHoldingWeight = " + pointsThatAreHoldingWeight);
          
+         // Don't set number of points in contact to more than 3, or it will
+         // sag a lot when there are points in contact not holding much weight.
+         // TODO: Smarter way to measure the effects of adding another contact point on stiffness and force?
+         
+         int pointsThatAreHoldingWeight = pointsThatAreContactingShapeOne.size();
+         if (pointsThatAreHoldingWeight > 3) pointsThatAreHoldingWeight = 3;
+         for (int k=0; k<pointsThatAreContactingShapeOne.size(); k++)
+         {
+            pointsThatAreContactingShapeOne.get(k).setNumberOfPointsInContactWithSameShape(pointsThatAreHoldingWeight);
+         }
+
+         for (int k=0; k<pointsThatAreContactingShapeTwo.size(); k++)
+         {
+            pointsThatAreContactingShapeTwo.get(k).setNumberOfPointsInContactWithSameShape(pointsThatAreContactingShapeTwo.size());
+         }
+ 
          ContactingExternalForcePoint externalForcePointOne = null;
          ContactingExternalForcePoint externalForcePointTwo = null;
 
@@ -589,11 +640,22 @@ public class HybridImpulseSpringDamperCollisionHandler implements CollisionHandl
             //TODO: What's best, setting the average of the collision points, or the actuals?
             if (useAverageNewCollisionTouchdownPoints)
             {
-               tempPoint.set(point1);
-               tempPoint.add(point2);
-               tempPoint.scale(0.5);
+               tempVectorForAveraging.set(point2);
+               tempVectorForAveraging.sub(point1);
+               tempVectorForAveraging.scale(0.5);
+               
+               double penetrationLength = tempVectorForAveraging.length();
+               if (penetrationLength > maximumPenetrationToStart)
+               {
+                  tempVectorForAveraging.scale(maximumPenetrationToStart/penetrationLength);
+               }
 
+               tempPoint.set(point1);
+               tempPoint.add(tempVectorForAveraging);
                externalForcePointOne.setOffsetWorld(tempPoint);
+
+               tempPoint.set(point2);
+               tempPoint.sub(tempVectorForAveraging);
                externalForcePointTwo.setOffsetWorld(tempPoint);
             }
             else
