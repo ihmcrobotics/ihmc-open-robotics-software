@@ -50,7 +50,7 @@ public class SDFLinkHolderTest
       assertTrue("Should have zeros for COM", expectedComOffset.equals(comOffset));//equals with doubles could cause problems
 
       double Ixx = 0.00319, Ixy = 0.0, Ixz = 0.0, Iyy = 0.00583, Iyz = 0.0, Izz = 0.00583;
-      RotationMatrix expectedInertia = new RotationMatrix(Ixx, Ixy, Ixz, Ixy, Iyy, Iyz, Ixz, Iyz, Izz);
+      Matrix3D expectedInertia = new Matrix3D(Ixx, Ixy, Ixz, Ixy, Iyy, Iyz, Ixz, Iyz, Izz);
       assertTrue("Inertia matrix should not change values", inertiaMatrix.equals(expectedInertia));
    }
 
@@ -89,7 +89,7 @@ public class SDFLinkHolderTest
       assertTrue("ComOffset should be value identified in Inertial Pose.", expectedComOffset.equals(comOffset));//equals with doubles could cause problems
 
       double Ixx = 0.011, Ixy = 0.0, Ixz = 0.0, Iyy = 0.009, Iyz = 0.004, Izz = 0.004;
-      RotationMatrix expectedInertia = new RotationMatrix(Ixx, Ixy, Ixz, Ixy, Iyy, Iyz, Ixz, Iyz, Izz);
+      Matrix3D expectedInertia = new Matrix3D(Ixx, Ixy, Ixz, Ixy, Iyy, Iyz, Ixz, Iyz, Izz);
       assertTrue("Inertia matrix should not change values", inertiaMatrix.equals(expectedInertia));
    }
 
@@ -132,7 +132,7 @@ public class SDFLinkHolderTest
 
       //      double Ixx=8.8101e-08,Ixy=0.0,Ixz=0.0,Iyy=4.09812e-08,Iyz=0.0,Izz=5.31842e-08;//Incorrect output
       double Ixx = 4.09812e-08, Ixy = 0.0, Ixz = 0.0, Iyy = 5.31842e-08, Iyz = 0.0, Izz = 8.8101e-08;
-      RotationMatrix expectedInertia = new RotationMatrix(Ixx, Ixy, Ixz, Ixy, Iyy, Iyz, Ixz, Iyz, Izz);
+      Matrix3D expectedInertia = new Matrix3D(Ixx, Ixy, Ixz, Ixy, Iyy, Iyz, Ixz, Iyz, Izz);
       //1e-10
       assertArrayEquals(new double[] {Ixx, Ixy, Ixz, Iyy, Iyz, Izz}, new double[] {inertiaMatrix.getM00(), inertiaMatrix.getM01(), inertiaMatrix.getM02(),
             inertiaMatrix.getM11(), inertiaMatrix.getM12(), inertiaMatrix.getM22()}, 1e-10);
@@ -195,7 +195,7 @@ public class SDFLinkHolderTest
        * <!-- cad -> gazebo coordinate mapping y -> -x z -> -y x -> z -->
        */
       double Ixx = 1.1962e-06, Ixy = 1.90704e-07, Ixz = 1.44904e-06, Iyy = 1.27365e-06, Iyz = 7.74579e-07, Izz = 2.42069e-06;
-      RotationMatrix expectedInertia = new RotationMatrix(Ixx, Ixy, Ixz, Ixy, Iyy, Iyz, Ixz, Iyz, Izz);
+      Matrix3D expectedInertia = new Matrix3D(Ixx, Ixy, Ixz, Ixy, Iyy, Iyz, Ixz, Iyz, Izz);
       //1e-10
       boolean inertiaEqual = inertiaMatrix.equals(expectedInertia);
       String helpMessage = "Incorrect actual: Ixx=" + inertiaMatrix.getM00() + ", Ixy=" + inertiaMatrix.getM01() + ", Ixz=" + inertiaMatrix.getM02() + ", Iyy="
@@ -258,7 +258,7 @@ public class SDFLinkHolderTest
        */
       //double Ixx=1.62414e-06, Ixy=5.6e-10, Ixz=1.33e-10, Iyy=1.71788e-06, Iyz=-1.1997e-07, Izz=5.60221e-07;//Incorrect output
       double Ixx = 1.62414e-06, Ixy = -5.6e-10, Ixz = 1.33e-10, Iyy = 1.71788e-06, Iyz = 1.1997e-07, Izz = 5.60221e-07;
-      RotationMatrix expectedInertia = new RotationMatrix(Ixx, Ixy, Ixz, Ixy, Iyy, Iyz, Ixz, Iyz, Izz);
+      Matrix3D expectedInertia = new Matrix3D(Ixx, Ixy, Ixz, Ixy, Iyy, Iyz, Ixz, Iyz, Izz);
 
       //1e-10
       boolean inertiaEqual = inertiaMatrix.equals(expectedInertia);
