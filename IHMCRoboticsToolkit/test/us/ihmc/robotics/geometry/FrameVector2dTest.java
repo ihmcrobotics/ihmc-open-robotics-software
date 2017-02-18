@@ -253,6 +253,27 @@ public class FrameVector2dTest extends FrameTuple2dTest<FrameVector2d>
       {
          //Good
       }
+
+      for (int i = 0; i<1000; i++)
+      {
+         double firstVectorLength = RandomTools.generateRandomDouble(random, 0.0, 10.0);
+         double secondVectorLength = RandomTools.generateRandomDouble(random, 0.0, 10.0);
+         FrameVector2d firstVector = FrameVector2d.generateRandomFrameVector2d(random, worldFrame);
+         firstVector.scale(firstVectorLength / firstVector.length());
+         FrameVector2d secondVector = new FrameVector2d();
+
+         for (double yaw = -Math.PI; yaw <= Math.PI; yaw += Math.PI / 100.0)
+         {
+            double c = Math.cos(yaw);
+            double s = Math.sin(yaw);
+            secondVector.setX(firstVector.getX() * c - firstVector.getY() * s);
+            secondVector.setY(firstVector.getX() * s + firstVector.getY() * c);
+            secondVector.scale(secondVectorLength / firstVectorLength);
+            double computedYaw = firstVector.angle(secondVector);
+            double yawDifference = AngleTools.computeAngleDifferenceMinusPiToPi(yaw, computedYaw);
+            assertEquals(0.0, yawDifference, 1.0e-12);
+         }
+      }
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
