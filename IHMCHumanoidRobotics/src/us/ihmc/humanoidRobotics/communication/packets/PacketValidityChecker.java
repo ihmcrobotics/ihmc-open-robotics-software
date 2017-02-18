@@ -318,7 +318,7 @@ public abstract class PacketValidityChecker
    {
       String errorMessage = validatePacket(handTrajectoryMessage, true);
       if (errorMessage != null)
-         return errorMessage;
+         return HandTrajectoryMessage.class.getSimpleName() + " " + errorMessage;
 
       ObjectErrorType errorType;
       SE3TrajectoryPointMessage previousTrajectoryPoint = null;
@@ -354,7 +354,7 @@ public abstract class PacketValidityChecker
    {
       String errorMessage = validatePacket(armTrajectoryMessage, true);
       if (errorMessage != null)
-         return errorMessage;
+         return ArmTrajectoryMessage.class.getSimpleName() + " " + errorMessage;
 
       ObjectErrorType packetFieldErrorType = ObjectValidityChecker.validateEnum(armTrajectoryMessage.robotSide);
       if (packetFieldErrorType != null)
@@ -394,7 +394,7 @@ public abstract class PacketValidityChecker
    {
       String errorMessage = validatePacket(headTrajectoryMessage, true);
       if (errorMessage != null)
-         return errorMessage;
+         return HeadTrajectoryMessage.class.getSimpleName() + " " + errorMessage;
 
       SO3TrajectoryPointMessage previousTrajectoryPoint = null;
 
@@ -422,7 +422,7 @@ public abstract class PacketValidityChecker
    {
       String errorMessage = validatePacket(neckTrajectoryMessage, true);
       if (errorMessage != null)
-         return errorMessage;
+         return NeckTrajectoryMessage.class.getSimpleName() + " " + errorMessage;
 
       if (neckTrajectoryMessage.jointTrajectoryMessages == null)
       {
@@ -455,7 +455,7 @@ public abstract class PacketValidityChecker
    {
       String errorMessage = validatePacket(neckDesiredAccelerationsMessage, true);
       if (errorMessage != null)
-         return errorMessage;
+         return NeckDesiredAccelerationsMessage.class.getSimpleName() + " " + errorMessage;
 
       ObjectErrorType packetFieldErrorType = ObjectValidityChecker.validateEnum(neckDesiredAccelerationsMessage.neckControlMode);
       if (packetFieldErrorType != null)
@@ -484,7 +484,7 @@ public abstract class PacketValidityChecker
    {
       String errorMessage = validatePacket(chestTrajectoryMessage, true);
       if (errorMessage != null)
-         return errorMessage;
+         return ChestTrajectoryMessage.class.getSimpleName() + " " + errorMessage;
 
       SO3TrajectoryPointMessage previousTrajectoryPoint = null;
 
@@ -512,7 +512,7 @@ public abstract class PacketValidityChecker
    {
       String errorMessage = validatePacket(pelvisOrientationTrajectoryMessage, true);
       if (errorMessage != null)
-         return errorMessage;
+         return PelvisOrientationTrajectoryMessage.class.getSimpleName() + " " + errorMessage;
 
       SO3TrajectoryPointMessage previousTrajectoryPoint = null;
 
@@ -540,7 +540,7 @@ public abstract class PacketValidityChecker
    {
       String errorMessage = validatePacket(pelvisTrajectoryMessage, true);
       if (errorMessage != null)
-         return errorMessage;
+         return PelvisTrajectoryMessage.class.getSimpleName() + " " + errorMessage;
 
       SE3TrajectoryPointMessage previousTrajectoryPoint = null;
 
@@ -568,7 +568,7 @@ public abstract class PacketValidityChecker
    {
       String errorMessage = validatePacket(footTrajectoryMessage, true);
       if (errorMessage != null)
-         return errorMessage;
+         return FootTrajectoryMessage.class.getSimpleName() + " " + errorMessage;
 
       ObjectErrorType errorType;
       SE3TrajectoryPointMessage previousTrajectoryPoint = null;
@@ -604,7 +604,7 @@ public abstract class PacketValidityChecker
    {
       String errorMessage = validatePacket(endEffectorLoadBearingMessage, true);
       if (errorMessage != null)
-         return errorMessage;
+         return EndEffectorLoadBearingMessage.class.getSimpleName() + " " + errorMessage;
 
       ObjectErrorType errorType;
 
@@ -639,7 +639,7 @@ public abstract class PacketValidityChecker
    {
       String errorMessage = validatePacket(goHomeMessage, true);
       if (errorMessage != null)
-         return errorMessage;
+         return GoHomeMessage.class.getSimpleName() + " " + errorMessage;
 
       ObjectErrorType errorType;
 
@@ -667,7 +667,7 @@ public abstract class PacketValidityChecker
    {
       String errorMessage = validatePacket(pelvisHeightTrajectoryMessage, true);
       if (errorMessage != null)
-         return errorMessage;
+         return PelvisHeightTrajectoryMessage.class.getSimpleName() + " " + errorMessage;
 
       TrajectoryPoint1DMessage previousTrajectoryPoint = null;
 
@@ -695,7 +695,7 @@ public abstract class PacketValidityChecker
    {
       String errorMessage = validatePacket(armDesiredAccelerationsMessage, true);
       if (errorMessage != null)
-         return errorMessage;
+         return ArmDesiredAccelerationsMessage.class.getSimpleName() + " " + errorMessage;
 
       ObjectErrorType packetFieldErrorType = ObjectValidityChecker.validateEnum(armDesiredAccelerationsMessage.robotSide);
       if (packetFieldErrorType != null)
