@@ -38,7 +38,7 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 
 import us.ihmc.commons.Conversions;
-import us.ihmc.robotics.EpsilonComparable;
+import us.ihmc.euclid.interfaces.EpsilonComparable;
 
 public class ScriptEditorInterface
 {

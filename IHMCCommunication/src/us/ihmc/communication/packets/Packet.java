@@ -4,7 +4,7 @@ import com.esotericsoftware.kryo.serializers.FieldSerializer.Optional;
 
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosIgnoredField;
-import us.ihmc.robotics.EpsilonComparable;
+import us.ihmc.euclid.interfaces.EpsilonComparable;
 
 public abstract class Packet<T extends Packet<T>> implements EpsilonComparable<T>
 {
@@ -27,7 +27,7 @@ public abstract class Packet<T extends Packet<T>> implements EpsilonComparable<T
    @Optional(value = "scripting")
    public String notes;
 
-   
+
    public void setDestination(PacketDestination destination)
    {
       setDestination(destination.ordinal());
