@@ -11,11 +11,13 @@ import org.junit.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
+import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.Epsilons;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -104,9 +106,55 @@ public class FrameBox3dTest
       };
       frame.update();
       box.changeFrame(frame);
-      
+
       assertTrue(box.getReferenceFrame().getName().contains(frame.getName()));
 
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testChangeFrame() throws Exception
+   {
+      // This test ensures consistency between the changeFrame of FrameBox3d and FramePose.
+      double epsilon = 1.0e-12;
+      Random random = new Random(342554L);
+
+      ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+      ReferenceFrame frameA = ReferenceFrame.constructFrameWithUnchangingTransformFromParent("A", worldFrame,
+                                                                                             EuclidCoreRandomTools.generateRandomRigidBodyTransform(random));
+      ReferenceFrame frameB = ReferenceFrame.constructFrameWithUnchangingTransformFromParent("B", worldFrame,
+                                                                                             EuclidCoreRandomTools.generateRandomRigidBodyTransform(random));
+      ReferenceFrame frameC = ReferenceFrame.constructFrameWithUnchangingTransformFromParent("C", frameB,
+                                                                                             EuclidCoreRandomTools.generateRandomRigidBodyTransform(random));
+      ReferenceFrame frameD = ReferenceFrame.constructFrameWithUnchangingTransformFromParent("D", frameA,
+                                                                                             EuclidCoreRandomTools.generateRandomRigidBodyTransform(random));
+      ReferenceFrame[] frames = {worldFrame, frameA, frameB, frameC, frameD};
+
+      RigidBodyTransform randomTransform = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
+      Box3d expectedBox = new Box3d(random.nextDouble(), random.nextDouble(), random.nextDouble());
+      FramePose expectedBoxPose = new FramePose(worldFrame, randomTransform);
+      FramePose actualBoxPose = new FramePose();
+      FrameBox3d frameBox = new FrameBox3d(worldFrame, expectedBox);
+      frameBox.setPose(expectedBoxPose.getGeometryObject());
+      frameBox.getFramePose(actualBoxPose);
+
+      expectedBoxPose.checkReferenceFrameMatch(actualBoxPose);
+      EuclidCoreTestTools.assertTuple3DEquals(expectedBoxPose.getPositionUnsafe(), actualBoxPose.getPositionUnsafe(), epsilon);
+      EuclidCoreTestTools.assertQuaternionEqualsSmart(expectedBoxPose.getOrientationUnsafe(), actualBoxPose.getOrientationUnsafe(), epsilon);
+
+      for (int i = 0; i < 100; i++)
+      {
+         ReferenceFrame newFrame = frames[random.nextInt(frames.length)];
+
+         expectedBoxPose.changeFrame(newFrame);
+         frameBox.changeFrame(newFrame);
+         frameBox.getFramePose(actualBoxPose);
+
+         assertTrue(expectedBox.epsilonEquals(frameBox.getBox3d(), epsilon));
+         expectedBoxPose.checkReferenceFrameMatch(actualBoxPose);
+         EuclidCoreTestTools.assertTuple3DEquals(expectedBoxPose.getPositionUnsafe(), actualBoxPose.getPositionUnsafe(), epsilon);
+         EuclidCoreTestTools.assertQuaternionEqualsSmart(expectedBoxPose.getOrientationUnsafe(), actualBoxPose.getOrientationUnsafe(), epsilon);
+      }
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -137,7 +185,7 @@ public class FrameBox3dTest
       assertTrue(expectedPoint.epsilonEquals(returnedPoint, 1e-14));
       assertTrue(expectedNormal.epsilonEquals(returnedNormal, 1e-14));
    }
-   
+
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testIsInsideOrOnSurface()
@@ -148,21 +196,20 @@ public class FrameBox3dTest
 
       FramePoint pointOnXFace = new FramePoint(worldFrame);
       pointOnXFace.set(0.4, 0.3, -0.1);
-      
-      assertTrue(box.isInsideOrOnSurface(pointOnXFace, 1e-7));
 
+      assertTrue(box.isInsideOrOnSurface(pointOnXFace, 1e-7));
 
       FramePoint pointOnYFace = new FramePoint(worldFrame);
       pointOnYFace.set(-0.2, 0.4, -0.1);
-      
+
       assertTrue(box.isInsideOrOnSurface(pointOnYFace, 1e-7));
-      
+
       FramePoint pointOutsideBox = new FramePoint(worldFrame);
       pointOutsideBox.set(10, 10, 10);
-      
+
       assertFalse(box.isInsideOrOnSurface(pointOutsideBox, 1e-7));
    }
-   
+
    @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testApplyTransform()
@@ -235,7 +282,6 @@ public class FrameBox3dTest
       assertTrue(vector.epsilonEquals(box.getCenterCopy().getVectorCopy(), 0.0));
    }
 
-
    private static FrameBox3d createRandomBox(ReferenceFrame referenceFrame, Random random)
    {
       RigidBodyTransform configuration = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
@@ -270,6 +316,5 @@ public class FrameBox3dTest
 
       return pointToTest;
    }
-
 
 }
