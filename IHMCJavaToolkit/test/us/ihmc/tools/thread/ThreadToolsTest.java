@@ -156,6 +156,7 @@ public class ThreadToolsTest
       long timeSleptInNanoseconds = runnable.getTimeSleptNanonseconds();
       long timeOverSleptInNanoseconds = timeSleptInNanoseconds - totalNanosecondsToSleep;
 
+      // Check to make sure slept at least the amount specified.
       assertTrue("timeSlept = " + timeSleptInNanoseconds + ", millisecondsToSleep = " + millisecondsToSleep, timeOverSleptInNanoseconds >= 0);
 
       // Check to make sure didn't over sleep by more than 5 milliseconds, which seems reasonable on most operating systems.
