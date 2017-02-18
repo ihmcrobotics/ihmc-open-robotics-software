@@ -15,7 +15,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.OpenOption;
 import java.nio.file.Path;
@@ -38,10 +38,10 @@ public class FileTools
 {
    /** A carriage return */
    private static final byte CARRIAGE_RETURN = '\r';
-   
+
    /** A newline */
    private static final byte NEWLINE = '\n';
-   
+
    /**
     * Delete a file or directory quietly. A bridge from Java's NIO.2 to Apache Commons IO.
     * 
@@ -91,12 +91,12 @@ public class FileTools
    public static void writeAllLines(List<String> lines, Path path, WriteOption writeOption, DefaultExceptionHandler defaultExceptionHandler)
    {
       PrintWriter printer = newPrintWriter(path, writeOption, defaultExceptionHandler);
-      
+
       for (String line : lines)
       {
          printer.println(line);
       }
-      
+
       printer.close();
    }
 
@@ -121,6 +121,7 @@ public class FileTools
          return (PrintWriter) defaultExceptionHandler.handleException(ioException);
       }
    }
+
    /**
     * Creates a new PrintWriter. Uses Java's NIO.2 API.
     * 
@@ -143,31 +144,52 @@ public class FileTools
       }
    }
 
-   public static List<String> readLinesFromBytes(byte[] bytes)
+   /**
+    * Read bytes into a list of strings using {@link BufferedReader#readLine()}.
+    * 
+    * @param bytes bytes to read
+    * @param defaultExceptionHandler default exception handler
+    * @return list of strings
+    */
+   public static List<String> readLinesFromBytes(byte[] bytes, DefaultExceptionHandler defaultExceptionHandler)
    {
       List<String> lines = new ArrayList<>();
-      try(BufferedReader reader = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(bytes), Charset.forName("UTF-8").newDecoder())))
+      try (BufferedReader reader = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(bytes), StandardCharsets.UTF_8.newDecoder())))
       {
-         while(true)
+         while (true)
          {
             String line = reader.readLine();
             if (line != null)
+            {
                lines.add(line);
+            }
             else
+            {
                break;
+            }
          }
       }
-      catch (IOException e)
+      catch (IOException ioException)
       {
-         e.printStackTrace();
+         defaultExceptionHandler.handleException(ioException);
       }
       return lines;
    }
-   
+
+   /**
+    * Replace a line in a file by index with a replacement line. For efficiency, it is required
+    * to pass in the file as an array of bytes and also as a list of strings by line.
+    * 
+    * @param lineIndex line number starting at 0 of line to replace
+    * @param newLine replacement line
+    * @param fileBytes file as an array of bytes
+    * @param fileLines file as a list of lines
+    * @return updated file with replacement line as an array of bytes
+    */
    public static byte[] replaceLineInFile(int lineIndex, String newLine, byte[] fileBytes, List<String> fileLines)
    {
       byte[] newBytes = new byte[fileBytes.length - fileLines.get(lineIndex).length() + newLine.length()];
-      
+
       int newBytesIndex = 0;
       int fileBytesIndex = 0;
       for (int fileLineIndex = 0; fileLineIndex < fileLines.size(); fileLineIndex++)
@@ -178,7 +200,7 @@ public class FileTools
             {
                newBytes[newBytesIndex++] = b;
             }
-            
+
             fileBytesIndex += fileLines.get(fileLineIndex).length();
             fileLines.set(fileLineIndex, newLine);
          }
@@ -190,9 +212,8 @@ public class FileTools
                ++fileBytesIndex;
             }
          }
-         
-         if (fileBytes.length > fileBytesIndex + 1 &&
-             fileBytes[fileBytesIndex] == CARRIAGE_RETURN && fileBytes[fileBytesIndex + 1] == NEWLINE)
+
+         if (fileBytes.length > fileBytesIndex + 1 && fileBytes[fileBytesIndex] == CARRIAGE_RETURN && fileBytes[fileBytesIndex + 1] == NEWLINE)
          {
             newBytes[newBytesIndex++] = fileBytes[fileBytesIndex++];
             newBytes[newBytesIndex++] = fileBytes[fileBytesIndex++];
@@ -202,10 +223,10 @@ public class FileTools
             newBytes[newBytesIndex++] = fileBytes[fileBytesIndex++];
          }
       }
-      
+
       return newBytes;
    }
-   
+
    public static byte[] readAllBytes(Path path)
    {
       try
@@ -218,14 +239,14 @@ public class FileTools
          return null;
       }
    }
-   
+
    public static void ensureDirectoryExists(Path path)
    {
       try
       {
          if (!Files.exists(path.getParent()))
             ensureDirectoryExists(path.getParent());
-         
+
          if (!Files.exists(path))
             Files.createDirectory(path);
       }
@@ -234,7 +255,7 @@ public class FileTools
          e.printStackTrace();
       }
    }
-   
+
    public static void write(Path path, byte[] bytes, OpenOption... options)
    {
       try
@@ -246,34 +267,34 @@ public class FileTools
          e.printStackTrace();
       }
    }
-   
+
    public static BufferedReader newBufferedReader(Path path) throws IOException
    {
-      return Files.newBufferedReader(path, Charset.defaultCharset());
+      return Files.newBufferedReader(path);
    }
-   
+
    public static boolean checkIfSerializable(Object objectToTest)
    {
-      try(ObjectOutputStream testStream = new ObjectOutputStream(new ByteArrayOutputStream()))
+      try (ObjectOutputStream testStream = new ObjectOutputStream(new ByteArrayOutputStream()))
       {
          testStream.writeObject(objectToTest);
          testStream.flush();
          return true;
-      } 
+      }
       catch (IOException e1)
       {
          e1.printStackTrace();
          return false;
       }
    }
-   
+
    public static void concatenateFilesTogether(List<Path> filesToConcatenate, Path concatenatedFile)
    {
-      try(DataOutputStream dataOutputStream = getFileDataOutputStream(concatenatedFile))
+      try (DataOutputStream dataOutputStream = getFileDataOutputStream(concatenatedFile))
       {
          for (Path fileToConcatenate : filesToConcatenate)
          {
-            try(DataInputStream dataInputStream = getFileDataInputStream(fileToConcatenate))
+            try (DataInputStream dataInputStream = getFileDataInputStream(fileToConcatenate))
             {
                while (dataInputStream.available() > 0)
                {
@@ -293,12 +314,12 @@ public class FileTools
          e.printStackTrace();
       }
    }
-   
+
    public static DataOutputStream getFileDataOutputStream(Path file)
    {
       return getFileDataOutputStream(file, Conversions.kibibytesToBytes(8));
    }
-   
+
    public static DataOutputStream getFileDataOutputStream(Path file, int bufferSize)
    {
       try
@@ -311,12 +332,12 @@ public class FileTools
          return null;
       }
    }
-   
+
    public static DataInputStream getFileDataInputStream(Path file)
    {
       return getFileDataInputStream(file, Conversions.kibibytesToBytes(8));
    }
-   
+
    public static DataInputStream getFileDataInputStream(Path file, int bufferSize)
    {
       try
@@ -329,7 +350,7 @@ public class FileTools
          return null;
       }
    }
-   
+
    public static Path getTemporaryDirectoryPath()
    {
       return Paths.get(System.getProperty("java.io.tmpdir"));

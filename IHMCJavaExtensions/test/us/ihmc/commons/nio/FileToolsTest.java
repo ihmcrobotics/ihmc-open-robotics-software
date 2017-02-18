@@ -95,14 +95,14 @@ public class FileToolsTest
    public void testReadAllBytesAndReadLinesFromBytesAndReplaceLine()
    {
       byte[] bytes = FileTools.readAllBytes(READ_ALL_LINES_PATH);
-      List<String> lines = FileTools.readLinesFromBytes(bytes);
+      List<String> lines = FileTools.readLinesFromBytes(bytes, DefaultExceptionHandler.PRINT_STACKTRACE);
       
       assertTrue(lines.get(0).equals("line1"));
       assertTrue(lines.get(1).equals("line2"));
       assertTrue(lines.get(2).equals("line3"));
       
       bytes = FileTools.replaceLineInFile(1, "line2Mod", bytes, lines);
-      lines = FileTools.readLinesFromBytes(bytes);
+      lines = FileTools.readLinesFromBytes(bytes, DefaultExceptionHandler.PRINT_STACKTRACE);
 
       assertTrue(lines.get(0).equals("line1"));
       assertTrue(lines.get(1).equals("line2Mod"));
