@@ -150,7 +150,7 @@ public class CreateFootstepScript
       footstep.robotSide = robotSide;
       // set pose
       footstep.location = new Point3D(x, y, ankleHeight);
-      footstep.orientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
+      footstep.setOrientation(new Quaternion(0.0, 0.0, 0.0, 1.0));
       // set contact points
       footstep.predictedContactPoints = new ArrayList<>();
       for (int i = 0; i < contactPoints.length; i++)

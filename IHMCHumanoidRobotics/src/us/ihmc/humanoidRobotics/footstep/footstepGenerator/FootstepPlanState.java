@@ -35,8 +35,10 @@ public class FootstepPlanState implements Comparable<FootstepPlanState>
    public FootstepPlanState(double x, double y, double theta, RobotSide side)
    {
       footstepData.location = new Point3D(x, y, 0);
-      footstepData.orientation = new Quaternion();
-      footstepData.orientation.setToYawQuaternion(theta);
+      
+      Quaternion orientation = new Quaternion();
+      orientation.setToYawQuaternion(theta);
+      footstepData.setOrientation(orientation);
       footstepData.robotSide = side;
       this.theta = theta;
    }

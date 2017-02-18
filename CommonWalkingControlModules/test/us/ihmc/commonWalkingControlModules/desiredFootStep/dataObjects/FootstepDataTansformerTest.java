@@ -62,8 +62,10 @@ public class FootstepDataTansformerTest
       ret.robotSide = RobotSide.LEFT;
       ret.location = RandomTools.generateRandomPoint(random, 10.0, 10.0, 10.0);
       AxisAngle axisAngle = RandomTools.generateRandomRotation(random);
-      ret.orientation = new Quaternion();
-      ret.orientation.set(axisAngle);
+      
+      Quaternion orientation = new Quaternion();
+      orientation.set(axisAngle);
+      ret.setOrientation(orientation);
 
       List<Point3D> listOfPoints = new ArrayList<Point3D>();
       {

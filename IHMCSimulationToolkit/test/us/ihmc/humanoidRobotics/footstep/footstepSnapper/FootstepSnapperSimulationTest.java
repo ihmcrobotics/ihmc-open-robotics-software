@@ -582,7 +582,7 @@ public class FootstepSnapperSimulationTest
                   tokenizer.nextToken();
                   yaw = Double.parseDouble(tokenizer.nextToken());
                   RotationTools.computeQuaternionFromYawAndZNormal(yaw, new Vector3D(0.0, 0.0, 1.0), orientation);
-                  footstepData.orientation = (orientation);
+                  footstepData.setOrientation(orientation);
                }
             }
 

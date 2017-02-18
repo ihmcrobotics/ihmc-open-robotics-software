@@ -469,7 +469,7 @@ public class Box3dTest
             assertTrue(box.isInsideOrOnSurface(projectedPoint, epsilon));
             if (box.isInsideOrOnSurface(point))
             {
-               EuclidCoreTestTools.assertTuple3DEquals(point, projectedPoint, 0.0);
+               EuclidCoreTestTools.assertTuple3DEquals(point, projectedPoint, 1e-10);
             }
             else
             {
