@@ -18,7 +18,7 @@
           <x>2.152526913793795E-4</x>
           <y>-0.003926732389557396</y>
           <z>-0.0010246821224833887</z>
-          <w>0.9999917421986881</w>
+          <s>0.9999917421986881</s>
         </orientation>
         <trajectoryType>DEFAULT</trajectoryType>
         <swingHeight>0.0</swingHeight>
@@ -37,7 +37,7 @@
           <x>2.152526913793793E-4</x>
           <y>-0.003926732389557398</y>
           <z>-0.0010246821224833887</z>
-          <w>0.9999917421986881</w>
+          <s>0.9999917421986881</s>
         </orientation>
         <trajectoryType>DEFAULT</trajectoryType>
         <swingHeight>0.0</swingHeight>
@@ -56,7 +56,7 @@
           <x>2.1525269137937961E-4</x>
           <y>-0.003926732389557398</y>
           <z>-0.0010246821224833887</z>
-          <w>0.9999917421986881</w>
+          <s>0.9999917421986881</s>
         </orientation>
         <trajectoryType>DEFAULT</trajectoryType>
         <swingHeight>0.0</swingHeight>
@@ -75,7 +75,7 @@
           <x>2.1525269137938043E-4</x>
           <y>-0.003926732389557398</y>
           <z>-0.0010246821224833887</z>
-          <w>0.9999917421986881</w>
+          <s>0.9999917421986881</s>
         </orientation>
         <trajectoryType>DEFAULT</trajectoryType>
         <swingHeight>0.0</swingHeight>
@@ -94,7 +94,7 @@
           <x>2.1525269137937961E-4</x>
           <y>-0.003926732389557398</y>
           <z>-0.0010246821224833887</z>
-          <w>0.9999917421986881</w>
+          <s>0.9999917421986881</s>
         </orientation>
         <trajectoryType>DEFAULT</trajectoryType>
         <swingHeight>0.0</swingHeight>
@@ -113,7 +113,7 @@
           <x>2.1525269137938037E-4</x>
           <y>-0.003926732389557398</y>
           <z>-0.0010246821224833887</z>
-          <w>0.9999917421986881</w>
+          <s>0.9999917421986881</s>
         </orientation>
         <trajectoryType>DEFAULT</trajectoryType>
         <swingHeight>0.0</swingHeight>
