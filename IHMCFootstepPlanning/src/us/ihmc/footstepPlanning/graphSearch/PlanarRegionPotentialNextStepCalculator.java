@@ -162,10 +162,15 @@ public class PlanarRegionPotentialNextStepCalculator
          toTheRight = new Vector3D(0.0, -idealFootstepWidth / 2.0, 0.0);
       }
 
-      toTheLeft.applyTransform(goalLeftFootPose);
-      goalLeftFootPose.setTranslation(toTheLeft);
-      toTheRight.applyTransform(goalRightFootPose);
-      goalRightFootPose.setTranslation(toTheRight);
+      RigidBodyTransform tempTransform = new RigidBodyTransform();
+      tempTransform.setTranslation(toTheLeft);
+      goalLeftFootPose.transform(tempTransform);
+      goalLeftFootPose.set(tempTransform);
+
+      tempTransform.setIdentity();
+      tempTransform.setTranslation(toTheRight);
+      goalRightFootPose.transform(tempTransform);
+      goalRightFootPose.set(tempTransform);
 
       goalFootstepPoses = new SideDependentList<>(goalLeftFootPose, goalRightFootPose);
 
