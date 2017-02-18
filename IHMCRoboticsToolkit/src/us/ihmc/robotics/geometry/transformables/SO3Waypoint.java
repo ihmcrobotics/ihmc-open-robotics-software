@@ -57,13 +57,13 @@ public class SO3Waypoint implements GeometryObject<SO3Waypoint>, SO3WaypointInte
    @Override
    public void setOrientationToZero()
    {
-      orientation.set(0.0, 0.0, 0.0, 1.0);
+      orientation.setToZero();
    }
 
    @Override
    public void setAngularVelocityToZero()
    {
-      angularVelocity.set(0.0, 0.0, 0.0);
+      angularVelocity.setToZero();
    }
 
    @Override
@@ -76,13 +76,13 @@ public class SO3Waypoint implements GeometryObject<SO3Waypoint>, SO3WaypointInte
    @Override
    public void setOrientationToNaN()
    {
-      orientation.set(Double.NaN, Double.NaN, Double.NaN, Double.NaN);
+      orientation.setToNaN();
    }
 
    @Override
    public void setAngularVelocityToNaN()
    {
-      angularVelocity.set(Double.NaN, Double.NaN, Double.NaN);
+      angularVelocity.setToNaN();
    }
 
    @Override
