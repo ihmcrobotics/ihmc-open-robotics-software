@@ -10,6 +10,7 @@ import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -113,7 +114,7 @@ public class YoFrameSE3TrajectoryPointTest
    @Test(timeout = 30000)
    public void testSetters()
    {
-      double epsilon = 1.0e-20;
+      double epsilon = 1.0e-14;
       Random random = new Random(21651016L);
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -329,7 +330,9 @@ public class YoFrameSE3TrajectoryPointTest
       assertEquals(expectedNamePrefix, testedYoFrameSE3TrajectoryPoint.getNamePrefix());
       assertEquals(expectedNameSuffix, testedYoFrameSE3TrajectoryPoint.getNameSuffix());
       assertTrue(expectedPosition.epsilonEquals(testedYoFrameSE3TrajectoryPoint.getPosition().getFramePointCopy(), epsilon));
-      assertTrue(expectedOrientation.epsilonEquals(testedYoFrameSE3TrajectoryPoint.getOrientation().getFrameOrientationCopy(), epsilon));
+      Quaternion trajectoryPointQuaternion = testedYoFrameSE3TrajectoryPoint.getOrientation().getFrameOrientationCopy().getQuaternion();
+      assertEquals(expectedOrientation.getReferenceFrame(), testedYoFrameSE3TrajectoryPoint.getOrientation().getReferenceFrame());
+      EuclidCoreTestTools.assertQuaternionEquals(expectedOrientation.getQuaternion(), trajectoryPointQuaternion, epsilon);
       assertTrue(expectedLinearVelocity.epsilonEquals(testedYoFrameSE3TrajectoryPoint.getLinearVelocity().getFrameVectorCopy(), epsilon));
       assertTrue(expectedAngularVelocity.epsilonEquals(testedYoFrameSE3TrajectoryPoint.getAngularVelocity().getFrameVectorCopy(), epsilon));
 
