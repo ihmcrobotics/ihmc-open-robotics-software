@@ -21,7 +21,8 @@ public class ContactingExternalForcePoint extends ExternalForcePoint
 
    //TODO: This isn't rewindable...
    private CollisionShapeWithLink collisionShape;
-
+   private int numberOfPointsInContactWithSameShape = 0;
+   
    public ContactingExternalForcePoint(String name, Joint parentJoint, YoVariableRegistry registry)
    {
       super(name, registry);
@@ -32,6 +33,16 @@ public class ContactingExternalForcePoint extends ExternalForcePoint
       isSlipping = new BooleanYoVariable(name + "IsSlipping", registry);
       
       indexOfContactingPair.set(-1);
+   }
+
+   public int getNumberOfPointsInContactWithSameShape()
+   {
+      return numberOfPointsInContactWithSameShape;
+   }
+
+   public void setNumberOfPointsInContactWithSameShape(int numberOfPointsInContactWithSameShape)
+   {
+      this.numberOfPointsInContactWithSameShape = numberOfPointsInContactWithSameShape;
    }
 
    public int getIndexOfContactingPair()
