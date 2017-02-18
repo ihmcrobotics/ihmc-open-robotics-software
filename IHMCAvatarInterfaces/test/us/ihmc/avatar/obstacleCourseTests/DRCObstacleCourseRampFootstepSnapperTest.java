@@ -129,7 +129,7 @@ public abstract class DRCObstacleCourseRampFootstepSnapperTest implements MultiR
          yawPitchRoll[1] = RandomTools.generateRandomDouble(random, Math.PI / 4.0);
          yawPitchRoll[2] = RandomTools.generateRandomDouble(random, Math.PI / 4.0);
          tempFrameOrientation.setYawPitchRoll(yawPitchRoll);
-         tempFrameOrientation.getQuaternion(footstepData.orientation);
+         tempFrameOrientation.getQuaternion(footstepData.getOrientation());
       }
       
       vidualizeCorruptedFootsteps(corruptedFootstepDataList, scs);
