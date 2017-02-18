@@ -93,7 +93,7 @@ public class YoIMUHandleHolder
    
    public void packOrientation(Quaternion orientationToPack)
    {
-      orientationToPack.set(q_w.getDoubleValue(), q_x.getDoubleValue(), q_y.getDoubleValue(), q_z.getDoubleValue());
+      orientationToPack.set(q_x.getDoubleValue(), q_y.getDoubleValue(), q_z.getDoubleValue(), q_w.getDoubleValue());
    }
    
 }
