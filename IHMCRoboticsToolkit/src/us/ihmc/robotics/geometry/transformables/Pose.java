@@ -18,49 +18,48 @@ import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 
 public class Pose implements GeometryObject<Pose>
 {
-   private final Point3D position;
    private final Quaternion orientation;
+   private final Point3D position;
 
    public Pose(Pose pose)
    {
-      this(pose.position, pose.orientation);
+      orientation = new Quaternion(pose.getOrientation());
+      position = new Point3D(pose.getPosition());
    }
 
    public Pose()
    {
-      this.position = new Point3D();
-      this.orientation = new Quaternion();
+      orientation = new Quaternion();
+      position = new Point3D();
    }
-   
+
    public Pose(RigidBodyTransform transform)
    {
-      position = new Point3D();
-      orientation = new Quaternion();
-      
-      setPose(transform);
+      transform.getRotation(orientation = new Quaternion());
+      transform.getTranslation(position = new Point3D());
    }
 
    public Pose(Point3DReadOnly position, QuaternionReadOnly orientation)
    {
-      this.position = new Point3D(position);
       this.orientation = new Quaternion(orientation);
+      this.position = new Point3D(position);
    }
 
    public void setX(double x)
    {
       position.setX(x);
    }
-   
+
    public void setY(double y)
    {
       position.setY(y);
    }
-   
+
    public void setZ(double z)
    {
       position.setZ(z);
    }
-   
+
    public double getX()
    {
       return position.getX();
@@ -75,7 +74,7 @@ public class Pose implements GeometryObject<Pose>
    {
       return position.getZ();
    }
-   
+
    public void setPosition(double x, double y, double z)
    {
       position.set(x, y, z);
@@ -88,9 +87,7 @@ public class Pose implements GeometryObject<Pose>
 
    public void translate(double x, double y, double z)
    {
-      position.setX(position.getX() + x);
-      position.setY(position.getY() + y);
-      position.setZ(position.getZ() + z);
+      position.add(x, y, z);
    }
 
    public Point3DReadOnly getPoint()
@@ -106,53 +103,57 @@ public class Pose implements GeometryObject<Pose>
    @Override
    public void set(Pose other)
    {
-      this.position.set(other.position);
-      this.orientation.set(other.orientation);
+      orientation.set(other.getOrientation());
+      position.set(other.getPosition());
    }
 
    @Override
    public void setToZero()
    {
-      this.position.setToZero();
-      this.orientation.setToZero();
+      orientation.setToZero();
+      position.setToZero();
    }
 
    @Override
    public void setToNaN()
    {
-      this.position.setToNaN();
-      this.orientation.setToNaN();
+      orientation.setToNaN();
+      position.setToNaN();
    }
 
    @Override
    public boolean containsNaN()
    {
-      if (this.position.containsNaN())
-         return true;
-      if (this.orientation.containsNaN())
-         return true;
-
-      return false;
+      return orientation.containsNaN() || position.containsNaN();
    }
 
    @Override
    public boolean epsilonEquals(Pose other, double epsilon)
    {
-      return (this.position.epsilonEquals(other.position, epsilon)) && (this.orientation.epsilonEquals(other.orientation, epsilon));
+      return orientation.epsilonEquals(other.getOrientation(), epsilon) && position.epsilonEquals(other.getPosition(), epsilon);
    }
 
    @Override
    public void applyTransform(Transform transform)
    {
-      this.position.applyTransform(transform);
-      this.orientation.applyTransform(transform);
+      transform.transform(position);
+      transform.transform(orientation);
+   }
+   
+   public void applyTransformToPositionOnly(Transform transform)
+   {
+      transform.transform(position);
    }
 
+   public void applyTransformToOrientationOnly(Transform transform)
+   {
+      transform.transform(orientation);
+   }
+   
    public void interpolate(Pose pose1, Pose pose2, double alpha)
    {
-      position.interpolate(pose1.position, pose2.position, alpha);
-      orientation.interpolate(pose1.orientation, pose2.orientation, alpha);
-      orientation.normalize();
+      orientation.interpolate(pose1.getOrientation(), pose2.getOrientation(), alpha);
+      position.interpolate(pose1.getPosition(), pose2.getPosition(), alpha);
    }
 
    public String printOutPosition()
@@ -167,20 +168,20 @@ public class Pose implements GeometryObject<Pose>
 
    public void setPose(RigidBodyTransform transform)
    {
-      transform.getTranslation(position);
       transform.getRotation(orientation);
+      transform.getTranslation(position);
    }
 
    public void setPose(Tuple3DReadOnly position, QuaternionReadOnly orientation)
    {
-      setPosition(position);
-      setOrientation(orientation);
+      this.orientation.set(orientation);
+      this.position.set(position);
    }
 
    public void setPose(Tuple3DReadOnly position, AxisAngleReadOnly orientation)
    {
-      setPosition(position);
-      setOrientation(orientation);
+      this.orientation.set(orientation);
+      this.position.set(position);
    }
 
    public void setPosition(Tuple3DReadOnly position)
@@ -190,65 +191,60 @@ public class Pose implements GeometryObject<Pose>
 
    public void setXY(Point2DReadOnly point)
    {
-      setX(point.getX());
-      setY(point.getY());     
+      position.setX(point.getX());
+      position.setY(point.getY());
    }
-   
+
    public void getPose(RigidBodyTransform transformToPack)
    {
       transformToPack.set(orientation, position);
    }
-   
-   public Point3D getPositionUnsafe()
+
+   public Point3DReadOnly getPosition()
    {
       return position;
    }
-   
+
    public void getPosition(Tuple3DBasics tupleToPack)
    {
-      tupleToPack.set(position); 
+      tupleToPack.set(position);
    }
 
    public void getRigidBodyTransform(RigidBodyTransform transformToPack)
    {
-      getPose(transformToPack);
+      transformToPack.set(orientation, position);
    }
 
    public void setOrientation(double qx, double qy, double qz, double qs)
    {
-      this.orientation.set(qx, qy, qz, qs);
+      orientation.set(qx, qy, qy, qs);
    }
 
    public void setOrientation(QuaternionReadOnly quaternion)
    {
-      this.orientation.set(quaternion);
+      orientation.set(quaternion);
    }
 
    public void setOrientation(RotationMatrixReadOnly matrix3d)
    {
-      this.orientation.set(matrix3d);
+      orientation.set(matrix3d);
    }
 
    public void setOrientation(AxisAngleReadOnly axisAngle4d)
    {
-      this.orientation.set(axisAngle4d);
-   }
-   
-   public Quaternion getOrientationUnsafe()
-   {
-      return orientation;
+      orientation.set(axisAngle4d);
    }
 
    public void getOrientation(RotationMatrix matrixToPack)
    {
-      matrixToPack.set(orientation);    
+      matrixToPack.set(orientation);
    }
 
    public void getOrientation(QuaternionBasics quaternionToPack)
    {
       quaternionToPack.set(orientation);
    }
-   
+
    public void getOrientation(AxisAngleBasics axisAngleToPack)
    {
       axisAngleToPack.set(orientation);
@@ -256,17 +252,17 @@ public class Pose implements GeometryObject<Pose>
 
    public void setYawPitchRoll(double[] yawPitchRoll)
    {
-      this.orientation.setYawPitchRoll(yawPitchRoll);
+      orientation.setYawPitchRoll(yawPitchRoll);
    }
 
    public void setYawPitchRoll(double yaw, double pitch, double roll)
    {
-      this.orientation.setYawPitchRoll(yaw, pitch, roll);
+      orientation.setYawPitchRoll(yaw, pitch, roll);
    }
 
    public void getYawPitchRoll(double[] yawPitchRollToPack)
    {
-      this.orientation.getYawPitchRoll(yawPitchRollToPack);
+      orientation.getYawPitchRoll(yawPitchRollToPack);
    }
 
    public double getYaw()
@@ -286,8 +282,6 @@ public class Pose implements GeometryObject<Pose>
 
    public boolean epsilonEquals(Pose other, double positionErrorMargin, double orientationErrorMargin)
    {
-      return (this.position.epsilonEquals(other.position, positionErrorMargin)) && (this.orientation.epsilonEquals(other.orientation, orientationErrorMargin));
+      return position.epsilonEquals(other.getPosition(), positionErrorMargin) && orientation.epsilonEquals(other.getOrientation(), orientationErrorMargin);
    }
-
-
 }

@@ -8,12 +8,10 @@ import us.ihmc.euclid.axisAngle.interfaces.AxisAngleReadOnly;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
-import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.robotics.Axis;
@@ -251,9 +249,9 @@ public class FramePose extends AbstractFrameObject<FramePose, Pose>
       getOrientationIncludingFrame(orientationToPack);
    }
 
-   public Point3D getPositionUnsafe()
+   public Point3DReadOnly getPosition()
    {
-      return pose.getPositionUnsafe();
+      return pose.getPosition();
    }
 
    public void getPosition(Tuple3DBasics tupleToPack)
@@ -271,9 +269,9 @@ public class FramePose extends AbstractFrameObject<FramePose, Pose>
       pose.getRigidBodyTransform(transformToPack);
    }
 
-   public Quaternion getOrientationUnsafe()
+   public QuaternionReadOnly getOrientation()
    {
-      return pose.getOrientationUnsafe();
+      return pose.getOrientation();
    }
 
    public void getOrientation(RotationMatrix matrixToPack)
@@ -354,7 +352,7 @@ public class FramePose extends AbstractFrameObject<FramePose, Pose>
       }
 
       if (!lockOrientation)
-         pose.getOrientationUnsafe().applyTransform(axisRotationTransform);
+         pose.applyTransformToOrientationOnly(axisRotationTransform);
 
       changeFrame(initialFrame);
    }
@@ -553,7 +551,7 @@ public class FramePose extends AbstractFrameObject<FramePose, Pose>
    @Override
    public String toString()
    {
-      return "Position: " + pose.getPoint().toString() + "\n" + pose.getOrientationUnsafe().toStringAsYawPitchRoll() + "  -- " + referenceFrame.getName();
+      return "Position: " + pose.getPoint().toString() + "\n" + pose.getOrientation().toString() + "  -- " + referenceFrame.getName();
    }
 
    public boolean epsilonEquals(FramePose other, double positionErrorMargin, double orientationErrorMargin)

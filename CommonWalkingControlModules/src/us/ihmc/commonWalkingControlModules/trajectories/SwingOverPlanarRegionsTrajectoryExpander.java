@@ -244,7 +244,7 @@ public class SwingOverPlanarRegionsTrajectoryExpander
 
          footCollisionSphere.setToZero(WORLD);
          footCollisionSphere.setRadius(soleToToeLength);
-         footCollisionSphere.getSphere3d().setPosition(solePoseReferenceFrame.getPositionUnsafe());
+         footCollisionSphere.getSphere3d().setPosition(solePoseReferenceFrame.getPosition());
 
          footCollisionSphere.changeFrame(WORLD);
 
@@ -274,7 +274,7 @@ public class SwingOverPlanarRegionsTrajectoryExpander
 
                      if ((swingStartToeFacingSwingEndPlane.isOnOrAbove(sphereWithConvexPolygonIntersector.getClosestPointOnPolygon().getPoint())
                            && swingEndHeelFacingSwingStartPlane.isOnOrAbove(sphereWithConvexPolygonIntersector.getClosestPointOnPolygon().getPoint()))
-                           || midGroundPoint.distance(sphereWithConvexPolygonIntersector.getClosestPointOnPolygon()) < midGroundPoint.distance(solePoseReferenceFrame.getPositionUnsafe()))
+                           || midGroundPoint.distance(sphereWithConvexPolygonIntersector.getClosestPointOnPolygon()) < midGroundPoint.distance(solePoseReferenceFrame.getPosition()))
                      {
                         updateClosestAndMostSevereIntersectionPoint(SwingOverPlanarRegionsTrajectoryCollisionType.CRITICAL_INTERSECTION);
 

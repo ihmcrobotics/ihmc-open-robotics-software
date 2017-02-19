@@ -5,6 +5,7 @@ import org.apache.commons.math3.util.Pair;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.ConvexPolygon2dCalculator;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
@@ -334,6 +335,14 @@ public class FrameConvexPolygon2dIntersector
          return new Line2d();
       }
    };
+   private static final ThreadLocal<Quaternion> tempQuaternion = new ThreadLocal<Quaternion>()
+   {
+      @Override
+      public Quaternion initialValue()
+      {
+         return new Quaternion();
+      }
+   };
 
    // TODO check out GeometryTools.getIntersectionBetweenTwoPlanes => no thread local and tested.
    public static void intersectTwoPlanes(FramePlane3d planeOne, FramePlane3d planeTwo, FrameLine intersectionToPack)
@@ -352,8 +361,10 @@ public class FrameConvexPolygon2dIntersector
          intersectPlaneNormal.cross(planeOne.getNormal(), planeTwo.getNormal());
          intersectionToPack.setVectorWithoutChecks(intersectPlaneNormal);
 
+         tempIntersectPlaneReferenceFrame.get().getOrientation(tempQuaternion.get());
          RotationTools.computeQuaternionFromYawAndZNormal(0.0, intersectionToPack.getNormalizedVector(),
-                                                          tempIntersectPlaneReferenceFrame.get().getOrientationUnsafe());
+                                                          tempQuaternion.get());
+         tempIntersectPlaneReferenceFrame.get().setOrientationAndUpdate(tempQuaternion.get());
          tempIntersectPlaneReferenceFrame.get().setPositionWithoutChecksAndUpdate(planeOne.getPoint());
 
          tempIntersectFrameLineOne.get().setPointWithoutChecks(planeOne.getPoint());
