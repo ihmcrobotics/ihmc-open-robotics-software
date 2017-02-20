@@ -38,7 +38,7 @@ public class MotionQPInputCalculatorTest
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    @ContinuousIntegrationTest(estimatedDuration = 0.8)
-   @Test//(timeout = 30000)
+   @Test(timeout = 30000)
    public void testPointAccelerationCommandsWithChainRobot() throws Exception
    {
       Random random = new Random(5641654L);
