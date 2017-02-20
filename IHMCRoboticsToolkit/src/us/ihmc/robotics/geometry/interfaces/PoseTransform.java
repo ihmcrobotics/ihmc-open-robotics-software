@@ -36,7 +36,7 @@ public interface PoseTransform
     *
     * @param transformable the transformable to transform. Modified.
     */
-   void tranformToWorld(Transformable transformable);
+   void transformToWorld(Transformable transformable);
    
    /**
     * Transforms the given {@code pointToTransform} to world frame.
@@ -522,7 +522,7 @@ public interface PoseTransform
     *
     * @param transformable the transformable to transform. Modified.
     */
-   void tranformToLocal(Transformable transformable);
+   void transformToLocal(Transformable transformable);
    
    /**
     * Performs the transform to local frame on the given point {@code pointToTransform}.
