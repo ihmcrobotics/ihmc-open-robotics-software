@@ -1,11 +1,13 @@
 package us.ihmc.robotics.geometry.shapes;
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
+import us.ihmc.robotics.geometry.transformables.AbstractPose;
 
 public class Ellipsoid3d extends Shape3d<Ellipsoid3d>
 {
@@ -15,7 +17,7 @@ public class Ellipsoid3d extends Shape3d<Ellipsoid3d>
 
    public Ellipsoid3d(Ellipsoid3d ellipsoid)
    {
-      this(ellipsoid.getXRadius(), ellipsoid.getYRadius(), ellipsoid.getZRadius(), ellipsoid.getTransformUnsafe());
+      this(ellipsoid.getXRadius(), ellipsoid.getYRadius(), ellipsoid.getZRadius(), ellipsoid);
    }
 
    public Ellipsoid3d(double xRadius, double yRadius, double zRadius)
@@ -27,7 +29,15 @@ public class Ellipsoid3d extends Shape3d<Ellipsoid3d>
 
    public Ellipsoid3d(double xRadius, double yRadius, double zRadius, RigidBodyTransform transform)
    {
-      setTransform(transform);
+      setPose(transform);
+      radius = new Vector3D(xRadius, yRadius, zRadius);
+      
+      tempPoint3d = new Point3D();
+   }
+
+   public Ellipsoid3d(double xRadius, double yRadius, double zRadius, AbstractPose pose)
+   {
+      setPose(pose);
       radius = new Vector3D(xRadius, yRadius, zRadius);
       
       tempPoint3d = new Point3D();
@@ -155,7 +165,7 @@ public class Ellipsoid3d extends Shape3d<Ellipsoid3d>
    {
       if (this != other)
       {
-         setTransform(other.getTransformUnsafe());
+         setPose(other);
          radius.set(other.radius);
       }
    }
@@ -187,6 +197,12 @@ public class Ellipsoid3d extends Shape3d<Ellipsoid3d>
    @Override
    public String toString()
    {
-      return "radius = " + radius + ", \ntransform = " + getTransformUnsafe() + "\n";
+      return "radius = " + radius + ", \npose = " + getPoseString() + "\n";
+   }
+
+   @Override
+   public void applyTransform(Transform transform)
+   {
+      applyTransformToPose(transform);
    }
 }

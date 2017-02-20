@@ -35,14 +35,9 @@ public class FrameRamp3d extends FrameShape3d<FrameRamp3d, Ramp3d>
       return ramp3d;
    }
 
-   public RigidBodyTransform getTransform()
-   {
-      return ramp3d.getTransformUnsafe();
-   }
-
    public void setTransform(RigidBodyTransform transform3D)
    {
-      ramp3d.setTransform(transform3D);
+      ramp3d.setPose(transform3D);
    }
 
    @Override

@@ -72,12 +72,12 @@ public class Ramp3dTest
       ramp2.setWidth(ramp1.getWidth());
       ramp2.setLength(ramp1.getLength());
       ramp2.setHeight(ramp1.getHeight());
-      ramp2.setTransform(ramp1.getTransformUnsafe());
+      ramp2.setPose(ramp1);
 
       assertTrue(ramp1.getWidth() == ramp2.getWidth());
       assertTrue(ramp1.getLength() == ramp2.getLength());
       assertTrue(ramp1.getHeight() == ramp2.getHeight());
-      assertEquals(ramp1.getTransformUnsafe(), ramp2.getTransformUnsafe());
+      ramp1.epsilonEquals(ramp2, 1e-7);
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -256,22 +256,22 @@ public class Ramp3dTest
 
          // x < 0 (in ramp frame) means it's outside the ramp
          pointToTest.set(-random.nextDouble() - 2e-7, random.nextDouble(), random.nextDouble());
-         ramp.getTransformUnsafe().transform(pointToTest);
+         ramp.transformToWorld(pointToTest);
          assertFalse(ramp.isInsideOrOnSurface(pointToTest));
 
          // x > length (in ramp frame) means it's outside the ramp
          pointToTest.set(Math.abs(random.nextDouble()) + ramp.getLength() + 2e-7, random.nextDouble(), random.nextDouble());
-         ramp.getTransformUnsafe().transform(pointToTest);
+         ramp.transformToWorld(pointToTest);
          assertFalse(ramp.isInsideOrOnSurface(pointToTest));
 
          // z < 0 (in ramp frame) means it's outside the ramp
          pointToTest.set(random.nextDouble(), random.nextDouble(), -random.nextDouble() - 2e-7);
-         ramp.getTransformUnsafe().transform(pointToTest);
+         ramp.transformToWorld(pointToTest);
          assertFalse(ramp.isInsideOrOnSurface(pointToTest));
 
          // z > height (in ramp frame) means it's outside the ramp
          pointToTest.set(random.nextDouble(), random.nextDouble(), Math.abs(random.nextDouble()) + ramp.getHeight() + 2e-7);
-         ramp.getTransformUnsafe().transform(pointToTest);
+         ramp.transformToWorld(pointToTest);
          assertFalse(ramp.isInsideOrOnSurface(pointToTest));
 
          // points below the ramp surface (z < 0 in angled frame) are inside
@@ -284,12 +284,12 @@ public class Ramp3dTest
 
          // points barely above the base (small positive z in ramp frame and x and z so that they fit into the rectangular sides) are inside
          pointToTest.set(random.nextDouble() * ramp.getLength(), 0.5 * random.nextDouble() * ramp.getWidth(), random.nextDouble() * epsilon);
-         ramp.getTransformUnsafe().transform(pointToTest);
+         ramp.transformToWorld(pointToTest);
          assertTrue(ramp.isInsideOrOnSurface(pointToTest, epsilon));
 
          // points barely inside of the 'backboard', ie x = length
          pointToTest.set(random.nextDouble() * epsilon + ramp.getLength(), 0.5 * random.nextDouble() * ramp.getWidth(), random.nextDouble() * ramp.getHeight());
-         ramp.getTransformUnsafe().transform(pointToTest);
+         ramp.transformToWorld(pointToTest);
          assertTrue(ramp.isInsideOrOnSurface(pointToTest, epsilon));
       }
    }
@@ -454,14 +454,14 @@ public class Ramp3dTest
       RigidBodyTransform transformAppliedOnlyToCopy = new RigidBodyTransform();
       transformAppliedOnlyToCopy.setRotationPitchAndZeroTranslation(Math.PI / 4);
       rampCopy.applyTransform(transformAppliedOnlyToCopy);
-      assertFalse(rampCopy.getTransformUnsafe().equals(ramp.getTransformUnsafe()));
+      assertFalse(rampCopy.equals(ramp));
 
       Ramp3d rampCopyBySet = new Ramp3d(5.0, 6.0, 7.0);
       rampCopyBySet.set(ramp);
       RigidBodyTransform transformAppliedOnlyToCopyBySet = new RigidBodyTransform();
       transformAppliedOnlyToCopyBySet.setRotationYawAndZeroTranslation(Math.PI / 5);
       rampCopyBySet.applyTransform(transformAppliedOnlyToCopyBySet);
-      assertFalse(rampCopyBySet.getTransformUnsafe().equals(ramp.getTransformUnsafe()));
+      assertFalse(rampCopyBySet.equals(ramp));
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -512,7 +512,7 @@ public class Ramp3dTest
       angleTransform.setRotationPitchAndZeroTranslation(-ramp.getRampIncline());
       angleTransform.transform(point);
       
-      ramp.getTransformToWorldUnsafe().transform(point);
+      ramp.transformToWorld(point);
       
       return new Point3D(point);
    }
@@ -529,7 +529,7 @@ public class Ramp3dTest
          zVal = xVal * (ramp.getHeight() / ramp.getLength());
 
       pointToPack.set(xVal, yVal, zVal);
-      ramp.getTransformUnsafe().transform(pointToPack);
+      ramp.transformToWorld(pointToPack);
    }
    
    private void printIfDebug(String string)
