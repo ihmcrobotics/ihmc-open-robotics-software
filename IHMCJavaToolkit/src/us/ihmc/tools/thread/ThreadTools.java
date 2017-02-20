@@ -55,6 +55,7 @@ public class ThreadTools
       long startTimeNanos = System.nanoTime();
 
       boolean doneSleeping = false;
+      boolean wasInterrupted = false;
 
       while (!doneSleeping)
       {
@@ -65,6 +66,8 @@ public class ThreadTools
          }
          catch (InterruptedException ex)
          {
+            wasInterrupted = true;
+
             long nanosecondsSleptSoFar = System.nanoTime() - startTimeNanos;
             long nanoSecondsRemaining = totalNanosecondsToSleep - nanosecondsSleptSoFar;
 
@@ -78,6 +81,13 @@ public class ThreadTools
                additionalNanosecondsToSleep = (int) (nanoSecondsRemaining - (millisecondsToSleep * oneMillion));
             }
          }
+      }
+
+      // If the thread was interrupted while sleeping, make sure to interrupt it again.
+      if (wasInterrupted)
+      {
+         System.out.println("was interrupted. interrupting again");
+         Thread.currentThread().interrupt();
       }
    }
 
