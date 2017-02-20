@@ -8,6 +8,7 @@ import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
 import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
+import us.ihmc.euclid.tools.QuaternionTools;
 import us.ihmc.euclid.transform.AffineTransform;
 import us.ihmc.euclid.transform.QuaternionBasedTransform;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -167,6 +168,18 @@ public class Pose implements GeometryObject<Pose>, PoseTransform
    public void applyTransformToOrientationOnly(Transform transform)
    {
       transform.transform(orientation);
+   }
+   
+   public void appendTransform(RigidBodyTransform transform)
+   {
+      QuaternionTools.addTransform(orientation, transform.getTranslationVector(), position);
+      orientation.multiply(transform.getRotationMatrix());
+   }
+
+   public void appendTransform(QuaternionBasedTransform transform)
+   {
+      QuaternionTools.addTransform(orientation, transform.getTranslationVector(), position);
+      orientation.multiply(transform.getQuaternion());
    }
    
    public void interpolate(Pose pose1, Pose pose2, double alpha)
