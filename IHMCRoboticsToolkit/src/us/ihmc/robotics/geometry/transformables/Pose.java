@@ -3,10 +3,12 @@ package us.ihmc.robotics.geometry.transformables;
 import us.ihmc.euclid.axisAngle.interfaces.AxisAngleBasics;
 import us.ihmc.euclid.axisAngle.interfaces.AxisAngleReadOnly;
 import us.ihmc.euclid.interfaces.GeometryObject;
+import us.ihmc.euclid.interfaces.Transformable;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
 import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
+import us.ihmc.euclid.transform.AffineTransform;
 import us.ihmc.euclid.transform.QuaternionBasedTransform;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.Transform;
@@ -32,29 +34,34 @@ public class Pose implements GeometryObject<Pose>, PoseTransform
 {
    private final Quaternion orientation;
    private final Point3D position;
+   private final PoseTransformMapping poseTransformMapping;
 
    public Pose(Pose pose)
    {
       orientation = new Quaternion(pose.getOrientation());
       position = new Point3D(pose.getPosition());
+      poseTransformMapping = new PoseTransformMapping();
    }
 
    public Pose()
    {
       orientation = new Quaternion();
       position = new Point3D();
+      poseTransformMapping = new PoseTransformMapping();
    }
 
    public Pose(RigidBodyTransform transform)
    {
       transform.getRotation(orientation = new Quaternion());
       transform.getTranslation(position = new Point3D());
+      poseTransformMapping = new PoseTransformMapping();
    }
 
    public Pose(Point3DReadOnly position, QuaternionReadOnly orientation)
    {
       this.orientation = new Quaternion(orientation);
       this.position = new Point3D(position);
+      poseTransformMapping = new PoseTransformMapping();
    }
 
    public void setX(double x)
@@ -296,6 +303,13 @@ public class Pose implements GeometryObject<Pose>, PoseTransform
    {
       return position.epsilonEquals(other.getPosition(), positionErrorMargin) && orientation.epsilonEquals(other.getOrientation(), orientationErrorMargin);
    }
+   
+   /** {@inheritDoc} */
+   @Override
+   public void tranformToWorld(Transformable transformable)
+   {
+      transformable.applyTransform(poseTransformMapping);
+   }
 
    /** {@inheritDoc} */
    @Override
@@ -372,6 +386,13 @@ public class Pose implements GeometryObject<Pose>, PoseTransform
    {
       transformed.set(orientation, position);
       transformed.multiply(original);
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public void tranformToLocal(Transformable transformable)
+   {
+      transformable.applyTransform(poseTransformMapping);
    }
 
    /** {@inheritDoc} */
@@ -454,5 +475,140 @@ public class Pose implements GeometryObject<Pose>, PoseTransform
       transformed.set(orientation, position);
       transformed.invert();
       transformed.multiply(original);
+   }
+   
+   private class PoseTransformMapping implements Transform
+   {
+      @Override
+      public void transform(Point3DReadOnly pointOriginal, Point3DBasics pointTransformed)
+      {
+         transformToWorld(pointOriginal, pointTransformed);
+      }
+
+      @Override
+      public void transform(Vector3DReadOnly vectorOriginal, Vector3DBasics vectorTransformed)
+      {
+         transformToWorld(vectorOriginal, vectorTransformed);
+      }
+
+      @Override
+      public void transform(QuaternionReadOnly quaternionOriginal, QuaternionBasics quaternionTransformed)
+      {
+         transformToWorld(quaternionOriginal, quaternionTransformed);
+      }
+
+      @Override
+      public void transform(Vector4DReadOnly vectorOriginal, Vector4DBasics vectorTransformed)
+      {
+         transformToWorld(vectorOriginal, vectorTransformed);
+      }
+
+      @Override
+      public void transform(Point2DReadOnly pointOriginal, Point2DBasics pointTransformed, boolean checkIfTransformInXYPlane)
+      {
+         transformToWorld(pointOriginal, pointTransformed, checkIfTransformInXYPlane);
+      }
+
+      @Override
+      public void transform(Vector2DReadOnly vectorOriginal, Vector2DBasics vectorTransformed, boolean checkIfTransformInXYPlane)
+      {
+         transformToWorld(vectorOriginal, vectorTransformed, checkIfTransformInXYPlane);
+      }
+
+      @Override
+      public void transform(Matrix3DReadOnly matrixOriginal, Matrix3D matrixTransformed)
+      {
+         transformToWorld(matrixOriginal, matrixTransformed);
+      }
+
+      @Override
+      public void transform(RotationMatrixReadOnly matrixOriginal, RotationMatrix matrixTransformed)
+      {
+         transformToWorld(matrixOriginal, matrixTransformed);
+      }
+
+      @Override
+      public void transform(RigidBodyTransform original, RigidBodyTransform transformed)
+      {
+         transformToWorld(original, transformed);
+      }
+
+      @Override
+      public void transform(QuaternionBasedTransform original, QuaternionBasedTransform transformed)
+      {
+         transformToWorld(original, transformed);
+      }
+
+      @Override
+      public void transform(AffineTransform original, AffineTransform transformed)
+      {
+         throw new RuntimeException("Affine transforms can't be transformed to Pose frame.");
+      }
+
+      @Override
+      public void inverseTransform(Point3DReadOnly pointOriginal, Point3DBasics pointTransformed)
+      {
+         transformToLocal(pointOriginal, pointTransformed);
+      }
+
+      @Override
+      public void inverseTransform(Vector3DReadOnly vectorOriginal, Vector3DBasics vectorTransformed)
+      {
+         transformToLocal(vectorOriginal, vectorTransformed);
+      }
+
+      @Override
+      public void inverseTransform(QuaternionReadOnly quaternionOriginal, QuaternionBasics quaternionTransformed)
+      {
+         transformToLocal(quaternionOriginal, quaternionTransformed);
+      }
+
+      @Override
+      public void inverseTransform(Vector4DReadOnly vectorOriginal, Vector4DBasics vectorTransformed)
+      {
+         transformToLocal(vectorOriginal, vectorTransformed);
+      }
+
+      @Override
+      public void inverseTransform(Point2DReadOnly pointOriginal, Point2DBasics pointTransformed, boolean checkIfTransformInXYPlane)
+      {
+         transformToLocal(pointOriginal, pointTransformed, checkIfTransformInXYPlane);
+      }
+
+      @Override
+      public void inverseTransform(Vector2DReadOnly vectorOriginal, Vector2DBasics vectorTransformed, boolean checkIfTransformInXYPlane)
+      {
+         transformToLocal(vectorOriginal, vectorTransformed, checkIfTransformInXYPlane);
+      }
+
+      @Override
+      public void inverseTransform(Matrix3DReadOnly matrixOriginal, Matrix3D matrixTransformed)
+      {
+         transformToLocal(matrixOriginal, matrixTransformed);
+      }
+
+      @Override
+      public void inverseTransform(RotationMatrixReadOnly matrixOriginal, RotationMatrix matrixTransformed)
+      {
+         transformToLocal(matrixOriginal, matrixTransformed);
+      }
+
+      @Override
+      public void inverseTransform(RigidBodyTransform original, RigidBodyTransform transformed)
+      {
+         transformToLocal(original, transformed);
+      }
+
+      @Override
+      public void inverseTransform(QuaternionBasedTransform original, QuaternionBasedTransform transformed)
+      {
+         transformToLocal(original, transformed);
+      }
+
+      @Override
+      public void inverseTransform(AffineTransform original, AffineTransform transformed)
+      {
+         throw new RuntimeException("Affine transforms can't be transformed to Pose frame.");
+      }
    }
 }
