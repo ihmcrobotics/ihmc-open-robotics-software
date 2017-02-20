@@ -36,34 +36,34 @@ public class Pose implements GeometryObject<Pose>, PoseTransform
 {
    private final Quaternion orientation;
    private final Point3D position;
-   private final TransformToPoseTransformAPIMap poseTransformMapping;
+   private final TransformToPoseTransformAPIMap transformToPoseTransformAPIMap;
 
    public Pose(Pose pose)
    {
       orientation = new Quaternion(pose.getOrientation());
       position = new Point3D(pose.getPosition());
-      poseTransformMapping = new TransformToPoseTransformAPIMap();
+      transformToPoseTransformAPIMap = new TransformToPoseTransformAPIMap();
    }
 
    public Pose()
    {
       orientation = new Quaternion();
       position = new Point3D();
-      poseTransformMapping = new TransformToPoseTransformAPIMap();
+      transformToPoseTransformAPIMap = new TransformToPoseTransformAPIMap();
    }
 
    public Pose(RigidBodyTransform transform)
    {
       transform.getRotation(orientation = new Quaternion());
       transform.getTranslation(position = new Point3D());
-      poseTransformMapping = new TransformToPoseTransformAPIMap();
+      transformToPoseTransformAPIMap = new TransformToPoseTransformAPIMap();
    }
 
    public Pose(Point3DReadOnly position, QuaternionReadOnly orientation)
    {
       this.orientation = new Quaternion(orientation);
       this.position = new Point3D(position);
-      poseTransformMapping = new TransformToPoseTransformAPIMap();
+      transformToPoseTransformAPIMap = new TransformToPoseTransformAPIMap();
    }
 
    public void setX(double x)
@@ -328,7 +328,7 @@ public class Pose implements GeometryObject<Pose>, PoseTransform
    @Override
    public void transformToWorld(Transformable transformable)
    {
-      transformable.applyTransform(poseTransformMapping);
+      transformable.applyTransform(transformToPoseTransformAPIMap);
    }
 
    /** {@inheritDoc} */
@@ -412,7 +412,7 @@ public class Pose implements GeometryObject<Pose>, PoseTransform
    @Override
    public void transformToLocal(Transformable transformable)
    {
-      transformable.applyTransform(poseTransformMapping);
+      transformable.applyTransform(transformToPoseTransformAPIMap);
    }
 
    /** {@inheritDoc} */
