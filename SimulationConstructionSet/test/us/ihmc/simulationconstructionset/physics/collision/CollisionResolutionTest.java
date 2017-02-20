@@ -29,9 +29,9 @@ public class CollisionResolutionTest
       Link link = new Link("baseLink");
 
       double mass = 5e-3;
-      double Ixx = 2e-7;
-      double Iyy = 2e-7;
-      double Izz = 4e-7;
+      double Ixx = 2e-5;
+      double Iyy = 2e-5;
+      double Izz = 4e-5;
             
       link.setMass(mass);
       link.setMomentOfInertia(Ixx, Iyy, Izz);
@@ -97,14 +97,14 @@ public class CollisionResolutionTest
       kiCollision = jointPhysics.computeKiCollision(offsetFromCenterOfMass, identityMatrix);
       expectedKiCollision = new Matrix3D(1.0/mass, 0.0, 0.0, 0.0, 1.0/mass, 0.0, 0.0, 0.0, 1.0/mass);
       
-      RotationMatrix rTilde = new RotationMatrix(0.0, -offsetFromCenterOfMass.getZ(), offsetFromCenterOfMass.getY(), 
+      Matrix3D rTilde = new Matrix3D(0.0, -offsetFromCenterOfMass.getZ(), offsetFromCenterOfMass.getY(), 
             offsetFromCenterOfMass.getZ(), 0.0, -offsetFromCenterOfMass.getX(),
             -offsetFromCenterOfMass.getY(), offsetFromCenterOfMass.getX(), 0.0);
 
-      RotationMatrix IInverse = new RotationMatrix(Ixx, 0.0, 0.0, 0.0, Iyy, 0.0, 0.0, 0.0, Izz);
+      Matrix3D IInverse = new Matrix3D(Ixx, 0.0, 0.0, 0.0, Iyy, 0.0, 0.0, 0.0, Izz);
       IInverse.invert();
       
-      RotationMatrix expectedKiCollisionAngularPart = new RotationMatrix(rTilde);
+      Matrix3D expectedKiCollisionAngularPart = new Matrix3D(rTilde);
       expectedKiCollisionAngularPart.multiply(IInverse);
       expectedKiCollisionAngularPart.multiply(rTilde);
       
