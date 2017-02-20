@@ -1,12 +1,14 @@
 package us.ihmc.robotics.geometry.shapes;
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.robotics.MathTools;
+import us.ihmc.robotics.geometry.transformables.AbstractPose;
 import us.ihmc.robotics.math.Epsilons;
 
 /**
@@ -28,7 +30,7 @@ public class Torus3d extends Shape3d<Torus3d>
 
    public Torus3d(Torus3d torus3d)
    {
-      this(torus3d.getTransformUnsafe(), torus3d.radius, torus3d.tubeRadius);
+      this(torus3d, torus3d.radius, torus3d.tubeRadius);
    }
    
    public Torus3d()
@@ -49,17 +51,27 @@ public class Torus3d extends Shape3d<Torus3d>
 
    public Torus3d(RigidBodyTransform transform, double radius, double thickness)
    {
-      setTransform(transform);
+      setPose(transform);
       this.radius = radius;
       this.tubeRadius = thickness;
       
       checkRadiusAndThickness();
    }
 
+   public Torus3d(AbstractPose pose, double radius, double thickness)
+   {
+      setPose(pose);
+      this.radius = radius;
+      this.tubeRadius = thickness;
+      
+      checkRadiusAndThickness();
+   }
+
+
    @Override
    public void set(Torus3d torus3d)
    {
-      setTransform(torus3d.getTransformUnsafe());
+      setPose(torus3d);
       this.radius = torus3d.radius;
       this.tubeRadius = torus3d.tubeRadius;
    }
@@ -122,9 +134,15 @@ public class Torus3d extends Shape3d<Torus3d>
    }
 
    @Override
+   public void applyTransform(Transform transform)
+   {
+      applyTransformToPose(transform);
+   }
+
+   @Override
    public String toString()
    {
-      return "radius = " + radius + ", thickness = " + tubeRadius + ", transform = " + getTransformUnsafe() + "\n";
+      return "radius = " + radius + ", thickness = " + tubeRadius + ", pose = " + getPoseString() + "\n";
    }
 
    @Override

@@ -196,7 +196,7 @@ public class Ellipsoid3dTest
          transform.setTranslation(new Vector3D(xTranslation, yTranslation, zTranslation));
 
          Ellipsoid3d ellipsoid = new Ellipsoid3d(xRadius, yRadius, zRadius);
-         ellipsoid.setTransform(transform);
+         ellipsoid.setPose(transform);
 
          assertTrue(ellipsoid.isInsideOrOnSurface(new Point3D(xTranslation, yTranslation, zTranslation)));
 
@@ -234,7 +234,7 @@ public class Ellipsoid3dTest
                   transform.setRotationYawAndZeroTranslation(angle);
 
                Ellipsoid3d ellipsoid = new Ellipsoid3d(xRadius, yRadius, zRadius);
-               ellipsoid.setTransform(transform);
+               ellipsoid.setPose(transform);
 
                assertTrue(ellipsoid.isInsideOrOnSurface(new Point3D(0.0, 0.0, 0.0)));
 
@@ -329,7 +329,7 @@ public class Ellipsoid3dTest
          ellipsoid.setXRadius(xRad);
          ellipsoid.setYRadius(yRad);
          ellipsoid.setZRadius(zRad);
-         ellipsoid.setTransform(transform);
+         ellipsoid.setPose(transform);
 
          Ellipsoid3d ellipsoidCopy = new Ellipsoid3d(ellipsoid);
 
