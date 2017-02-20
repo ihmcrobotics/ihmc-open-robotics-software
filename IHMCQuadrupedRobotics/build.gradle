@@ -39,7 +39,7 @@ ihmc.configureForIHMCOpenSourceBintrayPublish(false, "mavenJava", "maven-release
 
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.11'
-    compile group: 'us.ihmc', name: 'euclid-core', version: '0.4'
+    compile group: 'us.ihmc', name: 'euclid-core', version: '0.4.1'
     compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
     compile group: 'us.ihmc.thirdparty.jinput', name: 'jinput', version: '160414'
     compile group: 'org.ejml', name: 'core', version: '0.30'
