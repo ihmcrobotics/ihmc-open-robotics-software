@@ -31,6 +31,7 @@ public class KinematicPoint implements java.io.Serializable
 
    private final YoFramePoint position;
    private final YoFrameVector velocity;
+   private final YoFrameVector angularVelocity;
 
    private final YoFrameVector offsetYoFrameVector;
 
@@ -68,6 +69,7 @@ public class KinematicPoint implements java.io.Serializable
 
       position = new YoFramePoint(name + "_", "", ReferenceFrame.getWorldFrame(), registry);
       velocity = new YoFrameVector(name + "_d", "", ReferenceFrame.getWorldFrame(), registry);
+      angularVelocity = new YoFrameVector(name + "_w", "", ReferenceFrame.getWorldFrame(), registry);
 
       this.offsetYoFrameVector = new YoFrameVector(name + "off", "", ReferenceFrame.getWorldFrame(), registry);
       if (offset != null)
@@ -89,6 +91,7 @@ public class KinematicPoint implements java.io.Serializable
 
       position.set(0, 0, 0);
       velocity.set(0, 0, 0);
+      angularVelocity.set(0, 0, 0);
    }
 
    public KinematicPointUpdater getKinematicPointUpdater()
@@ -158,6 +161,7 @@ public class KinematicPoint implements java.io.Serializable
       R0_i.transform(v_point);
 
       velocity.set(v_point);
+      angularVelocity.set(w_i);
    }
 
    protected void updatePointPosition(RigidBodyTransform t1)
@@ -253,6 +257,11 @@ public class KinematicPoint implements java.io.Serializable
       this.velocity.set(velocity);
    }
 
+   public void setAngularVelocity(Vector3D angularVelocity)
+   {
+      this.velocity.set(velocity);
+   }
+
    public void setPosition(Point3D position)
    {
       this.position.set(position);
@@ -266,6 +275,11 @@ public class KinematicPoint implements java.io.Serializable
    public YoFrameVector getYoVelocity()
    {
       return velocity;
+   }
+
+   public YoFrameVector getYoAngularVelocity()
+   {
+      return angularVelocity;
    }
 
    public YoVariableRegistry getYoVariableRegistry()
