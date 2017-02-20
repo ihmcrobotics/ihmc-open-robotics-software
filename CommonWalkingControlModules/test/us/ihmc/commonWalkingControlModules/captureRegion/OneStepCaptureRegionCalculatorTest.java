@@ -13,6 +13,7 @@ import org.junit.Test;
 
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.CapturePointTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -195,6 +196,8 @@ public class OneStepCaptureRegionCalculatorTest
       for (int i = 0; i < expectedPointsOnBorder.size(); i++)
       {
          FramePoint2d closestVertex = captureRegion.getClosestVertexCopy(expectedPointsOnBorder.get(i));
+         closestVertex.checkReferenceFrameMatch(expectedPointsOnBorder.get(i));
+         EuclidCoreTestTools.assertTuple2DEquals(closestVertex.getPoint(), expectedPointsOnBorder.get(i).getPoint(), 1.0e-6);
          assertTrue(closestVertex.epsilonEquals(expectedPointsOnBorder.get(i), 10e-7));
       }
 

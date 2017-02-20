@@ -342,7 +342,7 @@ public class GraphicsDemoTools
       public void run()
       {
          AffineTransform transform = new AffineTransform();
-         transform.setRotationEulerAndZeroTranslation(nextVector3d(parametersHolder.getRotationTrajectory()));
+         transform.setRotationEuler(nextVector3d(parametersHolder.getRotationTrajectory()));
          transform.setTranslation(nextVector3d(parametersHolder.getTranslationTrajectory()));
          transform.setScale(parametersHolder.getScaleTrajectory().getNextValue());
          node.setTransform(transform);

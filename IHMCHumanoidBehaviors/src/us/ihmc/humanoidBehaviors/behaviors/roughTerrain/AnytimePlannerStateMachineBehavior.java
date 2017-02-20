@@ -648,8 +648,8 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
             SimpleFootstep footstep = plan.getFootstep(i);
             footstep.getSoleFramePose(swingEndPose);
 
-            FootstepDataMessage firstFootstepMessage = new FootstepDataMessage(footstep.getRobotSide(), new Point3D(swingEndPose.getPositionUnsafe()),
-                                                                               new Quaternion(swingEndPose.getOrientationUnsafe()));
+            FootstepDataMessage firstFootstepMessage = new FootstepDataMessage(footstep.getRobotSide(), new Point3D(swingEndPose.getPosition()),
+                                                                               new Quaternion(swingEndPose.getOrientation()));
             firstFootstepMessage.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
 
             swingOverPlanarRegionsTrajectoryExpander.expandTrajectoryOverPlanarRegions(stanceFootPose, swingStartPose, swingEndPose, planarRegionsList);

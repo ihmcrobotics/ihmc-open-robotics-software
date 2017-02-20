@@ -117,9 +117,7 @@ public class PlanarRegionTest
          convexPolygon.update();
 
       RigidBodyTransform regionTransform = new RigidBodyTransform();
-      Vector3D zTranslationInLocal = new Vector3D(0.0, 0.0, zLocationOfPlanarRegion);
-      regionTransform.transform(zTranslationInLocal);
-      regionTransform.setTranslation(zTranslationInLocal);
+      regionTransform.appendTranslation(0.0, 0.0, zLocationOfPlanarRegion);
       PlanarRegion planarRegion = new PlanarRegion(regionTransform, regionConvexPolygons);
 
       BoundingBox3d boundingBox3dInWorld = planarRegion.getBoundingBox3dInWorld();
@@ -159,9 +157,7 @@ public class PlanarRegionTest
          convexPolygon.update();
 
       RigidBodyTransform regionTransform = new RigidBodyTransform();
-      Vector3D zTranslationInLocal = new Vector3D(0.0, 0.0, zLocationOfPlanarRegion);
-      regionTransform.transform(zTranslationInLocal);
-      regionTransform.setTranslation(zTranslationInLocal);
+      regionTransform.appendTranslation(0.0, 0.0, zLocationOfPlanarRegion);
       PlanarRegion planarRegion = new PlanarRegion(regionTransform, regionConvexPolygons);
 
       BoundingBox3d boundingBox3dInWorld = planarRegion.getBoundingBox3dInWorld();
