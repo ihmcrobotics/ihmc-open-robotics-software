@@ -33,9 +33,9 @@ public abstract class Shape3d<S extends Shape3d<S>> implements GeometryObject<S>
     */
    public final double distance(Point3DBasics point)
    {
-      transformToShapeFrame(point);
+      transformToLocal(point);
       double distance = distanceShapeFrame(point);
-      transformFromShapeFrame(point);
+      transformToWorld(point);
       return distance;
    }
    
@@ -63,9 +63,9 @@ public abstract class Shape3d<S extends Shape3d<S>> implements GeometryObject<S>
     */
    public final boolean isInsideOrOnSurface(Point3DBasics pointToCheck, double epsilonToGrowObject)
    {
-      transformToShapeFrame(pointToCheck);
+      transformToLocal(pointToCheck);
       boolean isInsideOrOnSurface = isInsideOrOnSurfaceShapeFrame(pointToCheck, epsilonToGrowObject);
-      transformFromShapeFrame(pointToCheck);
+      transformToWorld(pointToCheck);
       return isInsideOrOnSurface;
    }
    
@@ -81,9 +81,9 @@ public abstract class Shape3d<S extends Shape3d<S>> implements GeometryObject<S>
     */
    public final void orthogonalProjection(Point3DBasics pointToCheckAndPack)
    {
-      transformToShapeFrame(pointToCheckAndPack);
+      transformToLocal(pointToCheckAndPack);
       orthogonalProjectionShapeFrame(pointToCheckAndPack);
-      transformFromShapeFrame(pointToCheckAndPack);
+      transformToWorld(pointToCheckAndPack);
    }
    
    protected abstract void orthogonalProjectionShapeFrame(Point3DBasics pointToCheckAndPack);
@@ -100,17 +100,17 @@ public abstract class Shape3d<S extends Shape3d<S>> implements GeometryObject<S>
     */
    public final boolean checkIfInside(Point3DBasics pointToCheck, Point3DBasics closestPointOnSurfaceToPack, Vector3DBasics normalToPack)
    {
-      transformToShapeFrame(pointToCheck);
+      transformToLocal(pointToCheck);
       boolean isInside = checkIfInsideShapeFrame(pointToCheck, closestPointOnSurfaceToPack, normalToPack);
       //TODO: This modifies pointToCheck and transforms back. Should we make a temp variable instead, or are we trying to be Thread safe here?
-      transformFromShapeFrame(pointToCheck);
+      transformToWorld(pointToCheck);
       if (closestPointOnSurfaceToPack != null)
       {
-         transformFromShapeFrame(closestPointOnSurfaceToPack);
+         transformToWorld(closestPointOnSurfaceToPack);
       }
       if (normalToPack != null)
       {
-         transformFromShapeFrame(normalToPack);
+         transformToWorld(normalToPack);
       }
       return isInside;
    }
@@ -121,27 +121,27 @@ public abstract class Shape3d<S extends Shape3d<S>> implements GeometryObject<S>
    
    public void getTransform(RigidBodyTransform transformToPack)
    {
-      transformToPack.set(getTransformFromShapeFrameUnsafe());
+      transformToPack.set(getTransformToWorldUnsafe());
    }
    
    public RigidBodyTransform getTransformUnsafe()
    {
-      return getTransformFromShapeFrameUnsafe();
+      return getTransformToWorldUnsafe();
    }
 
    public void getPosition(Point3DBasics positionToPack)
    {
-      getTransformFromShapeFrameUnsafe().getTranslation(positionToPack);
+      getTransformToWorldUnsafe().getTranslation(positionToPack);
    }
    
    public void getOrientation(RotationMatrix orientationToPack)
    {
-      getTransformFromShapeFrameUnsafe().getRotation(orientationToPack);
+      getTransformToWorldUnsafe().getRotation(orientationToPack);
    }
    
    public void getOrientation(QuaternionBasics orientationToPack)
    {
-      getTransformFromShapeFrameUnsafe().getRotation(orientationToPack);
+      getTransformToWorldUnsafe().getRotation(orientationToPack);
    }
    
    // Transform setters
@@ -149,9 +149,9 @@ public abstract class Shape3d<S extends Shape3d<S>> implements GeometryObject<S>
    @Override
    public void applyTransform(Transform transform)
    {
-      RigidBodyTransform fromShape = getTransformFromShapeFrameUnsafe();
+      RigidBodyTransform fromShape = getTransformToWorldUnsafe();
       transform.transform(fromShape);
-      setTransformFromShapeFrame(fromShape);
+      setTransformToWorld(fromShape);
    }
 
    public void appendTransform(RigidBodyTransform transform)
@@ -163,69 +163,69 @@ public abstract class Shape3d<S extends Shape3d<S>> implements GeometryObject<S>
 
    public void setPosition(Point3DReadOnly point)
    {
-      RigidBodyTransform fromShape = getTransformFromShapeFrameUnsafe();
+      RigidBodyTransform fromShape = getTransformToWorldUnsafe();
       fromShape.setTranslation(point);
-      setTransformFromShapeFrame(fromShape);
+      setTransformToWorld(fromShape);
    }
 
    public void setPosition(double x, double y, double z)
    {
-      RigidBodyTransform fromShape = getTransformFromShapeFrameUnsafe();
+      RigidBodyTransform fromShape = getTransformToWorldUnsafe();
       fromShape.setTranslation(x, y, z);
-      setTransformFromShapeFrame(fromShape);
+      setTransformToWorld(fromShape);
    }
    
    public void setOrientation(QuaternionReadOnly orientation)
    {
-      RigidBodyTransform fromShape = getTransformFromShapeFrameUnsafe();
+      RigidBodyTransform fromShape = getTransformToWorldUnsafe();
       fromShape.setRotation(orientation);
-      setTransformFromShapeFrame(fromShape);
+      setTransformToWorld(fromShape);
    }
 
    public void setOrientation(RotationMatrixReadOnly orientation)
    {
-      RigidBodyTransform fromShape = getTransformFromShapeFrameUnsafe();
+      RigidBodyTransform fromShape = getTransformToWorldUnsafe();
       fromShape.setRotation(orientation);
-      setTransformFromShapeFrame(fromShape);
+      setTransformToWorld(fromShape);
    }
 
    public void setOrientation(double yaw, double pitch, double roll)
    {
-      RigidBodyTransform fromShape = getTransformFromShapeFrameUnsafe();
+      RigidBodyTransform fromShape = getTransformToWorldUnsafe();
       fromShape.setRotationYawPitchRoll(yaw, pitch, roll);
-      setTransformFromShapeFrame(fromShape);
+      setTransformToWorld(fromShape);
    }
    
    public void setPose(Point3DReadOnly position, QuaternionReadOnly orientation)
    {
-      RigidBodyTransform fromShape = getTransformFromShapeFrameUnsafe();
+      RigidBodyTransform fromShape = getTransformToWorldUnsafe();
       fromShape.set(orientation, position);
-      setTransformFromShapeFrame(fromShape);
+      setTransformToWorld(fromShape);
    }
    
    public void setTransform(RigidBodyTransform transform)
    {
-      setTransformFromShapeFrame(transform);
+      setTransformToWorld(transform);
    }
    
    // Two way transform boilerplate
 
-   public void setTransformToShapeFrame(RigidBodyTransform transform)
+   public void setTransformToLocal(RigidBodyTransform transform)
    {
       twoWayTransform.setForwardTransform(transform);
    }
    
-   public void setTransformFromShapeFrame(RigidBodyTransform transform)
+   public void setTransformToWorld(RigidBodyTransform transform)
    {
       twoWayTransform.setBackwardTransform(transform);
    }
    
-   public RigidBodyTransform getTransformToShapeFrameUnsafe()
+   public RigidBodyTransform getTransformToLocalUnsafe()
    {
       return twoWayTransform.getForwardTransformUnsafe();
    }
    
-   public RigidBodyTransform getTransformFromShapeFrameUnsafe()
+   public RigidBodyTransform getTransformToWorldUnsafe()
    {
       return twoWayTransform.getBackwardTransformUnsafe();
    }
@@ -235,42 +235,42 @@ public abstract class Shape3d<S extends Shape3d<S>> implements GeometryObject<S>
       twoWayTransform.ensureTransformsUpToDate();
    }
    
-   public void transformToShapeFrame(Transformable transformable)
+   public void transformToLocal(Transformable transformable)
    {
       twoWayTransform.transformForward(transformable);
    }
 
-   public void transformToShapeFrame(Vector3DReadOnly vectorIn, Vector3DBasics vectorOut)
+   public void transformToLocal(Vector3DReadOnly vectorIn, Vector3DBasics vectorOut)
    {
       twoWayTransform.transformForward(vectorIn, vectorOut);
    }
    
-   public void transformToShapeFrame(Vector4DReadOnly vectorIn, Vector4DBasics vectorOut)
+   public void transformToLocal(Vector4DReadOnly vectorIn, Vector4DBasics vectorOut)
    {
       twoWayTransform.transformForward(vectorIn, vectorOut);
    }
    
-   public void transformToShapeFrame(Point3DReadOnly pointIn, Point3DBasics pointOut)
+   public void transformToLocal(Point3DReadOnly pointIn, Point3DBasics pointOut)
    {
       twoWayTransform.transformForward(pointIn, pointOut);
    }
    
-   public void transformFromShapeFrame(Transformable transformable)
+   public void transformToWorld(Transformable transformable)
    {
       twoWayTransform.transformBackward(transformable);
    }
 
-   public void transformFromShapeFrame(Vector3DReadOnly vectorIn, Vector3DBasics vectorOut)
+   public void transformToWorld(Vector3DReadOnly vectorIn, Vector3DBasics vectorOut)
    {
       twoWayTransform.transformBackward(vectorIn, vectorOut);
    }
    
-   public void transformFromShapeFrame(Vector4DReadOnly vectorIn, Vector4DBasics vectorOut)
+   public void transformToWorld(Vector4DReadOnly vectorIn, Vector4DBasics vectorOut)
    {
       twoWayTransform.transformBackward(vectorIn, vectorOut);
    }
    
-   public void transformFromShapeFrame(Point3DReadOnly pointIn, Point3DBasics pointOut)
+   public void transformToWorld(Point3DReadOnly pointIn, Point3DBasics pointOut)
    {
       twoWayTransform.transformBackward(pointIn, pointOut);
    }

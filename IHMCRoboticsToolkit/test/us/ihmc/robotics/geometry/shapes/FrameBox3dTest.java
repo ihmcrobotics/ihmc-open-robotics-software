@@ -239,8 +239,8 @@ public class FrameBox3dTest
          {
             Point3D point = getRandomConvexCombination(random, vertices);
             Point3D pointTransformed = new Point3D(point);
-            box.getGeometryObject().getTransformToShapeFrameUnsafe().transform(pointTransformed);
-            boxTransformed.getGeometryObject().getTransformFromShapeFrameUnsafe().transform(pointTransformed);
+            box.getGeometryObject().getTransformToLocalUnsafe().transform(pointTransformed);
+            boxTransformed.getGeometryObject().getTransformToWorldUnsafe().transform(pointTransformed);
 
             assertEquals(box.isInsideOrOnSurface(new FramePoint(worldFrame, point)),
                          boxTransformed.isInsideOrOnSurface(new FramePoint(worldFrame, pointTransformed)));

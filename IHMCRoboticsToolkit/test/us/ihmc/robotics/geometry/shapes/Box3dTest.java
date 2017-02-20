@@ -542,8 +542,8 @@ public class Box3dTest
          {
             Point3D point = getRandomConvexCombination(random, vertices);
             Point3D pointTransformed = new Point3D(point);
-            box.getTransformToShapeFrameUnsafe().transform(pointTransformed);
-            boxTransformed.getTransformFromShapeFrameUnsafe().transform(pointTransformed);
+            box.getTransformToLocalUnsafe().transform(pointTransformed);
+            boxTransformed.getTransformToWorldUnsafe().transform(pointTransformed);
             
             assertEquals(box.isInsideOrOnSurface(point), boxTransformed.isInsideOrOnSurface(pointTransformed));            
          }
