@@ -306,7 +306,7 @@ public class Pose implements GeometryObject<Pose>, PoseTransform
    
    /** {@inheritDoc} */
    @Override
-   public void tranformToWorld(Transformable transformable)
+   public void transformToWorld(Transformable transformable)
    {
       transformable.applyTransform(poseTransformMapping);
    }
@@ -390,7 +390,7 @@ public class Pose implements GeometryObject<Pose>, PoseTransform
 
    /** {@inheritDoc} */
    @Override
-   public void tranformToLocal(Transformable transformable)
+   public void transformToLocal(Transformable transformable)
    {
       transformable.applyTransform(poseTransformMapping);
    }
