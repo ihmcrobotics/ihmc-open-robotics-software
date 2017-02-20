@@ -357,8 +357,8 @@ public class FrameVector2dTest extends FrameTuple2dTest<FrameVector2d>
          //Good
       }
 
-      double[] matrix = {6.0, 7.0, 0.0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1.0};
-      RigidBodyTransform transform2 = new RigidBodyTransform(matrix);
+      double[] matrix = {6.0, 7.0, 0.0};
+      RigidBodyTransform transform2 = EuclidCoreRandomTools.generateRandomRigidBodyTransform2D(random);
 
       Vector3D vectorToTransform2 = new Vector3D(matrix);
       FrameVector2d vectorToTest2 = new FrameVector2d(null, matrix);
@@ -390,8 +390,8 @@ public class FrameVector2dTest extends FrameTuple2dTest<FrameVector2d>
          //Good
       }
 
-      double[] matrix = {6.0, 7.0, 0.0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1.0};
-      RigidBodyTransform transform2 = new RigidBodyTransform(matrix);
+      double[] matrix = {6.0, 7.0, 0.0};
+      RigidBodyTransform transform2 = EuclidCoreRandomTools.generateRandomRigidBodyTransform2D(random);
 
       Vector3D vectorToTransform2 = new Vector3D(matrix);
       FrameVector2d vectorToTest2 = new FrameVector2d(null, matrix);
@@ -407,8 +407,9 @@ public class FrameVector2dTest extends FrameTuple2dTest<FrameVector2d>
 	@Test(timeout = 30000)
    public void testChangeFrameUsingTransform_ReferenceFrame_Transform3D()
    { 
-      double[] matrix = {6.0, 7.0, 0.0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1.0};
-      RigidBodyTransform transform = new RigidBodyTransform(matrix);
+	   Random random = new Random(234L);
+      double[] matrix = {6.0, 7.0, 0.0};
+      RigidBodyTransform transform = EuclidCoreRandomTools.generateRandomRigidBodyTransform2D(random);
 
       Vector3D vectorToTransform = new Vector3D(matrix);
       FrameVector2d vectorToTest = new FrameVector2d(aFrame, matrix);
