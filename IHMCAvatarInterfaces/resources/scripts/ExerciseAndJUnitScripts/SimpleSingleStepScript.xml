@@ -11,7 +11,7 @@
         <destination>0</destination>
         <origin>AT_SOLE_FRAME</origin>
         <robotSide>LEFT</robotSide>
-        <location class="us.ihmc.robotics.geometry.transformables.TransformablePoint3d">
+        <location>
           <x>0.3</x>
           <y>0.0</y>
           <z>0.0</z>
