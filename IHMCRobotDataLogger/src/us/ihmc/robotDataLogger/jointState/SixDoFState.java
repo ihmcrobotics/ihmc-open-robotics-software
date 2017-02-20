@@ -45,7 +45,7 @@ public class SixDoFState extends JointState
       double qx = Double.longBitsToDouble(buffer.get());
       double qy = Double.longBitsToDouble(buffer.get());
       double qz = Double.longBitsToDouble(buffer.get());
-      rotation.set(qs, qx, qy, qz);
+      rotation.set(qx, qy, qz, qs);
       translation.setX(Double.longBitsToDouble(buffer.get()));
       translation.setY(Double.longBitsToDouble(buffer.get()));
       translation.setZ(Double.longBitsToDouble(buffer.get()));

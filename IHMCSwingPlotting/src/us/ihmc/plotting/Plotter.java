@@ -176,12 +176,10 @@ public class Plotter implements PlotterInterface
             screenPosition.changeFrame(pixelsFrame);
             transformToParent.setIdentity();
             tempTranslation.set(screenPosition.getX() + getPlotterWidthPixels() / 2.0, screenPosition.getY() - getPlotterHeightPixels() / 2.0, 0.0);
-            transformToParent.transform(tempTranslation);
-            transformToParent.setTranslation(tempTranslation);
+            transformToParent.appendTranslation(tempTranslation);
             transformToParent.appendYawRotation(screenRotation);
             tempTranslation.set(-getPlotterWidthPixels() / 2.0, getPlotterHeightPixels() / 2.0, 0.0);
-            transformToParent.transform(tempTranslation);
-            transformToParent.setTranslation(tempTranslation);
+            transformToParent.appendTranslation(tempTranslation);
             transformToParent.appendPitchRotation(Math.PI);
             transformToParent.appendYawRotation(Math.PI);
          }
