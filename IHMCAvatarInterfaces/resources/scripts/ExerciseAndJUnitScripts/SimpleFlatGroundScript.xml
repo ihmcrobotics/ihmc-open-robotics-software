@@ -55,7 +55,7 @@
         <uniqueId>0</uniqueId>
         <destination>0</destination>
         <time>1.0</time>
-        <position class="us.ihmc.robotics.geometry.transformables.TransformablePoint3d">
+        <position>
           <x>5.476810966098342E-4</x>
           <y>-0.1779935489886092</y>
           <z>0.2539844464669048</z>
@@ -89,7 +89,7 @@
         <uniqueId>0</uniqueId>
         <destination>0</destination>
         <time>1.0</time>
-        <position class="us.ihmc.robotics.geometry.transformables.TransformablePoint3d">
+        <position>
           <x>5.476810966098342E-4</x>
           <y>-0.1779935489886092</y>
           <z>0.2539844464669048</z>
@@ -123,7 +123,7 @@
         <uniqueId>0</uniqueId>
         <destination>0</destination>
         <time>1.0</time>
-        <position class="us.ihmc.robotics.geometry.transformables.TransformablePoint3d">
+        <position>
           <x>0.2</x>
           <y>-0.1779935489886092</y>
           <z>0.2539844464669048</z>
@@ -157,7 +157,7 @@
         <uniqueId>0</uniqueId>
         <destination>0</destination>
         <time>1.0</time>
-        <position class="us.ihmc.robotics.geometry.transformables.TransformablePoint3d">
+        <position>
           <x>0.4199690627038005</x>
           <y>0.35860143998984684</y>
           <z>0.6559708718911196</z>
@@ -192,7 +192,7 @@
         <uniqueId>0</uniqueId>
         <destination>0</destination>
         <time>1.0</time>
-        <position class="us.ihmc.robotics.geometry.transformables.TransformablePoint3d">
+        <position>
           <x>0.0</x>
           <y>-0.5</y>
           <z>0.2539844464669048</z>
@@ -226,7 +226,7 @@
         <uniqueId>0</uniqueId>
         <destination>0</destination>
         <time>1.0</time>
-        <position class="us.ihmc.robotics.geometry.transformables.TransformablePoint3d">
+        <position>
           <x>-0.2</x>
           <y>-0.18</y>
           <z>0.2539844464669048</z>
@@ -260,7 +260,7 @@
         <uniqueId>0</uniqueId>
         <destination>0</destination>
         <time>1.0</time>
-        <position class="us.ihmc.robotics.geometry.transformables.TransformablePoint3d">
+        <position>
           <x>5.476810966098342E-4</x>
           <y>-0.1779935489886092</y>
           <z>0.0</z>
@@ -296,7 +296,7 @@
         <uniqueId>0</uniqueId>
         <destination>0</destination>
         <time>1.0</time>
-        <position class="us.ihmc.robotics.geometry.transformables.TransformablePoint3d">
+        <position>
           <x>0.4167700799201439</x>
           <y>-0.47675430268366864</y>
           <z>0.7524664429543557</z>
@@ -403,7 +403,7 @@
         <uniqueId>0</uniqueId>
         <destination>0</destination>
         <time>1.0</time>
-        <position class="us.ihmc.robotics.geometry.transformables.TransformablePoint3d">
+        <position>
           <x>1.0165296549196627</x>
           <y>0.683854585841049</y>
           <z>0.9930150943863845</z>
@@ -510,7 +510,7 @@
         <uniqueId>0</uniqueId>
         <destination>0</destination>
         <time>1.0</time>
-        <position class="us.ihmc.robotics.geometry.transformables.TransformablePoint3d">
+        <position>
           <x>1.2359404935023015</x>
           <y>-0.476256866778741</y>
           <z>1.1375618512072712</z>
@@ -545,7 +545,7 @@
         <uniqueId>0</uniqueId>
         <destination>0</destination>
         <time>1.0</time>
-        <position class="us.ihmc.robotics.geometry.transformables.TransformablePoint3d">
+        <position>
           <x>1.1041450944218136</x>
           <y>0.21622499638951612</y>
           <z>0.7837944624296049</z>

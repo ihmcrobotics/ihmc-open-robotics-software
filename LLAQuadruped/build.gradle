@@ -41,7 +41,7 @@ ihmc.configureForIHMCOpenSourceBintrayPublish(false, "mavenJava", "maven-release
 dependencies {
    testCompile group: 'junit', name: 'junit', version: '4.11'
 
-   compile group: 'us.ihmc', name: 'euclid-core', version: '0.3.1-alpha'
+   compile group: 'us.ihmc', name: 'euclid-core', version: '0.4'
 //   compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
     
     testCompile group: 'us.ihmc', name: 'ihmc-continuous-integration-framework', version: '0.9.4'

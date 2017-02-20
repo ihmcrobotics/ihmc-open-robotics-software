@@ -33,9 +33,9 @@ public class PlanarRegionTerrainObjectTest
 
       for (int i = 0; i < 100000; i++)
       {
-         PlanarRegion planarRegion = PlanarRegion
-               .generatePlanarRegionFromRandomPolygonsWithRandomTransform(random, random.nextInt(10), RandomTools.generateRandomDouble(random, 30.0),
-                     random.nextInt(10));
+         PlanarRegion planarRegion = PlanarRegion.generatePlanarRegionFromRandomPolygonsWithRandomTransform(random, random.nextInt(10),
+                                                                                                            RandomTools.generateRandomDouble(random, 30.0),
+                                                                                                            random.nextInt(10));
          BoundingBox3d boundingBox3dInWorld = planarRegion.getBoundingBox3dInWorld();
 
          double randomXCoord = RandomTools.generateRandomDouble(random, boundingBox3dInWorld.getXMin() - 10.0, boundingBox3dInWorld.getXMax() + 10.0);
@@ -69,9 +69,9 @@ public class PlanarRegionTerrainObjectTest
 
       for (int i = 0; i < 100000; i++)
       {
-         PlanarRegion planarRegion = PlanarRegion
-               .generatePlanarRegionFromRandomPolygonsWithRandomTransform(random, random.nextInt(10), RandomTools.generateRandomDouble(random, 30.0),
-                     random.nextInt(10));
+         PlanarRegion planarRegion = PlanarRegion.generatePlanarRegionFromRandomPolygonsWithRandomTransform(random, random.nextInt(10),
+                                                                                                            RandomTools.generateRandomDouble(random, 30.0),
+                                                                                                            random.nextInt(10));
          BoundingBox3d boundingBox3dInWorld = planarRegion.getBoundingBox3dInWorld();
 
          double randomXCoord = RandomTools.generateRandomDouble(random, boundingBox3dInWorld.getXMin() - 10.0, boundingBox3dInWorld.getXMax() + 10.0);
@@ -98,7 +98,7 @@ public class PlanarRegionTerrainObjectTest
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 4.0)
-   @Test(timeout = 30000)
+   @Test //(timeout = 30000)
    public void testGetBoundingBox() throws Exception
    {
       Random random = new Random(1776L);
@@ -110,9 +110,11 @@ public class PlanarRegionTerrainObjectTest
 
       for (int i = 0; i < 100000; i++)
       {
-         PlanarRegion planarRegion = PlanarRegion
-               .generatePlanarRegionFromRandomPolygonsWithRandomTransform(random, random.nextInt(10), RandomTools.generateRandomDouble(random, 30.0),
-                     random.nextInt(10));
+         int numberOfRandomlyGeneratedPolygons = random.nextInt(10);
+         double maxAbsoluteXYForPolygons = RandomTools.generateRandomDouble(random, 30.0);
+         PlanarRegion planarRegion = PlanarRegion.generatePlanarRegionFromRandomPolygonsWithRandomTransform(random, numberOfRandomlyGeneratedPolygons,
+                                                                                                            maxAbsoluteXYForPolygons,
+                                                                                                            numberOfRandomlyGeneratedPolygons);
 
          PlanarRegionTerrainObject terrainObject = new PlanarRegionTerrainObject(planarRegion, DEFAULT_ALLOWABLE_PENETRATION_THICKNESS);
 
@@ -121,8 +123,20 @@ public class PlanarRegionTerrainObjectTest
          terrainObject.getBoundingBox().getMinPoint(terrainObjectBoundingBoxMinPoint);
          terrainObject.getBoundingBox().getMaxPoint(terrainObjectBoundingBoxMaxPoint);
 
-         EuclidCoreTestTools.assertTuple3DEquals("Bounding box min points are not equal!", planarRegionBoundingBoxMinPoint, terrainObjectBoundingBoxMinPoint, 1e-10);
-         EuclidCoreTestTools.assertTuple3DEquals("Bounding box max points are not equal!", planarRegionBoundingBoxMaxPoint, terrainObjectBoundingBoxMaxPoint, 1e-10);
+         if (numberOfRandomlyGeneratedPolygons == 0)
+         {
+            EuclidCoreTestTools.assertTuple3DContainsOnlyNaN(planarRegionBoundingBoxMinPoint);
+            EuclidCoreTestTools.assertTuple3DContainsOnlyNaN(planarRegionBoundingBoxMaxPoint);
+            EuclidCoreTestTools.assertTuple3DContainsOnlyNaN(terrainObjectBoundingBoxMinPoint);
+            EuclidCoreTestTools.assertTuple3DContainsOnlyNaN(terrainObjectBoundingBoxMaxPoint);
+         }
+         else
+         {
+            EuclidCoreTestTools.assertTuple3DEquals("Bounding box min points are not equal!", planarRegionBoundingBoxMinPoint, terrainObjectBoundingBoxMinPoint,
+                                                    1e-10);
+            EuclidCoreTestTools.assertTuple3DEquals("Bounding box max points are not equal!", planarRegionBoundingBoxMaxPoint, terrainObjectBoundingBoxMaxPoint,
+                                                    1e-10);
+         }
       }
    }
 
@@ -134,9 +148,9 @@ public class PlanarRegionTerrainObjectTest
 
       for (int i = 0; i < 100000; i++)
       {
-         PlanarRegion planarRegion = PlanarRegion
-               .generatePlanarRegionFromRandomPolygonsWithRandomTransform(random, random.nextInt(10), RandomTools.generateRandomDouble(random, 30.0),
-                     random.nextInt(10));
+         PlanarRegion planarRegion = PlanarRegion.generatePlanarRegionFromRandomPolygonsWithRandomTransform(random, random.nextInt(10),
+                                                                                                            RandomTools.generateRandomDouble(random, 30.0),
+                                                                                                            random.nextInt(10));
          BoundingBox3d boundingBox3dInWorld = planarRegion.getBoundingBox3dInWorld();
 
          double randomXCoord = RandomTools.generateRandomDouble(random, boundingBox3dInWorld.getXMin() - 10.0, boundingBox3dInWorld.getXMax() + 10.0);
@@ -172,9 +186,9 @@ public class PlanarRegionTerrainObjectTest
       for (int i = 0; i < 100000; i++)
       {
 
-         PlanarRegion planarRegion = PlanarRegion
-               .generatePlanarRegionFromRandomPolygonsWithRandomTransform(random, random.nextInt(10), RandomTools.generateRandomDouble(random, 30.0),
-                     random.nextInt(10));
+         PlanarRegion planarRegion = PlanarRegion.generatePlanarRegionFromRandomPolygonsWithRandomTransform(random, random.nextInt(10),
+                                                                                                            RandomTools.generateRandomDouble(random, 30.0),
+                                                                                                            random.nextInt(10));
 
          double randomXCoord = RandomTools.generateRandomDouble(random, 15.0);
          double randomYCoord = RandomTools.generateRandomDouble(random, 15.0);

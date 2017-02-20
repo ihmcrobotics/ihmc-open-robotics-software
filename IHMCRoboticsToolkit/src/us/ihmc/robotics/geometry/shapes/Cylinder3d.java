@@ -47,7 +47,7 @@ public class Cylinder3d extends Shape3d<Cylinder3d>
    {
       if (this != cylinder3d)
       {
-         setTransformFromShapeFrame(cylinder3d.getTransformToShapeFrameUnsafe());
+         setTransformToWorld(cylinder3d.getTransformToLocalUnsafe());
          this.height = cylinder3d.height;
          this.radius = cylinder3d.radius;
       }
@@ -88,7 +88,7 @@ public class Cylinder3d extends Shape3d<Cylinder3d>
             throw(new RuntimeException("Unrecognized cylinder face"));
       }
       
-      transformFromShapeFrame(plane);
+      transformToWorld(plane);
       return plane;
    }
 
@@ -256,7 +256,7 @@ public class Cylinder3d extends Shape3d<Cylinder3d>
    public boolean projectToBottomOfCurvedSurface(Vector3DReadOnly surfaceNormal, Point3DBasics pointToProject)
    {
       //TODO: Should this method be in Shape3d, or not even be here at all? Not sure...
-      RigidBodyTransform transformToShapeFrame = getTransformToShapeFrameUnsafe();
+      RigidBodyTransform transformToShapeFrame = getTransformToLocalUnsafe();
 
       tempPointInWorldForProjectingToBottom.set(pointToProject);
       tempVectorInWorldForProjectingToBottom.set(surfaceNormal);
@@ -264,7 +264,7 @@ public class Cylinder3d extends Shape3d<Cylinder3d>
       transformToShapeFrame.transform(tempVectorInWorldForProjectingToBottom);
 
       boolean wasRolling = projectToBottomOfCurvedSurfaceInShapeFrame(tempVectorInWorldForProjectingToBottom, tempPointInWorldForProjectingToBottom);
-      RigidBodyTransform transformFromShapeFrame = getTransformFromShapeFrameUnsafe();
+      RigidBodyTransform transformFromShapeFrame = getTransformToWorldUnsafe();
       transformFromShapeFrame.transform(tempPointInWorldForProjectingToBottom);
 
       pointToProject.set(tempPointInWorldForProjectingToBottom);

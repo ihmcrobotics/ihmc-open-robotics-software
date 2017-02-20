@@ -36,7 +36,7 @@ public class Box3d extends Shape3d<Box3d>
 
    public Box3d(Box3d other)
    {
-      this(other.getTransformFromShapeFrameUnsafe(), other.getLength(), other.getWidth(), other.getHeight());
+      this(other.getTransformToWorldUnsafe(), other.getLength(), other.getWidth(), other.getHeight());
    }
 
    public Box3d(RigidBodyTransform configuration, double[] dimensions)
@@ -127,7 +127,7 @@ public class Box3d extends Shape3d<Box3d>
    public void getFace(Direction direction, boolean positive, Plane3d planeToPack)
    {
       planeToPack.set(faces.get(FaceName.get(positive, direction)));
-      transformFromShapeFrame(planeToPack);
+      transformToWorld(planeToPack);
    }
    
    @Override
@@ -160,7 +160,7 @@ public class Box3d extends Shape3d<Box3d>
    {
       if (other != this)
       {
-         setTransformFromShapeFrame(other.getTransformFromShapeFrameUnsafe());
+         setTransformToWorld(other.getTransformToWorldUnsafe());
          setDimensions(other.dimensions);
          facesAreOutOfDate = true;
       }
@@ -182,7 +182,7 @@ public class Box3d extends Shape3d<Box3d>
 
    public void setFromTransform(RigidBodyTransform transform)
    {
-      setTransformFromShapeFrame(transform);
+      setTransformToWorld(transform);
       facesAreOutOfDate = true;
    }
 
@@ -416,7 +416,7 @@ public class Box3d extends Shape3d<Box3d>
    {
       for (int i = 0; i < verticesInShapeFrame.length; i++)
       {
-         transformFromShapeFrame(verticesInShapeFrame[i]);
+         transformToWorld(verticesInShapeFrame[i]);
       }
    }
 
@@ -554,7 +554,7 @@ public class Box3d extends Shape3d<Box3d>
    
       Plane3d facePlane = new Plane3d();
       facePlane.set(faces.get(faceName));
-      transformFromShapeFrame(facePlane);
+      transformToWorld(facePlane);
       return facePlane;
    }
 
