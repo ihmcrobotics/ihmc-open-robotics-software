@@ -154,7 +154,7 @@ public class ThreadToolsTest
          // thread after it is done sleeping.
          thread.interrupt();
       }
-      
+
       // Yield this thread to make sure the other one has an opportunity to wake up during its second sleep.
       Thread.yield();
       assertTrue(runnable.wasInterruptedDuringSecondSleep());
