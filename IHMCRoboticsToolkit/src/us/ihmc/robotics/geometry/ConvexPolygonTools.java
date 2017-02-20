@@ -1549,8 +1549,8 @@ public class ConvexPolygonTools
       Point2D proj2AOnto1 = GeometryTools.getOrthogonalProjectionOnLine(edgePoint2A, edgePoint1A, edgePoint1B);
       Point2D proj2BOnto1 = GeometryTools.getOrthogonalProjectionOnLine(edgePoint2B, edgePoint1A, edgePoint1B);
    
-      Point2DReadOnly[][] possiblePointPairsWithProj = new Point2D[4][2];
-      Point2DReadOnly[][] possiblePointPairsWithoutProj = new Point2D[4][2];
+      Point2DReadOnly[][] possiblePointPairsWithProj = new Point2DReadOnly[4][2];
+      Point2DReadOnly[][] possiblePointPairsWithoutProj = new Point2DReadOnly[4][2];
       double[] possibleDistancesWithProj = new double[4];
       double[] possibleDistancesWithoutProj = new double[4];
    

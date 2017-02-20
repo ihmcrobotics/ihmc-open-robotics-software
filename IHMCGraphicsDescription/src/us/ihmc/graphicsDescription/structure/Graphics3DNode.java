@@ -6,10 +6,8 @@ import java.util.List;
 
 import us.ihmc.euclid.transform.AffineTransform;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.input.SelectedListener;
@@ -101,7 +99,8 @@ public class Graphics3DNode
    
    public void translateTo(Vector3D translation)
    {
-      transform.setTranslationAndIdentityRotation(translation);
+      transform.setIdentity();
+      transform.setTranslation(translation);
    }
 
    public void rotate(double angle, Axis axis)

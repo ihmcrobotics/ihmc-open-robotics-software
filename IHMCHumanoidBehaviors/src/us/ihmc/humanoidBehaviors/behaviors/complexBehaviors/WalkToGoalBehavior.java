@@ -304,7 +304,7 @@ public class WalkToGoalBehavior extends AbstractBehavior
          return false;
       if (Math.sqrt(Math.pow(xDiff, 2) + Math.pow(yDiff, 2)) > 0.05)
          return false;
-      if (Math.abs(currentLocation.orientation.getYaw() - checkAgainst.orientation.getYaw()) > Math.PI / 16)
+      if (Math.abs(currentLocation.getOrientation().getYaw() - checkAgainst.getOrientation().getYaw()) > Math.PI / 16)
          return false;
       return true;
    }
@@ -327,10 +327,10 @@ public class WalkToGoalBehavior extends AbstractBehavior
 
    private void sendUpdateStart(FootstepDataMessage updatedLocation)
    {
-      if (updatedLocation.orientation.epsilonEquals(new Quaternion(), .003))
+      if (updatedLocation.getOrientation().epsilonEquals(new Quaternion(), .003))
          return;
       FootstepPlanRequestPacket updateStartPacket = new FootstepPlanRequestPacket(FootstepPlanRequestPacket.RequestType.UPDATE_START, updatedLocation,
-                                                                                  updatedLocation.orientation.getYaw(), null, 10);
+                                                                                  updatedLocation.getOrientation().getYaw(), null, 10);
       communicationBridge.sendPacket(updateStartPacket);
    }
 

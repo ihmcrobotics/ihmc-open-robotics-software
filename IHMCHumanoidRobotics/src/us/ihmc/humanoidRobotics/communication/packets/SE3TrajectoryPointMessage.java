@@ -75,19 +75,19 @@ public class SE3TrajectoryPointMessage extends Packet<SE3TrajectoryPointMessage>
       if (other.position != null)
          position.set(other.position);
       else
-         position.set(0.0, 0.0, 0.0);
+         position.setToZero();
       if (other.orientation != null)
          orientation.set(other.orientation);
       else
-         orientation.set(0.0, 0.0, 0.0, 1.0);
+         orientation.setToZero();
       if (other.linearVelocity != null)
          linearVelocity.set(other.linearVelocity);
       else
-         linearVelocity.set(0.0, 0.0, 0.0);
+         linearVelocity.setToZero();
       if (other.angularVelocity != null)
          angularVelocity.set(other.angularVelocity);
       else
-         angularVelocity.set(0.0, 0.0, 0.0);
+         angularVelocity.setToZero();
    }
 
    public void setTime(double time)

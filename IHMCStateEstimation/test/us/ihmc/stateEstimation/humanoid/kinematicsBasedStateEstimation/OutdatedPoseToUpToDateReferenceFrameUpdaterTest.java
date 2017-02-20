@@ -77,7 +77,7 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdaterTest
    }
    
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test//(timeout = 30000)
+   @Test(timeout = 30000)
    public void testComputedRotationError()
    {
       Random random = new Random(1987L);
@@ -136,7 +136,7 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdaterTest
    }
    
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test//(timeout = 30000)
+   @Test(timeout = 30000)
    public void testComputedTranslationError()
    {
       Random random = new Random(1987L);
@@ -201,7 +201,7 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdaterTest
    }
    
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test//(timeout = 30000)
+   @Test(timeout = 30000)
    public void testComputedError()
    {
       Random random = new Random(1987L);
@@ -490,7 +490,7 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdaterTest
    //this tests fails, I don't think OutdatedPoseToUpToDateReferenceFrameUpdater can support more than a single rotation at a time
    @Ignore
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test//(timeout = 30000)
+   @Test(timeout = 30000)
    public void testUpdateOutdatedTransformWithKnownOffsets()
    {
       int numberOfUpToDateTransforms = 10;

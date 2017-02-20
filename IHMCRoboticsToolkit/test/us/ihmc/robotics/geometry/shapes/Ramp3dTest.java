@@ -512,7 +512,7 @@ public class Ramp3dTest
       angleTransform.setRotationPitchAndZeroTranslation(-ramp.getRampIncline());
       angleTransform.transform(point);
       
-      ramp.getTransformFromShapeFrameUnsafe().transform(point);
+      ramp.getTransformToWorldUnsafe().transform(point);
       
       return new Point3D(point);
    }

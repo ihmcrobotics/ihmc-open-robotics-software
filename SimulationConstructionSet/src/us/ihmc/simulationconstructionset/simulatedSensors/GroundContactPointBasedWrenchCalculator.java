@@ -47,7 +47,10 @@ public class GroundContactPointBasedWrenchCalculator implements WrenchCalculator
          if (registry != null)
          {
             String contactPointName = contactPoints.get(i).getName();
-            this.yoContactForceInSensorFrame.put(contactPointName, new YoFrameVector(contactPointName + "_ForceInSensorFrame", sensorFrame, registry));
+            String namePrefix = contactPointName + "_ForceInSensorFrame";
+            // Checking if that variable does already exist for some reason.
+            if (registry.getVariable(namePrefix + "X") == null)
+               this.yoContactForceInSensorFrame.put(contactPointName, new YoFrameVector(namePrefix, sensorFrame, registry));
          }
       }
    }

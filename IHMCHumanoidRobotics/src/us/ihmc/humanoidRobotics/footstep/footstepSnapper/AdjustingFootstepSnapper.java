@@ -214,7 +214,7 @@ public class AdjustingFootstepSnapper implements FootstepSnapper
 
 
       footstep.location = originalFootstepFound.location;
-      footstep.orientation = originalFootstepFound.orientation;
+      footstep.setOrientation(originalFootstepFound.getOrientation());
       return Footstep.FootstepType.BAD_FOOTSTEP;
    }
 }

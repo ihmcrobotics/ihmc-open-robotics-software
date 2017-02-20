@@ -16,6 +16,7 @@ import us.ihmc.commonWalkingControlModules.configurations.JointPrivilegedConfigu
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PointAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.GeometricJacobianHolder;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -98,7 +99,8 @@ public class MotionQPInputCalculatorTest
          FrameVector actualLinearAcceleration = new FrameVector();
          spatialAccelerationCalculator.getLinearAccelerationOfBodyFixedPoint(actualLinearAcceleration, elevator, endEffector, bodyFixedPointToControl);
 
-         assertTrue(actualLinearAcceleration.epsilonEquals(desiredLinearAcceleration, 1.0-7));
+         desiredLinearAcceleration.checkReferenceFrameMatch(actualLinearAcceleration);
+         EuclidCoreTestTools.assertTuple3DEquals(desiredLinearAcceleration.getVector(), actualLinearAcceleration.getVector(), 1.0e-7);
       }
    }
 
@@ -164,7 +166,7 @@ public class MotionQPInputCalculatorTest
          FrameVector actualLinearAcceleration = new FrameVector();
          spatialAccelerationCalculator.getLinearAccelerationOfBodyFixedPoint(actualLinearAcceleration, elevator, endEffector, bodyFixedPointToControl);
 
-         assertTrue(actualLinearAcceleration.epsilonEquals(desiredLinearAcceleration, 1.0-7));
+         assertTrue(actualLinearAcceleration.epsilonEquals(desiredLinearAcceleration, 1.0e-7));
       }
    }
 }

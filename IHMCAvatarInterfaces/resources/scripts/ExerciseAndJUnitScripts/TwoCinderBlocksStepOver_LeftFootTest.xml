@@ -18,7 +18,7 @@
           <x>-1.2524710193756035E-4</x>
           <y>7.761199562072805E-4</y>
           <z>2.875122121910303E-6</z>
-          <w>0.9999996909713076</w>
+          <s>0.9999996909713076</s>
         </orientation>
         <trajectoryType>DEFAULT</trajectoryType>
         <swingHeight>0.0</swingHeight>
@@ -37,7 +37,7 @@
           <x>-1.296117157889561E-4</x>
           <y>8.301744138303921E-4</y>
           <z>3.000606007414705E-6</z>
-          <w>0.9999996470010588</w>
+          <s>0.9999996470010588</s>
         </orientation>
         <trajectoryType>DEFAULT</trajectoryType>
         <swingHeight>0.0</swingHeight>
@@ -56,7 +56,7 @@
           <x>0.030387169822316894</x>
           <y>3.5479184805830985E-4</y>
           <z>-7.82728713927082E-6</z>
-          <w>0.999538140328656</w>
+          <s>0.999538140328656</s>
         </orientation>
         <trajectoryType>DEFAULT</trajectoryType>
         <swingHeight>0.0</swingHeight>
@@ -75,7 +75,7 @@
           <x>-1.2961178576678537E-4</x>
           <y>8.301744029050383E-4</y>
           <z>2.9163131120462015E-6</z>
-          <w>0.9999996470013082</w>
+          <s>0.9999996470013082</s>
         </orientation>
         <trajectoryType>DEFAULT</trajectoryType>
         <swingHeight>0.0</swingHeight>
@@ -103,7 +103,7 @@
           <x>-1.3139590771280222E-4</x>
           <y>7.75102663137779E-4</y>
           <z>-0.007924687639773113</z>
-          <w>0.9999682901356368</w>
+          <s>0.9999682901356368</s>
         </orientation>
         <trajectoryType>DEFAULT</trajectoryType>
         <swingHeight>0.0</swingHeight>
@@ -122,7 +122,7 @@
           <x>-1.3139590771280222E-4</x>
           <y>7.75102663137779E-4</y>
           <z>-0.007924687639773113</z>
-          <w>0.9999682901356368</w>
+          <s>0.9999682901356368</s>
         </orientation>
         <trajectoryType>DEFAULT</trajectoryType>
         <swingHeight>0.0</swingHeight>
@@ -141,7 +141,7 @@
           <x>-1.3139590771280222E-4</x>
           <y>7.75102663137779E-4</y>
           <z>-0.007924687639773113</z>
-          <w>0.9999682901356368</w>
+          <s>0.9999682901356368</s>
         </orientation>
         <trajectoryType>DEFAULT</trajectoryType>
         <swingHeight>0.0</swingHeight>
