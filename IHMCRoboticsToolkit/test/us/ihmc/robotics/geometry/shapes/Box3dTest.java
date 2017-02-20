@@ -562,7 +562,8 @@ public class Box3dTest
       box3d.applyTransform(transform);
       
       box3d.getCenter(point);
-      EuclidCoreTestTools.assertTuple3DEquals(new Point3D(1.0, 1.0, 1.0), point, Epsilons.ONE_TRILLIONTH);
+      Point3D expectedPosition = new Point3D(1.0, 1.0, 1.0);
+      EuclidCoreTestTools.assertTuple3DEquals(expectedPosition, point, Epsilons.ONE_TRILLIONTH);
       
       Quaternion quat = new Quaternion();
       quat.setYawPitchRoll(1.0, 1.0, 1.0);
@@ -573,7 +574,8 @@ public class Box3dTest
       
       box3d.getPosition(point);
       box3d.getOrientation(quat);
-      EuclidCoreTestTools.assertTuple3DEquals(new Point3D(1.0, 1.0, 1.0), point, Epsilons.ONE_TRILLIONTH);
+      expectedPosition.applyTransform(transform);
+      EuclidCoreTestTools.assertTuple3DEquals(expectedPosition, point, Epsilons.ONE_TRILLIONTH);
       EuclidCoreTestTools.assertQuaternionEquals(quat2, quat, Epsilons.ONE_TRILLIONTH);
    }
 
