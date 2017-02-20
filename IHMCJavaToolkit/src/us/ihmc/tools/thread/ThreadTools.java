@@ -18,7 +18,8 @@ public class ThreadTools
     * Causes the currently executing thread to sleep (temporarily cease execution) for the specified number of seconds, 
     * subject to the precision and accuracy of system timers and schedulers. If the sleep is interrupted with a InterruptedException,
     * it will ignore the interruption, see how long it has slept so far, and go back to sleep for the remaining time.
-    * 
+    * When it is fully done sleeping, it will interrupt its Thread again if it was interrupted at all during sleeping.
+    *
     * @param secondsToSleep The time to sleep in seconds. The Thread should sleep this long, even if interrupted.
     */
    public static void sleepSeconds(double secondsToSleep)
@@ -30,6 +31,7 @@ public class ThreadTools
     * Causes the currently executing thread to sleep (temporarily cease execution) for the specified number of milliseconds, 
     * subject to the precision and accuracy of system timers and schedulers. If the sleep is interrupted with a InterruptedException,
     * it will ignore the interruption, see how long it has slept so far, and go back to sleep for the remaining time.
+    * When it is fully done sleeping, it will interrupt its Thread again if it was interrupted at all during sleeping.
     * 
     * @param millisecondsToSleep The time to sleep in milliseconds. The Thread should sleep this long, even if interrupted.
     */
@@ -43,6 +45,7 @@ public class ThreadTools
     * plus the specified number of nanoseconds, subject to the precision and accuracy of system timers and schedulers. 
     * If the sleep is interrupted with a InterruptedException,
     * it will ignore the interruption, see how long it has slept so far, and go back to sleep for the remaining time.
+    * When it is fully done sleeping, it will interrupt its Thread again if it was interrupted at all during sleeping.
     * 
     * @param millisecondsToSleep The time to sleep in milliseconds. The Thread should sleep this long, even if interrupted.
     * @param additionalNanosecondsToSleep 0-999999 additional nanoseconds to sleep
