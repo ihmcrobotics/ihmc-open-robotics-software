@@ -75,7 +75,7 @@ public class RotationTools
       double Cy = Math.tan(yaw);
       if (Math.abs(zNormal.getZ()) < 1e-9)
       {
-         quaternionToPack.set(Double.NaN, Double.NaN, Double.NaN, Double.NaN);
+         quaternionToPack.setToNaN();
          return;
       }
       double Cz = -1.0 * (zNormal.getX() + Cy * zNormal.getY()) / zNormal.getZ();

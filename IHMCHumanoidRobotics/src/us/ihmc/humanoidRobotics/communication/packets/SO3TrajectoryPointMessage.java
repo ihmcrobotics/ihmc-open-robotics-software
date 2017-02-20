@@ -66,11 +66,11 @@ public class SO3TrajectoryPointMessage extends Packet<SO3TrajectoryPointMessage>
       if (other.orientation != null)
          orientation.set(other.orientation);
       else
-         orientation.set(0.0, 0.0, 0.0, 1.0);
+         orientation.setToZero();
       if (other.angularVelocity != null)
          angularVelocity.set(other.angularVelocity);
       else
-         angularVelocity.set(0.0, 0.0, 0.0);
+         angularVelocity.setToZero();
    }
 
    public double getTime()

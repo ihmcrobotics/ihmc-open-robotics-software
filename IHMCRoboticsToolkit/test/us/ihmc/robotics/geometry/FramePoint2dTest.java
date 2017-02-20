@@ -311,8 +311,8 @@ public class FramePoint2dTest extends FrameTuple2dTest<FramePoint2d>
          //Good
       }
 
-      double[] matrix = { 6.0, 7.0, 0.0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1.0 };
-      RigidBodyTransform transform2 = new RigidBodyTransform(matrix);
+      double[] matrix = { 6.0, 7.0, 0.0 };
+      RigidBodyTransform transform2 = EuclidCoreRandomTools.generateRandomRigidBodyTransform2D(random);
 
       Point3D pointToTransform2 = new Point3D(matrix);
       FramePoint2d pointToTest2 = new FramePoint2d(null, matrix);
@@ -345,8 +345,8 @@ public class FramePoint2dTest extends FrameTuple2dTest<FramePoint2d>
          //Good
       }
 
-      double[] matrix = { 6.0, 7.0, 0.0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1.0 };
-      RigidBodyTransform transform2 = new RigidBodyTransform(matrix);
+      double[] matrix = { 6.0, 7.0 };
+      RigidBodyTransform transform2 = EuclidCoreRandomTools.generateRandomRigidBodyTransform2D(random);
       FramePoint2d pointToTransform2 = new FramePoint2d(null, matrix);
       FramePoint2d pointToTest2 = new FramePoint2d(null, matrix);
 
@@ -439,7 +439,7 @@ public class FramePoint2dTest extends FrameTuple2dTest<FramePoint2d>
    {
       Random random = new Random(398742498237598750L);
       FramePoint2d frame = new FramePoint2d(aFrame);
-      RigidBodyTransform transform = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
+      RigidBodyTransform transform = EuclidCoreRandomTools.generateRandomRigidBodyTransform2D(random);
       frame.changeFrameUsingTransform(theFrame, transform);
       frame.checkReferenceFrameMatch(theFrame);
    }

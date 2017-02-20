@@ -995,7 +995,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
       EuclidCoreTestTools.assertTuple3DEquals(desiredPosition, controllerDesiredPosition, EPSILON_FOR_DESIREDS);
 
       Quaternion controllerDesiredOrientation = findControllerDesiredOrientation(robotSide, scs);
-      EuclidCoreTestTools.assertQuaternionEquals(desiredOrientation, controllerDesiredOrientation, EPSILON_FOR_DESIREDS);
+      EuclidCoreTestTools.assertQuaternionEqualsSmart(desiredOrientation, controllerDesiredOrientation, EPSILON_FOR_DESIREDS);
    }
 
    public static void assertNumberOfWaypoints(RobotSide robotSide, int expectedNumberOfTrajectoryPoints, SimulationConstructionSet scs)

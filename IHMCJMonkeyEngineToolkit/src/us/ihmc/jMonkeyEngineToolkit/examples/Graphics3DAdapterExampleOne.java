@@ -249,7 +249,7 @@ public class Graphics3DAdapterExampleOne
          }
          
          AffineTransform transform = new AffineTransform();
-         transform.setRotationEulerAndZeroTranslation(Math.PI/2.0, 0.0, rotation);
+         transform.setRotationEuler(Math.PI/2.0, 0.0, rotation);
          transform.setTranslation(new Vector3D(translation, 0.0, 0.0));
          transform.setScale(scale);
          node.setTransform(transform);

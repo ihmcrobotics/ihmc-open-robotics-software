@@ -113,12 +113,12 @@ public class FootstepStatus extends StatusPacket<FootstepStatus>
          desiredFootOrientationInWorld = new Quaternion();
 
       if (other.desiredFootPositionInWorld == null)
-         desiredFootPositionInWorld.set(Double.NaN, Double.NaN, Double.NaN);
+         desiredFootPositionInWorld.setToNaN();
       else
          desiredFootPositionInWorld.set(other.desiredFootPositionInWorld);
 
       if (other.desiredFootOrientationInWorld == null)
-         desiredFootOrientationInWorld.set(Double.NaN, Double.NaN, Double.NaN, Double.NaN);
+         desiredFootOrientationInWorld.setToNaN();
       else
          desiredFootOrientationInWorld.set(other.desiredFootOrientationInWorld);
 
@@ -128,12 +128,12 @@ public class FootstepStatus extends StatusPacket<FootstepStatus>
          actualFootOrientationInWorld = new Quaternion();
 
       if (other.actualFootPositionInWorld == null)
-         actualFootPositionInWorld.set(Double.NaN, Double.NaN, Double.NaN);
+         actualFootPositionInWorld.setToNaN();
       else
          actualFootPositionInWorld.set(other.actualFootPositionInWorld);
 
       if (other.actualFootOrientationInWorld == null)
-         actualFootOrientationInWorld.set(Double.NaN, Double.NaN, Double.NaN, Double.NaN);
+         actualFootOrientationInWorld.setToNaN();
       else
          actualFootOrientationInWorld.set(other.actualFootOrientationInWorld);
    }

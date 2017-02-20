@@ -4,7 +4,9 @@ import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
@@ -105,13 +107,19 @@ public class PoseReferenceFrame extends ReferenceFrame
       this.update();
    }
 
+   public void setOrientationAndUpdate(double qx, double qy, double qz, double qs)
+   {
+      originPose.setOrientation(qx, qy, qz, qs);
+      update();
+   }
+
    public void setOrientationAndUpdate(FrameOrientation frameOrientation)
    {
       frameOrientation.checkReferenceFrameMatch(parentFrame);
       originPose.setOrientation(frameOrientation);
       this.update();
    }
-
+   
    public void setXYFromPosition2dAndUpdate(FramePoint2d position2d)
    {
       position2d.checkReferenceFrameMatch(parentFrame);
@@ -179,9 +187,9 @@ public class PoseReferenceFrame extends ReferenceFrame
       framePoseToPack.setPoseIncludingFrame(originPose);
    }
    
-   public Point3D getPositionUnsafe()
+   public Point3DReadOnly getPosition()
    {
-      return originPose.getPositionUnsafe();
+      return originPose.getPosition();
    }
 
    public void getPosition(Point3D pointToPack)
@@ -194,9 +202,9 @@ public class PoseReferenceFrame extends ReferenceFrame
       originPose.getPositionIncludingFrame(framePointToPack);
    }
    
-   public Quaternion getOrientationUnsafe()
+   public QuaternionReadOnly getOrientation()
    {
-      return originPose.getOrientationUnsafe();
+      return originPose.getOrientation();
    }
 
    public void getOrientation(Quaternion quaternionToPack)

@@ -138,7 +138,7 @@ public class ExplorationHelper
 
       currentCorner.changeFrame(soleFrame);
       centroid.changeFrame(soleFrame);
-      desiredCenterOfPressure.changeFrame(soleFrame);
+      desiredCenterOfPressure.setToZero(soleFrame);
 
       double timeExploringCurrentCorner = timeExploring - (double)currentCornerIdx * timeToExploreCorner;
       if (timeExploringCurrentCorner <= timeToGoToCorner)

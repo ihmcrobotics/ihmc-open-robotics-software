@@ -3,7 +3,6 @@ package us.ihmc.robotics.screwTheory;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.euclid.matrix.Matrix3D;
-import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -16,8 +15,9 @@ public abstract class GeneralizedRigidBodyInertia
    protected final Vector3D crossPart;
    protected double mass;
    protected boolean crossPartZero;
-   protected Vector3D tempVector = new Vector3D();
+   protected final Vector3D tempVector = new Vector3D();
    private final Matrix3D tempForCrossPartTilde = new Matrix3D();
+   private final RigidBodyTransform tempForChangeFrame = new RigidBodyTransform();
 
    /**
     * Default constructor; null reference frame, everything set to zero
@@ -32,10 +32,12 @@ public abstract class GeneralizedRigidBodyInertia
    }
 
    /**
-    * Construct using the reference frame in which the GeneralizedRigidBodyInertia is expressed, the mass moment of inertia matrix in that frame and the mass
-    * For the case that the origin of the frame in which the GeneralizedRigidBodyInertia is expressed coincides with the center of mass.
+    * Construct using the reference frame in which the GeneralizedRigidBodyInertia is expressed, the
+    * mass moment of inertia matrix in that frame and the mass For the case that the origin of the
+    * frame in which the GeneralizedRigidBodyInertia is expressed coincides with the center of mass.
     *
-    * @param frame the reference frame in which the GeneralizedRigidBodyInertia is expressed, and also the frame of which this
+    * @param frame the reference frame in which the GeneralizedRigidBodyInertia is expressed, and
+    *           also the frame of which this
     * @param massMomentOfInertia the mass moment of inertia matrix in ReferenceFrame frame
     * @param mass the mass of the rigid body to which this GeneralizedRigidBodyInertia corresponds
     */
@@ -147,7 +149,8 @@ public abstract class GeneralizedRigidBodyInertia
    }
 
    /**
-    * @return a 6 x 6 matrix representing this generalized inertia in matrix form [massMomentOfInertia, crossTranspose; cross, mI]
+    * @return a 6 x 6 matrix representing this generalized inertia in matrix form
+    *         [massMomentOfInertia, crossTranspose; cross, mI]
     */
    public void getMatrix(DenseMatrix64F matrixToPack)
    {
@@ -171,7 +174,8 @@ public abstract class GeneralizedRigidBodyInertia
    }
 
    /**
-    * @return a 6 x 6 matrix representing this generalized inertia in matrix form [massMomentOfInertia, crossTranspose; cross, mI] 
+    * @return a 6 x 6 matrix representing this generalized inertia in matrix form
+    *         [massMomentOfInertia, crossTranspose; cross, mI]
     */
    public DenseMatrix64F toMatrix()
    {
@@ -183,34 +187,31 @@ public abstract class GeneralizedRigidBodyInertia
    /**
     * Changes the frame in which this GeneralizedRigidBodyInertia is expressed.
     *
-    * See Duindam, Port-Based Modeling and Control for Efficient Bipedal Walking Robots, page 40, eq. (2.57)
-    * http://sites.google.com/site/vincentduindam/publications
+    * See Duindam, Port-Based Modeling and Control for Efficient Bipedal Walking Robots, page 40,
+    * eq. (2.57) http://sites.google.com/site/vincentduindam/publications
     *
     * @param newFrame the frame in which this inertia should be expressed
     */
    public void changeFrame(ReferenceFrame newFrame)
    {
-      RigidBodyTransform transform = newFrame.getTransformToDesiredFrame(expressedInframe);
+      if (newFrame == expressedInframe)
+         return;
 
-      RotationMatrix rotation = new RotationMatrix();
-      transform.getRotation(rotation);
+      newFrame.getTransformToDesiredFrame(tempForChangeFrame, expressedInframe);
 
-      transform.getTranslation(tempVector); // p
+      tempForChangeFrame.getTranslation(tempVector); // p
 
       // mass moment of inertia part:
 
       subTildeTimesTildePlusTildeTimesTildeTransposeFromSymmetricMatrix(massMomentOfInertiaPart, crossPart, tempVector); // J - (tilde(c) * tilde(p))^T - tilde(c) * tilde(p)
       subScalarTimesTildeTimesTildeFromSymmetricMatrix(massMomentOfInertiaPart, tempVector, mass); // J - (tilde(c) * tilde(p))^T - tilde(c) * tilde(p) - m * tilde(p) * tilde(p)
 
-      massMomentOfInertiaPart.set(rotation);
-      massMomentOfInertiaPart.multiplyTransposeThis(massMomentOfInertiaPart); // RTranspose * (J - (tilde(c) * tilde(p))^T - tilde(c) * tilde(p) - m * tilde(p) * tilde(p))
-      massMomentOfInertiaPart.multiply(rotation); // RTranspose * (J - (tilde(c) * tilde(p))^T - tilde(c) * tilde(p) - m * tilde(p) * tilde(p)) * R: done.
+      tempForChangeFrame.inverseTransform(massMomentOfInertiaPart); // RTranspose * (J - (tilde(c) * tilde(p))^T - tilde(c) * tilde(p) - m * tilde(p) * tilde(p)) * R: done.
 
       // cross part:
       tempVector.scale(mass); // m * p
       crossPart.add(tempVector); // c + m * p
-      rotation.transpose(); // RTranspose
-      rotation.transform(crossPart); // RTranspose * (c + m * p)
+      tempForChangeFrame.inverseTransform(crossPart);
 
       // mass part doesn't change
 

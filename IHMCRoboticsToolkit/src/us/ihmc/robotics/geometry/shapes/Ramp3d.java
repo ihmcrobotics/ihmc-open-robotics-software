@@ -113,7 +113,7 @@ public class Ramp3d extends Shape3d<Ramp3d>
    public void getSurfaceNormal(Vector3DBasics surfaceNormalToPack)
    {
       surfaceNormalToPack.set(rampPlane.getNormal());
-      transformFromShapeFrame(surfaceNormalToPack);
+      transformToWorld(surfaceNormalToPack);
    }
 
    public double getRampIncline()
