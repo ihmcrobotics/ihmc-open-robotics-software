@@ -8,7 +8,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.GeometryTools;
-import us.ihmc.robotics.geometry.transformables.AbstractPose;
+import us.ihmc.robotics.geometry.transformables.Pose;
 import us.ihmc.robotics.math.Epsilons;
 
 /**
@@ -29,7 +29,12 @@ public class Ramp3d extends Shape3d<Ramp3d>
 
    public Ramp3d(Ramp3d ramp3d)
    {
-      this(ramp3d, ramp3d.getWidth(), ramp3d.getLength(), ramp3d.getHeight());
+      setPose(ramp3d);
+      size = new Size3d(ramp3d.getLength(), ramp3d.getWidth(), ramp3d.getHeight());
+      rampPlane = new Plane3d();
+      temporaryPoint = new Point3D();
+
+      updateRamp();
    }
 
    public Ramp3d(double width, double length, double height)
@@ -51,7 +56,7 @@ public class Ramp3d extends Shape3d<Ramp3d>
       updateRamp();
    }
 
-   public Ramp3d(AbstractPose pose, double width, double length, double height)
+   public Ramp3d(Pose pose, double width, double length, double height)
    {
       setPose(pose);
       size = new Size3d(length, width, height);

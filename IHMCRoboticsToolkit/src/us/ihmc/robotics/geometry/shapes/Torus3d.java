@@ -8,7 +8,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.geometry.transformables.AbstractPose;
+import us.ihmc.robotics.geometry.transformables.Pose;
 import us.ihmc.robotics.math.Epsilons;
 
 /**
@@ -30,7 +30,11 @@ public class Torus3d extends Shape3d<Torus3d>
 
    public Torus3d(Torus3d torus3d)
    {
-      this(torus3d, torus3d.radius, torus3d.tubeRadius);
+      setPose(torus3d);
+      this.radius = torus3d.radius;
+      this.tubeRadius = torus3d.tubeRadius;
+      
+      checkRadiusAndThickness();
    }
    
    public Torus3d()
@@ -58,7 +62,7 @@ public class Torus3d extends Shape3d<Torus3d>
       checkRadiusAndThickness();
    }
 
-   public Torus3d(AbstractPose pose, double radius, double thickness)
+   public Torus3d(Pose pose, double radius, double thickness)
    {
       setPose(pose);
       this.radius = radius;
