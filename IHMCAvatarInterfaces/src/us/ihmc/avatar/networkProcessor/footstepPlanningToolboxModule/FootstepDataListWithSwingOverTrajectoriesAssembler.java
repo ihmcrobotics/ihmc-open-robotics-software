@@ -77,8 +77,8 @@ public class FootstepDataListWithSwingOverTrajectoriesAssembler
 
          simpleFootstep.getSoleFramePose(swingEndPose);
 
-         FootstepDataMessage footstepDataMessage = new FootstepDataMessage(simpleFootstep.getRobotSide(), new Point3D(swingEndPose.getPositionUnsafe()),
-                                                                           new Quaternion(swingEndPose.getOrientationUnsafe()));
+         FootstepDataMessage footstepDataMessage = new FootstepDataMessage(simpleFootstep.getRobotSide(), new Point3D(swingEndPose.getPosition()),
+                                                                           new Quaternion(swingEndPose.getOrientation()));
          footstepDataMessage.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
 
          double maxSpeedDimensionless = swingOverPlanarRegionsTrajectoryExpander.expandTrajectoryOverPlanarRegions(stanceFootPose, swingStartPose, swingEndPose, planarRegionsList);
@@ -142,8 +142,8 @@ public class FootstepDataListWithSwingOverTrajectoriesAssembler
 
          footstep.getSolePose(swingEndPose);
 
-         FootstepDataMessage footstepDataMessage = new FootstepDataMessage(footstep.getRobotSide(), new Point3D(swingEndPose.getPositionUnsafe()),
-                                                                           new Quaternion(swingEndPose.getOrientationUnsafe()));
+         FootstepDataMessage footstepDataMessage = new FootstepDataMessage(footstep.getRobotSide(), new Point3D(swingEndPose.getPosition()),
+                                                                           new Quaternion(swingEndPose.getOrientation()));
          footstepDataMessage.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
 
          swingOverPlanarRegionsTrajectoryExpander.expandTrajectoryOverPlanarRegions(stanceFootPose, swingStartPose, swingEndPose, planarRegionsList);

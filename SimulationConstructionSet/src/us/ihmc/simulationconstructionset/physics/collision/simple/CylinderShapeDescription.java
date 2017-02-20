@@ -75,7 +75,7 @@ public class CylinderShapeDescription<T extends CylinderShapeDescription<T>> imp
    {
       supportingVertexHolder.setTransform(transform);
       this.cylinder3d.setTransform(this.transform);
-      this.cylinder3d.applyTransform(cylinderConsistencyTransform);
+      this.cylinder3d.appendTransform(cylinderConsistencyTransform);
       boundingBoxNeedsUpdating = true;
    }
 
