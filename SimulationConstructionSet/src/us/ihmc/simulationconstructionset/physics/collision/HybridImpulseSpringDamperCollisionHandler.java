@@ -44,7 +44,7 @@ public class HybridImpulseSpringDamperCollisionHandler implements CollisionHandl
 
    //TODO: Get maximumPenetrationToStart implemented for when useAverageNewCollisionTouchdownPoints = true;
    private static final boolean useAverageNewCollisionTouchdownPoints = true;
-   private double maximumPenetrationToStart = 0.001;
+   private double maximumPenetrationToStart = 0.002;
 
    private static final boolean divideByNumberContacting = true; //true; //false;
 
@@ -928,6 +928,8 @@ public class HybridImpulseSpringDamperCollisionHandler implements CollisionHandl
       return pointsThatAreContactingShapeTwo;
    }
 
+   private final Vector3D tempForceVector = new Vector3D();
+
    private ContactingExternalForcePoint getAvailableContactingExternalForcePoint(ArrayList<ContactingExternalForcePoint> contactingExternalForcePoints)
    {
       for (int i=0; i<contactingExternalForcePoints.size(); i++)
@@ -942,7 +944,22 @@ public class HybridImpulseSpringDamperCollisionHandler implements CollisionHandl
       if (allowRecyclingOfPointsInUse)
       {
          //System.err.println("Warning. Recycling a point that is in use...");
-         ContactingExternalForcePoint contactingExternalForcePointToRecycleOne = contactingExternalForcePoints.get(random.nextInt(contactingExternalForcePoints.size()));
+         int indexWithSmallestForce = -1;
+         double smallestForceSquared = Double.POSITIVE_INFINITY;
+
+         for (int i=0; i<contactingExternalForcePoints.size(); i++)
+         {
+            contactingExternalForcePoints.get(i).getForce(tempForceVector);
+            double forceSquared = tempForceVector.dot(tempForceVector);
+            if (forceSquared < smallestForceSquared)
+            {
+               smallestForceSquared = forceSquared;
+               indexWithSmallestForce = i;
+            }
+         }
+
+         ContactingExternalForcePoint contactingExternalForcePointToRecycleOne = contactingExternalForcePoints.get(indexWithSmallestForce);
+//         ContactingExternalForcePoint contactingExternalForcePointToRecycleOne = contactingExternalForcePoints.get(random.nextInt(contactingExternalForcePoints.size()));
          int indexOfContactingPair = contactingExternalForcePointToRecycleOne.getIndexOfContactingPair();
          ContactingExternalForcePoint contactingExternalForcePointToRecycleTwo = allContactingExternalForcePoints.get(indexOfContactingPair);
 
