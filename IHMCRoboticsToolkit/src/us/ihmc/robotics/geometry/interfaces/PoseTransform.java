@@ -1,6 +1,7 @@
 package us.ihmc.robotics.geometry.interfaces;
 
 import us.ihmc.euclid.exceptions.NotAMatrix2DException;
+import us.ihmc.euclid.interfaces.Transformable;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
@@ -30,6 +31,13 @@ import us.ihmc.euclid.tuple4D.interfaces.Vector4DReadOnly;
  */
 public interface PoseTransform
 {
+   /**
+    * Transforms the given {@code transformable} to world frame.
+    *
+    * @param transformable the transformable to transform. Modified.
+    */
+   void tranformToWorld(Transformable transformable);
+   
    /**
     * Transforms the given {@code pointToTransform} to world frame.
     * <p>
@@ -508,6 +516,14 @@ public interface PoseTransform
     */
    void transformToWorld(QuaternionBasedTransform original, QuaternionBasedTransform transformed);
 
+   
+   /**
+    * Transforms the given {@code transformable} to world frame.
+    *
+    * @param transformable the transformable to transform. Modified.
+    */
+   void tranformToLocal(Transformable transformable);
+   
    /**
     * Performs the transform to local frame on the given point {@code pointToTransform}.
     * <p>
