@@ -162,9 +162,9 @@ public class KinematicPointTest
 		YoFramePoint yoPosition = kinematicPoint.getYoPosition();
 		String frameName = yoPosition.getReferenceFrame().getName();
 
-		assertEquals("(0.0, 0.0, 0.0)-" + frameName, yoPosition.toString());
+		assertEquals("( 0.000,  0.000,  0.000 )-" + frameName, yoPosition.toString());
 		yoPosition.set(new Point3D(5.0, 5.1, 5.2));
-		assertEquals("(5.0, 5.1, 5.2)-" + frameName, yoPosition.toString());
+		assertEquals("( 5.000,  5.100,  5.200 )-" + frameName, yoPosition.toString());
 	}
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -174,9 +174,9 @@ public class KinematicPointTest
 		YoFrameVector yoVelocity = kinematicPoint.getYoVelocity();
 		String frameName = yoVelocity.getReferenceFrame().getName();
 		
-      assertEquals("(0.0, 0.0, 0.0)-" + frameName, yoVelocity.toString());
+      assertEquals("( 0.000,  0.000,  0.000 )-" + frameName, yoVelocity.toString());
 		yoVelocity.set(new Vector3D(5.0, 5.1, 5.2));
-		assertEquals("(5.0, 5.1, 5.2)-" + frameName, yoVelocity.toString());
+		assertEquals("( 5.000,  5.100,  5.200 )-" + frameName, yoVelocity.toString());
 	}
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
