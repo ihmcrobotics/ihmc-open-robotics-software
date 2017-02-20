@@ -154,6 +154,13 @@ public abstract class Shape3d<S extends Shape3d<S>> implements GeometryObject<S>
       setTransformFromShapeFrame(fromShape);
    }
 
+   public void appendTransform(RigidBodyTransform transform)
+   {
+      RigidBodyTransform fromShape = getTransformFromShapeFrameUnsafe();
+      fromShape.multiply(transform);
+      setTransformFromShapeFrame(fromShape);
+   }
+
    public void setPosition(Point3DReadOnly point)
    {
       RigidBodyTransform fromShape = getTransformFromShapeFrameUnsafe();
