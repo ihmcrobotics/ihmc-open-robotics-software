@@ -85,7 +85,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.GroundAsABoxRobot.baseContactingPoint48_z</Variables>
+		<Variables></Variables>
 		<GraphConfiguration>
 			<Name>config8</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -126,7 +126,7 @@
 <Title>
 Tab0
 </Title>
-<Entry Boxes>root.ball.qd_ball_x,root.cylinder.qd_cylinder_x,root.HybridImpulseSpringDamperCollisionHandler.kpCollision,root.HybridImpulseSpringDamperCollisionHandler.kdCollision,root.cylinder.qd_cylinder_wz,root.HybridImpulseSpringDamperCollisionHandler.pullingOutSpringHysteresisReduction</Entry Boxes>
+<Entry Boxes>root.ball.qd_ball_x,root.cylinder.qd_cylinder_x,root.HybridImpulseSpringDamperCollisionHandler.kpCollision,root.HybridImpulseSpringDamperCollisionHandler.kdCollision,root.cylinder.qd_cylinder_wz,root.HybridImpulseSpringDamperCollisionHandler.pullingOutSpringHysteresisReduction,root.ball.ballLinkContactingPoint0_mX,root.ball.ballLinkContactingPoint0_mY,root.ball.ballLinkContactingPoint0_mZ,root.ball.qd_ball_wx,root.ball.qd_ball_wy,root.ball.qd_ball_wz,root.HybridImpulseSpringDamperCollisionHandler.kdRotationalDamping,root.HybridImpulseSpringDamperCollisionHandler.rotationalCoefficientOfFrictionBeta</Entry Boxes>
 </EntryBoxTab>
 </Entry Boxes Tab Pane>
 
@@ -135,7 +135,7 @@ Tab0
 <Visible> true</Visible>
 </Main Viewport>
 
-<Graph Array Window Size>2</Graph Array Window Size>
+<Graph Array Window Size>3</Graph Array Window Size>
 <Graph Array Window1>
 <ScreenID>1</ScreenID>
 <WindowLocation>1912.0, -8.0</WindowLocation>
@@ -450,7 +450,74 @@ Tab0
 		</GraphConfig>
 	</Graph>
 </GraphGroup>
-</Graph Array Window2>
+</Graph Array Window2><Graph Array Window3>
+<ScreenID>1</ScreenID>
+<WindowLocation>1912.0, -8.0</WindowLocation>
+<WindowSize>1936.0, 1176.0</WindowSize>
+<GraphGroup>
+	<Cols>1</Cols>
+	<Graph>
+		<Variables>root.ball.ballLinkContactingPoint0_wX,root.ball.qd_ball_wx</Variables>
+		<GraphConfiguration>
+			<Name>config36</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.ball.ballLinkContactingPoint0_wY,root.ball.qd_ball_wy</Variables>
+		<GraphConfiguration>
+			<Name>config37</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.ball.ballLinkContactingPoint0_wZ,root.ball.qd_ball_wz,root.ball.ballLinkContactingPoint0_wX,root.ball.ballLinkContactingPoint0_wY</Variables>
+		<GraphConfiguration>
+			<Name>config38</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.ball.ballLinkContactingPoint0_mZ</Variables>
+		<GraphConfiguration>
+			<Name>config39</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.cylinder.qd_cylinder_x</Variables>
+		<GraphConfiguration>
+			<Name>config40</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+</GraphGroup>
+</Graph Array Window3>
 
 <Extra Panels>
 <Main Viewport>
@@ -459,9 +526,9 @@ Tab0
 
 <Current View>Normal View</Current View>
  <Canvas 1> 
- <Camera X>5.80395106671129</Camera X>
- <Camera Y>1.2161347053182954</Camera Y>
- <Camera Z>1.597581271747437</Camera Z>
+ <Camera X>5.934274955369679</Camera X>
+ <Camera Y>-0.33936141902089023</Camera Y>
+ <Camera Z>1.5106122014075787</Camera Z>
  <Dolly data> 
  <Position X>2.0</Position X>
  <Position Y>12.0</Position Y>
