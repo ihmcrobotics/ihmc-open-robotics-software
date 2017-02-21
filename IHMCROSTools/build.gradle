@@ -62,7 +62,7 @@ dependencies {
 	testCompile group: 'junit', name: 'junit', version: '4.11'
 
     compile group: 'io.netty', name: 'netty', version: '3.5.8.Final'
-    compile group: 'us.ihmc', name: 'euclid-core', version: '0.4'
+    compile group: 'us.ihmc', name: 'euclid-core', version: '0.4.1'
     compile group: 'com.google.guava', name: 'guava', version: '18.0'
     compile group: 'org.apache.commons', name: 'com.springsource.org.apache.commons.io', version: '1.4.0'
     compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
