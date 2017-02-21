@@ -25,12 +25,12 @@ public class KinematicPoint implements java.io.Serializable
 {
    private static final long serialVersionUID = 3047881738704107434L;
 
-   public final String name;
+   private final String name;
 
-   private final Point3D temp = new Point3D();
-
-   private final YoFramePoint position;
-   private final YoFrameVector velocity;
+   // The position and velocity are in world frame. AngularVelocity is in body frame of the joint.
+   private final YoFramePoint positionInWorld;
+   private final YoFrameVector velocityInWorld;
+   private final YoFrameVector angularVelocityInWorld;
 
    private final YoFrameVector offsetYoFrameVector;
 
@@ -40,11 +40,12 @@ public class KinematicPoint implements java.io.Serializable
 
    private final YoVariableRegistry registry;
 
-   protected final Vector3D
-      offsetFromCOM = new Vector3D(), wXr = new Vector3D(), v_point = new Vector3D();
+   protected final Vector3D tempVectorForOffsetFromCOM = new Vector3D(), tempVectorForWXr = new Vector3D(), tempVectorForVelocity = new Vector3D();
 
    private RigidBodyTransform tempTransformFromWorldToJoint = new RigidBodyTransform();
    private Vector4D offsetPlus = new Vector4D();
+
+   private final Point3D tempPoint = new Point3D();
 
    public KinematicPoint(String name, Robot robot)
    {
@@ -66,8 +67,9 @@ public class KinematicPoint implements java.io.Serializable
       this.name = name;
       this.registry = registry;
 
-      position = new YoFramePoint(name + "_", "", ReferenceFrame.getWorldFrame(), registry);
-      velocity = new YoFrameVector(name + "_d", "", ReferenceFrame.getWorldFrame(), registry);
+      positionInWorld = new YoFramePoint(name + "_", "", ReferenceFrame.getWorldFrame(), registry);
+      velocityInWorld = new YoFrameVector(name + "_d", "", ReferenceFrame.getWorldFrame(), registry);
+      angularVelocityInWorld = new YoFrameVector(name + "_w", "", ReferenceFrame.getWorldFrame(), registry);
 
       this.offsetYoFrameVector = new YoFrameVector(name + "off", "", ReferenceFrame.getWorldFrame(), registry);
       if (offset != null)
@@ -80,15 +82,16 @@ public class KinematicPoint implements java.io.Serializable
 
       offsetYoFrameVector.set(0, 0, 0);
 
-      offsetFromCOM.set(0, 0, 0);
-      wXr.set(0, 0, 0);
-      v_point.set(0, 0, 0);
+      tempVectorForOffsetFromCOM.set(0, 0, 0);
+      tempVectorForWXr.set(0, 0, 0);
+      tempVectorForVelocity.set(0, 0, 0);
 
       tempTransformFromWorldToJoint.setIdentity();
       offsetPlus.set(0, 0, 0, 0);
 
-      position.set(0, 0, 0);
-      velocity.set(0, 0, 0);
+      positionInWorld.set(0, 0, 0);
+      velocityInWorld.set(0, 0, 0);
+      angularVelocityInWorld.set(0, 0, 0);
    }
 
    public KinematicPointUpdater getKinematicPointUpdater()
@@ -114,7 +117,7 @@ public class KinematicPoint implements java.io.Serializable
    @Override
    public String toString()
    {
-      return ("name: " + name + " x: " + position.getX() + ", y: " + position.getY() + ", z: " + position.getZ());
+      return ("name: " + name + " x: " + positionInWorld.getX() + ", y: " + positionInWorld.getY() + ", z: " + positionInWorld.getZ());
    }
 
    public void setOffsetJoint(double x, double y, double z)
@@ -144,20 +147,23 @@ public class KinematicPoint implements java.io.Serializable
 //      System.out.println("Setting offset Joint: " + offsetPlus.getX() + ", " + offsetPlus.getY() + ", " + offsetPlus.getZ());
  
       //TODO: Make sure all methods update the various variables so that a set followed by a get is consistent...
-      this.position.set(x, y, z);
+      this.positionInWorld.set(x, y, z);
    }
 
    public void updatePointVelocity(RotationMatrix R0_i, Vector3D comOffset, Vector3D v_i, Vector3D w_i)
    {
-      this.getOffset(offsetFromCOM);
-      offsetFromCOM.sub(comOffset);
+      this.getOffset(tempVectorForOffsetFromCOM);
+      tempVectorForOffsetFromCOM.sub(comOffset);
 
-      wXr.cross(w_i, offsetFromCOM);
-      v_point.add(v_i, wXr);
+      tempVectorForWXr.cross(w_i, tempVectorForOffsetFromCOM);
+      tempVectorForVelocity.add(v_i, tempVectorForWXr);
 
-      R0_i.transform(v_point);
+      R0_i.transform(tempVectorForVelocity);
+      velocityInWorld.set(tempVectorForVelocity);
 
-      velocity.set(v_point);
+      tempVectorForVelocity.set(w_i);
+      R0_i.transform(tempVectorForVelocity);
+      angularVelocityInWorld.set(tempVectorForVelocity);
    }
 
    protected void updatePointPosition(RigidBodyTransform t1)
@@ -168,10 +174,10 @@ public class KinematicPoint implements java.io.Serializable
          kinematicPointUpdater.updateKinematicPoint(this);
       }
 
-      this.getOffset(temp);
-      t1.transform(temp);
+      this.getOffset(tempPoint);
+      t1.transform(tempPoint);
 
-      position.set(temp);
+      positionInWorld.set(tempPoint);
    }
 
    public String getName()
@@ -194,37 +200,37 @@ public class KinematicPoint implements java.io.Serializable
 
    public double getX()
    {
-      return position.getX();
+      return positionInWorld.getX();
    }
 
    public double getY()
    {
-      return position.getY();
+      return positionInWorld.getY();
    }
 
    public double getZ()
    {
-      return position.getZ();
+      return positionInWorld.getZ();
    }
 
    public double getXVelocity()
    {
-      return velocity.getX();
+      return velocityInWorld.getX();
    }
 
    public double getYVelocity()
    {
-      return velocity.getY();
+      return velocityInWorld.getY();
    }
 
    public double getZVelocity()
    {
-      return velocity.getZ();
+      return velocityInWorld.getZ();
    }
 
    public void getPosition(Tuple3DBasics positionToPack)
    {
-      position.get(positionToPack);
+      positionInWorld.get(positionToPack);
    }
 
    public Point3D getPositionPoint()
@@ -237,35 +243,50 @@ public class KinematicPoint implements java.io.Serializable
 
    public void getVelocity(Vector3D velocityToPack)
    {
-      velocity.get(velocityToPack);
+      velocityInWorld.get(velocityToPack);
    }
 
    public Vector3D getVelocityVector()
    {
       Vector3D velocityToReturn = new Vector3D();
-      velocity.get(velocityToReturn);
+      velocityInWorld.get(velocityToReturn);
 
       return velocityToReturn;
    }
 
    public void setVelocity(Vector3D velocity)
    {
-      this.velocity.set(velocity);
+      this.velocityInWorld.set(velocity);
+   }
+
+   public void getAngularVelocity(Vector3D angularVelocityInWorldToPack)
+   {
+      this.angularVelocityInWorld.get(angularVelocityInWorldToPack);
+   }
+
+   public void setAngularVelocity(Vector3D angularVelocityInWorld)
+   {
+      this.angularVelocityInWorld.set(angularVelocityInWorld);
    }
 
    public void setPosition(Point3D position)
    {
-      this.position.set(position);
+      this.positionInWorld.set(position);
    }
 
    public YoFramePoint getYoPosition()
    {
-      return position;
+      return positionInWorld;
    }
 
    public YoFrameVector getYoVelocity()
    {
-      return velocity;
+      return velocityInWorld;
+   }
+
+   public YoFrameVector getYoAngularVelocity()
+   {
+      return angularVelocityInWorld;
    }
 
    public YoVariableRegistry getYoVariableRegistry()
