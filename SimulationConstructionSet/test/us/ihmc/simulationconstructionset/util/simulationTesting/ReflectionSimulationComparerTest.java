@@ -7,14 +7,13 @@ import static org.junit.Assert.assertTrue;
 import java.lang.reflect.Field;
 import java.util.Collection;
 
-import javax.vecmath.Vector3d;
-
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
@@ -125,7 +124,7 @@ public class ReflectionSimulationComparerTest
    private Robot createSimpleRobot()
    {
       Robot robot0 = new Robot("robot");
-      FloatingJoint floatingJoint0 = new FloatingJoint("floatingJoint", new Vector3d(), robot0);
+      FloatingJoint floatingJoint0 = new FloatingJoint("floatingJoint", new Vector3D(), robot0);
       Link link0 = new Link("body");
       link0.setMass(1.0);
       link0.setMomentOfInertia(0.1, 0.1, 0.1);

@@ -2,9 +2,8 @@ package us.ihmc.simulationconstructionset.physics.collision.simple;
 
 import java.util.ArrayList;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.simulationconstructionset.physics.CollisionShape;
 import us.ihmc.simulationconstructionset.physics.Contacts;
 
@@ -66,13 +65,13 @@ public class SimpleContactWrapper implements Contacts
       {
          SingleContact singleContact = new SingleContact();
 
-         Point3d worldAPoint = new Point3d();
+         Point3D worldAPoint = new Point3D();
          contactsToAdd.getWorldA(i, worldAPoint);
 
-         Point3d worldBPoint = new Point3d();
+         Point3D worldBPoint = new Point3D();
          contactsToAdd.getWorldB(i, worldBPoint);
 
-         Vector3d normalAVector = new Vector3d();
+         Vector3D normalAVector = new Vector3D();
 
          contactsToAdd.getWorldNormal(i, normalAVector);
 
@@ -127,10 +126,10 @@ public class SimpleContactWrapper implements Contacts
          {
             SingleContact singleContactToCheck = contacts.get(j);
             
-            Point3d worldAToCheck = new Point3d();
+            Point3D worldAToCheck = new Point3D();
             singleContactToCheck.getWorldA(worldAToCheck);
             
-            Point3d worldAPoint = new Point3d();
+            Point3D worldAPoint = new Point3D();
             if (switched)
             {
                contactsToAdd.getWorldB(i, worldAPoint);
@@ -152,13 +151,13 @@ public class SimpleContactWrapper implements Contacts
             contacts.add(singleContact);
          }
 
-         Point3d worldAPoint = new Point3d();
+         Point3D worldAPoint = new Point3D();
          contactsToAdd.getWorldA(i, worldAPoint);
 
-         Point3d worldBPoint = new Point3d();
+         Point3D worldBPoint = new Point3D();
          contactsToAdd.getWorldB(i, worldBPoint);
 
-         Vector3d normalAVector = new Vector3d();
+         Vector3D normalAVector = new Vector3D();
 
          contactsToAdd.getWorldNormal(i, normalAVector);
 
@@ -179,7 +178,7 @@ public class SimpleContactWrapper implements Contacts
    }
 
 
-   public void addContact(Point3d pointA, Point3d pointB, Vector3d normalA, double distance)
+   public void addContact(Point3D pointA, Point3D pointB, Vector3D normalA, double distance)
    {
       SingleContact singleContact = new SingleContact();
       singleContact.set(pointA, pointB, normalA, distance);
@@ -193,14 +192,14 @@ public class SimpleContactWrapper implements Contacts
    }
 
    @Override
-   public void getWorldA(int which, Point3d location)
+   public void getWorldA(int which, Point3D location)
    {
       SingleContact singleContact = contacts.get(which);
       singleContact.getWorldA(location);
    }
 
    @Override
-   public void getWorldB(int which, Point3d location)
+   public void getWorldB(int which, Point3D location)
    {
       SingleContact singleContact = contacts.get(which);
       singleContact.getWorldB(location);
@@ -214,7 +213,7 @@ public class SimpleContactWrapper implements Contacts
    }
 
    @Override
-   public void getWorldNormal(int which, Vector3d normalToPack)
+   public void getWorldNormal(int which, Vector3D normalToPack)
    {
       SingleContact singleContact = contacts.get(which);
       singleContact.getNormalA(normalToPack);

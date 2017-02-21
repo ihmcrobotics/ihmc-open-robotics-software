@@ -1,15 +1,13 @@
 package us.ihmc.robotics.math;
 
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.kinematics.TransformInterpolationCalculator;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.geometry.RotationTools;
 
 public class YoReferencePose extends ReferenceFrame
 {
@@ -24,9 +22,8 @@ public class YoReferencePose extends ReferenceFrame
    private final RigidBodyTransform output = new RigidBodyTransform();
 
    //Below are used for updating YoFramePose only
-   private final Quat4d rotation = new Quat4d();
-   private final Vector3d translation = new Vector3d();
-   private final double[] yawPitchRoll = new double[3];
+   private final Quaternion rotation = new Quaternion();
+   private final Vector3D translation = new Vector3D();
 
    public YoReferencePose(String frameName, ReferenceFrame parentFrame, YoVariableRegistry registry)
    {
@@ -49,32 +46,31 @@ public class YoReferencePose extends ReferenceFrame
       setAndUpdate(rotation, translation);
    }
 
-   public void setAndUpdate(Vector3d newTranslation)
+   public void setAndUpdate(Vector3D newTranslation)
    {
       set(newTranslation);
       update();
    }
 
-   public void setAndUpdate(Quat4d newRotation)
+   public void setAndUpdate(Quaternion newRotation)
    {
       set(newRotation);
       update();
    }
 
-   public void setAndUpdate(Quat4d newRotation, Vector3d newTranslation)
+   public void setAndUpdate(Quaternion newRotation, Vector3D newTranslation)
    {
       set(newRotation);
       set(newTranslation);
       update();
    }
 
-   private void set(Quat4d newRotation)
+   private void set(Quaternion newRotation)
    {
-      RotationTools.convertQuaternionToYawPitchRoll(newRotation, yawPitchRoll);
-      yoFramePose.setYawPitchRoll(yawPitchRoll);
+      yoFramePose.setOrientation(newRotation);
    }
 
-   private void set(Vector3d newTranslation)
+   private void set(Vector3D newTranslation)
    {
       yoFramePose.setXYZ(newTranslation.getX(), newTranslation.getY(), newTranslation.getZ());
    }
@@ -88,12 +84,12 @@ public class YoReferencePose extends ReferenceFrame
       setAndUpdate(output);
    }
 
-   public void get(Quat4d rotation)
+   public void get(Quaternion rotation)
    {
       yoFramePose.getOrientation().getQuaternion(rotation);
    }
 
-   public void get(Vector3d translation)
+   public void get(Vector3D translation)
    {
       yoFramePose.getPosition().get(translation);
    }

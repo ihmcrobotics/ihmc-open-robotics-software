@@ -1,6 +1,5 @@
 package us.ihmc.simulationconstructionset.physics.collision.simple;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 

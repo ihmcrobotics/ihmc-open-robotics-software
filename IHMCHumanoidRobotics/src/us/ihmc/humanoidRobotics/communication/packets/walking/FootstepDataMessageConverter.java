@@ -2,10 +2,9 @@ package us.ihmc.humanoidRobotics.communication.packets.walking;
 
 import java.util.ArrayList;
 
-import javax.vecmath.Point2d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.SimpleFootstep;
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
@@ -32,8 +31,8 @@ public class FootstepDataMessageConverter
 
          FramePose footstepPose = new FramePose();
          footstep.getSoleFramePose(footstepPose);
-         Point3d location = new Point3d();
-         Quat4d orientation = new Quat4d();
+         Point3D location = new Point3D();
+         Quaternion orientation = new Quaternion();
          footstepPose.getPosition(location);
          footstepPose.getOrientation(orientation);
 
@@ -48,9 +47,9 @@ public class FootstepDataMessageConverter
             if (foothold.getNumberOfVertices() != 4)
                ConvexPolygonTools.limitVerticesConservative(foothold, 4);
 
-            ArrayList<Point2d> contactPoints = new ArrayList<>();
+            ArrayList<Point2D> contactPoints = new ArrayList<>();
             for (int contactPointIdx = 0; contactPointIdx < 4; contactPointIdx++)
-               contactPoints.add(new Point2d(foothold.getVertex(contactPointIdx)));
+               contactPoints.add(new Point2D(foothold.getVertex(contactPointIdx)));
             footstepData.setPredictedContactPoints(contactPoints);
          }
 
@@ -69,8 +68,8 @@ public class FootstepDataMessageConverter
 
          FramePose footstepPose = new FramePose();
          footstep.getSoleFramePose(footstepPose);
-         Point3d location = new Point3d();
-         Quat4d orientation = new Quat4d();
+         Point3D location = new Point3D();
+         Quaternion orientation = new Quaternion();
          footstepPose.getPosition(location);
          footstepPose.getOrientation(orientation);
 
@@ -85,9 +84,9 @@ public class FootstepDataMessageConverter
             if (foothold.getNumberOfVertices() != 4)
                ConvexPolygonTools.limitVerticesConservative(foothold, 4);
 
-            ArrayList<Point2d> contactPoints = new ArrayList<>();
+            ArrayList<Point2D> contactPoints = new ArrayList<>();
             for (int contactPointIdx = 0; contactPointIdx < 4; contactPointIdx++)
-               contactPoints.add(new Point2d(foothold.getVertex(contactPointIdx)));
+               contactPoints.add(new Point2D(foothold.getVertex(contactPointIdx)));
             footstepData.setPredictedContactPoints(contactPoints);
          }
 

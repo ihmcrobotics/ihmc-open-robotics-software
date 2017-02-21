@@ -18,7 +18,8 @@
 
 package us.ihmc.sensorProcessing.bubo.gui;
 
-import java.awt.*;
+import java.awt.Dimension;
+import java.awt.Graphics;
 
 /**
  * <p>

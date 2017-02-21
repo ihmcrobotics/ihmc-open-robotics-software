@@ -1,11 +1,10 @@
 package us.ihmc.commonWalkingControlModules.controllerAPI.input.userDesired;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.packets.Packet;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisOrientationTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
@@ -128,9 +127,9 @@ public class UserDesiredPelvisPoseControllerCommandGenerator
 
    private final PelvisTrajectoryCommand poseCommand = new PelvisTrajectoryCommand();
    private final PelvisOrientationTrajectoryCommand orientationCommand = new PelvisOrientationTrajectoryCommand();
-   private final Point3d position = new Point3d();
-   private final Quat4d orientation = new Quat4d();
-   private final Vector3d zeroVelocity = new Vector3d();
+   private final Point3D position = new Point3D();
+   private final Quaternion orientation = new Quaternion();
+   private final Vector3D zeroVelocity = new Vector3D();
 
    private void sendPelvisTrajectoryCommand()
    {

@@ -13,21 +13,25 @@ public class CountActionsTask implements Task
       this.numberOfDoActionsBeforeDone = numberOfDoActionsBeforeDone;
    }
 
+   @Override
    public void doTransitionIntoAction()
    {
       numberOfTimesTransitionIntoActionWasCalled++;
    }
 
+   @Override
    public void doAction()
    {
       numberOfTimesDoActionWasCalled++;
    }
 
+   @Override
    public void doTransitionOutOfAction()
    {
       numberOfTimesTransitionOutOfActionWasCalled++;
    }
 
+   @Override
    public boolean isDone()
    {
       return (numberOfTimesDoActionWasCalled >= numberOfDoActionsBeforeDone);

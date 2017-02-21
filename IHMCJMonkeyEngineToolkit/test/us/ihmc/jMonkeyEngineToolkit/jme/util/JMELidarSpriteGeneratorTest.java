@@ -6,8 +6,6 @@ package us.ihmc.jMonkeyEngineToolkit.jme.util;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import javax.vecmath.Point3f;
-
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -19,6 +17,7 @@ import com.jme3.math.Vector3f;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
+import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.jMonkeyEngineToolkit.jme.JMERenderer;
 import us.ihmc.tools.thread.ThreadTools;
 
@@ -38,11 +37,11 @@ public class JMELidarSpriteGeneratorTest
 
       ui.getZUpNode().attachChild(result);
 
-      Point3f[] points = new Point3f[data.length];
+      Point3D32[] points = new Point3D32[data.length];
 
       for (int i = 0; i < data.length; i++)
       {
-         points[i] = new Point3f(data[i][0],data[i][1], data[i][2]);
+         points[i] = new Point3D32(data[i][0],data[i][1], data[i][2]);
       }
 
 

@@ -2,10 +2,9 @@ package us.ihmc.acsell.hardware.state;
 
 import java.nio.ByteBuffer;
 
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
 import us.ihmc.acsell.hardware.configuration.AcsellRobot;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
@@ -21,9 +20,9 @@ public class AcsellXSensState
    
    private final IntegerYoVariable sample;
    
-   private final Quat4d Qsi = new Quat4d();
-   private final Quat4d Qip = new Quat4d();
-   private final Quat4d Qip2 = new Quat4d();
+   private final Quaternion Qsi = new Quaternion();
+   private final Quaternion Qip = new Quaternion();
+   private final Quaternion Qip2 = new Quaternion();
    private final AcsellRobot robot;   
    
    
@@ -53,28 +52,28 @@ public class AcsellXSensState
       parentRegistry.addChild(registry);
    }
    
-   public void getAccel(Vector3d accelToPack)
+   public void getAccel(Vector3D accelToPack)
    {
       accelToPack.setX(accelX.getDoubleValue());
       accelToPack.setY(accelY.getDoubleValue());
       accelToPack.setZ(accelZ.getDoubleValue());
    }
    
-   public void getGyro(Vector3d gyroToPack)
+   public void getGyro(Vector3D gyroToPack)
    {
       gyroToPack.setX(gyroX.getDoubleValue());
       gyroToPack.setY(gyroY.getDoubleValue());
       gyroToPack.setZ(gyroZ.getDoubleValue());
    }
    
-   public void getMagnetometer(Vector3d magToPack)
+   public void getMagnetometer(Vector3D magToPack)
    {
       magToPack.setX(magX.getDoubleValue());
       magToPack.setY(magY.getDoubleValue());
       magToPack.setZ(magZ.getDoubleValue());
    }
    
-   public void getQuaternion(Quat4d quatToPack)
+   public void getQuaternion(Quaternion quatToPack)
    {
       quatToPack.set(qx.getDoubleValue(), qy.getDoubleValue(), qz.getDoubleValue(), qs.getDoubleValue());
    }
@@ -119,8 +118,8 @@ public class AcsellXSensState
     
     Qsi.set(qxtemp,qytemp,qztemp,qstemp);
     Qip.set(0,.707106781186548,0,-.707106781186548);
-    Qsi.mul(Qip);
-    qs.set(Qsi.getW());
+    Qsi.multiply(Qip);
+    qs.set(Qsi.getS());
     qx.set(Qsi.getX());
     qy.set(Qsi.getY());
     qz.set(Qsi.getZ());
@@ -161,9 +160,9 @@ public class AcsellXSensState
     Qsi.set(qxtemp,qytemp,qztemp,qstemp);
     Qip.set(0,.707106781186548,0,-.707106781186548);
     Qip2.set(0,0,1,0);
-    Qip.mul(Qip2);
-    Qsi.mul(Qip);
-    qs.set(Qsi.getW());
+    Qip.multiply(Qip2);
+    Qsi.multiply(Qip);
+    qs.set(Qsi.getS());
     qx.set(Qsi.getX());
     qy.set(Qsi.getY());
     qz.set(Qsi.getZ());

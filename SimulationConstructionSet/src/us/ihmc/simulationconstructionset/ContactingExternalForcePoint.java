@@ -1,11 +1,10 @@
 package us.ihmc.simulationconstructionset;
 
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.simulationconstructionset.physics.CollisionShapeWithLink;
 
@@ -22,7 +21,8 @@ public class ContactingExternalForcePoint extends ExternalForcePoint
 
    //TODO: This isn't rewindable...
    private CollisionShapeWithLink collisionShape;
-
+   private int numberOfPointsInContactWithSameShape = 0;
+   
    public ContactingExternalForcePoint(String name, Joint parentJoint, YoVariableRegistry registry)
    {
       super(name, registry);
@@ -33,6 +33,16 @@ public class ContactingExternalForcePoint extends ExternalForcePoint
       isSlipping = new BooleanYoVariable(name + "IsSlipping", registry);
       
       indexOfContactingPair.set(-1);
+   }
+
+   public int getNumberOfPointsInContactWithSameShape()
+   {
+      return numberOfPointsInContactWithSameShape;
+   }
+
+   public void setNumberOfPointsInContactWithSameShape(int numberOfPointsInContactWithSameShape)
+   {
+      this.numberOfPointsInContactWithSameShape = numberOfPointsInContactWithSameShape;
    }
 
    public int getIndexOfContactingPair()
@@ -70,10 +80,10 @@ public class ContactingExternalForcePoint extends ExternalForcePoint
       return parentJoint.getLink();
    }
    
-   private final Vector3d tempSurfaceNormal = new Vector3d();
+   private final Vector3D tempSurfaceNormal = new Vector3D();
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
    
-   public void setSurfaceNormalInWorld(Vector3d surfaceNormalInWorld)
+   public void setSurfaceNormalInWorld(Vector3D surfaceNormalInWorld)
    {
       //TODO: Make more efficient by having getTransformFromWorld() in Joint...
       tempSurfaceNormal.set(surfaceNormalInWorld);
@@ -86,7 +96,7 @@ public class ContactingExternalForcePoint extends ExternalForcePoint
       this.surfaceNormalInJointFrame.set(tempSurfaceNormal);
    }
    
-   public void getSurfaceNormalInWorld(Vector3d surfaceNormalInWorldToPack)
+   public void getSurfaceNormalInWorld(Vector3D surfaceNormalInWorldToPack)
    {
       this.surfaceNormalInJointFrame.get(surfaceNormalInWorldToPack);
       parentJoint.getTransformToWorld(tempTransform);

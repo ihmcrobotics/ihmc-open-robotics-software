@@ -1,8 +1,7 @@
 package us.ihmc.exampleSimulations.exampleContact;
 
-import javax.vecmath.Vector3d;
-
-import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObject3D;
 
 public class SimpleTableEnvironmentOne extends CombinedTerrainObject3D
@@ -20,8 +19,8 @@ public class SimpleTableEnvironmentOne extends CombinedTerrainObject3D
       FIELD_WIDTH = FIELD_LENGTH * 0.5;
 
       RigidBodyTransform configuration = new RigidBodyTransform();
-      configuration.setRotationEulerAndZeroTranslation(new Vector3d(0.0, 0.0, Math.toRadians(45.0)));
-      configuration.setTranslation(new Vector3d(4.0, 4.0, 0.7));
+      configuration.setRotationEulerAndZeroTranslation(new Vector3D(0.0, 0.0, Math.toRadians(45.0)));
+      configuration.setTranslation(new Vector3D(4.0, 4.0, 0.7));
       this.addRotatableTable(configuration, 4.0, 2.0, 1.6, 0.1);
 
       // Table 1

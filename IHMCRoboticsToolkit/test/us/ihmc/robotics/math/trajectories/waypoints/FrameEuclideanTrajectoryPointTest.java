@@ -6,18 +6,17 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Random;
 
-import javax.vecmath.AxisAngle4d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.frameObjects.FrameEuclideanWaypoint;
 import us.ihmc.robotics.geometry.transformables.EuclideanWaypoint;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.EuclideanTrajectoryPointInterface;
@@ -34,18 +33,18 @@ public class FrameEuclideanTrajectoryPointTest
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
       PoseReferenceFrame poseFrame = new PoseReferenceFrame("poseFrame", new FramePose(worldFrame));
 
-      FramePoint poseFramePosition = new FramePoint(worldFrame, new Point3d(0.5, 7.7, 9.2));
+      FramePoint poseFramePosition = new FramePoint(worldFrame, new Point3D(0.5, 7.7, 9.2));
       poseFrame.setPositionAndUpdate(poseFramePosition);
 
-      FrameOrientation poseOrientation = new FrameOrientation(worldFrame, new AxisAngle4d(1.2, 3.9, 4.7, 2.2));
+      FrameOrientation poseOrientation = new FrameOrientation(worldFrame, new AxisAngle(1.2, 3.9, 4.7, 2.2));
       poseFrame.setOrientationAndUpdate(poseOrientation);
 
       FrameEuclideanTrajectoryPoint frameEuclideanTrajectoryPoint = new FrameEuclideanTrajectoryPoint(worldFrame);
       SimpleEuclideanTrajectoryPoint simpleTrajectoryPoint = new SimpleEuclideanTrajectoryPoint();
 
       double time = 3.4;
-      Point3d position = new Point3d(1.0, 2.1, 3.7);
-      Vector3d linearVelocity = new Vector3d(-0.4, 1.2, 3.3);
+      Point3D position = new Point3D(1.0, 2.1, 3.7);
+      Vector3D linearVelocity = new Vector3D(-0.4, 1.2, 3.3);
 
       simpleTrajectoryPoint.set(time, position, linearVelocity);
       frameEuclideanTrajectoryPoint.setIncludingFrame(worldFrame, simpleTrajectoryPoint);
@@ -316,8 +315,8 @@ public class FrameEuclideanTrajectoryPointTest
       assertTrue(expectedPosition.epsilonEquals(testedFrameEuclideanTrajectoryPoint.getGeometryObject().getPosition(), epsilon));
       assertTrue(expectedLinearVelocity.epsilonEquals(testedFrameEuclideanTrajectoryPoint.getGeometryObject().getLinearVelocity(), epsilon));
 
-      Point3d actualPosition = new Point3d();
-      Vector3d actualLinearVelocity = new Vector3d();
+      Point3D actualPosition = new Point3D();
+      Vector3D actualLinearVelocity = new Vector3D();
 
       testedFrameEuclideanTrajectoryPoint.getPosition(actualPosition);
       testedFrameEuclideanTrajectoryPoint.getLinearVelocity(actualLinearVelocity);
@@ -356,8 +355,8 @@ public class FrameEuclideanTrajectoryPointTest
       SimpleEuclideanTrajectoryPoint simpleTrajectoryPoint = new SimpleEuclideanTrajectoryPoint();
 
       double time = 3.4;
-      Point3d position = new Point3d(1.0, 2.1, 3.7);
-      Vector3d linearVelocity = new Vector3d(-0.4, 1.2, 3.3);
+      Point3D position = new Point3D(1.0, 2.1, 3.7);
+      Vector3D linearVelocity = new Vector3D(-0.4, 1.2, 3.3);
 
       simpleTrajectoryPoint.set(time, position, linearVelocity);
       FrameEuclideanTrajectoryPoint.setIncludingFrame(worldFrame, simpleTrajectoryPoint);
@@ -388,8 +387,8 @@ public class FrameEuclideanTrajectoryPointTest
       FrameEuclideanTrajectoryPoint.getLinearVelocity(linearVelocity);
 
       // Make sure they are all equal to zero:
-      assertTrue(position.epsilonEquals(new Point3d(), 1e-10));
-      assertTrue(linearVelocity.epsilonEquals(new Vector3d(), 1e-10));
+      assertTrue(position.epsilonEquals(new Point3D(), 1e-10));
+      assertTrue(linearVelocity.epsilonEquals(new Vector3D(), 1e-10));
 
       time = 9.9;
       pointForVerification.set(3.9, 2.2, 1.1);
@@ -459,10 +458,10 @@ public class FrameEuclideanTrajectoryPointTest
 
       PoseReferenceFrame poseFrame = new PoseReferenceFrame("poseFrame", new FramePose(worldFrame));
 
-      FramePoint poseFramePosition = new FramePoint(worldFrame, new Point3d(0.5, 7.7, 9.2));
+      FramePoint poseFramePosition = new FramePoint(worldFrame, new Point3D(0.5, 7.7, 9.2));
       poseFrame.setPositionAndUpdate(poseFramePosition);
 
-      FrameOrientation poseOrientation = new FrameOrientation(worldFrame, new AxisAngle4d(1.2, 3.9, 4.7, 2.2));
+      FrameOrientation poseOrientation = new FrameOrientation(worldFrame, new AxisAngle(1.2, 3.9, 4.7, 2.2));
       poseFrame.setOrientationAndUpdate(poseOrientation);
 
       frameEuclideanTrajectoryPoint.changeFrame(poseFrame);

@@ -3,8 +3,7 @@ package us.ihmc.jMonkeyEngineToolkit.camera;
 import java.awt.Canvas;
 import java.util.ArrayList;
 
-import javax.vecmath.Point3d;
-
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.jMonkeyEngineToolkit.CameraAdapter;
 import us.ihmc.jMonkeyEngineToolkit.ContextSwitchedListener;
 import us.ihmc.jMonkeyEngineToolkit.Graphics3DFrameListener;
@@ -32,7 +31,7 @@ public abstract class ViewportAdapter
 
    public abstract void setupOffscreenView(int width, int height);
 
-   public abstract Point3d getWorldCoordinatesFromScreenCoordinates(float f, float g, double z);
+   public abstract Point3D getWorldCoordinatesFromScreenCoordinates(float f, float g, double z);
 
    public abstract void addContextSwitchedListener(ContextSwitchedListener contextSwitchedListener);
 

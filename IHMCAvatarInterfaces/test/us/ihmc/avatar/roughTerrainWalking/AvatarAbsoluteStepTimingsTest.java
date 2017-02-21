@@ -5,9 +5,6 @@ import static org.junit.Assert.assertTrue;
 import java.util.List;
 import java.util.Random;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-
 import org.junit.After;
 import org.junit.Before;
 
@@ -20,6 +17,8 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WalkingHighLevelHumanoidController;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPPlannerWithTimeFreezer;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage.FootstepOrigin;
@@ -79,8 +78,8 @@ public abstract class AvatarAbsoluteStepTimingsTest implements MultiRobotTestInt
       {
          RobotSide side = stepIndex % 2 == 0 ? RobotSide.LEFT : RobotSide.RIGHT;
          double y = side == RobotSide.LEFT ? stepWidth / 2.0 : -stepWidth / 2.0;
-         Point3d location = new Point3d((double) stepIndex * stepLength, y, 0.0);
-         Quat4d orientation = new Quat4d(0.0, 0.0, 0.0, 1.0);
+         Point3D location = new Point3D((double) stepIndex * stepLength, y, 0.0);
+         Quaternion orientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
          FootstepDataMessage footstepData = new FootstepDataMessage(side, location, orientation);
          footstepData.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
          footstepData.setAbsoluteTime(swingStartInterval * (double) (stepIndex + 1));
@@ -126,8 +125,8 @@ public abstract class AvatarAbsoluteStepTimingsTest implements MultiRobotTestInt
       {
          RobotSide side = RobotSide.LEFT;
          double y = side == RobotSide.LEFT ? 0.15 : -0.15;
-         Point3d location = new Point3d(0.0, y, 0.0);
-         Quat4d orientation = new Quat4d(0.0, 0.0, 0.0, 1.0);
+         Point3D location = new Point3D(0.0, y, 0.0);
+         Quaternion orientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
          FootstepDataMessage footstepData = new FootstepDataMessage(side, location, orientation);
          footstepData.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
          footstepData.setAbsoluteTime(minimumTransferTime / 2.0);

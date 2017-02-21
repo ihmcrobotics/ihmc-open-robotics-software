@@ -1,9 +1,9 @@
 package us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation;
 
-import javax.vecmath.AxisAngle4d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.StampedPosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.PelvisPoseErrorPacket;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
@@ -15,8 +15,6 @@ import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.LongYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
 import us.ihmc.robotics.math.YoReferencePose;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
@@ -73,8 +71,8 @@ public class PelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrectionI
    private final YoReferencePose interpolatedTranslationCorrectionFrame;
    private final YoReferencePose interpolationRotationStartFrame;
    private final YoReferencePose interpolationTranslationStartFrame;
-   private final Vector3d distanceToTravelVector = new Vector3d();
-   private final AxisAngle4d angleToTravelAxis4d = new AxisAngle4d();
+   private final Vector3D distanceToTravelVector = new Vector3D();
+   private final AxisAngle angleToTravelAxis4d = new AxisAngle();
 
    private final LongYoVariable seNonProcessedPelvisTimeStamp;
 
@@ -105,13 +103,13 @@ public class PelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrectionI
 
    private final double estimatorDT;
    private boolean sendCorrectionUpdate = false;
-   private final Quat4d totalRotationError = new Quat4d();
-   private final Vector3d totalTranslationError = new Vector3d();
+   private final Quaternion totalRotationError = new Quaternion();
+   private final Vector3D totalTranslationError = new Vector3D();
 
-   private final Vector3d localizationTranslationInPast = new Vector3d();
-   private final Vector3d seTranslationInPast = new Vector3d();
-   private final Quat4d seRotationInPast = new Quat4d();
-   private final Quat4d localizationRotationInPast = new Quat4d();
+   private final Vector3D localizationTranslationInPast = new Vector3D();
+   private final Vector3D seTranslationInPast = new Vector3D();
+   private final Quaternion seRotationInPast = new Quaternion();
+   private final Quaternion localizationRotationInPast = new Quaternion();
 
    public PelvisPoseHistoryCorrection(FullInverseDynamicsStructure inverseDynamicsStructure, final double dt, YoVariableRegistry parentRegistry,
          int pelvisBufferSize)
@@ -435,13 +433,12 @@ public class PelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrectionI
 
       RigidBodyTransform pelvisPose = new RigidBodyTransform();
 
-      Quat4d rotation = new Quat4d();
+      Quaternion rotation = new Quaternion();
       pelvisPose.getRotation(rotation);
-      RotationTools.convertYawPitchRollToQuaternion(manualRotationOffsetInRadZ.getDoubleValue(), manualRotationOffsetInRadY.getDoubleValue(), manualRotationOffsetInRadX.getDoubleValue(),
-            rotation);
+      rotation.setYawPitchRoll(manualRotationOffsetInRadZ.getDoubleValue(), manualRotationOffsetInRadY.getDoubleValue(), manualRotationOffsetInRadX.getDoubleValue());
       pelvisPose.setRotation(rotation);
 
-      Vector3d translation = new Vector3d();
+      Vector3D translation = new Vector3D();
       pelvisPose.getTranslation(translation);
       translation.setX(manualTranslationOffsetX.getDoubleValue());
       translation.setY(manualTranslationOffsetY.getDoubleValue());
@@ -453,8 +450,8 @@ public class PelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrectionI
       manuallyTriggerLocalizationUpdate.set(false);
    }
 
-   Vector3d translationalResidualError = new Vector3d();
-   Vector3d translationalTotalError = new Vector3d();
+   Vector3D translationalResidualError = new Vector3D();
+   Vector3D translationalTotalError = new Vector3D();
    //TODO Check how to integrate the rotationCorrection here
    private void sendCorrectionUpdatePacket()
    {

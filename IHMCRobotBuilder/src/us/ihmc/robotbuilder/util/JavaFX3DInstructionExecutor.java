@@ -5,12 +5,6 @@ import java.util.Arrays;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Point3f;
-import javax.vecmath.TexCoord2f;
-import javax.vecmath.Vector3d;
-import javax.vecmath.Vector3f;
-
 import javafx.scene.Node;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Material;
@@ -23,11 +17,34 @@ import javafx.scene.transform.MatrixType;
 import javafx.scene.transform.Scale;
 import javafx.scene.transform.Transform;
 import javafx.scene.transform.Translate;
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.tuple3D.Point3D32;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.Vector3D32;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.MeshDataGenerator;
 import us.ihmc.graphicsDescription.MeshDataHolder;
+import us.ihmc.graphicsDescription.TexCoord2f;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
-import us.ihmc.graphicsDescription.instructions.*;
+import us.ihmc.graphicsDescription.instructions.ArcTorusGraphics3DInstruction;
+import us.ihmc.graphicsDescription.instructions.CapsuleGraphics3DInstruction;
+import us.ihmc.graphicsDescription.instructions.ConeGraphics3DInstruction;
+import us.ihmc.graphicsDescription.instructions.CubeGraphics3DInstruction;
+import us.ihmc.graphicsDescription.instructions.CylinderGraphics3DInstruction;
+import us.ihmc.graphicsDescription.instructions.EllipsoidGraphics3DInstruction;
+import us.ihmc.graphicsDescription.instructions.ExtrudedPolygonGraphics3DInstruction;
+import us.ihmc.graphicsDescription.instructions.Graphics3DAddExtrusionInstruction;
+import us.ihmc.graphicsDescription.instructions.Graphics3DAddHeightMapInstruction;
+import us.ihmc.graphicsDescription.instructions.Graphics3DAddMeshDataInstruction;
+import us.ihmc.graphicsDescription.instructions.Graphics3DAddModelFileInstruction;
+import us.ihmc.graphicsDescription.instructions.Graphics3DPrimitiveInstruction;
+import us.ihmc.graphicsDescription.instructions.HemiEllipsoidGraphics3DInstruction;
+import us.ihmc.graphicsDescription.instructions.PolygonGraphics3DInstruction;
+import us.ihmc.graphicsDescription.instructions.PrimitiveGraphics3DInstruction;
+import us.ihmc.graphicsDescription.instructions.PyramidCubeGraphics3DInstruction;
+import us.ihmc.graphicsDescription.instructions.SphereGraphics3DInstruction;
+import us.ihmc.graphicsDescription.instructions.TruncatedConeGraphics3DInstruction;
+import us.ihmc.graphicsDescription.instructions.WedgeGraphics3DInstruction;
 import us.ihmc.graphicsDescription.instructions.primitives.Graphics3DRotateInstruction;
 import us.ihmc.graphicsDescription.instructions.primitives.Graphics3DScaleInstruction;
 import us.ihmc.graphicsDescription.instructions.primitives.Graphics3DTranslateInstruction;
@@ -75,7 +92,7 @@ public class JavaFX3DInstructionExecutor extends Graphics3DInstructionExecutor {
 
     @Override
     protected void doRotateInstruction(Graphics3DRotateInstruction rot) {
-        Matrix3d mat = rot.getRotationMatrix();
+        RotationMatrix mat = rot.getRotationMatrix();
         outputRotation = new Affine(new double[] {
                 mat.getM00(), mat.getM01(), mat.getM02(), 0,
                 mat.getM10(), mat.getM11(), mat.getM12(), 0,
@@ -86,14 +103,14 @@ public class JavaFX3DInstructionExecutor extends Graphics3DInstructionExecutor {
 
     @Override
     protected void doScaleInstruction(Graphics3DScaleInstruction graphics3DScale) {
-        Vector3d scale = graphics3DScale.getScaleFactor();
-        outputScale = new Scale(scale.x, scale.y, scale.z);
+        Vector3D scale = graphics3DScale.getScaleFactor();
+        outputScale = new Scale(scale.getX(), scale.getY(), scale.getZ());
     }
 
     @Override
     protected void doTranslateInstruction(Graphics3DTranslateInstruction graphics3DTranslate) {
-        Vector3d t = graphics3DTranslate.getTranslation();
-        outputTranslation = new Translate(t.x, t.y, t.z);
+        Vector3D t = graphics3DTranslate.getTranslation();
+        outputTranslation = new Translate(t.getX(), t.getY(), t.getZ());
     }
 
     public Node getResult() {
@@ -115,22 +132,22 @@ public class JavaFX3DInstructionExecutor extends Graphics3DInstructionExecutor {
 
     private static TriangleMesh interpretMeshData(MeshDataHolder meshData)
     {
-        Point3f[] vertices = meshData.getVertices();
+        Point3D32[] vertices = meshData.getVertices();
         TexCoord2f[] textureCoords = meshData.getTexturePoints();
         int[] triangleIndices = meshData.getTriangleIndices();
-        Vector3f[] normals = meshData.getVertexNormals();
+        Vector3D32[] normals = meshData.getVertexNormals();
 
         TriangleMesh mesh = new TriangleMesh(VertexFormat.POINT_NORMAL_TEXCOORD);
         int[] indices = Arrays.stream(triangleIndices).flatMap(x -> IntStream.of(x, x, x)).toArray();
         mesh.getFaces().addAll(indices);
 
-        float[] vertexBuffer = Arrays.stream(vertices).flatMap(v -> Stream.of(v.x, v.y, v.z)).collect(FloatArrayCollector.create());
+        float[] vertexBuffer = Arrays.stream(vertices).flatMap(v -> Stream.of(v.getX(), v.getY(), v.getZ())).collect(FloatArrayCollector.create());
         mesh.getPoints().addAll(vertexBuffer);
 
         float[] texCoordBuffer = Arrays.stream(textureCoords).flatMap(v -> Stream.of(v.x, v.y)).collect(FloatArrayCollector.create());
         mesh.getTexCoords().addAll(texCoordBuffer);
 
-        float[] normalBuffer = Arrays.stream(normals).flatMap(n -> Stream.of(n.x, n.y, n.z)).collect(FloatArrayCollector.create());
+        float[] normalBuffer = Arrays.stream(normals).flatMap(n -> Stream.of(n.getX(), n.getY(), n.getZ())).collect(FloatArrayCollector.create());
         mesh.getPoints().addAll(normalBuffer);
 
         return mesh;

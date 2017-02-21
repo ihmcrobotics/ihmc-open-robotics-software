@@ -1,8 +1,8 @@
 package us.ihmc.robotics.geometry;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 /**
@@ -27,13 +27,13 @@ public class FrameLineSegment extends AbstractFrameObject<FrameLineSegment, Line
       lineSegment3d = getGeometryObject();
    }
 
-   public FrameLineSegment(ReferenceFrame referenceFrame, Point3d firstEndpoint, Point3d secondEndpoint)
+   public FrameLineSegment(ReferenceFrame referenceFrame, Point3DReadOnly firstEndpoint, Point3DReadOnly secondEndpoint)
    {
       super(referenceFrame, new LineSegment3d(firstEndpoint, secondEndpoint));
       lineSegment3d = getGeometryObject();
    }
 
-   public void setFirstEndpoint(Point3d firstEndpoint)
+   public void setFirstEndpoint(Point3D firstEndpoint)
    {
       lineSegment3d.setFirstEndpoint(firstEndpoint);
    }
@@ -44,7 +44,7 @@ public class FrameLineSegment extends AbstractFrameObject<FrameLineSegment, Line
       lineSegment3d.setFirstEndpoint(firstEndpoint.getPoint());
    }
 
-   public void setSecondEndpoint(Point3d secondEndpoint)
+   public void setSecondEndpoint(Point3D secondEndpoint)
    {
       lineSegment3d.setSecondEndpoint(secondEndpoint);
    }
@@ -55,7 +55,7 @@ public class FrameLineSegment extends AbstractFrameObject<FrameLineSegment, Line
       lineSegment3d.setSecondEndpoint(secondEndpoint.getPoint());
    }
 
-   public void set(Point3d firstEndpoint, Point3d secondEndpoint)
+   public void set(Point3D firstEndpoint, Point3D secondEndpoint)
    {
       setFirstEndpoint(firstEndpoint);
       setSecondEndpoint(secondEndpoint);
@@ -74,7 +74,7 @@ public class FrameLineSegment extends AbstractFrameObject<FrameLineSegment, Line
       set(firstEndpoint, secondEndpoint);
    }
 
-   public void set(Point3d firstEndpoint, Vector3d fromFirstToSecondEndpoint)
+   public void set(Point3D firstEndpoint, Vector3D fromFirstToSecondEndpoint)
    {
       lineSegment3d.set(firstEndpoint, fromFirstToSecondEndpoint);
    }
@@ -145,7 +145,7 @@ public class FrameLineSegment extends AbstractFrameObject<FrameLineSegment, Line
       return lineSegment3d.secondEndpointContainsNaN();
    }
 
-   public Point3d getFirstEndpoint()
+   public Point3D getFirstEndpoint()
    {
       return lineSegment3d.getFirstEndpoint();
    }
@@ -161,7 +161,7 @@ public class FrameLineSegment extends AbstractFrameObject<FrameLineSegment, Line
       firstEndpointToPack.setIncludingFrame(referenceFrame, getFirstEndpoint());
    }
 
-   public Point3d getSecondEndpoint()
+   public Point3D getSecondEndpoint()
    {
       return lineSegment3d.getSecondEndpoint();
    }

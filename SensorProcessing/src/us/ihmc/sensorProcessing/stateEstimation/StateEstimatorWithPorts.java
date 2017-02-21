@@ -4,9 +4,9 @@ import java.util.List;
 
 import us.ihmc.controlFlow.ControlFlowGraph;
 import us.ihmc.controlFlow.ControlFlowInputPort;
+import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.PointPositionDataObject;
 import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.PointVelocityDataObject;
-import us.ihmc.robotics.geometry.FrameVector;
 
 public interface StateEstimatorWithPorts extends StateEstimator
 {

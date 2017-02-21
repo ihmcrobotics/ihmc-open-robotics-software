@@ -1,9 +1,8 @@
 package us.ihmc.simulationconstructionset.util.ground;
 
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.geometry.BoundingBox3d;
 
 
@@ -30,20 +29,20 @@ public class StepUpGroundProfile extends GroundProfileFromHeightMap
    }
 
    @Override
-   public void closestIntersectionAndNormalAt(double x, double y, double z, Point3d intersection, Vector3d normal)
+   public void closestIntersectionAndNormalAt(double x, double y, double z, Point3D intersection, Vector3D normal)
    {
       closestIntersectionTo(x, y, z, intersection);
       surfaceNormalAt(x, y, z, normal);
 
    }
 
-   public void closestIntersectionTo(double x, double y, double z, Point3d intersection)
+   public void closestIntersectionTo(double x, double y, double z, Point3D intersection)
    {
       intersection.set(x, y, heightAt(x, y, z));
    }
 
    @Override
-   public double heightAndNormalAt(double x, double y, double z, Vector3d normalToPack)
+   public double heightAndNormalAt(double x, double y, double z, Vector3D normalToPack)
    {
       double height = heightAt(x, y, z);
       surfaceNormalAt(x, y, z, normalToPack);
@@ -60,7 +59,7 @@ public class StepUpGroundProfile extends GroundProfileFromHeightMap
       return 0.0;
    }
 
-   public void surfaceNormalAt(double x, double y, double z, Vector3d normal)
+   public void surfaceNormalAt(double x, double y, double z, Vector3D normal)
    {
       normal.set(0.0, 0.0, 1.0);
    }

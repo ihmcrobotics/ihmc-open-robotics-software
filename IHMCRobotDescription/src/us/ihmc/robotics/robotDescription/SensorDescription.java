@@ -1,15 +1,14 @@
 package us.ihmc.robotics.robotDescription;
 
-import javax.vecmath.Vector3d;
-
-import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
 
 public class SensorDescription
 {
    private String name;
    private final RigidBodyTransform transformToJoint = new RigidBodyTransform();
 
-   public SensorDescription(String name, Vector3d offsetFromJoint)
+   public SensorDescription(String name, Vector3D offsetFromJoint)
    {
       this.name = name;
       transformToJoint.setTranslationAndIdentityRotation(offsetFromJoint);
@@ -31,7 +30,7 @@ public class SensorDescription
       this.name = name;
    }
 
-   public void setOffsetFromJoint(Vector3d offsetFromJoint)
+   public void setOffsetFromJoint(Vector3D offsetFromJoint)
    {
       transformToJoint.setTranslationAndIdentityRotation(offsetFromJoint);
    }
@@ -51,9 +50,9 @@ public class SensorDescription
       return transformToJoint;
    }
 
-   public Vector3d getOffsetFromJoint()
+   public Vector3D getOffsetFromJoint()
    {
-      Vector3d ret = new Vector3d();
+      Vector3D ret = new Vector3D();
 
       transformToJoint.getTranslation(ret);
 

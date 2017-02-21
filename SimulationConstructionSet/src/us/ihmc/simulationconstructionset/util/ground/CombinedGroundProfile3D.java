@@ -2,9 +2,8 @@ package us.ihmc.simulationconstructionset.util.ground;
 
 import java.util.ArrayList;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.jMonkeyEngineToolkit.CombinedHeightMapWithNormals;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.jMonkeyEngineToolkit.HeightMapWithNormals;
@@ -66,14 +65,14 @@ public class CombinedGroundProfile3D implements GroundProfile3D
       return groundProfiles;
    }
 
-   private final Point3d tempPointToCheck = new Point3d();
+   private final Point3D tempPointToCheck = new Point3D();
 
    @Override
-   public boolean checkIfInside(double x, double y, double z, Point3d intersectionToPack, Vector3d normalToPack)
+   public boolean checkIfInside(double x, double y, double z, Point3D intersectionToPack, Vector3D normalToPack)
    {
       double smallestDistance = Double.MAX_VALUE;
-      Point3d localIntersection = new Point3d();
-      Vector3d localNormal = new Vector3d();
+      Point3D localIntersection = new Point3D();
+      Vector3D localNormal = new Vector3D();
       boolean isInside = false;
 
       tempPointToCheck.set(x, y, z);

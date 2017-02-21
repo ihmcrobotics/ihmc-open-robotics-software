@@ -4,13 +4,12 @@ import java.util.ArrayList;
 import java.util.Random;
 import java.util.zip.CRC32;
 
-import javax.vecmath.Quat4d;
-import javax.vecmath.Quat4f;
-import javax.vecmath.Vector3d;
-import javax.vecmath.Vector3f;
-
 import us.ihmc.communication.packets.IMUPacket;
 import us.ihmc.communication.packets.Packet;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.Vector3D32;
+import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.tuple4D.Quaternion32;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -28,12 +27,12 @@ public class RobotConfigurationData extends Packet<RobotConfigurationData>
    public float[] jointVelocities;
    public float[] jointTorques;
 
-   public Vector3f rootTranslation = new Vector3f();
-   public Vector3f pelvisLinearVelocity = new Vector3f();
-   public Vector3f pelvisAngularVelocity = new Vector3f();
-   public Quat4f rootOrientation = new Quat4f();
+   public Vector3D32 rootTranslation = new Vector3D32();
+   public Vector3D32 pelvisLinearVelocity = new Vector3D32();
+   public Vector3D32 pelvisAngularVelocity = new Vector3D32();
+   public Quaternion32 rootOrientation = new Quaternion32();
 
-   public Vector3f pelvisLinearAcceleration = new Vector3f();
+   public Vector3D32 pelvisLinearAcceleration = new Vector3D32();
    //   public DenseMatrix64F[] momentAndForceDataAllForceSensors;
    public float[][] momentAndForceDataAllForceSensors;
    public IMUPacket[] imuSensorData;
@@ -120,12 +119,12 @@ public class RobotConfigurationData extends Packet<RobotConfigurationData>
       }
    }
 
-   public void setRootTranslation(Vector3d rootTranslation)
+   public void setRootTranslation(Vector3D rootTranslation)
    {
       this.rootTranslation.set(rootTranslation);
    }
 
-   public void setRootOrientation(Quat4d rootOrientation)
+   public void setRootOrientation(Quaternion rootOrientation)
    {
       this.rootOrientation.set(rootOrientation);
    }
@@ -145,12 +144,12 @@ public class RobotConfigurationData extends Packet<RobotConfigurationData>
       return jointTorques;
    }
 
-   public Vector3f getPelvisTranslation()
+   public Vector3D32 getPelvisTranslation()
    {
       return rootTranslation;
    }
 
-   public Quat4f getPelvisOrientation()
+   public Quaternion32 getPelvisOrientation()
    {
       return rootOrientation;
    }
@@ -241,22 +240,22 @@ public class RobotConfigurationData extends Packet<RobotConfigurationData>
       return robotMotionStatus;
    }
 
-   public Vector3f getPelvisLinearVelocity()
+   public Vector3D32 getPelvisLinearVelocity()
    {
       return pelvisLinearVelocity;
    }
 
-   public Vector3f getPelvisAngularVelocity()
+   public Vector3D32 getPelvisAngularVelocity()
    {
       return pelvisAngularVelocity;
    }
 
-   public void setPelvisLinearVelocity(Vector3d pelvisLinearVelocityToPack)
+   public void setPelvisLinearVelocity(Vector3D pelvisLinearVelocityToPack)
    {
       pelvisLinearVelocity.set(pelvisLinearVelocityToPack);
    }
 
-   public void setPelvisAngularVelocity(Vector3d pelvisAngularVelocityToPack)
+   public void setPelvisAngularVelocity(Vector3D pelvisAngularVelocityToPack)
    {
       pelvisAngularVelocity.set(pelvisAngularVelocityToPack);
    }
@@ -274,12 +273,12 @@ public class RobotConfigurationData extends Packet<RobotConfigurationData>
       }
    }
 
-   public Vector3f getPelvisLinearAcceleration()
+   public Vector3D32 getPelvisLinearAcceleration()
    {
       return pelvisLinearAcceleration;
    }
 
-   public void setPelvisLinearAcceleration(Vector3d pelvisLinearAcceleration)
+   public void setPelvisLinearAcceleration(Vector3D pelvisLinearAcceleration)
    {
       this.pelvisLinearAcceleration.set(pelvisLinearAcceleration);
    }

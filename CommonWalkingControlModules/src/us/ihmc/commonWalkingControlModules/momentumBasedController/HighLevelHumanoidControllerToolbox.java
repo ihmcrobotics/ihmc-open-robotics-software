@@ -9,17 +9,16 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 
-import javax.vecmath.Point2d;
-
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactPointVisualizer;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoContactPoint;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonHumanoidReferenceFramesVisualizer;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPosition;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
@@ -693,7 +692,7 @@ public class HighLevelHumanoidControllerToolbox
    {
       RobotSide robotSide = nextFootstep.getRobotSide();
 
-      List<Point2d> predictedContactPoints = nextFootstep.getPredictedContactPoints();
+      List<Point2D> predictedContactPoints = nextFootstep.getPredictedContactPoints();
 
       if ((predictedContactPoints != null) && (!predictedContactPoints.isEmpty()))
       {
@@ -714,7 +713,7 @@ public class HighLevelHumanoidControllerToolbox
       footContactState.setContactFramePoints(defaultContactPoints);
    }
 
-   private void setFootPlaneContactPoints(RobotSide robotSide, List<Point2d> predictedContactPoints)
+   private void setFootPlaneContactPoints(RobotSide robotSide, List<Point2D> predictedContactPoints)
    {
       ContactablePlaneBody foot = feet.get(robotSide);
       YoPlaneContactState footContactState = yoPlaneContactStates.get(foot);

@@ -8,7 +8,7 @@ import org.ejml.data.DenseMatrix64F;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.tools.testing.JUnitTools;
@@ -38,7 +38,7 @@ public class CompositeRigidBodyMassMatrixCalculatorTest extends MassMatrixCalcul
       Random random = new Random(1982L);
       SixDoFJoint sixDoFJoint = new SixDoFJoint("sixDoFJoint", elevator, elevator.getBodyFixedFrame());
 
-      sixDoFJoint.setPositionAndRotation(RigidBodyTransform.generateRandomTransform(random));
+      sixDoFJoint.setPositionAndRotation(EuclidCoreRandomTools.generateRandomRigidBodyTransform(random));
       Twist sixDoFJointTwist = new Twist();
       sixDoFJoint.getJointTwist(sixDoFJointTwist);
       sixDoFJointTwist.setLinearPart(RandomTools.generateRandomVector(random));

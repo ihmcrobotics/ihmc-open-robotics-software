@@ -11,8 +11,6 @@ import us.ihmc.communication.packetCommunicator.interfaces.GlobalPacketConsumer;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.SimpleCoactiveBehaviorDataPacket;
-import us.ihmc.humanoidRobotics.communication.packets.behaviors.ValveLocationPacket;
-import us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataStateCommand;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 

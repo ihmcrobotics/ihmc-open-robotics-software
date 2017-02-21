@@ -2,8 +2,6 @@ package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
 import java.util.List;
 
-import javax.vecmath.Vector3d;
-
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
@@ -16,6 +14,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OrientationFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.PointFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -126,7 +125,7 @@ public class OnToesState extends AbstractFootControlState
       orientationFeedbackControlCommand.setWeightForSolver(weight);
    }
 
-   public void setWeights(Vector3d angular, Vector3d linear)
+   public void setWeights(Vector3D angular, Vector3D linear)
    {
       pointFeedbackControlCommand.setWeightsForSolver(linear);
       orientationFeedbackControlCommand.setWeightsForSolver(angular);

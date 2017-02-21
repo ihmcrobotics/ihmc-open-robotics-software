@@ -8,7 +8,7 @@ import java.util.ArrayList;
 
 import com.thoughtworks.xstream.io.StreamException;
 
-import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.tools.io.printing.PrintTools;
 

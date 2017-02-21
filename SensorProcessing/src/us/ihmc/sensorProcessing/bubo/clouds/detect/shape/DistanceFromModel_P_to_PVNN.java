@@ -18,13 +18,13 @@
 
 package us.ihmc.sensorProcessing.bubo.clouds.detect.shape;
 
-import georegression.struct.point.Point3D_F64;
-import us.ihmc.sensorProcessing.bubo.clouds.detect.alg.PointVectorNN;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.ddogleg.fitting.modelset.DistanceFromModel;
 
-import java.util.ArrayList;
-import java.util.List;
+import georegression.struct.point.Point3D_F64;
+import us.ihmc.sensorProcessing.bubo.clouds.detect.alg.PointVectorNN;
 
 /**
  * Converts point from {@link us.ihmc.sensorProcessing.bubo.clouds.detect.alg.PointVectorNN} into {@link Point3D_F64} for distance calculations.

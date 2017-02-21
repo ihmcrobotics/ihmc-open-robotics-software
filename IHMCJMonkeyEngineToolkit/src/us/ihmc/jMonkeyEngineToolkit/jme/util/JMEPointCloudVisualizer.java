@@ -3,14 +3,13 @@ package us.ihmc.jMonkeyEngineToolkit.jme.util;
 import java.util.Collection;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import javax.vecmath.Tuple3f;
+import com.jme3.scene.Node;
 
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.structure.Graphics3DNode;
 import us.ihmc.jMonkeyEngineToolkit.jme.JMEGraphics3DAdapter;
 import us.ihmc.jMonkeyEngineToolkit.jme.JMEGraphics3DWorld;
-
-import com.jme3.scene.Node;
 
 public class JMEPointCloudVisualizer extends JMEGraphics3DWorld
 {
@@ -42,7 +41,7 @@ public class JMEPointCloudVisualizer extends JMEGraphics3DWorld
       addChild(new Graphics3DNode("CoordinateFrameNode", coordinateFrameObject));
    }
    
-   public <T extends Tuple3f> void addPointCloud(Collection<T> worldPoints)
+   public <T extends Tuple3DBasics> void addPointCloud(Collection<T> worldPoints)
    {
       Node pointCloud = jmePointCloudGenerator.generatePointCloudGraph(worldPoints);
     

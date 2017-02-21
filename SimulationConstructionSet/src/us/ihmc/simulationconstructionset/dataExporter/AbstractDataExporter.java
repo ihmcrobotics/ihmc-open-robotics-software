@@ -9,9 +9,6 @@ import java.util.ArrayList;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.dataExporter.DataExporterDirectoryFinder;
-import us.ihmc.simulationconstructionset.dataExporter.DataExporterGraphCreator;
-import us.ihmc.simulationconstructionset.dataExporter.DataExporterReadmeWriter;
 import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.tools.time.DateTools;
 

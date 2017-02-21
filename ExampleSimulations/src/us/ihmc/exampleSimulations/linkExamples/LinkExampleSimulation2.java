@@ -1,5 +1,8 @@
 package us.ihmc.exampleSimulations.linkExamples;
 
+import java.util.ArrayList;
+
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.MeshDataGenerator;
 import us.ihmc.graphicsDescription.MeshDataHolder;
@@ -8,9 +11,6 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-
-import javax.vecmath.Point2d;
-import java.util.ArrayList;
 
 
 public class LinkExampleSimulation2
@@ -114,10 +114,10 @@ public class LinkExampleSimulation2
       linkGraphics.translate(-2.0 * OFFSET, OFFSET, 0.0);
       linkGraphics.addCoordinateSystem(COORD_LENGTH);
 
-      ArrayList<Point2d> polygonPoints = new ArrayList<Point2d>();
-      polygonPoints.add(new Point2d());
-      polygonPoints.add(new Point2d(0.4, 0.0));
-      polygonPoints.add(new Point2d(0.3, 0.3));
+      ArrayList<Point2D> polygonPoints = new ArrayList<Point2D>();
+      polygonPoints.add(new Point2D());
+      polygonPoints.add(new Point2D(0.4, 0.0));
+      polygonPoints.add(new Point2D(0.3, 0.3));
       double height = 0.25;
       linkGraphics.addExtrudedPolygon(polygonPoints, height, YoAppearance.Purple());
 

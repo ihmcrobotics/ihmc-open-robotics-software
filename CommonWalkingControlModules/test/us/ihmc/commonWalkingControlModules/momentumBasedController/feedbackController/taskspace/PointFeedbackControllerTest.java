@@ -6,8 +6,6 @@ import static org.junit.Assert.assertTrue;
 import java.util.List;
 import java.util.Random;
 
-import javax.vecmath.Vector3d;
-
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.factory.LinearSolverFactory;
 import org.ejml.interfaces.linsol.LinearSolver;
@@ -26,6 +24,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MotionQPInputCalculator;
 import us.ihmc.convexOptimization.quadraticProgram.OASESConstrainedQPSolver;
 import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSolver;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.controllers.PositionPIDGains;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -52,7 +51,7 @@ public abstract class PointFeedbackControllerTest
       Random random = new Random(5641654L);
 
       int numberOfJoints = 10;
-      Vector3d[] jointAxes = new Vector3d[numberOfJoints];
+      Vector3D[] jointAxes = new Vector3D[numberOfJoints];
       for (int i = 0; i < numberOfJoints; i++)
          jointAxes[i] = RandomTools.generateRandomVector(random, 1.0);
 
@@ -147,7 +146,7 @@ public abstract class PointFeedbackControllerTest
       Random random = new Random(5641654L);
 
       int numberOfJoints = 10;
-      Vector3d[] jointAxes = new Vector3d[numberOfJoints];
+      Vector3D[] jointAxes = new Vector3D[numberOfJoints];
       for (int i = 0; i < numberOfJoints; i++)
          jointAxes[i] = RandomTools.generateRandomVector(random, 1.0);
 

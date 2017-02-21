@@ -5,11 +5,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
-import javax.vecmath.Point2d;
-import javax.vecmath.Point2f;
-import javax.vecmath.Point3d;
-import javax.vecmath.Tuple2d;
-
+import us.ihmc.euclid.transform.interfaces.Transform;
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
+import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
 import us.ihmc.robotics.geometry.ConvexPolygonTools.EmptyPolygonException;
 import us.ihmc.robotics.geometry.ConvexPolygonTools.OutdatedPolygonException;
 import us.ihmc.robotics.random.RandomTools;
@@ -30,9 +30,9 @@ import us.ihmc.robotics.random.RandomTools;
  */
 public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
 {
-   private final ArrayList<Point2d> clockwiseOrderedListOfPoints = new ArrayList<Point2d>();
+   private final ArrayList<Point2D> clockwiseOrderedListOfPoints = new ArrayList<Point2D>();
    private final BoundingBox2d boundingBox = new BoundingBox2d();
-   private final Point2d centroid = new Point2d();
+   private final Point2D centroid = new Point2D();
    private int numberOfVertices = 0;
    private boolean isUpToDate = false;
    private double area;
@@ -40,9 +40,6 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
    private int minX_index = 0, maxX_index = 0, minY_index = 0, maxY_index = 0;
    private int minXminY_index = 0, maxXminY_index = 0, maxXmaxY_index = 0;
    private final int minXmaxY_index = 0;
-
-   // temporary object to avoid garbage generation
-   private final Point3d tempVertex3d = new Point3d();
 
    /**
     * Creates an empty convex polygon.
@@ -59,7 +56,7 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
     * @param numberOfVertices int that is used to determine the number of vertices of the polygon.
     * Note the: {@code pointList.size()} can be greater or equal to numberOfVertices.
     */
-   public ConvexPolygon2d(List<Point2d> vertices, int numberOfVertices)
+   public ConvexPolygon2d(List<? extends Point2DReadOnly> vertices, int numberOfVertices)
    {
       setAndUpdate(vertices, numberOfVertices);
    }
@@ -69,7 +66,7 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
     * @param vertices {@code List<Point2d>} the list of points that is used to creates the vertices.
     * The number of vertices of this polygon will be equal to the size of the point list.
     */
-   public ConvexPolygon2d(List<Point2d> vertices)
+   public ConvexPolygon2d(List<? extends Point2DReadOnly> vertices)
    {
       this(vertices, vertices.size());
    }
@@ -80,7 +77,7 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
     * @param numberOfVertices int that is used to determine the number of vertices of the polygon.
     * Note the: {@code vertices.length} can be greater or equal to numberOfVertices.
     */
-   public ConvexPolygon2d(Point2d[] vertices, int numberOfVertices)
+   public ConvexPolygon2d(Point2DReadOnly[] vertices, int numberOfVertices)
    {
       setAndUpdate(vertices, numberOfVertices);
    }
@@ -90,28 +87,7 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
     * @param vertices {@code Point2d[]} the array of points that is used to creates the vertices.
     * The number of vertices of this polygon will be equal to the length of the point array.
     */
-   public ConvexPolygon2d(Point2d[] vertices)
-   {
-      this(vertices, vertices.length);
-   }
-
-   /**
-    * Creates an empty convex polygon, adds N new vertices using an array of {@code Point2f}, updates the vertices so they are clockwise ordered, and initializes some essential numbers such as the centroid.
-    * @param vertices {@code Point2f[]} the array of points that is used to creates the vertices.
-    * @param numberOfVertices int that is used to determine the number of vertices of the polygon.
-    * Note the: {@code vertices.length} can be greater or equal to numberOfVertices.
-    */
-   public ConvexPolygon2d(Point2f[] vertices, int numberOfVertices)
-   {
-      setAndUpdate(vertices, numberOfVertices);
-   }
-
-   /**
-    * Creates an empty convex polygon, adds N new vertices using an array of {@code Point2f}, updates the vertices so they are clockwise ordered, and initializes some essential numbers such as the centroid.
-    * @param vertices {@code Point2f[]} the array of points that is used to creates the vertices.
-    * The number of vertices of this polygon will be equal to the length of the point array.
-    */
-   public ConvexPolygon2d(Point2f[] vertices)
+   public ConvexPolygon2d(Point2DReadOnly[] vertices)
    {
       this(vertices, vertices.length);
    }
@@ -164,7 +140,7 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
 
    public static ConvexPolygon2d generateRandomConvexPolygon2d(Random random, double maxAbsoluteXY, int numberOfPossiblePoints)
    {
-      ArrayList<Point2d> vertices = new ArrayList<Point2d>();
+      ArrayList<Point2D> vertices = new ArrayList<Point2D>();
 
       for (int i = 0; i < numberOfPossiblePoints; i++)
       {
@@ -204,19 +180,7 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
     * Note that this method recycles memory.
     * @param vertex {@code Point2d} the new vertex.
     */
-   public void addVertex(Point2d vertex)
-   {
-      isUpToDate = false;
-      setOrCreate(vertex, numberOfVertices);
-      numberOfVertices++;
-   }
-
-   /**
-    * Add a vertex to this polygon.
-    * Note that this method recycles memory.
-    * @param vertex {@code Point2f} the new vertex.
-    */
-   public void addVertex(Point2f vertex)
+   public void addVertex(Point2DReadOnly vertex)
    {
       isUpToDate = false;
       setOrCreate(vertex, numberOfVertices);
@@ -242,7 +206,7 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
     * @param vertices {@code List<Point2d>} the list of new vertices.
     * @param numberOfVertices {@code int} that is used to determine the number of vertices to add to this polygon. Note the: {@code vertices.size()} can be greater or equal to numberOfVertices.
     */
-   public void addVertices(List<Point2d> vertices, int numberOfVertices)
+   public void addVertices(List<? extends Point2DReadOnly> vertices, int numberOfVertices)
    {
       isUpToDate = false;
       for (int i = 0; i < numberOfVertices; i++)
@@ -255,20 +219,7 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
     * @param vertices {@code Point2d[]} the list of new vertices.
     * @param numberOfVertices {@code int} that is used to determine the number of vertices to add to this polygon. Note the: {@code vertices.length} can be greater or equal to numberOfVertices.
     */
-   public void addVertices(Point2d[] vertices, int numberOfVertices)
-   {
-      isUpToDate = false;
-      for (int i = 0; i < numberOfVertices; i++)
-         addVertex(vertices[i]);
-   }
-
-   /**
-    * Adds N new vertices to this polygon using an array of {@code Point2f}.
-    * Note that this method recycles memory.
-    * @param vertices {@code Point2f[]} the list of new vertices.
-    * @param numberOfVertices {@code int} that is used to determine the number of vertices to add to this polygon. Note the: {@code vertices.length} can be greater or equal to numberOfVertices.
-    */
-   public void addVertices(Point2f[] vertices, int numberOfVertices)
+   public void addVertices(Point2DReadOnly[] vertices, int numberOfVertices)
    {
       isUpToDate = false;
       for (int i = 0; i < numberOfVertices; i++)
@@ -315,12 +266,7 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
       numberOfVertices--;
    }
 
-   private void setOrCreate(Point2d point2d, int i)
-   {
-      setOrCreate(point2d.getX(), point2d.getY(), i);
-   }
-
-   private void setOrCreate(Point2f point2d, int i)
+   private void setOrCreate(Point2DReadOnly point2d, int i)
    {
       setOrCreate(point2d.getX(), point2d.getY(), i);
    }
@@ -328,7 +274,7 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
    private void setOrCreate(double x, double y, int i)
    {
       while (i >= clockwiseOrderedListOfPoints.size())
-         clockwiseOrderedListOfPoints.add(new Point2d());
+         clockwiseOrderedListOfPoints.add(new Point2D());
       clockwiseOrderedListOfPoints.get(i).set(x, y);
    }
 
@@ -350,8 +296,8 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
       // Only two distinct vertices: trivial case
       else if (numberOfVertices == 2 && !clockwiseOrderedListOfPoints.get(0).equals(clockwiseOrderedListOfPoints.get(1)))
       {
-         Point2d p0 = clockwiseOrderedListOfPoints.get(0);
-         Point2d p1 = clockwiseOrderedListOfPoints.get(1);
+         Point2D p0 = clockwiseOrderedListOfPoints.get(0);
+         Point2D p1 = clockwiseOrderedListOfPoints.get(1);
 
          if (!(p0.getX() < p1.getX()) || ((p0.getX() == p1.getX()) && (p0.getY() > p1.getY())))
          {
@@ -373,7 +319,7 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
     * @param vertices {@code List<Point2d>} the list of points that is used to creates the vertices.
     * @param numberOfVertices {@code int} that is used to determine the number of vertices of the polygon. Note the: {@code vertices.size()} can be greater or equal to numberOfVertices.
     */
-   public void setAndUpdate(List<Point2d> vertices, int numberOfVertices)
+   public void setAndUpdate(List<? extends Point2DReadOnly> vertices, int numberOfVertices)
    {
       clear();
       addVertices(vertices, numberOfVertices);
@@ -388,22 +334,7 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
     * @param vertices {@code Point2d[]} the list of points that is used to creates the vertices.
     * @param numberOfVertices {@code int} that is used to determine the number of vertices of the polygon. Note the: {@code vertices.length} can be greater or equal to numberOfVertices.
     */
-   public void setAndUpdate(Point2d[] vertices, int numberOfVertices)
-   {
-      clear();
-      addVertices(vertices, numberOfVertices);
-      update();
-   }
-
-   /**
-    * This method does:
-    * 1- {@code clear()};
-    * 2- {@code addVertices(vertices, numberOfVertices)};
-    * 3- {@code update()}.
-    * @param vertices {@code Point2f[]} the list of points that is used to creates the vertices.
-    * @param numberOfVertices {@code int} that is used to determine the number of vertices of the polygon. Note the: {@code vertices.length} can be greater or equal to numberOfVertices.
-    */
-   public void setAndUpdate(Point2f[] vertices, int numberOfVertices)
+   public void setAndUpdate(Point2DReadOnly[] vertices, int numberOfVertices)
    {
       clear();
       addVertices(vertices, numberOfVertices);
@@ -458,7 +389,7 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
       update();
    }
 
-   private void updateBoundingBox()
+   void updateBoundingBox()
    {
       minX_index = 0;
       maxX_index = 0;
@@ -470,16 +401,16 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
 
       if (hasAtLeastOneVertex())
       {
-         Point2d firstVertex = getVertex(0);
+         Point2D firstVertex = getVertexUnsafe(0);
          double minX = firstVertex.getX();
          double minY = firstVertex.getY();
          double maxX = firstVertex.getX();
          double maxY = firstVertex.getY();
 
-         Point2d p;
+         Point2D p;
          for (int i = 1; i < numberOfVertices; i++)
          {
-            p = getVertex(i);
+            p = getVertexUnsafe(i);
 
             if (p.getX() < minX)
             {
@@ -530,10 +461,10 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
    }
 
    // Compute centroid and area of this polygon. Formula taken from http://local.wasp.uwa.edu.au/~pbourke/geometry/polyarea/
-   private void updateCentroidAndArea()
+   void updateCentroidAndArea()
    {
       area = 0.0;
-      centroid.set(0, 0);
+      centroid.set(0.0, 0.0);
 
       if (hasAtLeastThreeVertices())
       {
@@ -543,8 +474,8 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
          // Order counterclockwise to make the area positive
          for (int i = numberOfVertices - 1; i >= 0; i--)
          {
-            Point2d ci = getVertex(i);
-            Point2d ciMinus1 = getPreviousVertex(i);
+            Point2D ci = getVertexUnsafe(i);
+            Point2D ciMinus1 = getPreviousVertexUnsafe(i);
 
             double weight = (ci.getX() * ciMinus1.getY() - ciMinus1.getX() * ci.getY());
 
@@ -590,13 +521,13 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
       return area;
    }
 
-   public void getCentroid(Point2d centroid)
+   public void getCentroid(Point2DBasics centroidToPack)
    {
       checkIfUpToDate();
-      centroid.set(this.centroid);
+      centroidToPack.set(this.centroid);
    }
 
-   public Point2d getCentroid()
+   public Point2DReadOnly getCentroid()
    {
       checkIfUpToDate();
       return centroid;
@@ -631,14 +562,14 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
    }
 
    /** Return the vertex from a clockwise ordered list */
-   public Point2d getVertex(int vertexIndex)
+   public Point2DReadOnly getVertex(int vertexIndex)
    {
       checkIfUpToDate();
       return getVertexUnsafe(vertexIndex);
    }
 
    /** Same as getVertex(vertexIndex) but without checking if the polygon has been updated. Be careful when using it! */
-   protected Point2d getVertexUnsafe(int vertexIndex)
+   protected Point2D getVertexUnsafe(int vertexIndex)
    {
       checkNonEmpty();
       checkIndexInBoundaries(vertexIndex);
@@ -646,29 +577,29 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
    }
 
    /** Return the next vertex from a clockwise ordered list */
-   public Point2d getNextVertex(int index)
+   public Point2DReadOnly getNextVertex(int index)
    {
       return getVertex(getNextVertexIndex(index));
    }
 
-   protected Point2d getNextVertexUnsafe(int index)
+   protected Point2D getNextVertexUnsafe(int index)
    {
       return getVertexUnsafe(getNextVertexIndexUnsafe(index));
    }
 
    /** Return the previous vertex from a clockwise ordered list */
-   public Point2d getPreviousVertex(int index)
+   public Point2DReadOnly getPreviousVertex(int index)
    {
       return getVertex(getPreviousVertexIndex(index));
    }
 
-   protected Point2d getPreviousVertexUnsafe(int index)
+   protected Point2D getPreviousVertexUnsafe(int index)
    {
       return getVertexUnsafe(getPreviousVertexIndexUnsafe(index));
    }
 
    /** Return the vertex from a counter clockwise ordered list */
-   public Point2d getVertexCCW(int vertexIndex)
+   public Point2DReadOnly getVertexCCW(int vertexIndex)
    {
       checkIfUpToDate();
       checkNonEmpty();
@@ -677,13 +608,13 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
    }
 
    /** Return the next vertex from a counter clockwise ordered list */
-   public Point2d getNextVertexCCW(int index)
+   public Point2DReadOnly getNextVertexCCW(int index)
    {
       return getVertexCCW(getNextVertexIndex(index));
    }
 
    /** Return the previous vertex from a counter clockwise ordered list */
-   public Point2d getPreviousVertexCCW(int index)
+   public Point2DReadOnly getPreviousVertexCCW(int index)
    {
       return getVertexCCW(getPreviousVertexIndex(index));
    }
@@ -740,12 +671,12 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
     * Scale this convex polygon about pointToScaleAbout.
     * @param scaleFactor
     */
-   public void scale(Point2d pointToScaleAbout, double scaleFactor)
+   public void scale(Point2DReadOnly pointToScaleAbout, double scaleFactor)
    {
       checkIfUpToDate();
       for (int i = 0; i < numberOfVertices; i++)
       {
-         Point2d vertex = getVertexUnsafe(i);
+         Point2D vertex = getVertexUnsafe(i);
          vertex.sub(pointToScaleAbout);
          vertex.scale(scaleFactor);
          vertex.add(pointToScaleAbout);
@@ -759,7 +690,7 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
       String ret = "";
       for (int i = 0; i < numberOfVertices; i++)
       {
-         Point2d vertex = clockwiseOrderedListOfPoints.get(i);
+         Point2D vertex = clockwiseOrderedListOfPoints.get(i);
          ret = ret + "{" + vertex.getX() + ", " + vertex.getY() + "}," + "\n";
       }
 
@@ -767,29 +698,33 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
    }
 
    @Override
-   public void applyTransform(RigidBodyTransform transform)
-   {
-      throw new RuntimeException("This is a 2d object use applyTransformAndProjectToXYPlane method instead.");
-   }
-
-   @Override
-   public void applyTransformAndProjectToXYPlane(RigidBodyTransform transform)
+   public void applyTransform(Transform transform)
    {
       isUpToDate = false;
 
       for (int i = 0; i < numberOfVertices; i++)
       {
-         Point2d vertex = getVertexUnsafe(i);
-         tempVertex3d.set(vertex.getX(), vertex.getY(), 0.0);
-         transform.transform(tempVertex3d);
-         vertex.setX(tempVertex3d.getX());
-         vertex.setY(tempVertex3d.getY());
+         Point2D vertex = getVertexUnsafe(i);
+         vertex.applyTransform(transform);
       }
       update();
    }
 
    @Override
-   public ConvexPolygon2d applyTransformCopy(RigidBodyTransform transform)
+   public void applyTransformAndProjectToXYPlane(Transform transform)
+   {
+      isUpToDate = false;
+
+      for (int i = 0; i < numberOfVertices; i++)
+      {
+         Point2D vertex = getVertexUnsafe(i);
+         vertex.applyTransform(transform, false);
+      }
+      update();
+   }
+
+   @Override
+   public ConvexPolygon2d applyTransformCopy(Transform transform)
    {
       ConvexPolygon2d copy = new ConvexPolygon2d(this);
       copy.applyTransform(transform);
@@ -797,7 +732,7 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
    }
 
    @Override
-   public ConvexPolygon2d applyTransformAndProjectToXYPlaneCopy(RigidBodyTransform transform)
+   public ConvexPolygon2d applyTransformAndProjectToXYPlaneCopy(Transform transform)
    {
       ConvexPolygon2d copy = new ConvexPolygon2d(this);
       copy.applyTransformAndProjectToXYPlane(transform);
@@ -845,31 +780,31 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
       return maxY_index;
    }
 
-   public Point2d getMinXMaxYPointCopy()
+   public Point2D getMinXMaxYPointCopy()
    {
       checkIfUpToDate();
-      return new Point2d(getVertex(minXmaxY_index));
+      return new Point2D(getVertex(minXmaxY_index));
    }
 
-   public Point2d getMinXMinYPointCopy()
+   public Point2D getMinXMinYPointCopy()
    {
       checkIfUpToDate();
-      return new Point2d(getVertex(minXminY_index));
+      return new Point2D(getVertex(minXminY_index));
    }
 
-   public Point2d getMaxXMaxYPointCopy()
+   public Point2D getMaxXMaxYPointCopy()
    {
       checkIfUpToDate();
-      return new Point2d(getVertex(maxXmaxY_index));
+      return new Point2D(getVertex(maxXmaxY_index));
    }
 
-   public Point2d getMaxXMinYPointCopy()
+   public Point2D getMaxXMinYPointCopy()
    {
       checkIfUpToDate();
-      return new Point2d(getVertex(maxXminY_index));
+      return new Point2D(getVertex(maxXminY_index));
    }
 
-   protected void getPointsInClockwiseOrder(int startIndexInclusive, int endIndexInclusive, ArrayList<Point2d> pointList)
+   protected void getPointsInClockwiseOrder(int startIndexInclusive, int endIndexInclusive, List<Point2DReadOnly> pointList)
    {
       checkIfUpToDate();
       int index = startIndexInclusive;
@@ -986,9 +921,9 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
    {
       numberOfVertices = 1;
       if (clockwiseOrderedListOfPoints.isEmpty())
-         clockwiseOrderedListOfPoints.add(new Point2d());
+         clockwiseOrderedListOfPoints.add(new Point2D());
 
-      Point2d point = clockwiseOrderedListOfPoints.get(0);
+      Point2D point = clockwiseOrderedListOfPoints.get(0);
       point.set(0.0, 0.0);
 
       isUpToDate = false;
@@ -1000,9 +935,9 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
    {
       numberOfVertices = 1;
       if (clockwiseOrderedListOfPoints.isEmpty())
-         clockwiseOrderedListOfPoints.add(new Point2d());
+         clockwiseOrderedListOfPoints.add(new Point2D());
 
-      Point2d point = clockwiseOrderedListOfPoints.get(0);
+      Point2D point = clockwiseOrderedListOfPoints.get(0);
       point.set(Double.NaN, Double.NaN);
 
       isUpToDate = false;
@@ -1016,7 +951,7 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
 
       for (int i = 0; i < numberOfVertices; i++)
       {
-         Point2d point = clockwiseOrderedListOfPoints.get(i);
+         Point2D point = clockwiseOrderedListOfPoints.get(i);
 
          if (Double.isNaN(point.getX()))
             return true;
@@ -1037,17 +972,17 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
       return ConvexPolygon2dCalculator.isPointInside(x, y, epsilon, this);
    }
 
-   public boolean isPointInside(Point2d point)
+   public boolean isPointInside(Point2DReadOnly point)
    {
       return ConvexPolygon2dCalculator.isPointInside(point, this);
    }
 
-   public boolean isPointInside(Point2d point, double epsilon)
+   public boolean isPointInside(Point2DReadOnly point, double epsilon)
    {
       return ConvexPolygon2dCalculator.isPointInside(point, epsilon, this);
    }
 
-   public ConvexPolygon2d translateCopy(Tuple2d translation)
+   public ConvexPolygon2d translateCopy(Tuple2DReadOnly translation)
    {
       return ConvexPolygon2dCalculator.translatePolygonCopy(translation, this);
    }
@@ -1057,62 +992,62 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
       return ConvexPolygon2dCalculator.getIntersectingEdgesCopy(line, this);
    }
 
-   public int intersectionWithRay(Line2d ray, Point2d intersectionToPack1, Point2d intersectionToPack2)
+   public int intersectionWithRay(Line2d ray, Point2DBasics intersectionToPack1, Point2DBasics intersectionToPack2)
    {
       return ConvexPolygon2dCalculator.intersectionWithRay(ray, intersectionToPack1, intersectionToPack2, this);
    }
 
-   public boolean getClosestPointWithRay(Point2d pointToPack, Line2d ray)
+   public boolean getClosestPointWithRay(Point2DBasics pointToPack, Line2d ray)
    {
       return ConvexPolygon2dCalculator.getClosestPointToRay(ray, pointToPack, this);
    }
 
    @Override
-   public double distance(Point2d point)
+   public double distance(Point2DReadOnly point)
    {
       return Math.max(0.0, ConvexPolygon2dCalculator.getSignedDistance(point, this));
    }
 
    @Override
-   public void orthogonalProjection(Point2d point2d)
+   public void orthogonalProjection(Point2DBasics point2d)
    {
       ConvexPolygon2dCalculator.orthogonalProjection(point2d, this);
    }
 
-   public boolean pointIsOnPerimeter(Point2d point)
+   public boolean pointIsOnPerimeter(Point2DReadOnly point)
    {
       return Math.abs(ConvexPolygon2dCalculator.getSignedDistance(point, this)) < 1.0E-10;
    }
 
    @Override
-   public Point2d[] intersectionWith(Line2d line)
+   public Point2D[] intersectionWith(Line2d line)
    {
       return ConvexPolygon2dCalculator.intersectionWithLineCopy(line, this);
    }
 
-   public boolean getClosestEdge(LineSegment2d closestEdgeToPack, Point2d point)
+   public boolean getClosestEdge(LineSegment2d closestEdgeToPack, Point2DReadOnly point)
    {
       return ConvexPolygon2dCalculator.getClosestEdge(point, this, closestEdgeToPack);
    }
 
-   public LineSegment2d getClosestEdgeCopy(Point2d point)
+   public LineSegment2d getClosestEdgeCopy(Point2DReadOnly point)
    {
       return ConvexPolygon2dCalculator.getClosestEdgeCopy(point, this);
    }
 
-   public Point2d[] intersectionWithRayCopy(Line2d ray)
+   public Point2D[] intersectionWithRayCopy(Line2d ray)
    {
       return ConvexPolygon2dCalculator.intersectionWithRayCopy(ray, this);
    }
 
    @Override
-   public Point2d orthogonalProjectionCopy(Point2d point)
+   public Point2D orthogonalProjectionCopy(Point2DReadOnly point)
    {
       return ConvexPolygon2dCalculator.orthogonalProjectionCopy(point, this);
    }
 
    @Override
-   public Point2d[] intersectionWith(LineSegment2d lineSegment2d)
+   public Point2D[] intersectionWith(LineSegment2d lineSegment2d)
    {
       return ConvexPolygon2dCalculator.intersectionWithLineSegmentCopy(lineSegment2d, this);
    }

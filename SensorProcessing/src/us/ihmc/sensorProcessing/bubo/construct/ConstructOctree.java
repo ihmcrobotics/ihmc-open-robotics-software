@@ -18,12 +18,13 @@
 
 package us.ihmc.sensorProcessing.bubo.construct;
 
-import georegression.struct.GeoTuple;
-import org.ddogleg.struct.FastQueue;
-
 import java.lang.reflect.Array;
 import java.util.List;
 import java.util.Stack;
+
+import org.ddogleg.struct.FastQueue;
+
+import georegression.struct.GeoTuple;
 
 /**
  * Base class for constructing octrees.  Contains internal functions for managing data structures.  All data

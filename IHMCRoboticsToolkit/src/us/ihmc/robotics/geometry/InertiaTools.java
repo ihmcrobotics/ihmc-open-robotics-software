@@ -1,12 +1,13 @@
 package us.ihmc.robotics.geometry;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Vector3d;
-
 import org.ejml.data.DenseMatrix64F;
 
 import Jama.Matrix;
 import Jama.SingularValueDecomposition;
+import us.ihmc.euclid.matrix.Matrix3D;
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
 
 public class InertiaTools
 {
@@ -16,14 +17,14 @@ public class InertiaTools
     * @param mass mass of the link
     * @return the three radii of the inertia ellipsoid
     */
-   public static Vector3d getInertiaEllipsoidRadii(Vector3d principalMomentsOfInertia, double mass)
+   public static Vector3D getInertiaEllipsoidRadii(Vector3D principalMomentsOfInertia, double mass)
    {
       double Ixx = principalMomentsOfInertia.getX();
       double Iyy = principalMomentsOfInertia.getY();
       double Izz = principalMomentsOfInertia.getZ();
 
 //    http://en.wikipedia.org/wiki/Ellipsoid#Mass_properties
-      Vector3d ret = new Vector3d();
+      Vector3D ret = new Vector3D();
       ret.setX(Math.sqrt(5.0 / 2.0 * (Iyy + Izz - Ixx) / mass));
       ret.setY(Math.sqrt(5.0 / 2.0 * (Izz + Ixx - Iyy) / mass));
       ret.setZ(Math.sqrt(5.0 / 2.0 * (Ixx + Iyy - Izz) / mass));
@@ -31,21 +32,19 @@ public class InertiaTools
       return ret;
    }
 
-   public static Matrix3d rotate(RigidBodyTransform inertialFrameRotation, Matrix3d inertia)
+   public static Matrix3D rotate(RigidBodyTransform inertialFrameRotation, Matrix3D inertia)
    {
-      Matrix3d temp = new Matrix3d();
+      RotationMatrix temp = new RotationMatrix();
       inertialFrameRotation.getRotation(temp);
 
       return rotate(temp, inertia);
    }
 
-   public static Matrix3d rotate(Matrix3d inertialFrameRotation, Matrix3d inertia)
+   public static Matrix3D rotate(RotationMatrix inertialFrameRotation, Matrix3D inertia)
    {
-      Matrix3d temp = new Matrix3d();
-      temp.mulTransposeRight(inertia, inertialFrameRotation);
-
-      Matrix3d result = new Matrix3d();
-      result.mul(inertialFrameRotation, temp);
+      Matrix3D result = new Matrix3D();
+      result.set(inertia);
+      inertialFrameRotation.transform(result);
 
       return result;
 
@@ -58,7 +57,7 @@ public class InertiaTools
    }
 
 
-   public static void computePrincipalMomentsOfInertia(DenseMatrix64F Inertia, Matrix3d principalAxesRotationToPack, Vector3d principalMomentsOfInertiaToPack)
+   public static void computePrincipalMomentsOfInertia(DenseMatrix64F Inertia, RotationMatrix principalAxesRotationToPack, Vector3D principalMomentsOfInertiaToPack)
    {
       double[][] moiArray = new double[][]{
          {Inertia.get(0, 0), Inertia.get(0, 1), Inertia.get(0, 2)},
@@ -70,7 +69,7 @@ public class InertiaTools
       computePrincipalMomentsOfInertia(inertiaForSVD, principalAxesRotationToPack, principalMomentsOfInertiaToPack);
    }
 
-   public static void computePrincipalMomentsOfInertia(Matrix3d Inertia, Matrix3d principalAxesRotationToPack, Vector3d principalMomentsOfInertiaToPack)
+   public static void computePrincipalMomentsOfInertia(Matrix3D Inertia, RotationMatrix principalAxesRotationToPack, Vector3D principalMomentsOfInertiaToPack)
    {
       double[][] moiArray = new double[][]{
          {Inertia.getM00(), Inertia.getM01(), Inertia.getM02()},
@@ -82,7 +81,7 @@ public class InertiaTools
       computePrincipalMomentsOfInertia(inertiaForSVD, principalAxesRotationToPack, principalMomentsOfInertiaToPack);
    }
 
-   public static void computePrincipalMomentsOfInertia(Matrix inertiaForSVD, Matrix3d principalAxesRotationToPack, Vector3d principalMomentsOfInertiaToPack)
+   public static void computePrincipalMomentsOfInertia(Matrix inertiaForSVD, RotationMatrix principalAxesRotationToPack, Vector3D principalMomentsOfInertiaToPack)
    {
       // Decompose Inertia Matrix:  I = U*sigma*V
 

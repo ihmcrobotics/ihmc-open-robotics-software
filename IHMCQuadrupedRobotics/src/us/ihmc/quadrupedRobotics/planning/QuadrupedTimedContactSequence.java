@@ -1,5 +1,9 @@
 package us.ihmc.quadrupedRobotics.planning;
 
+import java.util.Comparator;
+import java.util.List;
+
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.quadrupedRobotics.util.ArraySorter;
 import us.ihmc.quadrupedRobotics.util.PreallocatedList;
 import us.ihmc.quadrupedRobotics.util.TimeIntervalTools;
@@ -7,10 +11,6 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
-
-import javax.vecmath.Point3d;
-import java.util.Comparator;
-import java.util.List;
 
 public class QuadrupedTimedContactSequence extends PreallocatedList<QuadrupedTimedContactPhase>
 {
@@ -23,14 +23,14 @@ public class QuadrupedTimedContactSequence extends PreallocatedList<QuadrupedTim
    {
       QuadrupedStepTransitionType type;
       RobotQuadrant robotQuadrant;
-      Point3d solePosition;
+      Point3D solePosition;
       double time;
 
       public QuadrupedStepTransition()
       {
          time = 0.0;
          type = QuadrupedStepTransitionType.LIFT_OFF;
-         solePosition = new Point3d();
+         solePosition = new Point3D();
          robotQuadrant = RobotQuadrant.FRONT_LEFT;
       }
    }

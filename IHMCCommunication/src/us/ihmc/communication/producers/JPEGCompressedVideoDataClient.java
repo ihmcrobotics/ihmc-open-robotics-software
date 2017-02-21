@@ -3,14 +3,13 @@ package us.ihmc.communication.producers;
 import java.awt.image.BufferedImage;
 import java.nio.ByteBuffer;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-
 import boofcv.struct.calib.IntrinsicParameters;
 import us.ihmc.codecs.generated.YUVPicture;
 import us.ihmc.codecs.util.ByteBufferProvider;
 import us.ihmc.codecs.yuv.JPEGDecoder;
 import us.ihmc.codecs.yuv.YUVPictureConverter;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 
 public class JPEGCompressedVideoDataClient implements CompressedVideoDataClient
 {
@@ -36,7 +35,7 @@ public class JPEGCompressedVideoDataClient implements CompressedVideoDataClient
    }
 
    @Override
-   public void consumeObject(byte[] data, Point3d position, Quat4d orientation, IntrinsicParameters intrinsicParameters)
+   public void consumeObject(byte[] data, Point3D position, Quaternion orientation, IntrinsicParameters intrinsicParameters)
    {
       ByteBuffer buffer = byteBufferProvider.getOrCreateBuffer(data.length);
       buffer.put(data);

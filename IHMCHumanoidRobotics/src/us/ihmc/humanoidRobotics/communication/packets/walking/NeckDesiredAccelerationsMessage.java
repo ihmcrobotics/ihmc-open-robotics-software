@@ -4,10 +4,10 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Random;
 
-import us.ihmc.communication.ros.generators.RosEnumValueDocumentation;
-import us.ihmc.communication.ros.generators.RosMessagePacket;
-import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.packets.Packet;
+import us.ihmc.communication.ros.generators.RosEnumValueDocumentation;
+import us.ihmc.communication.ros.generators.RosExportedField;
+import us.ihmc.communication.ros.generators.RosMessagePacket;
 import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.tools.ArrayTools;

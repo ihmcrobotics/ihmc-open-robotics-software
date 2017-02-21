@@ -1,14 +1,13 @@
 package us.ihmc.simulationconstructionset.simulatedSensors;
 
-import javax.vecmath.Vector3d;
-
 import org.ejml.data.DenseMatrix64F;
 
-import us.ihmc.simulationconstructionset.JointWrenchSensor;
-import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.screwTheory.SpatialForceVector;
 import us.ihmc.robotics.screwTheory.Wrench;
+import us.ihmc.simulationconstructionset.JointWrenchSensor;
+import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 
 public class FeatherStoneJointBasedWrenchCalculator implements WrenchCalculatorInterface
 {
@@ -31,8 +30,8 @@ public class FeatherStoneJointBasedWrenchCalculator implements WrenchCalculatorI
       return forceSensorName;
    }
 
-   private Vector3d force = new Vector3d();
-   private Vector3d tau = new Vector3d();
+   private Vector3D force = new Vector3D();
+   private Vector3D tau = new Vector3D();
 
    @Override
    public void calculate()

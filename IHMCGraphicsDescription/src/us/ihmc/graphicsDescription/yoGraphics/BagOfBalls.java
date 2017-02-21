@@ -2,8 +2,7 @@ package us.ihmc.graphicsDescription.yoGraphics;
 
 import java.util.ArrayList;
 
-import javax.vecmath.Point3d;
-
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -203,12 +202,12 @@ public class BagOfBalls
       index++;
    }
    
-   public void setBall(Point3d pointToTestAboveRamp)
+   public void setBall(Point3D pointToTestAboveRamp)
    {
       setBall(new FramePoint(ReferenceFrame.getWorldFrame(), pointToTestAboveRamp));
    }
    
-   public void setBall(Point3d pointToTestAboveRamp, AppearanceDefinition appearance)
+   public void setBall(Point3D pointToTestAboveRamp, AppearanceDefinition appearance)
    {
       setBall(new FramePoint(ReferenceFrame.getWorldFrame(), pointToTestAboveRamp), appearance);
    }

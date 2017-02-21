@@ -66,7 +66,8 @@ public class DateToolsTest
 
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
+	@SuppressWarnings("deprecation")
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testGetCurrentDate()
    {

@@ -1,10 +1,8 @@
 package us.ihmc.simulationconstructionset;
 
-//import Jama.*;
-
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.matrix.Matrix3D;
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.simulationconstructionset.mathfunctions.Matrix;
 
 /**
@@ -20,15 +18,15 @@ import us.ihmc.simulationconstructionset.mathfunctions.Matrix;
 public final class SpatialVector implements java.io.Serializable
 {
    private static final long serialVersionUID = 971129051271759424L;
-   public Vector3d top = new Vector3d(), bottom = new Vector3d();
+   public Vector3D top = new Vector3D(), bottom = new Vector3D();
 
 
-   public void getTop(Vector3d topToPack)
+   public void getTop(Vector3D topToPack)
    {
       topToPack.set(top);
    }
    
-   public void getBottom(Vector3d bottomToPack)
+   public void getBottom(Vector3D bottomToPack)
    {
       bottomToPack.set(bottom);
    }
@@ -63,7 +61,7 @@ public final class SpatialVector implements java.io.Serializable
       return bottom.getZ();
    }
 
-   public void setFromVector3d(Vector3d v1, Vector3d v2)
+   public void setFromVector3d(Vector3D v1, Vector3D v2)
    {
       top.setX(v1.getX());
       top.setY(v1.getY());
@@ -140,7 +138,7 @@ public final class SpatialVector implements java.io.Serializable
       return (top.dot(sV.bottom) + bottom.dot(sV.top));
    }
 
-   Vector3d temp1 = new Vector3d();
+   Vector3D temp1 = new Vector3D();
 
    /*
     * public void setInitArticulatedZeroAccel(double mass, Vector3d w_i, double Ixx, double Iyy, double Izz, Matrix3d Ri_0, double gX, double gY, double gZ)
@@ -157,7 +155,7 @@ public final class SpatialVector implements java.io.Serializable
     * }
     */
 
-   public void setInitArticulatedZeroAccel(double mass, Vector3d w_i, Matrix3d Inertia, Matrix3d Ri_0, double gX, double gY, double gZ)
+   public void setInitArticulatedZeroAccel(double mass, Vector3D w_i, Matrix3D Inertia, RotationMatrix Ri_0, double gX, double gY, double gZ)
    {
       top.setX(-gX * mass);
       top.setY(-gY * mass);

@@ -2,10 +2,9 @@ package us.ihmc.simulationconstructionset.util.ground.steppingStones;
 
 import java.util.ArrayList;
 
-import javax.vecmath.Vector3d;
-
-import us.ihmc.simulationconstructionset.util.ground.GroundProfileFromHeightMap;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.geometry.BoundingBox3d;
+import us.ihmc.simulationconstructionset.util.ground.GroundProfileFromHeightMap;
 
 public class SteppingStonesGroundProfile extends GroundProfileFromHeightMap
 {
@@ -26,7 +25,7 @@ public class SteppingStonesGroundProfile extends GroundProfileFromHeightMap
    private final ArrayList<SteppingStone> tempStonesIntersectingLocation = new ArrayList<SteppingStone>();
 
    @Override
-   public double heightAndNormalAt(double x, double y, double z, Vector3d normalToPack)
+   public double heightAndNormalAt(double x, double y, double z, Vector3D normalToPack)
    {
       double height = heightAt(x, y, z);
       surfaceNormalAt(x, y, z, normalToPack);
@@ -56,7 +55,7 @@ public class SteppingStonesGroundProfile extends GroundProfileFromHeightMap
       return maxHeight;
    }
 
-   public void surfaceNormalAt(double x, double y, double z, Vector3d normal)
+   public void surfaceNormalAt(double x, double y, double z, Vector3D normal)
    {
       normal.setX(0.0);
       normal.setY(0.0);

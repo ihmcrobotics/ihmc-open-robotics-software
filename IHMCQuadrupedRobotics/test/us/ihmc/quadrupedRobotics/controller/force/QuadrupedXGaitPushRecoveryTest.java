@@ -2,7 +2,7 @@ package us.ihmc.quadrupedRobotics.controller.force;
 
 import java.io.IOException;
 
-import javax.vecmath.Vector3d;
+import us.ihmc.euclid.tuple3D.Vector3D;
 
 import org.junit.After;
 import org.junit.Before;
@@ -74,14 +74,14 @@ public abstract class QuadrupedXGaitPushRecoveryTest implements QuadrupedMultiRo
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getRobotBodyX(), 1.0));
       conductor.simulate();
       
-      pusher.applyForce(new Vector3d(0.0, -1.0, 0.0), 50.0, 0.3);
+      pusher.applyForce(new Vector3D(0.0, -1.0, 0.0), 50.0, 0.3);
       
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addTimeLimit(variables.getYoTime(), 5.0);
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getRobotBodyX(), 4.0));
       conductor.simulate();
       
-      pusher.applyForce(new Vector3d(0.0, 1.0, 0.0), 50.0, 0.3);
+      pusher.applyForce(new Vector3D(0.0, 1.0, 0.0), 50.0, 0.3);
       
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addTimeLimit(variables.getYoTime(), 5.0);

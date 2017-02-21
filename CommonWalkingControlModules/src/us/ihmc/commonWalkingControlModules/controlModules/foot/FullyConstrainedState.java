@@ -1,7 +1,5 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
-import javax.vecmath.Vector3d;
-
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.SolverWeightLevels;
@@ -9,6 +7,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -45,7 +44,7 @@ public class FullyConstrainedState extends AbstractFootControlState
       spatialAccelerationCommand.setWeight(weight);
    }
 
-   public void setWeights(Vector3d angular, Vector3d linear)
+   public void setWeights(Vector3D angular, Vector3D linear)
    {
       spatialAccelerationCommand.setWeights(angular, linear);
    }

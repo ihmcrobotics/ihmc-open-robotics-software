@@ -2,8 +2,7 @@ package us.ihmc.exampleSimulations.collidingArms;
 
 import java.util.ArrayList;
 
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.robotics.Axis;
@@ -55,7 +54,7 @@ public class CollidingArmRobotDescription extends RobotDescription
    private final ArrayList<CollisionMeshDescription> upperArmCollisionGroup = new ArrayList<>();
    private final ArrayList<CollisionMeshDescription> lowerArmCollisionGroup = new ArrayList<>();
 
-   public CollidingArmRobotDescription(String name, Vector3d baseOffset)
+   public CollidingArmRobotDescription(String name, Vector3D baseOffset)
    {
       super(name);
 
@@ -67,7 +66,7 @@ public class CollidingArmRobotDescription extends RobotDescription
       LinkGraphicsDescription baseLinkGraphics = new LinkGraphicsDescription();
       AppearanceDefinition baseAppearance = YoAppearance.AliceBlue();
       baseLinkGraphics.addCylinder(baseHeight, baseRadius, baseAppearance);
-      baseLinkGraphics.translate(new Vector3d(0.0, 0.0, shoulderOffsetZ));
+      baseLinkGraphics.translate(new Vector3D(0.0, 0.0, shoulderOffsetZ));
       baseLinkGraphics.rotate(Math.PI / 2.0, Axis.X);
       baseLinkGraphics.translate(0.0, 0.0, -shoulderMotorWidth / 2.0);
       baseLinkGraphics.addCylinder(shoulderMotorWidth, shoulderMotorRadius, YoAppearance.Black());
@@ -84,15 +83,15 @@ public class CollidingArmRobotDescription extends RobotDescription
       this.addRootJoint(baseJoint);
 
       // Upper Arm:
-      PinJointDescription shoulderJoint = new PinJointDescription("shoulder", new Vector3d(0.0, 0.0, shoulderOffsetZ), Axis.Y);
+      PinJointDescription shoulderJoint = new PinJointDescription("shoulder", new Vector3D(0.0, 0.0, shoulderOffsetZ), Axis.Y);
       LinkDescription upperArm = new LinkDescription("upperArm");
-      upperArm.setCenterOfMassOffset(new Vector3d(0.0, 0.0, upperArmLength / 2.0));
+      upperArm.setCenterOfMassOffset(new Vector3D(0.0, 0.0, upperArmLength / 2.0));
       upperArm.setMassAndRadiiOfGyration(upperArmMass, upperArmRadiusOfGyrationX, upperArmRadiusOfGyrationY, upperArmRadiusOfGyrationZ);
 
       LinkGraphicsDescription upperArmGraphics = new LinkGraphicsDescription();
       AppearanceDefinition upperArmAppearance = YoAppearance.Red();
       upperArmGraphics.addCylinder(upperArmLength, upperArmRadius, upperArmAppearance);
-      upperArmGraphics.translate(new Vector3d(0.0, 0.0, upperArmLength));
+      upperArmGraphics.translate(new Vector3D(0.0, 0.0, upperArmLength));
       upperArmGraphics.rotate(Math.PI / 2.0, Axis.X);
       upperArmGraphics.translate(0.0, 0.0, -elbowMotorWidth / 2.0);
       upperArmGraphics.addCylinder(elbowMotorWidth, elbowMotorRadius, YoAppearance.Black());
@@ -109,16 +108,16 @@ public class CollidingArmRobotDescription extends RobotDescription
       baseJoint.addJoint(shoulderJoint);
 
       // Lower arm:
-      PinJointDescription elbowJoint = new PinJointDescription("elbow", new Vector3d(0.0, 0.0, upperArmLength), Axis.Y);
+      PinJointDescription elbowJoint = new PinJointDescription("elbow", new Vector3D(0.0, 0.0, upperArmLength), Axis.Y);
       LinkDescription lowerArm = new LinkDescription("lowerArm");
-      lowerArm.setCenterOfMassOffset(new Vector3d(0.0, 0.0, lowerArmLength / 2.0));
+      lowerArm.setCenterOfMassOffset(new Vector3D(0.0, 0.0, lowerArmLength / 2.0));
       lowerArm.setMassAndRadiiOfGyration(lowerArmMass, lowerArmRadiusOfGyrationX, lowerArmRadiusOfGyrationY, lowerArmRadiusOfGyrationZ);
 
       LinkGraphicsDescription lowerArmGraphics = new LinkGraphicsDescription();
       AppearanceDefinition lowerArmAppearance = YoAppearance.Green();
       lowerArmGraphics.addCylinder(lowerArmLength, lowerArmRadius, lowerArmAppearance);
       lowerArmGraphics.identity();
-      lowerArmGraphics.translate(new Vector3d(0.0, 0.0, lowerArmLength));
+      lowerArmGraphics.translate(new Vector3D(0.0, 0.0, lowerArmLength));
       lowerArmGraphics.addSphere(handRadius);
       lowerArm.setLinkGraphics(lowerArmGraphics);
 

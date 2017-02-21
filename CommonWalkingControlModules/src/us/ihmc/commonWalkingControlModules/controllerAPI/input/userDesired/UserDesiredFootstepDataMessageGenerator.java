@@ -2,10 +2,9 @@ package us.ihmc.commonWalkingControlModules.controllerAPI.input.userDesired;
 
 import java.util.List;
 
-import javax.vecmath.Point2d;
-
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataListCommand;
@@ -62,8 +61,8 @@ public class UserDesiredFootstepDataMessageGenerator
    private final BooleanYoVariable sendSteps = new BooleanYoVariable(namePrefix + "Send", registry);
 
    private List<FramePoint2d> contactFramePoints;
-   private RecyclingArrayList<Point2d> contactPoints = new RecyclingArrayList<Point2d>(4, Point2d.class);
-   private Point2d contactPoint;
+   private RecyclingArrayList<Point2D> contactPoints = new RecyclingArrayList<Point2D>(4, Point2D.class);
+   private Point2D contactPoint;
 
    private final SideDependentList<ContactableFoot> bipedFeet;
    private ContactableFoot swingFoot;

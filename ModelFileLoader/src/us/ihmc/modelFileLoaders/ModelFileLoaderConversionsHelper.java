@@ -1,12 +1,11 @@
 package us.ihmc.modelFileLoaders;
 
-import javax.vecmath.Color3f;
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Vector2d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.matrix.Matrix3D;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFInertia;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.dataStructures.MutableColor;
 
 public class ModelFileLoaderConversionsHelper
 {
@@ -16,35 +15,35 @@ public class ModelFileLoaderConversionsHelper
       return dirtyName.trim().replaceAll("[//[//]///]", "").replace(".", "_");
    }
 
-   public static Vector3d stringToNormalizedVector3d(String vector)
+   public static Vector3D stringToNormalizedVector3d(String vector)
    {
-      Vector3d vector3d = stringToVector3d(vector);
+      Vector3D vector3d = stringToVector3d(vector);
       vector3d.normalize();
       return vector3d;
 
    }
    
-   public static Vector3d stringToVector3d(String vector)
+   public static Vector3D stringToVector3d(String vector)
    {
       String[] vecString = vector.split("\\s+");
-      Vector3d vector3d = new Vector3d(Double.parseDouble(vecString[0]), Double.parseDouble(vecString[1]), Double.parseDouble(vecString[2]));
+      Vector3D vector3d = new Vector3D(Double.parseDouble(vecString[0]), Double.parseDouble(vecString[1]), Double.parseDouble(vecString[2]));
       return vector3d;
    }
    
-   public static Color3f stringToColor(String color)
+   public static MutableColor stringToColor(String color)
    {
       String[] vecString = color.split("\\s+");
-      Color3f color3f = new Color3f(Float.parseFloat(vecString[0]), Float.parseFloat(vecString[1]), Float.parseFloat(vecString[2]));
+      MutableColor color3f = new MutableColor(Float.parseFloat(vecString[0]), Float.parseFloat(vecString[1]), Float.parseFloat(vecString[2]));
       return color3f;
    }
 
 
    
-   public static Vector2d stringToVector2d(String xy)
+   public static Vector2D stringToVector2d(String xy)
    {
       String[] vecString = xy.split("\\s+");
    
-      Vector2d vector = new Vector2d(Double.parseDouble(vecString[0]), Double.parseDouble(vecString[1]));
+      Vector2D vector = new Vector2D(Double.parseDouble(vecString[0]), Double.parseDouble(vecString[1]));
       return vector;
    
    }
@@ -60,28 +59,29 @@ public class ModelFileLoaderConversionsHelper
       String[] data = pose.split("\\s+");
       
       RigidBodyTransform translation = new RigidBodyTransform();
-      Vector3d translationVector = new Vector3d();
+      Vector3D translationVector = new Vector3D();
       translationVector.setX(Double.parseDouble(data[0]));
       translationVector.setY(Double.parseDouble(data[1]));
       translationVector.setZ(Double.parseDouble(data[2]));
       translation.setTranslationAndIdentityRotation(translationVector);
    
       RigidBodyTransform rotation = new RigidBodyTransform();
-      Vector3d eulerAngels = new Vector3d();
+      Vector3D eulerAngels = new Vector3D();
       eulerAngels.setX(Double.parseDouble(data[3]));
       eulerAngels.setY(Double.parseDouble(data[4]));
       eulerAngels.setZ(Double.parseDouble(data[5]));
       rotation.setRotationEulerAndZeroTranslation(eulerAngels);
    
-      ret.multiply(translation, rotation);
+      ret.set(translation);
+      ret.multiply(rotation);
    
       return ret;
    }
 
-   public static Matrix3d sdfInertiaToMatrix3d(SDFInertia sdfInertia)
+   public static Matrix3D sdfInertiaToMatrix3d(SDFInertia sdfInertia)
    {
       
-      Matrix3d inertia = new Matrix3d();
+      Matrix3D inertia = new Matrix3D();
       if(sdfInertia != null)
       {
          double ixx = Double.parseDouble(sdfInertia.getIxx());

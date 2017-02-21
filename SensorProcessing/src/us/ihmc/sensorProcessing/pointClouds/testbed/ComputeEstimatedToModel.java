@@ -1,7 +1,5 @@
 package us.ihmc.sensorProcessing.pointClouds.testbed;
 
-import georegression.struct.se.Se3_F64;
-
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -10,6 +8,8 @@ import java.util.Arrays;
 import java.util.List;
 
 import com.thoughtworks.xstream.XStream;
+
+import georegression.struct.se.Se3_F64;
 
 /**
  * Processes transforms found be the automated algorithm and manually aligned.  It selects the transform which minimizes

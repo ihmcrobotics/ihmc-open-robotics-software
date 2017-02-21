@@ -2,13 +2,12 @@ package us.ihmc.humanoidRobotics.communication.packets.walking;
 
 import java.util.Random;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-
-import us.ihmc.communication.ros.generators.RosEnumValueDocumentation;
-import us.ihmc.communication.ros.generators.RosMessagePacket;
-import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.packets.StatusPacket;
+import us.ihmc.communication.ros.generators.RosEnumValueDocumentation;
+import us.ihmc.communication.ros.generators.RosExportedField;
+import us.ihmc.communication.ros.generators.RosMessagePacket;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -40,16 +39,16 @@ public class FootstepStatus extends StatusPacket<FootstepStatus>
    public RobotSide robotSide;
    @RosExportedField(documentation = "desiredFootPositionInWorld gives the position of the desired position sent to the controller as opposed\n"
          + "to where the foot actually landed")
-   public Point3d desiredFootPositionInWorld;
+   public Point3D desiredFootPositionInWorld;
    @RosExportedField(documentation = "desiredFootOrientationInWorld gives the desired orientation of the foot sent to the controller as opposed to\n"
          + "the orientation where the foot actually is")
-   public Quat4d desiredFootOrientationInWorld;
+   public Quaternion desiredFootOrientationInWorld;
    @RosExportedField(documentation = "actualFootPositionInWorld gives the position of where the foot actually landed as opposed\n"
                                      + "to the desired position sent to the controller")
-   public Point3d actualFootPositionInWorld;
+   public Point3D actualFootPositionInWorld;
    @RosExportedField(documentation = "actualFootOrientationInWorld gives the orientation the foot is actually in as opposed to\n"
                                      + "the desired orientation sent to the controller")
-   public Quat4d actualFootOrientationInWorld;
+   public Quaternion actualFootOrientationInWorld;
 
    public FootstepStatus()
    {
@@ -66,7 +65,7 @@ public class FootstepStatus extends StatusPacket<FootstepStatus>
       this.robotSide = null;
    }
 
-   public FootstepStatus(Status status, int footstepIndex, Point3d actualFootPositionInWorld, Quat4d actualFootOrientationInWorld)
+   public FootstepStatus(Status status, int footstepIndex, Point3D actualFootPositionInWorld, Quaternion actualFootOrientationInWorld)
    {
       this.status = status;
       this.footstepIndex = footstepIndex;
@@ -78,7 +77,7 @@ public class FootstepStatus extends StatusPacket<FootstepStatus>
       this.robotSide = null;
    }
 
-   public FootstepStatus(Status status, int footstepIndex, Point3d actualFootPositionInWorld, Quat4d actualFootOrientationInWorld, RobotSide robotSide)
+   public FootstepStatus(Status status, int footstepIndex, Point3D actualFootPositionInWorld, Quaternion actualFootOrientationInWorld, RobotSide robotSide)
    {
       this.status = status;
       this.footstepIndex = footstepIndex;
@@ -89,8 +88,8 @@ public class FootstepStatus extends StatusPacket<FootstepStatus>
       this.robotSide = robotSide;
    }
 
-   public FootstepStatus(Status status, int footstepIndex, Point3d desiredFootPositionInWorld, Quat4d desiredFootOrientationInWorld,
-         Point3d actualFootPositionInWorld, Quat4d actualFootOrientationInWorld, RobotSide robotSide)
+   public FootstepStatus(Status status, int footstepIndex, Point3D desiredFootPositionInWorld, Quaternion desiredFootOrientationInWorld,
+         Point3D actualFootPositionInWorld, Quaternion actualFootOrientationInWorld, RobotSide robotSide)
    {
       this.status = status;
       this.footstepIndex = footstepIndex;
@@ -109,32 +108,32 @@ public class FootstepStatus extends StatusPacket<FootstepStatus>
       robotSide = other.robotSide;
 
       if (desiredFootPositionInWorld == null)
-         desiredFootPositionInWorld = new Point3d();
+         desiredFootPositionInWorld = new Point3D();
       if (desiredFootOrientationInWorld == null)
-         desiredFootOrientationInWorld = new Quat4d();
+         desiredFootOrientationInWorld = new Quaternion();
 
       if (other.desiredFootPositionInWorld == null)
-         desiredFootPositionInWorld.set(Double.NaN, Double.NaN, Double.NaN);
+         desiredFootPositionInWorld.setToNaN();
       else
          desiredFootPositionInWorld.set(other.desiredFootPositionInWorld);
 
       if (other.desiredFootOrientationInWorld == null)
-         desiredFootOrientationInWorld.set(Double.NaN, Double.NaN, Double.NaN, Double.NaN);
+         desiredFootOrientationInWorld.setToNaN();
       else
          desiredFootOrientationInWorld.set(other.desiredFootOrientationInWorld);
 
       if (actualFootPositionInWorld == null)
-         actualFootPositionInWorld = new Point3d();
+         actualFootPositionInWorld = new Point3D();
       if (actualFootOrientationInWorld == null)
-         actualFootOrientationInWorld = new Quat4d();
+         actualFootOrientationInWorld = new Quaternion();
 
       if (other.actualFootPositionInWorld == null)
-         actualFootPositionInWorld.set(Double.NaN, Double.NaN, Double.NaN);
+         actualFootPositionInWorld.setToNaN();
       else
          actualFootPositionInWorld.set(other.actualFootPositionInWorld);
 
       if (other.actualFootOrientationInWorld == null)
-         actualFootOrientationInWorld.set(Double.NaN, Double.NaN, Double.NaN, Double.NaN);
+         actualFootOrientationInWorld.setToNaN();
       else
          actualFootOrientationInWorld.set(other.actualFootOrientationInWorld);
    }
@@ -154,28 +153,28 @@ public class FootstepStatus extends StatusPacket<FootstepStatus>
       return "FootstepStatus{" + status + ", index: " + footstepIndex + "}";
    }
 
-   public Point3d getDesiredFootPositionInWorld()
+   public Point3D getDesiredFootPositionInWorld()
    {
       if (desiredFootPositionInWorld != null)
          return desiredFootPositionInWorld;
       return null;
    }
 
-   public Quat4d getDesiredFootOrientationInWorld()
+   public Quaternion getDesiredFootOrientationInWorld()
    {
       if (desiredFootOrientationInWorld != null)
          return desiredFootOrientationInWorld;
       return null;
    }
 
-   public Point3d getActualFootPositionInWorld()
+   public Point3D getActualFootPositionInWorld()
    {
       if (actualFootPositionInWorld != null)
          return actualFootPositionInWorld;
       return null;
    }
 
-   public Quat4d getActualFootOrientationInWorld()
+   public Quaternion getActualFootOrientationInWorld()
    {
       if (actualFootOrientationInWorld != null)
          return actualFootOrientationInWorld;

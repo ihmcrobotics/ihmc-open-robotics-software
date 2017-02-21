@@ -1,12 +1,11 @@
 package us.ihmc.humanoidRobotics.footstep.footstepGenerator.overheadPath;
 
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.FootstepOverheadPath;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.InterpolatedFootstepOverheadPath;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.FramePose2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-
-import javax.vecmath.Point2d;
 
 /**
  * Created by agrabertilton on 3/6/15.
@@ -48,7 +47,7 @@ public class TurnInPlaceFootstepOverheadPath extends FootstepOverheadPath
       double x = (1-interpolationValue) * startPose.getX() + (interpolationValue) * endPose.getX();
       double y = (1-interpolationValue) * startPose.getY() + (interpolationValue) * endPose.getY();
       double yaw = AngleTools.trimAngleMinusPiToPi(startPose.getYaw() + (interpolationValue) * angleChange);
-      return new FramePose2d(startPose.getReferenceFrame(), new Point2d(x,y), yaw);
+      return new FramePose2d(startPose.getReferenceFrame(), new Point2D(x,y), yaw);
    }
 
    @Override

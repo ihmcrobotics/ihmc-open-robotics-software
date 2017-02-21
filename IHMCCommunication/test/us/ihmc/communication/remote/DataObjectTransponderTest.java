@@ -7,9 +7,9 @@ import java.util.ArrayList;
 
 import org.junit.Test;
 
+import us.ihmc.commons.Assertions;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.commons.Assertions;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.tools.thread.ThreadTools;
 

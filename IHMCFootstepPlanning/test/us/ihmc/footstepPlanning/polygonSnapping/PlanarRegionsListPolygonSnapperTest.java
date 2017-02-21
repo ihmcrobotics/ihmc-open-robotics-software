@@ -6,20 +6,20 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import javax.vecmath.Point2d;
-import javax.vecmath.Point3d;
-
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.tools.testing.MutationTestingTools;
 import us.ihmc.tools.thread.ThreadTools;
@@ -210,8 +210,8 @@ public class PlanarRegionsListPolygonSnapperTest
             int numberOfVertices = polygonToSnap.getNumberOfVertices();
             for (int vertexIndex = 0; vertexIndex < numberOfVertices; vertexIndex++)
             {
-               Point2d vertex = polygonToSnap.getVertex(vertexIndex);
-               Point3d snappedVertex = new Point3d(vertex.getX(), vertex.getY(), 0.0);
+               Point2DReadOnly vertex = polygonToSnap.getVertex(vertexIndex);
+               Point3D snappedVertex = new Point3D(vertex.getX(), vertex.getY(), 0.0);
 
                snapTransform.transform(snappedVertex);
 

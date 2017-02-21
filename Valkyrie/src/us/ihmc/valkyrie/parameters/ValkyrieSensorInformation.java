@@ -4,14 +4,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.geometry.RotationTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -142,8 +140,8 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
    private static final String lidarEndFrame = "/head_hokuyo_frame";
    private static final String baseTfName = "upperNeckPitchLink";
 
-   private ImmutableTriple<String, String, RigidBodyTransform> neckToLeftCameraTransform = new ImmutableTriple<>(baseTfName, multisense_namespace + "left_camera_optical_frame", new RigidBodyTransform(new Quat4d(0.997858923235, -4.00478664636e-18, -0.0654031292802, -6.1101236817e-17), new Vector3d(0.183847013385, -0.035, 0.0773367157227)));
-   private ImmutableTriple<String, String, RigidBodyTransform> neckToRightCameraTransform = new ImmutableTriple<>(baseTfName, multisense_namespace + "left_camera_optical_frame", new RigidBodyTransform(new Quat4d(0.997858923235, -4.00478664636e-18, -0.0654031292802, -6.1101236817e-17), new Vector3d(0.183847013385, 0.035, 0.0773367157227)));
+   private ImmutableTriple<String, String, RigidBodyTransform> neckToLeftCameraTransform = new ImmutableTriple<>(baseTfName, multisense_namespace + "left_camera_optical_frame", new RigidBodyTransform(new Quaternion(0.997858923235, -4.00478664636e-18, -0.0654031292802, -6.1101236817e-17), new Vector3D(0.183847013385, -0.035, 0.0773367157227)));
+   private ImmutableTriple<String, String, RigidBodyTransform> neckToRightCameraTransform = new ImmutableTriple<>(baseTfName, multisense_namespace + "left_camera_optical_frame", new RigidBodyTransform(new Quaternion(0.997858923235, -4.00478664636e-18, -0.0654031292802, -6.1101236817e-17), new Vector3D(0.183847013385, 0.035, 0.0773367157227)));
 
    private static final String lidarSensorName = "head_hokuyo_sensor";
    private static final String lidarJointTopic = multisense_namespace + "/joint_states";
@@ -365,9 +363,9 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
 
    private void setupStaticTransformsForRos()
    {
-      Quat4d orientation = new Quat4d();
-      Vector3d translation = new Vector3d(0.183585961, 0.0, 0.075353826);
-      RotationTools.convertYawPitchRollToQuaternion(0.0, 0.130899694, -Math.PI, orientation);
+      Quaternion orientation = new Quaternion();
+      Vector3D translation = new Vector3D(0.183585961, 0.0, 0.075353826);
+      orientation.setYawPitchRoll(0.0, 0.130899694, -Math.PI);
       RigidBodyTransform staticTransform = new RigidBodyTransform(orientation, translation);
       ImmutableTriple<String, String, RigidBodyTransform> headToHeadRootStaticTransform = new ImmutableTriple<String, String, RigidBodyTransform>("upperNeckPitchLink", "multisense/head_root",
             staticTransform);

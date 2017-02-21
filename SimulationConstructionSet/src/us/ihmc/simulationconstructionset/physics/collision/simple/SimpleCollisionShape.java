@@ -1,8 +1,8 @@
 
 package us.ihmc.simulationconstructionset.physics.collision.simple;
 
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.geometry.BoundingBox3d;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.simulationconstructionset.physics.CollisionShape;
 import us.ihmc.simulationconstructionset.physics.CollisionShapeDescription;
 

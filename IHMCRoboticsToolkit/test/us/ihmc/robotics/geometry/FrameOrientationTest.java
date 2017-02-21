@@ -5,17 +5,18 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Random;
 
-import javax.vecmath.AxisAngle4d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
+import us.ihmc.euclid.tools.EuclidCoreTestTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.testing.JUnitTools;
 
 public class FrameOrientationTest
 {
@@ -28,7 +29,7 @@ public class FrameOrientationTest
    public void setUp() throws Exception
    {
       testTransform = new RigidBodyTransform();
-      testTransform.setTranslation(new Vector3d(0.0, 0.0, 1.0));
+      testTransform.setTranslation(new Vector3D(0.0, 0.0, 1.0));
       testTransform.setRotationRollAndZeroTranslation(0.2);
       testTransform.setRotationPitchAndZeroTranslation(0.6);
       testTransform.setRotationYawAndZeroTranslation(0.8);
@@ -82,10 +83,10 @@ public class FrameOrientationTest
 	      ReferenceFrame frameTwo = ReferenceFrame.generateRandomReferenceFrame("frameTwo", random, worldFrame);
 
 	      RigidBodyTransform transformFromOneToTwoOriginal = frameOne.getTransformToDesiredFrame(frameTwo);
-	      transformFromOneToTwoOriginal.setTranslation(new Vector3d());
+	      transformFromOneToTwoOriginal.setTranslation(new Vector3D());
 
 	      RigidBodyTransform transformFromTwoToOneOriginal = frameTwo.getTransformToDesiredFrame(frameOne);
-	      transformFromTwoToOneOriginal.setTranslation(new Vector3d());
+	      transformFromTwoToOneOriginal.setTranslation(new Vector3D());
 
 	      FrameOrientation orientationOne = new FrameOrientation(frameOne);
 	      FrameOrientation orientationTwo = new FrameOrientation(frameTwo);
@@ -116,14 +117,14 @@ public class FrameOrientationTest
 	      expectedFromTwoToOne.getTransform3D(transformFromTwoToOneExpected);
 
 
-		   RigidBodyTransformTest.assertTransformEquals(transformFromOneToTwoOriginal, transformFromOneToTwoExpected, 1e-7);
-		   RigidBodyTransformTest.assertTransformEquals(transformFromOneToTwoOriginal, transformFromOneToTwo, 1e-7);
+		   EuclidCoreTestTools.assertRigidBodyTransformEquals(transformFromOneToTwoOriginal, transformFromOneToTwoExpected, 1e-7);
+		   EuclidCoreTestTools.assertRigidBodyTransformEquals(transformFromOneToTwoOriginal, transformFromOneToTwo, 1e-7);
 
-		   RigidBodyTransformTest.assertTransformEquals(transformFromTwoToOneOriginal, transformFromTwoToOneExpected, 1e-7);
-		   RigidBodyTransformTest.assertTransformEquals(transformFromTwoToOneOriginal, transformFromTwoToOne, 1e-7);
+		   EuclidCoreTestTools.assertRigidBodyTransformEquals(transformFromTwoToOneOriginal, transformFromTwoToOneExpected, 1e-7);
+		   EuclidCoreTestTools.assertRigidBodyTransformEquals(transformFromTwoToOneOriginal, transformFromTwoToOne, 1e-7);
 
-	      JUnitTools.assertQuaternionsEqualUsingDifference(fromOneToTwo.getQuaternionCopy(), expectedFromOneToTwo.getQuaternionCopy(), 1e-3);
-	      JUnitTools.assertQuaternionsEqualUsingDifference(fromTwoToOne.getQuaternionCopy(), expectedFromTwoToOne.getQuaternionCopy(), 1e-3);
+	      EuclidCoreTestTools.assertQuaternionEqualsUsingDifference(fromOneToTwo.getQuaternionCopy(), expectedFromOneToTwo.getQuaternionCopy(), 1e-3);
+	      EuclidCoreTestTools.assertQuaternionEqualsUsingDifference(fromTwoToOne.getQuaternionCopy(), expectedFromTwoToOne.getQuaternionCopy(), 1e-3);
 	   }
 	}
 
@@ -267,35 +268,37 @@ public class FrameOrientationTest
 
       for (int i = 0; i < 100000; i ++)
       {
-         RigidBodyTransform originalTransform = RigidBodyTransform.generateRandomTransform(random);
+         RigidBodyTransform originalTransform = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
          originalTransform.setTranslation(0.0, 0.0, 0.0);
          ReferenceFrame randomFrame_A = ReferenceFrame.generateRandomReferenceFrame("randomFrameA" + i, random, worldFrame);
          ReferenceFrame randomFrame_B = ReferenceFrame.generateRandomReferenceFrame("randomFrameB" + i, random, worldFrame);
          RigidBodyTransform randomTransformToWorld = randomFrame_B.getTransformToDesiredFrame(worldFrame);
          randomTransformToWorld.setTranslation(0.0, 0.0, 0.0);
-         Quat4d randomQuaternionForTransformToWorld = new Quat4d();
+         Quaternion randomQuaternionForTransformToWorld = new Quaternion();
          randomTransformToWorld.getRotation(randomQuaternionForTransformToWorld);
 
          testedFrameOrientation.setIncludingFrame(randomFrame_B, originalTransform);
          testedFrameOrientation.applyTransform(randomTransformToWorld);
          testedFrameOrientation.getTransform3D(actualTransformedTransform);
 
-         expectedTransformedTransform.multiply(randomTransformToWorld, originalTransform);
+         expectedTransformedTransform.set(randomTransformToWorld);
+         expectedTransformedTransform.multiply(originalTransform);
          
-         RigidBodyTransformTest.assertTransformEquals(expectedTransformedTransform, actualTransformedTransform, epsilon);
+         EuclidCoreTestTools.assertRigidBodyTransformEquals(expectedTransformedTransform, actualTransformedTransform, epsilon);
 
          RigidBodyTransform randomTransformToA = randomFrame_B.getTransformToDesiredFrame(randomFrame_A);
          randomTransformToA.setTranslation(0.0, 0.0, 0.0);
-         Quat4d randomQuaternionForTransformToA = new Quat4d();
+         Quaternion randomQuaternionForTransformToA = new Quaternion();
          randomTransformToA.getRotation(randomQuaternionForTransformToA);
 
          testedFrameOrientation.setIncludingFrame(randomFrame_B, originalTransform);
          testedFrameOrientation.applyTransform(randomTransformToA);
          testedFrameOrientation.getTransform3D(actualTransformedTransform);
 
-         expectedTransformedTransform.multiply(randomTransformToA, originalTransform);
+         expectedTransformedTransform.set(randomTransformToA);
+         expectedTransformedTransform.multiply(originalTransform);
 
-         RigidBodyTransformTest.assertTransformEquals(expectedTransformedTransform, actualTransformedTransform, epsilon);
+         EuclidCoreTestTools.assertRigidBodyTransformEquals(expectedTransformedTransform, actualTransformedTransform, epsilon);
       }
    }
 
@@ -314,35 +317,37 @@ public class FrameOrientationTest
 
       for (int i = 0; i < 100000; i ++)
       {
-         RigidBodyTransform originalTransform = RigidBodyTransform.generateRandomTransform(random);
+         RigidBodyTransform originalTransform = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
          originalTransform.setTranslation(0.0, 0.0, 0.0);
          ReferenceFrame randomFrame_A = ReferenceFrame.generateRandomReferenceFrame("randomFrameA" + i, random, worldFrame);
          ReferenceFrame randomFrame_B = ReferenceFrame.generateRandomReferenceFrame("randomFrameB" + i, random, worldFrame);
          RigidBodyTransform randomTransformToWorld = randomFrame_B.getTransformToDesiredFrame(worldFrame);
          randomTransformToWorld.setTranslation(0.0, 0.0, 0.0);
-         Quat4d randomQuaternionForTransformToWorld = new Quat4d();
+         Quaternion randomQuaternionForTransformToWorld = new Quaternion();
          randomTransformToWorld.getRotation(randomQuaternionForTransformToWorld);
 
          testedFrameOrientation.setIncludingFrame(randomFrame_B, originalTransform);
          testedFrameOrientation.changeFrame(worldFrame);
          testedFrameOrientation.getTransform3D(actualTransformedTransform);
 
-         expectedTransformedTransform.multiply(randomTransformToWorld, originalTransform);
+         expectedTransformedTransform.set(randomTransformToWorld);
+         expectedTransformedTransform.multiply(originalTransform);
          
-         RigidBodyTransformTest.assertTransformEquals(expectedTransformedTransform, actualTransformedTransform, epsilon);
+         EuclidCoreTestTools.assertRigidBodyTransformEquals(expectedTransformedTransform, actualTransformedTransform, epsilon);
 
          RigidBodyTransform randomTransformToA = randomFrame_B.getTransformToDesiredFrame(randomFrame_A);
          randomTransformToA.setTranslation(0.0, 0.0, 0.0);
-         Quat4d randomQuaternionForTransformToA = new Quat4d();
+         Quaternion randomQuaternionForTransformToA = new Quaternion();
          randomTransformToA.getRotation(randomQuaternionForTransformToA);
 
          testedFrameOrientation.setIncludingFrame(randomFrame_B, originalTransform);
          testedFrameOrientation.changeFrame(randomFrame_A);
          testedFrameOrientation.getTransform3D(actualTransformedTransform);
 
-         expectedTransformedTransform.multiply(randomTransformToA, originalTransform);
+         expectedTransformedTransform.set(randomTransformToA);
+         expectedTransformedTransform.multiply(originalTransform);
 
-         RigidBodyTransformTest.assertTransformEquals(expectedTransformedTransform, actualTransformedTransform, epsilon);
+         EuclidCoreTestTools.assertRigidBodyTransformEquals(expectedTransformedTransform, actualTransformedTransform, epsilon);
       }
    }
 
@@ -363,19 +368,19 @@ public class FrameOrientationTest
 
 	public static void assertFrameOrientationEquals(FrameOrientation ori1, FrameOrientation ori2, double angleTolerance)
 	{
-		AxisAngle4d axisAngle = computeDifferenceAxisAngle(ori1, ori2);
+		AxisAngle axisAngle = computeDifferenceAxisAngle(ori1, ori2);
 		double angle = Math.abs(axisAngle.getAngle());
 		assertTrue("difference angle: " + angle + " is greater than tolerance: " + angleTolerance, angle < angleTolerance);
 	}
 
-	public static AxisAngle4d computeDifferenceAxisAngle(FrameOrientation initialOrientation, FrameOrientation finalOrientation)
+	public static AxisAngle computeDifferenceAxisAngle(FrameOrientation initialOrientation, FrameOrientation finalOrientation)
 	{
 		initialOrientation.checkReferenceFrameMatch(finalOrientation);
-		Quat4d qDifference = initialOrientation.getQuaternionCopy();
-		Quat4d q2 = finalOrientation.getQuaternionCopy();
+		Quaternion qDifference = initialOrientation.getQuaternionCopy();
+		Quaternion q2 = finalOrientation.getQuaternionCopy();
 		qDifference.inverse();
-		qDifference.mul(q2);
-		AxisAngle4d axisAngle = new AxisAngle4d();
+		qDifference.multiply(q2);
+		AxisAngle axisAngle = new AxisAngle();
 		axisAngle.set(qDifference);
 		return axisAngle;
 	}

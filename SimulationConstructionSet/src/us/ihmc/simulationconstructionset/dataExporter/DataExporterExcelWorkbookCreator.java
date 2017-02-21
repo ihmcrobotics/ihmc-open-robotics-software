@@ -6,10 +6,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
 import jxl.Cell;
 import jxl.Workbook;
 import jxl.write.DateTime;
@@ -22,6 +18,12 @@ import jxl.write.WritableFont;
 import jxl.write.WritableSheet;
 import jxl.write.WritableWorkbook;
 import jxl.write.WriteException;
+import us.ihmc.euclid.matrix.Matrix3D;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.robotics.MathTools;
+import us.ihmc.robotics.geometry.Direction;
+import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.simulationconstructionset.DataBuffer;
 import us.ihmc.simulationconstructionset.DataBufferEntry;
 import us.ihmc.simulationconstructionset.FloatingJoint;
@@ -31,9 +33,6 @@ import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.PinJoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.tools.io.printing.PrintTools;
-import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.geometry.Direction;
-import us.ihmc.robotics.math.frames.YoFramePoint;
 
 public class DataExporterExcelWorkbookCreator
 {
@@ -134,7 +133,7 @@ public class DataExporterExcelWorkbookCreator
       row++;
 
       addStringToSheet(infoSheet, labelColumn, row, "Total mass [kg]: ", headerCellFormat);
-      addNumberToSheet(infoSheet, dataColumn, row, robot.computeCenterOfMass(new Point3d()));
+      addNumberToSheet(infoSheet, dataColumn, row, robot.computeCenterOfMass(new Point3D()));
       row++;
 
       addStringToSheet(infoSheet, labelColumn, row, "Run time [s]: ", headerCellFormat);
@@ -200,8 +199,8 @@ public class DataExporterExcelWorkbookCreator
    private double computeMechanicalCostOfTransport()
    {
       double cot = computeTotalMechanicalEnergy();
-      double robotMass = robot.computeCenterOfMass(new Point3d());
-      Vector3d gravity = new Vector3d();
+      double robotMass = robot.computeCenterOfMass(new Point3D());
+      Vector3D gravity = new Vector3D();
       robot.getGravity(gravity);
       // Get the distance traveled through a random GroundContactPoint assuming it is attached to the robot
       // TODO: it would be way nicer to get access to the actual robot position
@@ -223,7 +222,7 @@ public class DataExporterExcelWorkbookCreator
          zPosition = dataBuffer.getEntry(yoPosition.getYoZ()).getData();
       }
       int dataLength = xPosition.length;
-      Vector3d totalDistance = new Vector3d();
+      Vector3D totalDistance = new Vector3D();
       totalDistance.setX(xPosition[dataLength-1]-xPosition[0]);
       totalDistance.setY(yPosition[dataLength-1]-yPosition[0]);
       totalDistance.setZ(zPosition[dataLength-1]-zPosition[0]);
@@ -334,7 +333,7 @@ public class DataExporterExcelWorkbookCreator
          addStringToSheet(configDataSheet, column++, row, linkName);
 
          // Link offset
-         Vector3d offset = new Vector3d();
+         Vector3D offset = new Vector3D();
          joint.getOffset(offset);
 
          for (Direction direction : Direction.values())
@@ -349,7 +348,7 @@ public class DataExporterExcelWorkbookCreator
          addNumberToSheet(configDataSheet, column++, row, mass);
 
          // CoM offset
-         Vector3d comOffset = new Vector3d();
+         Vector3D comOffset = new Vector3D();
          link.getComOffset(comOffset);
 
          for (Direction direction : Direction.values())
@@ -359,7 +358,7 @@ public class DataExporterExcelWorkbookCreator
          }
 
          // Mass moment of inertia
-         Matrix3d momentOfInertia = new Matrix3d();
+         Matrix3D momentOfInertia = new Matrix3D();
          link.getMomentOfInertia(momentOfInertia);
 
          for (int i = 0; i < 3; i++)

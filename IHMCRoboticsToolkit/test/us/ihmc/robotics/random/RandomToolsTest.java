@@ -7,13 +7,12 @@ import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.Random;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Point3f;
-import javax.vecmath.Vector3d;
-
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Point3D32;
+import us.ihmc.euclid.tuple3D.Vector3D;
 
 public class RandomToolsTest
 {
@@ -65,9 +64,9 @@ public class RandomToolsTest
    {
       Random random = new Random();
 
-      Point3f min = new Point3f(-7.0f, -5.0f, -6.0f);
-      Point3f max = new Point3f(5.0f, 4.0f, 8.0f);
-      Point3f randomPoint3f;
+      Point3D32 min = new Point3D32(-7.0f, -5.0f, -6.0f);
+      Point3D32 max = new Point3D32(5.0f, 4.0f, 8.0f);
+      Point3D32 randomPoint3f;
 
       for (int i = 0; i < 1000; i++)
       {
@@ -85,9 +84,9 @@ public class RandomToolsTest
    {
       Random random = new Random();
 
-      Point3f min = new Point3f(-7.0f, -5.0f, -6.0f);
-      Point3f max = new Point3f(5.0f, 4.0f, 8.0f);
-      Point3f[] randomPoint3fCloud = RandomTools.generateRandomPoint3fCloud(random, 1000, min, max);
+      Point3D32 min = new Point3D32(-7.0f, -5.0f, -6.0f);
+      Point3D32 max = new Point3D32(5.0f, 4.0f, 8.0f);
+      Point3D32[] randomPoint3fCloud = RandomTools.generateRandomPoint3fCloud(random, 1000, min, max);
 
       for (int i = 0; i < 1000; i++)
       {
@@ -107,7 +106,7 @@ public class RandomToolsTest
 
       for (int i = 0; i < 25; i++)
       {
-         Point3d point = RandomTools.generateRandomPoint3d(random, range1, range2);
+         Point3D point = RandomTools.generateRandomPoint3d(random, range1, range2);
          assertTrue(range1[0] < point.getX() && point.getX() < range2[0]);
          assertTrue(range1[1] < point.getY() && point.getY() < range2[1]);
          assertTrue(range1[2] < point.getZ() && point.getZ() < range2[2]);
@@ -119,12 +118,12 @@ public class RandomToolsTest
    public void testGenerateRandomVector3d()
    {
       Random random = new Random(4876L);
-      Point3d boundary1 = new Point3d(0.0, 0.0, 0.0);
-      Point3d boundary2 = new Point3d(12, 12, 12);
+      Point3D boundary1 = new Point3D(0.0, 0.0, 0.0);
+      Point3D boundary2 = new Point3D(12, 12, 12);
 
       for (int i = 0; i < 25; i++)
       {
-         Vector3d vector = RandomTools.generateRandomVector(random, boundary1, boundary2);
+         Vector3D vector = RandomTools.generateRandomVector(random, boundary1, boundary2);
          assertTrue(boundary1.getX() < vector.getX() && vector.getX() < boundary2.getX());
          assertTrue(boundary1.getY() < vector.getY() && vector.getY() < boundary2.getY());
          assertTrue(boundary1.getZ() < vector.getZ() && vector.getZ() < boundary2.getZ());
@@ -140,8 +139,8 @@ public class RandomToolsTest
       for (int i = 0; i < 100; i++)
       {
          double length = RandomTools.generateRandomDouble(random, 0.1, 100.0);
-         Vector3d vector = RandomTools.generateRandomVector(random, length);
-         Vector3d orthoVector = RandomTools.generateRandomOrthogonalVector3d(random, vector, true);
+         Vector3D vector = RandomTools.generateRandomVector(random, length);
+         Vector3D orthoVector = RandomTools.generateRandomOrthogonalVector3d(random, vector, true);
 
          assertEquals(0.0, vector.dot(orthoVector), 1.0e-12);
          assertEquals(1.0, orthoVector.length(), 1.0e-12);

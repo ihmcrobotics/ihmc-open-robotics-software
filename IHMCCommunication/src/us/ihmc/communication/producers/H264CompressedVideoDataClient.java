@@ -3,13 +3,12 @@ package us.ihmc.communication.producers;
 import java.awt.image.BufferedImage;
 import java.nio.ByteBuffer;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-
+import boofcv.struct.calib.IntrinsicParameters;
 import us.ihmc.codecs.generated.YUVPicture;
 import us.ihmc.codecs.h264.OpenH264Decoder;
 import us.ihmc.codecs.yuv.YUVPictureConverter;
-import boofcv.struct.calib.IntrinsicParameters;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 
 public class H264CompressedVideoDataClient implements CompressedVideoDataClient
 {
@@ -27,7 +26,7 @@ public class H264CompressedVideoDataClient implements CompressedVideoDataClient
    }
 
    @Override
-   public synchronized void consumeObject(byte[] data, Point3d position, Quat4d orientation, IntrinsicParameters intrinsicParameters)
+   public synchronized void consumeObject(byte[] data, Point3D position, Quaternion orientation, IntrinsicParameters intrinsicParameters)
    {
       nalBuffer.clear();
       nalBuffer.put(data);
