@@ -392,7 +392,7 @@ public class NewtonsCradleSimulation
       double initialCapsuleRoll = -Math.PI / 32.0;
       double initialBoxRoll = -Math.PI / 64.0;
       double initialVelocity = 0.0;
-      double initialRotationalVelocity = 2.0;
+      double initialRotationalVelocity = 8.0;
 
       RobotFromDescription ballRobot = createASingleBallRobot(ballRadius, ballMass, ballRadiusOfGyrationPercent);
       robots.add(ballRobot);
@@ -463,7 +463,7 @@ public class NewtonsCradleSimulation
       SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters();
       parameters.setDataBufferSize(8000);
       SimulationConstructionSet scs = new SimulationConstructionSet(robotArray, parameters);
-      scs.setDT(0.0001, 1);
+      scs.setDT(0.0001, 10);
       scs.setFastSimulate(true);
       scs.setGroundVisible(false);
 
@@ -648,11 +648,13 @@ public class NewtonsCradleSimulation
 
    public static void createPileOfRandomObjectsSimulation()
    {
+      int numberOfObjects = 40;
+
       PileOfRandomObjectsRobot pileOfRandomObjectsRobot = new PileOfRandomObjectsRobot();
-      pileOfRandomObjectsRobot.setNumberOfObjects(40);
+      pileOfRandomObjectsRobot.setNumberOfObjects(numberOfObjects);
       ArrayList<Robot> robots = pileOfRandomObjectsRobot.createAndGetRobots();
 
-      int estimatedNumberOfContactPoints = 50 * 16;//500;
+      int estimatedNumberOfContactPoints = 2 * numberOfObjects * 16;//500;
       GroundAsABoxRobot groundAsABoxRobot = new GroundAsABoxRobot();
       groundAsABoxRobot.setEstimatedNumberOfContactPoints(estimatedNumberOfContactPoints);
       groundAsABoxRobot.setAddWalls(true);
@@ -709,10 +711,10 @@ public class NewtonsCradleSimulation
       //            createBoxDownRampSimulation();
       //            createRowOfDominosSimulation();
       //      createStackOfBlocksSimulation();
-      //      createRollingObjectsSimulation();
+//            createRollingObjectsSimulation();
             createSpinningAndDroppingObjectsSimulation();
 //      createTeeteringEdgeToEdgeContactSimulation();
-      //      createPileOfRandomObjectsSimulation();
+//            createPileOfRandomObjectsSimulation();
    }
 
 }
