@@ -20,8 +20,8 @@ import java.util.Random;
 
 import org.junit.Test;
 
+import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.tools.testing.MutationTestingTools;
 
 public class ListWrappingIndexToolsTest
 {
@@ -383,8 +383,6 @@ public class ListWrappingIndexToolsTest
 
    public static void main(String[] args) throws URISyntaxException, IOException
    {
-      String targetTests = "us.ihmc.robotEnvironmentAwareness.geometry.ListWrappingIndexToolsTest";
-      String targetClasses = "us.ihmc.robotEnvironmentAwareness.geometry.ListWrappingIndexTools";
-      MutationTestingTools.doPITMutationTestAndOpenResult(targetTests, targetClasses);
+      MutationTestFacilitator.facilitateMutationTestForClass(ListWrappingIndexTools.class, ListWrappingIndexToolsTest.class);
    }
 }

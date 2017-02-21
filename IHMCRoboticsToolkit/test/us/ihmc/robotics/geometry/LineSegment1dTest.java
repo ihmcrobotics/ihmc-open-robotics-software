@@ -8,13 +8,13 @@ import java.util.Random;
 
 import org.junit.Test;
 
+import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.random.RandomTools;
-import us.ihmc.tools.testing.MutationTestingTools;
 
 public class LineSegment1dTest
 {
@@ -410,9 +410,7 @@ public class LineSegment1dTest
 
    public static void main(String[] args)
    {
-      String targetTests = "us.ihmc.robotics.geometry.LineSegment1dTest";
-      String targetClasses = "us.ihmc.robotics.geometry.LineSegment1d";
-      MutationTestingTools.doPITMutationTestAndOpenResult(targetTests, targetClasses);
+      MutationTestFacilitator.facilitateMutationTestForClass(LineSegment1d.class, LineSegment1dTest.class);
    }
 
 }

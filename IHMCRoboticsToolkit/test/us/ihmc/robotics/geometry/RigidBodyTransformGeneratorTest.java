@@ -4,11 +4,11 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
+import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.Axis;
-import us.ihmc.tools.testing.MutationTestingTools;
 
 public class RigidBodyTransformGeneratorTest
 {
@@ -128,8 +128,6 @@ public class RigidBodyTransformGeneratorTest
 
    public static void main(String[] args)
    {
-      String targetTests = "us.ihmc.robotics.geometry.RigidBodyTransformGeneratorTest";
-      String targetClasses = "us.ihmc.robotics.geometry.RigidBodyTransformGenerator";
-      MutationTestingTools.doPITMutationTestAndOpenResult(targetTests, targetClasses);
+      MutationTestFacilitator.facilitateMutationTestForClass(RigidBodyTransformGenerator.class, RigidBodyTransformGeneratorTest.class);
    }
 }
