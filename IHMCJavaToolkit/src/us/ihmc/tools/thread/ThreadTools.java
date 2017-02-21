@@ -89,7 +89,6 @@ public class ThreadTools
       // If the thread was interrupted while sleeping, make sure to interrupt it again.
       if (wasInterrupted)
       {
-         System.out.println("was interrupted. interrupting again");
          Thread.currentThread().interrupt();
       }
    }

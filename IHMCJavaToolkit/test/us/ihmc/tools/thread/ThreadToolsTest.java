@@ -90,7 +90,6 @@ public class ThreadToolsTest
       final StateHolder holder = new StateHolder();
       for (int i = 0; i < 10; i++)
       {
-         System.out.println("i = " + i);
          holder.state = State.DIDNT_RUN;
          ThreadTools.executeWithTimeout("timeoutTest1", new Runnable()
          {
@@ -237,7 +236,6 @@ public class ThreadToolsTest
          catch (InterruptedException e)
          {
             wasInterruptedDuringSecondSleep = true;
-            System.out.println("Interrupted during second sleep!");
          }
       }
    }
