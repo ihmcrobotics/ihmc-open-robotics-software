@@ -35,7 +35,6 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
 import us.ihmc.commons.Conversions;
 import us.ihmc.euclid.matrix.Matrix3D;
-import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.FootstepPlanningParameterization;
@@ -68,6 +67,7 @@ import us.ihmc.robotics.robotController.OutputProcessor;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotiq.control.RobotiqHandCommandManager;
 import us.ihmc.robotiq.model.RobotiqHandModel;
 import us.ihmc.robotiq.simulatedHand.SimulatedRobotiqHandsController;
@@ -100,7 +100,6 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
 
    private static final double ATLAS_ONBOARD_SAMPLINGFREQ = 1000.0;
    public static final double ATLAS_ONBOARD_DT = 1.0 / ATLAS_ONBOARD_SAMPLINGFREQ;
-   private static final boolean USE_WHOLE_BODY_IK = true;
 
    public static final boolean BATTERY_MASS_SIMULATOR_IN_ROBOT = false;
 
@@ -143,7 +142,9 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
 
       this.loader = DRCRobotSDFLoader.loadDRCRobot(selectedVersion.getResourceDirectories(), selectedVersion.getSdfFileAsStream(), this);
 
-      for (String forceSensorNames : AtlasSensorInformation.forceSensorNames)
+      sensorInformation = new AtlasSensorInformation(atlasVersion, target);
+
+      for (String forceSensorNames : sensorInformation.getForceSensorNames())
       {
          loader.addForceSensor(jointMap, forceSensorNames, forceSensorNames, new RigidBodyTransform());
       }
@@ -151,7 +152,6 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
       boolean runningOnRealRobot = target == DRCRobotModel.RobotTarget.REAL_ROBOT;
       capturePointPlannerParameters = new AtlasCapturePointPlannerParameters(atlasPhysicalProperties);
       icpOptimizationParameters = new AtlasICPOptimizationParameters(runningOnRealRobot);
-      sensorInformation = new AtlasSensorInformation(target);
       armControllerParameters = new AtlasArmControllerParameters(runningOnRealRobot, jointMap);
       walkingControllerParameters = new AtlasWalkingControllerParameters(target, jointMap);
       stateEstimatorParameters = new AtlasStateEstimatorParameters(jointMap, sensorInformation, runningOnRealRobot, getEstimatorDT());
@@ -295,8 +295,12 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
 
          for (ArmJointName armJointName : armJointNames)
          {
-            double lowerLimit = fullRobotModel.getArmJoint(robotSide, armJointName).getJointLimitLower();
-            double upperLimit = fullRobotModel.getArmJoint(robotSide, armJointName).getJointLimitUpper();
+            OneDoFJoint armJoint = fullRobotModel.getArmJoint(robotSide, armJointName);
+            if (armJoint == null)
+               continue;
+
+            double lowerLimit = armJoint.getJointLimitLower();
+            double upperLimit = armJoint.getJointLimitUpper();
 
             double range = upperLimit - lowerLimit;
 
@@ -306,8 +310,8 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
                double safeUpperBound = upperLimit - HARDSTOP_RESTRICTION_ANGLE;
 
 
-               fullRobotModel.getArmJoint(robotSide, armJointName).setJointLimitLower(safeLowerBound);
-               fullRobotModel.getArmJoint(robotSide, armJointName).setJointLimitUpper(safeUpperBound);
+               armJoint.setJointLimitLower(safeLowerBound);
+               armJoint.setJointLimitUpper(safeUpperBound);
             }
             else
             {
@@ -492,7 +496,10 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    @Override
    public String getSimpleRobotName()
    {
-      return "Atlas";
+      if (selectedVersion != AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_FOREARMS)
+         return "Atlas";
+      else
+         return "AtlasNoForearms"; // This String is notably used in the UI to figure out if Atlas has the forearms on.
    }
 
    @Override

@@ -14,6 +14,7 @@ public enum AtlasRobotVersion
 {
    ATLAS_UNPLUGGED_V5_NO_HANDS,
    ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ,
+   ATLAS_UNPLUGGED_V5_NO_FOREARMS,
    ATLAS_UNPLUGGED_V5_INVISIBLE_CONTACTABLE_PLANE_HANDS,
    ATLAS_UNPLUGGED_V5_ROBOTIQ_AND_SRI,
    ATLAS_UNPLUGGED_V5_TROOPER;
@@ -25,27 +26,28 @@ public enum AtlasRobotVersion
    {
       switch (this)
       {
-         case ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ:
-         case ATLAS_UNPLUGGED_V5_TROOPER:
-            return DRCHandType.ROBOTIQ;
-         case ATLAS_UNPLUGGED_V5_ROBOTIQ_AND_SRI:
-            return DRCHandType.ROBOTIQ_AND_SRI;
-         case ATLAS_UNPLUGGED_V5_NO_HANDS:
-         case ATLAS_UNPLUGGED_V5_INVISIBLE_CONTACTABLE_PLANE_HANDS:
-         default:
-            return DRCHandType.NONE;
+      case ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ:
+      case ATLAS_UNPLUGGED_V5_TROOPER:
+         return DRCHandType.ROBOTIQ;
+      case ATLAS_UNPLUGGED_V5_ROBOTIQ_AND_SRI:
+         return DRCHandType.ROBOTIQ_AND_SRI;
+      case ATLAS_UNPLUGGED_V5_NO_HANDS:
+      case ATLAS_UNPLUGGED_V5_NO_FOREARMS:
+      case ATLAS_UNPLUGGED_V5_INVISIBLE_CONTACTABLE_PLANE_HANDS:
+      default:
+         return DRCHandType.NONE;
       }
    }
-   
+
    public double getDistanceAttachmentPlateHand()
    {
       switch (this)
       {
-         case ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ:
-         case ATLAS_UNPLUGGED_V5_ROBOTIQ_AND_SRI:
-            return 0.16;
-         default:
-            return 0.0;
+      case ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ:
+      case ATLAS_UNPLUGGED_V5_ROBOTIQ_AND_SRI:
+         return 0.16;
+      default:
+         return 0.0;
       }
    }
 
@@ -53,22 +55,23 @@ public enum AtlasRobotVersion
    {
       return getHandModel() == DRCHandType.ROBOTIQ || getHandModel() == DRCHandType.ROBOTIQ_AND_SRI;
    }
-   
 
    public String getSdfFile()
    {
       switch (this)
       {
-         case ATLAS_UNPLUGGED_V5_INVISIBLE_CONTACTABLE_PLANE_HANDS:
-         case ATLAS_UNPLUGGED_V5_NO_HANDS:
-            return "models/GFE/atlas_unplugged_v5.sdf";
-         case ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ:
-         case ATLAS_UNPLUGGED_V5_ROBOTIQ_AND_SRI:
-            return "models/GFE/atlas_unplugged_v5_dual_robotiq.sdf";
-         case ATLAS_UNPLUGGED_V5_TROOPER:
-            return "models/GFE/atlas_unplugged_v5_trooper.sdf";
-         default:
-            throw new RuntimeException("AtlasRobotVersion: Unimplemented enumeration case : " + this);
+      case ATLAS_UNPLUGGED_V5_INVISIBLE_CONTACTABLE_PLANE_HANDS:
+      case ATLAS_UNPLUGGED_V5_NO_HANDS:
+         return "models/GFE/atlas_unplugged_v5.sdf";
+      case ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ:
+      case ATLAS_UNPLUGGED_V5_ROBOTIQ_AND_SRI:
+         return "models/GFE/atlas_unplugged_v5_dual_robotiq.sdf";
+      case ATLAS_UNPLUGGED_V5_NO_FOREARMS:
+         return "models/GFE/atlas_unplugged_v5_no_forearms.sdf";
+      case ATLAS_UNPLUGGED_V5_TROOPER:
+         return "models/GFE/atlas_unplugged_v5_trooper.sdf";
+      default:
+         throw new RuntimeException("AtlasRobotVersion: Unimplemented enumeration case : " + this);
       }
    }
 
@@ -76,7 +79,7 @@ public enum AtlasRobotVersion
    {
       if (resourceDirectories == null)
       {
-         resourceDirectories = new String[] { "models/GFE/" };
+         resourceDirectories = new String[] {"models/GFE/"};
       }
       return resourceDirectories;
    }
@@ -103,7 +106,7 @@ public enum AtlasRobotVersion
          float[] angles = new float[3];
          if (hasRobotiqHands())
          {
-            centerOfHandToWristTranslation = new Vector3f((float)getDistanceAttachmentPlateHand(), robotSide.negateIfLeftSide(0f), 0f);
+            centerOfHandToWristTranslation = new Vector3f((float) getDistanceAttachmentPlateHand(), robotSide.negateIfLeftSide(0f), 0f);
             angles[0] = (float) robotSide.negateIfLeftSide(Math.toRadians(0));
             angles[1] = 0.0f;
             angles[2] = (float) robotSide.negateIfLeftSide(Math.toRadians(0));
@@ -118,4 +121,3 @@ public enum AtlasRobotVersion
       return "atlas";
    }
 }
-
