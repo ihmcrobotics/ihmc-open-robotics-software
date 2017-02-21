@@ -10,26 +10,21 @@ import us.ihmc.simulationconstructionset.util.environments.PlanarRegionsListDefi
 import us.ihmc.simulationconstructionset.util.environments.SelectableObjectListener;
 import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 
-public class LittleWallsWithIncreasingHeightEnvironment implements CommonAvatarEnvironmentInterface
+public abstract class PlanarRegionEnvironmentInterface implements CommonAvatarEnvironmentInterface
 {
-   private final PlanarRegionsListDefinedEnvironment environment;
-   private final PlanarRegionsListGenerator generator;
+   protected PlanarRegionsListDefinedEnvironment environment;
+   protected final PlanarRegionsListGenerator generator;
    
-   public LittleWallsWithIncreasingHeightEnvironment()
+   public PlanarRegionEnvironmentInterface()
    {
       generator = new PlanarRegionsListGenerator();
-      
-      generator.translate(2.0, 0.0, -0.01);
-      generator.addCubeReferencedAtCenter(6.0, 1.0, 0.00005);
-      generator.translate(-2.0, 0.0, 0.0);
-      generator.translate(0.35, 0.2, 0.0);
-      generator.addCubeReferencedAtBottomMiddle(0.1, 0.1, 0.1);
-      generator.translate(0.62, 0.0, 0.0);
-      generator.addCubeReferencedAtBottomMiddle(0.1, 0.1, 0.14);
-      generator.translate(0.3, -0.3, 0.0);
-      generator.addCubeReferencedAtBottomMiddle(0.1, 0.1, 0.15);
-      generator.translate(0.4, 0.1, 0.0);
-      generator.addCubeReferencedAtBottomMiddle(0.1, 1.0, 0.11);
+   }
+   
+   protected abstract void buildGenerator(PlanarRegionsListGenerator generator);
+   
+   protected void generateEnvironment()
+   {
+      buildGenerator(generator);
       
       environment = new PlanarRegionsListDefinedEnvironment(generator.getPlanarRegionsList(), 1e-2, false);
    }
