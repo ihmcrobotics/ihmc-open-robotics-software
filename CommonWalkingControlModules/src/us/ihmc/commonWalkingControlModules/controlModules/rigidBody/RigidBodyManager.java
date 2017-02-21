@@ -73,14 +73,15 @@ public class RigidBodyManager
       hasBeenInitialized = new BooleanYoVariable(namePrefix + "Initialized", registry);
       hasBeenInitialized.set(false);
 
-      jointsOriginal = ScrewTools.createOneDoFJointPath(rootBody, bodyToControl);
+      OneDoFJoint[] jointsToControl = ScrewTools.createOneDoFJointPath(rootBody, bodyToControl);
+      jointsOriginal = jointsToControl;
       jointsAtDesiredPosition = ScrewTools.cloneOneDoFJointPath(rootBody, bodyToControl);
       initialJointPositions = new double[jointsOriginal.length];
 
       RigidBody elevator = humanoidControllerToolbox.getFullRobotModel().getElevator();
       jointspaceControlState = new RigidBodyJointspaceControlState(bodyName, jointsOriginal, yoTime, registry);
       taskspaceControlState = new RigidBodyTaskspaceControlState(bodyName, bodyToControl, rootBody, elevator, controlFrameMap, rootFrame, yoTime, registry);
-      userControlState = new RigidBodyUserControlState(bodyName, yoTime);
+      userControlState = new RigidBodyUserControlState(bodyName, jointsToControl, yoTime);
 
       setupStateMachine();
       parentRegistry.addChild(registry);
