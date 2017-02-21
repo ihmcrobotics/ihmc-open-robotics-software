@@ -1,5 +1,6 @@
 root*false*false
 root.RowOfDominosRobot*false*false
+root.ball*false*false
 root.GroundAsABoxRobot*false*false
 root.DefaultCollisionVisualizer*false*false
 root.DefaultCollisionVisualizer.CollisionOneBalls*false*false
