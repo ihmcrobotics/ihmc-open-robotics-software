@@ -7,6 +7,7 @@ import java.util.Random;
 
 import org.junit.Test;
 
+import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
@@ -15,7 +16,6 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Vector4D;
 import us.ihmc.robotics.math.Epsilons;
-import us.ihmc.tools.testing.MutationTestingTools;
 
 public class TwoWayRigidBodyTransformTest
 {
@@ -93,9 +93,7 @@ public class TwoWayRigidBodyTransformTest
    
    public static void main(String[] args)
    {
-      String targetTests = TwoWayRigidBodyTransformTest.class.getName();
-      String targetClassesInSamePackage = TwoWayRigidBodyTransform.class.getName();
-      MutationTestingTools.doPITMutationTestAndOpenResult(targetTests, targetClassesInSamePackage);
+      MutationTestFacilitator.facilitateMutationTestForClass(TwoWayRigidBodyTransform.class, TwoWayRigidBodyTransformTest.class);
    }
    
 }

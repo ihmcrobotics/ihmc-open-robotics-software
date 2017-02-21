@@ -13,6 +13,7 @@ import java.util.Random;
 import org.junit.Test;
 
 import us.ihmc.commons.Assertions;
+import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.commons.RunnableThatThrows;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
@@ -23,7 +24,6 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.testing.MutationTestingTools;
 
 /**
  * <p>Title: </p>
@@ -693,8 +693,6 @@ public class FramePointTest extends FrameTupleTest<Point3D>
 
    public static void main(String[] args)
    {
-      String targetTests = "us.ihmc.robotics.geometry.FramePointTest";
-      String targetClasses = "us.ihmc.robotics.geometry.FrameTuple,us.ihmc.robotics.geometry.FramePoint";
-      MutationTestingTools.doPITMutationTestAndOpenResult(targetTests, targetClasses);
+      MutationTestFacilitator.facilitateMutationTestForClass(FramePoint.class, FramePointTest.class);
    }
 }

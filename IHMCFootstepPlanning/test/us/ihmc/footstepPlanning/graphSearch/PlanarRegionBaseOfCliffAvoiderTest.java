@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
+import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -16,7 +17,6 @@ import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.tools.testing.MutationTestingTools;
 import us.ihmc.tools.thread.ThreadTools;
 
 public class PlanarRegionBaseOfCliffAvoiderTest
@@ -173,8 +173,6 @@ public class PlanarRegionBaseOfCliffAvoiderTest
 
    public static void main(String[] args)
    {
-      String targetTests = PlanarRegionBaseOfCliffAvoiderTest.class.getName();
-      String targetClassesInSamePackage = PlanarRegionBaseOfCliffAvoider.class.getName();
-      MutationTestingTools.doPITMutationTestAndOpenResult(targetTests, targetClassesInSamePackage);
+      MutationTestFacilitator.facilitateMutationTestForClass(PlanarRegionBaseOfCliffAvoider.class, PlanarRegionBaseOfCliffAvoiderTest.class);
    }
 }

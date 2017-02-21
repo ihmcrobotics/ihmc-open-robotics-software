@@ -5,12 +5,12 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
+import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.robotics.geometry.BoundingBox3d;
-import us.ihmc.tools.testing.MutationTestingTools;
 
 public class CylinderShapeDescriptionTest
 {
@@ -123,8 +123,6 @@ public class CylinderShapeDescriptionTest
 
    public static void main(String[] args)
    {
-      String targetTests = CylinderShapeDescriptionTest.class.getName();
-      String targetClassesInSamePackage = CylinderShapeDescription.class.getName();
-      MutationTestingTools.doPITMutationTestAndOpenResult(targetTests, targetClassesInSamePackage);
+      MutationTestFacilitator.facilitateMutationTestForClass(CylinderShapeDescription.class, CylinderShapeDescriptionTest.class);
    }
 }
