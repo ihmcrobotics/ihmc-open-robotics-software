@@ -21,6 +21,8 @@ public class SingleBoxRobotDescription
 
    private int collisionGroup = 0xffff;
    private int collisionMask = 0xffff;
+   private int estimatedNumberOfContactPoints = 6;
+
    private AppearanceDefinition appearance = YoAppearance.Aqua();
 
    public SingleBoxRobotDescription()
@@ -94,7 +96,7 @@ public class SingleBoxRobotDescription
       collisionMesh.addCubeReferencedAtCenter(xLength, yWidth, zHeight);
       collisionMesh.setCollisionGroup(collisionGroup);
       collisionMesh.setCollisionMask(collisionMask);
-      collisionMesh.setEstimatedNumberOfContactPoints(16);
+      collisionMesh.setEstimatedNumberOfContactPoints(estimatedNumberOfContactPoints);
       link.addCollisionMesh(collisionMesh);
 
       for (int i = 0; i < 8; i++)

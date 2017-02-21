@@ -17,7 +17,7 @@ import us.ihmc.simulationconstructionset.Robot;
 
 public class RowOfDominosRobot extends Robot
 {
-   public RowOfDominosRobot(int numberOfDominos)
+   public RowOfDominosRobot(int numberOfDominos, boolean firstDominoFalling)
    {
       super("RowOfDominosRobot");
 
@@ -75,7 +75,7 @@ public class RowOfDominosRobot extends Robot
          tempTransform2.multiply(nextDominoTransform);
          nextDominoTransform.set(tempTransform2);
 
-         if (i==0)
+         if ((firstDominoFalling) && (i==0))
          {
             floatingJoint.setAngularVelocityInBody(new Vector3D(0.0, 10.0, 0.0));
          }

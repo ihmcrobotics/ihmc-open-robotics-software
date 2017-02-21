@@ -173,15 +173,18 @@ public class Plotter implements PlotterInterface
          @Override
          protected void updateTransformToParent(RigidBodyTransform transformToParent)
          {
+            //this fixes a threading issue. Generating garbage on purpose.
+            RigidBodyTransform tempTransform = new RigidBodyTransform();
             screenPosition.changeFrame(pixelsFrame);
-            transformToParent.setIdentity();
+            tempTransform.setIdentity();
             tempTranslation.set(screenPosition.getX() + getPlotterWidthPixels() / 2.0, screenPosition.getY() - getPlotterHeightPixels() / 2.0, 0.0);
-            transformToParent.appendTranslation(tempTranslation);
-            transformToParent.appendYawRotation(screenRotation);
+            tempTransform.appendTranslation(tempTranslation);
+            tempTransform.appendYawRotation(screenRotation);
             tempTranslation.set(-getPlotterWidthPixels() / 2.0, getPlotterHeightPixels() / 2.0, 0.0);
-            transformToParent.appendTranslation(tempTranslation);
-            transformToParent.appendPitchRotation(Math.PI);
-            transformToParent.appendYawRotation(Math.PI);
+            tempTransform.appendTranslation(tempTranslation);
+            tempTransform.appendPitchRotation(Math.PI);
+            tempTransform.appendYawRotation(Math.PI);
+            transformToParent.set(tempTransform);
          }
       };
       metersFrame = new MetersReferenceFrame("metersFrame", ReferenceFrame.getWorldFrame(), spaceConverter)

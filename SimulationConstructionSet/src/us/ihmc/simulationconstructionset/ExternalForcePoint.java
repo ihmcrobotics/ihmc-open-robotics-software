@@ -12,6 +12,7 @@ public class ExternalForcePoint extends KinematicPoint
 {
    private static final long serialVersionUID = -7715587266631433612L;
 
+   // The force, impulse, and moment are all in world frame.
    private final YoFrameVector force;
    private final YoFrameVector moment;
    private final YoFrameVector impulse;
@@ -61,10 +62,10 @@ public class ExternalForcePoint extends KinematicPoint
    @Override
    public String toString()
    {
-      return ("name: " + name + "x: " + getX() + ", y: " + getY() + ", z: " + getZ());
+      return ("name: " + getName() + "x: " + getX() + ", y: " + getY() + ", z: " + getZ());
    }
 
-   public boolean isForceZero()
+   public boolean isForceAndMomentZero()
    {
       return ((force.getX() == 0.0) && (force.getY() == 0.0) && (force.getZ() == 0.0) && (moment.getX() == 0.0) && (moment.getY() == 0.0) && (moment.getZ() == 0.0));
    }
@@ -121,11 +122,11 @@ public class ExternalForcePoint extends KinematicPoint
 
       Rk_coll.set(this.parentJoint.physics.Ri_0);
       Rk_coll.multiply(R0_coll);
-      Matrix3D Ki_collision = parentJoint.physics.computeKiCollision(offsetFromCOM, Rk_coll);
+      Matrix3D Ki_collision = parentJoint.physics.computeKiCollision(tempVectorForOffsetFromCOM, Rk_coll);
 
       Rk_coll2.set(externalForcePoint.parentJoint.physics.Ri_0);
       Rk_coll2.multiply(R0_coll);
-      Matrix3D Ki_collision2 = externalForcePoint.parentJoint.physics.computeKiCollision(externalForcePoint.offsetFromCOM, Rk_coll2);
+      Matrix3D Ki_collision2 = externalForcePoint.parentJoint.physics.computeKiCollision(externalForcePoint.tempVectorForOffsetFromCOM, Rk_coll2);
 
       Ki_collision_total.add(Ki_collision, Ki_collision2);
       parentJoint.physics.integrateCollision(Ki_collision_total, u_coll, epsilon, mu, impulseInWorldToPack);    // Returns the impulse in collision coordinates
@@ -160,7 +161,7 @@ public class ExternalForcePoint extends KinematicPoint
       Rk_coll.set(this.parentJoint.physics.Ri_0);
       Rk_coll.multiply(R0_coll);
 
-      parentJoint.physics.resolveCollision(offsetFromCOM, Rk_coll, u_coll, epsilon, mu, impulseInWorldToPack);    // Returns the impulse in collision coordinates
+      parentJoint.physics.resolveCollision(tempVectorForOffsetFromCOM, Rk_coll, u_coll, epsilon, mu, impulseInWorldToPack);    // Returns the impulse in collision coordinates
 
       // Rotate into world coordinates:
       R0_coll.transform(impulseInWorldToPack);
@@ -186,7 +187,7 @@ public class ExternalForcePoint extends KinematicPoint
       Rk_coll.set(this.parentJoint.physics.Ri_0);
       Rk_coll.multiply(R0_coll);
 
-      parentJoint.physics.resolveMicroCollision(penetrationSquared, offsetFromCOM, Rk_coll, u_coll, epsilon, mu, impulseInWorldToPack);    // Returns the impulse in collision coordinates
+      parentJoint.physics.resolveMicroCollision(penetrationSquared, tempVectorForOffsetFromCOM, Rk_coll, u_coll, epsilon, mu, impulseInWorldToPack);    // Returns the impulse in collision coordinates
 
       // Rotate into world coordinates:
       R0_coll.transform(impulseInWorldToPack);
