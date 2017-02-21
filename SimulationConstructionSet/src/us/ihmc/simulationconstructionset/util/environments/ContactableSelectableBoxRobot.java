@@ -4,20 +4,11 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.EnumMap;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
-import us.ihmc.simulationconstructionset.FloatingJoint;
-import us.ihmc.simulationconstructionset.GroundContactPoint;
-import us.ihmc.simulationconstructionset.GroundContactPointGroup;
-import us.ihmc.simulationconstructionset.Link;
-import us.ihmc.tools.containers.EnumTools;
-import us.ihmc.tools.inputDevices.keyboard.Key;
-import us.ihmc.tools.inputDevices.keyboard.ModifierKeyInterface;
-import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
-import us.ihmc.robotics.geometry.shapes.Box3d;
-import us.ihmc.robotics.geometry.shapes.Box3d.FaceName;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -30,9 +21,18 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.geometry.Direction;
+import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
+import us.ihmc.robotics.geometry.shapes.Box3d;
+import us.ihmc.robotics.geometry.shapes.Box3d.FaceName;
 import us.ihmc.robotics.geometry.shapes.FrameBox3d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.simulationconstructionset.FloatingJoint;
+import us.ihmc.simulationconstructionset.GroundContactPoint;
+import us.ihmc.simulationconstructionset.GroundContactPointGroup;
+import us.ihmc.simulationconstructionset.Link;
+import us.ihmc.tools.containers.EnumTools;
+import us.ihmc.tools.inputDevices.keyboard.Key;
+import us.ihmc.tools.inputDevices.keyboard.ModifierKeyInterface;
 
 public class ContactableSelectableBoxRobot extends ContactableRobot implements SelectableObject, SelectedListener
 {
@@ -63,7 +63,7 @@ public class ContactableSelectableBoxRobot extends ContactableRobot implements S
    {
       super(name);
 
-      floatingJoint = new FloatingJoint(name + "Base", name, new Vector3d(0.0, 0.0, 0.0), this);
+      floatingJoint = new FloatingJoint(name + "Base", name, new Vector3D(0.0, 0.0, 0.0), this);
       linkGraphics = new Graphics3DObject();
       linkGraphics.setChangeable(true);
       boxLink = boxLink(linkGraphics, length, width, height, mass);
@@ -155,18 +155,18 @@ public class ContactableSelectableBoxRobot extends ContactableRobot implements S
    {
       String name = this.getName();
 
-      Point3d[] vertices = new Point3d[Box3d.NUM_VERTICES];
+      Point3D[] vertices = new Point3D[Box3d.NUM_VERTICES];
       for (int i = 0; i < vertices.length; i++)
       {
-         vertices[i] = new Point3d();
+         vertices[i] = new Point3D();
       }
 
       frameBox.getBox3d().computeVertices(vertices);
 
       for (int i = 0; i < vertices.length; i++)
       {
-         Point3d vertex = vertices[i];
-         GroundContactPoint groundContactPoint = new GroundContactPoint("gc_" + name + i, new Vector3d(vertex), this.getRobotsYoVariableRegistry());
+         Point3D vertex = vertices[i];
+         GroundContactPoint groundContactPoint = new GroundContactPoint("gc_" + name + i, new Vector3D(vertex), this.getRobotsYoVariableRegistry());
 
          floatingJoint.addGroundContactPoint(groundContactPoint);
       }
@@ -195,7 +195,7 @@ public class ContactableSelectableBoxRobot extends ContactableRobot implements S
    }
 
    @Override
-   public synchronized boolean isPointOnOrInside(Point3d pointInWorldToCheck)
+   public synchronized boolean isPointOnOrInside(Point3D pointInWorldToCheck)
    {
       return frameBox.getBox3d().isInsideOrOnSurface(pointInWorldToCheck);
    }
@@ -206,13 +206,13 @@ public class ContactableSelectableBoxRobot extends ContactableRobot implements S
    }
 
    @Override
-   public boolean isClose(Point3d pointInWorldToCheck)
+   public boolean isClose(Point3D pointInWorldToCheck)
    {
       return isPointOnOrInside(pointInWorldToCheck);
    }
 
    @Override
-   public synchronized void closestIntersectionAndNormalAt(Point3d intersectionToPack, Vector3d normalToPack, Point3d pointInWorldToCheck)
+   public synchronized void closestIntersectionAndNormalAt(Point3D intersectionToPack, Vector3D normalToPack, Point3D pointInWorldToCheck)
    {
       frameBox.getBox3d().checkIfInside(pointInWorldToCheck, intersectionToPack, normalToPack);
    }
@@ -279,10 +279,10 @@ public class ContactableSelectableBoxRobot extends ContactableRobot implements S
       for (FaceName faceName : FaceName.values())
       {
          int nVerticesPerFace = Box3d.NUM_VERTICES_PER_FACE;
-         Point3d[] vertices = new Point3d[nVerticesPerFace];
+         Point3D[] vertices = new Point3D[nVerticesPerFace];
          for (int i = 0; i < vertices.length; i++)
          {
-            vertices[i] = new Point3d();
+            vertices[i] = new Point3D();
          }
 
          frameBox.getBox3d().computeVertices(vertices, faceName);
@@ -316,7 +316,7 @@ public class ContactableSelectableBoxRobot extends ContactableRobot implements S
    {
       Graphics3DObject graphics = new Graphics3DObject();
       graphics.translate(0.0, 0.0, -height / 2.0); // TODO: Center the 3ds files so we don't have to do this translate.
-      graphics.scale(new Vector3d(length, width, height));
+      graphics.scale(new Vector3D(length, width, height));
       graphics.addModelFile(fileName);
 
       linkGraphics.combine(graphics);
@@ -343,7 +343,7 @@ public class ContactableSelectableBoxRobot extends ContactableRobot implements S
    }
 
    @Override
-   public void selected(Graphics3DNode graphics3dNode, ModifierKeyInterface modifierKeyHolder, Point3d location, Point3d cameraLocation, Quat4d cameraRotation)
+   public void selected(Graphics3DNode graphics3dNode, ModifierKeyInterface modifierKeyHolder, Point3DReadOnly location, Point3DReadOnly cameraLocation, QuaternionReadOnly cameraRotation)
    {
       if (!modifierKeyHolder.isKeyPressed(Key.P))
          return;

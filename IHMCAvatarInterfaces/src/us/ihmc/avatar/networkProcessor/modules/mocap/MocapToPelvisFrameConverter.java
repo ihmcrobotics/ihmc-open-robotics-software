@@ -1,11 +1,10 @@
 package us.ihmc.avatar.networkProcessor.modules.mocap;
 
 import optiTrack.MocapRigidBody;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-
-import javax.vecmath.Vector3d;
 
 
 // SMcCrory 2/1/2017 - this module is specific to localization tests performed on Atlas given a certain marker configuration
@@ -17,13 +16,13 @@ public class MocapToPelvisFrameConverter
    private ReferenceFrame mocapFrame = null;
 
    private static final double ballRadius = 0.006;
-   private static final Vector3d markerPlateOriginInPelvisFrame = new Vector3d(0.17235, 0.0, 0.12888);
-   private static final Vector3d plateOriginToMarker2InPelvisFrame = new Vector3d(0.005 + ballRadius, 0.045, 0.0);
+   private static final Vector3D markerPlateOriginInPelvisFrame = new Vector3D(0.17235, 0.0, 0.12888);
+   private static final Vector3D plateOriginToMarker2InPelvisFrame = new Vector3D(0.005 + ballRadius, 0.045, 0.0);
    private static final RigidBodyTransform pelvisToMarker2Transform = new RigidBodyTransform();
 
    static
    {
-      Vector3d marker2PositionInPelvisFrame = new Vector3d(markerPlateOriginInPelvisFrame);
+      Vector3D marker2PositionInPelvisFrame = new Vector3D(markerPlateOriginInPelvisFrame);
       marker2PositionInPelvisFrame.add(plateOriginToMarker2InPelvisFrame);
       pelvisToMarker2Transform.setTranslation(marker2PositionInPelvisFrame);
       pelvisToMarker2Transform.invert();      

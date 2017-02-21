@@ -7,13 +7,15 @@ import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.imgproc.Moments;
 import org.opencv.videoio.VideoCapture;
+
+import us.ihmc.euclid.tuple2D.Point2D32;
 import us.ihmc.ihmcPerception.OpenCVTools;
 import us.ihmc.tools.FormattingTools;
 import us.ihmc.tools.nativelibraries.NativeLibraryLoader;
 import us.ihmc.tools.time.Timer;
 
 import javax.imageio.ImageIO;
-import javax.vecmath.Point2f;
+
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
@@ -100,7 +102,7 @@ public class ColorBlobDetector
       Imgproc.erode(hsvImage, hsvImage, Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(size, size)));
    }
    
-   public static Point2f findBlobFromThresholdImage(Mat thresholdedImage)
+   public static Point2D32 findBlobFromThresholdImage(Mat thresholdedImage)
    {
       Moments moments = Imgproc.moments(thresholdedImage);
       
@@ -108,14 +110,14 @@ public class ColorBlobDetector
       double m10 = moments.get_m10();
       double area = moments.get_m00();
       
-      Point2f blobPosition;
+      Point2D32 blobPosition;
       if (m01 != 0.0 && m10 != 0.0 && area != 0.0 && thresholdedImage.width() != 0 && thresholdedImage.height() != 0)
       {
-         blobPosition = new Point2f((float) (m10 / area / (double) thresholdedImage.width()), (float) (1.0 - m01 / area / (double) thresholdedImage.height()));
+         blobPosition = new Point2D32((float) (m10 / area / (double) thresholdedImage.width()), (float) (1.0 - m01 / area / (double) thresholdedImage.height()));
       }
       else
       {
-         blobPosition = new Point2f();
+         blobPosition = new Point2D32();
       }
       
       return blobPosition;
@@ -124,7 +126,7 @@ public class ColorBlobDetector
    /**
     * Taken from: http://opencv-srf.blogspot.com/2010/09/object-detection-using-color-seperation.html
     */
-   public static Point2f findBlob(BufferedImage bufferedImage, HueSaturationValueRange hsvRange, int size)
+   public static Point2D32 findBlob(BufferedImage bufferedImage, HueSaturationValueRange hsvRange, int size)
    {
       Mat image = convertBufferedImageToHSV(bufferedImage);
       thresholdImage(image, image, hsvRange);
@@ -133,7 +135,7 @@ public class ColorBlobDetector
       return findBlobFromThresholdImage(image);
    }
    
-   public static Point2f findBlob(Mat image, HueSaturationValueRange hsvRange, int size)
+   public static Point2D32 findBlob(Mat image, HueSaturationValueRange hsvRange, int size)
    {
       convertImageFromRGBToHSV(image, image);
       thresholdImage(image, image, hsvRange);
@@ -192,7 +194,7 @@ public class ColorBlobDetector
          morphologicallyOpen(image, size);
          morphologicallyClose(image, size);
          bufferedImage2 = OpenCVTools.convertMatToBufferedImage(image);
-         Point2f ballLocation = findBlobFromThresholdImage(image);
+         Point2D32 ballLocation = findBlobFromThresholdImage(image);
          
          if (count++ % 10 == 0)
          {

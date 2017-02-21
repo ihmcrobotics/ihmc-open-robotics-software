@@ -5,17 +5,16 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Random;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-import javax.vecmath.Vector4d;
-
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
+import us.ihmc.euclid.tools.EuclidCoreTestTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple4D.Vector4D;
 import us.ihmc.robotics.math.Epsilons;
-import us.ihmc.tools.testing.JUnitTools;
 import us.ihmc.tools.testing.MutationTestingTools;
 
 public class TwoWayRigidBodyTransformTest
@@ -28,27 +27,26 @@ public class TwoWayRigidBodyTransformTest
       
       Random random = new Random(832498235L);
       
-      Point3d translation = new Point3d(random.nextDouble(), random.nextDouble(), random.nextDouble());
-      Matrix3d rotation = new Matrix3d();
-      createRandomRotationMatrix(rotation, random);
+      Point3D translation = new Point3D(random.nextDouble(), random.nextDouble(), random.nextDouble());
+      RotationMatrix rotation = EuclidCoreRandomTools.generateRandomRotationMatrix(random);
       
       RigidBodyTransform forwardTransformUnsafe = twoWayRigidBodyTransform.getForwardTransformUnsafe();
       forwardTransformUnsafe.setTranslation(translation);
       forwardTransformUnsafe.setRotation(rotation);
       twoWayRigidBodyTransform.setBackwardTransform(forwardTransformUnsafe);
       
-      Point3d originalPosition = new Point3d(random.nextDouble(), random.nextDouble(), random.nextDouble());
-      Vector4d originalOrientation = new Vector4d(random.nextDouble(), random.nextDouble(), random.nextDouble(), 1.0);
+      Point3D originalPosition = new Point3D(random.nextDouble(), random.nextDouble(), random.nextDouble());
+      Vector4D originalOrientation = new Vector4D(random.nextDouble(), random.nextDouble(), random.nextDouble(), 1.0);
       
-      Point3d resultPosition = new Point3d(originalPosition);
-      Vector4d resultOrientation = new Vector4d(originalOrientation);
+      Point3D resultPosition = new Point3D(originalPosition);
+      Vector4D resultOrientation = new Vector4D(originalOrientation);
       
       twoWayRigidBodyTransform.transformForward(resultPosition);
       twoWayRigidBodyTransform.transformForward(resultOrientation);
       twoWayRigidBodyTransform.transformBackward(resultPosition);
       twoWayRigidBodyTransform.transformBackward(resultOrientation);
       
-      JUnitTools.assertPoint3dEquals("not equal", originalPosition, resultPosition, Epsilons.ONE_TRILLIONTH);
+      EuclidCoreTestTools.assertTuple3DEquals("not equal", originalPosition, resultPosition, Epsilons.ONE_TRILLIONTH);
    }
    
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -72,7 +70,7 @@ public class TwoWayRigidBodyTransformTest
       assertTrue(twoWayRigidBodyTransform.isBackwardTransformOutOfDate());
       
       RigidBodyTransform transform = new RigidBodyTransform();
-      transform.applyRotationX(0.9);
+      transform.appendRollRotation(0.9);
       
       twoWayRigidBodyTransform.setForwardTransform(transform);
       assertFalse(twoWayRigidBodyTransform.isForwardTransformOutOfDate());
@@ -83,7 +81,7 @@ public class TwoWayRigidBodyTransformTest
       assertTrue(transform.epsilonEquals(backwardTransformUnsafe, 1e-10));
       
       transform = new RigidBodyTransform();
-      transform.applyRotationY(0.9);
+      transform.appendPitchRotation(0.9);
       twoWayRigidBodyTransform.setBackwardTransform(transform);
       assertTrue(twoWayRigidBodyTransform.isForwardTransformOutOfDate());
       assertFalse(twoWayRigidBodyTransform.isBackwardTransformOutOfDate());
@@ -92,88 +90,6 @@ public class TwoWayRigidBodyTransformTest
       transform.invert();
       assertTrue(transform.epsilonEquals(forwardTransformUnsafe, 1e-10));
    }
-   
-   private void createRandomRotationMatrix(Matrix3d matrix, Random random)
-   {
-      Matrix3d rotX = new Matrix3d();
-      Matrix3d rotY = new Matrix3d();
-      Matrix3d rotZ = new Matrix3d();
-      Vector3d trans = new Vector3d();
-
-      randomizeVector(random, trans);
-      createRandomRotationMatrixX(random, rotX);
-      createRandomRotationMatrixY(random, rotY);
-      createRandomRotationMatrixZ(random, rotZ);
-
-      rotX.mul(rotY);
-      rotX.mul(rotZ);
-
-      matrix.setM00(rotX.getM00());
-      matrix.setM01(rotX.getM01());
-      matrix.setM02(rotX.getM02());
-      matrix.setM10(rotX.getM10());
-      matrix.setM11(rotX.getM11());
-      matrix.setM12(rotX.getM12());
-      matrix.setM20(rotX.getM20());
-      matrix.setM21(rotX.getM21());
-      matrix.setM22(rotX.getM22());
-   }
-
-   private void createRandomRotationMatrixX(Random random, Matrix3d matrix)
-   {
-      double theta = random.nextDouble();
-      double cTheta = Math.cos(theta);
-      double sTheta = Math.sin(theta);
-      matrix.setM00(1);
-      matrix.setM01(0);
-      matrix.setM02(0);
-      matrix.setM10(0);
-      matrix.setM11(cTheta);
-      matrix.setM12(-sTheta);
-      matrix.setM20(0);
-      matrix.setM21(sTheta);
-      matrix.setM22(cTheta);
-   }
-
-   private void createRandomRotationMatrixY(Random random, Matrix3d matrix)
-   {
-      double theta = random.nextDouble();
-      double cTheta = Math.cos(theta);
-      double sTheta = Math.sin(theta);
-      matrix.setM00(cTheta);
-      matrix.setM01(0);
-      matrix.setM02(sTheta);
-      matrix.setM10(0);
-      matrix.setM11(1);
-      matrix.setM12(0);
-      matrix.setM20(-sTheta);
-      matrix.setM21(0);
-      matrix.setM22(cTheta);
-   }
-
-   private void createRandomRotationMatrixZ(Random random, Matrix3d matrix)
-   {
-      double theta = random.nextDouble();
-      double cTheta = Math.cos(theta);
-      double sTheta = Math.sin(theta);
-      matrix.setM00(cTheta);
-      matrix.setM01(-sTheta);
-      matrix.setM02(0);
-      matrix.setM10(sTheta);
-      matrix.setM11(cTheta);
-      matrix.setM12(0);
-      matrix.setM20(0);
-      matrix.setM21(0);
-      matrix.setM22(1);
-   }
-
-   private void randomizeVector(Random random, Vector3d vector)
-   {
-      vector.setX(random.nextDouble());
-      vector.setY(random.nextDouble());
-      vector.setZ(random.nextDouble());
-   }
-   
    
    public static void main(String[] args)
    {

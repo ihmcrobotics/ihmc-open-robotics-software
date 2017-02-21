@@ -1,10 +1,13 @@
 package us.ihmc.robotics.geometry;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
-import us.ihmc.robotics.geometry.interfaces.GeometryObject;
-import us.ihmc.robotics.geometry.transformables.TransformablePoint3d;
+import us.ihmc.euclid.interfaces.GeometryObject;
+import us.ihmc.euclid.transform.interfaces.Transform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 
 /**
  * Represents a finite-length 3D line segment defined by its two 3D endpoints.
@@ -14,8 +17,8 @@ import us.ihmc.robotics.geometry.transformables.TransformablePoint3d;
  */
 public class LineSegment3d implements GeometryObject<LineSegment3d>
 {
-   private final TransformablePoint3d firstEndpoint = new TransformablePoint3d();
-   private final TransformablePoint3d secondEndpoint = new TransformablePoint3d();
+   private final Point3D firstEndpoint = new Point3D();
+   private final Point3D secondEndpoint = new Point3D();
 
    /**
     * Default constructor that initializes both endpoints of this line segment to zero.
@@ -30,7 +33,7 @@ public class LineSegment3d implements GeometryObject<LineSegment3d>
     * @param firstEndpoint the first endpoint of this line segment. Not modified.
     * @param secondEndpoint the second endpoint of this line segment. Not modified.
     */
-   public LineSegment3d(Point3d firstEndpoint, Point3d secondEndpoint)
+   public LineSegment3d(Point3DReadOnly firstEndpoint, Point3DReadOnly secondEndpoint)
    {
       set(firstEndpoint, secondEndpoint);
    }
@@ -67,7 +70,7 @@ public class LineSegment3d implements GeometryObject<LineSegment3d>
     * 
     * @param firstEndpoint new endpoint of this line segment. Not modified
     */
-   public void setFirstEndpoint(Point3d firstEndpoint)
+   public void setFirstEndpoint(Point3DReadOnly firstEndpoint)
    {
       this.firstEndpoint.set(firstEndpoint);
    }
@@ -89,7 +92,7 @@ public class LineSegment3d implements GeometryObject<LineSegment3d>
     * 
     * @param secondEndpoint new second endpoint of this line segment. Not modified.
     */
-   public void setSecondEndpoint(Point3d secondEndpoint)
+   public void setSecondEndpoint(Point3DReadOnly secondEndpoint)
    {
       this.secondEndpoint.set(secondEndpoint);
    }
@@ -116,7 +119,7 @@ public class LineSegment3d implements GeometryObject<LineSegment3d>
     * @param firstEndpoint new endpoint of this line segment. Not modified
     * @param secondEndpoint new second endpoint of this line segment. Not modified.
     */
-   public void set(Point3d firstEndpoint, Point3d secondEndpoint)
+   public void set(Point3DReadOnly firstEndpoint, Point3DReadOnly secondEndpoint)
    {
       setFirstEndpoint(firstEndpoint);
       setSecondEndpoint(secondEndpoint);
@@ -129,7 +132,7 @@ public class LineSegment3d implements GeometryObject<LineSegment3d>
     * @param firstEndpoint new first endpoint. Not modified.
     * @param fromFirstToSecondEndpoint vector going from the first to the second endpoint. Not modified.
     */
-   public void set(Point3d firstEndpoint, Vector3d fromFirstToSecondEndpoint)
+   public void set(Point3DReadOnly firstEndpoint, Vector3DReadOnly fromFirstToSecondEndpoint)
    {
       this.firstEndpoint.set(firstEndpoint);
       this.secondEndpoint.add(firstEndpoint, fromFirstToSecondEndpoint);
@@ -205,7 +208,7 @@ public class LineSegment3d implements GeometryObject<LineSegment3d>
     * @param transform the transform to apply on the endpoints of this line segment. Not modified.
     */
    @Override
-   public void applyTransform(RigidBodyTransform transform)
+   public void applyTransform(Transform transform)
    {
       transform.transform(firstEndpoint);
       transform.transform(secondEndpoint);
@@ -233,7 +236,7 @@ public class LineSegment3d implements GeometryObject<LineSegment3d>
     * @param point 3D point to compute the distance from this line segment. Not modified.
     * @return the minimum distance between the 3D point and this 3D line segment.
     */
-   public double distanceSquared(Point3d point)
+   public double distanceSquared(Point3DReadOnly point)
    {
       return GeometryTools.distanceFromPointToLineSegmentSquared(point, firstEndpoint, secondEndpoint);
    }
@@ -250,7 +253,7 @@ public class LineSegment3d implements GeometryObject<LineSegment3d>
     * @param point 3D point to compute the distance from this line segment. Not modified.
     * @return the minimum distance between the 3D point and this 3D line segment.
     */
-   public double distance(Point3d point)
+   public double distance(Point3DReadOnly point)
    {
       return GeometryTools.distanceFromPointToLineSegment(point, firstEndpoint, secondEndpoint);
    }
@@ -286,7 +289,7 @@ public class LineSegment3d implements GeometryObject<LineSegment3d>
     * @param pointToProject the point to compute the projection of. Not modified.
     * @return the projection of the point onto the line segment or {@code null} if the method failed.
     */
-   public Point3d orthogonalProjectionCopy(Point3d pointToProject)
+   public Point3D orthogonalProjectionCopy(Point3DReadOnly pointToProject)
    {
       return GeometryTools.getOrthogonalProjectionOnLineSegment(pointToProject, firstEndpoint, secondEndpoint);
    }
@@ -308,7 +311,7 @@ public class LineSegment3d implements GeometryObject<LineSegment3d>
     * @param projectionToPack point in which the projection of the point onto this line segment is stored. Modified.
     * @return whether the method succeeded or not.
     */
-   public boolean orthogonalProjection(Point3d pointToProject, Point3d projectionToPack)
+   public boolean orthogonalProjection(Point3DReadOnly pointToProject, Point3DBasics projectionToPack)
    {
       return GeometryTools.getOrthogonalProjectionOnLineSegment(pointToProject, firstEndpoint, secondEndpoint, projectionToPack);
    }
@@ -324,9 +327,9 @@ public class LineSegment3d implements GeometryObject<LineSegment3d>
     * @return the computed point.
     * @throws {@link RuntimeException} if {@code percentage} &notin; [0, 1].
     */
-   public Point3d pointBetweenEndPointsGivenPercentageCopy(double percentage)
+   public Point3D pointBetweenEndPointsGivenPercentageCopy(double percentage)
    {
-      Point3d point = new Point3d();
+      Point3D point = new Point3D();
       pointBetweenEndPointsGivenPercentage(percentage, point);
       return point;
    }
@@ -339,7 +342,7 @@ public class LineSegment3d implements GeometryObject<LineSegment3d>
     * @param pointToPack where the result is stored. Modified.
     * @throws {@link RuntimeException} if {@code percentage} &notin; [0, 1].
     */
-   public void pointBetweenEndPointsGivenPercentage(double percentage, Point3d pointToPack)
+   public void pointBetweenEndPointsGivenPercentage(double percentage, Point3DBasics pointToPack)
    {
       if (percentage < 0.0 || percentage > 1.0)
          throw new RuntimeException("Percentage must be between 0.0 and 1.0. Was: " + percentage);
@@ -357,9 +360,9 @@ public class LineSegment3d implements GeometryObject<LineSegment3d>
     * @param percentage the percentage along this line segment of the point.
     * @return the computed point.
     */
-   public Point3d pointOnLineGivenPercentageCopy(double percentage)
+   public Point3D pointOnLineGivenPercentageCopy(double percentage)
    {
-      Point3d point = new Point3d();
+      Point3D point = new Point3D();
       pointOnLineGivenPercentage(percentage, point);
       return point;
    }
@@ -371,7 +374,7 @@ public class LineSegment3d implements GeometryObject<LineSegment3d>
     * @param percentage the percentage along this line segment of the point.
     * @param pointToPack where the result is stored. Modified.
     */
-   public void pointOnLineGivenPercentage(double percentage, Point3d pointToPack)
+   public void pointOnLineGivenPercentage(double percentage, Point3DBasics pointToPack)
    {
       pointToPack.interpolate(firstEndpoint, secondEndpoint, percentage);
    }
@@ -381,7 +384,7 @@ public class LineSegment3d implements GeometryObject<LineSegment3d>
     * 
     * @param midpointToPack point in which the mid-point of this line segment is stored. Modified.
     */
-   public void getMidpoint(Point3d midpointToPack)
+   public void getMidpoint(Point3DBasics midpointToPack)
    {
       midpointToPack.interpolate(firstEndpoint, secondEndpoint, 0.5);
    }
@@ -392,7 +395,7 @@ public class LineSegment3d implements GeometryObject<LineSegment3d>
     * @param normalize whether the direction vector is to be normalized.
     * @param directionToPack vector in which the direction is stored. Modified.
     */
-   public void getDirection(boolean normalize, Vector3d directionToPack)
+   public void getDirection(boolean normalize, Vector3DBasics directionToPack)
    {
       directionToPack.sub(secondEndpoint, firstEndpoint);
       if (normalize)
@@ -408,9 +411,9 @@ public class LineSegment3d implements GeometryObject<LineSegment3d>
     * @param normalize whether the direction vector is to be normalized.
     * @return the direction of this line segment.
     */
-   public Vector3d getDirectionCopy(boolean normalize)
+   public Vector3D getDirectionCopy(boolean normalize)
    {
-      Vector3d direction = new Vector3d();
+      Vector3D direction = new Vector3D();
       getDirection(normalize, direction);
       return direction;
    }
@@ -422,7 +425,7 @@ public class LineSegment3d implements GeometryObject<LineSegment3d>
     * @param point the query. Not modified.
     * @return {@code true} if the projection of the point is between the endpoints of this line segment, {@code false} otherwise.
     */
-   public boolean isBetweenEndpoints(Point3d point)
+   public boolean isBetweenEndpoints(Point3DReadOnly point)
    {
       return isBetweenEndpoints(point, 0);
    }
@@ -443,7 +446,7 @@ public class LineSegment3d implements GeometryObject<LineSegment3d>
     * @param epsilon the tolerance to use.
     * @return {@code true} if the projection of the point is between the endpoints of this line segment, {@code false} otherwise.
     */
-   public boolean isBetweenEndpoints(Point3d point, double epsilon)
+   public boolean isBetweenEndpoints(Point3DReadOnly point, double epsilon)
    {
       return isBetweenEndpoints(point.getX(), point.getY(), point.getZ(), epsilon);
    }
@@ -485,7 +488,7 @@ public class LineSegment3d implements GeometryObject<LineSegment3d>
     * For example, if the returned percentage is {@code 0.5}, it means that the projection of the given point is located at the middle of this line segment.
     * The coordinates of the projection of the point can be computed from the {@code percentage} as follows:
     * <code>
-    * Point3d projection = new Point3d(); </br>
+    * Point3D projection = new Point3D(); </br>
     * projection.interpolate(lineSegmentStart, lineSegmentEnd, percentage); </br>
     * </code>
     * </p>
@@ -499,7 +502,7 @@ public class LineSegment3d implements GeometryObject<LineSegment3d>
     * @param point the query point. Not modified.
     * @return the computed percentage along the line segment representing where the point projection is located.
     */
-   public double percentageAlongLineSegment(Point3d point)
+   public double percentageAlongLineSegment(Point3DReadOnly point)
    {
       return percentageAlongLineSegment(point.getX(), point.getY(), point.getZ());
    }
@@ -511,7 +514,7 @@ public class LineSegment3d implements GeometryObject<LineSegment3d>
     * For example, if the returned percentage is {@code 0.5}, it means that the projection of the given point is located at the middle of this line segment.
     * The coordinates of the projection of the point can be computed from the {@code percentage} as follows:
     * <code>
-    * Point3d projection = new Point3d(); </br>
+    * Point3D projection = new Point3D(); </br>
     * projection.interpolate(lineSegmentStart, lineSegmentEnd, percentage); </br>
     * </code>
     * </p>
@@ -536,7 +539,7 @@ public class LineSegment3d implements GeometryObject<LineSegment3d>
    /**
     * @return the reference to the first endpoint of this line segment.
     */
-   public Point3d getFirstEndpoint()
+   public Point3D getFirstEndpoint()
    {
       return firstEndpoint;
    }
@@ -544,7 +547,7 @@ public class LineSegment3d implements GeometryObject<LineSegment3d>
    /**
     * @return the reference to the second endpoint of this line segment.
     */
-   public Point3d getSecondEndpoint()
+   public Point3D getSecondEndpoint()
    {
       return secondEndpoint;
    }

@@ -1,10 +1,10 @@
 package us.ihmc.simulationconstructionset.testSimulations;
 
+import us.ihmc.commons.Conversions;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.LongYoVariable;
-import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.simulationconstructionset.robotController.MultiThreadedRobotControlElement;
 
 public class DoublePendulumController implements MultiThreadedRobotControlElement
@@ -63,7 +63,7 @@ public class DoublePendulumController implements MultiThreadedRobotControlElemen
       tick.increment();
       
       long start = System.nanoTime();
-      while(System.nanoTime() - start < TimeTools.milliSecondsToNanoSeconds(10))
+      while(System.nanoTime() - start < Conversions.milliSecondsToNanoSeconds(10))
       {
          // Busy wait
       }

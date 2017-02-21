@@ -1,6 +1,10 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
-import us.ihmc.robotics.controllers.*;
+import us.ihmc.robotics.controllers.OrientationPIDGainsInterface;
+import us.ihmc.robotics.controllers.PositionPIDGainsInterface;
+import us.ihmc.robotics.controllers.SE3PIDGainsInterface;
+import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
+import us.ihmc.robotics.controllers.YoTangentialDampingGains;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 
 public class YoFootSE3Gains implements YoSE3PIDGainsInterface

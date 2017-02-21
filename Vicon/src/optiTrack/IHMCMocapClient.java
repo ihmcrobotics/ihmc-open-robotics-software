@@ -2,16 +2,15 @@ package optiTrack;
 
 import java.util.ArrayList;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 //import us.ihmc.userInterface.ThirdPersonPerspective;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.time.CallFrequencyCalculator;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 public class IHMCMocapClient extends MocapDataClient
 {
@@ -105,18 +104,18 @@ public class IHMCMocapClient extends MocapDataClient
       {
 //         if (rb.getId() == 1)
 //         {
-            rigidBodyInformationInMocapOrigin = new RigidBodyTransform(new Quat4d(rb.qx, rb.qy, rb.qz, rb.qw),
-                    new Vector3d(rb.xPosition, rb.yPosition, rb.zPosition));
+            rigidBodyInformationInMocapOrigin = new RigidBodyTransform(new Quaternion(rb.qx, rb.qy, rb.qz, rb.qw),
+                    new Vector3D(rb.xPosition, rb.yPosition, rb.zPosition));
             mocapRB.update();
             mocapRBZUp.update();
 
-            FramePose rigidBodyPoseInZUp = new FramePose(mocapRBZUp, new Point3d(0, 0, 0), new Quat4d());
+            FramePose rigidBodyPoseInZUp = new FramePose(mocapRBZUp, new Point3D(0, 0, 0), new Quaternion());
             rigidBodyPoseInZUp.changeFrame(ReferenceFrame.getWorldFrame());
 
-            final Vector3d position = new Vector3d();
+            final Vector3D position = new Vector3D();
             rigidBodyPoseInZUp.getPosition(position);
 
-            final Quat4d rotation = new Quat4d();
+            final Quaternion rotation = new Quaternion();
             rigidBodyPoseInZUp.getOrientation(rotation);
 
             listOfConvertedRigidBodies.add(new MocapRigidBody(rb.getId(), position, rotation, null, true));

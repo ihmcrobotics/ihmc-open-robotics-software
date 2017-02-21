@@ -2,15 +2,14 @@ package us.ihmc.footstepPlanning.graphSearch;
 
 import java.util.ArrayList;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector2d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.PlanarRegion;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -75,7 +74,7 @@ public class BipedalFootstepPlannerNode
       parentNode.getSoleTransform(transformToParentToPack);
       transformToParentToPack.invert();
 
-      transformToParentToPack.multiply(transformToParentToPack, soleTransform);
+      transformToParentToPack.multiply(soleTransform);
    }
 
    public RobotSide getRobotSide()
@@ -98,16 +97,16 @@ public class BipedalFootstepPlannerNode
       soleTransformToPack.set(soleTransform);
    }
 
-   public Point3d getSolePosition()
+   public Point3D getSolePosition()
    {
-      Point3d currentSolePosition = new Point3d();
+      Point3D currentSolePosition = new Point3D();
       soleTransform.transform(currentSolePosition);
       return currentSolePosition;
    }
 
    public double getSoleYaw()
    {
-      Vector3d eulerAngles = new Vector3d();
+      Vector3D eulerAngles = new Vector3D();
       soleTransform.getRotationEuler(eulerAngles);
       return eulerAngles.getZ();
    }
@@ -115,15 +114,15 @@ public class BipedalFootstepPlannerNode
    public void transformSoleTransformWithSnapTransformFromZeroZ(RigidBodyTransform snapTransform, PlanarRegion planarRegion)
    {
       // Ignore the z since the snap transform snapped from z = 0. Keep everything else.
-      soleTransform.setM23(0.0);
-      soleTransform.multiply(snapTransform, soleTransform);
+      soleTransform.setTranslationZ(0.0);
+      soleTransform.preMultiply(snapTransform);
    }
 
-   public void shiftInSoleFrame(Vector2d shiftVector)
+   public void shiftInSoleFrame(Vector2D shiftVector)
    {
       RigidBodyTransform shiftTransform = new RigidBodyTransform();
-      shiftTransform.setTranslation(new Vector3d(shiftVector.getX(), shiftVector.getY(), 0.0));
-      soleTransform.multiply(soleTransform, shiftTransform);
+      shiftTransform.setTranslation(new Vector3D(shiftVector.getX(), shiftVector.getY(), 0.0));
+      soleTransform.multiply(shiftTransform);
    }
 
    public BipedalFootstepPlannerNode getParentNode()
@@ -178,10 +177,10 @@ public class BipedalFootstepPlannerNode
       this.estimatedCostToGoal = estimatedCostToGoal;
    }
 
-   private final Vector3d tempPointA = new Vector3d();
-   private final Vector3d tempPointB = new Vector3d();
-   private final Vector3d tempRotationVectorA = new Vector3d();
-   private final Vector3d tempRotationVectorB = new Vector3d();
+   private final Vector3D tempPointA = new Vector3D();
+   private final Vector3D tempPointB = new Vector3D();
+   private final Vector3D tempRotationVectorA = new Vector3D();
+   private final Vector3D tempRotationVectorB = new Vector3D();
 
    @Override
    public boolean equals(Object o)

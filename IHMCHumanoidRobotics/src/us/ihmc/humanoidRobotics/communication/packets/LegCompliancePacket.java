@@ -1,11 +1,11 @@
 package us.ihmc.humanoidRobotics.communication.packets;
 
+import java.util.Random;
+
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.robotSide.RobotSide;
-
-import java.util.Random;
 
 /**
  * This packet controls the stiffness of LegJoints. i.e., the maximum force a joint puts out

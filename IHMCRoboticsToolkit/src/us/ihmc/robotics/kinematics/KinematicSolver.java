@@ -1,23 +1,23 @@
 package us.ihmc.robotics.kinematics;
 
+import java.util.ArrayList;
+import java.util.Random;
+
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.factory.LinearSolverFactory;
 import org.ejml.interfaces.linsol.LinearSolver;
 import org.ejml.ops.CommonOps;
 import org.ejml.ops.NormOps;
+
+import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.SpatialMotionVector;
-
-import javax.vecmath.AxisAngle4d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-import java.util.ArrayList;
-import java.util.Random;
 
 public class KinematicSolver implements InverseKinematicsCalculator
 {
@@ -30,10 +30,10 @@ public class KinematicSolver implements InverseKinematicsCalculator
    private final RigidBodyTransform transformShoulderToEndEffector = new RigidBodyTransform();
    private final RigidBodyTransform transformEndEffectorToShoulder = new RigidBodyTransform();
    private final RigidBodyTransform transformEndEffectorToDesired = new RigidBodyTransform();
-   private final Vector3d errorTranslationVector = new Vector3d();
-   private final Vector3d errorAngularVector = new Vector3d();
-   private final AxisAngle4d errorAxisAngle = new AxisAngle4d();
-   private final Quat4d errorQuat = new Quat4d();
+   private final Vector3D errorTranslationVector = new Vector3D();
+   private final Vector3D errorAngularVector = new Vector3D();
+   private final AxisAngle errorAxisAngle = new AxisAngle();
+   private final Quaternion errorQuat = new Quaternion();
 
    private final DenseMatrix64F spatialError;
    private final DenseMatrix64F jacobianTranspose;
@@ -110,8 +110,9 @@ public class KinematicSolver implements InverseKinematicsCalculator
    private void calculateErrorTransform(RigidBodyTransform transformShoulderToDesired)
    {
       jacobian.getEndEffector().getBodyFixedFrame().getTransformToDesiredFrame(transformShoulderToEndEffector, jacobian.getBaseFrame());
-      transformEndEffectorToShoulder.invert(transformShoulderToEndEffector);
-      transformEndEffectorToDesired.multiply(transformEndEffectorToShoulder, transformShoulderToDesired);
+      transformEndEffectorToShoulder.setAndInvert(transformShoulderToEndEffector);
+      transformEndEffectorToDesired.set(transformEndEffectorToShoulder);
+      transformEndEffectorToDesired.multiply(transformShoulderToDesired);
    }
 
    private void minimizeError()
@@ -251,8 +252,8 @@ public class KinematicSolver implements InverseKinematicsCalculator
       errorAxisAngle.set(errorQuat);
       errorAngularVector.set(errorAxisAngle.getX(), errorAxisAngle.getY(), errorAxisAngle.getZ());
       errorAngularVector.scale(errorAxisAngle.getAngle());
-      MatrixTools.setDenseMatrixFromTuple3d(spatialError, errorAngularVector, 0, 0);
-      MatrixTools.setDenseMatrixFromTuple3d(spatialError, errorTranslationVector, 3, 0);
+      errorAngularVector.get(0, 0, spatialError);
+      errorTranslationVector.get(3, 0, spatialError);
 
       return spatialError;
    }

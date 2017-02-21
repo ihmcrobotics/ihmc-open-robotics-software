@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
+
 import us.ihmc.tools.thread.ThreadTools;
 
 public class StreamingDataTCPServer implements EstablishedAConnectionListener

@@ -2,9 +2,9 @@ package us.ihmc.jMonkeyEngineToolkit;
 
 import java.util.concurrent.LinkedBlockingQueue;
 
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.lidar.LidarScan;
 import us.ihmc.robotics.lidar.LidarScanParameters;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 @SuppressWarnings("serial")
 public class GPULidarScanBuffer extends LinkedBlockingQueue<LidarScan> implements GPULidarListener

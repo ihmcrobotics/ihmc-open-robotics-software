@@ -1,7 +1,6 @@
 package us.ihmc.exampleSimulations.mobile;
 
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -39,7 +38,7 @@ public class MobileRobot extends Robot
       this.addStaticLink(topLink);
 
       // create first gimbal joint at the top of the mobile
-      GimbalJoint firstGimbal = new GimbalJoint("gimbal_x", "gimbal_y", "gimbal_z", new Vector3d(0.0, 0.0, 1.0), this, Axis.X, Axis.Y, Axis.Z);
+      GimbalJoint firstGimbal = new GimbalJoint("gimbal_x", "gimbal_y", "gimbal_z", new Vector3D(0.0, 0.0, 1.0), this, Axis.X, Axis.Y, Axis.Z);
 
       // attach a crossbar to the top gimbal joint
       Link bar1 = createCrossBarLink(M1, L1, R1, Ixx1, Iyy1, Izz1);
@@ -69,7 +68,7 @@ public class MobileRobot extends Robot
          else // i == 3
             yOffset = -L1;
 
-         nextGimbal = new GimbalJoint("gimbal1_" + i + "_x", "gimbal1_" + i + "_y", "gimbal1_" + i + "_z", new Vector3d(xOffset, yOffset, -L1 / 2.0), this,
+         nextGimbal = new GimbalJoint("gimbal1_" + i + "_x", "gimbal1_" + i + "_y", "gimbal1_" + i + "_z", new Vector3D(xOffset, yOffset, -L1 / 2.0), this,
                Axis.X, Axis.Y, Axis.Z);
          nextLink = createCrossBarLink(M2, L2, R2, Ixx2, Iyy2, Izz2);
          nextGimbal.setLink(nextLink);
@@ -93,14 +92,14 @@ public class MobileRobot extends Robot
                yOffset = -L2;
 
             finalGimbal = new GimbalJoint("gimbal2_" + i + "_" + j + "_x", "gimbal2_" + i + "_" + j + "_y", "gimbal2_" + i + "_" + j + "_z",
-                  new Vector3d(xOffset, yOffset, -L2 / 2.0), this, Axis.X, Axis.Y, Axis.Z);
+                  new Vector3D(xOffset, yOffset, -L2 / 2.0), this, Axis.X, Axis.Y, Axis.Z);
 
             // generate a random toy link and attach it to gimbal
             nextLink = createRandomShapeLink();
             finalGimbal.setLink(nextLink);
 
             // add external force point at the toy COM
-            Vector3d offset = new Vector3d();
+            Vector3D offset = new Vector3D();
             nextLink.getComOffset(offset);
             ExternalForcePoint point = new ExternalForcePoint("ef_track" + i + j, offset, this);
             finalGimbal.addExternalForcePoint(point);

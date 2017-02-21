@@ -1,8 +1,8 @@
 package us.ihmc.robotics.dataStructures;
 
-import javax.vecmath.Point3f;
+import us.ihmc.euclid.tuple3D.Point3D32;
 
-public class TimestampedPoint extends Point3f
+public class TimestampedPoint extends Point3D32
 {
    final long timestamp;
 //   public ColorRGBA color;

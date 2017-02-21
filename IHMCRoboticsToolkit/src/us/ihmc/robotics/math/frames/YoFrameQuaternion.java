@@ -5,22 +5,25 @@ import static us.ihmc.robotics.math.frames.YoFrameVariableNameTools.createQxName
 import static us.ihmc.robotics.math.frames.YoFrameVariableNameTools.createQyName;
 import static us.ihmc.robotics.math.frames.YoFrameVariableNameTools.createQzName;
 
-import javax.vecmath.AxisAngle4d;
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Matrix3f;
-import javax.vecmath.Quat4d;
-
 import org.apache.commons.lang3.StringUtils;
 
+import us.ihmc.euclid.axisAngle.interfaces.AxisAngleBasics;
+import us.ihmc.euclid.axisAngle.interfaces.AxisAngleReadOnly;
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
+import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.AbstractReferenceFrameHolder;
+import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
-//Note: You should only make these once at the initialization of a controller. You shouldn't make any on the fly since they contain YoVariables.
+// Note: You should only make these once at the initialization of a controller. You shouldn't make
+// any on the fly since they contain YoVariables.
 public class YoFrameQuaternion extends AbstractReferenceFrameHolder
 {
    private final String namePrefix;
@@ -28,7 +31,10 @@ public class YoFrameQuaternion extends AbstractReferenceFrameHolder
 
    private final DoubleYoVariable qx, qy, qz, qs;
    private final FrameOrientation frameOrientation = new FrameOrientation();
-   /** Never use this reference frame directly, use {@link #getReferenceFrame()} instead so the multiple frames version of this {@link YoFrameQuaternion} will work properly. */
+   /**
+    * Never use this reference frame directly, use {@link #getReferenceFrame()} instead so the
+    * multiple frames version of this {@link YoFrameQuaternion} will work properly.
+    */
    private final ReferenceFrame referenceFrame;
 
    public YoFrameQuaternion(String namePrefix, ReferenceFrame referenceFrame, YoVariableRegistry registry)
@@ -68,19 +74,19 @@ public class YoFrameQuaternion extends AbstractReferenceFrameHolder
       return frameOrientation;
    }
 
-   public void set(Quat4d quaternion)
+   public void set(QuaternionReadOnly quaternion)
    {
       frameOrientation.set(quaternion);
       getYoValuesFromFrameOrientation();
    }
 
-   public void set(Matrix3d matrix)
+   public void set(RotationMatrixReadOnly matrix)
    {
       frameOrientation.set(matrix);
       getYoValuesFromFrameOrientation();
    }
 
-   public void set(AxisAngle4d axisAngle)
+   public void set(AxisAngleReadOnly axisAngle)
    {
       frameOrientation.set(axisAngle);
       getYoValuesFromFrameOrientation();
@@ -159,25 +165,19 @@ public class YoFrameQuaternion extends AbstractReferenceFrameHolder
       setFromReferenceFrame(referenceFrame, true);
    }
 
-   public void get(Quat4d quaternionToPack)
+   public void get(QuaternionBasics quaternionToPack)
    {
       putYoValuesIntoFrameOrientation();
       frameOrientation.getQuaternion(quaternionToPack);
    }
 
-   public void get(Matrix3d matrixToPack)
+   public void get(RotationMatrix matrixToPack)
    {
       putYoValuesIntoFrameOrientation();
       frameOrientation.getMatrix3d(matrixToPack);
    }
 
-   public void get(Matrix3f matrixToPack)
-   {
-      putYoValuesIntoFrameOrientation();
-      frameOrientation.getMatrix3f(matrixToPack);
-   }
-
-   public void get(AxisAngle4d axisAngleToPack)
+   public void get(AxisAngleBasics axisAngleToPack)
    {
       putYoValuesIntoFrameOrientation();
       frameOrientation.getAxisAngle(axisAngleToPack);
@@ -201,7 +201,7 @@ public class YoFrameQuaternion extends AbstractReferenceFrameHolder
       frameOrientationToPack.setIncludingFrame(frameOrientation);
    }
 
-   public Quat4d getQuaternionCopy()
+   public Quaternion getQuaternionCopy()
    {
       putYoValuesIntoFrameOrientation();
       return frameOrientation.getQuaternionCopy();
@@ -271,7 +271,7 @@ public class YoFrameQuaternion extends AbstractReferenceFrameHolder
       getYoValuesFromFrameOrientation();
    }
 
-   public void interpolate(Quat4d quaternion1, Quat4d quaternion2, double alpha)
+   public void interpolate(QuaternionReadOnly quaternion1, QuaternionReadOnly quaternion2, double alpha)
    {
       alpha = MathTools.clipToMinMax(alpha, 0.0, 1.0);
 
@@ -281,24 +281,28 @@ public class YoFrameQuaternion extends AbstractReferenceFrameHolder
    }
 
    /**
-    * Method used to concatenate the orientation represented by this YoFrameQuaternion and the orientation represented by the FrameOrientation.
+    * Method used to concatenate the orientation represented by this YoFrameQuaternion and the
+    * orientation represented by the FrameOrientation.
+    * 
     * @param quaternion
     */
-   public void mul(Quat4d quaternion)
+   public void multiply(Quaternion quaternion)
    {
       putYoValuesIntoFrameOrientation();
-      frameOrientation.mul(quaternion);
+      frameOrientation.multiply(quaternion);
       getYoValuesFromFrameOrientation();
    }
 
    /**
-    * Method used to concatenate the orientation represented by this YoFrameQuaternion and the orientation represented by the FrameOrientation.
+    * Method used to concatenate the orientation represented by this YoFrameQuaternion and the
+    * orientation represented by the FrameOrientation.
+    * 
     * @param frameOrientation
     */
-   public void mul(FrameOrientation frameOrientation)
+   public void multiply(FrameOrientation frameOrientation)
    {
       putYoValuesIntoFrameOrientation();
-      this.frameOrientation.mul(frameOrientation);
+      this.frameOrientation.multiply(frameOrientation);
       getYoValuesFromFrameOrientation();
    }
 
@@ -310,7 +314,9 @@ public class YoFrameQuaternion extends AbstractReferenceFrameHolder
    }
 
    /**
-    * Compute the dot product between this quaternion and the orhter quaternion: this . other = qx * other.qx + qy * other.qy + qz * other.qz + qs * other.qs.
+    * Compute the dot product between this quaternion and the orhter quaternion: this . other = qx *
+    * other.qx + qy * other.qy + qz * other.qz + qs * other.qs.
+    * 
     * @param other
     * @return
     */
@@ -322,10 +328,10 @@ public class YoFrameQuaternion extends AbstractReferenceFrameHolder
 
    public void negate()
    {
-      qx.set(- qx.getDoubleValue());
-      qy.set(- qy.getDoubleValue());
-      qz.set(- qz.getDoubleValue());
-      qs.set(- qs.getDoubleValue());
+      qx.set(-qx.getDoubleValue());
+      qy.set(-qy.getDoubleValue());
+      qz.set(-qz.getDoubleValue());
+      qs.set(-qs.getDoubleValue());
    }
 
    public void checkQuaternionIsUnitMagnitude()
@@ -411,6 +417,4 @@ public class YoFrameQuaternion extends AbstractReferenceFrameHolder
       putYoValuesIntoFrameOrientation();
       return frameOrientation.epsilonEquals(other.frameOrientation, epsilon);
    }
-
-
 }

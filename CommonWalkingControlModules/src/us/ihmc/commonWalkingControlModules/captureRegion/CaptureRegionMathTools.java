@@ -1,13 +1,12 @@
 package us.ihmc.commonWalkingControlModules.captureRegion;
 
-import javax.vecmath.AxisAngle4d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVector2d;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 public class CaptureRegionMathTools
 {
@@ -65,10 +64,10 @@ public class CaptureRegionMathTools
       pointToPack.set(pointB.getX() + l2 * vector.getX(), pointB.getY() + l2 * vector.getY());
    }
 
-   private final Vector3d negZRotationAxis = new Vector3d(0.0, 0.0, -1.0);
+   private final Vector3D negZRotationAxis = new Vector3D(0.0, 0.0, -1.0);
    private final RigidBodyTransform rotation = new RigidBodyTransform();
    private final FrameVector rotatedFromA = new FrameVector();
-   private final AxisAngle4d axisAngle = new AxisAngle4d();
+   private final AxisAngle axisAngle = new AxisAngle();
 
    /**
    * Will return a point on a circle around the origin. The point will be in between the given directions and at
@@ -82,7 +81,7 @@ public class CaptureRegionMathTools
       directionA.checkReferenceFrameMatch(midpoint.getReferenceFrame());
       alpha = MathTools.clipToMinMax(alpha, 0.0, 1.0);
 
-      double angleBetweenDirections = directionA.angle(directionB);
+      double angleBetweenDirections = Math.abs(directionA.angle(directionB));
       double angleBetweenDirectionsToSetLine = angleBetweenDirections * alpha;
 
       rotatedFromA.setToZero(directionA.getReferenceFrame());

@@ -2,13 +2,12 @@ package us.ihmc.simulationconstructionset;
 
 import java.util.ArrayList;
 
-import javax.vecmath.Point2d;
-
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.MeshDataGenerator;
 import us.ihmc.graphicsDescription.MeshDataHolder;
@@ -244,10 +243,10 @@ public class LinkGraphicsTest
       // Extruded Polygon
       linkGraphics.translate(-2.0 * OFFSET, OFFSET, 0.0);
       linkGraphics.addCoordinateSystem(COORD_LENGTH);
-      ArrayList<Point2d> polygonPoints = new ArrayList<Point2d>();
-      polygonPoints.add(new Point2d(0.0, 0.0));
-      polygonPoints.add(new Point2d(0.4, 0.0));
-      polygonPoints.add(new Point2d(0.3, 0.3));
+      ArrayList<Point2D> polygonPoints = new ArrayList<Point2D>();
+      polygonPoints.add(new Point2D(0.0, 0.0));
+      polygonPoints.add(new Point2D(0.4, 0.0));
+      polygonPoints.add(new Point2D(0.3, 0.3));
       double height = 0.25;
       linkGraphics.addExtrudedPolygon(polygonPoints, height, YoAppearance.Purple());
 
@@ -287,10 +286,10 @@ public class LinkGraphicsTest
       // Extruded Polygon
       linkGraphics.translate(-2.0 * OFFSET, OFFSET, 0.0);
       linkGraphics.addCoordinateSystem(COORD_LENGTH);
-      ArrayList<Point2d> polygonPoints = new ArrayList<Point2d>();
-      polygonPoints.add(new Point2d(0.0, 0.0));
-      polygonPoints.add(new Point2d(0.4, 0.0));
-      polygonPoints.add(new Point2d(0.3, 0.3));
+      ArrayList<Point2D> polygonPoints = new ArrayList<Point2D>();
+      polygonPoints.add(new Point2D(0.0, 0.0));
+      polygonPoints.add(new Point2D(0.4, 0.0));
+      polygonPoints.add(new Point2D(0.3, 0.3));
       double height = 0.25;
       linkGraphics.addExtrudedPolygon(polygonPoints, height, YoAppearance.Purple());
 

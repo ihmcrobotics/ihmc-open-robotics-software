@@ -5,7 +5,8 @@ import java.util.Random;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 
 public class JMEDataTypeUtilsTest
 {
@@ -16,7 +17,7 @@ public class JMEDataTypeUtilsTest
    {
       for (int i = 0; i < 1000; i++)
       {
-         RigidBodyTransform randomTransform = RigidBodyTransform.generateRandomTransform(new Random(-2346283641976L));
+         RigidBodyTransform randomTransform = EuclidCoreRandomTools.generateRandomRigidBodyTransform(new Random(-2346283641976L));
          //TODO @Davide test removed
          //Transform jmeVersion = JMEDataTypeUtils.j3dTransform3DToJMETransform(randomTransform);
          //RigidBodyTransform resultTransform = JMEDataTypeUtils.jmeTransformToTransform3D(jmeVersion);

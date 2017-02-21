@@ -3,12 +3,9 @@ package us.ihmc.simulationconstructionset.util.perturbance;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
-import us.ihmc.simulationconstructionset.GroundContactPoint;
-import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -18,6 +15,8 @@ import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotController.RobotController;
+import us.ihmc.simulationconstructionset.GroundContactPoint;
+import us.ihmc.simulationconstructionset.Robot;
 
 //Used to make ground contact points slip a delta.
 public class GroundContactPointsSlipper implements RobotController
@@ -92,7 +91,7 @@ public class GroundContactPointsSlipper implements RobotController
       this.percentToSlipPerTick.set(percentToSlipPerTick);
    }
 
-   public void setSlipTranslation(Vector3d slipAmount)
+   public void setSlipTranslation(Vector3D slipAmount)
    {
       this.slipAmount.set(slipAmount);
    }
@@ -107,7 +106,7 @@ public class GroundContactPointsSlipper implements RobotController
       this.slipRotation.setYawPitchRoll(yaw, pitch, roll);
    }
    
-   public void setSlipRotationEulerAngles(Vector3d eulerAngles)
+   public void setSlipRotationEulerAngles(Vector3D eulerAngles)
    {
       this.slipRotation.setEulerAngles(eulerAngles);
    }
@@ -116,7 +115,7 @@ public class GroundContactPointsSlipper implements RobotController
    {
       boolean translationalSlipDone = slipAmount.lengthSquared() < 0.0001 * 0.0001;
       
-      Vector3d eulerAngles = new Vector3d();
+      Vector3D eulerAngles = new Vector3D();
       slipRotation.getEulerAngles(eulerAngles);
       boolean rotationalSlipDone = eulerAngles.lengthSquared() < 0.001 * 0.001;
       
@@ -140,7 +139,7 @@ public class GroundContactPointsSlipper implements RobotController
       slipDelta.scale(percentOfDelta);
       slipAmount.sub(slipDelta);
 
-      Point3d touchdownLocation = new Point3d();
+      Point3D touchdownLocation = new Point3D();
 
       for (int i = 0; i < groundContactPointsToSlip.size(); i++)
       {
@@ -168,10 +167,10 @@ public class GroundContactPointsSlipper implements RobotController
       desired.interpolate(identity, desired, 1.0-percentOfDelta);
       slipRotation.set(desired);
 
-      Point3d touchdownCoM = computeTouchdownCoM();
-      Matrix3d deltaRotation = delta.getMatrix3dCopy();
+      Point3D touchdownCoM = computeTouchdownCoM();
+      RotationMatrix deltaRotation = delta.getMatrix3dCopy();
 
-      Point3d touchdownLocation = new Point3d();
+      Point3D touchdownLocation = new Point3D();
 
       for (int i = 0; i < groundContactPointsToSlip.size(); i++)
       {
@@ -190,11 +189,11 @@ public class GroundContactPointsSlipper implements RobotController
       }
    }
 
-   private Point3d computeTouchdownCoM()
+   private Point3D computeTouchdownCoM()
    {
       int touchdownCount = 0;
-      Point3d touchdownCoM = new Point3d();
-      Point3d touchdownLocation = new Point3d();
+      Point3D touchdownCoM = new Point3D();
+      Point3D touchdownLocation = new Point3D();
 
       for (int i = 0; i < groundContactPointsToSlip.size(); i++)
       {

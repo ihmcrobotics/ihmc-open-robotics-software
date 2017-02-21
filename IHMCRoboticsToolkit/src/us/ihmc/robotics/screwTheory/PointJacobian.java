@@ -1,11 +1,10 @@
 package us.ihmc.robotics.screwTheory;
 
 import org.ejml.data.DenseMatrix64F;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.linearAlgebra.MatrixTools;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
-import javax.vecmath.Vector3d;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 /**
  * Jacobian that maps joint velocities to the velocity of a point fixed
@@ -22,9 +21,9 @@ public class PointJacobian
    private final DenseMatrix64F jacobianMatrix = new DenseMatrix64F(1, 1);
 
    // temp stuff
-   private final Vector3d tempJacobianColumn = new Vector3d();
-   private final Vector3d translation = new Vector3d();
-   private final Vector3d tempVector = new Vector3d();
+   private final Vector3D tempJacobianColumn = new Vector3D();
+   private final Vector3D translation = new Vector3D();
+   private final Vector3D tempVector = new Vector3D();
 
    public void set(GeometricJacobian geometricJacobian, FramePoint point)
    {
@@ -52,13 +51,13 @@ public class PointJacobian
          DenseMatrix64F geometricJacobianMatrix = geometricJacobian.getJacobianMatrix();
 
          // angular part:
-         MatrixTools.denseMatrixToVector3d(geometricJacobianMatrix, tempVector, angularPartStartRow, i);
+         tempVector.set(angularPartStartRow, i, geometricJacobianMatrix);
          tempJacobianColumn.cross(tempVector, translation);
-         MatrixTools.denseMatrixToVector3d(geometricJacobianMatrix, tempVector, linearPartStartRow, i);
+         tempVector.set(linearPartStartRow, i, geometricJacobianMatrix);
 
          // linear part
          tempJacobianColumn.add(tempVector);
-         MatrixTools.setDenseMatrixFromTuple3d(jacobianMatrix, tempJacobianColumn, angularPartStartRow, i);
+         tempJacobianColumn.get(angularPartStartRow, i, jacobianMatrix);
       }
    }
 

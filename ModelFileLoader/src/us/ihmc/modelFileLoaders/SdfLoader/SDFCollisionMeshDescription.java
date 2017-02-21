@@ -2,16 +2,15 @@ package us.ihmc.modelFileLoaders.SdfLoader;
 
 import java.util.List;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Vector3d;
-
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.modelFileLoaders.ModelFileLoaderConversionsHelper;
 import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.AbstractSDFMesh;
 import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFGeometry;
 import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFGeometry.Mesh;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.robotDescription.CollisionMeshDescription;
 
 
@@ -24,8 +23,8 @@ public class SDFCollisionMeshDescription extends CollisionMeshDescription
 
    public SDFCollisionMeshDescription(List<? extends AbstractSDFMesh> sdfVisuals, RigidBodyTransform graphicsTransform)
    {
-      Matrix3d rotation = new Matrix3d();
-      Vector3d offset = new Vector3d();
+      RotationMatrix rotation = new RotationMatrix();
+      Vector3D offset = new Vector3D();
       graphicsTransform.get(rotation, offset);
 
       if(sdfVisuals != null)
@@ -37,8 +36,8 @@ public class SDFCollisionMeshDescription extends CollisionMeshDescription
             rotate(rotation);
 
             RigidBodyTransform visualPose = ModelFileLoaderConversionsHelper.poseToTransform(sdfVisual.getPose());
-            Vector3d modelOffset = new Vector3d();
-            Matrix3d modelRotation = new Matrix3d();
+            Vector3D modelOffset = new Vector3D();
+            RotationMatrix modelRotation = new RotationMatrix();
             visualPose.get(modelRotation, modelOffset);
 
             translate(modelOffset);

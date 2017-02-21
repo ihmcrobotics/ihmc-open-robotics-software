@@ -6,8 +6,8 @@ import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
-import us.ihmc.robotics.trajectories.providers.DoubleProvider;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.robotics.trajectories.providers.DoubleProvider;
 
 public class OneDoFJointWayPointTrajectoryGenerator implements OneDoFJointTrajectoryGenerator
 {

@@ -1,8 +1,7 @@
 package us.ihmc.robotics.math.trajectories;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -117,7 +116,7 @@ public class ParabolicWithFinalVelocityConstrainedPositionTrajectoryGenerator im
       this.finalVelocity.set(finalVelocity);
    }
 
-   public void setTrajectoryParameters(double duration, Point3d initialPosition, double intermediatePosition, Point3d finalPosition, Vector3d finalVelocity)
+   public void setTrajectoryParameters(double duration, Point3D initialPosition, double intermediatePosition, Point3D finalPosition, Vector3D finalVelocity)
    {
       trajectoryTime.set(duration);
 
@@ -185,7 +184,7 @@ public class ParabolicWithFinalVelocityConstrainedPositionTrajectoryGenerator im
       positionToPack.set(currentPosition);
    }
 
-   public void get(Point3d positionToPack)
+   public void get(Point3D positionToPack)
    {
       currentPosition.get(positionToPack);
    }
@@ -201,7 +200,7 @@ public class ParabolicWithFinalVelocityConstrainedPositionTrajectoryGenerator im
       velocityToPack.set(currentVelocity);
    }
 
-   public void getVelocity(Vector3d velocityToPack)
+   public void getVelocity(Vector3D velocityToPack)
    {
       currentVelocity.get(velocityToPack);
    }
@@ -212,7 +211,7 @@ public class ParabolicWithFinalVelocityConstrainedPositionTrajectoryGenerator im
       currentAcceleration.getFrameTupleIncludingFrame(accelerationToPack);
    }
 
-   public void getAcceleration(Vector3d accelerationToPack)
+   public void getAcceleration(Vector3D accelerationToPack)
    {
       currentAcceleration.get(accelerationToPack);
    }

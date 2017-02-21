@@ -2,14 +2,10 @@ package us.ihmc.simulationconstructionset.util.environments;
 
 import java.util.ArrayList;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
-import us.ihmc.simulationconstructionset.FloatingJoint;
-import us.ihmc.simulationconstructionset.GroundContactPoint;
-import us.ihmc.simulationconstructionset.GroundContactPointGroup;
-import us.ihmc.simulationconstructionset.Link;
+import us.ihmc.euclid.matrix.Matrix3D;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -19,7 +15,10 @@ import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
 import us.ihmc.robotics.geometry.shapes.FrameCylinder3d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.simulationconstructionset.FloatingJoint;
+import us.ihmc.simulationconstructionset.GroundContactPoint;
+import us.ihmc.simulationconstructionset.GroundContactPointGroup;
+import us.ihmc.simulationconstructionset.Link;
 
 public class ContactableCylinderRobot extends ContactableRobot
 {
@@ -67,9 +66,9 @@ public class ContactableCylinderRobot extends ContactableRobot
 
       link = new Link(name + "Link");
       link.setMass(mass);
-      link.setComOffset(new Vector3d(0.0, 0.0, height / 3.0));
+      link.setComOffset(new Vector3D(0.0, 0.0, height / 3.0));
 
-      Matrix3d inertia = RotationalInertiaCalculator.getRotationalInertiaMatrixOfSolidCylinder(mass, radius, height, Axis.Z);
+      Matrix3D inertia = RotationalInertiaCalculator.getRotationalInertiaMatrixOfSolidCylinder(mass, radius, height, Axis.Z);
       link.setMomentOfInertia(inertia);
 
       linkGraphics = new Graphics3DObject();
@@ -79,7 +78,7 @@ public class ContactableCylinderRobot extends ContactableRobot
          linkGraphics.addModelFile(modelName);
       link.setLinkGraphics(linkGraphics);
 
-      floatingJoint = new FloatingJoint(name + "Base", name, new Vector3d(), this);
+      floatingJoint = new FloatingJoint(name + "Base", name, new Vector3D(), this);
       floatingJoint.setRotationAndTranslation(rootJointTransform);
       floatingJoint.setLink(link);
       this.addRootJoint(floatingJoint);
@@ -111,7 +110,7 @@ public class ContactableCylinderRobot extends ContactableRobot
    }
 
    @Override
-   public synchronized boolean isPointOnOrInside(Point3d pointInWorldToCheck)
+   public synchronized boolean isPointOnOrInside(Point3D pointInWorldToCheck)
    {
       afterRootJointFrame.update();
       frameCylinder.changeFrame(worldFrame);
@@ -121,13 +120,13 @@ public class ContactableCylinderRobot extends ContactableRobot
    }
 
    @Override
-   public boolean isClose(Point3d pointInWorldToCheck)
+   public boolean isClose(Point3D pointInWorldToCheck)
    {
       return isPointOnOrInside(pointInWorldToCheck);
    }
 
    @Override
-   public synchronized void closestIntersectionAndNormalAt(Point3d intersectionToPack, Vector3d normalToPack, Point3d pointInWorldToCheck)
+   public synchronized void closestIntersectionAndNormalAt(Point3D intersectionToPack, Vector3D normalToPack, Point3D pointInWorldToCheck)
    {
       afterRootJointFrame.update();
       frameCylinder.changeFrame(worldFrame);

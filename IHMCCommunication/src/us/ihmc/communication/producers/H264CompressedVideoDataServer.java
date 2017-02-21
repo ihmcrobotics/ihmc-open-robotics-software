@@ -5,9 +5,6 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-
 import boofcv.struct.calib.IntrinsicParameters;
 import us.ihmc.codecs.generated.EUsageType;
 import us.ihmc.codecs.generated.FilterModeEnum;
@@ -16,9 +13,11 @@ import us.ihmc.codecs.generated.YUVPicture;
 import us.ihmc.codecs.generated.YUVPicture.YUVSubsamplingType;
 import us.ihmc.codecs.h264.OpenH264Encoder;
 import us.ihmc.codecs.yuv.YUVPictureConverter;
+import us.ihmc.commons.Conversions;
 import us.ihmc.communication.net.NetStateListener;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.time.TimeTools;
 
 public class H264CompressedVideoDataServer implements NetStateListener, CompressedVideoDataServer
 {
@@ -65,7 +64,7 @@ public class H264CompressedVideoDataServer implements NetStateListener, Compress
    }
 
    @Override
-   public synchronized void updateImage(VideoSource videoSource, BufferedImage bufferedImage, final long timeStamp, final Point3d cameraPosition, final Quat4d cameraOrientation,
+   public synchronized void updateImage(VideoSource videoSource, BufferedImage bufferedImage, final long timeStamp, final Point3D cameraPosition, final Quaternion cameraOrientation,
          IntrinsicParameters intrinsicParameters)
    {
       if (!handler.isConnected() || !videoEnabled)
@@ -82,7 +81,7 @@ public class H264CompressedVideoDataServer implements NetStateListener, Compress
       {
          initialTimestamp = timeStamp;
       }
-      else if ((timeStamp - prevTimeStamp) < TimeTools.secondsToNanoSeconds(1.0 / ((double) fps)))
+      else if ((timeStamp - prevTimeStamp) < Conversions.secondsToNanoSeconds(1.0 / ((double) fps)))
       {
          return;
       }

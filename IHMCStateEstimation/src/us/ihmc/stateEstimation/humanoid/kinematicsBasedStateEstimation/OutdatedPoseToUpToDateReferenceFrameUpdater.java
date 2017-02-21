@@ -1,12 +1,11 @@
 package us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation;
 
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.subscribers.TimeStampedTransformBuffer;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -48,7 +47,7 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdater
    private final FramePoint localizationPositionInThePastInWorldFrame;
 
    private final FrameVector translationOffsetFrameVector = new FrameVector(worldFrame);
-   private final Vector3d translationOffsetVector = new Vector3d();
+   private final Vector3D translationOffsetVector = new Vector3D();
 
    private final RigidBodyTransform totalErrorTransform = new RigidBodyTransform();
 
@@ -78,7 +77,7 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdater
          protected void updateTransformToParent(RigidBodyTransform transformToParent)
          {
             OutdatedPoseToUpToDateReferenceFrameUpdater.this.stateEstimatorReferenceFrameInPresent.getTransformToDesiredFrame(transformToParent, worldFrame);
-            transformToParent.setRotationToIdentity();
+            transformToParent.setRotationToZero();
          }
       };
 
@@ -107,7 +106,7 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdater
          protected void updateTransformToParent(RigidBodyTransform transformToParent)
          {
             OutdatedPoseToUpToDateReferenceFrameUpdater.this.stateEstimatorReferenceFrameInPresent.getTransformToDesiredFrame(transformToParent, worldFrame);
-            transformToParent.zeroTranslation();
+            transformToParent.setTranslationToZero();
          }
 
          @Override
@@ -164,7 +163,7 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdater
 
       localizationPoseInThePast.changeFrame(stateEstimatorReferenceFrameInThePast);
       localizationPoseInThePast.getPose(localizationPoseTransformInThePast_InStateEstimatorReferenceFrameInThePast_Rotation);
-      localizationPoseTransformInThePast_InStateEstimatorReferenceFrameInThePast_Rotation.zeroTranslation();
+      localizationPoseTransformInThePast_InStateEstimatorReferenceFrameInThePast_Rotation.setTranslationToZero();
 
       totalErrorTransform.set(localizationPoseTransformInThePast_InStateEstimatorReferenceFrameInThePast_Rotation);
       totalErrorTransform.setTranslation(translationOffsetVector);

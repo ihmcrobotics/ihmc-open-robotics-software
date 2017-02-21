@@ -9,7 +9,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
 
-import javax.vecmath.Point3d;
+import us.ihmc.euclid.tuple3D.Point3D;
 
 public class RosFaceDetectionSubscriber extends AbstractRosTopicSubscriber<PositionMeasurementArray>
 {
@@ -34,7 +34,7 @@ public class RosFaceDetectionSubscriber extends AbstractRosTopicSubscriber<Posit
       Object[] people = message.getPeople().toArray();
 
       String[] ids = new String[people.length];
-      Point3d[] positions = new Point3d[people.length];
+      Point3D[] positions = new Point3D[people.length];
 
       for(int i = 0; i < people.length; i++)
       {

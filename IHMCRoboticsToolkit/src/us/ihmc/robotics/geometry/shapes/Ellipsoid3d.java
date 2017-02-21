@@ -1,15 +1,17 @@
 package us.ihmc.robotics.geometry.shapes;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
-import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 
 public class Ellipsoid3d extends Shape3d<Ellipsoid3d>
 {
-   private Vector3d radius;
+   private Vector3D radius;
 
-   private final Point3d tempPoint3d;
+   private final Point3D tempPoint3d;
 
    public Ellipsoid3d(Ellipsoid3d ellipsoid)
    {
@@ -18,25 +20,25 @@ public class Ellipsoid3d extends Shape3d<Ellipsoid3d>
 
    public Ellipsoid3d(double xRadius, double yRadius, double zRadius)
    {
-      radius = new Vector3d(xRadius, yRadius, zRadius);
+      radius = new Vector3D(xRadius, yRadius, zRadius);
       
-      tempPoint3d = new Point3d();
+      tempPoint3d = new Point3D();
    }
 
    public Ellipsoid3d(double xRadius, double yRadius, double zRadius, RigidBodyTransform transform)
    {
       setTransform(transform);
-      radius = new Vector3d(xRadius, yRadius, zRadius);
+      radius = new Vector3D(xRadius, yRadius, zRadius);
       
-      tempPoint3d = new Point3d();
+      tempPoint3d = new Point3D();
    }
 
-   public void getCenter(Point3d centerToPack)
+   public void getCenter(Point3DBasics centerToPack)
    {
       getPosition(centerToPack);
    }
    
-   public void getRadii(Vector3d radiiToPack)
+   public void getRadii(Vector3DBasics radiiToPack)
    {
       radiiToPack.set(radius);
    }
@@ -72,7 +74,7 @@ public class Ellipsoid3d extends Shape3d<Ellipsoid3d>
    }
 
    @Override
-   protected boolean checkIfInsideShapeFrame(Point3d pointToCheck, Point3d closestPointToPack, Vector3d normalToPack)
+   protected boolean checkIfInsideShapeFrame(Point3DReadOnly pointToCheck, Point3DBasics closestPointToPack, Vector3DBasics normalToPack)
    {
       tempPoint3d.set(pointToCheck);
       double scaledX = tempPoint3d.getX() / radius.getX();
@@ -108,7 +110,7 @@ public class Ellipsoid3d extends Shape3d<Ellipsoid3d>
    }
 
    @Override
-   protected boolean isInsideOrOnSurfaceShapeFrame(Point3d point, double epsilon)
+   protected boolean isInsideOrOnSurfaceShapeFrame(Point3DReadOnly point, double epsilon)
    {
       tempPoint3d.set(point);
       double scaledX = tempPoint3d.getX() / radius.getX();
@@ -121,7 +123,7 @@ public class Ellipsoid3d extends Shape3d<Ellipsoid3d>
    }
 
    @Override
-   protected double distanceShapeFrame(Point3d point)
+   protected double distanceShapeFrame(Point3DReadOnly point)
    {
       tempPoint3d.set(point);
       orthogonalProjectionShapeFrame(tempPoint3d);
@@ -129,7 +131,7 @@ public class Ellipsoid3d extends Shape3d<Ellipsoid3d>
    }
 
    @Override
-   protected void orthogonalProjectionShapeFrame(Point3d pointToCheckAndPack)
+   protected void orthogonalProjectionShapeFrame(Point3DBasics pointToCheckAndPack)
    {
       double scaledX = pointToCheckAndPack.getX() / radius.getX();
       double scaledY = pointToCheckAndPack.getY() / radius.getY();

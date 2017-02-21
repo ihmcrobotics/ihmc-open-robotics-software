@@ -3,14 +3,14 @@ package us.ihmc.robotics.referenceFrames;
 import java.util.ArrayList;
 import java.util.Random;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Vector3d;
-
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.tools.EuclidCoreTestTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.screwTheory.CenterOfMassCalculator;
 import us.ihmc.robotics.screwTheory.RevoluteJoint;
@@ -18,7 +18,6 @@ import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTestTools;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.SixDoFJoint;
-import us.ihmc.tools.testing.JUnitTools;
 
 public class CenterOfMassReferenceFrameTest
 {
@@ -35,7 +34,7 @@ public class CenterOfMassReferenceFrameTest
       RigidBody floatingBody = ScrewTools.addRigidBody("floatingBody", sixDoFJoint, RandomTools.generateRandomDiagonalMatrix3d(random), random.nextDouble(),
                                   RandomTools.generateRandomVector(random));
 
-      Vector3d[] jointAxes = new Vector3d[nJoints];
+      Vector3D[] jointAxes = new Vector3D[nJoints];
       for (int i = 0; i < nJoints; i++)
       {
          jointAxes[i] = RandomTools.generateRandomVector(random);
@@ -63,13 +62,13 @@ public class CenterOfMassReferenceFrameTest
       FramePoint centerOfMassFromFrame = new FramePoint(centerOfMassReferenceFrame);
       centerOfMassFromFrame.changeFrame(elevator.getBodyFixedFrame());
 
-      JUnitTools.assertTuple3dEquals(centerOfMass.getVectorCopy(), centerOfMassFromFrame.getVectorCopy(), 1e-12);
+      EuclidCoreTestTools.assertTuple3DEquals(centerOfMass.getVectorCopy(), centerOfMassFromFrame.getVectorCopy(), 1e-12);
 
-      Matrix3d rotation = new Matrix3d();
+      RotationMatrix rotation = new RotationMatrix();
       RigidBodyTransform transform = centerOfMassReferenceFrame.getTransformToDesiredFrame(elevator.getBodyFixedFrame());
       transform.getRotation(rotation);
-      Matrix3d idenitity = new Matrix3d();
+      RotationMatrix idenitity = new RotationMatrix();
       idenitity.setIdentity();
-      JUnitTools.assertMatrix3dEquals("", idenitity, rotation, 1e-12);
+      EuclidCoreTestTools.assertMatrix3DEquals("", idenitity, rotation, 1e-12);
    }
 }

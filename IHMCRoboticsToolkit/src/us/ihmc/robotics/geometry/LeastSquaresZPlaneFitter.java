@@ -1,12 +1,13 @@
 package us.ihmc.robotics.geometry;
 
+import java.util.List;
+
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
-import us.ihmc.robotics.geometry.shapes.Plane3d;
 
-import javax.vecmath.Point2d;
-import javax.vecmath.Point3d;
-import java.util.List;
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.robotics.geometry.shapes.Plane3d;
 
 /**
  * Created by agrabertilton on 11/13/14.
@@ -21,12 +22,12 @@ public class LeastSquaresZPlaneFitter implements PlaneFitter
    {
    }
 
-   public static boolean checkDistanceThreshold(List<Point3d> point3dList, Plane3d plane3d, double threshold)
+   public static boolean checkDistanceThreshold(List<Point3D> point3dList, Plane3d plane3d, double threshold)
    {
       if (plane3d.containsNaN())
          return false;
 
-      for (Point3d point3d : point3dList)
+      for (Point3D point3d : point3dList)
       {
          double distance = plane3d.distance(point3d);
          if (distance > threshold)
@@ -37,7 +38,7 @@ public class LeastSquaresZPlaneFitter implements PlaneFitter
    }
 
 
-   public static boolean checkZDistanceThreshold(List<Point3d> point3dList, double[] xyCCoefficients, double threshold)
+   public static boolean checkZDistanceThreshold(List<Point3D> point3dList, double[] xyCCoefficients, double threshold)
    {
       // Checks to make sure no point is beyond the distance threshold to the plane in the z direction
       if (xyCCoefficients.length != 3)
@@ -45,7 +46,7 @@ public class LeastSquaresZPlaneFitter implements PlaneFitter
          return false;
       }
 
-      for (Point3d point3d : point3dList)
+      for (Point3D point3d : point3dList)
       {
          if (Math.abs(point3d.getZ() + xyCCoefficients[0] * point3d.getX() + xyCCoefficients[1] * point3d.getY() + xyCCoefficients[2]) > threshold)
          {
@@ -56,18 +57,18 @@ public class LeastSquaresZPlaneFitter implements PlaneFitter
       return true;
    }
 
-   public double fitPlaneToPoints(Point2d center, List<Point3d> pointList, Plane3d planeToPack)
+   public double fitPlaneToPoints(Point2D center, List<Point3D> pointList, Plane3d planeToPack)
    {
       double squareError = fitPlaneToPoints(pointList, planeToPack);
 
       double centerZ = planeToPack.getZOnPlane(center.getX(), center.getY());
-      Point3d planePoint = new Point3d(center.getX(), center.getY(), centerZ);
+      Point3D planePoint = new Point3D(center.getX(), center.getY(), centerZ);
       planeToPack.setPoint(planePoint);
       return squareError;
    }
    
    @Override
-   public double fitPlaneToPoints(List<Point3d> pointList, Plane3d planeToPack)
+   public double fitPlaneToPoints(List<Point3D> pointList, Plane3d planeToPack)
    {
       // Given plane equation Ax+By+z +C = 0
       // find coefficients of plane that best fits the points using least squared in the z direction
@@ -92,7 +93,7 @@ public class LeastSquaresZPlaneFitter implements PlaneFitter
 
       for (int i = 0; i < pointList.size(); i++)
       {
-         Point3d point3d = pointList.get(i);
+         Point3D point3d = pointList.get(i);
          n++;
          x += point3d.getX();
          y += point3d.getY();

@@ -3,13 +3,12 @@ package us.ihmc.commonWalkingControlModules.desiredFootStep;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.vecmath.Point2d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.controllerAPI.command.CommandArrayDeque;
 import us.ihmc.communication.packets.TextToSpeechPacket;
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.AdjustFootstepCommand;
@@ -248,8 +247,8 @@ public class WalkingMessageHandler
          return false;
       }
 
-      Point3d adjustedPosition = requestedFootstepAdjustment.getPosition();
-      Quat4d adjustedOrientation = requestedFootstepAdjustment.getOrientation();
+      Point3D adjustedPosition = requestedFootstepAdjustment.getPosition();
+      Quaternion adjustedOrientation = requestedFootstepAdjustment.getOrientation();
 
       switch (requestedFootstepAdjustment.getOrigin())
       {
@@ -265,7 +264,7 @@ public class WalkingMessageHandler
 
       if (!requestedFootstepAdjustment.getPredictedContactPoints().isEmpty())
       {
-         List<Point2d> contactPoints = new ArrayList<>();
+         List<Point2D> contactPoints = new ArrayList<>();
          for (int i = 0; i < footstepToAdjust.getPredictedContactPoints().size(); i++)
             contactPoints.add(footstepToAdjust.getPredictedContactPoints().get(i));
          footstepToAdjust.setPredictedContactPointsFromPoint2ds(contactPoints);
@@ -346,10 +345,10 @@ public class WalkingMessageHandler
       updateVisualization();
    }
 
-   private final Point3d desiredFootPositionInWorld = new Point3d();
-   private final Quat4d desiredFootOrientationInWorld = new Quat4d();
-   private final Point3d actualFootPositionInWorld = new Point3d();
-   private final Quat4d actualFootOrientationInWorld = new Quat4d();
+   private final Point3D desiredFootPositionInWorld = new Point3D();
+   private final Quaternion desiredFootOrientationInWorld = new Quaternion();
+   private final Point3D actualFootPositionInWorld = new Point3D();
+   private final Quaternion actualFootOrientationInWorld = new Quaternion();
    private final TextToSpeechPacket reusableSpeechPacket = new TextToSpeechPacket();
    private final WalkingControllerFailureStatusMessage failureStatusMessage = new WalkingControllerFailureStatusMessage();
 
@@ -541,7 +540,7 @@ public class WalkingMessageHandler
       FramePose footstepPose = new FramePose(worldFrame, footstepData.getPosition(), footstepData.getOrientation());
       PoseReferenceFrame footstepPoseFrame = new PoseReferenceFrame("footstepPoseFrame", footstepPose);
 
-      List<Point2d> contactPoints;
+      List<Point2D> contactPoints;
       if (footstepData.getPredictedContactPoints().isEmpty())
          contactPoints = null;
       else
@@ -568,7 +567,7 @@ public class WalkingMessageHandler
          }
          else
          {
-            RecyclingArrayList<Point3d> trajectoryWaypoints = footstepData.getTrajectoryWaypoints();
+            RecyclingArrayList<Point3D> trajectoryWaypoints = footstepData.getTrajectoryWaypoints();
             footstep.setSwingWaypoints(trajectoryWaypoints);
          }
       }

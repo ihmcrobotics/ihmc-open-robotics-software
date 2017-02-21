@@ -8,13 +8,15 @@ import java.util.ArrayList;
 
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.vecmath.Point2d;
-import javax.vecmath.Vector3d;
 
 import org.junit.Test;
 
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.CapturePointTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.tools.EuclidCoreTestTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
@@ -31,7 +33,6 @@ import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FrameGeometry2dPlotter;
 import us.ihmc.robotics.geometry.FrameGeometryTestFrame;
 import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -86,11 +87,11 @@ public class OneStepCaptureRegionCalculatorTest
       OneStepCaptureRegionCalculator captureRegionCalculator = new OneStepCaptureRegionCalculator(midFootAnkleXOffset, footWidth, kineamaticStepRange,
             ankleZUpFrames, registry, null);
 
-      ArrayList<Point2d> listOfPoints = new ArrayList<Point2d>();
-      listOfPoints.add(new Point2d(-footLength / 2.0, -footWidth / 2.0));
-      listOfPoints.add(new Point2d(-footLength / 2.0, footWidth / 2.0));
-      listOfPoints.add(new Point2d(footLength / 2.0, -footWidth / 2.0));
-      listOfPoints.add(new Point2d(footLength / 2.0, footWidth / 2.0));
+      ArrayList<Point2D> listOfPoints = new ArrayList<Point2D>();
+      listOfPoints.add(new Point2D(-footLength / 2.0, -footWidth / 2.0));
+      listOfPoints.add(new Point2D(-footLength / 2.0, footWidth / 2.0));
+      listOfPoints.add(new Point2D(footLength / 2.0, -footWidth / 2.0));
+      listOfPoints.add(new Point2D(footLength / 2.0, footWidth / 2.0));
       FrameConvexPolygon2d supportFootPolygon = new FrameConvexPolygon2d(worldFrame, listOfPoints);
 
       FramePoint2d icp = new FramePoint2d(worldFrame, 0.6, -0.5);
@@ -172,11 +173,11 @@ public class OneStepCaptureRegionCalculatorTest
       OneStepCaptureRegionCalculator captureRegionCalculator = new OneStepCaptureRegionCalculator(midFootAnkleXOffset, footWidth, kineamaticStepRange,
             ankleZUpFrames, registry, null);
 
-      ArrayList<Point2d> listOfPoints = new ArrayList<Point2d>();
-      listOfPoints.add(new Point2d(-footLength / 2.0, -footWidth / 2.0));
-      listOfPoints.add(new Point2d(-footLength / 2.0, footWidth / 2.0));
-      listOfPoints.add(new Point2d(footLength / 2.0, -footWidth / 2.0));
-      listOfPoints.add(new Point2d(footLength / 2.0, footWidth / 2.0));
+      ArrayList<Point2D> listOfPoints = new ArrayList<Point2D>();
+      listOfPoints.add(new Point2D(-footLength / 2.0, -footWidth / 2.0));
+      listOfPoints.add(new Point2D(-footLength / 2.0, footWidth / 2.0));
+      listOfPoints.add(new Point2D(footLength / 2.0, -footWidth / 2.0));
+      listOfPoints.add(new Point2D(footLength / 2.0, footWidth / 2.0));
       FrameConvexPolygon2d supportFootPolygon = new FrameConvexPolygon2d(worldFrame, listOfPoints);
 
       FramePoint2d icp = new FramePoint2d(worldFrame, 0.6, -0.5);
@@ -195,6 +196,8 @@ public class OneStepCaptureRegionCalculatorTest
       for (int i = 0; i < expectedPointsOnBorder.size(); i++)
       {
          FramePoint2d closestVertex = captureRegion.getClosestVertexCopy(expectedPointsOnBorder.get(i));
+         closestVertex.checkReferenceFrameMatch(expectedPointsOnBorder.get(i));
+         EuclidCoreTestTools.assertTuple2DEquals(closestVertex.getPoint(), expectedPointsOnBorder.get(i).getPoint(), 1.0e-6);
          assertTrue(closestVertex.epsilonEquals(expectedPointsOnBorder.get(i), 10e-7));
       }
 
@@ -246,11 +249,11 @@ public class OneStepCaptureRegionCalculatorTest
       // set the cutoff angle such that the reachable region should be a half circle
       captureRegionCalculator.setReachableRegionCutoffAngle(1.0);
 
-      ArrayList<Point2d> listOfPoints = new ArrayList<Point2d>();
-      listOfPoints.add(new Point2d(-footLength / 2.0, -footWidth / 2.0));
-      listOfPoints.add(new Point2d(-footLength / 2.0, footWidth / 2.0));
-      listOfPoints.add(new Point2d(footLength / 2.0, -footWidth / 2.0));
-      listOfPoints.add(new Point2d(footLength / 2.0, footWidth / 2.0));
+      ArrayList<Point2D> listOfPoints = new ArrayList<Point2D>();
+      listOfPoints.add(new Point2D(-footLength / 2.0, -footWidth / 2.0));
+      listOfPoints.add(new Point2D(-footLength / 2.0, footWidth / 2.0));
+      listOfPoints.add(new Point2D(footLength / 2.0, -footWidth / 2.0));
+      listOfPoints.add(new Point2D(footLength / 2.0, footWidth / 2.0));
       FrameConvexPolygon2d supportFootPolygon = new FrameConvexPolygon2d(worldFrame, listOfPoints);
 
       // set the icp to be inside the foot polygon
@@ -372,7 +375,7 @@ public class OneStepCaptureRegionCalculatorTest
    private class SimpleAnkleZUpReferenceFrame extends ReferenceFrame
    {
       private static final long serialVersionUID = -2855876641425187923L;
-      private final Vector3d offset = new Vector3d();
+      private final Vector3D offset = new Vector3D();
 
       public SimpleAnkleZUpReferenceFrame(String name)
       {
@@ -429,7 +432,7 @@ public class OneStepCaptureRegionCalculatorTest
             @Override
             protected void updateTransformToParent(RigidBodyTransform transformToParent)
             {
-               transformToParent.setTranslation(new Vector3d(0.0, robotSide.negateIfRightSide(0.15), 0.0));
+               transformToParent.setTranslation(new Vector3D(0.0, robotSide.negateIfRightSide(0.15), 0.0));
             }
          };
          ankleZUpFrame.update();

@@ -1,6 +1,10 @@
 package us.ihmc.avatar.simulationStarter;
 
-import com.github.quickhull3d.Point3d;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ConcurrentLinkedQueue;
+
 import us.ihmc.avatar.DRCLidar;
 import us.ihmc.avatar.DRCStartingLocation;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -27,6 +31,8 @@ import us.ihmc.communication.net.LocalObjectCommunicator;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.util.NetworkPorts;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidBehaviors.behaviors.scripts.engine.ScriptBasedControllerCommandGenerator;
 import us.ihmc.humanoidRobotics.communication.packets.HighLevelStateMessage;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
@@ -51,12 +57,6 @@ import us.ihmc.tools.processManagement.JavaProcessSpawner;
 import us.ihmc.util.PeriodicNonRealtimeThreadScheduler;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
-
-import javax.vecmath.Vector3d;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class DRCSimulationStarter implements SimulationStarterInterface
 {
@@ -103,8 +103,8 @@ public class DRCSimulationStarter implements SimulationStarterInterface
    private final ICPOptimizationParameters icpOptimizationParameters;
    private final RobotContactPointParameters contactPointParameters;
 
-   private final Point3d scsCameraPosition = new Point3d(6.0, -2.0, 4.5);
-   private final Point3d scsCameraFix = new Point3d(-0.44, -0.17, 0.75);
+   private final Point3D scsCameraPosition = new Point3D(6.0, -2.0, 4.5);
+   private final Point3D scsCameraFix = new Point3D(-0.44, -0.17, 0.75);
 
    private final List<HighLevelBehaviorFactory> highLevelBehaviorFactories = new ArrayList<>();
    private DRCNetworkProcessor networkProcessor;
@@ -113,7 +113,17 @@ public class DRCSimulationStarter implements SimulationStarterInterface
 
    private final ConcurrentLinkedQueue<Command<?, ?>> controllerCommands = new ConcurrentLinkedQueue<>();
 
+   public DRCSimulationStarter(DRCRobotModel robotModel, DRCSCSInitialSetup scsInitialSetup)
+   {
+      this(robotModel, null, scsInitialSetup);
+   }
+   
    public DRCSimulationStarter(DRCRobotModel robotModel, CommonAvatarEnvironmentInterface environment)
+   {
+      this(robotModel, environment, null);
+   }
+   
+   public DRCSimulationStarter(DRCRobotModel robotModel, CommonAvatarEnvironmentInterface environment, DRCSCSInitialSetup scsInitialSetup)
    {
       this.robotModel = robotModel;
       this.environment = environment;
@@ -123,10 +133,17 @@ public class DRCSimulationStarter implements SimulationStarterInterface
 
       this.createSCSSimulatedSensors = true;
 
-      scsInitialSetup = new DRCSCSInitialSetup(environment, robotModel.getSimulateDT());
-      scsInitialSetup.setInitializeEstimatorToActual(false);
-      scsInitialSetup.setTimePerRecordTick(robotModel.getControllerDT());
-      scsInitialSetup.setRunMultiThreaded(true);
+      if(scsInitialSetup == null)
+      {
+         this.scsInitialSetup = new DRCSCSInitialSetup(environment, robotModel.getSimulateDT());
+         this.scsInitialSetup.setInitializeEstimatorToActual(false);
+         this.scsInitialSetup.setTimePerRecordTick(robotModel.getControllerDT());
+         this.scsInitialSetup.setRunMultiThreaded(true);
+      }
+      else
+      {
+         this.scsInitialSetup = scsInitialSetup;
+      }
 
       this.walkingControllerParameters = robotModel.getWalkingControllerParameters();
       this.armControllerParameters = robotModel.getArmControllerParameters();
@@ -269,7 +286,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
    /**
     * Set a specific starting location offset. By default, the robot will start at (0, 0) in world with no yaw.
     */
-   public void setStartingLocationOffset(Vector3d robotInitialPosition, double yaw)
+   public void setStartingLocationOffset(Vector3D robotInitialPosition, double yaw)
    {
       setStartingLocationOffset(new OffsetAndYawRobotInitialSetup(robotInitialPosition, yaw));
    }
@@ -437,8 +454,8 @@ public class DRCSimulationStarter implements SimulationStarterInterface
       simulationConstructionSet = avatarSimulation.getSimulationConstructionSet();
       sdfRobot = avatarSimulation.getHumanoidFloatingRootJointRobot();
 
-      simulationConstructionSet.setCameraPosition(scsCameraPosition.x, scsCameraPosition.y, scsCameraPosition.z);
-      simulationConstructionSet.setCameraFix(scsCameraFix.x, scsCameraFix.y, scsCameraFix.z);
+      simulationConstructionSet.setCameraPosition(scsCameraPosition.getX(), scsCameraPosition.getY(), scsCameraPosition.getZ());
+      simulationConstructionSet.setCameraFix(scsCameraFix.getX(), scsCameraFix.getY(), scsCameraFix.getZ());
 
       PlaybackListener playbackListener = new SCSPlaybackListener(dataProducer);
       simulationConstructionSet.attachPlaybackListener(playbackListener);

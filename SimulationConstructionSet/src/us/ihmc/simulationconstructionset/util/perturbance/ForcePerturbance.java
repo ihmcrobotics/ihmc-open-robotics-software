@@ -1,7 +1,6 @@
 package us.ihmc.simulationconstructionset.util.perturbance;
 
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 
@@ -30,9 +29,9 @@ public class ForcePerturbance implements DirectedPerturbance
    }
 
    @Override
-   public void perturb(Vector3d direction)
+   public void perturb(Vector3D direction)
    {
-      Vector3d force = new Vector3d(direction);
+      Vector3D force = new Vector3D(direction);
       if (direction.lengthSquared() > 0.0)
       {
          force.normalize();

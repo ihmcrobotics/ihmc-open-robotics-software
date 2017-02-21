@@ -3,9 +3,9 @@ package us.ihmc.humanoidRobotics.communication.packets.sensing;
 import java.util.ArrayList;
 import java.util.Random;
 
-import javax.vecmath.Point3d;
-
-import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
 
 
 public class FilteredPointCloudPacket extends AbstractPointCloudPacket
@@ -15,7 +15,7 @@ public class FilteredPointCloudPacket extends AbstractPointCloudPacket
    public FilteredPointCloudPacket(Random random)
    {
 	   super(random);
-	   transform = RigidBodyTransform.generateRandomTransform(random);
+	   transform = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
    }
    
    public FilteredPointCloudPacket()
@@ -23,7 +23,7 @@ public class FilteredPointCloudPacket extends AbstractPointCloudPacket
       super();
    }
    
-   public FilteredPointCloudPacket(Point3d origin, ArrayList<Point3d> pointCloud, RigidBodyTransform transform, long timeStamp)
+   public FilteredPointCloudPacket(Point3D origin, ArrayList<Point3D> pointCloud, RigidBodyTransform transform, long timeStamp)
    {
       super(origin, pointCloud, timeStamp);
       this.transform = transform;

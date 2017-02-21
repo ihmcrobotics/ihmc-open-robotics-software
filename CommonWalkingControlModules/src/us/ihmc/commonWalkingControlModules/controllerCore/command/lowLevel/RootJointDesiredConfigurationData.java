@@ -8,7 +8,6 @@ import org.ejml.ops.CommonOps;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 
 public class RootJointDesiredConfigurationData implements RootJointDesiredConfigurationDataReadOnly
@@ -59,22 +58,22 @@ public class RootJointDesiredConfigurationData implements RootJointDesiredConfig
    public void setDesiredConfiguration(FrameOrientation orientation, FramePoint position)
    {
       desiredConfiguration.reshape(7, 1);
-      MatrixTools.insertQuat4dIntoEJMLVector(desiredConfiguration, orientation.getQuaternion(), 0);
-      MatrixTools.insertTuple3dIntoEJMLVector(position.getPoint(), desiredConfiguration, 4);
+      orientation.getQuaternion().get(0, desiredConfiguration);
+      position.getPoint().get(4, desiredConfiguration);
    }
 
    public void setDesiredVelocity(FrameVector angularVelocity, FrameVector linearVelocity)
    {
       desiredVelocity.reshape(6, 1);
-      MatrixTools.insertTuple3dIntoEJMLVector(angularVelocity.getVector(), desiredVelocity, 0);
-      MatrixTools.insertTuple3dIntoEJMLVector(linearVelocity.getVector(), desiredVelocity, 3);
+      angularVelocity.getVector().get(0, desiredVelocity);
+      linearVelocity.getVector().get(3, desiredVelocity);
    }
 
    public void setDesiredAcceleration(FrameVector angularAcceleration, FrameVector linearAcceleration)
    {
       desiredAcceleration.reshape(6, 1);
-      MatrixTools.insertTuple3dIntoEJMLVector(angularAcceleration.getVector(), desiredAcceleration, 0);
-      MatrixTools.insertTuple3dIntoEJMLVector(linearAcceleration.getVector(), desiredAcceleration, 3);
+      angularAcceleration.getVector().get(0, desiredAcceleration);
+      linearAcceleration.getVector().get(3, desiredAcceleration);
    }
 
    public void setDesiredConfiguration(DenseMatrix64F q)

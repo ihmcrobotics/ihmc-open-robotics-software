@@ -1,9 +1,12 @@
 package us.ihmc.robotics.geometry;
 
-import javax.vecmath.Point2d;
-import javax.vecmath.Tuple2d;
-import javax.vecmath.Vector2d;
-
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
+import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
+import us.ihmc.euclid.tuple2D.interfaces.Vector2DBasics;
+import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 /**
@@ -18,13 +21,13 @@ public class ConvexPolygon2dCalculator
     * Returns distance from the point to the boundary of this polygon. The return value
     * is negative if the point is inside the polygon.
     */
-   public static double getSignedDistance(Point2d point, ConvexPolygon2d polygon)
+   public static double getSignedDistance(Point2DReadOnly point, ConvexPolygon2d polygon)
    {
       double closestDistance = Double.POSITIVE_INFINITY;
       for (int index = 0; index < polygon.getNumberOfVertices(); index++)
       {
-         Point2d pointOne = polygon.getVertex(index);
-         Point2d pointTwo = polygon.getNextVertex(index);
+         Point2DReadOnly pointOne = polygon.getVertex(index);
+         Point2DReadOnly pointTwo = polygon.getNextVertex(index);
 
          double distance = GeometryTools.distanceFromPointToLineSegment(point, pointOne, pointTwo);
          if (distance < closestDistance)
@@ -40,7 +43,7 @@ public class ConvexPolygon2dCalculator
     * Moves the given point onto the boundary of the polygon if the point lies outside the
     * polygon. If the point is inside the polygon it is not modified.
     */
-   public static void orthogonalProjection(Point2d pointToProject, ConvexPolygon2d polygon)
+   public static void orthogonalProjection(Point2DBasics pointToProject, ConvexPolygon2d polygon)
    {
       if (!polygon.hasAtLeastOneVertex())
          return;
@@ -57,28 +60,28 @@ public class ConvexPolygon2dCalculator
       int closestVertexIndex = getClosestVertexIndex(pointToProject, polygon);
 
       // the orthogonal projection is either on the edge from point 1 to 2 or on the edge from 2 to 3.
-      Point2d point1 = polygon.getPreviousVertex(closestVertexIndex);
-      Point2d point2 = polygon.getVertex(closestVertexIndex);
-      Point2d point3 = polygon.getNextVertex(closestVertexIndex);
+      Point2DReadOnly point1 = polygon.getPreviousVertex(closestVertexIndex);
+      Point2DReadOnly point2 = polygon.getVertex(closestVertexIndex);
+      Point2DReadOnly point3 = polygon.getNextVertex(closestVertexIndex);
 
       // check first edge from point 2 to 3
-      double edgeVector1X = point3.x - point2.x;
-      double edgeVector1Y = point3.y - point2.y;
-      double lambda1 = getIntersectionLambda(point2.x, point2.y, edgeVector1X, edgeVector1Y, pointToProject.x, pointToProject.y, -edgeVector1Y, edgeVector1X);
+      double edgeVector1X = point3.getX() - point2.getX();
+      double edgeVector1Y = point3.getY() - point2.getY();
+      double lambda1 = getIntersectionLambda(point2.getX(), point2.getY(), edgeVector1X, edgeVector1Y, pointToProject.getX(), pointToProject.getY(), -edgeVector1Y, edgeVector1X);
       lambda1 = Math.max(lambda1, 0.0);
-      double candidate1X = point2.x + lambda1 * edgeVector1X;
-      double candidate1Y = point2.y + lambda1 * edgeVector1Y;
+      double candidate1X = point2.getX() + lambda1 * edgeVector1X;
+      double candidate1Y = point2.getY() + lambda1 * edgeVector1Y;
 
       // check second edge from point 1 to 2
-      double edgeVector2X = point2.x - point1.x;
-      double edgeVector2Y = point2.y - point1.y;
-      double lambda2 = getIntersectionLambda(point1.x, point1.y, edgeVector2X, edgeVector2Y, pointToProject.x, pointToProject.y, -edgeVector2Y, edgeVector2X);
+      double edgeVector2X = point2.getX() - point1.getX();
+      double edgeVector2Y = point2.getY() - point1.getY();
+      double lambda2 = getIntersectionLambda(point1.getX(), point1.getY(), edgeVector2X, edgeVector2Y, pointToProject.getX(), pointToProject.getY(), -edgeVector2Y, edgeVector2X);
       lambda2 = Math.min(lambda2, 1.0);
-      double candidate2X = point1.x + lambda2 * edgeVector2X;
-      double candidate2Y = point1.y + lambda2 * edgeVector2Y;
+      double candidate2X = point1.getX() + lambda2 * edgeVector2X;
+      double candidate2Y = point1.getY() + lambda2 * edgeVector2Y;
 
-      double distanceSquared1 = (pointToProject.x - candidate1X) * (pointToProject.x - candidate1X) + (pointToProject.y - candidate1Y) * (pointToProject.y - candidate1Y);
-      double distanceSquared2 = (pointToProject.x - candidate2X) * (pointToProject.x - candidate2X) + (pointToProject.y - candidate2Y) * (pointToProject.y - candidate2Y);
+      double distanceSquared1 = (pointToProject.getX() - candidate1X) * (pointToProject.getX() - candidate1X) + (pointToProject.getY() - candidate1Y) * (pointToProject.getY() - candidate1Y);
+      double distanceSquared2 = (pointToProject.getX() - candidate2X) * (pointToProject.getX() - candidate2X) + (pointToProject.getY() - candidate2Y) * (pointToProject.getY() - candidate2Y);
 
       if (distanceSquared1 < distanceSquared2)
          pointToProject.set(candidate1X, candidate1Y);
@@ -98,7 +101,7 @@ public class ConvexPolygon2dCalculator
       int index = -1;
       for (int i = 0; i < polygon.getNumberOfVertices(); i++)
       {
-         Point2d vertex = polygon.getVertex(i);
+         Point2DReadOnly vertex = polygon.getVertex(i);
          double distance = line.distance(vertex);
          if (distance < minDistance)
          {
@@ -113,7 +116,7 @@ public class ConvexPolygon2dCalculator
    /**
     * Packs the closest vertex of the polygon to the given line.
     */
-   public static boolean getClosestVertex(Line2d line, ConvexPolygon2d polygon, Point2d pointToPack)
+   public static boolean getClosestVertex(Line2d line, ConvexPolygon2d polygon, Point2DBasics pointToPack)
    {
       int index = getClosestVertexIndex(line, polygon);
       if (index < 0)
@@ -125,13 +128,13 @@ public class ConvexPolygon2dCalculator
    /**
     * Returns the index of the closest vertex of the polygon to the given point
     */
-   public static int getClosestVertexIndex(Point2d point, ConvexPolygon2d polygon)
+   public static int getClosestVertexIndex(Point2DReadOnly point, ConvexPolygon2d polygon)
    {
       double minDistance = Double.POSITIVE_INFINITY;
       int index = -1;
       for (int i = 0; i < polygon.getNumberOfVertices(); i++)
       {
-         Point2d vertex = polygon.getVertex(i);
+         Point2DReadOnly vertex = polygon.getVertex(i);
          double distance = vertex.distance(point);
          if (distance < minDistance)
          {
@@ -146,7 +149,7 @@ public class ConvexPolygon2dCalculator
    /**
     * Packs the closest vertex of the polygon to the given point
     */
-   public static boolean getClosestVertex(Point2d point, ConvexPolygon2d polygon, Point2d pointToPack)
+   public static boolean getClosestVertex(Point2DReadOnly point, ConvexPolygon2d polygon, Point2DBasics pointToPack)
    {
       int index = getClosestVertexIndex(point, polygon);
       if (index < 0)
@@ -159,7 +162,7 @@ public class ConvexPolygon2dCalculator
     * Packs the index of the closest edge to the given point. The index corresponds to the index
     * of the vertex at the start of the edge.
     */
-   public static int getClosestEdgeIndex(Point2d point, ConvexPolygon2d polygon)
+   public static int getClosestEdgeIndex(Point2DReadOnly point, ConvexPolygon2d polygon)
    {
       int index = -1;
       if (!polygon.hasAtLeastTwoVertices())
@@ -168,8 +171,8 @@ public class ConvexPolygon2dCalculator
       double minDistance = Double.POSITIVE_INFINITY;
       for (int i = 0; i < polygon.getNumberOfVertices(); i++)
       {
-         Point2d start = polygon.getVertex(i);
-         Point2d end = polygon.getNextVertex(i);
+         Point2DReadOnly start = polygon.getVertex(i);
+         Point2DReadOnly end = polygon.getNextVertex(i);
          double distance = GeometryTools.distanceFromPointToLineSegment(point, start, end);
          if (distance < minDistance)
          {
@@ -184,7 +187,7 @@ public class ConvexPolygon2dCalculator
    /**
     * Packs the closest edge to the given point.
     */
-   public static boolean getClosestEdge(Point2d point, ConvexPolygon2d polygon, LineSegment2d edgeToPack)
+   public static boolean getClosestEdge(Point2DReadOnly point, ConvexPolygon2d polygon, LineSegment2d edgeToPack)
    {
       int edgeIndex = getClosestEdgeIndex(point, polygon);
       if (edgeIndex == -1)
@@ -199,15 +202,15 @@ public class ConvexPolygon2dCalculator
     * intersects the polygon the result of this method will be wrong. If unsure check first using the
     * intersectionWithRay method.
     */
-   public static boolean getClosestPointToRay(Line2d ray, Point2d pointToPack, ConvexPolygon2d polygon)
+   public static boolean getClosestPointToRay(Line2d ray, Point2DBasics pointToPack, ConvexPolygon2d polygon)
    {
       if (!polygon.hasAtLeastOneVertex())
          return false;
 
-      Point2d rayStart = ray.getPoint();
-      Vector2d rayDirection = ray.getNormalizedVector();
+      Point2D rayStart = ray.getPoint();
+      Vector2D rayDirection = ray.getNormalizedVector();
       int closestVertexIndex = getClosestVertexIndex(ray, polygon);
-      Point2d closestVertexToLine = polygon.getVertex(closestVertexIndex);
+      Point2DReadOnly closestVertexToLine = polygon.getVertex(closestVertexIndex);
 
       // validate the closest vertex is in front of the ray:
       boolean vertexValid = isPointInFrontOfRay(rayStart, rayDirection, closestVertexToLine);
@@ -258,15 +261,15 @@ public class ConvexPolygon2dCalculator
    /**
     * Determines if the pointToTest is inside the bounding box of the convex polygon.
     */
-   public static boolean isPointInBoundingBox(Point2d pointToTest, double epsilon, ConvexPolygon2d polygon)
+   public static boolean isPointInBoundingBox(Point2DReadOnly pointToTest, double epsilon, ConvexPolygon2d polygon)
    {
-      return isPointInBoundingBox(pointToTest.x, pointToTest.y, epsilon, polygon);
+      return isPointInBoundingBox(pointToTest.getX(), pointToTest.getY(), epsilon, polygon);
    }
 
    /**
     * Determines if the point is inside the bounding box of the convex polygon.
     */
-   public static boolean isPointInBoundingBox(Point2d pointToTest, ConvexPolygon2d polygon)
+   public static boolean isPointInBoundingBox(Point2DReadOnly pointToTest, ConvexPolygon2d polygon)
    {
       return isPointInBoundingBox(pointToTest, 0.0, polygon);
    }
@@ -278,18 +281,18 @@ public class ConvexPolygon2dCalculator
    {
       if (polygon.hasExactlyOneVertex())
       {
-         Point2d vertex = polygon.getVertex(0);
-         if (Math.abs(vertex.x - pointX) > epsilon)
+         Point2DReadOnly vertex = polygon.getVertex(0);
+         if (Math.abs(vertex.getX() - pointX) > epsilon)
             return false;
-         if (Math.abs(vertex.y - pointY) > epsilon)
+         if (Math.abs(vertex.getY() - pointY) > epsilon)
             return false;
          return true;
       }
 
       if (polygon.hasExactlyTwoVertices())
       {
-         Point2d lineStart = polygon.getVertex(0);
-         Point2d lineEnd = polygon.getVertex(1);
+         Point2DReadOnly lineStart = polygon.getVertex(0);
+         Point2DReadOnly lineEnd = polygon.getVertex(1);
          double distance = GeometryTools.distanceFromPointToLineSegment(pointX, pointY, lineStart, lineEnd);
          if (distance > epsilon)
             return false;
@@ -301,9 +304,9 @@ public class ConvexPolygon2dCalculator
          // Determine whether the point is on the right side of each edge:
          for (int i = 0; i < polygon.getNumberOfVertices(); i++)
          {
-            Point2d edgeStart = polygon.getVertex(i);
-            Point2d edgeEnd = polygon.getNextVertex(i);
-            double distanceToEdgeLine = GeometryTools.distanceFromPointToLine(pointX, pointY, edgeStart.x, edgeStart.y, edgeEnd.x - edgeStart.x, edgeEnd.y - edgeStart.y);
+            Point2DReadOnly edgeStart = polygon.getVertex(i);
+            Point2DReadOnly edgeEnd = polygon.getNextVertex(i);
+            double distanceToEdgeLine = GeometryTools.distanceFromPointToLine(pointX, pointY, edgeStart.getX(), edgeStart.getY(), edgeEnd.getX() - edgeStart.getX(), edgeEnd.getY() - edgeStart.getY());
 
             boolean pointOutside = canObserverSeeEdge(i, pointX, pointY, polygon);
             if (!pointOutside)
@@ -330,7 +333,7 @@ public class ConvexPolygon2dCalculator
    /**
     * Determines if the pointToTest is inside the convex polygon.
     */
-   public static boolean isPointInside(Point2d pointToTest, ConvexPolygon2d polygon)
+   public static boolean isPointInside(Point2DReadOnly pointToTest, ConvexPolygon2d polygon)
    {
       return isPointInside(pointToTest, 0.0, polygon);
    }
@@ -338,9 +341,9 @@ public class ConvexPolygon2dCalculator
    /**
     * Determines if the pointToTest is inside the convex polygon.
     */
-   public static boolean isPointInside(Point2d pointToTest, double epsilon, ConvexPolygon2d polygon)
+   public static boolean isPointInside(Point2DReadOnly pointToTest, double epsilon, ConvexPolygon2d polygon)
    {
-      return isPointInside(pointToTest.x, pointToTest.y, epsilon, polygon);
+      return isPointInside(pointToTest.getX(), pointToTest.getY(), epsilon, polygon);
    }
 
    /**
@@ -368,13 +371,16 @@ public class ConvexPolygon2dCalculator
    /**
     * Translates the given polygon.
     */
-   public static void translatePolygon(Tuple2d translation, ConvexPolygon2d polygon)
+   public static void translatePolygon(Tuple2DReadOnly translation, ConvexPolygon2d polygon)
    {
       for (int i = 0; i < polygon.getNumberOfVertices(); i++)
       {
-         Point2d vertex = polygon.getVertex(i);
+         Point2D vertex = polygon.getVertexUnsafe(i);
          vertex.add(translation);
       }
+
+      polygon.updateBoundingBox();
+      polygon.updateCentroidAndArea();
    }
 
    /**
@@ -384,11 +390,11 @@ public class ConvexPolygon2dCalculator
     */
    public static boolean canObserverSeeEdge(int edgeIndex, double observerX, double observerY, ConvexPolygon2d polygon)
    {
-      Point2d vertexOne = polygon.getVertex(edgeIndex);
-      Point2d vertexTwo = polygon.getNextVertex(edgeIndex);
-      double edgeVectorX = vertexTwo.x - vertexOne.x;
-      double edgeVectorY = vertexTwo.y - vertexOne.y;
-      return GeometryTools.isPointOnSideOfLine(observerX, observerY, vertexOne.x, vertexOne.y, edgeVectorX, edgeVectorY, RobotSide.LEFT);
+      Point2DReadOnly vertexOne = polygon.getVertex(edgeIndex);
+      Point2DReadOnly vertexTwo = polygon.getNextVertex(edgeIndex);
+      double edgeVectorX = vertexTwo.getX() - vertexOne.getX();
+      double edgeVectorY = vertexTwo.getY() - vertexOne.getY();
+      return GeometryTools.isPointOnSideOfLine(observerX, observerY, vertexOne.getX(), vertexOne.getY(), edgeVectorX, edgeVectorY, RobotSide.LEFT);
    }
 
    /**
@@ -396,23 +402,23 @@ public class ConvexPolygon2dCalculator
     * the vertex at the start of the edge when moving clockwise around the polygon. Will return false if the
     * observer is on the edge.
     */
-   public static boolean canObserverSeeEdge(int edgeIndex, Point2d observer, ConvexPolygon2d polygon)
+   public static boolean canObserverSeeEdge(int edgeIndex, Point2DReadOnly observer, ConvexPolygon2d polygon)
    {
-      return canObserverSeeEdge(edgeIndex, observer.x, observer.y, polygon);
+      return canObserverSeeEdge(edgeIndex, observer.getX(), observer.getY(), polygon);
    }
 
    /**
     * For an observer looking at the vertices corresponding to index1 and index2 this method will select the
     * index that corresponds to the vertex on the specified side.
     */
-   public static int getVertexOnSide(int index1, int index2, RobotSide side, Point2d observer, ConvexPolygon2d polygon)
+   public static int getVertexOnSide(int index1, int index2, RobotSide side, Point2DReadOnly observer, ConvexPolygon2d polygon)
    {
-      Point2d point1 = polygon.getVertex(index1);
-      Point2d point2 = polygon.getVertex(index2);
-      double observerToPoint1X = point1.getX() - observer.x;
-      double observerToPoint1Y = point1.getY() - observer.y;
-      double observerToPoint2X = point2.getX() - observer.x;
-      double observerToPoint2Y = point2.getY() - observer.y;
+      Point2DReadOnly point1 = polygon.getVertex(index1);
+      Point2DReadOnly point2 = polygon.getVertex(index2);
+      double observerToPoint1X = point1.getX() - observer.getX();
+      double observerToPoint1Y = point1.getY() - observer.getY();
+      double observerToPoint2X = point2.getX() - observer.getX();
+      double observerToPoint2Y = point2.getY() - observer.getY();
 
       // Rotate the vector from observer to point 2 90 degree counter clockwise.
       double observerToPoint2PerpendicularX = - observerToPoint2Y;
@@ -431,7 +437,7 @@ public class ConvexPolygon2dCalculator
     * For an observer looking at the vertices corresponding to index1 and index2 this method will select the
     * index that corresponds to the vertex on the left side.
     */
-   public static int getVertexOnLeft(int index1, int index2, Point2d observer, ConvexPolygon2d polygon)
+   public static int getVertexOnLeft(int index1, int index2, Point2DReadOnly observer, ConvexPolygon2d polygon)
    {
       return getVertexOnSide(index1, index2, RobotSide.LEFT, observer, polygon);
    }
@@ -440,7 +446,7 @@ public class ConvexPolygon2dCalculator
     * For an observer looking at the vertices corresponding to index1 and index2 this method will select the
     * index that corresponds to the vertex on the right side.
     */
-   public static int getVertexOnRight(int index1, int index2, Point2d observer, ConvexPolygon2d polygon)
+   public static int getVertexOnRight(int index1, int index2, Point2DReadOnly observer, ConvexPolygon2d polygon)
    {
       return getVertexOnSide(index1, index2, RobotSide.RIGHT, observer, polygon);
    }
@@ -462,13 +468,13 @@ public class ConvexPolygon2dCalculator
    /**
     * Packs a vector that is orthogonal to the given edge, facing towards the outside of the polygon
     */
-   public static void getEdgeNormal(int edgeIndex, Vector2d normalToPack, ConvexPolygon2d polygon)
+   public static void getEdgeNormal(int edgeIndex, Vector2DBasics normalToPack, ConvexPolygon2d polygon)
    {
-      Point2d edgeStart = polygon.getVertex(edgeIndex);
-      Point2d edgeEnd = polygon.getNextVertex(edgeIndex);
+      Point2DReadOnly edgeStart = polygon.getVertex(edgeIndex);
+      Point2DReadOnly edgeEnd = polygon.getNextVertex(edgeIndex);
 
-      double edgeVectorX = edgeEnd.x - edgeStart.x;
-      double edgeVectorY = edgeEnd.y - edgeStart.y;
+      double edgeVectorX = edgeEnd.getX() - edgeStart.getX();
+      double edgeVectorY = edgeEnd.getY() - edgeStart.getY();
 
       normalToPack.set(-edgeVectorY, edgeVectorX);
       normalToPack.normalize();
@@ -480,7 +486,7 @@ public class ConvexPolygon2dCalculator
     * observer point of view will be the first vertex packed. The argument vertexIndices is expected to
     * have at least length two. If it is longer only the first two entries will be used.
     */
-   public static boolean getLineOfSightVertexIndices(Point2d observer, int[] vertexIndicesToPack, ConvexPolygon2d polygon)
+   public static boolean getLineOfSightVertexIndices(Point2DReadOnly observer, int[] vertexIndicesToPack, ConvexPolygon2d polygon)
    {
       if (!polygon.hasAtLeastOneVertex())
          return false;
@@ -537,18 +543,18 @@ public class ConvexPolygon2dCalculator
     * and pointToPack2. If there is only one intersection it will be stored in pointToPack1. Returns the number of
     * intersections found.
     */
-   public static int intersectionWithLineSegment(LineSegment2d lineSegment, Point2d pointToPack1, Point2d pointToPack2, ConvexPolygon2d polygon)
+   public static int intersectionWithLineSegment(LineSegment2d lineSegment, Point2DBasics pointToPack1, Point2DBasics pointToPack2, ConvexPolygon2d polygon)
    {
-      Point2d segmentStart = lineSegment.getFirstEndpoint();
-      Point2d segmentEnd = lineSegment.getSecondEndpoint();
-      double segmentVectorX = segmentEnd.x - segmentStart.x;
-      double segmentVectorY = segmentEnd.y - segmentStart.y;
+      Point2DReadOnly segmentStart = lineSegment.getFirstEndpoint();
+      Point2DReadOnly segmentEnd = lineSegment.getSecondEndpoint();
+      double segmentVectorX = segmentEnd.getX() - segmentStart.getX();
+      double segmentVectorY = segmentEnd.getY() - segmentStart.getY();
 
       int foundIntersections = 0;
       if (polygon.hasExactlyTwoVertices())
       {
-         Point2d vertex0 = polygon.getVertex(0);
-         Point2d vertex1 = polygon.getVertex(1);
+         Point2DReadOnly vertex0 = polygon.getVertex(0);
+         Point2DReadOnly vertex1 = polygon.getVertex(1);
          if (GeometryTools.distanceFromPointToLineSegment(vertex0, segmentStart, segmentEnd) < epsilon)
          {
             pointToPack1.set(vertex0);
@@ -569,8 +575,8 @@ public class ConvexPolygon2dCalculator
 
       for (int i = 0; i < polygon.getNumberOfVertices(); i++)
       {
-         Point2d edgeStart = polygon.getVertex(i);
-         Point2d edgeEnd = polygon.getNextVertex(i);
+         Point2DReadOnly edgeStart = polygon.getVertex(i);
+         Point2DReadOnly edgeEnd = polygon.getNextVertex(i);
 
          // check if the end points of the line segments are on this edge
          if (GeometryTools.distanceFromPointToLineSegment(segmentStart, edgeStart, edgeEnd) < epsilon)
@@ -598,9 +604,9 @@ public class ConvexPolygon2dCalculator
             if (foundIntersections == 2) break;
          }
 
-         double edgeVectorX = edgeEnd.x - edgeStart.x;
-         double edgeVectorY = edgeEnd.y - edgeStart.y;
-         double lambda = getIntersectionLambda(edgeStart.x, edgeStart.y, edgeVectorX, edgeVectorY, segmentStart.x, segmentStart.y, segmentVectorX,
+         double edgeVectorX = edgeEnd.getX() - edgeStart.getX();
+         double edgeVectorY = edgeEnd.getY() - edgeStart.getY();
+         double lambda = getIntersectionLambda(edgeStart.getX(), edgeStart.getY(), edgeVectorX, edgeVectorY, segmentStart.getX(), segmentStart.getY(), segmentVectorX,
                segmentVectorY);
          if (Double.isNaN(lambda))
             continue;
@@ -609,13 +615,13 @@ public class ConvexPolygon2dCalculator
          if (lambda < 0.0 || lambda > 1.0)
             continue;
 
-         double candidateX = edgeStart.x + lambda * edgeVectorX;
-         double candidateY = edgeStart.y + lambda * edgeVectorY;
+         double candidateX = edgeStart.getX() + lambda * edgeVectorX;
+         double candidateY = edgeStart.getY() + lambda * edgeVectorY;
 
          // check if within segment bounds:
-         if (!isPointInFrontOfRay(segmentStart.x, segmentStart.y, segmentVectorX, segmentVectorY, candidateX, candidateY))
+         if (!isPointInFrontOfRay(segmentStart.getX(), segmentStart.getY(), segmentVectorX, segmentVectorY, candidateX, candidateY))
             continue;
-         if (!isPointInFrontOfRay(segmentEnd.x, segmentEnd.y, -segmentVectorX, -segmentVectorY, candidateX, candidateY))
+         if (!isPointInFrontOfRay(segmentEnd.getX(), segmentEnd.getY(), -segmentVectorX, -segmentVectorY, candidateX, candidateY))
             continue;
 
          if (foundIntersections == 0)
@@ -638,11 +644,11 @@ public class ConvexPolygon2dCalculator
     * intersections found. The ray is given as a Line2d, where the start point of the ray is the point used to
     * specify the line and the direction of the ray is given by the direction of the line.
     */
-   public static int intersectionWithRay(Line2d ray, Point2d pointToPack1, Point2d pointToPack2, ConvexPolygon2d polygon)
+   public static int intersectionWithRay(Line2d ray, Point2DBasics pointToPack1, Point2DBasics pointToPack2, ConvexPolygon2d polygon)
    {
       int intersections = intersectionWithLine(ray, pointToPack1, pointToPack2, polygon);
-      Point2d rayStart = ray.getPoint();
-      Vector2d rayDirection = ray.getNormalizedVector();
+      Point2D rayStart = ray.getPoint();
+      Vector2D rayDirection = ray.getNormalizedVector();
 
       if (intersections == 2)
       {
@@ -669,11 +675,11 @@ public class ConvexPolygon2dCalculator
     * pointToPack2. If there is only one intersection (line goes through a vertex) it will be stored in pointToPack1.
     * Returns the number of intersections found.
     */
-   public static int intersectionWithLine(Line2d line, Point2d pointToPack1, Point2d pointToPack2, ConvexPolygon2d polygon)
+   public static int intersectionWithLine(Line2d line, Point2DBasics pointToPack1, Point2DBasics pointToPack2, ConvexPolygon2d polygon)
    {
       if (polygon.hasExactlyOneVertex())
       {
-         Point2d vertex = polygon.getVertex(0);
+         Point2DReadOnly vertex = polygon.getVertex(0);
          if (line.isPointOnLine(vertex))
          {
             pointToPack1.set(vertex);
@@ -684,8 +690,8 @@ public class ConvexPolygon2dCalculator
 
       if (polygon.hasExactlyTwoVertices())
       {
-         Point2d vertex0 = polygon.getVertex(0);
-         Point2d vertex1 = polygon.getVertex(1);
+         Point2DReadOnly vertex0 = polygon.getVertex(0);
+         Point2DReadOnly vertex1 = polygon.getVertex(1);
          if (line.isPointOnLine(vertex0) && line.isPointOnLine(vertex1))
          {
             pointToPack1.set(vertex0);
@@ -699,14 +705,14 @@ public class ConvexPolygon2dCalculator
       {
          if (doesLineIntersectEdge(line, i, polygon))
          {
-            Point2d edgeStart = polygon.getVertex(i);
-            Point2d edgeEnd = polygon.getNextVertex(i);
-            double edgeVectorX = edgeEnd.x - edgeStart.x;
-            double edgeVectorY = edgeEnd.y - edgeStart.y;
-            Point2d lineStart = line.getPoint();
-            Vector2d lineDirection = line.getNormalizedVector();
-            double lambda = getIntersectionLambda(edgeStart.x, edgeStart.y, edgeVectorX, edgeVectorY, lineStart.x, lineStart.y, lineDirection.x,
-                  lineDirection.y);
+            Point2DReadOnly edgeStart = polygon.getVertex(i);
+            Point2DReadOnly edgeEnd = polygon.getNextVertex(i);
+            double edgeVectorX = edgeEnd.getX() - edgeStart.getX();
+            double edgeVectorY = edgeEnd.getY() - edgeStart.getY();
+            Point2D lineStart = line.getPoint();
+            Vector2D lineDirection = line.getNormalizedVector();
+            double lambda = getIntersectionLambda(edgeStart.getX(), edgeStart.getY(), edgeVectorX, edgeVectorY, lineStart.getX(), lineStart.getY(), lineDirection.getX(),
+                  lineDirection.getY());
 
             if (foundIntersections == 0)
             {
@@ -746,8 +752,8 @@ public class ConvexPolygon2dCalculator
       int foundEdges = 0;
       for (int i = 0; i < polygon.getNumberOfVertices(); i++)
       {
-         Point2d startVertex = polygon.getVertex(i);
-         Point2d endVertex = polygon.getNextVertex(i);
+         Point2DReadOnly startVertex = polygon.getVertex(i);
+         Point2DReadOnly endVertex = polygon.getNextVertex(i);
 
          // edge is on the line
          if (line.isPointOnLine(startVertex) && line.isPointOnLine(endVertex))
@@ -786,13 +792,13 @@ public class ConvexPolygon2dCalculator
       if (!polygon.hasAtLeastTwoVertices())
          return false;
 
-      Point2d edgePointOne = polygon.getVertex(edgeIndex);
-      Point2d edgePointTwo = polygon.getNextVertex(edgeIndex);
+      Point2DReadOnly edgePointOne = polygon.getVertex(edgeIndex);
+      Point2DReadOnly edgePointTwo = polygon.getNextVertex(edgeIndex);
 
-      double edgeVectorX = edgePointTwo.x - edgePointOne.x;
-      double edgeVectorY = edgePointTwo.y - edgePointOne.y;
-      double lambdaOne = getIntersectionLambda(edgePointOne.x, edgePointOne.y, edgeVectorX, edgeVectorY, line.getPoint().x, line.getPoint().y,
-            line.getNormalizedVector().x, line.getNormalizedVector().y);
+      double edgeVectorX = edgePointTwo.getX() - edgePointOne.getX();
+      double edgeVectorY = edgePointTwo.getY() - edgePointOne.getY();
+      double lambdaOne = getIntersectionLambda(edgePointOne.getX(), edgePointOne.getY(), edgeVectorX, edgeVectorY, line.getPoint().getX(), line.getPoint().getY(),
+            line.getNormalizedVector().getX(), line.getNormalizedVector().getY());
       if (Double.isNaN(lambdaOne) || lambdaOne < 0.0 || lambdaOne > 1.0)
          return false;
 
@@ -827,9 +833,9 @@ public class ConvexPolygon2dCalculator
     * is on the line orthogonal to the ray through the ray start (perfectly left or right of the
     * observer) the method will return true.
     */
-   public static boolean isPointInFrontOfRay(Point2d rayStart, Vector2d rayDirection, Point2d pointToTest)
+   public static boolean isPointInFrontOfRay(Point2DReadOnly rayStart, Vector2DReadOnly rayDirection, Point2DReadOnly pointToTest)
    {
-      return isPointInFrontOfRay(rayStart.x, rayStart.y, rayDirection.x, rayDirection.y, pointToTest.x, pointToTest.y);
+      return isPointInFrontOfRay(rayStart.getX(), rayStart.getY(), rayDirection.getX(), rayDirection.getY(), pointToTest.getX(), pointToTest.getY());
    }
 
    /**
@@ -851,43 +857,43 @@ public class ConvexPolygon2dCalculator
     * Determines if edge i of the polygon is parallel to the given direction. If the edge is too
     * short to determine its direction this method will return false.
     */
-   public static boolean isEdgeParallel(int edgeIndex, Vector2d direction, ConvexPolygon2d polygon)
+   public static boolean isEdgeParallel(int edgeIndex, Vector2DReadOnly direction, ConvexPolygon2d polygon)
    {
-      Point2d edgeStart = polygon.getVertex(edgeIndex);
-      Point2d edgeEnd = polygon.getNextVertex(edgeIndex);
+      Point2DReadOnly edgeStart = polygon.getVertex(edgeIndex);
+      Point2DReadOnly edgeEnd = polygon.getNextVertex(edgeIndex);
 
-      double edgeDirectionX = edgeEnd.x - edgeStart.x;
-      double edgeDirectionY = edgeEnd.y - edgeStart.y;
+      double edgeDirectionX = edgeEnd.getX() - edgeStart.getX();
+      double edgeDirectionY = edgeEnd.getY() - edgeStart.getY();
 
-      double crossProduct = -edgeDirectionY * direction.x + edgeDirectionX * direction.y;
+      double crossProduct = -edgeDirectionY * direction.getX() + edgeDirectionX * direction.getY();
       return Math.abs(crossProduct) < epsilon;
    }
 
    // --- Methods that generate garbage ---
-   public static Point2d getClosestVertexCopy(Line2d line, ConvexPolygon2d polygon)
+   public static Point2D getClosestVertexCopy(Line2d line, ConvexPolygon2d polygon)
    {
-      Point2d ret = new Point2d();
+      Point2D ret = new Point2D();
       if (getClosestVertex(line, polygon, ret))
          return ret;
       return null;
    }
 
-   public static Point2d getClosestVertexCopy(Point2d point, ConvexPolygon2d polygon)
+   public static Point2D getClosestVertexCopy(Point2DReadOnly point, ConvexPolygon2d polygon)
    {
-      Point2d ret = new Point2d();
+      Point2D ret = new Point2D();
       if (getClosestVertex(point, polygon, ret))
          return ret;
       return null;
    }
 
-   public static ConvexPolygon2d translatePolygonCopy(Tuple2d translation, ConvexPolygon2d polygon)
+   public static ConvexPolygon2d translatePolygonCopy(Tuple2DReadOnly translation, ConvexPolygon2d polygon)
    {
       ConvexPolygon2d ret = new ConvexPolygon2d(polygon);
       translatePolygon(translation, ret);
       return ret;
    }
 
-   public static int[] getLineOfSightVertexIndicesCopy(Point2d observer, ConvexPolygon2d polygon)
+   public static int[] getLineOfSightVertexIndicesCopy(Point2DReadOnly observer, ConvexPolygon2d polygon)
    {
       int[] ret = new int[2];
       if (getLineOfSightVertexIndices(observer, ret, polygon))
@@ -895,18 +901,18 @@ public class ConvexPolygon2dCalculator
       return null;
    }
 
-   public static Point2d[] getLineOfSightVerticesCopy(Point2d observer, ConvexPolygon2d polygon)
+   public static Point2D[] getLineOfSightVerticesCopy(Point2DReadOnly observer, ConvexPolygon2d polygon)
    {
       int[] indices = getLineOfSightVertexIndicesCopy(observer, polygon);
       if (indices == null)
          return null;
 
-      Point2d point1 = new Point2d(polygon.getVertex(indices[0]));
-      Point2d point2 = new Point2d(polygon.getVertex(indices[1]));
+      Point2D point1 = new Point2D(polygon.getVertex(indices[0]));
+      Point2D point2 = new Point2D(polygon.getVertex(indices[1]));
 
       if (indices[0] == indices[1])
-         return new Point2d[] {point1};
-      return new Point2d[] {point1, point2};
+         return new Point2D[] {point1};
+      return new Point2D[] {point1, point2};
    }
 
    public static LineSegment2d[] getIntersectingEdgesCopy(Line2d line, ConvexPolygon2d polygon)
@@ -922,61 +928,61 @@ public class ConvexPolygon2dCalculator
       return null;
    }
 
-   public static Point2d[] intersectionWithLineCopy(Line2d line, ConvexPolygon2d polygon)
+   public static Point2D[] intersectionWithLineCopy(Line2d line, ConvexPolygon2d polygon)
    {
-      Point2d point1 = new Point2d();
-      Point2d point2 = new Point2d();
+      Point2D point1 = new Point2D();
+      Point2D point2 = new Point2D();
 
       int intersections = intersectionWithLine(line, point1, point2, polygon);
       if (intersections == 2)
-         return new Point2d[] {point1, point2};
+         return new Point2D[] {point1, point2};
       if (intersections == 1)
-         return new Point2d[] {point1};
+         return new Point2D[] {point1};
       return null;
    }
 
-   public static Point2d[] intersectionWithRayCopy(Line2d ray, ConvexPolygon2d polygon)
+   public static Point2D[] intersectionWithRayCopy(Line2d ray, ConvexPolygon2d polygon)
    {
-      Point2d point1 = new Point2d();
-      Point2d point2 = new Point2d();
+      Point2D point1 = new Point2D();
+      Point2D point2 = new Point2D();
 
       int intersections = intersectionWithRay(ray, point1, point2, polygon);
       if (intersections == 2)
-         return new Point2d[] {point1, point2};
+         return new Point2D[] {point1, point2};
       if (intersections == 1)
-         return new Point2d[] {point1};
+         return new Point2D[] {point1};
       return null;
    }
 
-   public static Point2d[] intersectionWithLineSegmentCopy(LineSegment2d lineSegment, ConvexPolygon2d polygon)
+   public static Point2D[] intersectionWithLineSegmentCopy(LineSegment2d lineSegment, ConvexPolygon2d polygon)
    {
-      Point2d point1 = new Point2d();
-      Point2d point2 = new Point2d();
+      Point2D point1 = new Point2D();
+      Point2D point2 = new Point2D();
 
       int intersections = intersectionWithLineSegment(lineSegment, point1, point2, polygon);
       if (intersections == 2)
-         return new Point2d[] {point1, point2};
+         return new Point2D[] {point1, point2};
       if (intersections == 1)
-         return new Point2d[] {point1};
+         return new Point2D[] {point1};
       return null;
    }
 
-   public static Point2d orthogonalProjectionCopy(Point2d pointToProject, ConvexPolygon2d polygon)
+   public static Point2D orthogonalProjectionCopy(Point2DReadOnly pointToProject, ConvexPolygon2d polygon)
    {
-      Point2d ret = new Point2d(pointToProject);
+      Point2D ret = new Point2D(pointToProject);
       orthogonalProjection(ret, polygon);
       return ret;
    }
 
-   public static Point2d getClosestPointToRayCopy(Line2d ray, ConvexPolygon2d polygon)
+   public static Point2D getClosestPointToRayCopy(Line2d ray, ConvexPolygon2d polygon)
    {
-      Point2d ret = new Point2d();
+      Point2D ret = new Point2D();
       if (getClosestPointToRay(ray, ret, polygon))
          return ret;
       return null;
    }
 
-   public static LineSegment2d getClosestEdgeCopy(Point2d point, ConvexPolygon2d polygon)
+   public static LineSegment2d getClosestEdgeCopy(Point2DReadOnly point, ConvexPolygon2d polygon)
    {
       LineSegment2d ret = new LineSegment2d();
       if (getClosestEdge(point, polygon, ret))

@@ -2,11 +2,10 @@ package us.ihmc.geometry.polytope;
 
 import java.util.ArrayList;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.geometry.BoundingBox3d;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 public class ConvexPolytope implements SupportingVertexHolder
 {
@@ -98,7 +97,7 @@ public class ConvexPolytope implements SupportingVertexHolder
       return vertices;
    }
 
-   public void addVertices(Point3d[] polytopePoints)
+   public void addVertices(Point3D[] polytopePoints)
    {
       for (int i = 0; i < polytopePoints.length; i++)
       {
@@ -108,7 +107,7 @@ public class ConvexPolytope implements SupportingVertexHolder
       boundingBoxNeedsUpdating = true;
    }
 
-   public PolytopeVertex addVertex(Point3d position)
+   public PolytopeVertex addVertex(Point3D position)
    {
       PolytopeVertex vertex = new PolytopeVertex(position);
       vertices.add(vertex);
@@ -211,7 +210,7 @@ public class ConvexPolytope implements SupportingVertexHolder
    }
 
    @Override
-   public Point3d getSupportingVertex(Vector3d supportDirection)
+   public Point3D getSupportingVertex(Vector3D supportDirection)
    {
       // Naive implementation. Just search through all of them.
       // TODO: Smart downhill march along edges. But will require always having the edges...

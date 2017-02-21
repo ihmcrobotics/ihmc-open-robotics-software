@@ -55,11 +55,23 @@ public class PathTools
       return false;
    }
 
+   /**
+    * Get the base name of a file. A bridge from Java's NIO.2 to Apache Commons IO.
+    * 
+    * @param path path
+    * @return baseName the base name, minus the full path and extension, from a full filename
+    */
    public static String getBaseName(Path path)
    {
       return FilenameUtils.getBaseName(path.toString());
    }
    
+   /**
+    * Get the extension of a file. A bridge from Java's NIO.2 to Apache Commons IO.
+    * 
+    * @param path path
+    * @return extension the extension of a file name
+    */
    public static String getExtension(Path path)
    {
       return FilenameUtils.getExtension(path.toString());
@@ -94,6 +106,12 @@ public class PathTools
       return findFirstPathMatchingGlob(directory, glob) != null;
    }
 
+   /**
+    * Recursively walk through a directory. A simple case of Files.walkFileTree provided by Java's NIO.2.
+    * 
+    * @param directory directory to walk
+    * @param basicFileVisitor callback to take action on visits
+    */
    public static void walkRecursively(Path directory, final BasicPathVisitor basicFileVisitor)
    {
       try
@@ -118,6 +136,12 @@ public class PathTools
       }
    }
    
+   /**
+    * Walk through a directory to a max depth. A simple case of Files.walkFileTree provided by Java's NIO.2.
+    * 
+    * @param directory directory to walk
+    * @param basicFileVisitor callback to take action on visits
+    */
    public static void walkDepth(final Path directory, int maxDepth, final BasicPathVisitor basicFileVisitor)
    {
       try
@@ -151,6 +175,13 @@ public class PathTools
       }
    }
 
+   /**
+    * Walk through a directory's immediate contents without diving deeper.
+    * A simple case of Files.walkFileTree provided by Java's NIO.2.
+    * 
+    * @param directory directory to walk
+    * @param basicFileVisitor callback to take action on visits
+    */
    public static void walkFlat(final Path directory, final BasicPathVisitor basicFileVisitor)
    {
       walkDepth(directory, 1, basicFileVisitor);

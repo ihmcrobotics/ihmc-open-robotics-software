@@ -2,8 +2,7 @@ package us.ihmc.robotics.lists;
 
 import java.util.List;
 
-import javax.vecmath.Tuple2d;
-
+import us.ihmc.euclid.tuple2D.interfaces.Tuple2DBasics;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameTuple2d;
 import us.ihmc.robotics.geometry.FrameVector2d;
@@ -41,7 +40,7 @@ public class FrameTuple2dArrayList<T extends FrameTuple2d<?, ?>> extends Recycli
       unsafeGet(i).setIncludingFrame(frameTuple2d);
    }
 
-   private void unsafeSet(int i, ReferenceFrame referenceFrame, Tuple2d tuple2d)
+   private void unsafeSet(int i, ReferenceFrame referenceFrame, Tuple2DBasics tuple2d)
    {
       unsafeGet(i).setIncludingFrame(referenceFrame, tuple2d);
    }
@@ -68,7 +67,7 @@ public class FrameTuple2dArrayList<T extends FrameTuple2d<?, ?>> extends Recycli
       }
    }
 
-   public void copyFromPoint2dListAndTrimSize(ReferenceFrame referenceFrame, List<? extends Tuple2d> otherList)
+   public void copyFromPoint2dListAndTrimSize(ReferenceFrame referenceFrame, List<? extends Tuple2DBasics> otherList)
    {
       ensureCapacity(otherList.size());
       size = otherList.size();

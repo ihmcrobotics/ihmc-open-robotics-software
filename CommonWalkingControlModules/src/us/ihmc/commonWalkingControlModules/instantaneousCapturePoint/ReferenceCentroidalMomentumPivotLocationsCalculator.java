@@ -3,14 +3,13 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.vecmath.Point2d;
-
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
@@ -461,7 +460,7 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
 
    private void addPredictedContactPointsToPolygon(Footstep footstep, FrameConvexPolygon2d convexPolygonToExtend)
    {
-      List<Point2d> predictedContactPoints = footstep.getPredictedContactPoints();
+      List<Point2D> predictedContactPoints = footstep.getPredictedContactPoints();
 
       if (predictedContactPoints != null && !predictedContactPoints.isEmpty())
       {
@@ -497,7 +496,7 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
          YoFramePoint previousExitCMP)
    {
       ReferenceFrame soleFrame = footstep.getSoleReferenceFrame();
-      List<Point2d> predictedContactPoints = footstep.getPredictedContactPoints();
+      List<Point2D> predictedContactPoints = footstep.getPredictedContactPoints();
       RobotSide robotSide = footstep.getRobotSide();
 
       if (predictedContactPoints != null)
@@ -565,7 +564,7 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
       if (useTwoCMPsPerSupport)
       {
          ReferenceFrame soleFrame = footstep.getSoleReferenceFrame();
-         List<Point2d> predictedContactPoints = footstep.getPredictedContactPoints();
+         List<Point2D> predictedContactPoints = footstep.getPredictedContactPoints();
          RobotSide robotSide = footstep.getRobotSide();
 
          if (predictedContactPoints != null)

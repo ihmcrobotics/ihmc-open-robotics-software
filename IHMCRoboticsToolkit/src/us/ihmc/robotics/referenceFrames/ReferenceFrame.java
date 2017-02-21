@@ -3,18 +3,16 @@ package us.ihmc.robotics.referenceFrames;
 import java.io.Serializable;
 import java.util.Random;
 
-import javax.vecmath.AxisAngle4d;
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.geometry.AbstractReferenceFrameHolder;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.GeometryTools;
 import us.ihmc.robotics.geometry.ReferenceFrameMismatchException;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.nameBasedHashCode.NameBasedHashCodeHolder;
 import us.ihmc.robotics.nameBasedHashCode.NameBasedHashCodeTools;
 
@@ -114,14 +112,14 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
          break;
       }
       
-      AxisAngle4d rotationToDesired = new AxisAngle4d();
+      AxisAngle rotationToDesired = new AxisAngle();
       alignAxisWithThis.changeFrame(referenceNormal.getReferenceFrame());
       GeometryTools.getAxisAngleFromFirstToSecondVector(referenceNormal.getVectorCopy(), alignAxisWithThis.getVectorCopy(), rotationToDesired);
       
       RigidBodyTransform transformToDesired = new RigidBodyTransform();
 
       transformToDesired.setRotation(rotationToDesired);
-      Vector3d translation = new Vector3d();
+      Vector3D translation = new Vector3D();
       point.get(translation);
       transformToDesired.setTranslation(translation);
 
@@ -130,7 +128,7 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
 
    public static ReferenceFrame generateRandomReferenceFrame(String frameName, Random random, ReferenceFrame parentFrame)
    {
-      RigidBodyTransform transformFromParent = RigidBodyTransform.generateRandomTransform(random);
+      RigidBodyTransform transformFromParent = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
       return constructFrameWithUnchangingTransformFromParent(frameName, parentFrame, transformFromParent);
    }
 
@@ -167,7 +165,7 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
       
       ReferenceFrame initialFrame = alignAxisWithThis.getReferenceFrame();
       alignAxisWithThis.changeFrame(currentXYZAxis.getReferenceFrame());
-      AxisAngle4d rotationToDesired = new AxisAngle4d();
+      AxisAngle rotationToDesired = new AxisAngle();
       GeometryTools.getAxisAngleFromFirstToSecondVector(currentXYZAxis.getVector(), alignAxisWithThis.getVector(), rotationToDesired);
       alignAxisWithThis.changeFrame(initialFrame);
       
@@ -208,7 +206,7 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
    }
 
    public static ReferenceFrame constructBodyFrameWithUnchangingTranslationFromParent(String frameName, ReferenceFrame parentFrame,
-         Vector3d translationFromParent)
+         Vector3D translationFromParent)
    {
       RigidBodyTransform transformToParent = new RigidBodyTransform();
       transformToParent.setTranslation(translationFromParent);
@@ -500,7 +498,8 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
       {
          if (this.transformToRoot != null)
          {
-            transformToPack.multiply(desiredFrame.inverseTransformToRoot, this.transformToRoot);
+            transformToPack.set(desiredFrame.inverseTransformToRoot);
+            transformToPack.multiply(this.transformToRoot);
          }
          else
          {
@@ -597,7 +596,7 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
                }
                
                referenceFrame.transformToRoot.normalizeRotationPart();
-               referenceFrame.inverseTransformToRoot.invert(referenceFrame.transformToRoot);
+               referenceFrame.inverseTransformToRoot.setAndInvert(referenceFrame.transformToRoot);
 
                referenceFrame.transformToRootID = nextTransformToRootID;
             }
@@ -622,7 +621,7 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
       RigidBodyTransform ret = new RigidBodyTransform();
 
       ret.setRotation(GeometryTools.getAxisAngleFromZUpToVector(zAxis.getVectorCopy()));
-      Vector3d translation = new Vector3d();
+      Vector3D translation = new Vector3D();
       point.get(translation);
       ret.setTranslation(translation);
 
@@ -717,26 +716,6 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
             }
          }
       }
-   }
-
-   public static boolean isTransformationInPlane(RigidBodyTransform transform)
-   {
-      // true if the transform preserves the z axis direction and magnitude, paying no heed to transformations.
-      // for SO(3) matrices (orthogonal with determinant 1, equivalent to rotations)
-      Matrix3d rotation = new Matrix3d();
-      transform.getRotation(rotation);
-
-      return isRotationInPlane(rotation);
-   }
-
-   public static boolean isRotationInPlane(Matrix3d rotation)
-   {
-      // true if the transform preserves the z axis direction and magnitude, paying no heed to transformations.
-      // for SO(3) matrices (orthogonal with determinant 1, equivalent to rotations)
-      RotationTools.checkProperRotationMatrix(rotation);
-      double epsilon = 1e-14;
-
-      return ((Math.abs(rotation.getM02()) <= epsilon) && (Math.abs(rotation.getM12()) <= epsilon) && (Math.abs(rotation.getM22() - 1.0) <= epsilon));
    }
 
    @Override

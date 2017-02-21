@@ -1,10 +1,5 @@
 package us.ihmc.utilities.ros;
 
-import geometry_msgs.Point;
-import geometry_msgs.Pose;
-import geometry_msgs.Quaternion;
-import geometry_msgs.Vector3;
-
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
 import java.awt.image.DataBuffer;
@@ -21,13 +16,16 @@ import java.net.URISyntaxException;
 import java.net.UnknownHostException;
 
 import javax.imageio.ImageIO;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-import javax.vecmath.Vector3f;
 
 import org.ros.node.NodeConfiguration;
 
-import us.ihmc.robotics.geometry.RigidBodyTransform;
+import geometry_msgs.Point;
+import geometry_msgs.Pose;
+import geometry_msgs.Quaternion;
+import geometry_msgs.Vector3;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.Vector3D32;
 
 public class RosTools
 {
@@ -167,37 +165,34 @@ public class RosTools
    }
 
    
-   public static void packRosQuaternionToQuat4d(Quaternion rosQuat, Quat4d quat)
+   public static void packRosQuaternionToQuat4d(Quaternion rosQuat, us.ihmc.euclid.tuple4D.Quaternion quat)
    {
-      quat.setX(rosQuat.getX());
-      quat.setY(rosQuat.getY());
-      quat.setZ(rosQuat.getZ());
-      quat.setW(rosQuat.getW());
+      quat.set(rosQuat.getX(), rosQuat.getY(), rosQuat.getZ(), rosQuat.getW());
       
    }
 
-   public static void packRosVector3ToVector3d(Vector3 rosVector, Vector3d vectorToPack)
+   public static void packRosVector3ToVector3d(Vector3 rosVector, Vector3D vectorToPack)
    {
       vectorToPack.setX(rosVector.getX());
       vectorToPack.setY(rosVector.getY());
       vectorToPack.setZ(rosVector.getZ());
    }
    
-   public static void packVector3dToGeometry_msgsVector3(Vector3d vector, Vector3 rosVectorToPack)
+   public static void packVector3dToGeometry_msgsVector3(Vector3D vector, Vector3 rosVectorToPack)
    {
       rosVectorToPack.setX(vector.getX());
       rosVectorToPack.setY(vector.getY());
       rosVectorToPack.setZ(vector.getZ());
    }
    
-   public static void packVector3fToGeometry_msgsVector3(Vector3f vector, Vector3 rosVectorToPack)
+   public static void packVector3fToGeometry_msgsVector3(Vector3D32 vector, Vector3 rosVectorToPack)
    {
       rosVectorToPack.setX(vector.getX());
       rosVectorToPack.setY(vector.getY());
       rosVectorToPack.setZ(vector.getZ());
    }
    
-   public static void packVector3dToGeometry_MsgPoint(Vector3d position, Point point)
+   public static void packVector3dToGeometry_MsgPoint(Vector3D position, Point point)
    {
       point.setX(position.getX());
       point.setY(position.getY());
@@ -206,24 +201,24 @@ public class RosTools
 
    public static void packRigidBodyTransformToGeometry_msgsPose(RigidBodyTransform pelvisTransform, Pose pose)
    {
-      Vector3d point = new Vector3d();
+      Vector3D point = new Vector3D();
       pelvisTransform.getTranslation(point);
 
-      Quat4d rotation = new Quat4d();
+      us.ihmc.euclid.tuple4D.Quaternion rotation = new us.ihmc.euclid.tuple4D.Quaternion();
       pelvisTransform.getRotation(rotation);
       
       packVector3dAndQuat4dToGeometry_msgsPose(point, rotation, pose);
    }
    
-   public static void packVector3dAndQuat4dToGeometry_msgsPose(Vector3d point, Quat4d rotation, Pose pose)
+   public static void packVector3dAndQuat4dToGeometry_msgsPose(Vector3D point, us.ihmc.euclid.tuple4D.Quaternion rotation, Pose pose)
    {
       RosTools.packVector3dToGeometry_MsgPoint(point, pose.getPosition());
       RosTools.packQuat4dToGeometry_msgsQuaternion(rotation, pose.getOrientation());
    }
 
-   private static void packQuat4dToGeometry_msgsQuaternion(Quat4d quat, Quaternion orientation)
+   private static void packQuat4dToGeometry_msgsQuaternion(us.ihmc.euclid.tuple4D.Quaternion quat, Quaternion orientation)
    {
-      orientation.setW(quat.getW());
+      orientation.setW(quat.getS());
       orientation.setX(quat.getX());
       orientation.setY(quat.getY());
       orientation.setZ(quat.getZ());

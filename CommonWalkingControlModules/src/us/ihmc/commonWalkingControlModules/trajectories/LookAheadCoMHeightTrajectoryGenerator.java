@@ -4,13 +4,12 @@ import static us.ihmc.communication.packets.Packet.INVALID_MESSAGE_ID;
 
 import java.util.List;
 
-import javax.vecmath.Point2d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
 import us.ihmc.communication.controllerAPI.command.CommandArrayDeque;
 import us.ihmc.communication.packets.Packet;
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
@@ -265,7 +264,7 @@ public class LookAheadCoMHeightTrajectoryGenerator
       correctForCoMHeightDrift.set(activate);
    }
 
-   private final Point2d[] points = new Point2d[4];
+   private final Point2D[] points = new Point2D[4];
    private final double[] endpointSlopes = new double[] {0.0, 0.0};
    private final double[] waypointSlopes = new double[2];
 
@@ -313,32 +312,32 @@ public class LookAheadCoMHeightTrajectoryGenerator
       frameOfLastFoostep = newFrame;
    }
 
-   private final Point2d tempPoint2dA = new Point2d();
-   private final Point2d tempPoint2dB = new Point2d();
+   private final Point2D tempPoint2dA = new Point2D();
+   private final Point2D tempPoint2dB = new Point2D();
 
-   private final Point2d s0Min = new Point2d();
-   private final Point2d d0Min = new Point2d();
-   private final Point2d dFMin = new Point2d();
-   private final Point2d sFMin = new Point2d();
-   private final Point2d sNextMin = new Point2d();
+   private final Point2D s0Min = new Point2D();
+   private final Point2D d0Min = new Point2D();
+   private final Point2D dFMin = new Point2D();
+   private final Point2D sFMin = new Point2D();
+   private final Point2D sNextMin = new Point2D();
 
-   private final Point2d s0Nom = new Point2d();
-   private final Point2d d0Nom = new Point2d();
-   private final Point2d dFNom = new Point2d();
-   private final Point2d sFNom = new Point2d();
-   private final Point2d sNextNom = new Point2d();
+   private final Point2D s0Nom = new Point2D();
+   private final Point2D d0Nom = new Point2D();
+   private final Point2D dFNom = new Point2D();
+   private final Point2D sFNom = new Point2D();
+   private final Point2D sNextNom = new Point2D();
 
-   private final Point2d s0Max = new Point2d();
-   private final Point2d d0Max = new Point2d();
-   private final Point2d dFMax = new Point2d();
-   private final Point2d sFMax = new Point2d();
-   private final Point2d sNextMax = new Point2d();
+   private final Point2D s0Max = new Point2D();
+   private final Point2D d0Max = new Point2D();
+   private final Point2D dFMax = new Point2D();
+   private final Point2D sFMax = new Point2D();
+   private final Point2D sNextMax = new Point2D();
 
-   private final Point2d s0 = new Point2d();
-   private final Point2d d0 = new Point2d();
-   private final Point2d dF = new Point2d();
-   private final Point2d sF = new Point2d();
-   private final Point2d sNext = new Point2d();
+   private final Point2D s0 = new Point2D();
+   private final Point2D d0 = new Point2D();
+   private final Point2D dF = new Point2D();
+   private final Point2D sF = new Point2D();
+   private final Point2D sNext = new Point2D();
 
    private final FramePoint framePointS0 = new FramePoint();
    private final FramePoint framePointD0 = new FramePoint();
@@ -460,7 +459,7 @@ public class LookAheadCoMHeightTrajectoryGenerator
       computeHeightsToUseByStretchingString(transferFromFootstep.getRobotSide());
       previousZFinals.get(transferToFootstep.getRobotSide()).set(sF.getY());
 
-      Point2d[] points = new Point2d[] {s0, d0, dF, sF};
+      Point2D[] points = new Point2D[] {s0, d0, dF, sF};
       double[] endpointSlopes = new double[] {0.0, 0.0};
 
       double[] waypointSlopes = new double[2];
@@ -565,7 +564,7 @@ public class LookAheadCoMHeightTrajectoryGenerator
             tempFramePointForViz1.setToZero(transferFromContactFramePosition.getReferenceFrame());
             tempFramePointForViz1.interpolate(transferFromContactFramePosition, transferToContactFramePosition, ((double) i) / ((double) numberOfPoints));
             tempFramePointForViz1.changeFrame(worldFrame);
-            Point2d queryPoint = new Point2d(tempFramePointForViz1.getX(), tempFramePointForViz1.getY());
+            Point2D queryPoint = new Point2D(tempFramePointForViz1.getX(), tempFramePointForViz1.getY());
             this.solve(coMHeightPartialDerivativesData, queryPoint, false);
             coMHeightPartialDerivativesData.getCoMHeight(tempFramePointForViz2);
             tempFramePointForViz2.setX(tempFramePointForViz1.getX());
@@ -576,7 +575,7 @@ public class LookAheadCoMHeightTrajectoryGenerator
       }
    }
 
-   private Point2d tempPoint2dForStringStretching = new Point2d();
+   private Point2D tempPoint2dForStringStretching = new Point2D();
 
    private void computeHeightsToUseByStretchingString(RobotSide transferFromSide)
    {
@@ -638,7 +637,7 @@ public class LookAheadCoMHeightTrajectoryGenerator
          stringStretcher2d.addMinMaxPoints(dFMin, dFMax);
       }
 
-      List<Point2d> stretchedString = stringStretcher2d.stretchString();
+      List<Point2D> stretchedString = stringStretcher2d.stretchString();
 
       d0.set(stretchedString.get(1));
       dF.set(stretchedString.get(2));
@@ -658,7 +657,7 @@ public class LookAheadCoMHeightTrajectoryGenerator
       if (nextContactFramePosition != null)
       {
          Line2d line2d = new Line2d(projectionSegment.getFirstEndpointCopy(), projectionSegment.getSecondEndpointCopy());
-         Point2d nextPoint2d = new Point2d(nextContactFramePosition.getX(), nextContactFramePosition.getY());
+         Point2D nextPoint2d = new Point2D(nextContactFramePosition.getX(), nextContactFramePosition.getY());
          line2d.orthogonalProjectionCopy(nextPoint2d);
          xSNext = projectionSegment.percentageAlongLineSegment(nextPoint2d) * projectionSegment.length();
       }
@@ -712,14 +711,14 @@ public class LookAheadCoMHeightTrajectoryGenerator
       return z_d0;
    }
 
-   private void getPoint2d(Point2d point2dToPack, FramePoint point)
+   private void getPoint2d(Point2D point2dToPack, FramePoint point)
    {
       point2dToPack.set(point.getX(), point.getY());
    }
 
    private final FramePoint tempFramePoint = new FramePoint();
-   private final Point2d queryPoint = new Point2d();
-   private final Point2d solutionPoint = new Point2d();
+   private final Point2D queryPoint = new Point2D();
+   private final Point2D solutionPoint = new Point2D();
 
    public void solve(CoMHeightPartialDerivativesData coMHeightPartialDerivativesDataToPack, boolean isInDoubleSupport)
    {
@@ -736,7 +735,7 @@ public class LookAheadCoMHeightTrajectoryGenerator
    private final double[] splineOutput = new double[3];
    private final double[] partialDerivativesWithRespectToS = new double[2];
 
-   private void solve(CoMHeightPartialDerivativesData coMHeightPartialDerivativesDataToPack, Point2d queryPoint, boolean isInDoubleSupport)
+   private void solve(CoMHeightPartialDerivativesData coMHeightPartialDerivativesDataToPack, Point2D queryPoint, boolean isInDoubleSupport)
    {
       projectionSegment.orthogonalProjection(queryPoint);
       double splineQuery = projectionSegment.percentageAlongLineSegment(queryPoint) * projectionSegment.length();
@@ -985,7 +984,7 @@ public class LookAheadCoMHeightTrajectoryGenerator
 
    private final FramePoint coM = new FramePoint();
 
-   private void getCenterOfMass2d(Point2d point2dToPack, ReferenceFrame centerOfMassFrame)
+   private void getCenterOfMass2d(Point2D point2dToPack, ReferenceFrame centerOfMassFrame)
    {
       coM.setToZero(centerOfMassFrame);
       coM.changeFrame(worldFrame);
@@ -1031,13 +1030,13 @@ public class LookAheadCoMHeightTrajectoryGenerator
    private void printFootstepConstructor(Footstep footstep)
    {
       RobotSide robotSide = footstep.getRobotSide();
-      Point3d position = new Point3d();
+      Point3D position = new Point3D();
       footstep.getPositionInWorldFrame(position);
-      Quat4d orientation = new Quat4d();
+      Quaternion orientation = new Quaternion();
       footstep.getOrientationInWorldFrame(orientation);
 
-      System.out.println("footsteps.add(footstepProviderTestHelper.createFootstep(RobotSide." + robotSide + ", new Point3d(" + position.getX() + ", "
-            + position.getY() + ", " + position.getZ() + "), new Quat4d(" + orientation.getW() + ", " + orientation.getX() + ", " + orientation.getY() + ", "
+      System.out.println("footsteps.add(footstepProviderTestHelper.createFootstep(RobotSide." + robotSide + ", new Point3D(" + position.getX() + ", "
+            + position.getY() + ", " + position.getZ() + "), new Quat4d(" + orientation.getS() + ", " + orientation.getX() + ", " + orientation.getY() + ", "
             + orientation.getZ() + ")));");
    }
 }

@@ -1,14 +1,13 @@
 package us.ihmc.robotics.geometry.shapes;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Point3f;
-import javax.vecmath.Vector3d;
-import javax.vecmath.Vector3f;
-import javax.vecmath.Vector4d;
-import javax.vecmath.Vector4f;
-
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.geometry.transformables.Transformable;
+import us.ihmc.euclid.interfaces.Transformable;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.euclid.tuple4D.interfaces.Vector4DBasics;
+import us.ihmc.euclid.tuple4D.interfaces.Vector4DReadOnly;
 
 /**
  * Class that by default, lazily keeps an inverse transform around.
@@ -95,73 +94,19 @@ class TwoWayRigidBodyTransform
       transformable.applyTransform(forwardTransform);
    }
 
-   public void transformForward(Vector3f vector)
-   {
-      ensureForwardTransformUpToDate();
-      forwardTransform.transform(vector);
-   }
-
-   public void transformForward(Vector4f vector)
-   {
-      ensureForwardTransformUpToDate();
-      forwardTransform.transform(vector);
-   }
-
-   public void transformForward(Vector3d vector)
-   {
-      ensureForwardTransformUpToDate();
-      forwardTransform.transform(vector);
-   }
-
-   public void transformForward(Vector4d vector)
-   {
-      ensureForwardTransformUpToDate();
-      forwardTransform.transform(vector);
-   }
-
-   public void transformForward(Vector3f vectorIn, Vector3f vectorOut)
+   public void transformForward(Vector3DReadOnly vectorIn, Vector3DBasics vectorOut)
    {
       ensureForwardTransformUpToDate();
       forwardTransform.transform(vectorIn, vectorOut);
    }
    
-   public void transformForward(Vector4f vectorIn, Vector4f vectorOut)
-   {
-      ensureForwardTransformUpToDate();
-      forwardTransform.transform(vectorIn, vectorOut);
-   }
-   
-   public void transformForward(Vector3d vectorIn, Vector3d vectorOut)
-   {
-      ensureForwardTransformUpToDate();
-      forwardTransform.transform(vectorIn, vectorOut);
-   }
-   
-   public void transformForward(Vector4d vectorIn, Vector4d vectorOut)
+   public void transformForward(Vector4DReadOnly vectorIn, Vector4DBasics vectorOut)
    {
       ensureForwardTransformUpToDate();
       forwardTransform.transform(vectorIn, vectorOut);
    }
 
-   public void transformForward(Point3f point)
-   {
-      ensureForwardTransformUpToDate();
-      forwardTransform.transform(point);
-   }
-   
-   public void transformForward(Point3d point)
-   {
-      ensureForwardTransformUpToDate();
-      forwardTransform.transform(point);
-   }
-   
-   public void transformForward(Point3f pointIn, Point3f pointOut)
-   {
-      ensureForwardTransformUpToDate();
-      forwardTransform.transform(pointIn, pointOut);
-   }
-   
-   public void transformForward(Point3d pointIn, Point3d pointOut)
+   public void transformForward(Point3DReadOnly pointIn, Point3DBasics pointOut)
    {
       ensureForwardTransformUpToDate();
       forwardTransform.transform(pointIn, pointOut);
@@ -173,73 +118,19 @@ class TwoWayRigidBodyTransform
       transformable.applyTransform(backwardTransform);
    }
 
-   public void transformBackward(Vector3f vector)
-   {
-      ensureBackwardTransformUpToDate();
-      backwardTransform.transform(vector);
-   }
-
-   public void transformBackward(Vector4f vector)
-   {
-      ensureBackwardTransformUpToDate();
-      backwardTransform.transform(vector);
-   }
-
-   public void transformBackward(Vector3d vector)
-   {
-      ensureBackwardTransformUpToDate();
-      backwardTransform.transform(vector);
-   }
-
-   public void transformBackward(Vector4d vector)
-   {
-      ensureBackwardTransformUpToDate();
-      backwardTransform.transform(vector);
-   }
-
-   public void transformBackward(Vector3f vectorIn, Vector3f vectorOut)
+   public void transformBackward(Vector3DReadOnly vectorIn, Vector3DBasics vectorOut)
    {
       ensureBackwardTransformUpToDate();
       backwardTransform.transform(vectorIn, vectorOut);
    }
    
-   public void transformBackward(Vector4f vectorIn, Vector4f vectorOut)
+   public void transformBackward(Vector4DReadOnly vectorIn, Vector4DBasics vectorOut)
    {
       ensureBackwardTransformUpToDate();
       backwardTransform.transform(vectorIn, vectorOut);
    }
    
-   public void transformBackward(Vector3d vectorIn, Vector3d vectorOut)
-   {
-      ensureBackwardTransformUpToDate();
-      backwardTransform.transform(vectorIn, vectorOut);
-   }
-   
-   public void transformBackward(Vector4d vectorIn, Vector4d vectorOut)
-   {
-      ensureBackwardTransformUpToDate();
-      backwardTransform.transform(vectorIn, vectorOut);
-   }
-
-   public void transformBackward(Point3f point)
-   {
-      ensureBackwardTransformUpToDate();
-      backwardTransform.transform(point);
-   }
-   
-   public void transformBackward(Point3d point)
-   {
-      ensureBackwardTransformUpToDate();
-      backwardTransform.transform(point);
-   }
-   
-   public void transformBackward(Point3f pointIn, Point3f pointOut)
-   {
-      ensureBackwardTransformUpToDate();
-      backwardTransform.transform(pointIn, pointOut);
-   }
-   
-   public void transformBackward(Point3d pointIn, Point3d pointOut)
+   public void transformBackward(Point3DReadOnly pointIn, Point3DBasics pointOut)
    {
       ensureBackwardTransformUpToDate();
       backwardTransform.transform(pointIn, pointOut);

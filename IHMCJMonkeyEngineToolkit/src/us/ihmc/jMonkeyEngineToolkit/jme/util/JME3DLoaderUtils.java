@@ -2,13 +2,13 @@ package us.ihmc.jMonkeyEngineToolkit.jme.util;
 
 import java.util.ArrayList;
 
-import us.ihmc.graphicsDescription.structure.Graphics3DNodeType;
-import us.ihmc.jMonkeyEngineToolkit.jme.JMEAssetLocator;
-import us.ihmc.jMonkeyEngineToolkit.jme.JMEGraphicsObject;
-
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
+
+import us.ihmc.graphicsDescription.structure.Graphics3DNodeType;
+import us.ihmc.jMonkeyEngineToolkit.jme.JMEAssetLocator;
+import us.ihmc.jMonkeyEngineToolkit.jme.JMEGraphicsObject;
 
 public class JME3DLoaderUtils
 {

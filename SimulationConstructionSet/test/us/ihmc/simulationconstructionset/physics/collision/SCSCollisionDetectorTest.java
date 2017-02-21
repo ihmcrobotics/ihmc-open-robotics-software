@@ -5,10 +5,9 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
-import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.simulationconstructionset.ContactingExternalForcePoint;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.Link;
@@ -215,8 +214,8 @@ public abstract class SCSCollisionDetectorTest
 
          Contacts collision = result.getCollision(0);
 
-         Point3d pointOnA = new Point3d();
-         Point3d pointOnB = new Point3d();
+         Point3D pointOnA = new Point3D();
+         Point3D pointOnB = new Point3D();
          collision.getWorldA(0, pointOnA);
          collision.getWorldB(0, pointOnB);
 
@@ -259,7 +258,7 @@ public abstract class SCSCollisionDetectorTest
       collisionDetector.initialize();
 
       RigidBodyTransform offset = new RigidBodyTransform();
-      offset.setTranslation(new Vector3d(0, 0, -1.7));
+      offset.setTranslation(new Vector3D(0, 0, -1.7));
 
       FloatingJoint cubeA = cube(collisionDetector, "A", 10, null, 1, 1, 1, 2, 2);
       FloatingJoint cubeB = cube(collisionDetector, "B", 10, null, 1, 1, 1, 2, 2);
@@ -287,7 +286,7 @@ public abstract class SCSCollisionDetectorTest
    public FloatingJoint cube(ScsCollisionDetector collisionDetector, String name, double mass, RigidBodyTransform shapeToLink, double radiusX, double radiusY, double radiusZ, int collisionGroup, int collisionMask)
    {
       Robot robot = new Robot("null");
-      FloatingJoint joint = new FloatingJoint("cube", new Vector3d(), robot);
+      FloatingJoint joint = new FloatingJoint("cube", new Vector3D(), robot);
       Link link = new Link(name);
 
       //    link.setMass(mass);

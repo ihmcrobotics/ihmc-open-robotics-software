@@ -1,13 +1,12 @@
 package us.ihmc.robotics.dataStructures;
 
-import gnu.trove.map.hash.TLongObjectHashMap;
-
 import java.util.ArrayList;
 import java.util.LinkedList;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Point3f;
-import javax.vecmath.Vector3f;
+import gnu.trove.map.hash.TLongObjectHashMap;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Point3D32;
+import us.ihmc.euclid.tuple3D.Vector3D32;
 
 public class DecayingResolutionFilter
 {
@@ -29,7 +28,7 @@ public class DecayingResolutionFilter
       list = new LinkedList<TimestampedPoint>();
    }
 
-   public boolean add(Point3d p)
+   public boolean add(Point3D p)
    {
       return add(p.getX(), p.getY(), p.getZ());
    }
@@ -104,7 +103,7 @@ public class DecayingResolutionFilter
 
    private long hash(TimestampedPoint point)
    {
-      return hash(point.getX(), point.getY(), point.getZ(), resolution);
+      return hash(point.getX32(), point.getY32(), point.getZ32(), resolution);
    }
 
    private static final int bits = 20;
@@ -157,11 +156,11 @@ public class DecayingResolutionFilter
     * Get the points in a new array. The points them self are not copied.
     * @return new Point3f array
     */
-   public Point3f[] getPoints3f()
+   public Point3D32[] getPoints3f()
    {
       synchronized (list)
       {
-         Point3f[] points = new Point3f[list.size()];
+         Point3D32[] points = new Point3D32[list.size()];
 
          for (int i = 0; i < list.size(); i++)
          {
@@ -176,9 +175,9 @@ public class DecayingResolutionFilter
     * Unsafe when reading/writing from different threads, but it is quicker.
     * @return
     */
-   public Point3f[] getPoints3fUnsynchronized()
+   public Point3D32[] getPoints3fUnsynchronized()
    {
-      return list.toArray(new Point3f[0]);
+      return list.toArray(new Point3D32[0]);
    }
 
    public ArrayList<TimestampedPoint> getPointsCopy()
@@ -194,7 +193,7 @@ public class DecayingResolutionFilter
       return copy;
    }
 
-   public Point3f getNearestIntersection(Point3f origin, Vector3f direction)
+   public Point3D32 getNearestIntersection(Point3D32 origin, Vector3D32 direction)
    {
       ArrayList<TimestampedPoint> points = getPointsCopy();
       direction.normalize();
@@ -202,19 +201,19 @@ public class DecayingResolutionFilter
       double distanceToLine, distance;
 
       double nearestDistance = Double.POSITIVE_INFINITY;
-      Point3f nearestPoint = null;
+      Point3D32 nearestPoint = null;
 
-      for (Point3f p : points)
+      for (Point3D32 p : points)
       {
-         dx = origin.getX() - p.getX();
-         dy = origin.getY() - p.getY();
-         dz = origin.getZ() - p.getZ();
+         dx = origin.getX32() - p.getX32();
+         dy = origin.getY32() - p.getY32();
+         dz = origin.getZ32() - p.getZ32();
 
-         dot = dx * direction.getX() + dy * direction.getY() + dz * direction.getZ();
+         dot = dx * direction.getX32() + dy * direction.getY32() + dz * direction.getZ32();
 
-         dx = dx - dot * direction.getX();
-         dy = dy - dot * direction.getY();
-         dz = dz - dot * direction.getZ();
+         dx = dx - dot * direction.getX32();
+         dy = dy - dot * direction.getY32();
+         dz = dz - dot * direction.getZ32();
 
          distanceToLine = Math.sqrt(dx * dx + dy * dy + dz * dz);
 

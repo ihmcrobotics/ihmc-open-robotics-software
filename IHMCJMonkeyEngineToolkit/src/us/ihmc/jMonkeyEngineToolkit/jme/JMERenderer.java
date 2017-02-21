@@ -26,7 +26,6 @@ import java.util.logging.Logger;
 
 import javax.swing.JComponent;
 import javax.swing.RepaintManager;
-import javax.vecmath.Color3f;
 
 import org.jmonkeyengine.scene.plugins.ogre.MaterialLoader;
 
@@ -60,7 +59,7 @@ import com.jme3.util.SkyFactory.EnvMapType;
 import jme3dae.ColladaLoader;
 import jme3dae.collada14.ColladaDocumentV14;
 import jme3dae.materials.FXBumpMaterialGenerator;
-import us.ihmc.graphicsDescription.*;
+import us.ihmc.graphicsDescription.HeightMap;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.input.SelectedListener;
 import us.ihmc.graphicsDescription.structure.Graphics3DNode;
@@ -82,6 +81,7 @@ import us.ihmc.jMonkeyEngineToolkit.jme.terrain.JMEHeightMapTerrain;
 import us.ihmc.jMonkeyEngineToolkit.jme.util.JMEGeometryUtils;
 import us.ihmc.jMonkeyEngineToolkit.jme.util.JMENodeTools;
 import us.ihmc.jMonkeyEngineToolkit.stlLoader.STLLoader;
+import us.ihmc.robotics.dataStructures.MutableColor;
 import us.ihmc.robotics.lidar.LidarScanParameters;
 import us.ihmc.tools.FormattingTools;
 import us.ihmc.tools.inputDevices.keyboard.KeyListener;
@@ -1167,7 +1167,7 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
    }
 
    @Override
-   public void setBackgroundColor(final Color3f color)
+   public void setBackgroundColor(final MutableColor color)
    {
       //      enqueue(new Callable<Object>()
       //      {

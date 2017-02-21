@@ -1,9 +1,8 @@
 package us.ihmc.ihmcPerception.depthData;
 
-import javax.vecmath.Point3d;
-
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataFilterParameters;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 public class DepthDataFilter extends DepthDataStore
 {
@@ -22,7 +21,7 @@ public class DepthDataFilter extends DepthDataStore
       this.worldToCorrected.set(adjustment);
    }
 
-   public boolean addNearScanPoint(Point3d point, Point3d sensorOrigin)
+   public boolean addNearScanPoint(Point3D point, Point3D sensorOrigin)
    {
       boolean send = false;
       if(!pointInRange(point, sensorOrigin))
@@ -39,7 +38,7 @@ public class DepthDataFilter extends DepthDataStore
 
       return send;
    }
-   public boolean addQuatreePoint(Point3d point, Point3d sensorOrigin)
+   public boolean addQuatreePoint(Point3D point, Point3D sensorOrigin)
    {
       boolean send = false;
       if(!pointInRange(point, sensorOrigin))
@@ -60,25 +59,25 @@ public class DepthDataFilter extends DepthDataStore
       return send;
    }
    
-   public boolean addPoint(Point3d point,Point3d sensorOrigin)
+   public boolean addPoint(Point3D point,Point3D sensorOrigin)
    {
       return addNearScanPoint(point, sensorOrigin)| addQuatreePoint(point, sensorOrigin);
    }
    
 
-   protected boolean isValidNearScan(Point3d point, Point3d lidarOrigin)
+   protected boolean isValidNearScan(Point3D point, Point3D lidarOrigin)
    {
       boolean valid = true;
       valid &= point.getZ() < lidarOrigin.getZ() + parameters.nearScanZMaxAboveHead;
 
-      Point3d center = new Point3d(lidarOrigin.getX(), lidarOrigin.getY(), point.getZ());
+      Point3D center = new Point3D(lidarOrigin.getX(), lidarOrigin.getY(), point.getZ());
       valid &= point.distance(center) < parameters.nearScanRadius;
 
 
       return valid;
    }
 
-   protected boolean isValidPoint(Point3d point, Point3d lidarOrigin)
+   protected boolean isValidPoint(Point3D point, Point3D lidarOrigin)
    {
       boolean valid = true;
 
@@ -87,14 +86,14 @@ public class DepthDataFilter extends DepthDataStore
       return valid;
    }
 
-   protected boolean isPossibleGround(Point3d point, Point3d lidarOrigin)
+   protected boolean isPossibleGround(Point3D point, Point3D lidarOrigin)
    {
       final double footZ = 0;
 
       return (point.getZ() - footZ) < parameters.quadTreeZMax;
    }
 
-   private boolean pointInRange(Point3d point, Point3d sensorOrigin)
+   private boolean pointInRange(Point3D point, Point3D sensorOrigin)
    {
       double dist = sensorOrigin.distance(point);
 

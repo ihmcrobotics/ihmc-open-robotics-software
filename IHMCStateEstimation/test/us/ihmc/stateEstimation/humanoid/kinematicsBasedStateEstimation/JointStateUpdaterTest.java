@@ -6,7 +6,7 @@ import static org.junit.Assert.fail;
 import java.util.ArrayList;
 import java.util.Random;
 
-import javax.vecmath.Vector3d;
+import us.ihmc.euclid.tuple3D.Vector3D;
 
 import org.junit.Test;
 
@@ -27,9 +27,9 @@ import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsSt
 
 public class JointStateUpdaterTest
 {
-   private static final Vector3d X = new Vector3d(1.0, 0.0, 0.0);
-   private static final Vector3d Y = new Vector3d(0.0, 1.0, 0.0);
-   private static final Vector3d Z = new Vector3d(0.0, 0.0, 1.0);
+   private static final Vector3D X = new Vector3D(1.0, 0.0, 0.0);
+   private static final Vector3D Y = new Vector3D(0.0, 1.0, 0.0);
+   private static final Vector3D Z = new Vector3D(0.0, 0.0, 1.0);
 
    private static final Random random = new Random(1776L);
    private static final double EPS = 1e-10;
@@ -40,7 +40,7 @@ public class JointStateUpdaterTest
    {
       YoVariableRegistry registry = new YoVariableRegistry("Blop");
       
-      Vector3d[] jointAxes = {X, Y, Z, Z, X, Z, Z, X, Y, Y};
+      Vector3D[] jointAxes = {X, Y, Z, Z, X, Z, Z, X, Y, Y};
       ScrewTestTools.RandomFloatingChain randomFloatingChain = new ScrewTestTools.RandomFloatingChain(random, jointAxes);
       ArrayList<RevoluteJoint> joints = new ArrayList<RevoluteJoint>(randomFloatingChain.getRevoluteJoints());
       
@@ -67,7 +67,7 @@ public class JointStateUpdaterTest
    {
       YoVariableRegistry registry = new YoVariableRegistry("Blop");
       
-      Vector3d[] jointAxes = {X, Y, Z, Z, X, Z, Z, X, Y, Y};
+      Vector3D[] jointAxes = {X, Y, Z, Z, X, Z, Z, X, Y, Y};
       ScrewTestTools.RandomFloatingChain randomFloatingChain = new ScrewTestTools.RandomFloatingChain(random, jointAxes);
       ArrayList<RevoluteJoint> joints = new ArrayList<RevoluteJoint>(randomFloatingChain.getRevoluteJoints());
       

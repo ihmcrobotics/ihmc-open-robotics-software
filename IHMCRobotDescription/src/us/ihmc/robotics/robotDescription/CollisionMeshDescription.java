@@ -2,9 +2,8 @@ package us.ihmc.robotics.robotDescription;
 
 import java.util.ArrayList;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.geometry.polytope.ConvexPolytope;
 import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.geometry.LineSegment3d;
@@ -137,7 +136,7 @@ public class CollisionMeshDescription implements CollisionMaskHolder
       transformGenerator.translate(x, y, z);
    }
 
-   public void translate(Vector3d translationVector)
+   public void translate(Vector3D translationVector)
    {
       transformGenerator.translate(translationVector);
    }
@@ -147,12 +146,12 @@ public class CollisionMeshDescription implements CollisionMaskHolder
       transformGenerator.identity();
    }
 
-   public void rotateEuler(Vector3d eulerAngles)
+   public void rotateEuler(Vector3D eulerAngles)
    {
       transformGenerator.rotateEuler(eulerAngles);
    }
 
-   public void rotate(Matrix3d rotation)
+   public void rotate(RotationMatrix rotation)
    {
       transformGenerator.rotate(rotation);
    }

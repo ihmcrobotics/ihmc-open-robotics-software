@@ -2,7 +2,7 @@ package us.ihmc.quadrupedRobotics.mechanics.inverseKinematics;
 
 import java.util.ArrayList;
 
-import javax.vecmath.Vector3d;
+import us.ihmc.euclid.tuple3D.Vector3D;
 
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
@@ -61,7 +61,7 @@ public class QuadrupedInverseKinematicsCalculators implements QuadrupedLegInvers
    }
 
    @Override
-   public boolean solveForEndEffectorLocationInBodyAndUpdateDesireds(RobotQuadrant robotQuadrant, Vector3d footPositionInFrameBeforeHipRoll,
+   public boolean solveForEndEffectorLocationInBodyAndUpdateDesireds(RobotQuadrant robotQuadrant, Vector3D footPositionInFrameBeforeHipRoll,
          FullRobotModel fullRobotModel)
    {
       QuadrantHolder quadrantHolder = quadrantHolders.get(robotQuadrant);
@@ -177,7 +177,7 @@ public class QuadrupedInverseKinematicsCalculators implements QuadrupedLegInvers
          }
       }
 
-      public boolean solveGivenFootLocationInHip(Vector3d footPositionInFrameBeforeHipRoll, double[] jointAnglesToPack)
+      public boolean solveGivenFootLocationInHip(Vector3D footPositionInFrameBeforeHipRoll, double[] jointAnglesToPack)
       {
          desiredFrame.updateTranslation(footPositionInFrameBeforeHipRoll);
          return closedFormInverseKinematicsCalculator.computeJointAnglesGivenFootInFrameBeforeHipRoll(footPositionInFrameBeforeHipRoll, jointAnglesToPack);
