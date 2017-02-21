@@ -118,7 +118,7 @@ public class LinearAccelerationMeasurementModelElementTest
       EjmlUnitTests.assertEquals(zeroVector, zeroResidual, 1e-12);
 
       double perturbation = 1e-6;
-      double tol = 1e-11;
+      double tol = 1.0e-6;//1e-11;
       modelElement.computeMatrixBlocks();
 
       // CoM velocity perturbations
