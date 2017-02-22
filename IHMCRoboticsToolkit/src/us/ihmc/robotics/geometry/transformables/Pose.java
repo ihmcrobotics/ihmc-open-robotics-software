@@ -8,6 +8,7 @@ import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
 import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
+import us.ihmc.euclid.tools.EuclidCoreIOTools;
 import us.ihmc.euclid.tools.QuaternionTools;
 import us.ihmc.euclid.transform.AffineTransform;
 import us.ihmc.euclid.transform.QuaternionBasedTransform;
@@ -35,34 +36,34 @@ public class Pose implements GeometryObject<Pose>, PoseTransform
 {
    private final Quaternion orientation;
    private final Point3D position;
-   private final PoseTransformMapping poseTransformMapping;
+   private final TransformToPoseTransformAPIMap transformToPoseTransformAPIMap;
 
    public Pose(Pose pose)
    {
       orientation = new Quaternion(pose.getOrientation());
       position = new Point3D(pose.getPosition());
-      poseTransformMapping = new PoseTransformMapping();
+      transformToPoseTransformAPIMap = new TransformToPoseTransformAPIMap();
    }
 
    public Pose()
    {
       orientation = new Quaternion();
       position = new Point3D();
-      poseTransformMapping = new PoseTransformMapping();
+      transformToPoseTransformAPIMap = new TransformToPoseTransformAPIMap();
    }
 
    public Pose(RigidBodyTransform transform)
    {
       transform.getRotation(orientation = new Quaternion());
       transform.getTranslation(position = new Point3D());
-      poseTransformMapping = new PoseTransformMapping();
+      transformToPoseTransformAPIMap = new TransformToPoseTransformAPIMap();
    }
 
    public Pose(Point3DReadOnly position, QuaternionReadOnly orientation)
    {
       this.orientation = new Quaternion(orientation);
       this.position = new Point3D(position);
-      poseTransformMapping = new PoseTransformMapping();
+      transformToPoseTransformAPIMap = new TransformToPoseTransformAPIMap();
    }
 
    public void setX(double x)
@@ -317,11 +318,17 @@ public class Pose implements GeometryObject<Pose>, PoseTransform
       return position.epsilonEquals(other.getPosition(), positionErrorMargin) && orientation.epsilonEquals(other.getOrientation(), orientationErrorMargin);
    }
    
+   @Override
+   public String toString()
+   {
+      return EuclidCoreIOTools.getTuple3DString(position) + "\n" + EuclidCoreIOTools.getTuple4DString(orientation);
+   }
+
    /** {@inheritDoc} */
    @Override
    public void transformToWorld(Transformable transformable)
    {
-      transformable.applyTransform(poseTransformMapping);
+      transformable.applyTransform(transformToPoseTransformAPIMap);
    }
 
    /** {@inheritDoc} */
@@ -405,7 +412,7 @@ public class Pose implements GeometryObject<Pose>, PoseTransform
    @Override
    public void transformToLocal(Transformable transformable)
    {
-      transformable.applyTransform(poseTransformMapping);
+      transformable.applyTransform(transformToPoseTransformAPIMap);
    }
 
    /** {@inheritDoc} */
@@ -490,7 +497,7 @@ public class Pose implements GeometryObject<Pose>, PoseTransform
       transformed.multiply(original);
    }
    
-   private class PoseTransformMapping implements Transform
+   private class TransformToPoseTransformAPIMap implements Transform
    {
       @Override
       public void transform(Point3DReadOnly pointOriginal, Point3DBasics pointTransformed)

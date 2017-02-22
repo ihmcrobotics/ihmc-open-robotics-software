@@ -125,7 +125,7 @@ public class Box3dTest
       box.setFromTransform(transform);
 
       RigidBodyTransform transformBack = new RigidBodyTransform();
-      box.getTransform(transformBack);
+      box.getPose(transformBack);
       assertTrue(transform.epsilonEquals(transformBack, Epsilons.ONE_TRILLIONTH));
       assertTrue(transform.epsilonEquals(box.getTransformCopy(), Epsilons.ONE_TRILLIONTH));
 
@@ -542,8 +542,8 @@ public class Box3dTest
          {
             Point3D point = getRandomConvexCombination(random, vertices);
             Point3D pointTransformed = new Point3D(point);
-            box.getTransformToLocalUnsafe().transform(pointTransformed);
-            boxTransformed.getTransformToWorldUnsafe().transform(pointTransformed);
+            box.transformToLocal(pointTransformed);
+            boxTransformed.transformToWorld(pointTransformed);
             
             assertEquals(box.isInsideOrOnSurface(point), boxTransformed.isInsideOrOnSurface(pointTransformed));            
          }

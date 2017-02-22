@@ -13,6 +13,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.Direction;
+import us.ihmc.robotics.geometry.transformables.Pose;
 
 /**
  * Box where base frame is in the center.
@@ -36,7 +37,12 @@ public class Box3d extends Shape3d<Box3d>
 
    public Box3d(Box3d other)
    {
-      this(other.getTransformToWorldUnsafe(), other.getLength(), other.getWidth(), other.getHeight());
+      setPose(other);
+      dimensions = new EnumMap<Direction, Double>(Direction.class);
+      faces = new EnumMap<FaceName, Plane3d>(FaceName.class);
+      temporaryPoint = new Point3D();
+
+      commonConstructor(other.getLength(), other.getWidth(), other.getHeight());
    }
 
    public Box3d(RigidBodyTransform configuration, double[] dimensions)
@@ -55,7 +61,17 @@ public class Box3d extends Shape3d<Box3d>
 
    public Box3d(RigidBodyTransform transform, double length, double width, double height)
    {
-      setTransform(transform);
+      setPose(transform);
+      dimensions = new EnumMap<Direction, Double>(Direction.class);
+      faces = new EnumMap<FaceName, Plane3d>(FaceName.class);
+      temporaryPoint = new Point3D();
+
+      commonConstructor(length, width, height);
+   }
+
+   public Box3d(Pose pose, double length, double width, double height)
+   {
+      setPose(pose);
       dimensions = new EnumMap<Direction, Double>(Direction.class);
       faces = new EnumMap<FaceName, Plane3d>(FaceName.class);
       temporaryPoint = new Point3D();
@@ -160,7 +176,7 @@ public class Box3d extends Shape3d<Box3d>
    {
       if (other != this)
       {
-         setTransformToWorld(other.getTransformToWorldUnsafe());
+         setPose(other);
          setDimensions(other.dimensions);
          facesAreOutOfDate = true;
       }
@@ -182,13 +198,14 @@ public class Box3d extends Shape3d<Box3d>
 
    public void setFromTransform(RigidBodyTransform transform)
    {
-      setTransformToWorld(transform);
+      setPose(transform);
       facesAreOutOfDate = true;
    }
 
+   @Override
    public void setYawPitchRoll(double yaw, double pitch, double roll)
    {
-      super.setOrientation(yaw, pitch, roll);
+      super.setYawPitchRoll(yaw, pitch, roll);
       facesAreOutOfDate = true;
    }
 
@@ -199,7 +216,6 @@ public class Box3d extends Shape3d<Box3d>
       facesAreOutOfDate = true;
    }
 
-   @Override
    public void setPosition(Point3DReadOnly translation)
    {
       super.setPosition(translation);
@@ -209,7 +225,7 @@ public class Box3d extends Shape3d<Box3d>
    @Override
    public void applyTransform(Transform transform)
    {
-      super.applyTransform(transform);
+      applyTransformToPose(transform);
       facesAreOutOfDate = true;
    }
 
@@ -523,7 +539,7 @@ public class Box3d extends Shape3d<Box3d>
    public RigidBodyTransform getTransformCopy()
    {
       RigidBodyTransform ret = new RigidBodyTransform();
-      getTransform(ret);
+      getRigidBodyTransform(ret);
       return ret;
    }
 
