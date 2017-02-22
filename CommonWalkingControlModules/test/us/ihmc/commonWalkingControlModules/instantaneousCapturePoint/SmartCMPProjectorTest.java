@@ -24,6 +24,7 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.junit.Test;
 
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.SmartCMPProjector.ProjectionMethod;
+import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
@@ -44,7 +45,6 @@ import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.testing.MutationTestingTools;
 
 @ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class SmartCMPProjectorTest
@@ -774,8 +774,6 @@ public class SmartCMPProjectorTest
 
    public static void main(String[] args)
    {
-      String targetTests = "us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.SmartCMPProjectorTest";
-      String targetClasses = "us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.SmartCMPProjector";
-      MutationTestingTools.doPITMutationTestAndOpenResult(targetTests, targetClasses);
+      MutationTestFacilitator.facilitateMutationTestForClass(SmartCMPProjector.class, SmartCMPProjectorTest.class);
    }
 }

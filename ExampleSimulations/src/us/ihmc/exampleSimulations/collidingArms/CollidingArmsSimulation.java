@@ -89,8 +89,13 @@ public class CollidingArmsSimulation
       }
 
       int estimatedNumberOfContactPoints = 100;
-      Robot groundRobot = new GroundAsABoxRobot(estimatedNumberOfContactPoints , false, nextGroupBitMask, 0xff);
-      scs.addRobot(groundRobot);
+      GroundAsABoxRobot groundAsABoxRobot = new GroundAsABoxRobot();
+      groundAsABoxRobot.setEstimatedNumberOfContactPoints(estimatedNumberOfContactPoints);
+      groundAsABoxRobot.setAddWalls(false);
+      groundAsABoxRobot.setCollisionGroup(nextGroupBitMask);
+      groundAsABoxRobot.setCollisionMask(0xff);
+
+      scs.addRobot(groundAsABoxRobot.createRobot());
 
       scs.setGroundVisible(false);
       //      SingleBallRobotDescription ball = new SingleBallRobotDescription("ballOne", 0.1, 0.1);
