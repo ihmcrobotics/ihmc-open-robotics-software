@@ -1,9 +1,5 @@
 package us.ihmc.avatar.networkProcessor;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map.Entry;
-
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.footstepPlanningToolboxModule.FootstepPlanningToolboxModule;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxModule;
@@ -16,7 +12,6 @@ import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
 import us.ihmc.communication.PacketRouter;
 import us.ihmc.communication.configuration.NetworkParameterKeys;
 import us.ihmc.communication.configuration.NetworkParameters;
-import us.ihmc.communication.net.KryoObjectServer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.util.NetworkPorts;
@@ -24,11 +19,14 @@ import us.ihmc.humanoidBehaviors.IHMCHumanoidBehaviorManager;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.robotBehaviors.watson.TextToSpeechNetworkModule;
-import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationKryoNetClassLists;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.tools.io.printing.PrintTools;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map.Entry;
 
 public class DRCNetworkProcessor
 {
@@ -56,7 +54,6 @@ public class DRCNetworkProcessor
          setupFootstepPlanningToolboxModule(robotModel, params);
          addRobotSpecificModuleCommunicators(params.getRobotSpecificModuleCommunicatorPorts());
          addTextToSpeechEngine(params);
-         setupRobotEnvironmentAwarenessModule(params);
          setupHeightQuadTreeToolboxModule(robotModel, params);
          setupLidarScanLogger();
          setupRemoteObjectDetectionFeedbackEndpoint(params);
@@ -93,7 +90,8 @@ public class DRCNetworkProcessor
    {
       if (params.isZeroPoseRobotConfigurationPublisherEnabled())
       {
-         PacketCommunicator zeroPosePublisherCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.ZERO_POSE_PRODUCER, NET_CLASS_LIST);
+         PacketCommunicator zeroPosePublisherCommunicator = PacketCommunicator
+               .createIntraprocessPacketCommunicator(NetworkPorts.ZERO_POSE_PRODUCER, NET_CLASS_LIST);
          packetRouter.attachPacketCommunicator(PacketDestination.ZERO_POSE_PRODUCER, zeroPosePublisherCommunicator);
          try
          {
@@ -118,12 +116,12 @@ public class DRCNetworkProcessor
          packetRouter.attachPacketCommunicator(destinationId, packetCommunicator);
          try
          {
-		   	packetCommunicator.connect();
-		   }
+            packetCommunicator.connect();
+         }
          catch (IOException e)
          {
-   			e.printStackTrace();
-	   	}
+            e.printStackTrace();
+         }
          printModuleConnectedDebugStatement(destinationId, "addRobotSpecificModuleCommunicators");
       }
    }
@@ -152,7 +150,8 @@ public class DRCNetworkProcessor
    {
       if (params.isRemoteObjectDetectionFeedbackEnabled())
       {
-         PacketCommunicator objectDetectionFeedbackCommunicator = PacketCommunicator.createTCPPacketCommunicatorServer(NetworkPorts.VALVE_DETECTOR_FEEDBACK_PORT, NET_CLASS_LIST);
+         PacketCommunicator objectDetectionFeedbackCommunicator = PacketCommunicator
+               .createTCPPacketCommunicatorServer(NetworkPorts.VALVE_DETECTOR_FEEDBACK_PORT, NET_CLASS_LIST);
          packetRouter.attachPacketCommunicator(PacketDestination.OBJECT_DETECTOR, objectDetectionFeedbackCommunicator);
          try
          {
@@ -175,7 +174,8 @@ public class DRCNetworkProcessor
 
       new KinematicsToolboxModule(robotModel, params.isKinematicsToolboxVisualizerEnabled());
 
-      PacketCommunicator kinematicsToolboxCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.KINEMATICS_TOOLBOX_MODULE_PORT, NET_CLASS_LIST);
+      PacketCommunicator kinematicsToolboxCommunicator = PacketCommunicator
+            .createIntraprocessPacketCommunicator(NetworkPorts.KINEMATICS_TOOLBOX_MODULE_PORT, NET_CLASS_LIST);
       packetRouter.attachPacketCommunicator(PacketDestination.KINEMATICS_TOOLBOX_MODULE, kinematicsToolboxCommunicator);
       kinematicsToolboxCommunicator.connect();
 
@@ -192,7 +192,8 @@ public class DRCNetworkProcessor
 
       new FootstepPlanningToolboxModule(robotModel, fullRobotModel, null, params.isFootstepPlanningToolboxVisualizerEnabled());
 
-      PacketCommunicator footstepPlanningToolboxCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.FOOTSTEP_PLANNING_TOOLBOX_MODULE_PORT, NET_CLASS_LIST);
+      PacketCommunicator footstepPlanningToolboxCommunicator = PacketCommunicator
+            .createIntraprocessPacketCommunicator(NetworkPorts.FOOTSTEP_PLANNING_TOOLBOX_MODULE_PORT, NET_CLASS_LIST);
       packetRouter.attachPacketCommunicator(PacketDestination.FOOTSTEP_PLANNING_TOOLBOX_MODULE, footstepPlanningToolboxCommunicator);
       footstepPlanningToolboxCommunicator.connect();
 
@@ -206,7 +207,8 @@ public class DRCNetworkProcessor
       {
          new MultisenseMocapManualCalibrationTestModule(robotModel, params.getRosUri());
 
-         PacketCommunicator multisenseModuleCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.MULTISENSE_MOCAP_MANUAL_CALIBRATION_TEST_MODULE, NET_CLASS_LIST);
+         PacketCommunicator multisenseModuleCommunicator = PacketCommunicator
+               .createIntraprocessPacketCommunicator(NetworkPorts.MULTISENSE_MOCAP_MANUAL_CALIBRATION_TEST_MODULE, NET_CLASS_LIST);
          packetRouter.attachPacketCommunicator(PacketDestination.MULTISENSE_TEST_MODULE, multisenseModuleCommunicator);
          try
          {
@@ -222,26 +224,26 @@ public class DRCNetworkProcessor
       }
    }
 
-   private void setupMocapModule(DRCNetworkModuleParameters params)  throws IOException
+   private void setupMocapModule(DRCNetworkModuleParameters params) throws IOException
    {
-     if (params.isMocapModuleEnabled())
-     {
-//        new MocapDetectedObjectModule(null, null, null);
+      if (params.isMocapModuleEnabled())
+      {
+         //        new MocapDetectedObjectModule(null, null, null);
 
-        PacketCommunicator mocapModuleCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.MOCAP_MODULE, NET_CLASS_LIST);
-        packetRouter.attachPacketCommunicator(PacketDestination.MOCAP_MODULE, mocapModuleCommunicator);
-        mocapModuleCommunicator.connect();
+         PacketCommunicator mocapModuleCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.MOCAP_MODULE, NET_CLASS_LIST);
+         packetRouter.attachPacketCommunicator(PacketDestination.MOCAP_MODULE, mocapModuleCommunicator);
+         mocapModuleCommunicator.connect();
 
-        String methodName = "setupMocapModule";
-        printModuleConnectedDebugStatement(PacketDestination.MOCAP_MODULE, methodName);
-     }
+         String methodName = "setupMocapModule";
+         printModuleConnectedDebugStatement(PacketDestination.MOCAP_MODULE, methodName);
+      }
    }
 
    private void setupHandModules(DRCRobotModel robotModel, DRCNetworkModuleParameters params) throws IOException
    {
       if (params.isHandModuleEnabled())
       {
-         for(RobotSide robotSide : RobotSide.values)
+         for (RobotSide robotSide : RobotSide.values)
          {
             NetworkPorts port = robotSide == RobotSide.LEFT ? NetworkPorts.LEFT_HAND_PORT : NetworkPorts.RIGHT_HAND_PORT;
             PacketCommunicator handModuleCommunicator = PacketCommunicator.createTCPPacketCommunicatorServer(port, NET_CLASS_LIST);
@@ -264,17 +266,19 @@ public class DRCNetworkProcessor
 
          if (params.isAutomaticDiagnosticEnabled())
          {
-            IHMCHumanoidBehaviorManager.createBehaviorModuleForAutomaticDiagnostic(robotModel, logModelProvider, params.isBehaviorVisualizerEnabled(), sensorInformation, params.getTimeToWaitBeforeStartingDiagnostics());
+            IHMCHumanoidBehaviorManager
+                  .createBehaviorModuleForAutomaticDiagnostic(robotModel, logModelProvider, params.isBehaviorVisualizerEnabled(), sensorInformation,
+                                                              params.getTimeToWaitBeforeStartingDiagnostics());
          }
          else
          {
             new IHMCHumanoidBehaviorManager(robotModel, logModelProvider, params.isBehaviorVisualizerEnabled(), sensorInformation);
          }
 
-         PacketCommunicator behaviorModuleCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.BEHAVIOUR_MODULE_PORT, NET_CLASS_LIST);
+         PacketCommunicator behaviorModuleCommunicator = PacketCommunicator
+               .createIntraprocessPacketCommunicator(NetworkPorts.BEHAVIOUR_MODULE_PORT, NET_CLASS_LIST);
          packetRouter.attachPacketCommunicator(PacketDestination.BEHAVIOR_MODULE, behaviorModuleCommunicator);
          behaviorModuleCommunicator.connect();
-
 
          String methodName = "setupBehaviorModule ";
          printModuleConnectedDebugStatement(PacketDestination.BEHAVIOR_MODULE, methodName);
@@ -311,10 +315,10 @@ public class DRCNetworkProcessor
          }
          sensorSuiteManager.connect();
 
-         PacketCommunicator sensorSuiteManagerCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.SENSOR_MANAGER, NET_CLASS_LIST);
+         PacketCommunicator sensorSuiteManagerCommunicator = PacketCommunicator
+               .createIntraprocessPacketCommunicator(NetworkPorts.SENSOR_MANAGER, NET_CLASS_LIST);
          packetRouter.attachPacketCommunicator(PacketDestination.SENSOR_MANAGER, sensorSuiteManagerCommunicator);
          sensorSuiteManagerCommunicator.connect();
-
 
          String methodName = "setupSensorModule ";
          printModuleConnectedDebugStatement(PacketDestination.SENSOR_MANAGER, methodName);
@@ -337,7 +341,7 @@ public class DRCNetworkProcessor
 
    private void setupROSAPIModule(DRCNetworkModuleParameters params) throws IOException
    {
-      if(params.isROSAPICommunicatorEnabled())
+      if (params.isROSAPICommunicatorEnabled())
       {
          PacketCommunicator rosAPICommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.ROS_API_COMMUNICATOR, NET_CLASS_LIST);
          packetRouter.attachPacketCommunicator(PacketDestination.ROS_API, rosAPICommunicator);
@@ -352,7 +356,7 @@ public class DRCNetworkProcessor
       if (params.isControllerCommunicatorEnabled())
       {
          PacketCommunicator controllerPacketCommunicator;
-         if(params.isLocalControllerCommunicatorEnabled())
+         if (params.isLocalControllerCommunicatorEnabled())
          {
             PrintTools.info(this, "Connecting to controller using intra process communication");
             controllerPacketCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.CONTROLLER_PORT, NET_CLASS_LIST);
@@ -360,7 +364,9 @@ public class DRCNetworkProcessor
          else
          {
             System.out.println("Connecting to controller using TCP on " + NetworkParameters.getHost(NetworkParameterKeys.robotController));
-            controllerPacketCommunicator = PacketCommunicator.createTCPPacketCommunicatorClient(NetworkParameters.getHost(NetworkParameterKeys.robotController), NetworkPorts.CONTROLLER_PORT, NET_CLASS_LIST);
+            controllerPacketCommunicator = PacketCommunicator
+                  .createTCPPacketCommunicatorClient(NetworkParameters.getHost(NetworkParameterKeys.robotController), NetworkPorts.CONTROLLER_PORT,
+                                                     NET_CLASS_LIST);
          }
 
          packetRouter.attachPacketCommunicator(PacketDestination.CONTROLLER, controllerPacketCommunicator);
@@ -371,25 +377,14 @@ public class DRCNetworkProcessor
       }
    }
 
-   private void setupRobotEnvironmentAwarenessModule(DRCNetworkModuleParameters parameters) throws IOException
-   {
-      if (parameters.isRobotEnvironmentAwerenessModuleEnabled())
-      {
-         KryoObjectServer server = new KryoObjectServer(NetworkPorts.REA_MODULE_PORT.getPort(), REACommunicationKryoNetClassLists.getPublicNetClassList());
-         server.throwExceptionForUnregisteredPackets(false);
-         PacketCommunicator reaCommunicator = PacketCommunicator.createCustomPacketCommunicator(server, REACommunicationKryoNetClassLists.getPublicNetClassList());
-         packetRouter.attachPacketCommunicator(PacketDestination.REA_MODULE, reaCommunicator);
-         reaCommunicator.connect();
-      }
-   }
-
    private void setupHeightQuadTreeToolboxModule(DRCRobotModel robotModel, DRCNetworkModuleParameters params) throws IOException
    {
       if (params.isHeightQuadTreeToolboxEnabled())
       {
          new HeightQuadTreeToolboxModule(robotModel.createFullRobotModel(), robotModel.getLogModelProvider());
 
-         PacketCommunicator heightQuadTreeToolboxCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.HEIGHT_QUADTREE_TOOLBOX_MODULE_PORT, NET_CLASS_LIST);
+         PacketCommunicator heightQuadTreeToolboxCommunicator = PacketCommunicator
+               .createIntraprocessPacketCommunicator(NetworkPorts.HEIGHT_QUADTREE_TOOLBOX_MODULE_PORT, NET_CLASS_LIST);
          packetRouter.attachPacketCommunicator(PacketDestination.HEIGHT_QUADTREE_TOOLBOX_MODULE, heightQuadTreeToolboxCommunicator);
          heightQuadTreeToolboxCommunicator.connect();
 
@@ -400,7 +395,8 @@ public class DRCNetworkProcessor
 
    private void setupLidarScanLogger() throws IOException
    {
-      PacketCommunicator lidarScanLoggerCommunicator = PacketCommunicator.createTCPPacketCommunicatorServer(NetworkPorts.LIDAR_SCAN_LOGGER_PORT, NET_CLASS_LIST);
+      PacketCommunicator lidarScanLoggerCommunicator = PacketCommunicator
+            .createTCPPacketCommunicatorServer(NetworkPorts.LIDAR_SCAN_LOGGER_PORT, NET_CLASS_LIST);
       packetRouter.attachPacketCommunicator(PacketDestination.LIDAR_SCAN_LOGGER, lidarScanLoggerCommunicator);
       lidarScanLoggerCommunicator.connect();
 
