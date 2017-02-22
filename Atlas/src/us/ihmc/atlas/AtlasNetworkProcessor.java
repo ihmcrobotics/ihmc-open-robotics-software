@@ -59,7 +59,6 @@ public class AtlasNetworkProcessor
         networkModuleParams.enableSensorModule(true);
         networkModuleParams.enableBehaviorVisualizer(true);
         networkModuleParams.setDrillDetectionModuleEnabled(true);
-        networkModuleParams.enableRobotEnvironmentAwerenessModule(true);
         networkModuleParams.enableHeightQuadTreeToolbox(true);
         networkModuleParams.enableKinematicsToolboxVisualizer(ENABLE_KINEMATICS_TOOLBOX_SERVER);
 

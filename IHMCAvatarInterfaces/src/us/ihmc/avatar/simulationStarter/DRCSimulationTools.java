@@ -1,10 +1,16 @@
 package us.ihmc.avatar.simulationStarter;
 
-import java.awt.BorderLayout;
+import us.ihmc.avatar.DRCStartingLocation;
+import us.ihmc.avatar.networkProcessor.DRCNetworkModuleParameters;
+import us.ihmc.tools.FormattingTools;
+import us.ihmc.tools.processManagement.JavaProcessSpawner;
+import us.ihmc.tools.thread.ThreadTools;
+
+import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import java.awt.*;
 import java.awt.Dialog.ModalExclusionType;
-import java.awt.GridLayout;
-import java.awt.KeyEventDispatcher;
-import java.awt.KeyboardFocusManager;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.io.FileInputStream;
@@ -12,34 +18,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.EnumMap;
-import java.util.HashMap;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-
-import javax.swing.AbstractAction;
-import javax.swing.BoxLayout;
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.SwingUtilities;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-
-import us.ihmc.avatar.DRCStartingLocation;
-import us.ihmc.avatar.networkProcessor.DRCNetworkModuleParameters;
-import us.ihmc.robotEnvironmentAwareness.LidarBasedREAStandaloneLauncher;
-import us.ihmc.robotEnvironmentAwareness.RemoteLidarBasedREAModuleLauncher;
-import us.ihmc.robotEnvironmentAwareness.RemoteLidarBasedREAUILauncher;
-import us.ihmc.tools.FormattingTools;
-import us.ihmc.tools.processManagement.JavaProcessSpawner;
-import us.ihmc.tools.thread.ThreadTools;
 
 public abstract class DRCSimulationTools
 {
@@ -74,7 +54,6 @@ public abstract class DRCSimulationTools
          networkProcessorParameters.enableLocalControllerCommunicator(true);
          networkProcessorParameters.enableKinematicsToolbox(true);
          networkProcessorParameters.enableFootstepPlanningToolbox(true);
-         networkProcessorParameters.enableRobotEnvironmentAwerenessModule(modulesToStart.contains(Modules.REA_MODULE));
       }
       else
       {
@@ -94,21 +73,6 @@ public abstract class DRCSimulationTools
 
       if (modulesToStart.contains(Modules.BEHAVIOR_VISUALIZER))
          simulationStarter.startBehaviorVisualizer();
-
-      boolean startREAModule = modulesToStart.contains(Modules.REA_MODULE);
-      boolean startREAUI = modulesToStart.contains(Modules.REA_UI);
-
-      if (startREAModule || startREAUI)
-      {
-         Class<?> reaClassToSpawn;
-         if (startREAModule && startREAUI)
-            reaClassToSpawn = LidarBasedREAStandaloneLauncher.class;
-         else if (startREAModule)
-            reaClassToSpawn = RemoteLidarBasedREAModuleLauncher.class;
-         else
-            reaClassToSpawn = RemoteLidarBasedREAUILauncher.class;
-         new JavaProcessSpawner(true, true).spawn(reaClassToSpawn);
-      }
    }
 
    @SuppressWarnings({ "hiding", "unchecked", "rawtypes", "serial" })
@@ -159,8 +123,6 @@ public abstract class DRCSimulationTools
             moduleCheckBoxes.get(Modules.SENSOR_MODULE).setEnabled(isNetworkProcessorSelected && isNetworkProcessorEnabled);
             moduleCheckBoxes.get(Modules.ZERO_POSE_PRODUCER).setEnabled(isNetworkProcessorSelected && isNetworkProcessorEnabled);
             moduleCheckBoxes.get(Modules.ROS_MODULE).setEnabled(isNetworkProcessorSelected && isNetworkProcessorEnabled);
-            moduleCheckBoxes.get(Modules.REA_MODULE).setEnabled(isNetworkProcessorSelected && isNetworkProcessorEnabled);
-            moduleCheckBoxes.get(Modules.REA_UI).setEnabled(isNetworkProcessorSelected && isNetworkProcessorEnabled);
          }
       };
 
@@ -353,7 +315,7 @@ public abstract class DRCSimulationTools
 
    public enum Modules
    {
-      SIMULATION, OPERATOR_INTERFACE, BEHAVIOR_VISUALIZER, NETWORK_PROCESSOR, SENSOR_MODULE, ROS_MODULE, BEHAVIOR_MODULE, ZERO_POSE_PRODUCER, REA_MODULE, REA_UI;
+      SIMULATION, OPERATOR_INTERFACE, BEHAVIOR_VISUALIZER, NETWORK_PROCESSOR, SENSOR_MODULE, ROS_MODULE, BEHAVIOR_MODULE, ZERO_POSE_PRODUCER;
 
       public String getPropertyNameForEnable()
       {

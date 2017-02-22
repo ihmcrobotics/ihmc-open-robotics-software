@@ -32,7 +32,6 @@ public class DRCNetworkModuleParameters
    private boolean useKinematicsToolboxVisualizer = false;
    private boolean useFootstepPlanningToolboxVisualizer = true;
    private boolean useTextToSpeechModule = false;
-   private boolean useRobotEnvironmentAwarenessModule = true;
    private boolean useHeightQuadTreeToolbox = true;
    private boolean useRemoteObjectDetectionFeedback = true;
 
@@ -101,11 +100,6 @@ public class DRCNetworkModuleParameters
    public boolean isMultisenseManualTestModuleEnabled()
    {
       return useMultisenseManualTestModule;
-   }
-
-   public boolean isRobotEnvironmentAwerenessModuleEnabled()
-   {
-      return useRobotEnvironmentAwarenessModule;
    }
 
    public boolean isHeightQuadTreeToolboxEnabled()
@@ -177,11 +171,6 @@ public class DRCNetworkModuleParameters
       usePerceptionModule = b;
       if (b)
          useController = true;
-   }
-
-   public void enableRobotEnvironmentAwerenessModule(boolean enable)
-   {
-      this.useRobotEnvironmentAwarenessModule = enable;
    }
 
    public void enableHeightQuadTreeToolbox(boolean useHeightQuadTreeToolbox)
