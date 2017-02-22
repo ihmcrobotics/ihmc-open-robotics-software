@@ -177,7 +177,7 @@ public class HighLevelControlManagerFactory
 
       Vector3D chestAngularWeight = momentumOptimizationSettings.getChestAngularWeight();
       Vector3D chestLinearWeight = null;
-      double chestUserModeWeight = momentumOptimizationSettings.getHeadUserModeWeight();
+      double chestUserModeWeight = momentumOptimizationSettings.getChestUserModeWeight();
 
       YoOrientationPIDGainsInterface taskspaceOrientationGains = walkingControllerParameters.createChestControlGains(registry);
       YoPositionPIDGainsInterface taskspacePositionGains = null;

@@ -73,4 +73,6 @@ public abstract class MomentumOptimizationSettings
    {
       return 1.0;
    }
+
+   public abstract double getChestUserModeWeight();
 }

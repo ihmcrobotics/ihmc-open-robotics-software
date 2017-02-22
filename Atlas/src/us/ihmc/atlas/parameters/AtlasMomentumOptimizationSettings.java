@@ -41,6 +41,7 @@ public class AtlasMomentumOptimizationSettings extends MomentumOptimizationSetti
    private final Vector2D copRateHighWeight = new Vector2D(2500000.0, 10000000.0);
    private final double headTaskspaceWeight = 1.0;
    private final double headUserModeWeight = 1.0;
+   private final double chestUserModeWeight = 50.0;
    private final double handUserModeWeight = 50.0;
    private final Vector3D handAngularTaskspaceWeight = new Vector3D(1.0, 1.0, 1.0);
    private final Vector3D handLinearTaskspaceWeight = new Vector3D(1.0, 1.0, 1.0);
@@ -231,6 +232,13 @@ public class AtlasMomentumOptimizationSettings extends MomentumOptimizationSetti
    public double getHandUserModeWeight()
    {
       return handUserModeWeight;
+   }
+   
+   /** @inheritDoc */
+   @Override
+   public double getChestUserModeWeight()
+   {
+      return chestUserModeWeight;
    }
 
    /** @inheritDoc */
