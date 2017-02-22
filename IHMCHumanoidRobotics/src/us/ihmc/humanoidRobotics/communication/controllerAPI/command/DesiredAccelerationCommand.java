@@ -2,12 +2,11 @@ package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
 import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.communication.controllerAPI.command.Command;
-import us.ihmc.communication.packets.Packet;
+import us.ihmc.humanoidRobotics.communication.packets.AbstractDesiredAccelerationsMessage;
 
-public abstract class DesiredAccelerationCommand<T extends DesiredAccelerationCommand<T, M>, M extends Packet<M>> implements Command<T, M>
+public abstract class DesiredAccelerationCommand<T extends DesiredAccelerationCommand<T, M>, M extends AbstractDesiredAccelerationsMessage<M>> implements Command<T, M>
 {
    private final TDoubleArrayList desiredJointAccelerations = new TDoubleArrayList(10);
-   private double weight;
 
    public DesiredAccelerationCommand()
    {
@@ -17,34 +16,26 @@ public abstract class DesiredAccelerationCommand<T extends DesiredAccelerationCo
    public void clear()
    {
       desiredJointAccelerations.reset();
-      weight = 0;
    }
 
    @Override
    public void set(M message)
    {
-//      weight = message.getWeight();
-//      desiredJointAccelerations.reset();
-//      for (int i = 0; i < message.getNumberOfJoints(); i++)
-//      {
-//         desiredJointAccelerations.add(message.getNeckDesiredJointAcceleration(i));
-//      }
+      desiredJointAccelerations.reset();
+      for (int i = 0; i < message.getNumberOfJoints(); i++)
+      {
+         desiredJointAccelerations.add(message.getDesiredJointAcceleration(i));
+      }
    }
 
    @Override
    public void set(T other)
    {
-      weight = other.getWeight();
       desiredJointAccelerations.reset();
       for (int i = 0; i < other.getNumberOfJoints(); i++)
          desiredJointAccelerations.add(other.getDesiredJointAcceleration(i));
    }
    
-   public double getWeight()
-   {
-      return weight;
-   }
-
    public int getNumberOfJoints()
    {
       return desiredJointAccelerations.size();

@@ -12,6 +12,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolderReadOnly;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.DesiredAccelerationCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.GoHomeCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.JointspaceTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SE3TrajectoryControllerCommand;
@@ -81,7 +82,7 @@ public class RigidBodyManager
       RigidBody elevator = humanoidControllerToolbox.getFullRobotModel().getElevator();
       jointspaceControlState = new RigidBodyJointspaceControlState(bodyName, jointsOriginal, yoTime, registry);
       taskspaceControlState = new RigidBodyTaskspaceControlState(bodyName, bodyToControl, rootBody, elevator, controlFrameMap, rootFrame, yoTime, registry);
-      userControlState = new RigidBodyUserControlState(bodyName, jointsToControl, yoTime);
+      userControlState = new RigidBodyUserControlState(bodyName, jointsToControl, yoTime, registry);
 
       setupStateMachine();
       parentRegistry.addChild(registry);
@@ -131,6 +132,10 @@ public class RigidBodyManager
    public void compute()
    {
       initialize();
+      if(stateMachine.isCurrentState(RigidBodyControlMode.USER) && userControlState.isAbortUserControlModeRequested())
+      {
+         holdInJointspace();
+      }
       stateMachine.checkTransitionConditions();
       stateMachine.doAction();
 
@@ -224,11 +229,20 @@ public class RigidBodyManager
          PrintTools.warn(getClass().getSimpleName() + " for " + bodyName + " recieved invalid jointspace trajectory command.");
    }
 
-   public void handleDesiredAccelerationsCommand()
+   public void handleDesiredAccelerationsCommand(DesiredAccelerationCommand<?, ?> command)
    {
       // TODO: hand, head
       // check the control mode in the message
       // if it is USER forward command to the user controller and activate it if necessary
+      
+      if(userControlState.handleDesiredAccelerationsCommand(command))
+      {
+         requestState(RigidBodyControlMode.USER);
+      }
+      else
+      {
+         PrintTools.warn(getClass().getSimpleName() + " for " + bodyName + " recieved invalid jointspace trajectory command.");
+      }
    }
 
    public void handleGoHomeCommand(GoHomeCommand command)
