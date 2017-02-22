@@ -35,6 +35,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PauseWalking
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisHeightTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisOrientationTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SpineDesiredAccelerationCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SpineTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ManipulationAbortedStatus;
@@ -116,6 +117,8 @@ public class WalkingCommandConsumer
          chestManager.handleTaskspaceTrajectoryCommand(commandInputManager.pollNewestCommand(ChestTrajectoryCommand.class));
       if (commandInputManager.isNewCommandAvailable(SpineTrajectoryCommand.class))
          chestManager.handleJointspaceTrajectoryCommand(commandInputManager.pollNewestCommand(SpineTrajectoryCommand.class));
+      if (commandInputManager.isNewCommandAvailable(SpineDesiredAccelerationCommand.class))
+         chestManager.handleDesiredAccelerationsCommand(commandInputManager.pollNewestCommand(SpineDesiredAccelerationCommand.class));
    }
 
    public void consumePelvisHeightCommands()

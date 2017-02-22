@@ -27,6 +27,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.NeckTrajectoryMess
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisHeightTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisOrientationTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.SpineDesiredAccelerationsMessage;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
 public abstract class PacketValidityChecker
@@ -964,6 +965,23 @@ public abstract class PacketValidityChecker
          return "is null.";
       if (checkId && packet.getUniqueId() == Packet.INVALID_MESSAGE_ID)
          return "invalid id.";
+      return null;
+   }
+
+   public static String validateSpineDesiredAccelerationsMessage(SpineDesiredAccelerationsMessage packet, boolean checkId)
+   {
+      if (packet == null)
+         return "is null.";
+      if (checkId && packet.getUniqueId() == Packet.INVALID_MESSAGE_ID)
+         return "invalid id.";
+      if(packet.getDesiredJointAccelerations() == null)
+      {
+         return "desired acceleration buffer null";
+      }
+      if(packet.getDesiredJointAccelerations().length  == 0)
+      {
+         return "desired acceleration buffer empty";
+      }
       return null;
    }
 }

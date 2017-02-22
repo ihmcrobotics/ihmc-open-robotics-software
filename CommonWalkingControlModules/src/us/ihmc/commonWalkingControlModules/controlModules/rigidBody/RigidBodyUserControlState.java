@@ -4,6 +4,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointspaceAccelerationCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.DesiredAccelerationCommand;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -24,7 +25,7 @@ public class RigidBodyUserControlState extends RigidBodyControlState
    private final BooleanYoVariable abortUserControlMode;
    private final DoubleYoVariable yoTime;
 
-   public RigidBodyUserControlState(String bodyName, OneDoFJoint[] jointsToControl, DoubleYoVariable yoTime)
+   public RigidBodyUserControlState(String bodyName, OneDoFJoint[] jointsToControl, DoubleYoVariable yoTime, YoVariableRegistry parentRegistry)
    {
       super(RigidBodyControlMode.USER, bodyName, yoTime);
 
@@ -46,24 +47,25 @@ public class RigidBodyUserControlState extends RigidBodyControlState
       timeOfLastUserMesage = new DoubleYoVariable(bodyName + "TimeOfLastAccelerationMesage", registry);
       timeSinceLastUserMesage = new DoubleYoVariable(bodyName + "TimeSinceLastAccelerationMesage", registry);
       abortUserControlMode = new BooleanYoVariable(bodyName + "AbortUserControlMode", registry);
+      parentRegistry.addChild(registry);
    }
 
-   public void handleDesiredAccelerationsCommand(DesiredAccelerationCommand command)
+   public boolean handleDesiredAccelerationsCommand(DesiredAccelerationCommand<?, ?> command)
    {
       if (command.getNumberOfJoints() != jointsToControl.length)
       {
          abortUserControlMode.set(true);
-         return;
+         return false;
       }
 
       for (int i = 0; i < jointsToControl.length; i++)
       {
          userDesiredJointAccelerations[i].set(command.getDesiredJointAcceleration(i));
          //         weights[i].set(command.getWeight(i));
-         weight.set(command.getWeight());
       }
       timeSinceLastUserMesage.set(0.0);
       timeOfLastUserMesage.set(yoTime.getDoubleValue());
+      return true;
    }
 
    @Override
