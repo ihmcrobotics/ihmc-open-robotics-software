@@ -99,7 +99,7 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       numberOfPoints = new IntegerYoVariable(prefix + "NumberOfPoints", registry);
 
       spatialFeedbackControlCommand.set(elevator, bodyToControl);
-      spatialFeedbackControlCommand.setPrimaryBase(rootBody);
+      spatialFeedbackControlCommand.setPrimaryBase(rootBody); // TODO Rename to base
       spatialFeedbackControlCommand.setSelectionMatrixToIdentity();
 
       yoAngularWeight = new YoFrameVector(prefix + "AngularWeight", null, registry);
