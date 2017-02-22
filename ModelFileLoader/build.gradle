@@ -50,7 +50,6 @@ dependencies {
     compile ihmc.getProjectDependency(":IHMCRoboticsToolkit")
     
     
-    testCompile ihmc.getProjectDependency(":IHMCUnitTesting")
 	testCompile ihmc.getProjectTestDependency(":IHMCRoboticsToolkit")
 	testCompile ihmc.getProjectTestDependency(":IHMCJavaExtensions")
     testCompile ihmc.getProjectDependency(":SimulationConstructionSet")

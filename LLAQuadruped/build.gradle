@@ -61,7 +61,6 @@ dependencies {
     compile ihmc.getProjectDependency(":LLAQuadrupedController")
    
 
-   testCompile ihmc.getProjectDependency(":IHMCUnitTesting")
 	testCompile ihmc.getProjectTestDependency(":IHMCRoboticsToolkit")
 	testCompile ihmc.getProjectTestDependency(":IHMCJavaExtensions")
    testCompile ihmc.getProjectTestDependency(":IHMCQuadrupedRobotics")
