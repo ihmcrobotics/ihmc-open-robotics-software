@@ -7,8 +7,8 @@ import java.util.ArrayList;
 
 import org.junit.Test;
 
+import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.tools.testing.MutationTestingTools;
 
 public class CollisionMasksHelperTest
 {
@@ -152,8 +152,6 @@ public class CollisionMasksHelperTest
 
    public static void main(String[] args)
    {
-      String targetTests = CollisionMasksHelperTest.class.getName();
-      String targetClassesInSamePackage = CollisionMasksHelper.class.getName();
-      MutationTestingTools.doPITMutationTestAndOpenResult(targetTests, targetClassesInSamePackage);
+      MutationTestFacilitator.facilitateMutationTestForClass(CollisionMasksHelper.class, CollisionMasksHelperTest.class);
    }
 }

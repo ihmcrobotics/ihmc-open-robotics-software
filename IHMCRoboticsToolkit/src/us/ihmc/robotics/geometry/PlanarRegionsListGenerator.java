@@ -47,6 +47,13 @@ public class PlanarRegionsListGenerator
       addCubeReferencedAtCenter(lengthX, widthY, heightZ);
       translate(0.0, 0.0, -heightZ / 2.0);
    }
+   
+   public void addCubeReferencedAtBottomNegativeXEdgeCenter(double lengthX, double widthY, double heightZ)
+   {
+      translate(-lengthX / 2.0, 0.0, heightZ / 2.0);
+      addCubeReferencedAtCenter(lengthX, widthY, heightZ);
+      translate(lengthX / 2.0, 0.0, -heightZ / 2.0);
+   }
 
    public void addRectangle(double lengthX, double widthY)
    {

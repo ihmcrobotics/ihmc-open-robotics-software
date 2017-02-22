@@ -13,7 +13,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.ball.qd_ball_x,root.cylinder.qd_cylinder_x,root.capsule.qd_capsule_x</Variables>
+		<Variables>root.ball.qd_ball_x,root.cylinder.qd_cylinder_x</Variables>
 		<GraphConfiguration>
 			<Name>config2</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -25,7 +25,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.capsule.q_capsule_z,root.cylinder.q_cylinder_z,root.ball.q_ball_z</Variables>
+		<Variables>root.cylinder.q_cylinder_z,root.ball.q_ball_z</Variables>
 		<GraphConfiguration>
 			<Name>config3</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -37,7 +37,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.ball.qd_ball_wy,root.cylinder.qd_cylinder_wz,root.capsule.qd_capsule_wz,root.ball.qd_ball_wz</Variables>
+		<Variables>root.ball.qd_ball_wy,root.cylinder.qd_cylinder_wz,root.ball.qd_ball_wz</Variables>
 		<GraphConfiguration>
 			<Name>config4</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -49,7 +49,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.capsule.qd_capsule_wx,root.capsule.qd_capsule_wy,root.capsule.qd_capsule_wz</Variables>
+		<Variables></Variables>
 		<GraphConfiguration>
 			<Name>config5</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -85,9 +85,33 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.capsule.qd_capsule_wx,root.box.qd_box_wx</Variables>
+		<Variables></Variables>
 		<GraphConfiguration>
 			<Name>config8</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.cylinder.cylinderLinkContactingPoint0_z</Variables>
+		<GraphConfiguration>
+			<Name>config9</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables></Variables>
+		<GraphConfiguration>
+			<Name>config10</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -102,7 +126,7 @@
 <Title>
 Tab0
 </Title>
-<Entry Boxes>root.ball.qd_ball_x,root.cylinder.qd_cylinder_x,root.capsule.qd_capsule_wy,root.HybridImpulseSpringDamperCollisionHandler.kpCollision,root.HybridImpulseSpringDamperCollisionHandler.kdCollision,root.cylinder.qd_cylinder_wz</Entry Boxes>
+<Entry Boxes>root.ball.qd_ball_x,root.cylinder.qd_cylinder_x,root.HybridImpulseSpringDamperCollisionHandler.kpCollision,root.HybridImpulseSpringDamperCollisionHandler.kdCollision,root.cylinder.qd_cylinder_wz,root.HybridImpulseSpringDamperCollisionHandler.pullingOutSpringHysteresisReduction,root.ball.ballLinkContactingPoint0_mX,root.ball.ballLinkContactingPoint0_mY,root.ball.ballLinkContactingPoint0_mZ,root.ball.qd_ball_wx,root.ball.qd_ball_wy,root.ball.qd_ball_wz,root.HybridImpulseSpringDamperCollisionHandler.kdRotationalDamping,root.HybridImpulseSpringDamperCollisionHandler.rotationalCoefficientOfFrictionBeta</Entry Boxes>
 </EntryBoxTab>
 </Entry Boxes Tab Pane>
 
@@ -111,7 +135,7 @@ Tab0
 <Visible> true</Visible>
 </Main Viewport>
 
-<Graph Array Window Size>2</Graph Array Window Size>
+<Graph Array Window Size>3</Graph Array Window Size>
 <Graph Array Window1>
 <ScreenID>1</ScreenID>
 <WindowLocation>1912.0, -8.0</WindowLocation>
@@ -120,30 +144,6 @@ Tab0
 	<Cols>3</Cols>
 	<Graph>
 		<Variables>root.ball.q_ball_x,root.ball.ballLinkContactingPoint0_x</Variables>
-		<GraphConfiguration>
-			<Name>config9</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.ball.ballLinkContactingPoint0PairIndex</Variables>
-		<GraphConfiguration>
-			<Name>config10</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.ball.ballLinkContactingPoint0_z</Variables>
 		<GraphConfiguration>
 			<Name>config11</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -155,7 +155,7 @@ Tab0
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.ball.q_ball_x,root.ball.ballLinkContactingPoint1_x</Variables>
+		<Variables>root.ball.ballLinkContactingPoint0PairIndex</Variables>
 		<GraphConfiguration>
 			<Name>config12</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -167,7 +167,7 @@ Tab0
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.ball.ballLinkContactingPoint1PairIndex</Variables>
+		<Variables>root.ball.ballLinkContactingPoint0_z</Variables>
 		<GraphConfiguration>
 			<Name>config13</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -179,7 +179,7 @@ Tab0
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.ball.ballLinkContactingPoint1_z</Variables>
+		<Variables>root.ball.q_ball_x,root.ball.ballLinkContactingPoint1_x</Variables>
 		<GraphConfiguration>
 			<Name>config14</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -191,7 +191,7 @@ Tab0
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.cylinder.cylinderLinkContactingPoint3PairIndex</Variables>
+		<Variables>root.ball.ballLinkContactingPoint1PairIndex</Variables>
 		<GraphConfiguration>
 			<Name>config15</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -203,7 +203,7 @@ Tab0
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables></Variables>
+		<Variables>root.ball.ballLinkContactingPoint1_z</Variables>
 		<GraphConfiguration>
 			<Name>config16</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -215,7 +215,7 @@ Tab0
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables></Variables>
+		<Variables>root.cylinder.cylinderLinkContactingPoint3PairIndex</Variables>
 		<GraphConfiguration>
 			<Name>config17</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -262,15 +262,8 @@ Tab0
 			<MinScaling>0.0</MinScaling>
 		</GraphConfig>
 	</Graph>
-</GraphGroup>
-</Graph Array Window1><Graph Array Window2>
-<ScreenID>1</ScreenID>
-<WindowLocation>1912.0, -8.0</WindowLocation>
-<WindowSize>1936.0, 1176.0</WindowSize>
-<GraphGroup>
-	<Cols>3</Cols>
 	<Graph>
-		<Variables>root.capsule.capsuleLinkContactingPoint0PairIndex,root.capsule.capsuleLinkContactingPoint1PairIndex,root.capsule.capsuleLinkContactingPoint2PairIndex,root.capsule.capsuleLinkContactingPoint3PairIndex</Variables>
+		<Variables></Variables>
 		<GraphConfiguration>
 			<Name>config21</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -282,7 +275,7 @@ Tab0
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.capsule.capsuleLinkContactingPoint4PairIndex,root.capsule.capsuleLinkContactingPoint5PairIndex,root.capsule.capsuleLinkContactingPoint6PairIndex,root.capsule.capsuleLinkContactingPoint7PairIndex</Variables>
+		<Variables></Variables>
 		<GraphConfiguration>
 			<Name>config22</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -293,8 +286,15 @@ Tab0
 			<MinScaling>0.0</MinScaling>
 		</GraphConfig>
 	</Graph>
+</GraphGroup>
+</Graph Array Window1><Graph Array Window2>
+<ScreenID>1</ScreenID>
+<WindowLocation>1912.0, -8.0</WindowLocation>
+<WindowSize>1936.0, 1176.0</WindowSize>
+<GraphGroup>
+	<Cols>3</Cols>
 	<Graph>
-		<Variables>root.capsule.capsuleLinkContactingPoint8PairIndex,root.capsule.capsuleLinkContactingPoint9PairIndex,root.capsule.capsuleLinkContactingPoint10PairIndex,root.capsule.capsuleLinkContactingPoint11PairIndex</Variables>
+		<Variables></Variables>
 		<GraphConfiguration>
 			<Name>config23</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -306,7 +306,7 @@ Tab0
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.capsule.capsuleLinkContactingPoint12PairIndex,root.capsule.capsuleLinkContactingPoint13PairIndex,root.capsule.capsuleLinkContactingPoint14PairIndex,root.capsule.capsuleLinkContactingPoint15PairIndex</Variables>
+		<Variables></Variables>
 		<GraphConfiguration>
 			<Name>config24</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -318,7 +318,7 @@ Tab0
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.capsule.capsuleLinkContactingPoint16PairIndex,root.capsule.capsuleLinkContactingPoint17PairIndex,root.capsule.capsuleLinkContactingPoint18PairIndex,root.capsule.capsuleLinkContactingPoint19PairIndex</Variables>
+		<Variables></Variables>
 		<GraphConfiguration>
 			<Name>config25</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -330,7 +330,7 @@ Tab0
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.capsule.capsuleLinkContactingPoint20PairIndex,root.capsule.capsuleLinkContactingPoint21PairIndex,root.capsule.capsuleLinkContactingPoint22PairIndex,root.capsule.capsuleLinkContactingPoint23PairIndex</Variables>
+		<Variables></Variables>
 		<GraphConfiguration>
 			<Name>config26</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -342,7 +342,7 @@ Tab0
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.capsule.capsuleLinkContactingPoint0_x,root.capsule.q_capsule_x,root.capsule.capsuleLinkContactingPoint1_x</Variables>
+		<Variables></Variables>
 		<GraphConfiguration>
 			<Name>config27</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -354,7 +354,7 @@ Tab0
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.capsule.capsuleLinkContactingPoint0_y,root.capsule.capsuleLinkContactingPoint1_y,root.capsule.q_capsule_y</Variables>
+		<Variables></Variables>
 		<GraphConfiguration>
 			<Name>config28</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -366,7 +366,7 @@ Tab0
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.cylinder.cylinderLinkContactingPoint0PairIndex</Variables>
+		<Variables></Variables>
 		<GraphConfiguration>
 			<Name>config29</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -378,7 +378,7 @@ Tab0
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.cylinder.cylinderLinkContactingPoint0_dX,root.cylinder.cylinderLinkContactingPoint0_dY,root.cylinder.cylinderLinkContactingPoint0_dZ</Variables>
+		<Variables></Variables>
 		<GraphConfiguration>
 			<Name>config30</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -390,7 +390,7 @@ Tab0
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.cylinder.cylinderLinkContactingPoint0IsSlipping</Variables>
+		<Variables>root.cylinder.cylinderLinkContactingPoint0PairIndex</Variables>
 		<GraphConfiguration>
 			<Name>config31</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -402,7 +402,7 @@ Tab0
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.cylinder.cylinderLinkContactingPoint0_x,root.cylinder.cylinderLinkContactingPoint0_y</Variables>
+		<Variables>root.cylinder.cylinderLinkContactingPoint0_dX,root.cylinder.cylinderLinkContactingPoint0_dY,root.cylinder.cylinderLinkContactingPoint0_dZ</Variables>
 		<GraphConfiguration>
 			<Name>config32</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -414,7 +414,7 @@ Tab0
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.cylinder.cylinderLinkContactingPoint0_z</Variables>
+		<Variables>root.cylinder.cylinderLinkContactingPoint0IsSlipping</Variables>
 		<GraphConfiguration>
 			<Name>config33</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -425,8 +425,99 @@ Tab0
 			<MinScaling>0.0</MinScaling>
 		</GraphConfig>
 	</Graph>
+	<Graph>
+		<Variables>root.cylinder.cylinderLinkContactingPoint0_x,root.cylinder.cylinderLinkContactingPoint0_y</Variables>
+		<GraphConfiguration>
+			<Name>config34</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.cylinder.cylinderLinkContactingPoint0_z</Variables>
+		<GraphConfiguration>
+			<Name>config35</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
 </GraphGroup>
-</Graph Array Window2>
+</Graph Array Window2><Graph Array Window3>
+<ScreenID>1</ScreenID>
+<WindowLocation>1912.0, -8.0</WindowLocation>
+<WindowSize>1936.0, 1176.0</WindowSize>
+<GraphGroup>
+	<Cols>1</Cols>
+	<Graph>
+		<Variables>root.ball.ballLinkContactingPoint0_wX,root.ball.qd_ball_wx</Variables>
+		<GraphConfiguration>
+			<Name>config36</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.ball.ballLinkContactingPoint0_wY,root.ball.qd_ball_wy</Variables>
+		<GraphConfiguration>
+			<Name>config37</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.ball.ballLinkContactingPoint0_wZ,root.ball.qd_ball_wz,root.ball.ballLinkContactingPoint0_wX,root.ball.ballLinkContactingPoint0_wY</Variables>
+		<GraphConfiguration>
+			<Name>config38</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.ball.ballLinkContactingPoint0_mZ</Variables>
+		<GraphConfiguration>
+			<Name>config39</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.cylinder.qd_cylinder_x</Variables>
+		<GraphConfiguration>
+			<Name>config40</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+</GraphGroup>
+</Graph Array Window3>
 
 <Extra Panels>
 <Main Viewport>
@@ -435,9 +526,9 @@ Tab0
 
 <Current View>Normal View</Current View>
  <Canvas 1> 
- <Camera X>0.638271696566864</Camera X>
- <Camera Y>0.8278791067648318</Camera Y>
- <Camera Z>0.05974420513339071</Camera Z>
+ <Camera X>2.976604536830525</Camera X>
+ <Camera Y>-1.2096813862378475</Camera Y>
+ <Camera Z>1.0876330111814765</Camera Z>
  <Dolly data> 
  <Position X>2.0</Position X>
  <Position Y>12.0</Position Y>
@@ -461,8 +552,8 @@ Tab0
 </Track Booleans>
 </Track data>
 <Fix Position>
-<Fix X>0.15544462203979492</Fix X>
-<Fix Y>0.44615864753723145</Fix Y>
-<Fix Z>0.03156399726867676</Fix Z>
+<Fix X>-0.98569731824138</Fix X>
+<Fix Y>0.3066138302512358</Fix Y>
+<Fix Z>0.08866143742272614</Fix Z>
 </Fix Position>
 </Canvas 1>

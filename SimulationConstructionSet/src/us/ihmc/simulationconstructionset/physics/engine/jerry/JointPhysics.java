@@ -297,7 +297,7 @@ public abstract class JointPhysics< J extends Joint>
 
    private void applyForcesAndMomentsFromExternalForcePoints(ExternalForcePoint point)
    {
-      if (!point.isForceZero())    // +++JEP OPTIMIZE: Don't do the math if the forces are zero!
+      if (!point.isForceAndMomentZero())    // +++JEP OPTIMIZE: Don't do the math if the forces are zero!
       {
          point.getForce(externalForceVector);
          externalForceVector.negate();
@@ -1916,7 +1916,7 @@ public abstract class JointPhysics< J extends Joint>
          for (int i = 0; i < kinematicPoints.size(); i++)
          {
             KinematicPoint kp = kinematicPoints.get(i);
-            retBuffer.append("      " + kp.name);
+            retBuffer.append("      " + kp.getName());
 
             if (i != kinematicPoints.size() - 1)
                retBuffer.append("\n");
@@ -1931,7 +1931,7 @@ public abstract class JointPhysics< J extends Joint>
          for (int i = 0; i < externalForcePoints.size(); i++)
          {
             ExternalForcePoint ef = externalForcePoints.get(i);
-            retBuffer.append("      " + ef.name);
+            retBuffer.append("      " + ef.getName());
             if (i != kinematicPoints.size() - 1)
                retBuffer.append("\n");
          }

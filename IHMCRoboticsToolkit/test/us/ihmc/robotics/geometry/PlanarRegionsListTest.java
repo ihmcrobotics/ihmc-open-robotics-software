@@ -9,11 +9,11 @@ import java.util.List;
 
 import org.junit.Test;
 
+import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.tools.testing.MutationTestingTools;
 
 public class PlanarRegionsListTest
 {
@@ -175,8 +175,6 @@ public class PlanarRegionsListTest
 
    public static void main(String[] args)
    {
-      String targetTests = PlanarRegionsListTest.class.getName();
-      String targetClassesInSamePackage = PlanarRegionsList.class.getName();
-      MutationTestingTools.doPITMutationTestAndOpenResult(targetTests, targetClassesInSamePackage);
+      MutationTestFacilitator.facilitateMutationTestForClass(PlanarRegionsList.class, PlanarRegionsListTest.class);
    }
 }
