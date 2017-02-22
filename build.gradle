@@ -39,11 +39,11 @@ if (buildType.equals("RC")) {
    project.ext.fullVersion = version += "-RC${project.ext.releaseCandidateCounter}.rev.${repo.head().abbreviatedId}"
 }
 
-if (buildType.equals("RELEASE")) {
-   if (!project.ext.repo.branch.current.name.equals("master")) {
-      throw new GradleException("Cannot make RELEASE build from branch \"${project.ext.repo.branch.current.name}\", it is not the branch used for stable releases!")
-   }
-}
+// if (buildType.equals("RELEASE")) {
+//    if (!project.ext.repo.branch.current.name.equals("master")) {
+//       throw new GradleException("Cannot make RELEASE build from branch \"${project.ext.repo.branch.current.name}\", it is not the branch used for stable releases!")
+//    }
+// }
 
 repositories {
     mavenLocal()
