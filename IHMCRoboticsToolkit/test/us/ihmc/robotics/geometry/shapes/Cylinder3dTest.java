@@ -90,7 +90,7 @@ public class Cylinder3dTest
          assertEquals(cylinder3d.getHeight(), 10.0, 1e-7);
          
          RigidBodyTransform rbt = new RigidBodyTransform();
-         cylinder3d.getTransform(rbt);
+         cylinder3d.getPose(rbt);
          
          Point3D point = new  Point3D();
          rbt.getTranslation(point);

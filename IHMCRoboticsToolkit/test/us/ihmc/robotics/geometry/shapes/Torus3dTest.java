@@ -258,7 +258,7 @@ public class Torus3dTest
          // test rotation about x-axis of pi/2
          rotation.setToRollMatrix(Math.PI / 2);
          transform.setRotation(rotation);
-         torus3d.setTransform(transform);
+         torus3d.setPose(transform);
          
          assertFalse(torus3d.isInsideOrOnSurface(new Point3D(0.0, 0.0, 0.0)));
          assertTrue(torus3d.isInsideOrOnSurface(new Point3D(radius, 0.0, 0.0)));
@@ -269,7 +269,7 @@ public class Torus3dTest
          // test rotation about y-axis of pi/2
          rotation.setToPitchMatrix(Math.PI / 2);
          transform.setRotation(rotation);
-         torus3d.setTransform(transform);
+         torus3d.setPose(transform);
          
          assertFalse(torus3d.isInsideOrOnSurface(new Point3D(0.0, 0.0, 0.0)));
          assertTrue(torus3d.isInsideOrOnSurface(new Point3D(0.0, radius, 0.0)));
@@ -336,7 +336,7 @@ public class Torus3dTest
                }
 
                transform.setRotation(rotation);
-               torus3d.setTransform(transform);
+               torus3d.setPose(transform);
 
                for (int j = -1; j < 2; j++)
                {
@@ -404,18 +404,18 @@ public class Torus3dTest
       RigidBodyTransform transform = new RigidBodyTransform();
       
       transform.setTranslation(new Vector3D(translation, 0.0, 0.0));
-      torus3d.setTransform(transform);
+      torus3d.setPose(transform);
       testPointsInsideWhenOffsetBy(torus3d, translation, 0.0, 0.0);
       
       translation = (random.nextDouble() - 0.5) * 10.0;
       transform.setTranslation(new Vector3D(0.0, translation, 0.0));
-      torus3d.setTransform(transform);
+      torus3d.setPose(transform);
       testPointsInsideWhenOffsetBy(torus3d, 0.0, translation, 0.0);
 
       translation = (random.nextDouble() - 0.5) * 10.0;
 //      System.out.println("Torus3dTest:testTranslatedPointOnOrInside:" + "0,0," + translation);
       transform.setTranslation(new Vector3D(0.0, 0.0, translation));
-      torus3d.setTransform(transform);
+      torus3d.setPose(transform);
       testPointsInsideWhenOffsetBy(torus3d, 0.0, 0.0, translation);
 
       translation = (random.nextDouble() - 0.5) * 10.0;
@@ -423,7 +423,7 @@ public class Torus3dTest
       double translationZ = (random.nextDouble() - 0.5) * 10.0;
 //      System.out.println("Torus3dTest:testTranslatedPointOnOrInside:" + translation + "," + translationY + "," + translationZ);
       transform.setTranslation(new Vector3D(translation, translationY, translationZ));
-      torus3d.setTransform(transform);
+      torus3d.setPose(transform);
       testPointsInsideWhenOffsetBy(torus3d, translation, translationY, translationZ);
    }
    
@@ -491,13 +491,13 @@ public class Torus3dTest
       RigidBodyTransform transformAppliedOnlyToCopy = new RigidBodyTransform();
       transformAppliedOnlyToCopy.setRotationPitchAndZeroTranslation(Math.PI / 4);
       torusCopy.applyTransform(transformAppliedOnlyToCopy);
-      assertFalse(torusCopy.getTransformUnsafe().equals(torus.getTransformUnsafe()));
+      assertFalse(torusCopy.equals(torus));
       
       Torus3d torusCopyBySet = new Torus3d(5.0, 1.0);
       torusCopyBySet.set(torus);
       RigidBodyTransform transformAppliedOnlyToCopyBySet = new RigidBodyTransform();
       transformAppliedOnlyToCopyBySet.setRotationYawAndZeroTranslation(Math.PI / 5);
       torusCopyBySet.applyTransform(transformAppliedOnlyToCopyBySet);      
-      assertFalse(torusCopyBySet.getTransformUnsafe().equals(torus.getTransformUnsafe()));
+      assertFalse(torusCopyBySet.equals(torus));
    }
 }
