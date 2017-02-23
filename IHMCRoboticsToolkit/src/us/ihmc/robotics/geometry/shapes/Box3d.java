@@ -2,15 +2,18 @@ package us.ihmc.robotics.geometry.shapes;
 
 import java.util.EnumMap;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.Transform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.Direction;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.geometry.RotationTools;
+import us.ihmc.robotics.geometry.transformables.Pose;
 
 /**
  * Box where base frame is in the center.
@@ -25,8 +28,7 @@ public class Box3d extends Shape3d<Box3d>
    private final EnumMap<FaceName, Plane3d> faces;
    private boolean facesAreOutOfDate;
 
-   private final Point3d temporaryPoint;
-   private final Matrix3d temporaryMatrix;
+   private final Point3D temporaryPoint;
 
    public Box3d()
    {
@@ -35,7 +37,12 @@ public class Box3d extends Shape3d<Box3d>
 
    public Box3d(Box3d other)
    {
-      this(other.getTransformFromShapeFrameUnsafe(), other.getLength(), other.getWidth(), other.getHeight());
+      setPose(other);
+      dimensions = new EnumMap<Direction, Double>(Direction.class);
+      faces = new EnumMap<FaceName, Plane3d>(FaceName.class);
+      temporaryPoint = new Point3D();
+
+      commonConstructor(other.getLength(), other.getWidth(), other.getHeight());
    }
 
    public Box3d(RigidBodyTransform configuration, double[] dimensions)
@@ -47,30 +54,37 @@ public class Box3d extends Shape3d<Box3d>
    {
       dimensions = new EnumMap<Direction, Double>(Direction.class);
       faces = new EnumMap<FaceName, Plane3d>(FaceName.class);
-      temporaryPoint = new Point3d();
-      temporaryMatrix = new Matrix3d();
+      temporaryPoint = new Point3D();
 
       commonConstructor(lengthX, widthY, heightZ);
    }
 
    public Box3d(RigidBodyTransform transform, double length, double width, double height)
    {
-      setTransform(transform);
+      setPose(transform);
       dimensions = new EnumMap<Direction, Double>(Direction.class);
       faces = new EnumMap<FaceName, Plane3d>(FaceName.class);
-      temporaryPoint = new Point3d();
-      temporaryMatrix = new Matrix3d();
+      temporaryPoint = new Point3D();
 
       commonConstructor(length, width, height);
    }
 
-   public Box3d(Point3d position, Quat4d orientation, double length, double width, double height)
+   public Box3d(Pose pose, double length, double width, double height)
+   {
+      setPose(pose);
+      dimensions = new EnumMap<Direction, Double>(Direction.class);
+      faces = new EnumMap<FaceName, Plane3d>(FaceName.class);
+      temporaryPoint = new Point3D();
+
+      commonConstructor(length, width, height);
+   }
+
+   public Box3d(Point3DReadOnly position, QuaternionReadOnly orientation, double length, double width, double height)
    {
       setPose(position, orientation);
       dimensions = new EnumMap<Direction, Double>(Direction.class);
       faces = new EnumMap<FaceName, Plane3d>(FaceName.class);
-      temporaryPoint = new Point3d();
-      temporaryMatrix = new Matrix3d();
+      temporaryPoint = new Point3D();
 
       commonConstructor(length, width, height);
    }
@@ -86,7 +100,7 @@ public class Box3d extends Shape3d<Box3d>
       facesAreOutOfDate = true;
    }
 
-   public void getCenter(Point3d centerToPack)
+   public void getCenter(Point3DBasics centerToPack)
    {
       getPosition(centerToPack);
    }
@@ -129,7 +143,7 @@ public class Box3d extends Shape3d<Box3d>
    public void getFace(Direction direction, boolean positive, Plane3d planeToPack)
    {
       planeToPack.set(faces.get(FaceName.get(positive, direction)));
-      transformFromShapeFrame(planeToPack);
+      transformToWorld(planeToPack);
    }
    
    @Override
@@ -162,7 +176,7 @@ public class Box3d extends Shape3d<Box3d>
    {
       if (other != this)
       {
-         setTransformFromShapeFrame(other.getTransformFromShapeFrameUnsafe());
+         setPose(other);
          setDimensions(other.dimensions);
          facesAreOutOfDate = true;
       }
@@ -184,34 +198,34 @@ public class Box3d extends Shape3d<Box3d>
 
    public void setFromTransform(RigidBodyTransform transform)
    {
-      setTransformFromShapeFrame(transform);
+      setPose(transform);
       facesAreOutOfDate = true;
    }
 
+   @Override
    public void setYawPitchRoll(double yaw, double pitch, double roll)
    {
-      RotationTools.convertYawPitchRollToMatrix(yaw, pitch, roll, temporaryMatrix);
-      setRotation(temporaryMatrix);
+      super.setYawPitchRoll(yaw, pitch, roll);
+      facesAreOutOfDate = true;
    }
 
    @Override
-   public void setOrientation(Matrix3d rotation)
+   public void setOrientation(RotationMatrixReadOnly rotation)
    {
       super.setOrientation(rotation);
       facesAreOutOfDate = true;
    }
 
-   @Override
-   public void setPosition(Point3d translation)
+   public void setPosition(Point3DReadOnly translation)
    {
       super.setPosition(translation);
       facesAreOutOfDate = true;
    }
 
    @Override
-   public void applyTransform(RigidBodyTransform transform)
+   public void applyTransform(Transform transform)
    {
-      super.applyTransform(transform);
+      applyTransformToPose(transform);
       facesAreOutOfDate = true;
    }
 
@@ -226,7 +240,7 @@ public class Box3d extends Shape3d<Box3d>
    }
 
    @Override
-   protected double distanceShapeFrame(Point3d point)
+   protected double distanceShapeFrame(Point3DReadOnly point)
    {
       ensureFacesAreUpToDate();
       temporaryPoint.set(point);
@@ -236,7 +250,7 @@ public class Box3d extends Shape3d<Box3d>
    }
 
    @Override
-   protected void orthogonalProjectionShapeFrame(Point3d point)
+   protected void orthogonalProjectionShapeFrame(Point3DBasics point)
    {
       ensureFacesAreUpToDate();
 
@@ -250,7 +264,7 @@ public class Box3d extends Shape3d<Box3d>
    }
 
    @Override
-   protected boolean isInsideOrOnSurfaceShapeFrame(Point3d point, double epsilon)
+   protected boolean isInsideOrOnSurfaceShapeFrame(Point3DReadOnly point, double epsilon)
    {
       ensureFacesAreUpToDate();
 
@@ -269,12 +283,12 @@ public class Box3d extends Shape3d<Box3d>
    }
 
    @Override
-   protected boolean checkIfInsideShapeFrame(Point3d pointInWorldToCheck, Point3d closestPointToPack, Vector3d normalToPack)
+   protected boolean checkIfInsideShapeFrame(Point3DReadOnly pointInWorldToCheck, Point3DBasics closestPointToPack, Vector3DBasics normalToPack)
    {
       ensureFacesAreUpToDate();
 
       if (closestPointToPack == null)
-         closestPointToPack = new Point3d();
+         closestPointToPack = new Point3D();
 
       if (isInsideOrOnSurfaceShapeFrame(pointInWorldToCheck, 0.0))
       {
@@ -314,7 +328,7 @@ public class Box3d extends Shape3d<Box3d>
       }
    }
 
-   private Plane3d getClosestFace(Point3d point)
+   private Plane3d getClosestFace(Point3DReadOnly point)
    {
       ensureFacesAreUpToDate();
 
@@ -337,29 +351,29 @@ public class Box3d extends Shape3d<Box3d>
    /**
     * Not real-time
     */
-   public Point3d[] getVertices()
+   public Point3D[] getVertices()
    {
-      Point3d[] vertices = new Point3d[NUM_VERTICES];
-      vertices[0] = new Point3d();
-      vertices[1] = new Point3d();
-      vertices[2] = new Point3d();
-      vertices[3] = new Point3d();
-      vertices[4] = new Point3d();
-      vertices[5] = new Point3d();
-      vertices[6] = new Point3d();
-      vertices[7] = new Point3d();
+      Point3D[] vertices = new Point3D[NUM_VERTICES];
+      vertices[0] = new Point3D();
+      vertices[1] = new Point3D();
+      vertices[2] = new Point3D();
+      vertices[3] = new Point3D();
+      vertices[4] = new Point3D();
+      vertices[5] = new Point3D();
+      vertices[6] = new Point3D();
+      vertices[7] = new Point3D();
       computeVerticesShapeFrame(vertices);
       transformVerticesFromShapeFrame(vertices);
       return vertices;
    }
 
-   public void computeVertices(Point3d[] verticesToPack)
+   public void computeVertices(Point3DBasics[] verticesToPack)
    {
       computeVerticesShapeFrame(verticesToPack);
       transformVerticesFromShapeFrame(verticesToPack);
    }
    
-   private void computeVerticesShapeFrame(Point3d[] verticesToPack)
+   private void computeVerticesShapeFrame(Point3DBasics[] verticesToPack)
    {
       MathTools.checkIfEqual(NUM_VERTICES, verticesToPack.length);
       
@@ -377,13 +391,13 @@ public class Box3d extends Shape3d<Box3d>
       verticesToPack[7].set(+dx, +dy, +dz);
    }
 
-   public void computeVertices(Point3d[] verticesToPack, FaceName faceName)
+   public void computeVertices(Point3DBasics[] verticesToPack, FaceName faceName)
    {
       computeVerticesShapeFrame(verticesToPack, faceName);
       transformVerticesFromShapeFrame(verticesToPack);
    }
    
-   private void computeVerticesShapeFrame(Point3d[] verticesToPack, FaceName faceName)
+   private void computeVerticesShapeFrame(Point3DBasics[] verticesToPack, FaceName faceName)
    {
       MathTools.checkIfEqual(NUM_VERTICES_PER_FACE, verticesToPack.length);
       
@@ -414,11 +428,11 @@ public class Box3d extends Shape3d<Box3d>
       }
    }
    
-   private void transformVerticesFromShapeFrame(Point3d[] verticesInShapeFrame)
+   private void transformVerticesFromShapeFrame(Point3DBasics[] verticesInShapeFrame)
    {
       for (int i = 0; i < verticesInShapeFrame.length; i++)
       {
-         transformFromShapeFrame(verticesInShapeFrame[i]);
+         transformToWorld(verticesInShapeFrame[i]);
       }
    }
 
@@ -510,11 +524,11 @@ public class Box3d extends Shape3d<Box3d>
    }
 
    /**
-    * @deprecated Use getCenter(Point3d)
+    * @deprecated Use getCenter(Point3D)
     */
-   public Point3d getCenterCopy()
+   public Point3D getCenterCopy()
    {
-      Point3d ret = new Point3d();
+      Point3D ret = new Point3D();
       getCenter(ret);
       return ret;
    }
@@ -525,14 +539,14 @@ public class Box3d extends Shape3d<Box3d>
    public RigidBodyTransform getTransformCopy()
    {
       RigidBodyTransform ret = new RigidBodyTransform();
-      getTransform(ret);
+      getRigidBodyTransform(ret);
       return ret;
    }
 
    /**
     * @deprecated Use getOrientation(Matrix3d) 
     */
-   public void getRotation(Matrix3d rotationMatrixToPack)
+   public void getRotation(RotationMatrix rotationMatrixToPack)
    {
       getOrientation(rotationMatrixToPack);
    }
@@ -540,9 +554,9 @@ public class Box3d extends Shape3d<Box3d>
    /**
     * @deprecated Use getOrientation(Matrix3d) 
     */
-   public Matrix3d getRotationCopy()
+   public RotationMatrix getRotationCopy()
    {
-      Matrix3d ret = new Matrix3d();
+      RotationMatrix ret = new RotationMatrix();
       getRotation(ret);
       return ret;
    }
@@ -556,23 +570,23 @@ public class Box3d extends Shape3d<Box3d>
    
       Plane3d facePlane = new Plane3d();
       facePlane.set(faces.get(faceName));
-      transformFromShapeFrame(facePlane);
+      transformToWorld(facePlane);
       return facePlane;
    }
 
    /**
     * @deprecated Use setOrientation(Matrix3d)
     */
-   public void setRotation(Matrix3d rotation)
+   public void setRotation(RotationMatrix rotation)
    {
       super.setOrientation(rotation);
       facesAreOutOfDate = true;
    }
 
    /**
-    * @deprecated Use setPosition(Point3d)
+    * @deprecated Use setPosition(Point3D)
     */
-   public void setTranslation(Point3d translation)
+   public void setTranslation(Point3D translation)
    {
       setPosition(translation);
       facesAreOutOfDate = true;

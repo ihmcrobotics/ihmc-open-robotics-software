@@ -3,15 +3,6 @@ package us.ihmc.jMonkeyEngineToolkit.jme.util;
 import java.awt.Color;
 import java.util.List;
 
-import javax.vecmath.Color3f;
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Quat4f;
-import javax.vecmath.TexCoord2f;
-import javax.vecmath.Tuple3d;
-import javax.vecmath.Tuple3f;
-import javax.vecmath.Vector3d;
-
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Ray;
@@ -19,22 +10,30 @@ import com.jme3.math.Transform;
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
+import us.ihmc.euclid.tuple4D.Quaternion32;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
+import us.ihmc.graphicsDescription.TexCoord2f;
+import us.ihmc.robotics.dataStructures.MutableColor;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.Ray3d;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 public class JMEDataTypeUtils
 {
-   public static Point3d jmeVector3fToJ3DPoint3d(Vector3f original)
+   public static Point3D jmeVector3fToJ3DPoint3d(Vector3f original)
    {
-      return new Point3d(original.getX(), original.getY(), original.getZ());
+      return new Point3D(original.getX(), original.getY(), original.getZ());
    }
 
-   public static Vector3d jmeVector3fToVecmathVector3d(Vector3f original)
+   public static Vector3D jmeVector3fToVecmathVector3d(Vector3f original)
    {
-      return new Vector3d(original.getX(), original.getY(), original.getZ());
+      return new Vector3D(original.getX(), original.getY(), original.getZ());
    }
 
    public static float[] quaternionToEuler(Quaternion quat)
@@ -65,7 +64,7 @@ public class JMEDataTypeUtils
 
    }
 
-   public static Vector3f vecMathTuple3dToJMEVector3f(Tuple3d original)
+   public static Vector3f vecMathTuple3dToJMEVector3f(Tuple3DBasics original)
    {
       Vector3f target = new Vector3f();
       packVecMathTuple3dInJMEVector3f(original, target);
@@ -73,7 +72,7 @@ public class JMEDataTypeUtils
       return target;
    }
 
-   public static Quaternion vecMathQuat4dToJMEQuaternion(Quat4d original)
+   public static Quaternion vecMathQuat4dToJMEQuaternion(QuaternionReadOnly original)
    {
       Quaternion target = new Quaternion();
       packVectMathQuat4dInJMEQuaternion(original, target);
@@ -81,20 +80,20 @@ public class JMEDataTypeUtils
       return target;
    }
 
-   public static Quat4d jMEQuaternionToVecMathQuat4d(Quaternion original)
+   public static us.ihmc.euclid.tuple4D.Quaternion jMEQuaternionToVecMathQuat4d(Quaternion original)
    {
-      Quat4d target = new Quat4d();
+      us.ihmc.euclid.tuple4D.Quaternion target = new us.ihmc.euclid.tuple4D.Quaternion();
       packJMEQuaterionInVecMathQuat4d(original, target);
 
       return target;
    }
 
-   public static void packJMEVector3fInVecMathTuple3d(Vector3f original, Tuple3d target)
+   public static void packJMEVector3fInVecMathTuple3d(Vector3f original, Tuple3DBasics target)
    {
       target.set(original.getX(), original.getY(), original.getZ());
    }
 
-   public static void packJMEQuaterionInVecMathQuat4d(Quaternion original, Quat4d target)
+   public static void packJMEQuaterionInVecMathQuat4d(Quaternion original, QuaternionBasics target)
    {
       target.set(original.getX(), original.getY(), original.getZ(), original.getW());
 
@@ -105,19 +104,19 @@ public class JMEDataTypeUtils
       target.normalize();
    }
 
-   public static void packVecMathTuple3dInJMEVector3f(Tuple3d original, Vector3f target)
+   public static void packVecMathTuple3dInJMEVector3f(Tuple3DBasics original, Vector3f target)
    {
       target.set((float) original.getX(), (float) original.getY(), (float) original.getZ());
    }
 
-   public static void packVecMathTuple3fInJMEVector3f(Tuple3f original, Vector3f target)
+   public static void packVecMathTuple3fInJMEVector3f(Tuple3DBasics original, Vector3f target)
    {
-      target.set(original.getX(), original.getY(), original.getZ());
+      target.set(original.getX32(), original.getY32(), original.getZ32());
    }
 
-   public static void packVectMathQuat4dInJMEQuaternion(Quat4d original, Quaternion target)
+   public static void packVectMathQuat4dInJMEQuaternion(QuaternionReadOnly original, Quaternion target)
    {
-      target.set((float) original.getX(), (float) original.getY(), (float) original.getZ(), (float) original.getW());
+      target.set((float) original.getX(), (float) original.getY(), (float) original.getZ(), (float) original.getS());
    }
 
    public static void packFramePoseInJMEVector(FramePose original, Vector3f target)
@@ -132,13 +131,13 @@ public class JMEDataTypeUtils
 
    public static void packFrameOrientationInJMEQuaternion(FrameOrientation original, Quaternion target)
    {
-      Quat4d quat4d = new Quat4d();
+      us.ihmc.euclid.tuple4D.Quaternion quat4d = new us.ihmc.euclid.tuple4D.Quaternion();
       packVectMathQuat4dInJMEQuaternion(original.getQuaternion(), target);
    }
 
    public static void packFramePoseInJMEQuaternion(FramePose original, Quaternion target)
    {
-      Quat4d quat4d = new Quat4d();
+      us.ihmc.euclid.tuple4D.Quaternion quat4d = new us.ihmc.euclid.tuple4D.Quaternion();
       original.getOrientation(quat4d);
       packVectMathQuat4dInJMEQuaternion(quat4d, target);
    }
@@ -154,7 +153,7 @@ public class JMEDataTypeUtils
       return new ColorRGBA(color.getRed() / 255.0f, color.getGreen() / 255.0f, color.getBlue() / 255.0f, color.getAlpha() / 255.0f);
    }
 
-   public static ColorRGBA jMEColorRGBAFromVecMathColor3f(Color3f originalColor, double alpha)
+   public static ColorRGBA jMEColorRGBAFromVecMathColor3f(MutableColor originalColor, double alpha)
    {
       float r = originalColor.getX();
       float g = originalColor.getY();
@@ -163,7 +162,7 @@ public class JMEDataTypeUtils
       return new ColorRGBA(r, g, b, (float) alpha);
    }
 
-   public static Vector3f[] vecMathTuple3fArrayToJMEVector3fArray(Tuple3f[] original)
+   public static Vector3f[] vecMathTuple3fArrayToJMEVector3fArray(Tuple3DBasics[] original)
    {
       Vector3f[] ret = new Vector3f[original.length];
       for (int i = 0; i < original.length; i++)
@@ -203,16 +202,16 @@ public class JMEDataTypeUtils
 
    public static void packTexCoord2fInJMEVector2f(TexCoord2f textureCoordinate, Vector2f vector)
    {
-      vector.setX(textureCoordinate.getX());
-      vector.setY(textureCoordinate.getY());
+      vector.setX(textureCoordinate.getX32());
+      vector.setY(textureCoordinate.getY32());
    }
 
-   public static float[] toPointCloudFloatArray(List<Point3d> points)
+   public static float[] toPointCloudFloatArray(List<Point3D> points)
    {
       float[] ret = new float[points.size() * 3];
       for (int i = 0; i < points.size(); i++)
       {
-         Point3d point3d = points.get(i);
+         Point3D point3d = points.get(i);
          ret[i * 3 + 0] = (float) point3d.getX();
          ret[i * 3 + 1] = (float) point3d.getY();
          ret[i * 3 + 2] = (float) point3d.getZ();
@@ -221,12 +220,12 @@ public class JMEDataTypeUtils
       return ret;
    }
 
-   public static float[] toPointCloudFloatArrayInYUp(List<Point3d> points)
+   public static float[] toPointCloudFloatArrayInYUp(List<Point3D> points)
    {
       float[] ret = new float[points.size() * 3];
       for (int i = 0; i < points.size(); i++)
       {
-         Point3d point3d = points.get(i);
+         Point3D point3d = points.get(i);
          ret[i * 3 + 0] = (float) point3d.getY();
          ret[i * 3 + 1] = (float) point3d.getZ();
          ret[i * 3 + 2] = (float) point3d.getX();
@@ -237,11 +236,11 @@ public class JMEDataTypeUtils
 
    public static Transform j3dTransform3DToJMETransform(RigidBodyTransform transform3D)
    {
-      Quat4f quat = new Quat4f();
-      javax.vecmath.Vector3f vector = new javax.vecmath.Vector3f();
+      Quaternion32 quat = new Quaternion32();
+      us.ihmc.euclid.tuple3D.Vector3D32 vector = new us.ihmc.euclid.tuple3D.Vector3D32();
       transform3D.get(quat, vector);
-      Vector3f jmeVector = new Vector3f(vector.getX(), vector.getY(), vector.getZ());
-      Quaternion jmeQuat = new Quaternion(quat.getX(), quat.getY(), quat.getZ(), quat.getW());
+      Vector3f jmeVector = new Vector3f(vector.getX32(), vector.getY32(), vector.getZ32());
+      Quaternion jmeQuat = new Quaternion(quat.getX32(), quat.getY32(), quat.getZ32(), quat.getS32());
       Transform ret = new Transform(jmeVector, jmeQuat, new Vector3f(1.0f, 1.0f, 1.0f));
 
       return ret;
@@ -251,8 +250,8 @@ public class JMEDataTypeUtils
    {
       Quaternion jmeQuat = jmeTransform.getRotation();
       Vector3f jmeVect = jmeTransform.getTranslation();
-      Quat4d quat = new Quat4d(jmeQuat.getX(), jmeQuat.getY(), jmeQuat.getZ(), jmeQuat.getW());
-      Vector3d vect = new Vector3d(jmeVect.getX(), jmeVect.getY(), jmeVect.getZ());
+      us.ihmc.euclid.tuple4D.Quaternion quat = new us.ihmc.euclid.tuple4D.Quaternion(jmeQuat.getX(), jmeQuat.getY(), jmeQuat.getZ(), jmeQuat.getW());
+      Vector3D vect = new Vector3D(jmeVect.getX(), jmeVect.getY(), jmeVect.getZ());
       RigidBodyTransform ret = new RigidBodyTransform(quat, vect);
 
       return ret;

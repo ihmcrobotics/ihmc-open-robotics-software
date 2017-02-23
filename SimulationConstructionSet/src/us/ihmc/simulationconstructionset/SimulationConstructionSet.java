@@ -29,11 +29,10 @@ import javax.swing.JMenuBar;
 import javax.swing.JOptionPane;
 import javax.swing.JRadioButton;
 import javax.swing.JTextField;
-import javax.vecmath.Color3f;
-import javax.vecmath.Tuple3d;
 
 import com.jme3.renderer.Camera;
 
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.HeightMap;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
@@ -50,6 +49,7 @@ import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
 import us.ihmc.jMonkeyEngineToolkit.camera.CaptureDevice;
 import us.ihmc.jMonkeyEngineToolkit.camera.RenderedSceneHandler;
 import us.ihmc.robotics.TickAndUpdatable;
+import us.ihmc.robotics.dataStructures.MutableColor;
 import us.ihmc.robotics.dataStructures.YoVariableHolder;
 import us.ihmc.robotics.dataStructures.listener.RewoundListener;
 import us.ihmc.robotics.dataStructures.listener.YoVariableRegistryChangedListener;
@@ -263,7 +263,8 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
 
    // private boolean keyPointToggle = false;
 
-   private boolean simulationThreadIsUpAndRunning = false;
+   private boolean hasSimulationThreadStarted = false;
+   private boolean isSimulationThreadRunning = false;
    private boolean isSimulating = false;
    private boolean simulateNoFasterThanRealTime = false;
    private final RealTimeRateEnforcer realTimeRateEnforcer = new RealTimeRateEnforcer();
@@ -1132,7 +1133,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
     *
     * @param cameraFix coordinates of the fix point.
     */
-   public void setCameraFix(Tuple3d cameraFix)
+   public void setCameraFix(Tuple3DBasics cameraFix)
    {
       if (myGUI != null)
       {
@@ -1160,7 +1161,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
     *
     * @param cameraPosition coordinates of the camera.
     */
-   public void setCameraPosition(Tuple3d cameraPosition)
+   public void setCameraPosition(Tuple3DBasics cameraPosition)
    {
       if (myGUI != null)
       {
@@ -1193,7 +1194,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
    {
       ThreadTools.startAThread(this, "Simulation Contruction Set");
 
-      while (!this.isSimulationThreadUpAndRunning())
+      while (!this.hasSimulationThreadStarted())
       {
          Thread.yield();
       }
@@ -2154,16 +2155,16 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
     */
    public void setBackgroundColor(Color color)
    {
-      setBackgroundColor(new Color3f(color));
+      setBackgroundColor(new MutableColor(color));
    }
 
    /**
     * Set the specified background color
     *
     * @param color Color3f
-    * @see Color3f
+    * @see MutableColor
     */
-   public void setBackgroundColor(Color3f color)
+   public void setBackgroundColor(MutableColor color)
    {
       if (myGUI != null)
       {
@@ -2230,7 +2231,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
    public void run()
    {
       // myGUI.setupConfiguration("all", "all", "all", "all");
-
+      
       if (!TESTING_LOAD_STUFF)
       {
          if ((!defaultLoaded) && (myGUI != null))
@@ -2290,19 +2291,20 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
          {
             dynamicGraphicMenuManager.hideAllGraphics();
          }
-
       }
+
+      hasSimulationThreadStarted = true;
+      isSimulationThreadRunning = true;
 
       if (robots == null)
       {
+         isSimulationThreadRunning = false;
          return;
       }
 
       fastTicks = 0;
 
       // t = rob.getVariable("t");
-
-      simulationThreadIsUpAndRunning = true;
 
       // Three state loop, simulation is either playing, running, or waiting
       while (true)
@@ -2375,8 +2377,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
          // System.out.println("Tick" + foo);
       }
 
-      simulationThreadIsUpAndRunning = false;
-
+      isSimulationThreadRunning = false;
    }
 
    /**
@@ -2386,7 +2387,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
    {
       stopSimulationThread = true;
 
-      while (isSimulationThreadUpAndRunning())
+      while (isSimulationThreadRunning)
       {
          try
          {
@@ -2739,9 +2740,14 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
 
    }
 
-   public boolean isSimulationThreadUpAndRunning()
+   public boolean hasSimulationThreadStarted()
    {
-      return this.simulationThreadIsUpAndRunning;
+      return this.hasSimulationThreadStarted;
+   }
+
+   public boolean isSimulationThreadRunning()
+   {
+      return this.isSimulationThreadRunning;
    }
 
    /**

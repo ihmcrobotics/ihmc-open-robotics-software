@@ -5,10 +5,6 @@ import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -19,6 +15,9 @@ import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.avatar.testTools.ScriptedFootstepGenerator;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
@@ -186,8 +185,8 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
 
       assertTrue(success);
       
-      Point3d center = new Point3d(-3.7944324216932475, -5.38051322671167, 0.7893380490431007);
-      Vector3d plusMinusVector = new Vector3d(0.2, 0.2, 0.5);
+      Point3D center = new Point3D(-3.7944324216932475, -5.38051322671167, 0.7893380490431007);
+      Vector3D plusMinusVector = new Vector3D(0.2, 0.2, 0.5);
       BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 
@@ -222,8 +221,8 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
 
       assertTrue(success);
 
-      Point3d center = new Point3d(-3.7944324216932475, -5.38051322671167, 0.7893380490431007);
-      Vector3d plusMinusVector = new Vector3d(0.2, 0.2, 0.5);
+      Point3D center = new Point3D(-3.7944324216932475, -5.38051322671167, 0.7893380490431007);
+      Vector3D plusMinusVector = new Vector3D(0.2, 0.2, 0.5);
       BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 
@@ -257,8 +256,8 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
 
       assertTrue(success);
 
-      Point3d center = new Point3d(-4.7944324216932475, -4.38051322671167, 0.7893380490431007);
-      Vector3d plusMinusVector = new Vector3d(0.2, 0.2, 0.5);
+      Point3D center = new Point3D(-4.7944324216932475, -4.38051322671167, 0.7893380490431007);
+      Vector3D plusMinusVector = new Vector3D(0.2, 0.2, 0.5);
       BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 
@@ -301,8 +300,8 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
 
       assertTrue(success);
 
-      Point3d center = new Point3d(-3.7944324216932475, -5.38051322671167, 0.7893380490431007);
-      Vector3d plusMinusVector = new Vector3d(0.2, 0.2, 0.5);
+      Point3D center = new Point3D(-3.7944324216932475, -5.38051322671167, 0.7893380490431007);
+      Vector3D plusMinusVector = new Vector3D(0.2, 0.2, 0.5);
       BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 
@@ -340,8 +339,8 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
 
       assertTrue(success);
       
-      Point3d center = new Point3d(-4.0997851961824665, -5.797669618987603, 0.9903260891750866);
-      Vector3d plusMinusVector = new Vector3d(0.2, 0.2, 0.5);
+      Point3D center = new Point3D(-4.0997851961824665, -5.797669618987603, 0.9903260891750866);
+      Vector3D plusMinusVector = new Vector3D(0.2, 0.2, 0.5);
       BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
       
@@ -377,8 +376,8 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       
       assertTrue(success);
       
-      Point3d center = new Point3d(-4.4003012528878935, -6.046150532235836, 0.7887649325247877);
-      Vector3d plusMinusVector = new Vector3d(0.2, 0.2, 0.5);
+      Point3D center = new Point3D(-4.4003012528878935, -6.046150532235836, 0.7887649325247877);
+      Vector3D plusMinusVector = new Vector3D(0.2, 0.2, 0.5);
       BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
       
@@ -407,7 +406,7 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
 	   FrameOrientation desiredChestFrameOrientation = new FrameOrientation(ReferenceFrame.getWorldFrame());
 	   double leanAngle = 30.0;
 	   desiredChestFrameOrientation.setIncludingFrame(ReferenceFrame.getWorldFrame(), -2.36, Math.toRadians(leanAngle), Math.toRadians(0.0));
-      Quat4d desiredChestQuat = new Quat4d();
+      Quaternion desiredChestQuat = new Quaternion();
       desiredChestFrameOrientation.getQuaternion(desiredChestQuat);
       
       double trajectoryTime = 0.5;
@@ -434,8 +433,8 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
 
 	   assertTrue(success);
 
-	   Point3d center = new Point3d(-4.4003012528878935, -6.046150532235836, 0.7887649325247877);
-	   Vector3d plusMinusVector = new Vector3d(0.2, 0.2, 0.5);
+	   Point3D center = new Point3D(-4.4003012528878935, -6.046150532235836, 0.7887649325247877);
+	   Vector3D plusMinusVector = new Vector3D(0.2, 0.2, 0.5);
 	   BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
 	   drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 
@@ -444,24 +443,24 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
 
 	private void setupCameraForWalkingOverSmallPlatform(SimulationConstructionSet scs)
    {
-      Point3d cameraFix = new Point3d(-3.0, -4.6, 0.8);
-      Point3d cameraPosition = new Point3d(-11.5, -5.8, 2.5);
+      Point3D cameraFix = new Point3D(-3.0, -4.6, 0.8);
+      Point3D cameraPosition = new Point3D(-11.5, -5.8, 2.5);
 
       drcSimulationTestHelper.setupCameraForUnitTest(cameraFix, cameraPosition);
    }
    
    private void setupCameraForWalkingOverMediumPlatform(SimulationConstructionSet scs)
    {
-      Point3d cameraFix = new Point3d(-3.9, -5.6, 0.55);
-      Point3d cameraPosition = new Point3d(-7.5, -2.3, 0.58);
+      Point3D cameraFix = new Point3D(-3.9, -5.6, 0.55);
+      Point3D cameraPosition = new Point3D(-7.5, -2.3, 0.58);
 
       drcSimulationTestHelper.setupCameraForUnitTest(cameraFix, cameraPosition);
    }
    
    private void setupCameraForWalkingOffOfMediumPlatform(SimulationConstructionSet scs)
    {
-      Point3d cameraFix = new Point3d(-3.9, -5.6, 0.55);
-      Point3d cameraPosition = new Point3d(-7.6, -2.4, 0.58);
+      Point3D cameraFix = new Point3D(-3.9, -5.6, 0.55);
+      Point3D cameraPosition = new Point3D(-7.6, -2.4, 0.58);
 
       drcSimulationTestHelper.setupCameraForUnitTest(cameraFix, cameraPosition);
    }
@@ -480,35 +479,35 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
 
    private FootstepDataListMessage createFootstepsForSideSteppingOverSmallPlatform()
    {
-      Quat4d orientation = new Quat4d();
-      Vector3d verticalVector = new Vector3d(0.0, 0.0, 1.0);
+      Quaternion orientation = new Quaternion();
+      Vector3D verticalVector = new Vector3D(0.0, 0.0, 1.0);
       FootstepDataListMessage footstepDataList = new FootstepDataListMessage();
       RotationTools.computeQuaternionFromYawAndZNormal(3.0/4.0*Math.PI, verticalVector, orientation);
-      footstepDataList.add(new FootstepDataMessage(RobotSide.LEFT, new Point3d(-3.40, -5.03, .24), new Quat4d(orientation)));
-      footstepDataList.add(new FootstepDataMessage(RobotSide.RIGHT, new Point3d(-3.22, -4.85, 0.0), new Quat4d(orientation)));
-      footstepDataList.add(new FootstepDataMessage(RobotSide.LEFT, new Point3d(-3.50, -5.13, .24), new Quat4d(orientation)));
-      footstepDataList.add(new FootstepDataMessage(RobotSide.RIGHT, new Point3d(-3.37, -5.00, .24), new Quat4d(orientation)));
-      footstepDataList.add(new FootstepDataMessage(RobotSide.LEFT, new Point3d(-3.67, -5.30, 0.0), new Quat4d(orientation)));
-      footstepDataList.add(new FootstepDataMessage(RobotSide.RIGHT, new Point3d(-3.50, -5.13, .24), new Quat4d(orientation)));
-      footstepDataList.add(new FootstepDataMessage(RobotSide.LEFT, new Point3d(-3.84, -5.47, 0.0), new Quat4d(orientation)));
-      footstepDataList.add(new FootstepDataMessage(RobotSide.RIGHT, new Point3d(-3.67, -5.30, 0.0), new Quat4d(orientation)));
+      footstepDataList.add(new FootstepDataMessage(RobotSide.LEFT, new Point3D(-3.40, -5.03, .24), new Quaternion(orientation)));
+      footstepDataList.add(new FootstepDataMessage(RobotSide.RIGHT, new Point3D(-3.22, -4.85, 0.0), new Quaternion(orientation)));
+      footstepDataList.add(new FootstepDataMessage(RobotSide.LEFT, new Point3D(-3.50, -5.13, .24), new Quaternion(orientation)));
+      footstepDataList.add(new FootstepDataMessage(RobotSide.RIGHT, new Point3D(-3.37, -5.00, .24), new Quaternion(orientation)));
+      footstepDataList.add(new FootstepDataMessage(RobotSide.LEFT, new Point3D(-3.67, -5.30, 0.0), new Quaternion(orientation)));
+      footstepDataList.add(new FootstepDataMessage(RobotSide.RIGHT, new Point3D(-3.50, -5.13, .24), new Quaternion(orientation)));
+      footstepDataList.add(new FootstepDataMessage(RobotSide.LEFT, new Point3D(-3.84, -5.47, 0.0), new Quaternion(orientation)));
+      footstepDataList.add(new FootstepDataMessage(RobotSide.RIGHT, new Point3D(-3.67, -5.30, 0.0), new Quaternion(orientation)));
       return footstepDataList;
    }
 
    private FootstepDataListMessage createFootstepsForSideSteppingOverSmallWall()
    {
-      Quat4d orientation = new Quat4d();
-      Vector3d verticalVector = new Vector3d(0.0, 0.0, 1.0);
+      Quaternion orientation = new Quaternion();
+      Vector3D verticalVector = new Vector3D(0.0, 0.0, 1.0);
       FootstepDataListMessage footstepDataList = new FootstepDataListMessage();
       RotationTools.computeQuaternionFromYawAndZNormal(3.0/4.0*Math.PI, verticalVector, orientation);
-      footstepDataList.add(new FootstepDataMessage(RobotSide.LEFT, new Point3d(-4.30, -3.93, 0.0), new Quat4d(orientation)));
-      footstepDataList.add(new FootstepDataMessage(RobotSide.RIGHT, new Point3d(-4.18, -3.81, 0.0), new Quat4d(orientation)));
-      footstepDataList.add(new FootstepDataMessage(RobotSide.LEFT, new Point3d(-4.58, -4.21, 0.0), new Quat4d(orientation), TrajectoryType.OBSTACLE_CLEARANCE, 0.24));
-      footstepDataList.add(new FootstepDataMessage(RobotSide.RIGHT, new Point3d(-4.30, -3.93, 0.0), new Quat4d(orientation)));
-      footstepDataList.add(new FootstepDataMessage(RobotSide.LEFT, new Point3d(-4.71, -4.34, 0.0), new Quat4d(orientation)));
-      footstepDataList.add(new FootstepDataMessage(RobotSide.RIGHT, new Point3d(-4.58, -4.21, 0.0), new Quat4d(orientation), TrajectoryType.OBSTACLE_CLEARANCE, 0.24));
-      footstepDataList.add(new FootstepDataMessage(RobotSide.LEFT, new Point3d(-4.84, -4.47, 0.0), new Quat4d(orientation)));
-      footstepDataList.add(new FootstepDataMessage(RobotSide.RIGHT, new Point3d(-4.67, -4.30, 0.0), new Quat4d(orientation)));
+      footstepDataList.add(new FootstepDataMessage(RobotSide.LEFT, new Point3D(-4.30, -3.93, 0.0), new Quaternion(orientation)));
+      footstepDataList.add(new FootstepDataMessage(RobotSide.RIGHT, new Point3D(-4.18, -3.81, 0.0), new Quaternion(orientation)));
+      footstepDataList.add(new FootstepDataMessage(RobotSide.LEFT, new Point3D(-4.58, -4.21, 0.0), new Quaternion(orientation), TrajectoryType.OBSTACLE_CLEARANCE, 0.24));
+      footstepDataList.add(new FootstepDataMessage(RobotSide.RIGHT, new Point3D(-4.30, -3.93, 0.0), new Quaternion(orientation)));
+      footstepDataList.add(new FootstepDataMessage(RobotSide.LEFT, new Point3D(-4.71, -4.34, 0.0), new Quaternion(orientation)));
+      footstepDataList.add(new FootstepDataMessage(RobotSide.RIGHT, new Point3D(-4.58, -4.21, 0.0), new Quaternion(orientation), TrajectoryType.OBSTACLE_CLEARANCE, 0.24));
+      footstepDataList.add(new FootstepDataMessage(RobotSide.LEFT, new Point3D(-4.84, -4.47, 0.0), new Quaternion(orientation)));
+      footstepDataList.add(new FootstepDataMessage(RobotSide.RIGHT, new Point3D(-4.67, -4.30, 0.0), new Quaternion(orientation)));
       return footstepDataList;
    }
 

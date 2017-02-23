@@ -2,7 +2,7 @@ package us.ihmc.geometry.polytope;
 
 import java.util.ArrayList;
 
-import javax.vecmath.Point3d;
+import us.ihmc.euclid.tuple3D.Point3D;
 
 import gnu.trove.map.hash.THashMap;
 
@@ -16,13 +16,13 @@ public class ConvexPolytopeFromExpandingPolytopeEntryGenerator
       ArrayList<ExpandingPolytopeEntry> triangles = new ArrayList<>();
       expandingPolytope.getAllConnectedTriangles(triangles);
 
-      THashMap<Point3d, PolytopeVertex> pointsToPolytopeVertices = new THashMap<>();
+      THashMap<Point3D, PolytopeVertex> pointsToPolytopeVertices = new THashMap<>();
 
       for (ExpandingPolytopeEntry triangle : triangles)
       {
          for (int i = 0; i < 3; i++)
          {
-            Point3d vertex = triangle.getVertex(i);
+            Point3D vertex = triangle.getVertex(i);
 
             if (!pointsToPolytopeVertices.containsKey(vertex))
             {
@@ -36,8 +36,8 @@ public class ConvexPolytopeFromExpandingPolytopeEntryGenerator
       {
          for (int i = 0; i < 3; i++)
          {
-            Point3d vertex = triangle.getVertex(i);
-            Point3d nextVertex = triangle.getVertex((i + 1) % 3);
+            Point3D vertex = triangle.getVertex(i);
+            Point3D nextVertex = triangle.getVertex((i + 1) % 3);
 
             PolytopeVertex polytopeVertex = pointsToPolytopeVertices.get(vertex);
             PolytopeVertex nextPolytopeVertex = pointsToPolytopeVertices.get(nextVertex);

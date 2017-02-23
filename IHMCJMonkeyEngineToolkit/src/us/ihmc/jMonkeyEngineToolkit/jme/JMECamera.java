@@ -1,20 +1,20 @@
 package us.ihmc.jMonkeyEngineToolkit.jme;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Tuple3d;
-import javax.vecmath.Vector3d;
-
-import us.ihmc.jMonkeyEngineToolkit.CameraAdapter;
-import us.ihmc.jMonkeyEngineToolkit.camera.CameraController;
-import us.ihmc.jMonkeyEngineToolkit.jme.util.JMEDataTypeUtils;
-import us.ihmc.jMonkeyEngineToolkit.jme.util.JMEGeometryUtils;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-
 import com.jme3.math.FastMath;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.Camera;
+
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
+import us.ihmc.jMonkeyEngineToolkit.CameraAdapter;
+import us.ihmc.jMonkeyEngineToolkit.camera.CameraController;
+import us.ihmc.jMonkeyEngineToolkit.jme.util.JMEDataTypeUtils;
+import us.ihmc.jMonkeyEngineToolkit.jme.util.JMEGeometryUtils;
 
 /**
  * JMECamera overloads camera and implements the following assumptions
@@ -33,8 +33,8 @@ public class JMECamera extends Camera implements CameraAdapter
       convertLookingUpToLookingForward.fromRotationMatrix(0f, 0f, 1f, 1f, 0f, 0f, 0f, 1f, 0f);
       convertLookingForwardToLookingUp = convertLookingUpToLookingForward.inverse();
    }
-   private final Quat4d cameraRotation = new Quat4d();
-   private final Vector3d cameraPosition = new Vector3d();
+   private final QuaternionBasics cameraRotation = new us.ihmc.euclid.tuple4D.Quaternion();
+   private final Vector3D cameraPosition = new Vector3D();
 
    private CameraController cameraController;
 
@@ -135,7 +135,7 @@ public class JMECamera extends Camera implements CameraAdapter
       return cameraController;
    }
 
-   public void setLocationInZUpCoordinates(Tuple3d cameraPosition)
+   public void setLocationInZUpCoordinates(Tuple3DBasics cameraPosition)
    {
       setLocationInZUpCoordinates(JMEDataTypeUtils.vecMathTuple3dToJMEVector3f(cameraPosition));
    }
@@ -147,7 +147,7 @@ public class JMECamera extends Camera implements CameraAdapter
       setLocation(tempVector);
    }
 
-   public void setRotationInZUpcoordinates(Quat4d rotation)
+   public void setRotationInZUpcoordinates(QuaternionReadOnly rotation)
    {
       setRotationInZUpcoordinates(JMEDataTypeUtils.vecMathQuat4dToJMEQuaternion(rotation));
    }
@@ -201,20 +201,20 @@ public class JMECamera extends Camera implements CameraAdapter
       this.cameraController = cameraController;
    }
 
-   public Quat4d getCameraRotation()
+   public QuaternionBasics getCameraRotation()
    {
       Quaternion quat = new Quaternion(getRotation());
       JMEGeometryUtils.transformFromJMECoordinatesToZup(quat);
       quat.multLocal(convertLookingForwardToLookingUp);
 
-      return new Quat4d(quat.getX(), quat.getY(), quat.getZ(), quat.getW());
+      return new us.ihmc.euclid.tuple4D.Quaternion(quat.getX(), quat.getY(), quat.getZ(), quat.getW());
    }
 
-   public Point3d getCameraPosition()
+   public Point3D getCameraPosition()
    {
       Vector3f position = new Vector3f(getLocation());
       JMEGeometryUtils.transformFromJMECoordinatesToZup(position);
-      return new Point3d(position.getX(), position.getY(), position.getZ());
+      return new Point3D(position.getX(), position.getY(), position.getZ());
    }
 
    @Override

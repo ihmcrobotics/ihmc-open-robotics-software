@@ -1,7 +1,6 @@
 package us.ihmc.commonWalkingControlModules.pushRecovery;
 
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -40,7 +39,7 @@ public class PushRobotTestConductor
                                     (DoubleYoVariable) scs.getVariable(jointName + "_pushForceZ"), ReferenceFrame.getWorldFrame());
    }
    
-   public void applyForce(Vector3d direction, double magnitude, double duration)
+   public void applyForce(Vector3D direction, double magnitude, double duration)
    {
       PrintTools.info("\nPushing " + jointName + " direction: " + direction + " magnitude: " + magnitude + "(N) for " + duration + "(s)");
       

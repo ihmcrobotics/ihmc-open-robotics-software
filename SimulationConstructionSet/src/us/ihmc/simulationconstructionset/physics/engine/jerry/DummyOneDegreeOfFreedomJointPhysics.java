@@ -1,8 +1,7 @@
 package us.ihmc.simulationconstructionset.physics.engine.jerry;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.simulationconstructionset.DummyOneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.Joint;
 
@@ -46,7 +45,7 @@ public class DummyOneDegreeOfFreedomJointPhysics extends JointPhysics<DummyOneDe
     */
 
    @Override
-   protected void jointDependentSetAndGetRotation(Matrix3d Rh_i)
+   protected void jointDependentSetAndGetRotation(RotationMatrix Rh_i)
    {
       Rh_i.setIdentity();
    }
@@ -78,7 +77,7 @@ public class DummyOneDegreeOfFreedomJointPhysics extends JointPhysics<DummyOneDe
    // private Vector3d vel_i = new Vector3d();  // vel_i is the vector velocity of joint i (vel_i = q_dot_i * u_i)
 
    @Override
-   protected void jointDependentFeatherstonePassTwo(Vector3d w_h)
+   protected void jointDependentFeatherstonePassTwo(Vector3D w_h)
    {
       // Coriolis Forces:
 

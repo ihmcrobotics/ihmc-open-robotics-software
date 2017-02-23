@@ -3,14 +3,32 @@ package us.ihmc.simulationconstructionset.util.environments;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.vecmath.AxisAngle4d;
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Point2d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector2d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.matrix.Matrix3D;
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
+import us.ihmc.graphicsDescription.Graphics3DObject;
+import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.input.SelectedListener;
+import us.ihmc.graphicsDescription.structure.Graphics3DNode;
+import us.ihmc.robotics.Axis;
+import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePose;
+import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
+import us.ihmc.robotics.geometry.shapes.FrameBox3d;
+import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.Link;
@@ -19,27 +37,11 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.util.ground.Contactable;
 import us.ihmc.tools.inputDevices.keyboard.Key;
 import us.ihmc.tools.inputDevices.keyboard.ModifierKeyInterface;
-import us.ihmc.graphicsDescription.Graphics3DObject;
-import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
-import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.graphicsDescription.input.SelectedListener;
-import us.ihmc.graphicsDescription.structure.Graphics3DNode;
-import us.ihmc.robotics.Axis;
-import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
-import us.ihmc.robotics.geometry.shapes.FrameBox3d;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
 
 public class ContactableDoorRobot extends Robot implements SelectableObject, SelectedListener, Contactable
 {
-   public static final Vector2d DEFAULT_HANDLE_OFFSET = new Vector2d(0.83, 0.98);
-   public static final Vector3d DEFAULT_DOOR_DIMENSIONS = new Vector3d(0.9144, 0.045, 2.04);
+   public static final Vector2D DEFAULT_HANDLE_OFFSET = new Vector2D(0.83, 0.98);
+   public static final Vector3D DEFAULT_DOOR_DIMENSIONS = new Vector3D(0.9144, 0.045, 2.04);
    public static final double DEFAULT_MASS = 2.28; // 5lbs
    public static final double DEFAULT_HANDLE_DOOR_SEPARATION = 0.06;
    public static final double DEFAULT_HANDLE_HINGE_RADIUS = 0.01;
@@ -59,7 +61,7 @@ public class ContactableDoorRobot extends Robot implements SelectableObject, Sel
    private final SideDependentList<PoseReferenceFrame> handlePoses = new SideDependentList<PoseReferenceFrame>();
    
    private double mass;
-   private Matrix3d inertiaMatrix;
+   private Matrix3D inertiaMatrix;
    
    private Link doorLink;
    private PinJoint doorHingePinJoint;
@@ -68,20 +70,20 @@ public class ContactableDoorRobot extends Robot implements SelectableObject, Sel
    private PinJoint handlePinJoint;
    private Link handleLink;
    private Graphics3DObject doorHandleGraphics = new Graphics3DObject();
-   private final Vector2d handleOffset;
+   private final Vector2D handleOffset;
    private final double handleDoorSeparation;
    private final double handleHingeRadius;
    private final double handleRadius, handleLength;
       
    private final InternalMultiJointArticulatedContactable internalMultiJointArticulatedContactable;
    
-   public ContactableDoorRobot(String name, Point3d positionInWorld)
+   public ContactableDoorRobot(String name, Point3D positionInWorld)
    {
       this(name, DEFAULT_DOOR_DIMENSIONS, DEFAULT_MASS, positionInWorld, DEFAULT_HANDLE_OFFSET, 
             DEFAULT_HANDLE_RADIUS, DEFAULT_HANDLE_LENGTH, DEFAULT_HANDLE_DOOR_SEPARATION, DEFAULT_HANDLE_HINGE_RADIUS);
    }
    
-   public ContactableDoorRobot(String name, Vector3d boxDimensions, double mass, Point3d positionInWorld, Vector2d handleOffset, 
+   public ContactableDoorRobot(String name, Vector3D boxDimensions, double mass, Point3D positionInWorld, Vector2D handleOffset, 
          double handleRadius, double handleLength, double handleDoorSeparation, double handleHingeRadius)
    {
       super(name);
@@ -100,27 +102,27 @@ public class ContactableDoorRobot extends Robot implements SelectableObject, Sel
       this.handleRadius = handleRadius;
       this.handleLength = handleLength;
       
-      createDoor(new Vector3d(positionInWorld));
+      createDoor(new Vector3D(positionInWorld));
       createDoorGraphics();
       createHandle();
       createHandleGraphics();
       
       // set up reference frames
-      originalDoorPose = new RigidBodyTransform(new AxisAngle4d(), new Vector3d(positionInWorld)); 
-      doorFrame = new PoseReferenceFrame("doorFrame", new FramePose(ReferenceFrame.getWorldFrame(), new Point3d(positionInWorld), new AxisAngle4d()));
+      originalDoorPose = new RigidBodyTransform(new AxisAngle(), new Vector3D(positionInWorld)); 
+      doorFrame = new PoseReferenceFrame("doorFrame", new FramePose(ReferenceFrame.getWorldFrame(), new Point3D(positionInWorld), new AxisAngle()));
       doorBox = new FrameBox3d(doorFrame, widthX, depthY, heightZ);
       
       for(RobotSide robotSide : RobotSide.values())
       {
-         Vector3d offset = new Vector3d(handleOffset.getX(), 0.5*depthY + robotSide.negateIfLeftSide(0.5*depthY + handleDoorSeparation), handleOffset.getY());
+         Vector3D offset = new Vector3D(handleOffset.getX(), 0.5*depthY + robotSide.negateIfLeftSide(0.5*depthY + handleDoorSeparation), handleOffset.getY());
          handlePoses.put(robotSide, new PoseReferenceFrame(robotSide.getCamelCaseNameForStartOfExpression() + "HandleFrame",
-               new FramePose(doorFrame, new Point3d(offset), new AxisAngle4d())));
+               new FramePose(doorFrame, new Point3D(offset), new AxisAngle())));
       }
       
       internalMultiJointArticulatedContactable = new InternalMultiJointArticulatedContactable(getName(), this);
    }
 
-   private void createDoor(Vector3d positionInWorld)
+   private void createDoor(Vector3D positionInWorld)
    {
       // creating the pinJoint, i.e. door hinge
       doorHingePinJoint = new PinJoint("doorHingePinJoint", positionInWorld, this, Axis.Z);
@@ -139,7 +141,7 @@ public class ContactableDoorRobot extends Robot implements SelectableObject, Sel
    private void createHandle()
    {
       // create handle
-      handlePinJoint = new PinJoint("handlePinJoint", new Vector3d(handleOffset.getX(), 0.0, handleOffset.getY()), this, Axis.Y);
+      handlePinJoint = new PinJoint("handlePinJoint", new Vector3D(handleOffset.getX(), 0.0, handleOffset.getY()), this, Axis.Y);
       
       // handle link
       handleLink = new Link("handleHorizontalLink");
@@ -154,11 +156,11 @@ public class ContactableDoorRobot extends Robot implements SelectableObject, Sel
    private void createDoorGraphics()
    {      
       // graphics - door
-      List<Point2d> doorPoints = new ArrayList<Point2d>();
-      doorPoints.add(new Point2d());
-      doorPoints.add(new Point2d(widthX, 0.0));
-      doorPoints.add(new Point2d(widthX, depthY));
-      doorPoints.add(new Point2d(0.0,    depthY));
+      List<Point2D> doorPoints = new ArrayList<Point2D>();
+      doorPoints.add(new Point2D());
+      doorPoints.add(new Point2D(widthX, 0.0));
+      doorPoints.add(new Point2D(widthX, depthY));
+      doorPoints.add(new Point2D(0.0,    depthY));
       doorLinkGraphics.addExtrudedPolygon(doorPoints, heightZ, defaultColor);
       doorLink.setLinkGraphics(doorLinkGraphics);
    }
@@ -166,37 +168,37 @@ public class ContactableDoorRobot extends Robot implements SelectableObject, Sel
    private void createHandleGraphics()
    {
       // graphics - handle hinge
-      Matrix3d rotX90 = new Matrix3d();
-      rotX90.rotX(Math.PI / 2.0);
+      RotationMatrix rotX90 = new RotationMatrix();
+      rotX90.setToRollMatrix(Math.PI / 2.0);
       doorHandleGraphics.rotate(rotX90);
-      doorHandleGraphics.translate(new Vector3d(0.0, 0.0, -0.5 * depthY)); // center graphics
+      doorHandleGraphics.translate(new Vector3D(0.0, 0.0, -0.5 * depthY)); // center graphics
       
       for(RobotSide robotSide : RobotSide.values())
       {
          doorHandleGraphics.addCylinder(robotSide.negateIfLeftSide(handleDoorSeparation+0.5*depthY), handleHingeRadius, YoAppearance.Grey());
          // graphics - handle
          double translation = robotSide.negateIfLeftSide(handleDoorSeparation + 0.5*depthY);
-         doorHandleGraphics.translate(new Vector3d(0.0, 0.0, translation));
+         doorHandleGraphics.translate(new Vector3D(0.0, 0.0, translation));
          
-         doorHandleGraphics.rotate(new AxisAngle4d(0.0, 1.0, 0.0, robotSide.negateIfRightSide(0.5 * Math.PI)));
+         doorHandleGraphics.rotate(new AxisAngle(0.0, 1.0, 0.0, robotSide.negateIfRightSide(0.5 * Math.PI)));
          doorHandleGraphics.addCylinder(robotSide.negateIfLeftSide(handleLength), handleRadius, YoAppearance.Grey());
-         doorHandleGraphics.rotate(new AxisAngle4d(0.0, 1.0, 0.0, -robotSide.negateIfRightSide(0.5 * Math.PI)));
+         doorHandleGraphics.rotate(new AxisAngle(0.0, 1.0, 0.0, -robotSide.negateIfRightSide(0.5 * Math.PI)));
          
-         doorHandleGraphics.translate(new Vector3d(0.0, 0.0, -translation)); 
+         doorHandleGraphics.translate(new Vector3D(0.0, 0.0, -translation)); 
       }
       
       handleLink.setLinkGraphics(doorHandleGraphics);
    }
    
    @Override
-   public boolean isClose(Point3d pointInWorldToCheck)
+   public boolean isClose(Point3D pointInWorldToCheck)
    {      
       return isPointOnOrInside(pointInWorldToCheck);
    }
    
    private final FramePoint pointToCheck = new FramePoint();
    @Override
-   public boolean isPointOnOrInside(Point3d pointInWorldToCheck)
+   public boolean isPointOnOrInside(Point3D pointInWorldToCheck)
    {
       pointToCheck.setIncludingFrame(ReferenceFrame.getWorldFrame(), pointInWorldToCheck);
       pointToCheck.changeFrame(doorFrame);
@@ -234,7 +236,7 @@ public class ContactableDoorRobot extends Robot implements SelectableObject, Sel
    }   
    
    @Override
-   public void closestIntersectionAndNormalAt(Point3d intersectionToPack, Vector3d normalToPack, Point3d pointInWorldToCheck)
+   public void closestIntersectionAndNormalAt(Point3D intersectionToPack, Vector3D normalToPack, Point3D pointInWorldToCheck)
    {
       FramePoint pointToCheck = new FramePoint(ReferenceFrame.getWorldFrame(), pointInWorldToCheck);
       
@@ -278,8 +280,8 @@ public class ContactableDoorRobot extends Robot implements SelectableObject, Sel
    @Override
    public void updateAllGroundContactPointVelocities()
    {
-      Matrix3d hingeRotation = new Matrix3d();
-      hingeRotation.rotZ(getHingeYaw());
+      RotationMatrix hingeRotation = new RotationMatrix();
+      hingeRotation.setToYawMatrix(getHingeYaw());
       RigidBodyTransform newDoorPose = new RigidBodyTransform(originalDoorPose);
       newDoorPose.setRotation(hingeRotation);
       doorFrame.setPoseAndUpdate(newDoorPose);
@@ -287,7 +289,7 @@ public class ContactableDoorRobot extends Robot implements SelectableObject, Sel
       for(RobotSide robotSide : RobotSide.values())
       {
          RigidBodyTransform handlePose = handlePoses.get(robotSide).getTransformToDesiredFrame(doorFrame);
-         handlePose.setRotation(new AxisAngle4d(0.0, 1.0, 0.0, getHandleAngle()));
+         handlePose.setRotation(new AxisAngle(0.0, 1.0, 0.0, getHandleAngle()));
          handlePoses.get(robotSide).setPoseAndUpdate(handlePose);
       }
       
@@ -345,7 +347,7 @@ public class ContactableDoorRobot extends Robot implements SelectableObject, Sel
    }
 
    @Override
-   public void selected(Graphics3DNode graphics3dNode, ModifierKeyInterface modifierKeyInterface, Point3d location, Point3d cameraLocation, Quat4d cameraRotation)
+   public void selected(Graphics3DNode graphics3dNode, ModifierKeyInterface modifierKeyInterface, Point3DReadOnly location, Point3DReadOnly cameraLocation, QuaternionReadOnly cameraRotation)
    {
       if (!modifierKeyInterface.isKeyPressed(Key.N))
          return;
@@ -446,19 +448,19 @@ public class ContactableDoorRobot extends Robot implements SelectableObject, Sel
       }
 
       @Override
-      public boolean isClose(Point3d pointInWorldToCheck)
+      public boolean isClose(Point3D pointInWorldToCheck)
       {
          return robot.isClose(pointInWorldToCheck);
       }
 
       @Override
-      public boolean isPointOnOrInside(Point3d pointInWorldToCheck)
+      public boolean isPointOnOrInside(Point3D pointInWorldToCheck)
       {
          return robot.isPointOnOrInside(pointInWorldToCheck);
       }
 
       @Override
-      public void closestIntersectionAndNormalAt(Point3d intersectionToPack, Vector3d normalToPack, Point3d pointInWorldToCheck)
+      public void closestIntersectionAndNormalAt(Point3D intersectionToPack, Vector3D normalToPack, Point3D pointInWorldToCheck)
       {
          robot.closestIntersectionAndNormalAt(intersectionToPack, normalToPack, pointInWorldToCheck);
       }

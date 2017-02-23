@@ -1,14 +1,13 @@
 package us.ihmc.sensorProcessing.stateEstimation.measurementModelElements;
 
-import javax.vecmath.AxisAngle4d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import org.ejml.ops.EjmlUnitTests;
 
 import us.ihmc.controlFlow.ControlFlowOutputPort;
+import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.Direction;
 import us.ihmc.robotics.geometry.FrameOrientation;
@@ -47,7 +46,7 @@ public class MeasurementModelTestTools
          perturbationVector.set(direction, perturbationMagnitude);
 
          DenseMatrix64F perturbationEjmlVector = new DenseMatrix64F(3, 1);
-         MatrixTools.setDenseMatrixFromTuple3d(perturbationEjmlVector, perturbationVector.getVector(), 0, 0);
+         perturbationVector.getVector().get(perturbationEjmlVector);
 
          FramePoint perturbedState = new FramePoint(nominalState);
          perturbedState.add(perturbationVector);
@@ -72,7 +71,7 @@ public class MeasurementModelTestTools
          perturbationVector.set(direction, perturbationMagnitude);
 
          DenseMatrix64F perturbationEjmlVector = new DenseMatrix64F(3, 1);
-         MatrixTools.setDenseMatrixFromTuple3d(perturbationEjmlVector, perturbationVector.getVector(), 0, 0);
+         perturbationVector.getVector().get(perturbationEjmlVector);
 
          FrameVector perturbedState = new FrameVector(nominalState);
          perturbedState.add(perturbationVector);
@@ -93,18 +92,18 @@ public class MeasurementModelTestTools
       DenseMatrix64F outputMatrixBlock = modelElement.getOutputMatrixBlock(statePort);
       for (Direction direction : Direction.values())
       {
-         Vector3d perturbationRotationVector = new Vector3d();
+         Vector3D perturbationRotationVector = new Vector3D();
          MathTools.set(perturbationRotationVector, direction, perturbationMagnitude);
 
          DenseMatrix64F perturbationEjmlVector = new DenseMatrix64F(3, 1);
-         MatrixTools.setDenseMatrixFromTuple3d(perturbationEjmlVector, perturbationRotationVector, 0, 0);
+         perturbationRotationVector.get(perturbationEjmlVector);
 
-         Quat4d perturbedQuaternion = new Quat4d();
-         AxisAngle4d perturbationAxisAngle = new AxisAngle4d();
-         RotationTools.convertRotationVectorToAxisAngle(perturbationRotationVector, perturbationAxisAngle);
-         Quat4d perturbationQuaternion = new Quat4d();
+         Quaternion perturbedQuaternion = new Quaternion();
+         AxisAngle perturbationAxisAngle = new AxisAngle();
+         perturbationAxisAngle.set(perturbationRotationVector);
+         Quaternion perturbationQuaternion = new Quaternion();
          perturbationQuaternion.set(perturbationAxisAngle);
-         perturbedQuaternion.mul(nominalState.getQuaternionCopy(), perturbationQuaternion);
+         perturbedQuaternion.multiply(nominalState.getQuaternionCopy(), perturbationQuaternion);
          FrameOrientation perturbedState = new FrameOrientation(nominalState.getReferenceFrame(), perturbedQuaternion);
          statePort.setData(perturbedState);
 

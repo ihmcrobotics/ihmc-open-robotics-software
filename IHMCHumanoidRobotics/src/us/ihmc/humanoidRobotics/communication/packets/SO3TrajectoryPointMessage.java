@@ -4,17 +4,16 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Random;
 
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
-import us.ihmc.communication.ros.generators.RosMessagePacket;
-import us.ihmc.communication.ros.generators.RosExportedField;
-import us.ihmc.communication.ros.generators.RosIgnoredField;
 import us.ihmc.communication.packets.Packet;
+import us.ihmc.communication.ros.generators.RosExportedField;
+import us.ihmc.communication.ros.generators.RosMessagePacket;
+import us.ihmc.euclid.interfaces.Transformable;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.Transform;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.TransformTools;
-import us.ihmc.robotics.geometry.transformables.Transformable;
 import us.ihmc.robotics.random.RandomTools;
 
 @RosMessagePacket(documentation =
@@ -27,9 +26,9 @@ public class SO3TrajectoryPointMessage extends Packet<SO3TrajectoryPointMessage>
    @RosExportedField(documentation = "Time at which the trajectory point has to be reached. The time is relative to when the trajectory starts.")
    public double time;
    @RosExportedField(documentation = "Define the desired 3D orientation to be reached at this trajectory point. It is expressed in world frame.")
-   public Quat4d orientation;
+   public Quaternion orientation;
    @RosExportedField(documentation = "Define the desired 3D angular velocity to be reached at this trajectory point. It is expressed in world frame.")
-   public Vector3d angularVelocity;
+   public Vector3D angularVelocity;
 
    /**
     * Empty constructor for serialization.
@@ -49,12 +48,12 @@ public class SO3TrajectoryPointMessage extends Packet<SO3TrajectoryPointMessage>
    {
       time = trajectoryPoint.time;
       if (trajectoryPoint.orientation != null)
-         orientation = new Quat4d(trajectoryPoint.orientation);
+         orientation = new Quaternion(trajectoryPoint.orientation);
       if (trajectoryPoint.angularVelocity != null)
-         angularVelocity = new Vector3d(trajectoryPoint.angularVelocity);
+         angularVelocity = new Vector3D(trajectoryPoint.angularVelocity);
    }
 
-   public SO3TrajectoryPointMessage(double time, Quat4d orientation, Vector3d angularVelocity)
+   public SO3TrajectoryPointMessage(double time, Quaternion orientation, Vector3D angularVelocity)
    {
       this.time = time;
       this.orientation = orientation;
@@ -67,11 +66,11 @@ public class SO3TrajectoryPointMessage extends Packet<SO3TrajectoryPointMessage>
       if (other.orientation != null)
          orientation.set(other.orientation);
       else
-         orientation.set(0.0, 0.0, 0.0, 1.0);
+         orientation.setToZero();
       if (other.angularVelocity != null)
          angularVelocity.set(other.angularVelocity);
       else
-         angularVelocity.set(0.0, 0.0, 0.0);
+         angularVelocity.setToZero();
    }
 
    public double getTime()
@@ -84,22 +83,22 @@ public class SO3TrajectoryPointMessage extends Packet<SO3TrajectoryPointMessage>
       this.time = time;
    }
 
-   public void getOrientation(Quat4d orientationToPack)
+   public void getOrientation(Quaternion orientationToPack)
    {
       orientationToPack.set(orientation);
    }
 
-   public void setOrientation(Quat4d orientation)
+   public void setOrientation(Quaternion orientation)
    {
       this.orientation = orientation;
    }
 
-   public void getAngularVelocity(Vector3d angularVelocityToPack)
+   public void getAngularVelocity(Vector3D angularVelocityToPack)
    {
       angularVelocityToPack.set(angularVelocity);
    }
 
-   public void setAngularVelocity(Vector3d angularVelocity)
+   public void setAngularVelocity(Vector3D angularVelocity)
    {
       this.angularVelocity = angularVelocity;
    }
@@ -146,16 +145,10 @@ public class SO3TrajectoryPointMessage extends Packet<SO3TrajectoryPointMessage>
       return true;
    }
 
-   @RosIgnoredField
-   public Quat4d tempQuaternionForTransform;
-
    @Override
-   public void applyTransform(RigidBodyTransform transform)
+   public void applyTransform(Transform transform)
    {
-      if (tempQuaternionForTransform == null)
-         tempQuaternionForTransform = new Quat4d();
-      transform.getRotation(tempQuaternionForTransform);
-      orientation.mul(tempQuaternionForTransform, orientation);
+      transform.transform(orientation);
       transform.transform(angularVelocity);
    }
 
@@ -166,7 +159,7 @@ public class SO3TrajectoryPointMessage extends Packet<SO3TrajectoryPointMessage>
       String qxToString = doubleFormat.format(orientation.getX());
       String qyToString = doubleFormat.format(orientation.getY());
       String qzToString = doubleFormat.format(orientation.getZ());
-      String qsToString = doubleFormat.format(orientation.getW());
+      String qsToString = doubleFormat.format(orientation.getS());
       String wxToString = doubleFormat.format(angularVelocity.getX());
       String wyToString = doubleFormat.format(angularVelocity.getY());
       String wzToString = doubleFormat.format(angularVelocity.getZ());

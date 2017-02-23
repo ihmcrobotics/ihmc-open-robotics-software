@@ -157,7 +157,7 @@ public class SimulationConstructionSetMemoryReclamationTest
       Thread thread = new Thread(scs);
       thread.start();
 
-      while (useARobot &&!scs.isSimulationThreadUpAndRunning())
+      while (useARobot &&!scs.isSimulationThreadRunning())
       {
          sleep(100);
       }

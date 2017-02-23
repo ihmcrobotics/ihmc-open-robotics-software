@@ -9,8 +9,8 @@ import java.util.ArrayList;
 
 import com.thoughtworks.xstream.XStream;
 
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 public class ScriptFileSaver
 {

@@ -1,12 +1,14 @@
 package us.ihmc.robotics.geometry;
 
-import javax.vecmath.Point2d;
 import java.util.Collections;
 import java.util.List;
 
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
+
 public class InPlaceConvexHullCalculator2d
 {
-   public static boolean isConvexAndClockwise(List<Point2d> points)
+   public static boolean isConvexAndClockwise(List<? extends Point2DReadOnly> points)
    {
       int n = points.size();
       return isConvexAndClockwise(points, n);
@@ -20,16 +22,17 @@ public class InPlaceConvexHullCalculator2d
     * @param n is the number of useful elements assuming they are positioned in [0; n-1]. The others won't be used. 
     * @return boolean
     */
-   public static boolean isConvexAndClockwise(List<Point2d> points, int n)
+   public static boolean isConvexAndClockwise(List<? extends Point2DReadOnly> points, int n)
    {
       if (n > points.size())
       {
          throw new RuntimeException("n must be less or equal to points.size()");
       }
       
+      Point2DReadOnly temp;
       // get the y max (if == get x min) point
-      Point2d temp, curr;
-      Point2d firstPoint = points.get(0);
+      Point2DReadOnly curr;
+      Point2DReadOnly firstPoint = points.get(0);
       int firstIndex = 0;
       for (int i = 1; i < n; i++)
       {
@@ -70,7 +73,7 @@ public class InPlaceConvexHullCalculator2d
 
    /** Use inPlaceGiftWrapConvexHull2d(List<Point2d> points, int originalSize) instead */
    @Deprecated
-   public static List<Point2d> inPlaceGiftWrapConvexHull2d(List<Point2d> points)
+   public static List<Point2D> inPlaceGiftWrapConvexHull2d(List<Point2D> points)
    {
       int originalSize = points.size();
       int newSize = inPlaceGiftWrapConvexHull2d(points, originalSize);
@@ -87,13 +90,13 @@ public class InPlaceConvexHullCalculator2d
     * @param points: List<Point2d> that can contains garbage elements.
     * @param originalSize: int that refers the number of significant elements. They have to be in [0; originalSize-1].
     */
-   public static int inPlaceGiftWrapConvexHull2d(List<Point2d> points, int originalSize)
+   public static int inPlaceGiftWrapConvexHull2d(List<? extends Point2DReadOnly> points, int originalSize)
    {
       int size = originalSize;
 
       // get the y max of the x min
-      Point2d temp;
-      Point2d firstPoint = points.get(0);
+      Point2DReadOnly temp;
+      Point2DReadOnly firstPoint = points.get(0);
       int bestIndex = 0;
       for (int i = 1; i < size; i++)
       {
@@ -111,7 +114,7 @@ public class InPlaceConvexHullCalculator2d
       Collections.swap(points, bestIndex, 0);
 
       int j;
-      Point2d curr;
+      Point2DReadOnly curr;
       double tempAngle, bestAngle;
       for (int i = 0; i < size; i++)
       {
@@ -155,7 +158,7 @@ public class InPlaceConvexHullCalculator2d
       return size;
    }
 
-   public static double getAngle(Point2d from, Point2d to)
+   public static double getAngle(Point2DReadOnly from, Point2DReadOnly to)
    {
       if (from.equals(to))
          return 0;

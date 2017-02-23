@@ -11,6 +11,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.yaml.snakeyaml.Yaml;
 
+import us.ihmc.commons.Conversions;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager.StatusMessageListener;
@@ -28,7 +29,6 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.ForceSensorCalibrationModule;
 import us.ihmc.tools.TimestampProvider;
@@ -275,9 +275,9 @@ public class ValkyrieRosControlLowLevelController
       long timestamp = timestampProvider.getTimestamp();
 
       if (wakeUpTime.isNaN())
-         wakeUpTime.set(TimeTools.nanoSecondstoSeconds(timestamp));
+         wakeUpTime.set(Conversions.nanoSecondstoSeconds(timestamp));
 
-      yoTime.set(TimeTools.nanoSecondstoSeconds(timestamp) - wakeUpTime.getDoubleValue());
+      yoTime.set(Conversions.nanoSecondstoSeconds(timestamp) - wakeUpTime.getDoubleValue());
 
       taskExecutor.doControl();
       ValkyrieLowLevelControlModeMessage.ControlMode newRequest = requestedLowLevelControlModeAtomic.getAndSet(null);

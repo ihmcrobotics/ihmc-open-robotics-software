@@ -60,7 +60,7 @@ repositories {
 
 
 dependencies {
-    compile group: 'javax.vecmath', name: 'vecmath', version: '1.5.2'
+    compile group: 'us.ihmc', name: 'euclid-core', version: '0.4.1'
     compile "net.sf.trove4j:trove4j:3.0.3"
     compile "org.apache.commons:commons-lang3:3.4"
     compile ("org.fxyz3d:fxyz3d:0.1.1") {

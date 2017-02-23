@@ -1,10 +1,10 @@
 package us.ihmc.communication.packets;
 
-import us.ihmc.robotics.random.RandomTools;
-import us.ihmc.tools.ArrayTools;
-
 import java.util.Arrays;
 import java.util.Random;
+
+import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.tools.ArrayTools;
 
 /**
  *

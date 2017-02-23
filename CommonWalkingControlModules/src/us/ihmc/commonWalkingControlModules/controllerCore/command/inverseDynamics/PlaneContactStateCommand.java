@@ -2,9 +2,8 @@ package us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynami
 
 import java.util.List;
 
-import javax.vecmath.Point2d;
-
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -64,7 +63,7 @@ public class PlaneContactStateCommand implements InverseDynamicsCommand<PlaneCon
       contactPoints.copyFromListAndTrimSize(newPointsInContact);
    }
 
-   public void setPoint2dsInContact(ReferenceFrame contactFrame, List<Point2d> newPointsInContact)
+   public void setPoint2dsInContact(ReferenceFrame contactFrame, List<Point2D> newPointsInContact)
    {
       clearContactPoints();
       for (int i = 0; i < newPointsInContact.size(); i++)

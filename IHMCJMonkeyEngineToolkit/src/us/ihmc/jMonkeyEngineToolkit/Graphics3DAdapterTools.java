@@ -8,8 +8,8 @@ import java.awt.Dimension;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
-import javax.vecmath.Vector3d;
 
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.jMonkeyEngineToolkit.camera.CameraController;
 import us.ihmc.jMonkeyEngineToolkit.camera.CameraTrackingAndDollyPositionHolder;
 import us.ihmc.jMonkeyEngineToolkit.camera.ClassicCameraController;
@@ -24,7 +24,7 @@ public class Graphics3DAdapterTools
    }
 
    public static ClassicCameraController createCameraController(Graphics3DAdapter graphics3DAdapter, ViewportAdapter viewportAdapter,
-           Vector3d initialCameraTranslation)
+           Vector3D initialCameraTranslation)
    {
       CameraTrackingAndDollyPositionHolder cameraTrackingAndDollyPositionHolder = new SimpleCameraTrackingAndDollyPositionHolder();
       ClassicCameraController classicCameraController = ClassicCameraController.createClassicCameraControllerAndAddListeners(viewportAdapter,
@@ -35,7 +35,7 @@ public class Graphics3DAdapterTools
    }
 
    public static ClassicCameraController createNewWindow(Graphics3DAdapter graphics3DAdapter, ViewportAdapter viewportAdapter, String title, int width,
-           int height, Vector3d initialCameraTranslation)
+           int height, Vector3D initialCameraTranslation)
    {
       ClassicCameraController classicCameraController = createCameraController(graphics3DAdapter, viewportAdapter, initialCameraTranslation);
 
@@ -54,7 +54,7 @@ public class Graphics3DAdapterTools
    }
 
    public static ClassicCameraController createNewWindow(Graphics3DAdapter graphics3DAdapter, String title, int width, int height,
-           Vector3d initialCameraTranslation)
+           Vector3D initialCameraTranslation)
    {
       return createNewWindow(graphics3DAdapter, createViewport(graphics3DAdapter), title, width, height, initialCameraTranslation);
    }
@@ -62,7 +62,7 @@ public class Graphics3DAdapterTools
    public static ClassicCameraController createNewWindow(Graphics3DAdapter graphics3DAdapter, String title, int width, int height)
    {
       return createNewWindow(graphics3DAdapter, title, width, height,
-                             new Vector3d(ClassicCameraController.CAMERA_START_X, ClassicCameraController.CAMERA_START_Y,
+                             new Vector3D(ClassicCameraController.CAMERA_START_X, ClassicCameraController.CAMERA_START_Y,
                                 ClassicCameraController.CAMERA_START_Z));
    }
 

@@ -20,8 +20,10 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.nio.CommonPaths;
 import us.ihmc.commons.nio.FileToolsTest;
+import us.ihmc.commons.nio.WriteOption;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public class DeprecatedFileToolsTest
@@ -37,6 +39,7 @@ public class DeprecatedFileToolsTest
    private static final String EXAMPLE_JAVA_FILE1_JAVA = "ExampleJavaFile1.java.txt";
    private static final String EXAMPLE_JAVA_FILE2_JAVA = "ExampleJavaFile2.java.txt";
    private static final String TEST_FILE_BAD_TXT = "testFileBad.txt";
+   @SuppressWarnings("unused")
    private static final String FILE_TOOLS_EXAMPLE_FILE_CAT_TXT = "FileToolsExampleFileCat.txt";
    private static final String FILE_TOOLS_EXAMPLE_FILE1_TXT = "FileToolsExampleFile1.txt";
    private static final String FILE_TOOLS_EXAMPLE_FILE2_TXT = "FileToolsExampleFile2.txt";
@@ -82,7 +85,7 @@ public class DeprecatedFileToolsTest
    
    private static void createTestFile1()
    {
-      PrintWriter writer = FileTools.newPrintWriter(FILE_TOOLS_EXAMPLE_FILE1_PATH);
+      PrintWriter writer = FileTools.newPrintWriter(FILE_TOOLS_EXAMPLE_FILE1_PATH, WriteOption.TRUNCATE, DefaultExceptionHandler.PRINT_STACKTRACE);
       writer.println(EXAMPLE_FILE_1_TEXT_LINE_1);
       writer.flush();
       writer.close();
@@ -90,7 +93,7 @@ public class DeprecatedFileToolsTest
 
    private static void createTestFile2()
    {
-      PrintWriter writer = FileTools.newPrintWriter(FILE_TOOLS_EXAMPLE_FILE2_PATH);
+      PrintWriter writer = FileTools.newPrintWriter(FILE_TOOLS_EXAMPLE_FILE2_PATH, WriteOption.TRUNCATE, DefaultExceptionHandler.PRINT_STACKTRACE);
       writer.println(EXAMPLE_FILE_2_TEXT_LINE_1);
       writer.println(EXAMPLE_FILE_2_TEXT_LINE_2);
       writer.flush();
@@ -99,7 +102,7 @@ public class DeprecatedFileToolsTest
 
    private static void createJavaFile1()
    {
-      PrintWriter writer = FileTools.newPrintWriter(EXAMPLE_JAVA_FILE1_PATH);
+      PrintWriter writer = FileTools.newPrintWriter(EXAMPLE_JAVA_FILE1_PATH, WriteOption.TRUNCATE, DefaultExceptionHandler.PRINT_STACKTRACE);
       writer.println("// This is a comment");
       writer.println("package us.ihmc.tools.io.files.fileToolsTest.exampleJavaFiles;");
       writer.println("public class ExampleJavaFile1");
@@ -116,7 +119,7 @@ public class DeprecatedFileToolsTest
 
    private static void createJavaFile2()
    {
-      PrintWriter writer = FileTools.newPrintWriter(EXAMPLE_JAVA_FILE2_PATH);
+      PrintWriter writer = FileTools.newPrintWriter(EXAMPLE_JAVA_FILE2_PATH, WriteOption.TRUNCATE, DefaultExceptionHandler.PRINT_STACKTRACE);
       writer.println("package us.ihmc.tools.io.files.fileToolsTest.exampleJavaFiles;");
       writer.println("public class ExampleJavaFile2");
       writer.println("{");
@@ -131,7 +134,7 @@ public class DeprecatedFileToolsTest
    
    private static void createReadAllLinesFile()
    {
-      PrintWriter writer = FileTools.newPrintWriter(READ_ALL_LINES_PATH);
+      PrintWriter writer = FileTools.newPrintWriter(READ_ALL_LINES_PATH, WriteOption.TRUNCATE, DefaultExceptionHandler.PRINT_STACKTRACE);
       writer.print("line1\r\nline2\nline3\r");
       writer.close();
    }

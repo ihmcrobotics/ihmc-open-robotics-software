@@ -7,7 +7,7 @@ import java.awt.Graphics2D;
 import java.awt.Stroke;
 import java.util.ArrayList;
 
-import javax.vecmath.Vector3d;
+import us.ihmc.euclid.tuple3D.Vector3D;
 
 /**
  * User: Matt
@@ -15,7 +15,7 @@ import javax.vecmath.Vector3d;
  */
 public class CirclePainter implements PostProcessor
 {
-   private ArrayList<Vector3d> circles = new ArrayList<Vector3d>();
+   private ArrayList<Vector3D> circles = new ArrayList<Vector3D>();
    private float lineThickness = 1.0f;
    private int imageHeight = 480;
 
@@ -29,7 +29,7 @@ public class CirclePainter implements PostProcessor
       this.imageHeight = imageHeight;
    }
 
-   public void setCircles(ArrayList<Vector3d> circles)
+   public void setCircles(ArrayList<Vector3D> circles)
    {
       this.circles = circles;
    }
@@ -47,7 +47,7 @@ public class CirclePainter implements PostProcessor
       Stroke originalStroke = g2d.getStroke();
       g2d.setStroke(new BasicStroke(lineThickness));
 
-      for (Vector3d circle : circles)
+      for (Vector3D circle : circles)
       {
          graphics.drawOval(new Double(circle.getX()).intValue(), new Double(circle.getY()).intValue(), new Double(circle.getZ()).intValue(), new Double(circle.getZ()).intValue());
       }

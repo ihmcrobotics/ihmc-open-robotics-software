@@ -1,7 +1,7 @@
 package us.ihmc.humanoidRobotics.footstep.footstepGenerator;
 
-import us.ihmc.robotics.geometry.FramePose2d;
 import us.ihmc.robotics.geometry.AbstractReferenceFrameHolder;
+import us.ihmc.robotics.geometry.FramePose2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 /**

@@ -1,8 +1,8 @@
 package us.ihmc.sensorProcessing.imu;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.matrix.Matrix3D;
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.tools.calibration.CalibrationProperties;
 
 public class IMUCalibrationProperties extends CalibrationProperties
@@ -24,7 +24,7 @@ public class IMUCalibrationProperties extends CalibrationProperties
       return "accel" + row;
    }
 
-   public void setOrientationOffset(Matrix3d orientationOffset)
+   public void setOrientationOffset(RotationMatrix orientationOffset)
    {
       for (int row = 0; row < MATRIX_SIZE; row++)
       {
@@ -36,9 +36,9 @@ public class IMUCalibrationProperties extends CalibrationProperties
       }
    }
 
-   public Matrix3d getOrientationOffset()
+   public RotationMatrix getOrientationOffset()
    {
-      Matrix3d ret = new Matrix3d();
+      Matrix3D ret = new Matrix3D();
       for (int row = 0; row < MATRIX_SIZE; row++)
       {
          for (int column = 0; column < MATRIX_SIZE; column++)
@@ -47,28 +47,28 @@ public class IMUCalibrationProperties extends CalibrationProperties
             ret.setElement(row, column, getDoubleProperty(name));
          }
       }
-      
+
       if (Math.abs(Math.abs(ret.determinant()) - 1.0) > 1e-6)
       {
          System.err.println("Not a valid rotation matrix in " + getClass().getName() + ":");
          System.err.println(ret);
-         
+
          throw new InvalidRotationMatrix(getClass().getName(), ret);
       }
 
-      return ret;
+      return new RotationMatrix(ret);
    }
 
-   public void setAccelerationOffset(Vector3d accelerationOffset)
+   public void setAccelerationOffset(Vector3D accelerationOffset)
    {
       setProperty(getAccelerationOffsetPropertyName(0), accelerationOffset.getX());
       setProperty(getAccelerationOffsetPropertyName(1), accelerationOffset.getY());
       setProperty(getAccelerationOffsetPropertyName(2), accelerationOffset.getZ());
    }
 
-   public Vector3d getAccelerationOffset()
+   public Vector3D getAccelerationOffset()
    {
-      Vector3d ret = new Vector3d();
+      Vector3D ret = new Vector3D();
       double[] accelerationOffsetArray = new double[MATRIX_SIZE];
       for (int row = 0; row < MATRIX_SIZE; row++)
       {
@@ -78,14 +78,20 @@ public class IMUCalibrationProperties extends CalibrationProperties
       ret.set(accelerationOffsetArray);
       return ret;
    }
-   
+
    public class InvalidRotationMatrix extends RuntimeException
    {
       private static final long serialVersionUID = -4680703803078778082L;
-      public InvalidRotationMatrix(String originatingClass, Matrix3d invalidRotationMatrix)
+
+      public InvalidRotationMatrix(String originatingClass, RotationMatrix invalidRotationMatrix)
+      {
+         super("Not a valid rotation matrix in " + originatingClass + ":" + invalidRotationMatrix);
+      }
+
+      public InvalidRotationMatrix(String originatingClass, Matrix3D invalidRotationMatrix)
       {
          super("Not a valid rotation matrix in " + originatingClass + ":" + invalidRotationMatrix);
       }
    }
-   
+
 }

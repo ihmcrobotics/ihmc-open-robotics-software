@@ -18,6 +18,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.io.files.FileTools;
 import us.ihmc.tools.io.printing.PrintTools;
@@ -82,7 +83,7 @@ public class FileToolsTest
    @Test(timeout = 30000)
    public void testReadAllLines()
    {
-      List<String> lines = FileTools.readAllLines(READ_ALL_LINES_PATH);
+      List<String> lines = FileTools.readAllLines(READ_ALL_LINES_PATH, DefaultExceptionHandler.PRINT_STACKTRACE);
       
       assertTrue(lines.get(0).equals("line1"));
       assertTrue(lines.get(1).equals("line2"));
@@ -94,14 +95,14 @@ public class FileToolsTest
    public void testReadAllBytesAndReadLinesFromBytesAndReplaceLine()
    {
       byte[] bytes = FileTools.readAllBytes(READ_ALL_LINES_PATH);
-      List<String> lines = FileTools.readLinesFromBytes(bytes);
+      List<String> lines = FileTools.readLinesFromBytes(bytes, DefaultExceptionHandler.PRINT_STACKTRACE);
       
       assertTrue(lines.get(0).equals("line1"));
       assertTrue(lines.get(1).equals("line2"));
       assertTrue(lines.get(2).equals("line3"));
       
       bytes = FileTools.replaceLineInFile(1, "line2Mod", bytes, lines);
-      lines = FileTools.readLinesFromBytes(bytes);
+      lines = FileTools.readLinesFromBytes(bytes, DefaultExceptionHandler.PRINT_STACKTRACE);
 
       assertTrue(lines.get(0).equals("line1"));
       assertTrue(lines.get(1).equals("line2Mod"));
@@ -151,7 +152,7 @@ public class FileToolsTest
 	
 	private static void createTestFile1()
    {
-      PrintWriter writer = FileTools.newPrintWriter(FILE_TOOLS_EXAMPLE_FILE1_PATH);
+      PrintWriter writer = FileTools.newPrintWriter(FILE_TOOLS_EXAMPLE_FILE1_PATH, WriteOption.TRUNCATE, DefaultExceptionHandler.PRINT_STACKTRACE);
       writer.println(EXAMPLE_FILE_1_TEXT_LINE_1);
       writer.flush();
       writer.close();
@@ -159,7 +160,7 @@ public class FileToolsTest
 
    private static void createTestFile2()
    {
-      PrintWriter writer = FileTools.newPrintWriter(FILE_TOOLS_EXAMPLE_FILE2_PATH);
+      PrintWriter writer = FileTools.newPrintWriter(FILE_TOOLS_EXAMPLE_FILE2_PATH, WriteOption.TRUNCATE, DefaultExceptionHandler.PRINT_STACKTRACE);
       writer.println(EXAMPLE_FILE_2_TEXT_LINE_1);
       writer.println(EXAMPLE_FILE_2_TEXT_LINE_2);
       writer.flush();
@@ -168,7 +169,7 @@ public class FileToolsTest
 
    private static void createJavaFile1()
    {
-      PrintWriter writer = FileTools.newPrintWriter(EXAMPLE_JAVA_FILE1_PATH);
+      PrintWriter writer = FileTools.newPrintWriter(EXAMPLE_JAVA_FILE1_PATH, WriteOption.TRUNCATE, DefaultExceptionHandler.PRINT_STACKTRACE);
       writer.println("// This is a comment");
       writer.println("package us.ihmc.tools.io.files.fileToolsTest.exampleJavaFiles;");
       writer.println("public class ExampleJavaFile1");
@@ -185,7 +186,7 @@ public class FileToolsTest
 
    private static void createJavaFile2()
    {
-      PrintWriter writer = FileTools.newPrintWriter(EXAMPLE_JAVA_FILE2_PATH);
+      PrintWriter writer = FileTools.newPrintWriter(EXAMPLE_JAVA_FILE2_PATH, WriteOption.TRUNCATE, DefaultExceptionHandler.PRINT_STACKTRACE);
       writer.println("package us.ihmc.tools.io.files.fileToolsTest.exampleJavaFiles;");
       writer.println("public class ExampleJavaFile2");
       writer.println("{");
@@ -200,7 +201,7 @@ public class FileToolsTest
    
    private static void createReadAllLinesFile()
    {
-      PrintWriter writer = FileTools.newPrintWriter(READ_ALL_LINES_PATH);
+      PrintWriter writer = FileTools.newPrintWriter(READ_ALL_LINES_PATH, WriteOption.TRUNCATE, DefaultExceptionHandler.PRINT_STACKTRACE);
       writer.print("line1\r\nline2\nline3\r");
       writer.close();
    }

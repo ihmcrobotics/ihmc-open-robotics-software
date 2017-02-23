@@ -1,22 +1,24 @@
 package us.ihmc.robotics.geometry;
 
-import javax.vecmath.Point2d;
-import javax.vecmath.Vector2d;
 import java.util.ArrayList;
+
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 
 public class ConvexPolygonShrinker
 {
    private final LineSegment2d polygonAsLineSegment = new LineSegment2d();
-   private final ArrayList<Point2d> newVertices = new ArrayList<Point2d>();
-   private final Point2d newVertex0 = new Point2d();
-   private final Point2d newVertex1 = new Point2d();
+   private final ArrayList<Point2D> newVertices = new ArrayList<Point2D>();
+   private final Point2D newVertex0 = new Point2D();
+   private final Point2D newVertex1 = new Point2D();
    private final ArrayList<Line2d> rays = new ArrayList<Line2d>();
 
    private final Line2d edgeOnQ = new Line2d();
-   private final Vector2d vectorPerpendicularToEdgeOnQ = new Vector2d();
+   private final Vector2D vectorPerpendicularToEdgeOnQ = new Vector2D();
    private final Line2d LinePerpendicularToEdgeOnQ = new Line2d();
-   private final Point2d referencePoint = new Point2d();
-   private final Vector2d normalizedVector = new Vector2d();
+   private final Point2D referencePoint = new Point2D();
+   private final Vector2D normalizedVector = new Vector2D();
    
    private final ArrayList<Line2d> edgePool = new ArrayList<Line2d>();
    
@@ -54,11 +56,11 @@ public class ConvexPolygonShrinker
 
       if (polygonQ.hasExactlyTwoVertices())
       {
-         Point2d vertex0 = polygonQ.getVertex(0);
-         Point2d vertex1 = polygonQ.getVertex(1);
+         Point2DReadOnly vertex0 = polygonQ.getVertex(0);
+         Point2DReadOnly vertex1 = polygonQ.getVertex(1);
          if (vertex0.distance(vertex1) < 2.0 * distance)
          {
-            Point2d midPoint = new Point2d(vertex0);
+            Point2D midPoint = new Point2D(vertex0);
             midPoint.add(vertex1);
             midPoint.scale(0.5);
             
@@ -93,9 +95,9 @@ public class ConvexPolygonShrinker
       rays.clear();
 
       int leftMostIndexOnPolygonQ = polygonQ.getMinXIndex();
-      Point2d vertexQ = polygonQ.getVertex(leftMostIndexOnPolygonQ);
+      Point2DReadOnly vertexQ = polygonQ.getVertex(leftMostIndexOnPolygonQ);
       int nextVertexQIndex = polygonQ.getNextVertexIndex(leftMostIndexOnPolygonQ);
-      Point2d nextVertexQ = polygonQ.getVertex(nextVertexQIndex);
+      Point2DReadOnly nextVertexQ = polygonQ.getVertex(nextVertexQIndex);
 
       for (int i = 0; i < polygonQ.getNumberOfVertices(); i++)
       {

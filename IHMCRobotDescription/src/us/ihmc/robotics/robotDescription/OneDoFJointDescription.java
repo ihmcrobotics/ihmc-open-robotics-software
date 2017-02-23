@@ -2,8 +2,7 @@ package us.ihmc.robotics.robotDescription;
 
 import java.util.List;
 
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.Axis;
 
 public class OneDoFJointDescription extends JointDescription
@@ -21,9 +20,9 @@ public class OneDoFJointDescription extends JointDescription
    private double damping;
    private double stiction;
 
-   private final Vector3d jointAxis = new Vector3d();
+   private final Vector3D jointAxis = new Vector3D();
 
-   public OneDoFJointDescription(String name, Vector3d offsetFromParentJoint, Axis jointAxis)
+   public OneDoFJointDescription(String name, Vector3D offsetFromParentJoint, Axis jointAxis)
    {
       super(name, offsetFromParentJoint);
 
@@ -47,7 +46,7 @@ public class OneDoFJointDescription extends JointDescription
       }
    }
 
-   public OneDoFJointDescription(String name, Vector3d offset, Vector3d jointAxis)
+   public OneDoFJointDescription(String name, Vector3D offset, Vector3D jointAxis)
    {
       super(name, offset);
       this.jointAxis.set(jointAxis);
@@ -98,7 +97,7 @@ public class OneDoFJointDescription extends JointDescription
       this.bLimit = bLimit;
    }
 
-   public void getJointAxis(Vector3d jointAxisToPack)
+   public void getJointAxis(Vector3D jointAxisToPack)
    {
       jointAxisToPack.set(jointAxis);
    }

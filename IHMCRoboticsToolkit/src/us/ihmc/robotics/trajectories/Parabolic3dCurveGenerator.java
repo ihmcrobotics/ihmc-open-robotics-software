@@ -1,11 +1,11 @@
 package us.ihmc.robotics.trajectories;
 
+import java.util.ArrayList;
+
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-
-import javax.vecmath.Point3d;
-import java.util.ArrayList;
 
 /**
  * <p>Title: </p>
@@ -56,15 +56,15 @@ public class Parabolic3dCurveGenerator
       startFramePoint.checkReferenceFrameMatch(endFramePoint);
       ReferenceFrame referenceFrame = startFramePoint.getReferenceFrame();
 
-      Point3d startPoint = new Point3d();
+      Point3D startPoint = new Point3D();
       startFramePoint.get(startPoint);
-      Point3d endPoint = new Point3d();
+      Point3D endPoint = new Point3D();
       endFramePoint.get(endPoint);
-      ArrayList<Point3d> listOf3dPoints = generate3dParabola(startPoint, endPoint, apexOfParabola, numberOfPointsToGenerate);
+      ArrayList<Point3D> listOf3dPoints = generate3dParabola(startPoint, endPoint, apexOfParabola, numberOfPointsToGenerate);
 
       ArrayList<FramePoint> ret = new ArrayList<FramePoint>();
 
-      for (Point3d point3d : listOf3dPoints)
+      for (Point3D point3d : listOf3dPoints)
       {
          FramePoint pointToAdd = new FramePoint(referenceFrame, point3d);
          ret.add(pointToAdd);
@@ -74,7 +74,7 @@ public class Parabolic3dCurveGenerator
    }
 
 
-   public static ArrayList<Point3d> generate3dParabola(Point3d startPoint, Point3d endPoint, double apexOfParabola, int numberOfPointsToGenerate)
+   public static ArrayList<Point3D> generate3dParabola(Point3D startPoint, Point3D endPoint, double apexOfParabola, int numberOfPointsToGenerate)
    {
       if (apexOfParabola <= Math.max(startPoint.getZ(), endPoint.getZ()))
       {
@@ -87,8 +87,8 @@ public class Parabolic3dCurveGenerator
 //           "Apex of parabola should be greater than the difference in Z- components of start and end points!");
 
 
-      Point3d pointToAdd = new Point3d();
-      ArrayList<Point3d> pointsOnPath = new ArrayList<Point3d>(numberOfPointsToGenerate);
+      Point3D pointToAdd = new Point3D();
+      ArrayList<Point3D> pointsOnPath = new ArrayList<Point3D>(numberOfPointsToGenerate);
       double[] coefficientsOfParabola = new double[3];
 
       double lengthOfParabola = Math.sqrt(MathTools.square(endPoint.getX() - startPoint.getX()) + MathTools.square(endPoint.getY() - startPoint.getY()));
@@ -108,7 +108,7 @@ public class Parabolic3dCurveGenerator
          pointToAdd.setX(startPoint.getX() + deltaTimesI * cosineAngle);
          pointToAdd.setY(startPoint.getY() + deltaTimesI * sinAngle);
          pointToAdd.setZ(coefficientsOfParabola[2] * deltaTimesI * deltaTimesI + coefficientsOfParabola[1] * deltaTimesI + coefficientsOfParabola[0]);
-         pointsOnPath.add(new Point3d(pointToAdd));
+         pointsOnPath.add(new Point3D(pointToAdd));
       }
 
       return pointsOnPath;

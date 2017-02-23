@@ -17,7 +17,7 @@
           <x>0.0</x>
           <y>0.0</y>
           <z>0.0</z>
-          <w>1.0</w>
+          <s>1.0</s>
         </orientation>
         <linearVelocity>
           <x>0.0</x>
@@ -33,7 +33,7 @@
           <x>0.0</x>
           <y>0.0</y>
           <z>0.0</z>
-          <w>1.0</w>
+          <s>1.0</s>
         </tempQuaternionForTransform>
       </us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage>
     </taskspaceTrajectoryPoints>

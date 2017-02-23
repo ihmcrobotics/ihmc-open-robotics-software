@@ -2,6 +2,7 @@ package us.ihmc.robotics.linearDynamicSystems;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
+
 import us.ihmc.robotics.linearAlgebra.MatrixExponentialCalculator;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 

@@ -1,7 +1,6 @@
 package us.ihmc.sensorProcessing.stateEstimation;
 
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -114,7 +113,7 @@ public class DesiredCoMAccelerationsFromRobotStealerController implements RobotC
    {
       private final CenterOfMassAccelerationCalculator centerOfMassAccelerationCalculator;
       private final FrameVector comAccelerationFrameVector = new FrameVector(ReferenceFrame.getWorldFrame());
-      private final Vector3d comAcceleration = new Vector3d();
+      private final Vector3D comAcceleration = new Vector3D();
 
       private final GaussianVectorCorruptor signalCorruptor = new GaussianVectorCorruptor(123412L, getClass().getSimpleName() + "Corruptor", registry);
 
@@ -152,7 +151,7 @@ public class DesiredCoMAccelerationsFromRobotStealerController implements RobotC
       // know the frame that the user will want it in. It should be implied to be a body frame.
       // Or that frame should be passed in somehow.
       private final FrameVector desiredAngularAccelerationFrameVector = new FrameVector((ReferenceFrame) null);
-      private final Vector3d desiredAngularAcceleration = new Vector3d();
+      private final Vector3D desiredAngularAcceleration = new Vector3D();
 
       private final GaussianVectorCorruptor signalCorruptor = new GaussianVectorCorruptor(123412L, getClass().getSimpleName() + "Corruptor", registry);
 

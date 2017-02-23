@@ -81,6 +81,7 @@ public class StringFieldMatcherTest
          this.value = value;
       }
       
+      @Override
       public String toString()
       {
          return "name = " + name + ", occupation = " + occupation + ", value = " + value;

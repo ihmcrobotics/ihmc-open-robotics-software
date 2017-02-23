@@ -2,24 +2,22 @@ package us.ihmc.simulationconstructionset.util.ground;
 
 import java.util.ArrayList;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
 import org.apache.commons.math3.geometry.euclidean.threed.Line;
-import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.jMonkeyEngineToolkit.HeightMapWithNormals;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.BoundingBox3d;
+import us.ihmc.robotics.geometry.Direction;
+import us.ihmc.robotics.geometry.TransformTools;
 import us.ihmc.robotics.geometry.shapes.Box3d;
 import us.ihmc.robotics.geometry.shapes.Cylinder3d;
-import us.ihmc.robotics.geometry.Direction;
 import us.ihmc.robotics.geometry.shapes.Plane3d;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.geometry.TransformTools;
 
 public class CylinderTerrainObject implements TerrainObject3D, HeightMapWithNormals
 {
@@ -30,8 +28,8 @@ public class CylinderTerrainObject implements TerrainObject3D, HeightMapWithNorm
    private final double radius;
    protected Graphics3DObject linkGraphics;
 
-   private final Point3d tempPoint = new Point3d();
-   private final Vector3d zVector = new Vector3d(0.0, 0.0, 1.0);
+   private final Point3D tempPoint = new Point3D();
+   private final Vector3D zVector = new Vector3D(0.0, 0.0, 1.0);
 
 
    // TODO: change box based surface equations to cylinder surface equations
@@ -45,11 +43,11 @@ public class CylinderTerrainObject implements TerrainObject3D, HeightMapWithNorm
       cylinder = new Cylinder3d(bottomTransform, height, radius);
 
       Box3d box = new Box3d(location, radius * 2, radius * 2, height);
-      Point3d[] vertices = box.getVertices();
-      Point3d minPoint = new Point3d(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
-      Point3d maxPoint = new Point3d(Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY);
+      Point3D[] vertices = box.getVertices();
+      Point3D minPoint = new Point3D(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
+      Point3D maxPoint = new Point3D(Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY);
 
-      for (Point3d cornerPoint : vertices)
+      for (Point3D cornerPoint : vertices)
       {
          for (Direction direction : Direction.values())
          {
@@ -69,7 +67,7 @@ public class CylinderTerrainObject implements TerrainObject3D, HeightMapWithNorm
       addGraphics(appearance);
    }
 
-   public CylinderTerrainObject(Vector3d center, double pitchDownDegrees, double yawDegrees, double height, double radius, AppearanceDefinition app)
+   public CylinderTerrainObject(Vector3D center, double pitchDownDegrees, double yawDegrees, double height, double radius, AppearanceDefinition app)
    {
       this(TransformTools.yawPitchDegreesTransform(center, yawDegrees, pitchDownDegrees), height, radius, app);
    }
@@ -104,7 +102,7 @@ public class CylinderTerrainObject implements TerrainObject3D, HeightMapWithNorm
    }
 
    @Override
-   public double heightAndNormalAt(double x, double y, double z, Vector3d normalToPack)
+   public double heightAndNormalAt(double x, double y, double z, Vector3D normalToPack)
    {
       double heightAt = heightAt(x, y, 1e9);
       surfaceNormalAt(x, y, heightAt, normalToPack);
@@ -117,8 +115,8 @@ public class CylinderTerrainObject implements TerrainObject3D, HeightMapWithNorm
    {
       Line axis = getAxis();
 
-      Vector3D zero = new Vector3D(x, y, z);
-      Vector3D zVector3D = new Vector3D(0.0, 0.0, 1.0);
+      org.apache.commons.math3.geometry.euclidean.threed.Vector3D zero = new org.apache.commons.math3.geometry.euclidean.threed.Vector3D(x, y, z);
+      org.apache.commons.math3.geometry.euclidean.threed.Vector3D zVector3D = new org.apache.commons.math3.geometry.euclidean.threed.Vector3D(0.0, 0.0, 1.0);
       Line zLine = new Line(zero, zero.add(zVector3D));
 
       double distance = axis.distance(zLine);
@@ -126,11 +124,11 @@ public class CylinderTerrainObject implements TerrainObject3D, HeightMapWithNorm
       if (distance > radius)
          return 0.0;
 
-      ArrayList<Point3d> intersections = new ArrayList<Point3d>();
+      ArrayList<Point3D> intersections = new ArrayList<Point3D>();
 
       // Find intersections of line with planes at end of cylinder
-      Point3d testPoint = new Point3d(x, y, z);
-      Vector3d testDirection = zVector;
+      Point3D testPoint = new Point3D(x, y, z);
+      Vector3D testDirection = zVector;
 
       addCylinderEndIntersectionsWithLine(intersections, testPoint, testDirection);
 
@@ -143,9 +141,9 @@ public class CylinderTerrainObject implements TerrainObject3D, HeightMapWithNorm
          return 0.0;
 
       // TODO: This returns the closest, not the highest, which is what heightAt should return...
-      Point3d closestPoint = intersections.get(0);
+      Point3D closestPoint = intersections.get(0);
       double closestSquaredDistance = closestPoint.distanceSquared(testPoint);
-      for (Point3d intersection : intersections)
+      for (Point3D intersection : intersections)
       {
          double nextSquaredDistance = intersection.distanceSquared(testPoint);
          if (nextSquaredDistance < closestSquaredDistance)
@@ -174,10 +172,10 @@ public class CylinderTerrainObject implements TerrainObject3D, HeightMapWithNorm
 
    }
 
-   private void addCylinderSideIntersectionsWithLine(ArrayList<Point3d> intersections, Point3d testPoint, Vector3d testDirection)
+   private void addCylinderSideIntersectionsWithLine(ArrayList<Point3D> intersections, Point3D testPoint, Vector3D testDirection)
    {
-      Point3d localTestPoint = new Point3d(testPoint);
-      Vector3d localVector = new Vector3d(testDirection);
+      Point3D localTestPoint = new Point3D(testPoint);
+      Vector3D localVector = new Vector3D(testDirection);
       transformLineToLocalCoordinates(localTestPoint, localVector);
 
       double a = localVector.getX() * localVector.getX() + localVector.getY() * localVector.getY();
@@ -187,7 +185,7 @@ public class CylinderTerrainObject implements TerrainObject3D, HeightMapWithNorm
 
       for (int i = 0; i < t.length; i++)
       {
-         Point3d localSideIntersection = new Point3d();
+         Point3D localSideIntersection = new Point3D();
          localSideIntersection.scaleAdd(t[i], localVector, localTestPoint);
 
          if ((localSideIntersection.getZ() >= -height / 2) && (localSideIntersection.getZ() <= height / 2))
@@ -198,12 +196,12 @@ public class CylinderTerrainObject implements TerrainObject3D, HeightMapWithNorm
       }
    }
 
-   private void addCylinderEndIntersectionsWithLine(ArrayList<Point3d> intersections, Point3d testPoint, Vector3d testDirection)
+   private void addCylinderEndIntersectionsWithLine(ArrayList<Point3D> intersections, Point3D testPoint, Vector3D testDirection)
    {
       for (Cylinder3d.CylinderFaces face : Cylinder3d.CylinderFaces.values())
       {
          Plane3d plane = cylinder.getPlane(face);
-         Point3d intersectionToPack = new Point3d();
+         Point3D intersectionToPack = new Point3D();
          plane.getIntersectionWithLine(intersectionToPack, testPoint, testDirection);
 
          if (MathTools.isFinite(intersectionToPack) && (intersectionToPack.distanceSquared(plane.getPointCopy()) < radius * radius))
@@ -221,42 +219,42 @@ public class CylinderTerrainObject implements TerrainObject3D, HeightMapWithNorm
       return x;
    }
 
-   private void transformLineToLocalCoordinates(Point3d localPointToPack, Vector3d localDirectionVectorToPack)
+   private void transformLineToLocalCoordinates(Point3D localPointToPack, Vector3D localDirectionVectorToPack)
    {
       RigidBodyTransform inverseTransform = new RigidBodyTransform();
-      inverseTransform.invert(location);
+      inverseTransform.setAndInvert(location);
       inverseTransform.transform(localPointToPack);
       inverseTransform.transform(localDirectionVectorToPack);
    }
 
    public Line getAxis()
    {
-      Vector3d axisOrigin = new Vector3d();
+      Vector3D axisOrigin = new Vector3D();
       location.getTranslation(axisOrigin);
 
-      Vector3d axisDirection = getAxisDirectionCopy();
+      Vector3D axisDirection = getAxisDirectionCopy();
 
-      Vector3D axisOrigin_ = vector3DFromVector3d(axisOrigin);
-      Vector3D axisDirection_ = vector3DFromVector3d(axisDirection);
+      org.apache.commons.math3.geometry.euclidean.threed.Vector3D axisOrigin_ = vector3DFromVector3d(axisOrigin);
+      org.apache.commons.math3.geometry.euclidean.threed.Vector3D axisDirection_ = vector3DFromVector3d(axisDirection);
       Line line = new Line(axisOrigin_, axisOrigin_.add(axisDirection_));
 
       return line;
    }
 
-   public Vector3d getAxisDirectionCopy()
+   public Vector3D getAxisDirectionCopy()
    {
-      Matrix3d rotation = new Matrix3d();
+      RotationMatrix rotation = new RotationMatrix();
       location.getRotation(rotation);
 
-      Vector3d axisDirection = new Vector3d();
+      Vector3D axisDirection = new Vector3D();
       rotation.getColumn(Direction.Z.getIndex(), axisDirection);
 
       return axisDirection;
    }
 
-   private Vector3D vector3DFromVector3d(Vector3d vector3d)
+   private org.apache.commons.math3.geometry.euclidean.threed.Vector3D vector3DFromVector3d(Vector3D vector3d)
    {
-      Vector3D vector3D = new Vector3D(vector3d.getX(), vector3d.getY(), vector3d.getZ());
+      org.apache.commons.math3.geometry.euclidean.threed.Vector3D vector3D = new org.apache.commons.math3.geometry.euclidean.threed.Vector3D(vector3d.getX(), vector3d.getY(), vector3d.getZ());
 
       return vector3D;
    }
@@ -287,28 +285,28 @@ public class CylinderTerrainObject implements TerrainObject3D, HeightMapWithNorm
       return boundingBox.isXYInside(x, y);
    }
 
-   public void closestIntersectionTo(double x, double y, double z, Point3d intersectionToPack)
+   public void closestIntersectionTo(double x, double y, double z, Point3D intersectionToPack)
    {
       tempPoint.set(x, y, z);
       cylinder.checkIfInside(tempPoint, intersectionToPack, null);
    }
 
-   private final Point3d ignoreIntesectionPoint = new Point3d();
+   private final Point3D ignoreIntesectionPoint = new Point3D();
 
-   public void surfaceNormalAt(double x, double y, double z, Vector3d normalToPack)
+   public void surfaceNormalAt(double x, double y, double z, Vector3D normalToPack)
    {
       tempPoint.set(x, y, z);
       cylinder.checkIfInside(tempPoint, ignoreIntesectionPoint, normalToPack);
    }
 
-   public void closestIntersectionAndNormalAt(double x, double y, double z, Point3d intersectionToPack, Vector3d normalToPack)
+   public void closestIntersectionAndNormalAt(double x, double y, double z, Point3D intersectionToPack, Vector3D normalToPack)
    {
       tempPoint.set(x, y, z);
       cylinder.checkIfInside(tempPoint, intersectionToPack, normalToPack);
    }
 
    @Override
-   public boolean checkIfInside(double x, double y, double z, Point3d intersectionToPack, Vector3d normalToPack)
+   public boolean checkIfInside(double x, double y, double z, Point3D intersectionToPack, Vector3D normalToPack)
    {
       tempPoint.set(x, y, z);
       return cylinder.checkIfInside(tempPoint, intersectionToPack, normalToPack);

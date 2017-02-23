@@ -129,7 +129,7 @@ public class ProcessSpawnerTest
          return;
       }
 
-      final List<Integer> exitValues = new ArrayList(2);
+      final List<Integer> exitValues = new ArrayList<>(2);
       exitValues.clear();
       String[] arguments = {"2"};
 

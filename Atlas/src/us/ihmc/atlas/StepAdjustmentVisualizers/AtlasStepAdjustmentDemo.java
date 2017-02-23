@@ -5,13 +5,12 @@ import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.controllers.ControllerFailureException;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransitionCondition;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.tools.io.printing.PrintTools;
-
-import javax.vecmath.Vector3d;
 
 public class AtlasStepAdjustmentDemo
 {
@@ -80,13 +79,13 @@ public class AtlasStepAdjustmentDemo
       };
 
       String script;
-      Vector3d forceDirection;
+      Vector3D forceDirection;
       double percentWeight;
 
       switch(pushDirection)
       {
       case FORWARD:
-         forceDirection = new Vector3d(1.0, 0.0, 0.0);
+         forceDirection = new Vector3D(1.0, 0.0, 0.0);
 
          switch (stepScriptType)
          {
@@ -169,7 +168,7 @@ public class AtlasStepAdjustmentDemo
          }
          break;
       case BACKWARD:
-         forceDirection = new Vector3d(-1.0, 0.0, 0.0);
+         forceDirection = new Vector3D(-1.0, 0.0, 0.0);
 
          switch (stepScriptType)
          {
@@ -253,7 +252,7 @@ public class AtlasStepAdjustmentDemo
          break;
       case FORWARD_45:
          double angle = Math.PI / 4.0;
-         forceDirection = new Vector3d(Math.cos(angle), -Math.sin(angle), 0.0);
+         forceDirection = new Vector3D(Math.cos(angle), -Math.sin(angle), 0.0);
 
          switch (stepScriptType)
          {
@@ -337,7 +336,7 @@ public class AtlasStepAdjustmentDemo
          break;
       case FORWARD_60:
          angle = Math.PI / 3.0;
-         forceDirection = new Vector3d(Math.cos(angle), -Math.sin(angle), 0.0);
+         forceDirection = new Vector3D(Math.cos(angle), -Math.sin(angle), 0.0);
 
          switch (stepScriptType)
          {
@@ -421,7 +420,7 @@ public class AtlasStepAdjustmentDemo
          break;
       case BACKWARD_45:
          angle = Math.PI / 4.0;
-         forceDirection = new Vector3d(-Math.cos(angle), -Math.sin(angle), 0.0);
+         forceDirection = new Vector3D(-Math.cos(angle), -Math.sin(angle), 0.0);
 
          switch (stepScriptType)
          {
@@ -505,7 +504,7 @@ public class AtlasStepAdjustmentDemo
          break;
       case FORWARD_30:
          angle = Math.PI / 6.0;
-         forceDirection = new Vector3d(Math.cos(angle), -Math.sin(angle), 0.0);
+         forceDirection = new Vector3D(Math.cos(angle), -Math.sin(angle), 0.0);
 
          switch (stepScriptType)
          {
@@ -588,7 +587,7 @@ public class AtlasStepAdjustmentDemo
          }
          break;
       case INWARD:
-         forceDirection = new Vector3d(0.0, 1.0, 0.0);
+         forceDirection = new Vector3D(0.0, 1.0, 0.0);
 
          switch (stepScriptType)
          {
@@ -672,7 +671,7 @@ public class AtlasStepAdjustmentDemo
          break;
       case FORWARD_IN_45:
          angle = Math.PI / 4.0;
-         forceDirection = new Vector3d(Math.cos(angle), Math.sin(angle), 0.0);
+         forceDirection = new Vector3D(Math.cos(angle), Math.sin(angle), 0.0);
 
          switch (stepScriptType)
          {
@@ -756,7 +755,7 @@ public class AtlasStepAdjustmentDemo
          break;
       case FORWARD_IN_30:
          angle = Math.PI / 6.0;
-         forceDirection = new Vector3d(Math.cos(angle), Math.sin(angle), 0.0);
+         forceDirection = new Vector3D(Math.cos(angle), Math.sin(angle), 0.0);
 
          switch (stepScriptType)
          {
@@ -840,7 +839,7 @@ public class AtlasStepAdjustmentDemo
          break;
       case BACKWARD_60:
          angle = Math.PI / 3.0;
-         forceDirection = new Vector3d(-Math.cos(angle), -Math.sin(angle), 0.0);
+         forceDirection = new Vector3D(-Math.cos(angle), -Math.sin(angle), 0.0);
 
          switch (stepScriptType)
          {
@@ -924,7 +923,7 @@ public class AtlasStepAdjustmentDemo
          break;
       case BACKWARD_30:
          angle = Math.PI / 6.0;
-         forceDirection = new Vector3d(-Math.cos(angle), -Math.sin(angle), 0.0);
+         forceDirection = new Vector3D(-Math.cos(angle), -Math.sin(angle), 0.0);
 
          switch (stepScriptType)
          {
@@ -1008,7 +1007,7 @@ public class AtlasStepAdjustmentDemo
          break;
       case BACKWARD_IN_45:
          angle = Math.PI / 4.0;
-         forceDirection = new Vector3d(-Math.cos(angle), Math.sin(angle), 0.0);
+         forceDirection = new Vector3D(-Math.cos(angle), Math.sin(angle), 0.0);
 
          switch (stepScriptType)
          {
@@ -1092,7 +1091,7 @@ public class AtlasStepAdjustmentDemo
          break;
       case BACKWARD_IN_30:
          angle = Math.PI / 6.0;
-         forceDirection = new Vector3d(-Math.cos(angle), Math.sin(angle), 0.0);
+         forceDirection = new Vector3D(-Math.cos(angle), Math.sin(angle), 0.0);
 
          switch (stepScriptType)
          {
@@ -1175,7 +1174,7 @@ public class AtlasStepAdjustmentDemo
          }
          break;
       default: // OUTWARD
-         forceDirection = new Vector3d(0.0, -1.0, 0.0);
+         forceDirection = new Vector3D(0.0, -1.0, 0.0);
 
          switch (stepScriptType)
          {

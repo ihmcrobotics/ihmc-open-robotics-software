@@ -1,7 +1,6 @@
 package us.ihmc.graphicsDescription.yoGraphics;
 
-import javax.vecmath.Point2d;
-
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.MeshDataGenerator;
 import us.ihmc.graphicsDescription.MeshDataHolder;
@@ -71,7 +70,7 @@ public class YoGraphicPolygon extends YoGraphicAbstractShape implements RemoteYo
       super(name, framePoint, orientation, scale);
 
       if (yoFrameConvexPolygon2d.getNumberOfVertices() <= 0)
-         yoFrameConvexPolygon2d.setConvexPolygon2d(new ConvexPolygon2d(new Point2d[] {new Point2d()}));
+         yoFrameConvexPolygon2d.setConvexPolygon2d(new ConvexPolygon2d(new Point2D[] {new Point2D()}));
 
       this.yoFrameConvexPolygon2d = yoFrameConvexPolygon2d;
       this.appearance = appearance;

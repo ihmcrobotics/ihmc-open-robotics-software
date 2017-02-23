@@ -1,7 +1,6 @@
 package us.ihmc.simulationconstructionset.gui.camera;
 
-import javax.vecmath.Point3d;
-
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.jMonkeyEngineToolkit.camera.CameraTrackingAndDollyPositionHolder;
 import us.ihmc.robotics.dataStructures.YoVariableHolder;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -38,7 +37,7 @@ public class CameraTrackAndDollyYoVariablesHolder implements CameraTrackingAndDo
    }
 
    @Override
-   public void getTrackingPosition(Point3d trackPositionToPack)
+   public void getTrackingPosition(Point3D trackPositionToPack)
    {
       if (track_x_var != null)
       {
@@ -55,7 +54,7 @@ public class CameraTrackAndDollyYoVariablesHolder implements CameraTrackingAndDo
    }
 
    @Override
-   public void getDollyPosition(Point3d dollyPositionToPack)
+   public void getDollyPosition(Point3D dollyPositionToPack)
    {
       if (dolly_x_var != null)
       {

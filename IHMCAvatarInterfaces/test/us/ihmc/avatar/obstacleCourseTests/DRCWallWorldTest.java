@@ -4,11 +4,6 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Tuple3d;
-import javax.vecmath.Vector3d;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -20,6 +15,10 @@ import us.ihmc.avatar.testTools.ScriptedFootstepGenerator;
 import us.ihmc.avatar.testTools.ScriptedHandstepGenerator;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Handstep;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandstepPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.robotics.geometry.BoundingBox3d;
@@ -88,9 +87,9 @@ public abstract class DRCWallWorldTest implements MultiRobotTestInterface
          ArrayList<Handstep> handsteps = createHandstepForTesting(leftHandstepY, rightHandstepY, scriptedHandstepGenerator);
          for (Handstep handstep : handsteps)
          {
-            Point3d location = new Point3d();
-            Quat4d orientation = new Quat4d();
-            Vector3d surfaceNormal = new Vector3d();
+            Point3D location = new Point3D();
+            Quaternion orientation = new Quaternion();
+            Vector3D surfaceNormal = new Vector3D();
             handstep.getPose(location, orientation);
             handstep.getSurfaceNormal(surfaceNormal);
             HandstepPacket handstepPacket = new HandstepPacket(handstep.getRobotSide(), location, orientation, surfaceNormal,
@@ -123,8 +122,8 @@ public abstract class DRCWallWorldTest implements MultiRobotTestInterface
       drcSimulationTestHelper.createVideo(getSimpleRobotName(), 1);
       drcSimulationTestHelper.checkNothingChanged();
       assertTrue(success);
-      Point3d center = new Point3d(0.022237149581994832, 3.6888378632721963, 0.7893353089719684);
-      Vector3d plusMinusVector = new Vector3d(0.4, 0.3, 0.5);
+      Point3D center = new Point3D(0.022237149581994832, 3.6888378632721963, 0.7893353089719684);
+      Vector3D plusMinusVector = new Vector3D(0.4, 0.3, 0.5);
       BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
@@ -132,8 +131,8 @@ public abstract class DRCWallWorldTest implements MultiRobotTestInterface
 
    private void setupCameraForHandstepsOnWalls()
    {
-      Point3d cameraFix = new Point3d(1.8375, -0.16, 0.89);
-      Point3d cameraPosition = new Point3d(1.10, 8.30, 1.37);
+      Point3D cameraFix = new Point3D(1.8375, -0.16, 0.89);
+      Point3D cameraPosition = new Point3D(1.10, 8.30, 1.37);
       drcSimulationTestHelper.setupCameraForUnitTest(cameraFix, cameraPosition);
    }
 
@@ -141,15 +140,15 @@ public abstract class DRCWallWorldTest implements MultiRobotTestInterface
    {
       ArrayList<Handstep> ret = new ArrayList<Handstep>();
       RobotSide robotSide = RobotSide.LEFT;
-      Tuple3d position = new Point3d(0.6, leftHandstepY, 1.0);
-      Vector3d surfaceNormal = new Vector3d(-1.0, 0.0, 0.0);
+      Tuple3DBasics position = new Point3D(0.6, leftHandstepY, 1.0);
+      Vector3D surfaceNormal = new Vector3D(-1.0, 0.0, 0.0);
       double rotationAngleAboutNormal = 0.0;
       double swingTrajectoryTime = 1.0;
       Handstep handstep = scriptedHandstepGenerator.createHandstep(robotSide, position, surfaceNormal, rotationAngleAboutNormal, swingTrajectoryTime);
       ret.add(handstep);
       robotSide = RobotSide.RIGHT;
-      position = new Point3d(0.6, rightHandstepY, 1.0);
-      surfaceNormal = new Vector3d(-1.0, 0.0, 0.0);
+      position = new Point3D(0.6, rightHandstepY, 1.0);
+      surfaceNormal = new Vector3D(-1.0, 0.0, 0.0);
       rotationAngleAboutNormal = 0.0;
       handstep = scriptedHandstepGenerator.createHandstep(robotSide, position, surfaceNormal, rotationAngleAboutNormal, swingTrajectoryTime);
       ret.add(handstep);

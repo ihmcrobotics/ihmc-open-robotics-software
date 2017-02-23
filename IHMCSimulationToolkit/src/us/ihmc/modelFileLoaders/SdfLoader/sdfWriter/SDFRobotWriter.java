@@ -4,13 +4,19 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Vector3d;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.PropertyException;
 
+import us.ihmc.euclid.matrix.Matrix3D;
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.graphicsDescription.instructions.Graphics3DAddModelFileInstruction;
+import us.ihmc.graphicsDescription.instructions.Graphics3DPrimitiveInstruction;
+import us.ihmc.graphicsDescription.instructions.primitives.Graphics3DRotateInstruction;
+import us.ihmc.graphicsDescription.instructions.primitives.Graphics3DTranslateInstruction;
 import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFGeometry;
 import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFGeometry.Mesh;
 import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFInertia;
@@ -26,12 +32,7 @@ import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFSensor;
 import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFSensor.IMU;
 import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFSensor.IMU.IMUNoise;
 import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFSensor.IMU.IMUNoise.NoiseParameters;
-import us.ihmc.graphicsDescription.instructions.Graphics3DAddModelFileInstruction;
-import us.ihmc.graphicsDescription.instructions.Graphics3DPrimitiveInstruction;
-import us.ihmc.graphicsDescription.instructions.primitives.Graphics3DRotateInstruction;
-import us.ihmc.graphicsDescription.instructions.primitives.Graphics3DTranslateInstruction;
 import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFVisual;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.TransformTools;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.Link;
@@ -151,7 +152,7 @@ public abstract class SDFRobotWriter
    {
       Axis sdfJointAxis = new Axis();
 
-      Vector3d scsJointAxis = new Vector3d();
+      Vector3D scsJointAxis = new Vector3D();
       scsJoint.getJointAxis(scsJointAxis);
 
       String xyz = String.valueOf(scsJointAxis.getX()) + " " + String.valueOf(scsJointAxis.getY()) + " " + String.valueOf(scsJointAxis.getZ());
@@ -279,18 +280,21 @@ public abstract class SDFRobotWriter
             RigidBodyTransform temp = new RigidBodyTransform();
             temp.setRotation(graphics3dRotateInstruction.getRotationMatrix());
 //            temp.invert();
-            visualPose.multiply(temp, visualPose);
+            visualPose.set(temp);
+            visualPose.multiply(visualPose);
          }
          else if (instruction instanceof Graphics3DTranslateInstruction)
          {
             Graphics3DTranslateInstruction graphics3dTranslateInstruction = (Graphics3DTranslateInstruction) instruction;
             RigidBodyTransform temp = new RigidBodyTransform();
             temp.setTranslation(graphics3dTranslateInstruction.getTranslation());
-            visualPose.multiply(temp, visualPose);
+            visualPose.set(temp);
+            visualPose.multiply(visualPose);
          }
       }
       
-      visualPose.multiply(parentJointTransformToWorld, visualPose);
+      visualPose.set(parentJointTransformToWorld);
+      visualPose.multiply(visualPose);
       sdfVisual.setPose(getPoseFromTransform3D(visualPose));
       
       SDFGeometry sdfGeometry = new SDFGeometry();
@@ -331,7 +335,7 @@ public abstract class SDFRobotWriter
 
       RigidBodyTransform comOffsetInWorld = new RigidBodyTransform();
       scsLink.getParentJoint().getTransformToWorld(comOffsetInWorld);
-      Vector3d com = new Vector3d();
+      Vector3D com = new Vector3D();
       scsLink.getComOffset(com);
 
       RigidBodyTransform comOffset = TransformTools.createTranslationTransform(com);
@@ -346,7 +350,7 @@ public abstract class SDFRobotWriter
    {
       SDFInertia sdfInertia = new SDFInertia();
 
-      Matrix3d scsInertia = new Matrix3d();
+      Matrix3D scsInertia = new Matrix3D();
       scsLink.getMomentOfInertia(scsInertia);
 
       sdfInertia.setIxx(String.valueOf(scsInertia.getM00()));
@@ -361,12 +365,12 @@ public abstract class SDFRobotWriter
 
    private String getPoseFromTransform3D(RigidBodyTransform scsJointOffset)
    {
-      Vector3d translation = new Vector3d();
+      Vector3D translation = new Vector3D();
       scsJointOffset.getTranslation(translation);
-      Matrix3d rotation = new Matrix3d();
+      RotationMatrix rotation = new RotationMatrix();
       scsJointOffset.getRotation(rotation);
-      Vector3d eulerAngles = new Vector3d();
-      scsJointOffset.getEulerXYZ(eulerAngles);
+      Vector3D eulerAngles = new Vector3D();
+      scsJointOffset.getRotationEuler(eulerAngles);
 //      eulerAngles.y = Math.asin(rotation.m02);
 //      double cosY = Math.cos(eulerAngles.y);
 //      if (Math.abs(cosY) > 1e-5)
