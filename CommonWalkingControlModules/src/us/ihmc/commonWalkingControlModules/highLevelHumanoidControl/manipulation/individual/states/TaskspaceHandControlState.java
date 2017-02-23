@@ -127,8 +127,6 @@ public class TaskspaceHandControlState extends HandControlState
 
       setupVisualization(namePrefix, yoGraphicsListRegistry);
 
-      privilegedConfigurationCommand.applyPrivilegedConfigurationToSubChain(chest, endEffector);
-
       abortTaskspaceControlState = new BooleanYoVariable(namePrefix + "AbortTaskspaceControlState", registry);
       lastCommandId = new LongYoVariable(namePrefix + "LastCommandId", registry);
       lastCommandId.set(Packet.INVALID_MESSAGE_ID);

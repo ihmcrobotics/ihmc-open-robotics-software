@@ -36,6 +36,7 @@ public class FullyConstrainedState extends AbstractFootControlState
       footSwitch = momentumBasedController.getFootSwitches().get(robotSide);
       spatialAccelerationCommand.setWeight(SolverWeightLevels.FOOT_SUPPORT_WEIGHT);
       spatialAccelerationCommand.set(rootBody, contactableFoot.getRigidBody());
+      spatialAccelerationCommand.setPrimaryBase(pelvis);
       spatialAccelerationCommand.setSelectionMatrixToIdentity();
    }
 

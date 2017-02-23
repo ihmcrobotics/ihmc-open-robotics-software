@@ -599,6 +599,12 @@ public class ScrewTools
       return clone;
    }
 
+   /**
+    * Traverses up the kinematic chain from the candidate descendant towards the root body, checking to see if each parent body is the ancestor in question.
+    * @param candidateDescendant
+    * @param ancestor
+    * @return
+    */
    public static boolean isAncestor(RigidBody candidateDescendant, RigidBody ancestor)
    {
       RigidBody currentBody = candidateDescendant;
