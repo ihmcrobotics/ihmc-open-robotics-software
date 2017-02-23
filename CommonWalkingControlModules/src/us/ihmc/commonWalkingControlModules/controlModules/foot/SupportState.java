@@ -119,11 +119,16 @@ public class SupportState extends AbstractFootControlState
       footLoadThreshold = new DoubleYoVariable(prefix + "LoadThreshold", registry);
       footLoadThreshold.set(defaultFootLoadThreshold);
 
+      FullHumanoidRobotModel fullRobotModel = footControlHelper.getMomentumBasedController().getFullRobotModel();
+      pelvis = fullRobotModel.getPelvis();
+
       spatialAccelerationCommand.setWeight(SolverWeightLevels.FOOT_SUPPORT_WEIGHT);
       spatialAccelerationCommand.set(rootBody, contactableFoot.getRigidBody());
+      spatialAccelerationCommand.setPrimaryBase(pelvis);
 
       spatialFeedbackControlCommand.setWeightForSolver(SolverWeightLevels.FOOT_SUPPORT_WEIGHT);
       spatialFeedbackControlCommand.set(rootBody, contactableFoot.getRigidBody());
+      spatialFeedbackControlCommand.setPrimaryBase(pelvis);
       spatialFeedbackControlCommand.setGains(holdPositionGains);
 
       desiredLinearVelocity.setToZero(worldFrame);
@@ -151,8 +156,6 @@ public class SupportState extends AbstractFootControlState
          timeBeforeExploring = new DoubleYoVariable(prefix + "TimeBeforeExploring", registry);
       }
 
-      FullHumanoidRobotModel fullRobotModel = footControlHelper.getMomentumBasedController().getFullRobotModel();
-      pelvis = fullRobotModel.getPelvis();
       kneePitch = fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE_PITCH);
       kneePrivilegedConfigurationTrajectory = new YoPolynomial(prefix + "KneePrivilegedConfiguration", 4, registry);
       durationForStanceLegStraightening = new DoubleYoVariable(prefix + "DurationForStanceLegStraightening", registry);
@@ -308,7 +311,6 @@ public class SupportState extends AbstractFootControlState
 
       straightLegsPrivilegedConfigurationCommand.clear();
       straightLegsPrivilegedConfigurationCommand.addJoint(kneePitch, kneePrivilegedConfigurationTrajectory.getPosition());
-      straightLegsPrivilegedConfigurationCommand.applyPrivilegedConfigurationToSubChain(pelvis, contactableFoot.getRigidBody());
    }
 
    private void updateHoldPositionSetpoints()
