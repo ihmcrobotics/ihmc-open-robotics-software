@@ -3,14 +3,13 @@ package us.ihmc.simulationconstructionset.screwTheory;
 import java.util.ArrayList;
 import java.util.Random;
 
-import javax.vecmath.Vector3d;
-
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.CenterOfMassReferenceFrame;
@@ -54,7 +53,7 @@ public class CentroidalMomentumRateADotVTermSCSTest
       ReferenceFrame elevatorFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent("elevator", worldFrame, new RigidBodyTransform());
       RigidBody elevator = new RigidBody("elevator", elevatorFrame);
       int numberOfJoints = 10;
-      Vector3d[] jointAxes = new Vector3d[numberOfJoints];
+      Vector3D[] jointAxes = new Vector3D[numberOfJoints];
       for (int i = 0; i < numberOfJoints; i++)
          jointAxes[i] = RandomTools.generateRandomVector(random, 1.0);
 
@@ -92,7 +91,7 @@ public class CentroidalMomentumRateADotVTermSCSTest
 
       ArrayList<RevoluteJoint> joints = new ArrayList<>();
       int numberOfJoints = 6; 
-      Vector3d[] jointAxes = new Vector3d[numberOfJoints];
+      Vector3D[] jointAxes = new Vector3D[numberOfJoints];
       for (int i = 0; i < numberOfJoints; i++)
          jointAxes[i] = RandomTools.generateRandomVector(random, 1.0);
 

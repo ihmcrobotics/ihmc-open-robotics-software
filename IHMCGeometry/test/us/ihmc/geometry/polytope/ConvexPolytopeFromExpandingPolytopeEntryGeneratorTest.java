@@ -5,9 +5,9 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 
-import javax.vecmath.Point3d;
-
 import org.junit.Test;
+
+import us.ihmc.euclid.tuple3D.Point3D;
 
 public class ConvexPolytopeFromExpandingPolytopeEntryGeneratorTest
 {
@@ -19,7 +19,7 @@ public class ConvexPolytopeFromExpandingPolytopeEntryGeneratorTest
       int recursionLevel = 0;
       SimpleTriangleMesh icoSphere = creator.createIcoSphere(recursionLevel);
 
-      ArrayList<Point3d> vertexPoints = icoSphere.positions;
+      ArrayList<Point3D> vertexPoints = icoSphere.positions;
       ArrayList<Integer> triangleIndices = icoSphere.triangleIndices;
       assertTrue(triangleIndices.size() % 3 == 0);
 

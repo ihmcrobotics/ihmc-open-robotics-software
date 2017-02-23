@@ -5,19 +5,18 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
 import org.junit.Test;
 
+import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
+import us.ihmc.euclid.tools.EuclidCoreTestTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.PlanarRegion;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.tools.testing.JUnitTools;
-import us.ihmc.tools.testing.MutationTestingTools;
 
 @ContinuousIntegrationAnnotations.ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
 public class PlanarRegionPolygonSnapperTest
@@ -46,7 +45,7 @@ public class PlanarRegionPolygonSnapperTest
       RigidBodyTransform planarRegionTransformToWorld = new RigidBodyTransform();
 
       PlanarRegion planarRegionToSnapTo = new PlanarRegion(planarRegionTransformToWorld, planarRegionConvexPolygons);
-      Point3d highestVertexInWorld = new Point3d();
+      Point3D highestVertexInWorld = new Point3D();
       RigidBodyTransform polygonSnappingTransform = PlanarRegionPolygonSnapper.snapPolygonToPlanarRegion(polygonToSnap, planarRegionToSnapTo, highestVertexInWorld);
 
       RigidBodyTransform identityTransform = new RigidBodyTransform();
@@ -91,18 +90,18 @@ public class PlanarRegionPolygonSnapperTest
       planarRegionTransformToWorld.setRotationEulerAndZeroTranslation(roll, pitch, yaw);
 
       PlanarRegion planarRegionToSnapTo = new PlanarRegion(planarRegionTransformToWorld, planarRegionConvexPolygons);
-      Point3d highestVertexInWorld = new Point3d();
+      Point3D highestVertexInWorld = new Point3D();
       RigidBodyTransform polygonSnappingTransform = PlanarRegionPolygonSnapper.snapPolygonToPlanarRegion(polygonToSnap, planarRegionToSnapTo, highestVertexInWorld);
 
       // Make sure the two equally high vertices just got projected vertically
-      Point3d highVertexOne = new Point3d(-1.0, -1.0, 0.0);
+      Point3D highVertexOne = new Point3D(-1.0, -1.0, 0.0);
       polygonSnappingTransform.transform(highVertexOne);
 
       assertEquals(-1.0, highVertexOne.getX(), 1e-7);
       assertEquals(-1.0, highVertexOne.getY(), 1e-7);
       assertEquals(planarRegionToSnapTo.getPlaneZGivenXY(-1.0, -1.0), highVertexOne.getZ(), 1e-7);
 
-      Point3d highVertexTwo = new Point3d(-1.0, 1.0, 0.0);
+      Point3D highVertexTwo = new Point3D(-1.0, 1.0, 0.0);
       polygonSnappingTransform.transform(highVertexTwo);
 
       assertEquals(-1.0, highVertexTwo.getX(), 1e-7);
@@ -140,11 +139,11 @@ public class PlanarRegionPolygonSnapperTest
       planarRegionTransformToWorld.setRotationEulerAndZeroTranslation(roll, pitch, yaw);
 
       PlanarRegion planarRegionToSnapTo = new PlanarRegion(planarRegionTransformToWorld, planarRegionConvexPolygons);
-      Point3d highestVertexInWorld = new Point3d();
+      Point3D highestVertexInWorld = new Point3D();
       RigidBodyTransform polygonSnappingTransform = PlanarRegionPolygonSnapper.snapPolygonToPlanarRegion(polygonToSnap, planarRegionToSnapTo, highestVertexInWorld);
 
       // Make sure the two equally high vertices just got projected vertically
-      Point3d highVertexOne = new Point3d(-1.0, -1.0, 0.0);
+      Point3D highVertexOne = new Point3D(-1.0, -1.0, 0.0);
       polygonSnappingTransform.transform(highVertexOne);
 
       assertEquals(-1.0, highVertexOne.getX(), 1e-7);
@@ -156,22 +155,20 @@ public class PlanarRegionPolygonSnapperTest
 
    public static void assertSurfaceNormalsMatchAndSnapPreservesXFromAbove(RigidBodyTransform snapTransform, RigidBodyTransform planarRegionTransform)
    {
-      Vector3d expectedSurfaceNormal = new Vector3d(0.0, 0.0, 1.0);
+      Vector3D expectedSurfaceNormal = new Vector3D(0.0, 0.0, 1.0);
       planarRegionTransform.transform(expectedSurfaceNormal);
 
-      Vector3d actualSurfaceNormal = new Vector3d(0.0, 0.0, 1.0);
+      Vector3D actualSurfaceNormal = new Vector3D(0.0, 0.0, 1.0);
       snapTransform.transform(actualSurfaceNormal);
-      JUnitTools.assertTuple3dEquals(expectedSurfaceNormal, actualSurfaceNormal, 1e-7);
+      EuclidCoreTestTools.assertTuple3DEquals(expectedSurfaceNormal, actualSurfaceNormal, 1e-7);
 
-      Vector3d xAxis = new Vector3d(1.0, 0.0, 0.0);
+      Vector3D xAxis = new Vector3D(1.0, 0.0, 0.0);
       snapTransform.transform(xAxis);
       assertEquals(0.0, xAxis.getY(), 1e-7);
    }
 
    public static void main(String[] args)
    {
-      String targetTests = PlanarRegionPolygonSnapperTest.class.getName();
-      String targetClassesInSamePackage = PlanarRegionPolygonSnapper.class.getName();
-      MutationTestingTools.doPITMutationTestAndOpenResult(targetTests, targetClassesInSamePackage);
+      MutationTestFacilitator.facilitateMutationTestForClass(PlanarRegionPolygonSnapper.class, PlanarRegionPolygonSnapperTest.class);
    }
 }

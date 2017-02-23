@@ -4,9 +4,8 @@ import java.io.BufferedReader;
 import java.io.PrintWriter;
 import java.util.StringTokenizer;
 
-import javax.vecmath.Point2d;
-import javax.vecmath.Vector2d;
-
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.graphicsDescription.plotting.Graphics2DAdapter;
 import us.ihmc.graphicsDescription.plotting.Plotter2DAdapter;
 
@@ -14,14 +13,14 @@ public class ShapeArtifact extends Artifact
 {
    private static final double LEGEND_RADIUS = 20.0;
    
-   private Point2d pose;
+   private Point2D pose;
    private double height;
    private double width;
    
-   private final Point2d tempCenter = new Point2d();
-   private final Vector2d tempRadii = new Vector2d();
+   private final Point2D tempCenter = new Point2D();
+   private final Vector2D tempRadii = new Vector2D();
 
-   public ShapeArtifact(String id, String type, double height, double width, Point2d pose)
+   public ShapeArtifact(String id, String type, double height, double width, Point2D pose)
    {
       super(id);
       setType(type);
@@ -31,12 +30,12 @@ public class ShapeArtifact extends Artifact
       this.width = width;
    }
 
-   public void setPose(Point2d pose)
+   public void setPose(Point2D pose)
    {
       this.pose = pose;
    }
 
-   public Point2d getPose()
+   public Point2D getPose()
    {
       return pose;
    }
@@ -77,7 +76,7 @@ public class ShapeArtifact extends Artifact
    }
 
    @Override
-   public void drawLegend(Plotter2DAdapter graphics, Point2d origin)
+   public void drawLegend(Plotter2DAdapter graphics, Point2D origin)
    {
       graphics.setColor(color);
       tempCenter.set(origin);
@@ -116,7 +115,7 @@ public class ShapeArtifact extends Artifact
          StringTokenizer s = new StringTokenizer(line, " ");
          double x = Double.parseDouble(s.nextToken());
          double y = Double.parseDouble(s.nextToken());
-         Point2d pose = new Point2d(x, y);
+         Point2D pose = new Point2D(x, y);
          double width = Double.parseDouble(s.nextToken());
          double height = Double.parseDouble(s.nextToken());
          String type = s.nextToken();

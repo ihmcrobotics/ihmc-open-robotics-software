@@ -1,7 +1,7 @@
 package us.ihmc.valkyrie.kinematics.transmissions;
 
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
@@ -12,7 +12,6 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.referenceFrames.TransformReferenceFrame;
 import us.ihmc.robotics.referenceFrames.TranslationReferenceFrame;
@@ -31,13 +30,13 @@ public class InefficientPushrodTransmissionJacobian implements PushrodTransmissi
    private double futekLength;    // futek link length (m)
    private double futekLengthSquared;
 
-   private final Vector3d rod5PointInBoneFrame = new Vector3d();    // position where rod 5 passes through bone frame plane. x is forward. y is to the left. z is up. (m)
-   private final Vector3d rod6PointInBoneFrame = new Vector3d();    // position where rod 6 passes through bone frame plane. x is forward. y is to the left. z is up. (m)
+   private final Vector3D rod5PointInBoneFrame = new Vector3D();    // position where rod 5 passes through bone frame plane. x is forward. y is to the left. z is up. (m)
+   private final Vector3D rod6PointInBoneFrame = new Vector3D();    // position where rod 6 passes through bone frame plane. x is forward. y is to the left. z is up. (m)
    private double actuatorSlider5PitchRotation; // actuator slider 5 pitch angle
    private double actuatorSlider6PitchRotation; // actuator slider 6 pitch angle
    
-   private final Vector3d rodBottom5 = new Vector3d();  // position vector of futek link base for actuator 5 side in foot frame (m)
-   private final Vector3d rodBottom6 = new Vector3d();   // position vector of futek link base for actuator 6 side in foot frame (m)
+   private final Vector3D rodBottom5 = new Vector3D();  // position vector of futek link base for actuator 5 side in foot frame (m)
+   private final Vector3D rodBottom6 = new Vector3D();   // position vector of futek link base for actuator 6 side in foot frame (m)
    
    private boolean useFuteks = true; 
    
@@ -116,11 +115,11 @@ public class InefficientPushrodTransmissionJacobian implements PushrodTransmissi
       
       RigidBodyTransform transformFromActuatorSlide5FrameToBoneFrame = new RigidBodyTransform();      
       transformFromActuatorSlide5FrameToBoneFrame.setRotationPitchAndZeroTranslation(-actuatorSlider5PitchRotation);
-      transformFromActuatorSlide5FrameToBoneFrame.setTranslation(new Vector3d(rod5PointInBoneFrame));
+      transformFromActuatorSlide5FrameToBoneFrame.setTranslation(new Vector3D(rod5PointInBoneFrame));
       
       RigidBodyTransform transformFromActuatorSlide6FrameToBoneFrame = new RigidBodyTransform();      
       transformFromActuatorSlide6FrameToBoneFrame.setRotationPitchAndZeroTranslation(-actuatorSlider6PitchRotation);
-      transformFromActuatorSlide6FrameToBoneFrame.setTranslation(new Vector3d(rod6PointInBoneFrame));
+      transformFromActuatorSlide6FrameToBoneFrame.setTranslation(new Vector3D(rod6PointInBoneFrame));
 
       actuator5SlideFrame.setTransformAndUpdate(transformFromActuatorSlide5FrameToBoneFrame);
       actuator6SlideFrame.setTransformAndUpdate(transformFromActuatorSlide6FrameToBoneFrame);

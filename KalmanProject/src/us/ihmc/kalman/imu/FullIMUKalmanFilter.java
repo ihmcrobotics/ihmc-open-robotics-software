@@ -1,10 +1,10 @@
 package us.ihmc.kalman.imu;
 
-import javax.vecmath.Quat4d;
-
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
+import us.ihmc.euclid.rotationConversion.YawPitchRollConversion;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 
@@ -379,9 +379,9 @@ public class FullIMUKalmanFilter
       bias.set(2, 0, X_vect.get(6, 0));
       normalize(q);
 
-      Quat4d quaternion = new Quat4d();
-      MatrixTools.extractQuat4dFromEJMLVector(quaternion, q, 0);
-      RotationTools.convertQuaternionToYawPitchRoll(quaternion, eulerAngles);
+      Quaternion quaternion = new Quaternion();
+      quaternion.set(q);
+      YawPitchRollConversion.convertQuaternionToYawPitchRoll(quaternion, eulerAngles);
    }
 
    /*
@@ -484,9 +484,9 @@ public class FullIMUKalmanFilter
       accel2euler(accel, heading);
       double[] angles_e = new double[3];
       
-      Quat4d quaternion = new Quat4d();
-      MatrixTools.extractQuat4dFromEJMLVector(quaternion, q, 0);
-      RotationTools.convertQuaternionToYawPitchRoll(quaternion, angles_e);
+      Quaternion quaternion = new Quaternion();
+      quaternion.set(q);
+      YawPitchRollConversion.convertQuaternionToYawPitchRoll(quaternion, angles_e);
 
       // Compute the error between our measurement and our estimate
 //    Matrix error = euler_diff(angles_m, angles_e);
@@ -599,9 +599,9 @@ public class FullIMUKalmanFilter
       propagateCovariance(A);
 
       /* compute angles from quaternions */
-      Quat4d quaternion = new Quat4d();
-      MatrixTools.extractQuat4dFromEJMLVector(quaternion, q, 0);
-      RotationTools.convertQuaternionToYawPitchRoll(quaternion, eulerAngles);
+      Quaternion quaternion = new Quaternion();
+      quaternion.set(q);
+      YawPitchRollConversion.convertQuaternionToYawPitchRoll(quaternion, eulerAngles);
    }
 
    /*
@@ -619,9 +619,9 @@ public class FullIMUKalmanFilter
 
 //    euler = accel2euler(accel, heading);
       accel2euler(accel, heading);
-      Quat4d quaternion = new Quat4d();
-      RotationTools.convertYawPitchRollToQuaternion(eulerAngles, quaternion);
-      MatrixTools.insertQuat4dIntoEJMLVector(q, quaternion, 0);
+      Quaternion quaternion = new Quaternion();
+      quaternion.setYawPitchRoll(eulerAngles);
+      quaternion.get(q);
    }
 
    public void reset()

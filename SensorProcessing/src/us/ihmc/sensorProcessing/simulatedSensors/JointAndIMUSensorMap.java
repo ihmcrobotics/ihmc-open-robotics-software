@@ -4,12 +4,11 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Vector3d;
-
 import us.ihmc.controlFlow.ControlFlowOutputPort;
-import us.ihmc.robotics.sensors.IMUDefinition;
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.robotics.sensors.IMUDefinition;
 
 public class JointAndIMUSensorMap
 {
@@ -18,12 +17,12 @@ public class JointAndIMUSensorMap
    private final LinkedHashMap<OneDoFJoint, ControlFlowOutputPort<double[]>> jointVelocitySensors = new LinkedHashMap<OneDoFJoint,
                                                                                                      ControlFlowOutputPort<double[]>>();
 
-   private final LinkedHashMap<IMUDefinition, ControlFlowOutputPort<Matrix3d>> orientationSensors = new LinkedHashMap<IMUDefinition,
-                                                                                                       ControlFlowOutputPort<Matrix3d>>();
-   private final LinkedHashMap<IMUDefinition, ControlFlowOutputPort<Vector3d>> angularVelocitySensors = new LinkedHashMap<IMUDefinition,
-                                                                                                           ControlFlowOutputPort<Vector3d>>();
-   private final LinkedHashMap<IMUDefinition, ControlFlowOutputPort<Vector3d>> linearAccelerationSensors = new LinkedHashMap<IMUDefinition,
-                                                                                                              ControlFlowOutputPort<Vector3d>>();
+   private final LinkedHashMap<IMUDefinition, ControlFlowOutputPort<RotationMatrix>> orientationSensors = new LinkedHashMap<IMUDefinition,
+                                                                                                       ControlFlowOutputPort<RotationMatrix>>();
+   private final LinkedHashMap<IMUDefinition, ControlFlowOutputPort<Vector3D>> angularVelocitySensors = new LinkedHashMap<IMUDefinition,
+                                                                                                           ControlFlowOutputPort<Vector3D>>();
+   private final LinkedHashMap<IMUDefinition, ControlFlowOutputPort<Vector3D>> linearAccelerationSensors = new LinkedHashMap<IMUDefinition,
+                                                                                                              ControlFlowOutputPort<Vector3D>>();
 
    public JointAndIMUSensorMap()
    {
@@ -39,17 +38,17 @@ public class JointAndIMUSensorMap
       return jointVelocitySensors;
    }
 
-   public Map<IMUDefinition, ControlFlowOutputPort<Matrix3d>> getOrientationSensors()
+   public Map<IMUDefinition, ControlFlowOutputPort<RotationMatrix>> getOrientationSensors()
    {
       return orientationSensors;
    }
 
-   public Map<IMUDefinition, ControlFlowOutputPort<Vector3d>> getAngularVelocitySensors()
+   public Map<IMUDefinition, ControlFlowOutputPort<Vector3D>> getAngularVelocitySensors()
    {
       return angularVelocitySensors;
    }
 
-   public Map<IMUDefinition, ControlFlowOutputPort<Vector3d>> getLinearAccelerationSensors()
+   public Map<IMUDefinition, ControlFlowOutputPort<Vector3D>> getLinearAccelerationSensors()
    {
       return linearAccelerationSensors;
    }
@@ -64,17 +63,17 @@ public class JointAndIMUSensorMap
       return jointVelocitySensors.get(oneDoFJoint);
    }
 
-   public ControlFlowOutputPort<Matrix3d> getOrientationSensorPort(IMUDefinition imuDefinition)
+   public ControlFlowOutputPort<RotationMatrix> getOrientationSensorPort(IMUDefinition imuDefinition)
    {
       return orientationSensors.get(imuDefinition);
    }
 
-   public ControlFlowOutputPort<Vector3d> getAngularVelocitySensorPort(IMUDefinition imuDefinition)
+   public ControlFlowOutputPort<Vector3D> getAngularVelocitySensorPort(IMUDefinition imuDefinition)
    {
       return angularVelocitySensors.get(imuDefinition);
    }
 
-   public ControlFlowOutputPort<Vector3d> getLinearAccelerationSensorPort(IMUDefinition imuDefinition)
+   public ControlFlowOutputPort<Vector3D> getLinearAccelerationSensorPort(IMUDefinition imuDefinition)
    {
       return linearAccelerationSensors.get(imuDefinition);
    }
@@ -89,32 +88,32 @@ public class JointAndIMUSensorMap
       jointVelocitySensors.put(oneDoFJoint, jointVelocitySensorPort);
    }
 
-   public void addOrientationSensorPort(IMUDefinition imuDefinition, ControlFlowOutputPort<Matrix3d> orientationSensorPort)
+   public void addOrientationSensorPort(IMUDefinition imuDefinition, ControlFlowOutputPort<RotationMatrix> orientationSensorPort)
    {
       orientationSensors.put(imuDefinition, orientationSensorPort);
    }
 
-   public void addAngularVelocitySensorPort(IMUDefinition imuDefinition, ControlFlowOutputPort<Vector3d> angularVelocitySensorPort)
+   public void addAngularVelocitySensorPort(IMUDefinition imuDefinition, ControlFlowOutputPort<Vector3D> angularVelocitySensorPort)
    {
       angularVelocitySensors.put(imuDefinition, angularVelocitySensorPort);
    }
 
-   public void addLinearAccelerationSensorPort(IMUDefinition imuDefinition, ControlFlowOutputPort<Vector3d> linearAccelerationSensorPort)
+   public void addLinearAccelerationSensorPort(IMUDefinition imuDefinition, ControlFlowOutputPort<Vector3D> linearAccelerationSensorPort)
    {
       linearAccelerationSensors.put(imuDefinition, linearAccelerationSensorPort);
    }
 
-   public Collection<ControlFlowOutputPort<Matrix3d>> getOrientationOutputPorts()
+   public Collection<ControlFlowOutputPort<RotationMatrix>> getOrientationOutputPorts()
    {
       return orientationSensors.values();
    }
 
-   public Collection<ControlFlowOutputPort<Vector3d>> getAngularVelocityOutputPorts()
+   public Collection<ControlFlowOutputPort<Vector3D>> getAngularVelocityOutputPorts()
    {
       return angularVelocitySensors.values();
    }
 
-   public Collection<ControlFlowOutputPort<Vector3d>> getLinearAccelerationOutputPorts()
+   public Collection<ControlFlowOutputPort<Vector3D>> getLinearAccelerationOutputPorts()
    {
       return linearAccelerationSensors.values();
    }

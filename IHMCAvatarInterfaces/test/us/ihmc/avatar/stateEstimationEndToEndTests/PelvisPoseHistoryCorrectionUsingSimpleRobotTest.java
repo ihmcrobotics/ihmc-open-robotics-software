@@ -4,14 +4,16 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Random;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-import javax.vecmath.Vector4d;
-
 import org.junit.Test;
 
+import us.ihmc.commons.Conversions;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.tuple4D.Vector4D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.humanoidRobotics.communication.packets.StampedPosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.LocalizationPacket;
@@ -22,14 +24,12 @@ import us.ihmc.robotics.controllers.ControllerFailureException;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.LongYoVariable;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SixDoFJoint;
-import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.Robot;
@@ -291,7 +291,7 @@ public class PelvisPoseHistoryCorrectionUsingSimpleRobotTest
    private void setupCorrector()
    {
       externalPelvisPoseCreator = new ExternalPelvisPoseCreator();
-      PelvisPoseHistoryCorrection pelvisCorrector = new PelvisPoseHistoryCorrection(sixDofPelvisJoint, TimeTools.nanoSecondstoSeconds(1000000), registry, 100,
+      PelvisPoseHistoryCorrection pelvisCorrector = new PelvisPoseHistoryCorrection(sixDofPelvisJoint, Conversions.nanoSecondstoSeconds(1000000), registry, 100,
             externalPelvisPoseCreator);
       PelvisPoseHistoryCorrectorController robotController = new PelvisPoseHistoryCorrectorController(pelvisCorrector, simulationConstructionSet);
       robot.setController(robotController);
@@ -329,7 +329,7 @@ public class PelvisPoseHistoryCorrectionUsingSimpleRobotTest
       RigidBodyTransform[] targets = new RigidBodyTransform[numOfTargets];
       for (int i = 0; i < 10; i++)
       {
-         targets[i] = RigidBodyTransform.generateRandomTransform(random);
+         targets[i] = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
       }
       return targets;
    }
@@ -337,11 +337,11 @@ public class PelvisPoseHistoryCorrectionUsingSimpleRobotTest
    private RigidBodyTransform[] createYawOnlyCorrectionTargets(Random random, int numTargets)
    {
       RigidBodyTransform[] targets = new RigidBodyTransform[numTargets];
-      Quat4d rot = new Quat4d();
+      Quaternion rot = new Quaternion();
       for (int i = 0; i < 10; i++)
       {
          targets[i] = new RigidBodyTransform();
-         RotationTools.convertYawPitchRollToQuaternion((random.nextDouble() * Math.PI * 2) - Math.PI, 0, 0, rot);
+         rot.setYawPitchRoll((random.nextDouble() * Math.PI * 2) - Math.PI, 0, 0);
          targets[i].setRotation(rot);
       }
       return targets;
@@ -357,9 +357,9 @@ public class PelvisPoseHistoryCorrectionUsingSimpleRobotTest
       RigidBodyTransform[] targets = createRandomCorrectionTargets(random, numTargets);
       boolean success = true;
 
-      Vector4d error = new Vector4d();
-      Vector3d targetTranslation = new Vector3d();
-      Matrix3d targetRotation = new Matrix3d();
+      Vector4D error = new Vector4D();
+      Vector3D targetTranslation = new Vector3D();
+      RotationMatrix targetRotation = new RotationMatrix();
       double targetYaw = 0;
       double translationFudgeFactor = 0.01;
       double rotationFudgeFactor = 0.01;
@@ -369,30 +369,30 @@ public class PelvisPoseHistoryCorrectionUsingSimpleRobotTest
       {
          targets[i].getTranslation(targetTranslation);
          targets[i].getRotation(targetRotation);
-         targetYaw = RotationTools.computeYaw(targetRotation);
+         targetYaw = targetRotation.getYaw();
          error.set(targetTranslation.getX(), targetTranslation.getY(), targetTranslation.getZ(), targetYaw);
 
-         long timeStamp = TimeTools.secondsToNanoSeconds(simulationConstructionSet.getTime());
+         long timeStamp = Conversions.secondsToNanoSeconds(simulationConstructionSet.getTime());
          TimeStampedTransform3D timeStampedTransform = new TimeStampedTransform3D(targets[i], timeStamp);
          StampedPosePacket posePacket = new StampedPosePacket("/pelvis", timeStampedTransform, 1.0);
 
-         success &= simulateAndBlockAndCatchExceptions(TimeTools.nanoSecondstoSeconds(1000000) * 3);
+         success &= simulateAndBlockAndCatchExceptions(Conversions.nanoSecondstoSeconds(1000000) * 3);
          externalPelvisPoseCreator.setNewestPose(posePacket);
 
          while (translationClippedAlphaValue.getDoubleValue() > 0.2 || rotationClippedAlphaValue.getDoubleValue() > 0.2)
          {
-            success &= simulateAndBlockAndCatchExceptions(TimeTools.nanoSecondstoSeconds(1000000) * 3);
+            success &= simulateAndBlockAndCatchExceptions(Conversions.nanoSecondstoSeconds(1000000) * 3);
          }
 
          while (translationClippedAlphaValue.getDoubleValue() < 0.9999999 && rotationClippedAlphaValue.getDoubleValue() <0.9999999)
          {
-            success &= simulateAndBlockAndCatchExceptions(TimeTools.nanoSecondstoSeconds(1000000) * 100);
+            success &= simulateAndBlockAndCatchExceptions(Conversions.nanoSecondstoSeconds(1000000) * 100);
          }
 
          double xError = Math.abs(correctedPelvis_x.getDoubleValue() - error.getX());
          double yError = Math.abs(correctedPelvis_y.getDoubleValue() - error.getY());
          double zError = Math.abs(correctedPelvis_z.getDoubleValue() - error.getZ());
-         double yawError = Math.abs(correctedPelvis_yaw.getDoubleValue() - error.getW());
+         double yawError = Math.abs(correctedPelvis_yaw.getDoubleValue() - error.getS());
 
          if (xError > largestError)
             largestError = xError;
@@ -423,9 +423,9 @@ public class PelvisPoseHistoryCorrectionUsingSimpleRobotTest
       RigidBodyTransform[] targets = createRandomCorrectionTargets(random, numTargets);
       boolean success = true;
       
-      Vector4d error = new Vector4d();
-      Vector3d targetTranslation = new Vector3d();
-      Matrix3d targetRotation = new Matrix3d();
+      Vector4D error = new Vector4D();
+      Vector3D targetTranslation = new Vector3D();
+      RotationMatrix targetRotation = new RotationMatrix();
       double targetYaw = 0;
       double translationFudgeFactor = 0.01;
       double rotationFudgeFactor = 0.035;
@@ -435,30 +435,30 @@ public class PelvisPoseHistoryCorrectionUsingSimpleRobotTest
       {
          targets[i].getTranslation(targetTranslation);
          targets[i].getRotation(targetRotation);
-         targetYaw = RotationTools.computeYaw(targetRotation);
+         targetYaw = targetRotation.getYaw();
          error.set(targetTranslation.getX(), targetTranslation.getY(), targetTranslation.getZ(), targetYaw);
          
-         long timeStamp = TimeTools.secondsToNanoSeconds(simulationConstructionSet.getTime());
+         long timeStamp = Conversions.secondsToNanoSeconds(simulationConstructionSet.getTime());
          TimeStampedTransform3D timeStampedTransform = new TimeStampedTransform3D(targets[i], timeStamp);
          StampedPosePacket posePacket = new StampedPosePacket("/pelvis", timeStampedTransform, 1.0);
          
-         success &= simulateAndBlockAndCatchExceptions(TimeTools.nanoSecondstoSeconds(1000000) * 3);
+         success &= simulateAndBlockAndCatchExceptions(Conversions.nanoSecondstoSeconds(1000000) * 3);
          externalPelvisPoseCreator.setNewestPose(posePacket);
 
          while (translationClippedAlphaValue.getDoubleValue() > 0.2)
          {
-            success &= simulateAndBlockAndCatchExceptions(TimeTools.nanoSecondstoSeconds(1000000) * 3);
+            success &= simulateAndBlockAndCatchExceptions(Conversions.nanoSecondstoSeconds(1000000) * 3);
          }
          
          while (translationClippedAlphaValue.getDoubleValue() < 0.9999999)
          {
-            success &= simulateAndBlockAndCatchExceptions(TimeTools.nanoSecondstoSeconds(1000000) * 100);
+            success &= simulateAndBlockAndCatchExceptions(Conversions.nanoSecondstoSeconds(1000000) * 100);
          }
          
          double xError = Math.abs(correctedPelvis_x.getDoubleValue() - error.getX());
          double yError = Math.abs(correctedPelvis_y.getDoubleValue() - error.getY());
          double zError = Math.abs(correctedPelvis_z.getDoubleValue() - error.getZ());
-         double yawError = Math.abs(correctedPelvis_yaw.getDoubleValue() - error.getW());
+         double yawError = Math.abs(correctedPelvis_yaw.getDoubleValue() - error.getS());
          
          if (xError > largestError)
             largestError = xError;
@@ -487,9 +487,9 @@ public class PelvisPoseHistoryCorrectionUsingSimpleRobotTest
       RigidBodyTransform[] targets = createRandomCorrectionTargets(random, numTargets);
       boolean success = true;
 
-      Vector4d error = new Vector4d();
-      Vector3d targetTranslation = new Vector3d();
-      Matrix3d targetRotation = new Matrix3d();
+      Vector4D error = new Vector4D();
+      Vector3D targetTranslation = new Vector3D();
+      RotationMatrix targetRotation = new RotationMatrix();
       double targetYaw = 0;
       double translationFudgeFactor = 0.01;
       double rotationFudgeFactor = 0.01;
@@ -499,32 +499,32 @@ public class PelvisPoseHistoryCorrectionUsingSimpleRobotTest
       {
          targets[i].getTranslation(targetTranslation);
          targets[i].getRotation(targetRotation);
-         targetYaw = RotationTools.computeYaw(targetRotation);
+         targetYaw = targetRotation.getYaw();
          error.set(targetTranslation.getX(), targetTranslation.getY(), targetTranslation.getZ(), targetYaw);
 
          robotPose.setTranslation(i, i, i);
 
-         long timeStamp = TimeTools.secondsToNanoSeconds(simulationConstructionSet.getTime());
+         long timeStamp = Conversions.secondsToNanoSeconds(simulationConstructionSet.getTime());
          TimeStampedTransform3D timeStampedTransform = new TimeStampedTransform3D(targets[i], timeStamp);
          StampedPosePacket posePacket = new StampedPosePacket("/pelvis", timeStampedTransform, 1.0);
 
-         success &= simulateAndBlockAndCatchExceptions(TimeTools.nanoSecondstoSeconds(1000000) * 3);
+         success &= simulateAndBlockAndCatchExceptions(Conversions.nanoSecondstoSeconds(1000000) * 3);
          externalPelvisPoseCreator.setNewestPose(posePacket);
 
          while (translationClippedAlphaValue.getDoubleValue() > 0.2 || rotationClippedAlphaValue.getDoubleValue() > 0.2)
          {
-            success &= simulateAndBlockAndCatchExceptions(TimeTools.nanoSecondstoSeconds(1000000) * 3);
+            success &= simulateAndBlockAndCatchExceptions(Conversions.nanoSecondstoSeconds(1000000) * 3);
          }
 
          while (translationClippedAlphaValue.getDoubleValue() < 0.9999999 && rotationClippedAlphaValue.getDoubleValue() < 0.9999999)
          {
-            success &= simulateAndBlockAndCatchExceptions(TimeTools.nanoSecondstoSeconds(1000000) * 100);
+            success &= simulateAndBlockAndCatchExceptions(Conversions.nanoSecondstoSeconds(1000000) * 100);
          }
 
          double xError = Math.abs(correctedPelvis_x.getDoubleValue() - error.getX());
          double yError = Math.abs(correctedPelvis_y.getDoubleValue() - error.getY());
          double zError = Math.abs(correctedPelvis_z.getDoubleValue() - error.getZ());
-         double yawError = Math.abs(correctedPelvis_yaw.getDoubleValue() - error.getW());
+         double yawError = Math.abs(correctedPelvis_yaw.getDoubleValue() - error.getS());
 
          if (xError > largestError)
             largestError = xError;
@@ -555,9 +555,9 @@ public class PelvisPoseHistoryCorrectionUsingSimpleRobotTest
       RigidBodyTransform[] targets = createRandomCorrectionTargets(random, numTargets);
       boolean success = true;
       
-      Vector4d error = new Vector4d();
-      Vector3d targetTranslation = new Vector3d();
-      Matrix3d targetRotation = new Matrix3d();
+      Vector4D error = new Vector4D();
+      Vector3D targetTranslation = new Vector3D();
+      RotationMatrix targetRotation = new RotationMatrix();
       double targetYaw = 0;
       double translationFudgeFactor = 0.01;
       double rotationFudgeFactor = 0.035;
@@ -567,32 +567,32 @@ public class PelvisPoseHistoryCorrectionUsingSimpleRobotTest
       {
          targets[i].getTranslation(targetTranslation);
          targets[i].getRotation(targetRotation);
-         targetYaw = RotationTools.computeYaw(targetRotation);
+         targetYaw = targetRotation.getYaw();
          error.set(targetTranslation.getX(), targetTranslation.getY(), targetTranslation.getZ(), targetYaw);
          
          robotPose.setTranslation(i, i, i);
          
-         long timeStamp = TimeTools.secondsToNanoSeconds(simulationConstructionSet.getTime());
+         long timeStamp = Conversions.secondsToNanoSeconds(simulationConstructionSet.getTime());
          TimeStampedTransform3D timeStampedTransform = new TimeStampedTransform3D(targets[i], timeStamp);
          StampedPosePacket posePacket = new StampedPosePacket("/pelvis", timeStampedTransform, 1.0);
          
-         success &= simulateAndBlockAndCatchExceptions(TimeTools.nanoSecondstoSeconds(1000000) * 3);
+         success &= simulateAndBlockAndCatchExceptions(Conversions.nanoSecondstoSeconds(1000000) * 3);
          externalPelvisPoseCreator.setNewestPose(posePacket);
          
          while (translationClippedAlphaValue.getDoubleValue() > 0.2)
          {
-            success &= simulateAndBlockAndCatchExceptions(TimeTools.nanoSecondstoSeconds(1000000) * 3);
+            success &= simulateAndBlockAndCatchExceptions(Conversions.nanoSecondstoSeconds(1000000) * 3);
          }
          
          while (translationClippedAlphaValue.getDoubleValue() < 0.9999999)
          {
-            success &= simulateAndBlockAndCatchExceptions(TimeTools.nanoSecondstoSeconds(1000000) * 100);
+            success &= simulateAndBlockAndCatchExceptions(Conversions.nanoSecondstoSeconds(1000000) * 100);
          }
          
          double xError = Math.abs(correctedPelvis_x.getDoubleValue() - error.getX());
          double yError = Math.abs(correctedPelvis_y.getDoubleValue() - error.getY());
          double zError = Math.abs(correctedPelvis_z.getDoubleValue() - error.getZ());
-         double yawError = Math.abs(correctedPelvis_yaw.getDoubleValue() - error.getW());
+         double yawError = Math.abs(correctedPelvis_yaw.getDoubleValue() - error.getS());
          
          if (xError > largestError)
             largestError = xError;
@@ -621,9 +621,9 @@ public class PelvisPoseHistoryCorrectionUsingSimpleRobotTest
       RigidBodyTransform[] targets = createYawOnlyCorrectionTargets(random, numTargets);
       boolean success = true;
 
-      Vector4d error = new Vector4d();
-      Vector3d targetTranslation = new Vector3d();
-      Matrix3d targetRotation = new Matrix3d();
+      Vector4D error = new Vector4D();
+      Vector3D targetTranslation = new Vector3D();
+      RotationMatrix targetRotation = new RotationMatrix();
       double targetYaw = 0;
       double translationFudgeFactor = 0.01;
       double rotationFudgeFactor = 0.01;
@@ -634,32 +634,32 @@ public class PelvisPoseHistoryCorrectionUsingSimpleRobotTest
          targets[i].setTranslation(i, i, i / numTargets);
          targets[i].getTranslation(targetTranslation);
          targets[i].getRotation(targetRotation);
-         targetYaw = RotationTools.computeYaw(targetRotation);
+         targetYaw = targetRotation.getYaw();
          error.set(targetTranslation.getX(), targetTranslation.getY(), targetTranslation.getZ(), targetYaw);
 
          robotPose.setTranslation(i, i, i / numTargets);
 
-         long timeStamp = TimeTools.secondsToNanoSeconds(simulationConstructionSet.getTime());
+         long timeStamp = Conversions.secondsToNanoSeconds(simulationConstructionSet.getTime());
          TimeStampedTransform3D timeStampedTransform = new TimeStampedTransform3D(targets[i], timeStamp);
          StampedPosePacket posePacket = new StampedPosePacket("/pelvis", timeStampedTransform, 1.0);
 
-         success &= simulateAndBlockAndCatchExceptions(TimeTools.nanoSecondstoSeconds(1000000) * 3);
+         success &= simulateAndBlockAndCatchExceptions(Conversions.nanoSecondstoSeconds(1000000) * 3);
          externalPelvisPoseCreator.setNewestPose(posePacket);
 
          while (translationClippedAlphaValue.getDoubleValue() > 0.2 || rotationClippedAlphaValue.getDoubleValue() > 0.2)
          {
-            success &= simulateAndBlockAndCatchExceptions(TimeTools.nanoSecondstoSeconds(1000000) * 3);
+            success &= simulateAndBlockAndCatchExceptions(Conversions.nanoSecondstoSeconds(1000000) * 3);
          }
 
          while (translationClippedAlphaValue.getDoubleValue() < 0.9999999 && rotationClippedAlphaValue.getDoubleValue() < 0.9999999)
          {
-            success &= simulateAndBlockAndCatchExceptions(TimeTools.nanoSecondstoSeconds(1000000) * 100);
+            success &= simulateAndBlockAndCatchExceptions(Conversions.nanoSecondstoSeconds(1000000) * 100);
          }
 
          double xError = Math.abs(correctedPelvis_x.getDoubleValue() - error.getX());
          double yError = Math.abs(correctedPelvis_y.getDoubleValue() - error.getY());
          double zError = Math.abs(correctedPelvis_z.getDoubleValue() - error.getZ());
-         double yawError = Math.abs(correctedPelvis_yaw.getDoubleValue() - error.getW());
+         double yawError = Math.abs(correctedPelvis_yaw.getDoubleValue() - error.getS());
 
          if (xError > largestError)
             largestError = xError;
@@ -690,9 +690,9 @@ public class PelvisPoseHistoryCorrectionUsingSimpleRobotTest
       RigidBodyTransform[] targets = createYawOnlyCorrectionTargets(random, numTargets);
       boolean success = true;
       
-      Vector4d error = new Vector4d();
-      Vector3d targetTranslation = new Vector3d();
-      Matrix3d targetRotation = new Matrix3d();
+      Vector4D error = new Vector4D();
+      Vector3D targetTranslation = new Vector3D();
+      RotationMatrix targetRotation = new RotationMatrix();
       double targetYaw = 0;
       double translationFudgeFactor = 0.01;
       double rotationFudgeFactor = 0.035;
@@ -703,32 +703,32 @@ public class PelvisPoseHistoryCorrectionUsingSimpleRobotTest
          targets[i].setTranslation(i, i, i / numTargets);
          targets[i].getTranslation(targetTranslation);
          targets[i].getRotation(targetRotation);
-         targetYaw = RotationTools.computeYaw(targetRotation);
+         targetYaw = targetRotation.getYaw();
          error.set(targetTranslation.getX(), targetTranslation.getY(), targetTranslation.getZ(), targetYaw);
          
          robotPose.setTranslation(i, i, i / numTargets);
          
-         long timeStamp = TimeTools.secondsToNanoSeconds(simulationConstructionSet.getTime());
+         long timeStamp = Conversions.secondsToNanoSeconds(simulationConstructionSet.getTime());
          TimeStampedTransform3D timeStampedTransform = new TimeStampedTransform3D(targets[i], timeStamp);
          StampedPosePacket posePacket = new StampedPosePacket("/pelvis", timeStampedTransform, 1.0);
          
-         success &= simulateAndBlockAndCatchExceptions(TimeTools.nanoSecondstoSeconds(1000000) * 3);
+         success &= simulateAndBlockAndCatchExceptions(Conversions.nanoSecondstoSeconds(1000000) * 3);
          externalPelvisPoseCreator.setNewestPose(posePacket);
          
          while (translationClippedAlphaValue.getDoubleValue() > 0.2)
          {
-            success &= simulateAndBlockAndCatchExceptions(TimeTools.nanoSecondstoSeconds(1000000) * 3);
+            success &= simulateAndBlockAndCatchExceptions(Conversions.nanoSecondstoSeconds(1000000) * 3);
          }
          
          while (translationClippedAlphaValue.getDoubleValue() < 0.9999999)
          {
-            success &= simulateAndBlockAndCatchExceptions(TimeTools.nanoSecondstoSeconds(1000000) * 100);
+            success &= simulateAndBlockAndCatchExceptions(Conversions.nanoSecondstoSeconds(1000000) * 100);
          }
          
          double xError = Math.abs(correctedPelvis_x.getDoubleValue() - error.getX());
          double yError = Math.abs(correctedPelvis_y.getDoubleValue() - error.getY());
          double zError = Math.abs(correctedPelvis_z.getDoubleValue() - error.getZ());
-         double yawError = Math.abs(correctedPelvis_yaw.getDoubleValue() - error.getW());
+         double yawError = Math.abs(correctedPelvis_yaw.getDoubleValue() - error.getS());
          
          if (xError > largestError)
             largestError = xError;
@@ -868,7 +868,7 @@ public class PelvisPoseHistoryCorrectionUsingSimpleRobotTest
       {
          refFrame.update();
          sixDofPelvisJoint.setPositionAndRotation(robotPose);
-         pelvisPoseHistoryCorrection.doControl(TimeTools.secondsToNanoSeconds(scs.getTime()));
+         pelvisPoseHistoryCorrection.doControl(Conversions.secondsToNanoSeconds(scs.getTime()));
          floatingJoint.setRotationAndTranslation(sixDofPelvisJoint.getJointTransform3D());
       }
    }
@@ -879,7 +879,7 @@ public class PelvisPoseHistoryCorrectionUsingSimpleRobotTest
       public RectangleRobot()
       {
          super("RectangleRobot");
-         baseJoint = new FloatingJoint("base", new Vector3d(0.0, 0.0, 0.0), this);
+         baseJoint = new FloatingJoint("base", new Vector3D(0.0, 0.0, 0.0), this);
          Link link = base("base");
          baseJoint.setLink(link);
          this.addRootJoint(baseJoint);

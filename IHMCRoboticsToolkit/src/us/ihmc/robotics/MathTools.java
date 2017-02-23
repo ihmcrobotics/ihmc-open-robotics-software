@@ -3,11 +3,10 @@ package us.ihmc.robotics;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import javax.vecmath.Quat4d;
-import javax.vecmath.Tuple3d;
-
 import org.ejml.data.DenseMatrix64F;
 
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.Direction;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -634,7 +633,7 @@ public class MathTools
       }
    }
 
-   public static void set(Tuple3d tuple, Direction direction, double value)
+   public static void set(Tuple3DBasics tuple, Direction direction, double value)
    {
       switch (direction)
       {
@@ -658,7 +657,7 @@ public class MathTools
       }
    }
 
-   public static double get(Tuple3d tuple, Direction direction)
+   public static double get(Tuple3DBasics tuple, Direction direction)
    {
       switch (direction)
       {
@@ -689,19 +688,19 @@ public class MathTools
       return (!Double.isNaN(proposed));
    }
 
-   public static boolean isFinite(Tuple3d tuple)
+   public static boolean isFinite(Tuple3DBasics tuple)
    {
       return isFinite(tuple.getX()) && isFinite(tuple.getY()) && isFinite(tuple.getZ());
    }
    
-   public static boolean containsNaN(Tuple3d tuple)
+   public static boolean containsNaN(Tuple3DBasics tuple)
    {
       return (Double.isNaN(tuple.getX()) || Double.isNaN(tuple.getY()) || Double.isNaN(tuple.getZ()));
    }
 
-   public static boolean containsNaN(Quat4d quat4d)
+   public static boolean containsNaN(Quaternion quat4d)
    {
-      return (Double.isNaN(quat4d.getW()) || Double.isNaN(quat4d.getX()) || Double.isNaN(quat4d.getY()) || Double.isNaN(quat4d.getZ()));
+      return (Double.isNaN(quat4d.getS()) || Double.isNaN(quat4d.getX()) || Double.isNaN(quat4d.getY()) || Double.isNaN(quat4d.getZ()));
    }
 
    public static boolean containsNaN(DenseMatrix64F denseMatrix64F)
@@ -770,7 +769,7 @@ public class MathTools
       return roundedValue;
    }
 
-   public static void floorToGivenPrecision(Tuple3d tuple3d, double precision)
+   public static void floorToGivenPrecision(Tuple3DBasics tuple3d, double precision)
    {
       tuple3d.setX(floorToGivenPrecision(tuple3d.getX(), precision));
       tuple3d.setY(floorToGivenPrecision(tuple3d.getY(), precision));
@@ -786,7 +785,7 @@ public class MathTools
       return roundedValue;
    }
 
-   public static void roundToGivenPrecision(Tuple3d tuple3d, double precision)
+   public static void roundToGivenPrecision(Tuple3DBasics tuple3d, double precision)
    {
       tuple3d.setX(roundToPrecision(tuple3d.getX(), precision));
       tuple3d.setY(roundToPrecision(tuple3d.getY(), precision));
@@ -801,7 +800,7 @@ public class MathTools
       return AngleTools.trimAngleMinusPiToPi(roundedValue);
    }
 
-   public static void roundToGivenPrecisionForAngles(Tuple3d tuple3d, double precision)
+   public static void roundToGivenPrecisionForAngles(Tuple3DBasics tuple3d, double precision)
    {
       tuple3d.setX(roundToGivenPrecisionForAngle(tuple3d.getX(), precision));
       tuple3d.setY(roundToGivenPrecisionForAngle(tuple3d.getY(), precision));

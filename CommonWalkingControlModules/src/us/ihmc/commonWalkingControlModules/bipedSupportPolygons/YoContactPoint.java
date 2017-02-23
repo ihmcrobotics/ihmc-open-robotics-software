@@ -1,7 +1,6 @@
 package us.ihmc.commonWalkingControlModules.bipedSupportPolygons;
 
-import javax.vecmath.Point2d;
-
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -67,7 +66,7 @@ public class YoContactPoint implements ContactPointInterface
    }
 
    @Override
-   public void getPosition2d(Point2d position2d)
+   public void getPosition2d(Point2D position2d)
    {
       // TODO Auto-generated method stub
 
@@ -85,7 +84,7 @@ public class YoContactPoint implements ContactPointInterface
       yoPosition.setXY(position2d);
    }
 
-   public void setPosition2d(Point2d contactPointLocation)
+   public void setPosition2d(Point2D contactPointLocation)
    {
       yoPosition.setXY(contactPointLocation);
    }

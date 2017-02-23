@@ -3,8 +3,7 @@ package us.ihmc.ihmcPerception.depthData;
 import java.awt.Color;
 import java.net.URISyntaxException;
 
-import javax.vecmath.Point3d;
-
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.utilities.ros.apps.RosPointCloudFilterRepublisher;
 
 /*
@@ -13,7 +12,7 @@ import us.ihmc.utilities.ros.apps.RosPointCloudFilterRepublisher;
 public class DepthDataFilterRosDemo extends RosPointCloudFilterRepublisher
 {
    private DepthDataFilter depthDataFilter;
-   private Point3d sensorOrigin = new Point3d(0.0,0.0,1.0);
+   private Point3D sensorOrigin = new Point3D(0.0,0.0,1.0);
 
 
    public DepthDataFilterRosDemo()
@@ -24,13 +23,13 @@ public class DepthDataFilterRosDemo extends RosPointCloudFilterRepublisher
 
 
    @Override
-   protected boolean includePoint(Point3d point, Color color)
+   protected boolean includePoint(Point3D point, Color color)
    {
       return includePoint(point, (color.getRed() + color.getGreen() + color.getBlue()) / 3.0f);
    }
 
    @Override
-   protected boolean includePoint(Point3d point, float intensity)
+   protected boolean includePoint(Point3D point, float intensity)
    {
       return depthDataFilter.addPoint(point, sensorOrigin);
    }

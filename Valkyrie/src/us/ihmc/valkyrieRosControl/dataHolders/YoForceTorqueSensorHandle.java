@@ -2,7 +2,6 @@ package us.ihmc.valkyrieRosControl.dataHolders;
 
 import org.ejml.data.DenseMatrix64F;
 
-import us.ihmc.convexOptimization.qpOASES.DenseMatrix;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;

@@ -14,8 +14,8 @@ import java.util.ArrayList;
 
 import javax.swing.JFrame;
 import javax.swing.JScrollPane;
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 
 import org.ddogleg.optimization.functions.FunctionNtoM;
 
@@ -91,14 +91,14 @@ public class ComCopResidual implements FunctionNtoM
       }
    }
 
-   public Vector3d getCurrentLinkCom()
+   public Vector3D getCurrentLinkCom()
    {
-      Vector3d comOffset = new Vector3d();
+      Vector3D comOffset = new Vector3D();
       targetLink.getComOffset(comOffset);
       return comOffset;
    }
 
-   public void packRobotComCopSeries(ArrayList<Point3d> outCom, ArrayList<Point3d> outCop)
+   public void packRobotComCopSeries(ArrayList<Point3D> outCom, ArrayList<Point3D> outCop)
    {
       outCom.clear();
       outCop.clear();
@@ -107,12 +107,12 @@ public class ComCopResidual implements FunctionNtoM
          dataBuffer.setIndexButDoNotNotifySimulationRewoundListeners(selectedFrames[i]);
          // model predicted CoM
          robot.update(); //this pull data from dataBuffer magically through YoVariables
-         Point3d modelCoM = new Point3d();
+         Point3D modelCoM = new Point3D();
          robot.computeCenterOfMass(modelCoM);
          outCom.add(modelCoM);
 
          // sensedCoP
-         Point3d sensedCoP = new Point3d(dataBuffer.getVariable("sensedCoPX").getValueAsDouble(), dataBuffer.getVariable("sensedCoPY").getValueAsDouble(),
+         Point3D sensedCoP = new Point3D(dataBuffer.getVariable("sensedCoPX").getValueAsDouble(), dataBuffer.getVariable("sensedCoPY").getValueAsDouble(),
                dataBuffer.getVariable("sensedCoPZ").getValueAsDouble());
          outCop.add(sensedCoP);
       }
@@ -123,16 +123,16 @@ public class ComCopResidual implements FunctionNtoM
    {
       if (lockComY)
       {
-         Vector3d lastCom = new Vector3d();
+         Vector3D lastCom = new Vector3D();
          targetLink.getComOffset(lastCom);
          targetLink.setComOffset(inParameter[0], lastCom.getY(), inParameter[2]);
       }
       else
       {
-         targetLink.setComOffset(new Vector3d(inParameter));
+         targetLink.setComOffset(new Vector3D(inParameter));
       }
-      ArrayList<Point3d> com = new ArrayList<>(selectedFrames.length);
-      ArrayList<Point3d> cop = new ArrayList<>(selectedFrames.length);
+      ArrayList<Point3D> com = new ArrayList<>(selectedFrames.length);
+      ArrayList<Point3D> cop = new ArrayList<>(selectedFrames.length);
 
       packRobotComCopSeries(com, cop);
 
@@ -168,8 +168,8 @@ public class ComCopResidual implements FunctionNtoM
       Plotter plotter = createPlotter(frameTitle);
       // filter out zero velocity region
       int nSamples = getNumSamples();
-      ArrayList<Point3d> com = new ArrayList<>(nSamples);
-      ArrayList<Point3d> cop = new ArrayList<>(nSamples);
+      ArrayList<Point3D> com = new ArrayList<>(nSamples);
+      ArrayList<Point3D> cop = new ArrayList<>(nSamples);
       packRobotComCopSeries(com, cop);
 
       for (int i = 0; i < nSamples; i += nSamples / numPlotSample)

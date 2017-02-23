@@ -1,10 +1,11 @@
 package us.ihmc.robotics.geometry;
 
-import javax.vecmath.Point2d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector2d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
+import us.ihmc.euclid.tuple2D.interfaces.Vector2DBasics;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class FrameLine extends AbstractFrameObject<FrameLine, Line3d>
@@ -27,7 +28,7 @@ public class FrameLine extends AbstractFrameObject<FrameLine, Line3d>
       point.checkReferenceFrameMatch(vector);
    }
 
-   public FrameLine(ReferenceFrame referenceFrame, Point3d point, Vector3d vector)
+   public FrameLine(ReferenceFrame referenceFrame, Point3DReadOnly point, Vector3DReadOnly vector)
    {
       this(referenceFrame, new Line3d(point, vector));
    }
@@ -48,24 +49,24 @@ public class FrameLine extends AbstractFrameObject<FrameLine, Line3d>
       return new FrameVector(referenceFrame, line.getNormalizedVector());
    }
 
-   public Point3d getPoint()
+   public Point3D getPoint()
    {
       return line.getPoint();
    }
 
-   public Vector3d getNormalizedVector()
+   public Vector3D getNormalizedVector()
    {
       return line.getNormalizedVector();
    }
 
-   public Point3d getPointCopy()
+   public Point3D getPointCopy()
    {
-      return new Point3d(line.getPoint());
+      return new Point3D(line.getPoint());
    }
 
-   public Vector3d getNormalizedVectorCopy()
+   public Vector3D getNormalizedVectorCopy()
    {
-      return new Vector3d(line.getNormalizedVector());
+      return new Vector3D(line.getNormalizedVector());
    }
 
    @Override
@@ -83,7 +84,7 @@ public class FrameLine extends AbstractFrameObject<FrameLine, Line3d>
       line.setPoint(point.getPoint());
    }
    
-   public void setPointWithoutChecks(Point3d point)
+   public void setPointWithoutChecks(Point3DReadOnly point)
    {
       line.setPoint(point);
    }
@@ -95,7 +96,7 @@ public class FrameLine extends AbstractFrameObject<FrameLine, Line3d>
       line.setVector(vector.getVector());
    }
 
-   public void setVectorWithoutChecks(Vector3d vector)
+   public void setVectorWithoutChecks(Vector3DReadOnly vector)
    {
       line.setVector(vector);
    }
@@ -110,7 +111,7 @@ public class FrameLine extends AbstractFrameObject<FrameLine, Line3d>
       lineToPack.set(line.getPoint().getX(), line.getPoint().getY(), line.getNormalizedVector().getX(), line.getNormalizedVector().getY());
    }
    
-   public void projectOntoXYPlane(Point2d pointToPack, Vector2d normalizedVectorToPack)
+   public void projectOntoXYPlane(Point2DBasics pointToPack, Vector2DBasics normalizedVectorToPack)
    {
       pointToPack.set(line.getPoint().getX(), line.getPoint().getY());
       normalizedVectorToPack.set(line.getNormalizedVector().getX(), line.getNormalizedVector().getY());

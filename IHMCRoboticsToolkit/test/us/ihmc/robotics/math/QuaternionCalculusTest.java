@@ -1,18 +1,16 @@
 package us.ihmc.robotics.math;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Random;
 
-import javax.vecmath.AxisAngle4d;
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.tuple4D.Vector4D;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
@@ -34,20 +32,20 @@ public class QuaternionCalculusTest
       for (int i = 0; i < 10000; i++)
       {
          QuaternionCalculus quaternionCalculus = new QuaternionCalculus();
-         Quat4d q = RandomTools.generateRandomQuaternion(random);
+         Quaternion q = RandomTools.generateRandomQuaternion(random);
 
-         Quat4d qLog = new Quat4d();
-         Quat4d vExp = new Quat4d();
+         Vector4D qLog = new Vector4D();
+         Quaternion vExp = new Quaternion();
          
          quaternionCalculus.log(q, qLog);
-         Vector3d v = new Vector3d(qLog.getX(),qLog.getY(),qLog.getZ()); 
+         Vector3D v = new Vector3D(qLog.getX(),qLog.getY(),qLog.getZ()); 
          
          quaternionCalculus.exp(v, vExp);
 
          assertTrue(Math.abs(q.getX() - vExp.getX()) < 10e-10);
          assertTrue(Math.abs(q.getY() - vExp.getY()) < 10e-10);
          assertTrue(Math.abs(q.getZ() - vExp.getZ()) < 10e-10);
-         assertTrue(Math.abs(q.getW() - vExp.getW()) < 10e-10);
+         assertTrue(Math.abs(q.getS() - vExp.getS()) < 10e-10);
 
       }
    }
@@ -62,13 +60,13 @@ public class QuaternionCalculusTest
       for (int i = 0; i < 10000; i++)
       {
          QuaternionCalculus quaternionCalculus = new QuaternionCalculus();
-         Quat4d q = RandomTools.generateRandomQuaternion(random);
+         Quaternion q = RandomTools.generateRandomQuaternion(random);
          double length = RandomTools.generateRandomDouble(random, 0.0, 10.0);
-         Vector3d expectedAngularVelocity = RandomTools.generateRandomVector(random, length);
+         Vector3D expectedAngularVelocity = RandomTools.generateRandomVector(random, length);
          if (random.nextBoolean())
             expectedAngularVelocity.negate();
-         Vector3d actualAngularVelocity = new Vector3d();
-         Quat4d qDot = new Quat4d();
+         Vector3D actualAngularVelocity = new Vector3D();
+         Vector4D qDot = new Vector4D();
 
          quaternionCalculus.computeQDot(q, expectedAngularVelocity, qDot);
          quaternionCalculus.computeAngularVelocityInWorldFrame(q, qDot, actualAngularVelocity);
@@ -86,17 +84,17 @@ public class QuaternionCalculusTest
       for (int i = 0; i < 10000; i++)
       {
          QuaternionCalculus quaternionCalculus = new QuaternionCalculus();
-         Quat4d q = RandomTools.generateRandomQuaternion(random);
+         Quaternion q = RandomTools.generateRandomQuaternion(random);
          double length = RandomTools.generateRandomDouble(random, 0.0, 10.0);
-         Vector3d angularVelocity = RandomTools.generateRandomVector(random, length);
+         Vector3D angularVelocity = RandomTools.generateRandomVector(random, length);
          if (random.nextBoolean())
             angularVelocity.negate();
-         Vector3d expectedAngularAcceleration = RandomTools.generateRandomVector(random, length);
+         Vector3D expectedAngularAcceleration = RandomTools.generateRandomVector(random, length);
          if (random.nextBoolean())
             expectedAngularAcceleration.negate();
-         Vector3d actualAngularAcceleration = new Vector3d();
-         Quat4d qDot = new Quat4d();
-         Quat4d qDDot = new Quat4d();
+         Vector3D actualAngularAcceleration = new Vector3D();
+         Vector4D qDot = new Vector4D();
+         Vector4D qDDot = new Vector4D();
 
          quaternionCalculus.computeQDot(q, angularVelocity, qDot);
 
@@ -138,11 +136,11 @@ public class QuaternionCalculusTest
 
       FrameOrientation orientation = new FrameOrientation();
       FrameVector expectedAngularVelocity = new FrameVector();
-      Quat4d q = new Quat4d();
-      Quat4d qDot = new Quat4d();
-      Quat4d qPrevious = new Quat4d();
-      Quat4d qNext = new Quat4d();
-      Vector3d actualAngularVelocity = new Vector3d();
+      Quaternion q = new Quaternion();
+      Vector4D qDot = new Vector4D();
+      Quaternion qPrevious = new Quaternion();
+      Quaternion qNext = new Quaternion();
+      Vector3D actualAngularVelocity = new Vector3D();
 
       for (double time = dt; time <= trajectoryTime - dt; time += dt)
       {
@@ -172,19 +170,19 @@ public class QuaternionCalculusTest
       Random random = new Random(65265L);
       double integrationTime = 1.0;
       double angleVelocity = RandomTools.generateRandomDouble(random, 0.0, 2.0 * Math.PI) / integrationTime;
-      Vector3d expectedAngularVelocity = new Vector3d(angleVelocity, 0.0, 0.0);
-      Vector3d expectedAngularAcceleration = new Vector3d();
-      AxisAngle4d axisAnglePrevious = new AxisAngle4d(1.0, 0.0, 0.0, 0.0);
-      AxisAngle4d axisAngleCurrent = new AxisAngle4d(1.0, 0.0, 0.0, 0.0);
-      AxisAngle4d axisAngleNext = new AxisAngle4d(1.0, 0.0, 0.0, 0.0);
-      Quat4d qPrevious = new Quat4d();
-      Quat4d qCurrent = new Quat4d();
-      Quat4d qNext = new Quat4d();
-      Quat4d qDot = new Quat4d();
-      Quat4d qDDot = new Quat4d();
+      Vector3D expectedAngularVelocity = new Vector3D(angleVelocity, 0.0, 0.0);
+      Vector3D expectedAngularAcceleration = new Vector3D();
+      AxisAngle axisAnglePrevious = new AxisAngle(1.0, 0.0, 0.0, 0.0);
+      AxisAngle axisAngleCurrent = new AxisAngle(1.0, 0.0, 0.0, 0.0);
+      AxisAngle axisAngleNext = new AxisAngle(1.0, 0.0, 0.0, 0.0);
+      Quaternion qPrevious = new Quaternion();
+      Quaternion qCurrent = new Quaternion();
+      Quaternion qNext = new Quaternion();
+      Vector4D qDot = new Vector4D();
+      Vector4D qDDot = new Vector4D();
 
-      Vector3d actualAngularVelocity = new Vector3d();
-      Vector3d actualAngularAcceleration = new Vector3d();
+      Vector3D actualAngularVelocity = new Vector3D();
+      Vector3D actualAngularAcceleration = new Vector3D();
 
       double dt = 1.0e-4;
       for (double time = dt; time < integrationTime; time += dt)
@@ -233,12 +231,12 @@ public class QuaternionCalculusTest
 
       FrameOrientation orientation = new FrameOrientation();
       FrameVector expectedAngularAcceleration = new FrameVector();
-      Quat4d q = new Quat4d();
-      Quat4d qDot = new Quat4d();
-      Quat4d qDDot = new Quat4d();
-      Quat4d qPrevious = new Quat4d();
-      Quat4d qNext = new Quat4d();
-      Vector3d actualAngularAcceleration = new Vector3d();
+      Quaternion q = new Quaternion();
+      Vector4D qDot = new Vector4D();
+      Vector4D qDDot = new Vector4D();
+      Quaternion qPrevious = new Quaternion();
+      Quaternion qNext = new Quaternion();
+      Vector3D actualAngularAcceleration = new Vector3D();
 
       for (double time = dt; time <= trajectoryTime - dt; time += dt)
       {
@@ -267,10 +265,10 @@ public class QuaternionCalculusTest
    {
       QuaternionCalculus quaternionCalculus = new QuaternionCalculus();
       Random random = new Random(6546545L);
-      Quat4d q0 = RandomTools.generateRandomQuaternion(random);
-      Quat4d q1 = RandomTools.generateRandomQuaternion(random);
-      Quat4d expectedQInterpolated = new Quat4d();
-      Quat4d actualQInterpolated = new Quat4d();
+      Quaternion q0 = RandomTools.generateRandomQuaternion(random);
+      Quaternion q1 = RandomTools.generateRandomQuaternion(random);
+      Quaternion expectedQInterpolated = new Quaternion();
+      Quaternion actualQInterpolated = new Quaternion();
 
       for (double alpha = 0.0; alpha <= 1.0; alpha += 1.0e-6)
       {
@@ -280,137 +278,4 @@ public class QuaternionCalculusTest
          assertTrue(expectedQInterpolated.epsilonEquals(actualQInterpolated, EPSILON));
       }
    }
-
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
-   public void testTransformOnVector() throws Exception
-   {
-      QuaternionCalculus quaternionCalculus = new QuaternionCalculus();
-      Random random = new Random(6546545L);
-      Vector3d expectedTransformedVector = new Vector3d();
-      Vector3d actualTransformedVector = new Vector3d();
-
-      for (int i = 0; i < 1000; i++)
-      {
-         Quat4d qForTransform = RandomTools.generateRandomQuaternion(random);
-         qForTransform.normalize();
-         Matrix3d matrixForTranform = new Matrix3d();
-         matrixForTranform.set(qForTransform);
-         Vector3d originalVector = RandomTools.generateRandomVector(random, new Vector3d(-10.0, -10.0, -10.0), new Vector3d(10.0, 10.0, 10.0));
-         if (random.nextBoolean())
-            originalVector.negate();
-         matrixForTranform.transform(originalVector, expectedTransformedVector);
-         quaternionCalculus.transform(qForTransform, originalVector, actualTransformedVector);
-         assertEquals(expectedTransformedVector.length(), actualTransformedVector.length(), EPSILON);
-         assertTrue(expectedTransformedVector.epsilonEquals(actualTransformedVector, EPSILON));
-
-         actualTransformedVector.set(originalVector);
-         quaternionCalculus.transform(qForTransform, actualTransformedVector);
-         assertEquals(expectedTransformedVector.length(), actualTransformedVector.length(), EPSILON);
-         assertTrue(expectedTransformedVector.epsilonEquals(actualTransformedVector, EPSILON));
-      }
-   }
-
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
-   public void testInvertTransformOnVector() throws Exception
-   {
-      QuaternionCalculus quaternionCalculus = new QuaternionCalculus();
-      Random random = new Random(6546545L);
-      Vector3d expectedTransformedVector = new Vector3d();
-      Vector3d actualTransformedVector = new Vector3d();
-
-      for (int i = 0; i < 1000; i++)
-      {
-         Quat4d qForTransform = RandomTools.generateRandomQuaternion(random);
-         qForTransform.normalize();
-         Matrix3d matrixForTranform = new Matrix3d();
-         matrixForTranform.set(qForTransform);
-         matrixForTranform.transpose();
-         Vector3d originalVector = RandomTools.generateRandomVector(random, new Vector3d(-10.0, -10.0, -10.0), new Vector3d(10.0, 10.0, 10.0));
-         if (random.nextBoolean())
-            originalVector.negate();
-         matrixForTranform.transform(originalVector, expectedTransformedVector);
-         quaternionCalculus.invertTransform(qForTransform, originalVector, actualTransformedVector);
-         assertEquals(expectedTransformedVector.length(), actualTransformedVector.length(), EPSILON);
-         assertTrue(expectedTransformedVector.epsilonEquals(actualTransformedVector, EPSILON));
-
-         actualTransformedVector.set(originalVector);
-         quaternionCalculus.invertTransform(qForTransform, actualTransformedVector);
-         assertEquals(expectedTransformedVector.length(), actualTransformedVector.length(), EPSILON);
-         assertTrue(expectedTransformedVector.epsilonEquals(actualTransformedVector, EPSILON));
-      }
-   }
-
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
-   public void testTransformOnQuaternion() throws Exception
-   {
-      QuaternionCalculus quaternionCalculus = new QuaternionCalculus();
-      Random random = new Random(6546545L);
-      Quat4d actualTransformedQuaternion = new Quat4d();
-
-      Matrix3d originalMatrix = new Matrix3d();
-      Matrix3d expectedTransformedMatrix = new Matrix3d();
-      Matrix3d actualTransformedMatrix = new Matrix3d();
-
-      for (int i = 0; i < 1000; i++)
-      {
-         Quat4d qForTransform = RandomTools.generateRandomQuaternion(random);
-         qForTransform.normalize();
-         Matrix3d matrixForTranform = new Matrix3d();
-         matrixForTranform.set(qForTransform);
-         Quat4d originalQuat = RandomTools.generateRandomQuaternion(random);
-         if (random.nextBoolean())
-            originalQuat.negate();
-         originalMatrix.set(originalQuat);
-         expectedTransformedMatrix.mul(matrixForTranform, originalMatrix);
-         expectedTransformedMatrix.mulTransposeRight(expectedTransformedMatrix, matrixForTranform);
-         quaternionCalculus.transform(qForTransform, originalQuat, actualTransformedQuaternion);
-         actualTransformedMatrix.set(actualTransformedQuaternion);
-         assertTrue(expectedTransformedMatrix.epsilonEquals(actualTransformedMatrix, EPSILON));
-
-         actualTransformedQuaternion.set(originalQuat);
-         quaternionCalculus.transform(qForTransform, actualTransformedQuaternion);
-         actualTransformedMatrix.set(actualTransformedQuaternion);
-         assertTrue(expectedTransformedMatrix.epsilonEquals(actualTransformedMatrix, EPSILON));
-      }
-   }
-
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
-   public void testInvertTransformOnQuaternion() throws Exception
-   {
-      QuaternionCalculus quaternionCalculus = new QuaternionCalculus();
-      Random random = new Random(6546545L);
-      Quat4d actualTransformedQuaternion = new Quat4d();
-
-      Matrix3d originalMatrix = new Matrix3d();
-      Matrix3d expectedTransformedMatrix = new Matrix3d();
-      Matrix3d actualTransformedMatrix = new Matrix3d();
-
-      for (int i = 0; i < 1000; i++)
-      {
-         Quat4d qForTransform = RandomTools.generateRandomQuaternion(random);
-         qForTransform.normalize();
-         Matrix3d matrixForTranform = new Matrix3d();
-         matrixForTranform.set(qForTransform);
-         matrixForTranform.transpose();
-         Quat4d originalQuat = RandomTools.generateRandomQuaternion(random);
-         if (random.nextBoolean())
-            originalQuat.negate();
-         originalMatrix.set(originalQuat);
-         expectedTransformedMatrix.mul(matrixForTranform, originalMatrix);
-         expectedTransformedMatrix.mulTransposeRight(expectedTransformedMatrix, matrixForTranform);
-         quaternionCalculus.invertTransform(qForTransform, originalQuat, actualTransformedQuaternion);
-         actualTransformedMatrix.set(actualTransformedQuaternion);
-         assertTrue(expectedTransformedMatrix.epsilonEquals(actualTransformedMatrix, EPSILON));
-
-         actualTransformedQuaternion.set(originalQuat);
-         quaternionCalculus.invertTransform(qForTransform, actualTransformedQuaternion);
-         actualTransformedMatrix.set(actualTransformedQuaternion);
-         assertTrue(expectedTransformedMatrix.epsilonEquals(actualTransformedMatrix, EPSILON));
-      }
-   }
-
 }

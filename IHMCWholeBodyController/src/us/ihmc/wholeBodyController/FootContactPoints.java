@@ -3,10 +3,9 @@ package us.ihmc.wholeBodyController;
 import java.util.List;
 import java.util.Map;
 
-import javax.vecmath.Tuple2d;
-import javax.vecmath.Tuple3d;
-
-import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple2D.interfaces.Tuple2DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
 public interface FootContactPoints
@@ -23,7 +22,7 @@ public interface FootContactPoints
     * @param soleToAnkleFrameTransforms
     * @return
     */
-   public Map<String, List<Tuple3d>> getSimulationContactPoints(double footLength, double footWidth, double toeWidth, DRCRobotJointMap jointMap,
+   public Map<String, List<Tuple3DBasics>> getSimulationContactPoints(double footLength, double footWidth, double toeWidth, DRCRobotJointMap jointMap,
          SideDependentList<RigidBodyTransform> soleToAnkleFrameTransforms);
 
    /**
@@ -35,7 +34,7 @@ public interface FootContactPoints
     * @param toeWidth
     * @return
     */
-   public SideDependentList<List<Tuple2d>> getControllerContactPoints(double footLength, double footWidth, double toeWidth);
+   public SideDependentList<List<Tuple2DBasics>> getControllerContactPoints(double footLength, double footWidth, double toeWidth);
 
    /**
     * Creates the toe off contact point used by the controller for each robot side. The point is in 2d and expected
@@ -46,7 +45,7 @@ public interface FootContactPoints
     * @param toeWidth
     * @return
     */
-   public SideDependentList<Tuple2d> getToeOffContactPoints(double footLength, double footWidth, double toeWidth);
+   public SideDependentList<Tuple2DBasics> getToeOffContactPoints(double footLength, double footWidth, double toeWidth);
 
    /**
     * Allows switching between different sets of ground parameters.

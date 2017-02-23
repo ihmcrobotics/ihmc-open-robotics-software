@@ -1,7 +1,5 @@
 package us.ihmc.footstepPlanning.roughTerrainPlanning;
 
-import javax.vecmath.Vector3d;
-
 import org.junit.Before;
 import org.junit.Test;
 
@@ -9,6 +7,7 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
 import us.ihmc.continuousIntegration.IntegrationCategory;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.footstepPlanning.FootstepPlanner;
 import us.ihmc.footstepPlanning.graphSearch.BipedalFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.PlanarRegionBipedalFootstepPlanner;
@@ -35,7 +34,7 @@ public class PlanarRegionBipedalFootstepPlannerTest extends FootstepPlannerOnRou
       planner.setMaximumNumberOfNodesToExpand(Integer.MAX_VALUE);
       planner.setTimeout(10.0);
       planner.setExitAfterInitialSolution(false);
-      super.testOnStaircase(new Vector3d(), true);
+      super.testOnStaircase(new Vector3D(), true);
    }
 
    @Override

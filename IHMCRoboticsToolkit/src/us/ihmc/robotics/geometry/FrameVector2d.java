@@ -2,69 +2,100 @@ package us.ihmc.robotics.geometry;
 
 import java.util.Random;
 
-import javax.vecmath.Tuple2d;
-import javax.vecmath.Vector2d;
-
-import us.ihmc.robotics.geometry.transformables.TransformableVector2d;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 /**
- * One of the main goals of this class is to check, at runtime, that operations on vectors occur within the same Frame.
- * This method checks for one Vector argument.
+ * One of the main goals of this class is to check, at runtime, that operations on vectors occur
+ * within the same Frame. This method checks for one Vector argument.
  *
  * @author Learning Locomotion Team
  * @version 2.0
  */
-public class FrameVector2d extends FrameTuple2d<FrameVector2d, TransformableVector2d>
+public class FrameVector2d extends FrameTuple2d<FrameVector2d, Vector2D>
 {
    private static final long serialVersionUID = -610124454205790361L;
 
    private final RigidBodyTransform temporaryTransformToDesiredFrame = new RigidBodyTransform();
-   
-   /** FrameVector2d <p/> A normal vector2d associated with a specific reference frame. */
+
+   /**
+    * FrameVector2d
+    * <p/>
+    * A normal vector2d associated with a specific reference frame.
+    */
    public FrameVector2d(ReferenceFrame referenceFrame, double x, double y, String name)
    {
-      super(referenceFrame, new TransformableVector2d(x, y), name);
+      super(referenceFrame, new Vector2D(x, y), name);
    }
 
-   /** FrameVector2d <p/> A normal vector2d associated with a specific reference frame. */
+   /**
+    * FrameVector2d
+    * <p/>
+    * A normal vector2d associated with a specific reference frame.
+    */
    public FrameVector2d(ReferenceFrame referenceFrame, double x, double y)
    {
       this(referenceFrame, x, y, null);
    }
 
-   /** FrameVector2d <p/> A normal vector2d associated with a specific reference frame. */
+   /**
+    * FrameVector2d
+    * <p/>
+    * A normal vector2d associated with a specific reference frame.
+    */
    public FrameVector2d()
    {
       this(ReferenceFrame.getWorldFrame());
    }
 
-   /** FrameVector2d <p/> A normal vector2d associated with a specific reference frame. */
-   public FrameVector2d(ReferenceFrame referenceFrame, Tuple2d tuple)
+   /**
+    * FrameVector2d
+    * <p/>
+    * A normal vector2d associated with a specific reference frame.
+    */
+   public FrameVector2d(ReferenceFrame referenceFrame, Tuple2DReadOnly tuple)
    {
       this(referenceFrame, tuple.getX(), tuple.getY());
    }
 
-   /** FrameVector2d <p/> A normal vector2d associated with a specific reference frame. */
+   /**
+    * FrameVector2d
+    * <p/>
+    * A normal vector2d associated with a specific reference frame.
+    */
    public FrameVector2d(ReferenceFrame referenceFrame, double[] vector)
    {
       this(referenceFrame, vector[0], vector[1]);
    }
 
-   /** FrameVector2d <p/> A normal vector2d associated with a specific reference frame. */
+   /**
+    * FrameVector2d
+    * <p/>
+    * A normal vector2d associated with a specific reference frame.
+    */
    public FrameVector2d(ReferenceFrame referenceFrame)
    {
       this(referenceFrame, 0.0, 0.0);
    }
 
-   /** FrameVector2d <p/> A normal vector2d associated with a specific reference frame. */
+   /**
+    * FrameVector2d
+    * <p/>
+    * A normal vector2d associated with a specific reference frame.
+    */
    public FrameVector2d(FrameTuple2d<?, ?> frameTuple2d)
    {
       this(frameTuple2d.referenceFrame, frameTuple2d.tuple.getX(), frameTuple2d.tuple.getY(), frameTuple2d.name);
    }
 
-   /** FrameVector2d <p/> A normal vector2d associated with a specific reference frame. */
+   /**
+    * FrameVector2d
+    * <p/>
+    * A normal vector2d associated with a specific reference frame.
+    */
    public FrameVector2d(FramePoint2d startFramePoint, FramePoint2d endFramePoint)
    {
       this(endFramePoint.referenceFrame, endFramePoint.tuple.getX(), endFramePoint.tuple.getY(), endFramePoint.name);
@@ -86,7 +117,7 @@ public class FrameVector2d extends FrameTuple2d<FrameVector2d, TransformableVect
     *
     * @return Vector2d
     */
-   public Vector2d getVector()
+   public Vector2D getVector()
    {
       return this.tuple;
    }

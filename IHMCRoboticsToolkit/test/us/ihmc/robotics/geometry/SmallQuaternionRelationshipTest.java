@@ -2,13 +2,12 @@ package us.ihmc.robotics.geometry;
 
 import static org.junit.Assert.assertTrue;
 
-import javax.vecmath.AxisAngle4d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 
 public class SmallQuaternionRelationshipTest
 {
@@ -24,8 +23,8 @@ public class SmallQuaternionRelationshipTest
       // and delta_phi is the rotation vector corresponding to deltaQ.
       // Then check that delta_phi is approximately phi - phi_hat - 0.5 * phi cross phi_hat.
       
-      Vector3d vectorOne = new Vector3d(0.2, 0.4, 0.6);
-      Vector3d vectorTwo = new Vector3d(-0.3, 0.4, 0.6);
+      Vector3D vectorOne = new Vector3D(0.2, 0.4, 0.6);
+      Vector3D vectorTwo = new Vector3D(-0.3, 0.4, 0.6);
       
       vectorOne.normalize();
       vectorTwo.normalize();
@@ -33,53 +32,53 @@ public class SmallQuaternionRelationshipTest
       double angleOne = 0.3;
       double angleTwo = 0.35;
       
-      AxisAngle4d axisAngleOne = new AxisAngle4d(vectorOne, angleOne);
-      AxisAngle4d axisAngleTwo = new AxisAngle4d(vectorTwo, angleTwo);
+      AxisAngle axisAngleOne = new AxisAngle(vectorOne, angleOne);
+      AxisAngle axisAngleTwo = new AxisAngle(vectorTwo, angleTwo);
       
-      Quat4d quaternionOne = new Quat4d();
+      Quaternion quaternionOne = new Quaternion();
       quaternionOne.set(axisAngleOne);
       
-      Quat4d quaternionTwo = new Quat4d();
+      Quaternion quaternionTwo = new Quaternion();
       quaternionTwo.set(axisAngleTwo);
       
-      Quat4d quaternionError = new Quat4d();
-      quaternionError.mulInverse(quaternionOne, quaternionTwo);
+      Quaternion quaternionError = new Quaternion(quaternionOne);
+      quaternionError.multiplyConjugateOther(quaternionTwo);
       
       System.out.println("quaternionError = " + quaternionError);
       
-      Vector3d rotationVectorOne = new Vector3d(vectorOne);
+      Vector3D rotationVectorOne = new Vector3D(vectorOne);
       rotationVectorOne.scale(angleOne);
       
-      Vector3d rotationVectorTwo = new Vector3d(vectorTwo);
+      Vector3D rotationVectorTwo = new Vector3D(vectorTwo);
       rotationVectorTwo.scale(angleTwo);
       
       
-      Vector3d crossOneTwo = new Vector3d();
+      Vector3D crossOneTwo = new Vector3D();
       crossOneTwo.cross(rotationVectorOne, rotationVectorTwo);
       crossOneTwo.scale(-0.5);
       
-      Vector3d rotationVectorError = new Vector3d(rotationVectorOne);
+      Vector3D rotationVectorError = new Vector3D(rotationVectorOne);
       rotationVectorError.sub(rotationVectorTwo);
       rotationVectorError.add(crossOneTwo);
       
-      Vector3d errorVector = new Vector3d(rotationVectorError);
+      Vector3D errorVector = new Vector3D(rotationVectorError);
       double errorAngle = errorVector.length();
       errorVector.normalize();
       
-      AxisAngle4d axisAngleError = new AxisAngle4d(errorVector, errorAngle);
+      AxisAngle axisAngleError = new AxisAngle(errorVector, errorAngle);
 
-      Quat4d quaternionErrorCheck = new Quat4d();
+      Quaternion quaternionErrorCheck = new Quaternion();
       quaternionErrorCheck.set(axisAngleError);
       
       System.out.println("quaternionErrorCheck = " + quaternionErrorCheck);
 
       
-      Quat4d quaternionShouldBeOne = new Quat4d();
-      quaternionShouldBeOne.mulInverse(quaternionError, quaternionErrorCheck);
+      Quaternion quaternionShouldBeOne = new Quaternion(quaternionError);
+      quaternionShouldBeOne.multiplyConjugateOther(quaternionErrorCheck);
       
       System.out.println("quaternionShouldBeOne = " + quaternionShouldBeOne);
       
-      AxisAngle4d axisAngleShouldBeOne = new AxisAngle4d();
+      AxisAngle axisAngleShouldBeOne = new AxisAngle();
       axisAngleShouldBeOne.set(quaternionShouldBeOne);
       
       System.out.println("axisAngleShouldBeOne = " + axisAngleShouldBeOne.getAngle());

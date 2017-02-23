@@ -2,16 +2,15 @@ package us.ihmc.avatar;
 
 import static org.junit.Assert.assertTrue;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
 import org.junit.After;
 import org.junit.Before;
 
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage.FootstepOrigin;
@@ -78,7 +77,7 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
       setupTest();
 
       // setup all parameters
-      Vector3d forceDirection = new Vector3d(0.0, 1.0, 0.0);
+      Vector3D forceDirection = new Vector3D(0.0, 1.0, 0.0);
       double magnitude = 750.0;
       double duration = 0.04;
       double percentInSwing = 0.2;
@@ -93,7 +92,7 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
       setupTest();
 
       // setup all parameters
-      Vector3d forceDirection = new Vector3d(0.0, 1.0, 0.0);
+      Vector3D forceDirection = new Vector3D(0.0, 1.0, 0.0);
       double magnitude = 800.0;
       double duration = 0.05;
       double percentInSwing = 0.5;
@@ -108,7 +107,7 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
       setupTest();
 
       // setup all parameters
-      Vector3d forceDirection = new Vector3d(0.0, -1.0, 0.0);
+      Vector3D forceDirection = new Vector3D(0.0, -1.0, 0.0);
       double magnitude = 800.0;
       double duration = 0.05;
       double percentInSwing = 0.4;
@@ -118,7 +117,7 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
       testPush(forceDirection, magnitude, duration, percentInSwing, side, swingStartConditions, swingTime);
 
       // push the robot again with new parameters
-      forceDirection = new Vector3d(-1.0, 0.0, 0.0);
+      forceDirection = new Vector3D(-1.0, 0.0, 0.0);
       magnitude = 700.0;
       duration = 0.05;
       side = RobotSide.LEFT;
@@ -132,7 +131,7 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
       setupTest();
 
       // setup all parameters
-      Vector3d forceDirection = new Vector3d(-0.5, 1.0, 0.0);
+      Vector3D forceDirection = new Vector3D(-0.5, 1.0, 0.0);
       double magnitude = 800;
       double duration = 0.05;
       double percentInSwing = 0.2;
@@ -147,7 +146,7 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
       setupTest();
 
       // setup all parameters
-      Vector3d forceDirection = new Vector3d(0.5, 1.0, 0.0);
+      Vector3D forceDirection = new Vector3D(0.5, 1.0, 0.0);
       double magnitude = 800.0;
       double duration = 0.05;
       double percentInSwing = 0.4;
@@ -162,7 +161,7 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
       setupTest();
 
       // setup all parameters
-      Vector3d forceDirection = new Vector3d(0.0, -1.0, 0.0);
+      Vector3D forceDirection = new Vector3D(0.0, -1.0, 0.0);
       double magnitude = 600.0;
       double duration = 0.05;
       double percentInTransferState = 0.5;
@@ -172,7 +171,7 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
       testPush(forceDirection, magnitude, duration, percentInTransferState, side, swingFinishConditions, transferTime);
 
       // push the robot again with new parameters
-      forceDirection = new Vector3d(0.5, -1.0, 0.0);
+      forceDirection = new Vector3D(0.5, -1.0, 0.0);
       magnitude = 700.0;
       duration = 0.05;
       double percentInSwing = 0.4;
@@ -187,7 +186,7 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
       setupTest();
 
       // setup all parameters
-      Vector3d forceDirection = new Vector3d(0.0, -1.0, 0.0);
+      Vector3D forceDirection = new Vector3D(0.0, -1.0, 0.0);
       double magnitude = 600.0;
       double duration = 0.05;
       double percentInTransferState = 0.5;
@@ -197,7 +196,7 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
       testPush(forceDirection, magnitude, duration, percentInTransferState, side, swingFinishConditions, transferTime);
 
       // push the robot again with new parameters
-      forceDirection = new Vector3d(0.0, 1.0, 0.0);
+      forceDirection = new Vector3D(0.0, 1.0, 0.0);
       magnitude = 600.0;
       duration = 0.05;
       double percentInSwing = 0.4;
@@ -212,7 +211,7 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
       setupTest();
 
       // setup all parameters
-      Vector3d forceDirection = new Vector3d(0.0, -1.0, 0.0);
+      Vector3D forceDirection = new Vector3D(0.0, -1.0, 0.0);
       double magnitude = 700.0;
       double duration = 0.05;
 
@@ -235,7 +234,7 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
       pushRobotController = new PushRobotController(drcSimulationTestHelper.getRobot(), fullRobotModel);
       SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
       scs.addYoGraphic(pushRobotController.getForceVisualizer());
-      drcSimulationTestHelper.setupCameraForUnitTest(new Point3d(0.6, 0.0, 0.6), new Point3d(10.0, 3.0, 3.0));
+      drcSimulationTestHelper.setupCameraForUnitTest(new Point3D(0.6, 0.0, 0.6), new Point3D(10.0, 3.0, 3.0));
 
       // get YoVariables
       for (RobotSide robotSide : RobotSide.values)
@@ -274,7 +273,7 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
          FramePoint location = new FramePoint(pelvisFrame, footstepX, footstepY, 0.0);
          location.changeFrame(ReferenceFrame.getWorldFrame());
          location.setZ(0.0);
-         Quat4d orientation = new Quat4d(0.0, 0.0, 0.0, 1.0);
+         Quaternion orientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
          FootstepDataMessage footstepData = new FootstepDataMessage(robotSide, location.getPoint(), orientation);
          footstepData.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
          footsteps.add(footstepData);
@@ -284,7 +283,7 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
    }
 
-   private void testPush(Vector3d forceDirection, double magnitude, double duration, double percentInState, RobotSide side,
+   private void testPush(Vector3D forceDirection, double magnitude, double duration, double percentInState, RobotSide side,
          SideDependentList<StateTransitionCondition> condition, double stateTime)
                throws SimulationExceededMaximumTimeException
    {

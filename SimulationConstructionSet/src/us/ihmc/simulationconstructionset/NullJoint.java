@@ -1,11 +1,10 @@
 package us.ihmc.simulationconstructionset;
 
-import javax.vecmath.AxisAngle4d;
-import javax.vecmath.Vector3d;
-
-import us.ihmc.simulationconstructionset.physics.engine.jerry.NullJointPhysics;
+import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.dataStructures.variable.YoVariableList;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.simulationconstructionset.physics.engine.jerry.NullJointPhysics;
 
 public class NullJoint extends Joint
 {
@@ -30,12 +29,12 @@ public class NullJoint extends Joint
 
    private YoVariableList jointVars;
 
-   public NullJoint(String jname, Vector3d offset, Robot rob)
+   public NullJoint(String jname, Vector3D offset, Robot rob)
    {
       super(jname, offset, rob, 0);
       physics = new NullJointPhysics(this);
 
-      physics.u_i = new Vector3d(1.0, 0.0, 0.0);
+      physics.u_i = new Vector3D(1.0, 0.0, 0.0);
 
       this.setPinTransform3D(this.jointTransform3D, physics.u_i);    // jaxis);
    }
@@ -52,14 +51,14 @@ public class NullJoint extends Joint
       this.jointTransform3D.setIdentity();
    }
 
-   protected void setPinTransform3D(RigidBodyTransform t1, Vector3d u_i)    // int rotAxis)
+   protected void setPinTransform3D(RigidBodyTransform t1, Vector3D u_i)    // int rotAxis)
    {
       setPinTransform3D(t1, u_i, 0.0);    // rotAxis, 0.0);
    }
 
-   private AxisAngle4d axisAngle = new AxisAngle4d();
+   private AxisAngle axisAngle = new AxisAngle();
 
-   protected void setPinTransform3D(RigidBodyTransform t1, Vector3d u_i, double rotAng)
+   protected void setPinTransform3D(RigidBodyTransform t1, Vector3D u_i, double rotAng)
    {
       t1.setIdentity();
 

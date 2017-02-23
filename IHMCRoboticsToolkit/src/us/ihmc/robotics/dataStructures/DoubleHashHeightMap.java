@@ -1,13 +1,13 @@
 package us.ihmc.robotics.dataStructures;
 
-import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.geometry.InclusionFunction;
-
-import javax.vecmath.Point3d;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.robotics.MathTools;
+import us.ihmc.robotics.geometry.InclusionFunction;
 
 public class DoubleHashHeightMap implements HeightMapWithPoints
 {
@@ -97,9 +97,9 @@ public class DoubleHashHeightMap implements HeightMapWithPoints
       return this.gridSize;
    }
 
-   private List<Point3d> getAllPointsWithin(int xMin, int xMax, int yMin, int yMax)
+   private List<Point3D> getAllPointsWithin(int xMin, int xMax, int yMin, int yMax)
    {
-      ArrayList<Point3d> points = new ArrayList<Point3d>();
+      ArrayList<Point3D> points = new ArrayList<Point3D>();
       if ((xMax >= xMin) && (yMax >= yMin))
       {
          if (rows.values().size() < (xMax - xMin+1))
@@ -123,7 +123,7 @@ public class DoubleHashHeightMap implements HeightMapWithPoints
       }
    }
 
-   private void iterateOverKeysToPackAllRowsWithin(int xMin, int xMax, int yMin, int yMax, ArrayList<Point3d> points)
+   private void iterateOverKeysToPackAllRowsWithin(int xMin, int xMax, int yMin, int yMax, ArrayList<Point3D> points)
    {
       synchronized (rows)
       {
@@ -138,7 +138,7 @@ public class DoubleHashHeightMap implements HeightMapWithPoints
       }
    }
 
-   private void iterateOverValuesToPackAllRowsWithin(int xMin, int xMax, int yMin, int yMax, ArrayList<Point3d> points)
+   private void iterateOverValuesToPackAllRowsWithin(int xMin, int xMax, int yMin, int yMax, ArrayList<Point3D> points)
    {
       synchronized (rows)
       {
@@ -153,7 +153,7 @@ public class DoubleHashHeightMap implements HeightMapWithPoints
       }
    }
 
-   private void getAllPointsInRow(int yMin, int yMax, ArrayList<Point3d> points, int x, HashMap<Integer, Double> row)
+   private void getAllPointsInRow(int yMin, int yMax, ArrayList<Point3D> points, int x, HashMap<Integer, Double> row)
    {
       if (row.values().size() < (yMax - yMin+1))
       {
@@ -165,44 +165,44 @@ public class DoubleHashHeightMap implements HeightMapWithPoints
       }
    }
 
-   private void iterateOverColumnsToPackAllPoints(int yMin, int yMax, ArrayList<Point3d> points, int x, HashMap<Integer, Double> row)
+   private void iterateOverColumnsToPackAllPoints(int yMin, int yMax, ArrayList<Point3D> points, int x, HashMap<Integer, Double> row)
    {
       for (int y = yMin; y <= yMax; y++)
       {
          if (row.containsKey(y))
          {
-            points.add(new Point3d(x * gridSize, y * gridSize, row.get(y)));
+            points.add(new Point3D(x * gridSize, y * gridSize, row.get(y)));
          }
       }
    }
 
-   private void iterateOverKeysetToPackAllPoints(int yMin, int yMax, ArrayList<Point3d> points, int x, HashMap<Integer, Double> row)
+   private void iterateOverKeysetToPackAllPoints(int yMin, int yMax, ArrayList<Point3D> points, int x, HashMap<Integer, Double> row)
    {
       for (int y : row.keySet())
       {
          if ((yMin <= y) && (yMax >= y))
          {
-            points.add(new Point3d(x * gridSize, y * gridSize, row.get(y)));
+            points.add(new Point3D(x * gridSize, y * gridSize, row.get(y)));
          }
       }
    }
 
-   public List<Point3d> getAllPointsWithinArea(double xCenter, double yCenter, double xExtent, double yExtent)
+   public List<Point3D> getAllPointsWithinArea(double xCenter, double yCenter, double xExtent, double yExtent)
    {
       return getAllPointsWithinAreaMinMax(xCenter - (xExtent * 0.5), xCenter + (xExtent * 0.5), yCenter - (yExtent * 0.5), yCenter + (yExtent * 0.5));
    }
 
-   private List<Point3d> getAllPointsWithinAreaMinMax(double xMin, double xMax, double yMin, double yMax)
+   private List<Point3D> getAllPointsWithinAreaMinMax(double xMin, double xMax, double yMin, double yMax)
    {
       return getAllPointsWithin(index(xMin), index(xMax), index(yMin), index(yMax));
    }
 
-   public List<Point3d> getAllPointsWithinArea(double xCenter, double yCenter, double xExtent, double yExtent,
-         InclusionFunction<Point3d> maskFunctionAboutCenter)
+   public List<Point3D> getAllPointsWithinArea(double xCenter, double yCenter, double xExtent, double yExtent,
+         InclusionFunction<Point3D> maskFunctionAboutCenter)
    {
-      List<Point3d> allPointsInArea = getAllPointsWithinArea(xCenter, yCenter, xExtent, yExtent);
-      List<Point3d> pointsToReturn = new ArrayList<Point3d>();
-      for (Point3d point : allPointsInArea)
+      List<Point3D> allPointsInArea = getAllPointsWithinArea(xCenter, yCenter, xExtent, yExtent);
+      List<Point3D> pointsToReturn = new ArrayList<Point3D>();
+      for (Point3D point : allPointsInArea)
       {
            if (maskFunctionAboutCenter.isIncluded(point))
             pointsToReturn.add(point);

@@ -3,10 +3,9 @@ package us.ihmc.humanoidRobotics.communication.packets.walking;
 import java.util.Arrays;
 import java.util.Random;
 
-import javax.vecmath.Point2d;
-import javax.vecmath.Point3d;
-
 import us.ihmc.communication.packets.StatusPacket;
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.random.RandomTools;
@@ -17,15 +16,15 @@ public class CapturabilityBasedStatus extends StatusPacket<CapturabilityBasedSta
 {
    public static final int MAXIMUM_NUMBER_OF_VERTICES = 8;
 
-   public Point2d capturePoint = new Point2d();
-   public Point2d desiredCapturePoint = new Point2d();
+   public Point2D capturePoint = new Point2D();
+   public Point2D desiredCapturePoint = new Point2D();
 
-   public Point3d centerOfMass = new Point3d();
+   public Point3D centerOfMass = new Point3D();
 
    public int leftFootSupportPolygonLength;
-   public Point2d[] leftFootSupportPolygonStore = new Point2d[MAXIMUM_NUMBER_OF_VERTICES];
+   public Point2D[] leftFootSupportPolygonStore = new Point2D[MAXIMUM_NUMBER_OF_VERTICES];
    public int rightFootSupportPolygonLength;
-   public Point2d[] rightFootSupportPolygonStore = new Point2d[MAXIMUM_NUMBER_OF_VERTICES];
+   public Point2D[] rightFootSupportPolygonStore = new Point2D[MAXIMUM_NUMBER_OF_VERTICES];
 
    public CapturabilityBasedStatus(Random random)
    {
@@ -51,8 +50,8 @@ public class CapturabilityBasedStatus extends StatusPacket<CapturabilityBasedSta
       // Empty constructor for serialization
       for (int i = 0; i < MAXIMUM_NUMBER_OF_VERTICES; i++)
       {
-         leftFootSupportPolygonStore[i] = new Point2d();
-         rightFootSupportPolygonStore[i] = new Point2d();
+         leftFootSupportPolygonStore[i] = new Point2D();
+         rightFootSupportPolygonStore[i] = new Point2D();
 
       }
    }

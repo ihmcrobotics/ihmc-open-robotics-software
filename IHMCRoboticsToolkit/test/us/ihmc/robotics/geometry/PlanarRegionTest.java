@@ -8,19 +8,20 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import javax.vecmath.Point2d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector2d;
-import javax.vecmath.Vector3d;
-
 import org.junit.Test;
 
+import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.tools.EuclidCoreTestTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.testing.JUnitTools;
-import us.ihmc.tools.testing.MutationTestingTools;
 
 public class PlanarRegionTest
 {
@@ -32,20 +33,20 @@ public class PlanarRegionTest
       Random random = new Random(1776L);
 
       RigidBodyTransform transformToWorld = new RigidBodyTransform();
-      Point3d regionTranslation = new Point3d();
-      Point3d pointAbove = new Point3d();
-      Point3d pointBelow = new Point3d();
-      Vector3d regionNormal = new Vector3d();
+      Point3D regionTranslation = new Point3D();
+      Point3D pointAbove = new Point3D();
+      Point3D pointBelow = new Point3D();
+      Vector3D regionNormal = new Vector3D();
 
       for (int i = 0; i < 10000; i++)
       {
          PlanarRegion planarRegion = PlanarRegion.generatePlanarRegionFromRandomPolygonsWithRandomTransform(random, 1, 10.0, 5);
          planarRegion.getTransformToWorld(transformToWorld);
 
-         Point2d centroid = planarRegion.getLastConvexPolygon().getCentroid();
-         regionTranslation.set(centroid.x, centroid.y, 0.0);
+         Point2DReadOnly centroid = planarRegion.getLastConvexPolygon().getCentroid();
+         regionTranslation.set(centroid.getX(), centroid.getY(), 0.0);
          transformToWorld.transform(regionTranslation);
-         regionTranslation.setZ(planarRegion.getPlaneZGivenXY(regionTranslation.x, regionTranslation.y));
+         regionTranslation.setZ(planarRegion.getPlaneZGivenXY(regionTranslation.getX(), regionTranslation.getY()));
 
          planarRegion.getNormal(regionNormal);
 
@@ -67,20 +68,20 @@ public class PlanarRegionTest
       Random random = new Random(1776L);
 
       RigidBodyTransform transformToWorld = new RigidBodyTransform();
-      Point3d regionTranslation = new Point3d();
-      Point3d pointAbove = new Point3d();
-      Point3d pointBelow = new Point3d();
-      Vector3d regionNormal = new Vector3d();
+      Point3D regionTranslation = new Point3D();
+      Point3D pointAbove = new Point3D();
+      Point3D pointBelow = new Point3D();
+      Vector3D regionNormal = new Vector3D();
 
       for (int i = 0; i < 10000; i++)
       {
          PlanarRegion planarRegion = PlanarRegion.generatePlanarRegionFromRandomPolygonsWithRandomTransform(random, 1, 10.0, 5);
          planarRegion.getTransformToWorld(transformToWorld);
 
-         Point2d centroid = planarRegion.getLastConvexPolygon().getCentroid();
-         regionTranslation.set(centroid.x, centroid.y, 0.0);
+         Point2DReadOnly centroid = planarRegion.getLastConvexPolygon().getCentroid();
+         regionTranslation.set(centroid.getX(), centroid.getY(), 0.0);
          transformToWorld.transform(regionTranslation);
-         regionTranslation.setZ(planarRegion.getPlaneZGivenXY(regionTranslation.x, regionTranslation.y));
+         regionTranslation.setZ(planarRegion.getPlaneZGivenXY(regionTranslation.getX(), regionTranslation.getY()));
 
          planarRegion.getNormal(regionNormal);
 
@@ -100,15 +101,15 @@ public class PlanarRegionTest
    public void testCreationOfBoundingBoxWithAllPointsGreaterThanOrigin()
    {
       final double zLocationOfPlanarRegion = 2.0;
-      Point3d minPoint = new Point3d(1.0, 1.0, zLocationOfPlanarRegion);
-      Point3d maxPoint = new Point3d(2.0, 2.0, zLocationOfPlanarRegion);
+      Point3D minPoint = new Point3D(1.0, 1.0, zLocationOfPlanarRegion);
+      Point3D maxPoint = new Point3D(2.0, 2.0, zLocationOfPlanarRegion);
 
       List<ConvexPolygon2d> regionConvexPolygons = new ArrayList<>();
       ConvexPolygon2d polygon1 = new ConvexPolygon2d();
-      polygon1.addVertex(minPoint.x, minPoint.y);
-      polygon1.addVertex(maxPoint.x, minPoint.y);
-      polygon1.addVertex(minPoint.x, maxPoint.y);
-      polygon1.addVertex(maxPoint.x, maxPoint.y);
+      polygon1.addVertex(minPoint.getX(), minPoint.getY());
+      polygon1.addVertex(maxPoint.getX(), minPoint.getY());
+      polygon1.addVertex(minPoint.getX(), maxPoint.getY());
+      polygon1.addVertex(maxPoint.getX(), maxPoint.getY());
 
       regionConvexPolygons.add(polygon1);
 
@@ -116,7 +117,7 @@ public class PlanarRegionTest
          convexPolygon.update();
 
       RigidBodyTransform regionTransform = new RigidBodyTransform();
-      regionTransform.applyTranslation(new Vector3d(0, 0, zLocationOfPlanarRegion));
+      regionTransform.appendTranslation(0.0, 0.0, zLocationOfPlanarRegion);
       PlanarRegion planarRegion = new PlanarRegion(regionTransform, regionConvexPolygons);
 
       BoundingBox3d boundingBox3dInWorld = planarRegion.getBoundingBox3dInWorld();
@@ -125,8 +126,8 @@ public class PlanarRegionTest
 
       assertThatAllPolygonVerticesAreInBoundingBox(regionConvexPolygons, planarRegion, boundingBox3dInWorld);
 
-      Point3d boundingBoxMinPoint = new Point3d();
-      Point3d boundingBoxMaxPoint = new Point3d();
+      Point3D boundingBoxMinPoint = new Point3D();
+      Point3D boundingBoxMaxPoint = new Point3D();
 
       boundingBox3dInWorld.getMinPoint(boundingBoxMinPoint);
       boundingBox3dInWorld.getMaxPoint(boundingBoxMaxPoint);
@@ -140,15 +141,15 @@ public class PlanarRegionTest
    public void testCreationOfBoundingBoxWithAllPointsLessThanOrigin()
    {
       final double zLocationOfPlanarRegion = -2.0;
-      Point3d maxPoint = new Point3d(-1.0, -1.0, zLocationOfPlanarRegion);
-      Point3d minPoint = new Point3d(-2.0, -2.0, zLocationOfPlanarRegion);
+      Point3D maxPoint = new Point3D(-1.0, -1.0, zLocationOfPlanarRegion);
+      Point3D minPoint = new Point3D(-2.0, -2.0, zLocationOfPlanarRegion);
 
       List<ConvexPolygon2d> regionConvexPolygons = new ArrayList<>();
       ConvexPolygon2d polygon1 = new ConvexPolygon2d();
-      polygon1.addVertex(minPoint.x, minPoint.y);
-      polygon1.addVertex(maxPoint.x, minPoint.y);
-      polygon1.addVertex(minPoint.x, maxPoint.y);
-      polygon1.addVertex(maxPoint.x, maxPoint.y);
+      polygon1.addVertex(minPoint.getX(), minPoint.getY());
+      polygon1.addVertex(maxPoint.getX(), minPoint.getY());
+      polygon1.addVertex(minPoint.getX(), maxPoint.getY());
+      polygon1.addVertex(maxPoint.getX(), maxPoint.getY());
 
       regionConvexPolygons.add(polygon1);
 
@@ -156,7 +157,7 @@ public class PlanarRegionTest
          convexPolygon.update();
 
       RigidBodyTransform regionTransform = new RigidBodyTransform();
-      regionTransform.applyTranslation(new Vector3d(0, 0, zLocationOfPlanarRegion));
+      regionTransform.appendTranslation(0.0, 0.0, zLocationOfPlanarRegion);
       PlanarRegion planarRegion = new PlanarRegion(regionTransform, regionConvexPolygons);
 
       BoundingBox3d boundingBox3dInWorld = planarRegion.getBoundingBox3dInWorld();
@@ -165,8 +166,8 @@ public class PlanarRegionTest
 
       assertThatAllPolygonVerticesAreInBoundingBox(regionConvexPolygons, planarRegion, boundingBox3dInWorld);
 
-      Point3d boundingBoxMinPoint = new Point3d();
-      Point3d boundingBoxMaxPoint = new Point3d();
+      Point3D boundingBoxMinPoint = new Point3D();
+      Point3D boundingBoxMaxPoint = new Point3D();
 
       boundingBox3dInWorld.getMinPoint(boundingBoxMinPoint);
       boundingBox3dInWorld.getMaxPoint(boundingBoxMaxPoint);
@@ -179,15 +180,15 @@ public class PlanarRegionTest
    @Test(timeout = 30000)
    public void testCreationOfBoundingBoxWithMinimumLessThanOriginAndMaximumGreaterThanOrigin()
    {
-      Point3d maxPoint = new Point3d(2.0, 2.0, 0.0);
-      Point3d minPoint = new Point3d(-2.0, -2.0, 0.0);
+      Point3D maxPoint = new Point3D(2.0, 2.0, 0.0);
+      Point3D minPoint = new Point3D(-2.0, -2.0, 0.0);
 
       List<ConvexPolygon2d> regionConvexPolygons = new ArrayList<>();
       ConvexPolygon2d polygon1 = new ConvexPolygon2d();
-      polygon1.addVertex(minPoint.x, minPoint.y);
-      polygon1.addVertex(maxPoint.x, minPoint.y);
-      polygon1.addVertex(minPoint.x, maxPoint.y);
-      polygon1.addVertex(maxPoint.x, maxPoint.y);
+      polygon1.addVertex(minPoint.getX(), minPoint.getY());
+      polygon1.addVertex(maxPoint.getX(), minPoint.getY());
+      polygon1.addVertex(minPoint.getX(), maxPoint.getY());
+      polygon1.addVertex(maxPoint.getX(), maxPoint.getY());
 
       regionConvexPolygons.add(polygon1);
 
@@ -203,8 +204,8 @@ public class PlanarRegionTest
 
       assertThatAllPolygonVerticesAreInBoundingBox(regionConvexPolygons, planarRegion, boundingBox3dInWorld);
 
-      Point3d boundingBoxMinPoint = new Point3d();
-      Point3d boundingBoxMaxPoint = new Point3d();
+      Point3D boundingBoxMinPoint = new Point3D();
+      Point3D boundingBoxMaxPoint = new Point3D();
 
       boundingBox3dInWorld.getMinPoint(boundingBoxMinPoint);
       boundingBox3dInWorld.getMaxPoint(boundingBoxMaxPoint);
@@ -285,17 +286,17 @@ public class PlanarRegionTest
       for (int i = 0; i < 3; i++)
          assertTrue("Unexpected region polygon.", regionConvexPolygons.get(i).epsilonEquals(planarRegion.getConvexPolygon(i), 1.0e-10));
 
-      Vector3d actualNormal = new Vector3d();
+      Vector3D actualNormal = new Vector3D();
       planarRegion.getNormal(actualNormal);
-      JUnitTools.assertVector3dEquals("Wrong region normal.", new Vector3d(0.0, 0.0, 1.0), actualNormal, 1.0e-10);
-      Point3d actualOrigin = new Point3d();
+      EuclidCoreTestTools.assertTuple3DEquals("Wrong region normal.", new Vector3D(0.0, 0.0, 1.0), actualNormal, 1.0e-10);
+      Point3D actualOrigin = new Point3D();
       planarRegion.getPointInRegion(actualOrigin);
-      JUnitTools.assertPoint3dEquals("Wrong region origin.", new Point3d(), actualOrigin, 1.0e-10);
+      EuclidCoreTestTools.assertTuple3DEquals("Wrong region origin.", new Point3D(), actualOrigin, 1.0e-10);
       RigidBodyTransform actualTransform = new RigidBodyTransform();
       planarRegion.getTransformToWorld(actualTransform);
       assertTrue("Wrong region transform to world.", regionTransform.epsilonEquals(actualTransform, 1.0e-10));
 
-      Point2d point2d = new Point2d();
+      Point2D point2d = new Point2D();
 
       // Do a bunch of trivial queries with isPointInside(Point2d) method.
       point2d.set(0.0, 0.0);
@@ -307,9 +308,9 @@ public class PlanarRegionTest
       point2d.set(2.0, 2.0);
       assertFalse(planarRegion.isPointInside(point2d));
 
-      Point3d point3d = new Point3d();
+      Point3D point3d = new Point3D();
       double maximumOrthogonalDistance = 1.0e-3;
-      // Do a bunch of trivial queries with isPointInside(Point3d, double) method. Point in plane
+      // Do a bunch of trivial queries with isPointInside(Point3D, double) method. Point in plane
       point3d.set(0.0, 0.0, 0.0);
       assertTrue(planarRegion.isPointInside(point3d, maximumOrthogonalDistance));
       point3d.set(2.0, 0.0, 0.0);
@@ -318,7 +319,7 @@ public class PlanarRegionTest
       assertTrue(planarRegion.isPointInside(point3d, maximumOrthogonalDistance));
       point3d.set(2.0, 2.0, 0.0);
       assertFalse(planarRegion.isPointInside(point3d, maximumOrthogonalDistance));
-      // Do a bunch of trivial queries with isPointInside(Point3d, double) method. Point below plane
+      // Do a bunch of trivial queries with isPointInside(Point3D, double) method. Point below plane
       point3d.set(0.0, 0.0, -0.5 * maximumOrthogonalDistance);
       assertTrue(planarRegion.isPointInside(point3d, maximumOrthogonalDistance));
       point3d.set(2.0, 0.0, -0.5 * maximumOrthogonalDistance);
@@ -331,7 +332,7 @@ public class PlanarRegionTest
       assertFalse(planarRegion.isPointInside(point3d, maximumOrthogonalDistance));
       point3d.set(0.0, 2.0, -1.5 * maximumOrthogonalDistance);
       assertFalse(planarRegion.isPointInside(point3d, maximumOrthogonalDistance));
-      // Do a bunch of trivial queries with isPointInside(Point3d, double) method. Point above plane
+      // Do a bunch of trivial queries with isPointInside(Point3D, double) method. Point above plane
       point3d.set(0.0, 0.0, 0.5 * maximumOrthogonalDistance);
       assertTrue(planarRegion.isPointInside(point3d, maximumOrthogonalDistance));
       point3d.set(2.0, 0.0, 0.5 * maximumOrthogonalDistance);
@@ -361,7 +362,7 @@ public class PlanarRegionTest
       point2d.set(2.0, 2.0);
       assertFalse(planarRegion.isPointInsideByProjectionOntoXYPlane(point2d));
 
-      // Do a bunch of trivial queries with isPointInsideByProjectionOntoXYPlane(Point3d) method.
+      // Do a bunch of trivial queries with isPointInsideByProjectionOntoXYPlane(Point3D) method.
       point3d.set(0.0, 0.0, Double.POSITIVE_INFINITY);
       assertTrue(planarRegion.isPointInsideByProjectionOntoXYPlane(point3d));
       point3d.set(2.0, 0.0, Double.POSITIVE_INFINITY);
@@ -374,7 +375,7 @@ public class PlanarRegionTest
       // Do a bunch of trivial queries with isLineSegmentIntersecting(LineSegment2d) method.
       LineSegment2d lineSegment = new LineSegment2d(0.0, 0.0, 2.0, 2.0);
       assertTrue(planarRegion.isLineSegmentIntersecting(lineSegment));
-      ArrayList<Point2d[]> intersectionsInPlaneFrame = new ArrayList<>();
+      ArrayList<Point2D[]> intersectionsInPlaneFrame = new ArrayList<>();
       planarRegion.getLineSegmentIntersectionsWhenProjectedVertically(lineSegment, intersectionsInPlaneFrame);
       assertEquals(3, intersectionsInPlaneFrame.size());
 
@@ -389,12 +390,12 @@ public class PlanarRegionTest
       intersectionsInPlaneFrame.clear();
       planarRegion.getLineSegmentIntersectionsWhenProjectedVertically(lineSegment, intersectionsInPlaneFrame);
       assertEquals(2, intersectionsInPlaneFrame.size());
-      Point2d[] points = intersectionsInPlaneFrame.get(0);
+      Point2D[] points = intersectionsInPlaneFrame.get(0);
       assertEquals(1, points.length);
-      JUnitTools.assertTuple2dEquals(new Point2d(0.0, 1.0), points[0], 1e-7);
+      EuclidCoreTestTools.assertTuple2DEquals(new Point2D(0.0, 1.0), points[0], 1e-7);
       points = intersectionsInPlaneFrame.get(1);
       assertEquals(1, points.length);
-      JUnitTools.assertTuple2dEquals(new Point2d(0.0, 1.0), points[0], 1e-7);
+      EuclidCoreTestTools.assertTuple2DEquals(new Point2D(0.0, 1.0), points[0], 1e-7);
       
       lineSegment = new LineSegment2d(2.5, 0.5, 3.0, 9.0);
       assertTrue(planarRegion.isLineSegmentIntersecting(lineSegment));
@@ -408,8 +409,8 @@ public class PlanarRegionTest
       assertEquals(1, intersectionsInPlaneFrame.size());
       points = intersectionsInPlaneFrame.get(0);
       assertEquals(2, points.length);
-      JUnitTools.assertTuple2dEquals(new Point2d(2.0, 1.0), points[0], 1e-7);
-      JUnitTools.assertTuple2dEquals(new Point2d(2.0, -1.0), points[1], 1e-7);
+      EuclidCoreTestTools.assertTuple2DEquals(new Point2D(2.0, 1.0), points[0], 1e-7);
+      EuclidCoreTestTools.assertTuple2DEquals(new Point2D(2.0, -1.0), points[1], 1e-7);
 
       ConvexPolygon2d convexPolygon = new ConvexPolygon2d();
       convexPolygon.addVertex(0.2, 0.2);
@@ -519,8 +520,8 @@ public class PlanarRegionTest
 
       for (int iteration = 0; iteration < 10; iteration++)
       {
-         Quat4d orientation = RandomTools.generateRandomQuaternion(random, Math.toRadians(45.0));
-         Vector3d translation = RandomTools.generateRandomVector(random, 10.0);
+         Quaternion orientation = RandomTools.generateRandomQuaternion(random, Math.toRadians(45.0));
+         Vector3D translation = RandomTools.generateRandomVector(random, 10.0);
          RigidBodyTransform regionTransform = new RigidBodyTransform(orientation, translation);
          ReferenceFrame localFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent("local", worldFrame, regionTransform);
          PlanarRegion planarRegion = new PlanarRegion(regionTransform, regionConvexPolygons);
@@ -529,16 +530,16 @@ public class PlanarRegionTest
          for (int i = 0; i < 3; i++)
             assertTrue("Unexpected region polygon.", regionConvexPolygons.get(i).epsilonEquals(planarRegion.getConvexPolygon(i), 1.0e-10));
 
-         Vector3d expectedNormal = new Vector3d(0.0, 0.0, 1.0);
+         Vector3D expectedNormal = new Vector3D(0.0, 0.0, 1.0);
          regionTransform.transform(expectedNormal);
-         Vector3d actualNormal = new Vector3d();
+         Vector3D actualNormal = new Vector3D();
          planarRegion.getNormal(actualNormal);
-         JUnitTools.assertVector3dEquals("Wrong region normal.", expectedNormal, actualNormal, 1.0e-10);
-         Point3d expectedOrigin = new Point3d();
+         EuclidCoreTestTools.assertTuple3DEquals("Wrong region normal.", expectedNormal, actualNormal, 1.0e-10);
+         Point3D expectedOrigin = new Point3D();
          regionTransform.transform(expectedOrigin);
-         Point3d actualOrigin = new Point3d();
+         Point3D actualOrigin = new Point3D();
          planarRegion.getPointInRegion(actualOrigin);
-         JUnitTools.assertPoint3dEquals("Wrong region origin.", expectedOrigin, actualOrigin, 1.0e-10);
+         EuclidCoreTestTools.assertTuple3DEquals("Wrong region origin.", expectedOrigin, actualOrigin, 1.0e-10);
          RigidBodyTransform actualTransform = new RigidBodyTransform();
          planarRegion.getTransformToWorld(actualTransform);
          assertTrue("Wrong region transform to world.", regionTransform.epsilonEquals(actualTransform, 1.0e-10));
@@ -557,7 +558,7 @@ public class PlanarRegionTest
 
          FramePoint point3d = new FramePoint();
          double maximumOrthogonalDistance = 1.0e-3;
-         // Do a bunch of trivial queries with isPointInside(Point3d, double) method. Point in plane
+         // Do a bunch of trivial queries with isPointInside(Point3D, double) method. Point in plane
          point3d.setIncludingFrame(localFrame, 0.0, 0.0, 0.0);
          point3d.changeFrame(worldFrame);
          assertTrue(planarRegion.isPointInside(point3d.getPoint(), maximumOrthogonalDistance));
@@ -570,7 +571,7 @@ public class PlanarRegionTest
          point3d.setIncludingFrame(localFrame, 2.0, 2.0, 0.0);
          point3d.changeFrame(worldFrame);
          assertFalse(planarRegion.isPointInside(point3d.getPoint(), maximumOrthogonalDistance));
-         // Do a bunch of trivial queries with isPointInside(Point3d, double) method. Point below plane
+         // Do a bunch of trivial queries with isPointInside(Point3D, double) method. Point below plane
          point3d.setIncludingFrame(localFrame, 0.0, 0.0, -0.5 * maximumOrthogonalDistance);
          point3d.changeFrame(worldFrame);
          assertTrue(planarRegion.isPointInside(point3d.getPoint(), maximumOrthogonalDistance));
@@ -589,7 +590,7 @@ public class PlanarRegionTest
          point3d.setIncludingFrame(localFrame, 0.0, 2.0, -1.5 * maximumOrthogonalDistance);
          point3d.changeFrame(worldFrame);
          assertFalse(planarRegion.isPointInside(point3d.getPoint(), maximumOrthogonalDistance));
-         // Do a bunch of trivial queries with isPointInside(Point3d, double) method. Point above plane
+         // Do a bunch of trivial queries with isPointInside(Point3D, double) method. Point above plane
          point3d.setIncludingFrame(localFrame, 0.0, 0.0, 0.5 * maximumOrthogonalDistance);
          point3d.changeFrame(worldFrame);
          assertTrue(planarRegion.isPointInside(point3d.getPoint(), maximumOrthogonalDistance));
@@ -637,7 +638,7 @@ public class PlanarRegionTest
          point2d.changeFrameAndProjectToXYPlane(worldFrame);
          assertFalse(planarRegion.isPointInsideByProjectionOntoXYPlane(point2d.getPoint()));
 
-         // Do a bunch of trivial queries with isPointInsideByProjectionOntoXYPlane(Point3d) method.
+         // Do a bunch of trivial queries with isPointInsideByProjectionOntoXYPlane(Point3D) method.
          point3d.setIncludingFrame(localFrame, 0.0, 0.0, 0.0);
          point3d.changeFrame(worldFrame);
          point3d.setZ(Double.POSITIVE_INFINITY);
@@ -681,12 +682,12 @@ public class PlanarRegionTest
             ConvexPolygon2d convexPolygon2dInWorld = convexPolygon2d.applyTransformAndProjectToXYPlaneCopy(transformToWorld);
             for (int i = 0; i < convexPolygon2dInWorld.getNumberOfVertices(); i++)
             {
-               Point2d vertex = convexPolygon2dInWorld.getVertex(i);
-               double planeZGivenXY = planarRegion.getPlaneZGivenXY(vertex.x, vertex.y);
+               Point2DReadOnly vertex = convexPolygon2dInWorld.getVertex(i);
+               double planeZGivenXY = planarRegion.getPlaneZGivenXY(vertex.getX(), vertex.getY());
 
                assertTrue(
                      "Polygon vertex is not inside computed bounding box.\nVertex: " + vertex + "\nPlane z at vertex: " + planeZGivenXY + "\nBounding Box: "
-                           + boundingBox3dInWorld, boundingBox3dInWorld.isInside(vertex.x, vertex.y, planeZGivenXY));
+                           + boundingBox3dInWorld, boundingBox3dInWorld.isInside(vertex.getX(), vertex.getY(), planeZGivenXY));
             }
          }
       }
@@ -726,7 +727,7 @@ public class PlanarRegionTest
       planeZGivenXY = planarRegion.getPlaneZGivenXY(xWorld, yWorld);
 
       assertEquals(-xWorld * Math.tan(angle), planeZGivenXY, 1e-7);
-      assertTrue(planarRegion.isPointInside(new Point3d(0.0, 0.0, 0.0), 1e-7));
+      assertTrue(planarRegion.isPointInside(new Point3D(0.0, 0.0, 0.0), 1e-7));
 
       // Try really close to 90 degrees
       angle = Math.PI / 2.0 - 0.001;
@@ -736,7 +737,7 @@ public class PlanarRegionTest
       planeZGivenXY = planarRegion.getPlaneZGivenXY(xWorld, yWorld);
 
       assertEquals(-xWorld * Math.tan(angle), planeZGivenXY, 1e-7);
-      assertTrue(planarRegion.isPointInside(new Point3d(0.0, 0.0, 0.0), 1e-7));
+      assertTrue(planarRegion.isPointInside(new Point3D(0.0, 0.0, 0.0), 1e-7));
 
       // Exactly 90 degrees.
       angle = Math.PI / 2.0 - 0.1;
@@ -751,7 +752,7 @@ public class PlanarRegionTest
       boolean valueMatchesComputed = (Math.abs(planeZGivenXY - -tangent * xWorld) < 1e-7);
       assertFalse(planeZGivenXYIsNaN);
       assertTrue(valueMatchesComputed);
-      assertTrue(planarRegion.isPointInside(new Point3d(0.0, 0.0, 0.0), 1e-7));
+      assertTrue(planarRegion.isPointInside(new Point3D(0.0, 0.0, 0.0), 1e-7));
 
       // If we set the transform to exactly z axis having no zWorld component (exactly 90 degree rotation about y in this case), then we do get NaN.
       // However (0, 0, 0) should still be inside. As should (0, 0, 0.5)
@@ -764,13 +765,13 @@ public class PlanarRegionTest
       valueMatchesComputed = (Math.abs(planeZGivenXY - -tangent * xWorld) < 1e-7);
       assertTrue(planeZGivenXYIsNaN);
       assertFalse(valueMatchesComputed);
-      assertTrue(planarRegion.isPointInside(new Point3d(0.0, 0.0, 0.0), 1e-7));
-      assertTrue(planarRegion.isPointInside(new Point3d(0.0, 0.0, 0.5), 1e-7));
+      assertTrue(planarRegion.isPointInside(new Point3D(0.0, 0.0, 0.0), 1e-7));
+      assertTrue(planarRegion.isPointInside(new Point3D(0.0, 0.0, 0.5), 1e-7));
    }
 
    static ConvexPolygon2d translateConvexPolygon(double xTranslation, double yTranslation, ConvexPolygon2d convexPolygon)
    {
-      Vector2d translation = new Vector2d(xTranslation, yTranslation);
+      Vector2D translation = new Vector2D(xTranslation, yTranslation);
       return ConvexPolygon2dCalculator.translatePolygonCopy(translation, convexPolygon);
    }
 
@@ -788,19 +789,17 @@ public class PlanarRegionTest
       {
          for (int i = 0; i < convexPolygon2dInWorld.getNumberOfVertices(); i++)
          {
-            Point2d vertex = convexPolygon2dInWorld.getVertex(i);
-            double planeZGivenXY = planarRegion.getPlaneZGivenXY(vertex.x, vertex.y);
+            Point2DReadOnly vertex = convexPolygon2dInWorld.getVertex(i);
+            double planeZGivenXY = planarRegion.getPlaneZGivenXY(vertex.getX(), vertex.getY());
 
             assertTrue("Polygon vertex is not inside computed bounding box.\nVertex: " + vertex + "\nPlane z at vertex: " + planeZGivenXY + "\nBounding Box: "
-                  + boundingBox3dInWorld, boundingBox3dInWorld.isInside(vertex.x, vertex.y, planeZGivenXY));
+                  + boundingBox3dInWorld, boundingBox3dInWorld.isInside(vertex.getX(), vertex.getY(), planeZGivenXY));
          }
       }
    }
 
    public static void main(String[] args)
    {
-      String targetTests = PlanarRegionTest.class.getName();
-      String targetClassesInSamePackage = PlanarRegion.class.getName();
-      MutationTestingTools.doPITMutationTestAndOpenResult(targetTests, targetClassesInSamePackage);
+      MutationTestFacilitator.facilitateMutationTestForClass(PlanarRegion.class, PlanarRegionTest.class);
    }
 }

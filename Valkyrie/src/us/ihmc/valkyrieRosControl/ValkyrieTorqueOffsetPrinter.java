@@ -11,13 +11,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
-import javax.vecmath.Vector3d;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 
-import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -175,7 +175,7 @@ public class ValkyrieTorqueOffsetPrinter implements TorqueOffsetPrinter
       ReferenceFrame elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformFromParent("elevatorFrame", ReferenceFrame.getWorldFrame(), new RigidBodyTransform());
       RigidBody rootBody = new RigidBody("elevator", elevatorFrame);
       final Random random = new Random();
-      Vector3d[] jointAxes = new Vector3d[random.nextInt(10)];
+      Vector3D[] jointAxes = new Vector3D[random.nextInt(10)];
       for (int i = 0; i < jointAxes.length; i++)
          jointAxes[i] = RandomTools.generateRandomVector(random, 1.0);
       ScrewTestTools.createRandomChainRobot("blop", revoluteJoints, rootBody, jointAxes, random);

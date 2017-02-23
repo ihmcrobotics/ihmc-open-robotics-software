@@ -7,30 +7,29 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Vector;
 
-import javax.vecmath.Point2d;
-import javax.vecmath.Vector2d;
-
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.graphicsDescription.plotting.Graphics2DAdapter;
 import us.ihmc.graphicsDescription.plotting.Plotter2DAdapter;
 
 public class PointListArtifact extends Artifact
 {
-   private final List<Point2d> points = new ArrayList<Point2d>();
+   private final List<Point2D> points = new ArrayList<Point2D>();
    private int historyLength = 1;
    private Color historyColor = Color.BLUE;
    int medianFilterSize = 20;
    int meanFilterSize = 999;
    private double size = 10;
    
-   private final Point2d tempPoint = new Point2d();
-   private final Vector2d tempRadii = new Vector2d();
+   private final Point2D tempPoint = new Point2D();
+   private final Vector2D tempRadii = new Vector2D();
 
    public PointListArtifact(String id)
    {
       this(id, 1);
    }
 
-   public PointListArtifact(String id, Point2d point)
+   public PointListArtifact(String id, Point2D point)
    {
       this(id, 1);
 
@@ -47,7 +46,7 @@ public class PointListArtifact extends Artifact
       color = Color.red;
    }
 
-   public void setPoint(Point2d point)
+   public void setPoint(Point2D point)
    {
       synchronized (points)
       {
@@ -65,7 +64,7 @@ public class PointListArtifact extends Artifact
       this.size = size;
    }
 
-   public Point2d getPoint2d()
+   public Point2D getPoint2d()
    {
       if (points.size() == 0)
          return null;
@@ -141,7 +140,7 @@ public class PointListArtifact extends Artifact
       Vector<Double> xMeanFilter = new Vector<Double>();
       Vector<Double> yMeanFilter = new Vector<Double>();
 
-      Point2d coordinate = null;
+      Point2D coordinate = null;
       synchronized (points)
       {
          for (int i = 0; i < points.size(); i++)
@@ -185,7 +184,7 @@ public class PointListArtifact extends Artifact
    }
 
    @Override
-   public void drawLegend(Plotter2DAdapter graphics, Point2d origin)
+   public void drawLegend(Plotter2DAdapter graphics, Point2D origin)
    {
    }
 
@@ -193,7 +192,7 @@ public class PointListArtifact extends Artifact
    {
       for (int i = 0; i < points.size(); i++)
       {
-         Point2d coordinate = points.get(i);
+         Point2D coordinate = points.get(i);
          printWriter.println(coordinate.getX() + " " + coordinate.getY());
       }
    }

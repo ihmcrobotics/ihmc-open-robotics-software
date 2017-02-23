@@ -1,10 +1,14 @@
 package us.ihmc.robotics.geometry.shapes;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.Transform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.geometry.transformables.Pose;
 import us.ihmc.robotics.math.Epsilons;
 
 /**
@@ -15,18 +19,22 @@ public class Torus3d extends Shape3d<Torus3d>
    private double radius;
    private double tubeRadius;
 
-   private final Point3d temporaryPoint = new Point3d();
-   private final Vector3d temporaryVector = new Vector3d();
+   private final Point3D temporaryPoint = new Point3D();
+   private final Vector3D temporaryVector = new Vector3D();
    
-   private final Vector3d originToRadiusTemporaryVector = new Vector3d();
-   private final Vector3d tubeCenterToPointTemporaryVector = new Vector3d();
+   private final Vector3D originToRadiusTemporaryVector = new Vector3D();
+   private final Vector3D tubeCenterToPointTemporaryVector = new Vector3D();
 
    private static final double SMALLEST_ALLOWABLE_THICKNESS = 5e-3;
    private static final double SMALLEST_ALLOWABLE_RADIUS_MINUS_THICKNESS = 1e-4;
 
    public Torus3d(Torus3d torus3d)
    {
-      this(torus3d.getTransformUnsafe(), torus3d.radius, torus3d.tubeRadius);
+      setPose(torus3d);
+      this.radius = torus3d.radius;
+      this.tubeRadius = torus3d.tubeRadius;
+      
+      checkRadiusAndThickness();
    }
    
    public Torus3d()
@@ -47,17 +55,27 @@ public class Torus3d extends Shape3d<Torus3d>
 
    public Torus3d(RigidBodyTransform transform, double radius, double thickness)
    {
-      setTransform(transform);
+      setPose(transform);
       this.radius = radius;
       this.tubeRadius = thickness;
       
       checkRadiusAndThickness();
    }
 
+   public Torus3d(Pose pose, double radius, double thickness)
+   {
+      setPose(pose);
+      this.radius = radius;
+      this.tubeRadius = thickness;
+      
+      checkRadiusAndThickness();
+   }
+
+
    @Override
    public void set(Torus3d torus3d)
    {
-      setTransform(torus3d.getTransformUnsafe());
+      setPose(torus3d);
       this.radius = torus3d.radius;
       this.tubeRadius = torus3d.tubeRadius;
    }
@@ -120,13 +138,19 @@ public class Torus3d extends Shape3d<Torus3d>
    }
 
    @Override
-   public String toString()
+   public void applyTransform(Transform transform)
    {
-      return "radius = " + radius + ", thickness = " + tubeRadius + ", transform = " + getTransformUnsafe() + "\n";
+      applyTransformToPose(transform);
    }
 
    @Override
-   protected boolean checkIfInsideShapeFrame(Point3d pointInWorldToCheck, Point3d closestPointToPack, Vector3d normalToPack)
+   public String toString()
+   {
+      return "radius = " + radius + ", thickness = " + tubeRadius + ", pose = " + getPoseString() + "\n";
+   }
+
+   @Override
+   protected boolean checkIfInsideShapeFrame(Point3DReadOnly pointInWorldToCheck, Point3DBasics closestPointToPack, Vector3DBasics normalToPack)
    {
       surfaceNormalAt(normalToPack, pointInWorldToCheck);
       closestPointToPack.set(pointInWorldToCheck);
@@ -136,7 +160,7 @@ public class Torus3d extends Shape3d<Torus3d>
    }
 
    @Override
-   protected double distanceShapeFrame(Point3d point)
+   protected double distanceShapeFrame(Point3DReadOnly point)
    {
       temporaryPoint.set(point);
       orthogonalProjectionShapeFrame(temporaryPoint);
@@ -145,7 +169,7 @@ public class Torus3d extends Shape3d<Torus3d>
    }
 
    @Override
-   protected boolean isInsideOrOnSurfaceShapeFrame(Point3d pointToCheck, double epsilon)
+   protected boolean isInsideOrOnSurfaceShapeFrame(Point3DReadOnly pointToCheck, double epsilon)
    {
       temporaryVector.set(pointToCheck.getX(), pointToCheck.getY(), 0.0);
       
@@ -162,7 +186,7 @@ public class Torus3d extends Shape3d<Torus3d>
       return temporaryPoint.distance(pointToCheck) <= tubeRadius + epsilon;
    }
 
-   private void surfaceNormalAt(Vector3d normalToPack, Point3d pointToCheck)
+   private void surfaceNormalAt(Vector3DBasics normalToPack, Point3DReadOnly pointToCheck)
    {
       computeCompositeVectorsForPoint(originToRadiusTemporaryVector, tubeCenterToPointTemporaryVector, pointToCheck);
 
@@ -171,7 +195,7 @@ public class Torus3d extends Shape3d<Torus3d>
    }
 
    @Override
-   protected void orthogonalProjectionShapeFrame(Point3d pointToCheckAndPack)
+   protected void orthogonalProjectionShapeFrame(Point3DBasics pointToCheckAndPack)
    {
       computeCompositeVectorsForPoint(originToRadiusTemporaryVector, tubeCenterToPointTemporaryVector, pointToCheckAndPack);
 
@@ -189,7 +213,7 @@ public class Torus3d extends Shape3d<Torus3d>
     * @param tubeCenterToPointVectorToPack the vector from the closest point in the middle of the torus tube (at R) to the given point.
     * @param pointToCheck the point in world coordinates for which to compute the origin-to-radius and tube-center-to-point vectors.
     */
-   protected void computeCompositeVectorsForPoint(Vector3d originToRadiusVectorToPack, Vector3d tubeCenterToPointVectorToPack, Point3d pointToCheck)
+   protected void computeCompositeVectorsForPoint(Vector3DBasics originToRadiusVectorToPack, Vector3DBasics tubeCenterToPointVectorToPack, Point3DReadOnly pointToCheck)
    {
       temporaryPoint.set(pointToCheck);
 

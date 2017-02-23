@@ -1,8 +1,8 @@
 package us.ihmc.robotics.math.trajectories;
 
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.tuple4D.Vector4D;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -279,18 +279,18 @@ public class VelocityConstrainedOrientationTrajectoryGenerator extends Orientati
       currentAngularAcceleration.setToZero();
    }
 
-   private final Quat4d initialQuaternionDrifted = new Quat4d();
-   private final Quat4d finalQuaternionDrifted = new Quat4d();
+   private final Quaternion initialQuaternionDrifted = new Quaternion();
+   private final Quaternion finalQuaternionDrifted = new Quaternion();
 
-   private final Vector3d tempAngularVelocity = new Vector3d();
-   private final Vector3d tempAngularAcceleration = new Vector3d();
+   private final Vector3D tempAngularVelocity = new Vector3D();
+   private final Vector3D tempAngularAcceleration = new Vector3D();
 
-   private final Quat4d qInterpolatedPrevious = new Quat4d();
-   private final Quat4d qInterpolated = new Quat4d();
-   private final Quat4d qInterpolatedNext = new Quat4d();
+   private final Quaternion qInterpolatedPrevious = new Quaternion();
+   private final Quaternion qInterpolated = new Quaternion();
+   private final Quaternion qInterpolatedNext = new Quaternion();
 
-   private final Quat4d qDot = new Quat4d();
-   private final Quat4d qDDot = new Quat4d();
+   private final Vector4D qDot = new Vector4D();
+   private final Vector4D qDDot = new Vector4D();
 
    @Override
    public void compute(double time)
@@ -332,11 +332,11 @@ public class VelocityConstrainedOrientationTrajectoryGenerator extends Orientati
       currentAngularAcceleration.set(tempAngularAcceleration);
    }
 
-   private final Quat4d initialDrift = new Quat4d();
-   private final Quat4d finalDrift = new Quat4d();
-   private final Quat4d interpolatedDrift = new Quat4d();
+   private final Quaternion initialDrift = new Quaternion();
+   private final Quaternion finalDrift = new Quaternion();
+   private final Quaternion interpolatedDrift = new Quaternion();
 
-   private void interpolateOrientation(double time, Quat4d initialQuaternionDriftedToPack, Quat4d finalQuaternionDriftedToPack, Quat4d qInterpolated)
+   private void interpolateOrientation(double time, Quaternion initialQuaternionDriftedToPack, Quaternion finalQuaternionDriftedToPack, Quaternion qInterpolated)
    {
       parameterPolynomial.compute(time);
       double alpha = parameterPolynomial.getPosition();
@@ -374,22 +374,22 @@ public class VelocityConstrainedOrientationTrajectoryGenerator extends Orientati
       finalOrientation.get(finalQuaternionDriftedToPack);
       quaternionCalculus.interpolate(alpha, initialQuaternionDriftedToPack, finalQuaternionDriftedToPack, qInterpolated, true);
       quaternionCalculus.interpolate(alpha, initialDrift, finalDrift, interpolatedDrift, false);
-      qInterpolated.mul(interpolatedDrift, qInterpolated);
+      qInterpolated.multiply(interpolatedDrift, qInterpolated);
 
-      initialQuaternionDriftedToPack.mul(initialDrift, initialQuaternionDriftedToPack);
-      finalQuaternionDriftedToPack.mul(finalDrift, finalQuaternionDriftedToPack);
+      initialQuaternionDriftedToPack.multiply(initialDrift, initialQuaternionDriftedToPack);
+      finalQuaternionDriftedToPack.multiply(finalDrift, finalQuaternionDriftedToPack);
    }
 
-   private final Vector3d tempAngularVelocityForDrift = new Vector3d();
+   private final Vector3D tempAngularVelocityForDrift = new Vector3D();
 
-   private void computeDrift(double time, double alphaDecay, YoFrameVector angularVelocity, Quat4d driftToPack)
+   private void computeDrift(double time, double alphaDecay, YoFrameVector angularVelocity, Quaternion driftToPack)
    {
       angularVelocity.get(tempAngularVelocityForDrift);
       tempAngularVelocity.scale(alphaDecay);
       RotationTools.integrateAngularVelocity(tempAngularVelocityForDrift, time, driftToPack);
    }
 
-   private void computeDriftSaturated(double time, double alphaSaturation, YoFrameVector angularVelocity, DoubleYoVariable angularVelocityMagnitude, Quat4d driftToPack)
+   private void computeDriftSaturated(double time, double alphaSaturation, YoFrameVector angularVelocity, DoubleYoVariable angularVelocityMagnitude, Quaternion driftToPack)
    {
       angularVelocity.get(tempAngularVelocityForDrift);
 

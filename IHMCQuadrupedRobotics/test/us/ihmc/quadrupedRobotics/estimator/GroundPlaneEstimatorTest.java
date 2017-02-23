@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import javax.vecmath.Vector3d;
+import us.ihmc.euclid.tuple3D.Vector3D;
 
 import org.junit.After;
 import org.junit.Before;
@@ -62,7 +62,7 @@ public class GroundPlaneEstimatorTest
       
       groundPlaneEstimator.compute(pointListA);
       groundPlaneEstimator.getPlane(plane3dA);
-      Vector3d normalA = plane3dA.getNormalCopy();
+      Vector3D normalA = plane3dA.getNormalCopy();
       
       List<FramePoint> pointListB = new ArrayList<FramePoint>();
       Plane3d plane3dB = new Plane3d();
@@ -73,7 +73,7 @@ public class GroundPlaneEstimatorTest
       
       groundPlaneEstimator.compute(pointListB);
       groundPlaneEstimator.getPlane(plane3dB);
-      Vector3d normalB = plane3dB.getNormalCopy();
+      Vector3D normalB = plane3dB.getNormalCopy();
       
       assertTrue(normalA.epsilonEquals(normalB, 1e-7));
    }

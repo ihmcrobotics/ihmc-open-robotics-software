@@ -18,8 +18,14 @@
 
 package us.ihmc.sensorProcessing.bubo.gui;
 
-import javax.swing.*;
-import java.awt.*;
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Stroke;
+
+import javax.swing.JComponent;
 
 /**
  * Draws a basic horizontal 'I' bar with text unit indicating the scale of the image in the window.

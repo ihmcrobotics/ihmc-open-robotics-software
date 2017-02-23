@@ -6,16 +6,15 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Random;
 
-import javax.vecmath.Point2d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector2d;
-import javax.vecmath.Vector3d;
-
 import org.junit.Test;
 
+import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.random.RandomTools;
-import us.ihmc.tools.testing.MutationTestingTools;
 
 public class LineSegment1dTest
 {
@@ -393,27 +392,25 @@ public class LineSegment1dTest
    @Test(timeout = 30000)
    public void toUpperDImensionsTest()
    {
-      Point2d point2d = new Point2d(1,1);
-      Vector2d direction2d = new Vector2d(1,2);
+      Point2D point2d = new Point2D(1,1);
+      Vector2D direction2d = new Vector2D(1,2);
       LineSegment1d firstLine = new LineSegment1d(0, 10);
       LineSegment2d line2d = firstLine.toLineSegment2d(point2d, direction2d);
       
-      assertEquals(line2d.getFirstEndpoint(), new Point2d(1,1));
-      assertEquals(line2d.getSecondEndpoint(), new Point2d(11,21));
+      assertEquals(line2d.getFirstEndpoint(), new Point2D(1,1));
+      assertEquals(line2d.getSecondEndpoint(), new Point2D(11,21));
       
-      Point3d point3d = new Point3d(1,1,1);
-      Vector3d direction3d = new Vector3d(1,2,3);
+      Point3D point3d = new Point3D(1,1,1);
+      Vector3D direction3d = new Vector3D(1,2,3);
       LineSegment3d line3d = firstLine.toLineSegment3d(point3d, direction3d);
       
-      assertEquals(line3d.getFirstEndpoint(), new Point3d(1,1,1));
-      assertEquals(line3d.getSecondEndpoint(), new Point3d(11,21,31));
+      assertEquals(line3d.getFirstEndpoint(), new Point3D(1,1,1));
+      assertEquals(line3d.getSecondEndpoint(), new Point3D(11,21,31));
    }
 
    public static void main(String[] args)
    {
-      String targetTests = "us.ihmc.robotics.geometry.LineSegment1dTest";
-      String targetClasses = "us.ihmc.robotics.geometry.LineSegment1d";
-      MutationTestingTools.doPITMutationTestAndOpenResult(targetTests, targetClasses);
+      MutationTestFacilitator.facilitateMutationTestForClass(LineSegment1d.class, LineSegment1dTest.class);
    }
 
 }

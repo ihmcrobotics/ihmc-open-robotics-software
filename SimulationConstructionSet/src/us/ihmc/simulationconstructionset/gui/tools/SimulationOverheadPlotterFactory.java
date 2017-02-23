@@ -21,7 +21,6 @@ import us.ihmc.simulationconstructionset.gui.SimulationOverheadPlotter;
 import us.ihmc.tools.factories.FactoryTools;
 import us.ihmc.tools.factories.OptionalFactoryField;
 import us.ihmc.tools.factories.RequiredFactoryField;
-import us.ihmc.tools.io.printing.PrintTools;
 
 public class SimulationOverheadPlotterFactory
 {

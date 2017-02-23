@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import us.ihmc.commons.Conversions;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.controllers.ControllerStateChangedListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -11,7 +12,6 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
-import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
 
 public class DRCOutputWriterWithStateChangeSmoother implements DRCOutputWriter
@@ -51,10 +51,10 @@ public class DRCOutputWriterWithStateChangeSmoother implements DRCOutputWriter
       if (hasHighLevelControllerStateChanged.get())
       {
          hasHighLevelControllerStateChanged.set(false);
-         timeAtHighLevelControllerStateChange.set(TimeTools.nanoSecondstoSeconds(timestamp));
+         timeAtHighLevelControllerStateChange.set(Conversions.nanoSecondstoSeconds(timestamp));
       }
 
-      double currentTime = TimeTools.nanoSecondstoSeconds(timestamp);
+      double currentTime = Conversions.nanoSecondstoSeconds(timestamp);
       double deltaTime = Math.max(currentTime - timeAtHighLevelControllerStateChange.getDoubleValue(), 0.0);
       
       if (deltaTime < slopTime.getDoubleValue())

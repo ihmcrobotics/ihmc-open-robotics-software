@@ -1,7 +1,5 @@
 package us.ihmc.javaFXToolkit.scenes;
 
-import javax.vecmath.Vector3d;
-
 import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.event.Event;
 import javafx.event.EventHandler;
@@ -15,6 +13,7 @@ import javafx.scene.SceneAntialiasing;
 import javafx.scene.SubScene;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.javaFXToolkit.cameraControllers.FocusBasedCameraMouseEventHandler;
 import us.ihmc.javaFXToolkit.shapes.JavaFXCoordinateSystem;
 
@@ -164,8 +163,8 @@ public class View3DFactory
       camera.setFarClip(farClip);
       setCamera(camera);
 
-      Vector3d up = new Vector3d(0.0, 0.0, 1.0);
-      Vector3d forward = new Vector3d(1.0, 0.0, 0.0);
+      Vector3D up = new Vector3D(0.0, 0.0, 1.0);
+      Vector3D forward = new Vector3D(1.0, 0.0, 0.0);
       ReadOnlyDoubleProperty widthProperty = widthProperty();
       ReadOnlyDoubleProperty heightProperty = heightProperty();
       FocusBasedCameraMouseEventHandler cameraController = new FocusBasedCameraMouseEventHandler(widthProperty, heightProperty, camera, up, forward);

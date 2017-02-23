@@ -13,9 +13,6 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -25,6 +22,8 @@ import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.controllers.ControllerFailureException;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -118,9 +117,9 @@ public class AtlasSDFVerificationTest
 
    private void pinRobotInAir(FloatingRootJointRobot sdfRobot)
    {
-      sdfRobot.setPositionInWorld(new Vector3d(sdfRobot.getPositionInWorld().getX(), sdfRobot.getPositionInWorld().getY(), sdfRobot.getPositionInWorld().getZ() + 0.5));
+      sdfRobot.setPositionInWorld(new Vector3D(sdfRobot.getPositionInWorld().getX(), sdfRobot.getPositionInWorld().getY(), sdfRobot.getPositionInWorld().getZ() + 0.5));
       ExternalForcePoint fp = new ExternalForcePoint("gravityCompensation", sdfRobot.getRobotsYoVariableRegistry());
-      fp.setForce(0, 0, -sdfRobot.getGravityZ() * sdfRobot.computeCenterOfMass(new Point3d()) / 2);
+      fp.setForce(0, 0, -sdfRobot.getGravityZ() * sdfRobot.computeCenterOfMass(new Point3D()) / 2);
 
       sdfRobot.getJoint("l_arm_shx").addExternalForcePoint(fp);
       sdfRobot.getJoint("r_arm_shx").addExternalForcePoint(fp);

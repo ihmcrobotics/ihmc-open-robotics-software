@@ -8,8 +8,6 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Random;
 
-import javax.vecmath.Point3d;
-
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import org.ejml.ops.MatrixFeatures;
@@ -22,8 +20,9 @@ import georegression.struct.point.Point3D_F64;
 import georegression.struct.se.Se3_F64;
 import georegression.transform.se.SePointOps_F64;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
@@ -135,7 +134,7 @@ public class MatrixToolsTest
       MatrixTools.tranformSe3IntoTransform3D(a, b);
 
       Point3D_F64 p0 = new Point3D_F64(-1, 2, 3);
-      Point3d p1 = new Point3d(p0.x, p0.y, p0.z);
+      Point3D p1 = new Point3D(p0.x, p0.y, p0.z);
 
       SePointOps_F64.transform(a, p0, p0);
 

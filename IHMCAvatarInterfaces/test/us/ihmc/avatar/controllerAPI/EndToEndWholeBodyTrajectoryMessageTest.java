@@ -4,10 +4,6 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Random;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -16,6 +12,9 @@ import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage.BaseForControl;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
@@ -71,8 +70,8 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
       FramePose footPoseCloseToActual = new FramePose(foot.getBodyFixedFrame());
       footPoseCloseToActual.setPosition(0.0, 0.0, 0.10);
       footPoseCloseToActual.changeFrame(ReferenceFrame.getWorldFrame());
-      Point3d desiredPosition = new Point3d();
-      Quat4d desiredOrientation = new Quat4d();
+      Point3D desiredPosition = new Point3D();
+      Quaternion desiredOrientation = new Quaternion();
       footPoseCloseToActual.getPose(desiredPosition, desiredOrientation);
 
       FootTrajectoryMessage footTrajectoryMessage = new FootTrajectoryMessage(footSide, 0.0, desiredPosition, desiredOrientation);
@@ -107,8 +106,8 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
          FramePose desiredRandomHandPose = new FramePose(handClone.getBodyFixedFrame());
          desiredRandomHandPose.changeFrame(ReferenceFrame.getWorldFrame());
          desiredHandPoses.put(robotSide, desiredRandomHandPose);
-         desiredPosition = new Point3d();
-         desiredOrientation = new Quat4d();
+         desiredPosition = new Point3D();
+         desiredOrientation = new Quaternion();
          desiredRandomHandPose.getPose(desiredPosition, desiredOrientation);
          wholeBodyTrajectoryMessage.setHandTrajectoryMessage(new HandTrajectoryMessage(robotSide, BaseForControl.WORLD, trajectoryTime, desiredPosition, desiredOrientation));
       }
@@ -119,15 +118,15 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
       desiredPelvisPose.setOrientation(RandomTools.generateRandomQuaternion(random, 1.0));
       desiredPelvisPose.setPosition(RandomTools.generateRandomPoint(random, 0.05, 0.03, 0.05));
       desiredPelvisPose.setZ(desiredPelvisPose.getZ() - 0.1);
-      desiredPosition = new Point3d();
-      desiredOrientation = new Quat4d();
+      desiredPosition = new Point3D();
+      desiredOrientation = new Quaternion();
       desiredPelvisPose.changeFrame(ReferenceFrame.getWorldFrame());
       desiredPelvisPose.getPose(desiredPosition, desiredOrientation);
       wholeBodyTrajectoryMessage.setPelvisTrajectoryMessage(new PelvisTrajectoryMessage(trajectoryTime, desiredPosition, desiredOrientation));
 
       FrameOrientation desiredChestOrientation = new FrameOrientation(ReferenceFrame.getWorldFrame(), RandomTools.generateRandomQuaternion(random, 0.5));
       desiredChestOrientation.changeFrame(ReferenceFrame.getWorldFrame());
-      desiredOrientation = new Quat4d();
+      desiredOrientation = new Quaternion();
       desiredChestOrientation.getQuaternion(desiredOrientation);
       wholeBodyTrajectoryMessage.setChestTrajectoryMessage(new ChestTrajectoryMessage(trajectoryTime, desiredOrientation));
 
@@ -167,11 +166,11 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
 
       WholeBodyTrajectoryMessage wholeBodyTrajectoryMessage = new WholeBodyTrajectoryMessage();
       ChestTrajectoryMessage chestTrajectoryMessage = new ChestTrajectoryMessage(5);
-      chestTrajectoryMessage.setTrajectoryPoint(0, 0.00, new Quat4d(), new Vector3d());
-      chestTrajectoryMessage.setTrajectoryPoint(1, 0.10, new Quat4d(), new Vector3d());
-      chestTrajectoryMessage.setTrajectoryPoint(2, 0.20, new Quat4d(), new Vector3d());
-      chestTrajectoryMessage.setTrajectoryPoint(3, 0.10, new Quat4d(), new Vector3d());
-      chestTrajectoryMessage.setTrajectoryPoint(4, 0.00, new Quat4d(), new Vector3d());
+      chestTrajectoryMessage.setTrajectoryPoint(0, 0.00, new Quaternion(), new Vector3D());
+      chestTrajectoryMessage.setTrajectoryPoint(1, 0.10, new Quaternion(), new Vector3D());
+      chestTrajectoryMessage.setTrajectoryPoint(2, 0.20, new Quaternion(), new Vector3D());
+      chestTrajectoryMessage.setTrajectoryPoint(3, 0.10, new Quaternion(), new Vector3D());
+      chestTrajectoryMessage.setTrajectoryPoint(4, 0.00, new Quaternion(), new Vector3D());
       wholeBodyTrajectoryMessage.setChestTrajectoryMessage(chestTrajectoryMessage);
       drcSimulationTestHelper.send(wholeBodyTrajectoryMessage);
 
@@ -193,11 +192,11 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
 
       WholeBodyTrajectoryMessage wholeBodyTrajectoryMessage = new WholeBodyTrajectoryMessage();
       PelvisTrajectoryMessage pelvisTrajectoryMessage = new PelvisTrajectoryMessage(5);
-      pelvisTrajectoryMessage.setTrajectoryPoint(0, 0.00, new Point3d(), new Quat4d(), new Vector3d(), new Vector3d());
-      pelvisTrajectoryMessage.setTrajectoryPoint(1, 0.10, new Point3d(), new Quat4d(), new Vector3d(), new Vector3d());
-      pelvisTrajectoryMessage.setTrajectoryPoint(2, 0.20, new Point3d(), new Quat4d(), new Vector3d(), new Vector3d());
-      pelvisTrajectoryMessage.setTrajectoryPoint(3, 0.10, new Point3d(), new Quat4d(), new Vector3d(), new Vector3d());
-      pelvisTrajectoryMessage.setTrajectoryPoint(4, 0.00, new Point3d(), new Quat4d(), new Vector3d(), new Vector3d());
+      pelvisTrajectoryMessage.setTrajectoryPoint(0, 0.00, new Point3D(), new Quaternion(), new Vector3D(), new Vector3D());
+      pelvisTrajectoryMessage.setTrajectoryPoint(1, 0.10, new Point3D(), new Quaternion(), new Vector3D(), new Vector3D());
+      pelvisTrajectoryMessage.setTrajectoryPoint(2, 0.20, new Point3D(), new Quaternion(), new Vector3D(), new Vector3D());
+      pelvisTrajectoryMessage.setTrajectoryPoint(3, 0.10, new Point3D(), new Quaternion(), new Vector3D(), new Vector3D());
+      pelvisTrajectoryMessage.setTrajectoryPoint(4, 0.00, new Point3D(), new Quaternion(), new Vector3D(), new Vector3D());
       wholeBodyTrajectoryMessage.setPelvisTrajectoryMessage(pelvisTrajectoryMessage);
       drcSimulationTestHelper.send(wholeBodyTrajectoryMessage);
 

@@ -1,21 +1,20 @@
 package us.ihmc.jMonkeyEngineToolkit.jme;
 
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
-import us.ihmc.graphicsDescription.Graphics3DObject;
-import us.ihmc.graphicsDescription.structure.Graphics3DNode;
-import us.ihmc.graphicsDescription.structure.Graphics3DNodeType;
-import us.ihmc.jMonkeyEngineToolkit.jme.util.JMEDataTypeUtils;
-import us.ihmc.robotics.geometry.Transform3d;
-import us.ihmc.tools.thread.CloseableAndDisposable;
-import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
-
 import com.jme3.app.Application;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.queue.RenderQueue.ShadowMode;
 import com.jme3.scene.Node;
+
+import us.ihmc.euclid.transform.AffineTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
+import us.ihmc.graphicsDescription.Graphics3DObject;
+import us.ihmc.graphicsDescription.structure.Graphics3DNode;
+import us.ihmc.graphicsDescription.structure.Graphics3DNodeType;
+import us.ihmc.jMonkeyEngineToolkit.jme.util.JMEDataTypeUtils;
+import us.ihmc.tools.thread.CloseableAndDisposable;
+import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
 
 public class JMEGraphics3DNode extends Node implements JMEUpdatable, CloseableAndDisposable
 {
@@ -23,9 +22,9 @@ public class JMEGraphics3DNode extends Node implements JMEUpdatable, CloseableAn
    
    private final static boolean DEBUG= false;
    
-   private Quat4d rotation = new Quat4d();
-   private Vector3d translation = new Vector3d();
-   private Vector3d scale = new Vector3d();
+   private QuaternionBasics rotation = new us.ihmc.euclid.tuple4D.Quaternion();
+   private Vector3D translation = new Vector3D();
+   private Vector3D scale = new Vector3D();
    
    private Quaternion jmeRotation = new Quaternion();
    private Quaternion oldJmeRotation = new Quaternion(Float.NaN,Float.NaN,Float.NaN,Float.NaN);
@@ -82,8 +81,9 @@ public class JMEGraphics3DNode extends Node implements JMEUpdatable, CloseableAn
          createAndAttachGraphicsObject();
       }
       
-      Transform3d transform = graphics3dNode.getTransform();
-      transform.get(rotation, translation);
+      AffineTransform transform = graphics3dNode.getTransform();
+      transform.getRotation(rotation);
+      transform.getTranslation(translation);
       transform.getScale(scale);
       
       JMEDataTypeUtils.packVecMathTuple3dInJMEVector3f(translation, jmeTranslation);

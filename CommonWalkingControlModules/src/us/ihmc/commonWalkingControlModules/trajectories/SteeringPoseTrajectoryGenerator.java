@@ -3,9 +3,9 @@ package us.ihmc.commonWalkingControlModules.trajectories;
 import static us.ihmc.robotics.geometry.AngleTools.computeAngleDifferenceMinusPiToPi;
 import static us.ihmc.robotics.geometry.AngleTools.trimAngleMinusPiToPi;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
@@ -22,7 +22,6 @@ import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
@@ -165,13 +164,13 @@ public class SteeringPoseTrajectoryGenerator implements PoseTrajectoryGenerator
       {
          private static final long serialVersionUID = 9102217353690768074L;
 
-         private final Vector3d localTranslation = new Vector3d();
+         private final Vector3D localTranslation = new Vector3D();
 
-         private final Vector3d localXAxis = new Vector3d();
-         private final Vector3d localYAxis = new Vector3d();
-         private final Vector3d localZAxis = new Vector3d();
+         private final Vector3D localXAxis = new Vector3D();
+         private final Vector3D localYAxis = new Vector3D();
+         private final Vector3D localZAxis = new Vector3D();
 
-         private final Matrix3d localRotation = new Matrix3d();
+         private final RotationMatrix localRotation = new RotationMatrix();
 
          @Override
          protected void updateTransformToParent(RigidBodyTransform transformToParent)
@@ -184,9 +183,7 @@ public class SteeringPoseTrajectoryGenerator implements PoseTrajectoryGenerator
             steeringWheelZeroAxis.set(localXAxis);
 
             steeringWheelCenter.get(localTranslation);
-            localRotation.setColumn(0, localXAxis);
-            localRotation.setColumn(1, localYAxis);
-            localRotation.setColumn(2, localZAxis);
+            localRotation.setColumns(localXAxis, localYAxis, localZAxis);
             transformToParent.set(localRotation, localTranslation);
          }
       };

@@ -2,9 +2,8 @@ package us.ihmc.avatar.initialSetup;
 
 import java.util.ArrayList;
 
-import javax.vecmath.Vector3d;
-
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.HeightMap;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -26,7 +25,7 @@ public class DRCSCSInitialSetup
    private boolean drawGroundProfile = false;
 
    private int simulationDataBufferSize = 16000;
-   private Vector3d gravity = new Vector3d(0.0, 0.0,-9.81);
+   private Vector3D gravity = new Vector3D(0.0, 0.0,-9.81);
    private boolean runMultiThreaded = true;
    
 //   private SensorNoiseParameters simulatedSensorNoiseParameters = DRCSimulatedSensorNoiseParameters.createSensorNoiseParametersZeroNoise();
@@ -171,7 +170,7 @@ public class DRCSCSInitialSetup
       return recordFrequency;
    }
 
-   public Vector3d getGravity()
+   public Vector3D getGravity()
    {
       return gravity;
    }
@@ -238,9 +237,9 @@ public class DRCSCSInitialSetup
       this.drawGroundProfile = drawGroundProfile;
    }
 
-public void setGravity(Vector3d gravity) 
+public void setGravity(Vector3D gravity) 
 {
-	this.gravity = new Vector3d(gravity);
+	this.gravity = new Vector3D(gravity);
 	
 }
 

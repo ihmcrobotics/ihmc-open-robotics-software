@@ -1,21 +1,21 @@
 package us.ihmc.robotics.screwTheory;
 
+import java.util.Random;
+
 import org.ejml.data.DenseMatrix64F;
+
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.ReferenceFrameMismatchException;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
-import java.util.Random;
-
-import javax.vecmath.Vector3d;
-
 public class Twist extends SpatialMotionVector
 {
-   private Vector3d freeVector = new Vector3d();    // to store intermediate results
+   private Vector3D freeVector = new Vector3D();    // to store intermediate results
    private RigidBodyTransform freeTransform = new RigidBodyTransform();
 
    public Twist()
@@ -41,7 +41,7 @@ public class Twist extends SpatialMotionVector
     * @param linearVelocity linear velocity part of the twist
     * @param angularVelocity angular velocity part of the twist
     */
-   public Twist(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame, Vector3d linearVelocity, Vector3d angularVelocity)
+   public Twist(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame, Vector3D linearVelocity, Vector3D angularVelocity)
    {
       super(bodyFrame, baseFrame, expressedInFrame, linearVelocity, angularVelocity);
    }
@@ -79,8 +79,8 @@ public class Twist extends SpatialMotionVector
     */
    public Twist(Twist other)
    {
-      this.angularPart = new Vector3d();
-      this.linearPart = new Vector3d();
+      this.angularPart = new Vector3D();
+      this.linearPart = new Vector3D();
       set(other);
    }
 
@@ -96,7 +96,7 @@ public class Twist extends SpatialMotionVector
     * @param offset any vector from the origin of expressedInFrame to axisOfRotation
     */
    public Twist(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame, double angularVelocityMagnitude,
-                double linearVelocityMagnitude, Vector3d axisOfRotation, Vector3d offset)
+                double linearVelocityMagnitude, Vector3D axisOfRotation, Vector3D offset)
    {
       setScrew(bodyFrame, baseFrame, expressedInFrame, angularVelocityMagnitude, linearVelocityMagnitude, axisOfRotation, offset);
    }
@@ -120,7 +120,7 @@ public class Twist extends SpatialMotionVector
     * Packs the angular velocity of the body frame with respect to the base frame, expressed in the base frame.
     * The vector is computed by simply rotating the angular velocity part of this twist to base frame.
     */
-   public void getAngularVelocityInBaseFrame(Vector3d vectorToPack)
+   public void getAngularVelocityInBaseFrame(Vector3D vectorToPack)
    {
       vectorToPack.set(angularPart);
 
@@ -148,7 +148,7 @@ public class Twist extends SpatialMotionVector
    /**
     * Packs a version of the linear velocity, rotated to the base frame.
     */
-   public void getBodyOriginLinearPartInBaseFrame(Vector3d linearVelocityAtBodyOriginToPack)
+   public void getBodyOriginLinearPartInBaseFrame(Vector3D linearVelocityAtBodyOriginToPack)
    {
       if (expressedInFrame == bodyFrame)
       {
@@ -335,7 +335,7 @@ public class Twist extends SpatialMotionVector
    }
 
    public void setScrew(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame, double angularVelocityMagnitude,
-         double linearVelocityMagnitude, Vector3d axisOfRotation, Vector3d offset)
+         double linearVelocityMagnitude, Vector3D axisOfRotation, Vector3D offset)
    {
       axisOfRotation.normalize();
 
@@ -346,11 +346,11 @@ public class Twist extends SpatialMotionVector
       this.freeVector.cross(offset, axisOfRotation);
       this.freeVector.scale(angularVelocityMagnitude);
 
-      this.linearPart = new Vector3d(axisOfRotation);
+      this.linearPart = new Vector3D(axisOfRotation);
       this.linearPart.scale(linearVelocityMagnitude);
       this.linearPart.add(freeVector);
 
-      this.angularPart = new Vector3d(axisOfRotation);
+      this.angularPart = new Vector3D(axisOfRotation);
       this.angularPart.scale(angularVelocityMagnitude);
    }
 

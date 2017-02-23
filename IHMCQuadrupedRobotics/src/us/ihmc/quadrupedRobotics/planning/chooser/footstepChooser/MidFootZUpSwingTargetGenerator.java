@@ -1,6 +1,6 @@
 package us.ihmc.quadrupedRobotics.planning.chooser.footstepChooser;
 
-import javax.vecmath.Vector2d;
+import us.ihmc.euclid.tuple2D.Vector2D;
 
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.CommonQuadrupedReferenceFrames;
@@ -61,7 +61,7 @@ public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
    private final FramePoint desiredSwingFootPositionFromOppositeSideFoot = new FramePoint();
 
    private final FrameVector footDesiredVector= new FrameVector();
-   private final Vector2d footDesiredVector2d= new Vector2d();
+   private final Vector2D footDesiredVector2d= new Vector2D();
    
    private final QuadrupedLinkLengths linkLengths;
 

@@ -1,21 +1,21 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization;
 
+import us.ihmc.euclid.matrix.Matrix3D;
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameVector2d;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Vector3d;
 
 public class ICPOptimizationControllerHelper
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final Vector2dZUpFrame icpVelocityDirectionFrame = new Vector2dZUpFrame("icpVelocityDirectionFrame", worldFrame);
 
-   private static final Matrix3d matrix = new Matrix3d();
-   private static final Matrix3d matrixTransformed = new Matrix3d();
+   private static final Matrix3D matrix = new Matrix3D();
+   private static final Matrix3D matrixTransformed = new Matrix3D();
 
    public static void transformFeedbackGains(FrameVector2d feedbackGainsToPack, FrameVector2d desiredICPVelocity, DoubleYoVariable parallelGain, DoubleYoVariable orthogonalGain)
    {
@@ -31,13 +31,13 @@ public class ICPOptimizationControllerHelper
          rotationTranspose.transpose();
          transformTranspose.setRotation(rotationTranspose);
 
-         matrix.setZero();
+         matrix.setToZero();
          matrix.setElement(0, 0, 1.0 + parallelGain.getDoubleValue());
          matrix.setElement(1, 1, 1.0 + orthogonalGain.getDoubleValue());
 
          matrixTransformed.set(rotation);
-         matrixTransformed.mul(matrix);
-         matrixTransformed.mul(rotationTranspose);
+         matrixTransformed.multiply(matrix);
+         matrixTransformed.multiply(rotationTranspose);
 
          feedbackGainsToPack.setToZero(worldFrame);
          feedbackGainsToPack.setX(matrixTransformed.getElement(0, 0));
@@ -51,8 +51,8 @@ public class ICPOptimizationControllerHelper
    }
 
    private static final RigidBodyTransform transformTranspose = new RigidBodyTransform();
-   private static final Matrix3d rotation = new Matrix3d();
-   private static final Matrix3d rotationTranspose = new Matrix3d();
+   private static final RotationMatrix rotation = new RotationMatrix();
+   private static final RotationMatrix rotationTranspose = new RotationMatrix();
 
    public static void transformWeightsToWorldFrame(FrameVector2d weightsToPack, DoubleYoVariable xWeight, DoubleYoVariable yWeight, ReferenceFrame frame)
    {
@@ -63,13 +63,13 @@ public class ICPOptimizationControllerHelper
       rotation.transpose();
       transformTranspose.setRotation(rotationTranspose);
 
-      matrix.setZero();
+      matrix.setToZero();
       matrix.setElement(0, 0, xWeight.getDoubleValue());
       matrix.setElement(1, 1, yWeight.getDoubleValue());
 
       matrixTransformed.set(rotation);
-      matrixTransformed.mul(matrix);
-      matrixTransformed.mul(rotationTranspose);
+      matrixTransformed.multiply(matrix);
+      matrixTransformed.multiply(rotationTranspose);
 
       weightsToPack.setToZero(worldFrame);
       weightsToPack.setX(matrixTransformed.getElement(0, 0));
@@ -81,10 +81,10 @@ public class ICPOptimizationControllerHelper
    {
       private static final long serialVersionUID = -1810366869361449743L;
       private final FrameVector2d xAxis;
-      private final Vector3d x = new Vector3d();
-      private final Vector3d y = new Vector3d();
-      private final Vector3d z = new Vector3d();
-      private final Matrix3d rotation = new Matrix3d();
+      private final Vector3D x = new Vector3D();
+      private final Vector3D y = new Vector3D();
+      private final Vector3D z = new Vector3D();
+      private final RotationMatrix rotation = new RotationMatrix();
 
       public Vector2dZUpFrame(String string, ReferenceFrame parentFrame)
       {
@@ -107,9 +107,7 @@ public class ICPOptimizationControllerHelper
          z.set(0.0, 0.0, 1.0);
          y.cross(z, x);
 
-         rotation.setColumn(0, x);
-         rotation.setColumn(1, y);
-         rotation.setColumn(2, z);
+         rotation.setColumns(x, y, z);
 
          transformToParent.setRotationAndZeroTranslation(rotation);
       }

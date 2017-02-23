@@ -5,8 +5,6 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Random;
 
-import javax.vecmath.Point3d;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -15,6 +13,7 @@ import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisHeightTrajectoryMessage;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -60,7 +59,7 @@ public abstract class EndToEndPelvisHeightTrajectoryMessageTest implements Multi
       FramePoint desiredRandomPelvisPosition = new FramePoint(pelvis.getBodyFixedFrame());
       desiredRandomPelvisPosition.set(RandomTools.generateRandomPoint(random, 0.10, 0.20, 0.05));
       desiredRandomPelvisPosition.setZ(desiredRandomPelvisPosition.getZ() - 0.1);
-      Point3d desiredPosition = new Point3d();
+      Point3D desiredPosition = new Point3D();
 
       desiredRandomPelvisPosition.get(desiredPosition);
       if (DEBUG)

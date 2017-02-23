@@ -1,18 +1,17 @@
 package us.ihmc.atlas.initialSetup;
 
-import javax.vecmath.Vector3d;
-
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.initialSetup.SquaredUpDRCRobotInitialSetup;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
 public class SquaredUpVRCQual3Platform extends SquaredUpDRCRobotInitialSetup implements DRCRobotInitialSetup<HumanoidFloatingRootJointRobot>
 {
-   private final Vector3d additionalOffset = new Vector3d(16.4, 0.0, 1.0);
+   private final Vector3D additionalOffset = new Vector3D(16.4, 0.0, 1.0);
    private final double yaw = - 0.5*Math.PI;
 
-   private Vector3d newOffset = null;
+   private Vector3D newOffset = null;
 
    public SquaredUpVRCQual3Platform(double groundHeight)
    {
@@ -30,7 +29,7 @@ public class SquaredUpVRCQual3Platform extends SquaredUpDRCRobotInitialSetup imp
 
       if (newOffset == null)
       {
-         newOffset = new Vector3d();
+         newOffset = new Vector3D();
          super.getOffset(newOffset);
          newOffset.add(additionalOffset);
       }

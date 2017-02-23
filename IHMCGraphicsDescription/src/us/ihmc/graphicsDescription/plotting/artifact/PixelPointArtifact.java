@@ -3,8 +3,7 @@ package us.ihmc.graphicsDescription.plotting.artifact;
 import java.awt.BasicStroke;
 import java.awt.Color;
 
-import javax.vecmath.Point2d;
-
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.graphicsDescription.plotting.Graphics2DAdapter;
 import us.ihmc.graphicsDescription.plotting.Plotter2DAdapter;
 
@@ -15,15 +14,15 @@ import us.ihmc.graphicsDescription.plotting.Plotter2DAdapter;
  */
 public class PixelPointArtifact extends Artifact
 {
-   private final Point2d point;
+   private final Point2D point;
    private BasicStroke basicStroke;
    
-   public PixelPointArtifact(String id, Point2d point)
+   public PixelPointArtifact(String id, Point2D point)
    {
       this(id, point, Color.BLACK, 1.0f);
    }
    
-   public PixelPointArtifact(String id, Point2d point, Color color, float width)
+   public PixelPointArtifact(String id, Point2D point, Color color, float width)
    {
       super(id);
       
@@ -46,7 +45,7 @@ public class PixelPointArtifact extends Artifact
    }
 
    @Override
-   public void drawLegend(Plotter2DAdapter graphics, Point2d origin)
+   public void drawLegend(Plotter2DAdapter graphics, Point2D origin)
    {
    }
 

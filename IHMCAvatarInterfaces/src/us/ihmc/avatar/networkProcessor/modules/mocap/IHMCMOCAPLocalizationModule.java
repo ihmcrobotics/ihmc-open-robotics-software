@@ -3,12 +3,6 @@ package us.ihmc.avatar.networkProcessor.modules.mocap;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Quat4f;
-import javax.vecmath.Vector3d;
-import javax.vecmath.Vector3f;
-
 import optiTrack.MocapDataClient;
 import optiTrack.MocapRigidBody;
 import optiTrack.MocapRigidbodiesListener;
@@ -16,8 +10,14 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
-import us.ihmc.communication.packets.PlanarRegionsListMessage;
 import us.ihmc.communication.util.NetworkPorts;
+import us.ihmc.euclid.rotationConversion.YawPitchRollConversion;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.Vector3D32;
+import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.tuple4D.Quaternion32;
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
@@ -30,8 +30,6 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
@@ -50,14 +48,17 @@ public class IHMCMOCAPLocalizationModule implements MocapRigidbodiesListener, Pa
    private final MocapToPelvisFrameConverter mocapToPelvisFrameConverter = new MocapToPelvisFrameConverter();
    private final PacketCommunicator packetCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.MOCAP_MODULE,
                                                                                                                  new IHMCCommunicationKryoNetClassList());
+   
+   PacketCommunicator mocapVizPacketCommunicator = PacketCommunicator.createTCPPacketCommunicatorServer(NetworkPorts.MOCAP_MODULE_VIZ, new IHMCCommunicationKryoNetClassList());
+   
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final YoVariableServer yoVariableServer;
    private final FullHumanoidRobotModel fullRobotModel;
-   private final PlanarRegionsListListener planarRegionsListListener = new PlanarRegionsListListener();
+   private final MocapPlanarRegionsListManager planarRegionsListManager;
    private final WalkingStatusManager walkingStatusManager = new WalkingStatusManager();
 
-   private final Vector3f pelvisTranslationFromRobotConfigurationData = new Vector3f();
-   private final Quat4f pelvisOrientationFromRobotConfigurationData = new Quat4f(0.0f, 0.0f, 0.0f, 1.0f);
+   private final Vector3D32 pelvisTranslationFromRobotConfigurationData = new Vector3D32();
+   private final Quaternion32 pelvisOrientationFromRobotConfigurationData = new Quaternion32(0.0f, 0.0f, 0.0f, 1.0f);
    private final ReferenceFrame pelvisFrameFromRobotConfigurationDataPacket = new ReferenceFrame("pelvisFrameFromRobotConfigurationDataPacket", ReferenceFrame.getWorldFrame())
    {
       private static final long serialVersionUID = 116774591450076114L;
@@ -80,7 +81,7 @@ public class IHMCMOCAPLocalizationModule implements MocapRigidbodiesListener, Pa
       {
          transformToParent.set(pelvisToWorldFromMocapData);
       }
-   };   
+   };
    
    private final DoubleYoVariable computedPelvisPositionX = new DoubleYoVariable("computedPelvisPositionX", registry);
    private final DoubleYoVariable computedPelvisPositionY = new DoubleYoVariable("computedPelvisPositionY", registry);
@@ -97,20 +98,22 @@ public class IHMCMOCAPLocalizationModule implements MocapRigidbodiesListener, Pa
    private final DoubleYoVariable mocapWorldToRobotWorldTransformPitch = new DoubleYoVariable("mocapWorldToRobotWorldTransformPitch", registry);
    private final DoubleYoVariable mocapWorldToRobotWorldTransformRoll = new DoubleYoVariable("mocapWorldToRobotWorldTransformRoll", registry);
 
+   private final BooleanYoVariable requestReInitialization = new BooleanYoVariable("requestReInitialization", registry);
    private final BooleanYoVariable requestFootsteps = new BooleanYoVariable("requestFootsteps", registry);
    private final BooleanYoVariable walkingAround = new BooleanYoVariable("walkingAround", registry);
-   
-   public IHMCMOCAPLocalizationModule(DRCRobotModel drcRobotModel)
+      
+   public IHMCMOCAPLocalizationModule(DRCRobotModel drcRobotModel, MocapPlanarRegionsListManager planarRegionsListManager)
    {
       MocapDataClient mocapDataClient = new MocapDataClient();
       mocapDataClient.registerRigidBodiesListener(this);
 
       packetCommunicator.attachListener(RobotConfigurationData.class, this);
-      packetCommunicator.attachListener(PlanarRegionsListMessage.class, planarRegionsListListener);
       packetCommunicator.attachListener(FootstepStatus.class, walkingStatusManager);
 
       PeriodicThreadScheduler scheduler = new PeriodicNonRealtimeThreadScheduler("MocapModuleScheduler");
       LogModelProvider logModelProvider = drcRobotModel.getLogModelProvider();
+      
+      this.planarRegionsListManager = planarRegionsListManager;
 
       yoVariableServer = new YoVariableServer(getClass(), scheduler, logModelProvider, drcRobotModel.getLogSettings(), MOCAP_SERVER_DT);
       fullRobotModel = drcRobotModel.createFullRobotModel();
@@ -118,7 +121,7 @@ public class IHMCMOCAPLocalizationModule implements MocapRigidbodiesListener, Pa
 
       PrintTools.info("Starting server");
       yoVariableServer.start();
-
+      
       try
       {
          packetCommunicator.connect();
@@ -140,14 +143,18 @@ public class IHMCMOCAPLocalizationModule implements MocapRigidbodiesListener, Pa
 
       if (!mocapToPelvisFrameConverter.isInitialized() && latestRobotConfigurationData != null)
       {
-         pelvisFrameFromRobotConfigurationDataPacket.update();
-         MocapRigidBody pelvisRigidBody = getPelvisRigidBody(listOfRigidbodies);
-         mocapToPelvisFrameConverter.initialize(pelvisFrameFromRobotConfigurationDataPacket, pelvisRigidBody);
+         initializeMocapFrameConverter(listOfRigidbodies);
       }
       else if (latestRobotConfigurationData == null)
       {
          PrintTools.info("Waiting for robot configuration data");
          return;
+      }
+            
+      if(requestReInitialization.getBooleanValue())
+      {
+         initializeMocapFrameConverter(listOfRigidbodies);
+         requestReInitialization.set(false);
       }
 
       MocapRigidBody pelvisRigidBody = getPelvisRigidBody(listOfRigidbodies);
@@ -155,7 +162,7 @@ public class IHMCMOCAPLocalizationModule implements MocapRigidbodiesListener, Pa
       
       if (requestFootsteps.getBooleanValue())
       {
-         planarRegionsListListener.onWalkingStarted();
+         planarRegionsListManager.savePlanarRegionsAfterWalking();
          startWalking();
          walkingAround.set(true);
          requestFootsteps.set(false);
@@ -163,11 +170,19 @@ public class IHMCMOCAPLocalizationModule implements MocapRigidbodiesListener, Pa
       
       if(walkingAround.getBooleanValue() && walkingStatusManager.doneWalking())
       {
-         planarRegionsListListener.onWalkingStopped();
+         planarRegionsListManager.savePlanarRegionsAfterWalking();
          walkingAround.set(false);
       }
      
       yoVariableServer.update(System.currentTimeMillis());
+   }
+   
+   private void initializeMocapFrameConverter(ArrayList<MocapRigidBody> listOfRigidbodies)
+   {
+      pelvisFrameFromRobotConfigurationDataPacket.update();
+      MocapRigidBody pelvisRigidBody = getPelvisRigidBody(listOfRigidbodies);
+      mocapToPelvisFrameConverter.initialize(pelvisFrameFromRobotConfigurationDataPacket, pelvisRigidBody);
+      
    }
 
    private MocapRigidBody getPelvisRigidBody(ArrayList<MocapRigidBody> listOfRigidbodies)
@@ -184,14 +199,14 @@ public class IHMCMOCAPLocalizationModule implements MocapRigidbodiesListener, Pa
    
    private void setPelvisYoVariables(RigidBodyTransform pelvisTransform)
    {
-      Vector3d pelvisTranslation = new Vector3d();
+      Vector3D pelvisTranslation = new Vector3D();
       double[] yawPitchRoll = new double[3];
 
       pelvisTransform.getTranslation(pelvisTranslation);
 
-      Quat4d pelvisRotation = new Quat4d();
+      Quaternion pelvisRotation = new Quaternion();
       pelvisTransform.getRotation(pelvisRotation);
-      RotationTools.convertQuaternionToYawPitchRoll(pelvisRotation, yawPitchRoll);
+      YawPitchRollConversion.convertQuaternionToYawPitchRoll(pelvisRotation, yawPitchRoll);
 
       computedPelvisPositionX.set(pelvisTranslation.getX());
       computedPelvisPositionY.set(pelvisTranslation.getY());
@@ -244,7 +259,7 @@ public class IHMCMOCAPLocalizationModule implements MocapRigidbodiesListener, Pa
       pelvisOrientationFromRobotConfigurationData.set(packet.getPelvisOrientation());
 
       rootJoint.setPosition(pelvisTranslationFromRobotConfigurationData.getX(), pelvisTranslationFromRobotConfigurationData.getY(), pelvisTranslationFromRobotConfigurationData.getZ());
-      rootJoint.setRotation(pelvisOrientationFromRobotConfigurationData.getX(), pelvisOrientationFromRobotConfigurationData.getY(), pelvisOrientationFromRobotConfigurationData.getZ(), pelvisOrientationFromRobotConfigurationData.getW());
+      rootJoint.setRotation(pelvisOrientationFromRobotConfigurationData.getX(), pelvisOrientationFromRobotConfigurationData.getY(), pelvisOrientationFromRobotConfigurationData.getZ(), pelvisOrientationFromRobotConfigurationData.getS());
       
       computeDriftTransform();
 
@@ -259,13 +274,13 @@ public class IHMCMOCAPLocalizationModule implements MocapRigidbodiesListener, Pa
       pelvisFrameFromRobotConfigurationDataPacket.update();
       pelvisFrameFromMocap.getTransformToDesiredFrame(driftTransform, pelvisFrameFromRobotConfigurationDataPacket);
       
-      Vector3d driftTranslation = new Vector3d();
+      Vector3D driftTranslation = new Vector3D();
       driftTransform.getTranslation(driftTranslation);
       
-      Quat4d driftRotation = new Quat4d();
+      Quaternion driftRotation = new Quaternion();
       driftTransform.getRotation(driftRotation);
       double[] driftRotationYPR = new double[3];
-      RotationTools.convertQuaternionToYawPitchRoll(driftRotation, driftRotationYPR);
+      YawPitchRollConversion.convertQuaternionToYawPitchRoll(driftRotation, driftRotationYPR);
       
       mocapWorldToRobotWorldTransformX.set(driftTranslation.getX());
       mocapWorldToRobotWorldTransformY.set(driftTranslation.getY());
@@ -302,7 +317,7 @@ public class IHMCMOCAPLocalizationModule implements MocapRigidbodiesListener, Pa
       for (int i = 0; i < listOfSteps.size(); i++)
       {
          double y = robotSide == RobotSide.LEFT ? 0.15 : -0.15;
-         Point3d position = new Point3d();
+         Point3D position = new Point3D();
          position.setY(y);
 
          if (isDirectionForward)
@@ -315,46 +330,13 @@ public class IHMCMOCAPLocalizationModule implements MocapRigidbodiesListener, Pa
             position.setX(startingPoint -i * 0.2 - 0.2);
          }
 
-         FootstepDataMessage footStep = new FootstepDataMessage(robotSide, position, new Quat4d(0.0, 0.0, 0.0, 1.0));
+         FootstepDataMessage footStep = new FootstepDataMessage(robotSide, position, new Quaternion(0.0, 0.0, 0.0, 1.0));
          listOfSteps.set(i, footStep);
          robotSide = robotSide.getOppositeSide();
       }
       return listOfSteps;
    }
-   
-   private class PlanarRegionsListListener implements PacketConsumer<PlanarRegionsListMessage>
-   {
-      private PlanarRegionsListMessage latestPlanarRegionsListMessage;
-      private PlanarRegionsListMessage beforeWalkingPlanarRegionsListMessage;
-      private PlanarRegionsListMessage afterWalkingPlanarRegionsListMessage;
       
-      @Override
-      public void receivedPacket(PlanarRegionsListMessage packet)
-      {         
-         this.latestPlanarRegionsListMessage = packet;
-      }
-      
-      public void onWalkingStarted()
-      {
-         beforeWalkingPlanarRegionsListMessage = latestPlanarRegionsListMessage;
-      }
-
-      public void onWalkingStopped()
-      {
-         afterWalkingPlanarRegionsListMessage = latestPlanarRegionsListMessage;
-      }
-      
-      public PlanarRegionsListMessage getPlanarRegionsBeforeWalking()
-      {
-         return beforeWalkingPlanarRegionsListMessage;
-      }
-
-      public PlanarRegionsListMessage getPlanarRegionsAfterWalking()
-      {
-         return afterWalkingPlanarRegionsListMessage;
-      }
-   }
-   
    private class WalkingStatusManager implements PacketConsumer<FootstepStatus>
    {
       private final IntegerYoVariable footstepsCompleted = new IntegerYoVariable("footstepsCompleted", registry);

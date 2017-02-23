@@ -1,8 +1,7 @@
 package us.ihmc.exampleSimulations.beetle.controller;
 
-import javax.vecmath.Vector3d;
-
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.exampleSimulations.beetle.parameters.HexapodControllerParameters;
 import us.ihmc.exampleSimulations.beetle.referenceFrames.HexapodReferenceFrames;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -44,8 +43,8 @@ public class HexapodBodySpatialManager
    private final DoubleYoVariable desiredBodyHeight;
    private final AlphaFilteredYoVariable filteredBodyHeight;
 
-   private final Vector3d linearWeight = new Vector3d();
-   private final Vector3d angularWeight = new Vector3d();
+   private final Vector3D linearWeight = new Vector3D();
+   private final Vector3D angularWeight = new Vector3D();
 
    public HexapodBodySpatialManager(String prefix, FullRobotModel fullRobotModel, HexapodReferenceFrames referenceFrames, double controllerDt,
          YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)

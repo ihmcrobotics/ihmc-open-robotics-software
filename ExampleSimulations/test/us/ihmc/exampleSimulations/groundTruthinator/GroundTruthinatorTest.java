@@ -5,12 +5,11 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Random;
 
-import javax.vecmath.Point3d;
-
 import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
@@ -165,54 +164,54 @@ public class GroundTruthinatorTest
       GroundTruthinator groundTruthinator = new GroundTruthinator();
 
       // In X
-      Point3d attachmentPosition = new Point3d(attachCoord, attachCoord, attachCoord);
-      Point3d sensorPosition = new Point3d(sensorCoord, attachCoord, attachCoord);
+      Point3D attachmentPosition = new Point3D(attachCoord, attachCoord, attachCoord);
+      Point3D sensorPosition = new Point3D(sensorCoord, attachCoord, attachCoord);
       groundTruthinator.addSensor(sensorPosition, attachmentPosition);
 
-      sensorPosition = new Point3d(sensorCoord, -attachCoord, attachCoord);
-      attachmentPosition = new Point3d(attachCoord, -attachCoord, attachCoord);
+      sensorPosition = new Point3D(sensorCoord, -attachCoord, attachCoord);
+      attachmentPosition = new Point3D(attachCoord, -attachCoord, attachCoord);
       groundTruthinator.addSensor(sensorPosition, attachmentPosition);
 
-      sensorPosition = new Point3d(sensorCoord, attachCoord, -attachCoord);
-      attachmentPosition = new Point3d(attachCoord, attachCoord, -attachCoord);
+      sensorPosition = new Point3D(sensorCoord, attachCoord, -attachCoord);
+      attachmentPosition = new Point3D(attachCoord, attachCoord, -attachCoord);
       groundTruthinator.addSensor(sensorPosition, attachmentPosition);
 
-      sensorPosition = new Point3d(sensorCoord, -attachCoord, -attachCoord);
-      attachmentPosition = new Point3d(attachCoord, -attachCoord, -attachCoord);
+      sensorPosition = new Point3D(sensorCoord, -attachCoord, -attachCoord);
+      attachmentPosition = new Point3D(attachCoord, -attachCoord, -attachCoord);
       groundTruthinator.addSensor(sensorPosition, attachmentPosition);
 
       // In Y
-      attachmentPosition = new Point3d(attachCoord, attachCoord, attachCoord);
-      sensorPosition = new Point3d(attachCoord, sensorCoord, attachCoord);
+      attachmentPosition = new Point3D(attachCoord, attachCoord, attachCoord);
+      sensorPosition = new Point3D(attachCoord, sensorCoord, attachCoord);
       groundTruthinator.addSensor(sensorPosition, attachmentPosition);
 
-      attachmentPosition = new Point3d(-attachCoord, attachCoord, attachCoord);
-      sensorPosition = new Point3d(-attachCoord, sensorCoord, attachCoord);
+      attachmentPosition = new Point3D(-attachCoord, attachCoord, attachCoord);
+      sensorPosition = new Point3D(-attachCoord, sensorCoord, attachCoord);
       groundTruthinator.addSensor(sensorPosition, attachmentPosition);
 
-      attachmentPosition = new Point3d(attachCoord, attachCoord, -attachCoord);
-      sensorPosition = new Point3d(attachCoord, sensorCoord, -attachCoord);
+      attachmentPosition = new Point3D(attachCoord, attachCoord, -attachCoord);
+      sensorPosition = new Point3D(attachCoord, sensorCoord, -attachCoord);
       groundTruthinator.addSensor(sensorPosition, attachmentPosition);
 
-      attachmentPosition = new Point3d(-attachCoord, attachCoord, -attachCoord);
-      sensorPosition = new Point3d(-attachCoord, sensorCoord, -attachCoord);
+      attachmentPosition = new Point3D(-attachCoord, attachCoord, -attachCoord);
+      sensorPosition = new Point3D(-attachCoord, sensorCoord, -attachCoord);
       groundTruthinator.addSensor(sensorPosition, attachmentPosition);
 
       // In Z
-      attachmentPosition = new Point3d(attachCoord, attachCoord, attachCoord);
-      sensorPosition = new Point3d(attachCoord, attachCoord, sensorCoord);
+      attachmentPosition = new Point3D(attachCoord, attachCoord, attachCoord);
+      sensorPosition = new Point3D(attachCoord, attachCoord, sensorCoord);
       groundTruthinator.addSensor(sensorPosition, attachmentPosition);
 
-      attachmentPosition = new Point3d(-attachCoord, attachCoord, attachCoord);
-      sensorPosition = new Point3d(-attachCoord, attachCoord, sensorCoord);
+      attachmentPosition = new Point3D(-attachCoord, attachCoord, attachCoord);
+      sensorPosition = new Point3D(-attachCoord, attachCoord, sensorCoord);
       groundTruthinator.addSensor(sensorPosition, attachmentPosition);
 
-      attachmentPosition = new Point3d(attachCoord, -attachCoord, attachCoord);
-      sensorPosition = new Point3d(attachCoord, -attachCoord, sensorCoord);
+      attachmentPosition = new Point3D(attachCoord, -attachCoord, attachCoord);
+      sensorPosition = new Point3D(attachCoord, -attachCoord, sensorCoord);
       groundTruthinator.addSensor(sensorPosition, attachmentPosition);
 
-      attachmentPosition = new Point3d(-attachCoord, -attachCoord, attachCoord);
-      sensorPosition = new Point3d(-attachCoord, -attachCoord, sensorCoord);
+      attachmentPosition = new Point3D(-attachCoord, -attachCoord, attachCoord);
+      sensorPosition = new Point3D(-attachCoord, -attachCoord, sensorCoord);
       groundTruthinator.addSensor(sensorPosition, attachmentPosition);
 
       return groundTruthinator;

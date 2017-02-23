@@ -11,6 +11,7 @@ import us.ihmc.avatar.networkProcessor.modules.MultisenseMocapManualCalibrationT
 import us.ihmc.avatar.networkProcessor.modules.RosModule;
 import us.ihmc.avatar.networkProcessor.modules.ZeroPoseMockRobotConfigurationDataPublisherModule;
 import us.ihmc.avatar.networkProcessor.modules.mocap.IHMCMOCAPLocalizationModule;
+import us.ihmc.avatar.networkProcessor.modules.mocap.MocapPlanarRegionsListManager;
 import us.ihmc.avatar.networkProcessor.modules.uiConnector.UiConnectionModule;
 import us.ihmc.avatar.networkProcessor.quadTreeHeightMap.HeightQuadTreeToolboxModule;
 import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
@@ -20,6 +21,7 @@ import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.communication.net.KryoObjectServer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
+import us.ihmc.communication.packets.PlanarRegionsListMessage;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.humanoidBehaviors.IHMCHumanoidBehaviorManager;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
@@ -227,16 +229,21 @@ public class DRCNetworkProcessor
    {
      if (params.isMocapModuleEnabled())
      {
-        new IHMCMOCAPLocalizationModule(robotModel);
+        PacketCommunicator mocapVizPacketCommunicator = PacketCommunicator.createTCPPacketCommunicatorServer(NetworkPorts.MOCAP_MODULE_VIZ, NET_CLASS_LIST);
+        MocapPlanarRegionsListManager planarRegionsListManager = new MocapPlanarRegionsListManager();
+        mocapVizPacketCommunicator.attachListener(PlanarRegionsListMessage.class, planarRegionsListManager);
+        mocapVizPacketCommunicator.connect();
+        packetRouter.attachPacketCommunicator(PacketDestination.MOCAP_MODULE_VIZ, mocapVizPacketCommunicator);        
+        
+        new IHMCMOCAPLocalizationModule(robotModel, planarRegionsListManager);
         PacketCommunicator packetCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.MOCAP_MODULE, NET_CLASS_LIST);
         packetRouter.attachPacketCommunicator(PacketDestination.MOCAP_MODULE, packetCommunicator);
         packetCommunicator.connect();
         
         String methodName = "setupMocapModule";
-        printModuleConnectedDebugStatement(PacketDestination.MOCAP_MODULE, methodName);
+        printModuleConnectedDebugStatement(PacketDestination.MOCAP_MODULE, methodName);        
      }
    }
-      
 
    private void setupHandModules(DRCRobotModel robotModel, DRCNetworkModuleParameters params) throws IOException
    {

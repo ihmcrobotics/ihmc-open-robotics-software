@@ -1,20 +1,21 @@
 package us.ihmc.graphicsDescription.instructions;
 
-import javax.vecmath.Point2d;
 import java.util.List;
+
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 
 public class ExtrudedPolygonGraphics3DInstruction extends PrimitiveGraphics3DInstruction
 {
-   private final List<Point2d> polygonPoints;
+   private final List<? extends Point2DReadOnly> polygonPoints;
    private final double extrusionHeight;
 
-   public ExtrudedPolygonGraphics3DInstruction(List<Point2d> polygonPoints, double extrusionHeight)
+   public ExtrudedPolygonGraphics3DInstruction(List<? extends Point2DReadOnly> polygonPoints, double extrusionHeight)
    {
       this.polygonPoints = polygonPoints;
       this.extrusionHeight = extrusionHeight;
    }
 
-   public List<Point2d> getPolygonPoints()
+   public List<? extends Point2DReadOnly> getPolygonPoints()
    {
       return polygonPoints;
    }

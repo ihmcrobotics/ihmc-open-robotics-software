@@ -5,10 +5,9 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Random;
 
-import javax.vecmath.Point3d;
-
 import us.ihmc.communication.remote.DataObjectServer;
 import us.ihmc.communication.remote.DataObjectTransponder;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.tools.thread.ThreadTools;
 
@@ -74,10 +73,10 @@ public class SpoofNetoworkSimulatedLidar
    protected LIDARScan generateNewSpoofScan()
    {
       RandomTools.generateRandomVector(gen, 10);
-      ArrayList<Point3d> points = new ArrayList<Point3d>();
+      ArrayList<Point3D> points = new ArrayList<Point3D>();
       for (int i = 0; i < SPOOF_CLOUD_SIZE; i++)
       {
-         points.add(new Point3d(RandomTools.generateRandomVector(gen, 10)));
+         points.add(new Point3D(RandomTools.generateRandomVector(gen, 10)));
       }
 
       return new LIDARScan(points);
@@ -86,16 +85,16 @@ public class SpoofNetoworkSimulatedLidar
    public static class LIDARScan implements Serializable
    {
       private static final long serialVersionUID = 6533143962275276098L;
-      private final ArrayList<Point3d> points;
+      private final ArrayList<Point3D> points;
       private long initialTime;
 
-      public LIDARScan(ArrayList<Point3d> points)
+      public LIDARScan(ArrayList<Point3D> points)
       {
          this.points = points;
          initialTime = System.currentTimeMillis();
       }
 
-      public ArrayList<Point3d> getPoints()
+      public ArrayList<Point3D> getPoints()
       {
          return points;
       }

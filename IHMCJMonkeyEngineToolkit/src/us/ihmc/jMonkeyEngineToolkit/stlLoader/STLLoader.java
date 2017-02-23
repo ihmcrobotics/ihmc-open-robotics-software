@@ -18,7 +18,6 @@
 package us.ihmc.jMonkeyEngineToolkit.stlLoader;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.List;
 
 import com.jme3.asset.AssetInfo;

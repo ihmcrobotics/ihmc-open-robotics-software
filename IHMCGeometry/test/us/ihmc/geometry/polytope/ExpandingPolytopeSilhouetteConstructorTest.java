@@ -5,12 +5,11 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
 import org.junit.Test;
 
 import us.ihmc.commons.MutationTestFacilitator;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 
 public class ExpandingPolytopeSilhouetteConstructorTest
 {
@@ -18,10 +17,10 @@ public class ExpandingPolytopeSilhouetteConstructorTest
    @Test
    public void testSilhouetteConstructorWithTetrahedron()
    {
-      Point3d pointOne = new Point3d(-1.0, -1.0, -1.0);
-      Point3d pointTwo = new Point3d(1.0, -1.0, -1.0);
-      Point3d pointThree = new Point3d(0.0, 1.0, -1.0);
-      Point3d pointFour = new Point3d(0.0, 0.0, 1.0);
+      Point3D pointOne = new Point3D(-1.0, -1.0, -1.0);
+      Point3D pointTwo = new Point3D(1.0, -1.0, -1.0);
+      Point3D pointThree = new Point3D(0.0, 1.0, -1.0);
+      Point3D pointFour = new Point3D(0.0, 0.0, 1.0);
 
       ExpandingPolytopeEntry entry123 = new ExpandingPolytopeEntry(pointOne, pointTwo, pointThree);
       ExpandingPolytopeEntry entry324 = new ExpandingPolytopeEntry(pointThree, pointTwo, pointFour);
@@ -46,7 +45,7 @@ public class ExpandingPolytopeSilhouetteConstructorTest
       entry421.setAdjacentTriangle(2, entry134, 2);
       entry134.setAdjacentTriangle(2, entry421, 2);
 
-      Vector3d w = new Vector3d(0.0, 0.0, 1.5);
+      Vector3D w = new Vector3D(0.0, 0.0, 1.5);
       ExpandingPolytopeEdgeList edgeListToPack = new ExpandingPolytopeEdgeList();
       ExpandingPolytopeSilhouetteConstructor.computeSilhouetteFromW(entry421, w, edgeListToPack);
 
@@ -80,35 +79,35 @@ public class ExpandingPolytopeSilhouetteConstructorTest
       expandingPolytope.getAllConnectedTriangles(triangles);
 
       // These were all verified by eye using ExpandingPolytopeSilhouetteConstructorVisualizer
-      Vector3d w = new Vector3d(0.0, 0.0, 1.37);
+      Vector3D w = new Vector3D(0.0, 0.0, 1.37);
       int expectedNumberOfEdgesOnSilhouette = 4;
       confirmNumberOfEdgesInSilhouette(triangles, w, expectedNumberOfEdgesOnSilhouette);
 
-      w = new Vector3d(0.0, 0.0, 1.38);
+      w = new Vector3D(0.0, 0.0, 1.38);
       expectedNumberOfEdgesOnSilhouette = 8;
       confirmNumberOfEdgesInSilhouette(triangles, w, expectedNumberOfEdgesOnSilhouette);
 
-      w = new Vector3d(0.0, 0.0, 2.22);
+      w = new Vector3D(0.0, 0.0, 2.22);
       expectedNumberOfEdgesOnSilhouette = 8;
       confirmNumberOfEdgesInSilhouette(triangles, w, expectedNumberOfEdgesOnSilhouette);
 
-      w = new Vector3d(0.0, 0.0, 2.23);
+      w = new Vector3D(0.0, 0.0, 2.23);
       expectedNumberOfEdgesOnSilhouette = 6;
       confirmNumberOfEdgesInSilhouette(triangles, w, expectedNumberOfEdgesOnSilhouette);
 
-      w = new Vector3d(1.0, 0.0, 1.23);
+      w = new Vector3D(1.0, 0.0, 1.23);
       expectedNumberOfEdgesOnSilhouette = 5;
       confirmNumberOfEdgesInSilhouette(triangles, w, expectedNumberOfEdgesOnSilhouette);
 
-      w = new Vector3d(1.0, 0.0, 1.24);
+      w = new Vector3D(1.0, 0.0, 1.24);
       expectedNumberOfEdgesOnSilhouette = 6;
       confirmNumberOfEdgesInSilhouette(triangles, w, expectedNumberOfEdgesOnSilhouette);
 
-      w = new Vector3d(1.0, 0.0, 2.22);
+      w = new Vector3D(1.0, 0.0, 2.22);
       expectedNumberOfEdgesOnSilhouette = 6;
       confirmNumberOfEdgesInSilhouette(triangles, w, expectedNumberOfEdgesOnSilhouette);
 
-      w = new Vector3d(1.0, 0.0, 2.23);
+      w = new Vector3D(1.0, 0.0, 2.23);
       expectedNumberOfEdgesOnSilhouette = 8;
       confirmNumberOfEdgesInSilhouette(triangles, w, expectedNumberOfEdgesOnSilhouette);
 
@@ -121,56 +120,56 @@ public class ExpandingPolytopeSilhouetteConstructorTest
       expandingPolytope.getAllConnectedTriangles(triangles);
 
       // These were all verified by eye using ExpandingPolytopeSilhouetteConstructorVisualizer
-      w = new Vector3d(0.0, 0.0, 1.21);
+      w = new Vector3D(0.0, 0.0, 1.21);
       expectedNumberOfEdgesOnSilhouette = 6;
       confirmNumberOfEdgesInSilhouette(triangles, w, expectedNumberOfEdgesOnSilhouette);
 
-      w = new Vector3d(0.0, 0.0, 1.22);
+      w = new Vector3D(0.0, 0.0, 1.22);
       expectedNumberOfEdgesOnSilhouette = 8;
       confirmNumberOfEdgesInSilhouette(triangles, w, expectedNumberOfEdgesOnSilhouette);
 
-      w = new Vector3d(0.0, 0.0, 1.26);
+      w = new Vector3D(0.0, 0.0, 1.26);
       expectedNumberOfEdgesOnSilhouette = 8;
       confirmNumberOfEdgesInSilhouette(triangles, w, expectedNumberOfEdgesOnSilhouette);
 
-      w = new Vector3d(0.0, 0.0, 1.27);
+      w = new Vector3D(0.0, 0.0, 1.27);
       expectedNumberOfEdgesOnSilhouette = 12;
       confirmNumberOfEdgesInSilhouette(triangles, w, expectedNumberOfEdgesOnSilhouette);
 
-      w = new Vector3d(0.0, 0.0, 1.5);
+      w = new Vector3D(0.0, 0.0, 1.5);
       expectedNumberOfEdgesOnSilhouette = 12;
       confirmNumberOfEdgesInSilhouette(triangles, w, expectedNumberOfEdgesOnSilhouette);
 
-      w = new Vector3d(0.0, 0.0, 1.51);
+      w = new Vector3D(0.0, 0.0, 1.51);
       expectedNumberOfEdgesOnSilhouette = 10;
       confirmNumberOfEdgesInSilhouette(triangles, w, expectedNumberOfEdgesOnSilhouette);
 
-      w = new Vector3d(0.0, 0.0, 2.61);
+      w = new Vector3D(0.0, 0.0, 2.61);
       expectedNumberOfEdgesOnSilhouette = 10;
       confirmNumberOfEdgesInSilhouette(triangles, w, expectedNumberOfEdgesOnSilhouette);
 
-      w = new Vector3d(0.0, 0.0, 2.62);
+      w = new Vector3D(0.0, 0.0, 2.62);
       expectedNumberOfEdgesOnSilhouette = 12;
       confirmNumberOfEdgesInSilhouette(triangles, w, expectedNumberOfEdgesOnSilhouette);
 
-      w = new Vector3d(0.0, 0.0, 2.99);
+      w = new Vector3D(0.0, 0.0, 2.99);
       expectedNumberOfEdgesOnSilhouette = 12;
       confirmNumberOfEdgesInSilhouette(triangles, w, expectedNumberOfEdgesOnSilhouette);
 
-      w = new Vector3d(0.0, 0.0, 3.0);
+      w = new Vector3D(0.0, 0.0, 3.0);
       expectedNumberOfEdgesOnSilhouette = 16;
       confirmNumberOfEdgesInSilhouette(triangles, w, expectedNumberOfEdgesOnSilhouette);
 
-      w = new Vector3d(0.0, 0.0, 4.84);
+      w = new Vector3D(0.0, 0.0, 4.84);
       expectedNumberOfEdgesOnSilhouette = 16;
       confirmNumberOfEdgesInSilhouette(triangles, w, expectedNumberOfEdgesOnSilhouette);
 
-      w = new Vector3d(0.0, 0.0, 4.85);
+      w = new Vector3D(0.0, 0.0, 4.85);
       expectedNumberOfEdgesOnSilhouette = 12;
       confirmNumberOfEdgesInSilhouette(triangles, w, expectedNumberOfEdgesOnSilhouette);
    }
 
-   private void confirmNumberOfEdgesInSilhouette(ArrayList<ExpandingPolytopeEntry> triangles, Vector3d w, int expectedNumberOfEdgesOnSilhouette)
+   private void confirmNumberOfEdgesInSilhouette(ArrayList<ExpandingPolytopeEntry> triangles, Vector3D w, int expectedNumberOfEdgesOnSilhouette)
    {
       for (ExpandingPolytopeEntry triangle : triangles)
       {

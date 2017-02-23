@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimiz
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
+
 import us.ihmc.robotics.MathTools;
 
 public class CubicMatrix extends DenseMatrix64F

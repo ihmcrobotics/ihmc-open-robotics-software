@@ -40,7 +40,7 @@ ihmc.configureForIHMCOpenSourceBintrayPublish(false, "mavenJava", "maven-release
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.11'
 
-    compile group: 'javax.vecmath', name: 'vecmath', version: '1.5.2'
+    compile group: 'us.ihmc', name: 'euclid-core', version: '0.4.1'
     compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
     compile 'net.sf.trove4j:trove4j:3.0.3'
     compile group: 'org.jfree', name: 'jfreechart', version: '1.0.17'
@@ -52,7 +52,6 @@ dependencies {
     compile ihmc.getProjectDependency(":IHMCJavaExtensions")
     compile ihmc.getProjectDependency(":IHMCRoboticsToolkit")
     compile ihmc.getProjectDependency(":IHMCGraphicsDescription")
-    testCompile ihmc.getProjectDependency(":IHMCUnitTesting")
 	testCompile ihmc.getProjectTestDependency(":IHMCRoboticsToolkit")
 	testCompile ihmc.getProjectTestDependency(":IHMCJavaExtensions")
     testCompile ihmc.getProjectTestDependency(":IHMCRoboticsToolkit")

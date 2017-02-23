@@ -1,9 +1,5 @@
 package us.ihmc.jMonkeyEngineToolkit.jme;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Tuple3d;
-import javax.vecmath.Vector3d;
-
 import com.jme3.collision.Collidable;
 import com.jme3.collision.CollisionResult;
 import com.jme3.collision.CollisionResults;
@@ -12,6 +8,9 @@ import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.jMonkeyEngineToolkit.jme.util.JMEDataTypeUtils;
 import us.ihmc.jMonkeyEngineToolkit.jme.util.JMEGeometryUtils;
 import us.ihmc.robotics.geometry.Ray3d;
@@ -53,7 +52,7 @@ public class JMERayCollisionAdapter
       return getPickDistance(rootNode, null, null);
    }
 
-   public double getPickDistance(Node rootNode, Vector3d normalToPack, Point3d closestPoint)
+   public double getPickDistance(Node rootNode, Vector3D normalToPack, Point3D closestPoint)
    {
       results.clear();
       rootNode.collideWith(collidable, results);
@@ -100,7 +99,7 @@ public class JMERayCollisionAdapter
       return null;
    }
 
-   private void packInSCSCoordinates(Vector3f vector3f, Tuple3d tuple3d)
+   private void packInSCSCoordinates(Vector3f vector3f, Tuple3DBasics tuple3d)
    {
       JMEGeometryUtils.transformFromJMECoordinatesToZup(vector3f);
       JMEDataTypeUtils.packJMEVector3fInVecMathTuple3d(vector3f, tuple3d);
@@ -108,8 +107,8 @@ public class JMERayCollisionAdapter
 
    public void setPickingGeometry(Ray3d ray3d)
    {
-      Point3d rayOrigin = ray3d.getPoint();
-      Vector3d rayDirection = ray3d.getVector();
+      Point3D rayOrigin = ray3d.getPoint();
+      Vector3D rayDirection = ray3d.getVector();
 
       Vector3f rayOrigin3f = new Vector3f();
       Vector3f rayDirection3f = new Vector3f();

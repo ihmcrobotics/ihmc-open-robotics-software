@@ -2,96 +2,144 @@ package us.ihmc.robotics.geometry;
 
 import java.util.Random;
 
-import javax.vecmath.Point2d;
-import javax.vecmath.Tuple2d;
-
-import us.ihmc.robotics.geometry.transformables.TransformablePoint2d;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.Transform;
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 /**
- * <p>Title: FramePoint2d</p>
+ * <p>
+ * Title: FramePoint2d
+ * </p>
  *
- * <p>Description: A FramePoint2d is a normal point associated with a specified reference frame</p>
+ * <p>
+ * Description: A FramePoint2d is a normal point associated with a specified reference frame
+ * </p>
  *
- * <p>Copyright: Copyright (c) 2006</p>
+ * <p>
+ * Copyright: Copyright (c) 2006
+ * </p>
  *
- * <p>Company: IHMC</p>
+ * <p>
+ * Company: IHMC
+ * </p>
  *
  * @author Learning Locomotion Team
  * @version 2.0
  */
-public class FramePoint2d extends FrameTuple2d<FramePoint2d, TransformablePoint2d> implements FramePoint2dReadOnly
+public class FramePoint2d extends FrameTuple2d<FramePoint2d, Point2D> implements FramePoint2dReadOnly
 {
    private static final long serialVersionUID = -1287148635726098768L;
 
    private final RigidBodyTransform temporaryTransformToDesiredFrame = new RigidBodyTransform();
    private FrameVector2d temporaryPointForYawing;
 
-   /** FramePoint2d <p/> A normal point2d associated with a specific reference frame. */
+   /**
+    * FramePoint2d
+    * <p/>
+    * A normal point2d associated with a specific reference frame.
+    */
    public FramePoint2d(ReferenceFrame referenceFrame, double x, double y, String name)
    {
-      super(referenceFrame, new TransformablePoint2d(x, y), name);
+      super(referenceFrame, new Point2D(x, y), name);
    }
 
-   /** FramePoint2d <p/> A normal point2d associated with a specific reference frame. */
+   /**
+    * FramePoint2d
+    * <p/>
+    * A normal point2d associated with a specific reference frame.
+    */
    public FramePoint2d(FrameTuple2d<?, ?> frameTuple2d)
    {
       this(frameTuple2d.referenceFrame, frameTuple2d.tuple.getX(), frameTuple2d.tuple.getY(), frameTuple2d.name);
    }
 
-   /** FramePoint2d <p/> A normal point2d associated with a specific reference frame. */
+   /**
+    * FramePoint2d
+    * <p/>
+    * A normal point2d associated with a specific reference frame.
+    */
    public FramePoint2d(ReferenceFrame referenceFrame)
    {
       this(referenceFrame, 0.0, 0.0, null);
    }
 
-   /** FramePoint2d <p/> A normal point2d associated with a specific reference frame. */
+   /**
+    * FramePoint2d
+    * <p/>
+    * A normal point2d associated with a specific reference frame.
+    */
    public FramePoint2d()
    {
       this(ReferenceFrame.getWorldFrame());
    }
 
-   /** FramePoint2d <p/> A normal point2d associated with a specific reference frame. */
+   /**
+    * FramePoint2d
+    * <p/>
+    * A normal point2d associated with a specific reference frame.
+    */
    public FramePoint2d(ReferenceFrame referenceFrame, double x, double y)
    {
       this(referenceFrame, x, y, null);
    }
 
-   /** FramePoint2d <p/> A normal point2d associated with a specific reference frame. */
+   /**
+    * FramePoint2d
+    * <p/>
+    * A normal point2d associated with a specific reference frame.
+    */
    public FramePoint2d(ReferenceFrame referenceFrame, double[] position)
    {
       this(referenceFrame, position[0], position[1], null);
    }
 
-   /** FramePoint2d <p/> A normal point2d associated with a specific reference frame. */
+   /**
+    * FramePoint2d
+    * <p/>
+    * A normal point2d associated with a specific reference frame.
+    */
    public FramePoint2d(ReferenceFrame referenceFrame, double[] position, String name)
    {
       this(referenceFrame, position[0], position[1], name);
    }
 
-   /** FramePoint2d <p/> A normal point2d associated with a specific reference frame. */
+   /**
+    * FramePoint2d
+    * <p/>
+    * A normal point2d associated with a specific reference frame.
+    */
    public FramePoint2d(ReferenceFrame referenceFrame, String name)
    {
       this(referenceFrame, 0.0, 0.0, name);
    }
 
-   /** FramePoint2d <p/> A normal point2d associated with a specific reference frame. */
-   public FramePoint2d(ReferenceFrame referenceFrame, Tuple2d position)
+   /**
+    * FramePoint2d
+    * <p/>
+    * A normal point2d associated with a specific reference frame.
+    */
+   public FramePoint2d(ReferenceFrame referenceFrame, Tuple2DReadOnly position)
    {
       this(referenceFrame, position.getX(), position.getY(), null);
    }
 
-   /** FramePoint2d <p/> A normal point2d associated with a specific reference frame. */
-   public FramePoint2d(ReferenceFrame referenceFrame, Tuple2d position, String name)
+   /**
+    * FramePoint2d
+    * <p/>
+    * A normal point2d associated with a specific reference frame.
+    */
+   public FramePoint2d(ReferenceFrame referenceFrame, Tuple2DReadOnly position, String name)
    {
       this(referenceFrame, position.getX(), position.getY(), name);
    }
 
    public static FramePoint2d generateRandomFramePoint2d(Random random, ReferenceFrame zUpFrame, double xMin, double xMax, double yMin, double yMax)
    {
-      FramePoint2d randomPoint = new FramePoint2d(zUpFrame, RandomTools.generateRandomDouble(random, xMin, xMax), RandomTools
-            .generateRandomDouble(random, yMin, yMax));
+      FramePoint2d randomPoint = new FramePoint2d(zUpFrame, RandomTools.generateRandomDouble(random, xMin, xMax),
+                                                  RandomTools.generateRandomDouble(random, yMin, yMax));
 
       return randomPoint;
    }
@@ -115,7 +163,7 @@ public class FramePoint2d extends FrameTuple2d<FramePoint2d, TransformablePoint2
     *
     * @return Point2d
     */
-   public Point2d getPoint()
+   public Point2D getPoint()
    {
       return tuple;
    }
@@ -145,7 +193,8 @@ public class FramePoint2d extends FrameTuple2d<FramePoint2d, TransformablePoint2
    }
 
    /**
-    * Changes frame of this FramePoint2d to the given ReferenceFrame, projects into xy plane, and returns a copy.
+    * Changes frame of this FramePoint2d to the given ReferenceFrame, projects into xy plane, and
+    * returns a copy.
     *
     * @param desiredFrame ReferenceFrame to change the FramePoint2d into.
     * @return Copied FramePoint2d in the new reference frame.
@@ -157,7 +206,7 @@ public class FramePoint2d extends FrameTuple2d<FramePoint2d, TransformablePoint2
       return ret;
    }
 
-   public void applyTransform(RigidBodyTransform transform, boolean requireTransformInXYPlane)
+   public void applyTransform(Transform transform, boolean requireTransformInXYPlane)
    {
       this.getGeometryObject().applyTransform(transform, requireTransformInXYPlane);
    }

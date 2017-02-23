@@ -2,8 +2,8 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint;
 
 import java.awt.Color;
 
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPosition;

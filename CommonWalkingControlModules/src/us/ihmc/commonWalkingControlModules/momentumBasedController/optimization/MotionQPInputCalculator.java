@@ -266,7 +266,7 @@ public class MotionQPInputCalculator
       pointJacobianConvectiveTermCalculator.compute(pointJacobian, pPointVelocity);
       pPointVelocity.scale(-1.0);
       pPointVelocity.add(desiredAccelerationWithRespectToBase);
-      MatrixTools.setDenseMatrixFromTuple3d(tempPPointMatrixVelocity, pPointVelocity.getVector(), 0, 0);
+      pPointVelocity.getVector().get(tempPPointMatrixVelocity);
       CommonOps.mult(selectionMatrix, tempPPointMatrixVelocity, motionQPInputToPack.taskObjective);
 
       return true;

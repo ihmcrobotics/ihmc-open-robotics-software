@@ -5,18 +5,17 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Random;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector2d;
-import javax.vecmath.Vector3d;
-
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.tools.EuclidCoreTestTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.footstepPlanning.graphSearch.BipedalFootstepPlannerNode;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.tools.testing.JUnitTools;
 
 public class BipedalFootstepPlannerNodeTest
 {
@@ -114,8 +113,8 @@ public class BipedalFootstepPlannerNodeTest
          nodeA.getSoleTransform(transformA);
          nodeB.getSoleTransform(transformB);
 
-         Vector3d xAxisAInWorld = new Vector3d(1.0, 0.0, 0.0);
-         Vector3d xAxisBInWorld = new Vector3d(1.0, 0.0, 0.0);
+         Vector3D xAxisAInWorld = new Vector3D(1.0, 0.0, 0.0);
+         Vector3D xAxisBInWorld = new Vector3D(1.0, 0.0, 0.0);
 
          transformA.transform(xAxisAInWorld);
          transformB.transform(xAxisBInWorld);
@@ -142,20 +141,20 @@ public class BipedalFootstepPlannerNodeTest
       RigidBodyTransform soleTransform = new RigidBodyTransform();
       BipedalFootstepPlannerNode node = new BipedalFootstepPlannerNode(RobotSide.LEFT, soleTransform);
       
-      Vector2d shiftVector = new Vector2d(1.0, 2.0);
+      Vector2D shiftVector = new Vector2D(1.0, 2.0);
       node.shiftInSoleFrame(shiftVector);
 
-      Point3d solePosition = node.getSolePosition();
-      JUnitTools.assertTuple3dEquals(new Point3d(1.0, 2.0, 0.0), solePosition, 1e-7);
+      Point3D solePosition = node.getSolePosition();
+      EuclidCoreTestTools.assertTuple3DEquals(new Point3D(1.0, 2.0, 0.0), solePosition, 1e-7);
       
       soleTransform = new RigidBodyTransform();
       soleTransform.setRotationEulerAndZeroTranslation(0.0, 0.0, Math.PI/2.0);
       node = new BipedalFootstepPlannerNode(RobotSide.LEFT, soleTransform);
       
-      shiftVector = new Vector2d(1.0, 2.0);
+      shiftVector = new Vector2D(1.0, 2.0);
       node.shiftInSoleFrame(shiftVector);
 
       solePosition = node.getSolePosition();
-      JUnitTools.assertTuple3dEquals(new Point3d(-2.0, 1.0, 0.0), solePosition, 1e-7);
+      EuclidCoreTestTools.assertTuple3DEquals(new Point3D(-2.0, 1.0, 0.0), solePosition, 1e-7);
    }
 }

@@ -11,7 +11,7 @@ import javafx.scene.transform.Translate;
 import javaslang.concurrent.Future;
 import javaslang.concurrent.Promise;
 
-import javax.vecmath.Vector3d;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import java.util.concurrent.Callable;
 
 /**
@@ -45,7 +45,7 @@ public class Util {
      * @param dir direction where to look at the node from
      * @param up up vector
      */
-    public static PerspectiveCamera lookAtNodeFromDirection(final Node node, double fovDegrees, final Vector3d dir, final Vector3d up) {
+    public static PerspectiveCamera lookAtNodeFromDirection(final Node node, double fovDegrees, final Vector3D dir, final Vector3D up) {
         // We get a bounding sphere of the node and calculate how far the camera needs
         // to be to fit in the whole sphere in its view.
         final Bounds box = node.getBoundsInParent();
@@ -53,15 +53,15 @@ public class Util {
             return new PerspectiveCamera(true);
         }
 
-        Vector3d dirVec = new Vector3d(dir);
+        Vector3D dirVec = new Vector3D(dir);
         dirVec.normalize();
-        Vector3d bboxMin = new Vector3d(box.getMinX(), box.getMinY(), box.getMinZ());
-        Vector3d bboxMax = new Vector3d(box.getMaxX(), box.getMaxY(), box.getMaxZ());
-        Vector3d sceneCenter = new Vector3d(bboxMin);
+        Vector3D bboxMin = new Vector3D(box.getMinX(), box.getMinY(), box.getMinZ());
+        Vector3D bboxMax = new Vector3D(box.getMaxX(), box.getMaxY(), box.getMaxZ());
+        Vector3D sceneCenter = new Vector3D(bboxMin);
         sceneCenter.add(bboxMax);
         sceneCenter.scale(0.5f);
 
-        Vector3d radiusVec = new Vector3d(sceneCenter);
+        Vector3D radiusVec = new Vector3D(sceneCenter);
         radiusVec.sub(bboxMin);
         double r = radiusVec.length(); // scene bounding sphere radius
         double near = r / 1000; // camera near, giving some space for zoom-in
@@ -70,7 +70,7 @@ public class Util {
 
         double far = 10 * (2 * r + d); // (distance from the scene + scene bounding sphere diameter) * 10 (allows a 10x zoom-out)
 
-        Vector3d cameraLocation = new Vector3d(dirVec);
+        Vector3D cameraLocation = new Vector3D(dirVec);
         cameraLocation.scale(-d);
         cameraLocation.add(sceneCenter);
 
@@ -79,7 +79,7 @@ public class Util {
         result.setNearClip(near);
         result.setFarClip(far);
 
-        result.getTransforms().add(new Translate(cameraLocation.x, cameraLocation.y, cameraLocation.z));
+        result.getTransforms().add(new Translate(cameraLocation.getX(), cameraLocation.getY(), cameraLocation.getZ()));
         result.getTransforms().add(lookAt(cameraLocation, sceneCenter, up));
         // Adjust to JavaFX world (z up, right handed)
         result.getTransforms().add(new Rotate(180, Rotate.X_AXIS));
@@ -95,11 +95,11 @@ public class Util {
      * @param up up vector
      * @return transform representing the rotation
      */
-    private static Affine lookAt(Vector3d cameraLocation, Vector3d target, Vector3d up) {
+    private static Affine lookAt(Vector3D cameraLocation, Vector3D target, Vector3D up) {
         // Adjusted from JMonkey Engine code
-        Vector3d newDirection = new Vector3d();
-        Vector3d newUp = new Vector3d();
-        Vector3d newLeft = new Vector3d();
+        Vector3D newDirection = new Vector3D();
+        Vector3D newUp = new Vector3D();
+        Vector3D newLeft = new Vector3D();
 
         newDirection.set(target);
         newDirection.sub(cameraLocation);
@@ -114,11 +114,11 @@ public class Util {
         newLeft.cross(newUp, newDirection);
         newLeft.normalize();
         if (newLeft.lengthSquared() < 1e-8) {
-            if (newDirection.x != 0) {
+            if (newDirection.getX() != 0) {
                 //noinspection SuspiciousNameCombination
-                newLeft.set(newDirection.y, -newDirection.x, 0f);
+                newLeft.set(newDirection.getY(), -newDirection.getX(), 0f);
             } else {
-                newLeft.set(0f, newDirection.z, -newDirection.y);
+                newLeft.set(0f, newDirection.getZ(), -newDirection.getY());
             }
         }
 
@@ -127,9 +127,9 @@ public class Util {
         newUp.normalize();
 
         return new Affine(new double[] {
-            newLeft.x, newLeft.y, newLeft.z, 0,
-            newUp.x, newUp.y, newUp.z, 0,
-            newDirection.x, newDirection.y, newDirection.z, 0,
+            newLeft.getX(), newLeft.getY(), newLeft.getZ(), 0,
+            newUp.getX(), newUp.getY(), newUp.getZ(), 0,
+            newDirection.getX(), newDirection.getY(), newDirection.getZ(), 0,
             0, 0, 0, 1
         }, MatrixType.MT_3D_4x4, 0);
     }

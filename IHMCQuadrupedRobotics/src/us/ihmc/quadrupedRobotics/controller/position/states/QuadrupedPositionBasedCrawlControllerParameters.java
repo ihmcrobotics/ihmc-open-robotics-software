@@ -2,7 +2,7 @@ package us.ihmc.quadrupedRobotics.controller.position.states;
 
 import us.ihmc.quadrupedRobotics.planning.chooser.footstepChooser.SwingTargetGeneratorParameters;
 
-import javax.vecmath.Vector2d;
+import us.ihmc.euclid.tuple2D.Vector2D;
 
 public interface QuadrupedPositionBasedCrawlControllerParameters extends SwingTargetGeneratorParameters
 {
@@ -18,6 +18,6 @@ public interface QuadrupedPositionBasedCrawlControllerParameters extends SwingTa
 
    public abstract double getDefaultCoMCloseToFinalDesiredTransitionRadius();
    
-   public abstract Vector2d getDefaultDesiredCoMOffset();
+   public abstract Vector2D getDefaultDesiredCoMOffset();
 
 }

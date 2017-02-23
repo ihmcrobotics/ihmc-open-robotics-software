@@ -2,14 +2,13 @@ package us.ihmc.quadrupedRobotics.providers;
 
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.quadrupedRobotics.communication.packets.PlanarVelocityPacket;
+import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.parameter.DoubleArrayParameter;
 import us.ihmc.robotics.dataStructures.parameter.ParameterFactory;
-import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-
-import javax.vecmath.Vector3d;
 
 public class QuadrupedPlanarVelocityInputProvider
 {
@@ -22,7 +21,7 @@ public class QuadrupedPlanarVelocityInputProvider
    private final DoubleYoVariable yoPlanarVelocityInputX;
    private final DoubleYoVariable yoPlanarVelocityInputY;
    private final DoubleYoVariable yoPlanarVelocityInputZ;
-   private final Vector3d planarVelocityInput;
+   private final Vector3D planarVelocityInput;
 
    public QuadrupedPlanarVelocityInputProvider(GlobalDataProducer globalDataProducer, YoVariableRegistry parentRegistry)
    {
@@ -32,7 +31,7 @@ public class QuadrupedPlanarVelocityInputProvider
       yoPlanarVelocityInputX.set(0);
       yoPlanarVelocityInputY.set(0);
       yoPlanarVelocityInputZ.set(0);
-      planarVelocityInput = new Vector3d();
+      planarVelocityInput = new Vector3D();
 
       if (globalDataProducer != null)
       {
@@ -55,7 +54,7 @@ public class QuadrupedPlanarVelocityInputProvider
       parentRegistry.addChild(registry);
    }
 
-   public Vector3d get()
+   public Vector3D get()
    {
       planarVelocityInput.set(yoPlanarVelocityInputX.getDoubleValue(), yoPlanarVelocityInputY.getDoubleValue(), yoPlanarVelocityInputZ.getDoubleValue());
       return planarVelocityInput;

@@ -3,8 +3,7 @@ package us.ihmc.exampleSimulations.newtonsCradle;
 import java.util.ArrayList;
 import java.util.Random;
 
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.robotics.random.RandomTools;
@@ -23,7 +22,7 @@ public class PileOfRandomObjectsRobot
    private int collisionGroup = 0xffffffff;
    private int collisionMask = 0xffffffff;
 
-   private final int estimatedContactPointsPerShape = 16;
+   private final int estimatedContactPointsPerShape = 8;
 
    private final Random random = new Random(1886L);
 
@@ -82,7 +81,7 @@ public class PileOfRandomObjectsRobot
          RobotDescription robotDescription = new RobotDescription("RandomRobot" + i);
          //         Robot robot = new Robot("RandomRobot" + i);
 
-         Vector3d offset = new Vector3d(0.0, 0.0, 0.0);
+         Vector3D offset = new Vector3D(0.0, 0.0, 0.0);
          FloatingJointDescription floatingJointDescription = new FloatingJointDescription("object" + i, "object" + i);
          floatingJointDescription.setOffsetFromParentJoint(offset);
 

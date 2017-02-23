@@ -2,8 +2,7 @@ package us.ihmc.humanoidBehaviors.behaviors.roughTerrain;
 
 import java.util.ArrayList;
 
-import javax.vecmath.Point2d;
-
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.graphSearch.BipedalFootstepPlannerParameters;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -26,12 +25,12 @@ public class FootstepPlannerForBehaviorsHelper
       SideDependentList<ConvexPolygon2d> footPolygons = new SideDependentList<>();
       for (RobotSide side : RobotSide.values)
       {
-         ArrayList<Point2d> footPoints = contactPointParameters.getFootContactPoints().get(side);         
-         ArrayList<Point2d> scaledFootPoints = new ArrayList<Point2d>();
+         ArrayList<Point2D> footPoints = contactPointParameters.getFootContactPoints().get(side);         
+         ArrayList<Point2D> scaledFootPoints = new ArrayList<Point2D>();
          
          for(int i = 0; i < footPoints.size(); i++)
          {
-            Point2d footPoint = new Point2d(footPoints.get(i));
+            Point2D footPoint = new Point2D(footPoints.get(i));
             footPoint.setX(footPoint.getX() * scalingFactorForFootholdX);
             footPoint.setY(footPoint.getY() * scalingFactorForFootholdY);
             scaledFootPoints.add(footPoint);

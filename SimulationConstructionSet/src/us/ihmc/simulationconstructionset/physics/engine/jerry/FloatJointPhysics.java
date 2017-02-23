@@ -3,10 +3,9 @@ package us.ihmc.simulationconstructionset.physics.engine.jerry;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.simulationconstructionset.GroundContactPointGroup;
@@ -24,17 +23,17 @@ public class FloatJointPhysics extends JointPhysics<FloatingJoint>
    private double[] k_qd_wx = new double[4], k_qd_wy = new double[4], k_qd_wz = new double[4];
    private double[] k_qd_qs = new double[4], k_qd_qx = new double[4], k_qd_qy = new double[4], k_qd_qz = new double[4];
 
-   private Quat4d tempOrientation2 = new Quat4d();
-   private Vector3d wXr1 = new Vector3d();
+   private Quaternion tempOrientation2 = new Quaternion();
+   private Vector3D wXr1 = new Vector3D();
 
    // private Matrix3d R0_i = new Matrix3d();
-   private Vector3d a_hat_world_top = new Vector3d(), a_hat_world_bot = new Vector3d();
+   private Vector3D a_hat_world_top = new Vector3D(), a_hat_world_bot = new Vector3D();
    private Matrix a_hat_matrix = new Matrix(6, 1);
    private Matrix Z_hat_matrix = new Matrix(6, 1);
    private Matrix Y_hat_matrix = new Matrix(6, 1);
    private Matrix I_hat_matrix = new Matrix(6, 6);
-   private Vector3d wdXr = new Vector3d(), wXr = new Vector3d(), wXwXr = new Vector3d();
-   private Vector3d delta_qd_xyz = new Vector3d();
+   private Vector3D wdXr = new Vector3D(), wXr = new Vector3D(), wXwXr = new Vector3D();
+   private Vector3D delta_qd_xyz = new Vector3D();
    private final Matrix I_hat_inverse = new Matrix(6, 6);
 
    private double q_x_n, q_y_n, q_z_n, qd_x_n, qd_y_n, qd_z_n, q_qs_n, q_qx_n, q_qy_n, q_qz_n, qd_wx_n, qd_wy_n, qd_wz_n;
@@ -52,7 +51,7 @@ public class FloatJointPhysics extends JointPhysics<FloatingJoint>
 
    // Override featherstonePassOne since don't need to do everything...
    @Override
-   public void featherstonePassOne(Vector3d w_h, Vector3d v_h, Matrix3d Rh_0)
+   public void featherstonePassOne(Vector3D w_h, Vector3D v_h, RotationMatrix Rh_0)
    {
       owner.update();
       owner.jointTransform3D.getRotation(Ri_0);
@@ -110,7 +109,7 @@ public class FloatJointPhysics extends JointPhysics<FloatingJoint>
    }
 
    @Override
-   protected void jointDependentSetAndGetRotation(Matrix3d Rh_i)
+   protected void jointDependentSetAndGetRotation(RotationMatrix Rh_i)
    {
       tempOrientation2.set(owner.q_qx.getDoubleValue(), owner.q_qy.getDoubleValue(), owner.q_qz.getDoubleValue(), owner.q_qs.getDoubleValue());
       Rh_i.set(tempOrientation2);
@@ -145,7 +144,7 @@ public class FloatJointPhysics extends JointPhysics<FloatingJoint>
    }
 
    @Override
-   protected void jointDependentFeatherstonePassTwo(Vector3d w_h)
+   protected void jointDependentFeatherstonePassTwo(Vector3D w_h)
    {
       // Coriolis Forces:
       c_hat_i.top = null;

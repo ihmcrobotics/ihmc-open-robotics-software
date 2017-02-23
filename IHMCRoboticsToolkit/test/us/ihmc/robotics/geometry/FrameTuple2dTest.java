@@ -8,14 +8,15 @@ import static org.junit.Assert.fail;
 
 import java.util.Random;
 
-import javax.vecmath.Point2d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector2d;
-
 import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
@@ -33,7 +34,7 @@ public abstract class FrameTuple2dTest<T extends FrameTuple2d<?, ?>>
 
    protected ReferenceFrame aFrame = ReferenceFrame.constructARootFrame("aFrame", false, true, true);
 
-   protected Transform3d theFrameToChildFrame;
+   protected RigidBodyTransform theFrameToChildFrame;
 
    protected ReferenceFrame childFrame;
 
@@ -79,12 +80,12 @@ public abstract class FrameTuple2dTest<T extends FrameTuple2d<?, ?>>
          transformInPlane.setTranslation(RandomTools.generateRandomVector(random));
 
          transformNOTInPlane.setIdentity();
-         transformNOTInPlane.set(RigidBodyTransform.generateRandomTransform(random));
+         transformNOTInPlane.set(EuclidCoreRandomTools.generateRandomRigidBodyTransform(random));
 
          frameTransformInPlane.update();
          frameTransformNOTInPlane.update();
 
-         Point2d point2d = RandomTools.generateRandomPoint2d(random, 1.0, 1.0);
+         Point2D point2d = RandomTools.generateRandomPoint2d(random, 1.0, 1.0);
 
          framePoint2d.setIncludingFrame(worldFrame, point2d);
          try
@@ -117,7 +118,7 @@ public abstract class FrameTuple2dTest<T extends FrameTuple2d<?, ?>>
    @Before
    public final void setUp() throws Exception
    {
-      theFrameToChildFrame = new Transform3d();
+      theFrameToChildFrame = new RigidBodyTransform();
       childFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("childFrame", theFrame, theFrameToChildFrame, false, true, true);
    }
 
@@ -267,7 +268,7 @@ public abstract class FrameTuple2dTest<T extends FrameTuple2d<?, ?>>
    public void testGetPointCopy()
    {
       FrameTuple2d<?, ?> frameTuple = createFrameTuple(theFrame, 10.0, 10.0);
-      Point2d point = frameTuple.getPointCopy();
+      Point2D point = frameTuple.getPointCopy();
       assertEquals("These should be equal", point.getX(), frameTuple.getX(), epsilon);
       assertEquals("These should be equal", point.getY(), frameTuple.getY(), epsilon);
    }
@@ -277,7 +278,7 @@ public abstract class FrameTuple2dTest<T extends FrameTuple2d<?, ?>>
    public void testGetVectorCopy()
    {
       FrameTuple2d<?, ?> frameTuple = createFrameTuple(theFrame, 10.0, 10.0);
-      Vector2d point = frameTuple.getVectorCopy();
+      Vector2D point = frameTuple.getVectorCopy();
       assertEquals("These should be equal", point.getX(), frameTuple.getX(), epsilon);
       assertEquals("These should be equal", point.getY(), frameTuple.getY(), epsilon);
    }
@@ -286,7 +287,7 @@ public abstract class FrameTuple2dTest<T extends FrameTuple2d<?, ?>>
 	@Test(timeout = 30000)
    public void testGet_Tuple2d()
    {
-      Point2d tuple2dToPack = new Point2d();
+      Point2D tuple2dToPack = new Point2D();
       double[] values = {456465.067, 456.898};
       FrameTuple2d<?, ?> frameTuple = createFrameTuple(aFrame, values[0], values[1]);
       frameTuple.get(tuple2dToPack);
@@ -298,7 +299,7 @@ public abstract class FrameTuple2dTest<T extends FrameTuple2d<?, ?>>
 	@Test(timeout = 30000)
    public void testGet_Tuple3d()
    {
-      Point3d tuple3dToPack = new Point3d();
+      Point3D tuple3dToPack = new Point3D();
       double[] values = {456465.067, 456.898};
       FrameTuple2d<?, ?> frameTuple = createFrameTuple(aFrame, values[0], values[1]);
       frameTuple.get(tuple3dToPack);
@@ -432,7 +433,7 @@ public abstract class FrameTuple2dTest<T extends FrameTuple2d<?, ?>>
       double[] values = {8.0, -5.0};
       FrameTuple2d<?, ?> frameTuple = createFrameTuple(aFrame, 0.0, 0.0);
       double scaleFactor = 7.0;
-      Point2d tuple2d = new Point2d(values);
+      Point2D tuple2d = new Point2D(values);
       frameTuple.scale(scaleFactor, tuple2d);
 
       assertEquals("Should be equal doubles", scaleFactor * values[0], frameTuple.getX(), epsilon);
@@ -447,8 +448,8 @@ public abstract class FrameTuple2dTest<T extends FrameTuple2d<?, ?>>
       double[] values2 = {19.6, -3.9};
       FrameTuple2d<?, ?> frameTuple = createFrameTuple(aFrame, 0.0, 0.0);
       double scaleFactor = -7.43;
-      Point2d tuple1 = new Point2d(values1);
-      Point2d tuple2 = new Point2d(values2);
+      Point2D tuple1 = new Point2D(values1);
+      Point2D tuple2 = new Point2D(values2);
 
       frameTuple.scaleAdd(scaleFactor, tuple1, tuple2);      
       assertEquals("Should be equal doubles", scaleFactor * values1[0] + values2[0], frameTuple.getX(), epsilon);
@@ -463,8 +464,8 @@ public abstract class FrameTuple2dTest<T extends FrameTuple2d<?, ?>>
       double[] values2 = {19.6, -3.9};
       FrameTuple2d<?, ?> frameTuple = createFrameTuple(aFrame, 1.5, 7.0);
       double scaleFactor1 = -7.43, scaleFactor2 = 6.545;
-      Point2d tuple1 = new Point2d(values1);
-      Point2d tuple2 = new Point2d(values2);
+      Point2D tuple1 = new Point2D(values1);
+      Point2D tuple2 = new Point2D(values2);
 
       frameTuple.scaleAdd(scaleFactor1, tuple1, scaleFactor2, tuple2);      
       assertEquals("Should be equal doubles", scaleFactor1 * values1[0] + scaleFactor2 * values2[0], frameTuple.getX(), epsilon);
@@ -479,7 +480,7 @@ public abstract class FrameTuple2dTest<T extends FrameTuple2d<?, ?>>
       double[] frameTuple2dValues = {6.4, 3.9};
       FrameTuple2d<?, ?> frameTuple = createFrameTuple(aFrame, frameTuple2dValues[0], frameTuple2dValues[1]);
       double scaleFactor1 = 7.43;
-      Point2d tuple1 = new Point2d(tuple2dValues);
+      Point2D tuple1 = new Point2D(tuple2dValues);
 
       frameTuple.scaleAdd(scaleFactor1, tuple1);      
       assertEquals("Should be equal doubles", scaleFactor1 * frameTuple2dValues[0] + tuple2dValues[0], frameTuple.getX(), epsilon);
@@ -574,8 +575,8 @@ public abstract class FrameTuple2dTest<T extends FrameTuple2d<?, ?>>
    {
       double[] originalValues = {1.9, 3.7};
       FrameTuple2d<?, ?> original = createFrameTuple(theFrame, originalValues[0], originalValues[1]);
-      Point2d tuple1 = new Point2d(1.6, 43.6);
-      Point2d tuple2 = new Point2d(5.665, 34.7);
+      Point2D tuple1 = new Point2D(1.6, 43.6);
+      Point2D tuple2 = new Point2D(5.665, 34.7);
       original.add(tuple1, tuple2);
       assertEquals(original.getX(), tuple1.getX() + tuple2.getX(), epsilon);
       assertEquals(original.getY(), tuple1.getY() + tuple2.getY(), epsilon);
@@ -642,7 +643,7 @@ public abstract class FrameTuple2dTest<T extends FrameTuple2d<?, ?>>
    {
       double[] originalValues = {1.9, 3.7};
       FrameTuple2d<?, ?> original = createFrameTuple(theFrame, originalValues[0], originalValues[1]);
-      Point2d tuple1 = new Point2d(originalValues[0], originalValues[1]);
+      Point2D tuple1 = new Point2D(originalValues[0], originalValues[1]);
       original.sub(tuple1);
       assertEquals("These should be equal: ", originalValues[0] - tuple1.getX(), original.getX(), epsilon);
       assertEquals("These should be equal: ", originalValues[1] - tuple1.getY(), original.getY(), epsilon);
@@ -654,8 +655,8 @@ public abstract class FrameTuple2dTest<T extends FrameTuple2d<?, ?>>
    {
       double[] originalValues = {1.9, 3.7};
       FrameTuple2d<?, ?> original = createFrameTuple(theFrame, originalValues[0], originalValues[1]);
-      Point2d tuple1 = new Point2d(originalValues[0], originalValues[1]);
-      Point2d tuple2 = new Point2d(originalValues[0], originalValues[1]);
+      Point2D tuple1 = new Point2D(originalValues[0], originalValues[1]);
+      Point2D tuple2 = new Point2D(originalValues[0], originalValues[1]);
 
       original.sub(tuple1, tuple2);
       assertEquals("These should be equal: ", tuple1.getX() - tuple2.getX(), original.getX(), epsilon);
@@ -744,8 +745,8 @@ public abstract class FrameTuple2dTest<T extends FrameTuple2d<?, ?>>
    {
       double[] originalValues = {1.9, 3.7};
       FrameTuple2d<?, ?> original = createFrameTuple(theFrame, originalValues[0], originalValues[1]);
-      Point2d tuple1 = new Point2d(6.7, 45.6);
-      Point2d tuple2 = new Point2d(56.6, 3.5);
+      Point2D tuple1 = new Point2D(6.7, 45.6);
+      Point2D tuple2 = new Point2D(56.6, 3.5);
       double alpha = 2.0;
 
       original.interpolate(tuple1, tuple2, alpha);
@@ -821,9 +822,9 @@ public abstract class FrameTuple2dTest<T extends FrameTuple2d<?, ?>>
    public void testEpsilonEquals_Tuple2d_double()
    {
       double threshold = 10.0;
-      Point2d tuple1 = new Point2d(10.0, 10.0);
-      Point2d tuple2 = new Point2d(11.0, 11.0);
-      Point2d tuple3 = new Point2d(11.1, 11.1);
+      Point2D tuple1 = new Point2D(10.0, 10.0);
+      Point2D tuple2 = new Point2D(11.0, 11.0);
+      Point2D tuple3 = new Point2D(11.1, 11.1);
       FrameTuple2d<?, ?> frameTuple = createFrameTuple(theFrame, 1.0, 1.0);
       assertTrue(frameTuple.epsilonEquals(tuple1, threshold));
       assertTrue(frameTuple.epsilonEquals(tuple2, threshold));

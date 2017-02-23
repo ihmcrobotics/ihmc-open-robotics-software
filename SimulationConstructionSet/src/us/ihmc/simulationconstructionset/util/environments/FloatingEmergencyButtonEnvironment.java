@@ -3,11 +3,10 @@ package us.ihmc.simulationconstructionset.util.environments;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
-import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.robotController.ContactController;
 import us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObject3D;
@@ -23,7 +22,7 @@ public class FloatingEmergencyButtonEnvironment implements CommonAvatarEnvironme
 	private final CombinedTerrainObject3D combinedTerrainObject;
 	private final ArrayList<ExternalForcePoint> contactPoints = new ArrayList<ExternalForcePoint>();
 	
-	public FloatingEmergencyButtonEnvironment(ArrayList<Point3d> buttonLocations, ArrayList<Vector3d> pushVectors)
+	public FloatingEmergencyButtonEnvironment(ArrayList<Point3D> buttonLocations, ArrayList<Vector3D> pushVectors)
 	{
 		double forceVectorScale = 1.0 / 5.0; 
 		
@@ -31,7 +30,7 @@ public class FloatingEmergencyButtonEnvironment implements CommonAvatarEnvironme
 		combinedTerrainObject.addTerrainObject(DefaultCommonAvatarEnvironment.setUpGround("Ground"));
 		
 		int i = 0;
-		for(Point3d buttonLocation : buttonLocations)
+		for(Point3D buttonLocation : buttonLocations)
 		{
 		   String buttonRobotName = "ButtonRobot" + i;
 		   createButton(buttonRobotName, buttonLocation, pushVectors.get(i), forceVectorScale);
@@ -43,23 +42,24 @@ public class FloatingEmergencyButtonEnvironment implements CommonAvatarEnvironme
 		}
 	}
 
-	private void createButton(String buttonRobotName, Point3d buttonLocation, Vector3d pushVector, double forceVectorScale)
+	private void createButton(String buttonRobotName, Point3D buttonLocation, Vector3D pushVector, double forceVectorScale)
 	{
 	   
-		Matrix3d zRotation = new Matrix3d();
-		Matrix3d yRotation = new Matrix3d();
-		Matrix3d rotation = new Matrix3d();
+		RotationMatrix zRotation = new RotationMatrix();
+		RotationMatrix yRotation = new RotationMatrix();
+		RotationMatrix rotation = new RotationMatrix();
 		pushVector.normalize();
 		
 		
 		double alpha = Math.atan(pushVector.getY() / pushVector.getX());
 		double beta = (Math.PI / 2.0) - Math.atan(pushVector.getZ() / Math.sqrt(Math.pow(pushVector.getX(), 2.0) + Math.pow(pushVector.getY(),2.0)));
 		
-		zRotation.rotZ(alpha);
-		yRotation.rotY(beta);
-		rotation.mul(zRotation, yRotation);
+		zRotation.setToYawMatrix(alpha);
+		yRotation.setToPitchMatrix(beta);
+		rotation.set(zRotation);
+		rotation.multiply(yRotation);
 		
-		RigidBodyTransform rootBodyTransform = new RigidBodyTransform(rotation, new Vector3d(buttonLocation));
+		RigidBodyTransform rootBodyTransform = new RigidBodyTransform(rotation, new Vector3D(buttonLocation));
 	
 		ContactableButtonRobot button = new ContactableButtonRobot(buttonRobotName, rootBodyTransform, pushVector);
 		

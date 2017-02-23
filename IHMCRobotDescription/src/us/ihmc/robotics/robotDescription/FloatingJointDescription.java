@@ -1,6 +1,6 @@
 package us.ihmc.robotics.robotDescription;
 
-import javax.vecmath.Vector3d;
+import us.ihmc.euclid.tuple3D.Vector3D;
 
 public class FloatingJointDescription extends JointDescription
 {
@@ -13,7 +13,7 @@ public class FloatingJointDescription extends JointDescription
 
    public FloatingJointDescription(String name, String jointVariableName)
    {
-      super(name, new Vector3d());
+      super(name, new Vector3D());
       this.jointVariableName = jointVariableName;
    }
 

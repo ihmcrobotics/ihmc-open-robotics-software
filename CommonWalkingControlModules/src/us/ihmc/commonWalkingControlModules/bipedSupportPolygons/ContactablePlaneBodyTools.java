@@ -2,7 +2,8 @@ package us.ihmc.commonWalkingControlModules.bipedSupportPolygons;
 
 import java.util.Random;
 
-import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 
@@ -32,7 +33,7 @@ public class ContactablePlaneBodyTools
       //TODO: Use a better frame than just world here.
       ReferenceFrame endEffectorFrame = ReferenceFrame.getWorldFrame(); //rigidBody.getParentJoint().getFrameAfterJoint();
 
-      RigidBodyTransform transform3D = RigidBodyTransform.generateRandomTransform(random);
+      RigidBodyTransform transform3D = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
 
       ReferenceFrame soleFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent(rigidBody.getName() + "SoleFrame", endEffectorFrame,
             transform3D);

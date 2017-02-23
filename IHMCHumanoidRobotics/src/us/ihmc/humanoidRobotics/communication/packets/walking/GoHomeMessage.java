@@ -1,14 +1,14 @@
 package us.ihmc.humanoidRobotics.communication.packets.walking;
 
+import java.util.Random;
+
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.ros.generators.RosEnumValueDocumentation;
+import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
 import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
-import us.ihmc.communication.ros.generators.RosExportedField;
-import us.ihmc.communication.packets.Packet;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.robotSide.RobotSide;
-
-import java.util.Random;
 
 @RosMessagePacket(documentation = "The message commands the controller to bring the given part of the body back to a default configuration called 'home'."
       + " It is useful to get back to a safe configuration before walking.",

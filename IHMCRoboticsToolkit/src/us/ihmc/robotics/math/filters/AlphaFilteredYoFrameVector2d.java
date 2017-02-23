@@ -1,7 +1,6 @@
 package us.ihmc.robotics.math.filters;
 
-import javax.vecmath.Vector2d;
-
+import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameVector2d;
@@ -88,7 +87,7 @@ public class AlphaFilteredYoFrameVector2d extends YoFrameVector2d
       y.update(yUnfiltered);
    }
 
-   public void update(Vector2d vector2dUnfiltered)
+   public void update(Vector2D vector2dUnfiltered)
    {
       x.update(vector2dUnfiltered.getX());
       y.update(vector2dUnfiltered.getY());

@@ -1,8 +1,7 @@
 package us.ihmc.ihmcPerception.depthData.collisionShapes;
 
-import javax.vecmath.Point3d;
-
-import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
 
 public class CollisionSphere extends CollisionShape
 {
@@ -20,7 +19,7 @@ public class CollisionSphere extends CollisionShape
    }
 
    @Override
-   public boolean contains(Point3d point)
+   public boolean contains(Point3D point)
    {
       return (point.getX() * point.getX() + point.getY() * point.getY() + point.getZ() * point.getZ()) <= radiusSquared;
    }

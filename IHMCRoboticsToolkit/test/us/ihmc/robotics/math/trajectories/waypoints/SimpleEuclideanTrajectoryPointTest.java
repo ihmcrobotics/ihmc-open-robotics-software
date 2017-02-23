@@ -6,21 +6,18 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Random;
 
-import javax.vecmath.AxisAngle4d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.transformables.EuclideanWaypoint;
-import us.ihmc.robotics.geometry.transformables.TransformablePoint3d;
-import us.ihmc.robotics.geometry.transformables.TransformableVector3d;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.EuclideanTrajectoryPointInterface;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
@@ -36,18 +33,18 @@ public class SimpleEuclideanTrajectoryPointTest
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
       PoseReferenceFrame poseFrame = new PoseReferenceFrame("poseFrame", new FramePose(worldFrame));
 
-      FramePoint poseFramePosition = new FramePoint(worldFrame, new Point3d(0.5, 7.7, 9.2));
+      FramePoint poseFramePosition = new FramePoint(worldFrame, new Point3D(0.5, 7.7, 9.2));
       poseFrame.setPositionAndUpdate(poseFramePosition);
 
-      FrameOrientation poseOrientation = new FrameOrientation(worldFrame, new AxisAngle4d(1.2, 3.9, 4.7, 2.2));
+      FrameOrientation poseOrientation = new FrameOrientation(worldFrame, new AxisAngle(1.2, 3.9, 4.7, 2.2));
       poseFrame.setOrientationAndUpdate(poseOrientation);
 
       SimpleEuclideanTrajectoryPoint simpleEuclideanTrajectoryPoint = new SimpleEuclideanTrajectoryPoint();
       SimpleEuclideanTrajectoryPoint simpleTrajectoryPoint = new SimpleEuclideanTrajectoryPoint();
 
       double time = 3.4;
-      Point3d position = new Point3d(1.0, 2.1, 3.7);
-      Vector3d linearVelocity = new Vector3d(-0.4, 1.2, 3.3);
+      Point3D position = new Point3D(1.0, 2.1, 3.7);
+      Vector3D linearVelocity = new Vector3D(-0.4, 1.2, 3.3);
 
       simpleTrajectoryPoint.set(time, position, linearVelocity);
       simpleEuclideanTrajectoryPoint.set(simpleTrajectoryPoint);
@@ -77,8 +74,8 @@ public class SimpleEuclideanTrajectoryPointTest
       Random random = new Random(21651016L);
 
       double expectedTime = 0.0;
-      Point3d expectedPosition = new Point3d();
-      Vector3d expectedLinearVelocity = new Vector3d();
+      Point3D expectedPosition = new Point3D();
+      Vector3D expectedLinearVelocity = new Vector3D();
 
       SimpleEuclideanTrajectoryPoint testedSimpleEuclideanTrajectoryPoint = new SimpleEuclideanTrajectoryPoint();
 
@@ -86,8 +83,8 @@ public class SimpleEuclideanTrajectoryPointTest
             testedSimpleEuclideanTrajectoryPoint, epsilon);
 
       expectedTime = 0.0;
-      expectedPosition = new Point3d();
-      expectedLinearVelocity = new Vector3d();
+      expectedPosition = new Point3D();
+      expectedLinearVelocity = new Vector3D();
       testedSimpleEuclideanTrajectoryPoint = new SimpleEuclideanTrajectoryPoint();
 
       assertTrajectoryPointContainsExpectedData(expectedTime, expectedPosition, expectedLinearVelocity,
@@ -116,8 +113,8 @@ public class SimpleEuclideanTrajectoryPointTest
             expectedPosition, expectedLinearVelocity, testedSimpleEuclideanTrajectoryPoint, epsilon);
 
       final double expectedFinalTime = RandomTools.generateRandomDouble(random, 0.0, 1000.0);
-      final Point3d expectedFinalPosition = RandomTools.generateRandomPoint(random, 10.0, 10.0, 10.0);
-      final Vector3d expectedFinalLinearVelocity = RandomTools.generateRandomVector(random);
+      final Point3D expectedFinalPosition = RandomTools.generateRandomPoint(random, 10.0, 10.0, 10.0);
+      final Vector3D expectedFinalLinearVelocity = RandomTools.generateRandomVector(random);
 
       SimpleEuclideanTrajectoryPoint expectedEuclideanTrajectoryPoint = new SimpleEuclideanTrajectoryPoint();
       expectedEuclideanTrajectoryPoint.setTime(expectedFinalTime);
@@ -139,8 +136,8 @@ public class SimpleEuclideanTrajectoryPointTest
       Random random = new Random(21651016L);
 
       double expectedTime = 0.0;
-      Point3d expectedPosition = new Point3d();
-      Vector3d expectedLinearVelocity = new Vector3d();
+      Point3D expectedPosition = new Point3D();
+      Vector3D expectedLinearVelocity = new Vector3D();
 
       final SimpleEuclideanTrajectoryPoint testedSimpleEuclideanTrajectoryPoint = new SimpleEuclideanTrajectoryPoint();
 
@@ -196,10 +193,10 @@ public class SimpleEuclideanTrajectoryPointTest
             expectedPosition, expectedLinearVelocity, testedSimpleEuclideanTrajectoryPoint, epsilon);
 
       final double expectedFinalTime = RandomTools.generateRandomDouble(random, 0.0, 1000.0);
-      final Point3d expectedFinalPosition = RandomTools.generateRandomPoint(random, 10.0, 10.0, 10.0);
-      final Quat4d expectedFinalOrientation = RandomTools.generateRandomQuaternion(random);
-      final Vector3d expectedFinalLinearVelocity = RandomTools.generateRandomVector(random);
-      final Vector3d expectedFinalAngularVelocity = RandomTools.generateRandomVector(random);
+      final Point3D expectedFinalPosition = RandomTools.generateRandomPoint(random, 10.0, 10.0, 10.0);
+      final Quaternion expectedFinalOrientation = RandomTools.generateRandomQuaternion(random);
+      final Vector3D expectedFinalLinearVelocity = RandomTools.generateRandomVector(random);
+      final Vector3D expectedFinalAngularVelocity = RandomTools.generateRandomVector(random);
 
       SimpleEuclideanTrajectoryPoint expectedEuclideanTrajectoryPoint = new SimpleEuclideanTrajectoryPoint();
       expectedEuclideanTrajectoryPoint.setTime(expectedFinalTime);
@@ -223,8 +220,8 @@ public class SimpleEuclideanTrajectoryPointTest
 
       ReferenceFrame expectedFrame = worldFrame;
       double expectedTime = RandomTools.generateRandomDouble(random, 0.0, 1000.0);
-      TransformablePoint3d expectedPosition = new TransformablePoint3d(RandomTools.generateRandomPoint(random, 10.0, 10.0, 10.0));
-      TransformableVector3d expectedLinearVelocity = new TransformableVector3d(RandomTools.generateRandomVector(random));
+      Point3D expectedPosition = RandomTools.generateRandomPoint(random, 10.0, 10.0, 10.0);
+      Vector3D expectedLinearVelocity = new Vector3D(RandomTools.generateRandomVector(random));
       SimpleEuclideanTrajectoryPoint testedSimpleEuclideanTrajectoryPoint = new SimpleEuclideanTrajectoryPoint(expectedTime, expectedPosition,
             expectedLinearVelocity);
 
@@ -249,8 +246,8 @@ public class SimpleEuclideanTrajectoryPointTest
       Random random = new Random(21651016L);
 
       double expectedTime = RandomTools.generateRandomDouble(random, 0.0, 1000.0);
-      Point3d expectedPosition = RandomTools.generateRandomPoint(random, 10.0, 10.0, 10.0);
-      Vector3d expectedLinearVelocity = RandomTools.generateRandomVector(random);
+      Point3D expectedPosition = RandomTools.generateRandomPoint(random, 10.0, 10.0, 10.0);
+      Vector3D expectedLinearVelocity = RandomTools.generateRandomVector(random);
       SimpleEuclideanTrajectoryPoint testedSimpleEuclideanTrajectoryPoint = new SimpleEuclideanTrajectoryPoint(expectedTime, expectedPosition,
             expectedLinearVelocity);
 
@@ -283,8 +280,8 @@ public class SimpleEuclideanTrajectoryPointTest
       Random random = new Random(21651016L);
 
       double expectedTime = RandomTools.generateRandomDouble(random, 0.0, 1000.0);
-      Point3d expectedPosition = RandomTools.generateRandomPoint(random, 10.0, 10.0, 10.0);
-      Vector3d expectedLinearVelocity = RandomTools.generateRandomVector(random);
+      Point3D expectedPosition = RandomTools.generateRandomPoint(random, 10.0, 10.0, 10.0);
+      Vector3D expectedLinearVelocity = RandomTools.generateRandomVector(random);
       SimpleEuclideanTrajectoryPoint testedSimpleEuclideanTrajectoryPoint = new SimpleEuclideanTrajectoryPoint(expectedTime, expectedPosition, expectedLinearVelocity);
 
       testedSimpleEuclideanTrajectoryPoint.setToNaN();
@@ -302,16 +299,16 @@ public class SimpleEuclideanTrajectoryPointTest
       assertTrue(testedSimpleEuclideanTrajectoryPoint.containsNaN());
    }
 
-   static void assertTrajectoryPointContainsExpectedData(double expectedTime, Point3d expectedPosition,
-         Vector3d expectedLinearVelocity,
+   static void assertTrajectoryPointContainsExpectedData(double expectedTime, Point3D expectedPosition,
+         Vector3D expectedLinearVelocity,
          SimpleEuclideanTrajectoryPoint testedSimpleEuclideanTrajectoryPoint, double epsilon)
    {
       assertEquals(expectedTime, testedSimpleEuclideanTrajectoryPoint.getTime(), epsilon);
       assertTrue(expectedPosition.epsilonEquals(testedSimpleEuclideanTrajectoryPoint.getEuclideanWaypoint().getPosition(), epsilon));
       assertTrue(expectedLinearVelocity.epsilonEquals(testedSimpleEuclideanTrajectoryPoint.getEuclideanWaypoint().getLinearVelocity(), epsilon));
 
-      Point3d actualPosition = new Point3d();
-      Vector3d actualLinearVelocity = new Vector3d();
+      Point3D actualPosition = new Point3D();
+      Vector3D actualLinearVelocity = new Vector3D();
 
       testedSimpleEuclideanTrajectoryPoint.getPosition(actualPosition);
       testedSimpleEuclideanTrajectoryPoint.getLinearVelocity(actualLinearVelocity);
@@ -319,8 +316,8 @@ public class SimpleEuclideanTrajectoryPointTest
       assertTrue(expectedPosition.epsilonEquals(actualPosition, epsilon));
       assertTrue(expectedLinearVelocity.epsilonEquals(actualLinearVelocity, epsilon));
 
-      Point3d actualFramePosition = new Point3d();
-      Vector3d actualFrameLinearVelocity = new Vector3d();
+      Point3D actualFramePosition = new Point3D();
+      Vector3D actualFrameLinearVelocity = new Vector3D();
 
       testedSimpleEuclideanTrajectoryPoint.getPosition(actualFramePosition);
       testedSimpleEuclideanTrajectoryPoint.getLinearVelocity(actualFrameLinearVelocity);
@@ -328,8 +325,8 @@ public class SimpleEuclideanTrajectoryPointTest
       assertTrue(expectedPosition.epsilonEquals(actualFramePosition, epsilon));
       assertTrue(expectedLinearVelocity.epsilonEquals(actualFrameLinearVelocity, epsilon));
 
-      actualFramePosition = new Point3d();
-      actualFrameLinearVelocity = new Vector3d();
+      actualFramePosition = new Point3D();
+      actualFrameLinearVelocity = new Vector3D();
 
       testedSimpleEuclideanTrajectoryPoint.getPosition(actualFramePosition);
       testedSimpleEuclideanTrajectoryPoint.getLinearVelocity(actualFrameLinearVelocity);
@@ -347,15 +344,15 @@ public class SimpleEuclideanTrajectoryPointTest
       SimpleEuclideanTrajectoryPoint simpleTrajectoryPoint = new SimpleEuclideanTrajectoryPoint();
 
       double time = 3.4;
-      Point3d position = new Point3d(1.0, 2.1, 3.7);
-      Vector3d linearVelocity = new Vector3d(-0.4, 1.2, 3.3);
+      Point3D position = new Point3D(1.0, 2.1, 3.7);
+      Vector3D linearVelocity = new Vector3D(-0.4, 1.2, 3.3);
 
       simpleTrajectoryPoint.set(time, position, linearVelocity);
       simpleEuclideanTrajectoryPoint.set(simpleTrajectoryPoint);
 
       // Check some get calls: 
-      Point3d pointForVerification = new Point3d();
-      Vector3d linearVelocityForVerification = new Vector3d();
+      Point3D pointForVerification = new Point3D();
+      Vector3D linearVelocityForVerification = new Vector3D();
 
       simpleEuclideanTrajectoryPoint.getPosition(pointForVerification);
       simpleEuclideanTrajectoryPoint.getLinearVelocity(linearVelocityForVerification);
@@ -379,8 +376,8 @@ public class SimpleEuclideanTrajectoryPointTest
       simpleEuclideanTrajectoryPoint.getLinearVelocity(linearVelocity);
 
       // Make sure they are all equal to zero:
-      assertTrue(position.epsilonEquals(new Point3d(), 1e-10));
-      assertTrue(linearVelocity.epsilonEquals(new Vector3d(), 1e-10));
+      assertTrue(position.epsilonEquals(new Point3D(), 1e-10));
+      assertTrue(linearVelocity.epsilonEquals(new Vector3D(), 1e-10));
 
       time = 9.9;
       pointForVerification.set(3.9, 2.2, 1.1);
@@ -441,8 +438,8 @@ public class SimpleEuclideanTrajectoryPointTest
       SimpleEuclideanTrajectoryPoint simpleEuclideanTrajectoryPoint = new SimpleEuclideanTrajectoryPoint();
 
       double time = 3.4;
-      TransformablePoint3d position = new TransformablePoint3d(1.0, 2.1, 3.7);
-      TransformableVector3d linearVelocity = new TransformableVector3d(-0.4, 1.2, 3.3);
+      Point3D position = new Point3D(1.0, 2.1, 3.7);
+      Vector3D linearVelocity = new Vector3D(-0.4, 1.2, 3.3);
 
       simpleEuclideanTrajectoryPoint.setTime(time);
       simpleEuclideanTrajectoryPoint.setPosition(position);
@@ -450,10 +447,10 @@ public class SimpleEuclideanTrajectoryPointTest
 
       PoseReferenceFrame poseFrame = new PoseReferenceFrame("poseFrame", new FramePose(worldFrame));
 
-      FramePoint poseFramePosition = new FramePoint(worldFrame, new Point3d(0.5, 7.7, 9.2));
+      FramePoint poseFramePosition = new FramePoint(worldFrame, new Point3D(0.5, 7.7, 9.2));
       poseFrame.setPositionAndUpdate(poseFramePosition);
 
-      FrameOrientation poseOrientation = new FrameOrientation(worldFrame, new AxisAngle4d(1.2, 3.9, 4.7, 2.2));
+      FrameOrientation poseOrientation = new FrameOrientation(worldFrame, new AxisAngle(1.2, 3.9, 4.7, 2.2));
       poseFrame.setOrientationAndUpdate(poseOrientation);
 
       simpleEuclideanTrajectoryPoint.applyTransform(worldFrame.getTransformToDesiredFrame(poseFrame));
@@ -506,8 +503,8 @@ public class SimpleEuclideanTrajectoryPointTest
       assertTrue(simpleEuclideanTrajectoryPointTwo.epsilonEquals(simpleEuclideanTrajectoryPoint, 1e-10));
 
       
-      Point3d positionToPack = new Point3d();
-      Vector3d linearVelocityToPack = new Vector3d();
+      Point3D positionToPack = new Point3D();
+      Vector3D linearVelocityToPack = new Vector3D();
       simpleEuclideanTrajectoryPoint.get(positionToPack, linearVelocityToPack);
 
       simpleEuclideanTrajectoryPointTwo = new SimpleEuclideanTrajectoryPoint();
@@ -517,8 +514,8 @@ public class SimpleEuclideanTrajectoryPointTest
       
       
       
-      positionToPack = new Point3d();
-      linearVelocityToPack = new Vector3d();
+      positionToPack = new Point3D();
+      linearVelocityToPack = new Vector3D();
       simpleEuclideanTrajectoryPoint.get( positionToPack, linearVelocityToPack);
 
       simpleEuclideanTrajectoryPointTwo = new SimpleEuclideanTrajectoryPoint();

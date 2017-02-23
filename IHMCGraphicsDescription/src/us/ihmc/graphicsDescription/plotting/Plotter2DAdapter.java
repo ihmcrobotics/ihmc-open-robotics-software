@@ -24,9 +24,8 @@ import java.awt.image.renderable.RenderableImage;
 import java.text.AttributedCharacterIterator;
 import java.util.Map;
 
-import javax.vecmath.Point2d;
-import javax.vecmath.Vector2d;
-
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.graphicsDescription.plotting.frames.MetersReferenceFrame;
 import us.ihmc.graphicsDescription.plotting.frames.PixelsReferenceFrame;
 import us.ihmc.graphicsDescription.plotting.frames.PlotterReferenceFrame;
@@ -83,20 +82,20 @@ public class Plotter2DAdapter
 
    // for graphics 2d adapter use
 
-   public void drawCross(PlotterReferenceFrame frame, Point2d center, Vector2d radii)
+   public void drawCross(PlotterReferenceFrame frame, Point2D center, Vector2D radii)
    {
       drawLineSegment(frame, center.getX() - radii.getX(), center.getY(), center.getX() + radii.getX(), center.getY());
       drawLineSegment(frame, center.getX(), center.getY() - radii.getY(), center.getX(), center.getY() + radii.getY());
    }
 
-   public void drawCircleWithCross(PlotterReferenceFrame frame, Point2d center, Vector2d radii)
+   public void drawCircleWithCross(PlotterReferenceFrame frame, Point2D center, Vector2D radii)
    {
       drawOval(frame, center, radii);
       drawLineSegment(frame, center.getX() - radii.getX(), center.getY(), center.getX() + radii.getX(), center.getY());
       drawLineSegment(frame, center.getX(), center.getY() - radii.getY(), center.getX(), center.getY() + radii.getY());
    }
 
-   public void drawRotatedCross(PlotterReferenceFrame frame, Point2d center, Vector2d radii)
+   public void drawRotatedCross(PlotterReferenceFrame frame, Point2D center, Vector2D radii)
    {
       double distanceX = 0.707 * radii.getX();
       double distanceY = 0.707 * radii.getY();
@@ -104,7 +103,7 @@ public class Plotter2DAdapter
       drawLineSegment(frame, center.getX() - distanceX, center.getY() + distanceY, center.getX() + distanceX, center.getY() - distanceY);
    }
 
-   public void drawCircleWithRotatedCross(PlotterReferenceFrame frame, Point2d center, Vector2d radii)
+   public void drawCircleWithRotatedCross(PlotterReferenceFrame frame, Point2D center, Vector2D radii)
    {
       double distanceX = 0.707 * radii.getX();
       double distanceY = 0.707 * radii.getY();
@@ -113,7 +112,7 @@ public class Plotter2DAdapter
       drawLineSegment(frame, center.getX() - distanceX, center.getY() + distanceY, center.getX() + distanceX, center.getY() - distanceY);
    }
 
-   public void drawDiamond(PlotterReferenceFrame frame, Point2d center, Vector2d radii)
+   public void drawDiamond(PlotterReferenceFrame frame, Point2D center, Vector2D radii)
    {
       drawLineSegment(frame, center.getX() - radii.getX(), center.getY(), center.getX(), center.getY() + radii.getY());
       drawLineSegment(frame, center.getX() - radii.getX(), center.getY(), center.getX(), center.getY() - radii.getY());
@@ -121,7 +120,7 @@ public class Plotter2DAdapter
       drawLineSegment(frame, center.getX(), center.getY() - radii.getY(), center.getX() + radii.getX(), center.getY());
    }
 
-   public void drawDiamondWithCross(PlotterReferenceFrame frame, Point2d center, Vector2d radii)
+   public void drawDiamondWithCross(PlotterReferenceFrame frame, Point2D center, Vector2D radii)
    {
       drawLineSegment(frame, center.getX() - radii.getX(), center.getY(), center.getX(), center.getY() + radii.getY());
       drawLineSegment(frame, center.getX() - radii.getX(), center.getY(), center.getX(), center.getY() - radii.getY());
@@ -131,14 +130,14 @@ public class Plotter2DAdapter
       drawLineSegment(frame, center.getX(), center.getY() - radii.getY(), center.getX(), center.getY() + radii.getY());
    }
 
-   public void drawSquareWithCross(PlotterReferenceFrame frame, Point2d center, Vector2d radii)
+   public void drawSquareWithCross(PlotterReferenceFrame frame, Point2D center, Vector2D radii)
    {
       drawRectangle(frame, center, radii);
       drawLineSegment(frame, center.getX() - radii.getX(), center.getY(), center.getX() + radii.getX(), center.getY());
       drawLineSegment(frame, center.getX(), center.getY() - radii.getY(), center.getX(), center.getY() + radii.getY());
    }
 
-   public void drawRectangle(PlotterReferenceFrame frame, Point2d center, Vector2d radii)
+   public void drawRectangle(PlotterReferenceFrame frame, Point2D center, Vector2D radii)
    {
       PlotterPoint2d centerFramePoint = pointBin[0];
       PlotterVector2d radiiFrameVector = vectorBin[0];
@@ -162,7 +161,7 @@ public class Plotter2DAdapter
       drawRectangle(pixelate(position.getX()), pixelate(position.getY()), pixelate(dimensions.getX()), pixelate(dimensions.getY()));
    }
 
-   public void drawSquareFilled(PlotterReferenceFrame frame, Point2d center, Vector2d radii)
+   public void drawSquareFilled(PlotterReferenceFrame frame, Point2D center, Vector2D radii)
    {
       PlotterPoint2d centerFramePoint = pointBin[0];
       PlotterVector2d radiiFrameVector = vectorBin[0];
@@ -175,7 +174,7 @@ public class Plotter2DAdapter
       drawRectangleFilled(pixelate(centerFramePoint.getX()), pixelate(centerFramePoint.getY()), pixelate(2.0 * radiiFrameVector.getX()), pixelate(2.0 * radiiFrameVector.getY()));
    }
 
-   public void drawOval(PlotterReferenceFrame frame, Point2d center, Vector2d radii)
+   public void drawOval(PlotterReferenceFrame frame, Point2D center, Vector2D radii)
    {
       PlotterPoint2d centerFramePoint = pointBin[0];
       PlotterVector2d radiiFrameVector = vectorBin[0];
@@ -188,7 +187,7 @@ public class Plotter2DAdapter
       drawOval(pixelate(centerFramePoint.getX()), pixelate(centerFramePoint.getY()), pixelate(2.0 * radiiFrameVector.getX()), pixelate(2.0 * radiiFrameVector.getY()));
    }
 
-   public void drawOvalFilled(PlotterReferenceFrame frame, Point2d center, Vector2d radii)
+   public void drawOvalFilled(PlotterReferenceFrame frame, Point2D center, Vector2D radii)
    {
       PlotterPoint2d centerFramePoint = pointBin[0];
       PlotterVector2d radiiFrameVector = vectorBin[0];
@@ -223,7 +222,7 @@ public class Plotter2DAdapter
       drawLineSegment(pixelate(firstEndpoint.getX()), pixelate(firstEndpoint.getY()), pixelate(secondEndpoint.getX()), pixelate(secondEndpoint.getY()));
    }
 
-   public void drawPoint(PlotterReferenceFrame frame, Point2d point)
+   public void drawPoint(PlotterReferenceFrame frame, Point2D point)
    {
       PlotterPoint2d plotterPoint = pointBin[0];
       plotterPoint.setIncludingFrame(frame, point);
@@ -264,7 +263,7 @@ public class Plotter2DAdapter
          drawPolygon(tempPoints[0], tempPoints[1], convexPolygon2d.getNumberOfVertices());
    }
 
-   public void drawArc(PlotterReferenceFrame frame, Point2d center, Vector2d radii, double startAngle, double arcAngle)
+   public void drawArc(PlotterReferenceFrame frame, Point2D center, Vector2D radii, double startAngle, double arcAngle)
    {
       PlotterPoint2d plotCenter = pointBin[0];
       PlotterVector2d plotRadii = vectorBin[0];
@@ -280,7 +279,7 @@ public class Plotter2DAdapter
                          pixelate(BodeUnitsConverter.convertRadianToDegrees(arcAngle)));
    }
 
-   public void drawString(PlotterReferenceFrame frame, String string, Point2d startPoint)
+   public void drawString(PlotterReferenceFrame frame, String string, Point2D startPoint)
    {
       PlotterPoint2d plotStart = pointBin[0];
       plotStart.setIncludingFrame(frame, startPoint);
