@@ -4,9 +4,9 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
+import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.io.printing.PrintTools;
-import us.ihmc.tools.testing.MutationTestingTools;
 import us.ihmc.tools.thread.ThreadTools;
 
 public class TimerTest
@@ -81,6 +81,6 @@ public class TimerTest
    
    public static void main(String[] args)
    {
-      MutationTestingTools.doPITMutationTestAndOpenResult(TimerTest.class);
+      MutationTestFacilitator.facilitateMutationTestForClass(Timer.class, TimerTest.class);
    }
 }

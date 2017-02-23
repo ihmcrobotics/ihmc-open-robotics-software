@@ -389,10 +389,11 @@ public class NewtonsCradleSimulation
       double boxRadiusOfGyrationPercent = 0.8;
 
       double initialPitch = -Math.PI / 8.0;
-      double initialCapsuleRoll = -Math.PI / 32.0;
+      double initialCapsuleRoll = -Math.PI / 8.0;
       double initialBoxRoll = -Math.PI / 64.0;
       double initialVelocity = 0.0;
-      double initialRotationalVelocity = 2.0;
+      double initialCylinderSpinRotationalVelocity = 3.0;
+      double initialRotationalVelocity = 6.0;
 
       RobotFromDescription ballRobot = createASingleBallRobot(ballRadius, ballMass, ballRadiusOfGyrationPercent);
       robots.add(ballRobot);
@@ -408,35 +409,35 @@ public class NewtonsCradleSimulation
       cylinderRootJoint.setPosition(-1.0, 0.0, cylinderHeight / 2.0 * 1.05 + cylinderRadius * Math.abs(Math.sin(initialPitch)));
       cylinderRootJoint.setVelocity(initialVelocity, 0.0, 0.0);
       cylinderRootJoint.setYawPitchRoll(0.0, initialPitch, 0.0);
-      cylinderRootJoint.setAngularVelocityInBody(new Vector3D(initialRotationalVelocity, 0.0, 0.0));
+      cylinderRootJoint.setAngularVelocityInBody(new Vector3D(initialCylinderSpinRotationalVelocity, 0.0, 0.0));
 
-      RobotFromDescription cylinderRobotTwo = createASingleCylinderRobot("cylinderTwo", cylinderRadius, cylinderHeight, cylinderMass,
-                                                                         cylinderRadiusOfGyrationPercent);
-      robots.add(cylinderRobotTwo);
-      FloatingJoint cylinderRootJointTwo = (FloatingJoint) cylinderRobotTwo.getRootJoints().get(0);
-      cylinderRootJointTwo.setPosition(0.0, 0.0, cylinderHeight / 2.0 * 1.05 + cylinderRadius * Math.abs(Math.sin(initialPitch)));
-      cylinderRootJointTwo.setVelocity(initialVelocity, 0.0, 0.0);
-      cylinderRootJointTwo.setYawPitchRoll(0.0, 0.0, 0.0);
-      cylinderRootJointTwo.setAngularVelocityInBody(new Vector3D(0.0, 0.0, initialRotationalVelocity));
-
-      RobotFromDescription cylinderRobotThree = createASingleCylinderRobot("cylinderThree", cylinderRadius, cylinderHeight, cylinderMass,
-                                                                           cylinderRadiusOfGyrationPercent);
-      robots.add(cylinderRobotThree);
-      FloatingJoint cylinderRootJointThree = (FloatingJoint) cylinderRobotThree.getRootJoints().get(0);
-      cylinderRootJointThree.setPosition(0.0, -cylinderRadius * 3.0, cylinderHeight / 2.0 * 1.05 + cylinderRadius * Math.abs(Math.sin(initialPitch)));
-      cylinderRootJointThree.setVelocity(initialVelocity, 0.0, 0.0);
-      cylinderRootJointThree.setYawPitchRoll(0.0, initialPitch, 0.0);
-      cylinderRootJointThree.setAngularVelocityInBody(new Vector3D(0.0, 0.0, 0.0));
-
-//      RobotFromDescription capsuleRobot = createASingleCapsuleRobot(capsuleRadius, capsuleHeight, capsuleMass, capsuleRadiusOfGyrationPercent);
-//      robots.add(capsuleRobot);
-//      FloatingJoint capsuleRootJoint = (FloatingJoint) capsuleRobot.getRootJoints().get(0);
-//      capsuleRootJoint.setPosition(-1.0, cylinderRadius + capsuleHeight / 2.0 + capsuleRadius,
-//                                   capsuleRadius * 1.02 + capsuleSegmentHeight / 2.0 * Math.sin(Math.abs(initialCapsuleRoll)));
-//      capsuleRootJoint.setVelocity(initialVelocity, 0.0, 0.0);
-//      capsuleRootJoint.setYawPitchRoll(0.0, 0.0, Math.PI / 2.0 + initialCapsuleRoll);
-//      capsuleRootJoint.setAngularVelocityInBody(new Vector3D(0.0, 0.0, 0.0));
+//      RobotFromDescription cylinderRobotTwo = createASingleCylinderRobot("cylinderTwo", cylinderRadius, cylinderHeight, cylinderMass,
+//                                                                         cylinderRadiusOfGyrationPercent);
+//      robots.add(cylinderRobotTwo);
+//      FloatingJoint cylinderRootJointTwo = (FloatingJoint) cylinderRobotTwo.getRootJoints().get(0);
+//      cylinderRootJointTwo.setPosition(0.0, 0.0, cylinderHeight / 2.0 * 1.05 + cylinderRadius * Math.abs(Math.sin(initialPitch)));
+//      cylinderRootJointTwo.setVelocity(initialVelocity, 0.0, 0.0);
+//      cylinderRootJointTwo.setYawPitchRoll(0.0, 0.0, 0.0);
+//      cylinderRootJointTwo.setAngularVelocityInBody(new Vector3D(0.0, 0.0, initialRotationalVelocity));
 //
+//      RobotFromDescription cylinderRobotThree = createASingleCylinderRobot("cylinderThree", cylinderRadius, cylinderHeight, cylinderMass,
+//                                                                           cylinderRadiusOfGyrationPercent);
+//      robots.add(cylinderRobotThree);
+//      FloatingJoint cylinderRootJointThree = (FloatingJoint) cylinderRobotThree.getRootJoints().get(0);
+//      cylinderRootJointThree.setPosition(0.0, -cylinderRadius * 3.0, cylinderHeight / 2.0 * 1.05 + cylinderRadius * Math.abs(Math.sin(initialPitch)));
+//      cylinderRootJointThree.setVelocity(initialVelocity, 0.0, 0.0);
+//      cylinderRootJointThree.setYawPitchRoll(0.0, initialPitch, 0.0);
+//      cylinderRootJointThree.setAngularVelocityInBody(new Vector3D(0.0, 0.0, 0.0));
+//
+      RobotFromDescription capsuleRobot = createASingleCapsuleRobot(capsuleRadius, capsuleHeight, capsuleMass, capsuleRadiusOfGyrationPercent);
+      robots.add(capsuleRobot);
+      FloatingJoint capsuleRootJoint = (FloatingJoint) capsuleRobot.getRootJoints().get(0);
+      capsuleRootJoint.setPosition(-1.0, cylinderRadius + capsuleHeight / 2.0 + capsuleRadius,
+                                   capsuleRadius * 1.02 + capsuleSegmentHeight / 2.0 * Math.sin(Math.abs(initialCapsuleRoll)));
+      capsuleRootJoint.setVelocity(initialVelocity, 0.0, 0.0);
+      capsuleRootJoint.setYawPitchRoll(0.0, 0.0, Math.PI / 2.0 + initialCapsuleRoll);
+      capsuleRootJoint.setAngularVelocityInBody(new Vector3D(0.0, 0.0, 0.0));
+
 //      RobotFromDescription boxRobot = createASingleBoxRobot(boxXLength, boxYWidth, boxZHeight, boxMass, boxRadiusOfGyrationPercent);
 //      robots.add(boxRobot);
 //      FloatingJoint boxRootJoint = (FloatingJoint) boxRobot.getRootJoints().get(0);
@@ -463,7 +464,7 @@ public class NewtonsCradleSimulation
       SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters();
       parameters.setDataBufferSize(8000);
       SimulationConstructionSet scs = new SimulationConstructionSet(robotArray, parameters);
-      scs.setDT(0.0001, 1);
+      scs.setDT(0.0001, 100);
       scs.setFastSimulate(true);
       scs.setGroundVisible(false);
 
@@ -570,8 +571,22 @@ public class NewtonsCradleSimulation
    {
       ArrayList<Robot> robots = new ArrayList<>();
       int numberOfDominos = 30;
-      RowOfDominosRobot robot = new RowOfDominosRobot(numberOfDominos);
+      boolean firstDominoFalling = false;
+      RowOfDominosRobot robot = new RowOfDominosRobot(numberOfDominos, firstDominoFalling);
       robots.add(robot);
+
+      double ballRadius = 0.02;
+      double ballMass = 0.2;
+      double ballRadiusOfGyrationPercent = 0.5;
+      double ballInitialVelocity = 0.5;
+      double ballInitialRoationalVelocity = 0.0;
+
+      Robot ballRobot = createASingleBallRobot(ballRadius, ballMass, ballRadiusOfGyrationPercent);
+      FloatingJoint ballRootJoint = (FloatingJoint) ballRobot.getRootJoints().get(0);
+      ballRootJoint.setPosition(-6.0 * ballRadius, 0.0, ballRadius * 1.01);
+      ballRootJoint.setVelocity(ballInitialVelocity, 0.0, 0.0);
+      ballRootJoint.setAngularVelocityInBody(new Vector3D(0.0, 0.0, ballInitialRoationalVelocity));
+      robots.add(ballRobot);
 
       int estimatedNumberOfContactPoints = 200;
       GroundAsABoxRobot groundAsABoxRobot = new GroundAsABoxRobot();
@@ -648,11 +663,13 @@ public class NewtonsCradleSimulation
 
    public static void createPileOfRandomObjectsSimulation()
    {
+      int numberOfObjects = 60;
+
       PileOfRandomObjectsRobot pileOfRandomObjectsRobot = new PileOfRandomObjectsRobot();
-      pileOfRandomObjectsRobot.setNumberOfObjects(40);
+      pileOfRandomObjectsRobot.setNumberOfObjects(numberOfObjects);
       ArrayList<Robot> robots = pileOfRandomObjectsRobot.createAndGetRobots();
 
-      int estimatedNumberOfContactPoints = 50 * 16;//500;
+      int estimatedNumberOfContactPoints = 2 * numberOfObjects * 8;//500;
       GroundAsABoxRobot groundAsABoxRobot = new GroundAsABoxRobot();
       groundAsABoxRobot.setEstimatedNumberOfContactPoints(estimatedNumberOfContactPoints);
       groundAsABoxRobot.setAddWalls(true);
@@ -703,16 +720,16 @@ public class NewtonsCradleSimulation
 
    public static void main(String[] args)
    {
-      //            createNewtonsCradleSimulation();
+//                  createNewtonsCradleSimulation();
       //    createSpinningCoinSimulation();
       //            createStackOfBouncyBallsSimulation();
       //            createBoxDownRampSimulation();
-      //            createRowOfDominosSimulation();
+//                  createRowOfDominosSimulation();
       //      createStackOfBlocksSimulation();
-      //      createRollingObjectsSimulation();
-            createSpinningAndDroppingObjectsSimulation();
+//            createRollingObjectsSimulation();
+//            createSpinningAndDroppingObjectsSimulation();
 //      createTeeteringEdgeToEdgeContactSimulation();
-      //      createPileOfRandomObjectsSimulation();
+            createPileOfRandomObjectsSimulation();
    }
 
 }

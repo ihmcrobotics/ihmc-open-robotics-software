@@ -13,6 +13,7 @@ import javax.swing.JFrame;
 
 import org.junit.Test;
 
+import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
@@ -29,7 +30,6 @@ import us.ihmc.robotics.geometry.ConvexPolygon2dCalculator;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.testing.MutationTestingTools;
 import us.ihmc.tools.thread.ThreadTools;
 
 @ContinuousIntegrationAnnotations.ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
@@ -786,8 +786,6 @@ public class PolygonWigglingTest
 
    public static void main(String[] args)
    {
-      String targetTests = PolygonWigglingTest.class.getName();
-      String targetClassesInSamePackage = PolygonWiggler.class.getName();
-      MutationTestingTools.doPITMutationTestAndOpenResult(targetTests, targetClassesInSamePackage);
+      MutationTestFacilitator.facilitateMutationTestForClass(PolygonWiggler.class, PolygonWigglingTest.class);
    }
 }

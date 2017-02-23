@@ -22,7 +22,7 @@ public class PileOfRandomObjectsRobot
    private int collisionGroup = 0xffffffff;
    private int collisionMask = 0xffffffff;
 
-   private final int estimatedContactPointsPerShape = 16;
+   private final int estimatedContactPointsPerShape = 8;
 
    private final Random random = new Random(1886L);
 

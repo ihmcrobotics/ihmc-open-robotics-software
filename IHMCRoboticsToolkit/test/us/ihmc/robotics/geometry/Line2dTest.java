@@ -12,6 +12,7 @@ import java.util.Random;
 
 import org.junit.Test;
 
+import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
@@ -22,7 +23,6 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.math.Epsilons;
 import us.ihmc.robotics.random.RandomTools;
-import us.ihmc.tools.testing.MutationTestingTools;
 
 public class Line2dTest
 {
@@ -1700,9 +1700,7 @@ public class Line2dTest
 	
 	public static void main(String[] args)
    {
-	   String targetTests = "us.ihmc.robotics.geometry.Line2dTest";
-	   String targetClasses = "us.ihmc.robotics.geometry.FrameTuple,us.ihmc.robotics.geometry.Line2d";
-	   MutationTestingTools.doPITMutationTestAndOpenResult(targetTests, targetClasses);
+      MutationTestFacilitator.facilitateMutationTestForClass(Line2d.class, Line2dTest.class);
    }
 
 }

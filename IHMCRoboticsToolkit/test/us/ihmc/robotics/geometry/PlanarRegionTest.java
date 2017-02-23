@@ -10,6 +10,7 @@ import java.util.Random;
 
 import org.junit.Test;
 
+import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -21,7 +22,6 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.testing.MutationTestingTools;
 
 public class PlanarRegionTest
 {
@@ -800,8 +800,6 @@ public class PlanarRegionTest
 
    public static void main(String[] args)
    {
-      String targetTests = PlanarRegionTest.class.getName();
-      String targetClassesInSamePackage = PlanarRegion.class.getName();
-      MutationTestingTools.doPITMutationTestAndOpenResult(targetTests, targetClassesInSamePackage);
+      MutationTestFacilitator.facilitateMutationTestForClass(PlanarRegion.class, PlanarRegionTest.class);
    }
 }

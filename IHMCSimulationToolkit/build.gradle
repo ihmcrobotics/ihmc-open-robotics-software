@@ -64,7 +64,6 @@ dependencies {
     compile ihmc.getProjectDependency(":IHMCStateEstimation")
     
     
-    testCompile ihmc.getProjectDependency(":IHMCUnitTesting")
 	testCompile ihmc.getProjectTestDependency(":IHMCRoboticsToolkit")
 	testCompile ihmc.getProjectTestDependency(":IHMCJavaExtensions")
     testCompile ihmc.getProjectTestDependency(":IHMCRoboticsToolkit")

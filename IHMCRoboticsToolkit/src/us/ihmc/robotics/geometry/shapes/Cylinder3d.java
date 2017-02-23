@@ -1,6 +1,7 @@
 package us.ihmc.robotics.geometry.shapes;
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -9,6 +10,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.MathTools;
+import us.ihmc.robotics.geometry.transformables.Pose;
 
 public class Cylinder3d extends Shape3d<Cylinder3d>
 {
@@ -37,7 +39,14 @@ public class Cylinder3d extends Shape3d<Cylinder3d>
 
    public Cylinder3d(RigidBodyTransform transform, double height, double radius)
    {
-      setTransform(transform);
+      setPose(transform);
+      this.height = height;
+      this.radius = radius;
+   }
+   
+   public Cylinder3d(Pose pose, double height, double radius)
+   {
+      setPose(pose);
       this.height = height;
       this.radius = radius;
    }
@@ -47,7 +56,7 @@ public class Cylinder3d extends Shape3d<Cylinder3d>
    {
       if (this != cylinder3d)
       {
-         setTransformToWorld(cylinder3d.getTransformToLocalUnsafe());
+         setPose(cylinder3d);
          this.height = cylinder3d.height;
          this.radius = cylinder3d.radius;
       }
@@ -116,6 +125,12 @@ public class Cylinder3d extends Shape3d<Cylinder3d>
    public boolean epsilonEquals(Cylinder3d other, double epsilon)
    {
       return MathTools.epsilonEquals(height, other.height, epsilon) && MathTools.epsilonEquals(radius, other.radius, epsilon);
+   }
+
+   @Override
+   public void applyTransform(Transform transform)
+   {
+      applyTransformToPose(transform);
    }
 
    @Override
@@ -256,16 +271,13 @@ public class Cylinder3d extends Shape3d<Cylinder3d>
    public boolean projectToBottomOfCurvedSurface(Vector3DReadOnly surfaceNormal, Point3DBasics pointToProject)
    {
       //TODO: Should this method be in Shape3d, or not even be here at all? Not sure...
-      RigidBodyTransform transformToShapeFrame = getTransformToLocalUnsafe();
-
       tempPointInWorldForProjectingToBottom.set(pointToProject);
       tempVectorInWorldForProjectingToBottom.set(surfaceNormal);
-      transformToShapeFrame.transform(tempPointInWorldForProjectingToBottom);
-      transformToShapeFrame.transform(tempVectorInWorldForProjectingToBottom);
+      transformToLocal(tempPointInWorldForProjectingToBottom);
+      transformToLocal(tempVectorInWorldForProjectingToBottom);
 
       boolean wasRolling = projectToBottomOfCurvedSurfaceInShapeFrame(tempVectorInWorldForProjectingToBottom, tempPointInWorldForProjectingToBottom);
-      RigidBodyTransform transformFromShapeFrame = getTransformToWorldUnsafe();
-      transformFromShapeFrame.transform(tempPointInWorldForProjectingToBottom);
+      transformToWorld(tempPointInWorldForProjectingToBottom);
 
       pointToProject.set(tempPointInWorldForProjectingToBottom);
       return wasRolling;
