@@ -83,7 +83,6 @@ dependencies {
     testCompile group: 'org.ejml', name: 'dense64', version: '0.30'
     testCompile group: 'gov.nist.math', name: 'jama', version: '1.0.3'
 
-	testCompile ihmc.getProjectDependency(":IHMCUnitTesting")
 	testCompile ihmc.getProjectTestDependency(":IHMCRoboticsToolkit")
 	testCompile ihmc.getProjectTestDependency(":IHMCJavaExtensions")
 }

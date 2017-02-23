@@ -45,7 +45,6 @@ dependencies {
     testCompile group: 'org.jfree', name: 'jcommon', version: '1.0.21'
     testCompile group: 'us.ihmc', name: 'ihmc-continuous-integration-framework', version: '0.9.4'
     
-    testCompile ihmc.getProjectDependency(":IHMCUnitTesting")
 	testCompile ihmc.getProjectTestDependency(":IHMCJavaExtensions")
 
     compile group: 'us.ihmc', name: 'euclid-core', version: '0.4.1'

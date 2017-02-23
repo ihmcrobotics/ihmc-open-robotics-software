@@ -122,11 +122,11 @@ public class ExternalForcePoint extends KinematicPoint
 
       Rk_coll.set(this.parentJoint.physics.Ri_0);
       Rk_coll.multiply(R0_coll);
-      Matrix3D Ki_collision = parentJoint.physics.computeKiCollision(offsetFromCOM, Rk_coll);
+      Matrix3D Ki_collision = parentJoint.physics.computeKiCollision(tempVectorForOffsetFromCOM, Rk_coll);
 
       Rk_coll2.set(externalForcePoint.parentJoint.physics.Ri_0);
       Rk_coll2.multiply(R0_coll);
-      Matrix3D Ki_collision2 = externalForcePoint.parentJoint.physics.computeKiCollision(externalForcePoint.offsetFromCOM, Rk_coll2);
+      Matrix3D Ki_collision2 = externalForcePoint.parentJoint.physics.computeKiCollision(externalForcePoint.tempVectorForOffsetFromCOM, Rk_coll2);
 
       Ki_collision_total.add(Ki_collision, Ki_collision2);
       parentJoint.physics.integrateCollision(Ki_collision_total, u_coll, epsilon, mu, impulseInWorldToPack);    // Returns the impulse in collision coordinates
@@ -161,7 +161,7 @@ public class ExternalForcePoint extends KinematicPoint
       Rk_coll.set(this.parentJoint.physics.Ri_0);
       Rk_coll.multiply(R0_coll);
 
-      parentJoint.physics.resolveCollision(offsetFromCOM, Rk_coll, u_coll, epsilon, mu, impulseInWorldToPack);    // Returns the impulse in collision coordinates
+      parentJoint.physics.resolveCollision(tempVectorForOffsetFromCOM, Rk_coll, u_coll, epsilon, mu, impulseInWorldToPack);    // Returns the impulse in collision coordinates
 
       // Rotate into world coordinates:
       R0_coll.transform(impulseInWorldToPack);
@@ -187,7 +187,7 @@ public class ExternalForcePoint extends KinematicPoint
       Rk_coll.set(this.parentJoint.physics.Ri_0);
       Rk_coll.multiply(R0_coll);
 
-      parentJoint.physics.resolveMicroCollision(penetrationSquared, offsetFromCOM, Rk_coll, u_coll, epsilon, mu, impulseInWorldToPack);    // Returns the impulse in collision coordinates
+      parentJoint.physics.resolveMicroCollision(penetrationSquared, tempVectorForOffsetFromCOM, Rk_coll, u_coll, epsilon, mu, impulseInWorldToPack);    // Returns the impulse in collision coordinates
 
       // Rotate into world coordinates:
       R0_coll.transform(impulseInWorldToPack);

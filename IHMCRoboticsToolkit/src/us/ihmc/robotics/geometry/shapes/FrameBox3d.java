@@ -83,7 +83,7 @@ public class FrameBox3d extends FrameShape3d<FrameBox3d, Box3d>
 
    public void getTransform(RigidBodyTransform transformToPack)
    {
-      this.box3d.getTransform(transformToPack);
+      this.box3d.getPose(transformToPack);
    }
 
    public RigidBodyTransform getTransformCopy()
@@ -135,7 +135,7 @@ public class FrameBox3d extends FrameShape3d<FrameBox3d, Box3d>
 
    public void getFramePose(FramePose framePoseToPack)
    {
-      framePoseToPack.setPoseIncludingFrame(referenceFrame, box3d.getTransformToWorldUnsafe());
+      framePoseToPack.setPoseIncludingFrame(referenceFrame, box3d.getPosition(), box3d.getOrientation());
    }
 
    public void scale(double scale)

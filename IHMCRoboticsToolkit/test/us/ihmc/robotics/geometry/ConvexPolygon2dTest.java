@@ -12,6 +12,7 @@ import java.util.Random;
 
 import org.junit.Test;
 
+import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -19,7 +20,6 @@ import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.testing.MutationTestingTools;
 
 public class ConvexPolygon2dTest
 {
@@ -2289,8 +2289,6 @@ public class ConvexPolygon2dTest
 
    public static void main(String[] args)
    {
-      String targetTests = "us.ihmc.robotics.geometry.ConvexPolygon2dTest";
-      String targetClasses = "us.ihmc.robotics.geometry.ConvexPolygon2d";
-      MutationTestingTools.doPITMutationTestAndOpenResult(targetTests, targetClasses);
+      MutationTestFacilitator.facilitateMutationTestForClass(ConvexPolygon2d.class, ConvexPolygon2dTest.class);
    }
 }
