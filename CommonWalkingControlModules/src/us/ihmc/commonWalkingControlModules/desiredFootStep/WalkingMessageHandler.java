@@ -382,6 +382,7 @@ public class WalkingMessageHandler
 
    public void reportWalkingComplete()
    {
+      System.out.println("reportWalkingComplete");
       WalkingStatusMessage walkingStatusMessage = new WalkingStatusMessage();
       walkingStatusMessage.setWalkingStatus(WalkingStatusMessage.Status.COMPLETED);
       statusOutputManager.reportStatusMessage(walkingStatusMessage);

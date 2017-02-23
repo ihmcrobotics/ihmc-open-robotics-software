@@ -222,6 +222,7 @@ public class FootstepListBehavior extends AbstractBehavior
       sendPacketToController(new PauseWalkingMessage(false));
       isPaused.set(false);
       isStopped.set(false);
+      isRobotDoneWalking.set(false);
       if (DEBUG)
          PrintTools.debug(this, "Resuming Behavior");
    }
@@ -229,7 +230,8 @@ public class FootstepListBehavior extends AbstractBehavior
    @Override
    public boolean isDone()
    {
-      boolean ret = isRobotDoneWalking.getBooleanValue() && hasLastStepBeenReached.getBooleanValue() && !isPaused.getBooleanValue();
+//      System.out.println("isDone "+isRobotDoneWalking.getBooleanValue() + " " +isPaused.getBooleanValue());
+      boolean ret = isRobotDoneWalking.getBooleanValue() && !isPaused.getBooleanValue();
       if (!isDone.getBooleanValue() && ret)
       {
          if (DEBUG)
@@ -239,6 +241,7 @@ public class FootstepListBehavior extends AbstractBehavior
       return ret;
    }
 
+   
 
    public boolean hasInputBeenSet()
    {
