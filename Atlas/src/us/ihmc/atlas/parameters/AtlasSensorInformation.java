@@ -5,6 +5,7 @@ import java.util.EnumMap;
 
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 
+import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -28,9 +29,9 @@ public class AtlasSensorInformation implements DRCRobotSensorInformation
    /**
     * Force Sensor Parameters
     */
-   public static final String[] forceSensorNames = { "l_leg_akx", "r_leg_akx", "l_arm_wry2", "r_arm_wry2" };
-   public static final SideDependentList<String> feetForceSensorNames = new SideDependentList<String>("l_leg_akx", "r_leg_akx");
-   public static final SideDependentList<String> handForceSensorNames = new SideDependentList<String>("l_arm_wry2", "r_arm_wry2");
+   private final String[] forceSensorNames;
+   private final SideDependentList<String> feetForceSensorNames = new SideDependentList<String>("l_leg_akx", "r_leg_akx");
+   private final SideDependentList<String> handForceSensorNames;
 
    /**
     * PPS Parameters
@@ -116,9 +117,21 @@ public class AtlasSensorInformation implements DRCRobotSensorInformation
    private final boolean setupROSParameterSetters;
    private final DRCRobotModel.RobotTarget target;
 
-   public AtlasSensorInformation(DRCRobotModel.RobotTarget target)
+   public AtlasSensorInformation(AtlasRobotVersion atlasRobotVersion, DRCRobotModel.RobotTarget target)
    {
 	   this.target = target;
+
+	   if (atlasRobotVersion != AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_FOREARMS)
+	   {
+	      forceSensorNames = new String[]{ "l_leg_akx", "r_leg_akx", "l_arm_wry2", "r_arm_wry2" };
+	      handForceSensorNames = new SideDependentList<String>("l_arm_wry2", "r_arm_wry2");
+	   }
+	   else
+	   {
+	      forceSensorNames = new String[]{ "l_leg_akx", "r_leg_akx" };
+	      handForceSensorNames = null;
+	   }
+
       if(target == DRCRobotModel.RobotTarget.REAL_ROBOT)
       {
          cameraParameters[MULTISENSE_SL_LEFT_CAMERA_ID] = new DRCRobotCameraParameters(RobotSide.LEFT, left_camera_name, left_camera_topic, left_info_camera_topic, multisenseHandoffFrame, baseTfName, left_frame_name, MULTISENSE_SL_LEFT_CAMERA_ID);
