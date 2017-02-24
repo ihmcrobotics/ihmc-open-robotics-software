@@ -14,39 +14,88 @@ public class ThreadTools
 {
    public static final int REASONABLE_WAITING_SLEEP_DURATION_MS = 10;
 
+   /**
+    * Causes the currently executing thread to sleep (temporarily cease execution) for the specified number of seconds, 
+    * subject to the precision and accuracy of system timers and schedulers. If the sleep is interrupted with a InterruptedException,
+    * it will ignore the interruption, see how long it has slept so far, and go back to sleep for the remaining time.
+    * When it is fully done sleeping, it will interrupt its Thread again if it was interrupted at all during sleeping.
+    *
+    * @param secondsToSleep The time to sleep in seconds. The Thread should sleep this long, even if interrupted.
+    */
    public static void sleepSeconds(double secondsToSleep)
    {
-      try
-      {
-         Thread.sleep((long) (secondsToSleep * 1000));
-      }
-      catch (InterruptedException e)
-      {
-      }
+      sleep((long) (secondsToSleep * 1000));
    }
-   
-   public static void sleep(long milliseconds)
+
+   /**
+    * Causes the currently executing thread to sleep (temporarily cease execution) for the specified number of milliseconds, 
+    * subject to the precision and accuracy of system timers and schedulers. If the sleep is interrupted with a InterruptedException,
+    * it will ignore the interruption, see how long it has slept so far, and go back to sleep for the remaining time.
+    * When it is fully done sleeping, it will interrupt its Thread again if it was interrupted at all during sleeping.
+    * 
+    * @param millisecondsToSleep The time to sleep in milliseconds. The Thread should sleep this long, even if interrupted.
+    */
+   public static void sleep(long millisecondsToSleep)
    {
-      try
-      {
-         Thread.sleep(milliseconds);
-      }
-      catch (InterruptedException ex)
-      {
-      }
+      sleep(millisecondsToSleep, 0);
    }
-   
-   public static void sleep(int milliseconds, int nanoseconds)
+
+   /**
+    * Causes the currently executing thread to sleep (temporarily cease execution) for the specified number of milliseconds 
+    * plus the specified number of nanoseconds, subject to the precision and accuracy of system timers and schedulers. 
+    * If the sleep is interrupted with a InterruptedException,
+    * it will ignore the interruption, see how long it has slept so far, and go back to sleep for the remaining time.
+    * When it is fully done sleeping, it will interrupt its Thread again if it was interrupted at all during sleeping.
+    * 
+    * @param millisecondsToSleep The time to sleep in milliseconds. The Thread should sleep this long, even if interrupted.
+    * @param additionalNanosecondsToSleep 0-999999 additional nanoseconds to sleep
+    */
+   public static void sleep(long millisecondsToSleep, int additionalNanosecondsToSleep)
    {
-      try
+      int oneMillion = 1000000;
+      long totalNanosecondsToSleep = millisecondsToSleep * oneMillion + additionalNanosecondsToSleep;
+
+      long startTimeNanos = System.nanoTime();
+
+      boolean doneSleeping = false;
+      boolean wasInterrupted = false;
+
+      while (!doneSleeping)
       {
-         Thread.sleep(milliseconds, nanoseconds);
+         try
+         {
+            Thread.sleep(millisecondsToSleep, additionalNanosecondsToSleep);
+            doneSleeping = true;
+         }
+         catch (InterruptedException ex)
+         {
+            wasInterrupted = true;
+
+            long nanosecondsSleptSoFar = System.nanoTime() - startTimeNanos;
+            long nanoSecondsRemaining = totalNanosecondsToSleep - nanosecondsSleptSoFar;
+
+            if (nanoSecondsRemaining <= 0)
+            {
+               doneSleeping = true;
+            }
+            else
+            {
+               millisecondsToSleep = nanoSecondsRemaining / oneMillion;
+               additionalNanosecondsToSleep = (int) (nanoSecondsRemaining - (millisecondsToSleep * oneMillion));
+            }
+         }
       }
-      catch (InterruptedException ex)
+
+      // If the thread was interrupted while sleeping, make sure to interrupt it again.
+      if (wasInterrupted)
       {
+         Thread.currentThread().interrupt();
       }
    }
 
+   /**
+    * Causes this Thread to continuously sleep, ignoring any interruptions.
+    */
    public static void sleepForever()
    {
       while (true)
@@ -54,7 +103,7 @@ public class ThreadTools
          ThreadTools.sleep(1000);
       }
    }
-   
+
    public static void startAThread(Runnable runnable, String threadName)
    {
       Thread newThread = new Thread(runnable, threadName);
@@ -91,7 +140,6 @@ public class ThreadTools
       }
    }
 
-   
    public static ThreadFactory getNamedThreadFactory(final String name)
    {
       return new ThreadFactory()
@@ -112,14 +160,14 @@ public class ThreadTools
          }
       };
    }
-   
+
    public static String getBaseClassName()
    {
       StackTraceElement[] stack = Thread.currentThread().getStackTrace();
       String className = stack[stack.length - 1].getClassName();
       return className;
    }
-   
+
    public static String getBaseSimpleClassName()
    {
       String baseClassName = getBaseClassName();
@@ -132,25 +180,25 @@ public class ThreadTools
    {
       Map<Thread, StackTraceElement[]> allStackTraces = Thread.getAllStackTraces();
       Set<Thread> threadSet = allStackTraces.keySet();
-      
+
       for (Thread thread : threadSet)
       {
          if (thread.isAlive() && thread != Thread.currentThread())
          {
             if (thread.getName().contains(stringToContain))
             {
-//               System.out.println("Interrupting thread " + thread.getName());
+               //               System.out.println("Interrupting thread " + thread.getName());
                thread.interrupt();
             }
          }
       }
    }
-   
+
    public static void interruptAllAliveThreadsExceptThisOne()
    {
       Map<Thread, StackTraceElement[]> allStackTraces = Thread.getAllStackTraces();
       Set<Thread> threadSet = allStackTraces.keySet();
-      
+
       for (Thread thread : threadSet)
       {
          if (thread.isAlive() && thread != Thread.currentThread())
@@ -159,7 +207,7 @@ public class ThreadTools
          }
       }
    }
-   
+
    public static ExecutorService executeWithTimeout(String threadName, Runnable runnable, long timeout, TimeUnit timeUnit)
    {
       ExecutorService executor = Executors.newSingleThreadExecutor(getNamedThreadFactory(threadName));
@@ -173,11 +221,12 @@ public class ThreadTools
       {
          e.printStackTrace();
       }
-      
+
       return executor;
    }
 
-   public static ScheduledFuture<?> scheduleWithFixeDelayAndTimeLimit(String threadName, final Runnable runnable, long initialDelay, long delay, TimeUnit timeUnit, final long timeLimit)
+   public static ScheduledFuture<?> scheduleWithFixeDelayAndTimeLimit(String threadName, final Runnable runnable, long initialDelay, long delay,
+                                                                      TimeUnit timeUnit, final long timeLimit)
    {
       ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor(getNamedThreadFactory(threadName));
       final ScheduledFuture<?> handle = scheduler.scheduleWithFixedDelay(runnable, initialDelay, delay, timeUnit);
@@ -189,11 +238,12 @@ public class ThreadTools
             handle.cancel(true);
          }
       }, timeLimit, timeUnit);
-      
+
       return handleKiller;
    }
 
-   public static ScheduledFuture<?> scheduleWithFixedDelayAndIterationLimit(String threadName, final Runnable runnable, long initialDelay, final long delay, final TimeUnit timeUnit, final int iterations)
+   public static ScheduledFuture<?> scheduleWithFixedDelayAndIterationLimit(String threadName, final Runnable runnable, long initialDelay, final long delay,
+                                                                            final TimeUnit timeUnit, final int iterations)
    {
       final AtomicInteger counter = new AtomicInteger();
       ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(2, getNamedThreadFactory(threadName));
@@ -202,27 +252,27 @@ public class ThreadTools
          @Override
          public void run()
          {
-            if(counter.get() < iterations)
+            if (counter.get() < iterations)
             {
                runnable.run();
                counter.incrementAndGet();
             }
          }
       }, initialDelay, delay, timeUnit);
-      
+
       ScheduledFuture<?> handleKiller = scheduler.schedule(new Runnable()
       {
          @Override
          public void run()
          {
-            while(counter.get() < iterations)
+            while (counter.get() < iterations)
             {
                sleep(TimeUnit.MILLISECONDS.convert(delay, timeUnit));
             }
             handle.cancel(true);
          }
       }, 0, timeUnit);
-      
+
       return handleKiller;
    }
 
