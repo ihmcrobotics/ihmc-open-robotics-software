@@ -54,11 +54,11 @@ public class LookAheadCoMHeightTrajectoryGenerator
 
    private static final boolean PROCESS_GO_HOME_COMMANDS = false;
 
-   private boolean VISUALIZE = true;
+   private boolean visualize = true;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private final FourPointSpline1D spline = new FourPointSpline1D(registry);
+   private final YoFourPointCubicSpline1D spline = new YoFourPointCubicSpline1D("height", registry);
 
    private final BooleanYoVariable isTrajectoryOffsetStopped = new BooleanYoVariable("isPelvisOffsetHeightTrajectoryStopped", registry);
 
@@ -164,19 +164,14 @@ public class LookAheadCoMHeightTrajectoryGenerator
       parentRegistry.addChild(registry);
 
       if (yoGraphicsListRegistry == null)
-      {
-         VISUALIZE = false;
-      }
+         visualize = false;
 
-      if (VISUALIZE)
+      if (visualize)
       {
          double pointSize = 0.03;
 
          YoGraphicPosition position0 = new YoGraphicPosition("contactFrame0", contactFrameZeroPosition, pointSize, YoAppearance.Purple());
          YoGraphicPosition position1 = new YoGraphicPosition("contactFrame1", contactFrameOnePosition, pointSize, YoAppearance.Orange());
-
-         yoGraphicsListRegistry.registerYoGraphic("CoMHeightTrajectoryGenerator", position0);
-         yoGraphicsListRegistry.registerYoGraphic("CoMHeightTrajectoryGenerator", position1);
 
          pointS0Viz = new YoGraphicPosition("pointS0", "", registry, pointSize, YoAppearance.CadetBlue());
          pointSFViz = new YoGraphicPosition("pointSF", "", registry, pointSize, YoAppearance.Chartreuse());
@@ -198,26 +193,31 @@ public class LookAheadCoMHeightTrajectoryGenerator
 
          bagOfBalls = new BagOfBalls(registry, yoGraphicsListRegistry);
 
-         yoGraphicsListRegistry.registerYoGraphic("CoMHeightTrajectoryGenerator", pointS0Viz);
-         yoGraphicsListRegistry.registerYoGraphic("CoMHeightTrajectoryGenerator", pointSFViz);
-         yoGraphicsListRegistry.registerYoGraphic("CoMHeightTrajectoryGenerator", pointD0Viz);
-         yoGraphicsListRegistry.registerYoGraphic("CoMHeightTrajectoryGenerator", pointDFViz);
-         yoGraphicsListRegistry.registerYoGraphic("CoMHeightTrajectoryGenerator", pointSNextViz);
-
-         yoGraphicsListRegistry.registerYoGraphic("CoMHeightTrajectoryGenerator", pointS0MinViz);
-         yoGraphicsListRegistry.registerYoGraphic("CoMHeightTrajectoryGenerator", pointSFMinViz);
-         yoGraphicsListRegistry.registerYoGraphic("CoMHeightTrajectoryGenerator", pointD0MinViz);
-         yoGraphicsListRegistry.registerYoGraphic("CoMHeightTrajectoryGenerator", pointDFMinViz);
-         yoGraphicsListRegistry.registerYoGraphic("CoMHeightTrajectoryGenerator", pointSNextMinViz);
-
-         yoGraphicsListRegistry.registerYoGraphic("CoMHeightTrajectoryGenerator", pointS0MaxViz);
-         yoGraphicsListRegistry.registerYoGraphic("CoMHeightTrajectoryGenerator", pointSFMaxViz);
-         yoGraphicsListRegistry.registerYoGraphic("CoMHeightTrajectoryGenerator", pointD0MaxViz);
-         yoGraphicsListRegistry.registerYoGraphic("CoMHeightTrajectoryGenerator", pointDFMaxViz);
-         yoGraphicsListRegistry.registerYoGraphic("CoMHeightTrajectoryGenerator", pointSNextMaxViz);
-
          YoGraphicPosition desiredCoMPositionViz = new YoGraphicPosition("desiredCoMPosition", desiredCoMPosition, 1.1 * pointSize, YoAppearance.Gold());
-         yoGraphicsListRegistry.registerYoGraphic("CoMHeightTrajectoryGenerator", desiredCoMPositionViz);
+
+         String graphicListName = "CoMHeightTrajectoryGenerator";
+         yoGraphicsListRegistry.registerYoGraphic(graphicListName, position0);
+         yoGraphicsListRegistry.registerYoGraphic(graphicListName, position1);
+
+         yoGraphicsListRegistry.registerYoGraphic(graphicListName, pointS0Viz);
+         yoGraphicsListRegistry.registerYoGraphic(graphicListName, pointSFViz);
+         yoGraphicsListRegistry.registerYoGraphic(graphicListName, pointD0Viz);
+         yoGraphicsListRegistry.registerYoGraphic(graphicListName, pointDFViz);
+         yoGraphicsListRegistry.registerYoGraphic(graphicListName, pointSNextViz);
+
+         yoGraphicsListRegistry.registerYoGraphic(graphicListName, pointS0MinViz);
+         yoGraphicsListRegistry.registerYoGraphic(graphicListName, pointSFMinViz);
+         yoGraphicsListRegistry.registerYoGraphic(graphicListName, pointD0MinViz);
+         yoGraphicsListRegistry.registerYoGraphic(graphicListName, pointDFMinViz);
+         yoGraphicsListRegistry.registerYoGraphic(graphicListName, pointSNextMinViz);
+
+         yoGraphicsListRegistry.registerYoGraphic(graphicListName, pointS0MaxViz);
+         yoGraphicsListRegistry.registerYoGraphic(graphicListName, pointSFMaxViz);
+         yoGraphicsListRegistry.registerYoGraphic(graphicListName, pointD0MaxViz);
+         yoGraphicsListRegistry.registerYoGraphic(graphicListName, pointDFMaxViz);
+         yoGraphicsListRegistry.registerYoGraphic(graphicListName, pointSNextMaxViz);
+
+         yoGraphicsListRegistry.registerYoGraphic(graphicListName, desiredCoMPositionViz);
 
       }
       else
@@ -264,10 +264,6 @@ public class LookAheadCoMHeightTrajectoryGenerator
       correctForCoMHeightDrift.set(activate);
    }
 
-   private final Point2D[] points = new Point2D[4];
-   private final double[] endpointSlopes = new double[] {0.0, 0.0};
-   private final double[] waypointSlopes = new double[2];
-
    public void setSupportLeg(RobotSide supportLeg)
    {
       ReferenceFrame newFrame = ankleZUpFrames.get(supportLeg);
@@ -288,18 +284,7 @@ public class LookAheadCoMHeightTrajectoryGenerator
       tempFramePoint.changeFrame(newFrame);
       sF.setY(tempFramePoint.getZ());
 
-      points[0] = s0;
-      points[1] = d0;
-      points[2] = dF;
-      points[3] = sF;
-
-      endpointSlopes[0] = 0.0;
-      endpointSlopes[1] = 0.0;
-
-      waypointSlopes[0] = (points[2].getY() - points[0].getY()) / (points[2].getX() - points[0].getX());
-      waypointSlopes[1] = (points[3].getY() - points[1].getY()) / (points[3].getX() - points[1].getX());
-
-      spline.setPoints(points, endpointSlopes, waypointSlopes);
+      spline.initialize(s0, d0, dF, sF);
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -459,16 +444,9 @@ public class LookAheadCoMHeightTrajectoryGenerator
       computeHeightsToUseByStretchingString(transferFromFootstep.getRobotSide());
       previousZFinals.get(transferToFootstep.getRobotSide()).set(sF.getY());
 
-      Point2D[] points = new Point2D[] {s0, d0, dF, sF};
-      double[] endpointSlopes = new double[] {0.0, 0.0};
+      spline.initialize(s0, d0, dF, sF);
 
-      double[] waypointSlopes = new double[2];
-      waypointSlopes[0] = (points[2].getY() - points[0].getY()) / (points[2].getX() - points[0].getX());
-      waypointSlopes[1] = (points[3].getY() - points[1].getY()) / (points[3].getX() - points[1].getX());
-
-      spline.setPoints(points, endpointSlopes, waypointSlopes);
-
-      if (VISUALIZE)
+      if (visualize)
       {
          framePointS0.setIncludingFrame(transferFromContactFramePosition);
          framePointS0.setZ(s0.getY() + offsetHeightAboveGround.getDoubleValue());
@@ -744,7 +722,7 @@ public class LookAheadCoMHeightTrajectoryGenerator
       if (isInDoubleSupport)
          splineQuery = Math.min(splineQuery, dF.getX());
 
-      spline.getZSlopeAndSecondDerivative(splineQuery, splineOutput);
+      spline.compute(splineQuery);
 
       handleInitializeToCurrent();
 
@@ -766,9 +744,9 @@ public class LookAheadCoMHeightTrajectoryGenerator
 
       offsetHeightAboveGroundPrevValue.set(offsetHeightTrajectoryGenerator.getValue());
 
-      double z = splineOutput[0] + offsetHeightAboveGroundTrajectoryOutput.getValue();
-      double dzds = splineOutput[1];
-      double ddzdds = splineOutput[2];
+      double z = spline.getY() + offsetHeightAboveGroundTrajectoryOutput.getValue();
+      double dzds = spline.getYDot();
+      double ddzdds = spline.getYDDot();
 
       getPartialDerivativesWithRespectToS(projectionSegment, partialDerivativesWithRespectToS);
       double dsdx = partialDerivativesWithRespectToS[0];
