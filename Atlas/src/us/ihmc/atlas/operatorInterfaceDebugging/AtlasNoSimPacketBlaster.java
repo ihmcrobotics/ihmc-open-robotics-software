@@ -1,15 +1,9 @@
 package us.ihmc.atlas.operatorInterfaceDebugging;
 
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.Random;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.handControl.packetsAndConsumers.HandSensorData;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.net.NetStateListener;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
@@ -29,6 +23,13 @@ import us.ihmc.robotiq.data.RobotiqHandSensorData;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.tools.thread.ThreadTools;
+
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Random;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class AtlasNoSimPacketBlaster implements Runnable
 {
@@ -152,7 +153,7 @@ public class AtlasNoSimPacketBlaster implements Runnable
          ThreadTools.sleepSeconds(5.0);
       }
       
-      RobotiqHandSensorData robotiqHandSensorData = new RobotiqHandSensorData();
+      HandSensorData robotiqHandSensorData = new RobotiqHandSensorData();
       
       HandJointAnglePacket leftHandJointAnglePacket = new HandJointAnglePacket();
       double[][] leftFingerJointAngles = robotiqHandSensorData.getFingerJointAngles(RobotSide.LEFT);
