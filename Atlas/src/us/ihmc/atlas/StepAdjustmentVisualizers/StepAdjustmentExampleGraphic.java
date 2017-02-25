@@ -16,8 +16,10 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicShape;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.humanoidRobotics.footstep.FootSpoof;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
@@ -53,8 +55,8 @@ public class StepAdjustmentExampleGraphic
    private static final double controlDT = 0.001;
 
    private static final double footLengthForControl = 0.22;
-   private static final double footWidthForControl = 0.0825;
-   private static final double toeWidthForControl = 0.11;
+   private static final double footWidthForControl = 0.11;
+   private static final double toeWidthForControl = 0.0825;
 
    public static final Color defaultLeftColor = new Color(0.85f, 0.35f, 0.65f, 1.0f);
    public static final Color defaultRightColor = new Color(0.15f, 0.8f, 0.15f, 1.0f);
@@ -154,9 +156,26 @@ public class StepAdjustmentExampleGraphic
       YoGraphicShape nextNextFootstepViz = new YoGraphicShape("nextNextFootstep", footstepGraphics, yoNextNextFootstepPose, 1.0);
       YoGraphicShape nextNextNextFootstepViz = new YoGraphicShape("nextNextNextFootstep", footstepGraphics, yoNextNextNextFootstepPose, 1.0);
 
+
+      YoArtifactPolygon nextFootstepArtifact =  new YoArtifactPolygon("nextFootstep", yoNextFootstepPolygon, Color.blue, false);
+      YoArtifactPolygon nextNextFootstepArtifact =  new YoArtifactPolygon("nextNextFootstep", yoNextNextFootstepPolygon, Color.blue, false);
+      YoArtifactPolygon nextNextNextFootstepArtifact =  new YoArtifactPolygon("nextNextNextFootstep", yoNextNextNextFootstepPolygon, Color.blue, false);
+
+      YoGraphicPosition desiredCMPViz = new YoGraphicPosition("Desired CMP", yoDesiredCMP, 0.012, YoAppearance.Red(), YoGraphicPosition.GraphicType.BALL_WITH_CROSS);
+      YoGraphicPosition desiredICPViz = new YoGraphicPosition("Desired ICP", yoDesiredICP, 0.01, YoAppearance.LightBlue(), YoGraphicPosition.GraphicType.BALL_WITH_CROSS);
+      YoGraphicPosition currentICPViz = new YoGraphicPosition("Current ICP", yoCurrentICP, 0.01, YoAppearance.Blue(), YoGraphicPosition.GraphicType.BALL_WITH_CROSS);
+
+
       yoGraphicsListRegistry.registerYoGraphic("dummy", nextFootstepViz);
       yoGraphicsListRegistry.registerYoGraphic("dummy", nextNextFootstepViz);
       yoGraphicsListRegistry.registerYoGraphic("dummy", nextNextNextFootstepViz);
+
+      yoGraphicsListRegistry.registerArtifact("dummy", desiredCMPViz.createArtifact());
+      yoGraphicsListRegistry.registerArtifact("dummy", desiredICPViz.createArtifact());
+      yoGraphicsListRegistry.registerArtifact("dummy", currentICPViz.createArtifact());
+      yoGraphicsListRegistry.registerArtifact("dummy", nextFootstepArtifact);
+      yoGraphicsListRegistry.registerArtifact("dummy", nextNextFootstepArtifact);
+      yoGraphicsListRegistry.registerArtifact("dummy", nextNextNextFootstepArtifact);
 
       scs = new SimulationConstructionSet(robot);
       SimulationOverheadPlotterFactory simulationOverheadPlotterFactory = scs.createSimulationOverheadPlotterFactory();
@@ -166,8 +185,6 @@ public class StepAdjustmentExampleGraphic
 
       Thread myThread = new Thread(scs);
       myThread.start();
-
-      initialize();
    }
 
    private void setupFeetFrames(YoGraphicsListRegistry yoGraphicsListRegistry)
@@ -228,47 +245,38 @@ public class StepAdjustmentExampleGraphic
 
    }
 
+   private double initialTime;
    private final FootstepTiming timing = new FootstepTiming();
    private void initialize()
    {
-      for (Footstep footstep : footstepTestHelper.createFootsteps(0.4, 0.6, 3))
-      {
+      for (Footstep footstep : footstepTestHelper.createFootsteps(0.2, 0.4, 4))
          footsteps.add(footstep);
-      }
 
       icpPlanner.clearPlan();
       icpOptimizationController.clearPlan();
 
       Footstep nextFootstep = footsteps.get(0);
-      Footstep nextNextFootstep = footsteps.get(0);
-      Footstep nextNextNextFootstep = footsteps.get(1);
+      Footstep nextNextFootstep = footsteps.get(1);
+      Footstep nextNextNextFootstep = footsteps.get(2);
 
       nextFootsteps.add(nextFootstep);
       nextFootsteps.add(nextNextFootstep);
       nextFootsteps.add(nextNextNextFootstep);
 
       for (int i = 3; i < icpOptimizationController.getNumberOfFootstepsToConsider(); i++)
-         nextFootsteps.add(footsteps.get(i - 1));
+         nextFootsteps.add(footsteps.get(i));
 
       timing.setTimings(doubleSupportDuration.getDoubleValue(), singleSupportDuration.getDoubleValue());
       icpPlanner.addFootstepToPlan(nextFootstep, timing);
       icpPlanner.addFootstepToPlan(nextNextFootstep, timing);
       icpPlanner.addFootstepToPlan(nextNextNextFootstep, timing);
 
-
-
       icpOptimizationController.setStepDurations(doubleSupportDuration.getDoubleValue(), singleSupportDuration.getDoubleValue());
-
       icpOptimizationController.addFootstepToPlan(nextFootstep);
       icpOptimizationController.addFootstepToPlan(nextNextFootstep);
       icpOptimizationController.addFootstepToPlan(nextNextNextFootstep);
 
       RobotSide supportSide = nextFootstep.getRobotSide().getOppositeSide();
-
-      icpPlanner.setSupportLeg(supportSide);
-      icpPlanner.initializeForSingleSupport(yoTime.getDoubleValue());
-
-      icpOptimizationController.initializeForSingleSupport(yoTime.getDoubleValue(), supportSide, omega0.getDoubleValue());
 
       FootSpoof footSpoof = contactableFeet.get(supportSide.getOppositeSide());
       FramePose nextSupportPose = footPosesAtTouchdown.get(supportSide.getOppositeSide());
@@ -281,10 +289,19 @@ public class StepAdjustmentExampleGraphic
          contactStates.get(supportSide.getOppositeSide()).setContactFramePoints(footSpoof.getContactPoints2d());
       else
          contactStates.get(supportSide.getOppositeSide()).setContactPoints(nextFootstep.getPredictedContactPoints());
+      bipedSupportPolygons.updateUsingContactStates(contactStates);
 
+      icpPlanner.setSupportLeg(supportSide);
+      icpPlanner.initializeForSingleSupport(yoTime.getDoubleValue());
+
+      icpOptimizationController.initializeForSingleSupport(yoTime.getDoubleValue(), supportSide, omega0.getDoubleValue());
+
+      initialTime = yoTime.getDoubleValue();
       updateViz(false);
 
    }
+
+   private boolean firstTick = true;
 
    private final FramePose footstepPose = new FramePose();
    private final FramePoint2d footstepPositionSolution = new FramePoint2d();
@@ -293,14 +310,21 @@ public class StepAdjustmentExampleGraphic
    private final FrameVector2d desiredICPVelocity = new FrameVector2d();
    private final FramePoint2d currentICP = new FramePoint2d();
 
-   public void update()
+   public void updateGraphic()
    {
+      if (firstTick)
+      {
+         initialize();
+         firstTick = false;
+      }
+
       yoCurrentICP.getFrameTuple2d(currentICP);
 
-      icpPlanner.getDesiredCapturePointPositionAndVelocity(desiredICP, desiredICPVelocity, timeToConsiderAdjustment.getDoubleValue());
+      double currentTime = timeToConsiderAdjustment.getDoubleValue() - initialTime;
+      icpPlanner.getDesiredCapturePointPositionAndVelocity(desiredICP, desiredICPVelocity, currentTime);
       yoDesiredICP.set(desiredICP);
 
-      icpOptimizationController.compute(timeToConsiderAdjustment.getDoubleValue(), desiredICP, desiredICPVelocity, currentICP, omega0.getDoubleValue());
+      icpOptimizationController.compute(currentTime, desiredICP, desiredICPVelocity, currentICP, omega0.getDoubleValue());
       icpOptimizationController.getDesiredCMP(desiredCMP);
       yoDesiredCMP.set(desiredCMP);
 
@@ -424,6 +448,7 @@ public class StepAdjustmentExampleGraphic
       public void update()
       {
          super.update();
+         updateGraphic();
       }
 
    }
@@ -1208,12 +1233,12 @@ public class StepAdjustmentExampleGraphic
 
          @Override public double getFeedbackParallelGain()
          {
-            return 6.0;
+            return 2.5;
          }
 
          @Override public double getFeedbackOrthogonalGain()
          {
-            return 6.0;
+            return 3.0;
          }
 
          @Override public double getDynamicRelaxationWeight()
