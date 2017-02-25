@@ -244,11 +244,47 @@ public class FileTools
    {
       try
       {
-         if (!Files.exists(path.getParent()))
+         if (path.getParent() != null && !Files.exists(path.getParent()))
+         {
             ensureDirectoryExists(path.getParent());
+         }
 
-         if (!Files.exists(path))
+         if (Files.exists(path) && !Files.isDirectory(path))
+         {
+            FileTools.deleteQuietly(path);
             Files.createDirectory(path);
+         }
+         
+         if (!Files.exists(path))
+         {
+            Files.createDirectory(path);
+         }
+      }
+      catch (IOException e)
+      {
+         e.printStackTrace();
+      }
+   }
+   
+   public static void ensureFileExists(Path path)
+   {
+      try
+      {
+         if (path.getParent() != null && !Files.exists(path.getParent()))
+         {
+            ensureDirectoryExists(path.getParent());
+         }
+
+         if (Files.exists(path) && Files.isDirectory(path))
+         {
+            FileTools.deleteQuietly(path);
+            Files.createFile(path);
+         }
+         
+         if (!Files.exists(path))
+         {
+            Files.createFile(path);
+         }
       }
       catch (IOException e)
       {
