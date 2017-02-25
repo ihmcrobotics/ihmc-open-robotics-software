@@ -293,8 +293,11 @@ public class StepAdjustmentExampleGraphic
 
       icpPlanner.setSupportLeg(supportSide);
       icpPlanner.initializeForSingleSupport(yoTime.getDoubleValue());
+      icpPlanner.getDesiredCapturePointPositionAndVelocity(desiredICP, desiredICPVelocity, yoTime.getDoubleValue());
+      yoCurrentICP.set(desiredICP);
 
       icpOptimizationController.initializeForSingleSupport(yoTime.getDoubleValue(), supportSide, omega0.getDoubleValue());
+      icpOptimizationController.setBeginningOfStateICP(desiredICP, desiredICPVelocity);
 
       initialTime = yoTime.getDoubleValue();
       updateViz(false);
@@ -1239,6 +1242,30 @@ public class StepAdjustmentExampleGraphic
          @Override public double getFeedbackOrthogonalGain()
          {
             return 3.0;
+         }
+
+         @Override
+         public double getLateralReachabilityOuterLimit()
+         {
+            return 1.0;
+         }
+
+         @Override
+         public double getLateralReachabilityInnerLimit()
+         {
+            return 0.05;
+         }
+
+         @Override
+         public double getForwardReachabilityLimit()
+         {
+            return 1.2;
+         }
+
+         @Override
+         public double getBackwardReachabilityLimit()
+         {
+            return -0.6;
          }
 
          @Override public double getDynamicRelaxationWeight()
