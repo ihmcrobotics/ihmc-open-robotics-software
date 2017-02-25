@@ -1,6 +1,10 @@
 package us.ihmc.atlas.StepAdjustmentVisualizers;
 
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.CapturePointTools;
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
@@ -10,6 +14,7 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameLine2d;
 import us.ihmc.robotics.geometry.FrameLineSegment2d;
 import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.simulationconstructionset.Robot;
@@ -24,6 +29,9 @@ public class SpeedUpExampleGraphic
    private final DoubleYoVariable speedUpTime;
    private final DoubleYoVariable omega0;
    private final DoubleYoVariable segmentTime;
+   private final DoubleYoVariable timeInSegment;
+
+   private final DoubleYoVariable currentTime;
 
    private final YoFramePoint2d stanceCMP;
    private final YoFramePoint2d endICP;
@@ -41,11 +49,13 @@ public class SpeedUpExampleGraphic
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
       YoVariableRegistry registry = robot.getRobotsYoVariableRegistry();
 
+      currentTime = robot.getYoTime();
       speedUpTime = new DoubleYoVariable("speedUpTime", registry);
       omega0 = new DoubleYoVariable("omega0", registry);
       omega0.set(3.0);
       segmentTime = new DoubleYoVariable("segmentTime", registry);
       segmentTime.set(0.5);
+      timeInSegment = new DoubleYoVariable("timeInSegment", registry);
 
       stanceCMP = new YoFramePoint2d("stanceCMP", worldFrame, registry);
       endICP = new YoFramePoint2d("endICP", worldFrame, registry);
@@ -96,11 +106,78 @@ public class SpeedUpExampleGraphic
       myThread.start();
    }
 
-   // from ICP Planner
-   public void estimateTimeRemainingForStateUnderDisturbance()
+   private void estimateTimeRemainingForStateUnderDisturbance()
    {
       double deltaTimeToBeAccounted = estimateDeltaTimeBetweenDesiredICPAndActualICP(currentICP.getFrameTuple2d());
       speedUpTime.set(deltaTimeToBeAccounted);
+   }
+
+   private static final double segmentDuration = 20.0;
+   private double initialTime = 0.0;
+   private int segmentNumber = 0;
+   private final Vector2dZUpFrame actionFrame = new Vector2dZUpFrame("actionFrame", worldFrame);
+   private void updateCurrentICPLocation()
+   {
+      if (timeInSegment.getDoubleValue() > segmentDuration)
+      {
+         initialTime = currentTime.getDoubleValue();
+         segmentNumber++;
+         if (segmentNumber > 3)
+            segmentNumber = 0;
+      }
+
+      timeInSegment.set(currentTime.getDoubleValue() - initialTime);
+
+      FramePoint2d firstKnot = new FramePoint2d();
+
+      FrameVector2d xAxis = new FrameVector2d(worldFrame);
+      xAxis.set(endICP.getFrameTuple2d());
+      xAxis.sub(desiredICP.getFrameTuple2d());
+      actionFrame.setXAxis(xAxis);
+      actionFrame.update();
+
+      FramePoint2d secondKnot = new FramePoint2d(actionFrame);
+      FramePoint2d thirdKnot = new FramePoint2d(actionFrame);
+      FramePoint2d fourthKnot = new FramePoint2d(actionFrame);
+      secondKnot.set(0.2, 0.2);
+      thirdKnot.set(0.2, -0.2);
+      fourthKnot.set(0.0, -0.2);
+      secondKnot.changeFrame(worldFrame);
+      thirdKnot.changeFrame(worldFrame);
+      fourthKnot.changeFrame(worldFrame);
+
+      desiredICP.getFrameTuple2d(firstKnot);
+
+      if (segmentNumber == 0)
+      {
+         currentICP.set(firstKnot);
+         secondKnot.scale(timeInSegment.getDoubleValue() / segmentDuration);
+         currentICP.add(secondKnot);
+      }
+      else if (segmentNumber == 1)
+      {
+         currentICP.set(firstKnot);
+         currentICP.add(secondKnot);
+
+         thirdKnot.sub(secondKnot);
+         thirdKnot.scale(timeInSegment.getDoubleValue() / segmentDuration);
+         currentICP.add(thirdKnot);
+      }
+      else if (segmentNumber == 2)
+      {
+         currentICP.set(firstKnot);
+         currentICP.add(thirdKnot);
+
+         fourthKnot.sub(thirdKnot);
+         fourthKnot.scale(timeInSegment.getDoubleValue() / segmentDuration);
+         currentICP.add(fourthKnot);
+      }
+      else if (segmentNumber == 3)
+      {
+         currentICP.set(firstKnot);
+         fourthKnot.scale(1 - timeInSegment.getDoubleValue() / segmentDuration);
+         currentICP.add(fourthKnot);
+      }
    }
 
    private final FrameLine2d desiredICPToFinalICPLine = new FrameLine2d();
@@ -163,7 +240,44 @@ public class SpeedUpExampleGraphic
       public void update()
       {
          super.update();
+         updateCurrentICPLocation();
          estimateTimeRemainingForStateUnderDisturbance();
+      }
+   }
+
+   private static class Vector2dZUpFrame extends ReferenceFrame
+   {
+      private static final long serialVersionUID = -1810366869361449743L;
+      private final FrameVector2d xAxis;
+      private final Vector3D x = new Vector3D();
+      private final Vector3D y = new Vector3D();
+      private final Vector3D z = new Vector3D();
+      private final RotationMatrix rotation = new RotationMatrix();
+
+      public Vector2dZUpFrame(String string, ReferenceFrame parentFrame)
+      {
+         super(string, parentFrame);
+         xAxis = new FrameVector2d(parentFrame);
+      }
+
+      public void setXAxis(FrameVector2d xAxis)
+      {
+         this.xAxis.setIncludingFrame(xAxis);
+         this.xAxis.changeFrame(parentFrame);
+         this.xAxis.normalize();
+         update();
+      }
+
+      @Override
+      protected void updateTransformToParent(RigidBodyTransform transformToParent)
+      {
+         x.set(xAxis.getX(), xAxis.getY(), 0.0);
+         z.set(0.0, 0.0, 1.0);
+         y.cross(z, x);
+
+         rotation.setColumns(x, y, z);
+
+         transformToParent.setRotationAndZeroTranslation(rotation);
       }
    }
 }
