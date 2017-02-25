@@ -6,20 +6,28 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicLineSegment;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
+import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactLineSegment2d;
+import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.geometry.FrameLine2d;
-import us.ihmc.robotics.geometry.FrameLineSegment2d;
-import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.geometry.*;
+import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
+import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.gui.tools.SimulationOverheadPlotterFactory;
+
+import java.awt.*;
+
+import static us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepListVisualizer.defaultFeetColors;
 
 public class SpeedUpExampleGraphic
 {
@@ -43,6 +51,11 @@ public class SpeedUpExampleGraphic
    private final FramePoint2d finalICP2d = new FramePoint2d();
    private final FramePoint2d referenceCMP = new FramePoint2d();
 
+   private static final double forwardCMPOffset = 0.075;
+   private static final double backwardCMPOffset = 0.02;
+   private static final double stepLength = 0.30;
+   private static final double stepWidth = 0.25;
+
    public SpeedUpExampleGraphic()
    {
       Robot robot = new DummyRobot();
@@ -63,28 +76,55 @@ public class SpeedUpExampleGraphic
       currentICP = new YoFramePoint2d("currentICP", worldFrame, registry);
       projectedICP = new YoFramePoint2d("projectedICP", worldFrame, registry);
 
-      double forwardCMPOffset = 0.075;
-      double backwardCMPOffset = 0.02;
-      double stepLength = 0.30;
-      double stepWidth = 0.25;
+      YoFrameConvexPolygon2d stanceFootPolygonViz = new YoFrameConvexPolygon2d("stanceFootPolygon", "", worldFrame, 4, registry);
+      YoFrameConvexPolygon2d stepFootPolygonViz = new YoFrameConvexPolygon2d("stepFootPolygon", "", worldFrame, 4, registry);
+
+      FrameConvexPolygon2d stanceFootPolygon = new FrameConvexPolygon2d();
+      stanceFootPolygon.addVertex(new FramePoint2d(worldFrame, 0.11, 0.0425));
+      stanceFootPolygon.addVertex(new FramePoint2d(worldFrame, 0.11, -0.0425));
+      stanceFootPolygon.addVertex(new FramePoint2d(worldFrame, -0.11, -0.055));
+      stanceFootPolygon.addVertex(new FramePoint2d(worldFrame, -0.11, 0.055));
+      stanceFootPolygon.update();
+
+      FrameConvexPolygon2d stepFootPolygon = new FrameConvexPolygon2d();
+      stepFootPolygon.addVertex(new FramePoint2d(worldFrame, 0.11 + stepLength, 0.0425 + stepWidth));
+      stepFootPolygon.addVertex(new FramePoint2d(worldFrame, 0.11 + stepLength, -0.0425 + stepWidth));
+      stepFootPolygon.addVertex(new FramePoint2d(worldFrame, -0.11 + stepLength, -0.055 + stepWidth));
+      stepFootPolygon.addVertex(new FramePoint2d(worldFrame, -0.11 + stepLength, 0.055 + stepWidth));
+      stepFootPolygon.update();
+
+      stanceFootPolygonViz.setFrameConvexPolygon2d(stanceFootPolygon);
+      stepFootPolygonViz.setFrameConvexPolygon2d(stepFootPolygon);
+
+      ArtifactList artifactList = new ArtifactList("");
+      YoArtifactPolygon stanceFootPolygonArtifact = new YoArtifactPolygon("Stance Foot Polygon", stanceFootPolygonViz, defaultFeetColors.get(RobotSide.LEFT), false);
+      YoArtifactPolygon stepFootPolygonArtifact = new YoArtifactPolygon("Step Foot Polygon", stepFootPolygonViz, defaultFeetColors.get(RobotSide.RIGHT), false);
+      artifactList.add(stanceFootPolygonArtifact);
+      artifactList.add(stepFootPolygonArtifact);
+      yoGraphicsListRegistry.registerArtifactList(artifactList);
+
+
 
       FramePoint2d heelStrikeCMP = new FramePoint2d(worldFrame, stepLength - backwardCMPOffset, stepWidth);
       stanceCMP.set(forwardCMPOffset, 0);
-      endICP.set(heelStrikeCMP);
-
-      endICP.getFrameTuple2d(finalICP2d);
       stanceCMP.getFrameTuple2d(referenceCMP);
+
+      CapturePointTools.computeCapturePointPosition(omega0.getDoubleValue(), -0.05, heelStrikeCMP, referenceCMP, finalICP2d);
+      endICP.set(finalICP2d);
 
       CapturePointTools.computeCapturePointPosition(omega0.getDoubleValue(), -segmentTime.getDoubleValue(), finalICP2d, referenceCMP, desiredICP2d);
       desiredICP.set(desiredICP2d);
 
-      YoGraphicPosition stanceCMPGraphic = new YoGraphicPosition("stanceCMP", stanceCMP, 0.005, YoAppearance.Green(), GraphicType.BALL);
-      YoGraphicPosition endICPGraphic = new YoGraphicPosition("endICP", endICP, 0.005, YoAppearance.DarkRed(), GraphicType.BALL_WITH_CROSS);
-      YoGraphicPosition desiredICPGraphic = new YoGraphicPosition("desiredICP", desiredICP, 0.005, YoAppearance.LightBlue(), GraphicType.BALL_WITH_CROSS);
-      YoGraphicPosition currentICPGraphic = new YoGraphicPosition("currentICP", currentICP, 0.005, YoAppearance.DarkBlue(), GraphicType.BALL_WITH_CROSS);
-      YoGraphicPosition projectedICPGraphic = new YoGraphicPosition("projectedICP", projectedICP, 0.005, YoAppearance.Yellow(), GraphicType.SOLID_BALL);
+      YoGraphicPosition stanceCMPGraphic = new YoGraphicPosition("stanceCMP", stanceCMP, 0.015, YoAppearance.Green(), GraphicType.BALL);
+      YoGraphicPosition endICPGraphic = new YoGraphicPosition("endICP", endICP, 0.015, YoAppearance.DarkRed(), GraphicType.BALL);
+      YoGraphicPosition desiredICPGraphic = new YoGraphicPosition("desiredICP", desiredICP, 0.02, YoAppearance.LightBlue(), GraphicType.BALL_WITH_CROSS);
+      YoGraphicPosition currentICPGraphic = new YoGraphicPosition("currentICP", currentICP, 0.025, YoAppearance.DarkBlue(), GraphicType.BALL_WITH_CROSS);
+      YoGraphicPosition projectedICPGraphic = new YoGraphicPosition("projectedICP", projectedICP, 0.015, YoAppearance.Yellow(), GraphicType.SOLID_BALL);
+
+      YoArtifactLineSegment2d icpDynamicsArtifact = new YoArtifactLineSegment2d("icpDynamics", desiredICP, endICP, Color.BLUE);
 
       String name = "SpeedUpGraphic";
+      yoGraphicsListRegistry.registerArtifact(name, icpDynamicsArtifact);
       yoGraphicsListRegistry.registerArtifact(name, stanceCMPGraphic.createArtifact());
       yoGraphicsListRegistry.registerArtifact(name, endICPGraphic.createArtifact());
       yoGraphicsListRegistry.registerArtifact(name, currentICPGraphic.createArtifact());
@@ -131,17 +171,19 @@ public class SpeedUpExampleGraphic
       FramePoint2d firstKnot = new FramePoint2d();
 
       FrameVector2d xAxis = new FrameVector2d(worldFrame);
-      xAxis.set(endICP.getFrameTuple2d());
-      xAxis.sub(desiredICP.getFrameTuple2d());
+      endICP.getFrameTuple2d(finalICP2d);
+      desiredICP.getFrameTuple2d(desiredICP2d);
+      xAxis.set(finalICP2d);
+      xAxis.sub(desiredICP2d);
       actionFrame.setXAxis(xAxis);
       actionFrame.update();
 
       FramePoint2d secondKnot = new FramePoint2d(actionFrame);
       FramePoint2d thirdKnot = new FramePoint2d(actionFrame);
       FramePoint2d fourthKnot = new FramePoint2d(actionFrame);
-      secondKnot.set(0.2, 0.2);
-      thirdKnot.set(0.2, -0.2);
-      fourthKnot.set(0.0, -0.2);
+      secondKnot.set(0.2, 0.1);
+      thirdKnot.set(0.2, -0.05);
+      fourthKnot.set(0.0, -0.15);
       secondKnot.changeFrame(worldFrame);
       thirdKnot.changeFrame(worldFrame);
       fourthKnot.changeFrame(worldFrame);
