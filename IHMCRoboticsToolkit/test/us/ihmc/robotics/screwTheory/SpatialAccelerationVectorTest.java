@@ -18,7 +18,7 @@ import us.ihmc.robotics.geometry.FrameVectorTest;
 import us.ihmc.robotics.geometry.ReferenceFrameMismatchException;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.testing.JUnitTools;
+import us.ihmc.robotics.testing.JUnitTools;
 
 public class SpatialAccelerationVectorTest extends SpatialMotionVectorTest
 {
