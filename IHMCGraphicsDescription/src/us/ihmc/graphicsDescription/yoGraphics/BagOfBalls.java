@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
+import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -29,6 +31,7 @@ public class BagOfBalls
    private int index;
    private boolean outOfBallsWarning = false;
    private YoGraphicsList yoGraphicsList;
+   private ArtifactList artifactList;
 
    public BagOfBalls(YoVariableRegistry parentYoVariableRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
@@ -57,6 +60,12 @@ public class BagOfBalls
       this(numberOfBalls, sizeInMeters, "BagOfBalls", appearance, parentYoVariableRegistry, yoGraphicsListRegistry);
    }
 
+   public BagOfBalls(int numberOfBalls, double sizeInMeters, AppearanceDefinition appearance, GraphicType graphicType, YoVariableRegistry parentYoVariableRegistry,
+         YoGraphicsListRegistry yoGraphicsListRegistry)
+   {
+      this(numberOfBalls, sizeInMeters, "BagOfBalls", appearance, graphicType, parentYoVariableRegistry, yoGraphicsListRegistry);
+   }
+
    /**
     * Creates a BagOfBalls with the given number of balls, and all the balls with the given Appearance.
     *
@@ -70,16 +79,7 @@ public class BagOfBalls
    public BagOfBalls(int numberOfBalls, double sizeInMeters, String name, AppearanceDefinition appearance, YoVariableRegistry parentYoVariableRegistry,
          YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      YoVariableRegistry registry = new YoVariableRegistry(name + "Balls");
-
-      for (int i = 0; i < numberOfBalls; i++)
-      {
-         createABall(name, i, sizeInMeters, appearance, registry);
-      }
-
-      index = 0;
-
-      registerBalls(name, registry, parentYoVariableRegistry, yoGraphicsListRegistry);
+      this(numberOfBalls, sizeInMeters, name, appearance, null, parentYoVariableRegistry, yoGraphicsListRegistry);
    }
 
    /**
@@ -104,6 +104,32 @@ public class BagOfBalls
       index = 0;
 
       registerBalls(name, registry, parentYoVariableRegistry, yoGraphicsListRegistry);
+   }
+
+   /**
+    * Creates a BagOfBalls with the given number of balls, and all the balls with the given Appearance.
+    *
+    * @param numberOfBalls int Number of balls to create.
+    * @param sizeInMeters double Size of each ball in meters.
+    * @param name String Name of the BagOfBalls
+    * @param appearance Appearance for each of the balls.
+    * @param parentYoVariableRegistry YoVariableRegistry to register the BagOfBalls with.
+    * @param yoGraphicsListRegistry DynamicGraphicObjectsListRegistry to register the BagOfBalls with.
+    */
+   public BagOfBalls(int numberOfBalls, double sizeInMeters, String name, AppearanceDefinition appearance, GraphicType graphicType,
+         YoVariableRegistry parentYoVariableRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+   {
+      YoVariableRegistry registry = new YoVariableRegistry(name + "Balls");
+
+      for (int i = 0; i < numberOfBalls; i++)
+      {
+         createABall(name, i, sizeInMeters, appearance, graphicType, registry);
+      }
+
+      index = 0;
+
+      if (graphicType != null)
+         registerGraphics(name, registry, parentYoVariableRegistry, yoGraphicsListRegistry);
    }
 
    /**
@@ -158,9 +184,19 @@ public class BagOfBalls
 
    private void createABall(String name, int i, double sizeInMeters, AppearanceDefinition appearance, YoVariableRegistry registry)
    {
+      createABall(name, i, sizeInMeters, appearance, null, registry);
+   }
+
+   private void createABall(String name, int i, double sizeInMeters, AppearanceDefinition appearance, GraphicType graphicType, YoVariableRegistry registry)
+   {
       YoFramePoint yoFramePoint = new YoFramePoint(name + i, "", ReferenceFrame.getWorldFrame(), registry);
       Double scale = new Double(sizeInMeters);
-      YoGraphicPosition newPosition = new YoGraphicPosition(name + i, yoFramePoint, scale, appearance);
+      YoGraphicPosition newPosition;
+      if (graphicType != null)
+         newPosition = new YoGraphicPosition(name + i, yoFramePoint, scale, appearance, graphicType);
+      else
+         newPosition = new YoGraphicPosition(name + i, yoFramePoint, scale, appearance);
+
       dynamicGraphicPositions.add(newPosition);
    }
 
@@ -177,8 +213,25 @@ public class BagOfBalls
             yoGraphicsList.add(dynamicGraphicPosition);
          }
 
-         if (yoGraphicsListRegistry != null)
-            yoGraphicsListRegistry.registerYoGraphicsList(yoGraphicsList);
+         yoGraphicsListRegistry.registerYoGraphicsList(yoGraphicsList);
+      }
+   }
+
+   private void registerGraphics(String name, YoVariableRegistry registry, YoVariableRegistry parentYoVariableRegistry,
+         YoGraphicsListRegistry yoGraphicsListRegistry)
+   {
+      registerBalls(name, registry, parentYoVariableRegistry, yoGraphicsListRegistry);
+
+      if ((parentYoVariableRegistry != null) && (yoGraphicsListRegistry != null))
+      {
+         artifactList = new ArtifactList(name + "Balls");
+
+         for (YoGraphicPosition dynamicGraphicPosition : dynamicGraphicPositions)
+         {
+            artifactList.add(dynamicGraphicPosition.createArtifact());
+         }
+
+         yoGraphicsListRegistry.registerArtifactList(artifactList);
       }
    }
 
