@@ -1,10 +1,8 @@
 package us.ihmc.robotics.random;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import java.util.ArrayList;
 import java.util.Random;
 
 import org.junit.Test;
@@ -175,29 +173,5 @@ public class RandomToolsTest
          double actualReturn = RandomTools.generateRandomFloatInRange(random, range1, range2);
          assertTrue(((range1 < actualReturn) && (actualReturn < range2)) || ((range2 < actualReturn) && (actualReturn < range1)));
       }
-   }
-
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
-   public void testGenerateRandomBoolean()
-   {
-      Random random = new Random(1876L);
-
-      boolean randomBoolean;
-
-      ArrayList<Boolean> listOfRandomBooleans = new ArrayList<>();
-
-      for (int i = 0; i < 10; i++)
-      {
-         randomBoolean = RandomTools.generateRandomBoolean(random);
-         listOfRandomBooleans.add(randomBoolean);
-      }
-
-      assertTrue(listOfRandomBooleans.get(0));
-      assertTrue(listOfRandomBooleans.get(3));
-      assertTrue(listOfRandomBooleans.get(5));
-      assertFalse(listOfRandomBooleans.get(1));
-      assertFalse(listOfRandomBooleans.get(2));
-      assertFalse(listOfRandomBooleans.get(4));
    }
 }
