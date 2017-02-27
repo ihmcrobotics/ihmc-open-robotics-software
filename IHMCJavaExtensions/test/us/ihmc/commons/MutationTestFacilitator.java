@@ -23,9 +23,9 @@ import java.util.concurrent.TimeUnit;
 import org.pitest.mutationtest.commandline.MutationCoverageReport;
 
 import us.ihmc.commons.exception.DefaultExceptionHandler;
+import us.ihmc.commons.nio.FileTools;
 import us.ihmc.commons.nio.WriteOption;
 import us.ihmc.tools.io.files.BasicPathVisitor;
-import us.ihmc.tools.io.files.FileTools;
 import us.ihmc.tools.io.files.PathTools;
 
 /**
