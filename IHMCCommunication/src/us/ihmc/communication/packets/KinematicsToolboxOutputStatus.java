@@ -10,7 +10,7 @@ import us.ihmc.euclid.tuple4D.Quaternion32;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.nameBasedHashCode.NameBasedHashCodeTools;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
@@ -37,8 +37,8 @@ public class KinematicsToolboxOutputStatus extends StatusPacket<KinematicsToolbo
          desiredJointAngles[i] = random.nextFloat();
       }
 
-      desiredRootTranslation = RandomTools.generateRandomVector3f(random);
-      desiredRootOrientation = RandomTools.generateRandomQuaternion4f(random);
+      desiredRootTranslation = RandomGeometry.nextVector3D32(random);
+      desiredRootOrientation = RandomGeometry.nextQuaternion32(random);
    }
 
    public KinematicsToolboxOutputStatus()

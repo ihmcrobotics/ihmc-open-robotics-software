@@ -11,7 +11,7 @@ import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.testing.JUnitTools;
 
@@ -29,13 +29,13 @@ public class MomentumTest
       // Transform3D transformToParent = new Transform3D();
 
       ReferenceFrame frame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("frame", world, transformToParent);
-      Matrix3D massMomentOfInertia = RandomTools.generateRandomDiagonalMatrix3d(random);
+      Matrix3D massMomentOfInertia = RandomGeometry.nextDiagonalMatrix3D(random);
       double mass = random.nextDouble();
       GeneralizedRigidBodyInertia inertia = new CompositeRigidBodyInertia(frame, massMomentOfInertia, mass);
       inertia.changeFrame(world);
 
-      Vector3D linearVelocity = RandomTools.generateRandomVector(random);
-      Vector3D angularVelocity = RandomTools.generateRandomVector(random);
+      Vector3D linearVelocity = RandomGeometry.nextVector3D(random);
+      Vector3D angularVelocity = RandomGeometry.nextVector3D(random);
       Twist twist = new Twist(frame, world, world, linearVelocity, angularVelocity);
 
       DenseMatrix64F inertiaMatrix = new DenseMatrix64F(6, 6);

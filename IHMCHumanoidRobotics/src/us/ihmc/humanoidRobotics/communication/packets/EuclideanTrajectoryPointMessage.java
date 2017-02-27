@@ -20,7 +20,7 @@ import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.TransformTools;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.EuclideanTrajectoryPointInterface;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 
 @RosMessagePacket(documentation = "This class is used to build trajectory messages in taskspace. It holds the only the translational information for one trajectory point (position & linear velocity). "
       + "Feel free to look at SO3TrajectoryPointMessage (rotational) and SE3TrajectoryPointMessage (rotational AND translational)", rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE)
@@ -44,8 +44,8 @@ public class EuclideanTrajectoryPointMessage extends Packet<EuclideanTrajectoryP
    public EuclideanTrajectoryPointMessage(Random random)
    {
       time = RandomNumbers.nextDoubleWithEdgeCases(random, 0.01);
-      position = RandomTools.generateRandomPoint(random, 1.0, 1.0, 1.0);
-      linearVelocity = RandomTools.generateRandomVector(random);
+      position = RandomGeometry.nextPoint3D(random, 1.0, 1.0, 1.0);
+      linearVelocity = RandomGeometry.nextVector3D(random);
    }
 
    public EuclideanTrajectoryPointMessage(EuclideanTrajectoryPointMessage trajectoryPoint)

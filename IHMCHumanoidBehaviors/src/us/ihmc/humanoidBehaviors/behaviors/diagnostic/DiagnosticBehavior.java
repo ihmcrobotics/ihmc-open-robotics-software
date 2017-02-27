@@ -78,7 +78,7 @@ import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.math.frames.YoFrameVector2d;
 import us.ihmc.robotics.math.trajectories.waypoints.TrajectoryPoint1DCalculator;
 import us.ihmc.robotics.partNames.LimbName;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -2693,8 +2693,8 @@ public class DiagnosticBehavior extends AbstractBehavior
             pelvisTransformInPast_Translation.setRotationToZero();
             pelvisTransformInPast_Rotation.setTranslationToZero();
 
-            Quaternion orientationOffset = RandomTools.generateRandomQuaternion(random, minMaxIcpAngularOffset.getDoubleValue());
-            Vector3D translationOffset = RandomTools.generateRandomVector(random, minMaxIcpTranslationOffset.getDoubleValue());
+            Quaternion orientationOffset = RandomGeometry.nextQuaternion(random, minMaxIcpAngularOffset.getDoubleValue());
+            Vector3D translationOffset = RandomGeometry.nextVector3D(random, minMaxIcpTranslationOffset.getDoubleValue());
 
             RigidBodyTransform offsetRotationTransform = new RigidBodyTransform(orientationOffset, new Vector3D());
             RigidBodyTransform offsetTranslationTransform = new RigidBodyTransform(new Quaternion(), translationOffset);

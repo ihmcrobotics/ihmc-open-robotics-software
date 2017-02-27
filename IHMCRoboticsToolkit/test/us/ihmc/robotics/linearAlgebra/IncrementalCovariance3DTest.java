@@ -16,7 +16,7 @@ import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.geometry.GeometryTools;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 
 public class IncrementalCovariance3DTest
 {
@@ -60,7 +60,7 @@ public class IncrementalCovariance3DTest
 
       for (int i = 0; i < 100; i++)
       {
-         Point3D average = RandomTools.generateRandomPoint(random, 10.0, 10.0, 10.0);
+         Point3D average = RandomGeometry.nextPoint3D(random, 10.0, 10.0, 10.0);
          List<Point3D> dataset = createRandomDataset(random, average, length, maxAmplitude);
 
          incrementalCovariance3D.clear();
@@ -112,7 +112,7 @@ public class IncrementalCovariance3DTest
       max.add(average, maxAmplitude);
 
       for (int i = 0; i < length; i++)
-         dataset.add(RandomTools.generateRandomPoint3d(random, min, max));
+         dataset.add(RandomGeometry.nextPoint3D(random, min, max));
 
       return dataset;
    }

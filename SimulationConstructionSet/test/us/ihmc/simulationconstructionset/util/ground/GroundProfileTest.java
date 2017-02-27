@@ -24,7 +24,7 @@ import us.ihmc.robotics.geometry.BoundingBox3d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -191,7 +191,7 @@ public abstract class GroundProfileTest
                {
                   numberOfTotalChecks++;
                   
-                  Vector2D excursionVector2d = RandomTools.generateRandomVector2d(random, excursionDistance);
+                  Vector2D excursionVector2d = RandomGeometry.nextVector2D(random, excursionDistance);
                   Vector3D excursionVector = new Vector3D(alongDirectionOne);
                   excursionVector.scale(excursionVector2d.getX());
                   excursionVector.scaleAdd(excursionVector2d.getY(), alongDirectionTwo, excursionVector);

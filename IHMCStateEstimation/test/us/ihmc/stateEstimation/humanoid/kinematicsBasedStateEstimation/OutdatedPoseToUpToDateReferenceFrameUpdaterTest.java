@@ -17,7 +17,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.subscribers.TimeStampedTransformBuffer;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
@@ -110,7 +110,7 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdaterTest
          int timeStamp = j * 2;
          outdatedTimeStamps[j] = timeStamp;
          translationOffsets[j] = new Vector3D();//RandomTools.generateRandomVector(random, -2.0, -2.0, 0.0, 2.0, 2.0, 2.0);
-         orientationOffsets[j] = RandomTools.generateRandomQuaternion(random, Math.PI / 2.0);
+         orientationOffsets[j] = RandomGeometry.nextQuaternion(random, Math.PI / 2.0);
 
          RigidBodyTransform outdatedTransform = generateOutdatedTransformWithTranslationAndOrientationOffset(upToDateTimeStampedTransformPoseBuffer, timeStamp,
                orientationOffsets[j], translationOffsets[j]);
@@ -168,8 +168,8 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdaterTest
       {
          int timeStamp = j * 2;
          outdatedTimeStamps[j] = timeStamp;
-         translationOffsets[j] = RandomTools.generateRandomVector(random, -2.0, -2.0, 0.0, 2.0, 2.0, 2.0);
-         orientationOffsets[j] = RandomTools.generateRandomQuaternion(random, Math.PI / 2.0);
+         translationOffsets[j] = RandomGeometry.nextVector3D(random, -2.0, -2.0, 0.0, 2.0, 2.0, 2.0);
+         orientationOffsets[j] = RandomGeometry.nextQuaternion(random, Math.PI / 2.0);
          
          RigidBodyTransform outdatedTransform = generateOutdatedTransformWithTranslationAndOrientationOffset(upToDateTimeStampedTransformPoseBuffer, timeStamp,
                orientationOffsets[j], translationOffsets[j]);
@@ -233,8 +233,8 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdaterTest
       {
          int timeStamp = j * 2;
          outdatedTimeStamps[j] = timeStamp;
-         translationOffsets[j] = RandomTools.generateRandomVector(random, -2.0, -2.0, 0.0, 2.0, 2.0, 2.0);
-         orientationOffsets[j] = RandomTools.generateRandomQuaternion(random, Math.PI / 2.0);
+         translationOffsets[j] = RandomGeometry.nextVector3D(random, -2.0, -2.0, 0.0, 2.0, 2.0, 2.0);
+         orientationOffsets[j] = RandomGeometry.nextQuaternion(random, Math.PI / 2.0);
          
          RigidBodyTransform outdatedTransform = generateOutdatedTransformWithTranslationAndOrientationOffset(upToDateTimeStampedTransformPoseBuffer, timeStamp,
                orientationOffsets[j], translationOffsets[j]);
@@ -529,8 +529,8 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdaterTest
          long timeStamp = (long) (j * (lastTimeStamp * 0.8 - firstTimeStamp * 0.8) / numberOfOutdatedTransforms + firstTimeStamp * 1.2);
          outdatedTimeStamps[j] = timeStamp;
 
-         translationOffsets[j] = RandomTools.generateRandomVector(random, -2.0, -2.0, 0.0, 2.0, 2.0, 2.0);
-         orientationOffsets[j] = RandomTools.generateRandomQuaternion(random, Math.PI / 2.0);//RandomTools.generateRandomQuaternion(random, Math.PI);
+         translationOffsets[j] = RandomGeometry.nextVector3D(random, -2.0, -2.0, 0.0, 2.0, 2.0, 2.0);
+         orientationOffsets[j] = RandomGeometry.nextQuaternion(random, Math.PI / 2.0);//RandomTools.generateRandomQuaternion(random, Math.PI);
 
          RigidBodyTransform outdatedTransform = generateOutdatedTransformWithTranslationAndOrientationOffset(upToDateTimeStampedTransformPoseBuffer, timeStamp,
                orientationOffsets[j], translationOffsets[j]);
@@ -617,8 +617,8 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdaterTest
    private RigidBodyTransform generateRandomUpToDateTransforms(Random random)
    {
       RigidBodyTransform upToDateTransform = new RigidBodyTransform();
-      upToDateTransform.setTranslation(RandomTools.generateRandomVector(random));
-      upToDateTransform.setRotation(RandomTools.generateRandomQuaternion(random));
+      upToDateTransform.setTranslation(RandomGeometry.nextVector3D(random));
+      upToDateTransform.setRotation(RandomGeometry.nextQuaternion(random));
       return upToDateTransform;
    }
 

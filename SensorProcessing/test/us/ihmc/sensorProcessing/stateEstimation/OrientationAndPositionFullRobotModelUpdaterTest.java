@@ -19,7 +19,7 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePointTest;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVectorTest;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.CenterOfMassAccelerationCalculator;
 import us.ihmc.robotics.screwTheory.CenterOfMassCalculator;
@@ -83,14 +83,14 @@ public class OrientationAndPositionFullRobotModelUpdaterTest
       int nTests = 100;
       for (int i = 0; i < nTests; i++)
       {
-         centerOfMassPositionPort.setData(new FramePoint(ReferenceFrame.getWorldFrame(), RandomTools.generateRandomVector(random)));
-         centerOfMassVelocityPort.setData(new FrameVector(ReferenceFrame.getWorldFrame(), RandomTools.generateRandomVector(random)));
-         centerOfMassAccelerationPort.setData(new FrameVector(ReferenceFrame.getWorldFrame(), RandomTools.generateRandomVector(random)));
+         centerOfMassPositionPort.setData(new FramePoint(ReferenceFrame.getWorldFrame(), RandomGeometry.nextVector3D(random)));
+         centerOfMassVelocityPort.setData(new FrameVector(ReferenceFrame.getWorldFrame(), RandomGeometry.nextVector3D(random)));
+         centerOfMassAccelerationPort.setData(new FrameVector(ReferenceFrame.getWorldFrame(), RandomGeometry.nextVector3D(random)));
          RotationMatrix orientation = new RotationMatrix();
-         orientation.set(RandomTools.generateRandomRotation(random));
+         orientation.set(RandomGeometry.nextAxisAngle(random));
          orientationPort.setData(new FrameOrientation(ReferenceFrame.getWorldFrame(), orientation));
-         angularVelocityPort.setData(new FrameVector(estimationFrame, RandomTools.generateRandomVector(random)));
-         angularAccelerationPort.setData(new FrameVector(estimationFrame, RandomTools.generateRandomVector(random)));
+         angularVelocityPort.setData(new FrameVector(estimationFrame, RandomGeometry.nextVector3D(random)));
+         angularAccelerationPort.setData(new FrameVector(estimationFrame, RandomGeometry.nextVector3D(random)));
 
          // update full robot model
          fullRobotModelUpdater.run();

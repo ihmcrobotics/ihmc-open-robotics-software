@@ -18,7 +18,7 @@ import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class FourBarKinematicLoopTest
@@ -416,7 +416,7 @@ public class FourBarKinematicLoopTest
       {
          // generate random quadrilateral with joint axes along z and random joint offsets along z
          Vector3D jointAxis = new Vector3D(0.0, 0.0, 1.0);
-         Vector3D elevatorToJointA = RandomTools.generateRandomVector(random);
+         Vector3D elevatorToJointA = RandomGeometry.nextVector3D(random);
          double[] sideLengths = generateRandomQuadrilateralSideLengths(random, 0.05, 2.0);
          Vector3D jointAtoB = new Vector3D(sideLengths[0], 0.0, random.nextDouble());
          Vector3D jointBtoC = new Vector3D(Math.sqrt(0.5) * sideLengths[1], Math.sqrt(0.5) * sideLengths[1], random.nextDouble());
@@ -923,10 +923,10 @@ public class FourBarKinematicLoopTest
    private void initializeFourBarWithRandomlyRotatedJointFrames(FramePoint jointAPosition, FramePoint jointBPosition, FramePoint jointCPosition, FramePoint jointDPosition,
          FrameVector jointAxisA, FrameVector jointAxisB, FrameVector jointAxisC, FrameVector jointAxisD)
    {
-      ReferenceFrame jointAFrame = ReferenceFrame.constructReferenceFrameFromPointAndAxis("jointAFrame", jointAPosition, Axis.Z, new FrameVector(worldFrame, RandomTools.generateRandomVector(random, 1.0)));
-      ReferenceFrame jointBFrame = ReferenceFrame.constructReferenceFrameFromPointAndAxis("jointBFrame", jointBPosition, Axis.Z, new FrameVector(worldFrame, RandomTools.generateRandomVector(random, 1.0)));
-      ReferenceFrame jointCFrame = ReferenceFrame.constructReferenceFrameFromPointAndAxis("jointCFrame", jointCPosition, Axis.Z, new FrameVector(worldFrame, RandomTools.generateRandomVector(random, 1.0)));
-      ReferenceFrame jointDFrame = ReferenceFrame.constructReferenceFrameFromPointAndAxis("jointDFrame", jointDPosition, Axis.Z, new FrameVector(worldFrame, RandomTools.generateRandomVector(random, 1.0)));
+      ReferenceFrame jointAFrame = ReferenceFrame.constructReferenceFrameFromPointAndAxis("jointAFrame", jointAPosition, Axis.Z, new FrameVector(worldFrame, RandomGeometry.nextVector3D(random, 1.0)));
+      ReferenceFrame jointBFrame = ReferenceFrame.constructReferenceFrameFromPointAndAxis("jointBFrame", jointBPosition, Axis.Z, new FrameVector(worldFrame, RandomGeometry.nextVector3D(random, 1.0)));
+      ReferenceFrame jointCFrame = ReferenceFrame.constructReferenceFrameFromPointAndAxis("jointCFrame", jointCPosition, Axis.Z, new FrameVector(worldFrame, RandomGeometry.nextVector3D(random, 1.0)));
+      ReferenceFrame jointDFrame = ReferenceFrame.constructReferenceFrameFromPointAndAxis("jointDFrame", jointDPosition, Axis.Z, new FrameVector(worldFrame, RandomGeometry.nextVector3D(random, 1.0)));
 
       Vector3D jointAxisAFrameA = new Vector3D();
       Vector3D jointAxisBFrameB = new Vector3D();

@@ -27,9 +27,9 @@ import us.ihmc.euclid.tuple4D.interfaces.Tuple4DReadOnly;
 /**
  * TODO: Rename to RandomGeometry or something.
  */
-public class RandomTools
+public class RandomGeometry
 {
-   public static Point3D generateRandomPoint(Random random, double maxAbsoluteX, double maxAbsoluteY, double maxAbsoluteZ)
+   public static Point3D nextPoint3D(Random random, double maxAbsoluteX, double maxAbsoluteY, double maxAbsoluteZ)
    {
       double x = RandomNumbers.nextDouble(random, -maxAbsoluteX, maxAbsoluteX);
       double y = RandomNumbers.nextDouble(random, -maxAbsoluteY, maxAbsoluteY);
@@ -38,7 +38,7 @@ public class RandomTools
       return new Point3D(x, y, z);
    }
 
-   public static Point3D generateRandomPoint(Random random, double minX, double minY, double minZ, double maxX, double maxY, double maxZ)
+   public static Point3D nextPoint3D(Random random, double minX, double minY, double minZ, double maxX, double maxY, double maxZ)
    {
       double x = RandomNumbers.nextDouble(random, minX, maxX);
       double y = RandomNumbers.nextDouble(random, minY, maxY);
@@ -47,7 +47,7 @@ public class RandomTools
       return new Point3D(x, y, z);
    }
 
-   public static Point3D generateRandomPointWithEdgeCases(Random random, double probabilityForEdgeCase)
+   public static Point3D nextPoint3DWithEdgeCases(Random random, double probabilityForEdgeCase)
    {
       double x = RandomNumbers.nextDouble(random, probabilityForEdgeCase);
       double y = RandomNumbers.nextDouble(random, probabilityForEdgeCase);
@@ -56,7 +56,7 @@ public class RandomTools
       return new Point3D(x, y, z);
    }
 
-   public static Point3D generateRandomPoint3d(Random random, double min, double max)
+   public static Point3D nextPoint3D(Random random, double min, double max)
    {
       double x = RandomNumbers.nextDouble(random, min, max);
       double y = RandomNumbers.nextDouble(random, min, max);
@@ -65,7 +65,7 @@ public class RandomTools
       return new Point3D(x, y, z);
    }
 
-   public static Point3D generateRandomPoint3d(Random random, double[] min, double[] max)
+   public static Point3D nextPoint3D(Random random, double[] min, double[] max)
    {
       double x = RandomNumbers.nextDouble(random, min[0], max[0]);
       double y = RandomNumbers.nextDouble(random, min[1], max[1]);
@@ -74,7 +74,7 @@ public class RandomTools
       return new Point3D(x, y, z);
    }
 
-   public static Point3D generateRandomPoint3d(Random random, Tuple3DReadOnly min, Tuple3DReadOnly max)
+   public static Point3D nextPoint3D(Random random, Tuple3DReadOnly min, Tuple3DReadOnly max)
    {
       double x = RandomNumbers.nextDouble(random, min.getX(), max.getX());
       double y = RandomNumbers.nextDouble(random, min.getY(), max.getY());
@@ -83,7 +83,7 @@ public class RandomTools
       return new Point3D(x, y, z);
    }
 
-   public static Point3D32 generateRandomPoint3f(Random random, Tuple3DReadOnly min, Tuple3DReadOnly max)
+   public static Point3D32 nextPoint3D32(Random random, Tuple3DReadOnly min, Tuple3DReadOnly max)
    {
       float x = RandomNumbers.nextFloat(random, min.getX32(), max.getX32());
       float y = RandomNumbers.nextFloat(random, min.getY32(), max.getY32());
@@ -92,19 +92,19 @@ public class RandomTools
       return new Point3D32(x, y, z);
    }
 
-   public static Point3D32[] generateRandomPoint3fCloud(Random random, int size, Tuple3DReadOnly min, Tuple3DReadOnly max)
+   public static Point3D32[] nextPoint3D32Array(Random random, int size, Tuple3DReadOnly min, Tuple3DReadOnly max)
    {
       Point3D32[] randomPoint3fCloud = new Point3D32[size];
 
       for (int i = 0; i < randomPoint3fCloud.length; i++)
       {
-         randomPoint3fCloud[i] = generateRandomPoint3f(random, min, max);
+         randomPoint3fCloud[i] = nextPoint3D32(random, min, max);
       }
 
       return randomPoint3fCloud;
    }
 
-   public static Point2D generateRandomPoint2d(Random random, double maxAbsoluteX, double maxAbsoluteY)
+   public static Point2D nextPoint2D(Random random, double maxAbsoluteX, double maxAbsoluteY)
    {
       double x = RandomNumbers.nextDouble(random, -maxAbsoluteX, maxAbsoluteX);
       double y = RandomNumbers.nextDouble(random, -maxAbsoluteY, maxAbsoluteY);
@@ -112,7 +112,7 @@ public class RandomTools
       return new Point2D(x, y);
    }
 
-   public static Point2D generateRandomPoint2d(Random random, double minX, double minY, double maxX, double maxY)
+   public static Point2D nextPoint2D(Random random, double minX, double minY, double maxX, double maxY)
    {
       double x = RandomNumbers.nextDouble(random, minX, maxX);
       double y = RandomNumbers.nextDouble(random, minY, maxY);
@@ -120,7 +120,7 @@ public class RandomTools
       return new Point2D(x, y);
    }
 
-   public static Point2D32 generateRandomPoint2f(Random random, float maxAbsoluteX, float maxAblsoluteY)
+   public static Point2D32 nextPoint2D32(Random random, float maxAbsoluteX, float maxAblsoluteY)
    {
       float x = RandomNumbers.nextFloat(random, -maxAbsoluteX, maxAbsoluteX);
       float y = RandomNumbers.nextFloat(random, -maxAblsoluteY, maxAblsoluteY);
@@ -128,7 +128,7 @@ public class RandomTools
       return new Point2D32(x, y);
    }
 
-   public static Point2D32 generateRandomPoint2f(Random random, float minX, float minY, float maxX, float maxY)
+   public static Point2D32 nextPoint2D32(Random random, float minX, float minY, float maxX, float maxY)
    {
       float x = RandomNumbers.nextFloat(random, minX, maxX);
       float y = RandomNumbers.nextFloat(random, minY, maxY);
@@ -136,7 +136,7 @@ public class RandomTools
       return new Point2D32(x, y);
    }
 
-   public static Vector3D generateRandomVector(Random random, double minX, double minY, double minZ, double maxX, double maxY, double maxZ)
+   public static Vector3D nextVector3D(Random random, double minX, double minY, double minZ, double maxX, double maxY, double maxZ)
    {
       double x = RandomNumbers.nextDouble(random, minX, maxX);
       double y = RandomNumbers.nextDouble(random, minY, maxY);
@@ -145,7 +145,7 @@ public class RandomTools
       return new Vector3D(x, y, z);
    }
 
-   public static Vector3D generateRandomVector(Random random, Tuple3DReadOnly boundary1, Tuple3DReadOnly boundary2)
+   public static Vector3D nextVector3D(Random random, Tuple3DReadOnly boundary1, Tuple3DReadOnly boundary2)
    {
       Vector3D ret = new Vector3D();
 
@@ -156,12 +156,12 @@ public class RandomTools
       return ret;
    }
 
-   public static Vector3D generateRandomVector(Random random)
+   public static Vector3D nextVector3D(Random random)
    {
       return new Vector3D(random.nextDouble() - 0.5, random.nextDouble() - 0.5, random.nextDouble() - 0.5);
    }
 
-   public static Vector3D generateRandomOrthogonalVector3d(Random random, Vector3DReadOnly vectorToBeOrthogonalTo, boolean normalize)
+   public static Vector3D nextOrthogonalVector3D(Random random, Vector3DReadOnly vectorToBeOrthogonalTo, boolean normalize)
    {
       Vector3D v1 = new Vector3D(vectorToBeOrthogonalTo.getY(), -vectorToBeOrthogonalTo.getX(), 0.0);
       Vector3D v2 = new Vector3D(-vectorToBeOrthogonalTo.getZ(), 0.0, vectorToBeOrthogonalTo.getX());
@@ -178,29 +178,29 @@ public class RandomTools
       return randomPerpendicular;
    }
 
-   public static Vector3D32 generateRandomVector3f(Random random)
+   public static Vector3D32 nextVector3D32(Random random)
    {
-      return new Vector3D32(generateRandomVector(random));
+      return new Vector3D32(nextVector3D(random));
    }
 
-   public static Vector3D generateRandomVector(Random random, double length)
+   public static Vector3D nextVector3D(Random random, double length)
    {
-      Vector3D ret = generateRandomVector(random);
+      Vector3D ret = nextVector3D(random);
       ret.normalize();
       ret.scale(length);
 
       return ret;
    }
 
-   public static Vector3D[] generateRandomVectorArray(Random random, int numberOfVectors, double length)
+   public static Vector3D[] nextVector3DArray(Random random, int numberOfVectors, double length)
    {
       Vector3D[] vectors = new Vector3D[numberOfVectors];
       for (int i = 0; i < numberOfVectors; i++)
-         vectors[i] = generateRandomVector(random, length);
+         vectors[i] = nextVector3D(random, length);
       return vectors;
    }
 
-   public static Vector4D generateRandomVector4d(Random random, Tuple4DReadOnly lowerBound, Tuple4DReadOnly upperBound)
+   public static Vector4D nextVector4D(Random random, Tuple4DReadOnly lowerBound, Tuple4DReadOnly upperBound)
    {
       Vector4D ret = new Vector4D();
 
@@ -212,7 +212,7 @@ public class RandomTools
       return ret;
    }
 
-   public static Vector4D32 generateRandomVector4f(Random random, Tuple4DReadOnly lowerBound, Tuple4DReadOnly upperBound)
+   public static Vector4D32 nextVector4D32(Random random, Tuple4DReadOnly lowerBound, Tuple4DReadOnly upperBound)
    {
       Vector4D32 ret = new Vector4D32();
 
@@ -224,21 +224,21 @@ public class RandomTools
       return ret;
    }
 
-   public static Vector2D generateRandomVector2d(Random random)
+   public static Vector2D nextVector2D(Random random)
    {
       return new Vector2D(random.nextDouble() - 0.5, random.nextDouble() - 0.5);
    }
 
-   public static Vector2D generateRandomVector2d(Random random, double length)
+   public static Vector2D nextVector2D(Random random, double length)
    {
-      Vector2D ret = generateRandomVector2d(random);
+      Vector2D ret = nextVector2D(random);
       ret.normalize();
       ret.scale(length);
 
       return ret;
    }
 
-   public static Matrix3D generateRandomDiagonalMatrix3d(Random random)
+   public static Matrix3D nextDiagonalMatrix3D(Random random)
    {
       Matrix3D ret = new Matrix3D();
       ret.setM00(random.nextDouble());
@@ -248,12 +248,12 @@ public class RandomTools
       return ret;
    }
 
-   public static AxisAngle generateRandomRotation(Random random)
+   public static AxisAngle nextAxisAngle(Random random)
    {
-      return generateRandomRotation(random, Math.PI);
+      return nextAxisAngle(random, Math.PI);
    }
 
-   public static AxisAngle generateRandomRotation(Random random, double minMaxAngleRange)
+   public static AxisAngle nextAxisAngle(Random random, double minMaxAngleRange)
    {
       // Generate uniformly random point on unit sphere (based on http://mathworld.wolfram.com/SpherePointPicking.html )
       double height = RandomNumbers.nextDouble(random, -1.0, 1.0);
@@ -263,7 +263,7 @@ public class RandomTools
       return new AxisAngle(radius * Math.cos(angle), radius * Math.sin(angle), height, angle);
    }
 
-   public static Matrix generateRandomJamaMatrix(Random random, int columns, int rows)
+   public static Matrix nextJamaMatrix(Random random, int columns, int rows)
    {
       Matrix ret = new Matrix(columns, rows);
 
@@ -278,7 +278,7 @@ public class RandomTools
       return ret;
    }
 
-   public static Matrix3D generateRandomMatrix3d(Random random, double maxAbsolute)
+   public static Matrix3D nextMatrix3D(Random random, double maxAbsolute)
    {
       Matrix3D ret = new Matrix3D();
       for (int row = 0; row < 3; row++)
@@ -292,12 +292,12 @@ public class RandomTools
       return ret;
    }
 
-   public static DenseMatrix64F generateRandomMatrix(Random random, int numberOfRows, int numberOfColumns)
+   public static DenseMatrix64F nextDenseMatrix64F(Random random, int numberOfRows, int numberOfColumns)
    {
-      return generateRandomMatrix(random, numberOfRows, numberOfColumns, 1.0);
+      return nextDenseMatrix64F(random, numberOfRows, numberOfColumns, 1.0);
    }
 
-   public static DenseMatrix64F generateRandomMatrix(Random random, int numberOfRows, int numberOfColumns, double maxAbsoluteValue)
+   public static DenseMatrix64F nextDenseMatrix64F(Random random, int numberOfRows, int numberOfColumns, double maxAbsoluteValue)
    {
       DenseMatrix64F matrixToReturn = new DenseMatrix64F(numberOfRows, numberOfColumns);
 
@@ -312,7 +312,7 @@ public class RandomTools
       return matrixToReturn;
    }
 
-   public static DenseMatrix64F generateRandomMatrix(Random random, int numberOfRows, int numberOfColumns, double boundaryOne, double boundaryTwo)
+   public static DenseMatrix64F nextDenseMatrix64F(Random random, int numberOfRows, int numberOfColumns, double boundaryOne, double boundaryTwo)
    {
       DenseMatrix64F matrixToReturn = new DenseMatrix64F(numberOfRows, numberOfColumns);
 
@@ -327,27 +327,27 @@ public class RandomTools
       return matrixToReturn;
    }
 
-   public static Quaternion generateRandomQuaternion(Random random)
+   public static Quaternion nextQuaternion(Random random)
    {
-      return generateRandomQuaternion(random, Math.PI);
+      return nextQuaternion(random, Math.PI);
    }
 
-   public static Quaternion32 generateRandomQuaternion4f(Random random)
+   public static Quaternion32 nextQuaternion32(Random random)
    {
-      return new Quaternion32(generateRandomQuaternion(random, Math.PI));
+      return new Quaternion32(nextQuaternion(random, Math.PI));
    }
 
-   public static Quaternion generateRandomQuaternion(Random random, double minMaxAngleRange)
+   public static Quaternion nextQuaternion(Random random, double minMaxAngleRange)
    {
-      AxisAngle orientation = generateRandomRotation(random, minMaxAngleRange);
+      AxisAngle orientation = nextAxisAngle(random, minMaxAngleRange);
       Quaternion quat = new Quaternion();
       quat.set(orientation);
       return quat;
    }
 
-   public static RotationMatrix generateRandomRotationMatrix(Random random)
+   public static RotationMatrix nextRotationMatrix(Random random)
    {
-      Quaternion quaternion = generateRandomQuaternion(random);
+      Quaternion quaternion = nextQuaternion(random);
       RotationMatrix ret = new RotationMatrix();
       ret.set(quaternion);
 

@@ -9,7 +9,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.geometry.interfaces.VectorInterface;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 /**
@@ -125,7 +125,7 @@ public class FrameVector extends FrameTuple<FrameVector, Vector3D> implements Ve
 
    public static FrameVector generateRandomFrameVector(Random random, ReferenceFrame frame)
    {
-      FrameVector randomVector = new FrameVector(frame, RandomTools.generateRandomVector(random));
+      FrameVector randomVector = new FrameVector(frame, RandomGeometry.nextVector3D(random));
       return randomVector;
    }
 

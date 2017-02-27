@@ -12,7 +12,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.TransformTools;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -167,9 +167,9 @@ public class HandstepPacket extends Packet<HandstepPacket> implements Transforma
       double TRAJECTORY_TIME_MAX = 10;
 
       this.robotSide = RobotSide.generateRandomRobotSide(random);
-      this.location = RandomTools.generateRandomPoint(random, 0.5, 0.5, 0.5);
-      this.orientation = RandomTools.generateRandomQuaternion(random, Math.PI / 4.0);
-      this.surfaceNormal = RandomTools.generateRandomVector(random, 1.0);
+      this.location = RandomGeometry.nextPoint3D(random, 0.5, 0.5, 0.5);
+      this.orientation = RandomGeometry.nextQuaternion(random, Math.PI / 4.0);
+      this.surfaceNormal = RandomGeometry.nextVector3D(random, 1.0);
       this.swingTrajectoryTime = RandomNumbers.nextDouble(random, TRAJECTORY_TIME_MIN, TRAJECTORY_TIME_MAX);
    }
 }

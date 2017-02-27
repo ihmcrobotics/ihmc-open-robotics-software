@@ -19,7 +19,7 @@ import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
 import us.ihmc.robotics.geometry.RigidBodyTransformGenerator;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -444,10 +444,10 @@ public abstract class FootstepPlannerOnRoughTerrainTest implements PlanningTest
       {
          generator.identity();
 
-         Vector3D translationVector = RandomTools.generateRandomVector(random, -5.0, -1.0, -0.05, 5.0, 1.0, 0.0);
+         Vector3D translationVector = RandomGeometry.nextVector3D(random, -5.0, -1.0, -0.05, 5.0, 1.0, 0.0);
          generator.translate(translationVector);
 
-         Quaternion rotation = RandomTools.generateRandomQuaternion(random, Math.toRadians(15.0));
+         Quaternion rotation = RandomGeometry.nextQuaternion(random, Math.toRadians(15.0));
          generator.rotate(rotation);
 
          generator.addCubeReferencedAtBottomMiddle(length, width, height);

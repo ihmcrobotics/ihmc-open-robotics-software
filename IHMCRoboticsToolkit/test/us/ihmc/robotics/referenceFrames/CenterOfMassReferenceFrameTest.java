@@ -11,7 +11,7 @@ import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.screwTheory.CenterOfMassCalculator;
 import us.ihmc.robotics.screwTheory.RevoluteJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -31,19 +31,19 @@ public class CenterOfMassReferenceFrameTest
       ArrayList<RevoluteJoint> joints = new ArrayList<RevoluteJoint>(nJoints);
       RigidBody elevator = new RigidBody("elevator", ReferenceFrame.getWorldFrame());
       SixDoFJoint sixDoFJoint = new SixDoFJoint("sixDoF", elevator, elevator.getBodyFixedFrame());
-      RigidBody floatingBody = ScrewTools.addRigidBody("floatingBody", sixDoFJoint, RandomTools.generateRandomDiagonalMatrix3d(random), random.nextDouble(),
-                                  RandomTools.generateRandomVector(random));
+      RigidBody floatingBody = ScrewTools.addRigidBody("floatingBody", sixDoFJoint, RandomGeometry.nextDiagonalMatrix3D(random), random.nextDouble(),
+                                  RandomGeometry.nextVector3D(random));
 
       Vector3D[] jointAxes = new Vector3D[nJoints];
       for (int i = 0; i < nJoints; i++)
       {
-         jointAxes[i] = RandomTools.generateRandomVector(random);
+         jointAxes[i] = RandomGeometry.nextVector3D(random);
       }
 
       ScrewTestTools.createRandomChainRobot("test", joints, floatingBody, jointAxes, random);
       ReferenceFrame centerOfMassReferenceFrame = new CenterOfMassReferenceFrame("com", elevator.getBodyFixedFrame(), elevator);
 
-      sixDoFJoint.setPosition(RandomTools.generateRandomVector(random));
+      sixDoFJoint.setPosition(RandomGeometry.nextVector3D(random));
       sixDoFJoint.setRotation(random.nextDouble(), random.nextDouble(), random.nextDouble());
 
       for (RevoluteJoint joint : joints)

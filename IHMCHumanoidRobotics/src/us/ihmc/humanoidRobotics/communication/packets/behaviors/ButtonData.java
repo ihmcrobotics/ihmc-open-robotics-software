@@ -5,7 +5,7 @@ import java.util.Random;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 
 public class ButtonData extends Packet<ButtonData>
 {
@@ -15,8 +15,8 @@ public class ButtonData extends Packet<ButtonData>
    public ButtonData(Random random)
    {
       double max = Double.MAX_VALUE / 2;
-      pushPoint = RandomTools.generateRandomPoint(random, max, max, max);
-      pushDirection = RandomTools.generateRandomVector(random, max, max, max, max, max, max);
+      pushPoint = RandomGeometry.nextPoint3D(random, max, max, max);
+      pushDirection = RandomGeometry.nextVector3D(random, max, max, max, max, max, max);
    }
    
    public ButtonData()

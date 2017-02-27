@@ -15,7 +15,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.simulationconstructionset.GroundContactPointsHolder;
 import us.ihmc.simulationconstructionset.Robot;
@@ -135,13 +135,13 @@ public class LinearStickSlipGroundContactModelTest
          double maxAbsoluteZ = 0.01;
          double maxSpeed = 0.1;
 
-         position = RandomTools.generateRandomPoint(random, maxAbsoluteX, maxAbsoluteY, maxAbsoluteZ);
+         position = RandomGeometry.nextPoint3D(random, maxAbsoluteX, maxAbsoluteY, maxAbsoluteZ);
 
          // Keep it under ground for now to make sure touchdown doesn't change.
          if (position.getZ() > -0.002)
             position.setZ(-0.002);
 
-         velocity = RandomTools.generateRandomVector(random, maxSpeed);
+         velocity = RandomGeometry.nextVector3D(random, maxSpeed);
          if (velocity.getZ() > 0.0) velocity.setZ(-velocity.getZ());
 
          groundContactPoint.setPosition(position);
@@ -227,8 +227,8 @@ public class LinearStickSlipGroundContactModelTest
       {
          double maxAbsoluteXYZ = 0.1;
          double maxAbsoluteVelocity = 1.0;
-         Point3D queryPointOnFlat = RandomTools.generateRandomPoint(random, maxAbsoluteXYZ , maxAbsoluteXYZ, maxAbsoluteXYZ);
-         Vector3D queryVelocityOnFlat = RandomTools.generateRandomVector(random, maxAbsoluteVelocity);
+         Point3D queryPointOnFlat = RandomGeometry.nextPoint3D(random, maxAbsoluteXYZ , maxAbsoluteXYZ, maxAbsoluteXYZ);
+         Vector3D queryVelocityOnFlat = RandomGeometry.nextVector3D(random, maxAbsoluteVelocity);
 
          groundContactPointOnFlat.setPosition(queryPointOnFlat);
          groundContactPointOnFlat.setVelocity(queryVelocityOnFlat);

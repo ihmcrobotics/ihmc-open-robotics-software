@@ -43,7 +43,7 @@ import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsOrientation
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsPositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.waypoints.SimpleSE3TrajectoryPoint;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -84,8 +84,8 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       RigidBody pelvis = fullRobotModel.getPelvis();
 
       FramePose desiredRandomPelvisPose = new FramePose(pelvis.getBodyFixedFrame());
-      desiredRandomPelvisPose.setOrientation(RandomTools.generateRandomQuaternion(random, 1.0));
-      desiredRandomPelvisPose.setPosition(RandomTools.generateRandomPoint(random, 0.10, 0.20, 0.05));
+      desiredRandomPelvisPose.setOrientation(RandomGeometry.nextQuaternion(random, 1.0));
+      desiredRandomPelvisPose.setPosition(RandomGeometry.nextPoint3D(random, 0.10, 0.20, 0.05));
       desiredRandomPelvisPose.setZ(desiredRandomPelvisPose.getZ() - 0.1);
       Point3D desiredPosition = new Point3D();
       Quaternion desiredOrientation = new Quaternion();
@@ -463,8 +463,8 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       RigidBody pelvis = fullRobotModel.getPelvis();
 
       FramePose desiredRandomPelvisPose = new FramePose(pelvis.getBodyFixedFrame());
-      desiredRandomPelvisPose.setOrientation(RandomTools.generateRandomQuaternion(random, 1.0));
-      desiredRandomPelvisPose.setPosition(RandomTools.generateRandomPoint(random, 0.10, 0.20, 0.05));
+      desiredRandomPelvisPose.setOrientation(RandomGeometry.nextQuaternion(random, 1.0));
+      desiredRandomPelvisPose.setPosition(RandomGeometry.nextPoint3D(random, 0.10, 0.20, 0.05));
       desiredRandomPelvisPose.setZ(desiredRandomPelvisPose.getZ() - 0.1);
       Point3D desiredPosition = new Point3D();
       Quaternion desiredOrientation = new Quaternion();

@@ -17,7 +17,7 @@ import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.trajectories.SimpleOrientationTrajectoryGenerator;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class QuaternionCalculusTest
@@ -33,7 +33,7 @@ public class QuaternionCalculusTest
       for (int i = 0; i < 10000; i++)
       {
          QuaternionCalculus quaternionCalculus = new QuaternionCalculus();
-         Quaternion q = RandomTools.generateRandomQuaternion(random);
+         Quaternion q = RandomGeometry.nextQuaternion(random);
 
          Vector4D qLog = new Vector4D();
          Quaternion vExp = new Quaternion();
@@ -61,9 +61,9 @@ public class QuaternionCalculusTest
       for (int i = 0; i < 10000; i++)
       {
          QuaternionCalculus quaternionCalculus = new QuaternionCalculus();
-         Quaternion q = RandomTools.generateRandomQuaternion(random);
+         Quaternion q = RandomGeometry.nextQuaternion(random);
          double length = RandomNumbers.nextDouble(random, 0.0, 10.0);
-         Vector3D expectedAngularVelocity = RandomTools.generateRandomVector(random, length);
+         Vector3D expectedAngularVelocity = RandomGeometry.nextVector3D(random, length);
          if (random.nextBoolean())
             expectedAngularVelocity.negate();
          Vector3D actualAngularVelocity = new Vector3D();
@@ -85,12 +85,12 @@ public class QuaternionCalculusTest
       for (int i = 0; i < 10000; i++)
       {
          QuaternionCalculus quaternionCalculus = new QuaternionCalculus();
-         Quaternion q = RandomTools.generateRandomQuaternion(random);
+         Quaternion q = RandomGeometry.nextQuaternion(random);
          double length = RandomNumbers.nextDouble(random, 0.0, 10.0);
-         Vector3D angularVelocity = RandomTools.generateRandomVector(random, length);
+         Vector3D angularVelocity = RandomGeometry.nextVector3D(random, length);
          if (random.nextBoolean())
             angularVelocity.negate();
-         Vector3D expectedAngularAcceleration = RandomTools.generateRandomVector(random, length);
+         Vector3D expectedAngularAcceleration = RandomGeometry.nextVector3D(random, length);
          if (random.nextBoolean())
             expectedAngularAcceleration.negate();
          Vector3D actualAngularAcceleration = new Vector3D();
@@ -266,8 +266,8 @@ public class QuaternionCalculusTest
    {
       QuaternionCalculus quaternionCalculus = new QuaternionCalculus();
       Random random = new Random(6546545L);
-      Quaternion q0 = RandomTools.generateRandomQuaternion(random);
-      Quaternion q1 = RandomTools.generateRandomQuaternion(random);
+      Quaternion q0 = RandomGeometry.nextQuaternion(random);
+      Quaternion q1 = RandomGeometry.nextQuaternion(random);
       Quaternion expectedQInterpolated = new Quaternion();
       Quaternion actualQInterpolated = new Quaternion();
 

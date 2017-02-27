@@ -25,7 +25,7 @@ import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.Direction;
 import us.ihmc.robotics.geometry.shapes.Box3d.FaceName;
 import us.ihmc.robotics.math.Epsilons;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 
 public class Box3dTest
 {
@@ -401,7 +401,7 @@ public class Box3dTest
       faces.add(new ImmutablePair<FaceName, Integer>(FaceName.PLUSY, 1));
       faces.add(new ImmutablePair<FaceName, Integer>(FaceName.PLUSZ, 2));
 
-      Vector3D center = RandomTools.generateRandomVector(random);
+      Vector3D center = RandomGeometry.nextVector3D(random);
       double length = random.nextDouble();
       double width = random.nextDouble();
       double height = random.nextDouble();
@@ -412,7 +412,7 @@ public class Box3dTest
       for (int i = 0; i < nTests; i++)
       {
          RotationMatrix rotation = new RotationMatrix();
-         rotation.set(RandomTools.generateRandomRotation(random));
+         rotation.set(RandomGeometry.nextAxisAngle(random));
          box.setRotation(rotation);
          assertEquals(length, box.getLength(), Epsilons.ONE_TRILLIONTH);
          assertEquals(width, box.getWidth(), Epsilons.ONE_TRILLIONTH);
@@ -482,13 +482,13 @@ public class Box3dTest
             double delta = 1e-5;
 
             Point3D point2 = new Point3D(point);
-            point2.add(RandomTools.generateRandomVector(random, delta));           
+            point2.add(RandomGeometry.nextVector3D(random, delta));           
             Point3D closestPoint2 = new Point3D();
             Vector3D normal2 = new Vector3D();
             box.checkIfInside(point2, closestPoint2, normal2);
             
             Point3D point3 = new Point3D(point);
-            point3.add(RandomTools.generateRandomVector(random, delta));
+            point3.add(RandomGeometry.nextVector3D(random, delta));
             Point3D closestPoint3 = new Point3D();
             Vector3D normal3 = new Vector3D();
             box.checkIfInside(point3, closestPoint3, normal3);

@@ -9,7 +9,7 @@ import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 
 public class PlanarRegionsListExamples
 {
@@ -148,10 +148,10 @@ public class PlanarRegionsListExamples
       {
          generator.identity();
 
-         Vector3D translationVector = RandomTools.generateRandomVector(random, -maxX, -maxY, 0.0, maxX, maxY, maxZ);
+         Vector3D translationVector = RandomGeometry.nextVector3D(random, -maxX, -maxY, 0.0, maxX, maxY, maxZ);
          generator.translate(translationVector);
 
-         Quaternion rotation = RandomTools.generateRandomQuaternion(random);
+         Quaternion rotation = RandomGeometry.nextQuaternion(random);
          generator.rotate(rotation);
 
          generator.addCubeReferencedAtBottomMiddle(length, width, height);

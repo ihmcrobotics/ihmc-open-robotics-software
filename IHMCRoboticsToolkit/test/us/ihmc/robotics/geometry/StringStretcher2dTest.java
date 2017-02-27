@@ -15,7 +15,7 @@ import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 
 public class StringStretcher2dTest
 {
@@ -155,7 +155,7 @@ public class StringStretcher2dTest
 
       for (int i = 0; i < numberOfPoints; i++)
       {
-         Point2D point = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
+         Point2D point = RandomGeometry.nextPoint2D(random, 10.0, 10.0);
          Point2D otherPoint = new Point2D(point);
          otherPoint.setY(RandomNumbers.nextDouble(random, -10.0, 10.0));
 

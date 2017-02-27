@@ -40,7 +40,7 @@ import us.ihmc.robotics.math.trajectories.waypoints.FrameEuclideanTrajectoryPoin
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsOrientationTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsPositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.waypoints.SimpleSE3TrajectoryPoint;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -95,8 +95,8 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
          // Now we can do the usual test.
          double trajectoryTime = 1.0;
          FramePose desiredRandomFootPose = new FramePose(foot.getBodyFixedFrame());
-         desiredRandomFootPose.setOrientation(RandomTools.generateRandomQuaternion(random, 1.0));
-         desiredRandomFootPose.setPosition(RandomTools.generateRandomPoint(random, -0.1, -0.1, 0.05, 0.1, 0.2, 0.3));
+         desiredRandomFootPose.setOrientation(RandomGeometry.nextQuaternion(random, 1.0));
+         desiredRandomFootPose.setPosition(RandomGeometry.nextPoint3D(random, -0.1, -0.1, 0.05, 0.1, 0.2, 0.3));
          desiredRandomFootPose.changeFrame(ReferenceFrame.getWorldFrame());
 
          desiredRandomFootPose.getPose(desiredPosition, desiredOrientation);
@@ -813,8 +813,8 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
          trajectoryTime = 1.0;
          FramePose desiredRandomFootPose = new FramePose(foot.getBodyFixedFrame());
          Random random = new Random(545L);
-         desiredRandomFootPose.setOrientation(RandomTools.generateRandomQuaternion(random, 1.0));
-         desiredRandomFootPose.setPosition(RandomTools.generateRandomPoint(random, -0.1, -0.1, 0.05, 0.1, 0.2, 0.3));
+         desiredRandomFootPose.setOrientation(RandomGeometry.nextQuaternion(random, 1.0));
+         desiredRandomFootPose.setPosition(RandomGeometry.nextPoint3D(random, -0.1, -0.1, 0.05, 0.1, 0.2, 0.3));
          desiredRandomFootPose.changeFrame(ReferenceFrame.getWorldFrame());
 
          desiredRandomFootPose.getPose(desiredPosition, desiredOrientation);

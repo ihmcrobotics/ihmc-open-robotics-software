@@ -16,7 +16,7 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 
 public class QuadTreeForGroundTest
 {
@@ -517,7 +517,7 @@ public class QuadTreeForGroundTest
    {
       for (int i = 0; i < numberOfPoints; i++)
       {
-         Point3D point = RandomTools.generateRandomPoint(random, bounds.minX, bounds.minY, minZ, bounds.maxX, bounds.maxY, maxZ);
+         Point3D point = RandomGeometry.nextPoint3D(random, bounds.minX, bounds.minY, minZ, bounds.maxX, bounds.maxY, maxZ);
          quadTree.put(point.getX(), point.getY(), point.getZ());
       }
    }
@@ -527,7 +527,7 @@ public class QuadTreeForGroundTest
       ArrayList<Point3D> pointsToReturn = new ArrayList<Point3D>();
       for (int i = 0; i < numberOfPoints; i++)
       {
-         Point3D point = RandomTools.generateRandomPoint(random, bounds.minX, bounds.minY, minZ, bounds.maxX, bounds.maxY, maxZ);
+         Point3D point = RandomGeometry.nextPoint3D(random, bounds.minX, bounds.minY, minZ, bounds.maxX, bounds.maxY, maxZ);
          pointsToReturn.add(point);
       }
 

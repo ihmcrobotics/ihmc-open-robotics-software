@@ -18,7 +18,7 @@ import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 
 public class PrincipalComponentAnalysis3DTest
 {
@@ -38,10 +38,10 @@ public class PrincipalComponentAnalysis3DTest
          {
             System.out.println("----------- Iteration #" + trialNumber + " ---------------------------");
          }
-         Point3D origin = RandomTools.generateRandomPoint(random, 1.0, 1.0, 1.0);
+         Point3D origin = RandomGeometry.nextPoint3D(random, 1.0, 1.0, 1.0);
          Point3D expectedMean = new Point3D();
          double pointScatteringAmplitude = 5.0;
-         Vector3D expectedPrincipalAxis = RandomTools.generateRandomVector(random, 1.0);
+         Vector3D expectedPrincipalAxis = RandomGeometry.nextVector3D(random, 1.0);
          double expectedVarianceAlongPrincipalAxis = 0.0;
          double expectedStandardDeviationAlongPrincipalAxis = 0.0;
 
@@ -176,12 +176,12 @@ public class PrincipalComponentAnalysis3DTest
          {
             System.out.println("----------- Iteration #" + trialNumber + " ---------------------------");
          }
-         Point3D origin = RandomTools.generateRandomPoint(random, 1.0, 1.0, 1.0);
+         Point3D origin = RandomGeometry.nextPoint3D(random, 1.0, 1.0, 1.0);
          Point3D expectedMean = new Point3D();
          Vector2D pointScatteringAmplitude = new Vector2D(15.0, 1.0);
-         Vector3D expectedPrincipalAxis = RandomTools.generateRandomVector(random, 1.0);
+         Vector3D expectedPrincipalAxis = RandomGeometry.nextVector3D(random, 1.0);
          // Build the secondary vector such as it is orthogonal to the principal axis
-         Vector3D randomVector = RandomTools.generateRandomVector(random, 1.0);
+         Vector3D randomVector = RandomGeometry.nextVector3D(random, 1.0);
          Vector3D expectedSecondaryAxis = new Vector3D();
          expectedSecondaryAxis.cross(expectedPrincipalAxis, randomVector);
          expectedSecondaryAxis.normalize();
@@ -360,12 +360,12 @@ public class PrincipalComponentAnalysis3DTest
          {
             System.out.println("----------- Iteration #" + trialNumber + " ---------------------------");
          }
-         Point3D origin = RandomTools.generateRandomPoint(random, 1.0, 1.0, 1.0);
+         Point3D origin = RandomGeometry.nextPoint3D(random, 1.0, 1.0, 1.0);
          Point3D expectedMean = new Point3D();
          Vector3D pointScatteringAmplitude = new Vector3D(15.0, 1.0, 0.2);
-         Vector3D expectedPrincipalAxis = RandomTools.generateRandomVector(random, 1.0);
+         Vector3D expectedPrincipalAxis = RandomGeometry.nextVector3D(random, 1.0);
          // Build the secondary vector such as it is orthogonal to the principal axis
-         Vector3D randomVector = RandomTools.generateRandomVector(random, 1.0);
+         Vector3D randomVector = RandomGeometry.nextVector3D(random, 1.0);
          Vector3D expectedSecondaryAxis = new Vector3D();
          expectedSecondaryAxis.cross(expectedPrincipalAxis, randomVector);
          expectedSecondaryAxis.normalize();
@@ -570,7 +570,7 @@ public class PrincipalComponentAnalysis3DTest
 
 	   PrincipalComponentAnalysis3D pca = new PrincipalComponentAnalysis3D();
 	   ArrayList<Point3D> listOfPoints = new ArrayList<>();
-	   listOfPoints.add(RandomTools.generateRandomPoint(random, 10.0, 10.0, 10.0));
+	   listOfPoints.add(RandomGeometry.nextPoint3D(random, 10.0, 10.0, 10.0));
 	   pca.setPointCloud(listOfPoints);
 	   pca.compute();
 	}
@@ -586,8 +586,8 @@ public class PrincipalComponentAnalysis3DTest
 
 	   PrincipalComponentAnalysis3D pca = new PrincipalComponentAnalysis3D();
 	   ArrayList<Point3D> listOfPoints = new ArrayList<>();
-	   listOfPoints.add(RandomTools.generateRandomPoint(random, 10.0, 10.0, 10.0));
-	   listOfPoints.add(RandomTools.generateRandomPoint(random, 10.0, 10.0, 10.0));
+	   listOfPoints.add(RandomGeometry.nextPoint3D(random, 10.0, 10.0, 10.0));
+	   listOfPoints.add(RandomGeometry.nextPoint3D(random, 10.0, 10.0, 10.0));
 	   pca.setPointCloud(listOfPoints);
 	   pca.compute();
 	}

@@ -13,7 +13,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class GroundTruthinatorTest
@@ -73,7 +73,7 @@ public class GroundTruthinatorTest
       Random random = new Random(1886L);
       for (int i=0; i<numberOfTests; i++)
       {
-         position = new FramePoint(worldFrame, RandomTools.generateRandomPoint3d(random, -0.2, 0.2));
+         position = new FramePoint(worldFrame, RandomGeometry.nextPoint3D(random, -0.2, 0.2));
          orientation = new FrameOrientation(worldFrame, 0.0, 0.0, 0.0, 1.0);
          objectPose.setPose(position, orientation);
 
@@ -144,7 +144,7 @@ public class GroundTruthinatorTest
       Random random = new Random(1886L);
       for (int i=0; i<numberOfTests; i++)
       {
-         position = new FramePoint(worldFrame, RandomTools.generateRandomPoint3d(random, -0.2, 0.2));
+         position = new FramePoint(worldFrame, RandomGeometry.nextPoint3D(random, -0.2, 0.2));
          orientation = new FrameOrientation(worldFrame, 0.0, 0.0, 0.0, 1.0);
          objectPose.setPose(position, orientation);
 

@@ -23,7 +23,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.partNames.NeckJointName;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
@@ -108,7 +108,7 @@ public class RosConnectedZeroPoseRobotConfigurationDataProducer extends Abstract
       for(int sensorNumber = 0; sensorNumber <  imuDefinitions.length; sensorNumber++)
       {
          IMUPacket imuPacket = robotConfigurationData.getImuPacketForSensor(sensorNumber);
-         imuPacket.set(RandomTools.generateRandomVector3f(random), RandomTools.generateRandomQuaternion4f(random), RandomTools.generateRandomVector3f(random));
+         imuPacket.set(RandomGeometry.nextVector3D32(random), RandomGeometry.nextQuaternion32(random), RandomGeometry.nextVector3D32(random));
       }
       
       robotConfigurationData.setRobotMotionStatus(RobotMotionStatus.STANDING);
