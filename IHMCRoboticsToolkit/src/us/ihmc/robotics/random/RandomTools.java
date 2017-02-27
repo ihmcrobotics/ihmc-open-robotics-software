@@ -25,11 +25,6 @@ import us.ihmc.euclid.tuple4D.interfaces.Tuple4DReadOnly;
 
 public class RandomTools
 {
-   public static boolean generateRandomBoolean(Random random)
-   {
-      return random.nextBoolean();
-   }
-
    public static boolean generateRandomBoolean(Random random, double percentChanceTrue)
    {
       double percent = random.nextDouble();

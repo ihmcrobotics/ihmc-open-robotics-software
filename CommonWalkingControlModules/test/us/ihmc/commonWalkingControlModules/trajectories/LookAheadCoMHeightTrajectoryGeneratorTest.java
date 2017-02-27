@@ -237,7 +237,7 @@ public class LookAheadCoMHeightTrajectoryGeneratorTest
             pelvisFrame.setY(queryPosition.getY());
             pelvisFrame.update();
 
-            boolean switchSupportSides = RandomTools.generateRandomBoolean(random);
+            boolean switchSupportSides = random.nextBoolean();
             if (switchSupportSides)
             {
                supportLegFrameSide.set(supportLegFrameSide.getEnumValue().getOppositeSide());
