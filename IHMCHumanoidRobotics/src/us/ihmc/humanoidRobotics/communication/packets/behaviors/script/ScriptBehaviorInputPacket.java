@@ -9,7 +9,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 
 public class ScriptBehaviorInputPacket extends Packet<ScriptBehaviorInputPacket>
 {
@@ -57,11 +57,11 @@ public class ScriptBehaviorInputPacket extends Packet<ScriptBehaviorInputPacket>
       double xMax = 0.90 * Math.min(Math.abs(XYZ_MAX[0]), Math.abs(XYZ_MIN[0]));
       double yMax = 0.90 * Math.min(Math.abs(XYZ_MAX[1]), Math.abs(XYZ_MIN[1]));
       double zMax = 0.90 * Math.min(Math.abs(XYZ_MAX[2]), Math.abs(XYZ_MIN[2]));
-      Point3D position = RandomTools.generateRandomPoint(random, xMax, yMax, zMax);
+      Point3D position = RandomGeometry.nextPoint3D(random, xMax, yMax, zMax);
       Vector3D translation = new Vector3D(position);
       Quaternion orientation = new Quaternion();
 
-      orientation.set(RandomTools.generateRandomRotation(random));
+      orientation.set(RandomGeometry.nextAxisAngle(random));
 
       this.scriptName = RandomStringUtils.random(length, true, true);
       this.referenceTransform = new RigidBodyTransform(orientation, translation);

@@ -21,9 +21,11 @@ public class PointAccelerationCommand implements InverseDynamicsCommand<PointAcc
 
    private RigidBody base;
    private RigidBody endEffector;
+   private RigidBody optionalPrimaryBase;
 
    private String baseName;
    private String endEffectorName;
+   private String optionalPrimaryBaseName;
 
    public PointAccelerationCommand()
    {
@@ -46,6 +48,12 @@ public class PointAccelerationCommand implements InverseDynamicsCommand<PointAcc
    {
       this.endEffector = endEffector;
       endEffectorName = endEffector.getName();
+   }
+
+   public void setPrimaryBase(RigidBody primaryBase)
+   {
+      optionalPrimaryBase = primaryBase;
+      optionalPrimaryBaseName = primaryBase.getName();
    }
 
    public void setBodyFixedPointToControl(FramePoint bodyFixedPointInEndEffectorFrame)
@@ -77,6 +85,9 @@ public class PointAccelerationCommand implements InverseDynamicsCommand<PointAcc
 
       baseName = other.baseName;
       endEffectorName = other.endEffectorName;
+
+      optionalPrimaryBase = other.optionalPrimaryBase;
+      optionalPrimaryBaseName = other.optionalPrimaryBaseName;
    }
 
    public void setSelectionMatrixToIdentity()
@@ -173,6 +184,16 @@ public class PointAccelerationCommand implements InverseDynamicsCommand<PointAcc
    public String getEndEffectorName()
    {
       return endEffectorName;
+   }
+
+   public RigidBody getPrimaryBase()
+   {
+      return optionalPrimaryBase;
+   }
+
+   public String getPrimaryBaseName()
+   {
+      return optionalPrimaryBaseName;
    }
 
    public void getBodyFixedPointIncludingFrame(FramePoint bodyFixedPointToControlToPack)

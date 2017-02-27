@@ -36,7 +36,7 @@ public class CylinderShapeDescription<T extends CylinderShapeDescription<T>> imp
       cylinder3d = new Cylinder3d(height, radius);
 
       cylinderConsistencyTransform.setTranslation(0.0, 0.0, -height / 2.0);
-      cylinder3d.setTransform(cylinderConsistencyTransform);
+      cylinder3d.setPose(cylinderConsistencyTransform);
       
       boundingBoxNeedsUpdating = true;
    }
@@ -74,7 +74,7 @@ public class CylinderShapeDescription<T extends CylinderShapeDescription<T>> imp
    private void setSupportingVertexAndCylinder3dTransformFromThisAndConsistencyTransform()
    {
       supportingVertexHolder.setTransform(transform);
-      this.cylinder3d.setTransform(this.transform);
+      this.cylinder3d.setPose(this.transform);
       this.cylinder3d.appendTransform(cylinderConsistencyTransform);
       boundingBoxNeedsUpdating = true;
    }

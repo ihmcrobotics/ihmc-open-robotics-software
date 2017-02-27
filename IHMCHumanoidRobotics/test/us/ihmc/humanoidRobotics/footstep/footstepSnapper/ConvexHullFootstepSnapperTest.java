@@ -13,7 +13,7 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 
 
 /**
@@ -53,7 +53,7 @@ public class ConvexHullFootstepSnapperTest
       double maxY = 10;
       int numPoints = 100;
       for (int i = 0; i < numPoints; i++){
-         pointsToCrop.add(RandomTools.generateRandomPoint2d(random, maxX, maxY));
+         pointsToCrop.add(RandomGeometry.nextPoint2D(random, maxX, maxY));
       }
 
       ConvexPolygon2d startPolygon = new ConvexPolygon2d(pointsToCrop);

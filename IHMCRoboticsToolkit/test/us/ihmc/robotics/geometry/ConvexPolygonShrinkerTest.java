@@ -8,11 +8,11 @@ import java.util.Random;
 
 import org.junit.Test;
 
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class ConvexPolygonShrinkerTest
@@ -143,7 +143,7 @@ public class ConvexPolygonShrinkerTest
 
       for (FrameConvexPolygon2d randomPolygon : randomPolygons)
       {
-         double distance = RandomTools.generateRandomDouble(random, 0.001, 5.0);
+         double distance = RandomNumbers.nextDouble(random, 0.001, 5.0);
          shrinker.shrinkConstantDistanceInto(randomPolygon, distance, shrunkenPolygon);
 
          ConvexPolygon2d bigPolygon = randomPolygon.getConvexPolygon2dCopy();

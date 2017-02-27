@@ -5,8 +5,8 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
+import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.tools.testing.MutationTestingTools;
 
 public class PipeLineTest
 {
@@ -381,8 +381,6 @@ public class PipeLineTest
 
    public static void main(String[] args)
    {
-      String targetTests = PipeLineTest.class.getName();
-      String targetClassesInSamePackage = targetTests.substring(0, targetTests.lastIndexOf('.')) + "*";
-      MutationTestingTools.doPITMutationTestAndOpenResult(targetTests, targetClassesInSamePackage);
+      MutationTestFacilitator.facilitateMutationTestForPackage(PipeLineTest.class);
    }
 }

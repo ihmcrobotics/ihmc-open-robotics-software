@@ -19,7 +19,7 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.AfterJointReferenceFrameNameMap;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -76,7 +76,7 @@ public class PointPositionMeasurementModelElementTest
       ControlFlowOutputPort<FrameVector> angularVelocityPort = new ControlFlowOutputPort<FrameVector>("angularVelocityPort", controlFlowElement);
       ControlFlowOutputPort<FrameVector> angularAccelerationPort = new ControlFlowOutputPort<FrameVector>("angularAccelerationPort", controlFlowElement);
 
-      FramePoint stationaryPoint = new FramePoint(measurementFrame, RandomTools.generateRandomPoint(random, 1.0, 1.0, 1.0));
+      FramePoint stationaryPoint = new FramePoint(measurementFrame, RandomGeometry.nextPoint3D(random, 1.0, 1.0, 1.0));
       PointPositionMeasurementModelElement modelElement = new PointPositionMeasurementModelElement(name, pointPositionMeasurementInputPort,
             centerOfMassPositionPort, orientationPort, estimationFrame, referenceFrameMap, false, registry);
 
@@ -87,14 +87,14 @@ public class PointPositionMeasurementModelElementTest
       Runnable updater = new OrientationAndPositionFullRobotModelUpdater(inverseDynamicsStructureInputPort, centerOfMassPositionPort, centerOfMassVelocityPort,
                             centerOfMassAccelerationPort, orientationPort, angularVelocityPort, angularAccelerationPort);
 
-      centerOfMassPositionPort.setData(new FramePoint(ReferenceFrame.getWorldFrame(), RandomTools.generateRandomVector(random)));
-      centerOfMassVelocityPort.setData(new FrameVector(ReferenceFrame.getWorldFrame(), RandomTools.generateRandomVector(random)));
-      centerOfMassAccelerationPort.setData(new FrameVector(ReferenceFrame.getWorldFrame(), RandomTools.generateRandomVector(random)));
+      centerOfMassPositionPort.setData(new FramePoint(ReferenceFrame.getWorldFrame(), RandomGeometry.nextVector3D(random)));
+      centerOfMassVelocityPort.setData(new FrameVector(ReferenceFrame.getWorldFrame(), RandomGeometry.nextVector3D(random)));
+      centerOfMassAccelerationPort.setData(new FrameVector(ReferenceFrame.getWorldFrame(), RandomGeometry.nextVector3D(random)));
       RotationMatrix orientation = new RotationMatrix();
-      orientation.set(RandomTools.generateRandomRotation(random));
+      orientation.set(RandomGeometry.nextAxisAngle(random));
       orientationPort.setData(new FrameOrientation(ReferenceFrame.getWorldFrame(), orientation));
-      angularVelocityPort.setData(new FrameVector(estimationFrame, RandomTools.generateRandomVector(random)));
-      angularAccelerationPort.setData(new FrameVector(estimationFrame, RandomTools.generateRandomVector(random)));
+      angularVelocityPort.setData(new FrameVector(estimationFrame, RandomGeometry.nextVector3D(random)));
+      angularAccelerationPort.setData(new FrameVector(estimationFrame, RandomGeometry.nextVector3D(random)));
 
       updater.run();
 

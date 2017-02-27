@@ -218,7 +218,10 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
       for(RobotSide robotSide : RobotSide.values)
       {
          ReferenceFrame handControlFrame = fullRobotModel.getHandControlFrame(robotSide);
-         nameBasedHashCodeToReferenceFrameMap.put(handControlFrame.nameBasedHashCode(), handControlFrame);
+         if(handControlFrame != null)
+         {
+            nameBasedHashCodeToReferenceFrameMap.put(handControlFrame.nameBasedHashCode(), handControlFrame);
+         }
       }
    }
 

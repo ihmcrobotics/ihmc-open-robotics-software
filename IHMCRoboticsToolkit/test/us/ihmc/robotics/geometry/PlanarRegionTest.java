@@ -10,6 +10,7 @@ import java.util.Random;
 
 import org.junit.Test;
 
+import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -19,9 +20,8 @@ import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.testing.MutationTestingTools;
 
 public class PlanarRegionTest
 {
@@ -520,8 +520,8 @@ public class PlanarRegionTest
 
       for (int iteration = 0; iteration < 10; iteration++)
       {
-         Quaternion orientation = RandomTools.generateRandomQuaternion(random, Math.toRadians(45.0));
-         Vector3D translation = RandomTools.generateRandomVector(random, 10.0);
+         Quaternion orientation = RandomGeometry.nextQuaternion(random, Math.toRadians(45.0));
+         Vector3D translation = RandomGeometry.nextVector3D(random, 10.0);
          RigidBodyTransform regionTransform = new RigidBodyTransform(orientation, translation);
          ReferenceFrame localFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent("local", worldFrame, regionTransform);
          PlanarRegion planarRegion = new PlanarRegion(regionTransform, regionConvexPolygons);
@@ -800,8 +800,6 @@ public class PlanarRegionTest
 
    public static void main(String[] args)
    {
-      String targetTests = PlanarRegionTest.class.getName();
-      String targetClassesInSamePackage = PlanarRegion.class.getName();
-      MutationTestingTools.doPITMutationTestAndOpenResult(targetTests, targetClassesInSamePackage);
+      MutationTestFacilitator.facilitateMutationTestForClass(PlanarRegion.class, PlanarRegionTest.class);
    }
 }

@@ -11,6 +11,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
+import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
 public class AtlasSimInitialSetup implements DRCRobotInitialSetup<HumanoidFloatingRootJointRobot>
@@ -37,7 +38,7 @@ public class AtlasSimInitialSetup implements DRCRobotInitialSetup<HumanoidFloati
    @Override
    public void initializeRobot(HumanoidFloatingRootJointRobot robot, DRCRobotJointMap jointMap)
    {
-      if(!robotInitialized)
+      if (!robotInitialized)
       {
          // Avoid singularities at startup
          for (RobotSide robotSide : RobotSide.values)
@@ -48,40 +49,51 @@ public class AtlasSimInitialSetup implements DRCRobotInitialSetup<HumanoidFloati
             robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(robotSide, LegJointName.KNEE_PITCH)).setQ(0.518); //leg_kny
             robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(robotSide, LegJointName.ANKLE_PITCH)).setQ(-0.276); //leg_aky
             robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(robotSide, LegJointName.ANKLE_ROLL)).setQ(robotSide.negateIfRightSide(-0.062)); //leg_akx
-            
-            robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_YAW)).setQ(robotSide.negateIfRightSide(0.785398)); //arm_shz
-            robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_ROLL)).setQ(robotSide.negateIfRightSide(-0.1)); //arm_shx
-            robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(robotSide, ArmJointName.ELBOW_PITCH)).setQ(3.00); //arm_ely
-            robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(robotSide, ArmJointName.ELBOW_ROLL)).setQ(robotSide.negateIfRightSide(1.8)); //arm_elx
-            robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(robotSide, ArmJointName.FIRST_WRIST_PITCH)).setQ(-0.30); //arm_wry
-            robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(robotSide, ArmJointName.WRIST_ROLL)).setQ(robotSide.negateIfRightSide(0.70)); //arm_wrx
-            robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(robotSide, ArmJointName.SECOND_WRIST_PITCH)).setQ(0.15); //arm_wry2
+
+            setArmJointPosition(robot, jointMap, robotSide, ArmJointName.SHOULDER_YAW, robotSide.negateIfRightSide(0.785398)); //arm_shz
+            setArmJointPosition(robot, jointMap, robotSide, ArmJointName.SHOULDER_ROLL, robotSide.negateIfRightSide(-0.1)); //arm_shx
+            setArmJointPosition(robot, jointMap, robotSide, ArmJointName.ELBOW_PITCH, 3.00); //arm_ely
+            setArmJointPosition(robot, jointMap, robotSide, ArmJointName.ELBOW_ROLL, robotSide.negateIfRightSide(1.8)); //arm_elx
+            setArmJointPosition(robot, jointMap, robotSide, ArmJointName.FIRST_WRIST_PITCH, -0.30); //arm_wry
+            setArmJointPosition(robot, jointMap, robotSide, ArmJointName.WRIST_ROLL, robotSide.negateIfRightSide(0.70)); //arm_wrx
+            setArmJointPosition(robot, jointMap, robotSide, ArmJointName.SECOND_WRIST_PITCH, 0.15); //arm_wry2
          }
-         
+
          robot.update();
          robot.getRootJointToWorldTransform(rootToWorld);
          rootToWorld.get(rotation, positionInWorld);
-         
+
          GroundContactPoint gc1 = robot.getFootGroundContactPoints(RobotSide.LEFT).get(0);
          double pelvisToFoot = positionInWorld.getZ() - gc1.getPositionPoint().getZ();
-         
+
          // Hardcoded for gazebo integration
          //      double pelvisToFoot = 0.887;
-         
+
          positionInWorld.setZ(groundZ + pelvisToFoot);
          positionInWorld.add(offset);
-         
+
          robot.setPositionInWorld(positionInWorld);
-         
+
          FrameOrientation frameOrientation = new FrameOrientation(ReferenceFrame.getWorldFrame(), rotation);
          double[] yawPitchRoll = frameOrientation.getYawPitchRoll();
          yawPitchRoll[0] = initialYaw;
          frameOrientation.setYawPitchRoll(yawPitchRoll);
-         
+
          robot.setOrientation(frameOrientation.getQuaternionCopy());
          robot.update();
          robotInitialized = true;
       }
+   }
+
+   private void setArmJointPosition(HumanoidFloatingRootJointRobot robot, DRCRobotJointMap jointMap, RobotSide robotSide, ArmJointName armJointName, double q)
+   {
+      String armJointString = jointMap.getArmJointName(robotSide, armJointName);
+      if (armJointString == null)
+         return;
+      OneDegreeOfFreedomJoint joint = robot.getOneDegreeOfFreedomJoint(armJointString);
+      if (joint == null)
+         return;
+      joint.setQ(q);
    }
 
    @Override

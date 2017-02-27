@@ -8,6 +8,7 @@ import java.util.Random;
 
 import org.junit.Test;
 
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -19,7 +20,6 @@ import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.RotationTools;
-import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
@@ -94,10 +94,10 @@ public class ContactableValveRobotTest
    {
       Random random = new Random(1235125L);
 
-      double valveX = RandomTools.generateRandomDouble(random, -2.0, 2.0);
-      double valveY = RandomTools.generateRandomDouble(random, -2.0, 2.0);
-      double valveZ = RandomTools.generateRandomDouble(random, 0.1, 2.0);
-      double valveYaw_degrees = RandomTools.generateRandomDouble(random, -100, 100);
+      double valveX = RandomNumbers.nextDouble(random, -2.0, 2.0);
+      double valveY = RandomNumbers.nextDouble(random, -2.0, 2.0);
+      double valveZ = RandomNumbers.nextDouble(random, 0.1, 2.0);
+      double valveYaw_degrees = RandomNumbers.nextDouble(random, -100, 100);
 
       ContactableValveRobot valveRobot = createValveRobot(valveX, valveY, valveZ, valveYaw_degrees);
 

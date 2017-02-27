@@ -48,7 +48,7 @@ dependencies {
    testCompile group: 'junit', name: 'junit', version: '4.11'
    testCompile ihmc.getProjectTestDependency(":IHMCAvatarInterfaces")
 
-   compile group: 'us.ihmc', name: 'euclid-core', version: '0.4'
+   compile group: 'us.ihmc', name: 'euclid-core', version: '0.4.1'
    compile group: 'us.ihmc', name: 'IHMCRealtime', version: '1.1.2'
    compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
    compile group: 'us.ihmc.thirdparty.jinput', name: 'jinput', version: '160414'
@@ -79,7 +79,6 @@ dependencies {
    compile ihmc.getProjectDependency(":IHMCRobotModels")
    compile ihmc.getProjectDependency(":IHMCRobotDataVisualizer")
    compile ihmc.getProjectDependency(":IHMCGraphicsDescription")
-   testCompile ihmc.getProjectDependency(":IHMCUnitTesting")
 	testCompile ihmc.getProjectTestDependency(":IHMCRoboticsToolkit")
 	testCompile ihmc.getProjectTestDependency(":IHMCJavaExtensions")
 }

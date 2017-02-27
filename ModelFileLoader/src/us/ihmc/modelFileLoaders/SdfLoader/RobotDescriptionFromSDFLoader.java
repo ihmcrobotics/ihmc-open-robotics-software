@@ -156,7 +156,7 @@ public class RobotDescriptionFromSDFLoader
 
       if (rootLinks.size() > 1)
       {
-         throw new RuntimeException("Can only accomodate one root link for now");
+         throw new RuntimeException("Can only accomodate one root link for now. Root links: " + rootLinks);
       }
 
       SDFLinkHolder rootLink = rootLinks.get(0);

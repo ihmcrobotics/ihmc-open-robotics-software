@@ -14,6 +14,7 @@ import java.util.StringTokenizer;
 
 import org.junit.Test;
 
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -49,7 +50,6 @@ import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.quadTree.Box;
 import us.ihmc.robotics.quadTree.QuadTreeForGroundParameters;
-import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.pointClouds.combinationQuadTreeOctTree.QuadTreeForGroundHeightMap;
@@ -775,9 +775,9 @@ public class FootstepSnapperSimulationTest
 
          for (int i = 0; i < numberOfPointsToTest; i++)
          {
-            soleX.set(RandomTools.generateRandomDouble(random, minX, maxX));
-            soleY.set(RandomTools.generateRandomDouble(random, minY, maxY));
-            soleYaw.set(RandomTools.generateRandomDouble(random, Math.PI));
+            soleX.set(RandomNumbers.nextDouble(random, minX, maxX));
+            soleY.set(RandomNumbers.nextDouble(random, minY, maxY));
+            soleYaw.set(RandomNumbers.nextDouble(random, Math.PI));
 
             testAPoint(assertPositionConditions, assertPointConditions);
          }

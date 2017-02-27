@@ -30,7 +30,7 @@ public class KinematicPoint implements java.io.Serializable
    // The position and velocity are in world frame. AngularVelocity is in body frame of the joint.
    private final YoFramePoint positionInWorld;
    private final YoFrameVector velocityInWorld;
-   private final YoFrameVector angularVelocityInBodyFrame;
+   private final YoFrameVector angularVelocityInWorld;
 
    private final YoFrameVector offsetYoFrameVector;
 
@@ -40,8 +40,7 @@ public class KinematicPoint implements java.io.Serializable
 
    private final YoVariableRegistry registry;
 
-   protected final Vector3D
-      offsetFromCOM = new Vector3D(), wXr = new Vector3D(), v_point = new Vector3D();
+   protected final Vector3D tempVectorForOffsetFromCOM = new Vector3D(), tempVectorForWXr = new Vector3D(), tempVectorForVelocity = new Vector3D();
 
    private RigidBodyTransform tempTransformFromWorldToJoint = new RigidBodyTransform();
    private Vector4D offsetPlus = new Vector4D();
@@ -70,7 +69,7 @@ public class KinematicPoint implements java.io.Serializable
 
       positionInWorld = new YoFramePoint(name + "_", "", ReferenceFrame.getWorldFrame(), registry);
       velocityInWorld = new YoFrameVector(name + "_d", "", ReferenceFrame.getWorldFrame(), registry);
-      angularVelocityInBodyFrame = new YoFrameVector(name + "_w", "", ReferenceFrame.getWorldFrame(), registry);
+      angularVelocityInWorld = new YoFrameVector(name + "_w", "", ReferenceFrame.getWorldFrame(), registry);
 
       this.offsetYoFrameVector = new YoFrameVector(name + "off", "", ReferenceFrame.getWorldFrame(), registry);
       if (offset != null)
@@ -83,16 +82,16 @@ public class KinematicPoint implements java.io.Serializable
 
       offsetYoFrameVector.set(0, 0, 0);
 
-      offsetFromCOM.set(0, 0, 0);
-      wXr.set(0, 0, 0);
-      v_point.set(0, 0, 0);
+      tempVectorForOffsetFromCOM.set(0, 0, 0);
+      tempVectorForWXr.set(0, 0, 0);
+      tempVectorForVelocity.set(0, 0, 0);
 
       tempTransformFromWorldToJoint.setIdentity();
       offsetPlus.set(0, 0, 0, 0);
 
       positionInWorld.set(0, 0, 0);
       velocityInWorld.set(0, 0, 0);
-      angularVelocityInBodyFrame.set(0, 0, 0);
+      angularVelocityInWorld.set(0, 0, 0);
    }
 
    public KinematicPointUpdater getKinematicPointUpdater()
@@ -153,16 +152,18 @@ public class KinematicPoint implements java.io.Serializable
 
    public void updatePointVelocity(RotationMatrix R0_i, Vector3D comOffset, Vector3D v_i, Vector3D w_i)
    {
-      this.getOffset(offsetFromCOM);
-      offsetFromCOM.sub(comOffset);
+      this.getOffset(tempVectorForOffsetFromCOM);
+      tempVectorForOffsetFromCOM.sub(comOffset);
 
-      wXr.cross(w_i, offsetFromCOM);
-      v_point.add(v_i, wXr);
+      tempVectorForWXr.cross(w_i, tempVectorForOffsetFromCOM);
+      tempVectorForVelocity.add(v_i, tempVectorForWXr);
 
-      R0_i.transform(v_point);
+      R0_i.transform(tempVectorForVelocity);
+      velocityInWorld.set(tempVectorForVelocity);
 
-      velocityInWorld.set(v_point);
-      angularVelocityInBodyFrame.set(w_i);
+      tempVectorForVelocity.set(w_i);
+      R0_i.transform(tempVectorForVelocity);
+      angularVelocityInWorld.set(tempVectorForVelocity);
    }
 
    protected void updatePointPosition(RigidBodyTransform t1)
@@ -258,9 +259,14 @@ public class KinematicPoint implements java.io.Serializable
       this.velocityInWorld.set(velocity);
    }
 
-   public void setAngularVelocity(Vector3D angularVelocity)
+   public void getAngularVelocity(Vector3D angularVelocityInWorldToPack)
    {
-      this.velocityInWorld.set(velocityInWorld);
+      this.angularVelocityInWorld.get(angularVelocityInWorldToPack);
+   }
+
+   public void setAngularVelocity(Vector3D angularVelocityInWorld)
+   {
+      this.angularVelocityInWorld.set(angularVelocityInWorld);
    }
 
    public void setPosition(Point3D position)
@@ -280,7 +286,7 @@ public class KinematicPoint implements java.io.Serializable
 
    public YoFrameVector getYoAngularVelocity()
    {
-      return angularVelocityInBodyFrame;
+      return angularVelocityInWorld;
    }
 
    public YoVariableRegistry getYoVariableRegistry()

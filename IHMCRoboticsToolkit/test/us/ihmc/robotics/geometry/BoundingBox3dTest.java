@@ -9,11 +9,11 @@ import java.util.Random;
 
 import org.junit.Test;
 
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.random.RandomTools;
 
 public class BoundingBox3dTest
 {
@@ -603,7 +603,7 @@ public class BoundingBox3dTest
 
       for(int i = 0; i < 100000; i++)
       {
-         double epsilonToShrink = RandomTools.generateRandomDoubleInRange(random, -1e-16, -1e-4);
+         double epsilonToShrink = RandomNumbers.nextDouble(random, -1e-16, -1e-4);
          boundingBox.setEpsilonToShrink(epsilonToShrink);
          assertFalse(boundingBox.isInside(originalMaxPoint));
          assertFalse(boundingBox.isInside(originalMinPoint));
@@ -622,7 +622,7 @@ public class BoundingBox3dTest
 
       for(int i = 0; i < 100000; i++)
       {
-         double epsilonToShrink = RandomTools.generateRandomDoubleInRange(random, 1e4, 1e16);
+         double epsilonToShrink = RandomNumbers.nextDouble(random, 1e4, 1e16);
          boundingBox.setEpsilonToGrow(epsilonToShrink);
          assertTrue(boundingBox.isInside(originalMaxPoint));
          assertTrue(boundingBox.isInside(originalMinPoint));

@@ -23,7 +23,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.tools.MemoryTools;
 
 public class ReferenceFrameTest
@@ -464,8 +464,8 @@ public class ReferenceFrameTest
 
       for (int i = 0; i < numberOfTests; i++)
       {
-         transformA.setRotationAndZeroTranslation(RandomTools.generateRandomQuaternion(random, Math.toRadians(80.0)));
-         transformB.setRotationAndZeroTranslation(RandomTools.generateRandomQuaternion(random, Math.toRadians(80.0)));
+         transformA.setRotationAndZeroTranslation(RandomGeometry.nextQuaternion(random, Math.toRadians(80.0)));
+         transformB.setRotationAndZeroTranslation(RandomGeometry.nextQuaternion(random, Math.toRadians(80.0)));
 
          ReferenceFrame frameA = ReferenceFrame.constructFrameWithUnchangingTransformToParent("frameA", worldFrame, transformA);
          ReferenceFrame frameB = ReferenceFrame.constructFrameWithUnchangingTransformToParent("frameB", worldFrame, transformB);
@@ -504,8 +504,8 @@ public class ReferenceFrameTest
 
       for (int i = 0; i < numberOfTests; i++)
       {
-         transformA.setRotationAndZeroTranslation(RandomTools.generateRandomQuaternion(random, Math.toRadians(80.0)));
-         transformB.setRotationAndZeroTranslation(RandomTools.generateRandomQuaternion(random, Math.toRadians(80.0)));
+         transformA.setRotationAndZeroTranslation(RandomGeometry.nextQuaternion(random, Math.toRadians(80.0)));
+         transformB.setRotationAndZeroTranslation(RandomGeometry.nextQuaternion(random, Math.toRadians(80.0)));
 
          ReferenceFrame frameA = ReferenceFrame.constructFrameWithUnchangingTransformToParent("frameA", worldFrame, transformA);
          ReferenceFrame frameB = ReferenceFrame.constructFrameWithUnchangingTransformToParent("frameB", worldFrame, transformB);

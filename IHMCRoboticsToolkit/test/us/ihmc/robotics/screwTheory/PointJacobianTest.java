@@ -15,7 +15,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVectorTest;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 
 /**
  * @author twan
@@ -44,7 +44,7 @@ public class PointJacobianTest
       GeometricJacobian geometricJacobian = new GeometricJacobian(base, endEffector, base.getBodyFixedFrame());
       geometricJacobian.compute();
 
-      FramePoint point = new FramePoint(base.getBodyFixedFrame(), RandomTools.generateRandomVector(random));
+      FramePoint point = new FramePoint(base.getBodyFixedFrame(), RandomGeometry.nextVector3D(random));
       PointJacobian pointJacobian = new PointJacobian();
       pointJacobian.set(geometricJacobian, point);
       pointJacobian.compute();
@@ -89,8 +89,8 @@ public class PointJacobianTest
       GeometricJacobian geometricJacobian = new GeometricJacobian(base, endEffector, base.getBodyFixedFrame());
       geometricJacobian.compute();
 
-      FramePoint point1 = new FramePoint(base.getBodyFixedFrame(), RandomTools.generateRandomVector(random));
-      FramePoint point2 = new FramePoint(base.getBodyFixedFrame(), RandomTools.generateRandomVector(random));
+      FramePoint point1 = new FramePoint(base.getBodyFixedFrame(), RandomGeometry.nextVector3D(random));
+      FramePoint point2 = new FramePoint(base.getBodyFixedFrame(), RandomGeometry.nextVector3D(random));
 
       PointJacobian pointJacobian1 = new PointJacobian();
       pointJacobian1.set(geometricJacobian, point1);

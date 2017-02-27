@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.ros.generators.RosEnumValueDocumentation;
 import us.ihmc.communication.ros.generators.RosExportedField;
@@ -20,7 +21,7 @@ import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.TransformTools;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
@@ -490,8 +491,8 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
 
       origin = FootstepOrigin.AT_ANKLE_FRAME;
       this.robotSide = random.nextBoolean() ? RobotSide.LEFT : RobotSide.RIGHT;
-      this.location = RandomTools.generateRandomPointWithEdgeCases(random, 0.05);
-      this.orientation = RandomTools.generateRandomQuaternion(random);
+      this.location = RandomGeometry.nextPoint3DWithEdgeCases(random, 0.05);
+      this.orientation = RandomGeometry.nextQuaternion(random);
       int numberOfPredictedContactPoints = random.nextInt(10);
       this.predictedContactPoints = new ArrayList<>();
 
@@ -501,26 +502,26 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
       }
 
       this.trajectoryType = trajectoryTypes[randomOrdinal];
-      this.swingHeight = RandomTools.generateRandomDoubleWithEdgeCases(random, 0.05);
+      this.swingHeight = RandomNumbers.nextDoubleWithEdgeCases(random, 0.05);
 
       if (random.nextBoolean())
       {
          hasTimings = true;
-         this.swingTime = RandomTools.generateRandomDoubleInRange(random, 0.05, 2.0);
-         this.transferTime = RandomTools.generateRandomDoubleInRange(random, 0.05, 2.0);
+         this.swingTime = RandomNumbers.nextDouble(random, 0.05, 2.0);
+         this.transferTime = RandomNumbers.nextDouble(random, 0.05, 2.0);
       }
 
       if (random.nextBoolean())
       {
          hasAbsoluteTime = true;
-         this.swingStartTime = RandomTools.generateRandomDoubleInRange(random, 0.0, 50.0);
+         this.swingStartTime = RandomNumbers.nextDouble(random, 0.0, 50.0);
       }
 
       if (trajectoryType == TrajectoryType.CUSTOM)
       {
          trajectoryWaypoints = new Point3D[2];
-         trajectoryWaypoints[0] = RandomTools.generateRandomPoint3d(random, -10.0, 10.0);
-         trajectoryWaypoints[1] = RandomTools.generateRandomPoint3d(random, -10.0, 10.0);
+         trajectoryWaypoints[0] = RandomGeometry.nextPoint3D(random, -10.0, 10.0);
+         trajectoryWaypoints[1] = RandomGeometry.nextPoint3D(random, -10.0, 10.0);
       }
    }
 

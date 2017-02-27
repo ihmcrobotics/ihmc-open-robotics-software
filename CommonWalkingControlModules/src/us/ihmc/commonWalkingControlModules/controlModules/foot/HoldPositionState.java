@@ -121,6 +121,7 @@ public class HoldPositionState extends AbstractFootControlState
       doHoldFootFlatOrientation.set(false);
 
       spatialFeedbackControlCommand.set(rootBody, contactableFoot.getRigidBody());
+      spatialFeedbackControlCommand.setPrimaryBase(pelvis);
       bodyFixedControlledPose.setToZero(soleFrame);
       bodyFixedControlledPose.changeFrame(contactableFoot.getRigidBody().getBodyFixedFrame());
       spatialFeedbackControlCommand.setControlFrameFixedInEndEffector(bodyFixedControlledPose);

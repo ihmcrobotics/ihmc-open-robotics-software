@@ -1,8 +1,6 @@
 package us.ihmc.quadrupedRobotics.planning.chooser.footstepChooser;
 
 import us.ihmc.euclid.tuple2D.Vector2D;
-
-import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.CommonQuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.geometry.supportPolygon.QuadrupedSupportPolygon;
 import us.ihmc.quadrupedRobotics.mechanics.inverseKinematics.QuadrupedLinkLengths;
@@ -14,6 +12,7 @@ import us.ihmc.robotics.geometry.FrameOrientation2d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.referenceFrames.MidFrameZUpFrame;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -21,7 +20,7 @@ import us.ihmc.robotics.referenceFrames.TranslationReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotEnd;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.time.GlobalTimer;
+import us.ihmc.robotics.time.ExecutionTimer;
 
 public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
 {
@@ -52,7 +51,7 @@ public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
    
    private final FrameOrientation2d tempOppositeSideOrientation = new FrameOrientation2d();
    
-   private final GlobalTimer getSwingTargetTimer = new GlobalTimer("getSwingTargetTimer", registry);
+   private final ExecutionTimer getSwingTargetTimer = new ExecutionTimer("getSwingTargetTimer", registry);
 
    private final FramePoint swingLegHipPitchPoint = new FramePoint();
    private final FrameOrientation swingLegHipRollOrientation = new FrameOrientation();
@@ -115,7 +114,7 @@ public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
    public void getSwingTarget(RobotQuadrant swingLeg, ReferenceFrame swingLegAttachmentFrame, FrameVector desiredBodyVelocity, double swingDuration, FramePoint swingTargetToPack,
          double desiredYawRate)
    {
-      getSwingTargetTimer.startTimer();
+      getSwingTargetTimer.startMeasurement();
       
       getSwingTarget(swingLeg, desiredBodyVelocity, swingTargetToPack, desiredYawRate);
       
@@ -155,7 +154,7 @@ public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
       }      
       swingTargetToPack.changeFrame(ReferenceFrame.getWorldFrame());
       
-      getSwingTargetTimer.stopTimer();
+      getSwingTargetTimer.stopMeasurement();
    }
    
    private double getMaxSwingDistanceGivenBodyVelocity(RobotQuadrant swingLeg, FramePoint swingTarget, FrameVector desiredBodyVelocity, double swingDuration)

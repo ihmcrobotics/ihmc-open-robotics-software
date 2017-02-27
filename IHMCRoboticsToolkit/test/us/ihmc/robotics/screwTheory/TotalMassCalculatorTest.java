@@ -11,7 +11,7 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class TotalMassCalculatorTest
@@ -42,13 +42,13 @@ public class TotalMassCalculatorTest
 
       for (int i = 0; i < numberOfJoints; i++)
       {
-         Vector3D jointOffset = RandomTools.generateRandomVector(random);
+         Vector3D jointOffset = RandomGeometry.nextVector3D(random);
          Vector3D jointAxis = new Vector3D(random.nextDouble(), random.nextDouble(), random.nextDouble());
          jointAxis.normalize();
-         Matrix3D momentOfInertia = RandomTools.generateRandomDiagonalMatrix3d(random);
+         Matrix3D momentOfInertia = RandomGeometry.nextDiagonalMatrix3D(random);
          double mass = random.nextDouble();
          totalMass += mass;
-         Vector3D comOffset = RandomTools.generateRandomVector(random);
+         Vector3D comOffset = RandomGeometry.nextVector3D(random);
 
 
 

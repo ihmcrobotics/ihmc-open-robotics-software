@@ -20,7 +20,7 @@ import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.referenceFrames.TranslationReferenceFrame;
 import us.ihmc.robotics.screwTheory.InverseDynamicsCalculator;
@@ -428,11 +428,11 @@ public class InverseDynamicsCalculatorSCSTest
       PinJoint previousJoint = null;
       for (int i = 0; i < jointAxes.length; i++)
       {         
-         Vector3D jointOffset = RandomTools.generateRandomVector(random);
+         Vector3D jointOffset = RandomGeometry.nextVector3D(random);
          Vector3D jointAxis = jointAxes[i];
-         Matrix3D momentOfInertia = RandomTools.generateRandomDiagonalMatrix3d(random);
+         Matrix3D momentOfInertia = RandomGeometry.nextDiagonalMatrix3D(random);
          double mass = random.nextDouble();
-         Vector3D comOffset = RandomTools.generateRandomVector(random);
+         Vector3D comOffset = RandomGeometry.nextVector3D(random);
          double jointPosition = random.nextDouble();
          double jointVelocity = useRandomVelocity ? random.nextDouble() : 0.0;
          double jointAcceleration = useRandomAcceleration ? random.nextDouble() : 0.0;
@@ -475,12 +475,12 @@ public class InverseDynamicsCalculatorSCSTest
       
       for (int i = 0; i < numberOfJoints; i++)
       {         
-         Vector3D jointOffset = RandomTools.generateRandomVector(random);
+         Vector3D jointOffset = RandomGeometry.nextVector3D(random);
          Vector3D jointAxis = new Vector3D(random.nextDouble(), random.nextDouble(), random.nextDouble());
          jointAxis.normalize();
-         Matrix3D momentOfInertia = RandomTools.generateRandomDiagonalMatrix3d(random);
+         Matrix3D momentOfInertia = RandomGeometry.nextDiagonalMatrix3D(random);
          double mass = random.nextDouble();
-         Vector3D comOffset = RandomTools.generateRandomVector(random);
+         Vector3D comOffset = RandomGeometry.nextVector3D(random);
          double jointPosition = random.nextDouble();
          double jointVelocity = useRandomVelocity ? random.nextDouble() : 0.0;
          double jointAcceleration = useRandomAcceleration ? random.nextDouble() : 0.0;
@@ -577,8 +577,8 @@ public class InverseDynamicsCalculatorSCSTest
    
    private void setRandomVelocity(FloatingJoint floatingJoint, SixDoFJoint sixDoFJoint)
    {
-      Vector3D linearVelocity = RandomTools.generateRandomVector(random, 1.0);
-      Vector3D angularVelocity = RandomTools.generateRandomVector(random, 1.0);
+      Vector3D linearVelocity = RandomGeometry.nextVector3D(random, 1.0);
+      Vector3D angularVelocity = RandomGeometry.nextVector3D(random, 1.0);
 
       floatingJoint.setVelocity(linearVelocity);
       floatingJoint.setAngularVelocityInBody(angularVelocity);

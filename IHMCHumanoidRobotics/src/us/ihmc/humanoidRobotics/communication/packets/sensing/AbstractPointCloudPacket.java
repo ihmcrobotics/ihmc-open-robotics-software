@@ -6,7 +6,7 @@ import java.util.Random;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 
 public abstract class AbstractPointCloudPacket extends Packet<AbstractPointCloudPacket>
 {
@@ -20,7 +20,7 @@ public abstract class AbstractPointCloudPacket extends Packet<AbstractPointCloud
 
    public AbstractPointCloudPacket(Random random) 
    {
-	   origin = RandomTools.generateRandomPoint(random, Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
+	   origin = RandomGeometry.nextPoint3D(random, Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
 	   timeStamp = random.nextLong();
 	   
 	   int size = Math.abs(random.nextInt(1000000));

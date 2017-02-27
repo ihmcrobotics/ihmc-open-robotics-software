@@ -12,7 +12,7 @@ import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.time.GlobalTimer;
+import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 
 public class OneStepCaptureRegionCalculator
@@ -27,7 +27,7 @@ public class OneStepCaptureRegionCalculator
 
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
-   private final GlobalTimer globalTimer = new GlobalTimer(name + "Timer", registry);
+   private final ExecutionTimer globalTimer = new ExecutionTimer(name + "Timer", registry);
 
    private CaptureRegionVisualizer captureRegionVisualizer = null;
    private final FrameConvexPolygon2d captureRegionPolygon = new FrameConvexPolygon2d(worldFrame);
@@ -104,7 +104,7 @@ public class OneStepCaptureRegionCalculator
 
    public void calculateCaptureRegion(RobotSide swingSide, double swingTimeRemaining, FramePoint2d icp, double omega0, FrameConvexPolygon2d footPolygon)
    {
-      globalTimer.startTimer();
+      globalTimer.startMeasurement();
 
       // 1. Set up all needed variables and reference frames for the calculation:
       ReferenceFrame supportAnkleZUp = ankleZUpFrames.get(swingSide.getOppositeSide());
@@ -133,7 +133,7 @@ public class OneStepCaptureRegionCalculator
       if (extremesOfFeasibleCOP == null)
       {
          // If the ICP is in the support polygon return the whole reachable region.
-         globalTimer.stopTimer();
+         globalTimer.stopMeasurement();
          captureRegionPolygon.setIncludingFrameAndUpdate(reachableRegions.get(swingSide.getOppositeSide()));
          updateVisualizer();
          return;
@@ -155,7 +155,7 @@ public class OneStepCaptureRegionCalculator
 
          if (kinematicExtreme.containsNaN())
          {
-            globalTimer.stopTimer();
+            globalTimer.stopMeasurement();
             captureRegionPolygon.update();
             return;
          }
@@ -193,7 +193,7 @@ public class OneStepCaptureRegionCalculator
 
       captureRegionPolygon.update();
 
-      globalTimer.stopTimer();
+      globalTimer.stopMeasurement();
       updateVisualizer();
    }
 

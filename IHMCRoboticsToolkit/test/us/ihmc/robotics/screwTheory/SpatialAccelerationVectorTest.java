@@ -16,9 +16,9 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVectorTest;
 import us.ihmc.robotics.geometry.ReferenceFrameMismatchException;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.testing.JUnitTools;
+import us.ihmc.robotics.testing.JUnitTools;
 
 public class SpatialAccelerationVectorTest extends SpatialMotionVectorTest
 {
@@ -100,9 +100,9 @@ public class SpatialAccelerationVectorTest extends SpatialMotionVectorTest
    public void testAccelerationOfPointFixedInBodyFrameAlternative()
    {
       Random random = new Random();
-      SpatialAccelerationVector accel = new SpatialAccelerationVector(frameB, frameA, frameA, RandomTools.generateRandomVector(random),
-                                           RandomTools.generateRandomVector(random));
-      Twist twist = new Twist(frameB, frameA, frameA, RandomTools.generateRandomVector(random), getRandomVector(random));
+      SpatialAccelerationVector accel = new SpatialAccelerationVector(frameB, frameA, frameA, RandomGeometry.nextVector3D(random),
+                                           RandomGeometry.nextVector3D(random));
+      Twist twist = new Twist(frameB, frameA, frameA, RandomGeometry.nextVector3D(random), getRandomVector(random));
       FramePoint pointFixedInFrameB = new FramePoint(frameA);    // , getRandomVector(random));
       FrameVector accelerationOfPointFixedInFrameB = new FrameVector(ReferenceFrame.getWorldFrame());
       accel.getAccelerationOfPointFixedInBodyFrame(twist, pointFixedInFrameB, accelerationOfPointFixedInFrameB);
@@ -222,10 +222,10 @@ public class SpatialAccelerationVectorTest extends SpatialMotionVectorTest
    public void testSub()
    {
       Random random = new Random(3454L);
-      SpatialAccelerationVector vector1 = new SpatialAccelerationVector(frameB, frameA, frameD, RandomTools.generateRandomVector(random),
-                                             RandomTools.generateRandomVector(random));
-      SpatialAccelerationVector vector2 = new SpatialAccelerationVector(frameC, frameB, frameD, RandomTools.generateRandomVector(random),
-                                             RandomTools.generateRandomVector(random));
+      SpatialAccelerationVector vector1 = new SpatialAccelerationVector(frameB, frameA, frameD, RandomGeometry.nextVector3D(random),
+                                             RandomGeometry.nextVector3D(random));
+      SpatialAccelerationVector vector2 = new SpatialAccelerationVector(frameC, frameB, frameD, RandomGeometry.nextVector3D(random),
+                                             RandomGeometry.nextVector3D(random));
       SpatialAccelerationVector vector3 = new SpatialAccelerationVector(vector1);
       vector3.add(vector2);
 
@@ -274,12 +274,12 @@ public class SpatialAccelerationVectorTest extends SpatialMotionVectorTest
       double angularAccelerationMagnitude = random.nextDouble();
       double linearVelocityMagnitude = random.nextDouble();
       double linearAccelerationMagnitude = random.nextDouble();
-      Vector3D axisOfRotation = RandomTools.generateRandomVector(random);
+      Vector3D axisOfRotation = RandomGeometry.nextVector3D(random);
       axisOfRotation.normalize();
       Vector3D axisOfRotationDot = new Vector3D();
-      axisOfRotationDot.cross(axisOfRotation, RandomTools.generateRandomVector(random));
-      Vector3D offset = RandomTools.generateRandomVector(random);
-      Vector3D offsetDot = RandomTools.generateRandomVector(random);
+      axisOfRotationDot.cross(axisOfRotation, RandomGeometry.nextVector3D(random));
+      Vector3D offset = RandomGeometry.nextVector3D(random);
+      Vector3D offsetDot = RandomGeometry.nextVector3D(random);
       SpatialAccelerationVector acceleration = new SpatialAccelerationVector(bodyFrame, baseFrame, expressedInFrame, angularVelocityMagnitude,
                                                   angularAccelerationMagnitude, linearVelocityMagnitude, linearAccelerationMagnitude, axisOfRotation,
                                                   axisOfRotationDot, offset, offsetDot);
@@ -311,10 +311,10 @@ public class SpatialAccelerationVectorTest extends SpatialMotionVectorTest
    public void testSetBasedOnOriginAcceleration()
    {
       SpatialAccelerationVector acceleration = new SpatialAccelerationVector(frameA, frameB, frameA);
-      Twist twistOfBodyWithRespectToBase = new Twist(frameA, frameB, frameA, RandomTools.generateRandomVector(random),
-                                              RandomTools.generateRandomVector(random));
-      FrameVector angularAcceleration = new FrameVector(twistOfBodyWithRespectToBase.getExpressedInFrame(), RandomTools.generateRandomVector(random));
-      FrameVector originAcceleration = new FrameVector(twistOfBodyWithRespectToBase.getExpressedInFrame(), RandomTools.generateRandomVector(random));
+      Twist twistOfBodyWithRespectToBase = new Twist(frameA, frameB, frameA, RandomGeometry.nextVector3D(random),
+                                              RandomGeometry.nextVector3D(random));
+      FrameVector angularAcceleration = new FrameVector(twistOfBodyWithRespectToBase.getExpressedInFrame(), RandomGeometry.nextVector3D(random));
+      FrameVector originAcceleration = new FrameVector(twistOfBodyWithRespectToBase.getExpressedInFrame(), RandomGeometry.nextVector3D(random));
       acceleration.setBasedOnOriginAcceleration(angularAcceleration, originAcceleration, twistOfBodyWithRespectToBase);
 
       FrameVector linearAccelerationCheck = new FrameVector();
@@ -341,7 +341,7 @@ public class SpatialAccelerationVectorTest extends SpatialMotionVectorTest
       ReferenceFrame bodyFrame = frameA;
       ReferenceFrame baseFrame = frameB;
       ReferenceFrame expressedInFrame = frameC;
-      Twist twist = new Twist(bodyFrame, baseFrame, expressedInFrame, RandomTools.generateRandomVector(random), RandomTools.generateRandomVector(random));
+      Twist twist = new Twist(bodyFrame, baseFrame, expressedInFrame, RandomGeometry.nextVector3D(random), RandomGeometry.nextVector3D(random));
       SpatialAccelerationVector acceleration = new SpatialAccelerationVector(bodyFrame, baseFrame, expressedInFrame, twist.getLinearPart(),
                                                   twist.getAngularPart());
 

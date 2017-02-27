@@ -11,6 +11,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -28,7 +29,6 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FramePose2d;
-import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -1609,13 +1609,13 @@ public class FootstepGeneratorsTest
 
       for (int i = 0; i < 100; i++)
       {
-         double startX = RandomTools.generateRandomDouble(random, 1.0);
-         double startY = RandomTools.generateRandomDouble(random, 1.0);
-         double startYaw = RandomTools.generateRandomDouble(random, Math.PI);
-         double pathYaw = RandomTools.generateRandomDouble(random, Math.PI);
-         double endX = RandomTools.generateRandomDouble(random, 1.0);
-         double endY = RandomTools.generateRandomDouble(random, 1.0);
-         double endYaw = RandomTools.generateRandomDouble(random, Math.PI);
+         double startX = RandomNumbers.nextDouble(random, 1.0);
+         double startY = RandomNumbers.nextDouble(random, 1.0);
+         double startYaw = RandomNumbers.nextDouble(random, Math.PI);
+         double pathYaw = RandomNumbers.nextDouble(random, Math.PI);
+         double endX = RandomNumbers.nextDouble(random, 1.0);
+         double endY = RandomNumbers.nextDouble(random, 1.0);
+         double endYaw = RandomNumbers.nextDouble(random, Math.PI);
 
          String testDescription = String.format("RTR random, (x,y,t):t:(x,y,t) = (%.2f,%.2f,%.2f):%.2f:(%.2f,%.2f,%.2f)", startX, startY, startYaw, pathYaw,
                endX, endY, endYaw);

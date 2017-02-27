@@ -83,7 +83,7 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
       controlFrame = new PoseReferenceFrame("controlFrame", contactableFoot.getRigidBody().getBodyFixedFrame());
 
       spatialFeedbackControlCommand.set(rootBody, foot);
-      spatialFeedbackControlCommand.setPrimaryBase(footControlHelper.getMomentumBasedController().getFullRobotModel().getPelvis());
+      spatialFeedbackControlCommand.setPrimaryBase(pelvis);
       spatialFeedbackControlCommand.setGains(gains);
       FramePose anklePoseInFoot = new FramePose(ankleFrame);
       anklePoseInFoot.changeFrame(contactableFoot.getRigidBody().getBodyFixedFrame());

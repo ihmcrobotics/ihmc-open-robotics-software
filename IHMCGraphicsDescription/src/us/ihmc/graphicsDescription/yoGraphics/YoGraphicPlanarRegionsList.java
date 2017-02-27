@@ -127,6 +127,10 @@ public class YoGraphicPlanarRegionsList extends YoGraphic implements RemoteYoGra
     */
    private final BooleanYoVariable isPlanarRegionsListComplete;
    /**
+    * Indicates that this {@link YoGraphic} is clearing the graphics and resetting its current state.
+    */
+   private final BooleanYoVariable clear;
+   /**
     * Indicates the pose with respect to world of the region that the new mesh belongs to.
     * It is used to transform the vertices so they're expressed in world.
     * When there is no mesh to render, {@link #currentRegionId} equals to {@code -1}.
@@ -187,6 +191,7 @@ public class YoGraphicPlanarRegionsList extends YoGraphic implements RemoteYoGra
       currentMeshIndex = new IntegerYoVariable(name + "CurrentMeshIndex", registry);
       currentRegionId = new IntegerYoVariable(name + "CurrentRegionId", registry);
       isPlanarRegionsListComplete = new BooleanYoVariable(name + "IsComplete", registry);
+      clear = new BooleanYoVariable(name + "Clear", registry);
       currentRegionPose = new YoFramePoseUsingQuaternions(name + "CurrentRegionPose", worldFrame, registry);
 
       clearYoVariables();
@@ -256,6 +261,7 @@ public class YoGraphicPlanarRegionsList extends YoGraphic implements RemoteYoGra
       currentMeshIndex = (IntegerYoVariable) yoVariables[variableIndex++];
       currentRegionId = (IntegerYoVariable) yoVariables[variableIndex++];
       isPlanarRegionsListComplete = (BooleanYoVariable) yoVariables[variableIndex++];
+      clear = (BooleanYoVariable) yoVariables[variableIndex++];
 
       DoubleYoVariable x = (DoubleYoVariable) yoVariables[variableIndex++];
       DoubleYoVariable y = (DoubleYoVariable) yoVariables[variableIndex++];
@@ -298,11 +304,37 @@ public class YoGraphicPlanarRegionsList extends YoGraphic implements RemoteYoGra
    @Override
    public void update()
    {
-      if (yoGraphicJob == YoGraphicJob.READER)
+      switch (yoGraphicJob)
+      {
+      case READER:
       {
          // Notify the updater that a reader exists and the updater must synchronize.
          waitForReader.set(true);
          hasReaderProcessedMesh.set(true);
+
+         if (clear.getBooleanValue())
+         {
+            for (int meshIndex = 0; meshIndex < meshBufferSize; meshIndex++)
+               meshBuffer.get(meshIndex).setMesh(null);
+            clear.set(false);
+            return;
+         }
+         break;
+      }
+      case WRITER:
+      {
+         if (clear.getBooleanValue())
+         {
+            for (int meshIndex = 0; meshIndex < meshBufferSize; meshIndex++)
+               meshBuffer.get(meshIndex).setMesh(null);
+            if (!waitForReader.getBooleanValue())
+               clear.set(false);
+            return;
+         }
+         break;
+      }
+      default:
+         throw new RuntimeException("Unknown job: " + yoGraphicJob);
       }
 
       if (currentMeshIndex.getIntegerValue() == -1)
@@ -525,6 +557,14 @@ public class YoGraphicPlanarRegionsList extends YoGraphic implements RemoteYoGra
       return planarRegionsList;
    }
 
+   public void clear()
+   {
+      clear.set(true);
+      planarRegionsListsDeque.clear();
+      clearYoVariables();
+      update();
+   }
+
    /**
     * Processes the queue of lists of planar regions to render and updates the graphics.
     * This method need to called every update tick in the caller.
@@ -532,6 +572,9 @@ public class YoGraphicPlanarRegionsList extends YoGraphic implements RemoteYoGra
    public void processPlanarRegionsListQueue()
    {
       if (waitForReader.getBooleanValue() && !hasReaderProcessedMesh.getBooleanValue())
+         return;
+
+      if (clear.getBooleanValue())
          return;
 
       if (planarRegionsListsDeque.isEmpty())
@@ -720,6 +763,7 @@ public class YoGraphicPlanarRegionsList extends YoGraphic implements RemoteYoGra
       allVariables.add(currentMeshIndex);
       allVariables.add(currentRegionId);
       allVariables.add(isPlanarRegionsListComplete);
+      allVariables.add(clear);
 
       allVariables.add(currentRegionPose.getYoX());
       allVariables.add(currentRegionPose.getYoY());

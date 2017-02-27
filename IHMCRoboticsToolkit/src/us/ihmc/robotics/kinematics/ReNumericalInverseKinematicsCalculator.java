@@ -8,12 +8,12 @@ import org.ejml.interfaces.linsol.LinearSolver;
 import org.ejml.ops.CommonOps;
 import org.ejml.ops.NormOps;
 
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.ScrewTestTools;
@@ -214,7 +214,7 @@ public class ReNumericalInverseKinematicsCalculator implements InverseKinematics
          //         System.err.println("IK solver internal solve failed!");
       }
       solver.solve(error, correction);
-      double correctionScale = RandomTools.generateRandomDouble(random, minRandomSearchScalar, maxRandomSearchScalar);
+      double correctionScale = RandomNumbers.nextDouble(random, minRandomSearchScalar, maxRandomSearchScalar);
       CommonOps.scale(correctionScale, correction);
 
       for (int i = 0; i < correction.getNumRows(); i++)

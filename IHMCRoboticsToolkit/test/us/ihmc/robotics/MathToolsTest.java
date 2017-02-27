@@ -16,11 +16,11 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class MathToolsTest
@@ -165,7 +165,7 @@ public class MathToolsTest
    @Test(timeout = 30000)
    public void squareTest()
    {
-      double[] randomValues = RandomTools.generateRandomDoubleArray(random, 25, 10.0);
+      double[] randomValues = RandomNumbers.nextDoubleArray(random, 25, 10.0);
       for (double randomValue : randomValues)
       {
          assertEquals(MathTools.square(randomValue), Math.pow(randomValue, 2), 1e-12);
@@ -176,7 +176,7 @@ public class MathToolsTest
    @Test(timeout = 30000)
    public void cubeTest()
    {
-      double[] randomValues = RandomTools.generateRandomDoubleArray(random, 25, 10.0);
+      double[] randomValues = RandomNumbers.nextDoubleArray(random, 25, 10.0);
       for (double randomValue : randomValues)
       {
          assertEquals(MathTools.cube(randomValue), Math.pow(randomValue, 3), 1e-12);
@@ -188,8 +188,8 @@ public class MathToolsTest
    public void powWithIntegerTest()
    {
       int numberOfTrials = 10000;
-      double[] randomValues = RandomTools.generateRandomDoubleArray(random, numberOfTrials, 0.1, 10.0);
-      int[] randomExponents = RandomTools.generateRandomIntArray(random, numberOfTrials, 10);
+      double[] randomValues = RandomNumbers.nextDoubleArray(random, numberOfTrials, 0.1, 10.0);
+      int[] randomExponents = RandomNumbers.nextIntArray(random, numberOfTrials, 10);
       for (int i = 0; i < numberOfTrials; i++)
       {
          double x = randomValues[i];
@@ -206,7 +206,7 @@ public class MathToolsTest
    @Test(timeout = 30000)
    public void signTest()
    {
-      double[] randomValues = RandomTools.generateRandomDoubleArray(random, 25, 10.0);
+      double[] randomValues = RandomNumbers.nextDoubleArray(random, 25, 10.0);
       for (double randomValue : randomValues)
       {
          if (randomValue == 0.0)
@@ -267,8 +267,8 @@ public class MathToolsTest
    @Test(timeout = 30000)
    public void dotPlusTest()
    {
-      double[] randomValues = RandomTools.generateRandomDoubleArray(random, 25, 10.0);
-      int[] randomInts = RandomTools.generateRandomIntArray(random, 25, 10);
+      double[] randomValues = RandomNumbers.nextDoubleArray(random, 25, 10.0);
+      int[] randomInts = RandomNumbers.nextIntArray(random, 25, 10);
       double sumOfRandomValues = MathTools.sumDoubles(randomValues);
       long sumOfInts = MathTools.sumIntegers(randomInts);
 
@@ -284,7 +284,7 @@ public class MathToolsTest
    @Test(timeout = 30000)
    public void testIsInsideBounds()
    {
-      double[] randomValues = RandomTools.generateRandomDoubleArray(random, 25, 12.5);
+      double[] randomValues = RandomNumbers.nextDoubleArray(random, 25, 12.5);
       for (double randomValue : randomValues)
       {
          assertTrue(MathTools.isInsideBoundsExclusive(randomValue, -12.5, 12.5));
@@ -318,7 +318,7 @@ public class MathToolsTest
    @Test(timeout = 30000)
    public void testIsInsideBoundsInclusive()
    {
-      double[] randomValues = RandomTools.generateRandomDoubleArray(random, 25, 12.5);
+      double[] randomValues = RandomNumbers.nextDoubleArray(random, 25, 12.5);
       for (double randomValue : randomValues)
       {
          assertTrue(MathTools.isInsideBoundsInclusive(randomValue, -12.5, 12.5));

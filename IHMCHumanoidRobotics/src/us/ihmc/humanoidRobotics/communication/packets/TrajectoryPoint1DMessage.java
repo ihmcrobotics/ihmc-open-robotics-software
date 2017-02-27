@@ -4,13 +4,13 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Random;
 
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
 import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.OneDoFTrajectoryPointInterface;
-import us.ihmc.robotics.random.RandomTools;
 
 @RosMessagePacket(documentation = "This class is used to build 1D trajectory messages including jointspace trajectory messages."
       + " For 3D trajectory points look at EuclideanTrajectoryMessage (translational), SO3TrajectoryPointMessage (rotational), and SE3TrajectoryPointMessage (translational AND rotational).",
@@ -33,9 +33,9 @@ public class TrajectoryPoint1DMessage extends Packet<TrajectoryPoint1DMessage> i
 
    public TrajectoryPoint1DMessage(Random random)
    {
-      time = RandomTools.generateRandomDoubleWithEdgeCases(random, 0.01);
-      position = RandomTools.generateRandomDoubleWithEdgeCases(random, 0.01);
-      velocity = RandomTools.generateRandomDoubleWithEdgeCases(random, 0.01);
+      time = RandomNumbers.nextDoubleWithEdgeCases(random, 0.01);
+      position = RandomNumbers.nextDoubleWithEdgeCases(random, 0.01);
+      velocity = RandomNumbers.nextDoubleWithEdgeCases(random, 0.01);
    }
 
    public TrajectoryPoint1DMessage(OneDoFTrajectoryPointInterface<?> trajectoryPoint)

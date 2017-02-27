@@ -99,10 +99,12 @@ public class OnToesState extends AbstractFootControlState
 
       orientationFeedbackControlCommand.setWeightForSolver(SolverWeightLevels.HIGH);
       orientationFeedbackControlCommand.set(rootBody, contactableFoot.getRigidBody());
+      orientationFeedbackControlCommand.setPrimaryBase(pelvis);
       orientationFeedbackControlCommand.setGains(gains.getOrientationGains());
 
       pointFeedbackControlCommand.setWeightForSolver(SolverWeightLevels.HIGH);
       pointFeedbackControlCommand.set(rootBody, contactableFoot.getRigidBody());
+      pointFeedbackControlCommand.setPrimaryBase(pelvis);
       pointFeedbackControlCommand.setGains(gains.getPositionGains());
 
       feedbackControlCommandList.addCommand(orientationFeedbackControlCommand);

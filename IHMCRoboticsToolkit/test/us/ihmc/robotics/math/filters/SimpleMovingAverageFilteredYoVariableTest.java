@@ -8,9 +8,9 @@ import java.util.Random;
 
 import org.junit.Test;
 
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.random.RandomTools;
 
 public class SimpleMovingAverageFilteredYoVariableTest
 {
@@ -22,10 +22,10 @@ public class SimpleMovingAverageFilteredYoVariableTest
       {
          YoVariableRegistry registry = new YoVariableRegistry("Blop");
          Random random = new Random(6541654L);
-         int windowSize = RandomTools.generateRandomInt(random, 1, 1000);
+         int windowSize = RandomNumbers.nextInt(random, 1, 1000);
          SimpleMovingAverageFilteredYoVariable sma = new SimpleMovingAverageFilteredYoVariable("tested", windowSize, registry);
          double amplitude = 100.0;
-         double[] randomArray = RandomTools.generateRandomDoubleArray(random, windowSize, amplitude);
+         double[] randomArray = RandomNumbers.nextDoubleArray(random, windowSize, amplitude);
          double expected = 0.0;
          for (double val : randomArray)
             expected += val / windowSize;

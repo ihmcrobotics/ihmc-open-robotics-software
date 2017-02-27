@@ -11,8 +11,8 @@ import java.util.Random;
 
 import org.junit.Test;
 
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.robotics.random.RandomTools;
 
 public class ConstantSideFourBarCalculatorWithDerivativesTest
 {
@@ -172,10 +172,10 @@ public class ConstantSideFourBarCalculatorWithDerivativesTest
 
       for (int i = 0; i < 100000; i++)
       {
-         AB = RandomTools.generateRandomDouble(rand, 0.1, 2.0);
-         BC = RandomTools.generateRandomDouble(rand, 0.1, 2.0);
-         CD = RandomTools.generateRandomDouble(rand, 0.1, 2.0);
-         DA = RandomTools.generateRandomDouble(rand, 0.1, 2.0);
+         AB = RandomNumbers.nextDouble(rand, 0.1, 2.0);
+         BC = RandomNumbers.nextDouble(rand, 0.1, 2.0);
+         CD = RandomNumbers.nextDouble(rand, 0.1, 2.0);
+         DA = RandomNumbers.nextDouble(rand, 0.1, 2.0);
          fourBar = new ConstantSideFourBarCalculatorWithDerivatives(DA, AB, BC, CD);
          isQuadrilateralOK = fourBar.getMaxDAB() - fourBar.getMinDAB() > 1.0e-5;
 
@@ -183,10 +183,10 @@ public class ConstantSideFourBarCalculatorWithDerivativesTest
 
          while (!isQuadrilateralOK)
          {
-            AB = RandomTools.generateRandomDouble(rand, 0.1, 2.0);
-            BC = RandomTools.generateRandomDouble(rand, 0.1, 2.0);
-            CD = RandomTools.generateRandomDouble(rand, 0.1, 2.0);
-            DA = RandomTools.generateRandomDouble(rand, 0.1, 2.0);
+            AB = RandomNumbers.nextDouble(rand, 0.1, 2.0);
+            BC = RandomNumbers.nextDouble(rand, 0.1, 2.0);
+            CD = RandomNumbers.nextDouble(rand, 0.1, 2.0);
+            DA = RandomNumbers.nextDouble(rand, 0.1, 2.0);
             fourBar = new ConstantSideFourBarCalculatorWithDerivatives(DA, AB, BC, CD);
             isQuadrilateralOK = fourBar.getMaxDAB() - fourBar.getMinDAB() > 1.0e-5;
 
@@ -200,8 +200,8 @@ public class ConstantSideFourBarCalculatorWithDerivativesTest
 
          while (isDABOutOfRange)
          {
-            dDAB = RandomTools.generateRandomDouble(rand, -30.0, 30.0);
-            DAB_t0 = RandomTools.generateRandomDouble(rand, 0.1, Math.PI - 0.1);
+            dDAB = RandomNumbers.nextDouble(rand, -30.0, 30.0);
+            DAB_t0 = RandomNumbers.nextDouble(rand, 0.1, Math.PI - 0.1);
             DAB_tf = DAB_t0 + dDAB * T;
 
             DAB_t0_outOfRange = fourBar.updateAnglesGivenAngleDAB(DAB_t0);
@@ -283,10 +283,10 @@ public class ConstantSideFourBarCalculatorWithDerivativesTest
 
       for (int i = 0; i < 50; i++)
       {
-         BA = RandomTools.generateRandomDouble(random, 0.1, 2.0);
-         CB = RandomTools.generateRandomDouble(random, 0.1, 2.0);
-         DC = RandomTools.generateRandomDouble(random, 0.1, 2.0);
-         AD = RandomTools.generateRandomDouble(random, 0.1, 2.0);
+         BA = RandomNumbers.nextDouble(random, 0.1, 2.0);
+         CB = RandomNumbers.nextDouble(random, 0.1, 2.0);
+         DC = RandomNumbers.nextDouble(random, 0.1, 2.0);
+         AD = RandomNumbers.nextDouble(random, 0.1, 2.0);
          fourBar = new ConstantSideFourBarCalculatorWithDerivatives(AD, BA, CB, DC);
          isQuadrilateralOK = fourBar.getMaxDAB() - fourBar.getMinDAB() > 1.0e-5;
 
@@ -294,10 +294,10 @@ public class ConstantSideFourBarCalculatorWithDerivativesTest
 
          while (!isQuadrilateralOK)
          {
-            BA = RandomTools.generateRandomDouble(random, 0.1, 2.0);
-            CB = RandomTools.generateRandomDouble(random, 0.1, 2.0);
-            DC = RandomTools.generateRandomDouble(random, 0.1, 2.0);
-            AD = RandomTools.generateRandomDouble(random, 0.1, 2.0);
+            BA = RandomNumbers.nextDouble(random, 0.1, 2.0);
+            CB = RandomNumbers.nextDouble(random, 0.1, 2.0);
+            DC = RandomNumbers.nextDouble(random, 0.1, 2.0);
+            AD = RandomNumbers.nextDouble(random, 0.1, 2.0);
             fourBar = new ConstantSideFourBarCalculatorWithDerivatives(AD, BA, CB, DC);
             isQuadrilateralOK = fourBar.getMaxDAB() - fourBar.getMinDAB() > 1.0e-5;
 
@@ -306,8 +306,8 @@ public class ConstantSideFourBarCalculatorWithDerivativesTest
                throw new RuntimeException("Could not make a convex quadrilateral");
          }
 
-         DAB_t0 = RandomTools.generateRandomDouble(random, fourBar.getMinDAB(), fourBar.getMaxDAB());
-         DAB_tf = RandomTools.generateRandomDouble(random, fourBar.getMinDAB(), fourBar.getMaxDAB());
+         DAB_t0 = RandomNumbers.nextDouble(random, fourBar.getMinDAB(), fourBar.getMaxDAB());
+         DAB_tf = RandomNumbers.nextDouble(random, fourBar.getMinDAB(), fourBar.getMaxDAB());
          dDAB_t0 = 0.0;
          ddDAB = 2.0 * (DAB_tf - DAB_t0 - dDAB_t0 * T) / square(T);
          dDAB_tf = dDAB_t0 + ddDAB * T;

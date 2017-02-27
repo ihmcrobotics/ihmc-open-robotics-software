@@ -7,8 +7,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class RandomPointCloudGenerator implements Runnable
@@ -47,9 +47,9 @@ public class RandomPointCloudGenerator implements Runnable
       //TODO: move this to RandomTools
       for(int i = 0; i < pointCloud.length; i++)
       {
-         double distanceFromCamera = RandomTools.generateRandomDouble(random, 0.0, coneHeight);
-         double angle = RandomTools.generateRandomDouble(random, Math.PI);
-         double distanceFromConeCenter = RandomTools.generateRandomDouble(random, distanceFromCamera * (coneBaseRadius / coneHeight));
+         double distanceFromCamera = RandomNumbers.nextDouble(random, 0.0, coneHeight);
+         double angle = RandomNumbers.nextDouble(random, Math.PI);
+         double distanceFromConeCenter = RandomNumbers.nextDouble(random, distanceFromCamera * (coneBaseRadius / coneHeight));
 
          double coneY = distanceFromConeCenter * Math.sin(angle);
          double coneZ = distanceFromConeCenter * Math.cos(angle);

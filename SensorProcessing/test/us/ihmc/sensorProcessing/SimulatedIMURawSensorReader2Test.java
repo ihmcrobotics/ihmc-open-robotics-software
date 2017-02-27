@@ -9,7 +9,7 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
@@ -35,11 +35,11 @@ public class SimulatedIMURawSensorReader2Test
    public void test() throws SimulationExceededMaximumTimeException, UnreasonableAccelerationException
    {
       SingleRigidBodyRobot robot = new SingleRigidBodyRobot();
-      robot.setPosition(RandomTools.generateRandomVector(random));
+      robot.setPosition(RandomGeometry.nextVector3D(random));
       robot.setYawPitchRoll(random.nextDouble(), random.nextDouble(), random.nextDouble());
-      robot.setAngularVelocity(RandomTools.generateRandomVector(random));
-      robot.setLinearVelocity(RandomTools.generateRandomVector(random));
-      robot.setExternalForce(RandomTools.generateRandomVector(random));
+      robot.setAngularVelocity(RandomGeometry.nextVector3D(random));
+      robot.setLinearVelocity(RandomGeometry.nextVector3D(random));
+      robot.setExternalForce(RandomGeometry.nextVector3D(random));
       
       SimulatedSensorsTestFullRobotModel fullRobotModel = new SimulatedSensorsTestFullRobotModel();
       YoVariableRegistry registry = new YoVariableRegistry("test");

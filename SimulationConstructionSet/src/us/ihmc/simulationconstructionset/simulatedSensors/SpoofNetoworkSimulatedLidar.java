@@ -8,7 +8,7 @@ import java.util.Random;
 import us.ihmc.communication.remote.DataObjectServer;
 import us.ihmc.communication.remote.DataObjectTransponder;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.tools.thread.ThreadTools;
 
 public class SpoofNetoworkSimulatedLidar
@@ -72,11 +72,11 @@ public class SpoofNetoworkSimulatedLidar
 
    protected LIDARScan generateNewSpoofScan()
    {
-      RandomTools.generateRandomVector(gen, 10);
+      RandomGeometry.nextVector3D(gen, 10);
       ArrayList<Point3D> points = new ArrayList<Point3D>();
       for (int i = 0; i < SPOOF_CLOUD_SIZE; i++)
       {
-         points.add(new Point3D(RandomTools.generateRandomVector(gen, 10)));
+         points.add(new Point3D(RandomGeometry.nextVector3D(gen, 10)));
       }
 
       return new LIDARScan(points);

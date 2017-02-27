@@ -8,13 +8,13 @@ import java.util.Random;
 
 import org.junit.Test;
 
+import us.ihmc.commons.MutationTestFacilitator;
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.random.RandomTools;
-import us.ihmc.tools.testing.MutationTestingTools;
 
 public class LineSegment1dTest
 {
@@ -103,14 +103,14 @@ public class LineSegment1dTest
       // lineSegment2 inside lineSegment1
       for (int i = 0; i < 1000; i++)
       {
-         double lineSegmentStart1 = RandomTools.generateRandomDouble(random, 10.0);
-         double lineSegmentEnd1 = RandomTools.generateRandomDouble(random, 10.0);
+         double lineSegmentStart1 = RandomNumbers.nextDouble(random, 10.0);
+         double lineSegmentEnd1 = RandomNumbers.nextDouble(random, 10.0);
          LineSegment1d lineSegment1 = new LineSegment1d(lineSegmentStart1, lineSegmentEnd1);
 
          double boundaryOne = lineSegmentStart1 < lineSegmentEnd1 ? lineSegmentStart1 : lineSegmentEnd1;
          double boundaryTwo = lineSegmentStart1 > lineSegmentEnd1 ? lineSegmentStart1 : lineSegmentEnd1;
-         double lineSegmentStart2 = RandomTools.generateRandomDouble(random, boundaryOne, boundaryTwo);
-         double lineSegmentEnd2 = RandomTools.generateRandomDouble(random, boundaryOne, boundaryTwo);
+         double lineSegmentStart2 = RandomNumbers.nextDouble(random, boundaryOne, boundaryTwo);
+         double lineSegmentEnd2 = RandomNumbers.nextDouble(random, boundaryOne, boundaryTwo);
          LineSegment1d lineSegment2 = new LineSegment1d(lineSegmentStart2, lineSegmentEnd2);
 
          double expectedOverlapStart = lineSegmentStart2;
@@ -150,14 +150,14 @@ public class LineSegment1dTest
       // lineSegment2 partially overlapping lineSegment1 case 1
       for (int i = 0; i < 1000; i++)
       {
-         double lineSegmentStart1 = RandomTools.generateRandomDouble(random, 10.0);
-         double lineSegmentEnd1 = RandomTools.generateRandomDouble(random, 10.0);
+         double lineSegmentStart1 = RandomNumbers.nextDouble(random, 10.0);
+         double lineSegmentEnd1 = RandomNumbers.nextDouble(random, 10.0);
          LineSegment1d lineSegment1 = new LineSegment1d(lineSegmentStart1, lineSegmentEnd1);
 
          double boundaryOne = lineSegmentStart1 < lineSegmentEnd1 ? lineSegmentStart1 : lineSegmentEnd1;
          double boundaryTwo = lineSegmentStart1 > lineSegmentEnd1 ? lineSegmentStart1 : lineSegmentEnd1;
-         double lineSegmentStart2 = RandomTools.generateRandomDouble(random, boundaryOne, boundaryTwo);
-         double lineSegmentEnd2 = RandomTools.generateRandomDouble(random, boundaryOne - 10.0, boundaryOne);
+         double lineSegmentStart2 = RandomNumbers.nextDouble(random, boundaryOne, boundaryTwo);
+         double lineSegmentEnd2 = RandomNumbers.nextDouble(random, boundaryOne - 10.0, boundaryOne);
          LineSegment1d lineSegment2 = new LineSegment1d(lineSegmentStart2, lineSegmentEnd2);
 
          double expectedOverlapStart = lineSegmentStart2;
@@ -197,14 +197,14 @@ public class LineSegment1dTest
       // lineSegment2 partially overlapping lineSegment1 case 2
       for (int i = 0; i < 1000; i++)
       {
-         double lineSegmentStart1 = RandomTools.generateRandomDouble(random, 10.0);
-         double lineSegmentEnd1 = RandomTools.generateRandomDouble(random, 10.0);
+         double lineSegmentStart1 = RandomNumbers.nextDouble(random, 10.0);
+         double lineSegmentEnd1 = RandomNumbers.nextDouble(random, 10.0);
          LineSegment1d lineSegment1 = new LineSegment1d(lineSegmentStart1, lineSegmentEnd1);
 
          double boundaryOne = lineSegmentStart1 < lineSegmentEnd1 ? lineSegmentStart1 : lineSegmentEnd1;
          double boundaryTwo = lineSegmentStart1 > lineSegmentEnd1 ? lineSegmentStart1 : lineSegmentEnd1;
-         double lineSegmentStart2 = RandomTools.generateRandomDouble(random, boundaryOne, boundaryTwo);
-         double lineSegmentEnd2 = RandomTools.generateRandomDouble(random, boundaryTwo, boundaryTwo + 10.0);
+         double lineSegmentStart2 = RandomNumbers.nextDouble(random, boundaryOne, boundaryTwo);
+         double lineSegmentEnd2 = RandomNumbers.nextDouble(random, boundaryTwo, boundaryTwo + 10.0);
          LineSegment1d lineSegment2 = new LineSegment1d(lineSegmentStart2, lineSegmentEnd2);
 
          double expectedOverlapStart = lineSegmentStart2;
@@ -244,13 +244,13 @@ public class LineSegment1dTest
       // lineSegment2 not overlapping lineSegment1 case 1
       for (int i = 0; i < 1000; i++)
       {
-         double lineSegmentStart1 = RandomTools.generateRandomDouble(random, 10.0);
-         double lineSegmentEnd1 = RandomTools.generateRandomDouble(random, 10.0);
+         double lineSegmentStart1 = RandomNumbers.nextDouble(random, 10.0);
+         double lineSegmentEnd1 = RandomNumbers.nextDouble(random, 10.0);
          LineSegment1d lineSegment1 = new LineSegment1d(lineSegmentStart1, lineSegmentEnd1);
 
          double max = lineSegmentStart1 > lineSegmentEnd1 ? lineSegmentStart1 : lineSegmentEnd1;
-         double lineSegmentStart2 = RandomTools.generateRandomDouble(random, max, max + 10.0);
-         double lineSegmentEnd2 = RandomTools.generateRandomDouble(random, max, max + 10.0);
+         double lineSegmentStart2 = RandomNumbers.nextDouble(random, max, max + 10.0);
+         double lineSegmentEnd2 = RandomNumbers.nextDouble(random, max, max + 10.0);
          LineSegment1d lineSegment2 = new LineSegment1d(lineSegmentStart2, lineSegmentEnd2);
 
          LineSegment1d actualOverlap = new LineSegment1d();
@@ -265,13 +265,13 @@ public class LineSegment1dTest
       // lineSegment2 not overlapping lineSegment1 case 2
       for (int i = 0; i < 1000; i++)
       {
-         double lineSegmentStart1 = RandomTools.generateRandomDouble(random, 10.0);
-         double lineSegmentEnd1 = RandomTools.generateRandomDouble(random, 10.0);
+         double lineSegmentStart1 = RandomNumbers.nextDouble(random, 10.0);
+         double lineSegmentEnd1 = RandomNumbers.nextDouble(random, 10.0);
          LineSegment1d lineSegment1 = new LineSegment1d(lineSegmentStart1, lineSegmentEnd1);
 
          double min = lineSegmentStart1 < lineSegmentEnd1 ? lineSegmentStart1 : lineSegmentEnd1;
-         double lineSegmentStart2 = RandomTools.generateRandomDouble(random, min - 10.0, min);
-         double lineSegmentEnd2 = RandomTools.generateRandomDouble(random, min - 10.0, min);
+         double lineSegmentStart2 = RandomNumbers.nextDouble(random, min - 10.0, min);
+         double lineSegmentEnd2 = RandomNumbers.nextDouble(random, min - 10.0, min);
          LineSegment1d lineSegment2 = new LineSegment1d(lineSegmentStart2, lineSegmentEnd2);
 
          LineSegment1d actualOverlap = new LineSegment1d();
@@ -410,9 +410,7 @@ public class LineSegment1dTest
 
    public static void main(String[] args)
    {
-      String targetTests = "us.ihmc.robotics.geometry.LineSegment1dTest";
-      String targetClasses = "us.ihmc.robotics.geometry.LineSegment1d";
-      MutationTestingTools.doPITMutationTestAndOpenResult(targetTests, targetClasses);
+      MutationTestFacilitator.facilitateMutationTestForClass(LineSegment1d.class, LineSegment1dTest.class);
    }
 
 }

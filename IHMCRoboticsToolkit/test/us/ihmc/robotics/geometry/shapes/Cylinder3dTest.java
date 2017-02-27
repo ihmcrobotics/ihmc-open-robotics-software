@@ -8,6 +8,7 @@ import java.util.Random;
 
 import org.junit.Test;
 
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
@@ -15,7 +16,6 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.robotics.random.RandomTools;
 
 public class Cylinder3dTest
 {
@@ -34,8 +34,8 @@ public class Cylinder3dTest
       for (int i = 0; i < numberOfShapes; i++)
       {
          RigidBodyTransform transform = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
-         double height = RandomTools.generateRandomDouble(random, 0.01, 10.0);
-         double radius = RandomTools.generateRandomDouble(random, 0.01, 10.0);
+         double height = RandomNumbers.nextDouble(random, 0.01, 10.0);
+         double radius = RandomNumbers.nextDouble(random, 0.01, 10.0);
          Cylinder3d cylinder3d = new Cylinder3d(transform, height, radius);
 
          testHelper.runSimpleTests(cylinder3d, random, numberOfPoints);
@@ -55,8 +55,8 @@ public class Cylinder3dTest
       for (int i = 0; i < numberOfShapes; i++)
       {
          RigidBodyTransform transform = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
-         double height = RandomTools.generateRandomDouble(random, 0.01, 10.0);
-         double radius = RandomTools.generateRandomDouble(random, 0.01, 10.0);
+         double height = RandomNumbers.nextDouble(random, 0.01, 10.0);
+         double radius = RandomNumbers.nextDouble(random, 0.01, 10.0);
          Cylinder3d cylinder3d = new Cylinder3d(transform, height, radius);
          Cylinder3d cylinder3d2 = new Cylinder3d(cylinder3d);
          testHelper.runSimpleTests(cylinder3d2, random, numberOfPoints);
@@ -76,8 +76,8 @@ public class Cylinder3dTest
       for (int i = 0; i < numberOfShapes; i++)
       {
          RigidBodyTransform transform = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
-         double height = RandomTools.generateRandomDouble(random, 0.01, 10.0);
-         double radius = RandomTools.generateRandomDouble(random, 0.01, 10.0);
+         double height = RandomNumbers.nextDouble(random, 0.01, 10.0);
+         double radius = RandomNumbers.nextDouble(random, 0.01, 10.0);
          Cylinder3d cylinder3d = new Cylinder3d(transform, height, radius);
          
          assertEquals(cylinder3d.getRadius(), radius, 1e-7);
@@ -90,7 +90,7 @@ public class Cylinder3dTest
          assertEquals(cylinder3d.getHeight(), 10.0, 1e-7);
          
          RigidBodyTransform rbt = new RigidBodyTransform();
-         cylinder3d.getTransform(rbt);
+         cylinder3d.getPose(rbt);
          
          Point3D point = new  Point3D();
          rbt.getTranslation(point);

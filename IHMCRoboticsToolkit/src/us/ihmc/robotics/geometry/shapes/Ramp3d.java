@@ -8,6 +8,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.GeometryTools;
+import us.ihmc.robotics.geometry.transformables.Pose;
 import us.ihmc.robotics.math.Epsilons;
 
 /**
@@ -28,7 +29,12 @@ public class Ramp3d extends Shape3d<Ramp3d>
 
    public Ramp3d(Ramp3d ramp3d)
    {
-      this(ramp3d.getTransformUnsafe(), ramp3d.getWidth(), ramp3d.getLength(), ramp3d.getHeight());
+      setPose(ramp3d);
+      size = new Size3d(ramp3d.getLength(), ramp3d.getWidth(), ramp3d.getHeight());
+      rampPlane = new Plane3d();
+      temporaryPoint = new Point3D();
+
+      updateRamp();
    }
 
    public Ramp3d(double width, double length, double height)
@@ -42,7 +48,17 @@ public class Ramp3d extends Shape3d<Ramp3d>
 
    public Ramp3d(RigidBodyTransform transform, double width, double length, double height)
    {
-      setTransform(transform);
+      setPose(transform);
+      size = new Size3d(length, width, height);
+      rampPlane = new Plane3d();
+      temporaryPoint = new Point3D();
+
+      updateRamp();
+   }
+
+   public Ramp3d(Pose pose, double width, double length, double height)
+   {
+      setPose(pose);
       size = new Size3d(length, width, height);
       rampPlane = new Plane3d();
       temporaryPoint = new Point3D();
@@ -55,7 +71,7 @@ public class Ramp3d extends Shape3d<Ramp3d>
    {
       if (this != ramp3d)
       {
-         setTransform(ramp3d.getTransformUnsafe());
+         setPose(ramp3d);
          size.set(ramp3d.size);
 
          updateRamp();
@@ -124,7 +140,7 @@ public class Ramp3d extends Shape3d<Ramp3d>
    @Override
    public void applyTransform(Transform transform)
    {
-      super.applyTransform(transform);
+      applyTransformToPose(transform);
       updateRamp();
    }
 
@@ -267,6 +283,6 @@ public class Ramp3d extends Shape3d<Ramp3d>
    @Override
    public String toString()
    {
-      return "size = " + size + ", + transform = " + getTransformUnsafe() + "\n";
+      return "size = " + size + ", + transform = " + getPoseString() + "\n";
    }
 }

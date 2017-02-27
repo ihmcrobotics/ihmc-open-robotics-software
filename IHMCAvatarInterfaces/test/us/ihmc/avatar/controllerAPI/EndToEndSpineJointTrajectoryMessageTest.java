@@ -16,6 +16,7 @@ import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyJointspaceControlState;
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -32,7 +33,6 @@ import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.math.QuaternionCalculus;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
-import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -369,7 +369,7 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
    {
       double jointLimitUpper = joint.getJointLimitUpper();
       double jointLimitLower = joint.getJointLimitLower();
-      return RandomTools.generateRandomDouble(random, jointLimitLower, jointLimitUpper);
+      return RandomNumbers.nextDouble(random, jointLimitLower, jointLimitUpper);
    }
 
    private ChestTrajectoryMessage createRandomChestMessage(double trajectoryTime, Random random)

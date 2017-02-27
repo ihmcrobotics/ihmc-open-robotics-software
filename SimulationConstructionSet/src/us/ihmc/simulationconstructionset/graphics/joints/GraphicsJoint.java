@@ -22,8 +22,7 @@ public class GraphicsJoint extends Graphics3DNode
 
    public final void updateFromJoint()
    {
-      transformToParent.setIdentity();
-      transformToParent.multiply(joint.getOffsetTransform3D());
+      transformToParent.set(joint.getOffsetTransform3D());
       transformToParent.multiply(joint.getJointTransform3D());
       setTransform(transformToParent);
    }

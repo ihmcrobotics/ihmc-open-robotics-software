@@ -59,7 +59,6 @@ import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariableList;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateMachinesJPanel;
-import us.ihmc.robotics.time.GlobalTimer;
 import us.ihmc.robotics.time.RealTimeRateEnforcer;
 import us.ihmc.simulationconstructionset.DataBuffer.RepeatDataBufferEntryException;
 import us.ihmc.simulationconstructionset.commands.AddCameraKeyCommandExecutor;
@@ -1298,10 +1297,6 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       // Destroy the LWJGL Threads. Not sure if need to do Display.destroy() or not.
 //      Display.destroy();
       ThreadTools.interruptLiveThreadsExceptThisOneContaining("LWJGL Timer"); // This kills the silly LWJGL sleeping thread which just sleeps and does nothing else...
-
-      GlobalTimer.clearTimers();
-
-
    }
 
    /**

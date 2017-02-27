@@ -8,14 +8,15 @@ import java.util.Random;
 
 import org.junit.Test;
 
+import us.ihmc.commons.MutationTestFacilitator;
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.geometry.LineSegment3d;
-import us.ihmc.robotics.random.RandomTools;
-import us.ihmc.tools.testing.MutationTestingTools;
+import us.ihmc.robotics.random.RandomGeometry;
 
 public class GilbertJohnsonKeerthiCollisionDetectorTest
 {
@@ -162,8 +163,8 @@ public class GilbertJohnsonKeerthiCollisionDetectorTest
 
       for (int i = 0; i < numberOfPolytopesToTests; i++)
       {
-         double xyzBoundary = RandomTools.generateRandomDouble(random, 1000.0);
-         double radius = RandomTools.generateRandomDouble(random, 1.0, 20.0);
+         double xyzBoundary = RandomNumbers.nextDouble(random, 1000.0);
+         double radius = RandomNumbers.nextDouble(random, 1.0, 20.0);
          int maxNumberOfPoints = 40;
 
          int numberOfPoints = random.nextInt(maxNumberOfPoints) + 1;
@@ -173,7 +174,7 @@ public class GilbertJohnsonKeerthiCollisionDetectorTest
 
          for (int j = 0; j < numberOfPointsToTests; j++)
          {
-            Point3D pointToProject = RandomTools.generateRandomPoint(random, xyzBoundary, xyzBoundary, xyzBoundary);
+            Point3D pointToProject = RandomGeometry.nextPoint3D(random, xyzBoundary, xyzBoundary, xyzBoundary);
             ConvexPolytope randomPointPolytope = ConvexPolytopeConstructor.constructSinglePointPolytope(pointToProject);
 
             Point3D closestPointOnPolytope = new Point3D();
@@ -331,8 +332,8 @@ public class GilbertJohnsonKeerthiCollisionDetectorTest
 
       for (int i = 0; i < numberOfPolytopesToTests; i++)
       {
-         double xyzBoundary = RandomTools.generateRandomDouble(random, 500.0);
-         double radius = RandomTools.generateRandomDouble(random, 1.0, 10.0);
+         double xyzBoundary = RandomNumbers.nextDouble(random, 500.0);
+         double radius = RandomNumbers.nextDouble(random, 1.0, 10.0);
          int maxNumberOfPoints = 40;
 
          int numberOfPoints = random.nextInt(maxNumberOfPoints) + 1;
@@ -427,9 +428,9 @@ public class GilbertJohnsonKeerthiCollisionDetectorTest
 
       for (int i = 0; i < numberOfPolytopesToTests; i++)
       {
-         double xyzBoundary = RandomTools.generateRandomDouble(random, 20.0);
-         double radius = RandomTools.generateRandomDouble(random, 1.0, 5.0);
-         double height = RandomTools.generateRandomDouble(random, 1.0, 5.0);
+         double xyzBoundary = RandomNumbers.nextDouble(random, 20.0);
+         double radius = RandomNumbers.nextDouble(random, 1.0, 5.0);
+         double height = RandomNumbers.nextDouble(random, 1.0, 5.0);
          int maxNumberOfPoints = 20;
 
          int numberOfPoints = random.nextInt(maxNumberOfPoints) + 1;
@@ -870,8 +871,6 @@ public class GilbertJohnsonKeerthiCollisionDetectorTest
 
    public static void main(String[] args)
    {
-      String targetTests = GilbertJohnsonKeerthiCollisionDetectorTest.class.getName();
-      String targetClassesInSamePackage = MutationTestingTools.createClassSelectorStringFromTargetString(targetTests);
-      MutationTestingTools.doPITMutationTestAndOpenResult(targetTests, targetClassesInSamePackage);
+      MutationTestFacilitator.facilitateMutationTestForPackage(GilbertJohnsonKeerthiCollisionDetectorTest.class);
    }
 }

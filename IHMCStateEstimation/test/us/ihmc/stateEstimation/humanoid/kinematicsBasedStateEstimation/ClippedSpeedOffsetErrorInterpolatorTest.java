@@ -25,7 +25,7 @@ import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
@@ -111,7 +111,7 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
          startPose.setPose(startPoseTransform);
 
          RigidBodyTransform goalPoseTransform = new RigidBodyTransform();
-         Vector3D goalPose_Translation = RandomTools.generateRandomVector(random, 0.04);
+         Vector3D goalPose_Translation = RandomGeometry.nextVector3D(random, 0.04);
          Quaternion goalPose_Rotation = new Quaternion(0.0,0.0,0.0,1.0);
          
          goalPoseTransform.setIdentity();
@@ -274,8 +274,8 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
          startPose.setPose(startPoseTransform);
 
          RigidBodyTransform goalPoseTransform = new RigidBodyTransform();
-         Vector3D goalPose_Translation = RandomTools.generateRandomVector(random, 0.04);
-         Quaternion goalPose_Rotation = RandomTools.generateRandomQuaternion(random, 0.04);
+         Vector3D goalPose_Translation = RandomGeometry.nextVector3D(random, 0.04);
+         Quaternion goalPose_Rotation = RandomGeometry.nextQuaternion(random, 0.04);
          
          goalPoseTransform.setIdentity();
          goalPoseTransform.multiply(new RigidBodyTransform(new Quaternion(0.0,0.0,0.0,1.0), referenceFrameToBeCorrectedTransform_Translation));
@@ -667,7 +667,7 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
 
          RigidBodyTransform goalPoseTransform = new RigidBodyTransform();
          Vector3D goalPose_Translation = new Vector3D(0.0, 0.0, 0.0);
-         Quaternion goalPose_Rotation = RandomTools.generateRandomQuaternion(random, 0.04);
+         Quaternion goalPose_Rotation = RandomGeometry.nextQuaternion(random, 0.04);
          
          goalPoseTransform.setIdentity();
          goalPoseTransform.multiply(new RigidBodyTransform(new Quaternion(0.0,0.0,0.0,1.0), referenceFrameToBeCorrectedTransform_Translation));
@@ -722,64 +722,64 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
 
       for(int i = 0; i < 200; i++)
       {
-         goalPose.setPose(RandomTools.generateRandomPoint(random, 0.1, 0.1, 0.1),RandomTools.generateRandomQuaternion(random, Math.toRadians(9.2)));
+         goalPose.setPose(RandomGeometry.nextPoint3D(random, 0.1, 0.1, 0.1),RandomGeometry.nextQuaternion(random, Math.toRadians(9.2)));
          assertFalse(clippedSpeedOffsetErrorInterpolator.checkIfErrorIsTooBig(startPose, goalPose, true));
       }
       
       goalOrientation.setYawPitchRoll(Math.toRadians(10.1), Math.toRadians(0.0), Math.toRadians(0.0));
-      goalPose.setPose(RandomTools.generateRandomPoint(random, 1.0, 1.0, 1.0), goalOrientation);
+      goalPose.setPose(RandomGeometry.nextPoint3D(random, 1.0, 1.0, 1.0), goalOrientation);
       assertTrue(clippedSpeedOffsetErrorInterpolator.checkIfErrorIsTooBig(startPose, goalPose, true));
       
       goalOrientation.setYawPitchRoll(Math.toRadians(0.0), Math.toRadians(10.1), Math.toRadians(0.0));
-      goalPose.setPose(RandomTools.generateRandomPoint(random, 1.0, 1.0, 1.0), goalOrientation);
+      goalPose.setPose(RandomGeometry.nextPoint3D(random, 1.0, 1.0, 1.0), goalOrientation);
       assertTrue(clippedSpeedOffsetErrorInterpolator.checkIfErrorIsTooBig(startPose, goalPose, true));
       
       goalOrientation.setYawPitchRoll(Math.toRadians(0.0), Math.toRadians(0.0), Math.toRadians(10.1));
-      goalPose.setPose(RandomTools.generateRandomPoint(random, 1.0, 1.0, 1.0), goalOrientation);
+      goalPose.setPose(RandomGeometry.nextPoint3D(random, 1.0, 1.0, 1.0), goalOrientation);
       assertTrue(clippedSpeedOffsetErrorInterpolator.checkIfErrorIsTooBig(startPose, goalPose, true));
       
       goalOrientation.setYawPitchRoll(Math.toRadians(10.2), Math.toRadians(10.3), Math.toRadians(0.0));
-      goalPose.setPose(RandomTools.generateRandomPoint(random, 1.0, 1.0, 1.0), goalOrientation);
+      goalPose.setPose(RandomGeometry.nextPoint3D(random, 1.0, 1.0, 1.0), goalOrientation);
       assertTrue(clippedSpeedOffsetErrorInterpolator.checkIfErrorIsTooBig(startPose, goalPose, true));
       
       goalOrientation.setYawPitchRoll(Math.toRadians(10.2), Math.toRadians(0.0), Math.toRadians(10.1));
-      goalPose.setPose(RandomTools.generateRandomPoint(random, 1.0, 1.0, 1.0), goalOrientation);
+      goalPose.setPose(RandomGeometry.nextPoint3D(random, 1.0, 1.0, 1.0), goalOrientation);
       assertTrue(clippedSpeedOffsetErrorInterpolator.checkIfErrorIsTooBig(startPose, goalPose, true));
       
       goalOrientation.setYawPitchRoll(Math.toRadians(0.0), Math.toRadians(10.2), Math.toRadians(10.1));
-      goalPose.setPose(RandomTools.generateRandomPoint(random, 1.0, 1.0, 1.0), goalOrientation);
+      goalPose.setPose(RandomGeometry.nextPoint3D(random, 1.0, 1.0, 1.0), goalOrientation);
       assertTrue(clippedSpeedOffsetErrorInterpolator.checkIfErrorIsTooBig(startPose, goalPose, true));
       
       goalOrientation.setYawPitchRoll(Math.toRadians(20.0), Math.toRadians(10.2), Math.toRadians(10.1));
-      goalPose.setPose(RandomTools.generateRandomPoint(random, 1.0, 1.0, 1.0), goalOrientation);
+      goalPose.setPose(RandomGeometry.nextPoint3D(random, 1.0, 1.0, 1.0), goalOrientation);
       assertTrue(clippedSpeedOffsetErrorInterpolator.checkIfErrorIsTooBig(startPose, goalPose, true));
       
       goalOrientation.setYawPitchRoll(Math.toRadians(-10.1), Math.toRadians(0.0), Math.toRadians(0.0));
-      goalPose.setPose(RandomTools.generateRandomPoint(random, 1.0, 1.0, 1.0), goalOrientation);
+      goalPose.setPose(RandomGeometry.nextPoint3D(random, 1.0, 1.0, 1.0), goalOrientation);
       assertTrue(clippedSpeedOffsetErrorInterpolator.checkIfErrorIsTooBig(startPose, goalPose, true));
       
       goalOrientation.setYawPitchRoll(Math.toRadians(0.0), Math.toRadians(-10.1), Math.toRadians(0.0));
-      goalPose.setPose(RandomTools.generateRandomPoint(random, 1.0, 1.0, 1.0), goalOrientation);
+      goalPose.setPose(RandomGeometry.nextPoint3D(random, 1.0, 1.0, 1.0), goalOrientation);
       assertTrue(clippedSpeedOffsetErrorInterpolator.checkIfErrorIsTooBig(startPose, goalPose, true));
       
       goalOrientation.setYawPitchRoll(Math.toRadians(0.0), Math.toRadians(0.0), Math.toRadians(-10.1));
-      goalPose.setPose(RandomTools.generateRandomPoint(random, 1.0, 1.0, 1.0), goalOrientation);
+      goalPose.setPose(RandomGeometry.nextPoint3D(random, 1.0, 1.0, 1.0), goalOrientation);
       assertTrue(clippedSpeedOffsetErrorInterpolator.checkIfErrorIsTooBig(startPose, goalPose, true));
       
       goalOrientation.setYawPitchRoll(Math.toRadians(-10.2), Math.toRadians(-10.3), Math.toRadians(0.0));
-      goalPose.setPose(RandomTools.generateRandomPoint(random, 1.0, 1.0, 1.0), goalOrientation);
+      goalPose.setPose(RandomGeometry.nextPoint3D(random, 1.0, 1.0, 1.0), goalOrientation);
       assertTrue(clippedSpeedOffsetErrorInterpolator.checkIfErrorIsTooBig(startPose, goalPose, true));
       
       goalOrientation.setYawPitchRoll(Math.toRadians(-10.2), Math.toRadians(0.0), Math.toRadians(-10.1));
-      goalPose.setPose(RandomTools.generateRandomPoint(random, 1.0, 1.0, 1.0), goalOrientation);
+      goalPose.setPose(RandomGeometry.nextPoint3D(random, 1.0, 1.0, 1.0), goalOrientation);
       assertTrue(clippedSpeedOffsetErrorInterpolator.checkIfErrorIsTooBig(startPose, goalPose, true));
       
       goalOrientation.setYawPitchRoll(Math.toRadians(0.0), Math.toRadians(-10.2), Math.toRadians(-10.1));
-      goalPose.setPose(RandomTools.generateRandomPoint(random, 1.0, 1.0, 1.0), goalOrientation);
+      goalPose.setPose(RandomGeometry.nextPoint3D(random, 1.0, 1.0, 1.0), goalOrientation);
       assertTrue(clippedSpeedOffsetErrorInterpolator.checkIfErrorIsTooBig(startPose, goalPose, true));
       
       goalOrientation.setYawPitchRoll(Math.toRadians(-20.0), Math.toRadians(-10.2), Math.toRadians(-10.1));
-      goalPose.setPose(RandomTools.generateRandomPoint(random, 1.0, 1.0, 1.0), goalOrientation);
+      goalPose.setPose(RandomGeometry.nextPoint3D(random, 1.0, 1.0, 1.0), goalOrientation);
       assertTrue(clippedSpeedOffsetErrorInterpolator.checkIfErrorIsTooBig(startPose, goalPose, true));
       
       
@@ -792,12 +792,12 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
       Vector3D translation = new Vector3D();
       Quaternion rotation = new Quaternion(0.0,0.0,0.0,1.0);
       
-      translation = RandomTools.generateRandomVector(random);
-      rotation = RandomTools.generateRandomQuaternion(random);
+      translation = RandomGeometry.nextVector3D(random);
+      rotation = RandomGeometry.nextQuaternion(random);
       putReferenceFrameToBeCorrectedWaypointInTransformBuffer(firstTimestamp, translation, rotation);
       
-      translation = RandomTools.generateRandomVector(random);
-      rotation = RandomTools.generateRandomQuaternion(random);
+      translation = RandomGeometry.nextVector3D(random);
+      rotation = RandomGeometry.nextQuaternion(random);
       putReferenceFrameToBeCorrectedWaypointInTransformBuffer(lastTimestamp, translation, rotation);
    }
 

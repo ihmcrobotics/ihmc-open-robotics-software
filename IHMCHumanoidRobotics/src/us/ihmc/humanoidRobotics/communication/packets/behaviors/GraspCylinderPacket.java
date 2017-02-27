@@ -5,7 +5,7 @@ import java.util.Random;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class GraspCylinderPacket extends Packet<GraspCylinderPacket>
@@ -17,8 +17,8 @@ public class GraspCylinderPacket extends Packet<GraspCylinderPacket>
    public GraspCylinderPacket(Random random)
    {
       robotSide = RobotSide.generateRandomRobotSide(random);
-      graspPointInWorld = RandomTools.generateRandomPoint(random, -10.0, -10.0, -10.0, 10.0, 10.0, 10.0);
-      cylinderLongAxisInWorld = RandomTools.generateRandomVector(random);
+      graspPointInWorld = RandomGeometry.nextPoint3D(random, -10.0, -10.0, -10.0, 10.0, 10.0, 10.0);
+      cylinderLongAxisInWorld = RandomGeometry.nextVector3D(random);
    }
    
    public GraspCylinderPacket()

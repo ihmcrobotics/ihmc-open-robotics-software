@@ -4,10 +4,10 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
+import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.tools.testing.MutationTestingTools;
 
 public class YoTimerTest
 {
@@ -89,6 +89,6 @@ public class YoTimerTest
    
    public static void main(String[] args)
    {
-      MutationTestingTools.doPITMutationTestAndOpenResult(YoTimerTest.class);
+      MutationTestFacilitator.facilitateMutationTestForClass(YoTimer.class, YoTimerTest.class);
    }
 }

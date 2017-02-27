@@ -4,7 +4,7 @@ import java.util.Random;
 
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 
 public class ConvexPolytopeConstructor
 {
@@ -77,11 +77,11 @@ public class ConvexPolytopeConstructor
    {
       ConvexPolytope polytope = new ConvexPolytope();
 
-      Point3D sphereCenter = RandomTools.generateRandomPoint(random, xyzBoundary, xyzBoundary, xyzBoundary);
+      Point3D sphereCenter = RandomGeometry.nextPoint3D(random, xyzBoundary, xyzBoundary, xyzBoundary);
 
       for (int i = 0; i < numberOfPoints; i++)
       {
-         Vector3D randomVector = RandomTools.generateRandomVector(random, radius);
+         Vector3D randomVector = RandomGeometry.nextVector3D(random, radius);
          Point3D point = new Point3D(sphereCenter);
          point.add(randomVector);
 
