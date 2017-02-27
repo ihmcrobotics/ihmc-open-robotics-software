@@ -59,6 +59,7 @@ import com.jme3.util.SkyFactory.EnvMapType;
 import jme3dae.ColladaLoader;
 import jme3dae.collada14.ColladaDocumentV14;
 import jme3dae.materials.FXBumpMaterialGenerator;
+import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.graphicsDescription.HeightMap;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.input.SelectedListener;
@@ -95,7 +96,6 @@ import us.ihmc.tools.io.files.FileTools;
 import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.tools.thread.CloseableAndDisposable;
 import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
-import us.ihmc.tools.time.Timer;
 
 public class JMERenderer extends SimpleApplication implements Graphics3DAdapter, PBOAwtPanelListener
 {
@@ -962,7 +962,7 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
    {
       if (!pboAwtPanels.isEmpty())
       {
-         Timer timer = new Timer().start();
+         Stopwatch timer = new Stopwatch().start();
 
          for (JMEGPULidar gpuLidar : gpuLidars)
          {

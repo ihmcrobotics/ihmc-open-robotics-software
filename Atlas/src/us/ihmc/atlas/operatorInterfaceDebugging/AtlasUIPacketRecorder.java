@@ -10,6 +10,7 @@ import java.util.Scanner;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.nio.WriteOption;
+import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.configuration.NetworkParameterKeys;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.communication.net.KryoStreamSerializer;
@@ -22,7 +23,6 @@ import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.tools.FormattingTools;
 import us.ihmc.tools.io.files.FileTools;
 import us.ihmc.tools.io.printing.PrintTools;
-import us.ihmc.tools.time.Timer;
 
 public class AtlasUIPacketRecorder
 {
@@ -77,7 +77,7 @@ public class AtlasUIPacketRecorder
       packetClient.connect();
       packetClient.attachGlobalListener(new GlobalPacketConsumer()
       {
-         Timer timer = new Timer();
+         Stopwatch timer = new Stopwatch();
          boolean firstPacketReceived = false;
          
          @Override
