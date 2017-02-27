@@ -1,4 +1,4 @@
-package us.ihmc.tools.testing;
+package us.ihmc.robotics.testing;
 
 import java.util.Random;
 
