@@ -3,6 +3,10 @@ package us.ihmc.tools;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+import java.util.TimeZone;
+
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
 
@@ -82,5 +86,56 @@ public class FormattingToolsTest
    {
       assertEquals("not equal", 100, FormattingTools.roundToSignificantFigures(123.45, 1), 1e-12);
       assertEquals("not equal", 120, FormattingTools.roundToSignificantFigures(123.45, 2), 1e-12);
+   }
+	
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testGetDateString()
+   {
+      String dateToolsDateString = FormattingTools.getDateString();
+      StringBuilder dateBuilder = new StringBuilder();
+
+      Calendar calendar = new GregorianCalendar(TimeZone.getDefault());
+
+      int year = calendar.get(GregorianCalendar.YEAR);
+      int month = calendar.get(GregorianCalendar.MONTH) + 1;
+      int day = calendar.get(GregorianCalendar.DAY_OF_MONTH);
+
+      dateBuilder.append(year);
+      if (month / 10 < 1)
+         dateBuilder.append("0" + month);
+      else
+         dateBuilder.append(month);
+
+      if (day / 10 < 1)
+         dateBuilder.append("0" + day);
+      else
+         dateBuilder.append(day);
+
+      assertEquals(dateBuilder.toString(), dateToolsDateString);
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testGetTimeString()
+   {
+      StringBuilder timeBuilder = new StringBuilder();
+      Calendar calendar = new GregorianCalendar(TimeZone.getDefault());
+
+      int hours = calendar.get(GregorianCalendar.HOUR_OF_DAY);
+      int minutes = calendar.get(GregorianCalendar.MINUTE);
+      String timeString = FormattingTools.getTimeString();
+
+      if (hours / 10 < 1)
+         timeBuilder.append("0" + hours);
+      else
+         timeBuilder.append(hours);
+
+      if (minutes / 10 < 1)
+         timeBuilder.append("0" + minutes);
+      else
+         timeBuilder.append(minutes);
+
+      assertEquals(timeBuilder.toString(), timeString);
    }
 }

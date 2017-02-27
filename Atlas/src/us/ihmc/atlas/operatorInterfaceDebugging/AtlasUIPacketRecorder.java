@@ -19,15 +19,15 @@ import us.ihmc.communication.packetCommunicator.interfaces.GlobalPacketConsumer;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
+import us.ihmc.tools.FormattingTools;
 import us.ihmc.tools.io.files.FileTools;
 import us.ihmc.tools.io.printing.PrintTools;
-import us.ihmc.tools.time.DateTools;
 import us.ihmc.tools.time.Timer;
 
 public class AtlasUIPacketRecorder
 {
    private static final Path PACKET_RECORDINGS_PATH = Paths.get("./packetRecordings");
-   private static final String PACKET_RECORDING_FILENAME = "PacketRecording_" + DateTools.getDateString() + "_real3";
+   private static final String PACKET_RECORDING_FILENAME = "PacketRecording_" + FormattingTools.getDateString() + "_real3";
    private Object streamConch = new Object();
 
    public AtlasUIPacketRecorder() throws IOException
@@ -127,7 +127,7 @@ public class AtlasUIPacketRecorder
    
    public static String getPrefixFileName()
    {
-      return "PacketRecording_" + DateTools.getDateString() + "_real5";
+      return "PacketRecording_" + FormattingTools.getDateString() + "_real5";
    }
    
    public static void main(String[] args) throws IOException
