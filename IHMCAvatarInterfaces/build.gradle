@@ -42,7 +42,7 @@ ihmc.configureForIHMCOpenSourceBintrayPublish(false, "mavenJava", "maven-release
 dependencies {
 	testCompile group: 'junit', name: 'junit', version: '4.11'
 
-	compile group: 'us.ihmc', name: 'euclid-core', version: '0.4'
+	compile group: 'us.ihmc', name: 'euclid-core', version: '0.4.1'
 	compile group: 'com.martiansoftware', name: 'jsap', version: '2.1'
 	compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
 	compile group: 'us.ihmc.thirdparty.jinput', name: 'jinput', version: '160414'
@@ -62,7 +62,7 @@ dependencies {
 	compile group: 'us.ihmc.thirdparty.jme', name: 'jme3-core', version: '3.1.0-internal4'
 	compile group: 'com.github.wendykierp', name: 'JTransforms', version: '3.1'
 	compile group: 'org.reflections', name: 'reflections', version: '0.9.10'
-	compile group: 'us.ihmc', name: 'RobotEnvironmentAwareness', version: '0.2.2'
+	compile group: 'us.ihmc', name: 'RobotEnvironmentAwareness', version: '0.3'
     
     testCompile group: 'us.ihmc', name: 'ihmc-continuous-integration-framework', version: '0.9.4'
 
@@ -90,7 +90,6 @@ dependencies {
     compile ihmc.getProjectDependency(":IHMCRobotDataVisualizer")
     compile ihmc.getProjectDependency(":IHMCFootstepPlanning")
 
-	testCompile ihmc.getProjectDependency(":IHMCUnitTesting")
 	testCompile ihmc.getProjectTestDependency(":IHMCRoboticsToolkit")
 	testCompile ihmc.getProjectTestDependency(":IHMCJavaExtensions")
 	testCompile ihmc.getProjectTestDependency(":IHMCFootstepPlanning")

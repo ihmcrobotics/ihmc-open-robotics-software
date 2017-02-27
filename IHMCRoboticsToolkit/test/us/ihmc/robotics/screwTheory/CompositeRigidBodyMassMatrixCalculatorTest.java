@@ -9,9 +9,9 @@ import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.testing.JUnitTools;
+import us.ihmc.robotics.testing.JUnitTools;
 
 public class CompositeRigidBodyMassMatrixCalculatorTest extends MassMatrixCalculatorTest
 {
@@ -41,12 +41,12 @@ public class CompositeRigidBodyMassMatrixCalculatorTest extends MassMatrixCalcul
       sixDoFJoint.setPositionAndRotation(EuclidCoreRandomTools.generateRandomRigidBodyTransform(random));
       Twist sixDoFJointTwist = new Twist();
       sixDoFJoint.getJointTwist(sixDoFJointTwist);
-      sixDoFJointTwist.setLinearPart(RandomTools.generateRandomVector(random));
-      sixDoFJointTwist.setAngularPart(RandomTools.generateRandomVector(random));
+      sixDoFJointTwist.setLinearPart(RandomGeometry.nextVector3D(random));
+      sixDoFJointTwist.setAngularPart(RandomGeometry.nextVector3D(random));
       sixDoFJoint.setJointTwist(sixDoFJointTwist);
 
-      RigidBody floating = ScrewTools.addRigidBody("floating", sixDoFJoint, RandomTools.generateRandomDiagonalMatrix3d(random), random.nextDouble(),
-            RandomTools.generateRandomVector(random));
+      RigidBody floating = ScrewTools.addRigidBody("floating", sixDoFJoint, RandomGeometry.nextDiagonalMatrix3D(random), random.nextDouble(),
+            RandomGeometry.nextVector3D(random));
       MassMatrixCalculator massMatrixCalculator = new CompositeRigidBodyMassMatrixCalculator(elevator);
       massMatrixCalculator.compute();
       DenseMatrix64F massMatrix = massMatrixCalculator.getMassMatrix();

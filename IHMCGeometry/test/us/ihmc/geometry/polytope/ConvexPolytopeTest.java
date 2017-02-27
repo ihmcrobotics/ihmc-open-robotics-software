@@ -7,13 +7,13 @@ import java.util.ArrayList;
 
 import org.junit.Test;
 
+import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.geometry.BoundingBox3d;
-import us.ihmc.tools.testing.MutationTestingTools;
 
 public class ConvexPolytopeTest
 {
@@ -182,8 +182,6 @@ public class ConvexPolytopeTest
 
    public static void main(String[] args)
    {
-      String targetTests = ConvexPolytopeTest.class.getName();
-      String targetClassesInSamePackage = MutationTestingTools.createClassSelectorStringFromTargetString(targetTests);
-      MutationTestingTools.doPITMutationTestAndOpenResult(targetTests, targetClassesInSamePackage);
+      MutationTestFacilitator.facilitateMutationTestForPackage(ConvexPolytopeTest.class);
    }
 }

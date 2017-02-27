@@ -2,12 +2,12 @@ package us.ihmc.humanoidRobotics.communication.packets.walking;
 
 import java.util.Random;
 
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.ros.generators.RosEnumValueDocumentation;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
 import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
-import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 @RosMessagePacket(documentation = "The message commands the controller to bring the given part of the body back to a default configuration called 'home'."
@@ -56,9 +56,9 @@ public class GoHomeMessage extends Packet<GoHomeMessage>
 
    public GoHomeMessage(Random random)
    {
-      bodyPart = RandomTools.generateRandomEnum(random, BodyPart.class);
-      robotSide = RandomTools.generateRandomEnum(random, RobotSide.class);
-      trajectoryTime = RandomTools.generateRandomDoubleWithEdgeCases(random, 0.01);
+      bodyPart = RandomNumbers.nextEnum(random, BodyPart.class);
+      robotSide = RandomNumbers.nextEnum(random, RobotSide.class);
+      trajectoryTime = RandomNumbers.nextDoubleWithEdgeCases(random, 0.01);
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 

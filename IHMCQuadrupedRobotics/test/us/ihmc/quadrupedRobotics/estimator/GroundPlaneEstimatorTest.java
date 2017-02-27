@@ -8,8 +8,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import us.ihmc.euclid.tuple3D.Vector3D;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -17,6 +15,7 @@ import org.junit.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
@@ -28,7 +27,6 @@ import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotEnd;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.time.GlobalTimer;
 import us.ihmc.tools.MemoryTools;
 
 @ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
@@ -43,7 +41,6 @@ public class GroundPlaneEstimatorTest
    @After
    public void destroySimulationAndRecycleMemory()
    {
-      GlobalTimer.clearTimers();
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
    

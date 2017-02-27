@@ -14,6 +14,7 @@ import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCBehaviorTestHelper;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.WalkToLocationBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.WalkToLocationBehavior.WalkingOrientation;
@@ -25,9 +26,7 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FramePose2d;
-import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.time.GlobalTimer;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.environments.FlatGroundEnvironment;
@@ -61,7 +60,6 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
          drcBehaviorTestHelper = null;
       }
 
-      GlobalTimer.clearTimers();
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
@@ -116,7 +114,7 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
       PrintTools.debug(this, "Initializing Behavior");
-      double walkDistance = RandomTools.generateRandomDouble(new Random(), 1.0, 2.0);
+      double walkDistance = RandomNumbers.nextDouble(new Random(), 1.0, 2.0);
       Vector2D walkDirection = new Vector2D(1, 0);
       FramePose2d desiredMidFeetPose2d = copyAndOffsetCurrentMidfeetPose2d(walkDistance, walkDirection);
       WalkToLocationBehavior walkToLocationBehavior = createAndSetupWalkToLocationBehavior(desiredMidFeetPose2d);
@@ -139,7 +137,7 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
       double walkDistance = 2.0 * getRobotModel().getWalkingControllerParameters().getMinStepLengthForToeOff();
       Vector2D walkDirection = new Vector2D(-1, 0);
       FramePose2d desiredMidFeetPose2d = copyAndOffsetCurrentMidfeetPose2d(walkDistance, walkDirection);
-      int randomZeroOrOne = RandomTools.generateRandomInt(new Random(), 0, 1);
+      int randomZeroOrOne = RandomNumbers.nextInt(new Random(), 0, 1);
       double walkingOrientationRelativeToPathDirection;
       if (randomZeroOrOne == 0)
       {
@@ -285,8 +283,8 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
       PrintTools.debug(this, "Initializing Behavior");
-      double walkDistance = RandomTools.generateRandomDouble(new Random(), 1.0, 2.0);
-      double walkAngleDegrees = RandomTools.generateRandomDouble(new Random(), 45.0);
+      double walkDistance = RandomNumbers.nextDouble(new Random(), 1.0, 2.0);
+      double walkAngleDegrees = RandomNumbers.nextDouble(new Random(), 45.0);
       Vector2D walkDirection = new Vector2D(Math.cos(Math.toRadians(walkAngleDegrees)), Math.sin(Math.toRadians(walkAngleDegrees)));
       FramePose2d desiredMidFeetPose2d = copyOffsetAndYawCurrentMidfeetPose2d(walkDistance, walkDirection, Math.toRadians(walkAngleDegrees));
       WalkToLocationBehavior walkToLocationBehavior = createAndSetupWalkToLocationBehavior(desiredMidFeetPose2d);
@@ -306,8 +304,8 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
       PrintTools.debug(this, "Initializing Behavior");
-      double walkDistance = RandomTools.generateRandomDouble(new Random(), 1.0, 2.0);
-      double walkAngleDegrees = RandomTools.generateRandomDouble(new Random(), 45.0);
+      double walkDistance = RandomNumbers.nextDouble(new Random(), 1.0, 2.0);
+      double walkAngleDegrees = RandomNumbers.nextDouble(new Random(), 45.0);
       Vector2D walkDirection = new Vector2D(Math.cos(Math.toRadians(walkAngleDegrees)), Math.sin(Math.toRadians(walkAngleDegrees)));
       FramePose2d desiredMidFeetPose2d = copyAndOffsetCurrentMidfeetPose2d(walkDistance, walkDirection);
       WalkToLocationBehavior walkToLocationBehavior = createAndSetupWalkToLocationBehavior(desiredMidFeetPose2d);

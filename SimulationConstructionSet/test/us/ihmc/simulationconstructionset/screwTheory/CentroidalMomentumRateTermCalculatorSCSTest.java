@@ -11,7 +11,7 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.CenterOfMassReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.CentroidalMomentumMatrix;
@@ -22,9 +22,9 @@ import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTestTools;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
+import us.ihmc.robotics.testing.JUnitTools;
 import us.ihmc.simulationconstructionset.RobotTools.SCSRobotFromInverseDynamicsRobotModel;
 import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
-import us.ihmc.tools.testing.JUnitTools;
 
 public class CentroidalMomentumRateTermCalculatorSCSTest
 {
@@ -56,7 +56,7 @@ public class CentroidalMomentumRateTermCalculatorSCSTest
       int numberOfJoints = 10;
       Vector3D[] jointAxes = new Vector3D[numberOfJoints];
       for (int i = 0; i < numberOfJoints; i++)
-         jointAxes[i] = RandomTools.generateRandomVector(random, 1.0);
+         jointAxes[i] = RandomGeometry.nextVector3D(random, 1.0);
 
       ScrewTestTools.createRandomChainRobot("blop", joints, elevator, jointAxes, random);
       SCSRobotFromInverseDynamicsRobotModel robot = new SCSRobotFromInverseDynamicsRobotModel("robot", elevator.getChildrenJoints().get(0));
@@ -94,7 +94,7 @@ public class CentroidalMomentumRateTermCalculatorSCSTest
       int numberOfJoints = 12; 
       Vector3D[] jointAxes = new Vector3D[numberOfJoints];
       for (int i = 0; i < numberOfJoints; i++)
-         jointAxes[i] = RandomTools.generateRandomVector(random, 1.0);
+         jointAxes[i] = RandomGeometry.nextVector3D(random, 1.0);
 
       ScrewTestTools.RandomFloatingChain idRobot = new ScrewTestTools.RandomFloatingChain(random, jointAxes);
       RigidBody elevator = idRobot.getElevator();

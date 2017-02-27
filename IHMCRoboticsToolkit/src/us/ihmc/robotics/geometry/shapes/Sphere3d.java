@@ -1,5 +1,6 @@
 package us.ihmc.robotics.geometry.shapes;
 
+import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -62,25 +63,10 @@ public class Sphere3d extends Shape3d<Sphere3d>
       getPosition(centerToPack);
    }
 
-   public double getX()
-   {
-      return getTransformUnsafe().getM03();
-   }
-
-   public double getY()
-   {
-      return getTransformUnsafe().getM13();
-   }
-
-   public double getZ()
-   {
-      return getTransformUnsafe().getM23();
-   }
-
    @Override
    public void set(Sphere3d sphere3d)
    {
-      setTransform(sphere3d.getTransformUnsafe());
+      setPose(sphere3d);
       radius = sphere3d.radius;
    }
 
@@ -163,5 +149,11 @@ public class Sphere3d extends Shape3d<Sphere3d>
    public String toString()
    {
       return "radius = " + radius + "\n";
+   }
+
+   @Override
+   public void applyTransform(Transform transform)
+   {
+      applyTransformToPose(transform);
    }
 }

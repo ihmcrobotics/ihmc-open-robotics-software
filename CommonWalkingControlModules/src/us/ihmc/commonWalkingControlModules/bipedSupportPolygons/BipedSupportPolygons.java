@@ -14,7 +14,7 @@ import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.time.GlobalTimer;
+import us.ihmc.robotics.time.ExecutionTimer;
 
 /**
  * <p>Title: BipedSupportPolygons </p>
@@ -59,7 +59,7 @@ public class BipedSupportPolygons
    private final YoFrameConvexPolygon2d supportPolygonViz;
    private final SideDependentList<YoFrameConvexPolygon2d> footPolygonsViz = new SideDependentList<>();
 
-   private final GlobalTimer timer = new GlobalTimer(getClass().getSimpleName() + "Timer", registry);
+   private final ExecutionTimer timer = new ExecutionTimer(getClass().getSimpleName() + "Timer", registry);
 
    public BipedSupportPolygons(SideDependentList<ReferenceFrame> ankleZUpFrames, ReferenceFrame midFeetZUpFrame,
          SideDependentList<ReferenceFrame> soleZUpFrames, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
@@ -102,7 +102,7 @@ public class BipedSupportPolygons
 
    public void updateUsingContactStates(SideDependentList<? extends PlaneContactState> contactStates)
    {
-      timer.startTimer();
+      timer.startMeasurement();
       boolean inDoubleSupport = true;
       boolean neitherFootIsSupportingFoot = true;
       RobotSide supportSide = null;
@@ -156,7 +156,7 @@ public class BipedSupportPolygons
 
       updateSupportPolygon(inDoubleSupport, neitherFootIsSupportingFoot, supportSide);
 
-      timer.stopTimer();
+      timer.stopMeasurement();
 
       if (VISUALIZE)
          visualize();

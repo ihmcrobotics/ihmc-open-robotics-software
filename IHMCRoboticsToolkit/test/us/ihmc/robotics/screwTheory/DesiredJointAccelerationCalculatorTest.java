@@ -12,7 +12,7 @@ import org.junit.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class DesiredJointAccelerationCalculatorTest
@@ -65,8 +65,8 @@ public class DesiredJointAccelerationCalculatorTest
 
          if (Math.abs(jacobian.det()) > minJacobianDeterminant)
          {
-            Vector3D desiredAngularAcceleration = RandomTools.generateRandomVector(random);
-            Vector3D desiredLinearAcceleration = RandomTools.generateRandomVector(random);
+            Vector3D desiredAngularAcceleration = RandomGeometry.nextVector3D(random);
+            Vector3D desiredLinearAcceleration = RandomGeometry.nextVector3D(random);
             SpatialAccelerationVector accelerationOfEndEffectorWithRespectToBase = new SpatialAccelerationVector(endEffector.getBodyFixedFrame(),
                                                                                       base.getBodyFixedFrame(), endEffector.getBodyFixedFrame(),
                                                                                       desiredAngularAcceleration, desiredLinearAcceleration);

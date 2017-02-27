@@ -12,7 +12,7 @@ import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
 import us.ihmc.robotics.geometry.ConvexPolygonTools.EmptyPolygonException;
 import us.ihmc.robotics.geometry.ConvexPolygonTools.OutdatedPolygonException;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 
 /**
  * <p>Title: ConvexPolygon2d</p>
@@ -144,7 +144,7 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
 
       for (int i = 0; i < numberOfPossiblePoints; i++)
       {
-         vertices.add(RandomTools.generateRandomPoint2d(random, maxAbsoluteXY, maxAbsoluteXY));
+         vertices.add(RandomGeometry.nextPoint2D(random, maxAbsoluteXY, maxAbsoluteXY));
       }
 
       ConvexPolygon2d polygonToReturn = new ConvexPolygon2d(vertices);

@@ -14,7 +14,7 @@ import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class YoFramePointInMultipleFramesTest
@@ -128,7 +128,7 @@ public class YoFramePointInMultipleFramesTest
       
       FramePoint framePoint = new FramePoint(worldFrame);
 
-      Point3D point = RandomTools.generateRandomPoint(random, 100.0, 100.0, 100.0);
+      Point3D point = RandomGeometry.nextPoint3D(random, 100.0, 100.0, 100.0);
       
       yoFramePointInMultipleFrames.set(point);
       framePoint.set(point);

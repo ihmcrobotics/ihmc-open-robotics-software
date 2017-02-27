@@ -13,6 +13,7 @@ import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.avatar.testTools.ScriptedFootstepGenerator;
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -36,7 +37,6 @@ import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.quadTree.Box;
 import us.ihmc.robotics.quadTree.QuadTreeForGroundParameters;
-import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -126,8 +126,8 @@ public abstract class DRCObstacleCourseRampFootstepSnapperTest implements MultiR
          footstepData.location.setZ(footstepData.location.getZ() + 1.0);
          tempFrameOrientation.set(footstepData.getOrientation());
          double[] yawPitchRoll = tempFrameOrientation.getYawPitchRoll();
-         yawPitchRoll[1] = RandomTools.generateRandomDouble(random, Math.PI / 4.0);
-         yawPitchRoll[2] = RandomTools.generateRandomDouble(random, Math.PI / 4.0);
+         yawPitchRoll[1] = RandomNumbers.nextDouble(random, Math.PI / 4.0);
+         yawPitchRoll[2] = RandomNumbers.nextDouble(random, Math.PI / 4.0);
          tempFrameOrientation.setYawPitchRoll(yawPitchRoll);
          tempFrameOrientation.getQuaternion(footstepData.getOrientation());
       }

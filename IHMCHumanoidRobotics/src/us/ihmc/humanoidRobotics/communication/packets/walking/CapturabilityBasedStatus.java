@@ -8,7 +8,7 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -29,19 +29,19 @@ public class CapturabilityBasedStatus extends StatusPacket<CapturabilityBasedSta
    public CapturabilityBasedStatus(Random random)
    {
       double max = Double.MAX_VALUE / 2;
-      capturePoint = RandomTools.generateRandomPoint2d(random, max, max);
-      desiredCapturePoint = RandomTools.generateRandomPoint2d(random, max, max);
-      centerOfMass = RandomTools.generateRandomPoint(random, max, max, max);
+      capturePoint = RandomGeometry.nextPoint2D(random, max, max);
+      desiredCapturePoint = RandomGeometry.nextPoint2D(random, max, max);
+      centerOfMass = RandomGeometry.nextPoint3D(random, max, max, max);
 
       leftFootSupportPolygonLength = Math.abs(random.nextInt(MAXIMUM_NUMBER_OF_VERTICES));
       for (int i = 0; i < leftFootSupportPolygonLength; i++)
       {
-         leftFootSupportPolygonStore[i] = RandomTools.generateRandomPoint2d(random, max, max);
+         leftFootSupportPolygonStore[i] = RandomGeometry.nextPoint2D(random, max, max);
       }
       rightFootSupportPolygonLength = Math.abs(random.nextInt(MAXIMUM_NUMBER_OF_VERTICES));
       for (int i = 0; i < rightFootSupportPolygonLength; i++)
       {
-         rightFootSupportPolygonStore[i] = RandomTools.generateRandomPoint2d(random, max, max);
+         rightFootSupportPolygonStore[i] = RandomGeometry.nextPoint2D(random, max, max);
       }
    }
 

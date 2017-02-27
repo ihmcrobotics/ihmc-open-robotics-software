@@ -25,9 +25,9 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.ReferenceFrameMismatchException;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.testing.JUnitTools;
+import us.ihmc.robotics.testing.JUnitTools;
 
 public class TwistTest extends SpatialMotionVectorTest
 {
@@ -287,8 +287,8 @@ public class TwistTest extends SpatialMotionVectorTest
    public void testSub()
    {
       Random random = new Random(3454L);
-      Twist twist1 = new Twist(frameB, frameA, frameD, RandomTools.generateRandomVector(random), RandomTools.generateRandomVector(random));
-      Twist twist2 = new Twist(frameC, frameB, frameD, RandomTools.generateRandomVector(random), RandomTools.generateRandomVector(random));
+      Twist twist1 = new Twist(frameB, frameA, frameD, RandomGeometry.nextVector3D(random), RandomGeometry.nextVector3D(random));
+      Twist twist2 = new Twist(frameC, frameB, frameD, RandomGeometry.nextVector3D(random), RandomGeometry.nextVector3D(random));
       Twist twist3 = new Twist(twist1);
       twist3.add(twist2);
 
@@ -483,9 +483,9 @@ public class TwistTest extends SpatialMotionVectorTest
    {
       double angularVelocityMagnitude = random.nextDouble();
       double linearVelocityMagnitude = 0.0;
-      Vector3D axisOfRotation = RandomTools.generateRandomVector(random);
+      Vector3D axisOfRotation = RandomGeometry.nextVector3D(random);
       axisOfRotation.normalize();
-      Vector3D offset = RandomTools.generateRandomVector(random);
+      Vector3D offset = RandomGeometry.nextVector3D(random);
 
       Twist twist = new Twist(frameB, frameA, frameB, angularVelocityMagnitude, linearVelocityMagnitude, axisOfRotation, offset);
       twist.changeFrame(frameA);

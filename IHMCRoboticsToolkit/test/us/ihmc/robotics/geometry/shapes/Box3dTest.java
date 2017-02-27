@@ -12,6 +12,7 @@ import java.util.Random;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.junit.Test;
 
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
@@ -24,7 +25,7 @@ import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.Direction;
 import us.ihmc.robotics.geometry.shapes.Box3d.FaceName;
 import us.ihmc.robotics.math.Epsilons;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 
 public class Box3dTest
 {
@@ -42,9 +43,9 @@ public class Box3dTest
       for (int i=0; i<numberOfShapes; i++)
       {
          RigidBodyTransform transform = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
-         double length = RandomTools.generateRandomDouble(random, 0.01, 10.0);
-         double width = RandomTools.generateRandomDouble(random, 0.01, 10.0);
-         double height = RandomTools.generateRandomDouble(random, 0.01, 10.0);
+         double length = RandomNumbers.nextDouble(random, 0.01, 10.0);
+         double width = RandomNumbers.nextDouble(random, 0.01, 10.0);
+         double height = RandomNumbers.nextDouble(random, 0.01, 10.0);
          Box3d box3d = new Box3d(transform, length, width, height);
 
          try
@@ -125,7 +126,7 @@ public class Box3dTest
       box.setFromTransform(transform);
 
       RigidBodyTransform transformBack = new RigidBodyTransform();
-      box.getTransform(transformBack);
+      box.getPose(transformBack);
       assertTrue(transform.epsilonEquals(transformBack, Epsilons.ONE_TRILLIONTH));
       assertTrue(transform.epsilonEquals(box.getTransformCopy(), Epsilons.ONE_TRILLIONTH));
 
@@ -289,7 +290,7 @@ public class Box3dTest
             Vector3D offset = new Vector3D(vertex);
             offset.sub(center);
             offset.normalize();
-            offset.scale(RandomTools.generateRandomDoubleInRange(random, epsilon, maxScale));
+            offset.scale(RandomNumbers.nextDouble(random, epsilon, maxScale));
             Point3D testPoint = new Point3D(vertex);
             testPoint.add(offset);
             assertFalse(box.isInsideOrOnSurface(testPoint, epsilon));
@@ -400,7 +401,7 @@ public class Box3dTest
       faces.add(new ImmutablePair<FaceName, Integer>(FaceName.PLUSY, 1));
       faces.add(new ImmutablePair<FaceName, Integer>(FaceName.PLUSZ, 2));
 
-      Vector3D center = RandomTools.generateRandomVector(random);
+      Vector3D center = RandomGeometry.nextVector3D(random);
       double length = random.nextDouble();
       double width = random.nextDouble();
       double height = random.nextDouble();
@@ -411,7 +412,7 @@ public class Box3dTest
       for (int i = 0; i < nTests; i++)
       {
          RotationMatrix rotation = new RotationMatrix();
-         rotation.set(RandomTools.generateRandomRotation(random));
+         rotation.set(RandomGeometry.nextAxisAngle(random));
          box.setRotation(rotation);
          assertEquals(length, box.getLength(), Epsilons.ONE_TRILLIONTH);
          assertEquals(width, box.getWidth(), Epsilons.ONE_TRILLIONTH);
@@ -481,13 +482,13 @@ public class Box3dTest
             double delta = 1e-5;
 
             Point3D point2 = new Point3D(point);
-            point2.add(RandomTools.generateRandomVector(random, delta));           
+            point2.add(RandomGeometry.nextVector3D(random, delta));           
             Point3D closestPoint2 = new Point3D();
             Vector3D normal2 = new Vector3D();
             box.checkIfInside(point2, closestPoint2, normal2);
             
             Point3D point3 = new Point3D(point);
-            point3.add(RandomTools.generateRandomVector(random, delta));
+            point3.add(RandomGeometry.nextVector3D(random, delta));
             Point3D closestPoint3 = new Point3D();
             Vector3D normal3 = new Vector3D();
             box.checkIfInside(point3, closestPoint3, normal3);
@@ -542,8 +543,8 @@ public class Box3dTest
          {
             Point3D point = getRandomConvexCombination(random, vertices);
             Point3D pointTransformed = new Point3D(point);
-            box.getTransformToLocalUnsafe().transform(pointTransformed);
-            boxTransformed.getTransformToWorldUnsafe().transform(pointTransformed);
+            box.transformToLocal(pointTransformed);
+            boxTransformed.transformToWorld(pointTransformed);
             
             assertEquals(box.isInsideOrOnSurface(point), boxTransformed.isInsideOrOnSurface(pointTransformed));            
          }

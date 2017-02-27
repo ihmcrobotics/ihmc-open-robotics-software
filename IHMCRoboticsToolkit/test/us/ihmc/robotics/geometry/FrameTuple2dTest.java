@@ -11,13 +11,14 @@ import java.util.Random;
 import org.junit.Before;
 import org.junit.Test;
 
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public abstract class FrameTuple2dTest<T extends FrameTuple2d<?, ?>>
@@ -76,8 +77,8 @@ public abstract class FrameTuple2dTest<T extends FrameTuple2d<?, ?>>
       for (int i = 0; i < 100000; i++)
       {
          transformInPlane.setIdentity();
-         transformInPlane.setRotationYawAndZeroTranslation(RandomTools.generateRandomDouble(random, -Math.PI, Math.PI));
-         transformInPlane.setTranslation(RandomTools.generateRandomVector(random));
+         transformInPlane.setRotationYawAndZeroTranslation(RandomNumbers.nextDouble(random, -Math.PI, Math.PI));
+         transformInPlane.setTranslation(RandomGeometry.nextVector3D(random));
 
          transformNOTInPlane.setIdentity();
          transformNOTInPlane.set(EuclidCoreRandomTools.generateRandomRigidBodyTransform(random));
@@ -85,7 +86,7 @@ public abstract class FrameTuple2dTest<T extends FrameTuple2d<?, ?>>
          frameTransformInPlane.update();
          frameTransformNOTInPlane.update();
 
-         Point2D point2d = RandomTools.generateRandomPoint2d(random, 1.0, 1.0);
+         Point2D point2d = RandomGeometry.nextPoint2D(random, 1.0, 1.0);
 
          framePoint2d.setIncludingFrame(worldFrame, point2d);
          try

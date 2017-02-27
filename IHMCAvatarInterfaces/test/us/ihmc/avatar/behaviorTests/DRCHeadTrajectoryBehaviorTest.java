@@ -13,6 +13,7 @@ import org.junit.Test;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCBehaviorTestHelper;
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -21,9 +22,8 @@ import us.ihmc.humanoidBehaviors.behaviors.primitives.HeadTrajectoryBehavior;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HeadTrajectoryMessage;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.time.GlobalTimer;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.environments.DefaultCommonAvatarEnvironment;
@@ -56,10 +56,6 @@ public abstract class DRCHeadTrajectoryBehaviorTest implements MultiRobotTestInt
          drcBehaviorTestHelper.closeAndDispose();
          drcBehaviorTestHelper = null;
       }
-
-      GlobalTimer.clearTimers();
-      
-      
 
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
@@ -99,7 +95,7 @@ public abstract class DRCHeadTrajectoryBehaviorTest implements MultiRobotTestInt
 
       double trajectoryTime = 4.0;
       Vector3D axis = new Vector3D(0, 1, 0);
-      double rotationAngle = MAX_ANGLE_TO_TEST_RAD * RandomTools.generateRandomDouble(new Random(), 0.3, 1.0);
+      double rotationAngle = MAX_ANGLE_TO_TEST_RAD * RandomNumbers.nextDouble(new Random(), 0.3, 1.0);
 
       HeadTrajectoryMessage message = createHeadOrientationPacket(axis, rotationAngle, trajectoryTime);
       testHeadOrientationBehavior(message, trajectoryTime + EXTRA_SIM_TIME_FOR_SETTLING);
@@ -113,7 +109,7 @@ public abstract class DRCHeadTrajectoryBehaviorTest implements MultiRobotTestInt
 
       double trajectoryTime = 4.0;
       Vector3D axis = new Vector3D(1, 0, 0);
-      double rotationAngle = MAX_ANGLE_TO_TEST_RAD * RandomTools.generateRandomDouble(new Random(), 0.3, 1.0);
+      double rotationAngle = MAX_ANGLE_TO_TEST_RAD * RandomNumbers.nextDouble(new Random(), 0.3, 1.0);
 
       HeadTrajectoryMessage message = createHeadOrientationPacket(axis, rotationAngle, trajectoryTime);
       testHeadOrientationBehavior(message, trajectoryTime + EXTRA_SIM_TIME_FOR_SETTLING);
@@ -127,7 +123,7 @@ public abstract class DRCHeadTrajectoryBehaviorTest implements MultiRobotTestInt
 
       double trajectoryTime = 4.0;
       Vector3D axis = new Vector3D(0, 0, 1);
-      double rotationAngle = MAX_ANGLE_TO_TEST_RAD * RandomTools.generateRandomDouble(new Random(), 0.3, 1.0);
+      double rotationAngle = MAX_ANGLE_TO_TEST_RAD * RandomNumbers.nextDouble(new Random(), 0.3, 1.0);
 
       HeadTrajectoryMessage message = createHeadOrientationPacket(axis, rotationAngle, trajectoryTime);
       testHeadOrientationBehavior(message, trajectoryTime + EXTRA_SIM_TIME_FOR_SETTLING);
@@ -140,7 +136,7 @@ public abstract class DRCHeadTrajectoryBehaviorTest implements MultiRobotTestInt
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       double trajectoryTime = 4.0;
-      Quaternion desiredHeadQuat = new Quaternion(RandomTools.generateRandomQuaternion(new Random(), MAX_ANGLE_TO_TEST_RAD));
+      Quaternion desiredHeadQuat = new Quaternion(RandomGeometry.nextQuaternion(new Random(), MAX_ANGLE_TO_TEST_RAD));
       HeadTrajectoryMessage message = new HeadTrajectoryMessage(trajectoryTime, desiredHeadQuat);
       testHeadOrientationBehavior(message, trajectoryTime + EXTRA_SIM_TIME_FOR_SETTLING);
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());

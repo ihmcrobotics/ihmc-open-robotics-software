@@ -12,23 +12,25 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.commons.exception.DefaultExceptionHandler;
-import us.ihmc.commons.nio.CommonPaths;
 import us.ihmc.commons.nio.FileToolsTest;
 import us.ihmc.commons.nio.WriteOption;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public class DeprecatedFileToolsTest
 {
-   private static final Path FILE_TOOLS_TEST_PATH = CommonPaths.deriveTestResourcesPath(FileToolsTest.class);
+   private static final Path FILE_TOOLS_TEST_PATH = getResourcesPathForTestClass(FileToolsTest.class);
    private static final Path TEXT_DIRECTORY_PATH = FILE_TOOLS_TEST_PATH.resolve("exampleTextFiles");
    private static final Path JAVA_DIRECTORY_PATH = FILE_TOOLS_TEST_PATH.resolve("exampleJavaFiles");
    private static final Path EMPTY_DIRECTORY_PATH = FILE_TOOLS_TEST_PATH.resolve("exampleEmptyFiles");
@@ -69,18 +71,23 @@ public class DeprecatedFileToolsTest
    @After
    public void tearDown()
    {
-      try
-      {
-         Files.delete(EXAMPLE_JAVA_FILE1_PATH);
-         Files.delete(EXAMPLE_JAVA_FILE2_PATH);
-         Files.delete(FILE_TOOLS_EXAMPLE_FILE1_PATH);
-         Files.delete(FILE_TOOLS_EXAMPLE_FILE2_PATH);
-         Files.delete(READ_ALL_LINES_PATH);
-      }
-      catch (IOException e)
-      {
-         e.printStackTrace();
-      }
+      FileTools.deleteQuietly(EXAMPLE_JAVA_FILE1_PATH);
+      FileTools.deleteQuietly(EXAMPLE_JAVA_FILE2_PATH);
+      FileTools.deleteQuietly(FILE_TOOLS_EXAMPLE_FILE1_PATH);
+      FileTools.deleteQuietly(FILE_TOOLS_EXAMPLE_FILE2_PATH);
+      FileTools.deleteQuietly(READ_ALL_LINES_PATH);
+   }
+   
+   private static Path getResourcesPathForTestClass(Class<?> clazz)
+   {
+      List<String> pathNames = new ArrayList<String>();
+      
+      String[] packageNames = clazz.getPackage().getName().split("\\.");
+      
+      pathNames.addAll(Arrays.asList(packageNames));
+      pathNames.add(StringUtils.uncapitalize(clazz.getSimpleName()));
+      
+      return Paths.get("testResources", pathNames.toArray(new String[0]));
    }
    
    private static void createTestFile1()

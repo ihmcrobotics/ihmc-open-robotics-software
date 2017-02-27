@@ -19,7 +19,7 @@ import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class CenterOfMassJacobianTest
@@ -104,7 +104,7 @@ public class CenterOfMassJacobianTest
    public void testComputeJacobianSixDoFPlusRandomChain()
    {
       SixDoFJoint sixDoFJoint = new SixDoFJoint("sixDoFJoint", elevator, elevator.getBodyFixedFrame());
-      RigidBody floatingBody = ScrewTools.addRigidBody("floating", sixDoFJoint, new Matrix3D(), random.nextDouble(), RandomTools.generateRandomVector(random));
+      RigidBody floatingBody = ScrewTools.addRigidBody("floating", sixDoFJoint, new Matrix3D(), random.nextDouble(), RandomGeometry.nextVector3D(random));
       ArrayList<RevoluteJoint> revoluteJoints = setUpRandomChain(floatingBody);
 
       CenterOfMassJacobian jacobian = new CenterOfMassJacobian(elevator);
@@ -112,8 +112,8 @@ public class CenterOfMassJacobianTest
       sixDoFJoint.setPositionAndRotation(EuclidCoreRandomTools.generateRandomRigidBodyTransform(random));
       Twist sixDoFJointTwist = new Twist();
       sixDoFJoint.getJointTwist(sixDoFJointTwist);
-      sixDoFJointTwist.setLinearPart(RandomTools.generateRandomVector(random));
-      sixDoFJointTwist.setAngularPart(RandomTools.generateRandomVector(random));
+      sixDoFJointTwist.setLinearPart(RandomGeometry.nextVector3D(random));
+      sixDoFJointTwist.setAngularPart(RandomGeometry.nextVector3D(random));
       sixDoFJoint.setJointTwist(sixDoFJointTwist);
 
       ScrewTestTools.setRandomPositions(revoluteJoints, random);
@@ -253,9 +253,9 @@ public class CenterOfMassJacobianTest
    {
       ArrayList<RevoluteJoint> joints = new ArrayList<RevoluteJoint>();
       joints = new ArrayList<RevoluteJoint>();
-      RevoluteJoint joint = ScrewTools.addRevoluteJoint("joint", elevator, RandomTools.generateRandomVector(random), X);
+      RevoluteJoint joint = ScrewTools.addRevoluteJoint("joint", elevator, RandomGeometry.nextVector3D(random), X);
       joints.add(joint);
-      ScrewTools.addRigidBody("body", joint, new Matrix3D(), random.nextDouble(), RandomTools.generateRandomVector(random));
+      ScrewTools.addRigidBody("body", joint, new Matrix3D(), random.nextDouble(), RandomGeometry.nextVector3D(random));
 
       return joints;
    }

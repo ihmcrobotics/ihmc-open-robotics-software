@@ -310,6 +310,9 @@ public class AvatarSimulationFactory
             boolean isUpperBodyJoint = ((jointRole != JointRole.LEG) && (jointRole != JointRole.SPINE));
             boolean isBackJoint = jointRole == JointRole.SPINE;
 
+            if (simulatedJoint == null || controllerJoint == null)
+               continue;
+
             JointLowLevelPositionControlSimulator positionControlSimulator = new JointLowLevelPositionControlSimulator(simulatedJoint, controllerJoint,
                                                                                                                        isUpperBodyJoint, isBackJoint, false,
                                                                                                                        robotModel.get().getSimulateDT());

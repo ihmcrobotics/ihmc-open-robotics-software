@@ -17,10 +17,10 @@ import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.CenterOfMassReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.testing.JUnitTools;
+import us.ihmc.robotics.testing.JUnitTools;
 
 public class MomentumCalculatorTest
 {
@@ -33,10 +33,10 @@ public class MomentumCalculatorTest
       Random random = new Random(1766L);
 
       RigidBody elevator = new RigidBody("elevator", world);
-      Vector3D jointAxis = RandomTools.generateRandomVector(random);
+      Vector3D jointAxis = RandomGeometry.nextVector3D(random);
       jointAxis.normalize();
       PrismaticJoint joint = ScrewTools.addPrismaticJoint("joint", elevator, new Vector3D(), jointAxis);
-      RigidBody body = ScrewTools.addRigidBody("body", joint, RandomTools.generateRandomDiagonalMatrix3d(random), random.nextDouble(), new Vector3D());
+      RigidBody body = ScrewTools.addRigidBody("body", joint, RandomGeometry.nextDiagonalMatrix3D(random), random.nextDouble(), new Vector3D());
 
       joint.setQ(random.nextDouble());
       joint.setQd(random.nextDouble());
@@ -64,12 +64,12 @@ public class MomentumCalculatorTest
       Random random = new Random(1766L);
 
       RigidBody elevator = new RigidBody("elevator", world);
-      Vector3D jointAxis = RandomTools.generateRandomVector(random);
+      Vector3D jointAxis = RandomGeometry.nextVector3D(random);
       jointAxis.normalize();
       RigidBodyTransform transformToParent = new RigidBodyTransform();
       transformToParent.setIdentity();
       RevoluteJoint joint = ScrewTools.addRevoluteJoint("joint", elevator, transformToParent, jointAxis);
-      RigidBody body = ScrewTools.addRigidBody("body", joint, RandomTools.generateRandomDiagonalMatrix3d(random), random.nextDouble(), new Vector3D());
+      RigidBody body = ScrewTools.addRigidBody("body", joint, RandomGeometry.nextDiagonalMatrix3D(random), random.nextDouble(), new Vector3D());
 
       joint.setQ(random.nextDouble());
       joint.setQd(random.nextDouble());
@@ -106,7 +106,7 @@ public class MomentumCalculatorTest
       Vector3D[] jointAxes = new Vector3D[nJoints];
       for (int i = 0; i < nJoints; i++)
       {
-         Vector3D jointAxis = RandomTools.generateRandomVector(random);
+         Vector3D jointAxis = RandomGeometry.nextVector3D(random);
          jointAxis.normalize();
          jointAxes[i] = jointAxis;
       }

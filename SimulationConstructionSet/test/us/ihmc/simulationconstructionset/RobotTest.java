@@ -26,7 +26,7 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
 import us.ihmc.robotics.math.frames.YoFrameVector;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
@@ -249,8 +249,8 @@ public class RobotTest
               random.nextDouble(), random.nextDouble()));
       root1.setLink(floatingBody);
 
-      Vector3D offset = RandomTools.generateRandomVector(random);
-      PinJoint pin1 = new PinJoint("pin1", offset, robot, RandomTools.generateRandomVector(random));
+      Vector3D offset = RandomGeometry.nextVector3D(random);
+      PinJoint pin1 = new PinJoint("pin1", offset, robot, RandomGeometry.nextVector3D(random));
       pin1.setLink(massiveLink());
       root1.addJoint(pin1);
 

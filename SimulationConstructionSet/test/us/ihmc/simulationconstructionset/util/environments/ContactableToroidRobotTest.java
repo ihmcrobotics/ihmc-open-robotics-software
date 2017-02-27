@@ -11,7 +11,7 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 
 public class ContactableToroidRobotTest
 {
@@ -60,7 +60,7 @@ public class ContactableToroidRobotTest
       double minorRadius = ContactableToroidRobot.DEFAULT_THICKNESS;
       double delta = 5e-4;
       
-      Vector3D randomVector = RandomTools.generateRandomVector(random);
+      Vector3D randomVector = RandomGeometry.nextVector3D(random);
       RigidBodyTransform transform3d = new RigidBodyTransform();
       transform3d.setTranslation(randomVector);
 
@@ -100,7 +100,7 @@ public class ContactableToroidRobotTest
       double minorRadius = ContactableToroidRobot.DEFAULT_THICKNESS;
       double delta = 5e-4;
       
-      Vector3D vector3d = RandomTools.generateRandomVector(random);
+      Vector3D vector3d = RandomGeometry.nextVector3D(random);
       RigidBodyTransform randomTransform = new RigidBodyTransform();
       randomTransform.setTranslation(vector3d);
 

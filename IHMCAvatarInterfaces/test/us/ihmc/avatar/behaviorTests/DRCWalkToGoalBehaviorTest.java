@@ -15,6 +15,7 @@ import org.junit.Test;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.communication.PacketRouter;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
@@ -35,7 +36,6 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FramePose2d;
-import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
@@ -164,7 +164,7 @@ public abstract class DRCWalkToGoalBehaviorTest implements MultiRobotTestInterfa
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
 
-      double walkDistance = RandomTools.generateRandomDouble(new Random(), 1.0, 2.0);
+      double walkDistance = RandomNumbers.nextDouble(new Random(), 1.0, 2.0);
       Vector2D walkDirection = new Vector2D(1, 0);
       double trajectoryTime = walkDistance / ASSUMED_WALKING_SPEED_mPerSec;
 

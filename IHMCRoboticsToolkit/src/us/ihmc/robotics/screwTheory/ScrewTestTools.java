@@ -8,6 +8,7 @@ import java.util.Random;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.RandomMatrices;
 
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
@@ -15,7 +16,7 @@ import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class ScrewTestTools
@@ -27,7 +28,7 @@ public class ScrewTestTools
 
    public static List<RevoluteJoint> createRandomChainRobot(String prefix, int numberOfJoints, Random random)
    {
-      return createRandomChainRobot(prefix, RandomTools.generateRandomVectorArray(random, numberOfJoints, 1.0), random);
+      return createRandomChainRobot(prefix, RandomGeometry.nextVector3DArray(random, numberOfJoints, 1.0), random);
    }
 
    public static List<RevoluteJoint> createRandomChainRobot(String prefix, Vector3D[] jointAxes, Random random)
@@ -65,7 +66,7 @@ public class ScrewTestTools
 
    public static List<PrismaticJoint> createRandomChainRobotWithPrismaticJoints(String prefix, int numberOfJoints, Random random)
    {
-      return createRandomChainRobotWithPrismaticJoints(prefix, RandomTools.generateRandomVectorArray(random, numberOfJoints, 1.0), random);
+      return createRandomChainRobotWithPrismaticJoints(prefix, RandomGeometry.nextVector3DArray(random, numberOfJoints, 1.0), random);
    }
 
    public static List<PrismaticJoint> createRandomChainRobotWithPrismaticJoints(String prefix, Vector3D[] jointAxes, Random random)
@@ -103,7 +104,7 @@ public class ScrewTestTools
 
    public static List<OneDoFJoint> createRandomChainRobotWithOneDoFJoints(String prefix, int numberOfJoints, Random random)
    {
-      return createRandomChainRobotWithOneDoFJoints(prefix, RandomTools.generateRandomVectorArray(random, numberOfJoints, 1.0), random);
+      return createRandomChainRobotWithOneDoFJoints(prefix, RandomGeometry.nextVector3DArray(random, numberOfJoints, 1.0), random);
    }
 
    public static List<OneDoFJoint> createRandomChainRobotWithOneDoFJoints(String prefix, Vector3D[] jointAxes, Random random)
@@ -267,7 +268,7 @@ public class ScrewTestTools
 
    public static RevoluteJoint addRandomRevoluteJoint(String name, Vector3D jointAxis, Random random, RigidBody predecessor)
    {
-      Vector3D jointOffset = RandomTools.generateRandomVector(random);
+      Vector3D jointOffset = RandomGeometry.nextVector3D(random);
       jointAxis.normalize();
       RevoluteJoint ret = ScrewTools.addRevoluteJoint(name, predecessor, jointOffset, jointAxis);
 
@@ -282,7 +283,7 @@ public class ScrewTestTools
 
    public static PrismaticJoint addRandomPrismaticJoint(String name, Vector3D jointAxis, Random random, RigidBody predecessor)
    {
-      Vector3D jointOffset = RandomTools.generateRandomVector(random);
+      Vector3D jointOffset = RandomGeometry.nextVector3D(random);
       jointAxis.normalize();
       PrismaticJoint ret = ScrewTools.addPrismaticJoint(name, predecessor, jointOffset, jointAxis);
 
@@ -291,9 +292,9 @@ public class ScrewTestTools
 
    public static RigidBody addRandomRigidBody(String name, Random random, InverseDynamicsJoint parentJoint)
    {
-      Matrix3D momentOfInertia = RandomTools.generateRandomDiagonalMatrix3d(random);
+      Matrix3D momentOfInertia = RandomGeometry.nextDiagonalMatrix3D(random);
       double mass = random.nextDouble();
-      Vector3D comOffset = RandomTools.generateRandomVector(random);
+      Vector3D comOffset = RandomGeometry.nextVector3D(random);
       RigidBody ret = ScrewTools.addRigidBody(name, parentJoint, momentOfInertia, mass, comOffset);
 
       return ret;
@@ -317,7 +318,7 @@ public class ScrewTestTools
 
    public static void setRandomPosition(OneDoFJoint joint, Random random, double boundaryOne, double boundaryTwo)
    {
-      joint.setQ(RandomTools.generateRandomDouble(random, boundaryOne, boundaryTwo));
+      joint.setQ(RandomNumbers.nextDouble(random, boundaryOne, boundaryTwo));
    }
 
    public static void setRandomPositionWithinJointLimits(OneDoFJoint joint, Random random)
@@ -340,7 +341,7 @@ public class ScrewTestTools
 
    public static void setRandomVelocity(OneDoFJoint joint, Random random, double min, double max)
    {
-      joint.setQd(RandomTools.generateRandomDouble(random, min, max));
+      joint.setQd(RandomNumbers.nextDouble(random, min, max));
    }
 
    public static void setRandomDesiredAccelerations(OneDoFJoint[] joints, Random random)
@@ -419,7 +420,7 @@ public class ScrewTestTools
    {
       for (OneDoFJoint joint : joints)
       {
-         joint.setTau(RandomTools.generateRandomDouble(random, magnitude));
+         joint.setTau(RandomNumbers.nextDouble(random, magnitude));
       }
    }
 
@@ -487,8 +488,8 @@ public class ScrewTestTools
    {
       Twist jointTwist = new Twist();
       rootJoint.getJointTwist(jointTwist);
-      jointTwist.setAngularPart(RandomTools.generateRandomVector(random));
-      jointTwist.setLinearPart(RandomTools.generateRandomVector(random));
+      jointTwist.setAngularPart(RandomGeometry.nextVector3D(random));
+      jointTwist.setLinearPart(RandomGeometry.nextVector3D(random));
       rootJoint.setJointTwist(jointTwist);
    }
 
@@ -496,8 +497,8 @@ public class ScrewTestTools
    {
       SpatialAccelerationVector jointAcceleration = new SpatialAccelerationVector();
       rootJoint.getJointAcceleration(jointAcceleration);
-      jointAcceleration.setAngularPart(RandomTools.generateRandomVector(random));
-      jointAcceleration.setLinearPart(RandomTools.generateRandomVector(random));
+      jointAcceleration.setAngularPart(RandomGeometry.nextVector3D(random));
+      jointAcceleration.setLinearPart(RandomGeometry.nextVector3D(random));
       rootJoint.setAcceleration(jointAcceleration);
    }
 
@@ -556,7 +557,7 @@ public class ScrewTestTools
 
       public RandomFloatingChain(Random random, int numberOfRevoluteJoints)
       {
-         this(random, RandomTools.generateRandomVectorArray(random, numberOfRevoluteJoints, 1.0));
+         this(random, RandomGeometry.nextVector3DArray(random, numberOfRevoluteJoints, 1.0));
       }
 
       public RandomFloatingChain(Random random, Vector3D[] jointAxes)

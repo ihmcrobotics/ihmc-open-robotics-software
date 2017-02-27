@@ -7,6 +7,7 @@ import java.util.Random;
 
 import org.ejml.data.DenseMatrix64F;
 
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -18,7 +19,7 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFrameVector;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -446,7 +447,7 @@ public class DRCInverseDynamicsCalculatorTestHelper
       for (OneDegreeOfFreedomJoint oneDegreeOfFreedomJoint : oneDegreeOfFreedomJoints)
       {
          OneDoFJoint oneDoFJoint = fullRobotModel.getOneDoFJointByName(oneDegreeOfFreedomJoint.getName());
-         oneDoFJoint.setQddDesired(RandomTools.generateRandomDouble(random, maxJointAcceleration));
+         oneDoFJoint.setQddDesired(RandomNumbers.nextDouble(random, maxJointAcceleration));
       }
    }
 
@@ -603,15 +604,15 @@ public class DRCInverseDynamicsCalculatorTestHelper
       ReferenceFrame elevatorFrame = rootJoint.getFrameBeforeJoint();
       ReferenceFrame bodyFrame = rootJoint.getFrameAfterJoint();
 
-      Twist bodyTwist = new Twist(bodyFrame, elevatorFrame, bodyFrame, RandomTools.generateRandomVector(random, maxRootJointLinearAndAngularVelocity),
-            RandomTools.generateRandomVector(random, maxRootJointLinearAndAngularVelocity));
+      Twist bodyTwist = new Twist(bodyFrame, elevatorFrame, bodyFrame, RandomGeometry.nextVector3D(random, maxRootJointLinearAndAngularVelocity),
+            RandomGeometry.nextVector3D(random, maxRootJointLinearAndAngularVelocity));
       rootJoint.setJointTwist(bodyTwist);
 
-      rootJoint.setPosition(RandomTools.generateRandomVector(random));
+      rootJoint.setPosition(RandomGeometry.nextVector3D(random));
 
-      double yaw = RandomTools.generateRandomDouble(random, Math.PI / 20.0);
-      double pitch = RandomTools.generateRandomDouble(random, Math.PI / 20.0);
-      double roll = RandomTools.generateRandomDouble(random, Math.PI / 20.0);
+      double yaw = RandomNumbers.nextDouble(random, Math.PI / 20.0);
+      double pitch = RandomNumbers.nextDouble(random, Math.PI / 20.0);
+      double roll = RandomNumbers.nextDouble(random, Math.PI / 20.0);
       rootJoint.setRotation(yaw, pitch, roll);
 
       ArrayList<OneDoFJoint> oneDoFJoints = new ArrayList<OneDoFJoint>();
@@ -625,21 +626,21 @@ public class DRCInverseDynamicsCalculatorTestHelper
          lowerLimit = lowerLimit + 0.05 * delta;
          upperLimit = upperLimit - 0.05 * delta;
 
-         oneDoFJoint.setQ(RandomTools.generateRandomDouble(random, lowerLimit, upperLimit));
-         oneDoFJoint.setQd(RandomTools.generateRandomDouble(random, maxJointVelocity));
+         oneDoFJoint.setQ(RandomNumbers.nextDouble(random, lowerLimit, upperLimit));
+         oneDoFJoint.setQd(RandomNumbers.nextDouble(random, maxJointVelocity));
       }
    }
 
    public void setRobotStateRandomly(Random random, double maxJointVelocity, double maxRootJointLinearAndAngularVelocity)
    {
       FloatingJoint rootJoint = robot.getRootJoint();
-      rootJoint.setVelocity(RandomTools.generateRandomVector(random, maxRootJointLinearAndAngularVelocity));
-      rootJoint.setAngularVelocityInBody(RandomTools.generateRandomVector(random, maxRootJointLinearAndAngularVelocity));
+      rootJoint.setVelocity(RandomGeometry.nextVector3D(random, maxRootJointLinearAndAngularVelocity));
+      rootJoint.setAngularVelocityInBody(RandomGeometry.nextVector3D(random, maxRootJointLinearAndAngularVelocity));
 
-      rootJoint.setPosition(RandomTools.generateRandomVector(random));
-      double yaw = RandomTools.generateRandomDouble(random, Math.PI / 20.0);
-      double pitch = RandomTools.generateRandomDouble(random, Math.PI / 20.0);
-      double roll = RandomTools.generateRandomDouble(random, Math.PI / 20.0);
+      rootJoint.setPosition(RandomGeometry.nextVector3D(random));
+      double yaw = RandomNumbers.nextDouble(random, Math.PI / 20.0);
+      double pitch = RandomNumbers.nextDouble(random, Math.PI / 20.0);
+      double roll = RandomNumbers.nextDouble(random, Math.PI / 20.0);
       rootJoint.setYawPitchRoll(yaw, pitch, roll);
 
       ArrayList<OneDegreeOfFreedomJoint> oneDegreeOfFreedomJoints = new ArrayList<OneDegreeOfFreedomJoint>();
@@ -653,8 +654,8 @@ public class DRCInverseDynamicsCalculatorTestHelper
          lowerLimit = lowerLimit + 0.05 * delta;
          upperLimit = upperLimit - 0.05 * delta;
 
-         oneDegreeOfFreedomJoint.setQ(RandomTools.generateRandomDouble(random, lowerLimit, upperLimit));
-         oneDegreeOfFreedomJoint.setQd(RandomTools.generateRandomDouble(random, maxJointVelocity));
+         oneDegreeOfFreedomJoint.setQ(RandomNumbers.nextDouble(random, lowerLimit, upperLimit));
+         oneDegreeOfFreedomJoint.setQd(RandomNumbers.nextDouble(random, maxJointVelocity));
       }
    }
 
@@ -666,12 +667,12 @@ public class DRCInverseDynamicsCalculatorTestHelper
 
          for (GroundContactPoint groundContactPoint : footGroundContactPoints)
          {
-            groundContactPoint.setForce(RandomTools.generateRandomVector(random, maxGroundContactPointForce));
+            groundContactPoint.setForce(RandomGeometry.nextVector3D(random, maxGroundContactPointForce));
          }
 
          ExternalForcePoint footExternalForcePoint = feetExternalForcePoints.get(robotSide);
-         footExternalForcePoint.setForce(RandomTools.generateRandomVector(random, maxFootExternalForce));
-         footExternalForcePoint.setMoment(RandomTools.generateRandomVector(random, maxFootExternalTorque));
+         footExternalForcePoint.setForce(RandomGeometry.nextVector3D(random, maxFootExternalForce));
+         footExternalForcePoint.setMoment(RandomGeometry.nextVector3D(random, maxFootExternalTorque));
       }
    }
 
@@ -740,16 +741,16 @@ public class DRCInverseDynamicsCalculatorTestHelper
          RigidBody foot = fullRobotModel.getFoot(robotSide);
          ReferenceFrame bodyFixedFrame = foot.getBodyFixedFrame();
 
-         Wrench wrench = new Wrench(bodyFixedFrame, bodyFixedFrame, RandomTools.generateRandomVector(random, maxFeetExternalForce),
-               RandomTools.generateRandomVector(random, maxFeetExternalTorque));
+         Wrench wrench = new Wrench(bodyFixedFrame, bodyFixedFrame, RandomGeometry.nextVector3D(random, maxFeetExternalForce),
+               RandomGeometry.nextVector3D(random, maxFeetExternalTorque));
          inverseDynamicsCalculator.setExternalWrench(foot, wrench);
       }
    }
 
    public void setRobotRootJointExternalForcesRandomly(Random random, double maxRootJointForceAndTorque)
    {
-      rootJointExternalForcePoint.setForce(RandomTools.generateRandomVector(random, maxRootJointForceAndTorque));
-      rootJointExternalForcePoint.setMoment(RandomTools.generateRandomVector(random, maxRootJointForceAndTorque));
+      rootJointExternalForcePoint.setForce(RandomGeometry.nextVector3D(random, maxRootJointForceAndTorque));
+      rootJointExternalForcePoint.setMoment(RandomGeometry.nextVector3D(random, maxRootJointForceAndTorque));
    }
 
    public void setRobotTorquesRandomly(Random random, double maxJointTorque)
@@ -759,7 +760,7 @@ public class DRCInverseDynamicsCalculatorTestHelper
 
       for (OneDegreeOfFreedomJoint oneDegreeOfFreedomJoint : oneDegreeOfFreedomJoints)
       {
-         oneDegreeOfFreedomJoint.setTau(RandomTools.generateRandomDouble(random, maxJointTorque));
+         oneDegreeOfFreedomJoint.setTau(RandomNumbers.nextDouble(random, maxJointTorque));
       }
    }
 
@@ -791,8 +792,8 @@ public class DRCInverseDynamicsCalculatorTestHelper
       Twist bodyTwist = new Twist();
       sixDoFJoint.getJointTwist(bodyTwist);
 
-      FrameVector originAcceleration = new FrameVector(elevatorFrame, RandomTools.generateRandomVector(random, maxRootJointLinearAcceleration));
-      FrameVector angularAcceleration = new FrameVector(bodyFrame, RandomTools.generateRandomVector(random, maxRootJointAngularAcceleration));
+      FrameVector originAcceleration = new FrameVector(elevatorFrame, RandomGeometry.nextVector3D(random, maxRootJointLinearAcceleration));
+      FrameVector angularAcceleration = new FrameVector(bodyFrame, RandomGeometry.nextVector3D(random, maxRootJointAngularAcceleration));
       //      originAcceleration.changeFrame(elevatorFrame);
 
       SpatialAccelerationVector spatialAccelerationVector = new SpatialAccelerationVector(bodyFrame, elevatorFrame, bodyFrame);

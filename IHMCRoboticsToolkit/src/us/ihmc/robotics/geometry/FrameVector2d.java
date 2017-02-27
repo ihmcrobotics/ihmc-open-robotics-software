@@ -2,10 +2,10 @@ package us.ihmc.robotics.geometry;
 
 import java.util.Random;
 
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
-import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 /**
@@ -105,7 +105,7 @@ public class FrameVector2d extends FrameTuple2d<FrameVector2d, Vector2D>
 
    public static FrameVector2d generateRandomFrameVector2d(Random random, ReferenceFrame zUpFrame)
    {
-      double randomAngle = RandomTools.generateRandomDouble(random, -Math.PI, Math.PI);
+      double randomAngle = RandomNumbers.nextDouble(random, -Math.PI, Math.PI);
 
       FrameVector2d randomVector = new FrameVector2d(zUpFrame, Math.cos(randomAngle), Math.sin(randomAngle));
 

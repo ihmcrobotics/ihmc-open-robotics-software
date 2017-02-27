@@ -21,7 +21,7 @@ import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.controllers.ControllerFailureException;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -227,7 +227,7 @@ public class StepAdjustmentDemoHelper
       CameraConfiguration cameraConfiguration = new CameraConfiguration("testCamera");
 
       Random randomForSlightlyMovingCameraSoThatYouTubeVideosAreDifferent = new Random();
-      Vector3D randomCameraOffset = RandomTools.generateRandomVector(randomForSlightlyMovingCameraSoThatYouTubeVideosAreDifferent, 0.05);
+      Vector3D randomCameraOffset = RandomGeometry.nextVector3D(randomForSlightlyMovingCameraSoThatYouTubeVideosAreDifferent, 0.05);
       cameraFix.add(randomCameraOffset);
 
       cameraConfiguration.setCameraFix(cameraFix);

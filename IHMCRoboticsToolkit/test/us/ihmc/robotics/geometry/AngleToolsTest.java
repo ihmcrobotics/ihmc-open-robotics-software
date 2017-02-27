@@ -10,10 +10,10 @@ import java.util.Random;
 
 import org.junit.Test;
 
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
-import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class AngleToolsTest
@@ -44,8 +44,8 @@ public class AngleToolsTest
 
       for (int i = 0; i < 25; i++)
       {
-         angleA = RandomTools.generateRandomDoubleInRange(random, -128.0, 128.0);
-         angleB = RandomTools.generateRandomDoubleInRange(random, -128.0, 128.0);
+         angleA = RandomNumbers.nextDouble(random, -128.0, 128.0);
+         angleB = RandomNumbers.nextDouble(random, -128.0, 128.0);
 
          double ret = AngleTools.computeAngleDifferenceMinusTwoPiToZero(angleA, angleB);
 
@@ -68,8 +68,8 @@ public class AngleToolsTest
 
       for (int i = 0; i < 25; i++)
       {
-         angleA = RandomTools.generateRandomDoubleInRange(random, -128.0, 128.0);
-         angleB = RandomTools.generateRandomDoubleInRange(random, -128.0, 128.0);
+         angleA = RandomNumbers.nextDouble(random, -128.0, 128.0);
+         angleB = RandomNumbers.nextDouble(random, -128.0, 128.0);
 
          double ret = AngleTools.computeAngleDifferenceMinusPiToPi(angleA, angleB);
 
@@ -92,8 +92,8 @@ public class AngleToolsTest
 
       for (int i = 0; i < 25; i++)
       {
-         angleA = RandomTools.generateRandomDoubleInRange(random, -128.0, 128.0);
-         angleB = RandomTools.generateRandomDoubleInRange(random, -128.0, 128.0);
+         angleA = RandomNumbers.nextDouble(random, -128.0, 128.0);
+         angleB = RandomNumbers.nextDouble(random, -128.0, 128.0);
 
          double ret = AngleTools.trimAngleMinusPiToPi(angleA - angleB);
 
@@ -336,7 +336,7 @@ public class AngleToolsTest
 
       for (int i = 0; i < 25; i++)
       {
-         double randomAngle = RandomTools.generateRandomDoubleInRange(random, -128.0, 128.0);
+         double randomAngle = RandomNumbers.nextDouble(random, -128.0, 128.0);
          randomAngle = AngleTools.trimAngleMinusPiToPi(randomAngle);
          assertTrue(randomAngle <= Math.PI);
          assertTrue(randomAngle >= -Math.PI);

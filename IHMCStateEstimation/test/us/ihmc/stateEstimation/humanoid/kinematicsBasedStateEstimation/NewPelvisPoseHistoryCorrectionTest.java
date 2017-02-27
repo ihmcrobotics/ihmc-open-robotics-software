@@ -26,7 +26,7 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
 import us.ihmc.robotics.math.frames.YoFramePose;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SixDoFJoint;
@@ -199,8 +199,8 @@ public class NewPelvisPoseHistoryCorrectionTest
 
       for(long timeStamp = 3000; timeStamp <50000; timeStamp += 3000)
       {
-         Vector3D translationOffset = RandomTools.generateRandomVector(random, 0.04);
-         Quaternion rotationOffset = RandomTools.generateRandomQuaternion(random, 0.04);
+         Vector3D translationOffset = RandomGeometry.nextVector3D(random, 0.04);
+         Quaternion rotationOffset = RandomGeometry.nextQuaternion(random, 0.04);
          saveIcpOffsetInTransformBuffer(timeStamp, translationOffset, rotationOffset);
          generateIcpOffsetsWithRespectToPelvisInTransformBuffer(timeStamp, translationOffset, rotationOffset);
       }
@@ -417,7 +417,7 @@ public class NewPelvisPoseHistoryCorrectionTest
       
       for(long timeStamp = 3000; timeStamp <50000; timeStamp += 3000)
       {
-         Vector3D translationOffset = RandomTools.generateRandomVector(random, 0.04);
+         Vector3D translationOffset = RandomGeometry.nextVector3D(random, 0.04);
          Quaternion rotationOffset = orientationTooBigOffset[index];
          saveIcpOffsetInTransformBuffer(timeStamp, translationOffset, rotationOffset);
          generateIcpOffsetsWithRespectToPelvisInTransformBuffer(timeStamp, translationOffset, rotationOffset);

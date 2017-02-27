@@ -7,6 +7,7 @@ import java.util.ArrayList;
 
 import org.junit.Test;
 
+import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
@@ -16,7 +17,6 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.PlanarRegion;
-import us.ihmc.tools.testing.MutationTestingTools;
 
 @ContinuousIntegrationAnnotations.ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
 public class PlanarRegionPolygonSnapperTest
@@ -169,8 +169,6 @@ public class PlanarRegionPolygonSnapperTest
 
    public static void main(String[] args)
    {
-      String targetTests = PlanarRegionPolygonSnapperTest.class.getName();
-      String targetClassesInSamePackage = PlanarRegionPolygonSnapper.class.getName();
-      MutationTestingTools.doPITMutationTestAndOpenResult(targetTests, targetClassesInSamePackage);
+      MutationTestFacilitator.facilitateMutationTestForClass(PlanarRegionPolygonSnapper.class, PlanarRegionPolygonSnapperTest.class);
    }
 }

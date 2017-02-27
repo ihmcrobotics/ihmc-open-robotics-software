@@ -13,7 +13,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.geometry.TransformTools;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 
 @HighBandwidthPacket
 public class VideoPacket extends Packet<VideoPacket> implements TransformableDataObject<VideoPacket>
@@ -149,8 +149,8 @@ public class VideoPacket extends Packet<VideoPacket> implements TransformableDat
       byte[] data = new byte[length];
       random.nextBytes(data);
 
-      Point3D position = RandomTools.generateRandomPoint(random, 2.0, 2.0, 1.0);
-      Quaternion orientation = RandomTools.generateRandomQuaternion(random);
+      Point3D position = RandomGeometry.nextPoint3D(random, 2.0, 2.0, 1.0);
+      Quaternion orientation = RandomGeometry.nextQuaternion(random);
 
       this.timeStamp = 0;
       this.videoSource = VideoSource.MULTISENSE_LEFT_EYE;

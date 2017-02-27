@@ -19,13 +19,14 @@ import org.junit.Before;
 import org.junit.Test;
 
 import gnu.trove.list.array.TIntArrayList;
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.ScrewTestTools.RandomFloatingChain;
 
@@ -149,8 +150,8 @@ public class ScrewToolsTest
 
       String jointName = "joint";
       RigidBody parentBody = bodiesArray[bodiesArray.length - 1];
-      Vector3D jointOffset = RandomTools.generateRandomVector(random, 5.0);
-      Vector3D jointAxis = RandomTools.generateRandomVector(random, 5.0);
+      Vector3D jointOffset = RandomGeometry.nextVector3D(random, 5.0);
+      Vector3D jointAxis = RandomGeometry.nextVector3D(random, 5.0);
 
       RevoluteJoint joint = ScrewTools.addRevoluteJoint(jointName, parentBody, jointOffset, jointAxis);
 
@@ -166,7 +167,7 @@ public class ScrewToolsTest
       String jointName = "joint";
       RigidBody parentBody = new RigidBody(null, null);
       RigidBodyTransform transformToParent = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
-      Vector3D jointAxis = RandomTools.generateRandomVector(random, 5.0);
+      Vector3D jointAxis = RandomGeometry.nextVector3D(random, 5.0);
 
       RevoluteJoint joint = ScrewTools.addRevoluteJoint(jointName, parentBody, transformToParent, jointAxis);
 
@@ -181,8 +182,8 @@ public class ScrewToolsTest
    {
       String jointName = "joint";
       RigidBody parentBody = new RigidBody(null, null);
-      Vector3D jointOffset = RandomTools.generateRandomVector(random, 5.0);
-      Vector3D jointAxis = RandomTools.generateRandomVector(random, 5.0);
+      Vector3D jointOffset = RandomGeometry.nextVector3D(random, 5.0);
+      Vector3D jointAxis = RandomGeometry.nextVector3D(random, 5.0);
 
       PrismaticJoint joint = ScrewTools.addPrismaticJoint(jointName, parentBody, jointOffset, jointAxis);
 
@@ -197,7 +198,7 @@ public class ScrewToolsTest
       String jointName = "joint";
       RigidBody parentBody = new RigidBody(null, null);
       RigidBodyTransform transformToParent = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
-      Vector3D jointAxis = RandomTools.generateRandomVector(random, 5.0);
+      Vector3D jointAxis = RandomGeometry.nextVector3D(random, 5.0);
 
       PrismaticJoint joint = ScrewTools.addPrismaticJoint(jointName, parentBody, transformToParent, jointAxis);
 
@@ -655,7 +656,7 @@ public class ScrewToolsTest
       RandomFloatingChain chain = new RandomFloatingChain(random, jointAxes);
       chain.setRandomPositionsAndVelocities(random);
 
-      double gravity = RandomTools.generateRandomDouble(random, 100.0);
+      double gravity = RandomNumbers.nextDouble(random, 100.0);
       SpatialAccelerationVector result = ScrewTools.
             createGravitationalSpatialAcceleration(chain.getElevator(), gravity);
 
@@ -917,10 +918,10 @@ public class ScrewToolsTest
 
       ReferenceFrame frame1 = ReferenceFrame.constructFrameWithUnchangingTransformToParent("frame1", theFrame, EuclidCoreRandomTools.generateRandomRigidBodyTransform(random));
 
-      Wrench externalWrench1 = new Wrench(rigidBody1.getBodyFixedFrame(), theFrame, RandomTools.generateRandomDoubleArray(random, 6, 100.0));
-      Wrench externalWrench2 = new Wrench(rigidBody3.getBodyFixedFrame(), theFrame, RandomTools.generateRandomDoubleArray(random, 6, 100.0));
-      Wrench addedWrench1 = new Wrench(rigidBody2.getBodyFixedFrame(), frame1, RandomTools.generateRandomDoubleArray(random, 6, 100.0));
-      Wrench addedWrench2 = new Wrench(rigidBody3.getBodyFixedFrame(), theFrame, RandomTools.generateRandomDoubleArray(random, 6, 100.0));
+      Wrench externalWrench1 = new Wrench(rigidBody1.getBodyFixedFrame(), theFrame, RandomNumbers.nextDoubleArray(random, 6, 100.0));
+      Wrench externalWrench2 = new Wrench(rigidBody3.getBodyFixedFrame(), theFrame, RandomNumbers.nextDoubleArray(random, 6, 100.0));
+      Wrench addedWrench1 = new Wrench(rigidBody2.getBodyFixedFrame(), frame1, RandomNumbers.nextDoubleArray(random, 6, 100.0));
+      Wrench addedWrench2 = new Wrench(rigidBody3.getBodyFixedFrame(), theFrame, RandomNumbers.nextDoubleArray(random, 6, 100.0));
 
       external.put(rigidBody1, new Wrench(externalWrench1));
       external.put(rigidBody3, new Wrench(externalWrench2));

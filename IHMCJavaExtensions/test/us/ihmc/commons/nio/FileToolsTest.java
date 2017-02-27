@@ -11,9 +11,12 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -25,7 +28,7 @@ import us.ihmc.tools.io.printing.PrintTools;
 
 public class FileToolsTest
 {
-   private static final Path FILE_TOOLS_TEST_PATH = CommonPaths.deriveTestResourcesPath(FileToolsTest.class);
+   private static final Path FILE_TOOLS_TEST_PATH = getResourcesPathForTestClass(FileToolsTest.class);
    private static final Path TEXT_DIRECTORY_PATH = FILE_TOOLS_TEST_PATH.resolve("exampleTextFiles");
    private static final Path JAVA_DIRECTORY_PATH = FILE_TOOLS_TEST_PATH.resolve("exampleJavaFiles");
    private static final Path EMPTY_DIRECTORY_PATH = FILE_TOOLS_TEST_PATH.resolve("exampleEmptyFiles");
@@ -35,7 +38,6 @@ public class FileToolsTest
    private static final String EXAMPLE_FILE_2_TEXT_LINE_2 = "It has two lines";
    private static final String EXAMPLE_JAVA_FILE1_JAVA = "ExampleJavaFile1.java.txt";
    private static final String EXAMPLE_JAVA_FILE2_JAVA = "ExampleJavaFile2.java.txt";
-   private static final String TEST_FILE_BAD_TXT = "testFileBad.txt";
    private static final String FILE_TOOLS_EXAMPLE_FILE_CAT_TXT = "FileToolsExampleFileCat.txt";
    private static final String FILE_TOOLS_EXAMPLE_FILE1_TXT = "FileToolsExampleFile1.txt";
    private static final String FILE_TOOLS_EXAMPLE_FILE2_TXT = "FileToolsExampleFile2.txt";
@@ -65,18 +67,23 @@ public class FileToolsTest
    @After
    public void tearDown()
    {
-      try
-      {
-         Files.delete(EXAMPLE_JAVA_FILE1_PATH);
-         Files.delete(EXAMPLE_JAVA_FILE2_PATH);
-         Files.delete(FILE_TOOLS_EXAMPLE_FILE1_PATH);
-         Files.delete(FILE_TOOLS_EXAMPLE_FILE2_PATH);
-         Files.delete(READ_ALL_LINES_PATH);
-      }
-      catch (IOException e)
-      {
-         e.printStackTrace();
-      }
+      FileTools.deleteQuietly(EXAMPLE_JAVA_FILE1_PATH);
+      FileTools.deleteQuietly(EXAMPLE_JAVA_FILE2_PATH);
+      FileTools.deleteQuietly(FILE_TOOLS_EXAMPLE_FILE1_PATH);
+      FileTools.deleteQuietly(FILE_TOOLS_EXAMPLE_FILE2_PATH);
+      FileTools.deleteQuietly(READ_ALL_LINES_PATH);
+   }
+   
+   private static Path getResourcesPathForTestClass(Class<?> clazz)
+   {
+      List<String> pathNames = new ArrayList<String>();
+      
+      String[] packageNames = clazz.getPackage().getName().split("\\.");
+      
+      pathNames.addAll(Arrays.asList(packageNames));
+      pathNames.add(StringUtils.uncapitalize(clazz.getSimpleName()));
+      
+      return Paths.get("testResources", pathNames.toArray(new String[0]));
    }
    
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)

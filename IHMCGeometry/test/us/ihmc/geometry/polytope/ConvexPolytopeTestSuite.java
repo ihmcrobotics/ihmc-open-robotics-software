@@ -3,10 +3,10 @@ package us.ihmc.geometry.polytope;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite.SuiteClasses;
 
+import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.continuousIntegration.ContinuousIntegrationSuite;
 import us.ihmc.continuousIntegration.ContinuousIntegrationSuite.ContinuousIntegrationSuiteCategory;
 import us.ihmc.continuousIntegration.IntegrationCategory;
-import us.ihmc.tools.testing.MutationTestingTools;
 
 @RunWith(ContinuousIntegrationSuite.class)
 @ContinuousIntegrationSuiteCategory(IntegrationCategory.FAST)
@@ -17,8 +17,6 @@ public class ConvexPolytopeTestSuite
 {
    public static void main(String[] args)
    {
-      String targetTests = ConvexPolytopeTestSuite.class.getName();
-      String targetClassesInSamePackage = MutationTestingTools.createClassSelectorStringFromTargetString(targetTests);
-      MutationTestingTools.doPITMutationTestAndOpenResult(targetTests, targetClassesInSamePackage);
+      MutationTestFacilitator.facilitateMutationTestForPackage(ConvexPolytopeTestSuite.class);
    }
 }

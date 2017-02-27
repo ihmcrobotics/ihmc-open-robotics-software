@@ -13,7 +13,7 @@ import us.ihmc.robotiq.communication.JamodTCPMaster;
 import us.ihmc.robotiq.communication.RobotiqReadResponseFactory;
 import us.ihmc.robotiq.communication.RobotiqWriteRequestFactory;
 import us.ihmc.robotiq.communication.registers.GripperStatusRegister.gACT;
-import us.ihmc.robotiq.data.RobotiqHandSensorDizzata;
+import us.ihmc.robotiq.data.RobotiqHandSensorData;
 import us.ihmc.tools.thread.ThreadTools;
 
 public class RobotiqHandCommunicator
@@ -27,7 +27,7 @@ public class RobotiqHandCommunicator
    private RobotiqWriteRequestFactory writeRequestFactory = new RobotiqWriteRequestFactory();
    private RobotiqReadResponseFactory readResponseFactory = new RobotiqReadResponseFactory();
    
-   private final RobotiqHandSensorDizzata handSensorData = new RobotiqHandSensorDizzata();
+   private final RobotiqHandSensorData handSensorData = new RobotiqHandSensorData();
    
    private RobotiqGraspMode graspMode = RobotiqGraspMode.BASIC_MODE;
    private HandConfiguration handConfiguration = HandConfiguration.OPEN;
@@ -166,7 +166,7 @@ public class RobotiqHandCommunicator
       }
    }
    
-   public RobotiqHandSensorDizzata getHandSensorData()
+   public RobotiqHandSensorData getHandSensorData()
    {
       return handSensorData;
    }

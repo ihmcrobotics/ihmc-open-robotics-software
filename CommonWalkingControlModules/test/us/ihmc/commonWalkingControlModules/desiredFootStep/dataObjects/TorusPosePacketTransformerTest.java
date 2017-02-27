@@ -16,7 +16,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.TorusPosePacket;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 /**
@@ -41,9 +41,9 @@ public class TorusPosePacketTransformerTest
 
       for (int i = 0; i < numberOfTests; i++)
       {
-         Point3D point3d = RandomTools.generateRandomPoint(random, 10.0, 10.0, 10.0);
+         Point3D point3d = RandomGeometry.nextPoint3D(random, 10.0, 10.0, 10.0);
 
-         AxisAngle axisAngle = RandomTools.generateRandomRotation(random);
+         AxisAngle axisAngle = RandomGeometry.nextAxisAngle(random);
          Quaternion quat = new Quaternion();
          quat.set(axisAngle);
 

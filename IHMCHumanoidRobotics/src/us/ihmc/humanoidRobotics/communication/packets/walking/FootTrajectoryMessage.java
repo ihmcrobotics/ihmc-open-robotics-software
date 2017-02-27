@@ -2,6 +2,7 @@ package us.ihmc.humanoidRobotics.communication.packets.walking;
 
 import java.util.Random;
 
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.VisualizablePacket;
 import us.ihmc.communication.ros.generators.RosExportedField;
@@ -12,7 +13,6 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.AbstractSE3TrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
-import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 @RosMessagePacket(documentation =
@@ -40,7 +40,7 @@ public class FootTrajectoryMessage extends AbstractSE3TrajectoryMessage<FootTraj
    public FootTrajectoryMessage(Random random)
    {
       super(random);
-      robotSide = RandomTools.generateRandomEnum(random, RobotSide.class);
+      robotSide = RandomNumbers.nextEnum(random, RobotSide.class);
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
