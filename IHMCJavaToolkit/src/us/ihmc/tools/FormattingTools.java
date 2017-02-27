@@ -1,6 +1,8 @@
 package us.ihmc.tools;
 
 import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -9,6 +11,10 @@ public class FormattingTools
    private static final DecimalFormat decimal3DPrintFormatter = new DecimalFormat("0.000");
    private static final DecimalFormat decimal2DPrintFormatter = new DecimalFormat("0.00");
    private static final DecimalFormat decimal1DPrintFormatter = new DecimalFormat("0.0");
+   
+   private static final SimpleDateFormat dateStringFormatter = new SimpleDateFormat("yyyyMMdd");
+   private static final SimpleDateFormat timeStringFormatter = new SimpleDateFormat("HHmm");
+   private static final SimpleDateFormat timeStringFormatterWithSeconds = new SimpleDateFormat("HHmmss");
 
    public static String getFormattedDecimal3D(double value)
    {
@@ -127,5 +133,26 @@ public class FormattingTools
       for (int i = 0; i < strs.length; i++)
          reversedStrs[i] = StringUtils.reverse(strs[i]);
       return StringUtils.reverse(StringUtils.getCommonPrefix(reversedStrs));
+   }
+
+   public static String getDateString()
+   {
+      Date date = new Date();
+   
+      return dateStringFormatter.format(date);
+   }
+
+   public static String getTimeString()
+   {
+      Date date = new Date();
+   
+      return timeStringFormatter.format(date);
+   }
+
+   public static String getTimeStringWithSeconds()
+   {
+      Date date = new Date();
+   
+      return timeStringFormatterWithSeconds.format(date);
    }
 }
