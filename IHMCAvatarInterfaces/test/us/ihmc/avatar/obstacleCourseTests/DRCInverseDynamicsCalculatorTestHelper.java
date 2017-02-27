@@ -7,6 +7,7 @@ import java.util.Random;
 
 import org.ejml.data.DenseMatrix64F;
 
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -446,7 +447,7 @@ public class DRCInverseDynamicsCalculatorTestHelper
       for (OneDegreeOfFreedomJoint oneDegreeOfFreedomJoint : oneDegreeOfFreedomJoints)
       {
          OneDoFJoint oneDoFJoint = fullRobotModel.getOneDoFJointByName(oneDegreeOfFreedomJoint.getName());
-         oneDoFJoint.setQddDesired(RandomTools.generateRandomDouble(random, maxJointAcceleration));
+         oneDoFJoint.setQddDesired(RandomNumbers.nextDouble(random, maxJointAcceleration));
       }
    }
 
@@ -609,9 +610,9 @@ public class DRCInverseDynamicsCalculatorTestHelper
 
       rootJoint.setPosition(RandomTools.generateRandomVector(random));
 
-      double yaw = RandomTools.generateRandomDouble(random, Math.PI / 20.0);
-      double pitch = RandomTools.generateRandomDouble(random, Math.PI / 20.0);
-      double roll = RandomTools.generateRandomDouble(random, Math.PI / 20.0);
+      double yaw = RandomNumbers.nextDouble(random, Math.PI / 20.0);
+      double pitch = RandomNumbers.nextDouble(random, Math.PI / 20.0);
+      double roll = RandomNumbers.nextDouble(random, Math.PI / 20.0);
       rootJoint.setRotation(yaw, pitch, roll);
 
       ArrayList<OneDoFJoint> oneDoFJoints = new ArrayList<OneDoFJoint>();
@@ -625,8 +626,8 @@ public class DRCInverseDynamicsCalculatorTestHelper
          lowerLimit = lowerLimit + 0.05 * delta;
          upperLimit = upperLimit - 0.05 * delta;
 
-         oneDoFJoint.setQ(RandomTools.generateRandomDouble(random, lowerLimit, upperLimit));
-         oneDoFJoint.setQd(RandomTools.generateRandomDouble(random, maxJointVelocity));
+         oneDoFJoint.setQ(RandomNumbers.nextDouble(random, lowerLimit, upperLimit));
+         oneDoFJoint.setQd(RandomNumbers.nextDouble(random, maxJointVelocity));
       }
    }
 
@@ -637,9 +638,9 @@ public class DRCInverseDynamicsCalculatorTestHelper
       rootJoint.setAngularVelocityInBody(RandomTools.generateRandomVector(random, maxRootJointLinearAndAngularVelocity));
 
       rootJoint.setPosition(RandomTools.generateRandomVector(random));
-      double yaw = RandomTools.generateRandomDouble(random, Math.PI / 20.0);
-      double pitch = RandomTools.generateRandomDouble(random, Math.PI / 20.0);
-      double roll = RandomTools.generateRandomDouble(random, Math.PI / 20.0);
+      double yaw = RandomNumbers.nextDouble(random, Math.PI / 20.0);
+      double pitch = RandomNumbers.nextDouble(random, Math.PI / 20.0);
+      double roll = RandomNumbers.nextDouble(random, Math.PI / 20.0);
       rootJoint.setYawPitchRoll(yaw, pitch, roll);
 
       ArrayList<OneDegreeOfFreedomJoint> oneDegreeOfFreedomJoints = new ArrayList<OneDegreeOfFreedomJoint>();
@@ -653,8 +654,8 @@ public class DRCInverseDynamicsCalculatorTestHelper
          lowerLimit = lowerLimit + 0.05 * delta;
          upperLimit = upperLimit - 0.05 * delta;
 
-         oneDegreeOfFreedomJoint.setQ(RandomTools.generateRandomDouble(random, lowerLimit, upperLimit));
-         oneDegreeOfFreedomJoint.setQd(RandomTools.generateRandomDouble(random, maxJointVelocity));
+         oneDegreeOfFreedomJoint.setQ(RandomNumbers.nextDouble(random, lowerLimit, upperLimit));
+         oneDegreeOfFreedomJoint.setQd(RandomNumbers.nextDouble(random, maxJointVelocity));
       }
    }
 
@@ -759,7 +760,7 @@ public class DRCInverseDynamicsCalculatorTestHelper
 
       for (OneDegreeOfFreedomJoint oneDegreeOfFreedomJoint : oneDegreeOfFreedomJoints)
       {
-         oneDegreeOfFreedomJoint.setTau(RandomTools.generateRandomDouble(random, maxJointTorque));
+         oneDegreeOfFreedomJoint.setTau(RandomNumbers.nextDouble(random, maxJointTorque));
       }
    }
 

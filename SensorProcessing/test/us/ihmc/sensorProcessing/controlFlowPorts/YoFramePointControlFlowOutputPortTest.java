@@ -7,6 +7,7 @@ import java.util.Random;
 
 import org.junit.Test;
 
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.controlFlow.ControlFlowElement;
 import us.ihmc.controlFlow.NullControlFlowElement;
@@ -39,7 +40,7 @@ public class YoFramePointControlFlowOutputPortTest
       
       for (int i = 0; i < 1000; i++)
       {
-         Vector3D vector = RandomTools.generateRandomVector(rand, RandomTools.generateRandomDouble(rand, Double.MIN_VALUE, Double.MAX_VALUE));
+         Vector3D vector = RandomTools.generateRandomVector(rand, RandomNumbers.nextDouble(rand, Double.MIN_VALUE, Double.MAX_VALUE));
          FramePoint dataIn = new FramePoint(frame, vector);
          controlFlowOutputPort.setData(dataIn);
          FramePoint dataOut = controlFlowOutputPort.getData();

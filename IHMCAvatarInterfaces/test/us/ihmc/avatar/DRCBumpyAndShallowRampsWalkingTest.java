@@ -18,6 +18,7 @@ import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.initialSetup.DRCSCSInitialSetup;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
@@ -27,7 +28,6 @@ import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
 import us.ihmc.robotics.controllers.ControllerFailureException;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
@@ -283,12 +283,12 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
 
       for (int i=0; i<numberOfBoxes; i++)
       {
-         double xStart = RandomTools.generateRandomDouble(random, xMin, xMax);
-         double yStart = RandomTools.generateRandomDouble(random, yMin, yMax);
-         double xEnd = xStart + RandomTools.generateRandomDouble(random, maxLength*0.1, maxLength);
-         double yEnd = yStart + RandomTools.generateRandomDouble(random, maxLength*0.1, maxLength);
+         double xStart = RandomNumbers.nextDouble(random, xMin, xMax);
+         double yStart = RandomNumbers.nextDouble(random, yMin, yMax);
+         double xEnd = xStart + RandomNumbers.nextDouble(random, maxLength*0.1, maxLength);
+         double yEnd = yStart + RandomNumbers.nextDouble(random, maxLength*0.1, maxLength);
          double zStart = 0.0;
-         double zEnd = zStart + RandomTools.generateRandomDouble(random, maxHeight*0.1, maxHeight);
+         double zEnd = zStart + RandomNumbers.nextDouble(random, maxHeight*0.1, maxHeight);
          combinedTerrainObject.addBox(xStart, yStart, xEnd, yEnd, zStart, zEnd, YoAppearance.Green());
       }
 

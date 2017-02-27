@@ -11,6 +11,7 @@ import java.util.Random;
 import org.junit.Before;
 import org.junit.Test;
 
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -76,7 +77,7 @@ public abstract class FrameTuple2dTest<T extends FrameTuple2d<?, ?>>
       for (int i = 0; i < 100000; i++)
       {
          transformInPlane.setIdentity();
-         transformInPlane.setRotationYawAndZeroTranslation(RandomTools.generateRandomDouble(random, -Math.PI, Math.PI));
+         transformInPlane.setRotationYawAndZeroTranslation(RandomNumbers.nextDouble(random, -Math.PI, Math.PI));
          transformInPlane.setTranslation(RandomTools.generateRandomVector(random));
 
          transformNOTInPlane.setIdentity();

@@ -4,6 +4,7 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Random;
 
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
@@ -42,7 +43,7 @@ public class EuclideanTrajectoryPointMessage extends Packet<EuclideanTrajectoryP
 
    public EuclideanTrajectoryPointMessage(Random random)
    {
-      time = RandomTools.generateRandomDoubleWithEdgeCases(random, 0.01);
+      time = RandomNumbers.nextDoubleWithEdgeCases(random, 0.01);
       position = RandomTools.generateRandomPoint(random, 1.0, 1.0, 1.0);
       linearVelocity = RandomTools.generateRandomVector(random);
    }

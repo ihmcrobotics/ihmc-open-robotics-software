@@ -19,6 +19,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import gnu.trove.list.array.TIntArrayList;
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
@@ -655,7 +656,7 @@ public class ScrewToolsTest
       RandomFloatingChain chain = new RandomFloatingChain(random, jointAxes);
       chain.setRandomPositionsAndVelocities(random);
 
-      double gravity = RandomTools.generateRandomDouble(random, 100.0);
+      double gravity = RandomNumbers.nextDouble(random, 100.0);
       SpatialAccelerationVector result = ScrewTools.
             createGravitationalSpatialAcceleration(chain.getElevator(), gravity);
 
@@ -917,10 +918,10 @@ public class ScrewToolsTest
 
       ReferenceFrame frame1 = ReferenceFrame.constructFrameWithUnchangingTransformToParent("frame1", theFrame, EuclidCoreRandomTools.generateRandomRigidBodyTransform(random));
 
-      Wrench externalWrench1 = new Wrench(rigidBody1.getBodyFixedFrame(), theFrame, RandomTools.generateRandomDoubleArray(random, 6, 100.0));
-      Wrench externalWrench2 = new Wrench(rigidBody3.getBodyFixedFrame(), theFrame, RandomTools.generateRandomDoubleArray(random, 6, 100.0));
-      Wrench addedWrench1 = new Wrench(rigidBody2.getBodyFixedFrame(), frame1, RandomTools.generateRandomDoubleArray(random, 6, 100.0));
-      Wrench addedWrench2 = new Wrench(rigidBody3.getBodyFixedFrame(), theFrame, RandomTools.generateRandomDoubleArray(random, 6, 100.0));
+      Wrench externalWrench1 = new Wrench(rigidBody1.getBodyFixedFrame(), theFrame, RandomNumbers.nextDoubleArray(random, 6, 100.0));
+      Wrench externalWrench2 = new Wrench(rigidBody3.getBodyFixedFrame(), theFrame, RandomNumbers.nextDoubleArray(random, 6, 100.0));
+      Wrench addedWrench1 = new Wrench(rigidBody2.getBodyFixedFrame(), frame1, RandomNumbers.nextDoubleArray(random, 6, 100.0));
+      Wrench addedWrench2 = new Wrench(rigidBody3.getBodyFixedFrame(), theFrame, RandomNumbers.nextDoubleArray(random, 6, 100.0));
 
       external.put(rigidBody1, new Wrench(externalWrench1));
       external.put(rigidBody3, new Wrench(externalWrench2));

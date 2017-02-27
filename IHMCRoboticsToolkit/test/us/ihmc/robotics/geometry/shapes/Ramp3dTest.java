@@ -8,6 +8,7 @@ import java.util.Random;
 
 import org.junit.Test;
 
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
@@ -38,9 +39,9 @@ public class Ramp3dTest
       for (int i = 0; i < numberOfShapes; i++)
       {
          RigidBodyTransform transform = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
-         double length = RandomTools.generateRandomDouble(random, 0.01, 10.0);
-         double width = RandomTools.generateRandomDouble(random, 0.01, 10.0);
-         double height = RandomTools.generateRandomDouble(random, 0.01, 10.0);
+         double length = RandomNumbers.nextDouble(random, 0.01, 10.0);
+         double width = RandomNumbers.nextDouble(random, 0.01, 10.0);
+         double height = RandomNumbers.nextDouble(random, 0.01, 10.0);
          Ramp3d box3d = new Ramp3d(transform, width, length, height);
          testHelper.runSimpleTests(box3d, random, numberOfPoints);
       }
@@ -484,9 +485,9 @@ public class Ramp3dTest
    {
       RigidBodyTransform configuration = createRandomTransform(random);      
       
-      double width = RandomTools.generateRandomDouble(random, 0.05, 1.0); 
-      double length = RandomTools.generateRandomDouble(random, 0.05, 1.0); 
-      double height = RandomTools.generateRandomDouble(random, 0.05, 1.0); 
+      double width = RandomNumbers.nextDouble(random, 0.05, 1.0); 
+      double length = RandomNumbers.nextDouble(random, 0.05, 1.0); 
+      double height = RandomNumbers.nextDouble(random, 0.05, 1.0); 
 
       return new Ramp3d(configuration, length, width, height);
    }

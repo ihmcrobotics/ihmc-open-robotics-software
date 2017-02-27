@@ -9,6 +9,7 @@ import java.util.Random;
 import org.junit.After;
 import org.junit.Test;
 
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
@@ -201,7 +202,7 @@ public class FrameVectorTest extends FrameTupleTest<Vector3D>
 
       FrameVector randomFrameVector = new FrameVector(theFrame, RandomTools.generateRandomVector(random));
       FrameVector parallelVector = new FrameVector(randomFrameVector);
-      parallelVector.scale(RandomTools.generateRandomDouble(random, -1.0, 1.0));
+      parallelVector.scale(RandomNumbers.nextDouble(random, -1.0, 1.0));
 
       String errorMsg = "\n" + randomFrameVector + "\n should be parallel to: \n" + parallelVector + "\n Angle between vectors = " + randomFrameVector.angle(parallelVector);
       assertTrue(errorMsg, randomFrameVector.isEpsilonParallel(parallelVector, 1e-7));

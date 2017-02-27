@@ -12,6 +12,7 @@ import java.util.Random;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.junit.Test;
 
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
@@ -42,9 +43,9 @@ public class Box3dTest
       for (int i=0; i<numberOfShapes; i++)
       {
          RigidBodyTransform transform = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
-         double length = RandomTools.generateRandomDouble(random, 0.01, 10.0);
-         double width = RandomTools.generateRandomDouble(random, 0.01, 10.0);
-         double height = RandomTools.generateRandomDouble(random, 0.01, 10.0);
+         double length = RandomNumbers.nextDouble(random, 0.01, 10.0);
+         double width = RandomNumbers.nextDouble(random, 0.01, 10.0);
+         double height = RandomNumbers.nextDouble(random, 0.01, 10.0);
          Box3d box3d = new Box3d(transform, length, width, height);
 
          try
@@ -289,7 +290,7 @@ public class Box3dTest
             Vector3D offset = new Vector3D(vertex);
             offset.sub(center);
             offset.normalize();
-            offset.scale(RandomTools.generateRandomDoubleInRange(random, epsilon, maxScale));
+            offset.scale(RandomNumbers.nextDouble(random, epsilon, maxScale));
             Point3D testPoint = new Point3D(vertex);
             testPoint.add(offset);
             assertFalse(box.isInsideOrOnSurface(testPoint, epsilon));

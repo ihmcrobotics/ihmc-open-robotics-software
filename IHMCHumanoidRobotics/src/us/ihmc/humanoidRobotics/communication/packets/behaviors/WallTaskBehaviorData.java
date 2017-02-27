@@ -2,8 +2,8 @@ package us.ihmc.humanoidRobotics.communication.packets.behaviors;
 
 import java.util.Random;
 
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.robotics.random.RandomTools;
 
 public class WallTaskBehaviorData extends Packet<WallTaskBehaviorData>
 {
@@ -17,7 +17,7 @@ public class WallTaskBehaviorData extends Packet<WallTaskBehaviorData>
 	
 	public WallTaskBehaviorData(Random random) {
 		
-		command = RandomTools.generateRandomEnum(random, Commands.class);
+		command = RandomNumbers.nextEnum(random, Commands.class);
 	}
 	
 	public void start()

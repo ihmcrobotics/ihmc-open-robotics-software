@@ -8,6 +8,7 @@ import java.util.Random;
 
 import org.junit.Test;
 
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.matrix.RotationMatrix;
@@ -98,7 +99,7 @@ public class YoFrameQuaternionTest
       yoFrameQuaternion.getFrameOrientationIncludingFrame(frameOrientationActual);
       assertTrue(frameOrientationActual.epsilonEquals(frameOrientationExpected, EPS));
 
-      double[] yawPitchRollExpected = RandomTools.generateRandomDoubleArray(random, 3, 2.0 * Math.PI);
+      double[] yawPitchRollExpected = RandomNumbers.nextDoubleArray(random, 3, 2.0 * Math.PI);
       yoFrameQuaternion.set(yawPitchRollExpected[0], yawPitchRollExpected[1], yawPitchRollExpected[2]);
       double[] yawPitchRollActual = new double[3];
       yoFrameQuaternion.getYawPitchRoll(yawPitchRollActual);

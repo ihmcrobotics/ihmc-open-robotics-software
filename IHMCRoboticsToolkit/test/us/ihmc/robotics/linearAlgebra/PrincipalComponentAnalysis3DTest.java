@@ -9,6 +9,7 @@ import java.util.Random;
 
 import org.junit.Test;
 
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.matrix.RotationMatrix;
@@ -44,7 +45,7 @@ public class PrincipalComponentAnalysis3DTest
          double expectedVarianceAlongPrincipalAxis = 0.0;
          double expectedStandardDeviationAlongPrincipalAxis = 0.0;
 
-         int numberOfPoints = RandomTools.generateRandomInt(random, 10, 500);
+         int numberOfPoints = RandomNumbers.nextInt(random, 10, 500);
 
          List<Point3D> listOfPoints = new ArrayList<>();
 
@@ -190,7 +191,7 @@ public class PrincipalComponentAnalysis3DTest
          Vector2D expectedVariance = new Vector2D();
          Vector2D expectedStandardDeviation = new Vector2D();
 
-         int numberOfPoints = RandomTools.generateRandomInt(random, 5000, 10000);
+         int numberOfPoints = RandomNumbers.nextInt(random, 5000, 10000);
 
          List<Point3D> listOfPoints = new ArrayList<>();
 
@@ -374,7 +375,7 @@ public class PrincipalComponentAnalysis3DTest
          Vector3D expectedVariance = new Vector3D();
          Vector3D expectedStandardDeviation = new Vector3D();
 
-         int numberOfPoints = RandomTools.generateRandomInt(random, 5000, 10000);
+         int numberOfPoints = RandomNumbers.nextInt(random, 5000, 10000);
 
          List<Point3D> listOfPoints = new ArrayList<>();
 

@@ -8,6 +8,7 @@ import java.util.Random;
 
 import org.junit.Test;
 
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.matrix.RotationMatrix;
@@ -16,7 +17,6 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
@@ -414,7 +414,7 @@ public class TransformInterpolationCalculatorTest
          framePose1.setPoseIncludingFrame(ReferenceFrame.getWorldFrame(), transform1);
          framePose2.setPoseIncludingFrame(ReferenceFrame.getWorldFrame(), transform2);
 
-         double alpha = RandomTools.generateRandomDouble(random, 0.0, 1.0);
+         double alpha = RandomNumbers.nextDouble(random, 0.0, 1.0);
          transformInterpolationCalculator.computeInterpolation(transform1, transform2, toTestTransform, alpha);
 
          frame1.setPoseAndUpdate(framePose1);
@@ -447,7 +447,7 @@ public class TransformInterpolationCalculatorTest
       
       TransformInterpolationCalculator transformInterpolationCalculator = new TransformInterpolationCalculator();
       
-      firstTimeStampedTransform.setTimeStamp(RandomTools.generateRandomInt(random, 123, 45196516));
+      firstTimeStampedTransform.setTimeStamp(RandomNumbers.nextInt(random, 123, 45196516));
       secondTimeStampedTransform.setTimeStamp(firstTimeStampedTransform.getTimeStamp() - 1);
       
       try
@@ -460,8 +460,8 @@ public class TransformInterpolationCalculatorTest
          // Good
       }
 
-      firstTimeStampedTransform.setTimeStamp(RandomTools.generateRandomInt(random, 123, 45196516));
-      secondTimeStampedTransform.setTimeStamp(firstTimeStampedTransform.getTimeStamp() + RandomTools.generateRandomInt(random, 1, 20));
+      firstTimeStampedTransform.setTimeStamp(RandomNumbers.nextInt(random, 123, 45196516));
+      secondTimeStampedTransform.setTimeStamp(firstTimeStampedTransform.getTimeStamp() + RandomNumbers.nextInt(random, 1, 20));
 
       try
       {
@@ -489,12 +489,12 @@ public class TransformInterpolationCalculatorTest
          firstTimeStampedTransform.setTransform3D(EuclidCoreRandomTools.generateRandomRigidBodyTransform(random));
          secondTimeStampedTransform.setTransform3D(EuclidCoreRandomTools.generateRandomRigidBodyTransform(random));
 
-         long timestamp1 = RandomTools.generateRandomInt(random, 123, Integer.MAX_VALUE / 4);
-         long timestamp2 = timestamp1 + RandomTools.generateRandomInt(random, 1, 200);
+         long timestamp1 = RandomNumbers.nextInt(random, 123, Integer.MAX_VALUE / 4);
+         long timestamp2 = timestamp1 + RandomNumbers.nextInt(random, 1, 200);
          firstTimeStampedTransform.setTimeStamp(timestamp1);
          secondTimeStampedTransform.setTimeStamp(timestamp2);
 
-         long timeStampForInterpolation = RandomTools.generateRandomInt(random, (int) firstTimeStampedTransform.getTimeStamp(), (int) secondTimeStampedTransform.getTimeStamp());
+         long timeStampForInterpolation = RandomNumbers.nextInt(random, (int) firstTimeStampedTransform.getTimeStamp(), (int) secondTimeStampedTransform.getTimeStamp());
 
          transformInterpolationCalculator.interpolate(firstTimeStampedTransform, secondTimeStampedTransform, toTestTimeStampedTransform, timeStampForInterpolation);
 

@@ -15,6 +15,7 @@ import org.junit.Before;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -29,7 +30,6 @@ import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.math.QuaternionCalculus;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
-import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -184,7 +184,7 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
          OneDoFJoint joint = spineJoints[jointIdx];
          double jointLimitUpper = joint.getJointLimitUpper();
          double jointLimitLower = joint.getJointLimitLower();
-         double desired = RandomTools.generateRandomDouble(random, jointLimitLower, jointLimitUpper);
+         double desired = RandomNumbers.nextDouble(random, jointLimitLower, jointLimitUpper);
          jointDesireds[jointIdx] = desired;
       }
       return new SpineTrajectoryMessage(trajectoryTime, jointDesireds);

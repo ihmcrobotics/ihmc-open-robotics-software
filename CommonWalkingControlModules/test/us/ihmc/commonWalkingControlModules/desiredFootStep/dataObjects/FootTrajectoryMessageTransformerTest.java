@@ -7,6 +7,7 @@ import java.util.Random;
 
 import org.junit.Test;
 
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
@@ -52,7 +53,7 @@ public class FootTrajectoryMessageTransformerTest
 
          Point3D point3d = RandomTools.generateRandomPoint(random, 10.0, 10.0, 10.0);
 
-         double trajectoryTime = RandomTools.generateRandomDouble(random, 0.6, 5.0);
+         double trajectoryTime = RandomNumbers.nextDouble(random, 0.6, 5.0);
 
          FootTrajectoryMessage starting = new FootTrajectoryMessage(robotSide, trajectoryTime, point3d, quat);
 

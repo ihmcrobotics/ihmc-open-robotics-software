@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Random;
 
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.VisualizablePacket;
 import us.ihmc.communication.ros.generators.RosExportedField;
@@ -16,7 +17,6 @@ import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
 import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -257,10 +257,10 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage> imp
          footstepDataList.add(new FootstepDataMessage(random));
       }
 
-      this.defaultSwingTime = RandomTools.generateRandomDoubleWithEdgeCases(random, 0.1);
-      this.defaultTransferTime = RandomTools.generateRandomDoubleWithEdgeCases(random, 0.1);
-      this.finalTransferTime = RandomTools.generateRandomDoubleWithEdgeCases(random, 0.1);
-      this.executionMode = RandomTools.generateRandomEnum(random, ExecutionMode.class);
+      this.defaultSwingTime = RandomNumbers.nextDoubleWithEdgeCases(random, 0.1);
+      this.defaultTransferTime = RandomNumbers.nextDoubleWithEdgeCases(random, 0.1);
+      this.finalTransferTime = RandomNumbers.nextDoubleWithEdgeCases(random, 0.1);
+      this.executionMode = RandomNumbers.nextEnum(random, ExecutionMode.class);
    }
 
    /** {@inheritDoc} */

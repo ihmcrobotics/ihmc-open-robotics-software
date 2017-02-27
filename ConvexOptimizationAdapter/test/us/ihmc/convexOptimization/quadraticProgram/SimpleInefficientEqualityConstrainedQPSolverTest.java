@@ -9,6 +9,7 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import org.junit.Test;
 
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.robotics.random.RandomTools;
 
@@ -142,7 +143,7 @@ public class SimpleInefficientEqualityConstrainedQPSolverTest
          CommonOps.addEquals(costQuadraticMatrix, identity);
 
          DenseMatrix64F costLinearVector = RandomTools.generateRandomMatrix(random, numberOfVariables, 1);
-         double quadraticCostScalar = RandomTools.generateRandomDouble(random, 30.0);
+         double quadraticCostScalar = RandomNumbers.nextDouble(random, 30.0);
 
          solver.setQuadraticCostFunction(costQuadraticMatrix, costLinearVector, quadraticCostScalar);
 
@@ -159,7 +160,7 @@ public class SimpleInefficientEqualityConstrainedQPSolverTest
          double[] solutionWithSmallPerturbation = new double[numberOfVariables];
          for (int i = 0; i < numberOfVariables; i++)
          {
-            solutionWithSmallPerturbation[i] = solution[i] + RandomTools.generateRandomDouble(random, 1e-7);
+            solutionWithSmallPerturbation[i] = solution[i] + RandomNumbers.nextDouble(random, 1e-7);
          }
 
          solutionMatrix = new DenseMatrix64F(numberOfVariables, 1);
@@ -194,7 +195,7 @@ public class SimpleInefficientEqualityConstrainedQPSolverTest
          CommonOps.addEquals(costQuadraticMatrix, identity);
 
          DenseMatrix64F costLinearVector = RandomTools.generateRandomMatrix(random, numberOfVariables, 1);
-         double quadraticCostScalar = RandomTools.generateRandomDouble(random, 30.0);
+         double quadraticCostScalar = RandomNumbers.nextDouble(random, 30.0);
 
          solver.setQuadraticCostFunction(costQuadraticMatrix, costLinearVector, quadraticCostScalar);
 
@@ -220,7 +221,7 @@ public class SimpleInefficientEqualityConstrainedQPSolverTest
          double[] solutionWithSmallPerturbation = new double[numberOfVariables];
          for (int i = 0; i < numberOfVariables; i++)
          {
-            solutionWithSmallPerturbation[i] = solution[i] + RandomTools.generateRandomDouble(random, 1e-4);
+            solutionWithSmallPerturbation[i] = solution[i] + RandomNumbers.nextDouble(random, 1e-4);
          }
 
          solutionMatrix = new DenseMatrix64F(numberOfVariables, 1);

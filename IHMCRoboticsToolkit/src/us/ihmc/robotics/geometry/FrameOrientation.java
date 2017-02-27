@@ -2,6 +2,7 @@ package us.ihmc.robotics.geometry;
 
 import java.util.Random;
 
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.axisAngle.interfaces.AxisAngleBasics;
 import us.ihmc.euclid.axisAngle.interfaces.AxisAngleReadOnly;
 import us.ihmc.euclid.matrix.RotationMatrix;
@@ -87,9 +88,9 @@ public class FrameOrientation extends AbstractFrameObject<FrameOrientation, Quat
    public static FrameOrientation generateRandomFrameOrientation(Random random, ReferenceFrame referenceFrame, double yawMin, double yawMax, double pitchMin,
                                                                  double pitchMax, double rollMin, double rollMax)
    {
-      double yaw = RandomTools.generateRandomDouble(random, yawMin, yawMax);
-      double pitch = RandomTools.generateRandomDouble(random, pitchMin, pitchMax);
-      double roll = RandomTools.generateRandomDouble(random, rollMin, rollMax);
+      double yaw = RandomNumbers.nextDouble(random, yawMin, yawMax);
+      double pitch = RandomNumbers.nextDouble(random, pitchMin, pitchMax);
+      double roll = RandomNumbers.nextDouble(random, rollMin, rollMax);
       FrameOrientation randomOrientation = new FrameOrientation(referenceFrame, yaw, pitch, roll);
       return randomOrientation;
    }

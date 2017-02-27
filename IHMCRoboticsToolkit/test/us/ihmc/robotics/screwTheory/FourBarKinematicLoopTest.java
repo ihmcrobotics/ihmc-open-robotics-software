@@ -9,6 +9,7 @@ import java.util.Random;
 import org.ejml.data.DenseMatrix64F;
 import org.junit.Test;
 
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -785,8 +786,8 @@ public class FourBarKinematicLoopTest
 
       for(int i = 0; i < numTests; i++)
       {
-         double qMaster = RandomTools.generateRandomDouble(random, - 0.5 * Math.PI + 0.01, 0.5 * Math.PI - 0.01);
-         double qdMaster = RandomTools.generateRandomDouble(random, -2.0, 2.0);
+         double qMaster = RandomNumbers.nextDouble(random, - 0.5 * Math.PI + 0.01, 0.5 * Math.PI - 0.01);
+         double qdMaster = RandomNumbers.nextDouble(random, -2.0, 2.0);
 
          masterJointA.setQ(qMaster);
          masterJointA.setQd(qdMaster);

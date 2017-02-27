@@ -9,6 +9,7 @@ import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 import org.junit.Test;
 
 import us.ihmc.commons.Conversions;
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.matrix.RotationMatrix;
@@ -158,7 +159,7 @@ public class DdoglegInverseKinematicsCalculatorTest
    {
       for (RevoluteJoint revoluteJoint : revoluteJoints)
       {
-         revoluteJoint.setQ(revoluteJoint.getQ() + RandomTools.generateRandomDouble(random, -deltaThetaMax, deltaThetaMax));
+         revoluteJoint.setQ(revoluteJoint.getQ() + RandomNumbers.nextDouble(random, -deltaThetaMax, deltaThetaMax));
          revoluteJoint.getFrameAfterJoint().update();
       }
    }

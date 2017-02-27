@@ -11,6 +11,7 @@ import java.util.Random;
 
 import org.junit.Test;
 
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
@@ -355,8 +356,8 @@ public class QuadTreeForGroundTest
 
       for (int i = 0; i < numberOfTests; i++)
       {
-         double xQuery = RandomTools.generateRandomDouble(random, bounds.minX, bounds.maxX);
-         double yQuery = RandomTools.generateRandomDouble(random, bounds.minY, bounds.maxY);
+         double xQuery = RandomNumbers.nextDouble(random, bounds.minX, bounds.maxX);
+         double yQuery = RandomNumbers.nextDouble(random, bounds.minY, bounds.maxY);
 
          quadTree.getClosestPoint(xQuery, yQuery, closestPoint);
 
@@ -454,9 +455,9 @@ public class QuadTreeForGroundTest
       {
          pointsWithinDistance.clear();
 
-         double xQuery = RandomTools.generateRandomDouble(random, bounds.minX, bounds.maxX);
-         double yQuery = RandomTools.generateRandomDouble(random, bounds.minY, bounds.maxY);
-         double distance = RandomTools.generateRandomDouble(random, 0.0, 5.0);
+         double xQuery = RandomNumbers.nextDouble(random, bounds.minX, bounds.maxX);
+         double yQuery = RandomNumbers.nextDouble(random, bounds.minY, bounds.maxY);
+         double distance = RandomNumbers.nextDouble(random, 0.0, 5.0);
 
          quadTree.getAllPointsWithinDistance(xQuery, yQuery, distance, pointsWithinDistance);
 

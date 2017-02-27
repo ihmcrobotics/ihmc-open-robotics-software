@@ -10,10 +10,10 @@ import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Box;
 import javafx.scene.shape.MeshView;
 import javafx.stage.Stage;
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D32;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
-import us.ihmc.robotics.random.RandomTools;
 
 public class MultiColorMeshBuilderVisualizer extends Application
 {
@@ -102,7 +102,7 @@ public class MultiColorMeshBuilderVisualizer extends Application
             {
                Color color = colors[count%colors.length];
 //               Color color = Color.hsb(360.0 * random.nextDouble(), random.nextDouble(), random.nextDouble()); 
-               Vector3D32 pointsOffset = new Vector3D32(x, y, 0 * RandomTools.generateRandomFloatInRange(random, -5.0f, 5.0f));
+               Vector3D32 pointsOffset = new Vector3D32(x, y, 0 * RandomNumbers.nextFloat(random, -5.0f, 5.0f));
                meshBuilder.addCube(0.05f, pointsOffset, color);
                Box box = new Box(0.025f, 0.025f, 0.025f);
                box.setTranslateX(pointsOffset.getX());

@@ -9,6 +9,7 @@ import java.util.Random;
 import org.junit.Test;
 
 import us.ihmc.commons.MutationTestFacilitator;
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -162,8 +163,8 @@ public class GilbertJohnsonKeerthiCollisionDetectorTest
 
       for (int i = 0; i < numberOfPolytopesToTests; i++)
       {
-         double xyzBoundary = RandomTools.generateRandomDouble(random, 1000.0);
-         double radius = RandomTools.generateRandomDouble(random, 1.0, 20.0);
+         double xyzBoundary = RandomNumbers.nextDouble(random, 1000.0);
+         double radius = RandomNumbers.nextDouble(random, 1.0, 20.0);
          int maxNumberOfPoints = 40;
 
          int numberOfPoints = random.nextInt(maxNumberOfPoints) + 1;
@@ -331,8 +332,8 @@ public class GilbertJohnsonKeerthiCollisionDetectorTest
 
       for (int i = 0; i < numberOfPolytopesToTests; i++)
       {
-         double xyzBoundary = RandomTools.generateRandomDouble(random, 500.0);
-         double radius = RandomTools.generateRandomDouble(random, 1.0, 10.0);
+         double xyzBoundary = RandomNumbers.nextDouble(random, 500.0);
+         double radius = RandomNumbers.nextDouble(random, 1.0, 10.0);
          int maxNumberOfPoints = 40;
 
          int numberOfPoints = random.nextInt(maxNumberOfPoints) + 1;
@@ -427,9 +428,9 @@ public class GilbertJohnsonKeerthiCollisionDetectorTest
 
       for (int i = 0; i < numberOfPolytopesToTests; i++)
       {
-         double xyzBoundary = RandomTools.generateRandomDouble(random, 20.0);
-         double radius = RandomTools.generateRandomDouble(random, 1.0, 5.0);
-         double height = RandomTools.generateRandomDouble(random, 1.0, 5.0);
+         double xyzBoundary = RandomNumbers.nextDouble(random, 20.0);
+         double radius = RandomNumbers.nextDouble(random, 1.0, 5.0);
+         double height = RandomNumbers.nextDouble(random, 1.0, 5.0);
          int maxNumberOfPoints = 20;
 
          int numberOfPoints = random.nextInt(maxNumberOfPoints) + 1;

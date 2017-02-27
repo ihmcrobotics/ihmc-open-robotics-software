@@ -3,6 +3,7 @@ package us.ihmc.humanoidRobotics.communication.packets.manipulation;
 import java.util.Arrays;
 import java.util.Random;
 
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -169,6 +170,6 @@ public class HandstepPacket extends Packet<HandstepPacket> implements Transforma
       this.location = RandomTools.generateRandomPoint(random, 0.5, 0.5, 0.5);
       this.orientation = RandomTools.generateRandomQuaternion(random, Math.PI / 4.0);
       this.surfaceNormal = RandomTools.generateRandomVector(random, 1.0);
-      this.swingTrajectoryTime = RandomTools.generateRandomDouble(random, TRAJECTORY_TIME_MIN, TRAJECTORY_TIME_MAX);
+      this.swingTrajectoryTime = RandomNumbers.nextDouble(random, TRAJECTORY_TIME_MIN, TRAJECTORY_TIME_MAX);
    }
 }
