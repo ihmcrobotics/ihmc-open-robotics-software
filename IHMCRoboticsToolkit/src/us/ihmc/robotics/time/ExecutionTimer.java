@@ -67,7 +67,6 @@ public class ExecutionTimer
             maximum.set(timeTaken);
          }
       }
-
    }
 
    public DoubleYoVariable getCurrentTime()
@@ -94,5 +93,4 @@ public class ExecutionTimer
    {
       return maximum;
    }
-
 }
