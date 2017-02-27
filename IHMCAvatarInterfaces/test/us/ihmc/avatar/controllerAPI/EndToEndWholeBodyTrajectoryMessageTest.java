@@ -11,6 +11,7 @@ import org.junit.Test;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -100,7 +101,7 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
          for (int i = 0; i < armClone.length; i++)
          {
             OneDoFJoint joint = armClone[i];
-            joint.setQ(arm[i].getQ() + RandomTools.generateRandomDouble(random, -0.2, 0.2));
+            joint.setQ(arm[i].getQ() + RandomNumbers.nextDouble(random, -0.2, 0.2));
          }
          RigidBody handClone = armClone[armClone.length - 1].getSuccessor();
          FramePose desiredRandomHandPose = new FramePose(handClone.getBodyFixedFrame());

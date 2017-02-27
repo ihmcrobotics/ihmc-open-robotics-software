@@ -2,6 +2,7 @@ package us.ihmc.humanoidRobotics.communication.packets.walking;
 
 import java.util.Random;
 
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -54,7 +55,7 @@ public class FootstepDataListCorruptor
    private void corruptOrientation(Quaternion orientation)
    {
       Vector3D axis = RandomTools.generateRandomVector(random);
-      double angle = RandomTools.generateRandomDouble(random, -maxRotationCorruption, maxRotationCorruption);
+      double angle = RandomNumbers.nextDouble(random, -maxRotationCorruption, maxRotationCorruption);
       
       AxisAngle axisAngle4d = new AxisAngle();
       axisAngle4d.set(axis, angle);

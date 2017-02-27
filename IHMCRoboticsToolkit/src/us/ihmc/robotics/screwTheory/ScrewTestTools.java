@@ -8,6 +8,7 @@ import java.util.Random;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.RandomMatrices;
 
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
@@ -317,7 +318,7 @@ public class ScrewTestTools
 
    public static void setRandomPosition(OneDoFJoint joint, Random random, double boundaryOne, double boundaryTwo)
    {
-      joint.setQ(RandomTools.generateRandomDouble(random, boundaryOne, boundaryTwo));
+      joint.setQ(RandomNumbers.nextDouble(random, boundaryOne, boundaryTwo));
    }
 
    public static void setRandomPositionWithinJointLimits(OneDoFJoint joint, Random random)
@@ -340,7 +341,7 @@ public class ScrewTestTools
 
    public static void setRandomVelocity(OneDoFJoint joint, Random random, double min, double max)
    {
-      joint.setQd(RandomTools.generateRandomDouble(random, min, max));
+      joint.setQd(RandomNumbers.nextDouble(random, min, max));
    }
 
    public static void setRandomDesiredAccelerations(OneDoFJoint[] joints, Random random)
@@ -419,7 +420,7 @@ public class ScrewTestTools
    {
       for (OneDoFJoint joint : joints)
       {
-         joint.setTau(RandomTools.generateRandomDouble(random, magnitude));
+         joint.setTau(RandomNumbers.nextDouble(random, magnitude));
       }
    }
 

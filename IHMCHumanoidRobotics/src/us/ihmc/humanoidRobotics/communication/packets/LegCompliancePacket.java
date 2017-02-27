@@ -2,9 +2,9 @@ package us.ihmc.humanoidRobotics.communication.packets;
 
 import java.util.Random;
 
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 /**
@@ -32,7 +32,7 @@ public class LegCompliancePacket extends Packet<LegCompliancePacket>
 
    public LegCompliancePacket(Random random)
    {
-      robotSide = RandomTools.generateRandomEnum(random, RobotSide.class);
+      robotSide = RandomNumbers.nextEnum(random, RobotSide.class);
 
       maxVelocityDeltas = new float[6];
 

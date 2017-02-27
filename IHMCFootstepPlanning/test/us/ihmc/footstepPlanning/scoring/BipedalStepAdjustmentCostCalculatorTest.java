@@ -10,6 +10,7 @@ import java.util.Random;
 
 import org.junit.Test;
 
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -108,7 +109,7 @@ public class BipedalStepAdjustmentCostCalculatorTest
          candidateFootstep.set(idealFootstep);
 
          RigidBodyTransform transform = new RigidBodyTransform();
-         transform.setTranslation(RandomTools.generateRandomDouble(random, 0.1), RandomTools.generateRandomDouble(random, 0.1), 0.0);
+         transform.setTranslation(RandomNumbers.nextDouble(random, 0.1), RandomNumbers.nextDouble(random, 0.1), 0.0);
          candidateFootstep.applyTransform(transform);
          double footstepCost = stepAdjustmentCostCalculator.calculateCost(stanceFoot, swingStartFoot, idealFootstep, candidateFootstep, 1.0);
 

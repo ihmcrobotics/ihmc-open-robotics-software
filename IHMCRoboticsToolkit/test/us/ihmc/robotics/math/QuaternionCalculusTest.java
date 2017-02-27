@@ -6,6 +6,7 @@ import java.util.Random;
 
 import org.junit.Test;
 
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -61,7 +62,7 @@ public class QuaternionCalculusTest
       {
          QuaternionCalculus quaternionCalculus = new QuaternionCalculus();
          Quaternion q = RandomTools.generateRandomQuaternion(random);
-         double length = RandomTools.generateRandomDouble(random, 0.0, 10.0);
+         double length = RandomNumbers.nextDouble(random, 0.0, 10.0);
          Vector3D expectedAngularVelocity = RandomTools.generateRandomVector(random, length);
          if (random.nextBoolean())
             expectedAngularVelocity.negate();
@@ -85,7 +86,7 @@ public class QuaternionCalculusTest
       {
          QuaternionCalculus quaternionCalculus = new QuaternionCalculus();
          Quaternion q = RandomTools.generateRandomQuaternion(random);
-         double length = RandomTools.generateRandomDouble(random, 0.0, 10.0);
+         double length = RandomNumbers.nextDouble(random, 0.0, 10.0);
          Vector3D angularVelocity = RandomTools.generateRandomVector(random, length);
          if (random.nextBoolean())
             angularVelocity.negate();
@@ -169,7 +170,7 @@ public class QuaternionCalculusTest
       QuaternionCalculus quaternionCalculus = new QuaternionCalculus();
       Random random = new Random(65265L);
       double integrationTime = 1.0;
-      double angleVelocity = RandomTools.generateRandomDouble(random, 0.0, 2.0 * Math.PI) / integrationTime;
+      double angleVelocity = RandomNumbers.nextDouble(random, 0.0, 2.0 * Math.PI) / integrationTime;
       Vector3D expectedAngularVelocity = new Vector3D(angleVelocity, 0.0, 0.0);
       Vector3D expectedAngularAcceleration = new Vector3D();
       AxisAngle axisAnglePrevious = new AxisAngle(1.0, 0.0, 0.0, 0.0);

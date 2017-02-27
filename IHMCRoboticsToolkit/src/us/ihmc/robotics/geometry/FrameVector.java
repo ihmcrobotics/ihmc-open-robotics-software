@@ -2,6 +2,7 @@ package us.ihmc.robotics.geometry;
 
 import java.util.Random;
 
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
@@ -131,8 +132,8 @@ public class FrameVector extends FrameTuple<FrameVector, Vector3D> implements Ve
    public static FrameVector generateRandomFrameVector(Random random, ReferenceFrame frame, double xMin, double xMax, double yMin, double yMax, double zMin,
                                                        double zMax)
    {
-      FrameVector randomVector = new FrameVector(frame, RandomTools.generateRandomDouble(random, xMin, xMax),
-                                                 RandomTools.generateRandomDouble(random, yMin, yMax), RandomTools.generateRandomDouble(random, zMin, zMax));
+      FrameVector randomVector = new FrameVector(frame, RandomNumbers.nextDouble(random, xMin, xMax),
+                                                 RandomNumbers.nextDouble(random, yMin, yMax), RandomNumbers.nextDouble(random, zMin, zMax));
       return randomVector;
    }
 

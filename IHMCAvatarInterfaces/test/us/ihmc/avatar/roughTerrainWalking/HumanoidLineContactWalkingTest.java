@@ -19,6 +19,7 @@ import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.ExploreFootPolygonState.ExplorationMethod;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -47,7 +48,6 @@ import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.Line2d;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.partNames.LimbName;
-import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -261,14 +261,14 @@ public abstract class HumanoidLineContactWalkingTest implements MultiRobotTestIn
 
    private ArrayList<Point2D> generateContactPointsForRandomRotatedLineOfContact(Random random)
    {
-      double angle = RandomTools.generateRandomDouble(random, Math.PI);
+      double angle = RandomNumbers.nextDouble(random, Math.PI);
 
       WalkingControllerParameters walkingControllerParameters = getRobotModel().getWalkingControllerParameters();
       double footLengthForLineOrigin = 0.5 * walkingControllerParameters.getFootLength();
       double footWidthForLineOrigin = 0.5 * walkingControllerParameters.getFootWidth();
 
-      double x = RandomTools.generateRandomDouble(random, footLengthForLineOrigin) - footLengthForLineOrigin/2.0;
-      double y = RandomTools.generateRandomDouble(random, footWidthForLineOrigin) - footWidthForLineOrigin/2.0;
+      double x = RandomNumbers.nextDouble(random, footLengthForLineOrigin) - footLengthForLineOrigin/2.0;
+      double y = RandomNumbers.nextDouble(random, footWidthForLineOrigin) - footWidthForLineOrigin/2.0;
 
       return generateContactPointsForRotatedLineOfContact(angle, x, y);
    }

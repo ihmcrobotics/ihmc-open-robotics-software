@@ -6,6 +6,7 @@ import java.util.Random;
 
 import org.junit.Test;
 
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -55,7 +56,7 @@ public class AverageQuaternionCalculatorTest
          double epsilon = 1.0e-15;
          Random random = new Random(56416456L);
          Vector3D randomRotationAxis = RandomTools.generateRandomVector(random, 1.0);
-         double[] randomAngles = RandomTools.generateRandomDoubleArray(random, 100, Math.PI);
+         double[] randomAngles = RandomNumbers.nextDoubleArray(random, 100, Math.PI);
 
          AxisAngle expectedAverageAxisAngle = new AxisAngle(randomRotationAxis, AngleTools.computeAngleAverage(randomAngles));
          Quaternion expectedAverageQuat = new Quaternion();

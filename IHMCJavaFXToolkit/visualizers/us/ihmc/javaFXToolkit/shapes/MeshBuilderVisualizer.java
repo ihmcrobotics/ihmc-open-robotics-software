@@ -7,11 +7,11 @@ import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.MeshView;
 import javafx.stage.Stage;
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D32;
 import us.ihmc.graphicsDescription.MeshDataGenerator;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
-import us.ihmc.robotics.random.RandomTools;
 
 public class MeshBuilderVisualizer extends Application
 {
@@ -73,7 +73,7 @@ public class MeshBuilderVisualizer extends Application
       {
          for (float y = -2.0f; y <= 2.0f; y += 0.055f)
          {
-            meshBuilder.addBox(0.05f, 0.05f, 0.05f, new Vector3D32(x, y, RandomTools.generateRandomFloatInRange(new Random(), -2.0f, 2.0f)));
+            meshBuilder.addBox(0.05f, 0.05f, 0.05f, new Vector3D32(x, y, RandomNumbers.nextFloat(new Random(), -2.0f, 2.0f)));
             count++;
          }
       }

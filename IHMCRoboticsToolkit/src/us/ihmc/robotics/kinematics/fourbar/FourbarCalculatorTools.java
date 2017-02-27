@@ -11,8 +11,8 @@ import static us.ihmc.robotics.MathTools.square;
 
 import java.util.Random;
 
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.random.RandomTools;
 
 public class FourbarCalculatorTools
 {
@@ -102,7 +102,7 @@ public class FourbarCalculatorTools
     */
    public static void generateRandomFourBar(Random random, double[] sideLengths, double[] validInitialAngles, double minSideLength, double maxSideLength)
    {
-      double e = RandomTools.generateRandomDouble(random, minSideLength, maxSideLength);
+      double e = RandomNumbers.nextDouble(random, minSideLength, maxSideLength);
       double k1 = random.nextDouble();
       double k2 = random.nextDouble();
       double d1 = e * abs(random.nextGaussian());

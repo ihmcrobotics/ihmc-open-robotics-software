@@ -5,6 +5,7 @@ import java.util.Random;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.communication.packets.TrackablePacket;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosIgnoredField;
@@ -16,7 +17,6 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3TrajectoryPointList;
-import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public abstract class AbstractSE3TrajectoryMessage<T extends AbstractSE3TrajectoryMessage<T>> extends TrackablePacket<T>
@@ -53,7 +53,7 @@ public abstract class AbstractSE3TrajectoryMessage<T extends AbstractSE3Trajecto
          taskspaceTrajectoryPoints[i] = new SE3TrajectoryPointMessage(random);
       }
 
-      executionMode = RandomTools.generateRandomEnum(random, ExecutionMode.class);
+      executionMode = RandomNumbers.nextEnum(random, ExecutionMode.class);
    }
 
    public AbstractSE3TrajectoryMessage(T se3TrajectoryMessage)

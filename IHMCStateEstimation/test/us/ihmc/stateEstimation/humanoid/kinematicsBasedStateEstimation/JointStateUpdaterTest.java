@@ -10,9 +10,9 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 
 import org.junit.Test;
 
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RevoluteJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -125,13 +125,13 @@ public class JointStateUpdaterTest
    {
       for (OneDoFJoint joint : jointsWithPositionSensor)
       {
-         double randPosition = RandomTools.generateRandomDouble(random, -5000.0, 5000.0);
+         double randPosition = RandomNumbers.nextDouble(random, -5000.0, 5000.0);
          sensorMap.setJointPositionSensorValue(joint, randPosition);
       }
       
       for (OneDoFJoint joint : jointsWithVelocitySensor)
       {
-         double randVelocity = RandomTools.generateRandomDouble(random, -5000.0, 5000.0);
+         double randVelocity = RandomNumbers.nextDouble(random, -5000.0, 5000.0);
          sensorMap.setJointVelocitySensorValue(joint, randVelocity);
       }
    }
@@ -177,7 +177,7 @@ public class JointStateUpdaterTest
    private static FullInverseDynamicsStructure createFullInverseDynamicsStructure(ScrewTestTools.RandomFloatingChain randomFloatingChain,
          ArrayList<RevoluteJoint> joints)
    {
-      int indexOfEstimationParentJoint = RandomTools.generateRandomInt(random, 0, joints.size() - 1);
+      int indexOfEstimationParentJoint = RandomNumbers.nextInt(random, 0, joints.size() - 1);
       RigidBody estimationLink = joints.get(indexOfEstimationParentJoint).getSuccessor();
       SixDoFJoint rootInverseDynamicsJoint = randomFloatingChain.getRootJoint();
       RigidBody elevator = randomFloatingChain.getElevator();

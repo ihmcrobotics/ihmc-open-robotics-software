@@ -7,6 +7,7 @@ import java.util.Random;
 
 import org.junit.Test;
 
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
@@ -164,7 +165,7 @@ public class FramePoseTest
    public void testRotatePoseAboutOffsetAxisAndCheckTranslation()
    {
       Random random = new Random(1179L);
-      double angleToRotate = RandomTools.generateRandomDouble(random, Math.toRadians(720.0));
+      double angleToRotate = RandomNumbers.nextDouble(random, Math.toRadians(720.0));
 
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -195,7 +196,7 @@ public class FramePoseTest
    public void testRotatePoseAboutCollinearAxisAndCheckTranslation()
    {
       Random random = new Random(1179L);
-      double angleToRotate = RandomTools.generateRandomDouble(random, Math.toRadians(720.0));
+      double angleToRotate = RandomNumbers.nextDouble(random, Math.toRadians(720.0));
 
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -234,7 +235,7 @@ public class FramePoseTest
 
       while (angleToRotate < Math.toRadians(720.0))
       {
-         initialPose.setPosition(0.0, 0.0, RandomTools.generateRandomDouble(random, 10.0));
+         initialPose.setPosition(0.0, 0.0, RandomNumbers.nextDouble(random, 10.0));
          rotatedPose.setPoseIncludingFrame(initialPose);
 
          desiredRotationAxisAngle.setAngle(angleToRotate);
@@ -260,7 +261,7 @@ public class FramePoseTest
    {
       Random random = new Random(1179L);
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-      double angleToRotate = RandomTools.generateRandomDouble(random, Math.toRadians(720.0));
+      double angleToRotate = RandomNumbers.nextDouble(random, Math.toRadians(720.0));
 
       FramePose framePose = new FramePose(worldFrame);
       framePose.setPosition(0.0, 0.0, 1.0);
@@ -356,7 +357,7 @@ public class FramePoseTest
 
       Random random = new Random(1179L);
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-      double angleToRotate = RandomTools.generateRandomDouble(random, 0.0);
+      double angleToRotate = RandomNumbers.nextDouble(random, 0.0);
 
       FramePose rotatedPose = new FramePose(worldFrame);
       FramePose initialPose = new FramePose(worldFrame);

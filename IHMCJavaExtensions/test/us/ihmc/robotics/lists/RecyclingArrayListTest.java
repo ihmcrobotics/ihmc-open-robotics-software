@@ -12,8 +12,8 @@ import java.util.Random;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.junit.Test;
 
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.robotics.random.RandomTools;
 
 public class RecyclingArrayListTest
 {
@@ -328,8 +328,8 @@ public class RecyclingArrayListTest
 
       for (int k = 0; k < 20; k++)
       {
-         int indexA = RandomTools.generateRandomInt(rand, 0, currentSize - 1);
-         int indexB = RandomTools.generateRandomInt(rand, 0, currentSize - 1);
+         int indexA = RandomNumbers.nextInt(rand, 0, currentSize - 1);
+         int indexB = RandomNumbers.nextInt(rand, 0, currentSize - 1);
          list.swap(indexA, indexB);
          Collections.swap(expectedList, indexA, indexB);
          assertTrue(list.size() == currentSize);
@@ -378,10 +378,10 @@ public class RecyclingArrayListTest
 
       for (int k = 0; k < 20; k++)
       {
-         int randomIndex = RandomTools.generateRandomInt(rand, 0, currentSize);
+         int randomIndex = RandomNumbers.nextInt(rand, 0, currentSize);
          if (k == 5)
             randomIndex = currentSize;
-         int newRandomValue = RandomTools.generateRandomInt(rand, 0, 52161);
+         int newRandomValue = RandomNumbers.nextInt(rand, 0, 52161);
          MutableInt newObject = list.insertAtIndex(randomIndex);
          newObject.setValue(newRandomValue);
          expectedList.add(randomIndex, newObject);

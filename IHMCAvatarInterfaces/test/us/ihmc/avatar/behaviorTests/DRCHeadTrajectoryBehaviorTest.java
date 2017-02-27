@@ -13,6 +13,7 @@ import org.junit.Test;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCBehaviorTestHelper;
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -94,7 +95,7 @@ public abstract class DRCHeadTrajectoryBehaviorTest implements MultiRobotTestInt
 
       double trajectoryTime = 4.0;
       Vector3D axis = new Vector3D(0, 1, 0);
-      double rotationAngle = MAX_ANGLE_TO_TEST_RAD * RandomTools.generateRandomDouble(new Random(), 0.3, 1.0);
+      double rotationAngle = MAX_ANGLE_TO_TEST_RAD * RandomNumbers.nextDouble(new Random(), 0.3, 1.0);
 
       HeadTrajectoryMessage message = createHeadOrientationPacket(axis, rotationAngle, trajectoryTime);
       testHeadOrientationBehavior(message, trajectoryTime + EXTRA_SIM_TIME_FOR_SETTLING);
@@ -108,7 +109,7 @@ public abstract class DRCHeadTrajectoryBehaviorTest implements MultiRobotTestInt
 
       double trajectoryTime = 4.0;
       Vector3D axis = new Vector3D(1, 0, 0);
-      double rotationAngle = MAX_ANGLE_TO_TEST_RAD * RandomTools.generateRandomDouble(new Random(), 0.3, 1.0);
+      double rotationAngle = MAX_ANGLE_TO_TEST_RAD * RandomNumbers.nextDouble(new Random(), 0.3, 1.0);
 
       HeadTrajectoryMessage message = createHeadOrientationPacket(axis, rotationAngle, trajectoryTime);
       testHeadOrientationBehavior(message, trajectoryTime + EXTRA_SIM_TIME_FOR_SETTLING);
@@ -122,7 +123,7 @@ public abstract class DRCHeadTrajectoryBehaviorTest implements MultiRobotTestInt
 
       double trajectoryTime = 4.0;
       Vector3D axis = new Vector3D(0, 0, 1);
-      double rotationAngle = MAX_ANGLE_TO_TEST_RAD * RandomTools.generateRandomDouble(new Random(), 0.3, 1.0);
+      double rotationAngle = MAX_ANGLE_TO_TEST_RAD * RandomNumbers.nextDouble(new Random(), 0.3, 1.0);
 
       HeadTrajectoryMessage message = createHeadOrientationPacket(axis, rotationAngle, trajectoryTime);
       testHeadOrientationBehavior(message, trajectoryTime + EXTRA_SIM_TIME_FOR_SETTLING);

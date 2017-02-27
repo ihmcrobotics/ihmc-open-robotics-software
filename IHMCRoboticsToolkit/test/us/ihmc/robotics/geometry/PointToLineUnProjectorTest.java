@@ -6,6 +6,7 @@ import java.util.Random;
 
 import org.junit.Test;
 
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -40,7 +41,7 @@ public class PointToLineUnProjectorTest
       {
          Point3D point1 = RandomTools.generateRandomPoint(gen, -1000, -1000, -1000, 1000, 1000, 1000);
          Point3D point2 = RandomTools.generateRandomPoint(gen, -1000, -1000, -1000, 1000, 1000, 1000);
-         double s = RandomTools.generateRandomDouble(gen, 0, 1);
+         double s = RandomNumbers.nextDouble(gen, 0, 1);
          Point3D temp = new Point3D(point1);
          temp.scale(1 - s);
          Point3D point3 = new Point3D(temp);
@@ -60,7 +61,7 @@ public class PointToLineUnProjectorTest
       {
          Point3D point1 = RandomTools.generateRandomPoint(gen, -1000, -1000, -1000, 1000, 1000, 1000);
          Point3D point2 = new Point3D(point1);
-         double s = RandomTools.generateRandomDouble(gen, 0, 1);
+         double s = RandomNumbers.nextDouble(gen, 0, 1);
          Point3D temp = new Point3D(point1);
          temp.scale(1 - s);
          Point3D point3 = new Point3D(temp);
@@ -81,7 +82,7 @@ public class PointToLineUnProjectorTest
          Point3D point1 = RandomTools.generateRandomPoint(gen, -1000, -1000, -1000, 1000, 1000, 1000);
          Point3D point2 = RandomTools.generateRandomPoint(gen, -1000, -1000, -1000, 1000, 1000, 1000);
          point2.setY(point1.getY());
-         double s = RandomTools.generateRandomDouble(gen, 0, 1);
+         double s = RandomNumbers.nextDouble(gen, 0, 1);
          Point3D temp = new Point3D(point1);
          temp.scale(1 - s);
          Point3D point3 = new Point3D(temp);
@@ -102,7 +103,7 @@ public class PointToLineUnProjectorTest
          Point3D point1 = RandomTools.generateRandomPoint(gen, -1000, -1000, -1000, 1000, 1000, 1000);
          Point3D point2 = RandomTools.generateRandomPoint(gen, -1000, -1000, -1000, 1000, 1000, 1000);
          point2.setX(point1.getX());
-         double s = RandomTools.generateRandomDouble(gen, 0, 1);
+         double s = RandomNumbers.nextDouble(gen, 0, 1);
          Point3D temp = new Point3D(point1);
          temp.scale(1 - s);
          Point3D point3 = new Point3D(temp);

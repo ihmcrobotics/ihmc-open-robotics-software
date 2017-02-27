@@ -3,12 +3,12 @@ package us.ihmc.robotics.geometry;
 import java.util.List;
 import java.util.Random;
 
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.robotics.geometry.interfaces.PointInterface;
-import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 /**
@@ -152,16 +152,16 @@ public class FramePoint extends FrameTuple<FramePoint, Point3D> implements Point
 
    public static FramePoint generateRandomFramePoint(Random random, ReferenceFrame frame, double xMaxAbsoluteX, double yMaxAbsoluteY, double zMaxAbsoluteZ)
    {
-      FramePoint randomPoint = new FramePoint(frame, RandomTools.generateRandomDouble(random, xMaxAbsoluteX),
-                                              RandomTools.generateRandomDouble(random, yMaxAbsoluteY), RandomTools.generateRandomDouble(random, zMaxAbsoluteZ));
+      FramePoint randomPoint = new FramePoint(frame, RandomNumbers.nextDouble(random, xMaxAbsoluteX),
+                                              RandomNumbers.nextDouble(random, yMaxAbsoluteY), RandomNumbers.nextDouble(random, zMaxAbsoluteZ));
       return randomPoint;
    }
 
    public static FramePoint generateRandomFramePoint(Random random, ReferenceFrame frame, double xMin, double xMax, double yMin, double yMax, double zMin,
                                                      double zMax)
    {
-      FramePoint randomPoint = new FramePoint(frame, RandomTools.generateRandomDouble(random, xMin, xMax), RandomTools.generateRandomDouble(random, yMin, yMax),
-                                              RandomTools.generateRandomDouble(random, zMin, zMax));
+      FramePoint randomPoint = new FramePoint(frame, RandomNumbers.nextDouble(random, xMin, xMax), RandomNumbers.nextDouble(random, yMin, yMax),
+                                              RandomNumbers.nextDouble(random, zMin, zMax));
       return randomPoint;
    }
 

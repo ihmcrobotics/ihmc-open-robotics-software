@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.ros.generators.RosEnumValueDocumentation;
 import us.ihmc.communication.ros.generators.RosExportedField;
@@ -501,19 +502,19 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
       }
 
       this.trajectoryType = trajectoryTypes[randomOrdinal];
-      this.swingHeight = RandomTools.generateRandomDoubleWithEdgeCases(random, 0.05);
+      this.swingHeight = RandomNumbers.nextDoubleWithEdgeCases(random, 0.05);
 
       if (random.nextBoolean())
       {
          hasTimings = true;
-         this.swingTime = RandomTools.generateRandomDoubleInRange(random, 0.05, 2.0);
-         this.transferTime = RandomTools.generateRandomDoubleInRange(random, 0.05, 2.0);
+         this.swingTime = RandomNumbers.nextDouble(random, 0.05, 2.0);
+         this.transferTime = RandomNumbers.nextDouble(random, 0.05, 2.0);
       }
 
       if (random.nextBoolean())
       {
          hasAbsoluteTime = true;
-         this.swingStartTime = RandomTools.generateRandomDoubleInRange(random, 0.0, 50.0);
+         this.swingStartTime = RandomNumbers.nextDouble(random, 0.0, 50.0);
       }
 
       if (trajectoryType == TrajectoryType.CUSTOM)

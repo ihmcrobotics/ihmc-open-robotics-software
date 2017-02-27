@@ -4,6 +4,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Random;
 
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -435,9 +436,9 @@ public abstract class FootstepPlannerOnRoughTerrainTest implements PlanningTest
       generator.translate(0.0, 0.0, 0.001);
       generator.addRectangle(14.0, 3.0); // floor plane
 
-      double length = RandomTools.generateRandomDouble(random, 0.3, 1.0);
-      double width = RandomTools.generateRandomDouble(random, 0.3, 1.0);
-      double height = RandomTools.generateRandomDouble(random, 0.07, 0.3);
+      double length = RandomNumbers.nextDouble(random, 0.3, 1.0);
+      double width = RandomNumbers.nextDouble(random, 0.3, 1.0);
+      double height = RandomNumbers.nextDouble(random, 0.07, 0.3);
 
       for (int i = 0; i < 100; i++)
       {

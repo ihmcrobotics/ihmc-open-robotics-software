@@ -9,6 +9,7 @@ import java.util.Random;
 import org.ejml.data.DenseMatrix64F;
 import org.junit.Test;
 
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -128,10 +129,10 @@ public class ExpandingPolytopeAlgorithmTest
          ConvexPolytope cubeOne = generateRandomCube(random);
          ConvexPolytope cubeTwo = generateRandomCube(random);
 
-         rotateObject(cubeOne, RandomTools.generateRandomDouble(random, Math.PI), RandomTools.generateRandomDouble(random, Math.PI),
-               RandomTools.generateRandomDouble(random, Math.PI));
-         rotateObject(cubeTwo, RandomTools.generateRandomDouble(random, Math.PI), RandomTools.generateRandomDouble(random, Math.PI),
-               RandomTools.generateRandomDouble(random, Math.PI));
+         rotateObject(cubeOne, RandomNumbers.nextDouble(random, Math.PI), RandomNumbers.nextDouble(random, Math.PI),
+               RandomNumbers.nextDouble(random, Math.PI));
+         rotateObject(cubeTwo, RandomNumbers.nextDouble(random, Math.PI), RandomNumbers.nextDouble(random, Math.PI),
+               RandomNumbers.nextDouble(random, Math.PI));
 
          translateObject(cubeOne, RandomTools.generateRandomVector(random, new Vector3D(5.0, -7.0, 10.0), new Vector3D(7.0, -5.0, 12.0)));
          translateObject(cubeTwo, RandomTools.generateRandomVector(random, new Vector3D(5.0, -7.0, 10.0), new Vector3D(7.0, -5.0, 12.0)));
@@ -189,19 +190,19 @@ public class ExpandingPolytopeAlgorithmTest
       {
          double xyzBoundary = 0.0;
 
-         double radiusOne = RandomTools.generateRandomDouble(random, 0.5, 2.0);
-         double radiusTwo = RandomTools.generateRandomDouble(random, 0.5, 2.0);
+         double radiusOne = RandomNumbers.nextDouble(random, 0.5, 2.0);
+         double radiusTwo = RandomNumbers.nextDouble(random, 0.5, 2.0);
 
-         int numberOfPointsOne = RandomTools.generateRandomInt(random, 4, 20);
-         int numberOfPointsTwo = RandomTools.generateRandomInt(random, 4, 20);
+         int numberOfPointsOne = RandomNumbers.nextInt(random, 4, 20);
+         int numberOfPointsTwo = RandomNumbers.nextInt(random, 4, 20);
 
          ConvexPolytope polytopeOne = ConvexPolytopeConstructor.constructRandomSphereOutlinedPolytope(random, numberOfPointsOne, radiusOne, xyzBoundary);
          ConvexPolytope polytopeTwo = ConvexPolytopeConstructor.constructRandomSphereOutlinedPolytope(random, numberOfPointsTwo, radiusTwo, xyzBoundary);
 
-         rotateObject(polytopeOne, RandomTools.generateRandomDouble(random, Math.PI), RandomTools.generateRandomDouble(random, Math.PI),
-               RandomTools.generateRandomDouble(random, Math.PI));
-         rotateObject(polytopeTwo, RandomTools.generateRandomDouble(random, Math.PI), RandomTools.generateRandomDouble(random, Math.PI),
-               RandomTools.generateRandomDouble(random, Math.PI));
+         rotateObject(polytopeOne, RandomNumbers.nextDouble(random, Math.PI), RandomNumbers.nextDouble(random, Math.PI),
+               RandomNumbers.nextDouble(random, Math.PI));
+         rotateObject(polytopeTwo, RandomNumbers.nextDouble(random, Math.PI), RandomNumbers.nextDouble(random, Math.PI),
+               RandomNumbers.nextDouble(random, Math.PI));
 
          translateObject(polytopeOne, RandomTools.generateRandomVector(random, new Vector3D(4.5, -10.0, 8.5), new Vector3D(6.5, -7.0, 11.5)));
          translateObject(polytopeTwo, RandomTools.generateRandomVector(random, new Vector3D(4.5, -10.0, 8.5), new Vector3D(6.5, -7.0, 11.5)));
@@ -286,19 +287,19 @@ public class ExpandingPolytopeAlgorithmTest
       {
          double xyzBoundary = 0.0;
 
-         double radiusOne = RandomTools.generateRandomDouble(random, 0.5, 2.0);
-         double radiusTwo = RandomTools.generateRandomDouble(random, 0.5, 2.0);
-         double heightTwo = RandomTools.generateRandomDouble(random, 0.5, 2.0);
+         double radiusOne = RandomNumbers.nextDouble(random, 0.5, 2.0);
+         double radiusTwo = RandomNumbers.nextDouble(random, 0.5, 2.0);
+         double heightTwo = RandomNumbers.nextDouble(random, 0.5, 2.0);
 
-         int numberOfPointsOne = RandomTools.generateRandomInt(random, 4, 20);
+         int numberOfPointsOne = RandomNumbers.nextInt(random, 4, 20);
 
          ConvexPolytope polytopeOne = ConvexPolytopeConstructor.constructRandomSphereOutlinedPolytope(random, numberOfPointsOne, radiusOne, xyzBoundary);
          CylinderSupportingVertexHolder cylinderTwo = new CylinderSupportingVertexHolder(radiusTwo, heightTwo);
 
-         rotateObject(polytopeOne, RandomTools.generateRandomDouble(random, Math.PI), RandomTools.generateRandomDouble(random, Math.PI),
-               RandomTools.generateRandomDouble(random, Math.PI));
-         rotateObject(cylinderTwo, RandomTools.generateRandomDouble(random, Math.PI), RandomTools.generateRandomDouble(random, Math.PI),
-               RandomTools.generateRandomDouble(random, Math.PI));
+         rotateObject(polytopeOne, RandomNumbers.nextDouble(random, Math.PI), RandomNumbers.nextDouble(random, Math.PI),
+               RandomNumbers.nextDouble(random, Math.PI));
+         rotateObject(cylinderTwo, RandomNumbers.nextDouble(random, Math.PI), RandomNumbers.nextDouble(random, Math.PI),
+               RandomNumbers.nextDouble(random, Math.PI));
 
          translateObject(polytopeOne, RandomTools.generateRandomVector(random, new Vector3D(4.5, -10.0, 8.5), new Vector3D(6.5, -7.0, 11.5)));
          translateObject(cylinderTwo, RandomTools.generateRandomVector(random, new Vector3D(4.5, -10.0, 8.5), new Vector3D(6.5, -7.0, 11.5)));
@@ -490,9 +491,9 @@ public class ExpandingPolytopeAlgorithmTest
 
    private ConvexPolytope generateRandomCube(Random random)
    {
-      double halfLengthX = RandomTools.generateRandomDouble(random, 0.10, 2.0);
-      double halfWidthY = RandomTools.generateRandomDouble(random, 0.10, 0.5);
-      double halfHeightZ = RandomTools.generateRandomDouble(random, 0.10, 1.0);
+      double halfLengthX = RandomNumbers.nextDouble(random, 0.10, 2.0);
+      double halfWidthY = RandomNumbers.nextDouble(random, 0.10, 0.5);
+      double halfHeightZ = RandomNumbers.nextDouble(random, 0.10, 1.0);
 
       return ConvexPolytopeConstructor.constructBoxWithCenterAtZero(halfLengthX, halfWidthY, halfHeightZ);
    }

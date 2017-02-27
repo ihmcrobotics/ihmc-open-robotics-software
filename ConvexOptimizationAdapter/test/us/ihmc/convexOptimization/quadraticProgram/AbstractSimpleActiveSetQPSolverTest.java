@@ -12,6 +12,7 @@ import org.ejml.ops.CommonOps;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.random.RandomTools;
@@ -1114,7 +1115,7 @@ public abstract class AbstractSimpleActiveSetQPSolverTest
          CommonOps.addEquals(costQuadraticMatrix, identity);
 
          DenseMatrix64F costLinearVector = RandomTools.generateRandomMatrix(random, numberOfVariables, 1);
-         double quadraticCostScalar = RandomTools.generateRandomDouble(random, 30.0);
+         double quadraticCostScalar = RandomNumbers.nextDouble(random, 30.0);
 
          solver.setQuadraticCostFunction(costQuadraticMatrix, costLinearVector, quadraticCostScalar);
 
@@ -1143,7 +1144,7 @@ public abstract class AbstractSimpleActiveSetQPSolverTest
          // Verify objective is minimized by comparing to small perturbation:
          for (int i = 0; i < numberOfVariables; i++)
          {
-            solutionWithSmallPerturbation[i] = solution.get(i, 0) + RandomTools.generateRandomDouble(random, 1e-4);
+            solutionWithSmallPerturbation[i] = solution.get(i, 0) + RandomNumbers.nextDouble(random, 1e-4);
          }
 
          solution.zero();
@@ -1249,7 +1250,7 @@ public abstract class AbstractSimpleActiveSetQPSolverTest
          CommonOps.addEquals(costQuadraticMatrix, identity);
 
          DenseMatrix64F costLinearVector = RandomTools.generateRandomMatrix(random, numberOfVariables, 1);
-         double quadraticCostScalar = RandomTools.generateRandomDouble(random, 30.0);
+         double quadraticCostScalar = RandomNumbers.nextDouble(random, 30.0);
 
          solver.setQuadraticCostFunction(costQuadraticMatrix, costLinearVector, quadraticCostScalar);
 
@@ -1294,7 +1295,7 @@ public abstract class AbstractSimpleActiveSetQPSolverTest
          // Verify objective is minimized by comparing to small perturbation:
          for (int i = 0; i < numberOfVariables; i++)
          {
-            solutionWithSmallPerturbation[i] = solution.get(i, 0) + RandomTools.generateRandomDouble(random, 1e-4);
+            solutionWithSmallPerturbation[i] = solution.get(i, 0) + RandomNumbers.nextDouble(random, 1e-4);
          }
 
          solution.zero();

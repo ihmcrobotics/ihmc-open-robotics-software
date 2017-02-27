@@ -3,7 +3,7 @@ package us.ihmc.communication.packets;
 import java.util.Arrays;
 import java.util.Random;
 
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.tools.ArrayTools;
 
 /**
@@ -29,14 +29,14 @@ public class HeatMapPacket extends Packet<HeatMapPacket>
 
    public HeatMapPacket(Random random)
    {
-      this.height = RandomTools.generateRandomInt(random, -100, 100);
-      this.width = RandomTools.generateRandomInt(random, -100, 100);
+      this.height = RandomNumbers.nextInt(random, -100, 100);
+      this.width = RandomNumbers.nextInt(random, -100, 100);
       data = new float[this.height * this.width];
       name = Integer.toHexString(random.nextInt());
 
       for(int i = 0; i < data.length; i++)
       {
-         data[i] = RandomTools.generateRandomFloatInRange(random, 0.0f, 1.0f);
+         data[i] = RandomNumbers.nextFloat(random, 0.0f, 1.0f);
       }
    }
 

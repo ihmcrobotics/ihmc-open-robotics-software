@@ -8,6 +8,7 @@ import java.util.Random;
 
 import org.junit.Test;
 
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
@@ -110,7 +111,7 @@ public class LeastSquaresZPlaneFitterTest
 
          Plane3d plane3d = new Plane3d(planePoint, planeNormal);
 
-         int numberOfPoints = RandomTools.generateRandomInt(random, 3, 50);
+         int numberOfPoints = RandomNumbers.nextInt(random, 3, 50);
          ArrayList<Point3D> listOfPoints = new ArrayList<Point3D>();
 
          for (int j = 0; j < numberOfPoints; j++)

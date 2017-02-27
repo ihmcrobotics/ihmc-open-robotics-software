@@ -4,6 +4,7 @@ import java.util.Random;
 
 import org.junit.Test;
 
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
@@ -11,7 +12,6 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector2d;
-import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class CaptureRegionMathToolsTest
@@ -25,7 +25,7 @@ public class CaptureRegionMathToolsTest
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
       RotationMatrix rotationMatrix = new RotationMatrix();
       
-      double radius = RandomTools.generateRandomDouble(random, 0.1, 10.0);
+      double radius = RandomNumbers.nextDouble(random, 0.1, 10.0);
       FramePoint2d center = FramePoint2d.generateRandomFramePoint2d(random, worldFrame, -10.0, 10.0, -10.0, 10.0);
       
       FrameVector2d directionToExpectedPoint = FrameVector2d.generateRandomFrameVector2d(random, worldFrame);
@@ -33,12 +33,12 @@ public class CaptureRegionMathToolsTest
       FramePoint2d expectedPoint = new FramePoint2d();
       expectedPoint.scaleAdd(radius, directionToExpectedPoint, center);
 
-      double angleFromExpectedToA = RandomTools.generateRandomDouble(random, 0.0, Math.PI);
+      double angleFromExpectedToA = RandomNumbers.nextDouble(random, 0.0, Math.PI);
       FrameVector2d directionA = new FrameVector2d(directionToExpectedPoint);
       rotationMatrix.setToYawMatrix(angleFromExpectedToA);
       directionA.applyTransform(new RigidBodyTransform(rotationMatrix, new Vector3D()));
 
-      double angleFromExpectedToB = RandomTools.generateRandomDouble(random, -Math.PI, 0.0);
+      double angleFromExpectedToB = RandomNumbers.nextDouble(random, -Math.PI, 0.0);
       FrameVector2d directionB = new FrameVector2d(directionToExpectedPoint);
       rotationMatrix.setToYawMatrix(angleFromExpectedToB);
       directionB.applyTransform(new RigidBodyTransform(rotationMatrix, new Vector3D()));

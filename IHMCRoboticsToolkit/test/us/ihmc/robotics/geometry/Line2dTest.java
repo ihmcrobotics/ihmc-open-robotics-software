@@ -13,6 +13,7 @@ import java.util.Random;
 import org.junit.Test;
 
 import us.ihmc.commons.MutationTestFacilitator;
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
@@ -834,7 +835,7 @@ public class Line2dTest
          Line2d line1 = new Line2d(pointOnLine1, lineDirection1);
 
          Point2D expectedIntersection = new Point2D();
-         expectedIntersection.scaleAdd(RandomTools.generateRandomDouble(random, 10.0), lineDirection1, pointOnLine1);
+         expectedIntersection.scaleAdd(RandomNumbers.nextDouble(random, 10.0), lineDirection1, pointOnLine1);
 
          Vector2D lineDirection2 = RandomTools.generateRandomVector2d(random, 1.0);
          Point2D pointOnLine2 = new Point2D(expectedIntersection);
@@ -842,7 +843,7 @@ public class Line2dTest
          Point2D actualIntersection = line1.intersectionWith(new Line2d(pointOnLine2, lineDirection2));
          EuclidCoreTestTools.assertTuple2DEquals(expectedIntersection, actualIntersection, epsilon);
 
-         pointOnLine2.scaleAdd(RandomTools.generateRandomDouble(random, 10.0), lineDirection2, pointOnLine2);
+         pointOnLine2.scaleAdd(RandomNumbers.nextDouble(random, 10.0), lineDirection2, pointOnLine2);
          actualIntersection = line1.intersectionWith(new Line2d(pointOnLine2, lineDirection2));
          EuclidCoreTestTools.assertTuple2DEquals(expectedIntersection, actualIntersection, epsilon);
       }
@@ -861,8 +862,8 @@ public class Line2dTest
 
          Vector2D orthogonal = new Vector2D(- lineDirection1.getY(), lineDirection1.getX());
 
-         pointOnLine2.scaleAdd(RandomTools.generateRandomDouble(random, 10.0), orthogonal, pointOnLine2);
-         pointOnLine2.scaleAdd(RandomTools.generateRandomDouble(random, 10.0), lineDirection2, pointOnLine2);
+         pointOnLine2.scaleAdd(RandomNumbers.nextDouble(random, 10.0), orthogonal, pointOnLine2);
+         pointOnLine2.scaleAdd(RandomNumbers.nextDouble(random, 10.0), lineDirection2, pointOnLine2);
          Point2D actualIntersection = line1.intersectionWith(new Line2d(pointOnLine2, lineDirection2));
          assertNull(actualIntersection);
       }
@@ -883,7 +884,7 @@ public class Line2dTest
          Point2D actualIntersection = line1.intersectionWith(new Line2d(pointOnLine2, lineDirection2));
          EuclidCoreTestTools.assertTuple2DEquals(expectedIntersection, actualIntersection, epsilon);
 
-         pointOnLine2.scaleAdd(RandomTools.generateRandomDouble(random, 10.0), lineDirection2, pointOnLine2);
+         pointOnLine2.scaleAdd(RandomNumbers.nextDouble(random, 10.0), lineDirection2, pointOnLine2);
          actualIntersection = line1.intersectionWith(new Line2d(pointOnLine2, lineDirection2));
          EuclidCoreTestTools.assertTuple2DEquals(expectedIntersection, actualIntersection, epsilon);
       }
@@ -924,15 +925,15 @@ public class Line2dTest
 	   for (int i = 0; i < ITERATIONS; i++)
 	   {
 	      Point2D pointOnLine = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
-	      Vector2D lineDirection = RandomTools.generateRandomVector2d(random, RandomTools.generateRandomDouble(random, 0.0, 10.0));
+	      Vector2D lineDirection = RandomTools.generateRandomVector2d(random, RandomNumbers.nextDouble(random, 0.0, 10.0));
 	      Line2d line = new Line2d(pointOnLine, lineDirection);
 
 	      Point2D randomPointOnLine = new Point2D();
-	      randomPointOnLine.scaleAdd(RandomTools.generateRandomDouble(random, 10.0), lineDirection, pointOnLine);
+	      randomPointOnLine.scaleAdd(RandomNumbers.nextDouble(random, 10.0), lineDirection, pointOnLine);
 
 	      Vector2D orthogonal = new Vector2D(-lineDirection.getY(), lineDirection.getX());
 	      orthogonal.normalize();
-	      double expectedDistance = RandomTools.generateRandomDouble(random, 0.0, 10.0);
+	      double expectedDistance = RandomNumbers.nextDouble(random, 0.0, 10.0);
 
 	      Point2D point = new Point2D();
 	      point.scaleAdd(expectedDistance, orthogonal, randomPointOnLine);
