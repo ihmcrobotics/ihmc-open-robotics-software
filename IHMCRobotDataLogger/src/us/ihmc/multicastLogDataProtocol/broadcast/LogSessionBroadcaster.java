@@ -23,7 +23,7 @@ import us.ihmc.communication.configuration.NetworkParameterKeys;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.multicastLogDataProtocol.LogDataProtocolSettings;
 import us.ihmc.robotDataLogger.logger.LogSettings;
-import us.ihmc.tools.io.files.FileTools;
+import us.ihmc.tools.io.files.PathTools;
 import us.ihmc.tools.io.printing.PrintTools;
 
 public class LogSessionBroadcaster extends Thread
@@ -283,7 +283,7 @@ public class LogSessionBroadcaster extends Thread
    private static long createTempSessionID() throws IOException
    {
       String prefix = "LogSession";
-      Path temporaryDirectoryPath = FileTools.getTemporaryDirectoryPath();
+      Path temporaryDirectoryPath = PathTools.getTemporaryDirectoryPath();
 
       SecureRandom random = new SecureRandom();
 

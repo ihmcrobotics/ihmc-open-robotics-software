@@ -7,6 +7,7 @@ import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
+import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
@@ -185,5 +186,10 @@ public class PathTools
    public static void walkFlat(final Path directory, final BasicPathVisitor basicFileVisitor)
    {
       walkDepth(directory, 1, basicFileVisitor);
+   }
+
+   public static Path getTemporaryDirectoryPath()
+   {
+      return Paths.get(System.getProperty("java.io.tmpdir"));
    }
 }

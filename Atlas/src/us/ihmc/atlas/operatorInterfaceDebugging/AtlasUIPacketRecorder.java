@@ -9,6 +9,7 @@ import java.util.Scanner;
 
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
+import us.ihmc.commons.nio.FileTools;
 import us.ihmc.commons.nio.WriteOption;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.configuration.NetworkParameterKeys;
@@ -21,7 +22,6 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.tools.FormattingTools;
-import us.ihmc.tools.io.files.FileTools;
 import us.ihmc.tools.io.printing.PrintTools;
 
 public class AtlasUIPacketRecorder
@@ -36,7 +36,7 @@ public class AtlasUIPacketRecorder
       PrintTools.info("Press Enter to record...");
       scanner.nextLine();
       
-      final DataOutputStream fileDataOutputStream = FileTools.getFileDataOutputStream(getPacketRecordingFilePath());
+      final DataOutputStream fileDataOutputStream = FileTools.newFileDataOutputStream(getPacketRecordingFilePath(), DefaultExceptionHandler.PRINT_STACKTRACE);
       final PrintWriter timeWriter = FileTools.newPrintWriter(getPacketTimingPath(), WriteOption.TRUNCATE, DefaultExceptionHandler.PRINT_STACKTRACE);
       
       IHMCCommunicationKryoNetClassList netClassList = new IHMCCommunicationKryoNetClassList();
@@ -116,7 +116,7 @@ public class AtlasUIPacketRecorder
    
    public static Path getPacketRecordingFilePath()
    {
-      FileTools.ensureDirectoryExists(PACKET_RECORDINGS_PATH);
+      FileTools.ensureDirectoryExists(PACKET_RECORDINGS_PATH, DefaultExceptionHandler.PRINT_STACKTRACE);
       return PACKET_RECORDINGS_PATH.resolve(getPrefixFileName() + ".ibag");
    }
    

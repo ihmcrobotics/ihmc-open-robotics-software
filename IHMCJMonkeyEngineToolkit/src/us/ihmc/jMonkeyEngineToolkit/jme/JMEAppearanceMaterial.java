@@ -32,7 +32,7 @@ import us.ihmc.jMonkeyEngineToolkit.jme.util.JMEDataTypeUtils;
 import us.ihmc.robotics.dataStructures.MutableColor;
 import us.ihmc.robotics.geometry.BoundingBox3d;
 import us.ihmc.tools.ClassLoaderTools;
-import us.ihmc.tools.io.files.FileTools;
+import us.ihmc.tools.io.files.PathTools;
 
 public class JMEAppearanceMaterial
 {
@@ -254,7 +254,7 @@ public class JMEAppearanceMaterial
       }
       else
       {
-         Path temporaryDirectoryPath = FileTools.getTemporaryDirectoryPath();
+         Path temporaryDirectoryPath = PathTools.getTemporaryDirectoryPath();
         
          printIfDebug("temporaryDirectoryPathName = " + temporaryDirectoryPath);
          
