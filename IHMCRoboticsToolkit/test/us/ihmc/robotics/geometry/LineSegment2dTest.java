@@ -19,7 +19,7 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.robotics.math.Epsilons;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 
 public class LineSegment2dTest
 {
@@ -485,8 +485,8 @@ public class LineSegment2dTest
       // Test on line segment
       for (int i = 0; i < 1000; i++)
       {
-         Point2D lineSegmentStart = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
-         Point2D lineSegmentEnd = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
+         Point2D lineSegmentStart = RandomGeometry.nextPoint2D(random, 10.0, 10.0);
+         Point2D lineSegmentEnd = RandomGeometry.nextPoint2D(random, 10.0, 10.0);
          LineSegment2d lineSegment = new LineSegment2d(lineSegmentStart, lineSegmentEnd);
 
          Point2D pointOnLineSegment = new Point2D();
@@ -513,8 +513,8 @@ public class LineSegment2dTest
       // Test off line segment
       for (int i = 0; i < 1000; i++)
       {
-         Point2D lineSegmentStart = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
-         Point2D lineSegmentEnd = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
+         Point2D lineSegmentStart = RandomGeometry.nextPoint2D(random, 10.0, 10.0);
+         Point2D lineSegmentEnd = RandomGeometry.nextPoint2D(random, 10.0, 10.0);
          LineSegment2d lineSegment = new LineSegment2d(lineSegmentStart, lineSegmentEnd);
 
          Point2D pointOffLineSegment = new Point2D();
@@ -595,13 +595,13 @@ public class LineSegment2dTest
 
       for (int i = 0; i < 100; i++)
       {
-         Point2D lineSegmentStart1 = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
-         Point2D lineSegmentEnd1 = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
+         Point2D lineSegmentStart1 = RandomGeometry.nextPoint2D(random, 10.0, 10.0);
+         Point2D lineSegmentEnd1 = RandomGeometry.nextPoint2D(random, 10.0, 10.0);
 
          Point2D expectedIntersection = new Point2D();
          expectedIntersection.interpolate(lineSegmentStart1, lineSegmentEnd1, RandomNumbers.nextDouble(random, 0.0, 1.0));
 
-         Vector2D lineDirection2 = RandomTools.generateRandomVector2d(random, 1.0);
+         Vector2D lineDirection2 = RandomGeometry.nextVector2D(random, 1.0);
 
          Point2D lineSegmentStart2 = new Point2D();
          Point2D lineSegmentEnd2 = new Point2D();
@@ -620,12 +620,12 @@ public class LineSegment2dTest
       // Test intersection at one of the end points
       for (int i = 0; i < 100; i++)
       {
-         Point2D lineSegmentStart1 = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
-         Point2D lineSegmentEnd1 = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
+         Point2D lineSegmentStart1 = RandomGeometry.nextPoint2D(random, 10.0, 10.0);
+         Point2D lineSegmentEnd1 = RandomGeometry.nextPoint2D(random, 10.0, 10.0);
 
          Point2D expectedIntersection = new Point2D(lineSegmentStart1);
 
-         Vector2D lineDirection2 = RandomTools.generateRandomVector2d(random, 1.0);
+         Vector2D lineDirection2 = RandomGeometry.nextVector2D(random, 1.0);
 
          Point2D lineSegmentStart2 = new Point2D();
          Point2D lineSegmentEnd2 = new Point2D();
@@ -639,8 +639,8 @@ public class LineSegment2dTest
       // Test with parallel/collinear line segments
       for (int i = 0; i < 100; i++)
       {
-         Point2D lineSegmentStart1 = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
-         Point2D lineSegmentEnd1 = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
+         Point2D lineSegmentStart1 = RandomGeometry.nextPoint2D(random, 10.0, 10.0);
+         Point2D lineSegmentEnd1 = RandomGeometry.nextPoint2D(random, 10.0, 10.0);
 
          Point2D lineSegmentStart2 = new Point2D();
          Point2D lineSegmentEnd2 = new Point2D();
@@ -736,8 +736,8 @@ public class LineSegment2dTest
 
       for (int i = 0; i < 100; i++)
       {
-         Point2D lineSegmentStart = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
-         Point2D lineSegmentEnd = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
+         Point2D lineSegmentStart = RandomGeometry.nextPoint2D(random, 10.0, 10.0);
+         Point2D lineSegmentEnd = RandomGeometry.nextPoint2D(random, 10.0, 10.0);
          LineSegment2d lineSegment = new LineSegment2d(lineSegmentStart, lineSegmentEnd);
          LineSegment2d reverseLineSegment = new LineSegment2d(lineSegmentEnd, lineSegmentStart);
 
@@ -745,7 +745,7 @@ public class LineSegment2dTest
          expectedIntersection.interpolate(lineSegmentStart, lineSegmentEnd, RandomNumbers.nextDouble(random, 0.0, 1.0));
 
          Point2D pointOnLine = new Point2D(expectedIntersection);
-         Vector2D lineDirection = RandomTools.generateRandomVector2d(random, 1.0);
+         Vector2D lineDirection = RandomGeometry.nextVector2D(random, 1.0);
 
          // Expecting intersection
          Point2D actualIntersection = lineSegment.intersectionWith(new Line2d(pointOnLine, lineDirection));
@@ -765,13 +765,13 @@ public class LineSegment2dTest
       // Make the intersection happen outside the line segment
       for (int i = 0; i < 100; i++)
       {
-         Point2D lineSegmentStart = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
-         Point2D lineSegmentEnd = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
+         Point2D lineSegmentStart = RandomGeometry.nextPoint2D(random, 10.0, 10.0);
+         Point2D lineSegmentEnd = RandomGeometry.nextPoint2D(random, 10.0, 10.0);
          LineSegment2d lineSegment = new LineSegment2d(lineSegmentStart, lineSegmentEnd);
          LineSegment2d reverseLineSegment = new LineSegment2d(lineSegmentEnd, lineSegmentStart);
          
          Point2D pointOnLine = new Point2D();
-         Vector2D lineDirection = RandomTools.generateRandomVector2d(random, 1.0);
+         Vector2D lineDirection = RandomGeometry.nextVector2D(random, 1.0);
 
          Point2D lineLineIntersection = new Point2D();
          lineLineIntersection.interpolate(lineSegmentStart, lineSegmentEnd, RandomNumbers.nextDouble(random, 1.0, 2.0));
@@ -794,13 +794,13 @@ public class LineSegment2dTest
       // Make the intersection happen on each end point of the line segment
       for (int i = 0; i < 100; i++)
       {
-         Point2D lineSegmentStart = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
-         Point2D lineSegmentEnd = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
+         Point2D lineSegmentStart = RandomGeometry.nextPoint2D(random, 10.0, 10.0);
+         Point2D lineSegmentEnd = RandomGeometry.nextPoint2D(random, 10.0, 10.0);
          LineSegment2d lineSegment = new LineSegment2d(lineSegmentStart, lineSegmentEnd);
          LineSegment2d reverseLineSegment = new LineSegment2d(lineSegmentEnd, lineSegmentStart);
 
          Point2D pointOnLine = new Point2D();
-         Vector2D lineDirection = RandomTools.generateRandomVector2d(random, 1.0);
+         Vector2D lineDirection = RandomGeometry.nextVector2D(random, 1.0);
 
          Point2D expectedIntersection = new Point2D();
          expectedIntersection.set(lineSegmentStart);
@@ -823,8 +823,8 @@ public class LineSegment2dTest
       // Make the line segment and the line parallel not collinear.
       for (int i = 0; i < 100; i++)
       {
-         Point2D lineSegmentStart = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
-         Point2D lineSegmentEnd = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
+         Point2D lineSegmentStart = RandomGeometry.nextPoint2D(random, 10.0, 10.0);
+         Point2D lineSegmentEnd = RandomGeometry.nextPoint2D(random, 10.0, 10.0);
          LineSegment2d lineSegment = new LineSegment2d(lineSegmentStart, lineSegmentEnd);
          
          Point2D pointOnLine = new Point2D(lineSegmentStart);
@@ -845,8 +845,8 @@ public class LineSegment2dTest
       // Make the line segment and the line collinear.
       for (int i = 0; i < 100; i++)
       {
-         Point2D lineSegmentStart = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
-         Point2D lineSegmentEnd = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
+         Point2D lineSegmentStart = RandomGeometry.nextPoint2D(random, 10.0, 10.0);
+         Point2D lineSegmentEnd = RandomGeometry.nextPoint2D(random, 10.0, 10.0);
          LineSegment2d lineSegment = new LineSegment2d(lineSegmentStart, lineSegmentEnd);
          LineSegment2d reverseLineSegment = new LineSegment2d(lineSegmentEnd, lineSegmentStart);
          
@@ -1179,8 +1179,8 @@ public class LineSegment2dTest
 
       for (int i = 0; i < 1000; i++)
       {
-         Point2D lineSegmentStart = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
-         Point2D lineSegmentEnd = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
+         Point2D lineSegmentStart = RandomGeometry.nextPoint2D(random, 10.0, 10.0);
+         Point2D lineSegmentEnd = RandomGeometry.nextPoint2D(random, 10.0, 10.0);
          LineSegment2d lineSegment = new LineSegment2d(lineSegmentStart, lineSegmentEnd);
          Vector2D orthogonal = new Vector2D();
          orthogonal.sub(lineSegmentEnd, lineSegmentStart);

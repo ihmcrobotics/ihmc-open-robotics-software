@@ -12,7 +12,7 @@ import us.ihmc.controlFlow.ControlFlowElement;
 import us.ihmc.controlFlow.NullControlFlowElement;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class YoFrameQuaternionControlFlowOutputPortTest
@@ -38,7 +38,7 @@ public class YoFrameQuaternionControlFlowOutputPortTest
       
       for (int i = 0; i < 1000; i++)
       {
-         FrameOrientation dataIn = new FrameOrientation(frame, RandomTools.generateRandomQuaternion(rand));
+         FrameOrientation dataIn = new FrameOrientation(frame, RandomGeometry.nextQuaternion(rand));
          controlFlowOutputPort.setData(dataIn);
          FrameOrientation dataOut = controlFlowOutputPort.getData();
 

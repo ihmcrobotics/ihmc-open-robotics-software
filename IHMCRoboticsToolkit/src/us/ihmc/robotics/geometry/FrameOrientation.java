@@ -12,7 +12,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class FrameOrientation extends AbstractFrameObject<FrameOrientation, Quaternion>
@@ -81,7 +81,7 @@ public class FrameOrientation extends AbstractFrameObject<FrameOrientation, Quat
 
    public static FrameOrientation generateRandomFrameOrientation(Random random, ReferenceFrame referenceFrame)
    {
-      FrameOrientation randomOrientation = new FrameOrientation(referenceFrame, RandomTools.generateRandomQuaternion(random));
+      FrameOrientation randomOrientation = new FrameOrientation(referenceFrame, RandomGeometry.nextQuaternion(random));
       return randomOrientation;
    }
 

@@ -11,7 +11,7 @@ import us.ihmc.euclid.tuple3D.Vector3D32;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.Quaternion32;
 import us.ihmc.robotics.geometry.RotationTools;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
@@ -69,8 +69,8 @@ public class RobotConfigurationData extends Packet<RobotConfigurationData>
          jointTorques[i] = random.nextFloat();
       }
 
-      rootTranslation = RandomTools.generateRandomVector3f(random);
-      rootOrientation = RandomTools.generateRandomQuaternion4f(random);
+      rootTranslation = RandomGeometry.nextVector3D32(random);
+      rootOrientation = RandomGeometry.nextQuaternion32(random);
 
       size = Math.abs(random.nextInt(1000));
       momentAndForceDataAllForceSensors = new float[size][Wrench.SIZE];

@@ -7,7 +7,7 @@ import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 
 public class FootstepDataListCorruptor
 {
@@ -54,7 +54,7 @@ public class FootstepDataListCorruptor
    
    private void corruptOrientation(Quaternion orientation)
    {
-      Vector3D axis = RandomTools.generateRandomVector(random);
+      Vector3D axis = RandomGeometry.nextVector3D(random);
       double angle = RandomNumbers.nextDouble(random, -maxRotationCorruption, maxRotationCorruption);
       
       AxisAngle axisAngle4d = new AxisAngle();
@@ -68,7 +68,7 @@ public class FootstepDataListCorruptor
 
    private void corruptLocationVector(Point3D location)
    {
-      Vector3D randomVector = RandomTools.generateRandomVector(random, minLocationCorruption, maxLocationCorruption);
+      Vector3D randomVector = RandomGeometry.nextVector3D(random, minLocationCorruption, maxLocationCorruption);
       location.add(randomVector);
    }
    

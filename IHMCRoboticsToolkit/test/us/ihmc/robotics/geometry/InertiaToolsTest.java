@@ -13,7 +13,7 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 
 public class InertiaToolsTest
 {
@@ -62,7 +62,7 @@ public class InertiaToolsTest
          Matrix3D rotationalInertia = RotationalInertiaCalculator.getRotationalInertiaMatrixOfSolidEllipsoid(mass, xRadius, yRadius, zRadius);
 
          Matrix3D rotationalInertiaCopy = new Matrix3D(rotationalInertia);
-         RotationMatrix inertialFrameRotation = RandomTools.generateRandomRotationMatrix(random);
+         RotationMatrix inertialFrameRotation = RandomGeometry.nextRotationMatrix(random);
          
          Matrix3D rotatedInertia = InertiaTools.rotate(inertialFrameRotation, rotationalInertiaCopy);
          

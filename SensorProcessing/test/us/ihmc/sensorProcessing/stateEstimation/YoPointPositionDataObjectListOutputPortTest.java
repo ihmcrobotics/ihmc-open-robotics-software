@@ -16,7 +16,7 @@ import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.AfterJointReferenceFrameNameMap;
 import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.PointPositionDataObject;
@@ -73,8 +73,8 @@ public class YoPointPositionDataObjectListOutputPortTest
          PointPositionDataObject pointPositionDataObject = new PointPositionDataObject();
          int referenceFrameIndex = random.nextInt(frames.size());
          ReferenceFrame frame = frames.get(referenceFrameIndex);
-         FramePoint measurementPointInBodyFrame = new FramePoint(frame, RandomTools.generateRandomVector(random));
-         FramePoint measurementPointInWorldFrame = new FramePoint(ReferenceFrame.getWorldFrame(), RandomTools.generateRandomVector(random));
+         FramePoint measurementPointInBodyFrame = new FramePoint(frame, RandomGeometry.nextVector3D(random));
+         FramePoint measurementPointInWorldFrame = new FramePoint(ReferenceFrame.getWorldFrame(), RandomGeometry.nextVector3D(random));
          boolean isPointPositionValid = true;
          pointPositionDataObject.set(measurementPointInBodyFrame, measurementPointInWorldFrame, isPointPositionValid);
 

@@ -17,7 +17,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 /**
@@ -200,7 +200,7 @@ public class FrameVectorTest extends FrameTupleTest<Vector3D>
    {
       Random random = new Random(100L);
 
-      FrameVector randomFrameVector = new FrameVector(theFrame, RandomTools.generateRandomVector(random));
+      FrameVector randomFrameVector = new FrameVector(theFrame, RandomGeometry.nextVector3D(random));
       FrameVector parallelVector = new FrameVector(randomFrameVector);
       parallelVector.scale(RandomNumbers.nextDouble(random, -1.0, 1.0));
 
@@ -215,7 +215,7 @@ public class FrameVectorTest extends FrameTupleTest<Vector3D>
       for(int i = 0; i < 100; i++) //compare against Vector3d.length()
       {
          Random random = new Random(45456L);
-         Vector3D vector3d = RandomTools.generateRandomVector(random);
+         Vector3D vector3d = RandomGeometry.nextVector3D(random);
          FrameVector frameVector= new FrameVector(theFrame, vector3d);
          double vector3dResult = vector3d.length();
          double frameVectorResult = frameVector.length();
@@ -238,7 +238,7 @@ public class FrameVectorTest extends FrameTupleTest<Vector3D>
       for(int i = 0; i < 100; i++)
       {
          Random random = new Random(45456L);
-         Vector3D vector3d = RandomTools.generateRandomVector(random);
+         Vector3D vector3d = RandomGeometry.nextVector3D(random);
          FrameVector frameVector = new FrameVector(theFrame, vector3d);
          RigidBodyTransform transform = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
 
@@ -286,10 +286,10 @@ public class FrameVectorTest extends FrameTupleTest<Vector3D>
       for(int i = 0; i < 100; i++) //compare against Vector3d.cross()
       {
          Random random = new Random(45456L);
-         Vector3D v1 = RandomTools.generateRandomVector(random);
-         Vector3D v2 = RandomTools.generateRandomVector(random);
-         Vector3D v3 = RandomTools.generateRandomVector(random);
-         Vector3D staticResult = RandomTools.generateRandomVector(random);
+         Vector3D v1 = RandomGeometry.nextVector3D(random);
+         Vector3D v2 = RandomGeometry.nextVector3D(random);
+         Vector3D v3 = RandomGeometry.nextVector3D(random);
+         Vector3D staticResult = RandomGeometry.nextVector3D(random);
          FrameVector fv1 = new FrameVector(theFrame, v1);
          FrameVector fv2 = new FrameVector(theFrame, v2);
          FrameVector fv3 = new FrameVector(theFrame, v3);
@@ -313,9 +313,9 @@ public class FrameVectorTest extends FrameTupleTest<Vector3D>
 
       for(int i = 0; i < 100; i++) //compare against Vector3d.cross()
       {
-         Vector3D v1 = RandomTools.generateRandomVector(random);
-         Vector3D v2 = RandomTools.generateRandomVector(random);
-         Vector3D v3 = RandomTools.generateRandomVector(random);
+         Vector3D v1 = RandomGeometry.nextVector3D(random);
+         Vector3D v2 = RandomGeometry.nextVector3D(random);
+         Vector3D v3 = RandomGeometry.nextVector3D(random);
          
 
          v3.cross(v1, v2);  //Compare cross of Vector3d and FrameVector
@@ -332,7 +332,7 @@ public class FrameVectorTest extends FrameTupleTest<Vector3D>
       for(int i = 0; i < 100; i++) //sum of squares of normalized vector equals 1
       {
          Random random = new Random(45456L);
-         Vector3D vector3d = RandomTools.generateRandomVector(random);
+         Vector3D vector3d = RandomGeometry.nextVector3D(random);
          FrameVector v1 = new FrameVector(theFrame, vector3d);
          v1.normalize();
          double sumOfSquares = v1.getX()*v1.getX() + v1.getY()*v1.getY() + v1.getZ()*v1.getZ(); 

@@ -12,7 +12,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 
 public class RandomRobotGenerator
 {
@@ -38,8 +38,8 @@ public class RandomRobotGenerator
       
       for (int jointNumber = 0; jointNumber < numberOfPinJoints; jointNumber++)
       {
-         Vector3D offset = RandomTools.generateRandomVector(random, random.nextDouble() + 0.1);
-         Vector3D axis = RandomTools.generateRandomVector(random, 1.0);
+         Vector3D offset = RandomGeometry.nextVector3D(random, random.nextDouble() + 0.1);
+         Vector3D axis = RandomGeometry.nextVector3D(random, 1.0);
          axis.normalize();
 
          String jointName = "joint" + jointNumber;
@@ -124,8 +124,8 @@ public class RandomRobotGenerator
          double rotation = RandomNumbers.nextDouble(random, -Math.PI, Math.PI);
          floatingJoint.setRotation(rotation);
 
-         Tuple2DBasics position = RandomTools.generateRandomVector2d(random, 1.0);
-         Tuple2DBasics velocity = RandomTools.generateRandomVector2d(random, 0.5);
+         Tuple2DBasics position = RandomGeometry.nextVector2D(random, 1.0);
+         Tuple2DBasics velocity = RandomGeometry.nextVector2D(random, 0.5);
          floatingJoint.setCartesianPosition(position, velocity);
       }
       else if (joint instanceof PinJoint)
@@ -154,10 +154,10 @@ public class RandomRobotGenerator
       {
          FloatingJoint floatingJoint = (FloatingJoint) joint;
        
-         Tuple3DBasics velocity = RandomTools.generateRandomVector(random, 0.5);
+         Tuple3DBasics velocity = RandomGeometry.nextVector3D(random, 0.5);
          floatingJoint.setVelocity(velocity);
          
-         Vector3D angularVelocityInBody = RandomTools.generateRandomVector(random, 2.0);
+         Vector3D angularVelocityInBody = RandomGeometry.nextVector3D(random, 2.0);
          floatingJoint.setAngularVelocityInBody(angularVelocityInBody);
       }
       else if (joint instanceof FloatingPlanarJoint)
@@ -167,7 +167,7 @@ public class RandomRobotGenerator
          double rotationalVelocity = RandomNumbers.nextDouble(random, -Math.PI, Math.PI);
          floatingJoint.setRotationalVelocity(rotationalVelocity);
 
-         Tuple2DBasics velocity = RandomTools.generateRandomVector2d(random, 0.5);
+         Tuple2DBasics velocity = RandomGeometry.nextVector2D(random, 0.5);
          floatingJoint.setCartesianVelocity(velocity);
       }
       else if (joint instanceof PinJoint)
@@ -217,7 +217,7 @@ public class RandomRobotGenerator
    public static Link generateRandomLink(Random random, String jointName, Vector3D axis)
    {
       Link link = new Link(jointName);
-      Vector3D comOffset = RandomTools.generateRandomVector(random, 0.2);
+      Vector3D comOffset = RandomGeometry.nextVector3D(random, 0.2);
       link.setComOffset(comOffset);
       double mass = (0.25 + random.nextDouble()) * 4.0;
       double radiusOfGyrationX = 0.04 + 0.1 * random.nextDouble();

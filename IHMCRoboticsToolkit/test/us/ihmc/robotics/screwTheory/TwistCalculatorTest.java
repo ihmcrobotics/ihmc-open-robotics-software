@@ -14,7 +14,7 @@ import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.QuaternionCalculus;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.ScrewTestTools.RandomFloatingChain;
 
@@ -305,8 +305,8 @@ public class TwistCalculatorTest
 
       for (int i = 0; i < 100; i++)
       {
-         floatingJoint.setRotation(RandomTools.generateRandomQuaternion(random));
-         floatingJoint.setPosition(RandomTools.generateRandomPoint3d(random, -10.0, 10.0));
+         floatingJoint.setRotation(RandomGeometry.nextQuaternion(random));
+         floatingJoint.setPosition(RandomGeometry.nextPoint3D(random, -10.0, 10.0));
          Twist floatingJointTwist = Twist.generateRandomTwist(random, floatingJoint.getFrameAfterJoint(), floatingJoint.getFrameBeforeJoint(), floatingJoint.getFrameAfterJoint());
          floatingJoint.setJointTwist(floatingJointTwist);
 
@@ -364,8 +364,8 @@ public class TwistCalculatorTest
 
       for (int i = 0; i < 50; i++)
       {
-         floatingJoint.setRotation(RandomTools.generateRandomQuaternion(random));
-         floatingJoint.setPosition(RandomTools.generateRandomPoint3d(random, -10.0, 10.0));
+         floatingJoint.setRotation(RandomGeometry.nextQuaternion(random));
+         floatingJoint.setPosition(RandomGeometry.nextPoint3D(random, -10.0, 10.0));
          Twist floatingJointTwist = Twist.generateRandomTwist(random, floatingJoint.getFrameAfterJoint(), floatingJoint.getFrameBeforeJoint(), floatingJoint.getFrameAfterJoint());
          floatingJoint.setJointTwist(floatingJointTwist);
 

@@ -23,7 +23,7 @@ import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.math.Epsilons;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 
 public class Line2dTest
 {
@@ -830,14 +830,14 @@ public class Line2dTest
 
       for (int i = 0; i < ITERATIONS; i++)
       {
-         Point2D pointOnLine1 = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
-         Vector2D lineDirection1 = RandomTools.generateRandomVector2d(random, 1.0);
+         Point2D pointOnLine1 = RandomGeometry.nextPoint2D(random, 10.0, 10.0);
+         Vector2D lineDirection1 = RandomGeometry.nextVector2D(random, 1.0);
          Line2d line1 = new Line2d(pointOnLine1, lineDirection1);
 
          Point2D expectedIntersection = new Point2D();
          expectedIntersection.scaleAdd(RandomNumbers.nextDouble(random, 10.0), lineDirection1, pointOnLine1);
 
-         Vector2D lineDirection2 = RandomTools.generateRandomVector2d(random, 1.0);
+         Vector2D lineDirection2 = RandomGeometry.nextVector2D(random, 1.0);
          Point2D pointOnLine2 = new Point2D(expectedIntersection);
 
          Point2D actualIntersection = line1.intersectionWith(new Line2d(pointOnLine2, lineDirection2));
@@ -851,8 +851,8 @@ public class Line2dTest
       // Test when parallel but not collinear
       for (int i = 0; i < ITERATIONS; i++)
       {
-         Point2D pointOnLine1 = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
-         Vector2D lineDirection1 = RandomTools.generateRandomVector2d(random, 1.0);
+         Point2D pointOnLine1 = RandomGeometry.nextPoint2D(random, 10.0, 10.0);
+         Vector2D lineDirection1 = RandomGeometry.nextVector2D(random, 1.0);
          Line2d line1 = new Line2d(pointOnLine1, lineDirection1);
 
          Vector2D lineDirection2 = new Vector2D(lineDirection1);
@@ -871,8 +871,8 @@ public class Line2dTest
       // Test when collinear
       for (int i = 0; i < ITERATIONS; i++)
       {
-         Point2D pointOnLine1 = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
-         Vector2D lineDirection1 = RandomTools.generateRandomVector2d(random, 1.0);
+         Point2D pointOnLine1 = RandomGeometry.nextPoint2D(random, 10.0, 10.0);
+         Vector2D lineDirection1 = RandomGeometry.nextVector2D(random, 1.0);
          Line2d line1 = new Line2d(pointOnLine1, lineDirection1);
 
          Point2D expectedIntersection = new Point2D();
@@ -924,8 +924,8 @@ public class Line2dTest
 
 	   for (int i = 0; i < ITERATIONS; i++)
 	   {
-	      Point2D pointOnLine = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
-	      Vector2D lineDirection = RandomTools.generateRandomVector2d(random, RandomNumbers.nextDouble(random, 0.0, 10.0));
+	      Point2D pointOnLine = RandomGeometry.nextPoint2D(random, 10.0, 10.0);
+	      Vector2D lineDirection = RandomGeometry.nextVector2D(random, RandomNumbers.nextDouble(random, 0.0, 10.0));
 	      Line2d line = new Line2d(pointOnLine, lineDirection);
 
 	      Point2D randomPointOnLine = new Point2D();

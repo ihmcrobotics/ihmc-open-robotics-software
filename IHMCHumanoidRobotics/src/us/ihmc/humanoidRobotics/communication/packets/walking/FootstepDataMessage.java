@@ -21,7 +21,7 @@ import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.TransformTools;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
@@ -491,8 +491,8 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
 
       origin = FootstepOrigin.AT_ANKLE_FRAME;
       this.robotSide = random.nextBoolean() ? RobotSide.LEFT : RobotSide.RIGHT;
-      this.location = RandomTools.generateRandomPointWithEdgeCases(random, 0.05);
-      this.orientation = RandomTools.generateRandomQuaternion(random);
+      this.location = RandomGeometry.nextPoint3DWithEdgeCases(random, 0.05);
+      this.orientation = RandomGeometry.nextQuaternion(random);
       int numberOfPredictedContactPoints = random.nextInt(10);
       this.predictedContactPoints = new ArrayList<>();
 
@@ -520,8 +520,8 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
       if (trajectoryType == TrajectoryType.CUSTOM)
       {
          trajectoryWaypoints = new Point3D[2];
-         trajectoryWaypoints[0] = RandomTools.generateRandomPoint3d(random, -10.0, 10.0);
-         trajectoryWaypoints[1] = RandomTools.generateRandomPoint3d(random, -10.0, 10.0);
+         trajectoryWaypoints[0] = RandomGeometry.nextPoint3D(random, -10.0, 10.0);
+         trajectoryWaypoints[1] = RandomGeometry.nextPoint3D(random, -10.0, 10.0);
       }
    }
 

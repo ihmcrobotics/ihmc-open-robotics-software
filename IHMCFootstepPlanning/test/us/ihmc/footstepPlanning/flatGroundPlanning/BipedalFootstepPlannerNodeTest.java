@@ -14,7 +14,7 @@ import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.footstepPlanning.graphSearch.BipedalFootstepPlannerNode;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class BipedalFootstepPlannerNodeTest
@@ -74,8 +74,8 @@ public class BipedalFootstepPlannerNodeTest
          RobotSide robotSide = RobotSide.generateRandomRobotSide(random);
 
          // test for exact same transform
-         transformA.setRotationEulerAndZeroTranslation(RandomTools.generateRandomVector(random));
-         transformA.setTranslation(RandomTools.generateRandomVector(random));
+         transformA.setRotationEulerAndZeroTranslation(RandomGeometry.nextVector3D(random));
+         transformA.setTranslation(RandomGeometry.nextVector3D(random));
 
          nodeA = new BipedalFootstepPlannerNode(robotSide, transformA);
          nodeB = new BipedalFootstepPlannerNode(robotSide, transformA);
@@ -100,8 +100,8 @@ public class BipedalFootstepPlannerNodeTest
          RobotSide robotSide = RobotSide.generateRandomRobotSide(random);
 
          // test for exact same transform
-         transform.setRotationEulerAndZeroTranslation(RandomTools.generateRandomVector(random));
-         transform.setTranslation(RandomTools.generateRandomVector(random));
+         transform.setRotationEulerAndZeroTranslation(RandomGeometry.nextVector3D(random));
+         transform.setTranslation(RandomGeometry.nextVector3D(random));
 
          nodeA = new BipedalFootstepPlannerNode(robotSide, transform);
          nodeB = new BipedalFootstepPlannerNode(nodeA);

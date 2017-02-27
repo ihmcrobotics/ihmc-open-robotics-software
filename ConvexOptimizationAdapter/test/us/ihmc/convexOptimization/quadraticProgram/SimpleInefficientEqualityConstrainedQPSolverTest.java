@@ -11,7 +11,7 @@ import org.junit.Test;
 
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 
 public class SimpleInefficientEqualityConstrainedQPSolverTest
 {
@@ -137,12 +137,12 @@ public class SimpleInefficientEqualityConstrainedQPSolverTest
          solver.clear();
          int numberOfVariables = 100;
 
-         DenseMatrix64F costQuadraticMatrix = RandomTools.generateRandomMatrix(random, numberOfVariables, numberOfVariables);
+         DenseMatrix64F costQuadraticMatrix = RandomGeometry.nextDenseMatrix64F(random, numberOfVariables, numberOfVariables);
          DenseMatrix64F identity = CommonOps.identity(numberOfVariables, numberOfVariables); // Add n*I to make sure it is positive definite...
          CommonOps.scale(numberOfVariables, identity);
          CommonOps.addEquals(costQuadraticMatrix, identity);
 
-         DenseMatrix64F costLinearVector = RandomTools.generateRandomMatrix(random, numberOfVariables, 1);
+         DenseMatrix64F costLinearVector = RandomGeometry.nextDenseMatrix64F(random, numberOfVariables, 1);
          double quadraticCostScalar = RandomNumbers.nextDouble(random, 30.0);
 
          solver.setQuadraticCostFunction(costQuadraticMatrix, costLinearVector, quadraticCostScalar);
@@ -189,18 +189,18 @@ public class SimpleInefficientEqualityConstrainedQPSolverTest
          int numberOfVariables = 80;
          int numberOfEqualityConstraints = 16;
 
-         DenseMatrix64F costQuadraticMatrix = RandomTools.generateRandomMatrix(random, numberOfVariables, numberOfVariables);
+         DenseMatrix64F costQuadraticMatrix = RandomGeometry.nextDenseMatrix64F(random, numberOfVariables, numberOfVariables);
          DenseMatrix64F identity = CommonOps.identity(numberOfVariables, numberOfVariables); // Add n*I to make sure it is positive definite...
          CommonOps.scale(numberOfVariables, identity);
          CommonOps.addEquals(costQuadraticMatrix, identity);
 
-         DenseMatrix64F costLinearVector = RandomTools.generateRandomMatrix(random, numberOfVariables, 1);
+         DenseMatrix64F costLinearVector = RandomGeometry.nextDenseMatrix64F(random, numberOfVariables, 1);
          double quadraticCostScalar = RandomNumbers.nextDouble(random, 30.0);
 
          solver.setQuadraticCostFunction(costQuadraticMatrix, costLinearVector, quadraticCostScalar);
 
-         DenseMatrix64F linearEqualityConstraintsAMatrix = RandomTools.generateRandomMatrix(random, numberOfEqualityConstraints, numberOfVariables);
-         DenseMatrix64F linearEqualityConstraintsBVector = RandomTools.generateRandomMatrix(random, numberOfEqualityConstraints, 1);
+         DenseMatrix64F linearEqualityConstraintsAMatrix = RandomGeometry.nextDenseMatrix64F(random, numberOfEqualityConstraints, numberOfVariables);
+         DenseMatrix64F linearEqualityConstraintsBVector = RandomGeometry.nextDenseMatrix64F(random, numberOfEqualityConstraints, 1);
          solver.setLinearEqualityConstraints(linearEqualityConstraintsAMatrix, linearEqualityConstraintsBVector);
 
          double[] solution = new double[numberOfVariables];

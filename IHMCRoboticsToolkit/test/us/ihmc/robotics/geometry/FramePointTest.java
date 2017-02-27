@@ -23,7 +23,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 /**
@@ -493,7 +493,7 @@ public class FramePointTest extends FrameTupleTest<Point3D>
       assertTrue(pointToBeTested.getPoint().epsilonEquals(point3dExpected, epsilon));
 
       double max = Double.MAX_VALUE / 2.0;
-      point3dExpected = RandomTools.generateRandomPoint(random, max, max, max);
+      point3dExpected = RandomGeometry.nextPoint3D(random, max, max, max);
       pointToBeTested = new FramePoint(referenceFrame, point3dExpected, "");
 
       pointToBeTested = new FramePoint(aFrame, point3dExpected, "");

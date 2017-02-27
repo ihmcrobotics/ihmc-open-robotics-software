@@ -13,7 +13,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 
 public class Shape3dTestHelper
 {   
@@ -26,7 +26,7 @@ public class Shape3dTestHelper
    {
       for (int i=0; i<numberOfPoints; i++)
       {
-         Point3D point = RandomTools.generateRandomPoint(random, 1.0, 1.0, 1.0);
+         Point3D point = RandomGeometry.nextPoint3D(random, 1.0, 1.0, 1.0);
 
          boolean pointIsInside = shape3d.isInsideOrOnSurface(point, -1e-5);
          boolean pointIsOutside = !(shape3d.isInsideOrOnSurface(point, 1e-5));

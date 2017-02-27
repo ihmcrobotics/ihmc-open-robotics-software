@@ -6,7 +6,7 @@ import java.util.Random;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.tuple3D.Vector3D32;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 /**
@@ -92,8 +92,8 @@ public class HandComplianceControlParametersMessage extends Packet<HandComplianc
          enableAngularCompliance[i] = random.nextBoolean();
       }
 
-      desiredForce = RandomTools.generateRandomVector3f(random);
-      desiredTorque = RandomTools.generateRandomVector3f(random);
+      desiredForce = RandomGeometry.nextVector3D32(random);
+      desiredTorque = RandomGeometry.nextVector3D32(random);
 
       wrenchDeadzones = new float[2];
       wrenchDeadzones[0] = random.nextFloat();

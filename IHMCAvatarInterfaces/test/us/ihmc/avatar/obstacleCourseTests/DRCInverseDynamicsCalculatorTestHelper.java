@@ -19,7 +19,7 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFrameVector;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -604,11 +604,11 @@ public class DRCInverseDynamicsCalculatorTestHelper
       ReferenceFrame elevatorFrame = rootJoint.getFrameBeforeJoint();
       ReferenceFrame bodyFrame = rootJoint.getFrameAfterJoint();
 
-      Twist bodyTwist = new Twist(bodyFrame, elevatorFrame, bodyFrame, RandomTools.generateRandomVector(random, maxRootJointLinearAndAngularVelocity),
-            RandomTools.generateRandomVector(random, maxRootJointLinearAndAngularVelocity));
+      Twist bodyTwist = new Twist(bodyFrame, elevatorFrame, bodyFrame, RandomGeometry.nextVector3D(random, maxRootJointLinearAndAngularVelocity),
+            RandomGeometry.nextVector3D(random, maxRootJointLinearAndAngularVelocity));
       rootJoint.setJointTwist(bodyTwist);
 
-      rootJoint.setPosition(RandomTools.generateRandomVector(random));
+      rootJoint.setPosition(RandomGeometry.nextVector3D(random));
 
       double yaw = RandomNumbers.nextDouble(random, Math.PI / 20.0);
       double pitch = RandomNumbers.nextDouble(random, Math.PI / 20.0);
@@ -634,10 +634,10 @@ public class DRCInverseDynamicsCalculatorTestHelper
    public void setRobotStateRandomly(Random random, double maxJointVelocity, double maxRootJointLinearAndAngularVelocity)
    {
       FloatingJoint rootJoint = robot.getRootJoint();
-      rootJoint.setVelocity(RandomTools.generateRandomVector(random, maxRootJointLinearAndAngularVelocity));
-      rootJoint.setAngularVelocityInBody(RandomTools.generateRandomVector(random, maxRootJointLinearAndAngularVelocity));
+      rootJoint.setVelocity(RandomGeometry.nextVector3D(random, maxRootJointLinearAndAngularVelocity));
+      rootJoint.setAngularVelocityInBody(RandomGeometry.nextVector3D(random, maxRootJointLinearAndAngularVelocity));
 
-      rootJoint.setPosition(RandomTools.generateRandomVector(random));
+      rootJoint.setPosition(RandomGeometry.nextVector3D(random));
       double yaw = RandomNumbers.nextDouble(random, Math.PI / 20.0);
       double pitch = RandomNumbers.nextDouble(random, Math.PI / 20.0);
       double roll = RandomNumbers.nextDouble(random, Math.PI / 20.0);
@@ -667,12 +667,12 @@ public class DRCInverseDynamicsCalculatorTestHelper
 
          for (GroundContactPoint groundContactPoint : footGroundContactPoints)
          {
-            groundContactPoint.setForce(RandomTools.generateRandomVector(random, maxGroundContactPointForce));
+            groundContactPoint.setForce(RandomGeometry.nextVector3D(random, maxGroundContactPointForce));
          }
 
          ExternalForcePoint footExternalForcePoint = feetExternalForcePoints.get(robotSide);
-         footExternalForcePoint.setForce(RandomTools.generateRandomVector(random, maxFootExternalForce));
-         footExternalForcePoint.setMoment(RandomTools.generateRandomVector(random, maxFootExternalTorque));
+         footExternalForcePoint.setForce(RandomGeometry.nextVector3D(random, maxFootExternalForce));
+         footExternalForcePoint.setMoment(RandomGeometry.nextVector3D(random, maxFootExternalTorque));
       }
    }
 
@@ -741,16 +741,16 @@ public class DRCInverseDynamicsCalculatorTestHelper
          RigidBody foot = fullRobotModel.getFoot(robotSide);
          ReferenceFrame bodyFixedFrame = foot.getBodyFixedFrame();
 
-         Wrench wrench = new Wrench(bodyFixedFrame, bodyFixedFrame, RandomTools.generateRandomVector(random, maxFeetExternalForce),
-               RandomTools.generateRandomVector(random, maxFeetExternalTorque));
+         Wrench wrench = new Wrench(bodyFixedFrame, bodyFixedFrame, RandomGeometry.nextVector3D(random, maxFeetExternalForce),
+               RandomGeometry.nextVector3D(random, maxFeetExternalTorque));
          inverseDynamicsCalculator.setExternalWrench(foot, wrench);
       }
    }
 
    public void setRobotRootJointExternalForcesRandomly(Random random, double maxRootJointForceAndTorque)
    {
-      rootJointExternalForcePoint.setForce(RandomTools.generateRandomVector(random, maxRootJointForceAndTorque));
-      rootJointExternalForcePoint.setMoment(RandomTools.generateRandomVector(random, maxRootJointForceAndTorque));
+      rootJointExternalForcePoint.setForce(RandomGeometry.nextVector3D(random, maxRootJointForceAndTorque));
+      rootJointExternalForcePoint.setMoment(RandomGeometry.nextVector3D(random, maxRootJointForceAndTorque));
    }
 
    public void setRobotTorquesRandomly(Random random, double maxJointTorque)
@@ -792,8 +792,8 @@ public class DRCInverseDynamicsCalculatorTestHelper
       Twist bodyTwist = new Twist();
       sixDoFJoint.getJointTwist(bodyTwist);
 
-      FrameVector originAcceleration = new FrameVector(elevatorFrame, RandomTools.generateRandomVector(random, maxRootJointLinearAcceleration));
-      FrameVector angularAcceleration = new FrameVector(bodyFrame, RandomTools.generateRandomVector(random, maxRootJointAngularAcceleration));
+      FrameVector originAcceleration = new FrameVector(elevatorFrame, RandomGeometry.nextVector3D(random, maxRootJointLinearAcceleration));
+      FrameVector angularAcceleration = new FrameVector(bodyFrame, RandomGeometry.nextVector3D(random, maxRootJointAngularAcceleration));
       //      originAcceleration.changeFrame(elevatorFrame);
 
       SpatialAccelerationVector spatialAccelerationVector = new SpatialAccelerationVector(bodyFrame, elevatorFrame, bodyFrame);

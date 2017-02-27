@@ -15,7 +15,7 @@ import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.screwTheory.RevoluteJoint;
 import us.ihmc.robotics.screwTheory.ScrewTestTools;
@@ -59,10 +59,10 @@ public class NumericalInverseKinematicsCalculatorTest
       {
          setRandomPositions(random, revoluteJoints, Math.PI);
 
-         AxisAngle axisAngle = RandomTools.generateRandomRotation(random);
+         AxisAngle axisAngle = RandomGeometry.nextAxisAngle(random);
          RotationMatrix rotation = new RotationMatrix();
          rotation.set(axisAngle);
-         Vector3D translation = RandomTools.generateRandomVector(random, 50.0);
+         Vector3D translation = RandomGeometry.nextVector3D(random, 50.0);
          RigidBodyTransform desiredTransform = new RigidBodyTransform(rotation, translation);
 
          long t0 = System.nanoTime();
