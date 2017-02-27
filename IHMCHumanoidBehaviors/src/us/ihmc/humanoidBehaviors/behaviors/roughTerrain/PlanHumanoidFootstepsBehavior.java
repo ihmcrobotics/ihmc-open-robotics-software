@@ -41,7 +41,7 @@ import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.time.YoTimer;
+import us.ihmc.robotics.time.YoStopwatch;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
 public class PlanHumanoidFootstepsBehavior extends AbstractBehavior
@@ -75,7 +75,7 @@ public class PlanHumanoidFootstepsBehavior extends AbstractBehavior
    private final FramePose tempFirstFootstepPose = new FramePose();
    private final Point3D tempFootstepPosePosition = new Point3D();
    private final Quaternion tempFirstFootstepPoseOrientation = new Quaternion();
-   private final YoTimer plannerTimer;
+   private final YoStopwatch plannerTimer;
 
    public PlanHumanoidFootstepsBehavior(DoubleYoVariable yoTime, CommunicationBridge behaviorCommunicationBridge, FullHumanoidRobotModel fullRobotModel,
                                         HumanoidReferenceFrames referenceFrames)
@@ -92,7 +92,7 @@ public class PlanHumanoidFootstepsBehavior extends AbstractBehavior
       nextSideToSwing = new EnumYoVariable<>("nextSideToSwing", registry, RobotSide.class);
       nextSideToSwing.set(RobotSide.LEFT);
 
-      plannerTimer = new YoTimer(yoTime);
+      plannerTimer = new YoStopwatch(yoTime);
       plannerTimer.start();
 
       footstepPlannerGoalPose = new YoFramePose(prefix + "FootstepGoalPose", ReferenceFrame.getWorldFrame(), registry);

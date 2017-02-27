@@ -4,7 +4,7 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.LongYoVariable;
 
-public class YoTimer
+public class YoStopwatch
 {
    private final DoubleYoVariable timeProviderYoVariable;
 
@@ -22,7 +22,7 @@ public class YoTimer
    private long numLaps;
    private double deltaSum;
 
-   public YoTimer(String name, DoubleYoVariable timeYoVariable, YoVariableRegistry registry)
+   public YoStopwatch(String name, DoubleYoVariable timeYoVariable, YoVariableRegistry registry)
    {
       this(timeYoVariable);
 
@@ -34,12 +34,12 @@ public class YoTimer
       deltaSumYoVariable = new DoubleYoVariable(name + "DeltaSum", registry);
    }
 
-   public YoTimer(DoubleYoVariable timeYoVariable)
+   public YoStopwatch(DoubleYoVariable timeYoVariable)
    {
       this.timeProviderYoVariable = timeYoVariable;
    }
 
-   public YoTimer start()
+   public YoStopwatch start()
    {
       reset();
 

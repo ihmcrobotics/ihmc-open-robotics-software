@@ -8,11 +8,11 @@ import org.opencv.imgproc.Imgproc;
 import org.opencv.imgproc.Moments;
 import org.opencv.videoio.VideoCapture;
 
+import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.euclid.tuple2D.Point2D32;
 import us.ihmc.ihmcPerception.OpenCVTools;
 import us.ihmc.tools.FormattingTools;
 import us.ihmc.tools.nativelibraries.NativeLibraryLoader;
-import us.ihmc.tools.time.Timer;
 
 import javax.imageio.ImageIO;
 
@@ -152,7 +152,7 @@ public class ColorBlobDetector
       ImagePanel imagePanel4 = null;
       Mat image = new Mat();
       MatOfByte matOfByte = new MatOfByte();
-      Timer blobTimer = new Timer().start();
+      Stopwatch blobTimer = new Stopwatch().start();
       HueSaturationValueRange hsvRange;
       if (args.length > 1)
       {

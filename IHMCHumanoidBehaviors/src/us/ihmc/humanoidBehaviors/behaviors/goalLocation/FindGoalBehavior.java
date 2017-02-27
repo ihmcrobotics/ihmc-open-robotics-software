@@ -18,7 +18,7 @@ import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFramePoseUsingQuaternions;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.time.YoTimer;
+import us.ihmc.robotics.time.YoStopwatch;
 
 public class FindGoalBehavior extends AbstractBehavior
 {
@@ -28,7 +28,7 @@ public class FindGoalBehavior extends AbstractBehavior
    private final FullHumanoidRobotModel fullRobotModel;
    private final HumanoidReferenceFrames referenceFrames;
 
-   private final YoTimer headTrajectorySentTimer;
+   private final YoStopwatch headTrajectorySentTimer;
 
    private final BooleanYoVariable foundFiducial = new BooleanYoVariable(prefix + "FoundGoal", registry);
    private final IntegerYoVariable behaviorEnteredCount = new IntegerYoVariable(prefix + "BehaviorEnteredCount", registry);
@@ -52,7 +52,7 @@ public class FindGoalBehavior extends AbstractBehavior
 
       headPitchToFindFucdicial.set(0.6);
 
-      headTrajectorySentTimer = new YoTimer(yoTime);
+      headTrajectorySentTimer = new YoStopwatch(yoTime);
       headTrajectorySentTimer.start();
       //      behaviorCommunicationBridge.attachNetworkListeningQueue(robotConfigurationDataQueue, RobotConfigurationData.class);
       //      behaviorCommunicationBridge.attachNetworkListeningQueue(footstepStatusQueue, FootstepStatus.class);

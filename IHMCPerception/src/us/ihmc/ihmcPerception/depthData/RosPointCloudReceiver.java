@@ -4,19 +4,19 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 import sensor_msgs.PointCloud2;
+import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.time.Timer;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.subscriber.RosPointCloudSubscriber;
 
 public class RosPointCloudReceiver extends RosPointCloudSubscriber
 {
    private final boolean DEBUG = false;
-   private Timer timer;
+   private Stopwatch timer;
    {
       if(DEBUG)
-         timer = new Timer().start();
+         timer = new Stopwatch().start();
    }
 
    private final String rosTopic;
