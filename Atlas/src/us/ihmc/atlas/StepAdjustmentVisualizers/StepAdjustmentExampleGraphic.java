@@ -169,7 +169,7 @@ public class StepAdjustmentExampleGraphic
       YoGraphicPosition desiredICPViz = new YoGraphicPosition("Desired ICP", yoDesiredICP, 0.01, YoAppearance.LightBlue(), YoGraphicPosition.GraphicType.BALL_WITH_CROSS);
       YoGraphicPosition currentICPViz = new YoGraphicPosition("Current ICP", yoCurrentICP, 0.01, YoAppearance.Blue(), YoGraphicPosition.GraphicType.BALL_WITH_CROSS);
 
-      bagOfBalls = new BagOfBalls(numberOfBalls, 0.007, YoAppearance.Blue(), YoGraphicPosition.GraphicType.SOLID_BALL, registry, yoGraphicsListRegistry);
+      bagOfBalls = new BagOfBalls(numberOfBalls, 0.002, YoAppearance.Blue(), YoGraphicPosition.GraphicType.SOLID_BALL, registry, yoGraphicsListRegistry);
 
       yoGraphicsListRegistry.registerYoGraphic("dummy", nextFootstepViz);
       yoGraphicsListRegistry.registerYoGraphic("dummy", nextNextFootstepViz);
@@ -313,7 +313,7 @@ public class StepAdjustmentExampleGraphic
       icpPlanner.clearPlan();
       icpOptimizationController.clearPlan();
 
-      timing.setTimings(doubleSupportDuration.getDoubleValue(), singleSupportDuration.getDoubleValue());
+      timing.setTimings(singleSupportDuration.getDoubleValue(), doubleSupportDuration.getDoubleValue());
       icpPlanner.addFootstepToPlan(nextFootstep, timing);
       icpPlanner.addFootstepToPlan(nextNextFootstep, timing);
       icpPlanner.addFootstepToPlan(nextNextNextFootstep, timing);
@@ -327,6 +327,8 @@ public class StepAdjustmentExampleGraphic
       icpPlanner.initializeForSingleSupport(yoTime.getDoubleValue());
 
       icpOptimizationController.initializeForSingleSupport(yoTime.getDoubleValue(), supportSide, omega0.getDoubleValue());
+
+      icpPlanner.getDesiredCapturePointPositionAndVelocity(desiredICP, desiredICPVelocity, yoTime.getDoubleValue());
       icpOptimizationController.setBeginningOfStateICP(desiredICP, desiredICPVelocity);
 
       icpPlanner.getDesiredCapturePointPositionAndVelocity(desiredICP, desiredICPVelocity, yoTime.getDoubleValue() + timeToConsiderAdjustment.getDoubleValue());
@@ -377,7 +379,7 @@ public class StepAdjustmentExampleGraphic
       }
 
       updateViz();
-      //updateTrajectoyViz();
+      updateTrajectoyViz();
    }
 
    private final FrameConvexPolygon2d footstepPolygon = new FrameConvexPolygon2d();
@@ -471,7 +473,7 @@ public class StepAdjustmentExampleGraphic
       Footstep nextNextNextFootstep = nextFootsteps.get(2);
 
       icpPlanner.clearPlan();
-      timing.setTimings(doubleSupportDuration.getDoubleValue(), singleSupportDuration.getDoubleValue());
+      timing.setTimings(singleSupportDuration.getDoubleValue(), doubleSupportDuration.getDoubleValue());
       icpPlanner.addFootstepToPlan(nextFootstep, timing);
       icpPlanner.addFootstepToPlan(nextNextFootstep, timing);
       icpPlanner.addFootstepToPlan(nextNextNextFootstep, timing);
@@ -1213,7 +1215,7 @@ public class StepAdjustmentExampleGraphic
          @Override
          public double getMaxExitCMPForwardOffset()
          {
-            return 0.15;
+            return 0.08;
          }
 
          @Override
