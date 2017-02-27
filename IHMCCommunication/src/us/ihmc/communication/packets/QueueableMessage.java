@@ -2,9 +2,9 @@ package us.ihmc.communication.packets;
 
 import java.util.Random;
 
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
-import us.ihmc.robotics.random.RandomTools;
 
 /**
  * A QueueableMessage is a {@link #Packet} that can be queued for execution inside the controller. It implements command
@@ -43,7 +43,7 @@ public abstract class QueueableMessage<T extends QueueableMessage<T>> extends Tr
     */
    public QueueableMessage(Random random)
    {
-      executionMode = RandomTools.generateRandomEnum(random, ExecutionMode.class);
+      executionMode = RandomNumbers.nextEnum(random, ExecutionMode.class);
    }
 
    /**

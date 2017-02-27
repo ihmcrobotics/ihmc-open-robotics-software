@@ -17,11 +17,11 @@ import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyCon
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyUserControlState;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyInverseDynamicsSolver;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.HandUserControlModeState;
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.humanoidRobotics.communication.packets.walking.SpineDesiredAccelerationsMessage;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
-import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
@@ -58,7 +58,7 @@ public abstract class EndToEndChestDesiredAccelerationsMessageTest implements Mu
       RigidBody pelvis = fullRobotModel.getPelvis();
       RigidBody chest = fullRobotModel.getChest();
       OneDoFJoint[] spineJoints = ScrewTools.createOneDoFJointPath(pelvis, chest);
-      double[] chestDesiredJointAccelerations = RandomTools.generateRandomDoubleArray(random, spineJoints.length, 0.1);
+      double[] chestDesiredJointAccelerations = RandomNumbers.nextDoubleArray(random, spineJoints.length, 0.1);
       SpineDesiredAccelerationsMessage desiredAccelerationsMessage = new SpineDesiredAccelerationsMessage(chestDesiredJointAccelerations);
 
       SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
@@ -74,7 +74,7 @@ public abstract class EndToEndChestDesiredAccelerationsMessageTest implements Mu
       assertArrayEquals(chestDesiredJointAccelerations, controllerDesiredJointAccelerations, 1.0e-10);
       double[] qpOutputJointAccelerations = findQPOutputJointAccelerations(spineJoints, scs);
       assertArrayEquals(chestDesiredJointAccelerations, qpOutputJointAccelerations, 1.0e-3);
-      
+
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(RigidBodyUserControlState.TIME_WITH_NO_MESSAGE_BEFORE_ABORT + 0.01);
       assertTrue(success);
       assertEquals(RigidBodyControlMode.JOINTSPACE, findControllerState(scs));
@@ -102,7 +102,7 @@ public abstract class EndToEndChestDesiredAccelerationsMessageTest implements Mu
 
       assertEquals(RigidBodyControlMode.JOINTSPACE, findControllerState(scs));
    }
-   
+
    @SuppressWarnings("unchecked")
    public RigidBodyControlMode findControllerState(SimulationConstructionSet scs)
    {

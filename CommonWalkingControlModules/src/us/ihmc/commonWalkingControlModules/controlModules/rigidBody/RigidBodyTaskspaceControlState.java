@@ -101,7 +101,7 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       spatialFeedbackControlCommand.set(elevator, bodyToControl);
       spatialFeedbackControlCommand.setPrimaryBase(rootBody);
       spatialFeedbackControlCommand.setSelectionMatrixToIdentity();
-      privilegedConfigurationCommand.applyPrivilegedConfigurationToSubChain(rootBody, bodyToControl);
+//      privilegedConfigurationCommand.applyPrivilegedConfigurationToSubChain(rootBody, bodyToControl);
 
       yoAngularWeight = new YoFrameVector(prefix + "AngularWeight", null, registry);
       yoLinearWeight = new YoFrameVector(prefix + "LinearWeight", null, registry);
