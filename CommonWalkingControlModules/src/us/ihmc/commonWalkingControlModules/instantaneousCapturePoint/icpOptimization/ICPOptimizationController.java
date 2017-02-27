@@ -221,6 +221,23 @@ public class ICPOptimizationController
       parentRegistry.addChild(registry);
    }
 
+   public void setFootstepWeights(double forwardWeight, double lateralWeight)
+   {
+      forwardFootstepWeight.set(forwardWeight);
+      lateralFootstepWeight.set(lateralWeight);
+   }
+
+   public void setFeedbackWeights(double forwardWeight, double lateralWeight)
+   {
+      feedbackForwardWeight.set(forwardWeight);
+      feedbackLateralWeight.set(lateralWeight);
+   }
+
+   public void setDynamicRelaxationWeight(double relaxationWeight)
+   {
+      dynamicRelaxationWeight.set(relaxationWeight);
+   }
+
    public void setStepDurations(double doubleSupportDuration, double singleSupportDuration)
    {
       setDoubleSupportDuration(doubleSupportDuration);
