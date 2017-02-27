@@ -45,7 +45,6 @@ import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.InverseDynamicsCalculatorListener;
-import us.ihmc.robotics.time.GlobalTimer;
 import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
@@ -300,7 +299,6 @@ public class DRCSimulationTestHelper
       {
          avatarSimulation.dispose();
       }
-      GlobalTimer.clearTimers();
 
       if (networkProcessorParameters != null)
       {
