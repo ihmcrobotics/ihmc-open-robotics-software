@@ -56,6 +56,9 @@ public class StepAdjustmentExampleGraphic
    private static final int numberOfBalls = 100;
    private static final double controlDT = 0.001;
 
+   private static final double pointFootDuration = 2.5;
+   private static final double icpError = 0.05;
+
    private static final double footLengthForControl = 0.22;
    private static final double footWidthForControl = 0.11;
    private static final double toeWidthForControl = 0.0825;
@@ -338,6 +341,60 @@ public class StepAdjustmentExampleGraphic
       updateViz();
    }
 
+   double timeForUpdate = 0.0;
+   double initialPrimeTime = 0.0;
+   boolean pointFoot = true;
+   int segmentNumber = 0;
+
+   public void updateCurrentICPPosition()
+   {
+      timeForUpdate = yoTime.getDoubleValue() - initialPrimeTime - initialTime;
+
+      double segmentDuration;
+      if (segmentNumber == 1)
+         segmentDuration = 2 * pointFootDuration;
+      else
+         segmentDuration = pointFootDuration;
+
+      if (timeForUpdate > segmentDuration)
+      {
+         timeForUpdate = 0.0;
+         initialPrimeTime = yoTime.getDoubleValue() + initialTime;
+
+         segmentNumber++;
+
+         if (segmentNumber > 2)
+         {
+            segmentNumber = 0;
+            if (pointFoot)
+               pointFoot = false;
+            else
+               pointFoot = true;
+         }
+      }
+
+      if (segmentNumber == 0)
+      {
+         double scaleFactor = timeForUpdate / segmentDuration;
+         yoCurrentICP.set(yoDesiredICP);
+         yoCurrentICP.add(scaleFactor * icpError, scaleFactor * icpError);
+      }
+      else if (segmentNumber == 1)
+      {
+         double scaleFactor = timeForUpdate / segmentDuration;
+         yoCurrentICP.set(yoDesiredICP);
+         yoCurrentICP.add(icpError, icpError);
+         yoCurrentICP.add(-scaleFactor * 2 * icpError, -scaleFactor * 2 * icpError);
+      }
+      else if (segmentNumber == 2)
+      {
+         double scaleFactor = timeForUpdate / segmentDuration;
+         yoCurrentICP.set(yoDesiredICP);
+         yoCurrentICP.add(-icpError, -icpError);
+         yoCurrentICP.add(scaleFactor * icpError, scaleFactor * icpError);
+      }
+   }
+
    private boolean firstTick = true;
 
    private final FramePose footstepPose = new FramePose();
@@ -355,12 +412,14 @@ public class StepAdjustmentExampleGraphic
          firstTick = false;
       }
 
-      yoCurrentICP.getFrameTuple2d(currentICP);
 
       double currentTime = timeToConsiderAdjustment.getDoubleValue() + initialTime;
       icpPlanner.getDesiredCapturePointPositionAndVelocity(desiredICP, desiredICPVelocity, currentTime);
       yoDesiredICP.set(desiredICP);
 
+      updateCurrentICPPosition();
+
+      yoCurrentICP.getFrameTuple2d(currentICP);
       icpOptimizationController.compute(currentTime, desiredICP, desiredICPVelocity, currentICP, omega0.getDoubleValue());
       icpOptimizationController.getDesiredCMP(desiredCMP);
       yoDesiredCMP.set(desiredCMP);
@@ -1310,6 +1369,12 @@ public class StepAdjustmentExampleGraphic
          @Override public double getFeedbackOrthogonalGain()
          {
             return 3.0;
+         }
+
+         @Override
+         public double getFootstepSolutionResolution()
+         {
+            return 0.0;
          }
 
          @Override
