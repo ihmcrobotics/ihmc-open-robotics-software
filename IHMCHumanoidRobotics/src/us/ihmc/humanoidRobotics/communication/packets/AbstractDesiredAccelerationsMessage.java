@@ -4,9 +4,9 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Random;
 
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.communication.packets.TrackablePacket;
 import us.ihmc.communication.ros.generators.RosExportedField;
-import us.ihmc.robotics.random.RandomTools;
 
 public abstract class AbstractDesiredAccelerationsMessage<T extends AbstractDesiredAccelerationsMessage<T>> extends TrackablePacket<T>
 {
@@ -25,7 +25,7 @@ public abstract class AbstractDesiredAccelerationsMessage<T extends AbstractDesi
 
       for(int i = 0; i < randomNumberOfAccels; i++)
       {
-         desiredJointAccelerations[i] = RandomTools.generateRandomDoubleWithEdgeCases(random, 0.01);
+         desiredJointAccelerations[i] = RandomNumbers.nextDoubleWithEdgeCases(random, 0.01);
       }
    }
 
