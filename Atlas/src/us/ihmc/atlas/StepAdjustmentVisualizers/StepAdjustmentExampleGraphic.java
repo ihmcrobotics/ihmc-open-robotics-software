@@ -29,6 +29,7 @@ import us.ihmc.robotics.controllers.YoPDGains;
 import us.ihmc.robotics.controllers.YoPIDGains;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.*;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
@@ -53,10 +54,12 @@ import java.util.List;
 
 public class StepAdjustmentExampleGraphic
 {
+   private static final boolean switchType = true;
+   private static final int numberOfFootstepsToCreate = 4;
    private static final int numberOfBalls = 100;
    private static final double controlDT = 0.001;
 
-   private static final double pointFootDuration = 2.5;
+   private static final double pointFootDuration = 2.0;
    private static final double icpError = 0.05;
 
    private static final double footLengthForControl = 0.22;
@@ -85,14 +88,21 @@ public class StepAdjustmentExampleGraphic
    private final DoubleYoVariable yoTime;
    private final DoubleYoVariable timeToConsiderAdjustment;
 
+   private final DoubleYoVariable pointFootFeedbackWeight;
+   private final DoubleYoVariable pointFootFootstepWeight;
+
    private final YoFramePoint2d yoDesiredCMP;
    private final YoFramePoint2d yoCurrentICP;
    private final YoFramePoint2d yoDesiredICP;
 
    private final BagOfBalls bagOfBalls;
 
-   private final ArrayList<Footstep> footsteps = new ArrayList<>();
-   private final ArrayList<Footstep> nextFootsteps = new ArrayList<>();
+   private final ArrayList<Footstep> plannedFootsteps = new ArrayList<>();
+   private final ArrayList<Footstep> footstepSolutions = new ArrayList<>();
+
+   private final YoFramePose yoNextFootstepPlan;
+   private final YoFramePose yoNextNextFootstepPlan;
+   private final YoFramePose yoNextNextNextFootstepPlan;
 
    private final YoFramePose yoNextFootstepPose;
    private final YoFramePose yoNextNextFootstepPose;
@@ -100,6 +110,8 @@ public class StepAdjustmentExampleGraphic
    private final YoFrameConvexPolygon2d yoNextFootstepPolygon;
    private final YoFrameConvexPolygon2d yoNextNextFootstepPolygon;
    private final YoFrameConvexPolygon2d yoNextNextNextFootstepPolygon;
+
+   private final BooleanYoVariable usePointFeet;
 
    private BipedSupportPolygons bipedSupportPolygons;
    private FootstepTestHelper footstepTestHelper;
@@ -121,6 +133,14 @@ public class StepAdjustmentExampleGraphic
       WalkingControllerParameters walkingControllerParameters = createWalkingControllerParamters();
       capturePointPlannerParameters = createICPPlannerParameters();
       icpOptimizationParameters = createICPOptimizationParameters();
+
+      usePointFeet = new BooleanYoVariable("usePointFoot", registry);
+      usePointFeet.set(true);
+
+      pointFootFeedbackWeight = new DoubleYoVariable("pointFootFeedbackWeight", registry);
+      pointFootFootstepWeight = new DoubleYoVariable("pointFootFootstepWeight", registry);
+      pointFootFeedbackWeight.set(10000.0);
+      pointFootFootstepWeight.set(0.1);
 
       yoDesiredCMP = new YoFramePoint2d("desiredCMP", worldFrame, registry);
       yoCurrentICP = new YoFramePoint2d("currentICP", worldFrame, registry);
@@ -146,9 +166,24 @@ public class StepAdjustmentExampleGraphic
       icpOptimizationController = new ICPOptimizationController(capturePointPlannerParameters, icpOptimizationParameters, walkingControllerParameters, bipedSupportPolygons,
             contactableFeet, controlDT, registry, yoGraphicsListRegistry);
 
+      RobotSide currentSide = RobotSide.LEFT;
+      for (int i = 0; i < numberOfFootstepsToCreate; i++)
+      {
+         currentSide = currentSide.getOppositeSide();
+
+         plannedFootsteps.add(new Footstep(contactableFeet.get(currentSide).getRigidBody(), currentSide, contactableFeet.get(currentSide).getSoleFrame()));
+         footstepSolutions.add(new Footstep(contactableFeet.get(currentSide).getRigidBody(), currentSide, contactableFeet.get(currentSide).getSoleFrame()));
+      }
+
+
+      yoNextFootstepPlan = new YoFramePose("nextFootstepPlan", worldFrame, registry);
+      yoNextNextFootstepPlan = new YoFramePose("nextNextFootstepPlan", worldFrame, registry);
+      yoNextNextNextFootstepPlan = new YoFramePose("nextNextNextFootstepPlan", worldFrame, registry);
+
       yoNextFootstepPose = new YoFramePose("nextFootstepPose", worldFrame, registry);
       yoNextNextFootstepPose = new YoFramePose("nextNextFootstepPose", worldFrame, registry);
       yoNextNextNextFootstepPose = new YoFramePose("nextNextNextFootstepPose", worldFrame, registry);
+
       yoNextFootstepPolygon = new YoFrameConvexPolygon2d("nextFootstep", "", worldFrame, 4, registry);
       yoNextNextFootstepPolygon = new YoFrameConvexPolygon2d("nextNextFootstep", "", worldFrame, 4, registry);
       yoNextNextNextFootstepPolygon = new YoFrameConvexPolygon2d("nextNextNextFootstep", "", worldFrame, 4, registry);
@@ -257,19 +292,15 @@ public class StepAdjustmentExampleGraphic
    private final FootstepTiming timing = new FootstepTiming();
    private void initialize()
    {
-      for (Footstep footstep : footstepTestHelper.createFootsteps(0.2, 0.4, 4))
-         footsteps.add(footstep);
+      int index = 0;
+      for (Footstep footstep : footstepTestHelper.createFootsteps(0.2, 0.4, numberOfFootstepsToCreate))
+      {
+         footstep.getPose(footstepPose);
+         plannedFootsteps.get(index).setPose(footstepPose);
+         footstepSolutions.get(index).setPose(footstepPose);
 
-      Footstep nextFootstep = footsteps.get(0);
-      Footstep nextNextFootstep = footsteps.get(1);
-      Footstep nextNextNextFootstep = footsteps.get(2);
-
-      nextFootsteps.add(nextFootstep);
-      nextFootsteps.add(nextNextFootstep);
-      nextFootsteps.add(nextNextNextFootstep);
-
-      for (int i = 3; i < icpOptimizationController.getNumberOfFootstepsToConsider(); i++)
-         nextFootsteps.add(footsteps.get(i));
+         index++;
+      }
 
       /** fake transfer **/
       for (RobotSide robotSide : RobotSide.values)
@@ -277,19 +308,18 @@ public class StepAdjustmentExampleGraphic
       bipedSupportPolygons.updateUsingContactStates(contactStates);
 
       icpPlanner.clearPlan();
-      icpOptimizationController.clearPlan();
-
       timing.setTimings(doubleSupportDuration.getDoubleValue(), singleSupportDuration.getDoubleValue());
-      icpPlanner.addFootstepToPlan(nextFootstep, timing);
-      icpPlanner.addFootstepToPlan(nextNextFootstep, timing);
-      icpPlanner.addFootstepToPlan(nextNextNextFootstep, timing);
+      icpPlanner.addFootstepToPlan(plannedFootsteps.get(0), timing);
+      icpPlanner.addFootstepToPlan(plannedFootsteps.get(1), timing);
+      icpPlanner.addFootstepToPlan(plannedFootsteps.get(2), timing);
 
+      icpOptimizationController.clearPlan();
       icpOptimizationController.setStepDurations(doubleSupportDuration.getDoubleValue(), singleSupportDuration.getDoubleValue());
-      icpOptimizationController.addFootstepToPlan(nextFootstep);
-      icpOptimizationController.addFootstepToPlan(nextNextFootstep);
-      icpOptimizationController.addFootstepToPlan(nextNextNextFootstep);
+      icpOptimizationController.addFootstepToPlan(plannedFootsteps.get(0));
+      icpOptimizationController.addFootstepToPlan(plannedFootsteps.get(1));
+      icpOptimizationController.addFootstepToPlan(plannedFootsteps.get(2));
 
-      RobotSide supportSide = nextFootstep.getRobotSide().getOppositeSide();
+      RobotSide supportSide = plannedFootsteps.get(0).getRobotSide().getOppositeSide();
 
       icpPlanner.setSupportLeg(supportSide);
       icpPlanner.initializeForTransfer(yoTime.getDoubleValue());
@@ -302,29 +332,28 @@ public class StepAdjustmentExampleGraphic
 
       FootSpoof footSpoof = contactableFeet.get(supportSide.getOppositeSide());
       FramePose nextSupportPose = footPosesAtTouchdown.get(supportSide.getOppositeSide());
-      nextSupportPose.setToZero(nextFootstep.getSoleReferenceFrame());
+      nextSupportPose.setToZero(plannedFootsteps.get(0).getSoleReferenceFrame());
       nextSupportPose.changeFrame(ReferenceFrame.getWorldFrame());
       footSpoof.setSoleFrame(nextSupportPose);
 
       contactStates.get(supportSide.getOppositeSide()).clear();
-      if (nextFootstep.getPredictedContactPoints() == null)
+      if (plannedFootsteps.get(0).getPredictedContactPoints() == null)
          contactStates.get(supportSide.getOppositeSide()).setContactFramePoints(footSpoof.getContactPoints2d());
       else
-         contactStates.get(supportSide.getOppositeSide()).setContactPoints(nextFootstep.getPredictedContactPoints());
+         contactStates.get(supportSide.getOppositeSide()).setContactPoints(plannedFootsteps.get(0).getPredictedContactPoints());
       bipedSupportPolygons.updateUsingContactStates(contactStates);
 
       icpPlanner.clearPlan();
-      icpOptimizationController.clearPlan();
-
       timing.setTimings(singleSupportDuration.getDoubleValue(), doubleSupportDuration.getDoubleValue());
-      icpPlanner.addFootstepToPlan(nextFootstep, timing);
-      icpPlanner.addFootstepToPlan(nextNextFootstep, timing);
-      icpPlanner.addFootstepToPlan(nextNextNextFootstep, timing);
+      icpPlanner.addFootstepToPlan(plannedFootsteps.get(0), timing);
+      icpPlanner.addFootstepToPlan(plannedFootsteps.get(1), timing);
+      icpPlanner.addFootstepToPlan(plannedFootsteps.get(2), timing);
 
+      icpOptimizationController.clearPlan();
       icpOptimizationController.setStepDurations(doubleSupportDuration.getDoubleValue(), singleSupportDuration.getDoubleValue());
-      icpOptimizationController.addFootstepToPlan(nextFootstep);
-      icpOptimizationController.addFootstepToPlan(nextNextFootstep);
-      icpOptimizationController.addFootstepToPlan(nextNextNextFootstep);
+      icpOptimizationController.addFootstepToPlan(plannedFootsteps.get(0));
+      icpOptimizationController.addFootstepToPlan(plannedFootsteps.get(1));
+      icpOptimizationController.addFootstepToPlan(plannedFootsteps.get(2));
 
       icpPlanner.setSupportLeg(supportSide);
       icpPlanner.initializeForSingleSupport(yoTime.getDoubleValue());
@@ -343,7 +372,6 @@ public class StepAdjustmentExampleGraphic
 
    double timeForUpdate = 0.0;
    double initialPrimeTime = 0.0;
-   boolean pointFoot = true;
    int segmentNumber = 0;
 
    public void updateCurrentICPPosition()
@@ -366,10 +394,14 @@ public class StepAdjustmentExampleGraphic
          if (segmentNumber > 2)
          {
             segmentNumber = 0;
-            if (pointFoot)
-               pointFoot = false;
-            else
-               pointFoot = true;
+
+            if (switchType)
+            {
+               if (usePointFeet.getBooleanValue())
+                  usePointFeet.set(false);
+               else
+                  usePointFeet.set(true);
+            }
          }
       }
 
@@ -393,6 +425,17 @@ public class StepAdjustmentExampleGraphic
          yoCurrentICP.add(-icpError, -icpError);
          yoCurrentICP.add(scaleFactor * icpError, scaleFactor * icpError);
       }
+
+      if (usePointFeet.getBooleanValue())
+      {
+         icpOptimizationController.setFootstepWeights(pointFootFootstepWeight.getDoubleValue(), pointFootFootstepWeight.getDoubleValue());
+         icpOptimizationController.setFeedbackWeights(pointFootFeedbackWeight.getDoubleValue(), pointFootFeedbackWeight.getDoubleValue());
+      }
+      else
+      {
+         icpOptimizationController.setFootstepWeights(100.0, 100.0);
+         icpOptimizationController.setFeedbackWeights(1.0, 1.0);
+      }
    }
 
    private boolean firstTick = true;
@@ -412,7 +455,6 @@ public class StepAdjustmentExampleGraphic
          firstTick = false;
       }
 
-
       double currentTime = timeToConsiderAdjustment.getDoubleValue() + initialTime;
       icpPlanner.getDesiredCapturePointPositionAndVelocity(desiredICP, desiredICPVelocity, currentTime);
       yoDesiredICP.set(desiredICP);
@@ -424,9 +466,10 @@ public class StepAdjustmentExampleGraphic
       icpOptimizationController.getDesiredCMP(desiredCMP);
       yoDesiredCMP.set(desiredCMP);
 
+      //// FIXME: 2/27/17  This is messing things up
       for (int i = 0; i < icpOptimizationController.getNumberOfFootstepsToConsider(); i++)
       {
-         Footstep footstep = nextFootsteps.get(i);
+         Footstep footstep = footstepSolutions.get(i);
 
          if (footstep != null)
          {
@@ -438,8 +481,13 @@ public class StepAdjustmentExampleGraphic
       }
 
       updateViz();
-      updateTrajectoyViz();
+      updateTrajectoyViz(); //// FIXME: 2/27/17
    }
+
+
+   private final FramePose nextPlannedFootstep = new FramePose();
+   private final FramePose nextNextPlannedFootstep = new FramePose();
+   private final FramePose nextNextNextPlannedFootstep = new FramePose();
 
    private final FrameConvexPolygon2d footstepPolygon = new FrameConvexPolygon2d();
    private final FrameConvexPolygon2d tempFootstepPolygonForShrinking = new FrameConvexPolygon2d();
@@ -447,11 +495,14 @@ public class StepAdjustmentExampleGraphic
 
    private void updateViz()
    {
-      Footstep nextFootstep = nextFootsteps.get(0);
-      Footstep nextNextFootstep = nextFootsteps.get(1);
-      Footstep nextNextNextFootstep = nextFootsteps.get(2);
+      nextPlannedFootstep.setToZero(plannedFootsteps.get(0).getSoleReferenceFrame());
+      nextNextPlannedFootstep.setToZero(plannedFootsteps.get(0).getSoleReferenceFrame());
+      nextNextNextPlannedFootstep.setToZero(plannedFootsteps.get(0).getSoleReferenceFrame());
+      yoNextFootstepPlan.setAndMatchFrame(nextPlannedFootstep);
+      yoNextNextFootstepPlan.setAndMatchFrame(nextNextPlannedFootstep);
+      yoNextNextNextFootstepPlan.setAndMatchFrame(nextNextNextPlannedFootstep);
 
-      if (nextFootstep == null)
+      if (footstepSolutions.get(0) == null)
       {
          yoNextFootstepPose.setToNaN();
          yoNextNextFootstepPose.setToNaN();
@@ -462,21 +513,21 @@ public class StepAdjustmentExampleGraphic
          return;
       }
 
-      if (nextFootstep.getPredictedContactPoints() == null)
-         nextFootstep.setPredictedContactPointsFromFramePoint2ds(contactableFeet.get(nextFootstep.getRobotSide()).getContactPoints2d());
+      if (footstepSolutions.get(0).getPredictedContactPoints() == null)
+         footstepSolutions.get(0).setPredictedContactPointsFromFramePoint2ds(contactableFeet.get(footstepSolutions.get(0).getRobotSide()).getContactPoints2d());
 
       double polygonShrinkAmount = 0.005;
 
-      tempFootstepPolygonForShrinking.setIncludingFrameAndUpdate(nextFootstep.getSoleReferenceFrame(), nextFootstep.getPredictedContactPoints());
+      tempFootstepPolygonForShrinking.setIncludingFrameAndUpdate(footstepSolutions.get(0).getSoleReferenceFrame(), footstepSolutions.get(0).getPredictedContactPoints());
       convexPolygonShrinker.shrinkConstantDistanceInto(tempFootstepPolygonForShrinking, polygonShrinkAmount, footstepPolygon);
 
       footstepPolygon.changeFrameAndProjectToXYPlane(worldFrame);
       yoNextFootstepPolygon.setFrameConvexPolygon2d(footstepPolygon);
 
-      FramePose nextFootstepPose = new FramePose(nextFootstep.getSoleReferenceFrame());
+      FramePose nextFootstepPose = new FramePose(footstepSolutions.get(0).getSoleReferenceFrame());
       yoNextFootstepPose.setAndMatchFrame(nextFootstepPose);
 
-      if (nextNextFootstep == null)
+      if (footstepSolutions.get(1) == null)
       {
          yoNextNextFootstepPose.setToNaN();
          yoNextNextNextFootstepPose.setToNaN();
@@ -485,41 +536,41 @@ public class StepAdjustmentExampleGraphic
          return;
       }
 
-      if (nextNextFootstep.getPredictedContactPoints() == null)
-         nextNextFootstep.setPredictedContactPointsFromFramePoint2ds(contactableFeet.get(nextNextFootstep.getRobotSide()).getContactPoints2d());
+      if (footstepSolutions.get(1).getPredictedContactPoints() == null)
+         footstepSolutions.get(1).setPredictedContactPointsFromFramePoint2ds(contactableFeet.get(footstepSolutions.get(1).getRobotSide()).getContactPoints2d());
 
-      tempFootstepPolygonForShrinking.setIncludingFrameAndUpdate(nextNextFootstep.getSoleReferenceFrame(), nextNextFootstep.getPredictedContactPoints());
+      tempFootstepPolygonForShrinking.setIncludingFrameAndUpdate(footstepSolutions.get(1).getSoleReferenceFrame(), footstepSolutions.get(1).getPredictedContactPoints());
       convexPolygonShrinker.shrinkConstantDistanceInto(tempFootstepPolygonForShrinking, polygonShrinkAmount, footstepPolygon);
 
       footstepPolygon.changeFrameAndProjectToXYPlane(worldFrame);
       yoNextNextFootstepPolygon.setFrameConvexPolygon2d(footstepPolygon);
 
-      FramePose nextNextFootstepPose = new FramePose(nextNextFootstep.getSoleReferenceFrame());
+      FramePose nextNextFootstepPose = new FramePose(footstepSolutions.get(1).getSoleReferenceFrame());
       yoNextNextFootstepPose.setAndMatchFrame(nextNextFootstepPose);
 
-      if (nextNextNextFootstep == null)
+      if (footstepSolutions.get(2) == null)
       {
          yoNextNextNextFootstepPose.setToNaN();
          yoNextNextNextFootstepPolygon.hide();
          return;
       }
 
-      if (nextNextNextFootstep.getPredictedContactPoints() == null)
-         nextNextNextFootstep.setPredictedContactPointsFromFramePoint2ds(contactableFeet.get(nextNextNextFootstep.getRobotSide()).getContactPoints2d());
+      if (footstepSolutions.get(2).getPredictedContactPoints() == null)
+         footstepSolutions.get(2).setPredictedContactPointsFromFramePoint2ds(contactableFeet.get(footstepSolutions.get(2).getRobotSide()).getContactPoints2d());
 
-      tempFootstepPolygonForShrinking.setIncludingFrameAndUpdate(nextNextNextFootstep.getSoleReferenceFrame(), nextNextNextFootstep.getPredictedContactPoints());
+      tempFootstepPolygonForShrinking.setIncludingFrameAndUpdate(footstepSolutions.get(2).getSoleReferenceFrame(), footstepSolutions.get(2).getPredictedContactPoints());
       convexPolygonShrinker.shrinkConstantDistanceInto(tempFootstepPolygonForShrinking, polygonShrinkAmount, footstepPolygon);
 
       footstepPolygon.changeFrameAndProjectToXYPlane(worldFrame);
       yoNextNextNextFootstepPolygon.setFrameConvexPolygon2d(footstepPolygon);
 
-      FramePose nextNextNextFootstepPose = new FramePose(nextNextNextFootstep.getSoleReferenceFrame());
+      FramePose nextNextNextFootstepPose = new FramePose(footstepSolutions.get(2).getSoleReferenceFrame());
       yoNextNextNextFootstepPose.setAndMatchFrame(nextNextNextFootstepPose);
 
-      RobotSide supportSide = nextFootstep.getRobotSide().getOppositeSide();
+      RobotSide supportSide = footstepSolutions.get(0).getRobotSide().getOppositeSide();
       FootSpoof footSpoof = contactableFeet.get(supportSide.getOppositeSide());
       FramePose nextSupportPose = footPosesAtTouchdown.get(supportSide.getOppositeSide());
-      nextSupportPose.setToZero(nextFootstep.getSoleReferenceFrame());
+      nextSupportPose.setToZero(footstepSolutions.get(0).getSoleReferenceFrame());
       nextSupportPose.changeFrame(ReferenceFrame.getWorldFrame());
       footSpoof.setSoleFrame(nextSupportPose);
    }
@@ -527,16 +578,13 @@ public class StepAdjustmentExampleGraphic
    private final FramePoint desiredICP3d = new FramePoint();
    public void updateTrajectoyViz()
    {
-      Footstep nextFootstep = nextFootsteps.get(0);
-      Footstep nextNextFootstep = nextFootsteps.get(1);
-      Footstep nextNextNextFootstep = nextFootsteps.get(2);
-
       icpPlanner.clearPlan();
       timing.setTimings(singleSupportDuration.getDoubleValue(), doubleSupportDuration.getDoubleValue());
-      icpPlanner.addFootstepToPlan(nextFootstep, timing);
-      icpPlanner.addFootstepToPlan(nextNextFootstep, timing);
-      icpPlanner.addFootstepToPlan(nextNextNextFootstep, timing);
+      icpPlanner.addFootstepToPlan(footstepSolutions.get(0), timing);
+      icpPlanner.addFootstepToPlan(footstepSolutions.get(1), timing);
+      icpPlanner.addFootstepToPlan(footstepSolutions.get(2), timing);
 
+      icpPlanner.setSupportLeg(plannedFootsteps.get(0).getRobotSide().getOppositeSide());
       icpPlanner.initializeForSingleSupport(initialTime);
 
       double trajectoryDT = singleSupportDuration.getDoubleValue() / numberOfBalls;
@@ -549,16 +597,13 @@ public class StepAdjustmentExampleGraphic
          bagOfBalls.setBall(desiredICP3d, i);
       }
 
-      nextFootstep = footsteps.get(0);
-      nextNextFootstep = footsteps.get(1);
-      nextNextNextFootstep = footsteps.get(2);
-
       icpPlanner.clearPlan();
-      timing.setTimings(doubleSupportDuration.getDoubleValue(), singleSupportDuration.getDoubleValue());
-      icpPlanner.addFootstepToPlan(nextFootstep, timing);
-      icpPlanner.addFootstepToPlan(nextNextFootstep, timing);
-      icpPlanner.addFootstepToPlan(nextNextNextFootstep, timing);
+      timing.setTimings(singleSupportDuration.getDoubleValue(), doubleSupportDuration.getDoubleValue());
+      icpPlanner.addFootstepToPlan(plannedFootsteps.get(0), timing);
+      icpPlanner.addFootstepToPlan(plannedFootsteps.get(1), timing);
+      icpPlanner.addFootstepToPlan(plannedFootsteps.get(2), timing);
 
+      icpPlanner.setSupportLeg(plannedFootsteps.get(0).getRobotSide().getOppositeSide());
       icpPlanner.initializeForSingleSupport(initialTime);
    }
 
@@ -1386,7 +1431,7 @@ public class StepAdjustmentExampleGraphic
          @Override
          public double getLateralReachabilityInnerLimit()
          {
-            return 0.05;
+            return -0.15;
          }
 
          @Override
@@ -1403,7 +1448,7 @@ public class StepAdjustmentExampleGraphic
 
          @Override public double getDynamicRelaxationWeight()
          {
-            return 1000.0;
+            return 10000.0;
          }
 
          @Override public double getDynamicRelaxationDoubleSupportWeightModifier()
