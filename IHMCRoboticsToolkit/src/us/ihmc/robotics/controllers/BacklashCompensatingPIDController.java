@@ -136,7 +136,7 @@ public class BacklashCompensatingPIDController extends PIDController
             switchTime.set(time);
          }
          
-         percentRampDown = MathTools.clipToMinMax(percentRampDown, 0.0, 1.0);
+         percentRampDown = MathTools.clamp(percentRampDown, 0.0, 1.0);
          gainReduction.set(1.0 - percentRampDown * (1.0 - lowGainReduction.getDoubleValue()));
          
          break;
@@ -153,7 +153,7 @@ public class BacklashCompensatingPIDController extends PIDController
             switchTime.set(time);
          }
          
-         percentRampUp = MathTools.clipToMinMax(percentRampUp, 0.0, 1.0);
+         percentRampUp = MathTools.clamp(percentRampUp, 0.0, 1.0);
          gainReduction.set(lowGainReduction.getDoubleValue() + percentRampUp * (1.0 - lowGainReduction.getDoubleValue()));
          
          break;

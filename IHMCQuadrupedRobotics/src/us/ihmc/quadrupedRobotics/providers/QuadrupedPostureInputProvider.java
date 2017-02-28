@@ -87,11 +87,11 @@ public class QuadrupedPostureInputProvider implements QuadrupedPostureInputProvi
             {
                comPositionPacket.set(packet);
                yoComPositionInputX.set(
-                     MathTools.clipToMinMax(comPositionPacket.get().getX(), comPositionLowerLimitsParameter.get(0), comPositionUpperLimitsParameter.get(0)));
+                     MathTools.clamp(comPositionPacket.get().getX(), comPositionLowerLimitsParameter.get(0), comPositionUpperLimitsParameter.get(0)));
                yoComPositionInputY.set(
-                     MathTools.clipToMinMax(comPositionPacket.get().getY(), comPositionLowerLimitsParameter.get(1), comPositionUpperLimitsParameter.get(1)));
+                     MathTools.clamp(comPositionPacket.get().getY(), comPositionLowerLimitsParameter.get(1), comPositionUpperLimitsParameter.get(1)));
                yoComPositionInputZ.set(
-                     MathTools.clipToMinMax(comPositionPacket.get().getZ(), comPositionLowerLimitsParameter.get(2), comPositionUpperLimitsParameter.get(2)));
+                     MathTools.clamp(comPositionPacket.get().getZ(), comPositionLowerLimitsParameter.get(2), comPositionUpperLimitsParameter.get(2)));
             }
          });
 
@@ -102,11 +102,11 @@ public class QuadrupedPostureInputProvider implements QuadrupedPostureInputProvi
             {
                comVelocityPacket.set(packet);
                yoComVelocityInputX.set(
-                     MathTools.clipToMinMax(comVelocityPacket.get().getX(), comVelocityLowerLimitsParameter.get(0), comVelocityUpperLimitsParameter.get(0)));
+                     MathTools.clamp(comVelocityPacket.get().getX(), comVelocityLowerLimitsParameter.get(0), comVelocityUpperLimitsParameter.get(0)));
                yoComVelocityInputY.set(
-                     MathTools.clipToMinMax(comVelocityPacket.get().getY(), comVelocityLowerLimitsParameter.get(1), comVelocityUpperLimitsParameter.get(1)));
+                     MathTools.clamp(comVelocityPacket.get().getY(), comVelocityLowerLimitsParameter.get(1), comVelocityUpperLimitsParameter.get(1)));
                yoComVelocityInputZ.set(
-                     MathTools.clipToMinMax(comVelocityPacket.get().getZ(), comVelocityLowerLimitsParameter.get(2), comVelocityUpperLimitsParameter.get(2)));
+                     MathTools.clamp(comVelocityPacket.get().getZ(), comVelocityLowerLimitsParameter.get(2), comVelocityUpperLimitsParameter.get(2)));
             }
          });
 
@@ -116,11 +116,11 @@ public class QuadrupedPostureInputProvider implements QuadrupedPostureInputProvi
             public void receivedPacket(BodyOrientationPacket packet)
             {
                bodyOrientationPacket.set(packet);
-               yoBodyOrientationInputYaw.set(MathTools.clipToMinMax(bodyOrientationPacket.get().getYaw(), bodyOrientationLowerLimitsParameter.get(0),
+               yoBodyOrientationInputYaw.set(MathTools.clamp(bodyOrientationPacket.get().getYaw(), bodyOrientationLowerLimitsParameter.get(0),
                      bodyOrientationUpperLimitsParameter.get(0)));
-               yoBodyOrientationInputPitch.set(MathTools.clipToMinMax(bodyOrientationPacket.get().getPitch(), bodyOrientationLowerLimitsParameter.get(1),
+               yoBodyOrientationInputPitch.set(MathTools.clamp(bodyOrientationPacket.get().getPitch(), bodyOrientationLowerLimitsParameter.get(1),
                      bodyOrientationUpperLimitsParameter.get(1)));
-               yoBodyOrientationInputRoll.set(MathTools.clipToMinMax(bodyOrientationPacket.get().getRoll(), bodyOrientationLowerLimitsParameter.get(2),
+               yoBodyOrientationInputRoll.set(MathTools.clamp(bodyOrientationPacket.get().getRoll(), bodyOrientationLowerLimitsParameter.get(2),
                      bodyOrientationUpperLimitsParameter.get(2)));
             }
          });
@@ -131,11 +131,11 @@ public class QuadrupedPostureInputProvider implements QuadrupedPostureInputProvi
             public void receivedPacket(BodyAngularRatePacket packet)
             {
                bodyAngularRatePacket.set(packet);
-               yoBodyAngularRateInputX.set(MathTools.clipToMinMax(bodyAngularRatePacket.get().getX(), bodyAngularRateLowerLimitsParameter.get(0),
+               yoBodyAngularRateInputX.set(MathTools.clamp(bodyAngularRatePacket.get().getX(), bodyAngularRateLowerLimitsParameter.get(0),
                      bodyAngularRateUpperLimitsParameter.get(0)));
-               yoBodyAngularRateInputY.set(MathTools.clipToMinMax(bodyAngularRatePacket.get().getY(), bodyAngularRateLowerLimitsParameter.get(1),
+               yoBodyAngularRateInputY.set(MathTools.clamp(bodyAngularRatePacket.get().getY(), bodyAngularRateLowerLimitsParameter.get(1),
                      bodyAngularRateUpperLimitsParameter.get(1)));
-               yoBodyAngularRateInputZ.set(MathTools.clipToMinMax(bodyAngularRatePacket.get().getZ(), bodyAngularRateLowerLimitsParameter.get(2),
+               yoBodyAngularRateInputZ.set(MathTools.clamp(bodyAngularRatePacket.get().getZ(), bodyAngularRateLowerLimitsParameter.get(2),
                      bodyAngularRateUpperLimitsParameter.get(2)));
             }
          });

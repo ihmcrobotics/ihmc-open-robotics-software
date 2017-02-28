@@ -90,7 +90,7 @@ public class PinJointPhysics extends JointPhysics<PinJoint>
       if (owner.tau_max != null)
       {
          double maxTorque = owner.tau_max.getDoubleValue();
-         owner.getTauYoVariable().set(MathTools.clipToMinMax(owner.getTau(), -maxTorque, maxTorque));
+         owner.getTauYoVariable().set(MathTools.clamp(owner.getTau(), -maxTorque, maxTorque));
       }
 
       Q_i = owner.doPDControl() + owner.getTau();

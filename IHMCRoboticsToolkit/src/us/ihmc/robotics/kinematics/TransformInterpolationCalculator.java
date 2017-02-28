@@ -31,7 +31,7 @@ public class TransformInterpolationCalculator
     */
    public void computeInterpolation(RigidBodyTransform transform1, RigidBodyTransform transform2, RigidBodyTransform result, double alpha)
    {
-      alpha = MathTools.clipToMinMax(alpha, 0.0, 1.0);
+      alpha = MathTools.clamp(alpha, 0.0, 1.0);
       
       transform1.get(transform1Quaternion, transform1Translation);
       transform2.get(transform2Quaternion, transform2Translation);

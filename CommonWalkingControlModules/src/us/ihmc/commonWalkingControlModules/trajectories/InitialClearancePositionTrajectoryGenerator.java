@@ -291,7 +291,7 @@ public class InitialClearancePositionTrajectoryGenerator implements PositionTraj
       this.currentTime.set(time);
 
       double tIntermediate = leaveTime.getDoubleValue();
-      xyPolynomial.compute(MathTools.clipToMinMax(time, tIntermediate, trajectoryTime.getDoubleValue()));
+      xyPolynomial.compute(MathTools.clamp(time, tIntermediate, trajectoryTime.getDoubleValue()));
       boolean shouldBeZero = currentTime.getDoubleValue() >= tIntermediate || currentTime.getDoubleValue() < 0.0;
       double alphaDot = shouldBeZero ? 0.0 : xyPolynomial.getVelocity();
       double alphaDDot = shouldBeZero ? 0.0 : xyPolynomial.getAcceleration();
@@ -300,7 +300,7 @@ public class InitialClearancePositionTrajectoryGenerator implements PositionTraj
       currentVelocity.subAndScale(alphaDot, finalPosition, initialPosition);
       currentAcceleration.subAndScale(alphaDDot, finalPosition, initialPosition);
 
-      zPolynomial.compute(MathTools.clipToMinMax(time, 0.0, trajectoryTime.getDoubleValue()));
+      zPolynomial.compute(MathTools.clamp(time, 0.0, trajectoryTime.getDoubleValue()));
       shouldBeZero = isDone() || currentTime.getDoubleValue() < 0.0;
       alphaDot = shouldBeZero ? 0.0 : zPolynomial.getVelocity();
       alphaDDot = shouldBeZero ? 0.0 : zPolynomial.getAcceleration();

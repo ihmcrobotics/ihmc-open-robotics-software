@@ -131,7 +131,7 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
 
    public void setAlphaTaskPriority(double alpha)
    {
-      alphaTaskPriority = MathTools.clipToMinMax(alpha, 0.0, 1.0);
+      alphaTaskPriority = MathTools.clamp(alpha, 0.0, 1.0);
    }
 
    public void setSpatialAcceleration(SpatialAccelerationVector spatialAcceleration)

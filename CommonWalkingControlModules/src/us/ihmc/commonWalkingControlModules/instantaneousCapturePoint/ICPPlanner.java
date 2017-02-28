@@ -562,7 +562,7 @@ public class ICPPlanner
          return 0.0;
 
       double estimatedTimeRemaining = computeAndReturnTimeRemaining(time) - deltaTimeToBeAccounted;
-      estimatedTimeRemaining = MathTools.clipToMinMax(estimatedTimeRemaining, 0.0, Double.POSITIVE_INFINITY);
+      estimatedTimeRemaining = MathTools.clamp(estimatedTimeRemaining, 0.0, Double.POSITIVE_INFINITY);
 
       return estimatedTimeRemaining;
    }
@@ -633,7 +633,7 @@ public class ICPPlanner
          singleSupportInitialICP.getFrameTupleIncludingFrame(tempICP);
          tempICP.changeFrame(worldFrame);
          double currentSwingTime = swingTimes.get(0).getDoubleValue();
-         timeInCurrentState = MathTools.clipToMinMax(timeInCurrentState, 0.0, currentSwingTime);
+         timeInCurrentState = MathTools.clamp(timeInCurrentState, 0.0, currentSwingTime);
          CapturePointTools.computeDesiredCapturePointPosition(omega0.getDoubleValue(), timeInCurrentState, tempICP, tempConstantCMP, desiredCapturePointPosition);
          CapturePointTools.computeDesiredCapturePointVelocity(omega0.getDoubleValue(), timeInCurrentState, tempICP, tempConstantCMP, desiredCapturePointVelocity);
          CapturePointTools.computeDesiredCapturePointAcceleration(omega0.getDoubleValue(), timeInCurrentState, tempICP, tempConstantCMP, desiredCapturePointAcceleration);
@@ -662,7 +662,7 @@ public class ICPPlanner
       }
       else
       {
-         velocityReductionFactor.set(MathTools.clipToMinMax(1.0 - hasBeenDoneForDuration / velocityDecayDurationWhenDone.getDoubleValue(), 0.0, 1.0));
+         velocityReductionFactor.set(MathTools.clamp(1.0 - hasBeenDoneForDuration / velocityDecayDurationWhenDone.getDoubleValue(), 0.0, 1.0));
          desiredCapturePointVelocity.scale(velocityReductionFactor.getDoubleValue());
       }
    }

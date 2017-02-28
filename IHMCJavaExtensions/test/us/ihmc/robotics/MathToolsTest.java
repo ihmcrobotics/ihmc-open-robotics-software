@@ -16,7 +16,10 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import us.ihmc.commons.Assertions;
+import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.commons.RandomNumbers;
+import us.ihmc.commons.RunnableThatThrows;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public class MathToolsTest
@@ -48,47 +51,96 @@ public class MathToolsTest
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000, expected = RuntimeException.class)
-   public void testClipToMinMaxWrongBounds()
+   @Test(timeout = 30000)
+   public void testClampWrongBounds()
    {
-      double min = 1.0;
-      double max = 0.9;
-      MathTools.clipToMinMax(5.0, min, max);
+      Assertions.assertExceptionThrown(RuntimeException.class, new RunnableThatThrows()
+      {
+         @Override
+         public void run() throws Throwable
+         {
+            double min = 1.0;
+            double max = 0.9;
+            MathTools.clamp(5.0, min, max);
+         }
+      });
+      Assertions.assertExceptionThrown(RuntimeException.class, new RunnableThatThrows()
+      {
+         @Override
+         public void run() throws Throwable
+         {
+            float min = 1.0f;
+            float max = 0.9f;
+            MathTools.clamp(5.0, min, max);
+         }
+      });
+      Assertions.assertExceptionThrown(RuntimeException.class, new RunnableThatThrows()
+      {
+         @Override
+         public void run() throws Throwable
+         {
+            int min = 1;
+            int max = -1;
+            MathTools.clamp(5.0, min, max);
+         }
+      });
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
-   public void testClipToMinMax_2()
+   public void testClamp2()
    {
       Random rand = new Random();
       for (int i = 0; i < 1000; i++)
       {
          double max = rand.nextDouble() * 1000.0;
-         double clippedVal = MathTools.clipToMinMax(max * 2.0, max);
+         double clippedVal = MathTools.clamp(max * 2.0, max);
          assertEquals(clippedVal, max, 1e-7);
 
          max = rand.nextDouble() * 1000.0;
-         clippedVal = MathTools.clipToMinMax(max * -2.0, max);
+         clippedVal = MathTools.clamp(max * -2.0, max);
          assertEquals(clippedVal, -max, 1e-7);
 
          max = rand.nextDouble() * 1000.0;
-         clippedVal = MathTools.clipToMinMax((float) (max * 2.0), (float) max);
+         clippedVal = MathTools.clamp((float) (max * 2.0), (float) max);
          assertEquals(clippedVal, max, 1e-4);
 
          max = rand.nextDouble() * 1000.0;
-         clippedVal = MathTools.clipToMinMax((float) (max * -2.0), (float) max);
+         clippedVal = MathTools.clamp((float) (max * -2.0), (float) max);
          assertEquals(clippedVal, -max, 1e-4);
+         
+         int maxInt = rand.nextInt(1000);
+         int clippedInt = MathTools.clamp(maxInt * -2, maxInt);
+         assertEquals(clippedInt, -maxInt, 1e-4);
+         
+         maxInt = rand.nextInt(1000);
+         clippedInt = MathTools.clamp(maxInt * 2, maxInt);
+         assertEquals(clippedInt, maxInt, 1e-4);
+         
+         maxInt = rand.nextInt(1000);
+         clippedInt = MathTools.clamp(maxInt, maxInt);
+         assertEquals(clippedInt, maxInt, 1e-4);
+         
+         maxInt = rand.nextInt(1000);
+         clippedInt = MathTools.clamp(-maxInt, maxInt);
+         assertEquals(clippedInt, -maxInt, 1e-4);
+         
+         maxInt = rand.nextInt(1000);
+         clippedInt = MathTools.clamp(-maxInt / 2, maxInt);
+         assertEquals(clippedInt, -maxInt / 2, 1e-4);
+         
+         maxInt = rand.nextInt(1000);
+         clippedInt = MathTools.clamp(maxInt / 2, maxInt);
+         assertEquals(clippedInt, maxInt / 2, 1e-4);
       }
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
-   public void testClipToMinMaxNaN()
+   public void testClampNaN()
    {
-      assertTrue(Double.isNaN(MathTools.clipToMinMax(Double.NaN, 0.0, 1.0)));
+      assertTrue(Double.isNaN(MathTools.clamp(Double.NaN, 0.0, 1.0)));
    }
-
-
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
@@ -109,14 +161,14 @@ public class MathToolsTest
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
-   public void testClipToMinMax()
+   public void testClamp()
    {
       for (int i = 0; i < 10; i++)
       {
          double min = random.nextDouble();
          double max = min + random.nextDouble();
          double val = 3.0 * (random.nextDouble() - 0.25);
-         double result = MathTools.clipToMinMax(val, min, max);
+         double result = MathTools.clamp(val, min, max);
 
          boolean tooSmall = result < min;
          boolean tooBig = result > max;
@@ -802,5 +854,10 @@ public class MathToolsTest
       assertEquals(3, MathTools.orderOfMagnitude(1000.01));
       assertEquals(3, MathTools.orderOfMagnitude(1000.0));
       assertEquals(4, MathTools.orderOfMagnitude(10000.0));
+   }
+   
+   public static void main(String[] args)
+   {
+      MutationTestFacilitator.facilitateMutationTestForClass(MathTools.class, MathToolsTest.class);
    }
 }

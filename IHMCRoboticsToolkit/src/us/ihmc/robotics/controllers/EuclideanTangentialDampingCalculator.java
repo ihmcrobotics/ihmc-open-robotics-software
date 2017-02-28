@@ -83,7 +83,7 @@ public class EuclideanTangentialDampingCalculator
 
    private double computeDampingReductionRatioParallelToMotion(double parallelError)
    {
-      double reductionRatio = MathTools.clipToMinMax(tangentialDampingGains.getKdReductionRatio(), 0.0, 1.0);
+      double reductionRatio = MathTools.clamp(tangentialDampingGains.getKdReductionRatio(), 0.0, 1.0);
       double deadband = tangentialDampingGains.getParallelDampingDeadband();
       double maxError = tangentialDampingGains.getPositionErrorForMinimumKd();
 

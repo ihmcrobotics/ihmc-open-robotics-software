@@ -240,7 +240,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
             {
                double averageVelocity = RandomNumbers.nextDouble(random, 1.0);
                desiredJointPositions[jointIndex] += averageVelocity * timePerWaypoint;
-               desiredJointPositions[jointIndex] = MathTools.clipToMinMax(desiredJointPositions[jointIndex], joint.getJointLimitLower(), joint.getJointLimitUpper());
+               desiredJointPositions[jointIndex] = MathTools.clamp(desiredJointPositions[jointIndex], joint.getJointLimitLower(), joint.getJointLimitUpper());
                trajectoryPoint1DCalculator.appendTrajectoryPoint(waypointTime, desiredJointPositions[jointIndex]);
                waypointTime += timePerWaypoint;
             }

@@ -176,11 +176,11 @@ public class ComponentBasedDesiredFootstepCalculator extends AbstractDesiredFoot
 
       if (swingLegSide == RobotSide.LEFT)
       {
-         desiredOffsetFromSupport.setY(MathTools.clipToMinMax(desiredOffsetFromSupport.getY(), minStepWidth.getDoubleValue(), maxStepWidth.getDoubleValue()));
+         desiredOffsetFromSupport.setY(MathTools.clamp(desiredOffsetFromSupport.getY(), minStepWidth.getDoubleValue(), maxStepWidth.getDoubleValue()));
       }
       else
       {
-         desiredOffsetFromSupport.setY(MathTools.clipToMinMax(desiredOffsetFromSupport.getY(), -maxStepWidth.getDoubleValue(), -minStepWidth.getDoubleValue()));
+         desiredOffsetFromSupport.setY(MathTools.clamp(desiredOffsetFromSupport.getY(), -maxStepWidth.getDoubleValue(), -minStepWidth.getDoubleValue()));
       }
 
       double stepLength = desiredOffsetFromSupport.length();

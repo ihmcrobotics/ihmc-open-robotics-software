@@ -78,10 +78,10 @@ public class RobotJointVelocityAccelerationIntegrator
          {
             OneDoFJoint joint = (OneDoFJoint) joints[i];
 
-            double qDot = MathTools.clipToMinMax(jointVelocitiesToIntegrate.get(jointStartIndex, 0), maximumOneDoFJointVelocity);
+            double qDot = MathTools.clamp(jointVelocitiesToIntegrate.get(jointStartIndex, 0), maximumOneDoFJointVelocity);
 
             double q = joint.getQ() + qDot * controlDT;
-            q = MathTools.clipToMinMax(q, joint.getJointLimitLower(), joint.getJointLimitUpper());
+            q = MathTools.clamp(q, joint.getJointLimitLower(), joint.getJointLimitUpper());
             qDot = (q - joint.getQ()) / controlDT;
 
             jointConfigurations.set(jointConfigurationStartIndex, 0, q);
@@ -146,10 +146,10 @@ public class RobotJointVelocityAccelerationIntegrator
          {
             OneDoFJoint joint = (OneDoFJoint) joints[i];
 
-            double qDDot = MathTools.clipToMinMax(jointAccelerationsToIntegrate.get(jointStartIndex, 0), maximumOneDoFJointAcceleration);
+            double qDDot = MathTools.clamp(jointAccelerationsToIntegrate.get(jointStartIndex, 0), maximumOneDoFJointAcceleration);
 
             double qDot = joint.getQd() + qDDot * controlDT;
-            qDot = MathTools.clipToMinMax(qDot, maximumOneDoFJointVelocity);
+            qDot = MathTools.clamp(qDot, maximumOneDoFJointVelocity);
             qDDot = (qDot - joint.getQd()) / controlDT;
 
             jointVelocities.set(jointStartIndex, 0, qDot);

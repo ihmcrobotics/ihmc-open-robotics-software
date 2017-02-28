@@ -121,7 +121,7 @@ public class WandererStandPrep implements WandererController
          break;
 
       case EXECUTE:
-         double timeInTrajectory = MathTools.clipToMinMax(Conversions.nanoSecondstoSeconds(timestamp) - initialTime.getDoubleValue(), 0, trajectoryTime);
+         double timeInTrajectory = MathTools.clamp(Conversions.nanoSecondstoSeconds(timestamp) - initialTime.getDoubleValue(), 0, trajectoryTime);
          trajectory.compute(timeInTrajectory);
          double positionScale = trajectory.getPosition();
 

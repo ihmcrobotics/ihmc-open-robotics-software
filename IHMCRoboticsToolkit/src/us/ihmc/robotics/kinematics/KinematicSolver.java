@@ -150,7 +150,7 @@ public class KinematicSolver implements InverseKinematicsCalculator
       for (int i = 0; i < oneDoFJoints.length; i++)
       {
          double newQ = oneDoFJoints[i].getQ() + correction.get(i, 0);
-         newQ = MathTools.clipToMinMax(newQ, oneDoFJoints[i].getJointLimitLower(), oneDoFJoints[i].getJointLimitUpper());
+         newQ = MathTools.clamp(newQ, oneDoFJoints[i].getJointLimitLower(), oneDoFJoints[i].getJointLimitUpper());
          oneDoFJoints[i].setQ(newQ);
          oneDoFJoints[i].getFrameAfterJoint().update();
       }

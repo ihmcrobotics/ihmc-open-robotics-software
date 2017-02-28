@@ -2245,7 +2245,7 @@ public class DiagnosticBehavior extends AbstractBehavior
          double qLow = joint.getJointLimitLower();
          double qUp = joint.getJointLimitUpper();
          double qRange = qUp - qLow;
-         desiredUpperArmJointAngles[i] = MathTools.clipToMinMax(qDesired, qLow + 0.01 * qRange, qUp - 0.01 * qRange);
+         desiredUpperArmJointAngles[i] = MathTools.clamp(qDesired, qLow + 0.01 * qRange, qUp - 0.01 * qRange);
       }
 
       return desiredUpperArmJointAngles;

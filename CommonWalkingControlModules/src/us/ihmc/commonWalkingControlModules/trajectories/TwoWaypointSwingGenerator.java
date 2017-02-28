@@ -220,7 +220,7 @@ public class TwoWaypointSwingGenerator implements PositionTrajectoryGenerator
       double trajectoryTime = stepTime.getDoubleValue();
       isDone.set(time >= trajectoryTime);
 
-      time = MathTools.clipToMinMax(time, 0.0, trajectoryTime);
+      time = MathTools.clamp(time, 0.0, trajectoryTime);
       timeIntoStep.set(time);
 
       double percent = time / trajectoryTime;

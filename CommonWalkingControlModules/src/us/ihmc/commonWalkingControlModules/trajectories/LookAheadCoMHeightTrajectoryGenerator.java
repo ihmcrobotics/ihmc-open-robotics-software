@@ -558,7 +558,7 @@ public class LookAheadCoMHeightTrajectoryGenerator
    private void computeHeightsToUseByStretchingString(RobotSide transferFromSide)
    {
       // s0 is at previous
-      double z0 = MathTools.clipToMinMax(previousZFinals.get(transferFromSide).getDoubleValue(), s0Min.getY(), s0Max.getY());
+      double z0 = MathTools.clamp(previousZFinals.get(transferFromSide).getDoubleValue(), s0Min.getY(), s0Max.getY());
       s0.setY(z0);
 
       StringStretcher2d stringStretcher2d = new StringStretcher2d();

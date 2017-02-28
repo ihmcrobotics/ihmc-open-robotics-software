@@ -247,7 +247,7 @@ public class QuadrupedXGaitPlanner
       // Compute support durations and end phase shift.
       double nominalStepDuration = xGaitSettings.getStepDuration();
       double endDoubleSupportDuration = xGaitSettings.getEndDoubleSupportDuration();
-      double endPhaseShift = MathTools.clipToMinMax(xGaitSettings.getEndPhaseShift(), 0, 359);
+      double endPhaseShift = MathTools.clamp(xGaitSettings.getEndPhaseShift(), 0, 359);
       if (thisStepEnd == RobotEnd.HIND)
          endPhaseShift = 360 - endPhaseShift;
       if (pastStepSide != thisStepSide)
@@ -256,7 +256,7 @@ public class QuadrupedXGaitPlanner
       // Compute step time interval. Step duration is scaled in the range (1.0, 1.5) to account for end phase shifts.
       double thisStepStartTime = pastStepEndTimeForSameEnd + endDoubleSupportDuration;
       double thisStepEndTime = pastStepEndTimeForOppositeEnd + (nominalStepDuration + endDoubleSupportDuration) * endPhaseShift / 180.0;
-      double thisStepDuration = MathTools.clipToMinMax(thisStepEndTime - thisStepStartTime, nominalStepDuration, 1.5 * nominalStepDuration);
+      double thisStepDuration = MathTools.clamp(thisStepEndTime - thisStepStartTime, nominalStepDuration, 1.5 * nominalStepDuration);
 
       thisStep.getTimeInterval().setStartTime(thisStepStartTime);
       thisStep.getTimeInterval().setEndTime(thisStepStartTime + thisStepDuration);

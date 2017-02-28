@@ -42,7 +42,7 @@ public class FrameOrientation2d extends AbstractReferenceFrameHolder implements 
 
    public void interpolate(FrameOrientation2d orientationOne, FrameOrientation2d orientationTwo, double alpha)
    {
-      alpha = MathTools.clipToMinMax(alpha, 0.0, 1.0);
+      alpha = MathTools.clamp(alpha, 0.0, 1.0);
       extrapolate(orientationOne, orientationTwo, alpha);
    }
 
