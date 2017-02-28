@@ -1635,6 +1635,21 @@ public abstract class JointPhysics< J extends Joint>
       return externalForcePoints;
    }
 
+   public ExternalForcePoint getExternalForcePoint(String name)
+   {
+      if (externalForcePoints == null) 
+         return null;
+
+      for (int i=0; i<externalForcePoints.size(); i++)
+      {
+         ExternalForcePoint externalForcePoint = externalForcePoints.get(i);
+         if (externalForcePoint.getName().equals(name)) 
+            return externalForcePoint;
+      }
+
+      return null;
+   }
+
    /**
     * Recurse over the children of this joint and add their GroundContactPoints to the
     * provided ArrayList.

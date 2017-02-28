@@ -6,9 +6,6 @@ import us.ihmc.robotics.MathTools;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.PinJoint;
 
-/**
- * @author Peter Abeles
- */
 public class PinJointPhysics extends JointPhysics<PinJoint>
 {
 
