@@ -5,9 +5,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.SliderJoint;
 
-/**
- * @author Peter Abeles
- */
+
 public class SliderJointPhysics extends JointPhysics<SliderJoint>
 {
 

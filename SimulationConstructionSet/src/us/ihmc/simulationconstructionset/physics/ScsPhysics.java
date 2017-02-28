@@ -5,7 +5,6 @@ import us.ihmc.simulationconstructionset.physics.visualize.DefaultCollisionVisua
 /**
  * Data structure which contains references to high level implementations of the physics code
  *
- * @author Peter Abeles
  */
 public class ScsPhysics
 {
