@@ -199,9 +199,9 @@ public class Ramp3d extends Shape3d<Ramp3d>
    @Override
    protected boolean isInsideOrOnSurfaceShapeFrame(Point3DReadOnly pointToCheck, double epsilon)
    {
-      return MathTools.isPreciselyBoundedByInclusive(0.0, size.getX(), pointToCheck.getX(), epsilon * 2.0)
-          && MathTools.isPreciselyBoundedByInclusive(-size.getY() / 2.0, size.getY() / 2.0, pointToCheck.getY(), epsilon * 2.0)
-          && MathTools.isPreciselyBoundedByInclusive(0.0, size.getZ(), pointToCheck.getZ(), epsilon * 2.0)
+      return MathTools.isPreciselyBoundedByInclusive(pointToCheck.getX(), 0.0, size.getX(), epsilon * 2.0)
+          && MathTools.isPreciselyBoundedByInclusive(pointToCheck.getY(), -size.getY() / 2.0, size.getY() / 2.0, epsilon * 2.0)
+          && MathTools.isPreciselyBoundedByInclusive(pointToCheck.getZ(), 0.0, size.getZ(), epsilon * 2.0)
           && rampPlane.isOnOrBelow(pointToCheck, epsilon);
    }
 

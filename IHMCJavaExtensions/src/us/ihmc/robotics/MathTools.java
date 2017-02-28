@@ -1,7 +1,7 @@
 package us.ihmc.robotics;
 
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import us.ihmc.commons.Epsilons;
 
@@ -274,6 +274,22 @@ public class MathTools
       return ((val > min) && (val < max));
    }
 
+   public static boolean isBoundedByExclusive(double number, double boundaryOne, double boundaryTwo)
+   {
+      if (boundaryOne < boundaryTwo)
+      {
+         return number > boundaryOne && number < boundaryTwo;
+      }
+      else if (boundaryOne > boundaryTwo)
+      {
+         return number > boundaryTwo && number < boundaryOne;
+      }
+      else // (boundaryOne == boundaryTwo)
+      {
+         return false;
+      }
+   }
+
    public static boolean isInsideBoundsInclusive(double val, double max)
    {
       return isInsideBoundsInclusive(val, -max, max);
@@ -295,6 +311,18 @@ public class MathTools
       return ((val >= min) && (val <= max));
    }
 
+   public static boolean isBoundedByInclusive(double number, double boundaryOne, double boundaryTwo)
+   {
+      if (boundaryOne < boundaryTwo)
+      {
+         return number >= boundaryOne && number <= boundaryTwo;
+      }
+      else // (boundaryOne >= boundaryTwo)
+      {
+         return number >= boundaryTwo && number <= boundaryOne;
+      }
+   }
+
    public static boolean isInsideBoundsInclusive(long val, long min, long max)
    {
       if (min > max)
@@ -304,6 +332,16 @@ public class MathTools
       }
 
       return ((val >= min) && (val <= max));
+   }
+
+   public static boolean isPreciselyBoundedByInclusive(double number, double boundaryOne, double boundaryTwo, double precision)
+   {
+      return isBoundedByInclusive(roundToPrecision(number, precision), roundToPrecision(boundaryOne, precision), roundToPrecision(boundaryTwo, precision));
+   }
+
+   public static boolean isPreciselyBoundedByExclusive(double boundaryOne, double boundaryTwo, double number, double precision)
+   {
+      return isBoundedByExclusive(roundToPrecision(number, precision), roundToPrecision(boundaryOne, precision), roundToPrecision(boundaryTwo, precision));
    }
 
    /**
@@ -456,7 +494,7 @@ public class MathTools
     * @param array ArrayList<Double>
     * @return double
     */
-   public static double mean(ArrayList<Double> array)
+   public static double mean(List<Double> array)
    {
       double tot = 0.0;
       for (double d : array)
@@ -597,44 +635,6 @@ public class MathTools
       return roundToPrecision(numberOne, precision) <= roundToPrecision(numberTwo, precision);
    }
    
-   public static boolean isPreciselyBoundedByInclusive(double boundaryOne, double boundaryTwo, double number, double precision)
-   {
-      return isBoundedByInclusive(roundToPrecision(boundaryOne, precision), roundToPrecision(boundaryTwo, precision), roundToPrecision(number, precision));
-   }
-   
-   public static boolean isPreciselyBoundedByExclusive(double boundaryOne, double boundaryTwo, double number, double precision)
-   {
-      return isBoundedByExclusive(roundToPrecision(boundaryOne, precision), roundToPrecision(boundaryTwo, precision), roundToPrecision(number, precision));
-   }
-   
-   public static boolean isBoundedByInclusive(double boundaryOne, double boundaryTwo, double number)
-   {
-      if (boundaryOne < boundaryTwo)
-      {
-         return number >= boundaryOne && number <= boundaryTwo;
-      }
-      else // (boundaryOne >= boundaryTwo)
-      {
-         return number >= boundaryTwo && number <= boundaryOne;
-      }
-   }
-   
-   public static boolean isBoundedByExclusive(double boundaryOne, double boundaryTwo, double number)
-   {
-      if (boundaryOne < boundaryTwo)
-      {
-         return number > boundaryOne && number < boundaryTwo;
-      }
-      else if (boundaryOne > boundaryTwo)
-      {
-         return number > boundaryTwo && number < boundaryOne;
-      }
-      else // (boundaryOne == boundaryTwo)
-      {
-         return false;
-      }
-   }
-
    public static long gcd(long a, long b)
    {
       while(b > 0)
