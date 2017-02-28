@@ -606,11 +606,6 @@ public class MathTools
       }
    }
 
-   public static boolean isNumber(double proposed)
-   {
-      return (!Double.isNaN(proposed));
-   }
-
    public static boolean isFinite(Tuple3DBasics tuple)
    {
       return Double.isFinite(tuple.getX()) && Double.isFinite(tuple.getY()) && Double.isFinite(tuple.getZ());

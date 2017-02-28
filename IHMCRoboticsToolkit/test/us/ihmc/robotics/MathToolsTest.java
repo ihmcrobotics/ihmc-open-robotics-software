@@ -87,21 +87,6 @@ public class MathToolsTest
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
-   public void testIsNumber()
-   {
-      Random rand = new Random();
-      for (int i = 0; i < 1000; i++)
-      {
-         assertTrue(MathTools.isNumber(rand.nextDouble() * 1000.0));
-         assertFalse(new Vector3D(rand.nextDouble() * 1000.0, rand.nextDouble() * 1000.0, rand.nextDouble() * 1000.0).containsNaN());
-      }
-
-      assertFalse(MathTools.isNumber(Double.NaN));
-      assertTrue(new Vector3D(Double.NaN, Double.NaN, Double.NaN).containsNaN());
-   }
-
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
    public void testClipToMinMaxNaN()
    {
       assertTrue(Double.isNaN(MathTools.clipToMinMax(Double.NaN, 0.0, 1.0)));
