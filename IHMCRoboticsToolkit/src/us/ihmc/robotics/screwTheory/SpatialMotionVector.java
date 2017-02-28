@@ -557,6 +557,19 @@ public abstract class SpatialMotionVector
       if (this.expressedInFrame != expressedInFrame) throw new ReferenceFrameMismatchException("this.expressedInFrame != expressedInFrame");
    }
 
+   public boolean containsNaN(SpatialMotionVector spatialMotionVector)
+   {
+      if (Double.isNaN(getLinearPartX())) return true;
+      if (Double.isNaN(getLinearPartY())) return true;
+      if (Double.isNaN(getLinearPartZ())) return true;
+      
+      if (Double.isNaN(getAngularPartX())) return true;
+      if (Double.isNaN(getAngularPartY())) return true;
+      if (Double.isNaN(getAngularPartZ())) return true;
+
+      return false;
+   }
+
    ///CLOVER:OFF
    @Override
    public String toString()
