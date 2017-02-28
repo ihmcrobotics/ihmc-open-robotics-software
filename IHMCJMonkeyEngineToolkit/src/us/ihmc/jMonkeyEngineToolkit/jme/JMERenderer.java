@@ -127,7 +127,7 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
 
    static
    {
-      Path scsCachePath = PathTools.getTemporaryDirectoryPath().resolve("SCSCache");
+      Path scsCachePath = PathTools.systemTemporaryDirectory().resolve("SCSCache");
 
       FileTools.ensureDirectoryExists(scsCachePath, DefaultExceptionHandler.PRINT_STACKTRACE);
 

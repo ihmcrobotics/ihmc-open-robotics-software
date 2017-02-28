@@ -27,8 +27,12 @@ import us.ihmc.commons.Conversions;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 
 /**
- * A collection of tools to bridge the NIO.2 and Apache Commons IO APIs.
- * Includes some convenient tools that don't force the use of try-catch.
+ * <p>A collection of tools to extend Java's NIO.2 API. Tools here should fit one of
+ * the following categories:</p>
+ * 
+ * <ol>Provide a commonly needed method not provided by Apache Commons Lang or Java's NIO.2. API.</ol>
+ * <ol>Provide a wrapper around a commonly used method that uses a {@link DefaultExceptionHandler}.</ol>
+ * <ol>Provide a bridge between Java's NIO.2 API and Apache Commons Lang.</ol>
  */
 public class FileTools
 {

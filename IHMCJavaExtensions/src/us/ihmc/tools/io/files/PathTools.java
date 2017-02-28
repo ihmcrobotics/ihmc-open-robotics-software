@@ -23,39 +23,6 @@ public class PathTools
    private static final String GLOB_SYNTAX_PREFIX = "glob:";
    private static final String REGEX_SYNTAX_PREFIX = "regex:";
    
-   public static List<Path> findAllPathsRecursivelyThatMatchRegex(Path rootPath, String regex)
-   {
-      final PathMatcher matcher = FileSystems.getDefault().getPathMatcher(REGEX_SYNTAX_PREFIX + regex);
-      final List<Path> matchingPaths = new ArrayList<Path>();
-      
-      walkRecursively(rootPath, new BasicPathVisitor()
-      {
-         @Override
-         public FileVisitResult visitPath(Path path, PathType pathType)
-         {
-            if (matcher.matches(path))
-               matchingPaths.add(path);
-            
-            return FileVisitResult.CONTINUE;
-         }
-      });
-      
-      return matchingPaths;
-   }
-   
-   public static boolean contains(Path path, String name)
-   {
-      for (int i = 0; i < path.getNameCount(); i++)
-      {
-         if (path.getName(i).toString().equals(name))
-         {
-            return true;
-         }
-      }
-
-      return false;
-   }
-
    /**
     * Get the base name of a file. A bridge from Java's NIO.2 to Apache Commons IO.
     * 
@@ -76,6 +43,33 @@ public class PathTools
    public static String getExtension(Path path)
    {
       return FilenameUtils.getExtension(path.toString());
+   }
+
+   public static Path systemTemporaryDirectory()
+   {
+      return Paths.get(System.getProperty("java.io.tmpdir"));
+   }
+
+   public static List<Path> findAllPathsRecursivelyThatMatchRegex(Path rootPath, String regex)
+   {
+      final PathMatcher matcher = FileSystems.getDefault().getPathMatcher(REGEX_SYNTAX_PREFIX + regex);
+      final List<Path> matchingPaths = new ArrayList<Path>();
+      
+      walkRecursively(rootPath, new BasicPathVisitor()
+      {
+         @Override
+         public FileVisitResult visitPath(Path path, PathType pathType)
+         {
+            if (matcher.matches(path))
+            {
+               matchingPaths.add(path);
+            }
+            
+            return FileVisitResult.CONTINUE;
+         }
+      });
+      
+      return matchingPaths;
    }
 
    public static Path findFirstPathMatchingGlob(Path directory, final String glob)
@@ -153,7 +147,9 @@ public class PathTools
             public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException
             {
                if (dir.equals(directory))
+               {
                   return FileVisitResult.CONTINUE;
+               }
                
                return basicFileVisitor.visitPath(dir, PathType.DIRECTORY);
             }
@@ -165,6 +161,7 @@ public class PathTools
                {
                   return basicFileVisitor.visitPath(file, PathType.DIRECTORY);
                }
+               else
                {
                   return basicFileVisitor.visitPath(file, PathType.FILE);
                }
@@ -186,10 +183,5 @@ public class PathTools
    public static void walkFlat(final Path directory, final BasicPathVisitor basicFileVisitor)
    {
       walkDepth(directory, 1, basicFileVisitor);
-   }
-
-   public static Path getTemporaryDirectoryPath()
-   {
-      return Paths.get(System.getProperty("java.io.tmpdir"));
    }
 }
