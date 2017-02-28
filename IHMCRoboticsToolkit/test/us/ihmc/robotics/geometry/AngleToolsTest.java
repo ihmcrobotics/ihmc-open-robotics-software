@@ -419,6 +419,15 @@ public class AngleToolsTest
       expected = AngleTools.angleMinusPiToPi(vectorA, vectorB);
       assertTrue(Double.isNaN(expected));
    }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testAngleFromZeroToTwoPi()
+   {
+      assertEquals("not equal", 0.0, AngleTools.angleFromZeroToTwoPi(0.0, 0.0), 1e-7);
+      assertEquals("not equal", Math.PI / 4.0, AngleTools.angleFromZeroToTwoPi(1.0, 1.0), 1e-7);
+      assertEquals("not equal", 7.0 * Math.PI / 4.0, AngleTools.angleFromZeroToTwoPi(1.0, -1.0), 1e-7);
+   }
    
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)

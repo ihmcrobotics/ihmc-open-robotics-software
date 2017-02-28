@@ -295,4 +295,24 @@ public class AngleTools
       return heading;
    }
 
+   /**
+    * Pass in a vector. Get its angle in polar coordinates.
+    * 
+    * @param vx
+    * @param vy
+    * @return angle of vector from 0 to 2PI
+    */
+   public static double angleFromZeroToTwoPi(double vx, double vy)
+   {
+      double angleFromNegtivePiToPi = Math.atan2(vy, vx);
+      
+      if (angleFromNegtivePiToPi < 0.0)
+      {
+         return 2.0 * Math.PI + angleFromNegtivePiToPi;
+      }
+      else
+      {
+         return angleFromNegtivePiToPi;
+      }
+   }
 }
