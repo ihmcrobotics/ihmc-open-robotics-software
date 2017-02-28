@@ -11,6 +11,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.robotics.MathTools;
 
 public class FormattingToolsTest
 {
@@ -84,8 +85,8 @@ public class FormattingToolsTest
    @Test(timeout = 30000)
    public void testFormatToSignificantFigures()
    {
-      assertEquals("not equal", 100, FormattingTools.roundToSignificantFigures(123.45, 1), 1e-12);
-      assertEquals("not equal", 120, FormattingTools.roundToSignificantFigures(123.45, 2), 1e-12);
+      assertEquals("not equal", 100, MathTools.roundToSignificantFigures(123.45, 1), 1e-12);
+      assertEquals("not equal", 120, MathTools.roundToSignificantFigures(123.45, 2), 1e-12);
    }
 	
    @ContinuousIntegrationTest(estimatedDuration = 0.0)

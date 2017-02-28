@@ -1,4 +1,4 @@
-package us.ihmc.robotics.math;
+package us.ihmc.commons;
 
 public class Epsilons
 {
