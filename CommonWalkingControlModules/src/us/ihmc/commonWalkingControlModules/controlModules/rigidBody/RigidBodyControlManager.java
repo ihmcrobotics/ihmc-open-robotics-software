@@ -36,7 +36,7 @@ import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.GenericStateMac
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateMachineTools;
 import us.ihmc.tools.io.printing.PrintTools;
 
-public class RigidBodyManager
+public class RigidBodyControlManager
 {
    private final String bodyName;
    private final YoVariableRegistry registry;
@@ -58,7 +58,7 @@ public class RigidBodyManager
    private final ReferenceFrame bodyFrame;
    private final ReferenceFrame rootFrame;
 
-   public RigidBodyManager(RigidBody bodyToControl, RigidBody rootBody, HighLevelHumanoidControllerToolbox humanoidControllerToolbox,
+   public RigidBodyControlManager(RigidBody bodyToControl, RigidBody rootBody, HighLevelHumanoidControllerToolbox humanoidControllerToolbox,
          WalkingControllerParameters walkingControllerParameters, Map<BaseForControl, ReferenceFrame> controlFrameMap, ReferenceFrame rootFrame,
          YoVariableRegistry parentRegistry)
    {
