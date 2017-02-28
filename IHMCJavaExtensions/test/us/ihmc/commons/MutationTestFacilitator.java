@@ -23,10 +23,10 @@ import java.util.concurrent.TimeUnit;
 import org.pitest.mutationtest.commandline.MutationCoverageReport;
 
 import us.ihmc.commons.exception.DefaultExceptionHandler;
+import us.ihmc.commons.nio.BasicPathVisitor;
 import us.ihmc.commons.nio.FileTools;
+import us.ihmc.commons.nio.PathTools;
 import us.ihmc.commons.nio.WriteOption;
-import us.ihmc.tools.io.files.BasicPathVisitor;
-import us.ihmc.tools.io.files.PathTools;
 
 /**
  * <p>Easily run mutation tests and display the results in your web browser. This class is designed to wrap an otherwise command-line only tool.</p>

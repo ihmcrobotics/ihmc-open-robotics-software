@@ -1,9 +1,10 @@
-package us.ihmc.tools.io.files;
+package us.ihmc.commons.nio;
 
 import java.io.IOException;
 import java.nio.file.FileSystems;
 import java.nio.file.FileVisitOption;
 import java.nio.file.FileVisitResult;
+import java.nio.file.FileVisitor;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
@@ -17,7 +18,7 @@ import java.util.List;
 import org.apache.commons.io.FilenameUtils;
 
 import us.ihmc.commons.exception.DefaultExceptionHandler;
-import us.ihmc.tools.io.files.BasicPathVisitor.PathType;
+import us.ihmc.commons.nio.BasicPathVisitor.PathType;
 
 /**
  * <p>A collection of tools to extend Java's NIO.2 API and

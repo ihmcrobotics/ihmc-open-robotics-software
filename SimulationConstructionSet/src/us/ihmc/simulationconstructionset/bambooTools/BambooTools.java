@@ -15,10 +15,10 @@ import java.util.Comparator;
 
 import org.apache.commons.lang3.SystemUtils;
 
+import us.ihmc.commons.nio.PathTools;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.gui.GUIMessageFrame;
 import us.ihmc.tools.FormattingTools;
-import us.ihmc.tools.io.files.PathTools;
 import us.ihmc.tools.io.printing.PrintTools;
 
 public class BambooTools
