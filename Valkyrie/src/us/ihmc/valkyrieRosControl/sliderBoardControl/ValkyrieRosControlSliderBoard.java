@@ -242,9 +242,9 @@ public class ValkyrieRosControlSliderBoard extends IHMCWholeRobotControlJavaBrid
 
       tauFunctionSelected.set(selectedFunctionGenerator.getValue());
 
-      masterScaleFactor.set(MathTools.clipToMinMax(masterScaleFactor.getDoubleValue(), 0.0, 1.0));
+      masterScaleFactor.set(MathTools.clamp(masterScaleFactor.getDoubleValue(), 0.0, 1.0));
       ValkyrieSliderBoardJointHolder selected = jointHolders.get(selectedJoint.getOrdinal());
-      selected.q_d.set(MathTools.clipToMinMax(qDesiredSelected.getDoubleValue(), selected.joint.getJointLimitLower(), selected.joint.getJointLimitUpper()));
+      selected.q_d.set(MathTools.clamp(qDesiredSelected.getDoubleValue(), selected.joint.getJointLimitLower(), selected.joint.getJointLimitUpper()));
       selected.qd_d.set(qdDesiredSelected.getDoubleValue());
       selected.pdController.setProportionalGain(kpSelected.getDoubleValue());
       selected.pdController.setDerivativeGain(kdSelected.getDoubleValue());

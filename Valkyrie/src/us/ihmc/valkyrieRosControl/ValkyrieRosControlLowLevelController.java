@@ -124,7 +124,7 @@ public class ValkyrieRosControlLowLevelController
          public void doAction()
          {
             double newRatio = doIHMCControlRatio.getDoubleValue() - updateDT / controlRatioRampDuration.getDoubleValue();
-            doIHMCControlRatio.set(MathTools.clipToMinMax(newRatio, 0.0, 1.0));
+            doIHMCControlRatio.set(MathTools.clamp(newRatio, 0.0, 1.0));
          }
 
          @Override
@@ -140,7 +140,7 @@ public class ValkyrieRosControlLowLevelController
          public void doAction()
          {
             double newRatio = doIHMCControlRatio.getDoubleValue() + updateDT / controlRatioRampDuration.getDoubleValue();
-            doIHMCControlRatio.set(MathTools.clipToMinMax(newRatio, 0.0, 1.0));
+            doIHMCControlRatio.set(MathTools.clamp(newRatio, 0.0, 1.0));
          }
 
          @Override
@@ -262,7 +262,7 @@ public class ValkyrieRosControlLowLevelController
 
    public void setDoIHMCControlRatio(double controlRatio)
    {
-      doIHMCControlRatio.set(MathTools.clipToMinMax(controlRatio, 0.0, 1.0));
+      doIHMCControlRatio.set(MathTools.clamp(controlRatio, 0.0, 1.0));
    }
 
    public void requestCalibration()
@@ -367,7 +367,7 @@ public class ValkyrieRosControlLowLevelController
          timeInStandprep.set(yoTime.getDoubleValue() - standPrepStartTime.getDoubleValue());
 
          double ramp = timeInStandprep.getDoubleValue() / standPrepRampDuration.getDoubleValue();
-         ramp = MathTools.clipToMinMax(ramp, 0.0, 1.0);
+         ramp = MathTools.clamp(ramp, 0.0, 1.0);
 
          for (int i = 0; i < effortControlCommandCalculators.size(); i++)
          {

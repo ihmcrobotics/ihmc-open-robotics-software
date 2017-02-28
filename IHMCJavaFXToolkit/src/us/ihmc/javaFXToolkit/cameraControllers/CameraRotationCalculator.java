@@ -195,9 +195,9 @@ public class CameraRotationCalculator
    {
       double newLatitude = latitude.get() + deltaLatitude;
       if (restrictLatitude.get())
-         newLatitude = MathTools.clipToMinMax(newLatitude, minLatitude.get(), maxLatitude.get());
+         newLatitude = MathTools.clamp(newLatitude, minLatitude.get(), maxLatitude.get());
       else
-         newLatitude = MathTools.clipToMinMax(newLatitude, Math.PI);
+         newLatitude = MathTools.clamp(newLatitude, Math.PI);
       latitude.set(newLatitude);
       double newLongitude = longitude.get() + deltaLongitude;
       newLongitude = AngleTools.trimAngleMinusPiToPi(newLongitude);
@@ -257,9 +257,9 @@ public class CameraRotationCalculator
    public void setRotation(double latitude, double longitude, double roll)
    {
       if (restrictLatitude.get())
-         this.latitude.set(MathTools.clipToMinMax(latitude, minLatitude.get(), maxLatitude.get()));
+         this.latitude.set(MathTools.clamp(latitude, minLatitude.get(), maxLatitude.get()));
       else
-         this.latitude.set(MathTools.clipToMinMax(latitude, Math.PI / 2.0));
+         this.latitude.set(MathTools.clamp(latitude, Math.PI / 2.0));
 
       this.longitude.set(AngleTools.trimAngleMinusPiToPi(longitude));
       this.roll.set(AngleTools.trimAngleMinusPiToPi(roll));

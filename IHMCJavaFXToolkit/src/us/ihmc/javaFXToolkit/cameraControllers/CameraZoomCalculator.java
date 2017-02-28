@@ -77,7 +77,7 @@ public class CameraZoomCalculator
    private void zoomInternal(double direction)
    {
       double newOffset = zoom.get() + direction * zoom.get() * zoomSpeedFactor.get();
-      newOffset = MathTools.clipToMinMax(newOffset, minZoom.get(), maxZoom.get());
+      newOffset = MathTools.clamp(newOffset, minZoom.get(), maxZoom.get());
       zoom.set(newOffset);
    }
 

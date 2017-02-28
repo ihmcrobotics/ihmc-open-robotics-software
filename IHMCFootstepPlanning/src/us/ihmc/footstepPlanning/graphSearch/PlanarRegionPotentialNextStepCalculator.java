@@ -311,7 +311,7 @@ public class PlanarRegionPotentialNextStepCalculator
       }
 
       double idealStepYaw = AngleTools.computeAngleDifferenceMinusPiToPi(idealYawInWorld, currentYaw);
-      idealStepYaw = MathTools.clipToMinMax(idealStepYaw, parameters.getMaximumStepYaw());
+      idealStepYaw = MathTools.clamp(idealStepYaw, parameters.getMaximumStepYaw());
 
       BipedalFootstepPlannerNode childNode = createAndAddNextNodeGivenStep(soleZUpTransform, nodeToExpand, idealStepVector, idealStepYaw);
       seeIfNodeIsAtGoal(childNode);
@@ -802,7 +802,7 @@ public class PlanarRegionPotentialNextStepCalculator
       Vector3D rotationEuler = new Vector3D();
       wiggleTransformLocalToLocal.getRotationEuler(rotationEuler);
       double yaw = rotationEuler.getZ();
-      yaw = MathTools.clipToMinMax(yaw, parameters.getMaximumYawWiggle());
+      yaw = MathTools.clamp(yaw, parameters.getMaximumYawWiggle());
 
       rotationEuler.setZ(yaw);
       wiggleTransformLocalToLocal.setRotationEulerAndZeroTranslation(rotationEuler);

@@ -176,7 +176,7 @@ public class TranslationFootstepGenerator extends AbstractFootstepGenerator
       if (nLR == 0)
          stepWidth = nominalStepWidth;
       else
-         stepWidth = MathTools.clipToMinMax(initialDeltaFeetY - Math.abs(lrStepLength) * 2, minimumStepWidth, nominalStepWidth);
+         stepWidth = MathTools.clamp(initialDeltaFeetY - Math.abs(lrStepLength) * 2, minimumStepWidth, nominalStepWidth);
 
       boolean isSideStep = startWithNearSideFoot;
       FramePoint2d currentPathPosition = position;

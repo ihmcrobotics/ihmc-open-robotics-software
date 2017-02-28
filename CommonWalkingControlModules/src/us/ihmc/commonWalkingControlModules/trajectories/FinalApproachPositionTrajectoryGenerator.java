@@ -244,8 +244,8 @@ public class FinalApproachPositionTrajectoryGenerator extends PositionTrajectory
       currentTime.set(time);
 
       double tIntermediate = trajectoryTime.getDoubleValue() - approachTime.getDoubleValue();
-      time = MathTools.clipToMinMax(time, 0.0, tIntermediate);
-      xyPolynomial.compute(MathTools.clipToMinMax(time, 0.0, tIntermediate));
+      time = MathTools.clamp(time, 0.0, tIntermediate);
+      xyPolynomial.compute(MathTools.clamp(time, 0.0, tIntermediate));
       boolean shouldBeZero = currentTime.getDoubleValue() >= tIntermediate || currentTime.getDoubleValue() < 0.0;
       double alphaDot = shouldBeZero ? 0.0 : xyPolynomial.getVelocity();
       double alphaDDot = shouldBeZero ? 0.0 : xyPolynomial.getAcceleration();
@@ -254,7 +254,7 @@ public class FinalApproachPositionTrajectoryGenerator extends PositionTrajectory
       currentVelocity.subAndScale(alphaDot, finalPosition, initialPosition);
       currentAcceleration.subAndScale(alphaDDot, finalPosition, initialPosition);
 
-      time = MathTools.clipToMinMax(currentTime.getDoubleValue(), 0.0, trajectoryTime.getDoubleValue());
+      time = MathTools.clamp(currentTime.getDoubleValue(), 0.0, trajectoryTime.getDoubleValue());
       zPolynomial.compute(time);
       shouldBeZero = isDone() || currentTime.getDoubleValue() < 0.0;
       alphaDot = shouldBeZero ? 0.0 : zPolynomial.getVelocity();

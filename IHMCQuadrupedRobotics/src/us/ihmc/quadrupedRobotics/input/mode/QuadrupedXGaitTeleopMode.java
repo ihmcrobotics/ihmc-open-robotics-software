@@ -123,7 +123,7 @@ public class QuadrupedXGaitTeleopMode implements QuadrupedTeleopMode
       packetCommunicator.send(comPositionPacket);
 
       double deltaTrigger = (channels.get(XBoxOneMapping.LEFT_TRIGGER) - channels.get(XBoxOneMapping.RIGHT_TRIGGER));
-      xGaitSettings.setEndDoubleSupportDuration(MathTools.clipToMinMax(xGaitSettings.getEndDoubleSupportDuration() + deltaTrigger * deltaDoubleSupportParameter.get(), 0.1, 1));
+      xGaitSettings.setEndDoubleSupportDuration(MathTools.clamp(xGaitSettings.getEndDoubleSupportDuration() + deltaTrigger * deltaDoubleSupportParameter.get(), 0.1, 1));
       QuadrupedXGaitSettingsPacket settingsPacket = new QuadrupedXGaitSettingsPacket(xGaitSettings);
       packetCommunicator.send(settingsPacket);
    }
@@ -177,7 +177,7 @@ public class QuadrupedXGaitTeleopMode implements QuadrupedTeleopMode
       case LEFT_BUMPER:
          if (event.getValue() > 0.5)
          {
-            xGaitSettings.setEndPhaseShift(MathTools.clipToMinMax(xGaitSettings.getEndPhaseShift() + deltaPhaseShiftParameter.get(), 0, 359));
+            xGaitSettings.setEndPhaseShift(MathTools.clamp(xGaitSettings.getEndPhaseShift() + deltaPhaseShiftParameter.get(), 0, 359));
             QuadrupedXGaitSettingsPacket settingsPacket = new QuadrupedXGaitSettingsPacket(xGaitSettings);
             packetCommunicator.send(settingsPacket);
          }
@@ -185,7 +185,7 @@ public class QuadrupedXGaitTeleopMode implements QuadrupedTeleopMode
       case RIGHT_BUMPER:
          if (event.getValue() > 0.5)
          {
-            xGaitSettings.setEndPhaseShift(MathTools.clipToMinMax(xGaitSettings.getEndPhaseShift() - deltaPhaseShiftParameter.get(), 0, 359));
+            xGaitSettings.setEndPhaseShift(MathTools.clamp(xGaitSettings.getEndPhaseShift() - deltaPhaseShiftParameter.get(), 0, 359));
             QuadrupedXGaitSettingsPacket settingsPacket = new QuadrupedXGaitSettingsPacket(xGaitSettings);
             packetCommunicator.send(settingsPacket);
          }

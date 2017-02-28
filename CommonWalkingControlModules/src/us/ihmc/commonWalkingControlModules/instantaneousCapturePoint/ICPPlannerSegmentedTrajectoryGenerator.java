@@ -240,7 +240,7 @@ public class ICPPlannerSegmentedTrajectoryGenerator implements PositionTrajector
    @Override
    public void compute(double time)
    {
-      time = MathTools.clipToMinMax(time, 0.0, totalTrajectoryTime.getDoubleValue());
+      time = MathTools.clamp(time, 0.0, totalTrajectoryTime.getDoubleValue());
       progressionInPercent.set(time / totalTrajectoryTime.getDoubleValue());
 
       updateSplineBoundaries();

@@ -130,7 +130,7 @@ public class RotationToolsTest
       for (int i = 0; i < numberOfTests; i++)
       {
          double randomAngleMultipleOfTwoPi = random.nextInt(2) * (2.0 * Math.PI);
-         double randomAngleEpsilonToHalfPiMinusEpsilon = MathTools.clipToMinMax(random.nextDouble(), 0.1, Math.PI / 2.0 - 0.1);
+         double randomAngleEpsilonToHalfPiMinusEpsilon = MathTools.clamp(random.nextDouble(), 0.1, Math.PI / 2.0 - 0.1);
          double randomAngleNotZeroOrMultipleOfTwoPi = randomAngleMultipleOfTwoPi + randomAngleEpsilonToHalfPiMinusEpsilon;
 
          double remainder = randomAngleNotZeroOrMultipleOfTwoPi % (2.0 * Math.PI);

@@ -295,7 +295,7 @@ public class GeometryTools
    public static double distanceFromPointToLineSegmentSquared(double pointX, double pointY, double lineSegmentStartX, double lineSegmentStartY, double lineSegmentEndX, double lineSegmentEndY)
    {
       double percentage = getPercentageAlongLineSegment(pointX, pointY, lineSegmentStartX, lineSegmentStartY, lineSegmentEndX, lineSegmentEndY);
-      percentage = MathTools.clipToMinMax(percentage, 0.0, 1.0);
+      percentage = MathTools.clamp(percentage, 0.0, 1.0);
 
       double projectionX = (1.0 - percentage) * lineSegmentStartX + percentage * lineSegmentEndX;
       double projectionY = (1.0 - percentage) * lineSegmentStartY + percentage * lineSegmentEndY;
@@ -385,7 +385,7 @@ public class GeometryTools
    {
       double percentage = getPercentageAlongLineSegment(pointX, pointY, pointZ, lineSegmentStart.getX(), lineSegmentStart.getY(), lineSegmentStart.getZ(),
                                                         lineSegmentEnd.getX(), lineSegmentEnd.getY(), lineSegmentEnd.getZ());
-      percentage = MathTools.clipToMinMax(percentage, 0.0, 1.0);
+      percentage = MathTools.clamp(percentage, 0.0, 1.0);
 
       double projectionX = (1.0 - percentage) * lineSegmentStart.getX() + percentage * lineSegmentEnd.getX();
       double projectionY = (1.0 - percentage) * lineSegmentStart.getY() + percentage * lineSegmentEnd.getY();
@@ -1035,7 +1035,7 @@ public class GeometryTools
       if (!Double.isFinite(percentage))
          return false;
 
-      percentage = MathTools.clipToMinMax(percentage, 0.0, 1.0);
+      percentage = MathTools.clamp(percentage, 0.0, 1.0);
 
       projectionToPack.setX((1.0 - percentage) * lineSegmentStartX + percentage * lineSegmentEndX);
       projectionToPack.setY((1.0 - percentage) * lineSegmentStartY + percentage * lineSegmentEndY);
@@ -1222,7 +1222,7 @@ public class GeometryTools
       if (!Double.isFinite(percentage))
          return false;
 
-      percentage = MathTools.clipToMinMax(percentage, 0.0, 1.0);
+      percentage = MathTools.clamp(percentage, 0.0, 1.0);
 
       projectionToPack.setX((1.0 - percentage) * lineSegmentStartX + percentage * lineSegmentEndX);
       projectionToPack.setY((1.0 - percentage) * lineSegmentStartY + percentage * lineSegmentEndY);
@@ -1706,13 +1706,13 @@ public class GeometryTools
       if (tNumerator < 0.0)
       {
          tNumerator = 0.0;
-         sNumerator = MathTools.clipToMinMax(-d, 0.0, a);
+         sNumerator = MathTools.clamp(-d, 0.0, a);
          sDenominator = a;
       }
       else if (tNumerator > tDenominator)
       {
          tNumerator = tDenominator;
-         sNumerator = MathTools.clipToMinMax(-d + b, 0.0, a);
+         sNumerator = MathTools.clamp(-d + b, 0.0, a);
          sDenominator = a;
       }
 
@@ -2701,7 +2701,7 @@ public class GeometryTools
 
          if (0.0 - epsilon < beta && beta < 1.0 + epsilon)
          {
-            beta = MathTools.clipToMinMax(beta, 0.0, 1.0);
+            beta = MathTools.clamp(beta, 0.0, 1.0);
             intersectionToPack.setX(lineSegmentStartX + beta * lineSegmentDirectionX);
             intersectionToPack.setY(lineSegmentStartY + beta * lineSegmentDirectionY);
             return true;
@@ -3333,9 +3333,9 @@ public class GeometryTools
    // FIXME this is rather unsafe, the user should know the difference between the minimum and maximum coordinates of the bounding box.
    public static void clipToBoundingBox(Tuple3DBasics tupleToClip, double x1, double x2, double y1, double y2, double z1, double z2)
    {
-      tupleToClip.setX(x1 < x2 ? MathTools.clipToMinMax(tupleToClip.getX(), x1, x2) : MathTools.clipToMinMax(tupleToClip.getX(), x2, x1));
-      tupleToClip.setY(y1 < y2 ? MathTools.clipToMinMax(tupleToClip.getY(), y1, y2) : MathTools.clipToMinMax(tupleToClip.getY(), y2, y1));
-      tupleToClip.setZ(z1 < z2 ? MathTools.clipToMinMax(tupleToClip.getZ(), z1, z2) : MathTools.clipToMinMax(tupleToClip.getZ(), z2, z1));
+      tupleToClip.setX(x1 < x2 ? MathTools.clamp(tupleToClip.getX(), x1, x2) : MathTools.clamp(tupleToClip.getX(), x2, x1));
+      tupleToClip.setY(y1 < y2 ? MathTools.clamp(tupleToClip.getY(), y1, y2) : MathTools.clamp(tupleToClip.getY(), y2, y1));
+      tupleToClip.setZ(z1 < z2 ? MathTools.clamp(tupleToClip.getZ(), z1, z2) : MathTools.clamp(tupleToClip.getZ(), z2, z1));
    }
 
    /**
@@ -3798,7 +3798,7 @@ public class GeometryTools
       double dotProduct = firstVectorX * secondVectorX + firstVectorY * secondVectorY + firstVectorZ * secondVectorZ;
       dotProduct /= firstVectorLength * secondVectorLength;
 
-      return Math.acos(MathTools.clipToMinMax(dotProduct, -1.0, 1.0));
+      return Math.acos(MathTools.clamp(dotProduct, -1.0, 1.0));
    }
 
    /**

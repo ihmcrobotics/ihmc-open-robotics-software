@@ -114,7 +114,7 @@ public class StepprAirwalk implements StepprController
          break;
 
       case GOTO_ZERO:
-         double timeInTrajectory = MathTools.clipToMinMax(time - initialTime.getDoubleValue(), 0, trajectoryTime);
+         double timeInTrajectory = MathTools.clamp(time - initialTime.getDoubleValue(), 0, trajectoryTime);
          trajectory.compute(timeInTrajectory);
          double positionScale = trajectory.getPosition();
 

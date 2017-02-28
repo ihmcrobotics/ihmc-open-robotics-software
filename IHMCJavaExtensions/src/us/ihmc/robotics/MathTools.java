@@ -3,10 +3,13 @@ package us.ihmc.robotics;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import us.ihmc.commons.Epsilons;
+
 public class MathTools
 {
    private MathTools()
    {
+      // Disallow construction
    }
    
    /**
@@ -150,60 +153,107 @@ public class MathTools
       return (Math.abs(v1 - v2) <= Math.abs(percent * v1));
    }
 
-   public static double clipToMinMax(double val, double minMax)
+   /**
+    * Clamps value to the given range, defined by <code>-minMax</code> and <code>minMax</code>, inclusive.
+    *
+    * @param value value
+    * @param minMax inclusive absolute boundary
+    * @return <li><code>-minMax</code> if <code>value</code> is less than <code>-minMax</code></li>
+    *         <li><code>minMax</code> if <code>value</code> is greater than <code>minMax</code></li>
+    *         <li><code>value</code> if <code>value</code> is between or equal to <code>-minMax</code> and <code>minMax</code></li>
+    */
+   public static double clamp(double value, double minMax)
    {
-      return clipToMinMax(val, -minMax, minMax);
+      return clamp(value, -minMax, minMax);
    }
    
-   public static double clipToMinMax(float val, float minMax)
+   /**
+    * Clamps value to the given range, defined by <code>-minMax</code> and <code>minMax</code>, inclusive.
+    *
+    * @param value value
+    * @param minMax inclusive absolute boundary
+    * @return <li><code>-minMax</code> if <code>value</code> is less than <code>-minMax</code></li>
+    *         <li><code>minMax</code> if <code>value</code> is greater than <code>minMax</code></li>
+    *         <li><code>value</code> if <code>value</code> is between or equal to <code>-minMax</code> and <code>minMax</code></li>
+    */
+   public static float clamp(float value, float minMax)
    {
-      return clipToMinMax(val, -minMax, minMax);
+      return clamp(value, -minMax, minMax);
+   }
+   
+   /**
+    * Clamps value to the given range, defined by <code>-minMax</code> and <code>minMax</code>, inclusive.
+    *
+    * @param value value
+    * @param minMax inclusive absolute boundary
+    * @return <li><code>-minMax</code> if <code>value</code> is less than <code>-minMax</code></li>
+    *         <li><code>minMax</code> if <code>value</code> is greater than <code>minMax</code></li>
+    *         <li><code>value</code> if <code>value</code> is between or equal to <code>-minMax</code> and <code>minMax</code></li>
+    */
+   public static int clamp(int value, int minMax)
+   {
+      return clamp(value, -minMax, minMax);
    }
 
    /**
-    * Returns max if max greater than given value
-    * Returns min if min less than given value
-    * Returns value if value is between max and min
+    * Clamps value to the given range, inclusive.
     *
-    *
-    * @param val double
-    * @param min double
-    * @param max double
-    * @return double
+    * @param value value
+    * @param min inclusive boundary start
+    * @param max inclusive boundary end
+    * @return <li><code>min</code> if <code>value</code> is less than <code>min</code></li>
+    *         <li><code>max</code> if <code>value</code> is greater than <code>max</code></li>
+    *         <li><code>value</code> if <code>value</code> is between or equal to <code>min</code> and <code>max</code></li>
     */
-   public static double clipToMinMax(double val, double min, double max)
+   public static double clamp(double value, double min, double max)
    {
-      if (min > (max + 1e-10))
+      if (min > (max + Epsilons.ONE_TEN_BILLIONTH))
       {
-         throw new RuntimeException("tried to cap a value " + val + " between a min of " + min + " and a max of " + max
-                                    + ". The max value is less than or equal to the min value");
+         throw new RuntimeException(MathTools.class.getSimpleName() + ".clamp(double, double, double): min > max (" + min + " > " + max + ")");
       }
 
-      return (Math.min(max, Math.max(val, min)));
+      return (Math.min(max, Math.max(value, min)));
    }
+
+   /**
+    * Clamps value to the given range, inclusive.
+    *
+    * @param value value
+    * @param min inclusive boundary start
+    * @param max inclusive boundary end
+    * @return <li><code>min</code> if <code>value</code> is less than <code>min</code></li>
+    *         <li><code>max</code> if <code>value</code> is greater than <code>max</code></li>
+    *         <li><code>value</code> if <code>value</code> is between or equal to <code>min</code> and <code>max</code></li>
+    */
+   public static float clamp(float value, float min, float max)
+   {
+      if (min > (max + Epsilons.ONE_TEN_BILLIONTH))
+      {
+         throw new RuntimeException(MathTools.class.getSimpleName() + ".clamp(float, float, float): min > max (" + min + " > " + max + ")");
+      }
    
-   public static int clipToMinMax(int val, int min, int max)
+      return (Math.min(max, Math.max(value, min)));
+   }
+
+   /**
+    * Clamps value to the given range, inclusive.
+    *
+    * @param value value
+    * @param min inclusive boundary start
+    * @param max inclusive boundary end
+    * @return <li><code>min</code> if <code>value</code> is less than <code>min</code></li>
+    *         <li><code>max</code> if <code>value</code> is greater than <code>max</code></li>
+    *         <li><code>value</code> if <code>value</code> is between or equal to <code>min</code> and <code>max</code></li>
+    */
+   public static int clamp(int value, int min, int max)
    {
       if (min > max)
       {
-         throw new RuntimeException("tried to cap a value " + val + " between a min of " + min + " and a max of " + max
-               + ". The max value is less than or equal to the min value");
+         throw new RuntimeException(MathTools.class.getSimpleName() + ".clamp(int, int, int): min > max (" + min + " > " + max + ")");
       }
       
-      return (Math.min(max, Math.max(val, min)));
+      return (Math.min(max, Math.max(value, min)));
    }
-
-   public static float clipToMinMax(float val, float min, float max)
-   {
-      if (min > (max + 1e-10))
-      {
-         throw new RuntimeException("tried to cap a value " + val + " between a min of " + min + " and a max of " + max
-                                    + ". The max value is less than or equal to the min value");
-      }
-
-      return (Math.min(max, Math.max(val, min)));
-   }
-
 
    /**
     * Checks to see if val is Inside Bounds of max and min

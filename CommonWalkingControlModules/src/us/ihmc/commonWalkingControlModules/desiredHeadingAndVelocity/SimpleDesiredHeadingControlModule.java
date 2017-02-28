@@ -135,7 +135,7 @@ public class SimpleDesiredHeadingControlModule implements DesiredHeadingControlM
       double error = desiredHeadingFinal.getDoubleValue() - desiredHeading.getDoubleValue();
       double maximumChangePerTick = maxHeadingDot.getDoubleValue() * controlDT;
 
-      double deltaHeading = MathTools.clipToMinMax(error, -maximumChangePerTick, maximumChangePerTick);
+      double deltaHeading = MathTools.clamp(error, -maximumChangePerTick, maximumChangePerTick);
 
       desiredHeading.set(desiredHeading.getDoubleValue() + deltaHeading);
    }
@@ -145,7 +145,7 @@ public class SimpleDesiredHeadingControlModule implements DesiredHeadingControlM
       double error = desiredHeadingFinal.getDoubleValue() - desiredHeading.getDoubleValue();
       double maximumChange = maxHeadingDot.getDoubleValue() * timeFromNow;
 
-      double deltaHeading = MathTools.clipToMinMax(error, -maximumChange, maximumChange);
+      double deltaHeading = MathTools.clamp(error, -maximumChange, maximumChange);
 
       return desiredHeading.getDoubleValue() + deltaHeading;
    }

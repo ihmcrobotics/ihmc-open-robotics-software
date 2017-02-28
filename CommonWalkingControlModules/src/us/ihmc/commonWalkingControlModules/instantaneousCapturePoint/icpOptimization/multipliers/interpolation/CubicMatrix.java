@@ -30,7 +30,7 @@ public class CubicMatrix extends DenseMatrix64F
 
    public void update(double timeInCurrentState)
    {
-      timeInCurrentState = MathTools.clipToMinMax(timeInCurrentState, 0.0, duration);
+      timeInCurrentState = MathTools.clamp(timeInCurrentState, 0.0, duration);
       cubicTimeMatrix.setCurrentTime(timeInCurrentState);
 
       CommonOps.mult(cubicTimeMatrix, cubicSplineCoefficientMatrix, this);

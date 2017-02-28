@@ -292,7 +292,7 @@ public class PelvisIMUCheckUpDiagnosticTask extends DiagnosticTask
             ramp = 1.0;
          }
 
-         ramps.get(direction).set(MathTools.clipToMinMax(ramp, 0.0, 1.0));
+         ramps.get(direction).set(MathTools.clamp(ramp, 0.0, 1.0));
       }
 
       FrameVector tempAngularVelocity = new FrameVector(imuSensor.getMeasurementFrame());

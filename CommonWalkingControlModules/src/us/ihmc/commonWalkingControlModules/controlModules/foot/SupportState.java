@@ -306,7 +306,7 @@ public class SupportState extends AbstractFootControlState
 
    private void updatePrivilegedConfiguration()
    {
-      double timeInTrajectory = MathTools.clipToMinMax(getTimeInCurrentState(), 0.0, durationForStanceLegStraightening.getDoubleValue());
+      double timeInTrajectory = MathTools.clamp(getTimeInCurrentState(), 0.0, durationForStanceLegStraightening.getDoubleValue());
       kneePrivilegedConfigurationTrajectory.compute(timeInTrajectory);
 
       straightLegsPrivilegedConfigurationCommand.clear();

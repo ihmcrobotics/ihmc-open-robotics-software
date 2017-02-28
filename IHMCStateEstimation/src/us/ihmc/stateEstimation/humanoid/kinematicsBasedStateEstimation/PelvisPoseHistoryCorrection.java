@@ -328,7 +328,7 @@ public class PelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrectionI
       distanceToTravel.set(distanceToTravelVector.length());
       maxTranslationAlpha.set((estimatorDT * maxTranslationVelocityClip.getDoubleValue() / distanceToTravel.getDoubleValue())
             + previousTranslationClippedAlphaValue.getDoubleValue());
-      translationClippedAlphaValue.set(MathTools.clipToMinMax(interpolationTranslationAlphaFilter.getDoubleValue(), 0.0, maxTranslationAlpha.getDoubleValue()));
+      translationClippedAlphaValue.set(MathTools.clamp(interpolationTranslationAlphaFilter.getDoubleValue(), 0.0, maxTranslationAlpha.getDoubleValue()));
       previousTranslationClippedAlphaValue.set(translationClippedAlphaValue.getDoubleValue());
    }
 
@@ -342,7 +342,7 @@ public class PelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrectionI
       angleToTravel.set(angleToTravelAxis4d.getAngle());
       maxRotationAlpha.set((estimatorDT * maxRotationVelocityClip.getDoubleValue() / angleToTravel.getDoubleValue())
             + previousRotationClippedAlphaValue.getDoubleValue());
-      rotationClippedAlphaValue.set(MathTools.clipToMinMax(interpolationRotationAlphaFilter.getDoubleValue(), 0.0, maxRotationAlpha.getDoubleValue()));
+      rotationClippedAlphaValue.set(MathTools.clamp(interpolationRotationAlphaFilter.getDoubleValue(), 0.0, maxRotationAlpha.getDoubleValue()));
       previousRotationClippedAlphaValue.set(rotationClippedAlphaValue.getDoubleValue());
    }
 
@@ -369,7 +369,7 @@ public class PelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrectionI
       if (stateEstimatorPelvisPoseBuffer.isInRange(timeStampedExternalPose.getTimeStamp()))
       {
          double confidence = newPacket.getConfidenceFactor();
-         confidence = MathTools.clipToMinMax(confidence, 0.0, 1.0);
+         confidence = MathTools.clamp(confidence, 0.0, 1.0);
          confidenceFactor.set(confidence);
          addNewExternalPose(timeStampedExternalPose);
       }
