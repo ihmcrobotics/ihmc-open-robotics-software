@@ -855,23 +855,6 @@ public class MathToolsTest
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
-   public void testIsFinite()
-   {
-      Random rand = new Random();
-      for (int i = 0; i < 1000; i++)
-      {
-         assertTrue(MathTools.isFinite(rand.nextFloat() * 1000));
-         assertFalse(MathTools.isFinite(rand.nextFloat() / 0.0));
-
-         assertTrue(MathTools.isFinite(new Vector3D(rand.nextDouble() * 1000, rand.nextDouble() * 1000, rand.nextDouble() * 1000)));
-         assertFalse(MathTools.isFinite(new Vector3D(rand.nextDouble() / 0.0, rand.nextDouble() / 0.0, rand.nextDouble() / 0.0)));
-
-      }
-
-   }
-
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
    public void testApplyDeadband()
    {
       assertEquals(MathTools.applyDeadband(1.0, 0.0), 1.0, 1e-12);

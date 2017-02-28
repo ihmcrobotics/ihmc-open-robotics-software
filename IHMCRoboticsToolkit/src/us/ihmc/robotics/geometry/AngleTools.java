@@ -4,6 +4,7 @@ import java.util.Random;
 
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.euclid.tuple4D.Quaternion32;
 import us.ihmc.robotics.MathTools;
 
@@ -314,5 +315,20 @@ public class AngleTools
       {
          return angleFromNegtivePiToPi;
       }
+   }
+
+   public static double roundToGivenPrecisionForAngle(double angleValue, double precisionFactor)
+   {
+      double centeredAngleValue = trimAngleMinusPiToPi(angleValue + 0.5 * precisionFactor);
+      long longValue = (long) (centeredAngleValue / precisionFactor);
+      double roundedValue = ((double) longValue) * precisionFactor;
+      return trimAngleMinusPiToPi(roundedValue);
+   }
+
+   public static void roundToGivenPrecisionForAngles(Tuple3DBasics tuple3d, double precision)
+   {
+      tuple3d.setX(roundToGivenPrecisionForAngle(tuple3d.getX(), precision));
+      tuple3d.setY(roundToGivenPrecisionForAngle(tuple3d.getY(), precision));
+      tuple3d.setZ(roundToGivenPrecisionForAngle(tuple3d.getZ(), precision));
    }
 }

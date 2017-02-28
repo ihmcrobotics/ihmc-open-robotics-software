@@ -2,7 +2,6 @@ package us.ihmc.robotics.geometry;
 
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
-import us.ihmc.robotics.MathTools;
 
 public class PointToLineUnProjector
 {
@@ -33,7 +32,7 @@ public class PointToLineUnProjector
          qMult = 1 / difference.getY();
       }
 
-      if (!MathTools.isFinite(qMult))
+      if (!Double.isFinite(qMult))
          qMult = 0;
 
    }
