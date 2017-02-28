@@ -379,14 +379,14 @@ public class MathToolsTest
    @Test(timeout = 30000)
    public void testIsBoundedByMethods()
    {
-      assertTrue(MathTools.isBoundedByExclusive(1.0, -1.0, 0.0));
-      assertTrue(MathTools.isBoundedByExclusive(-1.0, 1.0, 0.0));
-      assertFalse(MathTools.isBoundedByExclusive(-1.0, 1.0, -1.0));
-      assertFalse(MathTools.isBoundedByExclusive(-1.0, 1.0, 1.0));
-      assertTrue(MathTools.isBoundedByInclusive(-1.0, 1.0, -1.0));
-      assertTrue(MathTools.isBoundedByInclusive(-1.0, 1.0, 1.0));
-      assertTrue(MathTools.isPreciselyBoundedByInclusive(-1.0, 1.0, 1.0, 1e-12));
-      assertFalse(MathTools.isPreciselyBoundedByExclusive(-1.0, 1.0, 1.0, 1e-12));
+      assertTrue(MathTools.isBoundedByExclusive(0.0, 1.0, -1.0));
+      assertTrue(MathTools.isBoundedByExclusive(0.0, -1.0, 1.0));
+      assertFalse(MathTools.isBoundedByExclusive(-1.0, -1.0, 1.0));
+      assertFalse(MathTools.isBoundedByExclusive(1.0, -1.0, 1.0));
+      assertTrue(MathTools.isBoundedByInclusive(-1.0, -1.0, 1.0));
+      assertTrue(MathTools.isBoundedByInclusive(1.0, -1.0, 1.0));
+      assertTrue(MathTools.isPreciselyBoundedByInclusive(1.0, -1.0, 1.0, 1e-12));
+      assertFalse(MathTools.isPreciselyBoundedByExclusive(1.0, -1.0, 1.0, 1e-12));
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
