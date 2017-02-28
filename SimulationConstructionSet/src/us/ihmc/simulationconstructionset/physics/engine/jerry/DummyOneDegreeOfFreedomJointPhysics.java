@@ -5,9 +5,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.simulationconstructionset.DummyOneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.Joint;
 
-/**
- * @author Peter Abeles
- */
+
 public class DummyOneDegreeOfFreedomJointPhysics extends JointPhysics<DummyOneDegreeOfFreedomJoint>
 {
 

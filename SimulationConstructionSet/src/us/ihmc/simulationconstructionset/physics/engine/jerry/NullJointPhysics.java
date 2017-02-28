@@ -5,9 +5,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.NullJoint;
 
-/**
- * @author Peter Abeles
- */
+
 public class NullJointPhysics extends JointPhysics<NullJoint>
 {
    public NullJointPhysics(NullJoint owner)
