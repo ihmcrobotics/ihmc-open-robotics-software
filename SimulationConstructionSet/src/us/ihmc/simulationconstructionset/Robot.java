@@ -734,6 +734,21 @@ public class Robot implements YoVariableHolder, GroundContactPointsHolder
       return ret;
    }
 
+   public ExternalForcePoint getExternalForcePoint(String name)
+   {
+      ArrayList<Joint> children = this.getRootJoints();
+
+      for (int i = 0; i < children.size(); i++)
+      {
+         Joint rootJoint = children.get(i);
+         ExternalForcePoint externalForcePoint = rootJoint.recursiveGetExternalForcePoint(name);
+         if (externalForcePoint != null) 
+            return externalForcePoint;
+      }
+
+      return null;
+   }
+
    /**
     * Adds the specified link to the robot.  Static links have no effect on the simulation, they are purely cosmetic.
     *
@@ -1981,6 +1996,18 @@ public class Robot implements YoVariableHolder, GroundContactPointsHolder
       }
       
       return true;
+   }
+
+   public Joint getJoint(String name)
+   {
+      for (int i=0; i<rootJoints.size(); i++)
+      {
+         Joint rootJoint = rootJoints.get(i);
+         Joint joint = rootJoint.recursivelyGetJoint(name);
+         if (joint != null)
+            return joint;
+      }
+      return null;
    }
    
 //   public void resetup()
