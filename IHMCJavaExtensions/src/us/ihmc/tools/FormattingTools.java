@@ -6,6 +6,8 @@ import java.util.Date;
 
 import org.apache.commons.lang3.StringUtils;
 
+import us.ihmc.robotics.MathTools;
+
 public class FormattingTools
 {
    private static final DecimalFormat decimal3DPrintFormatter = new DecimalFormat("0.000");
@@ -33,27 +35,12 @@ public class FormattingTools
 
    public static String getFormattedToSignificantFigures(double number, int significantFigures)
    {
-      double roundToSignificantFigures = roundToSignificantFigures(number, significantFigures);
+      double roundToSignificantFigures = MathTools.roundToSignificantFigures(number, significantFigures);
 
       if (Math.abs(roundToSignificantFigures) >= Math.pow(10, significantFigures - 1))
          return String.valueOf((int) roundToSignificantFigures);
       else
          return String.valueOf(roundToSignificantFigures);
-   }
-
-   public static double roundToSignificantFigures(double number, int significantFigures)
-   {
-      if (Math.abs(number) < 1e-10)
-      {
-         return 0;
-      }
-
-      final double log10 = Math.ceil(Math.log10(Math.abs(number)));
-      final int power = significantFigures - (int) log10;
-
-      final double magnitude = Math.pow(10, power);
-      final long shifted = Math.round(number * magnitude);
-      return shifted / magnitude;
    }
 
    public static String underscoredToCamelCase(String underscoredString, boolean capitalizeFirstLetter)
