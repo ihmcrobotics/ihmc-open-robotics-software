@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
-import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.FrameVector;
 
 public class MathTools
@@ -607,14 +606,6 @@ public class MathTools
       }
    }
 
-   public static boolean isFinite(double proposed)
-   {
-      boolean isNotInfinite = (!Double.isInfinite(proposed));
-      boolean isNotInfiniteAndNotNaN = isNotInfinite & (!Double.isNaN(proposed));
-
-      return isNotInfiniteAndNotNaN;
-   }
-
    public static boolean isNumber(double proposed)
    {
       return (!Double.isNaN(proposed));
@@ -622,7 +613,7 @@ public class MathTools
 
    public static boolean isFinite(Tuple3DBasics tuple)
    {
-      return isFinite(tuple.getX()) && isFinite(tuple.getY()) && isFinite(tuple.getZ());
+      return Double.isFinite(tuple.getX()) && Double.isFinite(tuple.getY()) && Double.isFinite(tuple.getZ());
    }
 
    public static long gcd(long a, long b)
@@ -685,21 +676,6 @@ public class MathTools
       tuple3d.setZ(roundToPrecision(tuple3d.getZ(), precision));
    }
 
-   public static double roundToGivenPrecisionForAngle(double angleValue, double precisionFactor)
-   {
-      double centeredAngleValue = AngleTools.trimAngleMinusPiToPi(angleValue + 0.5 * precisionFactor);
-      long longValue = (long) (centeredAngleValue / precisionFactor);
-      double roundedValue = ((double) longValue) * precisionFactor;
-      return AngleTools.trimAngleMinusPiToPi(roundedValue);
-   }
-
-   public static void roundToGivenPrecisionForAngles(Tuple3DBasics tuple3d, double precision)
-   {
-      tuple3d.setX(roundToGivenPrecisionForAngle(tuple3d.getX(), precision));
-      tuple3d.setY(roundToGivenPrecisionForAngle(tuple3d.getY(), precision));
-      tuple3d.setZ(roundToGivenPrecisionForAngle(tuple3d.getZ(), precision));
-   }
-   
    public static double roundToSignificantFigures(double number, int significantFigures)
    {
       if (Math.abs(number) < Double.MIN_VALUE)
