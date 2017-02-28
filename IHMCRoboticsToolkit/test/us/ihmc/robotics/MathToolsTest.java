@@ -20,7 +20,6 @@ import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
@@ -94,11 +93,11 @@ public class MathToolsTest
       for (int i = 0; i < 1000; i++)
       {
          assertTrue(MathTools.isNumber(rand.nextDouble() * 1000.0));
-         assertFalse(MathTools.containsNaN(new Vector3D(rand.nextDouble() * 1000.0, rand.nextDouble() * 1000.0, rand.nextDouble() * 1000.0)));
+         assertFalse(new Vector3D(rand.nextDouble() * 1000.0, rand.nextDouble() * 1000.0, rand.nextDouble() * 1000.0).containsNaN());
       }
 
       assertFalse(MathTools.isNumber(Double.NaN));
-      assertTrue(MathTools.containsNaN(new Vector3D(Double.NaN, Double.NaN, Double.NaN)));
+      assertTrue(new Vector3D(Double.NaN, Double.NaN, Double.NaN).containsNaN());
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)

@@ -12,7 +12,6 @@ import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.random.RandomGeometry;
 
 public class Shape3dTestHelper
@@ -80,9 +79,9 @@ public class Shape3dTestHelper
       boolean isInside = shape3d.checkIfInside(pointOutside, pointOnSurface, surfaceNormal);
       assertFalse(isInside); 
       
-      if (MathTools.containsNaN(pointOnSurface))
+      if (pointOnSurface.containsNaN())
       {
-         assertTrue(MathTools.containsNaN(surfaceNormal));
+         assertTrue(surfaceNormal.containsNaN());
          
          pointOnSurface.set(pointOutside);
          shape3d.orthogonalProjection(pointOnSurface);
@@ -100,8 +99,8 @@ public class Shape3dTestHelper
       boolean isInside = shape3d.checkIfInside(pointInside, pointOnSurface, surfaceNormal);
       
       assertTrue(isInside); 
-      assertFalse(MathTools.containsNaN(surfaceNormal));
-      assertFalse(MathTools.containsNaN(pointOnSurface));
+      assertFalse(surfaceNormal.containsNaN());
+      assertFalse(pointOnSurface.containsNaN());
       
       runSomeTestsWithPointOnSurface(shape3d, pointOnSurface, surfaceNormal);
    }
@@ -109,7 +108,7 @@ public class Shape3dTestHelper
    private void runSomeTestsWithPointOnSurface(Shape3d<?> shape3d, Point3D pointOnSurface, Vector3D surfaceNormal)
    {
       // If the surface normal is NaN, then that means it was projected or something. If it does not contain NaN, then it should be checked for validity.
-      if (MathTools.containsNaN(surfaceNormal))
+      if (surfaceNormal.containsNaN())
       {
          assertEquals(1.0, surfaceNormal.length(), 1e-7);
       }
@@ -119,10 +118,10 @@ public class Shape3dTestHelper
       Vector3D newNormal = new Vector3D();
       boolean isInside = shape3d.checkIfInside(pointOnSurface, newProjection, newNormal);
       
-      if (MathTools.containsNaN(newProjection))
+      if (newProjection.containsNaN())
       {
          assertFalse(isInside); // Check this!!!
-         assertTrue(MathTools.containsNaN(newNormal));
+         assertTrue(newNormal.containsNaN());
          newProjection.set(pointOnSurface);
          shape3d.orthogonalProjection(newProjection);
          
