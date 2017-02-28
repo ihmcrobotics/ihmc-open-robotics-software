@@ -1,5 +1,6 @@
 package us.ihmc.robotics.geometry.shapes;
 
+import us.ihmc.commons.Epsilons;
 import us.ihmc.euclid.axisAngle.interfaces.AxisAngleBasics;
 import us.ihmc.euclid.axisAngle.interfaces.AxisAngleReadOnly;
 import us.ihmc.euclid.interfaces.GeometryObject;
@@ -27,7 +28,6 @@ import us.ihmc.euclid.tuple4D.interfaces.Vector4DBasics;
 import us.ihmc.euclid.tuple4D.interfaces.Vector4DReadOnly;
 import us.ihmc.robotics.geometry.interfaces.PoseTransform;
 import us.ihmc.robotics.geometry.transformables.Pose;
-import us.ihmc.robotics.math.Epsilons;
 
 public abstract class Shape3d<S extends Shape3d<S>> implements GeometryObject<S>, PoseTransform
 {
