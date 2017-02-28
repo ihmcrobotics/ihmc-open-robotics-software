@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.controlModules.rigidBody;
 
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import gnu.trove.map.hash.TObjectDoubleHashMap;
@@ -28,17 +29,16 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
    public static final int maxPoints = 200;
    public static final int maxPointsInGenerator = 5;
 
-   // TODO: get rid of hash maps and use a simple array instead
-   private final Map<OneDoFJoint, MultipleWaypointsTrajectoryGenerator> jointTrajectoryGenerators = new HashMap<>();
-   private final Map<OneDoFJoint, RecyclingArrayDeque<SimpleTrajectoryPoint1D>> pointQueues = new HashMap<>();
-   private final Map<OneDoFJoint, JointspaceFeedbackControlCommand> feedbackControlCommands = new HashMap<>();
+   private final List<MultipleWaypointsTrajectoryGenerator> jointTrajectoryGenerators = new ArrayList<>();
+   private final List<RecyclingArrayDeque<SimpleTrajectoryPoint1D>> pointQueues = new ArrayList<>();
+   private final List<JointspaceFeedbackControlCommand> feedbackControlCommands = new ArrayList<>();
 
-   private final Map<OneDoFJoint, IntegerYoVariable> numberOfPointsInQueue = new HashMap<>();
-   private final Map<OneDoFJoint, IntegerYoVariable> numberOfPointsInGenerator = new HashMap<>();
-   private final Map<OneDoFJoint, IntegerYoVariable> numberOfPoints = new HashMap<>();
+   private final List<IntegerYoVariable> numberOfPointsInQueue = new ArrayList<>();
+   private final List<IntegerYoVariable> numberOfPointsInGenerator = new ArrayList<>();
+   private final List<IntegerYoVariable> numberOfPoints = new ArrayList<>();
 
-   private final Map<OneDoFJoint, DoubleYoVariable> weights = new HashMap<>();
-   private final Map<OneDoFJoint, YoPIDGains> gains = new HashMap<>();
+   private final List<DoubleYoVariable> weights = new ArrayList<>();
+   private final List<YoPIDGains> gains = new ArrayList<>();
 
    private final BooleanYoVariable hasWeights;
    private final BooleanYoVariable hasGains;
@@ -65,26 +65,21 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
       {
          OneDoFJoint joint = jointsToControl[i];
          String jointName = joint.getName();
-         MultipleWaypointsTrajectoryGenerator jointTrajectoryGenerator = new MultipleWaypointsTrajectoryGenerator(jointName, maxPointsInGenerator, registry);
-         jointTrajectoryGenerators.put(joint, jointTrajectoryGenerator);
+         jointTrajectoryGenerators.add(new MultipleWaypointsTrajectoryGenerator(jointName, maxPointsInGenerator, registry));
 
          RecyclingArrayDeque<SimpleTrajectoryPoint1D> pointQueue = new RecyclingArrayDeque<>(maxPoints, SimpleTrajectoryPoint1D.class);
          pointQueue.clear();
-         pointQueues.put(joint, pointQueue);
+         pointQueues.add(pointQueue);
 
          JointspaceFeedbackControlCommand jointControlCommand = new JointspaceFeedbackControlCommand();
          jointControlCommand.addJoint(joint, Double.NaN, Double.NaN, Double.NaN);
-         feedbackControlCommands.put(joint, jointControlCommand);
+         feedbackControlCommands.add(jointControlCommand);
 
-         IntegerYoVariable numberOfPointsInQueue = new IntegerYoVariable(prefix + "_" + jointName + "_numberOfPointsInQueue", registry);
-         IntegerYoVariable numberOfPointsInGenerator = new IntegerYoVariable(prefix + "_" + jointName + "_numberOfPointsInGenerator", registry);
-         IntegerYoVariable numberOfPoints = new IntegerYoVariable(prefix + "_" + jointName + "_numberOfPoints", registry);
-         this.numberOfPointsInQueue.put(joint, numberOfPointsInQueue);
-         this.numberOfPointsInGenerator.put(joint, numberOfPointsInGenerator);
-         this.numberOfPoints.put(joint, numberOfPoints);
+         numberOfPointsInQueue.add(new IntegerYoVariable(prefix + "_" + jointName + "_numberOfPointsInQueue", registry));
+         numberOfPointsInGenerator.add(new IntegerYoVariable(prefix + "_" + jointName + "_numberOfPointsInGenerator", registry));
+         numberOfPoints.add(new IntegerYoVariable(prefix + "_" + jointName + "_numberOfPoints", registry));
 
-         DoubleYoVariable weight = new DoubleYoVariable(prefix + "_" + jointName + "_weight", registry);
-         weights.put(joint, weight);
+         weights.add(new DoubleYoVariable(prefix + "_" + jointName + "_weight", registry));
       }
 
       parentRegistry.addChild(registry);
@@ -97,7 +92,7 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
       {
          OneDoFJoint joint = jointsOriginal[jointIdx];
          if (weights.containsKey(joint.getName()))
-            this.weights.get(joint).set(weights.get(joint.getName()));
+            this.weights.get(jointIdx).set(weights.get(joint.getName()));
          else
             hasWeights.set(false);
       }
@@ -110,9 +105,15 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
       {
          OneDoFJoint joint = jointsOriginal[jointIdx];
          if (gains.containsKey(joint.getName()))
-            this.gains.put(joint, gains.get(joint.getName()));
+         {
+            this.gains.add(gains.get(joint.getName()));
+         }
          else
+         {
+            this.gains.clear();
             hasGains.set(false);
+            return;
+         }
       }
    }
 
@@ -124,7 +125,7 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
       for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
       {
          OneDoFJoint joint = jointsOriginal[jointIdx];
-         queueInitialPoint(joint.getQ(), joint);
+         queueInitialPoint(joint.getQ(), jointIdx);
       }
 
       trajectoryStopped.set(false);
@@ -139,11 +140,10 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
 
       for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
       {
-         OneDoFJoint joint = jointsOriginal[jointIdx];
-         MultipleWaypointsTrajectoryGenerator generator = jointTrajectoryGenerators.get(joint);
+         MultipleWaypointsTrajectoryGenerator generator = jointTrajectoryGenerators.get(jointIdx);
 
          if (!trajectoryDone.getBooleanValue() && generator.isDone())
-            allDone = fillAndReinitializeTrajectories(joint) && allDone;
+            allDone = fillAndReinitializeTrajectories(jointIdx) && allDone;
          else if (trajectoryDone.getBooleanValue())
             allDone = true;
          else
@@ -156,15 +156,15 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
          double desiredVelocity = generator.getVelocity();
          double feedForwardAcceleration = generator.getAcceleration();
 
-         JointspaceFeedbackControlCommand feedbackControlCommand = feedbackControlCommands.get(joint);
+         JointspaceFeedbackControlCommand feedbackControlCommand = feedbackControlCommands.get(jointIdx);
          feedbackControlCommand.setOneDoFJoint(0, desiredPosition, desiredVelocity, feedForwardAcceleration);
-         feedbackControlCommand.setGains(gains.get(joint));
-         feedbackControlCommand.setWeightForSolver(weights.get(joint).getDoubleValue());
+         feedbackControlCommand.setGains(gains.get(jointIdx));
+         feedbackControlCommand.setWeightForSolver(weights.get(jointIdx).getDoubleValue());
 
-         IntegerYoVariable numberOfPointsInQueue = this.numberOfPointsInQueue.get(joint);
-         IntegerYoVariable numberOfPointsInGenerator = this.numberOfPointsInGenerator.get(joint);
-         IntegerYoVariable numberOfPoints = this.numberOfPoints.get(joint);
-         numberOfPointsInQueue.set(pointQueues.get(joint).size());
+         IntegerYoVariable numberOfPointsInQueue = this.numberOfPointsInQueue.get(jointIdx);
+         IntegerYoVariable numberOfPointsInGenerator = this.numberOfPointsInGenerator.get(jointIdx);
+         IntegerYoVariable numberOfPoints = this.numberOfPoints.get(jointIdx);
+         numberOfPointsInQueue.set(pointQueues.get(jointIdx).size());
          numberOfPointsInGenerator.set(generator.getCurrentNumberOfWaypoints());
          numberOfPoints.set(numberOfPointsInQueue.getIntegerValue() + numberOfPointsInGenerator.getIntegerValue());
       }
@@ -172,13 +172,13 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
       trajectoryDone.set(allDone);
    }
 
-   private boolean fillAndReinitializeTrajectories(OneDoFJoint joint)
+   private boolean fillAndReinitializeTrajectories(int jointIdx)
    {
-      RecyclingArrayDeque<SimpleTrajectoryPoint1D> pointQueue = pointQueues.get(joint);
+      RecyclingArrayDeque<SimpleTrajectoryPoint1D> pointQueue = pointQueues.get(jointIdx);
       if (pointQueue.isEmpty())
          return true;
 
-      MultipleWaypointsTrajectoryGenerator generator = jointTrajectoryGenerators.get(joint);
+      MultipleWaypointsTrajectoryGenerator generator = jointTrajectoryGenerators.get(jointIdx);
       if (!generator.isEmpty())
       {
          generator.getLastWaypoint(lastPointAdded);
@@ -223,7 +223,7 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
          {
             SimpleTrajectoryPoint1DList trajectoryPoints = command.getJointTrajectoryPointList(jointIdx);
             if (trajectoryPoints.getTrajectoryPoint(0).getTime() > 1.0e-5)
-               queueInitialPoint(initialJointPositions[jointIdx], jointsOriginal[jointIdx]);
+               queueInitialPoint(initialJointPositions[jointIdx], jointIdx);
          }
       }
 
@@ -234,9 +234,9 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
          for (int pointIdx = 0; pointIdx < trajectoryPoints.getNumberOfTrajectoryPoints(); pointIdx++)
          {
             SimpleTrajectoryPoint1D trajectoryPoint = trajectoryPoints.getTrajectoryPoint(pointIdx);
-            if (!checkTime(trajectoryPoint.getTime(), joint))
+            if (!checkTime(trajectoryPoint.getTime(), jointIdx))
                return false;
-            if (!queuePoint(trajectoryPoint, joint))
+            if (!queuePoint(trajectoryPoint, jointIdx))
                return false;
          }
       }
@@ -244,16 +244,16 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
       return true;
    }
 
-   private void queueInitialPoint(double initialPosition, OneDoFJoint joint)
+   private void queueInitialPoint(double initialPosition, int jointIdx)
    {
-      RecyclingArrayDeque<SimpleTrajectoryPoint1D> pointQueue = pointQueues.get(joint);
+      RecyclingArrayDeque<SimpleTrajectoryPoint1D> pointQueue = pointQueues.get(jointIdx);
       SimpleTrajectoryPoint1D point = pointQueue.addLast();
       point.set(0.0, initialPosition, 0.0);
    }
 
-   private boolean queuePoint(SimpleTrajectoryPoint1D trajectoryPoint, OneDoFJoint joint)
+   private boolean queuePoint(SimpleTrajectoryPoint1D trajectoryPoint, int jointIdx)
    {
-      RecyclingArrayDeque<SimpleTrajectoryPoint1D> pointQueue = pointQueues.get(joint);
+      RecyclingArrayDeque<SimpleTrajectoryPoint1D> pointQueue = pointQueues.get(jointIdx);
       if (atCapacityLimit(pointQueue))
          return false;
 
@@ -272,9 +272,9 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
       return false;
    }
 
-   private boolean checkTime(double time, OneDoFJoint joint)
+   private boolean checkTime(double time, int jointIdx)
    {
-      boolean timeValid = time > getLastTrajectoryPointTime(joint);
+      boolean timeValid = time > getLastTrajectoryPointTime(jointIdx);
       if (!timeValid)
          PrintTools.warn(warningPrefix + "Time in trajectory must be strictly increasing.");
       return timeValid;
@@ -286,19 +286,19 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
       double lastTrajectoryPointTime = Double.NEGATIVE_INFINITY;
       for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
       {
-         double jointLastTime = getLastTrajectoryPointTime(jointsOriginal[jointIdx]);
+         double jointLastTime = getLastTrajectoryPointTime(jointIdx);
          lastTrajectoryPointTime = Math.max(lastTrajectoryPointTime, jointLastTime);
       }
       return lastTrajectoryPointTime;
    }
 
-   public double getLastTrajectoryPointTime(OneDoFJoint joint)
+   public double getLastTrajectoryPointTime(int jointIdx)
    {
-      if (isEmpty(joint))
+      if (isEmpty(jointIdx))
          return Double.NEGATIVE_INFINITY;
 
-      RecyclingArrayDeque<SimpleTrajectoryPoint1D> pointQueue = pointQueues.get(joint);
-      MultipleWaypointsTrajectoryGenerator generator = jointTrajectoryGenerators.get(joint);
+      RecyclingArrayDeque<SimpleTrajectoryPoint1D> pointQueue = pointQueues.get(jointIdx);
+      MultipleWaypointsTrajectoryGenerator generator = jointTrajectoryGenerators.get(jointIdx);
 
       if (pointQueue.isEmpty())
          return generator.getLastWaypointTime();
@@ -309,9 +309,8 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
    {
       for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
       {
-         OneDoFJoint joint = jointsOriginal[jointIdx];
-         jointTrajectoryGenerators.get(joint).clear();
-         pointQueues.get(joint).clear();
+         jointTrajectoryGenerators.get(jointIdx).clear();
+         pointQueues.get(jointIdx).clear();
       }
    }
 
@@ -320,27 +319,27 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
    {
       for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
       {
-         if (!isEmpty(jointsOriginal[jointIdx]))
+         if (!isEmpty(jointIdx))
             return false;
       }
       return true;
    };
 
-   public boolean isEmpty(OneDoFJoint joint)
+   public boolean isEmpty(int jointIdx)
    {
-      RecyclingArrayDeque<SimpleTrajectoryPoint1D> pointQueue = pointQueues.get(joint);
-      MultipleWaypointsTrajectoryGenerator generator = jointTrajectoryGenerators.get(joint);
+      RecyclingArrayDeque<SimpleTrajectoryPoint1D> pointQueue = pointQueues.get(jointIdx);
+      MultipleWaypointsTrajectoryGenerator generator = jointTrajectoryGenerators.get(jointIdx);
       return pointQueue.isEmpty() && generator.isDone();
    };
 
-   public double getJointDesiredPosition(OneDoFJoint joint)
+   public double getJointDesiredPosition(int jointIdx)
    {
-      return jointTrajectoryGenerators.get(joint).getValue();
+      return jointTrajectoryGenerators.get(jointIdx).getValue();
    }
 
-   public double getJointDesiredVelocity(OneDoFJoint joint)
+   public double getJointDesiredVelocity(int jointIdx)
    {
-      return jointTrajectoryGenerators.get(joint).getVelocity();
+      return jointTrajectoryGenerators.get(jointIdx).getVelocity();
    }
 
    @Override
@@ -364,7 +363,7 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
    {
       feedbackControlCommand.clear();
       for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
-         feedbackControlCommand.addCommand(feedbackControlCommands.get(jointsOriginal[jointIdx]));
+         feedbackControlCommand.addCommand(feedbackControlCommands.get(jointIdx));
 
       return feedbackControlCommand;
    }
