@@ -3,13 +3,10 @@ package us.ihmc.robotics;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import org.ejml.data.DenseMatrix64F;
-
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.Direction;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.screwTheory.SpatialMotionVector;
 
 public class MathTools
 {
@@ -669,35 +666,6 @@ public class MathTools
    public static boolean isFinite(Tuple3DBasics tuple)
    {
       return isFinite(tuple.getX()) && isFinite(tuple.getY()) && isFinite(tuple.getZ());
-   }
-
-   public static boolean containsNaN(DenseMatrix64F denseMatrix64F)
-   {
-      int numberOfRows = denseMatrix64F.getNumRows();
-      int numberOfColumns = denseMatrix64F.getNumCols();
-      
-      for (int row = 0; row < numberOfRows; row++)
-      {
-         for (int column = 0; column < numberOfColumns; column++)
-         {
-            if (Double.isNaN(denseMatrix64F.get(row, column))) return true;
-         }
-      }
-
-      return false;
-   }
-
-   public static boolean containsNaN(SpatialMotionVector spatialMotionVector)
-   {
-      if (Double.isNaN(spatialMotionVector.getLinearPartX())) return true;
-      if (Double.isNaN(spatialMotionVector.getLinearPartY())) return true;
-      if (Double.isNaN(spatialMotionVector.getLinearPartZ())) return true;
-      
-      if (Double.isNaN(spatialMotionVector.getAngularPartX())) return true;
-      if (Double.isNaN(spatialMotionVector.getAngularPartY())) return true;
-      if (Double.isNaN(spatialMotionVector.getAngularPartZ())) return true;
-
-      return false;
    }
 
    public static long gcd(long a, long b)
