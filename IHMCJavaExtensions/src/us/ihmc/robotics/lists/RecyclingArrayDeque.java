@@ -1,30 +1,46 @@
-package us.ihmc.communication.controllerAPI.command;
+package us.ihmc.robotics.lists;
 
 import java.util.ArrayDeque;
 import java.util.Collection;
 import java.util.Iterator;
 
-import us.ihmc.robotics.lists.GenericTypeBuilder;
-
-public class CommandArrayDeque<C extends Command<C, ?>> extends ArrayDeque<C>
+/**
+ * This is an implementation of ArrayDeque that will reuse objects, making it more allocation efficient.
+ *
+ * @param <T> the type of object in this deque must extend {@link #Settable}.
+ */
+public class RecyclingArrayDeque<T extends Settable<T>> extends ArrayDeque<T>
 {
    private static final long serialVersionUID = 8118722036566615731L;
+   private static final int defaultNumberOfElements = 16;
 
-   private final GenericTypeBuilder<C> commandBuilder;
-   private final ArrayDeque<C> unusedCommands;
-   
-   public CommandArrayDeque(Class<C> commandClass)
+   private final T emptyObject;
+   private final GenericTypeBuilder<T> typeBuilder;
+   private final ArrayDeque<T> unusedObjects;
+
+   public RecyclingArrayDeque(GenericTypeBuilder<T> typeBuilder)
    {
-      this(16, commandClass);
+      this(defaultNumberOfElements, typeBuilder);
    }
 
-   public CommandArrayDeque(int numElements, Class<C> commandClass)
+   public RecyclingArrayDeque(Class<T> objectClass)
+   {
+      this(defaultNumberOfElements, GenericTypeBuilder.createBuilderWithEmptyConstructor(objectClass));
+   }
+
+   public RecyclingArrayDeque(int numElements, Class<T> objectClass)
+   {
+      this(16, GenericTypeBuilder.createBuilderWithEmptyConstructor(objectClass));
+   }
+
+   public RecyclingArrayDeque(int numElements, GenericTypeBuilder<T> typeBuilder)
    {
       super(numElements);
-      commandBuilder = GenericTypeBuilder.createBuilderWithEmptyConstructor(commandClass);
-      unusedCommands = new ArrayDeque<>(numElements);
+      this.typeBuilder = typeBuilder;
+      unusedObjects = new ArrayDeque<>(numElements);
       for (int i = 0; i < numElements; i++)
-         unusedCommands.add(commandBuilder.newInstance());
+         unusedObjects.add(typeBuilder.newInstance());
+      emptyObject = typeBuilder.newInstance();
    }
 
    /** {@inheritDoc} */
@@ -42,34 +58,34 @@ public class CommandArrayDeque<C extends Command<C, ?>> extends ArrayDeque<C>
    }
 
    /**
-    * Add an empty command at the front of this deque and return it.
-    * @return the new empty command.
+    * Add an empty object at the front of this deque and return it.
+    * @return the new empty object.
     */
-   public C addFirst()
+   public T addFirst()
    {
-      C newCommand = getOrCreateUnusedCommand();
-      newCommand.clear();
-      super.addFirst(newCommand);
-      return newCommand;
+      T newObject = getOrCreateUnusedObject();
+      newObject.set(emptyObject);
+      super.addFirst(newObject);
+      return newObject;
    }
 
    /**
-    * Add an empty command at the end of this deque and return it.
-    * @return the new empty command.
+    * Add an empty object at the end of this deque and return it.
+    * @return the new empty object.
     */
-   public C addLast()
+   public T addLast()
    {
-      C newCommand = getOrCreateUnusedCommand();
-      newCommand.clear();
-      super.addLast(newCommand);
-      return newCommand;
+      T newObject = getOrCreateUnusedObject();
+      newObject.set(emptyObject);
+      super.addLast(newObject);
+      return newObject;
    }
 
    /** {@inheritDoc} */
    @Override
-   public boolean add(C newCommand)
+   public boolean add(T newObject)
    {
-      return super.add(copyAndReturnLocalCommand(newCommand));
+      return super.add(copyAndReturnLocalObject(newObject));
    }
 
    /**
@@ -80,42 +96,42 @@ public class CommandArrayDeque<C extends Command<C, ?>> extends ArrayDeque<C>
    public void clear()
    {
       while (!super.isEmpty())
-         unusedCommands.add(super.poll());
+         unusedObjects.add(super.poll());
    }
 
    /** {@inheritDoc} */
    @Override
-   public void addFirst(C newCommand)
+   public void addFirst(T newObject)
    {
-      super.addFirst(copyAndReturnLocalCommand(newCommand));
+      super.addFirst(copyAndReturnLocalObject(newObject));
    }
 
    /** {@inheritDoc} */
    @Override
-   public void addLast(C newCommand)
+   public void addLast(T newObject)
    {
-      super.addLast(copyAndReturnLocalCommand(newCommand));
+      super.addLast(copyAndReturnLocalObject(newObject));
    }
 
    /** {@inheritDoc} */
    @Override
-   public void push(C newCommand)
+   public void push(T newObject)
    {
-      super.push(copyAndReturnLocalCommand(newCommand));
+      super.push(copyAndReturnLocalObject(newObject));
    }
 
    /** {@inheritDoc} */
    @Override
-   public boolean offerFirst(C newCommand)
+   public boolean offerFirst(T newObject)
    {
-      return super.offerFirst(copyAndReturnLocalCommand(newCommand));
+      return super.offerFirst(copyAndReturnLocalObject(newObject));
    }
 
    /** {@inheritDoc} */
    @Override
-   public boolean offerLast(C newCommand)
+   public boolean offerLast(T newObject)
    {
-      return super.offerLast(copyAndReturnLocalCommand(newCommand));
+      return super.offerLast(copyAndReturnLocalObject(newObject));
    }
 
    /**
@@ -123,11 +139,11 @@ public class CommandArrayDeque<C extends Command<C, ?>> extends ArrayDeque<C>
     * {@inheritDoc}
     */
    @Override
-   public C removeFirst()
+   public T removeFirst()
    {
-      C commandToReturn = super.removeFirst();
-      unusedCommands.add(commandToReturn);
-      return commandToReturn;
+      T objectToReturn = super.removeFirst();
+      unusedObjects.add(objectToReturn);
+      return objectToReturn;
    }
 
    /**
@@ -135,11 +151,11 @@ public class CommandArrayDeque<C extends Command<C, ?>> extends ArrayDeque<C>
     * {@inheritDoc}
     */
    @Override
-   public C removeLast()
+   public T removeLast()
    {
-      C commandToReturn = super.removeLast();
-      unusedCommands.add(commandToReturn);
-      return commandToReturn;
+      T objectToReturn = super.removeLast();
+      unusedObjects.add(objectToReturn);
+      return objectToReturn;
    }
 
    /**
@@ -147,11 +163,11 @@ public class CommandArrayDeque<C extends Command<C, ?>> extends ArrayDeque<C>
     * {@inheritDoc}
     */
    @Override
-   public C pollFirst()
+   public T pollFirst()
    {
-      C commandToReturn = super.pollFirst();
-      unusedCommands.add(commandToReturn);
-      return commandToReturn;
+      T objectToReturn = super.pollFirst();
+      unusedObjects.add(objectToReturn);
+      return objectToReturn;
    }
 
    /**
@@ -159,11 +175,11 @@ public class CommandArrayDeque<C extends Command<C, ?>> extends ArrayDeque<C>
     * {@inheritDoc}
     */
    @Override
-   public C pollLast()
+   public T pollLast()
    {
-      C commandToReturn = super.pollLast();
-      unusedCommands.add(commandToReturn);
-      return commandToReturn;
+      T objectToReturn = super.pollLast();
+      unusedObjects.add(objectToReturn);
+      return objectToReturn;
    }
 
    /**
@@ -171,11 +187,11 @@ public class CommandArrayDeque<C extends Command<C, ?>> extends ArrayDeque<C>
     * {@inheritDoc}
     */
    @Override
-   public C getFirst()
+   public T getFirst()
    {
-      C commandToReturn = super.getFirst();
-      unusedCommands.add(commandToReturn);
-      return commandToReturn;
+      T objectToReturn = super.getFirst();
+      unusedObjects.add(objectToReturn);
+      return objectToReturn;
    }
 
    /**
@@ -183,11 +199,11 @@ public class CommandArrayDeque<C extends Command<C, ?>> extends ArrayDeque<C>
     * {@inheritDoc}
     */
    @Override
-   public C getLast()
+   public T getLast()
    {
-      C commandToReturn = super.getLast();
-      unusedCommands.add(commandToReturn);
-      return commandToReturn;
+      T objectToReturn = super.getLast();
+      unusedObjects.add(objectToReturn);
+      return objectToReturn;
    }
 
    /**
@@ -195,11 +211,11 @@ public class CommandArrayDeque<C extends Command<C, ?>> extends ArrayDeque<C>
     * {@inheritDoc}
     */
    @Override
-   public C peekFirst()
+   public T peekFirst()
    {
-      C commandToReturn = super.peekFirst();
-      unusedCommands.add(commandToReturn);
-      return commandToReturn;
+      T objectToReturn = super.peekFirst();
+      unusedObjects.add(objectToReturn);
+      return objectToReturn;
    }
 
    /**
@@ -207,11 +223,11 @@ public class CommandArrayDeque<C extends Command<C, ?>> extends ArrayDeque<C>
     * {@inheritDoc}
     */
    @Override
-   public C peekLast()
+   public T peekLast()
    {
-      C commandToReturn = super.peekLast();
-      unusedCommands.add(commandToReturn);
-      return commandToReturn;
+      T objectToReturn = super.peekLast();
+      unusedObjects.add(objectToReturn);
+      return objectToReturn;
    }
 
    /**
@@ -219,11 +235,11 @@ public class CommandArrayDeque<C extends Command<C, ?>> extends ArrayDeque<C>
     * {@inheritDoc}
     */
    @Override
-   public C remove()
+   public T remove()
    {
-      C commandToReturn = super.remove();
-      unusedCommands.add(commandToReturn);
-      return commandToReturn;
+      T objectToReturn = super.remove();
+      unusedObjects.add(objectToReturn);
+      return objectToReturn;
    }
 
    /**
@@ -231,11 +247,11 @@ public class CommandArrayDeque<C extends Command<C, ?>> extends ArrayDeque<C>
     * {@inheritDoc}
     */
    @Override
-   public C poll()
+   public T poll()
    {
-      C commandToReturn = super.poll();
-      unusedCommands.add(commandToReturn);
-      return commandToReturn;
+      T objectToReturn = super.poll();
+      unusedObjects.add(objectToReturn);
+      return objectToReturn;
    }
 
    /**
@@ -243,11 +259,11 @@ public class CommandArrayDeque<C extends Command<C, ?>> extends ArrayDeque<C>
     * {@inheritDoc}
     */
    @Override
-   public C element()
+   public T element()
    {
-      C commandToReturn = super.element();
-      unusedCommands.add(commandToReturn);
-      return commandToReturn;
+      T objectToReturn = super.element();
+      unusedObjects.add(objectToReturn);
+      return objectToReturn;
    }
 
    /**
@@ -255,11 +271,11 @@ public class CommandArrayDeque<C extends Command<C, ?>> extends ArrayDeque<C>
     * {@inheritDoc}
     */
    @Override
-   public C peek()
+   public T peek()
    {
-      C commandToReturn = super.peek();
-      unusedCommands.add(commandToReturn);
-      return commandToReturn;
+      T objectToReturn = super.peek();
+      unusedObjects.add(objectToReturn);
+      return objectToReturn;
    }
 
    /**
@@ -267,32 +283,32 @@ public class CommandArrayDeque<C extends Command<C, ?>> extends ArrayDeque<C>
     * {@inheritDoc}
     */
    @Override
-   public C pop()
+   public T pop()
    {
-      C commandToReturn = super.pop();
-      unusedCommands.add(commandToReturn);
-      return commandToReturn;
+      T objectToReturn = super.pop();
+      unusedObjects.add(objectToReturn);
+      return objectToReturn;
    }
 
-   private C copyAndReturnLocalCommand(C commandToCopy)
+   private T copyAndReturnLocalObject(T objectToCopy)
    {
-      C localCommand = getOrCreateUnusedCommand();
-      localCommand.set(commandToCopy);
-      return localCommand;
+      T localObject = getOrCreateUnusedObject();
+      localObject.set(objectToCopy);
+      return localObject;
    }
 
-   private C getOrCreateUnusedCommand()
+   private T getOrCreateUnusedObject()
    {
-      if (unusedCommands.isEmpty())
-         return commandBuilder.newInstance();
+      if (unusedObjects.isEmpty())
+         return typeBuilder.newInstance();
       else
-         return unusedCommands.poll();
+         return unusedObjects.poll();
    }
 
    @Override
    public String toString()
    {
-      Iterator<C> iterator = super.iterator();
+      Iterator<T> iterator = super.iterator();
       if (!iterator.hasNext())
          return "[]";
 
@@ -300,8 +316,8 @@ public class CommandArrayDeque<C extends Command<C, ?>> extends ArrayDeque<C>
       sb.append('[');
       for (;;)
       {
-         C nextCommand = iterator.next();
-         sb.append(nextCommand);
+         T nextObject = iterator.next();
+         sb.append(nextObject);
          if (!iterator.hasNext())
             return sb.append(']').toString();
          sb.append(',').append(' ');
@@ -310,7 +326,7 @@ public class CommandArrayDeque<C extends Command<C, ?>> extends ArrayDeque<C>
 
    /** Unsupported operation. */
    @Override
-   public CommandArrayDeque<C> clone()
+   public RecyclingArrayDeque<T> clone()
    {
       throw new UnsupportedOperationException();
    }
@@ -331,7 +347,7 @@ public class CommandArrayDeque<C extends Command<C, ?>> extends ArrayDeque<C>
 
    /** Unsupported operation. */
    @Override
-   public Iterator<C> iterator()
+   public Iterator<T> iterator()
    {
       throw new UnsupportedOperationException();
    }
@@ -359,7 +375,7 @@ public class CommandArrayDeque<C extends Command<C, ?>> extends ArrayDeque<C>
 
    /** Unsupported operation. */
    @Override
-   public boolean addAll(Collection<? extends C> c)
+   public boolean addAll(Collection<? extends T> c)
    {
       throw new UnsupportedOperationException();
    }
@@ -394,14 +410,14 @@ public class CommandArrayDeque<C extends Command<C, ?>> extends ArrayDeque<C>
 
    /** Unsupported operation. */
    @Override
-   public boolean offer(C e)
+   public boolean offer(T e)
    {
       throw new UnsupportedOperationException();
    }
 
    /** Unsupported operation. */
    @Override
-   public Iterator<C> descendingIterator()
+   public Iterator<T> descendingIterator()
    {
       throw new UnsupportedOperationException();
    }
