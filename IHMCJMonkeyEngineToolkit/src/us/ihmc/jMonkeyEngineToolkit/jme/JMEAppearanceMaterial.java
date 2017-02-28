@@ -254,7 +254,7 @@ public class JMEAppearanceMaterial
       }
       else
       {
-         Path temporaryDirectoryPath = PathTools.getTemporaryDirectoryPath();
+         Path temporaryDirectoryPath = PathTools.systemTemporaryDirectory();
         
          printIfDebug("temporaryDirectoryPathName = " + temporaryDirectoryPath);
          

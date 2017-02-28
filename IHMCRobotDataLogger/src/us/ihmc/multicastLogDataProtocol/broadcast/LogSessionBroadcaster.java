@@ -283,7 +283,7 @@ public class LogSessionBroadcaster extends Thread
    private static long createTempSessionID() throws IOException
    {
       String prefix = "LogSession";
-      Path temporaryDirectoryPath = PathTools.getTemporaryDirectoryPath();
+      Path temporaryDirectoryPath = PathTools.systemTemporaryDirectory();
 
       SecureRandom random = new SecureRandom();
 

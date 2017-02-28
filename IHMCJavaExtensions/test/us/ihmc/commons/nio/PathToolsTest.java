@@ -108,7 +108,7 @@ public class PathToolsTest
    @Test(timeout = 30000)
    public void testTemporaryDirectoryPath()
    {
-      String tempPath = PathTools.getTemporaryDirectoryPath().toString();
+      String tempPath = PathTools.systemTemporaryDirectory().toString();
       PrintTools.info(this, "Java temp directory: " + tempPath);
       assertNotNull("Java temp directory is null.", tempPath);
    }

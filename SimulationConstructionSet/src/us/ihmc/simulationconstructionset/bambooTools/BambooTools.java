@@ -146,7 +146,7 @@ public class BambooTools
          // the other specified directories don't exist
          System.out.println("Saving videos to tmp dir before uploading..");
 
-         Path temporaryDirectoryPath = PathTools.getTemporaryDirectoryPath();
+         Path temporaryDirectoryPath = PathTools.systemTemporaryDirectory();
          File videoDir = temporaryDirectoryPath.resolve("atlas-videos").toFile();
          if (videoDir.exists() || videoDir.mkdirs())
          {
