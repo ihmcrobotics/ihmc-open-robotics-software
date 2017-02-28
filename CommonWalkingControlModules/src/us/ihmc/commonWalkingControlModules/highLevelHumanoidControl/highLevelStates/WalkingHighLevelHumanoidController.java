@@ -7,7 +7,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.PelvisOrientationManag
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.controlModules.head.HeadOrientationManager;
-import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyManager;
+import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlManager;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutputReadOnly;
@@ -84,7 +84,7 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
    private final BalanceManager balanceManager;
    private final CenterOfMassHeightManager comHeightManager;
 
-   private final RigidBodyManager chestManager;
+   private final RigidBodyControlManager chestManager;
 
    private final OneDoFJoint[] allOneDoFjoints;
 

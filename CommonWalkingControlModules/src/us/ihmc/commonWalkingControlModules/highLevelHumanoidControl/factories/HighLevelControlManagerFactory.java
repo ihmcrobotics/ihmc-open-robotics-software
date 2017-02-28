@@ -12,7 +12,7 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.controlModules.PelvisOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.controlModules.head.HeadOrientationManager;
-import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyManager;
+import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlManager;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.ManipulationControlModule;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.BalanceManager;
@@ -48,7 +48,7 @@ public class HighLevelControlManagerFactory
    private FeetManager feetManager;
    private PelvisOrientationManager pelvisOrientationManager;
 
-   private final Map<String, RigidBodyManager> rigidBodyManagerMapByBodyName = new HashMap<>();
+   private final Map<String, RigidBodyControlManager> rigidBodyManagerMapByBodyName = new HashMap<>();
 
    private HighLevelHumanoidControllerToolbox momentumBasedController;
    private WalkingControllerParameters walkingControllerParameters;
@@ -151,19 +151,19 @@ public class HighLevelControlManagerFactory
       return headOrientationManager;
    }
 
-   public RigidBodyManager getOrCreateRigidBodyManager(RigidBody bodyToControl, RigidBody rootBody, ReferenceFrame rootFrame)
+   public RigidBodyControlManager getOrCreateRigidBodyManager(RigidBody bodyToControl, RigidBody rootBody, ReferenceFrame rootFrame)
    {
       String bodyName = bodyToControl.getName();
       if (rigidBodyManagerMapByBodyName.containsKey(bodyName))
       {
-         RigidBodyManager manager = rigidBodyManagerMapByBodyName.get(bodyName);
+         RigidBodyControlManager manager = rigidBodyManagerMapByBodyName.get(bodyName);
          if (manager != null)
             return manager;
       }
 
-      if (!hasWalkingControllerParameters(RigidBodyManager.class))
+      if (!hasWalkingControllerParameters(RigidBodyControlManager.class))
          return null;
-      if (!hasMomentumOptimizationSettings(RigidBodyManager.class))
+      if (!hasMomentumOptimizationSettings(RigidBodyControlManager.class))
          return null;
 
       CommonHumanoidReferenceFrames referenceFrames = momentumBasedController.getReferenceFrames();
@@ -173,7 +173,7 @@ public class HighLevelControlManagerFactory
       controlFrameMap.put(BaseForControl.WALKING_PATH, referenceFrames.getMidFeetUnderPelvisFrame());
       controlFrameMap.put(BaseForControl.WORLD, ReferenceFrame.getWorldFrame());
 
-      RigidBodyManager manager = new RigidBodyManager(bodyToControl, rootBody, momentumBasedController, walkingControllerParameters, controlFrameMap, rootFrame, registry);
+      RigidBodyControlManager manager = new RigidBodyControlManager(bodyToControl, rootBody, momentumBasedController, walkingControllerParameters, controlFrameMap, rootFrame, registry);
 
       Vector3D chestAngularWeight = momentumOptimizationSettings.getChestAngularWeight();
       Vector3D chestLinearWeight = null;
@@ -332,8 +332,8 @@ public class HighLevelControlManagerFactory
       if (headOrientationManager != null)
          headOrientationManager.initialize();
 
-      Collection<RigidBodyManager> bodyManagers = rigidBodyManagerMapByBodyName.values();
-      for (RigidBodyManager bodyManager : bodyManagers)
+      Collection<RigidBodyControlManager> bodyManagers = rigidBodyManagerMapByBodyName.values();
+      for (RigidBodyControlManager bodyManager : bodyManagers)
       {
          if (bodyManager != null)
             bodyManager.initialize();
@@ -363,8 +363,8 @@ public class HighLevelControlManagerFactory
          ret.addCommand(headOrientationManager.createFeedbackControlTemplate());
       }
 
-      Collection<RigidBodyManager> bodyManagers = rigidBodyManagerMapByBodyName.values();
-      for (RigidBodyManager bodyManager : bodyManagers)
+      Collection<RigidBodyControlManager> bodyManagers = rigidBodyManagerMapByBodyName.values();
+      for (RigidBodyControlManager bodyManager : bodyManagers)
       {
          if (bodyManager != null)
             ret.addCommand(bodyManager.createFeedbackControlTemplate());
