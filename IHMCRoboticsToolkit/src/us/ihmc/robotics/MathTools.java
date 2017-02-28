@@ -6,7 +6,6 @@ import java.util.Collection;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
-import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.Direction;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -670,16 +669,6 @@ public class MathTools
    public static boolean isFinite(Tuple3DBasics tuple)
    {
       return isFinite(tuple.getX()) && isFinite(tuple.getY()) && isFinite(tuple.getZ());
-   }
-   
-   public static boolean containsNaN(Tuple3DBasics tuple)
-   {
-      return (Double.isNaN(tuple.getX()) || Double.isNaN(tuple.getY()) || Double.isNaN(tuple.getZ()));
-   }
-
-   public static boolean containsNaN(Quaternion quat4d)
-   {
-      return (Double.isNaN(quat4d.getS()) || Double.isNaN(quat4d.getX()) || Double.isNaN(quat4d.getY()) || Double.isNaN(quat4d.getZ()));
    }
 
    public static boolean containsNaN(DenseMatrix64F denseMatrix64F)
