@@ -338,7 +338,7 @@ public class RigidBodyControlManager
       if (stateMachine.getCurrentStateEnum() == RigidBodyControlMode.JOINTSPACE)
       {
          for (int i = 0; i < jointsOriginal.length; i++)
-            desiredJointPositionsToPack[i] = jointspaceControlState.getJointDesiredPosition(jointsOriginal[i]);
+            desiredJointPositionsToPack[i] = jointspaceControlState.getJointDesiredPosition(i);
       }
       else
       {
@@ -354,8 +354,8 @@ public class RigidBodyControlManager
       {
          for (int i = 0; i < jointsAtDesiredPosition.length; i++)
          {
-            jointsAtDesiredPosition[i].setQ(jointspaceControlState.getJointDesiredPosition(jointsOriginal[i]));
-            jointsAtDesiredPosition[i].setQd(jointspaceControlState.getJointDesiredVelocity(jointsOriginal[i]));
+            jointsAtDesiredPosition[i].setQ(jointspaceControlState.getJointDesiredPosition(i));
+            jointsAtDesiredPosition[i].setQd(jointspaceControlState.getJointDesiredVelocity(i));
          }
       }
       else
