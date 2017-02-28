@@ -3,9 +3,6 @@ package us.ihmc.robotics;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
-import us.ihmc.robotics.geometry.FrameVector;
-
 public class MathTools
 {
    private MathTools()
@@ -60,24 +57,6 @@ public class MathTools
       for (int i = 0; i < array.length; i++)
       {
          ret[i] = array[i] + addToAllElementsOfA;
-      }
-
-      return ret;
-   }
-
-   /**
-    *
-    * @param array ArrayList
-    * @return ArrayList
-    */
-   public static ArrayList<FrameVector> diff(ArrayList<FrameVector> array)
-   {
-      ArrayList<FrameVector> ret = new ArrayList<FrameVector>();
-      for (int i = 1; i < array.size(); i++)
-      {
-         FrameVector diffedVector = new FrameVector(array.get(i));
-         diffedVector.sub(array.get(i - 1));
-         ret.add(diffedVector);
       }
 
       return ret;
@@ -606,11 +585,6 @@ public class MathTools
       }
    }
 
-   public static boolean isFinite(Tuple3DBasics tuple)
-   {
-      return Double.isFinite(tuple.getX()) && Double.isFinite(tuple.getY()) && Double.isFinite(tuple.getZ());
-   }
-
    public static long gcd(long a, long b)
    {
       while(b > 0)
@@ -648,27 +622,12 @@ public class MathTools
       return roundedValue;
    }
 
-   public static void floorToGivenPrecision(Tuple3DBasics tuple3d, double precision)
-   {
-      tuple3d.setX(floorToGivenPrecision(tuple3d.getX(), precision));
-      tuple3d.setY(floorToGivenPrecision(tuple3d.getY(), precision));
-      tuple3d.setZ(floorToGivenPrecision(tuple3d.getZ(), precision));
-      
-   }
-
    public static double roundToPrecision(double value, double precision)
    {
       double adjustmentFactor = (value > 0.0) ? 0.5 * precision : -0.5 * precision;
       long longValue = (long) ((value + adjustmentFactor) / precision);
       double roundedValue = ((double) longValue) * precision;
       return roundedValue;
-   }
-
-   public static void roundToGivenPrecision(Tuple3DBasics tuple3d, double precision)
-   {
-      tuple3d.setX(roundToPrecision(tuple3d.getX(), precision));
-      tuple3d.setY(roundToPrecision(tuple3d.getY(), precision));
-      tuple3d.setZ(roundToPrecision(tuple3d.getZ(), precision));
    }
 
    public static double roundToSignificantFigures(double number, int significantFigures)
