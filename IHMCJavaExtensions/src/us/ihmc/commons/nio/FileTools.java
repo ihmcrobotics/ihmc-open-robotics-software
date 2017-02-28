@@ -27,7 +27,8 @@ import us.ihmc.commons.Conversions;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 
 /**
- * <p>A collection of tools to extend Java's NIO.2 API. Tools here should fit one of
+ * <p>A collection of tools to extend Java's NIO.2 API and
+ * Apache Commons Lang. Tools here should fit one of
  * the following categories:</p>
  * 
  * <ol>Provide a commonly needed method not provided by Apache Commons Lang or Java's NIO.2. API.</ol>
