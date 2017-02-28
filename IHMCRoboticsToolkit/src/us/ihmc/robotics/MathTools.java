@@ -19,27 +19,6 @@ public class MathTools
    }
    
    /**
-    * Pass in a vector. Get its angle in polar coordinates.
-    * 
-    * @param vx
-    * @param vy
-    * @return angle of vector from 0 to 2PI
-    */
-   public static double angleFromZeroToTwoPi(double vx, double vy)
-   {
-      double angleFromNegtivePiToPi = Math.atan2(vy, vx);
-      
-      if (angleFromNegtivePiToPi < 0.0)
-      {
-         return 2.0 * Math.PI + angleFromNegtivePiToPi;
-      }
-      else
-      {
-         return angleFromNegtivePiToPi;
-      }
-   }
-
-   /**
     * Returns the sign of the argument. 1.0 if positive or 0.0, -1.0 if negative.
     * (Unlike Math.signum that returns 0.0 if the argument is 0.0)
     *

@@ -20,6 +20,7 @@ import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
@@ -36,15 +37,6 @@ public class MathToolsTest
    @After
    public void tearDown() throws Exception
    {
-   }
-
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
-   public void testAngleFromZeroToTwoPi()
-   {
-      assertEquals("not equal", 0.0, MathTools.angleFromZeroToTwoPi(0.0, 0.0), 1e-7);
-      assertEquals("not equal", Math.PI / 4.0, MathTools.angleFromZeroToTwoPi(1.0, 1.0), 1e-7);
-      assertEquals("not equal", 7.0 * Math.PI / 4.0, MathTools.angleFromZeroToTwoPi(1.0, -1.0), 1e-7);
    }
    
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
