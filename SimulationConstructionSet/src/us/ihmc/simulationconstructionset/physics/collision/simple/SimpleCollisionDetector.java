@@ -24,7 +24,7 @@ public class SimpleCollisionDetector implements ScsCollisionDetector
    private final ArrayList<CollisionShape> collisionObjects = new ArrayList<CollisionShape>();
 
    // Temporary variables for computation:
-   private final Point3d centerOne = new Point3d();
+   private final Point3d centerOne = new Point3d(); 
    private final Point3d centerTwo = new Point3d();
    private final Vector3d centerToCenterVector = new Vector3d();
 
