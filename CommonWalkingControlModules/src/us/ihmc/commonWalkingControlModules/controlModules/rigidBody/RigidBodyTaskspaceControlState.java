@@ -26,7 +26,7 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
-import us.ihmc.robotics.lists.RecyclingArrayList;
+import us.ihmc.robotics.lists.RecyclingArrayDeque;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSO3TrajectoryPoint;
@@ -76,7 +76,7 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
    private final FrameVector desiredAngularVelocity = new FrameVector(worldFrame);
    private final FrameVector feedForwardAngularAcceleration = new FrameVector(worldFrame);
 
-   private final RecyclingArrayList<FrameSE3TrajectoryPoint> pointQueue = new RecyclingArrayList<>(maxPoints, FrameSE3TrajectoryPoint.class);
+   private final RecyclingArrayDeque<FrameSE3TrajectoryPoint> pointQueue = new RecyclingArrayDeque<>(maxPoints, FrameSE3TrajectoryPoint.class);
    private final FrameSE3TrajectoryPoint lastPointAdded = new FrameSE3TrajectoryPoint();
 
    private final ReferenceFrame rootFrame;
@@ -243,11 +243,10 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
          if (pointQueue.isEmpty())
             break;
 
-         FrameSE3TrajectoryPoint pointToAdd = pointQueue.get(0);
+         FrameSE3TrajectoryPoint pointToAdd = pointQueue.pollFirst();
          lastPointAdded.setIncludingFrame(pointToAdd); // TODO: get from generators
          positionTrajectoryGenerator.appendWaypoint(pointToAdd);
          orientationTrajectoryGenerator.appendWaypoint(pointToAdd);
-         pointQueue.remove(0); // TODO: replace with queue
       }
 
       lastPointAdded.changeFrame(rootFrame);
@@ -420,7 +419,7 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       }
       else
       {
-         return pointQueue.getLast().getTime();
+         return pointQueue.peekLast().getTime();
       }
    }
 
@@ -443,7 +442,7 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       if (atCapacityLimit())
          return false;
 
-      pointQueue.add().setIncludingFrame(trajectoryPoint);
+      pointQueue.addLast().setIncludingFrame(trajectoryPoint);
       return true;
    }
 
@@ -452,7 +451,7 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       if (atCapacityLimit())
          return false;
 
-      FrameSE3TrajectoryPoint point = pointQueue.add();
+      FrameSE3TrajectoryPoint point = pointQueue.addLast();
       trajectoryPoint.getOrientation(desiredOrientation);
       trajectoryPoint.getAngularVelocity(desiredAngularVelocity);
       point.setToZero(trajectoryPoint.getReferenceFrame());
@@ -464,7 +463,7 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
 
    private void queueInitialPoint(FramePose initialPose)
    {
-      FrameSE3TrajectoryPoint point = pointQueue.add();
+      FrameSE3TrajectoryPoint point = pointQueue.addLast();
       point.setToZero(initialPose.getReferenceFrame());
       point.setTime(0.0);
       initialPose.getPoseIncludingFrame(desiredPosition, desiredOrientation);
@@ -474,7 +473,7 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
 
    private void queueInitialPoint(FrameOrientation initialOrientation)
    {
-      FrameSE3TrajectoryPoint point = pointQueue.add();
+      FrameSE3TrajectoryPoint point = pointQueue.addLast();
       point.setToZero(initialOrientation.getReferenceFrame());
       point.setTime(0.0);
       point.setOrientation(initialOrientation);

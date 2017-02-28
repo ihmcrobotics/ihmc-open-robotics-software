@@ -190,7 +190,7 @@ public class RecyclingArrayDeque<T extends Settable<T>> extends ArrayDeque<T>
    public T getFirst()
    {
       T objectToReturn = super.getFirst();
-      unusedObjects.add(objectToReturn);
+//      unusedObjects.add(objectToReturn);
       return objectToReturn;
    }
 
@@ -202,7 +202,7 @@ public class RecyclingArrayDeque<T extends Settable<T>> extends ArrayDeque<T>
    public T getLast()
    {
       T objectToReturn = super.getLast();
-      unusedObjects.add(objectToReturn);
+//      unusedObjects.add(objectToReturn);
       return objectToReturn;
    }
 
@@ -214,7 +214,7 @@ public class RecyclingArrayDeque<T extends Settable<T>> extends ArrayDeque<T>
    public T peekFirst()
    {
       T objectToReturn = super.peekFirst();
-      unusedObjects.add(objectToReturn);
+//      unusedObjects.add(objectToReturn);
       return objectToReturn;
    }
 
@@ -226,7 +226,7 @@ public class RecyclingArrayDeque<T extends Settable<T>> extends ArrayDeque<T>
    public T peekLast()
    {
       T objectToReturn = super.peekLast();
-      unusedObjects.add(objectToReturn);
+//      unusedObjects.add(objectToReturn);
       return objectToReturn;
    }
 
@@ -262,7 +262,7 @@ public class RecyclingArrayDeque<T extends Settable<T>> extends ArrayDeque<T>
    public T element()
    {
       T objectToReturn = super.element();
-      unusedObjects.add(objectToReturn);
+//      unusedObjects.add(objectToReturn);
       return objectToReturn;
    }
 
@@ -274,7 +274,7 @@ public class RecyclingArrayDeque<T extends Settable<T>> extends ArrayDeque<T>
    public T peek()
    {
       T objectToReturn = super.peek();
-      unusedObjects.add(objectToReturn);
+//      unusedObjects.add(objectToReturn);
       return objectToReturn;
    }
 

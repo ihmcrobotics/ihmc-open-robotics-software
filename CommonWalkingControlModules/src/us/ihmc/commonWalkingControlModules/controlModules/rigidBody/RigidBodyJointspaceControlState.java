@@ -16,7 +16,7 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
-import us.ihmc.robotics.lists.RecyclingArrayList;
+import us.ihmc.robotics.lists.RecyclingArrayDeque;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.waypoints.SimpleTrajectoryPoint1D;
 import us.ihmc.robotics.math.trajectories.waypoints.SimpleTrajectoryPoint1DList;
@@ -30,7 +30,7 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
 
    // TODO: get rid of hash maps and use a simple array instead
    private final Map<OneDoFJoint, MultipleWaypointsTrajectoryGenerator> jointTrajectoryGenerators = new HashMap<>();
-   private final Map<OneDoFJoint, RecyclingArrayList<SimpleTrajectoryPoint1D>> pointQueues = new HashMap<>();
+   private final Map<OneDoFJoint, RecyclingArrayDeque<SimpleTrajectoryPoint1D>> pointQueues = new HashMap<>();
    private final Map<OneDoFJoint, JointspaceFeedbackControlCommand> feedbackControlCommands = new HashMap<>();
 
    private final Map<OneDoFJoint, IntegerYoVariable> numberOfPointsInQueue = new HashMap<>();
@@ -68,7 +68,7 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
          MultipleWaypointsTrajectoryGenerator jointTrajectoryGenerator = new MultipleWaypointsTrajectoryGenerator(jointName, maxPointsInGenerator, registry);
          jointTrajectoryGenerators.put(joint, jointTrajectoryGenerator);
 
-         RecyclingArrayList<SimpleTrajectoryPoint1D> pointQueue = new RecyclingArrayList<>(maxPoints, SimpleTrajectoryPoint1D.class);
+         RecyclingArrayDeque<SimpleTrajectoryPoint1D> pointQueue = new RecyclingArrayDeque<>(maxPoints, SimpleTrajectoryPoint1D.class);
          pointQueue.clear();
          pointQueues.put(joint, pointQueue);
 
@@ -174,7 +174,7 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
 
    private boolean fillAndReinitializeTrajectories(OneDoFJoint joint)
    {
-      RecyclingArrayList<SimpleTrajectoryPoint1D> pointQueue = pointQueues.get(joint);
+      RecyclingArrayDeque<SimpleTrajectoryPoint1D> pointQueue = pointQueues.get(joint);
       if (pointQueue.isEmpty())
          return true;
 
@@ -193,9 +193,8 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
          if (pointQueue.isEmpty())
             break;
 
-         SimpleTrajectoryPoint1D pointToAdd = pointQueue.get(0);
+         SimpleTrajectoryPoint1D pointToAdd = pointQueue.pollFirst();
          generator.appendWaypoint(pointToAdd);
-         pointQueue.remove(0); // TODO: replace with queue
       }
 
       generator.initialize();
@@ -247,23 +246,23 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
 
    private void queueInitialPoint(double initialPosition, OneDoFJoint joint)
    {
-      RecyclingArrayList<SimpleTrajectoryPoint1D> pointQueue = pointQueues.get(joint);
-      SimpleTrajectoryPoint1D point = pointQueue.add();
+      RecyclingArrayDeque<SimpleTrajectoryPoint1D> pointQueue = pointQueues.get(joint);
+      SimpleTrajectoryPoint1D point = pointQueue.addLast();
       point.set(0.0, initialPosition, 0.0);
    }
 
    private boolean queuePoint(SimpleTrajectoryPoint1D trajectoryPoint, OneDoFJoint joint)
    {
-      RecyclingArrayList<SimpleTrajectoryPoint1D> pointQueue = pointQueues.get(joint);
+      RecyclingArrayDeque<SimpleTrajectoryPoint1D> pointQueue = pointQueues.get(joint);
       if (atCapacityLimit(pointQueue))
          return false;
 
-      SimpleTrajectoryPoint1D point = pointQueue.add();
+      SimpleTrajectoryPoint1D point = pointQueue.addLast();
       point.set(trajectoryPoint);
       return true;
    }
 
-   private boolean atCapacityLimit(RecyclingArrayList<SimpleTrajectoryPoint1D> pointQueue)
+   private boolean atCapacityLimit(RecyclingArrayDeque<SimpleTrajectoryPoint1D> pointQueue)
    {
       if (pointQueue.size() >= maxPoints)
       {
@@ -298,12 +297,12 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
       if (isEmpty(joint))
          return Double.NEGATIVE_INFINITY;
 
-      RecyclingArrayList<SimpleTrajectoryPoint1D> pointQueue = pointQueues.get(joint);
+      RecyclingArrayDeque<SimpleTrajectoryPoint1D> pointQueue = pointQueues.get(joint);
       MultipleWaypointsTrajectoryGenerator generator = jointTrajectoryGenerators.get(joint);
 
       if (pointQueue.isEmpty())
          return generator.getLastWaypointTime();
-      return pointQueue.getLast().getTime();
+      return pointQueue.peekLast().getTime();
    }
 
    private void overrideTrajectory()
@@ -329,7 +328,7 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
 
    public boolean isEmpty(OneDoFJoint joint)
    {
-      RecyclingArrayList<SimpleTrajectoryPoint1D> pointQueue = pointQueues.get(joint);
+      RecyclingArrayDeque<SimpleTrajectoryPoint1D> pointQueue = pointQueues.get(joint);
       MultipleWaypointsTrajectoryGenerator generator = jointTrajectoryGenerators.get(joint);
       return pointQueue.isEmpty() && generator.isDone();
    };
