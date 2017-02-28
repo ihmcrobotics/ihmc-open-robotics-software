@@ -124,10 +124,11 @@ public abstract class EndToEndChestDesiredAccelerationsMessageTest implements Mu
    public double[] findControllerDesiredJointAccelerations(OneDoFJoint[] joints, SimulationConstructionSet scs)
    {
       double[] qdd_ds = new double[joints.length];
-      String bodyName = "utorso_";
+      String prefix = "utorsoUserMode";
       for (int i = 0; i < joints.length; i++)
       {
-         qdd_ds[i] = scs.getVariable(bodyName + "qdd_d_user_" + joints[i].getName()).getValueAsDouble();
+         String name = prefix + "_" + joints[i].getName() + "_qdd_d";
+         qdd_ds[i] = scs.getVariable(name).getValueAsDouble();
       }
       return qdd_ds;
    }

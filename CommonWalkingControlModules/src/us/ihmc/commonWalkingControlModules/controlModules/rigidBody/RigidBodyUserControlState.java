@@ -1,106 +1,117 @@
 package us.ihmc.commonWalkingControlModules.controlModules.rigidBody;
 
+import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointspaceAccelerationCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.DesiredAccelerationCommand;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.tools.io.printing.PrintTools;
 
 public class RigidBodyUserControlState extends RigidBodyControlState
 {
    public static final double TIME_WITH_NO_MESSAGE_BEFORE_ABORT = 0.25;
 
-   private final JointspaceAccelerationCommand jointspaceAccelerationCommand = new JointspaceAccelerationCommand();
+   // TODO: make multiple weights part of a single command instead of using a list here
+   private final JointspaceAccelerationCommand[] jointspaceAccelerationCommands;
+   private final InverseDynamicsCommandList jointspaceAccelerationCommandList = new InverseDynamicsCommandList();
 
    private final OneDoFJoint[] jointsToControl;
-   private final DoubleYoVariable[] userDesiredJointAccelerations;
-   //   private final DoubleYoVariable[] weights;
-   private final DoubleYoVariable weight;
+   private final int numberOfJoints;
 
-   private final DoubleYoVariable timeOfLastUserMesage;
-   private final DoubleYoVariable timeSinceLastUserMesage;
+   private final DoubleYoVariable[] userDesiredJointAccelerations;
+   private final DoubleYoVariable[] weights;
+
    private final BooleanYoVariable abortUserControlMode;
-   private final DoubleYoVariable yoTime;
+   private final BooleanYoVariable hasWeights;
 
    public RigidBodyUserControlState(String bodyName, OneDoFJoint[] jointsToControl, DoubleYoVariable yoTime, YoVariableRegistry parentRegistry)
    {
       super(RigidBodyControlMode.USER, bodyName, yoTime);
+      String prefix = bodyName + "UserMode";
+      hasWeights = new BooleanYoVariable(prefix + "HasWeights", registry);
 
       this.jointsToControl = jointsToControl;
-      this.yoTime = yoTime;
+      this.numberOfJoints = jointsToControl.length;
 
+      jointspaceAccelerationCommands = new JointspaceAccelerationCommand[jointsToControl.length];
       userDesiredJointAccelerations = new DoubleYoVariable[jointsToControl.length];
-      //      weights = new DoubleYoVariable[jointsToControl.length];
-      weight = new DoubleYoVariable(bodyName + "UserControlModeWeight", registry);
+      weights = new DoubleYoVariable[jointsToControl.length];
 
-      for (int i = 0; i < jointsToControl.length; i++)
+      for (int i = 0; i < numberOfJoints; i++)
       {
          String jointName = jointsToControl[i].getName();
-         userDesiredJointAccelerations[i] = new DoubleYoVariable(bodyName + "_qdd_d_user_" + jointName, registry);
-         //         weights[i] = new DoubleYoVariable(bodyName + "_qdd_user_weight_" + jointName, registry);
-         jointspaceAccelerationCommand.addJoint(jointsToControl[i], Double.NaN);
+         userDesiredJointAccelerations[i] = new DoubleYoVariable(prefix + "_" + jointName + "_qdd_d", registry);
+         weights[i] = new DoubleYoVariable(prefix + "_" + jointName + "_weight", registry);
+
+         jointspaceAccelerationCommands[i] = new JointspaceAccelerationCommand();
+         jointspaceAccelerationCommands[i].addJoint(jointsToControl[i], Double.NaN);
       }
 
-      timeOfLastUserMesage = new DoubleYoVariable(bodyName + "TimeOfLastAccelerationMesage", registry);
-      timeSinceLastUserMesage = new DoubleYoVariable(bodyName + "TimeSinceLastAccelerationMesage", registry);
-      abortUserControlMode = new BooleanYoVariable(bodyName + "AbortUserControlMode", registry);
+      abortUserControlMode = new BooleanYoVariable(prefix + "Abort", registry);
       parentRegistry.addChild(registry);
    }
 
    public boolean handleDesiredAccelerationsCommand(DesiredAccelerationCommand<?, ?> command)
    {
-      if (command.getNumberOfJoints() != jointsToControl.length)
+      if (!hasWeights.getBooleanValue())
       {
-         abortUserControlMode.set(true);
+         PrintTools.warn(warningPrefix + "Can not send joint desired accelerations. Do not have all weights set.");
          return false;
       }
 
-      for (int i = 0; i < jointsToControl.length; i++)
+      if (command.getNumberOfJoints() != jointsToControl.length)
       {
-         userDesiredJointAccelerations[i].set(command.getDesiredJointAcceleration(i));
-         //         weights[i].set(command.getWeight(i));
+         PrintTools.warn(warningPrefix + "Unexpected number of joints.");
+         return false;
       }
-      timeSinceLastUserMesage.set(0.0);
-      timeOfLastUserMesage.set(yoTime.getDoubleValue());
+
+      if (!handleCommandInternal(command))
+         return false;
+
+      for (int i = 0; i < numberOfJoints; i++)
+         userDesiredJointAccelerations[i].set(command.getDesiredJointAcceleration(i));
+
+      abortUserControlMode.set(false);
       return true;
    }
 
    @Override
    public void doAction()
    {
-      timeSinceLastUserMesage.set(yoTime.getDoubleValue() - timeOfLastUserMesage.getDoubleValue());
-
-      if (timeSinceLastUserMesage.getDoubleValue() > TIME_WITH_NO_MESSAGE_BEFORE_ABORT)
+      if (getTimeInTrajectory() > TIME_WITH_NO_MESSAGE_BEFORE_ABORT)
       {
          abortUserControlMode.set(true);
          return;
       }
 
-      for (int i = 0; i < jointsToControl.length; i++)
+      for (int i = 0; i < numberOfJoints; i++)
       {
-         jointspaceAccelerationCommand.setOneDoFJointDesiredAcceleration(i, userDesiredJointAccelerations[i].getDoubleValue());
-         //         jointspaceAccelerationCommand.setWeight(i, weights[i].getDoubleValue());
-         jointspaceAccelerationCommand.setWeight(weight.getDoubleValue());
+         jointspaceAccelerationCommands[i].setOneDoFJointDesiredAcceleration(0, userDesiredJointAccelerations[i].getDoubleValue());
+         jointspaceAccelerationCommands[i].setWeight(weights[i].getDoubleValue());
       }
    }
 
-   public void setWeight(double weight)
+   public void setWeights(TObjectDoubleHashMap<String> weights)
    {
-      this.weight.set(weight);
-   }
-
-   public boolean isAbortUserControlModeRequested()
-   {
-      return abortUserControlMode.getBooleanValue();
+      hasWeights.set(true);
+      for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
+      {
+         OneDoFJoint joint = jointsToControl[jointIdx];
+         if (weights.containsKey(joint.getName()))
+            this.weights[jointIdx].set(weights.get(joint.getName()));
+         else
+            hasWeights.set(false);
+      }
    }
 
    @Override
    public void doTransitionIntoAction()
    {
-      abortUserControlMode.set(false);
    }
 
    @Override
@@ -110,21 +121,13 @@ public class RigidBodyUserControlState extends RigidBodyControlState
    }
 
    @Override
-   public boolean isEmpty()
-   {
-      return false;
-   }
-
-   @Override
-   public double getLastTrajectoryPointTime()
-   {
-      return 0;
-   }
-
-   @Override
    public InverseDynamicsCommand<?> getInverseDynamicsCommand()
    {
-      return jointspaceAccelerationCommand;
+      jointspaceAccelerationCommandList.clear();
+      for (int i = 0; i < numberOfJoints; i++)
+         jointspaceAccelerationCommandList.addCommand(jointspaceAccelerationCommands[i]);
+
+      return jointspaceAccelerationCommandList;
    }
 
    @Override
@@ -133,4 +136,23 @@ public class RigidBodyUserControlState extends RigidBodyControlState
       return null;
    }
 
+   @Override
+   public boolean abortState()
+   {
+      return abortUserControlMode.getBooleanValue();
+   }
+
+   @Override
+   public boolean isEmpty()
+   {
+      // this control mode does not support command queuing
+      return false;
+   }
+
+   @Override
+   public double getLastTrajectoryPointTime()
+   {
+      // this control mode does not support command queuing
+      return 0.0;
+   }
 }

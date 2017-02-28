@@ -177,15 +177,15 @@ public class HighLevelControlManagerFactory
 
       Vector3D chestAngularWeight = momentumOptimizationSettings.getChestAngularWeight();
       Vector3D chestLinearWeight = null;
-      double chestUserModeWeight = momentumOptimizationSettings.getChestUserModeWeight();
 
       YoOrientationPIDGainsInterface taskspaceOrientationGains = walkingControllerParameters.createChestControlGains(registry);
       YoPositionPIDGainsInterface taskspacePositionGains = null;
 
       TObjectDoubleHashMap<String> jointspaceWeights = momentumOptimizationSettings.getJointspaceWeights();
       Map<String, YoPIDGains> jointspaceGains = walkingControllerParameters.getOrCreateJointSpaceControlGains(registry);
+      TObjectDoubleHashMap<String> userModeWeights = momentumOptimizationSettings.getUserModeWeights();
 
-      manager.setWeights(jointspaceWeights, chestAngularWeight, chestLinearWeight, chestUserModeWeight);
+      manager.setWeights(jointspaceWeights, chestAngularWeight, chestLinearWeight, userModeWeights);
       manager.setGains(jointspaceGains, taskspaceOrientationGains, taskspacePositionGains);
 
       rigidBodyManagerMapByBodyName.put(bodyName, manager);
