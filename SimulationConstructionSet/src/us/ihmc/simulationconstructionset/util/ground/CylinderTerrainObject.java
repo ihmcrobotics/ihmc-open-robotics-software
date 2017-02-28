@@ -11,7 +11,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.jMonkeyEngineToolkit.HeightMapWithNormals;
-import us.ihmc.robotics.MathTools;
+import us.ihmc.robotics.EuclidCoreMissingTools;
 import us.ihmc.robotics.geometry.BoundingBox3d;
 import us.ihmc.robotics.geometry.Direction;
 import us.ihmc.robotics.geometry.TransformTools;
@@ -204,7 +204,7 @@ public class CylinderTerrainObject implements TerrainObject3D, HeightMapWithNorm
          Point3D intersectionToPack = new Point3D();
          plane.getIntersectionWithLine(intersectionToPack, testPoint, testDirection);
 
-         if (MathTools.isFinite(intersectionToPack) && (intersectionToPack.distanceSquared(plane.getPointCopy()) < radius * radius))
+         if (EuclidCoreMissingTools.isFinite(intersectionToPack) && (intersectionToPack.distanceSquared(plane.getPointCopy()) < radius * radius))
          {
             intersections.add(intersectionToPack);
          }

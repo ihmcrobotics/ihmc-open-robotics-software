@@ -18,10 +18,6 @@ import org.junit.Test;
 
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.euclid.tools.EuclidCoreTestTools;
-import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class MathToolsTest
 {
@@ -528,42 +524,6 @@ public class MathToolsTest
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
-   public void testDiffFrameVector()
-   {
-      ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-      ArrayList<FrameVector> vectors = new ArrayList<FrameVector>();
-      vectors.add(new FrameVector(worldFrame, 1.0, 2.0, 3.0));
-      vectors.add(new FrameVector(worldFrame, 4.0, -2.0, 0.0));
-      vectors.add(new FrameVector(worldFrame, 6.0, 2.0, -4.0));
-
-      ArrayList<FrameVector> expectedReturn = new ArrayList<FrameVector>();
-      expectedReturn.add(new FrameVector(worldFrame, 3.0, -4.0, -3.0));
-      expectedReturn.add(new FrameVector(worldFrame, 2.0, 4.0, -4.0));
-
-      ArrayList<FrameVector> actualReturn = MathTools.diff(vectors);
-
-      for (int i = 0; i < 2; i++)
-      {
-         assertTrue(expectedReturn.get(i).epsilonEquals(actualReturn.get(i), 1e-12));
-      }
-
-   }
-
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000, expected = RuntimeException.class)
-   public void testDiffFrameVectorDifferentFrames()
-   {
-      ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-      ReferenceFrame anotherFrame = ReferenceFrame.constructARootFrame("anotherFrame");
-      ArrayList<FrameVector> vectors = new ArrayList<FrameVector>();
-      vectors.add(new FrameVector(worldFrame, 1.0, 2.0, 3.0));
-      vectors.add(new FrameVector(anotherFrame, 4.0, -2.0, 0.0));
-
-      MathTools.diff(vectors);
-   }
-
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
    public void testCheckIsEqual()
    {
       MathTools.checkIfEqual(1, 1);
@@ -815,28 +775,6 @@ public class MathToolsTest
 //      assertEquals(p.getY(), proj.getY(), Double.MIN_VALUE);
 //      assertEquals(0.1, proj.getZ(), 10e-10);
 //   }
-
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
-   public void testRoundToGivenPrecision()
-   {
-      double longDouble = 0.12345678910111213;
-
-      double roundedNumber = MathTools.floorToGivenPrecision(longDouble, 1e-7);
-      assertEquals(roundedNumber, 0.1234567, 1e-14);
-
-      roundedNumber = MathTools.floorToGivenPrecision(longDouble, 1e-3);
-      assertEquals(roundedNumber, 0.123, 1e-14);
-
-      Vector3D preciseVector = new Vector3D(0.12345678910111213, 100.12345678910111213, 1000.12345678910111213);
-      Vector3D roundedVector = new Vector3D(preciseVector);
-
-      MathTools.floorToGivenPrecision(roundedVector, 1e-7);
-      EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(0.1234567, 100.1234567, 1000.1234567), roundedVector, 1e-12);
-
-      MathTools.floorToGivenPrecision(roundedVector, 1e-3);
-      EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(0.123, 100.123, 1000.123), roundedVector, 1e-14);
-   }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
