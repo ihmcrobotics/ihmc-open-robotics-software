@@ -39,11 +39,11 @@ public class RotatableBoxTerrainObject implements TerrainObject3D, HeightMapWith
       {
          for (Direction direction : Direction.values())
          {
-            double coordinate = MathTools.get(cornerPoint, direction);
-            if (coordinate > MathTools.get(maxPoint, direction))
-               MathTools.set(maxPoint, direction, coordinate);
-            if (coordinate < MathTools.get(minPoint, direction))
-               MathTools.set(minPoint, direction, coordinate);
+            double coordinate = Direction.get(cornerPoint, direction);
+            if (coordinate > Direction.get(maxPoint, direction))
+               Direction.set(maxPoint, direction, coordinate);
+            if (coordinate < Direction.get(minPoint, direction))
+               Direction.set(minPoint, direction, coordinate);
          }
       }
 

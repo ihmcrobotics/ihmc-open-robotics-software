@@ -3,8 +3,6 @@ package us.ihmc.stateEstimation.humanoid;
 import java.util.Random;
 
 import us.ihmc.euclid.tuple3D.Vector3D;
-
-import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.Direction;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
 
@@ -191,7 +189,7 @@ public class DRCSimulatedSensorNoiseParameters
       Vector3D ret = new Vector3D();
       for (Direction direction : Direction.values())
       {
-         MathTools.set(ret, direction, computeGazeboBias(mean, standardDeviation, random));
+         Direction.set(ret, direction, computeGazeboBias(mean, standardDeviation, random));
       }
 
       return ret;

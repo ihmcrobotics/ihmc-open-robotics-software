@@ -5,7 +5,6 @@ import java.util.Collection;
 
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.robotics.geometry.AngleTools;
-import us.ihmc.robotics.geometry.Direction;
 import us.ihmc.robotics.geometry.FrameVector;
 
 public class MathTools
@@ -605,48 +604,6 @@ public class MathTools
       else // (boundaryOne == boundaryTwo)
       {
          return false;
-      }
-   }
-
-   public static void set(Tuple3DBasics tuple, Direction direction, double value)
-   {
-      switch (direction)
-      {
-         case X :
-            tuple.setX(value);
-
-            break;
-
-         case Y :
-            tuple.setY(value);
-
-            break;
-
-         case Z :
-            tuple.setZ(value);
-
-            break;
-
-         default :
-            throw new IndexOutOfBoundsException();
-      }
-   }
-
-   public static double get(Tuple3DBasics tuple, Direction direction)
-   {
-      switch (direction)
-      {
-         case X :
-            return tuple.getX();
-
-         case Y :
-            return tuple.getY();
-
-         case Z :
-            return tuple.getZ();
-
-         default :
-            throw new IndexOutOfBoundsException();
       }
    }
 
