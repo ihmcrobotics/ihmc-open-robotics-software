@@ -44,6 +44,7 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
    private final BooleanYoVariable hasGains;
 
    private final SimpleTrajectoryPoint1D lastPointAdded = new SimpleTrajectoryPoint1D();
+   // TODO: make multiple weight part of a single command instead of using a list here
    private final FeedbackControlCommandList feedbackControlCommand = new FeedbackControlCommandList();
 
    private final OneDoFJoint[] jointsOriginal;

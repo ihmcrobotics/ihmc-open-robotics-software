@@ -106,11 +106,11 @@ public class RigidBodyManager
    }
 
    public void setWeights(TObjectDoubleHashMap<String> jointspaceWeights, Vector3D taskspaceAngularWeight, Vector3D taskspaceLinearWeight,
-         double userModeWeight)
+         TObjectDoubleHashMap<String> userModeWeights)
    {
       jointspaceControlState.setWeights(jointspaceWeights);
       taskspaceControlState.setWeights(taskspaceAngularWeight, taskspaceLinearWeight);
-      userControlState.setWeight(userModeWeight);
+      userControlState.setWeights(userModeWeights);
    }
 
    public void setGains(Map<String, YoPIDGains> jointspaceGains, YoOrientationPIDGainsInterface taskspaceOrientationGains,
@@ -132,10 +132,10 @@ public class RigidBodyManager
    public void compute()
    {
       initialize();
-      if(stateMachine.isCurrentState(RigidBodyControlMode.USER) && userControlState.isAbortUserControlModeRequested())
-      {
+
+      if (stateMachine.getCurrentState().abortState())
          holdInJointspace();
-      }
+
       stateMachine.checkTransitionConditions();
       stateMachine.doAction();
 
@@ -234,8 +234,8 @@ public class RigidBodyManager
       // TODO: hand, head
       // check the control mode in the message
       // if it is USER forward command to the user controller and activate it if necessary
-      
-      if(userControlState.handleDesiredAccelerationsCommand(command))
+
+      if (userControlState.handleDesiredAccelerationsCommand(command))
       {
          requestState(RigidBodyControlMode.USER);
       }

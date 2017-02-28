@@ -4,6 +4,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
+import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.controllerAPI.command.QueueableCommand;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
@@ -43,29 +44,39 @@ public abstract class RigidBodyControlState extends FinishableState<RigidBodyCon
       trajectoryStartTime = new DoubleYoVariable(prefix + "TrajectoryStartTime", registry);
    }
 
-   protected boolean handleCommandInternal(QueueableCommand<?, ?> command)
+   protected boolean handleCommandInternal(Command<?, ?> command)
    {
-      if (command.getCommandId() == Packet.INVALID_MESSAGE_ID)
+      if (command instanceof QueueableCommand<?, ?>)
       {
-         PrintTools.warn(warningPrefix + "Recieved packet with invalid ID.");
-         return false;
+         QueueableCommand<?, ?> queueableCommand = (QueueableCommand<?, ?>) command;
+
+         if (queueableCommand.getCommandId() == Packet.INVALID_MESSAGE_ID)
+         {
+            PrintTools.warn(warningPrefix + "Recieved packet with invalid ID.");
+            return false;
+         }
+
+         boolean wantToQueue = queueableCommand.getExecutionMode() == ExecutionMode.QUEUE;
+         boolean previousIdMatch = queueableCommand.getPreviousCommandId() == lastCommandId.getLongValue();
+
+         if (!isEmpty() && wantToQueue && !previousIdMatch)
+         {
+            PrintTools.warn(warningPrefix + "Unexpected command ID.");
+            return false;
+         }
+
+         if (!wantToQueue || isEmpty())
+            trajectoryStartTime.set(yoTime.getDoubleValue());
+         else
+            queueableCommand.addTimeOffset(getLastTrajectoryPointTime());
+
+         lastCommandId.set(queueableCommand.getCommandId());
       }
-
-      boolean wantToQueue = command.getExecutionMode() == ExecutionMode.QUEUE;
-      boolean previousIdMatch = command.getPreviousCommandId() == lastCommandId.getLongValue();
-
-      if (!isEmpty() && wantToQueue && !previousIdMatch)
-      {
-         PrintTools.warn(warningPrefix + "Unexpected command ID.");
-         return false;
-      }
-
-      if (!wantToQueue || isEmpty())
-         trajectoryStartTime.set(yoTime.getDoubleValue());
       else
-         command.addTimeOffset(getLastTrajectoryPointTime());
+      {
+         trajectoryStartTime.set(yoTime.getDoubleValue());
+      }
 
-      lastCommandId.set(command.getCommandId());
       trajectoryStopped.set(false);
       trajectoryDone.set(false);
       return true;
@@ -84,6 +95,11 @@ public abstract class RigidBodyControlState extends FinishableState<RigidBodyCon
    public void handleStopAllTrajectoryCommand(StopAllTrajectoryCommand command)
    {
       trajectoryStopped.set(command.isStopAllTrajectory());
+   }
+
+   public boolean abortState()
+   {
+      return false;
    }
 
    public abstract InverseDynamicsCommand<?> getInverseDynamicsCommand();

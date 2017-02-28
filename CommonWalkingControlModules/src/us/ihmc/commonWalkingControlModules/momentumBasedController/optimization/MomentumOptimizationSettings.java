@@ -30,8 +30,6 @@ public abstract class MomentumOptimizationSettings
 
    public abstract Vector2D getCoPRateHighWeight();
 
-   public abstract double getHeadUserModeWeight();
-
    public abstract double getHeadTaskspaceWeight();
 
    public abstract Vector3D getChestAngularWeight();
@@ -45,8 +43,6 @@ public abstract class MomentumOptimizationSettings
    public abstract Vector3D getHighLinearFootWeight();
 
    public abstract Vector3D getHighAngularFootWeight();
-
-   public abstract double getHandUserModeWeight();
 
    public abstract Vector3D getHandAngularTaskspaceWeight();
 
@@ -62,6 +58,8 @@ public abstract class MomentumOptimizationSettings
 
    public abstract TObjectDoubleHashMap<String> getJointspaceWeights();
 
+   public abstract TObjectDoubleHashMap<String> getUserModeWeights();
+
    // TODO: nuke this once all managers support individual joint weights
    public abstract double getHandJointspaceWeight();
 
@@ -74,5 +72,13 @@ public abstract class MomentumOptimizationSettings
       return 1.0;
    }
 
+   // TODO: nuke this once all managers support individual joint weights
    public abstract double getChestUserModeWeight();
+
+   // TODO: nuke this once all managers support individual joint weights
+   public abstract double getHandUserModeWeight();
+
+   // TODO: nuke this once all managers support individual joint weights
+   public abstract double getHeadUserModeWeight();
+
 }

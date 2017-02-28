@@ -252,11 +252,19 @@ public class HexapodMomentumOptimizationSettings extends MomentumOptimizationSet
       // TODO Auto-generated method stub
       return null;
    }
-   
+
    /** @inheritDoc */
    @Override
    public double getChestUserModeWeight()
    {
       return chestUserModeWeight;
+   }
+
+   /** @inheritDoc */
+   @Override
+   public TObjectDoubleHashMap<String> getUserModeWeights()
+   {
+      // TODO Auto-generated method stub
+      return null;
    }
 }
