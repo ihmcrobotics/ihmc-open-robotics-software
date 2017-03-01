@@ -109,11 +109,15 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       positionTrajectoryGenerator = new MultipleWaypointsPositionTrajectoryGenerator(bodyName, maxPointsInGenerator, true, worldFrame, registry);
       orientationTrajectoryGenerator = new MultipleWaypointsOrientationTrajectoryGenerator(bodyName, maxPointsInGenerator, true, worldFrame, registry);
 
-      for (ReferenceFrame frameToRegister : controlFrameMap.values())
+      if (controlFrameMap != null)
       {
-         positionTrajectoryGenerator.registerNewTrajectoryFrame(frameToRegister);
-         orientationTrajectoryGenerator.registerNewTrajectoryFrame(frameToRegister);
+         for (ReferenceFrame frameToRegister : controlFrameMap.values())
+         {
+            positionTrajectoryGenerator.registerNewTrajectoryFrame(frameToRegister);
+            orientationTrajectoryGenerator.registerNewTrajectoryFrame(frameToRegister);
+         }
       }
+
       positionTrajectoryGenerator.registerNewTrajectoryFrame(rootFrame);
       orientationTrajectoryGenerator.registerNewTrajectoryFrame(rootFrame);
 
@@ -149,6 +153,14 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
          yoLinearWeight.setToZero();
          hasLinearWeight.set(false);
       }
+   }
+
+   public void setWeight(double weight)
+   {
+      hasAngularWeight.set(true);
+      yoAngularWeight.set(weight, weight, weight);
+      hasLinearWeight.set(true);
+      yoLinearWeight.set(weight, weight, weight);
    }
 
    public void setGains(YoOrientationPIDGainsInterface orientationGains, YoPositionPIDGainsInterface positionGains)
