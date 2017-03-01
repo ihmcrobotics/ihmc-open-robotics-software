@@ -484,7 +484,7 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
       alphaSwingKneeMechanicalLimitAvoidance
             .set((desiredPercentOfLegLength.getDoubleValue() - percentOfLegLengthThresholdToEnableSwingKneeLimitAvoidance.getDoubleValue())
                   / (minMechanicalPercentOfLegLength.getDoubleValue() - percentOfLegLengthThresholdToEnableSwingKneeLimitAvoidance.getDoubleValue()));
-      alphaSwingKneeMechanicalLimitAvoidance.set(MathTools.clipToMinMax(alphaSwingKneeMechanicalLimitAvoidance.getDoubleValue(), 0.0, 1.0));
+      alphaSwingKneeMechanicalLimitAvoidance.set(MathTools.clamp(alphaSwingKneeMechanicalLimitAvoidance.getDoubleValue(), 0.0, 1.0));
 
       //      double desiredOrMinLegLength = - Math.max(desiredLegLength.getDoubleValue(), minimumLegLength.getDoubleValue());
       double correctedDesiredPositionZ = ((1.0 - alphaSwingKneeMechanicalLimitAvoidance.getDoubleValue()) * desiredLegLength.getDoubleValue()
@@ -522,7 +522,7 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
       {
          alphaSwingHipMechanicalLimitAvoidance.set((hipPitchJoint.getQ() - hipFlexionAngleThresholdToEnableSwingHipLimitAvoidance.getDoubleValue())
                / (hipFlexionMechanicalLimit.getDoubleValue() - hipFlexionAngleThresholdToEnableSwingHipLimitAvoidance.getDoubleValue()));
-         alphaSwingHipMechanicalLimitAvoidance.set(MathTools.clipToMinMax(alphaSwingHipMechanicalLimitAvoidance.getDoubleValue(), 0.0, 1.0));
+         alphaSwingHipMechanicalLimitAvoidance.set(MathTools.clamp(alphaSwingHipMechanicalLimitAvoidance.getDoubleValue(), 0.0, 1.0));
 
          if (alphaSwingHipMechanicalLimitAvoidance.getDoubleValue() > 1.0e-3)
          {
@@ -593,7 +593,7 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
       alphaSwingSingularityAvoidance.set((desiredPercentOfLegLength.getDoubleValue() - percentOfLegLengthThresholdToEnableSingularityAvoidance.getDoubleValue())
             / (maxPercentOfLegLengthForSingularityAvoidanceInSwing.getDoubleValue()
                   - percentOfLegLengthThresholdToEnableSingularityAvoidance.getDoubleValue()));
-      alphaSwingSingularityAvoidance.set(MathTools.clipToMinMax(alphaSwingSingularityAvoidance.getDoubleValue(), 0.0, 1.0));
+      alphaSwingSingularityAvoidance.set(MathTools.clamp(alphaSwingSingularityAvoidance.getDoubleValue(), 0.0, 1.0));
 
       double desiredOrMaxLegLength = -Math.min(desiredLegLength.getDoubleValue(),
             maxPercentOfLegLengthForSingularityAvoidanceInSwing.getDoubleValue() * maximumLegLength.getDoubleValue());
@@ -770,7 +770,7 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
             .set((desiredPercentOfLegLength.getDoubleValue() - percentOfLegLengthThresholdToEnableSingularityAvoidance.getDoubleValue())
                   / (maxPercentOfLegLengthForSingularityAvoidanceInSupport.getDoubleValue()
                         - percentOfLegLengthThresholdToEnableSingularityAvoidance.getDoubleValue()));
-      alphaSupportSingularityAvoidance.set(MathTools.clipToMinMax(alphaSupportSingularityAvoidance.getDoubleValue(), 0.0, 1.0));
+      alphaSupportSingularityAvoidance.set(MathTools.clamp(alphaSupportSingularityAvoidance.getDoubleValue(), 0.0, 1.0));
 
       double desiredOrMaxLegLength = Math.min(desiredLegLength.getDoubleValue(),
             maxPercentOfLegLengthForSingularityAvoidanceInSupport.getDoubleValue() * maximumLegLength.getDoubleValue());
@@ -919,7 +919,7 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
 
       alphaCollapseAvoidance.set((desiredPercentOfLegLength.getDoubleValue() - percentOfLegLengthThresholdForCollapseAvoidance.getDoubleValue())
             / (minPercentOfLegLengthForCollapseAvoidance.getDoubleValue() - percentOfLegLengthThresholdForCollapseAvoidance.getDoubleValue()));
-      alphaCollapseAvoidance.set(MathTools.clipToMinMax(alphaCollapseAvoidance.getDoubleValue(), 0.0, 1.0));
+      alphaCollapseAvoidance.set(MathTools.clamp(alphaCollapseAvoidance.getDoubleValue(), 0.0, 1.0));
 
       double desiredOrMinLegLength = Math.max(desiredLegLength.getDoubleValue(),
             minPercentOfLegLengthForCollapseAvoidance.getDoubleValue() * maximumLegLength.getDoubleValue());

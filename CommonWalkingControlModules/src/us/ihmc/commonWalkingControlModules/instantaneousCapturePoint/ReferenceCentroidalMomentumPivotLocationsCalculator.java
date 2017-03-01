@@ -649,7 +649,7 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
       // First constrain the computed CMP to the given min/max along the x-axis.
       FramePoint2d footSupportCentroid = footSupportPolygon.getCentroid();
       double cmpXOffsetFromCentroid = stepLengthToCMPOffsetFactor.getDoubleValue() * (centroidOfFootstepToConsider.getX() - footSupportCentroid.getX()) + cmpOffset.getX();
-      cmpXOffsetFromCentroid = MathTools.clipToMinMax(cmpXOffsetFromCentroid, minForwardCMPOffset, maxForwardCMPOffset);
+      cmpXOffsetFromCentroid = MathTools.clamp(cmpXOffsetFromCentroid, minForwardCMPOffset, maxForwardCMPOffset);
 
       cmpToPack.setIncludingFrame(footSupportCentroid);
       cmpToPack.add(cmpXOffsetFromCentroid, cmpOffset.getY());
@@ -690,7 +690,7 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
       upcomingSupport.getCentroid(tempCentroid);
       tempCentroid3d.setXYIncludingFrame(tempCentroid);
 
-      double chicken = MathTools.clipToMinMax(percentageChickenSupport.getDoubleValue(), 0.0, 1.0);
+      double chicken = MathTools.clamp(percentageChickenSupport.getDoubleValue(), 0.0, 1.0);
       if (chicken <= 0.5)
          entryCMPs.get(cmpIndex).interpolate(firstCMP, tempCentroid3d, chicken * 2.0);
       else
@@ -730,6 +730,6 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
 
    public void setCarefulFootholdPercentage(double percentage)
    {
-      percentageChickenSupport.set(MathTools.clipToMinMax(percentage, 0.0, 1.0));
+      percentageChickenSupport.set(MathTools.clamp(percentage, 0.0, 1.0));
    }
 }

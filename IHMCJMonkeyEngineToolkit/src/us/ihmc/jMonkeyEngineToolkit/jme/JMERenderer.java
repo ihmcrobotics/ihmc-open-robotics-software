@@ -59,6 +59,10 @@ import com.jme3.util.SkyFactory.EnvMapType;
 import jme3dae.ColladaLoader;
 import jme3dae.collada14.ColladaDocumentV14;
 import jme3dae.materials.FXBumpMaterialGenerator;
+import us.ihmc.commons.exception.DefaultExceptionHandler;
+import us.ihmc.commons.nio.FileTools;
+import us.ihmc.commons.nio.PathTools;
+import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.graphicsDescription.HeightMap;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.input.SelectedListener;
@@ -81,9 +85,9 @@ import us.ihmc.jMonkeyEngineToolkit.jme.terrain.JMEHeightMapTerrain;
 import us.ihmc.jMonkeyEngineToolkit.jme.util.JMEGeometryUtils;
 import us.ihmc.jMonkeyEngineToolkit.jme.util.JMENodeTools;
 import us.ihmc.jMonkeyEngineToolkit.stlLoader.STLLoader;
+import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.MutableColor;
 import us.ihmc.robotics.lidar.LidarScanParameters;
-import us.ihmc.tools.FormattingTools;
 import us.ihmc.tools.inputDevices.keyboard.KeyListener;
 import us.ihmc.tools.inputDevices.keyboard.KeyListenerHolder;
 import us.ihmc.tools.inputDevices.mouse.MouseListener;
@@ -91,11 +95,9 @@ import us.ihmc.tools.inputDevices.mouse.MouseListenerHolder;
 import us.ihmc.tools.inputDevices.mouse3DJoystick.Mouse3DJoystick;
 import us.ihmc.tools.inputDevices.mouse3DJoystick.Mouse3DListener;
 import us.ihmc.tools.inputDevices.mouse3DJoystick.Mouse3DListenerHolder;
-import us.ihmc.tools.io.files.FileTools;
 import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.tools.thread.CloseableAndDisposable;
 import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
-import us.ihmc.tools.time.Timer;
 
 public class JMERenderer extends SimpleApplication implements Graphics3DAdapter, PBOAwtPanelListener
 {
@@ -125,9 +127,9 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
 
    static
    {
-      Path scsCachePath = FileTools.getTemporaryDirectoryPath().resolve("SCSCache");
+      Path scsCachePath = PathTools.systemTemporaryDirectory().resolve("SCSCache");
 
-      FileTools.ensureDirectoryExists(scsCachePath);
+      FileTools.ensureDirectoryExists(scsCachePath, DefaultExceptionHandler.PRINT_STACKTRACE);
 
       System.setProperty("java.library.path", System.getProperty("java.library.path") + File.pathSeparator + scsCachePath.toString());
       NativeLibraryLoader.setCustomExtractionFolder(scsCachePath.toString());
@@ -962,7 +964,7 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
    {
       if (!pboAwtPanels.isEmpty())
       {
-         Timer timer = new Timer().start();
+         Stopwatch timer = new Stopwatch().start();
 
          for (JMEGPULidar gpuLidar : gpuLidars)
          {
@@ -970,7 +972,7 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
          }
 
          notifyRepaint();
-         PrintTools.info(this, "GPULidar scene updated. Took " + FormattingTools.roundToSignificantFigures(timer.totalElapsed(), 2) + " s");
+         PrintTools.info(this, "GPULidar scene updated. Took " + MathTools.roundToSignificantFigures(timer.totalElapsed(), 2) + " s");
       }
    }
 

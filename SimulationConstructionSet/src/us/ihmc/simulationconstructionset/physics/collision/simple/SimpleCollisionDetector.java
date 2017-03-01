@@ -242,6 +242,10 @@ public class SimpleCollisionDetector implements ScsCollisionDetector
       }
    }
 
+   public ArrayList<CollisionShape> getCollisionObjects()
+   {
+      return collisionObjects;
+   }
 
    private boolean doPolytopePolytopeCollisionDetection(CollisionShape objectOne, PolytopeShapeDescription<?> polytopeShapeDescriptionOne,
          CollisionShape objectTwo, PolytopeShapeDescription<?> polytopeShapeDescriptionTwo, CollisionDetectionResult result)

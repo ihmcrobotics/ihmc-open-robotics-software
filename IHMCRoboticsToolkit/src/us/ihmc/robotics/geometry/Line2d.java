@@ -490,9 +490,9 @@ public class Line2d implements Geometry2d<Line2d>
     */
    public boolean isPointInFrontOfLine(Vector2DReadOnly frontDirection, Point2DReadOnly point)
    {
-      double lineAngle = MathTools.angleFromZeroToTwoPi(normalizedVector.getX(), normalizedVector.getY());
-      double frontAngle = MathTools.angleFromZeroToTwoPi(frontDirection.getX(), frontDirection.getY());
-      double pointAngle = MathTools.angleFromZeroToTwoPi(point.getX() - this.point.getX(), point.getY() - this.point.getY());
+      double lineAngle = AngleTools.angleFromZeroToTwoPi(normalizedVector.getX(), normalizedVector.getY());
+      double frontAngle = AngleTools.angleFromZeroToTwoPi(frontDirection.getX(), frontDirection.getY());
+      double pointAngle = AngleTools.angleFromZeroToTwoPi(point.getX() - this.point.getX(), point.getY() - this.point.getY());
 
       double lineToFront = frontAngle - lineAngle;
       double lineToPoint = pointAngle - lineAngle;

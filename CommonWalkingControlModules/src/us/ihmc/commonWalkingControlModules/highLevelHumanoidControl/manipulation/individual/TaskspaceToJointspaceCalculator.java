@@ -505,13 +505,13 @@ public class TaskspaceToJointspaceCalculator
       for (int i = 0; i < numberOfDoF; i++)
       {
          OneDoFJoint joint = localJoints[i];
-         double qDotDesired = MathTools.clipToMinMax(desiredJointVelocities.get(i, 0), maximumJointVelocity.getDoubleValue());
+         double qDotDesired = MathTools.clamp(desiredJointVelocities.get(i, 0), maximumJointVelocity.getDoubleValue());
          double qDotDotDesired = (qDotDesired - joint.getQd()) / controlDT;
-         qDotDotDesired = MathTools.clipToMinMax(qDotDotDesired, maximumJointAcceleration.getDoubleValue());
+         qDotDotDesired = MathTools.clamp(qDotDotDesired, maximumJointAcceleration.getDoubleValue());
          qDotDesired = joint.getQd() + qDotDotDesired * controlDT;
 
          double qDesired = joint.getQ() + qDotDesired * controlDT;
-         qDesired = MathTools.clipToMinMax(qDesired, joint.getJointLimitLower(), joint.getJointLimitUpper());
+         qDesired = MathTools.clamp(qDesired, joint.getJointLimitLower(), joint.getJointLimitUpper());
          qDotDesired = (qDesired - joint.getQ()) / controlDT;
          qDotDotDesired = (qDotDesired - joint.getQd()) / controlDT;
 

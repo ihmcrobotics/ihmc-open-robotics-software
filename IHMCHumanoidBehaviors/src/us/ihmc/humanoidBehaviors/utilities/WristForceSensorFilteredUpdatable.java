@@ -214,7 +214,7 @@ public class WristForceSensorFilteredUpdatable implements Updatable
       yoForceLimitExceeded.set(yoWristSensorForceMagnitudeBandPassFiltered.getDoubleValue() > yoImpactForceThreshold_N.getDoubleValue());
 
       double forceToForceLimitRatio = yoWristSensorForceMagnitudeBandPassFiltered.getDoubleValue() / yoImpactForceThreshold_N.getDoubleValue();
-      yoCollisionSeverityLevelOneToThree.set(MathTools.clipToMinMax((int) Math.round(forceToForceLimitRatio), 1, 3));
+      yoCollisionSeverityLevelOneToThree.set(MathTools.clamp((int) Math.round(forceToForceLimitRatio), 1, 3));
 
       //            yoForceLimitExceeded.set( taskspaceStiffnessCalc.getForceAlongDirectionOfMotion() > yoImpactForceThreshold_N.getDoubleValue() );
       //      yoStiffnessLimitExceeded.set(taskspaceStiffnessCalc.getStiffnessAlongDirectionOfMotion() > yoImpactStiffnessThreshold_NperM.getDoubleValue());

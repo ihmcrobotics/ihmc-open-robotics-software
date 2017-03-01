@@ -17,7 +17,6 @@ import com.thoughtworks.xstream.mapper.MapperWrapper;
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
-import us.ihmc.tools.io.files.FileTools;
 import us.ihmc.tools.io.printing.PrintTools;
 
 public class ScriptFileLoader
@@ -48,7 +47,7 @@ public class ScriptFileLoader
          }
       };
 
-      reader = FileTools.newBufferedReader(scriptFilePath);
+      reader = Files.newBufferedReader(scriptFilePath);
       inputStream = xStream.createObjectInputStream(reader);
    }
    

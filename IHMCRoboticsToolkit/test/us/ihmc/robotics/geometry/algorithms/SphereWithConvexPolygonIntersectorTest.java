@@ -8,6 +8,7 @@ import java.util.List;
 
 import org.junit.Test;
 
+import us.ihmc.commons.Epsilons;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -15,7 +16,6 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.shapes.FrameSphere3d;
-import us.ihmc.robotics.math.Epsilons;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 

@@ -24,6 +24,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.commons.exception.DefaultExceptionHandler;
+import us.ihmc.commons.nio.FileTools;
 import us.ihmc.commons.nio.FileToolsTest;
 import us.ihmc.commons.nio.WriteOption;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
@@ -56,10 +57,10 @@ public class DeprecatedFileToolsTest
    @Before
    public void setUp()
    {
-      FileTools.ensureDirectoryExists(FILE_TOOLS_TEST_PATH);
-      FileTools.ensureDirectoryExists(TEXT_DIRECTORY_PATH);
-      FileTools.ensureDirectoryExists(JAVA_DIRECTORY_PATH);
-      FileTools.ensureDirectoryExists(EMPTY_DIRECTORY_PATH);
+      FileTools.ensureDirectoryExists(FILE_TOOLS_TEST_PATH, DefaultExceptionHandler.PRINT_STACKTRACE);
+      FileTools.ensureDirectoryExists(TEXT_DIRECTORY_PATH, DefaultExceptionHandler.PRINT_STACKTRACE);
+      FileTools.ensureDirectoryExists(JAVA_DIRECTORY_PATH, DefaultExceptionHandler.PRINT_STACKTRACE);
+      FileTools.ensureDirectoryExists(EMPTY_DIRECTORY_PATH, DefaultExceptionHandler.PRINT_STACKTRACE);
       
       createJavaFile1();
       createJavaFile2();

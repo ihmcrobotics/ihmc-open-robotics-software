@@ -143,7 +143,7 @@ public class ParabolicWithFinalVelocityConstrainedPositionTrajectoryGenerator im
    public void compute(double dt)
    {
       this.currentTime.add(dt);
-      double time = MathTools.clipToMinMax(currentTime.getDoubleValue(), 0.0, trajectoryTime.getDoubleValue());
+      double time = MathTools.clamp(currentTime.getDoubleValue(), 0.0, trajectoryTime.getDoubleValue());
       xPolynomial.compute(time);
       yPolynomial.compute(time);
       zPolynomial.compute(time);

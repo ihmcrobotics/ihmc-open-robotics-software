@@ -208,7 +208,7 @@ public class ExploreFootPolygonState extends AbstractFootControlState
             double settleDuration = 0.1;
 
             double percentRampOut = (timeInState - lastShrunkTime.getDoubleValue() - settleDuration) / rampOutDuration;
-            rampOutDuration = MathTools.clipToMinMax(rampOutDuration, 0.0, 1.0);
+            rampOutDuration = MathTools.clamp(rampOutDuration, 0.0, 1.0);
 
             boolean doSpiral = timeInState - lastShrunkTime.getDoubleValue() - settleDuration > rampOutDuration;
 
@@ -264,7 +264,7 @@ public class ExploreFootPolygonState extends AbstractFootControlState
             if (timeExploringCurrentCorner <= timeToGoToCorner)
             {
                double percent = timeExploringCurrentCorner / timeToGoToCorner;
-               percent = MathTools.clipToMinMax(percent, 0.0, 1.0);
+               percent = MathTools.clamp(percent, 0.0, 1.0);
                desiredCenterOfPressure.interpolate(centroid, currentCorner, percent);
             }
             else

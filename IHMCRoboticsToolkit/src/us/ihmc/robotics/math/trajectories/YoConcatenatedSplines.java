@@ -753,7 +753,7 @@ public class YoConcatenatedSplines
 
    private int getSplineIndex(double t)
    {
-      t = MathTools.clipToMinMax(t, rangeList.get(0).getLeft().getDoubleValue(), rangeList.get(rangeList.size() - 1).getRight().getDoubleValue());
+      t = MathTools.clamp(t, rangeList.get(0).getLeft().getDoubleValue(), rangeList.get(rangeList.size() - 1).getRight().getDoubleValue());
       int index;
       int lowerBound = 0;
       int upperBound = rangeList.size() - 1;

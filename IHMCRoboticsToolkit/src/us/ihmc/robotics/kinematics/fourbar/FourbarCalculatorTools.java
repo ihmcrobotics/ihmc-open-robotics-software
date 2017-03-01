@@ -23,7 +23,7 @@ public class FourbarCalculatorTools
       checkIfInRange(l_opposite, 0.0, Double.POSITIVE_INFINITY);
 
       double cosAngle = MathTools
-            .clipToMinMax((square(l_neighbour1) + square(l_neighbour2) - square(l_opposite)) / (2.0 * l_neighbour1 * l_neighbour2), -1.0, 1.0);
+            .clamp((square(l_neighbour1) + square(l_neighbour2) - square(l_opposite)) / (2.0 * l_neighbour1 * l_neighbour2), -1.0, 1.0);
 
       return cosAngle;
    }

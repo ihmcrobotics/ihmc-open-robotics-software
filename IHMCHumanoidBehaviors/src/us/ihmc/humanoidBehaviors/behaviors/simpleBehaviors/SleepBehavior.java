@@ -3,12 +3,12 @@ package us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.time.YoTimer;
+import us.ihmc.robotics.time.YoStopwatch;
 
 public class SleepBehavior extends AbstractBehavior
 {
    private final DoubleYoVariable sleepTime;
-   private final YoTimer timer;
+   private final YoStopwatch timer;
 
    public SleepBehavior(CommunicationBridgeInterface outgoingCommunicationBridge, DoubleYoVariable yoTime)
    {
@@ -22,7 +22,7 @@ public class SleepBehavior extends AbstractBehavior
       this.sleepTime = new DoubleYoVariable("sleepTime", registry);
       this.sleepTime.set(sleepTime);
 
-      timer = new YoTimer(yoTime);
+      timer = new YoStopwatch(yoTime);
    }
 
    @Override

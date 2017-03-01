@@ -705,7 +705,7 @@ public class QuadrupedVMCForceMultiGaitController implements QuadrupedController
       desiredFootPositions.get(robotQuadrant).setX((endX - startX) * currentPhaseCompletion + startX);
       desiredFootPositions.get(robotQuadrant).setY((endY - startY) * currentPhaseCompletion + startY);
 
-      int ballIndex = MathTools.clipToMinMax((int) Math.floor(currentPhaseCompletion * 20.0), 0, 20);
+      int ballIndex = MathTools.clamp((int) Math.floor(currentPhaseCompletion * 20.0), 0, 20);
       swingTrajectoryBagsOfBalls.get(robotQuadrant).setBall(desiredFootPositions.get(robotQuadrant).getFrameTuple(), YoAppearance.White(), ballIndex);
    }
 
@@ -956,7 +956,7 @@ public class QuadrupedVMCForceMultiGaitController implements QuadrupedController
          vmcFootForces.get(robotQuadrant).setToZero();
          for (int basisIndex = 0; basisIndex < NUMBER_OF_BASIS_VECTORS; basisIndex++)
          {
-            rhoScalars.get(robotQuadrant)[basisIndex] = MathTools.clipToMinMax(rhoScalars.get(robotQuadrant)[basisIndex], 400.0); // TODO Don't clip rhos
+            rhoScalars.get(robotQuadrant)[basisIndex] = MathTools.clamp(rhoScalars.get(robotQuadrant)[basisIndex], 400.0); // TODO Don't clip rhos
             basisForceVectors.get(robotQuadrant)[basisIndex].scale(rhoScalars.get(robotQuadrant)[basisIndex]);
             vmcFootForces.get(robotQuadrant).add(basisForceVectors.get(robotQuadrant)[basisIndex]);
          }
@@ -1002,7 +1002,7 @@ public class QuadrupedVMCForceMultiGaitController implements QuadrupedController
 
          double tau = -jointAxis.dot(vmcRequestedTorqueFromJoint);
 
-         tau = MathTools.clipToMinMax(tau, 100); // TODO Implement actual torque limits
+         tau = MathTools.clamp(tau, 100); // TODO Implement actual torque limits
 
          oneDoFJoint.setTau(tau);
       }

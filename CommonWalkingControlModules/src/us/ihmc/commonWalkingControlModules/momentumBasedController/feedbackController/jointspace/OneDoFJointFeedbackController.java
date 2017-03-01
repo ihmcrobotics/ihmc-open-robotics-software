@@ -124,7 +124,7 @@ public class OneDoFJointFeedbackController implements FeedbackControllerInterfac
       qDError.set(qDDesired.getDoubleValue() - qDCurrent.getDoubleValue());
 
       double qdd_fb = kp.getDoubleValue() * qError.getDoubleValue() + kd.getDoubleValue() * qDError.getDoubleValue();
-      qdd_fb = MathTools.clipToMinMax(qdd_fb, maxFeedbackAcceleration.getDoubleValue());
+      qdd_fb = MathTools.clamp(qdd_fb, maxFeedbackAcceleration.getDoubleValue());
       qDDFeedback.set(qdd_fb);
       qDDFeedbackRateLimited.update();
 

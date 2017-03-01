@@ -1,7 +1,6 @@
 package us.ihmc.commons.nio;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -23,8 +22,6 @@ import org.junit.Test;
 
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.tools.io.files.FileTools;
-import us.ihmc.tools.io.printing.PrintTools;
 
 public class FileToolsTest
 {
@@ -52,10 +49,10 @@ public class FileToolsTest
    @Before
    public void setUp()
    {
-      FileTools.ensureDirectoryExists(FILE_TOOLS_TEST_PATH);
-      FileTools.ensureDirectoryExists(TEXT_DIRECTORY_PATH);
-      FileTools.ensureDirectoryExists(JAVA_DIRECTORY_PATH);
-      FileTools.ensureDirectoryExists(EMPTY_DIRECTORY_PATH);
+      FileTools.ensureDirectoryExists(FILE_TOOLS_TEST_PATH, DefaultExceptionHandler.PRINT_STACKTRACE);
+      FileTools.ensureDirectoryExists(TEXT_DIRECTORY_PATH, DefaultExceptionHandler.PRINT_STACKTRACE);
+      FileTools.ensureDirectoryExists(JAVA_DIRECTORY_PATH, DefaultExceptionHandler.PRINT_STACKTRACE);
+      FileTools.ensureDirectoryExists(EMPTY_DIRECTORY_PATH, DefaultExceptionHandler.PRINT_STACKTRACE);
       
       createJavaFile1();
       createJavaFile2();
@@ -101,7 +98,7 @@ public class FileToolsTest
    @Test(timeout = 30000)
    public void testReadAllBytesAndReadLinesFromBytesAndReplaceLine()
    {
-      byte[] bytes = FileTools.readAllBytes(READ_ALL_LINES_PATH);
+      byte[] bytes = FileTools.readAllBytes(READ_ALL_LINES_PATH, DefaultExceptionHandler.PRINT_STACKTRACE);
       List<String> lines = FileTools.readLinesFromBytes(bytes, DefaultExceptionHandler.PRINT_STACKTRACE);
       
       assertTrue(lines.get(0).equals("line1"));
@@ -116,15 +113,6 @@ public class FileToolsTest
       assertTrue(lines.get(2).equals("line3"));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
-   public void testTemporaryDirectoryPath()
-   {
-      String tempPath = FileTools.getTemporaryDirectoryPath().toString();
-      PrintTools.info(this, "Java temp directory: " + tempPath);
-      assertNotNull("Java temp directory is null.", tempPath);
-   }
-
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testConcatenateFilesTogether()
@@ -137,11 +125,11 @@ public class FileToolsTest
       filesToConcat.add(concatFile1);
       filesToConcat.add(concatFile2);
 
-      FileTools.concatenateFilesTogether(filesToConcat, concatedFile);
+      FileTools.concatenateFiles(filesToConcat, concatedFile, DefaultExceptionHandler.PRINT_STACKTRACE);
 
       try
       {
-         BufferedReader reader = FileTools.newBufferedReader(concatedFile);
+         BufferedReader reader = Files.newBufferedReader(concatedFile);
          assertEquals(EXAMPLE_FILE_1_TEXT_LINE_1, reader.readLine());
          assertEquals(EXAMPLE_FILE_2_TEXT_LINE_1, reader.readLine());
          assertEquals(EXAMPLE_FILE_2_TEXT_LINE_2, reader.readLine());

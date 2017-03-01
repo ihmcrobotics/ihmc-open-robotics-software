@@ -264,7 +264,7 @@ public class BipedalStepAdjustmentCostCalculatorTest
       cost = -cost;
 
       double index = cost * 1000.0 / (greenCost - redCost);
-      index = MathTools.clipToMinMax(index, 0, 999);
+      index = MathTools.clamp(index, 0, 999);
 
       colorIndexYoVariable.set(index);
 

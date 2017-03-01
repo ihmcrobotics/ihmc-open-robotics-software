@@ -18,8 +18,8 @@ import com.jme3.texture.Texture.MagFilter;
 import com.jme3.texture.Texture.MinFilter;
 import com.jme3.texture.Texture2D;
 
+import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.jMonkeyEngineToolkit.jme.JMERenderer;
-import us.ihmc.tools.time.Timer;
 
 public class LidarSceneViewPort implements SceneProcessor
 {
@@ -113,7 +113,7 @@ public class LidarSceneViewPort implements SceneProcessor
    }
 
    // Debugging values used to measure performance
-   Timer timer = new Timer().start();
+   Stopwatch timer = new Stopwatch().start();
    long frameNum = 0;
    
    @Override

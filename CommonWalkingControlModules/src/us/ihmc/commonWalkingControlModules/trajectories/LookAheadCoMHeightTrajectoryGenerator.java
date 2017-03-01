@@ -558,7 +558,7 @@ public class LookAheadCoMHeightTrajectoryGenerator
    private void computeHeightsToUseByStretchingString(RobotSide transferFromSide)
    {
       // s0 is at previous
-      double z0 = MathTools.clipToMinMax(previousZFinals.get(transferFromSide).getDoubleValue(), s0Min.getY(), s0Max.getY());
+      double z0 = MathTools.clamp(previousZFinals.get(transferFromSide).getDoubleValue(), s0Min.getY(), s0Max.getY());
       s0.setY(z0);
 
       StringStretcher2d stringStretcher2d = new StringStretcher2d();
@@ -710,7 +710,6 @@ public class LookAheadCoMHeightTrajectoryGenerator
 
    private final FramePoint height = new FramePoint();
    private final FramePoint desiredPosition = new FramePoint();
-   private final double[] splineOutput = new double[3];
    private final double[] partialDerivativesWithRespectToS = new double[2];
 
    private void solve(CoMHeightPartialDerivativesData coMHeightPartialDerivativesDataToPack, Point2D queryPoint, boolean isInDoubleSupport)
@@ -782,7 +781,7 @@ public class LookAheadCoMHeightTrajectoryGenerator
          desiredPosition.setToZero(pelvisFrame);
          desiredPosition.changeFrame(frameOfLastFoostep);
 
-         double heightOffset = desiredPosition.getZ() - splineOutput[0];
+         double heightOffset = desiredPosition.getZ() - spline.getY();
 
          offsetHeightAboveGround.set(heightOffset);
          offsetHeightAboveGroundTrajectoryTimeProvider.set(0.0);
@@ -885,7 +884,7 @@ public class LookAheadCoMHeightTrajectoryGenerator
          desiredPosition.setIncludingFrame(worldFrame, 0.0, 0.0, z);
          desiredPosition.changeFrame(frameOfLastFoostep);
 
-         double zOffset = desiredPosition.getZ() - splineOutput[0];
+         double zOffset = desiredPosition.getZ() - spline.getY();
 
          offsetHeightTrajectoryGenerator.appendWaypoint(time, zOffset, zDot);
       }

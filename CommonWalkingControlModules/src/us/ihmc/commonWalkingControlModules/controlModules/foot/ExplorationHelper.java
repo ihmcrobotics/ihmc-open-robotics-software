@@ -144,7 +144,7 @@ public class ExplorationHelper
       if (timeExploringCurrentCorner <= timeToGoToCorner)
       {
          double percent = timeExploringCurrentCorner / timeToGoToCorner;
-         percent = MathTools.clipToMinMax(percent, 0.0, 1.0);
+         percent = MathTools.clamp(percent, 0.0, 1.0);
          desiredCenterOfPressure.interpolate(centroid, currentCorner, percent);
       }
       else

@@ -12,7 +12,7 @@ public class HandCollisionDetectedPacket extends Packet<HandCollisionDetectedPac
    public HandCollisionDetectedPacket(RobotSide robotSide, int collisionSeverityLevelZeroToThree)
    {
       this.robotSide = robotSide;
-      this.collisionSeverityLevelOneToThree = MathTools.clipToMinMax(collisionSeverityLevelZeroToThree, 1, 3);
+      this.collisionSeverityLevelOneToThree = MathTools.clamp(collisionSeverityLevelZeroToThree, 1, 3);
    }
    
    public HandCollisionDetectedPacket()

@@ -349,7 +349,7 @@ public class CirclePoseTrajectoryGenerator implements PoseTrajectoryGenerator
    public void compute(double time, boolean adjustAngle)
    {
       this.currentTime.set(time);
-      time = MathTools.clipToMinMax(time, 0.0, desiredTrajectoryTime.getDoubleValue());
+      time = MathTools.clamp(time, 0.0, desiredTrajectoryTime.getDoubleValue());
       anglePolynomial.compute(time);
 
       double angle = anglePolynomial.getPosition();

@@ -23,7 +23,7 @@ public class FootstepVisualizer
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private static final int maxNumberOfContactPoints = 4;
+   private static final int maxNumberOfContactPoints = 6;
 
    private final YoFramePose yoFootstepPose;
    private final YoFrameConvexPolygon2d yoFoothold;

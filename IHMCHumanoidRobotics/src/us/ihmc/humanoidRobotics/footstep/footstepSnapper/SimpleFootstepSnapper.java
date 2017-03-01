@@ -10,7 +10,6 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
-import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.HeightMapWithPoints;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FramePose2d;
@@ -119,7 +118,7 @@ public class SimpleFootstepSnapper implements FootstepSnapper
       double height = fittedPlane.getZOnPlane(position.getX(), position.getY());
 
       Vector3D surfaceNormal = fittedPlane.getNormalCopy();
-      if (MathTools.containsNaN(surfaceNormal))
+      if (surfaceNormal.containsNaN())
       {
          surfaceNormal.set(0.0, 0.0, 1.0);
          height = heightMap.getHeightAtPoint(position.getX(), position.getY());
@@ -158,7 +157,7 @@ public class SimpleFootstepSnapper implements FootstepSnapper
       double height = fittedPlane.getZOnPlane(footPose2d.getX(), footPose2d.getY());
 
       Vector3D surfaceNormal = fittedPlane.getNormalCopy();
-      if (MathTools.containsNaN(surfaceNormal))
+      if (surfaceNormal.containsNaN())
       {
          surfaceNormal.set(0.0, 0.0, 1.0);
          height = heightMap.getHeightAtPoint(footPose2d.getX(), footPose2d.getY());

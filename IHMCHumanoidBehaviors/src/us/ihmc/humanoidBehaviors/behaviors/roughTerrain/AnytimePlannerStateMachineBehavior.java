@@ -56,7 +56,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransitionCondition;
-import us.ihmc.robotics.time.YoTimer;
+import us.ihmc.robotics.time.YoStopwatch;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
@@ -328,7 +328,7 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
    private class RequestAndWaitForPlanarRegionsListBehavior extends AbstractBehavior
    {
       private final BooleanYoVariable receivedPlanarRegionsList = new BooleanYoVariable(prefix + "ReceivedPlanarRegionsList", registry);
-      private final YoTimer requestNewPlanarRegionsTimer = new YoTimer(yoTime);
+      private final YoStopwatch requestNewPlanarRegionsTimer = new YoStopwatch(yoTime);
       private final DoubleYoVariable planarRegionsResponseTimeout = new DoubleYoVariable(prefix + "PlanarRegionsResponseTimeout", registry);
       private PlanarRegionsList planarRegionsList;
 

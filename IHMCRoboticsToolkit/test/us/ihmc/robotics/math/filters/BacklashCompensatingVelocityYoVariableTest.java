@@ -246,7 +246,7 @@ public class BacklashCompensatingVelocityYoVariableTest
 
                double timeInSlop = t - crossTime;
                double percent = timeInSlop / slopTime.getDoubleValue();
-               percent = MathTools.clipToMinMax(percent, 0.0, 1.0);
+               percent = MathTools.clamp(percent, 0.0, 1.0);
                if (Double.isNaN(percent))
                {
                   percent = 1.0;
@@ -311,7 +311,7 @@ public class BacklashCompensatingVelocityYoVariableTest
 
                double timeInSlop = t - crossTime;
                double percent = timeInSlop / slopTime.getDoubleValue();
-               percent = MathTools.clipToMinMax(percent, 0.0, 1.0);
+               percent = MathTools.clamp(percent, 0.0, 1.0);
                if (Double.isNaN(percent))
                {
                   percent = 1.0;

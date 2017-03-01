@@ -272,14 +272,14 @@ public class FrameOrientation extends AbstractFrameObject<FrameOrientation, Quat
    public void interpolate(FrameOrientation orientationOne, FrameOrientation orientationTwo, double alpha)
    {
       orientationOne.checkReferenceFrameMatch(orientationTwo);
-      alpha = MathTools.clipToMinMax(alpha, 0.0, 1.0);
+      alpha = MathTools.clamp(alpha, 0.0, 1.0);
       quaternion.interpolate(orientationOne.quaternion, orientationTwo.quaternion, alpha);
       referenceFrame = orientationOne.getReferenceFrame();
    }
 
    public void interpolate(QuaternionReadOnly quaternion1, QuaternionReadOnly quaternion2, double alpha)
    {
-      alpha = MathTools.clipToMinMax(alpha, 0.0, 1.0);
+      alpha = MathTools.clamp(alpha, 0.0, 1.0);
       quaternion.interpolate(quaternion1, quaternion2, alpha);
    }
 

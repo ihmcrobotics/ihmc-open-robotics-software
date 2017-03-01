@@ -111,7 +111,7 @@ public class YoSolvePseudoInverseSVDWithDampedLeastSquaresNearSingularities impl
       {
          alpha = (minSingular - secondSingularValueThreshold.getDoubleValue()) / deltaThresholds;
       }
-      alpha = MathTools.clipToMinMax(alpha, 0.0, 1.0);
+      alpha = MathTools.clamp(alpha, 0.0, 1.0);
       alpha *= alpha;
       
       singularValueAlpha.set(alpha);

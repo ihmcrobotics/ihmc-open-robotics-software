@@ -424,6 +424,31 @@ public class Link implements java.io.Serializable
    // ////////// Graphics from Mass Properties Here ///////////////////////
 
    /**
+    * Goes through the given robot and finds all Links and adds an ellipsoid based on mass properties
+    * @param robot
+    * @param appearance
+    */
+   public static void addEllipsoidFromMassPropertiesToAllLinks(RobotFromDescription robot, AppearanceDefinition appearance)
+   {
+      ArrayList<Joint> joints = new ArrayList<>(robot.getRootJoints());
+      
+      while(!joints.isEmpty())
+      {
+         int lastIndex = joints.size() - 1;
+         Joint joint = joints.get(lastIndex);
+         joint.getLink().addEllipsoidFromMassProperties(appearance);
+
+         joints.remove(lastIndex);
+
+         ArrayList<Joint> childrenJoints = joint.getChildrenJoints();
+         if (childrenJoints != null)
+         {
+            joints.addAll(childrenJoints);
+         }
+      }
+   }
+   
+   /**
     * Adds an ellipsoid representing the mass and inertia of the link at its center of mass.
     * This ellipsoid has a default matte black appearance.
     */

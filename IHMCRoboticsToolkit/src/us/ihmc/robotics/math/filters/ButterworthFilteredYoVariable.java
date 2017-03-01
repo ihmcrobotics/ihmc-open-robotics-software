@@ -296,7 +296,7 @@ public class ButterworthFilteredYoVariable extends DoubleYoVariable
    {
       double alpha = 1.0 - 4.0 * dt * breakFrequencyInHetrz;
 
-      alpha = MathTools.clipToMinMax(alpha, 0.0, 1.0);
+      alpha = MathTools.clamp(alpha, 0.0, 1.0);
 
       return alpha;
    }

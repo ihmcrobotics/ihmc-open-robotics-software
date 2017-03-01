@@ -92,7 +92,7 @@ public class KinematicsToolboxOutputConverter
       for (int i = 0; i < numberOfArmJoints; i++)
       {
          OneDoFJoint armJoint = armJoints[i];
-         desiredJointPositions[i] = MathTools.clipToMinMax(armJoint.getQ(), armJoint.getJointLimitLower(), armJoint.getJointLimitUpper());
+         desiredJointPositions[i] = MathTools.clamp(armJoint.getQ(), armJoint.getJointLimitLower(), armJoint.getJointLimitUpper());
       }
       ArmTrajectoryMessage armTrajectoryMessage = new ArmTrajectoryMessage(robotSide, trajectoryTime, desiredJointPositions);
       output.setArmTrajectoryMessage(armTrajectoryMessage);

@@ -2,6 +2,7 @@ package us.ihmc.robotics.geometry.algorithms;
 
 import org.apache.commons.math3.util.Pair;
 
+import us.ihmc.commons.Epsilons;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -18,7 +19,6 @@ import us.ihmc.robotics.geometry.GeometryTools;
 import us.ihmc.robotics.geometry.Line2d;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.geometry.shapes.FramePlane3d;
-import us.ihmc.robotics.math.Epsilons;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
