@@ -1,11 +1,15 @@
 package us.ihmc.robotics.math.frames;
 
-import javax.vecmath.Point2d;
-import javax.vecmath.Vector2d;
-
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.geometry.*;
+import us.ihmc.robotics.geometry.AbstractReferenceFrameHolder;
+import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
+import us.ihmc.robotics.geometry.FrameLine2d;
+import us.ihmc.robotics.geometry.FrameLineSegment2d;
+import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.Line2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 //Note: You should only make these once at the initialization of a controller. You shouldn't make any on the fly
@@ -183,7 +187,7 @@ public class YoFrameLine2d extends AbstractReferenceFrameHolder
    {
       if (frameLine == null)
       {
-         frameLine = new FrameLine2d(referenceFrame, new Point2d(pointX.getDoubleValue(), pointY.getDoubleValue()), new Vector2d(vectorX.getDoubleValue(),
+         frameLine = new FrameLine2d(referenceFrame, new Point2D(pointX.getDoubleValue(), pointY.getDoubleValue()), new Vector2D(vectorX.getDoubleValue(),
                vectorY.getDoubleValue()));
       }
       else

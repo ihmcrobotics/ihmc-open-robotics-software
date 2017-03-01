@@ -5,8 +5,8 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public class AlternatingSlopesGroundProfileTest extends GroundProfileTest
 {

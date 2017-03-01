@@ -1,15 +1,14 @@
 package us.ihmc.kalman.imu.testCases;
 
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.graphicsDescription.Graphics3DObject;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.Robot;
-import us.ihmc.graphicsDescription.Graphics3DObject;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 public class TestIMUKalmanFilterRobot extends Robot
 {
@@ -41,7 +40,7 @@ public class TestIMUKalmanFilterRobot extends Robot
    {
       super("TestIMURobot");
 
-      rootJoint = new FloatingJoint("root", new Vector3d(0.0, 0.0, 0.0), this);
+      rootJoint = new FloatingJoint("root", new Vector3D(0.0, 0.0, 0.0), this);
 
       Link link = new Link("ahrs");
       Graphics3DObject linkGraphics = new Graphics3DObject();
@@ -53,7 +52,7 @@ public class TestIMUKalmanFilterRobot extends Robot
       link.setMass(1.0);
       link.setMomentOfInertia(1.0, 1.0, 1.0);
 
-      ExternalForcePoint ef_body = new ExternalForcePoint("ef_body", new Vector3d(), this.getRobotsYoVariableRegistry());
+      ExternalForcePoint ef_body = new ExternalForcePoint("ef_body", new Vector3D(), this.getRobotsYoVariableRegistry());
       rootJoint.addExternalForcePoint(ef_body);
 
       rootJoint.setLink(link);

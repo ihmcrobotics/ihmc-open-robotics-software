@@ -1,5 +1,6 @@
 package us.ihmc.humanoidBehaviors.behaviors.behaviorServices;
 
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidBehaviors.behaviors.goalLocation.GoalDetectorBehaviorService;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
@@ -8,7 +9,6 @@ import us.ihmc.humanoidRobotics.communication.packets.sensing.VideoPacket;
 import us.ihmc.ihmcPerception.fiducialDetector.FiducialDetectorFromCameraImages;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.tools.thread.ThreadTools;
 
 public class FiducialDetectorBehaviorService extends GoalDetectorBehaviorService

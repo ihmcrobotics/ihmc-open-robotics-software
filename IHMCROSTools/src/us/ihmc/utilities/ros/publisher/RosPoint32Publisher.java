@@ -1,9 +1,7 @@
 package us.ihmc.utilities.ros.publisher;
 
 import geometry_msgs.Point32;
-
-import javax.vecmath.Point3d;
-import javax.vecmath.Point3f;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 
 /**
  *
@@ -25,13 +23,8 @@ public class RosPoint32Publisher extends RosTopicPublisher<geometry_msgs.Point32
       publish(message);
    }
 
-   public void publish(Point3d point3d)
+   public void publish(Point3DBasics point3f)
    {
-      publish((float) point3d.getX(), (float) point3d.getY(), (float) point3d.getZ());
-   }
-
-   public void publish(Point3f point3f)
-   {
-      publish(point3f.getX(), point3f.getY(), point3f.getZ());
+      publish(point3f.getX32(), point3f.getY32(), point3f.getZ32());
    }
 }

@@ -1,12 +1,12 @@
 package us.ihmc.robotics.alphaToAlpha;
 
+import java.util.ArrayList;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-
-import java.util.ArrayList;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public class StretchedSlowInMiddleAlphaToAlphaFunctionTest
 {

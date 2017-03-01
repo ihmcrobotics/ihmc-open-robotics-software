@@ -1,6 +1,6 @@
 package us.ihmc.controlFlow;
 
-import javax.vecmath.Point3d;
+import us.ihmc.euclid.tuple3D.Point3D;
 
 public class InOneAndThreeOutFourAndFiveControlFlowElement extends AbstractControlFlowElement
 {
@@ -43,7 +43,7 @@ public class InOneAndThreeOutFourAndFiveControlFlowElement extends AbstractContr
       DataTypeFour dataTypeFour = new DataTypeFour();
       DataTypeFive dataTypeFive = new DataTypeFive();
       
-      dataTypeFour.setPoint(new Point3d(x, y, q));
+      dataTypeFour.setPoint(new Point3D(x, y, q));
       dataTypeFive.setString("scale");
       
       dataTypeFourOutputPort.setData(dataTypeFour);

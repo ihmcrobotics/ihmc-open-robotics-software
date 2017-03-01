@@ -1,6 +1,7 @@
 package us.ihmc.quadrupedRobotics.planning;
 
 import org.apache.commons.lang3.mutable.MutableDouble;
+
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;

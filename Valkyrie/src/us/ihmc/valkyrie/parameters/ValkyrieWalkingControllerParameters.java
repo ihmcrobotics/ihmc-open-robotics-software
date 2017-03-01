@@ -13,12 +13,12 @@ import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootOrientation
 import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootSE3Gains;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoPDGains;
 import us.ihmc.robotics.controllers.YoPIDGains;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -112,7 +112,7 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    @Override
    public boolean doToeOffIfPossible()
    {
-      return !(target == DRCRobotModel.RobotTarget.REAL_ROBOT);
+      return true;
    }
 
    @Override
@@ -124,7 +124,7 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    @Override
    public boolean checkECMPLocationToTriggerToeOff()
    {
-      return true;
+      return target != RobotTarget.REAL_ROBOT;
    }
 
    @Override
@@ -181,7 +181,7 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    @Override
    public boolean allowDisturbanceRecoveryBySpeedingUpSwing()
    {
-      return false;
+      return target == DRCRobotModel.RobotTarget.REAL_ROBOT;
    }
 
    @Override
@@ -193,13 +193,13 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    @Override
    public double getICPErrorThresholdToSpeedUpSwing()
    {
-      return Double.POSITIVE_INFINITY;
+      return 0.05;
    }
 
    @Override
    public double getMinimumSwingTimeForDisturbanceRecovery()
    {
-      return getDefaultSwingTime();
+      return 0.70;
    }
 
    @Override
@@ -749,13 +749,20 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    @Override
    public double getDefaultTransferTime()
    {
-      return target == DRCRobotModel.RobotTarget.REAL_ROBOT ? 2.0 : 0.25;
+      return target == DRCRobotModel.RobotTarget.REAL_ROBOT ? 1.00 : 0.25;
    }
 
    @Override
    public double getDefaultSwingTime()
    {
-      return target == DRCRobotModel.RobotTarget.REAL_ROBOT ? 1.5 : 0.60;
+      return target == DRCRobotModel.RobotTarget.REAL_ROBOT ? 1.20 : 0.60;
+   }
+
+   /** @inheritDoc */
+   @Override
+   public double getDefaultInitialTransferTime()
+   {
+      return (target == DRCRobotModel.RobotTarget.REAL_ROBOT) ? 2.0 : 1.0;
    }
 
    /** @inheritDoc */
@@ -922,9 +929,9 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
 //            jointToIgnoreList.add(forcedSideJointNames[ValkyrieOrderedJointMap.UpperNeckPitch]);
 //            jointToIgnoreList.add(forcedSideJointNames[ValkyrieOrderedJointMap.LowerNeckPitch]);
 //            jointToIgnoreList.add(forcedSideJointNames[ValkyrieOrderedJointMap.NeckYaw]);
-            jointToIgnoreList.add(forcedSideJointNames[ValkyrieOrderedJointMap.LeftForearmYaw]);
-            jointToIgnoreList.add(forcedSideJointNames[ValkyrieOrderedJointMap.LeftWristRoll]);
-            jointToIgnoreList.add(forcedSideJointNames[ValkyrieOrderedJointMap.LeftWristPitch]);
+//            jointToIgnoreList.add(forcedSideJointNames[ValkyrieOrderedJointMap.LeftForearmYaw]);
+//            jointToIgnoreList.add(forcedSideJointNames[ValkyrieOrderedJointMap.LeftWristRoll]);
+//            jointToIgnoreList.add(forcedSideJointNames[ValkyrieOrderedJointMap.LeftWristPitch]);
          }
       }
 

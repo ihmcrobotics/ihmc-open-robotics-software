@@ -37,8 +37,8 @@ import javax.swing.plaf.basic.BasicArrowButton;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 
-import us.ihmc.robotics.EpsilonComparable;
-import us.ihmc.robotics.time.TimeTools;
+import us.ihmc.commons.Conversions;
+import us.ihmc.euclid.interfaces.EpsilonComparable;
 
 public class ScriptEditorInterface
 {
@@ -415,7 +415,7 @@ public class ScriptEditorInterface
 
                for (int j = i + 2; j < tableData.size(); j++)
                {
-                  long deltaTime = TimeTools.secondsToNanoSeconds(Double.parseDouble(model.getValueAt(j - 1, 2).toString()));
+                  long deltaTime = Conversions.secondsToNanoSeconds(Double.parseDouble(model.getValueAt(j - 1, 2).toString()));
                   tableData.get(j).setTimeStamp(tableData.get(j - 1).getTimeStamp() + deltaTime);
                }
 
@@ -554,9 +554,9 @@ public class ScriptEditorInterface
             for (int i = 0; i < tableData.size(); i++)
             {
                ScriptObject scriptObject = tableData.get(i);
-               double time = TimeTools.nanoSecondstoSeconds(tableData.get(i).getTimeStamp());
+               double time = Conversions.nanoSecondstoSeconds(tableData.get(i).getTimeStamp());
 
-               double deltaT = (i == tableData.size() - 1) ? 0.0 : TimeTools.nanoSecondstoSeconds((long) (tableData.get(i + 1).getTimeStamp() - tableData
+               double deltaT = (i == tableData.size() - 1) ? 0.0 : Conversions.nanoSecondstoSeconds((long) (tableData.get(i + 1).getTimeStamp() - tableData
                      .get(i).getTimeStamp()));
                model2.addRow(new Object[] { rowOffset + i + 1, scriptObject.toString(), deltaT, time });
             }
@@ -575,9 +575,9 @@ public class ScriptEditorInterface
          for (int i = 0; i < tableData.size(); i++)
          {
             ScriptObject scriptObject = tableData.get(i);
-            double time = TimeTools.nanoSecondstoSeconds(tableData.get(i).getTimeStamp());
+            double time = Conversions.nanoSecondstoSeconds(tableData.get(i).getTimeStamp());
 
-            double deltaT = (i == tableData.size() - 1) ? 0.0 : TimeTools.nanoSecondstoSeconds((long) (tableData.get(i + 1).getTimeStamp() - tableData.get(i)
+            double deltaT = (i == tableData.size() - 1) ? 0.0 : Conversions.nanoSecondstoSeconds((long) (tableData.get(i + 1).getTimeStamp() - tableData.get(i)
                   .getTimeStamp()));
 
             whichModel.addRow(new Object[] { rowOffset1 + i + 1, scriptObject.toString(), deltaT, time });
@@ -774,7 +774,7 @@ public class ScriptEditorInterface
             deltaT = Double.parseDouble((String) dtToCast);
          else if (dtToCast instanceof Double)
             deltaT = (Double) dtToCast;
-         currentTimeStampNano += TimeTools.secondsToNanoSeconds(deltaT);
+         currentTimeStampNano += Conversions.secondsToNanoSeconds(deltaT);
       }
    }
 
@@ -787,7 +787,7 @@ public class ScriptEditorInterface
          return;
       }
 
-      timeDelta = TimeTools.secondsToNanoSeconds(Double.parseDouble(model.getValueAt(rowIndex, 2).toString()));
+      timeDelta = Conversions.secondsToNanoSeconds(Double.parseDouble(model.getValueAt(rowIndex, 2).toString()));
       deletedScripts.add(tableData.get(rowIndex));
       deletedScriptsPos.add(rowIndex);
       deletedScriptsTime.add(timeDelta);
@@ -904,7 +904,7 @@ public class ScriptEditorInterface
       }
       else
       {
-         long timeDelta = TimeTools.secondsToNanoSeconds(Double.parseDouble(model.getValueAt(selectedRow[0], 2).toString()));
+         long timeDelta = Conversions.secondsToNanoSeconds(Double.parseDouble(model.getValueAt(selectedRow[0], 2).toString()));
 
          ScriptObject selectedRowinTable = tableData.get(selectedRow[0]);
          ScriptObject cloneObject = new ScriptObject(selectedRowinTable.getTimeStamp() + timeDelta, selectedRowinTable.getScriptObject());
@@ -936,14 +936,14 @@ public class ScriptEditorInterface
          if (selectedRow[0] == tableData2.size() - 1)
             return;
 
-         long timeDeltaToCopy = TimeTools.secondsToNanoSeconds(Double.parseDouble(model2.getValueAt(selectedRow[0], 2).toString()));
+         long timeDeltaToCopy = Conversions.secondsToNanoSeconds(Double.parseDouble(model2.getValueAt(selectedRow[0], 2).toString()));
          if (selectedRow[0] == 0)
          {
             setTimeForCopy = tableData2.get(selectedRow[0]).getTimeStamp();
          }
          else
          {
-            long timeDelta = TimeTools.secondsToNanoSeconds(Double.parseDouble(model.getValueAt(selectedRow[0] - 1, 2).toString()));
+            long timeDelta = Conversions.secondsToNanoSeconds(Double.parseDouble(model.getValueAt(selectedRow[0] - 1, 2).toString()));
             setTimeForCopy = tableData.get(selectedRow[0] - 1).getTimeStamp() + timeDelta;
          }
 

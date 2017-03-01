@@ -7,11 +7,11 @@ import us.ihmc.controlFlow.AbstractControlFlowElement;
 import us.ihmc.controlFlow.ControlFlowGraph;
 import us.ihmc.controlFlow.ControlFlowInputPort;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
-import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.PointPositionDataObject;
-import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.PointVelocityDataObject;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.GenericCRC32;
+import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.PointPositionDataObject;
+import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.PointVelocityDataObject;
 
 public class StateEstimationDataFromController extends AbstractControlFlowElement
 {

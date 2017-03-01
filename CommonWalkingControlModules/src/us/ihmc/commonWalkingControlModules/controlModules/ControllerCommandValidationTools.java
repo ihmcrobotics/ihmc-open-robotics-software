@@ -10,6 +10,7 @@ import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.trajectories.waypoints.SimpleTrajectoryPoint1DList;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.tools.io.printing.PrintTools;
 
 public class ControllerCommandValidationTools
 {
@@ -36,12 +37,19 @@ public class ControllerCommandValidationTools
    public static boolean checkOneDoFJointTrajectoryCommandList(OneDoFJoint[] joints, RecyclingArrayList<OneDoFJointTrajectoryCommand> trajectoryPointLists)
    {
       if (trajectoryPointLists.size() != joints.length)
+      {
+         PrintTools.warn("Incorrect joint length. Expected "+joints.length+" got "+trajectoryPointLists.size());
          return false;
+      }
 
       for (int jointIndex = 0; jointIndex < trajectoryPointLists.size(); jointIndex++)
       {
          if (!ControllerCommandValidationTools.checkJointspaceTrajectoryPointList(joints[jointIndex], trajectoryPointLists.get(jointIndex)))
+         {
+            
+            PrintTools.warn("Invalid joint trajectory ( "+jointIndex+" - "+joints[jointIndex].getName()+")");
             return false;
+         }
       }
 
       return true;
@@ -55,7 +63,10 @@ public class ControllerCommandValidationTools
          double jointLimitLower = joint.getJointLimitLower();
          double jointLimitUpper = joint.getJointLimitUpper();
          if (!MathTools.isInsideBoundsInclusive(waypointPosition, jointLimitLower, jointLimitUpper))
+         {
+            PrintTools.warn("Joint out of bounds: "+joint.getName()+" (" +jointLimitLower+", "+jointLimitUpper+ ") = "+waypointPosition+" (t="+i+")");
             return false;
+         }
       }
       return true;
    }

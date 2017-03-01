@@ -1,8 +1,6 @@
 package us.ihmc.kalman.imu;
 
-import javax.vecmath.Quat4d;
-
-import us.ihmc.robotics.geometry.RotationTools;
+import us.ihmc.euclid.tuple4D.Quaternion;
 
 
 /**
@@ -282,9 +280,9 @@ public class FastQuaternionBasedFullIMUKalmanFilter
       double mag = KalmanMatrixTools.mag(accel);
       double[] yawPitchRoll = {heading, Math.asin(accel[0][0] / mag), -Math.atan2(accel[1][0], -accel[2][0])};
       double[] quaternions = new double[4];
-      Quat4d quaternion = new Quat4d();
-      RotationTools.convertYawPitchRollToQuaternion(yawPitchRoll, quaternion);
-      quaternions[0] = quaternion.getW();
+      Quaternion quaternion = new Quaternion();
+      quaternion.setYawPitchRoll(yawPitchRoll);
+      quaternions[0] = quaternion.getS();
       quaternions[1] = quaternion.getX();
       quaternions[2] = quaternion.getY();
       quaternions[3] = quaternion.getZ();

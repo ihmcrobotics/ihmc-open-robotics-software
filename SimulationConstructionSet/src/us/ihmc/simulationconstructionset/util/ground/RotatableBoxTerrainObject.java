@@ -1,18 +1,17 @@
 package us.ihmc.simulationconstructionset.util.ground;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.jMonkeyEngineToolkit.HeightMapWithNormals;
-import us.ihmc.robotics.MathTools;
+import us.ihmc.robotics.EuclidCoreMissingTools;
 import us.ihmc.robotics.geometry.BoundingBox3d;
-import us.ihmc.robotics.geometry.shapes.Box3d;
 import us.ihmc.robotics.geometry.Direction;
-import us.ihmc.robotics.geometry.shapes.Plane3d;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.TransformTools;
+import us.ihmc.robotics.geometry.shapes.Box3d;
+import us.ihmc.robotics.geometry.shapes.Plane3d;
 
 
 public class RotatableBoxTerrainObject implements TerrainObject3D, HeightMapWithNormals
@@ -23,28 +22,28 @@ public class RotatableBoxTerrainObject implements TerrainObject3D, HeightMapWith
    private final Box3d.FaceName[] faceNames = Box3d.FaceName.values();
    protected Graphics3DObject linkGraphics;
 
-   private final Point3d tempPoint = new Point3d();
-   private final Vector3d zVector = new Vector3d(0.0, 0.0, 1.0);
-   private final Point3d intersection = new Point3d();
+   private final Point3D tempPoint = new Point3D();
+   private final Vector3D zVector = new Vector3D(0.0, 0.0, 1.0);
+   private final Point3D intersection = new Point3D();
 
    public RotatableBoxTerrainObject(Box3d box, AppearanceDefinition appearance)
    {
       this.box = box;
       this.appearance = appearance;
       
-      Point3d[] vertices = box.getVertices();
-      Point3d minPoint = new Point3d(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
-      Point3d maxPoint = new Point3d(Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY);
+      Point3D[] vertices = box.getVertices();
+      Point3D minPoint = new Point3D(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
+      Point3D maxPoint = new Point3D(Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY);
       
-      for (Point3d cornerPoint : vertices)
+      for (Point3D cornerPoint : vertices)
       {
          for (Direction direction : Direction.values())
          {
-            double coordinate = MathTools.get(cornerPoint, direction);
-            if (coordinate > MathTools.get(maxPoint, direction))
-               MathTools.set(maxPoint, direction, coordinate);
-            if (coordinate < MathTools.get(minPoint, direction))
-               MathTools.set(minPoint, direction, coordinate);
+            double coordinate = Direction.get(cornerPoint, direction);
+            if (coordinate > Direction.get(maxPoint, direction))
+               Direction.set(maxPoint, direction, coordinate);
+            if (coordinate < Direction.get(minPoint, direction))
+               Direction.set(minPoint, direction, coordinate);
          }
       }
 
@@ -87,7 +86,7 @@ public class RotatableBoxTerrainObject implements TerrainObject3D, HeightMapWith
    }
 
    @Override
-   public double heightAndNormalAt(double x, double y, double z, Vector3d normalToPack)
+   public double heightAndNormalAt(double x, double y, double z, Vector3D normalToPack)
    {
       double heightAt = heightAt(x, y, z);
       surfaceNormalAt(x, y, z, normalToPack);
@@ -105,7 +104,7 @@ public class RotatableBoxTerrainObject implements TerrainObject3D, HeightMapWith
          Plane3d face = box.getFace(faceName);
          face.getIntersectionWithLine(intersection, tempPoint, zVector);
 
-         if (MathTools.isFinite(intersection))
+         if (EuclidCoreMissingTools.isFinite(intersection))
          {
 //            // check if point in range
             if (box.isInsideOrOnSurface(intersection, 1e-9) && intersection.getZ() > maxHeight)
@@ -148,26 +147,26 @@ public class RotatableBoxTerrainObject implements TerrainObject3D, HeightMapWith
       return boundingBox.isXYInside(x, y);
    }
 
-   public void closestIntersectionTo(double x, double y, double z, Point3d intersectionToPack)
+   public void closestIntersectionTo(double x, double y, double z, Point3D intersectionToPack)
    {
       tempPoint.set(x, y, z);
       box.checkIfInside(tempPoint, intersectionToPack, null);
    }
 
-   public void surfaceNormalAt(double x, double y, double z, Vector3d normalToPack)
+   public void surfaceNormalAt(double x, double y, double z, Vector3D normalToPack)
    {
       tempPoint.set(x, y, z);
       box.checkIfInside(tempPoint, null, normalToPack);
    }
 
-   public void closestIntersectionAndNormalAt(double x, double y, double z, Point3d intersectionToPack, Vector3d normalToPack)
+   public void closestIntersectionAndNormalAt(double x, double y, double z, Point3D intersectionToPack, Vector3D normalToPack)
    {
       tempPoint.set(x, y, z);
       box.checkIfInside(tempPoint, intersectionToPack, normalToPack);
    }
    
    @Override
-   public boolean checkIfInside(double x, double y, double z, Point3d intersectionToPack, Vector3d normalToPack)
+   public boolean checkIfInside(double x, double y, double z, Point3D intersectionToPack, Vector3D normalToPack)
    {
       tempPoint.set(x, y, z);
       

@@ -6,18 +6,17 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
-import javax.vecmath.Quat4d;
-
 import org.junit.Test;
 
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.tuple4D.Vector4D;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.QuaternionCalculus;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.ScrewTestTools.RandomFloatingChain;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public class TwistCalculatorTest
 {
@@ -306,8 +305,8 @@ public class TwistCalculatorTest
 
       for (int i = 0; i < 100; i++)
       {
-         floatingJoint.setRotation(RandomTools.generateRandomQuaternion(random));
-         floatingJoint.setPosition(RandomTools.generateRandomPoint3d(random, -10.0, 10.0));
+         floatingJoint.setRotation(RandomGeometry.nextQuaternion(random));
+         floatingJoint.setPosition(RandomGeometry.nextPoint3D(random, -10.0, 10.0));
          Twist floatingJointTwist = Twist.generateRandomTwist(random, floatingJoint.getFrameAfterJoint(), floatingJoint.getFrameBeforeJoint(), floatingJoint.getFrameAfterJoint());
          floatingJoint.setJointTwist(floatingJointTwist);
 
@@ -365,8 +364,8 @@ public class TwistCalculatorTest
 
       for (int i = 0; i < 50; i++)
       {
-         floatingJoint.setRotation(RandomTools.generateRandomQuaternion(random));
-         floatingJoint.setPosition(RandomTools.generateRandomPoint3d(random, -10.0, 10.0));
+         floatingJoint.setRotation(RandomGeometry.nextQuaternion(random));
+         floatingJoint.setPosition(RandomGeometry.nextPoint3D(random, -10.0, 10.0));
          Twist floatingJointTwist = Twist.generateRandomTwist(random, floatingJoint.getFrameAfterJoint(), floatingJoint.getFrameBeforeJoint(), floatingJoint.getFrameAfterJoint());
          floatingJoint.setJointTwist(floatingJointTwist);
 
@@ -463,7 +462,7 @@ public class TwistCalculatorTest
 
       FrameVector bodyAngularVelocity = new FrameVector(worldFrame);
       QuaternionCalculus quaternionCalculus = new QuaternionCalculus();
-      Quat4d qDot = new Quat4d();
+      Vector4D qDot = new Vector4D();
       quaternionCalculus.computeQDotByFiniteDifferenceCentral(bodyOrientation.getQuaternion(), bodyOrientationInFuture.getQuaternion(), 0.5 * dt, qDot);
       quaternionCalculus.computeAngularVelocityInWorldFrame(bodyOrientation.getQuaternion(), qDot, bodyAngularVelocity.getVector());
 

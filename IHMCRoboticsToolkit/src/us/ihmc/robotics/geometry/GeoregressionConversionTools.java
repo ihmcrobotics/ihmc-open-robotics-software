@@ -1,7 +1,9 @@
 package us.ihmc.robotics.geometry;
 
-import georegression.struct.se.Se3_F64;
 import org.ejml.data.DenseMatrix64F;
+
+import georegression.struct.se.Se3_F64;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 
 public class GeoregressionConversionTools
 {

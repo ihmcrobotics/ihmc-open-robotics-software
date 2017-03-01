@@ -2,26 +2,26 @@ package us.ihmc.quadrupedRobotics.footstepChooser;
 
 import java.awt.Color;
 
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
 import org.junit.After;
 import org.junit.Before;
 
-import us.ihmc.quadrupedRobotics.planning.chooser.footstepChooser.MidFootZUpSwingTargetGenerator;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicLineSegment;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactLineSegment2d;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.quadrupedRobotics.controller.position.states.QuadrupedPositionBasedCrawlControllerParameters;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.CommonQuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.geometry.supportPolygon.QuadrupedSupportPolygon;
+import us.ihmc.quadrupedRobotics.planning.chooser.footstepChooser.MidFootZUpSwingTargetGenerator;
 import us.ihmc.quadrupedRobotics.planning.chooser.swingLegChooser.LongestFeasibleStepChooser;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.controllers.ControllerFailureException;
@@ -32,7 +32,6 @@ import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFrameLineSegment2d;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -43,7 +42,6 @@ import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.time.GlobalTimer;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -141,7 +139,6 @@ public abstract class QuadrupedMidFootZUpSwingTargetGeneratorTest implements Rob
 
       blockingSimulationRunner.destroySimulation();
 
-      GlobalTimer.clearTimers();
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
@@ -387,7 +384,7 @@ public abstract class QuadrupedMidFootZUpSwingTargetGeneratorTest implements Rob
    private void setupRobot(CommonQuadrupedReferenceFrames referenceFrames, QuadrupedPositionBasedCrawlControllerParameters quadrupedControllerParameters)
    {
       robot = new Robot("testRobot");
-      rootJoint = new FloatingJoint("floating", new Vector3d(), robot);
+      rootJoint = new FloatingJoint("floating", new Vector3D(), robot);
       robot.getRobotsYoVariableRegistry();
       robot.setController(this);
 
@@ -416,11 +413,11 @@ public abstract class QuadrupedMidFootZUpSwingTargetGeneratorTest implements Rob
 
          ReferenceFrame hipPitchFrame = referenceFrames.getHipPitchFrame(robotQuadrant);
          RigidBodyTransform currenthipPitchFrameTransform = hipPitchFrame.getTransformToRoot();
-         Vector3d hipPitchFrameTranslation = new Vector3d();
+         Vector3D hipPitchFrameTranslation = new Vector3D();
          currenthipPitchFrameTransform.getTranslation(hipPitchFrameTranslation );
 
          double robotHeight = 0.7 * referenceFrames.getLegLength(robotQuadrant);
-         RigidBodyTransform preCorruptionTransform = new RigidBodyTransform(new Quat4d(0.0, 0.0, 0.0, 1.0), new Vector3d(0.0, 0.0, robotHeight - hipPitchFrameTranslation.getZ()));
+         RigidBodyTransform preCorruptionTransform = new RigidBodyTransform(new Quaternion(0.0, 0.0, 0.0, 1.0), new Vector3D(0.0, 0.0, robotHeight - hipPitchFrameTranslation.getZ()));
          hipPitchFrame.corruptTransformToParentPreMultiply(preCorruptionTransform);
 
          double maxStepLengthForward = Math.sqrt(Math.pow(referenceFrames.getLegLength(robotQuadrant), 2) - Math.pow(robotHeight, 2));

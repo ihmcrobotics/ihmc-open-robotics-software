@@ -1,13 +1,10 @@
 package us.ihmc.exampleSimulations.beetle.parameters;
 
-import javax.vecmath.Vector3d;
-
 import org.ejml.data.DenseMatrix64F;
 
-import us.ihmc.robotics.controllers.PDGainsInterface;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.controllers.SE3PIDGainsInterface;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
 public interface HexapodControllerParameters
 {
@@ -21,9 +18,9 @@ public interface HexapodControllerParameters
 
    SE3PIDGainsInterface getBodySpatialGains();
 
-   void getBodySpatialLinearQPWeight(Vector3d linearWeight);
+   void getBodySpatialLinearQPWeight(Vector3D linearWeight);
 
-   void getBodySpatialAngularQPWeight(Vector3d angularWeight);
+   void getBodySpatialAngularQPWeight(Vector3D angularWeight);
 
    DenseMatrix64F getBodySpatialSelectionMatrix();
 

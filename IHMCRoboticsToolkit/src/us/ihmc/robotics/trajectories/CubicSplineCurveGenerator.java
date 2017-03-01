@@ -1,7 +1,8 @@
 package us.ihmc.robotics.trajectories;
 
-import javax.vecmath.Point2d;
 import java.util.ArrayList;
+
+import us.ihmc.euclid.tuple2D.Point2D;
 
 /**
  * <p>Title: </p>
@@ -26,14 +27,14 @@ public class CubicSplineCurveGenerator implements CurveGenerator
    private double[] d2ydx2 = null;    // second derivatives of y
 
 
-   public CubicSplineCurveGenerator(Point2d[] points)
+   public CubicSplineCurveGenerator(Point2D[] points)
    {
       init(points);
    }
 
-   public CubicSplineCurveGenerator(ArrayList<Point2d> points)
+   public CubicSplineCurveGenerator(ArrayList<Point2D> points)
    {
-      Point2d[] arrayPoints = new Point2d[points.size()];
+      Point2D[] arrayPoints = new Point2D[points.size()];
       points.toArray(arrayPoints);
 
       init(arrayPoints);
@@ -41,13 +42,13 @@ public class CubicSplineCurveGenerator implements CurveGenerator
 
    public CubicSplineCurveGenerator(double[] points)
    {
-      Point2d[] arrayOfPoints = new Point2d[points.length];
+      Point2D[] arrayOfPoints = new Point2D[points.length];
 
       double numberOfPoints = points.length;
 
       for (int i = 0; i < points.length; i++)
       {
-         arrayOfPoints[i] = new Point2d();
+         arrayOfPoints[i] = new Point2D();
          arrayOfPoints[i].setY(points[i]);
          arrayOfPoints[i].setX((i + 1.0) / numberOfPoints);
       }
@@ -58,7 +59,7 @@ public class CubicSplineCurveGenerator implements CurveGenerator
 
 
 
-   private void init(Point2d[] points)
+   private void init(Point2D[] points)
    {
       this.xValues = new double[points.length];
       this.yValues = new double[points.length];
@@ -164,10 +165,10 @@ public class CubicSplineCurveGenerator implements CurveGenerator
       this.derivCalculated = true;
    }
 
-   public Point2d getPointGivenX(double xValue)
+   public Point2D getPointGivenX(double xValue)
    {
       double yValue = interpolate(xValue);
-      return new Point2d(xValue, yValue);
+      return new Point2D(xValue, yValue);
 
    }
 
@@ -230,14 +231,14 @@ public class CubicSplineCurveGenerator implements CurveGenerator
       return xMax;
    }
 
-   public Point2d[] getArrayOfPoints(int numberOfPointsToReturn)
+   public Point2D[] getArrayOfPoints(int numberOfPointsToReturn)
    {
       if (numberOfPointsToReturn < 2)
          numberOfPointsToReturn = 2;
 
       double stepSize = (xMax - xMin) / ((double) numberOfPointsToReturn - 1);
 
-      Point2d[] ret = new Point2d[numberOfPointsToReturn];
+      Point2D[] ret = new Point2D[numberOfPointsToReturn];
       double x = xMin;
 
       for (int i = 0; i < numberOfPointsToReturn; i++)
@@ -251,7 +252,7 @@ public class CubicSplineCurveGenerator implements CurveGenerator
       return ret;
    }
 
-   public void setArrayOfPoints(Point2d[] newArrayOfPoints)
+   public void setArrayOfPoints(Point2D[] newArrayOfPoints)
    {
       init(newArrayOfPoints);
    }

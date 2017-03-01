@@ -1,8 +1,10 @@
 package us.ihmc.commonWalkingControlModules.controllerAPI.input.userDesired;
 
+import java.util.List;
+
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataListCommand;
@@ -10,16 +12,21 @@ import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage.FootstepOrigin;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.*;
-import us.ihmc.robotics.geometry.*;
+import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
+import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
+import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.robotics.geometry.FrameOrientation;
+import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePose;
+import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-
-import javax.vecmath.Point2d;
-import java.util.List;
 
 public class UserDesiredFootstepDataMessageGenerator
 {
@@ -54,8 +61,8 @@ public class UserDesiredFootstepDataMessageGenerator
    private final BooleanYoVariable sendSteps = new BooleanYoVariable(namePrefix + "Send", registry);
 
    private List<FramePoint2d> contactFramePoints;
-   private RecyclingArrayList<Point2d> contactPoints = new RecyclingArrayList<Point2d>(4, Point2d.class);
-   private Point2d contactPoint;
+   private RecyclingArrayList<Point2D> contactPoints = new RecyclingArrayList<Point2D>(4, Point2D.class);
+   private Point2D contactPoint;
 
    private final SideDependentList<ContactableFoot> bipedFeet;
    private ContactableFoot swingFoot;

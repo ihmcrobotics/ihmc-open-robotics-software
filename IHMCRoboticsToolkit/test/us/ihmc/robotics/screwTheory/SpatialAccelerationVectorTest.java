@@ -4,21 +4,21 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.Random;
 
-import javax.vecmath.Vector3d;
-
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import org.junit.Test;
 
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.IntegrationCategory;
+import us.ihmc.euclid.tools.EuclidCoreTestTools;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVectorTest;
 import us.ihmc.robotics.geometry.ReferenceFrameMismatchException;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.testing.JUnitTools;
-import us.ihmc.tools.continuousIntegration.IntegrationCategory;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.robotics.testing.JUnitTools;
 
 public class SpatialAccelerationVectorTest extends SpatialMotionVectorTest
 {
@@ -35,17 +35,17 @@ public class SpatialAccelerationVectorTest extends SpatialMotionVectorTest
       double[] linearFrequencies = {1.0, 2.0, 3.0};
       double[] angularFrequencies = {4.0, 5.0, 6.0};
 
-      Vector3d previousLinearVelocity = new Vector3d();
-      Vector3d previousAngularVelocity = new Vector3d();
+      Vector3D previousLinearVelocity = new Vector3D();
+      Vector3D previousAngularVelocity = new Vector3D();
       double tMax = 1.0;
 
       for (double t = 0.0; t < tMax; t += deltaT)
       {
-         Vector3d linearVelocity = getSinusoidalVelocity(linearAmplitudes, linearFrequencies, t);
-         Vector3d angularVelocity = getSinusoidalVelocity(angularAmplitudes, angularFrequencies, t);
+         Vector3D linearVelocity = getSinusoidalVelocity(linearAmplitudes, linearFrequencies, t);
+         Vector3D angularVelocity = getSinusoidalVelocity(angularAmplitudes, angularFrequencies, t);
 
-         Vector3d linearAcceleration = getSinusoidalAcceleration(linearAmplitudes, linearFrequencies, t);
-         Vector3d angularAcceleration = getSinusoidalAcceleration(angularAmplitudes, angularFrequencies, t);
+         Vector3D linearAcceleration = getSinusoidalAcceleration(linearAmplitudes, linearFrequencies, t);
+         Vector3D angularAcceleration = getSinusoidalAcceleration(angularAmplitudes, angularFrequencies, t);
 
          Twist twistInB = new Twist(frameB, frameA, frameB, linearVelocity, angularVelocity);
          Twist twistInA = new Twist(twistInB);
@@ -56,14 +56,14 @@ public class SpatialAccelerationVectorTest extends SpatialMotionVectorTest
 
          if (t > deltaT / 2.0)    // numerically differentiating, so don't do the first step
          {
-            Vector3d linearAccelerationNewFrameNumeric = numericallyDifferentiate(previousLinearVelocity, twistInA.getLinearPartCopy(), deltaT);
-            Vector3d angularAccelerationNewFrameNumeric = numericallyDifferentiate(previousAngularVelocity, twistInA.getAngularPartCopy(), deltaT);
+            Vector3D linearAccelerationNewFrameNumeric = numericallyDifferentiate(previousLinearVelocity, twistInA.getLinearPartCopy(), deltaT);
+            Vector3D angularAccelerationNewFrameNumeric = numericallyDifferentiate(previousAngularVelocity, twistInA.getAngularPartCopy(), deltaT);
 
-            Vector3d linearAccelerationNewFrameAnalytic = acceleration.getLinearPartCopy();
-            Vector3d angularAccelerationNewFrameAnalytic = acceleration.getAngularPartCopy();
+            Vector3D linearAccelerationNewFrameAnalytic = acceleration.getLinearPartCopy();
+            Vector3D angularAccelerationNewFrameAnalytic = acceleration.getAngularPartCopy();
 
-            JUnitTools.assertTuple3dEquals("t = " + t, linearAccelerationNewFrameNumeric, linearAccelerationNewFrameAnalytic, epsilon);
-            JUnitTools.assertTuple3dEquals("t = " + t, angularAccelerationNewFrameNumeric, angularAccelerationNewFrameAnalytic, epsilon);
+            EuclidCoreTestTools.assertTuple3DEquals("t = " + t, linearAccelerationNewFrameNumeric, linearAccelerationNewFrameAnalytic, epsilon);
+            EuclidCoreTestTools.assertTuple3DEquals("t = " + t, angularAccelerationNewFrameNumeric, angularAccelerationNewFrameAnalytic, epsilon);
          }
 
          previousLinearVelocity.set(twistInA.getLinearPartCopy());
@@ -81,17 +81,17 @@ public class SpatialAccelerationVectorTest extends SpatialMotionVectorTest
    {
       Random random = new Random(1456L);
 
-      SpatialAccelerationVector accel = new SpatialAccelerationVector(frameB, frameA, frameA, new Vector3d(), new Vector3d());    // zero relative acceleration
-      Twist twist = new Twist(frameB, frameA, frameA, new Vector3d(), getRandomVector(random));    // pure rotational velocity
+      SpatialAccelerationVector accel = new SpatialAccelerationVector(frameB, frameA, frameA, new Vector3D(), new Vector3D());    // zero relative acceleration
+      Twist twist = new Twist(frameB, frameA, frameA, new Vector3D(), getRandomVector(random));    // pure rotational velocity
       FramePoint pointFixedInFrameB = new FramePoint(frameA, getRandomVector(random));
       FrameVector accelerationOfPointFixedInFrameB = new FrameVector(ReferenceFrame.getWorldFrame());
       accel.getAccelerationOfPointFixedInBodyFrame(twist, pointFixedInFrameB, accelerationOfPointFixedInFrameB);
 
-      Vector3d expected = new Vector3d(pointFixedInFrameB.getVectorCopy());
+      Vector3D expected = new Vector3D(pointFixedInFrameB.getVectorCopy());
       expected.cross(twist.getAngularPart(), expected);
       expected.cross(twist.getAngularPart(), expected);
 
-      JUnitTools.assertTuple3dEquals(expected, accelerationOfPointFixedInFrameB.getVector(), 1e-7);
+      EuclidCoreTestTools.assertTuple3DEquals(expected, accelerationOfPointFixedInFrameB.getVector(), 1e-7);
    }
 
    // TODO: Figure out this test and get it to pass if it should.
@@ -100,9 +100,9 @@ public class SpatialAccelerationVectorTest extends SpatialMotionVectorTest
    public void testAccelerationOfPointFixedInBodyFrameAlternative()
    {
       Random random = new Random();
-      SpatialAccelerationVector accel = new SpatialAccelerationVector(frameB, frameA, frameA, RandomTools.generateRandomVector(random),
-                                           RandomTools.generateRandomVector(random));
-      Twist twist = new Twist(frameB, frameA, frameA, RandomTools.generateRandomVector(random), getRandomVector(random));
+      SpatialAccelerationVector accel = new SpatialAccelerationVector(frameB, frameA, frameA, RandomGeometry.nextVector3D(random),
+                                           RandomGeometry.nextVector3D(random));
+      Twist twist = new Twist(frameB, frameA, frameA, RandomGeometry.nextVector3D(random), getRandomVector(random));
       FramePoint pointFixedInFrameB = new FramePoint(frameA);    // , getRandomVector(random));
       FrameVector accelerationOfPointFixedInFrameB = new FrameVector(ReferenceFrame.getWorldFrame());
       accel.getAccelerationOfPointFixedInBodyFrame(twist, pointFixedInFrameB, accelerationOfPointFixedInFrameB);
@@ -136,8 +136,8 @@ public class SpatialAccelerationVectorTest extends SpatialMotionVectorTest
 	@Test(timeout = 30000,expected = ReferenceFrameMismatchException.class)
    public void testAddExpressedInDifferentFrames()
    {
-      SpatialAccelerationVector acceleration1 = createSpatialMotionVector(frameB, frameA, frameC, new Vector3d(), new Vector3d());
-      SpatialAccelerationVector acceleration2 = createSpatialMotionVector(frameB, frameA, frameA, new Vector3d(), new Vector3d());
+      SpatialAccelerationVector acceleration1 = createSpatialMotionVector(frameB, frameA, frameC, new Vector3D(), new Vector3D());
+      SpatialAccelerationVector acceleration2 = createSpatialMotionVector(frameB, frameA, frameA, new Vector3D(), new Vector3D());
 
       acceleration1.add(acceleration2);
    }
@@ -150,8 +150,8 @@ public class SpatialAccelerationVectorTest extends SpatialMotionVectorTest
 	@Test(timeout = 30000,expected = ReferenceFrameMismatchException.class)
    public void testAddNotRelative()
    {
-      SpatialAccelerationVector acceleration1 = createSpatialMotionVector(frameB, frameA, frameC, new Vector3d(), new Vector3d());
-      SpatialAccelerationVector acceleration2 = createSpatialMotionVector(frameB, frameA, frameC, new Vector3d(), new Vector3d());
+      SpatialAccelerationVector acceleration1 = createSpatialMotionVector(frameB, frameA, frameC, new Vector3D(), new Vector3D());
+      SpatialAccelerationVector acceleration2 = createSpatialMotionVector(frameB, frameA, frameC, new Vector3D(), new Vector3D());
 
       acceleration1.add(acceleration2);
    }
@@ -165,12 +165,12 @@ public class SpatialAccelerationVectorTest extends SpatialMotionVectorTest
 	@Test(timeout = 30000)
    public void testAdd()
    {
-      Vector3d angularVelocity1 = new Vector3d(random.nextDouble(), random.nextDouble(), random.nextDouble());
-      Vector3d linearVelocity1 = new Vector3d(random.nextDouble(), random.nextDouble(), random.nextDouble());
+      Vector3D angularVelocity1 = new Vector3D(random.nextDouble(), random.nextDouble(), random.nextDouble());
+      Vector3D linearVelocity1 = new Vector3D(random.nextDouble(), random.nextDouble(), random.nextDouble());
       SpatialAccelerationVector spatialMotionVector1 = createSpatialMotionVector(frameB, frameA, frameD, linearVelocity1, angularVelocity1);
 
-      Vector3d angularVelocity2 = new Vector3d(random.nextDouble(), random.nextDouble(), random.nextDouble());
-      Vector3d linearVelocity2 = new Vector3d(random.nextDouble(), random.nextDouble(), random.nextDouble());
+      Vector3D angularVelocity2 = new Vector3D(random.nextDouble(), random.nextDouble(), random.nextDouble());
+      Vector3D linearVelocity2 = new Vector3D(random.nextDouble(), random.nextDouble(), random.nextDouble());
       SpatialAccelerationVector spatialMotionVector2 = createSpatialMotionVector(frameC, frameB, frameD, linearVelocity2, angularVelocity2);
 
       spatialMotionVector1.add(spatialMotionVector2);
@@ -183,11 +183,11 @@ public class SpatialAccelerationVectorTest extends SpatialMotionVectorTest
       linearVelocity1.add(linearVelocity2);
 
       double epsilon = 1e-14;
-      Vector3d angularVelocity1Plus2 = spatialMotionVector1.getAngularPartCopy();
-      JUnitTools.assertTuple3dEquals(angularVelocity1, angularVelocity1Plus2, epsilon);
+      Vector3D angularVelocity1Plus2 = spatialMotionVector1.getAngularPartCopy();
+      EuclidCoreTestTools.assertTuple3DEquals(angularVelocity1, angularVelocity1Plus2, epsilon);
 
-      Vector3d linearVelocity1Plus2 = spatialMotionVector1.getLinearPartCopy();
-      JUnitTools.assertTuple3dEquals(linearVelocity1, linearVelocity1Plus2, epsilon);
+      Vector3D linearVelocity1Plus2 = spatialMotionVector1.getLinearPartCopy();
+      EuclidCoreTestTools.assertTuple3DEquals(linearVelocity1, linearVelocity1Plus2, epsilon);
 
       // Should throw exception if try it the other way:
 
@@ -222,10 +222,10 @@ public class SpatialAccelerationVectorTest extends SpatialMotionVectorTest
    public void testSub()
    {
       Random random = new Random(3454L);
-      SpatialAccelerationVector vector1 = new SpatialAccelerationVector(frameB, frameA, frameD, RandomTools.generateRandomVector(random),
-                                             RandomTools.generateRandomVector(random));
-      SpatialAccelerationVector vector2 = new SpatialAccelerationVector(frameC, frameB, frameD, RandomTools.generateRandomVector(random),
-                                             RandomTools.generateRandomVector(random));
+      SpatialAccelerationVector vector1 = new SpatialAccelerationVector(frameB, frameA, frameD, RandomGeometry.nextVector3D(random),
+                                             RandomGeometry.nextVector3D(random));
+      SpatialAccelerationVector vector2 = new SpatialAccelerationVector(frameC, frameB, frameD, RandomGeometry.nextVector3D(random),
+                                             RandomGeometry.nextVector3D(random));
       SpatialAccelerationVector vector3 = new SpatialAccelerationVector(vector1);
       vector3.add(vector2);
 
@@ -274,12 +274,12 @@ public class SpatialAccelerationVectorTest extends SpatialMotionVectorTest
       double angularAccelerationMagnitude = random.nextDouble();
       double linearVelocityMagnitude = random.nextDouble();
       double linearAccelerationMagnitude = random.nextDouble();
-      Vector3d axisOfRotation = RandomTools.generateRandomVector(random);
+      Vector3D axisOfRotation = RandomGeometry.nextVector3D(random);
       axisOfRotation.normalize();
-      Vector3d axisOfRotationDot = new Vector3d();
-      axisOfRotationDot.cross(axisOfRotation, RandomTools.generateRandomVector(random));
-      Vector3d offset = RandomTools.generateRandomVector(random);
-      Vector3d offsetDot = RandomTools.generateRandomVector(random);
+      Vector3D axisOfRotationDot = new Vector3D();
+      axisOfRotationDot.cross(axisOfRotation, RandomGeometry.nextVector3D(random));
+      Vector3D offset = RandomGeometry.nextVector3D(random);
+      Vector3D offsetDot = RandomGeometry.nextVector3D(random);
       SpatialAccelerationVector acceleration = new SpatialAccelerationVector(bodyFrame, baseFrame, expressedInFrame, angularVelocityMagnitude,
                                                   angularAccelerationMagnitude, linearVelocityMagnitude, linearAccelerationMagnitude, axisOfRotation,
                                                   axisOfRotationDot, offset, offsetDot);
@@ -290,10 +290,10 @@ public class SpatialAccelerationVectorTest extends SpatialMotionVectorTest
       double dt = 1e-8;
       angularVelocityMagnitude += angularAccelerationMagnitude * dt;
       linearVelocityMagnitude += linearAccelerationMagnitude * dt;
-      Vector3d axisOfRotationDelta = new Vector3d(axisOfRotationDot);
+      Vector3D axisOfRotationDelta = new Vector3D(axisOfRotationDot);
       axisOfRotationDelta.scale(dt);
       axisOfRotation.add(axisOfRotationDelta);
-      Vector3d offsetDelta = new Vector3d(offsetDot);
+      Vector3D offsetDelta = new Vector3D(offsetDot);
       offsetDelta.scale(dt);
       offset.add(offsetDelta);
       Twist twist1 = new Twist();
@@ -311,17 +311,17 @@ public class SpatialAccelerationVectorTest extends SpatialMotionVectorTest
    public void testSetBasedOnOriginAcceleration()
    {
       SpatialAccelerationVector acceleration = new SpatialAccelerationVector(frameA, frameB, frameA);
-      Twist twistOfBodyWithRespectToBase = new Twist(frameA, frameB, frameA, RandomTools.generateRandomVector(random),
-                                              RandomTools.generateRandomVector(random));
-      FrameVector angularAcceleration = new FrameVector(twistOfBodyWithRespectToBase.getExpressedInFrame(), RandomTools.generateRandomVector(random));
-      FrameVector originAcceleration = new FrameVector(twistOfBodyWithRespectToBase.getExpressedInFrame(), RandomTools.generateRandomVector(random));
+      Twist twistOfBodyWithRespectToBase = new Twist(frameA, frameB, frameA, RandomGeometry.nextVector3D(random),
+                                              RandomGeometry.nextVector3D(random));
+      FrameVector angularAcceleration = new FrameVector(twistOfBodyWithRespectToBase.getExpressedInFrame(), RandomGeometry.nextVector3D(random));
+      FrameVector originAcceleration = new FrameVector(twistOfBodyWithRespectToBase.getExpressedInFrame(), RandomGeometry.nextVector3D(random));
       acceleration.setBasedOnOriginAcceleration(angularAcceleration, originAcceleration, twistOfBodyWithRespectToBase);
 
       FrameVector linearAccelerationCheck = new FrameVector();
       acceleration.getLinearAccelerationFromOriginAcceleration(twistOfBodyWithRespectToBase, linearAccelerationCheck);
       linearAccelerationCheck.changeFrame(originAcceleration.getReferenceFrame());
 
-      JUnitTools.assertTuple3dEquals(linearAccelerationCheck.getVector(), originAcceleration.getVector(), 1e-12);
+      EuclidCoreTestTools.assertTuple3DEquals(linearAccelerationCheck.getVector(), originAcceleration.getVector(), 1e-12);
       
       FrameVector originAccelerationBack = new FrameVector(twistOfBodyWithRespectToBase.getExpressedInFrame());
       FramePoint origin = new FramePoint(acceleration.getBodyFrame());
@@ -331,7 +331,7 @@ public class SpatialAccelerationVectorTest extends SpatialMotionVectorTest
       acceleration.getAccelerationOfPointFixedInBodyFrame(twistOfBodyWithRespectToBase, origin, originAccelerationBack);
 
       originAccelerationBack.changeFrame(originAcceleration.getReferenceFrame());
-      JUnitTools.assertTuple3dEquals(originAccelerationBack.getVector(), originAcceleration.getVector(), 1e-12);
+      EuclidCoreTestTools.assertTuple3DEquals(originAccelerationBack.getVector(), originAcceleration.getVector(), 1e-12);
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -341,7 +341,7 @@ public class SpatialAccelerationVectorTest extends SpatialMotionVectorTest
       ReferenceFrame bodyFrame = frameA;
       ReferenceFrame baseFrame = frameB;
       ReferenceFrame expressedInFrame = frameC;
-      Twist twist = new Twist(bodyFrame, baseFrame, expressedInFrame, RandomTools.generateRandomVector(random), RandomTools.generateRandomVector(random));
+      Twist twist = new Twist(bodyFrame, baseFrame, expressedInFrame, RandomGeometry.nextVector3D(random), RandomGeometry.nextVector3D(random));
       SpatialAccelerationVector acceleration = new SpatialAccelerationVector(bodyFrame, baseFrame, expressedInFrame, twist.getLinearPart(),
                                                   twist.getAngularPart());
 
@@ -350,20 +350,20 @@ public class SpatialAccelerationVectorTest extends SpatialMotionVectorTest
 
       double epsilon = 1e-12;
       assertEquals(twist.getExpressedInFrame(), acceleration.getExpressedInFrame());
-      JUnitTools.assertTuple3dEquals(twist.getAngularPart(), acceleration.getAngularPart(), epsilon);
-      JUnitTools.assertTuple3dEquals(twist.getLinearPart(), acceleration.getLinearPart(), epsilon);
+      EuclidCoreTestTools.assertTuple3DEquals(twist.getAngularPart(), acceleration.getAngularPart(), epsilon);
+      EuclidCoreTestTools.assertTuple3DEquals(twist.getLinearPart(), acceleration.getLinearPart(), epsilon);
    }
 
-   private static Vector3d numericallyDifferentiate(Vector3d previousLinearVelocity, Vector3d linearVelocity, double deltaT)
+   private static Vector3D numericallyDifferentiate(Vector3D previousLinearVelocity, Vector3D linearVelocity, double deltaT)
    {
-      Vector3d ret = new Vector3d(linearVelocity);
+      Vector3D ret = new Vector3D(linearVelocity);
       ret.sub(previousLinearVelocity);
       ret.scale(1.0 / deltaT);
 
       return ret;
    }
 
-   private static Vector3d getSinusoidalVelocity(double[] amplitudes, double[] frequencies, double t)
+   private static Vector3D getSinusoidalVelocity(double[] amplitudes, double[] frequencies, double t)
    {
       double[] velocities = new double[3];
 
@@ -375,10 +375,10 @@ public class SpatialAccelerationVectorTest extends SpatialMotionVectorTest
          velocities[i] = linearAmplitude * Math.sin(linearFrequency * t);
       }
 
-      return new Vector3d(velocities);
+      return new Vector3D(velocities);
    }
 
-   private static Vector3d getSinusoidalAcceleration(double[] amplitudes, double[] frequencies, double t)
+   private static Vector3D getSinusoidalAcceleration(double[] amplitudes, double[] frequencies, double t)
    {
       double[] accelerations = new double[3];
 
@@ -390,17 +390,17 @@ public class SpatialAccelerationVectorTest extends SpatialMotionVectorTest
          accelerations[i] = linearFrequency * linearAmplitude * Math.cos(linearFrequency * t);
       }
 
-      return new Vector3d(accelerations);
+      return new Vector3D(accelerations);
    }
 
-   private Vector3d getRandomVector(Random random)
+   private Vector3D getRandomVector(Random random)
    {
-      return new Vector3d(random.nextDouble(), random.nextDouble(), random.nextDouble());
+      return new Vector3D(random.nextDouble(), random.nextDouble(), random.nextDouble());
    }
 
    @Override
    protected SpatialAccelerationVector createSpatialMotionVector(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame,
-           Vector3d linearPart, Vector3d angularPart)
+           Vector3D linearPart, Vector3D angularPart)
    {
       return new SpatialAccelerationVector(bodyFrame, baseFrame, expressedInFrame, linearPart, angularPart);
    }

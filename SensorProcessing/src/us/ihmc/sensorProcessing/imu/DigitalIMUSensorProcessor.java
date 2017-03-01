@@ -1,9 +1,8 @@
 package us.ihmc.sensorProcessing.imu;
 
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -16,12 +15,12 @@ public class DigitalIMUSensorProcessor implements IMUSensorProcessor
    private final RawIMUSensorsInterface rawIMUSensors;
    private final ProcessedIMUSensorsWriteOnlyInterface processedSensors;
 
-   private final Matrix3d rotationMatrixBeforeOffset = new Matrix3d();
-   private final Matrix3d rotationMatrix = new Matrix3d();
-   private final Vector3d angularVelocity = new Vector3d();
-   private final Matrix3d orientationOffset; // rotates vectors from robot body to IMU body
-   private final Matrix3d orientationOffsetTranspose = new Matrix3d();
-   private final Vector3d accelerationOffset;
+   private final RotationMatrix rotationMatrixBeforeOffset = new RotationMatrix();
+   private final RotationMatrix rotationMatrix = new RotationMatrix();
+   private final Vector3D angularVelocity = new Vector3D();
+   private final RotationMatrix orientationOffset; // rotates vectors from robot body to IMU body
+   private final RotationMatrix orientationOffsetTranspose = new RotationMatrix();
+   private final Vector3D accelerationOffset;
    private final int imuIndex;
    private final double localGravityZ;
 
@@ -34,7 +33,7 @@ public class DigitalIMUSensorProcessor implements IMUSensorProcessor
       
       IMUCalibrationProperties imuCalibrationProperties = new IMUCalibrationProperties(imuIndex);
       this.orientationOffset = imuCalibrationProperties.getOrientationOffset();
-      this.orientationOffsetTranspose.transpose(this.orientationOffset);
+      this.orientationOffsetTranspose.setAndTranspose(this.orientationOffset);
       this.accelerationOffset = imuCalibrationProperties.getAccelerationOffset();
       imuCalibrationProperties.save();
    }
@@ -66,14 +65,15 @@ public class DigitalIMUSensorProcessor implements IMUSensorProcessor
    {
       rawIMUSensors.getOrientation(rotationMatrixBeforeOffset, imuIndex);
 
-      rotationMatrix.mul(rotationMatrixBeforeOffset, orientationOffset);
+      rotationMatrix.set(rotationMatrixBeforeOffset);
+      rotationMatrix.multiply(orientationOffset);
       processedSensors.setRotation(rotationMatrix, imuIndex);
    }
 
    private void processAcceleration()
    {
       // Compute acceleration in world frame, subtracting off gravity:
-      Vector3d acceleration = new Vector3d();
+      Vector3D acceleration = new Vector3D();
       rawIMUSensors.getAcceleration(acceleration, imuIndex);
       acceleration.sub(accelerationOffset);
 

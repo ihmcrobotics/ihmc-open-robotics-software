@@ -132,6 +132,10 @@ public class Collision implements AbstractSDFMesh
    {
       return null;
    }
-   
 
+   @Override
+   public String getTransparency()
+   {
+      return null;
+   }
 }

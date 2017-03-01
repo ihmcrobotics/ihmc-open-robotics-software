@@ -2,19 +2,19 @@ package us.ihmc.simulationconstructionset.physics.collision;
 
 import java.util.ArrayList;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.physics.CollisionHandler;
 import us.ihmc.simulationconstructionset.physics.CollisionShapeDescription;
 import us.ihmc.simulationconstructionset.physics.CollisionShapeFactory;
 import us.ihmc.simulationconstructionset.physics.Contacts;
@@ -56,22 +56,26 @@ public class SCSCollisionDetectorEvaluator
 
       robot.addDynamicGraphicObjectsListRegistry(yoGraphicsListRegistry );
       // Create the joints:
-      FloatingJoint jointOne = new FloatingJoint("one", "cubeOne", new Vector3d(), robot);
+      FloatingJoint jointOne = new FloatingJoint("one", "cubeOne", new Vector3D(), robot);
       Link linkOne = new Link("CubeOne");
 
-      FloatingJoint jointTwo = new FloatingJoint("two", "cubeTwo", new Vector3d(), robot);
+      FloatingJoint jointTwo = new FloatingJoint("two", "cubeTwo", new Vector3D(), robot);
       Link linkTwo = new Link("CubeTwo");
 
       // Set mass parameters
       double mass = 1.0;
 
+      double epsilon = 0.3;
+      double mu = 0.7;
+      CollisionHandler collisionHandler = new DefaultCollisionHandler(epsilon, mu);
+ 
       linkOne.setMass(mass);
       linkOne.setMomentOfInertia(0.1 * mass, 0.1 * mass, 0.1 * mass);
-      linkOne.enableCollisions(robot.getRobotsYoVariableRegistry());
+      linkOne.enableCollisions(4, collisionHandler, robot.getRobotsYoVariableRegistry());
 
       linkTwo.setMass(mass);
       linkTwo.setMomentOfInertia(0.1 * mass, 0.1 * mass, 0.1 * mass);
-      linkTwo.enableCollisions(robot.getRobotsYoVariableRegistry());
+      linkTwo.enableCollisions(4, collisionHandler, robot.getRobotsYoVariableRegistry());
 
       // Graphics
       Graphics3DObject linkOneGraphics = new Graphics3DObject();
@@ -151,11 +155,11 @@ public class SCSCollisionDetectorEvaluator
 
             for (int k=0; k<numberOfContacts; k++)
             {
-               Point3d pointOnA = new Point3d();
+               Point3D pointOnA = new Point3D();
                collision.getWorldA(k, pointOnA);
                pointsOnA.get(vizIndex).setPosition(pointOnA);
 
-               Point3d pointOnB = new Point3d();
+               Point3D pointOnB = new Point3D();
                collision.getWorldB(k, pointOnB);
                pointsOnB.get(vizIndex).setPosition(pointOnB);
 

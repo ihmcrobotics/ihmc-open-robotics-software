@@ -6,8 +6,8 @@ import java.awt.Container;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
-import javax.vecmath.Vector3d;
 
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.HeightMap;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -28,7 +28,7 @@ public class JMEHeightMapExample
       FlatHeightMap flatHeightMap = new FlatHeightMap();
 
 //      graphicsAdapter.setHeightMap(flatHeightMap);
-      Vector3d translation = new Vector3d(10.0, 10.0, 0.0);
+      Vector3D translation = new Vector3D(10.0, 10.0, 0.0);
 
       Graphics3DObject sphereObject = new Graphics3DObject();
       sphereObject.addCoordinateSystem(1.0);

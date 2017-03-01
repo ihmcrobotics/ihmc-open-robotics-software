@@ -5,13 +5,12 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Random;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
 import org.junit.Test;
 
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 
 public class CollisionSphereTest
 {
@@ -25,11 +24,11 @@ public class CollisionSphereTest
       for (int i = 0; i < 1000000; i++)
       {
          double radius = -5.0 + 10.0 * random.nextDouble();
-         Vector3d vector = new Vector3d(random.nextDouble(), random.nextDouble(), random.nextDouble());
+         Vector3D vector = new Vector3D(random.nextDouble(), random.nextDouble(), random.nextDouble());
          vector.normalize();
          vector.scale(radius);
          
-         Point3d point = new Point3d(vector);
+         Point3D point = new Point3D(vector);
          assertTrue(sphere.contains(point));
       }
    }
@@ -44,11 +43,11 @@ public class CollisionSphereTest
       for (int i = 0; i < 1000000; i++)
       {
          double radius = (random.nextBoolean()?-1:1) * (5.0 + 10.0 * random.nextDouble());
-         Vector3d vector = new Vector3d(random.nextDouble(), random.nextDouble(), random.nextDouble());
+         Vector3D vector = new Vector3D(random.nextDouble(), random.nextDouble(), random.nextDouble());
          vector.normalize();
          vector.scale(radius);
          
-         Point3d point = new Point3d(vector);
+         Point3D point = new Point3D(vector);
          assertFalse(sphere.contains(point));
       }
    }

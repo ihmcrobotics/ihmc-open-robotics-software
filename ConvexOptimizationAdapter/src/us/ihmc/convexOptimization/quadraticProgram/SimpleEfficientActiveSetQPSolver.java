@@ -101,6 +101,14 @@ public class SimpleEfficientActiveSetQPSolver implements SimpleActiveSetQPSolver
 
    private final LinearSolver<DenseMatrix64F> solver = LinearSolverFactory.linear(0);
 
+   private boolean useWarmStart = false;
+
+   private int previousNumberOfVariables = 0;
+   private int previousNumberOfEqualityConstraints = 0;
+   private int previousNumberOfInequalityConstraints = 0;
+   private int previousNumberOfLowerBoundConstraints = 0;
+   private int previousNumberOfUpperBoundConstraints = 0;
+
    @Override
    public void setMaxNumberOfIterations(int maxNumberOfIterations)
    {
@@ -317,6 +325,25 @@ public class SimpleEfficientActiveSetQPSolver implements SimpleActiveSetQPSolver
       return numberOfIterations;
    }
 
+   @Override
+   public void setUseWarmStart(boolean useWarmStart)
+   {
+      this.useWarmStart = useWarmStart;
+   }
+
+   @Override
+   public void resetActiveConstraints()
+   {
+      CBar.reshape(0, 0);
+      CHat.reshape(0, 0);
+      DBar.reshape(0, 0);
+      DHat.reshape(0, 0);
+
+      activeInequalityIndices.reset();
+      activeUpperBoundIndices.reset();
+      activeLowerBoundIndices.reset();
+   }
+
    private final DenseMatrix64F lagrangeEqualityConstraintMultipliersToThrowAway = new DenseMatrix64F(0, 0);
    private final DenseMatrix64F lagrangeInequalityConstraintMultipliersToThrowAway = new DenseMatrix64F(0, 0);
    private final DenseMatrix64F lagrangeLowerBoundMultipliersToThrowAway = new DenseMatrix64F(0, 0);
@@ -341,14 +368,8 @@ public class SimpleEfficientActiveSetQPSolver implements SimpleActiveSetQPSolver
                     DenseMatrix64F lagrangeInequalityConstraintMultipliersToPack, DenseMatrix64F lagrangeLowerBoundConstraintMultipliersToPack,
                     DenseMatrix64F lagrangeUpperBoundConstraintMultipliersToPack)
    {
-      CBar.reshape(0, 0);
-      CHat.reshape(0, 0);
-      DBar.reshape(0, 0);
-      DHat.reshape(0, 0);
-
-      activeInequalityIndices.reset();
-      activeUpperBoundIndices.reset();
-      activeLowerBoundIndices.reset();
+      if (!useWarmStart || problemSizeChanged())
+         resetActiveConstraints();
 
       int numberOfIterations = 0;
 
@@ -396,6 +417,35 @@ public class SimpleEfficientActiveSetQPSolver implements SimpleActiveSetQPSolver
       return numberOfIterations;
    }
 
+   private boolean problemSizeChanged()
+   {
+      boolean sizeChanged = checkProblemSize();
+
+      previousNumberOfVariables = quadraticCostQMatrix.getNumRows();
+      previousNumberOfEqualityConstraints = linearEqualityConstraintsAMatrix.getNumRows();
+      previousNumberOfInequalityConstraints = linearInequalityConstraintsCMatrixO.getNumRows();
+      previousNumberOfLowerBoundConstraints = variableLowerBounds.getNumRows();
+      previousNumberOfUpperBoundConstraints = variableUpperBounds.getNumRows();
+
+      return sizeChanged;
+   }
+
+   private boolean checkProblemSize()
+   {
+      if (previousNumberOfVariables != quadraticCostQMatrix.getNumRows())
+         return true;
+      if (previousNumberOfEqualityConstraints != linearEqualityConstraintsAMatrix.getNumRows())
+         return true;
+      if (previousNumberOfInequalityConstraints != linearInequalityConstraintsCMatrixO.getNumRows())
+         return true;
+      if (previousNumberOfLowerBoundConstraints != variableLowerBounds.getNumRows())
+         return true;
+      if (previousNumberOfUpperBoundConstraints != variableUpperBounds.getNumRows())
+         return true;
+
+      return false;
+   }
+
    private void computeQInverseAndAQInverse()
    {
       int numberOfVariables = quadraticCostQMatrix.getNumRows();
@@ -418,7 +468,6 @@ public class SimpleEfficientActiveSetQPSolver implements SimpleActiveSetQPSolver
          CommonOps.mult(QInverse, ATranspose, QInverseATranspose);
          CommonOps.mult(AQInverse, ATranspose, AQInverseATranspose);
       }
-
    }
 
    private void computeCBarTempMatrices()

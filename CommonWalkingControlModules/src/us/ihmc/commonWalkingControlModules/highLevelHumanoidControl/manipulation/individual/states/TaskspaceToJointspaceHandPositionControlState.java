@@ -265,7 +265,7 @@ public class TaskspaceToJointspaceHandPositionControlState extends FinishableSta
       if (time < startTimeInStateToIgnoreOrientation.getDoubleValue())
       {
          double alpha = 1.0 - time / startTimeInStateToIgnoreOrientation.getDoubleValue();
-         alpha = MathTools.clipToMinMax(alpha, 0.0, 1.0);
+         alpha = MathTools.clamp(alpha, 0.0, 1.0);
          alpha *= alpha;
          currentOrientationControlFactor.set(alpha);
          applyAlphaFactorForOrientationControl(alpha);
@@ -274,7 +274,7 @@ public class TaskspaceToJointspaceHandPositionControlState extends FinishableSta
       {
          double alpha = time - endTimeInStateToIgnoreOrientation.getDoubleValue();
          alpha /= activeTrajectoryTime.getDoubleValue() - endTimeInStateToIgnoreOrientation.getDoubleValue();
-         alpha = MathTools.clipToMinMax(alpha, 0.0, 1.0);
+         alpha = MathTools.clamp(alpha, 0.0, 1.0);
          alpha *= alpha;
          currentOrientationControlFactor.set(alpha);
          applyAlphaFactorForOrientationControl(alpha);
@@ -410,7 +410,7 @@ public class TaskspaceToJointspaceHandPositionControlState extends FinishableSta
          double trajectoryTime)
    {
       this.poseTrajectoryGenerator = poseTrajectoryGenerator;
-      percentOfTrajectoryWithOrientationBeingControlled = MathTools.clipToMinMax(percentOfTrajectoryWithOrientationBeingControlled, 0.0, 1.0);
+      percentOfTrajectoryWithOrientationBeingControlled = MathTools.clamp(percentOfTrajectoryWithOrientationBeingControlled, 0.0, 1.0);
       if (MathTools.epsilonEquals(percentOfTrajectoryWithOrientationBeingControlled, 1.0, 0.01))
       {
          this.percentOfTrajectoryWithOrientationBeingControlled.set(Double.NaN);

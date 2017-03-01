@@ -1,6 +1,9 @@
 package us.ihmc.humanoidRobotics.footstep.footstepGenerator;
 
 import static org.junit.Assert.assertTrue;
+
+import us.ihmc.humanoidRobotics.footstep.Footstep;
+import us.ihmc.humanoidRobotics.footstep.FootstepValidityMetric;
 import us.ihmc.robotics.geometry.FrameLineSegment2d;
 import us.ihmc.robotics.geometry.FrameOrientation2d;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -10,8 +13,6 @@ import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.humanoidRobotics.footstep.Footstep;
-import us.ihmc.humanoidRobotics.footstep.FootstepValidityMetric;
 
 public class SemiCircularStepValidityMetric implements FootstepValidityMetric
 {

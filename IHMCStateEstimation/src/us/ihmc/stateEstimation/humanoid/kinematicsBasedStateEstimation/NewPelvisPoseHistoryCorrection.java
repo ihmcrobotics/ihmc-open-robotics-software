@@ -1,8 +1,9 @@
 package us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation;
 
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.rotationConversion.YawPitchRollConversion;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -17,14 +18,10 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.geometry.RotationTools;
-import us.ihmc.robotics.geometry.TransformTools;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
 import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.SixDoFJoint;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 
 public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrectionInterface
@@ -40,7 +37,7 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
    private static final boolean ENABLE_GRAPHICS = true;
    
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private static final boolean ENABLE_ROTATION_CORRECTION = false;  
+   private static final boolean ENABLE_ROTATION_CORRECTION = true;
    
    private static final double DEFAULT_BREAK_FREQUENCY = 0.6;
 
@@ -74,8 +71,8 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
    
    private final RigidBodyTransform totalErrorBetweenPelvisAndLocalizationTransform = new RigidBodyTransform();
    private final RigidBodyTransform errorBetweenCorrectedAndLocalizationTransform = new RigidBodyTransform();
-   private final Vector3d totalErrorTranslation = new Vector3d(); 
-   private final Quat4d totalErrorRotation = new Quat4d(); 
+   private final Vector3D totalErrorTranslation = new Vector3D(); 
+   private final Quaternion totalErrorRotation = new Quaternion(); 
    private final DoubleYoVariable totalErrorTranslation_X;
    private final DoubleYoVariable totalErrorTranslation_Y;
    private final DoubleYoVariable totalErrorTranslation_Z;
@@ -97,14 +94,14 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
    
    private final BooleanYoVariable hasOneIcpPacketEverBeenReceived;
    
-   private final Vector3d localizationTranslation = new Vector3d();
-   private final Vector3d correctedPelvisTranslation = new Vector3d();
-   private final Vector3d errorBetweenCorrectedAndLocalizationTransform_Translation = new Vector3d();
+   private final Vector3D localizationTranslation = new Vector3D();
+   private final Vector3D correctedPelvisTranslation = new Vector3D();
+   private final Vector3D errorBetweenCorrectedAndLocalizationTransform_Translation = new Vector3D();
    
    private final FrameOrientation localizationOrientation = new FrameOrientation(worldFrame);
    private final FrameOrientation correctedPelvisOrientation = new FrameOrientation(worldFrame);
    private final FrameOrientation errorBetweenCorrectedAndLocalizationTransform_Rotation = new FrameOrientation(worldFrame);
-   private final Quat4d errorBetweenCorrectedAndLocalizationQuaternion_Rotation = new Quat4d();
+   private final Quaternion errorBetweenCorrectedAndLocalizationQuaternion_Rotation = new Quaternion();
    
    private final BooleanYoVariable isErrorTooBig;
    private final TimeStampedTransform3D timeStampedTransform3DToPack = new TimeStampedTransform3D();
@@ -251,8 +248,8 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
    }
 
    private final RigidBodyTransform tempTransform = new RigidBodyTransform(); 
-   private final Vector3d tempTranslation = new Vector3d();
-   private final Quat4d tempRotation = new Quat4d();
+   private final Vector3D tempTranslation = new Vector3D();
+   private final Quaternion tempRotation = new Quaternion();
    /**
     * pulls the corrected pose from the buffer, check that the nonprocessed buffer has
     * corresponding pelvis poses and calculates the total error
@@ -281,7 +278,7 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
             boolean withinXDeadband = Math.abs(tempTranslation.getX()) < xDeadzoneSize.getDoubleValue();
             boolean withinYDeadBand = Math.abs(tempTranslation.getY()) < yDeadzoneSize.getDoubleValue();
             boolean withinZDeadband = Math.abs(tempTranslation.getZ()) < zDeadzoneSize.getDoubleValue();
-            boolean withinYawDeadband = Math.abs(RotationTools.computeYaw(tempRotation)) < yawDeadzoneSize.getDoubleValue();
+            boolean withinYawDeadband = Math.abs(tempRotation.getYaw()) < yawDeadzoneSize.getDoubleValue();
             if(withinXDeadband && withinYDeadBand && withinZDeadband && withinYawDeadband)
             {
                return;
@@ -291,7 +288,7 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
             if (!hasOneIcpPacketEverBeenReceived.getBooleanValue())
                hasOneIcpPacketEverBeenReceived.set(true);
             double confidence = newPacket.getConfidenceFactor();
-            confidence = MathTools.clipToMinMax(confidence, 0.0, 1.0);
+            confidence = MathTools.clamp(confidence, 0.0, 1.0);
             confidenceFactor.set(confidence);
             addNewExternalPose(timeStampedExternalPose);
          }
@@ -321,7 +318,7 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
       totalErrorTranslation_Y.set(totalErrorTranslation.getY());
       totalErrorTranslation_Z.set(totalErrorTranslation.getZ());
       totalErrorBetweenPelvisAndLocalizationTransform.getRotation(totalErrorRotation);
-      RotationTools.convertQuaternionToYawPitchRoll(totalErrorRotation, totalErrorYawPitchRoll);
+      YawPitchRollConversion.convertQuaternionToYawPitchRoll(totalErrorRotation, totalErrorYawPitchRoll);
       totalErrorRotation_Yaw.set(totalErrorYawPitchRoll[0]);
       totalErrorRotation_Pitch.set(totalErrorYawPitchRoll[1]);
       totalErrorRotation_Roll.set(totalErrorYawPitchRoll[2]);
@@ -354,8 +351,8 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
       }
    }
    
-   Vector3d translationalResidualError = new Vector3d();
-   Vector3d translationalTotalError = new Vector3d();
+   Vector3D translationalResidualError = new Vector3D();
+   Vector3D translationalTotalError = new Vector3D();
    
    private void sendCorrectionUpdatePacket()
    {

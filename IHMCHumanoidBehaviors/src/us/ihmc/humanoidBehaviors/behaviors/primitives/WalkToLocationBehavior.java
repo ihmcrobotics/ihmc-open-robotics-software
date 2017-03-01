@@ -3,11 +3,10 @@ package us.ihmc.humanoidBehaviors.behaviors.primitives;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.coactiveDesignFramework.CoactiveElement;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
@@ -52,8 +51,8 @@ public class WalkToLocationBehavior extends AbstractBehavior
    private double transferTime;
 
    private final FramePose robotPose = new FramePose();
-   private final Point3d robotLocation = new Point3d();
-   private final Quat4d robotOrientation = new Quat4d();
+   private final Point3D robotLocation = new Point3D();
+   private final Quaternion robotOrientation = new Quaternion();
 
    private final YoFramePose robotYoPose = new YoFramePose("robotYoPose", worldFrame, registry);
 
@@ -156,7 +155,7 @@ public class WalkToLocationBehavior extends AbstractBehavior
 
       FrameVector2d frameHeadingVector = new FrameVector2d(referenceFrame, 1.0, 0.0);
       frameHeadingVector.changeFrame(worldFrame);
-      double ret = -frameHeadingVector.angle(walkPathVector.getFrameVector2dCopy());
+      double ret = -Math.abs(frameHeadingVector.angle(walkPathVector.getFrameVector2dCopy()));
 
       if (DEBUG)
       {
@@ -259,7 +258,7 @@ public class WalkToLocationBehavior extends AbstractBehavior
             footsteps.addAll(footstepsNominalOrientation);
          }
 
-         Vector3d footlocation = new Vector3d();
+         Vector3D footlocation = new Vector3D();
          referenceFrames.getAnkleZUpFrame(RobotSide.LEFT).getTransformToWorldFrame().getTranslation(footlocation);
          for (Footstep footstep : footsteps)
          {

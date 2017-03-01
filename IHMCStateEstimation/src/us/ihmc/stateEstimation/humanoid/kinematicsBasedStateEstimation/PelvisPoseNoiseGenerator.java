@@ -2,14 +2,12 @@ package us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation;
 
 import java.util.Random;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -25,16 +23,16 @@ public class PelvisPoseNoiseGenerator
    
    private final Random random = new Random();
    private final RigidBodyTransform pelvisPose = new RigidBodyTransform();
-   private final Matrix3d rotationError = new Matrix3d();
-   private final Vector3d translationError = new Vector3d();
+   private final RotationMatrix rotationError = new RotationMatrix();
+   private final Vector3D translationError = new Vector3D();
    
-   private final Vector3d translationNoise = new Vector3d();
-   private final Vector3d pelvisTranslation = new Vector3d();
+   private final Vector3D translationNoise = new Vector3D();
+   private final Vector3D pelvisTranslation = new Vector3D();
    
-   private final Quat4d rot = new Quat4d();
+   private final Quaternion rot = new Quaternion();
    private final double[] tempRots = new double[3];
-   private final Matrix3d rotationNoise = new Matrix3d();
-   private final Matrix3d pelvisRotation = new Matrix3d();
+   private final RotationMatrix rotationNoise = new RotationMatrix();
+   private final RotationMatrix pelvisRotation = new RotationMatrix();
    
    
    private final YoFramePoint nonProcessedRootJointPosition;
@@ -127,7 +125,7 @@ public class PelvisPoseNoiseGenerator
       integrateError();
       
       pelvisPose.getRotation(pelvisRotation);
-      pelvisRotation.mul(rotationError);
+      pelvisRotation.multiply(rotationError);
       pelvisPose.setRotation(pelvisRotation);
       
       pelvisPose.getTranslation(pelvisTranslation);
@@ -155,9 +153,9 @@ public class PelvisPoseNoiseGenerator
    
    private void updateAfterYoVariables()
    {
-      error_pitch.set(RotationTools.computePitch(rotationError));
-      error_roll.set(RotationTools.computeRoll(rotationError));
-      error_yaw.set(RotationTools.computeYaw(rotationError));
+      error_pitch.set(rotationError.getPitch());
+      error_roll.set(rotationError.getRoll());
+      error_yaw.set(rotationError.getYaw());
       error_x.set(translationError.getX()); 
       error_y.set(translationError.getY());  
       error_z.set(translationError.getZ()); 
@@ -179,8 +177,8 @@ public class PelvisPoseNoiseGenerator
       double pitchNoise = (random.nextDouble() - 0.5) * Math.PI * noiseScalar_pitch.getDoubleValue() + noiseBias_pitch.getDoubleValue();
       double rollNoise = (random.nextDouble() - 0.5) * Math.PI * noiseScalar_roll.getDoubleValue() + noiseBias_roll.getDoubleValue();
       
-      RotationTools.convertYawPitchRollToMatrix(yawNoise, pitchNoise, rollNoise, rotationNoise);
-      rotationError.mul(rotationNoise);
+      rotationNoise.setYawPitchRoll(yawNoise, pitchNoise, rollNoise);
+      rotationError.multiply(rotationNoise);
       
       double xNoise = (random.nextDouble() - 0.5) * noiseScalar_x.getDoubleValue() + noiseBias_x.getDoubleValue(); 
       double yNoise =  (random.nextDouble() - 0.5) * noiseScalar_y.getDoubleValue() + noiseBias_y.getDoubleValue(); 
@@ -190,7 +188,7 @@ public class PelvisPoseNoiseGenerator
       
       pelvisPose.getRotation(pelvisRotation);
       
-      pelvisRotation.mul(rotationError);
+      pelvisRotation.multiply(rotationError);
       pelvisRotation.transform(translationNoise);
       
       translationError.add(translationNoise);

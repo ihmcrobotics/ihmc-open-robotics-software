@@ -3,19 +3,18 @@ package us.ihmc.simulationconstructionset.physics.collision.simple;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
 import org.junit.Test;
 
-import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.tools.EuclidCoreTestTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.simulationconstructionset.physics.CollisionShape;
 import us.ihmc.simulationconstructionset.physics.CollisionShapeDescription;
 import us.ihmc.simulationconstructionset.physics.CollisionShapeFactory;
 import us.ihmc.simulationconstructionset.physics.Contacts;
 import us.ihmc.simulationconstructionset.physics.collision.CollisionDetectionResult;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.tools.testing.JUnitTools;
 
 public class SimpleCollisionDetectorTest
 {
@@ -70,9 +69,9 @@ public class SimpleCollisionDetectorTest
       CollisionShape shapeA = collision.getShapeA();
       CollisionShape shapeB = collision.getShapeB();
 
-      Point3d locationA = new Point3d();
-      Point3d locationB = new Point3d();
-      Vector3d normal = new Vector3d();
+      Point3D locationA = new Point3D();
+      Point3D locationB = new Point3D();
+      Vector3D normal = new Vector3D();
 
       double distance = collision.getDistance(0);
       collision.getWorldA(0, locationA);
@@ -87,7 +86,7 @@ public class SimpleCollisionDetectorTest
          shapeA = shapeB;
          shapeB = tempShape;
 
-         Point3d tempLocation = locationA;
+         Point3D tempLocation = locationA;
          locationA = locationB;
          locationB = tempLocation;
 
@@ -97,9 +96,9 @@ public class SimpleCollisionDetectorTest
       assertTrue(shapeA == collideableObjectOne);
       assertTrue(shapeB == collideableObjectTwo);
 
-      JUnitTools.assertTuple3dEquals(new Vector3d(-1.0, 0.0, 0.0), normal, 1e-7);
-      JUnitTools.assertTuple3dEquals(new Vector3d(0.49, 0.0, 0.0), locationA, 1e-7);
-      JUnitTools.assertTuple3dEquals(new Vector3d(0.5, 0.0, 0.0), locationB, 1e-7);
+      EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(-1.0, 0.0, 0.0), normal, 1e-7);
+      EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(0.49, 0.0, 0.0), locationA, 1e-7);
+      EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(0.5, 0.0, 0.0), locationB, 1e-7);
       assertEquals(-delta, distance, 1e-7);
 
       // Another sphere to sphere test
@@ -130,7 +129,7 @@ public class SimpleCollisionDetectorTest
          shapeA = shapeB;
          shapeB = tempShape;
 
-         Point3d tempLocation = locationA;
+         Point3D tempLocation = locationA;
          locationA = locationB;
          locationB = tempLocation;
 
@@ -140,9 +139,9 @@ public class SimpleCollisionDetectorTest
       assertTrue(shapeA == collideableObjectOne);
       assertTrue(shapeB == collideableObjectTwo);
 
-      JUnitTools.assertTuple3dEquals(new Vector3d(0.40561610125071507, -0.8619342151577695, -0.3042120759380363), normal, 1e-7);
-      JUnitTools.assertTuple3dEquals(new Vector3d(-0.1971919493746425, 0.41903289242111524, 0.14789396203098185), locationA, 1e-7);
-      JUnitTools.assertTuple3dEquals(new Vector3d(-0.20280805062535753, 0.43096710757888473, 0.15210603796901814), locationB, 1e-7);
+      EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(0.40561610125071507, -0.8619342151577695, -0.3042120759380363), normal, 1e-7);
+      EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(-0.1971919493746425, 0.41903289242111524, 0.14789396203098185), locationA, 1e-7);
+      EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(-0.20280805062535753, 0.43096710757888473, 0.15210603796901814), locationB, 1e-7);
       assertEquals(-0.013845853834199007, distance, 1e-7);
    }
 
@@ -198,9 +197,9 @@ public class SimpleCollisionDetectorTest
       CollisionShape shapeA = collision.getShapeA();
       CollisionShape shapeB = collision.getShapeB();
 
-      Point3d locationA = new Point3d();
-      Point3d locationB = new Point3d();
-      Vector3d normal = new Vector3d();
+      Point3D locationA = new Point3D();
+      Point3D locationB = new Point3D();
+      Vector3D normal = new Vector3D();
 
       double distance = collision.getDistance(0);
       collision.getWorldA(0, locationA);
@@ -215,7 +214,7 @@ public class SimpleCollisionDetectorTest
          shapeA = shapeB;
          shapeB = tempShape;
 
-         Point3d tempLocation = locationA;
+         Point3D tempLocation = locationA;
          locationA = locationB;
          locationB = tempLocation;
 
@@ -225,9 +224,9 @@ public class SimpleCollisionDetectorTest
       assertTrue(shapeA == collideableObjectOne);
       assertTrue(shapeB == collideableObjectTwo);
 
-      //      JUnitTools.assertTuple3dEquals(new Vector3d(-1.0, 0.0, 0.0), normal, 1e-7);
-      //      JUnitTools.assertTuple3dEquals(new Vector3d(0.49, 0.0, 0.0), locationA, 1e-7);
-      //      JUnitTools.assertTuple3dEquals(new Vector3d(0.5, 0.0, 0.0), locationB, 1e-7);
+      //      EuclidCoreTestTools.assertTuple3DEquals(new Vector3d(-1.0, 0.0, 0.0), normal, 1e-7);
+      //      EuclidCoreTestTools.assertTuple3DEquals(new Vector3d(0.49, 0.0, 0.0), locationA, 1e-7);
+      //      EuclidCoreTestTools.assertTuple3DEquals(new Vector3d(0.5, 0.0, 0.0), locationB, 1e-7);
       assertEquals(-delta, distance, 1e-7);
 
       // Another sphere to sphere test
@@ -258,7 +257,7 @@ public class SimpleCollisionDetectorTest
          shapeA = shapeB;
          shapeB = tempShape;
 
-         Point3d tempLocation = locationA;
+         Point3D tempLocation = locationA;
          locationA = locationB;
          locationB = tempLocation;
 
@@ -268,9 +267,9 @@ public class SimpleCollisionDetectorTest
       assertTrue(shapeA == collideableObjectOne);
       assertTrue(shapeB == collideableObjectTwo);
 
-      //      JUnitTools.assertTuple3dEquals(new Vector3d(0.40561610125071507, -0.8619342151577695, -0.3042120759380363), normal, 1e-7);
-      //      JUnitTools.assertTuple3dEquals(new Vector3d(-0.1971919493746425, 0.41903289242111524, 0.14789396203098185), locationA, 1e-7);
-      //      JUnitTools.assertTuple3dEquals(new Vector3d(-0.20280805062535753, 0.43096710757888473, 0.15210603796901814), locationB, 1e-7);
+      //      EuclidCoreTestTools.assertTuple3DEquals(new Vector3d(0.40561610125071507, -0.8619342151577695, -0.3042120759380363), normal, 1e-7);
+      //      EuclidCoreTestTools.assertTuple3DEquals(new Vector3d(-0.1971919493746425, 0.41903289242111524, 0.14789396203098185), locationA, 1e-7);
+      //      EuclidCoreTestTools.assertTuple3DEquals(new Vector3d(-0.20280805062535753, 0.43096710757888473, 0.15210603796901814), locationB, 1e-7);
       assertEquals(-0.25, distance, 1e-7);
    }
 

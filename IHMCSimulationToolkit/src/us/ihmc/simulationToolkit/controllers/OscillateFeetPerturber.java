@@ -2,8 +2,7 @@ package us.ihmc.simulationToolkit.controllers;
 
 import java.util.List;
 
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -129,12 +128,12 @@ public class OscillateFeetPerturber extends ModularRobotController
       rotationPhaseEuler.setZ(rotationPhaseEuler.getZ() + 2.0  * Math.PI * rotationFreqHzYawPitchRoll[0] * deltaT);
 
       
-      Vector3d nextTranslationToSlip = translationMagnitude.getVector3dCopy();
+      Vector3D nextTranslationToSlip = translationMagnitude.getVector3dCopy();
       nextTranslationToSlip.setX(nextTranslationToSlip.getX() * (2.0 * Math.PI * translationFreqHz[0] * Math.sin(translationPhase.getX()) * deltaT));
       nextTranslationToSlip.setY(nextTranslationToSlip.getY() * (2.0 * Math.PI * translationFreqHz[1] * Math.sin(translationPhase.getY()) * deltaT));
       nextTranslationToSlip.setZ(nextTranslationToSlip.getZ() * (2.0 * Math.PI * translationFreqHz[2] * Math.sin(translationPhase.getZ()) * deltaT));
       
-      Vector3d nextRotationToSlipEulerAngles = new Vector3d();
+      Vector3D nextRotationToSlipEulerAngles = new Vector3D();
       rotationMagnitude.getEulerAngles(nextRotationToSlipEulerAngles);
       nextRotationToSlipEulerAngles.setX(nextRotationToSlipEulerAngles.getX() * (2.0 * Math.PI * rotationFreqHzYawPitchRoll[2] * Math.sin(rotationPhaseEuler.getX()) * deltaT));
       nextRotationToSlipEulerAngles.setY(nextRotationToSlipEulerAngles.getY() * (2.0 * Math.PI * rotationFreqHzYawPitchRoll[1] * Math.sin(rotationPhaseEuler.getY()) * deltaT));

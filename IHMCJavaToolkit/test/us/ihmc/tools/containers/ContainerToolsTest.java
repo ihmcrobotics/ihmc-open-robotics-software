@@ -19,8 +19,7 @@ import java.util.Vector;
 
 import org.junit.Test;
 
-import us.ihmc.tools.containers.ContainerTools;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public class ContainerToolsTest
 {
@@ -72,6 +71,7 @@ public class ContainerToolsTest
 
       Comparator<Integer> comparator = new Comparator<Integer>()
       {
+         @Override
          public int compare(Integer o1, Integer o2)
          {
             if (o1.intValue() > o2.intValue())

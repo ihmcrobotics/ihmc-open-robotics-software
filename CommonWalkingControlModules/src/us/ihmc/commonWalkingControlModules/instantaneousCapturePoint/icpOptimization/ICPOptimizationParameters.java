@@ -104,12 +104,6 @@ public abstract class ICPOptimizationParameters
    public abstract boolean scaleUpcomingStepWeights();
 
    /**
-    * Enabling this boolean enables the use of CMP feedback for stabilization.
-    * Should almost always be set to true.
-    */
-   public abstract boolean useFeedback();
-
-   /**
     * Enabling this boolean enables the use of feedback regularization, found in {@link #getFeedbackRegularizationWeight()}.
     */
    public abstract boolean useFeedbackRegularization();
@@ -123,20 +117,6 @@ public abstract class ICPOptimizationParameters
     * Enabling this boolean enables the use of step adjustment regularization, found in {@link #getFootstepRegularizationWeight()}.
     */
    public abstract boolean useFootstepRegularization();
-
-   /**
-    * Enabling this boolean enables has the optimization increase the weight with respect to the previous amount of CMP feedback.
-    * Effectively causes the weight to be a nonlinear, convex weight, while maintaining its quadratic form in execution.
-    */
-   public abstract boolean useFeedbackWeightHardening();
-
-   /**
-    * This boolean determines whether the ICP setpoints remain smooth.
-    * Setting it false will cause the reference trajectories to always start from their nominal starting position, rather than what the
-    * ICP location was at the beginning of the state.
-    * Setting it true maintains smoothness, but can result in some poor reference trajectories if the adjustment was large enough.
-    */
-   public abstract boolean useICPFromBeginningOfState();
 
    /**
     * The minimum value to allow the footstep weight {@link #getFootstepWeight()} to be set to.
@@ -155,11 +135,6 @@ public abstract class ICPOptimizationParameters
     * This makes sure the problem maintains a "nice" form.
     */
    public abstract double getMinimumTimeRemaining();
-
-   /**
-    * The amount to increase the weight on CMP feedback by, used in {@link #useFeedbackWeightHardening()}.
-    */
-   public abstract double getFeedbackWeightHardeningMultiplier();
 
    /**
     * Maximum forward distance the CMP is allowed to exit the support polygon.
@@ -201,18 +176,39 @@ public abstract class ICPOptimizationParameters
    public abstract double getAdjustmentDeadband();
 
    /**
-    * This is the time to disable step adjustment.
-    * This is used to prevent there being step adjustment in the last portion of a step, when more change cannot be realized.
+    * Represents the amount of adjustment to define as big
     */
-   public abstract double getRemainingTimeToStopAdjusting();
-   
-   /**
-    * This method determines whether or not to use a discontinuous deadband.
-    * If set true, the value of the deadband is not subtracted out, as normally done.
-    */
-   public boolean useDiscontinuousDeadband()
+   public boolean useDifferentSplitRatioForBigAdjustment()
    {
-      return false;
+      return true;
+   }
+
+   /**
+    * Represents the amount of adjustment to define as big
+    */
+   public double getMagnitudeForBigAdjustment()
+   {
+      return 0.2;
+   }
+
+   /**
+    * Represents in percent of the current double support duration, how much time the transfer will spend before reaching the next entry CMP.
+    * The returned value should be between 0.0 and 1.0:
+    * <li> 0.0 is equivalent to spend the entire double support on the initial CMP (last entry CMP if using one CMP per support, last exit CMP otherwise), </li>
+    * <li> 1.0 is equivalent to spend the entire double support on the next entry CMP. </li>
+    * <p> A value close to 0.5 is preferable. </p>
+    */
+   public double getDoubleSupportSplitFractionForBigAdjustment()
+   {
+      return 0.5;
+   }
+
+   /**
+    * Represents the minimum time in transfer before reaching the next entry CMP.
+    */
+   public double getMinimumTimeOnInitialCMPForBigAdjustment()
+   {
+      return 0.15;
    }
 
    /**
@@ -254,5 +250,14 @@ public abstract class ICPOptimizationParameters
    public double getBackwardReachabilityLimit()
    {
       return -0.3;
+   }
+
+   /**
+    * Sets whether or not to use a warm start in the active set solver. This epxloits that the active set doesn't change often.
+    * @return Whether or not to use a warm start in the solver
+    */
+   public boolean useWarmStartInSolver()
+   {
+      return false;
    }
 }

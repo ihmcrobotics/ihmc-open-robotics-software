@@ -6,10 +6,10 @@ import java.io.PrintWriter;
 
 import javax.swing.BoxLayout;
 import javax.swing.JFrame;
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
 
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.exampleSimulations.skippy.SkippyRobot.RobotType;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
@@ -521,7 +521,7 @@ public class SkippyController implements RobotController
       /*
        * Ground reaction force and unit vector
        */
-      Vector3d tempReactionForce = new Vector3d();
+      Vector3D tempReactionForce = new Vector3D();
       robot.computeFootContactForce(tempReactionForce);
       reactionForce.set(tempReactionForce);
       reactionUnitVector.set(reactionForce);
@@ -532,7 +532,7 @@ public class SkippyController implements RobotController
       /*
        * Surface normal
        */
-      Vector3d tempSurfaceNormal = new Vector3d();
+      Vector3D tempSurfaceNormal = new Vector3D();
       robot.footGroundContactPoint.getSurfaceNormal(tempSurfaceNormal);
       surfaceNormal.set(tempSurfaceNormal);
       surfaceNormal.normalize();
@@ -544,9 +544,9 @@ public class SkippyController implements RobotController
    public void comAndComVelocity()
    {
 
-      Point3d tempCOMPosition = new Point3d();
-      Vector3d tempLinearMomentum = new Vector3d();
-      Vector3d tempAngularMomentum = new Vector3d();
+      Point3D tempCOMPosition = new Point3D();
+      Vector3D tempLinearMomentum = new Vector3D();
+      Vector3D tempAngularMomentum = new Vector3D();
       /*
        * CoM and CoM velocity in WorldFrame
        */
@@ -579,8 +579,8 @@ public class SkippyController implements RobotController
     */
    public void positionVectorFomFootToCom(YoFramePoint actualFootPosition)
    {
-      Vector3d tempFootToComPositionVector = new Vector3d();
-      Point3d footLocationInWorld = new Point3d();
+      Vector3D tempFootToComPositionVector = new Vector3D();
+      Point3D footLocationInWorld = new Point3D();
       footLocationInWorld.set(robot.computeFootLocation());
       com.get(tempFootToComPositionVector);
       footToComPositionVector.setVector(tempFootToComPositionVector);
@@ -741,11 +741,11 @@ public class SkippyController implements RobotController
       /*
        * angular vel : angle created w/ com to groundpoint against vertical
        */
-      Vector3d linearMomentum = new Vector3d();
+      Vector3D linearMomentum = new Vector3D();
       robot.computeLinearMomentum(linearMomentum);
 
       // 1: projection vector
-      Vector3d componentPerpendicular = new Vector3d(0, 1, -com.getY() / com.getZ());
+      Vector3D componentPerpendicular = new Vector3D(0, 1, -com.getY() / com.getZ());
       componentPerpendicular.normalize();
       double angleVel = componentPerpendicular.dot(linearMomentum) / componentPerpendicular.length();
       angleVel = angleVel / robotMass.getDoubleValue();
@@ -770,11 +770,11 @@ public class SkippyController implements RobotController
             + k3.getDoubleValue() * (hipDesired - hipAngle) + k4.getDoubleValue() * (0.0 - hipAngleVel));
    }
 
-   private Vector3d createVectorInDirectionOfHipJointAlongHip()
+   private Vector3D createVectorInDirectionOfHipJointAlongHip()
    {
-      Vector3d rootJointCoordinates = new Vector3d();
+      Vector3D rootJointCoordinates = new Vector3D();
       robot.getHipJointSkippy().getTranslationToWorld(rootJointCoordinates);
-      Vector3d hipEndPointCoordinates = new Vector3d();
+      Vector3D hipEndPointCoordinates = new Vector3D();
       robot.getGroundContactPoints().get(1).getPosition(hipEndPointCoordinates);
       rootJointCoordinates.sub(hipEndPointCoordinates);
       return rootJointCoordinates;
@@ -796,11 +796,11 @@ public class SkippyController implements RobotController
       /*
        * angular vel : angle created w/ com to groundpoint against vertical
        */
-      Vector3d linearMomentum = new Vector3d();
+      Vector3D linearMomentum = new Vector3D();
       robot.computeLinearMomentum(linearMomentum);
 
       // 1: projection vector
-      Vector3d componentPerpendicular = new Vector3d(1, 0, -com.getX() / com.getZ());
+      Vector3D componentPerpendicular = new Vector3D(1, 0, -com.getX() / com.getZ());
       componentPerpendicular.normalize();
       double angleVel = componentPerpendicular.dot(linearMomentum) / componentPerpendicular.length();
       angleVel = angleVel / robotMass.getDoubleValue();
@@ -837,11 +837,11 @@ public class SkippyController implements RobotController
 
    }
 
-   private Vector3d createVectorInDirectionOfShoulderJointAlongShoulder()
+   private Vector3D createVectorInDirectionOfShoulderJointAlongShoulder()
    {
-      Vector3d shoulderJointCoordinates = new Vector3d();
+      Vector3D shoulderJointCoordinates = new Vector3D();
       robot.getShoulderJoint().getTranslationToWorld(shoulderJointCoordinates);
-      Vector3d shoulderEndPointCoordinates = new Vector3d();
+      Vector3D shoulderEndPointCoordinates = new Vector3D();
       robot.getGroundContactPoints().get(2).getPosition(shoulderEndPointCoordinates);
       shoulderEndPointCoordinates.sub(shoulderJointCoordinates);
       return shoulderEndPointCoordinates;
@@ -876,8 +876,8 @@ public class SkippyController implements RobotController
        */
       double[] finale = new double[2];
 
-      Vector3d verticalVector = new Vector3d(0.0, 0.0, 1.0);
-      Vector3d floatVector = createVectorInDirectionOfHipJointAlongHip();
+      Vector3D verticalVector = new Vector3D(0.0, 0.0, 1.0);
+      Vector3D floatVector = createVectorInDirectionOfHipJointAlongHip();
       verticalVector.setX(0.0);
       floatVector.setX(0.0); // angle wrt yz plane only
 
@@ -923,15 +923,15 @@ public class SkippyController implements RobotController
    {
       double[] finale = new double[2];
 
-      Vector3d horizontalVector = new Vector3d(1.0, 0.0, 0.0);
-      Vector3d shoulderVector = createVectorInDirectionOfShoulderJointAlongShoulder();
+      Vector3D horizontalVector = new Vector3D(1.0, 0.0, 0.0);
+      Vector3D shoulderVector = createVectorInDirectionOfShoulderJointAlongShoulder();
       horizontalVector.setY(0);
       shoulderVector.setY(0);
 
       double cosineTheta = (horizontalVector.dot(shoulderVector) / (horizontalVector.length() * shoulderVector.length()));
       double angle = Math.abs(Math.acos(cosineTheta));
 
-      Vector3d shoulderJointPosition = new Vector3d();
+      Vector3D shoulderJointPosition = new Vector3D();
       joint.getTranslationToWorld(shoulderJointPosition);
 
       if (robot.getGroundContactPoints().get(2).getZ() < shoulderJointPosition.getZ())
@@ -965,7 +965,7 @@ public class SkippyController implements RobotController
    {
       // try to change position based on angular position wrt xyz coordinate
       // system
-      Matrix3d rotationMatrixForWorld = new Matrix3d();
+      RotationMatrix rotationMatrixForWorld = new RotationMatrix();
       joint.getRotationToWorld(rotationMatrixForWorld);
       double rotationToWorld = Math.asin((rotationMatrixForWorld.getM21()));
       // if(rotationMatrixForWorld.getM11()<0)

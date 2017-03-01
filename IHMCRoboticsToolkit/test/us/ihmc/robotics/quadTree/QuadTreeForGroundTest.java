@@ -9,14 +9,14 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Random;
 
-import javax.vecmath.Point3d;
-
 import org.junit.Test;
 
-import us.ihmc.robotics.random.RandomTools;
-import us.ihmc.tools.testing.JUnitTools;
-import us.ihmc.tools.continuousIntegration.IntegrationCategory;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.commons.RandomNumbers;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.IntegrationCategory;
+import us.ihmc.euclid.tools.EuclidCoreTestTools;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.robotics.random.RandomGeometry;
 
 public class QuadTreeForGroundTest
 {
@@ -27,7 +27,7 @@ public class QuadTreeForGroundTest
       QuadTreeForGroundParameters quadTreeParameters = new QuadTreeForGroundParameters(0.01, Double.MAX_VALUE, Double.MAX_VALUE, Integer.MAX_VALUE, 0.0, -1);
       QuadTreeForGround tree = new QuadTreeForGround(new Box(-1, -1, 1, 1), quadTreeParameters);
 
-      Collection<Point3d> points = new ArrayList<>();
+      Collection<Point3D> points = new ArrayList<>();
 
       //ensure 
       for (double x = -0.5; x < 0.5; x += quadTreeParameters.getResolution() * 2)
@@ -35,13 +35,13 @@ public class QuadTreeForGroundTest
          for (double y = -0.5; y < 0.5; y += quadTreeParameters.getResolution() * 2)
          {
             final double z = 0.1;
-            Point3d p = new Point3d(x, y, z);
+            Point3D p = new Point3D(x, y, z);
             points.add(p);
             tree.put(x, y, 0.1);
          }
       }
 
-      ArrayList<Point3d> retrievedPoints = new ArrayList<>();
+      ArrayList<Point3D> retrievedPoints = new ArrayList<>();
       tree.getStoredPoints(retrievedPoints);
       assertTrue(points.containsAll(retrievedPoints));
 
@@ -79,22 +79,22 @@ public class QuadTreeForGroundTest
       double minZ = -1.0;
       double maxZ = 1.0;
 
-      ArrayList<Point3d> points = generateRandomPoints(random, numberOfPoints, bounds, minZ, maxZ);
-      for (Point3d point : points)
+      ArrayList<Point3D> points = generateRandomPoints(random, numberOfPoints, bounds, minZ, maxZ);
+      for (Point3D point : points)
       {
          quadTree.put(point.getX(), point.getY(), point.getZ());
 
          Box boundsAroundPoint = new Box(point.getX() - resolution / 2.0, point.getY() - resolution / 2.0, point.getX() + resolution / 2.0, point.getY()
                + resolution / 2.0);
-         ArrayList<Point3d> pointsToCheck = new ArrayList<Point3d>();
+         ArrayList<Point3D> pointsToCheck = new ArrayList<Point3D>();
          quadTree.getAllPointsWithinBounds(boundsAroundPoint, pointsToCheck);
 
          assertTrue(isPointValueInList(point, pointsToCheck));
 
-         Point3d closestPoint = new Point3d();
+         Point3D closestPoint = new Point3D();
          quadTree.getClosestPoint(point.getX(), point.getY(), closestPoint);
          assertFalse(point == closestPoint);
-         JUnitTools.assertPoint3dEquals("point = " + point + ", closestPoint = " + closestPoint, point, closestPoint, 1e-7);
+         EuclidCoreTestTools.assertTuple3DEquals("point = " + point + ", closestPoint = " + closestPoint, point, closestPoint, 1e-7);
       }
    }
 
@@ -273,12 +273,12 @@ public class QuadTreeForGroundTest
       quadTree.put(x, y, z1);
       assertEquals(z1, quadTree.getHeightAtPoint(x, y), 1e-7);
       assertEquals(1, quadTree.getNumberOfQuads());
-      ArrayList<Point3d> allPoints = new ArrayList<Point3d>();
+      ArrayList<Point3D> allPoints = new ArrayList<Point3D>();
       quadTree.getStoredPoints(allPoints);
       assertEquals(1, allPoints.size());
 
-      Point3d firstPoint = allPoints.get(0);
-      JUnitTools.assertTuple3dEquals(new Point3d(x, y, z1), firstPoint, 1e-7);
+      Point3D firstPoint = allPoints.get(0);
+      EuclidCoreTestTools.assertTuple3DEquals(new Point3D(x, y, z1), firstPoint, 1e-7);
 
       double z2 = 1.01;
       quadTree.put(x + 0.001, y, z2);
@@ -287,8 +287,8 @@ public class QuadTreeForGroundTest
       allPoints.clear();
       quadTree.getStoredPoints(allPoints);
       assertEquals(2, allPoints.size());
-      Point3d firstPointAgain = allPoints.get(0);
-      JUnitTools.assertTuple3dEquals(new Point3d(x, y, z1), firstPointAgain, 1e-7);
+      Point3D firstPointAgain = allPoints.get(0);
+      EuclidCoreTestTools.assertTuple3DEquals(new Point3D(x, y, z1), firstPointAgain, 1e-7);
 
       double z3 = 1.02;
       quadTree.put(x, y, z3);
@@ -347,23 +347,23 @@ public class QuadTreeForGroundTest
       int numberOfPoints = 1000;
       QuadTreeForGround quadTree = generateRandomQuadTree(random, bounds, parameters, minZ, maxZ, numberOfPoints);
 
-      ArrayList<Point3d> points = new ArrayList<Point3d>();
+      ArrayList<Point3D> points = new ArrayList<Point3D>();
       quadTree.getStoredPoints(points);
 
       //    System.out.println("The quad tree has " + points.size() + " points.");
       int numberOfTests = 100;
-      Point3d closestPoint = new Point3d();
+      Point3D closestPoint = new Point3D();
 
       for (int i = 0; i < numberOfTests; i++)
       {
-         double xQuery = RandomTools.generateRandomDouble(random, bounds.minX, bounds.maxX);
-         double yQuery = RandomTools.generateRandomDouble(random, bounds.minY, bounds.maxY);
+         double xQuery = RandomNumbers.nextDouble(random, bounds.minX, bounds.maxX);
+         double yQuery = RandomNumbers.nextDouble(random, bounds.minY, bounds.maxY);
 
          quadTree.getClosestPoint(xQuery, yQuery, closestPoint);
 
          double distanceSquared = distanceXYSquared(xQuery, yQuery, closestPoint);
 
-         for (Point3d point : points)
+         for (Point3D point : points)
          {
             if ((point != closestPoint) && (distanceXYSquared(xQuery, yQuery, point) < distanceSquared))
             {
@@ -395,15 +395,15 @@ public class QuadTreeForGroundTest
       int numberOfPoints = 1000;
       QuadTreeForGround quadTree = generateRandomQuadTree(random, bounds, quadTreeParameters, minZ, maxZ, numberOfPoints);
 
-      ArrayList<Point3d> allPoints = new ArrayList<Point3d>();
+      ArrayList<Point3D> allPoints = new ArrayList<Point3D>();
       quadTree.getStoredPoints(allPoints);
 
-      ArrayList<Point3d> pointsToCheck = new ArrayList<Point3d>();
+      ArrayList<Point3D> pointsToCheck = new ArrayList<Point3D>();
       quadTree.getAllPointsWithinBounds(bounds, pointsToCheck);
 
       assertEquals(allPoints.size(), pointsToCheck.size());
 
-      for (Point3d point : allPoints)
+      for (Point3D point : allPoints)
       {
          Box boundsAroundPoint = new Box(point.getX() - resolution / 2.0, point.getY() - resolution / 2.0, point.getX() + resolution / 2.0, point.getY()
                + resolution / 2.0);
@@ -436,10 +436,10 @@ public class QuadTreeForGroundTest
       int numberOfPoints = 1000;
       QuadTreeForGround quadTree = generateRandomQuadTree(random, bounds, parameters, minZ, maxZ, numberOfPoints);
 
-      ArrayList<Point3d> allPoints = new ArrayList<Point3d>();
+      ArrayList<Point3D> allPoints = new ArrayList<Point3D>();
       quadTree.getStoredPoints(allPoints);
 
-      ArrayList<Point3d> pointsWithinDistance = new ArrayList<Point3d>();
+      ArrayList<Point3D> pointsWithinDistance = new ArrayList<Point3D>();
 
       // If distance is negative, return none of them.
       quadTree.getAllPointsWithinDistance(bounds.centreX, bounds.centreY, -0.01, pointsWithinDistance);
@@ -455,20 +455,20 @@ public class QuadTreeForGroundTest
       {
          pointsWithinDistance.clear();
 
-         double xQuery = RandomTools.generateRandomDouble(random, bounds.minX, bounds.maxX);
-         double yQuery = RandomTools.generateRandomDouble(random, bounds.minY, bounds.maxY);
-         double distance = RandomTools.generateRandomDouble(random, 0.0, 5.0);
+         double xQuery = RandomNumbers.nextDouble(random, bounds.minX, bounds.maxX);
+         double yQuery = RandomNumbers.nextDouble(random, bounds.minY, bounds.maxY);
+         double distance = RandomNumbers.nextDouble(random, 0.0, 5.0);
 
          quadTree.getAllPointsWithinDistance(xQuery, yQuery, distance, pointsWithinDistance);
 
-         ArrayList<Point3d> checkPointsWithinDistance = naiiveGetAllPointsWithinDistance(allPoints, xQuery, yQuery, distance);
+         ArrayList<Point3D> checkPointsWithinDistance = naiiveGetAllPointsWithinDistance(allPoints, xQuery, yQuery, distance);
 
          if (pointsWithinDistance.size() != checkPointsWithinDistance.size())
          {
             fail("pointsWithinDistance.size() != checkPointsWithinDistance.size()");
          }
 
-         for (Point3d pointWithinDistance : pointsWithinDistance)
+         for (Point3D pointWithinDistance : pointsWithinDistance)
          {
             if (!checkPointsWithinDistance.contains(pointWithinDistance))
             {
@@ -478,9 +478,9 @@ public class QuadTreeForGroundTest
       }
    }
 
-   private boolean isPointValueInList(Point3d pointToCheck, ArrayList<Point3d> pointList)
+   private boolean isPointValueInList(Point3D pointToCheck, ArrayList<Point3D> pointList)
    {
-      for (Point3d pointInList : pointList)
+      for (Point3D pointInList : pointList)
       {
          if (pointToCheck.distanceSquared(pointInList) < 1e-10)
             return true;
@@ -489,11 +489,11 @@ public class QuadTreeForGroundTest
       return false;
    }
 
-   private ArrayList<Point3d> naiiveGetAllPointsWithinDistance(ArrayList<Point3d> inputPoints, double x, double y, double distance)
+   private ArrayList<Point3D> naiiveGetAllPointsWithinDistance(ArrayList<Point3D> inputPoints, double x, double y, double distance)
    {
-      ArrayList<Point3d> pointsToReturn = new ArrayList<Point3d>();
+      ArrayList<Point3D> pointsToReturn = new ArrayList<Point3D>();
 
-      for (Point3d inputPoint : inputPoints)
+      for (Point3D inputPoint : inputPoints)
       {
          if (distanceXYSquared(x, y, inputPoint) < distance * distance)
          {
@@ -517,24 +517,24 @@ public class QuadTreeForGroundTest
    {
       for (int i = 0; i < numberOfPoints; i++)
       {
-         Point3d point = RandomTools.generateRandomPoint(random, bounds.minX, bounds.minY, minZ, bounds.maxX, bounds.maxY, maxZ);
+         Point3D point = RandomGeometry.nextPoint3D(random, bounds.minX, bounds.minY, minZ, bounds.maxX, bounds.maxY, maxZ);
          quadTree.put(point.getX(), point.getY(), point.getZ());
       }
    }
 
-   private ArrayList<Point3d> generateRandomPoints(Random random, int numberOfPoints, Box bounds, double minZ, double maxZ)
+   private ArrayList<Point3D> generateRandomPoints(Random random, int numberOfPoints, Box bounds, double minZ, double maxZ)
    {
-      ArrayList<Point3d> pointsToReturn = new ArrayList<Point3d>();
+      ArrayList<Point3D> pointsToReturn = new ArrayList<Point3D>();
       for (int i = 0; i < numberOfPoints; i++)
       {
-         Point3d point = RandomTools.generateRandomPoint(random, bounds.minX, bounds.minY, minZ, bounds.maxX, bounds.maxY, maxZ);
+         Point3D point = RandomGeometry.nextPoint3D(random, bounds.minX, bounds.minY, minZ, bounds.maxX, bounds.maxY, maxZ);
          pointsToReturn.add(point);
       }
 
       return pointsToReturn;
    }
 
-   private double distanceXYSquared(double x, double y, Point3d point)
+   private double distanceXYSquared(double x, double y, Point3D point)
    {
       if (point == null)
          return Double.POSITIVE_INFINITY;

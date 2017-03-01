@@ -1044,10 +1044,10 @@ public class IndividualRobotiqHandController implements RobotController
       if (!isStopped.getBooleanValue())
       {
          currentTrajectoryTime.set(yoTime.getDoubleValue() - startTrajectoryTime.getDoubleValue());
-         currentTrajectoryTime.set(MathTools.clipToMinMax(currentTrajectoryTime.getDoubleValue(), 0.0, trajectoryTime.getDoubleValue()));
+         currentTrajectoryTime.set(MathTools.clamp(currentTrajectoryTime.getDoubleValue(), 0.0, trajectoryTime.getDoubleValue()));
       }
       yoPolynomial.compute(currentTrajectoryTime.getDoubleValue());
-      double alpha = MathTools.clipToMinMax(yoPolynomial.getPosition(), 0.0, 1.0);
+      double alpha = MathTools.clamp(yoPolynomial.getPosition(), 0.0, 1.0);
 
       for (int i = 0; i < allFingerJoints.size(); i++)
       {

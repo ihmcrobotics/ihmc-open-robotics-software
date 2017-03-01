@@ -2,6 +2,9 @@ package us.ihmc.humanoidRobotics.footstep.footstepGenerator;
 
 import java.util.ArrayList;
 
+import us.ihmc.humanoidRobotics.footstep.Footstep;
+import us.ihmc.humanoidRobotics.footstep.footstepGenerator.overheadPath.OverheadPath;
+import us.ihmc.humanoidRobotics.footstep.footstepGenerator.overheadPath.StraightLineOverheadPath;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.AngleTools;
@@ -12,9 +15,6 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.humanoidRobotics.footstep.Footstep;
-import us.ihmc.humanoidRobotics.footstep.footstepGenerator.overheadPath.OverheadPath;
-import us.ihmc.humanoidRobotics.footstep.footstepGenerator.overheadPath.StraightLineOverheadPath;
 
 public class TranslationFootstepGenerator extends AbstractFootstepGenerator
 {
@@ -176,7 +176,7 @@ public class TranslationFootstepGenerator extends AbstractFootstepGenerator
       if (nLR == 0)
          stepWidth = nominalStepWidth;
       else
-         stepWidth = MathTools.clipToMinMax(initialDeltaFeetY - Math.abs(lrStepLength) * 2, minimumStepWidth, nominalStepWidth);
+         stepWidth = MathTools.clamp(initialDeltaFeetY - Math.abs(lrStepLength) * 2, minimumStepWidth, nominalStepWidth);
 
       boolean isSideStep = startWithNearSideFoot;
       FramePoint2d currentPathPosition = position;

@@ -6,15 +6,13 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-import javax.vecmath.Point2d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Point3f;
-
-import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.communication.net.NetStateListener;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataClearCommand;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataClearCommand.DepthDataTree;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataFilterParameters;
@@ -23,8 +21,9 @@ import us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataStateComm
 import us.ihmc.humanoidRobotics.communication.packets.sensing.MultisenseMocapExperimentPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.MultisenseTest;
 import us.ihmc.humanoidRobotics.kryo.PPSTimestampOffsetProvider;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -41,7 +40,7 @@ public class PointCloudDataReceiver extends Thread implements NetStateListener, 
    private final CollisionShapeTester collisionBoxNode;
 
    private final PointCloudWorldPacketGenerator pointCloudWorldPacketGenerator;
-   private final SideDependentList<ArrayList<Point2d>> contactPoints;
+   private final SideDependentList<ArrayList<Point2D>> contactPoints;
 
    private final ReentrantReadWriteLock readWriteLock = new ReentrantReadWriteLock();
    private final LinkedBlockingQueue<PointCloudData> dataQueue = new LinkedBlockingQueue<PointCloudData>();
@@ -99,7 +98,7 @@ public class PointCloudDataReceiver extends Thread implements NetStateListener, 
       for (RobotSide side : RobotSide.values)
       {
          ReferenceFrame soleFrame = fullRobotModel.getSoleFrame(side);
-         for (Point2d point : contactPoints.get(side))
+         for (Point2D point : contactPoints.get(side))
          {
             FramePoint footContactPoint = new FramePoint(soleFrame, point.getX(), point.getY(), 0.0);
 //            footContactPoint.scale(QuadTreePointUnderFeetScaling);
@@ -130,7 +129,7 @@ public class PointCloudDataReceiver extends Thread implements NetStateListener, 
                {
                   if(cloudSource == PointCloudSource.NEARSCAN)
                   {
-                     Point3d[] points = new Point3d[data.points.size()];
+                     Point3D[] points = new Point3D[data.points.size()];
                      points = data.points.toArray(points);
                      MultisenseMocapExperimentPacket packet = new MultisenseMocapExperimentPacket();
                      packet.setPointCloud(points, MultisenseTest.NEAR_SCAN_IN_POINT_CLOUD_DATA_RECEIVER);
@@ -185,7 +184,7 @@ public class PointCloudDataReceiver extends Thread implements NetStateListener, 
                      prevTimestamp = nextTimestamp;
                   }
 
-                  Point3d pointInWorld;
+                  Point3D pointInWorld;
                   if (!data.scanFrame.isWorldFrame())
                   {
                      data.scanFrame.getTransformToDesiredFrame(scanFrameToWorld, ReferenceFrame.getWorldFrame());
@@ -198,7 +197,7 @@ public class PointCloudDataReceiver extends Thread implements NetStateListener, 
                      pointInWorld = data.points.get(i);
                   }
 
-                  Point3d origin = new Point3d();
+                  Point3D origin = new Point3D();
                   data.lidarFrame.getTransformToWorldFrame().transform(origin);
                   if (collisionBoxNode == null || !collisionBoxNode.contains(pointInWorld) || depthDataFilter.getParameters().boundingBoxScale<=0)                  
                   {
@@ -241,7 +240,7 @@ public class PointCloudDataReceiver extends Thread implements NetStateListener, 
     * @param sources
     */
    @Override
-   public void receivedPointCloudData(ReferenceFrame scanFrame, ReferenceFrame lidarFrame, long[] timestamps, ArrayList<Point3d> points,
+   public void receivedPointCloudData(ReferenceFrame scanFrame, ReferenceFrame lidarFrame, long[] timestamps, ArrayList<Point3D> points,
          PointCloudSource... sources)
    {
       if (timestamps.length != points.size())
@@ -327,19 +326,19 @@ public class PointCloudDataReceiver extends Thread implements NetStateListener, 
 
    }
 
-   public List<Point3d> getQuadTreePoints()
+   public List<Point3D> getQuadTreePoints()
    {
       readWriteLock.readLock().lock();
-      ArrayList<Point3d> groundPoints = new ArrayList<>();
+      ArrayList<Point3D> groundPoints = new ArrayList<>();
       depthDataFilter.getQuadTree().getStoredPoints(groundPoints);
       readWriteLock.readLock().unlock();
       return groundPoints;
    }
 
-   public Point3f[] getDecayingPointCloudPoints()
+   public Point3D32[] getDecayingPointCloudPoints()
    {
       readWriteLock.readLock().lock();
-      Point3f[] points = depthDataFilter.getNearScan().getPoints3f();
+      Point3D32[] points = depthDataFilter.getNearScan().getPoints3f();
       readWriteLock.readLock().unlock();
       return points;
    }
@@ -364,9 +363,9 @@ public class PointCloudDataReceiver extends Thread implements NetStateListener, 
       private ReferenceFrame scanFrame;
       private ReferenceFrame lidarFrame;
       private long[] timestamps;
-      private ArrayList<Point3d> points;
+      private ArrayList<Point3D> points;
 
-      public PointCloudData(ReferenceFrame scanFrame, ReferenceFrame lidarFrame, long[] timestamps, ArrayList<Point3d> points, PointCloudSource[] sources)
+      public PointCloudData(ReferenceFrame scanFrame, ReferenceFrame lidarFrame, long[] timestamps, ArrayList<Point3D> points, PointCloudSource[] sources)
       {
          this.scanFrame = scanFrame;
          this.lidarFrame = lidarFrame;

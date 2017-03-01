@@ -2,37 +2,37 @@ package us.ihmc.graphicsDescription.appearance;
 
 import java.awt.Color;
 
-import javax.vecmath.Color3f;
+import us.ihmc.robotics.dataStructures.MutableColor;
 
 public class YoAppearanceRGBColor extends YoAppearanceTransparency
 {
-   private final Color3f color; 
+   private final MutableColor color; 
    private final Color awtColor;
    
-   public YoAppearanceRGBColor(Color3f color, double transparency)
+   public YoAppearanceRGBColor(MutableColor color, double transparency)
    {
-      this.color = new Color3f(color);
+      this.color = new MutableColor(color);
       awtColor = new Color(this.color.getX(), this.color.getY(), this.color.getZ(), (float) (1.0 - transparency));
       setTransparency(transparency);
    }
    
    public YoAppearanceRGBColor(Color color, double transparency)
    {
-      this.color = new Color3f(color);
+      this.color = new MutableColor(color);
       awtColor = new Color(color.getRed() / 255.0f, color.getGreen() / 255.0f, color.getBlue() / 255.0f, (float) (1.0 - transparency));
       setTransparency(transparency);
    }
    
    public YoAppearanceRGBColor(float red, float green, float blue, double transparency)
    {
-      color = new Color3f(red, green, blue);
+      color = new MutableColor(red, green, blue);
       awtColor = new Color(red, green, blue, (float) (1.0 - transparency));
       setTransparency(transparency);
    }
    
    public YoAppearanceRGBColor(double red, double green, double blue, double transparency)
    {
-      color = new Color3f((float) red, (float) green, (float) blue);
+      color = new MutableColor((float) red, (float) green, (float) blue);
       awtColor = new Color((float) red, (float) green, (float) blue, (float) (1.0 - transparency));
       setTransparency(transparency);
    }
@@ -53,7 +53,7 @@ public class YoAppearanceRGBColor extends YoAppearanceTransparency
    }
    
    @Override
-   public Color3f getColor()
+   public MutableColor getColor()
    {
       return color;
    }

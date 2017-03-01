@@ -7,13 +7,13 @@ import java.util.Random;
 
 import org.junit.Test;
 
+import us.ihmc.commons.RandomNumbers;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.random.RandomTools;
-import us.ihmc.tools.continuousIntegration.IntegrationCategory;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 @ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
 public class AlphaFilteredWrappingYoVariableTest
@@ -108,8 +108,8 @@ public class AlphaFilteredWrappingYoVariableTest
 	   alpha.set(0.999999);
 
 	   DoubleYoVariable positionVariable = new DoubleYoVariable("positionVariable", registry);
-	   double lowerLimit = RandomTools.generateRandomDouble(random, -100.0, 100.0);
-      double upperLimit = RandomTools.generateRandomDouble(random, -100.0, 100.0);
+	   double lowerLimit = RandomNumbers.nextDouble(random, -100.0, 100.0);
+      double upperLimit = RandomNumbers.nextDouble(random, -100.0, 100.0);
       if(upperLimit < lowerLimit)
       {
          double temp = lowerLimit;
@@ -118,12 +118,12 @@ public class AlphaFilteredWrappingYoVariableTest
       }
       
       AlphaFilteredWrappingYoVariable alphaFilteredWrappingYoVariable = new AlphaFilteredWrappingYoVariable("alphaFilteredWrappingYoVariable", "", registry, positionVariable, alpha, lowerLimit, upperLimit);
-	   positionVariable.set(RandomTools.generateRandomDouble(random, lowerLimit, upperLimit));
+	   positionVariable.set(RandomNumbers.nextDouble(random, lowerLimit, upperLimit));
 	   alphaFilteredWrappingYoVariable.update();
 	   
 	   for(int iteration = 0; iteration < 10000; iteration++)
 	   {
-	      positionVariable.set(RandomTools.generateRandomDouble(random, lowerLimit, upperLimit));
+	      positionVariable.set(RandomNumbers.nextDouble(random, lowerLimit, upperLimit));
 	      double lastError = getErrorConsideringWrap(alphaFilteredWrappingYoVariable.getDoubleValue(), positionVariable.getDoubleValue(),lowerLimit, upperLimit);
 	      for (int convergeAlphaCount = 0; convergeAlphaCount < 100; convergeAlphaCount++)
 	      {

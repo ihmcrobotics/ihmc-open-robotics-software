@@ -1,19 +1,20 @@
 package us.ihmc.robotics.screwTheory;
 
-import org.apache.commons.lang3.mutable.MutableBoolean;
-import org.apache.commons.lang3.mutable.MutableDouble;
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-
-import javax.vecmath.Vector3d;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.apache.commons.lang3.mutable.MutableBoolean;
+import org.apache.commons.lang3.mutable.MutableDouble;
+import org.ejml.data.DenseMatrix64F;
+import org.ejml.ops.CommonOps;
+
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class CenterOfMassJacobian
 {
@@ -23,8 +24,8 @@ public class CenterOfMassJacobian
 
    private final DenseMatrix64F jacobianMatrix;
    private final Twist tempUnitTwist = new Twist();
-   private final Vector3d tempJacobianColumn = new Vector3d();
-   private final Vector3d tempVector = new Vector3d();
+   private final Vector3D tempJacobianColumn = new Vector3D();
+   private final Vector3D tempVector = new Vector3D();
    private final DenseMatrix64F tempJointVelocitiesMatrix;
    private final DenseMatrix64F centerOfMassVelocityMatrix;
 

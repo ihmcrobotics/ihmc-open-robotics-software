@@ -5,11 +5,14 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFoot
 import us.ihmc.commonWalkingControlModules.desiredFootStep.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
+import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class TransferToFlamingoStanceState extends TransferState
 {
+   private final FootstepTiming footstepTiming = new FootstepTiming();
+
    public TransferToFlamingoStanceState(RobotSide transferToSide, WalkingMessageHandler walkingMessageHandler,
          HighLevelHumanoidControllerToolbox momentumBasedController, HighLevelControlManagerFactory managerFactory,
          WalkingFailureDetectionControlModule failureDetectionControlModule, YoVariableRegistry parentRegistry)
@@ -35,7 +38,8 @@ public class TransferToFlamingoStanceState extends TransferState
       // Transferring to execute a foot pose, hold current desired in upcoming support foot in case it slips
       pelvisOrientationManager.setToHoldCurrentDesiredInSupportFoot(transferToSide);
 
-      balanceManager.addFootstepToPlan(walkingMessageHandler.getFootstepAtCurrentLocation(transferToSide.getOppositeSide()));
+      footstepTiming.setTimings(Double.POSITIVE_INFINITY, walkingMessageHandler.getDefaultTransferTime());
+      balanceManager.addFootstepToPlan(walkingMessageHandler.getFootstepAtCurrentLocation(transferToSide.getOppositeSide()), footstepTiming);
       balanceManager.setICPPlanTransferToSide(transferToSide);
       double defaultSwingTime = Double.POSITIVE_INFINITY;
       double defaultTransferTime = walkingMessageHandler.getDefaultTransferTime();

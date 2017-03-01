@@ -2,15 +2,13 @@ package us.ihmc.exampleSimulations.skippy;
 
 import java.util.ArrayList;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.InverseDynamicsCalculator;
@@ -55,7 +53,7 @@ public class SkippyICPAndIDBasedController extends SimpleRobotController
       inverseDynamicsCalculator = new InverseDynamicsCalculator(twistCalculator, -skippy.getGravityZ());
 
       setupGraphics(graphicsListRegistry);
-      totalMass.set(skippy.computeCenterOfMass(new Point3d()));
+      totalMass.set(skippy.computeCenterOfMass(new Point3D()));
 
       kp = new DoubleYoVariable("kpTaskspace", registry);
       kp.set(0.5);
@@ -153,9 +151,9 @@ public class SkippyICPAndIDBasedController extends SimpleRobotController
          frameGraphics.update();
    }
 
-   private final Point3d tempCOMPosition = new Point3d();
-   private final Vector3d tempLinearMomentum = new Vector3d();
-   private final Vector3d tempAngularMomentum = new Vector3d();
+   private final Point3D tempCOMPosition = new Point3D();
+   private final Vector3D tempLinearMomentum = new Vector3D();
+   private final Vector3D tempAngularMomentum = new Vector3D();
 
    public void computeComAndICP(FramePoint comToPack, FrameVector comVelocityToPack, FramePoint icpToPack, FrameVector angularMomentumToPack)
    {

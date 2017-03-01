@@ -7,8 +7,9 @@ import org.bytedeco.javacpp.caffe.Caffe;
 import org.bytedeco.javacpp.caffe.FloatBlob;
 import org.bytedeco.javacpp.caffe.FloatBlobVector;
 import org.bytedeco.javacpp.caffe.FloatNet;
+
+import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.tools.io.printing.PrintTools;
-import us.ihmc.tools.time.Timer;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -168,7 +169,7 @@ public class ValveDetector
 
    public Pair<List<Rectangle>, HeatMap> detect(BufferedImage image)
    {
-      Timer timer = new Timer();
+      Stopwatch timer = new Stopwatch();
       timer.start();
 
       setCaffeMode(caffe_gpu);

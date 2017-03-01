@@ -3,14 +3,13 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.vecmath.Point2d;
-
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
@@ -461,7 +460,7 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
 
    private void addPredictedContactPointsToPolygon(Footstep footstep, FrameConvexPolygon2d convexPolygonToExtend)
    {
-      List<Point2d> predictedContactPoints = footstep.getPredictedContactPoints();
+      List<Point2D> predictedContactPoints = footstep.getPredictedContactPoints();
 
       if (predictedContactPoints != null && !predictedContactPoints.isEmpty())
       {
@@ -497,7 +496,7 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
          YoFramePoint previousExitCMP)
    {
       ReferenceFrame soleFrame = footstep.getSoleReferenceFrame();
-      List<Point2d> predictedContactPoints = footstep.getPredictedContactPoints();
+      List<Point2D> predictedContactPoints = footstep.getPredictedContactPoints();
       RobotSide robotSide = footstep.getRobotSide();
 
       if (predictedContactPoints != null)
@@ -565,7 +564,7 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
       if (useTwoCMPsPerSupport)
       {
          ReferenceFrame soleFrame = footstep.getSoleReferenceFrame();
-         List<Point2d> predictedContactPoints = footstep.getPredictedContactPoints();
+         List<Point2D> predictedContactPoints = footstep.getPredictedContactPoints();
          RobotSide robotSide = footstep.getRobotSide();
 
          if (predictedContactPoints != null)
@@ -650,7 +649,7 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
       // First constrain the computed CMP to the given min/max along the x-axis.
       FramePoint2d footSupportCentroid = footSupportPolygon.getCentroid();
       double cmpXOffsetFromCentroid = stepLengthToCMPOffsetFactor.getDoubleValue() * (centroidOfFootstepToConsider.getX() - footSupportCentroid.getX()) + cmpOffset.getX();
-      cmpXOffsetFromCentroid = MathTools.clipToMinMax(cmpXOffsetFromCentroid, minForwardCMPOffset, maxForwardCMPOffset);
+      cmpXOffsetFromCentroid = MathTools.clamp(cmpXOffsetFromCentroid, minForwardCMPOffset, maxForwardCMPOffset);
 
       cmpToPack.setIncludingFrame(footSupportCentroid);
       cmpToPack.add(cmpXOffsetFromCentroid, cmpOffset.getY());
@@ -691,7 +690,7 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
       upcomingSupport.getCentroid(tempCentroid);
       tempCentroid3d.setXYIncludingFrame(tempCentroid);
 
-      double chicken = MathTools.clipToMinMax(percentageChickenSupport.getDoubleValue(), 0.0, 1.0);
+      double chicken = MathTools.clamp(percentageChickenSupport.getDoubleValue(), 0.0, 1.0);
       if (chicken <= 0.5)
          entryCMPs.get(cmpIndex).interpolate(firstCMP, tempCentroid3d, chicken * 2.0);
       else
@@ -731,6 +730,6 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
 
    public void setCarefulFootholdPercentage(double percentage)
    {
-      percentageChickenSupport.set(MathTools.clipToMinMax(percentage, 0.0, 1.0));
+      percentageChickenSupport.set(MathTools.clamp(percentage, 0.0, 1.0));
    }
 }

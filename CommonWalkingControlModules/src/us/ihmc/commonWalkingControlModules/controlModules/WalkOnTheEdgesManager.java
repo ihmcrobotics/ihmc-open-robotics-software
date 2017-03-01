@@ -3,11 +3,10 @@ package us.ihmc.commonWalkingControlModules.controlModules;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.vecmath.Point2d;
-
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -106,6 +105,7 @@ public class WalkOnTheEdgesManager
       this.inPlaceWidth = walkingControllerParameters.getInPlaceWidth();
       this.footLength = walkingControllerParameters.getFootBackwardOffset() + walkingControllerParameters.getFootForwardOffset();
 
+      //TODO: extract param
       extraCoMMaxHeightWithToes.set(0.08);
 
       minStepLengthForToeOff.set(walkingControllerParameters.getMinStepLengthForToeOff());
@@ -244,7 +244,7 @@ public class WalkOnTheEdgesManager
       }
 
       ReferenceFrame footstepSoleFrame = nextFootstep.getSoleReferenceFrame();
-      List<Point2d> predictedContactPoints = nextFootstep.getPredictedContactPoints();
+      List<Point2D> predictedContactPoints = nextFootstep.getPredictedContactPoints();
       if (predictedContactPoints != null && !predictedContactPoints.isEmpty())
       {
          nextFootstepPolygon.setIncludingFrameAndUpdate(footstepSoleFrame, predictedContactPoints);
@@ -446,6 +446,9 @@ public class WalkOnTheEdgesManager
    {
       isDesiredECMPOKForToeOff.set(false);
       isDesiredICPOKForToeOff.set(false);
+
+      isRearAnklePitchHittingLimit.set(false);
+      isRearAnklePitchHittingLimitFilt.set(false);
 
       doToeOff.set(false);
    }

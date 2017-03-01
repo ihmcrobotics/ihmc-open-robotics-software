@@ -1,6 +1,6 @@
 package us.ihmc.jMonkeyEngineToolkit;
 
-import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 
 public interface GPULidarListener
 {

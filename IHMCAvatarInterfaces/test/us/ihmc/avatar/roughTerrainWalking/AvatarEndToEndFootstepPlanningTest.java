@@ -1,8 +1,14 @@
 package us.ihmc.avatar.roughTerrainWalking;
 
+import static org.junit.Assert.assertTrue;
+
+import java.io.IOException;
+import java.util.Arrays;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
@@ -12,13 +18,16 @@ import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.packets.PlanarRegionsListMessage;
 import us.ihmc.communication.util.NetworkPorts;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.footstepPlanning.polygonSnapping.PlanarRegionsListExamples;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidBehaviors.behaviors.behaviorServices.ConstantGoalDetectorBehaviorService;
 import us.ihmc.humanoidBehaviors.behaviors.goalLocation.GoalDetectorBehaviorService;
-import us.ihmc.humanoidBehaviors.behaviors.primitives.AtlasPrimitiveActions;
 import us.ihmc.humanoidBehaviors.behaviors.roughTerrain.AnytimePlannerStateMachineBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.roughTerrain.WalkOverTerrainStateMachineBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidBehaviors.dispatcher.BehaviorControlModeSubscriber;
 import us.ihmc.humanoidBehaviors.dispatcher.BehaviorDispatcher;
@@ -34,35 +43,17 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
-import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationconstructionset.util.environments.PlanarRegionsListDefinedEnvironment;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationTools;
-import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.tools.thread.ThreadTools;
-
-import javax.vecmath.Point2d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-import java.io.IOException;
-import java.sql.Ref;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
-
-import static org.junit.Assert.assertTrue;
 
 public abstract class AvatarEndToEndFootstepPlanningTest implements MultiRobotTestInterface
 {
@@ -180,7 +171,7 @@ public abstract class AvatarEndToEndFootstepPlanningTest implements MultiRobotTe
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 300000)
    public void testAnytimePlannerBehaviorOverRoughTerrain() throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
    {
@@ -193,7 +184,7 @@ public abstract class AvatarEndToEndFootstepPlanningTest implements MultiRobotTe
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
 
-      Point3d goalPoint = new Point3d(3.0, 0.0, 0.0);
+      Point3D goalPoint = new Point3D(3.0, 0.0, 0.0);
       GoalDetectorBehaviorService goalDetectorBehaviorService = new ConstantGoalDetectorBehaviorService(referenceFrames, goalPoint,
                                                                                                         communicationBridge);
       boolean createYoVariableServerForPlannerVisualizer = LOCAL_MODE;
@@ -223,19 +214,19 @@ public abstract class AvatarEndToEndFootstepPlanningTest implements MultiRobotTe
          assertTrue(success);
       }
 
-      Point2d planarGoalPoint = new Point2d(goalPoint.getX(), goalPoint.getY());
+      Point2D planarGoalPoint = new Point2D(goalPoint.getX(), goalPoint.getY());
       // TODO figure out a better assertion method, the anytime planner uses a threshold of 0.5
       assertBodyIsCloseToXYLocation(planarGoalPoint, 0.6);
    }
 
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 300000)
    public void testAnytimeBehaviorOverIncrementalTerrain() throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       PlanarRegionsList stairsUp = PlanarRegionsListExamples.generateStairCase();
-      PlanarRegionsList stairsDown = PlanarRegionsListExamples.generateStairCase(new Vector3d(3.8, 0.0, 0.0), new Vector3d(Math.PI, Math.PI, 0.0));
+      PlanarRegionsList stairsDown = PlanarRegionsListExamples.generateStairCase(new Vector3D(3.8, 0.0, 0.0), new Vector3D(Math.PI, Math.PI, 0.0));
       PlanarRegionsList completeStairCase = new PlanarRegionsList();
 
       for(int i = 0; i < stairsUp.getNumberOfPlanarRegions(); i++)
@@ -250,7 +241,7 @@ public abstract class AvatarEndToEndFootstepPlanningTest implements MultiRobotTe
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
 
-      Point3d goalPoint = new Point3d(4.0, 0.0, 0.0);
+      Point3D goalPoint = new Point3D(4.0, 0.0, 0.0);
       GoalDetectorBehaviorService goalDetectorBehaviorService = new ConstantGoalDetectorBehaviorService(referenceFrames, goalPoint,
                                                                                                         communicationBridge);
       boolean createYoVariableServerForPlannerVisualizer = LOCAL_MODE;
@@ -291,12 +282,12 @@ public abstract class AvatarEndToEndFootstepPlanningTest implements MultiRobotTe
          assertTrue(success);
       }
 
-      Point2d planarGoalPoint = new Point2d(goalPoint.getX(), goalPoint.getY());
+      Point2D planarGoalPoint = new Point2D(goalPoint.getX(), goalPoint.getY());
       // TODO figure out a better assertion method, the anytime planner uses a threshold of 0.5
       assertBodyIsCloseToXYLocation(planarGoalPoint, 0.6);
    }
 
-   private void assertBodyIsCloseToXYLocation(Point2d point, double threshold)
+   private void assertBodyIsCloseToXYLocation(Point2D point, double threshold)
    {
       referenceFrames.updateFrames();
       ReferenceFrame bodyFrame = referenceFrames.getABodyAttachedZUpFrame();

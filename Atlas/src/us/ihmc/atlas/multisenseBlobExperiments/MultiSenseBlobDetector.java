@@ -1,11 +1,11 @@
 package us.ihmc.atlas.multisenseBlobExperiments;
 
+import java.io.IOException;
+
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.atlas.multisenseMocapExperiments.MultisenseHeadOnAStickManualTestNetworkProcessor;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-
-import java.io.IOException;
 
 public class MultiSenseBlobDetector
 {

@@ -18,14 +18,14 @@
 
 package us.ihmc.sensorProcessing.bubo.clouds.detect.alg;
 
+import java.util.Stack;
+
 import org.ddogleg.fitting.modelset.DistanceFromModel;
 import org.ddogleg.fitting.modelset.ModelCodec;
 import org.ddogleg.fitting.modelset.ModelFitter;
 import org.ddogleg.fitting.modelset.ModelManager;
 
 import us.ihmc.sensorProcessing.bubo.clouds.detect.shape.CheckShapeParameters;
-
-import java.util.Stack;
 
 /**
  * Mathematically describes a shape, how to estimate the shape, how to compute the distance a point

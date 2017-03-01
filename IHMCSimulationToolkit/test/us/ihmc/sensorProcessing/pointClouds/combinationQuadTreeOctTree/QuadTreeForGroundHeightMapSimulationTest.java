@@ -6,12 +6,14 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.vecmath.Point2d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
 import org.junit.Test;
 
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.IntegrationCategory;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -22,7 +24,6 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.BoundingBox2d;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.shapes.Box3d;
 import us.ihmc.robotics.geometry.shapes.Plane3d;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -34,8 +35,6 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObject3D;
 import us.ihmc.simulationconstructionset.util.ground.RotatableBoxTerrainObject;
-import us.ihmc.tools.continuousIntegration.IntegrationCategory;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.thread.ThreadTools;
 
 public class QuadTreeForGroundHeightMapSimulationTest
@@ -76,7 +75,7 @@ public class QuadTreeForGroundHeightMapSimulationTest
      int maxNumberOfPoints = 2000000;
 
      QuadTreeForGroundReaderAndWriter quadTreeForGroundReaderAndWriter = new QuadTreeForGroundReaderAndWriter();
-     ArrayList<Point3d> points = quadTreeForGroundReaderAndWriter.readPointsFromFile(filename, skipPoints, maxNumberOfPoints, bounds, maxZ);
+     ArrayList<Point3D> points = quadTreeForGroundReaderAndWriter.readPointsFromFile(filename, skipPoints, maxNumberOfPoints, bounds, maxZ);
 
       int pointsPerBallUpdate = 10000;
       boolean drawPointsInBlue = false;
@@ -111,16 +110,16 @@ public class QuadTreeForGroundHeightMapSimulationTest
       double halfWidth = 0.5;
       double resolution = 0.1;
 
-      Point3d center = new Point3d(0.0, 0.0, 0.3);
-      Vector3d normal = new Vector3d(0.1, 0.2, 0.8);
+      Point3D center = new Point3D(0.0, 0.0, 0.3);
+      Vector3D normal = new Vector3D(0.1, 0.2, 0.8);
       testOnASlope(center, normal, halfWidth, resolution, visualizeAndKeepUp);
 
-      center = new Point3d(0.0, 0.0, 0.3);
-      normal = new Vector3d(1.0, 1.0, 1.0);
+      center = new Point3D(0.0, 0.0, 0.3);
+      normal = new Vector3D(1.0, 1.0, 1.0);
       testOnASlope(center, normal, halfWidth, resolution, visualizeAndKeepUp);
 
-      center = new Point3d(0.0, 0.0, 0.3);
-      normal = new Vector3d(-1.0, 1.0, 1.0);
+      center = new Point3D(0.0, 0.0, 0.3);
+      normal = new Vector3D(-1.0, 1.0, 1.0);
       testOnASlope(center, normal, halfWidth, resolution, visualizeAndKeepUp);
 
       if (visualizeAndKeepUp) ThreadTools.sleepForever();
@@ -135,11 +134,11 @@ public class QuadTreeForGroundHeightMapSimulationTest
       double halfWidth = 0.6;
       double resolution = 0.02;
 
-      Point3d center = new Point3d(0.0, 0.0, 0.3);
+      Point3D center = new Point3D(0.0, 0.0, 0.3);
       double stairSeparation = 0.2;
       double oneStairLandingHeight = 0.0;
 
-      Vector3d normal = new Vector3d(0.3, -0.3, 1.0);
+      Vector3D normal = new Vector3D(0.3, -0.3, 1.0);
       testOnAStaircase(center, normal, halfWidth, resolution, stairSeparation, oneStairLandingHeight, visualizeAndKeepUp);
 
 //    normal = new Vector3d(0.3, 0.3, 1.0);
@@ -185,7 +184,7 @@ public class QuadTreeForGroundHeightMapSimulationTest
       QuadTreeTestHelper testHelper = new QuadTreeTestHelper(boundingBox, (int) ((halfWidth/resolution) * (halfWidth/resolution)), visualizeAndKeepUp);      
       testHelper.setResolutionParameters(resolution, heightThreshold, maxMultiLevelZChangeToFilterNoise, maxNodes);
 
-      ArrayList<Point3d> points = testHelper.createAListOfPointsFromAGroundProfile(groundProfile, minX, minY, maxX, maxY, resolution);
+      ArrayList<Point3D> points = testHelper.createAListOfPointsFromAGroundProfile(groundProfile, minX, minY, maxX, maxY, resolution);
       int pointsPerBallUpdate = 1;
       
       boolean drawPointsInBlue = false;
@@ -198,13 +197,13 @@ public class QuadTreeForGroundHeightMapSimulationTest
    }
   
 
-   private QuadTreeTestHelper testOnAStaircase(Point3d center, Vector3d normal, double halfWidth, double resolution, double stairSeparation, double oneStairLandingHeight, boolean visualize)
+   private QuadTreeTestHelper testOnAStaircase(Point3D center, Vector3D normal, double halfWidth, double resolution, double stairSeparation, double oneStairLandingHeight, boolean visualize)
    {
       normal.normalize();
 
       BoundingBox2d boundingBox = new BoundingBox2d(center.getX() - halfWidth, center.getY() - halfWidth, center.getX() + halfWidth, center.getY() + halfWidth);
       Plane3d plane3d = new Plane3d(center, normal);
-      ArrayList<Point3d> points = generatePointsForStairs(plane3d, halfWidth, resolution, stairSeparation, oneStairLandingHeight);
+      ArrayList<Point3D> points = generatePointsForStairs(plane3d, halfWidth, resolution, stairSeparation, oneStairLandingHeight);
 
 //      Collections.shuffle(points);
       
@@ -215,7 +214,7 @@ public class QuadTreeForGroundHeightMapSimulationTest
       {
          testHelper.drawPoints(points, resolution/2.0, YoAppearance.Blue());
 
-         ArrayList<Point3d> allPointsInQuadTree = testHelper.getAllPointsInQuadTree();
+         ArrayList<Point3D> allPointsInQuadTree = testHelper.getAllPointsInQuadTree();
          testHelper. drawPoints(allPointsInQuadTree, resolution*0.6, YoAppearance.Chartreuse());
       }
 
@@ -226,19 +225,19 @@ public class QuadTreeForGroundHeightMapSimulationTest
       return testHelper;
    }
 
-   private QuadTreeTestHelper testOnASlope(Point3d center, Vector3d normal, double halfWidth, double resolution, boolean visualize)
+   private QuadTreeTestHelper testOnASlope(Point3D center, Vector3D normal, double halfWidth, double resolution, boolean visualize)
    {
       normal.normalize();
 
       BoundingBox2d boundingBox = new BoundingBox2d(center.getX() - halfWidth, center.getY() - halfWidth, center.getX() + halfWidth, center.getY() + halfWidth);
       Plane3d plane3d = new Plane3d(center, normal);
-      ArrayList<Point3d> points = generatePointsForSlope(plane3d, halfWidth, resolution);
+      ArrayList<Point3D> points = generatePointsForSlope(plane3d, halfWidth, resolution);
       
       int pointsPerBallUpdate = 1;
       return testOnAListOfPoints(points, pointsPerBallUpdate, boundingBox, resolution, visualize);
    }
 
-   private QuadTreeTestHelper testOnAListOfPoints(ArrayList<Point3d> points, int pointsPerBallUpdate, BoundingBox2d rangeOfPoints, double resolution, boolean visualize)
+   private QuadTreeTestHelper testOnAListOfPoints(ArrayList<Point3D> points, int pointsPerBallUpdate, BoundingBox2d rangeOfPoints, double resolution, boolean visualize)
    {
       double heightThreshold = 0.002;
       double quadTreeMaxMultiLevelZChangeToFilterNoise = 0.2;
@@ -256,41 +255,41 @@ public class QuadTreeForGroundHeightMapSimulationTest
    }
 
 
-   private static ArrayList<Point3d> generatePointsForStairs(Plane3d plane3d, double halfWidth, double stepSize, double stairSeparation,
+   private static ArrayList<Point3D> generatePointsForStairs(Plane3d plane3d, double halfWidth, double stepSize, double stairSeparation,
            double oneStairLandingHeight)
    {
-      ArrayList<Point3d> ret = generatePointsForSlope(plane3d, halfWidth, stepSize);
+      ArrayList<Point3D> ret = generatePointsForSlope(plane3d, halfWidth, stepSize);
       formStaircaseWithPointsOnAPlane(ret, stairSeparation, oneStairLandingHeight);
 
       return ret;
    }
 
-   private static ArrayList<Point3d> generatePointsForSlope(Plane3d plane3d, double halfWidth, double stepSize)
+   private static ArrayList<Point3D> generatePointsForSlope(Plane3d plane3d, double halfWidth, double stepSize)
    {
-      Point3d centerPoint = plane3d.getPointCopy();
+      Point3D centerPoint = plane3d.getPointCopy();
 
       double minX = centerPoint.getX() - halfWidth;
       double minY = centerPoint.getY() - halfWidth;
       double maxX = centerPoint.getX() + halfWidth;
       double maxY = centerPoint.getY() + halfWidth;
 
-      ArrayList<Point3d> points = new ArrayList<Point3d>();
+      ArrayList<Point3D> points = new ArrayList<Point3D>();
 
       for (double x = minX; x < maxX; x = x + stepSize)
       {
          for (double y = minY; y < maxY; y = y + stepSize)
          {
             double z = plane3d.getZOnPlane(x, y);
-            points.add(new Point3d(x, y, z));
+            points.add(new Point3D(x, y, z));
          }
       }
 
       return points;
    }
 
-   private static void formStaircaseWithPointsOnAPlane(ArrayList<Point3d> pointsList, double stairSeparation, double oneStairLandingHeight)
+   private static void formStaircaseWithPointsOnAPlane(ArrayList<Point3D> pointsList, double stairSeparation, double oneStairLandingHeight)
    {
-      for (Point3d point3d : pointsList)
+      for (Point3D point3d : pointsList)
       {
          double z = point3d.getZ();
 
@@ -360,9 +359,9 @@ public class QuadTreeForGroundHeightMapSimulationTest
          
       }
 
-      public ArrayList<Point3d> getAllPointsInQuadTree()
+      public ArrayList<Point3D> getAllPointsInQuadTree()
       {
-         ArrayList<Point3d> pointsToReturn = new ArrayList<Point3d>();
+         ArrayList<Point3D> pointsToReturn = new ArrayList<Point3D>();
          ((QuadTreeForGroundHeightMap) heightMap).getStoredPoints(pointsToReturn);
          return pointsToReturn;
          
@@ -387,7 +386,7 @@ public class QuadTreeForGroundHeightMapSimulationTest
       } 
         
       
-      public Graphics3DNode drawPoints(ArrayList<Point3d> points, double resolution, AppearanceDefinition appearance)
+      public Graphics3DNode drawPoints(ArrayList<Point3D> points, double resolution, AppearanceDefinition appearance)
       {
          return QuadTreeHeightMapVisualizer.drawPoints(scs, points, resolution, appearance);       
       }
@@ -419,13 +418,13 @@ public class QuadTreeForGroundHeightMapSimulationTest
          return null;     
       }
       
-      private void drawHeightOfOriginalPointsInPurple(ArrayList<Point3d> points, int pointsPerBallUpdate)
+      private void drawHeightOfOriginalPointsInPurple(ArrayList<Point3D> points, int pointsPerBallUpdate)
       {
          if (!visualize) return;
          
          int count = 0;
          Graphics3DObject staticLinkGraphics = new Graphics3DObject();
-         for (Point3d point : points)
+         for (Point3D point : points)
          {
             count ++;
             if (count >= pointsPerBallUpdate)
@@ -435,7 +434,7 @@ public class QuadTreeForGroundHeightMapSimulationTest
                double z = heightMap.getHeightAtPoint(point.getX(), point.getY());
 
                staticLinkGraphics.identity();
-               staticLinkGraphics.translate(new Vector3d(point.getX(), point.getY(), z + 0.001));
+               staticLinkGraphics.translate(new Vector3D(point.getX(), point.getY(), z + 0.001));
 
                double cubeSize = resolution * 0.35;
                staticLinkGraphics.addCube(cubeSize, cubeSize, cubeSize / 3.0, YoAppearance.Purple());
@@ -448,13 +447,13 @@ public class QuadTreeForGroundHeightMapSimulationTest
       {
          if (!visualize) return null;
          
-         Point2d centerPoint = new Point2d();
+         Point2D centerPoint = new Point2D();
          rangeOfPointsToTest.getCenterPointCopy(centerPoint);
-         List<Point3d> allPointsWithinArea = heightMap.getAllPointsWithinArea(centerPoint.getX(), centerPoint.getY(), 10.0, 10.0);
+         List<Point3D> allPointsWithinArea = heightMap.getAllPointsWithinArea(centerPoint.getX(), centerPoint.getY(), 10.0, 10.0);
          
          int count = 0;
          Graphics3DObject staticLinkGraphics = new Graphics3DObject();
-         for (Point3d point3d : allPointsWithinArea)
+         for (Point3D point3d : allPointsWithinArea)
          {
             count ++;
             if (count >= pointsPerBallUpdate)
@@ -463,7 +462,7 @@ public class QuadTreeForGroundHeightMapSimulationTest
 
                staticLinkGraphics.identity();
                double cubeSize = resolution * 0.5;
-               staticLinkGraphics.translate(new Vector3d(point3d.getX(), point3d.getY(), point3d.getZ() -cubeSize / 2.0 + 0.001));
+               staticLinkGraphics.translate(new Vector3D(point3d.getX(), point3d.getY(), point3d.getZ() -cubeSize / 2.0 + 0.001));
                staticLinkGraphics.addCube(cubeSize, cubeSize, cubeSize, appearance);
             }
          }
@@ -471,11 +470,11 @@ public class QuadTreeForGroundHeightMapSimulationTest
       }
 
 
-      public void assertPointsLieOnHeightMap(ArrayList<Point3d> points)
+      public void assertPointsLieOnHeightMap(ArrayList<Point3D> points)
       {
          if (DO_ASSERTS)
          {
-            for (Point3d point : points)
+            for (Point3D point : points)
             {
                double heightMapZ = heightMap.getHeightAtPoint(point.getX(), point.getY());
                assertEquals(point.getZ(), heightMapZ, 1e-7);
@@ -483,7 +482,7 @@ public class QuadTreeForGroundHeightMapSimulationTest
          }
       }
 
-      public ArrayList<Point3d> createAListOfPointsFromAGroundProfile(GroundProfile3D groundProfile, BoundingBox2d testingRange, double resolution)
+      public ArrayList<Point3D> createAListOfPointsFromAGroundProfile(GroundProfile3D groundProfile, BoundingBox2d testingRange, double resolution)
       {
          double minX = testingRange.getMinPoint().getX();
          double maxX = testingRange.getMaxPoint().getX();
@@ -493,16 +492,16 @@ public class QuadTreeForGroundHeightMapSimulationTest
          return createAListOfPointsFromAGroundProfile(groundProfile, minX, minY, maxX, maxY, resolution);
       }
 
-      public ArrayList<Point3d> createAListOfPointsFromAGroundProfile(GroundProfile3D groundProfile, double minX, double minY, double maxX, double maxY,
+      public ArrayList<Point3D> createAListOfPointsFromAGroundProfile(GroundProfile3D groundProfile, double minX, double minY, double maxX, double maxY,
               double resolution)
       {
-         ArrayList<Point3d> points = new ArrayList<Point3d>();
+         ArrayList<Point3D> points = new ArrayList<Point3D>();
          for (double x = minX; x < maxX; x = x + resolution)
          {
             for (double y = minY; y < maxY; y = y + resolution)
             {
                double z = groundProfile.getHeightMapIfAvailable().heightAt(x, y, 0.0);
-               points.add(new Point3d(x, y, z));
+               points.add(new Point3D(x, y, z));
             }
          }
 
@@ -510,7 +509,7 @@ public class QuadTreeForGroundHeightMapSimulationTest
       }
 
 
-      private void createHeightMapFromAListOfPoints(ArrayList<Point3d> points, boolean drawPointsInBlue, int pointsPerBallUpdate)
+      private void createHeightMapFromAListOfPoints(ArrayList<Point3D> points, boolean drawPointsInBlue, int pointsPerBallUpdate)
       {
          double minX = rangeOfPointsToTest.getMinPoint().getX();
          double maxX = rangeOfPointsToTest.getMaxPoint().getX();
@@ -524,7 +523,7 @@ public class QuadTreeForGroundHeightMapSimulationTest
          int pointsPerBall = 0;
          Graphics3DObject staticLinkGraphics = new Graphics3DObject();
 
-         for (Point3d point : points)
+         for (Point3D point : points)
          {
             queryPoint.set(point);
 
@@ -535,7 +534,7 @@ public class QuadTreeForGroundHeightMapSimulationTest
                if (drawPointsInBlue)
                {
                   staticLinkGraphics.identity();
-                  staticLinkGraphics.translate(new Vector3d(point.getX(), point.getY(), point.getZ() + 0.001));
+                  staticLinkGraphics.translate(new Vector3D(point.getX(), point.getY(), point.getZ() + 0.001));
                   double cubeSize = resolution * 0.35;
                   if (pointWasAdded) staticLinkGraphics.addCube(cubeSize, cubeSize, cubeSize / 3.0, YoAppearance.Blue());
                   else staticLinkGraphics.addCube(cubeSize, cubeSize, cubeSize / 3.0, YoAppearance.Red());
@@ -550,7 +549,7 @@ public class QuadTreeForGroundHeightMapSimulationTest
                   {
                      bagOfBalls.reset();
 
-                     for (Point3d checkPoint : points)
+                     for (Point3D checkPoint : points)
                      {
                         double z2 = heightMap.getHeightAtPoint(checkPoint.getX(), checkPoint.getY());
                         bagOfBalls.setBall(checkPoint.getX(), checkPoint.getY(), z2);
@@ -624,7 +623,7 @@ public class QuadTreeForGroundHeightMapSimulationTest
       RigidBodyTransform location = new RigidBodyTransform();
       location.setRotationYawAndZeroTranslation(Math.toRadians(yawDegrees));
 
-      location.setTranslation(new Vector3d(x, y, height / 2));
+      location.setTranslation(new Vector3D(x, y, height / 2));
       RotatableBoxTerrainObject newBox = new RotatableBoxTerrainObject(new Box3d(location, length, width, height), app);
       combinedTerrainObject.addTerrainObject(newBox);
    }

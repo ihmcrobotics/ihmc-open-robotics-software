@@ -1,7 +1,6 @@
 package us.ihmc.exampleSimulations.multilevelGround;
 
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
@@ -17,7 +16,7 @@ public class MultilevelGroundExampleSimulation
    {
       Robot robot = new Robot("block");
 
-      FloatingJoint rootJoint = new FloatingJoint("root", new Vector3d(), robot);
+      FloatingJoint rootJoint = new FloatingJoint("root", new Vector3D(), robot);
       Link link = new Link("block");
       link.setMass(1.0);
       link.setMomentOfInertia(0.1, 0.1, 0.1);
@@ -56,7 +55,7 @@ public class MultilevelGroundExampleSimulation
          }
 
          GroundContactPoint groundContactPoint = new GroundContactPoint("gc_" + i,
-                                                    new Vector3d(xSign * length / 2.0, ySign * width / 2.0, zSign * height / 2.0), robot);
+                                                    new Vector3D(xSign * length / 2.0, ySign * width / 2.0, zSign * height / 2.0), robot);
          rootJoint.addGroundContactPoint(groundContactPoint);
       }
 

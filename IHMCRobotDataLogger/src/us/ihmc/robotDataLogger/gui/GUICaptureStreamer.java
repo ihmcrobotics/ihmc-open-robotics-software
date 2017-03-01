@@ -19,11 +19,11 @@ import us.ihmc.codecs.generated.YUVPicture.YUVSubsamplingType;
 import us.ihmc.codecs.screenCapture.ScreenCapture;
 import us.ihmc.codecs.screenCapture.ScreenCaptureFactory;
 import us.ihmc.codecs.yuv.JPEGEncoder;
+import us.ihmc.commons.Conversions;
 import us.ihmc.multicastLogDataProtocol.LogDataProtocolSettings;
 import us.ihmc.multicastLogDataProtocol.LogUtils;
 import us.ihmc.multicastLogDataProtocol.MultiClientStreamingDataTCPServer;
 import us.ihmc.robotDataLogger.LogDataHeader;
-import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.tools.thread.ThreadTools;
 
 public class GUICaptureStreamer
@@ -68,7 +68,7 @@ public class GUICaptureStreamer
       {
          future.cancel(false);
       }
-      scheduler.scheduleAtFixedRate(captureRunner, 10, TimeTools.nano / fps, TimeUnit.NANOSECONDS);
+      scheduler.scheduleAtFixedRate(captureRunner, 10, Conversions.nano / fps, TimeUnit.NANOSECONDS);
       broadcast.start();
       server.start();
    }

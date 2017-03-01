@@ -24,13 +24,13 @@ public class CapturePointTools
 
    /**
     * Compute the constant CMP locations and store them in constantCMPsToPack.
-    * 
+    *
     * @param constantCMPsToPack List that will be packed with the constant CMP locations
     * @param footstepList List containing the footsteps
     * @param firstFootstepIndex Integer describing the index of the first footstep to consider when laying out the CMP's
     * @param lastFootstepIndex Integer describing the index of the last footstep to consider when laying out the CMP's
-    * @param startStanding If true, the first constant CMP will be between the 2 first footsteps, else it will at the first footstep. 
-    * @param endStanding If true, the last constant CMP will be between the 2 last footsteps, else it will at the last footstep. 
+    * @param startStanding If true, the first constant CMP will be between the 2 first footsteps, else it will at the first footstep.
+    * @param endStanding If true, the last constant CMP will be between the 2 last footsteps, else it will at the last footstep.
     */
    public static void computeConstantCMPs(List<YoFramePoint> constantCMPsToPack, List<FramePoint> footstepList, int firstFootstepIndex, int lastFootstepIndex,
                                           boolean startStanding, boolean endStanding)
@@ -60,7 +60,7 @@ public class CapturePointTools
 
    /**
     * Put the constant CMP's on the footsteps.
-    * 
+    *
     * @param constantCMPsToPack List that will be packed with the constant CMP locations
     * @param footstepList List containing the footsteps
     * @param firstFootstepIndex Integer describing the index of the first footstep to consider when laying out the CMP's
@@ -308,6 +308,15 @@ public class CapturePointTools
          double swingTime = swingTimes.get(i).getDoubleValue();
          double previousTransferTime = transferTimes.get(i).getDoubleValue();
          double nextTransferTime = transferTimes.get(i + 1).getDoubleValue();
+
+         if (Double.isNaN(swingTime))
+         {
+            nextEntryCornerPoint = entryCMPs.get(i);
+            exitCornerPointsToPack.get(i).setToNaN();
+            entryCornerPointsToPack.get(i).setToNaN();
+            continue;
+         }
+
          double timeSpentOnEntryCMP = swingTime * swingSplitFraction + previousTransferTime * (1.0 - transferSplitFraction);
          double timeSpentOnExitCMP = swingTime * (1.0 - swingSplitFraction) + nextTransferTime * transferSplitFraction;
          double entryExponentialTerm = Math.exp(-omega0 * timeSpentOnEntryCMP);
@@ -327,7 +336,7 @@ public class CapturePointTools
 
    /**
     * Given a desired capturePoint location and an initial position of the capture point,
-    * compute the constant CMP that will drive the capture point from the 
+    * compute the constant CMP that will drive the capture point from the
     * initial position to the final position.
     * @param cmpToPack
     * @param finalDesiredCapturePoint
@@ -344,7 +353,7 @@ public class CapturePointTools
    }
 
    /**
-    * Compute the desired capture point position at a given time. 
+    * Compute the desired capture point position at a given time.
     * x<sup>ICP<sub>des</sub></sup> = (e<sup>&omega;0 t</sup>) x<sup>ICP<sub>0</sub></sup> + (1-e<sup>&omega;0 t</sup>)x<sup>CMP<sub>0</sub></sup>
     * @param omega0 the natural frequency &omega; = &radic;<span style="text-decoration:overline;">&nbsp; g / z0&nbsp;</span> of the biped.
     * @param time
@@ -384,7 +393,7 @@ public class CapturePointTools
    /**
     * Compute the desired capture point position at a given time.
     * x<sup>ICP<sub>des</sub></sup> = (e<sup>&omega;0 t</sup>) x<sup>ICP<sub>0</sub></sup> + (1-e<sup>&omega;0 t</sup>)x<sup>CMP<sub>0</sub></sup>
-    * 
+    *
     * @param omega0 the natural frequency &omega; = &radic;<span style="text-decoration:overline;">&nbsp; g / z0&nbsp;</span> of the biped.
     * @param time
     * @param initialCapturePoint
@@ -401,9 +410,9 @@ public class CapturePointTools
    }
 
    /**
-    * Compute the desired capture point velocity at a given time. 
+    * Compute the desired capture point velocity at a given time.
     * ICPv_d = w * e^{w*t} * ICP0 - p0 * w * e^{w*t}
-    * 
+    *
     * @param omega0 the natural frequency &omega; = &radic;<span style="text-decoration:overline;">&nbsp; g / z0&nbsp;</span> of the biped.
     * @param time
     * @param initialCapturePoint
@@ -422,7 +431,7 @@ public class CapturePointTools
    /**
     * Compute the desired capture point velocity at a given time.
     * ICPv_d = w * * e^{w*t} * ICP0 - p0 * w * e^{w*t}
-    * 
+    *
     * @param omega0 the natural frequency &omega; = &radic;<span style="text-decoration:overline;">&nbsp; g / z0&nbsp;</span> of the biped.
     * @param time
     * @param initialCapturePoint
@@ -443,7 +452,7 @@ public class CapturePointTools
    /**
     * Compute the desired capture point velocity at a given time.
     * ICPv_d = w * * e^{w*t} * ICP0 - p0 * w * e^{w*t}
-    * 
+    *
     * @param omega0 the natural frequency &omega; = &radic;<span style="text-decoration:overline;">&nbsp; g / z0&nbsp;</span> of the biped.
     * @param time
     * @param initialCapturePoint
@@ -462,7 +471,7 @@ public class CapturePointTools
    /**
     * Compute the desired capture point acceleration given the desired capture
     * point velocity
-    * 
+    *
     * @param omega0 the natural frequency &omega; = &radic;<span style="text-decoration:overline;">&nbsp; g / z0&nbsp;</span> of the biped.
     * @param desiredCapturePointVelocity
     * @param desiredCapturePointAccelerationToPack
@@ -477,7 +486,7 @@ public class CapturePointTools
    /**
     * Compute the desired capture point velocity at a given time.
     * ICPv_d = w^2 * e^{w*t} * ICP0 - p0 * w^2 * e^{w*t}
-    * 
+    *
     * @param omega0 the natural frequency &omega; = &radic;<span style="text-decoration:overline;">&nbsp; g / z0&nbsp;</span> of the biped.
     * @param time
     * @param initialCapturePoint
@@ -496,7 +505,7 @@ public class CapturePointTools
    /**
     * Compute the desired capture point velocity at a given time.
     * ICPv_d = w^2 * e^{w*t} * ICP0 - p0 * w^2 * e^{w*t}
-    * 
+    *
     * @param omega0 the natural frequency &omega; = &radic;<span style="text-decoration:overline;">&nbsp; g / z0&nbsp;</span> of the biped.
     * @param time
     * @param initialCapturePoint
@@ -515,7 +524,7 @@ public class CapturePointTools
    /**
     * Compute the desired capture point velocity at a given time.
     * ICPv_d = w^2 * e^{w*t} * ICP0 - p0 * w^2 * e^{w*t}
-    * 
+    *
     * @param omega0 the natural frequency &omega; = &radic;<span style="text-decoration:overline;">&nbsp; g / z0&nbsp;</span> of the biped.
     * @param time
     * @param initialCapturePoint
@@ -534,7 +543,7 @@ public class CapturePointTools
    /**
     * Computes the desired centroidal momentum pivot by,
     * CMP_{d} = ICP_{d} - \dot{ICP}_{d}/omega0
-    * 
+    *
     * @param desiredCapturePointPosition
     * @param desiredCapturePointVelocity
     * @param omega0 the natural frequency &omega; = &radic;<span style="text-decoration:overline;">&nbsp; g / z0&nbsp;</span> of the biped.
@@ -549,7 +558,7 @@ public class CapturePointTools
    /**
     * Computes the desired centroidal momentum pivot velocity by,
     * \dot{CMP}_{d} = \dot{ICP}_{d} - \ddot{ICP}_{d}/omega0
-    * 
+    *
     * @param desiredCapturePointVelocity
     * @param desiredCapturePointAcceleration
     * @param omega0 the natural frequency &omega; = &radic;<span style="text-decoration:overline;">&nbsp; g / z0&nbsp;</span> of the biped.
@@ -564,7 +573,7 @@ public class CapturePointTools
    /**
     * Computes the desired centroidal momentum pivot by,
     * CMP_{d} = ICP_{d} - \dot{ICP}_{d}/omega0
-    * 
+    *
     * @param desiredCapturePointPosition
     * @param desiredCapturePointVelocity
     * @param omega0
@@ -579,7 +588,7 @@ public class CapturePointTools
    /**
     * Computes the desired centroidal momentum pivot by,
     * CMP_{d} = ICP_{d} - \dot{ICP}_{d}/omega0
-    * 
+    *
     * @param desiredCapturePointPosition
     * @param desiredCapturePointVelocity
     * @param omega0 the natural frequency &omega; = &radic;<span style="text-decoration:overline;">&nbsp; g / z0&nbsp;</span> of the biped.
@@ -594,7 +603,7 @@ public class CapturePointTools
    /**
     * Computes the desired centroidal momentum pivot by,
     * CMP_{d} = ICP_{d} - \dot{ICP}_{d}/omega0
-    * 
+    *
     * @param desiredCapturePointPosition
     * @param desiredCapturePointVelocity
     * @param omega0 the natural frequency &omega; = &radic;<span style="text-decoration:overline;">&nbsp; g / z0&nbsp;</span> of the biped.
@@ -607,9 +616,9 @@ public class CapturePointTools
    }
 
    /**
-    * Compute the distance along the capture point guide line from the 
+    * Compute the distance along the capture point guide line from the
     * current capture point position to the desired capture point position.
-    * 
+    *
     * @param currentCapturePointPosition
     * @param desiredCapturePointPosition
     * @param desiredCapturePointVelocity
@@ -641,9 +650,9 @@ public class CapturePointTools
    }
 
    /**
-    * Compute the distance along the capture point guide line from the 
+    * Compute the distance along the capture point guide line from the
     * current capture point position to the desired capture point position.
-    * 
+    *
     * @param currentCapturePointPosition
     * @param desiredCapturePointPosition
     * @param desiredCapturePointVelocity
@@ -675,10 +684,10 @@ public class CapturePointTools
    }
 
    /**
-    * Given a capture point trajectory line and the actual 
-    * capture point position, project the current capture point 
+    * Given a capture point trajectory line and the actual
+    * capture point position, project the current capture point
     * onto the capture point trajectory line.
-    * 
+    *
     * @param actualICP
     * @param capturePointTrajectoryLine
     * @param projectedCapturePoint
@@ -693,7 +702,7 @@ public class CapturePointTools
    /**
     * Compute the capture point position at a given time.
     * x<sup>ICP<sub>des</sub></sup> = (e<sup>&omega;0 t</sup>) x<sup>ICP<sub>0</sub></sup> + (1-e<sup>&omega;0 t</sup>)x<sup>CMP<sub>0</sub></sup>
-    * 
+    *
     * @param omega0 the natural frequency &omega; = &radic;<span style="text-decoration:overline;">&nbsp; g / z0&nbsp;</span> of the biped.
     * @param time
     * @param initialCapturePoint

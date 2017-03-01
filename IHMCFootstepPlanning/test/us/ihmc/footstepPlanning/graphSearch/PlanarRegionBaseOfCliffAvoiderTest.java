@@ -1,25 +1,22 @@
 package us.ihmc.footstepPlanning.graphSearch;
 
-import static org.junit.Assert.*;
-
-import javax.vecmath.Point3d;
+import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
-import us.ihmc.footstepPlanning.polygonWiggling.PolygonWiggler;
-import us.ihmc.footstepPlanning.polygonWiggling.PolygonWigglingTest;
+import us.ihmc.commons.MutationTestFacilitator;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.tools.testing.MutationTestingTools;
 import us.ihmc.tools.thread.ThreadTools;
 
 public class PlanarRegionBaseOfCliffAvoiderTest
@@ -143,7 +140,7 @@ public class PlanarRegionBaseOfCliffAvoiderTest
 
       if ((x > 1.0 - minimumDistanceFromCliffBottom) && (x < 1.0 - 0.1 - 1e-6) && (Math.abs(y) < 0.5-1e-6)) // Close to first cliff
       {
-         Point3d solePosition = node.getSolePosition();
+         Point3D solePosition = node.getSolePosition();
 
          if (doAsserts)
             assertEquals("x = " + x + ", y = " + y, 1.0 - minimumDistanceFromCliffBottom, solePosition.getX(), 1e-7);
@@ -152,7 +149,7 @@ public class PlanarRegionBaseOfCliffAvoiderTest
       
       if ((y > -0.5 - minimumDistanceFromCliffBottom) && (y < -0.5 - 0.1 - 1e-6) && (Math.abs(x - 1.5) < 0.5-1e-6)) // Close to left side cliff
       {
-         Point3d solePosition = node.getSolePosition();
+         Point3D solePosition = node.getSolePosition();
 
          if (doAsserts)
             assertEquals("x = " + x + ", y = " + y, -0.5 - minimumDistanceFromCliffBottom, solePosition.getY(), 1e-7);
@@ -161,7 +158,7 @@ public class PlanarRegionBaseOfCliffAvoiderTest
       
       if ((y < 0.5 + minimumDistanceFromCliffBottom) && (y > 0.5 + 0.1 + 1e-6) && (Math.abs(x - 1.5) < 0.5-1e-6)) // Close to right side cliff
       {
-         Point3d solePosition = node.getSolePosition();
+         Point3D solePosition = node.getSolePosition();
 
          if (doAsserts)
             assertEquals("x = " + x + ", y = " + y, 0.5 + minimumDistanceFromCliffBottom, solePosition.getY(), 1e-7);
@@ -176,8 +173,6 @@ public class PlanarRegionBaseOfCliffAvoiderTest
 
    public static void main(String[] args)
    {
-      String targetTests = PlanarRegionBaseOfCliffAvoiderTest.class.getName();
-      String targetClassesInSamePackage = PlanarRegionBaseOfCliffAvoider.class.getName();
-      MutationTestingTools.doPITMutationTestAndOpenResult(targetTests, targetClassesInSamePackage);
+      MutationTestFacilitator.facilitateMutationTestForClass(PlanarRegionBaseOfCliffAvoider.class, PlanarRegionBaseOfCliffAvoiderTest.class);
    }
 }

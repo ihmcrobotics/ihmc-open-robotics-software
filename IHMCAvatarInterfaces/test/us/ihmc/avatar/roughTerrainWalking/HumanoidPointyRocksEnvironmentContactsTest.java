@@ -4,10 +4,6 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -18,6 +14,11 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.ExploreFootPolygonState.ExplorationMethod;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.IntegrationCategory;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.TrajectoryPoint1DMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.OneDoFJointTrajectoryMessage;
@@ -37,14 +38,12 @@ import us.ihmc.simulationconstructionset.util.environments.PointyRocksWorld;
 import us.ihmc.simulationconstructionset.util.environments.PointyRocksWorld.PointyRocksType;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.tools.continuousIntegration.IntegrationCategory;
 import us.ihmc.tools.thread.ThreadTools;
 
 public abstract class HumanoidPointyRocksEnvironmentContactsTest implements MultiRobotTestInterface
 {
    private SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
-   private OffsetAndYawRobotInitialSetup location = new OffsetAndYawRobotInitialSetup(new Vector3d(0.0, 0.0, 0.0), 0.0);
+   private OffsetAndYawRobotInitialSetup location = new OffsetAndYawRobotInitialSetup(new Vector3D(0.0, 0.0, 0.0), 0.0);
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
    private BooleanYoVariable doFootExplorationInTransferToStanding;
@@ -73,8 +72,8 @@ public abstract class HumanoidPointyRocksEnvironmentContactsTest implements Mult
       PointyRocksWorld world = new PointyRocksWorld(PointyRocksType.LINES, 6);
       setupTest(world, true);
 
-      Point3d cameraFix = new Point3d();
-      Point3d cameraPosition = new Point3d();
+      Point3D cameraFix = new Point3D();
+      Point3D cameraPosition = new Point3D();
       world.setupCamera(cameraFix, cameraPosition);
       drcSimulationTestHelper.setupCameraForUnitTest(cameraFix, cameraPosition);
 
@@ -123,10 +122,10 @@ public abstract class HumanoidPointyRocksEnvironmentContactsTest implements Mult
          FootstepDataListMessage message = new FootstepDataListMessage(swingTime, transferTime);
          FootstepDataMessage footstepData = new FootstepDataMessage();
 
-         Point3d position = stepLocations.get(i).getPointCopy();
+         Point3D position = stepLocations.get(i).getPointCopy();
          RobotSide robotSide = position.getY() > 0.0 ? RobotSide.LEFT : RobotSide.RIGHT;
          footstepData.setLocation(position);
-         footstepData.setOrientation(new Quat4d(0.0, 0.0, 0.0, 1.0));
+         footstepData.setOrientation(new Quaternion(0.0, 0.0, 0.0, 1.0));
          footstepData.setRobotSide(robotSide);
          footstepData.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
          message.add(footstepData);
@@ -147,8 +146,8 @@ public abstract class HumanoidPointyRocksEnvironmentContactsTest implements Mult
       PointyRocksWorld world = new PointyRocksWorld(PointyRocksType.POINT, 0);
       setupTest(world, false);
 
-      Point3d cameraFix = new Point3d();
-      Point3d cameraPosition = new Point3d();
+      Point3D cameraFix = new Point3D();
+      Point3D cameraPosition = new Point3D();
       world.setupCamera(cameraFix, cameraPosition);
       drcSimulationTestHelper.setupCameraForUnitTest(cameraFix, cameraPosition);
 
@@ -197,10 +196,10 @@ public abstract class HumanoidPointyRocksEnvironmentContactsTest implements Mult
          FootstepDataListMessage message = new FootstepDataListMessage(swingTime, transferTime);
          FootstepDataMessage footstepData = new FootstepDataMessage();
 
-         Point3d position = stepLocations.get(i).getPointCopy();
+         Point3D position = stepLocations.get(i).getPointCopy();
          RobotSide robotSide = position.getY() > 0.0 ? RobotSide.LEFT : RobotSide.RIGHT;
          footstepData.setLocation(position);
-         footstepData.setOrientation(new Quat4d(0.0, 0.0, 0.0, 1.0));
+         footstepData.setOrientation(new Quaternion(0.0, 0.0, 0.0, 1.0));
          footstepData.setRobotSide(robotSide);
          footstepData.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
          message.add(footstepData);

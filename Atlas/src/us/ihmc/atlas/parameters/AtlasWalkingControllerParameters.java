@@ -2,9 +2,6 @@ package us.ihmc.atlas.parameters;
 
 import java.util.LinkedHashMap;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Vector3d;
-
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import us.ihmc.atlas.AtlasJointMap;
@@ -17,13 +14,15 @@ import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootSE3Gains;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoPDGains;
 import us.ihmc.robotics.controllers.YoPIDGains;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.controllers.YoSymmetricSE3PIDGains;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
@@ -94,15 +93,15 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
          double x = 0.20;
          double y = robotSide.negateIfRightSide(0.35);    // 0.30);
          double z = -0.40;
-         Vector3d translation = new Vector3d(x, y, z);
+         Vector3D translation = new Vector3D(x, y, z);
          translation.scale(jointMap.getModelScale());
          transform.setTranslation(translation);
 
-         Matrix3d rotation = new Matrix3d();
+         RotationMatrix rotation = new RotationMatrix();
          double yaw = 0.0;    // robotSide.negateIfRightSide(-1.7);
          double pitch = 0.7;
          double roll = 0.0;    // robotSide.negateIfRightSide(-0.8);
-         RotationTools.convertYawPitchRollToMatrix(yaw, pitch, roll, rotation);
+         rotation.setYawPitchRoll(yaw, pitch, roll);
          transform.setRotation(rotation);
 
          handPosesWithRespectToChestFrame.put(robotSide, transform);
@@ -1113,6 +1112,6 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    @Override
    public double getICPProximityToLeadingFootForToeOff()
    {
-      return 0.0;
+      return 0.1;
    }
 }

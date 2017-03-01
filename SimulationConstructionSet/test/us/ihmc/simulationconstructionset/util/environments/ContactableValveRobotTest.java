@@ -6,12 +6,22 @@ import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.Random;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
 import org.junit.Test;
 
+import us.ihmc.commons.RandomNumbers;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.graphicsDescription.Graphics3DObject;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.robotics.Axis;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.geometry.FramePose;
+import us.ihmc.robotics.geometry.RotationTools;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.Robot;
@@ -21,19 +31,8 @@ import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters
 import us.ihmc.simulationconstructionset.robotController.ContactController;
 import us.ihmc.simulationconstructionset.util.ground.Contactable;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
-import us.ihmc.graphicsDescription.Graphics3DObject;
-import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.robotics.Axis;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.tools.thread.ThreadTools;
-import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.robotController.RobotController;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.geometry.RotationTools;
-import us.ihmc.robotics.random.RandomTools;
 
 public class ContactableValveRobotTest
 {
@@ -95,10 +94,10 @@ public class ContactableValveRobotTest
    {
       Random random = new Random(1235125L);
 
-      double valveX = RandomTools.generateRandomDouble(random, -2.0, 2.0);
-      double valveY = RandomTools.generateRandomDouble(random, -2.0, 2.0);
-      double valveZ = RandomTools.generateRandomDouble(random, 0.1, 2.0);
-      double valveYaw_degrees = RandomTools.generateRandomDouble(random, -100, 100);
+      double valveX = RandomNumbers.nextDouble(random, -2.0, 2.0);
+      double valveY = RandomNumbers.nextDouble(random, -2.0, 2.0);
+      double valveZ = RandomNumbers.nextDouble(random, 0.1, 2.0);
+      double valveYaw_degrees = RandomNumbers.nextDouble(random, -100, 100);
 
       ContactableValveRobot valveRobot = createValveRobot(valveX, valveY, valveZ, valveYaw_degrees);
 
@@ -118,7 +117,7 @@ public class ContactableValveRobotTest
    {
 
       Robot floatingRobot = new Robot("floatingRobot");
-      Vector3d position = new Vector3d(0.0, 0.02, 1.1);
+      Vector3D position = new Vector3D(0.0, 0.02, 1.1);
       double length = 0.01;
 
       floatingRobot.setGravity(0.0, 0.0, 0.0);
@@ -138,7 +137,7 @@ public class ContactableValveRobotTest
 
       horizontalJoint.setLink(linkHorizontal);
 
-      verticalJoint = new SliderJoint("z", new Vector3d(0.0, 0.0, 0.0), floatingRobot, Axis.Z);
+      verticalJoint = new SliderJoint("z", new Vector3D(0.0, 0.0, 0.0), floatingRobot, Axis.Z);
 
       Link linkVertical = new Link("linkVertical");
       linkVertical.setMass(0.5);
@@ -160,13 +159,13 @@ public class ContactableValveRobotTest
 
    private void createContactPoints(Robot floatingRobot)
    {
-      GroundContactPoint contactPoint1 = new GroundContactPoint("contactPoint1", new Vector3d(0.0, 0.0, 0.0), floatingRobot);
+      GroundContactPoint contactPoint1 = new GroundContactPoint("contactPoint1", new Vector3D(0.0, 0.0, 0.0), floatingRobot);
       verticalJoint.addGroundContactPoint(1, contactPoint1);
 
-      GroundContactPoint contactPoint2 = new GroundContactPoint("contactPoint2", new Vector3d(-0.002, 0.0, 0.0), floatingRobot);
+      GroundContactPoint contactPoint2 = new GroundContactPoint("contactPoint2", new Vector3D(-0.002, 0.0, 0.0), floatingRobot);
       verticalJoint.addGroundContactPoint(1, contactPoint2);
 
-      GroundContactPoint contactPoint3 = new GroundContactPoint("contactPoint3", new Vector3d(0.002, 0.0, 0.0), floatingRobot);
+      GroundContactPoint contactPoint3 = new GroundContactPoint("contactPoint3", new Vector3D(0.002, 0.0, 0.0), floatingRobot);
       verticalJoint.addGroundContactPoint(1, contactPoint3);
 
       ContactController contactController = new ContactController();
@@ -252,10 +251,10 @@ public class ContactableValveRobotTest
    {
       FramePose framePose = new FramePose(ReferenceFrame.getWorldFrame());
 
-      Point3d position = new Point3d(x, y, z);
-      Quat4d orientation = new Quat4d();
+      Point3D position = new Point3D(x, y, z);
+      Quaternion orientation = new Quaternion();
 
-      RotationTools.convertYawPitchRollToQuaternion(Math.toRadians(yaw_degrees), Math.toRadians(0), Math.toRadians(0), orientation);
+      orientation.setYawPitchRoll(Math.toRadians(yaw_degrees), Math.toRadians(0), Math.toRadians(0));
       framePose.setPose(position, orientation);
 
       return framePose;

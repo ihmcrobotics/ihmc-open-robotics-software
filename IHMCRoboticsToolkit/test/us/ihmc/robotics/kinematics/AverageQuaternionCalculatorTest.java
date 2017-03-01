@@ -4,15 +4,15 @@ import static org.junit.Assert.assertArrayEquals;
 
 import java.util.Random;
 
-import javax.vecmath.AxisAngle4d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
 import org.junit.Test;
 
+import us.ihmc.commons.RandomNumbers;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.geometry.AngleTools;
-import us.ihmc.robotics.random.RandomTools;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.robotics.random.RandomGeometry;
 
 public class AverageQuaternionCalculatorTest
 {
@@ -24,20 +24,20 @@ public class AverageQuaternionCalculatorTest
       {
          double epsilon = 1.0e-15;
          Random random = new Random(56416456L);
-         Quat4d quat1 = RandomTools.generateRandomQuaternion(random);
-         Quat4d quat2 = RandomTools.generateRandomQuaternion(random);
-         Quat4d expectedAverageQuat = new Quat4d();
+         Quaternion quat1 = RandomGeometry.nextQuaternion(random);
+         Quaternion quat2 = RandomGeometry.nextQuaternion(random);
+         Quaternion expectedAverageQuat = new Quaternion();
          expectedAverageQuat.interpolate(quat1, quat2, 0.5);
 
          AverageQuaternionCalculator averageQuaternionCalculator = new AverageQuaternionCalculator();
          averageQuaternionCalculator.queueQuaternion(quat1);
          averageQuaternionCalculator.queueQuaternion(quat2);
          averageQuaternionCalculator.compute();
-         Quat4d actualAverageQuat = new Quat4d();
+         Quaternion actualAverageQuat = new Quaternion();
          averageQuaternionCalculator.getAverageQuaternion(actualAverageQuat);
 
-         if (expectedAverageQuat.getW() * actualAverageQuat.getW() < 0.0)
-            expectedAverageQuat.scale(-1.0);
+         if (expectedAverageQuat.getS() * actualAverageQuat.getS() < 0.0)
+            expectedAverageQuat.negate();
 
          double[] expecteds = new double[4];
          expectedAverageQuat.get(expecteds);
@@ -55,27 +55,27 @@ public class AverageQuaternionCalculatorTest
       {
          double epsilon = 1.0e-15;
          Random random = new Random(56416456L);
-         Vector3d randomRotationAxis = RandomTools.generateRandomVector(random, 1.0);
-         double[] randomAngles = RandomTools.generateRandomDoubleArray(random, 100, Math.PI);
+         Vector3D randomRotationAxis = RandomGeometry.nextVector3D(random, 1.0);
+         double[] randomAngles = RandomNumbers.nextDoubleArray(random, 100, Math.PI);
 
-         AxisAngle4d expectedAverageAxisAngle = new AxisAngle4d(randomRotationAxis, AngleTools.computeAngleAverage(randomAngles));
-         Quat4d expectedAverageQuat = new Quat4d();
+         AxisAngle expectedAverageAxisAngle = new AxisAngle(randomRotationAxis, AngleTools.computeAngleAverage(randomAngles));
+         Quaternion expectedAverageQuat = new Quaternion();
          expectedAverageQuat.set(expectedAverageAxisAngle);
 
          AverageQuaternionCalculator averageQuaternionCalculator = new AverageQuaternionCalculator();
          for (int i = 0; i < randomAngles.length; i++)
          {
-            AxisAngle4d tempAxisAngle = new AxisAngle4d(randomRotationAxis, randomAngles[i]);
-            Quat4d tempQuat4d = new Quat4d();
+            AxisAngle tempAxisAngle = new AxisAngle(randomRotationAxis, randomAngles[i]);
+            Quaternion tempQuat4d = new Quaternion();
             tempQuat4d.set(tempAxisAngle);
             averageQuaternionCalculator.queueQuaternion(tempQuat4d);
          }
          averageQuaternionCalculator.compute();
-         Quat4d actualAverageQuat = new Quat4d();
+         Quaternion actualAverageQuat = new Quaternion();
          averageQuaternionCalculator.getAverageQuaternion(actualAverageQuat);
 
-         if (expectedAverageQuat.getW() * actualAverageQuat.getW() < 0.0)
-            expectedAverageQuat.scale(-1.0);
+         if (expectedAverageQuat.getS() * actualAverageQuat.getS() < 0.0)
+            expectedAverageQuat.negate();
 
          double[] expecteds = new double[4];
          expectedAverageQuat.get(expecteds);

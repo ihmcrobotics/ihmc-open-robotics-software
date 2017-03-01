@@ -39,8 +39,9 @@ ihmc.configureForIHMCOpenSourceBintrayPublish(false, "mavenJava", "maven-release
 
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.11'
+    testCompile group: 'us.ihmc', name: 'ihmc-continuous-integration-framework', version: '0.9.4'
 
-    compile group: 'javax.vecmath', name: 'vecmath', version: '1.5.2'
+    compile group: 'us.ihmc', name: 'euclid-core', version: '0.4.2'
     compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
     compile group: 'commons-collections', name: 'commons-collections', version: '3.2.1'
     compile group: 'org.georegression', name: 'georegression', version: '0.11'
@@ -50,8 +51,8 @@ dependencies {
     compile group: 'org.jgrapht', name: 'jgrapht-core', version: '0.9.0'
     compile group: 'org.jgrapht', name: 'jgrapht-ext', version: '0.9.0'
     compile group: 'com.github.wendykierp', name: 'JTransforms', version: '3.1'
-    compile group: 'org.ejml', name: 'dense64', version: '0.28'
-    compile group: 'org.ejml', name: 'core', version: '0.28'
+    compile group: 'org.ejml', name: 'dense64', version: '0.30'
+    compile group: 'org.ejml', name: 'core', version: '0.30'
     compile group: 'jgraph', name: 'jgraph', version: '5.13.0.0'
     compile group: 'us.ihmc', name: 'IHMCRealtime', version: '1.1.2'
     compile group: 'us.ihmc.thirdparty.jme', name: 'jme3-core', version: '3.1.0-internal4'
@@ -60,13 +61,15 @@ dependencies {
     compile ihmc.getProjectDependency(":IHMCCommunication")
     compile ihmc.getProjectDependency(":KalmanProject")
     compile ihmc.getProjectDependency(":IHMCJavaToolkit")
+    compile ihmc.getProjectDependency(":IHMCJavaExtensions")
     compile ihmc.getProjectDependency(":IHMCRoboticsToolkit")
     compile ihmc.getProjectDependency(":IHMCGraphicsDescription")
     compile ihmc.getProjectDependency(":IHMCRobotModels")
 
 
 	testCompile ihmc.getProjectDependency(":SimulationConstructionSet")
-    testCompile ihmc.getProjectDependency(":IHMCUnitTesting")
+	testCompile ihmc.getProjectTestDependency(":IHMCRoboticsToolkit")
+	testCompile ihmc.getProjectTestDependency(":IHMCJavaExtensions")
     testCompile ihmc.getProjectTestDependency(":IHMCRoboticsToolkit")
 }
 

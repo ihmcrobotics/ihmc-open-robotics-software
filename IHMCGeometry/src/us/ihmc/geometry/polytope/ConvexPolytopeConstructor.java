@@ -2,10 +2,9 @@ package us.ihmc.geometry.polytope;
 
 import java.util.Random;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.robotics.random.RandomGeometry;
 
 public class ConvexPolytopeConstructor
 {
@@ -19,10 +18,10 @@ public class ConvexPolytopeConstructor
       PolytopeVertex vertex2 = polytope.addVertex(1.0, 1.0, 0.0);
       PolytopeVertex vertex3 = polytope.addVertex(0.0, 1.0, 0.0);
 
-      PolytopeVertex vertex4 = polytope.addVertex(new Point3d(0.0, 0.0, 1.0));
-      PolytopeVertex vertex5 = polytope.addVertex(new Point3d(1.0, 0.0, 1.0));
-      PolytopeVertex vertex6 = polytope.addVertex(new Point3d(1.0, 1.0, 1.0));
-      PolytopeVertex vertex7 = polytope.addVertex(new Point3d(0.0, 1.0, 1.0));
+      PolytopeVertex vertex4 = polytope.addVertex(new Point3D(0.0, 0.0, 1.0));
+      PolytopeVertex vertex5 = polytope.addVertex(new Point3D(1.0, 0.0, 1.0));
+      PolytopeVertex vertex6 = polytope.addVertex(new Point3D(1.0, 1.0, 1.0));
+      PolytopeVertex vertex7 = polytope.addVertex(new Point3D(0.0, 1.0, 1.0));
 
       polytope.addEdge(vertex0, vertex1);
       polytope.addEdge(vertex1, vertex2);
@@ -51,10 +50,10 @@ public class ConvexPolytopeConstructor
       PolytopeVertex vertex2 = polytope.addVertex(halfLengthX, halfWidthY, -halfHeightZ);
       PolytopeVertex vertex3 = polytope.addVertex(-halfLengthX, halfWidthY, -halfHeightZ);
 
-      PolytopeVertex vertex4 = polytope.addVertex(new Point3d(-halfLengthX, -halfWidthY, halfHeightZ));
-      PolytopeVertex vertex5 = polytope.addVertex(new Point3d(halfLengthX, -halfWidthY, halfHeightZ));
-      PolytopeVertex vertex6 = polytope.addVertex(new Point3d(halfLengthX, halfWidthY, halfHeightZ));
-      PolytopeVertex vertex7 = polytope.addVertex(new Point3d(-halfLengthX, halfWidthY, halfHeightZ));
+      PolytopeVertex vertex4 = polytope.addVertex(new Point3D(-halfLengthX, -halfWidthY, halfHeightZ));
+      PolytopeVertex vertex5 = polytope.addVertex(new Point3D(halfLengthX, -halfWidthY, halfHeightZ));
+      PolytopeVertex vertex6 = polytope.addVertex(new Point3D(halfLengthX, halfWidthY, halfHeightZ));
+      PolytopeVertex vertex7 = polytope.addVertex(new Point3D(-halfLengthX, halfWidthY, halfHeightZ));
 
       polytope.addEdge(vertex0, vertex1);
       polytope.addEdge(vertex1, vertex2);
@@ -78,12 +77,12 @@ public class ConvexPolytopeConstructor
    {
       ConvexPolytope polytope = new ConvexPolytope();
 
-      Point3d sphereCenter = RandomTools.generateRandomPoint(random, xyzBoundary, xyzBoundary, xyzBoundary);
+      Point3D sphereCenter = RandomGeometry.nextPoint3D(random, xyzBoundary, xyzBoundary, xyzBoundary);
 
       for (int i = 0; i < numberOfPoints; i++)
       {
-         Vector3d randomVector = RandomTools.generateRandomVector(random, radius);
-         Point3d point = new Point3d(sphereCenter);
+         Vector3D randomVector = RandomGeometry.nextVector3D(random, radius);
+         Point3D point = new Point3D(sphereCenter);
          point.add(randomVector);
 
          //TODO: Need to connect the edges later once they are used in the algorithm!!
@@ -93,7 +92,7 @@ public class ConvexPolytopeConstructor
       return polytope;
    }
 
-   public static ConvexPolytope constructSinglePointPolytope(Point3d singlePoint)
+   public static ConvexPolytope constructSinglePointPolytope(Point3D singlePoint)
    {
       ConvexPolytope polytope = new ConvexPolytope();
       polytope.addVertex(singlePoint);

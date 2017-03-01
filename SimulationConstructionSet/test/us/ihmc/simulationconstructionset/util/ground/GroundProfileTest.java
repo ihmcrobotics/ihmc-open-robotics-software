@@ -6,12 +6,13 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Random;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector2d;
-import javax.vecmath.Vector3d;
-
 import org.junit.Test;
 
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.tools.EuclidCoreTestTools;
+import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
@@ -19,18 +20,16 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.jMonkeyEngineToolkit.HeightMapWithNormals;
-import us.ihmc.simulationconstructionset.Robot;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.util.LinearStickSlipGroundContactModel;
-import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.robotics.geometry.BoundingBox3d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.tools.testing.JUnitTools;
+import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.util.LinearStickSlipGroundContactModel;
+import us.ihmc.tools.thread.ThreadTools;
 
 public abstract class GroundProfileTest
 {
@@ -108,23 +107,23 @@ public abstract class GroundProfileTest
          for (int j=2; j < ySteps-2; j++)
          {
             double y = yMin + ((double) j) * yStep;
-            Vector3d surfaceNormal = new Vector3d();
+            Vector3D surfaceNormal = new Vector3D();
             double height = heightMap.heightAndNormalAt(x, y, 0.0, surfaceNormal);
             assertEquals(1.0, surfaceNormal.length(), 1e-7);
 
-            Point3d queryPoint = new Point3d(x, y, height);
+            Point3D queryPoint = new Point3D(x, y, height);
             numberOfTotalPoints++;
             
-            Point3d queryPointALittleInside = new Point3d(queryPoint);
+            Point3D queryPointALittleInside = new Point3D(queryPoint);
             queryPointALittleInside.scaleAdd(-0.002, surfaceNormal, queryPointALittleInside);
             
-            Point3d queryPointALittleOutside = new Point3d(queryPoint);
+            Point3D queryPointALittleOutside = new Point3D(queryPoint);
             queryPointALittleOutside.scaleAdd(0.002, surfaceNormal, queryPointALittleOutside);
             
 //            System.out.println("queryPoint = " + queryPoint);
 //            System.out.println("queryPointALittleInside = " + queryPointALittleInside);
-            Vector3d surfaceNormalCheck= new Vector3d();
-            Point3d intersectionCheck = new Point3d();
+            Vector3D surfaceNormalCheck= new Vector3D();
+            Point3D intersectionCheck = new Point3D();
             boolean insideShouldBeTrue = groundProfile.checkIfInside(queryPointALittleInside.getX(), queryPointALittleInside.getY(), queryPointALittleInside.getZ(), intersectionCheck, surfaceNormalCheck);
             
             // If surface normals are not close when looking a little inside, then might likely have a peak
@@ -139,7 +138,7 @@ public abstract class GroundProfileTest
                assertTrue(groundProfile.isClose(queryPointALittleInside.getX(), queryPointALittleInside.getY(), queryPointALittleInside.getZ()));
             }
 
-            JUnitTools.assertTuple3dEquals(intersectionCheck, queryPoint, 0.002);
+            EuclidCoreTestTools.assertTuple3DEquals(intersectionCheck, queryPoint, 0.002);
             
             boolean outsideShouldBeFalse = groundProfile.checkIfInside(queryPointALittleOutside.getX(), queryPointALittleOutside.getY(), queryPointALittleOutside.getZ(), intersectionCheck, surfaceNormalCheck);
             
@@ -151,12 +150,12 @@ public abstract class GroundProfileTest
             if (aboveAValley) numberOfValleyPoints++; //assertTrue(surfaceNormalsAreClose);
             else assertFalse(outsideShouldBeFalse);
 
-            JUnitTools.assertTuple3dEquals(intersectionCheck, queryPoint, 0.002);
+            EuclidCoreTestTools.assertTuple3DEquals(intersectionCheck, queryPoint, 0.002);
 
             if (VISUALIZE)
             {
                // Draw a normal vector. Make it long if on a peak and short if in a valley.
-               Vector3d normalToDraw = new Vector3d(surfaceNormal);
+               Vector3D normalToDraw = new Vector3D(surfaceNormal);
                if (aboveAValley) normalToDraw.scale(0.5);
                else if (belowAPeak) normalToDraw.scale(2.0);
                
@@ -176,8 +175,8 @@ public abstract class GroundProfileTest
             if (!aboveAValley && !belowAPeak)
             {
                // Move a little and see that mostly a flat plane, when not in a valley or on a peak.
-               Vector3d alongDirectionOne = new Vector3d();
-               Vector3d alongDirectionTwo = new Vector3d();
+               Vector3D alongDirectionOne = new Vector3D();
+               Vector3D alongDirectionTwo = new Vector3D();
 
                alongDirectionOne.set(1.0, 0.0, 0.0);
                alongDirectionTwo.cross(surfaceNormal, alongDirectionOne);
@@ -192,8 +191,8 @@ public abstract class GroundProfileTest
                {
                   numberOfTotalChecks++;
                   
-                  Vector2d excursionVector2d = RandomTools.generateRandomVector2d(random, excursionDistance);
-                  Vector3d excursionVector = new Vector3d(alongDirectionOne);
+                  Vector2D excursionVector2d = RandomGeometry.nextVector2D(random, excursionDistance);
+                  Vector3D excursionVector = new Vector3D(alongDirectionOne);
                   excursionVector.scale(excursionVector2d.getX());
                   excursionVector.scaleAdd(excursionVector2d.getY(), alongDirectionTwo, excursionVector);
 

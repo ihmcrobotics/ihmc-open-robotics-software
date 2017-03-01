@@ -2,9 +2,12 @@ package us.ihmc.communication.packets;
 
 import static java.lang.Double.isInfinite;
 import static java.lang.Double.isNaN;
-import us.ihmc.robotics.geometry.RotationTools;
 
-import javax.vecmath.*;
+import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.tuple2D.interfaces.Tuple2DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
+import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.tuple4D.interfaces.Tuple4DBasics;
 
 public abstract class ObjectValidityChecker
 {
@@ -48,11 +51,11 @@ public abstract class ObjectValidityChecker
    }
 
    /**
-    * Checks the validity of a {@link Tuple2d}
+    * Checks the validity of a {@link Tuple2DBasics}
     * @param tuple2dToCheck
     * @return null if the tuple2d is valid, or the error message.
     */
-   public static ObjectErrorType validateTuple2d(Tuple2d tuple2dToCheck)
+   public static ObjectErrorType validateTuple2d(Tuple2DBasics tuple2dToCheck)
    {
       if (tuple2dToCheck == null)
          return ObjectErrorType.NULL;
@@ -65,11 +68,11 @@ public abstract class ObjectValidityChecker
    }
 
    /**
-    * Checks the validity of a {@link Tuple3d}
+    * Checks the validity of a {@link Tuple3DBasics}
     * @param tuple3dToCheck
     * @return null if the tuple3d is valid, or the error message.
     */
-   public static ObjectErrorType validateTuple3d(Tuple3d tuple3dToCheck)
+   public static ObjectErrorType validateTuple3d(Tuple3DBasics tuple3dToCheck)
    {
       if (tuple3dToCheck == null)
          return ObjectErrorType.NULL;
@@ -82,23 +85,23 @@ public abstract class ObjectValidityChecker
    }
 
    /**
-    * Checks the validity of a {@link Tuple4d}
+    * Checks the validity of a {@link Tuple4DBasics}
     * @param tuple4dToCheck
     * @return null if the tuple4d is valid, or the error message.
     */
-   public static ObjectErrorType validateTuple4d(Tuple4d tuple4dToCheck)
+   public static ObjectErrorType validateTuple4d(Tuple4DBasics tuple4dToCheck)
    {
       if (tuple4dToCheck == null)
          return ObjectErrorType.NULL;
-      if (isNaN(tuple4dToCheck.getX()) || isNaN(tuple4dToCheck.getY()) || isNaN(tuple4dToCheck.getZ()) || isNaN(tuple4dToCheck.getW()))
+      if (isNaN(tuple4dToCheck.getX()) || isNaN(tuple4dToCheck.getY()) || isNaN(tuple4dToCheck.getZ()) || isNaN(tuple4dToCheck.getS()))
          return ObjectErrorType.CONTAINS_NaN;
-      if (isInfinite(tuple4dToCheck.getX()) || isInfinite(tuple4dToCheck.getY()) || isInfinite(tuple4dToCheck.getZ()) || isInfinite(tuple4dToCheck.getW()))
+      if (isInfinite(tuple4dToCheck.getX()) || isInfinite(tuple4dToCheck.getY()) || isInfinite(tuple4dToCheck.getZ()) || isInfinite(tuple4dToCheck.getS()))
          return ObjectErrorType.CONTAINS_INFINITY;
 
       return null;
    }
 
-   public static ObjectErrorType validateQuat4d(Quat4d quat4dToCheck)
+   public static ObjectErrorType validateQuat4d(Quaternion quat4dToCheck)
    {
       ObjectErrorType objectErrorType = validateTuple4d(quat4dToCheck);
       if(objectErrorType != null)
@@ -107,7 +110,7 @@ public abstract class ObjectValidityChecker
       }
       else
       {
-         boolean quaternionNormalized = RotationTools.isQuaternionNormalized(quat4dToCheck);
+         boolean quaternionNormalized = quat4dToCheck.isUnitary(1.0e-5);
          if(!quaternionNormalized)
          {
             return ObjectErrorType.NOT_NORMALIZED;
@@ -120,11 +123,11 @@ public abstract class ObjectValidityChecker
    }
 
    /**
-    * Checks the validity of a {@link AxisAngle4d}
+    * Checks the validity of a {@link AxisAngle}
     * @param axisAngleToCheck
     * @return null if the axisAngle4d is valid, or the error message.
     */
-   public static ObjectErrorType validateAxisAngle4d(AxisAngle4d axisAngleToCheck)
+   public static ObjectErrorType validateAxisAngle4d(AxisAngle axisAngleToCheck)
    {
       if (axisAngleToCheck == null)
          return ObjectErrorType.NULL;

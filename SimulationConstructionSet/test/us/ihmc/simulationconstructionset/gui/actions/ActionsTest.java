@@ -24,6 +24,9 @@ import org.junit.Test;
 
 import com.google.common.base.Defaults;
 
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.jMonkeyEngineToolkit.camera.CameraPropertiesHolder;
 import us.ihmc.simulationconstructionset.ExtraPanelConfiguration;
 import us.ihmc.simulationconstructionset.commands.AddCameraKeyCommandExecutor;
@@ -103,9 +106,6 @@ import us.ihmc.simulationconstructionset.gui.dialogConstructors.ResizeViewportDi
 import us.ihmc.simulationconstructionset.gui.dialogConstructors.SaveConfigurationDialogConstructor;
 import us.ihmc.simulationconstructionset.gui.dialogConstructors.SaveGraphConfigurationDialogConstructor;
 import us.ihmc.simulationconstructionset.gui.dialogConstructors.SaveRobotConfigurationDialogConstructor;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.tools.continuousIntegration.IntegrationCategory;
 
 @ContinuousIntegrationPlan(categories = { IntegrationCategory.UI})
 public class ActionsTest

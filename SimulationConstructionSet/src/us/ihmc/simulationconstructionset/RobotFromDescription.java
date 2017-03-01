@@ -3,9 +3,8 @@ package us.ihmc.simulationconstructionset;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
-import javax.vecmath.Vector3d;
-
-import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.lidar.LidarScanParameters;
 import us.ihmc.robotics.robotDescription.CameraSensorDescription;
 import us.ihmc.robotics.robotDescription.CollisionMeshDescription;
@@ -248,13 +247,13 @@ public class RobotFromDescription extends Robot implements OneDegreeOfFreedomJoi
             joint.recursiveGetAllGroundContactPoints(groundContactPoints);
 
             wrenchCalculator = new GroundContactPointBasedWrenchCalculator(forceSensorDescription.getName(), groundContactPoints, oneDegreeOfFreedomJoint,
-                                                                           forceSensorDescription.getTransformToJoint());
+                                                                           forceSensorDescription.getTransformToJoint(), yoVariableRegistry);
          }
          else
          {
             //               System.out.println("SDFRobot: Adding force sensor to: " + joint.getName());
 
-            Vector3d offsetToPack = new Vector3d();
+            Vector3D offsetToPack = new Vector3D();
             forceSensorDescription.getTransformToJoint().getTranslation(offsetToPack);
             JointWrenchSensor jointWrenchSensor = new JointWrenchSensor(forceSensorDescription.getName(), offsetToPack, this);
             joint.addJointWrenchSensor(jointWrenchSensor);
@@ -315,10 +314,10 @@ public class RobotFromDescription extends Robot implements OneDegreeOfFreedomJoi
       {
          FloatingJointDescription floatingJointDescription = (FloatingJointDescription) jointDescription;
 
-         Vector3d offset = new Vector3d();
+         Vector3D offset = new Vector3D();
          floatingJointDescription.getOffsetFromParentJoint(offset);
 
-         joint = new FloatingJoint(jointDescription.getName(), offset, this, true);
+         joint = new FloatingJoint(jointDescription.getName(), floatingJointDescription.getJointVariableName(), offset, this, true);
       }
 
       else if (jointDescription instanceof FloatingPlanarJointDescription)
@@ -331,12 +330,12 @@ public class RobotFromDescription extends Robot implements OneDegreeOfFreedomJoi
       else if (jointDescription instanceof PinJointDescription)
       {
          PinJointDescription pinJointDescription = (PinJointDescription) jointDescription;
-         Vector3d offset = new Vector3d();
+         Vector3D offset = new Vector3D();
          pinJointDescription.getOffsetFromParentJoint(offset);
 
          if (jointDescription.isDynamic())
          {
-            Vector3d jointAxis = new Vector3d();
+            Vector3D jointAxis = new Vector3D();
             pinJointDescription.getJointAxis(jointAxis);
             joint = new PinJoint(jointDescription.getName(), offset, this, jointAxis);
 
@@ -366,7 +365,7 @@ public class RobotFromDescription extends Robot implements OneDegreeOfFreedomJoi
          }
          else
          {
-            Vector3d jointAxis = new Vector3d();
+            Vector3D jointAxis = new Vector3D();
             pinJointDescription.getJointAxis(jointAxis);
             joint = new DummyOneDegreeOfFreedomJoint(jointDescription.getName(), offset, this, jointAxis);
          }
@@ -374,10 +373,10 @@ public class RobotFromDescription extends Robot implements OneDegreeOfFreedomJoi
       else if (jointDescription instanceof SpringPinJointDescription)
       {
          SpringPinJointDescription pinJointDescription = (SpringPinJointDescription) jointDescription;
-         Vector3d offset = new Vector3d();
+         Vector3D offset = new Vector3D();
          pinJointDescription.getOffsetFromParentJoint(offset);
 
-         Vector3d jointAxis = new Vector3d();
+         Vector3D jointAxis = new Vector3D();
          pinJointDescription.getJointAxis(jointAxis);
          joint = new SpringPinJoint(jointDescription.getName(), offset, this, jointAxis);
 
@@ -408,10 +407,10 @@ public class RobotFromDescription extends Robot implements OneDegreeOfFreedomJoi
       else if (jointDescription instanceof SliderJointDescription)
       {
          SliderJointDescription sliderJointDescription = (SliderJointDescription) jointDescription;
-         Vector3d offset = new Vector3d();
+         Vector3D offset = new Vector3D();
          sliderJointDescription.getOffsetFromParentJoint(offset);
 
-         Vector3d jointAxis = new Vector3d();
+         Vector3D jointAxis = new Vector3D();
          sliderJointDescription.getJointAxis(jointAxis);
          joint = new SliderJoint(jointDescription.getName(), offset, this, jointAxis);
 
@@ -463,8 +462,8 @@ public class RobotFromDescription extends Robot implements OneDegreeOfFreedomJoi
       link.setLinkGraphics(linkGraphics);
 
       ArrayList<CollisionMeshDescription> collisonMeshDescriptions = linkDescription.getCollisionMeshes();
-      
-      for (int i=0; i<collisonMeshDescriptions.size(); i++)
+
+      for (int i = 0; i < collisonMeshDescriptions.size(); i++)
       {
          link.addCollisionMesh(collisonMeshDescriptions.get(i));
       }
