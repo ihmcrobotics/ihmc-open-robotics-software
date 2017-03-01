@@ -2,13 +2,12 @@ package us.ihmc.humanoidRobotics.communication.packets.walking;
 
 import java.util.Random;
 
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.VisualizablePacket;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.AbstractSO3TrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 
 @RosMessagePacket(documentation =
       "This message commands the controller to move in taskspace the chest to the desired orientation while going through the specified trajectory points."
@@ -21,24 +20,29 @@ public class ChestTrajectoryMessage extends AbstractSO3TrajectoryMessage<ChestTr
 {
    /**
     * Empty constructor for serialization.
+    * Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
     */
    public ChestTrajectoryMessage()
    {
       super();
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
+   /**
+    * Random constructor for unit testing this packet
+    * @param random seed
+    */
    public ChestTrajectoryMessage(Random random)
    {
       super(random);
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
-   public ChestTrajectoryMessage(ChestTrajectoryMessage chestTrajectoryMessage)
+   /**
+    * Clone constructor.
+    * @param message to clone.
+    */
+   public ChestTrajectoryMessage(AbstractSO3TrajectoryMessage<?> chestTrajectoryMessage)
    {
       super(chestTrajectoryMessage);
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
-      setDestination(chestTrajectoryMessage.getDestination());
    }
 
    /**
@@ -49,7 +53,6 @@ public class ChestTrajectoryMessage extends AbstractSO3TrajectoryMessage<ChestTr
    public ChestTrajectoryMessage(double trajectoryTime, Quaternion desiredOrientation)
    {
       super(trajectoryTime, desiredOrientation);
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
    /**
@@ -60,36 +63,6 @@ public class ChestTrajectoryMessage extends AbstractSO3TrajectoryMessage<ChestTr
    public ChestTrajectoryMessage(int numberOfTrajectoryPoints)
    {
       super(numberOfTrajectoryPoints);
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
-   @Override
-   public boolean epsilonEquals(ChestTrajectoryMessage other, double epsilon)
-   {
-      return super.epsilonEquals(other, epsilon);
-   }
-
-   @Override
-   public ChestTrajectoryMessage transform(RigidBodyTransform transform)
-   {
-      ChestTrajectoryMessage transformedChestTrajectoryMessage = new ChestTrajectoryMessage(this);
-      transformedChestTrajectoryMessage.applyTransform(transform);
-      return transformedChestTrajectoryMessage;
-   }
-
-   @Override
-   public String toString()
-   {
-      if (taskspaceTrajectoryPoints != null)
-         return "Chest SO3 trajectory: number of SO3 trajectory points = " + getNumberOfTrajectoryPoints();
-      else
-         return "Chest SO3 trajectory: no SO3 trajectory points";
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public String validateMessage()
-   {
-      return PacketValidityChecker.validateChestTrajectoryMessage(this);
-   }
 }
