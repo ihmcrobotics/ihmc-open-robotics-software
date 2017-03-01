@@ -635,27 +635,15 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
       if (jointspaceGains != null)
          return jointspaceGains;
 
-      boolean runningOnRealRobot = target == DRCRobotModel.RobotTarget.REAL_ROBOT;
-      double kp = runningOnRealRobot ? 40.0 : 80.0;
-      double zeta = runningOnRealRobot ? 0.3 : 0.6;
-      double ki = 0.0;
-      double maxIntegralError = 0.0;
-      double maxAccel = runningOnRealRobot ? 20.0 : Double.POSITIVE_INFINITY;
-      double maxJerk = runningOnRealRobot ? 100.0 : Double.POSITIVE_INFINITY;
-
-      YoPIDGains defaultJointspaceControlGains = new YoPIDGains("DefaultJointspace", registry);
-      defaultJointspaceControlGains.setKp(kp);
-      defaultJointspaceControlGains.setZeta(zeta);
-      defaultJointspaceControlGains.setKi(ki);
-      defaultJointspaceControlGains.setMaximumIntegralError(maxIntegralError);
-      defaultJointspaceControlGains.setMaximumFeedback(maxAccel);
-      defaultJointspaceControlGains.setMaximumFeedbackRate(maxJerk);
-      defaultJointspaceControlGains.createDerivativeGainUpdater(true);
-
       jointspaceGains = new HashMap<>();
-      jointspaceGains.put(jointMap.getSpineJointName(SpineJointName.SPINE_YAW), defaultJointspaceControlGains);
-      jointspaceGains.put(jointMap.getSpineJointName(SpineJointName.SPINE_PITCH), defaultJointspaceControlGains);
-      jointspaceGains.put(jointMap.getSpineJointName(SpineJointName.SPINE_ROLL), defaultJointspaceControlGains);
+
+      YoPIDGains spineGains = createSpineControlGains(registry);
+      for (SpineJointName name : jointMap.getSpineJointNames())
+         jointspaceGains.put(jointMap.getSpineJointName(name), spineGains);
+
+      YoPIDGains headGains = createHeadJointspaceControlGains(registry);
+      for (NeckJointName name : jointMap.getNeckJointNames())
+         jointspaceGains.put(jointMap.getNeckJointName(name), headGains);
 
       return jointspaceGains;
    }
