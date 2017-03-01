@@ -1,7 +1,6 @@
 package us.ihmc.commonWalkingControlModules.bipedSupportPolygons;
 
-import javax.vecmath.Point2d;
-
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
@@ -50,7 +49,7 @@ public class YoFramePoint2dInPolygonCoordinate
     * This function is called at beginning of every DoubleSupport, not frequent enough to preallocate eveything. 
     */
 
-   public void updatePointAndPolygon(FrameConvexPolygon2d polygon, Point2d pointInPolygonFrame)
+   public void updatePointAndPolygon(FrameConvexPolygon2d polygon, Point2D pointInPolygonFrame)
    {
       //copy external point back to polygon frame
       framePoint2d = new FramePoint2d(polygon.getReferenceFrame(), pointInPolygonFrame);

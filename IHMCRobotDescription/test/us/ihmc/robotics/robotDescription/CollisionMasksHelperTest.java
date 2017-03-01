@@ -1,13 +1,14 @@
 package us.ihmc.robotics.robotDescription;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
 
 import org.junit.Test;
 
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.tools.testing.MutationTestingTools;
+import us.ihmc.commons.MutationTestFacilitator;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public class CollisionMasksHelperTest
 {
@@ -151,8 +152,6 @@ public class CollisionMasksHelperTest
 
    public static void main(String[] args)
    {
-      String targetTests = CollisionMasksHelperTest.class.getName();
-      String targetClassesInSamePackage = CollisionMasksHelper.class.getName();
-      MutationTestingTools.doPITMutationTestAndOpenResult(targetTests, targetClassesInSamePackage);
+      MutationTestFacilitator.facilitateMutationTestForClass(CollisionMasksHelper.class, CollisionMasksHelperTest.class);
    }
 }

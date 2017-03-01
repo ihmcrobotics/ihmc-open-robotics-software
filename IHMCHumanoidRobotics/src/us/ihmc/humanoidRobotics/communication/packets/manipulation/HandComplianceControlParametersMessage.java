@@ -1,12 +1,13 @@
 package us.ihmc.humanoidRobotics.communication.packets.manipulation;
 
-import us.ihmc.communication.packets.Packet;
-import us.ihmc.robotics.random.RandomTools;
-import us.ihmc.robotics.robotSide.RobotSide;
-
-import javax.vecmath.Vector3f;
 import java.util.Arrays;
 import java.util.Random;
+
+import us.ihmc.commons.RandomNumbers;
+import us.ihmc.communication.packets.Packet;
+import us.ihmc.euclid.tuple3D.Vector3D32;
+import us.ihmc.robotics.random.RandomGeometry;
+import us.ihmc.robotics.robotSide.RobotSide;
 
 /**
  * This message setup the hand controller to activate a compliance module if at least one of the fields is set and deactivate if the message is empty.
@@ -49,7 +50,7 @@ public class HandComplianceControlParametersMessage extends Packet<HandComplianc
     *  - Z refers to the axis orthogonal to the two other axes (e.g. up/down).
     * If the field is null, the desired force will be set to zero.
     */
-   public Vector3f desiredForce;
+   public Vector3D32 desiredForce;
 
    /**
     * desiredTorque allows to set the desired torque to be achieved on the hand for each individual axes (X, Y, and Z).
@@ -59,7 +60,7 @@ public class HandComplianceControlParametersMessage extends Packet<HandComplianc
     *  - Z refers to the axis orthogonal to the two other axes.
     * If the field is null, the desired torque will be set to zero.
     */
-   public Vector3f desiredTorque;
+   public Vector3D32 desiredTorque;
 
    /**
     * wrenchDeadzones set the deadzones that are used on the force and torque measurements, respectively.
@@ -78,7 +79,7 @@ public class HandComplianceControlParametersMessage extends Packet<HandComplianc
 
    public HandComplianceControlParametersMessage(Random random)
    {
-      robotSide = RandomTools.generateRandomEnum(random, RobotSide.class);
+      robotSide = RandomNumbers.nextEnum(random, RobotSide.class);
       enableLinearCompliance = new boolean[3];
       for(int i = 0; i < 3; i++)
       {
@@ -91,8 +92,8 @@ public class HandComplianceControlParametersMessage extends Packet<HandComplianc
          enableAngularCompliance[i] = random.nextBoolean();
       }
 
-      desiredForce = RandomTools.generateRandomVector3f(random);
-      desiredTorque = RandomTools.generateRandomVector3f(random);
+      desiredForce = RandomGeometry.nextVector3D32(random);
+      desiredTorque = RandomGeometry.nextVector3D32(random);
 
       wrenchDeadzones = new float[2];
       wrenchDeadzones[0] = random.nextFloat();
@@ -125,12 +126,12 @@ public class HandComplianceControlParametersMessage extends Packet<HandComplianc
       this.enableAngularCompliance = enableAngularCompliance;
    }
 
-   public void setDesiredForce(Vector3f desiredForce)
+   public void setDesiredForce(Vector3D32 desiredForce)
    {
       this.desiredForce = desiredForce;
    }
 
-   public void setDesiredTorque(Vector3f desiredTorque)
+   public void setDesiredTorque(Vector3D32 desiredTorque)
    {
       this.desiredTorque = desiredTorque;
    }
@@ -155,12 +156,12 @@ public class HandComplianceControlParametersMessage extends Packet<HandComplianc
       return enableAngularCompliance;
    }
 
-   public Vector3f getDesiredForce()
+   public Vector3D32 getDesiredForce()
    {
       return desiredForce;
    }
 
-   public Vector3f getDesiredTorque()
+   public Vector3D32 getDesiredTorque()
    {
       return desiredTorque;
    }

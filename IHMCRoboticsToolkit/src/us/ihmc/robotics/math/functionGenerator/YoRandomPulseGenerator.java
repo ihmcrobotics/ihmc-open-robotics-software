@@ -93,7 +93,7 @@ public class YoRandomPulseGenerator
          else
             percentIntoPulse = 1.0;
 
-         percentIntoPulse = MathTools.clipToMinMax(percentIntoPulse, 0.0, 1.0);
+         percentIntoPulse = MathTools.clamp(percentIntoPulse, 0.0, 1.0);
 
          double temp = (Math.sin(2.0 * Math.PI * (percentIntoPulse - 0.25)) + 1.0)/2.0;
          value.set(amplitudeUsed.getDoubleValue() * temp);

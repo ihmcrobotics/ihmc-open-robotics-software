@@ -19,9 +19,11 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
 
    private RigidBody base;
    private RigidBody endEffector;
+   private RigidBody optionalPrimaryBase;
 
    private String baseName;
    private String endEffectorName;
+   private String optionalPrimaryBaseName;
 
    public SpatialVelocityCommand()
    {
@@ -44,6 +46,12 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
    {
       this.endEffector = endEffector;
       endEffectorName = endEffector.getName();
+   }
+
+   public void setPrimaryBase(RigidBody primaryBase)
+   {
+      optionalPrimaryBase = primaryBase;
+      optionalPrimaryBaseName = primaryBase.getName();
    }
 
    public void set(Twist spatialVelocity)
@@ -121,6 +129,9 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
       endEffector = other.getEndEffector();
       baseName = other.baseName;
       endEffectorName = other.endEffectorName;
+
+      optionalPrimaryBase = other.optionalPrimaryBase;
+      optionalPrimaryBaseName = other.optionalPrimaryBaseName;
    }
 
    private void setSelectionMatrixToIdentity()
@@ -177,6 +188,16 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
    public String getEndEffectorName()
    {
       return endEffectorName;
+   }
+
+   public RigidBody getPrimaryBase()
+   {
+      return optionalPrimaryBase;
+   }
+
+   public String getPrimaryBaseName()
+   {
+      return optionalPrimaryBaseName;
    }
 
    public void setWeight(double weight)

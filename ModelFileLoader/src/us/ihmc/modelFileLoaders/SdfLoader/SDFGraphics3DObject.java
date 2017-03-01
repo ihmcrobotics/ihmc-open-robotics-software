@@ -7,27 +7,27 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.vecmath.AxisAngle4d;
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Vector2d;
-import javax.vecmath.Vector3d;
-
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
-import us.ihmc.modelFileLoaders.ModelFileLoaderConversionsHelper;
-import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.AbstractSDFMesh;
-import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFGeometry;
-import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFGeometry.HeightMap.Blend;
-import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFGeometry.HeightMap.Texture;
+import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.ModelFileType;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.HeightBasedTerrainBlend;
 import us.ihmc.graphicsDescription.appearance.SDFAppearance;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.appearance.YoAppearanceMaterial;
+import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
+import us.ihmc.modelFileLoaders.ModelFileLoaderConversionsHelper;
+import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.AbstractSDFMesh;
+import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFGeometry;
+import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFGeometry.HeightMap.Blend;
+import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFGeometry.HeightMap.Texture;
 import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFGeometry.Mesh;
 import us.ihmc.robotics.geometry.GeometryTools;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.robotDescription.LinkGraphicsDescription;
 
 
@@ -47,8 +47,8 @@ public class SDFGraphics3DObject extends LinkGraphicsDescription
 
    public SDFGraphics3DObject(List<? extends AbstractSDFMesh> sdfVisuals, List<String> resourceDirectories, RigidBodyTransform graphicsTransform)
    {
-      Matrix3d rotation = new Matrix3d();
-      Vector3d offset = new Vector3d();
+      RotationMatrix rotation = new RotationMatrix();
+      Vector3D offset = new Vector3D();
       graphicsTransform.get(rotation, offset);
 
       if(sdfVisuals != null)
@@ -60,8 +60,8 @@ public class SDFGraphics3DObject extends LinkGraphicsDescription
             rotate(rotation);
 
             RigidBodyTransform visualPose = ModelFileLoaderConversionsHelper.poseToTransform(sdfVisual.getPose());
-            Vector3d modelOffset = new Vector3d();
-            Matrix3d modelRotation = new Matrix3d();
+            Vector3D modelOffset = new Vector3D();
+            RotationMatrix modelRotation = new RotationMatrix();
             visualPose.get(modelRotation, modelOffset);
 
             if (SHOW_COORDINATE_SYSTEMS)
@@ -109,6 +109,16 @@ public class SDFGraphics3DObject extends LinkGraphicsDescription
                }
             }
 
+            if (sdfVisual.getTransparency() != null)
+            {
+               // An appearance must exist in order to set a transparency value, whether a material was defined above or not.
+               if (appearance == null)
+               {
+                  appearance = new YoAppearanceRGBColor(DEFAULT_APPEARANCE.getColor(), 0.0);
+               }
+               appearance.setTransparency(Double.parseDouble(sdfVisual.getTransparency()));
+            }
+
             SDFGeometry geometry = sdfVisual.getGeometry();
             Mesh mesh = geometry.getMesh();
             if(mesh != null)
@@ -116,7 +126,7 @@ public class SDFGraphics3DObject extends LinkGraphicsDescription
                String resourceUrl = convertToResourceIdentifier(resourceDirectories, mesh.getUri());
                if(mesh.getScale() != null)
                {
-                  Vector3d scale = ModelFileLoaderConversionsHelper.stringToVector3d(mesh.getScale());
+                  Vector3D scale = ModelFileLoaderConversionsHelper.stringToVector3d(mesh.getScale());
                   scale(scale);
                }
                String submesh = null;
@@ -151,10 +161,10 @@ public class SDFGraphics3DObject extends LinkGraphicsDescription
             }
             else if(geometry.getPlane() != null)
             {
-               Vector3d normal = ModelFileLoaderConversionsHelper.stringToNormalizedVector3d(geometry.getPlane().getNormal());
-               Vector2d size = ModelFileLoaderConversionsHelper.stringToVector2d(geometry.getPlane().getSize());
+               Vector3D normal = ModelFileLoaderConversionsHelper.stringToNormalizedVector3d(geometry.getPlane().getNormal());
+               Vector2D size = ModelFileLoaderConversionsHelper.stringToVector2d(geometry.getPlane().getSize());
 
-               AxisAngle4d planeRotation = GeometryTools.getAxisAngleFromZUpToVector(normal);
+               AxisAngle planeRotation = GeometryTools.getAxisAngleFromZUpToVector(normal);
                rotate(planeRotation);
                addCube(size.getX(), size.getY(), 0.005, getDefaultAppearanceIfNull(appearance));
             }

@@ -1,8 +1,8 @@
 package us.ihmc.graphicsDescription.plotting.frames;
 
-import javax.vecmath.Vector2d;
+import us.ihmc.euclid.tuple2D.Vector2D;
 
 public interface PlotterSpaceConverter
 {
-   public Vector2d getConversionToSpace(PlotterFrameSpace plotterFrameType);
+   public Vector2D getConversionToSpace(PlotterFrameSpace plotterFrameType);
 }

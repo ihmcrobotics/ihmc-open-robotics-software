@@ -7,13 +7,13 @@ import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.vecmath.Point2d;
-import javax.vecmath.Point3d;
-
 import org.junit.Test;
 
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.tools.testing.MutationTestingTools;
+import us.ihmc.commons.MutationTestFacilitator;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple3D.Point3D;
 
 public class PlanarRegionsListTest
 {
@@ -63,7 +63,7 @@ public class PlanarRegionsListTest
       for (int i = 0; i < 2; i++)
          assertTrue(planarRegionsList.getPlanarRegion(i).epsilonEquals(planarRegions.get(i), 1.0e-10));
 
-      Point2d point2d = new Point2d();
+      Point2D point2d = new Point2D();
       List<PlanarRegion> result;
 
       // Do a bunch of trivial queries with findPlanarRegionsContainingPointByProjectionOntoXYPlane(double x, double y)
@@ -123,10 +123,10 @@ public class PlanarRegionsListTest
       result = planarRegionsList.findPlanarRegionsContainingPointByProjectionOntoXYPlane(point2d);
       assertNull(result);
 
-      Point3d point3d = new Point3d();
+      Point3D point3d = new Point3D();
       double epsilon = 1.0e-3;
 
-      // Do a bunch of trivial queries with findPlanarRegionsContainingPoint(Point3d point, double epsilon)
+      // Do a bunch of trivial queries with findPlanarRegionsContainingPoint(Point3D point, double epsilon)
       point3d.set(0.0, 0.0, 0.0);
       result = planarRegionsList.findPlanarRegionsContainingPoint(point3d, epsilon);
       assertEquals(1, result.size());
@@ -175,8 +175,6 @@ public class PlanarRegionsListTest
 
    public static void main(String[] args)
    {
-      String targetTests = PlanarRegionsListTest.class.getName();
-      String targetClassesInSamePackage = PlanarRegionsList.class.getName();
-      MutationTestingTools.doPITMutationTestAndOpenResult(targetTests, targetClassesInSamePackage);
+      MutationTestFacilitator.facilitateMutationTestForClass(PlanarRegionsList.class, PlanarRegionsListTest.class);
    }
 }

@@ -1,13 +1,5 @@
 package us.ihmc.jMonkeyEngineToolkit.jme;
 
-import us.ihmc.graphicsDescription.Graphics3DObject;
-import us.ihmc.graphicsDescription.MeshDataGenerator;
-import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.graphicsDescription.instructions.Graphics3DAddMeshDataInstruction;
-import us.ihmc.jMonkeyEngineToolkit.jme.JMEAssetLocator;
-import us.ihmc.jMonkeyEngineToolkit.jme.JMEGraphicsObject;
-import us.ihmc.robotics.Axis;
-
 import com.jme3.app.SimpleApplication;
 import com.jme3.light.AmbientLight;
 import com.jme3.light.DirectionalLight;
@@ -15,6 +7,12 @@ import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
 import com.jme3.system.AppSettings;
+
+import us.ihmc.graphicsDescription.Graphics3DObject;
+import us.ihmc.graphicsDescription.MeshDataGenerator;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.instructions.Graphics3DAddMeshDataInstruction;
+import us.ihmc.robotics.Axis;
 
 public class JMEChangeMeshTester extends SimpleApplication
 {

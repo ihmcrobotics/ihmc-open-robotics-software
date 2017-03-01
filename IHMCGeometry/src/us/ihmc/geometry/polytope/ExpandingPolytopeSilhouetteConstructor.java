@@ -1,10 +1,10 @@
 package us.ihmc.geometry.polytope;
 
-import javax.vecmath.Vector3d;
+import us.ihmc.euclid.tuple3D.Vector3D;
 
 public class ExpandingPolytopeSilhouetteConstructor
 {
-   public static void computeSilhouetteFromW(ExpandingPolytopeEntry triangleEntrySeenByW, Vector3d w, ExpandingPolytopeEdgeList edgeListToPack)
+   public static void computeSilhouetteFromW(ExpandingPolytopeEntry triangleEntrySeenByW, Vector3D w, ExpandingPolytopeEdgeList edgeListToPack)
    {
       triangleEntrySeenByW.setObsolete(); // This triangle is visible from w.
 
@@ -22,13 +22,13 @@ public class ExpandingPolytopeSilhouetteConstructor
       }
    }
 
-   public static void silhouette(ExpandingPolytopeEntry entry, int i, Vector3d w, ExpandingPolytopeEdgeList edgeList)
+   public static void silhouette(ExpandingPolytopeEntry entry, int i, Vector3D w, ExpandingPolytopeEdgeList edgeList)
    {
       if ((entry != null) && !entry.isObsolete())
       {
          // Facet entry is visited for the first time.
 
-         Vector3d closestPointToOrigin = entry.getClosestPointToOrigin();
+         Vector3D closestPointToOrigin = entry.getClosestPointToOrigin();
          if (isNotVisibleFromW(closestPointToOrigin, w))
          {
             // Facet entry is not visible from w.
@@ -46,7 +46,7 @@ public class ExpandingPolytopeSilhouetteConstructor
       }
    }
 
-   public static boolean isNotVisibleFromW(Vector3d closestPointToOriginOnTriangle, Vector3d w)
+   public static boolean isNotVisibleFromW(Vector3D closestPointToOriginOnTriangle, Vector3D w)
    {
       return closestPointToOriginOnTriangle.dot(w) < closestPointToOriginOnTriangle.dot(closestPointToOriginOnTriangle);
    }

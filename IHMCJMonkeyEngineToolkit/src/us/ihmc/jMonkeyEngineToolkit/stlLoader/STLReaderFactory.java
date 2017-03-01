@@ -17,11 +17,11 @@
  */
 package us.ihmc.jMonkeyEngineToolkit.stlLoader;
 
-import com.jme3.asset.AssetInfo;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.regex.Pattern;
+
+import com.jme3.asset.AssetInfo;
 
 public class STLReaderFactory
 {

@@ -1,35 +1,35 @@
 package us.ihmc.atlas.operatorInterfaceDebugging;
 
+import us.ihmc.atlas.AtlasRobotModel;
+import us.ihmc.atlas.AtlasRobotVersion;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.handControl.packetsAndConsumers.HandSensorData;
+import us.ihmc.commons.Conversions;
+import us.ihmc.communication.net.NetStateListener;
+import us.ihmc.communication.packetCommunicator.PacketCommunicator;
+import us.ihmc.communication.util.NetworkPorts;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandJointAnglePacket;
+import us.ihmc.humanoidRobotics.communication.packets.sensing.PointCloudWorldPacket;
+import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotModels.FullRobotModelUtils;
+import us.ihmc.robotics.random.RandomGeometry;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.robotics.sensors.ForceSensorDefinition;
+import us.ihmc.robotics.sensors.IMUDefinition;
+import us.ihmc.robotiq.data.RobotiqHandSensorData;
+import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
+import us.ihmc.tools.io.printing.PrintTools;
+import us.ihmc.tools.thread.ThreadTools;
+
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Random;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-
-import javax.vecmath.Vector3d;
-
-import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotModels.FullRobotModelUtils;
-import us.ihmc.atlas.AtlasRobotModel;
-import us.ihmc.atlas.AtlasRobotVersion;
-import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.communication.net.NetStateListener;
-import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-import us.ihmc.communication.util.NetworkPorts;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandJointAnglePacket;
-import us.ihmc.humanoidRobotics.communication.packets.sensing.PointCloudWorldPacket;
-import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
-import us.ihmc.robotics.random.RandomTools;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.sensors.ForceSensorDefinition;
-import us.ihmc.robotics.sensors.IMUDefinition;
-import us.ihmc.robotics.time.TimeTools;
-import us.ihmc.robotiq.data.RobotiqHandSensorData;
-import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
-import us.ihmc.tools.io.printing.PrintTools;
-import us.ihmc.tools.thread.ThreadTools;
 
 public class AtlasNoSimPacketBlaster implements Runnable
 {
@@ -106,7 +106,7 @@ public class AtlasNoSimPacketBlaster implements Runnable
 
       RobotConfigurationData robotConfigurationData = new RobotConfigurationData(joints, forceSensorDefinitions, null, imuDefinitions);
 
-      robotConfigurationData.setTimestamp(random.nextInt(1800) * TimeTools.milliSecondsToNanoSeconds(100));
+      robotConfigurationData.setTimestamp(random.nextInt(1800) * Conversions.milliSecondsToNanoSeconds(100));
 
       robotConfigurationData.jointAngles = new float[numberOfJoints];
       for (int i = 0; i < numberOfJoints; i++)
@@ -117,9 +117,9 @@ public class AtlasNoSimPacketBlaster implements Runnable
       }
 
 //      robotConfigurationData.setRootTranslation(RandomTools.generateRandomVector(random, random.nextDouble() * 1000.0));
-      robotConfigurationData.setRootTranslation(new Vector3d(random.nextDouble(), random.nextDouble(), 1.0 * random.nextDouble()));
+      robotConfigurationData.setRootTranslation(new Vector3D(random.nextDouble(), random.nextDouble(), 1.0 * random.nextDouble()));
 //      robotConfigurationData.setRootTranslation(new Vector3d(0.0, 0.0, 1.0));
-      robotConfigurationData.setRootOrientation(RandomTools.generateRandomQuaternion(random));
+      robotConfigurationData.setRootOrientation(RandomGeometry.nextQuaternion(random));
 
       for (int sensorNumber = 0; sensorNumber < forceSensorDefinitions.length; sensorNumber++)
       {
@@ -136,8 +136,8 @@ public class AtlasNoSimPacketBlaster implements Runnable
       
       PointCloudWorldPacket pointCloudWorldPacket = new PointCloudWorldPacket();
       pointCloudWorldPacket.setTimestamp(1);
-//      pointCloudWorldPacket.setDecayingWorldScan(new Point3d[100]);
-//      pointCloudWorldPacket.setGroundQuadTreeSupport(new Point3d[100]);
+//      pointCloudWorldPacket.setDecayingWorldScan(new Point3D[100]);
+//      pointCloudWorldPacket.setGroundQuadTreeSupport(new Point3D[100]);
       
       if (skip++ > 20)
       {
@@ -153,7 +153,7 @@ public class AtlasNoSimPacketBlaster implements Runnable
          ThreadTools.sleepSeconds(5.0);
       }
       
-      RobotiqHandSensorData robotiqHandSensorData = new RobotiqHandSensorData();
+      HandSensorData robotiqHandSensorData = new RobotiqHandSensorData();
       
       HandJointAnglePacket leftHandJointAnglePacket = new HandJointAnglePacket();
       double[][] leftFingerJointAngles = robotiqHandSensorData.getFingerJointAngles(RobotSide.LEFT);

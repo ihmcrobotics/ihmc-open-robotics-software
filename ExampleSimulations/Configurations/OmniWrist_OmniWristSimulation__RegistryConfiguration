@@ -1,0 +1,11 @@
+root*false*false
+root.OmniWrist*false*false
+root.OmniWrist.OmniWristController*false*false
+root.OmniWrist.OmniWristController.functionAYoFunGen*false*false
+root.OmniWrist.OmniWristController.functionBYoFunGen*false*false
+root.OmniWrist.weldB1*false*false
+root.OmniWrist.weldB2*false*false
+root.OmniWrist.weldC1*false*false
+root.OmniWrist.weldC2*false*false
+root.OmniWrist.weldD1*false*false
+root.OmniWrist.weldD2*false*false

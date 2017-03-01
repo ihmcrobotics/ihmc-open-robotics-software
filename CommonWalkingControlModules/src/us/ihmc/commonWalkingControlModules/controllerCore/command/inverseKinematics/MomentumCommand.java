@@ -52,7 +52,7 @@ public class MomentumCommand implements InverseKinematicsCommand<MomentumCommand
       selectionMatrix.set(2, 5, 1.0);
 
       momentum.reshape(selectionMatrix.getNumCols(), 1);
-      MatrixTools.setDenseMatrixFromTuple3d(momentum, linearMomentum.getVector(), 3, 0);
+      linearMomentum.getVector().get(3, 0, momentum);
    }
 
    public void setLinearMomentumXY(FrameVector2d linearMomentum)
@@ -62,7 +62,7 @@ public class MomentumCommand implements InverseKinematicsCommand<MomentumCommand
       selectionMatrix.set(1, 4, 1.0);
 
       momentum.reshape(selectionMatrix.getNumCols(), 1);
-      MatrixTools.setDenseMatrixFromTuple2d(momentum, linearMomentum.getVector(), 3, 0);
+      linearMomentum.getVector().get(3, 0, momentum);
    }
 
    public void setEmpty()

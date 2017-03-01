@@ -1,5 +1,7 @@
 package us.ihmc.robotics.math.trajectories.waypoints;
 
+import java.util.ArrayList;
+
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
@@ -9,8 +11,6 @@ import us.ihmc.robotics.math.trajectories.QuinticPolynomialTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.OneDoFTrajectoryPointInterface;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.TrajectoryPointListInterface;
 import us.ihmc.robotics.trajectories.providers.SettableDoubleProvider;
-
-import java.util.ArrayList;
 
 public class MultipleWaypointsMinimumJerkTrajectoryGenerator implements DoubleTrajectoryGenerator
 {

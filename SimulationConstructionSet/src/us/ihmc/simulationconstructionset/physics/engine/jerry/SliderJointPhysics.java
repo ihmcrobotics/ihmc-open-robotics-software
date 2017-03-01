@@ -1,14 +1,11 @@
 package us.ihmc.simulationconstructionset.physics.engine.jerry;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.SliderJoint;
 
-/**
- * @author Peter Abeles
- */
+
 public class SliderJointPhysics extends JointPhysics<SliderJoint>
 {
 
@@ -38,7 +35,7 @@ public class SliderJointPhysics extends JointPhysics<SliderJoint>
     * @param Rh_i Matrix3d in which the rotation matrix is stored
     */
    @Override
-   protected void jointDependentSetAndGetRotation(Matrix3d Rh_i)
+   protected void jointDependentSetAndGetRotation(RotationMatrix Rh_i)
    {
       Rh_i.setIdentity();
    }
@@ -114,16 +111,16 @@ public class SliderJointPhysics extends JointPhysics<SliderJoint>
       d_i.add(owner.getLink().getComOffset());
    }
 
-   private Vector3d w_hXr_i = new Vector3d();
-   private Vector3d temp1 = new Vector3d(), temp2 = new Vector3d();
-   private Vector3d vel_i = new Vector3d();    // vel_i is the vector velocity of joint i (vel_i = q_dot_i * u_i)
+   private Vector3D w_hXr_i = new Vector3D();
+   private Vector3D temp1 = new Vector3D(), temp2 = new Vector3D();
+   private Vector3D vel_i = new Vector3D();    // vel_i is the vector velocity of joint i (vel_i = q_dot_i * u_i)
 
    /**
     *
     * @param w_h Vector3d
     */
    @Override
-   protected void jointDependentFeatherstonePassTwo(Vector3d w_h)
+   protected void jointDependentFeatherstonePassTwo(Vector3D w_h)
    {
       // Coriolis Forces:
 

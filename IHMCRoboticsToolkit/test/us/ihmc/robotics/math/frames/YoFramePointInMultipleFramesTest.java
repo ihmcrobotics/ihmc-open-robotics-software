@@ -7,17 +7,15 @@ import static org.junit.Assert.fail;
 import java.util.ArrayList;
 import java.util.Random;
 
-import javax.vecmath.Point3d;
-
 import org.junit.Test;
 
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.math.frames.YoFramePointInMultipleFrames;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public class YoFramePointInMultipleFramesTest
 {
@@ -25,11 +23,11 @@ public class YoFramePointInMultipleFramesTest
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final ReferenceFrame frameA = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent("frameA", worldFrame,
-         RigidBodyTransform.generateRandomTransform(random));
+         EuclidCoreRandomTools.generateRandomRigidBodyTransform(random));
    private static final ReferenceFrame frameB = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent("frameB", worldFrame,
-         RigidBodyTransform.generateRandomTransform(random));
+         EuclidCoreRandomTools.generateRandomRigidBodyTransform(random));
    private static final ReferenceFrame frameC = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent("frameC", worldFrame,
-         RigidBodyTransform.generateRandomTransform(random));
+         EuclidCoreRandomTools.generateRandomRigidBodyTransform(random));
 
    private static final ReferenceFrame[] allFrames = new ReferenceFrame[] { worldFrame, frameA, frameB, frameC };
 
@@ -130,7 +128,7 @@ public class YoFramePointInMultipleFramesTest
       
       FramePoint framePoint = new FramePoint(worldFrame);
 
-      Point3d point = RandomTools.generateRandomPoint(random, 100.0, 100.0, 100.0);
+      Point3D point = RandomGeometry.nextPoint3D(random, 100.0, 100.0, 100.0);
       
       yoFramePointInMultipleFrames.set(point);
       framePoint.set(point);

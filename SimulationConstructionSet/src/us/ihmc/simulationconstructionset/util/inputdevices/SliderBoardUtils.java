@@ -32,7 +32,7 @@ public class SliderBoardUtils
       double minValueAllowed = Math.min(control.min, control.max);
       double maxValueAllowed = Math.max(control.min, control.max);
      
-      value = MathTools.clipToMinMax(control.var.getValueAsDouble(), minValueAllowed, maxValueAllowed);
+      value = MathTools.clamp(control.var.getValueAsDouble(), minValueAllowed, maxValueAllowed);
 
       return valueRatioConvertToIntWithExponents(sliderBoardMax, max, min, exponent, hires, value);
    }

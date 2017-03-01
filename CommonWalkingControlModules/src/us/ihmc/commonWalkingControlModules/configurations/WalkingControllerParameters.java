@@ -8,12 +8,12 @@ import us.ihmc.commonWalkingControlModules.controlModules.foot.ExplorationParame
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoPDGains;
 import us.ihmc.robotics.controllers.YoPIDGains;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
@@ -157,7 +157,7 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
     * This is particularly useful when manipulation was performed
     * with respect to world during standing to prevent "leaving a hand behind"
     * when the robot starts walking.
-    * 
+    *
     * @return whether the manipulation control should get prepared
     *  for walking.
     */
@@ -169,7 +169,7 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
     * When the controller is initialized, the pelvis will
     * smoothly cancel out the user orientation offset on
     * the first transfer of a walking sequence.
-    * 
+    *
     * @return whether the pelvis orientation control should get prepared
     *  for walking.
     */
@@ -181,7 +181,7 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
    /**
     * Specifies whether upper-body motion is allowed when the robot is walking
     * or during any exchange support.
-    * 
+    *
     * @return whether the upper-body can be moved during walking or not.
     */
    public boolean allowUpperBodyMotionDuringLocomotion()
@@ -191,9 +191,44 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
 
    public abstract boolean controlHeadAndHandsWithSliders();
 
+   /**
+    * The default transfer time used in the walking controller. This is the time interval spent in double support shifting
+    * the weight from one foot to the other while walking.
+    */
    public abstract double getDefaultTransferTime();
 
+   /**
+    * The default swing time used in the walking controller. This is the time interval spent in single support moving the
+    * swing foot to the next foothold.
+    */
    public abstract double getDefaultSwingTime();
+
+   /**
+    * This is the default transfer time used in the walking controller to shift the weight back to the center of the feet
+    * after executing a footstep plan.
+    */
+   public double getDefaultFinalTransferTime()
+   {
+      return getDefaultTransferTime();
+   }
+
+   /**
+    * This is the default transfer time used in the walking controller to shift the weight to the initial stance foot
+    * when starting to execute a footstep plan.
+    */
+   public double getDefaultInitialTransferTime()
+   {
+      return 1.0;
+   }
+
+   /**
+    * This is the minimum transfer time that the controller will allow when adjusting transfer times to achieve certain step
+    * times in footstep plans.
+    */
+   public double getMinimumTransferTime()
+   {
+      return 0.1;
+   }
 
    /** Used by the UI to limit motion range of the spine yaw. It doesn't have to be equal to the actual joint limit */
    public abstract double getSpineYawLimit();

@@ -4,9 +4,8 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Font;
 
-import javax.vecmath.Point2d;
-import javax.vecmath.Vector2d;
-
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.Line2d;
 import us.ihmc.robotics.geometry.LineSegment2d;
@@ -39,47 +38,47 @@ public class Graphics2DAdapter
       plotter2dAdapter.setFont(font);
    }
 
-   public void drawCircleWithCross(Point2d center, Vector2d radii)
+   public void drawCircleWithCross(Point2D center, Vector2D radii)
    {
       plotter2dAdapter.drawCircleWithCross(plotter2dAdapter.getMetersFrame(), center, radii);
    }
 
-   public void drawCircleWithRotatedCross(Point2d center, Vector2d radii)
+   public void drawCircleWithRotatedCross(Point2D center, Vector2D radii)
    {
       plotter2dAdapter.drawCircleWithRotatedCross(plotter2dAdapter.getMetersFrame(), center, radii);
    }
 
-   public void drawDiamond(Point2d center, Vector2d radii)
+   public void drawDiamond(Point2D center, Vector2D radii)
    {
       plotter2dAdapter.drawDiamond(plotter2dAdapter.getMetersFrame(), center, radii);
    }
 
-   public void drawDiamondWithCross(Point2d center, Vector2d radii)
+   public void drawDiamondWithCross(Point2D center, Vector2D radii)
    {
       plotter2dAdapter.drawDiamondWithCross(plotter2dAdapter.getMetersFrame(), center, radii);
    }
 
-   public void drawSquare(Point2d center, Vector2d radii)
+   public void drawSquare(Point2D center, Vector2D radii)
    {
       plotter2dAdapter.drawRectangle(plotter2dAdapter.getMetersFrame(), center, radii);
    }
 
-   public void drawSquareWithCross(Point2d center, Vector2d radii)
+   public void drawSquareWithCross(Point2D center, Vector2D radii)
    {
       plotter2dAdapter.drawSquareWithCross(plotter2dAdapter.getMetersFrame(), center, radii);
    }
 
-   public void drawSquareFilled(Point2d center, Vector2d radii)
+   public void drawSquareFilled(Point2D center, Vector2D radii)
    {
       plotter2dAdapter.drawSquareFilled(plotter2dAdapter.getMetersFrame(), center, radii);
    }
 
-   public void drawCross(Point2d center, Vector2d radii)
+   public void drawCross(Point2D center, Vector2D radii)
    {
       plotter2dAdapter.drawCross(plotter2dAdapter.getMetersFrame(), center, radii);
    }
 
-   public void drawRotatedCross(Point2d center, Vector2d radii)
+   public void drawRotatedCross(Point2D center, Vector2D radii)
    {
       plotter2dAdapter.drawRotatedCross(plotter2dAdapter.getMetersFrame(), center, radii);
    }
@@ -94,7 +93,7 @@ public class Graphics2DAdapter
       plotter2dAdapter.drawPolygonFilled(plotter2dAdapter.getMetersFrame(), polygon);
    }
 
-   public void drawString(String string, Point2d start)
+   public void drawString(String string, Point2D start)
    {
       plotter2dAdapter.drawString(plotter2dAdapter.getMetersFrame(), string, start);
    }
@@ -114,22 +113,22 @@ public class Graphics2DAdapter
       plotter2dAdapter.drawLineSegment(plotter2dAdapter.getMetersFrame(), firstPointX, firstPointY, secondPointX, secondPointY);
    }
 
-   public void drawOval(Point2d center, Vector2d radii)
+   public void drawOval(Point2D center, Vector2D radii)
    {
       plotter2dAdapter.drawOval(plotter2dAdapter.getMetersFrame(), center, radii);
    }
 
-   public void drawOvalFilled(Point2d center, Vector2d radii)
+   public void drawOvalFilled(Point2D center, Vector2D radii)
    {
       plotter2dAdapter.drawOvalFilled(plotter2dAdapter.getMetersFrame(), center, radii);
    }
 
-   public void drawPoint(Point2d point)
+   public void drawPoint(Point2D point)
    {
       plotter2dAdapter.drawPoint(plotter2dAdapter.getMetersFrame(), point);
    }
 
-   public void drawArc(Point2d center, Vector2d radii, double startAngle, double arcAngle)
+   public void drawArc(Point2D center, Vector2D radii, double startAngle, double arcAngle)
    {
       plotter2dAdapter.drawArc(plotter2dAdapter.getMetersFrame(), center, radii, startAngle, arcAngle);
    }

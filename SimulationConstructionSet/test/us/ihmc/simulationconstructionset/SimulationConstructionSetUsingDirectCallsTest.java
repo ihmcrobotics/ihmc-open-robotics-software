@@ -21,8 +21,6 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 
 import javax.swing.AbstractAction;
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
 
 import org.fest.swing.edt.FailOnThreadViolationRepaintManager;
 import org.junit.After;
@@ -31,8 +29,10 @@ import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.graphicsDescription.Graphics3DObject;
-import us.ihmc.graphicsDescription.input.SelectedListener;
 import us.ihmc.graphicsDescription.structure.Graphics3DNode;
 import us.ihmc.graphicsDescription.structure.Graphics3DNodeType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphic;
@@ -60,20 +60,17 @@ import us.ihmc.simulationconstructionset.gui.StandardSimulationGUI;
 import us.ihmc.simulationconstructionset.gui.ViewportWindow;
 import us.ihmc.simulationconstructionset.gui.camera.CameraTrackAndDollyYoVariablesHolder;
 import us.ihmc.simulationconstructionset.gui.config.GraphGroupList;
+import us.ihmc.simulationconstructionset.physics.CollisionArbiter;
 import us.ihmc.simulationconstructionset.physics.CollisionHandler;
-import us.ihmc.simulationconstructionset.physics.CollisionShape;
 import us.ihmc.simulationconstructionset.physics.CollisionShapeFactory;
 import us.ihmc.simulationconstructionset.physics.ScsCollisionConfigure;
 import us.ihmc.simulationconstructionset.physics.ScsCollisionDetector;
 import us.ihmc.simulationconstructionset.physics.ScsPhysics;
 import us.ihmc.simulationconstructionset.physics.collision.CollisionDetectionResult;
 import us.ihmc.simulationconstructionset.physics.collision.DefaultCollisionHandler;
+import us.ihmc.simulationconstructionset.physics.collision.simple.DoNothingCollisionArbiter;
 import us.ihmc.simulationconstructionset.physics.visualize.DefaultCollisionVisualizer;
 import us.ihmc.simulationconstructionset.robotcommprotocol.RobotSocketConnection;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.tools.continuousIntegration.IntegrationCategory;
-import us.ihmc.tools.inputDevices.keyboard.ModifierKeyInterface;
 import us.ihmc.tools.thread.ThreadTools;
 
 @ContinuousIntegrationPlan(categories = {IntegrationCategory.UI})
@@ -897,7 +894,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
       assertEquals(ticksIncrease, currentSCSIndex9, epsilon);
 
       scs.stopSimulationThread();
-      boolean isThreadRunningFromSCS = scs.isSimulationThreadUpAndRunning();
+      boolean isThreadRunningFromSCS = scs.isSimulationThreadRunning();
       assertFalse(isThreadRunningFromSCS);
 
       setInputAndOutputPointsWithoutCroppingInSCS(scs, inputPoint, outputPoint);
@@ -1255,9 +1252,11 @@ public class SimulationConstructionSetUsingDirectCallsTest
    {
       ScsCollisionConfigure collisionConfigure = createScsCollisionConfigure();
       ScsCollisionDetector collisionDetector = createScsCollisionDetector();
+      CollisionArbiter collisionArbiter = new DoNothingCollisionArbiter();
       CollisionHandler collisionHandler = new DefaultCollisionHandler(0.3, 0.3);
-      DefaultCollisionVisualizer visualize = new DefaultCollisionVisualizer(0.1, 0.1, scs, 100);
-      ScsPhysics physics = new ScsPhysics(collisionConfigure, collisionDetector, collisionHandler, visualize);
+      DefaultCollisionVisualizer visualize = new DefaultCollisionVisualizer(0.1, 0.1, 0.01, scs, 100);
+
+      ScsPhysics physics = new ScsPhysics(collisionConfigure, collisionDetector, collisionArbiter, collisionHandler, visualize);
 
       return physics;
    }
@@ -1266,19 +1265,6 @@ public class SimulationConstructionSetUsingDirectCallsTest
    {
       ScsCollisionDetector scsCollisionDetector = new ScsCollisionDetector()
       {
-
-         @Override
-         public void removeShape(Link link)
-         {
-
-         }
-
-         @Override
-         public CollisionShape lookupCollisionShape(Link link)
-         {
-            return null;
-         }
-
          @Override
          public void initialize()
          {
@@ -1348,21 +1334,6 @@ public class SimulationConstructionSetUsingDirectCallsTest
          assertFalse(two);
       else
          assertTrue(two);
-   }
-
-   private SelectedListener createSelectedListener()
-   {
-      SelectedListener selectedListener = new SelectedListener()
-      {
-         @Override
-         public void selected(Graphics3DNode graphics3dNode, ModifierKeyInterface modifierKeyInterface, Point3d location, Point3d cameraLocation,
-               Quat4d cameraRotation)
-         {
-
-         }
-      };
-
-      return selectedListener;
    }
 
    private DataProcessingFunction createDataProcessingFunction()

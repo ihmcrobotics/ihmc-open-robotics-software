@@ -3,9 +3,8 @@ package us.ihmc.simulationconstructionset.physics.engine.jerry;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.Plane;
 import us.ihmc.simulationconstructionset.FloatingPlanarJoint;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
@@ -16,9 +15,7 @@ import us.ihmc.simulationconstructionset.SpatialVector;
 import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
 import us.ihmc.simulationconstructionset.mathfunctions.Matrix;
 
-/**
- * @author Peter Abeles
- */
+
 public class FloatingPlanarJointPhysics extends JointPhysics<FloatingPlanarJoint>
 {
    private double[] k_qdd_t1 = new double[4], k_qdd_t2 = new double[4];
@@ -42,7 +39,7 @@ public class FloatingPlanarJointPhysics extends JointPhysics<FloatingPlanarJoint
    // Override featherstonePassOne since don't need to do everything...
 
    @Override
-   public void featherstonePassOne(Vector3d w_h, Vector3d v_h, Matrix3d Rh_0)
+   public void featherstonePassOne(Vector3D w_h, Vector3D v_h, RotationMatrix Rh_0)
    {
       // this.update(false);
       // this.jointTransform3D.get(Ri_0);
@@ -140,7 +137,7 @@ public class FloatingPlanarJointPhysics extends JointPhysics<FloatingPlanarJoint
    }
 
    @Override
-   protected void jointDependentFeatherstonePassTwo(Vector3d w_h)
+   protected void jointDependentFeatherstonePassTwo(Vector3D w_h)
    {
       // Coriolis Forces:
       c_hat_i.top = null;
@@ -166,7 +163,7 @@ public class FloatingPlanarJointPhysics extends JointPhysics<FloatingPlanarJoint
 
    }
 
-   private Vector3d wdXr = new Vector3d(), wXr = new Vector3d(), wXwXr = new Vector3d();
+   private Vector3D wdXr = new Vector3D(), wXr = new Vector3D(), wXwXr = new Vector3D();
    @Override
    public void featherstonePassFour(SpatialVector a_hat_h, int passNumber) throws UnreasonableAccelerationException
    {
@@ -423,7 +420,7 @@ public class FloatingPlanarJointPhysics extends JointPhysics<FloatingPlanarJoint
    }
 
 
-   private Vector3d delta_qd_xyz = new Vector3d();
+   private Vector3D delta_qd_xyz = new Vector3D();
 
    @Override
    protected void propagateImpulseSetDeltaVOnPath(SpatialVector delta_v_parent, SpatialVector delta_v_me)
@@ -495,7 +492,7 @@ public class FloatingPlanarJointPhysics extends JointPhysics<FloatingPlanarJoint
    private Matrix a_hat_matrix = new Matrix(3, 1);    // new Matrix(6,1);
 
    // private Matrix3d R0_i = new Matrix3d();
-   private final Vector3d a_hat_world_bot = new Vector3d();
+   private final Vector3D a_hat_world_bot = new Vector3D();
 
    private Matrix Y_hat_matrix = new Matrix(3, 1);    // new Matrix(6,1);
    private Matrix I_hat_inverse = new Matrix(3, 3);
@@ -514,31 +511,22 @@ public class FloatingPlanarJointPhysics extends JointPhysics<FloatingPlanarJoint
    }
 
    @Override
-   protected void jointDependentSetAndGetRotation(Matrix3d Rh_i)
+   protected void jointDependentSetAndGetRotation(RotationMatrix Rh_i)
    {
       Rh_i.setIdentity();    // We probably can rely on Rh_i not changing its 1 and 0 elements but let's just be safe.
-      double cosQ = Math.cos(owner.q_rot.getDoubleValue()), sinQ = Math.sin(owner.q_rot.getDoubleValue());
 
       if (owner.type == Plane.YZ)
       {
-         Rh_i.setElement(1, 1, cosQ);
-         Rh_i.setElement(2, 2, cosQ);
-         Rh_i.setElement(1, 2, -sinQ);
-         Rh_i.setElement(2, 1, sinQ);
+         Rh_i.setToRollMatrix(owner.q_rot.getDoubleValue());
+         
       }    // Rotation about X
       else if (owner.type == Plane.XZ)
       {
-         Rh_i.setElement(0, 0, cosQ);
-         Rh_i.setElement(2, 2, cosQ);
-         Rh_i.setElement(0, 2, sinQ);
-         Rh_i.setElement(2, 0, -sinQ);
+         Rh_i.setToPitchMatrix(owner.q_rot.getDoubleValue());
       }    // Rotation about Y
       else
       {
-         Rh_i.setElement(0, 0, cosQ);
-         Rh_i.setElement(1, 1, cosQ);
-         Rh_i.setElement(0, 1, -sinQ);
-         Rh_i.setElement(1, 0, sinQ);
+         Rh_i.setToYawMatrix(owner.q_rot.getDoubleValue());
       }    // Rotation about Z
    }
 }

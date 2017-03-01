@@ -1,12 +1,11 @@
 package us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PointAccelerationCommand;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.controllers.PositionPIDGains;
 import us.ihmc.robotics.controllers.PositionPIDGainsInterface;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -18,9 +17,9 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private final Point3d desiredPositionInWorld = new Point3d();
-   private final Vector3d desiredLinearVelocityInWorld = new Vector3d();
-   private final Vector3d feedForwardLinearAccelerationInWorld = new Vector3d();
+   private final Point3D desiredPositionInWorld = new Point3D();
+   private final Vector3D desiredLinearVelocityInWorld = new Vector3D();
+   private final Vector3D feedForwardLinearAccelerationInWorld = new Vector3D();
 
    private final PositionPIDGains gains = new PositionPIDGains();
 
@@ -34,6 +33,11 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
    public void set(RigidBody base, RigidBody endEffector)
    {
       pointAccelerationCommand.set(base, endEffector);
+   }
+
+   public void setPrimaryBase(RigidBody primaryBase)
+   {
+      pointAccelerationCommand.setPrimaryBase(primaryBase);
    }
 
    public void setGains(PositionPIDGainsInterface gains)
@@ -67,7 +71,7 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
       pointAccelerationCommand.setWeight(weight);
    }
 
-   public void setWeightsForSolver(Vector3d weight)
+   public void setWeightsForSolver(Vector3D weight)
    {
       pointAccelerationCommand.setWeights(weight);
    }

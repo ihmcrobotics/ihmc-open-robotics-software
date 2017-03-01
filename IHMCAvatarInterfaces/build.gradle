@@ -42,15 +42,15 @@ ihmc.configureForIHMCOpenSourceBintrayPublish(false, "mavenJava", "maven-release
 dependencies {
 	testCompile group: 'junit', name: 'junit', version: '4.11'
 
-	compile group: 'javax.vecmath', name: 'vecmath', version: '1.5.2'
+	compile group: 'us.ihmc', name: 'euclid-core', version: '0.4.2'
 	compile group: 'com.martiansoftware', name: 'jsap', version: '2.1'
 	compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
 	compile group: 'us.ihmc.thirdparty.jinput', name: 'jinput', version: '160414'
 	compile group: 'us.ihmc', name: 'IHMCRealtime', version: '1.1.2'
 	compile group: 'org.ros.rosjava_core', name: 'rosjava', version: '0.2.1'
 	compile group: 'org.ros.rosjava_bootstrap', name: 'message_generation', version: '0.2.1'
-	compile group: 'org.ejml', name: 'core', version: '0.28'
-	compile group: 'org.ejml', name: 'dense64', version: '0.28'
+	compile group: 'org.ejml', name: 'core', version: '0.30'
+	compile group: 'org.ejml', name: 'dense64', version: '0.30'
 	compile group: 'org.boofcv', name: 'geo', version: '0.24.1'
 	compile group: 'org.ros.rosjava_messages', name: 'std_msgs', version: '0.5.9'
 	compile group: 'org.ros.rosjava_messages', name: 'geometry_msgs', version: '1.11.7'
@@ -62,7 +62,9 @@ dependencies {
 	compile group: 'us.ihmc.thirdparty.jme', name: 'jme3-core', version: '3.1.0-internal4'
 	compile group: 'com.github.wendykierp', name: 'JTransforms', version: '3.1'
 	compile group: 'org.reflections', name: 'reflections', version: '0.9.10'
-	compile group: 'us.ihmc', name: 'RobotEnvironmentAwareness', version: '0.2.2'
+	compile group: 'us.ihmc', name: 'RobotEnvironmentAwareness', version: '0.3'
+    
+    testCompile group: 'us.ihmc', name: 'ihmc-continuous-integration-framework', version: '0.9.4'
 
 	compile ihmc.getProjectDependency(":IHMCROSTools")
 	compile ihmc.getProjectDependency(":CommonWalkingControlModules")
@@ -78,6 +80,7 @@ dependencies {
 	compile ihmc.getProjectDependency(":IHMCWholeBodyController")
 	compile ihmc.getProjectDependency(":IHMCStateEstimation")
 	compile ihmc.getProjectDependency(":IHMCJavaToolkit")
+    compile ihmc.getProjectDependency(":IHMCJavaExtensions")
 	compile ihmc.getProjectDependency(":IHMCRoboticsToolkit")
 	compile ihmc.getProjectDependency(":IHMCRobotBehaviors")
 	compile ihmc.getProjectDependency(":Vicon")
@@ -87,7 +90,8 @@ dependencies {
     compile ihmc.getProjectDependency(":IHMCRobotDataVisualizer")
     compile ihmc.getProjectDependency(":IHMCFootstepPlanning")
 
-	testCompile ihmc.getProjectDependency(":IHMCUnitTesting")
+	testCompile ihmc.getProjectTestDependency(":IHMCRoboticsToolkit")
+	testCompile ihmc.getProjectTestDependency(":IHMCJavaExtensions")
 	testCompile ihmc.getProjectTestDependency(":IHMCFootstepPlanning")
 	testCompile ihmc.getProjectTestDependency(":IHMCHumanoidRobotics")
 }

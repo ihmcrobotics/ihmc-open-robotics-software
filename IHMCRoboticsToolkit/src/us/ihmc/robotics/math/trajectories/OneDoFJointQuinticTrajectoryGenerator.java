@@ -3,8 +3,8 @@ package us.ihmc.robotics.math.trajectories;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.trajectories.providers.DoubleProvider;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.robotics.trajectories.providers.DoubleProvider;
 
 public class OneDoFJointQuinticTrajectoryGenerator implements OneDoFJointTrajectoryGenerator
 {
@@ -60,7 +60,7 @@ public class OneDoFJointQuinticTrajectoryGenerator implements OneDoFJointTraject
    public void compute(double time)
    {
       this.currentTime.set(time);
-      time = MathTools.clipToMinMax(time, 0.0, trajectoryTime.getDoubleValue());
+      time = MathTools.clamp(time, 0.0, trajectoryTime.getDoubleValue());
       polynomial.compute(time);
       if (isDone() || trajectoryTime.getDoubleValue() <= 0.0)
       {

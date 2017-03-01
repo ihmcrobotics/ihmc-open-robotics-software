@@ -3,9 +3,9 @@ package us.ihmc.graphicsDescription.appearance;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 
-import javax.vecmath.Color3f;
-
 import org.apache.commons.lang3.NotImplementedException;
+
+import us.ihmc.robotics.dataStructures.MutableColor;
 
 public class YoAppearanceTexture extends YoAppearanceTransparency
 {
@@ -37,7 +37,7 @@ public class YoAppearanceTexture extends YoAppearanceTransparency
    }
 
    @Override
-   public Color3f getColor()
+   public MutableColor getColor()
    {
       throw new NotImplementedException("getColor() is not implemented");
    }

@@ -4,9 +4,8 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -28,7 +27,7 @@ public class EmergencyValveEnvironment implements CommonAvatarEnvironmentInterfa
       this(0.75f,-0.38f,1.1811f, 0.0);
    }
 
-   public EmergencyValveEnvironment(ArrayList<Point3d> valveLocations, LinkedHashMap<Point3d, Double> valveYawAngles_degrees)
+   public EmergencyValveEnvironment(ArrayList<Point3D> valveLocations, LinkedHashMap<Point3D, Double> valveYawAngles_degrees)
    {
       double forceVectorScale = 1.0 / 50.0;
 
@@ -36,7 +35,7 @@ public class EmergencyValveEnvironment implements CommonAvatarEnvironmentInterfa
       combinedTerrainObject.addTerrainObject(DefaultCommonAvatarEnvironment.setUpGround("Ground"));
 
       int i = 0;
-      for (Point3d valveLocation : valveLocations)
+      for (Point3D valveLocation : valveLocations)
       {
          String valveRobotName = "ValveRobot" + i;
          createValve(valveRobotName, ValveType.BIG_VALVE, valveLocation.getX(), valveLocation.getY(), valveLocation.getZ(), valveYawAngles_degrees.get(valveLocation),
@@ -59,10 +58,10 @@ public class EmergencyValveEnvironment implements CommonAvatarEnvironmentInterfa
    private void createValve(String valveRobotName, ValveType valveType, double x, double y, double z, double yaw_degrees, double forceVectorScale)
    {
       FramePose valvePose = new FramePose(ReferenceFrame.getWorldFrame());
-      Point3d position = new Point3d(x, y, z);
-      Quat4d orientation = new Quat4d();
+      Point3D position = new Point3D(x, y, z);
+      Quaternion orientation = new Quaternion();
 
-      RotationTools.convertYawPitchRollToQuaternion(Math.toRadians(yaw_degrees), Math.toRadians(0), Math.toRadians(0), orientation);
+      orientation.setYawPitchRoll(Math.toRadians(yaw_degrees), Math.toRadians(0), Math.toRadians(0));
       valvePose.setPose(position, orientation);
 
       ContactableValveRobot valve = new ContactableValveRobot(valveRobotName, valveType, 0.5, valvePose);

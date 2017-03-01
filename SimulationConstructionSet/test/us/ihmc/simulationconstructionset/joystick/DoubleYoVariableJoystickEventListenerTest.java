@@ -4,14 +4,13 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.Random;
 
-import net.java.games.input.Component;
-import net.java.games.input.Event;
-
 import org.junit.Test;
 
+import net.java.games.input.Component;
+import net.java.games.input.Event;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 
 public class DoubleYoVariableJoystickEventListenerTest

@@ -2,14 +2,13 @@ package us.ihmc.commonWalkingControlModules.controlModules.chest;
 
 import static us.ihmc.communication.packets.Packet.INVALID_MESSAGE_ID;
 
-import javax.vecmath.Vector3d;
-
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OrientationFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.communication.controllerAPI.command.CommandArrayDeque;
 import us.ihmc.communication.packets.Packet;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ChestTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.GoHomeCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
@@ -38,7 +37,7 @@ public class TaskspaceChestControlState extends ChestControlState
 
    private final OrientationFeedbackControlCommand orientationFeedbackControlCommand = new OrientationFeedbackControlCommand();
    private final YoFrameVector yoChestAngularWeight = new YoFrameVector("chestWeight", null, registry);
-   private final Vector3d chestAngularWeight = new Vector3d();
+   private final Vector3D chestAngularWeight = new Vector3D();
    private final YoOrientationPIDGainsInterface gains;
 
    private final FrameOrientation desiredOrientation = new FrameOrientation();
@@ -303,7 +302,7 @@ public class TaskspaceChestControlState extends ChestControlState
       this.lastCommandId.set(lastCommandId);
    }
 
-   public void setWeights(Vector3d weights)
+   public void setWeights(Vector3D weights)
    {
       yoChestAngularWeight.set(weights);
    }

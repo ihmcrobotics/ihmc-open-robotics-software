@@ -18,7 +18,6 @@ import us.ihmc.graphicsDescription.HeightMap;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.robotics.controllers.ControllerFailureListener;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.time.GlobalTimer;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -85,8 +84,16 @@ public class DRCFlatGroundWalkingTrack
       avatarSimulationFactory.setGuiInitialSetup(guiInitialSetup);
       avatarSimulationFactory.setHumanoidGlobalDataProducer(null);
       avatarSimulation = avatarSimulationFactory.createAvatarSimulation();
-
+      initialize();
       avatarSimulation.start();
+   }
+   
+   /**
+    * used to inject anything you need into scs before the sim starts
+    */
+   public void initialize()
+   {
+	   
    }
 
    public void attachControllerFailureListener(ControllerFailureListener listener)
@@ -110,6 +117,5 @@ public class DRCFlatGroundWalkingTrack
       {
          avatarSimulation.dispose();
       }
-      GlobalTimer.clearTimers();
    }
 }

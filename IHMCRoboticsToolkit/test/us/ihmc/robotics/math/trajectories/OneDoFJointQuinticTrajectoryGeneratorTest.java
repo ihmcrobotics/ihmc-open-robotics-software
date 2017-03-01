@@ -8,16 +8,15 @@ import static org.junit.Assert.fail;
 import org.junit.Before;
 import org.junit.Test;
 
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.math.trajectories.OneDoFJointQuinticTrajectoryGenerator;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.trajectories.providers.ConstantDoubleProvider;
-import us.ihmc.robotics.trajectories.providers.DoubleProvider;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RevoluteJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.robotics.trajectories.providers.ConstantDoubleProvider;
+import us.ihmc.robotics.trajectories.providers.DoubleProvider;
 
 public class OneDoFJointQuinticTrajectoryGeneratorTest
 {

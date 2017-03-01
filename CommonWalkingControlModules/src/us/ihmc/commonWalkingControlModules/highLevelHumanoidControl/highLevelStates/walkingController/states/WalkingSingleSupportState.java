@@ -11,6 +11,7 @@ import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.CenterOfMas
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPPlanner;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
+import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -27,6 +28,7 @@ public class WalkingSingleSupportState extends SingleSupportState
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private Footstep nextFootstep;
+   private final FootstepTiming footstepTiming = new FootstepTiming();
    private double swingTime;
 
    private final FramePose actualFootPoseInWorld = new FramePose(worldFrame);
@@ -120,10 +122,11 @@ public class WalkingSingleSupportState extends SingleSupportState
 
             walkingMessageHandler.reportWalkingAbortRequested();
             walkingMessageHandler.clearFootsteps();
+            footstepTiming.setTimings(swingTime, walkingMessageHandler.getDefaultTransferTime());
 
             balanceManager.clearICPPlan();
             balanceManager.setICPPlanSupportSide(supportSide);
-            balanceManager.addFootstepToPlan(nextFootstep);
+            balanceManager.addFootstepToPlan(nextFootstep, footstepTiming);
             balanceManager.updateICPPlanForSingleSupportDisturbances();
          }
       }
@@ -159,6 +162,8 @@ public class WalkingSingleSupportState extends SingleSupportState
 
       if (balanceManager.isRecoveringFromDoubleSupportFall())
       {
+         swingTime = defaultSwingTime;
+         footstepTiming.setTimings(swingTime, defaultTransferTime);
          nextFootstep = balanceManager.createFootstepForRecoveringFromDisturbance(swingSide, defaultSwingTime);
          nextFootstep.setTrajectoryType(TrajectoryType.DEFAULT);
          walkingMessageHandler.reportWalkingAbortRequested();
@@ -166,13 +171,10 @@ public class WalkingSingleSupportState extends SingleSupportState
       }
       else
       {
+         swingTime = walkingMessageHandler.getNextSwingTime();
+         footstepTiming.set(walkingMessageHandler.peekTiming(0));
          nextFootstep = walkingMessageHandler.poll();
       }
-
-      if (nextFootstep.hasTimings())
-         swingTime = nextFootstep.getSwingTime();
-      else
-         swingTime = defaultSwingTime;
 
       updateFootstepParameters();
 
@@ -180,9 +182,9 @@ public class WalkingSingleSupportState extends SingleSupportState
 
       balanceManager.setNextFootstep(nextFootstep);
 
-      balanceManager.addFootstepToPlan(nextFootstep);
-      balanceManager.addFootstepToPlan(walkingMessageHandler.peek(0));
-      balanceManager.addFootstepToPlan(walkingMessageHandler.peek(1));
+      balanceManager.addFootstepToPlan(nextFootstep, footstepTiming);
+      balanceManager.addFootstepToPlan(walkingMessageHandler.peek(0), walkingMessageHandler.peekTiming(0));
+      balanceManager.addFootstepToPlan(walkingMessageHandler.peek(1), walkingMessageHandler.peekTiming(1));
       balanceManager.setICPPlanSupportSide(supportSide);
       balanceManager.initializeICPPlanForSingleSupport(defaultSwingTime, defaultTransferTime, finalTransferTime);
 

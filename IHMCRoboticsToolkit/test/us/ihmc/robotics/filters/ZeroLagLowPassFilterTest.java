@@ -1,10 +1,10 @@
 package us.ihmc.robotics.filters;
 
+import static org.junit.Assert.assertEquals;
+
 import org.junit.Test;
 
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-
-import static org.junit.Assert.assertEquals;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public class ZeroLagLowPassFilterTest
 {

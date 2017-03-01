@@ -2,17 +2,15 @@ package us.ihmc.exampleSimulations.skippy;
 
 import static org.junit.Assert.assertTrue;
 
-import javax.vecmath.Vector3d;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import us.ihmc.exampleSimulations.skippy.SkippySimulationV2;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.IntegrationCategory;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.tools.continuousIntegration.IntegrationCategory;
 import us.ihmc.tools.thread.ThreadTools;
 
 @ContinuousIntegrationPlan(categories = {IntegrationCategory.IN_DEVELOPMENT})
@@ -38,7 +36,7 @@ public class SkippyV2Test
    public void testRecoveringFromPush() throws SimulationExceededMaximumTimeException
    {
       double pushDuration = 0.03;
-      Vector3d pushForce = new Vector3d(0.0, 0.0, -10.0);
+      Vector3D pushForce = new Vector3D(0.0, 0.0, -10.0);
 
       assertTrue(skippySimulationV2.run(1.0));
       pushRobot(pushDuration, pushForce);
@@ -46,10 +44,10 @@ public class SkippyV2Test
       System.out.println("testRecoveringFromPush");
    }
 
-   private void pushRobot(double time, Vector3d force) throws SimulationExceededMaximumTimeException
+   private void pushRobot(double time, Vector3D force) throws SimulationExceededMaximumTimeException
    {
       SkippyRobotV2 skippy = skippySimulationV2.getSkippy();
-      skippy.setRootJointForce(force.x, force.y, force.z);
+      skippy.setRootJointForce(force.getX(), force.getY(), force.getZ());
       assertTrue(skippySimulationV2.run(time));
       skippy.setRootJointForce(0.0, 0.0, 0.0);
       System.out.println("pushRobot");

@@ -2,9 +2,8 @@ package us.ihmc.graphicsDescription.plotting.artifact;
 
 import java.awt.BasicStroke;
 
-import javax.vecmath.Point2d;
-import javax.vecmath.Vector2d;
-
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.graphicsDescription.plotting.Graphics2DAdapter;
 import us.ihmc.graphicsDescription.plotting.Plotter2DAdapter;
 import us.ihmc.robotics.geometry.Line2d;
@@ -14,8 +13,8 @@ public class LineArtifact extends Artifact
 {
    private static final BasicStroke STROKE = new BasicStroke(1.0f);
    
-   private final Point2d point1 = new Point2d();
-   private final Point2d point2 = new Point2d(0.01, 0.01);
+   private final Point2D point1 = new Point2D();
+   private final Point2D point2 = new Point2D(0.01, 0.01);
 
    private final LineSegment2d tempLineSegment = new LineSegment2d();
    
@@ -33,7 +32,7 @@ public class LineArtifact extends Artifact
       setLine(line);
    }
 
-   public LineArtifact(String id, Point2d point1, Point2d point2)
+   public LineArtifact(String id, Point2D point1, Point2D point2)
    {
       super(id);
       this.point1.set(point1);
@@ -45,13 +44,13 @@ public class LineArtifact extends Artifact
       line.getTwoPointsOnLine(point1, point2);
    }
 
-   public void setPoints(Point2d point1, Point2d point2)
+   public void setPoints(Point2D point1, Point2D point2)
    {
       this.point1.set(point1);
       this.point2.set(point2);
    }
 
-   public void setPoints(Point2d point, Vector2d vector)
+   public void setPoints(Point2D point, Vector2D vector)
    {
       point1.set(point);
       point2.add(point1, vector);
@@ -78,7 +77,7 @@ public class LineArtifact extends Artifact
    }
 
    @Override
-   public void drawLegend(Plotter2DAdapter graphics, Point2d origin)
+   public void drawLegend(Plotter2DAdapter graphics, Point2D origin)
    {
    }
 

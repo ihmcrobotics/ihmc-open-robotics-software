@@ -7,18 +7,18 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Vector3d;
-
 import org.ejml.data.DenseMatrix64F;
 import org.junit.Test;
 
+import us.ihmc.commons.MutationTestFacilitator;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.matrix.Matrix3D;
+import us.ihmc.euclid.tools.EuclidCoreTestTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.robotics.Axis;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.tools.testing.JUnitTools;
-import us.ihmc.tools.testing.MutationTestingTools;
+import us.ihmc.robotics.testing.JUnitTools;
 
 public class RobotDescriptionTest
 {
@@ -39,17 +39,17 @@ public class RobotDescriptionTest
       assertEquals("rootLinkOne", rootLinkOne.getName());
 
       rootLinkOne.setMass(1.2);
-      rootLinkOne.setCenterOfMassOffset(new Vector3d(1.0, 2.0, 3.0));
+      rootLinkOne.setCenterOfMassOffset(new Vector3D(1.0, 2.0, 3.0));
       rootLinkOne.setMomentOfInertia(0.1, 0.2, 0.3);
 
       assertEquals(1.2, rootLinkOne.getMass(), 1e-7);
 
-      Vector3d comOffsetCheck = new Vector3d();
+      Vector3D comOffsetCheck = new Vector3D();
       rootLinkOne.getCenterOfMassOffset(comOffsetCheck);
-      JUnitTools.assertVector3dEquals("", new Vector3d(1.0, 2.0, 3.0), comOffsetCheck, 1e-7);
-      JUnitTools.assertVector3dEquals("", new Vector3d(1.0, 2.0, 3.0), rootLinkOne.getCenterOfMassOffset(), 1e-7);
+      EuclidCoreTestTools.assertTuple3DEquals("", new Vector3D(1.0, 2.0, 3.0), comOffsetCheck, 1e-7);
+      EuclidCoreTestTools.assertTuple3DEquals("", new Vector3D(1.0, 2.0, 3.0), rootLinkOne.getCenterOfMassOffset(), 1e-7);
 
-      Matrix3d momentOfInertiaCopy = rootLinkOne.getMomentOfInertiaCopy();
+      Matrix3D momentOfInertiaCopy = rootLinkOne.getMomentOfInertiaCopy();
       assertEquals(0.1, momentOfInertiaCopy.getM00(), 1e-7);
       assertEquals(0.2, momentOfInertiaCopy.getM11(), 1e-7);
       assertEquals(0.3, momentOfInertiaCopy.getM22(), 1e-7);
@@ -69,16 +69,16 @@ public class RobotDescriptionTest
       assertEquals(1, rootJoints.size());
       assertTrue(rootJointOne == rootJoints.get(0));
 
-      PinJointDescription rootJointTwo = new PinJointDescription("rootJointTwo", new Vector3d(-0.1, -0.2, -0.3), Axis.Y);
-      Vector3d jointAxisCheck = new Vector3d();
+      PinJointDescription rootJointTwo = new PinJointDescription("rootJointTwo", new Vector3D(-0.1, -0.2, -0.3), Axis.Y);
+      Vector3D jointAxisCheck = new Vector3D();
       rootJointTwo.getJointAxis(jointAxisCheck);
-      JUnitTools.assertVector3dEquals("", new Vector3d(0.0, 1.0, 0.0), jointAxisCheck, 1e-7);
+      EuclidCoreTestTools.assertTuple3DEquals("", new Vector3D(0.0, 1.0, 0.0), jointAxisCheck, 1e-7);
 
       LinkDescription rootLinkTwo = new LinkDescription("rootLinkTwo");
       assertEquals("rootLinkTwo", rootLinkTwo.getName());
 
       rootLinkTwo.setMass(1.2);
-      rootLinkTwo.setCenterOfMassOffset(new Vector3d(1.0, 2.0, 3.0));
+      rootLinkTwo.setCenterOfMassOffset(new Vector3D(1.0, 2.0, 3.0));
       rootLinkTwo.setMomentOfInertia(0.1, 0.2, 0.3);
 
       rootJointTwo.setLink(rootLinkTwo);
@@ -89,11 +89,11 @@ public class RobotDescriptionTest
       assertTrue(rootJointOne == robotDescription.getChildrenJoints().get(0));
       assertTrue(rootJointTwo == robotDescription.getChildrenJoints().get(1));
 
-      PinJointDescription childJointOne = new PinJointDescription("childJointOne", new Vector3d(1.2, 1.3, 7.7), Axis.Z);
+      PinJointDescription childJointOne = new PinJointDescription("childJointOne", new Vector3D(1.2, 1.3, 7.7), Axis.Z);
 
-      Vector3d jointOffsetCheck = new Vector3d();
+      Vector3D jointOffsetCheck = new Vector3D();
       childJointOne.getOffsetFromParentJoint(jointOffsetCheck);
-      JUnitTools.assertVector3dEquals("", new Vector3d(1.2, 1.3, 7.7), jointOffsetCheck, 1e-7);
+      EuclidCoreTestTools.assertTuple3DEquals("", new Vector3D(1.2, 1.3, 7.7), jointOffsetCheck, 1e-7);
 
       LinkDescription childLinkOne = new LinkDescription("childLinkOne");
       childLinkOne.setMass(3.3);
@@ -117,9 +117,9 @@ public class RobotDescriptionTest
       assertEquals(rootJointOne, childJointOne.getParentJoint());
       assertNull(rootJointOne.getParentJoint());
 
-      childJointOne.setOffsetFromParentJoint(new Vector3d(-0.4, -0.5, -0.6));
+      childJointOne.setOffsetFromParentJoint(new Vector3D(-0.4, -0.5, -0.6));
       childJointOne.getOffsetFromParentJoint(jointOffsetCheck);
-      JUnitTools.assertVector3dEquals("", new Vector3d(-0.4, -0.5, -0.6), jointOffsetCheck, 1e-7);
+      EuclidCoreTestTools.assertTuple3DEquals("", new Vector3D(-0.4, -0.5, -0.6), jointOffsetCheck, 1e-7);
 
       assertFalse(childJointOne.containsLimitStops());
 
@@ -155,10 +155,10 @@ public class RobotDescriptionTest
       assertTrue(childJointOne.containsLimitStops());
 
       childJointOne.getJointAxis(jointAxisCheck);
-      JUnitTools.assertVector3dEquals("", new Vector3d(0.0, 0.0, 1.0), jointAxisCheck, 1e-7);
+      EuclidCoreTestTools.assertTuple3DEquals("", new Vector3D(0.0, 0.0, 1.0), jointAxisCheck, 1e-7);
 
       //TODO: Do Axis vectors need to be normalized???
-      SliderJointDescription childJointTwo = new SliderJointDescription("childJointTwo", new Vector3d(0.5, 0.7, 0.9), new Vector3d(1.1, 2.2, 3.3));
+      SliderJointDescription childJointTwo = new SliderJointDescription("childJointTwo", new Vector3D(0.5, 0.7, 0.9), new Vector3D(1.1, 2.2, 3.3));
       assertTrue(Double.POSITIVE_INFINITY == childJointTwo.getEffortLimit());
       assertTrue(Double.POSITIVE_INFINITY == childJointTwo.getVelocityLimit());
       assertFalse(childJointTwo.containsLimitStops());
@@ -176,13 +176,13 @@ public class RobotDescriptionTest
       assertEquals(0.0, childJointTwo.getStiction(), 1e-7);
 
       childJointTwo.getJointAxis(jointAxisCheck);
-      JUnitTools.assertVector3dEquals("", new Vector3d(1.1, 2.2, 3.3), jointAxisCheck, 1e-7);
+      EuclidCoreTestTools.assertTuple3DEquals("", new Vector3D(1.1, 2.2, 3.3), jointAxisCheck, 1e-7);
 
       LinkDescription childLinkTwo = new LinkDescription("childLinkTwo");
       childLinkTwo.setMass(9.9);
       childLinkTwo.setMomentOfInertia(1.9, 2.2, 0.4);
 
-      JUnitTools.assertVector3dEquals("", new Vector3d(), childLinkTwo.getCenterOfMassOffset(), 1e-7);
+      EuclidCoreTestTools.assertTuple3DEquals("", new Vector3D(), childLinkTwo.getCenterOfMassOffset(), 1e-7);
       childJointTwo.setLink(childLinkTwo);
 
       rootJointOne.addJoint(childJointTwo);
@@ -192,11 +192,11 @@ public class RobotDescriptionTest
       assertTrue(childJointOne == childrenJoints.get(0));
       assertTrue(childJointTwo == childrenJoints.get(1));
 
-      PinJointDescription childJointThree = new PinJointDescription("childJointThree", new Vector3d(9.9, 0.0, -0.5), Axis.X);
+      PinJointDescription childJointThree = new PinJointDescription("childJointThree", new Vector3D(9.9, 0.0, -0.5), Axis.X);
       childJointThree.getOffsetFromParentJoint(jointOffsetCheck);
-      JUnitTools.assertVector3dEquals("", new Vector3d(9.9, 0.0, -0.5), jointOffsetCheck, 1e-7);
+      EuclidCoreTestTools.assertTuple3DEquals("", new Vector3D(9.9, 0.0, -0.5), jointOffsetCheck, 1e-7);
       childJointThree.getJointAxis(jointAxisCheck);
-      JUnitTools.assertVector3dEquals("", new Vector3d(1.0, 0.0, 0.0), jointAxisCheck, 1e-7);
+      EuclidCoreTestTools.assertTuple3DEquals("", new Vector3D(1.0, 0.0, 0.0), jointAxisCheck, 1e-7);
 
       LinkDescription childLinkThree = new LinkDescription("childLinkThree");
       childLinkThree.setMass(1.9);
@@ -245,9 +245,7 @@ public class RobotDescriptionTest
 
    public static void main(String[] args)
    {
-      String targetTests = RobotDescriptionTest.class.getName();
-      String targetClassesInSamePackage = MutationTestingTools.createClassSelectorStringFromTargetString(targetTests);
-      MutationTestingTools.doPITMutationTestAndOpenResult(targetTests, targetClassesInSamePackage);
+      MutationTestFacilitator.facilitateMutationTestForPackage(RobotDescriptionTest.class);
    }
 
 }

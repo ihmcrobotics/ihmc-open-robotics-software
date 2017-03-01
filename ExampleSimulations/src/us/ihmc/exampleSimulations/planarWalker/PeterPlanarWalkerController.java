@@ -260,19 +260,19 @@ public class PeterPlanarWalkerController implements RobotController
       //angleForCapture.set(0.8 *angleForCapture.getDoubleValue());
       
       //limit this angle
-      angleForCapture.set(MathTools.clipToMinMax(angleForCapture.getDoubleValue(), MAX_HIP_ANGLE));
+      angleForCapture.set(MathTools.clamp(angleForCapture.getDoubleValue(), MAX_HIP_ANGLE));
       
       //angle is opposite sign of desired velocity
       double velocityError = (filteredDesiredVelocity.getDoubleValue() - robot.getBodyVelocity());
       velocityErrorAngle.set(velocityError * scaleForVelToAngle.getDoubleValue());
-      velocityErrorAngle.set(MathTools.clipToMinMax(velocityErrorAngle.getDoubleValue(), maxVelocityErrorAngle.getDoubleValue()));
+      velocityErrorAngle.set(MathTools.clamp(velocityErrorAngle.getDoubleValue(), maxVelocityErrorAngle.getDoubleValue()));
 
       
       
       feedForwardAngle.set(filteredDesiredVelocity.getDoubleValue() * feedForwardGain.getDoubleValue());
       double angle = angleForCapture.getDoubleValue() + feedForwardAngle.getDoubleValue() + velocityErrorAngle.getDoubleValue();
     
-      angle = MathTools.clipToMinMax(angle, lastStepHipAngle.getDoubleValue() - stepToStepHipAngleDelta.getDoubleValue(), lastStepHipAngle.getDoubleValue() + stepToStepHipAngleDelta.getDoubleValue());
+      angle = MathTools.clamp(angle, lastStepHipAngle.getDoubleValue() - stepToStepHipAngleDelta.getDoubleValue(), lastStepHipAngle.getDoubleValue() + stepToStepHipAngleDelta.getDoubleValue());
       return angle;
    }
    

@@ -1,17 +1,16 @@
 package us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics;
 
-import javax.vecmath.Point2d;
-import javax.vecmath.Vector2d;
-
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.robotics.screwTheory.RigidBody;
 
 public class CenterOfPressureCommand implements InverseDynamicsCommand<CenterOfPressureCommand>
 {
    private RigidBody contactingRigidBody;
    private String contactingRigidBodyName;
-   private final Vector2d weightInSoleFrame = new Vector2d();
-   private final Point2d desiredCoPInSoleFrame = new Point2d();
+   private final Vector2D weightInSoleFrame = new Vector2D();
+   private final Point2D desiredCoPInSoleFrame = new Point2D();
 
    public CenterOfPressureCommand()
    {
@@ -39,22 +38,22 @@ public class CenterOfPressureCommand implements InverseDynamicsCommand<CenterOfP
       this.contactingRigidBodyName = contactingRigidBody.getName();
    }
 
-   public void setWeight(Vector2d weightInSoleFrame)
+   public void setWeight(Vector2D weightInSoleFrame)
    {
       this.weightInSoleFrame.set(weightInSoleFrame);
    }
 
-   public void setDesiredCoP(Point2d desiredCoPInSoleFrame)
+   public void setDesiredCoP(Point2D desiredCoPInSoleFrame)
    {
       this.desiredCoPInSoleFrame.set(desiredCoPInSoleFrame);
    }
 
-   public Point2d getDesiredCoPInSoleFrame()
+   public Point2D getDesiredCoPInSoleFrame()
    {
       return desiredCoPInSoleFrame;
    }
 
-   public Vector2d getWeightInSoleFrame()
+   public Vector2D getWeightInSoleFrame()
    {
       return weightInSoleFrame;
    }

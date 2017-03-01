@@ -2,18 +2,21 @@ package us.ihmc.robotics.geometry.transformables;
 
 import java.text.NumberFormat;
 
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.geometry.interfaces.GeometryObject;
+import us.ihmc.euclid.interfaces.GeometryObject;
+import us.ihmc.euclid.transform.interfaces.Transform;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.robotics.geometry.interfaces.SO3WaypointInterface;
 import us.ihmc.robotics.math.trajectories.waypoints.WaypointToStringTools;
 
 public class SO3Waypoint implements GeometryObject<SO3Waypoint>, SO3WaypointInterface<SO3Waypoint>
 {
-   private final TransformableQuat4d orientation = new TransformableQuat4d();
-   private final Vector3d angularVelocity = new Vector3d();
+   private final Quaternion orientation = new Quaternion();
+   private final Vector3D angularVelocity = new Vector3D();
 
    public SO3Waypoint()
    {
@@ -21,18 +24,18 @@ public class SO3Waypoint implements GeometryObject<SO3Waypoint>, SO3WaypointInte
    }
 
    @Override
-   public void setOrientation(Quat4d orientation)
+   public void setOrientation(QuaternionReadOnly orientation)
    {
-      this.orientation.setOrientation(orientation);
+      this.orientation.set(orientation);
    }
 
    @Override
-   public void setAngularVelocity(Vector3d angularVelocity)
+   public void setAngularVelocity(Vector3DReadOnly angularVelocity)
    {
       this.angularVelocity.set(angularVelocity);
    }
 
-   public void set(Quat4d orientation, Vector3d angularVelocity)
+   public void set(QuaternionReadOnly orientation, Vector3DReadOnly angularVelocity)
    {
       setOrientation(orientation);
       setAngularVelocity(angularVelocity);
@@ -54,13 +57,13 @@ public class SO3Waypoint implements GeometryObject<SO3Waypoint>, SO3WaypointInte
    @Override
    public void setOrientationToZero()
    {
-      orientation.set(0.0, 0.0, 0.0, 1.0);
+      orientation.setToZero();
    }
 
    @Override
    public void setAngularVelocityToZero()
    {
-      angularVelocity.set(0.0, 0.0, 0.0);
+      angularVelocity.setToZero();
    }
 
    @Override
@@ -73,13 +76,13 @@ public class SO3Waypoint implements GeometryObject<SO3Waypoint>, SO3WaypointInte
    @Override
    public void setOrientationToNaN()
    {
-      orientation.set(Double.NaN, Double.NaN, Double.NaN, Double.NaN);
+      orientation.setToNaN();
    }
 
    @Override
    public void setAngularVelocityToNaN()
    {
-      angularVelocity.set(Double.NaN, Double.NaN, Double.NaN);
+      angularVelocity.setToNaN();
    }
 
    @Override
@@ -92,7 +95,7 @@ public class SO3Waypoint implements GeometryObject<SO3Waypoint>, SO3WaypointInte
    @Override
    public boolean containsNaN()
    {
-      if (Double.isNaN(orientation.getX()) || Double.isNaN(orientation.getY()) || Double.isNaN(orientation.getZ()) || Double.isNaN(orientation.getW()))
+      if (Double.isNaN(orientation.getX()) || Double.isNaN(orientation.getY()) || Double.isNaN(orientation.getZ()) || Double.isNaN(orientation.getS()))
          return true;
       if (Double.isNaN(angularVelocity.getX()) || Double.isNaN(angularVelocity.getY()) || Double.isNaN(angularVelocity.getZ()))
          return true;
@@ -100,28 +103,28 @@ public class SO3Waypoint implements GeometryObject<SO3Waypoint>, SO3WaypointInte
    }
 
    @Override
-   public void getOrientation(Quat4d orientationToPack)
+   public void getOrientation(QuaternionBasics orientationToPack)
    {
       orientationToPack.set(orientation);
    }
 
    @Override
-   public void getAngularVelocity(Vector3d angularVelocityToPack)
+   public void getAngularVelocity(Vector3DBasics angularVelocityToPack)
    {
       angularVelocityToPack.set(angularVelocity);
    }
 
-   public void get(Quat4d orientationToPack, Vector3d angularVelocityToPack)
+   public void get(QuaternionBasics orientationToPack, Vector3DBasics angularVelocityToPack)
    {
       getOrientation(orientationToPack);
       getAngularVelocity(angularVelocityToPack);
    }
 
    @Override
-   public void applyTransform(RigidBodyTransform transform)
+   public void applyTransform(Transform transform)
    {
       orientation.applyTransform(transform);
-      transform.transform(angularVelocity);
+      angularVelocity.applyTransform(transform);
    }
 
    @Override
@@ -134,12 +137,12 @@ public class SO3Waypoint implements GeometryObject<SO3Waypoint>, SO3WaypointInte
       return true;
    }
 
-   public Quat4d getOrientation()
+   public QuaternionReadOnly getOrientation()
    {
       return orientation;
    }
 
-   public Vector3d getAngularVelocity()
+   public Vector3DReadOnly getAngularVelocity()
    {
       return angularVelocity;
    }
@@ -161,7 +164,7 @@ public class SO3Waypoint implements GeometryObject<SO3Waypoint>, SO3WaypointInte
 
    public double getOrientationQs()
    {
-      return orientation.getW();
+      return orientation.getS();
    }
 
    public double getAngularVelocityX()

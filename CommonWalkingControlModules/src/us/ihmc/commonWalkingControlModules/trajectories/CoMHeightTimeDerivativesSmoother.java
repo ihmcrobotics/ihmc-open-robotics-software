@@ -160,16 +160,16 @@ public class CoMHeightTimeDerivativesSmoother
 
       double jerk = comHeightAccelerationGain.getDoubleValue() * accelerationError + comHeightVelocityGain.getDoubleValue() * velocityError
             + comHeightGain.getDoubleValue() * heightError;
-      jerk = MathTools.clipToMinMax(jerk, -maximumJerk.getDoubleValue(), maximumJerk.getDoubleValue());
+      jerk = MathTools.clamp(jerk, -maximumJerk.getDoubleValue(), maximumJerk.getDoubleValue());
 
       smoothComHeightJerk.set(jerk);
 
       smoothComHeightAcceleration.add(jerk * dt);
-      smoothComHeightAcceleration.set(MathTools.clipToMinMax(smoothComHeightAcceleration.getDoubleValue(), maximumAcceleration.getDoubleValue()));
+      smoothComHeightAcceleration.set(MathTools.clamp(smoothComHeightAcceleration.getDoubleValue(), maximumAcceleration.getDoubleValue()));
 
       double newSmoothComHeightVelocity = smoothComHeightVelocity.getDoubleValue();
       newSmoothComHeightVelocity += smoothComHeightAcceleration.getDoubleValue() * dt;
-      newSmoothComHeightVelocity = MathTools.clipToMinMax(newSmoothComHeightVelocity, maximumVelocity.getDoubleValue());
+      newSmoothComHeightVelocity = MathTools.clamp(newSmoothComHeightVelocity, maximumVelocity.getDoubleValue());
 
       smoothComHeightAcceleration.set(newSmoothComHeightVelocity - smoothComHeightVelocity.getDoubleValue());
       smoothComHeightAcceleration.mul(1.0 / dt);

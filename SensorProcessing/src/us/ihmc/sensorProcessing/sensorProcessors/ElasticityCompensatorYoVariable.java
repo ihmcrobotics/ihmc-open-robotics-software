@@ -79,7 +79,7 @@ public class ElasticityCompensatorYoVariable extends DoubleYoVariable implements
       if (stiffness.getDoubleValue() > 1e-10)
       {
          jointDeflection = jointTau / stiffness.getDoubleValue();
-         jointDeflection = MathTools.clipToMinMax(jointDeflection, maximumDeflection.getDoubleValue());
+         jointDeflection = MathTools.clamp(jointDeflection, maximumDeflection.getDoubleValue());
          this.set(rawJointPosition - jointDeflection);
       }
       else

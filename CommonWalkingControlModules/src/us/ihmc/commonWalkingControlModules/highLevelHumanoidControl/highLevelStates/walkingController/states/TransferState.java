@@ -121,14 +121,7 @@ public abstract class TransferState extends WalkingState
 
       balanceManager.resetPushRecovery();
 
-      double transferTime;
-
-      boolean isPreviousStateDoubleSupport = isInitialTransfer();
-      if (isPreviousStateDoubleSupport && (nextFootstep == null || !nextFootstep.hasTimings()))
-         transferTime = balanceManager.getDefaultInitialTransferDuration();
-      else
-         transferTime = walkingMessageHandler.getNextTransferTime();
-
+      double transferTime = walkingMessageHandler.getNextTransferTime();
       pelvisOrientationManager.setTrajectoryTime(transferTime);
    }
 

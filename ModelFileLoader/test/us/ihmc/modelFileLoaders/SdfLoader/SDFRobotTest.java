@@ -9,12 +9,14 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Vector3d;
 import javax.xml.bind.JAXBException;
 
 import org.junit.Test;
 
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.matrix.Matrix3D;
+import us.ihmc.euclid.tools.EuclidCoreTestTools;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.instructions.Graphics3DPrimitiveInstruction;
 import us.ihmc.robotics.partNames.HumanoidJointNameMap;
@@ -26,9 +28,7 @@ import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.RobotFromDescription;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.io.printing.PrintTools;
-import us.ihmc.tools.testing.JUnitTools;
 
 public class SDFRobotTest
 {
@@ -91,13 +91,13 @@ public class SDFRobotTest
       
       assertEquals(jointOne.getName(), jointTwo.getName());
 
-      Vector3d offsetOne = new Vector3d();
+      Vector3D offsetOne = new Vector3D();
       jointOne.getOffset(offsetOne);
 
-      Vector3d offsetTwo = new Vector3d();
+      Vector3D offsetTwo = new Vector3D();
       jointTwo.getOffset(offsetTwo);
 
-      JUnitTools.assertTuple3dEquals(offsetOne, offsetTwo, 1e-7);
+      EuclidCoreTestTools.assertTuple3DEquals(offsetOne, offsetTwo, 1e-7);
 
       checkGroundContactPointsMatch(jointOne, jointTwo);
 
@@ -145,7 +145,7 @@ public class SDFRobotTest
          GroundContactPoint pointOne = groundContactPointsOne.get(i);
          GroundContactPoint pointTwo = groundContactPointsTwo.get(i);
 
-         JUnitTools.assertTuple3dEquals(pointOne.getOffsetCopy(), pointTwo.getOffsetCopy(), 1e-7);
+         EuclidCoreTestTools.assertTuple3DEquals(pointOne.getOffsetCopy(), pointTwo.getOffsetCopy(), 1e-7);
       }
    }
 
@@ -154,14 +154,14 @@ public class SDFRobotTest
       assertEquals(linkOne.getName(), linkTwo.getName());
 
       assertEquals(linkOne.getMass(), linkTwo.getMass(), 1e-7);
-      JUnitTools.assertTuple3dEquals(linkOne.getComOffset(), linkTwo.getComOffset(), 1e-7);
+      EuclidCoreTestTools.assertTuple3DEquals(linkOne.getComOffset(), linkTwo.getComOffset(), 1e-7);
 
-      Matrix3d momentOfInertiaOne = new Matrix3d();
+      Matrix3D momentOfInertiaOne = new Matrix3D();
       linkOne.getMomentOfInertia(momentOfInertiaOne);
 
-      Matrix3d momentOfInertiaTwo = new Matrix3d();
+      Matrix3D momentOfInertiaTwo = new Matrix3D();
       linkTwo.getMomentOfInertia(momentOfInertiaTwo);
-      JUnitTools.assertMatrix3dEquals("momentOfInertiaOne = " + momentOfInertiaOne + ", momentOfInertiaTwo = " + momentOfInertiaTwo, momentOfInertiaOne, momentOfInertiaTwo, 1e-7);
+      EuclidCoreTestTools.assertMatrix3DEquals("momentOfInertiaOne = " + momentOfInertiaOne + ", momentOfInertiaTwo = " + momentOfInertiaTwo, momentOfInertiaOne, momentOfInertiaTwo, 1e-7);
 
       Graphics3DObject linkGraphicsOne = linkOne.getLinkGraphics();
       Graphics3DObject linkGraphicsTwo = linkTwo.getLinkGraphics();

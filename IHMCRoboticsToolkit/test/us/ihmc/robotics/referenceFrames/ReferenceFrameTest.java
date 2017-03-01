@@ -10,21 +10,21 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Random;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
 import org.junit.Test;
 
+import us.ihmc.commons.Assertions;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
+import us.ihmc.euclid.tools.EuclidCoreTestTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.geometry.RigidBodyTransformTest;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.tools.testing.JUnitTools;
 
 public class ReferenceFrameTest
 {
@@ -122,76 +122,46 @@ public class ReferenceFrameTest
    private RigidBodyTransform generateRandomTransform()
    {
          Random random = new Random();
-         Matrix3d rotX = new Matrix3d();
-         Matrix3d rotY = new Matrix3d();
-         Matrix3d rotZ = new Matrix3d();
-         Vector3d trans = new Vector3d();
+         RotationMatrix rotX = new RotationMatrix();
+         RotationMatrix rotY = new RotationMatrix();
+         RotationMatrix rotZ = new RotationMatrix();
+         Vector3D trans = new Vector3D();
 
          randomizeVector(random, trans);
          createRandomRotationMatrixX(random, rotX);
          createRandomRotationMatrixY(random, rotY);
          createRandomRotationMatrixZ(random, rotZ);
 
-         rotX.mul(rotY);
-         rotX.mul(rotZ);
+         rotX.multiply(rotY);
+         rotX.multiply(rotZ);
          
          RigidBodyTransform ret = new RigidBodyTransform(rotX, trans);
          return ret;
    }
    
-   private void randomizeVector(Random random, Vector3d vector)
+   private void randomizeVector(Random random, Vector3D vector)
    {
       vector.setX(random.nextDouble());
       vector.setY(random.nextDouble());
       vector.setZ(random.nextDouble());
    }
    
-   private void createRandomRotationMatrixX(Random random, Matrix3d matrix)
+   private void createRandomRotationMatrixX(Random random, RotationMatrix matrix)
    {
       double theta = random.nextDouble();
-      double cTheta = Math.cos(theta);
-      double sTheta = Math.sin(theta);
-      matrix.setM00(1);
-      matrix.setM01(0);
-      matrix.setM02(0);
-      matrix.setM10(0);
-      matrix.setM11(cTheta);
-      matrix.setM12(-sTheta);
-      matrix.setM20(0);
-      matrix.setM21(sTheta);
-      matrix.setM22(cTheta);
+      matrix.setToRollMatrix(theta);
    }
 
-   private void createRandomRotationMatrixY(Random random, Matrix3d matrix)
+   private void createRandomRotationMatrixY(Random random, RotationMatrix matrix)
    {
       double theta = random.nextDouble();
-      double cTheta = Math.cos(theta);
-      double sTheta = Math.sin(theta);
-      matrix.setM00(cTheta);
-      matrix.setM01(0);
-      matrix.setM02(sTheta);
-      matrix.setM10(0);
-      matrix.setM11(1);
-      matrix.setM12(0);
-      matrix.setM20(-sTheta);
-      matrix.setM21(0);
-      matrix.setM22(cTheta);
+      matrix.setToPitchMatrix(theta);
    }
 
-   private void createRandomRotationMatrixZ(Random random, Matrix3d matrix)
+   private void createRandomRotationMatrixZ(Random random, RotationMatrix matrix)
    {
       double theta = random.nextDouble();
-      double cTheta = Math.cos(theta);
-      double sTheta = Math.sin(theta);
-      matrix.setM00(cTheta);
-      matrix.setM01(-sTheta);
-      matrix.setM02(0);
-      matrix.setM10(sTheta);
-      matrix.setM11(cTheta);
-      matrix.setM12(0);
-      matrix.setM20(0);
-      matrix.setM21(0);
-      matrix.setM22(1);
+      matrix.setToYawMatrix(theta);
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -319,39 +289,39 @@ public class ReferenceFrameTest
       TranslationReferenceFrame frame2 = new TranslationReferenceFrame("frame2", frame1);
       TranslationReferenceFrame frame3 = new TranslationReferenceFrame("frame3", frame2);
 
-      Vector3d translation1 = new Vector3d(0.1, 0.13, 0.45);
-      Vector3d translation2 = new Vector3d(0.7, 0.26, 0.09);
-      Vector3d translation3 = new Vector3d(0.04, 0.023, 0.067);
+      Vector3D translation1 = new Vector3D(0.1, 0.13, 0.45);
+      Vector3D translation2 = new Vector3D(0.7, 0.26, 0.09);
+      Vector3D translation3 = new Vector3D(0.04, 0.023, 0.067);
 
       frame1.updateTranslation(translation1);
       frame2.updateTranslation(translation2);
       frame3.updateTranslation(translation3);
 
       RigidBodyTransform transformToDesiredFrame = frame3.getTransformToDesiredFrame(ReferenceFrame.getWorldFrame());
-      Vector3d totalTranslation = new Vector3d();
+      Vector3D totalTranslation = new Vector3D();
 
-      Vector3d expectedTranslation = new Vector3d(translation1);
+      Vector3D expectedTranslation = new Vector3D(translation1);
       expectedTranslation.add(translation2);
       expectedTranslation.add(translation3);
 
       transformToDesiredFrame.getTranslation(totalTranslation);
 
-      JUnitTools.assertTuple3dEquals(expectedTranslation, totalTranslation, 1e-7);
+      EuclidCoreTestTools.assertTuple3DEquals(expectedTranslation, totalTranslation, 1e-7);
 
       translation2.set(0.33, 0.44, 0.11);
       frame2.updateTranslation(translation2);
 
       transformToDesiredFrame = frame3.getTransformToDesiredFrame(ReferenceFrame.getWorldFrame());
 
-      totalTranslation = new Vector3d();
+      totalTranslation = new Vector3D();
 
-      expectedTranslation = new Vector3d(translation1);
+      expectedTranslation = new Vector3D(translation1);
       expectedTranslation.add(translation2);
       expectedTranslation.add(translation3);
 
       transformToDesiredFrame.getTranslation(totalTranslation);
 
-      JUnitTools.assertTuple3dEquals(expectedTranslation, totalTranslation, 1e-7);
+      EuclidCoreTestTools.assertTuple3DEquals(expectedTranslation, totalTranslation, 1e-7);
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -364,15 +334,15 @@ public class ReferenceFrameTest
 
       RigidBodyTransform transform1 = new RigidBodyTransform();
       transform1.setRotationRollAndZeroTranslation(0.77);
-      transform1.setTranslation(new Vector3d(0.1, 0.13, 0.45));
+      transform1.setTranslation(new Vector3D(0.1, 0.13, 0.45));
 
       RigidBodyTransform transform2 = new RigidBodyTransform();
       transform2.setRotationPitchAndZeroTranslation(0.4);
-      transform2.setTranslation(new Vector3d(0.5, 0.12, 0.35));
+      transform2.setTranslation(new Vector3D(0.5, 0.12, 0.35));
 
       RigidBodyTransform transform3 = new RigidBodyTransform();
       transform3.setRotationYawAndZeroTranslation(0.37);
-      transform3.setTranslation(new Vector3d(0.11, 0.113, 0.415));
+      transform3.setTranslation(new Vector3D(0.11, 0.113, 0.415));
 
       frame1.setTransformAndUpdate(transform1);
       frame2.setTransformAndUpdate(transform2);
@@ -384,16 +354,16 @@ public class ReferenceFrameTest
       expectedTransform.multiply(transform2);
       expectedTransform.multiply(transform3);
 
-      RigidBodyTransformTest.assertTransformEquals(expectedTransform, transformToDesiredFrame, 1e-7);
+      EuclidCoreTestTools.assertRigidBodyTransformEquals(expectedTransform, transformToDesiredFrame, 1e-7);
 
       RigidBodyTransform preCorruptionTransform = new RigidBodyTransform();
       preCorruptionTransform.setRotationRollAndZeroTranslation(0.35);
-      preCorruptionTransform.setTranslation(new Vector3d(0.51, 0.113, 0.7415));
+      preCorruptionTransform.setTranslation(new Vector3D(0.51, 0.113, 0.7415));
       frame2.corruptTransformToParentPreMultiply(preCorruptionTransform);
 
       RigidBodyTransform postCorruptionTransform = new RigidBodyTransform();
       postCorruptionTransform.setRotationPitchAndZeroTranslation(0.97);
-      postCorruptionTransform.setTranslation(new Vector3d(0.12, 0.613, 0.415));
+      postCorruptionTransform.setTranslation(new Vector3D(0.12, 0.613, 0.415));
       frame2.corruptTransformToParentPostMultiply(postCorruptionTransform);
 
       expectedTransform = new RigidBodyTransform(transform1);
@@ -404,7 +374,7 @@ public class ReferenceFrameTest
 
       transformToDesiredFrame = frame3.getTransformToDesiredFrame(ReferenceFrame.getWorldFrame());
 
-      RigidBodyTransformTest.assertTransformEquals(expectedTransform, transformToDesiredFrame, 1e-7);
+      EuclidCoreTestTools.assertRigidBodyTransformEquals(expectedTransform, transformToDesiredFrame, 1e-7);
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.1)
@@ -494,8 +464,8 @@ public class ReferenceFrameTest
 
       for (int i = 0; i < numberOfTests; i++)
       {
-         transformA.setRotationAndZeroTranslation(RandomTools.generateRandomQuaternion(random, Math.toRadians(80.0)));
-         transformB.setRotationAndZeroTranslation(RandomTools.generateRandomQuaternion(random, Math.toRadians(80.0)));
+         transformA.setRotationAndZeroTranslation(RandomGeometry.nextQuaternion(random, Math.toRadians(80.0)));
+         transformB.setRotationAndZeroTranslation(RandomGeometry.nextQuaternion(random, Math.toRadians(80.0)));
 
          ReferenceFrame frameA = ReferenceFrame.constructFrameWithUnchangingTransformToParent("frameA", worldFrame, transformA);
          ReferenceFrame frameB = ReferenceFrame.constructFrameWithUnchangingTransformToParent("frameB", worldFrame, transformB);
@@ -534,8 +504,8 @@ public class ReferenceFrameTest
 
       for (int i = 0; i < numberOfTests; i++)
       {
-         transformA.setRotationAndZeroTranslation(RandomTools.generateRandomQuaternion(random, Math.toRadians(80.0)));
-         transformB.setRotationAndZeroTranslation(RandomTools.generateRandomQuaternion(random, Math.toRadians(80.0)));
+         transformA.setRotationAndZeroTranslation(RandomGeometry.nextQuaternion(random, Math.toRadians(80.0)));
+         transformB.setRotationAndZeroTranslation(RandomGeometry.nextQuaternion(random, Math.toRadians(80.0)));
 
          ReferenceFrame frameA = ReferenceFrame.constructFrameWithUnchangingTransformToParent("frameA", worldFrame, transformA);
          ReferenceFrame frameB = ReferenceFrame.constructFrameWithUnchangingTransformToParent("frameB", worldFrame, transformB);
@@ -570,10 +540,10 @@ public class ReferenceFrameTest
 
       RigidBodyTransform transformA = new RigidBodyTransform();
       
-      Point3d frameOriginInWorld = new Point3d();
+      Point3D frameOriginInWorld = new Point3D();
       
       FrameVector xAxis = new FrameVector(worldFrame, 1.0, 0.0, 0.0);
-      Vector3d xAxisInWorld = new Vector3d(1.0, 0.0, 0.0);
+      Vector3D xAxisInWorld = new Vector3D(1.0, 0.0, 0.0);
       FramePoint aimAxisAtThis = new FramePoint();
       
       FrameVector axisToAlign = new FrameVector();
@@ -582,7 +552,7 @@ public class ReferenceFrameTest
 
       for (int i = 0; i < numberOfTests; i++)
       {
-         transformA.set(RigidBodyTransform.generateRandomTransform(random));
+         transformA.set(EuclidCoreRandomTools.generateRandomRigidBodyTransform(random));
          ReferenceFrame frameA = ReferenceFrame.constructFrameWithUnchangingTransformToParent("frameA", worldFrame, transformA);
 
          transformA.getTranslation(frameOriginInWorld);
@@ -605,7 +575,7 @@ public class ReferenceFrameTest
    {
       setUp();
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-      JUnitTools.assertSerializable(worldFrame);
+      Assertions.assertSerializable(worldFrame);
       tearDown();
 
       //NOTE:No other reference frame is serializable because of transform3D

@@ -47,7 +47,7 @@ public class M2Simulation implements SimulationDoneListener
 
       // m2.createControllerBase(System.out, "M2");
 
-//      System.out.println("total robot mass = " + m2.computeCenterOfMass(new Point3d()));
+//      System.out.println("total robot mass = " + m2.computeCenterOfMass(new Point3D()));
 
       double groundKxy;
       double groundBxy;

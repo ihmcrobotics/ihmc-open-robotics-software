@@ -1,8 +1,7 @@
 package us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -53,7 +52,7 @@ public class YoPointVelocityDataObject extends PointVelocityDataObject
    }
 
    @Override
-   public Vector3d getVelocityOfMeasurementPointInWorldFrame()
+   public Vector3D getVelocityOfMeasurementPointInWorldFrame()
    {
       yoVelocityOfMeasurementPointInWorldFrame.get(velocityOfMeasurementPointInWorldFrame);
 
@@ -61,7 +60,7 @@ public class YoPointVelocityDataObject extends PointVelocityDataObject
    }
 
    @Override
-   public Point3d getMeasurementPointInBodyFrame()
+   public Point3D getMeasurementPointInBodyFrame()
    {
       yoMeasurementPointInBodyFrame.get(measurementPointInBodyFrame);
 

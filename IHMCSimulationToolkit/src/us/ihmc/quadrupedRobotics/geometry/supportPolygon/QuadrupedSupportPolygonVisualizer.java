@@ -2,13 +2,12 @@ package us.ihmc.quadrupedRobotics.geometry.supportPolygon;
 
 import java.awt.Color;
 
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactOval;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -83,7 +82,7 @@ public class QuadrupedSupportPolygonVisualizer implements RobotController
    {
       miniCircleRadius.set(0.2);
       robot = new Robot("viz");
-      rootJoint = new FloatingJoint("floating", new Vector3d(), robot);
+      rootJoint = new FloatingJoint("floating", new Vector3D(), robot);
       
       FramePoint point = new FramePoint(ReferenceFrame.getWorldFrame(), 0.5, 0.0, 0.0);
       FramePoint origin = new FramePoint(ReferenceFrame.getWorldFrame(), 0.5, -1.0, 2.0);

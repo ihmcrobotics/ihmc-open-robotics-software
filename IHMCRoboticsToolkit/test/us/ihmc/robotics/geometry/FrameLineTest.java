@@ -5,14 +5,13 @@ import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.Random;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
 import org.junit.Test;
 
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.referenceFrames.OrientationFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public class FrameLineTest
 {
@@ -24,7 +23,7 @@ public class FrameLineTest
       Random random = new Random(1776L);
 
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-      FrameLine lWorld = new FrameLine(ReferenceFrame.getWorldFrame(), new Point3d(-1.0, -2.0, -3.0), new Vector3d(1.0, 2.0, 3.0));
+      FrameLine lWorld = new FrameLine(ReferenceFrame.getWorldFrame(), new Point3D(-1.0, -2.0, -3.0), new Vector3D(1.0, 2.0, 3.0));
 
       ArrayList<ReferenceFrame> frames = new ArrayList<ReferenceFrame>();
       frames.add(worldFrame);
@@ -87,8 +86,8 @@ public class FrameLineTest
       ReferenceFrame target = createRandomFrame(world, random);
       ReferenceFrame target2 = createRandomFrame(world, random);
 
-      Point3d origin = new Point3d();
-      Vector3d direction = new Vector3d(1.0, 2.0, 3.0);
+      Point3D origin = new Point3D();
+      Vector3D direction = new Vector3D(1.0, 2.0, 3.0);
 
       FrameLine line = new FrameLine(world, origin, direction);
       FrameVector vector = new FrameVector(world, direction);
@@ -117,8 +116,8 @@ public class FrameLineTest
       ReferenceFrame target = createRandomFrame(world, random);
       ReferenceFrame target2 = createRandomFrame(world, random);
 
-      Point3d origin = new Point3d(1.0, 2.0, 3.0);
-      Vector3d direction = new Vector3d(2.0, 1.0, 4.0);
+      Point3D origin = new Point3D(1.0, 2.0, 3.0);
+      Vector3D direction = new Vector3D(2.0, 1.0, 4.0);
 
       FrameLine line = new FrameLine(world, origin, direction);
       FrameVector vector = new FrameVector(world, direction);
@@ -141,8 +140,8 @@ public class FrameLineTest
    @Test(timeout = 30000)
    public void testConstructorA()
    {
-      Point3d origin = new Point3d(1.0, 2.0, 3.0);
-      Vector3d direction = new Vector3d();
+      Point3D origin = new Point3D(1.0, 2.0, 3.0);
+      Vector3D direction = new Vector3D();
 
       FrameLine frameLine = new FrameLine(ReferenceFrame.getWorldFrame(), origin, direction);
       

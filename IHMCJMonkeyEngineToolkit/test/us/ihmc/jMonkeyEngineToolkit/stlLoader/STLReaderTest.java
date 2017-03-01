@@ -25,14 +25,9 @@ import java.util.List;
 
 import org.junit.Test;
 
-import us.ihmc.jMonkeyEngineToolkit.stlLoader.ASCIISTLReader;
-import us.ihmc.jMonkeyEngineToolkit.stlLoader.BinarySTLReader;
-import us.ihmc.jMonkeyEngineToolkit.stlLoader.STLReader;
-import us.ihmc.jMonkeyEngineToolkit.stlLoader.STLReaderFactory;
-import us.ihmc.jMonkeyEngineToolkit.stlLoader.Triangle;
-import us.ihmc.tools.continuousIntegration.IntegrationCategory;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.IntegrationCategory;
 
 /**
  * Test loading of STL files based on a hand crafted STL files with three triangles and known values.

@@ -2,8 +2,7 @@ package us.ihmc.commonWalkingControlModules.trajectories;
 
 import java.util.ArrayList;
 
-import javax.vecmath.Quat4d;
-
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
@@ -289,7 +288,7 @@ public class StraightLinePoseTrajectoryGenerator implements PoseTrajectoryGenera
    public void compute(double time)
    {
       this.currentTime.set(time);
-      time = MathTools.clipToMinMax(time, 0.0, trajectoryTime.getDoubleValue());
+      time = MathTools.clamp(time, 0.0, trajectoryTime.getDoubleValue());
       quinticParameterPolynomial.compute(time);
       boolean isDone = isDone();
       double alphaVel = isDone ? 0.0 : quinticParameterPolynomial.getVelocity();
@@ -395,7 +394,7 @@ public class StraightLinePoseTrajectoryGenerator implements PoseTrajectoryGenera
       getAngularAcceleration(angularAccelerationToPack);
    }
 
-   private final Quat4d temp = new Quat4d();
+   private final Quaternion temp = new Quaternion();
 
    public void getPose(FramePose framePoseToPack)
    {

@@ -1,17 +1,16 @@
 package us.ihmc.footstepPlanning.roughTerrainPlanning;
 
-import javax.vecmath.Vector3d;
-
 import org.junit.Test;
 
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
+import us.ihmc.continuousIntegration.IntegrationCategory;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.footstepPlanning.FootstepPlanner;
 import us.ihmc.footstepPlanning.simplePlanners.PlanThenSnapPlanner;
 import us.ihmc.footstepPlanning.simplePlanners.TurnWalkTurnPlanner;
 import us.ihmc.footstepPlanning.testTools.PlanningTestTools;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationTools;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.tools.continuousIntegration.IntegrationCategory;
 
 @ContinuousIntegrationAnnotations.ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
 public class PlanThenSnapPlannerTest extends FootstepPlannerOnRoughTerrainTest
@@ -23,7 +22,7 @@ public class PlanThenSnapPlannerTest extends FootstepPlannerOnRoughTerrainTest
    @Test(timeout = 300000)
    public void testOnStaircase()
    {
-      super.testOnStaircase(new Vector3d(), true);
+      super.testOnStaircase(new Vector3D(), true);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)

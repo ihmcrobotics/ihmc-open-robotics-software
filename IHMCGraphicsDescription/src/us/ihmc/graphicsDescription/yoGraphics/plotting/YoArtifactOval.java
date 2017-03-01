@@ -2,9 +2,8 @@ package us.ihmc.graphicsDescription.yoGraphics.plotting;
 
 import java.awt.Color;
 
-import javax.vecmath.Point2d;
-import javax.vecmath.Vector2d;
-
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.graphicsDescription.plotting.Graphics2DAdapter;
 import us.ihmc.graphicsDescription.plotting.Plotter2DAdapter;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -20,8 +19,8 @@ public class YoArtifactOval extends YoArtifact
    private final YoFramePoint2d center;
    private final YoFrameVector2d radii;
    
-   private final Point2d tempCenter = new Point2d();
-   private final Vector2d tempRadii = new Vector2d();
+   private final Point2D tempCenter = new Point2D();
+   private final Vector2D tempRadii = new Vector2D();
 
    public YoArtifactOval(String name, DoubleYoVariable centerX, DoubleYoVariable centerY, DoubleYoVariable radius, Color color)
    {
@@ -48,7 +47,7 @@ public class YoArtifactOval extends YoArtifact
    }
 
    @Override
-   public void drawLegend(Plotter2DAdapter graphics, Point2d origin)
+   public void drawLegend(Plotter2DAdapter graphics, Point2D origin)
    {
       graphics.setColor(color);
       tempCenter.set(origin);

@@ -1,6 +1,5 @@
 package us.ihmc.tools.thread;
 
-
 public class NonRealTimePeriodicThread implements Runnable
 {
    private final PeriodicWorker periodicWorker;
@@ -18,6 +17,7 @@ public class NonRealTimePeriodicThread implements Runnable
       thread.start();
    }
    
+   @Override
    public void run()
    {
       while (!periodicWorker.isStopped())
@@ -33,6 +33,4 @@ public class NonRealTimePeriodicThread implements Runnable
          }
       }      
    }
-   
-   
 }

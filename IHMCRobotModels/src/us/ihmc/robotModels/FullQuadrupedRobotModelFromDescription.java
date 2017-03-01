@@ -8,9 +8,9 @@ import java.util.Map;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 
+import us.ihmc.robotics.kinematics.JointLimit;
 import us.ihmc.robotics.partNames.JointRole;
 import us.ihmc.robotics.partNames.QuadrupedJointName;
-import us.ihmc.robotics.kinematics.JointLimit;
 import us.ihmc.robotics.partNames.QuadrupedJointNameMap;
 import us.ihmc.robotics.robotDescription.JointDescription;
 import us.ihmc.robotics.robotDescription.RobotDescription;

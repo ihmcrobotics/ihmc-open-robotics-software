@@ -3,10 +3,10 @@ package us.ihmc.simulationconstructionset.physics.engine.jerry;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.matrix.Matrix3D;
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.simulationconstructionset.CollisionIntegrator;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.ExternalTorque;
@@ -27,19 +27,19 @@ public abstract class JointPhysics< J extends Joint>
 {
    protected J owner;
 
-   public Vector3d u_i;    // u_i is unit vector in direction of joint axis.  Set once upon creation by the specific joint.
-   public Vector3d d_i = new Vector3d();    // d_i is vector from link i inboard joint to link i com (link.getComOffset());
+   public Vector3D u_i;    // u_i is unit vector in direction of joint axis.  Set once upon creation by the specific joint.
+   public Vector3D d_i = new Vector3D();    // d_i is vector from link i inboard joint to link i com (link.getComOffset());
 
-   public Vector3d u_iXd_i = new Vector3d();    // u_iXd_i is u_i cross d_i.
+   public Vector3D u_iXd_i = new Vector3D();    // u_iXd_i is u_i cross d_i.
 
-   public Vector3d r_in = new Vector3d();    // r_in is the vector from the previous center of mass to this joint in the previous joint coordinates.
+   public Vector3D r_in = new Vector3D();    // r_in is the vector from the previous center of mass to this joint in the previous joint coordinates.
 
-   public Vector3d w_i = new Vector3d();    // w_i is the rotational velocity of this link, in these coordinates.
-   public Vector3d v_i = new Vector3d();    // v_i is the linear velocity of this link in these coordinates.
+   public Vector3D w_i = new Vector3D();    // w_i is the rotational velocity of this link, in these coordinates.
+   public Vector3D v_i = new Vector3D();    // v_i is the linear velocity of this link in these coordinates.
 
-   public Vector3d r_i = new Vector3d();    // r_i is radius vector from previous center of mass to this center of mass in these coordinates.
-   private Vector3d r_h = new Vector3d();    // r_h is radius vector from this center of mass to the previous center of mass in the previous coordinates.
-   protected Vector3d v_i_temp = new Vector3d();
+   public Vector3D r_i = new Vector3D();    // r_i is radius vector from previous center of mass to this center of mass in these coordinates.
+   private Vector3D r_h = new Vector3D();    // r_h is radius vector from this center of mass to the previous center of mass in the previous coordinates.
+   protected Vector3D v_i_temp = new Vector3D();
 
    private SpatialTransformationMatrix i_X_hat_h = new SpatialTransformationMatrix();
    private SpatialTransformationMatrix h_X_hat_i = new SpatialTransformationMatrix();
@@ -61,14 +61,14 @@ public abstract class JointPhysics< J extends Joint>
 
    private JointWrenchSensor jointWrenchSensor;
    private SpatialVector tempJointWrenchVector;
-   private Vector3d tempVectorForWrenchTranslation, tempOffsetForWrenchTranslation;
+   private Vector3D tempVectorForWrenchTranslation, tempOffsetForWrenchTranslation;
 
    // private Transform3D R = new Transform3D();
-   public Matrix3d Ri_0 = new Matrix3d();    // Rotation matrix from this space to world space
-   public Matrix3d R0_i = new Matrix3d();    // Rotation matrix from world space to this space
-   public Matrix3d Ri_h = new Matrix3d();    // Rotation matrix from this joint to previous joint
-   public Matrix3d Rh_i = new Matrix3d();    // Rotation matrix from previous joint to this joint
-   public Matrix3d Rtemp = new Matrix3d();    // @todo Remove this if it is unused.
+   public RotationMatrix Ri_0 = new RotationMatrix();    // Rotation matrix from this space to world space
+   public RotationMatrix R0_i = new RotationMatrix();    // Rotation matrix from world space to this space
+   public RotationMatrix Ri_h = new RotationMatrix();    // Rotation matrix from this joint to previous joint
+   public RotationMatrix Rh_i = new RotationMatrix();    // Rotation matrix from previous joint to this joint
+   public RotationMatrix Rtemp = new RotationMatrix();    // @todo Remove this if it is unused.
 
    public JointPhysics(J owner)
    {
@@ -90,7 +90,7 @@ public abstract class JointPhysics< J extends Joint>
     * @param v_h Linear velocity of joint i-1.
     * @param Rh_0 Rotation matrix between frame i-1 and the world.
     */
-   public void featherstonePassOne(Vector3d w_h, Vector3d v_h, Matrix3d Rh_0)
+   public void featherstonePassOne(Vector3D w_h, Vector3D v_h, RotationMatrix Rh_0)
    {
       // First set the transform (rotation matrix) for this joint.
       // (R <- rotation matrix from F_h to F_i
@@ -111,7 +111,7 @@ public abstract class JointPhysics< J extends Joint>
       Ri_h.transpose();
 
       Ri_0.set(Ri_h);
-      Ri_0.mul(Rh_0);
+      Ri_0.multiply(Rh_0);
 
       jointDependentSet_d_i();
 
@@ -183,13 +183,13 @@ public abstract class JointPhysics< J extends Joint>
    }
 
    // Vectors used in the application of external force and ground contact points
-   private final Vector3d externalForceVector = new Vector3d();
-   private final Vector3d externalForceR = new Vector3d();
-   private final Vector3d tempExternalMomentVector = new Vector3d();
-   private final Vector3d externalMomentVector = new Vector3d();
+   private final Vector3D externalForceVector = new Vector3D();
+   private final Vector3D externalForceR = new Vector3D();
+   private final Vector3D tempExternalMomentVector = new Vector3D();
+   private final Vector3D externalMomentVector = new Vector3D();
 
 
-   private final Vector3d w_h = new Vector3d();    // Velocity of the previous joint in this joints coordinates
+   private final Vector3D w_h = new Vector3D();    // Velocity of the previous joint in this joints coordinates
 
    /**
     * The second Featherstone pass recurses down the tree initializing the spatial isolated inerta (spatial matrix) and
@@ -201,7 +201,7 @@ public abstract class JointPhysics< J extends Joint>
     * @param w_previous The angular velocity of the previous joint represented in that joints coordinates.  This value is
     * used in the calculation of the coriolis vector.
     */
-   public void featherstonePassTwo(Vector3d w_previous)
+   public void featherstonePassTwo(Vector3D w_previous)
    {
       // First need to rotate w_previous into these coordinate system to get w_h:
       w_h.set(w_previous);
@@ -297,7 +297,7 @@ public abstract class JointPhysics< J extends Joint>
 
    private void applyForcesAndMomentsFromExternalForcePoints(ExternalForcePoint point)
    {
-      if (!point.isForceZero())    // +++JEP OPTIMIZE: Don't do the math if the forces are zero!
+      if (!point.isForceAndMomentZero())    // +++JEP OPTIMIZE: Don't do the math if the forces are zero!
       {
          point.getForce(externalForceVector);
          externalForceVector.negate();
@@ -517,11 +517,11 @@ public abstract class JointPhysics< J extends Joint>
       }
    }
 
-   private final Vector3d tempDeltaPVector = new Vector3d();
-   private final Vector3d tempOmegaCrossDeltaPVector = new Vector3d();
-   private final Vector3d tempOmegaCrossOmegaCrossDeltaPVector = new Vector3d();
+   private final Vector3D tempDeltaPVector = new Vector3D();
+   private final Vector3D tempOmegaCrossDeltaPVector = new Vector3D();
+   private final Vector3D tempOmegaCrossOmegaCrossDeltaPVector = new Vector3D();
 
-   public void getLinearVelocityInBody(Vector3d linearVelocityInBodyToPack, Vector3d pointInBody)
+   public void getLinearVelocityInBody(Vector3D linearVelocityInBodyToPack, Vector3D pointInBody)
    {
       tempDeltaPVector.set(pointInBody);
       tempDeltaPVector.sub(owner.link.comOffset);
@@ -530,24 +530,24 @@ public abstract class JointPhysics< J extends Joint>
       linearVelocityInBodyToPack.add(v_i);
    }
 
-   public void getLinearVelocityInWorld(Vector3d linearVelocityInWorldToPack, Vector3d pointInBody)
+   public void getLinearVelocityInWorld(Vector3D linearVelocityInWorldToPack, Vector3D pointInBody)
    {
       getLinearVelocityInBody(linearVelocityInWorldToPack, pointInBody);
       owner.transformToNext.transform(linearVelocityInWorldToPack);
    }
 
-   public void getAngularVelocityInBody(Vector3d angularVelocityInBodyToPack)
+   public void getAngularVelocityInBody(Vector3D angularVelocityInBodyToPack)
    {
       angularVelocityInBodyToPack.set(w_i);
    }
 
-   public void getAngularVelocityInWorld(Vector3d angularVelocityInWorldToPack)
+   public void getAngularVelocityInWorld(Vector3D angularVelocityInWorldToPack)
    {
       getAngularVelocityInBody(angularVelocityInWorldToPack);
       owner.transformToNext.transform(angularVelocityInWorldToPack);
    }
 
-   public void getLinearAccelerationInBody(Vector3d linearAccelerationInBodyToPack, Vector3d pointInBody)
+   public void getLinearAccelerationInBody(Vector3D linearAccelerationInBodyToPack, Vector3D pointInBody)
    {
       tempDeltaPVector.set(pointInBody);
       tempDeltaPVector.sub(owner.link.comOffset);
@@ -561,18 +561,18 @@ public abstract class JointPhysics< J extends Joint>
    }
 
 
-   public void getLinearAccelerationInWorld(Vector3d linearAccelerationInWorldToPack, Vector3d pointInBody)
+   public void getLinearAccelerationInWorld(Vector3D linearAccelerationInWorldToPack, Vector3D pointInBody)
    {
       getLinearAccelerationInBody(linearAccelerationInWorldToPack, pointInBody);
       owner.transformToNext.transform(linearAccelerationInWorldToPack);
    }
 
-   public void getAngularAccelerationsInBodyFrame(Vector3d angularAccelerationToPack)
+   public void getAngularAccelerationsInBodyFrame(Vector3D angularAccelerationToPack)
    {
       a_hat_i.getTop(angularAccelerationToPack);
    }
 
-   public void getAngularAccelerationsInWorld(Vector3d angularAccelerationInWorldToPack)
+   public void getAngularAccelerationsInWorld(Vector3D angularAccelerationInWorldToPack)
    {
       getAngularAccelerationsInBodyFrame(angularAccelerationInWorldToPack);
       owner.transformToNext.transform(angularAccelerationInWorldToPack);
@@ -642,7 +642,7 @@ public abstract class JointPhysics< J extends Joint>
     */
    public abstract void recursiveRungeKuttaSum(double stepSize);
 
-   private Matrix3d Ki = new Matrix3d();
+   private Matrix3D Ki = new Matrix3D();
    private CollisionIntegrator collisionIntegrator = new CollisionIntegrator();
 
    // private Vector3d impulse = new Vector3d();
@@ -650,7 +650,7 @@ public abstract class JointPhysics< J extends Joint>
 
    private SpatialTransformationMatrix k_X_hat_coll = new SpatialTransformationMatrix();
 
-   private Vector3d tempVector = new Vector3d();
+   private Vector3D tempVector = new Vector3D();
 
    /**
     * This method calculates the multibody collision matrix Ki which relates the applied impulse
@@ -662,7 +662,7 @@ public abstract class JointPhysics< J extends Joint>
     * The collision frame is aligned with the z axis normal to the collision point.
     * @return Matrix3d Ki, which represents the half of the collision matrix.
     */
-   public Matrix3d computeKiCollision(Vector3d offsetFromCOM, Matrix3d Rk_coll)
+   public Matrix3D computeKiCollision(Vector3D offsetFromCOM, RotationMatrix Rk_coll)
    {
       tempVector.set(offsetFromCOM);
       tempVector.scale(-1.0);
@@ -687,7 +687,7 @@ public abstract class JointPhysics< J extends Joint>
     * @param mu The coefficent of friction.
     * @param p_coll Spatial collision impulse
     */
-   public void integrateCollision(Matrix3d Ki, Vector3d u_coll, double epsilon, double mu, Vector3d p_coll)
+   public void integrateCollision(Matrix3D Ki, Vector3D u_coll, double epsilon, double mu, Vector3D p_coll)
    {
       // Integrate the collision (Mirtich p. 146, step D.):
 
@@ -703,7 +703,7 @@ public abstract class JointPhysics< J extends Joint>
     *
     * @param p_coll Vector3d the impulse applied in reaction to the collision event.
     */
-   public void applyImpulse(Vector3d p_coll)
+   public void applyImpulse(Vector3D p_coll)
    {
       /*
        * if(p_coll.z < 0.0)
@@ -750,7 +750,7 @@ public abstract class JointPhysics< J extends Joint>
     * @param mu The coefficent of friction.
     * @param p_coll Vector to store the collision impulse once it has been calculated.
     */
-   public void resolveCollision(Vector3d offsetFromCOM, Matrix3d Rk_coll, Vector3d u_coll, double epsilon, double mu, Vector3d p_coll)
+   public void resolveCollision(Vector3D offsetFromCOM, RotationMatrix Rk_coll, Vector3D u_coll, double epsilon, double mu, Vector3D p_coll)
    {
       computeKiCollision(offsetFromCOM, Rk_coll);
       integrateCollision(Ki, u_coll, epsilon, mu, p_coll);
@@ -775,43 +775,56 @@ public abstract class JointPhysics< J extends Joint>
     * @param mu The coefficent of friction.
     * @param p_coll Vector3d in which the impulse will be stored.
     */
-   public void resolveMicroCollision(double penetrationSquared, Vector3d offsetFromCOM, Matrix3d Rk_coll, Vector3d u_coll, double epsilon, double mu,
-                                     Vector3d p_coll)
+   public void resolveMicroCollision(double penetrationSquared, Vector3D offsetFromCOM, RotationMatrix Rk_coll, Vector3D u_coll, double epsilon, double mu,
+                                     Vector3D p_coll)
    {
       //TODO: Commented out microcollisions for time being and replaced with penetration-based
       // epsilon increase. Need to make test cases and figure out exactly how we are going to 
       // do all of this...
+      boolean justUseSpringyEpsilonForMicroCollisions = true;
+      if (justUseSpringyEpsilonForMicroCollisions)
+      {
+         resolveMicroCollisionWithSpringyEpsilon(penetrationSquared, offsetFromCOM, Rk_coll, u_coll, epsilon, mu, p_coll);
+         return;
+      }
 
-//      computeKiCollision(offsetFromCOM, Rk_coll);
-//      collisionIntegrator.setup(Ki, u_coll, epsilon, mu);
-//      collisionIntegrator.computeMicroImpulse(p_coll);    // impulse is in collision coordinates.  Need to rotate into joint com coordinates:
-//
-//      if (Math.abs(Math.sqrt(p_coll.getX() * p_coll.getX() + p_coll.getY() * p_coll.getY()) / p_coll.getZ()) > mu)    // If slipping, just do it the normal way...
-//      {
+      computeKiCollision(offsetFromCOM, Rk_coll);
+      collisionIntegrator.setup(Ki, u_coll, epsilon, mu);
+      collisionIntegrator.computeMicroImpulse(p_coll);    // impulse is in collision coordinates.  Need to rotate into joint com coordinates:
+
+      if (Math.abs(Math.sqrt(p_coll.getX() * p_coll.getX() + p_coll.getY() * p_coll.getY()) / p_coll.getZ()) > mu)    // If slipping, just do it the normal way...
+      {
          // Slipping MicroCollision:
-//          System.out.println("Slipping Micro Collision:  " + p_coll);
-         // +++JEP: Adjust epsilon based on penetration...
-         epsilon = epsilon + 1000000.0 * penetrationSquared;
-         if (epsilon > 20.0)
-            epsilon = 20.0;
-
-//         System.out.println("epsilon = " + epsilon);
-//         System.out.println("penetrationSquared = " + penetrationSquared);
-         // if (epsilon > 1.2) System.out.print(epsilon + " ");
-
+//         System.out.println("Slipping Micro Collision:  " + p_coll);
          resolveCollision(offsetFromCOM, Rk_coll, u_coll, epsilon, mu, p_coll);
-//      }
-//      else
-//      {
-//          System.out.println("Non-Slipping Micro Collision:  " + p_coll);
-//         p_hat_k.top.set(p_coll);
-//         p_hat_k.bottom.set(0.0, 0.0, 0.0);
-//         k_X_hat_coll.transform(p_hat_k);    // p_k is now the impulse at the joint com.
-//
-//         propagateImpulse(p_hat_k);    // Propagate the impulse.  Mirtich p. 146, step E.
-//      }
+      }
+      else
+      {
+//         System.out.println("Non-Slipping Micro Collision:  " + p_coll);
+
+         p_hat_k.top.set(p_coll);
+         p_hat_k.bottom.set(0.0, 0.0, 0.0);
+         k_X_hat_coll.transform(p_hat_k);    // p_k is now the impulse at the joint com.
+
+         propagateImpulse(p_hat_k);    // Propagate the impulse.  Mirtich p. 146, step E.
+      }
 
 
+   }
+   
+   private void resolveMicroCollisionWithSpringyEpsilon(double penetrationSquared, Vector3D offsetFromCOM, RotationMatrix Rk_coll, Vector3D u_coll, double epsilon, double mu,
+                                                        Vector3D p_coll)
+   {
+   // +++JEP: Adjust epsilon based on penetration...
+      epsilon = epsilon + 1000000.0 * penetrationSquared;
+      if (epsilon > 20.0)
+         epsilon = 20.0;
+
+//      System.out.println("epsilon2 = " + epsilon);
+//      System.out.println("penetrationSquared2 = " + penetrationSquared);
+      // if (epsilon > 1.2) System.out.print(epsilon + " ");
+
+      resolveCollision(offsetFromCOM, Rk_coll, u_coll, epsilon, mu, p_coll);
    }
 
    private SpatialVector delta_v_hat_null = new SpatialVector();
@@ -910,7 +923,7 @@ public abstract class JointPhysics< J extends Joint>
     * @param k_X_hat_coll Spatial transformation matrix between this joint and collision space.
     * @param kiToPack Matrix3d in which the collision matrix will be stored.
     */
-   private void computeMultibodyKi(SpatialTransformationMatrix k_X_hat_coll, Matrix3d kiToPack)
+   private void computeMultibodyKi(SpatialTransformationMatrix k_X_hat_coll, Matrix3D kiToPack)
    {
       // Mirtich p. 144.  Compute the multi-body Ki for this Joint, given the SpatialTransformationMatrix from the contact frame to the joint COM frame.
       // Articulated inertias are already computed from the dynamics.  k_X_hat_coll is given.
@@ -1163,16 +1176,16 @@ public abstract class JointPhysics< J extends Joint>
       }
    }
 
-   private final Point3d tempCOMPoint = new Point3d();
+   private final Point3D tempCOMPoint = new Point3D();
 
    /**
     * Calculates center of mass position as well as the total mass of all joints beginning with
     * this joint as root.
     *
-    * @param comPoint Point3d representing the location of this subtree's center of mass in world coordinates.
+    * @param comPoint Point3D representing the location of this subtree's center of mass in world coordinates.
     * @return Double indicating the total mass of this joint and its children.
     */
-   public double recursiveComputeCenterOfMass(Point3d comPoint)
+   public double recursiveComputeCenterOfMass(Point3D comPoint)
    {
       double totalMass = 0.0;
       comPoint.set(0.0, 0.0, 0.0);
@@ -1215,7 +1228,7 @@ public abstract class JointPhysics< J extends Joint>
       return totalMass;
    }
 
-   private Vector3d tempLinearMomentum = new Vector3d();
+   private Vector3D tempLinearMomentum = new Vector3D();
 
    /**
     * Computes the total linear momentum and mass of this subtree.
@@ -1223,7 +1236,7 @@ public abstract class JointPhysics< J extends Joint>
     * @param linearMomentum Vector3d representing the total linear momentum of this subtree in world coordinates.
     * @return The total mass of this subtree.
     */
-   public double recursiveComputeLinearMomentum(Vector3d linearMomentum)
+   public double recursiveComputeLinearMomentum(Vector3D linearMomentum)
    {
       double totalMass = 0.0;
       linearMomentum.set(0.0, 0.0, 0.0);
@@ -1258,14 +1271,14 @@ public abstract class JointPhysics< J extends Joint>
    }
 
 
-   private Vector3d tempAngularMomentum = new Vector3d();
-   private Vector3d tempCOMVector = new Vector3d();
+   private Vector3D tempAngularMomentum = new Vector3D();
+   private Vector3D tempCOMVector = new Vector3D();
 
    /**
     * Calculates the total angular momentum of this subtree in world coordinates.
     * @param angularMomentum Vector3d in which the total angular momentum will be stored.
     */
-   public void recursiveComputeAngularMomentum(Vector3d angularMomentum)
+   public void recursiveComputeAngularMomentum(Vector3D angularMomentum)
    {
       angularMomentum.set(0.0, 0.0, 0.0);
       tempAngularMomentum.set(0.0, 0.0, 0.0);
@@ -1315,7 +1328,7 @@ public abstract class JointPhysics< J extends Joint>
 
    }
 
-   private Vector3d tempRotationalEnergyVector = new Vector3d();
+   private Vector3D tempRotationalEnergyVector = new Vector3D();
 
    /**
     * Calculates the total rotational kinetic energy of this subtree.
@@ -1360,7 +1373,7 @@ public abstract class JointPhysics< J extends Joint>
       return translationalKineticEnergy;
    }
 
-   private final Point3d tempPE_COMPoint = new Point3d();
+   private final Point3D tempPE_COMPoint = new Point3D();
 
    private boolean doFreezeFrame = false;
 
@@ -1471,9 +1484,9 @@ public abstract class JointPhysics< J extends Joint>
    {
       if (owner.parentJoint != null)
       {
-         Vector3d parentCoMOffset = new Vector3d();
+         Vector3D parentCoMOffset = new Vector3D();
          owner.parentJoint.getLink().getComOffset(parentCoMOffset);
-         Vector3d jointOffset = new Vector3d();
+         Vector3D jointOffset = new Vector3D();
          owner.getOffset(jointOffset);
 
          jointOffset.sub(parentCoMOffset);
@@ -1620,6 +1633,21 @@ public abstract class JointPhysics< J extends Joint>
    public ArrayList<ExternalForcePoint> getExternalForcePoints()
    {
       return externalForcePoints;
+   }
+
+   public ExternalForcePoint getExternalForcePoint(String name)
+   {
+      if (externalForcePoints == null) 
+         return null;
+
+      for (int i=0; i<externalForcePoints.size(); i++)
+      {
+         ExternalForcePoint externalForcePoint = externalForcePoints.get(i);
+         if (externalForcePoint.getName().equals(name)) 
+            return externalForcePoint;
+      }
+
+      return null;
    }
 
    /**
@@ -1775,8 +1803,8 @@ public abstract class JointPhysics< J extends Joint>
 
       this.jointWrenchSensor = jointWrenchSensor;
       tempJointWrenchVector = new SpatialVector();
-      tempVectorForWrenchTranslation = new Vector3d();
-      tempOffsetForWrenchTranslation = new Vector3d();
+      tempVectorForWrenchTranslation = new Vector3D();
+      tempOffsetForWrenchTranslation = new Vector3D();
    }
 
    public JointWrenchSensor getJointWrenchSensor()
@@ -1784,7 +1812,7 @@ public abstract class JointPhysics< J extends Joint>
       return jointWrenchSensor;
    }
 
-   public Vector3d getAngularVelocity()
+   public Vector3D getAngularVelocity()
    {
       return w_i;
    }
@@ -1804,12 +1832,12 @@ public abstract class JointPhysics< J extends Joint>
       doFreezeFrame = false;
    }
 
-   public Vector3d getUnitVector()
+   public Vector3D getUnitVector()
    {
       return u_i;
    }
 
-   public void getJointAxis(Vector3d axisToPack)
+   public void getJointAxis(Vector3D axisToPack)
    {
       if (u_i != null)
          axisToPack.set(u_i);
@@ -1822,7 +1850,7 @@ public abstract class JointPhysics< J extends Joint>
     *
     * @param Rh_i Matrix3d in which the rotation between from the previous joint space to the current will be stored.
     */
-   protected abstract void jointDependentSetAndGetRotation(Matrix3d Rh_i);
+   protected abstract void jointDependentSetAndGetRotation(RotationMatrix Rh_i);
 
    /**
     * The first featherstone pass handles velocity and position updates as it recurses down the tree.  The primary method does the majority
@@ -1846,7 +1874,7 @@ public abstract class JointPhysics< J extends Joint>
     * @param w_h The angular velocity of the previous link in this links coordinate system.  This value is necessary for the
     * calculation of coriolis forces.
     */
-   protected abstract void jointDependentFeatherstonePassTwo(Vector3d w_h);
+   protected abstract void jointDependentFeatherstonePassTwo(Vector3D w_h);
 
    // protected abstract void jointDependentComputeExternalForceR(Vector3d point_offset, Vector3d comOffset, Vector3d externalForceR);
 
@@ -1903,7 +1931,7 @@ public abstract class JointPhysics< J extends Joint>
          for (int i = 0; i < kinematicPoints.size(); i++)
          {
             KinematicPoint kp = kinematicPoints.get(i);
-            retBuffer.append("      " + kp.name);
+            retBuffer.append("      " + kp.getName());
 
             if (i != kinematicPoints.size() - 1)
                retBuffer.append("\n");
@@ -1918,7 +1946,7 @@ public abstract class JointPhysics< J extends Joint>
          for (int i = 0; i < externalForcePoints.size(); i++)
          {
             ExternalForcePoint ef = externalForcePoints.get(i);
-            retBuffer.append("      " + ef.name);
+            retBuffer.append("      " + ef.getName());
             if (i != kinematicPoints.size() - 1)
                retBuffer.append("\n");
          }

@@ -1,17 +1,17 @@
 package us.ihmc.sensorProcessing.pointClouds.shape;
 
-import georegression.metric.Intersection3D_F64;
-import georegression.struct.line.LineParametric3D_F64;
-import georegression.struct.plane.PlaneGeneral3D_F64;
-import georegression.struct.point.Point3D_F64;
-import georegression.struct.point.Vector3D_F64;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
 import org.junit.Test;
+
+import georegression.metric.Intersection3D_F64;
+import georegression.struct.line.LineParametric3D_F64;
+import georegression.struct.plane.PlaneGeneral3D_F64;
+import georegression.struct.point.Point3D_F64;
+import georegression.struct.point.Vector3D_F64;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public class ExpectationMaximizationFitterTest
 {

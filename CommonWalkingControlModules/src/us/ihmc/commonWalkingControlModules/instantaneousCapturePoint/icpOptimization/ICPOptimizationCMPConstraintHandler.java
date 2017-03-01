@@ -35,12 +35,8 @@ public class ICPOptimizationCMPConstraintHandler
    private final FramePoint2d tempVertex = new FramePoint2d();
    public void updateCMPConstraintForDoubleSupport(ICPOptimizationSolver solver)
    {
-      int numberOfVertices = 0;
-      for (RobotSide robotSide : RobotSide.values)
-         numberOfVertices += bipedSupportPolygons.getFootPolygonInMidFeetZUp(robotSide).getNumberOfVertices();
-      solver.setNumberOfCMPVertices(numberOfVertices);
+      solver.resetSupportPolygonConstraint();
 
-      numberOfVertices = 0;
       for (RobotSide robotSide : RobotSide.values)
       {
          FrameConvexPolygon2d supportPolygon = bipedSupportPolygons.getFootPolygonInMidFeetZUp(robotSide);
@@ -48,22 +44,21 @@ public class ICPOptimizationCMPConstraintHandler
          for (int i = 0; i < supportPolygon.getNumberOfVertices(); i++)
          {
             supportPolygon.getFrameVertex(i, tempVertex);
-            solver.setSupportPolygonVertex(numberOfVertices + i, tempVertex, supportPolygon.getReferenceFrame(), maxCMPDoubleSupportExitForward.getDoubleValue(),
+            solver.addSupportPolygonVertex(tempVertex, supportPolygon.getReferenceFrame(), maxCMPDoubleSupportExitForward.getDoubleValue(),
                   maxCMPDoubleSupportExitSideways.getDoubleValue());
          }
-
-         numberOfVertices += supportPolygon.getNumberOfVertices();
       }
    }
 
    public void updateCMPConstraintForSingleSupport(RobotSide supportSide, ICPOptimizationSolver solver)
    {
       FrameConvexPolygon2d supportPolygon = bipedSupportPolygons.getFootPolygonInSoleFrame(supportSide);
-      solver.setNumberOfCMPVertices(supportPolygon.getNumberOfVertices());
+      solver.resetSupportPolygonConstraint();
+
       for (int i = 0; i < supportPolygon.getNumberOfVertices(); i++)
       {
          supportPolygon.getFrameVertex(i, tempVertex);
-         solver.setSupportPolygonVertex(i, tempVertex, supportPolygon.getReferenceFrame(), maxCMPSingleSupportExitForward.getDoubleValue(),
+         solver.addSupportPolygonVertex(tempVertex, supportPolygon.getReferenceFrame(), maxCMPSingleSupportExitForward.getDoubleValue(),
                maxCMPSingleSupportExitSideways.getDoubleValue());
       }
    }

@@ -1,15 +1,5 @@
 package us.ihmc.jMonkeyEngineToolkit.jme.lidar;
 
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
-import us.ihmc.jMonkeyEngineToolkit.GPULidar;
-import us.ihmc.jMonkeyEngineToolkit.GPULidarListener;
-import us.ihmc.jMonkeyEngineToolkit.jme.JMERenderer;
-import us.ihmc.jMonkeyEngineToolkit.jme.util.JMEDataTypeUtils;
-import us.ihmc.jMonkeyEngineToolkit.jme.util.JMEGeometryUtils;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-
 import com.jme3.app.Application;
 import com.jme3.app.state.AppState;
 import com.jme3.app.state.AppStateManager;
@@ -17,6 +7,16 @@ import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.RenderManager;
 import com.jme3.scene.Node;
+
+import us.ihmc.euclid.transform.AffineTransform;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
+import us.ihmc.jMonkeyEngineToolkit.GPULidar;
+import us.ihmc.jMonkeyEngineToolkit.GPULidarListener;
+import us.ihmc.jMonkeyEngineToolkit.jme.JMERenderer;
+import us.ihmc.jMonkeyEngineToolkit.jme.util.JMEDataTypeUtils;
+import us.ihmc.jMonkeyEngineToolkit.jme.util.JMEGeometryUtils;
 
 public class JMEGPULidar implements GPULidar, AppState
 {
@@ -34,8 +34,8 @@ public class JMEGPULidar implements GPULidar, AppState
 
    private final Quaternion[] cameraRotations;
 
-   private final Vector3d j3dPosition = new Vector3d();
-   private final Quat4d j3dOrientation = new Quat4d();
+   private final Vector3D j3dPosition = new Vector3D();
+   private final QuaternionBasics j3dOrientation = new us.ihmc.euclid.tuple4D.Quaternion();
 
    private final Vector3f jmePosition = new Vector3f();
    private final Quaternion jmeOrientation = new Quaternion();
@@ -43,11 +43,11 @@ public class JMEGPULidar implements GPULidar, AppState
 
    private final RigidBodyTransform lidarTransform = new RigidBodyTransform();
    private double time = Double.NaN;
-   
+
    public JMEGPULidar(JMERenderer jmeRenderer, int scansPerSweep, int scanHeight, double fieldOfView, double minRange, double maxRange)
    {
       this.jmeRenderer = jmeRenderer;
-      
+
       // Figure out how many cameras to use. Use a small delta to avoid rounding errors of pi
       if (fieldOfView - 1e-4 <= Math.PI / 2)
       {
@@ -83,16 +83,16 @@ public class JMEGPULidar implements GPULidar, AppState
       LidarMaterial lidarMaterial = new LidarMaterial(jmeRenderer.getAssetManager());
       for (int i = 0; i < numberOfCameras; i++)
       {
-         lidarSceneViewPort[i] = new LidarSceneViewPort(jmeRenderer, lidarMaterial, numberOfCameras, scansPerSweep, scanHeight,
-               (float) fieldOfView, (float) minRange, (float) maxRange);
+         lidarSceneViewPort[i] = new LidarSceneViewPort(jmeRenderer, lidarMaterial, numberOfCameras, scansPerSweep, scanHeight, (float) fieldOfView,
+                                                        (float) minRange, (float) maxRange);
       }
 
-      lidarDistortionProcessor = new LidarDistortionProcessor(jmeRenderer, scansPerSweep, scanHeight,
-            numberOfCameras, startAngle, (float) fieldOfView, lidarSceneViewPort);
+      lidarDistortionProcessor = new LidarDistortionProcessor(jmeRenderer, scansPerSweep, scanHeight, numberOfCameras, startAngle, (float) fieldOfView,
+                                                              lidarSceneViewPort);
 
       jmeRenderer.getStateManager().attach(this);
    }
-   
+
    public void addGPULidarListener(GPULidarListener listener)
    {
       lidarDistortionProcessor.addGPULidarListener(listener);
@@ -148,7 +148,16 @@ public class JMEGPULidar implements GPULidar, AppState
          this.time = time;
       }
    }
-   
+
+   public void setTransformFromWorld(AffineTransform transformFromWorld, double time)
+   {
+      synchronized (lidarTransform)
+      {
+         transformFromWorld.getRigidBodyTransform(lidarTransform);
+         this.time = time;
+      }
+   }
+
    public void updateViewPortScenes()
    {
       Node sceneToUse;
@@ -160,7 +169,7 @@ public class JMEGPULidar implements GPULidar, AppState
       {
          sceneToUse = jmeRenderer.getZUpNode();
       }
-      
+
       for (LidarSceneViewPort viewPort : lidarSceneViewPort)
       {
          viewPort.updateScene(sceneToUse);

@@ -1,7 +1,6 @@
 package us.ihmc.robotics.math.filters;
 
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFrameVariableNameTools;
@@ -68,7 +67,7 @@ public class AverageSampleYoFrameVector extends YoFrameVector
       z.update(zSource);
    }
 
-   public void update(Vector3d vectorSource)
+   public void update(Vector3D vectorSource)
    {
       x.update(vectorSource.getX());
       y.update(vectorSource.getY());

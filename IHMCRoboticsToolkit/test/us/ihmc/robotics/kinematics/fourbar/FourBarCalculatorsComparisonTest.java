@@ -1,15 +1,15 @@
 package us.ihmc.robotics.kinematics.fourbar;
 
-import java.util.Random;
-
 import static java.lang.Math.abs;
 import static java.lang.Math.atan2;
 import static java.lang.Math.sqrt;
 import static org.junit.Assert.assertEquals;
 
+import java.util.Random;
+
 import org.junit.Test;
 
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 /**
  * It makes sure that the four bar calculator including derivatives and the calculator used in Beast, Steppr, and Wanderer give the same result

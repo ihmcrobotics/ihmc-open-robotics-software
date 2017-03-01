@@ -1,20 +1,19 @@
 package us.ihmc.quadrupedRobotics;
 
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotModels.OutputWriter;
-import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.sensorProcessing.communication.producers.DRCPoseCommunicator;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;
+import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.DRCKinematicsBasedStateEstimator;
 
 public class QuadrupedSimulationController implements RobotController
 {
    private static final boolean PIN_ROBOT_IN_AIR = false;
-   private static final Vector3d pinPosition = new Vector3d(0.0, 0.0, 1.0);
-   private static final Vector3d zeroAngularVelocity = new Vector3d();
+   private static final Vector3D pinPosition = new Vector3D(0.0, 0.0, 1.0);
+   private static final Vector3D zeroAngularVelocity = new Vector3D();
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
    private final FloatingRootJointRobot sdfRobot;

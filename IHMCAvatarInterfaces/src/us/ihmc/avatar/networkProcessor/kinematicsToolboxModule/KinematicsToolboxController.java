@@ -6,11 +6,6 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
-import javax.vecmath.AxisAngle4d;
-import javax.vecmath.Quat4f;
-import javax.vecmath.Vector3d;
-import javax.vecmath.Vector3f;
-
 import org.apache.commons.lang3.mutable.MutableDouble;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
@@ -36,6 +31,10 @@ import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packets.KinematicsToolboxOutputStatus;
+import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.Vector3D32;
+import us.ihmc.euclid.tuple4D.Quaternion32;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ChestTrajectoryCommand;
@@ -386,9 +385,9 @@ public class KinematicsToolboxController extends ToolboxController
 
    private final FramePose errorFramePose = new FramePose();
    private final FrameOrientation errorFrameOrientation = new FrameOrientation();
-   private final AxisAngle4d errorAxisAngle = new AxisAngle4d();
-   private final Vector3d errorRotation = new Vector3d();
-   private final Vector3d errorPosition = new Vector3d();
+   private final AxisAngle errorAxisAngle = new AxisAngle();
+   private final Vector3D errorRotation = new Vector3D();
+   private final Vector3D errorPosition = new Vector3D();
    private final DenseMatrix64F spatialError = new DenseMatrix64F(6, 1);
    private final DenseMatrix64F subspaceError = new DenseMatrix64F(6, 1);
 
@@ -435,7 +434,7 @@ public class KinematicsToolboxController extends ToolboxController
 
       ReferenceFrame endEffectorFrame = endEffector.getBodyFixedFrame();
       Twist desiredTwist = new Twist();
-      desiredTwist.set(endEffectorFrame, elevatorFrame, controlFrame, new Vector3d(), errorRotation);
+      desiredTwist.set(endEffectorFrame, elevatorFrame, controlFrame, new Vector3D(), errorRotation);
       desiredTwist.getMatrix(spatialError, 0);
       subspaceError.reshape(selectionMatrix.getNumRows(), 1);
       CommonOps.mult(selectionMatrix, spatialError, subspaceError);
@@ -540,10 +539,10 @@ public class KinematicsToolboxController extends ToolboxController
          oneDoFJoints[i].setQd(0.0);
       }
 
-      Vector3f translation = robotConfigurationData.getPelvisTranslation();
+      Vector3D32 translation = robotConfigurationData.getPelvisTranslation();
       desiredRootJoint.setPosition(translation.getX(), translation.getY(), translation.getZ());
-      Quat4f orientation = robotConfigurationData.getPelvisOrientation();
-      desiredRootJoint.setRotation(orientation.getX(), orientation.getY(), orientation.getZ(), orientation.getW());
+      Quaternion32 orientation = robotConfigurationData.getPelvisOrientation();
+      desiredRootJoint.setRotation(orientation.getX(), orientation.getY(), orientation.getZ(), orientation.getS());
       desiredRootJoint.setVelocity(zeroVelocityMatrix, 0);
 
       updateTools();

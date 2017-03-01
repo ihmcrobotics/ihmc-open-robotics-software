@@ -8,4 +8,5 @@ public interface AbstractSDFMesh
    public SDFGeometry getGeometry();
    public String getPose();
    public SDFMaterial getMaterial();
+   public String getTransparency();
 }

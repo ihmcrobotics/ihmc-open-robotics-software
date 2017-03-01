@@ -1,7 +1,6 @@
 package us.ihmc.simulationconstructionset;
 
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.Axis;
 
 /**
@@ -22,12 +21,12 @@ public class GimbalJoint extends PinJoint
    private static final long serialVersionUID = 6692640300004794312L;
    private PinJoint joint2, joint3;
 
-   public GimbalJoint(String jname1, String jname2, String jname3, Vector3d offset, Robot rob, Axis firstAxis, Axis secondAxis, Axis thirdAxis)
+   public GimbalJoint(String jname1, String jname2, String jname3, Vector3D offset, Robot rob, Axis firstAxis, Axis secondAxis, Axis thirdAxis)
    {
       super(jname1, offset, rob, firstAxis);
 
-      joint2 = new PinJoint(jname2, new Vector3d(), rob, secondAxis);
-      joint3 = new PinJoint(jname3, new Vector3d(), rob, thirdAxis);
+      joint2 = new PinJoint(jname2, new Vector3D(), rob, secondAxis);
+      joint3 = new PinJoint(jname3, new Vector3D(), rob, thirdAxis);
 
       // super.addJoint(joint2); // This crashes.  Instead, add the joint manually:
 

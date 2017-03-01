@@ -5,8 +5,8 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
 
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 
 public class MocapFrameDataPacket
 {
@@ -30,7 +30,7 @@ public class MocapFrameDataPacket
    public float uMarkerY;
    public float uMarkerZ;
 
-   public Vector3d[] markerPosition;
+   public Vector3D[] markerPosition;
    public int[] markerIds;
    public float[] markerSizes;
 
@@ -131,12 +131,12 @@ public class MocapFrameDataPacket
             data.rotW = buf.getFloat();
             data.nRigidMarkers = buf.getInt();
 
-            data.markerPosition = new Vector3d[data.nRigidMarkers];
+            data.markerPosition = new Vector3D[data.nRigidMarkers];
 
 
             for (int j = 0; j < data.nRigidMarkers; j++)
             {
-               data.markerPosition[j] = new Vector3d(buf.getFloat(), buf.getFloat(), buf.getFloat());
+               data.markerPosition[j] = new Vector3D(buf.getFloat(), buf.getFloat(), buf.getFloat());
             }
 
             data.markerIds = new int[data.nRigidMarkers];
@@ -168,8 +168,8 @@ public class MocapFrameDataPacket
                listfOfMarkersForThisRB.add(mocapMarker);
             }
 
-            rigidBody = new MocapRigidBody(data.rigidBodyId, new Vector3d(data.posX, data.posY, data.posZ),
-                                           new Quat4d(data.rotX, data.rotY, data.rotZ, data.rotW), listfOfMarkersForThisRB, data.isTracked);
+            rigidBody = new MocapRigidBody(data.rigidBodyId, new Vector3D(data.posX, data.posY, data.posZ),
+                                           new Quaternion(data.rotX, data.rotY, data.rotZ, data.rotW), listfOfMarkersForThisRB, data.isTracked);
 
             listfOfRigidbodies.add(rigidBody);
 

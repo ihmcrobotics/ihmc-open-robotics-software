@@ -5,19 +5,18 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Random;
 
-import javax.vecmath.Quat4d;
-
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.VisualizablePacket;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
 import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -190,7 +189,7 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage> imp
       if (numberOfSteps > 0)
       {
          startingFootstep = this.get(0).getLocation().toString();
-         Quat4d quat4d = this.get(0).getOrientation();
+         Quaternion quat4d = this.get(0).getOrientation();
 
          FrameOrientation frameOrientation = new FrameOrientation(ReferenceFrame.getWorldFrame(), quat4d);
          startingFootstep = startingFootstep + ", ypr= " + Arrays.toString(frameOrientation.getYawPitchRoll());
@@ -258,10 +257,10 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage> imp
          footstepDataList.add(new FootstepDataMessage(random));
       }
 
-      this.defaultSwingTime = RandomTools.generateRandomDoubleWithEdgeCases(random, 0.1);
-      this.defaultTransferTime = RandomTools.generateRandomDoubleWithEdgeCases(random, 0.1);
-      this.finalTransferTime = RandomTools.generateRandomDoubleWithEdgeCases(random, 0.1);
-      this.executionMode = RandomTools.generateRandomEnum(random, ExecutionMode.class);
+      this.defaultSwingTime = RandomNumbers.nextDoubleWithEdgeCases(random, 0.1);
+      this.defaultTransferTime = RandomNumbers.nextDoubleWithEdgeCases(random, 0.1);
+      this.finalTransferTime = RandomNumbers.nextDoubleWithEdgeCases(random, 0.1);
+      this.executionMode = RandomNumbers.nextEnum(random, ExecutionMode.class);
    }
 
    /** {@inheritDoc} */

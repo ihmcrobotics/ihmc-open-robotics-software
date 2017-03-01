@@ -1,6 +1,8 @@
 package us.ihmc.robotics.geometry;
 
-import us.ihmc.robotics.geometry.interfaces.GeometryObject;
+import us.ihmc.euclid.interfaces.GeometryObject;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public abstract class AbstractFrameObject<F extends AbstractFrameObject<F, G>, G extends GeometryObject<G>> extends AbstractReferenceFrameHolder implements FrameObject<F>
@@ -57,14 +59,14 @@ public abstract class AbstractFrameObject<F extends AbstractFrameObject<F, G>, G
    }
 
    @Override
-   public void changeFrameUsingTransform(ReferenceFrame desiredFrame, RigidBodyTransform transformToNewFrame)
+   public void changeFrameUsingTransform(ReferenceFrame desiredFrame, Transform transformToNewFrame)
    {
       geometryObject.applyTransform(transformToNewFrame);
       referenceFrame = desiredFrame;
    }
 
    @Override
-   public void applyTransform(RigidBodyTransform transform)
+   public void applyTransform(Transform transform)
    {
       geometryObject.applyTransform(transform);
    }

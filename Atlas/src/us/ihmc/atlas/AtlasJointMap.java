@@ -43,16 +43,15 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
 
-import javax.vecmath.Vector3d;
-
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import us.ihmc.atlas.parameters.AtlasContactPointParameters;
 import us.ihmc.avatar.drcRobot.NewRobotPhysicalProperties;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.jMonkeyEngineToolkit.jme.util.JMEDataTypeUtils;
 import us.ihmc.robotics.controllers.YoPDGains;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.JointRole;
 import us.ihmc.robotics.partNames.LegJointName;
@@ -83,10 +82,10 @@ public class AtlasJointMap implements DRCRobotJointMap
    public static final String pelvisName = "pelvis";
    public static final String headName = "head";
 
-   private final LegJointName[] legJoints = { HIP_YAW, HIP_ROLL, HIP_PITCH, KNEE_PITCH, ANKLE_PITCH, ANKLE_ROLL };
-   private final ArmJointName[] armJoints = { SHOULDER_YAW, SHOULDER_ROLL, ELBOW_PITCH, ELBOW_ROLL, FIRST_WRIST_PITCH, WRIST_ROLL, SECOND_WRIST_PITCH };
-   private final SpineJointName[] spineJoints = { SPINE_PITCH, SPINE_ROLL, SPINE_YAW };
-   private final NeckJointName[] neckJoints = { PROXIMAL_NECK_PITCH };
+   private final LegJointName[] legJoints = {HIP_YAW, HIP_ROLL, HIP_PITCH, KNEE_PITCH, ANKLE_PITCH, ANKLE_ROLL};
+   private final ArmJointName[] armJoints;
+   private final SpineJointName[] spineJoints = {SPINE_PITCH, SPINE_ROLL, SPINE_YAW};
+   private final NeckJointName[] neckJoints = {PROXIMAL_NECK_PITCH};
 
    private final LinkedHashMap<String, JointRole> jointRoles = new LinkedHashMap<String, JointRole>();
    private final LinkedHashMap<String, ImmutablePair<RobotSide, LimbName>> limbNames = new LinkedHashMap<String, ImmutablePair<RobotSide, LimbName>>();
@@ -110,7 +109,6 @@ public class AtlasJointMap implements DRCRobotJointMap
 
    private final String[] jointNamesBeforeFeet = new String[2];
 
-
    public AtlasJointMap(AtlasRobotVersion atlasVersion, NewRobotPhysicalProperties atlasPhysicalProperties)
    {
       this(atlasVersion, atlasPhysicalProperties, null);
@@ -120,9 +118,17 @@ public class AtlasJointMap implements DRCRobotJointMap
    {
       this.atlasVersion = atlasVersion;
       this.atlasPhysicalProperties = atlasPhysicalProperties;
+
+      if (atlasVersion != AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_FOREARMS)
+         armJoints = new ArmJointName[] {SHOULDER_YAW, SHOULDER_ROLL, ELBOW_PITCH, ELBOW_ROLL, FIRST_WRIST_PITCH, WRIST_ROLL, SECOND_WRIST_PITCH};
+      else
+         armJoints = new ArmJointName[] {SHOULDER_YAW, SHOULDER_ROLL, ELBOW_PITCH, ELBOW_ROLL};
+
       for (RobotSide robotSide : RobotSide.values)
       {
+         String prefix = getRobotSidePrefix(robotSide);
          String[] forcedSideJointNames = forcedSideDependentJointNames.get(robotSide);
+
          legJointNames.put(forcedSideJointNames[l_leg_hpz], new ImmutablePair<RobotSide, LegJointName>(robotSide, HIP_YAW));
          legJointNames.put(forcedSideJointNames[l_leg_hpx], new ImmutablePair<RobotSide, LegJointName>(robotSide, HIP_ROLL));
          legJointNames.put(forcedSideJointNames[l_leg_hpy], new ImmutablePair<RobotSide, LegJointName>(robotSide, HIP_PITCH));
@@ -130,18 +136,25 @@ public class AtlasJointMap implements DRCRobotJointMap
          legJointNames.put(forcedSideJointNames[l_leg_aky], new ImmutablePair<RobotSide, LegJointName>(robotSide, ANKLE_PITCH));
          legJointNames.put(forcedSideJointNames[l_leg_akx], new ImmutablePair<RobotSide, LegJointName>(robotSide, ANKLE_ROLL));
 
+         limbNames.put(prefix + "foot", new ImmutablePair<RobotSide, LimbName>(robotSide, LimbName.LEG));
+
          armJointNames.put(forcedSideJointNames[l_arm_shz], new ImmutablePair<RobotSide, ArmJointName>(robotSide, SHOULDER_YAW));
          armJointNames.put(forcedSideJointNames[l_arm_shx], new ImmutablePair<RobotSide, ArmJointName>(robotSide, SHOULDER_ROLL));
          armJointNames.put(forcedSideJointNames[l_arm_ely], new ImmutablePair<RobotSide, ArmJointName>(robotSide, ELBOW_PITCH));
          armJointNames.put(forcedSideJointNames[l_arm_elx], new ImmutablePair<RobotSide, ArmJointName>(robotSide, ELBOW_ROLL));
+
+         if (atlasVersion != AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_FOREARMS)
+            limbNames.put(prefix + "hand", new ImmutablePair<RobotSide, LimbName>(robotSide, LimbName.ARM));
+         else
+            limbNames.put(prefix + "larm", new ImmutablePair<RobotSide, LimbName>(robotSide, LimbName.ARM));
+
+         if (atlasVersion == AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_FOREARMS)
+            continue;
+
          armJointNames.put(forcedSideJointNames[l_arm_wry], new ImmutablePair<RobotSide, ArmJointName>(robotSide, FIRST_WRIST_PITCH));
          armJointNames.put(forcedSideJointNames[l_arm_wrx], new ImmutablePair<RobotSide, ArmJointName>(robotSide, WRIST_ROLL));
          armJointNames.put(forcedSideJointNames[l_arm_wry2], new ImmutablePair<RobotSide, ArmJointName>(robotSide, SECOND_WRIST_PITCH));
 
-         String prefix = getRobotSidePrefix(robotSide);
-
-         limbNames.put(prefix + "hand", new ImmutablePair<RobotSide, LimbName>(robotSide, LimbName.ARM));
-         limbNames.put(prefix + "foot", new ImmutablePair<RobotSide, LimbName>(robotSide, LimbName.LEG));
       }
 
       spineJointNames.put(jointNames[back_bkz], SPINE_YAW);
@@ -183,7 +196,10 @@ public class AtlasJointMap implements DRCRobotJointMap
       for (RobotSide robtSide : RobotSide.values)
       {
          nameOfJointsBeforeThighs.put(robtSide, legJointStrings.get(robtSide).get(HIP_PITCH));
-         nameOfJointsBeforeHands.put(robtSide, armJointStrings.get(robtSide).get(SECOND_WRIST_PITCH));
+         if (atlasVersion != AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_FOREARMS)
+            nameOfJointsBeforeHands.put(robtSide, armJointStrings.get(robtSide).get(SECOND_WRIST_PITCH));
+         else
+            nameOfJointsBeforeHands.put(robtSide, armJointStrings.get(robtSide).get(ELBOW_ROLL));
       }
 
       jointNamesBeforeFeet[0] = getJointBeforeFootName(RobotSide.LEFT);
@@ -193,7 +209,9 @@ public class AtlasJointMap implements DRCRobotJointMap
    @Override
    public SideDependentList<String> getNameOfJointBeforeHands()
    {
-      return nameOfJointsBeforeHands;
+      if (atlasVersion != AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_FOREARMS)
+         return nameOfJointsBeforeHands;
+      return null;
    }
 
    @Override
@@ -310,12 +328,13 @@ public class AtlasJointMap implements DRCRobotJointMap
    }
 
    @Override
-   public List<ImmutablePair<String, Vector3d>> getJointNameGroundContactPointMap()
+   public List<ImmutablePair<String, Vector3D>> getJointNameGroundContactPointMap()
    {
       return contactPointParameters.getJointNameGroundContactPointMap();
    }
 
-   @Override public List<ImmutablePair<String, YoPDGains>> getPassiveJointNameWithGains(YoVariableRegistry registry)
+   @Override
+   public List<ImmutablePair<String, YoPDGains>> getPassiveJointNameWithGains(YoVariableRegistry registry)
    {
       return null;
    }
@@ -337,11 +356,12 @@ public class AtlasJointMap implements DRCRobotJointMap
    {
       HashSet<String> lastSimulatedJoints = new HashSet<>();
 
-      if(!atlasVersion.getHandModel().isHandSimulated())
+      if (!atlasVersion.getHandModel().isHandSimulated())
       {
          for (RobotSide robotSide : RobotSide.values)
             lastSimulatedJoints.add(armJointStrings.get(robotSide).get(SECOND_WRIST_PITCH));
       }
+
       return lastSimulatedJoints;
    }
 
@@ -363,16 +383,15 @@ public class AtlasJointMap implements DRCRobotJointMap
       RigidBodyTransform attachmentPlateToPalm = JMEDataTypeUtils.jmeTransformToTransform3D(atlasVersion.getOffsetFromAttachmentPlate(robotSide));
       RigidBodyTransform attachmentPlateToWrist = atlasPhysicalProperties.getHandAttachmentPlateToWristTransforms().get(robotSide);
       RigidBodyTransform handControlFrameToWristTranform = new RigidBodyTransform();
-      handControlFrameToWristTranform.multiply(attachmentPlateToWrist, attachmentPlateToPalm);
+      handControlFrameToWristTranform.set(attachmentPlateToWrist);
+      handControlFrameToWristTranform.multiply(attachmentPlateToPalm);
 
-      Vector3d translation = new Vector3d();
+      Vector3D translation = new Vector3D();
       handControlFrameToWristTranform.getTranslation(translation);
       translation.scale(getModelScale());
       handControlFrameToWristTranform.setTranslation(translation);
 
-
       return handControlFrameToWristTranform;
-//      return AtlasPhysicalProperties.handAttachmentPlateToWristTransforms.get(robotSide);
    }
 
    @Override
@@ -426,16 +445,20 @@ public class AtlasJointMap implements DRCRobotJointMap
    @Override
    public Enum<?> getEndEffectorsRobotSegment(String joineNameBeforeEndEffector)
    {
-      for(RobotSide robotSide : RobotSide.values)
+      for (RobotSide robotSide : RobotSide.values)
       {
          String jointBeforeFootName = getJointBeforeFootName(robotSide);
-         if(jointBeforeFootName != null && jointBeforeFootName.equals(joineNameBeforeEndEffector))
+         if (jointBeforeFootName != null && jointBeforeFootName.equals(joineNameBeforeEndEffector))
          {
             return robotSide;
          }
 
-         String endOfArm = armJointStrings.get(robotSide).get(SECOND_WRIST_PITCH);
-         if(endOfArm != null && endOfArm.equals(joineNameBeforeEndEffector))
+         String endOfArm;
+         if (atlasVersion != AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_FOREARMS)
+            endOfArm = armJointStrings.get(robotSide).get(SECOND_WRIST_PITCH);
+         else
+            endOfArm = armJointStrings.get(robotSide).get(ELBOW_ROLL);
+         if (endOfArm != null && endOfArm.equals(joineNameBeforeEndEffector))
          {
             return robotSide;
          }
@@ -462,7 +485,6 @@ public class AtlasJointMap implements DRCRobotJointMap
 
    public String[] getHighInertiaForStableSimulationJoints()
    {
-      return new String[] { "hokuyo_joint" };
+      return new String[] {"hokuyo_joint"};
    }
 }
-

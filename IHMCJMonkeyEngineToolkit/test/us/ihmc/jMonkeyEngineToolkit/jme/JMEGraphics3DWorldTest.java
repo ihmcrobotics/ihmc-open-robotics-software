@@ -2,15 +2,6 @@ package us.ihmc.jMonkeyEngineToolkit.jme;
 
 import org.junit.Test;
 
-import us.ihmc.graphicsDescription.Graphics3DObject;
-import us.ihmc.graphicsDescription.structure.Graphics3DNode;
-import us.ihmc.jMonkeyEngineToolkit.jme.JMEGraphics3DAdapter;
-import us.ihmc.jMonkeyEngineToolkit.jme.JMEGraphics3DWorld;
-import us.ihmc.robotics.geometry.shapes.Sphere3d;
-import us.ihmc.tools.continuousIntegration.IntegrationCategory;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-
 import com.jme3.material.Material;
 import com.jme3.material.RenderState.BlendMode;
 import com.jme3.math.ColorRGBA;
@@ -18,6 +9,13 @@ import com.jme3.renderer.queue.RenderQueue.Bucket;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.shape.Sphere;
+
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.IntegrationCategory;
+import us.ihmc.graphicsDescription.Graphics3DObject;
+import us.ihmc.graphicsDescription.structure.Graphics3DNode;
+import us.ihmc.robotics.geometry.shapes.Sphere3d;
 
 @ContinuousIntegrationPlan(categories={IntegrationCategory.UI})
 public class JMEGraphics3DWorldTest

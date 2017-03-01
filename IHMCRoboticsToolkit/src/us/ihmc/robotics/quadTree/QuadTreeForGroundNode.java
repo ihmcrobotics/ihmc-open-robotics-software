@@ -1,8 +1,9 @@
 package us.ihmc.robotics.quadTree;
 
-import javax.vecmath.Point3d;
 import java.util.ArrayList;
 import java.util.Collection;
+
+import us.ihmc.euclid.tuple3D.Point3D;
 
 public class QuadTreeForGroundNode
 {
@@ -61,7 +62,7 @@ public class QuadTreeForGroundNode
       return defaultHeightWhenNoPonts;
    }
    
-   public void getAllSubTreePoints(Collection<Point3d> pointsToPack)
+   public void getAllSubTreePoints(Collection<Point3D> pointsToPack)
    {
       if (hasChildren)
       {
@@ -76,7 +77,7 @@ public class QuadTreeForGroundNode
       }
    }
 
-   public void getCellAverageSubTreePoints(Collection<Point3d> pointsToPack)
+   public void getCellAverageSubTreePoints(Collection<Point3D> pointsToPack)
    {
       if (hasChildren)
       {
@@ -173,7 +174,7 @@ public class QuadTreeForGroundNode
          {
             for (QuadTreeForGroundListener listener : listeners)
             {
-               Point3d averagePoint = leaf.getAveragePoint();
+               Point3D averagePoint = leaf.getAveragePoint();
                listener.nodeRemoved(id);
                listener.nodeAdded(id, bounds, (float) averagePoint.getX(), (float) averagePoint.getY(), (float) averagePoint.getZ());
             }
@@ -198,7 +199,7 @@ public class QuadTreeForGroundNode
          return this.put(point);
       }
 
-      Point3d averagePoint = leaf.getAveragePoint();
+      Point3D averagePoint = leaf.getAveragePoint();
       if (Math.abs(averagePoint.getZ() - point.getZ()) < parameters.getHeightThreshold())
       {
          updateLeafValue(point);
@@ -266,7 +267,7 @@ public class QuadTreeForGroundNode
       }
    }
 
-   public void getClosestPoint(double xQuery, double yQuery, Point3d pointToPack)
+   public void getClosestPoint(double xQuery, double yQuery, Point3D pointToPack)
    {
       PointAndDistance pointAndDistance = new PointAndDistance(pointToPack, Double.POSITIVE_INFINITY);
       getClosestPointAndDistance(xQuery, yQuery, pointAndDistance);
@@ -312,7 +313,7 @@ public class QuadTreeForGroundNode
    }
 
 
-   public void getAllPointsWithinDistance(double x, double y, double maxDistance, ArrayList<Point3d> pointsWithinDistanceToPack)
+   public void getAllPointsWithinDistance(double x, double y, double maxDistance, ArrayList<Point3D> pointsWithinDistanceToPack)
    {
       if (maxDistance < 0.0)
          return;
@@ -348,7 +349,7 @@ public class QuadTreeForGroundNode
       }
    }
 
-   public void getAllPointsWithBounds(Box bounds, ArrayList<Point3d> pointsWithinBoundsToPack)
+   public void getAllPointsWithBounds(Box bounds, ArrayList<Point3D> pointsWithinBoundsToPack)
    {
       if (this.hasChildren)
       {
@@ -497,7 +498,7 @@ public class QuadTreeForGroundNode
 
    private double getAverageHeightOfLeaf()
    {
-      Point3d averagePoint = leaf.getAveragePoint();
+      Point3D averagePoint = leaf.getAveragePoint();
 
       return averagePoint.getZ();
    }

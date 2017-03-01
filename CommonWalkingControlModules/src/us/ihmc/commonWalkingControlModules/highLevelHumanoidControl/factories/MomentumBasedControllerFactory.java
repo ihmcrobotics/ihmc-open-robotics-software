@@ -80,6 +80,7 @@ public class MomentumBasedControllerFactory implements CloseableAndDisposable
    private ConcurrentLinkedQueue<Command<?, ?>> controllerCommands;
 
    private final WalkingControllerParameters walkingControllerParameters;
+   private final CapturePointPlannerParameters capturePointPlannerParameters;
 
    private final HighLevelState initialBehavior;
 
@@ -120,6 +121,7 @@ public class MomentumBasedControllerFactory implements CloseableAndDisposable
       this.initialBehavior = initialBehavior;
 
       this.walkingControllerParameters = walkingControllerParameters;
+      this.capturePointPlannerParameters = capturePointPlannerParameters;
 
       commandInputManager = new CommandInputManager(ControllerAPIDefinition.getControllerSupportedCommands());
       statusOutputManager = new StatusMessageOutputManager(ControllerAPIDefinition.getControllerSupportedStatusMessages());
@@ -129,7 +131,7 @@ public class MomentumBasedControllerFactory implements CloseableAndDisposable
       managerFactory.setCapturePointPlannerParameters(capturePointPlannerParameters);
       managerFactory.setWalkingControllerParameters(walkingControllerParameters);
    }
-   
+
    public void setHeadingAndVelocityEvaluationScriptParameters(HeadingAndVelocityEvaluationScriptParameters walkingScriptParameters)
    {
       headingAndVelocityEvaluationScriptParameters = walkingScriptParameters;
@@ -269,7 +271,7 @@ public class MomentumBasedControllerFactory implements CloseableAndDisposable
       MomentumOptimizationSettings momentumOptimizationSettings = walkingControllerParameters.getMomentumOptimizationSettings();
       JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters = walkingControllerParameters.getJointPrivilegedConfigurationParameters();
       double omega0 = walkingControllerParameters.getOmega0();
-      momentumBasedController = new HighLevelHumanoidControllerToolbox(fullRobotModel, geometricJacobianHolder, referenceFrames, footSwitches, 
+      momentumBasedController = new HighLevelHumanoidControllerToolbox(fullRobotModel, geometricJacobianHolder, referenceFrames, footSwitches,
             centerOfMassDataHolder, wristForceSensors, yoTime,
             gravityZ, omega0, twistCalculator, feet, handContactableBodies, controlDT, updatables, yoGraphicsListRegistry, jointsToIgnore);
       momentumBasedController.attachControllerStateChangedListeners(controllerStateChangedListenersToAttach);
@@ -287,7 +289,7 @@ public class MomentumBasedControllerFactory implements CloseableAndDisposable
       /////////////////////////////////////////////////////////////////////////////////////////////
       // Setup the WalkingHighLevelHumanoidController /////////////////////////////////////////////
       walkingBehavior = new WalkingHighLevelHumanoidController(commandInputManager, statusOutputManager, managerFactory, walkingControllerParameters,
-            momentumBasedController);
+            capturePointPlannerParameters, momentumBasedController);
       highLevelBehaviors.add(walkingBehavior);
 
       /////////////////////////////////////////////////////////////////////////////////////////////

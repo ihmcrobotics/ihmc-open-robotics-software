@@ -1,11 +1,12 @@
 package us.ihmc.robotics.geometry;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
-import us.ihmc.robotics.geometry.interfaces.GeometryObject;
-import us.ihmc.robotics.geometry.transformables.TransformablePoint3d;
-import us.ihmc.robotics.geometry.transformables.TransformableVector3d;
+import us.ihmc.euclid.interfaces.GeometryObject;
+import us.ihmc.euclid.transform.interfaces.Transform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 
 /**
  * Represents an infinitely long 3D line defined by a 3D point and a 3D vector.
@@ -16,9 +17,9 @@ import us.ihmc.robotics.geometry.transformables.TransformableVector3d;
 public class Line3d implements GeometryObject<Line3d>
 {
    /** Coordinates of a point located on this line. */
-   private final TransformablePoint3d point = new TransformablePoint3d();
+   private final Point3D point = new Point3D();
    /** Normalized direction of this line. */
-   private final TransformableVector3d normalizedVector = new TransformableVector3d();
+   private final Vector3D normalizedVector = new Vector3D();
 
    /**
     * Default constructor that initializes both {@link #point} and {@link #normalizedVector} to zero.
@@ -34,7 +35,7 @@ public class Line3d implements GeometryObject<Line3d>
     * @param point point on this line. Not modified.
     * @param vector direction of this line. Not modified.
     */
-   public Line3d(Point3d point, Vector3d vector)
+   public Line3d(Point3DReadOnly point, Vector3DReadOnly vector)
    {
       set(point, vector);
    }
@@ -45,7 +46,7 @@ public class Line3d implements GeometryObject<Line3d>
     * @param firstPointOnLine first point on this line. Not modified.
     * @param secondPointOnLine second point on this line. Not modified.
     */
-   public Line3d(Point3d firstPointOnLine, Point3d secondPointOnLine)
+   public Line3d(Point3DReadOnly firstPointOnLine, Point3DReadOnly secondPointOnLine)
    {
       set(firstPointOnLine, secondPointOnLine);
    }
@@ -53,7 +54,7 @@ public class Line3d implements GeometryObject<Line3d>
    /**
     * @return the reference to the point through which this line is going.
     */
-   public Point3d getPoint()
+   public Point3D getPoint()
    {
       return point;
    }
@@ -61,7 +62,7 @@ public class Line3d implements GeometryObject<Line3d>
    /**
     * @return the reference to the direction of this line.
     */
-   public Vector3d getNormalizedVector()
+   public Vector3D getNormalizedVector()
    {
       return normalizedVector;
    }
@@ -71,7 +72,7 @@ public class Line3d implements GeometryObject<Line3d>
     * 
     * @param point new point on this line. Not modified.
     */
-   public void setPoint(Point3d point)
+   public void setPoint(Point3DReadOnly point)
    {
       this.point.set(point);
    }
@@ -81,7 +82,7 @@ public class Line3d implements GeometryObject<Line3d>
     * 
     * @param vector new direction of this line. Not modified.
     */
-   public void setVector(Vector3d vector)
+   public void setVector(Vector3DReadOnly vector)
    {
       this.normalizedVector.set(vector);
       normalize();
@@ -93,7 +94,7 @@ public class Line3d implements GeometryObject<Line3d>
     * @param point new point on this line. Not modified.
     * @param vector new direction of this line. Not modified.
     */
-   public void set(Point3d point, Vector3d vector)
+   public void set(Point3DReadOnly point, Vector3DReadOnly vector)
    {
       setPoint(point);
       setVector(vector);
@@ -105,7 +106,7 @@ public class Line3d implements GeometryObject<Line3d>
     * @param firstPointOnLine first point on this line. Not modified.
     * @param secondPointOnLine second point on this line. Not modified.
     */
-   public void set(Point3d firstPointOnLine, Point3d secondPointOnLine)
+   public void set(Point3DReadOnly firstPointOnLine, Point3DReadOnly secondPointOnLine)
    {
       setPoint(firstPointOnLine);
       normalizedVector.sub(secondPointOnLine, firstPointOnLine);
@@ -176,7 +177,7 @@ public class Line3d implements GeometryObject<Line3d>
     * @param point 3D point to compute the distance from the line. Not modified.
     * @return the minimum distance between the 3D point and this 3D line.
     */
-   public double distance(Point3d point)
+   public double distance(Point3DReadOnly point)
    {
       return GeometryTools.distanceFromPointToLine(point, this.point, this.normalizedVector);
    }
@@ -202,7 +203,7 @@ public class Line3d implements GeometryObject<Line3d>
     * @param closestPointOnOtherLineToPack the 3D coordinates of the point Q are packed in this 3D point. Modified. Can be {@code null}.
     * @return the minimum distance between the two lines.
     */
-   public double getClosestPointsWith(Line3d otherLine, Point3d closestPointOnThisLineToPack, Point3d closestPointOnOtherLineToPack)
+   public double getClosestPointsWith(Line3d otherLine, Point3DBasics closestPointOnThisLineToPack, Point3DBasics closestPointOnOtherLineToPack)
    {
       return GeometryTools.getClosestPointsForTwoLines(point, normalizedVector, otherLine.point, otherLine.normalizedVector, closestPointOnThisLineToPack, closestPointOnOtherLineToPack);
    }
@@ -213,7 +214,7 @@ public class Line3d implements GeometryObject<Line3d>
     * @param transform the transform to apply on this line's point and vector. Not modified.
     */
    @Override
-   public void applyTransform(RigidBodyTransform transform)
+   public void applyTransform(Transform transform)
    {
       point.applyTransform(transform);
       normalizedVector.applyTransform(transform);

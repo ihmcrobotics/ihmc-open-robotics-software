@@ -1,22 +1,20 @@
 package us.ihmc.robotics.referenceFrames;
 
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.geometry.RotationTools;
-
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Vector3d;
 
 public class OriginAndPointFrame extends ReferenceFrame
 {
    private static final long serialVersionUID = -3583775854419464525L;
    private final FramePoint origin;
    private final FramePoint positionToPointAt;
-   private final Vector3d xAxis = new Vector3d();
-   private final Vector3d yAxis = new Vector3d();
-   private final Vector3d zAxis = new Vector3d();
-   private final Matrix3d rotationMatrix = new Matrix3d();
-   private final Vector3d originVector = new Vector3d();
+   private final Vector3D xAxis = new Vector3D();
+   private final Vector3D yAxis = new Vector3D();
+   private final Vector3D zAxis = new Vector3D();
+   private final RotationMatrix rotationMatrix = new RotationMatrix();
+   private final Vector3D originVector = new Vector3D();
 
    public OriginAndPointFrame(String name, ReferenceFrame parentFrame)
    {
@@ -54,11 +52,7 @@ public class OriginAndPointFrame extends ReferenceFrame
       yAxis.normalize();
       zAxis.cross(xAxis, yAxis);
 
-      rotationMatrix.setColumn(0, xAxis);
-      rotationMatrix.setColumn(1, yAxis);
-      rotationMatrix.setColumn(2, zAxis);
-
-      RotationTools.checkProperRotationMatrix(rotationMatrix);
+      rotationMatrix.setColumns(xAxis, yAxis, zAxis);
 
       transformToParent.setRotationAndZeroTranslation(rotationMatrix);
       transformToParent.setTranslation(originVector);

@@ -1,7 +1,6 @@
 package us.ihmc.simulationconstructionset.util.graphics;
 
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -13,9 +12,6 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.jMonkeyEngineToolkit.Graphics3DAdapter;
 import us.ihmc.jMonkeyEngineToolkit.jme.JMEGraphics3DAdapter;
-import us.ihmc.simulationconstructionset.Robot;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
@@ -24,6 +20,9 @@ import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 
 public class DynamicGraphicObjectEvaluation
 {
@@ -149,7 +148,7 @@ public class DynamicGraphicObjectEvaluation
                yoFramePolygon.setConvexPolygon2d(newYoPolygon);
                dynamicGraphicYoFramePolygon.update();
 
-               Vector3d eulerAngles = new Vector3d();
+               Vector3D eulerAngles = new Vector3D();
                yoFramePolygonOrientation.getEulerAngles(eulerAngles);
                eulerAngles.setY(eulerAngles.getY() + 0.1);
                yoFramePolygonOrientation.setEulerAngles(eulerAngles);

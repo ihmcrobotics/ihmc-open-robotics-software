@@ -7,21 +7,21 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import javax.vecmath.AxisAngle4d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
 import org.junit.Test;
 
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 /**
  * Created with IntelliJ IDEA.
@@ -48,7 +48,7 @@ public class FootstepDataTansformerTest
       {
          originalFootstepData = getTestFootstepData();
          transform3D = new RigidBodyTransform();
-         transform3D = RigidBodyTransform.generateRandomTransform(random);
+         transform3D = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
 
          transformedFootstepData = originalFootstepData.transform(transform3D);
 
@@ -60,16 +60,18 @@ public class FootstepDataTansformerTest
    {
       FootstepDataMessage ret = new FootstepDataMessage();
       ret.robotSide = RobotSide.LEFT;
-      ret.location = RandomTools.generateRandomPoint(random, 10.0, 10.0, 10.0);
-      AxisAngle4d axisAngle = RandomTools.generateRandomRotation(random);
-      ret.orientation = new Quat4d();
-      ret.orientation.set(axisAngle);
+      ret.location = RandomGeometry.nextPoint3D(random, 10.0, 10.0, 10.0);
+      AxisAngle axisAngle = RandomGeometry.nextAxisAngle(random);
+      
+      Quaternion orientation = new Quaternion();
+      orientation.set(axisAngle);
+      ret.setOrientation(orientation);
 
-      List<Point3d> listOfPoints = new ArrayList<Point3d>();
+      List<Point3D> listOfPoints = new ArrayList<Point3D>();
       {
          for (int i = 0; i < 30; i++)
          {
-            listOfPoints.add(RandomTools.generateRandomPoint(random, 10.0, 10.0, 10.0));
+            listOfPoints.add(RandomGeometry.nextPoint3D(random, 10.0, 10.0, 10.0));
          }
       }
 
@@ -84,13 +86,13 @@ public class FootstepDataTansformerTest
       // public String rigidBodyName;
       assertTrue(footstepData.getRobotSide() == transformedFootstepData.getRobotSide());
 
-      // public Point3d location;
+      // public Point3D location;
       distance = getDistanceBetweenPoints(footstepData.getLocation(), transform3D, transformedFootstepData.getLocation());
       assertEquals("not equal", 0.0, distance, 1e-6);
 
       // public Quat4d orientation;
-      Quat4d startQuat = footstepData.getOrientation();
-      Quat4d endQuat = transformedFootstepData.getOrientation();
+      Quaternion startQuat = footstepData.getOrientation();
+      Quaternion endQuat = transformedFootstepData.getOrientation();
       assertTrue(areOrientationsEqualWithTransform(startQuat, transform3D, endQuat));
    }
 
@@ -98,18 +100,18 @@ public class FootstepDataTansformerTest
    @Test(timeout = 30000)
    public void testDistance()
    {
-      Point3d startPoint = new Point3d(2.0, 6.0, 5.0);
+      Point3D startPoint = new Point3D(2.0, 6.0, 5.0);
       RigidBodyTransform transform3D = new RigidBodyTransform();
-      transform3D.setTranslationAndIdentityRotation(new Vector3d(1.0, 2.0, 3.0));
+      transform3D.setTranslationAndIdentityRotation(new Vector3D(1.0, 2.0, 3.0));
 
-      Point3d endPoint = new Point3d();
+      Point3D endPoint = new Point3D();
       transform3D.transform(startPoint, endPoint);
 
       double distance = getDistanceBetweenPoints(startPoint, transform3D, endPoint);
       assertEquals("not equal", 0.0, distance, 1e-6);
    }
 
-   private static boolean areOrientationsEqualWithTransform(Quat4d orientationStart, RigidBodyTransform transform3D, Quat4d orientationEnd)
+   private static boolean areOrientationsEqualWithTransform(Quaternion orientationStart, RigidBodyTransform transform3D, Quaternion orientationEnd)
    {
       ReferenceFrame ending = ReferenceFrame.constructARootFrame("ending", false, true, true);
       ReferenceFrame starting = ReferenceFrame.constructFrameWithUnchangingTransformToParent("starting", ending, transform3D, false, true, true);
@@ -122,7 +124,7 @@ public class FootstepDataTansformerTest
       return equalsFrameOrientation(start, end);
    }
 
-   private static double getDistanceBetweenPoints(Point3d startingPoint, RigidBodyTransform transform3D, Point3d endPoint)
+   private static double getDistanceBetweenPoints(Point3D startingPoint, RigidBodyTransform transform3D, Point3D endPoint)
    {
       ReferenceFrame ending = ReferenceFrame.constructARootFrame("ending", false, true, true);
       ReferenceFrame starting = ReferenceFrame.constructFrameWithUnchangingTransformToParent("starting", ending, transform3D, false, true, true);

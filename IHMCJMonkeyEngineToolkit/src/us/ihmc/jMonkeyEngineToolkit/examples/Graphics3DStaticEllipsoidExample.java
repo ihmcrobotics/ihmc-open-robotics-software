@@ -3,9 +3,9 @@ package us.ihmc.jMonkeyEngineToolkit.examples;
 import java.util.ArrayList;
 import java.util.Random;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.structure.Graphics3DNode;
@@ -13,7 +13,6 @@ import us.ihmc.graphicsDescription.structure.Graphics3DNodeType;
 import us.ihmc.jMonkeyEngineToolkit.Graphics3DAdapter;
 import us.ihmc.jMonkeyEngineToolkit.Graphics3DAdapterTools;
 import us.ihmc.robotics.geometry.shapes.Ellipsoid3d;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 public class Graphics3DStaticEllipsoidExample
 {
@@ -21,15 +20,15 @@ public class Graphics3DStaticEllipsoidExample
    
    public void createWorld(Graphics3DAdapter graphics3DAdapter, Random random, int numberOfEllipsoids)
    {
-      Point3d minValues = new Point3d(-5.0, -5.0, 0.0);
-      Point3d maxValues = new Point3d(5.0, 5.0, 2.0);
+      Point3D minValues = new Point3D(-5.0, -5.0, 0.0);
+      Point3D maxValues = new Point3D(5.0, 5.0, 2.0);
 
       double minRadius = 0.1;
       double maxRadius = 0.5;
       
       for (int i=0; i<numberOfEllipsoids; i++)
       {
-        Vector3d center = generateRandomVector3d(random, minValues, maxValues);
+        Vector3D center = generateRandomVector3d(random, minValues, maxValues);
         RigidBodyTransform transform = new RigidBodyTransform();
         transform.setTranslation(center);
         double xRadius = generateRandomDoubleBetween(random, minRadius, maxRadius);
@@ -52,7 +51,7 @@ public class Graphics3DStaticEllipsoidExample
       Graphics3DAdapterTools.createNewWindow(graphics3DAdapter, "Graphics3DStaticEllipsoidExample", 800, 600);
    }
    
-   public boolean isPointNearSurfaceOfAnEllipsoid(Point3d point, double epsilon)
+   public boolean isPointNearSurfaceOfAnEllipsoid(Point3D point, double epsilon)
    {
       for (Ellipsoid3d ellipsoid : ellipsoids)
       {
@@ -62,7 +61,7 @@ public class Graphics3DStaticEllipsoidExample
       return false;
    }
    
-   public boolean isPointInsideAnEllipsoid(Point3d point, double epsilon)
+   public boolean isPointInsideAnEllipsoid(Point3D point, double epsilon)
    {
       for (Ellipsoid3d ellipsoid : ellipsoids)
       {
@@ -77,13 +76,13 @@ public class Graphics3DStaticEllipsoidExample
       return minValue + random.nextDouble() * (maxValue - minValue);
    }
    
-   private Vector3d generateRandomVector3d(Random random, Point3d minValues, Point3d maxValues)
+   private Vector3D generateRandomVector3d(Random random, Point3D minValues, Point3D maxValues)
    {
       double x = generateRandomDoubleBetween(random, minValues.getX(), maxValues.getX());
       double y = generateRandomDoubleBetween(random, minValues.getY(), maxValues.getY());
       double z = generateRandomDoubleBetween(random, minValues.getZ(), maxValues.getZ());
       
-      return new Vector3d(x, y, z);
+      return new Vector3D(x, y, z);
    }
    
 }

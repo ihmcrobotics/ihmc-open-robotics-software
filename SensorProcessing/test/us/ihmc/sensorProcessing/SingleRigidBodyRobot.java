@@ -1,15 +1,14 @@
 package us.ihmc.sensorProcessing;
 
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.graphicsDescription.Graphics3DObject;
+import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.Robot;
-import us.ihmc.graphicsDescription.Graphics3DObject;
-import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 
 public class SingleRigidBodyRobot extends Robot
@@ -34,12 +33,12 @@ public class SingleRigidBodyRobot extends Robot
       this.setGravity(0.0);
 
       // Create joints and assign links. Pin joints have a single axis of rotation.
-      bodyJoint = new FloatingJoint("joint1", new Vector3d(0.0, 0.0, 0.0), this);
+      bodyJoint = new FloatingJoint("joint1", new Vector3D(0.0, 0.0, 0.0), this);
       Link link1 = link1();
       bodyJoint.setLink(link1); // associate link1 with the joint pin1
       this.addRootJoint(bodyJoint);
       
-      forcePoint = new ExternalForcePoint("forcePoint", new Vector3d(), this.getRobotsYoVariableRegistry());
+      forcePoint = new ExternalForcePoint("forcePoint", new Vector3D(), this.getRobotsYoVariableRegistry());
       bodyJoint.addExternalForcePoint(forcePoint);
    }
 
@@ -93,19 +92,19 @@ public class SingleRigidBodyRobot extends Robot
    }
 
 
-   public void setAngularVelocity(Vector3d angularVelocity)
+   public void setAngularVelocity(Vector3D angularVelocity)
    {
       bodyJoint.setAngularVelocityInBody(angularVelocity);
    }
 
 
-   public void setLinearVelocity(Vector3d linearVelocity)
+   public void setLinearVelocity(Vector3D linearVelocity)
    {
       bodyJoint.setVelocity(linearVelocity);
    }
 
 
-   public void setPosition(Vector3d bodyPosition)
+   public void setPosition(Vector3D bodyPosition)
    {
       bodyJoint.setPosition(bodyPosition);
    }
@@ -117,7 +116,7 @@ public class SingleRigidBodyRobot extends Robot
    }
 
 
-   public void setExternalForce(Vector3d force)
+   public void setExternalForce(Vector3D force)
    {
       forcePoint.setForce(force);
    }

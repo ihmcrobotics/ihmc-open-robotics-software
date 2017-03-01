@@ -1,15 +1,20 @@
 package us.ihmc.robotics.math.frames;
 
-import javax.vecmath.Point2d;
-import javax.vecmath.Tuple2d;
-import javax.vecmath.Tuple3d;
-import javax.vecmath.Tuple3f;
-import javax.vecmath.Vector2d;
-
+import us.ihmc.euclid.transform.interfaces.Transform;
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple2D.interfaces.Tuple2DBasics;
+import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.geometry.*;
+import us.ihmc.robotics.geometry.AbstractReferenceFrameHolder;
+import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FrameTuple;
+import us.ihmc.robotics.geometry.FrameTuple2d;
+import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.geometry.ReferenceFrameMismatchException;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 //Note: You should only make these once at the initialization of a controller. You shouldn't make any on the fly since they contain YoVariables.
@@ -43,7 +48,7 @@ public abstract class YoFrameTuple2d<S, T extends FrameTuple2d<?, ?>> extends Ab
       putYoValuesIntoFrameTuple2d();
    }
 
-   public final void get(Tuple2d tuple2dToPack)
+   public final void get(Tuple2DBasics tuple2dToPack)
    {
       putYoValuesIntoFrameTuple2d();
       frameTuple2d.get(tuple2dToPack);
@@ -53,32 +58,22 @@ public abstract class YoFrameTuple2d<S, T extends FrameTuple2d<?, ?>> extends Ab
     * Pack this tuple2d in tuple3dToPack and tuple3dToPack.z = 0.0.
     * @param tuple3dToPack {@code Tuple3d}
     */
-   public final void get(Tuple3d tuple3dToPack)
+   public final void get(Tuple3DBasics tuple3dToPack)
    {
       putYoValuesIntoFrameTuple2d();
       frameTuple2d.get(tuple3dToPack);
    }
    
-   /**
-    * Pack this tuple2d in tuple3fToPack and tuple3fToPack.z = 0.0.
-    * @param tuple3fToPack {@code Tuple3f}
-    */
-   public final void get(Tuple3f tuple3fToPack)
+   public final Vector2D getVector2dCopy()
    {
-      putYoValuesIntoFrameTuple2d();
-      frameTuple2d.get(tuple3fToPack);
-   }
-
-   public final Vector2d getVector2dCopy()
-   {
-      Vector2d vector2d = new Vector2d();
+      Vector2D vector2d = new Vector2D();
       get(vector2d);
       return vector2d;
    }
 
-   public final Point2d getPoint2dCopy()
+   public final Point2D getPoint2dCopy()
    {
-      Point2d point2d = new Point2d();
+      Point2D point2d = new Point2D();
       get(point2d);
       return point2d;
    }
@@ -193,7 +188,7 @@ public abstract class YoFrameTuple2d<S, T extends FrameTuple2d<?, ?>> extends Ab
       set(yoFrameTuple2d.getFrameTuple2d());
    }
 
-   public final void set(Tuple2d tuple2d)
+   public final void set(Tuple2DReadOnly tuple2d)
    {
       this.frameTuple2d.set(tuple2d);
       getYoValuesFromFrameTuple2d();
@@ -227,7 +222,7 @@ public abstract class YoFrameTuple2d<S, T extends FrameTuple2d<?, ?>> extends Ab
       y.set(y.getDoubleValue() + dy);
    }
 
-   public final void add(Tuple2d tuple2d)
+   public final void add(Tuple2DReadOnly tuple2d)
    {
       putYoValuesIntoFrameTuple2d();
       this.frameTuple2d.add(tuple2d);
@@ -248,7 +243,7 @@ public abstract class YoFrameTuple2d<S, T extends FrameTuple2d<?, ?>> extends Ab
       getYoValuesFromFrameTuple2d();
    }
 
-   public final void sub(Tuple2d tuple2d)
+   public final void sub(Tuple2DReadOnly tuple2d)
    {
       putYoValuesIntoFrameTuple2d();
       frameTuple2d.sub(tuple2d);
@@ -310,7 +305,7 @@ public abstract class YoFrameTuple2d<S, T extends FrameTuple2d<?, ?>> extends Ab
       getYoValuesFromFrameTuple2d();
    }
 
-   public final void interpolate(Tuple2d tuple1, Tuple2d tuple2, double alpha)
+   public final void interpolate(Tuple2DReadOnly tuple1, Tuple2DReadOnly tuple2, double alpha)
    {
       putYoValuesIntoFrameTuple2d();
       frameTuple2d.interpolate(tuple1, tuple2, alpha);
@@ -363,7 +358,7 @@ public abstract class YoFrameTuple2d<S, T extends FrameTuple2d<?, ?>> extends Ab
       getYoValuesFromFrameTuple2d();
    }
 
-   public final void applyTransform(RigidBodyTransform transform)
+   public final void applyTransform(Transform transform)
    {
       putYoValuesIntoFrameTuple2d();
       frameTuple2d.applyTransform(transform);
