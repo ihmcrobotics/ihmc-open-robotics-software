@@ -622,12 +622,23 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    @Override
    public YoPIDGains createSpineControlGains(YoVariableRegistry registry)
    {
-      YoPIDGains ret = new YoPIDGains("Spine", registry);
+      double kp = runningOnRealRobot ? 40.0 : 80.0;
+      double zeta = runningOnRealRobot ? 0.3 : 0.6;
+      double ki = 0.0;
+      double maxIntegralError = 0.0;
+      double maxAccel = runningOnRealRobot ? 20.0 : Double.POSITIVE_INFINITY;
+      double maxJerk = runningOnRealRobot ? 100.0 : Double.POSITIVE_INFINITY;
 
-      ret.setKp(10.0);
-      ret.setZeta(0.5);
+      YoPIDGains spineGains = new YoPIDGains("DefaultJointspace", registry);
+      spineGains.setKp(kp);
+      spineGains.setZeta(zeta);
+      spineGains.setKi(ki);
+      spineGains.setMaximumIntegralError(maxIntegralError);
+      spineGains.setMaximumFeedback(maxAccel);
+      spineGains.setMaximumFeedbackRate(maxJerk);
+      spineGains.createDerivativeGainUpdater(true);
 
-      return ret;
+      return spineGains;
    }
 
    /** {@inheritDoc} */
@@ -637,26 +648,15 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       if (jointspaceGains != null)
          return jointspaceGains;
 
-      double kp = runningOnRealRobot ? 40.0 : 80.0;
-      double zeta = runningOnRealRobot ? 0.3 : 0.6;
-      double ki = 0.0;
-      double maxIntegralError = 0.0;
-      double maxAccel = runningOnRealRobot ? 20.0 : Double.POSITIVE_INFINITY;
-      double maxJerk = runningOnRealRobot ? 100.0 : Double.POSITIVE_INFINITY;
-
-      YoPIDGains defaultJointspaceControlGains = new YoPIDGains("DefaultJointspace", registry);
-      defaultJointspaceControlGains.setKp(kp);
-      defaultJointspaceControlGains.setZeta(zeta);
-      defaultJointspaceControlGains.setKi(ki);
-      defaultJointspaceControlGains.setMaximumIntegralError(maxIntegralError);
-      defaultJointspaceControlGains.setMaximumFeedback(maxAccel);
-      defaultJointspaceControlGains.setMaximumFeedbackRate(maxJerk);
-      defaultJointspaceControlGains.createDerivativeGainUpdater(true);
-
       jointspaceGains = new HashMap<>();
-      jointspaceGains.put(jointMap.getSpineJointName(SpineJointName.SPINE_YAW), defaultJointspaceControlGains);
-      jointspaceGains.put(jointMap.getSpineJointName(SpineJointName.SPINE_PITCH), defaultJointspaceControlGains);
-      jointspaceGains.put(jointMap.getSpineJointName(SpineJointName.SPINE_ROLL), defaultJointspaceControlGains);
+
+      YoPIDGains spineGains = createSpineControlGains(registry);
+      for (SpineJointName name : jointMap.getSpineJointNames())
+         jointspaceGains.put(jointMap.getSpineJointName(name), spineGains);
+
+      YoPIDGains headGains = createHeadJointspaceControlGains(registry);
+      for (NeckJointName name : jointMap.getNeckJointNames())
+         jointspaceGains.put(jointMap.getNeckJointName(name), headGains);
 
       return jointspaceGains;
    }
