@@ -48,6 +48,7 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    private final SideDependentList<LinkedHashMap<String, ImmutablePair<Double, Double>>> sliderBoardControlledFingerJointNamesWithLimits = new SideDependentList<LinkedHashMap<String, ImmutablePair<Double, Double>>>();
 
    private Map<String, YoPIDGains> jointspaceGains = null;
+   private Map<String, YoOrientationPIDGainsInterface> taskspaceAngularGains = null;
 
    public ValkyrieWalkingControllerParameters(DRCRobotJointMap jointMap)
    {
@@ -646,6 +647,24 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
          jointspaceGains.put(jointMap.getNeckJointName(name), headGains);
 
       return jointspaceGains;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public Map<String, YoOrientationPIDGainsInterface> getOrCreateTaskspaceAngularControlGains(YoVariableRegistry registry)
+   {
+      if (taskspaceAngularGains != null)
+         return taskspaceAngularGains;
+
+      taskspaceAngularGains = new HashMap<>();
+
+      YoOrientationPIDGainsInterface chestAngularGains = createChestControlGains(registry);
+      taskspaceAngularGains.put(jointMap.getChestName(), chestAngularGains);
+
+      YoOrientationPIDGainsInterface headAngularGains = createHeadOrientationControlGains(registry);
+      taskspaceAngularGains.put(jointMap.getHeadName(), headAngularGains);
+
+      return taskspaceAngularGains;
    }
 
    @Override

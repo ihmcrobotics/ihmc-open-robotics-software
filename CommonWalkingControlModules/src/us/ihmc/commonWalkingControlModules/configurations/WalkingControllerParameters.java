@@ -148,6 +148,11 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
       return new HashMap<String, YoPIDGains>();
    }
 
+   public Map<String, YoOrientationPIDGainsInterface> getOrCreateTaskspaceAngularControlGains(YoVariableRegistry registry)
+   {
+      return new HashMap<String, YoOrientationPIDGainsInterface>();
+   }
+
    public abstract YoSE3PIDGainsInterface createSwingFootControlGains(YoVariableRegistry registry);
 
    public abstract YoSE3PIDGainsInterface createHoldPositionFootControlGains(YoVariableRegistry registry);
