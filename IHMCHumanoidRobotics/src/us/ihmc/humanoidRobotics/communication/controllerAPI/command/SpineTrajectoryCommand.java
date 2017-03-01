@@ -6,6 +6,7 @@ public class SpineTrajectoryCommand extends JointspaceTrajectoryCommand<SpineTra
 {
    public SpineTrajectoryCommand()
    {
+      super();
    }
 
    @Override
