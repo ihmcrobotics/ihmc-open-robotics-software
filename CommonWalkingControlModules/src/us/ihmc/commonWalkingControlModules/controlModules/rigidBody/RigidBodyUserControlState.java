@@ -109,6 +109,13 @@ public class RigidBodyUserControlState extends RigidBodyControlState
       }
    }
 
+   public void setWeight(double weight)
+   {
+      hasWeights.set(true);
+      for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
+         this.weights[jointIdx].set(weight);
+   }
+
    @Override
    public void doTransitionIntoAction()
    {
@@ -155,4 +162,5 @@ public class RigidBodyUserControlState extends RigidBodyControlState
       // this control mode does not support command queuing
       return 0.0;
    }
+
 }

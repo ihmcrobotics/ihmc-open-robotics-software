@@ -98,9 +98,17 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
       }
    }
 
+   public void setWeight(double weight)
+   {
+      hasWeights.set(true);
+      for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
+         this.weights.get(jointIdx).set(weight);
+   }
+
    public void setGains(Map<String, YoPIDGains> gains)
    {
       hasGains.set(true);
+      this.gains.clear();
       for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
       {
          OneDoFJoint joint = jointsOriginal[jointIdx];
@@ -115,6 +123,14 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
             return;
          }
       }
+   }
+
+   public void setGains(YoPIDGains gains)
+   {
+      hasGains.set(true);
+      this.gains.clear();
+      for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
+         this.gains.add(gains);
    }
 
    public void holdCurrent()
@@ -367,4 +383,5 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
 
       return feedbackControlCommand;
    }
+
 }
