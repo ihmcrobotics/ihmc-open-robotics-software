@@ -631,6 +631,31 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
 
    /** {@inheritDoc} */
    @Override
+   public YoPIDGains createSpineControlGains(YoVariableRegistry registry)
+   {
+      boolean runningOnRealRobot = target == DRCRobotModel.RobotTarget.REAL_ROBOT;
+
+      double kp = runningOnRealRobot ? 40.0 : 80.0;
+      double zeta = runningOnRealRobot ? 0.3 : 0.6;
+      double ki = 0.0;
+      double maxIntegralError = 0.0;
+      double maxAccel = runningOnRealRobot ? 20.0 : Double.POSITIVE_INFINITY;
+      double maxJerk = runningOnRealRobot ? 100.0 : Double.POSITIVE_INFINITY;
+
+      YoPIDGains spineGains = new YoPIDGains("DefaultJointspace", registry);
+      spineGains.setKp(kp);
+      spineGains.setZeta(zeta);
+      spineGains.setKi(ki);
+      spineGains.setMaximumIntegralError(maxIntegralError);
+      spineGains.setMaximumFeedback(maxAccel);
+      spineGains.setMaximumFeedbackRate(maxJerk);
+      spineGains.createDerivativeGainUpdater(true);
+
+      return spineGains;
+   }
+
+   /** {@inheritDoc} */
+   @Override
    public Map<String, YoPIDGains> getOrCreateJointSpaceControlGains(YoVariableRegistry registry)
    {
       if (jointspaceGains != null)

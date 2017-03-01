@@ -24,7 +24,6 @@ import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage.BaseForControl;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoPIDGains;
 import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
@@ -125,32 +124,6 @@ public class HighLevelControlManagerFactory
       return centerOfMassHeightManager;
    }
 
-   public HeadOrientationManager getOrCreatedHeadOrientationManager()
-   {
-      if (headOrientationManager != null)
-         return headOrientationManager;
-
-      FullRobotModel fullRobotModel = momentumBasedController.getFullRobotModel();
-
-      if (fullRobotModel.getHead() == null)
-      {
-         robotMissingBodyWarning("head", HeadOrientationManager.class);
-         return null;
-      }
-
-      if (!hasWalkingControllerParameters(HeadOrientationManager.class))
-         return null;
-      if (!hasMomentumOptimizationSettings(HeadOrientationManager.class))
-         return null;
-
-      headOrientationManager = new HeadOrientationManager(momentumBasedController, walkingControllerParameters, registry);
-      double headJointspaceWeight = momentumOptimizationSettings.getHeadJointspaceWeight();
-      double headTaskspaceWeight = momentumOptimizationSettings.getHeadTaskspaceWeight();
-      double headUserModeWeight = momentumOptimizationSettings.getHeadUserModeWeight();
-      headOrientationManager.setWeights(headJointspaceWeight, headTaskspaceWeight, headUserModeWeight);
-      return headOrientationManager;
-   }
-
    public RigidBodyControlManager getOrCreateRigidBodyManager(RigidBody bodyToControl, RigidBody rootBody, ReferenceFrame rootFrame)
    {
       String bodyName = bodyToControl.getName();
@@ -166,6 +139,7 @@ public class HighLevelControlManagerFactory
       if (!hasMomentumOptimizationSettings(RigidBodyControlManager.class))
          return null;
 
+      // TODO: replace this when we support reference frames
       CommonHumanoidReferenceFrames referenceFrames = momentumBasedController.getReferenceFrames();
       FullHumanoidRobotModel fullRobotModel = momentumBasedController.getFullRobotModel();
       Map<BaseForControl, ReferenceFrame> controlFrameMap = new EnumMap<>(BaseForControl.class);
@@ -173,20 +147,20 @@ public class HighLevelControlManagerFactory
       controlFrameMap.put(BaseForControl.WALKING_PATH, referenceFrames.getMidFeetUnderPelvisFrame());
       controlFrameMap.put(BaseForControl.WORLD, ReferenceFrame.getWorldFrame());
 
-      RigidBodyControlManager manager = new RigidBodyControlManager(bodyToControl, rootBody, momentumBasedController, walkingControllerParameters, controlFrameMap, rootFrame, registry);
-
-      Vector3D chestAngularWeight = momentumOptimizationSettings.getChestAngularWeight();
-      Vector3D chestLinearWeight = null;
-
-      YoOrientationPIDGainsInterface taskspaceOrientationGains = walkingControllerParameters.createChestControlGains(registry);
-      YoPositionPIDGainsInterface taskspacePositionGains = null;
-
-      TObjectDoubleHashMap<String> jointspaceWeights = momentumOptimizationSettings.getJointspaceWeights();
+      // Gains
       Map<String, YoPIDGains> jointspaceGains = walkingControllerParameters.getOrCreateJointSpaceControlGains(registry);
-      TObjectDoubleHashMap<String> userModeWeights = momentumOptimizationSettings.getUserModeWeights();
+      YoOrientationPIDGainsInterface taskspaceOrientationGains = walkingControllerParameters.getOrCreateTaskspaceAngularControlGains(registry).get(bodyName);
+      YoPositionPIDGainsInterface taskspacePositionGains = null; // TODO
 
-      manager.setWeights(jointspaceWeights, chestAngularWeight, chestLinearWeight, userModeWeights);
+      // Weights
+      TObjectDoubleHashMap<String> jointspaceWeights = momentumOptimizationSettings.getJointspaceWeights();
+      TObjectDoubleHashMap<String> userModeWeights = momentumOptimizationSettings.getUserModeWeights();
+      Vector3D taskspaceAngularWeight = momentumOptimizationSettings.getTaskspaceAngularWeights().get(bodyName);
+      Vector3D taskspaceLinearWeight = null; // TODO
+
+      RigidBodyControlManager manager = new RigidBodyControlManager(bodyToControl, rootBody, momentumBasedController, walkingControllerParameters, controlFrameMap, rootFrame, registry);
       manager.setGains(jointspaceGains, taskspaceOrientationGains, taskspacePositionGains);
+      manager.setWeights(jointspaceWeights, taskspaceAngularWeight, taskspaceLinearWeight, userModeWeights);
 
       rigidBodyManagerMapByBodyName.put(bodyName, manager);
       return manager;

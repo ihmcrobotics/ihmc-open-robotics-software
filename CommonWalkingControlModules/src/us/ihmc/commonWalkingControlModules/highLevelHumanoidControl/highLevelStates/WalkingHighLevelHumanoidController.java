@@ -6,7 +6,6 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.controlModules.PelvisOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
-import us.ihmc.commonWalkingControlModules.controlModules.head.HeadOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlManager;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
@@ -78,13 +77,13 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
    private final HighLevelControlManagerFactory managerFactory;
 
    private final PelvisOrientationManager pelvisOrientationManager;
-   private final HeadOrientationManager headOrientationManager;
    private final ManipulationControlModule manipulationControlModule;
    private final FeetManager feetManager;
    private final BalanceManager balanceManager;
    private final CenterOfMassHeightManager comHeightManager;
 
    private final RigidBodyControlManager chestManager;
+   private final RigidBodyControlManager headManager;
 
    private final OneDoFJoint[] allOneDoFjoints;
 
@@ -144,14 +143,18 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
       allOneDoFjoints = fullRobotModel.getOneDoFJoints();
 
       this.pelvisOrientationManager = managerFactory.getOrCreatePelvisOrientationManager();
-      this.headOrientationManager = managerFactory.getOrCreatedHeadOrientationManager();
       this.manipulationControlModule = managerFactory.getOrCreateManipulationControlModule();
       this.feetManager = managerFactory.getOrCreateFeetManager();
 
+      RigidBody head = fullRobotModel.getHead();
       RigidBody chest = fullRobotModel.getChest();
       RigidBody pelvis = fullRobotModel.getPelvis();
+
       ReferenceFrame pelvisZUpFrame = momentumBasedController.getPelvisZUpFrame();
+      ReferenceFrame chestFrame = chest.getBodyFixedFrame();
+
       this.chestManager = managerFactory.getOrCreateRigidBodyManager(chest, pelvis, pelvisZUpFrame);
+      this.headManager = managerFactory.getOrCreateRigidBodyManager(head, chest, chestFrame);
 
       this.walkingControllerParameters = walkingControllerParameters;
 
@@ -493,9 +496,6 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
    {
       momentumBasedController.update();
 
-      if (headOrientationManager != null)
-         headOrientationManager.submitNewNeckJointDesiredConfiguration(controllerCoreOutput.getLowLevelOneDoFJointDesiredDataHolder());
-
       controllerCoreOutput.getLinearMomentumRate(achievedLinearMomentumRate);
       balanceManager.computeAchievedCMP(achievedLinearMomentumRate);
 
@@ -596,8 +596,8 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
       feetManager.compute();
       if (manipulationControlModule != null)
          manipulationControlModule.doControl();
-      if (headOrientationManager != null)
-         headOrientationManager.compute();
+      if (headManager != null)
+         headManager.compute();
       if (chestManager != null)
          chestManager.compute();
       if (pelvisOrientationManager != null)
@@ -645,17 +645,18 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
          }
       }
 
-      if (headOrientationManager != null)
+      if (headManager != null)
       {
-         controllerCoreCommand.addFeedbackControlCommand(headOrientationManager.getFeedbackControlCommand());
-         controllerCoreCommand.addInverseDynamicsCommand(headOrientationManager.getInverseDynamicsCommand());
-         controllerCoreCommand.completeLowLevelJointData(headOrientationManager.getLowLevelJointDesiredData());
+         controllerCoreCommand.addFeedbackControlCommand(headManager.getFeedbackControlCommand());
+         controllerCoreCommand.addInverseDynamicsCommand(headManager.getInverseDynamicsCommand());
+         controllerCoreCommand.completeLowLevelJointData(headManager.getLowLevelJointDesiredData());
       }
 
       if (chestManager != null)
       {
          controllerCoreCommand.addFeedbackControlCommand(chestManager.getFeedbackControlCommand());
          controllerCoreCommand.addInverseDynamicsCommand(chestManager.getInverseDynamicsCommand());
+         controllerCoreCommand.completeLowLevelJointData(chestManager.getLowLevelJointDesiredData());
       }
 
       controllerCoreCommand.addFeedbackControlCommand(pelvisOrientationManager.getFeedbackControlCommand());
