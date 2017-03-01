@@ -1,8 +1,10 @@
 package us.ihmc.valkyrie.parameters;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
@@ -44,6 +46,8 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
 
    private final LinkedHashMap<NeckJointName, ImmutablePair<Double, Double>> sliderBoardControlledNeckJointNamesWithLimits = new LinkedHashMap<NeckJointName, ImmutablePair<Double, Double>>();
    private final SideDependentList<LinkedHashMap<String, ImmutablePair<Double, Double>>> sliderBoardControlledFingerJointNamesWithLimits = new SideDependentList<LinkedHashMap<String, ImmutablePair<Double, Double>>>();
+
+   private Map<String, YoPIDGains> jointspaceGains = null;
 
    public ValkyrieWalkingControllerParameters(DRCRobotJointMap jointMap)
    {
@@ -622,6 +626,38 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
       gains.createDerivativeGainUpdater(true);
 
       return gains;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public Map<String, YoPIDGains> getOrCreateJointSpaceControlGains(YoVariableRegistry registry)
+   {
+      if (jointspaceGains != null)
+         return jointspaceGains;
+
+      boolean runningOnRealRobot = target == DRCRobotModel.RobotTarget.REAL_ROBOT;
+      double kp = runningOnRealRobot ? 40.0 : 80.0;
+      double zeta = runningOnRealRobot ? 0.3 : 0.6;
+      double ki = 0.0;
+      double maxIntegralError = 0.0;
+      double maxAccel = runningOnRealRobot ? 20.0 : Double.POSITIVE_INFINITY;
+      double maxJerk = runningOnRealRobot ? 100.0 : Double.POSITIVE_INFINITY;
+
+      YoPIDGains defaultJointspaceControlGains = new YoPIDGains("DefaultJointspace", registry);
+      defaultJointspaceControlGains.setKp(kp);
+      defaultJointspaceControlGains.setZeta(zeta);
+      defaultJointspaceControlGains.setKi(ki);
+      defaultJointspaceControlGains.setMaximumIntegralError(maxIntegralError);
+      defaultJointspaceControlGains.setMaximumFeedback(maxAccel);
+      defaultJointspaceControlGains.setMaximumFeedbackRate(maxJerk);
+      defaultJointspaceControlGains.createDerivativeGainUpdater(true);
+
+      jointspaceGains = new HashMap<>();
+      jointspaceGains.put(jointMap.getSpineJointName(SpineJointName.SPINE_YAW), defaultJointspaceControlGains);
+      jointspaceGains.put(jointMap.getSpineJointName(SpineJointName.SPINE_PITCH), defaultJointspaceControlGains);
+      jointspaceGains.put(jointMap.getSpineJointName(SpineJointName.SPINE_ROLL), defaultJointspaceControlGains);
+
+      return jointspaceGains;
    }
 
    @Override
