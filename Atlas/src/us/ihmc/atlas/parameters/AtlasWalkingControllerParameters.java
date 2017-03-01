@@ -62,6 +62,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
 
    private ExplorationParameters explorationParameters = null;
    private Map<String, YoPIDGains> jointspaceGains = null;
+   private Map<String, YoOrientationPIDGainsInterface> taskspaceAngularGains = null;
 
    private final JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters;
 
@@ -659,6 +660,24 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
          jointspaceGains.put(jointMap.getNeckJointName(name), headGains);
 
       return jointspaceGains;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public Map<String, YoOrientationPIDGainsInterface> getOrCreateTaskspaceAngularControlGains(YoVariableRegistry registry)
+   {
+      if (taskspaceAngularGains != null)
+         return taskspaceAngularGains;
+
+      taskspaceAngularGains = new HashMap<>();
+
+      YoOrientationPIDGainsInterface chestAngularGains = createChestControlGains(registry);
+      taskspaceAngularGains.put(jointMap.getChestName(), chestAngularGains);
+
+      YoOrientationPIDGainsInterface headAngularGains = createHeadOrientationControlGains(registry);
+      taskspaceAngularGains.put(jointMap.getHeadName(), headAngularGains);
+
+      return taskspaceAngularGains;
    }
 
    @Override
