@@ -34,7 +34,7 @@ public abstract class JointspaceTrajectoryCommand<T extends JointspaceTrajectory
    public void set(M message)
    {
       setQueueqableCommandVariables(message);
-      set(message.getTrajectoryPointsLists());
+      set(message.getTrajectoryPointLists());
    }
 
    private void set(RecyclingArrayList<? extends SimpleTrajectoryPoint1DList> trajectoryPointListArray)

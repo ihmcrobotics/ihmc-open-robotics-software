@@ -404,7 +404,7 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
       double trajectoryTime = 0.0;
       for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
       {
-         OneDoFJointTrajectoryMessage jointTrajectory = message.getTrajectoryPointsLists()[jointIdx];
+         OneDoFJointTrajectoryMessage jointTrajectory = message.getTrajectoryPointLists()[jointIdx];
          double jointTrajectoryTime = jointTrajectory.getLastTrajectoryPoint().getTime();
          if (jointTrajectoryTime > trajectoryTime)
             trajectoryTime = jointTrajectoryTime;
@@ -417,7 +417,7 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
    {
       for (int jointIdx = 0; jointIdx < spineJoints.length; jointIdx++)
       {
-         OneDoFJointTrajectoryMessage jointTrajectory = message.getTrajectoryPointsLists()[jointIdx];
+         OneDoFJointTrajectoryMessage jointTrajectory = message.getTrajectoryPointLists()[jointIdx];
          double desired = jointTrajectory.getLastTrajectoryPoint().getPosition();
          OneDoFJoint joint = spineJoints[jointIdx];
          assertJointDesired(scs, joint, desired);

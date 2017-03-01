@@ -22,6 +22,20 @@ public abstract class AbstractJointspaceTrajectoryMessage<T extends AbstractJoin
    }
 
    /**
+    * Clone constructor.
+    * @param neckTrajectoryMessage message to clone.
+    */
+   public AbstractJointspaceTrajectoryMessage(T trajectoryMessage)
+   {
+      setUniqueId(trajectoryMessage.getUniqueId());
+      setDestination(trajectoryMessage.getDestination());
+      jointTrajectoryMessages = new OneDoFJointTrajectoryMessage[trajectoryMessage.getNumberOfJoints()];
+
+      for (int i = 0; i < getNumberOfJoints(); i++)
+         jointTrajectoryMessages[i] = new OneDoFJointTrajectoryMessage(trajectoryMessage.jointTrajectoryMessages[i]);
+   }
+
+   /**
     * Use this constructor to go straight to the given end points.
     * Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
     * @param trajectoryTime how long it takes to reach the desired pose.
@@ -63,6 +77,25 @@ public abstract class AbstractJointspaceTrajectoryMessage<T extends AbstractJoin
    }
 
    /**
+    * Create a message using the given joint trajectory points.
+    * Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
+    * @param jointTrajectory1DListMessages joint trajectory points to be executed.
+    */
+   public AbstractJointspaceTrajectoryMessage(OneDoFJointTrajectoryMessage[] jointTrajectory1DListMessages)
+   {
+      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
+      this.jointTrajectoryMessages = jointTrajectory1DListMessages;
+   }
+
+   public AbstractJointspaceTrajectoryMessage(Random random)
+   {
+      this(random.nextInt(10) + 1);
+
+      for (int i = 0; i < getNumberOfJoints(); i++)
+         setTrajectory1DMessage(i, new OneDoFJointTrajectoryMessage(random));
+   }
+
+   /**
     * Set the trajectory points to be executed by this joint.
     * @param jointIndex index of the joint that will go through the trajectory points.
     * @param trajectory1DMessage joint trajectory points to be executed.
@@ -92,18 +125,56 @@ public abstract class AbstractJointspaceTrajectoryMessage<T extends AbstractJoin
       return jointTrajectoryMessages.length;
    }
 
+   public OneDoFJointTrajectoryMessage getJointTrajectoryPointList(int jointIndex)
+   {
+      rangeCheck(jointIndex);
+      return jointTrajectoryMessages[jointIndex];
+   }
+
+   public int getNumberOfJointTrajectoryPoints(int jointIndex)
+   {
+      rangeCheck(jointIndex);
+      return jointTrajectoryMessages[jointIndex].getNumberOfTrajectoryPoints();
+   }
+
+   public OneDoFJointTrajectoryMessage[] getTrajectoryPointLists()
+   {
+      return jointTrajectoryMessages;
+   }
+
+   public TrajectoryPoint1DMessage getJointTrajectoryPoint(int jointIndex, int trajectoryPointIndex)
+   {
+      rangeCheck(jointIndex);
+      return jointTrajectoryMessages[jointIndex].getTrajectoryPoint(trajectoryPointIndex);
+   }
+
+   public void getFinalJointAngles(double[] finalJointAnglesToPack)
+   {
+      for (int i = 0; i < getNumberOfJoints(); i++)
+      {
+         finalJointAnglesToPack[i] = jointTrajectoryMessages[i].getLastTrajectoryPoint().position;
+      }
+   }
+
+   public double getTrajectoryTime()
+   {
+      double trajectoryTime = 0.0;
+      for (int i = 0; i < getNumberOfJoints(); i++)
+         trajectoryTime = Math.max(trajectoryTime, jointTrajectoryMessages[i].getLastTrajectoryPoint().time);
+      return trajectoryTime;
+   }
+
    private void rangeCheck(int jointIndex)
    {
       if (jointIndex >= getNumberOfJoints() || jointIndex < 0)
          throw new IndexOutOfBoundsException("Joint index: " + jointIndex + ", number of joints: " + getNumberOfJoints());
    }
 
-   public AbstractJointspaceTrajectoryMessage(Random random)
+   /** {@inheritDoc} */
+   @Override
+   public String validateMessage()
    {
-      this(random.nextInt(10) + 1);
-
-      for (int i = 0; i < getNumberOfJoints(); i++)
-         setTrajectory1DMessage(i, new OneDoFJointTrajectoryMessage(random));
+      return PacketValidityChecker.validateJointspaceTrajectoryMessage(this);
    }
 
    @Override
@@ -122,11 +193,6 @@ public abstract class AbstractJointspaceTrajectoryMessage<T extends AbstractJoin
          }
       }
 
-      return true;
-   }
-
-   public OneDoFJointTrajectoryMessage[] getTrajectoryPointsLists()
-   {
-      return jointTrajectoryMessages;
+      return super.epsilonEquals(other, epsilon);
    }
 }

@@ -7,6 +7,7 @@ import java.util.Random;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.communication.packets.TrackablePacket;
 import us.ihmc.communication.ros.generators.RosExportedField;
+import us.ihmc.tools.ArrayTools;
 
 public abstract class AbstractDesiredAccelerationsMessage<T extends AbstractDesiredAccelerationsMessage<T>> extends TrackablePacket<T>
 {
@@ -51,6 +52,21 @@ public abstract class AbstractDesiredAccelerationsMessage<T extends AbstractDesi
    public double getDesiredJointAcceleration(int jointIndex)
    {
       return desiredJointAccelerations[jointIndex];
+   }
+
+   @Override
+   public boolean epsilonEquals(T other, double epsilon)
+   {
+      if (!ArrayTools.deltaEquals(getDesiredJointAccelerations(), other.getDesiredJointAccelerations(), epsilon))
+         return false;
+      return true;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public String validateMessage()
+   {
+      return PacketValidityChecker.validateDesiredAccelerationsMessage(this, true);
    }
 
    @Override

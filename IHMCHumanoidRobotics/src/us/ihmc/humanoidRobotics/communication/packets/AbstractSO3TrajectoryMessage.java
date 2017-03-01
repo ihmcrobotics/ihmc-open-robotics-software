@@ -12,13 +12,11 @@ import us.ihmc.euclid.interfaces.Transformable;
 import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSO3TrajectoryPointList;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
-public abstract class AbstractSO3TrajectoryMessage<T extends AbstractSO3TrajectoryMessage<T>> extends QueueableMessage<T>
-      implements TransformableDataObject<T>, Transformable
+public abstract class AbstractSO3TrajectoryMessage<T extends AbstractSO3TrajectoryMessage<T>> extends QueueableMessage<T> implements Transformable
 {
    @RosExportedField(documentation = "List of trajectory points (in taskpsace) to go through while executing the trajectory. All the information contained in these trajectory points needs to be expressed in world frame.")
    public SO3TrajectoryPointMessage[] taskspaceTrajectoryPoints;
@@ -26,14 +24,19 @@ public abstract class AbstractSO3TrajectoryMessage<T extends AbstractSO3Trajecto
    @RosIgnoredField
    public float[] selectionMatrixDiagonal;
 
+   /**
+    * Empty constructor for serialization.
+    */
    public AbstractSO3TrajectoryMessage()
    {
       super();
+      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
    public AbstractSO3TrajectoryMessage(Random random)
    {
       super(random);
+      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
 
       int randomNumberOfPoints = random.nextInt(16) + 1;
       taskspaceTrajectoryPoints = new SO3TrajectoryPointMessage[randomNumberOfPoints];
@@ -43,23 +46,28 @@ public abstract class AbstractSO3TrajectoryMessage<T extends AbstractSO3Trajecto
       }
    }
 
-   public AbstractSO3TrajectoryMessage(T so3TrajectoryMessage)
+   public AbstractSO3TrajectoryMessage(AbstractSO3TrajectoryMessage<?> so3TrajectoryMessage)
    {
       taskspaceTrajectoryPoints = new SO3TrajectoryPointMessage[so3TrajectoryMessage.getNumberOfTrajectoryPoints()];
       for (int i = 0; i < getNumberOfTrajectoryPoints(); i++)
          taskspaceTrajectoryPoints[i] = new SO3TrajectoryPointMessage(so3TrajectoryMessage.taskspaceTrajectoryPoints[i]);
       setExecutionMode(so3TrajectoryMessage.getExecutionMode(), so3TrajectoryMessage.getPreviousMessageId());
+
+      setUniqueId(so3TrajectoryMessage.getUniqueId());
+      setDestination(so3TrajectoryMessage.getDestination());
    }
 
    public AbstractSO3TrajectoryMessage(double trajectoryTime, Quaternion desiredOrientation)
    {
       Vector3D zeroAngularVelocity = new Vector3D();
       taskspaceTrajectoryPoints = new SO3TrajectoryPointMessage[] {new SO3TrajectoryPointMessage(trajectoryTime, desiredOrientation, zeroAngularVelocity)};
+      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
    public AbstractSO3TrajectoryMessage(int numberOfTrajectoryPoints)
    {
       taskspaceTrajectoryPoints = new SO3TrajectoryPointMessage[numberOfTrajectoryPoints];
+      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
    public void getTrajectoryPoints(FrameSO3TrajectoryPointList trajectoryPointListToPack)
@@ -176,6 +184,22 @@ public abstract class AbstractSO3TrajectoryMessage<T extends AbstractSO3Trajecto
       if (trajectoryPointIndex >= getNumberOfTrajectoryPoints() || trajectoryPointIndex < 0)
          throw new IndexOutOfBoundsException(
                "Trajectory point index: " + trajectoryPointIndex + ", number of trajectory points: " + getNumberOfTrajectoryPoints());
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public String validateMessage()
+   {
+      return PacketValidityChecker.validateSO3TrajectoryMessage(this);
+   }
+
+   @Override
+   public String toString()
+   {
+      if (taskspaceTrajectoryPoints != null)
+         return getClass().getSimpleName() + ": number of SO3 trajectory points = " + getNumberOfTrajectoryPoints();
+      else
+         return getClass().getSimpleName() + ": no SO3 trajectory points";
    }
 
    @Override

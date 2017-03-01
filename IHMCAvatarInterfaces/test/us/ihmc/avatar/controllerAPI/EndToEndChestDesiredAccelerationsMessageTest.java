@@ -14,7 +14,6 @@ import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
-import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyUserControlState;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyInverseDynamicsSolver;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.HandUserControlModeState;
 import us.ihmc.commons.RandomNumbers;
@@ -65,8 +64,7 @@ public abstract class EndToEndChestDesiredAccelerationsMessageTest implements Mu
       assertEquals(RigidBodyControlMode.JOINTSPACE, findControllerState(scs));
 
       drcSimulationTestHelper.send(desiredAccelerationsMessage);
-
-      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.05);
+      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(HandUserControlModeState.TIME_WITH_NO_MESSAGE_BEFORE_ABORT - 0.05);
       assertTrue(success);
 
       assertEquals(RigidBodyControlMode.USER, findControllerState(scs));
@@ -74,28 +72,6 @@ public abstract class EndToEndChestDesiredAccelerationsMessageTest implements Mu
       assertArrayEquals(chestDesiredJointAccelerations, controllerDesiredJointAccelerations, 1.0e-10);
       double[] qpOutputJointAccelerations = findQPOutputJointAccelerations(spineJoints, scs);
       assertArrayEquals(chestDesiredJointAccelerations, qpOutputJointAccelerations, 1.0e-3);
-
-      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(RigidBodyUserControlState.TIME_WITH_NO_MESSAGE_BEFORE_ABORT + 0.01);
-      assertTrue(success);
-      assertEquals(RigidBodyControlMode.JOINTSPACE, findControllerState(scs));
-
-      desiredAccelerationsMessage = new SpineDesiredAccelerationsMessage(null);
-
-      drcSimulationTestHelper.send(desiredAccelerationsMessage);
-
-      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.1);
-      assertTrue(success);
-
-      assertEquals(RigidBodyControlMode.JOINTSPACE, findControllerState(scs));
-
-      desiredAccelerationsMessage = new SpineDesiredAccelerationsMessage(chestDesiredJointAccelerations);
-
-      drcSimulationTestHelper.send(desiredAccelerationsMessage);
-
-      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(HandUserControlModeState.TIME_WITH_NO_MESSAGE_BEFORE_ABORT - 0.05);
-      assertTrue(success);
-
-      assertEquals(RigidBodyControlMode.USER, findControllerState(scs));
 
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.07);
       assertTrue(success);
