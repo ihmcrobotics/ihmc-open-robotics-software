@@ -155,9 +155,9 @@ public class PathTools
          Files.walkFileTree(directory, new SimpleFileVisitor<Path>()
          {
             @Override
-            public FileVisitResult preVisitDirectory(Path directory, BasicFileAttributes attributes) throws IOException
+            public FileVisitResult preVisitDirectory(Path preVisitDirectory, BasicFileAttributes attributes) throws IOException
             {
-               return basicFileVisitor.visitPath(directory, PathType.DIRECTORY);
+               return basicFileVisitor.visitPath(preVisitDirectory, PathType.DIRECTORY);
             }
             
             @Override
@@ -188,14 +188,14 @@ public class PathTools
          Files.walkFileTree(directory, EnumSet.noneOf(FileVisitOption.class), maxDepth, new SimpleFileVisitor<Path>()
          {
             @Override
-            public FileVisitResult preVisitDirectory(Path directory, BasicFileAttributes attributes) throws IOException
+            public FileVisitResult preVisitDirectory(Path preVisitDirectory, BasicFileAttributes attributes) throws IOException
             {
-               if (directory.equals(directory))
+               if (preVisitDirectory.equals(directory))
                {
                   return FileVisitResult.CONTINUE;
                }
                
-               return basicFileVisitor.visitPath(directory, PathType.DIRECTORY);
+               return basicFileVisitor.visitPath(preVisitDirectory, PathType.DIRECTORY);
             }
             
             @Override
