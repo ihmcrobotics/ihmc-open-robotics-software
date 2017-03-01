@@ -1,5 +1,8 @@
 package us.ihmc.atlas.parameters;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.atlas.AtlasJointMap;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
@@ -27,7 +30,6 @@ public class AtlasMomentumOptimizationSettings extends MomentumOptimizationSetti
    private final Vector3D highAngularFootWeight = new Vector3D(5.0, 5.0, 5.0);
    private final Vector3D highLinearFootWeight = new Vector3D(50.0, 50.0, 50.0);
 
-   private final Vector3D chestAngularWeight = new Vector3D(15.0, 10.0, 5.0);
    private final Vector3D pelvisAngularWeight = new Vector3D(5.0, 5.0, 5.0);
 
    private final int nBasisVectorsPerContactPoint = 4;
@@ -39,7 +41,6 @@ public class AtlasMomentumOptimizationSettings extends MomentumOptimizationSetti
    private final Vector2D copWeight = new Vector2D(100.0, 200.0);
    private final Vector2D copRateDefaultWeight = new Vector2D(20000.0, 20000.0);
    private final Vector2D copRateHighWeight = new Vector2D(2500000.0, 10000000.0);
-   private final double headTaskspaceWeight = 1.0;
    private final Vector3D handAngularTaskspaceWeight = new Vector3D(1.0, 1.0, 1.0);
    private final Vector3D handLinearTaskspaceWeight = new Vector3D(1.0, 1.0, 1.0);
 
@@ -57,6 +58,10 @@ public class AtlasMomentumOptimizationSettings extends MomentumOptimizationSetti
    private final double spineUserModeWeight = 200.0;
    private final double armUserModeWeight = 50.0;
    private final TObjectDoubleHashMap<String> userModeWeights = new TObjectDoubleHashMap<>();
+
+   private final Vector3D headAngularWeight = new Vector3D(1.0, 1.0, 1.0);
+   private final Vector3D chestAngularWeight = new Vector3D(15.0, 10.0, 5.0);
+   private final Map<String, Vector3D> taskspaceAngularWeights = new HashMap<>();
 
    public AtlasMomentumOptimizationSettings(AtlasJointMap jointMap)
    {
@@ -91,6 +96,9 @@ public class AtlasMomentumOptimizationSettings extends MomentumOptimizationSetti
          jointspaceWeights.put(jointMap.getNeckJointName(jointName), neckJointspaceWeight);
          userModeWeights.put(jointMap.getNeckJointName(jointName), neckUserModeWeight);
       }
+
+      taskspaceAngularWeights.put(jointMap.getChestName(), chestAngularWeight);
+      taskspaceAngularWeights.put(jointMap.getHeadName(), headAngularWeight);
    }
 
    /** @inheritDoc */
@@ -193,9 +201,9 @@ public class AtlasMomentumOptimizationSettings extends MomentumOptimizationSetti
 
    /** @inheritDoc */
    @Override
-   public double getHeadTaskspaceWeight()
+   public Vector3D getHeadAngularWeight()
    {
-      return headTaskspaceWeight;
+      return headAngularWeight;
    }
 
    /** @inheritDoc */
@@ -315,5 +323,12 @@ public class AtlasMomentumOptimizationSettings extends MomentumOptimizationSetti
    public TObjectDoubleHashMap<String> getUserModeWeights()
    {
       return userModeWeights;
+   }
+
+   /** @inheritDoc */
+   @Override
+   public Map<String, Vector3D> getTaskspaceAngularWeights()
+   {
+      return taskspaceAngularWeights;
    }
 }

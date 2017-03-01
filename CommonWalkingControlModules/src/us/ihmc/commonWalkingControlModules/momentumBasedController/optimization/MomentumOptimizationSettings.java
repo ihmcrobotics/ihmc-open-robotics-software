@@ -1,5 +1,7 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization;
 
+import java.util.Map;
+
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -30,10 +32,6 @@ public abstract class MomentumOptimizationSettings
 
    public abstract Vector2D getCoPRateHighWeight();
 
-   public abstract double getHeadTaskspaceWeight();
-
-   public abstract Vector3D getChestAngularWeight();
-
    public abstract Vector3D getPelvisAngularWeight();
 
    public abstract Vector3D getDefaultLinearFootWeight();
@@ -60,6 +58,8 @@ public abstract class MomentumOptimizationSettings
 
    public abstract TObjectDoubleHashMap<String> getUserModeWeights();
 
+   public abstract Map<String, Vector3D> getTaskspaceAngularWeights();
+
    // TODO: nuke this once all managers support individual joint weights
    public abstract double getHandJointspaceWeight();
 
@@ -80,5 +80,11 @@ public abstract class MomentumOptimizationSettings
 
    // TODO: nuke this once all managers support individual joint weights
    public abstract double getHeadUserModeWeight();
+
+   // TODO: nuke this once all managers support individual joint weights
+   public abstract Vector3D getHeadAngularWeight();
+
+   // TODO: nuke this once all managers support individual joint weights
+   public abstract Vector3D getChestAngularWeight();
 
 }
