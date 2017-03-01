@@ -5,7 +5,6 @@ import java.util.List;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.PelvisOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
-import us.ihmc.commonWalkingControlModules.controlModules.head.HeadOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlManager;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
@@ -63,13 +62,13 @@ public class WalkingCommandConsumer
    private final StatusMessageOutputManager statusMessageOutputManager;
 
    private final PelvisOrientationManager pelvisOrientationManager;
-   private final HeadOrientationManager headOrientationManager;
    private final ManipulationControlModule manipulationControlModule;
    private final FeetManager feetManager;
    private final BalanceManager balanceManager;
    private final CenterOfMassHeightManager comHeightManager;
 
    private final RigidBodyControlManager chestManager;
+   private final RigidBodyControlManager headManager;
 
    public WalkingCommandConsumer(CommandInputManager commandInputManager, StatusMessageOutputManager statusMessageOutputManager, HighLevelHumanoidControllerToolbox momentumBasedController, WalkingMessageHandler walkingMessageHandler, HighLevelControlManagerFactory managerFactory,
          WalkingControllerParameters walkingControllerParameters, YoVariableRegistry parentRegistry)
@@ -80,13 +79,16 @@ public class WalkingCommandConsumer
       this.commandInputManager = commandInputManager;
       this.statusMessageOutputManager = statusMessageOutputManager;
 
+      RigidBody head = momentumBasedController.getFullRobotModel().getHead();
       RigidBody chest = momentumBasedController.getFullRobotModel().getChest();
       RigidBody pelvis = momentumBasedController.getFullRobotModel().getPelvis();
+
       ReferenceFrame pelvisZUpFrame = momentumBasedController.getPelvisZUpFrame();
+      ReferenceFrame chestFrame = chest.getBodyFixedFrame();
 
       pelvisOrientationManager = managerFactory.getOrCreatePelvisOrientationManager();
       chestManager = managerFactory.getOrCreateRigidBodyManager(chest, pelvis, pelvisZUpFrame);
-      headOrientationManager = managerFactory.getOrCreatedHeadOrientationManager();
+      headManager = managerFactory.getOrCreateRigidBodyManager(head, chest, chestFrame);
       manipulationControlModule = managerFactory.getOrCreateManipulationControlModule();
       feetManager = managerFactory.getOrCreateFeetManager();
       balanceManager = managerFactory.getOrCreateBalanceManager();
@@ -104,11 +106,11 @@ public class WalkingCommandConsumer
    public void consumeHeadCommands()
    {
       if (commandInputManager.isNewCommandAvailable(HeadTrajectoryCommand.class))
-         headOrientationManager.handleHeadTrajectoryCommand(commandInputManager.pollNewestCommand(HeadTrajectoryCommand.class));
+         headManager.handleTaskspaceTrajectoryCommand(commandInputManager.pollNewestCommand(HeadTrajectoryCommand.class));
       if (commandInputManager.isNewCommandAvailable(NeckTrajectoryCommand.class))
-         headOrientationManager.handleNeckTrajectoryCommand(commandInputManager.pollNewestCommand(NeckTrajectoryCommand.class));
+         headManager.handleJointspaceTrajectoryCommand(commandInputManager.pollNewestCommand(NeckTrajectoryCommand.class));
       if (commandInputManager.isNewCommandAvailable(NeckDesiredAccelerationsCommand.class))
-         headOrientationManager.handleNeckDesiredAccelerationsCommand(commandInputManager.pollNewestCommand(NeckDesiredAccelerationsCommand.class));
+         headManager.handleDesiredAccelerationsCommand(commandInputManager.pollNewestCommand(NeckDesiredAccelerationsCommand.class));
    }
 
    public void consumeChestCommands()
