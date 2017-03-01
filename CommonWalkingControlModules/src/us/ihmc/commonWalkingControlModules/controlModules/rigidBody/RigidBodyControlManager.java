@@ -223,18 +223,20 @@ public class RigidBodyControlManager
    public void handleJointspaceTrajectoryCommand(JointspaceTrajectoryCommand<?, ?> command)
    {
       computeDesiredJointPositions(initialJointPositions);
+
       if (jointspaceControlState.handleTrajectoryCommand(command, initialJointPositions))
+      {
          requestState(RigidBodyControlMode.JOINTSPACE);
+      }
       else
+      {
          PrintTools.warn(getClass().getSimpleName() + " for " + bodyName + " recieved invalid jointspace trajectory command.");
+         holdInJointspace();
+      }
    }
 
    public void handleDesiredAccelerationsCommand(DesiredAccelerationCommand<?, ?> command)
    {
-      // TODO: hand, head
-      // check the control mode in the message
-      // if it is USER forward command to the user controller and activate it if necessary
-
       if (userControlState.handleDesiredAccelerationsCommand(command))
       {
          requestState(RigidBodyControlMode.USER);
@@ -242,6 +244,7 @@ public class RigidBodyControlManager
       else
       {
          PrintTools.warn(getClass().getSimpleName() + " for " + bodyName + " recieved invalid jointspace trajectory command.");
+         holdInJointspace();
       }
    }
 
