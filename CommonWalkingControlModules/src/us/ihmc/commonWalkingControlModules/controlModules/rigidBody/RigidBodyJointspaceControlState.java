@@ -245,7 +245,6 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
 
       for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
       {
-         OneDoFJoint joint = jointsOriginal[jointIdx];
          SimpleTrajectoryPoint1DList trajectoryPoints = command.getJointTrajectoryPointList(jointIdx);
          for (int pointIdx = 0; pointIdx < trajectoryPoints.getNumberOfTrajectoryPoints(); pointIdx++)
          {
