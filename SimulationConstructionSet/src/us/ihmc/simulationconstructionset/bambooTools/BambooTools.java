@@ -15,10 +15,10 @@ import java.util.Comparator;
 
 import org.apache.commons.lang3.SystemUtils;
 
+import us.ihmc.commons.nio.PathTools;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.gui.GUIMessageFrame;
 import us.ihmc.tools.FormattingTools;
-import us.ihmc.tools.io.files.FileTools;
 import us.ihmc.tools.io.printing.PrintTools;
 
 public class BambooTools
@@ -146,7 +146,7 @@ public class BambooTools
          // the other specified directories don't exist
          System.out.println("Saving videos to tmp dir before uploading..");
 
-         Path temporaryDirectoryPath = FileTools.getTemporaryDirectoryPath();
+         Path temporaryDirectoryPath = PathTools.systemTemporaryDirectory();
          File videoDir = temporaryDirectoryPath.resolve("atlas-videos").toFile();
          if (videoDir.exists() || videoDir.mkdirs())
          {

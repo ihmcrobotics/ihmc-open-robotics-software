@@ -1,4 +1,4 @@
-package us.ihmc.tools.time;
+package us.ihmc.robotics.time;
 
 import static org.junit.Assert.assertEquals;
 
@@ -6,81 +6,89 @@ import org.junit.Test;
 
 import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.tools.io.printing.PrintTools;
-import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 
-public class TimerTest
+public class YoStopwatchTest
 {
    @ContinuousIntegrationTest(estimatedDuration = 1.8)
    @Test(timeout = 30000)
-   public void testTimer()
+   public void testStopwatch()
    {
-      Timer timer = new Timer();
+      YoVariableRegistry registry = new YoVariableRegistry("test");
+      DoubleYoVariable yoTime = new DoubleYoVariable("t", registry);
       
-      double averageLap = timer.averageLap();
-      PrintTools.debug(this, "Lap: " + timer.lap());
+      testStopwatch(yoTime, new YoStopwatch(yoTime));
+      testStopwatch(yoTime, new YoStopwatch("timerTest", yoTime, registry));
+   }
+
+   private void testStopwatch(DoubleYoVariable yoTime, YoStopwatch stopwatch)
+   {
+      yoTime.set(0.0);
+      
+      double averageLap = stopwatch.averageLap();
       assertEquals("averageLap incorrect", Double.NaN, averageLap, 1e-2);
       
-      timer.start();
+      stopwatch.start();
       
-      double lapElapsed = timer.lapElapsed();
-      double totalElapsed = timer.totalElapsed();
-      averageLap = timer.averageLap();
+      double lapElapsed = stopwatch.lapElapsed();
+      double totalElapsed = stopwatch.totalElapsed();
+      averageLap = stopwatch.averageLap();
       assertEquals("lapElapsed incorrect", 0.0, lapElapsed, 1e-2);
       assertEquals("totalElapsed incorrect", 0.0, totalElapsed, 1e-2);
       assertEquals("averageLap incorrect", Double.NaN, averageLap, 1e-2);
       
       double sleepTime1 = 0.5;
-      ThreadTools.sleepSeconds(sleepTime1);
+      yoTime.add(sleepTime1);
       
-      double lap = timer.lap();
-      averageLap = timer.averageLap();
+      double lap = stopwatch.lap();
+      averageLap = stopwatch.averageLap();
       assertEquals("lap incorrect", sleepTime1, lap, 1e-2);
       assertEquals("averageLap incorrect", sleepTime1, averageLap, 1e-2);
       
       double sleepTime2 = 1.0;
-      ThreadTools.sleepSeconds(sleepTime2);
+      yoTime.add(sleepTime2);
       
-      lap = timer.lap();
-      averageLap = timer.averageLap();
+      lap = stopwatch.lap();
+      averageLap = stopwatch.averageLap();
       assertEquals("lap incorrect", sleepTime2, lap, 1e-2);
       assertEquals("averageLap incorrect", (sleepTime1 + sleepTime2) / 2.0, averageLap, 1e-2);
       
-      timer.resetLap();
-      lapElapsed = timer.lapElapsed();
+      stopwatch.resetLap();
+      lapElapsed = stopwatch.lapElapsed();
       assertEquals("lapElapsed incorrect", 0.0, lapElapsed, 1e-2);
       
-      lap = timer.lap();
-      averageLap = timer.averageLap();
+      lap = stopwatch.lap();
+      averageLap = stopwatch.averageLap();
       assertEquals("lap incorrect", 0.0, lap, 1e-2);
       assertEquals("averageLap incorrect", (sleepTime1 + sleepTime2) / 3.0, averageLap, 1e-2);
       
       double sleepTime3 = 0.3;
-      ThreadTools.sleepSeconds(sleepTime3);
+      yoTime.add(sleepTime3);
       
-      lapElapsed = timer.lapElapsed();
-      totalElapsed = timer.totalElapsed();
+      lapElapsed = stopwatch.lapElapsed();
+      totalElapsed = stopwatch.totalElapsed();
       assertEquals("lapElapsed incorrect", sleepTime3, lapElapsed, 1e-2);
       assertEquals("totalElapsed incorrect", sleepTime1 + sleepTime2 + sleepTime3, totalElapsed, 1e-2);
       
-      timer.reset();
-      lapElapsed = timer.lapElapsed();
-      totalElapsed = timer.totalElapsed();
-      averageLap = timer.averageLap();
+      stopwatch.reset();
+      lapElapsed = stopwatch.lapElapsed();
+      totalElapsed = stopwatch.totalElapsed();
+      averageLap = stopwatch.averageLap();
       assertEquals("lapElapsed incorrect", 0.0, lapElapsed, 1e-2);
       assertEquals("totalElapsed incorrect", 0.0, totalElapsed, 1e-2);
       assertEquals("averageLap incorrect", Double.NaN, averageLap, 1e-2);
       
       double sleepTime4 = 0.3;
-      ThreadTools.sleepSeconds(sleepTime4);
+      yoTime.add(sleepTime4);
       
-      timer.resetLap();
-      lapElapsed = timer.lapElapsed();
+      stopwatch.resetLap();
+      lapElapsed = stopwatch.lapElapsed();
       assertEquals("lapElapsed incorrect", 0.0, lapElapsed, 1e-2);
    }
    
    public static void main(String[] args)
    {
-      MutationTestFacilitator.facilitateMutationTestForClass(Timer.class, TimerTest.class);
+      MutationTestFacilitator.facilitateMutationTestForClass(YoStopwatch.class, YoStopwatchTest.class);
    }
 }

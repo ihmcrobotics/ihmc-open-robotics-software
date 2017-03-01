@@ -894,7 +894,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
 
          //yaw rate
          double providedDesiredYawRate = planarVelocityInput.getZ();
-         providedDesiredYawRate = MathTools.clipToMinMax(providedDesiredYawRate, minYawRate.getDoubleValue(), maxYawRate.getDoubleValue());
+         providedDesiredYawRate = MathTools.clamp(providedDesiredYawRate, minYawRate.getDoubleValue(), maxYawRate.getDoubleValue());
          if (providedDesiredYawRate != lastProvidedDesiredYawRate)
          {
             desiredYawRate.set(providedDesiredYawRate);
@@ -905,7 +905,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
          Quaternion bodyOrientationInput = postureProvider.getBodyOrientationInput();// support z up
 //            double providedDesiredYawInPlace = desiredYawInPlaceProvider.getValue();
          double providedDesiredYawInPlace = bodyOrientationInput.getYaw();
-         providedDesiredYawInPlace = MathTools.clipToMinMax(providedDesiredYawInPlace, -MAX_YAW_IN_PLACE, MAX_YAW_IN_PLACE);
+         providedDesiredYawInPlace = MathTools.clamp(providedDesiredYawInPlace, -MAX_YAW_IN_PLACE, MAX_YAW_IN_PLACE);
          if (isDesiredVelocityAndYawRateZero())
          {
             desiredYawInPlace.set(providedDesiredYawInPlace);

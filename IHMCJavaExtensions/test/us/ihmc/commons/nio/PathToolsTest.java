@@ -1,5 +1,6 @@
 package us.ihmc.commons.nio;
 
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.nio.file.FileSystems;
@@ -17,9 +18,6 @@ import org.junit.Test;
 
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.tools.io.files.BasicPathVisitor;
-import us.ihmc.tools.io.files.FileTools;
-import us.ihmc.tools.io.files.PathTools;
 import us.ihmc.tools.io.printing.PrintTools;
 
 public class PathToolsTest
@@ -32,10 +30,10 @@ public class PathToolsTest
    @Before
    public void setUp()
    {
-      FileTools.ensureFileExists(TEST_FILES[0]);
-      FileTools.ensureFileExists(TEST_FILES[1]);
+      FileTools.ensureFileExists(TEST_FILES[0], DefaultExceptionHandler.PRINT_STACKTRACE);
+      FileTools.ensureFileExists(TEST_FILES[1], DefaultExceptionHandler.PRINT_STACKTRACE);
       
-      FileTools.ensureFileExists(FAKE_JAVA_FILE_PATH);
+      FileTools.ensureFileExists(FAKE_JAVA_FILE_PATH, DefaultExceptionHandler.PRINT_STACKTRACE);
       FileTools.writeAllLines(createFakeJavaFile(), FAKE_JAVA_FILE_PATH, WriteOption.TRUNCATE, DefaultExceptionHandler.PRINT_STACKTRACE);
    }
    
@@ -104,6 +102,15 @@ public class PathToolsTest
       assertTrue("First path not correct.", firstPath.getFileName().toString().equals(camelCasedClassSimpleName));
    }
 	
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testTemporaryDirectoryPath()
+   {
+      String tempPath = PathTools.systemTemporaryDirectory().toString();
+      PrintTools.info(this, "Java temp directory: " + tempPath);
+      assertNotNull("Java temp directory is null.", tempPath);
+   }
+   
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testWalkTreeFlat()

@@ -43,7 +43,7 @@ public class PIDController
       {
          @Override public void variableChanged(YoVariable<?> v)
          {
-            integralLeakRatio.set(MathTools.clipToMinMax(integralLeakRatio.getDoubleValue(), 0.0, 1.0), false);
+            integralLeakRatio.set(MathTools.clamp(integralLeakRatio.getDoubleValue(), 0.0, 1.0), false);
          }
       };
 
@@ -166,7 +166,7 @@ public class PIDController
    
    public void setIntegralLeakRatio(double integralLeakRatio)
    {
-      this.integralLeakRatio.set(MathTools.clipToMinMax(integralLeakRatio, 0.0, 1.0));
+      this.integralLeakRatio.set(MathTools.clamp(integralLeakRatio, 0.0, 1.0));
    }
    
    public double getIntegralLeakRatio()
@@ -211,14 +211,14 @@ public class PIDController
          // LIMIT THE MAX INTEGRAL ERROR SO WON'T WIND UP
          double maxError = maxIntegralError.getDoubleValue();
          double errorAfterLeak = pdController.getPositionError() * deltaTime + integralLeakRatio.getDoubleValue() * cumulativeError.getDoubleValue();
-         cumulativeError.set(MathTools.clipToMinMax(errorAfterLeak, maxError));
+         cumulativeError.set(MathTools.clamp(errorAfterLeak, maxError));
 
          actionI.set(integralGain.getDoubleValue() * cumulativeError.getDoubleValue());
          outputSignal += actionI.getDoubleValue();
       }
 
       double maximumOutput = Math.abs( maxOutput.getDoubleValue() );
-      outputSignal = MathTools.clipToMinMax(outputSignal, maximumOutput);
+      outputSignal = MathTools.clamp(outputSignal, maximumOutput);
       return outputSignal;
    }
 }

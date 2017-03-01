@@ -16,12 +16,11 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import us.ihmc.commons.Assertions;
+import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.commons.RandomNumbers;
+import us.ihmc.commons.RunnableThatThrows;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.euclid.tools.EuclidCoreTestTools;
-import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class MathToolsTest
 {
@@ -36,15 +35,6 @@ public class MathToolsTest
    @After
    public void tearDown() throws Exception
    {
-   }
-
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
-   public void testAngleFromZeroToTwoPi()
-   {
-      assertEquals("not equal", 0.0, MathTools.angleFromZeroToTwoPi(0.0, 0.0), 1e-7);
-      assertEquals("not equal", Math.PI / 4.0, MathTools.angleFromZeroToTwoPi(1.0, 1.0), 1e-7);
-      assertEquals("not equal", 7.0 * Math.PI / 4.0, MathTools.angleFromZeroToTwoPi(1.0, -1.0), 1e-7);
    }
    
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -61,62 +51,96 @@ public class MathToolsTest
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000, expected = RuntimeException.class)
-   public void testClipToMinMaxWrongBounds()
+   @Test(timeout = 30000)
+   public void testClampWrongBounds()
    {
-      double min = 1.0;
-      double max = 0.9;
-      MathTools.clipToMinMax(5.0, min, max);
+      Assertions.assertExceptionThrown(RuntimeException.class, new RunnableThatThrows()
+      {
+         @Override
+         public void run() throws Throwable
+         {
+            double min = 1.0;
+            double max = 0.9;
+            MathTools.clamp(5.0, min, max);
+         }
+      });
+      Assertions.assertExceptionThrown(RuntimeException.class, new RunnableThatThrows()
+      {
+         @Override
+         public void run() throws Throwable
+         {
+            float min = 1.0f;
+            float max = 0.9f;
+            MathTools.clamp(5.0, min, max);
+         }
+      });
+      Assertions.assertExceptionThrown(RuntimeException.class, new RunnableThatThrows()
+      {
+         @Override
+         public void run() throws Throwable
+         {
+            int min = 1;
+            int max = -1;
+            MathTools.clamp(5.0, min, max);
+         }
+      });
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
-   public void testClipToMinMax_2()
+   public void testClamp2()
    {
       Random rand = new Random();
       for (int i = 0; i < 1000; i++)
       {
          double max = rand.nextDouble() * 1000.0;
-         double clippedVal = MathTools.clipToMinMax(max * 2.0, max);
+         double clippedVal = MathTools.clamp(max * 2.0, max);
          assertEquals(clippedVal, max, 1e-7);
 
          max = rand.nextDouble() * 1000.0;
-         clippedVal = MathTools.clipToMinMax(max * -2.0, max);
+         clippedVal = MathTools.clamp(max * -2.0, max);
          assertEquals(clippedVal, -max, 1e-7);
 
          max = rand.nextDouble() * 1000.0;
-         clippedVal = MathTools.clipToMinMax((float) (max * 2.0), (float) max);
+         clippedVal = MathTools.clamp((float) (max * 2.0), (float) max);
          assertEquals(clippedVal, max, 1e-4);
 
          max = rand.nextDouble() * 1000.0;
-         clippedVal = MathTools.clipToMinMax((float) (max * -2.0), (float) max);
+         clippedVal = MathTools.clamp((float) (max * -2.0), (float) max);
          assertEquals(clippedVal, -max, 1e-4);
+         
+         int maxInt = rand.nextInt(1000);
+         int clippedInt = MathTools.clamp(maxInt * -2, maxInt);
+         assertEquals(clippedInt, -maxInt, 1e-4);
+         
+         maxInt = rand.nextInt(1000);
+         clippedInt = MathTools.clamp(maxInt * 2, maxInt);
+         assertEquals(clippedInt, maxInt, 1e-4);
+         
+         maxInt = rand.nextInt(1000);
+         clippedInt = MathTools.clamp(maxInt, maxInt);
+         assertEquals(clippedInt, maxInt, 1e-4);
+         
+         maxInt = rand.nextInt(1000);
+         clippedInt = MathTools.clamp(-maxInt, maxInt);
+         assertEquals(clippedInt, -maxInt, 1e-4);
+         
+         maxInt = rand.nextInt(1000);
+         clippedInt = MathTools.clamp(-maxInt / 2, maxInt);
+         assertEquals(clippedInt, -maxInt / 2, 1e-4);
+         
+         maxInt = rand.nextInt(1000);
+         clippedInt = MathTools.clamp(maxInt / 2, maxInt);
+         assertEquals(clippedInt, maxInt / 2, 1e-4);
       }
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
-   public void testIsNumber()
+   public void testClampNaN()
    {
-      Random rand = new Random();
-      for (int i = 0; i < 1000; i++)
-      {
-         assertTrue(MathTools.isNumber(rand.nextDouble() * 1000.0));
-         assertFalse(MathTools.containsNaN(new Vector3D(rand.nextDouble() * 1000.0, rand.nextDouble() * 1000.0, rand.nextDouble() * 1000.0)));
-      }
-
-      assertFalse(MathTools.isNumber(Double.NaN));
-      assertTrue(MathTools.containsNaN(new Vector3D(Double.NaN, Double.NaN, Double.NaN)));
+      assertTrue(Double.isNaN(MathTools.clamp(Double.NaN, 0.0, 1.0)));
    }
-
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
-   public void testClipToMinMaxNaN()
-   {
-      assertTrue(Double.isNaN(MathTools.clipToMinMax(Double.NaN, 0.0, 1.0)));
-   }
-
-
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
@@ -137,14 +161,14 @@ public class MathToolsTest
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
-   public void testClipToMinMax()
+   public void testClamp()
    {
       for (int i = 0; i < 10; i++)
       {
          double min = random.nextDouble();
          double max = min + random.nextDouble();
          double val = 3.0 * (random.nextDouble() - 0.25);
-         double result = MathTools.clipToMinMax(val, min, max);
+         double result = MathTools.clamp(val, min, max);
 
          boolean tooSmall = result < min;
          boolean tooBig = result > max;
@@ -355,14 +379,14 @@ public class MathToolsTest
    @Test(timeout = 30000)
    public void testIsBoundedByMethods()
    {
-      assertTrue(MathTools.isBoundedByExclusive(1.0, -1.0, 0.0));
-      assertTrue(MathTools.isBoundedByExclusive(-1.0, 1.0, 0.0));
-      assertFalse(MathTools.isBoundedByExclusive(-1.0, 1.0, -1.0));
-      assertFalse(MathTools.isBoundedByExclusive(-1.0, 1.0, 1.0));
-      assertTrue(MathTools.isBoundedByInclusive(-1.0, 1.0, -1.0));
-      assertTrue(MathTools.isBoundedByInclusive(-1.0, 1.0, 1.0));
-      assertTrue(MathTools.isPreciselyBoundedByInclusive(-1.0, 1.0, 1.0, 1e-12));
-      assertFalse(MathTools.isPreciselyBoundedByExclusive(-1.0, 1.0, 1.0, 1e-12));
+      assertTrue(MathTools.isBoundedByExclusive(0.0, 1.0, -1.0));
+      assertTrue(MathTools.isBoundedByExclusive(0.0, -1.0, 1.0));
+      assertFalse(MathTools.isBoundedByExclusive(-1.0, -1.0, 1.0));
+      assertFalse(MathTools.isBoundedByExclusive(1.0, -1.0, 1.0));
+      assertTrue(MathTools.isBoundedByInclusive(-1.0, -1.0, 1.0));
+      assertTrue(MathTools.isBoundedByInclusive(1.0, -1.0, 1.0));
+      assertTrue(MathTools.isPreciselyBoundedByInclusive(1.0, -1.0, 1.0, 1e-12));
+      assertFalse(MathTools.isPreciselyBoundedByExclusive(1.0, -1.0, 1.0, 1e-12));
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -548,42 +572,6 @@ public class MathToolsTest
       expectedReturn = false;
       actualReturn = MathTools.withinPercentEquals(v1, v2, percent);
       assertEquals(expectedReturn, actualReturn);
-   }
-
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
-   public void testDiffFrameVector()
-   {
-      ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-      ArrayList<FrameVector> vectors = new ArrayList<FrameVector>();
-      vectors.add(new FrameVector(worldFrame, 1.0, 2.0, 3.0));
-      vectors.add(new FrameVector(worldFrame, 4.0, -2.0, 0.0));
-      vectors.add(new FrameVector(worldFrame, 6.0, 2.0, -4.0));
-
-      ArrayList<FrameVector> expectedReturn = new ArrayList<FrameVector>();
-      expectedReturn.add(new FrameVector(worldFrame, 3.0, -4.0, -3.0));
-      expectedReturn.add(new FrameVector(worldFrame, 2.0, 4.0, -4.0));
-
-      ArrayList<FrameVector> actualReturn = MathTools.diff(vectors);
-
-      for (int i = 0; i < 2; i++)
-      {
-         assertTrue(expectedReturn.get(i).epsilonEquals(actualReturn.get(i), 1e-12));
-      }
-
-   }
-
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000, expected = RuntimeException.class)
-   public void testDiffFrameVectorDifferentFrames()
-   {
-      ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-      ReferenceFrame anotherFrame = ReferenceFrame.constructARootFrame("anotherFrame");
-      ArrayList<FrameVector> vectors = new ArrayList<FrameVector>();
-      vectors.add(new FrameVector(worldFrame, 1.0, 2.0, 3.0));
-      vectors.add(new FrameVector(anotherFrame, 4.0, -2.0, 0.0));
-
-      MathTools.diff(vectors);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -842,45 +830,6 @@ public class MathToolsTest
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
-   public void testRoundToGivenPrecision()
-   {
-      double longDouble = 0.12345678910111213;
-
-      double roundedNumber = MathTools.floorToGivenPrecision(longDouble, 1e-7);
-      assertEquals(roundedNumber, 0.1234567, 1e-14);
-
-      roundedNumber = MathTools.floorToGivenPrecision(longDouble, 1e-3);
-      assertEquals(roundedNumber, 0.123, 1e-14);
-
-      Vector3D preciseVector = new Vector3D(0.12345678910111213, 100.12345678910111213, 1000.12345678910111213);
-      Vector3D roundedVector = new Vector3D(preciseVector);
-
-      MathTools.floorToGivenPrecision(roundedVector, 1e-7);
-      EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(0.1234567, 100.1234567, 1000.1234567), roundedVector, 1e-12);
-
-      MathTools.floorToGivenPrecision(roundedVector, 1e-3);
-      EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(0.123, 100.123, 1000.123), roundedVector, 1e-14);
-   }
-
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
-   public void testIsFinite()
-   {
-      Random rand = new Random();
-      for (int i = 0; i < 1000; i++)
-      {
-         assertTrue(MathTools.isFinite(rand.nextFloat() * 1000));
-         assertFalse(MathTools.isFinite(rand.nextFloat() / 0.0));
-
-         assertTrue(MathTools.isFinite(new Vector3D(rand.nextDouble() * 1000, rand.nextDouble() * 1000, rand.nextDouble() * 1000)));
-         assertFalse(MathTools.isFinite(new Vector3D(rand.nextDouble() / 0.0, rand.nextDouble() / 0.0, rand.nextDouble() / 0.0)));
-
-      }
-
-   }
-
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
    public void testApplyDeadband()
    {
       assertEquals(MathTools.applyDeadband(1.0, 0.0), 1.0, 1e-12);
@@ -905,5 +854,10 @@ public class MathToolsTest
       assertEquals(3, MathTools.orderOfMagnitude(1000.01));
       assertEquals(3, MathTools.orderOfMagnitude(1000.0));
       assertEquals(4, MathTools.orderOfMagnitude(10000.0));
+   }
+   
+   public static void main(String[] args)
+   {
+      MutationTestFacilitator.facilitateMutationTestForClass(MathTools.class, MathToolsTest.class);
    }
 }

@@ -135,7 +135,7 @@ public class ICPOptimizationInputHandler
       referenceCMPsCalculator.update();
 
       initializeCornerPoints(useTwoCMPs, omega0);
-      computeFinalICP(numberOfFootstepsToConsider, useTwoCMPs, true);
+      computeFinalICP(numberOfFootstepsToConsider);
 
       stateMultiplierCalculator.initializeForDoubleSupport();
 
@@ -150,7 +150,7 @@ public class ICPOptimizationInputHandler
       referenceCMPsCalculator.update();
 
       initializeCornerPoints(useTwoCMPs, omega0);
-      computeFinalICP(numberOfFootstepsToConsider, useTwoCMPs, false);
+      computeFinalICP(numberOfFootstepsToConsider);
 
       stateMultiplierCalculator.initializeForSingleSupport();
 
@@ -205,12 +205,9 @@ public class ICPOptimizationInputHandler
       finalICPRecursionToPack.scale(stateMultiplierCalculator.getStateEndCurrentMultiplier());
    }
 
-   private void computeFinalICP(int numberOfFootstepsToConsider, boolean useTwoCMPs, boolean isInTransfer)
+   private void computeFinalICP(int numberOfFootstepsToConsider)
    {
-      if (!useTwoCMPs || isInTransfer)
-         finalICP.set(entryCornerPoints.get(numberOfFootstepsToConsider + 1));
-      else
-         finalICP.set(exitCornerPoints.get(numberOfFootstepsToConsider + 1));
+      finalICP.set(entryCornerPoints.get(numberOfFootstepsToConsider + 1));
    }
 
    private final FramePoint2d stanceCMPProjection = new FramePoint2d();

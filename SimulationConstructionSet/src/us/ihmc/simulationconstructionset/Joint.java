@@ -908,4 +908,37 @@ public abstract class Joint implements CommonJoint, java.io.Serializable
    {
       return physics.getExternalForcePoints();
    }
+
+   public ExternalForcePoint recursiveGetExternalForcePoint(String name)
+   {
+      ExternalForcePoint externalForcePoint = physics.getExternalForcePoint(name);
+      if (externalForcePoint != null) 
+         return externalForcePoint;
+
+      for (int i = 0; i < childrenJoints.size(); i++)
+      {
+         Joint child = childrenJoints.get(i);
+         externalForcePoint = child.recursiveGetExternalForcePoint(name);
+         if (externalForcePoint != null) 
+            return externalForcePoint;
+      }
+
+      return null;
+   }
+
+   public Joint recursivelyGetJoint(String name)
+   {
+      if (this.getName().equals(name)) return this;
+
+      for (int i = 0; i < childrenJoints.size(); i++)
+      {
+         Joint child = childrenJoints.get(i);
+         Joint jointToReturn = child.recursivelyGetJoint(name);
+         if (jointToReturn != null) 
+            return jointToReturn;
+      }
+
+      return null;
+   }
+
 }

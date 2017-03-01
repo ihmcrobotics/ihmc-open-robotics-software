@@ -174,8 +174,8 @@ public class H264CompressedVideoDataServer implements NetStateListener, Compress
          cropVideo = object.crop();
          videoEnabled = true;
 
-         cropX = MathTools.clipToMinMax(object.cropX(), 0, 100);
-         cropY = MathTools.clipToMinMax(object.cropY(), 0, 100);
+         cropX = MathTools.clamp(object.cropX(), 0, 100);
+         cropY = MathTools.clamp(object.cropY(), 0, 100);
 
       }
       else

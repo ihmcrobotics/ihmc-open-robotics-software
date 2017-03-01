@@ -8,7 +8,6 @@ import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.Direction;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -93,7 +92,7 @@ public class MeasurementModelTestTools
       for (Direction direction : Direction.values())
       {
          Vector3D perturbationRotationVector = new Vector3D();
-         MathTools.set(perturbationRotationVector, direction, perturbationMagnitude);
+         Direction.set(perturbationRotationVector, direction, perturbationMagnitude);
 
          DenseMatrix64F perturbationEjmlVector = new DenseMatrix64F(3, 1);
          perturbationRotationVector.get(perturbationEjmlVector);

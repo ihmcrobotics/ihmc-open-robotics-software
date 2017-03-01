@@ -321,7 +321,7 @@ public class SteeringPoseTrajectoryGenerator implements PoseTrajectoryGenerator
       initialSteeringAngle.set(Math.atan2(y, x));
       double initialToFinalAngle = computeAngleDifferenceMinusPiToPi(finalSteeringAngle.getDoubleValue(), initialSteeringAngle.getDoubleValue());
       double finalSteeringAngleForShortestPath = initialSteeringAngle.getDoubleValue() + initialToFinalAngle;
-      trajectoryTime.set(MathTools.clipToMinMax(Math.abs(initialToFinalAngle) / desiredSteeringSpeed.getDoubleValue(), 0.25, Double.POSITIVE_INFINITY));
+      trajectoryTime.set(MathTools.clamp(Math.abs(initialToFinalAngle) / desiredSteeringSpeed.getDoubleValue(), 0.25, Double.POSITIVE_INFINITY));
 
       steeringAnglePolynomial.setLinear(0.0, trajectoryTime.getDoubleValue(), initialSteeringAngle.getDoubleValue(), finalSteeringAngleForShortestPath);
 
@@ -348,7 +348,7 @@ public class SteeringPoseTrajectoryGenerator implements PoseTrajectoryGenerator
    public void compute(double time, boolean adjustAngle)
    {
       this.currentTime.set(time);
-      time = MathTools.clipToMinMax(time, 0.0, trajectoryTime.getDoubleValue());
+      time = MathTools.clamp(time, 0.0, trajectoryTime.getDoubleValue());
       steeringAnglePolynomial.compute(time);
 
       double angle = steeringAnglePolynomial.getPosition();

@@ -208,7 +208,7 @@ public class ElasticityCompensatorYoVariableTest
          jointTau.set(RandomNumbers.nextDouble(random, 10000.0));
          elasticityCompensatorYoVariable.update();
          
-         double deflectedJointPosition = rawJointPosition.getDoubleValue() - MathTools.clipToMinMax(jointTau.getDoubleValue() / stiffness.getDoubleValue(), maximumDeflection);
+         double deflectedJointPosition = rawJointPosition.getDoubleValue() - MathTools.clamp(jointTau.getDoubleValue() / stiffness.getDoubleValue(), maximumDeflection);
          
          assertEquals(deflectedJointPosition, elasticityCompensatorYoVariable.getDoubleValue(), EPSILON);
       }
@@ -262,7 +262,7 @@ public class ElasticityCompensatorYoVariableTest
          elasticityCompensatorYoVariable.setMaximuDeflection(maximumDeflection);
          elasticityCompensatorYoVariable.update();
          
-         double deflectedJointPosition = rawJointPosition.getDoubleValue() - MathTools.clipToMinMax(jointTau.getDoubleValue() / stiffness.getDoubleValue(), maximumDeflection);
+         double deflectedJointPosition = rawJointPosition.getDoubleValue() - MathTools.clamp(jointTau.getDoubleValue() / stiffness.getDoubleValue(), maximumDeflection);
          
          assertEquals(deflectedJointPosition, elasticityCompensatorYoVariable.getDoubleValue(), EPSILON);
       }

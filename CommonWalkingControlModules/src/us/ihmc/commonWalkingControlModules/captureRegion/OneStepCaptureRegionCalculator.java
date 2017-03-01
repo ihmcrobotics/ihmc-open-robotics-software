@@ -123,7 +123,7 @@ public class OneStepCaptureRegionCalculator
       predictedICP.changeFrame(supportAnkleZUp);
       projectedLine.changeFrame(supportAnkleZUp);
 
-      swingTimeRemaining = MathTools.clipToMinMax(swingTimeRemaining, 0.0, Double.POSITIVE_INFINITY);
+      swingTimeRemaining = MathTools.clamp(swingTimeRemaining, 0.0, Double.POSITIVE_INFINITY);
       supportFootPolygon.getCentroid(footCentroid);
       rawCaptureRegion.clear(supportAnkleZUp);
       captureRegionPolygon.clear(supportAnkleZUp);

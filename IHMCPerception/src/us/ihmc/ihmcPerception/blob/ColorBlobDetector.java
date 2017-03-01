@@ -1,22 +1,8 @@
 package us.ihmc.ihmcPerception.blob;
 
-import boofcv.gui.image.ImagePanel;
-import boofcv.gui.image.ShowImages;
-import org.opencv.core.*;
-import org.opencv.imgcodecs.Imgcodecs;
-import org.opencv.imgproc.Imgproc;
-import org.opencv.imgproc.Moments;
-import org.opencv.videoio.VideoCapture;
-
-import us.ihmc.euclid.tuple2D.Point2D32;
-import us.ihmc.ihmcPerception.OpenCVTools;
-import us.ihmc.tools.FormattingTools;
-import us.ihmc.tools.nativelibraries.NativeLibraryLoader;
-import us.ihmc.tools.time.Timer;
-
-import javax.imageio.ImageIO;
-
-import java.awt.*;
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
 import java.io.ByteArrayInputStream;
@@ -24,6 +10,28 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.imageio.ImageIO;
+
+import org.opencv.core.Core;
+import org.opencv.core.CvType;
+import org.opencv.core.Mat;
+import org.opencv.core.MatOfByte;
+import org.opencv.core.MatOfPoint;
+import org.opencv.core.Scalar;
+import org.opencv.core.Size;
+import org.opencv.imgcodecs.Imgcodecs;
+import org.opencv.imgproc.Imgproc;
+import org.opencv.imgproc.Moments;
+import org.opencv.videoio.VideoCapture;
+
+import boofcv.gui.image.ImagePanel;
+import boofcv.gui.image.ShowImages;
+import us.ihmc.commons.time.Stopwatch;
+import us.ihmc.euclid.tuple2D.Point2D32;
+import us.ihmc.ihmcPerception.OpenCVTools;
+import us.ihmc.robotics.MathTools;
+import us.ihmc.tools.nativelibraries.NativeLibraryLoader;
 
 /**
  * Taken from https://github.com/Itseez/opencv/blob/master/samples/android/color-blob-detection/src/org/opencv/samples/colorblobdetect/ColorBlobDetector.java
@@ -152,7 +160,7 @@ public class ColorBlobDetector
       ImagePanel imagePanel4 = null;
       Mat image = new Mat();
       MatOfByte matOfByte = new MatOfByte();
-      Timer blobTimer = new Timer().start();
+      Stopwatch blobTimer = new Stopwatch().start();
       HueSaturationValueRange hsvRange;
       if (args.length > 1)
       {
@@ -198,9 +206,9 @@ public class ColorBlobDetector
          
          if (count++ % 10 == 0)
          {
-            String timeStr = String.valueOf(FormattingTools.roundToSignificantFigures(blobTimer.lapElapsed(), 2));
-            String xStr = String.valueOf(FormattingTools.roundToSignificantFigures(ballLocation.getX(), 2));
-            String yStr = String.valueOf(FormattingTools.roundToSignificantFigures(ballLocation.getY(), 2));
+            String timeStr = String.valueOf(MathTools.roundToSignificantFigures(blobTimer.lapElapsed(), 2));
+            String xStr = String.valueOf(MathTools.roundToSignificantFigures(ballLocation.getX(), 2));
+            String yStr = String.valueOf(MathTools.roundToSignificantFigures(ballLocation.getY(), 2));
             System.out.println("imgx: " + bufferedImage.getWidth() + " imgy: " + bufferedImage.getHeight() + " hue: " + hue + " sat: " + sat + " val: " + val + " time: " + timeStr + " x: " + xStr + " y: " + yStr);
          }
          

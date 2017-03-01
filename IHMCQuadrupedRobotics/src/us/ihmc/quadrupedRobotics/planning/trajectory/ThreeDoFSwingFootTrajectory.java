@@ -118,7 +118,7 @@ public class ThreeDoFSwingFootTrajectory
       {
          throw new RuntimeException("parameters must be initialized before adjusting trajectory");
       }
-      currentTime = MathTools.clipToMinMax(currentTime, timeInterval.getStartTime(), timeInterval.getEndTime());
+      currentTime = MathTools.clamp(currentTime, timeInterval.getStartTime(), timeInterval.getEndTime());
 
       xTrajectoryAdjustment.compute(currentTime - timeIntervalAdjustment.getStartTime());
       yTrajectoryAdjustment.compute(currentTime - timeIntervalAdjustment.getStartTime());
@@ -143,7 +143,7 @@ public class ThreeDoFSwingFootTrajectory
       {
          throw new RuntimeException("parameters must be initialized before computing trajectory");
       }
-      currentTime = MathTools.clipToMinMax(currentTime, timeInterval.getStartTime(), timeInterval.getEndTime());
+      currentTime = MathTools.clamp(currentTime, timeInterval.getStartTime(), timeInterval.getEndTime());
 
       xTrajectory.compute(currentTime - timeInterval.getStartTime());
       yTrajectory.compute(currentTime - timeInterval.getStartTime());

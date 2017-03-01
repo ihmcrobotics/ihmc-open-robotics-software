@@ -219,7 +219,7 @@ public class ReNumericalInverseKinematicsCalculator implements InverseKinematics
 
       for (int i = 0; i < correction.getNumRows(); i++)
       {
-         correction.set(i, 0, MathTools.clipToMinMax(correction.get(i, 0), -maxStepSize, maxStepSize));
+         correction.set(i, 0, MathTools.clamp(correction.get(i, 0), -maxStepSize, maxStepSize));
       }
    }
 
@@ -237,7 +237,7 @@ public class ReNumericalInverseKinematicsCalculator implements InverseKinematics
             oneDoFJoint = oneDoFJoints[i];
          }
          double newQ = oneDoFJoint.getQ() - correction.get(i, 0);
-         newQ = MathTools.clipToMinMax(newQ, oneDoFJoint.getJointLimitLower(), oneDoFJoint.getJointLimitUpper());
+         newQ = MathTools.clamp(newQ, oneDoFJoint.getJointLimitLower(), oneDoFJoint.getJointLimitUpper());
          oneDoFJoint.setQ(newQ);
          oneDoFJoint.getFrameAfterJoint().update();
       }

@@ -42,11 +42,11 @@ public class QuadrupedPlanarVelocityInputProvider
             {
                packet.get(planarVelocityInput);
                yoPlanarVelocityInputX.set(MathTools
-                     .clipToMinMax(planarVelocityInput.getX(), planarVelocityLowerLimitsParameter.get(0), planarVelocityUpperLimitsParameter.get(0)));
+                     .clamp(planarVelocityInput.getX(), planarVelocityLowerLimitsParameter.get(0), planarVelocityUpperLimitsParameter.get(0)));
                yoPlanarVelocityInputY.set(MathTools
-                     .clipToMinMax(planarVelocityInput.getY(), planarVelocityLowerLimitsParameter.get(1), planarVelocityUpperLimitsParameter.get(1)));
+                     .clamp(planarVelocityInput.getY(), planarVelocityLowerLimitsParameter.get(1), planarVelocityUpperLimitsParameter.get(1)));
                yoPlanarVelocityInputZ.set(MathTools
-                     .clipToMinMax(planarVelocityInput.getZ(), planarVelocityLowerLimitsParameter.get(2), planarVelocityUpperLimitsParameter.get(2)));
+                     .clamp(planarVelocityInput.getZ(), planarVelocityLowerLimitsParameter.get(2), planarVelocityUpperLimitsParameter.get(2)));
             }
          });
       }

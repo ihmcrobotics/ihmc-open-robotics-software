@@ -480,7 +480,7 @@ public class VelocityConstrainedPoseTrajectoryGenerator implements PoseTrajector
    {
       this.currentTime.set(time);
       currentTrajectoryFrame.update();
-      time = MathTools.clipToMinMax(time, 0.0, trajectoryTime.getDoubleValue());
+      time = MathTools.clamp(time, 0.0, trajectoryTime.getDoubleValue());
 
       xPolynomial.compute(time);
       yPolynomial.compute(time);

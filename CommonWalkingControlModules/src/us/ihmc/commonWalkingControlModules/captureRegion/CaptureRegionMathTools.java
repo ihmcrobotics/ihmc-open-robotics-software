@@ -79,7 +79,7 @@ public class CaptureRegionMathTools
    {
       directionA.checkReferenceFrameMatch(directionB.getReferenceFrame());
       directionA.checkReferenceFrameMatch(midpoint.getReferenceFrame());
-      alpha = MathTools.clipToMinMax(alpha, 0.0, 1.0);
+      alpha = MathTools.clamp(alpha, 0.0, 1.0);
 
       double angleBetweenDirections = Math.abs(directionA.angle(directionB));
       double angleBetweenDirectionsToSetLine = angleBetweenDirections * alpha;

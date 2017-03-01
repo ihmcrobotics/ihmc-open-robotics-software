@@ -29,7 +29,7 @@ public class StraightLineOverheadPath extends OverheadPath
    @Override
    public FramePose2d getPoseAtS(double pathVariableS)
    {
-      pathVariableS = MathTools.clipToMinMax(pathVariableS, 0.0, 1.0);
+      pathVariableS = MathTools.clamp(pathVariableS, 0.0, 1.0);
       return getExtrapolatedPoseAtS(pathVariableS);
    }
 

@@ -19,6 +19,7 @@ import com.jme3.texture.Texture.WrapMode;
 import com.jme3.texture.Texture2D;
 import com.jme3.texture.plugins.AWTLoader;
 
+import us.ihmc.commons.nio.PathTools;
 import us.ihmc.graphicsDescription.HeightMap;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.HeightBasedTerrainBlend;
@@ -32,7 +33,6 @@ import us.ihmc.jMonkeyEngineToolkit.jme.util.JMEDataTypeUtils;
 import us.ihmc.robotics.dataStructures.MutableColor;
 import us.ihmc.robotics.geometry.BoundingBox3d;
 import us.ihmc.tools.ClassLoaderTools;
-import us.ihmc.tools.io.files.FileTools;
 
 public class JMEAppearanceMaterial
 {
@@ -254,7 +254,7 @@ public class JMEAppearanceMaterial
       }
       else
       {
-         Path temporaryDirectoryPath = FileTools.getTemporaryDirectoryPath();
+         Path temporaryDirectoryPath = PathTools.systemTemporaryDirectory();
         
          printIfDebug("temporaryDirectoryPathName = " + temporaryDirectoryPath);
          

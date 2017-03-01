@@ -12,6 +12,7 @@ import java.util.Random;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.junit.Test;
 
+import us.ihmc.commons.Epsilons;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.matrix.RotationMatrix;
@@ -24,7 +25,6 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.Direction;
 import us.ihmc.robotics.geometry.shapes.Box3d.FaceName;
-import us.ihmc.robotics.math.Epsilons;
 import us.ihmc.robotics.random.RandomGeometry;
 
 public class Box3dTest

@@ -286,7 +286,7 @@ public class LeadInOutPositionTrajectoryGenerator extends PositionTrajectoryGene
       double t2 = trajectoryTime.getDoubleValue() - approachTime.getDoubleValue();
       double tf = trajectoryTime.getDoubleValue();
 
-      xyPolynomial.compute(MathTools.clipToMinMax(time, t1, t2));
+      xyPolynomial.compute(MathTools.clamp(time, t1, t2));
 
       currentDistortionPose.interpolate(initialDistortionPose, finalDistortionPose, xyPolynomial.getPosition());
       distortedPlanePose.setAndMatchFrame(currentDistortionPose);
@@ -301,7 +301,7 @@ public class LeadInOutPositionTrajectoryGenerator extends PositionTrajectoryGene
       currentVelocity.subAndScale(alphaDot, finalPosition, initialPosition);
       currentAcceleration.subAndScale(alphaDDot, finalPosition, initialPosition);
 
-      zPolynomial.compute(MathTools.clipToMinMax(time, 0.0, tf));
+      zPolynomial.compute(MathTools.clamp(time, 0.0, tf));
 
       currentPosition.setZ(zPolynomial.getPosition());
       currentVelocity.setZ(zPolynomial.getVelocity());

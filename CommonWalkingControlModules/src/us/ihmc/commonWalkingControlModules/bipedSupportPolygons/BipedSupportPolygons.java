@@ -38,7 +38,7 @@ public class BipedSupportPolygons
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private static boolean VISUALIZE = true;
-   private static final int maxNumberOfContactPointsPerFoot = 4;
+   private static final int maxNumberOfContactPointsPerFoot = 6;
 
    private final YoVariableRegistry registry = new YoVariableRegistry("BipedSupportPolygons");
 

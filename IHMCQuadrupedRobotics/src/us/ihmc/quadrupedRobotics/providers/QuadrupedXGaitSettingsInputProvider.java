@@ -65,12 +65,12 @@ public class QuadrupedXGaitSettingsInputProvider
             public void receivedPacket(QuadrupedXGaitSettingsPacket xGaitSettingsPacket)
             {
                QuadrupedXGaitSettings xGaitSettings = xGaitSettingsPacket.get();
-               yoStanceLength.set(MathTools.clipToMinMax(xGaitSettings.getStanceLength(), stanceLengthLowerLimitParameter.get(), stanceLengthUpperLimitParameter.get()));
-               yoStanceWidth.set(MathTools.clipToMinMax(xGaitSettings.getStanceWidth(), stanceWidthLowerLimitParameter.get(), stanceWidthUpperLimitParameter.get()));
-               yoStepGroundClearance.set(MathTools.clipToMinMax(xGaitSettings.getStepGroundClearance(), stepGroundClearanceLowerLimitParameter.get(), stepGroundClearanceUpperLimitParameter.get()));
-               yoStepDuration.set(MathTools.clipToMinMax(xGaitSettings.getStepDuration(), stepDurationLowerLimitParameter.get(), stepDurationUpperLimitParameter.get()));
-               yoEndDoubleSupportDuration.set(MathTools.clipToMinMax(xGaitSettings.getEndDoubleSupportDuration(), endDoubleSupportDurationLowerLimitParameter.get(), endDoubleSupportDurationUpperLimitParameter.get()));
-               yoEndPhaseShift.set(MathTools.clipToMinMax(xGaitSettings.getEndPhaseShift(), endPhaseShiftLowerLimitParameter.get(), endPhaseShiftUpperLimitParameter.get()));
+               yoStanceLength.set(MathTools.clamp(xGaitSettings.getStanceLength(), stanceLengthLowerLimitParameter.get(), stanceLengthUpperLimitParameter.get()));
+               yoStanceWidth.set(MathTools.clamp(xGaitSettings.getStanceWidth(), stanceWidthLowerLimitParameter.get(), stanceWidthUpperLimitParameter.get()));
+               yoStepGroundClearance.set(MathTools.clamp(xGaitSettings.getStepGroundClearance(), stepGroundClearanceLowerLimitParameter.get(), stepGroundClearanceUpperLimitParameter.get()));
+               yoStepDuration.set(MathTools.clamp(xGaitSettings.getStepDuration(), stepDurationLowerLimitParameter.get(), stepDurationUpperLimitParameter.get()));
+               yoEndDoubleSupportDuration.set(MathTools.clamp(xGaitSettings.getEndDoubleSupportDuration(), endDoubleSupportDurationLowerLimitParameter.get(), endDoubleSupportDurationUpperLimitParameter.get()));
+               yoEndPhaseShift.set(MathTools.clamp(xGaitSettings.getEndPhaseShift(), endPhaseShiftLowerLimitParameter.get(), endPhaseShiftUpperLimitParameter.get()));
             }
          });
       }

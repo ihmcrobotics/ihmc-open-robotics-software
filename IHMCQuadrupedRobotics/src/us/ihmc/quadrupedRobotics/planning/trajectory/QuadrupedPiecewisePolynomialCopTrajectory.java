@@ -236,7 +236,7 @@ public class QuadrupedPiecewisePolynomialCopTrajectory
       {
          throw new RuntimeException("Trajectory must be initialized before calling computeTrajectory.");
       }
-      currentTime = MathTools.clipToMinMax(currentTime, trajectoryTimeInterval.getStartTime(), trajectoryTimeInterval.getEndTime());
+      currentTime = MathTools.clamp(currentTime, trajectoryTimeInterval.getStartTime(), trajectoryTimeInterval.getEndTime());
 
       for (RobotEnd robotEnd : RobotEnd.values)
       {

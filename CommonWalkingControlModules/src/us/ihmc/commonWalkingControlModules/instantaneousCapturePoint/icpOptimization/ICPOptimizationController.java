@@ -15,7 +15,6 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFrameVector2d;
@@ -28,7 +27,7 @@ import us.ihmc.tools.io.printing.PrintTools;
 
 public class ICPOptimizationController
 {
-   private static final boolean VISUALIZE = true;
+   private static final boolean VISUALIZE = false;
    private static final boolean COMPUTE_COST_TO_GO = false;
    private static final boolean RECONSTRUCT_CMP_FROM_UNCLIPPED = true;
    private static final boolean DEBUG = false;
@@ -220,6 +219,23 @@ public class ICPOptimizationController
       }
 
       parentRegistry.addChild(registry);
+   }
+
+   public void setFootstepWeights(double forwardWeight, double lateralWeight)
+   {
+      forwardFootstepWeight.set(forwardWeight);
+      lateralFootstepWeight.set(lateralWeight);
+   }
+
+   public void setFeedbackWeights(double forwardWeight, double lateralWeight)
+   {
+      feedbackForwardWeight.set(forwardWeight);
+      feedbackLateralWeight.set(lateralWeight);
+   }
+
+   public void setDynamicRelaxationWeight(double relaxationWeight)
+   {
+      dynamicRelaxationWeight.set(relaxationWeight);
    }
 
    public void setStepDurations(double doubleSupportDuration, double singleSupportDuration)

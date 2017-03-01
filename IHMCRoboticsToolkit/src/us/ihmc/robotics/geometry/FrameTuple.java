@@ -10,7 +10,6 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
-import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 /**
@@ -142,7 +141,7 @@ public abstract class FrameTuple<S extends FrameTuple<S, T>, T extends Tuple3DBa
 
    public final void set(Direction direction, double value)
    {
-      MathTools.set(tuple, direction, value);
+      Direction.set(tuple, direction, value);
    }
 
    /**
@@ -169,7 +168,7 @@ public abstract class FrameTuple<S extends FrameTuple<S, T>, T extends Tuple3DBa
 
    public final double get(Direction direction)
    {
-      return MathTools.get(tuple, direction);
+      return Direction.get(tuple, direction);
    }
 
    public final void scale(double scaleFactor)
