@@ -14,6 +14,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoPDGains;
 import us.ihmc.robotics.controllers.YoPIDGains;
+import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.partNames.NeckJointName;
@@ -148,9 +149,14 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
       return new HashMap<String, YoPIDGains>();
    }
 
-   public Map<String, YoOrientationPIDGainsInterface> getOrCreateTaskspaceAngularControlGains(YoVariableRegistry registry)
+   public Map<String, YoOrientationPIDGainsInterface> getOrCreateTaskspaceOrientationControlGains(YoVariableRegistry registry)
    {
       return new HashMap<String, YoOrientationPIDGainsInterface>();
+   }
+
+   public Map<String, YoPositionPIDGainsInterface> getOrCreateTaskspacePositionControlGains(YoVariableRegistry registry)
+   {
+      return new HashMap<String, YoPositionPIDGainsInterface>();
    }
 
    public abstract YoSE3PIDGainsInterface createSwingFootControlGains(YoVariableRegistry registry);
